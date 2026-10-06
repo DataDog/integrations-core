@@ -18,7 +18,7 @@ import pytest
 
 from ddev.cli.application import Application
 from ddev.cli.ci.dispatch_run import resolve_run
-from ddev.cli.ci.dispatch_tests import attach_datadog_log_handler
+from ddev.cli.ci.dispatch_tests import RUN_OUTCOME_METRICS, attach_datadog_log_handler
 from ddev.cli.ci.tests.batching.exceptions import PlanningError
 from ddev.cli.ci.tests.dispatcher_attributes import metric_tag_mapping
 from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
@@ -890,7 +890,7 @@ def test_command_metrics_project_centralized_tags(
     )
 
     def observe_plan(app: Application, *, monitor: ComponentMonitor, **kwargs: Any) -> list[TestBatch]:
-        monitor.metrics.count('planned', environment='py3.13', integration='ntp', blob='unselected')
+        monitor.metrics.count('planned', environment='py3.13', target='ntp', blob='unselected')
         return []
 
     mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', observe_plan)
@@ -902,7 +902,7 @@ def test_command_metrics_project_centralized_tags(
     assert series['type'] == 1
     tags = series['tags']
     assert 'dispatcher.batch.job.environment:py3.13' in tags
-    assert 'dispatcher.batch.job.integration:ntp' in tags
+    assert 'dispatcher.batch.job.target:ntp' in tags
     assert 'git.repository.id_v2:github.com/datadog/integrations-core' in tags
     assert 'dispatcher.context:pr' in tags
     assert not any('pr.number' in tag for tag in tags)
@@ -929,6 +929,15 @@ def fast_dispatcher_config(mocker: MockerFixture) -> None:
     """Run the real bus without its production tail: the grace period is a wait for late messages."""
     config = DispatcherConfig(grace_period_seconds=0.1, global_timeout_seconds=5, poll_interval_seconds=0.01)
     mocker.patch.object(DispatcherConfig, 'from_repo_config', return_value=config)
+
+
+def run_outcome_counts(sink) -> dict[str, float]:
+    return {record.name: record.value for record in sink.records if record.name in RUN_OUTCOME_METRICS.values()}
+
+
+def only_outcome(metric: str) -> dict[str, int]:
+    """Every run outcome counter, with only *metric* counting the run."""
+    return {name: int(name == metric) for name in RUN_OUTCOME_METRICS.values()}
 
 
 @pytest.mark.parametrize('global_options', [(), ('-qq',)], ids=['normal', 'quiet'])
@@ -959,20 +968,28 @@ def test_an_executed_run_reports_its_execution_metrics(
             'jobs.count': 1,
             'batch.duration': 1,
             'job.duration': 1,
+            'job.queue.duration': 1,
+            'jobs.queued': 1,
+            'jobs.running': 1,
             'artifacts.download.duration': 1,
             'runs.count': 1,
+            'runs.passed': 1,
+            'runs.tests_failed': 1,
             'runs.failed': 1,
-            'runs.planning_failed': 1,
-            'runs.cancelled': 1,
             'runs.timed_out': 1,
+            'runs.cancelled': 1,
             'runs.no_op': 1,
+            'runs.planning_failed': 1,
             'run.duration': 1,
             'jobs.incomplete': 1,
+            'batches.passed': 1,
             'batches.failed': 1,
             'jobs.failed': 1,
             'jobs.skipped': 1,
         }
     )
+    assert run_outcome_counts(sink) == only_outcome('runs.passed')
+    assert sink.records_named('run.duration')[0].tags['dispatcher.outcome'] == 'passed'
     runs = sink.records_named('runs.count')[0]
     assert runs.tags['dispatcher.context'] == 'pr'
     assert runs.tags['git.repository.id_v2'] == 'github.com/datadog/integrations-core'
@@ -980,7 +997,7 @@ def test_an_executed_run_reports_its_execution_metrics(
     # Run-level records carry no job dimensions: a mixed batch must not split them per integration.
     assert not any(tag.startswith('dispatcher.batch.job') for tag in runs.tags)
     counted = sink.records_named('jobs.count')[0]
-    assert counted.tags['dispatcher.batch.job.integration'] == 'ntp'
+    assert counted.tags['dispatcher.batch.job.target'] == 'ntp'
     assert counted.tags['dispatcher.batch.job.environment'] == 'py3.13'
     operation_failures = {}
     for record in sink.records_named('operations.failed'):
@@ -1005,7 +1022,7 @@ def test_an_executed_run_reports_its_execution_metrics(
     }
 
 
-def test_a_failed_run_reports_failure_metrics_and_counts_itself_once(
+def test_a_run_with_failed_tests_is_counted_as_a_test_failure(
     ddev: CliRunner,
     github: FakeAsyncGitHubClient,
     planned: MagicMock,
@@ -1029,11 +1046,11 @@ def test_a_failed_run_reports_failure_metrics_and_counts_itself_once(
     assert result.exit_code == 1, result.output
     assert 'Dispatcher tests failed.' in result.output
     assert [record.value for record in sink.records_named('runs.count')] == [1]
-    assert [record.value for record in sink.records_named('runs.failed')] == [1]
+    assert run_outcome_counts(sink) == only_outcome('runs.tests_failed')
     assert [record.value for record in sink.records_named('batches.failed')] == [1]
     failed = sink.records_named('jobs.failed')
     assert [record.value for record in failed] == [1]
-    assert failed[0].tags['dispatcher.batch.job.integration'] == 'ntp'
+    assert failed[0].tags['dispatcher.batch.job.target'] == 'ntp'
     assert [record.value for record in sink.records_named('jobs.incomplete')] == [0]
     assert [record.value for record in sink.records_named('jobs.skipped')] == [0]
 
@@ -1059,7 +1076,7 @@ def test_a_run_whose_final_report_fails_is_counted_failed_without_invented_job_o
 
     assert result.exit_code == 1, result.output
     assert [record.value for record in sink.records_named('runs.count')] == [1]
-    assert [record.value for record in sink.records_named('runs.failed')] == [1]
+    assert run_outcome_counts(sink) == only_outcome('runs.failed')
     assert [record.value for record in sink.records_named('batches.failed')] == [0]
     assert [record.value for record in sink.records_named('jobs.failed')] == [0]
     assert [record.value for record in sink.records_named('jobs.skipped')] == [0]
@@ -1078,9 +1095,7 @@ def test_a_planning_failure_is_reported_as_its_own_outcome(
     assert result.exit_code == 1, result.output
     assert 'Could not build a test plan: the plan is not valid' in result.output
     assert [record.value for record in sink.records_named('runs.count')] == [1]
-    assert [record.value for record in sink.records_named('runs.planning_failed')] == [1]
-    assert [record.value for record in sink.records_named('runs.failed')] == [1]
-    assert [record.value for record in sink.records_named('runs.no_op')] == [0]
+    assert run_outcome_counts(sink) == only_outcome('runs.planning_failed')
     # No batch ran, so no batch outcome exists; there is no aggregate zero to invent.
     assert sink.records_named('batches.failed') == []
     assert not any(record.name.startswith('jobs.') for record in sink.records)

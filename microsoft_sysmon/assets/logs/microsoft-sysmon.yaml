@@ -4074,7 +4074,7 @@ pipeline:
               target: $targetElem.rdata
               preserveSource: true
               overrideOnConflict: false
-          preserve_source: false
+          preserveSource: false
         - type: schema-processor
           name: Apply OCSF schema for 4003
           enabled: true

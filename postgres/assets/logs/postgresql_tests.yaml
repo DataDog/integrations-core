@@ -1,3 +1,6 @@
+# bypass-global-date-remapper-parse-failure-checks
+# Prefixes outside the original parser retain the incoming official timestamp.
+# These cases assert extracted postgres.* attributes and the complete existing output.
 id: "postgresql"
 tests:
  -
@@ -7,6 +10,10 @@ tests:
       db:
         date: 1510075839000
         severity: "LOG"
+      postgres:
+        error_severity: "LOG"
+        message: "incomplete startup packet"
+        timestamp: "2017-11-07 17:30:39 UTC"
     message: "incomplete startup packet"
     status: "info"
     tags:
@@ -27,9 +34,17 @@ tests:
         client:
           ip: "[local]"
       postgres:
+        application_name: "psql"
         appname: "psql"
+        dbname: "postgres"
+        error_severity: "LOG"
+        message: "statement: SELECT * FROM playground;"
+        pid: 5237
         proc_id: "5237"
+        remote_host: "[local]"
         session_id: "5a0348cd.1475"
+        timestamp: "2017-11-08 18:11:35.727 UTC"
+        user: "postgres"
     message: "2017-11-08 18:11:35.727 UTC [5237] postgres psql postgres [local] 5a0348cd.1475 LOG:  statement: SELECT * FROM playground;"
     status: "info"
     tags:
@@ -52,9 +67,17 @@ tests:
         client:
           ip: "172.28.0.1"
       postgres:
+        application_name: "datadog-agent"
         appname: "datadog-agent"
+        dbname: "datadog_test"
+        error_severity: "LOG"
+        message: "duration: 0.140 ms  statement: select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter"
+        pid: 114
         proc_id: "114"
+        remote_host: "172.28.0.1"
         session_id: "5defc7c5.72"
+        timestamp: "2019-12-10 18:27:45.389 UTC"
+        user: "datadog"
     message: "2019-12-10 18:27:45.389 UTC [114] datadog_test datadog-agent datadog 172.28.0.1 5defc7c5.72 LOG:  duration: 0.140 ms  statement: select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync, checkpoint_write_time, checkpoint_sync_time FROM pg_stat_bgwriter"
     status: "info"
     tags:
@@ -77,8 +100,19 @@ tests:
           port: 36378
       postgres:
         appname: "[unknown]"
+        dbname: "dbmorders_1"
+        error_severity: "LOCATION"
+        line_num: 395
+        message: "exec_simple_query, postgres.c:1075"
+        pid: 20337
         proc_id: "20337"
+        remote_host: "10.0.216.218"
+        remote_port: 36378
         session_id: "68c862e1.4f71"
+        session_start: "2025-09-15 19:02:57 UTC"
+        timestamp: "2025-09-15 19:05:58.892 UTC"
+        txid: 0
+        user: "shopper_1"
         vxid: "384/39221"
         xid: "0"
       session_lineno: 395
@@ -105,9 +139,21 @@ tests:
           ip: "192.168.65.1"
           port: 31674
       postgres:
+        application_name: "pgbench"
         appname: "pgbench"
+        dbname: "postgres"
+        error_severity: "LOG"
+        line_num: 34853
+        message: "duration: 0.003 ms  execute <unnamed>: INSERT INTO pgbench_history (tid, bid, aid, delta, mtime) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP);"
+        pid: 87
         proc_id: "87"
+        remote_host: "192.168.65.1"
+        remote_port: 31674
         session_id: "68c9abb6.57"
+        session_start: "2025-09-16 18:25:58 UTC"
+        timestamp: "2025-09-16 18:26:45.429 UTC"
+        txid: 2823
+        user: "postgres"
         vxid: "5/2050"
         xid: "2823"
       session_lineno: 34853
@@ -134,9 +180,21 @@ tests:
           ip: "10.198.137.95"
           port: 54414
       postgres:
+        application_name: "PostgreSQL JDBC Driver"
         appname: "PostgreSQL JDBC Driver"
+        dbname: "service_catalog"
+        error_severity: "LOG"
+        line_num: 4
+        message: "duration: 1626.107 ms  plan: {}"
+        pid: 194370
         proc_id: "194370"
+        remote_host: "10.198.137.95"
+        remote_port: 54414
         session_id: "691e0ab7.2f742"
+        session_start: "2025-11-19 18:21:43 UTC"
+        timestamp: "2025-11-19 18:27:10.640 UTC"
+        txid: 276953619
+        user: "service_catalog_rw"
         vxid: "15/174689"
         xid: "276953619"
       session_lineno: 4
@@ -156,8 +214,15 @@ tests:
         date: 1764791980415
         severity: "LOG"
       postgres:
+        error_severity: "LOG"
+        line_num: 1
+        message: "automatic vacuum of table \"dm_v0.stream_router.kv_shadow_entei\": index scans: 1"
+        pid: 1670514
         proc_id: "1670514"
         session_id: "6930969e.197d72"
+        session_start: "2025-12-03 19:59:26 UTC"
+        timestamp: "2025-12-03 19:59:40.415 UTC"
+        txid: 0
         vxid: "20/120887"
         xid: "0"
       session_lineno: 1
@@ -167,3 +232,517 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1764791980415
+ -
+  sample: "2026-08-17 20:46:39.837 UTC [63] LOG:  checkpoint starting: shutdown immediate"
+  result:
+    custom:
+      db:
+        date: 1786999599837
+        severity: "LOG"
+      postgres:
+        error_severity: "LOG"
+        message: "checkpoint starting: shutdown immediate"
+        pid: 63
+        proc_id: "63"
+        timestamp: "2026-08-17 20:46:39.837 UTC"
+    message: "checkpoint starting: shutdown immediate"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1786999599837
+ -
+  sample: "2026-08-17 20:45:45 UTC-6a8372f9.6b-LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      postgres:
+        error_severity: "LOG"
+        message: "statement: SELECT 2 AS c02;"
+        session_id: "6a8372f9.6b"
+        timestamp: "2026-08-17 20:45:45 UTC"
+    message: "2026-08-17 20:45:45 UTC-6a8372f9.6b-LOG:  statement: SELECT 2 AS c02;"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b idle>LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      postgres:
+        application_name: "pgllp_app"
+        dbname: "pgllp_db"
+        error_severity: "LOG"
+        message: "statement: SELECT 2 AS c02;"
+        pid: 107
+        ps: "idle"
+        remote_host: "172.17.0.1"
+        remote_port: 45772
+        session_id: "6a837346.6b"
+        timestamp: "2026-08-17 20:47:02 UTC"
+        user: "pgllp_user"
+    message: "<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b idle>LOG:  statement: SELECT 2 AS c02;"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ # pgprefix_bracket: Preserve spaces and parentheses in the process activity.
+ -
+  sample: "<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b idle in transaction (aborted)>LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      postgres:
+        application_name: "pgllp_app"
+        dbname: "pgllp_db"
+        error_severity: "LOG"
+        message: "statement: SELECT 2 AS c02;"
+        pid: 107
+        ps: "idle in transaction (aborted)"
+        remote_host: "172.17.0.1"
+        remote_port: 45772
+        session_id: "6a837346.6b"
+        timestamp: "2026-08-17 20:47:02 UTC"
+        user: "pgllp_user"
+    message: "<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b idle in transaction (aborted)>LOG:  statement: SELECT 2 AS c02;"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ # pgprefix_bracket: An embedded > belongs to the activity, not the end of the prefix.
+ -
+  sample: "<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b <FASTPATH>>LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      postgres:
+        application_name: "pgllp_app"
+        dbname: "pgllp_db"
+        error_severity: "LOG"
+        message: "statement: SELECT 2 AS c02;"
+        pid: 107
+        ps: "<FASTPATH>"
+        remote_host: "172.17.0.1"
+        remote_port: 45772
+        session_id: "6a837346.6b"
+        timestamp: "2026-08-17 20:47:02 UTC"
+        user: "pgllp_user"
+    message: "<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b <FASTPATH>>LOG:  statement: SELECT 2 AS c02;"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ # pgprefix_bracket: An unavailable process activity must not prevent prefix extraction.
+ -
+  sample: "<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b >LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      postgres:
+        application_name: "pgllp_app"
+        dbname: "pgllp_db"
+        error_severity: "LOG"
+        message: "statement: SELECT 2 AS c02;"
+        pid: 107
+        remote_host: "172.17.0.1"
+        remote_port: 45772
+        session_id: "6a837346.6b"
+        timestamp: "2026-08-17 20:47:02 UTC"
+        user: "pgllp_user"
+    message: "<2026-08-17 20:47:02 UTC 172.17.0.1(45772) pgllp_app pgllp_db pgllp_user 107 6a837346.6b >LOG:  statement: SELECT 2 AS c02;"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: " sql_error_code = 00000 time_ms = \"2026-08-17 20:47:13.749 UTC\" pid=\"108\" proc_start_time=\"2026-08-17 20:47:13 UTC\" session_id=\"6a837351.6c\" vtid=\"4/5\" tid=\"0\" log_line=\"10\" database=\"pgllp_db\" connection_source=\"172.17.0.1(42336)\" user=\"pgllp_user\" application_name=\"pgllp_app\" LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      postgres:
+        application_name: "pgllp_app"
+        dbname: "pgllp_db"
+        error_severity: "LOG"
+        line_num: 10
+        message: "statement: SELECT 2 AS c02;"
+        pid: 108
+        remote_host: "172.17.0.1"
+        remote_port: 42336
+        session_id: "6a837351.6c"
+        session_start: "2026-08-17 20:47:13 UTC"
+        timestamp: "2026-08-17 20:47:13.749 UTC"
+        txid: 0
+        user: "pgllp_user"
+        vxid: "4/5"
+    message: " sql_error_code = 00000 time_ms = \"2026-08-17 20:47:13.749 UTC\" pid=\"108\" proc_start_time=\"2026-08-17 20:47:13 UTC\" session_id=\"6a837351.6c\" vtid=\"4/5\" tid=\"0\" log_line=\"10\" database=\"pgllp_db\" connection_source=\"172.17.0.1(42336)\" user=\"pgllp_user\" application_name=\"pgllp_app\" LOG:  statement: SELECT 2 AS c02;"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2026-08-17 20:45:12 UTC:172.17.0.1(37472):pgllp_user@pgllp_db:[107]:LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      postgres:
+        dbname: "pgllp_db"
+        error_severity: "LOG"
+        message: "statement: SELECT 2 AS c02;"
+        pid: 107
+        remote_host: "172.17.0.1"
+        remote_port: 37472
+        timestamp: "2026-08-17 20:45:12 UTC"
+        user: "pgllp_user"
+    message: "2026-08-17 20:45:12 UTC:172.17.0.1(37472):pgllp_user@pgllp_db:[107]:LOG:  statement: SELECT 2 AS c02;"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2026-08-17 20:46:29.997 UTC [106][client backend]: [10-1] db=pgllp_db,user=pgllp_user LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      postgres:
+        backend_type: "client backend"
+        dbname: "pgllp_db"
+        error_severity: "LOG"
+        line_num: 10
+        message: "statement: SELECT 2 AS c02;"
+        pid: 106
+        timestamp: "2026-08-17 20:46:29.997 UTC"
+        user: "pgllp_user"
+    message: "2026-08-17 20:46:29.997 UTC [106][client backend]: [10-1] db=pgllp_db,user=pgllp_user LOG:  statement: SELECT 2 AS c02;"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2026-08-17 20:46:19.015 UTC [119]: [10-1] db=pgllp_db,user=pgllp_user,host=db.123host LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      postgres:
+        dbname: "pgllp_db"
+        error_severity: "LOG"
+        line_num: 10
+        message: "statement: SELECT 2 AS c02;"
+        pid: 119
+        remote_host: "db.123host"
+        timestamp: "2026-08-17 20:46:19.015 UTC"
+        user: "pgllp_user"
+    message: "2026-08-17 20:46:19.015 UTC [119]: [10-1] db=pgllp_db,user=pgllp_user,host=db.123host LOG:  statement: SELECT 2 AS c02;"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2026-08-17 20:46:08.111 UTC [118]: [10-1] db=pgllp_db,user=pgllp_user LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      postgres:
+        dbname: "pgllp_db"
+        error_severity: "LOG"
+        line_num: 10
+        message: "statement: SELECT 2 AS c02;"
+        pid: 118
+        timestamp: "2026-08-17 20:46:08.111 UTC"
+        user: "pgllp_user"
+    message: "2026-08-17 20:46:08.111 UTC [118]: [10-1] db=pgllp_db,user=pgllp_user LOG:  statement: SELECT 2 AS c02;"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2026-08-17 20:46:41.019 UTC [118] pgllp_user@pgllp_db LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      postgres:
+        dbname: "pgllp_db"
+        error_severity: "LOG"
+        message: "statement: SELECT 2 AS c02;"
+        pid: 118
+        timestamp: "2026-08-17 20:46:41.019 UTC"
+        user: "pgllp_user"
+    message: "2026-08-17 20:46:41.019 UTC [118] pgllp_user@pgllp_db LOG:  statement: SELECT 2 AS c02;"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=pgllp_db,app=pgllp_app] LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      postgres:
+        application_name: "pgllp_app"
+        dbname: "pgllp_db"
+        error_severity: "LOG"
+        message: "statement: SELECT 2 AS c02;"
+        pid: 105
+        timestamp: "2026-08-17 20:45:34.801 UTC"
+        user: "pgllp_user"
+    message: "2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=pgllp_db,app=pgllp_app] LOG:  statement: SELECT 2 AS c02;"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: " sql_error_code = 42601 time_ms = \"2026-08-17 20:47:13.749 UTC\" pid=\"108\" proc_start_time=\"2026-08-17 20:47:13 UTC\" session_id=\"6a837351.6c\" vtid=\"4/5\" tid=\"0\" log_line=\"10\" database=\"pgllp_db\" connection_source=\"172.17.0.1(42336)\" user=\"pgllp_user\" application_name=\"pgllp_app\" ERROR:  42601: syntax error at or near \"SELEC\""
+  result:
+    custom:
+      postgres:
+        application_name: "pgllp_app"
+        dbname: "pgllp_db"
+        error_severity: "ERROR"
+        line_num: 10
+        message: "syntax error at or near \"SELEC\""
+        pid: 108
+        remote_host: "172.17.0.1"
+        remote_port: 42336
+        session_id: "6a837351.6c"
+        session_start: "2026-08-17 20:47:13 UTC"
+        state_code: "42601"
+        timestamp: "2026-08-17 20:47:13.749 UTC"
+        txid: 0
+        user: "pgllp_user"
+        vxid: "4/5"
+    message: " sql_error_code = 42601 time_ms = \"2026-08-17 20:47:13.749 UTC\" pid=\"108\" proc_start_time=\"2026-08-17 20:47:13 UTC\" session_id=\"6a837351.6c\" vtid=\"4/5\" tid=\"0\" log_line=\"10\" database=\"pgllp_db\" connection_source=\"172.17.0.1(42336)\" user=\"pgllp_user\" application_name=\"pgllp_app\" ERROR:  42601: syntax error at or near \"SELEC\""
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2025-09-16 18:26:45.429 UTC:192.168.65.1(31674):postgres@postgres:[87]:34853:42601:2025-09-16 18:25:58 UTC:5/2050:2823:68c9abb6.57:pgbench:ERROR:  42601: syntax error at or near \"SELEC\""
+  result:
+    custom:
+      db:
+        backend_start: 1758047158000
+        date: 1758047205429
+        instance: "postgres"
+        severity: "ERROR"
+        user: "postgres"
+      network:
+        client:
+          ip: "192.168.65.1"
+          port: 31674
+      postgres:
+        application_name: "pgbench"
+        appname: "pgbench"
+        dbname: "postgres"
+        error_severity: "ERROR"
+        line_num: 34853
+        message: "syntax error at or near \"SELEC\""
+        pid: 87
+        proc_id: "87"
+        remote_host: "192.168.65.1"
+        remote_port: 31674
+        session_id: "68c9abb6.57"
+        session_start: "2025-09-16 18:25:58 UTC"
+        state_code: "42601"
+        timestamp: "2025-09-16 18:26:45.429 UTC"
+        txid: 2823
+        user: "postgres"
+        vxid: "5/2050"
+        xid: "2823"
+      session_lineno: 34853
+      sql_state: "42601"
+    message: "syntax error at or near \"SELEC\""
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+     - "db:postgres"
+    timestamp: 1758047205429
+ -
+  sample: "2026-08-17 20:45:34.801 UTC [105] [user=edge@user,db=pgllp_db,app=pgllp_app] LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      postgres:
+        application_name: "pgllp_app"
+        dbname: "pgllp_db"
+        error_severity: "LOG"
+        message: "statement: SELECT 2 AS c02;"
+        pid: 105
+        timestamp: "2026-08-17 20:45:34.801 UTC"
+        user: "edge@user"
+    message: "2026-08-17 20:45:34.801 UTC [105] [user=edge@user,db=pgllp_db,app=pgllp_app] LOG:  statement: SELECT 2 AS c02;"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=edge@db,app=pgllp_app] LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      postgres:
+        application_name: "pgllp_app"
+        dbname: "edge@db"
+        error_severity: "LOG"
+        message: "statement: SELECT 2 AS c02;"
+        pid: 105
+        timestamp: "2026-08-17 20:45:34.801 UTC"
+        user: "pgllp_user"
+    message: "2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=edge@db,app=pgllp_app] LOG:  statement: SELECT 2 AS c02;"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=pgllp_db,app=edge@app] LOG:  statement: SELECT 2 AS c02;"
+  result:
+    custom:
+      postgres:
+        application_name: "edge@app"
+        dbname: "pgllp_db"
+        error_severity: "LOG"
+        message: "statement: SELECT 2 AS c02;"
+        pid: 105
+        timestamp: "2026-08-17 20:45:34.801 UTC"
+        user: "pgllp_user"
+    message: "2026-08-17 20:45:34.801 UTC [105] [user=pgllp_user,db=pgllp_db,app=edge@app] LOG:  statement: SELECT 2 AS c02;"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2017-11-07 17:30:39 UTC LOG:  execute <unnamed>: INSERT INTO t VALUES ('statement: DELETE FROM x')"
+  result:
+    custom:
+      db:
+        date: 1510075839000
+        severity: "LOG"
+      postgres:
+        error_severity: "LOG"
+        message: "execute <unnamed>: INSERT INTO t VALUES ('statement: DELETE FROM x')"
+        timestamp: "2017-11-07 17:30:39 UTC"
+    message: "execute <unnamed>: INSERT INTO t VALUES ('statement: DELETE FROM x')"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1510075839000
+ -
+  sample: "pid=107,user=pgllp_user,db=pgllp_db,app=pgllp_app,client=fd42::3 LOG:  duration: 12.345 ms"
+  result:
+    custom:
+      postgres:
+        application_name: "pgllp_app"
+        dbname: "pgllp_db"
+        error_severity: "LOG"
+        message: "duration: 12.345 ms"
+        pid: 107
+        remote_host: "fd42::3"
+        user: "pgllp_user"
+    message: "pid=107,user=pgllp_user,db=pgllp_db,app=pgllp_app,client=fd42::3 LOG:  duration: 12.345 ms"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2026-01-15 12:00:00 EST:fd42::3(5432):postgres@postgres:[87]:FATAL:  3D000: database \"missing\" does not exist at character 12"
+  result:
+    custom:
+      postgres:
+        dbname: "postgres"
+        error_severity: "FATAL"
+        message: "database \"missing\" does not exist"
+        pid: 87
+        remote_host: "fd42::3"
+        remote_port: 5432
+        state_code: "3D000"
+        timestamp: "2026-01-15 12:00:00 EST"
+        user: "postgres"
+    message: "2026-01-15 12:00:00 EST:fd42::3(5432):postgres@postgres:[87]:FATAL:  3D000: database \"missing\" does not exist at character 12"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: " sql_error_code = 00000 time_ms = \"2026-08-28 12:19:21.018 \" pid=\"108\" proc_start_time=\"2026-08-28 12:19:20 \" session_id=\"6a837351.6c\" vtid=\"\" tid=\"0\" log_line=\"1\" PANIC:  could not write to log file"
+  result:
+    custom:
+      postgres:
+        error_severity: "PANIC"
+        line_num: 1
+        message: "could not write to log file"
+        pid: 108
+        session_id: "6a837351.6c"
+        session_start: "2026-08-28 12:19:20 "
+        timestamp: "2026-08-28 12:19:21.018 "
+        txid: 0
+    message: " sql_error_code = 00000 time_ms = \"2026-08-28 12:19:21.018 \" pid=\"108\" proc_start_time=\"2026-08-28 12:19:20 \" session_id=\"6a837351.6c\" vtid=\"\" tid=\"0\" log_line=\"1\" PANIC:  could not write to log file"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2026-08-28 12:19:21 :db.internal:[unknown]@[unknown]:[87]:1:00000:2026-08-28 12:19:20.018 :5/2050:0:68c9abb6.57:[unknown]:WARNING:  connection warning"
+  result:
+    custom:
+      postgres:
+        error_severity: "WARNING"
+        line_num: 1
+        message: "connection warning"
+        pid: 87
+        remote_host: "db.internal"
+        session_id: "68c9abb6.57"
+        session_start: "2026-08-28 12:19:20.018 "
+        timestamp: "2026-08-28 12:19:21 "
+        txid: 0
+        vxid: "5/2050"
+    message: "2026-08-28 12:19:21 :db.internal:[unknown]@[unknown]:[87]:1:00000:2026-08-28 12:19:20.018 :5/2050:0:68c9abb6.57:[unknown]:WARNING:  connection warning"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: " sql_error_code = 00000 time_ms = \"2026-08-17 20:47:13.749 UTC\" pid=\"108\" proc_start_time=\"2026-08-17 20:47:13.031 UTC\" session_id=\"6a837351.6c\" vtid=\"4/5\" tid=\"0\" log_line=\"10\" database=\"pgllp_db\" connection_source=\"[local]\" user=\"pgllp_user\" application_name=\"pgllp_app\" DEBUG5:  backend initialized"
+  result:
+    custom:
+      postgres:
+        application_name: "pgllp_app"
+        dbname: "pgllp_db"
+        error_severity: "DEBUG5"
+        line_num: 10
+        message: "backend initialized"
+        pid: 108
+        remote_host: "[local]"
+        session_id: "6a837351.6c"
+        session_start: "2026-08-17 20:47:13.031 UTC"
+        timestamp: "2026-08-17 20:47:13.749 UTC"
+        txid: 0
+        user: "pgllp_user"
+        vxid: "4/5"
+    message: " sql_error_code = 00000 time_ms = \"2026-08-17 20:47:13.749 UTC\" pid=\"108\" proc_start_time=\"2026-08-17 20:47:13.031 UTC\" session_id=\"6a837351.6c\" vtid=\"4/5\" tid=\"0\" log_line=\"10\" database=\"pgllp_db\" connection_source=\"[local]\" user=\"pgllp_user\" application_name=\"pgllp_app\" DEBUG5:  backend initialized"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1
+ -
+  sample: "2026-08-17 20:46:39.837 UTC [63] NOTICE:  table \"missing\" does not exist, skipping"
+  result:
+    custom:
+      db:
+        date: 1786999599837
+        severity: "NOTICE"
+      postgres:
+        error_severity: "NOTICE"
+        message: "table \"missing\" does not exist, skipping"
+        pid: 63
+        proc_id: "63"
+        timestamp: "2026-08-17 20:46:39.837 UTC"
+    message: "table \"missing\" does not exist, skipping"
+    status: "notice"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1786999599837
+# Generated with PostgreSQL 18.6 and pgAudit 18.0: session and object audit logging.
+ -
+  sample: "2026-09-30 20:52:58.043 UTC [86678] LOG:  AUDIT: SESSION,1,1,READ,SELECT,,,SELECT 1,<not logged>"
+  result:
+    custom:
+      db:
+        date: 1790801578043
+        severity: "LOG"
+      postgres:
+        error_severity: "LOG"
+        message: "AUDIT: SESSION,1,1,READ,SELECT,,,SELECT 1,<not logged>"
+        pid: 86678
+        proc_id: "86678"
+        timestamp: "2026-09-30 20:52:58.043 UTC"
+    message: "AUDIT: SESSION,1,1,READ,SELECT,,,SELECT 1,<not logged>"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1790801578043
+ -
+  sample: "2026-09-30 20:52:58.114 UTC:[local]:postgres@postgres:[86692]:1:00000:2026-09-30 20:52:58 UTC:10/2:0:6abd76aa.152a4:psql:LOG:  AUDIT: OBJECT,1,1,READ,SELECT,TABLE,public.audit_sample,SELECT * FROM audit_sample,<not logged>"
+  result:
+    custom:
+      postgres:
+        application_name: "psql"
+        dbname: "postgres"
+        error_severity: "LOG"
+        line_num: 1
+        message: "AUDIT: OBJECT,1,1,READ,SELECT,TABLE,public.audit_sample,SELECT * FROM audit_sample,<not logged>"
+        pid: 86692
+        remote_host: "[local]"
+        session_id: "6abd76aa.152a4"
+        session_start: "2026-09-30 20:52:58 UTC"
+        timestamp: "2026-09-30 20:52:58.114 UTC"
+        txid: 0
+        user: "postgres"
+        vxid: "10/2"
+    message: "2026-09-30 20:52:58.114 UTC:[local]:postgres@postgres:[86692]:1:00000:2026-09-30 20:52:58 UTC:10/2:0:6abd76aa.152a4:psql:LOG:  AUDIT: OBJECT,1,1,READ,SELECT,TABLE,public.audit_sample,SELECT * FROM audit_sample,<not logged>"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1

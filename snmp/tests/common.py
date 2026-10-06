@@ -24,7 +24,7 @@ HOST = get_docker_hostname()
 PORT = 1161
 HERE = os.path.dirname(os.path.abspath(__file__))
 COMPOSE_DIR = os.path.join(HERE, 'compose')
-SNMP_LISTENER_ENV = os.environ['SNMP_LISTENER_ENV']
+SNMP_TEST_SUITE = os.environ['SNMP_TEST_SUITE']
 ACTIVE_ENV_NAME = get_active_env()
 
 AUTH_PROTOCOLS = {'MD5': 'usmHMACMD5AuthProtocol', 'SHA': 'usmHMACSHAAuthProtocol'}
@@ -208,8 +208,10 @@ SNMP_E2E_BACKEND_ENRICHED_TAG_KEYS = {
 }
 SNMP_E2E_ENRICHMENT_MATCH_TAG_KEYS = {'autodiscovery_subnet'}
 
-snmp_listener_only = pytest.mark.skipif(SNMP_LISTENER_ENV != 'true', reason='Agent snmp lister tests only')
-snmp_integration_only = pytest.mark.skipif(SNMP_LISTENER_ENV != 'false', reason='Normal tests')
+# Each suite runs in its own hatch environment so CI can run them in parallel.
+python_suite_only = pytest.mark.skipif(SNMP_TEST_SUITE != 'python', reason='Python check tests only')
+core_suite_only = pytest.mark.skipif(SNMP_TEST_SUITE != 'core', reason='Core check tests only')
+snmp_listener_only = pytest.mark.skipif(SNMP_TEST_SUITE != 'listener', reason='Agent snmp listener tests only')
 py3_plus_only = pytest.mark.skipif(sys.version_info[0] < 3, reason='Run test with Python 3+ only')
 
 
@@ -460,13 +462,21 @@ def _is_snmp_backend_enriched_metric(metric_name):
     return metric_name.startswith(SNMP_E2E_BACKEND_ENRICHED_METRIC_PREFIXES)
 
 
+def two_runs_instead_of_rate(kwargs):
+    # `--check-rate` sleeps 1s between its two runs. The simulated data is static, so two
+    # back-to-back runs submit the same metrics without the pause.
+    if kwargs.pop('rate', False):
+        kwargs['times'] = max(kwargs.get('times', 1), 2)
+    return kwargs
+
+
 def dd_agent_check_wrapper(dd_agent_check, *args, **kwargs):
     """
     dd_agent_check_wrapper is a wrapper around dd_agent_check that will return an aggregator.
     The wrapper modifies e2e metric tags by excluding EXCLUDED_E2E_TAG_KEYS and,
     for core SNMP checks, mirroring backend device/profile tag enrichment.
     """
-    aggregator = dd_agent_check(*args, **kwargs)
+    aggregator = dd_agent_check(*args, **two_runs_instead_of_rate(kwargs))
     metric_enrichment_tag_sets = []
     if _should_enrich_snmp_e2e_metrics(args):
         # The core Agent submits SNMP metrics with an NDM resource and relies on

@@ -58,7 +58,7 @@ def monitored(
         rate_limit_resource='forged',
         rate_limiter='forged',
     )
-    monitor = GitHubMonitor(monitoring.component('github-async', integration='ntp'), now=lambda: NOW)
+    monitor = GitHubMonitor(monitoring.component('github-async', target='ntp'), now=lambda: NOW)
     client = AsyncGitHubClient('token', rate_limiter=rate_limiter, transport=transport, observer=monitor)
     return client, monitor, sink, handler
 
@@ -100,7 +100,7 @@ async def test_every_attempt_is_counted_under_the_family_tags_only(monkeypatch: 
     [failure] = [event for event in handler.events if event['level'] == 'error']
     assert failure['event'] == 'GitHub request attempt failed'
     assert (failure['endpoint'], failure['attempt'], failure['status_code']) == (RUN_PATH, 1, 503)
-    assert (failure['reason'], failure['terminal'], failure['integration']) == ('server_error', False, 'ntp')
+    assert (failure['reason'], failure['terminal'], failure['target']) == ('server_error', False, 'ntp')
     [completed] = [event for event in handler.events if event['event'] == 'GitHub request completed']
     assert (completed['level'], completed['attempt'], completed['status_code']) == ('debug', 2, 200)
 

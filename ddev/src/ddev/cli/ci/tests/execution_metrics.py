@@ -10,16 +10,26 @@ from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from enum import StrEnum, auto
+from typing import Any
+
+from structlog.stdlib import BoundLogger
 
 from ddev.monitoring.metrics import Metrics
 
 
 class ExecutionOutcome(StrEnum):
-    """Terminal command outcomes, including modes that skip execution."""
+    """Terminal command outcomes, including modes that skip execution.
+
+    `TESTS_FAILED` is a run the Dispatcher carried through whose tests failed. `FAILED` is a run the
+    Dispatcher itself could not carry through: a crash, a batch it lost track of or a report it could
+    not publish.
+    """
 
     NO_OP = 'no-op'
     PASSED = auto()
+    TESTS_FAILED = 'tests-failed'
     FAILED = auto()
+    TIMED_OUT = 'timed-out'
     CANCELLED = auto()
     PLANNING_FAILED = 'planning-failed'
     RESOLVED = auto()
@@ -56,6 +66,24 @@ class MetricsHelper:
         """Emit one logical operation's outcome after retries and fallbacks settle."""
         self._metrics.count('operations.count', 1, operation=operation)
         self._metrics.count('operations.failed', int(failed), operation=operation)
+
+    def log_failed_operation(
+        self,
+        operation: Operation,
+        logger: BoundLogger,
+        message: str,
+        *args: Any,
+        recovered: bool = False,
+        exc_info: bool = False,
+        **fields: Any,
+    ) -> None:
+        """Log a failed operation: an error when it escaped, a warning when the processor recovered.
+
+        Does not record the metric; `record_operation` or `time_operation` does.
+        """
+        (logger.warning if recovered else logger.error)(
+            message, *args, operation=operation, exc_info=exc_info, **fields
+        )
 
     @contextmanager
     def time_operation(self, operation: Operation, *, duration_metric: str) -> Iterator[OperationResult]:
