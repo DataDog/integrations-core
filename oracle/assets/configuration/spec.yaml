@@ -12,7 +12,7 @@ files:
       value:
         example: false
         type: boolean
-      fleet_configurable: true
+      fleet_configurable: false
     - name: propagate_agent_tags
       description: |
         Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
@@ -27,7 +27,6 @@ files:
     options:
     - name: server
       description: The IP address or hostname of the Oracle Database Server.
-      required: true
       value:
         type: string
         example: localhost:1521
@@ -36,7 +35,6 @@ files:
       description: |
         The Oracle Database service name. To view the services available on your server,
         run the following query: `SELECT value FROM v$parameter WHERE name='service_names'`
-      required: true
       value:
         type: string
       fleet_configurable: true
@@ -88,6 +86,19 @@ files:
         The directory containing the Oracle wallet. The Oracle wallet is used with the TCPS protocol.
       value:
         type: string
+      fleet_configurable: true
+    - name: oracle_client
+      description: |
+        Force using an external Oracle client even when `tns_alias` isn't set. This might be necessary
+        for using some advanced Oracle SQLNet features which aren't supported by the
+        Oracle driver for Go. If you specify `tns_admin`, the Agent automatically tries
+        to use an external client. For Linux, if you are using Instant Client, set
+        the environment variable `LD_LIBRARY_PATH` for the Agent process. If you are using
+        a client or server Oracle home, additionally set `ORACLE_HOME`.
+      value:
+        type: boolean
+        example: false
+        display_default: false
       fleet_configurable: true
     - name: query_timeout
       description: |
@@ -253,6 +264,14 @@ files:
             type: boolean
             example: true
             display_default: true
+          fleet_configurable: true
+        - name: collection_interval
+          description: |
+            The interval in seconds between tablespace usage collections. Defaults to 600.
+          value:
+            type: integer
+            example: 600
+            display_default: 600
           fleet_configurable: true
       fleet_configurable: true
     - name: process_memory
