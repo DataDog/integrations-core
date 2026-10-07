@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 MAX_DESCRIPTION_LENGTH = 3000
 # PRs opened before the checklist template existed are exempt. Set to the merge date of the template change.
-ENFORCED_SINCE = datetime.fromisoformat('2026-10-02T00:00:00+00:00')
+ENFORCED_SINCE = datetime.fromisoformat('2026-10-07T14:35:00+00:00')
 CHECKLIST_HEADING = 'Checklist before requesting review'
 HEADING_PATTERN = re.compile(r'^##[ \t]+(.+?)[ \t]*$', re.MULTILINE)
 COMMENT_PATTERN = re.compile(r'<!--.*?-->', re.DOTALL)
