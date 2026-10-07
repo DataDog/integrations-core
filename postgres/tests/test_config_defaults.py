@@ -199,6 +199,8 @@ EXPECTED_DEFAULTS = {
         'config_id': None,
         'queries': (),
     },
+    # === Remote Queries ===
+    'remote_queries': None,  # Optional section, no forced timeout default
     # === Relations configuration ===
     'relations': [],
     # === Query encodings ===

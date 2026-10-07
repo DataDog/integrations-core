@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import re
+import threading
 import types
 from pathlib import Path
 from typing import Any  # noqa: F401
@@ -1718,3 +1719,174 @@ def test_resolve_issue(datadog_agent, issue_check):
     issue_check.resolve_issue('issue-1')
 
     datadog_agent.assert_resolved_issue('issue-1')
+
+
+class TestCancellationLifecycle:
+    """The opt-in AgentCheck cancellation lifecycle: admission, deferred teardown, hooks.
+
+    These tests pin the base behavior on `_lifecycle_managed` checks; DatabaseCheck layers
+    its async-job teardown on the same hooks (see test_database_check.py), and checks that
+    have not opted in keep exactly their previous behavior.
+    """
+
+    # Upper bound for waits on another thread; tests only ever wait for a signal that is
+    # already on its way.
+    WAIT_TIMEOUT = 5
+
+    @staticmethod
+    def make_check(**overrides):
+        class LifecycleCheck(AgentCheck):
+            _lifecycle_managed = True
+
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.check_calls = 0
+                self.shutdown_calls = 0
+                self.background_stops = 0
+                self.cancel_signals = 0
+                self.teardown_order = []
+                # Cleared by tests that need a cancel to land while check() executes.
+                self.in_check = threading.Event()
+                self.release_check = threading.Event()
+                self.release_check.set()
+
+            def check(self, _):
+                self.check_calls += 1
+                self.in_check.set()
+                assert self.release_check.wait(timeout=TestCancellationLifecycle.WAIT_TIMEOUT)
+
+            def _on_cancel(self):
+                self.cancel_signals += 1
+
+            def _stop_background_work(self):
+                self.background_stops += 1
+                self.teardown_order.append('background')
+
+            def shutdown(self):
+                self.shutdown_calls += 1
+                self.teardown_order.append('shutdown')
+
+        return LifecycleCheck('test', {}, [{}], **overrides)
+
+    def test_cancel_when_idle_finalizes_immediately(self):
+        check = self.make_check()
+
+        check.cancel()
+
+        assert check.is_cancelled
+        assert check.cancel_signals == 1
+        assert check.shutdown_calls == 1
+
+    def test_run_without_cancel_runs_the_check_without_teardown(self):
+        check = self.make_check()
+
+        assert check.run() == ''
+        assert check.check_calls == 1
+        assert not check.is_cancelled
+        assert check.shutdown_calls == 0
+
+    def test_cancel_during_run_defers_teardown_until_run_completes(self):
+        """Teardown must wait for the scheduled run, never run beside it.
+
+        Releasing resources under a running check() means the run resumes against closed
+        connections and clients, which fails deep inside the client library instead of at
+        the check's own boundary.
+        """
+        check = self.make_check()
+        check.release_check.clear()
+        run_result = []
+        run_thread = threading.Thread(target=lambda: run_result.append(check.run()))
+        run_thread.start()
+        assert check.in_check.wait(timeout=self.WAIT_TIMEOUT)
+
+        check.cancel()
+
+        # The cancel is signaled, but the run is still executing so nothing may be released.
+        assert check.is_cancelled
+        assert check.cancel_signals == 1
+        assert check.shutdown_calls == 0
+
+        check.release_check.set()
+        run_thread.join(timeout=self.WAIT_TIMEOUT)
+        assert not run_thread.is_alive()
+        assert run_result == ['']
+        assert check.shutdown_calls == 1
+
+    def test_run_after_cancel_is_refused_without_touching_the_check(self):
+        check = self.make_check()
+        check.cancel()
+
+        assert check.run() == ''
+        assert check.check_calls == 0
+
+    @pytest.mark.parametrize('in_flight', [False, True], ids=['idle', 'during_run'])
+    def test_cancel_is_idempotent(self, in_flight):
+        check = self.make_check()
+        if in_flight:
+            check.release_check.clear()
+            run_thread = threading.Thread(target=check.run)
+            run_thread.start()
+            assert check.in_check.wait(timeout=self.WAIT_TIMEOUT)
+
+        check.cancel()
+        check.cancel()
+
+        if in_flight:
+            check.release_check.set()
+            run_thread.join(timeout=self.WAIT_TIMEOUT)
+            assert not run_thread.is_alive()
+        # Every cancel signals, but the teardown runs once however many arrive.
+        assert check.cancel_signals == 2
+        assert check.shutdown_calls == 1
+
+    def test_background_work_stops_before_resources_are_released(self):
+        """The teardown hooks run in a fixed order: loops waited for, then resources released."""
+        check = self.make_check()
+
+        check.cancel()
+
+        assert check.teardown_order == ['background', 'shutdown']
+
+    def test_run_failure_still_releases_the_admission(self):
+        """A run whose check() raises must not wedge the lifecycle: the error report is
+        returned and a later cancel can still tear the check down."""
+        check = self.make_check()
+
+        def failing_check(_):
+            raise ValueError('boom')
+
+        check.check = failing_check
+        error_report = check.run()
+        assert 'boom' in error_report
+
+        check.cancel()
+        assert check.shutdown_calls == 1
+
+    def test_check_without_opt_in_keeps_its_previous_lifecycle_behavior(self):
+        """The lifecycle is opt-in: a plain check's cancel stays a no-op.
+
+        Its runs keep executing after a cancel, the flag never turns True, and no teardown
+        hook fires. Integrations that override `cancel` without calling `super()` keep
+        their own behavior the same way.
+        """
+
+        class PlainCheck(AgentCheck):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.check_calls = 0
+                self.shutdown_calls = 0
+
+            def check(self, _):
+                self.check_calls += 1
+
+            def shutdown(self):
+                self.shutdown_calls += 1
+
+        check = PlainCheck('test', {}, [{}])
+
+        check.cancel()
+
+        assert not check.is_cancelled
+        assert check.shutdown_calls == 0
+        assert check.run() == ''
+        assert check.check_calls == 1

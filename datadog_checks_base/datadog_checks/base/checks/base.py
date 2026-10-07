@@ -9,6 +9,7 @@ import importlib
 import logging
 import os
 import re
+import threading
 from collections import deque
 from collections.abc import Iterable
 from os.path import basename
@@ -69,6 +70,8 @@ if TYPE_CHECKING:
     from datadog_checks.base.utils.discovery import Service
     from datadog_checks.base.utils.http import RequestsWrapper
     from datadog_checks.base.utils.metadata import MetadataManager
+    from datadog_checks.base.utils.remote_queries.contract import RemoteQueryEmit
+    from datadog_checks.base.utils.remote_queries.handler import RemoteQueryHandler
 
 inspect: _module_inspect = lazy_loader.load('inspect')
 traceback: _module_traceback = lazy_loader.load('traceback')
@@ -209,6 +212,14 @@ class AgentCheck(object):
     # be sent to the aggregator, the rest are dropped. The state is reset after each run.
     # See https://github.com/DataDog/integrations-core/pull/2093 for more information.
     DEFAULT_METRIC_LIMIT = 0
+
+    # Checks that coordinate their unscheduling through the base cancellation lifecycle set
+    # this to True. Their scheduled runs and remote-query bridge calls then share one
+    # admission path, cancellation signaling, deferred one-time finalization, and the
+    # `shutdown()` resource hook below. Opting in is deliberate: every other check keeps
+    # exactly its current `run()`/`cancel()` behavior, including integrations that override
+    # `cancel()` without calling `super()` (which opts out entirely).
+    _lifecycle_managed = False
 
     # Allow tracing for classic integrations
     def __init_subclass__(cls, *args, **kwargs):
@@ -392,6 +403,14 @@ class AgentCheck(object):
                 self.__initialize_persistent_cache_key_prefix,
             ]
         )
+
+        # Unschedule-lifecycle state, shared between the scheduler thread (`run`) and the
+        # Agent's cancellation thread (`cancel`). Only `_lifecycle_managed` checks engage
+        # it: for every other check these fields stay untouched.
+        self._lifecycle_lock = threading.Lock()
+        self._cancelled = False
+        self._finalized = False
+        self._active_operations = 0
 
         self.__formatted_tags = None
         self.__logs_enabled = None
@@ -1618,22 +1637,233 @@ class AgentCheck(object):
         tag = self.DOT_UNDERSCORE_CLEANUP.sub(rb'.', tag).strip(b'_')
         return to_native_string(tag)
 
+    def get_remote_query_handler(self) -> RemoteQueryHandler | None:
+        """The check's composed remote-query capability, or None when it has none.
+
+        Integrations that support remote queries return one handler here, composed with
+        the check; the hook may use a function-local import so ordinary monitoring
+        startup never imports the optional remote-query runtime. A fresh, cheap handler
+        per bridge call is expected: handlers hold the check they serve, never shared
+        request state.
+        """
+        return None
+
+    def run_remote_query(self, request_json: str | bytes | bytearray, emit: RemoteQueryEmit) -> None:
+        """Agent bridge entry point for the optional remote-query capability.
+
+        The dispatcher validates the request's operation against the closed Remote Query
+        vocabulary, then acquires one optional handler through `get_remote_query_handler`
+        and dispatches directly through it: handler presence alone gates the capability,
+        because a handler implements the complete protocol — resolve and execute. Requests
+        are decoded JSON objects; the handler validates its operation's schema before
+        accessing database state. Only metadata events cross `emit`, never rows.
+
+        The Agent pins this loaded check for the call and prevents calls after shutdown.
+        This path is independent of scheduled `check()` runs: implementations must use
+        concurrency-safe database resources, honor the run deadline and `is_cancelled`,
+        and release resources when the event generator is closed (including emit failure).
+
+        `_lifecycle_managed` checks additionally admit the whole bridge call — resolve and
+        execute alike — through the base cancellation lifecycle: a call that arrives after
+        `cancel` is refused at admission with a retryable `cancelled` error event instead
+        of touching the handler, and a cancel that arrives mid-call defers the check's
+        teardown until the call has unwound (generator closed, emit callback failed, or
+        exception propagated — every exit path releases the admission).
+        """
+        # Keep the optional runtime out of ordinary monitoring check startup.
+        from datadog_checks.base.utils.remote_queries.events import (
+            emit_agent_rpc_events,
+            emit_event,
+            failed_event,
+            parse_agent_rpc_request,
+        )
+        from datadog_checks.base.utils.remote_queries.handler import (
+            REMOTE_QUERY_OPERATION_RESOLVE_TARGET,
+            REMOTE_QUERY_OPERATIONS,
+        )
+
+        if self._lifecycle_managed and not self._admit_lifecycle_operation():
+            # Refuse at the boundary, before the request is parsed or the check is touched:
+            # the fixed retryable outcome lets the backend re-dispatch after a reschedule
+            # instead of waiting on a stream that will never answer.
+            emit_event(emit, failed_event('cancelled', 'Remote query run was cancelled.', retryable=True))
+            return
+        try:
+            request, started_at, failure = parse_agent_rpc_request(request_json)
+            if failure is not None:
+                emit_event(emit, failure)
+                return
+            assert request is not None
+            operation = request.get('operation')
+            if not isinstance(operation, str) or operation not in REMOTE_QUERY_OPERATIONS:
+                emit_event(emit, failed_event('invalid_request', 'Unknown remote query operation.'))
+                return
+            handler = self.get_remote_query_handler()
+            if handler is None:
+                emit_event(emit, failed_event('unsupported_operation', 'Check does not support remote queries.'))
+                return
+            events = (
+                handler.resolve(request)
+                if operation == REMOTE_QUERY_OPERATION_RESOLVE_TARGET
+                else handler.execute(request, started_at)
+            )
+            emit_agent_rpc_events(emit, events)
+        finally:
+            if self._lifecycle_managed:
+                # Runs on every exit path, including emit-callback failure (the generator is
+                # closed first) and mid-stream exceptions, so teardown can never overtake an
+                # in-flight call on a check being unscheduled.
+                self._release_lifecycle_operation()
+
     def check(self, instance):
         # type: (InstanceType) -> None
         raise NotImplementedError
 
     def cancel(self):
         # type: () -> None
+        """Signal that the check is being unscheduled; no destructive work happens here.
+
+        The Agent may call this from another thread while a scheduled run or a remote-query
+        bridge call is executing, so this method only marks the check cancelled and runs
+        `_on_cancel` to signal in-flight work. Resource teardown is deferred to
+        `_finalize`: it runs here when no operation is in flight, and in the last
+        operation's unwind otherwise. Integrations release resources by overriding
+        `shutdown`, not this method.
+
+        This base implementation engages only for `_lifecycle_managed` checks; every other
+        check keeps whatever cancellation behavior it (or its own `cancel` override)
+        defines.
         """
-        This method is called when the check in unscheduled by the agent. This
-        is SIGNAL that the check is being unscheduled and can be called while
-        the check is running. It's up to the python implementation to make sure
-        cancel is thread safe and won't block.
+        if not self._lifecycle_managed:
+            return
+        self.log.debug("Marking check as cancelled")
+        with self._lifecycle_lock:
+            self._cancelled = True
+            needs_finalize = self._active_operations == 0
+        # Deliberately outside the lock: interrupting in-flight work and teardown may
+        # block (network interrupts, waiting for loops) and must never hold up another
+        # admission.
+        self._on_cancel()
+        if needs_finalize:
+            self.log.debug("cancel() finalizing immediately, no operation is in flight")
+            self._finalize()
+        else:
+            self.log.debug("cancel() deferred finalize, an operation is still in flight")
+
+    @property
+    def is_cancelled(self) -> bool:
+        """Whether `cancel` has been signaled for this check.
+
+        Long-running work admitted before the cancel should poll this and stop promptly
+        instead of running to its own deadline on a check the Agent is tearing down. Only
+        `_lifecycle_managed` checks ever see this become True.
         """
-        pass
+        return self._cancelled
+
+    def _on_cancel(self) -> None:
+        """Hook run by `cancel` after the check is marked cancelled, outside `_lifecycle_lock`.
+
+        Override to signal in-flight work that must stop promptly — background loops,
+        in-flight remote statements — without releasing anything a running operation still
+        depends on. Keep it bounded: the Agent waits on this call with a timeout. The
+        default does nothing.
+        """
+
+    def _stop_background_work(self) -> None:
+        """Hook run by `_finalize` before `shutdown`, outside `_lifecycle_lock`.
+
+        Override to wait for and tear down work the check owns that runs outside its
+        scheduled runs, so `shutdown` never releases resources under a live loop. The
+        default does nothing.
+        """
+
+    def _finalize(self) -> None:
+        """Tear the check down: stop its background work, release its resources, drop its state.
+
+        Runs at most once, and never while an admitted operation is executing: `cancel` and
+        the admission pair between them guarantee that. Each step's failures are contained
+        so teardown always completes.
+        """
+        with self._lifecycle_lock:
+            if self._finalized:
+                return
+            self._finalized = True
+        self.log.debug("Finalizing check: stopping background work and releasing resources")
+        try:
+            self._stop_background_work()
+        except Exception:
+            self.log.exception("Error stopping background work during teardown; continuing")
+        try:
+            self.shutdown()
+        except Exception:
+            self.log.exception("Error in shutdown() during teardown; continuing")
+        # Dropping these breaks the reference cycles that would otherwise keep the check,
+        # and everything it holds, from being reclaimed once the Agent lets go of it.
+        self.check_initializations.clear()
+        if hasattr(self, '_diagnosis'):
+            del self._diagnosis
+        self.log.debug("Check cleanup complete")
+
+    def shutdown(self) -> None:
+        """Release the resources this check holds for its whole lifetime, such as
+        connections, connection pools and clients.
+
+        Called once by `_finalize` during teardown, after `_stop_background_work` has
+        stopped the check's background work, and never while a scheduled run or remote
+        call is executing. To unschedule a check, call `cancel` rather than this method.
+        The default is a no-op.
+        """
+
+    def _admit_lifecycle_operation(self) -> bool:
+        """Admit one operation (scheduled run or remote bridge call) under `_lifecycle_lock`.
+
+        Returns False when the check has been cancelled: no new operation may start on a
+        check the Agent is tearing down. The caller must pair every True with
+        `_release_lifecycle_operation`, on every exit path including exceptions and
+        emit-callback failure.
+        """
+        with self._lifecycle_lock:
+            if self._cancelled:
+                return False
+            self._active_operations += 1
+            return True
+
+    def _release_lifecycle_operation(self) -> None:
+        """Release one admitted operation, finalizing when the last one leaves after a cancel.
+
+        The finalize runs outside the lock, only when this release brings the
+        active-operation count to zero on a cancelled check, so teardown never executes
+        while an operation still uses the check.
+        """
+        with self._lifecycle_lock:
+            self._active_operations -= 1
+            needs_finalize = self._cancelled and self._active_operations == 0
+        if needs_finalize:
+            self.log.debug("Cancel was signaled during the operation, finalizing now that it has unwound")
+            self._finalize()
 
     def run(self):
         # type: () -> str
+        """Run one scheduled interval of the check, returning its error report, if any.
+
+        `_lifecycle_managed` checks are admitted through the base cancellation lifecycle:
+        a run refused because the check was cancelled returns an empty error report
+        without touching the check, and a cancel that arrives mid-run defers the check's
+        teardown to this method's exit.
+        """
+        if not self._lifecycle_managed:
+            return self._run_scheduled_check()
+        if not self._admit_lifecycle_operation():
+            self.log.debug("run() skipped, check already cancelled")
+            return ''
+        try:
+            return self._run_scheduled_check()
+        finally:
+            self._release_lifecycle_operation()
+
+    def _run_scheduled_check(self):
+        # type: () -> str
+        """The scheduled check cycle: initializations, one `check()` call, error reporting."""
         try:
             self._clear_diagnosis()
             # Ignore check initializations if running in a separate process

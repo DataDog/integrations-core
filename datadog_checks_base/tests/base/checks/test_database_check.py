@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import gc
+import json
 import threading
 import time
 import weakref
@@ -13,6 +14,7 @@ import pytest
 from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.stubs.datadog_agent import datadog_agent
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
+from datadog_checks.base.utils.remote_queries.contract import RemoteQueryEvent
 
 # Upper bound for waits on another thread; the tests only ever wait for a signal that is
 # already on its way.
@@ -352,3 +354,73 @@ def test_check_is_reclaimed_after_cancel():
             pytest.fail(f"check still alive after cancel() and del -- pinned by: {referrers}")
     finally:
         gc.enable()
+
+
+class ParkingHandler:
+    """A remote-query handler that parks mid-execution until the test releases it."""
+
+    def __init__(self):
+        self.started = threading.Event()
+        self.release = threading.Event()
+        self.closed = False
+
+    def resolve(self, request):
+        yield RemoteQueryEvent('final', {'status': 'MATCHED'})
+
+    def execute(self, request, started_at):
+        try:
+            yield RemoteQueryEvent('metadata', {'status': 'STARTED'})
+            self.started.set()
+            assert self.release.wait(timeout=WAIT_TIMEOUT)
+            yield RemoteQueryEvent('final', {'status': 'SUCCEEDED'})
+        finally:
+            self.closed = True
+
+
+class RemoteLifecycleCheck(LifecycleCheck):
+    """A DatabaseCheck with a remote-query handler, for lifecycle participation."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.handler = ParkingHandler()
+
+    def get_remote_query_handler(self):
+        return self.handler
+
+
+def test_cancel_during_remote_call_defers_async_job_teardown_until_it_unwinds():
+    """The remote bridge call participates with check() in the deferred teardown.
+
+    The async jobs are signalled at cancel time so their loops stop promptly, but they
+    are only awaited and released — together with the check's own resources — once the
+    last admitted operation has unwound: releasing them under a live call would leave
+    the call running against a torn-down check.
+    """
+    check = RemoteLifecycleCheck("test", {}, [{}])
+    job = check.register_async_job(RegistryTestJob(check))
+    check.run_async_jobs([])
+    events = []
+    thread = threading.Thread(
+        target=lambda: check.run_remote_query(
+            json.dumps({"operation": "produce_json_pages"}), lambda *event: events.append(event)
+        )
+    )
+    thread.start()
+    assert check.handler.started.wait(timeout=WAIT_TIMEOUT)
+
+    check.cancel()
+
+    # The jobs are signalled immediately, but the call is still executing so their loops
+    # are not awaited, nor are the check's resources released.
+    assert check.is_cancelled
+    assert job._cancel_event.is_set()
+    assert check.shutdown_calls == 0
+    assert job.shutdown_calls == 0
+
+    check.handler.release.set()
+    thread.join(timeout=WAIT_TIMEOUT)
+    assert not thread.is_alive()
+    assert [event[0] for event in events] == ["metadata", "final"]
+    assert job.shutdown_calls == 1
+    assert check.shutdown_calls == 1
+    assert check._async_job_registry == {}
