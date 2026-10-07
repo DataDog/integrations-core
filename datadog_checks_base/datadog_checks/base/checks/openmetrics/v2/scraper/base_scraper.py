@@ -24,7 +24,7 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http import DEFAULT_OPENMETRICS_MAX_RESPONSE_SIZE, RequestsWrapper
 
 
 class OpenMetricsScraper:
@@ -218,7 +218,14 @@ class OpenMetricsScraper:
 
             self.raw_line_filter = re.compile('|'.join(raw_line_filters))
 
-        self.http = RequestsWrapper(config, self.check.init_config, self.check.HTTP_CONFIG_REMAPPER, self.check.log)
+        # Bound the amount of decoded data read from the endpoint, `max_response_size: 0` disables the limit
+        http_config = config
+        if config.get('max_response_size') is None:
+            http_config = {**config, 'max_response_size': DEFAULT_OPENMETRICS_MAX_RESPONSE_SIZE}
+
+        self.http = RequestsWrapper(
+            http_config, self.check.init_config, self.check.HTTP_CONFIG_REMAPPER, self.check.log
+        )
 
         self._content_type = ''
         self._use_latest_spec = is_affirmative(config.get('use_latest_spec', False))
