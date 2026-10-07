@@ -24,7 +24,13 @@ from ddev.cli.ci.dispatch_run import ResolvedRun
 from ddev.cli.ci.dispatch_tests import run_summary
 from ddev.cli.ci.tests import dispatcher as dispatcher_module
 from ddev.cli.ci.tests import rate_limiting
-from ddev.cli.ci.tests.dispatcher import CANCELLED_RATE_LIMITS, Dispatcher, build_dispatcher, message_scope
+from ddev.cli.ci.tests.dispatcher import (
+    CANCELLED_RATE_LIMITS,
+    Dispatcher,
+    DispatcherOutcome,
+    build_dispatcher,
+    message_scope,
+)
 from ddev.cli.ci.tests.dispatcher_attributes import (
     PROTECTED_RUN_FIELDS,
     console_hidden_fields,
@@ -36,7 +42,6 @@ from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
 from ddev.cli.ci.tests.execution_metrics import ExecutionOutcome
 from ddev.cli.ci.tests.messages import (
     BatchFinished,
-    BatchJob,
     BatchProgressUpdate,
     TestBatch,
     UpdatePRComment,
@@ -70,11 +75,15 @@ from ddev.utils.github_async.observer import RequestObserver
 from ddev.utils.rate_limiting import BucketEvent, InstrumentedAsyncLimiter, RateLimitEvent
 from tests.cli.ci.helpers import mock_job_result
 from tests.cli.ci.tests.helpers import (
+    attempt,
+    batch_progress,
     invalid_response_error,
+    job_progress,
     jobs_reported,
     make_batch,
     make_job,
     recording_runtime,
+    timed_out_job,
 )
 from tests.helpers.github_async import (
     DEFAULT_COMMENT_ID,
@@ -102,6 +111,8 @@ CONTEXT = ResolvedRun(
     base_branch="master",
     base_sha="base-sha",
 )
+
+TIMED_OUT = ShutdownRequest.timed_out(RuntimeError('the run reached its time limit'))
 
 
 def build_bus(
@@ -153,6 +164,7 @@ def build_bus(
         max_timeout=max_timeout,
         grace_period=0.2,
         monitor=monitoring.component('dispatcher'),
+        message_scope=message_scope(monitoring.context, batches),
     )
 
 
@@ -201,7 +213,7 @@ def test_a_batch_travels_from_dispatch_to_the_pull_request_comment(client, tmp_p
 
     outcome = dispatcher.outcome
     assert outcome is not None
-    assert outcome.successful
+    assert outcome.execution_outcome is ExecutionOutcome.PASSED
     assert outcome.progress.done
     assert outcome.progress.passed == 1
 
@@ -311,7 +323,7 @@ def test_progress_reaches_the_comment_before_artifact_collection_finishes(
 
 
 @pytest.mark.parametrize("client", ["failure"], indirect=True)
-def test_a_failed_batch_makes_the_run_unsuccessful(client, tmp_path):
+def test_a_failed_batch_is_a_test_failure(client, tmp_path):
     job = make_job()
     mock_job_result(client, job, "failure")
     dispatcher = build_bus(client, tmp_path, [make_batch(job)])
@@ -320,11 +332,84 @@ def test_a_failed_batch_makes_the_run_unsuccessful(client, tmp_path):
 
     outcome = dispatcher.outcome
     assert outcome is not None
-    assert not outcome.successful
+    assert outcome.execution_outcome is ExecutionOutcome.TESTS_FAILED
     assert outcome.progress.failed == 1
 
 
-def test_missing_final_job_metadata_keeps_the_run_unsuccessful(client: FakeAsyncGitHubClient, tmp_path: Path):
+@pytest.mark.parametrize(
+    ("batches", "expected"),
+    [
+        pytest.param(
+            [batch_progress("batch-01", job_progress(attempt(Status.FAILURE)), status=Status.SUCCESS)],
+            ExecutionOutcome.TESTS_FAILED,
+            id="failed-job-in-a-passing-batch",
+        ),
+        pytest.param(
+            [
+                batch_progress("batch-01", job_progress(attempt()), status=Status.FAILURE),
+                batch_progress(
+                    "batch-02", job_progress(attempt(Status.CANCELLED), target="kafka"), status=Status.CANCELLED
+                ),
+            ],
+            ExecutionOutcome.TESTS_FAILED,
+            id="failed-batch-outranks-a-cancelled-one",
+        ),
+        pytest.param(
+            [batch_progress("batch-01", job_progress(attempt(Status.FAILURE)), status=Status.CANCELLED)],
+            ExecutionOutcome.CANCELLED,
+            id="failed-job-inside-a-cancelled-batch",
+        ),
+        pytest.param(
+            [batch_progress("batch-01", job_progress(attempt(Status.CANCELLED)), status=Status.CANCELLED)],
+            ExecutionOutcome.CANCELLED,
+            id="cancelled-batch-alone",
+        ),
+    ],
+)
+def test_a_failed_batch_outranks_a_cancelled_one(batches: list, expected: ExecutionOutcome):
+    """A real failure keeps the run `tests-failed`; a cancelled batch's failed jobs are discarded."""
+    outcome = DispatcherOutcome(
+        progress=DispatcherProgress(batches=tuple(batches), done=True), final_report_published=True
+    )
+
+    assert outcome.execution_outcome is expected
+
+
+@pytest.mark.parametrize("client", ["cancelled"], indirect=True)
+def test_a_batch_timed_out_by_its_job_fails_the_run(client, tmp_path):
+    """A run cancelled because a job hit its timeout is a failure, not a cancellation."""
+    job = make_job()
+    client.mock_response("list_workflow_jobs", make_workflow_jobs_list([timed_out_job(job.name)]))
+    dispatcher = build_bus(client, tmp_path, [make_batch(job)])
+
+    dispatcher.run()
+
+    outcome = dispatcher.outcome
+    assert outcome is not None
+    assert outcome.execution_outcome is ExecutionOutcome.TESTS_FAILED
+    assert outcome.progress.failed == 1
+    assert outcome.progress.cancelled == 0
+    assert CANCELLED_HEADING not in client.last_call("update_issue_comment").kwargs["body"]
+
+
+def test_a_test_failure_that_could_not_be_reported_fails_the_run(client, tmp_path):
+    job = make_job()
+    mock_job_result(client, job, "failure")
+    for method in ("update_issue_comment", "create_issue_comment", "list_issue_comments"):
+        client.mock_response(method, RuntimeError("the comment API is down"))
+    dispatcher = build_bus(client, tmp_path, [make_batch(job)])
+
+    dispatcher.run()
+
+    outcome = dispatcher.outcome
+    assert outcome is not None
+    assert outcome.progress.failed == 1
+    assert not outcome.final_report_published
+    assert outcome.execution_outcome is ExecutionOutcome.FAILED
+
+
+def test_missing_final_job_metadata_is_resolved_from_the_run_conclusion(client: FakeAsyncGitHubClient, tmp_path: Path):
+    """A successful run clears a job whose final listing failed, since GitHub fails a run with a failed job."""
     job = make_job()
     client.mock_response(
         "get_workflow_run",
@@ -341,8 +426,9 @@ def test_missing_final_job_metadata_keeps_the_run_unsuccessful(client: FakeAsync
 
     dispatcher.run()
 
-    assert not dispatcher.outcome.progress.done
-    assert not dispatcher.outcome.successful
+    assert dispatcher.outcome.progress.done
+    assert dispatcher.outcome.progress.passed == 1
+    assert dispatcher.outcome.execution_outcome is ExecutionOutcome.PASSED
 
 
 def test_the_report_is_written_to_the_run_summary(client, tmp_path, step_summary):
@@ -421,7 +507,7 @@ def test_a_cancelled_run_reports_itself_and_stops_the_work_it_started(client, tm
 
     outcome = dispatcher.outcome
     assert outcome is not None
-    assert not outcome.successful
+    assert outcome.execution_outcome is ExecutionOutcome.CANCELLED
     assert outcome.shutdown is not None
     assert outcome.shutdown.kind is ShutdownKind.CANCELLED
 
@@ -437,7 +523,7 @@ def test_a_timed_out_run_reports_itself_and_cancels_what_it_started(
 
     outcome = dispatcher.outcome
     assert outcome is not None
-    assert not outcome.successful
+    assert outcome.execution_outcome is ExecutionOutcome.TIMED_OUT
     assert not dispatcher.cancelled
     assert outcome.shutdown is not None
     assert outcome.shutdown.kind is ShutdownKind.TIMED_OUT
@@ -530,7 +616,7 @@ def test_a_fatal_response_failure_cancels_every_dispatched_run(
     outcome = dispatcher.outcome
     assert outcome is not None
     assert not outcome.progress.done
-    assert not outcome.successful
+    assert outcome.execution_outcome is ExecutionOutcome.FAILED
 
 
 def test_a_programmatic_stop_goes_through_the_same_path_as_a_signal(
@@ -564,10 +650,11 @@ def test_a_comment_write_failure_does_not_prevent_remote_cancellation(
     assert CANCELLED_HEADING.removeprefix("## ") in step_summary.read_text(encoding="utf-8")
     outcome = dispatcher.outcome
     assert outcome is not None
-    assert not outcome.successful
+    assert outcome.execution_outcome is ExecutionOutcome.CANCELLED
 
 
-def test_a_cancelled_run_counts_its_uncollected_jobs_as_incomplete(client: FakeAsyncGitHubClient, tmp_path: Path):
+def test_a_cancelled_run_reports_its_unfinished_work_as_cancelled(client: FakeAsyncGitHubClient, tmp_path: Path):
+    """A cancelled run reports its unfinished work as cancelled, never incomplete or failed."""
     monitoring, sink = recording_runtime()
     dispatcher = build_bus(client, tmp_path, [make_batch(make_job())], monitoring=monitoring)
     a_run_that_never_finishes(client)
@@ -577,22 +664,58 @@ def test_a_cancelled_run_counts_its_uncollected_jobs_as_incomplete(client: FakeA
     run_summary(
         monitoring.component('dispatcher'),
         started=time.monotonic(),
-        outcome=ExecutionOutcome.CANCELLED if dispatcher.cancelled else ExecutionOutcome.FAILED,
+        outcome=dispatcher.outcome.execution_outcome,
         dispatcher=dispatcher,
     )
 
     assert [record.value for record in sink.records_named('runs.count')] == [1]
     assert [record.value for record in sink.records_named('runs.cancelled')] == [1]
     assert [record.value for record in sink.records_named('runs.failed')] == [0]
-    incomplete = sink.records_named('jobs.incomplete')
-    assert [record.value for record in incomplete] == [1]
-    assert incomplete[0].tags['dispatcher.batch.job.target'] == 'ntp'
-    assert incomplete[0].tags['dispatcher.component'] == 'dispatcher'
-    assert sink.records_named('jobs.failed') == []
-    assert sink.records_named('batches.failed') == []
+    assert [record.value for record in sink.records_named('batches.cancelled')] == [1]
+    assert [record.value for record in sink.records_named('batches.failed')] == [0]
+    assert [record.value for record in sink.records_named('jobs.cancelled')] == [1]
+    assert [record.value for record in sink.records_named('jobs.failed')] == [0]
+    assert sink.records_named('jobs.incomplete') == []
 
 
-def test_a_timed_out_run_is_counted_failed_with_its_jobs_incomplete(client: FakeAsyncGitHubClient, tmp_path: Path):
+@pytest.mark.parametrize("cancelled", [False, True], ids=["gathered", "cancelled-shutdown"])
+def test_a_jobs_dimensions_stay_identical_from_launch_to_terminal_accounting(
+    client: FakeAsyncGitHubClient, tmp_path: Path, cancelled: bool
+):
+    """The launch, gathering and shutdown accounting of one job share their metric dimensions.
+
+    The launch and the gatherer's outcome counters are emitted inside a message scope, while the
+    shutdown accounting runs outside one, so a scope field marked as a metric tag would split the
+    job's series between the run and its terminal accounting.
+    """
+    monitoring, sink = recording_runtime()
+    job = make_job()
+    dispatcher = build_bus(client, tmp_path, [make_batch(job)], monitoring=monitoring)
+    if cancelled:
+        a_run_that_never_finishes(client)
+        stop_from_inside_the_run(dispatcher, client, request=ShutdownRequest.cancelled())
+    else:
+        # The listing never answers, so the job's outcome is resolved from the run's conclusion at gathering.
+        client.mock_response('list_workflow_jobs', RuntimeError('Final job metadata unavailable'))
+        dispatcher.run()
+
+    terminal = 'jobs.cancelled' if cancelled else 'jobs.passed'
+    # A cancelled shutdown counts the outstanding work as cancelled; a completed one flags nothing.
+    names = ('jobs.count', terminal) if cancelled else ('jobs.count', terminal, 'jobs.incomplete')
+    records = {name: next(record for record in sink.records_named(name)) for name in names}
+    # The runner counts the launch, the gatherer the outcome and the shutdown accounting.
+    components = {record.tags['dispatcher.component'] for record in records.values()}
+    assert components == {'test-runner', 'test-gatherer'}
+    shared = {
+        tuple(sorted((key, value) for key, value in record.tags.items() if key != 'dispatcher.component'))
+        for record in records.values()
+    }
+    assert len(shared) == 1
+
+
+def test_a_timed_out_run_is_counted_only_as_timed_out_with_its_jobs_incomplete(
+    client: FakeAsyncGitHubClient, tmp_path: Path
+):
     monitoring, sink = recording_runtime()
     dispatcher = build_bus(client, tmp_path, [make_batch(make_job())], max_timeout=0.5, monitoring=monitoring)
     a_run_that_never_finishes(client)
@@ -602,50 +725,57 @@ def test_a_timed_out_run_is_counted_failed_with_its_jobs_incomplete(client: Fake
     run_summary(
         monitoring.component('dispatcher'),
         started=time.monotonic(),
-        outcome=ExecutionOutcome.CANCELLED if dispatcher.cancelled else ExecutionOutcome.FAILED,
+        outcome=dispatcher.outcome.execution_outcome,
         dispatcher=dispatcher,
     )
 
     assert [record.value for record in sink.records_named('runs.count')] == [1]
-    assert [record.value for record in sink.records_named('runs.failed')] == [1]
     assert [record.value for record in sink.records_named('runs.timed_out')] == [1]
+    assert [record.value for record in sink.records_named('runs.failed')] == [0]
     assert [record.value for record in sink.records_named('runs.cancelled')] == [0]
     assert [record.value for record in sink.records_named('jobs.incomplete')] == [1]
     assert sink.records_named('jobs.failed') == []
 
 
-@pytest.mark.parametrize('cancelled', [False, True], ids=['completed', 'cancelled'])
+@pytest.mark.parametrize('stopped', [False, True], ids=['completed', 'timed-out'])
 def test_accounting_errors_allow_final_reporting_and_remote_cleanup(
-    client: FakeAsyncGitHubClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, cancelled: bool
+    client: FakeAsyncGitHubClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, stopped: bool
 ):
     handler = RecordingJsonHandler()
     monitoring = MonitoringRuntime(console_handler=handler)
     job = make_job()
     dispatcher = build_bus(client, tmp_path, [make_batch(job)], monitoring=monitoring)
 
-    def fail_job_fields(job: BatchJob) -> dict[str, Any]:
-        raise ValueError('Cannot build job dimensions')
+    # The incomplete flag is the shutdown accounting's own emission, so failing it leaves the run
+    # itself untouched.
+    metrics = dispatcher._gatherer.monitor.metrics
+    real_count = metrics.count
 
-    monkeypatch.setattr(dispatcher_module, 'job_fields', fail_job_fields)
-    if cancelled:
+    def fail_incomplete(name: str, value: float, **tags: Any) -> None:
+        if name == 'jobs.incomplete':
+            raise ValueError('Cannot count incomplete jobs')
+        real_count(name, value, **tags)
+
+    monkeypatch.setattr(metrics, 'count', fail_incomplete)
+    if stopped:
         a_run_that_never_finishes(client)
-        stop_from_inside_the_run(dispatcher, client, request=ShutdownRequest.cancelled())
+        stop_from_inside_the_run(dispatcher, client, request=TIMED_OUT)
     else:
         mock_job_result(client, job, 'success')
         dispatcher.run()
 
     outcome = dispatcher.outcome
     assert outcome is not None
-    assert outcome.cancelled is cancelled
-    assert outcome.successful is not cancelled
-    if cancelled:
-        assert CANCELLED_HEADING in client.last_call('update_issue_comment').kwargs['body']
+    assert outcome.execution_outcome is (ExecutionOutcome.TIMED_OUT if stopped else ExecutionOutcome.PASSED)
+    if stopped:
+        assert TIMED_OUT_HEADING in client.last_call('update_issue_comment').kwargs['body']
     else:
         assert outcome.final_report_published
-    assert [call.kwargs['run_id'] for call in client.calls_to('cancel_workflow_run')] == ([123] if cancelled else [])
-    [error] = [event for event in handler.events if event['event'] == 'Failed to report incomplete jobs']
+    assert [call.kwargs['run_id'] for call in client.calls_to('cancel_workflow_run')] == ([123] if stopped else [])
+    [error] = [event for event in handler.events if event['event'] == 'Failed to report unfinished work']
     assert error['level'] == 'error'
-    assert 'Cannot build job dimensions' in error['exception']
+    assert error['component'] == 'test-gatherer'
+    assert 'Cannot count incomplete jobs' in error['exception']
 
 
 def test_a_cleanup_failure_keeps_the_collected_accounting(
@@ -661,7 +791,7 @@ def test_a_cleanup_failure_keeps_the_collected_accounting(
     monkeypatch.setattr(dispatcher, '_shutdown_cleanup', fail_cleanup)
 
     with pytest.raises(asyncio.CancelledError):
-        stop_from_inside_the_run(dispatcher, client, request=ShutdownRequest.cancelled())
+        stop_from_inside_the_run(dispatcher, client, request=TIMED_OUT)
 
     assert dispatcher.outcome is None
     assert [record.value for record in sink.records_named('jobs.count')] == [1]
@@ -677,7 +807,7 @@ def test_shutdown_before_progress_counts_only_launched_jobs(client: FakeAsyncGit
     ]
     dispatcher = build_bus(client, tmp_path, batches, monitoring=monitoring)
 
-    stop_from_inside_the_run(dispatcher, client, request=ShutdownRequest.cancelled())
+    stop_from_inside_the_run(dispatcher, client, request=TIMED_OUT)
 
     assert dispatcher.outcome is not None
     assert {batch.state for batch in dispatcher.outcome.progress.batches} == {ExecutionState.PLANNED}
@@ -688,29 +818,6 @@ def test_shutdown_before_progress_counts_only_launched_jobs(client: FakeAsyncGit
         (record.value, record.tags['dispatcher.batch.job.target']) for record in sink.records_named('jobs.incomplete')
     ]
     assert incomplete == [(1, 'ntp')]
-
-
-def test_a_jobs_dimensions_stay_identical_from_launch_to_terminal_accounting(
-    client: FakeAsyncGitHubClient, tmp_path: Path
-):
-    monitoring, sink = recording_runtime()
-    job = make_job()
-    mock_job_result(client, job, 'success')
-    dispatcher = build_bus(client, tmp_path, [make_batch(job)], monitoring=monitoring)
-
-    dispatcher.run()
-
-    records = {
-        name: next(record for record in sink.records_named(name))
-        for name in ('jobs.count', 'jobs.failed', 'jobs.skipped', 'jobs.incomplete')
-    }
-    components = {record.tags['dispatcher.component'] for record in records.values()}
-    assert components == {'test-runner', 'test-gatherer', 'dispatcher'}
-    shared = {
-        tuple(sorted((key, value) for key, value in record.tags.items() if key != 'dispatcher.component'))
-        for record in records.values()
-    }
-    assert len(shared) == 1
 
 
 @requires_signals

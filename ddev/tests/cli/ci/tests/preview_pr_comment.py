@@ -148,7 +148,7 @@ def nothing_collected() -> DispatcherProgress:
             batch_progress(
                 "batch-03",
                 job_progress(attempt(error=ProgressError.NO_ARTIFACTS), target="vault"),
-                error=ProgressError.TIMED_OUT,
+                error=ProgressError.NO_JOB_RESULTS,
                 run_id=123,
                 workflow_url=f"{RUN_URL}/123",
             ),

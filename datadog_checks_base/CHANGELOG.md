@@ -8,7 +8,7 @@
 
 * Allow schema collectors to report object-specific count telemetry. ([#24947](https://github.com/DataDog/integrations-core/pull/24947))
 
-## 38.3.1 / 2026-09-03
+## 38.3.1 / 2026-09-03 / Agent 7.84.0
 
 ***Fixed***:
 

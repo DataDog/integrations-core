@@ -147,9 +147,24 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                     published = await self._write(pr_number, body, message.progress, revision=message.revision, now=now)
                 except Exception:
                     self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=True)
+                    self._metrics.log_failed_operation(
+                        Operation.PUBLISH_REPORT,
+                        self._logger,
+                        "Failed to publish PR comment for revision %s",
+                        message.revision,
+                        exc_info=True,
+                    )
                     raise
                 self._pr_comment_failed = not published
                 self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=not published)
+                if not published:
+                    self._metrics.log_failed_operation(
+                        Operation.PUBLISH_REPORT,
+                        self._logger,
+                        "PR comment not published for revision %s",
+                        message.revision,
+                        recovered=True,
+                    )
 
             if message.progress.done and published:
                 self._final_report_published = True
@@ -183,9 +198,22 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                     published = await self._write(pr_number, body, progress, shutdown=request, now=now)
                 except Exception:
                     self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=True)
+                    self._metrics.log_failed_operation(
+                        Operation.PUBLISH_REPORT,
+                        self._logger,
+                        "Failed to publish the shutdown PR comment",
+                        exc_info=True,
+                    )
                     raise
                 self._pr_comment_failed = not published
                 self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=not published)
+                if not published:
+                    self._metrics.log_failed_operation(
+                        Operation.PUBLISH_REPORT,
+                        self._logger,
+                        "Shutdown PR comment not published",
+                        recovered=True,
+                    )
                 if published:
                     self._logger.info("Run reported as %s", request.kind.value, published=True)
 
