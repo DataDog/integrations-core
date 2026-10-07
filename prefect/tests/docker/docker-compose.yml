@@ -12,6 +12,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
   redis:
     image: redis:7
     volumes:
@@ -86,11 +87,11 @@ services:
       start_period: 10s
     restart: on-failure
 
-  prefect-flow:
+  prefect-setup:
     image: prefecthq/prefect:${PREFECT_VERSION}-python${PYTHON}
     depends_on:
       prefect-worker:
-        condition: service_healthy 
+        condition: service_healthy
     environment:
       PREFECT_API_URL: http://prefect-server:4200/api
     working_dir: /app
@@ -109,7 +110,7 @@ services:
       "
 
     restart: "no"
-      
+
 volumes:
   postgres_data:
   redis_data:
