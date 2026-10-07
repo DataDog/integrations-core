@@ -1640,7 +1640,10 @@ class AgentCheck(object):
             if is_affirmative(self.instance.get('process_isolation', self.init_config.get('process_isolation', False))):
                 from datadog_checks.base.utils.replay.execute import run_with_isolation
 
-                run_with_isolation(self, aggregator, datadog_agent)
+                # The isolated process reports its own errors, so return them as this run's result
+                error_report = run_with_isolation(self, aggregator, datadog_agent)
+                if error_report:
+                    return error_report
             else:
                 self.run_check_initializations()
 
