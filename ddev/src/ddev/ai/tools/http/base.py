@@ -30,7 +30,7 @@ from .response_store import ResponseStore, ResponseStoreError
 DEFAULT_TIMEOUT: Final = 10.0
 MAX_TIMEOUT: Final = 60.0
 
-# Engineering default for the decoded-download ceiling, independent of the buffering threshold.
+# Stops a single request from downloading an arbitrarily large body.
 MAX_DOWNLOAD_BYTES: Final = 1024 * 1024 * 1024
 STREAM_CHUNK_BYTES: Final = 64 * 1024
 

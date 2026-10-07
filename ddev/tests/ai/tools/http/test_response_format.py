@@ -9,53 +9,76 @@ import httpx
 import pytest
 
 from ddev.ai.tools.http.base import HttpRequestInput
-from ddev.ai.tools.http.http_get import HttpGetTool
-from ddev.ai.tools.http.response_format import BufferedResponse, format_response
+from ddev.ai.tools.http.response_format import (
+    BufferedResponse,
+    HttpResponse,
+    format_response,
+    is_textual,
+    response_metadata,
+)
 from ddev.ai.tools.http.response_store import ResponseStore
 
-from .helpers import parse_result, respond
+from .helpers import parse_result
+
+
+@pytest.mark.parametrize(
+    "content_type,supported",
+    [
+        ("application/vnd.openxmlformats-officedocument.wordprocessingml.document", False),
+        ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", False),
+        ("image/png", False),
+        ("application/graphql", True),
+        ("application/yaml", True),
+        ("application/x-yaml", True),
+        ("application/javascript", True),
+        ("application/x-javascript", True),
+        ("application/openmetrics-text", True),
+        ("application/x-www-form-urlencoded", True),
+        ("application/xml", True),
+        ("application/soap+xml", True),
+        ("Application/Problem+JSON; charset=utf-8", True),
+        ("application/json", True),
+        ("text/plain", True),
+        ("", True),
+    ],
+)
+def test_media_type_support(content_type: str, supported: bool):
+    assert is_textual(content_type) is supported
 
 
 @pytest.mark.parametrize(
     "content_type,body,representation",
     [
-        ("application/vnd.openxmlformats-officedocument.wordprocessingml.document", b"PK\x03\x04binary", None),
-        ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", b"PK\x03\x04binary", None),
-        ("application/graphql", b"query { user { id } }", "text"),
-        ("application/yaml", b"user: 1", "text"),
-        ("application/x-yaml", b"user: 1", "text"),
-        ("application/javascript", b"const user = 1;", "text"),
-        ("application/x-javascript", b"const user = 1;", "text"),
-        ("application/openmetrics-text", b"requests_total 1", "text"),
-        ("application/x-www-form-urlencoded", b"user=1", "text"),
-        ("application/xml", b"<user>1</user>", "text"),
-        ("application/soap+xml", b"<user>1</user>", "text"),
-        ("Application/Problem+JSON; charset=utf-8", b'{"user":1}', "formatted_json"),
         ("application/json", b'{"user":1}', "formatted_json"),
+        ("Application/Problem+JSON; charset=utf-8", b'{"user":1}', "formatted_json"),
+        ("application/xml", b"<user>1</user>", "text"),
         ("text/plain", b"user: 1", "text"),
-        ("", b"user: 1", "text"),
     ],
 )
-async def test_media_type_controls_response_preservation(
-    store: ResponseStore, content_type: str, body: bytes, representation: str | None
+def test_media_type_controls_saved_representation(
+    store: ResponseStore, content_type: str, body: bytes, representation: str
 ):
-    response = httpx.Response(200, content=body, headers={"content-type": content_type})
+    fetched = BufferedResponse(
+        url=httpx.URL("http://localhost/api"),
+        status=200,
+        content_type=content_type,
+        location=None,
+        body=body,
+        charset=None,
+        fetched_at=datetime.now(UTC),
+        received_bytes=len(body),
+    )
 
-    result = await HttpGetTool(store, transport=respond(response)).run({"url": "http://localhost/api"})
+    result = format_response(HttpRequestInput(url=str(fetched.url)), method="GET", fetched=fetched, store=store)
 
-    assert result.success is True
-    if representation is None:
-        assert "not downloaded" in json.loads(result.data)["note"]
-        assert not store.root.exists()
+    fields, inline = parse_result(result.data)
+    assert fields["representation"] == representation
+    assert inline == body.decode()
+    saved = Path(fields["saved_to"]).read_text(encoding="utf-8")
+    if representation == "formatted_json":
+        assert json.loads(saved) == json.loads(body)
     else:
-        fields, inline = parse_result(result.data)
-        assert fields["representation"] == representation
-        assert inline == body.decode()
-        saved = Path(fields["saved_to"]).read_text(encoding="utf-8")
-        if representation == "formatted_json":
-            assert json.loads(saved) == json.loads(body)
-        else:
-            assert saved == body.decode()
+        assert saved == body.decode()
 
 
 @pytest.mark.parametrize(
@@ -114,3 +137,59 @@ def test_metadata_redacts_credential_names_and_preserves_ordinary_names(tmp_path
         ["REDACTED", "REDACTED"] if sensitive else ["first", "second"]
     )
     assert metadata["request_headers"][name] == ("REDACTED" if sensitive else "header-value")
+
+
+@pytest.mark.parametrize(
+    "body_input,recorded",
+    [
+        (
+            {
+                "json": {
+                    "username": "admin",
+                    "password": "login-secret",
+                    "profile": {"apiKey": "nested-secret", "name": "Ada"},
+                    "items": [{"token": "list-secret", "id": 1}],
+                }
+            },
+            {
+                "username": "admin",
+                "password": "REDACTED",
+                "profile": {"apiKey": "REDACTED", "name": "Ada"},
+                "items": [{"token": "REDACTED", "id": 1}],
+            },
+        ),
+        (
+            {
+                "content": "grant_type=client_credentials&client_secret=form-secret&scope=read",
+                "headers": {"Content-Type": "application/x-www-form-urlencoded; charset=utf-8"},
+            },
+            "grant_type=client_credentials&client_secret=REDACTED&scope=read",
+        ),
+        (
+            {
+                "content": '{"username": "admin", "password": "raw-secret"}',
+                "headers": {"Content-Type": "application/json"},
+            },
+            '{"username": "admin", "password": "REDACTED"}',
+        ),
+    ],
+)
+def test_metadata_redacts_credential_fields_in_request_body(body_input: dict, recorded: object):
+    url = "http://localhost/api/login"
+    fetched = HttpResponse(
+        url=httpx.URL(url),
+        status=200,
+        content_type="application/json",
+        location=None,
+        fetched_at=datetime.now(UTC),
+        received_bytes=0,
+    )
+
+    metadata = response_metadata(
+        HttpRequestInput.model_validate({"url": url, **body_input}),
+        method="POST",
+        fetched=fetched,
+        representation="text",
+    )
+
+    assert metadata["request_body"] == recorded
