@@ -1,0 +1,1 @@
+Record the duration of every Dispatcher operation and log each settled operation with its result.
