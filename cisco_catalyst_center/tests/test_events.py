@@ -32,7 +32,7 @@ from datadog_checks.cisco_catalyst_center.errors import CatalystApiError
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import client_from_script as _client
-from .common import load_captured, metric_values
+from .common import load_captured, load_captured_reservable, metric_values
 
 # One hour, in the epoch milliseconds the endpoint expects.
 WINDOW_START = 1_755_000_000_000
@@ -284,6 +284,36 @@ def test_collect_events_maps_syslog_severity_to_alert_type(
     collect_events(check, _client(instance, [_page([record], 1)]), WINDOW_START, WINDOW_END)
 
     assert aggregator.events[0]['alert_type'] == expected
+
+
+def _recorded_event(name: str) -> dict[str, Any]:
+    """One event recorded on Catalyst Center 2.3.7.11, which sends no `severity` field at all."""
+    return next(r for r in load_captured_reservable('data_assurance_events')['response'] if r['name'] == name)
+
+
+def test_collect_events_given_no_severity_field_reads_the_alert_type_from_the_syslog_mnemonic(
+    aggregator: AggregatorStub, instance: InstanceType, check: CiscoCatalystCenterCheck
+) -> None:
+    # A syslog message still carries its severity, in the mnemonic: %LINK-3-UPDOWN is severity 3,
+    # Error. Without reading it every recorded event arrived as info, so a link going down looked
+    # the same as a configuration save.
+    record = _recorded_event('LINK:UPDOWN')
+
+    collect_events(check, _client(instance, [_page([record], 1)]), WINDOW_START, WINDOW_END)
+
+    assert aggregator.events[0]['alert_type'] == 'error'
+
+
+def test_collect_events_given_no_severity_field_tags_the_count_from_the_syslog_mnemonic(
+    aggregator: AggregatorStub, instance: InstanceType, check: CiscoCatalystCenterCheck
+) -> None:
+    # event.count breaks down by severity, so without the mnemonic every event lands in one
+    # untagged series and a dashboard grouping by severity shows nothing else.
+    record = _recorded_event('LINK:UPDOWN')
+
+    collect_events(check, _client(instance, [_page([record], 1)]), WINDOW_START, WINDOW_END)
+
+    assert metric_values(aggregator, 'cisco_catalyst_center.event.count', 'severity:3') == [1]
 
 
 def test_collect_events_given_no_timestamp_falls_back_to_the_window_end(

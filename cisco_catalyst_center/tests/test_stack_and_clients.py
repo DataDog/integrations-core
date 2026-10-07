@@ -5,7 +5,10 @@
 
 from __future__ import annotations
 
+import pytest
+
 from datadog_checks.cisco_catalyst_center.collectors import collect_client_health, collect_stacks
+from datadog_checks.cisco_catalyst_center.errors import CatalystApiError
 
 from .common import client_from_script as _client
 from .common import load_captured, metric_values, with_value
@@ -73,6 +76,26 @@ def test_collect_stacks_skips_devices_that_are_not_switches(instance, check):
     collect_stacks(check, client, devices)
 
     assert client.http.requests == [], 'stack is a per-device fan-out; only switches should be asked'
+
+
+def test_collect_stacks_skips_switches_that_are_unreachable(instance, check):
+    # Catalyst Center can only answer for an unreachable switch from its last-known copy, which
+    # would report members that have lost power as ready. Skipping it also saves the request.
+    devices = [SWITCHES[0], {**SWITCHES[1], 'reachabilityHealthStatus': 'UNREACHABLE'}]
+    client = _client(instance, [load_captured('intent_stack')])
+
+    collect_stacks(check, client, devices)
+
+    assert not [request for request in client.http.requests if 'uuid-sw2' in request['url']]
+
+
+def test_collect_stacks_given_every_switch_failing_raises(instance, check):
+    # One failing switch is skipped so it cannot cost the cycle. When every switch fails, nothing
+    # was collected, and returning normally would report the cycle as a success.
+    failure = {'status_code': 500, 'json': {}}
+
+    with pytest.raises(CatalystApiError):
+        collect_stacks(check, _client(instance, [failure, failure]), SWITCHES)
 
 
 # -- aggregate client health ------------------------------------------------------

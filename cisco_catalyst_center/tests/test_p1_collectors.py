@@ -26,9 +26,10 @@ from datadog_checks.cisco_catalyst_center.collectors import (
     collect_security,
     collect_topology,
 )
+from datadog_checks.cisco_catalyst_center.errors import CatalystApiError
 
 from .common import client_from_script as _client
-from .common import load_captured, metric_values, with_value
+from .common import load_captured, load_captured_reservable, metric_values, with_value
 
 # -- topology ---------------------------------------------------------------------
 
@@ -95,6 +96,27 @@ def test_collect_sda_fabric_emits_device_role_counts_from_the_bulk_record(aggreg
 
     assert metric_values(aggregator, 'cisco_catalyst_center.fabric.device.count', 'fabric_role:edge') == [2]
     assert metric_values(aggregator, 'cisco_catalyst_center.fabric.device.count', 'fabric_role:border') == [1]
+
+
+@pytest.mark.parametrize(
+    'metric',
+    [
+        'cisco_catalyst_center.fabric.site.health',
+        'cisco_catalyst_center.fabric.site.connectivity.health',
+        'cisco_catalyst_center.fabric.site.control_plane.health',
+    ],
+)
+def test_collect_sda_fabric_given_a_site_with_no_devices_skips_its_percentages(aggregator, instance, check, metric):
+    # The reservable sandbox's fabric site had no devices yet still reported 0.0% healthy, which
+    # reads as a fabric that is entirely down. A share of zero devices is not a measurement.
+    script = [
+        load_captured_reservable('data_fabric_site_health_summaries'),
+        load_captured('data_virtual_network_health_summaries'),
+    ]
+
+    collect_sda_fabric(check, _client(instance, script), devices=[])
+
+    aggregator.assert_metric(metric, count=0)
 
 
 # -- assurance issues -------------------------------------------------------------
@@ -238,6 +260,16 @@ def test_collect_application_health_given_no_sites_makes_no_calls(instance, chec
     collect_application_health(check, client, sites=[])
 
     assert client.http.requests == []
+
+
+def test_collect_application_health_given_every_site_failing_raises(instance, check):
+    # One failing site is skipped so it cannot cost the sweep. When every site fails, nothing was
+    # collected, and returning normally would report the cycle as a success.
+    sites = [*SITES, {'id': 'site-b', 'siteHierarchy': 'Global/B'}]
+    failure = {'status_code': 500, 'json': {}}
+
+    with pytest.raises(CatalystApiError):
+        collect_application_health(check, _client(instance, [failure, failure]), sites=sites)
 
 
 # -- security ---------------------------------------------------------------------

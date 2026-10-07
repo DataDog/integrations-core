@@ -30,6 +30,10 @@ SECURITY_ROGUE_ENDPOINT: Final = '/dna/intent/api/v1/security/rogue/additional/d
 SECURITY_THREATS_ENDPOINT: Final = '/dna/intent/api/v1/security/threats/details'
 
 INTENT_INTERFACES_ENDPOINT: Final = '/dna/intent/api/v1/interface'
+# The device inventory. Its reachability is the fallback for devices the data API reports
+# without one. Paged at the default 500, Cisco's documented maximum for this endpoint, which has
+# not been probed live.
+INTENT_NETWORK_DEVICES_ENDPOINT: Final = '/dna/intent/api/v1/network-device'
 STACK_ENDPOINT_TEMPLATE: Final = '/dna/intent/api/v1/network-device/{device_id}/stack'
 NETWORK_HEALTH_ENDPOINT: Final = '/dna/intent/api/v1/network-health'
 CLIENT_HEALTH_ENDPOINT: Final = '/dna/intent/api/v1/client-health'

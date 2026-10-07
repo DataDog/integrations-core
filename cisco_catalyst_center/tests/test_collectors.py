@@ -16,7 +16,7 @@ import pytest
 from datadog_checks.cisco_catalyst_center.collectors import collect_devices
 
 from .common import client_from_payload as _client
-from .common import load_captured, load_wireless_synthetic, metric_values, with_value
+from .common import load_captured, load_captured_reservable, load_wireless_synthetic, metric_values, with_value
 
 # -- switches, from the sandbox recording -----------------------------------------
 
@@ -50,13 +50,36 @@ def test_collect_devices_maps_reachability_to_a_gauge(aggregator, instance, chec
     assert metric_values(aggregator, 'cisco_catalyst_center.device.reachable', 'device_name:sw1') == [expected]
 
 
-def test_collect_devices_given_score_of_minus_one_skips_that_metric(aggregator, instance, check):
-    # -1 is Catalyst Center's "no data" sentinel for scores. Emitting it graphs a false value.
-    payload = with_value(load_captured('data_network_devices'), 'response.0.metricsDetails.cpuScore', -1)
+@pytest.mark.parametrize(
+    ('field', 'sentinel', 'metric'),
+    [
+        pytest.param('cpuScore', -1, 'cisco_catalyst_center.device.cpu.score', id='no-data'),
+        # What the reservable sandbox scored a powered-off switch, recorded 2026-10-05.
+        pytest.param('overallHealthScore', -2, 'cisco_catalyst_center.device.health', id='unreachable'),
+    ],
+)
+def test_collect_devices_given_a_negative_sentinel_score_skips_that_metric(
+    aggregator, instance, check, field, sentinel, metric
+):
+    # Scores run from 1 to 10, and Catalyst Center encodes "no data" as -1 and "unreachable" as
+    # -2. Emitting either graphs a false value, and -2 drags any average below the poor band.
+    payload = with_value(load_captured('data_network_devices'), f'response.0.metricsDetails.{field}', sentinel)
 
     collect_devices(check, _client(instance, payload), collect_wireless=False)
 
-    aggregator.assert_metric('cisco_catalyst_center.device.cpu.score', count=3)
+    aggregator.assert_metric(metric, count=3)
+
+
+def test_collect_devices_given_an_unreachable_device_reports_only_its_reachability(aggregator, instance, check):
+    # Catalyst Center keeps serving an unreachable device's last readings: the recorded sw4 was
+    # powered off, yet its uptime kept counting and it still reported a wired client. Emitting
+    # them would graph a switch that is up and serving clients.
+    payload = load_captured_reservable('data_network_devices_switch_unreachable')
+
+    collect_devices(check, _client(instance, payload), collect_wireless=False)
+
+    reported = {name for name in aggregator.metric_names if metric_values(aggregator, name, 'device_name:sw4')}
+    assert reported == {'cisco_catalyst_center.device.reachable'}
 
 
 # -- access points and controllers, from the synthetic payload --------------------
