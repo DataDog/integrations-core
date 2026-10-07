@@ -146,7 +146,7 @@ def test_query_metrics(
 
 
 def test_query_text_lookup_matches_lifetime(instance: dict, monkeypatch: pytest.MonkeyPatch):
-    """Batched binary-ID lookups must not attach text from a different cache lifetime."""
+    """Counter-scan keys resolve to the matching text, but not a different cache lifetime."""
     monkeypatch.setattr(query_metrics, 'TEXT_FETCH_BATCH_SIZE', 2)
     instance['dbm'] = True
     check = IbmDb2Check('ibm_db2', {}, [instance])
@@ -162,11 +162,7 @@ def test_query_text_lookup_matches_lifetime(instance: dict, monkeypatch: pytest.
             ibm_db.free_stmt(cursor)
             cursor = ibm_db.prepare(
                 conn,
-                """/* DDIGNORE */
-                SELECT MEMBER, EXECUTABLE_ID, INSERT_TIMESTAMP
-                FROM TABLE(SYSPROC.MON_GET_PKG_CACHE_STMT(NULL, NULL, NULL, -1))
-                WHERE VARCHAR(STMT_TEXT, 1000) = ?
-                """,
+                query_metrics.QUERY_METRICS + '\nWHERE VARCHAR(STMT_TEXT, 1000) = ?',
             )
             try:
                 ibm_db.execute(cursor, (query,))
