@@ -55,6 +55,33 @@ def _checklist(body: str) -> dict[str, bool]:
     return {' '.join(text.split()): bool(mark.strip()) for mark, text in CHECKBOX_PATTERN.findall(section)}
 
 
+def _fetch_current_body(app: Application, repository: str, pr_number: int) -> str | None:
+    """Return the PR's current description ('' if empty), or None if it could not be fetched."""
+    import asyncio
+
+    import httpx
+
+    from ddev.utils.github_async import async_github_client
+    from ddev.utils.github_errors import GitHubAuthenticationError
+
+    owner, _, repo = repository.partition('/')
+    token = app.config.github.token
+    if not (owner and repo and token):
+        return None
+
+    async def fetch() -> str:
+        async with async_github_client(token=token) as client:
+            response = await client.get_pull_request(owner, repo, pr_number)
+            return response.data.body or ''
+
+    try:
+        return asyncio.run(fetch())
+    except GitHubAuthenticationError as error:
+        app.abort(str(error))
+    except httpx.HTTPError:
+        return None
+
+
 def _check_pr_description(body: str, required_items: list[str]) -> list[str]:
     visible_body = COMMENT_PATTERN.sub('', body)
     items = _checklist(body)
@@ -132,7 +159,8 @@ def pr_description(app: Application, event_name: str, event_path: str):
         return
 
     # Re-runs reuse the original event payload, so read the current description from the API.
-    body = app.github.get_pull_request_body(pull_request.number) if pull_request.number else None
+    repository = event.base_repo
+    body = _fetch_current_body(app, repository, pull_request.number) if repository and pull_request.number else None
     if body is None:
         app.display_warning('Could not fetch the current PR description; using the event payload, which may be stale.')
         body = pull_request.body or ''

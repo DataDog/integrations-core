@@ -226,7 +226,6 @@ def test_secondary_rate_limit_retries_are_bounded(github_manager: GitHubManager,
     [
         ('get_changed_files_by_commit_sha', ('abc',)),
         ('get_pull_request_labels', (1,)),
-        ('get_pull_request_body', (1,)),
     ],
 )
 def test_authentication_errors_are_not_swallowed(

@@ -111,8 +111,7 @@ VALIDATIONS: dict[str, ValidationConfig] = {
         repo_wide=True,
         failure_guidance=(
             "**To fix:** Tick every item in `.github/PULL_REQUEST_TEMPLATE.md` and keep the description under "
-            "3,000 visible characters. Editing the description does not re-run validations; re-run the Validate "
-            "job or push."
+            "3,000 visible characters."
         ),
     ),
     "qa-label": ValidationConfig(

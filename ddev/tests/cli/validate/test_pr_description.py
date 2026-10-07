@@ -3,9 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 
+import httpx
 import pytest
 
 from ddev.cli.validate.pr_description import _check_pr_description, _checklist, _skip_reason
+from ddev.utils.github_errors import GitHubAuthenticationError
+from tests.helpers.github_async import make_pull_request
 
 CHECKLIST_ITEMS = ['First required item', 'Second required item']
 TEMPLATE = (
@@ -97,9 +100,14 @@ def pr_template(fake_repo):
 
 
 @pytest.fixture
-def current_body(mocker):
-    """Mock the PR description fetched from the GitHub API; defaults to a valid body."""
-    return mocker.patch('ddev.utils.github.GitHubManager.get_pull_request_body', return_value=VALID_BODY)
+def current_body(fake_async_github):
+    """Serve the PR's current description from the fake GitHub client; defaults to a valid body."""
+
+    def set_body(body: str | None) -> None:
+        fake_async_github.mock_response('get_pull_request', make_pull_request(number=1234, body=body))
+
+    set_body(VALID_BODY)
+    return set_body
 
 
 def _event_args(tmp_path, **overrides):
@@ -109,6 +117,7 @@ def _event_args(tmp_path, **overrides):
         'title': 'Improve PR validation',
         'user': {'login': 'human-author', 'type': 'User'},
         'created_at': '2026-10-03T00:00:00Z',
+        'base': {'repo': {'full_name': 'DataDog/integrations-core'}},
         **overrides,
     }
     event_path = tmp_path / 'event.json'
@@ -116,16 +125,21 @@ def _event_args(tmp_path, **overrides):
     return ['--event-name', 'pull_request', '--event-path', str(event_path)]
 
 
-def test_cli_passes_with_ticked_checklist(ddev, tmp_path, pr_template, current_body):
+def test_cli_passes_with_ticked_checklist(ddev, tmp_path, pr_template, current_body, fake_async_github):
     result = ddev('validate', 'pr-description', *_event_args(tmp_path))
 
     assert result.exit_code == 0, result.output
     assert 'PR description check passed' in result.output
-    current_body.assert_called_once_with(1234)
+    assert fake_async_github.last_call('get_pull_request').kwargs == {
+        'owner': 'DataDog',
+        'repo': 'integrations-core',
+        'pull_number': 1234,
+        'timeout': None,
+    }
 
 
 def test_cli_fails_and_reports_errors(ddev, tmp_path, pr_template, current_body):
-    current_body.return_value = ''
+    current_body(None)
 
     result = ddev('validate', 'pr-description', *_event_args(tmp_path))
 
@@ -142,8 +156,8 @@ def test_cli_uses_current_description_over_stale_payload(ddev, tmp_path, pr_temp
     assert 'PR description check passed' in result.output
 
 
-def test_cli_falls_back_to_payload_when_fetch_fails(ddev, tmp_path, pr_template, current_body):
-    current_body.return_value = None
+def test_cli_falls_back_to_payload_when_fetch_fails(ddev, tmp_path, pr_template, fake_async_github):
+    # With no mocked response, the fake client raises a 404 for get_pull_request.
     stale_body = VALID_BODY.replace('- [x] Second', '- [ ] Second')
 
     result = ddev('validate', 'pr-description', *_event_args(tmp_path, body=stale_body))
@@ -151,6 +165,17 @@ def test_cli_falls_back_to_payload_when_fetch_fails(ddev, tmp_path, pr_template,
     assert result.exit_code == 1, result.output
     assert 'Could not fetch the current PR description' in result.output
     assert 'Unchecked checklist item: Second required item' in result.output
+
+
+def test_cli_aborts_on_authentication_error(ddev, tmp_path, pr_template, fake_async_github):
+    request = httpx.Request('GET', 'https://api.github.com/repos/DataDog/integrations-core/pulls/1234')
+    error = httpx.HTTPStatusError('Unauthorized', request=request, response=httpx.Response(401, request=request))
+    fake_async_github.mock_response('get_pull_request', GitHubAuthenticationError.from_http_status_error(error))
+
+    result = ddev('validate', 'pr-description', *_event_args(tmp_path))
+
+    assert result.exit_code == 1, result.output
+    assert 'Could not fetch the current PR description' not in result.output
 
 
 def test_cli_logs_skip_reason(ddev, tmp_path, pr_template):
