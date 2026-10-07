@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, MagicMock
 
 import anthropic
+import httpx
 import pytest
 
 from ddev.ai.agent.anthropic_agent import (
@@ -21,6 +22,7 @@ from ddev.ai.agent.anthropic_agent import (
 )
 from ddev.ai.agent.exceptions import AgentAPIError, AgentConnectionError, AgentError, AgentRateLimitError
 from ddev.ai.agent.types import StopReason, ToolResultMessage
+from ddev.ai.model_catalog import ANTHROPIC_MESSAGES, RESOLVER, BindingConfig, ModelConfig, ResolvedModel, Route
 from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.registry import NATIVE_TOOL_NAMES, ToolRegistry
 
@@ -82,6 +84,25 @@ def make_response(
 FAKE_CONTEXT_WINDOW = 200_000
 
 
+def make_resolved_model(
+    context_window: int = FAKE_CONTEXT_WINDOW,
+    headers: dict[str, str] | None = None,
+) -> ResolvedModel:
+    spec = ModelConfig(
+        provider="anthropic",
+        context_window=context_window,
+        bindings={
+            Route.DIRECT: BindingConfig(protocol=ANTHROPIC_MESSAGES, model="claude-sonnet-5", headers=headers or {})
+        },
+    )
+    return ResolvedModel(
+        canonical="claude-sonnet-5",
+        route=Route.DIRECT,
+        model=spec,
+        binding=spec.bindings[Route.DIRECT],
+    )
+
+
 def _stream_cm(response: SimpleNamespace | BaseException) -> MagicMock | BaseException:
     """Stub for one client.messages.stream(...) call: an async context manager whose
     get_final_message() resolves to `response`. An exception is passed through so the
@@ -117,19 +138,19 @@ def make_repeatable_stream_mock(response: SimpleNamespace) -> MagicMock:
 def make_agent(
     tools: ToolRegistry | None = None,
     mock_response: SimpleNamespace | None = None,
+    context_window: int = FAKE_CONTEXT_WINDOW,
+    extra_headers: dict[str, str] | None = None,
 ) -> tuple[AnthropicAgent, MagicMock]:
     client = MagicMock(spec=anthropic.AsyncAnthropic)
     client.messages = MagicMock()
     client.messages.stream = make_stream_mock([mock_response or make_response("end_turn", [])])
-    client.models = MagicMock()
-    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
     registry = tools or ToolRegistry([])
     agent = AnthropicAgent(
         client=client,
         tools=registry,
         system_prompt="You are helpful.",
         name="test-agent",
-        model="claude-sonnet-5",
+        model=make_resolved_model(context_window, extra_headers),
     )
     return agent, client.messages.stream
 
@@ -269,7 +290,13 @@ def _make_error_agent(side_effect: Exception) -> AnthropicAgent:
     client = MagicMock(spec=anthropic.AsyncAnthropic)
     client.messages = MagicMock()
     client.messages.stream = make_stream_mock([side_effect])
-    return AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
+    return AnthropicAgent(
+        client=client,
+        tools=ToolRegistry([]),
+        system_prompt="",
+        name="t",
+        model=make_resolved_model(),
+    )
 
 
 async def test_connection_error_maps_to_agent_connection_error() -> None:
@@ -357,40 +384,72 @@ async def test_cache_tokens_none_defaults_to_zero() -> None:
     assert result.usage.cache_creation_input_tokens == 0
 
 
-# ---------------------------------------------------------------------------
-# ContextUsage fields
-# ---------------------------------------------------------------------------
-
-
-async def test_context_usage_fields() -> None:
+@pytest.mark.parametrize("context_window", [200_000, 123_456])
+async def test_context_usage_fields(context_window: int):
     usage = make_usage(input_tokens=1000, cache_read=500, cache_creation=200)
     resp = make_response("end_turn", [make_text_block("ok")], usage=usage)
-    agent, _ = make_agent(mock_response=resp)
+    agent, _ = make_agent(mock_response=resp, context_window=context_window)
 
     result = await agent.send("Hi")
 
     assert result.usage.total_input_tokens == 1700
     ctx = result.usage.context_usage
-    assert ctx.window_size == FAKE_CONTEXT_WINDOW
-    assert ctx.used_tokens == 1700  # 1000 + 500 + 200
-    assert ctx.context_pct == pytest.approx(1700 / FAKE_CONTEXT_WINDOW * 100)
-    assert ctx.remaining_tokens == FAKE_CONTEXT_WINDOW - 1700
+    assert ctx is not None
+    assert ctx.window_size == context_window
+    assert ctx.used_tokens == 1700
+    assert ctx.context_pct == pytest.approx(1700 / context_window * 100)
+    assert ctx.remaining_tokens == context_window - 1700
 
 
-# ---------------------------------------------------------------------------
-# context_window is fetched once and cached across multiple sends
-# ---------------------------------------------------------------------------
-
-
-async def test_context_window_fetched_once() -> None:
+@pytest.mark.parametrize("client_beta", [None, "feature-a, feature-b"])
+async def test_binding_headers_are_scoped_to_agent(client_beta: str | None):
     resp = make_response("end_turn", [make_text_block("ok")])
-    agent, _ = make_agent(mock_response=resp)
-    agent._client.messages.stream = make_repeatable_stream_mock(resp)
+    client = MagicMock(spec=anthropic.AsyncAnthropic)
+    client.messages = MagicMock()
+    client.messages.stream = make_repeatable_stream_mock(resp)
+    client.default_headers = {"Anthropic-Beta": client_beta} if client_beta else {}
+    beta_headers = {"ANTHROPIC-BETA": "feature-b"}
+    with_headers = AnthropicAgent(
+        client=client,
+        tools=ToolRegistry([]),
+        system_prompt="You are helpful.",
+        name="with-headers",
+        model=make_resolved_model(headers=beta_headers),
+    )
+    without_headers = AnthropicAgent(
+        client=client,
+        tools=ToolRegistry([]),
+        system_prompt="You are helpful.",
+        name="default",
+        model=make_resolved_model(),
+    )
 
-    await agent.send("First")
-    await agent.send("Second")
+    await with_headers.send("Hi")
+    await without_headers.send("Hi")
 
-    agent._client.models.retrieve.assert_awaited_once()
+    first, second = (call.kwargs for call in client.messages.stream.call_args_list)
+    expected_beta = "feature-a,feature-b" if client_beta else "feature-b"
+    assert httpx.Headers(first["extra_headers"])["anthropic-beta"] == expected_beta
+    assert "extra_headers" not in second
+    assert client.default_headers == ({"Anthropic-Beta": client_beta} if client_beta else {})
+
+
+async def test_request_uses_the_selected_binding_wire_model():
+    resp = make_response("end_turn", [make_text_block("ok")])
+    client = MagicMock(spec=anthropic.AsyncAnthropic)
+    client.messages = MagicMock()
+    client.messages.stream = make_repeatable_stream_mock(resp)
+    agent = AnthropicAgent(
+        client=client,
+        tools=ToolRegistry([]),
+        system_prompt="You are helpful.",
+        name="wire-id",
+        model=RESOLVER.resolve("sonnet", route=Route.AI_GATEWAY),
+    )
+
+    await agent.send("Hi")
+
+    assert client.messages.stream.call_args.kwargs["model"] == "anthropic/claude-sonnet-5"
 
 
 # ---------------------------------------------------------------------------
@@ -405,9 +464,13 @@ async def test_multi_turn_history_grows_correctly() -> None:
     client = MagicMock(spec=anthropic.AsyncAnthropic)
     client.messages = MagicMock()
     client.messages.stream = make_stream_mock([tool_resp, text_resp])
-    client.models = MagicMock()
-    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
+    agent = AnthropicAgent(
+        client=client,
+        tools=ToolRegistry([]),
+        system_prompt="",
+        name="t",
+        model=make_resolved_model(),
+    )
 
     first = await agent.send("Do X")
     assert first.stop_reason is StopReason.TOOL_USE
@@ -816,9 +879,13 @@ async def test_pause_turn_triggers_continuation() -> None:
     client = MagicMock(spec=anthropic.AsyncAnthropic)
     client.messages = MagicMock()
     client.messages.stream = make_stream_mock([pause_resp, final_resp])
-    client.models = MagicMock()
-    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
+    agent = AnthropicAgent(
+        client=client,
+        tools=ToolRegistry([]),
+        system_prompt="",
+        name="t",
+        model=make_resolved_model(),
+    )
 
     result = await agent.send("Hi")
 
@@ -837,9 +904,13 @@ async def test_pause_turn_second_call_includes_paused_turn_in_messages() -> None
     client = MagicMock(spec=anthropic.AsyncAnthropic)
     client.messages = MagicMock()
     client.messages.stream = make_stream_mock([pause_resp, final_resp])
-    client.models = MagicMock()
-    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
+    agent = AnthropicAgent(
+        client=client,
+        tools=ToolRegistry([]),
+        system_prompt="",
+        name="t",
+        model=make_resolved_model(),
+    )
 
     await agent.send("Hi")
 
@@ -858,9 +929,13 @@ async def test_multiple_consecutive_pause_turns() -> None:
     client = MagicMock(spec=anthropic.AsyncAnthropic)
     client.messages = MagicMock()
     client.messages.stream = make_stream_mock([pause1, pause2, final])
-    client.models = MagicMock()
-    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
+    agent = AnthropicAgent(
+        client=client,
+        tools=ToolRegistry([]),
+        system_prompt="",
+        name="t",
+        model=make_resolved_model(),
+    )
 
     result = await agent.send("Hi")
 
@@ -885,9 +960,13 @@ async def test_error_during_paused_continuation_leaves_history_unchanged() -> No
             anthropic.APIConnectionError(request=MagicMock()),
         ]
     )
-    client.models = MagicMock()
-    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
+    agent = AnthropicAgent(
+        client=client,
+        tools=ToolRegistry([]),
+        system_prompt="",
+        name="t",
+        model=make_resolved_model(),
+    )
 
     await agent.send("First")
     history_after_first = agent.history[:]
@@ -907,9 +986,13 @@ async def test_pause_turn_token_usage_summed_across_calls() -> None:
     client = MagicMock(spec=anthropic.AsyncAnthropic)
     client.messages = MagicMock()
     client.messages.stream = make_stream_mock([pause_resp, final_resp])
-    client.models = MagicMock()
-    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
+    agent = AnthropicAgent(
+        client=client,
+        tools=ToolRegistry([]),
+        system_prompt="",
+        name="t",
+        model=make_resolved_model(),
+    )
 
     result = await agent.send("Hi")
 
@@ -956,9 +1039,13 @@ async def test_error_mid_conversation_leaves_history_unchanged() -> None:
             anthropic.APIConnectionError(request=MagicMock()),
         ]
     )
-    client.models = MagicMock()
-    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
+    agent = AnthropicAgent(
+        client=client,
+        tools=ToolRegistry([]),
+        system_prompt="",
+        name="t",
+        model=make_resolved_model(),
+    )
 
     await agent.send("First message")
     history_after_first = agent.history[:]
@@ -1189,9 +1276,13 @@ async def test_multi_turn_only_latest_user_message_in_request_has_cache_control(
     client = MagicMock(spec=anthropic.AsyncAnthropic)
     client.messages = MagicMock()
     client.messages.stream = make_stream_mock([first_resp, second_resp])
-    client.models = MagicMock()
-    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="sp", name="t", model="claude-sonnet-5")
+    agent = AnthropicAgent(
+        client=client,
+        tools=ToolRegistry([]),
+        system_prompt="sp",
+        name="t",
+        model=make_resolved_model(),
+    )
 
     await agent.send("First")
     await agent.send([ToolResultMessage(tool_call_id="t1", result=ToolResult(success=True, data="r"))])
@@ -1219,9 +1310,13 @@ async def test_pause_turn_raises_after_max_continuations() -> None:
     client = MagicMock(spec=anthropic.AsyncAnthropic)
     client.messages = MagicMock()
     client.messages.stream = make_repeatable_stream_mock(pause_resp)
-    client.models = MagicMock()
-    client.models.retrieve = AsyncMock(return_value=SimpleNamespace(max_input_tokens=FAKE_CONTEXT_WINDOW))
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
+    agent = AnthropicAgent(
+        client=client,
+        tools=ToolRegistry([]),
+        system_prompt="",
+        name="t",
+        model=make_resolved_model(),
+    )
 
     with pytest.raises(AgentError, match=f"pause_turn did not resolve after {MAX_CONTINUATIONS} continuations"):
         await agent.send("Hi")
@@ -1242,7 +1337,13 @@ async def test_stream_failure_during_get_final_message_maps_to_agent_error() -> 
     client.messages.stream = MagicMock(
         return_value=_stream_cm_raising_on_final_message(anthropic.APIConnectionError(request=MagicMock()))
     )
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
+    agent = AnthropicAgent(
+        client=client,
+        tools=ToolRegistry([]),
+        system_prompt="",
+        name="t",
+        model=make_resolved_model(),
+    )
 
     with pytest.raises(AgentConnectionError):
         await agent.send("Hi")
@@ -1256,7 +1357,13 @@ async def test_stream_cancellation_propagates_without_recording_history() -> Non
     client = MagicMock(spec=anthropic.AsyncAnthropic)
     client.messages = MagicMock()
     client.messages.stream = MagicMock(return_value=_stream_cm_raising_on_final_message(asyncio.CancelledError()))
-    agent = AnthropicAgent(client=client, tools=ToolRegistry([]), system_prompt="", name="t", model="claude-sonnet-5")
+    agent = AnthropicAgent(
+        client=client,
+        tools=ToolRegistry([]),
+        system_prompt="",
+        name="t",
+        model=make_resolved_model(),
+    )
 
     with pytest.raises(asyncio.CancelledError):
         await agent.send("Hi")

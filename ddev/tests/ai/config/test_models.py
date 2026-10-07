@@ -126,13 +126,14 @@ def test_agent_rejects_provider_when_not_configured():
         AgentConfig.model_validate({"provider": "custom"}, context={"provider_registry": AgentProviderRegistry()})
 
 
-def test_agent_infers_provider_from_model():
+@pytest.mark.parametrize("model", ["opus", "claude-sonnet-5-5"])
+def test_agent_infers_provider_from_model(model: str):
     registry = make_provider_registry("anthropic")
 
-    config = AgentConfig.model_validate({"model": "opus"}, context={"provider_registry": registry})
+    config = AgentConfig.model_validate({"model": model}, context={"provider_registry": registry})
 
     assert config.provider == "anthropic"
-    assert config.model == "opus"
+    assert config.model == model
 
 
 def test_agent_infers_provider_from_differently_cased_model_alias():

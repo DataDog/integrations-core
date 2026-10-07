@@ -129,6 +129,19 @@ def test_no_subcommand_reports_configuration_error(ddev, mocker):
     assert 'bad flow directory' in result.output
 
 
+def test_no_subcommand_reports_invalid_model_catalog(ddev, tmp_path, config_file):
+    catalog = tmp_path / 'catalog.yaml'
+    catalog.write_text('models: [', encoding='utf-8')
+    config_file.model.ai.anthropic_api_key = 'sk-test'
+    config_file.model.ai.models_catalog = str(catalog)
+    config_file.save()
+
+    result = ddev('meta', 'ai', catch_exceptions=True)
+
+    assert result.exit_code == 1
+    assert str(catalog.resolve()) in result.output
+
+
 def test_no_subcommand_construction_error(ddev, mocker, with_api_key):
     """`ddev meta ai` surfaces an unexpected error when TogoApp.__init__ raises."""
     from ddev.cli.meta.ai.tui.app import TogoApp

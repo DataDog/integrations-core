@@ -1,0 +1,113 @@
+# Togo model catalog.
+#
+# Context and output limits come from Anthropic's public model pages:
+# https://platform.claude.com/docs/en/build-with-claude/context-windows plus the
+# opus-5-5, sonnet-5, sonnet-5-5, and haiku-4-5 overview pages.
+# `claude-haiku-4-5` is a convenience alias for the pinned `claude-haiku-4-5-20251001`
+# snapshot, which is the ID the AI Gateway lists.
+#
+# context_window is the actual supported context capacity of the model on the selected
+# route; bindings carry any provider settings required to enable it. Opus 5.5,
+# Sonnet 5, and Sonnet 5.5 serve their 1M window without a beta header.
+#
+# Pricing rates are Anthropic's standard list prices, USD per million tokens, from
+# https://platform.claude.com/docs/en/build-with-claude/prompt-caching#pricing
+# (uncached input / output / cache read / 5-minute and 1-hour cache write). They are
+# provider list-price estimates; Gateway-specific billing has not been verified.
+
+aliases:
+  opus: claude-opus-5-5
+  sonnet: claude-sonnet-5
+  haiku: claude-haiku-4-5
+
+models:
+  claude-opus-5-5:
+    provider: anthropic
+    context_window: 1000000
+    max_input_tokens: 1000000
+    max_output_tokens: 128000
+    pricing:
+      input_usd_per_million: "4"
+      output_usd_per_million: "20"
+      cache_read_usd_per_million: "0.20"
+      cache_write_5m_usd_per_million: "5"
+      cache_write_1h_usd_per_million: "8"
+    bindings:
+      direct:
+        protocol: anthropic-messages
+        model: claude-opus-5-5
+      ai-gateway:
+        protocol: anthropic-messages
+        model: anthropic/claude-opus-5-5
+  claude-sonnet-5:
+    provider: anthropic
+    context_window: 1000000
+    max_input_tokens: 1000000
+    max_output_tokens: 128000
+    pricing:
+      input_usd_per_million: "2"
+      output_usd_per_million: "10"
+      cache_read_usd_per_million: "0.20"
+      cache_write_5m_usd_per_million: "2.50"
+      cache_write_1h_usd_per_million: "4"
+    bindings:
+      direct:
+        protocol: anthropic-messages
+        model: claude-sonnet-5
+      ai-gateway:
+        protocol: anthropic-messages
+        model: anthropic/claude-sonnet-5
+  claude-sonnet-5-5:
+    provider: anthropic
+    context_window: 1000000
+    max_input_tokens: 1000000
+    max_output_tokens: 128000
+    pricing:
+      input_usd_per_million: "2"
+      output_usd_per_million: "10"
+      cache_read_usd_per_million: "0.10"
+      cache_write_5m_usd_per_million: "2.50"
+      cache_write_1h_usd_per_million: "4"
+    bindings:
+      direct:
+        protocol: anthropic-messages
+        model: claude-sonnet-5-5
+      ai-gateway:
+        protocol: anthropic-messages
+        model: anthropic/claude-sonnet-5-5
+  claude-haiku-4-5:
+    provider: anthropic
+    context_window: 200000
+    max_input_tokens: 200000
+    max_output_tokens: 64000
+    pricing:
+      input_usd_per_million: "1"
+      output_usd_per_million: "5"
+      cache_read_usd_per_million: "0.10"
+      cache_write_5m_usd_per_million: "1.25"
+      cache_write_1h_usd_per_million: "2"
+    bindings:
+      direct:
+        protocol: anthropic-messages
+        model: claude-haiku-4-5
+      ai-gateway:
+        protocol: anthropic-messages
+        model: anthropic/claude-haiku-4-5-20251001
+  claude-haiku-4-5-20251001:
+    provider: anthropic
+    context_window: 200000
+    max_input_tokens: 200000
+    max_output_tokens: 64000
+    pricing:
+      input_usd_per_million: "1"
+      output_usd_per_million: "5"
+      cache_read_usd_per_million: "0.10"
+      cache_write_5m_usd_per_million: "1.25"
+      cache_write_1h_usd_per_million: "2"
+    bindings:
+      direct:
+        protocol: anthropic-messages
+        model: claude-haiku-4-5-20251001
+      ai-gateway:
+        protocol: anthropic-messages
+        model: anthropic/claude-haiku-4-5-20251001
