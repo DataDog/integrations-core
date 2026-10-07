@@ -4,6 +4,11 @@ excluded_paths = [
   # contain the compiled extension modules instead.
   "psycopg_c/**/*.c",
 
+  # PyMongo wheels use compiled extensions; their C sources and headers are build inputs.
+  "bson/**/*.c",
+  "bson/**/*.h",
+  "pymongo/**/*.c",
+
   # --- Type annotation ---
   "krb5/**/*.pyi",
   "krb5/**/py.typed",
