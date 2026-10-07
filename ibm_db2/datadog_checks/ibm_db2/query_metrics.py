@@ -39,9 +39,12 @@ FROM TABLE(SYSPROC.MON_GET_PKG_CACHE_STMT(NULL, NULL, NULL, -1))
 """
 
 STATEMENT_TEXT_LOOKUP_QUERY = """
-SELECT MEMBER, EXECUTABLE_ID, INSERT_TIMESTAMP, STMT_TEXT
-FROM TABLE(SYSPROC.MON_GET_PKG_CACHE_STMT(NULL, CAST(? AS VARCHAR(32) FOR BIT DATA), NULL, CAST(? AS INTEGER)))
-WHERE INSERT_TIMESTAMP = ?
+/* DDIGNORE */
+WITH REQUESTED(EXECUTABLE_ID, MEMBER, INSERT_TIMESTAMP) AS (VALUES {key_rows})
+SELECT S.MEMBER, S.EXECUTABLE_ID, S.INSERT_TIMESTAMP, S.STMT_TEXT
+FROM REQUESTED AS R,
+     TABLE(SYSPROC.MON_GET_PKG_CACHE_STMT(NULL, R.EXECUTABLE_ID, NULL, R.MEMBER)) AS S
+WHERE S.INSERT_TIMESTAMP = R.INSERT_TIMESTAMP
 """
 
 StatementKey = tuple[int, str, datetime]
@@ -136,21 +139,20 @@ class QueryMetricsCollector(DBMAsyncJob):
             self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
 
     def _fetch_statement_texts(self, keys: set[StatementKey]) -> dict[StatementKey, str]:
+        """Fetch each requested cache entry's text only if its insertion lifetime still matches."""
         texts = {}
+        key_placeholders = '(CAST(? AS VARCHAR(32) FOR BIT DATA), CAST(? AS INTEGER), CAST(? AS TIMESTAMP))'
         for batch in batched(sorted(keys), TEXT_FETCH_BATCH_SIZE, strict=False):
-            # Combine one fixed SQL fragment per key into a single request. Only the number of
-            # fragments varies; all key values are bound separately, never interpolated into SQL.
-            query = '/* DDIGNORE */\n' + '\nUNION ALL\n'.join(STATEMENT_TEXT_LOOKUP_QUERY for _ in batch)
-            # Flatten in fragment order, matching each fragment's three placeholders:
-            # binary executable ID, member, then insertion timestamp.
-            params = tuple(
-                value
-                for member, executable_id, inserted in batch
-                for value in (unhexlify(executable_id), member, inserted)
-            )
+            # REQUESTED drives a targeted lookup per key, not a scan of every cached statement.
+            # Only fixed placeholder rows enter the SQL string; all key values are bound separately.
+            query = STATEMENT_TEXT_LOOKUP_QUERY.format(key_rows=', '.join(key_placeholders for _ in batch))
+            params = []
+            for member, executable_id, inserted in batch:
+                # Match REQUESTED's column order, converting our hex ID back to Db2's binary ID.
+                params.extend((unhexlify(executable_id), member, inserted))
             cursor = ibm_db.prepare(self._connection.conn, query, {ibm_db.SQL_ATTR_QUERY_TIMEOUT: 10})
             try:
-                ibm_db.execute(cursor, params)
+                ibm_db.execute(cursor, tuple(params))
                 while (row := ibm_db.fetch_assoc(cursor)) is not False:
                     row['executable_id'] = hexlify(row['executable_id']).decode('ascii')
                     texts[statement_key(row)] = row['stmt_text']
