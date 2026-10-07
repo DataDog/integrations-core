@@ -280,6 +280,13 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         traffic_class_map: dict[str, str],
     ) -> None:
         app_ip = appliance.ip
+        if appliance.username is None or appliance.password is None:
+            self.log.warning(
+                "No credentials for appliance %s: add an `appliance_credentials_overrides` entry covering it "
+                "to collect its metrics.",
+                app_ip,
+            )
+            return
         self.log.debug("Starting collection for appliance %s", app_ip)
         client = self._create_appliance_client(app_ip, appliance.username, appliance.password)
 

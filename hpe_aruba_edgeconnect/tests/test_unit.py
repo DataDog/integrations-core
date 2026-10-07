@@ -235,13 +235,14 @@ def test_parse_speed(dd_run_check, aggregator, mocker, check, value, expected):
 
 
 @pytest.mark.parametrize(
-    'ip, appliance_credentials, expected_username, expected_password',
+    'ip, appliance_credentials, expected_username, expected_password, auth',
     [
         pytest.param(
             '192.168.1.5',
             [{'cidr': '192.168.1.0/24', 'username': 'cidr_user', 'password': 'cidr_pass'}],
             'cidr_user',
             'cidr_pass',
+            {'orchestrator_username': 'admin', 'orchestrator_password': 'default_pass'},
             id='cidr_match',
         ),
         pytest.param(
@@ -249,6 +250,7 @@ def test_parse_speed(dd_run_check, aggregator, mocker, check, value, expected):
             [{'cidr': '192.168.1.0/24', 'username': 'cidr_user', 'password': 'cidr_pass'}],
             'admin',
             'default_pass',
+            {'orchestrator_username': 'admin', 'orchestrator_password': 'default_pass'},
             id='fallback_to_shared',
         ),
         pytest.param(
@@ -256,6 +258,7 @@ def test_parse_speed(dd_run_check, aggregator, mocker, check, value, expected):
             None,
             'admin',
             'default_pass',
+            {'orchestrator_username': 'admin', 'orchestrator_password': 'default_pass'},
             id='no_overrides',
         ),
         pytest.param(
@@ -266,6 +269,7 @@ def test_parse_speed(dd_run_check, aggregator, mocker, check, value, expected):
             ],
             'good',
             'good',
+            {'orchestrator_username': 'admin', 'orchestrator_password': 'default_pass'},
             id='invalid_cidr_skipped',
         ),
         pytest.param(
@@ -273,6 +277,7 @@ def test_parse_speed(dd_run_check, aggregator, mocker, check, value, expected):
             [{'cidr': '192.168.1.0/24', 'username': 'cidr_user', 'password': ''}],
             'cidr_user',
             '',
+            {'orchestrator_username': 'admin', 'orchestrator_password': 'default_pass'},
             id='empty_password_is_valid',
         ),
         pytest.param(
@@ -283,19 +288,23 @@ def test_parse_speed(dd_run_check, aggregator, mocker, check, value, expected):
             ],
             'first_user',
             'first_pass',
+            {'orchestrator_username': 'admin', 'orchestrator_password': 'default_pass'},
             id='first_match_wins',
+        ),
+        pytest.param(
+            '10.0.0.1',
+            [{'cidr': '10.0.0.0/24', 'username': 'cidr_user', 'password': 'cidr_pass'}],
+            'cidr_user',
+            'cidr_pass',
+            {'orchestrator_api_key': 'k', 'orchestrator_username': None, 'orchestrator_password': None},
+            id='key_only_override_match',
         ),
     ],
 )
 def test_resolve_credentials(
-    dd_run_check, mocker, instance, ip, appliance_credentials, expected_username, expected_password
+    dd_run_check, mocker, instance, ip, appliance_credentials, expected_username, expected_password, auth
 ):
-    inst = instance(
-        'localhost:8443',
-        orchestrator_username='admin',
-        orchestrator_password='default_pass',
-        appliance_credentials=appliance_credentials,
-    )
+    inst = instance('localhost:8443', appliance_credentials=appliance_credentials, **auth)
     check = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [inst])
 
     payload = [{**APPLIANCE_PAYLOAD[0], 'ip': ip}]
@@ -307,6 +316,27 @@ def test_resolve_credentials(
     dd_run_check(check)
 
     create_client.assert_called_once_with(ip, expected_username, expected_password)
+
+
+def test_appliance_without_credentials_is_skipped(dd_run_check, aggregator, mocker, instance):
+    inst = instance(
+        'localhost:8443',
+        orchestrator_api_key='k',
+        orchestrator_username=None,
+        orchestrator_password=None,
+        appliance_credentials=[{'cidr': '10.0.0.1/32', 'username': 'admin', 'password': ''}],
+    )
+    check = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [inst])
+    payload = [APPLIANCE_PAYLOAD[0], {**APPLIANCE_PAYLOAD[0], 'ip': '10.0.0.9', 'hostName': 'Uncovered'}]
+    _setup_mocks(mocker, check, payload)
+    create_client = mocker.patch.object(
+        check, '_create_appliance_client', return_value=_mock_appliance_client(TGZ_DATA)
+    )
+
+    dd_run_check(check)
+
+    create_client.assert_called_once_with('10.0.0.1', 'admin', '')
+    aggregator.assert_metric(f'{NS}.device.reachability', count=2)
 
 
 @pytest.mark.parametrize(
