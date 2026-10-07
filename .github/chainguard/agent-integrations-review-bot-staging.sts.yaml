@@ -1,13 +1,16 @@
 # Trust policy for the agent_integrations_review_bot Rapid Slack review bot (staging)
 #
-# Grants a scoped, ephemeral, read-only token to the review bot's Kubernetes pod. The
-# bot coordinates PR reviews in Slack: it reads a PR's draft state, labels, body,
-# changed files, CI status and mergeability (readiness), and its reviews (to find the
-# one the review skill published). It never writes to GitHub: people run the review
-# skill locally and publish with their own credentials.
+# Grants a scoped, ephemeral token to the review bot's Kubernetes pod. The bot
+# coordinates PR reviews in Slack: it reads a PR's draft state, labels, body, changed
+# files, CI status and mergeability (readiness), and its reviews (to find the one the
+# review skill published). Its only write: when it hands a PR to a human reviewer in
+# Slack, it also requests that person as a reviewer on the PR. It never pushes code or
+# posts reviews: people run the review skill locally and publish with their own
+# credentials.
 #
 # Permissions:
-#   pull_requests: PR details, changed files, reviews, mergeability
+#   pull_requests: PR details, changed files, reviews, mergeability (read); requesting
+#                  a reviewer (write)
 #   checks, statuses: the PR's CI status (GraphQL statusCheckRollup covers both)
 #   contents: the head commit the CI status hangs off
 #
@@ -32,5 +35,5 @@ permissions:
   checks: read
   contents: read
   metadata: read
-  pull_requests: read
+  pull_requests: write
   statuses: read
