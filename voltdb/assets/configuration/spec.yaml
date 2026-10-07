@@ -17,7 +17,7 @@ files:
               protocol. The Agent discovers the rest of the cluster from this node and
               keeps a connection to every member. To connect to the VoltDB Management
               Center (VMC) over HTTP/JSON instead, leave `host` unset and set `url`.
-              To be able to start up while some members are down, use `hosts`
+              To allow the Agent to start while some members are down, use `hosts`
               instead of `host`.
             fleet_configurable: true
             display_priority: 5
@@ -32,7 +32,7 @@ files:
               `hostname:port`. The Agent connects to every reachable seed, discovers
               the rest of the cluster, and routes each call to the node that
               executes it. Node failures, rejoins, and cluster expansions are picked
-              up automatically. All seeds are dialed on one port, taken from the
+              up automatically. All seeds use the port determined by the
               first entry. Takes precedence over `host`.
             fleet_configurable: true
             display_priority: 5

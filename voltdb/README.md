@@ -44,9 +44,9 @@ No additional installation is needed on your server.
         password: "<PASSWORD>"
     ```
 
-    The native client is topology-aware: from the configured node it discovers the rest of the cluster, keeps a connection to every member, and routes each call to the node that executes it. Node failures, rejoins, and cluster expansions are picked up automatically. The statistics calls of each check run are sent together, so a run takes about one round-trip rather than one per statistics component.
+    The native client is topology-aware: it discovers the rest of the cluster from the configured node, keeps a connection to every member, and routes each call to the node that executes it. Node failures, rejoins, and cluster expansions are detected automatically. The statistics calls for each check run are sent together, so a run takes about one round trip rather than one per statistics component.
 
-    To be able to start up while some members are down, list several seeds with `hosts` instead of `host`. All seeds are dialed on the same client port:
+    To allow the Agent to start while some members are down, list several seeds with `hosts` instead of `host`. All seeds use the same client port:
 
     ```yaml
     instances:
