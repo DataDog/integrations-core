@@ -1,0 +1,1 @@
+Add `ddev validate all --scope` to run code or PR metadata validations separately, and run PR metadata validations in their own workflow that re-runs on description edits and label changes.
