@@ -6,6 +6,7 @@ from __future__ import annotations
 import codecs
 import json
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Final
@@ -61,6 +62,9 @@ SENSITIVE_NAME_COMPONENTS: Final = frozenset(
         "session",
         "cookie",
         "code",
+        "pass",
+        "passphrase",
+        "sig",
     }
 )
 
@@ -196,7 +200,7 @@ def _render(fields: dict[str, object], *, body: str | None) -> str:
 def response_metadata(
     tool_input: HttpRequestInput, *, method: str, fetched: HttpResponse, representation: str, note: str | None = None
 ) -> dict[str, JsonValue]:
-    """Describe the saved response and request, redacting credential-like URL and header fields."""
+    """Describe the saved response and request, redacting credential-like URL, header, and body fields."""
     metadata: dict[str, JsonValue] = {
         "method": method,
         "url": _safe_url(fetched.url),
@@ -210,9 +214,9 @@ def response_metadata(
     if note:
         metadata["note"] = note
     if "json_body" in tool_input.model_fields_set:
-        metadata["request_body"] = _recordable_request_body(tool_input.json_body)
+        metadata["request_body"] = _recordable_request_body(_redact_json(tool_input.json_body))
     elif tool_input.content is not None:
-        metadata["request_body"] = _recordable_request_body(tool_input.content)
+        metadata["request_body"] = _recordable_request_body(_redact_content(tool_input.content, tool_input.headers))
     if tool_input.headers:
         metadata["request_headers"] = {
             name: "REDACTED" if _is_sensitive_name(name) else value for name, value in tool_input.headers.items()
@@ -231,9 +235,13 @@ def _base_fields(fetched: HttpResponse) -> dict[str, object]:
     return fields
 
 
+def _media_type(content_type: str) -> str:
+    return content_type.split(";", 1)[0].strip().lower()
+
+
 def is_textual(content_type: str) -> bool:
     """Recognize supported text media types, treating a missing content type as text."""
-    media_type = content_type.split(";", 1)[0].strip().lower()
+    media_type = _media_type(content_type)
     return (
         not media_type
         or media_type.startswith("text/")
@@ -243,7 +251,7 @@ def is_textual(content_type: str) -> bool:
 
 
 def _is_json(content_type: str) -> bool:
-    media_type = content_type.split(";", 1)[0].strip().lower()
+    media_type = _media_type(content_type)
     return media_type == "application/json" or media_type.endswith("+json")
 
 
@@ -294,12 +302,41 @@ def _is_sensitive_name(name: str) -> bool:
     return any(component in SENSITIVE_NAME_COMPONENTS or component in SENSITIVE_NAMES for component in components)
 
 
+def _redact_params(params: Iterable[tuple[str, str]]) -> list[tuple[str, str]]:
+    return [(k, "REDACTED" if _is_sensitive_name(k) else v) for k, v in params]
+
+
 def _safe_url(url: httpx.URL) -> str:
     """Render `url` for metadata with values of credential-like query parameters redacted."""
     if not url.query:
         return str(url)
-    params = [(k, "REDACTED" if _is_sensitive_name(k) else v) for k, v in url.params.multi_items()]
-    return str(url.copy_with(params=params))
+    return str(url.copy_with(params=_redact_params(url.params.multi_items())))
+
+
+def _redact_json(value: JsonValue) -> JsonValue:
+    """Redact values under credential-like keys at any depth of a JSON request body."""
+    match value:
+        case dict():
+            return {k: "REDACTED" if _is_sensitive_name(k) else _redact_json(v) for k, v in value.items()}
+        case list():
+            return [_redact_json(item) for item in value]
+        case _:
+            return value
+
+
+def _redact_content(content: str, headers: dict[str, str] | None) -> str:
+    """Redact credential-like fields of a form-encoded or JSON body; other raw bodies are recorded as sent."""
+    media_type = _media_type(httpx.Headers(headers).get("content-type", ""))
+    if media_type == "application/x-www-form-urlencoded":
+        return str(httpx.QueryParams(_redact_params(httpx.QueryParams(content).multi_items())))
+    if _is_json(media_type):
+        try:
+            parsed = json.loads(content)
+        except (ValueError, RecursionError):
+            # Invalid JSON has no keys to match.
+            return content
+        return json.dumps(_redact_json(parsed), ensure_ascii=False)
+    return content
 
 
 def _recordable_request_body(json_body: JsonValue) -> JsonValue | str:
