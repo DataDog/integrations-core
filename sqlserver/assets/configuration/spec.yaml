@@ -1135,7 +1135,8 @@ files:
       options:
         - name: enabled
           description: |
-            Enable schema collection. Requires `dbm: true`. Defaults to false.
+            Enable schema collection. Requires either `dbm: true` or `data_observability.enabled: true`.
+            Defaults to false.
           value:
             type: boolean
             example: false
@@ -1176,7 +1177,8 @@ files:
       options:
         - name: enabled
           description: |
-            Enable schema collection. Requires `dbm: true`. Defaults to false.
+            Enable schema collection. Requires either `dbm: true` or `data_observability.enabled: true`.
+            Defaults to false.
           value:
             type: boolean
             example: false

@@ -216,10 +216,11 @@ class SQLServer(DatabaseCheck):
         if self._config.dbm_enabled:
             self.statement_metrics = self.register_async_job(SqlserverStatementMetrics(self, self._config))
             self.procedure_metrics = self.register_async_job(SqlserverProcedureMetrics(self, self._config))
-            self.sql_metadata = self.register_async_job(SqlserverMetadata(self, self._config))
             self.activity = self.register_async_job(SqlserverActivity(self, self._config))
             self.agent_history = self.register_async_job(SqlserverAgentHistory(self, self._config))
             self.deadlocks = self.register_async_job(Deadlocks(self, self._config))
+        if self._config.dbm_enabled or self._config.data_observability.enabled:
+            self.sql_metadata = self.register_async_job(SqlserverMetadata(self, self._config))
         if self._config.data_observability.enabled:
             self.data_observability = self.register_async_job(SqlServerDataObservability(self, self._config))
 
