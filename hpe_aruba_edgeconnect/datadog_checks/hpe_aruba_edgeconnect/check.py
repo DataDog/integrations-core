@@ -75,12 +75,13 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
     def check(self, _: Any) -> None:
         try:
             orch_client = self._get_orch_client()
+            raw_appliances = orch_client.get_appliances()
         except Exception:
             self.gauge('orchestrator.reachability', 0, tags=self.tags)
             self._orch_client = None
             raise
         self.gauge('orchestrator.reachability', 1, tags=self.tags)
-        appliances = self._collect_appliances_from_orch(orch_client)
+        appliances = self._collect_appliances_from_orch(orch_client, raw_appliances)
         self._remove_stale_appliance_clients({ap.ip for ap in appliances})
         with ThreadPoolExecutor(max_workers=self.config.max_concurrency) as pool:
             futs = {
@@ -136,8 +137,9 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             appliances.append(Appliance(raw))
         return appliances
 
-    def _collect_appliances_from_orch(self, client: OrchestratorClient) -> Appliances:
-        raw_appliances = client.get_appliances()
+    def _collect_appliances_from_orch(
+        self, client: OrchestratorClient, raw_appliances: list[dict[str, Any]]
+    ) -> Appliances:
         if not raw_appliances:
             self.log.warning("No appliances returned from orchestrator %s", self.config.orchestrator_ip)
             return Appliances([], self.log)

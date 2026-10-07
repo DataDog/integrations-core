@@ -724,6 +724,34 @@ def test_check_uses_api_key_instead_of_login(dd_run_check, aggregator, mocker, i
     aggregator.assert_metric(f'{NS}.orchestrator.reachability', value=1, count=1)
 
 
+@pytest.mark.parametrize(
+    'auth',
+    [
+        pytest.param({}, id='username-password'),
+        pytest.param(
+            {
+                'orchestrator_api_key': 'expired-key',
+                'orchestrator_username': None,
+                'orchestrator_password': None,
+                'appliance_credentials': APPLIANCE_OVERRIDE,
+            },
+            id='api-key',
+        ),
+    ],
+)
+def test_orchestrator_rejecting_appliance_list_reports_unreachable(dd_run_check, aggregator, mocker, instance, auth):
+    check = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [instance('localhost:8443', **auth)])
+    orch = _setup_mocks(mocker, check, APPLIANCE_PAYLOAD)
+    mocker.patch.object(orch, 'login')
+    orch.get_appliances.side_effect = requests.HTTPError('401 Unauthorized')
+
+    with pytest.raises(Exception, match='401'):
+        dd_run_check(check, extract_message=True)
+
+    aggregator.assert_metric(f'{NS}.orchestrator.reachability', value=0, count=1)
+    assert check._orch_client is None
+
+
 def test_api_key_is_not_sent_to_appliances(mocker, instance):
     inst = instance(
         'localhost:8443',
