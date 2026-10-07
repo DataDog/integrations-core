@@ -31,6 +31,9 @@ if TYPE_CHECKING:
 class ValidationConfig:
     description: str = ""
     repo_wide: bool = False
+    # This validation reads only pull request metadata, not repository files, so it runs in the
+    # separate PR-metadata job that re-runs on description edits and label changes.
+    pr_metadata: bool = False
     fix_flag: str | None = None
     failure_guidance: str | None = None
 
@@ -109,6 +112,7 @@ VALIDATIONS: dict[str, ValidationConfig] = {
     "qa-label": ValidationConfig(
         description="Validate the pull request declares whether it needs QA for the next Agent release",
         repo_wide=True,
+        pr_metadata=True,
         failure_guidance=(
             "**To fix:** Choose exactly one QA label:\n"
             "• `qa/required` if the PR needs QA validation.\n"
@@ -198,6 +202,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
         max_timeout: float = 600,
         subprocess_timeout: float = SUBPROCESS_TIMEOUT,
         pr_comment_output: Path | None = None,
+        comment_heading: str = COMMENT_HEADING,
     ):
         validations = validations if validations is not None else list(VALIDATIONS)
         super().__init__(
@@ -215,6 +220,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
         self._fix = fix
         self._pr_number = pr_number
         self._pr_comment_output = pr_comment_output
+        self._comment_heading = comment_heading
         self._results: dict[str, ValidationResult] = {}
 
         self.register_processor(
@@ -269,7 +275,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
         try:
             comments = self._app.github.get_pull_request_comments(pr_number)
             for comment in comments:
-                if comment.get("body", "").startswith(COMMENT_HEADING):
+                if comment.get("body", "").startswith(self._comment_heading):
                     self._app.github.delete_comment(comment["id"])
         except Exception as exc:
             self._app.display_warning(f"Failed to clean up previous validation comments: {exc}")
@@ -284,6 +290,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
             self._validations,
             error=error_msg,
             warning=extra_warning,
+            heading=self._comment_heading,
         )
         write_step_summary(summary_body)
 
@@ -294,6 +301,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
             self._validations,
             error=error_msg,
             warning=extra_warning,
+            heading=self._comment_heading,
         )
         if run_url := get_workflow_run_url():
             comment_body += f"\n\n[View full run]({run_url})"

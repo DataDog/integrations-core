@@ -5,6 +5,8 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
+import pytest
+
 from ddev.cli.validate.all.orchestrator import VALIDATIONS
 
 from .conftest import completed_process
@@ -33,6 +35,46 @@ def test_all_command_passes_when_all_validations_succeed(ddev):
     assert set(invoked) == set(ALL_NAMES)
 
 
+@pytest.mark.parametrize(
+    "scope, expected",
+    [
+        pytest.param("code", {"config"}, id="code"),
+        pytest.param("pr-metadata", {"qa-label"}, id="pr-metadata"),
+        pytest.param("all", {"config", "qa-label"}, id="all"),
+    ],
+)
+def test_all_command_filters_validations_by_scope(ddev, scope, expected):
+    invoked: list[str] = []
+    selected = {name: VALIDATIONS[name] for name in ("config", "qa-label")}
+
+    def fake_run(cmd, **kwargs):
+        invoked.append(cmd[4])
+        return completed_process(returncode=0, stdout="ok")
+
+    with (
+        patch("ddev.cli.validate.all._load_validations", return_value=selected),
+        patch("subprocess.run", side_effect=fake_run),
+    ):
+        result = ddev("validate", "all", "--scope", scope, *FAST_ORCHESTRATOR_OPTS)
+
+    assert result.exit_code == 0, result.output
+    assert set(invoked) == expected
+
+
+def test_all_command_passes_when_scope_has_no_validations(ddev):
+    selected = {"qa-label": VALIDATIONS["qa-label"]}
+
+    with (
+        patch("ddev.cli.validate.all._load_validations", return_value=selected),
+        patch("subprocess.run") as run,
+    ):
+        result = ddev("validate", "all", "--scope", "code", *FAST_ORCHESTRATOR_OPTS)
+
+    assert result.exit_code == 0, result.output
+    assert "No validations selected for scope 'code'." in result.output
+    run.assert_not_called()
+
+
 def test_all_command_writes_pr_comment_before_aborting_without_github_credentials(ddev, tmp_path):
     output = tmp_path / "pr-comment.md"
     selected = {"config": VALIDATIONS["config"]}
@@ -53,6 +95,28 @@ def test_all_command_writes_pr_comment_before_aborting_without_github_credential
     assert "| `config` | Validate default configuration files against spec.yaml | ❌ |" in output.read_text(
         encoding="utf-8"
     )
+
+
+def test_all_command_uses_pr_metadata_comment_heading(ddev, tmp_path):
+    output = tmp_path / "pr-comment.md"
+    selected = {"qa-label": VALIDATIONS["qa-label"]}
+
+    with (
+        patch("ddev.cli.validate.all._load_validations", return_value=selected),
+        patch("subprocess.run", return_value=completed_process()),
+    ):
+        result = ddev(
+            "validate",
+            "all",
+            "--scope",
+            "pr-metadata",
+            "--pr-comment-output",
+            str(output),
+            *FAST_ORCHESTRATOR_OPTS,
+        )
+
+    assert result.exit_code == 0, result.output
+    assert output.read_text(encoding="utf-8").startswith("## PR Metadata Validation Report\n")
 
 
 def test_all_command_aborts_on_failure_with_details(ddev):

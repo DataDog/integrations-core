@@ -9,6 +9,10 @@ on:
       ddev-version:
         required: false
         type: string
+      scope:
+        required: false
+        type: string
+        default: all
 
 defaults:
   run:
@@ -26,6 +30,7 @@ jobs:
 
     env:
       PYTHON_VERSION: "3.13"
+      SCOPE: ${{ inputs.scope }}
       TARGET: ${{ github.event_name == 'pull_request' && 'changed' || '' }}
 
     steps:
@@ -85,4 +90,4 @@ jobs:
       env:
         DD_GITHUB_USER: "${{ github.actor }}"
         DD_GITHUB_TOKEN: "${{ steps.octo-sts.outputs.token || secrets.GITHUB_TOKEN }}"
-      run: ddev validate all "$TARGET"
+      run: ddev validate all --scope "$SCOPE" "$TARGET"

@@ -5,7 +5,7 @@ on:
     branches:
     - master
   pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+    types: [opened, synchronize, reopened]
   merge_group:
     types: [checks_requested]
 
@@ -23,4 +23,5 @@ jobs:
     uses: ./.github/workflows/run-validations.yml
     with:
       repo: core
+      scope: code
     secrets: inherit

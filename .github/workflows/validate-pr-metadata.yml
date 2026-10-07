@@ -1,0 +1,24 @@
+# PR metadata validations are separate so they can use their own triggers and check.
+# Description edits and label changes then neither re-run nor mask the full suite.
+name: Validate PR metadata
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  run:
+    name: Run PR Metadata Validations
+    uses: ./.github/workflows/run-validations.yml
+    with:
+      repo: core
+      scope: pr-metadata
+    secrets: inherit

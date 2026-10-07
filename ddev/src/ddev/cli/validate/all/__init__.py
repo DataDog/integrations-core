@@ -37,6 +37,13 @@ def _load_validations(app: Application) -> dict[str, ValidationConfig]:
 @click.command(short_help="Run all validations in parallel")
 @click.argument("target", required=False)
 @click.option("--fix", is_flag=True, help="Attempt to auto-fix issues (passes --sync/--fix to each validation).")
+@click.option(
+    "--scope",
+    type=click.Choice(["all", "code", "pr-metadata"]),
+    default="all",
+    show_default=True,
+    help="Run all validations, only those reading repository files (code), or only PR metadata ones (pr-metadata).",
+)
 @click.option("--grace-period", type=float, default=5, help="Seconds to wait for stragglers after first completion.")
 @click.option("--max-timeout", type=float, default=600, help="Maximum total seconds before the orchestrator stops.")
 @click.option(
@@ -52,6 +59,7 @@ def all(
     app: Application,
     target: str | None,
     fix: bool,
+    scope: str,
     grace_period: float,
     max_timeout: float,
     subprocess_timeout: float,
@@ -62,24 +70,37 @@ def all(
     If TARGET is provided (e.g. 'changed'), per-integration validations are
     scoped to that target. Repo-wide validations always run without a target.
     """
-    from ddev.cli.validate.all.github import format_pr_comment, get_pr_number
+    from ddev.cli.validate.all.github import (
+        COMMENT_HEADING,
+        PR_METADATA_COMMENT_HEADING,
+        format_pr_comment,
+        get_pr_number,
+    )
     from ddev.cli.validate.all.orchestrator import ValidationOrchestrator
     from ddev.utils.github_actions import get_workflow_run_url, write_step_summary
 
     selected = _load_validations(app)
+    report_heading = PR_METADATA_COMMENT_HEADING if scope == "pr-metadata" else COMMENT_HEADING
     if not selected:
         msg = (
             "No validations are configured to run for this repository.\n"
             "Add entries to the `validations` list in `.ddev/config.toml` or remove the validation workflow."
         )
         app.display_error(msg)
-        write_step_summary(f"## Validation Report\n\n> **Error:** {msg}")
+        write_step_summary(f"{report_heading}\n\n> **Error:** {msg}")
         if pr_comment_output is not None:
-            comment_body = format_pr_comment({}, {}, target, [], error=msg)
+            comment_body = format_pr_comment({}, {}, target, [], error=msg, heading=report_heading)
             if run_url := get_workflow_run_url():
                 comment_body += f"\n\n[View full run]({run_url})"
             pr_comment_output.write_text(comment_body, encoding="utf-8")
         app.abort()
+
+    if scope != "all":
+        pr_metadata = scope == "pr-metadata"
+        selected = {name: config for name, config in selected.items() if config.pr_metadata is pr_metadata}
+        if not selected:
+            app.display_info(f"No validations selected for scope {scope!r}.")
+            return
 
     pr_number = get_pr_number(app)
     orchestrator = ValidationOrchestrator(
@@ -92,6 +113,7 @@ def all(
         max_timeout=max_timeout,
         subprocess_timeout=subprocess_timeout,
         pr_comment_output=pr_comment_output,
+        comment_heading=report_heading,
     )
     orchestrator.run()
 

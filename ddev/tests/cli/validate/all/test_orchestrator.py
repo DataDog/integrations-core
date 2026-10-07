@@ -311,7 +311,7 @@ def test_on_finalize_deletes_previous_validation_comments(mock_app):
     mock_app.config.github.token = "fake-token"
     mock_app.github.get_pull_request_comments.return_value = [
         {"id": 100, "body": "## Validation Report\nold report"},
-        {"id": 200, "body": "unrelated comment"},
+        {"id": 200, "body": "## PR Metadata Validation Report\nold report"},
     ]
 
     orch = ValidationOrchestrator(app=mock_app, validations=["config"], target=None, pr_number=42)
@@ -322,6 +322,31 @@ def test_on_finalize_deletes_previous_validation_comments(mock_app):
 
     mock_app.github.delete_comment.assert_called_once_with(100)
     mock_app.github.post_pull_request_comment.assert_called_once()
+
+
+def test_on_finalize_uses_separate_pr_metadata_report(mock_app, step_summary):
+    mock_app.config.github.token = "fake-token"
+    mock_app.github.get_pull_request_comments.return_value = [
+        {"id": 100, "body": "## Validation Report\nold report"},
+        {"id": 200, "body": "## PR Metadata Validation Report\nold report"},
+    ]
+
+    orch = ValidationOrchestrator(
+        app=mock_app,
+        validations=["qa-label"],
+        target=None,
+        pr_number=42,
+        comment_heading="## PR Metadata Validation Report",
+    )
+    orch._results = {
+        "qa-label": ValidationResult(name="qa-label", success=True, stdout="ok", stderr="", duration=1.0),
+    }
+    asyncio.run(orch.on_finalize(exception=None))
+
+    mock_app.github.delete_comment.assert_called_once_with(200)
+    comment = mock_app.github.post_pull_request_comment.call_args[0][1]
+    assert comment.startswith("## PR Metadata Validation Report\n")
+    assert step_summary.read_text(encoding="utf-8").startswith("## PR Metadata Validation Report\n")
 
 
 def test_on_finalize_includes_pr_warning_in_summary(mock_app, step_summary, monkeypatch):

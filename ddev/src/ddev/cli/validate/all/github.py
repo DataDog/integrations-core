@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from ddev.cli.validate.all.orchestrator import ValidationConfig, ValidationResult
 
 COMMENT_HEADING = "## Validation Report"
+PR_METADATA_COMMENT_HEADING = "## PR Metadata Validation Report"
 
 
 def parse_pr_number_from_event(event_path: str) -> int | None:
@@ -53,8 +54,8 @@ def get_pr_number(app: Application) -> int | None:
     return None
 
 
-def _build_preamble(error: str | None, warning: str | None) -> list[str]:
-    parts: list[str] = [f"{COMMENT_HEADING}\n"]
+def _build_preamble(error: str | None, warning: str | None, heading: str) -> list[str]:
+    parts: list[str] = [f"{heading}\n"]
     if error:
         parts.append(f"> **Error:** {error}\n")
     if warning:
@@ -120,6 +121,7 @@ def format_pr_comment(
     *,
     error: str | None = None,
     warning: str | None = None,
+    heading: str = COMMENT_HEADING,
 ) -> str:
     """Format a PR comment with collapsible sections to reduce clutter."""
     failures: dict[str, ValidationResult] = {}
@@ -128,7 +130,7 @@ def format_pr_comment(
         (passed if result.success else failures)[name] = result
 
     incomplete = _build_incomplete_warning(expected_validations, results)
-    parts = _build_preamble(error, warning)
+    parts = _build_preamble(error, warning, heading)
     parts.extend(incomplete)
 
     if failures:
@@ -155,11 +157,12 @@ def format_step_summary(
     *,
     error: str | None = None,
     warning: str | None = None,
+    heading: str = COMMENT_HEADING,
 ) -> str:
     """Format a flat summary table for the GitHub Actions step summary."""
     has_failures = any(not r.success for r in results.values())
 
-    parts = _build_preamble(error, warning)
+    parts = _build_preamble(error, warning, heading)
     parts.extend(_build_incomplete_warning(expected_validations, results))
 
     parts.extend(_build_table(results, configs))
