@@ -138,7 +138,11 @@ class QueryMetricsCollector(DBMAsyncJob):
     def _fetch_statement_texts(self, keys: set[StatementKey]) -> dict[StatementKey, str]:
         texts = {}
         for batch in batched(sorted(keys), TEXT_FETCH_BATCH_SIZE, strict=False):
+            # Combine one fixed SQL fragment per key into a single request. Only the number of
+            # fragments varies; all key values are bound separately, never interpolated into SQL.
             query = '/* DDIGNORE */\n' + '\nUNION ALL\n'.join(STATEMENT_TEXT_LOOKUP_QUERY for _ in batch)
+            # Flatten in fragment order, matching each fragment's three placeholders:
+            # binary executable ID, member, then insertion timestamp.
             params = tuple(
                 value
                 for member, executable_id, inserted in batch
