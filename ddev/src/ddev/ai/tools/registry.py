@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from ddev.ai.agent.scope import AgentScope
     from ddev.ai.config.models import AgentConfig
     from ddev.ai.react.factory import ReActProcessFactory
+    from ddev.ai.tools.http.response_store import ResponseStore
 
 
 @dataclass
@@ -30,6 +31,7 @@ class ToolContext:
     scope: AgentScope
     agent_config: AgentConfig
     process_factory: ReActProcessFactory
+    response_store: ResponseStore
 
     @property
     def policy(self) -> FileAccessPolicy:
@@ -50,6 +52,10 @@ def _file_policy_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
 
 def _spawn_subagent_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
     return tool_cls(parent_scope=ctx.scope, agent_config=ctx.agent_config, process_factory=ctx.process_factory)
+
+
+def _response_store_factory(tool_cls: type, ctx: ToolContext) -> ToolProtocol:
+    return tool_cls(ctx.response_store)
 
 
 @dataclass(frozen=True)
@@ -85,9 +91,9 @@ TOOL_MANIFEST: dict[str, ToolSpec] = {
     "grep": ToolSpec("shell.grep", "GrepTool", factory=_file_policy_factory, read_only=True),
     "list_files": ToolSpec("shell.list_files", "ListFilesTool", read_only=True),
     "mkdir": ToolSpec("fs.mkdir", "MkdirTool", factory=_file_policy_factory, read_only=False),
-    "http_get": ToolSpec("http.http_get", "HttpGetTool", read_only=True),
+    "http_get": ToolSpec("http.http_get", "HttpGetTool", factory=_response_store_factory, read_only=True),
     # POST may mutate state; reviewers inspect saved responses with read_file/grep.
-    "http_post": ToolSpec("http.http_post", "HttpPostTool", read_only=False),
+    "http_post": ToolSpec("http.http_post", "HttpPostTool", factory=_response_store_factory, read_only=False),
     # read_only=False because a reviewer must never be able to end the run on its own.
     "stop_flow": ToolSpec("stop_flow", "StopFlowTool", read_only=False),
     "ddev_create": ToolSpec("shell.ddev.create", "DdevCreateTool", read_only=False),
@@ -145,6 +151,7 @@ class ToolRegistry:
         file_registry: FileRegistry,
         agent_config: AgentConfig,
         process_factory: ReActProcessFactory,
+        response_store: ResponseStore,
     ) -> ToolRegistry:
         """Build a ToolRegistry from a list of tool name strings.
 
@@ -153,12 +160,14 @@ class ToolRegistry:
         each owner must still read-before-write on its own.
 
         ``process_factory`` is only consumed by tools that spawn child agents.
+        ``response_store`` is only consumed by the HTTP tools.
         """
         ctx = ToolContext(
             file_registry=file_registry,
             scope=scope,
             agent_config=agent_config,
             process_factory=process_factory,
+            response_store=response_store,
         )
         tools: list[ToolProtocol] = []
         native_tool_names: list[str] = []

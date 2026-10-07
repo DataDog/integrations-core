@@ -14,6 +14,7 @@ from ddev.ai.tools.agents.spawn_subagent import SpawnSubagentTool
 from ddev.ai.tools.core.types import ToolResult
 from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.fs.file_registry import FileRegistry
+from ddev.ai.tools.http.response_store import ResponseStore
 from ddev.ai.tools.registry import NATIVE_TOOL_NAMES, ToolRegistry, filter_read_only
 from tests.ai.config.utils import make_agent_config
 
@@ -176,6 +177,7 @@ def from_names(tool_names: list[str], tmp_path, *, scope: AgentScope = SCOPE) ->
         file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path, integration_name="my_integration")),
         agent_config=AgentConfig.model_construct(provider="anthropic", model="claude-3-sonnet", tools=tool_names),
         process_factory=PROCESS_FACTORY,
+        response_store=ResponseStore(tmp_path),
     )
 
 
@@ -217,6 +219,21 @@ def test_from_names_spawn_tools_get_runtime_context(name, tool_type, tmp_path):
     assert tool._allowed_tools == {"read_file"}
 
 
+@pytest.mark.parametrize("name", ["http_get", "http_post"])
+def test_from_names_http_tools_use_supplied_response_store(name, tmp_path):
+    store = ResponseStore(tmp_path / "responses")
+    registry = ToolRegistry.from_names(
+        [name],
+        scope=SCOPE,
+        file_registry=FileRegistry(policy=FileAccessPolicy(write_root=tmp_path, integration_name="my_integration")),
+        agent_config=make_agent_config(tools=[name]),
+        process_factory=PROCESS_FACTORY,
+        response_store=store,
+    )
+
+    assert registry._tools[name]._store is store
+
+
 def test_from_names_fs_tools_share_file_registry(tmp_path):
     """All tools that use the file registry in the same ToolRegistry share a single instance."""
     all_names = TOOLS_WITHOUT_EXTRA_DEPS
@@ -239,6 +256,7 @@ async def test_from_names_scopes_delete_file_tool_to_integration_root(tmp_path):
         file_registry=file_registry,
         agent_config=make_agent_config(tools=["delete_file"]),
         process_factory=PROCESS_FACTORY,
+        response_store=ResponseStore(tmp_path),
     )
 
     inside = integration_root / "inside.txt"
@@ -352,6 +370,7 @@ def test_from_names_reuses_supplied_file_registry(tmp_path):
         file_registry=shared,
         agent_config=make_agent_config(tools=["read_file", "create_file"]),
         process_factory=PROCESS_FACTORY,
+        response_store=ResponseStore(tmp_path),
     )
     reg_b = ToolRegistry.from_names(
         ["read_file", "create_file"],
@@ -359,6 +378,7 @@ def test_from_names_reuses_supplied_file_registry(tmp_path):
         file_registry=shared,
         agent_config=make_agent_config(tools=["read_file", "create_file"]),
         process_factory=PROCESS_FACTORY,
+        response_store=ResponseStore(tmp_path),
     )
 
     for tool in reg_a._tools.values():
