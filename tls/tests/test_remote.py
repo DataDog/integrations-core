@@ -389,6 +389,7 @@ def test_valid_version_with_critical_certificate_validation_and_critial_certific
 
     c = TLSCheck('tls', {}, [instance_remote_ok])
     check = TLSRemoteCheck(agent_check=c)
+    c.get_tls_context()
     with patch.object(check.agent_check, 'get_tls_context') as mock_get_tls_context:
         mock_tls_context = MagicMock()
         mock_get_tls_context.return_value = mock_tls_context
@@ -416,6 +417,7 @@ def test_valid_version_with_critical_certificate_validation_and_critial_certific
 def test_valid_version_and_critical_certificate_validation_due_to_socket_exception(aggregator, instance_remote_ok):
     c = TLSCheck('tls', {}, [instance_remote_ok])
     check = TLSRemoteCheck(agent_check=c)
+    c.get_tls_context()
     with patch.object(check.agent_check, 'get_tls_context') as mock_get_tls_context:
         mock_tls_context = MagicMock()
         mock_get_tls_context.return_value = mock_tls_context
@@ -444,6 +446,7 @@ def test_valid_version_and_critical_certificate_validation_due_to_socket_excepti
 def test_valid_version_and_critical_certificate_validation_due_to_parsing_error(aggregator, instance_remote_ok):
     c = TLSCheck('tls', {}, [instance_remote_ok])
     check = TLSRemoteCheck(agent_check=c)
+    c.get_tls_context()
     with patch.object(check.agent_check, 'get_tls_context') as mock_get_tls_context:
         mock_tls_context = MagicMock()
         mock_get_tls_context.return_value = mock_tls_context
