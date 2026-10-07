@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     from .ibm_db2 import IbmDb2Check
 
 COLLECTION_INTERVAL = 10
+# Provisional limit; validate against larger workloads. Db2 sizes its package cache in memory, not entry counts.
 TEXT_CACHE_SIZE = 10_000
 TEXT_FETCH_BATCH_SIZE = 50
 NANOSECONDS_PER_MILLISECOND = 1_000_000
