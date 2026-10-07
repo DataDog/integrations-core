@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchProgressUpdate, TestBatch
-from ddev.cli.ci.tests.status import conclusion_to_status, has_finished_running
+from ddev.cli.ci.tests.status import has_run, job_status
 from ddev.event_bus.orchestrator import BaseMessage
 from ddev.utils.github_async.models.workflow import WorkflowJobStatus
 
@@ -121,9 +121,6 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
         'dispatcher.batch.id',
         console_tag=True,
         test_tag=True,
-        # Concurrent batches of one run emit the same gauges; the batch keeps their series apart so
-        # one batch's points do not overwrite another's.
-        metric_tag=True,
     ),
     'batch_job_count': AttributeSpec(
         'dispatcher.batch.job_count',
@@ -544,7 +541,7 @@ def job_fields(job: BatchJob, workflow_job: WorkflowJob | None = None) -> dict[s
         fields['agent_image'] = job.agent_image
     if workflow_job is not None:
         if workflow_job.status is WorkflowJobStatus.COMPLETED:
-            fields['job_status'] = conclusion_to_status(workflow_job.conclusion).value
+            fields['job_status'] = job_status(workflow_job).value
         if workflow_job.conclusion is not None:
             fields['job_conclusion'] = workflow_job.conclusion
         fields['job_id'] = workflow_job.id
@@ -552,7 +549,7 @@ def job_fields(job: BatchJob, workflow_job: WorkflowJob | None = None) -> dict[s
             fields['job_url'] = workflow_job.html_url
         if (queue_duration := workflow_job.queue_duration_seconds) is not None:
             fields['job_queue_duration_seconds'] = queue_duration
-        if has_finished_running(workflow_job) and (duration := workflow_job.duration_seconds) is not None:
+        if has_run(workflow_job) and (duration := workflow_job.duration_seconds) is not None:
             fields['job_duration_seconds'] = duration
     return fields
 
