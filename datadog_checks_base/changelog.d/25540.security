@@ -1,1 +1,1 @@
-Add a `max_response_size` HTTP option bounding the decoded size of a response, and limit the OpenMetrics v1 and v2 scrapers to 100 MiB by default.
+Limit lines read with `iter_lines` to 10 MiB so that a response without line breaks is no longer buffered in memory in its entirety.

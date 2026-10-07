@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import gzip
+import io
 import logging
 import os
 import ssl
@@ -12,9 +14,10 @@ import mock
 import pytest
 import requests
 import requests_unixsocket
+import urllib3
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http import RequestsWrapper, is_uds_url, quote_uds_url
+from datadog_checks.base.utils.http import RequestsWrapper, ResponseWrapper, is_uds_url, quote_uds_url
 from datadog_checks.dev.utils import ON_WINDOWS
 
 
@@ -340,3 +343,25 @@ class TestLogger:
         expected_message = 'Sending GET request to https://www.google.com'
         for _, _, message in caplog.record_tuples:
             assert message != expected_message
+
+
+@pytest.mark.parametrize(
+    'body, too_long',
+    [
+        pytest.param(b'x' * 11, True, id='line too long'),
+        pytest.param(b'1234567\n' * 100, False, id='long body with short lines'),
+    ],
+)
+def test_iter_lines_limits_line_size(body, too_long):
+    response = requests.Response()
+    response.raw = urllib3.HTTPResponse(
+        io.BytesIO(gzip.compress(body)), headers={'Content-Encoding': 'gzip'}, preload_content=False
+    )
+    lines = ResponseWrapper(response, 4).iter_lines()
+
+    with mock.patch('datadog_checks.base.utils.http.MAX_LINE_SIZE', 10):
+        if too_long:
+            with pytest.raises(ValueError, match='line longer than 10 bytes'):
+                list(lines)
+        else:
+            assert len(list(lines)) == 100

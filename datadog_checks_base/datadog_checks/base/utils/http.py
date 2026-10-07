@@ -18,9 +18,9 @@ from urllib.parse import quote, urljoin, urlparse, urlunparse
 
 import lazy_loader
 import requests
-from binary import KIBIBYTE, MEBIBYTE
+from binary import KIBIBYTE
 from requests import auth as requests_auth
-from requests.exceptions import RequestException, SSLError
+from requests.exceptions import SSLError
 from urllib3.exceptions import InsecureRequestWarning
 from wrapt import ObjectProxy
 
@@ -61,9 +61,8 @@ DEFAULT_EXPIRATION = 300
 # https://www.bittorrent.org/beps/bep_0003.html
 DEFAULT_CHUNK_SIZE = 16
 
-# Default upper bound, in MiB of decoded (i.e. decompressed) data, for the OpenMetrics scrapers, which stream
-# a response whose size is controlled by the monitored endpoint. Generic HTTP checks are not limited by default.
-DEFAULT_OPENMETRICS_MAX_RESPONSE_SIZE = 100
+# `iter_lines` buffers a line until its end, so a line is limited to avoid holding an unbounded response in memory
+MAX_LINE_SIZE = 10 * 1024 * 1024
 
 STANDARD_FIELDS = {
     'allow_redirects': True,
@@ -83,7 +82,6 @@ STANDARD_FIELDS = {
     'kerberos_keytab': None,
     'kerberos_principal': None,
     'log_requests': False,
-    'max_response_size': None,
     'ntlm_domain': None,
     'password': None,
     'persist_connections': False,
@@ -236,63 +234,25 @@ class _SSLContextAdapter(requests.adapters.HTTPAdapter):
         return host_params, {"ssl_context": self.ssl_context}
 
 
-class ResponseSizeLimitExceeded(RequestException):
-    """The decoded body of a response is larger than the configured `max_response_size`."""
+def _limit_line_size(stream):
+    def limited_stream(*args, **kwargs):
+        line_size = 0
+        for chunk in stream(*args, **kwargs):
+            newline = chunk.rfind(b'\n')
+            line_size = len(chunk) - newline - 1 if newline >= 0 else line_size + len(chunk)
+            if line_size > MAX_LINE_SIZE:
+                raise ValueError(f'Response contains a line longer than {MAX_LINE_SIZE} bytes')
+            yield chunk
 
-
-class _SizeLimitedRaw(ObjectProxy):
-    """
-    Proxy for `requests.Response.raw` raising once more than `max_size` bytes of decoded data have been read.
-
-    `requests` reads the body of a response exclusively through `raw.stream()` (or `raw.read()` for file-like objects),
-    so limiting it bounds `iter_content`, `iter_lines`, `content`, `text` and `json` alike. In particular, `iter_lines`
-    buffers everything it receives until it finds a line delimiter, so a body without any would otherwise be held in
-    memory in its entirety.
-    """
-
-    def __init__(self, raw, max_size, url):
-        super(_SizeLimitedRaw, self).__init__(raw)
-
-        self._self_max_size = max_size
-        self._self_url = url
-        self._self_total = 0
-
-    def _count(self, data):
-        self._self_total += len(data)
-        if self._self_total > self._self_max_size:
-            self.__wrapped__.close()
-            raise ResponseSizeLimitExceeded(
-                f'The response from `{self._self_url}` exceeds the maximum allowed size of {self._self_max_size} '
-                f'bytes once decoded, see the `max_response_size` option'
-            )
-
-        return data
-
-    def stream(self, *args, **kwargs):
-        raw = self.__wrapped__
-        if hasattr(raw, 'stream'):
-            chunks = raw.stream(*args, **kwargs)
-        else:
-            # File-like objects, `requests` falls back to reading these in chunks
-            amt = args[0] if args else kwargs.get('amt')
-            chunks = iter(lambda: raw.read(amt), b'')
-
-        for chunk in chunks:
-            yield self._count(chunk)
-
-    def read(self, *args, **kwargs):
-        return self._count(self.__wrapped__.read(*args, **kwargs))
+    return limited_stream
 
 
 class ResponseWrapper(ObjectProxy):
-    def __init__(self, response, default_chunk_size, max_size=None):
+    def __init__(self, response, default_chunk_size):
         super(ResponseWrapper, self).__init__(response)
 
         # See https://github.com/psf/requests/pull/5942
         self.__default_chunk_size = default_chunk_size
-
-        if max_size is not None and response.raw is not None:
-            response.raw = _SizeLimitedRaw(response.raw, max_size, response.url)
 
     def iter_content(self, chunk_size=None, decode_unicode=False):
         if chunk_size is None:
@@ -303,6 +263,10 @@ class ResponseWrapper(ObjectProxy):
     def iter_lines(self, chunk_size=None, decode_unicode=False, delimiter=None):
         if chunk_size is None:
             chunk_size = self.__default_chunk_size
+
+        raw = self.__wrapped__.raw
+        if delimiter is None and hasattr(raw, 'stream'):
+            raw.stream = _limit_line_size(raw.stream)
 
         return self.__wrapped__.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter)
 
@@ -460,7 +424,6 @@ class RequestsWrapper(object):
         'request_hooks',
         'auth_token_handler',
         'request_size',
-        'max_response_size',
         'tls_protocols_allowed',
         'aia_chasing_max_depth',
         'tls_config',
@@ -628,13 +591,6 @@ class RequestsWrapper(object):
 
         self.request_size = int(float(config['request_size']) * KIBIBYTE)
 
-        # Maximum size of the decoded response body, in MiB. Unset or non-positive means unlimited.
-        self.max_response_size = None
-        if config['max_response_size'] is not None:
-            max_response_size = int(float(config['max_response_size']) * MEBIBYTE)
-            if max_response_size > 0:
-                self.max_response_size = max_response_size
-
         self.aia_chasing_max_depth = DEFAULT_AIA_CHASING_MAX_DEPTH
 
         self.tls_protocols_allowed = []
@@ -739,7 +695,7 @@ class RequestsWrapper(object):
             else:
                 response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
 
-            return ResponseWrapper(response, self.request_size, self.max_response_size)
+            return ResponseWrapper(response, self.request_size)
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
         try:
