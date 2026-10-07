@@ -2,13 +2,18 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+from datetime import timedelta
 
 import httpx
 import pytest
 
-from ddev.cli.validate.pr_description import _check_pr_description, _checklist, _skip_reason
+from ddev.cli.validate.pr_description import ENFORCED_SINCE, _check_pr_description, _checklist, _skip_reason
 from ddev.utils.github_errors import GitHubAuthenticationError
 from tests.helpers.github_async import make_pull_request
+
+# Dates relative to the cutoff, so moving ENFORCED_SINCE doesn't break the tests.
+OPENED_AFTER_CUTOFF = (ENFORCED_SINCE + timedelta(days=1)).isoformat()
+OPENED_BEFORE_CUTOFF = (ENFORCED_SINCE - timedelta(seconds=1)).isoformat()
 
 CHECKLIST_ITEMS = ['First required item', 'Second required item']
 TEMPLATE = (
@@ -69,15 +74,18 @@ def test_length_counts_visible_text_only():
 @pytest.mark.parametrize(
     ('author', 'author_type', 'title', 'created_at', 'reason'),
     [
-        pytest.param('human', 'User', 'Fix a bug', '2026-10-03T00:00:00Z', None, id='human'),
-        pytest.param('some-bot', 'User', 'Fix a bug', '2026-10-03T00:00:00Z', None, id='bot-like-name-is-a-user'),
+        pytest.param('human', 'User', 'Fix a bug', OPENED_AFTER_CUTOFF, None, id='human'),
+        pytest.param('some-bot', 'User', 'Fix a bug', OPENED_AFTER_CUTOFF, None, id='bot-like-name-is-a-user'),
+        pytest.param('dependabot[bot]', 'Bot', 'Bump x', OPENED_AFTER_CUTOFF, 'bot author dependabot[bot]', id='bot'),
+        pytest.param('Copilot', 'Bot', 'Fix a bug', OPENED_AFTER_CUTOFF, 'bot author Copilot', id='copilot'),
+        pytest.param('human', 'User', '[Release] Bumped x', OPENED_AFTER_CUTOFF, 'release PR', id='release'),
         pytest.param(
-            'dependabot[bot]', 'Bot', 'Bump x', '2026-10-03T00:00:00Z', 'bot author dependabot[bot]', id='bot'
-        ),
-        pytest.param('Copilot', 'Bot', 'Fix a bug', '2026-10-03T00:00:00Z', 'bot author Copilot', id='copilot'),
-        pytest.param('human', 'User', '[Release] Bumped x', '2026-10-03T00:00:00Z', 'release PR', id='release'),
-        pytest.param(
-            'human', 'User', 'Fix a bug', '2026-10-01T23:59:59Z', 'PR opened before 2026-10-02', id='before-cutoff'
+            'human',
+            'User',
+            'Fix a bug',
+            OPENED_BEFORE_CUTOFF,
+            f'PR opened before {ENFORCED_SINCE:%Y-%m-%d}',
+            id='before-cutoff',
         ),
         pytest.param('human', 'User', 'Fix a bug', None, None, id='no-created-at'),
     ],
@@ -116,7 +124,7 @@ def _event_args(tmp_path, **overrides):
         'body': VALID_BODY,
         'title': 'Improve PR validation',
         'user': {'login': 'human-author', 'type': 'User'},
-        'created_at': '2026-10-03T00:00:00Z',
+        'created_at': OPENED_AFTER_CUTOFF,
         'base': {'repo': {'full_name': 'DataDog/integrations-core'}},
         **overrides,
     }
