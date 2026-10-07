@@ -34,6 +34,9 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
     always_build+=("psycopg-c")
     # We need to build cryptography for FIPS support
     always_build+=("cryptography")
+    # PyPI's manylinux pymongo wheels ship C extensions with DWARF debug info (~1 MiB);
+    # building from source applies our LDFLAGS=-Wl,--strip-debug.
+    always_build+=("pymongo")
 else
     # Not working on Python 2
     sed -i '/aerospike==/d' /home/requirements.in

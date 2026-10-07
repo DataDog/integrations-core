@@ -19,3 +19,13 @@ file_pattern = "*.py"
 line_patterns = [
     "^\\s*if mibBuilder\\.loadTexts:",
 ]
+
+[[rules]]
+# pymongo.asynchronous is removed in files_to_remove.toml; drop the eager imports of it.
+package_pattern = "pymongo*"
+file_pattern = "*.py"
+line_patterns = [
+    "^from pymongo\\.asynchronous\\.mongo_client import AsyncMongoClient$",
+    "^from pymongo\\.asynchronous\\.helpers import _getaddrinfo$",
+    "^\\s*\"AsyncMongoClient\",$",
+]

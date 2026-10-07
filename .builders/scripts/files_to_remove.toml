@@ -9,6 +9,12 @@ excluded_paths = [
   "bson/**/*.h",
   "pymongo/**/*.c",
 
+  # --- Unused PyMongo packages ---
+  # The Agent only uses the sync client, which does not depend on these. The eager
+  # imports of pymongo.asynchronous are removed in lines_to_remove.toml.
+  "/pymongo/asynchronous/",
+  "/gridfs/",
+
   # --- Type annotation ---
   "krb5/**/*.pyi",
   "krb5/**/py.typed",
