@@ -159,9 +159,11 @@ SPAWN_TOOL_TYPES = (
     ("spawn_subagent", SpawnSubagentTool),
     ("spawn_identical_subagents", SpawnIdenticalSubagentsTool),
 )
-# Spawn tools have dedicated runtime-context coverage; native tools have no ToolProtocol instance.
+# Spawn tools need runtime context, HTTP tools need a response store, and native tools have no ToolProtocol instance.
 TOOLS_WITHOUT_EXTRA_DEPS = [
-    name for name in ToolRegistry.available_tool_names() if name not in {*dict(SPAWN_TOOL_TYPES), *NATIVE_TOOL_NAMES}
+    name
+    for name in ToolRegistry.available_tool_names()
+    if name not in {*dict(SPAWN_TOOL_TYPES), *NATIVE_TOOL_NAMES, "http_get", "http_post"}
 ]
 
 PROCESS_FACTORY = object()  # opaque sentinel — from_names only stores it on the spawn tool
@@ -269,8 +271,9 @@ async def test_from_names_scopes_delete_file_tool_to_integration_root(tmp_path):
         ([], []),
         (["read_file", "list_files"], ["read_file", "list_files"]),
         (["read_file", "stop_flow"], ["read_file"]),
+        (["http_get", "http_post"], ["http_get"]),
     ],
-    ids=["mixed", "all_writes", "empty", "all_reads", "stop_flow_excluded"],
+    ids=["mixed", "all_writes", "empty", "all_reads", "stop_flow_excluded", "http_post_excluded"],
 )
 def test_filter_read_only(input_names, expected):
     assert filter_read_only(input_names) == expected
