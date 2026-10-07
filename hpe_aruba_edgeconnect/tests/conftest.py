@@ -24,6 +24,9 @@ USE_EDGECONNECT_LAB = os.environ.get('USE_EDGECONNECT_LAB')
 # The fake Orchestrator only accepts this backend, so the E2E login fails unless the check
 # actually sends `loginType`.
 ORCH_LOGIN_TYPE = 2
+E2E_AUTH = os.environ.get('EDGECONNECT_E2E_AUTH', 'password')
+# Test-only value, not a real credential.
+ORCH_API_KEY = 'e2e-api-key'
 
 
 HERE = get_here()
@@ -74,11 +77,23 @@ def dd_environment(instance, dd_save_state):
             urlopen(f'https://{orch_ip}/health', timeout=2, context=ctx)
             urlopen(f'https://{HOST}:{appliance_port}/health', timeout=2, context=ctx)
 
+        if E2E_AUTH == 'api-key':
+            # The fake Orchestrator rejects data requests without this key, and appliances only take
+            # username/password, so they get credentials from an override.
+            auth = {
+                'orchestrator_api_key': ORCH_API_KEY,
+                'orchestrator_username': None,
+                'orchestrator_password': None,
+                'appliance_credentials': [{'cidr': '0.0.0.0/0', 'username': 'admin', 'password': ''}],
+            }
+        else:
+            auth = {'orchestrator_login_type': ORCH_LOGIN_TYPE}
+
         inst = instance(
             orch_ip,
             connect_timeout=2,
             appliance_ips={'exclude': [f'{EXCLUDED_APPLIANCE_IP}/32']},
-            orchestrator_login_type=ORCH_LOGIN_TYPE,
+            **auth,
         )
 
         with docker_run(
@@ -91,6 +106,7 @@ def dd_environment(instance, dd_save_state):
                 'ORCH_USERNAME': 'admin',
                 'ORCH_PASSWORD': '',
                 'ORCH_LOGIN_TYPE': str(ORCH_LOGIN_TYPE),
+                'ORCH_API_KEY': ORCH_API_KEY if E2E_AUTH == 'api-key' else '',
                 'APPLIANCE_USERNAME': 'admin',
                 'APPLIANCE_PASSWORD': '',
             },
