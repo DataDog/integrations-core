@@ -39,7 +39,10 @@ def ai_group(ctx: click.Context) -> None:
 
     phase_registry = PhaseRegistry()
     phase_registry.register_from(CORE_PHASES_DIR, CORE_PHASES_PACKAGE)
-    provider_registry = build_agent_provider_registry(app.config.ai)
+    try:
+        provider_registry = build_agent_provider_registry(app.config.ai)
+    except ValueError as error:
+        app.abort(str(error))
     try:
         engine = ConfigurationEngine(
             core_dir=CORE_FLOWS_DIR,
