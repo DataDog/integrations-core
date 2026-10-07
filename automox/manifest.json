@@ -13,6 +13,7 @@
     "title": "Automox",
     "media": [],
     "classifier_tags": [
+      "Category::Automation",
       "Category::Log Collection",
       "Category::Metrics",
       "Category::Security",

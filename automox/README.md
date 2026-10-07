@@ -65,4 +65,4 @@ For further assistance, contact [Datadog Support][5].
 [2]: https://console.automox.com/
 [3]: https://docs.automox.com/product/Developer/Using_Global_API_Keys.htm
 [4]: https://console.automox.com/global/setup/organizations
-[4]: https://docs.datadoghq.com/help/
+[5]: https://docs.datadoghq.com/help/
