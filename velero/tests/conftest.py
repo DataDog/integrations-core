@@ -28,7 +28,7 @@ def build_and_load_kubectl_image(image_tag: str):
 
     # Build the custom kubectl image
     run_command(
-        ['docker', 'build', '-t', image_tag, '-f', dockerfile_path, '.'],
+        ['docker', 'build', '-t', image_tag, '-f', dockerfile_path, KIND_DIR],
         check=True,
     )
     yield
