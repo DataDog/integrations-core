@@ -78,6 +78,16 @@ def role_catalog(roles_instance):
                 CREATE SCHEMA dd_role_obs AUTHORIZATION dd_role_obs_owner;
                 CREATE TABLE dd_role_obs.items (id integer);
                 ALTER TABLE dd_role_obs.items OWNER TO dd_role_obs_owner;
+                CREATE DOMAIN dd_role_obs.email AS text;
+                ALTER DOMAIN dd_role_obs.email OWNER TO dd_role_obs_owner;
+                REVOKE USAGE ON DOMAIN dd_role_obs.email FROM PUBLIC;
+                CREATE TYPE dd_role_obs.status AS ENUM ('active', 'closed');
+                ALTER TYPE dd_role_obs.status OWNER TO dd_role_obs_owner;
+                GRANT USAGE ON TYPE dd_role_obs.status TO dd_role_obs_reader;
+                CREATE TYPE dd_role_obs.address AS (street text, city text);
+                ALTER TYPE dd_role_obs.address OWNER TO dd_role_obs_owner;
+                CREATE TYPE dd_role_obs.floatrange AS RANGE (subtype = float8);
+                ALTER TYPE dd_role_obs.floatrange OWNER TO dd_role_obs_owner;
                 CREATE TABLE dd_role_obs.patients (id integer, name text, ssn text, retired text);
                 ALTER TABLE dd_role_obs.patients OWNER TO dd_role_obs_owner;
                 GRANT SELECT ON dd_role_obs.patients TO dd_role_obs_member;
@@ -409,6 +419,7 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         'materialized_view',
         'sequence',
         'table',
+        'type',
         'view',
     }
     if check.version >= V10:
@@ -568,7 +579,10 @@ def test_collect_roles_names_routines_by_input_types(integration_check, roles_in
         return {
             (row['object_type'], row['object_name'])
             for row in privilege_event[array_name]
-            if row['schema_name'] == 'dd_role_obs' and row['object_type'] in ('function', 'procedure', 'aggregate')
+            if row['schema_name'] == 'dd_role_obs'
+            and row['object_type'] in ('function', 'procedure', 'aggregate')
+            # Postgres creates constructor functions for the fixture's range type and, from 14, its multirange.
+            and not row['object_name'].startswith(('floatrange(', 'floatmultirange('))
         }
 
     granted = {('function', 'item_stats(integer)'), ('aggregate', 'item_total(integer)')}
@@ -694,6 +708,36 @@ def test_collect_roles_column_privileges(integration_check, roles_instance, role
         ('id', 'dd_role_obs_reader', 'SELECT'),
         ('name', 'dd_role_obs_reader', 'SELECT'),
         ('name', 'dd_role_obs_reader', 'UPDATE'),
+    }
+
+
+def test_collect_roles_type_privileges(integration_check, roles_instance, role_catalog, aggregator):
+    """User-defined types are collected with their explicit grants, so `ON TYPES` default privileges have objects.
+
+    Types Postgres creates implicitly, such as a table's row type, array types, and multiranges, are not reported.
+    """
+    check = integration_check(roles_instance)
+
+    run_one_check(check)
+
+    metadata = aggregator.get_event_platform_events('dbm-metadata')
+    privilege_event = next(event for event in metadata if event['kind'] == 'pg_role_privileges')
+    role_name = {v: k for k, v in _role_oids(next(e for e in metadata if e['kind'] == 'pg_roles')).items()}
+
+    assert {
+        obj['object_name']: obj['has_default_acl']
+        for obj in privilege_event['objects']
+        if obj['schema_name'] == 'dd_role_obs' and obj['object_type'] == 'type'
+    } == {'email': False, 'status': False, 'address': True, 'floatrange': True}
+    assert {
+        (privilege['object_name'], role_name[privilege['grantee_oid']], privilege['privilege'])
+        for privilege in privilege_event['object_privileges']
+        if privilege['schema_name'] == 'dd_role_obs' and privilege['object_type'] == 'type'
+    } == {
+        ('email', 'dd_role_obs_owner', 'USAGE'),
+        ('status', 'dd_role_obs_owner', 'USAGE'),
+        ('status', 'PUBLIC', 'USAGE'),
+        ('status', 'dd_role_obs_reader', 'USAGE'),
     }
 
 

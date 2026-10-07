@@ -226,6 +226,43 @@ FROM (
 
     UNION ALL
 
+    SELECT 'type'::text AS object_type,
+           namespace.nspname::text AS schema_name,
+           type.typname::text AS object_name,
+           ''::text AS column_name,
+           acl.grantee::bigint AS grantee_oid,
+           acl.grantor::bigint AS grantor_oid,
+           acl.privilege_type::text AS privilege,
+           acl.is_grantable AS is_grantable,
+           type.typowner::bigint AS owner_oid
+    FROM pg_catalog.pg_type AS type
+    JOIN pg_catalog.pg_namespace AS namespace
+      ON namespace.oid = type.typnamespace
+    CROSS JOIN LATERAL pg_catalog.aclexplode(type.typacl) AS acl
+    -- Base, composite, domain, enum, and range types; multiranges and pseudo-types are created by Postgres.
+    WHERE type.typtype IN ('b', 'c', 'd', 'e', 'r')
+      -- Composite types that are a table's or view's row type belong to that relation.
+      AND (
+          type.typrelid = 0
+          OR EXISTS (
+              SELECT 1
+              FROM pg_catalog.pg_class AS relation
+              WHERE relation.oid = type.typrelid
+                AND relation.relkind = 'c'
+          )
+      )
+      -- Array types are created alongside each type.
+      AND NOT EXISTS (
+          SELECT 1
+          FROM pg_catalog.pg_type AS element
+          WHERE element.typarray = type.oid
+      )
+      AND namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
+      AND namespace.nspname NOT LIKE 'pg_toast%'
+      AND namespace.nspname NOT LIKE 'pg_temp%'
+
+    UNION ALL
+
     SELECT CASE {routine_kind}
                WHEN 'p' THEN 'procedure'
                WHEN 'a' THEN 'aggregate'
@@ -327,6 +364,41 @@ FROM (
            namespace.nspacl IS NULL AS has_default_acl
     FROM pg_catalog.pg_namespace AS namespace
     WHERE namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
+      AND namespace.nspname NOT LIKE 'pg_toast%'
+      AND namespace.nspname NOT LIKE 'pg_temp%'
+
+    UNION ALL
+
+    SELECT 'type'::text AS object_type,
+           namespace.nspname::text AS schema_name,
+           type.typname::text AS object_name,
+           type.oid::bigint AS object_oid,
+           type.typowner::bigint AS owner_oid,
+           false AS is_security_definer,
+           false AS security_invoker,
+           type.typacl IS NULL AS has_default_acl
+    FROM pg_catalog.pg_type AS type
+    JOIN pg_catalog.pg_namespace AS namespace
+      ON namespace.oid = type.typnamespace
+    -- Base, composite, domain, enum, and range types; multiranges and pseudo-types are created by Postgres.
+    WHERE type.typtype IN ('b', 'c', 'd', 'e', 'r')
+      -- Composite types that are a table's or view's row type belong to that relation.
+      AND (
+          type.typrelid = 0
+          OR EXISTS (
+              SELECT 1
+              FROM pg_catalog.pg_class AS relation
+              WHERE relation.oid = type.typrelid
+                AND relation.relkind = 'c'
+          )
+      )
+      -- Array types are created alongside each type.
+      AND NOT EXISTS (
+          SELECT 1
+          FROM pg_catalog.pg_type AS element
+          WHERE element.typarray = type.oid
+      )
+      AND namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
       AND namespace.nspname NOT LIKE 'pg_toast%'
       AND namespace.nspname NOT LIKE 'pg_temp%'
 
