@@ -123,7 +123,7 @@ def test_query_metrics(
 
         # Once resolved, subsequent executions keep their deltas without fetching the text again.
         with patch.object(
-            check._query_metrics, '_fetch_query_texts', wraps=check._query_metrics._fetch_query_texts
+            check._query_metrics, '_fetch_statement_texts', wraps=check._query_metrics._fetch_statement_texts
         ) as fetch:
             dd_run_check(check)
             execute_query()
@@ -162,7 +162,7 @@ def test_query_text_lookup_matches_lifetime(instance: dict, monkeypatch: pytest.
             ibm_db.free_stmt(cursor)
             cursor = ibm_db.prepare(
                 conn,
-                query_metrics.QUERY_METRICS + '\nWHERE VARCHAR(STMT_TEXT, 1000) = ?',
+                query_metrics.STATEMENT_COUNTERS_QUERY + '\nWHERE VARCHAR(STMT_TEXT, 1000) = ?',
             )
             try:
                 ibm_db.execute(cursor, (query,))
@@ -174,6 +174,6 @@ def test_query_text_lookup_matches_lifetime(instance: dict, monkeypatch: pytest.
                 ibm_db.free_stmt(cursor)
         member, executable_id, inserted = next(iter(expected))
         stale_key = (member, executable_id, inserted - timedelta(seconds=1))
-        assert collector._fetch_query_texts(set(expected) | {stale_key}) == expected
+        assert collector._fetch_statement_texts(set(expected) | {stale_key}) == expected
     finally:
         collector.shutdown()

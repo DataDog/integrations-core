@@ -30,7 +30,7 @@ NANOSECONDS_PER_MILLISECOND = 1_000_000
 NANOSECONDS_PER_MICROSECOND = 1_000
 OBFUSCATION_OPTIONS = to_native_string(json.dumps({'obfuscation_mode': 'obfuscate_and_normalize', 'dbms': 'ibm_db2'}))
 
-QUERY_METRICS = """
+STATEMENT_COUNTERS_QUERY = """
 /* DDIGNORE */
 SELECT MEMBER, EXECUTABLE_ID, INSERT_TIMESTAMP,
        NUM_COORD_EXEC_WITH_METRICS AS "count", COORD_STMT_EXEC_TIME AS "time",
@@ -38,7 +38,7 @@ SELECT MEMBER, EXECUTABLE_ID, INSERT_TIMESTAMP,
 FROM TABLE(SYSPROC.MON_GET_PKG_CACHE_STMT(NULL, NULL, NULL, -1))
 """
 
-QUERY_TEXT = """
+STATEMENT_TEXT_LOOKUP_QUERY = """
 SELECT MEMBER, EXECUTABLE_ID, INSERT_TIMESTAMP, STMT_TEXT
 FROM TABLE(SYSPROC.MON_GET_PKG_CACHE_STMT(NULL, CAST(? AS VARCHAR(32) FOR BIT DATA), NULL, CAST(? AS INTEGER)))
 WHERE INSERT_TIMESTAMP = ?
@@ -51,7 +51,7 @@ def statement_key(row: dict) -> StatementKey:
     return row['member'], row['executable_id'], row['insert_timestamp']
 
 
-def classify_query_text(text: str) -> TextKind:
+def classify_statement_text(text: str) -> TextKind:
     return TextKind.EXCLUDED if text.lstrip().startswith('/* DDIGNORE */') else TextKind.STATEMENT
 
 
@@ -79,7 +79,7 @@ class QueryMetricsCollector(DBMAsyncJob):
 
     def run_job(self) -> None:
         connection = self._connection.ensure_connected()
-        cursor = ibm_db.prepare(connection, QUERY_METRICS, {ibm_db.SQL_ATTR_QUERY_TIMEOUT: 10})
+        cursor = ibm_db.prepare(connection, STATEMENT_COUNTERS_QUERY, {ibm_db.SQL_ATTR_QUERY_TIMEOUT: 10})
         try:
             ibm_db.execute(cursor)
             snapshot = []
@@ -94,8 +94,8 @@ class QueryMetricsCollector(DBMAsyncJob):
             self._obfuscation_lookup,
             live_keys={statement_key(row) for row in snapshot},
             changed_keys=delta.changed_keys,
-            fetch_texts=self._fetch_query_texts,
-            classify=classify_query_text,
+            fetch_texts=self._fetch_statement_texts,
+            classify=classify_statement_text,
         )
         self._check.log.debug('Query text resolution: %s', resolved.stats)
         rows_by_signature: dict[str, dict] = {}
@@ -135,10 +135,10 @@ class QueryMetricsCollector(DBMAsyncJob):
             }
             self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
 
-    def _fetch_query_texts(self, keys: set[StatementKey]) -> dict[StatementKey, str]:
+    def _fetch_statement_texts(self, keys: set[StatementKey]) -> dict[StatementKey, str]:
         texts = {}
         for batch in batched(sorted(keys), TEXT_FETCH_BATCH_SIZE, strict=False):
-            query = '/* DDIGNORE */\n' + '\nUNION ALL\n'.join(QUERY_TEXT for _ in batch)
+            query = '/* DDIGNORE */\n' + '\nUNION ALL\n'.join(STATEMENT_TEXT_LOOKUP_QUERY for _ in batch)
             params = tuple(
                 value
                 for member, executable_id, inserted in batch
