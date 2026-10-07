@@ -135,6 +135,7 @@ WHERE default_acl.defaclobjtype IN ('r', 'S', 'f', 'T', 'n')
 """
 
 
+# Rows carry no owner: every object they refer to is in `objects`, from the same snapshot, with its `owner_oid`.
 # Only explicitly stored ACLs are collected. An object with a NULL ACL has the compiled-in default privileges for
 # its type and owner; it is reported in `objects` with `has_default_acl` so the backend can resolve them, rather
 # than shipping the same owner and PUBLIC rows for every untouched object.
@@ -148,8 +149,7 @@ SELECT privileges.object_type,
        privileges.grantee_oid,
        privileges.grantor_oid,
        privileges.privilege,
-       privileges.is_grantable,
-       privileges.owner_oid
+       privileges.is_grantable
 FROM (
     SELECT CASE relation.relkind
                WHEN 'r' THEN 'table'
@@ -165,8 +165,7 @@ FROM (
            acl.grantee::bigint AS grantee_oid,
            acl.grantor::bigint AS grantor_oid,
            acl.privilege_type::text AS privilege,
-           acl.is_grantable AS is_grantable,
-           relation.relowner::bigint AS owner_oid
+           acl.is_grantable AS is_grantable
     FROM pg_catalog.pg_class AS relation
     JOIN pg_catalog.pg_namespace AS namespace
       ON namespace.oid = relation.relnamespace
@@ -191,8 +190,7 @@ FROM (
            acl.grantee::bigint AS grantee_oid,
            acl.grantor::bigint AS grantor_oid,
            acl.privilege_type::text AS privilege,
-           acl.is_grantable AS is_grantable,
-           relation.relowner::bigint AS owner_oid
+           acl.is_grantable AS is_grantable
     FROM pg_catalog.pg_attribute AS attribute
     JOIN pg_catalog.pg_class AS relation
       ON relation.oid = attribute.attrelid
@@ -216,8 +214,7 @@ FROM (
            acl.grantee::bigint AS grantee_oid,
            acl.grantor::bigint AS grantor_oid,
            acl.privilege_type::text AS privilege,
-           acl.is_grantable AS is_grantable,
-           namespace.nspowner::bigint AS owner_oid
+           acl.is_grantable AS is_grantable
     FROM pg_catalog.pg_namespace AS namespace
     CROSS JOIN LATERAL pg_catalog.aclexplode(namespace.nspacl) AS acl
     WHERE namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
@@ -233,8 +230,7 @@ FROM (
            acl.grantee::bigint AS grantee_oid,
            acl.grantor::bigint AS grantor_oid,
            acl.privilege_type::text AS privilege,
-           acl.is_grantable AS is_grantable,
-           type.typowner::bigint AS owner_oid
+           acl.is_grantable AS is_grantable
     FROM pg_catalog.pg_type AS type
     JOIN pg_catalog.pg_namespace AS namespace
       ON namespace.oid = type.typnamespace
@@ -279,8 +275,7 @@ FROM (
            acl.grantee::bigint AS grantee_oid,
            acl.grantor::bigint AS grantor_oid,
            acl.privilege_type::text AS privilege,
-           acl.is_grantable AS is_grantable,
-           routine.proowner::bigint AS owner_oid
+           acl.is_grantable AS is_grantable
     FROM pg_catalog.pg_proc AS routine
     JOIN pg_catalog.pg_namespace AS namespace
       ON namespace.oid = routine.pronamespace
@@ -299,8 +294,7 @@ FROM (
            acl.grantee::bigint AS grantee_oid,
            acl.grantor::bigint AS grantor_oid,
            acl.privilege_type::text AS privilege,
-           acl.is_grantable AS is_grantable,
-           database.datdba::bigint AS owner_oid
+           acl.is_grantable AS is_grantable
     FROM pg_catalog.pg_database AS database
     CROSS JOIN LATERAL pg_catalog.aclexplode(database.datacl) AS acl
     WHERE database.datname = current_database()

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import contextlib
 import json
+from collections import Counter
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import psycopg
@@ -346,7 +347,6 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         'grantor_oid',
         'privilege',
         'is_grantable',
-        'owner_oid',
     }
     assert set(privilege_event['objects'][0]) == {
         'object_type',
@@ -358,6 +358,14 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
         'security_invoker',
         'has_default_acl',
     }
+    # Privilege rows carry no owner; the backend takes it from the object, so every row must have exactly one.
+    object_counts = Counter(
+        (obj['object_type'], obj['schema_name'], obj['object_name']) for obj in privilege_event['objects']
+    )
+    assert {
+        object_counts[(privilege['object_type'], privilege['schema_name'], privilege['object_name'])]
+        for privilege in privilege_event['object_privileges']
+    } == {1}
     assert set(privilege_event['default_privileges'][0]) == {
         'owner_oid',
         'schema_name',
