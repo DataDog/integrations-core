@@ -2,15 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from contextlib import ExitStack
 
 import pytest
-import yaml
 
 from datadog_checks.dev import get_here, run_command
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.kind import kind_run
-from datadog_checks.dev.kube_port_forward import port_forward
 
 HERE = get_here()
 KUBEVIRT_VERSION = "v1.2.2"
@@ -18,10 +15,10 @@ KUBEVIRT_VERSION = "v1.2.2"
 
 def setup_kubevirt():
     # deploy the KubeVirt operator
-    run_command(["kubectl", "create", "-f", os.path.join(HERE, "kind", "kubevirt-operator.yaml")])
+    run_command(["kubectl", "create", "-f", os.path.join(HERE, "kind", "kubevirt-operator.yaml")], check=True)
 
     # deploy the KubeVirt Custom Resource Definitions
-    run_command(["kubectl", "create", "-f", os.path.join(HERE, "kind", "kubevirt-cr.yaml")])
+    run_command(["kubectl", "create", "-f", os.path.join(HERE, "kind", "kubevirt-cr.yaml")], check=True)
 
     # wait for kubevirt deployment
     run_command(
@@ -32,8 +29,9 @@ def setup_kubevirt():
             "-n",
             "kubevirt",
             "--for=jsonpath={.status.phase}=Deployed",
-            "--timeout=2m",
-        ]
+            "--timeout=5m",
+        ],
+        check=True,
     )
 
     # enable nested virtualization
@@ -48,34 +46,43 @@ def setup_kubevirt():
             "--type=merge",
             "--patch",
             '{"spec":{"configuration":{"developerConfiguration":{"useEmulation":true}}}}',
-        ]
+        ],
+        check=True,
     )
 
     # deploy a VirtualMachine instance
-    run_command(["kubectl", "apply", "-f", os.path.join(HERE, "kind", "vm.yaml")])
-    run_command(["kubectl", "patch", "virtualmachine", "testvm", "--type", "merge", "-p", '{"spec":{"running":true}}'])
+    run_command(["kubectl", "apply", "-f", os.path.join(HERE, "kind", "vm.yaml")], check=True)
+    run_command(
+        ["kubectl", "patch", "virtualmachine", "testvm", "--type", "merge", "-p", '{"spec":{"running":true}}'],
+        check=True,
+    )
+
+    # allow the in-cluster E2E Agent to list VMs and VMIs
+    run_command(
+        [
+            "kubectl",
+            "create",
+            "clusterrolebinding",
+            "ddev-agent-kubevirt-view",
+            "--clusterrole=kubevirt.io:view",
+            "--serviceaccount=ddev-agent:ddev-agent",
+        ],
+        check=True,
+    )
 
 
 @pytest.fixture(scope="session")
 def dd_environment():
-    with kind_run(conditions=[setup_kubevirt], sleep=10) as kubeconfig, ExitStack() as stack:
-        kubeconfig_content = None
-
-        with open(kubeconfig, "r") as f:
-            kubeconfig_content = yaml.safe_load(f)
-
+    with kind_run(conditions=[setup_kubevirt], sleep=10) as kubeconfig:
         instance = {}
 
-        host, port = stack.enter_context(port_forward(kubeconfig, "kubevirt", 443, "service", "virt-api"))
-
-        instance["kubevirt_api_metrics_endpoint"] = f"https://{host}:{port}/metrics"
-        instance["kubevirt_api_healthz_endpoint"] = f"https://{host}:{port}/healthz"
+        instance["kubevirt_api_metrics_endpoint"] = "https://virt-api.kubevirt.svc:443/metrics"
+        instance["kubevirt_api_healthz_endpoint"] = "https://virt-api.kubevirt.svc:443/healthz"
         instance["kube_namespace"] = "kubevirt"
         instance["kube_pod_name"] = "virt-api-98cf864cc-zkgcd"
-        instance["kube_config_dict"] = kubeconfig_content
         instance["tls_verify"] = "false"
 
-        yield {"instances": [instance]}
+        yield {"instances": [instance]}, {"agent_type": "kubernetes", "kubernetes": {"kubeconfig": kubeconfig}}
 
 
 @pytest.fixture
