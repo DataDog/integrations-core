@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 38.4.0 / 2026-10-06
+
+***Security***:
+
+* Bump pyjwt to 2.14.0. ([#25510](https://github.com/DataDog/integrations-core/pull/25510))
+* Bump urllib3 to 2.8.0. ([#25514](https://github.com/DataDog/integrations-core/pull/25514))
+
 ## 38.3.1 / 2026-09-03
 
 ***Fixed***:
