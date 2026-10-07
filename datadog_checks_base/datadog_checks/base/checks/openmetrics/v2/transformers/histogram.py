@@ -12,9 +12,10 @@ def get_histogram(check, metric_name, modifiers, global_options):
     https://prometheus.io/docs/concepts/metric_types/#histogram
     https://github.com/OpenObservability/OpenMetrics/blob/master/specification/OpenMetrics.md#histogram-1
     """
+    logger = check.log
+
     if global_options['collect_histogram_buckets']:
         if global_options['histogram_buckets_as_distributions']:
-            logger = check.log
             submit_histogram_bucket_method = check.submit_histogram_bucket
 
             if global_options['collect_counters_with_distributions']:
@@ -25,7 +26,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                 def histogram(metric, sample_data, runtime_data):
                     flush_first_value = runtime_data['flush_first_value']
 
-                    for sample, tags, hostname in decumulate_histogram_buckets(sample_data):
+                    for sample, tags, hostname in decumulate_histogram_buckets(sample_data, logger, metric_name):
                         sample_name = sample.name
                         if sample_name.endswith('_sum'):
                             monotonic_count_method(
@@ -54,6 +55,11 @@ def get_histogram(check, metric_name, modifiers, global_options):
                                 )
                                 continue
 
+                            if math.isinf(lower_bound):
+                                # the agent drops buckets with an infinite bound; collapse the open-ended bottom
+                                # bucket to its upper bound, as the agent already does for the +Inf top bucket
+                                lower_bound = upper_bound
+
                             submit_histogram_bucket_method(
                                 metric_name,
                                 sample.value,
@@ -70,7 +76,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                 def histogram(metric, sample_data, runtime_data):
                     flush_first_value = runtime_data['flush_first_value']
 
-                    for sample, tags, hostname in decumulate_histogram_buckets(sample_data):
+                    for sample, tags, hostname in decumulate_histogram_buckets(sample_data, logger, metric_name):
                         if not sample.name.endswith('_bucket'):
                             continue
 
@@ -83,6 +89,11 @@ def get_histogram(check, metric_name, modifiers, global_options):
                                 'Metric: %s has bucket boundaries equal, skipping: %s', metric_name, sample.labels
                             )
                             continue
+
+                        if math.isinf(lower_bound):
+                            # the agent drops buckets with an infinite bound; collapse the open-ended bottom
+                            # bucket to its upper bound, as the agent already does for the +Inf top bucket
+                            lower_bound = upper_bound
 
                         submit_histogram_bucket_method(
                             metric_name,
@@ -106,7 +117,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                 def histogram(metric, sample_data, runtime_data):
                     flush_first_value = runtime_data['flush_first_value']
 
-                    for sample, tags, hostname in decumulate_histogram_buckets(sample_data):
+                    for sample, tags, hostname in decumulate_histogram_buckets(sample_data, logger, metric_name):
                         sample_name = sample.name
                         if sample_name.endswith('_sum'):
                             monotonic_count_method(

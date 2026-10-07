@@ -129,6 +129,7 @@ gpu.remapped_rows.correctable,gauge,16,,,Number of rows remapped due to correcta
 gpu.remapped_rows.failed,gauge,16,,,Whether row remapping has failed. This value reflects the current remapping status reported by NVML.,0,gpu,remapped_rows.failed,,
 gpu.remapped_rows.pending,gauge,16,,,Whether row remapping is pending. This value reflects the current remapping status reported by NVML.,0,gpu,remapped_rows.pending,,
 gpu.remapped_rows.uncorrectable,gauge,16,,,Number of rows remapped due to uncorrectable errors. The counter reports the device lifetime total reported by NVML.,0,gpu,remapped_rows.uncorrectable,,
+gpu.retired_pages,gauge,16,,,"Number of GPU memory pages retired, or pending retirement, after a double-bit ECC error or multiple single-bit ECC errors, as reported by NVML. Pending retirements take effect after the next driver reload. A growing count can indicate degrading GPU memory. Tagged by retirement cause (multiple_single_bit or double_bit). Only for datacenter GPUs from Kepler to Turing.",0,gpu,retired_pages,,
 gpu.slowdown_temperature,gauge,16,degree celsius,,Slowdown temperature,0,gpu,slowdown_temperature,,
 gpu.sm_active,gauge,16,percent,,Percentage of time the streaming multiprocessor was active,0,gpu,sm_active,,
 gpu.sm_occupancy,gauge,16,percent,,Percentage of the Streaming Multiprocessors that were active in the interval,0,gpu,sm_occupancy,,
@@ -136,3 +137,4 @@ gpu.sm_utilization,gauge,16,percent,,Percentage of the Streaming Multiprocessors
 gpu.temperature,gauge,16,degree celsius,,Temperature of the GPU device,0,gpu,temperature,,
 gpu.tensor_active,gauge,16,percent,,Percentage of the time that the tensor calculation engine was active. Only for Hopper and newer GPUs,0,gpu,tensor_active,,
 gpu.total_energy_consumption,gauge,16,millijoule,,Total energy consumed by the device since the driver was reloaded,0,gpu,total_energy_consumption,,
+gpu.vgpu.license_status,gauge,16,,,"Whether the vGPU software license for the device's enabled product is active (1) or inactive (0), as reported by NVML from inside the guest VM. An inactive license exposes the workload to driver performance limitations but does not by itself indicate that throttling is in effect. Tagged with vgpu_product. Only emitted for vGPU devices that support vGPU software licensing.",0,gpu,vgpu.license_status,,

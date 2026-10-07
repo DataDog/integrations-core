@@ -30,6 +30,10 @@ validations = [
     "qa-label"
 ]
 
+# GitHub organization that owns this repository, used for GitHub API operations. Defaults to `DataDog`.
+[github]
+owner = "DataDog"
+
 [overrides.display-name]
 datadog_checks_base = "Datadog Checks Base"
 datadog_checks_dev = "Datadog Checks Dev"
@@ -219,6 +223,9 @@ exclude = [
     'pysnmp',          # Breaking snmp tests
     'aerospike',       # v8+ breaks agent build.
     'confluent-kafka',
+    # Newer drivers query system.settings.readonly, which ClickHouse 18 lacks.
+    # Remove once https://datadoghq.atlassian.net/browse/DBMON-6930 is resolved.
+    'clickhouse-connect',
     # https://github.com/DataDog/integrations-core/pull/16080
     'lxml',
     'psutil',
