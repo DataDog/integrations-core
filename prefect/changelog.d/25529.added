@@ -1,1 +1,4 @@
-Add concurrency limit metrics for global and task run concurrency limits, a `flow_name` tag wherever `flow_id` is set, and a `flow_names` option to filter by flow.
+Improve Prefect monitoring:
+- Add concurrency limit metrics for global and task run concurrency limits.
+- Add `flow_name` and `prefect_tag` (one per deployment tag) tags to deployment, flow run and task run metrics.
+- Add a `flow_names` option to filter by flow.

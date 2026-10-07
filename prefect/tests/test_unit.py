@@ -58,6 +58,7 @@ TAGS_F1 = [
     "deployment_name:deployment-1",
     "flow_id:f-1",
     "flow_name:flow-1",
+    "prefect_tag:tag-1",
 ]
 
 TAGS_F2 = [
@@ -477,6 +478,7 @@ ALL_METRIC_CASES = [
             "deployment_name:deployment-1",
             "flow_id:f-1",
             "flow_name:flow-1",
+            "prefect_tag:tag-1",
             "work_pool_name:default-pool",
             "work_pool_id:wp-1",
             "work_queue_name:default-queue",

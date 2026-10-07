@@ -238,6 +238,7 @@
       "id": "d-1",
       "name": "deployment-1",
       "flow_id": "f-1",
+      "tags": ["tag-1"],
       "work_pool_name": "default-pool",
       "work_queue_name": "default-queue",
       "status": "READY",

@@ -45,6 +45,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         self.queues_by_name = {}
         self.pools_by_name = {}
         self.deployments_by_id = {}
+        self.deployment_tags_by_id: dict[str, list[str]] = {}
         self.flows_by_id: dict[str, str] = {}
         self.completed_flow_runs: set[str] = set()
 
@@ -140,6 +141,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         self.queues_by_name = {}
         self.pools_by_name = {}
         self.deployments_by_id = {}
+        self.deployment_tags_by_id = {}
         self.flows_by_id = {}
 
         try:
@@ -324,6 +326,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         # the mapping needs to happen before filtering to ensure that flow_runs have the correct deployment name
         for d in all_deployments:
             self.deployments_by_id[d.get('id', '')] = d.get('name', '')
+            self.deployment_tags_by_id[d.get('id', '')] = [f"prefect_tag:{t}" for t in d.get('tags') or []]
 
         deployments = self.filter_metrics.filter_deployments(all_deployments, self.flows_by_id)
 
@@ -342,6 +345,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                     )
                 }",
                 f"is_paused:{d.get('paused', '')}",
+                *self.deployment_tags_by_id.get(d.get('id', ''), []),
             ]
 
             self._clean_and_emit_metric("deployment.is_ready", 1.0 if d.get('status', '') == 'READY' else 0.0, dtags)
@@ -380,6 +384,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             f"deployment_name:{d_name}",
             f"flow_id:{fr.get('flow_id', '')}",
             f"flow_name:{self.flows_by_id.get(fr.get('flow_id', ''), '')}",
+            *self.deployment_tags_by_id.get(d_id, []),
         ]
         if fr_id not in self.flow_runs_tags:
             self.flow_runs_tags[fr_id] = tuple(sorted(fr_tags))
@@ -568,7 +573,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                 return
             retry_gap = (event.occurred - await_retry_timestamp).total_seconds()
 
-            flow_run_tags = event.flow_tags
+            flow_run_tags = event.flow_tags + self._deployment_tags(event)
             self._clean_and_emit_metric("flow_runs.retry_gaps_duration", retry_gap, flow_run_tags)
 
     def _collect_task_run_metrics_from_events(self, event: Event) -> None:
@@ -580,7 +585,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             return
 
         state_type = event.state_type
-        task_tags = sorted(event.task_tags)
+        task_tags = sorted(event.task_tags + self._deployment_tags(event))
 
         terminal_state_metrics = {
             "task_runs.cancelled.count": {'CANCELLED'},
@@ -631,7 +636,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
 
                 last_dep_finished = max(parsed_times) if parsed_times else None
 
-                task_tags = event.task_tags
+                task_tags = event.task_tags + self._deployment_tags(event)
                 if last_dep_finished and event.occurred:
                     self._clean_and_emit_metric(
                         "task_runs.dependency_wait_duration",
@@ -642,6 +647,9 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                     self.log.error(
                         "Could not find last dependency finished time or occurred time for event %s", event.id
                     )
+
+    def _deployment_tags(self, event: Event) -> list[str]:
+        return self.deployment_tags_by_id.get(event.event_related.get('deployment', {}).get('id', ''), [])
 
     def _emit_aggregated_metrics(self):
         """

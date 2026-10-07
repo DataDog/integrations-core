@@ -13,6 +13,7 @@ pull: []
 deployments:
   - name: sample-deploy
     entrypoint: scripts/sample_flow.py:sample_flow
+    tags: [sample-flow]
     work_pool:
       name: local-pool
     schedules:
@@ -21,6 +22,7 @@ deployments:
 
   - name: sample-deploy-2
     entrypoint: scripts/failing_flow.py:failing_flow
+    tags: [failing-flow]
     work_pool:
       name: local-pool
     schedules:
