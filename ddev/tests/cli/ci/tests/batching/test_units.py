@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import logging
+from functools import partial
 
 import pytest
 
@@ -11,12 +11,17 @@ from ddev.cli.ci.tests.batching.exceptions import PlanningError
 from ddev.cli.ci.tests.batching.units import (
     TargetDefinition,
     TestUnit,
-    expand_test_units,
     normalize_job_name,
     resolve_platforms,
 )
+from ddev.cli.ci.tests.batching.units import (
+    expand_test_units as _expand_test_units,
+)
 from ddev.utils.platform import PlatformName
 from tests.cli.ci.tests.helpers import env
+from tests.helpers.monitoring import RecordingJsonHandler, make_monitor
+
+expand_test_units = partial(_expand_test_units, monitor=make_monitor('planner'))
 
 
 @pytest.mark.parametrize(
@@ -103,18 +108,19 @@ def test_expand_rejects_a_target_with_no_environments():
         expand_test_units([TargetDefinition("postgres")])
 
 
-def test_expand_warns_and_plans_nothing_for_a_platform_no_environment_covers(caplog: pytest.LogCaptureFixture):
+def test_expand_warns_and_plans_nothing_for_a_platform_no_environment_covers():
     target = TargetDefinition(
         "sqlserver",
         platforms=(PlatformName.LINUX, PlatformName.WINDOWS),
         environments=(env("py3.13-linux", platform=PlatformName.LINUX),),
     )
+    handler = RecordingJsonHandler()
 
-    with caplog.at_level(logging.WARNING, logger="ddev.cli.ci.tests.batching.units"):
-        units = expand_test_units([target])
+    units = expand_test_units([target], monitor=make_monitor('planner', handler=handler))
 
     assert [unit.platform for unit in units] == [PlatformName.LINUX]
-    assert "sqlserver runs on windows but no environment tests it" in caplog.text
+    [event] = handler.events
+    assert event['event'] == "sqlserver runs on windows but no environment tests it"
 
 
 def test_expand_environment_named_after_its_target_does_not_repeat_in_the_name():

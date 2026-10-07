@@ -189,6 +189,51 @@ ray_vllm:request_generation_tokens_sum{Component="core_worker",NodeAddress="10.1
 # HELP ray_vllm:avg_generation_throughput_toks_per_s Average generation throughput in tokens/s.
 # TYPE ray_vllm:avg_generation_throughput_toks_per_s gauge
 ray_vllm:avg_generation_throughput_toks_per_s{model_name="facebook/opt-125m"} 0.0
+# HELP ray_vllm:estimated_flops_per_gpu_total Estimated floating-point operations per GPU.
+# TYPE ray_vllm:estimated_flops_per_gpu_total counter
+ray_vllm:estimated_flops_per_gpu_total{model_name="facebook/opt-125m"} 1000000
+# HELP ray_vllm:external_prefix_cache_hits_total External prefix cache hits in tokens.
+# TYPE ray_vllm:external_prefix_cache_hits_total counter
+ray_vllm:external_prefix_cache_hits_total{model_name="facebook/opt-125m"} 8
+# HELP ray_vllm:external_prefix_cache_queries_total External prefix cache queries in tokens.
+# TYPE ray_vllm:external_prefix_cache_queries_total counter
+ray_vllm:external_prefix_cache_queries_total{model_name="facebook/opt-125m"} 10
+# HELP ray_vllm:prompt_tokens_cached_total Number of cached prompt tokens.
+# TYPE ray_vllm:prompt_tokens_cached_total counter
+ray_vllm:prompt_tokens_cached_total{model_name="facebook/opt-125m"} 8
+# HELP ray_vllm:request_decode_time_seconds Decode time per request.
+# TYPE ray_vllm:request_decode_time_seconds histogram
+ray_vllm:request_decode_time_seconds_bucket{le="1.0",model_name="facebook/opt-125m"} 1
+ray_vllm:request_decode_time_seconds_bucket{le="+Inf",model_name="facebook/opt-125m"} 1
+ray_vllm:request_decode_time_seconds_count{model_name="facebook/opt-125m"} 1
+ray_vllm:request_decode_time_seconds_sum{model_name="facebook/opt-125m"} 0.4
+# HELP ray_vllm:request_prefill_kv_computed_tokens New KV tokens computed during prefill.
+# TYPE ray_vllm:request_prefill_kv_computed_tokens histogram
+ray_vllm:request_prefill_kv_computed_tokens_bucket{le="10",model_name="facebook/opt-125m"} 1
+ray_vllm:request_prefill_kv_computed_tokens_bucket{le="+Inf",model_name="facebook/opt-125m"} 1
+ray_vllm:request_prefill_kv_computed_tokens_count{model_name="facebook/opt-125m"} 1
+ray_vllm:request_prefill_kv_computed_tokens_sum{model_name="facebook/opt-125m"} 8
+# HELP ray_vllm:request_prefill_time_seconds Prefill time per request.
+# TYPE ray_vllm:request_prefill_time_seconds histogram
+ray_vllm:request_prefill_time_seconds_bucket{le="1.0",model_name="facebook/opt-125m"} 1
+ray_vllm:request_prefill_time_seconds_bucket{le="+Inf",model_name="facebook/opt-125m"} 1
+ray_vllm:request_prefill_time_seconds_count{model_name="facebook/opt-125m"} 1
+ray_vllm:request_prefill_time_seconds_sum{model_name="facebook/opt-125m"} 0.1
+# HELP ray_vllm:request_queue_time_seconds Queue time per request.
+# TYPE ray_vllm:request_queue_time_seconds histogram
+ray_vllm:request_queue_time_seconds_bucket{le="1.0",model_name="facebook/opt-125m"} 1
+ray_vllm:request_queue_time_seconds_bucket{le="+Inf",model_name="facebook/opt-125m"} 1
+ray_vllm:request_queue_time_seconds_count{model_name="facebook/opt-125m"} 1
+ray_vllm:request_queue_time_seconds_sum{model_name="facebook/opt-125m"} 0.2
+# HELP ray_vllm:spec_decode_num_accepted_tokens_total Accepted speculative tokens.
+# TYPE ray_vllm:spec_decode_num_accepted_tokens_total counter
+ray_vllm:spec_decode_num_accepted_tokens_total{model_name="facebook/opt-125m"} 6
+# HELP ray_vllm:spec_decode_num_accepted_tokens_per_pos_total Accepted tokens per draft position.
+# TYPE ray_vllm:spec_decode_num_accepted_tokens_per_pos_total counter
+ray_vllm:spec_decode_num_accepted_tokens_per_pos_total{model_name="facebook/opt-125m",position="0"} 5
+# HELP ray_vllm:spec_decode_num_draft_tokens_total Draft speculative tokens.
+# TYPE ray_vllm:spec_decode_num_draft_tokens_total counter
+ray_vllm:spec_decode_num_draft_tokens_total{model_name="facebook/opt-125m"} 10
 # HELP ray_vllm:cache_config_info information of cache_config
 # TYPE ray_vllm:cache_config_info gauge
 ray_vllm:cache_config_info{block_size="16",cache_dtype="auto",cpu_kvcache_space_bytes="4294967296",enable_prefix_caching="False",gpu_memory_utilization="0.9",num_cpu_blocks="0",num_gpu_blocks="7281",num_gpu_blocks_override="None",sliding_window="None",swap_space_bytes="4294967296"} 1.0

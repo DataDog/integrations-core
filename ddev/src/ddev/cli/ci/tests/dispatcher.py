@@ -6,12 +6,12 @@
 from __future__ import annotations
 
 import asyncio
-import logging
 from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from ddev.cli.ci.tests.dispatcher_attributes import message_fields
+from ddev.cli.ci.tests.dispatcher_attributes import batch_fields, message_fields, run_fields
+from ddev.cli.ci.tests.execution_metrics import ExecutionOutcome
 from ddev.cli.ci.tests.messages import BatchFinished, BatchProgressUpdate, TestBatch, UpdatePRComment
 from ddev.cli.ci.tests.pr_comment import render_run_summary, summary_line
 from ddev.cli.ci.tests.rate_limiting import RateLimiterFactory
@@ -22,52 +22,24 @@ from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
 from ddev.event_bus.orchestrator import BaseMessage, EventBusOrchestrator, MessageScope
 from ddev.event_bus.shutdown import ShutdownKind, ShutdownRequest
 from ddev.monitoring import ComponentMonitor
+from ddev.monitoring.adapter import ComponentLogAdapter
 from ddev.monitoring.context import MonitorContext
 from ddev.monitoring.runtime import MonitoringRuntime
 from ddev.utils.github_actions import get_workflow_run_url, write_step_summary
 from ddev.utils.rate_limiting import RelaxedRateLimits
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
     from pathlib import Path
 
+    from ddev.cli.ci.dispatch_run import ResolvedRun
     from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
     from ddev.cli.ci.tests.progress import DispatcherProgress
     from ddev.utils.github_async import AsyncGitHubClient
 
-logger = logging.getLogger(__name__)
-
 # A cancelled job gets SIGINT, SIGTERM about 7.5s later, then a hard kill about 2.5s after that, so a
 # cancelled run abandons its pacing: the budget it was rationing outlives the process.
 CANCELLED_RATE_LIMITS = RelaxedRateLimits(max_wait_seconds=2.0, max_rate=10_000.0)
-
-
-@dataclass(frozen=True)
-class DispatcherContext:
-    """The run being tested. `build_dispatcher` consumes part of it; the rest describes the run
-    for the plan header and for the monitoring run context (see `run_fields`).
-
-    `checkout_sha` is the tree tested; `head_sha` is the revision that receives its results.
-    They differ for a pull request and are the same for a branch run.
-    """
-
-    owner: str
-    repo: str
-    checkout_sha: str
-    head_sha: str
-    head_branch: str
-    workflow: str
-    workflow_ref: str
-    base_branch: str | None = None
-    base_sha: str | None = None
-    pr_number: int | None = None
-    tags: tuple[str, ...] = ()
-    pytest_args: str = ''
-    is_fork: bool = False
-
-    @property
-    def concurrency_key(self) -> str:
-        """New PR revisions must cancel old batches, so they key on the PR, not the merge SHA."""
-        return f'pr-{self.pr_number}' if self.pr_number is not None else self.head_sha
 
 
 @dataclass(frozen=True)
@@ -79,22 +51,54 @@ class DispatcherOutcome:
     shutdown: ShutdownRequest | None = None
 
     @property
-    def successful(self) -> bool:
-        """Whether all batches finished without failure and the final report was published.
+    def execution_outcome(self) -> ExecutionOutcome:
+        """The run's single terminal outcome.
 
-        Any shutdown request makes the outcome unsuccessful.
+        Tests only count as failed once the Dispatcher finished every batch and published the final
+        report: a failed batch nobody was told about is a Dispatcher failure. After that a test
+        failure outranks a cancelled batch, and a cancelled batch outranks a pass.
         """
-        return (
-            self.shutdown is None
-            and self.final_report_published
-            and self.progress.done
-            and all(batch.status is not Status.FAILURE for batch in self.progress.batches)
-        )
+        if self.cancelled:
+            return ExecutionOutcome.CANCELLED
+        if self.timed_out:
+            return ExecutionOutcome.TIMED_OUT
+        if self.shutdown is not None or not (self.final_report_published and self.progress.done):
+            return ExecutionOutcome.FAILED
+        if self.progress.has_failure:
+            return ExecutionOutcome.TESTS_FAILED
+        if any(batch.status is Status.CANCELLED for batch in self.progress.batches):
+            return ExecutionOutcome.CANCELLED
+        return ExecutionOutcome.PASSED
+
+    @property
+    def cancelled(self) -> bool:
+        """Whether the run ended by cancellation rather than by finishing or failing."""
+        return self.shutdown is not None and self.shutdown.kind is ShutdownKind.CANCELLED
+
+    @property
+    def timed_out(self) -> bool:
+        """Whether the run ended because its timeout elapsed."""
+        return self.shutdown is not None and self.shutdown.kind is ShutdownKind.TIMED_OUT
 
 
-def message_scope(context: MonitorContext) -> MessageScope:
+def message_scope(context: MonitorContext, batches: Sequence[TestBatch]) -> MessageScope:
+    """Scope each message against the plan, so batch-scoped events resolve one canonical batch by id."""
+    planned = {batch.batch_id: batch for batch in batches}
+
     def scope(message: BaseMessage) -> AbstractContextManager[None]:
-        return context.scope(message_fields(message))
+        fields = {
+            'message_type': type(message).__name__,
+            'message_id': message.id,
+            **message_fields(message),
+        }
+        if isinstance(message, TestBatch | BatchProgressUpdate | BatchFinished):
+            # Progress and results correlate on the stable batch id, so they see the same
+            # canonical batch fields the dispatch did, resolved from the original plan.
+            if (batch := planned.get(message.batch_id)) is not None:
+                fields.update(batch_fields(batch))
+        elif isinstance(message, UpdatePRComment):
+            fields.update(revision=message.revision, done=message.progress.done)
+        return context.scope(fields)
 
     return scope
 
@@ -116,12 +120,11 @@ class Dispatcher(EventBusOrchestrator):
         reporter: TaskRunReporter,
         max_timeout: float | None,
         grace_period: float,
-        run_logger: logging.Logger | None = None,
-        monitor: ComponentMonitor | None = None,
+        monitor: ComponentMonitor,
         message_scope: MessageScope | None = None,
     ):
         super().__init__(
-            run_logger or logger,
+            ComponentLogAdapter(monitor),
             max_timeout=max_timeout,
             grace_period=grace_period,
             message_scope=message_scope,
@@ -163,18 +166,21 @@ class Dispatcher(EventBusOrchestrator):
         self.submit_message(self._gatherer.build_initial_update())
         for batch in self._batches:
             self.submit_message(batch)
-        if self._monitor is None:
-            self._logger.info('Dispatched %s batches', len(self._batches))
-        else:
-            # Queued, not dispatched: the workflows start when the runner's messages are processed.
-            self._monitor.logger.info('Queued planned batches', batch_count=len(self._batches))
+        # Queued, not dispatched: the workflows start when the runner's messages are processed.
+        self._monitor.logger.info('Queued planned batches', plan_batch_count=len(self._batches))
 
     async def on_message_received(self, message: BaseMessage):
-        self._logger.debug("Message received: %s(%s)", type(message).__name__, message.id)
+        self._monitor.logger.debug(
+            'Message received', message_type=type(message).__name__, message_id=message.id, **message_fields(message)
+        )
 
     async def on_finalize(self, exception: Exception | None):
         request = self.shutdown_request
         try:
+            # Processors have drained; report their results even if remote cleanup fails.
+            self._gatherer.report_unfinished(
+                [batch for batch in self._batches if batch.run_id is not None], cancelled=self.cancelled
+            )
             if request is not None:
                 await self._shutdown_cleanup(request)
             progress = self._gatherer.progress
@@ -183,10 +189,7 @@ class Dispatcher(EventBusOrchestrator):
                 final_report_published=self._reporter.final_report_published,
                 shutdown=request,
             )
-            if self._monitor is None:
-                self._logger.info(summary_line(progress, shutdown=request))
-            else:
-                self._monitor.logger.info(summary_line(progress, shutdown=request))
+            self._monitor.logger.info(summary_line(progress, shutdown=request))
             if (body := self._reporter.latest_body) is not None:
                 write_step_summary(render_run_summary(body, pr_comment_failed=self._reporter.pr_comment_failed))
         finally:
@@ -213,59 +216,69 @@ class Dispatcher(EventBusOrchestrator):
 def build_dispatcher(
     *,
     batches: list[TestBatch],
-    context: DispatcherContext,
+    run: ResolvedRun,
     config: DispatcherConfig,
     token: str,
     artifacts_path: Path,
     output_path: Path,
-    run_logger: logging.Logger | None = None,
-    monitoring: MonitoringRuntime | None = None,
+    monitoring: MonitoringRuntime,
+    tags: Sequence[str] = (),
+    pytest_args: str = '',
 ) -> Dispatcher:
-    """Assemble the client, the three tasks and the Dispatcher from a plan and its run context.
+    """Assemble the client, monitored tasks and Dispatcher from a plan and its resolved run.
 
     One HTTP pool is shared by every task. Artifact collection uses its own local bucket;
-    all buckets share the provider's budget and pauses.
-
-    The caller owns ``monitoring``; omitting it retains stdlib logging.
+    all buckets share the provider's budget and pauses. The caller owns `monitoring`; each
+    processor reports its own metrics through the monitor it is given.
     """
+    from ddev.cli.ci.tests.github_monitor import GitHubMonitor
     from ddev.utils.github_async import AsyncGitHubClient
 
-    def view(name: str) -> ComponentMonitor | None:
-        return monitoring.component(name) if monitoring is not None else None
-
-    active_logger = run_logger or logger
+    client_monitor = monitoring.component('github-async')
+    client_logger = ComponentLogAdapter(client_monitor)
+    github_monitor = GitHubMonitor(client_monitor)
     integrations = frozenset(integration for batch in batches for integration in batch.integrations)
-    rate_limiters = RateLimiterFactory(config.github_rate_limits, active_logger)
-    client = AsyncGitHubClient(token, rate_limiter=rate_limiters.get_limiter(integrations))
+    rate_limiters = RateLimiterFactory(
+        config.github_rate_limits, client_logger, on_event=github_monitor.rate_limit_event
+    )
+    client = AsyncGitHubClient(
+        token,
+        rate_limiter=rate_limiters.get_limiter(integrations),
+        logger=client_logger,
+        observer=github_monitor,
+    )
 
+    canonical_run_fields = run_fields(run, tags=tags)
     runner = TaskTestRunner(
         "test-runner",
         client,
         TestRunnerOptions(
-            owner=context.owner,
-            repo=context.repo,
-            workflow_id=context.workflow,
-            ref=context.workflow_ref,
-            head_sha=context.head_sha,
-            checkout_sha=context.checkout_sha,
-            concurrency_key=context.concurrency_key,
+            owner=run.owner,
+            repo=run.repo,
+            workflow_id=config.workflow,
+            ref=config.workflow_ref,
+            run_fields=canonical_run_fields,
+            concurrency_key=run.concurrency_key,
             artifacts_base_path=artifacts_path,
-            head_branch=context.head_branch,
-            is_fork=context.is_fork,
             poll_interval_seconds=config.poll_interval_seconds,
-            pytest_args=context.pytest_args,
+            pytest_args=pytest_args,
             origin_run_url=get_workflow_run_url(),
-            pr_number=context.pr_number,
+            pr_number=run.pr_number,
         ),
         artifact_client=client.with_rate_limit(rate_limiters.artifacts),
-        monitor=view('test-runner'),
+        monitor=monitoring.component('test-runner'),
     )
-    gatherer = TaskTestGatherer("test-gatherer", output_path, batches, monitor=view('test-gatherer'))
+    gatherer = TaskTestGatherer(
+        "test-gatherer",
+        output_path,
+        batches,
+        monitor=monitoring.component('test-gatherer'),
+    )
     reporter = TaskRunReporter(
         "run-reporter",
         client,
-        RunReporterOptions(owner=context.owner, repo=context.repo, pr_number=context.pr_number),
-        monitor=view('run-reporter'),
+        RunReporterOptions(owner=run.owner, repo=run.repo, pr_number=run.pr_number),
+        monitor=monitoring.component('run-reporter'),
     )
 
     return Dispatcher(
@@ -276,7 +289,6 @@ def build_dispatcher(
         reporter=reporter,
         max_timeout=config.global_timeout_seconds,
         grace_period=config.grace_period_seconds,
-        run_logger=active_logger,
-        monitor=view('dispatcher'),
-        message_scope=message_scope(monitoring.context) if monitoring is not None else None,
+        monitor=monitoring.component('dispatcher'),
+        message_scope=message_scope(monitoring.context, batches),
     )

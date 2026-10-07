@@ -221,6 +221,29 @@ def test_on_finalize_writes_step_summary(mock_app, step_summary):
     assert "| `config` |" in content
 
 
+def test_on_finalize_writes_pr_comment_instead_of_posting(mock_app, tmp_path):
+    mock_app.config.github.token = "fake-token"
+    output = tmp_path / "pr-comment.md"
+
+    orch = ValidationOrchestrator(
+        app=mock_app,
+        validations=["config"],
+        target=None,
+        pr_number=42,
+        pr_comment_output=output,
+    )
+    orch._results = {
+        "config": ValidationResult(name="config", success=False, stdout="err", stderr="", duration=1.0),
+    }
+    asyncio.run(orch.on_finalize(exception=None))
+
+    assert "| `config` | Validate default configuration files against spec.yaml | ❌ |" in output.read_text(
+        encoding="utf-8"
+    )
+    mock_app.github.get_pull_request_comments.assert_not_called()
+    mock_app.github.post_pull_request_comment.assert_not_called()
+
+
 def test_on_finalize_posts_pr_comment_on_failure(mock_app):
     mock_app.config.github.token = "fake-token"
 

@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING
 
 from ddev.cli.ci.tests.batching.jobs import expand_batch_jobs
@@ -32,10 +31,9 @@ if TYPE_CHECKING:
     from ddev.cli.ci.tests.dispatcher_config import BatchingConfig
     from ddev.cli.ci.tests.messages import BatchJob
     from ddev.integration.core import Integration
+    from ddev.monitoring import ComponentMonitor
     from ddev.repo.core import Repository
     from ddev.utils.git import ChangedFile
-
-logger = logging.getLogger(__name__)
 
 
 def build_test_units(
@@ -44,14 +42,17 @@ def build_test_units(
     *,
     environment_provider: EnvironmentProvider,
     rules: Sequence[TargetRule] | None = None,
+    infrastructure_targets: Sequence[str] = (),
+    monitor: ComponentMonitor,
 ) -> list[TestUnit]:
     """Turn changed files into the complete, deterministic list of test units.
 
-    Without explicit `rules`, the default set is used, with the repository-wide rule enabled only
-    for the core repository.
+    Without explicit `rules`, the default set is used, with the repository-wide and infrastructure
+    rules enabled only for the core repository. `infrastructure_targets` feeds the latter and is
+    ignored when `rules` is given.
     """
     if rules is None:
-        rules = default_target_rules(is_core=repo.name == "core")
+        rules = default_target_rules(is_core=repo.name == "core", infrastructure_targets=infrastructure_targets)
 
     facts = RegistryRepositoryFacts(repo.integrations)
     target_names = find_affected_targets(changed_files, facts, rules=rules)
@@ -68,7 +69,7 @@ def build_test_units(
         if not environments:
             # A `hatch.toml` makes a target testable, so one that enables no test or E2E
             # environment contradicts itself. Deliberate opt-out is `overrides.ci.<target>.exclude`.
-            logger.warning("%s has a hatch.toml but no testable environment", name)
+            monitor.logger.warning("%s has a hatch.toml but no testable environment", name)
             continue
 
         definitions.append(
@@ -82,7 +83,7 @@ def build_test_units(
             )
         )
 
-    return expand_test_units(definitions)
+    return expand_test_units(definitions, monitor=monitor)
 
 
 def supports_minimum_base_package(integration: Integration) -> bool:
@@ -105,6 +106,7 @@ def build_test_batches(
     strategy: BatchStrategy = default_strategy,
     rules: Sequence[TargetRule] | None = None,
     minimum_base_package: bool = False,
+    monitor: ComponentMonitor,
 ) -> list[TestBatch]:
     """Turn changed files into the complete, ordered list of `TestBatch` messages.
 
@@ -116,6 +118,8 @@ def build_test_batches(
         changed_files,
         environment_provider=environment_provider,
         rules=rules,
+        infrastructure_targets=config.test_infrastructure_targets,
+        monitor=monitor,
     )
     jobs = expand_batch_jobs(units, minimum_base_package=minimum_base_package)
     job_groups = strategy(jobs, config=config)

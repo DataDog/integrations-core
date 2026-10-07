@@ -75,6 +75,19 @@ def test_repository_identity_falls_back_when_remote_unparseable(mocker, tmp_path
     assert repo.full_name == expected_full_name
 
 
+@pytest.mark.parametrize(
+    'name, expected_full_name',
+    [
+        pytest.param('core', 'integrations-core', id='core'),
+        pytest.param('internal', 'integrations-internal', id='internal'),
+    ],
+)
+def test_repository_identity_known_alias_wins_over_remote(mocker, tmp_path, name, expected_full_name):
+    mocker.patch('ddev.repo.core._read_origin_url_from_git_config', return_value='git@github.com:me/renamed.git')
+
+    assert Repository(name, str(tmp_path)).full_name == expected_full_name
+
+
 def test_repository_identity_unknown_name_falls_back_to_name(mocker, tmp_path):
     mocker.patch('ddev.repo.core._read_origin_url_from_git_config', return_value=None)
     repo = Repository('custom-repo', str(tmp_path))
@@ -107,6 +120,26 @@ def test_repository_identity_follows_worktree_gitdir_pointer(tmp_path):
     repo = Repository('feature', str(worktree_path))
 
     assert repo.full_name == 'integrations-core'
+
+
+@pytest.mark.parametrize(
+    'config, expected_owner',
+    [
+        pytest.param('[github]\nowner = "ddoghq"\n', 'ddoghq', id='configured'),
+        pytest.param('[overrides.display-name]\nfoo = "Foo"\n', 'DataDog', id='no-github-table'),
+        pytest.param(None, 'DataDog', id='no-config-file'),
+    ],
+)
+def test_github_owner_comes_from_repository_config(tmp_path, config, expected_owner):
+    # A fork as origin must not change the owner GitHub operations target.
+    git_dir = tmp_path / '.git'
+    git_dir.mkdir()
+    (git_dir / 'config').write_text('[remote "origin"]\n\turl = git@github.com:some-fork/integrations-internal.git\n')
+    if config is not None:
+        (tmp_path / '.ddev').mkdir()
+        (tmp_path / '.ddev' / 'config.toml').write_text(config)
+
+    assert Repository('internal', str(tmp_path)).github_owner == expected_owner
 
 
 class TestGetIntegration:

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 from datetime import datetime, timezone
+from typing import NamedTuple
 
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
@@ -27,15 +28,27 @@ OTHER_RESOURCE_NAME = 'other'
 KUEUE_QUEUE_ENTITY_PREFIX = 'kubernetes_kueue_queue://'
 KUEUE_RESOURCE_FLAVOR_ENTITY_PREFIX = 'kueue_resource_flavor://'
 KUEUE_WORKLOAD_ENTITY_PREFIX = 'kueue_workload://'
+
+
+class WorkloadTransition(NamedTuple):
+    condition_type: str
+    status: str
+    label: str
+    alert_type: str
+
+
 WORKLOAD_TRANSITIONS = {
-    'QuotaReserved': ('quota_reserved', 'quota reserved', 'info'),
-    'Admitted': ('admitted', 'admitted', 'info'),
-    'PodsReady': ('running', 'running', 'info'),
-    'Evicted': ('evicted', 'evicted', 'warning'),
-    'Finished': ('finished', 'finished', 'info'),
+    'quota_reserved': WorkloadTransition('QuotaReserved', 'True', 'quota reserved', 'info'),
+    'admitted': WorkloadTransition('Admitted', 'True', 'admitted', 'info'),
+    'running': WorkloadTransition('PodsReady', 'True', 'running', 'info'),
+    'evicted': WorkloadTransition('Evicted', 'True', 'evicted', 'warning'),
+    'finished': WorkloadTransition('Finished', 'True', 'finished', 'info'),
+    'pending': WorkloadTransition('QuotaReserved', 'False', 'pending', 'warning'),
 }
+PENDING_WORKLOAD_REASONS = {'Inadmissible', 'Pending'}
 WORKLOAD_TRANSITION_EVENT_TYPES = {
     'created': 'kueue.workload.created',
+    'pending': 'kueue.workload.pending',
     'quota_reserved': 'kueue.workload.quota_reserved',
     'admitted': 'kueue.workload.admitted',
     'running': 'kueue.workload.running',
@@ -199,12 +212,14 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             self.submit_workload_event('created', workload)
             previous_state = {}
 
-        for condition_type, (transition, _, _) in WORKLOAD_TRANSITIONS.items():
-            condition = workload_state.get('conditions', {}).get(condition_type)
-            if not condition or condition.get('status') != 'True':
+        for transition, details in WORKLOAD_TRANSITIONS.items():
+            condition = workload_state.get('conditions', {}).get(details.condition_type)
+            if not condition or condition.get('status') != details.status:
+                continue
+            if transition == 'pending' and condition.get('reason') not in PENDING_WORKLOAD_REASONS:
                 continue
 
-            previous_condition = previous_state.get('conditions', {}).get(condition_type)
+            previous_condition = previous_state.get('conditions', {}).get(details.condition_type)
             if self.condition_changed(condition, previous_condition):
                 self.submit_workload_event(transition, workload, condition, previous_state)
 
@@ -258,8 +273,9 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         metadata = workload.get('metadata', {})
         name = metadata.get('name', 'unknown')
         namespace = metadata.get('namespace', 'unknown')
-        condition_type = self.condition_type_for_transition(transition)
-        _, transition_label, alert_type = WORKLOAD_TRANSITIONS.get(condition_type, (transition, transition, 'info'))
+        details = WORKLOAD_TRANSITIONS.get(transition)
+        transition_label = details.label if details else transition
+        alert_type = details.alert_type if details else 'info'
 
         self.event(
             {
@@ -272,13 +288,6 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                 'tags': self.workload_event_tags(transition, workload, condition, previous_state),
             }
         )
-
-    @staticmethod
-    def condition_type_for_transition(transition: str) -> str:
-        for condition_type, (condition_transition, _, _) in WORKLOAD_TRANSITIONS.items():
-            if condition_transition == transition:
-                return condition_type
-        return transition
 
     def workload_event_text(self, transition: str, workload: dict, condition: dict | None) -> str:
         metadata = workload.get('metadata', {})
@@ -372,6 +381,9 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                     tags.append(f'kueue_preemption_reason:{preempted_condition["reason"]}')
                 if preempted_by := self.preempting_workload_uid(condition, preempted_condition):
                     tags.append(f'kueue_preempted_by:{preempted_by}')
+
+        if transition == 'pending' and condition and (reason := condition.get('reason')):
+            tags.append(f'kueue_pending_reason:{reason}')
 
         return tags
 

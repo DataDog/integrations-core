@@ -6,21 +6,41 @@ from prometheus_client.samples import Sample
 NEGATIVE_INFINITY = float('-inf')
 
 
-def decumulate_histogram_buckets(sample_data):
+def decumulate_histogram_buckets(sample_data, logger=None, metric_name=None):
     """
     Decumulate buckets in a given histogram metric and adds the lower_bound label (le being upper_bound)
+
+    `logger` and `metric_name` are only used to report payloads that are out of spec.
     """
     # TODO: investigate performance optimizations
     new_sample_data = []
     bucket_values_by_context_upper_bound = {}
+    negative_threshold_labels_by_context = {}
+    sum_contexts = set()
     for sample, tags, hostname in sample_data:
         if sample.name.endswith('_bucket'):
             context_key = compute_bucket_hash(sample.labels)
             if context_key not in bucket_values_by_context_upper_bound:
                 bucket_values_by_context_upper_bound[context_key] = {}
-            bucket_values_by_context_upper_bound[context_key][float(sample.labels['upper_bound'])] = sample.value
+            upper_bound = float(sample.labels['upper_bound'])
+            bucket_values_by_context_upper_bound[context_key][upper_bound] = sample.value
+            if upper_bound < 0 and context_key not in negative_threshold_labels_by_context:
+                negative_threshold_labels_by_context[context_key] = sample.labels
+        elif sample.name.endswith('_sum'):
+            # `_sum` carries no `upper_bound`, so it hashes to the same context as its own buckets
+            sum_contexts.add(compute_bucket_hash(sample.labels))
 
         new_sample_data.append([sample, tags, hostname])
+
+    if logger is not None:
+        # Only a context that has both is out of spec; other contexts in the family may legitimately have either.
+        for context_key in sum_contexts & negative_threshold_labels_by_context.keys():
+            logger.debug(
+                'Metric: %s is out of spec for OpenMetrics: Histogram MetricPoint MUST NOT contain a '
+                'sum value for Negative threshold buckets: %s',
+                metric_name,
+                negative_threshold_labels_by_context[context_key],
+            )
 
     sorted_buckets_by_context = {}
     for context in bucket_values_by_context_upper_bound:
@@ -33,20 +53,15 @@ def decumulate_histogram_buckets(sample_data):
             if i == 0:
                 if context not in bucket_tuples_by_context_upper_bound:
                     bucket_tuples_by_context_upper_bound[context] = {}
-                if upper_b > 0:
-                    # positive buckets start at zero
-                    bucket_tuples_by_context_upper_bound[context][upper_b] = (
-                        0,
-                        upper_b,
-                        bucket_values_by_context_upper_bound[context][upper_b],
-                    )
-                else:
-                    # negative buckets start at -inf
-                    bucket_tuples_by_context_upper_bound[context][upper_b] = (
-                        NEGATIVE_INFINITY,
-                        upper_b,
-                        bucket_values_by_context_upper_bound[context][upper_b],
-                    )
+                # The first bucket is [-inf, upper_b]: non-negative buckets start at zero, negative ones keep
+                # their real -inf bound. Negative thresholds are valid input, not malformed input we can reject:
+                # https://github.com/OpenObservability/OpenMetrics/blob/v1.0.0/specification/OpenMetrics.md#L250
+                lower_b = 0 if upper_b >= 0 else NEGATIVE_INFINITY
+                bucket_tuples_by_context_upper_bound[context][upper_b] = (
+                    lower_b,
+                    upper_b,
+                    bucket_values_by_context_upper_bound[context][upper_b],
+                )
                 continue
             tmp = (
                 bucket_values_by_context_upper_bound[context][upper_b]

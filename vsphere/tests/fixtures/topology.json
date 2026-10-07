@@ -17,62 +17,72 @@
                             "spec": "VirtualMachine",
                             "name": "VM1-4",
                             "mo_id": "VM1-4-1",
-                            "runtime.powerState": "off"
+                            "runtime.powerState": "off",
+                            "summary.config.numCpu": 1
                         },
                         {
                             "spec": "VirtualMachine",
                             "name": "VM1-6ê",
                             "mo_id": "VM1-6ê-1",
                             "runtime.powerState": "off",
-                            "guest.hostName": "ubuntu-test"
+                            "guest.hostName": "ubuntu-test",
+                            "summary.config.numCpu": 2
                         },
                         {
                             "spec": "VirtualMachine",
                             "name": "VM2-1",
                             "mo_id": "VM2-1-1",
-                            "runtime.powerState": "off"
+                            "runtime.powerState": "off",
+                            "summary.config.numCpu": 4
                         },
                         {
                             "spec": "VirtualMachine",
                             "name": "VM1-3",
                             "mo_id": "VM1-3-1",
-                            "runtime.powerState": "off"
+                            "runtime.powerState": "off",
+                            "summary.config.numCpu": 8
                         },
                         {
                             "spec": "VirtualMachine",
                             "name": "VM2-2",
                             "mo_id": "VM2-2-1",
-                            "runtime.powerState": "off"
+                            "runtime.powerState": "off",
+                            "summary.config.numCpu": 1
                         },
                         {
                             "spec": "VirtualMachine",
                             "name": "VM1-5",
                             "mo_id": "VM1-5-1",
-                            "runtime.powerState": "off"
+                            "runtime.powerState": "off",
+                            "summary.config.numCpu": 2
                         },
                         {
                             "spec": "VirtualMachine",
                             "name": "VM1-2",
                             "mo_id": "VM1-2-1",
-                            "runtime.powerState": "off"
+                            "runtime.powerState": "off",
+                            "summary.config.numCpu": 4
                         },
                         {
                             "spec": "VirtualMachine",
                             "name": "VM-0",
                             "mo_id": "VM-0-1",
-                            "runtime.powerState": "off"
+                            "runtime.powerState": "off",
+                            "summary.config.numCpu": 8
                         },
                         {
                             "spec": "VirtualMachine",
                             "name": "migrationTest",
                             "mo_id": "migrationTest-1",
-                            "runtime.powerState": "off"
+                            "runtime.powerState": "off",
+                            "summary.config.numCpu": 1
                         },
                         {
                             "spec": "VirtualMachine",
                             "name": "VM1-1ä",
                             "mo_id": "VM1-1ä-1",
-                            "runtime.powerState": "off"
+                            "runtime.powerState": "off",
+                            "summary.config.numCpu": 2
                         }
                     ]
                 },
@@ -89,12 +99,14 @@
                                 {
                                     "spec": "HostSystem",
                                     "name": "10.0.0.101",
-                                    "mo_id": "10.0.0.101-1"
+                                    "mo_id": "10.0.0.101-1",
+                                    "summary.hardware.numCpuCores": 16
                                 },
                                 {
                                     "spec": "HostSystem",
                                     "name": "10.0.0.102",
-                                    "mo_id": "10.0.0.102-1"
+                                    "mo_id": "10.0.0.102-1",
+                                    "summary.hardware.numCpuCores": 16
                                 }
                             ]
                         }
@@ -156,35 +168,40 @@
                                     "name": "VM-on-fake-host",
                                     "mo_id": "VM-fake-host",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "DOES_NOT_EXIST"
+                                    "runtime.host": "DOES_NOT_EXIST",
+                                    "summary.config.numCpu": 4
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-2",
                                     "mo_id": "VM4-2-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "summary.config.numCpu": 8
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-20",
                                     "mo_id": "VM4-20-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "summary.config.numCpu": 1
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-4",
                                     "mo_id": "VM4-4-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "summary.config.numCpu": 2
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-14",
                                     "mo_id": "VM4-14-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "summary.config.numCpu": 4
                                 },
                                 {
                                     "spec": "VirtualMachine",
@@ -195,7 +212,8 @@
                                     "customValue": {
                                         "attr_key": "attr_val2",
                                         "foo": "bar1"
-                                    }
+                                    },
+                                    "summary.config.numCpu": 8
                                 },
                                 {
                                     "spec": "VirtualMachine",
@@ -206,119 +224,136 @@
                                     "customValue": {
                                         "attr_key": "attr_val",
                                         "foo": "bar2"
-                                    }
+                                    },
+                                    "summary.config.numCpu": 1
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-5",
                                     "mo_id": "VM4-5-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "summary.config.numCpu": 2
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-3",
                                     "mo_id": "VM4-3-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "summary.config.numCpu": 4
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-12",
                                     "mo_id": "VM4-12-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "summary.config.numCpu": 8
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-11",
                                     "mo_id": "VM4-11-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "summary.config.numCpu": 1
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "vm4-6",
                                     "mo_id": "vm4-6-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "summary.config.numCpu": 2
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-13",
                                     "mo_id": "VM4-13-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "summary.config.numCpu": 4
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-1",
                                     "mo_id": "VM4-1-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "summary.config.numCpu": 8
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-19",
                                     "mo_id": "VM4-19-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "summary.config.numCpu": 1
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-18",
                                     "mo_id": "VM4-18-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "summary.config.numCpu": 2
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "vm4-7",
                                     "mo_id": "vm4-7-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "summary.config.numCpu": 4
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-17",
                                     "mo_id": "VM4-17-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "summary.config.numCpu": 8
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-10",
                                     "mo_id": "VM4-10-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "summary.config.numCpu": 1
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM4-16",
                                     "mo_id": "VM4-16-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "summary.config.numCpu": 2
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "vm4-8",
                                     "mo_id": "vm4-8-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.104"
+                                    "runtime.host": "10.0.0.104",
+                                    "summary.config.numCpu": 4
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "VM3-1",
                                     "mo_id": "VM3-1-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.103"
+                                    "runtime.host": "10.0.0.103",
+                                    "summary.config.numCpu": 8
                                 },
                                 {
                                     "spec": "VirtualMachine",
                                     "name": "$VM3-2",
                                     "mo_id": "$VM3-2-1",
                                     "runtime.powerState": "on",
-                                    "runtime.host": "10.0.0.103"
+                                    "runtime.host": "10.0.0.103",
+                                    "summary.config.numCpu": 1
                                 }
                             ]
                         },
@@ -327,7 +362,8 @@
                             "name": "$VM5",
                             "mo_id": "$VM5-1",
                             "runtime.powerState": "on",
-                            "runtime.host": "10.0.0.103"
+                            "runtime.host": "10.0.0.103",
+                            "summary.config.numCpu": 2
                         }
                     ]
                 },
@@ -344,12 +380,14 @@
                                 {
                                     "spec": "HostSystem",
                                     "name": "10.0.0.103",
-                                    "mo_id": "10.0.0.103-1"
+                                    "mo_id": "10.0.0.103-1",
+                                    "summary.hardware.numCpuCores": 32
                                 },
                                 {
                                     "spec": "HostSystem",
                                     "name": "10.0.0.104",
-                                    "mo_id": "10.0.0.104-1"
+                                    "mo_id": "10.0.0.104-1",
+                                    "summary.hardware.numCpuCores": 8
                                 }
                             ]
                         },

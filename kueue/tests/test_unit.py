@@ -209,6 +209,16 @@ def without_admission(workloads):
     return workloads
 
 
+def with_pending_reason(workloads, reason):
+    workloads = json.loads(json.dumps(workloads))
+    for workload in workloads:
+        condition = next(
+            condition for condition in workload['status']['conditions'] if condition['type'] == 'QuotaReserved'
+        )
+        condition['reason'] = reason
+    return workloads
+
+
 def as_flavor_migration_eviction(workloads):
     """Rewrite the preemption eviction as Kueue's flavor-migration eviction, whose message looks alike."""
     workloads = json.loads(json.dumps(workloads))
@@ -313,6 +323,27 @@ def test_workload_events_no_duplicates(dd_run_check, aggregator, instance, mock_
     dd_run_check(check)
 
     aggregator.assert_event('Workload team-a/training-job admitted.', count=1, exact_match=False)
+
+
+@pytest.mark.parametrize('reason', ['Pending', 'Inadmissible'])
+def test_workload_events_pending(reason, dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    pending_workloads = with_pending_reason(load_workloads('pending'), reason)
+    check = KueueCheck('kueue', {}, [instance])
+    check.kube_client = FakeKubernetesAPIClient([], pending_workloads, pending_workloads)
+
+    dd_run_check(check)
+    dd_run_check(check)
+    dd_run_check(check)
+
+    assert_event_has_tags(
+        aggregator,
+        'Workload team-a/training-job pending. Waiting for quota',
+        ['kueue_transition:pending', f'kueue_pending_reason:{reason}'],
+        event_type='kueue.workload.pending',
+        alert_type='warning',
+    )
+    aggregator.assert_event('Workload team-a/training-job pending.', count=1, exact_match=False)
 
 
 def test_workload_events_created_for_new_workload(dd_run_check, aggregator, instance, mock_http_response):

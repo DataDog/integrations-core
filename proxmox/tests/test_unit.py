@@ -16,6 +16,7 @@ from datadog_checks.proxmox import ProxmoxCheck
 from .common import (
     ALL_EVENTS,
     ALL_METRICS,
+    BASE_TAGS,
     CONTAINER_PERF_METRICS,
     NO_CONTAINER_EVENTS,
     NODE_PERF_METRICS,
@@ -26,6 +27,8 @@ from .common import (
     STORAGE_PERF_METRICS,
     STORAGE_RESOURCE_METRICS,
     VM_PERF_METRICS,
+    cluster_resources_with_offline_node,
+    cluster_resources_with_vm_maxcpu,
 )
 
 
@@ -40,7 +43,7 @@ def test_api_up(dd_run_check, aggregator, instance):
         aggregator.assert_metric(metric, at_least=1)
 
     aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_symmetric_inclusion=True)
 
 
 @pytest.mark.usefixtures('mock_http_get')
@@ -414,6 +417,152 @@ def test_resource_metrics(dd_run_check, aggregator, instance):
         aggregator.assert_metric(metric, count=0, tags=pool_tags)
 
 
+@pytest.mark.parametrize(
+    ('metric', 'value', 'hostname', 'resource_tags'),
+    [
+        pytest.param(
+            'proxmox.vm.cpu.max',
+            2,
+            'debian',
+            [
+                'proxmox_type:vm',
+                'proxmox_name:VM 100',
+                'proxmox_id:qemu/100',
+                'proxmox_node:ip-122-82-3-112',
+            ],
+            id='vm',
+        ),
+        pytest.param(
+            'proxmox.node.cpu.max',
+            72,
+            'ip-122-82-3-112',
+            [
+                'proxmox_type:node',
+                'proxmox_type:host',
+                'proxmox_name:ip-122-82-3-112',
+                'proxmox_id:node/ip-122-82-3-112',
+            ],
+            id='node',
+        ),
+    ],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_vcpu_count_metric(dd_run_check, aggregator, instance, metric, value, hostname, resource_tags):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric(metric, value, hostname=hostname, tags=BASE_TAGS + resource_tags)
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_cpu_count_metrics_skip_containers(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    # lxc/111 reports its host's full 72 threads as `maxcpu`.
+    aggregator.assert_metric('proxmox.container.cpu.max', count=0)
+    aggregator.assert_metric('proxmox.container.count', at_least=1)
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_cpu_count_metrics_skip_powered_off_vm(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    # qemu/101 is stopped but still carries maxcpu=2.
+    aggregator.assert_metric(
+        'proxmox.vm.cpu.max',
+        count=0,
+        tags=BASE_TAGS
+        + [
+            'proxmox_type:vm',
+            'proxmox_name:VM 101',
+            'proxmox_id:qemu/101',
+            'proxmox_node:ip-122-82-3-112',
+        ],
+    )
+    aggregator.assert_metric('proxmox.vm.cpu.max', count=1)
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(
+                        status_code=200,
+                        json_data=cluster_resources_with_offline_node(),
+                    )
+                }
+            },
+            id='offline_node',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_cpu_count_metrics_skip_offline_node(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    aggregator.assert_metric('proxmox.node.cpu.max', count=0)
+    aggregator.assert_metric('proxmox.vm.cpu.max', count=1)
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'expected_count', 'expected_value'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(
+                        status_code=200,
+                        json_data=cluster_resources_with_vm_maxcpu(None),
+                    )
+                }
+            },
+            0,
+            None,
+            id='maxcpu_absent',
+        ),
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(
+                        status_code=200,
+                        json_data=cluster_resources_with_vm_maxcpu(0),
+                    )
+                }
+            },
+            1,
+            0,
+            id='maxcpu_zero',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_cpu_count_metrics_distinguish_absent_maxcpu_from_zero(
+    dd_run_check, aggregator, instance, expected_count, expected_value
+):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+    if expected_value is None:
+        aggregator.assert_metric('proxmox.vm.cpu.max', count=expected_count)
+    else:
+        aggregator.assert_metric('proxmox.vm.cpu.max', expected_value, count=expected_count)
+    aggregator.assert_metric('proxmox.vm.count', at_least=1)
+
+
+@pytest.mark.usefixtures('mock_http_get')
+def test_cpu_count_metrics_respect_resource_filters(dd_run_check, aggregator, instance):
+    new_instance = copy.deepcopy(instance)
+    new_instance['resource_filters'] = [
+        {'type': 'exclude', 'resource': 'vm', 'property': 'resource_name', 'patterns': ['VM 100']},
+    ]
+    check = ProxmoxCheck('proxmox', {}, [new_instance])
+    dd_run_check(check)
+    aggregator.assert_metric('proxmox.vm.cpu.max', count=0)
+    aggregator.assert_metric('proxmox.node.cpu.max', count=1)
+
+
 @pytest.mark.usefixtures('mock_http_get')
 def test_perf_metrics(dd_run_check, aggregator, instance):
     check = ProxmoxCheck('proxmox', {}, [instance])
@@ -522,6 +671,346 @@ def test_ha_metrics(dd_run_check, aggregator, instance):
     dd_run_check(check)
     aggregator.assert_metric('proxmox.ha.quorum', hostname='ip-122-82-3-112', tags=['node_status:OK'])
     aggregator.assert_metric('proxmox.ha.quorate', hostname='ip-122-82-3-112', tags=['node_status:OK'])
+
+
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/ha/status/current': MockResponse(
+                        status_code=200,
+                        json_data={'data': None},
+                    )
+                }
+            },
+            id='ha-disabled',
+        ),
+    ],
+    indirect=True,
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_ha_metrics_null_data(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+
+    aggregator.assert_metric('proxmox.ha.quorum', count=0)
+    aggregator.assert_metric('proxmox.ha.quorate', count=0)
+
+
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/metrics/export': MockResponse(
+                        status_code=200,
+                        json_data={'data': {'data': None}},
+                    )
+                }
+            },
+            id='no-exported-metrics',
+        ),
+    ],
+    indirect=True,
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_performance_metrics_null_data(dd_run_check, aggregator, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+    dd_run_check(check)
+
+    for metric in {'proxmox.cpu.current', 'proxmox.disk.total', 'proxmox.mem.total'}:
+        aggregator.assert_metric(metric, count=0)
+
+
+# Proxmox returns API errors with an HTTP error status and, on current versions, the reason in `message`.
+PERMISSION_DENIED_RESPONSE = {'data': None, 'message': 'Permission check failed (/ , Sys.Audit)\n'}
+TWO_NODE_RESOURCES = {
+    'data': [
+        {'id': 'node/node-1', 'node': 'node-1', 'status': 'online', 'type': 'node'},
+        {'id': 'node/node-2', 'node': 'node-2', 'status': 'online', 'type': 'node'},
+    ]
+}
+
+
+def task_calls(mock_http_get):
+    return [call for call in mock_http_get.call_args_list if call.args[0].endswith('/tasks')]
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'expected_error'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(status_code=403, json_data=PERMISSION_DENIED_RESPONSE)
+                }
+            },
+            r'HTTP 403 for .*/cluster/resources: Permission check failed \(/ , Sys.Audit\)',
+            id='with-message',
+        ),
+        pytest.param(
+            {'http_error': {'/api2/json/cluster/resources': MockResponse(status_code=403, json_data={'data': None})}},
+            r'HTTP 403 for .*/cluster/resources',
+            id='without-message',
+        ),
+        pytest.param(
+            {'http_error': {'/api2/json/cluster/resources': MockResponse(status_code=502, content='Bad Gateway')}},
+            r'HTTP 502 for .*/cluster/resources',
+            id='non-json-body',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_resources_api_error_response(dd_run_check, instance, expected_error):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+
+    with pytest.raises(Exception, match=expected_error):
+        dd_run_check(check, extract_message=True)
+
+
+@pytest.mark.parametrize(
+    ('mock_http_get', 'failed_collection', 'failed_endpoint', 'collected_metric'),
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/metrics/export': MockResponse(
+                        status_code=403, json_data=PERMISSION_DENIED_RESPONSE
+                    )
+                }
+            },
+            'performance metrics',
+            '/cluster/metrics/export',
+            'proxmox.ha.quorum',
+            id='performance-metrics',
+        ),
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/ha/status/current': MockResponse(
+                        status_code=403, json_data=PERMISSION_DENIED_RESPONSE
+                    )
+                }
+            },
+            'HA metrics',
+            '/cluster/ha/status/current',
+            'proxmox.cpu.current',
+            id='ha',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.proxmox.check.get_current_datetime")
+def test_optional_collection_error_does_not_block_other_collectors(
+    get_current_datetime, dd_run_check, aggregator, instance, failed_collection, failed_endpoint, collected_metric
+):
+    get_current_datetime.return_value = datetime.fromtimestamp(1752552000, timezone.utc)
+    new_instance = copy.deepcopy(instance)
+    new_instance['collect_tasks'] = True
+    check = ProxmoxCheck('proxmox', {}, [new_instance])
+
+    dd_run_check(check)
+
+    assert check.warnings == [
+        f"Skipping Proxmox {failed_collection} collection: Proxmox API returned HTTP 403 for "
+        f"http://localhost:8006/api2/json{failed_endpoint}: Permission check failed (/ , Sys.Audit)"
+    ]
+    aggregator.assert_metric(
+        "proxmox.api.up", 1, tags=['proxmox_server:http://localhost:8006/api2/json', 'proxmox_status:up', 'testing']
+    )
+    aggregator.assert_metric("proxmox.node.up", 1, tags=[], hostname='ip-122-82-3-112')
+    aggregator.assert_metric(collected_metric, at_least=1)
+    assert len(aggregator.events) == len(ALL_EVENTS)
+
+
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(
+                        status_code=200,
+                        json_data={'data': None},
+                    )
+                }
+            },
+            id='resources',
+        ),
+    ],
+    indirect=True,
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_required_null_data(dd_run_check, instance):
+    check = ProxmoxCheck('proxmox', {}, [instance])
+
+    with pytest.raises(Exception, match=r'Proxmox API returned null data for .*/cluster/resources'):
+        dd_run_check(check, extract_message=True)
+
+
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/nodes/ip-122-82-3-112/tasks': MockResponse(
+                        status_code=200,
+                        json_data={'data': None},
+                    )
+                }
+            },
+            id='no-tasks',
+        ),
+    ],
+    indirect=True,
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_tasks_null_data(dd_run_check, aggregator, instance):
+    new_instance = copy.deepcopy(instance)
+    new_instance['collect_tasks'] = True
+    check = ProxmoxCheck('proxmox', {}, [new_instance])
+
+    dd_run_check(check)
+    assert aggregator.events == []
+
+
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/nodes/ip-122-82-3-112/tasks': MockResponse(
+                        status_code=403,
+                        json_data=PERMISSION_DENIED_RESPONSE,
+                    )
+                }
+            },
+            id='tasks',
+        ),
+    ],
+    indirect=True,
+)
+@pytest.mark.usefixtures('mock_http_get')
+def test_tasks_api_error_response(dd_run_check, instance):
+    new_instance = copy.deepcopy(instance)
+    new_instance['collect_tasks'] = True
+    check = ProxmoxCheck('proxmox', {}, [new_instance])
+
+    dd_run_check(check)
+
+    endpoint = 'http://localhost:8006/api2/json/nodes/ip-122-82-3-112/tasks'
+    assert check.warnings == [
+        f"Failed to collect tasks for node ip-122-82-3-112; endpoint: {endpoint}; "
+        f"Proxmox API returned HTTP 403 for {endpoint}: Permission check failed (/ , Sys.Audit)"
+    ]
+
+
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(status_code=200, json_data=TWO_NODE_RESOURCES)
+                }
+            },
+            id='two-nodes',
+        ),
+    ],
+    indirect=True,
+)
+def test_failed_node_retries_from_last_successful_collection(
+    dd_run_check, aggregator, instance, mock_http_get, monkeypatch, caplog
+):
+    # One timestamp for check initialization, then one per node and check run.
+    collect_times = [datetime.fromtimestamp(ts, timezone.utc) for ts in (100, 200, 300, 400, 500)]
+    monkeypatch.setattr('datadog_checks.proxmox.check.get_current_datetime', mock.MagicMock(side_effect=collect_times))
+
+    def tasks_response(endtime):
+        return MockResponse(status_code=200, json_data={'data': [{'type': 'aptupdate', 'endtime': endtime}]})
+
+    # node-1 is unavailable on the first run while it runs a task, then recovers; node-2 always succeeds.
+    task_responses = {
+        '/nodes/node-1/tasks': iter(
+            [
+                MockResponse(status_code=500, json_data={'data': None, 'message': 'node unavailable'}),
+                tasks_response(150),
+            ]
+        ),
+        '/nodes/node-2/tasks': iter([tasks_response(150), tasks_response(350)]),
+    }
+    default_get = mock_http_get.side_effect
+
+    def get(url, *args, **kwargs):
+        for suffix, responses in task_responses.items():
+            if url.endswith(suffix):
+                return next(responses)
+        return default_get(url, *args, **kwargs)
+
+    mock_http_get.side_effect = get
+    new_instance = copy.deepcopy(instance)
+    new_instance['collect_tasks'] = True
+    check = ProxmoxCheck('proxmox', {}, [new_instance])
+
+    dd_run_check(check)
+    assert "Failed to collect tasks for node node-1" in caplog.text
+    assert [(event['host'], event['timestamp']) for event in aggregator.events] == [('node-2', 150)]
+
+    dd_run_check(check)
+    assert [(call.args[0].split('/')[-2], call.kwargs['params']['since']) for call in task_calls(mock_http_get)] == [
+        ('node-1', 100),
+        ('node-2', 100),
+        # node-1 retries from its last successful collection; node-2 moves on.
+        ('node-1', 100),
+        ('node-2', 300),
+    ]
+    # The node-1 task missed while the node was unavailable is emitted once it recovers.
+    assert [(event['host'], event['timestamp']) for event in aggregator.events] == [
+        ('node-2', 150),
+        ('node-1', 150),
+        ('node-2', 350),
+    ]
+
+
+@pytest.mark.parametrize(
+    'mock_http_get',
+    [
+        pytest.param(
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockResponse(status_code=200, json_data=TWO_NODE_RESOURCES),
+                    '/api2/json/nodes/node-1/tasks': MockResponse(
+                        status_code=200, json_data={'data': [{'type': 'vzstart'}, {'type': 'vzstop'}]}
+                    ),
+                    '/api2/json/nodes/node-2/tasks': MockResponse(
+                        status_code=200, json_data={'data': [{'type': 'vzstart'}]}
+                    ),
+                }
+            },
+            id='node-1-reaches-limit',
+        ),
+    ],
+    indirect=True,
+)
+def test_tasks_warn_when_limit_reached(dd_run_check, instance, mock_http_get, monkeypatch, caplog):
+    monkeypatch.setattr('datadog_checks.proxmox.check.TASK_COLLECTION_LIMIT', 2)
+    new_instance = copy.deepcopy(instance)
+    new_instance['collect_tasks'] = True
+    new_instance['collected_task_types'] = []
+    check = ProxmoxCheck('proxmox', {}, [new_instance])
+
+    dd_run_check(check)
+
+    assert [call.kwargs['params']['limit'] for call in task_calls(mock_http_get)] == [2, 2]
+    assert "Node node-1 returned 2 tasks since" in caplog.text
+    assert "Node node-2 returned" not in caplog.text
 
 
 @pytest.mark.parametrize(

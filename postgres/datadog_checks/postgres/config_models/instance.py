@@ -404,7 +404,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str] = None
     pg_stat_activity_view: Optional[str] = None
     pg_stat_statements_view: Optional[str] = None
-    port: Optional[int] = None
+    port: Optional[int] = Field(None, ge=1, le=65535)
     propagate_agent_tags: Optional[bool] = None
     query_activity: Optional[QueryActivity] = None
     query_encodings: Optional[tuple[str, ...]] = None

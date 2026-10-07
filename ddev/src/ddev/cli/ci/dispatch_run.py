@@ -136,6 +136,19 @@ class ResolvedRun(BaseModel):
     base_sha: str | None = None
     is_fork: bool = False
 
+    @property
+    def owner(self) -> str:
+        return self.repository.partition('/')[0]
+
+    @property
+    def repo(self) -> str:
+        return self.repository.partition('/')[2]
+
+    @property
+    def concurrency_key(self) -> str:
+        """New PR revisions must cancel old batches, so they key on the PR, not the merge SHA."""
+        return f'pr-{self.pr_number}' if self.pr_number is not None else self.head_sha
+
 
 def write_run_manifest(base_path: Path, *, run: ResolvedRun) -> None:
     """Write the resolved run's manifest as machine-readable JSON under its output directory.
@@ -181,20 +194,38 @@ def resolve_run(
     """Resolve what to test, reporting why a run has nothing left to test before returning None."""
     if pr_resolver is not None:
         return resolve_pull_request_run(
-            app, repository=repository, resolver=pr_resolver, token=token, all_targets=all_targets
+            app,
+            repository=repository,
+            resolver=pr_resolver,
+            token=token,
+            all_targets=all_targets,
+            monitor=monitor,
         )
 
+    head_branch = app.repo.git.current_branch()
+    if monitor is not None:
+        monitor.logger.info('Resolving tested revision', checkout_sha=commit, head_branch=head_branch)
     tested_commit = commit or app.repo.git.latest_commit().sha
-    return ResolvedRun(
+    run = ResolvedRun(
         repository=repository,
         checkout_sha=tested_commit,
         head_sha=tested_commit,
-        head_branch=app.repo.git.current_branch(),
+        head_branch=head_branch,
         all_targets=all_targets,
     )
+    if monitor is not None:
+        monitor.logger.info(
+            'Tested revision resolved',
+            checkout_sha=run.checkout_sha,
+            head_sha=run.head_sha,
+            head_branch=run.head_branch,
+        )
+    return run
 
 
-def changes_for_run(app: Application, *, run: ResolvedRun) -> list[ChangedFile] | None:
+def changes_for_run(
+    app: Application, *, run: ResolvedRun, monitor: ComponentMonitor | None = None
+) -> list[ChangedFile] | None:
     """The files the run is responsible for; `None` when the run covers every target."""
     validate_checkout(app, run=run)
     if run.all_targets:
@@ -203,9 +234,15 @@ def changes_for_run(app: Application, *, run: ResolvedRun) -> list[ChangedFile] 
     from ddev.cli.ci.tests.changes import ChangeResolutionError, changes_in_commit
 
     try:
-        return changes_in_commit(app.repo.git, run.checkout_sha)
+        changed_files = changes_in_commit(app.repo.git, run.checkout_sha)
     except ChangeResolutionError as error:
+        if monitor is not None:
+            monitor.logger.error('Revision resolution failed', error=str(error))
         app.abort(str(error))
+
+    if monitor is not None:
+        monitor.logger.info('Test changes resolved', changed_file_count=len(changed_files))
+    return changed_files
 
 
 def validate_checkout(app: Application, *, run: ResolvedRun) -> None:
@@ -247,6 +284,7 @@ def resolve_pull_request_run(
     resolver: PullRequestResolver,
     token: str,
     all_targets: bool,
+    monitor: ComponentMonitor | None = None,
 ) -> ResolvedRun | None:
     """Read the pull request from the API, in one client session."""
     import asyncio
@@ -257,16 +295,40 @@ def resolve_pull_request_run(
     from ddev.utils.github_async import async_github_client
     from ddev.utils.github_errors import GitHubAuthenticationError
 
+    client_logger = None
+    observer = None
+    rate_limiter = None
+    if monitor is not None:
+        from ddev.cli.ci.tests.github_monitor import GitHubMonitor
+        from ddev.monitoring.adapter import ComponentLogAdapter
+        from ddev.utils.github_async.defaults import default_github_rate_limiter, log_rate_limit_events
+        from ddev.utils.rate_limiting import RateLimitEvent
+
+        client_logger = ComponentLogAdapter(monitor)
+        github_monitor = observer = GitHubMonitor(monitor)
+        log_event = log_rate_limit_events(client_logger)
+
+        def on_rate_limit_event(event: RateLimitEvent) -> None:
+            log_event(event)
+            github_monitor.rate_limit_event(event)
+
+        rate_limiter = default_github_rate_limiter(on_event=on_rate_limit_event)
+        monitor.logger.info('Resolving pull request', pr_number=resolver.number, all_targets=all_targets)
+
     async def resolve() -> ResolvedRun | None:
-        async with async_github_client(token=token) as client:
+        async with async_github_client(
+            token=token, logger=client_logger, observer=observer, rate_limiter=rate_limiter
+        ) as client:
             pull = await resolver.resolve(client)
             if pull is None:
+                if monitor is not None:
+                    monitor.logger.info('Nothing to test', reason='no open pull request matches the requested revision')
                 app.display_info('No open pull request matches the requested revision, so there is nothing to test.')
                 return None
             assert pull.head is not None and pull.base is not None, 'Resolved PRs have branch references.'
             assert pull.merge_commit_sha is not None, 'Resolved PRs have a merge commit.'
 
-            return ResolvedRun(
+            run = ResolvedRun(
                 repository=repository,
                 checkout_sha=pull.merge_commit_sha,
                 head_sha=pull.head.sha,
@@ -277,6 +339,18 @@ def resolve_pull_request_run(
                 base_sha=pull.base.sha,
                 is_fork=head_is_fork(pull.head, owner=resolver.owner, repo=resolver.repo),
             )
+            if monitor is not None:
+                monitor.logger.info(
+                    'Pull request resolved',
+                    checkout_sha=run.checkout_sha,
+                    head_sha=run.head_sha,
+                    head_branch=run.head_branch,
+                    base_sha=run.base_sha,
+                    base_branch=run.base_branch,
+                    pr_number=run.pr_number,
+                    is_fork=run.is_fork,
+                )
+            return run
 
     try:
         return asyncio.run(resolve())

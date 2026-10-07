@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import math
+
 from datadog_checks.base.checks.openmetrics.v2.labels import canonicalize_numeric_label
 from datadog_checks.base.checks.openmetrics.v2.utils import decumulate_histogram_buckets
 
@@ -10,9 +12,10 @@ def get_histogram(check, metric_name, modifiers, global_options):
     https://prometheus.io/docs/concepts/metric_types/#histogram
     https://github.com/OpenObservability/OpenMetrics/blob/master/specification/OpenMetrics.md#histogram-1
     """
+    logger = check.log
+
     if global_options['collect_histogram_buckets']:
         if global_options['histogram_buckets_as_distributions']:
-            logger = check.log
             submit_histogram_bucket_method = check.submit_histogram_bucket
 
             if global_options['collect_counters_with_distributions']:
@@ -23,7 +26,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                 def histogram(metric, sample_data, runtime_data):
                     flush_first_value = runtime_data['flush_first_value']
 
-                    for sample, tags, hostname in decumulate_histogram_buckets(sample_data):
+                    for sample, tags, hostname in decumulate_histogram_buckets(sample_data, logger, metric_name):
                         sample_name = sample.name
                         if sample_name.endswith('_sum'):
                             monotonic_count_method(
@@ -45,12 +48,17 @@ def get_histogram(check, metric_name, modifiers, global_options):
                             lower_bound = canonicalize_numeric_label(sample.labels['lower_bound'])
                             upper_bound = canonicalize_numeric_label(sample.labels['upper_bound'])
 
-                            if lower_bound == upper_bound:
-                                # this can happen for -inf/-inf bucket that we don't want to send (always 0)
+                            if lower_bound == upper_bound and math.isinf(lower_bound):
+                                # skip only the degenerate -inf/-inf bucket; finite equal bounds (e.g. le=0) are valid
                                 logger.warning(
                                     'Metric: %s has bucket boundaries equal, skipping: %s', metric_name, sample.labels
                                 )
                                 continue
+
+                            if math.isinf(lower_bound):
+                                # the agent drops buckets with an infinite bound; collapse the open-ended bottom
+                                # bucket to its upper bound, as the agent already does for the +Inf top bucket
+                                lower_bound = upper_bound
 
                             submit_histogram_bucket_method(
                                 metric_name,
@@ -68,19 +76,24 @@ def get_histogram(check, metric_name, modifiers, global_options):
                 def histogram(metric, sample_data, runtime_data):
                     flush_first_value = runtime_data['flush_first_value']
 
-                    for sample, tags, hostname in decumulate_histogram_buckets(sample_data):
+                    for sample, tags, hostname in decumulate_histogram_buckets(sample_data, logger, metric_name):
                         if not sample.name.endswith('_bucket'):
                             continue
 
                         lower_bound = canonicalize_numeric_label(sample.labels['lower_bound'])
                         upper_bound = canonicalize_numeric_label(sample.labels['upper_bound'])
 
-                        if lower_bound == upper_bound:
-                            # this can happen for -inf/-inf bucket that we don't want to send (always 0)
+                        if lower_bound == upper_bound and math.isinf(lower_bound):
+                            # skip only the degenerate -inf/-inf bucket; finite equal bounds (e.g. le=0) are valid
                             logger.warning(
                                 'Metric: %s has bucket boundaries equal, skipping: %s', metric_name, sample.labels
                             )
                             continue
+
+                        if math.isinf(lower_bound):
+                            # the agent drops buckets with an infinite bound; collapse the open-ended bottom
+                            # bucket to its upper bound, as the agent already does for the +Inf top bucket
+                            lower_bound = upper_bound
 
                         submit_histogram_bucket_method(
                             metric_name,
@@ -104,7 +117,7 @@ def get_histogram(check, metric_name, modifiers, global_options):
                 def histogram(metric, sample_data, runtime_data):
                     flush_first_value = runtime_data['flush_first_value']
 
-                    for sample, tags, hostname in decumulate_histogram_buckets(sample_data):
+                    for sample, tags, hostname in decumulate_histogram_buckets(sample_data, logger, metric_name):
                         sample_name = sample.name
                         if sample_name.endswith('_sum'):
                             monotonic_count_method(

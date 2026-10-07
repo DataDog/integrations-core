@@ -1,0 +1,1 @@
+Add support for standard HTTP configuration options (TLS, authentication, proxy, timeouts, headers) and remove the `custom_headers` option in favor of the standard `headers`/`extra_headers` options.

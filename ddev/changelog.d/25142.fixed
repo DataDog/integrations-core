@@ -1,1 +1,0 @@
-Retry interrupted license archive downloads and make license validation tests independent of live HTTP requests.
