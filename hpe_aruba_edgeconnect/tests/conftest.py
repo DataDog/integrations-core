@@ -102,8 +102,8 @@ def dd_environment(instance, dd_save_state):
 def instance():
     def builder(
         orchestrator_ip: str,
-        orchestrator_username: str = 'admin',
-        orchestrator_password: str = '',
+        orchestrator_username: str | None = 'admin',
+        orchestrator_password: str | None = '',
         appliance_ips=None,
         appliance_credentials=None,
         send_ndm_metadata: bool = False,
@@ -111,12 +111,14 @@ def instance():
     ) -> dict:
         inst = {
             'orchestrator_ip': orchestrator_ip,
-            'orchestrator_username': orchestrator_username,
-            'orchestrator_password': orchestrator_password,
             'tls_verify': False,
             'send_ndm_metadata': send_ndm_metadata,
             **kwargs,
         }
+        if orchestrator_username is not None:
+            inst['orchestrator_username'] = orchestrator_username
+        if orchestrator_password is not None:
+            inst['orchestrator_password'] = orchestrator_password
         if appliance_ips is not None:
             inst['appliance_ips'] = appliance_ips if isinstance(appliance_ips, dict) else {'include': appliance_ips}
         if appliance_credentials is not None:

@@ -52,6 +52,67 @@ def test_config_rejects_invalid_appliance_ip_patterns(instance, appliance_ips):
         c.load_configuration_models()
 
 
+APPLIANCE_OVERRIDE = [{'cidr': '0.0.0.0/0', 'username': 'admin', 'password': ''}]
+
+
+@pytest.mark.parametrize(
+    'auth, match',
+    [
+        pytest.param(
+            {'orchestrator_username': None, 'orchestrator_password': None},
+            'Set either `orchestrator_api_key`',
+            id='no-auth',
+        ),
+        pytest.param(
+            {'orchestrator_api_key': '', 'orchestrator_username': None, 'orchestrator_password': None},
+            'Set either `orchestrator_api_key`',
+            id='empty-key-is-unset',
+        ),
+        pytest.param(
+            {'orchestrator_username': 'admin', 'orchestrator_password': None},
+            'must be set together',
+            id='username-without-password',
+        ),
+        pytest.param(
+            {'orchestrator_api_key': 'k', 'appliance_credentials': APPLIANCE_OVERRIDE},
+            'not both',
+            id='key-with-username-password',
+        ),
+        pytest.param(
+            {'orchestrator_api_key': 'k', 'orchestrator_username': None, 'orchestrator_password': None},
+            '`appliance_credentials_overrides` must provide',
+            id='key-without-appliance-credentials',
+        ),
+    ],
+)
+def test_config_rejects_incomplete_auth(instance, auth, match):
+    c = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [instance('localhost:8443', **auth)])
+
+    with pytest.raises(Exception, match=match):
+        c.load_configuration_models()
+
+
+@pytest.mark.parametrize(
+    'auth',
+    [
+        pytest.param({}, id='username-password'),
+        pytest.param(
+            {
+                'orchestrator_api_key': 'k',
+                'orchestrator_username': None,
+                'orchestrator_password': None,
+                'appliance_credentials': APPLIANCE_OVERRIDE,
+            },
+            id='key-with-overrides',
+        ),
+    ],
+)
+def test_config_accepts_complete_auth(instance, auth):
+    c = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [instance('localhost:8443', **auth)])
+
+    c.load_configuration_models()
+
+
 # ---------------------------------------------------------------------------
 # Appliance models
 # ---------------------------------------------------------------------------
