@@ -79,6 +79,9 @@ class MongoSchemas(DBMAsyncJob):
             for coll_name in self._check.api_client.list_authorized_collections(
                 db_name, limit=self._max_collections_per_database
             ):
+                # Profiler records lack _id, which the optimized $sample stage requires.
+                if coll_name == 'system.profile':
+                    continue
                 try:
                     collection = self._discover_collection(db_name, coll_name)
                     collections.append(collection)

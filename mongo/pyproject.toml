@@ -39,7 +39,7 @@ license = "BSD-3-Clause"
 deps = [
     "cachetools==7.2.0",
     "psutil==6.0.0",
-    "pymongo[srv]==4.8.0; python_version >= '3.9'",
+    "pymongo==4.18.2",
 ]
 
 [project.urls]

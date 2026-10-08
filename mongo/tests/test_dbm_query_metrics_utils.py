@@ -2,6 +2,14 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import copy
+import json
+
+import mock
+import pytest
+
+from datadog_checks.mongo import MongoDb
+from datadog_checks.mongo.common import HostingType, StandaloneDeployment
 from datadog_checks.mongo.dbm.utils import (
     get_query_stats_row_key,
     normalize_query_stats_value,
@@ -209,3 +217,76 @@ class TestGetQueryStatsRowKey:
         assert get_query_stats_row_key(row1) != get_query_stats_row_key(row2)
         assert get_query_stats_row_key(row1) != get_query_stats_row_key(row3)
         assert get_query_stats_row_key(row2) != get_query_stats_row_key(row3)
+
+
+@pytest.mark.parametrize(
+    'command,shape,expected',
+    [
+        ('insert', {'documents': ['?object']}, {'documents': ['?']}),
+        (
+            'update',
+            {'q': {'x': '?number'}, 'u': {'$set': {'y': '?string'}}, 'multi': False, 'upsert': True},
+            {'updates': [{'q': {'x': '?'}, 'u': {'$set': {'y': '?'}}, 'multi': False, 'upsert': True}]},
+        ),
+        (
+            'update',
+            {'q': {}, 'u': [{'$set': {'x': '?number'}}], 'arrayFilters': [{'i': '?number'}], 'let': {'v': '?number'}},
+            {'updates': [{'q': {}, 'u': [{'$set': {'x': '?'}}], 'arrayFilters': [{'i': '?'}]}], 'let': {'v': '?'}},
+        ),
+        ('delete', {'q': {'x': '?number'}, 'limit': 1}, {'deletes': [{'q': {'x': '?'}, 'limit': 1}]}),
+        ('count', {'query': {'x': '?number'}}, {'query': {'x': '?'}}),
+        ('distinct', {'query': {'x': '?number'}, 'key': 'x'}, {'query': {'x': '?'}, 'key': 'x'}),
+        ('aggregate', {'pipeline': [], 'allowPartialResults': False}, {'pipeline': [], 'allowPartialResults': False}),
+    ],
+)
+def test_reconstruct_query_stats_commands(command: str, shape: dict, expected: dict):
+    # Losing predicates or update expressions merges unrelated queries into one signature.
+    shape = {'cmdNs': {'db': 'test', 'coll': 'orders'}, 'command': command, **shape}
+    assert reconstruct_command_from_query_shape(shape) == {command: 'orders', '$db': 'test', **expected}
+
+
+@pytest.mark.parametrize('nested', [False, True], ids=['mongodb8', 'mongodb9'])
+def test_query_stats_metric_deltas(nested: bool):
+    # Both response layouts must produce numeric interval metrics, including zero-valued counters.
+    check = MongoDb(
+        'mongo', {}, [{'hosts': ['localhost'], 'database': 'test', 'dbm': True, 'cluster_name': 'test-cluster'}]
+    )
+    check.deployment_type = StandaloneDeployment(HostingType.SELF_HOSTED)
+    collector = check._query_metrics
+    groups = {
+        'cursor': {'firstResponseExecMicros': {'sum': 12}},
+        'queryExec': {'docsExamined': {'sum': 8}, 'docsReturned': {'sum': 2}, 'keysExamined': {'sum': 0}},
+        'queryPlanner': {'usedDisk': {'true': 0, 'false': 2}, 'planningTimeMicros': {'sum': 6}},
+    }
+    metrics = {'execCount': 2, 'totalExecMicros': {'sum': 20}, 'workingTimeMillis': {'sum': 10}}
+    if nested:
+        metrics.update(groups)
+        metrics['writes'] = {'nModified': {'sum': 4}, 'nInserted': {'sum': 0}}
+    else:
+        for group in groups.values():
+            metrics.update(group)
+    row = {
+        'key': {'queryShape': {'cmdNs': {'db': 'test', 'coll': 'orders'}, 'command': 'find', 'filter': {}}},
+        'keyHash': 'key-a',
+        'metrics': metrics,
+    }
+    second = copy.deepcopy(row)
+    second['metrics']['execCount'] = 3
+    second['metrics']['totalExecMicros']['sum'] = 35
+    second['metrics']['workingTimeMillis']['sum'] = 14
+    (second['metrics']['queryExec'] if nested else second['metrics'])['docsExamined']['sum'] = 11
+    if nested:
+        second['metrics']['writes']['nModified']['sum'] = 7
+    with mock.patch.object(collector, '_load_query_stats', side_effect=[[row], [second]]):
+        assert collector._collect_metrics_rows() == []
+        (result,) = collector._collect_metrics_rows()
+    assert result['exec_count'] == 1
+    assert result['total_exec_micros_sum'] == 15
+    assert result['working_time_millis_sum'] == 4
+    assert result['docs_examined_sum'] == 3
+    assert result['keys_examined_sum'] == 0
+    assert result['used_disk_count'] == 0
+    if nested:
+        assert result['docs_modified_sum'] == 3
+        assert result['docs_inserted_sum'] == 0
+    json.dumps(result)
