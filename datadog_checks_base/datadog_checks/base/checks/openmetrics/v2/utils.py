@@ -6,6 +6,11 @@ from prometheus_client.samples import Sample
 NEGATIVE_INFINITY = float('-inf')
 
 
+def remove_bound_tags(tags: list[str], bound_tag_prefixes: tuple[str, ...]) -> list[str]:
+    """Return the tags without the histogram bucket bound tags."""
+    return [tag for tag in tags if not tag.startswith(bound_tag_prefixes)]
+
+
 def decumulate_histogram_buckets(sample_data):
     """
     Decumulate buckets in a given histogram metric and adds the lower_bound label (le being upper_bound)
