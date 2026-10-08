@@ -1,1 +1,1 @@
-Limit lines read with `iter_lines` to 10 MiB so that a response without line breaks is no longer buffered in memory in its entirety.
+Limit lines read with `iter_lines` to 4 MiB so that a response without line breaks is no longer buffered in memory in its entirety. The limit can be changed with the new `max_line_size` option (in KiB).

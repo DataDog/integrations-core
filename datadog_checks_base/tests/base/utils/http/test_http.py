@@ -19,7 +19,13 @@ import requests_unixsocket
 import urllib3
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http import RequestsWrapper, ResponseWrapper, is_uds_url, quote_uds_url
+from datadog_checks.base.utils.http import (
+    RequestsWrapper,
+    ResponseLineTooLongError,
+    ResponseWrapper,
+    is_uds_url,
+    quote_uds_url,
+)
 from datadog_checks.dev.utils import ON_WINDOWS
 
 
@@ -363,8 +369,7 @@ def _gzip_response(body):
     ],
 )
 def test_iter_lines_allows_lines_up_to_limit(body, lines):
-    with mock.patch('datadog_checks.base.utils.http.MAX_LINE_SIZE', 10):
-        assert len(list(ResponseWrapper(_gzip_response(body), 4).iter_lines())) == lines
+    assert len(list(ResponseWrapper(_gzip_response(body), 4, 10).iter_lines())) == lines
 
 
 @pytest.mark.parametrize(
@@ -375,11 +380,18 @@ def test_iter_lines_allows_lines_up_to_limit(body, lines):
     ],
 )
 def test_iter_lines_limits_line_size(body):
-    lines = ResponseWrapper(_gzip_response(body), 4).iter_lines()
+    with pytest.raises(ResponseLineTooLongError, match='line longer than 10 bytes'):
+        list(ResponseWrapper(_gzip_response(body), 4, 10).iter_lines())
 
-    with mock.patch('datadog_checks.base.utils.http.MAX_LINE_SIZE', 10):
-        with pytest.raises(ValueError, match='line longer than 10 bytes'):
-            list(lines)
+
+def test_iter_lines_uses_configured_line_size():
+    http = RequestsWrapper({'max_line_size': 1}, {})
+
+    with mock.patch('requests.Session.get', return_value=_gzip_response(b'x' * 1024 + b'\ny\n')):
+        assert len(list(http.get('https://www.google.com', stream=True).iter_lines())) == 2
+    with mock.patch('requests.Session.get', return_value=_gzip_response(b'x' * 1025 + b'\ny\n')):
+        with pytest.raises(ResponseLineTooLongError, match='`max_line_size` option'):
+            list(http.get('https://www.google.com', stream=True).iter_lines())
 
 
 def test_iter_lines_does_not_create_reference_cycle():

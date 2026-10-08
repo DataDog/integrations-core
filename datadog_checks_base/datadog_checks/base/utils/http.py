@@ -63,8 +63,8 @@ DEFAULT_EXPIRATION = 300
 # https://www.bittorrent.org/beps/bep_0003.html
 DEFAULT_CHUNK_SIZE = 16
 
-# `iter_lines` buffers a line until its end, so a line is limited to avoid holding an unbounded response in memory
-MAX_LINE_SIZE = 10 * 1024 * 1024
+# `iter_lines` buffers a line until its end, so lines are limited (in KiB) to avoid buffering an unbounded response
+DEFAULT_MAX_LINE_SIZE = 4096
 
 STANDARD_FIELDS = {
     'allow_redirects': True,
@@ -84,6 +84,7 @@ STANDARD_FIELDS = {
     'kerberos_keytab': None,
     'kerberos_principal': None,
     'log_requests': False,
+    'max_line_size': DEFAULT_MAX_LINE_SIZE,
     'ntlm_domain': None,
     'password': None,
     'persist_connections': False,
@@ -236,7 +237,11 @@ class _SSLContextAdapter(requests.adapters.HTTPAdapter):
         return host_params, {"ssl_context": self.ssl_context}
 
 
-def _limit_line_size(raw):
+class ResponseLineTooLongError(ValueError):
+    pass
+
+
+def _limit_line_size(raw, max_line_size):
     # A weak reference avoids a `raw` -> `raw.stream` -> `raw` cycle that only the cyclic GC could free
     stream = weakref.WeakMethod(raw.stream)
 
@@ -246,23 +251,27 @@ def _limit_line_size(raw):
             newline = chunk.find(b'\n')
             if newline < 0:
                 line_size += len(chunk)
-            elif line_size + newline <= MAX_LINE_SIZE:
+            elif line_size + newline <= max_line_size:
                 line_size = len(chunk) - chunk.rfind(b'\n') - 1
             else:
                 line_size += newline
-            if line_size > MAX_LINE_SIZE:
-                raise ValueError(f'Response contains a line longer than {MAX_LINE_SIZE} bytes')
+            if line_size > max_line_size:
+                raise ResponseLineTooLongError(
+                    f'Response contains a line longer than {max_line_size} bytes, '
+                    'the limit can be raised with the `max_line_size` option'
+                )
             yield chunk
 
     return limited_stream
 
 
 class ResponseWrapper(ObjectProxy):
-    def __init__(self, response, default_chunk_size):
+    def __init__(self, response, default_chunk_size, max_line_size=DEFAULT_MAX_LINE_SIZE * KIBIBYTE):
         super(ResponseWrapper, self).__init__(response)
 
         # See https://github.com/psf/requests/pull/5942
         self.__default_chunk_size = default_chunk_size
+        self.__max_line_size = max_line_size
 
     def iter_content(self, chunk_size=None, decode_unicode=False):
         if chunk_size is None:
@@ -276,7 +285,7 @@ class ResponseWrapper(ObjectProxy):
 
         raw = self.__wrapped__.raw
         if delimiter is None and inspect.ismethod(getattr(raw, 'stream', None)):
-            raw.stream = _limit_line_size(raw)
+            raw.stream = _limit_line_size(raw, self.__max_line_size)
 
         return self.__wrapped__.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter)
 
@@ -434,6 +443,7 @@ class RequestsWrapper(object):
         'request_hooks',
         'auth_token_handler',
         'request_size',
+        'max_line_size',
         'tls_protocols_allowed',
         'aia_chasing_max_depth',
         'tls_config',
@@ -600,6 +610,9 @@ class RequestsWrapper(object):
         self.ignore_tls_warning = is_affirmative(config['tls_ignore_warning'])
 
         self.request_size = int(float(config['request_size']) * KIBIBYTE)
+        self.max_line_size = int(float(config['max_line_size']) * KIBIBYTE)
+        if self.max_line_size <= 0:
+            raise ConfigurationError('The `max_line_size` setting must be greater than 0')
 
         self.aia_chasing_max_depth = DEFAULT_AIA_CHASING_MAX_DEPTH
 
@@ -705,7 +718,7 @@ class RequestsWrapper(object):
             else:
                 response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
 
-            return ResponseWrapper(response, self.request_size)
+            return ResponseWrapper(response, self.request_size, self.max_line_size)
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
         try:
