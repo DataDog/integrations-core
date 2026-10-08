@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import gc
 import gzip
 import io
 import logging
@@ -9,6 +10,7 @@ import ssl
 import subprocess
 import tempfile
 import time
+import weakref
 
 import mock
 import pytest
@@ -345,23 +347,49 @@ class TestLogger:
             assert message != expected_message
 
 
-@pytest.mark.parametrize(
-    'body, too_long',
-    [
-        pytest.param(b'x' * 11, True, id='line too long'),
-        pytest.param(b'1234567\n' * 100, False, id='long body with short lines'),
-    ],
-)
-def test_iter_lines_limits_line_size(body, too_long):
+def _gzip_response(body):
     response = requests.Response()
     response.raw = urllib3.HTTPResponse(
         io.BytesIO(gzip.compress(body)), headers={'Content-Encoding': 'gzip'}, preload_content=False
     )
-    lines = ResponseWrapper(response, 4).iter_lines()
+    return response
+
+
+@pytest.mark.parametrize(
+    'body, lines',
+    [
+        pytest.param(b'1234567\n' * 100, 100, id='long body with short lines'),
+        pytest.param(b'x' * 10 + b'\ny', 2, id='line at the limit'),
+    ],
+)
+def test_iter_lines_allows_lines_up_to_limit(body, lines):
+    with mock.patch('datadog_checks.base.utils.http.MAX_LINE_SIZE', 10):
+        assert len(list(ResponseWrapper(_gzip_response(body), 4).iter_lines())) == lines
+
+
+@pytest.mark.parametrize(
+    'body',
+    [
+        pytest.param(b'x' * 11, id='no line break'),
+        pytest.param(b'x' * 11 + b'\ny', id='line break after the limit'),
+    ],
+)
+def test_iter_lines_limits_line_size(body):
+    lines = ResponseWrapper(_gzip_response(body), 4).iter_lines()
 
     with mock.patch('datadog_checks.base.utils.http.MAX_LINE_SIZE', 10):
-        if too_long:
-            with pytest.raises(ValueError, match='line longer than 10 bytes'):
-                list(lines)
-        else:
-            assert len(list(lines)) == 100
+        with pytest.raises(ValueError, match='line longer than 10 bytes'):
+            list(lines)
+
+
+def test_iter_lines_does_not_create_reference_cycle():
+    response = _gzip_response(b'line\n')
+    list(ResponseWrapper(response, 4).iter_lines())
+    raw = weakref.ref(response.raw)
+
+    gc.disable()
+    try:
+        del response
+        assert raw() is None
+    finally:
+        gc.enable()

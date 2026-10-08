@@ -3,11 +3,13 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import inspect
 import logging
 import os
 import re
 import socket
 import warnings
+import weakref
 from collections import ChainMap
 from collections.abc import Mapping
 from contextlib import ExitStack, contextmanager
@@ -234,12 +236,20 @@ class _SSLContextAdapter(requests.adapters.HTTPAdapter):
         return host_params, {"ssl_context": self.ssl_context}
 
 
-def _limit_line_size(stream):
+def _limit_line_size(raw):
+    # A weak reference avoids a `raw` -> `raw.stream` -> `raw` cycle that only the cyclic GC could free
+    stream = weakref.WeakMethod(raw.stream)
+
     def limited_stream(*args, **kwargs):
         line_size = 0
-        for chunk in stream(*args, **kwargs):
-            newline = chunk.rfind(b'\n')
-            line_size = len(chunk) - newline - 1 if newline >= 0 else line_size + len(chunk)
+        for chunk in stream()(*args, **kwargs):
+            newline = chunk.find(b'\n')
+            if newline < 0:
+                line_size += len(chunk)
+            elif line_size + newline <= MAX_LINE_SIZE:
+                line_size = len(chunk) - chunk.rfind(b'\n') - 1
+            else:
+                line_size += newline
             if line_size > MAX_LINE_SIZE:
                 raise ValueError(f'Response contains a line longer than {MAX_LINE_SIZE} bytes')
             yield chunk
@@ -265,8 +275,8 @@ class ResponseWrapper(ObjectProxy):
             chunk_size = self.__default_chunk_size
 
         raw = self.__wrapped__.raw
-        if delimiter is None and hasattr(raw, 'stream'):
-            raw.stream = _limit_line_size(raw.stream)
+        if delimiter is None and inspect.ismethod(getattr(raw, 'stream', None)):
+            raw.stream = _limit_line_size(raw)
 
         return self.__wrapped__.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter)
 
