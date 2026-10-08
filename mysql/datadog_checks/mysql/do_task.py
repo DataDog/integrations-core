@@ -16,6 +16,7 @@ event per execution. The backend joins them back to the task by `task_id`, `stat
 from __future__ import annotations
 
 import datetime
+import threading
 import time
 import uuid
 from contextlib import closing
@@ -57,6 +58,11 @@ CONNECTION_ERROR_CODES = frozenset((2002, 2003, 2006, 2013))
 # MySQL max_execution_time or MariaDB max_statement_time exceeded.
 STATEMENT_TIMEOUT_ERROR_CODES = frozenset((3024, 1969))
 LOCK_WAIT_TIMEOUT_ERROR_CODE = 1205
+# KILL QUERY on a connection that is no longer running a statement.
+UNKNOWN_THREAD_ERROR_CODE = 1094
+
+# Connect and read timeout of the short-lived connection that kills a cancelled statement.
+KILL_TIMEOUT_SECONDS = 10
 
 
 class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
@@ -78,6 +84,65 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
         self._session: DOQuerySession | None = None
         self._server_version = None
         self._metric_tags: list[str] | None = None
+        # Server connection ID of the statement in flight, read by cancel() from another thread.
+        self._statement_lock = threading.Lock()
+        self._running_connection_id: int | None = None
+
+    def cancel(self) -> None:
+        """
+        Stop the task when the Agent unschedules its check, which happens when the task's config
+        leaves Remote Configuration. Besides the base class's signal, a statement still running on
+        the server is killed, so it stops using the database now rather than at its timeout. The
+        Agent waits only briefly for cancel(), so the kill runs on a thread of its own. Killing is
+        best effort: it fails, for example, when the user has no connection left.
+        """
+        super().cancel()
+        with self._statement_lock:
+            connection_id = self._running_connection_id
+        if connection_id is None:
+            return
+        threading.Thread(
+            target=self._kill_statement,
+            args=(connection_id,),
+            name=f'do-task-kill-{self._task.task_id}',
+            daemon=True,
+        ).start()
+
+    def _kill_statement(self, connection_id: int) -> None:
+        args = {
+            **self._get_connection_args(),
+            'connect_timeout': KILL_TIMEOUT_SECONDS,
+            'read_timeout': KILL_TIMEOUT_SECONDS,
+        }
+        try:
+            conn = pymysql.connect(**args)
+            try:
+                with closing(conn.cursor(CommenterCursor)) as cursor:
+                    # A user may kill its own connections without any privilege.
+                    cursor.execute("KILL QUERY %s", (int(connection_id),))
+            finally:
+                _close_quietly(conn, self.log)
+        except pymysql.err.OperationalError as error:
+            if error.args and error.args[0] == UNKNOWN_THREAD_ERROR_CODE:
+                # The statement finished, and its connection closed, before the kill arrived.
+                self._count('dd.mysql.do_task.kills', ['outcome:not_running'])
+                return
+            self._kill_failed(error)
+            return
+        except Exception as error:
+            self._kill_failed(error)
+            return
+        self.log.debug("Killed the running statement of cancelled Data Observability task %s", self._task.task_id)
+        self._count('dd.mysql.do_task.kills', ['outcome:killed'])
+
+    def _kill_failed(self, error: Exception) -> None:
+        self.log.warning(
+            "Could not kill the running statement of cancelled Data Observability task %s, it runs until "
+            "its timeout: %s",
+            self._task.task_id,
+            error,
+        )
+        self._count('dd.mysql.do_task.kills', ['outcome:failed', f'exc_class:{type(error).__name__}'])
 
     def check(self, _):
         task = self._task
@@ -154,9 +219,27 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
     def _run_statement(self, statement: Statement) -> bool:
         """
         Run one statement, streaming its rows as chunk events, then send its final event. Returns
-        False if the check was cancelled during the read, in which case no final event is sent.
+        False if the check was cancelled before or during the statement, in which case no final
+        event is sent.
         """
         session = self._session
+        with self._statement_lock:
+            # Checked under the lock cancel() reads the connection ID with, so a cancel either sees
+            # this statement running and kills it, or the statement never starts.
+            if self.is_cancelled:
+                return False
+            self._running_connection_id = session.conn.thread_id()
+        try:
+            return self._stream_statement(session, statement)
+        finally:
+            self._statement_finished()
+
+    def _statement_finished(self) -> None:
+        """Mark the server done with the statement in flight, so a later cancel kills nothing."""
+        with self._statement_lock:
+            self._running_connection_id = None
+
+    def _stream_statement(self, session: DOQuerySession, statement: Statement) -> bool:
         # A new result_id for every execution, so the backend never mixes the chunks of two runs of
         # a statement, for example before and after an Agent restart.
         sender = _ChunkSender(self, statement, str(uuid.uuid4()))
@@ -181,6 +264,11 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
                     sender.add([_to_text(value) for value in row])
             sender.flush()
         except Exception as error:
+            if self.is_cancelled:
+                # Most likely the kill from cancel() interrupted the statement. Nobody waits for
+                # the result, and the session may be mid-result.
+                self._close()
+                return False
             duration = time.time() - start
             result = _error_result(error, duration)
             if not session.conn.open:
@@ -211,6 +299,7 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
                 'error_kind': None,
                 'error_code': None,
             }
+        self._statement_finished()
         self._emit_final(statement, sender, columns, result)
         return True
 
