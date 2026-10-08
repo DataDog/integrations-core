@@ -45,7 +45,7 @@ def test_query_metrics_recover_after_text_lookup_failure(instance: dict, aggrega
             '_fetch_statement_texts',
             side_effect=[
                 {(0, '01', inserted): 'SELECT A FROM T'},
-                ConnectionError('text lookup failed'),
+                Db2ConnectionError('text lookup failed'),
                 {(0, '02', inserted): 'SELECT B FROM T'},
             ],
         ),
@@ -54,7 +54,7 @@ def test_query_metrics_recover_after_text_lookup_failure(instance: dict, aggrega
         collector.run_job()
         assert len(aggregator.get_event_platform_events('dbm-metrics')) == 1
 
-        with pytest.raises(ConnectionError, match='text lookup failed'):
+        with pytest.raises(Db2ConnectionError, match='text lookup failed'):
             collector.run_job()
         assert len(aggregator.get_event_platform_events('dbm-metrics')) == 1
 
