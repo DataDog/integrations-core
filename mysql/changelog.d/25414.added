@@ -1,1 +1,1 @@
-Add a task mode that runs one-off Data Observability SQL statements once and streams each result, up to 1,000,000 rows, as events. Set `data_observability.task_concurrency` to let the Agent run more than one task against the database at a time.
+Add a task mode that runs one-off Data Observability SQL statements once and streams each result, up to 1,000,000 rows, as events. Set `data_observability.task_concurrency` to let the Agent run more than one task against the database at a time. A task the Agent cancels stops its running statement on the server.

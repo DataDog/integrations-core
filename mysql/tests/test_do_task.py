@@ -630,6 +630,136 @@ def test_cancel_while_reading_closes_the_connection(aggregator, dd_run_check, in
     aggregator.assert_metric('dd.mysql.do_task.statements', count=0)
 
 
+class _InlineThread:
+    """Runs a thread's target inside start(), so a test sees the kill finish before it asserts."""
+
+    started = []
+
+    def __init__(self, target, args=(), name=None, daemon=None):
+        self._target, self._args = target, args
+        _InlineThread.started.append(name)
+
+    def start(self):
+        self._target(*self._args)
+
+
+@pytest.fixture
+def inline_threads():
+    _InlineThread.started = []
+    with patch('datadog_checks.mysql.do_task.threading.Thread', _InlineThread):
+        yield _InlineThread.started
+
+
+INTERRUPTED = pymysql.err.OperationalError(1317, 'Query execution was interrupted')
+
+
+def test_cancel_kills_the_running_statement(aggregator, dd_run_check, instance_basic, inline_threads):
+    check = _create_check(instance_basic, [_statement('s0', 'SELECT SLOW'), _statement('s1')])
+    kill_conn = FakeConnection()
+
+    def cancelled_while_executing(conn):
+        # The Agent unschedules the check while the server is still executing the statement.
+        check.cancel()
+        return INTERRUPTED
+
+    conn = FakeConnection({'SELECT SLOW': cancelled_while_executing, 'SELECT 1': (['1'], [(1,)])})
+    conn.connection_id = 1234
+
+    with patch('datadog_checks.mysql.do_task.pymysql.connect', return_value=kill_conn) as connect:
+        _run(dd_run_check, check, conn)
+
+    assert inline_threads == [f'do-task-kill-{TASK_ID}']
+    assert connect.call_args.kwargs['connect_timeout'] == connect.call_args.kwargs['read_timeout'] == 10
+    assert kill_conn.executed == [('KILL QUERY %s', (1234,))]
+    assert not kill_conn.open
+    # Nobody waits for the result of a cancelled task.
+    assert not _events(aggregator)
+    assert not conn.open
+    assert 'SELECT 1' not in conn.executed
+    _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:cancelled')
+    _assert_count(aggregator, check, 'dd.mysql.do_task.kills', 'outcome:killed')
+
+
+def test_cancel_kills_the_statement_while_reading(aggregator, dd_run_check, instance_basic, inline_threads):
+    check = _create_check(instance_basic, [_statement('s0', 'SELECT id FROM big')])
+    conn = FakeConnection({'SELECT id FROM big': (['id'], [(i,) for i in range(5_000)])})
+    kill_conn = FakeConnection()
+    conn.on_fetch = lambda: check.cancel() if len(conn.fetch_sizes) == 2 else None
+
+    with patch('datadog_checks.mysql.do_task.pymysql.connect', return_value=kill_conn):
+        _run(dd_run_check, check, conn)
+
+    assert kill_conn.executed == [('KILL QUERY %s', (7,))]
+    assert not [event for event in _events(aggregator) if event.get('kind') == 'final']
+    _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:cancelled')
+
+
+def test_cancel_between_statements_kills_nothing(aggregator, dd_run_check, instance_basic, inline_threads):
+    check = _create_check(instance_basic, [_statement('s0', 'SELECT 1'), _statement('s1', 'SELECT 2')])
+    conn = FakeConnection({'SELECT 1': (['1'], [(1,)]), 'SELECT 2': (['2'], [(2,)])})
+    emit = check._emit
+
+    def cancel_after_the_first_result(event):
+        emit(event)
+        if event.get('kind') == 'final':
+            check.cancel()
+
+    with (
+        patch.object(check, '_emit', side_effect=cancel_after_the_first_result),
+        patch('datadog_checks.mysql.do_task.pymysql.connect') as connect,
+    ):
+        _run(dd_run_check, check, conn)
+
+    assert not inline_threads
+    connect.assert_not_called()
+    assert 'SELECT 2' not in conn.executed
+    _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:cancelled')
+
+
+def test_cancel_of_an_idle_check_kills_nothing(instance_basic, inline_threads):
+    check = _create_check(instance_basic, [_statement()])
+
+    with patch('datadog_checks.mysql.do_task.pymysql.connect') as connect:
+        check.cancel()
+
+    assert not inline_threads
+    connect.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    'error, outcome',
+    [
+        pytest.param(
+            pymysql.err.OperationalError(1094, 'Unknown thread id: 7'), ['outcome:not_running'], id='finished'
+        ),
+        pytest.param(
+            pymysql.err.OperationalError(1226, "User 'dog' has exceeded the 'max_user_connections' resource"),
+            ['outcome:failed', 'exc_class:OperationalError'],
+            id='no connection left',
+        ),
+        pytest.param(OSError('network unreachable'), ['outcome:failed', 'exc_class:OSError'], id='connect failed'),
+    ],
+)
+def test_kill_failures_are_counted(aggregator, instance_basic, error, outcome):
+    check = _create_check(instance_basic, [_statement()])
+
+    with patch('datadog_checks.mysql.do_task.pymysql.connect', side_effect=error):
+        check._kill_statement(7)
+
+    _assert_count(aggregator, check, 'dd.mysql.do_task.kills', *outcome)
+
+
+def test_kill_query_error_is_counted_and_closes_the_connection(aggregator, instance_basic):
+    check = _create_check(instance_basic, [_statement()])
+    kill_conn = FakeConnection({'KILL QUERY %s': pymysql.err.OperationalError(1094, 'Unknown thread id: 7')})
+
+    with patch('datadog_checks.mysql.do_task.pymysql.connect', return_value=kill_conn):
+        check._kill_statement(7)
+
+    assert not kill_conn.open
+    _assert_count(aggregator, check, 'dd.mysql.do_task.kills', 'outcome:not_running')
+
+
 def test_final_event_carries_the_statement(aggregator, dd_run_check, instance_basic):
     check = _create_check(instance_basic, [_statement(query='SELECT id FROM t')])
 

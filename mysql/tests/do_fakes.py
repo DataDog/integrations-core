@@ -32,6 +32,11 @@ class FakeConnection:
         self.drained = False
         # Like the server, results stop at the session's sql_select_limit.
         self.select_limit = None
+        # The server's ID for the connection, as pymysql reads it from the handshake.
+        self.connection_id = 7
+
+    def thread_id(self):
+        return self.connection_id
 
     def cursor(self, cursor_class=None):
         self.cursor_classes.append(cursor_class)
