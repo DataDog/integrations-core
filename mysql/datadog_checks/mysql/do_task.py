@@ -1,0 +1,516 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+"""
+One-off Data Observability tasks.
+
+The Agent schedules a separate run-once `mysql` check for each task that Remote Configuration
+delivers. That check holds only the connection settings of the matched instance plus a
+`do_task` block, so the user's own check is never touched. `MySql.__new__` builds it as a
+`MySqlTaskCheck`, which runs each statement once on its own connection and streams every result as
+`do-query-results` events: a chunk event each time 4 MiB of rows have been read, then one final
+event per execution. The backend joins them back to the task by `task_id`, `statement_id` and
+`result_id`.
+"""
+
+from __future__ import annotations
+
+import datetime
+import threading
+import time
+import uuid
+from contextlib import closing
+from decimal import Decimal
+from typing import TYPE_CHECKING, Any
+
+import pymysql
+
+from datadog_checks.base import DatabaseCheck
+from datadog_checks.base.utils.format import json
+
+from .config_models.instance import DoTask
+from .cursor import CommenterCursor
+from .data_observability import EVENT_TRACK_TYPE
+from .do_query import DOQuerySession, NoResultSetError
+from .instance_mixin import MySQLInstanceMixin
+from .util import connect_with_session_variables
+from .version_utils import parse_version
+
+if TYPE_CHECKING:
+    from .config_models.instance import Statement
+
+# Hard cap on the rows one statement returns, whatever its max_rows asks for. The DO_QUERY_ACTIONS
+# schema and agenttask enforce the same value.
+MAX_TASK_STATEMENT_ROWS = 1_000_000
+
+# Upper bound on one serialized event. Rows are sent in chunks of at most this size, which keeps
+# every event well under the intake's per-event limit.
+MAX_EVENT_BYTES = 4 * 1024 * 1024
+
+# How long the server waits while the check is not reading a result. The check reads continuously,
+# so this is only a margin for pauses such as garbage collection or a throttled Agent container.
+# It does not limit how long a statement runs: timeout_seconds does.
+NET_WRITE_TIMEOUT_SECONDS = 300
+
+# Client errors that mean the connection is gone: can't connect, server gone away, lost
+# connection during a query.
+CONNECTION_ERROR_CODES = frozenset((2002, 2003, 2006, 2013))
+# MySQL max_execution_time or MariaDB max_statement_time exceeded.
+STATEMENT_TIMEOUT_ERROR_CODES = frozenset((3024, 1969))
+LOCK_WAIT_TIMEOUT_ERROR_CODE = 1205
+# KILL QUERY on a connection that is no longer running a statement.
+UNKNOWN_THREAD_ERROR_CODE = 1094
+
+# Connect and read timeout of the short-lived connection that kills a cancelled statement.
+KILL_TIMEOUT_SECONDS = 10
+
+
+class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
+    """
+    Runs the statements of one `do_task` once and reports a result for each of them. It sends no
+    integration metrics, service checks, health events or DBM data: those would carry the tags of
+    the user's own instance, so for example a task that fails to connect would flip that instance's
+    `mysql.can_connect` status. Its only output besides the result events is internal
+    `dd.mysql.do_task.*` metrics.
+    """
+
+    DBMS = 'mysql'
+    HA_SUPPORTED = True
+
+    def __init__(self, name, init_config, instances):
+        super().__init__(name, init_config, instances)
+        self._init_instance(init_config)
+        self._task = DoTask.model_validate(self.instance['do_task'])
+        self._session: DOQuerySession | None = None
+        self._server_version = None
+        self._metric_tags: list[str] | None = None
+        # Server connection ID of the statement in flight, read by cancel() from another thread.
+        self._statement_lock = threading.Lock()
+        self._running_connection_id: int | None = None
+
+    def cancel(self) -> None:
+        """
+        Stop the task when the Agent unschedules its check, which happens when the task's config
+        leaves Remote Configuration. Besides the base class's signal, a statement still running on
+        the server is killed, so it stops using the database now rather than at its timeout. The
+        Agent waits only briefly for cancel(), so the kill runs on a thread of its own. Killing is
+        best effort: it fails, for example, when the user has no connection left.
+        """
+        super().cancel()
+        with self._statement_lock:
+            connection_id = self._running_connection_id
+        if connection_id is None:
+            return
+        threading.Thread(
+            target=self._kill_statement,
+            args=(connection_id,),
+            name=f'do-task-kill-{self._task.task_id}',
+            daemon=True,
+        ).start()
+
+    def _kill_statement(self, connection_id: int) -> None:
+        args = {
+            **self._get_connection_args(),
+            'connect_timeout': KILL_TIMEOUT_SECONDS,
+            'read_timeout': KILL_TIMEOUT_SECONDS,
+        }
+        try:
+            conn = pymysql.connect(**args)
+            try:
+                with closing(conn.cursor(CommenterCursor)) as cursor:
+                    # A user may kill its own connections without any privilege.
+                    cursor.execute("KILL QUERY %s", (int(connection_id),))
+            finally:
+                _close_quietly(conn, self.log)
+        except pymysql.err.OperationalError as error:
+            if error.args and error.args[0] == UNKNOWN_THREAD_ERROR_CODE:
+                # The statement finished, and its connection closed, before the kill arrived.
+                self._count('dd.mysql.do_task.kills', ['outcome:not_running'])
+                return
+            self._kill_failed(error)
+            return
+        except Exception as error:
+            self._kill_failed(error)
+            return
+        self.log.debug("Killed the running statement of cancelled Data Observability task %s", self._task.task_id)
+        self._count('dd.mysql.do_task.kills', ['outcome:killed'])
+
+    def _kill_failed(self, error: Exception) -> None:
+        self.log.warning(
+            "Could not kill the running statement of cancelled Data Observability task %s, it runs until "
+            "its timeout: %s",
+            self._task.task_id,
+            error,
+        )
+        self._count('dd.mysql.do_task.kills', ['outcome:failed', f'exc_class:{type(error).__name__}'])
+
+    def check(self, _):
+        task = self._task
+        if time.time() >= task.expires_at:
+            # The Agent drops stale tasks too; this catches a task that sat in the queue.
+            self.log.warning("Not running Data Observability task %s: it expired at %d", task.task_id, task.expires_at)
+            self._emit_task_error('expired', f'Task expired at {task.expires_at} before it ran')
+            self._count('dd.mysql.do_task.runs', ['outcome:expired'])
+            return
+
+        statements = task.statements
+        try:
+            for index, statement in enumerate(statements):
+                if self.is_cancelled:
+                    # The task's config is gone (cancelled or expired), so nobody waits for the rest.
+                    self.log.debug(
+                        "Data Observability task %s cancelled, skipping %d statements",
+                        task.task_id,
+                        len(statements) - index,
+                    )
+                    self._count('dd.mysql.do_task.runs', ['outcome:cancelled'])
+                    return
+                if self._session is None:
+                    try:
+                        self._connect()
+                    except Exception as error:
+                        self._close()
+                        self.log.warning("Data Observability task %s could not connect: %s", task.task_id, error)
+                        result = _error_result(error, 0.0, connecting=True)
+                        for pending in statements[index:]:
+                            sender = _ChunkSender(self, pending, str(uuid.uuid4()))
+                            self._emit_final(pending, sender, [], result, executed=False)
+                        self._count('dd.mysql.do_task.runs', ['outcome:connection_error'])
+                        return
+                if not self._run_statement(statement):
+                    self.log.debug(
+                        "Data Observability task %s cancelled while reading statement %s",
+                        task.task_id,
+                        statement.id,
+                    )
+                    self._count('dd.mysql.do_task.runs', ['outcome:cancelled'])
+                    return
+            self._count('dd.mysql.do_task.runs', ['outcome:completed'])
+        finally:
+            self._close()
+
+    def _connect(self) -> None:
+        conn = connect_with_session_variables(mysql_version=self._server_version, **self._get_connection_args())
+        try:
+            with closing(conn.cursor(CommenterCursor)) as cursor:
+                if self._server_version is None:
+                    cursor.execute("SELECT @@version, @@version_comment")
+                    raw_version, version_comment = cursor.fetchone()
+                    self._server_version = parse_version(raw_version, version_comment)
+                # Task statements only read. A read-only session makes the server reject any write a
+                # statement attempts, whatever the monitoring user is granted.
+                cursor.execute("SET SESSION TRANSACTION READ ONLY")
+                # Temporal values come back in UTC whatever the server's time zone is.
+                cursor.execute("SET time_zone = '+00:00'")
+                # The server waits this long for the check to read more rows before dropping the
+                # connection, so a short pause while streaming a large result never fails it.
+                cursor.execute("SET SESSION net_write_timeout = %s", (NET_WRITE_TIMEOUT_SECONDS,))
+        except Exception:
+            _close_quietly(conn, self.log)
+            raise
+        self._session = DOQuerySession(conn, self._server_version, self._server_version.flavor == 'MariaDB')
+
+    def _close(self) -> None:
+        session = self._session
+        self._session = None
+        if session is not None:
+            _close_quietly(session.conn, self.log)
+
+    def _run_statement(self, statement: Statement) -> bool:
+        """
+        Run one statement, streaming its rows as chunk events, then send its final event. Returns
+        False if the check was cancelled before or during the statement, in which case no final
+        event is sent.
+        """
+        session = self._session
+        with self._statement_lock:
+            # Checked under the lock cancel() reads the connection ID with, so a cancel either sees
+            # this statement running and kills it, or the statement never starts.
+            if self.is_cancelled:
+                return False
+            self._running_connection_id = session.conn.thread_id()
+        try:
+            return self._stream_statement(session, statement)
+        finally:
+            self._statement_finished()
+
+    def _statement_finished(self) -> None:
+        """Mark the server done with the statement in flight, so a later cancel kills nothing."""
+        with self._statement_lock:
+            self._running_connection_id = None
+
+    def _stream_statement(self, session: DOQuerySession, statement: Statement) -> bool:
+        # A new result_id for every execution, so the backend never mixes the chunks of two runs of
+        # a statement, for example before and after an Agent restart.
+        sender = _ChunkSender(self, statement, str(uuid.uuid4()))
+        start = time.time()
+        columns: list[str] = []
+        try:
+            columns, batches = session.stream(
+                statement.dbname,
+                statement.query,
+                statement.timeout_seconds * 1000,
+                min(statement.max_rows, MAX_TASK_STATEMENT_ROWS),
+            )
+            for batch in batches:
+                if self.is_cancelled:
+                    # Nobody waits for the result. Closing the iterator marks the session unusable
+                    # without draining the rest of the result; closing the connection makes the
+                    # server abort the statement on its next write.
+                    batches.close()
+                    self._close()
+                    return False
+                for row in batch:
+                    sender.add([_to_text(value) for value in row])
+            sender.flush()
+        except Exception as error:
+            if self.is_cancelled:
+                # Most likely the kill from cancel() interrupted the statement. Nobody waits for
+                # the result, and the session may be mid-result.
+                self._close()
+                return False
+            duration = time.time() - start
+            result = _error_result(error, duration)
+            if not session.conn.open:
+                result['error_kind'] = 'connection_error'
+            # Keep the connection only after a plain server error. Anything else can leave it
+            # mid-result, and a statement that returned no result set may have changed the session,
+            # its read-only setting included, so the next statement starts on a fresh one.
+            if (
+                not isinstance(error, pymysql.err.DatabaseError)
+                or isinstance(error, NoResultSetError)
+                or result['error_kind'] == 'connection_error'
+                or not session.usable
+            ):
+                self._close()
+            self.log.warning(
+                "Data Observability task %s statement %s failed (%.3fs): %s",
+                self._task.task_id,
+                statement.id,
+                duration,
+                error,
+            )
+            self.log.debug("Failed statement SQL: %s", statement.query)
+        else:
+            result = {
+                'status': 'success',
+                'duration_s': time.time() - start,
+                'error': None,
+                'error_kind': None,
+                'error_code': None,
+            }
+        self._statement_finished()
+        self._emit_final(statement, sender, columns, result)
+        return True
+
+    def _base_event(self) -> dict[str, Any]:
+        return {
+            'timestamp': int(time.time() * 1000),
+            'config_id': self._task.config_id,
+            'task_id': self._task.task_id,
+            'db_type': 'mysql',
+            'db_host': self.reported_hostname,
+            'db_port': self._config.port,
+        }
+
+    def _emit_final(
+        self,
+        statement: Statement,
+        sender: _ChunkSender,
+        columns: list[str],
+        result: dict[str, Any],
+        executed: bool = True,
+    ) -> None:
+        # Rows read but not yet sent when a read fails are discarded: the final event counts only
+        # the chunks already sent.
+        final = {
+            **sender.routing,
+            'timestamp': int(time.time() * 1000),
+            'kind': 'final',
+            'db_name': statement.dbname,
+            'query': statement.query,
+            'timeout_ms': statement.timeout_seconds * 1000,
+            'chunk_count': sender.sent_chunks,
+            'row_count': sender.sent_rows,
+            'columns': columns if result['status'] == 'success' else [],
+            **result,
+        }
+        self._record_statement(final, executed)
+        self._emit(final)
+
+    def _emit_task_error(self, error_kind: str, message: str) -> None:
+        self._emit(
+            {
+                **self._base_event(),
+                'chunk_index': 0,
+                'chunk_count': 1,
+                'status': 'error',
+                'columns': [],
+                'rows': [],
+                'row_count': 0,
+                'duration_s': 0.0,
+                'error': message,
+                'error_kind': error_kind,
+                'error_code': None,
+            }
+        )
+
+    def _emit(self, event: dict[str, Any]) -> None:
+        try:
+            self.event_platform_event(json.encode(event), EVENT_TRACK_TYPE)
+        except Exception as error:
+            self.log.exception(
+                "Failed to emit Data Observability task %s result for statement %s",
+                self._task.task_id,
+                event.get('statement_id'),
+            )
+            self._count('dd.mysql.do_task.emit_failures', [f'exc_class:{type(error).__name__}'])
+            return
+        self._count('dd.mysql.do_task.events')
+
+    def _record_statement(self, result: dict[str, Any], executed: bool) -> None:
+        status_tag = f"status:{result['status']}"
+        tags = [status_tag]
+        if result['status'] == 'error':
+            tags.append(f"error_kind:{result['error_kind']}")
+        self._count('dd.mysql.do_task.statements', tags)
+        if not executed:
+            # The statement never ran, so it has no execution time.
+            return
+        self._histogram('dd.mysql.do_task.statement_execution_time', result['duration_s'], [status_tag])
+        if result['status'] == 'success':
+            self._histogram('dd.mysql.do_task.statement_rows', result['row_count'])
+            self._histogram('dd.mysql.do_task.statement_chunks', result['chunk_count'])
+
+    def _base_metric_tags(self) -> list[str]:
+        if self._metric_tags is None:
+            self._metric_tags = [tag for tag in self.tag_manager.get_tags() if not tag.startswith('dd.internal')] + [
+                'db_type:mysql'
+            ]
+        return self._metric_tags
+
+    def _count(self, name: str, tags: list[str] | None = None) -> None:
+        self._submit(self.count, name, 1, tags)
+
+    def _histogram(self, name: str, value: float, tags: list[str] | None = None) -> None:
+        self._submit(self.histogram, name, value, tags)
+
+    def _submit(self, submit: Any, name: str, value: float, tags: list[str] | None) -> None:
+        # Internal metrics must never cost the task a statement or a result.
+        try:
+            submit(
+                name,
+                value,
+                tags=self._base_metric_tags() + (tags or []),
+                hostname=self.reported_hostname,
+                raw=True,
+            )
+        except Exception:
+            self.log.debug(
+                "Failed to submit %s for Data Observability task %s", name, self._task.task_id, exc_info=True
+            )
+
+
+class _ChunkSender:
+    """Collects one execution's rows and sends a chunk event each time they reach the budget."""
+
+    def __init__(self, check: MySqlTaskCheck, statement: Statement, result_id: str) -> None:
+        self._check = check
+        self.routing = {**check._base_event(), 'statement_id': statement.id, 'result_id': result_id}
+        # Measure a chunk event without rows, with the chunk index at its widest, to get the space
+        # the rows of one chunk may use.
+        envelope = {**self.routing, 'kind': 'chunk', 'chunk_index': MAX_TASK_STATEMENT_ROWS, 'rows': []}
+        self._budget = MAX_EVENT_BYTES - len(json.encode_bytes(envelope))
+        self._rows: list[list[str | None]] = []
+        self._size = 0
+        self.sent_chunks = 0
+        self.sent_rows = 0
+
+    def add(self, row: list[str | None]) -> None:
+        # One more byte for the separating comma. A row larger than the budget gets a chunk of its
+        # own.
+        row_size = len(json.encode_bytes(row)) + 1
+        if self._rows and self._size + row_size > self._budget:
+            self.flush()
+        self._rows.append(row)
+        self._size += row_size
+
+    def flush(self) -> None:
+        if not self._rows:
+            return
+        self._check._emit(
+            {
+                **self.routing,
+                'timestamp': int(time.time() * 1000),
+                'kind': 'chunk',
+                'chunk_index': self.sent_chunks,
+                'rows': self._rows,
+            }
+        )
+        self.sent_chunks += 1
+        self.sent_rows += len(self._rows)
+        self._rows, self._size = [], 0
+
+
+def _close_quietly(conn: Any, log: Any) -> None:
+    try:
+        conn.close()
+    except Exception:
+        log.debug("Failed to close Data Observability task connection", exc_info=True)
+
+
+def _error_result(error: Exception, duration: float, connecting: bool = False) -> dict[str, Any]:
+    # Same classification as the Data Observability job, so both report one set of error kinds.
+    # pymysql reports a closed socket as InterfaceError(0, ''); 0 is not a database error code.
+    code = error.args[0] if error.args and isinstance(error.args[0], int) and error.args[0] else None
+    if connecting or isinstance(error, pymysql.err.InterfaceError) or code in CONNECTION_ERROR_CODES:
+        kind = 'connection_error'
+    elif code in STATEMENT_TIMEOUT_ERROR_CODES:
+        kind = 'statement_timeout'
+    elif code == LOCK_WAIT_TIMEOUT_ERROR_CODE:
+        kind = 'lock_timeout'
+    else:
+        kind = 'sql_error'
+    message = str(error)
+    if connecting:
+        message = f'Statement not executed: could not connect to the database: {error}'
+    return {
+        'status': 'error',
+        'duration_s': duration,
+        'error': message,
+        'error_kind': kind,
+        'error_code': str(code) if code is not None else None,
+    }
+
+
+def _to_text(value: Any) -> str | None:
+    """
+    Render a column value as text, the only type the backend accepts besides null. Statements
+    should cast in SQL; this covers the values pymysql returns when they don't.
+    """
+    if value is None or isinstance(value, str):
+        return value
+    if isinstance(value, (bytes, bytearray)):
+        return bytes(value).decode('utf-8', errors='replace')
+    if isinstance(value, datetime.datetime):
+        # MySQL's own DATETIME text format.
+        return value.isoformat(sep=' ')
+    if isinstance(value, datetime.timedelta):
+        return _format_time(value)
+    if isinstance(value, Decimal):
+        # Plain notation keeps every digit the server sent, never an exponent.
+        return format(value, 'f')
+    return str(value)
+
+
+def _format_time(value: datetime.timedelta) -> str:
+    """Render a TIME value, which pymysql returns as a timedelta, the way MySQL prints it."""
+    total_microseconds = (value.days * 86_400 + value.seconds) * 1_000_000 + value.microseconds
+    sign = '-' if total_microseconds < 0 else ''
+    seconds, microseconds = divmod(abs(total_microseconds), 1_000_000)
+    minutes, seconds = divmod(seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    text = f'{sign}{hours:02d}:{minutes:02d}:{seconds:02d}'
+    if microseconds:
+        text += f'.{microseconds:06d}'
+    return text
