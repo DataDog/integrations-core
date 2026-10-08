@@ -1,4 +1,5 @@
 [env.collectors.datadog-checks]
+base-package-features = ["deps", "json"]
 
 [[envs.default.matrix]]
 python = ["3.13"]
@@ -11,4 +12,12 @@ matrix.version.env-vars = [
 ]
 
 [envs.bench.env-vars]
+CONSUL_VERSION = "1.9.0"
+
+[envs.stdlib-json]
+test-env = true
+python = "3.13"
+base-package-features = ["deps"]
+
+[envs.stdlib-json.env-vars]
 CONSUL_VERSION = "1.9.0"

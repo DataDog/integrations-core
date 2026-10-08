@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
+from pytest_benchmark.fixture import BenchmarkFixture
 
 from datadog_checks.consul import ConsulCheck
 
@@ -9,8 +10,10 @@ from . import common, consul_mocks
 
 
 @pytest.mark.parametrize('num_nodes', [1000, 2000])
-def test_check_network_latency(benchmark, num_nodes):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_NETWORK_LATENCY_CHECKS])
+@pytest.mark.parametrize('sample_size', [None, 256])
+def test_check_network_latency(benchmark: BenchmarkFixture, num_nodes: int, sample_size: int | None):
+    config = dict(consul_mocks.MOCK_CONFIG_NETWORK_LATENCY_CHECKS, network_latency_sample_size=sample_size)
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [config])
     my_mocks = consul_mocks._get_consul_mocks()
     consul_mocks.mock_check(consul_check, my_mocks)
 

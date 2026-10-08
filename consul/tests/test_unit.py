@@ -1,14 +1,17 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import copy
 import logging
+import statistics
 
 import mock
 import pytest
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.consul import ConsulCheck
-from datadog_checks.consul.common import MAX_SERVICES
+from datadog_checks.consul.common import MAX_SERVICES, distance
 
 from . import common, consul_mocks
 
@@ -602,10 +605,16 @@ def test_network_latency_checks(aggregator):
     ],
 )
 @pytest.mark.parametrize('reverse', [False, True])
+@pytest.mark.parametrize('sample_size', [None, 3, 16])
 def test_network_latency_distribution(
-    aggregator: AggregatorStub, positions: list[float], expected: list[tuple[float, float, float]], reverse: bool
+    aggregator: AggregatorStub,
+    positions: list[float],
+    expected: list[tuple[float, float, float]],
+    reverse: bool,
+    sample_size: int | None,
 ):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_NETWORK_LATENCY_CHECKS])
+    config = dict(consul_mocks.MOCK_CONFIG_NETWORK_LATENCY_CHECKS, network_latency_sample_size=sample_size)
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [config])
     consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
     nodes = [
         {
@@ -641,8 +650,10 @@ def test_network_latency_distribution(
 
 
 @pytest.mark.parametrize('num_nodes', [0, 1])
-def test_network_latency_without_peers(aggregator: AggregatorStub, num_nodes: int):
-    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_NETWORK_LATENCY_CHECKS])
+@pytest.mark.parametrize('sample_size', [None, 1])
+def test_network_latency_without_peers(aggregator: AggregatorStub, num_nodes: int, sample_size: int | None):
+    config = dict(consul_mocks.MOCK_CONFIG_NETWORK_LATENCY_CHECKS, network_latency_sample_size=sample_size)
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [config])
     consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
     consul_check._get_coord_nodes = lambda: consul_mocks.mock_get_coord_nodes()[:num_nodes]
 
@@ -650,6 +661,109 @@ def test_network_latency_without_peers(aggregator: AggregatorStub, num_nodes: in
 
     aggregator.assert_metric('consul.net.dc.latency.min')
     assert not any(name.startswith('consul.net.node.latency.') for name in aggregator._metrics)
+
+
+def _run_sampled_network_latency(
+    nodes: list[dict], sample_size: int, use_node_name_as_hostname: bool = True
+) -> list[tuple[dict, dict]]:
+    config = dict(
+        consul_mocks.MOCK_CONFIG_NETWORK_LATENCY_CHECKS,
+        network_latency_sample_size=sample_size,
+        use_node_name_as_hostname=use_node_name_as_hostname,
+    )
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [config])
+    consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
+    consul_check._get_coord_nodes = lambda: nodes
+    consul_check.consul_request = lambda endpoint: []
+    with mock.patch('datadog_checks.consul.consul.distance', wraps=distance) as distance_spy:
+        consul_check.check(None)
+    node_ids = {id(node) for node in nodes}
+    return [call.args for call in distance_spy.call_args_list if id(call.args[0]) in node_ids]
+
+
+@pytest.mark.parametrize('sample_size', [1, 3, 4])
+@pytest.mark.parametrize('use_node_name_as_hostname', [False, True])
+def test_network_latency_sampling(aggregator: AggregatorStub, sample_size: int, use_node_name_as_hostname: bool):
+    nodes = consul_mocks.mock_get_coord_nodes_benchmark(12)
+    by_name = {node['Node']: node for node in nodes}
+    # Fixed priorities anchor the cohort across processes and input order.
+    priority = ['host-11', 'host-2', 'host-5', 'host-0', 'host-3']
+    for ordered_nodes in (nodes, nodes[::-1]):
+        aggregator.reset()
+        pairs = _run_sampled_network_latency(ordered_nodes, sample_size, use_node_name_as_hostname)
+        assert len(pairs) == len(nodes) * sample_size
+        for node in nodes:
+            peers = [peer['Node'] for source, peer in pairs if source is node]
+            expected_peers = [name for name in priority if name != node['Node']][:sample_size]
+            assert peers == expected_peers
+            latencies = [distance(node, by_name[name]) for name in expected_peers]
+            tags = ['consul_datacenter:dc1', f"consul_node_name:{node['Node']}"]
+            hostname = ''
+            if use_node_name_as_hostname:
+                tags.append('agent_hostname:stubbed.hostname')
+                hostname = node['Node']
+            for suffix, value in [
+                ('min', min(latencies)),
+                ('median', statistics.median(latencies)),
+                ('max', max(latencies)),
+            ]:
+                aggregator.assert_metric(
+                    f'consul.net.node.latency.{suffix}',
+                    value=pytest.approx(value),
+                    hostname=hostname,
+                    tags=tags,
+                    count=1,
+                )
+        aggregator.assert_metric('consul.net.dc.latency.min', value=pytest.approx(1.6746410750238774), count=1)
+
+
+def test_network_latency_sampling_stability():
+    nodes = consul_mocks.mock_get_coord_nodes_benchmark(14)
+    original_pairs = [(a['Node'], b['Node']) for a, b in _run_sampled_network_latency(nodes[:12], 3)]
+    changed_coordinates = copy.deepcopy(nodes[:12])
+    for node in changed_coordinates:
+        node['Coord']['Vec'] = [value * 2 for value in node['Coord']['Vec']]
+        node['Partition'] = 'default'
+        node['Segment'] = ''
+
+    for current_nodes in (changed_coordinates, nodes, [node for node in nodes[:12] if node['Node'] != 'host-8']):
+        actual = [(a['Node'], b['Node']) for a, b in _run_sampled_network_latency(current_nodes, 3)]
+        current_names = {node['Node'] for node in current_nodes}
+        original_names = {node['Node'] for node in nodes[:12]}
+        assert [pair for pair in actual if pair[0] in original_names] == [
+            pair for pair in original_pairs if pair[0] in current_names
+        ]
+
+    without_member = [node for node in nodes[:12] if node['Node'] != 'host-2']
+    replacement_pairs = _run_sampled_network_latency(without_member, 3)
+    assert {peer['Node'] for _, peer in replacement_pairs} == {'host-11', 'host-5', 'host-0', 'host-3'}
+
+
+@pytest.mark.parametrize('partition, segment', [('default', ''), ('default', 'alpha'), ('other', '')])
+def test_network_latency_sampling_non_ascii_identity(aggregator: AggregatorStub, partition: str, segment: str):
+    nodes = consul_mocks.mock_get_coord_nodes_benchmark(12)
+    for node in nodes:
+        node.update(Node=f"{node['Node']}-caf\u00e9", Partition=partition, Segment=segment)
+
+    snapshots = []
+    for ordered_nodes in (nodes, nodes[::-1]):
+        aggregator.reset()
+        _run_sampled_network_latency(ordered_nodes, 3)
+        snapshot = {
+            name: sorted((m.hostname, tuple(sorted(m.tags)), m.value) for m in metrics)
+            for name, metrics in aggregator._metrics.items()
+            if name.startswith('consul.net.node.latency.')
+        }
+        assert snapshot
+        snapshots.append(snapshot)
+    assert snapshots[0] == snapshots[1]
+
+
+@pytest.mark.parametrize('sample_size', [0, -1, True, False, 1.5, '3', [], {}])
+def test_network_latency_sample_size_invalid(sample_size: object):
+    config = dict(consul_mocks.MOCK_CONFIG_NETWORK_LATENCY_CHECKS, network_latency_sample_size=sample_size)
+    with pytest.raises(ConfigurationError, match='network_latency_sample_size must be a positive integer'):
+        ConsulCheck(common.CHECK_NAME, {}, [config])
 
 
 @pytest.mark.parametrize(
