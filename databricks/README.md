@@ -20,6 +20,8 @@ Datadog offers several Databricks monitoring capabilities.
 
 Model-serving metrics provide insights into how your Databricks model-serving infrastructure is performing. With these metrics, you can detect endpoints that have high error rates, high latency, are over- or underprovisioned, and more.
 
+**Note**: You can also configure this integration programmatically using the [Databricks integration API][38] or the [Databricks Terraform resource][39].
+
 ## Setup
 
 ### Installation
@@ -144,5 +146,7 @@ You can troubleshoot issues yourself by enabling the [Databricks web terminal][1
 [35]: https://docs.databricks.com/aws/en/admin/system-tables/
 [36]: https://docs.datadoghq.com/data_observability/
 [37]: https://docs.databricks.com/en/dev-tools/auth/pat.html
+[38]: https://docs.datadoghq.com/api/latest/databricks-integration/
+[39]: https://registry.terraform.io/providers/DataDog/datadog/latest/docs/resources/integration_databricks_account
 [8]: https://docs.datadoghq.com/integrations/spark/#metrics
 [9]: https://docs.datadoghq.com/integrations/spark/#service-checks
