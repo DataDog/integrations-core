@@ -1445,7 +1445,7 @@
               "title_size": "16",
               "title_align": "left",
               "type": "event_stream",
-              "query": "sources:nifi status:error $source_name $nifi_version",
+              "query": "source:nifi status:error $source_name $nifi_version",
               "event_size": "l"
             },
             "layout": {
@@ -1461,7 +1461,7 @@
               "title_size": "16",
               "title_align": "left",
               "type": "event_stream",
-              "query": "sources:nifi status:warning $source_name $nifi_version",
+              "query": "source:nifi status:warning $source_name $nifi_version",
               "event_size": "l"
             },
             "layout": {
