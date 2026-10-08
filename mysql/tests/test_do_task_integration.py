@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import threading
 import time
 from copy import deepcopy
 from unittest.mock import patch
@@ -111,3 +112,48 @@ def test_streaming_timeout_net_write_drops_a_stalled_reader(aggregator, dd_run_c
 
     final, _ = _final_and_chunks(aggregator)
     assert (final['status'], final['error_kind']) == ('error', 'connection_error'), final
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_cancel_kills_the_running_statement(aggregator, dd_run_check, instance_basic, root_conn):
+    # The statement runs on the server for a minute without sending a row, so only the kill from
+    # cancel() can stop it early.
+    query = 'SELECT SLEEP(60) AS slept'
+    instance = deepcopy(instance_basic)
+    instance.update(
+        {
+            'run_once': True,
+            'do_task': {
+                'config_id': 'do-mysql-once-cancelled',
+                'task_id': 'cancelled',
+                'expires_at': int(time.time()) + 600,
+                'statements': [{'id': 's0', 'dbname': 'testdb', 'query': query, 'timeout_seconds': 120, 'max_rows': 1}],
+            },
+        }
+    )
+    check = MySql(common.CHECK_NAME, {}, [instance])
+    # The Agent unschedules the check from another thread while the statement runs.
+    canceller = threading.Timer(2, check.cancel)
+    canceller.start()
+    start = time.time()
+    try:
+        dd_run_check(check)
+    finally:
+        canceller.cancel()
+    elapsed = time.time() - start
+    for thread in threading.enumerate():
+        if thread.name.startswith('do-task-kill-'):
+            thread.join(timeout=15)
+
+    assert elapsed < 15
+    assert not aggregator.get_event_platform_events(EVENT_TRACK_TYPE)
+    with root_conn.cursor() as cursor:
+        cursor.execute(
+            "SELECT COUNT(*) FROM information_schema.PROCESSLIST WHERE INFO LIKE %s AND ID != CONNECTION_ID()",
+            (f'%{query}%',),
+        )
+        (still_running,) = cursor.fetchone()
+    assert still_running == 0
+    (kill,) = aggregator.metrics('dd.mysql.do_task.kills')
+    assert 'outcome:killed' in kill.tags
