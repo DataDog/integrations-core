@@ -1,0 +1,23 @@
+type: flow
+config:
+  name: api
+  description: >-
+    Draft an API integration from a PRD and optional prepared environment for human review.
+  inputs:
+    - name: integration
+      label: Integration display name
+      type: string
+      required: true
+    - name: docker_path
+      label: Prepared Docker assets (optional)
+      type: path
+      required: false
+      default: ''
+  flow:
+    - phase: api_design
+    - phase: api_build
+      dependencies: [api_design]
+    - phase: api_tests
+      dependencies: [api_build]
+    - phase: api_readme
+      dependencies: [api_tests]

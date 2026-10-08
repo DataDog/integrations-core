@@ -1,0 +1,79 @@
+- type: phase
+  config:
+    name: api_design
+    description: Research the API and plan collection using the PRD, local API, and official sources.
+    class: AgenticPhase
+    agent: api_designer
+    variables:
+      - name: integration
+      - name: prd
+      - name: docker_path
+    tasks:
+      - name: design
+        prompt_ref: api_design_task
+    checkpoint:
+      memory_prompt_ref: api_design_memory
+
+- type: phase
+  config:
+    name: api_build
+    description: Scaffold the integration, implement API collection, and generate configuration.
+    class: AgenticPhase
+    agent: api_builder
+    variables:
+      - name: integration
+      - name: prd
+      - name: docker_path
+    tasks:
+      - name: scaffold
+        prompt_ref: api_scaffold_task
+      - name: implement
+        prompt_ref: api_implement_task
+        clear_context_before: true
+      - name: configuration
+        prompt_ref: api_configuration_task
+        compact_context_before: true
+        goal_ref: api_build_goal
+        max_goal_attempts: 3
+    checkpoint:
+      memory_prompt_ref: api_build_memory
+
+- type: phase
+  config:
+    name: api_tests
+    description: Exercise fixture-backed behavior, run ddev checks, and repair scoped failures.
+    class: AgenticPhase
+    agent: api_tester
+    variables:
+      - name: integration
+      - name: prd
+      - name: docker_path
+    tasks:
+      - name: offline_tests
+        prompt_ref: api_tests_task
+        goal_ref: api_tests_offline_goal
+        max_goal_attempts: 3
+      - name: e2e_and_final_verification
+        prompt_ref: api_tests_live_task
+        compact_context_before: true
+        goal_ref: api_tests_goal
+        max_goal_attempts: 3
+    checkpoint:
+      memory_prompt_ref: api_tests_memory
+
+- type: phase
+  config:
+    name: api_readme
+    description: Document the implementation and hand off assumptions, command results, and gaps to a human.
+    class: AgenticPhase
+    agent: api_documenter
+    variables:
+      - name: integration
+      - name: prd
+    tasks:
+      - name: readme
+        prompt_ref: api_readme_task
+        goal_ref: api_readme_goal
+        max_goal_attempts: 3
+    checkpoint:
+      memory_prompt_ref: api_readme_memory
