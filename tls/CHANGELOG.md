@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 5.9.0 / 2026-10-01
+
+***Security***:
+
+* Fetch AIA intermediate certificates with a fresh credential-free HTTP session, trying TLS first and then plain HTTP fallback. ([#24154](https://github.com/DataDog/integrations-core/pull/24154))
+
+***Added***:
+
+* Update dependencies ([#25284](https://github.com/DataDog/integrations-core/pull/25284))
+
 ## 5.8.0 / 2026-08-24 / Agent 7.83.0
 
 ***Security***:
