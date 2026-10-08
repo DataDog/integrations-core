@@ -13,8 +13,10 @@ import yaml
 from requests.exceptions import RequestException
 
 from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.checks.openmetrics.line_size_issue import report_line_too_long, resolve_line_too_long
 from datadog_checks.base.checks.openmetrics.metric_limit_issue import MetricLimitIssueReporter
 from datadog_checks.base.errors import ConfigurationError
+from datadog_checks.base.utils.http import ResponseLineTooLongError
 from datadog_checks.base.utils.tracing import traced_class
 
 from .scraper import OpenMetricsScraper
@@ -95,9 +97,14 @@ class OpenMetricsBaseCheckV2(AgentCheck):
             with self.adopt_namespace(scraper.namespace):
                 try:
                     scraper.scrape()
+                except ResponseLineTooLongError as e:
+                    report_line_too_long(self, endpoint, scraper.namespace, e.max_line_size)
+                    raise
                 except (ConnectionError, RequestException) as e:
                     self.log.error("There was an error scraping endpoint %s: %s", endpoint, str(e))
                     raise type(e)("There was an error scraping endpoint {}: {}".format(endpoint, e)) from None
+
+                resolve_line_too_long(self, endpoint, scraper.namespace)
 
     def _on_metric_limit_state(self, reached_limit: bool, observed_count: int, limit: int) -> None:
         # Use the actual configured scraper endpoint keys rather than the raw instance field, so
