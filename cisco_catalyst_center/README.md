@@ -101,6 +101,11 @@ collector completed a cycle and 0 when any of them failed, and it is submitted o
 well as successful ones. Each failed collector also appears as a warning in the Agent status, and a
 cycle in which every collector fails is reported as a check error.
 
+Every cycle, the integration also reads the Catalyst Center device inventory, one request per 500
+devices, to fill in device reachability that Assurance leaves out. The inventory is not a collector
+you enable, so a failed read appears only as a warning in the Agent status and does not change
+`collection.success`.
+
 ## Troubleshooting
 
 Need help? Contact [Datadog support][8].

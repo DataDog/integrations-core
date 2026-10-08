@@ -209,7 +209,11 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         # list the stack collector fans out over.
         inventory_read = self._run('device inventory', _inventory)
         devices_read = self._run('devices', _devices)
-        healthy = inventory_read and devices_read
+        # The inventory only fills gaps the data API leaves, so losing it costs at most the
+        # fallback: `_run` has already made it a warning, and it does not count as a failed
+        # collection. It still counts as a success for the total-failure rule below, because the
+        # appliance answered and its reachability is still reported.
+        healthy = devices_read
 
         # The data API drops devices while it re-indexes -- all of them, if its call failed -- but
         # the inventory still lists them, so their reachability can still be reported.
@@ -241,6 +245,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
                     base_tags=base_tags,
                     namespace=namespace,
                     devices=devices,
+                    inventory=inventory,
                 )
 
             healthy &= self._run('interfaces', _interfaces)

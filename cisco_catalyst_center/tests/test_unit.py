@@ -167,6 +167,20 @@ def test_check_given_one_failing_collector_names_it_in_a_warning(
     assert [warning for warning in check.warnings if 'site health' in warning]
 
 
+def test_check_given_only_the_inventory_failing_warns_and_still_reports_collection_success(
+    dd_run_check: Callable[..., None], aggregator: AggregatorStub, instance: InstanceType
+):
+    # The inventory only fills gaps the data API leaves. Losing it earns a warning on the status
+    # page, but not a collection failure that pages every cycle while every metric still arrives.
+    check = _core_only(instance)
+    _route(check, devices=load_captured('data_network_devices'), inventory={'status_code': 500, 'json': {}})
+
+    dd_run_check(check)
+
+    aggregator.assert_metric('cisco_catalyst_center.collection.success', value=1)
+    assert any('device inventory' in warning for warning in check.warnings), check.warnings
+
+
 @pytest.mark.parametrize(
     'optional_collectors',
     [

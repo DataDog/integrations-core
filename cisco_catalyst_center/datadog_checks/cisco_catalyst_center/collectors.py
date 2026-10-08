@@ -114,7 +114,12 @@ def device_identity_tags(namespace: str, management_ip: Any, device_uuid: Any) -
 
 
 def device_tags(record: dict[str, Any], namespace: str = DEFAULT_NAMESPACE) -> list[str]:
-    """Tags shared by every metric derived from one device record."""
+    """Tags that describe a device, shared by every metric derived from its record.
+
+    Reachability is left out: it changes from one cycle to the next, and Assurance leaves it null
+    while it re-scores, so as a tag it would split one device's series. Only the device's own
+    metrics carry it, as they always have.
+    """
     return compact(
         [
             *device_identity_tags(namespace, record.get('managementIpAddress'), record.get('id')),
@@ -127,7 +132,6 @@ def device_tags(record: dict[str, Any], namespace: str = DEFAULT_NAMESPACE) -> l
             tag('software_version', record.get('softwareVersion')),
             tag('site_id', record.get('siteId')),
             tag('site_hierarchy', record.get('siteHierarchy')),
-            tag('reachability', record.get('reachabilityHealthStatus')),
         ]
     )
 
@@ -249,7 +253,8 @@ def collect_devices(
     inventory = inventory or {}
 
     for record in records:
-        tags = base_tags + device_tags(record, namespace)
+        reachability_tag = compact([tag('reachability', record.get('reachabilityHealthStatus'))])
+        tags = base_tags + device_tags(record, namespace) + reachability_tag
 
         # Reachability as a metric, not only as NDM inventory: a monitor cannot alert on
         # inventory, and "is this device up" is the first question an operator asks.
@@ -371,6 +376,7 @@ def collect_interfaces(
     base_tags: list[str] | None = None,
     namespace: str = DEFAULT_NAMESPACE,
     devices: list[dict[str, Any]] | None = None,
+    inventory: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, dict[str, Any]]:
     """Collect port health, returning the merged records keyed by interface id.
 
@@ -388,12 +394,27 @@ def collect_interfaces(
         base_tags: Tags applied to every metric.
         devices: The device records from `collect_devices`, which give the per-device throughput
             rollups the same tags as every other device metric.
+        inventory: The device inventory, keyed by device id, which supplies the reachability of
+            any device the data API reports without one.
+
+    A device with an explicit unreachable status emits no interface metrics. Catalyst Center cannot
+    poll it, so whatever it serves for the device's interfaces is a last-known value, the same
+    staleness that withholds the device's own metrics. Its records are still returned, so NDM keeps
+    its interfaces alongside the device it reports as unreachable.
     """
     base_tags = base_tags or []
     merged = _merge_views(client, views)
     _enrich_metadata(client, merged)
 
-    for record in merged.values():
+    devices_by_id = {device['id']: device for device in devices or [] if device.get('id')}
+    unreachable = {
+        device_id
+        for device_id, device in devices_by_id.items()
+        if is_unreachable(device_reachability(device, inventory or {}))
+    }
+    current = [record for record in merged.values() if record.get('networkDeviceId') not in unreachable]
+
+    for record in current:
         tags = base_tags + interface_tags(record, namespace)
 
         oper_status = record.get('operStatus')
@@ -417,8 +438,7 @@ def collect_interfaces(
         for field, metric_name in INTERFACE_POE_WATT_METRICS.items():
             emit_watts(check, metric_name, record.get(field), tags)
 
-    devices_by_id = {device['id']: device for device in devices or [] if device.get('id')}
-    _emit_device_rollups(check, merged.values(), base_tags, namespace, devices_by_id)
+    _emit_device_rollups(check, current, base_tags, namespace, devices_by_id)
 
     return merged
 
