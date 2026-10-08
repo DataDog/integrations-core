@@ -83,6 +83,11 @@ STACK_PORT_OK_VALUES: Final[frozenset[str]] = frozenset({'Yes', 'yes', 'true', '
 # in upper case, so both are accepted.
 REACHABLE_VALUES: Final[frozenset[str]] = frozenset({'REACHABLE', 'Reachable', 'reachable'})
 
+# Values for a device Catalyst Center cannot reach, and so answers for only from its last-known
+# readings. Matched explicitly rather than as "not reachable": Cisco also documents states such as
+# `ONLY_PING_REACHABLE` and `UNKNOWN`, and neither means the readings are stale.
+UNREACHABLE_VALUES: Final[frozenset[str]] = frozenset({'UNREACHABLE', 'Unreachable', 'unreachable'})
+
 # L3 topology types the endpoint serves.
 L3_TOPOLOGY_TYPES: Final[tuple[str, ...]] = ('ospf', 'isis', 'static')
 

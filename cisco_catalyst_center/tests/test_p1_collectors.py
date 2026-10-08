@@ -16,6 +16,8 @@ find out why. Security still emits metrics only.
 
 from __future__ import annotations
 
+from contextlib import nullcontext as does_not_raise
+
 import pytest
 
 from datadog_checks.cisco_catalyst_center.collectors import (
@@ -262,14 +264,30 @@ def test_collect_application_health_given_no_sites_makes_no_calls(instance, chec
     assert client.http.requests == []
 
 
-def test_collect_application_health_given_every_site_failing_raises(instance, check):
+FAILURE = {'status_code': 500, 'json': {}}
+
+
+@pytest.mark.parametrize(
+    ('script', 'expectation'),
+    [
+        pytest.param([FAILURE, load_captured('data_network_applications')], does_not_raise(), id='one-site-failing'),
+        # Matching the message tells the aggregate error apart from one site's error escaping.
+        pytest.param(
+            [FAILURE, FAILURE],
+            pytest.raises(CatalystApiError, match='any of the 2 sites'),
+            id='every-site-failing',
+        ),
+    ],
+)
+def test_collect_application_health_given_failing_sites_raises_only_when_every_one_fails(
+    instance, check, script, expectation
+):
     # One failing site is skipped so it cannot cost the sweep. When every site fails, nothing was
     # collected, and returning normally would report the cycle as a success.
     sites = [*SITES, {'id': 'site-b', 'siteHierarchy': 'Global/B'}]
-    failure = {'status_code': 500, 'json': {}}
 
-    with pytest.raises(CatalystApiError):
-        collect_application_health(check, _client(instance, [failure, failure]), sites=sites)
+    with expectation:
+        collect_application_health(check, _client(instance, script), sites=sites)
 
 
 # -- security ---------------------------------------------------------------------

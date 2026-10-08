@@ -167,11 +167,24 @@ def test_check_given_one_failing_collector_names_it_in_a_warning(
     assert [warning for warning in check.warnings if 'site health' in warning]
 
 
+@pytest.mark.parametrize(
+    'optional_collectors',
+    [
+        pytest.param({}, id='core-collectors-only'),
+        # Application health fans out over a site list that fails along with everything else. A
+        # sweep over no sites makes no request, so it must not count as a collector that succeeded.
+        pytest.param({'collect_application_health': True}, id='with-application-health'),
+    ],
+)
 def test_check_given_every_collector_failing_raises_and_still_reports_collection_failure(
-    dd_run_check: Callable[..., None], aggregator: AggregatorStub, instance: InstanceType
+    dd_run_check: Callable[..., None],
+    aggregator: AggregatorStub,
+    instance: InstanceType,
+    optional_collectors: dict[str, bool],
 ) -> None:
     # An unreachable appliance or a rejected login fails every call. That is an error rather than
     # a degraded cycle, and collection.success must still arrive for a monitor to alert on.
+    instance.update(optional_collectors)
     check = _core_only(instance)
     check.client.http = ViewRoutedHttp(by_view={None: {'status_code': 500, 'json': {}}})
 
@@ -212,13 +225,24 @@ def test_check_given_devices_missing_from_the_data_api_reports_their_inventory_s
     assert metric_values(aggregator, 'cisco_catalyst_center.device.reachable', 'device_name:sw1') == [1]
 
 
-def test_check_given_devices_missing_from_the_data_api_still_counts_them(
-    dd_run_check: Callable[..., None], aggregator: AggregatorStub, instance: InstanceType
-) -> None:
+@pytest.mark.parametrize(
+    'returned',
+    [
+        pytest.param(4, id='both-sources-list-every-device'),
+        pytest.param(3, id='data-api-drops-one'),
+        pytest.param(0, id='data-api-drops-all'),
+    ],
+)
+def test_check_given_two_device_sources_counts_each_managed_device_once(
+    dd_run_check: Callable[..., None], aggregator: AggregatorStub, instance: InstanceType, returned: int
+):
     # device.count is the number of managed devices, which the data API understates whenever it
-    # drops some.
+    # drops some. The inventory also lists every device the data API did return, so a device both
+    # sources report must still count once.
+    devices = load_captured('data_network_devices')
+    devices = with_value(devices, 'response', devices['response'][:returned])
     check = _core_only(instance)
-    _route(check, devices={'response': []}, inventory=load_captured('intent_network_device'))
+    _route(check, devices=devices, inventory=load_captured('intent_network_device'))
 
     dd_run_check(check)
 

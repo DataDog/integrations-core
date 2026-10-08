@@ -57,6 +57,7 @@ from .constants import (
     STACK_MEMBER_READY_STATES,
     STACK_PORT_OK_VALUES,
     STACKABLE_DEVICE_FAMILIES,
+    UNREACHABLE_VALUES,
     UP_VALUES,
     VIRTUAL_NETWORK_HEALTH_ENDPOINT,
 )
@@ -148,7 +149,8 @@ def device_reachability(record: dict[str, Any], inventory: dict[str, dict[str, A
     callers -- the reachability gauge, the stack fan-out and the NDM status -- so they cannot
     drift apart.
     """
-    reported = record.get('reachabilityHealthStatus')
+    # The empty string is one of Catalyst Center's encodings of absent data, so it is treated as null.
+    reported = record.get('reachabilityHealthStatus') or None
     device_id = record.get('id')
     if reported is not None or device_id is None:
         return reported
@@ -156,11 +158,12 @@ def device_reachability(record: dict[str, Any], inventory: dict[str, dict[str, A
 
 
 def is_unreachable(reachability: str | None) -> bool:
-    """Whether a reachability is known, and is anything other than reachable.
+    """Whether a reachability is an explicit unreachable status.
 
-    Unknown is not unreachable: a device neither source reports on is collected as before.
+    Only that status withholds a device's metrics, since it is the one in which Catalyst Center
+    serves last-known readings. Anything else, unknown included, is collected as before.
     """
-    return reachability is not None and reachability not in REACHABLE_VALUES
+    return reachability in UNREACHABLE_VALUES
 
 
 def collect_inventory_reachability(

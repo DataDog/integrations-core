@@ -332,11 +332,14 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
             # reports success.
             self.log.debug('Collecting application health for %s sites', len(sites))
 
-            # One request per site on top of that, so the cost scales with the hierarchy.
-            healthy &= self._run(
-                'application health',
-                lambda: collect_application_health(self, self.client, sites, base_tags=base_tags),
-            )
+            # One request per site on top of that, so the cost scales with the hierarchy. With no
+            # sites there is nothing to ask, and running it anyway would count a sweep that made no
+            # request as a collector that succeeded, which hides a cycle in which every call failed.
+            if sites:
+                healthy &= self._run(
+                    'application health',
+                    lambda: collect_application_health(self, self.client, sites, base_tags=base_tags),
+                )
 
         if self.config.collect_security:
             healthy &= self._run('security', lambda: collect_security(self, self.client, base_tags=base_tags))

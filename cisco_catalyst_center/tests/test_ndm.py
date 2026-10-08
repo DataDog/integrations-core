@@ -206,7 +206,9 @@ def test_batch_payloads_splits_into_batches_of_at_most_one_hundred(device_count,
 def test_check_given_ndm_disabled_sends_no_metadata_event(dd_run_check, aggregator, instance):
     instance['send_ndm_metadata'] = False
     check = CiscoCatalystCenterCheck('cisco_catalyst_center', {}, [instance])
-    check.client.http = ScriptedHttp([load_captured('data_network_devices')])
+    # The inventory sweep is the first request. It is answered empty so the devices reach the device
+    # collector: with no devices there is nothing to send, and the test would pass with NDM on too.
+    check.client.http = ScriptedHttp([{'response': []}, load_captured('data_network_devices')])
 
     dd_run_check(check)
 

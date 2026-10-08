@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from contextlib import nullcontext as does_not_raise
+
 import pytest
 
 from datadog_checks.cisco_catalyst_center.collectors import collect_client_health, collect_stacks
@@ -89,13 +91,26 @@ def test_collect_stacks_skips_switches_that_are_unreachable(instance, check):
     assert not [request for request in client.http.requests if 'uuid-sw2' in request['url']]
 
 
-def test_collect_stacks_given_every_switch_failing_raises(instance, check):
+FAILURE = {'status_code': 500, 'json': {}}
+
+
+@pytest.mark.parametrize(
+    ('script', 'expectation'),
+    [
+        pytest.param([FAILURE, load_captured('intent_stack')], does_not_raise(), id='one-switch-failing'),
+        # Matching the message tells the aggregate error apart from one switch's error escaping.
+        pytest.param(
+            [FAILURE, FAILURE],
+            pytest.raises(CatalystApiError, match='any of the 2 switches'),
+            id='every-switch-failing',
+        ),
+    ],
+)
+def test_collect_stacks_given_failing_switches_raises_only_when_every_one_fails(instance, check, script, expectation):
     # One failing switch is skipped so it cannot cost the cycle. When every switch fails, nothing
     # was collected, and returning normally would report the cycle as a success.
-    failure = {'status_code': 500, 'json': {}}
-
-    with pytest.raises(CatalystApiError):
-        collect_stacks(check, _client(instance, [failure, failure]), SWITCHES)
+    with expectation:
+        collect_stacks(check, _client(instance, script), SWITCHES)
 
 
 # -- aggregate client health ------------------------------------------------------

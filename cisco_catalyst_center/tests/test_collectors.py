@@ -82,6 +82,31 @@ def test_collect_devices_given_an_unreachable_device_reports_only_its_reachabili
     assert reported == {'cisco_catalyst_center.device.reachable'}
 
 
+@pytest.mark.parametrize('reachability', ['ONLY_PING_REACHABLE', 'UNKNOWN'])
+def test_collect_devices_given_a_reachability_short_of_unreachable_still_reports_the_device(
+    aggregator, instance, check, reachability
+):
+    # Cisco documents both as device reachability states, and neither means the readings are stale:
+    # a device that answers ping is up, and an unknown one may well be. Withholding its metrics
+    # would hide a device that is possibly healthy, so only an explicit unreachable status does.
+    payload = with_value(load_captured('data_network_devices'), 'response.0.reachabilityHealthStatus', reachability)
+
+    collect_devices(check, _client(instance, payload), collect_wireless=False)
+
+    assert metric_values(aggregator, 'cisco_catalyst_center.device.uptime', 'device_name:sw1') == [16847210]
+
+
+def test_collect_devices_given_an_empty_reachability_reports_the_inventory_status(aggregator, instance, check):
+    # The empty string is one of Catalyst Center's encodings of absent data, so it falls back to
+    # the inventory exactly as null does, rather than reading as a device that is not reachable.
+    payload = with_value(load_captured('data_network_devices'), 'response.0.reachabilityHealthStatus', '')
+    inventory = {payload['response'][0]['id']: {'reachabilityStatus': 'Reachable'}}
+
+    collect_devices(check, _client(instance, payload), collect_wireless=False, inventory=inventory)
+
+    assert metric_values(aggregator, 'cisco_catalyst_center.device.reachable', 'device_name:sw1') == [1]
+
+
 # -- access points and controllers, from the synthetic payload --------------------
 
 
