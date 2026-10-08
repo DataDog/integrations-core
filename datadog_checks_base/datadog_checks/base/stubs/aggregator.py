@@ -325,6 +325,12 @@ class AggregatorStub(object):
             if value is not None and value != bucket.value:
                 continue
 
+            if lower_bound is not None and lower_bound != bucket.lower_bound:
+                continue
+
+            if upper_bound is not None and upper_bound != bucket.upper_bound:
+                continue
+
             if expected_tags and expected_tags != sorted(bucket.tags):
                 continue
 

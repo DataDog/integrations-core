@@ -719,15 +719,16 @@ class TestMetrics:
 
     def test_multiple_buckets_support_ignores_discovery_proxy(self, monkeypatch):
         from datadog_checks.base.stubs.aggregator import AggregatorStub
-        from datadog_checks.base.utils.discovery.probe import _DiscoveryAggregatorProxy, _DiscoveryRunStats
+        from datadog_checks.base.utils.discovery.probe import _suppress_discovery_side_effects
 
         monkeypatch.delattr(AggregatorStub, 'submit_histogram_bucket_multi')
         check = AgentCheck()
-        check._discovery_aggregator = _DiscoveryAggregatorProxy(_DiscoveryRunStats())
 
-        assert check.multiple_histogram_buckets_unsupported_reason() == (
-            'is not supported by this Agent version, upgrade the Agent to use it'
-        )
+        with _suppress_discovery_side_effects(check):
+            assert hasattr(check._aggregator(), 'submit_histogram_bucket_multi')
+            assert check.multiple_histogram_buckets_unsupported_reason() == (
+                'is not supported by this Agent version, upgrade the Agent to use it'
+            )
 
 
 class TestEvents:

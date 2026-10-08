@@ -843,9 +843,17 @@ class AgentCheck(object):
         tags,
         raw=False,
         flush_first_value=False,
+        *,
         multiple_buckets=False,
     ):
         # type: (str, float, int, int, bool, str, Sequence[str], bool, bool, bool) -> None
+        """Submit one histogram bucket as part of a distribution.
+
+        Set `multiple_buckets` when the bucket tags don't identify the bucket, for example when the bound tags are
+        removed. The Agent then tracks each bucket by its bounds as well as its tags. This needs an Agent that
+        provides `submit_histogram_bucket_multi` and doesn't work with `process_isolation`, so call
+        `multiple_histogram_buckets_unsupported_reason()` first.
+        """
         if value is None:
             # ignore metric sample
             return
