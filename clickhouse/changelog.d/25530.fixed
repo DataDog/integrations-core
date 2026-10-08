@@ -1,0 +1,1 @@
+Send the `database_instance` metadata event before metric queries run, so a failing query no longer suppresses it.
