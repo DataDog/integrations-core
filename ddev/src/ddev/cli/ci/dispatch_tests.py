@@ -39,6 +39,16 @@ if TYPE_CHECKING:
 
 DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
 EXPORT_DRAIN_TIMEOUT = 10.0
+# `--resolve-only` and `--dry-run` invocations are not runs, so they count toward none of these.
+RUN_OUTCOME_METRICS = {
+    ExecutionOutcome.PASSED: 'runs.passed',
+    ExecutionOutcome.TESTS_FAILED: 'runs.tests_failed',
+    ExecutionOutcome.FAILED: 'runs.failed',
+    ExecutionOutcome.TIMED_OUT: 'runs.timed_out',
+    ExecutionOutcome.CANCELLED: 'runs.cancelled',
+    ExecutionOutcome.NO_OP: 'runs.no_op',
+    ExecutionOutcome.PLANNING_FAILED: 'runs.planning_failed',
+}
 
 
 @click.command(short_help='Run the Dispatcher to test a commit as parallel batches')
@@ -333,11 +343,15 @@ def dispatch_tests(
             app.abort(f'Dispatcher execution failed: {error}')
 
         dispatcher_outcome = dispatcher.outcome
-        if dispatcher_outcome is None or not dispatcher_outcome.successful:
+        if dispatcher_outcome is not None:
+            outcome = dispatcher_outcome.execution_outcome
+        else:
             outcome = ExecutionOutcome.CANCELLED if dispatcher.cancelled else ExecutionOutcome.FAILED
-            app.abort('Dispatcher tests failed.')
-
-        outcome = ExecutionOutcome.PASSED
+        if outcome is not ExecutionOutcome.PASSED:
+            if outcome is ExecutionOutcome.CANCELLED:
+                app.abort('Dispatcher tests were cancelled.')
+            else:
+                app.abort('Dispatcher tests failed.')
     except (KeyboardInterrupt, asyncio.CancelledError):
         if outcome is None:
             outcome = ExecutionOutcome.CANCELLED
@@ -420,24 +434,19 @@ def run_summary(
     if progress is not None:
         batch_count = len(progress.batches)
         job_count = sum(len(batch.jobs_progress) for batch in progress.batches)
-    cancelled = outcome is ExecutionOutcome.CANCELLED or (
-        dispatcher_outcome is not None and dispatcher_outcome.cancelled
-    )
+    cancelled = outcome is ExecutionOutcome.CANCELLED
     final_report_published = dispatcher_outcome.final_report_published if dispatcher_outcome is not None else False
-    timed_out = dispatcher_outcome is not None and dispatcher_outcome.timed_out
     elapsed = time.monotonic() - started
-    if outcome not in (ExecutionOutcome.RESOLVED, ExecutionOutcome.DRY_RUN):
+    if outcome in RUN_OUTCOME_METRICS:
         metrics = monitor.metrics
         metrics.count('runs.count', 1)
-        metrics.count('runs.failed', int(outcome in (ExecutionOutcome.FAILED, ExecutionOutcome.PLANNING_FAILED)))
-        metrics.count('runs.planning_failed', int(outcome is ExecutionOutcome.PLANNING_FAILED))
-        metrics.count('runs.cancelled', int(cancelled))
-        metrics.count('runs.timed_out', int(timed_out))
-        metrics.count('runs.no_op', int(outcome is ExecutionOutcome.NO_OP))
-        metrics.distribution('run.duration', elapsed)
+        # Every counter on every run: a monitor on one outcome sees zeros instead of gaps.
+        for candidate, metric in RUN_OUTCOME_METRICS.items():
+            metrics.count(metric, int(outcome is candidate))
+        metrics.distribution('run.duration', elapsed, outcome=outcome)
     log = (
         monitor.logger.error
-        if outcome in (ExecutionOutcome.FAILED, ExecutionOutcome.PLANNING_FAILED)
+        if outcome in (ExecutionOutcome.FAILED, ExecutionOutcome.TIMED_OUT, ExecutionOutcome.PLANNING_FAILED)
         else monitor.logger.warning
         if cancelled
         else monitor.logger.info
