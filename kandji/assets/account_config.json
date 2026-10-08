@@ -19,7 +19,9 @@
       "label": "Domain",
       "editable": true,
       "required": true,
-      "domain": {}
+      "text": {
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*\\.api\\.(eu\\.)?kandji\\.io$"
+      }
     }
   ],
   "dataflow_config": [

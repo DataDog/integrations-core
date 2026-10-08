@@ -1,4 +1,9 @@
 provides:
+  - id: kandji-logs
+    always_on: true
+    granular: false
+    data_type: logs
+    direction: inbound
   - id: kandji-audit-logs
     always_on: false
     granular: true
