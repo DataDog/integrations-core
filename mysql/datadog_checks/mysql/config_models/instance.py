@@ -138,6 +138,7 @@ class DataObservability(BaseModel):
     enabled: Optional[bool] = None
     queries: Optional[tuple[Query, ...]] = None
     run_sync: Optional[bool] = None
+    task_concurrency: Optional[int] = None
 
 
 class DatabaseIdentifier(BaseModel):

@@ -79,6 +79,14 @@ instances:
         #
         # collection_interval: 10
 
+        ## @param task_concurrency - integer - optional - default: 1
+        ## Maximum number of one-off Data Observability tasks the Agent runs against
+        ## this database at the same time. Each running task uses one more connection,
+        ## so raise MAX_USER_CONNECTIONS for the monitoring user by this value.
+        ## Tasks past the limit wait until a running task finishes.
+        #
+        # task_concurrency: 1
+
     ## @param propagate_agent_tags - boolean - optional - default: false
     ## Set to `true` to propagate the tags from `datadog.yaml` to the check.
     ## When set to `true`, the tags from `datadog.yaml` are added to the check's tags for all instances.
