@@ -663,7 +663,6 @@ class ConsulCheck(OpenMetricsBaseCheck):
         if num_nodes == 1:
             self.log.debug("Only 1 node in cluster, skipping network latency metrics.")
         else:
-            known_distances = {}
             for i, node in enumerate(nodes):
                 tags = main_tags + ['consul_node_name:{}'.format(node['Node'])]
 
@@ -674,14 +673,8 @@ class ConsulCheck(OpenMetricsBaseCheck):
                 else:
                     node_name = ''
 
-                # Initialize with pre-computed distances
-                latencies = [known_distances[(x, x + 1)] for x in range(i)]
-
-                # Calculate the distance between the current node and nodes that have not yet been seen
-                for n in range(i + 1, num_nodes):
-                    latency = distance(node, nodes[n])
-                    latencies.append(latency)
-                    known_distances[(i, n)] = latency
+                # Keep only this node's distances: caching all pairs requires quadratic memory.
+                latencies = [distance(node, other) for j, other in enumerate(nodes) if j != i]
 
                 latencies.sort()
                 n = len(latencies)

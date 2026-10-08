@@ -6,6 +6,7 @@ import logging
 import mock
 import pytest
 
+from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.consul import ConsulCheck
 from datadog_checks.consul.common import MAX_SERVICES
 
@@ -591,6 +592,64 @@ def test_network_latency_checks(aggregator):
     node = [m for m in latency if '.node.latency.' in m[0]]
     assert 16 == len(node)
     assert 0.26577747932995816 == node[0][2]
+
+
+@pytest.mark.parametrize(
+    'positions, expected',
+    [
+        ([0, 1, 4], [(1, 2.5, 4), (1, 2, 3), (3, 3.5, 4)]),
+        ([0, 1, 4, 10], [(1, 4, 10), (1, 3, 9), (3, 4, 6), (6, 9, 10)]),
+    ],
+)
+@pytest.mark.parametrize('reverse', [False, True])
+def test_network_latency_distribution(
+    aggregator: AggregatorStub, positions: list[float], expected: list[tuple[float, float, float]], reverse: bool
+):
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_NETWORK_LATENCY_CHECKS])
+    consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
+    nodes = [
+        {
+            'Node': f'node-{i}',
+            'Coord': {'Vec': [position / 1000] + [0] * 7, 'Height': 0, 'Adjustment': 0},
+        }
+        for i, position in enumerate(positions)
+    ]
+    consul_check._get_coord_nodes = lambda: nodes[::-1] if reverse else nodes
+
+    consul_check.check(None)
+
+    for i, (minimum, median, maximum) in enumerate(expected):
+        values = {
+            'min': minimum,
+            'p25': minimum,
+            'median': median,
+            'p75': maximum,
+            'p90': maximum,
+            'p95': maximum,
+            'p99': maximum,
+            'max': maximum,
+        }
+        tags = ['consul_datacenter:dc1', f'consul_node_name:node-{i}', 'agent_hostname:stubbed.hostname']
+        for suffix, value in values.items():
+            aggregator.assert_metric(
+                f'consul.net.node.latency.{suffix}',
+                value=pytest.approx(value),
+                hostname=f'node-{i}',
+                tags=tags,
+                count=1,
+            )
+
+
+@pytest.mark.parametrize('num_nodes', [0, 1])
+def test_network_latency_without_peers(aggregator: AggregatorStub, num_nodes: int):
+    consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG_NETWORK_LATENCY_CHECKS])
+    consul_mocks.mock_check(consul_check, consul_mocks._get_consul_mocks())
+    consul_check._get_coord_nodes = lambda: consul_mocks.mock_get_coord_nodes()[:num_nodes]
+
+    consul_check.check(None)
+
+    aggregator.assert_metric('consul.net.dc.latency.min')
+    assert not any(name.startswith('consul.net.node.latency.') for name in aggregator._metrics)
 
 
 @pytest.mark.parametrize(
