@@ -1,20 +1,31 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import gc
+import gzip
+import io
 import logging
 import os
 import ssl
 import subprocess
 import tempfile
 import time
+import weakref
 
 import mock
 import pytest
 import requests
 import requests_unixsocket
+import urllib3
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http import RequestsWrapper, is_uds_url, quote_uds_url
+from datadog_checks.base.utils.http import (
+    RequestsWrapper,
+    ResponseLineTooLongError,
+    ResponseWrapper,
+    is_uds_url,
+    quote_uds_url,
+)
 from datadog_checks.dev.utils import ON_WINDOWS
 
 
@@ -340,3 +351,57 @@ class TestLogger:
         expected_message = 'Sending GET request to https://www.google.com'
         for _, _, message in caplog.record_tuples:
             assert message != expected_message
+
+
+def _gzip_response(body):
+    response = requests.Response()
+    response.raw = urllib3.HTTPResponse(
+        io.BytesIO(gzip.compress(body)), headers={'Content-Encoding': 'gzip'}, preload_content=False
+    )
+    return response
+
+
+@pytest.mark.parametrize(
+    'body, lines',
+    [
+        pytest.param(b'1234567\n' * 100, 100, id='long body with short lines'),
+        pytest.param(b'x' * 10 + b'\ny', 2, id='line at the limit'),
+    ],
+)
+def test_iter_lines_allows_lines_up_to_limit(body, lines):
+    assert len(list(ResponseWrapper(_gzip_response(body), 4, 10).iter_lines())) == lines
+
+
+@pytest.mark.parametrize(
+    'body',
+    [
+        pytest.param(b'x' * 11, id='no line break'),
+        pytest.param(b'x' * 11 + b'\ny', id='line break after the limit'),
+    ],
+)
+def test_iter_lines_limits_line_size(body):
+    with pytest.raises(ResponseLineTooLongError, match='line longer than 10 bytes'):
+        list(ResponseWrapper(_gzip_response(body), 4, 10).iter_lines())
+
+
+def test_iter_lines_uses_configured_line_size():
+    http = RequestsWrapper({'max_line_size': 1}, {})
+
+    with mock.patch('requests.Session.get', return_value=_gzip_response(b'x' * 1024 + b'\ny\n')):
+        assert len(list(http.get('https://www.google.com', stream=True).iter_lines())) == 2
+    with mock.patch('requests.Session.get', return_value=_gzip_response(b'x' * 1025 + b'\ny\n')):
+        with pytest.raises(ResponseLineTooLongError, match='`max_line_size` option'):
+            list(http.get('https://www.google.com', stream=True).iter_lines())
+
+
+def test_iter_lines_does_not_create_reference_cycle():
+    response = _gzip_response(b'line\n')
+    list(ResponseWrapper(response, 4).iter_lines())
+    raw = weakref.ref(response.raw)
+
+    gc.disable()
+    try:
+        del response
+        assert raw() is None
+    finally:
+        gc.enable()
