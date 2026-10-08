@@ -10,6 +10,10 @@ This check monitors [TorchServe][1] through the Datadog Agent.
 
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 
+#### Container-based configuration discovery
+
+This check supports [Autodiscovery][3] based on containers exposing TorchServe's OpenMetrics endpoint (default port `8082`). Discovery only generates an `openmetrics_endpoint` instance; the Inference API and Management API endpoints cannot be derived automatically and remain manually configurable, as described below. Discovery also requires `metrics_mode` to be set to `prometheus` in `config.properties`, since TorchServe defaults to `log` mode, which the Agent cannot scrape.
+
 ### Installation
 
 Starting from Agent release 7.47.0, the TorchServe check is included in the [Datadog Agent][2] package. No additional installation is needed on your server.
