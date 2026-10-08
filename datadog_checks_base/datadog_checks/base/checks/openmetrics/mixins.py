@@ -19,7 +19,9 @@ from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_familie
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http import RequestsWrapper, ResponseLineTooLongError
+
+from .line_size_issue import report_line_too_long, resolve_line_too_long
 
 
 class OpenMetricsScraperMixin(object):
@@ -556,7 +558,16 @@ class OpenMetricsScraperMixin(object):
         Note that if the instance has a `tags` attribute, it will be pushed
         automatically as additional custom tags and added to the metrics
         """
+        endpoint = scraper_config['prometheus_url']
+        try:
+            self._process_scrape(scraper_config, metric_transformers)
+        except ResponseLineTooLongError as e:
+            report_line_too_long(self, endpoint, scraper_config['namespace'], e.max_line_size)
+            raise
 
+        resolve_line_too_long(self, endpoint, scraper_config['namespace'])
+
+    def _process_scrape(self, scraper_config, metric_transformers=None):
         transformers = scraper_config['_default_metric_transformers'].copy()
         if metric_transformers:
             transformers.update(metric_transformers)
