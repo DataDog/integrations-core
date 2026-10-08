@@ -1,0 +1,2015 @@
+{
+  "title": "InterSystems IRIS Overview",
+  "description": "Overview of InterSystems IRIS instance health, high availability (mirroring), Enterprise Cache Protocol (ECP) distributed caching, interoperability, and logs. Mirror, ECP, and outbound HTTP widgets show \"No data\" on deployments that do not use those features.",
+  "widgets": [
+    {
+      "definition": {
+        "background_color": "white",
+        "layout_type": "ordered",
+        "show_title": true,
+        "title": "About",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "has_background": false,
+              "has_border": false,
+              "margin": "md",
+              "sizing": "contain",
+              "type": "image",
+              "url": "/static/images/logos/intersystems-iris_large.svg",
+              "url_dark_theme": "/static/images/logos/intersystems-iris_reversed_large.svg"
+            },
+            "id": 6268867584030923,
+            "layout": {
+              "height": 2,
+              "width": 4,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "background_color": "white",
+              "content": "InterSystems IRIS is a data platform combining a multi-model database, interoperability engine, and analytics runtime. This dashboard tracks instance health, high availability (mirroring), Enterprise Cache Protocol (ECP) distributed caching, and interoperability productions.\n\n- **Mirror**, **ECP**, and **outbound HTTP** widgets show *No data* when those features are not in use; this is expected.\n- Event-style signals (failovers, process termination, license warnings) surface in the **Logs** group, which parses both `messages.log` and `structured.log`.\n\n**Useful links:**\n- [Datadog InterSystems IRIS integration documentation](https://docs.datadoghq.com/integrations/intersystems_iris/)\n- [InterSystems IRIS product documentation](https://docs.intersystems.com/)",
+              "font_size": "14",
+              "has_padding": true,
+              "text_align": "left",
+              "type": "note",
+              "vertical_align": "top"
+            },
+            "id": 8983261775890960,
+            "layout": {
+              "height": 6,
+              "width": 4,
+              "x": 0,
+              "y": 2
+            }
+          }
+        ]
+      },
+      "id": 7880701466565410,
+      "layout": {
+        "height": 9,
+        "width": 4,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "definition": {
+        "background_color": "vivid_blue",
+        "layout_type": "ordered",
+        "show_title": true,
+        "title": "Overview",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "background_color": "blue",
+              "content": "Instance-wide health and the state of this integration's monitors. **System state:** -1 hung, 0 OK, 1 warning, 2 alert. **Mirror status:** 1 not initialized, 2 primary, 3 backup, 4 connected, 5 transition, 6 synchronizing, 7 waiting, 8 stopped, 9 crashed.",
+              "font_size": "14",
+              "has_padding": true,
+              "text_align": "center",
+              "type": "note",
+              "vertical_align": "center"
+            },
+            "id": 2368420372069075,
+            "layout": {
+              "height": 2,
+              "width": 8,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "check": "intersystems_iris.openmetrics.health",
+              "group_by": [
+                "host"
+              ],
+              "grouping": "cluster",
+              "tags": [
+                "$env",
+                "$host"
+              ],
+              "title": "OpenMetrics endpoint health",
+              "type": "check_status"
+            },
+            "id": 7907214493865273,
+            "layout": {
+              "height": 2,
+              "width": 2,
+              "x": 0,
+              "y": 2
+            }
+          },
+          {
+            "definition": {
+              "has_search_bar": "auto",
+              "requests": [
+                {
+                  "aggregator": "last",
+                  "formulas": [
+                    {
+                      "alias": "State (-1 Hung/0 OK/1 Warn/2 Alert)",
+                      "conditional_formats": [
+                        {
+                          "comparator": "<",
+                          "palette": "white_on_red",
+                          "value": 0
+                        },
+                        {
+                          "comparator": "=",
+                          "palette": "white_on_green",
+                          "value": 0
+                        },
+                        {
+                          "comparator": "=",
+                          "palette": "white_on_yellow",
+                          "value": 1
+                        },
+                        {
+                          "comparator": ">=",
+                          "palette": "white_on_red",
+                          "value": 2
+                        }
+                      ],
+                      "formula": "state"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "state",
+                      "query": "max:intersystems_iris.system.state{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "System state (per instance)",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "query_table"
+            },
+            "id": 2831825396061809,
+            "layout": {
+              "height": 3,
+              "width": 8,
+              "x": 0,
+              "y": 8
+            }
+          },
+          {
+            "definition": {
+              "autoscale": true,
+              "precision": 0,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_red",
+                      "value": 8
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_yellow",
+                      "value": 5
+                    },
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_green",
+                      "value": 5
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:intersystems_iris.mirror.status{$env,$host}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "timeseries_background": {
+                "type": "area"
+              },
+              "title": "Mirror status",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "query_value"
+            },
+            "id": 5809963253647879,
+            "layout": {
+              "height": 2,
+              "width": 2,
+              "x": 2,
+              "y": 2
+            }
+          },
+          {
+            "definition": {
+              "autoscale": true,
+              "precision": 0,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_red",
+                      "value": 0
+                    },
+                    {
+                      "comparator": "<=",
+                      "palette": "white_on_green",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:intersystems_iris.system.alerts_new{$env,$host}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "timeseries_background": {
+                "type": "area"
+              },
+              "title": "New alerts posted",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "query_value"
+            },
+            "id": 1982336556835385,
+            "layout": {
+              "height": 2,
+              "width": 2,
+              "x": 0,
+              "y": 4
+            }
+          },
+          {
+            "definition": {
+              "autoscale": true,
+              "custom_unit": "%",
+              "precision": 1,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_red",
+                      "value": 90
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_yellow",
+                      "value": 75
+                    },
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_green",
+                      "value": 75
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:intersystems_iris.license.percent_used{$env,$host}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "timeseries_background": {
+                "type": "area"
+              },
+              "title": "License used (per instance)",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "query_value"
+            },
+            "id": 1113510508480422,
+            "layout": {
+              "height": 2,
+              "width": 2,
+              "x": 2,
+              "y": 4
+            }
+          },
+          {
+            "definition": {
+              "autoscale": true,
+              "precision": 1,
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "avg",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:intersystems_iris.cache_efficiency{$env,$host}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "timeseries_background": {
+                "type": "area"
+              },
+              "title": "Cache efficiency",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "query_value"
+            },
+            "id": 8117435439598443,
+            "layout": {
+              "height": 2,
+              "width": 2,
+              "x": 0,
+              "y": 6
+            }
+          },
+          {
+            "definition": {
+              "color_preference": "text",
+              "count": 50,
+              "display_format": "countsAndList",
+              "hide_zero_counts": true,
+              "last_triggered_format": "relative",
+              "query": "tag:(integration:intersystems-iris)",
+              "show_investigation": false,
+              "show_last_triggered": false,
+              "show_priority": false,
+              "show_status": true,
+              "sort": "status,asc",
+              "start": 0,
+              "summary_type": "monitors",
+              "title": "Monitors",
+              "type": "manage_status"
+            },
+            "id": 6064835780467316,
+            "layout": {
+              "height": 6,
+              "width": 4,
+              "x": 4,
+              "y": 2
+            }
+          }
+        ]
+      },
+      "id": 1167644893270612,
+      "layout": {
+        "height": 12,
+        "width": 8,
+        "x": 4,
+        "y": 0
+      }
+    },
+    {
+      "definition": {
+        "background_color": "vivid_blue",
+        "layout_type": "ordered",
+        "show_title": true,
+        "title": "Health at a glance",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "background_color": "blue",
+              "content": "Storage and daemon headroom on the instance. **Write daemon:** 0 active, 1 suspended. Lock table fullness is derived from the shared-memory `Lock_Table` gauge.",
+              "font_size": "14",
+              "has_padding": true,
+              "text_align": "center",
+              "type": "note",
+              "vertical_align": "center"
+            },
+            "id": 7618286238818004,
+            "layout": {
+              "height": 1,
+              "width": 12,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "autoscale": true,
+              "precision": 0,
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "min:intersystems_iris.jrn.free_space{$env,$host}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "timeseries_background": {
+                "type": "area"
+              },
+              "title": "Journal free space",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "query_value"
+            },
+            "id": 1162738813736039,
+            "layout": {
+              "height": 2,
+              "width": 4,
+              "x": 0,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "autoscale": true,
+              "custom_unit": "%",
+              "precision": 1,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_red",
+                      "value": 85
+                    },
+                    {
+                      "comparator": ">=",
+                      "palette": "white_on_yellow",
+                      "value": 70
+                    },
+                    {
+                      "comparator": "<",
+                      "palette": "white_on_green",
+                      "value": 70
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:intersystems_iris.smh.percent_full{$env,$host,id:lock_table}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "timeseries_background": {
+                "type": "area"
+              },
+              "title": "Lock table % full",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "query_value"
+            },
+            "id": 3816613338069766,
+            "layout": {
+              "height": 2,
+              "width": 4,
+              "x": 4,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "autoscale": true,
+              "precision": 0,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_red",
+                      "value": 0
+                    },
+                    {
+                      "comparator": "<=",
+                      "palette": "white_on_green",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:intersystems_iris.wd.suspended{$env,$host}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "timeseries_background": {
+                "type": "area"
+              },
+              "title": "Write daemon",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "query_value"
+            },
+            "id": 2894116659593939,
+            "layout": {
+              "height": 2,
+              "width": 4,
+              "x": 8,
+              "y": 1
+            }
+          }
+        ]
+      },
+      "id": 5203502943305292,
+      "layout": {
+        "height": 4,
+        "width": 12,
+        "x": 0,
+        "y": 12
+      }
+    },
+    {
+      "definition": {
+        "background_color": "vivid_blue",
+        "layout_type": "ordered",
+        "show_title": true,
+        "title": "Instance health trends",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "background_color": "blue",
+              "content": "CPU, memory, license consumption, cache efficiency, and write and journal daemon activity over time.",
+              "font_size": "14",
+              "has_padding": true,
+              "text_align": "center",
+              "type": "note",
+              "vertical_align": "center"
+            },
+            "id": 7327655128827194,
+            "layout": {
+              "height": 1,
+              "width": 12,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "System-wide",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:intersystems_iris.cpu.usage{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "dog_classic"
+                  }
+                },
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "By process type",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:intersystems_iris.cpu.pct{$env,$host} by {host,id}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "cool"
+                  }
+                }
+              ],
+              "show_legend": true,
+              "time": {},
+              "title": "CPU",
+              "type": "timeseries"
+            },
+            "id": 5660158190766494,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 0,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Physical memory %",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:intersystems_iris.phys.mem_percent_used{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "dog_classic"
+                  }
+                },
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Page space %",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:intersystems_iris.page_space_percent_used{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "warm"
+                  }
+                }
+              ],
+              "show_legend": true,
+              "time": {},
+              "title": "Memory",
+              "type": "timeseries"
+            },
+            "id": 392140854603138,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 6,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "License used %",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:intersystems_iris.license.percent_used{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "dog_classic"
+                  }
+                }
+              ],
+              "show_legend": true,
+              "time": {},
+              "title": "License usage (per instance)",
+              "type": "timeseries"
+            },
+            "id": 3987397485778950,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 0,
+              "y": 4
+            }
+          },
+          {
+            "definition": {
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Cache efficiency",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:intersystems_iris.cache_efficiency{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "dog_classic"
+                  }
+                }
+              ],
+              "show_legend": true,
+              "time": {},
+              "title": "Cache efficiency",
+              "type": "timeseries"
+            },
+            "id": 5062455437415432,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 6,
+              "y": 4
+            }
+          },
+          {
+            "definition": {
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Cycle time",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:intersystems_iris.wd.cycle_time{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "dog_classic"
+                  }
+                },
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Write time",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:intersystems_iris.wd.write_time{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "purple"
+                  }
+                }
+              ],
+              "show_legend": true,
+              "time": {},
+              "title": "Write daemon activity",
+              "type": "timeseries"
+            },
+            "id": 6589882292186572,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 0,
+              "y": 7
+            }
+          },
+          {
+            "definition": {
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Blocks/sec",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:intersystems_iris.jrn.block_per_sec{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "dog_classic"
+                  }
+                },
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Entries/sec",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:intersystems_iris.jrn.entry_per_sec{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "cool"
+                  }
+                }
+              ],
+              "show_legend": true,
+              "time": {},
+              "title": "Journal activity",
+              "type": "timeseries"
+            },
+            "id": 6530233748511297,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 6,
+              "y": 7
+            }
+          }
+        ]
+      },
+      "id": 6399750941464724,
+      "layout": {
+        "height": 11,
+        "width": 12,
+        "x": 0,
+        "y": 16
+      }
+    },
+    {
+      "definition": {
+        "background_color": "vivid_blue",
+        "layout_type": "ordered",
+        "show_title": true,
+        "title": "Mirror (high availability)",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "background_color": "blue",
+              "content": "Mirror member roles, synchronization status, failover readiness, and backup replication lag. Shows no data on deployments that do not use mirroring.",
+              "font_size": "14",
+              "has_padding": true,
+              "text_align": "center",
+              "type": "note",
+              "vertical_align": "center"
+            },
+            "id": 5988163591692585,
+            "layout": {
+              "height": 1,
+              "width": 12,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "has_search_bar": "auto",
+              "requests": [
+                {
+                  "aggregator": "last",
+                  "formulas": [
+                    {
+                      "alias": "Role (3 Failover/4 Async/2 None)",
+                      "formula": "role"
+                    },
+                    {
+                      "alias": "Status (2 Pri/3 Bkp/5 Trans/8 Stop/9 Crash)",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">=",
+                          "palette": "white_on_red",
+                          "value": 8
+                        },
+                        {
+                          "comparator": ">=",
+                          "palette": "white_on_yellow",
+                          "value": 5
+                        },
+                        {
+                          "comparator": "<",
+                          "palette": "white_on_green",
+                          "value": 5
+                        }
+                      ],
+                      "formula": "status"
+                    },
+                    {
+                      "alias": "Failover ready",
+                      "formula": "ready"
+                    },
+                    {
+                      "alias": "No failover",
+                      "formula": "nofail"
+                    },
+                    {
+                      "alias": "Missing DBs",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "palette": "white_on_red",
+                          "value": 0
+                        }
+                      ],
+                      "formula": "missing"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "role",
+                      "query": "max:intersystems_iris.mirror.member_type{$env,$host} by {host}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "status",
+                      "query": "max:intersystems_iris.mirror.status{$env,$host} by {host}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "ready",
+                      "query": "max:intersystems_iris.mirror.failover_ready{$env,$host} by {host}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "nofail",
+                      "query": "max:intersystems_iris.mirror.no_failover{$env,$host} by {host}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "missing",
+                      "query": "max:intersystems_iris.mirror.missing_databases{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "Mirror members: role, sync status, and readiness (per host)",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "query_table"
+            },
+            "id": 2011830198420393,
+            "layout": {
+              "height": 3,
+              "width": 12,
+              "x": 0,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "autoscale": true,
+              "precision": 0,
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "white_on_green",
+                      "value": 0
+                    },
+                    {
+                      "comparator": "<=",
+                      "palette": "white_on_red",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "min:intersystems_iris.mirror.failover_ready{$env,$host}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "timeseries_background": {
+                "type": "area"
+              },
+              "title": "Failover ready",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "query_value"
+            },
+            "id": 6625279407519307,
+            "layout": {
+              "height": 3,
+              "width": 4,
+              "x": 0,
+              "y": 4
+            }
+          },
+          {
+            "definition": {
+              "legend_columns": [
+                "avg",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Journal latency",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:intersystems_iris.mirror.journal_latency_time{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "warm"
+                  }
+                },
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Database latency",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:intersystems_iris.mirror.database_latency_time{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "orange"
+                  }
+                }
+              ],
+              "show_legend": true,
+              "time": {},
+              "title": "Backup replication lag (backup member only)",
+              "type": "timeseries"
+            },
+            "id": 3929788775894142,
+            "layout": {
+              "height": 3,
+              "width": 8,
+              "x": 4,
+              "y": 4
+            }
+          }
+        ]
+      },
+      "id": 8756451192302282,
+      "layout": {
+        "height": 8,
+        "width": 12,
+        "x": 0,
+        "y": 27
+      }
+    },
+    {
+      "definition": {
+        "background_color": "vivid_blue",
+        "layout_type": "ordered",
+        "show_title": true,
+        "title": "ECP (distributed cache)",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "background_color": "blue",
+              "content": "Enterprise Cache Protocol connections. An instance usually acts as either an application server (client) or a data server, so expect only one set of widgets to report. Shows no data when ECP is not in use.",
+              "font_size": "14",
+              "has_padding": true,
+              "text_align": "center",
+              "type": "note",
+              "vertical_align": "center"
+            },
+            "id": 4660381238021012,
+            "layout": {
+              "height": 1,
+              "width": 12,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "legend_columns": [
+                "avg",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Connections",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:intersystems_iris.ecp.conn{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "dog_classic"
+                  }
+                },
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Max connections",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:intersystems_iris.ecp.conn_max{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "dashed",
+                    "line_width": "normal",
+                    "palette": "grey"
+                  }
+                }
+              ],
+              "show_legend": true,
+              "time": {},
+              "title": "App-server connections (this instance as client)",
+              "type": "timeseries"
+            },
+            "id": 9000920188120748,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 0,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "legend_columns": [
+                "avg",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Connections",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:intersystems_iris.ecps.conn{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "cool"
+                  }
+                },
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Max connections",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:intersystems_iris.ecps.conn_max{$env,$host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "dashed",
+                    "line_width": "normal",
+                    "palette": "grey"
+                  }
+                }
+              ],
+              "show_legend": true,
+              "time": {},
+              "title": "Data-server connections (this instance as server)",
+              "type": "timeseries"
+            },
+            "id": 7478826409126664,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 6,
+              "y": 1
+            }
+          }
+        ]
+      },
+      "id": 5321146147404434,
+      "layout": {
+        "height": 5,
+        "width": 12,
+        "x": 0,
+        "y": 35
+      }
+    },
+    {
+      "definition": {
+        "background_color": "vivid_blue",
+        "layout_type": "ordered",
+        "show_title": true,
+        "title": "Interoperability",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "background_color": "blue",
+              "content": "Business host status, message throughput, error and abort counts, and queue depth across interoperability productions.",
+              "font_size": "14",
+              "has_padding": true,
+              "text_align": "center",
+              "type": "note",
+              "vertical_align": "center"
+            },
+            "id": 1032075317940021,
+            "layout": {
+              "height": 1,
+              "width": 12,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "has_search_bar": "auto",
+              "requests": [
+                {
+                  "aggregator": "last",
+                  "formulas": [
+                    {
+                      "alias": "Last activity (instance clock, s)",
+                      "formula": "idle"
+                    },
+                    {
+                      "alias": "Messages",
+                      "formula": "count"
+                    },
+                    {
+                      "alias": "Errored (lifetime)",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "palette": "white_on_red",
+                          "value": 0
+                        }
+                      ],
+                      "formula": "errored"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "idle",
+                      "query": "max:intersystems_iris.interop.last_activity{$env,$host,$production,$interop_host} by {host,production,interop_host}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "count",
+                      "query": "sum:intersystems_iris.interop.messages.count{$env,$host,$production,$interop_host} by {host,production,interop_host}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "errored",
+                      "query": "sum:intersystems_iris.interop.messages.errored{$env,$host,$production,$interop_host} by {host,production,interop_host}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "Business hosts: activity and message counts (per business host)",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "query_table"
+            },
+            "id": 2061317140947233,
+            "layout": {
+              "height": 4,
+              "width": 8,
+              "x": 0,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Hosts",
+                      "formula": "hosts"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "hosts",
+                      "query": "sum:intersystems_iris.interop.hosts{$env,$host,$production} by {status}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "Business hosts by status",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "toplist"
+            },
+            "id": 5472585730713342,
+            "layout": {
+              "height": 4,
+              "width": 4,
+              "x": 8,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "legend_columns": [
+                "avg",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Messages/sec",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:intersystems_iris.interop.messages.per_sec{$env,$host,$production,$interop_host} by {host,production,interop_host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "dog_classic"
+                  }
+                }
+              ],
+              "show_legend": true,
+              "time": {},
+              "title": "Message throughput (per business host)",
+              "type": "timeseries"
+            },
+            "id": 6374387243381060,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 0,
+              "y": 5
+            }
+          },
+          {
+            "definition": {
+              "legend_columns": [
+                "avg",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "display_type": "bars",
+                  "formulas": [
+                    {
+                      "alias": "Errored",
+                      "formula": "monotonic_diff(query1)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:intersystems_iris.interop.messages.errored{$env,$host,$production} by {host,production}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "warm"
+                  }
+                },
+                {
+                  "display_type": "bars",
+                  "formulas": [
+                    {
+                      "alias": "Aborted",
+                      "formula": "monotonic_diff(query2)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:intersystems_iris.interop.messages.aborted{$env,$host,$production} by {host,production}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "orange"
+                  }
+                },
+                {
+                  "display_type": "bars",
+                  "formulas": [
+                    {
+                      "alias": "Discarded",
+                      "formula": "monotonic_diff(query3)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:intersystems_iris.interop.messages.discarded{$env,$host,$production} by {host,production}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "yellow"
+                  }
+                },
+                {
+                  "display_type": "bars",
+                  "formulas": [
+                    {
+                      "alias": "Suspended",
+                      "formula": "monotonic_diff(query4)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:intersystems_iris.interop.messages.suspended{$env,$host,$production} by {host,production}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "grey"
+                  }
+                }
+              ],
+              "show_legend": true,
+              "time": {},
+              "title": "Errors, aborts, discards, and suspends (new per interval, per production)",
+              "type": "timeseries"
+            },
+            "id": 3120701753621362,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 6,
+              "y": 5
+            }
+          },
+          {
+            "definition": {
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:intersystems_iris.interop.queued{$env,$host,$production} by {host,production}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title": "Queue depth by production (current)",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "toplist"
+            },
+            "id": 6537000281916310,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 0,
+              "y": 8
+            }
+          },
+          {
+            "definition": {
+              "legend_columns": [
+                "avg",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Queued messages",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:intersystems_iris.interop.queued{$env,$host,$production} by {host,production}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "dog_classic"
+                  }
+                }
+              ],
+              "show_legend": true,
+              "time": {},
+              "title": "Queue depth by production over time",
+              "type": "timeseries"
+            },
+            "id": 8809890414393707,
+            "layout": {
+              "height": 3,
+              "width": 6,
+              "x": 6,
+              "y": 8
+            }
+          },
+          {
+            "definition": {
+              "legend_columns": [
+                "avg",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Time to first char",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:intersystems_iris.interop.http.avg_ttfc{$env,$host,$production,$interop_host} by {host,production,interop_host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "cool"
+                  }
+                },
+                {
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "alias": "Time to last char",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:intersystems_iris.interop.http.avg_ttlc{$env,$host,$production,$interop_host} by {host,production,interop_host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "purple"
+                  }
+                }
+              ],
+              "show_legend": true,
+              "time": {},
+              "title": "Outbound HTTP and SOAP latency (per business host; appears only with live outbound traffic)",
+              "type": "timeseries"
+            },
+            "id": 6848869437558945,
+            "layout": {
+              "height": 3,
+              "width": 12,
+              "x": 0,
+              "y": 11
+            }
+          }
+        ]
+      },
+      "id": 214830946565093,
+      "layout": {
+        "height": 15,
+        "width": 12,
+        "x": 0,
+        "y": 40
+      }
+    },
+    {
+      "definition": {
+        "background_color": "vivid_blue",
+        "layout_type": "ordered",
+        "show_title": true,
+        "title": "Logs",
+        "type": "group",
+        "widgets": [
+          {
+            "definition": {
+              "background_color": "blue",
+              "content": "Error and critical entries from the IRIS logs (`messages.log` and `structured.log`), alongside total log volume broken down by status.",
+              "font_size": "14",
+              "has_padding": true,
+              "text_align": "center",
+              "type": "note",
+              "vertical_align": "center"
+            },
+            "id": 3946666531041228,
+            "layout": {
+              "height": 1,
+              "width": 12,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "definition": {
+              "requests": [
+                {
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ],
+                  "query": {
+                    "data_source": "logs_stream",
+                    "indexes": [],
+                    "query_string": "source:intersystems-iris $env $host status:(alert OR error OR critical)",
+                    "sort": {
+                      "column": "timestamp",
+                      "order": "desc"
+                    },
+                    "storage": "hot"
+                  },
+                  "response_format": "event_list"
+                }
+              ],
+              "title": "Error and critical logs",
+              "title_align": "left",
+              "title_size": "16",
+              "type": "list_stream"
+            },
+            "id": 4161449453762634,
+            "layout": {
+              "height": 4,
+              "width": 8,
+              "x": 0,
+              "y": 1
+            }
+          },
+          {
+            "definition": {
+              "legend_columns": [
+                "value",
+                "sum"
+              ],
+              "legend_layout": "auto",
+              "requests": [
+                {
+                  "display_type": "bars",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "data_source": "logs",
+                      "group_by": [
+                        {
+                          "facet": "status",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc"
+                          }
+                        }
+                      ],
+                      "indexes": [
+                        "*"
+                      ],
+                      "name": "query1",
+                      "search": {
+                        "query": "source:intersystems-iris $env $host"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "palette": "dog_classic"
+                  }
+                }
+              ],
+              "show_legend": true,
+              "time": {},
+              "title": "Log volume by status",
+              "type": "timeseries"
+            },
+            "id": 7774292685351030,
+            "layout": {
+              "height": 4,
+              "width": 4,
+              "x": 8,
+              "y": 1
+            }
+          }
+        ]
+      },
+      "id": 6779563991413920,
+      "layout": {
+        "height": 6,
+        "width": 12,
+        "x": 0,
+        "y": 55
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "available_values": [],
+      "default": "*",
+      "name": "env",
+      "prefix": "env"
+    },
+    {
+      "available_values": [],
+      "default": "*",
+      "name": "host",
+      "prefix": "host"
+    },
+    {
+      "available_values": [],
+      "default": "*",
+      "name": "production",
+      "prefix": "production"
+    },
+    {
+      "available_values": [],
+      "default": "*",
+      "name": "interop_host",
+      "prefix": "interop_host"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed",
+  "created_at": "2026-08-25T14:36:02.795015Z",
+  "url": "/dashboard/ud2-hua-fcg/intersystems-iris-overview"
+}
