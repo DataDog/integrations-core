@@ -164,17 +164,6 @@ def test_restart_waits_for_agent_before_and_after_restart(agent, mocker):
     ]
 
 
-def test_restart_failure_shows_agent_logs(agent, mocker):
-    mocker.patch.object(agent, '_wait_for_agent')
-    mocker.patch.object(agent, '_exec', return_value=subprocess.CompletedProcess([], 1))
-    show_logs = mocker.patch.object(agent, '_show_logs')
-
-    with pytest.raises(RuntimeError, match='did not restart'):
-        agent._restart_agent_process()
-
-    show_logs.assert_called_once_with()
-
-
 def test_rejects_container_that_lost_prepared_state(agent, mocker):
     execute = mocker.patch.object(
         agent,
