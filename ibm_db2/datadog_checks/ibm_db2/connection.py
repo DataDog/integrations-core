@@ -6,13 +6,16 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Callable, Iterator
 
 import ibm_db
-from requests import ConnectionError
 
 from .utils import scrub_connection_string
 
 if TYPE_CHECKING:
     from .config_models import InstanceConfig
     from .ibm_db2 import IbmDb2Check
+
+
+class Db2ConnectionError(Exception):
+    """Exception raised when a Db2 connection cannot be established."""
 
 
 def get_connection_data(
@@ -77,14 +80,14 @@ class Db2Connection:
             self.conn = None
 
     def ensure_connected(self) -> Any:
-        """Return an active driver connection, or raise `ConnectionError` if connecting fails."""
+        """Return an active driver connection, or raise `Db2ConnectionError` if connecting fails."""
         if self.conn is not None and ibm_db.active(self.conn):
             return self.conn
 
         self.close()
         self.connect()
         if self.conn is None:
-            raise ConnectionError("Unable to create new connection")
+            raise Db2ConnectionError("Unable to create new connection")
         if self._on_reconnect is not None:
             self._on_reconnect()
         return self.conn
@@ -94,7 +97,7 @@ class Db2Connection:
         Execute `query` and yield rows fetched with `method` (an `ibm_db` fetch function).
 
         If execution fails, reconnects once, calls `on_reconnect`, and retries. Raises
-        `requests.ConnectionError` if the reconnect fails.
+        `Db2ConnectionError` if the reconnect fails.
         """
         # https://github.com/ibmdb/python-ibmdb/wiki/APIs
         try:
@@ -108,7 +111,7 @@ class Db2Connection:
             if self._on_reconnect is not None:
                 self._on_reconnect()
             if self.conn is None:
-                raise ConnectionError("Unable to create new connection")
+                raise Db2ConnectionError("Unable to create new connection")
 
             cursor = ibm_db.exec_immediate(self.conn, query)
 

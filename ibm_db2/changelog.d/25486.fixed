@@ -1,0 +1,1 @@
+Use a dedicated Db2 connection exception instead of an HTTP library exception.

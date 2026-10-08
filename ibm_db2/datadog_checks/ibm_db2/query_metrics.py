@@ -9,14 +9,13 @@ from time import time
 from typing import TYPE_CHECKING
 
 import ibm_db
-from requests import ConnectionError
 
 from datadog_checks.base import to_native_string
 from datadog_checks.base.utils.db.query_metrics import QueryStats, obfuscate_statement
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 
-from .connection import Db2Connection
+from .connection import Db2Connection, Db2ConnectionError
 
 if TYPE_CHECKING:
     from .config_models import InstanceConfig
@@ -43,7 +42,7 @@ class QueryMetricsCollector(DBMAsyncJob):
         super().__init__(
             check,
             config_host=config.host,
-            expected_db_exceptions=(ConnectionError,),
+            expected_db_exceptions=(Db2ConnectionError,),
             min_collection_interval=config.min_collection_interval,
             rate_limit=1 / COLLECTION_INTERVAL,
             dbms=check.dbms,
