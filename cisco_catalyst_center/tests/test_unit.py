@@ -212,6 +212,29 @@ def test_check_given_no_data_api_reachability_reports_the_inventory_status(
     assert metric_values(aggregator, 'cisco_catalyst_center.device.reachable', 'device_name:sw1') == [0]
 
 
+@pytest.mark.parametrize(
+    'devices',
+    [
+        pytest.param(
+            with_value(load_captured('data_network_devices'), 'response.0.reachabilityHealthStatus', None),
+            id='data-api-reports-none',
+        ),
+        pytest.param({'response': []}, id='inventory-only'),
+    ],
+)
+def test_check_given_an_empty_inventory_reachability_reports_no_reachability(
+    dd_run_check: Callable[..., None], aggregator: AggregatorStub, instance: InstanceType, devices: dict[str, Any]
+):
+    # The empty string is absent data from the inventory just as from the data API. Reporting it as
+    # not reachable would page on a device that nothing says is down.
+    check = _core_only(instance)
+    _route(check, devices=devices, inventory=_inventory_with('sw1', ''))
+
+    dd_run_check(check)
+
+    assert metric_values(aggregator, 'cisco_catalyst_center.device.reachable', 'device_name:sw1') == []
+
+
 def test_check_given_devices_missing_from_the_data_api_reports_their_inventory_status(
     dd_run_check: Callable[..., None], aggregator: AggregatorStub, instance: InstanceType
 ) -> None:

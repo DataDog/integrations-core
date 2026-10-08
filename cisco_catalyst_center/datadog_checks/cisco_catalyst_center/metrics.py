@@ -187,6 +187,9 @@ FABRIC_SITE_METRICS: Final[dict[str, str]] = {
     'associatedL3VnCount': 'fabric.site.l3vn.count',
     'connectivityGoodHealthPercentage': 'fabric.site.connectivity.health',
     'controlPlaneGoodHealthPercentage': 'fabric.site.control_plane.health',
+    # Cisco's 3.3.1 schema renamed the 1.0.1 schema's `infraHealthyPercentage`, and Catalyst Center
+    # 2.3.7.11 already answers with the new name. A response carries one or the other, so both map.
+    'infraGoodHealthPercentage': 'fabric.site.infra.health',
     'infraHealthyPercentage': 'fabric.site.infra.health',
 }
 
@@ -197,6 +200,7 @@ FABRIC_SITE_PERCENTAGE_FIELDS: Final[frozenset[str]] = frozenset(
         'goodHealthPercentage',
         'connectivityGoodHealthPercentage',
         'controlPlaneGoodHealthPercentage',
+        'infraGoodHealthPercentage',
         'infraHealthyPercentage',
     }
 )

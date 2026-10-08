@@ -149,12 +149,13 @@ def device_reachability(record: dict[str, Any], inventory: dict[str, dict[str, A
     callers -- the reachability gauge, the stack fan-out and the NDM status -- so they cannot
     drift apart.
     """
-    # The empty string is one of Catalyst Center's encodings of absent data, so it is treated as null.
+    # The empty string is one of Catalyst Center's encodings of absent data, so from either source
+    # it is treated as null.
     reported = record.get('reachabilityHealthStatus') or None
     device_id = record.get('id')
     if reported is not None or device_id is None:
         return reported
-    return (inventory.get(device_id) or {}).get('reachabilityStatus')
+    return (inventory.get(device_id) or {}).get('reachabilityStatus') or None
 
 
 def is_unreachable(reachability: str | None) -> bool:
@@ -179,7 +180,8 @@ def collect_inventory_reachability(
     """
     base_tags = base_tags or []
     for entry in entries:
-        reachability = entry.get('reachabilityStatus')
+        # An empty status is absent data, as in `device_reachability`, not a device that is down.
+        reachability = entry.get('reachabilityStatus') or None
         if reachability is None:
             continue
         tags = base_tags + compact(
@@ -740,15 +742,14 @@ def _emit_aggregates(
 
 
 def _is_wired_group(attributes: list[dict[str, Any]]) -> bool:
-    """Whether a client group holds wired clients: grouped by band, yet with no band.
+    """Whether a client group holds wired clients: grouped by band, yet with no band and no SSID.
 
     The appliance reports its wired clients as the group whose `band` is null and whose `ssid` is
-    empty. A grouping that leaves out `band` says nothing either way, so it is not treated as wired.
+    empty. A client on a named SSID is wireless whatever band it reports, and a grouping that leaves
+    out `band` says nothing either way, so neither is treated as wired.
     """
-    for attribute in attributes:
-        if attribute.get('name') == 'band':
-            return attribute.get('value') in (None, '')
-    return False
+    values = {attribute.get('name'): attribute.get('value') for attribute in attributes}
+    return 'band' in values and values['band'] in (None, '') and values.get('ssid') in (None, '')
 
 
 def collect_client_experience(

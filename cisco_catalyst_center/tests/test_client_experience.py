@@ -29,14 +29,15 @@ EMPTY = 'data_clients_summary_analytics'
 WIRED = 'data_clients_summary_analytics'
 
 
-@pytest.mark.parametrize(
-    'metric',
-    [
-        'cisco_catalyst_center.client.rssi.avg',
-        'cisco_catalyst_center.client.snr.avg',
-        'cisco_catalyst_center.client.data_rate.avg',
-    ],
-)
+#: The aggregates a client's radio measures.
+RADIO_AGGREGATES = [
+    'cisco_catalyst_center.client.rssi.avg',
+    'cisco_catalyst_center.client.snr.avg',
+    'cisco_catalyst_center.client.data_rate.avg',
+]
+
+
+@pytest.mark.parametrize('metric', RADIO_AGGREGATES)
 def test_collect_client_experience_given_the_wired_group_skips_its_radio_aggregates(
     aggregator, instance, check, metric
 ):
@@ -45,6 +46,19 @@ def test_collect_client_experience_given_the_wired_group_skips_its_radio_aggrega
     collect_client_experience(check, _client(instance, load_captured_reservable(WIRED)))
 
     aggregator.assert_metric(metric, count=0)
+
+
+@pytest.mark.parametrize('metric', RADIO_AGGREGATES)
+def test_collect_client_experience_given_a_group_on_a_named_ssid_reports_its_radio_aggregates(
+    aggregator, instance, check, metric
+):
+    # A client on a named SSID is wireless whatever band it reports, so a missing band alone does not
+    # make its radio readings placeholders.
+    payload = with_value(load_captured_reservable(WIRED), 'response.groups.0.attributes.0.value', 'corp-wifi')
+
+    collect_client_experience(check, _client(instance, payload))
+
+    aggregator.assert_metric(metric, count=1)
 
 
 @pytest.mark.parametrize(

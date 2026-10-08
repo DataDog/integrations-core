@@ -86,7 +86,7 @@ The alert type is derived from the event's syslog severity:
 - Warning becomes a warning
 - Notice and Info become informational
 
-Catalyst Center 2.3.7 sends events without a severity. For a syslog event, the integration reads
+Catalyst Center 2.3.7.11 sends events without a severity. For a syslog event, the integration reads
 the severity from the message mnemonic instead: `%LINK-3-UPDOWN` is severity 3, Error. Events with
 no mnemonic, such as SNMP traps, are informational.
 

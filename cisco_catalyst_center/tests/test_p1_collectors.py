@@ -100,14 +100,16 @@ def test_collect_sda_fabric_emits_device_role_counts_from_the_bulk_record(aggreg
     assert metric_values(aggregator, 'cisco_catalyst_center.fabric.device.count', 'fabric_role:border') == [1]
 
 
-@pytest.mark.parametrize(
-    'metric',
-    [
-        'cisco_catalyst_center.fabric.site.health',
-        'cisco_catalyst_center.fabric.site.connectivity.health',
-        'cisco_catalyst_center.fabric.site.control_plane.health',
-    ],
-)
+#: The fabric site metrics that are shares of the site's devices.
+FABRIC_SITE_PERCENTAGES = [
+    'cisco_catalyst_center.fabric.site.health',
+    'cisco_catalyst_center.fabric.site.connectivity.health',
+    'cisco_catalyst_center.fabric.site.control_plane.health',
+    'cisco_catalyst_center.fabric.site.infra.health',
+]
+
+
+@pytest.mark.parametrize('metric', FABRIC_SITE_PERCENTAGES)
 def test_collect_sda_fabric_given_a_site_with_no_devices_skips_its_percentages(aggregator, instance, check, metric):
     # The reservable sandbox's fabric site had no devices yet still reported 0.0% healthy, which
     # reads as a fabric that is entirely down. A share of zero devices is not a measurement.
@@ -119,6 +121,20 @@ def test_collect_sda_fabric_given_a_site_with_no_devices_skips_its_percentages(a
     collect_sda_fabric(check, _client(instance, script), devices=[])
 
     aggregator.assert_metric(metric, count=0)
+
+
+@pytest.mark.parametrize('metric', FABRIC_SITE_PERCENTAGES)
+def test_collect_sda_fabric_given_a_site_with_devices_emits_its_percentages(aggregator, instance, check, metric):
+    # The same recorded site with devices, so the skip above cannot widen unnoticed. Catalyst Center
+    # 2.3.7.11 names the infrastructure share `infraGoodHealthPercentage`, the 3.3.1 schema's
+    # spelling of the 1.0.1 schema's `infraHealthyPercentage`.
+    sites = load_captured_reservable('data_fabric_site_health_summaries')
+    sites = with_value(sites, 'response.0.totalDeviceCount', 2)
+    script = [sites, load_captured('data_virtual_network_health_summaries')]
+
+    collect_sda_fabric(check, _client(instance, script), devices=[])
+
+    assert metric_values(aggregator, metric) == [0.0]
 
 
 # -- assurance issues -------------------------------------------------------------
