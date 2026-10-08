@@ -23,11 +23,6 @@ CLUSTER_RESOURCE_NAME = 'ddev-agent'
 DEFAULT_WAIT_TIMEOUT = 120
 LOCAL_PACKAGES_METADATA = 'local_packages'
 PREPARED_MARKER = '/home/.ddev-agent-prepared'
-# Show the state of every Agent process, for example a stuck shutdown, without relying on `ps`.
-AGENT_PROCESSES_COMMAND = (
-    'for pid in $(pidof agent); do echo "Agent process $pid:"; '
-    'grep -E "^(State|PPid|Threads):" "/proc/$pid/status"; done'
-)
 
 
 class KubernetesAgent(AgentInterface):
@@ -407,20 +402,19 @@ class KubernetesAgent(AgentInterface):
         # process so s6 starts a fresh Agent in the same container, preserving
         # copied configuration and installed packages.
         restart_command = (
-            'old_pid=$(pidof agent) || { echo "No Agent process to restart" >&2; exit 1; }; '
+            'old_pid=$(pidof agent) || exit 1; '
             'set -- $old_pid; old_pid=$1; '
             'rm -f /var/run/s6/services/agent/finish; '
-            'kill "$old_pid" || { echo "Unable to stop Agent process $old_pid" >&2; exit 1; }; '
+            'kill "$old_pid" || exit 1; '
             'elapsed=0; '
             'while kill -0 "$old_pid" 2>/dev/null; do '
-            f'[ "$elapsed" -ge {self._wait_timeout} ] && '
-            f'{{ echo "Agent process $old_pid did not exit within {self._wait_timeout}s" >&2; exit 1; }}; '
+            f'[ "$elapsed" -ge {self._wait_timeout} ] && exit 1; '
             'sleep 1; elapsed=$((elapsed + 1)); '
             'done'
         )
         if self._exec(['sh', '-c', restart_command], check=False).returncode:
-            self._show_diagnostics()
-            raise RuntimeError('Kubernetes Agent process did not restart; diagnostics are shown above')
+            self._show_logs()
+            raise RuntimeError('Kubernetes Agent process did not restart')
         self._wait_for_agent()
 
     def restart(self) -> None:
@@ -457,11 +451,6 @@ class KubernetesAgent(AgentInterface):
             ],
             check=True,
         )
-
-    def _show_diagnostics(self) -> None:
-        self._kubectl(['describe', '--namespace', self._namespace, f'pod/{POD_NAME}'], check=False)
-        self._exec(['sh', '-c', AGENT_PROCESSES_COMMAND], check=False)
-        self._show_logs()
 
     def _show_logs(self, *, check: bool = False) -> None:
         self._kubectl(

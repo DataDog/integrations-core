@@ -1,1 +1,1 @@
-Show which step failed, the pod description, Agent process state and container logs when the Kubernetes E2E Agent fails to restart.
+Show the Agent container logs when the Kubernetes E2E Agent fails to restart.

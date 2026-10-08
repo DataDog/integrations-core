@@ -164,18 +164,14 @@ def test_restart_waits_for_agent_before_and_after_restart(agent, mocker):
     ]
 
 
-def test_restart_failure_shows_pod_process_and_log_diagnostics(agent, mocker):
+def test_restart_failure_shows_agent_logs(agent, mocker):
     mocker.patch.object(agent, '_wait_for_agent')
-    execute = mocker.patch.object(agent, '_exec', return_value=subprocess.CompletedProcess([], 1))
-    kubectl = mocker.patch.object(agent, '_kubectl')
+    mocker.patch.object(agent, '_exec', return_value=subprocess.CompletedProcess([], 1))
     show_logs = mocker.patch.object(agent, '_show_logs')
 
     with pytest.raises(RuntimeError, match='did not restart'):
         agent._restart_agent_process()
 
-    kubectl.assert_called_once_with(['describe', '--namespace', TEST_NAMESPACE, f'pod/{TEST_POD}'], check=False)
-    assert execute.call_args_list[-1] == mocker.call(['sh', '-c', mocker.ANY], check=False)
-    assert '/proc/$pid/status' in execute.call_args_list[-1].args[0][2]
     show_logs.assert_called_once_with()
 
 
