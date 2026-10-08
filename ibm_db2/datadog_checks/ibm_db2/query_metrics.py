@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from binascii import hexlify, unhexlify
+from copy import deepcopy
 from datetime import datetime
 from itertools import batched
 from time import time
@@ -92,7 +93,9 @@ class QueryMetricsCollector(DBMAsyncJob):
         finally:
             ibm_db.free_stmt(cursor)
 
-        delta = self._query_stats.diff(snapshot)
+        # Text lookup can fail after counters are read. Commit the baseline only after it succeeds.
+        query_stats = deepcopy(self._query_stats)
+        delta = query_stats.diff(snapshot)
         resolved = resolve_obfuscations(
             self._obfuscation_lookup,
             live_keys={statement_key(row) for row in snapshot},
@@ -101,6 +104,7 @@ class QueryMetricsCollector(DBMAsyncJob):
             classify=classify_statement_text,
         )
         self._check.log.debug('Query text resolution: %s', resolved.stats)
+        self._query_stats = query_stats
         rows_by_signature: dict[str, dict] = {}
         for row in delta.derivative_rows:
             obfuscated = resolved.results.get(statement_key(row))
