@@ -74,7 +74,7 @@ jobs:
 
     - name: Get GitHub token for PR comments
       if: github.event_name == 'pull_request'
-      uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+      uses: DataDog/dd-octo-sts-action@c85802a58e202b7e764b5441e4378c76043c8108 # v1.0.5
       id: octo-sts
       continue-on-error: true
       with:
