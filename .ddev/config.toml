@@ -27,7 +27,8 @@ validations = [
     "readmes",
     "saved-views",
     "version",
-    "qa-label"
+    "qa-label",
+    "pr-description"
 ]
 
 # GitHub organization that owns this repository, used for GitHub API operations. Defaults to `DataDog`.
