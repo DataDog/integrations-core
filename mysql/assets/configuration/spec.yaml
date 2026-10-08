@@ -108,6 +108,17 @@ files:
                   type: number
                   example: 10
                   display_default: 10
+              - name: task_concurrency
+                fleet_configurable: true
+                description: |
+                  Maximum number of one-off Data Observability tasks the Agent runs against
+                  this database at the same time. Each running task uses one more connection,
+                  so raise MAX_USER_CONNECTIONS for the monitoring user by this value.
+                  Tasks past the limit wait until a running task finishes.
+                value:
+                  type: integer
+                  example: 1
+                  display_default: 1
               - name: run_sync
                 hidden: true
                 description: Run the job synchronously (for testing).
