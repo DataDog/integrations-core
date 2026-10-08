@@ -52,7 +52,7 @@ GROUP BY object_id
 INDEX_QUERY = """
 SELECT
     i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled,
-    i.filter_definition,
+    MAX(i.filter_definition) AS filter_definition,
     ISNULL(STRING_AGG(
         CASE
             WHEN ic.is_included_column = 0 AND ic.key_ordinal > 0 THEN
@@ -80,7 +80,7 @@ WHERE i.object_id = schema_tables.table_id
     AND i.type <> 0
 GROUP BY
     i.object_id, i.index_id, i.name, i.type,
-    i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled, i.filter_definition
+    i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled
 """
 
 # Same single catalog read as INDEX_QUERY. STRING_AGG is unavailable here, so the

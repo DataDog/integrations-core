@@ -145,7 +145,6 @@ def _assert_include_split(indexes):
     assert indexes['ix_include']['included_columns'] == 'a,e'
     assert indexes['ix_prefix']['key_columns'] == 'c,a'
     assert indexes['ix_prefix']['included_columns'] == 'e'
-    # ix_filtered covers only rows WHERE e IS NOT NULL. Unfiltered indexes have no filter_definition.
     assert indexes['ix_filtered']['filter_definition'] == '([e] IS NOT NULL)'
     assert indexes['ix_include'].get('filter_definition') is None
 

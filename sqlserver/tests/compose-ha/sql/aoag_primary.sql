@@ -113,13 +113,8 @@ CREATE INDEX ix_include ON datadog_test_schemas.test_schema.index_coverage (c) I
 CREATE INDEX ix_prefix ON datadog_test_schemas.test_schema.index_coverage (c, a) INCLUDE (e);
 GO
 
--- ix_filtered covers only rows where e is not null. sqlcmd defaults QUOTED_IDENTIFIER to OFF,
--- which CREATE INDEX ... WHERE rejects.
-SET QUOTED_IDENTIFIER ON;
-GO
+-- ix_filtered covers only rows where e is not null.
 CREATE INDEX ix_filtered ON datadog_test_schemas.test_schema.index_coverage (a) WHERE e IS NOT NULL;
-GO
-SET QUOTED_IDENTIFIER OFF;
 GO
 
 -- Clustered (b, a) is not table column order, and ix_desc keeps the DESC suffix.
@@ -217,13 +212,8 @@ CREATE INDEX ix_include ON datadog_test_collation.test_schema.index_coverage (c)
 CREATE INDEX ix_prefix ON datadog_test_collation.test_schema.index_coverage (c, a) INCLUDE (e);
 GO
 
--- ix_filtered covers only rows where e is not null. sqlcmd defaults QUOTED_IDENTIFIER to OFF,
--- which CREATE INDEX ... WHERE rejects.
-SET QUOTED_IDENTIFIER ON;
-GO
+-- ix_filtered covers only rows where e is not null.
 CREATE INDEX ix_filtered ON datadog_test_collation.test_schema.index_coverage (a) WHERE e IS NOT NULL;
-GO
-SET QUOTED_IDENTIFIER OFF;
 GO
 
 -- Clustered (b, a) is not table column order, and ix_desc keeps the DESC suffix.
