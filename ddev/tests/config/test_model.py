@@ -1492,7 +1492,60 @@ class TestAI:
 
         assert config.ai.anthropic_api_key == config.ai.anthropic_api_key == ''
         assert config.ai.flow_dirs == config.ai.flow_dirs == []
+        assert config.ai.use_ai_gateway is False
+        assert config.ai.models_catalog is None
         assert config.raw_data == {'ai': {'flow_dirs': []}}
+
+    @pytest.mark.parametrize('raw, expected', [(True, True), (False, False), ('TrUe', True), ('false', False)])
+    def test_use_ai_gateway(self, raw: bool | str, expected: bool):
+        config = RootConfig({'ai': {'use_ai_gateway': raw}})
+
+        assert config.ai.use_ai_gateway is expected
+        assert config.raw_data == {'ai': {'use_ai_gateway': raw}}
+
+    def test_use_ai_gateway_update(self):
+        config = RootConfig({'ai': {'use_ai_gateway': True}})
+        assert config.ai.use_ai_gateway is True
+
+        config.ai.use_ai_gateway = False
+
+        assert config.ai.use_ai_gateway is False
+
+    def test_models_catalog_setter_invalidates_cache(self):
+        config = RootConfig({'ai': {'models_catalog': '~/togo/catalog.yaml'}})
+        assert config.ai.models_catalog == '~/togo/catalog.yaml'
+
+        config.ai.models_catalog = '~/togo/replacement.yaml'
+
+        assert config.ai.models_catalog == '~/togo/replacement.yaml'
+
+    @pytest.mark.parametrize(
+        'raw, message',
+        [
+            (9000, 'must be a string'),
+            ('', 'must be a non-empty string'),
+            ('   ', 'must be a non-empty string'),
+        ],
+    )
+    def test_models_catalog_invalid(self, raw: object, message: str):
+        config = RootConfig({'ai': {'models_catalog': raw}})
+
+        with pytest.raises(ConfigurationError, match=rf'ai -> models_catalog\n  {message}'):
+            _ = config.ai.models_catalog
+
+    def test_use_ai_gateway_not_boolean(self, helpers):
+        config = RootConfig({'ai': {'use_ai_gateway': 9000}})
+
+        with pytest.raises(
+            ConfigurationError,
+            match=helpers.dedent(
+                """
+                Error parsing config:
+                ai -> use_ai_gateway
+                  must be a boolean or the string "true"/"false\""""
+            ),
+        ):
+            _ = config.ai.use_ai_gateway
 
     def test_not_table(self, helpers):
         config = RootConfig({'ai': 9000})

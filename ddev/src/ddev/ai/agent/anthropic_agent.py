@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Final, overload
 
 import anthropic
+import httpx
 from anthropic.types import MessageParam
 from pydantic import BaseModel
 
@@ -27,6 +28,7 @@ from ddev.ai.agent.types import (
     WebFetchCall,
     WebSearchCall,
 )
+from ddev.ai.model_catalog import ResolvedModel
 from ddev.ai.tools.registry import ToolRegistry
 
 if TYPE_CHECKING:
@@ -92,7 +94,7 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         tools: ToolRegistry,
         system_prompt: str,
         name: str,
-        model: str,
+        model: ResolvedModel,
         max_tokens: int = DEFAULT_MAX_TOKENS,
     ) -> None:
         """Initialize an AnthropicAgent.
@@ -101,7 +103,7 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             tools: The ToolRegistry to use (might not be used in every call if allowed_tools in send() is provided)
             system_prompt: The system prompt to use.
             name: The name of the agent.
-            model: The model to use.
+            model: The resolved model; supplies the wire ID, context window, and request headers.
             max_tokens: The max tokens per response.
         """
 
@@ -109,7 +111,7 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         self._client = client
         self._model = model
         self._max_tokens = max_tokens
-        self._context_window: int | None = None
+        self._extra_headers = dict(model.binding.headers) if model.binding.headers else None
 
     @staticmethod
     def _without_thinking(message: MessageParam) -> MessageParam:
@@ -195,22 +197,6 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             )
         self._history = compacted
         return response
-
-    async def _get_context_window(self) -> int:
-        if self._context_window is None:
-            try:
-                info = await self._client.models.retrieve(self._model)
-            except anthropic.APIConnectionError as e:
-                raise AgentConnectionError(f"Connection failed: {e}") from e
-            except anthropic.RateLimitError as e:
-                raise AgentRateLimitError(f"Rate limit exceeded: {e}") from e
-            except anthropic.APIStatusError as e:
-                raise AgentAPIError(e.status_code, e.message) from e
-            except anthropic.APIResponseValidationError as e:
-                raise AgentError(f"Response validation failed: {e}") from e
-
-            self._context_window = info.max_input_tokens
-        return self._context_window
 
     @staticmethod
     def _filter_by_allowed(names: Sequence[str], allowed_tools: list[str] | None) -> list[str]:
@@ -322,15 +308,26 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         paused_turns: list[MessageParam] = []
         all_responses: list[Message] = []
         messages = request_messages
+        # Per request, not on the shared client, so headers do not leak between agents.
+        request_kwargs: dict[str, Any] = {}
+        if self._extra_headers:
+            headers = httpx.Headers(self._extra_headers)
+            client_beta = httpx.Headers(self._client.default_headers).get("anthropic-beta")
+            if client_beta and "anthropic-beta" in headers:
+                # The SDK otherwise replaces the client's beta flags with the binding's.
+                flags = f"{client_beta},{headers['anthropic-beta']}".split(",")
+                headers["anthropic-beta"] = ",".join(dict.fromkeys(flag.strip() for flag in flags if flag.strip()))
+            request_kwargs["extra_headers"] = dict(headers)
         for _ in range(MAX_CONTINUATIONS):
             # Streaming avoids the SDK's non-streaming timeout guard on large max_tokens values;
             # get_final_message() accumulates the stream into the same Message shape create() returned.
             async with self._client.messages.stream(
-                model=self._model,
+                model=self._model.binding.model,
                 max_tokens=self._max_tokens,
                 system=system_param,
                 messages=messages,
                 tools=tool_defs if tool_defs else anthropic.NOT_GIVEN,
+                **request_kwargs,
             ) as stream:
                 response = await stream.get_final_message()
             all_responses.append(response)
@@ -462,19 +459,20 @@ class AnthropicAgent(BaseAgent[MessageParam]):
                 tool_calls.append(ToolCall(id=block.id, name=block.name, input=dict(block.input)))
         return ResponseContent(text="\n".join(text_parts), tool_calls=tool_calls, citations=citations)
 
-    async def _build_usage(self, completion: CompletionResult) -> TokenUsage:
+    def _build_usage(self, completion: CompletionResult) -> TokenUsage:
         """Sum token and web-search usage across all responses; context reflects the final call."""
         all_responses = completion.all_responses
         final = completion.final_response
         final_cache_read = final.usage.cache_read_input_tokens or 0
         final_cache_creation = final.usage.cache_creation_input_tokens or 0
+        # TODO: Preserve 5m and 1h cache-write counts separately before reporting model costs.
         return TokenUsage(
             input_tokens=sum(r.usage.input_tokens for r in all_responses),
             output_tokens=sum(r.usage.output_tokens for r in all_responses),
             cache_read_input_tokens=sum(r.usage.cache_read_input_tokens or 0 for r in all_responses),
             cache_creation_input_tokens=sum(r.usage.cache_creation_input_tokens or 0 for r in all_responses),
             context_usage=ContextUsage(
-                window_size=await self._get_context_window(),
+                window_size=self._model.model.context_window,
                 used_tokens=final.usage.input_tokens + final_cache_read + final_cache_creation,
             ),
             web_search_requests=sum(self._server_tool_requests(r, "web_search_requests") for r in all_responses),
@@ -532,7 +530,7 @@ class AnthropicAgent(BaseAgent[MessageParam]):
             stop_reason=self._map_stop_reason(final.stop_reason),
             text=parsed.text,
             tool_calls=parsed.tool_calls,
-            usage=await self._build_usage(completion),
+            usage=self._build_usage(completion),
             web_activity=WebActivity(
                 searches=self._extract_web_searches(completion.all_responses),
                 fetches=self._extract_web_fetches(completion.all_responses),

@@ -10,6 +10,7 @@ from ddev.ai.agent.anthropic_provider import AnthropicProvider
 from ddev.ai.agent.base import BaseAgent
 from ddev.ai.agent.provider import AgentProvider
 from ddev.ai.config.models import AgentConfig
+from ddev.ai.model_catalog import ANTHROPIC, RESOLVER, ModelResolver, Route
 from ddev.ai.tools.registry import ToolRegistry
 
 
@@ -17,6 +18,8 @@ class AgentProviderConfig(Protocol):
     """App configuration needed to create the provider registry."""
 
     anthropic_api_key: str | None
+    use_ai_gateway: bool
+    models_catalog: str | None
 
 
 class AgentProviderRegistry:
@@ -76,7 +79,13 @@ class AgentProviderRegistry:
 
 def build_agent_provider_registry(config: AgentProviderConfig) -> AgentProviderRegistry:
     """Build the provider registry from ddev app configuration."""
+    # Captured here so later config or file edits cannot reroute agents from this registry.
+    route = Route.AI_GATEWAY if config.use_ai_gateway else Route.DIRECT
+    resolver = ModelResolver(config.models_catalog) if config.models_catalog else RESOLVER
     registry = AgentProviderRegistry()
-    if config.anthropic_api_key:
-        registry.register("anthropic", AnthropicProvider(config.anthropic_api_key))
+    if route is Route.AI_GATEWAY:
+        # Resolution and flow validation must work without the direct Anthropic key.
+        registry.register(ANTHROPIC, AnthropicProvider(None, route=route, resolver=resolver))
+    elif config.anthropic_api_key:
+        registry.register(ANTHROPIC, AnthropicProvider(config.anthropic_api_key, route=route, resolver=resolver))
     return registry
