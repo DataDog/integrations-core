@@ -14,7 +14,7 @@ The integration provides:
 - **Topology**: Physical (CDP/LLDP), site, and layer 3 topology sizing.
 - **SD-Access and security**: Fabric and virtual network health, plus rogue access point and aWIPS wireless intrusion counts.
 
-The integration also includes two dashboards, **Cisco Catalyst Center Overview** and **Cisco Catalyst Center Devices and Interfaces**, and three recommended monitors for collection failures, unreachable devices, and degraded network health.
+The integration also includes two dashboards, **Cisco Catalyst Center Overview** and **Cisco Catalyst Center Devices and Interfaces**, and four recommended monitors for collection failures, unreachable devices, degraded network health, and poor SD-Access fabric health.
 
 ## Setup
 

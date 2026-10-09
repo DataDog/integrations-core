@@ -48,7 +48,8 @@
     "monitors": {
       "Collection failure": "assets/monitors/collection_failure.json",
       "Managed device unreachable": "assets/monitors/managed_device_unreachable.json",
-      "Degraded network health": "assets/monitors/degraded_network_health.json"
+      "Degraded network health": "assets/monitors/degraded_network_health.json",
+      "Poor SD-Access fabric health": "assets/monitors/poor_fabric_health.json"
     },
     "saved_views": {}
   },
