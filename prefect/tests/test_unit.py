@@ -811,6 +811,38 @@ def test_assert_metrics(ready_check: PrefectCheck, aggregator: AggregatorStub):
     aggregator.assert_all_metrics_covered()
 
 
+def test_flow_name_after_flows_filter_failure(
+    check: PrefectCheck, dd_run_check: Callable, aggregator: AggregatorStub, mock_prefect_client, mocker
+):
+    """
+    When flows can't be resolved, runs are included without `flow_name`, and flow runs cached in that
+    state pick up `flow_name` once flows resolve again.
+    """
+    mocker.patch(
+        "datadog_checks.prefect.check._utcnow", return_value=datetime(2026, 1, 20, 15, 2, 0, tzinfo=timezone.utc)
+    )
+    mocker.patch.object(check, '_get_last_check_time')
+    post_responses = mock_prefect_client.paginate_filter.side_effect
+    mock_prefect_client.paginate_filter.side_effect = lambda endpoint, payload=None: (
+        [] if endpoint == "/flows/filter" else post_responses(endpoint, payload)
+    )
+
+    reset_check_time(check)
+    dd_run_check(check)
+
+    base = check.base_tags
+    nif_tags = [t for t in NIF_FLOW_TAGS if not t.startswith("flow_name:")]
+    aggregator.assert_metric("prefect.server.flow_runs.completed.count", value=1, tags=base + nif_tags, count=1)
+
+    mock_prefect_client.paginate_filter.side_effect = post_responses
+    aggregator.reset()
+    reset_check_time(check)
+    dd_run_check(check)
+
+    # fr-late is still running, so its tags stay cached between runs
+    aggregator.assert_metric("prefect.server.task_runs.paused", value=1, tags=base + TAGS_TR8, count=1)
+
+
 ALL_EVENT_CASES = [
     EventCase(
         msg_text="flow-run went from Late to Pending\n"

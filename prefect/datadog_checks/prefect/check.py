@@ -378,6 +378,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         d_id = fr.get('deployment_id', '')
         d_name = self.deployments_by_id.get(d_id, '')
         fr_id = fr.get('id', '')
+        fname = self.flows_by_id.get(fr.get('flow_id', ''))
         fr_tags = [
             f"work_pool_id:{fr.get('work_pool_id', '')}",
             f"work_pool_name:{fr.get('work_pool_name', '')}",
@@ -386,10 +387,12 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             f"deployment_id:{d_id}",
             f"deployment_name:{d_name}",
             f"flow_id:{fr.get('flow_id', '')}",
-            f"flow_name:{self.flows_by_id.get(fr.get('flow_id', ''), '')}",
+            *([f"flow_name:{fname}"] if fname else []),
             *self.deployment_tags_by_id.get(d_id, []),
         ]
-        if fr_id not in self.flow_runs_tags:
+        # Refresh entries cached while the flow name could not be resolved (e.g. /flows/filter failed)
+        cached = self.flow_runs_tags.get(fr_id)
+        if cached is None or (fname and not any(t.startswith('flow_name:') for t in cached)):
             self.flow_runs_tags[fr_id] = tuple(sorted(fr_tags))
 
         if fr.get('state_type', '') == 'COMPLETED':
