@@ -1,0 +1,1 @@
+Add wheel contents validation to `ddev validate package` to catch files the wheels pipeline's in-toto verification would reject at release time.
