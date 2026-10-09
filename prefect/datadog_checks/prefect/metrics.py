@@ -23,6 +23,7 @@ WORK_QUEUE_METRICS = {
 CONCURRENCY_LIMIT_METRICS = {
     "concurrency_limit.limit": "gauge",
     "concurrency_limit.active_slots": "gauge",
+    "concurrency_limit.is_active": "gauge",
 }
 
 DEPLOYMENT_METRICS = {

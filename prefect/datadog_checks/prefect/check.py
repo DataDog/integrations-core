@@ -268,7 +268,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
 
     def _collect_concurrency_limit_metrics(self):
         """
-        Collects concurrency_limit.limit and active_slots for global and task run (tag) limits.
+        Collects concurrency_limit.limit, active_slots and is_active for global and task run (tag) limits.
 
         Global limits come from the v2 endpoint. Prefect 3 also stores task run limits there as
         `tag:<tag>`, so those entries are skipped to avoid double counting. Task run limits are read
@@ -280,15 +280,18 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             cltags = [
                 f"concurrency_limit_id:{cl.get('id', '')}",
                 f"concurrency_limit_name:{cl.get('name', '')}",
-                f"is_active:{cl.get('active', '')}",
+                "concurrency_limit_type:global",
             ]
             self._clean_and_emit_metric("concurrency_limit.limit", cl.get('limit', 0), cltags)
             self._clean_and_emit_metric("concurrency_limit.active_slots", cl.get('active_slots', 0), cltags)
+            # A metric rather than a tag so that toggling a limit doesn't split its series
+            self._clean_and_emit_metric("concurrency_limit.is_active", 1.0 if cl.get('active') else 0.0, cltags)
 
         for cl in self.client.paginate_filter("/concurrency_limits/filter"):
             cltags = [
                 f"concurrency_limit_id:{cl.get('id', '')}",
                 f"concurrency_limit_name:{cl.get('tag', '')}",
+                "concurrency_limit_type:tag",
             ]
             self._clean_and_emit_metric("concurrency_limit.limit", cl.get('concurrency_limit', 0), cltags)
             # v1 returns the IDs of the task runs holding a slot rather than a count

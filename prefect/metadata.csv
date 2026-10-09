@@ -1,5 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
 prefect.server.concurrency_limit.active_slots,gauge,,,,Number of slots currently occupied in the global or task run concurrency limit.,0,prefect,concurrency limit active slots,,
+prefect.server.concurrency_limit.is_active,gauge,,,,"Indicates whether the global concurrency limit is active. Submits 1 when active and 0 when not.",0,prefect,concurrency limit active,,
 prefect.server.concurrency_limit.limit,gauge,,,,Maximum number of slots allowed by the global or task run concurrency limit.,0,prefect,concurrency limit,,
 prefect.server.deployment.is_ready,gauge,,,,"Indicates whether the deployment is ready. Submits 1 when ready and 0 when not.",0,prefect,deploy ready,,
 prefect.server.flow_runs.cancelled.count,count,,run,,Number of flow runs that were cancelled in the collection interval.,0,prefect,flow runs cancelled,,

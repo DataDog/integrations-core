@@ -18,10 +18,10 @@ WP1_WORKER_TAGS = ["work_pool_id:wp-1", "work_pool_name:default-pool", "worker_i
 WP2_WORKER_TAGS = ["work_pool_id:wp-2", "work_pool_name:paused-pool", "worker_id:w-6", "worker_name:worker-6"]
 WP3_WORKER_TAGS = ["work_pool_id:wp-3", "work_pool_name:not-ready-pool", "worker_id:w-8", "worker_name:worker-8"]
 
-CL1_TAGS = ["concurrency_limit_id:cl-1", "concurrency_limit_name:db-connections", "is_active:True"]
-CL2_TAGS = ["concurrency_limit_id:cl-2", "concurrency_limit_name:inactive-limit", "is_active:False"]
-CL3_TAGS = ["concurrency_limit_id:cl-3", "concurrency_limit_name:etl"]
-NI_CL_TAGS = ["concurrency_limit_id:cl-3", "concurrency_limit_name:tag:etl", "is_active:True"]
+CL1_TAGS = ["concurrency_limit_id:cl-1", "concurrency_limit_name:db-connections", "concurrency_limit_type:global"]
+CL2_TAGS = ["concurrency_limit_id:cl-2", "concurrency_limit_name:inactive-limit", "concurrency_limit_type:global"]
+CL3_TAGS = ["concurrency_limit_id:cl-3", "concurrency_limit_name:etl", "concurrency_limit_type:tag"]
+NI_CL_TAGS = ["concurrency_limit_id:cl-3", "concurrency_limit_name:tag:etl", "concurrency_limit_type:global"]
 
 WQ1_TAGS = [
     "work_queue_id:wq-1",
@@ -407,6 +407,13 @@ ALL_METRIC_CASES = [
         expected_count=1,
     ),
     MetricCase(
+        name="prefect.server.concurrency_limit.is_active",
+        value=1,
+        tags=CL1_TAGS,
+        mid="cl1-is_active",
+        expected_count=1,
+    ),
+    MetricCase(
         name="prefect.server.concurrency_limit.limit", value=3, tags=CL2_TAGS, mid="cl2-limit", expected_count=1
     ),
     MetricCase(
@@ -414,6 +421,13 @@ ALL_METRIC_CASES = [
         value=0,
         tags=CL2_TAGS,
         mid="cl2-active_slots",
+        expected_count=1,
+    ),
+    MetricCase(
+        name="prefect.server.concurrency_limit.is_active",
+        value=0,
+        tags=CL2_TAGS,
+        mid="cl2-is_active",
         expected_count=1,
     ),
     MetricCase(
