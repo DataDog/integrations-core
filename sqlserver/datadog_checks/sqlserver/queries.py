@@ -52,6 +52,7 @@ GROUP BY object_id
 INDEX_QUERY = """
 SELECT
     i.name, i.type, i.is_unique, i.is_primary_key, i.is_unique_constraint, i.is_disabled,
+    MAX(i.filter_definition) AS filter_definition,
     ISNULL(STRING_AGG(
         CASE
             WHEN ic.is_included_column = 0 AND ic.key_ordinal > 0 THEN
@@ -93,6 +94,7 @@ SELECT
     i.is_primary_key,
     i.is_unique_constraint,
     i.is_disabled,
+    i.filter_definition,
     ISNULL(STUFF((
         SELECT ',' + col.value('(k/text())[1]', 'nvarchar(max)')
         FROM cols.x.nodes('/c') AS T(col)

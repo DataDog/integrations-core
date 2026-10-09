@@ -194,6 +194,10 @@ CREATE INDEX ix_include ON datadog_test_schemas.test_schema.index_coverage (c) I
 CREATE INDEX ix_prefix ON datadog_test_schemas.test_schema.index_coverage (c, a) INCLUDE (e);
 GO
 
+-- ix_filtered covers only rows where e is not null.
+CREATE INDEX ix_filtered ON datadog_test_schemas.test_schema.index_coverage (a) WHERE e IS NOT NULL;
+GO
+
 -- Clustered (b, a) is not table column order, and ix_desc keeps the DESC suffix.
 CREATE TABLE datadog_test_schemas.test_schema.key_order (
     a INT,

@@ -1,0 +1,1 @@
+Report the `WHERE` condition of SQL Server filtered indexes as `filter_definition`.
