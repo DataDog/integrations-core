@@ -16,3 +16,5 @@ rules:
       - '159767151+datadog-agent-integrations-bot[bot]@users.noreply.github.com'
       - 'packages@datadoghq.com'
     allow_unsigned_external: true
+  - require: bewaire
+    strict_on_error: false
