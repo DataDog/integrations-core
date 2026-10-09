@@ -36,7 +36,8 @@ def test_query_metrics(
     check = IbmDb2Check('ibm_db2', {}, [instance])
     connection = Db2Connection(check, check._config)
     connection.connect()
-    query = f'SELECT COUNT(*) AS DBM_QUERY_METRICS_{uuid4().hex.upper()} FROM SYSCAT.TABLES'
+    table = f'DBM_QUERY_METRICS_{uuid4().hex.upper()}'
+    query = f'SELECT ID FROM {table} WHERE ID > 1'
 
     def execute_query() -> None:
         cursor = ibm_db.exec_immediate(connection.conn, query)
@@ -46,8 +47,29 @@ def test_query_metrics(
         finally:
             ibm_db.free_stmt(cursor)
 
+    def read_cpu_counter() -> dict:
+        cursor = ibm_db.prepare(
+            connection.conn,
+            """/* DDIGNORE */
+            SELECT MEMBER, EXECUTABLE_ID, INSERT_TIMESTAMP, TOTAL_CPU_TIME
+            FROM TABLE(SYSPROC.MON_GET_PKG_CACHE_STMT(NULL, NULL, NULL, -1))
+            WHERE VARCHAR(STMT_TEXT, 1000) = ?
+            """,
+        )
+        try:
+            ibm_db.execute(cursor, (query,))
+            row = ibm_db.fetch_assoc(cursor)
+            assert row is not False
+            assert ibm_db.fetch_assoc(cursor) is False
+            return row
+        finally:
+            ibm_db.free_stmt(cursor)
+
+    ibm_db.exec_immediate(connection.conn, f'CREATE TABLE {table} (ID INTEGER)')
     try:
+        ibm_db.exec_immediate(connection.conn, f'INSERT INTO {table} VALUES (1), (2), (3)')
         execute_query()
+        before = read_cpu_counter()
         dd_run_check(check)
         assert not aggregator.get_event_platform_events('dbm-metrics')
         instance_metadata = next(
@@ -66,6 +88,12 @@ def test_query_metrics(
         for _ in range(3):
             execute_query()
 
+        after = read_cpu_counter()
+        for key in ('member', 'executable_id', 'insert_timestamp'):
+            assert before[key] == after[key]
+        cpu_microseconds = after['total_cpu_time'] - before['total_cpu_time']
+        assert cpu_microseconds > 0
+
         def assert_query_metric() -> None:
             dd_run_check(check)
             payloads = aggregator.get_event_platform_events('dbm-metrics')
@@ -76,6 +104,9 @@ def test_query_metrics(
             payload, row = matching[0]
             assert row['count'] == 3
             assert row['time'] >= 0
+            assert row['cpu_time'] == cpu_microseconds * 1_000
+            assert row['rows_read'] == 9
+            assert row['rows_returned'] == 6
             assert row['query_signature'] == compute_sql_signature(query)
             assert payload['host'] == check.reported_hostname
             assert payload['database_instance'] == instance_metadata['database_instance']
@@ -87,4 +118,7 @@ def test_query_metrics(
 
         WaitFor(assert_query_metric, attempts=20, wait=1)()
     finally:
-        connection.close()
+        try:
+            ibm_db.exec_immediate(connection.conn, f'DROP TABLE {table}')
+        finally:
+            connection.close()
