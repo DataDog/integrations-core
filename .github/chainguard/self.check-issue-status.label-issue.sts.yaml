@@ -1,0 +1,40 @@
+# Trust policy for the check-issue-status workflow in DataDog/integrations-core
+#
+# This policy grants the workflow permission to remove the 'pending' and
+# 'waiting-on-author' labels from issues when the expected party comments:
+#   - a Datadog member commenting removes 'pending'
+#   - the issue author (non-member) commenting removes 'waiting-on-author'
+#
+# Naming convention:
+#   self:                Only this repository (DataDog/integrations-core) can use this policy
+#   check-issue-status:  Grants permissions to update issue labels based on comments
+#   label-issue:         Intended for the issue_comment workflow
+#
+# Security model:
+#   - Workflow runs on issue_comment events and manual dispatch, from the protected master branch only
+#   - job_workflow_ref is pinned to check-issue-status.yml committed to master
+#
+# Permissions granted:
+#   - issues: write   - List and remove labels on issues
+#   - members: read   - Check whether a commenter is a member of the datadog organization
+#
+# Usage in workflows:
+#   - uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+#     with:
+#       scope: DataDog/integrations-core
+#       policy: self.check-issue-status.label-issue
+
+issuer: https://token.actions.githubusercontent.com
+
+subject: repo:DataDog/integrations-core:ref:refs/heads/master
+
+claim_pattern:
+  event_name: (issue_comment|workflow_dispatch)
+  ref: refs/heads/master
+  ref_protected: "true"
+  job_workflow_ref: DataDog/integrations-core/\.github/workflows/check-issue-status\.yml@refs/heads/master
+  repository: DataDog/integrations-core
+
+permissions:
+  issues: write
+  members: read

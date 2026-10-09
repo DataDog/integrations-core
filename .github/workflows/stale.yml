@@ -1,0 +1,88 @@
+---
+name: Close stale issues and PRs
+
+on:
+  schedule:
+    # 4 times per day to cope with the backlog of open pull requests
+    - cron: '0 4,10,16,22 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  stale:
+    if: github.repository == 'DataDog/integrations-core'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # This is required for getting the required OIDC token from GitHub
+    steps:
+      - uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+        id: octo-sts
+        with:
+          scope: DataDog/integrations-core
+          policy: self.stale.manage-stale
+
+      - uses: actions/stale@4391f3da665fdf50b6810c1a66712fb9ba21aa93 # v11.0.0
+        with:
+          repo-token: ${{ steps.octo-sts.outputs.token }}
+
+          # Stale configuration
+          days-before-stale: 15
+          days-before-close: 30
+          operations-per-run: 100
+
+          # Issue configuration
+          stale-issue-message: |
+            This issue has been automatically marked as stale because it has not had activity in the past 15 days.
+
+
+            It will be closed in 30 days if no further activity occurs. If this issue is still relevant, adding a comment will keep it open. Also, you can always reopen the issue if you missed the window.
+
+
+            Thank you for your contributions!
+
+          close-issue-message: |
+            This issue was automatically closed because it has been stale for 30 days with no activity.
+
+
+            If this issue is still relevant, please reopen it or create a new issue with updated information.
+
+
+            Thanks!
+
+          stale-issue-label: 'stale'
+          close-issue-label: 'auto-closed'
+
+          # Pull request configuration
+          stale-pr-message: |
+            This pull request has been automatically marked as stale because it has not had activity in the past 15 days.
+
+
+            It will be closed in 30 days if no further activity occurs. If this pull request is still relevant, adding a comment or pushing new commits will keep it open. Also, you can always reopen the pull request if you missed the window.
+
+
+            Thank you for your contributions!
+
+          close-pr-message: |
+            This pull request was automatically closed because it has been stale for 30 days with no activity.
+
+
+            If this pull request is still relevant, please reopen it or create a new pull request with updated information.
+
+
+            Thanks!
+
+          stale-pr-label: 'stale'
+          close-pr-label: 'auto-closed'
+
+          # Exclude/include labels
+          # Only issues carrying one of the any-of labels are checked for staleness: 'waiting-on-author'
+          # is added by a maintainer when the issue needs input from its author (see
+          # check-issue-status.yml, which removes it when the author comments).
+          exempt-issue-labels: 'kind/bug,kind/feature-request,kind/new-integration,kind/security,category/bugfix,category/feature,category/improvement,category/release_operations,pending'
+          any-of-issue-labels: 'waiting-on-author'
+          # Pull requests from this repository are labeled 'internal' by labeler-reusable.yml, so only
+          # internal PRs and community PRs explicitly marked 'waiting-on-author' are ever closed
+          # automatically. Community PRs waiting for a first maintainer answer are never staled.
+          exempt-pr-labels: 'do-not-merge/WIP,do-not-merge/HOLD'
+          any-of-pr-labels: 'waiting-on-author,internal'
