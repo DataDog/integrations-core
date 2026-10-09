@@ -28,7 +28,7 @@
     "integration": {
       "auto_install": true,
       "source_type_id": 74883045,
-      "source_type_name": "Apache NiFi",
+      "source_type_name": "NiFi",
       "configuration": {
         "spec": "assets/configuration/spec.yaml"
       },
