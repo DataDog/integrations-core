@@ -103,6 +103,7 @@ class InstanceConfig(BaseModel):
     collect_counters_with_distributions: Optional[bool] = None
     collect_genresources: Optional[bool] = None
     collect_histogram_buckets: Optional[bool] = None
+    collect_histograms_as_distributions: Optional[bool] = None
     collect_openmetrics: Optional[bool] = None
     commit_server_endpoint: Optional[str] = None
     connect_timeout: Optional[float] = None
