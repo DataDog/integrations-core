@@ -13,7 +13,7 @@ from datadog_checks.dev import run_command
 def _build_pyproject_file(authors):
     return f'''
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling==1.32.4"]
 build-backend = "hatchling.build"
 
 [project]
