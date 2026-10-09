@@ -36,6 +36,23 @@ EXPECTED_TASKMANAGER_CORE_METRICS = [
     "flink.taskmanager.Status.JVM.Threads.Count",
 ]
 
+# Task/operator-scope metrics only exist once a job is running (see the
+# StateMachineExample.jar submission in conftest.py's dd_environment). This exercises
+# tag extraction (job_name, task_name, operator_name, subtask_index) and metric naming
+# against real Flink-emitted data, not the hand-written fixture in tests/fixtures/metrics.txt.
+# Counter-vs-gauge submission type (COUNTER_METRICS in metrics.py/check.py) is deliberately
+# NOT re-verified here: the real Agent's MonotonicCount sender computes a rate internally
+# and the e2e replay JSON reports the result as `gauge` regardless -- no e2e test in this
+# repo asserts MONOTONIC_COUNT for exactly that reason. That distinction is the unit test's job.
+EXPECTED_TASK_METRICS = [
+    "flink.task.numRecordsIn",
+    "flink.task.currentInputWatermark",
+]
+EXPECTED_OPERATOR_METRICS = [
+    "flink.operator.numRecordsIn",
+    "flink.operator.currentOutputWatermark",
+]
+
 
 def test_e2e_jobmanager_metrics(dd_agent_check, dd_environment):
     aggregator = dd_agent_check(dd_environment, rate=True)
@@ -46,12 +63,16 @@ def test_e2e_jobmanager_metrics(dd_agent_check, dd_environment):
 
 def test_e2e_discovery(dd_agent_check_discovery):
     # Both the jobmanager and taskmanager containers share the same `flink` image, so
-    # Autodiscovery finds and configures one instance per container.
+    # Autodiscovery finds and configures one instance per container. Task/operator-scope
+    # metrics are only exposed by the TaskManager's own endpoint (not the JobManager's),
+    # so this discovery-based check -- not test_e2e_jobmanager_metrics -- is what can see them.
     aggregator = dd_agent_check_discovery(rate=True, discovery_min_instances=2)
 
     for metric in EXPECTED_CORE_METRICS:
         aggregator.assert_metric(metric, at_least=1)
     for metric in EXPECTED_TASKMANAGER_CORE_METRICS:
+        aggregator.assert_metric(metric, at_least=1)
+    for metric in EXPECTED_TASK_METRICS + EXPECTED_OPERATOR_METRICS:
         aggregator.assert_metric(metric, at_least=1)
     aggregator.assert_service_check('flink.openmetrics.health', FlinkCheck.OK)
 
