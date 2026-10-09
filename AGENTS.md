@@ -93,6 +93,8 @@ ddev validate config -s <INTEGRATION_NAME>
 ddev validate models -s <INTEGRATION_NAME>
 ```
 
+The exception is `config_models/validators.py`, which is generated once and never overwritten: edit it by hand for rules a single spec field cannot express, such as cross-field checks or URL parsing.
+
 ## Service Checks
 
 **Applicable to:** newly created integrations. Existing integrations that already submit service checks are exempt.
