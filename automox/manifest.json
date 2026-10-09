@@ -1,0 +1,50 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "84477b49-a750-40ac-adec-0736875192d7",
+  "app_id": "automox",
+  "owner": "saas-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor Automox device patch compliance, policy runs, and console audit activity.",
+    "title": "Automox",
+    "media": [],
+    "classifier_tags": [
+      "Category::Automation",
+      "Category::Log Collection",
+      "Category::Metrics",
+      "Category::Security",
+      "Category::SIEM",
+      "Category::Compliance",
+      "Category::OS & System",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 91238407,
+      "source_type_name": "Automox",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    },
+    "dashboards": {},
+    "monitors": {},
+    "saved_views": {}
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
