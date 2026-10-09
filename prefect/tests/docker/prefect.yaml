@@ -8,11 +8,14 @@ build: null
 push: null
 
 # pull section allows you to provide instructions for cloning this project in remote locations
-pull: []
+pull:
+  - prefect.deployments.steps.set_working_directory:
+      directory: /app
 
 deployments:
   - name: sample-deploy
     entrypoint: scripts/sample_flow.py:sample_flow
+    tags: [sample-flow]
     work_pool:
       name: local-pool
     schedules:
@@ -21,6 +24,7 @@ deployments:
 
   - name: sample-deploy-2
     entrypoint: scripts/failing_flow.py:failing_flow
+    tags: [failing-flow]
     work_pool:
       name: local-pool
     schedules:
