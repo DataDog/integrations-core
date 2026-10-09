@@ -38,6 +38,12 @@ from datadog_checks.dev.tooling.utils import (
 # Some integrations aren't installable via the integration install command, so exclude them from the name requirements
 EXCLUDE_CHECKS = ["datadog_checks_downloader", "datadog_checks_dev", "datadog_checks_base", "ddev"]
 
+# Keep this hatchling pin in sync with the wheels pipeline builder:
+# wheels_builder/before.sh in the ddoghq/integrations-core-pipeline GitLab project. When updating
+# the pin, update both places. Keep a version compatible with the builder's Python 3.9
+# (1.27.0 is the last one).
+HATCHLING_PIN = 'hatchling==1.27.0'
+
 ALLOWED_DIST_INFO_FILES = frozenset(
     {
         'DESCRIPTION.rst',
@@ -159,6 +165,9 @@ def _validate_wheel_contents(project_file):
     would fail verification at release time.
     """
     with tempfile.TemporaryDirectory() as wheel_dir:
+        constraint_file = os.path.join(wheel_dir, 'hatchling-constraint.txt')
+        with open(constraint_file, 'w') as f:
+            f.write(HATCHLING_PIN)
         result = run_command(
             [
                 sys.executable,
@@ -166,6 +175,8 @@ def _validate_wheel_contents(project_file):
                 'pip',
                 'wheel',
                 os.path.dirname(project_file),
+                '--constraint',
+                constraint_file,
                 '--ignore-requires-python',
                 '--no-deps',
                 f'--wheel-dir={wheel_dir}',
