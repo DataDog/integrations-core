@@ -1,10 +1,15 @@
 [env.collectors.datadog-checks]
+base-package-features = ["deps", "json"]
 
 [[envs.default.matrix]]
 python = ["3.13"]
 version = ["1.6", "1.9"]
+json = ["orjson", "stdlib"]
 
 [envs.default.overrides]
+matrix.json.post-install-commands = [
+  { value = "uv pip uninstall orjson", if = ["stdlib"] },
+]
 matrix.version.env-vars = [
   { key = "CONSUL_VERSION", value = "1.6.0", if = ["1.6"] },
   { key = "CONSUL_VERSION", value = "1.9.0", if = ["1.9"] },

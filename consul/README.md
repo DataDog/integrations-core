@@ -56,6 +56,25 @@ To configure this check for an Agent running on a host:
    
 2. [Restart the Agent][5].
 
+###### Network latency
+
+Network latency collection is disabled by default. When enabled, the check calculates latency from Consul network coordinates for each node and between data centers. Comparing every node with every other node can use significant CPU.
+
+For data centers with roughly 1,000 nodes or more, consider setting `network_latency_sample_size` to compare each node with fewer peers. This sizing guidance counts the entries returned by `/v1/coordinate/nodes`, including Consul clients and servers; a node can have more than one entry when network segments are used.
+
+```yaml
+instances:
+  - url: http://localhost:8500
+    network_latency_checks: true
+    network_latency_sample_size: 256
+```
+
+All nodes are compared with a common group of peers. The check selects this group using data center, partition, segment, and node names, so the selection stays the same across Agent restarts and Consul leader changes. Adding or removing nodes changes only the affected part of the sample. A node in the group is replaced by another peer when calculating its own metrics, so it never compares with itself.
+
+Every node still reports metrics against up to `network_latency_sample_size` other nodes in the same data center. When fewer peers are available, the check uses all of them. With sampling enabled, the existing percentiles and min/max describe only the selected peers; calculations between data centers are unchanged. Leave the sample size unset to compare each node with every peer. The check does not switch to sampling automatically.
+
+Consul documents network coordinates as comparable only within the same network segment or WAN area. This check does not separate coordinates by segment or area before calculating latency.
+
 ###### OpenMetrics
 
 Optionally, you can enable the `use_prometheus_endpoint` configuration option to get an additional set of metrics from the Consul Prometheus endpoint.
