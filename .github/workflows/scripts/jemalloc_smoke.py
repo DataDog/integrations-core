@@ -13,6 +13,7 @@ import subprocess
 import sys
 import time
 import xml.etree.ElementTree as ET
+from contextlib import ExitStack
 from pathlib import Path
 from typing import Any
 
@@ -25,12 +26,16 @@ def _write(path: Path, data: Any) -> None:
     path.write_text(json.dumps(data, indent=2) + '\n')
 
 
-def _command(args: list[str], log: Path, *, cwd: Path = ROOT, timeout: int = 1800) -> int:
+def _command(
+    args: list[str], log: Path, *, cwd: Path = ROOT, timeout: int = 1800, stderr_log: Path | None = None
+) -> int:
     """Bound subprocess trees so a hung fixture cannot prevent the other allocator run."""
     log.parent.mkdir(parents=True, exist_ok=True)
     print(f'Running {args[0]} {args[1:3]} (log: {log})', flush=True)
-    with log.open('w') as output:
-        process = subprocess.Popen(args, cwd=cwd, stdout=output, stderr=subprocess.STDOUT, start_new_session=True)
+    with ExitStack() as stack:
+        output = stack.enter_context(log.open('w'))
+        errors = stack.enter_context(stderr_log.open('w')) if stderr_log else subprocess.STDOUT
+        process = subprocess.Popen(args, cwd=cwd, stdout=output, stderr=errors, start_new_session=True)
         try:
             return process.wait(timeout=timeout)
         except subprocess.TimeoutExpired:
@@ -216,12 +221,18 @@ def run_campaign(args: argparse.Namespace) -> None:
         [sys.executable, '-m', 'hatch', 'env', 'show', '--json'],
         output / 'environments.json',
         cwd=ROOT / args.integration,
+        stderr_log=output / 'environment-discovery.log',
     )
     if discovery_exit:
         report['error'] = 'Environment discovery failed; see environments.json'
         _write(report_path, report)
         return
-    environments = json.loads((output / 'environments.json').read_text())
+    try:
+        environments = json.loads((output / 'environments.json').read_text())
+    except ValueError as error:
+        report['error'] = 'Invalid environment discovery JSON; see environments.json and environment-discovery.log.'
+        _write(report_path, report)
+        raise ValueError(report['error']) from error
     names = [
         name
         for name, config in environments.items()

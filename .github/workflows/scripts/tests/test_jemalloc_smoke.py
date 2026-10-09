@@ -2,6 +2,7 @@
 
 import importlib.util
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -72,6 +73,14 @@ def test_junit_preserves_collection_errors_and_skips(tmp_path: Path):
         '<testcase name="optional"><skipped/></testcase></testsuite></testsuites>'
     )
     assert smoke.read_junit(report) == {'/ok': 'passed', '/setup': 'failed', '/optional': 'skipped'}
+
+
+def test_discovery_diagnostics_do_not_corrupt_json(tmp_path: Path):
+    output, diagnostics = tmp_path / 'environments.json', tmp_path / 'discovery.log'
+    code = 'import sys; print("Installing plugins", file=sys.stderr); print(\'{"py3.13": {}}\')'
+    assert smoke._command([sys.executable, '-c', code], output, stderr_log=diagnostics) == 0
+    assert json.loads(output.read_text()) == {'py3.13': {}}
+    assert diagnostics.read_text() == 'Installing plugins\n'
 
 
 @pytest.mark.parametrize('free_provider', ['libjemalloc.so.2', 'libc.so.6'])
