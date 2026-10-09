@@ -1,0 +1,82 @@
+{
+  "app_id": "intersystems-iris",
+  "app_uuid": "01a03956-43a3-752e-b78a-0034963e71ae",
+  "manifest_version": "2.0.0",
+  "display_on_public_website": false,
+  "tile": {
+    "title": "InterSystems IRIS",
+    "description": "Monitor InterSystems IRIS instance health, licensing, mirroring, Enterprise Cache Protocol (ECP), and interoperability.",
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "InterSystems IRIS Overview (light mode)",
+        "image_url": "images/intersystems-iris-overview-light.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "InterSystems IRIS Overview (dark mode)",
+        "image_url": "images/intersystems-iris-overview-dark.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Data Stores",
+      "Category::Log Collection",
+      "Category::Metrics",
+      "Offering::Integration",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com",
+    "vendor_id": "datadog"
+  },
+  "assets": {
+    "dashboards": {
+      "InterSystems IRIS Overview": "assets/dashboards/intersystems_iris_overview.json"
+    },
+    "monitors": {
+      "New system alerts have been posted": "assets/monitors/new_system_alerts_have_been_posted.json",
+      "License usage is nearly exhausted": "assets/monitors/license_usage_is_nearly_exhausted.json",
+      "Mirror member is in a degraded state": "assets/monitors/mirror_member_is_in_a_degraded_state.json",
+      "Interoperability queue depth is abnormally high": "assets/monitors/interoperability_queue_depth_is_abnormally_high.json",
+      "Instance CPU usage is saturated": "assets/monitors/instance_cpu_usage_is_saturated.json",
+      "Business host has stopped processing": "assets/monitors/business_host_has_stopped_processing.json"
+    },
+    "logs": {
+      "source": "intersystems-iris"
+    },
+    "integration": {
+      "source_type_name": "InterSystems IRIS",
+      "auto_install": true,
+      "configuration": {},
+      "process_signatures": [],
+      "metrics": {
+        "prefix": "intersystems_iris",
+        "check": [
+          "intersystems_iris.system.state"
+        ],
+        "metadata_path": "metadata.csv",
+        "disable_no_data_detection": false
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "source_type_id": 90769250
+    }
+  },
+  "owner": "agent-integrations"
+}

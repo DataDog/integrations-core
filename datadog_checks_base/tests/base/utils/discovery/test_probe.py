@@ -64,17 +64,22 @@ def test_generated_discovery_candidates_reraises_unrelated_import_error():
 def test_suppress_discovery_side_effects_counts_metrics():
     check = AgentCheck()
 
-    with patch('datadog_checks.base.checks.base.aggregator.submit_histogram_bucket') as submit_histogram_bucket:
+    with (
+        patch('datadog_checks.base.checks.base.aggregator.submit_histogram_bucket') as submit_histogram_bucket,
+        patch('datadog_checks.base.checks.base.aggregator.submit_histogram_bucket_multi') as submit_multi,
+    ):
         with _suppress_discovery_side_effects(check) as stats:
             assert stats.metric_count == 0
             check.gauge('my.metric', 1.0)
             check.count('my.metric', 2.0)
             check.submit_histogram_bucket('my.histogram', 3, 0, 1, True, '', [])
-            assert stats.metric_count == 3
+            check.submit_histogram_bucket('my.histogram', 3, 0, 1, True, '', [], multiple_buckets=True)
+            assert stats.metric_count == 4
 
         submit_histogram_bucket.assert_not_called()
+        submit_multi.assert_not_called()
 
-    assert stats.metric_count == 3
+    assert stats.metric_count == 4
 
 
 def test_suppress_discovery_side_effects_restores_metric_methods_after_exit():

@@ -7,7 +7,7 @@ binary==1.0.2
 boto3==1.43.108
 botocore==1.43.108
 cachetools==7.2.0
-clickhouse-connect==1.9.0
+clickhouse-connect==1.6.0
 cm-client==45.0.4
 confluent-kafka==2.13.2
 cryptography==50.0.2

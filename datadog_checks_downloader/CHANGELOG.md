@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 9.4.1 / 2026-10-01
+
+***Fixed***:
+
+* Retry transient 5xx/429 and network errors on TUF metadata and wheel fetches instead of failing immediately. ([#25308](https://github.com/DataDog/integrations-core/pull/25308))
+
 ## 9.4.0 / 2026-09-02 / Agent 7.84.0
 
 ***Added***:

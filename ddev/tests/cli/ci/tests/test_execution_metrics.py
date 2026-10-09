@@ -9,11 +9,16 @@ from collections.abc import Callable
 
 import pytest
 
-from ddev.cli.ci.tests.execution_metrics import MetricsHelper, Operation
+from ddev.cli.ci.tests.execution_metrics import (
+    MetricsHelper,
+    Operation,
+    ResultMetric,
+    report_result,
+)
 from ddev.monitoring.metrics import MetricKind
 from tests.cli.ci.tests.helpers import recording_runtime
 from tests.helpers.clock import FakeClock
-from tests.helpers.monitoring import RecordingSink
+from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink, make_monitor
 
 OPERATION = 'dispatcher.operation'
 
@@ -25,6 +30,17 @@ def helper_with_sink(clock: Callable[[], float]) -> tuple[MetricsHelper, Recordi
 
 def values(sink: RecordingSink, name: str) -> list[float]:
     return [record.value for record in sink.records_named(name)]
+
+
+def test_report_result_emits_the_whole_family_with_exactly_one_1():
+    """Dense 0/1 counters, so a monitor sees zeros where an outcome did not land, not gaps."""
+    monitoring, sink = recording_runtime()
+
+    report_result(monitoring.component('test-runner').metrics, 'jobs', ResultMetric.TIMED_OUT, target='ntp')
+
+    for result in ResultMetric:
+        assert values(sink, f'jobs.{result.value}') == [int(result is ResultMetric.TIMED_OUT)]
+    assert sink.records_named('jobs.timed_out')[0].tags['dispatcher.batch.job.target'] == 'ntp'
 
 
 @pytest.mark.parametrize('failed', [False, True], ids=['settled-healthy', 'settled-failed'])
@@ -87,3 +103,29 @@ def test_cancellation_propagates_without_settling_the_operation():
     assert sink.records_named('operations.count') == []
     assert sink.records_named('operations.failed') == []
     assert values(sink, 'artifacts.download.duration') == [3.0]
+
+
+@pytest.mark.parametrize('recovered', [False, True], ids=['escaped', 'recovered'])
+def test_log_failed_operation_level(recovered: bool):
+    handler = RecordingJsonHandler()
+    monitor = make_monitor('test-runner', handler=handler)
+    metrics = MetricsHelper(monitor.metrics)
+
+    try:
+        raise RuntimeError('boom')
+    except RuntimeError:
+        metrics.log_failed_operation(
+            Operation.REFRESH_JOBS,
+            monitor.logger,
+            'Failed to list workflow jobs for run %s',
+            123,
+            recovered=recovered,
+            exc_info=True,
+        )
+
+    [event] = handler.events
+    assert event['event'] == 'Failed to list workflow jobs for run 123'
+    assert event['level'] == ('warning' if recovered else 'error')
+    assert event['operation'] == 'refresh_jobs'
+    assert event['component'] == 'test-runner'
+    assert 'exception' in event

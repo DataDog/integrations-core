@@ -187,6 +187,8 @@ class WorkflowJob(BaseModel):
     name: str
     status: WorkflowJobStatus
     conclusion: WorkflowJobConclusion | None = None
+    # `runner_name` is null until GitHub assigns a runner, so it says whether the job ever ran.
+    runner_name: str | None = None
     html_url: str | None = None
     created_at: str
     started_at: str
