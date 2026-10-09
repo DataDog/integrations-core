@@ -2,6 +2,13 @@
 
 <!-- towncrier release notes start -->
 
+## 5.5.3 / 2026-10-01
+
+***Fixed***:
+
+* Explicitly declare `warning`/`critical` as named properties of the `thresholds` option so it can be validated when configured remotely via Fleet Automation. ([#25140](https://github.com/DataDog/integrations-core/pull/25140))
+* Fix `collect_children` failing to collect any child processes when a single pid on the system is inaccessible (eg. `AccessDenied`). ([#25367](https://github.com/DataDog/integrations-core/pull/25367))
+
 ## 5.5.2 / 2026-08-05 / Agent 7.83.0
 
 ***Fixed***:

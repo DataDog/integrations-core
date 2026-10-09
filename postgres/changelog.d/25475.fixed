@@ -1,0 +1,1 @@
+Constrain the `port` option to the valid range 1-65535.

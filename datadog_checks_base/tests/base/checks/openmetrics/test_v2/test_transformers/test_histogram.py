@@ -5,7 +5,42 @@ import logging
 
 import pytest
 
+from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.utils.replay.constants import EnvVars
+
 from ..utils import get_check
+
+LATENCY_PAYLOAD = """
+    # HELP rest_client_request_latency_seconds Request latency in seconds. Broken down by verb and URL.
+    # TYPE rest_client_request_latency_seconds histogram
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.004"} 702
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.001"} 254
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.002"} 621
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.008"} 727
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.016"} 738
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.032"} 744
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.064"} 748
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.128"} 754
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.256"} 755
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="0.512"} 755
+    rest_client_request_latency_seconds_bucket{url="http://127.0.0.1:8080/api",verb="GET",le="+Inf"} 755
+    rest_client_request_latency_seconds_sum{url="http://127.0.0.1:8080/api",verb="GET"} 2.185820220000001
+    rest_client_request_latency_seconds_count{url="http://127.0.0.1:8080/api",verb="GET"} 755
+    """
+LATENCY_SERIES_TAGS = ['endpoint:test', 'url:http://127.0.0.1:8080/api', 'verb:GET']
+LATENCY_BUCKETS = [
+    (0, 0.001, 254),
+    (0.001, 0.002, 367),
+    (0.002, 0.004, 81),
+    (0.004, 0.008, 25),
+    (0.008, 0.016, 11),
+    (0.016, 0.032, 6),
+    (0.032, 0.064, 4),
+    (0.064, 0.128, 6),
+    (0.128, 0.256, 1),
+    (0.256, 0.512, 0),
+    (0.512, float('inf'), 0),
+]
 
 
 def assert_metric_counts(aggregator, payload):
@@ -500,9 +535,13 @@ def test_histogram_buckets_as_distributions_with_zero_bucket(aggregator, dd_run_
     aggregator.assert_all_metrics_covered()
 
 
-def test_histogram_buckets_as_distributions_with_negative_first_bucket(aggregator, dd_run_check, mock_http_response):
-    # A first bucket with a negative upper bound must not keep a -Inf lower bound; it collapses to a point at its
-    # upper bound, mirroring how the Agent handles the +Inf top bucket. Otherwise its count is dropped downstream.
+@pytest.mark.parametrize('collect_counters_with_distributions', [False, True])
+def test_histogram_buckets_as_distributions_with_negative_first_bucket(
+    aggregator, dd_run_check, mock_http_response, collect_counters_with_distributions
+):
+    # The Agent drops sketch buckets with an infinite bound, so the open-ended [-inf, -1.0] bucket is submitted
+    # collapsed to a point at its upper bound, mirroring how the Agent handles the +Inf top bucket. The
+    # lower_bound tag keeps the real -inf bound.
     payload = """
         # HELP req_ms request duration
         # TYPE req_ms histogram
@@ -517,6 +556,7 @@ def test_histogram_buckets_as_distributions_with_negative_first_bucket(aggregato
             'metrics': ['.+'],
             'histogram_buckets_as_distributions': True,
             'collect_histogram_buckets': True,
+            'collect_counters_with_distributions': collect_counters_with_distributions,
         }
     )
     dd_run_check(check)
@@ -528,7 +568,7 @@ def test_histogram_buckets_as_distributions_with_negative_first_bucket(aggregato
         -1.0,
         True,
         '',
-        ['endpoint:test', 'upper_bound:-1.0', 'lower_bound:-1.0'],
+        ['endpoint:test', 'upper_bound:-1.0', 'lower_bound:-inf'],
     )
     aggregator.assert_histogram_bucket(
         'test.req_ms',
@@ -548,6 +588,42 @@ def test_histogram_buckets_as_distributions_with_negative_first_bucket(aggregato
         '',
         ['endpoint:test', 'upper_bound:inf', 'lower_bound:5.0'],
     )
+    if collect_counters_with_distributions:
+        aggregator.assert_metric(
+            'test.req_ms.count', 10, metric_type=aggregator.MONOTONIC_COUNT, tags=['endpoint:test']
+        )
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_non_cumulative_histogram_buckets_with_negative_first_bucket(aggregator, dd_run_check, mock_http_response):
+    # Outside distributions, buckets are plain counts and lower_bound is only a tag, so the open-ended first
+    # bucket keeps its real -inf bound.
+    payload = """
+        # HELP req_ms request duration
+        # TYPE req_ms histogram
+        req_ms_bucket{le="-1.0"} 4
+        req_ms_bucket{le="5.0"} 10
+        req_ms_bucket{le="+Inf"} 10
+        req_ms_count 10
+        """
+    mock_http_response(payload)
+    check = get_check({'metrics': ['.+'], 'non_cumulative_histogram_buckets': True})
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'test.req_ms.bucket',
+        4,
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=['endpoint:test', 'upper_bound:-1.0', 'lower_bound:-inf'],
+    )
+    aggregator.assert_metric(
+        'test.req_ms.bucket',
+        6,
+        metric_type=aggregator.MONOTONIC_COUNT,
+        tags=['endpoint:test', 'upper_bound:5.0', 'lower_bound:-1.0'],
+    )
+    aggregator.assert_metric('test.req_ms.count', 10, metric_type=aggregator.MONOTONIC_COUNT, tags=['endpoint:test'])
 
     aggregator.assert_all_metrics_covered()
 
@@ -758,3 +834,92 @@ def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_che
     )
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.parametrize('collect_counters_with_distributions', [False, True])
+def test_collect_histograms_as_distributions(
+    aggregator, dd_run_check, mock_http_response, collect_counters_with_distributions
+):
+    mock_http_response(LATENCY_PAYLOAD)
+    check = get_check(
+        {
+            'metrics': ['.+'],
+            'collect_counters_with_distributions': collect_counters_with_distributions,
+            'collect_histograms_as_distributions': True,
+        }
+    )
+    dd_run_check(check)
+
+    buckets = aggregator.histogram_bucket('test.rest_client_request_latency_seconds')
+    assert sorted((bucket.lower_bound, bucket.upper_bound, bucket.value) for bucket in buckets) == LATENCY_BUCKETS
+    for bucket in buckets:
+        assert sorted(bucket.tags) == LATENCY_SERIES_TAGS
+        assert bucket.multiple_buckets
+
+    if collect_counters_with_distributions:
+        aggregator.assert_metric(
+            'test.rest_client_request_latency_seconds.sum',
+            2.185820220000001,
+            metric_type=aggregator.MONOTONIC_COUNT,
+            tags=LATENCY_SERIES_TAGS,
+        )
+        aggregator.assert_metric(
+            'test.rest_client_request_latency_seconds.count',
+            755,
+            metric_type=aggregator.MONOTONIC_COUNT,
+            tags=LATENCY_SERIES_TAGS,
+        )
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_collect_histograms_as_distributions_with_renamed_upper_bound(aggregator, dd_run_check, mock_http_response):
+    mock_http_response(LATENCY_PAYLOAD)
+    check = get_check(
+        {
+            'metrics': ['.+'],
+            'collect_histograms_as_distributions': True,
+            'rename_labels': {'upper_bound': 'bucket_limit'},
+        }
+    )
+    dd_run_check(check)
+
+    buckets = aggregator.histogram_bucket('test.rest_client_request_latency_seconds')
+    assert sorted((bucket.lower_bound, bucket.upper_bound, bucket.value) for bucket in buckets) == LATENCY_BUCKETS
+    for bucket in buckets:
+        assert sorted(bucket.tags) == LATENCY_SERIES_TAGS
+
+
+def test_histogram_buckets_as_distributions_on_unsupported_agent(
+    aggregator, dd_run_check, mock_http_response, monkeypatch
+):
+    monkeypatch.delattr(AggregatorStub, 'submit_histogram_bucket_multi')
+    mock_http_response(LATENCY_PAYLOAD)
+    check = get_check({'metrics': ['.+'], 'histogram_buckets_as_distributions': True})
+    dd_run_check(check)
+
+    buckets = aggregator.histogram_bucket('test.rest_client_request_latency_seconds')
+    assert sorted((bucket.lower_bound, bucket.upper_bound, bucket.value) for bucket in buckets) == LATENCY_BUCKETS
+
+
+@pytest.mark.parametrize(
+    'setup, message',
+    [
+        pytest.param(
+            lambda monkeypatch: monkeypatch.delattr(AggregatorStub, 'submit_histogram_bucket_multi'),
+            'is not supported by this Agent version',
+            id='unsupported agent',
+        ),
+        pytest.param(
+            lambda monkeypatch: monkeypatch.setenv(EnvVars.MESSAGE_INDICATOR, 'indicator'),
+            'cannot be used with `process_isolation`',
+            id='process isolation',
+        ),
+    ],
+)
+def test_collect_histograms_as_distributions_rejected(dd_run_check, monkeypatch, setup, message):
+    setup(monkeypatch)
+    check = get_check({'metrics': ['.+'], 'collect_histograms_as_distributions': True})
+
+    with pytest.raises(Exception, match=message):
+        dd_run_check(check, extract_message=True)

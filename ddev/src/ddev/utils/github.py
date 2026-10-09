@@ -1,6 +1,12 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+"""Synchronous GitHub client.
+
+Adding new features to this client is deprecated. New GitHub API calls go in `ddev.utils.github_async`;
+only bug fixes to existing methods belong here.
+"""
+
 from __future__ import annotations
 
 import json

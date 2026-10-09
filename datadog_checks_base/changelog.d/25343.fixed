@@ -1,1 +1,0 @@
-Remove embedded null characters by default before obfuscating SQL.

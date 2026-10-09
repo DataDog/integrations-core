@@ -26,6 +26,7 @@ gpu.decoder_active,gauge,16,percent,,Percentage of time the decoder was active,0
 gpu.decoder_utilization,gauge,16,percent,,"Percentage of time the decoder was active. Only emitted on Agent 7.76 and previous versions, replaced by `gpu.decoder_active` since 7.77",0,gpu,decoder_utilization,,
 gpu.device.needs_recovery,gauge,16,,,"Whether the GPU requires a recovery action (e.g. reset or reboot) as reported by NVML's GPU recovery action field. 0 means no action is needed, 1 means a recovery action is required. The recovery_action tag indicates the specific action.",0,gpu,device.needs_recovery,,
 gpu.device.total,gauge,16,device,,Number of GPU devices found in the host,0,gpu,device.total,,
+gpu.device.unavailable,gauge,16,,,"Whether the GPU is unavailable for the reason in the unavailable_reason tag. The lost reason means NVML reports the GPU as inaccessible (NVML_ERROR_GPU_IS_LOST, typically because it has fallen off the bus). 0 means available, 1 means unavailable.",0,gpu,device.unavailable,,
 gpu.device.unhealthy,gauge,16,,,Whether the GPU device is unhealthy,0,gpu,device.unhealthy,,
 gpu.dram_active,gauge,16,percent,,Percentage of time the DRAM was active,0,gpu,dram_active,,
 gpu.ecc.repair_pending.channel,gauge,16,,,Whether a channel repair is pending due to ECC errors,0,gpu,ecc.repair_pending.channel,,
@@ -137,3 +138,4 @@ gpu.sm_utilization,gauge,16,percent,,Percentage of the Streaming Multiprocessors
 gpu.temperature,gauge,16,degree celsius,,Temperature of the GPU device,0,gpu,temperature,,
 gpu.tensor_active,gauge,16,percent,,Percentage of the time that the tensor calculation engine was active. Only for Hopper and newer GPUs,0,gpu,tensor_active,,
 gpu.total_energy_consumption,gauge,16,millijoule,,Total energy consumed by the device since the driver was reloaded,0,gpu,total_energy_consumption,,
+gpu.vgpu.license_status,gauge,16,,,"Whether the vGPU software license for the device's enabled product is active (1) or inactive (0), as reported by NVML from inside the guest VM. An inactive license exposes the workload to driver performance limitations but does not by itself indicate that throttling is in effect. Tagged with vgpu_product. Only emitted for vGPU devices that support vGPU software licensing.",0,gpu,vgpu.license_status,,

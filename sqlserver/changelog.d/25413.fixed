@@ -1,0 +1,1 @@
+Prefer the ODBC driver registration owned by the Agent install over the bundled odbcinst.ini, which hardcodes the Agent install path. The bundled file is still used on Agents that do not ship one.
