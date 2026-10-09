@@ -1,1 +1,0 @@
-Fix `collect_children` failing to collect any child processes when a single pid on the system is inaccessible (eg. `AccessDenied`).

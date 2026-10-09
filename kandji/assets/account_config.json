@@ -1,0 +1,55 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "API Key",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "domain",
+      "label": "Domain",
+      "editable": true,
+      "required": true,
+      "text": {
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*\\.api\\.(eu\\.)?kandji\\.io$"
+      }
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "kandji-audit-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Audit & Threat logs",
+        "help": "Collects Kandji audit and threat logs.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "audit",
+        "should_map_legacy_fields": true
+      }
+    },
+    {
+      "dataflow_id": "kandji-detection-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Detection logs",
+        "help": "Collects Kandji detection logs.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "detection",
+        "should_map_legacy_fields": true
+      }
+    }
+  ]
+}
