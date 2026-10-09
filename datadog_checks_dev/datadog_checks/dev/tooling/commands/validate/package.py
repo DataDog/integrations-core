@@ -12,6 +12,7 @@ from email.errors import InvalidHeaderDefect
 from email.headerregistry import Address
 
 import click
+
 from datadog_checks.dev import run_command
 from datadog_checks.dev.fs import basepath
 from datadog_checks.dev.tooling.commands.console import (
@@ -157,6 +158,14 @@ def _validate_wheel_contents(project_file):
     layouts (e.g. `1.extras.root.layout`) allow: `datadog_checks/*` plus `ALLOWED_DIST_INFO_FILES` in the
     `*.dist-info` directory, e.g. a `LICENSE` the build backend embeds as `*.dist-info/licenses/LICENSE`
     would fail verification at release time.
+
+    The same rules apply in every repo, including marketplace: unlike core/extras, marketplace wheels are
+    built and attested by a different pipeline that verifies no in-toto layout, but we still hold them to
+    the same rules to keep shipped wheels minimal.
+
+    The wheel is built with `pip`'s default build isolation, so the backend version is resolved from
+    PyPI at validation time, exactly as the pipeline does at release time; a backend release between
+    the two can still change the embedded files, so a pass here is not a release guarantee.
     """
     with tempfile.TemporaryDirectory() as wheel_dir:
         result = run_command(
