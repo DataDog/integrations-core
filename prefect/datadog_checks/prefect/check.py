@@ -479,10 +479,16 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             start_time = _parse_time(tr.get('start_time'), self.log)
             expected_start_time = _parse_time(tr.get('expected_start_time'), self.log)
 
+            # Task runs use their own tags rather than the deployment's, as those are what tag concurrency limits match
             tr_tags_list = sorted(
                 [
-                    *self.flow_runs_tags.get(tr.get('flow_run_id', ''), ()),
+                    *(
+                        t
+                        for t in self.flow_runs_tags.get(tr.get('flow_run_id', ''), ())
+                        if not t.startswith('prefect_tag:')
+                    ),
                     f"task_key:{tr.get('task_key', '')}",
+                    *(f"prefect_tag:{t}" for t in tr.get('tags') or []),
                 ]
             )
             task_tags.add(tuple(tr_tags_list))
@@ -591,7 +597,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             return
 
         state_type = event.state_type
-        task_tags = sorted(event.task_tags + self._deployment_tags(event))
+        task_tags = sorted(event.task_tags)
 
         terminal_state_metrics = {
             "task_runs.cancelled.count": {'CANCELLED'},
@@ -642,7 +648,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
 
                 last_dep_finished = max(parsed_times) if parsed_times else None
 
-                task_tags = event.task_tags + self._deployment_tags(event)
+                task_tags = event.task_tags
                 if last_dep_finished and event.occurred:
                     self._clean_and_emit_metric(
                         "task_runs.dependency_wait_duration",
@@ -1051,8 +1057,10 @@ class Event:
     @cached_property
     def task_tags(self) -> list[str]:
         if self.event_type.startswith('prefect.task-run'):
+            task_run = self.payload.get('task_run', {})
             return self.flow_tags + [
-                f"task_key:{self.payload.get('task_run', {}).get('task_key', '')}",
+                f"task_key:{task_run.get('task_key', '')}",
+                *(f"prefect_tag:{t}" for t in task_run.get('tags') or []),
             ]
         else:
             return []

@@ -49,7 +49,7 @@ WQ1_STATUS_TAGS = WQ1_TAGS + ["work_queue_status:READY"]
 WQ2_STATUS_TAGS = WQ2_TAGS + ["work_queue_status:PAUSED"]
 WQ4_STATUS_TAGS = WQ4_TAGS + ["work_queue_status:NOT_READY"]
 
-TAGS_F1 = [
+TAGS_F1_WITHOUT_DEPLOYMENT_TAGS = [
     "work_pool_id:wp-1",
     "work_pool_name:default-pool",
     "work_queue_id:wq-1",
@@ -58,8 +58,8 @@ TAGS_F1 = [
     "deployment_name:deployment-1",
     "flow_id:f-1",
     "flow_name:flow-1",
-    "prefect_tag:tag-1",
 ]
+TAGS_F1 = TAGS_F1_WITHOUT_DEPLOYMENT_TAGS + ["prefect_tag:tag-1"]
 
 TAGS_F2 = [
     "work_pool_id:wp-1",
@@ -83,12 +83,13 @@ TAGS_F3 = [
     "flow_name:flow-3",
 ]
 
-TAGS_TR1 = TAGS_F1 + ["task_key:task-1"]
-TAGS_TR2 = TAGS_F1 + ["task_key:task-2"]
-TAGS_TR3 = TAGS_F1 + ["task_key:task-3"]
-TAGS_TR7 = TAGS_F1 + ["task_key:task-7"]
-TAGS_TR8 = TAGS_F1 + ["task_key:task-8"]
-TAGS_TR9 = TAGS_F1 + ["task_key:task-9"]
+# Task runs carry their own tags (task-1 is tagged `etl`), not the deployment's
+TAGS_TR1 = TAGS_F1_WITHOUT_DEPLOYMENT_TAGS + ["task_key:task-1", "prefect_tag:etl"]
+TAGS_TR2 = TAGS_F1_WITHOUT_DEPLOYMENT_TAGS + ["task_key:task-2"]
+TAGS_TR3 = TAGS_F1_WITHOUT_DEPLOYMENT_TAGS + ["task_key:task-3"]
+TAGS_TR7 = TAGS_F1_WITHOUT_DEPLOYMENT_TAGS + ["task_key:task-7"]
+TAGS_TR8 = TAGS_F1_WITHOUT_DEPLOYMENT_TAGS + ["task_key:task-8"]
+TAGS_TR9 = TAGS_F1_WITHOUT_DEPLOYMENT_TAGS + ["task_key:task-9"]
 
 NI_WP_TAGS = ["work_pool_id:wp-4", "work_pool_name:not_included_pool", "work_pool_type:process"]
 NI_WORKER_TAGS = ["work_pool_id:wp-4", "work_pool_name:not_included_pool", "worker_id:w-9", "worker_name:worker-9"]

@@ -611,6 +611,7 @@
     {
       "id": "tr-1",
       "task_key": "task-1",
+      "tags": ["etl"],
       "flow_run_id": "fr-completed",
       "state_type": "COMPLETED",
       "expected_start_time": "2026-01-20T15:00:10Z",
@@ -620,6 +621,7 @@
     {
       "id": "tr-1.1",
       "task_key": "task-1",
+      "tags": ["etl"],
       "flow_run_id": "fr-completed",
       "state_type": "COMPLETED",
       "expected_start_time": "2026-01-20T15:01:10.123Z",
@@ -629,6 +631,7 @@
     {
       "id": "tr-1.2",
       "task_key": "task-1",
+      "tags": ["etl"],
       "flow_run_id": "fr-completed",
       "state_type": "COMPLETED",
       "expected_start_time": "2026-01-20T15:02:10Z",
@@ -674,6 +677,7 @@
     {
       "id": "tr-5",
       "task_key": "task-1",
+      "tags": ["etl"],
       "flow_run_id": "fr-completed",
       "state_type": "RUNNING",
       "expected_start_time": "2026-01-20T15:00:25Z",
@@ -742,6 +746,7 @@
     {
       "id": "tr-failed-1",
       "task_key": "task-1",
+      "tags": ["etl"],
       "flow_run_id": "fr-failed",
       "state_type": "FAILED",
       "expected_start_time": "2026-01-20T15:00:26Z",
@@ -761,6 +766,7 @@
     {
       "id": "tr-pending-1",
       "task_key": "task-1",
+      "tags": ["etl"],
       "flow_run_id": "fr-pending",
       "state_type": "PENDING",
       "expected_start_time": "2026-01-20T15:00:28Z"
@@ -919,6 +925,7 @@
             "task_run": {
               "name": "task-1",
               "task_key": "task-1",
+              "tags": ["etl"],
               "dynamic_key": "dyn-tr-1",
               "run_count": 1,
               "flow_run_run_count": 1,
@@ -959,6 +966,7 @@
             "task_run": {
               "name": "task-1",
               "task_key": "task-1",
+              "tags": ["etl"],
               "dynamic_key": "dyn-tr-1",
               "run_count": 1,
               "flow_run_run_count": 1,
@@ -1224,6 +1232,7 @@
             "task_run": {
               "name": "task-1",
               "task_key": "task-1",
+              "tags": ["etl"],
               "dynamic_key": "dyn-tr-1.1",
               "run_count": 2,
               "flow_run_run_count": 1,
