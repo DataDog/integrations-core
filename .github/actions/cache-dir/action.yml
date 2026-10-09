@@ -1,0 +1,22 @@
+name: 'Cache directory'
+description: 'Pinned actions/cache wrapper; the pin lives here so bumping it does not flip the resolution inputs hashed by .builders/inputs_hash.py'
+inputs:
+  path:
+    description: 'Directory to cache'
+    required: true
+  key:
+    description: 'Explicit cache key'
+    required: true
+outputs:
+  cache-hit:
+    description: 'Whether a cache hit occurred'
+    value: ${{ steps.cache.outputs.cache-hit }}
+runs:
+  using: composite
+  steps:
+    - name: Restore cache
+      id: cache
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ inputs.path }}
+        key: ${{ inputs.key }}
