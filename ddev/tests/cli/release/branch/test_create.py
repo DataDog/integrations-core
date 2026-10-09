@@ -45,7 +45,7 @@ def test_create_branch(ddev, mocker, yaml_updated):
     label_mock = mocker.patch('ddev.utils.github.GitHubManager.create_label')
     milestone_mock = mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
     pr_mock = mocker.patch(
-        'ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1'
+        'ddev.utils.github.GitHubManager.create_pull_request', return_value=(1, 'https://github.com/test/pr/1')
     )
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=yaml_updated)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
@@ -192,7 +192,9 @@ def test_create_branch_confirmation_required(ddev, mocker):
     mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
-    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1')
+    mocker.patch(
+        'ddev.utils.github.GitHubManager.create_pull_request', return_value=(1, 'https://github.com/test/pr/1')
+    )
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=False)
@@ -208,7 +210,9 @@ def test_create_branch_with_suggestion(ddev, mocker):
     mocker.patch('ddev.utils.git.GitRepository.capture', return_value='  origin/7.77.x\n  origin/7.76.x\n')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
-    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1')
+    mocker.patch(
+        'ddev.utils.github.GitHubManager.create_pull_request', return_value=(1, 'https://github.com/test/pr/1')
+    )
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.prompt', return_value='7.78.x')
@@ -225,7 +229,9 @@ def test_create_branch_with_gap_suggests_missing_branch(ddev, mocker):
     mocker.patch('ddev.utils.git.GitRepository.capture', return_value='  origin/7.62.x\n  origin/7.60.x\n')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
-    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1')
+    mocker.patch(
+        'ddev.utils.github.GitHubManager.create_pull_request', return_value=(1, 'https://github.com/test/pr/1')
+    )
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.prompt', return_value='7.61.x')
@@ -277,7 +283,10 @@ def test_create_branch_creates_milestone_and_pr(ddev, mocker):
     mocker.patch('ddev.utils.git.GitRepository.run')
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
-    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1')
+    mocker.patch(
+        'ddev.utils.github.GitHubManager.create_pull_request', return_value=(1, 'https://github.com/test/pr/1')
+    )
+    add_labels = mocker.patch('ddev.utils.github.GitHubManager.add_labels')
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=True)
@@ -285,6 +294,8 @@ def test_create_branch_creates_milestone_and_pr(ddev, mocker):
     result = ddev('release', 'branch', 'create', '7.79.x')
 
     assert result.exit_code == 0, result.output
+    # The milestone bump only touches release.json, so it must not require QA.
+    add_labels.assert_called_once_with(1, ['qa/skip-qa'])
     assert 'Creating the `7.80.0` milestone' in result.output
     assert 'Updating release.json with new milestone `7.80.0`' in result.output
     assert 'Pull request created' in result.output
@@ -301,7 +312,9 @@ def test_create_branch_milestone_already_exists(ddev, mocker):
         request=Request('POST', 'https://api.github.com/repos/test/milestones'),
         response=Response(422),
     )
-    mocker.patch('ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1')
+    mocker.patch(
+        'ddev.utils.github.GitHubManager.create_pull_request', return_value=(1, 'https://github.com/test/pr/1')
+    )
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=True)
@@ -340,7 +353,7 @@ def test_create_branch_push_failure(ddev, mocker):
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
     create_pr_mock = mocker.patch(
-        'ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1'
+        'ddev.utils.github.GitHubManager.create_pull_request', return_value=(1, 'https://github.com/test/pr/1')
     )
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
@@ -369,6 +382,30 @@ def test_create_branch_pr_creation_failure(ddev, mocker):
 
     assert result.exit_code == 0, result.output
     assert 'Failed to create the pull request' in result.output
+    assert 'All done' in result.output
+
+
+def test_create_branch_label_failure_keeps_pr_url(ddev, mocker):
+    """A labeling failure after the PR exists must surface its URL, not send the operator to open a duplicate."""
+    from httpx import HTTPError
+
+    mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.github.GitHubManager.create_label')
+    mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
+    mocker.patch(
+        'ddev.utils.github.GitHubManager.create_pull_request', return_value=(1, 'https://github.com/test/pr/1')
+    )
+    mocker.patch('ddev.utils.github.GitHubManager.add_labels', side_effect=HTTPError('API error'))
+    mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
+    mocker.patch('ddev.cli.release.branch.create.update_release_json')
+    mocker.patch('click.confirm', return_value=True)
+
+    result = ddev('release', 'branch', 'create', '7.79.x')
+
+    assert result.exit_code == 0, result.output
+    assert 'Pull request created: https://github.com/test/pr/1' in result.output
+    assert 'Failed to add `qa/skip-qa` to https://github.com/test/pr/1' in result.output
+    assert 'Failed to create the pull request' not in result.output
     assert 'All done' in result.output
 
 
