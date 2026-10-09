@@ -1,0 +1,408 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
+import json
+import threading
+import time
+from collections.abc import Callable
+from contextlib import ExitStack
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
+
+from psycopg.rows import dict_row
+
+from datadog_checks.base.utils.db.utils import default_json_event_encoding, now_ms
+
+from .filters import regex_exclude_clauses, regex_include_clause
+from .role_queries import (
+    QUERY_DEFAULT_PRIVILEGES,
+    QUERY_OBJECT_DEPENDENCIES,
+    QUERY_ROLE_SETTINGS,
+    QUERY_ROLES,
+    ROLE_SETTING_VALUE_PREFIXES,
+    list_databases_query,
+    memberships_query,
+    object_privileges_query,
+    objects_query,
+)
+from .util import payload_pg_version
+from .version_utils import V11, V16
+
+if TYPE_CHECKING:
+    from datadog_checks.postgres import PostgreSql
+
+
+INSTANCE_ARRAYS = ("roles", "memberships", "settings")
+DATABASE_ARRAYS = ("object_privileges", "default_privileges", "objects", "object_dependencies")
+PAYLOAD_CHUNK_SIZE = 10_000
+
+
+class RoleCollectionCancelled(Exception):
+    """Raised to stop a role snapshot without marking it complete."""
+
+
+@dataclass
+class PostgresRoleCollectorConfig:
+    collection_interval: float
+    max_query_duration: float
+    include_databases: list[str]
+    exclude_databases: list[str]
+    payload_chunk_size: int = PAYLOAD_CHUNK_SIZE
+
+
+class RoleSnapshotEmitter:
+    """Build and submit a chunked snapshot containing multiple entity arrays."""
+
+    def __init__(
+        self,
+        base_event: dict[str, Any],
+        array_names: tuple[str, ...],
+        submit: Callable[[dict[str, Any]], None],
+        chunk_size: int,
+    ) -> None:
+        self._base_event = base_event
+        self._array_names = array_names
+        self._submit = submit
+        self._chunk_size = chunk_size
+        self._buffers: dict[str, list[dict[str, Any]]] = {name: [] for name in array_names}
+        self._buffered_rows_count = 0
+        self.payloads_count = 0
+        self.rows_count = 0
+
+    def append(self, array_name: str, row: dict[str, Any]) -> None:
+        self._buffers[array_name].append(row)
+        self.rows_count += 1
+        self._buffered_rows_count += 1
+        if self._buffered_rows_count >= self._chunk_size:
+            self._flush(is_last=False)
+
+    def flush_terminal(self) -> None:
+        self._flush(is_last=True)
+
+    def discard(self) -> None:
+        self._clear_buffers()
+
+    def _clear_buffers(self) -> None:
+        self._buffers = {name: [] for name in self._array_names}
+        self._buffered_rows_count = 0
+
+    def _flush(self, is_last: bool) -> None:
+        event = dict(self._base_event)
+        event["timestamp"] = now_ms()
+        event.update(self._buffers)
+
+        self.payloads_count += 1
+        if is_last:
+            event["collection_payloads_count"] = self.payloads_count
+
+        self._submit(event)
+        self._clear_buffers()
+
+
+class PostgresRoleCollector:
+    """Collect role and privilege snapshots from a PostgreSQL instance."""
+
+    def __init__(self, check: PostgreSql, cancel_event: threading.Event) -> None:
+        role_config = check._config.collect_roles
+        self._check = check
+        self._cancel_event = cancel_event
+        self._log = check.log
+        self._config = PostgresRoleCollectorConfig(
+            collection_interval=role_config.collection_interval,
+            max_query_duration=role_config.max_query_duration,
+            include_databases=list(role_config.include_databases),
+            exclude_databases=list(role_config.exclude_databases),
+        )
+        self._resume_from_database: str | None = None
+        self._rows_count = 0
+        self._payloads_count = 0
+
+    def collect_roles(self, tags_no_db: list[str]) -> None:
+        """Collect the instance scope and each accessible logical database scope.
+
+        Once the server version is known, each run reports its outcome through the `status` tag on the
+        `dd.postgres.roles.*` metrics.
+        """
+        # The queries depend on the server version, which is unknown until the check has connected.
+        if self._check.version is None:
+            self._log.debug("Skipping role collection until the PostgreSQL version is known")
+            return
+
+        started_at = time.time() * 1000
+        had_error = False
+        self._rows_count = 0
+        self._payloads_count = 0
+        try:
+            if self._cancel_event.is_set():
+                return
+
+            if not self._collect_instance_scope(tags_no_db):
+                had_error = True
+
+            try:
+                databases = self._get_databases()
+            except RoleCollectionCancelled:
+                return
+            except Exception:
+                had_error = True
+                self._log.exception("Error listing databases for role collection")
+                databases = []
+
+            # The metadata job runs its collectors sequentially, so an unbounded fan-out delays every other
+            # metadata collection. Stop at the collection interval and resume from the first skipped database
+            # next run, so a deadline that is always hit still covers every database over time.
+            deadline = started_at / 1000 + self._config.collection_interval
+            databases = self._rotate_databases(databases)
+            self._resume_from_database = None
+            for index, database_name in enumerate(databases):
+                if self._cancel_event.is_set():
+                    break
+                # The first database always runs so every collection makes progress.
+                if index > 0 and time.time() > deadline:
+                    self._resume_from_database = database_name
+                    self._log.warning(
+                        "Role collection exceeded its %s second collection interval; skipped %d of %d databases, "
+                        "resuming from '%s' on the next run",
+                        self._config.collection_interval,
+                        len(databases) - index,
+                        len(databases),
+                        database_name,
+                    )
+                    self._check.count(
+                        "dd.postgres.roles.skipped_databases",
+                        len(databases) - index,
+                        tags=self._check.tags,
+                        hostname=self._check.reported_hostname,
+                        raw=True,
+                    )
+                    break
+                if not self._collect_database_scope(database_name, tags_no_db):
+                    had_error = True
+        finally:
+            # Cancellation can stop a run before any scope fails, or make a scope return as failed, so it takes
+            # precedence over both outcomes.
+            if self._cancel_event.is_set():
+                status = "cancelled"
+            else:
+                status = "error" if had_error else "success"
+            metric_tags = self._check.tags + [f"status:{status}"]
+            self._check.histogram(
+                "dd.postgres.roles.time",
+                (time.time() * 1000) - started_at,
+                tags=metric_tags,
+                hostname=self._check.reported_hostname,
+                raw=True,
+            )
+            self._check.gauge(
+                "dd.postgres.roles.rows_count",
+                self._rows_count,
+                tags=metric_tags,
+                hostname=self._check.reported_hostname,
+                raw=True,
+            )
+            self._check.gauge(
+                "dd.postgres.roles.payloads_count",
+                self._payloads_count,
+                tags=metric_tags,
+                hostname=self._check.reported_hostname,
+                raw=True,
+            )
+
+    def _collect_instance_scope(self, tags_no_db: list[str]) -> bool:
+        emitter = self._new_emitter("pg_roles", INSTANCE_ARRAYS, tags_no_db)
+        try:
+            with self._check._get_main_db() as conn, ExitStack() as cursors:
+                results = self._execute_in_snapshot(
+                    conn,
+                    cursors,
+                    [
+                        ("roles", QUERY_ROLES, ()),
+                        ("memberships", memberships_query(pg16_plus=self._check.version >= V16), ()),
+                        ("settings", QUERY_ROLE_SETTINGS, (list(ROLE_SETTING_VALUE_PREFIXES),)),
+                    ],
+                )
+                for array_name, cursor in results:
+                    self._emit_rows(cursor, array_name, emitter)
+                    cursor.close()
+            emitter.flush_terminal()
+            return True
+        except RoleCollectionCancelled:
+            emitter.discard()
+            return False
+        except Exception:
+            emitter.discard()
+            self._log.exception("Error collecting PostgreSQL instance role metadata")
+            return False
+        finally:
+            self._record_emitter(emitter)
+
+    def _collect_database_scope(self, database_name: str, tags_no_db: list[str]) -> bool:
+        emitter = self._new_emitter(
+            "pg_role_privileges",
+            DATABASE_ARRAYS,
+            tags_no_db,
+            database_name=database_name,
+        )
+        started_at = time.time() * 1000
+        status = "error"
+        try:
+            pg11_plus = self._check.version >= V11
+            with self._check.db_pool.get_connection(database_name) as conn, ExitStack() as cursors:
+                results = self._execute_in_snapshot(
+                    conn,
+                    cursors,
+                    [
+                        ("default_privileges", QUERY_DEFAULT_PRIVILEGES, ()),
+                        ("object_privileges", object_privileges_query(pg11_plus=pg11_plus), ()),
+                        ("objects", objects_query(pg11_plus=pg11_plus), ()),
+                        ("object_dependencies", QUERY_OBJECT_DEPENDENCIES, ()),
+                    ],
+                )
+                for array_name, cursor in results:
+                    self._emit_rows(cursor, array_name, emitter)
+                    cursor.close()
+            emitter.flush_terminal()
+            status = "success"
+            return True
+        except RoleCollectionCancelled:
+            status = "cancelled"
+            emitter.discard()
+            return False
+        except Exception:
+            emitter.discard()
+            self._log.exception("Error collecting role privileges for database '%s'", database_name)
+            return False
+        finally:
+            self._record_emitter(emitter)
+            self._check.histogram(
+                "dd.postgres.roles.database.time",
+                (time.time() * 1000) - started_at,
+                tags=self._check.tags_without_db + [f"db:{database_name}", f"status:{status}"],
+                hostname=self._check.reported_hostname,
+                raw=True,
+            )
+
+    def _get_databases(self) -> list[str]:
+        params: list[str] = []
+        database_filter = "TRUE"
+        if self._check._config.dbstrict and not self._check.autodiscovery:
+            database_filter += " AND d.datname = %s"
+            params.append(self._check._config.dbname)
+        else:
+            database_filter += regex_exclude_clauses("d.datname", self._config.exclude_databases)
+            params.extend(self._config.exclude_databases)
+            database_filter += regex_include_clause("d.datname", self._config.include_databases)
+            params.extend(self._config.include_databases)
+
+            autodiscovery_databases = self._check.autodiscovery.get_items() if self._check.autodiscovery else []
+            if autodiscovery_databases:
+                database_filter += " AND d.datname IN ({})".format(", ".join(["%s"] * len(autodiscovery_databases)))
+                params.extend(autodiscovery_databases)
+
+        with self._check._get_main_db() as conn:
+            with conn.transaction():
+                with conn.cursor(row_factory=dict_row) as cursor:
+                    self._configure_transaction(cursor)
+                    self._check_cancelled()
+                    query = list_databases_query(database_filter)
+                    if params:
+                        cursor.execute(query, params)
+                    else:
+                        cursor.execute(query)
+                    rows = cursor.fetchall()
+        skipped = [row["database_name"] for row in rows if not row["can_connect"]]
+        if skipped:
+            self._log.debug("Skipping role collection for databases without CONNECT privilege: %s", skipped)
+        return [row["database_name"] for row in rows if row["can_connect"]]
+
+    def _rotate_databases(self, databases: list[str]) -> list[str]:
+        """Start from the database the previous run stopped at, or from the beginning if it no longer exists."""
+        if self._resume_from_database in databases:
+            start = databases.index(self._resume_from_database)
+            return databases[start:] + databases[:start]
+        return databases
+
+    def _configure_transaction(self, cursor: Any) -> None:
+        self._check_cancelled()
+        cursor.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
+        cursor.execute(
+            "SELECT pg_catalog.set_config('statement_timeout', %s, true)",
+            (str(int(self._config.max_query_duration * 1000)),),
+        )
+        # Routine names format argument types relative to the session's search_path, which the agent role's or
+        # database's settings can change. With only pg_catalog searched, every other type is schema-qualified, so
+        # a routine's name does not depend on how the agent is configured.
+        cursor.execute("SELECT pg_catalog.set_config('search_path', 'pg_catalog', true)")
+
+    def _execute_in_snapshot(
+        self, conn: Any, cursors: ExitStack, queries: list[tuple[str, str, tuple[Any, ...]]]
+    ) -> list[tuple[str, Any]]:
+        """Run the queries in one REPEATABLE READ snapshot and return each array name with its executed cursor.
+
+        Each query gets its own client-side cursor, which holds its complete result once executed. The transaction
+        is committed before the rows are read, so the snapshot holds back vacuum only while the queries run, not
+        while rows are converted, serialized, and submitted. Callers close each cursor once its rows are emitted;
+        `cursors` closes any left open when a query or emit fails.
+        """
+        results = []
+        with conn.transaction():
+            for array_name, query, params in queries:
+                cursor = cursors.enter_context(conn.cursor(row_factory=dict_row))
+                if not results:
+                    self._configure_transaction(cursor)
+                self._execute(cursor, query, params)
+                results.append((array_name, cursor))
+        return results
+
+    def _execute(self, cursor: Any, query: str, params: tuple[Any, ...]) -> None:
+        self._check_cancelled()
+        if params:
+            cursor.execute(query, params)
+        else:
+            cursor.execute(query)
+
+    def _emit_rows(self, cursor: Any, array_name: str, emitter: RoleSnapshotEmitter) -> None:
+        for row in cursor:
+            self._check_cancelled()
+            emitter.append(array_name, row)
+
+    def _new_emitter(
+        self,
+        kind: str,
+        array_names: tuple[str, ...],
+        tags_no_db: list[str],
+        database_name: str | None = None,
+    ) -> RoleSnapshotEmitter:
+        event = {
+            "host": self._check.reported_hostname,
+            "database_instance": self._check.database_identifier,
+            "agent_version": self._check.agent_version,
+            "dbms": self._check.dbms,
+            "dbms_version": payload_pg_version(self._check.version),
+            "kind": kind,
+            "collection_interval": self._config.collection_interval,
+            "tags": tags_no_db,
+            "cloud_metadata": self._check.cloud_metadata,
+            "collection_started_at": now_ms(),
+        }
+        if database_name is not None:
+            event["database_name"] = database_name
+        return RoleSnapshotEmitter(
+            event,
+            array_names,
+            self._submit_event,
+            self._config.payload_chunk_size,
+        )
+
+    def _submit_event(self, event: dict[str, Any]) -> None:
+        self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
+
+    def _record_emitter(self, emitter: RoleSnapshotEmitter) -> None:
+        self._rows_count += emitter.rows_count
+        self._payloads_count += emitter.payloads_count
+
+    def _check_cancelled(self) -> None:
+        if self._cancel_event.is_set():
+            raise RoleCollectionCancelled()
