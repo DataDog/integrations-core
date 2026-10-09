@@ -11,6 +11,23 @@
 # Monitor element reference:
 # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.admin.mon.doc/doc/r0001140.html
 
+DDIGNORE_COMMENT = '/* DDIGNORE */'
+
+STATEMENT_METRICS = """
+/* DDIGNORE */
+SELECT MEMBER, HEX(EXECUTABLE_ID) AS EXECUTABLE_ID, INSERT_TIMESTAMP,
+       NUM_EXEC_WITH_METRICS, COORD_STMT_EXEC_TIME
+FROM TABLE(SYSPROC.MON_GET_PKG_CACHE_STMT(NULL, NULL, NULL, -1)) AS S
+WHERE NUM_EXEC_WITH_METRICS > 0
+"""
+
+STATEMENT_TEXT = """
+/* DDIGNORE */
+SELECT MEMBER, HEX(EXECUTABLE_ID) AS EXECUTABLE_ID, INSERT_TIMESTAMP, STMT_TEXT
+FROM TABLE(SYSPROC.MON_GET_PKG_CACHE_STMT(NULL, NULL, NULL, -1)) AS S
+WHERE HEX(EXECUTABLE_ID) IN ({placeholders})
+"""
+
 
 # https://www.ibm.com/support/knowledgecenter/SSEPGG_11.1.0/com.ibm.db2.luw.sql.rtn.doc/doc/r0060770.html
 INSTANCE_TABLE_COLUMNS = ('total_connections',)

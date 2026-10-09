@@ -12,6 +12,10 @@ def instance_connection_timeout():
     return 10
 
 
+def instance_dbm():
+    return False
+
+
 def instance_disable_generic_tags():
     return False
 

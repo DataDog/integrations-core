@@ -41,6 +41,8 @@ ibm_db2.log.reads,count,,read,,The number of log pages read from disk by the log
 ibm_db2.log.used,gauge,,block,,The disk blocks (4 KiB each) of active log space currently used in the database.,0,ibm_db2,,
 ibm_db2.log.utilized,gauge,,percent,,The utilization of active log space as a percentage.,-1,ibm_db2,,
 ibm_db2.log.writes,count,,write,,The number of log pages written to disk by the logger.,0,ibm_db2,,
+ibm_db2.queries.count,count,,query,,The total execution count per normalized query and database for executions with activity metrics collected. (DBM only),0,ibm_db2,,
+ibm_db2.queries.time,count,,nanosecond,,The total coordinator execution time per normalized query and database. (DBM only),0,ibm_db2,,
 ibm_db2.row.modified.total,count,,row,,"The total number of rows inserted, updated, or deleted.",0,ibm_db2,,
 ibm_db2.row.reads.total,count,,row,,The total number of rows that had to be read in order to return result sets.,0,ibm_db2,,
 ibm_db2.row.returned.total,count,,row,,The total number of rows that have been selected by and returned to applications.,0,ibm_db2,,
