@@ -1,0 +1,1 @@
+Report device reachability from the inventory when Assurance has none, stop sending stale and placeholder values, and show collector failures in the Agent status.

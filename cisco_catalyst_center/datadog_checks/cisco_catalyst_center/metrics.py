@@ -148,10 +148,11 @@ NETWORK_CATEGORY_METRICS: Final[dict[str, str]] = {
     'noHealthCount': 'network.category.device.no_health.count',
 }
 
-# Fields where -1 means "not measured" rather than a real negative reading. Confined to this set
-# so that a genuinely negative gauge -- radio noise in dBm, for one -- cannot inherit a filter it
-# never opted into. `wanLinkUtilization` is listed explicitly because it carries the sentinel
-# without a name a convention would catch.
+# Fields where a negative value is a sentinel rather than a reading: -1 for not measured, -2 for
+# a device Catalyst Center cannot reach. Confined to this set so that a genuinely negative gauge
+# -- radio noise in dBm, for one -- cannot inherit a filter it never opted into.
+# `wanLinkUtilization` is listed explicitly because it carries the sentinel without a name a
+# convention would catch.
 SCORE_FIELDS: Final[frozenset[str]] = frozenset(
     {
         'overallHealthScore',
@@ -186,8 +187,23 @@ FABRIC_SITE_METRICS: Final[dict[str, str]] = {
     'associatedL3VnCount': 'fabric.site.l3vn.count',
     'connectivityGoodHealthPercentage': 'fabric.site.connectivity.health',
     'controlPlaneGoodHealthPercentage': 'fabric.site.control_plane.health',
+    # Cisco's 3.3.1 schema renamed the 1.0.1 schema's `infraHealthyPercentage`, and Catalyst Center
+    # 2.3.7.11 already answers with the new name. A response carries one or the other, so both map.
+    'infraGoodHealthPercentage': 'fabric.site.infra.health',
     'infraHealthyPercentage': 'fabric.site.infra.health',
 }
+
+# The FABRIC_SITE_METRICS fields that are shares of the site's devices. A site with no devices
+# still reports them, as 0.0, which reads as a fabric that is entirely unhealthy.
+FABRIC_SITE_PERCENTAGE_FIELDS: Final[frozenset[str]] = frozenset(
+    {
+        'goodHealthPercentage',
+        'connectivityGoodHealthPercentage',
+        'controlPlaneGoodHealthPercentage',
+        'infraGoodHealthPercentage',
+        'infraHealthyPercentage',
+    }
+)
 
 VIRTUAL_NETWORK_METRICS: Final[dict[str, str]] = {
     'goodHealthPercentage': 'fabric.vn.health',
@@ -239,6 +255,16 @@ CLIENT_AGGREGATES: Final[tuple[tuple[str, str, str], ...]] = (
 # not among the eleven, so counts by connection state or authentication type are not obtainable
 # this way.
 CLIENT_GROUP_BY_DEFAULT: Final[tuple[str, ...]] = ('ssid', 'band')
+
+# Client aggregates that describe a radio link. The appliance reports them as 0 for its group of
+# wired clients, which have no radio -- and 0 dBm reads as a perfect signal.
+CLIENT_RADIO_FIELDS: Final[frozenset[str]] = frozenset({'rssi', 'snr', 'dataRate'})
+
+# Client aggregates that time an onboarding phase. No phase takes 0 ms, so a 0 is the appliance
+# saying that nothing was measured, the same absence a null signals.
+CLIENT_DURATION_FIELDS: Final[frozenset[str]] = frozenset(
+    {'avgRunDuration', 'maxRunDuration', 'avgAssocDuration', 'avgAuthDuration', 'avgDhcpDuration'}
+)
 
 # Tags on `event.count`, as (record field, tag key). Each event is counted once carrying all of
 # them, so the series sum to the event total however they are grouped.

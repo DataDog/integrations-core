@@ -147,6 +147,50 @@ def test_collect_interfaces_given_the_statistics_view_totals_throughput_per_devi
     aggregator.assert_metric('cisco_catalyst_center.device.uplink.throughput.rx', count=0)
 
 
+def test_collect_interfaces_given_device_records_tags_throughput_without_reachability(aggregator, instance, check):
+    # Reachability changes from one cycle to the next, and Assurance leaves it null while it
+    # re-scores, so as a tag it would split one switch's throughput into several series.
+    # `device.reachable` reports it instead.
+    devices = load_captured('data_network_devices')['response']
+
+    collect_interfaces(check, _client(instance, CONFIG_ONLY), views=('configuration', 'statistics'), devices=devices)
+
+    tags = {tag for metric in aggregator.metrics('cisco_catalyst_center.device.throughput.rx') for tag in metric.tags}
+    assert 'device_name:sw1' in tags
+    assert not [tag for tag in tags if tag.startswith('reachability:')]
+
+
+@pytest.mark.parametrize(
+    ('reported', 'inventory'),
+    [
+        pytest.param('UNREACHABLE', None, id='data-api-reports-it'),
+        # The data API left it null, so the inventory answers, as it does for the device's metrics.
+        pytest.param(
+            None,
+            {'aa754801-8895-41e8-8ca5-27ee415c9c42': {'reachabilityStatus': 'Unreachable'}},
+            id='inventory-reports-it',
+        ),
+    ],
+)
+def test_collect_interfaces_given_an_unreachable_device_skips_its_interfaces(
+    aggregator, instance, check, reported, inventory
+):
+    # Catalyst Center cannot poll a device it cannot reach, so any interface reading it serves for
+    # one is a last-known value: the same staleness that withholds the device's own metrics.
+    devices = with_value(load_captured('data_network_devices'), 'response.0.reachabilityHealthStatus', reported)
+
+    collect_interfaces(
+        check,
+        _client(instance, CONFIG_ONLY),
+        views=('configuration', 'statistics'),
+        devices=devices['response'],
+        inventory=inventory,
+    )
+
+    assert not [name for name in aggregator.metric_names if metric_values(aggregator, name, 'device_ip:10.10.20.175')]
+    assert metric_values(aggregator, 'cisco_catalyst_center.device.throughput.rx', 'device_ip:10.10.20.176') == [733.0]
+
+
 @pytest.mark.parametrize(
     ('is_wan', 'description', 'is_uplink'),
     [
