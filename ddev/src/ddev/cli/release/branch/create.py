@@ -72,7 +72,7 @@ def create(app: Application, branch_name: str | None):
     if yaml_updated:
         app.display_waiting("Adding and committing the changes...")
         app.repo.git.run('add', '.gitlab/build_agent.yaml')
-        app.repo.git.run('commit', '-m', f"Update build_agent.yaml to use agent branch: {branch_name}")
+        app.repo.git.run('commit', '-m', f"Update build_agent.yaml for release branch: {branch_name}")
         app.display_success("Done.")
 
     app.display_waiting(f"Pushing the release branch `{branch_name}`...")
