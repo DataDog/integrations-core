@@ -1,0 +1,1 @@
+Collect the per-queue ENA `system.net.ena.queue.rx_csum_bad` metric. Linux 5.17 renamed the ethtool statistic from `rx_bad_csum` to `rx_csum_bad`, and the check now collects both spellings.
