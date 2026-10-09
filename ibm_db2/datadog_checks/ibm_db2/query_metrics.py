@@ -11,9 +11,16 @@ from time import time
 from typing import TYPE_CHECKING
 
 import ibm_db
+from cachetools import TTLCache
 
 from datadog_checks.base import to_native_string
-from datadog_checks.base.utils.db.query_metrics import ObfuscationLookup, QueryStats, TextKind, resolve_obfuscations
+from datadog_checks.base.utils.db.query_metrics import (
+    ObfuscationLookup,
+    ObfuscationResult,
+    QueryStats,
+    TextKind,
+    resolve_obfuscations,
+)
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 
@@ -27,9 +34,21 @@ COLLECTION_INTERVAL = 10
 # Provisional limit; validate against larger workloads. Db2 sizes its package cache in memory, not entry counts.
 TEXT_CACHE_SIZE = 10_000
 TEXT_FETCH_BATCH_SIZE = 500
+FULL_QUERY_TEXT_CACHE_SIZE = 10_000
+FULL_QUERY_TEXT_REFRESH_INTERVAL = 3600
 NANOSECONDS_PER_MILLISECOND = 1_000_000
 NANOSECONDS_PER_MICROSECOND = 1_000
-OBFUSCATION_OPTIONS = to_native_string(json.dumps({'obfuscation_mode': 'obfuscate_and_normalize', 'dbms': 'ibm_db2'}))
+OBFUSCATION_OPTIONS = to_native_string(
+    json.dumps(
+        {
+            'obfuscation_mode': 'obfuscate_and_normalize',
+            'dbms': 'ibm_db2',
+            'return_json_metadata': True,
+            'table_names': True,
+            'collect_commands': True,
+        }
+    )
+)
 
 STATEMENT_COUNTERS_QUERY = """
 /* DDIGNORE */
@@ -71,7 +90,9 @@ class QueryMetricsCollector(DBMAsyncJob):
             job_name='query-metrics',
         )
         # Each background job owns its connection.
+        self._config = config
         self._connection = Db2Connection(check, config)
+        self._full_query_text_cache = TTLCache(maxsize=FULL_QUERY_TEXT_CACHE_SIZE, ttl=FULL_QUERY_TEXT_REFRESH_INTERVAL)
         self._obfuscation_lookup: ObfuscationLookup[StatementKey] = ObfuscationLookup(
             maxsize=TEXT_CACHE_SIZE, obfuscate_options=OBFUSCATION_OPTIONS
         )
@@ -110,6 +131,7 @@ class QueryMetricsCollector(DBMAsyncJob):
             obfuscated = resolved.results.get(statement_key(row))
             if obfuscated is None:
                 continue
+            self._submit_full_query_text(obfuscated)
             output = rows_by_signature.setdefault(
                 obfuscated.query_signature,
                 {
@@ -141,6 +163,29 @@ class QueryMetricsCollector(DBMAsyncJob):
                 'ibm_db2_rows': list(rows_by_signature.values()),
             }
             self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
+
+    def _submit_full_query_text(self, statement: ObfuscationResult) -> None:
+        """Send obfuscated SQL at most once per cache lifetime for this database and signature."""
+        if statement.query_signature in self._full_query_text_cache:
+            return
+        event = {
+            'timestamp': time() * 1000,
+            'host': self._check.reported_hostname,
+            'database_instance': self._check.database_identifier,
+            'ddagentversion': self._check.agent_version,
+            'ddsource': 'ibm_db2',
+            'ddtags': ','.join(self._check.tag_manager.get_tags(include_internal=False)),
+            'dbm_type': 'fqt',
+            'service': self._config.service,
+            'db': {
+                'instance': self._config.db,
+                'query_signature': statement.query_signature,
+                'statement': statement.obfuscated_query,
+                'metadata': {'tables': statement.tables, 'commands': statement.commands},
+            },
+        }
+        self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
+        self._full_query_text_cache[statement.query_signature] = True
 
     def _fetch_statement_texts(self, keys: set[StatementKey]) -> dict[StatementKey, str]:
         """Fetch each requested cache entry's text only if its insertion lifetime still matches."""
