@@ -4,6 +4,8 @@
 
 ## 38.3.2 / 2026-10-09
 
+_This release is special: it contains changes that also shipped with 38.4.0, but were backported to an older Agent branch._
+
 ***Fixed***:
 
 * Fix a bug where OpenMetrics histogram buckets with a zero upper bound (e.g. `le="0.0"`) were silently dropped when `histogram_buckets_as_distributions` is enabled. ([#25283](https://github.com/DataDog/integrations-core/pull/25283))
