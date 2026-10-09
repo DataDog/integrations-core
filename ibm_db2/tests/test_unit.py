@@ -3,10 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import mock
 import pytest
-from requests import ConnectionError
 
 from datadog_checks.ibm_db2 import IbmDb2Check
-from datadog_checks.ibm_db2.connection import get_connection_data
+from datadog_checks.ibm_db2.connection import Db2ConnectionError, get_connection_data
 from datadog_checks.ibm_db2.utils import scrub_connection_string
 
 pytestmark = pytest.mark.unit
@@ -35,11 +34,11 @@ def test_retry_connection(aggregator, instance):
     ibmdb2._connection.conn = conn1
 
     def mock_exception(*args, **kwargs):
-        raise ConnectionError("[IBM][CLI Driver] CLI0106E  Connection is closed. SQLSTATE=08003")
+        raise Db2ConnectionError("[IBM][CLI Driver] CLI0106E  Connection is closed. SQLSTATE=08003")
 
     with mock.patch('ibm_db.exec_immediate', side_effect=mock_exception):
         with mock.patch('ibm_db.connect', return_value=mock.MagicMock()):
-            with pytest.raises(ConnectionError, match='CLI0106E  Connection is closed. SQLSTATE=08003'):
+            with pytest.raises(Db2ConnectionError, match='CLI0106E  Connection is closed. SQLSTATE=08003'):
                 ibmdb2.check(instance)
         # new connection made
         assert ibmdb2._connection.conn != conn1
@@ -52,11 +51,11 @@ def test_fails_to_reconnect(aggregator, instance):
     ibmdb2._connection.conn = conn1
 
     def mock_exception(*args, **kwargs):
-        raise ConnectionError("[IBM][CLI Driver] CLI0106E  Connection is closed. SQLSTATE=08003")
+        raise Db2ConnectionError("[IBM][CLI Driver] CLI0106E  Connection is closed. SQLSTATE=08003")
 
     with mock.patch('ibm_db.exec_immediate', side_effect=mock_exception):
         with mock.patch('ibm_db.connect', side_effect=mock_exception):
-            with pytest.raises(ConnectionError, match='Unable to create new connection'):
+            with pytest.raises(Db2ConnectionError, match='Unable to create new connection'):
                 ibmdb2.check(instance)
         # new connection could not be made
         assert ibmdb2._connection.conn is None
@@ -106,7 +105,7 @@ def test_non_connection_errors_are_ignored(aggregator, instance):
 
 
 def test_connection_errors_stops_execution(aggregator, instance):
-    erroring_query = mock.Mock(side_effect=ConnectionError("I'm broken"))
+    erroring_query = mock.Mock(side_effect=Db2ConnectionError("I'm broken"))
     erroring_query.__name__ = 'Erroring query'
 
     ibmdb2 = IbmDb2Check('ibm_db2', {}, [instance])
@@ -114,7 +113,7 @@ def test_connection_errors_stops_execution(aggregator, instance):
     ibmdb2._connection.connect = mock.MagicMock()
     ibmdb2._query_methods = (mock.Mock(), erroring_query, mock.Mock())
 
-    with pytest.raises(ConnectionError):
+    with pytest.raises(Db2ConnectionError):
         ibmdb2.check(instance)
 
     ibmdb2._query_methods[0].assert_called()
