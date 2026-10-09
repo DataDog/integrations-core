@@ -1,0 +1,1 @@
+Pin hatchling to 1.27.0 in the wheel contents validation so PR-time builds match the wheels pipeline's Python 3.9 builder.
