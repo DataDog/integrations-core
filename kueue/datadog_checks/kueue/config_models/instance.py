@@ -99,6 +99,7 @@ class InstanceConfig(BaseModel):
     cache_shared_labels: Optional[bool] = None
     cluster_check: Optional[bool] = None
     collect_counters_with_distributions: Optional[bool] = None
+    collect_follower_metrics: Optional[bool] = None
     collect_histogram_buckets: Optional[bool] = None
     collect_workload_events: Optional[bool] = None
     connect_timeout: Optional[float] = None

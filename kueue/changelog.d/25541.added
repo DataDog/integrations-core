@@ -1,0 +1,1 @@
+Support HA Kueue: drop follower samples by default, add the `collect_follower_metrics` option, and submit Workload events only from the leader replica.
