@@ -316,6 +316,32 @@ def test_collect_events_given_no_severity_field_tags_the_count_from_the_syslog_m
     assert metric_values(aggregator, 'cisco_catalyst_center.event.count', 'severity:3') == [1]
 
 
+@pytest.mark.parametrize(
+    ('name', 'overrides', 'expected'),
+    [
+        # The appliance's own value wins, though this record's %LINK-3-UPDOWN would say 3.
+        pytest.param('LINK:UPDOWN', {'severity': 6}, ['severity:6'], id='reported-severity-wins'),
+        # A trap has no mnemonic, so it stays without a severity rather than gaining one from its
+        # text, which here holds digits (`GigabitEthernet1/0/8`) a looser pattern would catch.
+        pytest.param('LINK:DOWN', {}, [], id='trap-stays-without'),
+    ],
+)
+def test_collect_events_given_a_reported_severity_or_a_trap_takes_no_severity_from_the_text(
+    aggregator: AggregatorStub,
+    instance: InstanceType,
+    check: CiscoCatalystCenterCheck,
+    name: str,
+    overrides: dict[str, Any],
+    expected: list[str],
+):
+    # The mnemonic only fills a severity the appliance did not send, and only from a syslog message.
+    record = {**_recorded_event(name), **overrides}
+
+    collect_events(check, _client(instance, [_page([record], 1)]), WINDOW_START, WINDOW_END)
+
+    assert [tag for tag in aggregator.events[0]['tags'] if tag.startswith('severity:')] == expected
+
+
 def test_collect_events_given_no_timestamp_falls_back_to_the_window_end(
     aggregator: AggregatorStub, instance: InstanceType, check: CiscoCatalystCenterCheck
 ) -> None:

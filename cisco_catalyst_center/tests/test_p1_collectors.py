@@ -287,10 +287,11 @@ FAILURE = {'status_code': 500, 'json': {}}
     ('script', 'expectation'),
     [
         pytest.param([FAILURE, load_captured('data_network_applications')], does_not_raise(), id='one-site-failing'),
-        # Matching the message tells the aggregate error apart from one site's error escaping.
+        # The aggregate message, not one site's error escaping, carrying the last site's cause: the
+        # status page shows only the message, and its x-correlation-id is what TAC asks for.
         pytest.param(
             [FAILURE, FAILURE],
-            pytest.raises(CatalystApiError, match='any of the 2 sites'),
+            pytest.raises(CatalystApiError, match='any of the 2 sites.*x-correlation-id=test-correlation-id'),
             id='every-site-failing',
         ),
     ],

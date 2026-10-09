@@ -663,6 +663,7 @@ def collect_stacks(
     base_tags = base_tags or []
     inventory = inventory or {}
     attempted = failed = 0
+    last_error: CatalystApiError | None = None
 
     for device in devices:
         if device.get('deviceFamily') not in STACKABLE_DEVICE_FAMILIES:
@@ -682,9 +683,10 @@ def collect_stacks(
         attempted += 1
         try:
             stack = client.get_object(STACK_ENDPOINT_TEMPLATE.format(device_id=device_id))
-        except CatalystApiError:
+        except CatalystApiError as exc:
             check.log.warning('Could not read stack detail for device %s', device_id, exc_info=True)
             failed += 1
+            last_error = exc
             continue
 
         # Both of these are null rather than empty on a device with no stack, so `or []` is
@@ -712,7 +714,11 @@ def collect_stacks(
                 check.gauge('device.stack.port.status', int(str(sync_ok) in STACK_PORT_OK_VALUES), tags=port_tags)
 
     if attempted and failed == attempted:
-        raise CatalystApiError(f'Could not read stack detail for any of the {attempted} switches')
+        # The status page shows only the message, so the last cause goes in it: its
+        # x-correlation-id is the only reference Cisco TAC acts on.
+        raise CatalystApiError(
+            f'Could not read stack detail for any of the {attempted} switches; last error: {last_error}'
+        ) from last_error
 
 
 # -- aggregate client health ------------------------------------------------------------
@@ -1199,6 +1205,7 @@ def collect_application_health(
     """
     tags = base_tags or []
     attempted = failed = 0
+    last_error: CatalystApiError | None = None
 
     for site in sites:
         site_id = site.get('id')
@@ -1215,9 +1222,10 @@ def collect_application_health(
                 NETWORK_APPLICATIONS_ENDPOINT,
                 params={'siteId': site_id, 'sortBy': 'usage', 'order': 'desc'},
             )
-        except CatalystApiError:
+        except CatalystApiError as exc:
             check.log.warning('Could not read application health for site %s', site_id, exc_info=True)
             failed += 1
+            last_error = exc
             continue
 
         for application in applications:
@@ -1232,7 +1240,10 @@ def collect_application_health(
                 emit_gauge(check, metric_name, application.get(field), app_tags)
 
     if attempted and failed == attempted:
-        raise CatalystApiError(f'Could not read application health for any of the {attempted} sites')
+        # As in collect_stacks: the last cause, with its x-correlation-id, goes in the message.
+        raise CatalystApiError(
+            f'Could not read application health for any of the {attempted} sites; last error: {last_error}'
+        ) from last_error
 
 
 # -- security -------------------------------------------------------------------------

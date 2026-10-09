@@ -98,10 +98,11 @@ FAILURE = {'status_code': 500, 'json': {}}
     ('script', 'expectation'),
     [
         pytest.param([FAILURE, load_captured('intent_stack')], does_not_raise(), id='one-switch-failing'),
-        # Matching the message tells the aggregate error apart from one switch's error escaping.
+        # The aggregate message, not one switch's error escaping, carrying the last switch's cause:
+        # the status page shows only the message, and its x-correlation-id is what TAC asks for.
         pytest.param(
             [FAILURE, FAILURE],
-            pytest.raises(CatalystApiError, match='any of the 2 switches'),
+            pytest.raises(CatalystApiError, match='any of the 2 switches.*x-correlation-id=test-correlation-id'),
             id='every-switch-failing',
         ),
     ],
