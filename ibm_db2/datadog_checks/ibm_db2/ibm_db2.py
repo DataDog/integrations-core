@@ -5,8 +5,6 @@ from __future__ import division
 
 from time import time as timestamp
 
-from requests import ConnectionError
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db.utils import default_json_event_encoding
@@ -24,9 +22,10 @@ if Platform.is_windows():
 
 from .__about__ import __version__
 from .config import build_config
-from .connection import Db2Connection
+from .connection import Db2Connection, Db2ConnectionError
 from .custom_metrics import CustomMetricsCollector
 from .metrics import MetricsCollector
+from .query_metrics import QueryMetricsCollector
 from .utils import get_version
 
 
@@ -60,6 +59,8 @@ class IbmDb2Check(DatabaseCheck):
             self._metrics.query_transaction_log,
         )
         self._custom_metrics = self.register_async_job(CustomMetricsCollector(self, self._config))
+        if self._config.dbm:
+            self._query_metrics = self.register_async_job(QueryMetricsCollector(self, self._config))
 
     def check(self, instance):
         if self._connection.conn is None:
@@ -73,7 +74,7 @@ class IbmDb2Check(DatabaseCheck):
         for query_method in self._query_methods:
             try:
                 query_method()
-            except ConnectionError:
+            except Db2ConnectionError:
                 raise
             except Exception as e:
                 self.log.warning('Encountered error running `%s`: %s', query_method.__name__, str(e))

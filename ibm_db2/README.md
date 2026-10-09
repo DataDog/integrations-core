@@ -75,6 +75,12 @@ To monitor a Db2 instance, create a Db2 user with either the `EXECUTE` permissio
 * `DBADM` authority
 * `SQLADM` authority
 
+When enabling Database Monitoring (`dbm: true`), query metrics also require access to the `SYSPROC.MON_GET_PKG_CACHE_STMT` table function. If the Agent's Db2 user does not have one of the authorities listed above, have a database administrator run the following command in each monitored database, replacing `<DATADOG_USER>` with the Agent's Db2 username:
+
+```sql
+GRANT EXECUTE ON FUNCTION SYSPROC.MON_GET_PKG_CACHE_STMT TO USER <DATADOG_USER>;
+```
+
 To monitor the health of an instance, its associated databases, and database objects, enable the database system monitor switches for each of the objects you want to monitor:
 * Statement
 * Lock
