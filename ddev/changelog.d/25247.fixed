@@ -1,0 +1,1 @@
+Retry wheel download requests in `ddev size` when the connection is dropped mid-request, fixing recurring failures in the disk-usage measurement CI job.
