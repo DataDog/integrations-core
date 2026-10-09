@@ -40,6 +40,10 @@ def instance_collect_histogram_buckets():
     return True
 
 
+def instance_collect_histograms_as_distributions():
+    return False
+
+
 def instance_collect_node_metrics():
     return True
 
