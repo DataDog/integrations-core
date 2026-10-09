@@ -1,7 +1,10 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from binascii import hexlify
 from collections.abc import Callable
+from datetime import timedelta
+from unittest.mock import patch
 from uuid import uuid4
 
 import ibm_db
@@ -117,8 +120,60 @@ def test_query_metrics(
             assert f"db:{instance['db']}" in payload['tags']
 
         WaitFor(assert_query_metric, attempts=20, wait=1)()
+
+        # Once resolved, subsequent executions keep their deltas without fetching the text again.
+        with patch.object(
+            check._query_metrics, '_fetch_statement_texts', wraps=check._query_metrics._fetch_statement_texts
+        ) as fetch:
+            dd_run_check(check)
+            execute_query()
+            dd_run_check(check)
+            matching = [
+                row
+                for payload in aggregator.get_event_platform_events('dbm-metrics')
+                for row in payload['ibm_db2_rows']
+                if row['query'] == query
+            ]
+            assert sum(row['count'] for row in matching) == 4
+            assert sum(row['rows_returned'] for row in matching) == 8
+            key = (before['member'], hexlify(before['executable_id']).decode('ascii'), before['insert_timestamp'])
+            assert all(key not in call.args[0] for call in fetch.call_args_list)
     finally:
         try:
             ibm_db.exec_immediate(connection.conn, f'DROP TABLE {table}')
         finally:
             connection.close()
+
+
+def test_query_text_lookup_matches_lifetime(instance: dict, monkeypatch: pytest.MonkeyPatch):
+    """Counter-scan keys resolve to the matching text, but not a different cache lifetime."""
+    monkeypatch.setattr(query_metrics, 'TEXT_FETCH_BATCH_SIZE', 2)
+    instance['dbm'] = True
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    collector = check._query_metrics
+    conn = collector._connection.ensure_connected()
+    expected = {}
+    try:
+        for _ in range(3):
+            query = f'SELECT COUNT(*) AS DBM_TEXT_{uuid4().hex.upper()} FROM SYSCAT.TABLES'
+            cursor = ibm_db.exec_immediate(conn, query)
+            while ibm_db.fetch_tuple(cursor) is not False:
+                pass
+            ibm_db.free_stmt(cursor)
+            cursor = ibm_db.prepare(
+                conn,
+                query_metrics.STATEMENT_COUNTERS_QUERY + '\nWHERE VARCHAR(STMT_TEXT, 1000) = ?',
+            )
+            try:
+                ibm_db.execute(cursor, (query,))
+                row = ibm_db.fetch_assoc(cursor)
+                assert row is not False
+                row['executable_id'] = hexlify(row['executable_id']).decode('ascii')
+                expected[query_metrics.statement_key(row)] = query
+            finally:
+                ibm_db.free_stmt(cursor)
+        member, executable_id, inserted = next(iter(expected))
+        stale_key = (member, executable_id, inserted - timedelta(seconds=1))
+        assert collector._fetch_statement_texts(set(expected) | {stale_key}) == expected
+    finally:
+        collector.shutdown()

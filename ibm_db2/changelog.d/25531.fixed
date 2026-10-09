@@ -1,0 +1,1 @@
+Reduce query metrics collection overhead by resolving and caching statement text only when needed, preserving counter baselines when text lookup fails.

@@ -3,15 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-from binascii import hexlify
+from binascii import hexlify, unhexlify
+from copy import deepcopy
 from datetime import datetime
+from itertools import batched
 from time import time
 from typing import TYPE_CHECKING
 
 import ibm_db
 
 from datadog_checks.base import to_native_string
-from datadog_checks.base.utils.db.query_metrics import QueryStats, obfuscate_statement
+from datadog_checks.base.utils.db.query_metrics import ObfuscationLookup, QueryStats, TextKind, resolve_obfuscations
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 
@@ -22,21 +24,39 @@ if TYPE_CHECKING:
     from .ibm_db2 import IbmDb2Check
 
 COLLECTION_INTERVAL = 10
+# Provisional limit; validate against larger workloads. Db2 sizes its package cache in memory, not entry counts.
+TEXT_CACHE_SIZE = 10_000
+TEXT_FETCH_BATCH_SIZE = 500
 NANOSECONDS_PER_MILLISECOND = 1_000_000
 NANOSECONDS_PER_MICROSECOND = 1_000
 OBFUSCATION_OPTIONS = to_native_string(json.dumps({'obfuscation_mode': 'obfuscate_and_normalize', 'dbms': 'ibm_db2'}))
 
-QUERY_METRICS = """
+STATEMENT_COUNTERS_QUERY = """
 /* DDIGNORE */
 SELECT MEMBER, EXECUTABLE_ID, INSERT_TIMESTAMP,
        NUM_COORD_EXEC_WITH_METRICS AS "count", COORD_STMT_EXEC_TIME AS "time",
-       TOTAL_CPU_TIME AS "cpu_time", ROWS_READ, ROWS_RETURNED, STMT_TEXT
+       TOTAL_CPU_TIME AS "cpu_time", ROWS_READ, ROWS_RETURNED
 FROM TABLE(SYSPROC.MON_GET_PKG_CACHE_STMT(NULL, NULL, NULL, -1))
 """
 
+STATEMENT_TEXT_LOOKUP_QUERY = """
+/* DDIGNORE */
+WITH REQUESTED(EXECUTABLE_ID, MEMBER, INSERT_TIMESTAMP) AS (VALUES {key_rows})
+SELECT S.MEMBER, S.EXECUTABLE_ID, S.INSERT_TIMESTAMP, S.STMT_TEXT
+FROM REQUESTED AS R,
+     TABLE(SYSPROC.MON_GET_PKG_CACHE_STMT(NULL, R.EXECUTABLE_ID, NULL, R.MEMBER)) AS S
+WHERE S.INSERT_TIMESTAMP = R.INSERT_TIMESTAMP
+"""
 
-def statement_key(row: dict) -> tuple[int, str, datetime]:
+StatementKey = tuple[int, str, datetime]
+
+
+def statement_key(row: dict) -> StatementKey:
     return row['member'], row['executable_id'], row['insert_timestamp']
+
+
+def classify_statement_text(text: str) -> TextKind:
+    return TextKind.EXCLUDED if text.lstrip().startswith('/* DDIGNORE */') else TextKind.STATEMENT
 
 
 class QueryMetricsCollector(DBMAsyncJob):
@@ -52,6 +72,9 @@ class QueryMetricsCollector(DBMAsyncJob):
         )
         # Each background job owns its connection.
         self._connection = Db2Connection(check, config)
+        self._obfuscation_lookup: ObfuscationLookup[StatementKey] = ObfuscationLookup(
+            maxsize=TEXT_CACHE_SIZE, obfuscate_options=OBFUSCATION_OPTIONS
+        )
         self._query_stats = QueryStats(
             counter_columns={'count', 'time', 'cpu_time', 'rows_read', 'rows_returned'},
             key=statement_key,
@@ -60,7 +83,7 @@ class QueryMetricsCollector(DBMAsyncJob):
 
     def run_job(self) -> None:
         connection = self._connection.ensure_connected()
-        cursor = ibm_db.prepare(connection, QUERY_METRICS, {ibm_db.SQL_ATTR_QUERY_TIMEOUT: 10})
+        cursor = ibm_db.prepare(connection, STATEMENT_COUNTERS_QUERY, {ibm_db.SQL_ATTR_QUERY_TIMEOUT: 10})
         try:
             ibm_db.execute(cursor)
             snapshot = []
@@ -70,12 +93,21 @@ class QueryMetricsCollector(DBMAsyncJob):
         finally:
             ibm_db.free_stmt(cursor)
 
+        # Text lookup can fail after counters are read. Commit the baseline only after it succeeds.
+        query_stats = deepcopy(self._query_stats)
+        delta = query_stats.diff(snapshot)
+        resolved = resolve_obfuscations(
+            self._obfuscation_lookup,
+            live_keys={statement_key(row) for row in snapshot},
+            changed_keys=delta.changed_keys,
+            fetch_texts=self._fetch_statement_texts,
+            classify=classify_statement_text,
+        )
+        self._check.log.debug('Query text resolution: %s', resolved.stats)
+        self._query_stats = query_stats
         rows_by_signature: dict[str, dict] = {}
-        for row in self._query_stats.diff(snapshot).derivative_rows:
-            text = row['stmt_text']
-            if not text or text.lstrip().startswith('/* DDIGNORE */'):
-                continue
-            obfuscated = obfuscate_statement(text, OBFUSCATION_OPTIONS)
+        for row in delta.derivative_rows:
+            obfuscated = resolved.results.get(statement_key(row))
             if obfuscated is None:
                 continue
             output = rows_by_signature.setdefault(
@@ -109,6 +141,28 @@ class QueryMetricsCollector(DBMAsyncJob):
                 'ibm_db2_rows': list(rows_by_signature.values()),
             }
             self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
+
+    def _fetch_statement_texts(self, keys: set[StatementKey]) -> dict[StatementKey, str]:
+        """Fetch each requested cache entry's text only if its insertion lifetime still matches."""
+        texts = {}
+        key_placeholders = '(CAST(? AS VARCHAR(32) FOR BIT DATA), CAST(? AS INTEGER), CAST(? AS TIMESTAMP))'
+        for batch in batched(sorted(keys), TEXT_FETCH_BATCH_SIZE, strict=False):
+            # REQUESTED drives a targeted lookup per key, not a scan of every cached statement.
+            # Only fixed placeholder rows enter the SQL string; all key values are bound separately.
+            query = STATEMENT_TEXT_LOOKUP_QUERY.format(key_rows=', '.join(key_placeholders for _ in batch))
+            params = []
+            for member, executable_id, inserted in batch:
+                # Match REQUESTED's column order, converting our hex ID back to Db2's binary ID.
+                params.extend((unhexlify(executable_id), member, inserted))
+            cursor = ibm_db.prepare(self._connection.conn, query, {ibm_db.SQL_ATTR_QUERY_TIMEOUT: 10})
+            try:
+                ibm_db.execute(cursor, tuple(params))
+                while (row := ibm_db.fetch_assoc(cursor)) is not False:
+                    row['executable_id'] = hexlify(row['executable_id']).decode('ascii')
+                    texts[statement_key(row)] = row['stmt_text']
+            finally:
+                ibm_db.free_stmt(cursor)
+        return texts
 
     def shutdown(self) -> None:
         self._connection.close()
