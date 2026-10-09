@@ -358,8 +358,12 @@ def _get_warmup_conditions():
             init_hybrid_replication,
             populate_database,
         ]
+    conditions = [WaitFor(init_master, wait=2)]
+    # Keep replication off during the official entrypoint's temporary-server restart.
+    if COMPOSE_FILE == 'mysql-official.yaml':
+        conditions.append(WaitFor(init_official_replica, wait=2))
     return [
-        WaitFor(init_master, wait=2),
+        *conditions,
         WaitFor(init_slave, wait=2),
         CheckDockerLogs('mysql-slave', ["ready for connections", "mariadb successfully initialized"]),
         populate_database,
@@ -521,6 +525,15 @@ def root_conn():
     conn = _get_root_connection()
     yield conn
     conn.close()
+
+
+def init_official_replica() -> None:
+    """Start replication after the official image's final replica accepts TCP connections."""
+    with pymysql.connect(
+        host=common.HOST, port=common.SLAVE_PORT, user='root', password=common.mysql_root_password()
+    ) as conn:
+        with conn.cursor() as cur:
+            cur.execute('START REPLICA;')
 
 
 def init_slave():
