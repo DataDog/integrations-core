@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "created_at": "2026-09-25",
+  "last_updated_at": "2026-09-25",
+  "title": "Degraded network health",
+  "description": "Alerts when the share of monitored devices that Cisco Catalyst Center rates as healthy averages below 90% (warning) or 80% (critical) over 30 minutes, a sustained sign that part of the managed network is degraded and may be affecting users.",
+  "tags": [
+    "integration:cisco-catalyst-center"
+  ],
+  "definition": {
+    "name": "[Cisco Catalyst Center] Network health is degraded",
+    "type": "query alert",
+    "query": "avg(last_30m):avg:cisco_catalyst_center.network.health{*} by {catalyst_center_host} < 80",
+    "message": "{{^is_recovery}}Only {{value}}% of monitored devices on Catalyst Center {{catalyst_center_host.name}} were in good health over the last 30 minutes, below the {{#is_alert}}{{threshold}}{{/is_alert}}{{#is_warning}}{{warn_threshold}}{{/is_warning}}% threshold.\n\n1. Graph `cisco_catalyst_center.network.category.health` by `category` ([Metrics Explorer](/metric/explorer?exp_metric=cisco_catalyst_center.network.category.health&exp_scope=catalyst_center_host:{{catalyst_center_host.name}}&exp_group=category)) to find the category pulling health down.\n2. Check `cisco_catalyst_center.network.device.poor.count` and `cisco_catalyst_center.network.device.unhealthy.count` to size the impact.{{/is_recovery}}{{#is_recovery}}Recovered: {{value}}% of monitored devices are in good health.{{/is_recovery}}",
+    "tags": [
+      "integration:cisco-catalyst-center"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 80,
+        "warning": 90
+      },
+      "notify_audit": false,
+      "require_full_window": false,
+      "renotify_interval": 1440,
+      "renotify_statuses": [
+        "alert"
+      ],
+      "include_tags": true,
+      "new_group_delay": 60,
+      "on_missing_data": "default",
+      "avalanche_window": 10,
+      "silenced": {}
+    },
+    "priority": null,
+    "restricted_roles": null
+  }
+}

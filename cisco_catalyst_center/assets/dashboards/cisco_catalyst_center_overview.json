@@ -1,0 +1,2545 @@
+{
+  "title": "Cisco Catalyst Center Overview",
+  "description": "Landing page for a Cisco Catalyst Center appliance: collection status, network health, the devices and interfaces that need attention first, site health, client health and experience, and opt-in assurance issues and events.",
+  "template_variables": [
+    {
+      "name": "catalyst_center_host",
+      "prefix": "catalyst_center_host",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "site_hierarchy",
+      "prefix": "site_hierarchy",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "widgets": [
+    {
+      "definition": {
+        "title": "About Cisco Catalyst Center",
+        "type": "group",
+        "background_color": "white",
+        "layout_type": "ordered",
+        "show_title": true,
+        "widgets": [
+          {
+            "definition": {
+              "type": "image",
+              "url": "/static/images/logos/cisco-catalyst-center_large.svg",
+              "sizing": "contain",
+              "has_background": false,
+              "has_border": false,
+              "vertical_align": "center",
+              "horizontal_align": "center"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "definition": {
+              "type": "note",
+              "content": "Health of the network that one Cisco Catalyst Center appliance manages. **Collection success** is 1 when every enabled collector finished its last cycle and 0 when any of them failed. For per-device and per-interface detail, open the [Devices and Interfaces dashboard](/dash/integration/Cisco%20Catalyst%20Center%20Devices%20and%20Interfaces).\n\n- [Integration docs](https://docs.datadoghq.com/integrations/cisco_catalyst_center/)\n- [Integration tile](/integrations/cisco-catalyst-center)\n- [Cisco Catalyst Center](https://www.cisco.com/site/us/en/products/networking/catalyst-center/index.html)",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 4,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 4,
+        "height": 7
+      }
+    },
+    {
+      "definition": {
+        "title": "Overview",
+        "type": "group",
+        "background_color": "vivid_blue",
+        "layout_type": "ordered",
+        "show_title": true,
+        "widgets": [
+          {
+            "definition": {
+              "title": "Collection success",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "min:cisco_catalyst_center.collection.success{$catalyst_center_host}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "value": 1,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">=",
+                      "value": 1,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "definition": {
+              "title": "Network health",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_catalyst_center.network.health{$catalyst_center_host}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "value": 80,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": "<",
+                      "value": 90,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": ">=",
+                      "value": 90,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "bars"
+              },
+              "custom_unit": "%"
+            },
+            "layout": {
+              "x": 2,
+              "y": 0,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "definition": {
+              "title": "Unreachable devices",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "min:cisco_catalyst_center.device.reachable{$catalyst_center_host} by {catalyst_center_host,device_name}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "count_nonzero(1 - query1)"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": "<=",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "bars"
+              },
+              "custom_links": [
+                {
+                  "label": "View devices and interfaces",
+                  "link": "/dash/integration/Cisco%20Catalyst%20Center%20Devices%20and%20Interfaces"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "definition": {
+              "title": "Clients",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_catalyst_center.client.count{$catalyst_center_host,client_type:all}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "definition": {
+              "title": "Monitor status",
+              "type": "manage_status",
+              "summary_type": "monitors",
+              "display_format": "countsAndList",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "tag:(integration:cisco-catalyst-center) $catalyst_center_host",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 8,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 4,
+        "y": 0,
+        "width": 8,
+        "height": 7
+      }
+    },
+    {
+      "definition": {
+        "title": "Network Health",
+        "type": "group",
+        "background_color": "vivid_green",
+        "layout_type": "ordered",
+        "show_title": true,
+        "widgets": [
+          {
+            "definition": {
+              "type": "note",
+              "content": "Network health is the share of monitored devices that Catalyst Center rates healthy: below 90% is worth a look, and below 80% is critical. When it drops, find the category holding the fair and poor devices, then open the Devices and Interfaces dashboard to see which devices they are.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "definition": {
+              "title": "Devices",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_catalyst_center.network.device.total.count{$catalyst_center_host}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "definition": {
+              "title": "Monitored",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_catalyst_center.network.device.monitored.count{$catalyst_center_host}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 2,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "definition": {
+              "title": "Good health",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_catalyst_center.network.device.healthy.count{$catalyst_center_host}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "definition": {
+              "title": "Fair health",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_catalyst_center.network.device.fair.count{$catalyst_center_host}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": "<=",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "definition": {
+              "title": "Poor health",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_catalyst_center.network.device.poor.count{$catalyst_center_host}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": "<=",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "definition": {
+              "title": "No health data",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_catalyst_center.network.device.no_health.count{$catalyst_center_host}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": "<=",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 10,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "definition": {
+              "title": "Overall health",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_catalyst_center.network.health{$catalyst_center_host} by {catalyst_center_host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Network health"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  }
+                }
+              ],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "show_legend": true,
+              "markers": [
+                {
+                  "value": "y = 90",
+                  "display_type": "warning dashed",
+                  "label": "Warning"
+                },
+                {
+                  "value": "y = 80",
+                  "display_type": "error dashed",
+                  "label": "Critical"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "min": "0",
+                "max": "100",
+                "scale": "linear"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "definition": {
+              "title": "Devices by health",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_catalyst_center.network.device.healthy.count{$catalyst_center_host}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:cisco_catalyst_center.network.device.fair.count{$catalyst_center_host}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:cisco_catalyst_center.network.device.poor.count{$catalyst_center_host}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:cisco_catalyst_center.network.device.no_health.count{$catalyst_center_host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "area",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Good",
+                      "style": {
+                        "palette": "green",
+                        "palette_index": 2
+                      }
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Fair",
+                      "style": {
+                        "palette": "orange",
+                        "palette_index": 2
+                      }
+                    },
+                    {
+                      "formula": "query3",
+                      "alias": "Poor",
+                      "style": {
+                        "palette": "red",
+                        "palette_index": 2
+                      }
+                    },
+                    {
+                      "formula": "query4",
+                      "alias": "No health data",
+                      "style": {
+                        "palette": "grey",
+                        "palette_index": 2
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  }
+                }
+              ],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "show_legend": true
+            },
+            "layout": {
+              "x": 4,
+              "y": 3,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "definition": {
+              "title": "Health by category",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_catalyst_center.network.category.health{$catalyst_center_host} by {category}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Health"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "asc"
+                      }
+                    ]
+                  },
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "value": 80,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": "<",
+                      "value": 90,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": ">=",
+                      "value": 90,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 3,
+              "width": 4,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 7,
+        "width": 12,
+        "height": 7
+      }
+    },
+    {
+      "definition": {
+        "title": "Device and Interface Health",
+        "type": "group",
+        "background_color": "green",
+        "layout_type": "ordered",
+        "show_title": true,
+        "widgets": [
+          {
+            "definition": {
+              "type": "note",
+              "content": "Worst first: each list puts the devices that need attention at the top. A device Catalyst Center cannot reach is ranked by its time unreachable, not by a health score. Interface counts are Catalyst Center's own tally per device; for per-interface detail, open the [Devices and Interfaces dashboard](/dash/integration/Cisco%20Catalyst%20Center%20Devices%20and%20Interfaces).",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "definition": {
+              "title": "Time unreachable by device",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_catalyst_center.device.reachable{$catalyst_center_host,$site_hierarchy} by {device_name}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "(1 - query1) * 100",
+                      "alias": "Time unreachable",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_red"
+                    }
+                  ]
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "definition": {
+              "title": "Lowest health by device",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_catalyst_center.device.health{$catalyst_center_host,$site_hierarchy} by {device_name}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "cutoff_min(query1, 1)",
+                      "alias": "Health score"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "asc"
+                      }
+                    ]
+                  },
+                  "conditional_formats": [
+                    {
+                      "comparator": "<=",
+                      "value": 3,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": "<=",
+                      "value": 7,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 7,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "definition": {
+              "title": "Highest CPU utilization",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_catalyst_center.device.cpu.utilization{$catalyst_center_host,$site_hierarchy} by {device_name}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "CPU utilization"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 80,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 70,
+                      "palette": "white_on_yellow"
+                    }
+                  ]
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "definition": {
+              "title": "Highest memory utilization",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_catalyst_center.device.memory.utilization{$catalyst_center_host,$site_hierarchy} by {device_name}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Memory utilization"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 80,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": ">",
+                      "value": 70,
+                      "palette": "white_on_yellow"
+                    }
+                  ]
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "definition": {
+              "title": "Interfaces with errors by device",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_catalyst_center.device.link.error.count{$catalyst_center_host,$site_hierarchy} by {device_name}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Interfaces with errors"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_red"
+                    }
+                  ]
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "definition": {
+              "title": "Down inter-device links by device",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_catalyst_center.device.interdevice_link.down.count{$catalyst_center_host,$site_hierarchy} by {device_name}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Inter-device links down"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_red"
+                    }
+                  ]
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 14,
+        "width": 12,
+        "height": 8
+      }
+    },
+    {
+      "definition": {
+        "title": "Site Health",
+        "type": "group",
+        "background_color": "green",
+        "layout_type": "ordered",
+        "show_title": true,
+        "widgets": [
+          {
+            "definition": {
+              "type": "note",
+              "content": "Health, devices, clients, and open issues for every site, from Catalyst Center's site health summaries (on by default). Sites appear at every level of the hierarchy, so compare them rather than adding them up. Their issue counts can be lower than the deployment-wide count. The site_hierarchy variable filters this section and client health by site, and accepts wildcards such as global/emea/*.",
+              "background_color": "green",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "definition": {
+              "title": "Lowest network health by site",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_catalyst_center.site.network.health{$catalyst_center_host,$site_hierarchy} by {site_hierarchy}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Network health"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "asc"
+                      }
+                    ]
+                  },
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "value": 80,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": "<",
+                      "value": 90,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": ">=",
+                      "value": 90,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "definition": {
+              "title": "Network health across sites",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "min:cisco_catalyst_center.site.network.health{$catalyst_center_host,$site_hierarchy}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:cisco_catalyst_center.site.network.health{$catalyst_center_host,$site_hierarchy}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Lowest site"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Site average"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  }
+                }
+              ],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "show_legend": true,
+              "markers": [
+                {
+                  "value": "y = 90",
+                  "display_type": "warning dashed",
+                  "label": "Warning"
+                },
+                {
+                  "value": "y = 80",
+                  "display_type": "error dashed",
+                  "label": "Critical"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "min": "0",
+                "max": "100",
+                "scale": "linear"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "definition": {
+              "title": "Open issues by site",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_catalyst_center.site.issue.total.count{$catalyst_center_host,$site_hierarchy} by {site_hierarchy}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Open issues"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": "<=",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 1,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "definition": {
+              "title": "Site summary",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_catalyst_center.site.network.health{$catalyst_center_host,$site_hierarchy} by {site_hierarchy,site_type}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:cisco_catalyst_center.site.device.total.count{$catalyst_center_host,$site_hierarchy} by {site_hierarchy,site_type}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:cisco_catalyst_center.site.client.total.count{$catalyst_center_host,$site_hierarchy} by {site_hierarchy,site_type}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:cisco_catalyst_center.site.issue.total.count{$catalyst_center_host,$site_hierarchy} by {site_hierarchy,site_type}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "sum:cisco_catalyst_center.site.issue.count{$catalyst_center_host,$site_hierarchy,priority:p1} by {site_hierarchy,site_type}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query6",
+                      "query": "sum:cisco_catalyst_center.site.issue.count{$catalyst_center_host,$site_hierarchy,priority:p2} by {site_hierarchy,site_type}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Network health",
+                      "cell_display_mode": "number",
+                      "conditional_formats": [
+                        {
+                          "comparator": "<",
+                          "value": 80,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": "<",
+                          "value": 90,
+                          "palette": "white_on_yellow"
+                        },
+                        {
+                          "comparator": ">=",
+                          "value": 90,
+                          "palette": "white_on_green"
+                        }
+                      ]
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Devices",
+                      "cell_display_mode": "number"
+                    },
+                    {
+                      "formula": "query3",
+                      "alias": "Clients",
+                      "cell_display_mode": "number"
+                    },
+                    {
+                      "formula": "query4",
+                      "alias": "Open issues",
+                      "cell_display_mode": "number",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_yellow"
+                        },
+                        {
+                          "comparator": "<=",
+                          "value": 0,
+                          "palette": "white_on_green"
+                        }
+                      ]
+                    },
+                    {
+                      "formula": "query5",
+                      "alias": "P1 issues",
+                      "cell_display_mode": "number",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": "<=",
+                          "value": 0,
+                          "palette": "white_on_green"
+                        }
+                      ]
+                    },
+                    {
+                      "formula": "query6",
+                      "alias": "P2 issues",
+                      "cell_display_mode": "number",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": "<=",
+                          "value": 0,
+                          "palette": "white_on_green"
+                        }
+                      ]
+                    }
+                  ],
+                  "sort": {
+                    "count": 100,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "asc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 12,
+              "height": 6
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 22,
+        "width": 12,
+        "height": 12
+      }
+    },
+    {
+      "definition": {
+        "title": "Client Health",
+        "type": "group",
+        "background_color": "vivid_purple",
+        "layout_type": "ordered",
+        "show_title": true,
+        "widgets": [
+          {
+            "definition": {
+              "type": "note",
+              "content": "Catalyst Center's client health score and connected clients, where Overall covers wired and wireless together. Falling health with a steady client count points at connectivity or onboarding trouble.",
+              "background_color": "purple",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "definition": {
+              "title": "Health score by connection type",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_catalyst_center.client.health{$catalyst_center_host,client_type:all}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:cisco_catalyst_center.client.health{$catalyst_center_host,client_type:wired}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:cisco_catalyst_center.client.health{$catalyst_center_host,client_type:wireless}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Overall"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Wired"
+                    },
+                    {
+                      "formula": "query3",
+                      "alias": "Wireless"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  }
+                }
+              ],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "show_legend": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "definition": {
+              "title": "Connected clients by type",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_catalyst_center.client.count{$catalyst_center_host,client_type:wired}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:cisco_catalyst_center.client.count{$catalyst_center_host,client_type:wireless}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "area",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Wired"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Wireless"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  }
+                }
+              ],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "show_legend": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "definition": {
+              "title": "Lowest client health by site",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_catalyst_center.site.client.health.percentage{$catalyst_center_host,$site_hierarchy} by {site_hierarchy,client_type}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Healthy clients"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "asc"
+                      }
+                    ]
+                  },
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "value": 80,
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "comparator": "<",
+                      "value": 90,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": ">=",
+                      "value": 90,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 34,
+        "width": 6,
+        "height": 12
+      }
+    },
+    {
+      "definition": {
+        "title": "Client Experience",
+        "type": "group",
+        "background_color": "purple",
+        "layout_type": "ordered",
+        "show_title": true,
+        "widgets": [
+          {
+            "definition": {
+              "type": "note",
+              "content": "Signal and onboarding per SSID and band for wireless clients, aggregated by Catalyst Center. Dashed lines mark the -67 dBm voice-grade and -80 dBm poor signal levels; a slow DHCP or authentication phase points at those servers, not RF.",
+              "background_color": "purple",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "definition": {
+              "title": "Signal strength by SSID",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_catalyst_center.client.rssi.avg{$catalyst_center_host,ssid:*} by {ssid}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "line",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "RSSI"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  }
+                }
+              ],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "show_legend": true,
+              "markers": [
+                {
+                  "value": "y = -67",
+                  "display_type": "warning dashed",
+                  "label": "Warning"
+                },
+                {
+                  "value": "y = -80",
+                  "display_type": "error dashed",
+                  "label": "Critical"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "definition": {
+              "title": "Onboarding time by phase",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:cisco_catalyst_center.client.onboarding.assoc.duration{$catalyst_center_host,ssid:*}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:cisco_catalyst_center.client.onboarding.auth.duration{$catalyst_center_host,ssid:*}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:cisco_catalyst_center.client.onboarding.dhcp.duration{$catalyst_center_host,ssid:*}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "bars",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Association"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "Authentication"
+                    },
+                    {
+                      "formula": "query3",
+                      "alias": "DHCP"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  }
+                }
+              ],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "show_legend": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "definition": {
+              "title": "SSID summary",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_catalyst_center.client.observed.count{$catalyst_center_host,ssid:*} by {ssid,band}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:cisco_catalyst_center.client.rssi.avg{$catalyst_center_host,ssid:*} by {ssid,band}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:cisco_catalyst_center.client.snr.avg{$catalyst_center_host,ssid:*} by {ssid,band}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "avg:cisco_catalyst_center.client.data_rate.avg{$catalyst_center_host,ssid:*} by {ssid,band}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "sum:cisco_catalyst_center.client.usage{$catalyst_center_host,ssid:*} by {ssid,band}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query6",
+                      "query": "avg:cisco_catalyst_center.client.onboarding.duration{$catalyst_center_host,ssid:*} by {ssid,band}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Clients",
+                      "cell_display_mode": "number"
+                    },
+                    {
+                      "formula": "query2",
+                      "alias": "RSSI",
+                      "cell_display_mode": "number",
+                      "conditional_formats": [
+                        {
+                          "comparator": "<",
+                          "value": -80,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": "<",
+                          "value": -67,
+                          "palette": "white_on_yellow"
+                        },
+                        {
+                          "comparator": ">=",
+                          "value": -67,
+                          "palette": "white_on_green"
+                        }
+                      ]
+                    },
+                    {
+                      "formula": "query3",
+                      "alias": "SNR",
+                      "cell_display_mode": "number",
+                      "conditional_formats": [
+                        {
+                          "comparator": "<",
+                          "value": 15,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": "<",
+                          "value": 25,
+                          "palette": "white_on_yellow"
+                        },
+                        {
+                          "comparator": ">=",
+                          "value": 25,
+                          "palette": "white_on_green"
+                        }
+                      ]
+                    },
+                    {
+                      "formula": "query4",
+                      "alias": "Data rate",
+                      "cell_display_mode": "number"
+                    },
+                    {
+                      "formula": "query5",
+                      "alias": "Usage",
+                      "cell_display_mode": "number"
+                    },
+                    {
+                      "formula": "query6",
+                      "alias": "Onboarding",
+                      "cell_display_mode": "number"
+                    }
+                  ],
+                  "sort": {
+                    "count": 50,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 34,
+        "width": 6,
+        "height": 12
+      }
+    },
+    {
+      "definition": {
+        "title": "Assurance Issues (Opt-In)",
+        "type": "group",
+        "background_color": "vivid_orange",
+        "layout_type": "ordered",
+        "show_title": true,
+        "widgets": [
+          {
+            "definition": {
+              "type": "note",
+              "content": "Off by default: set `collect_assurance_issues: true` to fill this group, so empty graphs mean it is disabled, not broken. Priority runs from P1, the most severe, to P4.",
+              "background_color": "orange",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "definition": {
+              "title": "Open issues",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_catalyst_center.issue.total.count{$catalyst_center_host}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "value": 0,
+                      "palette": "white_on_yellow"
+                    },
+                    {
+                      "comparator": "<=",
+                      "value": 0,
+                      "palette": "white_on_green"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 2,
+              "height": 3
+            }
+          },
+          {
+            "definition": {
+              "title": "Issues by priority",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_catalyst_center.issue.count{$catalyst_center_host} by {priority}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "bars",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Issues"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  }
+                }
+              ],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "legend_layout": "auto",
+              "show_legend": true
+            },
+            "layout": {
+              "x": 2,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "definition": {
+              "title": "Issues by category",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_catalyst_center.issue.count{$catalyst_center_host} by {category}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Issues"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 46,
+        "width": 6,
+        "height": 9
+      }
+    },
+    {
+      "definition": {
+        "title": "Assurance Events (Opt-In)",
+        "type": "group",
+        "background_color": "orange",
+        "layout_type": "ordered",
+        "show_title": true,
+        "widgets": [
+          {
+            "definition": {
+              "type": "note",
+              "content": "Off by default: set `collect_events: true` to fill this group, so empty graphs mean it is disabled, not broken. Catalyst Center 2.3.7 events carry no severity, so they are broken down by device family and name.",
+              "background_color": "orange",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "definition": {
+              "title": "Events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_catalyst_center.event.total.count{$catalyst_center_host}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 2,
+              "height": 3
+            }
+          },
+          {
+            "definition": {
+              "title": "Events by device family",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_catalyst_center.event.count{$catalyst_center_host} by {device_family}.as_count()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "bars",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Events"
+                    }
+                  ],
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  }
+                }
+              ],
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "legend_layout": "auto",
+              "show_legend": true
+            },
+            "layout": {
+              "x": 2,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "definition": {
+              "title": "Most frequent events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:cisco_catalyst_center.event.count{$catalyst_center_host} by {event_name}.as_count()",
+                      "aggregator": "sum"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "alias": "Events"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 46,
+        "width": 6,
+        "height": 9
+      }
+    },
+    {
+      "definition": {
+        "title": "Assurance Event Stream",
+        "type": "group",
+        "background_color": "white",
+        "layout_type": "ordered",
+        "show_title": true,
+        "widgets": [
+          {
+            "definition": {
+              "type": "note",
+              "content": "Datadog events for each assurance issue (`collect_assurance_issues`) and assurance event (`collect_events`), both off by default. Each one carries Catalyst Center's diagnosis, and issues include its suggested actions.",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "definition": {
+              "title": "Assurance issues and events",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "list_stream",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "event_stream",
+                    "query_string": "source:cisco_catalyst_center $catalyst_center_host",
+                    "event_size": "s"
+                  },
+                  "columns": []
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 12,
+              "height": 7
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 55,
+        "width": 12,
+        "height": 9
+      }
+    }
+  ],
+  "notify_list": [],
+  "reflow_type": "fixed"
+}
