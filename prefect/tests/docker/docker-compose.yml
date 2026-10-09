@@ -100,6 +100,7 @@ services:
       - ./prefect.yaml:/app/prefect.yaml
     command: >
       bash -c "
+      prefect work-pool set-concurrency-limit local-pool 10 &&
       prefect work-queue set-concurrency-limit default 10 &&
       prefect global-concurrency-limit create e2e-limit --limit 5 &&
       prefect concurrency-limit create e2e-tag 3 &&
