@@ -412,4 +412,10 @@ def main() -> int:
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except Exception as error:
+        # Surface runner failures in check annotations as well as downloadable logs.
+        message = f'{type(error).__name__}: {error}'.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+        print(f'::error title=Jemalloc smoke runner::{message}', flush=True)
+        raise
