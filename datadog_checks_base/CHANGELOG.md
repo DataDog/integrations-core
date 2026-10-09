@@ -4,6 +4,8 @@
 
 ## 38.3.3 / 2026-10-09
 
+_This release is special: it contains changes that also shipped with 38.4.0, but were backported to an older Agent branch._
+
 ***Added***:
 
 * Add the `collect_histograms_as_distributions` OpenMetrics V2 option, which submits histogram buckets as distributions without the `upper_bound` and `lower_bound` tags on Agents that support it. ([#25378](https://github.com/DataDog/integrations-core/pull/25378))
