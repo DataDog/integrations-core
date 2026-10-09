@@ -1,0 +1,1 @@
+Fix a `ZeroDivisionError` when a Redis-compatible server such as Dragonfly reports an empty database (`keys=0`) in `INFO keyspace`.
