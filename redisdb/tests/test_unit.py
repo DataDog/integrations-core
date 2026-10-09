@@ -257,3 +257,18 @@ def test_info_command_fallback(check, redis_instance, caplog):
             redis_check._check_db()
     mock_conn.info.assert_has_calls((mock.call(section='all'), mock.call(), mock.call('keyspace')))
     assert any(msg.startswith('`INFO all` command failed, falling back to `INFO`:') for msg in caplog.messages)
+
+
+def test_check_db_with_empty_keyspace_db(check, aggregator):
+    redis_check = check({'host': 'localhost', 'port': 6379})
+    conn = mock.MagicMock()
+    conn.info.return_value = {'db0': {'keys': 0, 'expires': 0}, 'connected_clients': 3}
+    conn.config_get.return_value = {}
+
+    with mock.patch.object(redis_check, '_get_conn', return_value=conn):
+        redis_check._check_db()
+
+    aggregator.assert_metric('redis.persist', value=0, count=1)
+    aggregator.assert_metric('redis.persist.percent', count=0)
+    aggregator.assert_metric('redis.expires.percent', count=0)
+    aggregator.assert_metric('redis.net.clients', value=3, count=1)
