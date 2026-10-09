@@ -1,57 +1,102 @@
-name: Test Agent release
+name: Jemalloc integration smoke comparison
 
 on:
   workflow_dispatch:
     inputs:
-      test-py3:
-        required: false
-        description: Run Python 3 tests
-        default: true
-        type: boolean
       agent-image:
-        required: false
-        description: Agent 7 image
-        default: "registry.datadoghq.com/agent:7-rc"
+        description: Agent image with bundled jemalloc (use a JMX image for all integrations)
+        default: registry.datadoghq.com/agent:7.84.0-jmx
+        required: true
         type: string
-      agent-image-windows:
-        required: false
-        description: Agent 7 image on Windows
-        default: "registry.datadoghq.com/agent:7-rc-servercore"
+      targets:
+        description: Space-separated integrations, or all Linux Python integrations
+        default: tls
+        required: true
         type: string
-      test-py2:
-        required: false
-        description: Run Python 2 tests
-        default: false
-        type: boolean
-      agent-image-py2:
-        required: false
-        description: Agent 6 image
-        default: "registry.datadoghq.com/agent:6-rc"
+      environments:
+        description: Environment name glob (* runs all eligible environments)
+        default: '*'
         type: string
-      agent-image-windows-py2:
-        required: false
-        description: Agent 6 image on Windows
-        default: "datadog/agent-dev:master-py2-win-servercore"
+      malloc-conf:
+        description: Candidate MALLOC_CONF (empty uses jemalloc defaults)
+        default: ''
         type: string
+      jemalloc-library:
+        default: /opt/datadog-agent/embedded/lib/libjemalloc.so.2
+        type: string
+  # A pilot can run without merging or configuring CLI workflow-dispatch authentication.
+  push:
+    branches: [jemalloc-smoke-ci]
+
+permissions:
+  contents: read
 
 jobs:
-  test:
-    uses: ./.github/workflows/test-all.yml
-    with:
-      repo: core
+  prepare:
+    runs-on: ubuntu-22.04
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      image: ${{ steps.image.outputs.image }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Select integrations
+        id: plan
+        env:
+          TARGETS: ${{ inputs.targets || 'tls' }}
+        run: python .github/workflows/scripts/jemalloc_smoke.py plan --targets "$TARGETS"
+      - name: Pin the Agent image for both allocators and every job
+        id: image
+        env:
+          AGENT_IMAGE: ${{ inputs.agent-image || 'registry.datadoghq.com/agent:7.84.0-jmx' }}
+        run: |
+          docker pull "$AGENT_IMAGE"
+          image=$(docker image inspect "$AGENT_IMAGE" --format '{{index .RepoDigests 0}}')
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+          printf 'Agent artifact: `%s`\n' "$image" >> "$GITHUB_STEP_SUMMARY"
 
-      # Options
-      test-py2: ${{ inputs.test-py2 }}
-      test-py3: ${{ inputs.test-py3 }}
-      agent-image: "${{ inputs.agent-image }}"
-      agent-image-py2: "${{ inputs.agent-image-py2 }}"
-      agent-image-windows: "${{ inputs.agent-image-windows }}"
-      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
-      skip-ddev-tests: true
-      context: "test-agent"
+  smoke:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Jemalloc comparison for ${{ matrix.integration }}
+      target: ${{ matrix.integration }}
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: core
+      agent-image: ${{ needs.prepare.outputs.image }}
+      context: test-agent-jemalloc
+      jemalloc-smoke: true
+      jemalloc-environments: ${{ inputs.environments || '*' }}
+      jemalloc-library: ${{ inputs.jemalloc-library || '/opt/datadog-agent/embedded/lib/libjemalloc.so.2' }}
+      jemalloc-conf: ${{ inputs.malloc-conf || '' }}
+      step-timeout-minutes: 180
     secrets: inherit
     permissions:
-       # needed for compute-matrix in test-target.yml
-       contents: read
-       # needed for dd-sts in test-target.yml
-       id-token: write
+      contents: read
+      id-token: write
+
+  compare:
+    if: always() && needs.prepare.result == 'success'
+    needs: [prepare, smoke]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        continue-on-error: true
+        with:
+          pattern: test-results-*
+          path: comparison-input
+      - name: Compare executed tests and report coverage gaps
+        env:
+          EXPECTED_MATRIX: ${{ needs.prepare.outputs.matrix }}
+          AGENT_IMAGE: ${{ needs.prepare.outputs.image }}
+        run: python .github/workflows/scripts/jemalloc_smoke.py compare --results comparison-input --output jemalloc-comparison
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        if: always()
+        with:
+          name: jemalloc-comparison
+          path: jemalloc-comparison

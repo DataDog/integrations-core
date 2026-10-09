@@ -89,6 +89,18 @@ on:
         required: false
         default: 60
         type: number
+      jemalloc-smoke:
+        default: false
+        type: boolean
+      jemalloc-environments:
+        default: '*'
+        type: string
+      jemalloc-library:
+        default: /opt/datadog-agent/embedded/lib/libjemalloc.so.2
+        type: string
+      jemalloc-conf:
+        default: ''
+        type: string
 
 defaults:
   run:
@@ -289,6 +301,7 @@ jobs:
         ddev config set repo "$REPO"
 
     - name: Lint
+      if: inputs.jemalloc-smoke != true
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
       env:
         TARGET: ${{ inputs.target }}
@@ -315,16 +328,33 @@ jobs:
       run: bash .github/workflows/scripts/ensure-docker.sh
 
     - name: Run Unit & Integration tests
-      if: inputs.latest != true
+      if: inputs.latest != true && inputs.jemalloc-smoke != true
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
       run: bash .github/workflows/scripts/run-unit-integration-tests.sh
 
     - name: Run E2E tests
-      if: (inputs.repo == 'core' && !inputs.minimum-base-package) || inputs.repo != 'core'
+      if: inputs.jemalloc-smoke != true && ((inputs.repo == 'core' && !inputs.minimum-base-package) || inputs.repo != 'core')
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
       run: bash .github/workflows/scripts/run-e2e-tests.sh
       env:
         INPUT_SESSION_NAME: "e2e-tests"
+
+    - name: Run paired jemalloc smoke tests
+      if: inputs.jemalloc-smoke
+      timeout-minutes: ${{ inputs.step-timeout-minutes }}
+      env:
+        TARGET: ${{ inputs.target }}
+        ENVIRONMENTS: ${{ inputs.jemalloc-environments }}
+        JEMALLOC_LIBRARY: ${{ inputs.jemalloc-library }}
+        JEMALLOC_CONF: ${{ inputs.jemalloc-conf }}
+        DDEV_TEST_ENABLE_TRACING: '0'
+      run: python .github/workflows/scripts/jemalloc_smoke.py run --integration "$TARGET" --environments "$ENVIRONMENTS" --image "$DDEV_E2E_AGENT" --library "$JEMALLOC_LIBRARY" --malloc-conf "$JEMALLOC_CONF" --output "$TEST_RESULTS_DIR/jemalloc"
+
+    - name: Clean up interrupted jemalloc environments
+      if: always() && inputs.jemalloc-smoke
+      env:
+        TARGET: ${{ inputs.target }}
+      run: python .github/workflows/scripts/jemalloc_smoke.py cleanup --integration "$TARGET" --output "$TEST_RESULTS_DIR/jemalloc"
 
     - name: Run benchmarks
       if: inputs.benchmark
