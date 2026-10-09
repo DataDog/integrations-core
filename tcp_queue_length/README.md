@@ -44,8 +44,7 @@ system_probe_config:
 
 ### Configuration with Helm
 
-With the [Datadog Helm chart][3], the `system-probe` must be activated by setting `datadog.systemProbe.enabled` to `true` in the `values.yaml` file.
-Then, the check can be activated by setting the `datadog.systemProbe.enableTCPQueueLength` parameter.
+With the [Datadog Helm chart][3], set the `datadog.systemProbe.enableTCPQueueLength` parameter to `true` in the `values.yaml` file. The `system-probe` is deployed automatically.
 
 ### Configuration with the Operator (v1.0.0+)
 
