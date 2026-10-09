@@ -90,6 +90,7 @@ class QueryMetricsCollector(DBMAsyncJob):
         if rows_by_signature:
             payload = {
                 'host': self._check.reported_hostname,
+                'database_instance': self._check.database_identifier,
                 'timestamp': time() * 1000,
                 'min_collection_interval': COLLECTION_INTERVAL,
                 'tags': self._check.tag_manager.get_tags(include_internal=False),
