@@ -41,6 +41,7 @@ class CronScheduledQuery:
     query: Query
     scheduler: CronScheduler
     pending_retry: DueQuery | None = None
+    reported_connection_error: tuple[str, str | None] | None = None
 
 
 @dataclass
@@ -50,6 +51,7 @@ class IntervalScheduledQuery:
     interval_seconds: int
     last_execution: float | None = None
     pending_retry: DueQuery | None = None
+    reported_connection_error: tuple[str, str | None] | None = None
 
 
 ScheduledQuery = CronScheduledQuery | IntervalScheduledQuery
@@ -247,14 +249,35 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
                 e,
                 query_spec.query,
             )
-            return {
-                'status': 'error',
-                'columns': [],
-                'rows': [],
-                'row_count': 0,
-                'duration_s': duration,
-                'error': str(e),
-            }
+            return self._error_result(e, duration, 'execute')
+
+    @staticmethod
+    def _error_result(error: Exception, duration: float, phase: str) -> dict[str, Any]:
+        # pymysql reports a closed socket as InterfaceError(0, ''); 0 is not a database error code.
+        code = error.args[0] if error.args and isinstance(error.args[0], int) and error.args[0] else None
+        if phase != 'execute' or isinstance(error, pymysql.err.InterfaceError) or code in (2002, 2003, 2006, 2013):
+            kind = 'connection_error'
+        elif code in (3024, 1969):  # MySQL max_execution_time / MariaDB max_statement_time
+            kind = 'statement_timeout'
+        elif code == 1205:
+            kind = 'lock_timeout'
+        else:
+            kind = 'sql_error'
+        message = str(error)
+        if phase == 'connect':
+            message = f'Query not executed: could not connect to the database: {error}'
+        elif phase == 'blocked':
+            message = f'Query not executed: a previous query lost the database connection: {error}'
+        return {
+            'status': 'error',
+            'columns': [],
+            'rows': [],
+            'row_count': 0,
+            'duration_s': duration,
+            'error': message,
+            'error_kind': kind,
+            'error_code': str(code) if code is not None else None,
+        }
 
     def _build_event_payload(self, query_spec: Query, result: dict[str, Any]) -> dict[str, Any]:
         entity = query_spec.entity.model_dump(exclude_none=True, by_alias=True) if query_spec.entity else {}
@@ -274,6 +297,7 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
             'query': query_spec.query,
             'entity': entity,
             'custom_sql_select_fields': custom_fields,
+            'timeout_ms': query_spec.query_timeout,
             **result,
         }
 
@@ -290,32 +314,54 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
             self._log.debug("No data observability queries due for execution.")
             return
 
-        base_tags = self._build_base_tags()
         try:
             conn = self._get_db_connection()
-        except (pymysql.err.DatabaseError, pymysql.err.InterfaceError):
+        except (pymysql.err.DatabaseError, pymysql.err.InterfaceError) as error:
             self._close_db_conn()
             for due in due_queries:
                 due.scheduled_query.pending_retry = due
+            self._report_connection_errors(due_queries, error, 'connect')
             raise
 
         for index, due in enumerate(due_queries):
             query = due.query
-            tags = base_tags + [f'monitor_id:{query.monitor_id}']
-
             now_at_fire_start = time.time()
             try:
                 result = self._execute_single_query(conn, query)
-            except (pymysql.err.DatabaseError, pymysql.err.InterfaceError):
+            except (pymysql.err.DatabaseError, pymysql.err.InterfaceError) as error:
                 self._close_db_conn()
                 for pending in due_queries[index:]:
                     pending.scheduled_query.pending_retry = pending
+                if not self._cancel_event.is_set():
+                    # The connection is gone, so this is a connection error whatever the server reported.
+                    result = self._error_result(error, time.time() - now_at_fire_start, 'lost')
+                    self._emit_result(due, result, now_at_fire_start)
+                    self._report_connection_errors(due_queries[index + 1 :], error, 'blocked')
                 raise
             now_at_fire_end = time.time()
             if isinstance(due.scheduled_query, IntervalScheduledQuery):
                 due.scheduled_query.last_execution = now_at_fire_end
 
-            try:
+            self._emit_result(due, result, now_at_fire_start)
+
+    def _report_connection_errors(
+        self,
+        due_queries: list[DueQuery],
+        error: Exception,
+        phase: str,
+    ) -> None:
+        if self._cancel_event.is_set():
+            return
+        result = self._error_result(error, 0, phase)
+        for due in due_queries:
+            self._emit_result(due, result, None)
+
+    def _emit_result(self, due: DueQuery, result: dict[str, Any], fire_start: float | None) -> None:
+        query = due.query
+        tags = self._build_base_tags() + [f'monitor_id:{query.monitor_id}']
+
+        try:
+            if fire_start is not None:
                 self._check.gauge(
                     'dd.mysql.data_observability.query_execution_time',
                     result['duration_s'],
@@ -331,7 +377,7 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
                     raw=True,
                 )
 
-                lateness = max(0.0, now_at_fire_start - due.scheduled_time)
+                lateness = max(0.0, fire_start - due.scheduled_time)
                 self._check.gauge(
                     'dd.mysql.data_observability.query_fire_lateness_seconds',
                     lateness,
@@ -340,24 +386,49 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
                     raw=True,
                 )
 
-                payload = self._build_event_payload(query, result)
-                raw_event = json.dumps(payload, default=default_json_event_encoding)
-                self._log.debug(
-                    "Query result for monitor_id=%d: status=%s row_count=%d",
-                    query.monitor_id,
-                    result['status'],
-                    result['row_count'],
+            if result['status'] == 'error':
+                self._check.count(
+                    'dd.mysql.data_observability.query_errors',
+                    1,
+                    tags=tags + [f'error_kind:{result["error_kind"]}'],
+                    hostname=self._check.reported_hostname,
+                    raw=True,
                 )
-                self._check.event_platform_event(raw_event, EVENT_TRACK_TYPE)
-            except Exception as e:
-                self._log.exception("Failed to emit metrics/event for monitor_id=%d", query.monitor_id)
-                try:
-                    self._check.count(
-                        'dd.mysql.data_observability.emit_failures',
-                        1,
-                        tags=tags + [f'exc_class:{type(e).__name__}'],
-                        hostname=self._check.reported_hostname,
-                        raw=True,
-                    )
-                except Exception:
-                    pass
+
+            # Connection errors are retried every collection, so an outage would repeat the same
+            # event for every pending query. Send one only when its kind and code differ from the
+            # last event handed off for this query; the message is left out because it changes with
+            # the phase and the OS error even within one outage. The state is in memory, so a
+            # restart sends it again.
+            connection_error = (
+                (result['error_kind'], result['error_code'])
+                if result['status'] == 'error' and result['error_kind'] == 'connection_error'
+                else None
+            )
+            if connection_error is not None and connection_error == due.scheduled_query.reported_connection_error:
+                self._log.debug("Skipping unchanged connection error for monitor_id=%d", query.monitor_id)
+                return
+
+            payload = self._build_event_payload(query, result)
+            raw_event = json.dumps(payload, default=default_json_event_encoding)
+            self._log.debug(
+                "Query result for monitor_id=%d: status=%s row_count=%d",
+                query.monitor_id,
+                result['status'],
+                result['row_count'],
+            )
+            self._check.event_platform_event(raw_event, EVENT_TRACK_TYPE)
+            # Recorded only after a successful handoff, so a failed send is retried.
+            due.scheduled_query.reported_connection_error = connection_error
+        except Exception as e:
+            self._log.exception("Failed to emit metrics/event for monitor_id=%d", query.monitor_id)
+            try:
+                self._check.count(
+                    'dd.mysql.data_observability.emit_failures',
+                    1,
+                    tags=tags + [f'exc_class:{type(e).__name__}'],
+                    hostname=self._check.reported_hostname,
+                    raw=True,
+                )
+            except Exception:
+                pass
