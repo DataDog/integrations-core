@@ -13,11 +13,12 @@ files:
         options:
           - name: host
             description: |
-              Host of the VoltDB cluster member to connect to using the native binary
-              protocol. Use this option (with `port`) for direct connections to a
-              database node. To connect to the VoltDB Management Center (VMC) over
-              HTTP/JSON instead, leave `host` unset and set `url`. For failover across
-              multiple cluster members, use `hosts` instead of `host`.
+              Host of a VoltDB cluster member to connect to using the native binary
+              protocol. The Agent discovers the rest of the cluster from this node and
+              keeps a connection to every member. To connect to the VoltDB Management
+              Center (VMC) over HTTP/JSON instead, leave `host` unset and set `url`.
+              To allow the Agent to start while some members are down, use `hosts`
+              instead of `host`.
             fleet_configurable: true
             display_priority: 5
             value:
@@ -26,11 +27,13 @@ files:
 
           - name: hosts
             description: |
-              List of VoltDB cluster members to try when connecting using the native
-              binary protocol. Each entry is either `hostname` (uses the global
-              `port`) or `hostname:port`. The Agent connects to the first
-              reachable entry and silently fails over to subsequent entries if
-              the active node becomes unavailable. Takes precedence over `host`.
+              List of VoltDB cluster members used as seeds for the native binary
+              protocol. Each entry is either `hostname` (uses the global `port`) or
+              `hostname:port`. The Agent connects to every reachable seed, discovers
+              the rest of the cluster, and routes each call to the node that
+              executes it. Node failures, rejoins, and cluster expansions are picked
+              up automatically. All seeds use the port determined by the
+              first entry. Takes precedence over `host`.
             fleet_configurable: true
             display_priority: 5
             value:
