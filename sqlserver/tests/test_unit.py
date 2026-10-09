@@ -37,11 +37,11 @@ from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, SqlFract
 from datadog_checks.sqlserver.schemas import KEY_PREFIX, KEY_PREFIX_PRE_2017, SQLServerSchemaCollector
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
+    DRIVER_CONFIG_DIR,
     Database,
     construct_use_statement,
     extract_sql_comments_and_procedure_name,
     get_unixodbc_sysconfig,
-    is_non_empty_file,
     needs_comment_recovery,
     parse_sqlserver_major_version,
     parse_sqlserver_year,
@@ -1209,49 +1209,84 @@ def _mock_database_list_azure():
     return fetchall_results, mock_cursor
 
 
-def test_set_default_driver_conf():
-    # Docker Agent with ODBCSYSINI env var
-    # The only case where we set ODBCSYSINI to the the default odbcinst.ini folder
-    with EnvVars({'DOCKER_DD_AGENT': 'true'}, ignore=['ODBCSYSINI']):
-        set_default_driver_conf()
-        assert os.environ['ODBCSYSINI'].endswith(os.path.join('data', 'driver_config'))
+@pytest.fixture
+def odbc_dirs(tmp_path):
+    """Patch the Agent embedded/etc and embedded/share/odbc lookups to empty temp directories."""
+    sysconfig = tmp_path / 'embedded' / 'etc'
+    agent_default = tmp_path / 'embedded' / 'share' / 'odbc'
+    sysconfig.mkdir(parents=True)
+    agent_default.mkdir(parents=True)
+    with mock.patch('datadog_checks.sqlserver.utils.get_unixodbc_sysconfig', return_value=str(sysconfig)):
+        with mock.patch(
+            'datadog_checks.sqlserver.utils.get_agent_default_driver_config', return_value=str(agent_default)
+        ):
+            with mock.patch('datadog_checks.base.utils.platform.Platform.is_linux', return_value=True):
+                yield sysconfig, agent_default
 
-    with mock.patch("datadog_checks.base.utils.platform.Platform.is_linux", return_value=True):
-        with EnvVars({}, ignore=['ODBCSYSINI']):
-            set_default_driver_conf()
-            assert 'ODBCSYSINI' in os.environ, "ODBCSYSINI should be set"
-            assert os.environ['ODBCSYSINI'].endswith(os.path.join('data', 'driver_config'))
 
-    # `set_default_driver_conf` have no effect on the cases below
+def test_set_default_driver_conf_keeps_preset_odbcsysini():
     with EnvVars({'ODBCSYSINI': 'ABC', 'DOCKER_DD_AGENT': 'true'}):
         set_default_driver_conf()
         assert os.environ['ODBCSYSINI'] == 'ABC'
 
     with mock.patch("datadog_checks.base.utils.platform.Platform.is_linux", return_value=True):
-        with EnvVars({}):
-            set_default_driver_conf()
-            assert 'ODBCSYSINI' in os.environ
-            assert os.environ['ODBCSYSINI'].endswith(os.path.join('tests', 'odbc'))
-
         with EnvVars({'ODBCSYSINI': 'ABC'}):
             set_default_driver_conf()
             assert os.environ['ODBCSYSINI'] == 'ABC'
 
+        # hatch.toml presets ODBCSYSINI for the test environment.
+        with EnvVars({}):
+            set_default_driver_conf()
+            assert os.environ['ODBCSYSINI'].endswith(os.path.join('tests', 'odbc'))
+
+
+def test_set_default_driver_conf_prefers_embedded_etc(odbc_dirs):
+    sysconfig, agent_default = odbc_dirs
+    (sysconfig / 'odbcinst.ini').write_text('[FreeTDS]\nDriver=/opt/datadog-agent/embedded/lib/libtdsodbc.so\n')
+    (agent_default / 'odbcinst.ini').write_text('[FreeTDS]\nDriver=/unused\n')
+
+    with EnvVars({}, ignore=['ODBCSYSINI', 'TDSVER']):
+        set_default_driver_conf()
+        assert os.environ['ODBCSYSINI'] == str(sysconfig)
+        assert os.environ['TDSVER'] == '8.0'
+
+
+def test_set_default_driver_conf_falls_back_to_agent_default(odbc_dirs):
+    _, agent_default = odbc_dirs
+    (agent_default / 'odbcinst.ini').write_text('[FreeTDS]\nDriver=/opt/datadog-agent/embedded/lib/libtdsodbc.so\n')
+
+    with EnvVars({}, ignore=['ODBCSYSINI']):
+        set_default_driver_conf()
+        assert os.environ['ODBCSYSINI'] == str(agent_default)
+
+
+def test_set_default_driver_conf_falls_back_to_bundled_ini(odbc_dirs):
+    with EnvVars({}, ignore=['ODBCSYSINI']):
+        set_default_driver_conf()
+        assert os.environ['ODBCSYSINI'] == DRIVER_CONFIG_DIR
+
+
+def test_set_default_driver_conf_docker_skips_tdsver(odbc_dirs):
+    _, agent_default = odbc_dirs
+    (agent_default / 'odbcinst.ini').write_text('[FreeTDS]\nDriver=/opt/datadog-agent/embedded/lib/libtdsodbc.so\n')
+
+    with EnvVars({'DOCKER_DD_AGENT': 'true'}, ignore=['ODBCSYSINI', 'TDSVER']):
+        set_default_driver_conf()
+        assert os.environ['ODBCSYSINI'] == str(agent_default)
+        assert 'TDSVER' not in os.environ
+
 
 @not_windows_ci
-def test_set_default_driver_conf_linux():
-    odbc_config_dir = os.path.expanduser('~')
-    with mock.patch("datadog_checks.sqlserver.utils.get_unixodbc_sysconfig", return_value=odbc_config_dir):
-        with EnvVars({}, ignore=['ODBCSYSINI']):
-            odbc_inst = os.path.join(odbc_config_dir, "odbcinst.ini")
-            odbc_ini = os.path.join(odbc_config_dir, "odbc.ini")
-            for file in [odbc_inst, odbc_ini]:
-                if os.path.exists(file):
-                    os.remove(file)
-            with open(odbc_ini, "x") as file:
-                file.write("dummy-content")
-            set_default_driver_conf()
-            assert is_non_empty_file(odbc_inst), "odbc_inst should have been created when a non empty odbc.ini exists"
+def test_set_default_driver_conf_registers_drivers_next_to_odbc_ini(odbc_dirs):
+    sysconfig, agent_default = odbc_dirs
+    default_ini = '[FreeTDS]\nDriver=/opt/datadog-agent/embedded/lib/libtdsodbc.so\n'
+    (agent_default / 'odbcinst.ini').write_text(default_ini)
+    (sysconfig / 'odbc.ini').write_text('[mydsn]\nDriver=FreeTDS\n')
+
+    with EnvVars({}, ignore=['ODBCSYSINI']):
+        set_default_driver_conf()
+        assert os.environ['ODBCSYSINI'] == str(sysconfig)
+        assert (sysconfig / 'odbcinst.ini').read_text() == default_ini
 
 
 @windows_ci

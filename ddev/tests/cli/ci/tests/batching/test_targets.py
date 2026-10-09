@@ -139,10 +139,11 @@ def test_repository_wide_rule_still_fires_alongside_a_dependency_bump():
         pytest.param("datadog_checks_dev/datadog_checks/dev/plugin/pytest.py", id="pytest-plugin"),
         pytest.param("datadog_checks_dev/pyproject.toml", id="dev-dependencies"),
         pytest.param("datadog_checks_base/pyproject.toml", id="base-dependencies"),
+        pytest.param(".ddev/dispatcher.toml", id="dispatcher-configuration"),
     ],
 )
 def test_repository_wide_rule_triggers_full_set_for_test_execution_paths(path):
-    # Test jobs run this code from the pull request, and each target depends on it differently.
+    # The pull request's own run uses these paths, and their effect varies by target or run size.
     rule = RepositoryWideRule(is_core=True)
     changed = [modified(path)]
 

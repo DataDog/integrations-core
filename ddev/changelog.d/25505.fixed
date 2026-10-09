@@ -1,0 +1,1 @@
+Count cancelled Dispatcher batches and jobs as cancelled, report jobs stopped by the 120-minute test timeout as timed out and failed, and emit the same dense outcome counters for batches and jobs.

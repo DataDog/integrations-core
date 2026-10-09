@@ -2,13 +2,31 @@
 
 <!-- towncrier release notes start -->
 
+## 38.4.0 / 2026-10-01
+
+***Security***:
+
+* Fetch AIA intermediate certificates with a fresh credential-free HTTP session over http(s) endpoints only, trying TLS first then plain HTTP, and capping the response size. ([#24154](https://github.com/DataDog/integrations-core/pull/24154))
+
+***Added***:
+
+* Update dependencies ([#25284](https://github.com/DataDog/integrations-core/pull/25284))
+
+***Fixed***:
+
+* Add `get_agent_embedded_path` helper to resolve paths under the agent's embedded directory regardless of install location. ([#23644](https://github.com/DataDog/integrations-core/pull/23644))
+* Fix concurrent memory profiling crashes in DBM background jobs. ([#25090](https://github.com/DataDog/integrations-core/pull/25090))
+* Fix a bug where OpenMetrics histogram buckets with a zero upper bound (e.g. `le="0.0"`) were silently dropped when `histogram_buckets_as_distributions` is enabled. ([#25283](https://github.com/DataDog/integrations-core/pull/25283))
+* Remove embedded null characters by default before obfuscating SQL. ([#25343](https://github.com/DataDog/integrations-core/pull/25343))
+* Log query obfuscation failures with repr so an embedded null cannot crash the caller. ([#25344](https://github.com/DataDog/integrations-core/pull/25344))
+
 ## 38.3.2 / 2026-09-10
 
 ***Fixed***:
 
 * Allow schema collectors to report object-specific count telemetry. ([#24947](https://github.com/DataDog/integrations-core/pull/24947))
 
-## 38.3.1 / 2026-09-03
+## 38.3.1 / 2026-09-03 / Agent 7.84.0
 
 ***Fixed***:
 

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.3.1 / 2026-10-01
+
+***Fixed***:
+
+* Fix ``com.bea`` JMX metrics not being collected because ``bean_regex`` patterns in the default ``metrics.yaml`` assumed a key-property order that does not match WebLogic's actual (alphabetically sorted) ``ObjectName`` format. ([#24924](https://github.com/DataDog/integrations-core/pull/24924))
+
 ## 3.3.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:

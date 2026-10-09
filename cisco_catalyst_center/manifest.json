@@ -3,7 +3,7 @@
   "app_uuid": "7bec9670-bd98-479d-bcdc-bef44de76420",
   "app_id": "cisco-catalyst-center",
   "owner": "agent-integrations",
-  "display_on_public_website": true,
+  "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
