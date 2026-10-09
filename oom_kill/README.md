@@ -64,7 +64,7 @@ In addition to mounting `system-probe.yaml` and `oom_kill.d/conf.yaml` as descri
 
 ### Configuration with Helm
 
-With the [Datadog Helm chart][4], set the `datadog.systemProbe.enableOOMKill` parameter to `true` in the `values.yaml` file. The System Probe is deployed automatically.
+With the [Datadog Helm chart][4], set the `datadog.systemProbe.enableOOMKill` parameter to `true` in the `values.yaml` file. The `system-probe` is deployed automatically.
 
 ### Configuration with the Operator (v1.0.0+)
 
