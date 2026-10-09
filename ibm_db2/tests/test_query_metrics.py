@@ -50,6 +50,12 @@ def test_query_metrics(
         execute_query()
         dd_run_check(check)
         assert not aggregator.get_event_platform_events('dbm-metrics')
+        instance_metadata = next(
+            event
+            for event in aggregator.get_event_platform_events('dbm-metadata')
+            if event['kind'] == 'database_instance'
+        )
+        assert instance_metadata['database_instance'] == check.reported_hostname
 
         # A collection with no new executions must preserve the baseline.
         dd_run_check(check)
@@ -72,6 +78,7 @@ def test_query_metrics(
             assert row['time'] >= 0
             assert row['query_signature'] == compute_sql_signature(query)
             assert payload['host'] == check.reported_hostname
+            assert payload['database_instance'] == instance_metadata['database_instance']
             assert payload['timestamp'] > 0
             assert payload['ddagentversion'] == check.agent_version
             assert payload['min_collection_interval'] == collection_interval
