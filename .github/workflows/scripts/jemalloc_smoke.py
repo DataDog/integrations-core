@@ -218,7 +218,7 @@ def run_campaign(args: argparse.Namespace) -> None:
     report_path = output / 'jemalloc-results.json'
     _write(report_path, report)
     discovery_exit = _command(
-        [sys.executable, '-m', 'hatch', 'env', 'show', '--json'],
+        [sys.executable, '-m', 'hatch', '--no-color', '--no-interactive', 'env', 'show', '--json'],
         output / 'environments.json',
         cwd=ROOT / args.integration,
         stderr_log=output / 'environment-discovery.log',
@@ -378,7 +378,8 @@ def compare(results: Path, output: Path) -> int:
     if summary := os.getenv('GITHUB_STEP_SUMMARY'):
         with Path(summary).open('a') as stream:
             stream.write(text)
-    print(', '.join(f'{name}: {count}' for name, count in counts.items()))
+    count_summary = ', '.join(f'{name}: {count}' for name, count in counts.items())
+    print(f'::notice title=Jemalloc comparison::{count_summary}' if os.getenv('GITHUB_ACTIONS') else count_summary)
     return int(
         any(
             row['classification']
