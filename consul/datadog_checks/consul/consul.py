@@ -9,6 +9,7 @@ from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 from heapq import nsmallest
 from itertools import islice
+from json import dumps as json_dumps
 from multiprocessing.pool import ThreadPool
 from time import time as timestamp
 from urllib.parse import urljoin
@@ -18,7 +19,6 @@ from cachetools import TTLCache
 from requests import HTTPError
 
 from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheck, is_affirmative
-from datadog_checks.base.utils.format.json import encode_bytes
 from datadog_checks.base.utils.serialization import json
 
 from .common import (
@@ -681,9 +681,12 @@ class ConsulCheck(OpenMetricsBaseCheck):
 
                 def coordinate_priority(item: tuple[int, dict]) -> tuple[bytes, bytes]:
                     node = item[1]
-                    identity = encode_bytes(
-                        [agent_dc, node.get('Partition') or 'default', node.get('Segment') or '', node['Node']]
-                    )
+                    # Hash the same UTF-8 bytes regardless of the Agent's JSON backend.
+                    identity = json_dumps(
+                        [agent_dc, node.get('Partition') or 'default', node.get('Segment') or '', node['Node']],
+                        ensure_ascii=False,
+                        separators=(',', ':'),
+                    ).encode('utf-8')
                     return sha256(identity).digest(), identity
 
                 # Keep a spare peer so nodes in the cohort can exclude themselves.
