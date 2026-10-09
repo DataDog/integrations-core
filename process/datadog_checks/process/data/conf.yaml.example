@@ -111,14 +111,18 @@ instances:
     ##   * critical: (optional) List of two values: If the number of processes found is below the first value or
     ##               above the second one, the process check returns CRITICAL. To make an semi-unbounded interval,
     ##                use `.inf` for the upper bound.
+    ##
+    ## Each bound must be a number, or `.inf` for the upper bound. In a local YAML file either `.inf` or the
+    ## quoted string `'.inf'` works. When the configuration is sent as JSON (for example through Remote Config
+    ## or Fleet Automation), use the string `'.inf'`, since JSON cannot represent infinity.
     #
     # thresholds:
     #   warning:
-    #   - <BELOW_VALUE>
-    #   - <TOP_VALUE>
+    #   - 5
+    #   - 10
     #   critical:
-    #   - <BELOW_VALUE>
-    #   - <TOP_VALUE>
+    #   - 2
+    #   - '.inf'
 
     ## @param collect_children - boolean - optional - default: false
     ## If true, the check also collects metrics from all child processes of a matched process.
