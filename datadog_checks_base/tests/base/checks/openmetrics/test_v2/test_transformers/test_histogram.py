@@ -445,6 +445,58 @@ def test_histogram_buckets_as_distributions(aggregator, dd_run_check, mock_http_
     aggregator.assert_all_metrics_covered()
 
 
+def test_histogram_buckets_as_distributions_with_zero_bucket(aggregator, dd_run_check, mock_http_response):
+    # le="0.0" bucket's lower bound must not become -Inf; infinite-bound buckets are silently dropped downstream.
+    payload = """
+        # HELP req_ms request duration
+        # TYPE req_ms histogram
+        req_ms_bucket{le="0.0"} 7
+        req_ms_bucket{le="5.0"} 10
+        req_ms_bucket{le="+Inf"} 10
+        req_ms_sum 9
+        req_ms_count 10
+        """
+    mock_http_response(payload)
+    check = get_check(
+        {
+            'metrics': ['.+'],
+            'histogram_buckets_as_distributions': True,
+            'collect_histogram_buckets': True,
+        }
+    )
+    dd_run_check(check)
+
+    aggregator.assert_histogram_bucket(
+        'test.req_ms',
+        7,
+        0,
+        0,
+        True,
+        '',
+        ['endpoint:test', 'upper_bound:0', 'lower_bound:0'],
+    )
+    aggregator.assert_histogram_bucket(
+        'test.req_ms',
+        3,
+        0,
+        5.0,
+        True,
+        '',
+        ['endpoint:test', 'upper_bound:5.0', 'lower_bound:0'],
+    )
+    aggregator.assert_histogram_bucket(
+        'test.req_ms',
+        0,
+        5.0,
+        float('Inf'),
+        True,
+        '',
+        ['endpoint:test', 'upper_bound:inf', 'lower_bound:5.0'],
+    )
+
+    aggregator.assert_all_metrics_covered()
+
+
 def test_histogram_buckets_as_distributions_with_counters(aggregator, dd_run_check, mock_http_response):
     payload = """
         # HELP rest_client_request_latency_seconds Request latency in seconds. Broken down by verb and URL.
