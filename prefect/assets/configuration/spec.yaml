@@ -22,6 +22,20 @@ files:
         type: string
         example: http://localhost:4200/api
       fleet_configurable: false
+    - name: auth_string
+      description: |
+        Basic authentication credentials in `user:password` format, matching
+        Prefect's `PREFECT_API_AUTH_STRING` client setting. Use the same secret
+        configured as `PREFECT_SERVER_API_AUTH_STRING` on the server.
+
+        Do not combine this option with `username`, `password`, or another `auth_type`.
+        Passwords may contain colons. Use the Agent secret management mechanism
+        instead of storing credentials in plain text.
+      value:
+        type: string
+        example: <USER>:<PASSWORD>
+      secret: true
+      fleet_configurable: false
     - name: work_pool_names
       description: |
         A mapping of work pool name patterns to include or exclude, with each entry being a regular expression.
