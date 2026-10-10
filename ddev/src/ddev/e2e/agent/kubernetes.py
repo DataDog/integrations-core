@@ -412,7 +412,9 @@ class KubernetesAgent(AgentInterface):
             'sleep 1; elapsed=$((elapsed + 1)); '
             'done'
         )
-        self._exec(['sh', '-c', restart_command])
+        if self._exec(['sh', '-c', restart_command], check=False).returncode:
+            self._show_logs()
+            raise RuntimeError('Kubernetes Agent process did not restart')
         self._wait_for_agent()
 
     def restart(self) -> None:
