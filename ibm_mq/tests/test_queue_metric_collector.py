@@ -74,6 +74,27 @@ def test_regex_precedes_autodiscovery(instance):
     assert discovered_queues == {'pattern_queue', 'DEV.QUEUE.1'}
 
 
+def test_queue_patterns_suppress_full_sweep_when_combined_with_regex(instance):
+    """AGENT-16599 issue 3: with both queue_patterns and queue_regex set, an operator-precedence bug
+    parsed the guard as ``(auto_discover and not patterns) or regex``, so queue_regex forced the full
+    '*' sweep and queue_patterns was ignored for discovery. Discovery must instead scope to the
+    patterns, with queue_regex applied as a post-filter on the pattern results."""
+    instance['queue_patterns'] = ['pattern']
+    instance['queue_regex'] = ['pat*']
+    instance['auto_discover_queues'] = False
+    config = IBMMQConfig(instance, {})
+    collector = QueueMetricCollector(config, Mock(), Mock(), Mock(), Mock(), Mock())
+    collector._discover_queues = Mock(return_value=['pattern_queue', 'other_queue'])
+    queue_manager = Mock()
+
+    discovered_queues = collector.discover_queues(queue_manager)
+
+    # Discovery is scoped to the pattern only: no '*' full sweep.
+    collector._discover_queues.assert_called_once_with(queue_manager, 'pattern')
+    # queue_regex ('pat*') then filters the pattern results down to 'pattern_queue'.
+    assert discovered_queues == {'pattern_queue', 'DEV.QUEUE.1'}
+
+
 @pytest.mark.parametrize(
     "auto_discover_queues_via_names, error_code",
     [
