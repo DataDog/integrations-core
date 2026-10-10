@@ -97,6 +97,7 @@ class InstanceConfig(BaseModel):
         frozen=True,
     )
     allow_redirects: Optional[bool] = None
+    auth_string: Optional[str] = None
     auth_token: Optional[AuthToken] = None
     auth_type: Optional[str] = None
     aws_host: Optional[str] = None
