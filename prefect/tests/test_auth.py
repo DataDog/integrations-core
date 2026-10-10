@@ -16,6 +16,8 @@ pytestmark = pytest.mark.unit
     'credentials,expected',
     [
         ({'auth_string': 'platform:secret'}, 'platform:secret'),
+        ({'auth_string': 'platform:secret', 'auth_type': 'BASIC'}, 'platform:secret'),
+        ({'auth_string': 'platform:secret', 'auth_type': 'bAsIc'}, 'platform:secret'),
         ({'auth_string': 'platform:secret:with:colons'}, 'platform:secret:with:colons'),
         ({'username': 'platform', 'password': 'secret'}, 'platform:secret'),
         ({}, None),
