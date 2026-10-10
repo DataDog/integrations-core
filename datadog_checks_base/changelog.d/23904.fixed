@@ -1,0 +1,1 @@
+Fix `TailFile` to close the temporary CRC file handle.
