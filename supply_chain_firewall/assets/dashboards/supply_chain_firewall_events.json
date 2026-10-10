@@ -4232,7 +4232,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:scfw status:critical"
+                                                "query": "source:supply-chain-firewall status:critical"
                                             }
                                         }
                                     ],
@@ -4283,7 +4283,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:scfw status:high"
+                                                "query": "source:supply-chain-firewall status:high"
                                             }
                                         }
                                     ],
@@ -4339,7 +4339,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:scfw status:critical"
+                                                "query": "source:supply-chain-firewall status:critical"
                                             }
                                         }
                                     ],
@@ -4404,7 +4404,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:scfw status:medium"
+                                                "query": "source:supply-chain-firewall status:medium"
                                             }
                                         }
                                     ],
@@ -4455,7 +4455,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:scfw status:low"
+                                                "query": "source:supply-chain-firewall status:low"
                                             }
                                         }
                                     ],
@@ -4506,7 +4506,7 @@
                                             },
                                             "group_by": [],
                                             "search": {
-                                                "query": "source:scfw status:info"
+                                                "query": "source:supply-chain-firewall status:info"
                                             }
                                         }
                                     ],
@@ -4559,7 +4559,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:scfw status:high"
+                                                "query": "source:supply-chain-firewall status:high"
                                             }
                                         }
                                     ],
@@ -4626,7 +4626,7 @@
                                                 }
                                             ],
                                             "search": {
-                                                "query": "source:scfw status:medium"
+                                                "query": "source:supply-chain-firewall status:medium"
                                             }
                                         }
                                     ],
