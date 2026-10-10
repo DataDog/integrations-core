@@ -1,0 +1,1 @@
+Raise the default page size from 30 to 300, which cuts the number of requests a collection makes without changing the data it reports.
