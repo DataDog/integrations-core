@@ -18,6 +18,7 @@ from datadog_checks.base.stubs.datadog_agent import datadog_agent
 from datadog_checks.base.utils.db import QueryManager
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
+from datadog_checks.sqlserver.config import sanitize
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
 from datadog_checks.sqlserver.const import (
     ENGINE_EDITION_AZURE_MANAGED_INSTANCE,
@@ -58,6 +59,21 @@ except ImportError:
 
 # mark the whole module
 pytestmark = pytest.mark.unit
+
+
+def test_sanitize_config_redacts_connection_string_credentials():
+    config = {
+        'password': 'top-secret',
+        'connection_string': 'UID=datadog;PWD=connection-secret;TrustServerCertificate=yes',
+    }
+
+    sanitized = sanitize(config)
+
+    assert sanitized == {
+        'password': '***',
+        'connection_string': 'UID=datadog;PWD=***;TrustServerCertificate=yes',
+    }
+    assert config['connection_string'] == 'UID=datadog;PWD=connection-secret;TrustServerCertificate=yes'
 
 
 @pytest.mark.parametrize(
