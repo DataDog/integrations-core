@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 10.0.1 / 2026-10-08
+
+***Fixed***:
+
+* Do not stop vSAN collection for an entire vCenter when a single cluster fails, and log the real error instead of the retry failure that masked it. ([#25435](https://github.com/DataDog/integrations-core/pull/25435))
+
 ## 10.0.0 / 2026-10-01
 
 ***Changed***:
