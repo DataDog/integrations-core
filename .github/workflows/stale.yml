@@ -30,6 +30,10 @@ jobs:
           days-before-stale: 15
           days-before-close: 30
           operations-per-run: 100
+          # When the author replies or pushes, remove the `stale` label on the next run
+          # instead of keeping it until the close deadline (this is the action's default,
+          # made explicit).
+          remove-stale-when-updated: true
 
           # Issue configuration
           stale-issue-message: |
