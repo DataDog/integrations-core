@@ -348,7 +348,10 @@ def dispatch_tests(
         else:
             outcome = ExecutionOutcome.CANCELLED if dispatcher.cancelled else ExecutionOutcome.FAILED
         if outcome is not ExecutionOutcome.PASSED:
-            app.abort('Dispatcher tests failed.')
+            if outcome is ExecutionOutcome.CANCELLED:
+                app.abort('Dispatcher tests were cancelled.')
+            else:
+                app.abort('Dispatcher tests failed.')
     except (KeyboardInterrupt, asyncio.CancelledError):
         if outcome is None:
             outcome = ExecutionOutcome.CANCELLED
