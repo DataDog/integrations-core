@@ -203,6 +203,13 @@ def test_validate_config(instance):
         check.validate_config()
 
 
+def test_empty_compression_disables_compression(instance):
+    instance['compression'] = ''
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check.validate_config()
+    assert check._config.compression is None
+
+
 def test_deprecated_user_option():
     """Test that the deprecated 'user' option is migrated to 'username' with a warning."""
     instance = {
