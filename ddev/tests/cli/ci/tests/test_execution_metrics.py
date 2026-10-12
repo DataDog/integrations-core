@@ -9,7 +9,12 @@ from collections.abc import Callable
 
 import pytest
 
-from ddev.cli.ci.tests.execution_metrics import MetricsHelper, Operation
+from ddev.cli.ci.tests.execution_metrics import (
+    MetricsHelper,
+    Operation,
+    ResultMetric,
+    report_result,
+)
 from ddev.monitoring.metrics import MetricKind
 from tests.cli.ci.tests.helpers import recording_runtime
 from tests.helpers.clock import FakeClock
@@ -25,6 +30,17 @@ def helper_with_sink(clock: Callable[[], float]) -> tuple[MetricsHelper, Recordi
 
 def values(sink: RecordingSink, name: str) -> list[float]:
     return [record.value for record in sink.records_named(name)]
+
+
+def test_report_result_emits_the_whole_family_with_exactly_one_1():
+    """Dense 0/1 counters, so a monitor sees zeros where an outcome did not land, not gaps."""
+    monitoring, sink = recording_runtime()
+
+    report_result(monitoring.component('test-runner').metrics, 'jobs', ResultMetric.TIMED_OUT, target='ntp')
+
+    for result in ResultMetric:
+        assert values(sink, f'jobs.{result.value}') == [int(result is ResultMetric.TIMED_OUT)]
+    assert sink.records_named('jobs.timed_out')[0].tags['dispatcher.batch.job.target'] == 'ntp'
 
 
 @pytest.mark.parametrize('failed', [False, True], ids=['settled-healthy', 'settled-failed'])

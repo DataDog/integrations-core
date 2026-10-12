@@ -106,6 +106,14 @@ VALIDATIONS: dict[str, ValidationConfig] = {
     "package": ValidationConfig(
         description="Validate Python package metadata and naming",
     ),
+    "pr-description": ValidationConfig(
+        description="Validate the pull request checklist and visible description length",
+        repo_wide=True,
+        failure_guidance=(
+            "**To fix:** Tick every item in `.github/PULL_REQUEST_TEMPLATE.md` and keep the description under "
+            "3,000 visible characters."
+        ),
+    ),
     "qa-label": ValidationConfig(
         description="Validate the pull request declares whether it needs QA for the next Agent release",
         repo_wide=True,
