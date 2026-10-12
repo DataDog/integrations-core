@@ -61,6 +61,9 @@ files:
       value:
         type: string
         example: TCP
+        enum:
+        - TCP
+        - TCPS
       fleet_configurable: true
     - name: username
       description: The username for the Datadog user account.
