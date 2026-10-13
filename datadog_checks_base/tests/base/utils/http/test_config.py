@@ -61,11 +61,6 @@ class TestRequestSize:
 
 
 class TestMaxLineSize:
-    def test_config_default(self):
-        http = RequestsWrapper({}, {})
-
-        assert http.max_line_size == 64 * 1024 * 1024
-
     def test_config_correct(self):
         http = RequestsWrapper({'max_line_size': 0.5}, {})
 

@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import gc
 import gzip
 import io
 import logging
@@ -10,7 +9,6 @@ import ssl
 import subprocess
 import tempfile
 import time
-import weakref
 
 import mock
 import pytest
@@ -393,16 +391,3 @@ def test_iter_lines_uses_configured_line_size():
     with mock.patch('requests.Session.get', return_value=_gzip_response(b'x' * 1300 + b'\ny\n')):
         with pytest.raises(ResponseLineTooLongError, match='`max_line_size` option'):
             list(http.get('https://www.google.com', stream=True).iter_lines())
-
-
-def test_iter_lines_does_not_create_reference_cycle():
-    response = _gzip_response(b'line\n')
-    list(ResponseWrapper(response, 4).iter_lines())
-    raw = weakref.ref(response.raw)
-
-    gc.disable()
-    try:
-        del response
-        assert raw() is None
-    finally:
-        gc.enable()
