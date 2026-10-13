@@ -1,9 +1,10 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Routing protocol sessions: BGP peers of the legacy routing engine.
+"""Routing protocol sessions: BGP peers and OSPF neighbors of the legacy routing engine.
 
-The Advanced Routing Engine (ARE) answers `show routing protocol bgp peer` differently, and has no parser yet.
+The Advanced Routing Engine (ARE) answers `show routing protocol bgp peer` and `... ospf neighbor` differently, and
+has no parser yet.
 """
 
 from __future__ import annotations
@@ -17,6 +18,7 @@ from datadog_checks.pan_firewall.xml_utils import num, text
 from . import CollectContext, Sample, register
 
 BGP_PEER_CMD = '<show><routing><protocol><bgp><peer/></bgp></protocol></routing></show>'
+OSPF_NEIGHBOR_CMD = '<show><routing><protocol><ospf><neighbor/></ospf></protocol></routing></show>'
 
 # A peer that came up less than this long ago has restarted.
 RESTART_WINDOW_SECONDS = 1800
@@ -95,14 +97,49 @@ def parse_bgp_peers(root: Element) -> list[Sample]:
     return samples
 
 
+def parse_ospf_neighbors(root: Element) -> list[Sample]:
+    """One `ospf.neighbor.status` per neighbor: 1 when its state is `full`, else 0. No state, no sample."""
+    samples: list[Sample] = []
+    for entry in root.iterfind('result/entry'):
+        state = text(entry, 'status')
+        if state is None:
+            continue
+        tags = tuple(
+            f'{tag}:{value}'
+            for tag, value in (
+                ('neighbor', text(entry, 'neighbor-address')),
+                ('router_id', text(entry, 'neighbor-router-id')),
+                ('area', text(entry, 'area-id')),
+                ('vr', text(entry, 'virtual-router')),
+            )
+            if value
+        )
+        samples.append(Sample('ospf.neighbor.status', 1 if state.lower() == 'full' else 0, tags, 'gauge'))
+    return samples
+
+
+def legacy_routing_engine(ctx: CollectContext) -> bool:
+    """False, with one warning per firewall, when the firewall runs the Advanced Routing Engine."""
+    if not ctx.identity.advanced_routing:
+        return True
+    if not ctx.state.are_warned:
+        ctx.state.are_warned = True
+        ctx.log.warning(
+            'pan_firewall: the firewall runs the Advanced Routing Engine: BGP and OSPF metrics need the legacy '
+            'routing engine and are not reported'
+        )
+    return False
+
+
 @register('bgp')
 def collect_bgp(ctx: CollectContext) -> list[Sample]:
-    if ctx.identity.advanced_routing:
-        if not ctx.state.are_warned:
-            ctx.state.are_warned = True
-            ctx.log.warning(
-                'pan_firewall: the firewall runs the Advanced Routing Engine: BGP and OSPF metrics need the legacy '
-                'routing engine and are not reported'
-            )
+    if not legacy_routing_engine(ctx):
         return []
     return parse_bgp_peers(ctx.client.op(BGP_PEER_CMD))
+
+
+@register('ospf')
+def collect_ospf(ctx: CollectContext) -> list[Sample]:
+    if not legacy_routing_engine(ctx):
+        return []
+    return parse_ospf_neighbors(ctx.client.op(OSPF_NEIGHBOR_CMD))

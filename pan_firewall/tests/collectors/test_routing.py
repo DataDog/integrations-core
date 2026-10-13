@@ -6,12 +6,20 @@ from unittest import mock
 import pytest
 
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectContext, FirewallState
-from datadog_checks.pan_firewall.collectors.routing import BGP_PEER_CMD, collect_bgp, parse_bgp_peers, peer_ip
+from datadog_checks.pan_firewall.collectors.routing import (
+    BGP_PEER_CMD,
+    OSPF_NEIGHBOR_CMD,
+    collect_bgp,
+    collect_ospf,
+    parse_bgp_peers,
+    parse_ospf_neighbors,
+    peer_ip,
+)
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from ..common import FIXTURES
 from ..fixture_map import op_fixture
-from ..test_check import FW_A_TAGS, new_check
+from ..test_check import FW_A_TAGS, make_instance, new_check
 
 SYNTHETIC = FIXTURES / 'synthetic'
 
@@ -193,3 +201,78 @@ def test_bgp_is_registered_and_submits_through_the_check(real_collectors, dd_run
     expect('bgp.peer.prefixes.incoming.total', 1, [*FW_A_PEER, 'afi_safi:ipv4_unicast'], gauge)
     expect('bgp.peer.prefix_limit.utilization', 10.0, [*FW_A_PEER, 'afi_safi:ipv4_unicast'], gauge)
     assert len(aggregator.metrics('pan_firewall.bgp.peer.status')) == 2
+
+
+FW_A_OSPF = ('neighbor:169.254.10.2', 'router_id:10.255.0.2', 'area:0.0.0.0', 'vr:default')
+FW_B_OSPF = ('neighbor:169.254.10.1', 'router_id:10.255.0.1', 'area:0.0.0.0', 'vr:default')
+
+
+@pytest.mark.parametrize('firewall, tags', [('fw-a', FW_A_OSPF), ('fw-b', FW_B_OSPF)])
+def test_ospf_neighbor_of_the_captures_is_up_without_a_state_tag(firewall, tags):
+    samples = parse_ospf_neighbors(load(op_fixture(OSPF_NEIGHBOR_CMD, firewall)))
+
+    assert series(samples) == {('ospf.neighbor.status', tags): (1, 'gauge')}
+
+
+@pytest.mark.parametrize(
+    'state, expected',
+    [('full', 1), ('Full', 1), ('FULL', 1), ('2-way', 0), ('init', 0), ('exstart', 0), ('down', 0)],
+)
+def test_ospf_neighbor_is_up_only_in_the_full_state(state, expected):
+    root = load(op_fixture(OSPF_NEIGHBOR_CMD))
+    root.find('result/entry/status').text = state
+
+    # The state is the value; tagging it would split the series each time the neighbor changes state.
+    assert series(parse_ospf_neighbors(root)) == {('ospf.neighbor.status', FW_A_OSPF): (expected, 'gauge')}
+
+
+def test_ospf_neighbor_without_a_status_is_not_reported():
+    root = load(op_fixture(OSPF_NEIGHBOR_CMD))
+    entry = root.find('result/entry')
+    entry.remove(entry.find('status'))
+
+    assert parse_ospf_neighbors(root) == []
+
+
+def test_ospf_advanced_routing_engine_sends_no_call_and_warns_once_per_firewall():
+    state = FirewallState()
+    first, second = make_context(True, state), make_context(True, state)
+
+    assert collect_ospf(first) == []
+    assert collect_ospf(second) == []
+
+    first.client.op.assert_not_called()
+    second.client.op.assert_not_called()
+    first.log.warning.assert_called_once()
+    assert 'legacy routing engine' in first.log.warning.call_args.args[0]
+    second.log.warning.assert_not_called()
+
+
+def test_ospf_sends_the_legacy_call_on_a_legacy_routing_engine():
+    ctx = make_context(False)
+    ctx.client.op.return_value = load(op_fixture(OSPF_NEIGHBOR_CMD))
+
+    assert series(collect_ospf(ctx)) == {('ospf.neighbor.status', FW_A_OSPF): (1, 'gauge')}
+    ctx.client.op.assert_called_once_with(OSPF_NEIGHBOR_CMD)
+
+
+def test_ospf_is_registered_and_submits_through_the_check_when_enabled(real_collectors, dd_run_check, aggregator):
+    assert 'ospf' in COLLECT_FUNCTIONS
+
+    dd_run_check(new_check(make_instance(collect_ospf=True)))
+
+    aggregator.assert_metric(
+        'pan_firewall.ospf.neighbor.status',
+        1,
+        tags=sorted([*FW_A_TAGS, *FW_A_OSPF]),
+        metric_type=aggregator.GAUGE,
+    )
+    assert len(aggregator.metrics('pan_firewall.ospf.neighbor.status')) == 1
+
+
+@pytest.mark.parametrize('options', [{}, {'collect_ospf': False}])
+def test_ospf_is_not_called_unless_enabled(options, real_collectors, dd_run_check, aggregator, fake_panos):
+    dd_run_check(new_check(make_instance(**options)))
+
+    assert OSPF_NEIGHBOR_CMD not in {c.cmd for c in fake_panos.calls}
+    assert not aggregator.metrics('pan_firewall.ospf.neighbor.status')
