@@ -28,6 +28,7 @@ INSTANCE = STATIC_INSTANCE
 LAB_HOSTS_VAR = 'PANOS_LAB_HOSTS'
 LAB_USERNAME_VAR = 'PANOS_LAB_USERNAME'
 LAB_PASSWORD_VAR = 'PANOS_PASSWORD'
+LAB_COLLECT_ALL_VAR = 'PANOS_LAB_COLLECT_ALL'
 
 
 def lab_hosts(environ: Mapping[str, str] = os.environ) -> list[str]:
@@ -41,8 +42,12 @@ def build_lab_instance(environ: Mapping[str, str] = os.environ) -> dict[str, Any
         missing = sorted({*missing, LAB_HOSTS_VAR}, key=(LAB_HOSTS_VAR, LAB_USERNAME_VAR, LAB_PASSWORD_VAR).index)
     if missing:
         pytest.fail(f'USE_PANOS_LAB is set but these environment variables are missing or empty: {", ".join(missing)}')
-    return {
+    instance: dict[str, Any] = {
         'firewalls': lab_hosts(environ),
         'firewall_credentials': [{'username': environ[LAB_USERNAME_VAR], 'password': environ[LAB_PASSWORD_VAR]}],
         'tls_verify': False,
     }
+    # Optional: also run the collectors that are off by default (global counters, OSPF, reports).
+    if environ.get(LAB_COLLECT_ALL_VAR):
+        instance.update(collect_global_counters=True, collect_ospf=True, collect_reports=True)
+    return instance

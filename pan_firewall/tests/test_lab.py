@@ -36,3 +36,11 @@ def test_lab_instance_names_missing_variable_only(monkeypatch, missing):
         build_lab_instance(values)
     assert missing in str(error.value)
     assert PASSWORD not in str(error.value)
+
+
+@pytest.mark.parametrize('collect_all, expected', [('', False), ('1', True)])
+def test_lab_instance_turns_on_optional_collectors_on_request(collect_all, expected):
+    values = {'PANOS_LAB_HOSTS': '192.0.2.10', 'PANOS_LAB_USERNAME': 'lab-user', 'PANOS_PASSWORD': PASSWORD}
+    instance = build_lab_instance({**values, 'PANOS_LAB_COLLECT_ALL': collect_all})
+    flags = ('collect_global_counters', 'collect_ospf', 'collect_reports')
+    assert [instance.get(flag, False) for flag in flags] == [expected] * 3
