@@ -268,6 +268,29 @@ def test_transport_errors_are_typed_and_name_the_host(raised, expected, message)
     assert HOST in str(exc_info.value)
 
 
+@pytest.mark.parametrize(
+    'call',
+    [
+        pytest.param(lambda client: client.op(SYSTEM_INFO_CMD), id='op'),
+        pytest.param(lambda client: list(client.iter_log_entries('2')), id='log-stream'),
+    ],
+)
+def test_calls_after_a_timeout_fail_fast_until_the_stats_are_taken(call):
+    http = FakeHttp(api=[requests.exceptions.ReadTimeout('read timed out'), (200, THREAT_LOGS)])
+    client, _ = make_client(http, STATIC_CREDS)
+    with pytest.raises(PanosTimeout):
+        client.op(SYSTEM_INFO_CMD)
+
+    # The firewall is not asked again in the same run: a hung firewall costs one timeout, not one per call.
+    with pytest.raises(PanosTimeout):
+        call(client)
+    assert len(http.calls) == 1
+
+    client.take_stats()
+    call(client)
+    assert len(http.calls) == 2
+
+
 def test_jobs_return_the_job_id_and_status():
     http = FakeHttp(api=[(200, THREAT_SUBMIT), (200, THREAT_LOGS)])
     client, _ = make_client(http, STATIC_CREDS)

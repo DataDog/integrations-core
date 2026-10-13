@@ -133,6 +133,9 @@ class PanosClient:
 
     Every call holds one of `max_in_flight` slots for its whole duration, including any keygen and the retry, so
     the device never sees more than `max_in_flight` concurrent requests from this client.
+
+    Once a call times out, every later call raises PanosTimeout at once, without contacting the device, until the
+    next `take_stats()`: a hung device costs one timeout per run, not one per call.
     """
 
     def __init__(
@@ -182,6 +185,7 @@ class PanosClient:
         """
         params = {'type': 'log', 'action': 'get', 'job-id': job_id}
         with self._slots:
+            self._fail_fast_after_timeout()
             resp, root, events = self._authorized(lambda key: self._open_stream(params, key))
             with resp:
                 path: list[str] = [root.tag]
@@ -200,6 +204,7 @@ class PanosClient:
 
     def _call(self, params: dict[str, str]) -> Element:
         with self._slots:
+            self._fail_fast_after_timeout()
             return self._authorized(lambda key: read_response(post_api(self._http, self._url, params, key=key)))
 
     def take_stats(self) -> CallStats:
@@ -213,6 +218,11 @@ class PanosClient:
         """True once a call timed out since the last `take_stats()`. It is set before the PanosTimeout is raised."""
         with self._stats_lock:
             return self._stats.timed_out
+
+    def _fail_fast_after_timeout(self) -> None:
+        # Checked once the slot is held: a call waiting for the slot of the call that timed out does not go out either.
+        if self.timed_out:
+            raise PanosTimeout(f'not calling {self._host}: an earlier call timed out')
 
     def _authorized(self, attempt: Callable[[str], T]) -> T:
         """Run `attempt` through `_with_renewal` and record its outcome in the call stats."""

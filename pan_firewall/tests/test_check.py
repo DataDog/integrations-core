@@ -11,7 +11,8 @@ import pytest
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.pan_firewall import PanFirewallCheck
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, Sample
-from datadog_checks.pan_firewall.errors import PanosApiError
+from datadog_checks.pan_firewall.collectors.jobs import JOBS_PENDING_CMD
+from datadog_checks.pan_firewall.errors import PanosApiError, PanosTimeout
 from datadog_checks.pan_firewall.poller import FirewallPoller
 
 from .common import CREDENTIALS
@@ -91,10 +92,11 @@ def test_good_run_collects_identity_and_reports_connected(dd_run_check, aggregat
     assert only_value_and_tags(aggregator, 'api.authentication.status') == (0, FW_A_TAGS)
     assert [(c.type, c.cmd, c.key_sent) for c in fake_panos.calls] == [
         ('keygen', None, False),
+        ('op', JOBS_PENDING_CMD, True),
         ('op', SYSTEM_INFO_CMD, True),
         ('op', INTERFACE_ALL_CMD, True),
     ]
-    assert re.search(rf'pan_firewall {re.escape(FW_A_IP)}: 2 calls in \d+\.\d\ds', caplog.text)
+    assert re.search(rf'pan_firewall {re.escape(FW_A_IP)}: 3 calls in \d+\.\d\ds', caplog.text)
 
 
 # Transport failures, and HTTP errors whose body is not a PAN-OS response: none of them means the firewall API answered,
@@ -278,7 +280,8 @@ def test_timeout_skips_the_remaining_collectors_of_that_firewall_only(
         return [stub_sample('dataplane')]
 
     register_stubs(monkeypatch, bgp=bgp, dataplane=dataplane)
-    fake_panos.fail(FW_A_IP, 'timeout')
+    # Only bgp's call times out: the jobs check before the collectors answers.
+    fake_panos.answer_op(FW_A_IP, SYSTEM_INFO_CMD, FAILURES['timeout'])
     aggregator.reset()
     caplog.clear()
 
@@ -286,8 +289,7 @@ def test_timeout_skips_the_remaining_collectors_of_that_firewall_only(
 
     # The collector already in flight finishes; the ones not started yet are skipped.
     assert stub_runs(aggregator) == {(FW_A_IP, 'dataplane'), *((FW_B_IP, name) for name in STUBS)}
-    # The timed-out call was the only one this run: the firewall did not answer.
-    assert can_connect_by_ip(aggregator) == {FW_A_IP: 0, FW_B_IP: 1}
+    assert can_connect_by_ip(aggregator) == {FW_A_IP: 1, FW_B_IP: 1}
     warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
     assert warnings == [
         f'pan_firewall {FW_A_IP}: bgp timed out after 30s; skipped for this run: interfaces, system_resources'
@@ -304,39 +306,71 @@ def test_timeout_skips_the_remaining_collectors_of_that_firewall_only(
 def test_identity_timeout_skips_every_collector(dd_run_check, aggregator, fake_panos, monkeypatch, caplog):
     dd_run_check(new_check())
     register_stubs(monkeypatch)
-    fake_panos.fail(FW_A_IP, 'timeout')
+    fake_panos.answer_op(FW_A_IP, SYSTEM_INFO_CMD, FAILURES['timeout'])
     aggregator.reset()
     caplog.clear()
 
-    # After a restart, the identity comes from the cache and its refresh is the run's first call.
+    # After a restart, the identity comes from the cache and is refreshed right after the jobs check.
     dd_run_check(new_check())
 
     assert stub_runs(aggregator) == set()
-    assert only_value_and_tags(aggregator, 'can_connect') == (0, FW_A_TAGS)
+    # The jobs check answered.
+    assert only_value_and_tags(aggregator, 'can_connect') == (1, FW_A_TAGS)
     warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
     assert warnings == [
         f'pan_firewall {FW_A_IP}: identity_metadata timed out after 30s; skipped for this run: {", ".join(STUBS)}'
     ]
 
 
+def raise_(error):
+    raise error
+
+
 @pytest.mark.parametrize(
-    'error',
+    'bgp, error',
     [
-        pytest.param(ValueError('unexpected shape'), id='bug'),
-        pytest.param(PanosApiError('400', 'bad command'), id='api-error'),
+        pytest.param(lambda ctx: raise_(ValueError('unexpected shape')), 'unexpected shape', id='bug'),
+        pytest.param(
+            lambda ctx: raise_(PanosApiError('400', 'bad command')), 'PAN-OS API error 400: bad command', id='api-error'
+        ),
+        # Submitting it fails, after the collector returned.
+        pytest.param(
+            lambda ctx: [Sample('stub', 1, (), 'histogram')],  # type: ignore[arg-type]
+            "'histogram'",
+            id='malformed-sample',
+        ),
     ],
 )
-def test_failing_collector_does_not_stop_the_others(dd_run_check, aggregator, monkeypatch, caplog, error):
-    def bgp(ctx):
-        raise error
-
+def test_failing_collector_does_not_stop_the_others(dd_run_check, aggregator, monkeypatch, caplog, bgp, error):
     register_stubs(monkeypatch, bgp=bgp)
 
     dd_run_check(new_check())
 
     assert stub_runs(aggregator) == {(FW_A_IP, name) for name in STUBS if name != 'bgp'}
+    assert only_value_and_tags(aggregator, 'can_connect') == (1, FW_A_TAGS)
     warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
     assert warnings == [f'pan_firewall {FW_A_IP}: collector bgp failed: {error}']
+
+
+def test_timeout_a_collector_handles_itself_is_still_reported(dd_run_check, fake_panos, monkeypatch, caplog):
+    def bgp(ctx):
+        try:
+            ctx.client.op(SYSTEM_INFO_CMD)
+        except PanosTimeout:
+            pass
+        return [stub_sample('bgp')]
+
+    check = new_check()
+    # Caches the identity, so bgp is the only due collector on the next run.
+    dd_run_check(check)
+    monkeypatch.setitem(COLLECT_FUNCTIONS, 'bgp', bgp)
+    fake_panos.answer_op(FW_A_IP, SYSTEM_INFO_CMD, FAILURES['timeout'])
+    caplog.clear()
+
+    dd_run_check(check)
+
+    warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
+    assert warnings == [f'pan_firewall {FW_A_IP}: a call timed out after 30s; skipped for this run: none']
 
 
 def test_unexpected_poller_error_does_not_stop_other_firewalls(dd_run_check, aggregator, monkeypatch, caplog):

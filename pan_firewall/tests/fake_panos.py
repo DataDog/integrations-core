@@ -4,7 +4,8 @@
 """An in-process PAN-OS XML API for unit tests, patched in place of `RequestsWrapper.post`.
 
 Each firewall IP answers from a fixture set (`FIREWALL_SETS`) through `fixture_map`. Tests inject failures per host
-with `FakePanos.fail()` and inspect `FakePanos.calls`, which records what was asked but never the key itself.
+with `FakePanos.fail()`, replace the answer to one command with `FakePanos.answer_op()`, and inspect
+`FakePanos.calls`, which records what was asked but never the key itself.
 """
 
 from __future__ import annotations
@@ -57,14 +58,20 @@ class FakePanos:
     def __init__(self) -> None:
         self.calls: list[Call] = []
         self._failures: dict[tuple[str, str], Answer] = {}
+        self._op_answers: dict[tuple[str, str], Answer] = {}
 
     def fail(self, host: str, failure: str, on: Literal['all', 'keygen', 'api'] = 'all') -> None:
         """Answer every later request of kind `on` to `host` with the named entry of FAILURES."""
         for kind in ('keygen', 'api') if on == 'all' else (on,):
             self._failures[host, kind] = FAILURES[failure]
 
+    def answer_op(self, host: str, cmd: str, answer: Answer) -> None:
+        """Answer every later `type=op&cmd=<cmd>` request to `host` with `answer`; `fail()` still takes precedence."""
+        self._op_answers[host, cmd] = answer
+
     def recover(self, host: str) -> None:
         self._failures = {k: v for k, v in self._failures.items() if k[0] != host}
+        self._op_answers = {k: v for k, v in self._op_answers.items() if k[0] != host}
 
     def calls_to(self, host: str) -> list[Call]:
         return [c for c in self.calls if c.host == host]
@@ -82,7 +89,11 @@ class FakePanos:
                 key_sent='X-PAN-KEY' in (options.get('extra_headers') or {}),
             )
         )
-        answer = self._failures.get((host, kind)) or self._answer(host, data)
+        answer = (
+            self._failures.get((host, kind))
+            or (data.get('type') == 'op' and self._op_answers.get((host, data.get('cmd', ''))))
+            or self._answer(host, data)
+        )
         if isinstance(answer, Exception):
             raise answer
         return _response(url, *answer)

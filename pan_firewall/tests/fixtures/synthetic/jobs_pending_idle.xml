@@ -1,0 +1,3 @@
+<!-- Synthetic `show jobs pending` response with no job pending. This idle shape (an empty `<result/>`) is an
+     assumption, unverified until lab task L10 captures `show jobs pending` on an idle firewall. -->
+<response status="success"><result/></response>

@@ -34,3 +34,11 @@ COLLECTORS = tuple(INTERVALS)
 DEVICE_VENDOR_TAG = 'paloaltonetworks'
 NDM_DEVICE_RESOURCE_TAG = 'dd.internal.resource:ndm_device'
 NDM_DEVICE_USER_TAGS_RESOURCE_TAG = 'dd.internal.resource:ndm_device_user_tags'
+
+# A firewall is busy, and is not collected, while `show jobs pending` lists a job with one of these statuses and types.
+# The type strings are the ones seen in the lab's `show jobs all`; `Downld` (hourly downloads) and `IoT` never pause
+# collection.
+BUSY_JOB_STATUSES = frozenset({'ACT', 'PEND'})
+BUSY_JOB_TYPES = frozenset({'Commit', 'AutoCom', 'Content', 'Antivirus', 'WildFire'})
+# After this many seconds of continuously skipping a busy firewall, the check collects it anyway.
+COMMIT_SKIP_MAX_SECONDS = 600

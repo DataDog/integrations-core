@@ -18,6 +18,10 @@ class FirewallSchedule:
         self._clock = clock
         self._next_due: dict[str, float] = {}
 
+    def now(self) -> float:
+        """The schedule's clock, for timers that must follow it (tests inject a fake one)."""
+        return self._clock()
+
     def due(self, enabled: Collection[str], identity_missing: bool = False) -> list[str]:
         """Return the enabled collectors that are due, in `COLLECTORS` order.
 
