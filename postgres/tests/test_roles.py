@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import contextlib
 import json
-from collections import Counter
 from concurrent.futures.thread import ThreadPoolExecutor
 from unittest import mock
 
@@ -196,6 +195,42 @@ def role_catalog(roles_instance):
                 DROP ROLE IF EXISTS dd_role_obs_owner;
                 """
             )
+
+
+def _flatten_privilege_event(event):
+    """Return a nested `pg_role_privileges` payload as flat arrays, one row per privilege, dependency, or grant.
+
+    Assertions about individual grants read more simply against flat rows; the nested shape itself is pinned by the
+    payload contract test.
+    """
+    flat = {k: v for k, v in event.items() if k not in ('objects', 'default_privileges')}
+    flat['objects'] = [
+        {k: v for k, v in obj.items() if k not in ('privileges', 'reads_from')} for obj in event['objects']
+    ]
+    flat['object_privileges'] = [
+        {'object_type': obj['object_type'], 'schema_name': obj['schema_name'], 'object_name': obj['object_name']}
+        | privilege
+        for obj in event['objects']
+        for privilege in obj['privileges']
+    ]
+    flat['object_dependencies'] = [
+        {
+            'dependent_object_type': obj['object_type'],
+            'dependent_schema_name': obj['schema_name'],
+            'dependent_object_name': obj['object_name'],
+            'referenced_object_type': referenced['object_type'],
+            'referenced_schema_name': referenced['schema_name'],
+            'referenced_object_name': referenced['object_name'],
+        }
+        for obj in event['objects']
+        for referenced in obj['reads_from']
+    ]
+    flat['default_privileges'] = [
+        {k: v for k, v in rule.items() if k != 'grants'} | grant
+        for rule in event['default_privileges']
+        for grant in rule['grants']
+    ]
+    return flat
 
 
 def _emitter(base_event, array_names, chunk_size, byte_budget=4_000_000, log=None):
@@ -419,53 +454,58 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
     assert privilege_event['database_name'] == 'datadog_test'
     assert privilege_event['collection_payloads_count'] == 1
     assert privilege_event['collection_payload_index'] == 0
-    assert privilege_event['object_privileges']
-    assert privilege_event['objects']
-    assert set(privilege_event['object_privileges'][0]) == {
-        'object_type',
-        'schema_name',
-        'object_name',
-        'column_name',
-        'grantee_oid',
-        'grantor_oid',
-        'privilege',
-        'is_grantable',
+    assert set(privilege_event) == {
+        'host',
+        'database_instance',
+        'agent_version',
+        'dbms',
+        'dbms_version',
+        'kind',
+        'collection_interval',
+        'tags',
+        'cloud_metadata',
+        'collection_started_at',
+        'database_name',
+        'timestamp',
+        'collection_payload_index',
+        'collection_payloads_count',
+        'objects',
+        'default_privileges',
     }
-    assert set(privilege_event['objects'][0]) == {
-        'object_type',
-        'schema_name',
-        'object_name',
-        'object_oid',
-        'owner_oid',
-        'is_security_definer',
-        'security_invoker',
-        'has_default_acl',
+    assert {frozenset(obj) for obj in privilege_event['objects']} == {
+        frozenset(
+            {
+                'object_type',
+                'schema_name',
+                'object_name',
+                'object_oid',
+                'owner_oid',
+                'is_security_definer',
+                'security_invoker',
+                'has_default_acl',
+                'privileges',
+                'reads_from',
+            }
+        )
     }
-    # Privilege rows carry no owner; the backend takes it from the object, so every row must have exactly one.
-    object_counts = Counter(
-        (obj['object_type'], obj['schema_name'], obj['object_name']) for obj in privilege_event['objects']
-    )
-    assert {
-        object_counts[(privilege['object_type'], privilege['schema_name'], privilege['object_name'])]
-        for privilege in privilege_event['object_privileges']
-    } == {1}
-    assert set(privilege_event['default_privileges'][0]) == {
-        'owner_oid',
-        'schema_name',
-        'object_type',
-        'grantee_oid',
-        'grantor_oid',
-        'privilege',
-        'is_grantable',
+    assert {frozenset(privilege) for obj in privilege_event['objects'] for privilege in obj['privileges']} == {
+        frozenset({'column_name', 'grantee_oid', 'grantor_oid', 'privilege', 'is_grantable'})
     }
-    assert set(privilege_event['object_dependencies'][0]) == {
-        'dependent_object_type',
-        'dependent_schema_name',
-        'dependent_object_name',
-        'referenced_object_type',
-        'referenced_schema_name',
-        'referenced_object_name',
+    assert {frozenset(referenced) for obj in privilege_event['objects'] for referenced in obj['reads_from']} == {
+        frozenset({'schema_name', 'object_name', 'object_type'})
     }
+    assert {frozenset(rule) for rule in privilege_event['default_privileges']} == {
+        frozenset({'owner_oid', 'schema_name', 'object_type', 'grants'})
+    }
+    assert {frozenset(grant) for rule in privilege_event['default_privileges'] for grant in rule['grants']} == {
+        frozenset({'grantee_oid', 'grantor_oid', 'privilege', 'is_grantable'})
+    }
+    # Only views and materialized views read from other relations.
+    assert {obj['object_type'] for obj in privilege_event['objects'] if obj['reads_from']} <= {
+        'view',
+        'materialized_view',
+    }
+    privilege_event = _flatten_privilege_event(privilege_event)
     assert any(
         privilege['object_type'] == 'view'
         and privilege['schema_name'] == 'dd_role_obs'
@@ -652,6 +692,48 @@ def test_collect_roles_keeps_membership_with_dropped_grantor(integration_check, 
                 )
 
 
+def _privilege_chunks(aggregator):
+    return [
+        event for event in aggregator.get_event_platform_events('dbm-metadata') if event['kind'] == 'pg_role_privileges'
+    ]
+
+
+def test_collect_roles_chunks_never_split_an_object(integration_check, roles_instance, role_catalog, aggregator):
+    """With a small budget, every object still arrives whole, in exactly one chunk, and the snapshot is complete."""
+    check = integration_check(roles_instance)
+    run_one_check(check)
+    (expected,) = _privilege_chunks(aggregator)
+    aggregator.reset()
+
+    check = integration_check(roles_instance)
+    check.metadata_samples._role_collector._config.payload_chunk_size = 5
+    run_one_check(check)
+
+    chunks = _privilege_chunks(aggregator)
+
+    def key(obj):
+        return obj['object_type'], obj['schema_name'], obj['object_name']
+
+    def normalize(obj):
+        return {k: sorted(map(json.dumps, v)) if isinstance(v, list) else v for k, v in obj.items()}
+
+    received = [obj for chunk in chunks for obj in chunk['objects']]
+    assert sorted(map(key, received)) == sorted(map(key, expected['objects']))
+    # Each object, with its nested privileges, is identical to the one collected with the default budget.
+    by_key = {key(obj): obj for obj in expected['objects']}
+    assert all(normalize(obj) == normalize(by_key[key(obj)]) for obj in received)
+    # An object can only exceed the budget alone in its chunk.
+    for chunk in chunks:
+        entities = chunk['objects'] + chunk['default_privileges']
+        weight = sum(
+            1 + len(e.get('privileges', [])) + len(e.get('reads_from', [])) + len(e.get('grants', [])) for e in entities
+        )
+        assert weight <= 5 or len(entities) == 1
+    assert any(len(obj['privileges']) + 1 > 5 for obj in received)
+    assert [chunk['collection_payload_index'] for chunk in chunks] == list(range(len(chunks)))
+    assert chunks[-1]['collection_payloads_count'] == len(chunks)
+
+
 def test_collect_roles_names_routines_by_input_types(integration_check, roles_instance, role_catalog, aggregator):
     """Routines are named by their input argument types, the form `GRANT ... ON FUNCTION` accepts.
 
@@ -662,8 +744,12 @@ def test_collect_roles_names_routines_by_input_types(integration_check, roles_in
 
     run_one_check(check)
 
-    privilege_event = next(
-        event for event in aggregator.get_event_platform_events('dbm-metadata') if event['kind'] == 'pg_role_privileges'
+    privilege_event = _flatten_privilege_event(
+        next(
+            event
+            for event in aggregator.get_event_platform_events('dbm-metadata')
+            if event['kind'] == 'pg_role_privileges'
+        )
     )
 
     def routine_names(array_name):
@@ -726,8 +812,12 @@ def test_collect_roles_names_routines_independently_of_search_path(integration_c
                     """
                 )
 
-    privilege_event = next(
-        event for event in aggregator.get_event_platform_events('dbm-metadata') if event['kind'] == 'pg_role_privileges'
+    privilege_event = _flatten_privilege_event(
+        next(
+            event
+            for event in aggregator.get_event_platform_events('dbm-metadata')
+            if event['kind'] == 'pg_role_privileges'
+        )
     )
     assert {
         obj['object_name']
@@ -747,7 +837,9 @@ def test_collect_roles_ships_only_explicit_privileges(integration_check, roles_i
     run_one_check(check)
 
     metadata = aggregator.get_event_platform_events('dbm-metadata')
-    privilege_event = next(event for event in metadata if event['kind'] == 'pg_role_privileges')
+    privilege_event = _flatten_privilege_event(
+        next(event for event in metadata if event['kind'] == 'pg_role_privileges')
+    )
     role_name = {v: k for k, v in _role_oids(next(e for e in metadata if e['kind'] == 'pg_roles')).items()}
 
     def find_object(name):
@@ -785,7 +877,9 @@ def test_collect_roles_column_privileges(integration_check, roles_instance, role
     run_one_check(check)
 
     metadata = aggregator.get_event_platform_events('dbm-metadata')
-    privilege_event = next(event for event in metadata if event['kind'] == 'pg_role_privileges')
+    privilege_event = _flatten_privilege_event(
+        next(event for event in metadata if event['kind'] == 'pg_role_privileges')
+    )
     role_name = {v: k for k, v in _role_oids(next(e for e in metadata if e['kind'] == 'pg_roles')).items()}
 
     assert {
@@ -812,7 +906,9 @@ def test_collect_roles_type_privileges(integration_check, roles_instance, role_c
     run_one_check(check)
 
     metadata = aggregator.get_event_platform_events('dbm-metadata')
-    privilege_event = next(event for event in metadata if event['kind'] == 'pg_role_privileges')
+    privilege_event = _flatten_privilege_event(
+        next(event for event in metadata if event['kind'] == 'pg_role_privileges')
+    )
     role_name = {v: k for k, v in _role_oids(next(e for e in metadata if e['kind'] == 'pg_roles')).items()}
 
     assert {
@@ -843,8 +939,12 @@ def test_collect_roles_security_invoker_boolean_spellings(integration_check, rol
 
     run_one_check(check)
 
-    privilege_event = next(
-        event for event in aggregator.get_event_platform_events('dbm-metadata') if event['kind'] == 'pg_role_privileges'
+    privilege_event = _flatten_privilege_event(
+        next(
+            event
+            for event in aggregator.get_event_platform_events('dbm-metadata')
+            if event['kind'] == 'pg_role_privileges'
+        )
     )
 
     assert {
@@ -877,12 +977,13 @@ def test_collect_roles_database_failure_has_no_terminal_payload(
     collector._config.payload_chunk_size = 1
     original_emit_rows = PostgresRoleCollector._emit_rows
 
-    def fail_after_privileges(self, cursor, array_name, emitter):
-        if array_name == 'objects':
-            raise RuntimeError("injected object collection failure")
+    # Objects are emitted first, in chunks of one, so they are sent before default privileges fail.
+    def fail_after_objects(self, cursor, array_name, emitter):
+        if array_name == 'default_privileges':
+            raise RuntimeError("injected default privileges collection failure")
         return original_emit_rows(self, cursor, array_name, emitter)
 
-    monkeypatch.setattr(PostgresRoleCollector, '_emit_rows', fail_after_privileges)
+    monkeypatch.setattr(PostgresRoleCollector, '_emit_rows', fail_after_objects)
 
     run_one_check(check)
 

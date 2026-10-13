@@ -17,14 +17,13 @@ from datadog_checks.base.utils.db.utils import default_json_event_encoding, now_
 
 from .filters import regex_exclude_clauses, regex_include_clause
 from .role_queries import (
+    NESTED_ELEMENT_MARKERS,
     QUERY_DEFAULT_PRIVILEGES,
-    QUERY_OBJECT_DEPENDENCIES,
     QUERY_ROLE_SETTINGS,
     QUERY_ROLES,
     ROLE_SETTING_VALUE_PREFIXES,
     list_databases_query,
     memberships_query,
-    object_privileges_query,
     objects_query,
 )
 from .util import payload_pg_version
@@ -35,7 +34,7 @@ if TYPE_CHECKING:
 
 
 INSTANCE_ARRAYS = ("roles", "memberships", "settings")
-DATABASE_ARRAYS = ("object_privileges", "default_privileges", "objects", "object_dependencies")
+DATABASE_ARRAYS = ("objects", "default_privileges")
 PAYLOAD_CHUNK_SIZE = 10_000
 # The intake accepts batches of up to 5 MB of uncompressed data; the margin leaves room for the forwarder to batch
 # events together.
@@ -315,10 +314,8 @@ class PostgresRoleCollector:
                     conn,
                     cursors,
                     [
-                        ("default_privileges", QUERY_DEFAULT_PRIVILEGES, ()),
-                        ("object_privileges", object_privileges_query(pg11_plus=pg11_plus), ()),
                         ("objects", objects_query(pg11_plus=pg11_plus), ()),
-                        ("object_dependencies", QUERY_OBJECT_DEPENDENCIES, ()),
+                        ("default_privileges", QUERY_DEFAULT_PRIVILEGES, ()),
                     ],
                 )
                 for array_name, cursor in results:
@@ -427,7 +424,14 @@ class PostgresRoleCollector:
     def _emit_rows(self, cursor: Any, array_name: str, emitter: RoleSnapshotEmitter) -> None:
         for row in cursor:
             self._check_cancelled()
-            emitter.append(array_name, row)
+            # Nested arrays arrive as JSON text built by the query; splice them in without parsing them.
+            raw_json = {}
+            nested_count = 0
+            for field, marker in NESTED_ELEMENT_MARKERS.items():
+                if field in row:
+                    raw_json[field] = row.pop(field)
+                    nested_count += raw_json[field].count(marker)
+            emitter.append(array_name, row, raw_json, nested_count)
 
     def _new_emitter(
         self,

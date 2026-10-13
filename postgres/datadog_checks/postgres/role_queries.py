@@ -173,6 +173,104 @@ ROUTINE_NAME = """(
            )::text"""
 
 
+# Nested arrays are built in the query as JSON text, which is much cheaper for Postgres than `json_agg` of a row,
+# and returned as `text` so neither Postgres nor the agent parses them; the collector splices them into the payload.
+# OIDs are numbers and privilege types are fixed keywords, so only names, which can hold any character, are escaped
+# with `to_json`. Each element starts with a fixed key that `NESTED_ELEMENT_MARKERS` uses to count elements.
+PRIVILEGE_ENTRY = """'{"column_name":' || :column_name_json
+    || ',"grantee_oid":' || acl.grantee::text
+    || ',"grantor_oid":' || acl.grantor::text
+    || ',"privilege":"' || acl.privilege_type
+    || CASE WHEN acl.is_grantable THEN '","is_grantable":true}' ELSE '","is_grantable":false}' END"""
+
+GRANT_ENTRY = """'{"grantee_oid":' || acl.grantee::text
+    || ',"grantor_oid":' || acl.grantor::text
+    || ',"privilege":"' || acl.privilege_type
+    || CASE WHEN acl.is_grantable THEN '","is_grantable":true}' ELSE '","is_grantable":false}' END"""
+
+# The key each nested element starts with. JSON escapes every quote inside a string value, so these sequences can
+# only appear at the start of an element, and counting them gives the number of elements without parsing.
+NESTED_ELEMENT_MARKERS = {
+    "privileges": '{"column_name":',
+    "reads_from": '{"schema_name":',
+    "grants": '{"grantee_oid":',
+}
+
+
+def _privilege_entries(acl_column: str, column_name_json: str = "'\"\"'") -> str:
+    """Return a subquery producing the comma-separated JSON entries of `acl_column`, or NULL if it has none."""
+    entry = PRIVILEGE_ENTRY.replace(":column_name_json", column_name_json)
+    return f"""(SELECT pg_catalog.string_agg({entry}, ',')
+            FROM pg_catalog.aclexplode({acl_column}) AS acl)"""
+
+
+def _json_array(entries: str) -> str:
+    return f"('[' || COALESCE({entries}, '') || ']')"
+
+
+COLUMN_PRIVILEGE_ENTRY = PRIVILEGE_ENTRY.replace(
+    ":column_name_json", "pg_catalog.to_json(attribute.attname::text)::text"
+)
+
+# Column grants exist on few relations. The IN check is evaluated once per query and kept in memory, so the
+# per-relation pg_attribute lookup only runs for relations that have column grants. Sequences cannot have them.
+RELATION_PRIVILEGES = f"""('[' || pg_catalog.concat_ws(',',
+               {_privilege_entries("relation.relacl")},
+               CASE
+                   WHEN relation.relkind <> 'S'
+                    AND relation.oid IN (
+                        SELECT attrelid FROM pg_catalog.pg_attribute WHERE attacl IS NOT NULL
+                    )
+                   THEN (
+                       SELECT pg_catalog.string_agg({COLUMN_PRIVILEGE_ENTRY}, ',')
+                       FROM pg_catalog.pg_attribute AS attribute
+                       CROSS JOIN LATERAL pg_catalog.aclexplode(attribute.attacl) AS acl
+                       WHERE attribute.attrelid = relation.oid
+                         AND attribute.attnum > 0
+                         AND NOT attribute.attisdropped
+                         AND attribute.attacl IS NOT NULL
+                   )
+               END
+           ) || ']')"""
+
+# The relations a view or materialized view reads, limited to relations role collection also reports.
+RELATION_READS_FROM = f"""CASE
+               WHEN relation.relkind IN ('v', 'm') THEN (
+                   SELECT '[' || COALESCE(pg_catalog.string_agg(
+                       '{{"schema_name":' || pg_catalog.to_json(referenced.schema_name)::text
+                       || ',"object_name":' || pg_catalog.to_json(referenced.object_name)::text
+                       || ',"object_type":"' || referenced.object_type || '"}}',
+                       ','), '') || ']'
+                   FROM (
+                       SELECT DISTINCT
+                              referenced_namespace.nspname::text AS schema_name,
+                              referenced.relname::text AS object_name,
+                              {RELATION_TYPE.replace("relation.relkind", "referenced.relkind")} AS object_type
+                       FROM pg_catalog.pg_rewrite AS rewrite
+                       JOIN pg_catalog.pg_depend AS dependency
+                         ON dependency.objid = rewrite.oid
+                        AND dependency.classid = 'pg_catalog.pg_rewrite'::pg_catalog.regclass
+                        AND dependency.refclassid = 'pg_catalog.pg_class'::pg_catalog.regclass
+                       JOIN pg_catalog.pg_class AS referenced
+                         ON referenced.oid = dependency.refobjid
+                       JOIN pg_catalog.pg_namespace AS referenced_namespace
+                         ON referenced_namespace.oid = referenced.relnamespace
+                       WHERE rewrite.ev_class = relation.oid
+                         AND dependency.deptype = 'n'
+                         AND referenced.relkind IN ('r', 'p', 'v', 'm', 'f', 'S')
+                         AND referenced.oid <> relation.oid
+                         AND {_collected_schema("referenced_namespace")}
+                   ) AS referenced
+               )
+               ELSE '[]'
+           END"""
+
+
+DEFAULT_PRIVILEGE_GRANTS = _json_array(
+    f"(SELECT pg_catalog.string_agg({GRANT_ENTRY}, ',') FROM pg_catalog.aclexplode(default_acl.defaclacl) AS acl)"
+)
+
+# One row per default-privilege rule: pg_default_acl is unique on owner, schema, and object type.
 QUERY_DEFAULT_PRIVILEGES = f"""
 SELECT default_acl.defaclrole::bigint AS owner_oid,
        COALESCE(namespace.nspname::text, '') AS schema_name,
@@ -183,14 +281,10 @@ SELECT default_acl.defaclrole::bigint AS owner_oid,
            WHEN 'T' THEN 'type'
            WHEN 'n' THEN 'schema'
        END AS object_type,
-       acl.grantee::bigint AS grantee_oid,
-       acl.grantor::bigint AS grantor_oid,
-       acl.privilege_type::text AS privilege,
-       acl.is_grantable AS is_grantable
+       {DEFAULT_PRIVILEGE_GRANTS} AS grants
 FROM pg_catalog.pg_default_acl AS default_acl
 LEFT JOIN pg_catalog.pg_namespace AS namespace
   ON namespace.oid = default_acl.defaclnamespace
-CROSS JOIN LATERAL pg_catalog.aclexplode(default_acl.defaclacl) AS acl
 WHERE default_acl.defaclobjtype IN ('r', 'S', 'f', 'T', 'n')
   AND (
       default_acl.defaclnamespace = 0
@@ -201,126 +295,12 @@ WHERE default_acl.defaclobjtype IN ('r', 'S', 'f', 'T', 'n')
 """
 
 
-def _object_privileges_query(routine_kind: str) -> str:
-    # Rows carry no owner: every object they refer to is in `objects`, from the same snapshot, with its `owner_oid`.
-    # Only explicitly stored ACLs are collected. An object with a NULL ACL has the compiled-in default privileges for
-    # its type and owner; it is reported in `objects` with `has_default_acl` so the backend can resolve them, rather
-    # than shipping the same owner and PUBLIC rows for every untouched object.
-    # Column grants are stored only on columns granted individually: table-level grants never populate `attacl`, and
-    # columns have no default privileges. A column row adds access on top of the relation's own privileges.
-    return f"""
-SELECT privileges.object_type,
-       privileges.schema_name,
-       privileges.object_name,
-       privileges.column_name,
-       privileges.grantee_oid,
-       privileges.grantor_oid,
-       privileges.privilege,
-       privileges.is_grantable
-FROM (
-    SELECT {RELATION_TYPE} AS object_type,
-           namespace.nspname::text AS schema_name,
-           relation.relname::text AS object_name,
-           ''::text AS column_name,
-           acl.grantee::bigint AS grantee_oid,
-           acl.grantor::bigint AS grantor_oid,
-           acl.privilege_type::text AS privilege,
-           acl.is_grantable AS is_grantable
-    FROM pg_catalog.pg_class AS relation
-    JOIN pg_catalog.pg_namespace AS namespace
-      ON namespace.oid = relation.relnamespace
-    CROSS JOIN LATERAL pg_catalog.aclexplode(relation.relacl) AS acl
-    WHERE relation.relkind IN ('r', 'p', 'v', 'm', 'f', 'S')
-      AND {_collected_schema("namespace")}
-
-    UNION ALL
-
-    SELECT {RELATION_TYPE} AS object_type,
-           namespace.nspname::text AS schema_name,
-           relation.relname::text AS object_name,
-           attribute.attname::text AS column_name,
-           acl.grantee::bigint AS grantee_oid,
-           acl.grantor::bigint AS grantor_oid,
-           acl.privilege_type::text AS privilege,
-           acl.is_grantable AS is_grantable
-    FROM pg_catalog.pg_attribute AS attribute
-    JOIN pg_catalog.pg_class AS relation
-      ON relation.oid = attribute.attrelid
-    JOIN pg_catalog.pg_namespace AS namespace
-      ON namespace.oid = relation.relnamespace
-    CROSS JOIN LATERAL pg_catalog.aclexplode(attribute.attacl) AS acl
-    WHERE relation.relkind IN ('r', 'p', 'v', 'm', 'f')
-      AND attribute.attnum > 0
-      AND NOT attribute.attisdropped
-      AND attribute.attacl IS NOT NULL
-      AND {_collected_schema("namespace")}
-
-    UNION ALL
-
-    SELECT 'schema'::text AS object_type,
-           namespace.nspname::text AS schema_name,
-           namespace.nspname::text AS object_name,
-           ''::text AS column_name,
-           acl.grantee::bigint AS grantee_oid,
-           acl.grantor::bigint AS grantor_oid,
-           acl.privilege_type::text AS privilege,
-           acl.is_grantable AS is_grantable
-    FROM pg_catalog.pg_namespace AS namespace
-    CROSS JOIN LATERAL pg_catalog.aclexplode(namespace.nspacl) AS acl
-    WHERE {_collected_schema("namespace")}
-
-    UNION ALL
-
-    SELECT 'type'::text AS object_type,
-           namespace.nspname::text AS schema_name,
-           type.typname::text AS object_name,
-           ''::text AS column_name,
-           acl.grantee::bigint AS grantee_oid,
-           acl.grantor::bigint AS grantor_oid,
-           acl.privilege_type::text AS privilege,
-           acl.is_grantable AS is_grantable
-    FROM pg_catalog.pg_type AS type
-    JOIN pg_catalog.pg_namespace AS namespace
-      ON namespace.oid = type.typnamespace
-    CROSS JOIN LATERAL pg_catalog.aclexplode(type.typacl) AS acl
-    WHERE {COLLECTED_TYPE}
-      AND {_collected_schema("namespace")}
-
-    UNION ALL
-
-    SELECT {_routine_type(routine_kind)} AS object_type,
-           namespace.nspname::text AS schema_name,
-           {ROUTINE_NAME} AS object_name,
-           ''::text AS column_name,
-           acl.grantee::bigint AS grantee_oid,
-           acl.grantor::bigint AS grantor_oid,
-           acl.privilege_type::text AS privilege,
-           acl.is_grantable AS is_grantable
-    FROM pg_catalog.pg_proc AS routine
-    JOIN pg_catalog.pg_namespace AS namespace
-      ON namespace.oid = routine.pronamespace
-    CROSS JOIN LATERAL pg_catalog.aclexplode(routine.proacl) AS acl
-    WHERE {routine_kind} IN ('f', 'p', 'a', 'w')
-      AND {_collected_schema("namespace")}
-
-    UNION ALL
-
-    SELECT 'database'::text AS object_type,
-           ''::text AS schema_name,
-           database.datname::text AS object_name,
-           ''::text AS column_name,
-           acl.grantee::bigint AS grantee_oid,
-           acl.grantor::bigint AS grantor_oid,
-           acl.privilege_type::text AS privilege,
-           acl.is_grantable AS is_grantable
-    FROM pg_catalog.pg_database AS database
-    CROSS JOIN LATERAL pg_catalog.aclexplode(database.datacl) AS acl
-    WHERE database.datname = current_database()
-) AS privileges
-"""
-
-
 def _objects_query(routine_kind: str) -> str:
+    # Each row is one object with its explicitly stored ACL entries nested in `privileges`, including column grants.
+    # An object with a NULL ACL has the compiled-in default privileges for its type and owner; it has no entries of
+    # its own and reports `has_default_acl` so the backend can resolve them. Column grants are stored only on
+    # columns granted individually: table-level grants never populate `attacl`, and columns have no default
+    # privileges, so a column grant adds access on top of the relation's own privileges.
     return f"""
 SELECT objects.object_type,
        objects.schema_name,
@@ -329,7 +309,9 @@ SELECT objects.object_type,
        objects.owner_oid,
        objects.is_security_definer,
        objects.security_invoker,
-       objects.has_default_acl
+       objects.has_default_acl,
+       objects.privileges,
+       objects.reads_from
 FROM (
     SELECT {RELATION_TYPE} AS object_type,
            namespace.nspname::text AS schema_name,
@@ -349,7 +331,9 @@ FROM (
                )
                ELSE false
            END AS security_invoker,
-           relation.relacl IS NULL AS has_default_acl
+           relation.relacl IS NULL AS has_default_acl,
+           {RELATION_PRIVILEGES} AS privileges,
+           {RELATION_READS_FROM} AS reads_from
     FROM pg_catalog.pg_class AS relation
     JOIN pg_catalog.pg_namespace AS namespace
       ON namespace.oid = relation.relnamespace
@@ -365,7 +349,9 @@ FROM (
            namespace.nspowner::bigint AS owner_oid,
            false AS is_security_definer,
            false AS security_invoker,
-           namespace.nspacl IS NULL AS has_default_acl
+           namespace.nspacl IS NULL AS has_default_acl,
+           {_json_array(_privilege_entries("namespace.nspacl"))} AS privileges,
+           '[]' AS reads_from
     FROM pg_catalog.pg_namespace AS namespace
     WHERE {_collected_schema("namespace")}
 
@@ -378,7 +364,9 @@ FROM (
            type.typowner::bigint AS owner_oid,
            false AS is_security_definer,
            false AS security_invoker,
-           type.typacl IS NULL AS has_default_acl
+           type.typacl IS NULL AS has_default_acl,
+           {_json_array(_privilege_entries("type.typacl"))} AS privileges,
+           '[]' AS reads_from
     FROM pg_catalog.pg_type AS type
     JOIN pg_catalog.pg_namespace AS namespace
       ON namespace.oid = type.typnamespace
@@ -394,7 +382,9 @@ FROM (
            routine.proowner::bigint AS owner_oid,
            routine.prosecdef AS is_security_definer,
            false AS security_invoker,
-           routine.proacl IS NULL AS has_default_acl
+           routine.proacl IS NULL AS has_default_acl,
+           {_json_array(_privilege_entries("routine.proacl"))} AS privileges,
+           '[]' AS reads_from
     FROM pg_catalog.pg_proc AS routine
     JOIN pg_catalog.pg_namespace AS namespace
       ON namespace.oid = routine.pronamespace
@@ -410,7 +400,9 @@ FROM (
            database.datdba::bigint AS owner_oid,
            false AS is_security_definer,
            false AS security_invoker,
-           database.datacl IS NULL AS has_default_acl
+           database.datacl IS NULL AS has_default_acl,
+           {_json_array(_privilege_entries("database.datacl"))} AS privileges,
+           '[]' AS reads_from
     FROM pg_catalog.pg_database AS database
     WHERE database.datname = current_database()
 ) AS objects
@@ -418,58 +410,9 @@ FROM (
 
 
 # Both variants are built once, when the module loads; the collector selects one for the server version.
-OBJECT_PRIVILEGES_QUERIES = {
-    True: _object_privileges_query(ROUTINE_KIND_PG11_PLUS),
-    False: _object_privileges_query(ROUTINE_KIND_PRE_PG11),
-}
 OBJECTS_QUERIES = {True: _objects_query(ROUTINE_KIND_PG11_PLUS), False: _objects_query(ROUTINE_KIND_PRE_PG11)}
-
-
-def object_privileges_query(*, pg11_plus: bool) -> str:
-    """Select the object privilege query for the connected server version."""
-    return OBJECT_PRIVILEGES_QUERIES[pg11_plus]
 
 
 def objects_query(*, pg11_plus: bool) -> str:
     """Select the object query for the connected server version."""
     return OBJECTS_QUERIES[pg11_plus]
-
-
-QUERY_OBJECT_DEPENDENCIES = f"""
-SELECT DISTINCT
-       CASE dependent.relkind
-           WHEN 'v' THEN 'view'
-           WHEN 'm' THEN 'materialized_view'
-       END AS dependent_object_type,
-       dependent_namespace.nspname::text AS dependent_schema_name,
-       dependent.relname::text AS dependent_object_name,
-       CASE referenced.relkind
-           WHEN 'r' THEN 'table'
-           WHEN 'p' THEN 'partitioned_table'
-           WHEN 'v' THEN 'view'
-           WHEN 'm' THEN 'materialized_view'
-           WHEN 'f' THEN 'foreign_table'
-           WHEN 'S' THEN 'sequence'
-       END AS referenced_object_type,
-       referenced_namespace.nspname::text AS referenced_schema_name,
-       referenced.relname::text AS referenced_object_name
-FROM pg_catalog.pg_rewrite AS rewrite
-JOIN pg_catalog.pg_class AS dependent
-  ON dependent.oid = rewrite.ev_class
-JOIN pg_catalog.pg_namespace AS dependent_namespace
-  ON dependent_namespace.oid = dependent.relnamespace
-JOIN pg_catalog.pg_depend AS dependency
-  ON dependency.objid = rewrite.oid
- AND dependency.classid = 'pg_catalog.pg_rewrite'::pg_catalog.regclass
- AND dependency.refclassid = 'pg_catalog.pg_class'::pg_catalog.regclass
-JOIN pg_catalog.pg_class AS referenced
-  ON referenced.oid = dependency.refobjid
-JOIN pg_catalog.pg_namespace AS referenced_namespace
-  ON referenced_namespace.oid = referenced.relnamespace
-WHERE dependent.relkind IN ('v', 'm')
-  AND dependency.deptype = 'n'
-  AND referenced.relkind IN ('r', 'p', 'v', 'm', 'f', 'S')
-  AND referenced.oid <> dependent.oid
-  AND {_collected_schema("dependent_namespace")}
-  AND {_collected_schema("referenced_namespace")}
-"""
