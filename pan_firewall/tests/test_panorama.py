@@ -358,6 +358,26 @@ def test_unreachable_panorama_keeps_polling_the_last_discovered_firewalls(dd_run
     assert any(r.levelno == logging.WARNING and PANORAMA in r.getMessage() for r in caplog.records)
 
 
+def test_panorama_auth_failure_does_not_change_the_firewalls_auth_status(dd_run_check, aggregator, fake_panos):
+    credentials = {'panorama_api_key': None, 'panorama_username': 'pan-user', 'panorama_password': 'p'}
+    dd_run_check(new_check(**credentials))
+    fake_panos.fail(PANORAMA, 'capture_bad_password', on='keygen')
+    calls = len(fake_panos.calls)
+    aggregator.reset()
+
+    # A new check instance holds no Panorama key, so it must generate one: the persistent cache supplies the list.
+    dd_run_check(new_check(**{**credentials, 'panorama_password': 'bad'}))
+
+    assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))]
+    assert [c.type for c in fake_panos.calls[calls:] if c.host == PANORAMA] == ['keygen']
+    assert polled_hosts(fake_panos, skip=calls) == {FW_A_POLLED, FW_B_POLLED}
+    for name, value in (('api.authentication.status', 0), ('can_connect', 1)):
+        assert {ip: m.value for ip, m in metrics_by_ip(aggregator, name).items()} == {
+            FW_A_REPORTED: value,
+            FW_B_REPORTED: value,
+        }
+
+
 def test_unreachable_panorama_without_a_cached_list_polls_nothing_and_does_not_raise(
     dd_run_check, aggregator, fake_panos, caplog
 ):
