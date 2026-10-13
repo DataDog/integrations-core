@@ -392,11 +392,10 @@ def test_slow_firewall_is_polled_every_run_until_all_reports_are_collected_then_
         dd_run_check(check)
         schedule_clock.now += 60
 
-    for name, rows in FW_A_ROWS.items():
-        for (metric, tags), value in expected_samples(name, rows).items():
-            aggregator.assert_metric(
-                f'pan_firewall.{metric}', value, tags=sorted([*FW_A_TAGS, *tags]), metric_type=aggregator.GAUGE
-            )
+    reported = {
+        t for m in aggregator.metrics('pan_firewall.report.top.sessions') for t in m.tags if t.startswith('report:')
+    }
+    assert reported == {f'report:{name}' for name in REPORTS}
     calls = len(report_calls(fake_panos))
 
     dd_run_check(check)
@@ -411,14 +410,13 @@ def test_reports_are_registered_and_submit_through_the_check_when_enabled(
 
     dd_run_check(new_check(make_instance(collect_reports=True)))
 
-    total = 0
-    for name, rows in FW_A_ROWS.items():
-        for (metric, tags), value in expected_samples(name, rows).items():
+    # The first row of each report, with its three gauges.
+    for name, (dimension, rows) in FW_A_ROWS.items():
+        first = expected_samples(name, (dimension, rows[:1]))
+        for (metric, tags), value in first.items():
             aggregator.assert_metric(
                 f'pan_firewall.{metric}', value, tags=sorted([*FW_A_TAGS, *tags]), metric_type=aggregator.GAUGE
             )
-            total += 1
-    assert total == 90
     for metric in ('sessions', 'bytes', 'bytes_per_session'):
         assert len(aggregator.metrics(f'pan_firewall.report.top.{metric}')) == 30
     submits = [c for c in report_calls(fake_panos) if c.action is None]

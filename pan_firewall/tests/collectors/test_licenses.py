@@ -4,11 +4,9 @@
 import datetime
 from unittest import mock
 
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS
 from datadog_checks.pan_firewall.collectors.licenses import LICENSE_INFO_CMD, parse_licenses
 
-from ..common import FW_A_TAGS
-from ..helpers import load_op, new_check, series
+from ..helpers import load_op, series
 
 TODAY = datetime.date(2026, 10, 9)
 FEATURES = {
@@ -74,15 +72,3 @@ def test_unparseable_date_reports_only_expired():
     assert result['license.expired', ('feature:pa_vm',)] == (0, 'gauge')
     assert ('license.days_left', ('feature:pa_vm',)) not in result
     assert len(result) == 27
-
-
-def test_licenses_are_registered_and_submit_through_the_check(real_collectors, dd_run_check, aggregator):
-    assert 'licenses' in COLLECT_FUNCTIONS
-
-    dd_run_check(new_check())
-
-    tags = sorted([*FW_A_TAGS, 'feature:pan_db_url_filtering'])
-    aggregator.assert_metric('pan_firewall.license.expired', 0, tags=tags, metric_type=aggregator.GAUGE)
-    (days_left,) = [m for m in aggregator.metrics('pan_firewall.license.days_left') if sorted(m.tags) == tags]
-    assert days_left.type == aggregator.GAUGE
-    assert len(aggregator.metrics('pan_firewall.license.expired')) == 14

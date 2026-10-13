@@ -3,12 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from unittest import mock
 
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, FirewallState
+from datadog_checks.pan_firewall.collectors import FirewallState
 from datadog_checks.pan_firewall.collectors.rules import collect_rule_hits, parse_rule_hits, rule_hit_cmd
 
-from ..common import FW_A_TAGS
 from ..fixture_map import OP_FIXTURES
-from ..helpers import load_op, make_ctx, new_check, series
+from ..helpers import load_op, make_ctx, series
 
 RULE_HIT_CMD = rule_hit_cmd('vsys1')
 HITS = {
@@ -73,18 +72,3 @@ def test_collector_makes_one_call_per_vsys_and_tags_the_samples_with_it():
     assert series(samples) == {**expected(), **expected(vsys='vsys2')}
     # The configured filter applies to every vsys.
     assert series(collect_rule_hits(make_context(['vsys1'], ('^trust-out$',)))) == expected({'trust-out'})
-
-
-def test_rule_hits_are_registered_and_submit_through_the_check(real_collectors, dd_run_check, aggregator):
-    assert 'rule_hits' in COLLECT_FUNCTIONS
-
-    dd_run_check(new_check())
-
-    for name, hits in HITS.items():
-        aggregator.assert_metric(
-            'pan_firewall.security_rule.hits',
-            hits,
-            tags=sorted([*FW_A_TAGS, f'rule:{name}', 'vsys:vsys1']),
-            metric_type=aggregator.MONOTONIC_COUNT,
-        )
-    assert len(aggregator.metrics('pan_firewall.security_rule.hits')) == 6

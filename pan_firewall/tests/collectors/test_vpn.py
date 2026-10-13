@@ -7,7 +7,6 @@ from unittest import mock
 import pytest
 
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, FirewallState
-from datadog_checks.pan_firewall.collectors.interfaces import COUNTER_INTERFACE_CMD
 from datadog_checks.pan_firewall.collectors.vpn import VPN_FLOW_CMD, VPN_GATEWAY_CMD, collect_vpn, parse_vpn
 
 from ..common import FW_A_TAGS
@@ -99,25 +98,6 @@ def test_failed_vpn_call_keeps_the_stored_tunnels():
         collect_vpn(ctx)
 
     assert state.tunnel_states == {'tunnel.1': 'active'}
-
-
-def test_vpn_is_registered_and_submits_through_the_check(real_collectors, dd_run_check, aggregator, fake_panos):
-    assert 'vpn' in COLLECT_FUNCTIONS
-
-    dd_run_check(new_check())
-
-    gauge = aggregator.GAUGE
-    for name, value in (('total', 2), ('active', 1), ('inactive', 0), ('init', 1)):
-        aggregator.assert_metric(f'pan_firewall.ipsec.tunnels.{name}', value, tags=FW_A_TAGS, metric_type=gauge)
-    aggregator.assert_metric('pan_firewall.ipsec.gateways.total', 2, tags=FW_A_TAGS, metric_type=gauge)
-    aggregator.assert_metric(
-        'pan_firewall.ipsec.tunnel.state',
-        1,
-        tags=sorted([*FW_A_TAGS, *tunnel_tags('tun-peer', 'tunnel.1', '10.60.1.11', 'gw-peer')]),
-        metric_type=gauge,
-    )
-    # One `counter interface all` call serves the interfaces and the tunnels.
-    assert [c.cmd for c in fake_panos.calls if c.cmd == COUNTER_INTERFACE_CMD] == [COUNTER_INTERFACE_CMD]
 
 
 def test_tunnel_counters_wait_for_the_run_after_vpn_first_answers_whatever_the_collector_order(

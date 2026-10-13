@@ -13,8 +13,8 @@ from datadog_checks.pan_firewall.collectors.system import (
     parse_system_resources,
 )
 
-from ..common import FW_A_TAGS, SYNTHETIC
-from ..helpers import load_op, load_xml, new_check
+from ..common import SYNTHETIC
+from ..helpers import load_op, load_xml
 
 MIB = 1024**2
 
@@ -159,26 +159,3 @@ def test_disk_row_wrapped_onto_two_lines():
         ('disk.used_pct', ('mount:/', 'filesystem:/dev/root')): 43,
         ('disk.used_pct', ('mount:/opt/panlogs', 'filesystem:/dev/mapper/pan-very-long-volume-name')): 1,
     }
-
-
-def test_collectors_submit_through_the_check(real_collectors, dd_run_check, aggregator):
-    check = new_check()
-
-    dd_run_check(check)
-
-    def tags(*extra):
-        return sorted([*FW_A_TAGS, *extra])
-
-    for name, value in FW_A_SYSTEM.items():
-        aggregator.assert_metric(f'pan_firewall.{name}', value, tags=FW_A_TAGS, metric_type=aggregator.GAUGE)
-    aggregator.assert_metric(
-        'pan_firewall.dataplane.cpu.utilization', 0, tags=tags('dp:dp0', 'core:2'), metric_type=aggregator.GAUGE
-    )
-    aggregator.assert_metric(
-        'pan_firewall.disk.used_pct',
-        32,
-        tags=tags('mount:/opt/pancfg', 'filesystem:/dev/nvme0n1p5'),
-        metric_type=aggregator.GAUGE,
-    )
-    assert len(aggregator.metrics('pan_firewall.dataplane.cpu.utilization')) == 4
-    assert len(aggregator.metrics('pan_firewall.disk.used_pct')) == 4

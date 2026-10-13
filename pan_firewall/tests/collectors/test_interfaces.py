@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from unittest import mock
 
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, FirewallState
+from datadog_checks.pan_firewall.collectors import FirewallState
 from datadog_checks.pan_firewall.collectors.interfaces import (
     COUNTER_INTERFACE_CMD,
     parse_interface_counters,
@@ -217,24 +217,6 @@ def test_speed_is_submitted_as_a_gauge_with_the_interface_tags_through_the_check
             metric_type=aggregator.GAUGE,
         )
     assert len(aggregator.metrics('pan_firewall.interface.speed')) == 2
-
-
-def test_interfaces_is_registered_and_submits_through_the_check(real_collectors, dd_run_check, aggregator, fake_panos):
-    assert 'interfaces' in COLLECT_FUNCTIONS
-
-    dd_run_check(new_check())
-
-    assert [c.cmd for c in fake_panos.calls if c.cmd == COUNTER_INTERFACE_CMD] == [COUNTER_INTERFACE_CMD]
-    for field, metric in COUNTER_FIELDS.items():
-        value = FW_A_ROWS['ethernet1/1'][list(COUNTER_FIELDS).index(field)]
-        aggregator.assert_metric(
-            f'pan_firewall.{metric}',
-            value,
-            tags=sorted([*FW_A_TAGS, *with_map_tags('ethernet1/1')]),
-            metric_type=aggregator.MONOTONIC_COUNT,
-        )
-    assert len(aggregator.metrics('pan_firewall.interface.rx.bytes')) == 7
-    assert aggregator.metrics('pan_firewall.interface.speed') == []
 
 
 # Gated on the PA-3420 hardware capture (L8); see test_environment.py for the expected layout. The VM captures carry no

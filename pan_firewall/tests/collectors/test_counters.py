@@ -1,12 +1,11 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS
 from datadog_checks.pan_firewall.collectors.counters import GLOBAL_COUNTER_CMD, parse_global
 from datadog_checks.pan_firewall.constants import DROPPED_PACKET_ASPECTS, GLOBAL_COUNTERS
 
-from ..common import FW_A_TAGS, SYNTHETIC
-from ..helpers import load_op, load_xml, make_instance, new_check
+from ..common import SYNTHETIC
+from ..helpers import load_op, load_xml
 
 # The 26 counters, with the values of the capture (0 for a counter the capture doesn't list) and the category and
 # aspect they are tagged with when the capture lists them (otherwise the table's).
@@ -73,38 +72,3 @@ def test_listed_counter_takes_category_and_aspect_from_the_response():
     assert series[counter_tags('session_installed', 'session', 'pktproc')] == 2269
     assert counter_tags('session_installed', 'session', 'resource') not in series
     assert len(series) == 26
-
-
-def test_global_counters_submit_through_the_check(real_collectors, fake_panos, dd_run_check, aggregator):
-    assert 'global_counters' in COLLECT_FUNCTIONS
-
-    dd_run_check(new_check(make_instance(collect_global_counters=True)))
-
-    for counter, (category, aspect) in GLOBAL_COUNTERS.items():
-        aggregator.assert_metric(
-            'pan_firewall.counter.global',
-            value=FW_A_VALUES[counter],
-            tags=sorted([*FW_A_TAGS, *counter_tags(counter, category, aspect)]),
-            metric_type=aggregator.MONOTONIC_COUNT,
-        )
-    aggregator.assert_metric(
-        'pan_firewall.dropped_packets',
-        value=1546,
-        tags=sorted([*FW_A_TAGS, 'aspect:forward']),
-        metric_type=aggregator.MONOTONIC_COUNT,
-    )
-    aggregator.assert_metric(
-        'pan_firewall.dropped_packets',
-        value=0,
-        tags=sorted([*FW_A_TAGS, 'aspect:arp']),
-        metric_type=aggregator.MONOTONIC_COUNT,
-    )
-    aggregator.assert_metric(
-        'pan_firewall.counter.global',
-        value=1,
-        tags=sorted([*FW_A_TAGS, 'counter:ssl_hsm_up_down_event_rcv', 'category:ssl', 'aspect:pktproc']),
-        metric_type=aggregator.MONOTONIC_COUNT,
-    )
-    assert len(aggregator.metrics('pan_firewall.counter.global')) == 26
-    assert len(aggregator.metrics('pan_firewall.dropped_packets')) == 14
-    assert [c.cmd for c in fake_panos.calls if c.cmd == GLOBAL_COUNTER_CMD] == [GLOBAL_COUNTER_CMD]

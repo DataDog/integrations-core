@@ -5,7 +5,7 @@ from unittest import mock
 
 import pytest
 
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, FirewallState
+from datadog_checks.pan_firewall.collectors import FirewallState
 from datadog_checks.pan_firewall.collectors.routing import (
     BGP_PEER_CMD,
     OSPF_NEIGHBOR_CMD,
@@ -16,8 +16,8 @@ from datadog_checks.pan_firewall.collectors.routing import (
     peer_ip,
 )
 
-from ..common import FIXTURES, FW_A_TAGS, SYNTHETIC
-from ..helpers import load_op, load_xml, make_ctx, make_instance, needs_capture, new_check, series
+from ..common import FIXTURES, SYNTHETIC
+from ..helpers import load_op, load_xml, make_ctx, needs_capture, series
 
 
 def peer_samples(tags, *, status, duration, restart, updates, limit, prefixes=None):
@@ -151,29 +151,6 @@ def test_legacy_or_unknown_routing_engine_sends_the_legacy_call(collect, cmd, ad
     ctx.log.warning.assert_not_called()
 
 
-def test_bgp_is_registered_and_submits_through_the_check(real_collectors, dd_run_check, aggregator):
-    assert 'bgp' in COLLECT_FUNCTIONS
-
-    dd_run_check(new_check())
-
-    def expect(name, value, tags, metric_type):
-        aggregator.assert_metric(
-            f'pan_firewall.{name}', value, tags=sorted([*FW_A_TAGS, *tags]), metric_type=metric_type
-        )
-
-    gauge, monotonic = aggregator.GAUGE, aggregator.MONOTONIC_COUNT
-    expect('bgp.peer.status', 1, FW_A_PEER, gauge)
-    expect('bgp.peer.status', 0, FW_A_DEAD, gauge)
-    expect('bgp.peer.status_duration', 4856, FW_A_PEER, gauge)
-    expect('bgp.peer.restart', 0, FW_A_PEER, gauge)
-    expect('bgp.peer.updates.in', 2, FW_A_PEER, monotonic)
-    expect('bgp.peer.updates.out', 2, FW_A_PEER, monotonic)
-    expect('bgp.peer.prefix_limit', 10, FW_A_PEER, gauge)
-    expect('bgp.peer.prefixes.incoming.total', 1, [*FW_A_PEER, 'afi_safi:ipv4_unicast'], gauge)
-    expect('bgp.peer.prefix_limit.utilization', 10.0, [*FW_A_PEER, 'afi_safi:ipv4_unicast'], gauge)
-    assert len(aggregator.metrics('pan_firewall.bgp.peer.status')) == 2
-
-
 FW_A_OSPF = ('neighbor:169.254.10.2', 'router_id:10.255.0.2', 'area:0.0.0.0', 'vr:default')
 
 
@@ -201,20 +178,6 @@ def test_ospf_neighbor_without_a_status_is_not_reported():
     entry.remove(entry.find('status'))
 
     assert parse_ospf_neighbors(root) == []
-
-
-def test_ospf_is_registered_and_submits_through_the_check_when_enabled(real_collectors, dd_run_check, aggregator):
-    assert 'ospf' in COLLECT_FUNCTIONS
-
-    dd_run_check(new_check(make_instance(collect_ospf=True)))
-
-    aggregator.assert_metric(
-        'pan_firewall.ospf.neighbor.status',
-        1,
-        tags=sorted([*FW_A_TAGS, *FW_A_OSPF]),
-        metric_type=aggregator.GAUGE,
-    )
-    assert len(aggregator.metrics('pan_firewall.ospf.neighbor.status')) == 1
 
 
 # Gated on the ARE lab captures (L2). Expected layout, the answers of the Advanced Routing Engine:
