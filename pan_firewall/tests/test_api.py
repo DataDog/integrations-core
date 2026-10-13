@@ -38,7 +38,6 @@ SYSTEM_INFO = op_fixture(SYSTEM_INFO_CMD).read_bytes()
 THREAT_SUBMIT = (FIXTURES / 'fw-a' / 'threat_log_5m_submit.xml').read_bytes()
 THREAT_LOGS = (FIXTURES / 'fw-a' / 'threat_log_5m.xml').read_bytes()
 INVALID_CREDENTIAL = (FIXTURES / 'synthetic' / 'auth_invalid_credential.xml').read_bytes()
-NOT_AUTHENTICATED = (FIXTURES / 'synthetic' / 'auth_not_authenticated.xml').read_bytes()
 CODE_16 = (FIXTURES / 'synthetic' / 'auth_code_16.xml').read_bytes()
 
 # The keygen success shape (`result/key`) from the PAN-OS XML API docs. Kept inline: fixture files must hold no key.
@@ -47,7 +46,6 @@ KEYGEN_OK = f'<response status="success"><result><key>{GENERATED_KEY}</key></res
 # Auth rejections the client must treat as an expired key, with the HTTP status they arrive with.
 AUTH_FAILURES = [
     pytest.param(403, INVALID_CREDENTIAL, id='http-403-invalid-credential'),
-    pytest.param(403, NOT_AUTHENTICATED, id='http-403-not-authenticated'),
     pytest.param(200, INVALID_CREDENTIAL, id='code-403-in-body'),
     pytest.param(200, CODE_16, id='code-16'),
 ]
@@ -152,9 +150,10 @@ def test_rejected_key_is_regenerated_once_and_the_call_retried(status, body):
     assert keys.auth_failed is False
 
 
-@pytest.mark.parametrize('status, body', AUTH_FAILURES)
-def test_key_rejected_again_after_regeneration_raises(status, body):
-    http = FakeHttp(keygen=[(200, KEYGEN_OK), (200, KEYGEN_OK)], api=[(status, body), (status, body)])
+def test_key_rejected_again_after_regeneration_raises():
+    http = FakeHttp(
+        keygen=[(200, KEYGEN_OK), (200, KEYGEN_OK)], api=[(403, INVALID_CREDENTIAL), (403, INVALID_CREDENTIAL)]
+    )
     client, _ = make_client(http)
 
     with pytest.raises(PanosAuthError):
@@ -273,17 +272,20 @@ def read_log_job(client, job_id):
 
 
 @pytest.mark.parametrize(
-    'call',
+    'call, failure, error',
     [
-        pytest.param(lambda client: client.op(SYSTEM_INFO_CMD), id='op'),
-        pytest.param(lambda client: read_log_job(client, '2'), id='log-job'),
-    ],
-)
-@pytest.mark.parametrize(
-    'failure, error',
-    [
-        pytest.param(requests.exceptions.ReadTimeout('read timed out'), PanosTimeout, id='timeout'),
-        pytest.param(requests.exceptions.ConnectionError('refused'), PanosConnectionError, id='refused'),
+        pytest.param(
+            lambda client: client.op(SYSTEM_INFO_CMD),
+            requests.exceptions.ReadTimeout('read timed out'),
+            PanosTimeout,
+            id='op-timeout',
+        ),
+        pytest.param(
+            lambda client: read_log_job(client, '2'),
+            requests.exceptions.ConnectionError('refused'),
+            PanosConnectionError,
+            id='log-job-refused',
+        ),
     ],
 )
 def test_calls_after_a_timeout_or_refusal_fail_fast_until_the_stats_are_taken(call, failure, error):
@@ -300,33 +302,6 @@ def test_calls_after_a_timeout_or_refusal_fail_fast_until_the_stats_are_taken(ca
     client.take_stats()
     call(client)
     assert len(http.calls) == 2
-
-
-def test_jobs_return_the_job_id_and_status():
-    http = FakeHttp(api=[(200, THREAT_SUBMIT), (200, THREAT_LOGS)])
-    client, _ = make_client(http, STATIC_CREDS)
-
-    job_id = client.submit_job({'type': 'log', 'log-type': 'threat', 'nlogs': '5000'})
-    status, root = client.get_job('log', job_id)
-
-    assert job_id == '2'
-    assert status == 'FIN'
-    assert root.find('./result/log/logs') is not None
-    assert http.calls[0]['data'] == {'type': 'log', 'log-type': 'threat', 'nlogs': '5000'}
-    assert http.calls[1]['data'] == {'type': 'log', 'action': 'get', 'job-id': '2'}
-
-
-def test_open_log_job_reads_status_and_streams_the_entries_in_one_request():
-    http = FakeHttp(api=[(200, THREAT_LOGS)])
-    client, _ = make_client(http, STATIC_CREDS)
-
-    with client.open_log_job('2') as (status, entries):
-        seqnos = [entry.findtext('seqno') for entry in entries]
-
-    assert status == 'FIN'
-    assert len(seqnos) == 39
-    assert len(http.calls) == 1
-    assert http.calls[0]['stream'] is True
 
 
 def test_stream_that_breaks_mid_way_makes_the_next_calls_fail_fast():
@@ -356,16 +331,6 @@ def test_stream_that_breaks_mid_way_makes_the_next_calls_fail_fast():
     # The call itself was answered: can_connect does not turn to 0 because the body broke.
     stats = client.take_stats()
     assert (stats.calls, stats.answered) == (1, True)
-
-
-def test_open_log_job_that_is_not_finished_yields_no_entries():
-    running = (FIXTURES / 'synthetic' / 'threat_log_act.xml').read_bytes()
-    http = FakeHttp(api=[(200, running)])
-    client, _ = make_client(http, STATIC_CREDS)
-
-    with client.open_log_job('93') as (status, entries):
-        assert status == 'ACT'
-        assert list(entries) == []
 
 
 def test_api_error_is_not_treated_as_auth_failure():

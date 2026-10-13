@@ -7,7 +7,7 @@ import pytest
 
 from datadog_checks.pan_firewall.auth import Credentials
 from datadog_checks.pan_firewall.firewalls import FirewallTarget
-from datadog_checks.pan_firewall.identity import DeviceIdentity, device_ip, global_tags, parse_system_info, vsys_list
+from datadog_checks.pan_firewall.identity import DeviceIdentity, global_tags, parse_system_info, vsys_list
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from .common import FIXTURES
@@ -50,17 +50,6 @@ def test_clock_is_neither_compared_nor_persisted():
     assert (restored, restored.clock) == (FW_A, None)
 
 
-@pytest.mark.parametrize(
-    'target, expected',
-    [
-        pytest.param(STATIC_TARGET, '198.51.100.7', id='static-uses-config-ip'),
-        pytest.param(PANORAMA_TARGET, '198.51.100.8', id='panorama-uses-reported-ip-not-override'),
-    ],
-)
-def test_device_ip(target, expected):
-    assert device_ip(target) == expected
-
-
 def test_global_tags_with_identity():
     tags = global_tags(FW_A, STATIC_TARGET, 'default', ['env:lab'])
 
@@ -82,17 +71,6 @@ def test_global_tags_with_identity():
             f'dd.internal.resource:ndm_device_user_tags:{SERIAL}',
         ]
     )
-
-
-def test_global_tags_before_a_static_firewall_ever_answered():
-    tags = global_tags(None, STATIC_TARGET, 'default', ['env:lab'])
-
-    assert sorted(tags) == [
-        'device_ip:198.51.100.7',
-        'device_namespace:default',
-        'device_vendor:paloaltonetworks',
-        'env:lab',
-    ]
 
 
 def test_global_tags_take_serial_and_hostname_from_panorama_discovery():

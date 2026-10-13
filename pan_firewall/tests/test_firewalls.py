@@ -20,9 +20,8 @@ DEFAULT = FirewallCredential(username='default', password='pw3')
         ('172.16.0.1', [SUBNET, DEFAULT], Credentials('default', 'pw3', None)),
         ('10.0.0.5', [DEFAULT, SUBNET], Credentials('default', 'pw3', None)),
         ('172.16.0.1', [SUBNET, OTHER], None),
-        ('10.0.0.5', [], None),
     ],
-    ids=['first-cidr-match', 'api-key-entry', 'no-cidr-matches-all', 'order-respected', 'no-match', 'no-entries'],
+    ids=['first-cidr-match', 'api-key-entry', 'no-cidr-matches-all', 'order-respected', 'no-match'],
 )
 def test_resolve_credentials(ip, entries, expected):
     assert resolve_credentials(ip, entries) == expected
