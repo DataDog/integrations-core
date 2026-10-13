@@ -4,7 +4,6 @@
 import copy
 import gc
 import weakref
-from collections import Counter
 from itertools import groupby
 
 import mock
@@ -544,37 +543,70 @@ def test_collect_column_statistics_updates_timestamp_on_failure(pg_instance):
     assert after > before
 
 
-def _autodiscovery_scope(name):
-    return {'name': name, 'query': 'SELECT {metrics_columns} FROM fake', 'metrics': {}, 'descriptors': []}
-
-
-def test_autodiscovery_groups_connection_acquisitions_by_database(pg_instance):
-    """
-    Every scope group for a database is collected while that database's connection pool is the most
-    recently used one, so the pool is acquired in a single contiguous block instead of being
-    re-created once per group when the pool cap evicts it in between.
-    """
+def _autodiscovery_check(pg_instance, databases):
+    """Build a check whose per-database connections record each `(dbname, query)` in `check.executed`."""
     pg_instance['reported_hostname'] = 'stubbed-host'
     check = PostgreSql('postgres', {}, [pg_instance])
     check.version = VersionInfo(14, 0, 0)
+    check.db = mock.MagicMock()
+    check.db.return_value.__enter__.return_value.cursor.return_value.__enter__.return_value.fetchall.return_value = []
     check.autodiscovery = mock.MagicMock()
-    check.autodiscovery.get_items.return_value = ['db1', 'db2']
+    check.autodiscovery.get_items.return_value = databases
+
+    check.executed = []
+
+    def get_connection(dbname, persistent=False):
+        pool_connection = mock.MagicMock()
+        cursor = pool_connection.__enter__.return_value.cursor.return_value.__enter__.return_value
+        cursor.execute.side_effect = lambda query, *args: check.executed.append((dbname, query))
+        cursor.fetchall.return_value = []
+        return pool_connection
 
     check.db_pool = mock.MagicMock()
-    cursor = check.db_pool.get_connection.return_value.__enter__.return_value.cursor.return_value.__enter__.return_value
-    cursor.fetchall.return_value = []
+    check.db_pool.get_connection.side_effect = get_connection
+    return check
 
-    check._collect_metric_autodiscovery(
-        [],
-        scope_groups=[
-            ('_collect_relations_autodiscovery', [_autodiscovery_scope('relation_scope')]),
-            ('_collect_stat_autodiscovery', [_autodiscovery_scope('stat_scope')]),
-        ],
-    )
 
-    acquired = [call.args[0] for call in check.db_pool.get_connection.call_args_list]
-    assert Counter(acquired) == {'db1': 2, 'db2': 2}, "every group should still run against every database"
+def test_autodiscovery_visits_each_database_once(pg_instance):
+    """
+    All per-database queries for a database run in one contiguous block; interleaving databases lets
+    the LRU pool cap evict and re-create each database's pool within a single check run.
+    """
+    pg_instance['relations'] = [{'relation_regex': '.*'}]
+    pg_instance['collect_count_metrics'] = True
+    check = _autodiscovery_check(pg_instance, ['db1', 'db2'])
+
+    check._collect_stats([])
+
+    acquired = [dbname for dbname, _ in check.executed]
     assert [dbname for dbname, _ in groupby(acquired)] == ['db1', 'db2'], "each database should be acquired once"
+
+
+def test_autodiscovery_follows_refreshed_databases(pg_instance):
+    """
+    A dropped database must stop being queried and a new one must start being queried.
+    Regression test for https://github.com/DataDog/integrations-core/issues/25598.
+    """
+    pg_instance['relations'] = [{'relation_regex': '.*'}]
+    check = _autodiscovery_check(pg_instance, ['db1', 'db2'])
+    check._collect_stats([])
+
+    check.executed.clear()
+    check.autodiscovery.get_items.return_value = ['db2', 'db3']
+    check._collect_stats([])
+
+    assert {dbname for dbname, _ in check.executed} == {'db2', 'db3'}
+
+
+def test_autodiscovery_collection_interval_applies_per_database(pg_instance):
+    """A `collection_interval` query must run for every database, not only the first one visited."""
+    pg_instance['dbm'] = True
+    check = _autodiscovery_check(pg_instance, ['db1', 'db2'])
+
+    check._collect_stats([])
+
+    idle_tx_databases = [dbname for dbname, query in check.executed if "'idle in transaction'" in query]
+    assert idle_tx_databases == ['db1', 'db2']
 
 
 def test_autodiscovery_group_failure_does_not_skip_later_groups(pg_instance):
@@ -586,23 +618,16 @@ def test_autodiscovery_group_failure_does_not_skip_later_groups(pg_instance):
     check = PostgreSql('postgres', {}, [pg_instance])
     check.autodiscovery = mock.MagicMock()
     check.autodiscovery.get_items.return_value = ['db1']
-
-    relation_scope = _autodiscovery_scope('relation_scope')
-    stat_scope = _autodiscovery_scope('stat_scope')
     collected = []
 
-    def query_scope(scope, instance_tags, is_custom_metrics, dbname=None):
-        if scope is relation_scope:
-            raise psycopg.errors.InsufficientPrivilege('relation scope failed')
-        collected.append((dbname, scope['name']))
+    def failing_group(dbname):
+        raise psycopg.errors.InsufficientPrivilege('relation scope failed')
 
-    check._query_scope = query_scope
     check._collect_metric_autodiscovery(
-        [],
-        scope_groups=[
-            ('_collect_relations_autodiscovery', [relation_scope]),
-            ('_collect_stat_autodiscovery', [stat_scope]),
-        ],
+        [
+            ('_collect_relations_autodiscovery', failing_group),
+            ('_collect_stat_autodiscovery', collected.append),
+        ]
     )
 
-    assert collected == [('db1', 'stat_scope')]
+    assert collected == ['db1']
