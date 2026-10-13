@@ -304,7 +304,8 @@ def _objects_query(routine_kind: str) -> str:
     # An object with a NULL ACL has the compiled-in default privileges for its type and owner; it has no entries of
     # its own and reports `has_default_acl` so the backend can resolve them. Column grants are stored only on
     # columns granted individually: table-level grants never populate `attacl`, and columns have no default
-    # privileges, so a column grant adds access on top of the relation's own privileges.
+    # privileges, so a column grant adds access on top of the relation's own privileges. Only views can set
+    # security_invoker, so reloptions are parsed for views only.
     return f"""
 SELECT objects.object_type,
        objects.schema_name,
@@ -323,7 +324,6 @@ FROM (
            relation.oid::bigint AS object_oid,
            relation.relowner::bigint AS owner_oid,
            false AS is_security_definer,
-           -- Only views can set security_invoker; skip parsing reloptions for every other relation.
            CASE
                WHEN relation.relkind = 'v' THEN COALESCE(
                    (
