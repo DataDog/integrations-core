@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
 from datadog_checks.base import AgentCheck
@@ -24,8 +25,24 @@ class PanFirewallCheck(AgentCheck, ConfigMixin):
             return
         if self._source is None:
             self._source = StaticFirewallSource(self.config)
-        for target in self._source.list_firewalls():
+        targets = self._source.list_firewalls()
+        self._remove_stale_pollers({target.ip for target in targets})
+        pollers = []
+        for target in targets:
             poller = self._pollers.get(target.ip)
             if poller is None:
                 poller = self._pollers[target.ip] = FirewallPoller(self, target, self.config)
-            poller.run()
+            pollers.append(poller)
+        # A pool per run: no thread outlives the run, so nothing is left to stop when the check is unscheduled.
+        with ThreadPoolExecutor(max_workers=self.config.max_concurrency, thread_name_prefix='pan_firewall') as pool:
+            futures = {pool.submit(poller.run): poller for poller in pollers}
+            for future in as_completed(futures):
+                try:
+                    future.result()
+                except Exception as e:
+                    self.log.warning('pan_firewall %s: polling failed: %s', futures[future].ip, e, exc_info=True)
+
+    def _remove_stale_pollers(self, current_ips: set[str]) -> None:
+        # A dropped poller's HTTP session is closed when the RequestsWrapper is garbage collected.
+        for ip in set(self._pollers) - current_ips:
+            del self._pollers[ip]

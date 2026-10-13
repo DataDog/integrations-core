@@ -118,12 +118,14 @@ class CallStats:
 
     `answered` is True once any call got a PAN-OS response, successful or `status="error"` (an auth rejection
     included); transport failures and bodies that are not PAN-OS XML (`panos_response` False) leave it False.
-    `auth_rejected` is True once a call failed with PanosAuthError after the key renewal.
+    `auth_rejected` is True once a call failed with PanosAuthError after the key renewal. `timed_out` is True once a
+    call raised PanosTimeout.
     """
 
     calls: int = 0
     answered: bool = False
     auth_rejected: bool = False
+    timed_out: bool = False
 
 
 class PanosClient:
@@ -206,6 +208,12 @@ class PanosClient:
             stats, self._stats = self._stats, CallStats()
         return stats
 
+    @property
+    def timed_out(self) -> bool:
+        """True once a call timed out since the last `take_stats()`. It is set before the PanosTimeout is raised."""
+        with self._stats_lock:
+            return self._stats.timed_out
+
     def _authorized(self, attempt: Callable[[str], T]) -> T:
         """Run `attempt` through `_with_renewal` and record its outcome in the call stats."""
         try:
@@ -223,6 +231,8 @@ class PanosClient:
                 self._stats.answered = True
             if isinstance(error, PanosAuthError):
                 self._stats.auth_rejected = True
+            if isinstance(error, PanosTimeout):
+                self._stats.timed_out = True
 
     def _with_renewal(self, attempt: Callable[[str], T]) -> T:
         """Run `attempt` with the current key; on an auth failure, renew the key once and run it again."""

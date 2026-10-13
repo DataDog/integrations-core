@@ -3,18 +3,25 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import dataclasses
+import json
 from collections.abc import Iterable, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from xml.etree.ElementTree import Element
 
-from .constants import DEVICE_VENDOR_TAG, NDM_DEVICE_RESOURCE_TAG, NDM_DEVICE_USER_TAGS_RESOURCE_TAG
+from .constants import DEVICE_VENDOR_TAG, NDM_DEVICE_RESOURCE_TAG, NDM_DEVICE_USER_TAGS_RESOURCE_TAG, PARSE_ERROR_CODE
+from .errors import PanosApiError
 from .firewalls import FirewallTarget
 from .xml_utils import text
 
 
 @dataclass
 class DeviceIdentity:
-    """What the check knows about a firewall, from `show system info`. Persisted as JSON across restarts."""
+    """What the check knows about a firewall, from `show system info`. Persisted as JSON across restarts.
+
+    `clock` changes on every read and is stale after a restart, so it is neither compared nor persisted: a refresh
+    that only moves the clock does not rewrite the cache.
+    """
 
     serial: str | None
     hostname: str | None
@@ -24,12 +31,28 @@ class DeviceIdentity:
     own_ip: str | None
     multi_vsys: bool | None
     advanced_routing: bool | None
-    clock: str | None  # system info <time>, firewall-local
+    clock: str | None = field(default=None, compare=False)  # system info <time>, firewall-local
+
+    def to_json(self) -> str:
+        data = dataclasses.asdict(self)
+        del data['clock']
+        return json.dumps(data)
+
+    @classmethod
+    def from_json(cls, raw: str) -> DeviceIdentity:
+        """Load an identity written by `to_json()`. Raises ValueError or TypeError for anything else."""
+        return cls(**json.loads(raw))
 
 
 def parse_system_info(root: Element) -> DeviceIdentity:
-    """Build the identity from a `<show><system><info/></system></show>` response."""
+    """Build the identity from a `<show><system><info/></system></show>` response.
+
+    Raises PanosApiError (code `parse`) for a reply without a serial: the serial is the device ID, and an identity
+    without one would drop the device tags.
+    """
     system = root.find('./result/system')
+    if not text(system, 'serial'):
+        raise PanosApiError(PARSE_ERROR_CODE, 'system info has no serial')
     return DeviceIdentity(
         serial=text(system, 'serial'),
         hostname=text(system, 'hostname'),

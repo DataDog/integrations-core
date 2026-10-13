@@ -7,7 +7,7 @@ import pytest
 
 from datadog_checks.pan_firewall.auth import Credentials
 from datadog_checks.pan_firewall.firewalls import FirewallTarget
-from datadog_checks.pan_firewall.identity import device_ip, global_tags, parse_system_info, vsys_list
+from datadog_checks.pan_firewall.identity import DeviceIdentity, device_ip, global_tags, parse_system_info, vsys_list
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from .common import FIXTURES
@@ -39,6 +39,15 @@ def test_parse_system_info_fw_a():
     )
     assert (FW_A.sw_version, FW_A.multi_vsys, FW_A.advanced_routing) == ('11.1.13-h12', False, False)
     assert FW_A.clock == 'Fri Oct  2 04:49:06 2026'
+
+
+def test_clock_is_neither_compared_nor_persisted():
+    later = dataclasses.replace(FW_A, clock='Sat Oct  3 00:00:00 2026')
+
+    # A refresh that only moves the clock does not rewrite the cache, and a restart does not load a stale clock.
+    assert later == FW_A
+    restored = DeviceIdentity.from_json(later.to_json())
+    assert (restored, restored.clock) == (FW_A, None)
 
 
 @pytest.mark.parametrize(
