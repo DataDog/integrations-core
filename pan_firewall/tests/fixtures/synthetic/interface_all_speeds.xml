@@ -1,4 +1,4 @@
-<!-- Derived from fw-a-probe/interface_all.xml: only the hw speeds differ (ethernet1/1 1000, ethernet1/2 10000, tunnel "fast", loopback keeps [n/a]). Assumes PAN-OS reports Mbps until lab task L8 confirms it on hardware. -->
+<!-- Derived from fw-a-probe/interface_all.xml: only the hw speeds differ (ethernet1/1 1000, ethernet1/2 10000, tunnel "fast", loopback keeps [n/a]). Assumes PAN-OS reports Mbps until lab task L8 confirms it on hardware. Only the ifnet rows of ethernet1/1 and ethernet1/2 are kept. -->
 <response status="success"><result>
   <hw>
     <entry>
@@ -71,66 +71,6 @@
       <zone>trust</zone>
       <fwd>vr:default</fwd>
       <ip>10.60.2.10/24</ip>
-      <addr/>
-      <dyn-addr/>
-      <addr6/>
-    </entry>
-    <entry>
-      <name>loopback</name>
-      <id>3</id>
-      <tag>0</tag>
-      <vsys>1</vsys>
-      <zone/>
-      <fwd>N/A</fwd>
-      <ip>N/A</ip>
-      <addr/>
-      <dyn-addr/>
-      <addr6/>
-    </entry>
-    <entry>
-      <name>loopback.1</name>
-      <id>258</id>
-      <tag>0</tag>
-      <vsys>1</vsys>
-      <zone>trust</zone>
-      <fwd>vr:default</fwd>
-      <ip>10.255.0.1/32</ip>
-      <addr/>
-      <dyn-addr/>
-      <addr6/>
-    </entry>
-    <entry>
-      <name>tunnel</name>
-      <id>4</id>
-      <tag>0</tag>
-      <vsys>1</vsys>
-      <zone/>
-      <fwd>N/A</fwd>
-      <ip>N/A</ip>
-      <addr/>
-      <dyn-addr/>
-      <addr6/>
-    </entry>
-    <entry>
-      <name>tunnel.1</name>
-      <id>256</id>
-      <tag>0</tag>
-      <vsys>1</vsys>
-      <zone>vpn</zone>
-      <fwd>vr:default</fwd>
-      <ip>169.254.10.1/30</ip>
-      <addr/>
-      <dyn-addr/>
-      <addr6/>
-    </entry>
-    <entry>
-      <name>tunnel.2</name>
-      <id>257</id>
-      <tag>0</tag>
-      <vsys>1</vsys>
-      <zone>vpn</zone>
-      <fwd>vr:default</fwd>
-      <ip>169.254.20.1/30</ip>
       <addr/>
       <dyn-addr/>
       <addr6/>

@@ -1,55 +1,5 @@
-<!-- Derived from fw-a-probe/interface_all.xml (fw-a, single vsys): identical except that the ifnet rows ethernet1/2 and loopback.1 are moved to vsys 2, to stand in for a multi-vsys firewall. -->
+<!-- Derived from fw-a-probe/interface_all.xml (fw-a, single vsys): identical except that the ifnet rows ethernet1/2 and loopback.1 are moved to vsys 2, to stand in for a multi-vsys firewall. The `hw` block is removed: the vsys come from the ifnet rows. -->
 <response status="success"><result>
-  <hw>
-    <entry>
-      <name>ethernet1/1</name>
-      <id>16</id>
-      <type>0</type>
-      <mac>02:ff:e5:62:7e:1d</mac>
-      <speed>ukn</speed>
-      <duplex>ukn</duplex>
-      <state>up</state>
-      <mode>(autoneg)</mode>
-      <fec>auto</fec>
-      <st>ukn/ukn/up</st>
-    </entry>
-    <entry>
-      <name>ethernet1/2</name>
-      <id>17</id>
-      <type>0</type>
-      <mac>02:ff:f3:bd:d2:65</mac>
-      <speed>ukn</speed>
-      <duplex>ukn</duplex>
-      <state>up</state>
-      <mode>(autoneg)</mode>
-      <fec>auto</fec>
-      <st>ukn/ukn/up</st>
-    </entry>
-    <entry>
-      <name>loopback</name>
-      <id>3</id>
-      <type>5</type>
-      <mac>42:55:c0:55:40:03</mac>
-      <speed>[n/a]</speed>
-      <duplex>[n/a]</duplex>
-      <state>up</state>
-      <mode>(unknown)</mode>
-      <fec>[n/a]</fec>
-      <st>[n/a]/[n/a]/up</st>
-    </entry>
-    <entry>
-      <name>tunnel</name>
-      <id>4</id>
-      <type>6</type>
-      <mac>42:55:c0:55:40:04</mac>
-      <speed>[n/a]</speed>
-      <duplex>[n/a]</duplex>
-      <state>up</state>
-      <mode>(unknown)</mode>
-      <fec>[n/a]</fec>
-      <st>[n/a]/[n/a]/up</st>
-    </entry>
-  </hw>
   <ifnet>
     <entry>
       <name>ethernet1/1</name>
