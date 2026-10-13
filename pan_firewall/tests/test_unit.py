@@ -10,13 +10,22 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.pan_firewall import PanFirewallCheck, constants
 from datadog_checks.pan_firewall import poller as poller_module
+from datadog_checks.pan_firewall.constants import REPORTS
 from datadog_checks.pan_firewall.errors import PanosApiError
 from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 from datadog_checks.pan_firewall.xml_utils import num, parse_response, text
 
 from .common import CREDENTIALS, FIXTURES, SYSTEM_INFO_CMD
 from .fake_panos import FIREWALL_SETS
-from .fixture_map import OP_FIXTURES, PARTIAL_OP_FIXTURES, THREAT_LOG_FIRST_SEQNO, op_fixture
+from .fixture_map import (
+    LOG_FIXTURES,
+    OP_FIXTURES,
+    PANORAMA_OP_FIXTURES,
+    PARTIAL_OP_FIXTURES,
+    THREAT_LOG_FIRST_SEQNO,
+    find_report_fixture,
+    op_fixture,
+)
 from .helpers import THREAT_LOG_ACT, log_page
 
 # Patterns that mean a credential value was captured. The bare word "password" is not one of them: real fixtures
@@ -100,9 +109,17 @@ def test_fixture_map_points_at_existing_files():
     for firewall in ('fw-a', 'fw-b'):
         for cmd in OP_FIXTURES:
             assert op_fixture(cmd, firewall).is_file()
+        for field, _tag in REPORTS.values():
+            assert find_report_fixture(field, firewall), (field, firewall)
     for paths in PARTIAL_OP_FIXTURES.values():
         for relative in paths.values():
             assert (FIXTURES / relative).is_file()
+    for jobs in LOG_FIXTURES.values():
+        for response, submit in jobs.values():
+            assert (FIXTURES / response).is_file()
+            assert (FIXTURES / submit).is_file()
+    for relative in PANORAMA_OP_FIXTURES.values():
+        assert (FIXTURES / relative).is_file()
 
 
 def test_fixtures_hold_no_secrets():
