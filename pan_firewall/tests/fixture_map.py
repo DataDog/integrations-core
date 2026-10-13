@@ -34,6 +34,21 @@ OP_FIXTURES = {
 }
 
 
+# `type=op` commands captured on some firewall sets only (lab probes), to the fixture path under FIXTURES, per set.
+# A set missing here has no capture for the command (ruling R7: fw-b has no `show interface all`).
+PARTIAL_OP_FIXTURES = {
+    '<show><interface>all</interface></show>': {'fw-a': 'fw-a-probe/interface_all.xml'},
+}
+
+
 def op_fixture(cmd: str, firewall: str = 'fw-a') -> Path:
     """Return the fixture answering `type=op&cmd=<cmd>` for the given firewall set (`fw-a` or `fw-b`)."""
     return FIXTURES / firewall / OP_FIXTURES[cmd]
+
+
+def find_op_fixture(cmd: str, firewall: str) -> Path | None:
+    """Like `op_fixture`, but also looks in PARTIAL_OP_FIXTURES, and returns None when there is no capture."""
+    if cmd in OP_FIXTURES:
+        return op_fixture(cmd, firewall)
+    relative = PARTIAL_OP_FIXTURES.get(cmd, {}).get(firewall)
+    return FIXTURES / relative if relative else None

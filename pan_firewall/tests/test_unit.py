@@ -11,7 +11,7 @@ from datadog_checks.pan_firewall.errors import PanosApiError
 from datadog_checks.pan_firewall.xml_utils import num, parse_response, text
 
 from .common import FIXTURES
-from .fixture_map import OP_FIXTURES, op_fixture
+from .fixture_map import OP_FIXTURES, PARTIAL_OP_FIXTURES, op_fixture
 
 SYSTEM_INFO_CMD = '<show><system><info/></system></show>'
 
@@ -96,6 +96,9 @@ def test_fixture_map_points_at_existing_files():
     for firewall in ('fw-a', 'fw-b'):
         for cmd in OP_FIXTURES:
             assert op_fixture(cmd, firewall).is_file()
+    for paths in PARTIAL_OP_FIXTURES.values():
+        for relative in paths.values():
+            assert (FIXTURES / relative).is_file()
 
 
 def test_fixtures_hold_no_secrets():

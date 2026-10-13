@@ -6,6 +6,7 @@ from __future__ import annotations
 import threading
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, TypeVar
 from urllib.parse import urlsplit
 from xml.etree import ElementTree as ET
@@ -25,6 +26,7 @@ if TYPE_CHECKING:
     from .auth import KeyManager
 
 __all__ = [
+    'CallStats',
     'PanosApiError',
     'PanosAuthError',
     'PanosClient',
@@ -104,6 +106,20 @@ def _classify(status_code: int, error: PanosApiError) -> PanosApiError:
     return error
 
 
+@dataclass
+class CallStats:
+    """The outcome of the calls a client made since the last `PanosClient.take_stats()`.
+
+    `answered` is True once any call got a PAN-OS response, successful or `status="error"` (an auth rejection
+    included); only transport failures and non-PAN-OS bodies leave it False. `auth_rejected` is True once a call
+    failed with PanosAuthError after the key renewal.
+    """
+
+    calls: int = 0
+    answered: bool = False
+    auth_rejected: bool = False
+
+
 class PanosClient:
     """XML API client for one PAN-OS device (firewall or Panorama).
 
@@ -127,6 +143,8 @@ class PanosClient:
         self._log = log
         self._slots = threading.BoundedSemaphore(max_in_flight)
         self._renew_lock = threading.Lock()
+        self._stats = CallStats()
+        self._stats_lock = threading.Lock()
 
     def op(self, cmd: str) -> Element:
         return self._call({'type': 'op', 'cmd': cmd})
@@ -176,7 +194,31 @@ class PanosClient:
         with self._slots:
             return self._authorized(lambda key: read_response(post_api(self._http, self._url, params, key=key)))
 
+    def take_stats(self) -> CallStats:
+        """Return the stats of the calls made since the previous call, and start new ones."""
+        with self._stats_lock:
+            stats, self._stats = self._stats, CallStats()
+        return stats
+
     def _authorized(self, attempt: Callable[[str], T]) -> T:
+        """Run `attempt` through `_with_renewal` and record its outcome in the call stats."""
+        try:
+            result = self._with_renewal(attempt)
+        except PanosError as e:
+            self._record(e)
+            raise
+        self._record(None)
+        return result
+
+    def _record(self, error: PanosError | None) -> None:
+        with self._stats_lock:
+            self._stats.calls += 1
+            if error is None or (isinstance(error, PanosApiError) and error.code != PARSE_ERROR_CODE):
+                self._stats.answered = True
+            if isinstance(error, PanosAuthError):
+                self._stats.auth_rejected = True
+
+    def _with_renewal(self, attempt: Callable[[str], T]) -> T:
         """Run `attempt` with the current key; on an auth failure, renew the key once and run it again."""
         key = self._keys.key()
         try:

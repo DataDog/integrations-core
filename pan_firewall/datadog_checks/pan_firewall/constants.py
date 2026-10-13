@@ -29,3 +29,8 @@ INTERVALS = {
     'licenses': 86400,
 }
 COLLECTORS = tuple(INTERVALS)
+
+# `device_vendor` tag value (decision 27; the NDM metadata `vendor` is a different string).
+DEVICE_VENDOR_TAG = 'paloaltonetworks'
+NDM_DEVICE_RESOURCE_TAG = 'dd.internal.resource:ndm_device'
+NDM_DEVICE_USER_TAGS_RESOURCE_TAG = 'dd.internal.resource:ndm_device_user_tags'
