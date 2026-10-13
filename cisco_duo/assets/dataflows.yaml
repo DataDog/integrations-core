@@ -1,4 +1,9 @@
 provides:
+  - id: cisco-duo-logs
+    always_on: true
+    granular: true
+    data_type: logs
+    direction: inbound
   - id: cisco-duo-authentication-logs
     always_on: true
     granular: true
