@@ -171,6 +171,8 @@ class FakePanos:
             return None
         if data.get('action') == 'get':
             return self._read_job(self._report_jobs, self._report_reads, host, data.get('job-id', ''))
+        if data.get('async') != 'yes':  # PAN-OS refuses a report submit that is not asynchronous
+            return 200, NO_CAPTURE
         match = re.search(r'<aggregate-by><member>([^<]+)</member>', data.get('cmd', ''))
         field = match.group(1) if match else ''
         return self._open_job(

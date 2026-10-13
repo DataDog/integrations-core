@@ -71,6 +71,8 @@ def create_app(
             with lock:
                 read = reads[kind, job_id] = reads.get((kind, job_id), 0) + 1
             return _xml(ACTIVE_JOB % job_id.encode() if read == 1 else response.read_bytes())
+        if kind == 'report' and data.get('async') != 'yes':  # PAN-OS refuses a report submit that is not asynchronous
+            return _xml(NO_CAPTURE)
         fixtures = (log_fixtures if kind == 'log' else report_fixtures)(data)
         if fixtures is None:
             return _xml(NO_CAPTURE)

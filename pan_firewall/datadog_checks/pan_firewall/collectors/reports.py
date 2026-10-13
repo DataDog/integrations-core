@@ -15,6 +15,7 @@ from typing import Literal
 from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall import constants
+from datadog_checks.pan_firewall.errors import PanosError, PanosUnreachable
 from datadog_checks.pan_firewall.xml_utils import num, text
 
 from . import CollectContext, ReportJob, Sample, register, warn_once
@@ -30,6 +31,7 @@ def report_params(field: str, top_n: int) -> dict[str, str]:
         'type': 'report',
         'reporttype': 'dynamic',
         'reportname': 'custom-dynamic-report',
+        'async': 'yes',
         'cmd': (
             f'<type><trsum><sortby>sessions</sortby><aggregate-by><member>{field}</member></aggregate-by>'
             '<values><member>sessions</member><member>bytes</member></values></trsum></type>'
@@ -76,7 +78,7 @@ def collect_reports(ctx: CollectContext) -> list[Sample]:
             return samples
         if outcome == 'running':
             ctx.log.warning(
-                'the %s report job %s is still running after %d runs: giving up on it',
+                'the %s report job %s is still running after being carried over %d times: giving up on it',
                 job.report,
                 job.job_id,
                 job.carries,
@@ -106,7 +108,20 @@ def collect_reports(ctx: CollectContext) -> list[Sample]:
 def _poll(ctx: CollectContext, job: ReportJob) -> tuple[Literal['finished', 'running', 'failed'], Element | None]:
     """Poll the job until it ends: `finished` with its response, `failed` (warned once) or still `running`."""
     for attempt in range(constants.REPORT_JOB_POLLS):
-        status, root = ctx.client.get_job('report', job.job_id)
+        try:
+            status, root = ctx.client.get_job('report', job.job_id)
+        except PanosUnreachable:
+            raise
+        except PanosError as e:
+            warn_once(
+                ctx,
+                f'report:{job.report}',
+                'polling the %s report job %s failed: no samples for it (%s)',
+                job.report,
+                job.job_id,
+                e,
+            )
+            return 'failed', None
         if status == 'FIN':
             return 'finished', root
         if status not in ACTIVE_STATUSES:

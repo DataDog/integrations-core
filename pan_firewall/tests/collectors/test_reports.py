@@ -11,7 +11,7 @@ from datadog_checks.pan_firewall import poller as poller_module
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectContext, FirewallState
 from datadog_checks.pan_firewall.collectors.reports import collect_reports, parse_report, report_params
 from datadog_checks.pan_firewall.constants import REPORTS
-from datadog_checks.pan_firewall.errors import PanosTimeout
+from datadog_checks.pan_firewall.errors import PanosApiError, PanosTimeout
 from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
@@ -198,6 +198,7 @@ def test_job_asks_for_the_top_n_of_the_last_24_hours():
     assert params['type'] == 'report'
     assert params['reporttype'] == 'dynamic'
     assert params['reportname'] == 'custom-dynamic-report'
+    assert params['async'] == 'yes'
     assert params['cmd'] == (
         '<type><trsum><sortby>sessions</sortby><aggregate-by><member>app</member></aggregate-by>'
         '<values><member>sessions</member><member>bytes</member></values></trsum></type>'
@@ -231,6 +232,7 @@ class ScriptedClient:
         self.act_polls = dict(act_polls or {})
         self.failing = set(failing)
         self.timeout = False
+        self.erroring = set()
         self.firewall = firewall
         self.events = []
         self._fields = {}
@@ -249,6 +251,8 @@ class ScriptedClient:
         if self.timeout:
             raise PanosTimeout('slow')
         field = self._fields[job_id]
+        if field in self.erroring:
+            raise PanosApiError('400', 'bad job')
         self.events.append(('get', field, job_id))
         self._polls[job_id] += 1
         response, _submit = find_report_fixture(field, self.firewall)
@@ -401,6 +405,37 @@ def test_a_timeout_polling_a_carried_job_keeps_it_for_the_next_run():
     samples = collect_reports(make_context(client, state))
     assert client.submitted().count('app') == 1
     assert ('report.top.sessions', ('report:top_applications', 'app:ping')) in series(samples)
+
+
+def test_an_api_error_polling_a_carried_job_drops_it_and_the_next_run_submits_the_next_report():
+    client = ScriptedClient(act_polls={'app': SLOW})
+    state = FirewallState()
+    collect_reports(make_context(client, state))
+    client.erroring = {'app'}
+    ctx = make_context(client, state)
+
+    samples = collect_reports(ctx)
+
+    ctx.log.warning.assert_called_once()
+    assert state.reports.pending is None
+    # The failed job is dropped and the run goes on with the next report, instead of polling the dead job forever.
+    assert client.submitted()[1] == REPORTS['top_application_categories'][0]
+    assert {tags[0] for _name, tags in series(samples)} == {f'report:{n}' for n in REPORTS} - {
+        'report:top_applications'
+    }
+
+
+def test_an_api_error_polling_a_new_job_keeps_the_samples_already_gathered():
+    client = ScriptedClient()
+    client.erroring = {'src'}
+    state = FirewallState()
+    ctx = make_context(client, state)
+
+    samples = collect_reports(ctx)
+
+    ctx.log.warning.assert_called_once()
+    assert state.reports.pending is None
+    assert {tags[0] for _name, tags in series(samples)} == {f'report:{n}' for n in REPORTS} - {'report:top_sources'}
 
 
 def test_a_timeout_submitting_a_job_propagates():
