@@ -8,6 +8,7 @@ from typing import Any
 import pytest
 
 from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS
 
 from .common import INSTANCE, build_lab_instance
 from .fake_panos import FakePanos
@@ -44,3 +45,16 @@ def fake_panos(monkeypatch, datadog_agent) -> FakePanos:
     fake = FakePanos()
     monkeypatch.setattr(RequestsWrapper, 'post', lambda _self, url, **options: fake.post(url, **options))
     return fake
+
+
+@pytest.fixture
+def real_collectors():
+    """Request it to keep the real collectors registered, which the other tests replace with stubs."""
+
+
+@pytest.fixture(autouse=True)
+def only_test_collectors(request, monkeypatch):
+    """Start every test with an empty collector registry, so a test runs the collectors it registers and no others."""
+    if 'real_collectors' not in request.fixturenames:
+        for name in list(COLLECT_FUNCTIONS):
+            monkeypatch.delitem(COLLECT_FUNCTIONS, name)

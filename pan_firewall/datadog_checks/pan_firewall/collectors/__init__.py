@@ -52,5 +52,15 @@ class CollectContext:
 
 Collector = Callable[[CollectContext], list[Sample]]
 
-# Collector name -> function. Each collector task registers its own entry.
+# Collector name -> function, filled by `@register(name)` when the collector module is imported.
 COLLECT_FUNCTIONS: dict[str, Collector] = {}
+
+
+def register(name: str) -> Callable[[Collector], Collector]:
+    """Register the decorated function as the collector `name`. The module defining it must be imported by `poller`."""
+
+    def decorator(function: Collector) -> Collector:
+        COLLECT_FUNCTIONS[name] = function
+        return function
+
+    return decorator

@@ -13,7 +13,14 @@ from datadog_checks.base.utils.http import RequestsWrapper
 
 from .api import PanosClient, api_url
 from .auth import KeyManager
-from .collectors import COLLECT_FUNCTIONS, CollectContext, FirewallState, Sample
+from .collectors import (  # noqa: F401  (importing the modules registers their collectors)
+    COLLECT_FUNCTIONS,
+    CollectContext,
+    FirewallState,
+    Sample,
+    dataplane,
+    system,
+)
 from .collectors.jobs import busy_jobs
 from .constants import COMMIT_SKIP_MAX_SECONDS
 from .errors import PanosError, PanosTimeout
