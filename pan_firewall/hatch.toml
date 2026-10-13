@@ -1,0 +1,21 @@
+[env.collectors.datadog-checks]
+check-types = true
+mypy-args = [
+    "--explicit-package-bases",
+]
+
+[[envs.default.matrix]]
+python = ["3.13"]
+
+[[envs.default.matrix]]
+python = ["3.13"]
+setup = ["lab"]
+
+[envs.default]
+e2e-env = false
+
+[envs.default.overrides]
+name."^py3.13$".e2e-env = { value = true }
+matrix.setup.env-vars = [
+  { key = "USE_PANOS_LAB", value = "1", if = ["lab"] },
+]

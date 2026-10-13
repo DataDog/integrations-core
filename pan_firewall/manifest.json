@@ -53,7 +53,12 @@
         "metadata_path": "assets/service_checks.json"
       },
       "source_type_id": 10155,
-      "auto_install": true
+      "auto_install": true,
+      "metrics": {
+        "prefix": "pan_firewall.",
+        "check": "",
+        "metadata_path": "metadata.csv"
+      }
     },
     "dashboards": {
       "Palo Alto Networks Firewall Overview": "assets/dashboards/palo_alto_networks_firewall_overview.json"

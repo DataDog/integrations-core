@@ -1,0 +1,35 @@
+<response status="success"><result>
+  <job>
+    <reportjob/>
+    <tenq>04:49:47</tenq>
+    <tdeq>04:49:47</tdeq>
+    <tlast>04:49:47</tlast>
+    <status>FIN</status>
+    <percent>100.000000</percent>
+    <recordcnt>1</recordcnt>
+    <ndev>1</ndev>
+    <nskip>0</nskip>
+    <nreq>1</nreq>
+    <nresp>1</nresp>
+    <nproc>1</nproc>
+    <eruntime>0</eruntime>
+    <id>11</id>
+  </job>
+  <report name="ndm" logtype="trsum" start="2026/10/01 04:49:47" start-epoch="1790830187" end="2026/10/02 04:49:46" end-epoch="1790916586" generated-at="2026/10/02 04:49:47" generated-at-epoch="1790916587" range="Thursday, October 01, 2026">
+    <entry>
+      <rule>trust-out</rule>
+      <sessions>747</sessions>
+      <bytes>138467471</bytes>
+    </entry>
+    <entry>
+      <rule>trust-to-vpn</rule>
+      <sessions>426</sessions>
+      <bytes>223649</bytes>
+    </entry>
+    <entry>
+      <rule>vpn-to-trust</rule>
+      <sessions>316</sessions>
+      <bytes>180633</bytes>
+    </entry>
+  </report>
+</result></response>
