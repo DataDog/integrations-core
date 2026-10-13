@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 9.2.1 / 2026-10-13
+
+***Fixed***:
+
+* Avoid fetching offsets for consumer groups that do not match the configured group pattern. consumer_groups_regex patterns now match the complete group ID; patterns spanning the group/topic comma no longer select a group. ([#25232](https://github.com/DataDog/integrations-core/pull/25232))
+
 ## 9.2.0 / 2026-10-01
 
 ***Added***:
