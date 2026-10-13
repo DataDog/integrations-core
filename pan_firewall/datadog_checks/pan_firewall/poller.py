@@ -20,6 +20,7 @@ from .collectors import (  # noqa: F401  (importing the modules registers their 
     Sample,
     dataplane,
     interfaces,
+    licenses,
     routing,
     system,
     vpn,
