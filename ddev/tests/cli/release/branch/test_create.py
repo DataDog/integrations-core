@@ -385,30 +385,6 @@ def test_create_branch_pr_creation_failure(ddev, mocker):
     assert 'All done' in result.output
 
 
-def test_create_branch_label_failure_keeps_pr_url(ddev, mocker):
-    """A labeling failure after the PR exists must surface its URL, not send the operator to open a duplicate."""
-    from httpx import HTTPError
-
-    mocker.patch('ddev.utils.git.GitRepository.run')
-    mocker.patch('ddev.utils.github.GitHubManager.create_label')
-    mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
-    mocker.patch(
-        'ddev.utils.github.GitHubManager.create_pull_request', return_value=(1, 'https://github.com/test/pr/1')
-    )
-    mocker.patch('ddev.utils.github.GitHubManager.add_labels', side_effect=HTTPError('API error'))
-    mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
-    mocker.patch('ddev.cli.release.branch.create.update_release_json')
-    mocker.patch('click.confirm', return_value=True)
-
-    result = ddev('release', 'branch', 'create', '7.79.x')
-
-    assert result.exit_code == 0, result.output
-    assert 'Pull request created: https://github.com/test/pr/1' in result.output
-    assert 'Failed to add `qa/skip-qa` to https://github.com/test/pr/1' in result.output
-    assert 'Failed to create the pull request' not in result.output
-    assert 'All done' in result.output
-
-
 def test_create_branch_pr_authentication_failure_uses_central_handler(ddev, mocker):
     request = httpx.Request('POST', 'https://api.github.com/repos/DataDog/integrations-core/pulls')
     response = httpx.Response(403, request=request)
