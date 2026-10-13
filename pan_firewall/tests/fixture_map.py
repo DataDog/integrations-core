@@ -84,10 +84,11 @@ PROBE_SEQNO_START = 7691899338913581588
 # `nlogs` of the real `probe-seqno` capture: pages p0-p18 hold 20 entries and p19 holds 5.
 PROBE_SEQNO_PAGE_SIZE = 20
 PROBE_SEQNO_PAGES = 20
-# `seqno` of the newest log of `probe/threat_back_p0.xml`, and the lowest of the `threat_log_5m.xml` each set answers
-# with (fw-b answers with fw-a's, see `set_fixture`).
+# `seqno` of the newest log of `probe/threat_back_p0.xml`, and the watermark + 1 each set's forward threat query starts
+# at. fw-b answers with fw-a's `threat_log_5m.xml` (every seqno in it is above both), but from its own seqno: a poller
+# that queried with the other firewall's watermark would get no answer, so a watermark shared between firewalls fails.
 BACKWARD_NEWEST_SEQNO = 7691899338913581520
-THREAT_LOG_FIRST_SEQNO = dict.fromkeys(('fw-a', 'fw-b'), 7691899338913480957)
+THREAT_LOG_FIRST_SEQNO = {'fw-a': 7691899338913480957, 'fw-b': 7691899338913480957 - 1000}
 
 
 def seqno_query(seqno: int) -> str:
@@ -109,16 +110,18 @@ LOG_FIXTURES: dict[str, dict[tuple[str, str | None, int], tuple[str, str]]] = {
             for page in range(PROBE_SEQNO_PAGES)
         },
     },
+    'fw-b': {
+        ('forward', seqno_query(THREAT_LOG_FIRST_SEQNO['fw-b']), 0): (
+            'fw-a/threat_log_5m.xml',
+            'fw-a/threat_log_5m_submit.xml',
+        ),
+    },
 }
 
 
 def find_log_fixture(direction: str, query: str | None, skip: int, firewall: str) -> tuple[Path, Path] | None:
-    """Return the (response, submit) fixtures answering a `type=log` query for the firewall set, or None.
-
-    A set without its own answer to the query answers with fw-a's, like `set_fixture`.
-    """
-    key = (direction, query, skip)
-    paths = LOG_FIXTURES.get(firewall, {}).get(key) or LOG_FIXTURES['fw-a'].get(key)
+    """Return the (response, submit) fixtures answering a `type=log` query for the firewall set, or None."""
+    paths = LOG_FIXTURES.get(firewall, {}).get((direction, query, skip))
     return (FIXTURES / paths[0], FIXTURES / paths[1]) if paths else None
 
 
