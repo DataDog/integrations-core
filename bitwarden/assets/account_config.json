@@ -20,6 +20,31 @@
       }
     }
   ],
+  "supported_connection_methods": [
+    {
+      "name": "Bitwarden Cloud API",
+      "regional": {
+        "region_setting": {
+          "key": "cloud_region",
+          "label": "Cloud Region",
+          "help": "Only used when instance type is Cloud.",
+          "editable": true,
+          "required": true,
+          "dropdown": {
+            "options": [
+              { "value": "eu", "label": "European Union" },
+              { "value": "com", "label": "United States" }
+            ],
+            "default": "com"
+          }
+        },
+        "base_urls": {
+          "eu": "https://api.bitwarden.eu",
+          "com": "https://api.bitwarden.com"
+        }
+      }
+    }
+  ],
   "additional_config_fields": [
     {
       "key": "instance_type",
@@ -36,23 +61,10 @@
     {
       "key": "self_hosted_instance_url",
       "label": "Self-hosted instance URL",
-      "help": "Required when instance type is Self-hosted.",
+      "help": "The domain of your self-hosted Bitwarden instance, required only for self-hosted Bitwarden setups. The instance must be publicly accessible via HTTPS. Example: vault.example.com, 123.123.123.123:8443.",
       "editable": true,
       "required": false,
-      "domain": {}
-    },
-    {
-      "key": "cloud_region",
-      "label": "Cloud Region",
-      "help": "Only used when instance type is Cloud.",
-      "editable": true,
-      "required": false,
-      "dropdown": {
-        "options": [
-          { "value": "eu", "label": "European Union" },
-          { "value": "com", "label": "United States" }
-        ]
-      }
+      "text": {}
     }
   ],
   "dataflow_config": [
