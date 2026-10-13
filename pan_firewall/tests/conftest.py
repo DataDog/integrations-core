@@ -25,6 +25,24 @@ def dd_environment():
         #
         # then run `ddev env start pan_firewall py3.13-lab`, `ddev env agent pan_firewall py3.13-lab check` and
         # `ddev env test pan_firewall py3.13-lab`. The instance is never logged or printed: it holds the password.
+        #
+        # Panorama mode (setting PANOS_LAB_PANORAMA_HOST selects it, and PANOS_LAB_HOSTS is then not needed): the
+        # firewalls are discovered from Panorama, so set its host and credentials, plus the firewalls' own. Read
+        # BOTH passwords silently, in your own terminal:
+        #
+        #   read -rs "PANOS_LAB_PANORAMA_PASSWORD?Panorama password: "
+        #   read -rs "PANOS_PASSWORD?Firewall password: "
+        #   export PANOS_LAB_PANORAMA_PASSWORD PANOS_PASSWORD
+        #   export PANOS_LAB_PANORAMA_HOST=<host> PANOS_LAB_PANORAMA_USERNAME=<username> PANOS_LAB_USERNAME=<username>
+        #   export PANOS_LAB_FIREWALL_OVERRIDES=<serial>=<reachable-ip>,<serial>=<reachable-ip>
+        #
+        # PANOS_LAB_FIREWALL_OVERRIDES is only needed when the IPs Panorama reports are not reachable from where the
+        # Agent runs. Then run the `lab-panorama` env (its own name: hatch cannot make one env depend on either of
+        # two variables):
+        #
+        #   ddev env start pan_firewall py3.13-lab-panorama
+        #   ddev env test pan_firewall py3.13-lab-panorama
+        #   ddev env stop pan_firewall py3.13-lab-panorama
         yield {'instances': [build_lab_instance()]}
     else:
         # The docker environment is added in a later task.
