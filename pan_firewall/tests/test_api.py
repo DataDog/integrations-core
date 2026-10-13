@@ -8,6 +8,7 @@ from typing import Any
 
 import pytest
 import requests
+from urllib3.exceptions import ProtocolError
 
 from datadog_checks.pan_firewall.api import (
     PanosApiError,
@@ -51,7 +52,7 @@ AUTH_FAILURES = [
     pytest.param(200, CODE_16, id='code-16'),
 ]
 
-Answer = tuple[int, bytes] | Exception
+type Answer = tuple[int, bytes] | Exception | requests.Response
 
 
 def make_response(status: int, body: bytes) -> requests.Response:
@@ -76,6 +77,8 @@ class FakeHttp:
         answer = queue.pop(0)
         if isinstance(answer, Exception):
             raise answer
+        if isinstance(answer, requests.Response):
+            return answer
         return make_response(*answer)
 
     def calls_of(self, kind: str) -> list[dict[str, Any]]:
@@ -332,6 +335,35 @@ def test_open_log_job_reads_status_and_streams_the_entries_in_one_request():
     assert len(seqnos) == 39
     assert len(http.calls) == 1
     assert http.calls[0]['stream'] is True
+
+
+def test_stream_that_breaks_mid_way_makes_the_next_calls_fail_fast():
+    first_entry_end = THREAT_LOGS.index(b'</entry>') + len(b'</entry>')
+
+    class BrokenRaw:
+        def stream(self, *_args, **_kwargs):
+            yield THREAT_LOGS[:first_entry_end]
+            raise ProtocolError('connection broken')
+
+        def close(self):
+            pass
+
+    resp = make_response(200, b'')
+    resp.raw = BrokenRaw()
+    http = FakeHttp(api=[resp, (200, SYSTEM_INFO)])
+    client, _ = make_client(http, STATIC_CREDS)
+
+    with pytest.raises(PanosConnectionError), client.open_log_job('2') as (_, entries):
+        assert next(entries).findtext('seqno')
+        next(entries)
+
+    assert client.unreachable
+    with pytest.raises(PanosSkipped):
+        client.op(SYSTEM_INFO_CMD)
+    assert len(http.calls) == 1
+    # The call itself was answered: can_connect does not turn to 0 because the body broke.
+    stats = client.take_stats()
+    assert (stats.calls, stats.answered) == (1, True)
 
 
 def test_open_log_job_that_is_not_finished_yields_no_entries():

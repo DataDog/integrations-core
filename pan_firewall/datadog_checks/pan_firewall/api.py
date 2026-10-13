@@ -231,12 +231,17 @@ class PanosClient:
             self._fail_fast_if_unreachable()
             resp, root, events = self._authorized(lambda key: self._open_stream(self._log_get(job_id), key))
             with resp:
-                elements = _log_elements(root, events, with_status=True)
-                status_elem = next(elements, None)
-                if status_elem is None or status_elem.tag != 'status':
-                    raise PanosApiError(PARSE_ERROR_CODE, f'log job {job_id} response has no status')
-                status = (status_elem.text or '').strip()
-                yield status, (elements if status == 'FIN' else iter(()))
+                try:
+                    elements = _log_elements(root, events, with_status=True)
+                    status_elem = next(elements, None)
+                    if status_elem is None or status_elem.tag != 'status':
+                        raise PanosApiError(PARSE_ERROR_CODE, f'log job {job_id} response has no status')
+                    status = (status_elem.text or '').strip()
+                    yield status, (elements if status == 'FIN' else iter(()))
+                except (PanosTimeout, PanosConnectionError) as e:
+                    # The stream broke after `_authorized` recorded the call: the rest of the run must know.
+                    self._record_unreachable(e)
+                    raise
 
     @staticmethod
     def _log_get(job_id: str) -> dict[str, str]:
@@ -291,6 +296,14 @@ class PanosClient:
             raise
         self._record(None)
         return result
+
+    def _record_unreachable(self, error: PanosTimeout | PanosConnectionError) -> None:
+        """Note a failure to reach the device that came after the call was recorded; it is not a call of its own."""
+        with self._stats_lock:
+            if isinstance(error, PanosTimeout):
+                self._stats.timed_out = True
+            elif self._stats.connection_error is None:
+                self._stats.connection_error = str(error)
 
     def _record(self, error: PanosError | None) -> None:
         with self._stats_lock:
