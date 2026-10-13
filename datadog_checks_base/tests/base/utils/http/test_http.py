@@ -402,3 +402,13 @@ def test_limit_line_size_does_not_create_reference_cycle():
         assert raw() is None
     finally:
         gc.enable()
+
+
+def test_iter_lines_uses_configured_line_size():
+    http = RequestsWrapper({'max_line_size': 1}, {})
+
+    with mock.patch('requests.Session.get', return_value=_gzip_response(b'x' * 1024 + b'\ny\n')):
+        assert len(list(http.get('https://www.google.com', stream=True).iter_lines())) == 2
+    with mock.patch('requests.Session.get', return_value=_gzip_response(b'x' * 1025 + b'\ny\n')):
+        with pytest.raises(ResponseLineTooLongError, match='`max_line_size` option'):
+            list(http.get('https://www.google.com', stream=True).iter_lines())
