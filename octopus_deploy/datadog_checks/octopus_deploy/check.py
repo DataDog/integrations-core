@@ -366,15 +366,8 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
         self._prefetch_deployments(space_id, [task.get("Arguments", {}).get("DeploymentId") for task in tasks])
         self._process_tasks(space_id, space_name, monitored_projects, tasks)
 
-    def _get_by_ids(self, space_id, resource, ids):
-        items = []
-        for chunk_start in range(0, len(ids), BULK_ID_CHUNK_SIZE):
-            chunk = ids[chunk_start : chunk_start + BULK_ID_CHUNK_SIZE]
-            items += self._process_paginated_endpoint(f"api/{space_id}/{resource}", {'ids': chunk}).get('Items', [])
-        return items
-
     def _prefetch_deployments(self, space_id, deployment_ids):
-        """Populate the deployment and release caches for a whole space with bulk lookups by id."""
+        """Populate the deployment cache for a whole space with one bulk lookup per chunk of ids."""
         missing_deployments = sorted(
             {
                 deployment_id
@@ -382,27 +375,31 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 if deployment_id and deployment_id not in self._deployments_cache
             }
         )
-        if not missing_deployments:
-            return
-        deployments = self._get_by_ids(space_id, "deployments", missing_deployments)
+        for chunk_start in range(0, len(missing_deployments), BULK_ID_CHUNK_SIZE):
+            chunk = missing_deployments[chunk_start : chunk_start + BULK_ID_CHUNK_SIZE]
+            # A single page, never paginated: a server that ignores `ids` then costs one request instead of
+            # a walk through its whole deployment history. Deployments it did not return fall back to a lookup by id.
+            response = self._process_endpoint(f"api/{space_id}/deployments", {'ids': chunk, 'take': len(chunk)})
+            requested = set(chunk)
+            for deployment in response.get('Items', []):
+                if deployment.get("Id") not in requested:
+                    continue
+                release_version = self._get_release_version(space_id, deployment.get("ReleaseId"))
+                if release_version is None:
+                    # Leave it uncached so it is retried individually rather than tagged as None for the whole TTL.
+                    continue
+                environment_name = self._environments_cache.get(deployment.get("EnvironmentId"))
+                self._deployments_cache[deployment.get("Id")] = (release_version, environment_name)
 
-        missing_releases = sorted(
-            {
-                deployment.get("ReleaseId")
-                for deployment in deployments
-                if deployment.get("ReleaseId") and deployment.get("ReleaseId") not in self._releases_cache
-            }
-        )
-        for release in self._get_by_ids(space_id, "releases", missing_releases):
-            self._releases_cache[release.get("Id")] = release.get("Version")
-
-        for deployment in deployments:
-            release_version = self._releases_cache.get(deployment.get("ReleaseId"))
-            if release_version is None:
-                # Leave it uncached so it is retried individually rather than tagged as None for the whole TTL.
-                continue
-            environment_name = self._environments_cache.get(deployment.get("EnvironmentId"))
-            self._deployments_cache[deployment.get("Id")] = (release_version, environment_name)
+    def _get_release_version(self, space_id, release_id):
+        # Releases are fetched one by one: the releases collection ignores `ids` on some Octopus versions
+        # (seen on 2026.3), returning every release instead.
+        release_version = self._releases_cache.get(release_id)
+        if release_version is None:
+            self.log.debug("Cached release not found for release id: %s", release_id)
+            release_version = self._process_endpoint(f"api/{space_id}/releases/{release_id}").get("Version")
+            self._releases_cache[release_id] = release_version
+        return release_version
 
     def _calculate_task_times(self, task):
         task_queue_time = task.get("QueueTime")
@@ -492,14 +489,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             release_id = deployment.get("ReleaseId")
             environment_id = deployment.get("EnvironmentId")
             environment_name = self._environments_cache.get(environment_id)
-            release_version = self._releases_cache.get(release_id)
-            if release_version is None:
-                self.log.debug(
-                    "Cached release not found for deployment id: %s, release id: %s", deployment_id, release_id
-                )
-                release = self._process_endpoint(f"api/{space_id}/releases/{release_id}")
-                release_version = release.get("Version")
-                self._releases_cache[release_id] = release_version
+            release_version = self._get_release_version(space_id, release_id)
 
             self._deployments_cache[deployment_id] = (release_version, environment_name)
 

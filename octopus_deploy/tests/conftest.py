@@ -69,7 +69,7 @@ PARAMS_TO_FILENAME_MAPPING = {
 }
 
 # Endpoints the check reads in bulk with `?ids=`, mocked from the per-id fixtures of the same collection.
-BULK_ID_ENDPOINTS = ('deployments', 'releases')
+BULK_ID_ENDPOINTS = ('deployments',)
 
 
 # https://docs.python.org/3/library/unittest.mock-examples.html#coping-with-mutable-arguments

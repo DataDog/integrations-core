@@ -1651,7 +1651,6 @@ def test_environments_metrics_http_failure(
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/releases': MockResponse(status_code=500),
                     '/api/Spaces-1/releases/Releases-3': MockResponse(status_code=500),
                 }
             },
@@ -2157,23 +2156,23 @@ def test_deployments_caching(get_current_datetime, dd_run_check, mock_http_get, 
     dd_run_check(check)
 
     args_list = []
-    bulk_ids = {'deployments': [], 'releases': []}
+    bulk_deployment_ids = []
     for call in mock_http_get.call_args_list:
         args, kwargs = call
         args_list += list(args)
-        for resource, ids in bulk_ids.items():
-            if args[0] == f'http://localhost:80/api/Spaces-1/{resource}':
-                ids.append(kwargs.get('params', {}).get('ids'))
+        if args[0] == 'http://localhost:80/api/Spaces-1/deployments':
+            bulk_deployment_ids.append(kwargs.get('params', {}).get('ids'))
 
-    # Every deployment and release is looked up in bulk, and only on the run that first sees it.
-    assert bulk_ids['deployments'] == [['Deployments-18', 'Deployments-19'], ['Deployments-16', 'Deployments-17']]
-    assert bulk_ids['releases'] == [['Releases-1', 'Releases-3'], ['Releases-2']]
-
-    # Individual lookups are the fallback for a cache miss, and must not run when the bulk lookup succeeded.
+    # Deployments are looked up in bulk, only on the run that first sees them.
+    assert bulk_deployment_ids == [['Deployments-18', 'Deployments-19'], ['Deployments-16', 'Deployments-17']]
+    # Individual deployment lookups are the fallback for a cache miss, and must not run when the bulk lookup succeeded.
     for deployment_id in ['Deployments-16', 'Deployments-17', 'Deployments-18', 'Deployments-19']:
         assert args_list.count(f'http://localhost:80/api/Spaces-1/deployments/{deployment_id}') == 0
+
+    # Each release is fetched by id exactly once across all runs, never through the releases collection.
     for release_id in ['Releases-1', 'Releases-2', 'Releases-3']:
-        assert args_list.count(f'http://localhost:80/api/Spaces-1/releases/{release_id}') == 0
+        assert args_list.count(f'http://localhost:80/api/Spaces-1/releases/{release_id}') == 1
+    assert args_list.count('http://localhost:80/api/Spaces-1/releases') == 0
 
     assert args_list.count('http://localhost:80/api/Spaces-1/environments') == 5
 
@@ -2819,9 +2818,45 @@ def test_collection_does_not_scale_with_project_count(get_current_datetime, dd_r
     assert urls.count('http://localhost:80/api/Spaces-1/projectgroups') == 1
     # One call for queued/executing tasks and one for the tasks completed during the interval.
     assert urls.count('http://localhost:80/api/Spaces-1/tasks') == 2
-    # Deployments and their releases are resolved with one bulk lookup each, not one per task.
+    # Deployments are resolved with one bulk lookup, not one per task.
     assert urls.count('http://localhost:80/api/Spaces-1/deployments') == 1
-    assert urls.count('http://localhost:80/api/Spaces-1/releases') == 1
+
+
+# Some Octopus versions ignore the `ids` filter on collection endpoints and return the whole, paginated history.
+UNFILTERED_DEPLOYMENTS = {
+    'Items': [
+        {'Id': f'Deployments-{n}', 'ReleaseId': f'Releases-{n}', 'EnvironmentId': 'Environments-1'}
+        for n in range(9000, 9300)
+    ],
+    'TotalResults': 4800,
+    'ItemsPerPage': 300,
+    'NumberOfPages': 16,
+}
+
+
+@pytest.mark.parametrize(
+    'mock_http_get', [pytest.param({'mock_data': {'/api/Spaces-1/deployments': UNFILTERED_DEPLOYMENTS}})], indirect=True
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_bulk_lookup_bounded_when_ids_filter_is_ignored(
+    get_current_datetime, dd_run_check, aggregator, mock_http_get, instance
+):
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    get_current_datetime.return_value = MOCKED_TIME1
+    dd_run_check(check)
+
+    urls = [call[0][0] for call in mock_http_get.call_args_list]
+
+    # A single request rather than a walk through all 16 pages of deployment history.
+    assert urls.count('http://localhost:80/api/Spaces-1/deployments') == 1
+    # Nothing is looked up for deployments the check never asked for.
+    assert not [url for url in urls if '/releases/Releases-9' in url]
+    # The requested deployments fall back to individual lookups and keep their real tags.
+    assert urls.count('http://localhost:80/api/Spaces-1/deployments/Deployments-18') == 1
+    assert urls.count('http://localhost:80/api/Spaces-1/deployments/Deployments-19') == 1
+    aggregator.assert_metric_has_tag('octopus_deploy.deployment.count', 'release_version:0.0.1', count=1)
+    aggregator.assert_metric_has_tag('octopus_deploy.deployment.count', 'release_version:0.0.2', count=1)
 
 
 @pytest.mark.parametrize(
