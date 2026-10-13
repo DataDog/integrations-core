@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import ipaddress
+import re
 from collections.abc import Mapping
 from typing import Any
 
@@ -23,6 +24,7 @@ def check_instance(model: Any) -> Any:
     _check_firewalls(firewalls)
     _check_credentials(credentials)
     _check_discovery_filters(model)
+    _check_rule_filter(model)
     for ip in firewalls:
         if find_credential(ip, credentials) is None:
             raise ValueError(f'No entry in `firewall_credentials` matches the firewall `{ip}`')
@@ -100,4 +102,14 @@ def _check_discovery_filters(model: Any) -> None:
         except ValueError:
             raise ValueError(
                 f'`firewall_ip_overrides` entry for `{serial}` is not a valid IP address: `{ip}`'
+            ) from None
+
+
+def _check_rule_filter(model: Any) -> None:
+    for pattern in model.security_rule_filter or ():
+        try:
+            re.compile(pattern)
+        except re.error as e:
+            raise ValueError(
+                f'`security_rule_filter` entry `{pattern}` is not a valid regular expression: {e}'
             ) from None

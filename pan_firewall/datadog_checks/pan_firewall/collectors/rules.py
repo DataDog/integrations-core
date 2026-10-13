@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Sequence
+from functools import cache
 from typing import TYPE_CHECKING
 from xml.etree.ElementTree import Element
 from xml.sax.saxutils import escape
@@ -17,6 +18,12 @@ from . import CollectContext, Sample, once_log, register
 
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
+
+
+@cache
+def _compile_filter(patterns: tuple[str, ...]) -> tuple[re.Pattern[str], ...]:
+    """The filter compiled once. Config validation has already rejected a pattern that does not compile."""
+    return tuple(re.compile(p) for p in patterns)
 
 
 def rule_hit_cmd(vsys: str) -> str:
@@ -35,7 +42,7 @@ def parse_rule_hits(root: Element, vsys: str, patterns: Sequence[str], log: Chec
         log.warning('Unknown shape of `show rule-hit-count` for %s: no rules element, sending no rule metrics', vsys)
         return []
 
-    compiled = [re.compile(p) for p in patterns]
+    compiled = _compile_filter(tuple(patterns))
     samples: list[Sample] = []
     for rule in rules.iterfind('entry'):
         name = rule.get('name')

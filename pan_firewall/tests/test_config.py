@@ -77,6 +77,11 @@ def test_valid_config_loads(dd_run_check, base, changes):
         ),
         pytest.param({'max_concurrency': 0}, 'max_concurrency', id='max-concurrency-zero'),
         pytest.param({'report_top_n': 0}, 'report_top_n', id='report-top-n-zero'),
+        pytest.param(
+            {'security_rule_filter': ['^ok-', '[unclosed']},
+            r'`security_rule_filter` entry `\[unclosed` is not a valid regular expression',
+            id='bad-rule-filter-pattern',
+        ),
     ],
 )
 def test_invalid_static_config(dd_run_check, changes, message):
