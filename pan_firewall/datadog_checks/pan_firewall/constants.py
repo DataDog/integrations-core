@@ -50,3 +50,9 @@ THREAT_PAGE_SIZE = 5000
 THREAT_JOB_POLLS = 5
 THREAT_JOB_POLL_DELAY = 1.0
 THREAT_RESET_CHECK_SECONDS = 1800
+
+# NDM metadata values (the `vendor` here differs from the `device_vendor` tag).
+NDM_INTEGRATION = 'pan_firewall'
+NDM_VENDOR = 'Palo Alto Networks'
+NDM_OS_NAME = 'PAN-OS'
+NDM_DEVICE_TYPE = 'firewall'

@@ -1,0 +1,76 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
+
+import time
+from collections.abc import Iterable, Iterator
+
+from pydantic import BaseModel, ConfigDict, Field
+
+from .constants import NDM_INTEGRATION
+
+PAYLOAD_METADATA_BATCH_SIZE = 100
+
+
+class DeviceMetadata(BaseModel):
+    integration: str = NDM_INTEGRATION
+    id: str
+    id_tags: list[str]
+    tags: list[str]
+    ip_address: str
+    status: int
+    name: str | None = None
+    model: str | None = None
+    serial_number: str
+    version: str | None = None
+    vendor: str
+    os_name: str
+    device_type: str
+    namespace: str
+
+
+class InterfaceMetadata(BaseModel):
+    integration: str = NDM_INTEGRATION
+    device_id: str
+    raw_id: str
+    raw_id_type: str = 'name'
+    id_tags: list[str]
+    name: str
+    index: int | None = None
+    mac_address: str | None = None
+    oper_status: int
+
+
+class NetworkDevicesMetadata(BaseModel):
+    model_config = ConfigDict(validate_assignment=True)
+
+    integration: str = NDM_INTEGRATION
+    namespace: str
+    devices: list[DeviceMetadata] = Field(default_factory=list)
+    interfaces: list[InterfaceMetadata] = Field(default_factory=list)
+    collect_timestamp: int | None = None
+    size: int = Field(default=0, exclude=True)
+
+    def append(self, item: DeviceMetadata | InterfaceMetadata) -> None:
+        if isinstance(item, DeviceMetadata):
+            self.devices.append(item)
+        else:
+            self.interfaces.append(item)
+        self.size += 1
+
+
+def batch_payloads(
+    namespace: str, items: Iterable[DeviceMetadata | InterfaceMetadata], collect_timestamp: int | None = None
+) -> Iterator[NetworkDevicesMetadata]:
+    """Group the records into payloads of at most `PAYLOAD_METADATA_BATCH_SIZE`, in order."""
+    if collect_timestamp is None:
+        collect_timestamp = int(time.time())
+    payload = NetworkDevicesMetadata(namespace=namespace, collect_timestamp=collect_timestamp)
+    for item in items:
+        if payload.size >= PAYLOAD_METADATA_BATCH_SIZE:
+            yield payload
+            payload = NetworkDevicesMetadata(namespace=namespace, collect_timestamp=collect_timestamp)
+        payload.append(item)
+    if payload.size > 0:
+        yield payload

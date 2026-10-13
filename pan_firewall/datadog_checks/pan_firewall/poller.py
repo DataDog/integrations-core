@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import json
 import time
 from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor
@@ -32,6 +33,8 @@ from .collectors.jobs import busy_jobs
 from .constants import COMMIT_SKIP_MAX_SECONDS
 from .errors import PanosError, PanosTimeout
 from .identity import DeviceIdentity, device_ip, global_tags, parse_system_info, vsys_list
+from .metadata import build_device, build_interfaces
+from .ndm_models import DeviceMetadata, InterfaceMetadata, batch_payloads
 from .scheduler import FirewallSchedule
 
 if TYPE_CHECKING:
@@ -91,6 +94,8 @@ class FirewallPoller:
             self.state.vsys = vsys_list(self.identity, self.state.interface_rows, config.vsys)
         self._can_connect: int | None = None
         self._auth_status: int | None = None
+        # The `can_connect` the last metadata was sent with: a different one sends the metadata again at once.
+        self._metadata_status: int | None = None
         # Schedule-clock time of the first run of the current busy period: every jobs check since then listed a busy
         # job. None while the firewall is not busy.
         self._busy_since: float | None = None
@@ -138,7 +143,27 @@ class FirewallPoller:
             self.check.gauge('can_connect', self._can_connect, tags=tags)
         if self._auth_status is not None:
             self.check.gauge('api.authentication.status', self._auth_status, tags=tags)
+        self._send_metadata(outcome)
         self.log.debug('pan_firewall %s: %d calls in %.2fs', self.ip, stats.calls, time.monotonic() - start)
+
+    def _send_metadata(self, outcome: CollectorRun) -> None:
+        """Send the device and its interfaces: on the identity's schedule (30 min), and when `can_connect` flips.
+
+        Nothing is sent without a serial (a static firewall never reached), or when `send_ndm_metadata` is off.
+        """
+        identity = self.identity
+        if not self.config.send_ndm_metadata or identity is None or identity.serial is None:
+            return
+        if self._can_connect is None or (self._can_connect == self._metadata_status and IDENTITY not in outcome.ran):
+            return
+        self._metadata_status = self._can_connect
+        namespace = self.config.namespace or 'default'
+        device = build_device(identity, self.ip, namespace, self.tags(), self._can_connect, self.state.ha_state)
+        records: list[DeviceMetadata | InterfaceMetadata] = [device, *build_interfaces(identity.serial, self.state)]
+        for payload in batch_payloads(namespace, records):
+            self.check.event_platform_event(
+                json.dumps(payload.model_dump(exclude_none=True)), 'network-devices-metadata'
+            )
 
     def _busy(self) -> bool:
         """Run the jobs check; return True to skip this run's collectors because a commit or update is in progress.
