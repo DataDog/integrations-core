@@ -67,18 +67,16 @@ def interface_tags(name: str, state: FirewallState, serial: str | None) -> tuple
     if kind:
         tags.append(f'interface_type:{kind.group()}')
     row = next((r for r in state.interface_rows if text(r, 'name') == name), None)
-    if row is None:
-        return tuple(tags)
-    forward = text(row, 'fwd') or ''
-    values = (
-        ('zone', text(row, 'zone')),
-        ('vsys', _vsys(text(row, 'vsys'))),
-        ('vr', forward[3:] if forward.startswith('vr:') else None),
-    )
-    tags.extend(f'{key}:{value}' for key, value in values if value)
-    index = text(row, 'id')
-    if serial and index:
-        tags.append(f'{NDM_INTERFACE_RESOURCE_TAG}:{serial}:{index}')
+    if row is not None:
+        forward = text(row, 'fwd') or ''
+        values = (
+            ('zone', text(row, 'zone')),
+            ('vsys', _vsys(text(row, 'vsys'))),
+            ('vr', forward[3:] if forward.startswith('vr:') else None),
+        )
+        tags.extend(f'{key}:{value}' for key, value in values if value)
+    if serial:
+        tags.append(f'{NDM_INTERFACE_RESOURCE_TAG}:{serial}')
     return tuple(tags)
 
 

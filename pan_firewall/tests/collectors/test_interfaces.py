@@ -53,7 +53,7 @@ FW_B_ROWS = {
 }
 FW_A_TUNNELS = {'tunnel.1': (1563183, 919234, 11275, 5157), 'tunnel.2': (0, 0, 0, 0)}
 FW_B_TUNNELS = {'tunnel.1': (1573118, 923056, 11284, 5192), 'tunnel.2': (0, 0, 0, 0)}
-# interface, interface_type, zone, vsys, vr, NDM resource (id from `show interface all`)
+# interface, interface_type, zone, vsys, vr
 MAP_TAGS = {
     'ethernet1/1': ('interface:ethernet1/1', 'interface_type:ethernet', 'zone:untrust', 'vsys:vsys1', 'vr:default'),
     'ethernet1/2': ('interface:ethernet1/2', 'interface_type:ethernet', 'zone:trust', 'vsys:vsys1', 'vr:default'),
@@ -61,11 +61,11 @@ MAP_TAGS = {
     'loopback.1': ('interface:loopback.1', 'interface_type:loopback', 'zone:trust', 'vsys:vsys1', 'vr:default'),
     'tunnel': ('interface:tunnel', 'interface_type:tunnel', 'vsys:vsys1'),
 }
-INTERFACE_IDS = {'ethernet1/1': 16, 'ethernet1/2': 17, 'loopback': 3, 'loopback.1': 258, 'tunnel': 4}
 
 
 def resource_tag(name):
-    return f'dd.internal.resource:ndm_interface:{SERIAL}:{INTERFACE_IDS[name]}'
+    # Same shape as hpe_aruba_edgeconnect: the device id only, the `interface` tag identifies the port.
+    return f'dd.internal.resource:ndm_interface:{SERIAL}'
 
 
 def load(path):
@@ -122,14 +122,14 @@ def test_interface_counters_without_a_map_carry_the_interface_tag_only():
     assert series(interface_samples) == expected_interfaces(FW_B_ROWS, lambda name: (f'interface:{name}',))
 
 
-def test_interface_without_an_ifnet_row_gets_the_type_and_no_resource_tag():
+def test_interface_without_an_ifnet_row_gets_the_type_and_the_resource_tag():
     state = state_from(FIXTURES / 'fw-a-probe' / 'interface_all.xml')
     state.interface_rows = [r for r in state.interface_rows if r.findtext('name') != 'ethernet1/2']
 
     samples = parse_interface_counters(load(op_fixture(COUNTER_INTERFACE_CMD)), state, SERIAL, None, mock.Mock())
 
     tags = {s.tags for s in samples if s.name == 'interface.rx.bytes' and 'interface:ethernet1/2' in s.tags}
-    assert tags == {('interface:ethernet1/2', 'interface_type:ethernet')}
+    assert tags == {('interface:ethernet1/2', 'interface_type:ethernet', resource_tag('ethernet1/2'))}
 
 
 def test_resource_tag_is_omitted_without_a_serial():
