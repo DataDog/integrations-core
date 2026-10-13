@@ -13,6 +13,7 @@ import pytest
 import requests
 
 from datadog_checks.checks.prometheus import PrometheusCheck, UnknownFormatError
+from datadog_checks.dev.http import MockResponse as HTTPMockResponse
 from datadog_checks.utils.prometheus import metrics_pb2, parse_metric_family
 
 protobuf_content_type = 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited'
@@ -36,6 +37,13 @@ class MockResponse:
 
     def close(self):
         pass
+
+
+def text_response(text_data):
+    response = HTTPMockResponse(content=text_data, headers={'Content-Type': 'text/plain'})
+    # `requests` sets the encoding from the response headers, `MockResponse` does not
+    response.encoding = 'utf-8'
+    return response
 
 
 class SortedTagsPrometheusCheck(PrometheusCheck):
@@ -345,9 +353,7 @@ def test_poll_protobuf(mocked_prometheus_check, bin_data):
 def test_poll_text_plain(mocked_prometheus_check, text_data):
     """Tests poll using the text format"""
     check = mocked_prometheus_check
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-    )
+    mock_response = text_response(text_data)
     with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         response = check.poll("http://fake.endpoint:10055/metrics")
         messages = list(check.parse_metric_family(response))
@@ -1282,9 +1288,7 @@ def test_label_joins(sorted_tags_check):
     f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-    )
+    mock_response = text_response(text_data)
     with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
@@ -1632,9 +1636,7 @@ def test_label_joins_gc(sorted_tags_check):
     f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-    )
+    mock_response = text_response(text_data)
     with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
@@ -1682,9 +1684,7 @@ def test_label_joins_gc(sorted_tags_check):
         assert 15 == len(check._label_mapping['pod'])
         text_data = text_data.replace('dd-agent-62bgh', 'dd-agent-1337')
 
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-    )
+    mock_response = text_response(text_data)
     with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check.process("http://fake.endpoint:10055/metrics")
         assert 'dd-agent-1337' in check._label_mapping['pod']
@@ -1698,9 +1698,7 @@ def test_label_joins_missconfigured(sorted_tags_check):
     f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-    )
+    mock_response = text_response(text_data)
     with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
@@ -1751,9 +1749,7 @@ def test_label_join_not_existing(sorted_tags_check):
     f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-    )
+    mock_response = text_response(text_data)
     with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
@@ -1790,9 +1786,7 @@ def test_label_join_metric_not_existing(sorted_tags_check):
     f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-    )
+    mock_response = text_response(text_data)
     with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
@@ -1829,9 +1823,7 @@ def test_label_join_with_hostname(sorted_tags_check):
     f_name = os.path.join(FIXTURES_PATH, 'ksm.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-    )
+    mock_response = text_response(text_data)
     with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check = sorted_tags_check
         check.NAMESPACE = 'ksm'
@@ -1885,9 +1877,7 @@ def mock_get():
         text_data = f.read()
     mock_get = mock.patch(
         'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
+        return_value=text_response(text_data),
     )
 
     try:

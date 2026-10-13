@@ -10,6 +10,7 @@ from prometheus_client import CollectorRegistry, Counter, Gauge, generate_latest
 
 from datadog_checks.base import ensure_unicode
 from datadog_checks.dev import docker_run, get_docker_hostname
+from datadog_checks.dev.http import MockResponse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -62,13 +63,9 @@ def poll_mock():
     g3 = Gauge('metric3', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
     g3.labels(matched_label="foobar", node="host2", timestamp="456").set(float('inf'))
 
-    poll_mock_patch = mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: ensure_unicode(generate_latest(registry)).split("\n"),
-            headers={'Content-Type': "text/plain"},
-        ),
-    )
+    response = MockResponse(content=ensure_unicode(generate_latest(registry)), headers={'Content-Type': "text/plain"})
+    # `requests` sets the encoding from the response headers, `MockResponse` does not
+    response.encoding = 'utf-8'
+    poll_mock_patch = mock.patch('requests.Session.get', return_value=response)
     with poll_mock_patch:
         yield

@@ -560,18 +560,14 @@ def test_kubelet_credentials_update(monkeypatch, aggregator):
     }
     check = mock_kubelet_check(monkeypatch, [instance], kube_version=None)
 
-    get = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: mock_from_file('kubelet_metrics_1_14.txt').splitlines()
-    )
+    get = MockResponse(content=mock_from_file('kubelet_metrics_1_14.txt'))
     with mock.patch('requests.Session.get', return_value=get):
         check.check(instance)
 
     assert check._http_handlers[instance['kubelet_metrics_endpoint']].options['verify'] is True
     assert check._http_handlers[instance['cadvisor_metrics_endpoint']].options['verify'] is True
 
-    get = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: mock_from_file('kubelet_metrics_1_14.txt').splitlines()
-    )
+    get = MockResponse(content=mock_from_file('kubelet_metrics_1_14.txt'))
     kubelet_conn_info = {'url': 'http://127.0.0.1:10255', 'ca_cert': False}
     with (
         mock.patch('requests.Session.get', return_value=get),
@@ -1036,12 +1032,6 @@ def test_pod_expiration(monkeypatch, aggregator, tagger):
     aggregator.assert_metric("kubernetes.containers.running", value=1, tags=["pod_name:dd-agent-ntepl"])
 
 
-class MockedResponse(mock.Mock):
-    @staticmethod
-    def iter_lines(**kwargs):
-        return []
-
-
 def test_perform_kubelet_check(monkeypatch):
     check = KubeletCheck('kubelet', {}, [{}])
     check.kube_health_url = "http://127.0.0.1:10255/healthz"
@@ -1049,7 +1039,7 @@ def test_perform_kubelet_check(monkeypatch):
     monkeypatch.setattr(check, 'service_check', mock.Mock())
 
     instance_tags = ["one:1"]
-    get = MockedResponse()
+    get = mock.Mock(return_value=MockResponse())
     with mock.patch('requests.Session.get', side_effect=get):
         check._perform_kubelet_check(instance_tags)
 

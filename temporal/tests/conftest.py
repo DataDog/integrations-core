@@ -20,6 +20,7 @@ from datadog_checks.dev import (
 )
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.temporal import TemporalCheck
 
 INSTANCE = {
@@ -96,8 +97,6 @@ def mock_metrics():
         text_data = f.read()
     with mock.patch(
         'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
+        return_value=MockResponse(content=text_data, headers={'Content-Type': "text/plain"}),
     ):
         yield

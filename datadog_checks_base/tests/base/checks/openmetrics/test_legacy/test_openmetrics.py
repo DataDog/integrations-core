@@ -154,9 +154,7 @@ def test_process_metric_filtered(aggregator, mocked_prometheus_check, mocked_pro
 def test_poll_text_plain(mocked_prometheus_check, mocked_prometheus_scraper_config, text_data):
     """Tests poll using the text format"""
     check = mocked_prometheus_check
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
-    )
+    mock_response = MockResponse(content=text_data, headers={'Content-Type': text_content_type})
     with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         response = check.poll(mocked_prometheus_scraper_config)
         messages = list(check.parse_metric_family(response, mocked_prometheus_scraper_config))
@@ -1692,9 +1690,7 @@ def test_ignore_metrics_multiple_wildcards(
 
     config = check.create_scraper_configuration(instance)
 
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
-    )
+    mock_response = MockResponse(content=text_data, headers={'Content-Type': text_content_type})
     with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check.process(config)
 
@@ -1800,9 +1796,7 @@ def test_metrics_with_ignore_label_values(
     instance['ignore_metrics_by_labels'] = {'system': ['auth', 'recursive'], 'cache': ['*']}
     config = check.create_scraper_configuration(instance)
     expected_tags = ['cause:nxdomain']
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
-    )
+    mock_response = MockResponse(content=text_data, headers={'Content-Type': text_content_type})
     with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check.process(config)
 
@@ -1851,9 +1845,7 @@ def test_match_metrics_multiple_wildcards(
 
     config = check.create_scraper_configuration(instance)
 
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
-    )
+    mock_response = MockResponse(content=text_data, headers={'Content-Type': text_content_type})
     with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check.process(config)
 
@@ -2301,9 +2293,7 @@ def test_label_joins_gc(aggregator, mocked_prometheus_check, mocked_prometheus_s
     pvc_replace = re.compile(r'^kube_persistentvolumeclaim_.*\n', re.MULTILINE)
     text_data = pvc_replace.sub('', text_data)
 
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
-    )
+    mock_response = MockResponse(content=text_data, headers={'Content-Type': text_content_type})
     with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check.process(mocked_prometheus_scraper_config)
         assert 'dd-agent-1337' in mocked_prometheus_scraper_config['_label_mapping']['pod']
@@ -2461,9 +2451,7 @@ def test_label_join_state_change(aggregator, mocked_prometheus_check, mocked_pro
         'kube_pod_status_phase{namespace="default",phase="Test",pod="dd-agent-62bgh"} 1',
     )
 
-    mock_response = mock.MagicMock(
-        status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': text_content_type}
-    )
+    mock_response = MockResponse(content=text_data, headers={'Content-Type': text_content_type})
     with mock.patch('requests.Session.get', return_value=mock_response, __name__="get"):
         check.process(mocked_prometheus_scraper_config)
         assert 15 == len(mocked_prometheus_scraper_config['_label_mapping']['pod'])
@@ -2583,11 +2571,7 @@ def mock_filter_get():
         text_data = f.read()
     with mock.patch(
         'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={'Content-Type': text_content_type},
-        ),
+        return_value=MockResponse(content=text_data, headers={'Content-Type': text_content_type}),
     ):
         yield text_data
 

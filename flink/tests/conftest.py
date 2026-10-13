@@ -9,6 +9,7 @@ import pytest
 
 from datadog_checks.dev import docker_run, get_docker_hostname, get_e2e_discovery_metadata, get_here
 from datadog_checks.dev.conditions import CheckEndpoints
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.flink import FlinkCheck
 
 JOBMANAGER_PORT = 9249
@@ -53,10 +54,6 @@ def mock_metrics():
         text_data = f.read()
     with mock.patch(
         'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={'Content-Type': "text/plain"},
-        ),
+        return_value=MockResponse(content=text_data, headers={'Content-Type': "text/plain"}),
     ):
         yield

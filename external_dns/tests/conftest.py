@@ -7,6 +7,8 @@ from copy import deepcopy
 import mock
 import pytest
 
+from datadog_checks.dev.http import MockResponse
+
 from .common import FIXTURE_DIR
 
 INSTANCE = {'prometheus_url': 'http://localhost:7979/metrics', 'tags': ['custom:tag']}
@@ -20,9 +22,7 @@ def mock_external_dns():
 
     with mock.patch(
         'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split('\n'), headers={'Content-Type': 'text/plain'}
-        ),
+        return_value=MockResponse(content=text_data, headers={'Content-Type': 'text/plain'}),
     ):
         yield
 
