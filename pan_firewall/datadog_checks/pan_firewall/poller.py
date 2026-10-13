@@ -19,6 +19,7 @@ from .collectors import (  # noqa: F401  (importing the modules registers their 
     CollectContext,
     FirewallState,
     Sample,
+    counters,
     dataplane,
     ha,
     interfaces,

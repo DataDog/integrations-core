@@ -56,3 +56,55 @@ NDM_INTEGRATION = 'pan_firewall'
 NDM_VENDOR = 'Palo Alto Networks'
 NDM_OS_NAME = 'PAN-OS'
 NDM_DEVICE_TYPE = 'firewall'
+
+# The 26 counters of `counter.global`: raw name -> (category, aspect). The values are used only for a counter that
+# `show counter global` doesn't list, so it is still sent as 0 with the same tags; a listed counter takes both from the
+# response. Sources: the two captures, the lab by-name queries of 2026-10-09 (task L3b) and the lab probe of
+# `flow_host_ha_decap_err`. Never query with the `value all` filter (5,524 counters).
+GLOBAL_COUNTERS = {
+    'appid_unknown_fini_empty': ('appid', 'pktproc'),
+    'flow_arp_pkt_rcv': ('flow', 'arp'),
+    'flow_arp_pkt_xmt': ('flow', 'arp'),
+    'flow_arp_rcv_err': ('flow', 'arp'),
+    'flow_arp_resolve_xmt': ('flow', 'arp'),
+    'flow_fwd_l3_mcast_drop': ('flow', 'forward'),
+    'flow_fwd_l3_noarp': ('flow', 'forward'),
+    'flow_host_ha_decap_err': ('flow', 'mgmt'),
+    'flow_host_service_allow': ('flow', 'mgmt'),
+    'flow_host_service_deny': ('flow', 'mgmt'),
+    'flow_ipv6_disabled': ('flow', 'parse'),
+    'flow_lion_rcv_err': ('flow', 'offload'),
+    'flow_mld_pkt_rcv': ('flow', 'mld'),
+    'flow_mld_pkt_xmt': ('flow', 'mld'),
+    'flow_no_interface': ('flow', 'parse'),
+    'flow_rcv_dot1q_tag_err': ('flow', 'parse'),
+    'flow_rcv_err': ('flow', 'parse'),
+    'pkt_alloc': ('packet', 'resource'),
+    'pkt_recv': ('packet', 'pktproc'),
+    'pkt_recv_zero': ('packet', 'pktproc'),
+    'pkt_sent': ('packet', 'pktproc'),
+    'ssl_hsm_up_down_event_rcv': ('ssl', 'pktproc'),
+    'session_install_error': ('session', 'pktproc'),
+    'session_installed': ('session', 'resource'),
+    'session_peer_not_close': ('session', 'pktproc'),
+    'session_freed': ('session', 'resource'),
+}
+
+# The aspects `dropped_packets` sends as 0 when no drop counter of the response has them. Source: the testbed RFC
+# draft and the metrics-tags doc (the plan counts 13 without listing them). Any other aspect with a drop counter,
+# such as `mgmt`, is sent too.
+DROPPED_PACKET_ASPECTS = (
+    'arp',
+    'dos',
+    'forward',
+    'ipfrag',
+    'ipsec',
+    'offload',
+    'parse',
+    'pktproc',
+    'qos',
+    'resource',
+    'session',
+    'system',
+    'tunnel',
+)

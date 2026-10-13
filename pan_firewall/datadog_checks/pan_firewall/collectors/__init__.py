@@ -100,6 +100,7 @@ class FirewallState:
     # alarm has no direction (keyed by slot and sensor name).
     ha_warned: bool = False
     warned_sensors: set[str] = field(default_factory=set)
+    counters_warned: bool = False  # `show counter global` in an unknown shape, warned once
 
 
 @dataclass
