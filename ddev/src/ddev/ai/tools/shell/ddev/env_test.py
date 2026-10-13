@@ -20,7 +20,7 @@ class DdevEnvTestTool(CmdTool[EnvTestInput]):
     """Runs E2E tests for an integration. Always passes --dev and tests all environments by default.
     Pass a specific environment name to target a single environment."""
 
-    timeout = 600
+    timeout = 1800
 
     @property
     def name(self) -> str:
