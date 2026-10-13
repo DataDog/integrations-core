@@ -1,0 +1,1 @@
+Fail OpenMetrics checks when a response line is longer than 4 MiB, instead of reading the whole line into memory.

@@ -17,6 +17,7 @@ from requests.exceptions import ConnectionError
 
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.checks.openmetrics import parser_optimizations
+from datadog_checks.base.checks.openmetrics.line_size import limit_line_size
 from datadog_checks.base.checks.openmetrics.v2.first_scrape_handler import first_scrape_handler
 from datadog_checks.base.checks.openmetrics.v2.labels import LabelAggregator, get_label_normalizer
 from datadog_checks.base.checks.openmetrics.v2.transform import MetricTransformer
@@ -468,7 +469,7 @@ class OpenMetricsScraper:
         """
 
         kwargs['stream'] = True
-        return self.http.get(self.endpoint, **kwargs)
+        return limit_line_size(self.http.get(self.endpoint, **kwargs))
 
     def set_dynamic_tags(self, *tags):
         """

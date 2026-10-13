@@ -16,6 +16,7 @@ from prometheus_client.samples import Sample
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.checks import AgentCheck
 from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_families
+from datadog_checks.base.checks.openmetrics.line_size import limit_line_size
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import to_native_string
@@ -860,7 +861,7 @@ class OpenMetricsScraperMixin(object):
 
         http_handler = self.get_http_handler(scraper_config)
 
-        return http_handler.get(endpoint, stream=True, **kwargs)
+        return limit_line_size(http_handler.get(endpoint, stream=True, **kwargs))
 
     def get_hostname_for_sample(self, sample, scraper_config):
         """
