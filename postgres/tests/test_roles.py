@@ -5,6 +5,7 @@ import contextlib
 import json
 from collections import Counter
 from concurrent.futures.thread import ThreadPoolExecutor
+from unittest import mock
 
 import psycopg
 import pytest
@@ -197,44 +198,120 @@ def role_catalog(roles_instance):
             )
 
 
+def _emitter(base_event, array_names, chunk_size, byte_budget=4_000_000, log=None):
+    """Return an emitter and the list of chunks it submits, as (raw text, parsed JSON) pairs."""
+    chunks = []
+    emitter = RoleSnapshotEmitter(
+        base_event, array_names, lambda text: chunks.append((text, json.loads(text))), chunk_size, byte_budget, log
+    )
+    return emitter, chunks
+
+
 @pytest.mark.parametrize(
     'row_count, expected_payload_sizes',
     [
         (9_999, [9_999]),
-        (10_000, [10_000, 0]),
+        (10_000, [10_000]),
         (10_001, [10_000, 1]),
     ],
 )
 def test_role_snapshot_emitter_chunk_boundaries(row_count, expected_payload_sizes):
-    events = []
-    emitter = RoleSnapshotEmitter(
-        {'kind': 'pg_roles', 'collection_started_at': 1},
-        ('roles', 'memberships'),
-        events.append,
-        10_000,
-    )
+    emitter, chunks = _emitter({'kind': 'pg_roles', 'collection_started_at': 1}, ('roles', 'memberships'), 10_000)
 
     for index in range(row_count):
         array_name = 'roles' if index % 2 == 0 else 'memberships'
         emitter.append(array_name, {'index': index})
     emitter.flush_terminal()
 
+    events = [event for _, event in chunks]
     assert [len(event['roles']) + len(event['memberships']) for event in events] == expected_payload_sizes
     assert all(event['collection_started_at'] == 1 for event in events)
+    assert [event['collection_payload_index'] for event in events] == list(range(len(events)))
     assert all('collection_payloads_count' not in event for event in events[:-1])
     assert events[-1]['collection_payloads_count'] == len(events)
 
 
+def test_role_snapshot_emitter_never_splits_an_entity():
+    """Nested elements count toward the row budget, and a chunk closes before an entity that would not fit."""
+    emitter, chunks = _emitter({'kind': 'pg_role_privileges'}, ('objects',), chunk_size=5)
+
+    # Weights are 1 + nested_count: 2, 2, 4, 1, and 7, which alone exceeds the budget.
+    for name, nested_count in (('a', 1), ('b', 1), ('c', 3), ('d', 0), ('e', 6)):
+        emitter.append('objects', {'object_name': name}, {'privileges': '[]'}, nested_count)
+    emitter.flush_terminal()
+
+    assert [[obj['object_name'] for obj in event['objects']] for _, event in chunks] == [
+        ['a', 'b'],
+        ['c', 'd'],
+        ['e'],
+        [],
+    ]
+    assert chunks[-1][1]['collection_payloads_count'] == 4
+
+
+def test_role_snapshot_emitter_byte_budget():
+    """No chunk exceeds the byte budget, except one holding a single entity that is larger by itself."""
+    log = mock.MagicMock()
+    emitter, chunks = _emitter({'kind': 'pg_roles'}, ('roles',), chunk_size=10_000, byte_budget=1_000, log=log)
+
+    for index in range(20):
+        emitter.append('roles', {'role_name': f'role_{index:02d}', 'padding': 'x' * 80})
+    emitter.append('roles', {'role_name': 'huge', 'padding': 'x' * 3_000})
+    emitter.flush_terminal()
+
+    sizes = [len(text.encode()) for text, _ in chunks]
+    huge = next(i for i, (_, event) in enumerate(chunks) if any(r['role_name'] == 'huge' for r in event['roles']))
+    assert [r['role_name'] for r in chunks[huge][1]['roles']] == ['huge']
+    assert all(size <= 1_000 for i, size in enumerate(sizes) if i != huge)
+    assert sum(len(event['roles']) for _, event in chunks) == 21
+    log.warning.assert_called_once()
+
+
+def test_role_snapshot_emitter_measures_utf8_bytes():
+    """Raw JSON from Postgres can hold non-ASCII text, so the byte budget must count encoded bytes, not characters."""
+    emitter, chunks = _emitter({'kind': 'pg_roles'}, ('roles',), chunk_size=10_000, byte_budget=1_000)
+
+    # Each entity is about 310 characters but about 610 bytes, so only one fits within the budget.
+    for name in ('first', 'second'):
+        emitter.append('roles', {'role_name': name}, {'settings': '["' + 'é' * 300 + '"]'})
+    emitter.flush_terminal()
+
+    assert [[r['role_name'] for r in event['roles']] for _, event in chunks] == [['first'], ['second']]
+
+
+def test_role_snapshot_emitter_splices_raw_json():
+    emitter, chunks = _emitter({'kind': 'pg_role_privileges'}, ('objects',), 10_000)
+    name = 'a "quoted" \\ name\twith tab and é'
+
+    emitter.append(
+        'objects',
+        {'object_name': name, 'has_default_acl': False},
+        {'privileges': '[{"column_name":"é","grantee_oid":0}]', 'reads_from': '[]'},
+    )
+    emitter.append('objects', {}, {'privileges': '[]'})
+    emitter.flush_terminal()
+
+    assert chunks[0][1]['objects'] == [
+        {
+            'object_name': name,
+            'has_default_acl': False,
+            'privileges': [{'column_name': 'é', 'grantee_oid': 0}],
+            'reads_from': [],
+        },
+        {'privileges': []},
+    ]
+
+
 def test_role_snapshot_emitter_successful_empty_scope():
-    events = []
-    emitter = RoleSnapshotEmitter({'kind': 'pg_roles'}, ('roles', 'memberships'), events.append, 10_000)
+    emitter, chunks = _emitter({'kind': 'pg_roles'}, ('roles', 'memberships'), 10_000)
 
     emitter.flush_terminal()
 
-    assert events == [
+    assert [event for _, event in chunks] == [
         {
             'kind': 'pg_roles',
-            'timestamp': events[0]['timestamp'],
+            'timestamp': chunks[0][1]['timestamp'],
+            'collection_payload_index': 0,
             'roles': [],
             'memberships': [],
             'collection_payloads_count': 1,
@@ -243,17 +320,21 @@ def test_role_snapshot_emitter_successful_empty_scope():
 
 
 def test_role_snapshot_emitter_discard_does_not_complete_partial_snapshot():
-    events = []
-    emitter = RoleSnapshotEmitter({'kind': 'pg_roles'}, ('roles',), events.append, 2)
+    emitter, chunks = _emitter({'kind': 'pg_roles'}, ('roles',), 2)
 
     emitter.append('roles', {'role_name': 'first'})
     emitter.append('roles', {'role_name': 'second'})
     emitter.append('roles', {'role_name': 'discarded'})
     emitter.discard()
 
-    assert len(events) == 1
-    assert [role['role_name'] for role in events[0]['roles']] == ['first', 'second']
-    assert 'collection_payloads_count' not in events[0]
+    assert len(chunks) == 1
+    assert [role['role_name'] for role in chunks[0][1]['roles']] == ['first', 'second']
+    assert 'collection_payloads_count' not in chunks[0][1]
+    # A discarded snapshot can never be completed later.
+    with pytest.raises(RuntimeError):
+        emitter.flush_terminal()
+    with pytest.raises(RuntimeError):
+        emitter.append('roles', {'role_name': 'late'})
 
 
 def test_collect_roles_payload_contract(integration_check, roles_instance, role_catalog, aggregator):
@@ -271,6 +352,7 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
     oid = _role_oids(role_event)
     assert role_event['database_instance']
     assert role_event['collection_payloads_count'] == 1
+    assert role_event['collection_payload_index'] == 0
     assert role_event['collection_interval'] == 600
     assert role_event['roles']
     assert role_event['memberships']
@@ -336,6 +418,7 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
     privilege_event = privilege_events[0]
     assert privilege_event['database_name'] == 'datadog_test'
     assert privilege_event['collection_payloads_count'] == 1
+    assert privilege_event['collection_payload_index'] == 0
     assert privilege_event['object_privileges']
     assert privilege_event['objects']
     assert set(privilege_event['object_privileges'][0]) == {

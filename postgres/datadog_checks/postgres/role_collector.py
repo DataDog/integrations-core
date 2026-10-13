@@ -37,6 +37,11 @@ if TYPE_CHECKING:
 INSTANCE_ARRAYS = ("roles", "memberships", "settings")
 DATABASE_ARRAYS = ("object_privileges", "default_privileges", "objects", "object_dependencies")
 PAYLOAD_CHUNK_SIZE = 10_000
+# The intake accepts batches of up to 5 MB of uncompressed data; the margin leaves room for the forwarder to batch
+# events together.
+PAYLOAD_BYTE_BUDGET = 4_000_000
+# Approximate bytes a chunk adds around its entities: timestamp, payload index and count, and the array keys.
+CHUNK_OVERHEAD_BYTES = 256
 
 
 class RoleCollectionCancelled(Exception):
@@ -50,54 +55,110 @@ class PostgresRoleCollectorConfig:
     include_databases: list[str]
     exclude_databases: list[str]
     payload_chunk_size: int = PAYLOAD_CHUNK_SIZE
+    payload_byte_budget: int = PAYLOAD_BYTE_BUDGET
 
 
 class RoleSnapshotEmitter:
-    """Build and submit a chunked snapshot containing multiple entity arrays."""
+    """Build and submit a chunked snapshot of entities, such as roles or objects.
+
+    Each entity is serialized once, when appended, and a chunk is closed before an entity that would take it past the
+    row budget (entities plus their nested elements) or the byte budget. An entity is never split across chunks; one
+    that alone exceeds a budget is sent in a chunk by itself. Every chunk carries every array, possibly empty, and
+    `collection_payload_index`; only the final chunk carries `collection_payloads_count`, which commits the snapshot.
+    After `flush_terminal()` or `discard()`, the emitter accepts no more entities.
+    """
 
     def __init__(
         self,
         base_event: dict[str, Any],
         array_names: tuple[str, ...],
-        submit: Callable[[dict[str, Any]], None],
+        submit: Callable[[str], None],
         chunk_size: int,
+        byte_budget: int = PAYLOAD_BYTE_BUDGET,
+        log: Any = None,
     ) -> None:
         self._base_event = base_event
         self._array_names = array_names
         self._submit = submit
         self._chunk_size = chunk_size
-        self._buffers: dict[str, list[dict[str, Any]]] = {name: [] for name in array_names}
-        self._buffered_rows_count = 0
+        self._byte_budget = byte_budget
+        self._log = log
+        self._overhead_bytes = len(json.dumps(base_event, default=default_json_event_encoding).encode()) + (
+            CHUNK_OVERHEAD_BYTES
+        )
+        self._closed = False
+        self._clear_buffers()
         self.payloads_count = 0
         self.rows_count = 0
 
-    def append(self, array_name: str, row: dict[str, Any]) -> None:
-        self._buffers[array_name].append(row)
+    def append(
+        self,
+        array_name: str,
+        entity: dict[str, Any],
+        raw_json: dict[str, str] | None = None,
+        nested_count: int = 0,
+    ) -> None:
+        """Add an entity to `array_name`.
+
+        `raw_json` maps field names to values that are already serialized JSON, such as arrays built by the query;
+        they are spliced into the entity unchanged. `nested_count` is the number of elements in those values, which
+        counts toward the row budget.
+        """
+        if self._closed:
+            raise RuntimeError("The role snapshot is already complete or discarded")
+        text = json.dumps(entity, default=default_json_event_encoding)
+        if raw_json:
+            fields = ",".join(f"{json.dumps(name)}:{value}" for name, value in raw_json.items())
+            text = f"{text[:-1]},{fields}}}" if entity else f"{{{fields}}}"
+        size = len(text.encode())
+        weight = 1 + nested_count
+        if self._buffered_rows_count and (
+            self._buffered_rows_count + weight > self._chunk_size
+            or self._buffered_bytes + size > self._byte_budget - self._overhead_bytes
+        ):
+            self._flush(is_last=False)
+        self._buffers[array_name].append(text)
+        self._buffered_rows_count += weight
+        self._buffered_bytes += size + 1
         self.rows_count += 1
-        self._buffered_rows_count += 1
-        if self._buffered_rows_count >= self._chunk_size:
+        # An entity that alone exceeds a budget is sent at once, so no other entity joins its chunk.
+        if self._buffered_rows_count == weight and (
+            weight > self._chunk_size or size > self._byte_budget - self._overhead_bytes
+        ):
+            if size > self._byte_budget - self._overhead_bytes and self._log is not None:
+                self._log.warning(
+                    "A single %s entity serializes to %d bytes, above the %d-byte chunk budget; it is sent alone",
+                    array_name,
+                    size,
+                    self._byte_budget,
+                )
             self._flush(is_last=False)
 
     def flush_terminal(self) -> None:
+        if self._closed:
+            raise RuntimeError("The role snapshot is already complete or discarded")
         self._flush(is_last=True)
+        self._closed = True
 
     def discard(self) -> None:
         self._clear_buffers()
+        self._closed = True
 
     def _clear_buffers(self) -> None:
-        self._buffers = {name: [] for name in self._array_names}
+        self._buffers: dict[str, list[str]] = {name: [] for name in self._array_names}
         self._buffered_rows_count = 0
+        self._buffered_bytes = 0
 
     def _flush(self, is_last: bool) -> None:
         event = dict(self._base_event)
         event["timestamp"] = now_ms()
-        event.update(self._buffers)
-
+        event["collection_payload_index"] = self.payloads_count
         self.payloads_count += 1
         if is_last:
             event["collection_payloads_count"] = self.payloads_count
-
-        self._submit(event)
+        head = json.dumps(event, default=default_json_event_encoding)[:-1]
+        arrays = ",".join(f'{json.dumps(name)}:[{",".join(rows)}]' for name, rows in self._buffers.items())
+        self._submit(f"{head},{arrays}}}")
         self._clear_buffers()
 
 
@@ -392,12 +453,11 @@ class PostgresRoleCollector:
         return RoleSnapshotEmitter(
             event,
             array_names,
-            self._submit_event,
+            self._check.database_monitoring_metadata,
             self._config.payload_chunk_size,
+            self._config.payload_byte_budget,
+            self._log,
         )
-
-    def _submit_event(self, event: dict[str, Any]) -> None:
-        self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
     def _record_emitter(self, emitter: RoleSnapshotEmitter) -> None:
         self._rows_count += emitter.rows_count
