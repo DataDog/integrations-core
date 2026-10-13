@@ -17,8 +17,9 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class FirewallTarget:
-    """A firewall to poll. `serial`, `hostname`, `family` and `reported_ip` come from Panorama discovery (None in static
-    mode). The firewall's own `show system info` takes over `hostname` and `family` once it answers.
+    """A firewall to poll. `serial`, `hostname`, `family`, `model`, `sw_version` and `reported_ip` come from Panorama
+    discovery (None in static mode). The firewall's own `show system info` takes over `hostname`, `family`, `model`
+    and `sw_version` once it answers.
 
     `reported_ip` is the Panorama `ip-address` (the `device_ip` tag); `ip` is the address the check connects to.
     """
@@ -30,6 +31,14 @@ class FirewallTarget:
     hostname: str | None = None
     family: str | None = None
     reported_ip: str | None = None
+    model: str | None = None
+    sw_version: str | None = None
+
+    @property
+    def poller_key(self) -> tuple[object, ...]:
+        """What a poller is built from: a target with another key needs a new poller. The descriptive fields
+        (`hostname`, `family`, `model`, `sw_version`) can change on a poller that keeps running."""
+        return (self.ip, self.port, self.credentials, self.serial, self.reported_ip)
 
 
 class FirewallSource(Protocol):

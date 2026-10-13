@@ -215,6 +215,8 @@ class PanoramaFirewallSource:
             serial=firewall.serial,
             hostname=firewall.hostname,
             family=firewall.family,
+            model=firewall.model,
+            sw_version=firewall.sw_version,
             reported_ip=str(reported) if reported else None,
         )
 

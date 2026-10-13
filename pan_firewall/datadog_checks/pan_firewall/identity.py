@@ -81,7 +81,8 @@ def global_tags(
 ) -> list[str]:
     """Tags on every metric of a firewall. Empty values are left out; the serial-based tags need a known serial.
 
-    `identity` is None before a static firewall first answers; Panorama discovery fills the serial, hostname and family.
+    `identity` is None before a static firewall first answers; Panorama discovery fills the serial, hostname,
+    family, model and version until the firewall's own answer is known.
     """
     serial = (identity.serial if identity else None) or target.serial
     hostname = (identity.hostname if identity else None) or target.hostname
@@ -91,10 +92,10 @@ def global_tags(
         'device_id': serial,
         'device_hostname': hostname,
         'device_serial': serial,
-        'device_model': identity.model if identity else None,
+        'device_model': (identity.model if identity else None) or target.model,
         'device_family': (identity.family if identity else None) or target.family,
         'device_vendor': DEVICE_VENDOR_TAG,
-        'os_version': identity.sw_version if identity else None,
+        'os_version': (identity.sw_version if identity else None) or target.sw_version,
         'multi_vsys': _bool_tag(identity.multi_vsys) if identity else None,
         'advanced_routing': _bool_tag(identity.advanced_routing) if identity else None,
     }

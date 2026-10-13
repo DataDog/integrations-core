@@ -320,6 +320,19 @@ def test_override_supplies_the_ip_of_an_entry_without_one(dd_run_check, aggregat
     assert set(metrics_by_ip(aggregator, 'can_connect')) == {FW_A_POLLED}
 
 
+def test_renamed_firewall_keeps_its_poller_and_gets_the_new_hostname(dd_run_check, fake_panos):
+    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml((FW_A_SERIAL, 'fw-a', FW_A_REPORTED, 'yes')))
+    check = new_check()
+    dd_run_check(check)
+    poller = check._pollers[FW_A_POLLED]
+
+    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml((FW_A_SERIAL, 'fw-renamed', FW_A_REPORTED, 'yes')))
+    dd_run_check(check)
+
+    assert check._pollers[FW_A_POLLED] is poller
+    assert poller.target.hostname == 'fw-renamed'
+
+
 def test_firewall_replaced_at_the_same_ip_is_reported_under_its_new_serial(dd_run_check, aggregator, fake_panos):
     check = new_check(firewall_ip_overrides={**OVERRIDES, 'SYNTH-RMA-0001': FW_A_POLLED})
     dd_run_check(check)

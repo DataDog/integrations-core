@@ -112,6 +112,17 @@ def test_global_tags_take_serial_and_hostname_from_panorama_discovery():
     )
 
 
+def test_global_tags_use_discovery_model_and_version_until_the_firewall_answers():
+    target = dataclasses.replace(PANORAMA_TARGET, model='PA-DISCOVERED', sw_version='10.0.0')
+
+    before = global_tags(None, target, 'default', [])
+    after = global_tags(FW_A, target, 'default', [])
+
+    assert {'device_model:PA-DISCOVERED', 'os_version:10.0.0'} <= set(before)
+    assert {'device_model:PA-VM', 'os_version:11.1.13-h12'} <= set(after)
+    assert not {'device_model:PA-DISCOVERED', 'os_version:10.0.0'} & set(after)
+
+
 @pytest.mark.parametrize(
     'identity, rows_file, configured, expected',
     [
