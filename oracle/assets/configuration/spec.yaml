@@ -31,7 +31,7 @@ files:
       description: |
         Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
 
-        When set to `true`, the tags from the agent host are added to the check's tags for all instances.
+        When set to `true`, the tags from the agent host are added to this instance's tags.
         This option takes precedence over the `propagate_agent_tags` option in `init_config`.
       value:
         example: false
@@ -212,7 +212,8 @@ files:
           fleet_configurable: true
         - name: db_rows_limit
           description: |
-            The maximum number of rows to fetch in a single query metrics collection.
+            The maximum number of rows to fetch from each of the queries used to collect query metrics.
+            Query metrics are collected with two queries, so a single collection can fetch up to twice this value.
           value:
             type: integer
             example: 10000
@@ -226,7 +227,8 @@ files:
           fleet_configurable: true
         - name: max_run_time
           description: |
-            The maximum run time in seconds for a single query metrics collection.
+            The maximum time in seconds to spend collecting execution plans for a single query metrics collection.
+            This option only affects execution plan collection and has no effect when execution plans are disabled.
           value:
             type: integer
             example: 20
