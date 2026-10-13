@@ -62,6 +62,20 @@ METRIC_MAP = {
     'kyverno_policy_results': 'policy.results',
     # Not a counter, but a gauge
     'kyverno_policy_rule_info_total': 'policy.rule.info',
+    # CEL-based policy metrics. These are policy-level rather than rule-level, so they carry no
+    # rule_name/rule_type/policy_type labels and use execution_cause/result in place of the legacy
+    # rule_execution_cause/rule_result. They replace the kyverno_policy_* metrics above, which go
+    # silent once the legacy CRDs are removed.
+    'kyverno_validating_policy_results': 'validating.policy.results',
+    'kyverno_validating_policy_execution_duration_seconds': 'validating.policy.execution.duration.seconds',
+    'kyverno_mutating_policy_results': 'mutating.policy.results',
+    'kyverno_mutating_policy_execution_duration_seconds': 'mutating.policy.execution.duration.seconds',
+    'kyverno_image_validating_policy_results': 'image.validating.policy.results',
+    'kyverno_image_validating_policy_execution_duration_seconds': 'image.validating.policy.execution.duration.seconds',
+    'kyverno_generating_policy_results': 'generating.policy.results',
+    'kyverno_generating_policy_execution_duration_seconds': 'generating.policy.execution.duration.seconds',
+    'kyverno_deleting_controller_deletedobjects': 'deleting.controller.deletedobjects',
+    'kyverno_deleting_controller_errors': 'deleting.controller.errors',
 }
 
 
