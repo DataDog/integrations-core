@@ -290,6 +290,7 @@ class ResponseWrapper(ObjectProxy):
         if chunk_size is None:
             chunk_size = self.__default_chunk_size
 
+        # Not implemented yet for custom delimiters, which no check uses
         if delimiter is None:
             limit_line_size(self.__wrapped__, self.__max_line_size)
 
