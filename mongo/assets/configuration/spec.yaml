@@ -79,6 +79,9 @@ files:
       value:
         type: string
         example: mongodb
+        enum:
+        - mongodb
+        - mongodb+srv
     - name: database
       description: |
         The database to collect metrics from.
@@ -264,6 +267,11 @@ files:
           value:
             type: string
             example: queryPlanner
+            enum:
+            - queryPlanner
+            - executionStats
+            - allPlansExecution
+            - disabled
     - name: slow_operations
       description: Configure collection of MongoDB slow operations.
       fleet_configurable: true
@@ -301,6 +309,11 @@ files:
           value:
             type: string
             example: queryPlanner
+            enum:
+            - queryPlanner
+            - executionStats
+            - allPlansExecution
+            - disabled
     - name: collect_schemas
       description: Configure collection of MongoDB schemas (inferred) by sampling documents.
       fleet_configurable: true

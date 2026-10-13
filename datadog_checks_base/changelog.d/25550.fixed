@@ -1,0 +1,1 @@
+Report errors raised by checks running with `process_isolation` instead of showing them as OK.

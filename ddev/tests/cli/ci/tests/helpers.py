@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import re
 from collections.abc import Iterable, Sequence
 
@@ -27,15 +28,28 @@ from ddev.event_bus.orchestrator import BaseMessage
 from ddev.monitoring import MonitoringRuntime
 from ddev.utils.git import ChangedFile, ChangeType
 from ddev.utils.github_async import GitHubResponse
-from ddev.utils.github_async.models import IssueComment
+from ddev.utils.github_async.models import IssueComment, WorkflowJob
 from ddev.utils.github_async.models.workflow import WorkflowJobConclusion
 from ddev.utils.junit import JUnitCounts, JUnitReport, JUnitResult, JUnitResultKind, JUnitTestCase, JUnitTestSuite
 from ddev.utils.platform import PlatformName
-from tests.helpers.github_async import make_response
+from tests.helpers.github_async import make_response, make_workflow_job
 from tests.helpers.monitoring import RecordingSink
 
 DEFAULT_PYTHON_VERSION = "3.13"
 DEFAULT_RUNNER_LABELS = ("ubuntu-22.04",)
+
+RUNNER_NAME = "github-actions-runner"
+
+
+def timed_out_job(name: str) -> WorkflowJob:
+    """A job GitHub reports `cancelled` after running past the test jobs' 120-minute limit."""
+    return make_workflow_job(
+        name=name,
+        conclusion=WorkflowJobConclusion.CANCELLED,
+        runner_name=RUNNER_NAME,
+        started_at="2026-01-01T10:00:00Z",
+        completed_at="2026-01-01T12:00:30Z",
+    )
 
 
 def env(
@@ -114,10 +128,10 @@ def make_batch(*batch_jobs: BatchJob, batch_id: str = "batch-01") -> TestBatch:
     )
 
 
-def recording_runtime() -> tuple[MonitoringRuntime, RecordingSink]:
+def recording_runtime(handler: logging.Handler | None = None) -> tuple[MonitoringRuntime, RecordingSink]:
     """A monitoring runtime delivering every component's metrics into one recording sink."""
     sink = RecordingSink()
-    monitoring = MonitoringRuntime(metrics_sink=sink, metrics_tag_projector=metric_tag_mapping)
+    monitoring = MonitoringRuntime(console_handler=handler, metrics_sink=sink, metrics_tag_projector=metric_tag_mapping)
     return monitoring, sink
 
 
