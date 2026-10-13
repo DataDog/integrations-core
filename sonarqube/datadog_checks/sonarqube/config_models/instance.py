@@ -103,6 +103,7 @@ class InstanceConfig(BaseModel):
     key_store_password: Optional[str] = None
     key_store_path: Optional[str] = None
     log_requests: Optional[bool] = None
+    max_line_size: Optional[float] = None
     min_collection_interval: Optional[float] = None
     name: Optional[str] = None
     ntlm_domain: Optional[str] = None
