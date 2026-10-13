@@ -16,7 +16,15 @@ import requests
 from requests import Response
 
 from .constants import AUTH_ERROR_CODES, PARSE_ERROR_CODE
-from .errors import PanosApiError, PanosAuthError, PanosConnectionError, PanosError, PanosTimeout
+from .errors import (
+    PanosApiError,
+    PanosAuthError,
+    PanosConnectionError,
+    PanosError,
+    PanosSkipped,
+    PanosTimeout,
+    PanosUnreachable,
+)
 from .xml_utils import check_response, parse_response, text
 
 if TYPE_CHECKING:
@@ -32,7 +40,10 @@ __all__ = [
     'PanosClient',
     'PanosConnectionError',
     'PanosError',
+    'PanosSkipped',
     'PanosTimeout',
+    'PanosUnreachable',
+    'RequestCounter',
     'api_url',
 ]
 
@@ -72,13 +83,39 @@ def transport_errors(url: str) -> Iterator[None]:
         raise PanosConnectionError(f'request to {host} failed: {e}') from None
 
 
+class RequestCounter:
+    """Counts the requests sent, keygen and retries included: what the device sees, as `post_api` is the one sender."""
+
+    def __init__(self) -> None:
+        self._count = 0
+        self._lock = threading.Lock()
+
+    def add(self) -> None:
+        with self._lock:
+            self._count += 1
+
+    def take(self) -> int:
+        """Return the requests counted since the previous call, and start again from zero."""
+        with self._lock:
+            count, self._count = self._count, 0
+        return count
+
+
 def post_api(
-    http: RequestsWrapper, url: str, data: dict[str, str], *, key: str | None = None, stream: bool = False
+    http: RequestsWrapper,
+    url: str,
+    data: dict[str, str],
+    *,
+    key: str | None = None,
+    stream: bool = False,
+    counter: RequestCounter | None = None,
 ) -> Response:
     """POST form `data` to the XML API. The key, when given, goes only in the `X-PAN-KEY` header."""
     options: dict[str, Any] = {'data': data, 'stream': stream}
     if key is not None:
         options['extra_headers'] = {KEY_HEADER: key}
+    if counter is not None:
+        counter.add()
     with transport_errors(url):
         return http.post(url, **options)
 
@@ -120,13 +157,14 @@ class CallStats:
     `answered` is True once any call got a PAN-OS response, successful or `status="error"` (an auth rejection
     included); transport failures and bodies that are not PAN-OS XML (`panos_response` False) leave it False.
     `auth_rejected` is True once a call failed with PanosAuthError after the key renewal. `timed_out` is True once a
-    call raised PanosTimeout.
+    call raised PanosTimeout, and `connection_error` is the message of the first PanosConnectionError.
     """
 
     calls: int = 0
     answered: bool = False
     auth_rejected: bool = False
     timed_out: bool = False
+    connection_error: str | None = None
 
 
 class PanosClient:
@@ -135,8 +173,9 @@ class PanosClient:
     Every call holds one of `max_in_flight` slots for its whole duration, including any keygen and the retry, so
     the device never sees more than `max_in_flight` concurrent requests from this client.
 
-    Once a call times out, every later call raises PanosTimeout at once, without contacting the device, until the
-    next `take_stats()`: a hung device costs one timeout per run, not one per call.
+    Once a call times out or cannot connect, every later call raises PanosSkipped at once, without contacting the
+    device, until the next `take_stats()`: a hung device costs one timeout per run, not one per call, and a refused
+    one costs one attempt.
     """
 
     def __init__(
@@ -147,12 +186,14 @@ class PanosClient:
         keys: KeyManager,
         log: CheckLoggingAdapter,
         max_in_flight: int = 2,
+        counter: RequestCounter | None = None,
     ):
         self._http = http
         self._host = host
         self._url = api_url(host, port)
         self._keys = keys
         self._log = log
+        self._counter = counter
         self._slots = threading.BoundedSemaphore(max_in_flight)
         self._renew_lock = threading.Lock()
         self._stats = CallStats()
@@ -185,7 +226,7 @@ class PanosClient:
         exhausted or closed.
         """
         with self._slots:
-            self._fail_fast_after_timeout()
+            self._fail_fast_if_unreachable()
             resp, root, events = self._authorized(lambda key: self._open_stream(self._log_get(job_id), key))
             with resp:
                 yield from _log_elements(root, events, with_status=False)
@@ -200,7 +241,7 @@ class PanosClient:
         call the client again inside it.
         """
         with self._slots:
-            self._fail_fast_after_timeout()
+            self._fail_fast_if_unreachable()
             resp, root, events = self._authorized(lambda key: self._open_stream(self._log_get(job_id), key))
             with resp:
                 elements = _log_elements(root, events, with_status=True)
@@ -216,8 +257,10 @@ class PanosClient:
 
     def _call(self, params: dict[str, str]) -> Element:
         with self._slots:
-            self._fail_fast_after_timeout()
-            return self._authorized(lambda key: read_response(post_api(self._http, self._url, params, key=key)))
+            self._fail_fast_if_unreachable()
+            return self._authorized(
+                lambda key: read_response(post_api(self._http, self._url, params, key=key, counter=self._counter))
+            )
 
     def take_stats(self) -> CallStats:
         """Return the stats of the calls made since the previous call, and start new ones."""
@@ -231,10 +274,26 @@ class PanosClient:
         with self._stats_lock:
             return self._stats.timed_out
 
-    def _fail_fast_after_timeout(self) -> None:
-        # Checked once the slot is held: a call waiting for the slot of the call that timed out does not go out either.
-        if self.timed_out:
-            raise PanosTimeout(f'not calling {self._host}: an earlier call timed out')
+    @property
+    def connection_error(self) -> str | None:
+        """The message of the first call that could not connect since the last `take_stats()`."""
+        with self._stats_lock:
+            return self._stats.connection_error
+
+    @property
+    def unreachable(self) -> bool:
+        """True once a call timed out or could not connect since the last `take_stats()`."""
+        with self._stats_lock:
+            return self._stats.timed_out or self._stats.connection_error is not None
+
+    def _fail_fast_if_unreachable(self) -> None:
+        # Checked once the slot is held: a call waiting for the slot of the call that failed does not go out either.
+        with self._stats_lock:
+            timed_out, connection_error = self._stats.timed_out, self._stats.connection_error
+        if timed_out:
+            raise PanosSkipped(f'not calling {self._host}: an earlier call timed out')
+        if connection_error is not None:
+            raise PanosSkipped(f'not calling {self._host}: an earlier call could not connect')
 
     def _authorized(self, attempt: Callable[[str], T]) -> T:
         """Run `attempt` through `_with_renewal` and record its outcome in the call stats."""
@@ -255,6 +314,8 @@ class PanosClient:
                 self._stats.auth_rejected = True
             if isinstance(error, PanosTimeout):
                 self._stats.timed_out = True
+            if isinstance(error, PanosConnectionError) and self._stats.connection_error is None:
+                self._stats.connection_error = str(error)
 
     def _with_renewal(self, attempt: Callable[[str], T]) -> T:
         """Run `attempt` with the current key; on an auth failure, renew the key once and run it again."""
@@ -283,7 +344,7 @@ class PanosClient:
         An error response is read to the end and raised here, inside `_authorized`, so a rejected key is renewed
         before any entry reaches the caller.
         """
-        resp = post_api(self._http, self._url, params, key=key, stream=True)
+        resp = post_api(self._http, self._url, params, key=key, stream=True, counter=self._counter)
         try:
             if resp.status_code >= 400:
                 with transport_errors(self._url):

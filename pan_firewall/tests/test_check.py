@@ -99,7 +99,7 @@ def test_good_run_collects_identity_and_reports_connected(dd_run_check, aggregat
         ('op', SYSTEM_INFO_CMD, True),
         ('op', INTERFACE_ALL_CMD, True),
     ]
-    assert re.search(rf'pan_firewall {re.escape(FW_A_IP)}: 3 calls in \d+\.\d\ds', caplog.text)
+    assert re.search(rf'pan_firewall {re.escape(FW_A_IP)}: 4 requests in \d+\.\d\ds', caplog.text)
 
 
 # Transport failures, and HTTP errors whose body is not a PAN-OS response: none of them means the firewall API answered,
@@ -257,8 +257,17 @@ def test_removed_firewall_poller_is_dropped(dd_run_check):
     assert list(check._pollers) == [FW_A_IP]
 
 
-def test_timeout_skips_the_remaining_collectors_of_that_firewall_only(
-    dd_run_check, aggregator, fake_panos, monkeypatch, caplog
+@pytest.mark.parametrize(
+    'failure, warning',
+    [
+        pytest.param('timeout', 'bgp timed out after 30s', id='timeout'),
+        pytest.param(
+            'refused', 'bgp failed (cannot connect to 192.0.2.10:443: connection refused)', id='connection-refused'
+        ),
+    ],
+)
+def test_unreachable_firewall_skips_the_remaining_collectors_of_that_firewall_only(
+    dd_run_check, aggregator, fake_panos, monkeypatch, caplog, failure, warning
 ):
     check = new_check(make_instance(firewalls=[FW_A_IP, FW_B_IP]))
     # Caches the identity; no collector is registered yet, so the stubs below are all due on the next run.
@@ -268,7 +277,7 @@ def test_timeout_skips_the_remaining_collectors_of_that_firewall_only(
 
     def bgp(ctx):
         if ctx.identity.serial == FW_A_SERIAL:
-            # dataplane is in flight on the other worker when the call times out.
+            # dataplane is in flight on the other worker when the call fails.
             dataplane_started.wait(5)
             try:
                 ctx.client.op(SYSTEM_INFO_CMD)
@@ -280,30 +289,34 @@ def test_timeout_skips_the_remaining_collectors_of_that_firewall_only(
         if ctx.identity.serial == FW_A_SERIAL:
             dataplane_started.set()
             bgp_failed.wait(5)
+            # Its call fails fast, without waiting: it is skipped, not the one that timed out.
+            ctx.client.op(SYSTEM_INFO_CMD)
         return [stub_sample('dataplane')]
 
     register_stubs(monkeypatch, bgp=bgp, dataplane=dataplane)
-    # Only bgp's call times out: the jobs check before the collectors answers.
-    fake_panos.answer_op(FW_A_IP, SYSTEM_INFO_CMD, FAILURES['timeout'])
+    # Only bgp's call fails: the jobs check before the collectors answers.
+    fake_panos.answer_op(FW_A_IP, SYSTEM_INFO_CMD, FAILURES[failure])
     aggregator.reset()
     caplog.clear()
+    calls_before = len(fake_panos.calls_to(FW_A_IP))
 
     dd_run_check(check)
 
-    # The collector already in flight finishes; the ones not started yet are skipped.
-    assert stub_runs(aggregator) == {(FW_A_IP, 'dataplane'), *((FW_B_IP, name) for name in STUBS)}
+    assert stub_runs(aggregator) == {(FW_B_IP, name) for name in STUBS}
     assert can_connect_by_ip(aggregator) == {FW_A_IP: 1, FW_B_IP: 1}
+    # The jobs check and the one call that failed: nothing else reached the firewall.
+    assert len(fake_panos.calls_to(FW_A_IP)) - calls_before == 2
     warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
     assert warnings == [
-        f'pan_firewall {FW_A_IP}: bgp timed out after 30s; skipped for this run: interfaces, system_resources'
+        f'pan_firewall {FW_A_IP}: {warning}; skipped for this run: dataplane, interfaces, system_resources'
     ]
 
-    # The skipped collectors stay due; the ones that ran, timed out or not, wait for their interval.
+    # The skipped collectors stay due; the one that failed waits for its interval.
     fake_panos.recover(FW_A_IP)
     aggregator.reset()
     dd_run_check(check)
 
-    assert stub_runs(aggregator) == {(FW_A_IP, 'interfaces'), (FW_A_IP, 'system_resources')}
+    assert stub_runs(aggregator) == {(FW_A_IP, name) for name in ('dataplane', 'interfaces', 'system_resources')}
 
 
 def test_identity_timeout_skips_every_collector(dd_run_check, aggregator, fake_panos, monkeypatch, caplog):
@@ -503,3 +516,13 @@ def test_identity_is_read_again_on_the_next_run_after_the_key_is_regenerated(dd_
 
     # The identity is not due for 30 minutes, yet it is read.
     assert SYSTEM_INFO_CMD in [c.cmd for c in fake_panos.calls[calls_before:]]
+
+
+def test_request_count_is_logged_even_when_the_run_fails(dd_run_check, fake_panos, monkeypatch, caplog):
+    caplog.set_level(logging.DEBUG)
+    monkeypatch.setattr(FirewallPoller, '_send_metadata', lambda self, outcome: raise_(RuntimeError('boom')))
+
+    dd_run_check(new_check())
+
+    # The keygen counts as a request too.
+    assert re.search(rf'pan_firewall {re.escape(FW_A_IP)}: 4 requests in', caplog.text)

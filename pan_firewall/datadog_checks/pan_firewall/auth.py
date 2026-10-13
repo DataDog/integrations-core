@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 from urllib.parse import urlsplit
 
-from .api import post_api, read_response
+from .api import RequestCounter, post_api, read_response
 from .constants import PARSE_ERROR_CODE
 from .errors import PanosApiError, PanosAuthError
 from .xml_utils import text
@@ -36,13 +36,14 @@ class KeyManager:
     without contacting the device, so bad credentials cost one login attempt per run and never trigger a lockout.
     """
 
-    def __init__(self, http: RequestsWrapper, base_url: str, creds: Credentials):
+    def __init__(self, http: RequestsWrapper, base_url: str, creds: Credentials, counter: RequestCounter | None = None):
         if creds.api_key is None and not (creds.username and creds.password):
             raise ValueError('Credentials need either `username` and `password`, or `api_key`')
         self._http = http
         self._base_url = base_url
         self._host = urlsplit(base_url).netloc
         self._creds = creds
+        self._counter = counter
         self._key: str | None = creds.api_key
         self._lock = threading.Lock()
         self._keygen_rejected = False
@@ -90,7 +91,7 @@ class KeyManager:
     def _keygen(self) -> str:
         # The credentials go in the POST body, never in the URL.
         data = {'type': 'keygen', 'user': self._creds.username or '', 'password': self._creds.password or ''}
-        resp = post_api(self._http, self._base_url, data)
+        resp = post_api(self._http, self._base_url, data, counter=self._counter)
         try:
             root = read_response(resp)
         except PanosAuthError as e:

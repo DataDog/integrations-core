@@ -26,9 +26,20 @@ class PanosAuthError(PanosApiError):
     """PAN-OS rejected the credentials or the API key: HTTP 403, or `code="403"` / `code="16"` in the body."""
 
 
-class PanosTimeout(PanosError):
+class PanosUnreachable(PanosError):
+    """A call did not get to PAN-OS: it timed out, could not connect, or was not made because an earlier one failed so.
+
+    The rest of the run is cut off: `PanosClient` fails every later call at once, with `PanosSkipped`.
+    """
+
+
+class PanosTimeout(PanosUnreachable):
     """A call to PAN-OS did not answer within the configured timeout."""
 
 
-class PanosConnectionError(PanosError):
+class PanosConnectionError(PanosUnreachable):
     """PAN-OS could not be reached: connection refused, DNS, TLS handshake, or a broken stream."""
+
+
+class PanosSkipped(PanosUnreachable):
+    """A call that was not made, because an earlier call of the run timed out or could not connect."""

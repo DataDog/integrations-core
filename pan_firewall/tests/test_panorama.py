@@ -266,7 +266,7 @@ def test_connection_log_lines_name_the_polled_ip_when_it_differs_from_the_report
     dd_run_check(new_check())
 
     assert re.search(
-        rf'pan_firewall {re.escape(FW_A_REPORTED)} \(polled at {re.escape(FW_A_POLLED)}\): \d+ calls in', caplog.text
+        rf'pan_firewall {re.escape(FW_A_REPORTED)} \(polled at {re.escape(FW_A_POLLED)}\): \d+ requests in', caplog.text
     )
 
 

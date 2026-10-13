@@ -145,6 +145,21 @@ def test_jobs_check_error_collects_anyway_and_warns_once_per_episode(firewall):
     assert firewall.run_at(360) == ({'bgp', 'dataplane'}, [warning])
 
 
+def test_jobs_check_refused_cuts_off_the_run_with_one_warning(firewall, aggregator, fake_panos):
+    firewall.answer_jobs(FAILURES['refused'])
+    calls_before = len(fake_panos.calls)
+
+    ran, warnings = firewall.run_at(0)
+
+    assert ran == set()
+    assert warnings == [
+        f'pan_firewall {FW_A_IP}: jobs failed (cannot connect to {FW_A_IP}:443: connection refused); '
+        f'skipped for this run: {", ".join(STUBS)}'
+    ]
+    assert [c.cmd for c in fake_panos.calls[calls_before:]] == [JOBS_PENDING_CMD]
+    assert can_connect_by_ip(aggregator) == {FW_A_IP: 0}
+
+
 def test_jobs_check_timeout_cuts_off_the_run(firewall, aggregator, fake_panos):
     firewall.answer_jobs(FAILURES['timeout'])
     calls_before = len(fake_panos.calls)

@@ -15,6 +15,7 @@ from datadog_checks.pan_firewall.api import (
     PanosClient,
     PanosConnectionError,
     PanosError,
+    PanosSkipped,
     PanosTimeout,
     api_url,
 )
@@ -275,14 +276,21 @@ def test_transport_errors_are_typed_and_name_the_host(raised, expected, message)
         pytest.param(lambda client: list(client.iter_log_entries('2')), id='log-stream'),
     ],
 )
-def test_calls_after_a_timeout_fail_fast_until_the_stats_are_taken(call):
-    http = FakeHttp(api=[requests.exceptions.ReadTimeout('read timed out'), (200, THREAT_LOGS)])
+@pytest.mark.parametrize(
+    'failure, error',
+    [
+        pytest.param(requests.exceptions.ReadTimeout('read timed out'), PanosTimeout, id='timeout'),
+        pytest.param(requests.exceptions.ConnectionError('refused'), PanosConnectionError, id='refused'),
+    ],
+)
+def test_calls_after_a_timeout_or_refusal_fail_fast_until_the_stats_are_taken(call, failure, error):
+    http = FakeHttp(api=[failure, (200, THREAT_LOGS)])
     client, _ = make_client(http, STATIC_CREDS)
-    with pytest.raises(PanosTimeout):
+    with pytest.raises(error):
         client.op(SYSTEM_INFO_CMD)
 
     # The firewall is not asked again in the same run: a hung firewall costs one timeout, not one per call.
-    with pytest.raises(PanosTimeout):
+    with pytest.raises(PanosSkipped):
         call(client)
     assert len(http.calls) == 1
 
