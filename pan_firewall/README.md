@@ -4,6 +4,8 @@
 
 Datadog's Palo Alto Networks Firewall Log integration allows customers to ingest, parse, and analyze Palo Alto Networks firewall logs. This log integration relies on the HTTPS log templating and forwarding capability provided by PAN OS, the operating system that runs in Palo Alto firewalls. PAN-OS allows customers to forward threat, traffic, authentication, and other important log events.
 
+The integration also collects metrics and Network Device Monitoring (NDM) device metadata from the PAN-OS XML API, either directly from each firewall or through Panorama discovery. The metrics cover system resources, sessions, interfaces, tunnels, routing, licenses, security rules, threat counts, and optional global counters and top-N reports. The firewalls appear in NDM with their serial number as device ID. If you also monitor the same firewalls with SNMP, they appear as separate devices, because the two sources use different device IDs.
+
 ### Key use cases
 #### Respond to high severity threat events
 Firewall threat logs provide context on threats detected by a firewall, which can be filtered and analyzed by severity, type, origin IPs/countries, and more.
@@ -11,12 +13,110 @@ Firewall threat logs provide context on threats detected by a firewall, which ca
 #### Make informed decisions on Firewall deployment
 Firewall traffic logs can be used to measure the traffic and sessions passing through a firewall and also gives you the ability to monitor for anomalous throughput across firewall deployment.
 
+#### Monitor firewall health and capacity
+Resource, session, interface, tunnel, and license metrics show a firewall running out of capacity or a tunnel or routing peer going down, and threat counts by severity and action give you a metric view alongside the logs.
+
 #### Monitor authentication anomalies
 Firewall authentication logs provide detailed information on users as they authenticate with Palo Alto Networks firewall. These logs can be used to monitor anomalous spikes in authentication traffic from specific protocols, users, locations, and more.
 
 **Minimum Agent version:** 7.31.1
 
 ## Setup
+
+### Metrics and NDM collection
+
+The `pan_firewall` check polls the PAN-OS XML API of each firewall, either from a static list of firewalls or from the firewalls that a Panorama server manages. Metrics collection is independent of log collection: you can configure either one or both.
+
+#### Create an admin role and account
+
+1. In PAN-OS, go to **Device > Admin Roles** and add a role profile with an **XML API** tab that allows **Operational Requests**, **Report**, and **Log**. All other XML API privileges and the Web UI, Command Line, and REST API tabs can stay disabled.
+2. Go to **Device > Administrators** and add an account that uses this role, with a password or an API key.
+3. Commit the changes.
+
+For Panorama discovery, create an admin role on Panorama that allows **Operational Requests** in the XML API tab. The same credentials, or the credentials selected through `firewall_credentials`, are then used to poll the discovered firewalls, so the firewall accounts need the role described above.
+
+#### Network reach
+
+The Agent connects to the management interface of each firewall over HTTPS (port 443 by default). Make sure that:
+
+- The management interface (or the interface that carries management traffic) has HTTPS enabled in its management profile.
+- If you restrict management access, the Agent host is in the **Permitted IP Addresses** list (`permitted-ip`) of the firewall, and in the admin role or account restrictions, if you use any.
+
+With Panorama discovery, the Agent must also reach the firewall IP addresses that Panorama reports, or the addresses you set in `firewall_ip_overrides`. Firewalls that Panorama shows as disconnected (`connected=no`) are not polled.
+
+#### TLS
+
+PAN-OS management interfaces ship with a self-signed certificate. Either install a certificate signed by a CA that the Agent trusts (and set `tls_ca_cert` for a private CA), or set `tls_verify: false` to accept the self-signed certificate. TLS settings apply to the whole instance. Put firewalls with a different certificate setup in a separate instance.
+
+#### Configuration
+
+Create a `pan_firewall.d/conf.yaml` file at the root of the [Agent's configuration directory][3]. See the [sample `pan_firewall.d/conf.yaml`][11] for all available options, then [restart the Agent][4].
+
+Static list of firewalls with one account:
+
+```yaml
+init_config:
+
+instances:
+  - firewalls:
+      - 192.0.2.10
+      - 192.0.2.11
+    firewall_credentials:
+      - username: <USERNAME>
+        password: <PASSWORD>
+    tls_verify: false
+```
+
+Static list of firewalls with different credentials by network. The Agent uses the first entry whose `cidr` contains the firewall IP, and an entry without `cidr` matches every firewall:
+
+```yaml
+init_config:
+
+instances:
+  - firewalls:
+      - 192.0.2.10
+      - 198.51.100.20
+    firewall_credentials:
+      - cidr: 192.0.2.0/24
+        username: <USERNAME>
+        password: <PASSWORD>
+      - cidr: 198.51.100.0/24
+        api_key: <API_KEY>
+    tls_verify: false
+```
+
+Panorama discovery. Quote the serial numbers in `firewall_ip_overrides`: an unquoted serial can be read by YAML as a number, and the Agent then matches it by numeric value and logs a warning.
+
+```yaml
+init_config:
+
+instances:
+  - panorama_host: panorama.example.com
+    panorama_api_key: <PANORAMA_API_KEY>
+    firewall_ips:
+      include:
+        - 192.0.2.0/24
+    firewall_ip_overrides:
+      "012345678901": 198.51.100.30
+    firewall_credentials:
+      - username: <USERNAME>
+        password: <PASSWORD>
+    tls_verify: false
+```
+
+Panorama discovery was tested against Panorama 11.2.15 managing VM-Series firewalls only. Panorama-managed HA pairs and firewalls behind NAT were not tested.
+
+#### Namespace
+
+Set `namespace` to keep the device IDs of firewalls in overlapping address spaces apart in NDM. The default is `default`. Use the same namespace as your other NDM sources only if the devices should be correlated.
+
+#### API budget
+
+Each firewall receives about 265 API requests per hour with the default options, and about 355 with every optional collector enabled (`collect_global_counters`, `collect_ospf`, and `collect_reports`). The Agent keeps at most 2 requests in flight per firewall. Each call runs on its own interval, from 2 minutes to 24 hours, so a `min_collection_interval` below the default of 60 seconds does not collect more data. A first run with all collectors enabled took about 30 seconds per firewall in the lab.
+
+#### Commit skipping
+
+While a commit or a content update (Commit, AutoCom, Content, Antivirus, or WildFire job) is running or queued on a firewall, the Agent skips collection for that firewall and resumes on the next run after the job ends.
 
 ### Log collection
 
@@ -64,7 +164,59 @@ Firewall authentication logs provide detailed information on users as they authe
 
 ### Metrics
 
-The metrics collected for this integration are determined by the relevant configured profiles on the [network vendors][9] page. 
+See [metadata.csv][12] for the list of metrics that the `pan_firewall` check collects, with their types and tags. Every metric carries the `device_vendor:paloaltonetworks` tag and tags that identify the firewall by serial number and IP address.
+
+#### Global counters
+
+With `collect_global_counters: true`, the check collects 26 PAN-OS global counters. Each one is sent as `pan_firewall.counter.global` with its counter name, category, and aspect as tags, and a counter that the firewall does not list is sent as 0. The check also sums the counters that PAN-OS classifies as drops into a per-aspect dropped packet metric.
+
+| Counter | Description |
+| ------- | ----------- |
+| `appid_unknown_fini_empty` | The number of unknown applications because of no data |
+| `flow_arp_pkt_rcv` | ARP packets received |
+| `flow_arp_pkt_xmt` | ARP packets transmitted |
+| `flow_arp_rcv_err` | ARP receive error |
+| `flow_arp_resolve_xmt` | ARP resolution packets transmitted |
+| `flow_fwd_l3_mcast_drop` | Packets dropped: no route for IP multicast |
+| `flow_fwd_l3_noarp` | Packets dropped: no ARP |
+| `flow_host_ha_decap_err` | Packets dropped: decapsulation error from control plane's HA agent |
+| `flow_host_service_allow` | Device management session allowed |
+| `flow_host_service_deny` | Device management session denied |
+| `flow_ipv6_disabled` | Packets dropped: IPv6 disabled on interface |
+| `flow_lion_rcv_err` | Packets dropped: receive error from offload processor |
+| `flow_mld_pkt_rcv` | MLD packets received |
+| `flow_mld_pkt_xmt` | MLD packets transmitted |
+| `flow_no_interface` | Packets dropped: invalid interface |
+| `flow_rcv_dot1q_tag_err` | Packets dropped: 802.1q tag not configured |
+| `flow_rcv_err` | Packets dropped: flow stage receive error |
+| `pkt_alloc` | Packets allocated |
+| `pkt_recv` | Packets received |
+| `pkt_recv_zero` | Packets received from QoS 0 |
+| `pkt_sent` | Packets transmitted |
+| `session_freed` | Sessions freed |
+| `session_install_error` | Sessions installation error |
+| `session_installed` | Sessions installed |
+| `session_peer_not_close` | Installation flow close error |
+| `ssl_hsm_up_down_event_rcv` | The number of HSM up/down events received |
+
+#### Reports
+
+With `collect_reports: true`, the check runs 10 top-N reports every 30 minutes and keeps the top `report_top_n` entries (10 by default) of each:
+
+- Top applications
+- Top application categories
+- Top technology categories
+- Top sources
+- Top destinations
+- Top source countries
+- Top destination countries
+- Top ingress zones
+- Top egress zones
+- Top security rules
+
+#### Threat counts
+
+`pan_firewall.threat.count` is a count of the threat logs that the firewall wrote since the previous successful query, grouped by severity, action, subtype, and virtual system. The check runs every 5 minutes and reads logs by sequence number, not by time, so each log is counted once, including across Agent restarts and large bursts, and a firewall clock change has no effect. The first run counts nothing and sets the starting point at the newest log.
 
 ### Logs
 
@@ -85,7 +237,24 @@ Additional helpful documentation, links, and articles:
 - [Log types and fields][5]
 - [Logs Collection documentation][6]
 
+## Limitations
+
+- The VM-Series reports no power or temperature sensors and no interface speed. Hardware firewalls report them, but these parsers are verified on synthetic data only until a hardware capture is available.
+- On a firewall in an HA pair the HA state is reported on the device metadata, but the HA link counters (`ha.interface.*`) are not collected yet; the integration logs one warning.
+- BGP and OSPF metrics require the legacy routing engine. Firewalls running the Advanced Routing Engine (ARE) log one warning and report no BGP or OSPF metrics.
+- Administrative status and interface description come from SNMP; the XML API does not provide them.
+- The Top HTTP Applications report is not available.
+- `device_id` is the firewall serial number, so a firewall does not merge with an SNMP record for the same device.
+- A virtual system with no interfaces is not detected automatically; list it in `vsys`.
+- If a reboot or an HA failover resets the threat log sequence number, up to about 35 minutes of threat logs may not be counted.
+- TLS settings apply per instance. Put firewalls with a different certificate setup in a separate instance.
+- Perpetual licenses report `license.expired` as 0 and no `license.days_left`.
+- Panorama discovery was tested against Panorama 11.2.15 with VM-Series firewalls only. HA pairs and NAT'd firewalls were not tested.
+
 ## Troubleshooting
+
+- If `pan_firewall.api.authentication.status` is 1, the firewall rejected the credentials or the API key. Check the account, its admin role (**Operational Requests**, **Report**, and **Log**), and the `permitted-ip` list.
+- If you already collect logs with a `pan.firewall.d/conf.yaml` file, you can keep it as it is. The `pan_firewall` check and log collection are configured separately.
 
 Need help? Contact [Datadog support][7].
 
@@ -99,4 +268,6 @@ Need help? Contact [Datadog support][7].
 [8]: https://docs.paloaltonetworks.com/pan-os/10-1/pan-os-admin/monitoring/use-syslog-for-monitoring/syslog-field-descriptions
 [9]: https://docs.datadoghq.com/network_monitoring/devices/supported_devices/
 [10]: https://docs.datadoghq.com/agent/logs/
+[11]: https://github.com/DataDog/integrations-core/blob/master/pan_firewall/datadog_checks/pan_firewall/data/conf.yaml.example
+[12]: https://github.com/DataDog/integrations-core/blob/master/pan_firewall/metadata.csv
 
