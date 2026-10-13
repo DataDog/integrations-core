@@ -9,6 +9,7 @@ import pytest
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev._env import get_state, save_state
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.subprocess import run_command
 from datadog_checks.fluxcd import FluxcdCheck
@@ -120,11 +121,7 @@ def mock_metrics_v1():
 
     with mock.patch(
         "requests.Session.get",
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: content.split("\n"),
-            headers={"Content-Type": "text/plain"},
-        ),
+        return_value=MockResponse(content=content, headers={"Content-Type": "text/plain"}),
     ):
         yield
 
@@ -138,11 +135,7 @@ def mock_metrics_v2():
 
     with mock.patch(
         "requests.Session.get",
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: content.split("\n"),
-            headers={"Content-Type": "text/plain"},
-        ),
+        return_value=MockResponse(content=content, headers={"Content-Type": "text/plain"}),
     ):
         yield
 
@@ -156,10 +149,6 @@ def mock_metrics_ksm():
 
     with mock.patch(
         "requests.Session.get",
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: content.split("\n"),
-            headers={"Content-Type": "text/plain"},
-        ),
+        return_value=MockResponse(content=content, headers={"Content-Type": "text/plain"}),
     ):
         yield

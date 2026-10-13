@@ -10,6 +10,7 @@ import requests
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.kube_controller_manager import KubeControllerManagerCheck
 
 instance = {
@@ -38,9 +39,7 @@ def mock_metrics():
         text_data = f.read()
     with mock.patch(
         'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
+        return_value=MockResponse(content=text_data, headers={'Content-Type': "text/plain"}),
     ):
         yield
 

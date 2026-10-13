@@ -10,6 +10,7 @@ import pytest
 from datadog_checks.dev import EnvVars, TempDir, docker_run, get_docker_hostname, get_here
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.impala import ImpalaCheck
 
 
@@ -101,11 +102,7 @@ def mock_metrics(request):
 
     with mock.patch(
         "requests.Session.get",
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: content.split("\n"),
-            headers={"Content-Type": "text/plain"},
-        ),
+        return_value=MockResponse(content=content, headers={"Content-Type": "text/plain"}),
     ):
         yield
 

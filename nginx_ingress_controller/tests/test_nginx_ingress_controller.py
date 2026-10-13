@@ -6,6 +6,7 @@ import os
 import mock
 import pytest
 
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nginx_ingress_controller import NginxIngressControllerCheck
 
@@ -22,9 +23,7 @@ def mock_data():
         text_data = f.read()
     with mock.patch(
         'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
+        return_value=MockResponse(content=text_data, headers={'Content-Type': "text/plain"}),
     ):
         yield
 

@@ -7,6 +7,7 @@ import os
 import mock
 import pytest
 
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.kube_proxy import KubeProxyCheck
 
 instance = {'prometheus_url': 'http://localhost:10249/metrics'}
@@ -23,9 +24,7 @@ def mock_iptables():
         text_data = f.read()
     mock_iptables = mock.patch(
         'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
+        return_value=MockResponse(content=text_data, headers={'Content-Type': "text/plain"}),
     )
     yield mock_iptables.start()
     mock_iptables.stop()
@@ -38,9 +37,7 @@ def mock_userspace():
         text_data = f.read()
     mock_userspace = mock.patch(
         'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
+        return_value=MockResponse(content=text_data, headers={'Content-Type': "text/plain"}),
     )
     yield mock_userspace.start()
     mock_userspace.stop()

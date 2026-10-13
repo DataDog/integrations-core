@@ -7,6 +7,8 @@ from copy import deepcopy
 import mock
 import pytest
 
+from datadog_checks.dev.http import MockResponse
+
 INSTANCE = {'prometheus_url': 'http://localhost:5000/metrics'}
 
 
@@ -27,8 +29,6 @@ def mock_metrics_endpoint():
         text_data = f.read()
     with mock.patch(
         'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
+        return_value=MockResponse(content=text_data, headers={'Content-Type': "text/plain"}),
     ):
         yield

@@ -11,6 +11,7 @@ from datadog_checks.cilium import CiliumCheck
 from datadog_checks.dev import TempDir, run_command
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.fs import path_join
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.utils import get_active_env
 
@@ -241,9 +242,7 @@ def mock_agent_data():
         text_data = f.read()
     with mock.patch(
         'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={"Content-Type": "text/plain"}
-        ),
+        return_value=MockResponse(content=text_data, headers={"Content-Type": "text/plain"}),
     ):
         yield
 
@@ -255,8 +254,6 @@ def mock_operator_data():
         text_data = f.read()
     with mock.patch(
         'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={"Content-Type": "text/plain"}
-        ),
+        return_value=MockResponse(content=text_data, headers={"Content-Type": "text/plain"}),
     ):
         yield

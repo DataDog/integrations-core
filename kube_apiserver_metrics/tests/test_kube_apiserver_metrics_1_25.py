@@ -8,6 +8,7 @@ import os
 import mock
 import pytest
 
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
 
 customtag = "custom:tag"
@@ -26,10 +27,8 @@ def mock_get():
         text_data = f.read()
     with mock.patch(
         'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={'Content-Type': "text/plain", 'Authorization': "Bearer XXX"},
+        return_value=MockResponse(
+            content=text_data, headers={'Content-Type': "text/plain", 'Authorization': "Bearer XXX"}
         ),
     ):
         yield

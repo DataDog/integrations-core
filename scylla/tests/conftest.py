@@ -7,6 +7,7 @@ import mock
 import pytest
 
 from datadog_checks.dev import docker_run, get_docker_hostname, get_e2e_discovery_metadata, get_here
+from datadog_checks.dev.http import MockResponse
 
 HERE = get_here()
 HOST = get_docker_hostname()
@@ -46,10 +47,6 @@ def mock_db_data():
         text_data = f.read()
     with mock.patch(
         'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={'Content-Type': "text/plain"},
-        ),
+        return_value=MockResponse(content=text_data, headers={'Content-Type': "text/plain"}),
     ):
         yield
