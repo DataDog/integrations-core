@@ -38,7 +38,7 @@
             "default": "com"
           }
         },
-        "base_urls": {
+        "region_base_urls": {
           "eu": "https://api.bitwarden.eu",
           "com": "https://api.bitwarden.com"
         }
