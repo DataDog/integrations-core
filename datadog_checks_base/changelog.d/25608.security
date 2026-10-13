@@ -1,0 +1,1 @@
+Limit lines read with `iter_lines` to `max_line_size` (4 MiB by default) for every check, not only OpenMetrics checks.
