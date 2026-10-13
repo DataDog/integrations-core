@@ -4,15 +4,17 @@
 """Management-plane resources (`show system resources`) and filesystem usage (`show system disk-space`).
 
 Both commands answer with the output of a Linux tool as text under `result`, so they are parsed by line.
+The hardware sensors (`show system environmentals`) answer with XML.
 """
 
 from __future__ import annotations
 
 import re
+from collections.abc import Iterator
 from typing import TYPE_CHECKING
 from xml.etree.ElementTree import Element
 
-from datadog_checks.pan_firewall.xml_utils import text
+from datadog_checks.pan_firewall.xml_utils import num, text
 
 from . import CollectContext, Sample, register
 
@@ -21,6 +23,7 @@ if TYPE_CHECKING:
 
 SYSTEM_RESOURCES_CMD = '<show><system><resources/></system></show>'
 DISK_SPACE_CMD = '<show><system><disk-space/></system></show>'
+ENVIRONMENTALS_CMD = '<show><system><environmentals/></system></show>'
 
 CPU_STATES = {
     'us': 'user',
@@ -36,6 +39,9 @@ CPU_STATES = {
 UNIT_BYTES = {name: 1024**power for power, name in enumerate(('B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB'))}
 # Filesystems that are not storage.
 VIRTUAL_FILESYSTEMS = frozenset({'none', 'tmpfs', 'cgroup_root'})
+
+ALARM_TRUE = frozenset({'true', 'yes'})
+ALARM_FALSE = frozenset({'false', 'no'})
 
 CPU_LINE = re.compile(r'^%Cpu\(s\):(?P<values>.*)$', re.MULTILINE)
 MEMORY_LINE = re.compile(r'^(?P<unit>\w+) (?P<kind>Mem|Swap)\s*:(?P<values>.*)$', re.MULTILINE)
@@ -128,6 +134,93 @@ def parse_disk(root: Element, log: CheckLoggingAdapter) -> list[Sample]:
     return samples
 
 
+def _slot_number(slot: Element) -> str:
+    """`Slot1` -> `1`; any other element name is used whole."""
+    return slot.tag[4:] if slot.tag.lower().startswith('slot') and len(slot.tag) > 4 else slot.tag
+
+
+def _entries(root: Element, section: str) -> Iterator[tuple[Element, str, str]]:
+    """Yield (entry, slot number, sensor name) for `result/<section>/<slot>/entry`.
+
+    The sensor is the entry's `description`; an entry without one is named after its slot element.
+    """
+    container = root.find(f'result/{section}')
+    for slot in container if container is not None else ():
+        for entry in slot.iterfind('entry'):
+            yield entry, _slot_number(slot), text(entry, 'description') or slot.tag
+
+
+def _alarm(entry: Element) -> bool | None:
+    """PAN's `alarm` field as a bool, None when absent or not a recognised value."""
+    value = (text(entry, 'alarm') or '').lower()
+    if value in ALARM_TRUE:
+        return True
+    return False if value in ALARM_FALSE else None
+
+
+def parse_environmentals(root: Element, log: CheckLoggingAdapter, warned: set[str]) -> list[Sample]:
+    """Parse `show system environmentals`: power rails and temperature sensors.
+
+    A VM-Series firewall answers with an empty `result`, so nothing is sent. The alarms are PAN's own `alarm` field,
+    never a comparison of the reading with the thresholds. A power alarm whose direction cannot be told sends no alarm
+    metric and logs one warning per sensor; `warned` holds the sensors already warned about for this firewall.
+    """
+    samples: list[Sample] = []
+    for entry, slot, name in _entries(root, 'power'):
+        tags = (f'sensor:{name}', f'slot:{slot}')
+        volts = num(entry, 'Volts')
+        if volts is None:
+            continue
+        low = num(entry, 'min')
+        if low is None:
+            low = num(entry, 'min-volt')
+        high = num(entry, 'max')
+        if high is None:
+            high = num(entry, 'max-volt')
+        samples.append(Sample('power.voltage', volts, tags, 'gauge'))
+        if low is not None:
+            samples.append(Sample('power.voltage.min', low, tags, 'gauge'))
+        if high is not None:
+            samples.append(Sample('power.voltage.max', high, tags, 'gauge'))
+        alarm = _alarm(entry)
+        if alarm is None:
+            continue
+        if not alarm:
+            direction = (0, 0)
+        elif high is not None and volts >= high:
+            direction = (1, 0)
+        elif low is not None and volts <= low:
+            direction = (0, 1)
+        else:
+            key = f'{slot}/{name}'
+            if key not in warned:
+                warned.add(key)
+                log.warning(
+                    'pan_firewall: power sensor `%s` (slot %s) is in alarm but the voltage is not outside its '
+                    'thresholds: power.alarm.high and power.alarm.low are not reported for it',
+                    name,
+                    slot,
+                )
+            continue
+        samples.append(Sample('power.alarm.high', direction[0], tags, 'gauge'))
+        samples.append(Sample('power.alarm.low', direction[1], tags, 'gauge'))
+
+    for entry, slot, name in _entries(root, 'thermal'):
+        tags = (f'sensor:{name}', f'slot:{slot}')
+        for metric, field in (
+            ('temperature.current', 'DegreesC'),
+            ('temperature.min', 'min'),
+            ('temperature.max', 'max'),
+        ):
+            value = num(entry, field)
+            if value is not None:
+                samples.append(Sample(metric, value, tags, 'gauge'))
+        alarm = _alarm(entry)
+        if alarm is not None:
+            samples.append(Sample('temperature.alarm', int(alarm), tags, 'gauge'))
+    return samples
+
+
 @register('system_resources')
 def collect_system_resources(ctx: CollectContext) -> list[Sample]:
     return parse_system_resources(ctx.client.op(SYSTEM_RESOURCES_CMD), ctx.log)
@@ -136,3 +229,8 @@ def collect_system_resources(ctx: CollectContext) -> list[Sample]:
 @register('disk')
 def collect_disk(ctx: CollectContext) -> list[Sample]:
     return parse_disk(ctx.client.op(DISK_SPACE_CMD), ctx.log)
+
+
+@register('environment')
+def collect_environment(ctx: CollectContext) -> list[Sample]:
+    return parse_environmentals(ctx.client.op(ENVIRONMENTALS_CMD), ctx.log, ctx.state.warned_sensors)

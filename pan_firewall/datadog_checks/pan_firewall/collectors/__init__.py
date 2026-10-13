@@ -96,6 +96,10 @@ class FirewallState:
     tunnel_tags: dict[str, tuple[str, ...]] | None = None
     tunnel_states: dict[str, str] = field(default_factory=dict)
     threats: ThreatState = field(default_factory=ThreatState)
+    # Warnings logged once per firewall instead of once per run: the HA link counters, and the power sensors whose
+    # alarm has no direction (keyed by slot and sensor name).
+    ha_warned: bool = False
+    warned_sensors: set[str] = field(default_factory=set)
 
 
 @dataclass
