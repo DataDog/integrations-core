@@ -305,6 +305,29 @@ def test_jobs_return_the_job_id_and_status():
     assert http.calls[1]['data'] == {'type': 'log', 'action': 'get', 'job-id': '2'}
 
 
+def test_open_log_job_reads_status_and_streams_the_entries_in_one_request():
+    http = FakeHttp(api=[(200, THREAT_LOGS)])
+    client, _ = make_client(http, STATIC_CREDS)
+
+    with client.open_log_job('2') as (status, entries):
+        seqnos = [entry.findtext('seqno') for entry in entries]
+
+    assert status == 'FIN'
+    assert len(seqnos) == 39
+    assert len(http.calls) == 1
+    assert http.calls[0]['stream'] is True
+
+
+def test_open_log_job_that_is_not_finished_yields_no_entries():
+    running = (FIXTURES / 'synthetic' / 'threat_log_act.xml').read_bytes()
+    http = FakeHttp(api=[(200, running)])
+    client, _ = make_client(http, STATIC_CREDS)
+
+    with client.open_log_job('93') as (status, entries):
+        assert status == 'ACT'
+        assert list(entries) == []
+
+
 def test_api_error_is_not_treated_as_auth_failure():
     body = (FIXTURES / 'fw-a-probe' / 'report_top-rules.xml').read_bytes()
     http = FakeHttp(api=[(200, body)])

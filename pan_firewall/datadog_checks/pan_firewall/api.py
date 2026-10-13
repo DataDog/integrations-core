@@ -42,6 +42,7 @@ KEY_HEADER = 'X-PAN-KEY'
 STREAM_CHUNK_SIZE = 64 * 1024
 # Element path, from the root, of the entries in a finished `type=log` job.
 LOG_ENTRY_PATH = ['response', 'result', 'log', 'logs', 'entry']
+LOG_STATUS_PATH = ['response', 'result', 'job', 'status']
 
 
 def api_url(host: str, port: int) -> str:
@@ -183,24 +184,35 @@ class PanosClient:
         read what you need from an entry before advancing. The call holds its slot until the generator is
         exhausted or closed.
         """
-        params = {'type': 'log', 'action': 'get', 'job-id': job_id}
         with self._slots:
             self._fail_fast_after_timeout()
-            resp, root, events = self._authorized(lambda key: self._open_stream(params, key))
+            resp, root, events = self._authorized(lambda key: self._open_stream(self._log_get(job_id), key))
             with resp:
-                path: list[str] = [root.tag]
-                parent: Element | None = None
-                for event, elem in events:
-                    if event == 'start':
-                        path.append(elem.tag)
-                        if path == LOG_ENTRY_PATH[:-1]:
-                            parent = elem
-                        continue
-                    if path == LOG_ENTRY_PATH and parent is not None:
-                        yield elem
-                        elem.clear()
-                        parent.remove(elem)
-                    path.pop()
+                yield from _log_elements(root, events, with_status=False)
+
+    @contextmanager
+    def open_log_job(self, job_id: str) -> Iterator[tuple[str, Iterator[Element]]]:
+        """Read a log job with one streamed request: yield its status (`ACT`, `FIN`, ...) and its entries.
+
+        The status precedes `<log>` in the response and is read first. The entries are streamed and cleared as in
+        `iter_log_entries`, so memory stays bounded per page; for a job that is not `FIN` the iterator is empty and
+        the rest of the response is not read. The slot is held, and the response open, for the `with` block: do not
+        call the client again inside it.
+        """
+        with self._slots:
+            self._fail_fast_after_timeout()
+            resp, root, events = self._authorized(lambda key: self._open_stream(self._log_get(job_id), key))
+            with resp:
+                elements = _log_elements(root, events, with_status=True)
+                status_elem = next(elements, None)
+                if status_elem is None or status_elem.tag != 'status':
+                    raise PanosApiError(PARSE_ERROR_CODE, f'log job {job_id} response has no status')
+                status = (status_elem.text or '').strip()
+                yield status, (elements if status == 'FIN' else iter(()))
+
+    @staticmethod
+    def _log_get(job_id: str) -> dict[str, str]:
+        return {'type': 'log', 'action': 'get', 'job-id': job_id}
 
     def _call(self, params: dict[str, str]) -> Element:
         with self._slots:
@@ -304,6 +316,33 @@ class PanosClient:
             yield from _element_events(parser)
         except ET.ParseError as e:
             raise PanosApiError(PARSE_ERROR_CODE, f'response is not valid XML: {e}', panos_response=False) from None
+
+
+def _log_elements(root: Element, events: Iterator[tuple[str, Element]], with_status: bool) -> Iterator[Element]:
+    """Walk a log job response: yield `result/job/status` first when `with_status`, then each log entry.
+
+    An entry is cleared and detached once the consumer advances. A response whose entries come before its status
+    raises, because the status could not be reported first.
+    """
+    path: list[str] = [root.tag]
+    parent: Element | None = None
+    seen_status = False
+    for event, elem in events:
+        if event == 'start':
+            path.append(elem.tag)
+            if path == LOG_ENTRY_PATH[:-1]:
+                parent = elem
+            continue
+        if with_status and path == LOG_STATUS_PATH:
+            seen_status = True
+            yield elem
+        elif path == LOG_ENTRY_PATH and parent is not None:
+            if with_status and not seen_status:
+                raise PanosApiError(PARSE_ERROR_CODE, 'log job response has entries before its status')
+            yield elem
+            elem.clear()
+            parent.remove(elem)
+        path.pop()
 
 
 def _element_events(parser: ET.XMLPullParser[Element]) -> Iterator[tuple[str, Element]]:

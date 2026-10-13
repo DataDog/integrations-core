@@ -105,20 +105,19 @@ def _fetch(ctx: CollectContext, job: ThreatJob) -> bool:
     if job.job_id is None:
         job.job_id = client.submit_job(_params(job))
     for attempt in range(constants.THREAT_JOB_POLLS):
-        status, _ = client.get_job('log', job.job_id)
+        # One streamed request per poll: it reports the status and, once the job is finished, streams the entries.
+        # No other call while it is open: it holds one of the client's in-flight slots.
+        with client.open_log_job(job.job_id) as (status, entries):
+            if status == 'FIN':
+                for entry in entries:
+                    job.page_entries += 1
+                    _add(job, entry)
+                return True
         if status not in ACTIVE_STATUSES:
-            break
+            raise PanosApiError(PARSE_ERROR_CODE, f'threat log job {job.job_id} ended with status {status}')
         if attempt + 1 < constants.THREAT_JOB_POLLS:
             time.sleep(constants.THREAT_JOB_POLL_DELAY)
-    else:
-        return False
-    if status != 'FIN':
-        raise PanosApiError(PARSE_ERROR_CODE, f'threat log job {job.job_id} ended with status {status}')
-    # No other call while the entries stream: the iterator holds one of the client's in-flight slots.
-    for entry in ctx.client.iter_log_entries(job.job_id):
-        job.page_entries += 1
-        _add(job, entry)
-    return True
+    return False
 
 
 def _add(job: ThreatJob, entry: Element) -> None:

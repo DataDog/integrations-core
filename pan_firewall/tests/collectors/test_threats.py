@@ -221,6 +221,16 @@ def test_seqno_paging_fetches_every_page_in_order_without_duplicates(firewall, m
     assert firewall.watermark == PROBE_LAST_SEQNO == max(seqnos)
 
 
+def test_each_finished_page_is_read_with_one_request(firewall, monkeypatch):
+    monkeypatch.setattr(constants, 'THREAT_PAGE_SIZE', PROBE_SEQNO_PAGE_SIZE)
+    firewall.seed(PROBE_SEQNO_START - 1)
+
+    firewall.collect()
+
+    gets = [c for c in firewall.fake.calls if c.type == 'log' and c.action == 'get']
+    assert len(gets) == len(firewall.submits()) == PROBE_SEQNO_PAGES
+
+
 def test_same_window_again_counts_nothing(firewall, monkeypatch):
     monkeypatch.setattr(constants, 'THREAT_PAGE_SIZE', PROBE_SEQNO_PAGE_SIZE)
     firewall.seed(PROBE_SEQNO_START - 1, last_reset_check=firewall.clock.now)
