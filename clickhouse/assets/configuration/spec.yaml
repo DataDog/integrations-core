@@ -81,6 +81,11 @@ files:
       fleet_configurable: true
       value:
         type: string
+        enum:
+        - lz4
+        - zstd
+        - br
+        - gzip
     - name: tls_ca_cert
       description: The path to the CA certificate file.
       value:

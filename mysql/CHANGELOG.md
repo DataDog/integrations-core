@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 15.22.0 / 2026-10-01
+
+***Added***:
+
+* Rework schema collection onto the shared `SchemaCollector`, which streams schema metadata with snapshot markers. MySQL 8.0 and later use a single-query strategy and older versions use a chunked strategy that works on every supported version. ([#24653](https://github.com/DataDog/integrations-core/pull/24653))
+* Update dependencies ([#25284](https://github.com/DataDog/integrations-core/pull/25284))
+
+***Fixed***:
+
+* Log obfuscation failures with repr so an embedded null cannot crash the job. ([#25344](https://github.com/DataDog/integrations-core/pull/25344))
+
 ## 15.21.0 / 2026-09-02 / Agent 7.84.0
 
 ***Added***:

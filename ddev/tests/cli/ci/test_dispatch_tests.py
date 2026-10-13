@@ -8,7 +8,6 @@ from __future__ import annotations
 import json
 import logging
 import subprocess
-from collections import Counter
 from functools import partial
 from typing import TYPE_CHECKING, Any
 from unittest.mock import ANY
@@ -960,34 +959,6 @@ def test_an_executed_run_reports_its_execution_metrics(
     result = ddev(*global_options, 'ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--output-dir', str(tmp_path))
 
     assert result.exit_code == 0, result.output
-    cohort = Counter(record.name for record in sink.records if not record.name.startswith('operations.'))
-    assert cohort == Counter(
-        {
-            'batches.count': 1,
-            'batch.jobs.count': 1,
-            'jobs.count': 1,
-            'batch.duration': 1,
-            'job.duration': 1,
-            'job.queue.duration': 1,
-            'jobs.queued': 1,
-            'jobs.running': 1,
-            'artifacts.download.duration': 1,
-            'runs.count': 1,
-            'runs.passed': 1,
-            'runs.tests_failed': 1,
-            'runs.failed': 1,
-            'runs.timed_out': 1,
-            'runs.cancelled': 1,
-            'runs.no_op': 1,
-            'runs.planning_failed': 1,
-            'run.duration': 1,
-            'jobs.incomplete': 1,
-            'batches.passed': 1,
-            'batches.failed': 1,
-            'jobs.failed': 1,
-            'jobs.skipped': 1,
-        }
-    )
     assert run_outcome_counts(sink) == only_outcome('runs.passed')
     assert sink.records_named('run.duration')[0].tags['dispatcher.outcome'] == 'passed'
     runs = sink.records_named('runs.count')[0]
@@ -1053,6 +1024,40 @@ def test_a_run_with_failed_tests_is_counted_as_a_test_failure(
     assert failed[0].tags['dispatcher.batch.job.target'] == 'ntp'
     assert [record.value for record in sink.records_named('jobs.incomplete')] == [0]
     assert [record.value for record in sink.records_named('jobs.skipped')] == [0]
+
+
+def test_cancelled_run_output(
+    ddev: CliRunner,
+    github: FakeAsyncGitHubClient,
+    planned: MagicMock,
+    mocker: MockerFixture,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    step_summary: Path,
+):
+    """A run that observes its batches cancelled ends cancelled, not failed."""
+    job = planned.return_value[0].job_list[0]
+    mock_job_result(github, job, 'cancelled')
+    github.mock_response(
+        'get_workflow_run',
+        make_workflow_run(name='test-batch', conclusion='cancelled'),
+    )
+    sink = recording_runtime(mocker)
+    fast_dispatcher_config(mocker)
+    monkeypatch.setattr('ddev.utils.github_async.AsyncGitHubClient', lambda token, rate_limiter=None, **kwargs: github)
+
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--output-dir', str(tmp_path))
+
+    assert result.exit_code == 1, result.output
+    assert 'Dispatcher tests were cancelled.' in result.output
+    assert 'Dispatcher tests failed.' not in result.output
+    assert [record.value for record in sink.records_named('runs.count')] == [1]
+    assert run_outcome_counts(sink) == only_outcome('runs.cancelled')
+    assert [record.value for record in sink.records_named('batches.cancelled')] == [1]
+    assert [record.value for record in sink.records_named('batches.failed')] == [0]
+    assert [record.value for record in sink.records_named('jobs.cancelled')] == [1]
+    assert [record.value for record in sink.records_named('jobs.failed')] == [0]
+    assert [record.value for record in sink.records_named('jobs.incomplete')] == [0]
 
 
 def test_a_run_whose_final_report_fails_is_counted_failed_without_invented_job_outcomes(

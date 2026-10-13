@@ -14,7 +14,39 @@ from typing import Any
 
 from structlog.stdlib import BoundLogger
 
+from ddev.cli.ci.tests.status import Status
 from ddev.monitoring.metrics import Metrics
+
+
+class ResultMetric(StrEnum):
+    """Metric result of a batch or job.
+
+    `TIMED_OUT` has no `Status`: a timeout is a failure internally, but its counter stays apart from
+    `failed`.
+    """
+
+    PASSED = auto()
+    FAILED = auto()
+    SKIPPED = auto()
+    CANCELLED = auto()
+    INCONCLUSIVE = auto()
+    TIMED_OUT = auto()
+
+
+_STATUS_RESULTS = {
+    Status.SUCCESS: ResultMetric.PASSED,
+    Status.FAILURE: ResultMetric.FAILED,
+    Status.SKIPPED: ResultMetric.SKIPPED,
+    Status.CANCELLED: ResultMetric.CANCELLED,
+    Status.INCONCLUSIVE: ResultMetric.INCONCLUSIVE,
+}
+
+
+def result_metric(status: Status, *, timed_out: bool = False) -> ResultMetric:
+    """The one mapping from a status, with a timeout split off, to its counter's name."""
+    if timed_out:
+        return ResultMetric.TIMED_OUT
+    return _STATUS_RESULTS[status]
 
 
 class ExecutionOutcome(StrEnum):
@@ -53,6 +85,12 @@ class OperationResult:
 
     failed: bool = False
     cancelled: bool = False
+
+
+def report_result(metrics: Metrics, family: str, result: ResultMetric, **tags: Any) -> None:
+    """Emit every result counter of a family as 0/1, exactly one being 1, so monitors see zeros, not gaps."""
+    for candidate in ResultMetric:
+        metrics.count(f'{family}.{candidate.value}', int(candidate is result), **tags)
 
 
 class MetricsHelper:

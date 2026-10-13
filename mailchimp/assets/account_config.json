@@ -1,0 +1,29 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Marketing API key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "marketing_api_key",
+          "label": "Marketing API key",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "server_prefix",
+      "label": "Server prefix",
+      "help": "For example: us13",
+      "editable": true,
+      "required": true,
+      "text": {}
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "mailchimp-metrics" }
+  ]
+}
