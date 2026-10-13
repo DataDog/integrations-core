@@ -100,7 +100,7 @@ def parse_system_resources(root: Element, log: CheckLoggingAdapter) -> list[Samp
         missing.append('Swap')
     if missing:
         log.warning(
-            'pan_firewall: `show system resources` has no usable %s line: the metrics of the line are not reported',
+            '`show system resources` has no usable %s line: the metrics of the line are not reported',
             ', '.join(missing),
         )
     return samples
@@ -110,7 +110,7 @@ def parse_disk(root: Element, log: CheckLoggingAdapter) -> list[Sample]:
     """Parse `df` output: `disk.used_pct` per filesystem, without the virtual ones."""
     lines = (text(root, 'result') or '').splitlines()
     if not lines or not lines[0].startswith('Filesystem'):
-        log.warning('pan_firewall: `show system disk-space` is not df output: no disk usage is reported')
+        log.warning('`show system disk-space` is not df output: no disk usage is reported')
         return []
     samples = []
     pending = ''
@@ -196,7 +196,7 @@ def parse_environmentals(root: Element, log: CheckLoggingAdapter, warned: set[st
             if key not in warned:
                 warned.add(key)
                 log.warning(
-                    'pan_firewall: power sensor `%s` (slot %s) is in alarm but the voltage is not outside its '
+                    'power sensor `%s` (slot %s) is in alarm but the voltage is not outside its '
                     'thresholds: power.alarm.high and power.alarm.low are not reported for it',
                     name,
                     slot,

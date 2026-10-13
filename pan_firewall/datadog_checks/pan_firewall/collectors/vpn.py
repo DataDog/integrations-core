@@ -38,7 +38,7 @@ def parse_vpn(flow: Element, gateway: Element, log: CheckLoggingAdapter) -> VpnS
     """Tunnel totals, gateway total and per-tunnel state. A reply without `result` gives no samples and a warning."""
     flow_result, gateway_result = flow.find('result'), gateway.find('result')
     if flow_result is None or gateway_result is None:
-        log.warning('pan_firewall: `show vpn flow` or `show vpn gateway` has no result: no IPSec metrics are sent')
+        log.warning('`show vpn flow` or `show vpn gateway` has no result: no IPSec metrics are sent')
         return VpnSnapshot()
     gateways = {
         gwid: name
@@ -63,7 +63,7 @@ def parse_vpn(flow: Element, gateway: Element, log: CheckLoggingAdapter) -> VpnS
             snapshot.tunnel_tags[interface] = tags
             snapshot.tunnel_states[interface] = state
         if state not in STATE_VALUES:
-            log.warning('pan_firewall: IPSec tunnel %s has an unknown state %r: its state is not sent', tags, state)
+            log.warning('IPSec tunnel %s has an unknown state %r: its state is not sent', tags, state)
             continue
         counts[state] += 1
         snapshot.samples.append(Sample('ipsec.tunnel.state', STATE_VALUES[state], tags, 'gauge'))

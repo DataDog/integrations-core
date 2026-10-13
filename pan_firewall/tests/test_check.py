@@ -10,7 +10,7 @@ import pytest
 
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.pan_firewall import PanFirewallCheck
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, Sample
+from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, Sample, once_log, warn_once
 from datadog_checks.pan_firewall.collectors.jobs import JOBS_PENDING_CMD
 from datadog_checks.pan_firewall.errors import PanosApiError, PanosTimeout
 from datadog_checks.pan_firewall.poller import FirewallPoller
@@ -371,6 +371,24 @@ def test_timeout_a_collector_handles_itself_is_still_reported(dd_run_check, fake
 
     warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
     assert warnings == [f'pan_firewall {FW_A_IP}: a call timed out after 30s; skipped for this run: none']
+
+
+def test_collector_warnings_name_the_firewall(dd_run_check, monkeypatch, caplog):
+    def bgp(ctx):
+        warn_once(ctx, 'stub', 'something is off')
+        once_log(ctx).warning('unknown shape %s', 'x')
+        return []
+
+    register_stubs(monkeypatch, bgp=bgp)
+
+    dd_run_check(new_check(make_instance(firewalls=[FW_A_IP, FW_B_IP])))
+
+    warnings = {r.getMessage() for r in caplog.records if r.levelno == logging.WARNING}
+    assert {
+        f'pan_firewall {ip}: {message}'
+        for ip in (FW_A_IP, FW_B_IP)
+        for message in ('something is off', 'unknown shape x')
+    } <= warnings
 
 
 def test_unexpected_poller_error_does_not_stop_other_firewalls(dd_run_check, aggregator, monkeypatch, caplog):

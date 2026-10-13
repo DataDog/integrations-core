@@ -38,7 +38,7 @@ def collect_threats(ctx: CollectContext) -> list[Sample]:
             if not _fetch(ctx, job):
                 state.pending = job
                 ctx.state.still_due.add('threats')
-                ctx.log.debug('pan_firewall: threat log job %s still running, polled again next run', job.job_id)
+                ctx.log.debug('threat log job %s still running, polled again next run', job.job_id)
                 return []
             if job.purpose == 'forward' and job.page_entries >= job.page_size:
                 job.skip += job.page_size
@@ -64,7 +64,7 @@ def _load_watermark(ctx: CollectContext, state: ThreatState) -> None:
     try:
         state.watermark = Watermark.from_json(raw)
     except (ValueError, TypeError, KeyError) as e:
-        ctx.log.debug('pan_firewall: ignoring the cached threat watermark: %s', e)
+        ctx.log.debug('ignoring the cached threat watermark: %s', e)
 
 
 def _serial(ctx: CollectContext) -> str | None:
@@ -125,9 +125,7 @@ def _add(ctx: CollectContext, job: ThreatJob, entry: Element) -> None:
     try:
         seqno = int(entry.findtext('seqno') or '')
     except ValueError:
-        ctx.log.debug(
-            'pan_firewall: skipping a threat log entry with a missing or invalid seqno %r', entry.findtext('seqno')
-        )
+        ctx.log.debug('skipping a threat log entry with a missing or invalid seqno %r', entry.findtext('seqno'))
         return
     # A log at or below the watermark should not come back from the query; drop it if it does.
     if job.purpose == 'forward' and seqno <= job.base_seqno:
@@ -173,7 +171,7 @@ def _complete(ctx: CollectContext, state: ThreatState, job: ThreatJob) -> tuple[
     # `reset`: a newest log below the watermark means `seqno` went backwards.
     if job.newest_seqno is not None and job.newest_seqno < watermark.seqno:
         ctx.log.warning(
-            'pan_firewall: the newest threat log has seqno %d, below the last counted one (%d): the firewall '
+            'the newest threat log has seqno %d, below the last counted one (%d): the firewall '
             'restarted or failed over. Counting restarts from there; logs written since are not counted.',
             job.newest_seqno,
             watermark.seqno,

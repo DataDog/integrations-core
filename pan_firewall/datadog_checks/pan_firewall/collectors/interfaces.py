@@ -108,7 +108,7 @@ def parse_interface_counters(
     """
     rows = root.findall('./result/ifnet/ifnet/entry')
     if not rows:
-        log.warning('pan_firewall: `show counter interface all` has no interface rows: no interface counters are sent')
+        log.warning('`show counter interface all` has no interface rows: no interface counters are sent')
         return []
     samples: list[Sample] = []
     by_name = _rows_by_name(state)
@@ -139,10 +139,10 @@ def parse_interface_speeds(state: FirewallState, serial: str | None, log: CheckL
         try:
             megabits = float(raw)
         except ValueError:
-            log.debug('pan_firewall: interface %s has an unparseable speed %r: it is not sent', name, raw)
+            log.debug('interface %s has an unparseable speed %r: it is not sent', name, raw)
             continue
         if megabits != megabits or megabits in (float('inf'), float('-inf')):
-            log.debug('pan_firewall: interface %s has an unparseable speed %r: it is not sent', name, raw)
+            log.debug('interface %s has an unparseable speed %r: it is not sent', name, raw)
             continue
         samples.append(
             Sample('interface.speed', megabits * MEGABIT, interface_tags(name, state, serial, by_name), 'gauge')

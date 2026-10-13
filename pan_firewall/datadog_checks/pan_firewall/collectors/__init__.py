@@ -17,12 +17,23 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal, NamedTuple, cast
 from xml.etree.ElementTree import Element
 
-if TYPE_CHECKING:
-    from datadog_checks.base.log import CheckLoggingAdapter
+from datadog_checks.base.log import CheckLoggingAdapter
 
+if TYPE_CHECKING:
     from ..api import PanosClient
     from ..config_models.instance import InstanceConfig
     from ..identity import DeviceIdentity
+
+
+class FirewallLog(CheckLoggingAdapter):
+    """The check's log with `pan_firewall <firewall>: ` in front of every message, so a warning names its firewall."""
+
+    def __init__(self, log: CheckLoggingAdapter, firewall: str):
+        super().__init__(log.logger, log.check_id)
+        self._prefix = f'pan_firewall {firewall}: '
+
+    def process(self, msg: Any, kwargs: Any) -> tuple[Any, Any]:
+        return super().process(f'{self._prefix}{msg}', kwargs)
 
 
 class Sample(NamedTuple):

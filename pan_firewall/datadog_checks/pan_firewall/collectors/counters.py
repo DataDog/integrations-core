@@ -56,7 +56,7 @@ def collect_global_counters(ctx: CollectContext) -> list[Sample]:
         warn_once(
             ctx,
             'global_counters',
-            'pan_firewall: `show counter global` has no counters list: no global counter is reported',
+            '`show counter global` has no counters list: no global counter is reported',
         )
         return []
     return samples

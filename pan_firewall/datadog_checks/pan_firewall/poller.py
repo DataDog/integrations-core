@@ -17,6 +17,7 @@ from .auth import KeyManager
 from .collectors import (  # noqa: F401  (importing the modules registers their collectors)
     COLLECT_FUNCTIONS,
     CollectContext,
+    FirewallLog,
     FirewallState,
     Sample,
     counters,
@@ -86,6 +87,8 @@ class FirewallPoller:
         self.ip = device_ip(target)
         # What the log lines about connecting name: the polled IP too when an override sends the polling elsewhere.
         self._connect_label = self.ip if target.ip == self.ip else f'{self.ip} (polled at {target.ip})'
+        # The log of the collectors: every message starts with the firewall it is about.
+        self.firewall_log = FirewallLog(check.log, self._connect_label)
         # The model's default (30 s), not the wrapper's (10 s), applies when the instance sets no `timeout`.
         instance = {'timeout': config.timeout, **(check.instance or {})}
         http = RequestsWrapper(instance, check.init_config, check.HTTP_CONFIG_REMAPPER, check.log)
@@ -253,7 +256,7 @@ class FirewallPoller:
             identity=identity,
             state=self.state,
             config=self.config,
-            log=self.log,
+            log=self.firewall_log,
             tunnel_tags=self.state.tunnel_tags,
             clock=self.schedule.now,
             read_cache=self.check.read_persistent_cache,
@@ -330,7 +333,7 @@ class FirewallPoller:
         self.identity = identity
         # `interface.speed` follows this step's 30-minute schedule, as it comes from the interfaces read here.
         if fresh:
-            self.submit(parse_interface_speeds(self.state, identity.serial, self.log))
+            self.submit(parse_interface_speeds(self.state, identity.serial, self.firewall_log))
 
     def _load_identity(self) -> DeviceIdentity | None:
         raw = self.check.read_persistent_cache(self._cache_key)

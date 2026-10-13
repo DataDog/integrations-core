@@ -125,7 +125,7 @@ def legacy_routing_engine(ctx: CollectContext) -> bool:
     warn_once(
         ctx,
         'advanced_routing',
-        'pan_firewall: the firewall runs the Advanced Routing Engine: BGP and OSPF metrics need the legacy '
+        'the firewall runs the Advanced Routing Engine: BGP and OSPF metrics need the legacy '
         'routing engine and are not reported',
     )
     return False

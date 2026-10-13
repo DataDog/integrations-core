@@ -27,5 +27,5 @@ def collect_ha(ctx: CollectContext) -> list[Sample]:
         ctx.state.ha_state = None
         return []
     ctx.state.ha_state = text(root, 'result/group/local-info/state')
-    warn_once(ctx, 'ha', 'pan_firewall: high availability is enabled; the HA link counters are not supported yet')
+    warn_once(ctx, 'ha', 'high availability is enabled; the HA link counters are not supported yet')
     return []

@@ -76,7 +76,7 @@ def collect_reports(ctx: CollectContext) -> list[Sample]:
             return samples
         if outcome == 'running':
             ctx.log.warning(
-                'pan_firewall: the %s report job %s is still running after %d runs: giving up on it',
+                'the %s report job %s is still running after %d runs: giving up on it',
                 job.report,
                 job.job_id,
                 job.carries,
@@ -113,7 +113,7 @@ def _poll(ctx: CollectContext, job: ReportJob) -> tuple[Literal['finished', 'run
             warn_once(
                 ctx,
                 f'report:{job.report}',
-                'pan_firewall: the %s report job %s ended with status %s: no samples for it',
+                'the %s report job %s ended with status %s: no samples for it',
                 job.report,
                 job.job_id,
                 status,
