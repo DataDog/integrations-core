@@ -16,7 +16,7 @@ from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.xml_utils import num, text
 
-from . import CollectContext, Sample, register
+from . import CollectContext, Sample, once_log, register
 
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
@@ -192,7 +192,7 @@ def parse_environmentals(root: Element, log: CheckLoggingAdapter, warned: set[st
         elif low is not None and volts <= low:
             direction = (0, 1)
         else:
-            key = f'{slot}/{name}'
+            key = f'power-sensor:{slot}/{name}'
             if key not in warned:
                 warned.add(key)
                 log.warning(
@@ -223,14 +223,14 @@ def parse_environmentals(root: Element, log: CheckLoggingAdapter, warned: set[st
 
 @register('system_resources')
 def collect_system_resources(ctx: CollectContext) -> list[Sample]:
-    return parse_system_resources(ctx.client.op(SYSTEM_RESOURCES_CMD), ctx.log)
+    return parse_system_resources(ctx.client.op(SYSTEM_RESOURCES_CMD), once_log(ctx))
 
 
 @register('disk')
 def collect_disk(ctx: CollectContext) -> list[Sample]:
-    return parse_disk(ctx.client.op(DISK_SPACE_CMD), ctx.log)
+    return parse_disk(ctx.client.op(DISK_SPACE_CMD), once_log(ctx))
 
 
 @register('environment')
 def collect_environment(ctx: CollectContext) -> list[Sample]:
-    return parse_environmentals(ctx.client.op(ENVIRONMENTALS_CMD), ctx.log, ctx.state.warned_sensors)
+    return parse_environmentals(ctx.client.op(ENVIRONMENTALS_CMD), ctx.log, ctx.state.warned)

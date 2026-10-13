@@ -5,6 +5,7 @@ from unittest import mock
 
 import pytest
 
+from datadog_checks.pan_firewall import poller as poller_module
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectContext, FirewallState
 from datadog_checks.pan_firewall.collectors.interfaces import (
     COUNTER_INTERFACE_CMD,
@@ -12,11 +13,12 @@ from datadog_checks.pan_firewall.collectors.interfaces import (
     parse_interface_counters,
     parse_interface_speeds,
 )
+from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from ..common import FIXTURES
 from ..fixture_map import op_fixture
-from ..test_check import FW_A_TAGS, new_check
+from ..test_check import FW_A_IP, FW_A_TAGS, INTERFACE_ALL_CMD, new_check
 
 SYNTHETIC = FIXTURES / 'synthetic'
 SERIAL = '007955000930601'
@@ -43,6 +45,8 @@ FW_A_ROWS = {
     'loopback': (0,) * 13,
     'loopback.1': (0,) * 13,
     'tunnel': (0,) * 13,
+    'tunnel.1': (1563183, 919234, 11275, 5157, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    'tunnel.2': (0,) * 13,
 }
 FW_B_ROWS = {
     'ethernet1/1': (158850809, 3216766, 122598, 31770, 0, 0, 0, 4, 0, 0, 0, 0, 0),
@@ -50,6 +54,8 @@ FW_B_ROWS = {
     'loopback': (0,) * 13,
     'loopback.1': (0,) * 13,
     'tunnel': (0,) * 13,
+    'tunnel.1': (1573118, 923056, 11284, 5192, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    'tunnel.2': (0,) * 13,
 }
 FW_A_TUNNELS = {'tunnel.1': (1563183, 919234, 11275, 5157), 'tunnel.2': (0, 0, 0, 0)}
 FW_B_TUNNELS = {'tunnel.1': (1573118, 923056, 11284, 5192), 'tunnel.2': (0, 0, 0, 0)}
@@ -60,6 +66,8 @@ MAP_TAGS = {
     'loopback': ('interface:loopback', 'interface_type:loopback', 'vsys:vsys1'),
     'loopback.1': ('interface:loopback.1', 'interface_type:loopback', 'zone:trust', 'vsys:vsys1', 'vr:default'),
     'tunnel': ('interface:tunnel', 'interface_type:tunnel', 'vsys:vsys1'),
+    'tunnel.1': ('interface:tunnel.1', 'interface_type:tunnel', 'zone:vpn', 'vsys:vsys1', 'vr:default'),
+    'tunnel.2': ('interface:tunnel.2', 'interface_type:tunnel', 'zone:vpn', 'vsys:vsys1', 'vr:default'),
 }
 
 
@@ -110,7 +118,7 @@ def test_interface_counters_with_the_interface_map(firewall, rows):
 
     interface_samples = [s for s in samples if s.name.startswith('interface.')]
     assert series(interface_samples) == expected_interfaces(rows, with_map_tags)
-    assert len(interface_samples) == 13 * 5
+    assert len(interface_samples) == 13 * 7
 
 
 def test_interface_counters_without_a_map_carry_the_interface_tag_only():
@@ -164,7 +172,11 @@ def test_tunnel_rows_become_ipsec_counters_with_the_tags_vpn_stored(firewall, tu
         ):
             expected[metric, tunnel_tags(name)] = (value, 'monotonic_count')
     assert series(ipsec) == expected
-    assert not any(s.tags[0].startswith('interface:tunnel.') for s in samples)
+    # The same rows are also interfaces, tunnels included.
+    assert {s.tags[0] for s in samples if s.name == 'interface.rx.bytes'} >= {
+        'interface:tunnel.1',
+        'interface:tunnel.2',
+    }
 
 
 def test_tunnel_counters_wait_for_the_vpn_tags():
@@ -233,14 +245,34 @@ def make_context(state, response):
     return ctx
 
 
-def test_collector_makes_one_call_and_adds_the_speeds():
+def test_collector_makes_one_call_and_leaves_the_speeds_to_the_identity_step():
     state = state_from(SYNTHETIC / 'interface_all_speeds.xml')
     ctx = make_context(state, load(op_fixture(COUNTER_INTERFACE_CMD)))
 
     samples = collect_interfaces(ctx)
 
     ctx.client.op.assert_called_once_with(COUNTER_INTERFACE_CMD)
-    assert {s.name for s in samples} >= {'interface.speed', 'interface.rx.bytes'}
+    assert 'interface.rx.bytes' in {s.name for s in samples}
+    assert 'interface.speed' not in {s.name for s in samples}
+
+
+def test_speeds_are_sent_every_30_minutes_with_the_identity_not_every_3(
+    dd_run_check, aggregator, fake_panos, monkeypatch
+):
+    now = [1000.0]
+    monkeypatch.setattr(poller_module, 'FirewallSchedule', lambda: FirewallSchedule(lambda: now[0]))
+    fake_panos.answer_op(FW_A_IP, INTERFACE_ALL_CMD, (200, (SYNTHETIC / 'interface_all_speeds.xml').read_bytes()))
+    check = new_check()
+
+    sent = []
+    for seconds in (0, 180, 1799, 1800):
+        now[0] = 1000.0 + seconds
+        before = len(aggregator.metrics('pan_firewall.interface.speed'))
+        dd_run_check(check)
+        sent.append(len(aggregator.metrics('pan_firewall.interface.speed')) - before)
+
+    # Two interfaces report a speed: sent on the first run and on the 30-minute run only.
+    assert sent == [2, 0, 0, 2]
 
 
 def test_interfaces_is_registered_and_submits_through_the_check(real_collectors, dd_run_check, aggregator, fake_panos):
@@ -257,7 +289,7 @@ def test_interfaces_is_registered_and_submits_through_the_check(real_collectors,
             tags=sorted([*FW_A_TAGS, *with_map_tags('ethernet1/1')]),
             metric_type=aggregator.MONOTONIC_COUNT,
         )
-    assert len(aggregator.metrics('pan_firewall.interface.rx.bytes')) == 5
+    assert len(aggregator.metrics('pan_firewall.interface.rx.bytes')) == 7
     assert aggregator.metrics('pan_firewall.interface.speed') == []
 
 

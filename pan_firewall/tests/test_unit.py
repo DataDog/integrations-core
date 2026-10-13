@@ -7,13 +7,13 @@ from xml.etree import ElementTree as ET
 
 import pytest
 
-from datadog_checks.pan_firewall import PanFirewallCheck
+from datadog_checks.pan_firewall import PanFirewallCheck, constants
 from datadog_checks.pan_firewall import poller as poller_module
 from datadog_checks.pan_firewall.errors import PanosApiError
 from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 from datadog_checks.pan_firewall.xml_utils import num, parse_response, text
 
-from .collectors.test_threats import log_page
+from .collectors.test_threats import ACT, log_page
 from .common import CREDENTIALS, FIXTURES
 from .fixture_map import OP_FIXTURES, PARTIAL_OP_FIXTURES, THREAT_LOG_FIRST_SEQNO, op_fixture
 
@@ -124,9 +124,9 @@ MONOTONIC = 'monotonic_count'
 
 # The P0 metrics the captured lab firewalls produce on their first default run, with their types. Absent on purpose:
 # `ha.interface.*` (standalone firewalls), `power.*` and `temperature.*` (VM-Series has no sensors),
-# `interface.speed` (VM-Series reports no speed), and `threat.count` (the first threat run only records the newest
-# log as a watermark, so it counts nothing).
-# `interfaces` sends these once `vpn` has stored the tunnel tags, so from the second 3-minute tier.
+# `interface.speed` (VM-Series reports no speed). `threat.count` and the tunnel counters are not on the first run:
+# the first threat run only records the newest log as a watermark, and `interfaces` sends the tunnel counters once
+# `vpn` has stored the tunnel tags, so from the second 3-minute tier.
 TUNNEL_COUNTERS = {
     'ipsec.tunnel.rx.bytes': MONOTONIC,
     'ipsec.tunnel.rx.packets': MONOTONIC,
@@ -271,17 +271,29 @@ def call_labels(fake_panos, ip, since):
     return dict(labels)
 
 
-def test_first_run_submits_every_lab_available_p0_metric(dd_run_check, aggregator, real_collectors):
-    dd_run_check(new_static_check())
+def test_runs_at_0_180_and_300_seconds_submit_every_lab_available_p0_metric(
+    dd_run_check, aggregator, fake_panos, real_collectors, monkeypatch
+):
+    now = [1000.0]
+    monkeypatch.setattr(poller_module, 'FirewallSchedule', lambda: FirewallSchedule(lambda: now[0]))
+    # The first threat run reads the newest log as a watermark; start it just below each capture so the 5-minute
+    # run counts it.
+    for name, ip in FIREWALLS.items():
+        fake_panos.answer_log(ip, 'backward', None, 0, log_page([THREAT_LOG_FIRST_SEQNO[name] - 1]))
+    check = new_static_check()
+    start = now[0]
+    expected = {**FIRST_RUN_METRICS, **TUNNEL_COUNTERS, 'threat.count': 'count'}
+    assert len(expected) == 61
+
+    for seconds in (0, 180, 300):
+        now[0] = start + seconds
+        dd_run_check(check)
 
     for ip in FIREWALLS.values():
-        assert metrics_of(aggregator, ip) == set(FIRST_RUN_METRICS.items())
-    for name, metric_type in FIRST_RUN_METRICS.items():
-        aggregator.assert_metric(
-            f'pan_firewall.{name}',
-            metric_type={GAUGE: aggregator.GAUGE, MONOTONIC: aggregator.MONOTONIC_COUNT}[metric_type],
-            at_least=1,
-        )
+        assert metrics_of(aggregator, ip) == set(expected.items())
+    metric_types = {GAUGE: aggregator.GAUGE, MONOTONIC: aggregator.MONOTONIC_COUNT, 'count': aggregator.COUNT}
+    for name, metric_type in expected.items():
+        aggregator.assert_metric(f'pan_firewall.{name}', metric_type=metric_types[metric_type], at_least=1)
     aggregator.assert_all_metrics_covered()
 
 
@@ -326,3 +338,27 @@ def test_each_run_makes_only_the_requests_that_are_due(
 
     for ip in FIREWALLS.values():
         assert ('threat.count', 'count') in metrics_of(aggregator, ip)
+
+
+def test_a_threat_job_still_running_is_polled_again_on_the_next_run_not_in_5_minutes(
+    dd_run_check, fake_panos, real_collectors, monkeypatch
+):
+    monkeypatch.setattr(constants, 'THREAT_JOB_POLLS', 1)
+    monkeypatch.setattr(constants, 'THREAT_JOB_POLL_DELAY', 0)
+    now = [1000.0]
+    monkeypatch.setattr(poller_module, 'FirewallSchedule', lambda: FirewallSchedule(lambda: now[0]))
+    ip = FIREWALLS['fw-a']
+    fake_panos.answer_log(ip, 'backward', None, 0, ACT, log_page([1]))
+    check = new_static_check()
+    dd_run_check(check)
+
+    now[0] += 60
+    before = len(fake_panos.calls)
+    dd_run_check(check)
+    assert call_labels(fake_panos, ip, before) == {'jobs': 1, 'threats': 1}
+
+    # The job finished: the collector is on its 5-minute interval again.
+    now[0] += 60
+    before = len(fake_panos.calls)
+    dd_run_check(check)
+    assert 'threats' not in call_labels(fake_panos, ip, before)

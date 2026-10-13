@@ -15,7 +15,7 @@ from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.xml_utils import num, text
 
-from . import CollectContext, Sample, register
+from . import CollectContext, Sample, register, warn_once
 
 BGP_PEER_CMD = '<show><routing><protocol><bgp><peer/></bgp></protocol></routing></show>'
 OSPF_NEIGHBOR_CMD = '<show><routing><protocol><ospf><neighbor/></ospf></protocol></routing></show>'
@@ -122,12 +122,12 @@ def legacy_routing_engine(ctx: CollectContext) -> bool:
     """False, with one warning per firewall, when the firewall runs the Advanced Routing Engine."""
     if not ctx.identity.advanced_routing:
         return True
-    if not ctx.state.are_warned:
-        ctx.state.are_warned = True
-        ctx.log.warning(
-            'pan_firewall: the firewall runs the Advanced Routing Engine: BGP and OSPF metrics need the legacy '
-            'routing engine and are not reported'
-        )
+    warn_once(
+        ctx,
+        'advanced_routing',
+        'pan_firewall: the firewall runs the Advanced Routing Engine: BGP and OSPF metrics need the legacy '
+        'routing engine and are not reported',
+    )
     return False
 
 

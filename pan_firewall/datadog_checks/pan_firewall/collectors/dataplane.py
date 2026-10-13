@@ -10,7 +10,7 @@ from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.xml_utils import text
 
-from . import CollectContext, Sample, register
+from . import CollectContext, Sample, once_log, register
 
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
@@ -48,4 +48,4 @@ def _to_float(value: str) -> float | None:
 
 @register('dataplane')
 def collect_dataplane(ctx: CollectContext) -> list[Sample]:
-    return parse_dataplane(ctx.client.op(RESOURCE_MONITOR_CMD), ctx.log)
+    return parse_dataplane(ctx.client.op(RESOURCE_MONITOR_CMD), once_log(ctx))

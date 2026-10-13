@@ -12,7 +12,7 @@ from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.xml_utils import text
 
-from . import CollectContext, Sample, register
+from . import CollectContext, Sample, once_log, register
 
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
@@ -91,4 +91,4 @@ def parse_licenses(root: Element, log: CheckLoggingAdapter, today: datetime.date
 
 @register('licenses')
 def collect_licenses(ctx: CollectContext, today: datetime.date | None = None) -> list[Sample]:
-    return parse_licenses(ctx.client.op(LICENSE_INFO_CMD), ctx.log, today or datetime.date.today())
+    return parse_licenses(ctx.client.op(LICENSE_INFO_CMD), once_log(ctx), today or datetime.date.today())

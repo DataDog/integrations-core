@@ -13,7 +13,7 @@ from xml.sax.saxutils import escape
 
 from datadog_checks.pan_firewall.xml_utils import num
 
-from . import CollectContext, Sample, register
+from . import CollectContext, Sample, once_log, register
 
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
@@ -51,5 +51,5 @@ def collect_rule_hits(ctx: CollectContext) -> list[Sample]:
     patterns = ctx.config.security_rule_filter or ()
     samples: list[Sample] = []
     for vsys in ctx.state.vsys:
-        samples.extend(parse_rule_hits(ctx.client.op(rule_hit_cmd(vsys)), vsys, patterns, ctx.log))
+        samples.extend(parse_rule_hits(ctx.client.op(rule_hit_cmd(vsys)), vsys, patterns, once_log(ctx)))
     return samples

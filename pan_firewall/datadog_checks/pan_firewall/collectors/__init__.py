@@ -14,7 +14,7 @@ import time
 from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Literal, NamedTuple
+from typing import TYPE_CHECKING, Any, Literal, NamedTuple, cast
 from xml.etree.ElementTree import Element
 
 if TYPE_CHECKING:
@@ -91,7 +91,6 @@ class ReportJob:
 @dataclass
 class ReportState:
     pending: ReportJob | None = None  # polled first next run, never submitted again
-    warned: set[str] = field(default_factory=set)  # reports whose job failed, warned once per firewall
 
 
 @dataclass
@@ -104,19 +103,18 @@ class FirewallState:
     interface_map: dict[str, Element] | None = None
     vsys: list[str] = field(default_factory=lambda: ['vsys1'])
     ha_state: str | None = None
-    # The routing engine warning (advanced routing on) is logged once per firewall, not once per run.
-    are_warned: bool = False
     # Written by `vpn`, read by `interfaces` (which owns the `counter interface all` call): the tags of each IPSec
     # tunnel by its `tunnel.N` interface, None until `vpn` first answers, and the raw `show vpn flow` state by interface.
     tunnel_tags: dict[str, tuple[str, ...]] | None = None
     tunnel_states: dict[str, str] = field(default_factory=dict)
     threats: ThreatState = field(default_factory=ThreatState)
-    # Warnings logged once per firewall instead of once per run: the HA link counters, and the power sensors whose
-    # alarm has no direction (keyed by slot and sensor name).
-    ha_warned: bool = False
-    warned_sensors: set[str] = field(default_factory=set)
-    counters_warned: bool = False  # `show counter global` in an unknown shape, warned once
+    # Keys of the warnings already logged for this firewall (see `warn_once`): a condition that lasts is warned about
+    # once, not once per run.
+    warned: set[str] = field(default_factory=set)
     reports: ReportState = field(default_factory=ReportState)
+    # Collectors that ran but must stay due, as a job of theirs is still running: the poller leaves them out of
+    # `mark_run`, so they run again next run instead of after their interval.
+    still_due: set[str] = field(default_factory=set)
 
 
 @dataclass
@@ -146,3 +144,30 @@ def register(name: str) -> Callable[[Collector], Collector]:
         return function
 
     return decorator
+
+
+def warn_once(ctx: CollectContext, key: str, msg: str, *args: object) -> None:
+    """Log the warning the first time `key` is seen for this firewall, and at debug level after that."""
+    if key in ctx.state.warned:
+        ctx.log.debug(msg, *args)
+        return
+    ctx.state.warned.add(key)
+    ctx.log.warning(msg, *args)
+
+
+class _OnceLog:
+    """A logger whose `warning` is `warn_once` keyed by the formatted message; everything else is the context's log."""
+
+    def __init__(self, ctx: CollectContext):
+        self._ctx = ctx
+
+    def warning(self, msg: str, *args: object) -> None:
+        warn_once(self._ctx, msg % args if args else msg, msg, *args)
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._ctx.log, name)
+
+
+def once_log(ctx: CollectContext) -> CheckLoggingAdapter:
+    """The context's log for the `parse_*` functions, which warn about an unknown shape: once per firewall."""
+    return cast('CheckLoggingAdapter', _OnceLog(ctx))

@@ -21,7 +21,7 @@ from .fake_panos import FIREWALL_SETS
 from .test_check import FW_A_IP, FW_A_SERIAL, INTERFACE_ALL_CMD, SYSTEM_INFO_CMD, make_instance, new_check
 
 EVENT_TYPE = 'network-devices-metadata'
-FW_A_STATIC_IP = '3.13.247.39'
+FW_A_STATIC_IP = '198.51.100.7'
 SYSTEM_INFO = parse_system_info(parse_response((FIXTURES / 'fw-a' / 'system_info.xml').read_bytes()))
 NAMESPACE = 'default'
 
@@ -54,7 +54,7 @@ def test_device_metadata_of_the_static_fw_a():
         'id': '007955000930601',
         'id_tags': ['device_namespace:default', 'device_id:007955000930601'],
         'tags': tags,
-        'ip_address': '3.13.247.39',
+        'ip_address': FW_A_STATIC_IP,
         'status': 1,
         'name': 'fw-a',
         'model': 'PA-VM',

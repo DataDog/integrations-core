@@ -411,6 +411,42 @@ def test_pages_counted_before_a_job_is_still_active_are_kept(firewall, monkeypat
     assert firewall.watermark == 1003
 
 
+def edit_entries(page, edit):
+    """`page` with `edit(entry)` applied to each log entry."""
+    root = ET.fromstring(page)
+    for entry in root.iter('entry'):
+        edit(entry)
+    return ET.tostring(root)
+
+
+def test_a_missing_severity_action_subtype_or_vsys_leaves_the_tag_out(firewall):
+    def drop(entry):
+        for name in ('severity', 'action', 'subtype', 'vsys'):
+            entry.remove(entry.find(name))
+
+    firewall.seed(1000)
+    page = edit_entries(log_page([1001]), drop)
+    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1001), 0, page)
+
+    assert series(firewall.collect()) == {('threat.count', (), 'count'): 1}
+
+
+def test_entries_without_a_valid_seqno_are_skipped_and_logged_at_debug(firewall):
+    def break_seqno(entry):
+        if entry.findtext('seqno') == '1002':
+            entry.find('seqno').text = 'abc'
+
+    firewall.seed(1000)
+    page = edit_entries(log_page([1001, 1002]), break_seqno)
+    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1001), 0, page)
+
+    samples = firewall.collect()
+
+    assert sum(s.value for s in samples) == 1
+    assert any('invalid seqno' in call.args[0] for call in firewall.log.debug.call_args_list)
+    firewall.log.warning.assert_not_called()
+
+
 def test_vsys_tag_is_vsys_n(firewall):
     firewall.seed(1000)
     firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1001), 0, log_page([1001], vsys='2'))

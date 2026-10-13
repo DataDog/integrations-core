@@ -31,6 +31,7 @@ from .collectors import (  # noqa: F401  (importing the modules registers their 
     threats,
     vpn,
 )
+from .collectors.interfaces import parse_interface_speeds
 from .collectors.jobs import busy_jobs
 from .constants import COMMIT_SKIP_MAX_SECONDS
 from .errors import PanosError, PanosTimeout
@@ -255,6 +256,7 @@ class FirewallPoller:
             read_cache=self.check.read_persistent_cache,
             write_cache=self.check.write_persistent_cache,
         )
+        self.state.still_due.clear()
         with ThreadPoolExecutor(max_workers=COLLECTOR_WORKERS, thread_name_prefix=f'pan_firewall-{self.ip}') as pool:
             futures = {name: pool.submit(self._run_collector, name, ctx) for name in names}
         outcome = CollectorRun()
@@ -266,6 +268,8 @@ class FirewallPoller:
                     outcome.skipped.append(name)
                     continue
                 self.submit(samples)
+                if name in self.state.still_due:
+                    continue
             except PanosTimeout:
                 outcome.timed_out.append(name)
             except PanosError as e:
@@ -310,15 +314,20 @@ class FirewallPoller:
         except PanosError as e:
             # The identity does not depend on it; interface tags and vsys detection keep their last value.
             self.log.debug('pan_firewall %s: cannot read the interfaces: %s', self.ip, e)
+            fresh = False
         else:
             self.state.interface_rows = interfaces.findall('./result/ifnet/entry')
             self.state.interface_map = {
                 name: entry for entry in interfaces.findall('./result/hw/entry') if (name := entry.findtext('name'))
             }
+            fresh = True
         self.state.vsys = vsys_list(identity, self.state.interface_rows, self.config.vsys)
         if identity != self.identity:
             self.check.write_persistent_cache(self._cache_key, identity.to_json())
         self.identity = identity
+        # `interface.speed` follows this step's 30-minute schedule, as it comes from the interfaces read here.
+        if fresh:
+            self.submit(parse_interface_speeds(self.state, identity.serial, self.log))
 
     def _load_identity(self) -> DeviceIdentity | None:
         raw = self.check.read_persistent_cache(self._cache_key)

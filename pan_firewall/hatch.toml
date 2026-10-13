@@ -16,6 +16,10 @@ e2e-env = false
 
 [envs.default.overrides]
 name."^py3.13$".e2e-env = { value = true }
+# The lab env is an E2E env only where PANOS_LAB_HOSTS is set, so CI never runs it. The lab variables
+# (PANOS_LAB_HOSTS, PANOS_LAB_USERNAME, PANOS_PASSWORD, PANOS_LAB_COLLECT_ALL) reach the tests from the
+# caller's environment, which hatch passes through; no value is written here.
+matrix.setup.e2e-env = { value = true, if = ["lab"], env = ["PANOS_LAB_HOSTS"] }
 matrix.setup.env-vars = [
   { key = "USE_PANOS_LAB", value = "1", if = ["lab"] },
 ]

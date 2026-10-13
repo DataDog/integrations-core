@@ -16,11 +16,11 @@ from .fixture_map import op_fixture
 SYSTEM_INFO_CMD = '<show><system><info/></system></show>'
 SERIAL = '007955000930601'
 CREDS = Credentials(username='dummy-user', password='dummy-password', api_key=None)
-STATIC_TARGET = FirewallTarget(ip='3.13.247.39', port=443, credentials=CREDS)
+STATIC_TARGET = FirewallTarget(ip='198.51.100.7', port=443, credentials=CREDS)
 # A Panorama-discovered fw-a polled through a `firewall_ip_overrides` entry: it connects to the public IP, but the
 # device is the one Panorama reports.
 PANORAMA_TARGET = FirewallTarget(
-    ip='3.13.247.39', port=443, credentials=CREDS, serial=SERIAL, hostname='fw-a', reported_ip='10.60.0.10'
+    ip='198.51.100.7', port=443, credentials=CREDS, serial=SERIAL, hostname='fw-a', reported_ip='198.51.100.8'
 )
 FW_A = parse_system_info(parse_response(op_fixture(SYSTEM_INFO_CMD).read_bytes()))
 
@@ -53,8 +53,8 @@ def test_clock_is_neither_compared_nor_persisted():
 @pytest.mark.parametrize(
     'target, expected',
     [
-        pytest.param(STATIC_TARGET, '3.13.247.39', id='static-uses-config-ip'),
-        pytest.param(PANORAMA_TARGET, '10.60.0.10', id='panorama-uses-reported-ip-not-override'),
+        pytest.param(STATIC_TARGET, '198.51.100.7', id='static-uses-config-ip'),
+        pytest.param(PANORAMA_TARGET, '198.51.100.8', id='panorama-uses-reported-ip-not-override'),
     ],
 )
 def test_device_ip(target, expected):
@@ -67,7 +67,7 @@ def test_global_tags_with_identity():
     assert sorted(tags) == sorted(
         [
             'device_namespace:default',
-            'device_ip:3.13.247.39',
+            'device_ip:198.51.100.7',
             f'device_id:{SERIAL}',
             'device_hostname:fw-a',
             f'device_serial:{SERIAL}',
@@ -88,7 +88,7 @@ def test_global_tags_before_a_static_firewall_ever_answered():
     tags = global_tags(None, STATIC_TARGET, 'default', ['env:lab'])
 
     assert sorted(tags) == [
-        'device_ip:3.13.247.39',
+        'device_ip:198.51.100.7',
         'device_namespace:default',
         'device_vendor:paloaltonetworks',
         'env:lab',
@@ -101,7 +101,7 @@ def test_global_tags_take_serial_and_hostname_from_panorama_discovery():
     assert sorted(tags) == sorted(
         [
             'device_namespace:default',
-            'device_ip:10.60.0.10',
+            'device_ip:198.51.100.8',
             f'device_id:{SERIAL}',
             'device_hostname:fw-a',
             f'device_serial:{SERIAL}',

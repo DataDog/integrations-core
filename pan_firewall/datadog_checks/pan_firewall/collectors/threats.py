@@ -37,6 +37,7 @@ def collect_threats(ctx: CollectContext) -> list[Sample]:
         while job is not None:
             if not _fetch(ctx, job):
                 state.pending = job
+                ctx.state.still_due.add('threats')
                 ctx.log.debug('pan_firewall: threat log job %s still running, polled again next run', job.job_id)
                 return []
             if job.purpose == 'forward' and job.page_entries >= job.page_size:
@@ -111,7 +112,7 @@ def _fetch(ctx: CollectContext, job: ThreatJob) -> bool:
             if status == 'FIN':
                 for entry in entries:
                     job.page_entries += 1
-                    _add(job, entry)
+                    _add(ctx, job, entry)
                 return True
         if status not in ACTIVE_STATUSES:
             raise PanosApiError(PARSE_ERROR_CODE, f'threat log job {job.job_id} ended with status {status}')
@@ -120,10 +121,13 @@ def _fetch(ctx: CollectContext, job: ThreatJob) -> bool:
     return False
 
 
-def _add(job: ThreatJob, entry: Element) -> None:
+def _add(ctx: CollectContext, job: ThreatJob, entry: Element) -> None:
     try:
         seqno = int(entry.findtext('seqno') or '')
     except ValueError:
+        ctx.log.debug(
+            'pan_firewall: skipping a threat log entry with a missing or invalid seqno %r', entry.findtext('seqno')
+        )
         return
     # A log at or below the watermark should not come back from the query; drop it if it does.
     if job.purpose == 'forward' and seqno <= job.base_seqno:
@@ -133,9 +137,9 @@ def _add(job: ThreatJob, entry: Element) -> None:
     if job.purpose == 'forward':
         job.counted += 1
         key = (
-            text(entry, 'severity', 'unknown'),
-            text(entry, 'action', 'unknown'),
-            text(entry, 'subtype', 'unknown'),
+            text(entry, 'severity', ''),
+            text(entry, 'action', ''),
+            text(entry, 'subtype', ''),
             _vsys(text(entry, 'vsys')),
         )
         job.counts[key] += 1  # type: ignore[index]
@@ -143,7 +147,7 @@ def _add(job: ThreatJob, entry: Element) -> None:
 
 def _vsys(value: str | None) -> str:
     if not value:
-        return 'unknown'
+        return ''
     return f'vsys{value}' if value.isdigit() else value.lower()
 
 
@@ -181,11 +185,16 @@ def _complete(ctx: CollectContext, state: ThreatState, job: ThreatJob) -> tuple[
 
 
 def _samples(job: ThreatJob) -> list[Sample]:
+    """One `threat.count` per tag set; a severity, action or subtype the log does not carry is left out."""
     return [
         Sample(
             'threat.count',
             count,
-            (f'severity:{severity}', f'action:{action}', f'subtype:{subtype}', f'vsys:{vsys}'),
+            tuple(
+                f'{name}:{value}'
+                for name, value in (('severity', severity), ('action', action), ('subtype', subtype), ('vsys', vsys))
+                if value
+            ),
             'count',
         )
         for (severity, action, subtype, vsys), count in sorted(job.counts.items())

@@ -17,7 +17,7 @@ from xml.etree.ElementTree import Element
 from datadog_checks.pan_firewall import constants
 from datadog_checks.pan_firewall.xml_utils import num, text
 
-from . import CollectContext, ReportJob, Sample, register
+from . import CollectContext, ReportJob, Sample, register, warn_once
 
 DEFAULT_TOP_N = 10
 ACTIVE_STATUSES = frozenset({'ACT', 'PEND'})
@@ -103,15 +103,14 @@ def _poll(ctx: CollectContext, job: ReportJob) -> tuple[Literal['finished', 'run
         if status == 'FIN':
             return 'finished', root
         if status not in ACTIVE_STATUSES:
-            warned = ctx.state.reports.warned
-            if job.report not in warned:
-                warned.add(job.report)
-                ctx.log.warning(
-                    'pan_firewall: the %s report job %s ended with status %s: no samples for it',
-                    job.report,
-                    job.job_id,
-                    status,
-                )
+            warn_once(
+                ctx,
+                f'report:{job.report}',
+                'pan_firewall: the %s report job %s ended with status %s: no samples for it',
+                job.report,
+                job.job_id,
+                status,
+            )
             return 'failed', None
         if attempt + 1 < constants.REPORT_JOB_POLLS:
             time.sleep(constants.REPORT_JOB_POLL_DELAY)
