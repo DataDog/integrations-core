@@ -127,3 +127,31 @@ def test_environment_is_registered_and_submits_through_the_check(real_collectors
     aggregator.assert_metric('pan_firewall.temperature.current', 85.5, tags=cpu, metric_type=aggregator.GAUGE)
     aggregator.assert_metric('pan_firewall.temperature.alarm', 1, tags=cpu, metric_type=aggregator.GAUGE)
     assert len(aggregator.metrics('pan_firewall.temperature.current')) == 3
+
+
+# Gated on the PA-3420 hardware capture (L8). Expected layout:
+#   tests/fixtures/pa-3420/environmentals.xml   (`show system environmentals`)
+#   tests/fixtures/pa-3420/interface_all.xml    (`show interface all`; see test_interfaces.py for the speeds)
+#   tests/fixtures/pa-3420/system_info.xml      (`show system info`)
+# When it lands, fix the field names in `parse_environmentals` if they differ, and delete the synthetic
+# `environmentals_hw.xml` fixture together with the tests that use it once these pass.
+PA_3420 = FIXTURES / 'pa-3420'
+needs_pa_3420 = pytest.mark.skipif(
+    not PA_3420.is_dir(), reason='Needs lab capture L8 (PA-3420 hardware): tests/fixtures/pa-3420/ missing'
+)
+
+
+@needs_pa_3420
+def test_pa_3420_environmentals_parse_into_power_and_temperature_samples():
+    log = mock.Mock()
+
+    samples = parse_environmentals(parse_response((PA_3420 / 'environmentals.xml').read_bytes()), log, set())
+
+    assert samples
+    assert all(s.kind == 'gauge' for s in samples)
+    assert {s.name.split('.')[0] for s in samples} <= {'power', 'temperature'}
+    assert {'power.voltage', 'temperature.current'} <= {s.name for s in samples}
+    assert all(any(tag.startswith('sensor:') for tag in s.tags) for s in samples)
+    assert all(s.value >= 0 for s in samples if s.name.endswith(('.alarm', '.alarm.high', '.alarm.low')))
+    series(samples)
+    log.warning.assert_not_called()

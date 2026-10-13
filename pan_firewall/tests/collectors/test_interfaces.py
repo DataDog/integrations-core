@@ -259,3 +259,22 @@ def test_interfaces_is_registered_and_submits_through_the_check(real_collectors,
         )
     assert len(aggregator.metrics('pan_firewall.interface.rx.bytes')) == 5
     assert aggregator.metrics('pan_firewall.interface.speed') == []
+
+
+# Gated on the PA-3420 hardware capture (L8); see test_environment.py for the expected layout. The VM captures carry no
+# speed (`ukn`), the hardware one does.
+PA_3420 = FIXTURES / 'pa-3420'
+
+
+@pytest.mark.skipif(
+    not PA_3420.is_dir(), reason='Needs lab capture L8 (PA-3420 hardware): tests/fixtures/pa-3420/ missing'
+)
+def test_pa_3420_speeds_are_sent_in_bits_per_second():
+    state = state_from(PA_3420 / 'interface_all.xml')
+
+    samples = parse_interface_speeds(state, SERIAL, mock.Mock())
+
+    assert samples
+    assert {s.name for s in samples} == {'interface.speed'}
+    # The capture states megabits; bit/s is a multiple of 10**6 and at least 10 Mbit/s.
+    assert all(s.kind == 'gauge' and s.value >= 10 * 10**6 and s.value % 10**6 == 0 for s in samples)
