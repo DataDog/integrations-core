@@ -24,6 +24,8 @@ line_patterns = [
 # pymongo.asynchronous is removed in files_to_remove.toml; drop the eager imports of it.
 package_pattern = "pymongo*"
 file_pattern = "*.py"
+# Keep runtime code and data; embedded API documentation is not used by the Agent.
+strip_docstrings = true
 line_patterns = [
     "^from pymongo\\.asynchronous\\.mongo_client import AsyncMongoClient$",
     "^from pymongo\\.asynchronous\\.helpers import _getaddrinfo$",
