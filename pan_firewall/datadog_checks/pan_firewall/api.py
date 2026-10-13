@@ -218,27 +218,14 @@ class PanosClient:
             raise PanosApiError(PARSE_ERROR_CODE, f'{job_type} job {job_id} response has no status')
         return status, root
 
-    def iter_log_entries(self, job_id: str) -> Iterator[Element]:
-        """Stream the `result/log/logs/entry` elements of a finished log job.
-
-        Each entry is cleared once the caller asks for the next one, so memory stays bounded whatever the job size:
-        read what you need from an entry before advancing. The call holds its slot until the generator is
-        exhausted or closed.
-        """
-        with self._slots:
-            self._fail_fast_if_unreachable()
-            resp, root, events = self._authorized(lambda key: self._open_stream(self._log_get(job_id), key))
-            with resp:
-                yield from _log_elements(root, events, with_status=False)
-
     @contextmanager
     def open_log_job(self, job_id: str) -> Iterator[tuple[str, Iterator[Element]]]:
         """Read a log job with one streamed request: yield its status (`ACT`, `FIN`, ...) and its entries.
 
-        The status precedes `<log>` in the response and is read first. The entries are streamed and cleared as in
-        `iter_log_entries`, so memory stays bounded per page; for a job that is not `FIN` the iterator is empty and
-        the rest of the response is not read. The slot is held, and the response open, for the `with` block: do not
-        call the client again inside it.
+        The status precedes `<log>` in the response and is read first. The entries are streamed and cleared one at
+        a time, so memory stays bounded per page: read what you need from an entry before advancing. For a job that
+        is not `FIN` the iterator is empty and the rest of the response is not read. The slot is held, and the
+        response open, for the `with` block: do not call the client again inside it.
         """
         with self._slots:
             self._fail_fast_if_unreachable()

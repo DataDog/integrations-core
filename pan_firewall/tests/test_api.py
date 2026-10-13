@@ -123,7 +123,8 @@ def test_key_never_leaks_into_urls_logs_or_errors(caplog):
     client.op(SYSTEM_INFO_CMD)
     client.submit_job({'type': 'log', 'log-type': 'threat'})
     client.get_job('log', '2')
-    list(client.iter_log_entries('2'))
+    with client.open_log_job('2') as (_, entries):
+        list(entries)
     for _ in range(2):
         try:
             client.op(SYSTEM_INFO_CMD)
@@ -172,8 +173,10 @@ def test_log_stream_regenerates_a_rejected_key():
     http = FakeHttp(keygen=[(200, KEYGEN_OK), (200, KEYGEN_OK)], api=[(200, CODE_16), (200, THREAT_LOGS)])
     client, _ = make_client(http)
 
-    seqnos = [entry.findtext('seqno') for entry in client.iter_log_entries('2')]
+    with client.open_log_job('2') as (status, entries):
+        seqnos = [entry.findtext('seqno') for entry in entries]
 
+    assert status == 'FIN'
     assert len(seqnos) == 39
     assert seqnos[0] == '7691899338913481002'
     assert seqnos[-1] == '7691899338913480957'
@@ -269,11 +272,16 @@ def test_transport_errors_are_typed_and_name_the_host(raised, expected, message)
     assert HOST in str(exc_info.value)
 
 
+def read_log_job(client, job_id):
+    with client.open_log_job(job_id) as (_, entries):
+        return list(entries)
+
+
 @pytest.mark.parametrize(
     'call',
     [
         pytest.param(lambda client: client.op(SYSTEM_INFO_CMD), id='op'),
-        pytest.param(lambda client: list(client.iter_log_entries('2')), id='log-stream'),
+        pytest.param(lambda client: read_log_job(client, '2'), id='log-job'),
     ],
 )
 @pytest.mark.parametrize(

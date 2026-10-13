@@ -278,8 +278,8 @@ class FirewallPoller:
         way is skipped too, and stays due. A collector failing, or returning a sample that
         cannot be submitted, is logged and does not stop the others.
 
-        Collectors share the client's 2 in-flight slots. `iter_log_entries` holds one slot until exhausted, so a
-        collector must never call `client.op()` while iterating log entries.
+        Collectors share the client's 2 in-flight slots. `open_log_job` holds one slot for its `with` block, so a
+        collector must never call `client.op()` inside it.
         """
         ctx = CollectContext(
             client=self.client,
