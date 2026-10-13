@@ -334,7 +334,12 @@ class FirewallPoller:
         if not raw:
             return None
         try:
-            return DeviceIdentity.from_json(raw)
+            identity = DeviceIdentity.from_json(raw)
         except (ValueError, TypeError) as e:
             self.log.debug('pan_firewall %s: ignoring the cached identity: %s', self.ip, e)
             return None
+        # The cache is keyed by IP: a different firewall now at this IP (a replaced unit) must not inherit it.
+        if self.target.serial and identity.serial != self.target.serial:
+            self.log.debug('pan_firewall %s: ignoring the cached identity of another firewall', self.ip)
+            return None
+        return identity

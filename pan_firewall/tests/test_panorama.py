@@ -190,12 +190,29 @@ def test_entry_without_usable_ip_is_skipped_and_logged(dd_run_check, fake_panos,
     assert 'SYNTH-BAD-IP' in caplog.text
 
 
-def test_override_supplies_the_ip_of_an_entry_without_one(dd_run_check, fake_panos):
+def test_override_supplies_the_ip_of_an_entry_without_one(dd_run_check, aggregator, fake_panos):
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml((FW_A_SERIAL, 'fw-a', None, 'yes')))
 
     dd_run_check(new_check())
 
     assert polled_hosts(fake_panos) == {FW_A_POLLED}
+    # Panorama reported no IP, so the `device_ip` is the polled override.
+    assert set(metrics_by_ip(aggregator, 'can_connect')) == {FW_A_POLLED}
+
+
+def test_firewall_replaced_at_the_same_ip_is_reported_under_its_new_serial(dd_run_check, aggregator, fake_panos):
+    check = new_check(firewall_ip_overrides={**OVERRIDES, 'SYNTH-RMA-0001': FW_A_POLLED})
+    dd_run_check(check)
+    aggregator.reset()
+    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml(('SYNTH-RMA-0001', 'fw-a', FW_A_REPORTED, 'yes')))
+    # The replacement has not answered yet: the fake would otherwise still reply as the old unit (fw-a's capture).
+    fake_panos.fail(FW_A_POLLED, 'refused')
+
+    dd_run_check(check)
+
+    tags = metrics_by_ip(aggregator, 'can_connect')[FW_A_REPORTED].tags
+    assert 'device_id:SYNTH-RMA-0001' in tags
+    assert f'device_id:{FW_A_SERIAL}' not in tags
 
 
 def test_disconnected_firewall_is_skipped_with_a_debug_log(dd_run_check, fake_panos, caplog):

@@ -32,7 +32,9 @@ class PanFirewallCheck(AgentCheck, ConfigMixin):
         pollers = []
         for target in targets:
             poller = self._pollers.get(target.ip)
-            if poller is None:
+            # A changed target (a replaced firewall at the same IP, a renumbered one behind a fixed override) gets a
+            # new poller, so its identity and tags are not stale.
+            if poller is None or poller.target != target:
                 poller = self._pollers[target.ip] = FirewallPoller(self, target, self.config)
             pollers.append(poller)
         # A pool per run: no thread outlives the run, so nothing is left to stop when the check is unscheduled.

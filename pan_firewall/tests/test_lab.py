@@ -20,11 +20,12 @@ PANORAMA_ENV = {
 }
 
 
-def test_lab_password_never_leaks(monkeypatch, caplog, aggregator):
-    monkeypatch.setenv('PANOS_LAB_HOSTS', '192.0.2.10')
-    monkeypatch.setenv('PANOS_LAB_USERNAME', 'lab-user')
-    monkeypatch.setenv('PANOS_PASSWORD', PASSWORD)
-    instance = build_lab_instance()
+def test_lab_password_never_leaks(caplog, aggregator):
+    # An explicit mapping, never the real environment: a lab variable exported in the developer's shell must not
+    # change which mode (or whose password) this test builds.
+    instance = build_lab_instance(
+        {'PANOS_LAB_HOSTS': '192.0.2.10', 'PANOS_LAB_USERNAME': 'lab-user', 'PANOS_PASSWORD': PASSWORD}
+    )
     assert instance['firewall_credentials'][0]['password'] == PASSWORD
 
     check = new_check(instance)
@@ -37,10 +38,9 @@ def test_lab_password_never_leaks(monkeypatch, caplog, aggregator):
     assert [name for name, text in exposed.items() if PASSWORD in text] == []
 
 
-def test_lab_panorama_passwords_never_leak(monkeypatch, caplog, aggregator):
-    for name, value in PANORAMA_ENV.items():
-        monkeypatch.setenv(name, value)
-    instance = build_lab_instance()
+def test_lab_panorama_passwords_never_leak(caplog, aggregator):
+    instance = build_lab_instance(PANORAMA_ENV)
+    assert instance['panorama_password'] == PANORAMA_PASSWORD
 
     check = new_check(instance)
     with caplog.at_level(logging.DEBUG):
