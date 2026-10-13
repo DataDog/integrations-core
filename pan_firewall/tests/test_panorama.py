@@ -3,15 +3,27 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import logging
+import re
 
 import pytest
+import yaml
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.pan_firewall import PanFirewallCheck
 from datadog_checks.pan_firewall.panorama import DiscoveredFirewall, parse_devices
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from .common import CREDENTIALS, FIXTURES
+from .common import (
+    CREDENTIALS,
+    FIXTURES,
+    LAB_OVERRIDES_VAR,
+    LAB_PANORAMA_HOST_VAR,
+    LAB_PANORAMA_PASSWORD_VAR,
+    LAB_PANORAMA_USERNAME_VAR,
+    LAB_PASSWORD_VAR,
+    LAB_USERNAME_VAR,
+    build_lab_instance,
+)
 
 PANORAMA = 'panorama.example.com'
 DISCOVERY_CMD = '<show><devices><connected/></devices></show>'
@@ -179,6 +191,83 @@ def test_firewall_ips_filter_the_polled_ip(dd_run_check, fake_panos, filters, ex
     dd_run_check(new_check(firewall_ips=filters))
 
     assert polled_hosts(fake_panos) == expected
+
+
+@pytest.mark.parametrize(
+    'key',
+    [7955000930601, 7955000930601.0, '7955000930601', '7.955000930601e+12'],
+    ids=['int', 'float', 'digits-without-zeros', 'scientific'],
+)
+def test_override_key_read_as_a_number_matches_the_serial_and_warns_once(dd_run_check, fake_panos, caplog, key):
+    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, REAL_CAPTURE.read_bytes()))
+    check = new_check(firewall_ip_overrides={key: FW_A_POLLED, FW_B_SERIAL: FW_B_POLLED})
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    assert polled_hosts(fake_panos) == {FW_A_POLLED, FW_B_POLLED}
+    warnings = [r.getMessage() for r in caplog.records if 'was read as a number' in r.getMessage()]
+    assert len(warnings) == 1
+    assert 'quote serials' in warnings[0]
+
+
+def test_quoted_override_key_matches_without_a_warning(dd_run_check, fake_panos, caplog):
+    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, REAL_CAPTURE.read_bytes()))
+
+    dd_run_check(new_check())
+
+    assert polled_hosts(fake_panos) == {FW_A_POLLED, FW_B_POLLED}
+    assert 'was read as a number' not in caplog.text
+
+
+@pytest.mark.parametrize('key', [7955000930699, 7955000930601.5, '7955000930601x'], ids=['other', 'fractional', 'text'])
+def test_override_key_of_another_number_does_not_match(dd_run_check, fake_panos, key):
+    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, REAL_CAPTURE.read_bytes()))
+
+    dd_run_check(new_check(firewall_ip_overrides={key: FW_A_POLLED}))
+
+    assert polled_hosts(fake_panos) == {FW_A_REPORTED, FW_B_REPORTED}
+
+
+class _Yaml11Loader(yaml.SafeLoader):
+    """A loader that, like the Agent's, reads an all-digit scalar such as `007955000930601` as a number."""
+
+
+_Yaml11Loader.add_implicit_resolver('tag:yaml.org,2002:int', re.compile(r'^[0-9]+$'), list('0123456789'))
+_Yaml11Loader.add_constructor('tag:yaml.org,2002:int', lambda loader, node: int(loader.construct_scalar(node)))
+
+
+@pytest.mark.parametrize('loader', [yaml.SafeLoader, _Yaml11Loader], ids=['safe-load', 'digits-as-numbers'])
+def test_lab_instance_written_to_yaml_still_overrides_the_polled_ip(dd_run_check, fake_panos, loader):
+    environ = {
+        LAB_PANORAMA_HOST_VAR: PANORAMA,
+        LAB_PANORAMA_USERNAME_VAR: 'dummy-user',
+        LAB_PANORAMA_PASSWORD_VAR: 'dummy-password',
+        LAB_USERNAME_VAR: 'dummy-user',
+        LAB_PASSWORD_VAR: 'dummy-password',
+        LAB_OVERRIDES_VAR: f'{FW_A_SERIAL}={FW_A_POLLED},{FW_B_SERIAL}={FW_B_POLLED}',
+    }
+    written = yaml.safe_dump(build_lab_instance(environ))
+    assert f'{FW_A_SERIAL}: {FW_A_POLLED}' in written
+    instance = yaml.load(written, Loader=loader)
+    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, REAL_CAPTURE.read_bytes()))
+
+    dd_run_check(PanFirewallCheck('pan_firewall', {}, [instance]))
+
+    assert polled_hosts(fake_panos) == {FW_A_POLLED, FW_B_POLLED}
+
+
+def test_connection_log_lines_name_the_polled_ip_when_it_differs_from_the_reported_one(
+    dd_run_check, fake_panos, caplog
+):
+    caplog.set_level(logging.DEBUG)
+    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, REAL_CAPTURE.read_bytes()))
+
+    dd_run_check(new_check())
+
+    assert re.search(
+        rf'pan_firewall {re.escape(FW_A_REPORTED)} \(polled at {re.escape(FW_A_POLLED)}\): \d+ calls in', caplog.text
+    )
 
 
 @pytest.mark.parametrize('ip', [None, '', 'unknown', 'not-an-ip'], ids=['absent', 'empty', 'unknown', 'invalid'])

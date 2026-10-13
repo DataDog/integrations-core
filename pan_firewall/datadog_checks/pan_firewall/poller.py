@@ -84,6 +84,8 @@ class FirewallPoller:
         self.config = config
         self.log = check.log
         self.ip = device_ip(target)
+        # What the log lines about connecting name: the polled IP too when an override sends the polling elsewhere.
+        self._connect_label = self.ip if target.ip == self.ip else f'{self.ip} (polled at {target.ip})'
         # The model's default (30 s), not the wrapper's (10 s), applies when the instance sets no `timeout`.
         instance = {'timeout': config.timeout, **(check.instance or {})}
         http = RequestsWrapper(instance, check.init_config, check.HTTP_CONFIG_REMAPPER, check.log)
@@ -129,7 +131,7 @@ class FirewallPoller:
         if self.client.timed_out:
             self.log.warning(
                 'pan_firewall %s: %s timed out after %gs; skipped for this run: %s',
-                self.ip,
+                self._connect_label,
                 ', '.join(outcome.timed_out) or 'a call',
                 self.config.timeout,
                 ', '.join(outcome.skipped) or 'none',
@@ -147,7 +149,7 @@ class FirewallPoller:
         if self._auth_status is not None:
             self.check.gauge('api.authentication.status', self._auth_status, tags=tags)
         self._send_metadata(outcome)
-        self.log.debug('pan_firewall %s: %d calls in %.2fs', self.ip, stats.calls, time.monotonic() - start)
+        self.log.debug('pan_firewall %s: %d calls in %.2fs', self._connect_label, stats.calls, time.monotonic() - start)
 
     def _send_metadata(self, outcome: CollectorRun) -> None:
         """Send the device and its interfaces: on the identity's schedule (30 min), and when `can_connect` flips.

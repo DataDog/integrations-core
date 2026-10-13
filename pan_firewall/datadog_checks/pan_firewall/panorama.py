@@ -6,6 +6,7 @@ from __future__ import annotations
 import dataclasses
 import ipaddress
 import json
+import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from xml.etree.ElementTree import Element
@@ -166,7 +167,17 @@ class PanoramaFirewallSource:
 
     def _target(self, firewall: DiscoveredFirewall) -> FirewallTarget | None:
         overrides: Mapping[str, str] = self._config.firewall_ip_overrides or {}
-        polled = overrides.get(firewall.serial) or firewall.ip_address
+        override, numeric_key = _find_override(overrides, firewall.serial)
+        if numeric_key is not None:
+            self._warn_once(
+                f'numeric-override:{numeric_key}',
+                'pan_firewall: `firewall_ip_overrides` key `%s` was read as a number and matched the serial %s; '
+                'quote serials in `firewall_ip_overrides` (for example `\'%s\': 192.0.2.10`)',
+                numeric_key,
+                firewall.serial,
+                firewall.serial,
+            )
+        polled = override or firewall.ip_address
         address = _parse_ip(polled)
         if address is None:
             self._warn_once(
@@ -214,6 +225,39 @@ class PanoramaFirewallSource:
         if key not in self._warned:
             self._warned.add(key)
             self._log.warning(message, *args)
+
+
+def _serial_number(value: object) -> int | None:
+    """The integer a serial-like key stands for, or None when it is not an exactly representable whole number."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    try:
+        number = float(value) if isinstance(value, (str, float)) else None
+    except ValueError:
+        return None
+    # Below 2^53 every integer is exactly representable as a float, so no digit was silently rounded away.
+    if number is None or not math.isfinite(number) or number != int(number) or abs(number) >= 2**53:
+        return None
+    return int(number)
+
+
+def _find_override(overrides: Mapping[str, str], serial: str) -> tuple[str | None, str | None]:
+    """Return the override for `serial` and, when it was found through a numeric key, that key.
+
+    An exact key wins. Otherwise a key that YAML read as a number (`007955000930601` loses its leading zeros, and may
+    become `7955000930601.0` or `7.955000930601e+12`) matches a digit-only serial by integer value.
+    """
+    if serial in overrides:
+        return overrides[serial], None
+    if not serial.isdigit():
+        return None, None
+    wanted = int(serial)
+    for key, ip in overrides.items():
+        if _serial_number(key) == wanted:
+            return ip, key
+    return None, None
 
 
 def _parse_ip(value: str | None) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:

@@ -2,7 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import ipaddress
+from collections.abc import Mapping
 from typing import Any
+
+
+def instance_firewall_ip_overrides(value: Any, **kwargs: Any) -> Any:
+    """Read the keys as strings: YAML turns an unquoted serial such as `007955000930601` into a number."""
+    if isinstance(value, Mapping):
+        return {str(key): ip for key, ip in value.items()}
+    return value
 
 
 def check_instance(model: Any) -> Any:

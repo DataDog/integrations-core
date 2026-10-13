@@ -67,6 +67,9 @@ files:
         Map of firewall serial number to the IP address the Agent uses to reach that firewall,
         instead of the IP address Panorama reports. Use it when the Agent reaches the firewalls through
         a different network than Panorama does.
+
+        Quote the serial numbers: unquoted, YAML reads a serial such as `007951000123456` as a number and
+        drops its leading zeros.
       value:
         type: object
         additionalProperties:
