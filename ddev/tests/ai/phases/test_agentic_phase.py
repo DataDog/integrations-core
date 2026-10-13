@@ -392,6 +392,7 @@ async def test_spawn_subagent_wiring(flow_dir, flow_context, monkeypatch, messag
         file_access_policy=FileAccessPolicy(write_root=flow_dir, integration_name="my_integration"),
         agents={"writer": make_agent_config(tools=["spawn_subagent"])},
         callbacks=run_callbacks,
+        run_root=checkpoint_manager.root,
     )
     phase = AgenticPhase.build(
         phase_id="p1",

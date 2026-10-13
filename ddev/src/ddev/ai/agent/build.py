@@ -16,6 +16,7 @@ from ddev.ai.tools.registry import ToolRegistry
 if TYPE_CHECKING:
     from ddev.ai.agent.scope import AgentScope
     from ddev.ai.react.factory import ReActProcessFactory
+    from ddev.ai.tools.http.response_store import ResponseStore
 
 
 @dataclass(frozen=True)
@@ -58,9 +59,11 @@ class AgentRuntimeFactory:
         *,
         provider_registry: AgentProviderRegistry,
         file_registry: FileRegistry,
+        response_store: ResponseStore,
     ) -> None:
         self._provider_registry = provider_registry
         self._file_registry = file_registry
+        self._response_store = response_store
 
     def build_runtime(
         self,
@@ -78,6 +81,7 @@ class AgentRuntimeFactory:
             agent_config=agent_config,
             # forwarded untouched to tools that spawn child agents
             process_factory=process_factory,
+            response_store=self._response_store,
         )
         agent = self._provider_registry.build_agent(
             agent_config,
