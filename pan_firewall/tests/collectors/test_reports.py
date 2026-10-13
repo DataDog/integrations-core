@@ -19,7 +19,7 @@ from ..helpers import make_instance, new_check
 
 PRIVATE = '10.0.0.0-10.255.255.255'
 
-# The rows (dimension value, sessions, bytes) of each capture's `report_custom_<field>.xml`, by report.
+# The rows (dimension value, sessions, bytes) of fw-a's `report_custom_<field>.xml`, by report.
 FW_A_ROWS = {
     'top_applications': (
         'app',
@@ -70,62 +70,11 @@ FW_A_ROWS = {
         [('trust-out', 742, 135887596), ('trust-to-vpn', 416, 218733), ('vpn-to-trust', 324, 184787)],
     ),
 }
-FW_B_ROWS = {
-    'top_applications': (
-        'app',
-        [
-            ('ping', 533, 104468),
-            ('ssl', 267, 80983096),
-            ('web-browsing', 263, 3499357),
-            ('dns-base', 227, 42668),
-            ('google-base', 53, 5313702),
-        ],
-    ),
-    'top_application_categories': (
-        'app_category',
-        [
-            ('general-internet', 849, 8917527),
-            ('networking', 534, 81032964),
-            ('business-systems', 106, 48921262),
-        ],
-    ),
-    'top_technology_categories': (
-        'app_technology',
-        [
-            ('network-protocol', 800, 154336),
-            ('browser-based', 636, 105421861),
-            ('client-server', 53, 33295556),
-        ],
-    ),
-    'top_sources': ('src', [('10.60.3.100', 1173, 138691120), ('10.60.2.100', 316, 180633)]),
-    'top_destinations': (
-        'dst',
-        [
-            ('10.60.2.100', 426, 223649),
-            ('10.60.3.100', 316, 180633),
-            ('8.8.8.8', 227, 42668),
-            ('208.80.154.224', 53, 5813716),
-            ('146.75.76.81', 53, 43764204),
-        ],
-    ),
-    'top_source_countries': ('src_country', [(PRIVATE, 1489, 138871753)]),
-    'top_destination_countries': (
-        'dst_country',
-        [(PRIVATE, 742, 404282), ('United States', 694, 136046024), ('Japan', 53, 2421447)],
-    ),
-    'top_ingress_zones': ('src_zone', [('trust', 1173, 138691120), ('vpn', 316, 180633)]),
-    'top_egress_zones': ('dst_zone', [('untrust', 747, 138467471), ('vpn', 426, 223649), ('trust', 316, 180633)]),
-    'top_rules': (
-        'rule',
-        [('trust-out', 747, 138467471), ('trust-to-vpn', 426, 223649), ('vpn-to-trust', 316, 180633)],
-    ),
-}
-ROWS = {'fw-a': FW_A_ROWS, 'fw-b': FW_B_ROWS}
 
 
-def load_report(name, firewall='fw-a'):
+def load_report(name):
     field, _tag = REPORTS[name]
-    response, _submit = find_report_fixture(field, firewall)
+    response, _submit = find_report_fixture(field, 'fw-a')
     return parse_response(response.read_bytes())
 
 
@@ -149,12 +98,11 @@ def series(samples):
     return result
 
 
-@pytest.mark.parametrize('firewall', ['fw-a', 'fw-b'])
 @pytest.mark.parametrize('name', list(REPORTS))
-def test_report_of_the_captures(name, firewall):
-    samples = parse_report(load_report(name, firewall), name)
+def test_report_of_the_capture(name):
+    samples = parse_report(load_report(name), name)
 
-    assert series(samples) == expected_samples(name, ROWS[firewall][name])
+    assert series(samples) == expected_samples(name, FW_A_ROWS[name])
 
 
 def test_bytes_per_session_is_the_average_and_zero_without_sessions():

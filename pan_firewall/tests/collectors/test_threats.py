@@ -37,7 +37,7 @@ PROBE_ENTRIES = 19 * PROBE_SEQNO_PAGE_SIZE + 5
 EMPTY = (SYNTHETIC / 'threat_log_empty.xml').read_bytes()
 NEWEST_AFTER_RESET = SYNTHETIC / 'threat_log_newest_after_reset.xml'
 NO_CAPTURE = (200, b'<response status="error" code="400"><msg><line>no capture</line></msg></response>')
-# What fw-a's and fw-b's `threat_log_5m.xml` hold: (severity, action, subtype, vsys) -> logs. 39 logs each.
+# What fw-a's `threat_log_5m.xml` holds: (severity, action, subtype, vsys) -> logs. 39 logs.
 CAPTURE_COUNTS = {
     ('medium', 'drop', 'spyware', 'vsys1'): 22,
     ('critical', 'reset-both', 'vulnerability', 'vsys1'): 8,
@@ -127,14 +127,10 @@ def probe_counts():
     return counts, seqnos
 
 
-@pytest.mark.parametrize('name', ['fw-a', 'fw-b'])
-def test_threat_logs_of_the_captures_are_counted_by_tag(fake_panos, name):
-    host = '192.0.2.10' if name == 'fw-a' else '192.0.2.11'
-    ctx = Context(fake_panos, host=host)
-    first = THREAT_LOG_FIRST_SEQNO[name]
-    ctx.seed(first - 1)
+def test_threat_logs_of_the_capture_are_counted_by_tag(firewall):
+    firewall.seed(THREAT_LOG_FIRST_SEQNO['fw-a'] - 1)
 
-    samples = ctx.collect()
+    samples = firewall.collect()
 
     assert series(samples) == expected(CAPTURE_COUNTS)
     assert sum(s.value for s in samples) == 39

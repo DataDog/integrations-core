@@ -159,11 +159,10 @@ def test_dataplane_one_sample_per_dp_and_core_with_the_first_value():
     assert {s.kind for s in samples} == {'gauge'}
 
 
-@pytest.mark.parametrize('firewall', ['fw-a', 'fw-b'])
-def test_dataplane_of_the_captures(firewall):
-    samples = parse_dataplane(load(FIXTURES / firewall / 'resource_monitor.xml'), mock.Mock())
+def test_dataplane_of_the_capture():
+    samples = parse_dataplane(load(op_fixture(RESOURCE_MONITOR_CMD)), mock.Mock())
 
-    # Both lab firewalls have one data processor with 4 idle cores.
+    # The lab firewall has one data processor with 4 idle cores.
     assert by_name(samples) == {('dataplane.cpu.utilization', ('dp:dp0', f'core:{core}')): 0 for core in range(4)}
 
 
@@ -174,9 +173,8 @@ def test_dataplane_without_data_processors_gives_no_samples_and_one_warning():
     log.warning.assert_called_once()
 
 
-@pytest.mark.parametrize('firewall', ['fw-a', 'fw-b'])
-def test_disk_of_the_captures_skips_virtual_filesystems(firewall):
-    samples = parse_disk(load(FIXTURES / firewall / 'disk_space.xml'), mock.Mock())
+def test_disk_of_the_capture_skips_virtual_filesystems():
+    samples = parse_disk(load(op_fixture(DISK_SPACE_CMD)), mock.Mock())
 
     assert by_name(samples) == {
         ('disk.used_pct', ('mount:/', 'filesystem:/dev/root')): 43,

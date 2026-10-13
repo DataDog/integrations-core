@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from unittest import mock
 
-import pytest
-
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectContext, FirewallState
 from datadog_checks.pan_firewall.collectors.interfaces import (
     COUNTER_INTERFACE_CMD,
@@ -35,7 +33,7 @@ COUNTER_FIELDS = {
     'macspoof': 'interface.attack.mac_spoof',
 }
 ZERO = dict.fromkeys(COUNTER_FIELDS, 0)
-# Values of the `ifnet/ifnet/entry` rows of the captures, in COUNTER_FIELDS order.
+# Values of the `ifnet/ifnet/entry` rows of the capture, in COUNTER_FIELDS order.
 FW_A_ROWS = {
     'ethernet1/1': (153738451, 3120586, 119008, 30547, 0, 0, 0, 3, 0, 0, 0, 0, 0),
     'ethernet1/2': (2213914, 152466233, 25062, 110271, 0, 0, 0, 0, 0, 0, 0, 0, 0),
@@ -45,17 +43,7 @@ FW_A_ROWS = {
     'tunnel.1': (1563183, 919234, 11275, 5157, 0, 0, 0, 0, 0, 0, 0, 0, 0),
     'tunnel.2': (0,) * 13,
 }
-FW_B_ROWS = {
-    'ethernet1/1': (158850809, 3216766, 122598, 31770, 0, 0, 0, 4, 0, 0, 0, 0, 0),
-    'ethernet1/2': (2307104, 157577780, 26285, 113879, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-    'loopback': (0,) * 13,
-    'loopback.1': (0,) * 13,
-    'tunnel': (0,) * 13,
-    'tunnel.1': (1573118, 923056, 11284, 5192, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-    'tunnel.2': (0,) * 13,
-}
 FW_A_TUNNELS = {'tunnel.1': (1563183, 919234, 11275, 5157), 'tunnel.2': (0, 0, 0, 0)}
-FW_B_TUNNELS = {'tunnel.1': (1573118, 923056, 11284, 5192), 'tunnel.2': (0, 0, 0, 0)}
 # interface, interface_type, zone, vsys, vr
 MAP_TAGS = {
     'ethernet1/1': ('interface:ethernet1/1', 'interface_type:ethernet', 'zone:untrust', 'vsys:vsys1', 'vr:default'),
@@ -104,27 +92,23 @@ def with_map_tags(name):
     return (*MAP_TAGS[name], resource_tag(name))
 
 
-@pytest.mark.parametrize(
-    'firewall, rows', [pytest.param('fw-a', FW_A_ROWS, id='fw-a'), pytest.param('fw-b', FW_B_ROWS, id='fw-b')]
-)
-def test_interface_counters_with_the_interface_map(firewall, rows):
+def test_interface_counters_with_the_interface_map():
     state = state_from(FIXTURES / 'fw-a-probe' / 'interface_all.xml')
-    samples = parse_interface_counters(
-        load(FIXTURES / firewall / 'counter_interface.xml'), state, SERIAL, None, mock.Mock()
-    )
+    samples = parse_interface_counters(load(op_fixture(COUNTER_INTERFACE_CMD)), state, SERIAL, None, mock.Mock())
 
     interface_samples = [s for s in samples if s.name.startswith('interface.')]
-    assert series(interface_samples) == expected_interfaces(rows, with_map_tags)
+    assert series(interface_samples) == expected_interfaces(FW_A_ROWS, with_map_tags)
     assert len(interface_samples) == 13 * 7
 
 
 def test_interface_counters_without_a_map_carry_the_interface_tag_only():
+    # Without `show interface all` (fw-b has no capture of it, ruling R7) the state holds no interface map.
     samples = parse_interface_counters(
-        load(op_fixture(COUNTER_INTERFACE_CMD, 'fw-b')), FirewallState(), SERIAL, None, mock.Mock()
+        load(op_fixture(COUNTER_INTERFACE_CMD)), FirewallState(), SERIAL, None, mock.Mock()
     )
 
     interface_samples = [s for s in samples if s.name.startswith('interface.')]
-    assert series(interface_samples) == expected_interfaces(FW_B_ROWS, lambda name: (f'interface:{name}',))
+    assert series(interface_samples) == expected_interfaces(FW_A_ROWS, lambda name: (f'interface:{name}',))
 
 
 def test_interface_without_an_ifnet_row_gets_the_type_and_the_resource_tag():
@@ -149,20 +133,16 @@ def tunnel_tags(name):
     return (f'tunnel:tun-{name}', f'tunnel_interface:{name}', 'peer_ip:10.0.0.1', 'gateway:gw', 'outer_interface:e1')
 
 
-@pytest.mark.parametrize(
-    'firewall, tunnels',
-    [pytest.param('fw-a', FW_A_TUNNELS, id='fw-a'), pytest.param('fw-b', FW_B_TUNNELS, id='fw-b')],
-)
-def test_tunnel_rows_become_ipsec_counters_with_the_tags_vpn_stored(firewall, tunnels):
-    known = {name: tunnel_tags(name) for name in tunnels}
+def test_tunnel_rows_become_ipsec_counters_with_the_tags_vpn_stored():
+    known = {name: tunnel_tags(name) for name in FW_A_TUNNELS}
 
     samples = parse_interface_counters(
-        load(op_fixture(COUNTER_INTERFACE_CMD, firewall)), FirewallState(), SERIAL, known, mock.Mock()
+        load(op_fixture(COUNTER_INTERFACE_CMD)), FirewallState(), SERIAL, known, mock.Mock()
     )
 
     ipsec = [s for s in samples if s.name.startswith('ipsec.')]
     expected = {}
-    for name, values in tunnels.items():
+    for name, values in FW_A_TUNNELS.items():
         for metric, value in zip(
             ('ipsec.tunnel.rx.bytes', 'ipsec.tunnel.tx.bytes', 'ipsec.tunnel.rx.packets', 'ipsec.tunnel.tx.packets'),
             values,

@@ -54,9 +54,9 @@ def expected(peer_ip, *, total=2, active=1, inactive=0, init=1, states=None):
     return result
 
 
-@pytest.mark.parametrize('firewall, peer_ip', [('fw-a', '10.60.1.11'), ('fw-b', '10.60.1.10')])
-def test_vpn_of_the_captures(firewall, peer_ip):
-    snapshot = parse_vpn(load(firewall, VPN_FLOW_CMD), load(firewall, VPN_GATEWAY_CMD), mock.Mock())
+def test_vpn_of_the_capture():
+    peer_ip = '10.60.1.11'
+    snapshot = parse_vpn(load('fw-a', VPN_FLOW_CMD), load('fw-a', VPN_GATEWAY_CMD), mock.Mock())
 
     assert series(snapshot.samples) == expected(peer_ip)
     assert snapshot.tunnel_states == {'tunnel.1': 'active', 'tunnel.2': 'init'}

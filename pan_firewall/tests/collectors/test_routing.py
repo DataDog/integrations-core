@@ -54,29 +54,15 @@ def peer_samples(tags, *, status, duration, restart, updates, limit, prefixes=No
 
 FW_A_DEAD = ('peer:dead-peer', 'vr:default', 'peer_ip:10.60.1.250', 'remote_as:65099', 'peer_group:lab')
 FW_A_PEER = ('peer:fw-peer', 'vr:default', 'peer_ip:169.254.10.2', 'remote_as:65002', 'peer_group:lab')
-FW_B_DEAD = FW_A_DEAD
-FW_B_PEER = ('peer:fw-peer', 'vr:default', 'peer_ip:169.254.10.1', 'remote_as:65001', 'peer_group:lab')
 IPV4 = {'ipv4_unicast': ((1, 0, 1, 1), 10.0)}
 
 
-@pytest.mark.parametrize(
-    'firewall, peer, dead',
-    [('fw-a', FW_A_PEER, FW_A_DEAD), ('fw-b', FW_B_PEER, FW_B_DEAD)],
-)
-def test_bgp_of_the_captures(firewall, peer, dead):
-    samples = parse_bgp_peers(load(op_fixture(BGP_PEER_CMD, firewall)))
+def test_bgp_of_the_capture():
+    samples = parse_bgp_peers(load(op_fixture(BGP_PEER_CMD)))
 
     # The down peer reports zeros and its configured limit, and has no prefix family to report.
-    down = peer_samples(dead, status=0, duration=0, restart=0, updates=0, limit=5000)
-    up = peer_samples(
-        peer,
-        status=1,
-        duration=4856 if firewall == 'fw-a' else 4878,
-        restart=0,
-        updates=2,
-        limit=10,
-        prefixes=IPV4,
-    )
+    down = peer_samples(FW_A_DEAD, status=0, duration=0, restart=0, updates=0, limit=5000)
+    up = peer_samples(FW_A_PEER, status=1, duration=4856, restart=0, updates=2, limit=10, prefixes=IPV4)
     assert series(samples) == {**down, **up}
 
 
@@ -202,14 +188,12 @@ def test_bgp_is_registered_and_submits_through_the_check(real_collectors, dd_run
 
 
 FW_A_OSPF = ('neighbor:169.254.10.2', 'router_id:10.255.0.2', 'area:0.0.0.0', 'vr:default')
-FW_B_OSPF = ('neighbor:169.254.10.1', 'router_id:10.255.0.1', 'area:0.0.0.0', 'vr:default')
 
 
-@pytest.mark.parametrize('firewall, tags', [('fw-a', FW_A_OSPF), ('fw-b', FW_B_OSPF)])
-def test_ospf_neighbor_of_the_captures_is_up_without_a_state_tag(firewall, tags):
-    samples = parse_ospf_neighbors(load(op_fixture(OSPF_NEIGHBOR_CMD, firewall)))
+def test_ospf_neighbor_of_the_capture_is_up_without_a_state_tag():
+    samples = parse_ospf_neighbors(load(op_fixture(OSPF_NEIGHBOR_CMD)))
 
-    assert series(samples) == {('ospf.neighbor.status', tags): (1, 'gauge')}
+    assert series(samples) == {('ospf.neighbor.status', FW_A_OSPF): (1, 'gauge')}
 
 
 @pytest.mark.parametrize(

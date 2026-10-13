@@ -3,8 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from unittest import mock
 
-import pytest
-
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectContext, FirewallState
 from datadog_checks.pan_firewall.collectors.counters import GLOBAL_COUNTER_CMD, collect_global_counters, parse_global
 from datadog_checks.pan_firewall.constants import DROPPED_PACKET_ASPECTS, GLOBAL_COUNTERS
@@ -31,24 +29,9 @@ FW_A_VALUES = {
     'session_installed': 2269,
     'ssl_hsm_up_down_event_rcv': 1,
 }
-FW_B_VALUES = {
-    **ZERO,
-    'appid_unknown_fini_empty': 506,
-    'flow_arp_pkt_rcv': 225,
-    'flow_arp_pkt_xmt': 299,
-    'flow_arp_resolve_xmt': 299,
-    'flow_fwd_l3_noarp': 1524,
-    'flow_host_service_allow': 2833,
-    'pkt_recv': 145294,
-    'pkt_sent': 145540,
-    'session_freed': 2219,
-    'session_installed': 2247,
-    'ssl_hsm_up_down_event_rcv': 1,
-}
-# Sum of the `severity=drop` counters of each capture, by aspect. `mgmt` is `flow_host_decap_err`; `pktproc` is
+# Sum of the `severity=drop` counters of the capture, by aspect. `mgmt` is `flow_host_decap_err`; `pktproc` is
 # `flow_action_close` + `ctd_dns_wait_pkt_drop` + `ctd_dns_wait_pkt_drop_response`; `forward` is `flow_fwd_l3_noarp`.
 FW_A_DROPS = {'forward': 1546, 'pktproc': 118 + 8 + 8, 'mgmt': 45}
-FW_B_DROPS = {'forward': 1524, 'pktproc': 122 + 6 + 6, 'mgmt': 46}
 
 
 def load(path):
@@ -79,14 +62,13 @@ def dropped(samples):
     return result
 
 
-@pytest.mark.parametrize('firewall, values', [('fw-a', FW_A_VALUES), ('fw-b', FW_B_VALUES)], ids=['fw-a', 'fw-b'])
-def test_global_counters_of_the_captures(firewall, values):
-    samples = parse_global(load(op_fixture(GLOBAL_COUNTER_CMD, firewall)))
+def test_global_counters_of_the_capture():
+    samples = parse_global(load(op_fixture(GLOBAL_COUNTER_CMD)))
 
     series = global_series(samples)
 
     assert len(series) == 26
-    assert series == {counter_tags(counter, *GLOBAL_COUNTERS[counter]): value for counter, value in values.items()}
+    assert series == {counter_tags(counter, *GLOBAL_COUNTERS[counter]): value for counter, value in FW_A_VALUES.items()}
     assert {s.name for s in samples} == {'counter.global', 'dropped_packets'}
 
 
@@ -106,11 +88,10 @@ def test_unlisted_counter_takes_category_and_aspect_from_the_table():
     assert series[counter_tags('pkt_recv_zero', 'packet', 'pktproc')] == 0
 
 
-@pytest.mark.parametrize('firewall, drops', [('fw-a', FW_A_DROPS), ('fw-b', FW_B_DROPS)], ids=['fw-a', 'fw-b'])
-def test_dropped_packets_sum_the_drop_severity_counters_by_aspect(firewall, drops):
-    result = dropped(parse_global(load(op_fixture(GLOBAL_COUNTER_CMD, firewall))))
+def test_dropped_packets_sum_the_drop_severity_counters_by_aspect():
+    result = dropped(parse_global(load(op_fixture(GLOBAL_COUNTER_CMD))))
 
-    assert result == {**dict.fromkeys(DROPPED_PACKET_ASPECTS, 0), **drops}
+    assert result == {**dict.fromkeys(DROPPED_PACKET_ASPECTS, 0), **FW_A_DROPS}
     assert len(DROPPED_PACKET_ASPECTS) == 13
 
 

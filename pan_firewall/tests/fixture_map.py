@@ -36,7 +36,7 @@ OP_FIXTURES = {
 
 # `type=op` commands captured on some firewall sets only (lab probes), or answered from a synthetic stand-in until
 # captured, to the fixture path under FIXTURES, per set. A set missing here has no capture for the command (ruling
-# R7: fw-b has no `show interface all`).
+# R7: fw-b has no `show interface all`). Unlike the other maps, a set missing here does not fall back to fw-a's file.
 PARTIAL_OP_FIXTURES = {
     '<show><interface>all</interface></show>': {'fw-a': 'fw-a-probe/interface_all.xml'},
     # Idle until lab task L10 captures `show jobs pending`.
@@ -54,9 +54,19 @@ PANORAMA_OP_FIXTURES = {
 }
 
 
+def set_fixture(name: str, firewall: str) -> Path:
+    """Return `<firewall>/<name>` under FIXTURES, or fw-a's file of that name when the set has none.
+
+    The two lab firewalls are identical VMs, so fw-b keeps only the files that make it a second, distinct firewall (its
+    identity, and the values the docker E2E asserts for it) and answers everything else with fw-a's capture.
+    """
+    path = FIXTURES / firewall / name
+    return path if path.exists() else FIXTURES / 'fw-a' / name
+
+
 def op_fixture(cmd: str, firewall: str = 'fw-a') -> Path:
     """Return the fixture answering `type=op&cmd=<cmd>` for the given firewall set (`fw-a` or `fw-b`)."""
-    return FIXTURES / firewall / OP_FIXTURES[cmd]
+    return set_fixture(OP_FIXTURES[cmd], firewall)
 
 
 def find_op_fixture(cmd: str, firewall: str) -> Path | None:
@@ -74,9 +84,10 @@ PROBE_SEQNO_START = 7691899338913581588
 # `nlogs` of the real `probe-seqno` capture: pages p0-p18 hold 20 entries and p19 holds 5.
 PROBE_SEQNO_PAGE_SIZE = 20
 PROBE_SEQNO_PAGES = 20
-# `seqno` of the newest log of `probe/threat_back_p0.xml`, and the lowest of each set's `threat_log_5m.xml`.
+# `seqno` of the newest log of `probe/threat_back_p0.xml`, and the lowest of the `threat_log_5m.xml` each set answers
+# with (fw-b answers with fw-a's, see `set_fixture`).
 BACKWARD_NEWEST_SEQNO = 7691899338913581520
-THREAT_LOG_FIRST_SEQNO = {'fw-a': 7691899338913480957, 'fw-b': 7691899334618513665}
+THREAT_LOG_FIRST_SEQNO = dict.fromkeys(('fw-a', 'fw-b'), 7691899338913480957)
 
 
 def seqno_query(seqno: int) -> str:
@@ -98,23 +109,21 @@ LOG_FIXTURES: dict[str, dict[tuple[str, str | None, int], tuple[str, str]]] = {
             for page in range(PROBE_SEQNO_PAGES)
         },
     },
-    'fw-b': {
-        ('forward', seqno_query(THREAT_LOG_FIRST_SEQNO['fw-b']), 0): (
-            'fw-b/threat_log_5m.xml',
-            'fw-b/threat_log_5m_submit.xml',
-        ),
-    },
 }
 
 
 def find_log_fixture(direction: str, query: str | None, skip: int, firewall: str) -> tuple[Path, Path] | None:
-    """Return the (response, submit) fixtures answering a `type=log` query for the firewall set, or None."""
-    paths = LOG_FIXTURES.get(firewall, {}).get((direction, query, skip))
+    """Return the (response, submit) fixtures answering a `type=log` query for the firewall set, or None.
+
+    A set without its own answer to the query answers with fw-a's, like `set_fixture`.
+    """
+    key = (direction, query, skip)
+    paths = LOG_FIXTURES.get(firewall, {}).get(key) or LOG_FIXTURES['fw-a'].get(key)
     return (FIXTURES / paths[0], FIXTURES / paths[1]) if paths else None
 
 
 def find_report_fixture(field: str, firewall: str) -> tuple[Path, Path] | None:
     """Return the (response, submit) fixtures of the custom report aggregated by `field`, or None."""
-    response = FIXTURES / firewall / f'report_custom_{field}.xml'
-    submit = FIXTURES / firewall / f'report_custom_{field}_submit.xml'
+    response = set_fixture(f'report_custom_{field}.xml', firewall)
+    submit = set_fixture(f'report_custom_{field}_submit.xml', firewall)
     return (response, submit) if response.exists() and submit.exists() else None

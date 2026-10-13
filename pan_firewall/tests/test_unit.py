@@ -106,6 +106,8 @@ def test_num_and_text_on_missing_element():
 
 
 def test_fixture_map_points_at_existing_files():
+    # fw-b answers with fw-a's file where it has none of its own (`set_fixture`), except for its identity.
+    assert (FIXTURES / 'fw-b' / OP_FIXTURES[SYSTEM_INFO_CMD]).is_file()
     for firewall in ('fw-a', 'fw-b'):
         for cmd in OP_FIXTURES:
             assert op_fixture(cmd, firewall).is_file()
