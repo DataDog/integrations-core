@@ -88,6 +88,7 @@ class InstanceConfig(BaseModel):
     key_store_password: Optional[str] = None
     key_store_path: Optional[str] = None
     log_requests: Optional[bool] = None
+    max_line_size: Optional[float] = None
     mc_cluster_states: Optional[MappingProxyType[str, Any]] = None
     mc_health_check_endpoint: Optional[str] = None
     min_collection_interval: Optional[float] = None

@@ -87,6 +87,7 @@ class InstanceConfig(BaseModel):
     log_requests: Optional[bool] = None
     max_bulletins_per_cycle: Optional[int] = None
     max_connections: Optional[int] = None
+    max_line_size: Optional[float] = None
     max_processors: Optional[int] = None
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
