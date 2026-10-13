@@ -39,6 +39,8 @@ class FirewallState:
     interface_map: dict[str, Element] | None = None
     vsys: list[str] = field(default_factory=lambda: ['vsys1'])
     ha_state: str | None = None
+    # The routing engine warning (advanced routing on) is logged once per firewall, not once per run.
+    are_warned: bool = False
 
 
 @dataclass

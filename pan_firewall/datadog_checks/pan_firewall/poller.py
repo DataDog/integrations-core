@@ -19,6 +19,7 @@ from .collectors import (  # noqa: F401  (importing the modules registers their 
     FirewallState,
     Sample,
     dataplane,
+    routing,
     system,
 )
 from .collectors.jobs import busy_jobs
