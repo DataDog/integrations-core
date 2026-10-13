@@ -5,7 +5,8 @@
 
 The one counters response also carries the `tunnel.N` rows. Those are the IPSec tunnel counters, tagged with what the
 `vpn` collector stored in the state on an earlier run: the collectors run in parallel, so reading `vpn`'s result of the
-same run would be a race. Until `vpn` first answers, the tunnel counters carry the `tunnel_interface` tag only.
+same run would be a race. Until `vpn` first answers the tunnel counters are not sent: a series with fewer tags would
+start a monotonic_count context that is dropped as soon as the full tags arrive.
 """
 
 from __future__ import annotations
@@ -89,8 +90,8 @@ def parse_interface_counters(
 ) -> list[Sample]:
     """Parse `counter interface all`: `interface.*` for each interface, `ipsec.tunnel.*` for each `tunnel.N` row.
 
-    `tunnel_tags` is what `vpn` stored (None before it first answered). Once known, a `tunnel.N` row it does not list
-    is not an IPSec tunnel and is not reported.
+    `tunnel_tags` is what `vpn` stored (None before it first answered, when no tunnel counters are sent). A `tunnel.N`
+    row it does not list is not an IPSec tunnel and is not reported.
     """
     rows = root.findall('./result/ifnet/ifnet/entry')
     if not rows:
@@ -102,11 +103,8 @@ def parse_interface_counters(
         if not name:
             continue
         if TUNNEL_INTERFACE.match(name):
-            if tunnel_tags is None:
-                tags: tuple[str, ...] | None = (f'tunnel_interface:{name}',)
-            else:
-                tags = tunnel_tags.get(name)
-            metrics, kind_tags = TUNNEL_METRICS, tags
+            # Without the tags a tunnel series would be a useless monotonic_count context: wait for `vpn`.
+            metrics, kind_tags = TUNNEL_METRICS, (tunnel_tags or {}).get(name)
         else:
             metrics, kind_tags = INTERFACE_METRICS, interface_tags(name, state, serial)
         if kind_tags is None:

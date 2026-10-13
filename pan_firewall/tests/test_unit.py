@@ -126,6 +126,14 @@ MONOTONIC = 'monotonic_count'
 # `ha.interface.*` (standalone firewalls), `power.*` and `temperature.*` (VM-Series has no sensors),
 # `interface.speed` (VM-Series reports no speed), and `threat.count` (the first threat run only records the newest
 # log as a watermark, so it counts nothing).
+# `interfaces` sends these once `vpn` has stored the tunnel tags, so from the second 3-minute tier.
+TUNNEL_COUNTERS = {
+    'ipsec.tunnel.rx.bytes': MONOTONIC,
+    'ipsec.tunnel.rx.packets': MONOTONIC,
+    'ipsec.tunnel.tx.bytes': MONOTONIC,
+    'ipsec.tunnel.tx.packets': MONOTONIC,
+}
+
 FIRST_RUN_METRICS = {
     'api.authentication.status': GAUGE,
     'bgp.peer.prefix_limit': GAUGE,
@@ -156,11 +164,7 @@ FIRST_RUN_METRICS = {
     'interface.tx.bytes': MONOTONIC,
     'interface.tx.packets': MONOTONIC,
     'ipsec.gateways.total': GAUGE,
-    'ipsec.tunnel.rx.bytes': MONOTONIC,
-    'ipsec.tunnel.rx.packets': MONOTONIC,
     'ipsec.tunnel.state': GAUGE,
-    'ipsec.tunnel.tx.bytes': MONOTONIC,
-    'ipsec.tunnel.tx.packets': MONOTONIC,
     'ipsec.tunnels.active': GAUGE,
     'ipsec.tunnels.inactive': GAUGE,
     'ipsec.tunnels.init': GAUGE,
@@ -279,6 +283,25 @@ def test_first_run_submits_every_lab_available_p0_metric(dd_run_check, aggregato
             at_least=1,
         )
     aggregator.assert_all_metrics_covered()
+
+
+def test_tunnel_counters_arrive_on_the_second_interface_run_with_full_tags(
+    dd_run_check, aggregator, real_collectors, monkeypatch
+):
+    now = [1000.0]
+    monkeypatch.setattr(poller_module, 'FirewallSchedule', lambda: FirewallSchedule(lambda: now[0]))
+    check = new_static_check()
+
+    dd_run_check(check)
+    for ip in FIREWALLS.values():
+        assert not {name for name, _ in metrics_of(aggregator, ip)} & TUNNEL_COUNTERS.keys()
+    now[0] += 180
+    dd_run_check(check)
+
+    for ip in FIREWALLS.values():
+        assert TUNNEL_COUNTERS.items() <= metrics_of(aggregator, ip)
+    for metric in aggregator.metrics('pan_firewall.ipsec.tunnel.rx.bytes'):
+        assert {'tunnel:tun-peer', 'tunnel:tun-dead'} & set(metric.tags)
 
 
 def test_each_run_makes_only_the_requests_that_are_due(

@@ -167,13 +167,14 @@ def test_tunnel_rows_become_ipsec_counters_with_the_tags_vpn_stored(firewall, tu
     assert not any(s.tags[0].startswith('interface:tunnel.') for s in samples)
 
 
-def test_first_run_tunnel_rows_carry_the_tunnel_interface_tag_only():
+def test_tunnel_counters_wait_for_the_vpn_tags():
+    # A tag-poor series sent before `vpn` answers would be a useless monotonic_count context.
     samples = parse_interface_counters(
         load(op_fixture(COUNTER_INTERFACE_CMD)), FirewallState(), SERIAL, None, mock.Mock()
     )
 
-    tags = {s.tags for s in samples if s.name == 'ipsec.tunnel.rx.bytes'}
-    assert tags == {('tunnel_interface:tunnel.1',), ('tunnel_interface:tunnel.2',)}
+    assert not [s for s in samples if s.name.startswith('ipsec.')]
+    assert [s for s in samples if s.name == 'interface.rx.bytes']
 
 
 def test_tunnel_row_that_vpn_does_not_list_is_not_an_ipsec_tunnel():
@@ -239,7 +240,7 @@ def test_collector_makes_one_call_and_adds_the_speeds():
     samples = collect_interfaces(ctx)
 
     ctx.client.op.assert_called_once_with(COUNTER_INTERFACE_CMD)
-    assert {s.name for s in samples} >= {'interface.speed', 'interface.rx.bytes', 'ipsec.tunnel.rx.bytes'}
+    assert {s.name for s in samples} >= {'interface.speed', 'interface.rx.bytes'}
 
 
 def test_interfaces_is_registered_and_submits_through_the_check(real_collectors, dd_run_check, aggregator, fake_panos):
