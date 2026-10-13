@@ -255,7 +255,6 @@ class LineCappedRawResponse(ObjectProxy):
 
     def __init__(self, raw: Any, max_line_size: int):
         super().__init__(raw)
-        # wrapt forwards attributes to the wrapped object, except those prefixed with `_self_`
         self._self_max_line_size = max_line_size
 
     def stream(self, *args: Any, **kwargs: Any) -> Iterator[bytes]:
