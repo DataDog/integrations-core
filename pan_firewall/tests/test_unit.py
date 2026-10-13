@@ -7,6 +7,7 @@ from xml.etree import ElementTree as ET
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.pan_firewall import PanFirewallCheck, constants
 from datadog_checks.pan_firewall import poller as poller_module
 from datadog_checks.pan_firewall.errors import PanosApiError
@@ -295,6 +296,7 @@ def test_runs_at_0_180_and_300_seconds_submit_every_lab_available_p0_metric(
     for name, metric_type in expected.items():
         aggregator.assert_metric(f'pan_firewall.{name}', metric_type=metric_types[metric_type], at_least=1)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_tunnel_counters_arrive_on_the_second_interface_run_with_full_tags(

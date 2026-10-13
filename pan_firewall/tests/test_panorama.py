@@ -6,6 +6,7 @@ import logging
 
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.pan_firewall import PanFirewallCheck
 from datadog_checks.pan_firewall.panorama import DiscoveredFirewall, parse_devices
 from datadog_checks.pan_firewall.xml_utils import parse_response
@@ -296,6 +297,7 @@ def test_panorama_can_connect_is_1_after_a_successful_discovery(dd_run_check, ag
     dd_run_check(new_check())
 
     assert panorama_can_connect(aggregator) == [(1, sorted(PANORAMA_TAGS))]
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 def test_panorama_can_connect_is_not_sent_in_static_mode(dd_run_check, aggregator):
