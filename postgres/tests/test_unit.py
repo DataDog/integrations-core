@@ -595,7 +595,8 @@ def test_autodiscovery_follows_refreshed_databases(pg_instance):
     check.autodiscovery.get_items.return_value = ['db2', 'db3']
     check._collect_stats([])
 
-    assert {dbname for dbname, _ in check.executed} == {'db2', 'db3'}
+    # `pg_relation_size(` only appears in the dynamic relation queries, not in the relation scopes.
+    assert {dbname for dbname, query in check.executed if 'pg_relation_size(' in query} == {'db2', 'db3'}
 
 
 def test_autodiscovery_collection_interval_applies_per_database(pg_instance):
