@@ -574,7 +574,7 @@ files:
             - match_field: name
               match_value: eth5
               disabled: true
-        fleet_configurable: false
+        fleet_configurable: true
       - name: ping
         fleet_configurable: true
         description: |

@@ -1,0 +1,1 @@
+Submit Flink Counter metrics (`numRecordsIn`, `numRecordsOut`, etc.) as `count` instead of `gauge` in the OpenMetrics-based collection mode.
