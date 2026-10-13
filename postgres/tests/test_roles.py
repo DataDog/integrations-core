@@ -1045,6 +1045,7 @@ def test_collect_roles_database_failure_has_no_terminal_payload(
         return original_emit_rows(self, cursor, array_name, emitter)
 
     monkeypatch.setattr(PostgresRoleCollector, '_emit_rows', fail_after_objects)
+    payloads = _capture_payloads(monkeypatch, check)
 
     run_one_check(check)
 
@@ -1054,6 +1055,36 @@ def test_collect_roles_database_failure_has_no_terminal_payload(
     assert all('collection_payloads_count' not in event for event in privilege_events)
     assert any(event['kind'] == 'pg_roles' for event in metadata)
     assert _database_time_statuses(aggregator) == [('datadog_test', 'error')]
+    # The database's chunks were sent but never committed, so only the roles snapshot is counted.
+    role_payloads = [payload for payload in payloads if json.loads(payload)['kind'] == 'pg_roles']
+    roles = sum(len(event['roles']) for event in metadata if event['kind'] == 'pg_roles')
+    assert _entities_count(aggregator) == {'role': roles, 'object': 0, 'default_privilege_rule': 0}
+    aggregator.assert_metric(
+        'dd.postgres.roles.payload_bytes', value=sum(len(payload.encode()) for payload in role_payloads), count=1
+    )
+
+
+def _capture_payloads(monkeypatch, check):
+    """Record the serialized role payloads the check submits, so tests can compare exact byte counts."""
+    payloads = []
+    submit = check.database_monitoring_metadata
+
+    def capture(payload):
+        text = payload.decode() if isinstance(payload, bytes) else payload
+        if json.loads(text).get('kind') in ('pg_roles', 'pg_role_privileges'):
+            payloads.append(text)
+        submit(payload)
+
+    monkeypatch.setattr(check, 'database_monitoring_metadata', capture)
+    return payloads
+
+
+def _entities_count(aggregator):
+    counts = {}
+    for metric in aggregator.metrics('dd.postgres.roles.entities_count'):
+        entity = next(tag.split(':', 1)[1] for tag in metric.tags if tag.startswith('entity:'))
+        counts[entity] = metric.value
+    return counts
 
 
 def _role_oids(role_event):
@@ -1078,9 +1109,12 @@ def _database_time_statuses(aggregator):
     return sorted(statuses)
 
 
-def test_collect_roles_collects_every_database_within_budget(integration_check, roles_instance, aggregator):
+def test_collect_roles_collects_every_database_within_budget(
+    integration_check, roles_instance, aggregator, monkeypatch
+):
     roles_instance['collect_roles']['include_databases'] = ['^dogs_[0-3]$']
     check = integration_check(roles_instance)
+    payloads = _capture_payloads(monkeypatch, check)
 
     run_one_check(check)
 
@@ -1095,6 +1129,15 @@ def test_collect_roles_collects_every_database_within_budget(integration_check, 
     aggregator.assert_metric_has_tag('dd.postgres.roles.time', 'status:success', count=1)
     # One instance payload plus one payload per database.
     aggregator.assert_metric('dd.postgres.roles.payloads_count', value=5, count=1)
+    events = [json.loads(payload) for payload in payloads]
+    assert _entities_count(aggregator) == {
+        'role': sum(len(event.get('roles', [])) for event in events),
+        'object': sum(len(event.get('objects', [])) for event in events),
+        'default_privilege_rule': sum(len(event.get('default_privileges', [])) for event in events),
+    }
+    aggregator.assert_metric(
+        'dd.postgres.roles.payload_bytes', value=sum(len(payload.encode()) for payload in payloads), count=1
+    )
 
 
 def test_collect_roles_resumes_after_exceeding_budget(integration_check, roles_instance, aggregator):
@@ -1256,7 +1299,8 @@ def test_collect_roles_cancelled_before_start_reports_cancelled(integration_chec
 
     assert not aggregator.get_event_platform_events('dbm-metadata')
     aggregator.assert_metric_has_tag('dd.postgres.roles.time', 'status:cancelled', count=1)
-    aggregator.assert_metric_has_tag('dd.postgres.roles.rows_count', 'status:cancelled', count=1)
+    assert _entities_count(aggregator) == {'role': 0, 'object': 0, 'default_privilege_rule': 0}
+    aggregator.assert_metric('dd.postgres.roles.payload_bytes', value=0, count=1)
 
 
 @pytest.mark.parametrize('fails', [False, True], ids=['success', 'failure'])

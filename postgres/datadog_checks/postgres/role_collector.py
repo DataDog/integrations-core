@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import threading
 import time
+from collections import Counter
 from collections.abc import Callable
 from contextlib import ExitStack
 from dataclasses import dataclass
@@ -33,6 +34,8 @@ if TYPE_CHECKING:
 
 INSTANCE_ARRAYS = ("roles",)
 DATABASE_ARRAYS = ("objects", "default_privileges")
+# The `entity` tag of `dd.postgres.roles.entities_count` for each payload array.
+ENTITY_TYPES = {"roles": "role", "objects": "object", "default_privileges": "default_privilege_rule"}
 PAYLOAD_CHUNK_SIZE = 10_000
 # The intake accepts batches of up to 5 MB of uncompressed data; the margin leaves room for the forwarder to batch
 # events together.
@@ -86,7 +89,9 @@ class RoleSnapshotEmitter:
         self._closed = False
         self._clear_buffers()
         self.payloads_count = 0
-        self.rows_count = 0
+        self.entities_count: Counter[str] = Counter()
+        self.payload_bytes = 0
+        self.completed = False
 
     def append(
         self,
@@ -117,7 +122,7 @@ class RoleSnapshotEmitter:
         self._buffers[array_name].append(text)
         self._buffered_rows_count += weight
         self._buffered_bytes += size + 1
-        self.rows_count += 1
+        self.entities_count[array_name] += 1
         # An entity that alone exceeds a budget is sent at once, so no other entity joins its chunk.
         if self._buffered_rows_count == weight and (
             weight > self._chunk_size or size > self._byte_budget - self._overhead_bytes
@@ -136,6 +141,7 @@ class RoleSnapshotEmitter:
             raise RuntimeError("The role snapshot is already complete or discarded")
         self._flush(is_last=True)
         self._closed = True
+        self.completed = True
 
     def discard(self) -> None:
         self._clear_buffers()
@@ -155,7 +161,9 @@ class RoleSnapshotEmitter:
             event["collection_payloads_count"] = self.payloads_count
         head = json.dumps(event, default=default_json_event_encoding)[:-1]
         arrays = ",".join(f'{json.dumps(name)}:[{",".join(rows)}]' for name, rows in self._buffers.items())
-        self._submit(f"{head},{arrays}}}")
+        payload = f"{head},{arrays}}}"
+        self.payload_bytes += len(payload.encode())
+        self._submit(payload)
         self._clear_buffers()
 
 
@@ -174,7 +182,8 @@ class PostgresRoleCollector:
             exclude_databases=list(role_config.exclude_databases),
         )
         self._resume_from_database: str | None = None
-        self._rows_count = 0
+        self._entities_count: Counter[str] = Counter()
+        self._payload_bytes = 0
         self._payloads_count = 0
 
     def collect_roles(self, tags_no_db: list[str]) -> None:
@@ -190,7 +199,8 @@ class PostgresRoleCollector:
 
         started_at = time.time() * 1000
         had_error = False
-        self._rows_count = 0
+        self._entities_count: Counter[str] = Counter()
+        self._payload_bytes = 0
         self._payloads_count = 0
         try:
             if self._cancel_event.is_set():
@@ -253,9 +263,17 @@ class PostgresRoleCollector:
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
+            for entity in ENTITY_TYPES.values():
+                self._check.gauge(
+                    "dd.postgres.roles.entities_count",
+                    self._entities_count[entity],
+                    tags=metric_tags + [f"entity:{entity}"],
+                    hostname=self._check.reported_hostname,
+                    raw=True,
+                )
             self._check.gauge(
-                "dd.postgres.roles.rows_count",
-                self._rows_count,
+                "dd.postgres.roles.payload_bytes",
+                self._payload_bytes,
                 tags=metric_tags,
                 hostname=self._check.reported_hostname,
                 raw=True,
@@ -464,8 +482,13 @@ class PostgresRoleCollector:
         )
 
     def _record_emitter(self, emitter: RoleSnapshotEmitter) -> None:
-        self._rows_count += emitter.rows_count
         self._payloads_count += emitter.payloads_count
+        # Entities and bytes describe what the backend holds, so a scope that never sent its final chunk is not
+        # counted, even if some of its chunks were sent.
+        if emitter.completed:
+            for array_name, count in emitter.entities_count.items():
+                self._entities_count[ENTITY_TYPES[array_name]] += count
+            self._payload_bytes += emitter.payload_bytes
 
     def _check_cancelled(self) -> None:
         if self._cancel_event.is_set():
