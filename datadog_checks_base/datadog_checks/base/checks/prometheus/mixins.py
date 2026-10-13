@@ -8,6 +8,7 @@ from collections import defaultdict
 from fnmatch import fnmatchcase
 from math import isinf, isnan
 
+import requests
 from google.protobuf.internal.decoder import _DecodeVarint32  # pylint: disable=E0611,E0401
 
 from datadog_checks.base.checks import AgentCheck
@@ -574,7 +575,8 @@ class PrometheusScraperMixin(object):
 
         try:
             response = handler.get(endpoint, extra_headers=headers, stream=False)
-        except HTTPClientSSLError:
+        # Checks without AGNOSTIC_HTTP raise requests exceptions, which the agnostic types do not match.
+        except (requests.exceptions.SSLError, HTTPClientSSLError):
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
         except (IOError, HTTPClientError):
@@ -592,7 +594,7 @@ class PrometheusScraperMixin(object):
                     "{}{}".format(self.NAMESPACE, ".prometheus.health"), AgentCheck.OK, tags=["endpoint:" + endpoint]
                 )
             return response
-        except HTTPClientStatusError:
+        except (requests.HTTPError, HTTPClientStatusError):
             response.close()
             if self.health_service_check:
                 self._submit_service_check(

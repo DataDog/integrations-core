@@ -17,6 +17,8 @@ from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError,
 from datadog_checks.checks.prometheus import PrometheusCheck, PrometheusScraper, UnknownFormatError
 from datadog_checks.utils.prometheus import metrics_pb2, parse_metric_family
 
+pytestmark = pytest.mark.usefixtures('agnostic_http')
+
 protobuf_content_type = 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited'
 FAKE_ENDPOINT = 'http://fake.endpoint:10055/metrics'
 PROMETHEUS_REQUEST_OPTIONS = {

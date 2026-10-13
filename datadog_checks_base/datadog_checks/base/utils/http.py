@@ -10,7 +10,7 @@ import socket
 import warnings
 from collections import ChainMap
 from collections.abc import Mapping
-from contextlib import ExitStack, contextmanager
+from contextlib import ExitStack, contextmanager, nullcontext
 from copy import deepcopy
 from hashlib import sha256
 from types import MethodType
@@ -25,6 +25,7 @@ from requests import cookies as requests_cookies
 from requests.exceptions import SSLError
 from requests.structures import CaseInsensitiveDict
 from urllib3.exceptions import InsecureRequestWarning
+from wrapt import ObjectProxy
 
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.config import is_affirmative
@@ -223,6 +224,29 @@ def get_tls_config_from_options(new_options):
     return tls_config
 
 
+class ResponseWrapper(ObjectProxy):
+    def __init__(self, response, default_chunk_size):
+        super(ResponseWrapper, self).__init__(response)
+
+        # See https://github.com/psf/requests/pull/5942
+        self.__default_chunk_size = default_chunk_size
+
+    def iter_content(self, chunk_size=None, decode_unicode=False):
+        if chunk_size is None:
+            chunk_size = self.__default_chunk_size
+
+        return self.__wrapped__.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
+
+    def iter_lines(self, chunk_size=None, decode_unicode=False, delimiter=None):
+        if chunk_size is None:
+            chunk_size = self.__default_chunk_size
+
+        return self.__wrapped__.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter)
+
+    def __enter__(self):
+        return self
+
+
 def _der_to_pem(der_cert: bytes) -> str:
     return (
         _http_utils.cryptography_x509_load_certificate(der_cert)
@@ -383,6 +407,7 @@ def _suppress_netrc_auth(session: requests.Session) -> None:
 
 class RequestsWrapper(object):
     __slots__ = (
+        '_agnostic',
         '_session',
         '_trust_env',
         '_https_adapters',
@@ -401,7 +426,8 @@ class RequestsWrapper(object):
         'tls_config',
     )
 
-    def __init__(self, instance, init_config, remapper=None, logger=None, session=None):
+    def __init__(self, instance, init_config, remapper=None, logger=None, session=None, *, agnostic=False):
+        self._agnostic = agnostic
         self.logger = logger or LOGGER
         default_fields = dict(STANDARD_FIELDS)
 
@@ -693,12 +719,9 @@ class RequestsWrapper(object):
         self.handle_auth_token(method=method, url=url, default_options=self.options)
 
         new_options = ChainMap(options, self.options)
-        request_headers = CaseInsensitiveDict(
-            explicit_headers if explicit_headers is not None else self.options['headers']
-        )
+        # Without extra headers, the caller's headers, including an explicit None, reach requests unchanged.
         if extra_headers is not None:
-            request_headers.update(extra_headers)
-        new_options['headers'] = request_headers
+            new_options['headers'] = self._merge_extra_headers(explicit_headers, extra_headers)
 
         if url.startswith('https') and not self.ignore_tls_warning and not new_options['verify']:
             self.logger.debug('An unverified HTTPS request is being made to %s', url)
@@ -719,20 +742,29 @@ class RequestsWrapper(object):
                 except Exception as e:
                     self.logger.debug('Renewing auth token, as an error occurred: %s', e)
                     self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
-                    retry_headers = CaseInsensitiveDict(
-                        explicit_headers if explicit_headers is not None else self.options['headers']
-                    )
+                    # Rebuild so the merged headers carry the renewed token.
                     if extra_headers is not None:
-                        retry_headers.update(extra_headers)
-                    new_options['headers'] = retry_headers
+                        new_options['headers'] = self._merge_extra_headers(explicit_headers, extra_headers)
                     response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
             else:
                 response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
 
-            return requests_adapter.RequestsResponseAdapter(response, self.request_size)
+            if self._agnostic:
+                return requests_adapter.RequestsResponseAdapter(response, self.request_size)
+            return ResponseWrapper(response, self.request_size)
+
+    def _merge_extra_headers(self, explicit_headers, extra_headers):
+        """Layer per-request extra headers over the request's headers, or the client's when it sets none."""
+        headers = CaseInsensitiveDict(explicit_headers if explicit_headers is not None else self.options['headers'])
+        headers.update(extra_headers)
+        return headers
+
+    def _translate_errors(self):
+        """Raise backend-neutral errors in agnostic mode, and requests errors unchanged otherwise."""
+        return requests_adapter.translate_http_errors() if self._agnostic else nullcontext()
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
-        with requests_adapter.translate_http_errors():
+        with self._translate_errors():
             try:
                 response = request_method(url, **new_options)
             except SSLError as e:
@@ -933,7 +965,7 @@ class RequestsWrapper(object):
 
     def handle_auth_token(self, **request):
         if self.auth_token_handler is not None:
-            with requests_adapter.translate_http_errors():
+            with self._translate_errors():
                 self.auth_token_handler.poll(**request)
 
     def __del__(self):  # no cov
@@ -956,10 +988,15 @@ class RequestsWrapper(object):
 
 
 def create_http_client(
-    instance: dict | None, init_config: dict, remapper: dict | None = None, logger: logging.Logger | None = None
+    instance: dict | None,
+    init_config: dict,
+    remapper: dict | None = None,
+    logger: logging.Logger | None = None,
+    *,
+    agnostic: bool = False,
 ) -> HTTPClient:
-    """Construct the HTTP client."""
-    return RequestsWrapper(instance or {}, init_config, remapper, logger)
+    """Construct the HTTP client, using the backend-neutral contract when agnostic is set."""
+    return RequestsWrapper(instance or {}, init_config, remapper, logger, agnostic=agnostic)
 
 
 @contextmanager

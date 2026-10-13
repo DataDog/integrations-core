@@ -21,7 +21,8 @@ class PrometheusScraper(PrometheusScraperMixin):
         self._http_handlers = {}
 
     def create_http_client(self, instance: dict | None = None) -> HTTPClient:
-        return self.check.create_http_client(instance, remapper=self.HTTP_CONFIG_REMAPPER)
+        # The scraper takes its HTTP settings from the instance alone, never from the check's init_config.
+        return self.check.create_http_client(instance, init_config=self.init_config, remapper=self.HTTP_CONFIG_REMAPPER)
 
     def _submit_rate(self, metric_name, val, metric, custom_tags=None, hostname=None):
         """
@@ -91,11 +92,8 @@ class GenericPrometheusCheck(AgentCheck):
     """
 
     DEFAULT_METRIC_LIMIT = 2000
-    HTTP_CONFIG_REMAPPER = PrometheusScraperMixin.HTTP_CONFIG_REMAPPER
 
     def __init__(self, name, init_config, agentConfig, instances=None, default_instances=None, default_namespace=""):
-        if init_config is None:
-            init_config = {}
         super(GenericPrometheusCheck, self).__init__(name, init_config, agentConfig, instances)
         self.scrapers_map = {}
         self.default_instances = default_instances if default_instances is not None else {}

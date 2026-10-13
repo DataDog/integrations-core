@@ -2,6 +2,21 @@
 
 <!-- towncrier release notes start -->
 
+## 2.0.0 / 2026-10-01
+
+***Changed***:
+
+* The InfiniBand check now requires GPU monitoring to be enabled (gpu.enabled in datadog.yaml). Instances are skipped when it is not enabled. ([#25277](https://github.com/DataDog/integrations-core/pull/25277))
+* Report `infiniband.port_rcv_data` and `infiniband.port_xmit_data` in bytes rather than the raw sysfs value, which IBTA defines in units of 4-byte words, so the values for these two metrics increase fourfold and any monitor or dashboard using a static threshold on them must be rescaled; the `port_state` and `port_phys_state` tag values are now normalized, which changes the emitted value for any state whose kernel name contains a space or angle brackets. ([#25278](https://github.com/DataDog/integrations-core/pull/25278))
+
+***Added***:
+
+* Collect the `req_transport_retries_exceeded` and `req_rnr_retries_exceeded` hardware counters, and log at debug level any configured counter name that does not match a file in sysfs. ([#25278](https://github.com/DataDog/integrations-core/pull/25278))
+
+***Fixed***:
+
+* Correct the `exclude_counters` and `exclude_hw_counters` configuration examples, which were swapped, replace an `additional_counters` example that named a counter absent from every kernel tree, repair the physical-state monitor's tag filter and group-by so it can match the emitted tags, and drop two permanently empty dashboard widgets whose signal is already covered by adjacent panels. ([#25278](https://github.com/DataDog/integrations-core/pull/25278))
+
 ## 1.7.0 / 2026-06-09 / Agent 7.81.0
 
 ***Added***:

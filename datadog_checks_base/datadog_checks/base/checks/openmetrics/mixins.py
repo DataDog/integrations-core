@@ -10,6 +10,7 @@ from math import isinf, isnan
 from os.path import isfile
 from re import compile
 
+import requests
 from prometheus_client.samples import Sample
 
 from datadog_checks.base.agent import datadog_agent
@@ -836,7 +837,8 @@ class OpenMetricsScraperMixin(object):
 
         try:
             response = self.send_request(endpoint, scraper_config, headers)
-        except HTTPClientSSLError:
+        # Checks without AGNOSTIC_HTTP raise requests exceptions, which the agnostic types do not match.
+        except (requests.exceptions.SSLError, HTTPClientSSLError):
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
         except (IOError, HTTPClientError):
@@ -848,7 +850,7 @@ class OpenMetricsScraperMixin(object):
             if health_service_check:
                 self.service_check(service_check_name, AgentCheck.OK, tags=service_check_tags)
             return response
-        except HTTPClientStatusError:
+        except (requests.HTTPError, HTTPClientStatusError):
             response.close()
             if health_service_check:
                 self.service_check(service_check_name, AgentCheck.CRITICAL, tags=service_check_tags)

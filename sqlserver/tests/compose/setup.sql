@@ -83,6 +83,26 @@ CREATE TABLE datadog_test_schemas.test_schema.RestaurantReviews (
 );
 GO
 
+-- Both indexes contain a, c, and e. key_columns and included_columns keep the key and INCLUDE list apart.
+CREATE TABLE datadog_test_schemas.test_schema.index_coverage (
+    a INT,
+    c INT,
+    e INT
+);
+CREATE INDEX ix_include ON datadog_test_schemas.test_schema.index_coverage (c) INCLUDE (a, e);
+CREATE INDEX ix_prefix ON datadog_test_schemas.test_schema.index_coverage (c, a) INCLUDE (e);
+GO
+
+-- Clustered (b, a) is not table column order, and ix_desc keeps the DESC suffix.
+CREATE TABLE datadog_test_schemas.test_schema.key_order (
+    a INT,
+    b INT,
+    c INT,
+    CONSTRAINT pk_key_order PRIMARY KEY CLUSTERED (b, a)
+);
+CREATE INDEX ix_desc ON datadog_test_schemas.test_schema.key_order (c DESC, a);
+GO
+
 -- Create second test database for integration schema tests
 CREATE DATABASE datadog_test_schemas_second;
 GO
@@ -158,6 +178,25 @@ CREATE TABLE datadog_test_collation.test_schema.RestaurantReviews (
 );
 GO
 
+-- Both indexes contain a, c, and e. key_columns and included_columns keep the key and INCLUDE list apart.
+CREATE TABLE datadog_test_collation.test_schema.index_coverage (
+    a INT,
+    c INT,
+    e INT
+);
+CREATE INDEX ix_include ON datadog_test_collation.test_schema.index_coverage (c) INCLUDE (a, e);
+CREATE INDEX ix_prefix ON datadog_test_collation.test_schema.index_coverage (c, a) INCLUDE (e);
+GO
+
+-- Clustered (b, a) is not table column order, and ix_desc keeps the DESC suffix.
+CREATE TABLE datadog_test_collation.test_schema.key_order (
+    a INT,
+    b INT,
+    c INT,
+    CONSTRAINT pk_key_order PRIMARY KEY CLUSTERED (b, a)
+);
+CREATE INDEX ix_desc ON datadog_test_collation.test_schema.key_order (c DESC, a);
+GO
 
 -- Create test database for integration tests
 -- only bob and fred have read/write access to this database

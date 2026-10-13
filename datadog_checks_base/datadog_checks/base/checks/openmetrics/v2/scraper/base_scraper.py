@@ -13,6 +13,7 @@ from typing import List  # noqa: F401
 from prometheus_client import Metric
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
 from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
+from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from datadog_checks.base.agent import datadog_agent
 from datadog_checks.base.checks.openmetrics import parser_optimizations
@@ -416,8 +417,9 @@ class OpenMetricsScraper:
                 self._content_type = connection.headers.get('Content-Type', '')
                 for line in connection.iter_lines(decode_unicode=True):
                     yield line
-        # A timeout at any phase means the endpoint is unreachable, same as a connection failure.
-        except (HTTPClientConnectionError, HTTPClientTimeoutError):
+        # A timeout at any phase means the endpoint is unreachable, same as a connection failure. Checks without
+        # AGNOSTIC_HTTP raise requests exceptions, which the agnostic types do not match.
+        except (RequestsConnectionError, HTTPClientConnectionError, HTTPClientTimeoutError):
             if self.ignore_connection_errors:
                 self.log.warning("OpenMetrics endpoint %s is not accessible", self.endpoint)
             else:

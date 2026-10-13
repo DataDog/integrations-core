@@ -12,6 +12,8 @@ from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCre
 from datadog_checks.base.stubs.http import RecordedRequest
 from datadog_checks.dev import get_here
 
+pytestmark = pytest.mark.usefixtures('agnostic_http')
+
 HERE = get_here()
 
 

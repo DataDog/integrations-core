@@ -157,6 +157,15 @@ def test_request_headers_override_defaults_before_extra_headers():
     assert wire_headers['X-Default'] == 'default'
 
 
+def test_explicit_none_headers_reach_requests_unchanged():
+    http = RequestsWrapper({}, {})
+
+    with mock.patch('requests.Session.get') as get:
+        http.get('http://example.com/hello', headers=None)
+
+    assert get.call_args.kwargs['headers'] is None
+
+
 def test_a_per_request_mapping_keeps_the_configured_headers():
     http = RequestsWrapper({'extra_headers': {'X-Configured': 'configured'}}, {})
 
