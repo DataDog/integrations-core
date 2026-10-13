@@ -24,7 +24,7 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
-from datadog_checks.base.utils.http import RequestsWrapper, limit_line_size
+from datadog_checks.base.utils.http import RequestsWrapper, get_response_size, limit_line_size
 
 
 class OpenMetricsScraper:
@@ -417,6 +417,9 @@ class OpenMetricsScraper:
                 self._content_type = connection.headers.get('Content-Type', '')
                 for line in connection.iter_lines(decode_unicode=True):
                     yield line
+
+                # Measured once the body is read, so that it is not held in memory in its entirety
+                self.submit_telemetry_endpoint_response_size(connection)
         except ConnectionError as e:
             if self.ignore_connection_errors:
                 self.log.warning("OpenMetrics endpoint %s is not accessible", self.endpoint)
@@ -457,8 +460,6 @@ class OpenMetricsScraper:
                 # Never derive the encoding from the locale
                 if response.encoding is None:
                     response.encoding = 'utf-8'
-
-                self.submit_telemetry_endpoint_response_size(response)
 
                 return response
 
@@ -502,13 +503,9 @@ class OpenMetricsScraper:
         self.count('telemetry.metrics.blacklist.count', 1, tags=self.tags)
 
     def submit_telemetry_endpoint_response_size(self, response):
-        content_length = response.headers.get('Content-Length')
+        content_length = get_response_size(response)
         if content_length is not None:
-            content_length = int(content_length)
-        else:
-            content_length = len(response.content)
-
-        self.gauge('telemetry.payload.size', content_length, tags=self.tags)
+            self.gauge('telemetry.payload.size', content_length, tags=self.tags)
 
     def __getattr__(self, name):
         # Forward all unknown attribute lookups to the check instance for access to submission methods, hostname, etc.

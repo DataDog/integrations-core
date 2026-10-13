@@ -959,7 +959,9 @@ def test_telemetry(aggregator, instance):
     instance['experimental_metrics'] = True
 
     check = KubernetesState(CHECK_NAME, {}, [instance])
-    check.poll = mock.MagicMock(return_value=MockResponse(mock_from_file("prometheus.txt"), 'text/plain'))
+    response = MockResponse(mock_from_file("prometheus.txt"), 'text/plain')
+    response.headers['Content-Length'] = str(len(response.content))
+    check.poll = mock.MagicMock(return_value=response)
 
     endpoint = instance['kube_state_url']
     scraper_config = check.config_map[endpoint]

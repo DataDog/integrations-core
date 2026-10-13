@@ -19,7 +19,7 @@ from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_familie
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.base.utils.http import RequestsWrapper, limit_line_size
+from datadog_checks.base.utils.http import RequestsWrapper, get_response_size, limit_line_size
 
 
 class OpenMetricsScraperMixin(object):
@@ -498,12 +498,6 @@ class OpenMetricsScraperMixin(object):
         Poll the data from Prometheus and return the metrics as a generator.
         """
         response = self.poll(scraper_config)
-        if scraper_config['telemetry']:
-            if 'content-length' in response.headers:
-                content_len = int(response.headers['content-length'])
-            else:
-                content_len = len(response.content)
-            self._send_telemetry_gauge(self.TELEMETRY_GAUGE_MESSAGE_SIZE, content_len, scraper_config)
         try:
             # no dry run if no label joins
             if not scraper_config['label_joins']:
@@ -533,6 +527,12 @@ class OpenMetricsScraperMixin(object):
 
             for metric in self.parse_metric_family(response, scraper_config):
                 yield metric
+
+            if scraper_config['telemetry']:
+                # Measured once the body is read, so that it is not held in memory in its entirety
+                content_len = get_response_size(response)
+                if content_len is not None:
+                    self._send_telemetry_gauge(self.TELEMETRY_GAUGE_MESSAGE_SIZE, content_len, scraper_config)
 
             # Set dry run off
             scraper_config['_dry_run'] = False

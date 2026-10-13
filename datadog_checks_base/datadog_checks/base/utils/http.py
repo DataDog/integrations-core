@@ -251,6 +251,22 @@ def limit_line_size(response: requests.Response, max_line_size: int) -> None:
         raw.stream = LineSizeLimitedStream(raw, max_line_size)
 
 
+def get_response_size(response: requests.Response) -> int | None:
+    """
+    Return the `Content-Length` of `response`, or else the number of decoded bytes read so far if the response is
+    limited by `limit_line_size`. Unlike `len(response.content)`, this never holds the whole body in memory.
+    """
+    content_length = response.headers.get('Content-Length')
+    if content_length is not None:
+        return int(content_length)
+
+    stream = getattr(getattr(response, 'raw', None), 'stream', None)
+    if isinstance(stream, LineSizeLimitedStream):
+        return stream.bytes_read
+
+    return None
+
+
 class LineSizeLimitedStream:
     """
     Replacement for `HTTPResponse.stream` that raises `ResponseLineTooLongError` once a line grows past
@@ -265,6 +281,8 @@ class LineSizeLimitedStream:
         # strongly would create a `raw` -> this object -> method -> `raw` cycle that only the cyclic GC could free.
         self._stream = weakref.WeakMethod(raw.stream)
         self._max_line_size = max_line_size
+        # Decoded bytes read so far, for `get_response_size`
+        self.bytes_read = 0
 
     def __call__(self, *args: Any, **kwargs: Any) -> Iterator[bytes]:
         stream = self._stream()
@@ -290,6 +308,7 @@ class LineSizeLimitedStream:
                     f'Response contains a line longer than {self._max_line_size} bytes, '
                     'the limit can be raised with the `max_line_size` option'
                 )
+            self.bytes_read += len(chunk)
             yield chunk
 
 
