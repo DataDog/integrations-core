@@ -17,7 +17,8 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class FirewallTarget:
-    """A firewall to poll. `serial`, `hostname` and `reported_ip` come from Panorama discovery (None in static mode).
+    """A firewall to poll. `serial`, `hostname`, `family` and `reported_ip` come from Panorama discovery (None in static
+    mode). The firewall's own `show system info` takes over `hostname` and `family` once it answers.
 
     `reported_ip` is the Panorama `ip-address` (the `device_ip` tag); `ip` is the address the check connects to.
     """
@@ -27,6 +28,7 @@ class FirewallTarget:
     credentials: Credentials
     serial: str | None = None
     hostname: str | None = None
+    family: str | None = None
     reported_ip: str | None = None
 
 

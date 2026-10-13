@@ -21,10 +21,13 @@ from urllib.parse import urlsplit
 import requests
 
 from .common import FIXTURES
-from .fixture_map import find_log_fixture, find_op_fixture, find_report_fixture
+from .fixture_map import PANORAMA_OP_FIXTURES, find_log_fixture, find_op_fixture, find_report_fixture
 
 # Firewall IP -> fixture set.
 FIREWALL_SETS = {'192.0.2.10': 'fw-a', '192.0.2.11': 'fw-b'}
+
+# Hosts answering as a Panorama: keygen and the commands of PANORAMA_OP_FIXTURES.
+PANORAMA_HOSTS = {'panorama.example.com'}
 
 # The keygen success shape (`result/key`) from the PAN-OS XML API docs ("Get Your API Key"), with a dummy key. Kept
 # inline rather than in `fixtures/synthetic/`: fixture files must hold no `<key>` (see `test_fixtures_hold_no_secrets`).
@@ -47,6 +50,8 @@ FAILURES: dict[str, Answer] = {
     'tls': requests.exceptions.SSLError('certificate verify failed'),
     'http_403': (403, INVALID_CREDENTIAL),
     'code_403': (200, INVALID_CREDENTIAL),
+    # The real Panorama answer to a keygen with a wrong password (lab task P1).
+    'capture_bad_password': (200, (FIXTURES / 'panorama' / 'keygen_bad_password.xml').read_bytes()),
     # Non-PAN-OS bodies, such as a reverse proxy's or a hung management web server's error page.
     'html_502': (502, b'<html><body><h1>502 Bad Gateway</h1></body></html>'),
     'html_403': (403, b'<html><body><h1>403 Forbidden</h1></body></html>'),
@@ -136,6 +141,9 @@ class FakePanos:
     def _answer(self, host: str, data: dict[str, str]) -> Answer:
         if data.get('type') == 'keygen':
             return 200, KEYGEN_OK
+        if host in PANORAMA_HOSTS:
+            fixture = PANORAMA_OP_FIXTURES.get(data.get('cmd', ''))
+            return (200, (FIXTURES / fixture).read_bytes()) if fixture else (200, NO_CAPTURE)
         if host not in FIREWALL_SETS:
             return requests.exceptions.ConnectionError(f'no fake firewall at {host}')
         path = find_op_fixture(data['cmd'], FIREWALL_SETS[host]) if data.get('type') == 'op' else None

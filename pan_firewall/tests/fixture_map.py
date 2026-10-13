@@ -47,6 +47,13 @@ PARTIAL_OP_FIXTURES = {
 }
 
 
+# `type=op` commands a Panorama answers, to the fixture file under FIXTURES. The answer is the synthetic one: the two
+# real P1 entries plus the edge cases the lab lacks (`panorama/show_devices_connected.xml` is the unmodified capture).
+PANORAMA_OP_FIXTURES = {
+    '<show><devices><connected/></devices></show>': 'synthetic/panorama_show_devices_connected.xml',
+}
+
+
 def op_fixture(cmd: str, firewall: str = 'fw-a') -> Path:
     """Return the fixture answering `type=op&cmd=<cmd>` for the given firewall set (`fw-a` or `fw-b`)."""
     return FIXTURES / firewall / OP_FIXTURES[cmd]

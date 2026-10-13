@@ -1,0 +1,97 @@
+<!-- derived from the real capture panorama/show_devices_connected.xml (Panorama 11.2.15, lab task P1, 2026-10-13): the two real
+     entries (fw-a, fw-b) trimmed to the fields the check uses, with their nested vsys and plugin_versions entries kept
+     (the real response nests entry elements there, and the text node "Total Connected Devices" sits inside devices).
+     The SYNTH-* entries are hand-written edge cases the lab does not have: connected=no, no ip-address, ip-address
+     unknown, and an ha element. The shape of ha is UNVERIFIED: the lab firewalls are standalone, so it is a guess until
+     lab task L1 captures an HA pair behind Panorama. -->
+<response status="success">
+  <result>
+    <devices>
+      <entry name="007955000930601">
+        <serial>007955000930601</serial>
+        <hostname>fw-a</hostname>
+        <ip-address>10.60.0.10</ip-address>
+        <model>PA-VM</model>
+        <family>vm</family>
+        <sw-version>11.1.13-h12</sw-version>
+        <connected>yes</connected>
+        <multi-vsys>no</multi-vsys>
+        <vsys>
+          <entry name="vsys1">
+            <display-name>vsys1</display-name>
+          </entry>
+        </vsys>
+        <plugin_versions>
+          <entry name="openconfig" version="2.1.0"><pkginfo>openconfig-2.1.0</pkginfo></entry>
+          <entry name="dlp" version="5.0.7"><pkginfo>dlp-5.0.7</pkginfo></entry>
+          <entry name="vm_series" version="5.1.11"><pkginfo>vm_series-5.1.11-h1</pkginfo></entry>
+        </plugin_versions>
+      </entry>
+      <entry name="007955000930602">
+        <serial>007955000930602</serial>
+        <hostname>fw-b</hostname>
+        <ip-address>10.60.0.11</ip-address>
+        <model>PA-VM</model>
+        <family>vm</family>
+        <sw-version>11.1.13-h12</sw-version>
+        <connected>yes</connected>
+        <multi-vsys>no</multi-vsys>
+        <vsys>
+          <entry name="vsys1">
+            <display-name>vsys1</display-name>
+          </entry>
+        </vsys>
+        <plugin_versions>
+          <entry name="openconfig" version="2.1.0"><pkginfo>openconfig-2.1.0</pkginfo></entry>
+          <entry name="dlp" version="5.0.7"><pkginfo>dlp-5.0.7</pkginfo></entry>
+          <entry name="vm_series" version="5.1.11"><pkginfo>vm_series-5.1.11-h1</pkginfo></entry>
+        </plugin_versions>
+      </entry>
+      <entry name="SYNTH-DISCONNECTED-0001">
+        <serial>SYNTH-DISCONNECTED-0001</serial>
+        <hostname>synth-disconnected</hostname>
+        <ip-address>10.60.0.12</ip-address>
+        <model>PA-VM</model>
+        <family>vm</family>
+        <sw-version>11.1.13-h12</sw-version>
+        <connected>no</connected>
+        <multi-vsys>no</multi-vsys>
+      </entry>
+      <entry name="SYNTH-NO-IP-0001">
+        <serial>SYNTH-NO-IP-0001</serial>
+        <hostname>synth-no-ip</hostname>
+        <model>PA-VM</model>
+        <family>vm</family>
+        <sw-version>11.1.13-h12</sw-version>
+        <connected>yes</connected>
+        <multi-vsys>no</multi-vsys>
+      </entry>
+      <entry name="SYNTH-UNKNOWN-IP-0001">
+        <serial>SYNTH-UNKNOWN-IP-0001</serial>
+        <hostname>synth-unknown-ip</hostname>
+        <ip-address>unknown</ip-address>
+        <model>PA-VM</model>
+        <family>vm</family>
+        <sw-version>11.1.13-h12</sw-version>
+        <connected>yes</connected>
+        <multi-vsys>no</multi-vsys>
+      </entry>
+      <entry name="SYNTH-HA-0001">
+        <serial>SYNTH-HA-0001</serial>
+        <hostname>synth-ha</hostname>
+        <model>PA-VM</model>
+        <family>vm</family>
+        <sw-version>11.1.13-h12</sw-version>
+        <connected>yes</connected>
+        <multi-vsys>no</multi-vsys>
+        <ha>
+          <state>active</state>
+          <peer>
+            <serial>SYNTH-HA-0002</serial>
+          </peer>
+        </ha>
+      </entry>
+      Total Connected Devices: 5
+    </devices>
+  </result>
+</response>
