@@ -1,0 +1,2 @@
+<!-- Source: testbed docs/panos-open-issues.md item P2 (lab probe, 2026-10-09). A call sent without an API key returned HTTP 403 with this body. -->
+<response status="error" code="403"><result><msg>Not Authenticated</msg></result></response>

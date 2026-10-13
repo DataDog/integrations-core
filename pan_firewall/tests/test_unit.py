@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
+from xml.etree import ElementTree as ET
 
 import pytest
 
@@ -53,7 +54,16 @@ def test_parse_response_error_without_code():
     assert exc_info.value.msg == 'Invalid credentials.'
 
 
-@pytest.mark.parametrize('body', [b'<html><body>Bad Gateway', b'', b'not xml at all'])
+@pytest.mark.parametrize(
+    'body',
+    [
+        b'<html><body>Bad Gateway',
+        b'',
+        b'not xml at all',
+        # A proxy error page that happens to be well-formed XML must not pass as a PAN-OS success.
+        b'<html><body>502 Bad Gateway</body></html>',
+    ],
+)
 def test_parse_response_non_xml(body):
     with pytest.raises(PanosApiError) as exc_info:
         parse_response(body)
@@ -69,10 +79,12 @@ def test_parse_response_non_xml(body):
         ('<r><v>unknown</v></r>', 'v', None),
         ('<r><v></v></r>', 'v', None),
         ('<r></r>', 'v', None),
+        ('<r><v>nan</v></r>', 'v', None),
+        ('<r><v>-inf</v></r>', 'v', None),
     ],
 )
 def test_num_never_raises(xml, path, expected):
-    assert num(parse_response(xml.encode()), path) == expected
+    assert num(ET.fromstring(xml), path) == expected
 
 
 def test_num_and_text_on_missing_element():

@@ -17,3 +17,15 @@ class PanosApiError(PanosError):
         super().__init__(f'PAN-OS API error {code}: {msg}')
         self.code = code
         self.msg = msg
+
+
+class PanosAuthError(PanosApiError):
+    """PAN-OS rejected the credentials or the API key: HTTP 403, or `code="403"` / `code="16"` in the body."""
+
+
+class PanosTimeout(PanosError):
+    """A call to PAN-OS did not answer within the configured timeout."""
+
+
+class PanosConnectionError(PanosError):
+    """PAN-OS could not be reached: connection refused, DNS, TLS handshake, or a broken stream."""
