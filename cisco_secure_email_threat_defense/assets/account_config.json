@@ -20,21 +20,34 @@
       }
     }
   ],
-  "additional_config_fields": [
+  "supported_connection_methods": [
     {
-      "key": "host_name",
-      "label": "Host name",
-      "editable": true,
-      "required": true,
-      "dropdown": {
-        "options": [
-          { "value": "api.us.etd.cisco.com", "label": "api.us.etd.cisco.com" },
-          { "value": "api.au.etd.cisco.com", "label": "api.au.etd.cisco.com" },
-          { "value": "api.de.etd.cisco.com", "label": "api.de.etd.cisco.com" },
-          { "value": "api.in.etd.cisco.com", "label": "api.in.etd.cisco.com" }
-        ]
+      "name": "Cisco Secure Email Threat Defense API",
+      "regional": {
+        "region_setting": {
+          "key": "host_name",
+          "label": "Host name",
+          "editable": true,
+          "required": true,
+          "dropdown": {
+            "options": [
+              { "value": "api.us.etd.cisco.com", "label": "api.us.etd.cisco.com" },
+              { "value": "api.au.etd.cisco.com", "label": "api.au.etd.cisco.com" },
+              { "value": "api.de.etd.cisco.com", "label": "api.de.etd.cisco.com" },
+              { "value": "api.in.etd.cisco.com", "label": "api.in.etd.cisco.com" }
+            ]
+          }
+        },
+        "base_urls": {
+          "api.us.etd.cisco.com": "https://api.us.etd.cisco.com",
+          "api.au.etd.cisco.com": "https://api.au.etd.cisco.com",
+          "api.de.etd.cisco.com": "https://api.de.etd.cisco.com",
+          "api.in.etd.cisco.com": "https://api.in.etd.cisco.com"
+        }
       }
-    },
+    }
+  ],
+  "additional_config_fields": [
     {
       "key": "api_key",
       "label": "API key",
@@ -48,7 +61,11 @@
       "help": "Provide a delay (in minutes) for fetching data to allow verdicts to be updated. Default is 30 minutes.",
       "editable": true,
       "required": false,
-      "integer": {}
+      "integer": {
+        "min": 0,
+        "max": 720,
+        "default": 30
+      }
     }
   ],
   "dataflow_config": [
