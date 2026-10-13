@@ -8,3 +8,24 @@ PARSE_ERROR_CODE = 'parse'
 # `code` values PAN-OS uses for a rejected API key. 403 is lab-confirmed; 16 comes from the XML API error-codes doc
 # and was never seen in the lab.
 AUTH_ERROR_CODES = frozenset({'403', '16'})
+
+# Seconds between two runs of each collector, per firewall. `jobs` and the threat `seqno` reset check are not
+# scheduled collectors: the first runs whenever a collector is due, the second lives inside `threats`.
+INTERVALS = {
+    'bgp': 120,
+    'dataplane': 120,
+    'interfaces': 180,
+    'system_resources': 180,
+    'vpn': 180,
+    'ha': 180,
+    'rule_hits': 180,
+    'global_counters': 180,
+    'ospf': 180,
+    'environment': 300,
+    'threats': 300,
+    'disk': 1800,
+    'identity_metadata': 1800,
+    'reports': 1800,
+    'licenses': 86400,
+}
+COLLECTORS = tuple(INTERVALS)
