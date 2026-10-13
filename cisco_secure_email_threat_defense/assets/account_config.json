@@ -38,7 +38,7 @@
             ]
           }
         },
-        "base_urls": {
+        "region_base_urls": {
           "api.us.etd.cisco.com": "https://api.us.etd.cisco.com",
           "api.au.etd.cisco.com": "https://api.au.etd.cisco.com",
           "api.de.etd.cisco.com": "https://api.de.etd.cisco.com",
