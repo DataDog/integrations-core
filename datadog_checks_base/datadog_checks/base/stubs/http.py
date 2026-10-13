@@ -94,7 +94,6 @@ class FakeHTTPResponse:
         resolved_content_chunks = (
             ((content,) if content else ()) if isinstance(content_chunks, UnsetResponseResult) else content_chunks
         )
-        resolved_lines = tuple(resolved_text.splitlines()) if isinstance(lines, UnsetResponseResult) else lines
         if status_error is None and status_code >= 400:
             error_kind = 'Client Error' if status_code < 500 else 'Server Error'
             status_error = HTTPClientStatusError(f'{status_code} {error_kind}')
@@ -115,7 +114,8 @@ class FakeHTTPResponse:
         self._json_result = json_result
         self._json_error = json_error
         self._content_chunks = tuple(resolved_content_chunks)
-        self._lines = tuple(resolved_lines)
+        # Derived lines are resolved on read because callers may set the encoding after the response is created.
+        self._lines = None if isinstance(lines, UnsetResponseResult) else tuple(lines)
         self._stream_error = stream_error
         self._status_error = status_error
         self._reason = reason
@@ -160,7 +160,12 @@ class FakeHTTPResponse:
         decode_unicode: bool = False,
         delimiter: bytes | str | None = None,
     ) -> Iterator[bytes | str]:
-        yield from self._lines
+        if self._lines is not None:
+            yield from self._lines
+        elif decode_unicode and self.encoding is not None:
+            yield from self.content.decode(self.encoding).splitlines()
+        else:
+            yield from self.content.splitlines()
         if self._stream_error is not None:
             raise self._stream_error
 

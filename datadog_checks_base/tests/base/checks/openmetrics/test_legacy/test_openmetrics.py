@@ -191,15 +191,14 @@ def test_poll_text_plain(
     fake_http.assert_all_responses_consumed()
 
 
-def test_poll_octet_stream(
-    fake_http, fake_http_response, mocked_prometheus_check, mocked_prometheus_scraper_config, text_data
-):
+def test_poll_octet_stream(fake_http, mocked_prometheus_check, mocked_prometheus_scraper_config, text_data):
     """Tests poll using the text format"""
     check = mocked_prometheus_check
-    fake_http_response(
+    # An octet stream declares no charset, so the response has no encoding.
+    fake_http.register_response(
+        'GET',
         FAKE_ENDPOINT,
-        text_data,
-        headers={'Content-Type': 'application/octet-stream'},
+        _text_response(text_data, content_type='application/octet-stream'),
         match_options={'stream': True},
     )
 

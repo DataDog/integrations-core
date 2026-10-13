@@ -51,7 +51,29 @@ def test_fake_response_derives_text_and_stream_results_from_content(
 
     assert response.text == expected_text
     assert list(response.iter_content()) == [content]
-    assert list(response.iter_lines()) == expected_text.splitlines()
+
+
+@pytest.mark.parametrize(
+    ('content', 'encoding', 'decode_unicode', 'expected_lines'),
+    [
+        pytest.param(b'caf\xe9\nsecond', 'latin-1', True, ['caf\xe9', 'second'], id='decoded with the encoding'),
+        pytest.param(b'caf\xe9\nsecond', 'latin-1', False, [b'caf\xe9', b'second'], id='bytes unless decoding'),
+        pytest.param(b'first\nsecond', None, True, [b'first', b'second'], id='bytes without an encoding'),
+    ],
+)
+def test_fake_response_derives_lines_from_content(
+    content: bytes, encoding: str | None, decode_unicode: bool, expected_lines: list[bytes | str]
+):
+    response = FakeHTTPResponse(content=content, encoding=encoding)
+
+    assert list(response.iter_lines(decode_unicode=decode_unicode)) == expected_lines
+
+
+def test_fake_response_decodes_lines_with_an_encoding_set_after_creation():
+    response = FakeHTTPResponse(content=b'first\nsecond')
+    response.encoding = 'utf-8'
+
+    assert list(response.iter_lines(decode_unicode=True)) == ['first', 'second']
 
 
 def test_fake_response_preserves_explicit_text_and_stream_results():
