@@ -19,8 +19,10 @@ from .collectors import (  # noqa: F401  (importing the modules registers their 
     FirewallState,
     Sample,
     dataplane,
+    interfaces,
     routing,
     system,
+    vpn,
 )
 from .collectors.jobs import busy_jobs
 from .constants import COMMIT_SKIP_MAX_SECONDS

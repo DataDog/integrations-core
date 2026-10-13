@@ -34,6 +34,7 @@ COLLECTORS = tuple(INTERVALS)
 DEVICE_VENDOR_TAG = 'paloaltonetworks'
 NDM_DEVICE_RESOURCE_TAG = 'dd.internal.resource:ndm_device'
 NDM_DEVICE_USER_TAGS_RESOURCE_TAG = 'dd.internal.resource:ndm_device_user_tags'
+NDM_INTERFACE_RESOURCE_TAG = 'dd.internal.resource:ndm_interface'
 
 # A firewall is busy, and is not collected, while `show jobs pending` lists a job with one of these statuses and types.
 # The type strings are the ones seen in the lab's `show jobs all`; `Downld` (hourly downloads) and `IoT` never pause

@@ -41,6 +41,10 @@ class FirewallState:
     ha_state: str | None = None
     # The routing engine warning (advanced routing on) is logged once per firewall, not once per run.
     are_warned: bool = False
+    # Written by `vpn`, read by `interfaces` (which owns the `counter interface all` call): the tags of each IPSec
+    # tunnel by its `tunnel.N` interface, None until `vpn` first answers, and the raw `show vpn flow` state by interface.
+    tunnel_tags: dict[str, tuple[str, ...]] | None = None
+    tunnel_states: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
