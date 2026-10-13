@@ -26,15 +26,18 @@ The goal is met only when:
   and download behavior without a second HTTP stack;
 - check orchestration, joins, tags, values, failures, and metric submission semantics satisfy the
   requirements and verified API behavior, with justified departures from the design recorded;
-- metadata names, units, and backend types match every emitted metric;
+- metadata names follow one consistent naming scheme and match every emitted metric's name,
+  units, and backend type;
 - both init_config/http and instances/http templates are present alongside default templates;
 - each product option serves a connect, scope, or collection-cost need, declares its default and
   bounds once in spec.yaml (custom rules in validators.py), and agrees with generated configuration
   and ConfigMixin reads, with no duplicate defaults, fallbacks, or range checks in check code;
-- fatal failures raise at the failing step and optional ones warn and continue, with no deferred
-  raise and no custom exception the check does not handle differently;
+- only the designed fatal failures raise, at the failing step, and optional ones, including
+  metadata, warn and continue, with no deferred raise and no custom exception the check does not
+  handle differently;
 - response-supplied URLs are rebuilt on, or validated against, the configured origin before
   credentials are sent;
+- any connectivity or availability signal comes from a request that uses the configured credentials;
 - no integration service checks were added;
 - direct API logs, when required, are guarded by logs_enabled, use an integration logs stanza,
   stable streams, get_log_cursor/send_log, compound next-resume cursors where needed, bounded work,

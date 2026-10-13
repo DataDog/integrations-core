@@ -64,7 +64,7 @@
 - type: phase
   config:
     name: api_readme
-    description: Document the implementation and hand off assumptions, command results, and gaps to a human.
+    description: Write the user README and hand off assumptions, command results, and gaps to a human.
     class: AgenticPhase
     agent: api_documenter
     variables:

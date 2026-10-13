@@ -43,6 +43,13 @@ the generated example. Mention shared HTTP capabilities such as proxy, TLS verif
 headers, auth token, or timeout only when relevant; never include real secrets. Do not invent
 supported versions, roles, URLs, endpoints, or operational guarantees.
 
+The README is for someone installing and operating the integration, not a record of how it was built
+or tested; match the depth and length of comparable integration READMEs. Never state tested
+versions, validation status, or what the check observed; those belong in the handoff. Include a
+behavior or limitation only when a user would act on it or would otherwise misread the data, as one
+plain sentence next to the relevant option or under Troubleshooting. Leave out internals such as
+pagination and checkpoint mechanics.
+
 Reference metadata.csv for the metric catalog rather than duplicating a metric table that will
 drift. Describe events only if the current check emits Datadog events. Confirm whether service
 checks exist from code; for this flow there should be none, so state that and remove the scaffold's
@@ -55,7 +62,7 @@ collection. Tell users to enable `logs_enabled` in datadog.yaml and use the gene
 with `type: integration`, exact source, and any generated service/default-service setting. Explain
 required API permission, collection toggle/filter/lookback options, retention/backfill bounds,
 delayed export behavior, and possible duplicates after restart only when the implemented design
-establishes them. State customer-visible
+establishes them. For these API-forwarded logs, state customer-visible
 at-least-once limitations honestly without exposing internal cache-key names or claiming lossless/
 exactly-once delivery.
 
@@ -69,18 +76,22 @@ logs exist, separate them clearly. Never instruct users to configure a file tail
 download, and never document an API log stream that code did not implement.
 
 Describe first-run historical scope, maximum catch-up, vendor retention, and configuration-change
-restart behavior only when they are user-relevant and supported by code/design. Missing official
+restart behavior only when they are user-relevant and supported by code/design. Check each such
+behavior against the code path that implements it (for example, what persists across an Agent
+restart versus a configuration change), and state it in at most one sentence. Attribute a limitation
+to the vendor API only when the design cites vendor evidence; otherwise describe it as the
+integration's behavior. Missing official
 references belong in the handoff, not as guessed links. Use official URLs from the design memory or
 PRD; use plain product text when none is validated.
 
-Tests demonstrate specific behavior, not release readiness. State live compatibility only to the
-extent a successful Docker integration or Agent E2E run proved it. A healthy vendor container, a
-successful compose start, or a reachable endpoint is environment validation only: never report it
-as a passed Agent E2E run. A tier the test phase recorded as unrun, skipped, or blocked by external
+Tests demonstrate specific behavior, not release readiness. Do not claim compatibility beyond the
+evidence; record exercised versions and test tiers in the handoff. A healthy vendor container, a
+successful compose start, or a reachable endpoint is environment validation only: never report it as
+a passed Agent E2E run. A tier the test phase recorded as unrun, skipped, or blocked by external
 conditions must be carried into the handoff as exactly that. Do not imply the draft is already
 packaged, released, certified, or broadly compatible. Keep internal command failures, synthetic
 fixture details, and reviewer instructions in the response/memory rather than customer prose unless
-they reveal a real customer limitation.
+a user must act on them.
 
 Do not begin a paragraph with inline code. Do not create a separate report file. Finish the task
 with a concise reviewer summary of README changes, evidence checked, and unresolved claims.

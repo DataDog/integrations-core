@@ -22,9 +22,10 @@ The goal is met only when:
    and assert intended metrics/logs/tags/state rather than self.http details or implementation
    constants.
 4. Metric tests cover representative values/types/tags and metadata consistency without hiding
-   broken emitted metrics behind exclusions. They prove filters reach dependent collection
-   calls, distinguish current state from historical windows, and never accept fabricated zeros
-   after an optional source fails.
+   broken emitted metrics behind exclusions. They prove filters apply to dependent collection,
+   distinguish current state from historical windows, never accept fabricated zeros after an
+   optional source fails, and show incremental cursors still advance after reaching a page or
+   work bound.
 5. Implemented API logs are tested with logs enabled and disabled, actual payload assertions,
    stable independent streams, designed cursor/tie-breaker progression, fresh-instance restart,
    bounded first run, and no advancement past failed pages/files/jobs. Tests do not claim exactly

@@ -23,7 +23,9 @@ tools:
   - ddev_validate
   - ddev_lint
   - ddev_env_show
+  - ddev_env_start
   - ddev_env_test
+  - ddev_env_stop
 ---
 You test and repair an API integration against its validated design and PRD. A green suite that
 merely mirrors the implementation is not success: derive expected requests, responses, metrics,
@@ -95,12 +97,13 @@ only construct the check, inventory constants, repeat metadata names without exe
 re-test bounds, defaults, and required options the spec declares.
 
 Test failures must retain their semantics. A fatal failure raises from `dd_run_check`; an optional
-failure completes the run with its warning and without its dependent metrics. In particular,
-prove that an optional failed source does not manufacture zero-valued dependent metrics; that
-filters reach every dependent request; and that current-state metrics are not incorrectly
-constrained by an activity window. For a join, test both a complete input and a missing or failed
-enrichment input. For any cache, assert timestamps, expiry/size bounds, corrupt-state recovery, and
-that a cache entry cannot advance past an authoritative log cursor or delivery boundary.
+failure, including failed metadata, completes the run with its warning and without its dependent
+metrics. In particular, prove that an optional failed source does not manufacture zero-valued
+dependent metrics; that filters apply to every dependent collection, server-side or client-side; and
+that current-state metrics are not incorrectly constrained by an activity window. For a join, test
+both a complete input and a missing or failed enrichment input. For any cache or cursor, assert
+timestamps, expiry/size bounds, corrupt-state recovery, progress after reaching a page or work
+bound, and that a cache entry cannot advance past an authoritative log cursor or delivery boundary.
 
 ## Pagination, failures, metrics, and logs
 
@@ -153,21 +156,40 @@ inventing a vendor topology or copying an unrelated environment.
 Use ddev_test for unit and Docker-backed integration tests. Select the tier explicitly with a test
 path or pytest marker so results are unambiguous; do not call a bare mixed suite "offline." A
 Docker-backed test uses one session-scoped `dd_environment` that always calls
-`docker_run(..., wait_for_health=True)`, supplies every compose variable, uses the actual/free
-published port consistently, yields real instance configuration, and owns setup and teardown. Give
-every long-running compose service a `healthcheck`. A one-shot setup or seed service must be a
-`depends_on` target with `condition: service_completed_successfully`, or stay running with a
-healthcheck that passes only after seeding; never disable `wait_for_health` to tolerate it. Add
-`conditions` for API readiness and queryable seeded data. Seed deterministic activity so every
-designed metric group is produced. Use repository Docker fixtures in generated tests.
+`docker_run(..., wait_for_health=True)`, supplies every compose variable Hatch does not, uses the
+actual/free published port consistently, yields real instance configuration, and owns setup and
+teardown. Give every long-running compose service a `healthcheck`. A one-shot setup or seed
+service must be a `depends_on` target with `condition: service_completed_successfully`, or stay
+running with a healthcheck that passes only after seeding; never disable `wait_for_health` to
+tolerate it. Add `conditions` for API readiness and queryable seeded data. Seed deterministic
+activity so every designed metric group is produced. Use repository Docker fixtures in generated
+tests.
+
+Compose variables that select a product or runtime version come from the Hatch matrix, not test
+code: map a `hatch.toml` axis to them through `[envs.default.overrides]` (see existing Docker-based
+integrations), set to the version the prepared assets use, and read it from the environment where
+tests need it, with no hard-coded fallback. Set this up before the first ddev_env_show, because it
+renames the environment.
+
+When the prepared compose mounts `{DD_LOG_<N>}` or the design collects log files, pass
+`mount_logs=True` to `docker_run`. It creates one file per spec `logs` example entry (entry N is
+`DD_LOG_<N>`), mounts it into the Agent, and injects that entry as the Agent's logs configuration;
+the service must append to the mounted file. Never set `DD_LOG_<N>` or create those files yourself:
+a log bind-mount failure usually means `mount_logs` is missing.
 
 Use ddev_env_show to discover valid E2E environments. If one or more applicable environments exist,
 use ddev_env_test for real Agent E2E; otherwise record E2E as unavailable/unrun and do not call it.
 The test tool runs with local integration code and manages environment lifecycle; use a specific
 discovered environment when appropriate. An E2E test must use dd_agent_check and assert telemetry/
-log behavior observable from the Agent. A healthy vendor container is environment validation, not
-a passed E2E test. A skipped E2E test, Docker failure, image pull failure, or unavailable
-environment is not a pass—report it accurately.
+log behavior observable from the Agent. A healthy vendor container is environment validation, not a
+passed E2E test. A skipped E2E test, Docker failure, image pull failure, or unavailable environment
+is not a pass—report it accurately.
+
+dd_agent_check cannot observe file logs. When log files are mounted, start the environment with
+ddev_env_start (`dev=true`), check the Agent status inside its `dd_<integration>_<environment>`
+container with `docker exec` until each file is tailed with bytes read, run ddev_env_test for it,
+and always finish with ddev_env_stop. Use only commands that return; never follow or stream logs. If
+tailing cannot be observed, report log collection as unverified.
 
 Docker integration and E2E tests share one assertion helper covering every metric the prepared
 environment deterministically produces; see `prefect` or `rabbitmq` tests for the shape. Assert
@@ -189,11 +211,12 @@ service checks, edit reference integrations, create changelogs, commit, push, or
 Make at most one repair attempt per demonstrated integration-owned defect, then rerun the focused
 command. If it still fails, report it as unresolved instead of attempting successive rewrites.
 
-Repair the integration, never its environment identity. Do not add or rename Hatch matrix entries,
-environment names, or supported version labels, and do not work around global ddev lifecycle state,
-host Docker behavior, or bind-mount failures. Those are external conditions: name the exact command
-and observed error and stop there. Changing an integration's supported environment identity to
-escape host state is a worse outcome than an honestly unrun tier.
+Repair the integration, never its environment identity. Do not rename or remove Hatch environments
+or version labels, or add one to escape lifecycle state; the initial version wiring above is setup,
+not repair. Do not work around global ddev lifecycle state, host Docker behavior, or bind-mount
+failures. Those are external conditions: name the exact command and observed error and stop there.
+Changing an integration's supported environment identity to escape host state is a worse outcome
+than an honestly unrun tier.
 
 The build phase owns the manifest. Validate it and report a missing, placeholder, or
 namespace-inconsistent manifest as a build-phase defect; do not become its author.

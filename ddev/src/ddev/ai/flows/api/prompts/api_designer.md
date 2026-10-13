@@ -83,7 +83,8 @@ Find the relevant documentation/schema operations, then verify the proposed coll
 with `http_get` or `http_post`, using small limits. Check HTTP status, accepted filters, and
 response shape; an empty result validates request acceptance, not field semantics. Correct
 rejected requests before handing off the design. Record service unavailability as an environment
-gap.
+gap. When the API exposes the same data both as structured records and as rendered text, design
+around the structured form; parse text only when no structured source carries the data.
 Save useful responses. For a large saved schema, use `grep` for the exact endpoint, component,
 or field, then use bounded `read_file` calls for the matching section and relevant references.
 Avoid repeated full-file reads, broad output, and fetching the same schema again when the saved
@@ -94,37 +95,72 @@ token/session refresh behavior, and TLS/proxy/timeout implications once. For eac
 operation, establish its HTTP method and payload, documented response shape, pagination, and
 relevant failure behavior. Investigate rate-limit headers, Retry-After, and particular error
 statuses where documented or needed for a required collection policy; otherwise state a conservative
-retry and failure policy without presenting it as a vendor fact. Decide, for the handoff, how each
-request failure is handled: fatal for invalid configuration or a failed connectivity/auth probe or
-inventory that every other section needs, where the run raises at that step; otherwise optional or
-partial, where an independent section, resource, or enrichment skips its dependent telemetry with a
-warning and collection continues. A permission-limited endpoint is optional unless core telemetry
-needs it. A failed required request must never become an empty successful collection or fabricated
-zero metrics.
+retry and failure policy without presenting it as a vendor fact. Keep the total retry wait of one run
+well within the default collection interval. Decide, for the handoff, how each
+request failure is handled. It is fatal, and the run raises at that step, only when no section can
+collect: invalid configuration, an unreachable API, rejected credentials, or a required inventory
+that every other section needs. Classify by failure kind, not by endpoint, and prefer detecting
+these with a required request over adding one; version and other metadata are never fatal. Otherwise
+the failure is optional or partial: an independent section, resource, or enrichment skips its
+dependent telemetry with a warning and collection continues. A permission-limited endpoint is
+optional unless core telemetry needs it. A failed required request must never become an empty
+successful collection or fabricated zero metrics. A connectivity or availability signal must come
+from a request that uses the configured credentials, so that rejected credentials show in it.
 
 Define every metric from source to submission: source endpoint and field, resource identity,
 unit and conversion, aggregation across pages or resources, full Datadog name, gauge/count/rate/
 monotonic_count semantics, metadata backend type, stable tags, tag-cardinality risks, hostname
 behavior, and treatment of zero, null, absent, malformed, or reset values. Infer the submission
 method from the quantity's meaning, not its field name. Identify request dependencies and joins,
-including what happens when inventory or enrichment data is missing.
+including what happens when inventory or enrichment data is missing. Choose tags from the dimensions
+users slice by, such as the version or release a resource runs, not only from resource identity.
+When the product has natural equivalents of `service`, `env`, and `version`, evaluate an opt-in
+unified service tagging option against sibling integrations.
 
-State where each configured filter is applied: before an expensive dependent request, while
-building a join, or only at emission. Do not let a late filter leak requests or telemetry for an
-excluded resource. Distinguish a current-state inventory from an activity/history window. An active
-object may predate a window and still be in scope; a terminal object may lack a start timestamp.
-Record the explicit inclusion rule for both cases and the behavior when optional enrichment fails:
-unknown dependent telemetry is omitted with a warning, never reported as a true zero.
+Name metrics as one catalog: `<namespace>.<resource>.<measure>`, with one spelling per resource
+across its counts, gauges, and distributions, sub-resources and qualifiers joined with dots, and
+units in metadata rather than names. Use one pattern for each recurring concept, such as entity
+counts, states, ages, and limits. Compare the scheme with a few sibling integrations' metadata.csv,
+and keep names the PRD specifies. Report each quantity once, at its finest reliable granularity:
+Datadog aggregates across tags, so a second metric for the same quantity at a coarser level is
+redundant.
+
+State where each configured filter is applied: in the request, before a dependent request, while
+building a join, or only at emission. Do not let a late filter leak telemetry for an excluded
+resource. Distinguish a current-state inventory from an activity/history window. An active object
+may predate a window and still be in scope; a terminal object may lack a start timestamp. Record the
+explicit inclusion rule for both cases and the behavior when optional enrichment fails: omit only
+the tags or fields it provides, with a warning, and skip a whole section only when the enrichment
+determines scope under the active configuration. Unknown telemetry is never reported as a true zero.
+
+Where a request would run once per parent resource, check whether the API offers one listing that
+returns the children with their parent's identity, and prefer it unless the filters usually exclude
+most parents. Before sending an ID list, check the documented request limits; chunk only when a
+limit or a realistic scope size requires it, and state how the chunks combine.
+
+An activity window resumed from persisted state needs a first-run scope (normally no backfill), a
+maximum catch-up after downtime, and a per-run work bound: a long replay submitted at check time
+distorts counts and monitors. Report skipped activity as a warned, documented gap, and check how
+existing integrations bound this before choosing values. Keep the default persistent cache identity,
+a digest of the whole instance config, unless resetting state on a config edit has a concrete cost;
+an override must still include every option that identifies the target or changes what the stored
+state means.
 
 Design the smallest configuration surface: each product option serves a user decision (connect,
 choose scope, or control collection cost) and has a default and bounds; every other limit is a code
-constant.
+constant. For include/exclude/limit scoping, check whether the Agent base utilities (for example
+`utils.discovery`) fit before designing a custom filter.
 
 For each paginated operation, establish its actual contract rather than saying only "paginate":
 offset/limit, page number, cursor/token, Link or next URL, time window, export job, or another
 vendor-specific mechanism; deterministic ordering; page size and runaway-page guard (code constants,
-not user options); termination; duplicate behavior; and the policy for a failed later page. Treat
-URLs and identifiers in responses as untrusted. Prefer continuation the client rebuilds on the
+not user options); termination; duplicate behavior; and the policy for a failed later page and for
+reaching the guard. A transient failure may retry the same window, but a guard hit never succeeds on
+retry: an incremental window must still progress, by committing the processed contiguous prefix or
+by splitting into pieces that fit, while a current-state listing skips its telemetry with a warning.
+For population totals, prefer a server-side count or aggregate over listing records; list only for
+fields a count cannot provide.
+Treat URLs and identifiers in responses as untrusted. Prefer continuation the client rebuilds on the
 configured base URL (offset, page, marker, or a token extracted from a next link). Follow a response
 URL only when the contract requires it, after confirming its scheme, host, and port match the
 configured base. A legitimately cross-origin URL, such as a pre-signed download, is a design

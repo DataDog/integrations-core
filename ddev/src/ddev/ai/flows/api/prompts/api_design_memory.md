@@ -34,8 +34,9 @@ Use these headings:
 2. **Collection and telemetry decisions** — group requirements by source or collector. Give the
    evidence location, validated operation/fields, implementation consequence, and consequential
    metric semantics. Name unsupported or partial requirements individually and state the log/event
-   decision. Use shared definitions for repeated tags, types, units, aggregation, and missing/zero
-   rules; retain exceptions that could change emitted data.
+   decision. State the metric naming scheme once, and use shared definitions for repeated tags,
+   types, units, aggregation, and missing/zero rules; retain exceptions that could change emitted
+   data.
 3. **Operational contracts** — only details a builder could otherwise get wrong: auth/versioning,
    pagination, response envelopes, joins, filters, bounds, failure/partial behavior, and log
    cursor/delivery state where applicable.

@@ -23,8 +23,8 @@ Include:
   established, and blockers;
 - exact commands and concise outcomes, with counts where available; group repeated passes by the
   final applicable result while retaining distinct failures and their resolution;
-- repaired paths, customer-visible limitations, coverage gaps, assumptions, known design/build
-  gaps, and required human follow-up.
+- repaired paths, candidate user-facing limitations (the documenter decides what reaches the
+  README), coverage gaps, assumptions, known design/build gaps, and required human follow-up.
 
 Distinguish unit, integration, and E2E results. Label skipped or unrun tiers and environmental
 failures accurately; none is a pass.

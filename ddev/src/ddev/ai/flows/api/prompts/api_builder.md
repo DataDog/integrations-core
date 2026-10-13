@@ -98,8 +98,9 @@ because a reference happens to look similar.
 Client methods must implement the verified API contract: correct method/path/body/query, bounded
 pagination, deterministic termination, documented retry behavior, and explicit malformed-response
 errors. Let HTTP errors propagate (`raise_for_status()`); add a custom exception only when the check
-handles it differently, not a per-status exception hierarchy. Never silently truncate a later
-failed page or return an empty success for a required request.
+handles it differently, not a per-status exception hierarchy. Never silently truncate a later failed
+page or return an empty success for a required request. Skipping or capping an interval is reported
+as a warned gap, never as a complete window.
 
 Treat response values as untrusted. Pass dynamic path segments through `quote(value, safe='')` and
 query values through `params=`. Prefer rebuilding continuation requests on the configured base URL
@@ -111,10 +112,12 @@ different scheme, host, or port by comparing parsed components, not string prefi
 ## Metrics and collection behavior
 
 Keep transport and pagination in the client; keep Datadog semantics in the check. Split check
-collection into focused methods matching the designed operations. Normalize and validate response
-containers at the boundary, retain valid zero and false values, and skip/log malformed optional
-records without inventing defaults. Build resource maps before dependent joins and define missing
-join behavior exactly as designed.
+collection into focused methods matching the designed operations, and move a self-contained concern,
+such as a log collector or incremental window state, into its own module when the check grows hard
+to review. Normalize and validate response containers at the boundary, retain valid zero and false
+values, and skip/log malformed optional records without inventing defaults. Past that boundary, work
+with the validated data instead of re-checking the type of every vendor field at each use. Build
+resource maps before dependent joins and define missing join behavior exactly as designed.
 
 Use gauge for instantaneous levels, count for discrete observations, rate only for a rate value or
 intended derivative, and monotonic_count only for cumulative values with understood reset semantics.
@@ -125,7 +128,8 @@ contract requires them. Do not emit stale or fabricated telemetry after request 
 
 Apply filters at every dependent collection boundary, not merely to the final emitted metric list.
 Build unfiltered join indexes first when they are required for correct enrichment, then filter the
-candidate resources and every downstream endpoint request.
+candidate resources and their dependent requests or records. Implement the designed request fan-out
+and ID chunking; report a departure rather than silently changing it.
 
 Never apply a collection-window timestamp filter to a current-state query unless the official API
 contract proves that filter is correct for it. Classify every operation as either an incremental
@@ -134,19 +138,24 @@ what exists now: a resource that is still active must not disappear because it s
 window, and a pending or scheduled resource with no start time at all must still be counted. Give
 the two kinds of query separate client methods rather than passing an activity window into both.
 
+Implement each incremental activity window with its designed first-run scope, maximum catch-up, and
+per-run work bound. Reaching a bound must still advance the cursor through processed work and resume
+on the next run; never retry the same oversized window forever.
+
 Implement the designed failure policy. Raise `ConfigurationError` only from a
-`check_initializations` callback. Probe connectivity first and raise immediately when it fails, as
-for a required inventory that every section needs. A raise marks the run as failed, while metrics
-already submitted are still sent. Wrap each optional section, resource, or enrichment separately:
-skip only its dependent telemetry, never turn an unknown aggregate into zero, warn with the
-operation name, and continue. Use `self.warning` for user-actionable or persistent gaps (shown in
-`agent status`), `self.log.warning` for per-resource or transient failures, and `self.log.debug`
-for tracebacks and malformed records. Never collect errors to raise at the end of the run or return
-silently after a failure. `proxmox` and `hpe_aruba_edgeconnect` show this split.
+`check_initializations` callback. Raise immediately at the step the design marks fatal. A raise
+marks the run as failed, while metrics already submitted are still sent. Wrap each optional section,
+resource, or enrichment separately: skip only its dependent telemetry, never turn an unknown
+aggregate into zero, warn with the operation name, and continue. Use `self.warning` for
+user-actionable or persistent gaps (shown in `agent status`), `self.log.warning` for per-resource or
+transient failures, and `self.log.debug` for tracebacks and malformed records. Never collect errors
+to raise at the end of the run or return silently after a failure. `hpe_aruba_edgeconnect` shows
+this split.
 
 Do not add integration service checks. Do not log credentials, authorization headers, signed URLs,
 or raw sensitive responses. Use `set_metadata('version', ...)` only when the design validated the
-version endpoint and its failure policy.
+version source, under `@AgentCheck.metadata_entrypoint` with its own try/except that warns: metadata
+never fails the run.
 
 ## Direct API log collection
 
@@ -211,10 +220,12 @@ checks cross-field rules on the final model, with defaults applied. `initialize_
 sees only raw user input, without defaults, and suits renaming legacy options. The generated
 `instance.py` shows how these hooks are wired.
 Give each option a non-secret example, a description, and a repository-appropriate
-fleet_configurable value. Direct send_log ingestion needs a `template: logs` example
-with `type: integration`, source, and any justified service/default-service setting; local
-file/journald collection needs its actual separate template. The global Agent `logs_enabled` flag
-is not a custom instance option.
+fleet_configurable value. Direct send_log ingestion needs a `template: logs` example with
+`type: integration`, source, and any justified service/default-service setting; local file/journald
+collection needs its actual separate template, with file entries ordered to match any prepared
+`DD_LOG_<N>` mounts (entry N is `DD_LOG_<N>`), each with a concrete source and service. Verify a
+file path in an example against the prepared environment, for example with `docker exec`, or
+describe it as install-dependent. The global Agent `logs_enabled` flag is not a custom instance option.
 
 `config_models/validators.py` is generated once and then hand-maintained; never hand-edit the
 other config_models/ files or data/conf.yaml.example. Change the spec and use ddev_validate with
@@ -224,9 +235,8 @@ because they were read. Prefer short self-describing helpers and concise docstri
 
 Before writing a generic helper, check whether Agent base already provides it and reuse it only
 when its semantics match the design: for example `utils.time` (`get_timestamp`,
-`get_current_datetime`), `utils.common.pattern_filter`,
-`utils.persistent_cache.config_set_persistent_cache_id`, `cachetools.TTLCache`, and
-`AgentCheck.register_secret`. For another generic concern, grep
+`get_current_datetime`), `utils.common.pattern_filter`, `utils.discovery` for include/exclude/limit
+scoping, `cachetools.TTLCache`, and `AgentCheck.register_secret`. For another generic concern, grep
 `datadog_checks_base/datadog_checks/base/utils/` for it and read only the matching module.
 
 Use only ddev tools scoped to the target integration. Run generation, validation, formatting, and

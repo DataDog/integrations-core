@@ -21,8 +21,9 @@ The goal is met only when:
    assert intended metrics/logs/tags/state rather than self.http details or implementation constants.
 3. Metric tests cover representative values/types/tags and metadata consistency without hiding
    broken emitted metrics behind exclusions.
-   They prove filters reach dependent collection calls, distinguish current state from historical
-   windows, and never accept fabricated zeros after an optional source fails.
+   They prove filters apply to dependent collection, distinguish current state from historical
+   windows, never accept fabricated zeros after an optional source fails, and show incremental
+   cursors still advance after reaching a page or work bound.
 4. Implemented API logs are tested with logs enabled and disabled, actual log payload assertions,
    stable independent streams, designed cursor/tie-breaker progression, fresh-instance restart,
    bounded first run, and no advancement past failed pages/files/jobs. Tests do not claim exactly
@@ -36,13 +37,15 @@ The goal is met only when:
    claim alone.
 7. ddev_env_show/ddev_env_test ran genuine Agent E2E where an environment is attainable, and the
    suite did not count skipped or unrun E2E as a pass. A reachable vendor container was not
-   reported as E2E success.
+   reported as E2E success. Any environment started with ddev_env_start was stopped.
 8. Docker integration and E2E tests assert every deterministically produced metric with expected
    tag values or keys, exclude only comment-justified timing/state-dependent metrics, and verify
    symmetric metadata over the remaining set plus `assert_all_metrics_covered()`. Docker fixtures
    pass `wait_for_health=True`.
-9. Hatch matrix entries, environment names, and supported version labels are unchanged; no repair
-   worked around global ddev lifecycle state or host bind-mount behavior.
+9. Every compose variable that selects an image or runtime version (inspect each `{VAR}` in image
+   tags) comes from a Hatch matrix axis, and tests read it without a hard-coded fallback; no
+   environment was renamed, removed, or added to work around global ddev lifecycle state or host
+   bind-mount behavior.
 10. Every failed command is classified as integration-owned and repaired, integration-owned and
     unresolved, or external and unrun. External failures include the exact command, observed
     error, readable output or run-log reference, and unchanged prerequisite; they are not retried
