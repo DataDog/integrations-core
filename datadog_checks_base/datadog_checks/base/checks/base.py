@@ -30,6 +30,7 @@ from datadog_checks.base.utils.common import ensure_bytes, to_native_string
 from datadog_checks.base.utils.fips import enable_fips
 from datadog_checks.base.utils.format import json
 from datadog_checks.base.utils.models import validation
+from datadog_checks.base.utils.replay.constants import EnvVars
 from datadog_checks.base.utils.tagging import GENERIC_TAGS
 from datadog_checks.base.utils.tracing import traced_class
 
@@ -815,10 +816,44 @@ class AgentCheck(object):
         # type: (int, str, Sequence[str], str) -> str
         return '{}-{}-{}-{}'.format(mtype, name, tags if tags is None else hash(frozenset(tags)), hostname)
 
+    def multiple_histogram_buckets_unsupported_reason(self) -> str | None:
+        """Return why `submit_histogram_bucket(..., multiple_buckets=True)` cannot be used, or `None` if it can.
+
+        This probes the module-level aggregator rather than `_aggregator()`, because the discovery proxy
+        implements every builtin and would hide what the running Agent supports.
+        """
+        # An isolated child only sees stand-ins for the aggregator, so it cannot tell whether the Agent supports
+        # the multi-bucket builtin. Fail here instead of erroring mid-run in the parent after partial submission.
+        if EnvVars.MESSAGE_INDICATOR in os.environ:
+            return 'cannot be used with `process_isolation`'
+
+        if not hasattr(aggregator, 'submit_histogram_bucket_multi'):
+            return 'is not supported by this Agent version, upgrade the Agent to use it'
+
+        return None
+
     def submit_histogram_bucket(
-        self, name, value, lower_bound, upper_bound, monotonic, hostname, tags, raw=False, flush_first_value=False
+        self,
+        name,
+        value,
+        lower_bound,
+        upper_bound,
+        monotonic,
+        hostname,
+        tags,
+        raw=False,
+        flush_first_value=False,
+        *,
+        multiple_buckets=False,
     ):
-        # type: (str, float, int, int, bool, str, Sequence[str], bool, bool) -> None
+        # type: (str, float, int, int, bool, str, Sequence[str], bool, bool, bool) -> None
+        """Submit one histogram bucket as part of a distribution.
+
+        Set `multiple_buckets` when the bucket tags don't identify the bucket, for example when the bound tags are
+        removed. The Agent then tracks each bucket by its bounds as well as its tags. This needs an Agent that
+        provides `submit_histogram_bucket_multi` and doesn't work with `process_isolation`, so call
+        `multiple_histogram_buckets_unsupported_reason()` first.
+        """
         if value is None:
             # ignore metric sample
             return
@@ -839,7 +874,13 @@ class AgentCheck(object):
         if hostname is None:
             hostname = ''
 
-        self._aggregator().submit_histogram_bucket(
+        current_aggregator = self._aggregator()
+        submit_method = (
+            current_aggregator.submit_histogram_bucket_multi
+            if multiple_buckets
+            else current_aggregator.submit_histogram_bucket
+        )
+        submit_method(
             self,
             self.check_id,
             self._format_namespace(name, raw),
