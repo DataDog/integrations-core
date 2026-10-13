@@ -7,10 +7,12 @@ from unittest import mock
 import pytest
 
 from datadog_checks.pan_firewall import constants
+from datadog_checks.pan_firewall import poller as poller_module
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectContext, FirewallState
 from datadog_checks.pan_firewall.collectors.reports import collect_reports, parse_report, report_params
 from datadog_checks.pan_firewall.constants import REPORTS
 from datadog_checks.pan_firewall.errors import PanosTimeout
+from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from ..common import FIXTURES
@@ -22,68 +24,104 @@ PRIVATE = '10.0.0.0-10.255.255.255'
 
 # The rows (dimension value, sessions, bytes) of each capture's `report_custom_<field>.xml`, by report.
 FW_A_ROWS = {
-    'top_applications': [
-        ('ping', 536, 105056),
-        ('ssl', 262, 79433373),
-        ('web-browsing', 260, 3498139),
-        ('dns-base', 228, 42643),
-        ('google-base', 52, 5213825),
-    ],
-    'top_application_categories': [
-        ('general-internet', 848, 8817020),
-        ('networking', 530, 79483216),
-        ('business-systems', 104, 47990880),
-    ],
-    'top_technology_categories': [
-        ('network-protocol', 804, 154899),
-        ('browser-based', 626, 103473416),
-        ('client-server', 52, 32662801),
-    ],
-    'top_sources': [('10.60.2.100', 1158, 136106329), ('10.60.3.100', 324, 184787)],
-    'top_destinations': [
-        ('10.60.3.100', 416, 218733),
-        ('10.60.2.100', 324, 184787),
-        ('8.8.8.8', 231, 43231),
-        ('208.80.154.224', 52, 5703421),
-        ('146.75.76.81', 52, 42926114),
-    ],
-    'top_source_countries': [(PRIVATE, 1482, 136291116)],
-    'top_destination_countries': [(PRIVATE, 740, 403520), ('United States', 690, 133514055), ('Japan', 52, 2373541)],
-    'top_ingress_zones': [('trust', 1158, 136106329), ('vpn', 324, 184787)],
-    'top_egress_zones': [('untrust', 742, 135887596), ('vpn', 416, 218733), ('trust', 324, 184787)],
-    'top_rules': [('trust-out', 742, 135887596), ('trust-to-vpn', 416, 218733), ('vpn-to-trust', 324, 184787)],
+    'top_applications': (
+        'app',
+        [
+            ('ping', 536, 105056),
+            ('ssl', 262, 79433373),
+            ('web-browsing', 260, 3498139),
+            ('dns-base', 228, 42643),
+            ('google-base', 52, 5213825),
+        ],
+    ),
+    'top_application_categories': (
+        'app_category',
+        [
+            ('general-internet', 848, 8817020),
+            ('networking', 530, 79483216),
+            ('business-systems', 104, 47990880),
+        ],
+    ),
+    'top_technology_categories': (
+        'app_technology',
+        [
+            ('network-protocol', 804, 154899),
+            ('browser-based', 626, 103473416),
+            ('client-server', 52, 32662801),
+        ],
+    ),
+    'top_sources': ('src', [('10.60.2.100', 1158, 136106329), ('10.60.3.100', 324, 184787)]),
+    'top_destinations': (
+        'dst',
+        [
+            ('10.60.3.100', 416, 218733),
+            ('10.60.2.100', 324, 184787),
+            ('8.8.8.8', 231, 43231),
+            ('208.80.154.224', 52, 5703421),
+            ('146.75.76.81', 52, 42926114),
+        ],
+    ),
+    'top_source_countries': ('src_country', [(PRIVATE, 1482, 136291116)]),
+    'top_destination_countries': (
+        'dst_country',
+        [(PRIVATE, 740, 403520), ('United States', 690, 133514055), ('Japan', 52, 2373541)],
+    ),
+    'top_ingress_zones': ('src_zone', [('trust', 1158, 136106329), ('vpn', 324, 184787)]),
+    'top_egress_zones': ('dst_zone', [('untrust', 742, 135887596), ('vpn', 416, 218733), ('trust', 324, 184787)]),
+    'top_rules': (
+        'rule',
+        [('trust-out', 742, 135887596), ('trust-to-vpn', 416, 218733), ('vpn-to-trust', 324, 184787)],
+    ),
 }
 FW_B_ROWS = {
-    'top_applications': [
-        ('ping', 533, 104468),
-        ('ssl', 267, 80983096),
-        ('web-browsing', 263, 3499357),
-        ('dns-base', 227, 42668),
-        ('google-base', 53, 5313702),
-    ],
-    'top_application_categories': [
-        ('general-internet', 849, 8917527),
-        ('networking', 534, 81032964),
-        ('business-systems', 106, 48921262),
-    ],
-    'top_technology_categories': [
-        ('network-protocol', 800, 154336),
-        ('browser-based', 636, 105421861),
-        ('client-server', 53, 33295556),
-    ],
-    'top_sources': [('10.60.3.100', 1173, 138691120), ('10.60.2.100', 316, 180633)],
-    'top_destinations': [
-        ('10.60.2.100', 426, 223649),
-        ('10.60.3.100', 316, 180633),
-        ('8.8.8.8', 227, 42668),
-        ('208.80.154.224', 53, 5813716),
-        ('146.75.76.81', 53, 43764204),
-    ],
-    'top_source_countries': [(PRIVATE, 1489, 138871753)],
-    'top_destination_countries': [(PRIVATE, 742, 404282), ('United States', 694, 136046024), ('Japan', 53, 2421447)],
-    'top_ingress_zones': [('trust', 1173, 138691120), ('vpn', 316, 180633)],
-    'top_egress_zones': [('untrust', 747, 138467471), ('vpn', 426, 223649), ('trust', 316, 180633)],
-    'top_rules': [('trust-out', 747, 138467471), ('trust-to-vpn', 426, 223649), ('vpn-to-trust', 316, 180633)],
+    'top_applications': (
+        'app',
+        [
+            ('ping', 533, 104468),
+            ('ssl', 267, 80983096),
+            ('web-browsing', 263, 3499357),
+            ('dns-base', 227, 42668),
+            ('google-base', 53, 5313702),
+        ],
+    ),
+    'top_application_categories': (
+        'app_category',
+        [
+            ('general-internet', 849, 8917527),
+            ('networking', 534, 81032964),
+            ('business-systems', 106, 48921262),
+        ],
+    ),
+    'top_technology_categories': (
+        'app_technology',
+        [
+            ('network-protocol', 800, 154336),
+            ('browser-based', 636, 105421861),
+            ('client-server', 53, 33295556),
+        ],
+    ),
+    'top_sources': ('src', [('10.60.3.100', 1173, 138691120), ('10.60.2.100', 316, 180633)]),
+    'top_destinations': (
+        'dst',
+        [
+            ('10.60.2.100', 426, 223649),
+            ('10.60.3.100', 316, 180633),
+            ('8.8.8.8', 227, 42668),
+            ('208.80.154.224', 53, 5813716),
+            ('146.75.76.81', 53, 43764204),
+        ],
+    ),
+    'top_source_countries': ('src_country', [(PRIVATE, 1489, 138871753)]),
+    'top_destination_countries': (
+        'dst_country',
+        [(PRIVATE, 742, 404282), ('United States', 694, 136046024), ('Japan', 53, 2421447)],
+    ),
+    'top_ingress_zones': ('src_zone', [('trust', 1173, 138691120), ('vpn', 316, 180633)]),
+    'top_egress_zones': ('dst_zone', [('untrust', 747, 138467471), ('vpn', 426, 223649), ('trust', 316, 180633)]),
+    'top_rules': (
+        'rule',
+        [('trust-out', 747, 138467471), ('trust-to-vpn', 426, 223649), ('vpn-to-trust', 316, 180633)],
+    ),
 }
 ROWS = {'fw-a': FW_A_ROWS, 'fw-b': FW_B_ROWS}
 
@@ -94,9 +132,9 @@ def load_report(name, firewall='fw-a'):
     return parse_response(response.read_bytes())
 
 
-def expected_samples(name, rows):
+def expected_samples(name, expected_rows):
     """The three gauges of each row: sessions, bytes, and their ratio (0 without sessions)."""
-    _field, dimension = REPORTS[name]
+    dimension, rows = expected_rows
     expected = {}
     for value, sessions, size in rows:
         tags = (f'report:{name}', f'{dimension}:{value}')
@@ -112,21 +150,6 @@ def series(samples):
     result = {(s.name, s.tags): s.value for s in samples}
     assert len(result) == len(samples)
     return result
-
-
-def test_the_ten_reports_and_their_dimensions():
-    assert REPORTS == {
-        'top_applications': ('app', 'app'),
-        'top_application_categories': ('category-of-app', 'app_category'),
-        'top_technology_categories': ('technology-of-app', 'app_technology'),
-        'top_sources': ('src', 'src'),
-        'top_destinations': ('dst', 'dst'),
-        'top_source_countries': ('srcloc', 'src_country'),
-        'top_destination_countries': ('dstloc', 'dst_country'),
-        'top_ingress_zones': ('from', 'src_zone'),
-        'top_egress_zones': ('to', 'dst_zone'),
-        'top_rules': ('rule', 'rule'),
-    }
 
 
 @pytest.mark.parametrize('firewall', ['fw-a', 'fw-b'])
@@ -169,9 +192,8 @@ def test_private_country_range_is_kept_raw():
     assert ('report:top_source_countries', f'src_country:{PRIVATE}') in {s.tags for s in samples}
 
 
-@pytest.mark.parametrize('top_n, expected', [(None, 10), (5, 5), (25, 25)])
-def test_job_asks_for_the_top_n_of_the_last_24_hours(top_n, expected):
-    params = report_params('app', top_n or 10)
+def test_job_asks_for_the_top_n_of_the_last_24_hours():
+    params = report_params('app', 5)
 
     assert params['type'] == 'report'
     assert params['reporttype'] == 'dynamic'
@@ -179,7 +201,7 @@ def test_job_asks_for_the_top_n_of_the_last_24_hours(top_n, expected):
     assert params['cmd'] == (
         '<type><trsum><sortby>sessions</sortby><aggregate-by><member>app</member></aggregate-by>'
         '<values><member>sessions</member><member>bytes</member></values></trsum></type>'
-        f'<period>last-24-hrs</period><topn>{expected}</topn><topm>10</topm><caption>datadog</caption>'
+        '<period>last-24-hrs</period><topn>5</topn><topm>10</topm><caption>datadog</caption>'
     )
 
 
@@ -198,28 +220,42 @@ def field_of(params):
 
 
 class ScriptedClient:
-    """A client whose report jobs answer from a script: a job id to the statuses of its successive polls."""
+    """Stands in for `PanosClient` to the reports collector: it opens report jobs and answers their polls from the
+    captures.
 
-    def __init__(self, act_fields=(), firewall='fw-a'):
-        self.act_fields = set(act_fields)
+    `act_polls` maps a report field to how many polls of each of its jobs answer ACT before FIN (a huge number never
+    finishes), `failing` lists the fields whose jobs answer FAIL, and `timeout` makes every poll raise PanosTimeout.
+    """
+
+    def __init__(self, act_polls=None, failing=(), firewall='fw-a'):
+        self.act_polls = dict(act_polls or {})
+        self.failing = set(failing)
+        self.timeout = False
         self.firewall = firewall
         self.events = []
         self._fields = {}
+        self._polls = {}
 
     def submit_job(self, params):
         field = field_of(params)
         job_id = f'job-{len(self._fields) + 1}'
         self._fields[job_id] = field
+        self._polls[job_id] = 0
         self.events.append(('submit', field, params))
         return job_id
 
     def get_job(self, job_type, job_id):
         assert job_type == 'report'
+        if self.timeout:
+            raise PanosTimeout('slow')
         field = self._fields[job_id]
         self.events.append(('get', field, job_id))
-        if field in self.act_fields:
-            return 'ACT', parse_response((SYNTHETIC / 'report_job_act.xml').read_bytes())
+        self._polls[job_id] += 1
         response, _submit = find_report_fixture(field, self.firewall)
+        if field in self.failing:
+            return 'FAIL', parse_response(response.read_bytes())
+        if self._polls[job_id] <= self.act_polls.get(field, 0):
+            return 'ACT', parse_response((SYNTHETIC / 'report_job_act.xml').read_bytes())
         return 'FIN', parse_response(response.read_bytes())
 
     def submitted(self):
@@ -227,6 +263,10 @@ class ScriptedClient:
 
     def polls(self, field):
         return sum(1 for kind, f, *_ in self.events if kind == 'get' and f == field)
+
+
+STUCK = 10**6
+SLOW = constants.REPORT_JOB_POLLS  # ACT on every poll of the run that submits the job, FIN on the next run's first
 
 
 @pytest.fixture(autouse=True)
@@ -244,24 +284,25 @@ def test_the_jobs_run_one_at_a_time_and_none_aggregates_by_app_twice():
     fields = client.submitted()
     assert fields == [field for field, _tag in REPORTS.values()]
     assert fields.count('app') == 1
-    assert len(samples) == 3 * sum(len(rows) for rows in FW_A_ROWS.values())
+    assert len(samples) == 3 * sum(len(rows) for _tag, rows in FW_A_ROWS.values())
 
 
-def test_the_job_is_asked_for_the_configured_top_n():
+@pytest.mark.parametrize('top_n, expected', [(None, '10'), (7, '7')])
+def test_the_job_is_asked_for_the_configured_top_n_or_ten(top_n, expected):
     client = ScriptedClient()
 
-    collect_reports(make_context(client, top_n=7))
+    collect_reports(make_context(client, top_n=top_n))
 
     topn = {
         re.search(r'<topn>(\d+)</topn>', params['cmd']).group(1)
         for kind, _f, params in client.events
         if kind == 'submit'
     }
-    assert topn == {'7'}
+    assert topn == {expected}
 
 
 def test_a_job_still_running_after_ten_polls_is_carried_over_and_not_resubmitted():
-    client = ScriptedClient(act_fields={'app'})
+    client = ScriptedClient(act_polls={'app': STUCK})
     state = FirewallState()
 
     # The first report never finishes: the run polls it 10 times, submits nothing else, and reports nothing.
@@ -270,7 +311,7 @@ def test_a_job_still_running_after_ten_polls_is_carried_over_and_not_resubmitted
     assert client.submitted() == ['app']
 
     # The next run polls the same job first; it has finished, and the other nine reports follow.
-    client.act_fields.clear()
+    client.act_polls.clear()
     samples = collect_reports(make_context(client, state))
 
     assert client.submitted().count('app') == 1
@@ -282,7 +323,7 @@ def test_a_job_still_running_after_ten_polls_is_carried_over_and_not_resubmitted
 
 
 def test_a_job_that_never_finishes_is_dropped_after_three_carry_overs_so_the_others_are_reported():
-    client = ScriptedClient(act_fields={'app'})
+    client = ScriptedClient(act_polls={'app': STUCK})
     state = FirewallState()
     warnings = []
 
@@ -301,15 +342,8 @@ def test_a_job_that_never_finishes_is_dropped_after_three_carry_overs_so_the_oth
 
 
 def test_a_failed_job_is_skipped_with_one_warning_and_the_other_reports_still_run():
-    client = ScriptedClient()
+    client = ScriptedClient(failing={'src'})
     state = FirewallState()
-    original = client.get_job
-
-    def get_job(job_type, job_id):
-        status, root = original(job_type, job_id)
-        return ('FAIL', root) if client._fields[job_id] == 'src' else (status, root)
-
-    client.get_job = get_job
     ctx = make_context(client, state)
 
     samples = collect_reports(ctx)
@@ -320,7 +354,56 @@ def test_a_failed_job_is_skipped_with_one_warning_and_the_other_reports_still_ru
     second.log.warning.assert_not_called()
 
 
-def test_a_timeout_propagates_and_keeps_nothing_pending():
+def test_slow_jobs_do_not_starve_the_reports_after_them():
+    # Every job is still running at the end of the run that submits it and done at the next one's first poll.
+    client = ScriptedClient(act_polls={field: SLOW for field, _tag in REPORTS.values()})
+    state = FirewallState()
+    reported = set()
+    submitted_per_run = []
+
+    for _run in range(len(REPORTS) + 1):
+        ctx = make_context(client, state)
+        reported |= {tags[0] for _name, tags in series(collect_reports(ctx))}
+        submitted_per_run.append(len(client.submitted()))
+
+    # One cycle of the ten reports, each submitted once, before any is submitted again.
+    assert reported == {f'report:{name}' for name in REPORTS}
+    assert client.submitted() == [field for field, _tag in REPORTS.values()]
+    assert submitted_per_run == list(range(1, len(REPORTS) + 1)) + [len(REPORTS)]
+
+
+def test_a_carried_job_keeps_the_reports_collector_due_until_the_cycle_is_done():
+    client = ScriptedClient(act_polls={'app': SLOW})
+    state = FirewallState()
+
+    first = make_context(client, state)
+    collect_reports(first)
+    assert 'reports' in first.state.still_due
+
+    # The next run finishes the job and the rest of the cycle: nothing is left to poll.
+    state.still_due.clear()
+    collect_reports(make_context(client, state))
+    assert 'reports' not in state.still_due
+
+
+def test_a_timeout_polling_a_carried_job_keeps_it_for_the_next_run():
+    client = ScriptedClient(act_polls={'app': SLOW})
+    state = FirewallState()
+    collect_reports(make_context(client, state))
+    carried = state.reports.pending
+    client.timeout = True
+
+    with pytest.raises(PanosTimeout):
+        collect_reports(make_context(client, state))
+
+    assert state.reports.pending is carried
+    client.timeout = False
+    samples = collect_reports(make_context(client, state))
+    assert client.submitted().count('app') == 1
+    assert ('report.top.sessions', ('report:top_applications', 'app:ping')) in series(samples)
+
+
+def test_a_timeout_submitting_a_job_propagates():
     client = mock.Mock()
     client.submit_job.side_effect = PanosTimeout('slow')
     state = FirewallState()
@@ -333,6 +416,39 @@ def test_a_timeout_propagates_and_keeps_nothing_pending():
 
 def report_calls(fake_panos):
     return [c for c in fake_panos.calls if c.type == 'report']
+
+
+@pytest.fixture
+def clock(monkeypatch):
+    now = [1000.0]
+    monkeypatch.setattr(poller_module, 'FirewallSchedule', lambda: FirewallSchedule(lambda: now[0]))
+    return now
+
+
+def test_slow_firewall_is_polled_every_run_until_all_reports_are_collected_then_every_30_minutes(
+    real_collectors, dd_run_check, aggregator, fake_panos, clock
+):
+    act = SYNTHETIC / 'report_job_act.xml'
+    for field, _tag in REPORTS.values():
+        response, _submit = find_report_fixture(field, 'fw-a')
+        fake_panos.answer_report('192.0.2.10', field, *[act] * constants.REPORT_JOB_POLLS, response)
+    check = new_check(make_instance(collect_reports=True))
+
+    # One report per run (a job finishes at the first poll of the next run), 60 s apart, never 30 minutes.
+    for _run in range(len(REPORTS) + 1):
+        dd_run_check(check)
+        clock[0] += 60
+
+    for name, rows in FW_A_ROWS.items():
+        for (metric, tags), value in expected_samples(name, rows).items():
+            aggregator.assert_metric(
+                f'pan_firewall.{metric}', value, tags=sorted([*FW_A_TAGS, *tags]), metric_type=aggregator.GAUGE
+            )
+    calls = len(report_calls(fake_panos))
+
+    dd_run_check(check)
+
+    assert len(report_calls(fake_panos)) == calls
 
 
 def test_reports_are_registered_and_submit_through_the_check_when_enabled(

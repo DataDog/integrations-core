@@ -5,7 +5,7 @@
 
 The firewall builds a report as an asynchronous job. The jobs run one at a time, each polled to its end before the
 next is submitted. A job still running after `REPORT_JOB_POLLS` polls is kept in `FirewallState.reports` and polled
-first by the next run, never submitted again.
+first by the next run, never submitted again; the run after it carries on with the next report of the cycle.
 """
 
 from __future__ import annotations
@@ -59,40 +59,47 @@ def parse_report(root: Element, name: str) -> list[Sample]:
 
 @register('reports')
 def collect_reports(ctx: CollectContext) -> list[Sample]:
+    """Collect the reports of one cycle of `REPORTS`, resuming where the last run stopped.
+
+    A job still running after its polls keeps `reports` due (`still_due`), so the next run, not the next interval,
+    polls it and goes on with the reports after it; the 30-minute interval applies again once the cycle is complete.
+    A job pending is kept until it ends, so a timeout polling it loses nothing.
+    """
     state = ctx.state.reports
     samples: list[Sample] = []
-    done: set[str] = set()  # reports that need no new job this run
 
-    pending, state.pending = state.pending, None
-    if pending is not None:
-        done.add(pending.report)
-        outcome, root = _poll(ctx, pending)
+    if (job := state.pending) is not None:
+        outcome, root = _poll(ctx, job)
+        if outcome == 'running' and job.carries < constants.REPORT_MAX_CARRIES:
+            job.carries += 1
+            ctx.state.still_due.add('reports')
+            return samples
         if outcome == 'running':
-            if pending.carries < constants.REPORT_MAX_CARRIES:
-                pending.carries += 1
-                state.pending = pending
-                return samples
-            # Dropped, and not submitted again before the next run, so the reports after it are not held back.
             ctx.log.warning(
                 'pan_firewall: the %s report job %s is still running after %d runs: giving up on it',
-                pending.report,
-                pending.job_id,
-                pending.carries,
+                job.report,
+                job.job_id,
+                job.carries,
             )
         elif root is not None:
-            samples += parse_report(root, pending.report)
+            samples += parse_report(root, job.report)
+        state.pending = None
 
     top_n = ctx.config.report_top_n or DEFAULT_TOP_N
-    for name, (field, _dimension) in constants.REPORTS.items():
-        if name in done:
-            continue
+    reports = list(constants.REPORTS.items())
+    while state.cursor < len(reports):
+        name, (field, _dimension) = reports[state.cursor]
         job = ReportJob(name, ctx.client.submit_job(report_params(field, top_n)))
+        state.cursor += 1
+        state.pending = job
         outcome, root = _poll(ctx, job)
         if outcome == 'running':
-            state.pending = job
-            break
+            ctx.state.still_due.add('reports')
+            return samples
+        state.pending = None
         if root is not None:
             samples += parse_report(root, name)
+    state.cursor = 0
     return samples
 
 

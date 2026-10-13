@@ -156,21 +156,13 @@ class FakePanos:
         if data.get('action') == 'get':
             return self._read_log_job(host, data.get('job-id', ''))
         direction, query, skip = data.get('dir', ''), data.get('query'), int(data.get('skip', '0'))
-        bodies = self._log_overrides.get((host, direction, query, skip))
-        if bodies is not None:
-            job_id = str(next(self._job_ids))
-            submit = SUBMIT_TEMPLATE % (job_id.encode(), job_id.encode())
-        else:
-            fixture = find_log_fixture(direction, query, skip, FIREWALL_SETS[host])
-            if fixture is None:
-                return 200, NO_CAPTURE
-            response, submit_path = fixture
-            submit = submit_path.read_bytes()
-            job_id = re.search(rb'<job>(\d+)</job>', submit).group(1).decode()  # type: ignore[union-attr]
-            bodies = [response]
-        self._log_jobs[host, job_id] = bodies
-        self._log_reads[host, job_id] = 0
-        return 200, submit
+        return self._open_job(
+            self._log_jobs,
+            self._log_reads,
+            host,
+            self._log_overrides.get((host, direction, query, skip)),
+            find_log_fixture(direction, query, skip, FIREWALL_SETS[host]),
+        )
 
     def _answer_report(self, host: str, data: dict[str, str]) -> Answer | None:
         """Answer a `type=report` submit or `action=get`; None for an unknown host, which `_answer` then handles."""
@@ -180,20 +172,37 @@ class FakePanos:
             return self._read_job(self._report_jobs, self._report_reads, host, data.get('job-id', ''))
         match = re.search(r'<aggregate-by><member>([^<]+)</member>', data.get('cmd', ''))
         field = match.group(1) if match else ''
-        bodies = self._report_overrides.get((host, field))
-        if bodies is not None:
+        return self._open_job(
+            self._report_jobs,
+            self._report_reads,
+            host,
+            self._report_overrides.get((host, field)),
+            find_report_fixture(field, FIREWALL_SETS[host]),
+        )
+
+    def _open_job(
+        self,
+        jobs: dict[tuple[str, str], list[LogBody]],
+        reads: dict[tuple[str, str], int],
+        host: str,
+        override: list[LogBody] | None,
+        fixture: tuple[Path, Path] | None,
+    ) -> Answer:
+        """Register a job in `jobs` and return its submit answer: a new job answering the `override` bodies in turn, or
+        the job of the (response, submit) `fixture` pair; `NO_CAPTURE` when there is neither."""
+        if override is not None:
+            bodies = override
             job_id = str(next(self._job_ids))
             submit = SUBMIT_TEMPLATE % (job_id.encode(), job_id.encode())
-        else:
-            fixture = find_report_fixture(field, FIREWALL_SETS[host])
-            if fixture is None:
-                return 200, NO_CAPTURE
+        elif fixture is not None:
             response, submit_path = fixture
+            bodies = [response]
             submit = submit_path.read_bytes()
             job_id = re.search(rb'<job>(\d+)</job>', submit).group(1).decode()  # type: ignore[union-attr]
-            bodies = [response]
-        self._report_jobs[host, job_id] = bodies
-        self._report_reads[host, job_id] = 0
+        else:
+            return 200, NO_CAPTURE
+        jobs[host, job_id] = bodies
+        reads[host, job_id] = 0
         return 200, submit
 
     def _read_log_job(self, host: str, job_id: str) -> Answer:

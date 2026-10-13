@@ -91,6 +91,7 @@ class ReportJob:
 @dataclass
 class ReportState:
     pending: ReportJob | None = None  # polled first next run, never submitted again
+    cursor: int = 0  # index in `REPORTS` of the next report to submit; back to 0 once a cycle of all of them is done
 
 
 @dataclass
