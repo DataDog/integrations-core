@@ -375,6 +375,21 @@ def test_reset_check_is_due_when_the_persisted_time_is_ahead_of_the_clock(firewa
     assert len(firewall.backward_jobs()) == 1
 
 
+@pytest.mark.parametrize(
+    'seconds_since_check, jobs',
+    [
+        pytest.param(constants.THREAT_RESET_CHECK_SECONDS, 1, id='due'),
+        pytest.param(constants.THREAT_RESET_CHECK_SECONDS - 1, 0, id='not-due-yet'),
+    ],
+)
+def test_a_pass_with_nothing_new_runs_the_reset_check_only_when_due(firewall, seconds_since_check, jobs):
+    nothing_new(firewall, last_reset_check=firewall.clock.now - seconds_since_check, newest=log_page([1000]))
+
+    assert firewall.collect() == []
+
+    assert len(firewall.backward_jobs()) == jobs
+
+
 def test_a_pass_that_counted_logs_runs_no_reset_check(firewall):
     firewall.seed(1000)
     firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1001), 0, log_page([1001]))

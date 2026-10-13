@@ -45,6 +45,8 @@ def test_running_or_queued_commits_and_content_updates_are_busy(status):
         pytest.param('jobs_all.xml', id='finished-jobs-of-every-type'),
         # No report job type was seen in the lab; Downld and IoT are the real types that never pause collection.
         pytest.param('jobs_pending_not_busy.xml', id='running-downld-and-iot'),
+        # A running report job (the type name is hand-written, see the fixture) is not one of the busy types.
+        pytest.param('jobs_pending_report_act.xml', id='running-report'),
     ],
 )
 def test_jobs_that_do_not_pause_collection(name):

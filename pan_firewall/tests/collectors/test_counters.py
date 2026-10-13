@@ -151,6 +151,12 @@ def test_global_counters_submit_through_the_check(real_collectors, fake_panos, d
         tags=sorted([*FW_A_TAGS, 'aspect:arp']),
         metric_type=aggregator.MONOTONIC_COUNT,
     )
+    aggregator.assert_metric(
+        'pan_firewall.counter.global',
+        value=1,
+        tags=sorted([*FW_A_TAGS, 'counter:ssl_hsm_up_down_event_rcv', 'category:ssl', 'aspect:pktproc']),
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
     assert len(aggregator.metrics('pan_firewall.counter.global')) == 26
     assert len(aggregator.metrics('pan_firewall.dropped_packets')) == 14
     assert [c.cmd for c in fake_panos.calls if c.cmd == GLOBAL_COUNTER_CMD] == [GLOBAL_COUNTER_CMD]

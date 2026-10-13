@@ -243,6 +243,23 @@ def test_metadata_is_sent_at_once_when_can_connect_flips(dd_run_check, aggregato
     assert [e['devices'][0]['status'] for e in events(aggregator)] == [1, 2]
 
 
+def test_metadata_is_sent_at_once_when_the_firewall_comes_back(
+    dd_run_check, aggregator, fake_panos, clock, monkeypatch
+):
+    monkeypatch.setitem(COLLECT_FUNCTIONS, 'bgp', lambda ctx: [])
+    check = new_check()
+    dd_run_check(check)
+    fake_panos.fail(FW_A_IP, 'refused')
+    clock[0] += 120
+    dd_run_check(check)
+    fake_panos.recover(FW_A_IP)
+    clock[0] += 120
+
+    dd_run_check(check)
+
+    assert [e['devices'][0]['status'] for e in events(aggregator)] == [1, 2, 1]
+
+
 def test_disabled_metadata_sends_no_event_but_still_reads_the_identity(dd_run_check, aggregator, fake_panos):
     dd_run_check(new_check(make_instance(send_ndm_metadata=False)))
 
