@@ -40,3 +40,7 @@ class FirewallSchedule:
         now = self._clock()
         for name in names:
             self._next_due[name] = now + INTERVALS[name]
+
+    def make_due(self, name: str) -> None:
+        """Make a collector due on the next call to `due()`, whatever its interval."""
+        self._next_due.pop(name, None)

@@ -141,6 +141,9 @@ class FirewallPoller:
             )
         # Skipped collectors, and every collector of a busy run, stay due, so they run first thing next run.
         self.schedule.mark_run(outcome.ran)
+        if self.keys.take_regenerated():
+            # A rejected key that had worked may mean another unit answers here: read the identity again next run.
+            self.schedule.make_due(IDENTITY)
         stats = self.client.take_stats()
         if stats.calls:
             self._can_connect = 1 if stats.answered else 0
@@ -315,6 +318,12 @@ class FirewallPoller:
         except PanosError as e:
             self.log.warning('pan_firewall %s: cannot read the system info: %s', self.ip, e)
             return
+        previous = self.identity.serial if self.identity else None
+        if previous and identity.serial != previous:
+            # Another unit answers at this IP (a replaced static firewall). What was kept about the old one (pending
+            # jobs, threat watermark, warnings, interface rows) does not apply to it; the collectors reload theirs.
+            self.log.info('pan_firewall %s: the serial changed from %s to %s', self.ip, previous, identity.serial)
+            self.state = FirewallState()
         try:
             interfaces = self.client.op(INTERFACE_ALL_CMD)
         except PanosError as e:

@@ -10,10 +10,12 @@ import pytest
 
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.pan_firewall import PanFirewallCheck
+from datadog_checks.pan_firewall import poller as poller_module
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, Sample, once_log, warn_once
 from datadog_checks.pan_firewall.collectors.jobs import JOBS_PENDING_CMD
 from datadog_checks.pan_firewall.errors import PanosApiError, PanosTimeout
 from datadog_checks.pan_firewall.poller import FirewallPoller
+from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 
 from .common import CREDENTIALS
 from .fake_panos import FAILURES, FIREWALL_SETS
@@ -22,6 +24,7 @@ FW_A_IP = '192.0.2.10'
 FW_B_IP = '192.0.2.11'
 FW_C_IP = '192.0.2.12'
 FW_A_SERIAL = '007955000930601'
+FW_B_SERIAL = '007955000930602'
 STUBS = ('bgp', 'dataplane', 'interfaces', 'system_resources')
 SYSTEM_INFO_CMD = '<show><system><info/></system></show>'
 INTERFACE_ALL_CMD = '<show><interface>all</interface></show>'
@@ -446,3 +449,57 @@ def test_system_info_without_serial_keeps_the_cached_identity(dd_run_check, aggr
     aggregator.reset()
     dd_run_check(new_check())
     assert only_value_and_tags(aggregator, 'can_connect') == (0, FW_A_TAGS)
+
+
+def test_static_firewall_replaced_at_the_same_ip_is_tagged_and_tracked_as_the_new_unit(
+    dd_run_check, aggregator, real_collectors, monkeypatch
+):
+    now = [1000.0]
+    monkeypatch.setattr(poller_module, 'FirewallSchedule', lambda: FirewallSchedule(lambda: now[0]))
+    watermark_reads = []
+    read_cache = PanFirewallCheck.read_persistent_cache
+    monkeypatch.setattr(
+        PanFirewallCheck,
+        'read_persistent_cache',
+        lambda self, key: watermark_reads.append(key) or read_cache(self, key),
+    )
+    check = new_check(make_instance(collect_threats=True))
+    dd_run_check(check)
+    old_state = check._pollers[FW_A_IP].state
+    old_state.warned.add('left over from the old unit')
+    # The unit is swapped for another one that answers at the same IP; the identity is due again after 30 minutes.
+    monkeypatch.setitem(FIREWALL_SETS, FW_A_IP, 'fw-b')
+    now[0] += 1800
+    aggregator.reset()
+    watermark_reads.clear()
+
+    dd_run_check(check)
+
+    state = check._pollers[FW_A_IP].state
+    assert state is not old_state
+    assert not state.warned
+    value, tags = only_value_and_tags(aggregator, 'can_connect')
+    assert {f'device_id:{FW_B_SERIAL}', f'device_serial:{FW_B_SERIAL}', 'device_hostname:fw-b'} <= set(tags)
+    assert f'device_id:{FW_A_SERIAL}' not in tags
+    assert f'threat_watermark:{FW_B_SERIAL}' in watermark_reads
+    assert f'threat_watermark:{FW_A_SERIAL}' not in watermark_reads
+
+
+def test_identity_is_read_again_on_the_next_run_after_the_key_is_regenerated(dd_run_check, fake_panos, monkeypatch):
+    now = [1000.0]
+    monkeypatch.setattr(poller_module, 'FirewallSchedule', lambda: FirewallSchedule(lambda: now[0]))
+    monkeypatch.setitem(COLLECT_FUNCTIONS, 'bgp', lambda ctx: [])
+    check = new_check()
+    dd_run_check(check)
+    # A due collector makes the calls that the firewall now rejects, the key it just regenerated included.
+    fake_panos.fail(FW_A_IP, 'http_403', on='api')
+    now[0] += 120
+    dd_run_check(check)
+    fake_panos.recover(FW_A_IP)
+    now[0] += 120
+    calls_before = len(fake_panos.calls)
+
+    dd_run_check(check)
+
+    # The identity is not due for 30 minutes, yet it is read.
+    assert SYSTEM_INFO_CMD in [c.cmd for c in fake_panos.calls[calls_before:]]

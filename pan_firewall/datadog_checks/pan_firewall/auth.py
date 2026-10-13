@@ -47,6 +47,15 @@ class KeyManager:
         self._lock = threading.Lock()
         self._keygen_rejected = False
         self.auth_failed = False
+        # True once `regenerate()` replaced the key, until `take_regenerated()`: a key the device rejected after it
+        # had accepted it may mean the device is another one now.
+        self._regenerated = False
+
+    def take_regenerated(self) -> bool:
+        """Return whether the key was regenerated since the last call, and clear the flag."""
+        with self._lock:
+            regenerated, self._regenerated = self._regenerated, False
+        return regenerated
 
     def key(self) -> str:
         """Return the current key, generating one if none is held."""
@@ -66,6 +75,7 @@ class KeyManager:
             # The rejected key is dropped first, so a failed keygen leaves no key to retry with.
             self._key = None
             self._key = self._keygen()
+            self._regenerated = True
             return self._key
 
     def reset_failure(self) -> None:
