@@ -125,6 +125,9 @@ class CollectContext:
     state: FirewallState  # interface map, vpn cache, pending jobs, watermark, ha_state
     config: InstanceConfig
     log: CheckLoggingAdapter
+    # `state.tunnel_tags` as it was when the run started: what `interfaces` tags the tunnel counters with, so that
+    # whether they are sent does not depend on which of the parallel collectors finishes first.
+    tunnel_tags: dict[str, tuple[str, ...]] | None = None
     # The schedule's monotonic clock, and the check's persistent cache (read returns '' for an unknown key).
     clock: Callable[[], float] = time.monotonic
     read_cache: Callable[[str], str] = lambda key: ''

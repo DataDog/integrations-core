@@ -1,13 +1,16 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import threading
 from unittest import mock
 
 import pytest
 
+from datadog_checks.pan_firewall import poller as poller_module
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectContext, FirewallState
 from datadog_checks.pan_firewall.collectors.interfaces import COUNTER_INTERFACE_CMD, collect_interfaces
 from datadog_checks.pan_firewall.collectors.vpn import VPN_FLOW_CMD, VPN_GATEWAY_CMD, collect_vpn, parse_vpn
+from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from ..fixture_map import op_fixture
@@ -109,13 +112,14 @@ def test_unknown_shape_warns_and_sends_nothing():
     log.warning.assert_called_once()
 
 
-def make_context(state, responses):
+def make_context(state, responses, **kwargs):
     ctx = CollectContext(
         client=mock.Mock(),
         identity=mock.Mock(serial='007955000930601'),
         state=state,
         config=mock.Mock(),
         log=mock.Mock(),
+        **kwargs,
     )
     ctx.client.op.side_effect = lambda cmd: responses[cmd]
     return ctx
@@ -131,9 +135,11 @@ def test_collector_stores_tunnel_tags_and_states_and_interfaces_uses_them_on_the
     ctx = make_context(state, responses)
 
     collect_vpn(ctx)
-    samples = collect_interfaces(ctx)
+    # The next run's context snapshots what `vpn` stored.
+    next_ctx = make_context(state, responses, tunnel_tags=state.tunnel_tags)
+    samples = collect_interfaces(next_ctx)
 
-    assert [c.args[0] for c in ctx.client.op.call_args_list] == [VPN_FLOW_CMD, VPN_GATEWAY_CMD, COUNTER_INTERFACE_CMD]
+    assert [c.args[0] for c in ctx.client.op.call_args_list] == [VPN_FLOW_CMD, VPN_GATEWAY_CMD]
     assert state.tunnel_states == {'tunnel.1': 'active', 'tunnel.2': 'init'}
     rx = {s.tags: s.value for s in samples if s.name == 'ipsec.tunnel.rx.bytes'}
     assert rx == {
@@ -167,7 +173,39 @@ def test_vpn_is_registered_and_submits_through_the_check(real_collectors, dd_run
         tags=sorted([*FW_A_TAGS, *tunnel_tags('tun-peer', 'tunnel.1', '10.60.1.11', 'gw-peer')]),
         metric_type=gauge,
     )
-    # `interfaces` has no tunnel tags on the first run (it runs in parallel with `vpn`), so it sends no tunnel counters.
-    assert aggregator.metrics('pan_firewall.ipsec.tunnel.rx.bytes') == []
     # One `counter interface all` call serves the interfaces and the tunnels.
     assert [c.cmd for c in fake_panos.calls if c.cmd == COUNTER_INTERFACE_CMD] == [COUNTER_INTERFACE_CMD]
+
+
+def test_tunnel_counters_wait_for_the_run_after_vpn_first_answers_whatever_the_collector_order(
+    real_collectors, dd_run_check, aggregator, monkeypatch
+):
+    now = [1000.0]
+    monkeypatch.setattr(poller_module, 'FirewallSchedule', lambda: FirewallSchedule(lambda: now[0]))
+    # Force the ordering that used to leak: `interfaces` only starts once `vpn` has finished, on every run.
+    vpn_done = threading.Event()
+    real_vpn, real_interfaces = COLLECT_FUNCTIONS['vpn'], COLLECT_FUNCTIONS['interfaces']
+
+    def vpn_then_signal(ctx):
+        try:
+            return real_vpn(ctx)
+        finally:
+            vpn_done.set()
+
+    def interfaces_after_vpn(ctx):
+        assert vpn_done.wait(10)
+        return real_interfaces(ctx)
+
+    monkeypatch.setitem(COLLECT_FUNCTIONS, 'vpn', vpn_then_signal)
+    monkeypatch.setitem(COLLECT_FUNCTIONS, 'interfaces', interfaces_after_vpn)
+    check = new_check()
+
+    dd_run_check(check)
+    assert aggregator.metrics('pan_firewall.ipsec.tunnel.rx.bytes') == []
+
+    now[0] += 180
+    dd_run_check(check)
+    full_tags = sorted([*FW_A_TAGS, *tunnel_tags('tun-peer', 'tunnel.1', '10.60.1.11', 'gw-peer')])
+    aggregator.assert_metric(
+        'pan_firewall.ipsec.tunnel.rx.bytes', 1563183, tags=full_tags, metric_type=aggregator.MONOTONIC_COUNT
+    )

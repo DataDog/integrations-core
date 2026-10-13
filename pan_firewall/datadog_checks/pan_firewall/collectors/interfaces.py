@@ -7,9 +7,10 @@ The speeds are not collected here: they follow the identity step's 30-minute sch
 come from (`parse_interface_speeds` is called by the poller).
 
 Every row is an interface, `tunnel.N` included. The `tunnel.N` rows are also the IPSec tunnel counters, tagged with
-what the `vpn` collector stored in the state on an earlier run: the collectors run in parallel, so reading `vpn`'s
-result of the same run would be a race. Until `vpn` first answers the tunnel counters are not sent: a series with
-fewer tags would start a monotonic_count context that is dropped as soon as the full tags arrive.
+what the `vpn` collector stored in the state on an earlier run: the collectors run in parallel, so the context
+carries the tags as they were when the run started, and `vpn`'s result of the same run is never used.
+Until `vpn` first answers the tunnel counters are not sent: a series with fewer tags would start a monotonic_count
+context that is dropped as soon as the full tags arrive.
 """
 
 from __future__ import annotations
@@ -152,4 +153,4 @@ def parse_interface_speeds(state: FirewallState, serial: str | None, log: CheckL
 @register('interfaces')
 def collect_interfaces(ctx: CollectContext) -> list[Sample]:
     root = ctx.client.op(COUNTER_INTERFACE_CMD)
-    return parse_interface_counters(root, ctx.state, ctx.identity.serial, ctx.state.tunnel_tags, once_log(ctx))
+    return parse_interface_counters(root, ctx.state, ctx.identity.serial, ctx.tunnel_tags, once_log(ctx))

@@ -252,6 +252,7 @@ class FirewallPoller:
             state=self.state,
             config=self.config,
             log=self.log,
+            tunnel_tags=self.state.tunnel_tags,
             clock=self.schedule.now,
             read_cache=self.check.read_persistent_cache,
             write_cache=self.check.write_persistent_cache,
