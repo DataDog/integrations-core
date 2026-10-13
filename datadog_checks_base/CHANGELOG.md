@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 38.5.0 / 2026-10-13
+
+***Added***:
+
+* Add the `collect_histograms_as_distributions` OpenMetrics V2 option, which submits histogram buckets as distributions without the `upper_bound` and `lower_bound` tags on Agents that support it. ([#25378](https://github.com/DataDog/integrations-core/pull/25378))
+
+***Fixed***:
+
+* Make `assert_histogram_bucket` compare bucket bounds when they are given. ([#25378](https://github.com/DataDog/integrations-core/pull/25378))
+
 ## 38.4.0 / 2026-10-01
 
 ***Security***:
