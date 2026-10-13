@@ -19,11 +19,14 @@ name."^py3.13$".e2e-env = { value = true }
 # The lab envs are E2E envs only where their variable is set, so CI never runs them: `py3.13-lab` (static mode) where
 # PANOS_LAB_HOSTS is set, `py3.13-lab-panorama` (Panorama mode) where PANOS_LAB_PANORAMA_HOST is set. Hatch cannot
 # express "either variable" for one env (an `env` list needs ALL its variables, and an untyped option takes a single
-# table), hence two envs. The other lab variables (PANOS_LAB_USERNAME, PANOS_PASSWORD, PANOS_LAB_PANORAMA_USERNAME,
-# PANOS_LAB_PANORAMA_PASSWORD, PANOS_LAB_FIREWALL_OVERRIDES, PANOS_LAB_COLLECT_ALL) reach the tests from the
-# caller's environment, which hatch passes through; no value is written here.
+# table), hence two envs. Each sets PANOS_LAB_MODE, which the tests branch on. The other lab variables
+# (PANOS_LAB_USERNAME, PANOS_PASSWORD, PANOS_LAB_PANORAMA_USERNAME, PANOS_LAB_PANORAMA_PASSWORD,
+# PANOS_LAB_FIREWALL_OVERRIDES, PANOS_LAB_COLLECT_ALL) reach the tests from the caller's environment, which hatch
+# passes through; no value is written here.
 matrix.setup.e2e-env = { value = true, if = ["lab"], env = ["PANOS_LAB_HOSTS"] }
 name."^py3.13-lab-panorama$".e2e-env = { value = true, env = ["PANOS_LAB_PANORAMA_HOST"] }
 matrix.setup.env-vars = [
   { key = "USE_PANOS_LAB", value = "1", if = ["lab", "lab-panorama"] },
+  { key = "PANOS_LAB_MODE", value = "static", if = ["lab"] },
+  { key = "PANOS_LAB_MODE", value = "panorama", if = ["lab-panorama"] },
 ]

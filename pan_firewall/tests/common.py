@@ -29,18 +29,34 @@ INSTANCE = STATIC_INSTANCE
 # The docker fakes (see `docker/docker-compose.yaml`): the Agent container joins the `pan-firewall-e2e` network and
 # reaches each fake on port 443 at its own address.
 E2E_NETWORK = 'pan-firewall-e2e'
-E2E_SUBNET = '172.29.84.0/24'
-E2E_FIREWALL_IPS = {'fw-a': '172.29.84.10', 'fw-b': '172.29.84.11'}
-E2E_PANORAMA_IP = '172.29.84.12'
+DEFAULT_E2E_SUBNET = '172.29.84.0/24'
+
+
+def e2e_addresses(subnet: str) -> tuple[dict[str, str], str]:
+    """Derive the fake firewalls' and Panorama's addresses (offsets 10, 11 and 12) from the E2E subnet."""
+    network = ipaddress.ip_network(subnet, strict=False)
+    if network.version != 4 or network.num_addresses < 16:
+        pytest.fail(f'PANOS_E2E_SUBNET must be an IPv4 network with at least 16 addresses, got {subnet}')
+    first = network.network_address
+    return {'fw-a': str(first + 10), 'fw-b': str(first + 11)}, str(first + 12)
+
+
+# Set PANOS_E2E_SUBNET when the default subnet overlaps a network of your machine; docker-compose.yaml receives it
+# from `dd_environment` through its own `E2E_SUBNET` variable.
+E2E_SUBNET = os.environ.get('PANOS_E2E_SUBNET', DEFAULT_E2E_SUBNET)
+E2E_FIREWALL_IPS, E2E_PANORAMA_IP = e2e_addresses(E2E_SUBNET)
 PANORAMA_CREDENTIALS = {'username': 'dummy-panorama-user', 'password': 'dummy-panorama-password'}
 # The serials the synthetic Panorama device list gives the two firewalls (the real P1 entries).
 E2E_FIREWALL_SERIALS = {'fw-a': '007955000930601', 'fw-b': '007955000930602'}
 
+# `static` or `panorama`, set by the hatch env (`py3.13-lab` and `py3.13-lab-panorama`), never by hand.
+LAB_MODE_VAR = 'PANOS_LAB_MODE'
+LAB_MODES = ('static', 'panorama')
 LAB_HOSTS_VAR = 'PANOS_LAB_HOSTS'
 LAB_USERNAME_VAR = 'PANOS_LAB_USERNAME'
 LAB_PASSWORD_VAR = 'PANOS_PASSWORD'
 LAB_COLLECT_ALL_VAR = 'PANOS_LAB_COLLECT_ALL'
-# Panorama mode: set when `PANOS_LAB_PANORAMA_HOST` is, and then replaces the static `PANOS_LAB_HOSTS`.
+# Panorama mode: these replace the static `PANOS_LAB_HOSTS`.
 LAB_PANORAMA_HOST_VAR = 'PANOS_LAB_PANORAMA_HOST'
 LAB_PANORAMA_USERNAME_VAR = 'PANOS_LAB_PANORAMA_USERNAME'
 LAB_PANORAMA_PASSWORD_VAR = 'PANOS_LAB_PANORAMA_PASSWORD'
@@ -53,6 +69,14 @@ def lab_hosts(environ: Mapping[str, str] = os.environ) -> list[str]:
 
 def lab_panorama_host(environ: Mapping[str, str] = os.environ) -> str | None:
     return environ.get(LAB_PANORAMA_HOST_VAR) or None
+
+
+def lab_mode(environ: Mapping[str, str] = os.environ) -> str:
+    """Return the lab mode from `PANOS_LAB_MODE`; fail naming the variable (not echoing its value) if it is invalid."""
+    mode = environ.get(LAB_MODE_VAR, '')
+    if mode not in LAB_MODES:
+        pytest.fail(f'{LAB_MODE_VAR} must be one of: {", ".join(LAB_MODES)} (the py3.13-lab* hatch envs set it)')
+    return mode
 
 
 def _fail_missing(names: list[str]) -> None:
@@ -79,13 +103,18 @@ def _parse_overrides(environ: Mapping[str, str]) -> dict[str, str]:
 def build_lab_instance(environ: Mapping[str, str] = os.environ) -> dict[str, Any]:
     """Build the single lab instance from the environment only; fail naming (never showing) missing variables."""
     instance: dict[str, Any]
-    panorama_host = lab_panorama_host(environ)
-    if panorama_host:
-        required = (LAB_PANORAMA_USERNAME_VAR, LAB_PANORAMA_PASSWORD_VAR, LAB_USERNAME_VAR, LAB_PASSWORD_VAR)
+    if lab_mode(environ) == 'panorama':
+        required = (
+            LAB_PANORAMA_HOST_VAR,
+            LAB_PANORAMA_USERNAME_VAR,
+            LAB_PANORAMA_PASSWORD_VAR,
+            LAB_USERNAME_VAR,
+            LAB_PASSWORD_VAR,
+        )
         if missing := [name for name in required if not environ.get(name)]:
             _fail_missing(missing)
         instance = {
-            'panorama_host': panorama_host,
+            'panorama_host': environ[LAB_PANORAMA_HOST_VAR],
             'panorama_username': environ[LAB_PANORAMA_USERNAME_VAR],
             'panorama_password': environ[LAB_PANORAMA_PASSWORD_VAR],
             'firewall_credentials': [{'username': environ[LAB_USERNAME_VAR], 'password': environ[LAB_PASSWORD_VAR]}],
@@ -105,6 +134,6 @@ def build_lab_instance(environ: Mapping[str, str] = os.environ) -> dict[str, Any
             'tls_verify': False,
         }
     # Optional: also run the collectors that are off by default (global counters, OSPF, reports).
-    if environ.get(LAB_COLLECT_ALL_VAR):
+    if environ.get(LAB_COLLECT_ALL_VAR, '').lower() in ('1', 'true'):
         instance.update(collect_global_counters=True, collect_ospf=True, collect_reports=True)
     return instance

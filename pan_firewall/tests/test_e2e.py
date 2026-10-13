@@ -7,7 +7,7 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import E2E_FIREWALL_IPS, E2E_PANORAMA_IP, lab_hosts, lab_panorama_host
+from .common import E2E_FIREWALL_IPS, E2E_PANORAMA_IP, lab_hosts, lab_mode, lab_panorama_host
 
 LAB = bool(os.environ.get('USE_PANOS_LAB'))
 
@@ -25,8 +25,8 @@ def values_with_tag(aggregator, name, tag):
 def test_lab(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
 
-    panorama_host = lab_panorama_host()
-    if panorama_host:
+    if lab_mode() == 'panorama':
+        panorama_host = lab_panorama_host()
         # Panorama mode: the firewalls are discovered, so their IPs are not known here. Every `can_connect` series
         # (one per discovered firewall, tagged with the `device_ip` Panorama reports) must be 1, and there is one.
         panorama = values_with_tag(aggregator, 'pan_firewall.panorama.can_connect', f'panorama_host:{panorama_host}')

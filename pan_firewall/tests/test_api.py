@@ -30,7 +30,7 @@ URL = f'https://{HOST}:{PORT}/api/'
 SYSTEM_INFO_CMD = '<show><system><info/></system></show>'
 GENERATED_KEY = 'GENERATED-KEY-0123456789'
 STATIC_KEY = 'STATIC-KEY-9876543210'
-PASSWORD_CREDS = Credentials(username='admin', password='s3cret-pw', api_key=None)
+PASSWORD_CREDS = Credentials(username='dummy-user', password='s3cret-pw', api_key=None)
 STATIC_CREDS = Credentials(username=None, password=None, api_key=STATIC_KEY)
 
 SYSTEM_INFO = op_fixture(SYSTEM_INFO_CMD).read_bytes()
@@ -96,7 +96,7 @@ def test_keygen_posts_credentials_in_body_and_key_only_in_header():
     assert root.findtext('./result/system/hostname') == 'fw-a'
     keygen, op = http.calls
     assert keygen['url'] == URL
-    assert keygen['data'] == {'type': 'keygen', 'user': 'admin', 'password': 's3cret-pw'}
+    assert keygen['data'] == {'type': 'keygen', 'user': 'dummy-user', 'password': 's3cret-pw'}
     assert 'extra_headers' not in keygen
     assert op['url'] == URL
     assert op['data'] == {'type': 'op', 'cmd': SYSTEM_INFO_CMD}

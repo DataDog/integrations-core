@@ -16,6 +16,7 @@ from datadog_checks.pan_firewall.xml_utils import parse_response
 from .common import (
     CREDENTIALS,
     FIXTURES,
+    LAB_MODE_VAR,
     LAB_OVERRIDES_VAR,
     LAB_PANORAMA_HOST_VAR,
     LAB_PANORAMA_PASSWORD_VAR,
@@ -270,6 +271,7 @@ _Yaml11Loader.add_constructor('tag:yaml.org,2002:int', lambda loader, node: int(
 @pytest.mark.parametrize('loader', [yaml.SafeLoader, _Yaml11Loader], ids=['safe-load', 'digits-as-numbers'])
 def test_lab_instance_written_to_yaml_still_overrides_the_polled_ip(dd_run_check, fake_panos, loader):
     environ = {
+        LAB_MODE_VAR: 'panorama',
         LAB_PANORAMA_HOST_VAR: PANORAMA,
         LAB_PANORAMA_USERNAME_VAR: 'dummy-user',
         LAB_PANORAMA_PASSWORD_VAR: 'dummy-password',

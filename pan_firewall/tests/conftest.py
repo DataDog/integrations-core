@@ -65,16 +65,23 @@ def docker_environment():
 @pytest.fixture(scope='session')
 def dd_environment():
     if os.environ.get('USE_PANOS_LAB'):
-        # Lab mode: one instance built from environment variables only, no docker fakes. Set the variables in
-        # your own terminal (the password is read silently and never written to a file or to the shell history):
+        # Lab mode: one instance built from environment variables only, no docker fakes. The hatch env sets
+        # PANOS_LAB_MODE (`static` for py3.13-lab, `panorama` for py3.13-lab-panorama); do not set it yourself. Set
+        # the other variables in your own terminal (the password is read silently and never written to a file or to
+        # the shell history):
         #
         #   read -rs "PANOS_PASSWORD?Password: "
         #   export PANOS_PASSWORD PANOS_LAB_HOSTS=<ip1>,<ip2> PANOS_LAB_USERNAME=<username>
         #
         # then run `ddev env start pan_firewall py3.13-lab`, `ddev env agent pan_firewall py3.13-lab check` and
-        # `ddev env test pan_firewall py3.13-lab`. The instance is never logged or printed: it holds the password.
+        # `ddev env test pan_firewall py3.13-lab`, and finish with `ddev env stop pan_firewall py3.13-lab`. The
+        # instance is never logged or printed, but ddev writes it, password included, to its env config until the
+        # `ddev env stop` step removes it, so do not skip that step.
         #
-        # Panorama mode (setting PANOS_LAB_PANORAMA_HOST selects it, and PANOS_LAB_HOSTS is then not needed): the
+        # Set PANOS_LAB_COLLECT_ALL=1 (or `true`) to also run the collectors that are off by default (global
+        # counters, OSPF, reports). Any other value, including 0 and false, leaves them off.
+        #
+        # Panorama mode (the py3.13-lab-panorama env, where PANOS_LAB_HOSTS is not needed): the
         # firewalls are discovered from Panorama, so set its host and credentials, plus the firewalls' own. Read
         # BOTH passwords silently, in your own terminal:
         #
@@ -93,7 +100,6 @@ def dd_environment():
         #   ddev env stop pan_firewall py3.13-lab-panorama
         yield {'instances': [build_lab_instance()]}
     else:
-        # The docker environment is added in a later task.
         yield from docker_environment()
 
 
