@@ -40,6 +40,7 @@ instances:
     ## Filters for the firewalls discovered through Panorama. Entries are IP addresses or CIDR blocks.
     ## If no filters are configured, all connected firewalls are polled.
     ## Use `include` to poll only matching firewalls and `exclude` to skip them. `exclude` takes precedence.
+    ## The filters apply to the IP address the Agent polls, so a `firewall_ip_overrides` address is filtered too.
     #
     # firewall_ips:
     #   include:
@@ -190,7 +191,7 @@ instances:
     # collect_ospf: false
 
     ## @param collect_reports - boolean - optional - default: false
-    ## Set to `true` to collect the PAN-OS predefined reports.
+    ## Set to `true` to collect the 10 top-N traffic reports (custom dynamic reports over the last 24 hours).
     #
     # collect_reports: false
 

@@ -74,9 +74,9 @@ pan_firewall.power.alarm.low,gauge,,,,1 if in alarm below the minimum.,-1,palo_a
 pan_firewall.power.voltage,gauge,,volt,,Current voltage.,0,palo_alto_networks_firewall,power voltage,,"sensor,slot"
 pan_firewall.power.voltage.max,gauge,,volt,,Maximum voltage threshold.,0,palo_alto_networks_firewall,power voltage max,,"sensor,slot"
 pan_firewall.power.voltage.min,gauge,,volt,,Minimum voltage threshold.,0,palo_alto_networks_firewall,power voltage min,,"sensor,slot"
-pan_firewall.report.top.bytes,gauge,,byte,,Traffic in the last 24 h.,0,palo_alto_networks_firewall,report top bytes,,report
-pan_firewall.report.top.bytes_per_session,gauge,,byte,,Average traffic per session (derived).,0,palo_alto_networks_firewall,report top bytes per session,,report
-pan_firewall.report.top.sessions,gauge,,session,,Sessions in the last 24 h.,0,palo_alto_networks_firewall,report top sessions,,report
+pan_firewall.report.top.bytes,gauge,,byte,,Traffic in the last 24 h.,0,palo_alto_networks_firewall,report top bytes,,"report,app,app_category,app_technology,src,dst,src_country,dst_country,src_zone,dst_zone,rule"
+pan_firewall.report.top.bytes_per_session,gauge,,byte,,Average traffic per session (derived).,0,palo_alto_networks_firewall,report top bytes per session,,"report,app,app_category,app_technology,src,dst,src_country,dst_country,src_zone,dst_zone,rule"
+pan_firewall.report.top.sessions,gauge,,session,,Sessions in the last 24 h.,0,palo_alto_networks_firewall,report top sessions,,"report,app,app_category,app_technology,src,dst,src_country,dst_country,src_zone,dst_zone,rule"
 pan_firewall.security_rule.hits,count,,hit,,Hits per security rule.,0,palo_alto_networks_firewall,security rule hits,,"rule,vsys"
 pan_firewall.temperature.alarm,gauge,,,,"Whether the temperature sensor is in alarm (1 = in alarm, 0 = not in alarm).",-1,palo_alto_networks_firewall,temperature alarm,,"sensor,slot"
 pan_firewall.temperature.current,gauge,,degree celsius,,Current temperature.,0,palo_alto_networks_firewall,temperature current,,"sensor,slot"

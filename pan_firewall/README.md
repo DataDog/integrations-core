@@ -4,7 +4,7 @@
 
 Datadog's Palo Alto Networks Firewall Log integration allows customers to ingest, parse, and analyze Palo Alto Networks firewall logs. This log integration relies on the HTTPS log templating and forwarding capability provided by PAN OS, the operating system that runs in Palo Alto firewalls. PAN-OS allows customers to forward threat, traffic, authentication, and other important log events.
 
-The integration also collects metrics and Network Device Monitoring (NDM) device metadata from the PAN-OS XML API, either directly from each firewall or through Panorama discovery. The metrics cover system resources, sessions, interfaces, tunnels, routing, licenses, security rules, threat counts, and optional global counters and top-N reports. The firewalls appear in NDM with their serial number as device ID. If you also monitor the same firewalls with SNMP, they appear as separate devices, because the two sources use different device IDs.
+The integration also collects metrics and Network Device Monitoring (NDM) device metadata from the PAN-OS XML API, either directly from each firewall or through Panorama discovery. The metrics cover system resources, interfaces, tunnels, routing, licenses, security rules, threat counts, and optional global counters and top-N reports. The firewalls appear in NDM with their serial number as device ID. If you also monitor the same firewalls with SNMP, they appear as separate devices, because the two sources use different device IDs.
 
 ### Key use cases
 #### Respond to high severity threat events
@@ -14,7 +14,7 @@ Firewall threat logs provide context on threats detected by a firewall, which ca
 Firewall traffic logs can be used to measure the traffic and sessions passing through a firewall and also gives you the ability to monitor for anomalous throughput across firewall deployment.
 
 #### Monitor firewall health and capacity
-Resource, session, interface, tunnel, and license metrics show a firewall running out of capacity or a tunnel or routing peer going down, and threat counts by severity and action give you a metric view alongside the logs.
+Resource, interface, tunnel, and license metrics show a firewall running out of capacity or a tunnel or routing peer going down, and threat counts by severity and action give you a metric view alongside the logs.
 
 #### Monitor authentication anomalies
 Firewall authentication logs provide detailed information on users as they authenticate with Palo Alto Networks firewall. These logs can be used to monitor anomalous spikes in authentication traffic from specific protocols, users, locations, and more.
@@ -33,7 +33,7 @@ The `pan_firewall` check polls the PAN-OS XML API of each firewall, either from 
 2. Go to **Device > Administrators** and add an account that uses this role, with a password or an API key.
 3. Commit the changes.
 
-For Panorama discovery, create an admin role on Panorama that allows **Operational Requests** in the XML API tab. The same credentials, or the credentials selected through `firewall_credentials`, are then used to poll the discovered firewalls, so the firewall accounts need the role described above.
+For Panorama discovery, create an admin role on Panorama that allows **Operational Requests** in the XML API tab. The Agent does not poll the discovered firewalls with the Panorama credentials. It polls each one with the `firewall_credentials` entry that matches the polled IP address, so those accounts need the role described above.
 
 #### Network reach
 
@@ -97,14 +97,12 @@ instances:
       include:
         - 192.0.2.0/24
     firewall_ip_overrides:
-      "012345678901": 198.51.100.30
+      "012345678901": 192.0.2.30
     firewall_credentials:
       - username: <USERNAME>
         password: <PASSWORD>
     tls_verify: false
 ```
-
-Panorama discovery was tested against Panorama 11.2.15 managing VM-Series firewalls only. Panorama-managed HA pairs and firewalls behind NAT were not tested.
 
 #### Namespace
 
@@ -116,7 +114,7 @@ Each firewall receives about 265 API requests per hour with the default options,
 
 #### Commit skipping
 
-While a commit or a content update (Commit, AutoCom, Content, Antivirus, or WildFire job) is running or queued on a firewall, the Agent skips collection for that firewall and resumes on the next run after the job ends.
+While a commit or a content update (Commit, AutoCom, Content, Antivirus, or WildFire job) is running or queued on a firewall, the Agent skips collection for that firewall and resumes on the next run after the job ends. Skipping is capped at 10 minutes: if a job is still running after that, the Agent collects anyway and logs a warning.
 
 ### Log collection
 
@@ -166,6 +164,8 @@ While a commit or a content update (Commit, AutoCom, Content, Antivirus, or Wild
 
 See [metadata.csv][12] for the list of metrics that the `pan_firewall` check collects, with their types and tags. Every metric carries the `device_vendor:paloaltonetworks` tag and tags that identify the firewall by serial number and IP address.
 
+Counters such as `pan_firewall.counter.global` and `pan_firewall.security_rule.hits` are monotonic counts. The Agent needs two samples to report the first value, so they appear 3 to 6 minutes after it starts. Gauges appear on the first run of their collector.
+
 #### Global counters
 
 With `collect_global_counters: true`, the check collects 26 PAN-OS global counters. Each one is sent as `pan_firewall.counter.global` with its counter name, category, and aspect as tags, and a counter that the firewall does not list is sent as 0. The check also sums the counters that PAN-OS classifies as drops into a per-aspect dropped packet metric.
@@ -201,7 +201,7 @@ With `collect_global_counters: true`, the check collects 26 PAN-OS global counte
 
 #### Reports
 
-With `collect_reports: true`, the check runs 10 top-N reports every 30 minutes and keeps the top `report_top_n` entries (10 by default) of each:
+With `collect_reports: true`, the check runs 10 top-N reports every 30 minutes and keeps the top `report_top_n` entries (10 by default) of each. These are custom dynamic reports over the last 24 hours. The Agent drops a report job that is still running after it carried the job over 3 times, and submits the next report:
 
 - Top applications
 - Top application categories
@@ -249,7 +249,7 @@ Additional helpful documentation, links, and articles:
 - If a reboot or an HA failover resets the threat log sequence number, up to about 35 minutes of threat logs may not be counted.
 - TLS settings apply per instance. Put firewalls with a different certificate setup in a separate instance.
 - Perpetual licenses report `license.expired` as 0 and no `license.days_left`.
-- Panorama discovery was tested against Panorama 11.2.15 with VM-Series firewalls only. HA pairs and NAT'd firewalls were not tested.
+- Panorama discovery was tested live against Panorama 11.2.15 managing 2 VM-Series firewalls. Panorama-managed HA pairs and firewalls behind NAT were not tested.
 
 ## Troubleshooting
 
@@ -266,7 +266,6 @@ Need help? Contact [Datadog support][7].
 [6]: https://docs.datadoghq.com/logs/log_collection/?tab=tailexistingfiles#getting-started-with-the-agent
 [7]: https://docs.datadoghq.com/help/
 [8]: https://docs.paloaltonetworks.com/pan-os/10-1/pan-os-admin/monitoring/use-syslog-for-monitoring/syslog-field-descriptions
-[9]: https://docs.datadoghq.com/network_monitoring/devices/supported_devices/
 [10]: https://docs.datadoghq.com/agent/logs/
 [11]: https://github.com/DataDog/integrations-core/blob/master/pan_firewall/datadog_checks/pan_firewall/data/conf.yaml.example
 [12]: https://github.com/DataDog/integrations-core/blob/master/pan_firewall/metadata.csv

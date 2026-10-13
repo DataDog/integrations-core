@@ -45,6 +45,7 @@ files:
         Filters for the firewalls discovered through Panorama. Entries are IP addresses or CIDR blocks.
         If no filters are configured, all connected firewalls are polled.
         Use `include` to poll only matching firewalls and `exclude` to skip them. `exclude` takes precedence.
+        The filters apply to the IP address the Agent polls, so a `firewall_ip_overrides` address is filtered too.
       value:
         type: object
         properties:
@@ -236,7 +237,7 @@ files:
         example: false
     - name: collect_reports
       fleet_configurable: true
-      description: Set to `true` to collect the PAN-OS predefined reports.
+      description: Set to `true` to collect the 10 top-N traffic reports (custom dynamic reports over the last 24 hours).
       value:
         type: boolean
         default: false
