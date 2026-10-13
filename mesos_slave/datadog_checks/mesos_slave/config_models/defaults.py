@@ -56,6 +56,10 @@ def instance_master_port():
     return 5050
 
 
+def instance_max_line_size():
+    return 4096
+
+
 def instance_min_collection_interval():
     return 15
 

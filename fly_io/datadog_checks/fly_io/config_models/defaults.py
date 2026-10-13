@@ -80,6 +80,10 @@ def instance_match_string():
     return '{__name__=~".+"}'
 
 
+def instance_max_line_size():
+    return 4096
+
+
 def instance_min_collection_interval():
     return 15
 

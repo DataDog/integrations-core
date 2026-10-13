@@ -92,6 +92,10 @@ def instance_management_api_url():
     return 'http://localhost:8081'
 
 
+def instance_max_line_size():
+    return 4096
+
+
 def instance_min_collection_interval():
     return 15
 

@@ -60,6 +60,10 @@ def instance_max_dbs_per_check():
     return 50
 
 
+def instance_max_line_size():
+    return 4096
+
+
 def instance_max_nodes_per_check():
     return 20
 

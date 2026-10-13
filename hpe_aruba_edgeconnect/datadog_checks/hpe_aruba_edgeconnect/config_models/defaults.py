@@ -56,6 +56,10 @@ def instance_max_concurrency():
     return 50
 
 
+def instance_max_line_size():
+    return 4096
+
+
 def instance_min_collection_interval():
     return 60
 

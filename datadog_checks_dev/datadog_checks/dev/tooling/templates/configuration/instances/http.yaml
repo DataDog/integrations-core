@@ -417,6 +417,16 @@
   value:
     example: 16
     type: number
+- name: max_line_size
+  display_priority: 0
+  description: |
+    The maximum size in kibibytes (KiB) of a line when a streaming HTTP response is read line by line,
+    as OpenMetrics checks do. A longer line fails the check run instead of being buffered in memory.
+    The value must be greater than 0.
+  fleet_configurable: true
+  value:
+    example: 4096
+    type: number
 - name: log_requests
   display_priority: 0
   fleet_configurable: true

@@ -72,6 +72,10 @@ def instance_log_requests():
     return False
 
 
+def instance_max_line_size():
+    return 4096
+
+
 def instance_metricsservlet_path():
     return '/metrics/json'
 
