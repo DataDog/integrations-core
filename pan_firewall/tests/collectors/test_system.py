@@ -16,11 +16,10 @@ from datadog_checks.pan_firewall.collectors.system import (
 from datadog_checks.pan_firewall.constants import COLLECTORS
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from ..common import FIXTURES
+from ..common import FIXTURES, FW_A_TAGS, SYNTHETIC
 from ..fixture_map import op_fixture
-from ..test_check import FW_A_TAGS, new_check
+from ..helpers import new_check
 
-SYNTHETIC = FIXTURES / 'synthetic'
 MIB = 1024**2
 
 CPU_STATES = ('user', 'system', 'nice', 'idle', 'iowait', 'hardirq', 'softirq', 'steal')

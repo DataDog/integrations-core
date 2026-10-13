@@ -5,16 +5,13 @@ import logging
 
 import pytest
 
-from datadog_checks.pan_firewall import poller
 from datadog_checks.pan_firewall.collectors.jobs import JOBS_PENDING_CMD, parse_busy_jobs
-from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from ..common import FIXTURES
+from ..common import FIXTURES, FW_A_IP, STUBS, SYNTHETIC
 from ..fake_panos import FAILURES, NO_CAPTURE
-from ..test_check import FW_A_IP, STUBS, can_connect_by_ip, new_check, register_stubs, stub_runs
+from ..helpers import can_connect_by_ip, needs_capture, new_check, register_stubs, stub_runs
 
-SYNTHETIC = FIXTURES / 'synthetic'
 L10_IDLE = FIXTURES / 'l10' / 'jobs_pending_idle.xml'
 
 
@@ -53,25 +50,16 @@ def test_jobs_that_do_not_pause_collection(name):
     assert parse_busy_jobs(parse_response((SYNTHETIC / name).read_bytes())) == []
 
 
-@pytest.mark.skipif(not L10_IDLE.is_file(), reason='L10 capture missing: tests/fixtures/l10/jobs_pending_idle.xml')
+@needs_capture('l10/jobs_pending_idle.xml', 'L10')
 def test_idle_capture_is_not_busy():
     assert parse_busy_jobs(parse_response(L10_IDLE.read_bytes())) == []
-
-
-class FakeClock:
-    def __init__(self) -> None:
-        self.now = 1000.0
-
-    def __call__(self) -> float:
-        return self.now
 
 
 class Firewall:
     """fw-a with its identity cached and the stub collectors due, run at chosen times of a fake clock."""
 
-    def __init__(self, dd_run_check, aggregator, fake_panos, caplog, monkeypatch):
-        self.clock = FakeClock()
-        monkeypatch.setattr(poller, 'FirewallSchedule', lambda: FirewallSchedule(self.clock))
+    def __init__(self, dd_run_check, aggregator, fake_panos, caplog, monkeypatch, clock):
+        self.clock = clock
         self.check = new_check()
         dd_run_check(self.check)
         register_stubs(monkeypatch)
@@ -96,9 +84,9 @@ class Firewall:
 
 
 @pytest.fixture
-def firewall(dd_run_check, aggregator, fake_panos, caplog, monkeypatch):
+def firewall(dd_run_check, aggregator, fake_panos, caplog, monkeypatch, schedule_clock):
     caplog.set_level(logging.DEBUG)
-    return Firewall(dd_run_check, aggregator, fake_panos, caplog, monkeypatch)
+    return Firewall(dd_run_check, aggregator, fake_panos, caplog, monkeypatch, schedule_clock)
 
 
 @pytest.mark.parametrize('name', ['jobs_pending_idle.xml', 'jobs_pending_not_busy.xml'])

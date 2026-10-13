@@ -10,7 +10,9 @@ import pytest
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev import docker_run, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.pan_firewall import poller as poller_module
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS
+from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 
 from .common import (
     CREDENTIALS,
@@ -24,6 +26,7 @@ from .common import (
     build_lab_instance,
 )
 from .fake_panos import FakePanos
+from .helpers import FakeClock
 
 COMPOSE_FILE = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
 
@@ -130,3 +133,11 @@ def only_test_collectors(request, monkeypatch):
     if 'real_collectors' not in request.fixturenames:
         for name in list(COLLECT_FUNCTIONS):
             monkeypatch.delitem(COLLECT_FUNCTIONS, name)
+
+
+@pytest.fixture
+def schedule_clock(monkeypatch) -> FakeClock:
+    """Run every poller's schedule on a fake clock; move time by setting the returned clock's `now`."""
+    clock = FakeClock()
+    monkeypatch.setattr(poller_module, 'FirewallSchedule', lambda: FirewallSchedule(clock))
+    return clock

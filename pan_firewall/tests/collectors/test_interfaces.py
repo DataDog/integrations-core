@@ -5,7 +5,6 @@ from unittest import mock
 
 import pytest
 
-from datadog_checks.pan_firewall import poller as poller_module
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectContext, FirewallState
 from datadog_checks.pan_firewall.collectors.interfaces import (
     COUNTER_INTERFACE_CMD,
@@ -13,14 +12,12 @@ from datadog_checks.pan_firewall.collectors.interfaces import (
     parse_interface_counters,
     parse_interface_speeds,
 )
-from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from ..common import FIXTURES
+from ..common import FIXTURES, FW_A_IP, FW_A_TAGS, INTERFACE_ALL_CMD, SYNTHETIC
 from ..fixture_map import op_fixture
-from ..test_check import FW_A_IP, FW_A_TAGS, INTERFACE_ALL_CMD, new_check
+from ..helpers import needs_capture, new_check
 
-SYNTHETIC = FIXTURES / 'synthetic'
 SERIAL = '007955000930601'
 COUNTER_FIELDS = {
     'ibytes': 'interface.rx.bytes',
@@ -257,16 +254,18 @@ def test_collector_makes_one_call_and_leaves_the_speeds_to_the_identity_step():
 
 
 def test_speeds_are_sent_every_30_minutes_with_the_identity_not_every_3(
-    dd_run_check, aggregator, fake_panos, monkeypatch
+    dd_run_check,
+    aggregator,
+    fake_panos,
+    monkeypatch,
+    schedule_clock,
 ):
-    now = [1000.0]
-    monkeypatch.setattr(poller_module, 'FirewallSchedule', lambda: FirewallSchedule(lambda: now[0]))
     fake_panos.answer_op(FW_A_IP, INTERFACE_ALL_CMD, (200, (SYNTHETIC / 'interface_all_speeds.xml').read_bytes()))
     check = new_check()
 
     sent = []
     for seconds in (0, 180, 1799, 1800):
-        now[0] = 1000.0 + seconds
+        schedule_clock.now = 1000.0 + seconds
         before = len(aggregator.metrics('pan_firewall.interface.speed'))
         dd_run_check(check)
         sent.append(len(aggregator.metrics('pan_firewall.interface.speed')) - before)
@@ -313,9 +312,7 @@ def test_interfaces_is_registered_and_submits_through_the_check(real_collectors,
 PA_3420 = FIXTURES / 'pa-3420'
 
 
-@pytest.mark.skipif(
-    not PA_3420.is_dir(), reason='Needs lab capture L8 (PA-3420 hardware): tests/fixtures/pa-3420/ missing'
-)
+@needs_capture('pa-3420', 'L8 (PA-3420 hardware)')
 def test_pa_3420_speeds_are_sent_in_bits_per_second():
     state = state_from(PA_3420 / 'interface_all.xml')
 

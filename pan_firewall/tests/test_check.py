@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import copy
 import logging
 import re
 import threading
@@ -10,80 +9,30 @@ import pytest
 
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.pan_firewall import PanFirewallCheck
-from datadog_checks.pan_firewall import poller as poller_module
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, Sample, once_log, warn_once
 from datadog_checks.pan_firewall.collectors.jobs import JOBS_PENDING_CMD
 from datadog_checks.pan_firewall.errors import PanosApiError, PanosTimeout
 from datadog_checks.pan_firewall.poller import FirewallPoller
-from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 
-from .common import CREDENTIALS
-from .fake_panos import FAILURES, FIREWALL_SETS
-
-FW_A_IP = '192.0.2.10'
-FW_B_IP = '192.0.2.11'
-FW_C_IP = '192.0.2.12'
-FW_A_SERIAL = '007955000930601'
-FW_B_SERIAL = '007955000930602'
-STUBS = ('bgp', 'dataplane', 'interfaces', 'system_resources')
-SYSTEM_INFO_CMD = '<show><system><info/></system></show>'
-INTERFACE_ALL_CMD = '<show><interface>all</interface></show>'
-
-BASE_TAGS = [f'device_ip:{FW_A_IP}', 'device_namespace:default', 'device_vendor:paloaltonetworks', 'team:test']
-FW_A_TAGS = sorted(
-    [
-        *BASE_TAGS,
-        f'device_id:{FW_A_SERIAL}',
-        'device_hostname:fw-a',
-        f'device_serial:{FW_A_SERIAL}',
-        'device_model:PA-VM',
-        'device_family:vm',
-        'os_version:11.1.13-h12',
-        'multi_vsys:false',
-        'advanced_routing:false',
-        f'dd.internal.resource:ndm_device:{FW_A_SERIAL}',
-        f'dd.internal.resource:ndm_device_user_tags:{FW_A_SERIAL}',
-    ]
+from .common import (
+    BASE_TAGS,
+    FW_A_IP,
+    FW_A_SERIAL,
+    FW_A_TAGS,
+    FW_B_IP,
+    FW_B_SERIAL,
+    FW_C_IP,
+    INTERFACE_ALL_CMD,
+    STUBS,
+    SYSTEM_INFO_CMD,
 )
-
-
-def make_instance(ip=FW_A_IP, **options):
-    return {'firewalls': [ip], 'firewall_credentials': copy.deepcopy(CREDENTIALS), 'tags': ['team:test'], **options}
-
-
-def new_check(instance=None):
-    return PanFirewallCheck('pan_firewall', {}, [instance or make_instance()])
+from .fake_panos import FAILURES, FIREWALL_SETS
+from .helpers import can_connect_by_ip, make_instance, new_check, register_stubs, stub_runs, stub_sample
 
 
 def only_value_and_tags(aggregator, name):
     (metric,) = aggregator.metrics(f'pan_firewall.{name}')
     return metric.value, sorted(metric.tags)
-
-
-def stub_sample(name):
-    return Sample('stub', 1, (f'collector:{name}',), 'gauge')
-
-
-def register_stubs(monkeypatch, **overrides):
-    """Register a stub for each name in STUBS that submits `pan_firewall.stub` tagged `collector:<name>`."""
-    for name in STUBS:
-        monkeypatch.setitem(COLLECT_FUNCTIONS, name, overrides.get(name, lambda ctx, name=name: [stub_sample(name)]))
-
-
-def stub_runs(aggregator):
-    """The (device_ip, collector) pairs that submitted a stub sample."""
-    runs = set()
-    for metric in aggregator.metrics('pan_firewall.stub'):
-        tags = dict(tag.split(':', 1) for tag in metric.tags if tag.startswith(('device_ip:', 'collector:')))
-        runs.add((tags['device_ip'], tags['collector']))
-    return runs
-
-
-def can_connect_by_ip(aggregator):
-    return {
-        next(t.split(':', 1)[1] for t in m.tags if t.startswith('device_ip:')): m.value
-        for m in aggregator.metrics('pan_firewall.can_connect')
-    }
 
 
 def test_good_run_collects_identity_and_reports_connected(dd_run_check, aggregator, fake_panos, caplog):
@@ -465,10 +414,12 @@ def test_system_info_without_serial_keeps_the_cached_identity(dd_run_check, aggr
 
 
 def test_static_firewall_replaced_at_the_same_ip_is_tagged_and_tracked_as_the_new_unit(
-    dd_run_check, aggregator, real_collectors, monkeypatch
+    dd_run_check,
+    aggregator,
+    real_collectors,
+    monkeypatch,
+    schedule_clock,
 ):
-    now = [1000.0]
-    monkeypatch.setattr(poller_module, 'FirewallSchedule', lambda: FirewallSchedule(lambda: now[0]))
     watermark_reads = []
     read_cache = PanFirewallCheck.read_persistent_cache
     monkeypatch.setattr(
@@ -482,7 +433,7 @@ def test_static_firewall_replaced_at_the_same_ip_is_tagged_and_tracked_as_the_ne
     old_state.warned.add('left over from the old unit')
     # The unit is swapped for another one that answers at the same IP; the identity is due again after 30 minutes.
     monkeypatch.setitem(FIREWALL_SETS, FW_A_IP, 'fw-b')
-    now[0] += 1800
+    schedule_clock.now += 1800
     aggregator.reset()
     watermark_reads.clear()
 
@@ -498,18 +449,18 @@ def test_static_firewall_replaced_at_the_same_ip_is_tagged_and_tracked_as_the_ne
     assert f'threat_watermark:{FW_A_SERIAL}' not in watermark_reads
 
 
-def test_identity_is_read_again_on_the_next_run_after_the_key_is_regenerated(dd_run_check, fake_panos, monkeypatch):
-    now = [1000.0]
-    monkeypatch.setattr(poller_module, 'FirewallSchedule', lambda: FirewallSchedule(lambda: now[0]))
+def test_identity_is_read_again_on_the_next_run_after_the_key_is_regenerated(
+    dd_run_check, fake_panos, monkeypatch, schedule_clock
+):
     monkeypatch.setitem(COLLECT_FUNCTIONS, 'bgp', lambda ctx: [])
     check = new_check()
     dd_run_check(check)
     # A due collector makes the calls that the firewall now rejects, the key it just regenerated included.
     fake_panos.fail(FW_A_IP, 'http_403', on='api')
-    now[0] += 120
+    schedule_clock.now += 120
     dd_run_check(check)
     fake_panos.recover(FW_A_IP)
-    now[0] += 120
+    schedule_clock.now += 120
     calls_before = len(fake_panos.calls)
 
     dd_run_check(check)

@@ -10,11 +10,9 @@ from datadog_checks.pan_firewall.collectors.counters import GLOBAL_COUNTER_CMD, 
 from datadog_checks.pan_firewall.constants import DROPPED_PACKET_ASPECTS, GLOBAL_COUNTERS
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from ..common import FIXTURES
+from ..common import FW_A_TAGS, SYNTHETIC
 from ..fixture_map import op_fixture
-from ..test_check import FW_A_TAGS, make_instance, new_check
-
-SYNTHETIC = FIXTURES / 'synthetic'
+from ..helpers import make_instance, new_check
 
 # The 26 counters, with the values of each capture (0 for a counter the capture doesn't list) and the category and
 # aspect they are tagged with when the capture lists them (otherwise the table's).

@@ -14,11 +14,10 @@ from datadog_checks.pan_firewall.errors import PanosApiError
 from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 from datadog_checks.pan_firewall.xml_utils import num, parse_response, text
 
-from .collectors.test_threats import ACT, log_page
-from .common import CREDENTIALS, FIXTURES
+from .common import CREDENTIALS, FIXTURES, SYSTEM_INFO_CMD
+from .fake_panos import FIREWALL_SETS
 from .fixture_map import OP_FIXTURES, PARTIAL_OP_FIXTURES, THREAT_LOG_FIRST_SEQNO, op_fixture
-
-SYSTEM_INFO_CMD = '<show><system><info/></system></show>'
+from .helpers import THREAT_LOG_ACT, log_page
 
 # Patterns that mean a credential value was captured. The bare word "password" is not one of them: real fixtures
 # legitimately contain `<password-set>no</password-set>` and threat names such as "/etc/passwd Access Attempt".
@@ -118,7 +117,7 @@ def test_fixtures_hold_no_secrets():
     assert leaks == []
 
 
-FIREWALLS = {'fw-a': '192.0.2.10', 'fw-b': '192.0.2.11'}
+FIREWALLS = {name: ip for ip, name in FIREWALL_SETS.items()}
 
 GAUGE = 'gauge'
 MONOTONIC = 'monotonic_count'
@@ -300,16 +299,18 @@ def test_runs_at_0_180_and_300_seconds_submit_every_lab_available_p0_metric(
 
 
 def test_tunnel_counters_arrive_on_the_second_interface_run_with_full_tags(
-    dd_run_check, aggregator, real_collectors, monkeypatch
+    dd_run_check,
+    aggregator,
+    real_collectors,
+    monkeypatch,
+    schedule_clock,
 ):
-    now = [1000.0]
-    monkeypatch.setattr(poller_module, 'FirewallSchedule', lambda: FirewallSchedule(lambda: now[0]))
     check = new_static_check()
 
     dd_run_check(check)
     for ip in FIREWALLS.values():
         assert not {name for name, _ in metrics_of(aggregator, ip)} & TUNNEL_COUNTERS.keys()
-    now[0] += 180
+    schedule_clock.now += 180
     dd_run_check(check)
 
     for ip in FIREWALLS.values():
@@ -343,24 +344,26 @@ def test_each_run_makes_only_the_requests_that_are_due(
 
 
 def test_a_threat_job_still_running_is_polled_again_on_the_next_run_not_in_5_minutes(
-    dd_run_check, fake_panos, real_collectors, monkeypatch
+    dd_run_check,
+    fake_panos,
+    real_collectors,
+    monkeypatch,
+    schedule_clock,
 ):
     monkeypatch.setattr(constants, 'THREAT_JOB_POLLS', 1)
     monkeypatch.setattr(constants, 'THREAT_JOB_POLL_DELAY', 0)
-    now = [1000.0]
-    monkeypatch.setattr(poller_module, 'FirewallSchedule', lambda: FirewallSchedule(lambda: now[0]))
     ip = FIREWALLS['fw-a']
-    fake_panos.answer_log(ip, 'backward', None, 0, ACT, log_page([1]))
+    fake_panos.answer_log(ip, 'backward', None, 0, THREAT_LOG_ACT, log_page([1]))
     check = new_static_check()
     dd_run_check(check)
 
-    now[0] += 60
+    schedule_clock.now += 60
     before = len(fake_panos.calls)
     dd_run_check(check)
     assert call_labels(fake_panos, ip, before) == {'jobs': 1, 'threats': 1}
 
     # The job finished: the collector is on its 5-minute interval again.
-    now[0] += 60
+    schedule_clock.now += 60
     before = len(fake_panos.calls)
     dd_run_check(check)
     assert 'threats' not in call_labels(fake_panos, ip, before)

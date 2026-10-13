@@ -6,18 +6,12 @@ import pytest
 from datadog_checks.pan_firewall.constants import COLLECTORS, INTERVALS
 from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 
+from .helpers import FakeClock
+
 TIER_2M = ['bgp', 'dataplane']
 TIER_3M = ['interfaces', 'system_resources', 'vpn', 'ha', 'rule_hits', 'global_counters', 'ospf']
 TIER_5M = ['environment', 'threats']
 TIER_30M = ['disk', 'identity_metadata', 'reports']
-
-
-class FakeClock:
-    def __init__(self):
-        self.now = 1000.0
-
-    def __call__(self) -> float:
-        return self.now
 
 
 @pytest.fixture

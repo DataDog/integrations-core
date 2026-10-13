@@ -9,9 +9,9 @@ from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectCon
 from datadog_checks.pan_firewall.collectors.system import ENVIRONMENTALS_CMD, collect_environment, parse_environmentals
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from ..common import FIXTURES
+from ..common import FIXTURES, FW_A_IP, FW_A_TAGS
 from ..fixture_map import op_fixture
-from ..test_check import FW_A_IP, FW_A_TAGS, new_check
+from ..helpers import needs_capture, new_check
 
 HARDWARE = FIXTURES / 'synthetic' / 'environmentals_hw.xml'
 
@@ -136,9 +136,7 @@ def test_environment_is_registered_and_submits_through_the_check(real_collectors
 # When it lands, fix the field names in `parse_environmentals` if they differ, and delete the synthetic
 # `environmentals_hw.xml` fixture together with the tests that use it once these pass.
 PA_3420 = FIXTURES / 'pa-3420'
-needs_pa_3420 = pytest.mark.skipif(
-    not PA_3420.is_dir(), reason='Needs lab capture L8 (PA-3420 hardware): tests/fixtures/pa-3420/ missing'
-)
+needs_pa_3420 = needs_capture('pa-3420', 'L8 (PA-3420 hardware)')
 
 
 @needs_pa_3420

@@ -6,7 +6,7 @@ import logging
 import pytest
 
 from .common import build_lab_instance, e2e_addresses
-from .test_check import new_check
+from .helpers import new_check
 
 PASSWORD = 'lab-password-must-not-leak'
 PANORAMA_PASSWORD = 'panorama-password-must-not-leak'

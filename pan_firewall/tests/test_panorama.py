@@ -25,6 +25,7 @@ from .common import (
     LAB_USERNAME_VAR,
     build_lab_instance,
 )
+from .helpers import metrics_by_ip
 
 PANORAMA = 'panorama.example.com'
 DISCOVERY_CMD = '<show><devices><connected/></devices></show>'
@@ -68,13 +69,6 @@ def devices_xml(*entries):
 def polled_hosts(fake_panos, skip=0):
     """The firewall hosts (not Panorama) contacted after the first `skip` calls."""
     return {c.host for c in fake_panos.calls[skip:] if c.host != PANORAMA}
-
-
-def metrics_by_ip(aggregator, name):
-    return {
-        next(t.split(':', 1)[1] for t in m.tags if t.startswith('device_ip:')): m
-        for m in aggregator.metrics(f'pan_firewall.{name}')
-    }
 
 
 def panorama_can_connect(aggregator):

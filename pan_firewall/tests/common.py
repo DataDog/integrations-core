@@ -10,8 +10,37 @@ from typing import Any
 import pytest
 
 FIXTURES = Path(__file__).parent / 'fixtures'
+SYNTHETIC = FIXTURES / 'synthetic'
 
 CREDENTIALS = [{'username': 'dummy-user', 'password': 'dummy-password'}]
+
+# The unit fake's firewalls (`fake_panos.FIREWALL_SETS`); FW_C_IP answers nothing.
+FW_A_IP = '192.0.2.10'
+FW_B_IP = '192.0.2.11'
+FW_C_IP = '192.0.2.12'
+FW_A_SERIAL = '007955000930601'
+FW_B_SERIAL = '007955000930602'
+SYSTEM_INFO_CMD = '<show><system><info/></system></show>'
+INTERFACE_ALL_CMD = '<show><interface>all</interface></show>'
+# The collectors `helpers.register_stubs` replaces with stubs.
+STUBS = ('bgp', 'dataplane', 'interfaces', 'system_resources')
+
+BASE_TAGS = [f'device_ip:{FW_A_IP}', 'device_namespace:default', 'device_vendor:paloaltonetworks', 'team:test']
+FW_A_TAGS = sorted(
+    [
+        *BASE_TAGS,
+        f'device_id:{FW_A_SERIAL}',
+        'device_hostname:fw-a',
+        f'device_serial:{FW_A_SERIAL}',
+        'device_model:PA-VM',
+        'device_family:vm',
+        'os_version:11.1.13-h12',
+        'multi_vsys:false',
+        'advanced_routing:false',
+        f'dd.internal.resource:ndm_device:{FW_A_SERIAL}',
+        f'dd.internal.resource:ndm_device_user_tags:{FW_A_SERIAL}',
+    ]
+)
 
 STATIC_INSTANCE = {
     'firewalls': ['192.0.2.10'],

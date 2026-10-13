@@ -10,8 +10,9 @@ from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectCon
 from datadog_checks.pan_firewall.collectors.licenses import LICENSE_INFO_CMD, collect_licenses, parse_licenses
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
+from ..common import FW_A_TAGS
 from ..fixture_map import op_fixture
-from ..test_check import FW_A_TAGS, new_check
+from ..helpers import new_check
 
 TODAY = datetime.date(2026, 10, 9)
 FEATURES = {

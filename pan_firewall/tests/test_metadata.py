@@ -6,19 +6,17 @@ from xml.etree import ElementTree as ET
 
 import pytest
 
-from datadog_checks.pan_firewall import poller as poller_module
 from datadog_checks.pan_firewall.auth import Credentials
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, FirewallState
 from datadog_checks.pan_firewall.firewalls import FirewallTarget
 from datadog_checks.pan_firewall.identity import global_tags, parse_system_info
 from datadog_checks.pan_firewall.metadata import build_device, build_interfaces
 from datadog_checks.pan_firewall.ndm_models import batch_payloads
-from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from .common import FIXTURES
+from .common import FIXTURES, FW_A_IP, FW_A_SERIAL, INTERFACE_ALL_CMD, SYSTEM_INFO_CMD
 from .fake_panos import FIREWALL_SETS
-from .test_check import FW_A_IP, FW_A_SERIAL, INTERFACE_ALL_CMD, SYSTEM_INFO_CMD, make_instance, new_check
+from .helpers import make_instance, new_check
 
 EVENT_TYPE = 'network-devices-metadata'
 FW_A_STATIC_IP = '198.51.100.7'
@@ -209,34 +207,29 @@ def test_250_interfaces_are_sent_in_three_events(dd_run_check, aggregator, fake_
     assert all(e['namespace'] == 'default' and e['collect_timestamp'] for e in sent)
 
 
-@pytest.fixture
-def clock(monkeypatch):
-    now = [1000.0]
-    monkeypatch.setattr(poller_module, 'FirewallSchedule', lambda: FirewallSchedule(lambda: now[0]))
-    return now
-
-
-def test_metadata_is_sent_every_30_minutes(dd_run_check, aggregator, clock):
+def test_metadata_is_sent_every_30_minutes(dd_run_check, aggregator, schedule_clock):
     check = new_check()
     dd_run_check(check)
     assert len(events(aggregator)) == 1
 
-    clock[0] += 1799
+    schedule_clock.now += 1799
     dd_run_check(check)
     assert len(events(aggregator)) == 1
 
-    clock[0] += 1
+    schedule_clock.now += 1
     dd_run_check(check)
     assert len(events(aggregator)) == 2
 
 
-def test_metadata_is_sent_at_once_when_can_connect_flips(dd_run_check, aggregator, fake_panos, clock, monkeypatch):
+def test_metadata_is_sent_at_once_when_can_connect_flips(
+    dd_run_check, aggregator, fake_panos, schedule_clock, monkeypatch
+):
     # A due collector makes the calls that find the firewall down, well inside the 30 minutes.
     monkeypatch.setitem(COLLECT_FUNCTIONS, 'bgp', lambda ctx: [])
     check = new_check()
     dd_run_check(check)
     fake_panos.fail(FW_A_IP, 'refused')
-    clock[0] += 120
+    schedule_clock.now += 120
 
     dd_run_check(check)
 
@@ -244,16 +237,16 @@ def test_metadata_is_sent_at_once_when_can_connect_flips(dd_run_check, aggregato
 
 
 def test_metadata_is_sent_at_once_when_the_firewall_comes_back(
-    dd_run_check, aggregator, fake_panos, clock, monkeypatch
+    dd_run_check, aggregator, fake_panos, schedule_clock, monkeypatch
 ):
     monkeypatch.setitem(COLLECT_FUNCTIONS, 'bgp', lambda ctx: [])
     check = new_check()
     dd_run_check(check)
     fake_panos.fail(FW_A_IP, 'refused')
-    clock[0] += 120
+    schedule_clock.now += 120
     dd_run_check(check)
     fake_panos.recover(FW_A_IP)
-    clock[0] += 120
+    schedule_clock.now += 120
 
     dd_run_check(check)
 

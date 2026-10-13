@@ -137,7 +137,7 @@ class FakePanos:
         )
         if isinstance(answer, Exception):
             raise answer
-        return _response(url, *answer)
+        return response(url, *answer)
 
     def _answer(self, host: str, data: dict[str, str]) -> Answer:
         if data.get('type') == 'keygen':
@@ -226,7 +226,7 @@ class FakePanos:
         return (200, body) if isinstance(body, bytes) else body
 
 
-def _response(url: str, status: int, body: bytes) -> requests.Response:
+def response(url: str, status: int, body: bytes) -> requests.Response:
     resp = requests.Response()
     resp.status_code = status
     resp.raw = io.BytesIO(body)

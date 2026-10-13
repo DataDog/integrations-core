@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import copy
 import json
 from collections import Counter
 from types import SimpleNamespace
@@ -18,7 +17,7 @@ from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectCon
 from datadog_checks.pan_firewall.collectors.threats import collect_threats
 from datadog_checks.pan_firewall.errors import PanosApiError
 
-from ..common import FIXTURES
+from ..common import FIXTURES, FW_A_IP, FW_A_SERIAL, FW_A_TAGS, SYNTHETIC
 from ..fixture_map import (
     BACKWARD_NEWEST_SEQNO,
     PROBE_SEQNO_PAGE_SIZE,
@@ -27,16 +26,15 @@ from ..fixture_map import (
     THREAT_LOG_FIRST_SEQNO,
     seqno_query,
 )
-from ..test_check import FW_A_IP, FW_A_SERIAL, FW_A_TAGS, make_instance, new_check
+from ..helpers import THREAT_LOG_ACT as ACT
+from ..helpers import THREAT_LOG_CLOCK_BACK as CLOCK_BACK
+from ..helpers import FakeClock, log_page, make_instance, new_check
 
-SYNTHETIC = FIXTURES / 'synthetic'
 CACHE_KEY = f'threat_watermark:{FW_A_SERIAL}'
 FW_A_LAST_SEQNO = 7691899338913481002
 PROBE_LAST_SEQNO = 7691899338913582049
 PROBE_ENTRIES = 19 * PROBE_SEQNO_PAGE_SIZE + 5
 EMPTY = (SYNTHETIC / 'threat_log_empty.xml').read_bytes()
-ACT = (SYNTHETIC / 'threat_log_act.xml').read_bytes()
-CLOCK_BACK = SYNTHETIC / 'threat_log_clock_back.xml'
 NEWEST_AFTER_RESET = SYNTHETIC / 'threat_log_newest_after_reset.xml'
 NO_CAPTURE = (200, b'<response status="error" code="400"><msg><line>no capture</line></msg></response>')
 # What fw-a's and fw-b's `threat_log_5m.xml` hold: (severity, action, subtype, vsys) -> logs. 39 logs each.
@@ -46,7 +44,6 @@ CAPTURE_COUNTS = {
     ('medium', 'reset-both', 'vulnerability', 'vsys1'): 8,
     ('medium', 'drop-packet', 'spyware', 'vsys1'): 1,
 }
-POLL_ENTRY = ET.parse(CLOCK_BACK).getroot().find('result/log/logs/entry')
 
 
 @pytest.fixture(autouse=True)
@@ -55,21 +52,13 @@ def fast_polling(monkeypatch):
     monkeypatch.setattr(constants, 'THREAT_JOB_POLL_DELAY', 0)
 
 
-class Clock:
-    def __init__(self, now=100_000.0):
-        self.now = now
-
-    def __call__(self):
-        return self.now
-
-
 class Context:
     """A firewall's threats collector as the poller runs it: a real client on the fake transport, and a cache."""
 
     def __init__(self, fake_panos, cache=None, clock=None, host=FW_A_IP):
         self.fake = fake_panos
         self.cache = {} if cache is None else cache
-        self.clock = clock or Clock()
+        self.clock = clock or FakeClock(100_000.0)
         self.host = host
         self.log = mock.Mock()
         self.restart()
@@ -125,21 +114,6 @@ def tags(severity, action, subtype, vsys):
 
 def expected(counts):
     return {('threat.count', tags(*key), 'count'): n for key, n in counts.items()}
-
-
-def log_page(seqnos, **fields):
-    """A finished log job of one entry per seqno, copied from a real entry of `synthetic/threat_log_clock_back.xml`."""
-    entries = []
-    for seqno in seqnos:
-        entry = copy.deepcopy(POLL_ENTRY)
-        entry.find('seqno').text = str(seqno)
-        for name, value in fields.items():
-            entry.find(name).text = value
-        entries.append(ET.tostring(entry, encoding='unicode'))
-    return (
-        '<response status="success"><result><job><status>FIN</status><id>1</id></job>'
-        f'<log><logs count="{len(entries)}" progress="100">{"".join(entries)}</logs></log></result></response>'
-    ).encode()
 
 
 def probe_counts():

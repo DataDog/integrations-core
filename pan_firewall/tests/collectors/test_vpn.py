@@ -6,15 +6,14 @@ from unittest import mock
 
 import pytest
 
-from datadog_checks.pan_firewall import poller as poller_module
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectContext, FirewallState
 from datadog_checks.pan_firewall.collectors.interfaces import COUNTER_INTERFACE_CMD, collect_interfaces
 from datadog_checks.pan_firewall.collectors.vpn import VPN_FLOW_CMD, VPN_GATEWAY_CMD, collect_vpn, parse_vpn
-from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
+from ..common import FW_A_TAGS
 from ..fixture_map import op_fixture
-from ..test_check import FW_A_TAGS, new_check
+from ..helpers import new_check
 
 
 def load(firewall, cmd):
@@ -189,10 +188,12 @@ def test_vpn_is_registered_and_submits_through_the_check(real_collectors, dd_run
 
 
 def test_tunnel_counters_wait_for_the_run_after_vpn_first_answers_whatever_the_collector_order(
-    real_collectors, dd_run_check, aggregator, monkeypatch
+    real_collectors,
+    dd_run_check,
+    aggregator,
+    monkeypatch,
+    schedule_clock,
 ):
-    now = [1000.0]
-    monkeypatch.setattr(poller_module, 'FirewallSchedule', lambda: FirewallSchedule(lambda: now[0]))
     # Force the ordering that used to leak: `interfaces` only starts once `vpn` has finished, on every run.
     vpn_done = threading.Event()
     real_vpn, real_interfaces = COLLECT_FUNCTIONS['vpn'], COLLECT_FUNCTIONS['interfaces']
@@ -214,7 +215,7 @@ def test_tunnel_counters_wait_for_the_run_after_vpn_first_answers_whatever_the_c
     dd_run_check(check)
     assert aggregator.metrics('pan_firewall.ipsec.tunnel.rx.bytes') == []
 
-    now[0] += 180
+    schedule_clock.now += 180
     dd_run_check(check)
     full_tags = sorted([*FW_A_TAGS, *tunnel_tags('tun-peer', 'tunnel.1', '10.60.1.11', 'gw-peer')])
     aggregator.assert_metric(

@@ -7,19 +7,16 @@ from unittest import mock
 import pytest
 
 from datadog_checks.pan_firewall import constants
-from datadog_checks.pan_firewall import poller as poller_module
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectContext, FirewallState
 from datadog_checks.pan_firewall.collectors.reports import collect_reports, parse_report, report_params
 from datadog_checks.pan_firewall.constants import REPORTS
 from datadog_checks.pan_firewall.errors import PanosApiError, PanosTimeout
-from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from ..common import FIXTURES
+from ..common import FW_A_TAGS, SYNTHETIC
 from ..fixture_map import find_report_fixture
-from ..test_check import FW_A_TAGS, make_instance, new_check
+from ..helpers import make_instance, new_check
 
-SYNTHETIC = FIXTURES / 'synthetic'
 PRIVATE = '10.0.0.0-10.255.255.255'
 
 # The rows (dimension value, sessions, bytes) of each capture's `report_custom_<field>.xml`, by report.
@@ -453,15 +450,8 @@ def report_calls(fake_panos):
     return [c for c in fake_panos.calls if c.type == 'report']
 
 
-@pytest.fixture
-def clock(monkeypatch):
-    now = [1000.0]
-    monkeypatch.setattr(poller_module, 'FirewallSchedule', lambda: FirewallSchedule(lambda: now[0]))
-    return now
-
-
 def test_slow_firewall_is_polled_every_run_until_all_reports_are_collected_then_every_30_minutes(
-    real_collectors, dd_run_check, aggregator, fake_panos, clock
+    real_collectors, dd_run_check, aggregator, fake_panos, schedule_clock
 ):
     act = SYNTHETIC / 'report_job_act.xml'
     for field, _tag in REPORTS.values():
@@ -472,7 +462,7 @@ def test_slow_firewall_is_polled_every_run_until_all_reports_are_collected_then_
     # One report per run (a job finishes at the first poll of the next run), 60 s apart, never 30 minutes.
     for _run in range(len(REPORTS) + 1):
         dd_run_check(check)
-        clock[0] += 60
+        schedule_clock.now += 60
 
     for name, rows in FW_A_ROWS.items():
         for (metric, tags), value in expected_samples(name, rows).items():

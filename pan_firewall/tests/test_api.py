@@ -1,7 +1,6 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import io
 import logging
 import threading
 from typing import Any
@@ -23,6 +22,7 @@ from datadog_checks.pan_firewall.api import (
 from datadog_checks.pan_firewall.auth import Credentials, KeyManager
 
 from .common import FIXTURES
+from .fake_panos import response
 from .fixture_map import op_fixture
 
 HOST = '192.0.2.10'
@@ -55,14 +55,6 @@ AUTH_FAILURES = [
 type Answer = tuple[int, bytes] | Exception | requests.Response
 
 
-def make_response(status: int, body: bytes) -> requests.Response:
-    resp = requests.Response()
-    resp.status_code = status
-    resp.raw = io.BytesIO(body)
-    resp.url = URL
-    return resp
-
-
 class FakeHttp:
     """Stands in for `RequestsWrapper`: records every `post` and answers keygen and API calls from two queues."""
 
@@ -79,7 +71,7 @@ class FakeHttp:
             raise answer
         if isinstance(answer, requests.Response):
             return answer
-        return make_response(*answer)
+        return response(URL, *answer)
 
     def calls_of(self, kind: str) -> list[dict[str, Any]]:
         return [c for c in self.calls if (c['data'].get('type') == 'keygen') == (kind == 'keygen')]
@@ -348,7 +340,7 @@ def test_stream_that_breaks_mid_way_makes_the_next_calls_fail_fast():
         def close(self):
             pass
 
-    resp = make_response(200, b'')
+    resp = response(URL, 200, b'')
     resp.raw = BrokenRaw()
     http = FakeHttp(api=[resp, (200, SYSTEM_INFO)])
     client, _ = make_client(http, STATIC_CREDS)
@@ -407,7 +399,7 @@ class ConcurrencyProbe:
         self.release.wait(timeout=5)
         with self.lock:
             self.in_flight -= 1
-        return make_response(200, SYSTEM_INFO)
+        return response(URL, 200, SYSTEM_INFO)
 
 
 def test_at_most_two_calls_in_flight():

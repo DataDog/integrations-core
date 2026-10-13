@@ -9,8 +9,9 @@ from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectCon
 from datadog_checks.pan_firewall.collectors.rules import collect_rule_hits, parse_rule_hits, rule_hit_cmd
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
+from ..common import FW_A_TAGS
 from ..fixture_map import OP_FIXTURES, op_fixture
-from ..test_check import FW_A_TAGS, new_check
+from ..helpers import new_check
 
 RULE_HIT_CMD = rule_hit_cmd('vsys1')
 HITS = {

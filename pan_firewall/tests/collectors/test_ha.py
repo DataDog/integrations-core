@@ -11,7 +11,7 @@ from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from ..common import FIXTURES
 from ..fixture_map import op_fixture
-from ..test_check import new_check
+from ..helpers import needs_capture, new_check
 
 ENABLED = FIXTURES / 'synthetic' / 'ha_all_enabled.xml'
 
@@ -77,9 +77,7 @@ HA_LINK_METRICS = {
     'ha.interface.tx.bytes',
     'ha.interface.tx.packets',
 }
-needs_ha_pair = pytest.mark.skipif(
-    not HA_PAIR.is_dir(), reason='Needs lab capture L1 (HA pair): tests/fixtures/ha-pair/ missing'
-)
+needs_ha_pair = needs_capture('ha-pair', 'L1 (HA pair)')
 
 
 @needs_ha_pair

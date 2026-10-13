@@ -17,11 +17,9 @@ from datadog_checks.pan_firewall.collectors.routing import (
 )
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from ..common import FIXTURES
+from ..common import FIXTURES, FW_A_TAGS, SYNTHETIC
 from ..fixture_map import op_fixture
-from ..test_check import FW_A_TAGS, make_instance, new_check
-
-SYNTHETIC = FIXTURES / 'synthetic'
+from ..helpers import make_instance, needs_capture, new_check
 
 
 def load(path):
@@ -284,7 +282,7 @@ def test_ospf_is_not_called_unless_enabled(options, real_collectors, dd_run_chec
 # Without them the collectors warn once and send no BGP/OSPF metrics; `parse_bgp_are` and `parse_ospf_are` are
 # implemented once L2 lands. They are imported inside the tests so that collecting this module does not fail meanwhile.
 ARE = FIXTURES / 'are'
-needs_are = pytest.mark.skipif(not ARE.is_dir(), reason='Needs lab capture L2 (ARE): tests/fixtures/are/ missing')
+needs_are = needs_capture('are', 'L2 (ARE)')
 
 
 def names_and_tag_keys(samples):
