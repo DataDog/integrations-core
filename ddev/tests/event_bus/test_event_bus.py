@@ -404,6 +404,7 @@ def test_default_on_error_with_default_policy_logs_and_continues(
     assert "finalize" in orchestrator.events
     assert orchestrator.finalized_exception is None
     assert "Analyst failed intentionally" in caplog.text
+    assert caplog.text.count("Error processing message by processor 'analyst'") == 1
 
 
 def test_default_on_error_with_fail_fast_stops_bus(secretary: Secretary, analyst: Analyst, manager: Manager):
@@ -533,6 +534,32 @@ def test_orchestrator_hook_failure_surfaces_under_fail_fast(
     assert str(exc_info.value.original_exception) == f"{hook_attr} boom"
     if secretary is not None:
         assert len(secretary.delivered_memos) == 0
+
+
+@pytest.mark.parametrize(
+    ("render", "expected_text"),
+    [
+        pytest.param(str, "Memo 'm-1'", id="message"),
+        pytest.param(
+            lambda message: MessageProcessingError("secretary", message, ValueError("boom")),
+            "Error processing message by processor 'secretary'. Message: Memo 'm-1'. Original error: boom",
+            id="message-processing-error",
+        ),
+        pytest.param(
+            lambda message: OrchestratorHookError(HookName.ON_MESSAGE_RECEIVED, ValueError("boom"), message),
+            "Error in 'on_message_received' orchestrator hook. Message: Memo 'm-1'. Original error: boom",
+            id="orchestrator-hook-error",
+        ),
+        pytest.param(
+            lambda message: ProcessorHookError(HookName.ON_SUCCESS, "secretary", message, ValueError("boom")),
+            "Error in 'on_success' hook for processor 'secretary'. Message: Memo 'm-1'. Original error: boom",
+            id="processor-hook-error",
+        ),
+    ],
+)
+def test_text_identifies_message_by_type_and_id(render: Callable[[Memo], object], expected_text: str):
+    """A message and the errors that wrap it name it by type and id, whatever its payload."""
+    assert str(render(Memo("m-1", content="payload" * 100))) == expected_text
 
 
 def test_initialization_failure_swallowed_under_default_policy(caplog: pytest.LogCaptureFixture):
@@ -1947,7 +1974,7 @@ def test_work_submitted_after_a_stop_request_is_reported_rather_than_lost(
         orchestrator.run()
 
     assert [message.id for message in requester.processed] == ["memo1"]
-    assert "Dropped Memo(after_stop)" in caplog.text
+    assert "Dropped Memo 'after_stop'" in caplog.text
 
 
 def test_a_processor_is_not_dispatched_to_after_a_stop_request(secretary: Secretary):

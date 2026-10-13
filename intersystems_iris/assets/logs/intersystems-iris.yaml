@@ -1,0 +1,172 @@
+id: intersystems-iris
+metric_id: intersystems-iris
+backend_only: false
+facets:
+  - groups:
+      - Event
+    name: IRIS Facility
+    path: iris.facility
+    source: log
+  - groups:
+      - Event
+    name: IRIS Severity
+    path: iris.severity
+    source: log
+  - groups:
+      - Event
+    name: IRIS Level
+    path: iris.level
+    source: log
+pipeline:
+  type: pipeline
+  name: InterSystems IRIS
+  enabled: true
+  filter:
+    query: source:intersystems-iris
+  processors:
+    - type: grok-parser
+      name: Parsing InterSystems IRIS messages.log
+      enabled: true
+      source: message
+      samples:
+        - "08/06/26-13:55:02:627 (103291) 1 [Generic.Event] ECP: connection from 'PRIMARY:IP-10-1-57-213:IRISAPP' dropped (127.0.0.1:60308)"
+        - "08/06/26-14:02:11:004 (44210) 2 [Utility.Event] License limit exceeded."
+        - "08/06/26-14:02:11:050 (44210) 3 [Utility.Event] LMF Error: No valid license key found."
+        - "08/07/26-00:30:00:075 (141266) 0 [Utility.Event] [MIRRORING] DELETE: /usr/irissys/mgr/journal/MIRROR-IRISLAB-20260804.001"
+        - "08/05/26-14:38:42:383 (23153) 0 [Database.StartExpansion] Starting Expansion for database /usr/irissys/mgr/iristemp/. 10 MB requested."
+      grok:
+        supportRules: ""
+        matchRules: |
+          iris_rule %{date("MM/dd/yy-HH:mm:ss:SSS"):iris.timestamp} \(%{integer:iris.pid}\) %{integer:iris.severity} \[%{notSpace:iris.facility}\] %{data:iris.message}
+    - type: grok-parser
+      name: Parsing the structured log timestamp
+      enabled: true
+      source: when
+      samples:
+        - "2019-08-07 14:11:04.904"
+      grok:
+        supportRules: ""
+        matchRules: |
+          iris_structured_date_rule %{date("yyyy-MM-dd HH:mm:ss.SSS"):iris.timestamp}
+    - type: grok-parser
+      name: Casting the structured log process ID to an integer
+      enabled: true
+      source: pid
+      samples:
+        - "8540"
+      grok:
+        supportRules: ""
+        matchRules: |
+          iris_structured_pid_rule %{integer:iris.pid}
+    - type: attribute-remapper
+      name: Map the structured log `event` to `iris.facility`
+      enabled: true
+      sources:
+        - event
+      sourceType: attribute
+      target: iris.facility
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map the structured log `text` to `iris.message`
+      enabled: true
+      sources:
+        - text
+      sourceType: attribute
+      target: iris.message
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map the structured log `level` to `iris.level`
+      enabled: true
+      sources:
+        - level
+      sourceType: attribute
+      target: iris.level
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map the structured log `namespace` to `iris.namespace`
+      enabled: true
+      sources:
+        - namespace
+      sourceType: attribute
+      target: iris.namespace
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map the structured log `instance` to `iris.instance`
+      enabled: true
+      sources:
+        - instance
+      sourceType: attribute
+      target: iris.instance
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map the structured log audit `source` to `iris.audit_source`
+      enabled: true
+      sources:
+        - source
+      sourceType: attribute
+      target: iris.audit_source
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: category-processor
+      name: Categorize IRIS severity into a log status
+      enabled: true
+      categories:
+        - filter:
+            query: "@iris.severity:0"
+          name: info
+        - filter:
+            query: "@iris.severity:1"
+          name: warning
+        - filter:
+            query: "@iris.severity:2"
+          name: error
+        - filter:
+            query: "@iris.severity:3"
+          name: critical
+      target: iris.status
+    - type: category-processor
+      name: Categorize the structured log level into a log status
+      enabled: true
+      categories:
+        - filter:
+            query: "@iris.level:(DEBUG OR DEBUG2)"
+          name: debug
+        - filter:
+            query: "@iris.level:INFO"
+          name: info
+        - filter:
+            query: "@iris.level:WARNING"
+          name: warning
+        - filter:
+            query: "@iris.level:SEVERE"
+          name: error
+        - filter:
+            query: "@iris.level:FATAL"
+          name: critical
+      target: iris.status
+    - type: status-remapper
+      name: Define `iris.status` as the official status of the log
+      enabled: true
+      sources:
+        - iris.status
+    - type: date-remapper
+      name: Define `iris.timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - iris.timestamp
+    - type: message-remapper
+      name: Define `iris.message` as the official message of the log
+      enabled: true
+      sources:
+        - iris.message

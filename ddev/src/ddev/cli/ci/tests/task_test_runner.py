@@ -21,7 +21,13 @@ from ddev.cli.ci.tests.dispatcher_attributes import batch_fields, job_fields, te
 from ddev.cli.ci.tests.execution_metrics import MetricsHelper, Operation
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchJobResult, BatchProgressUpdate, TestBatch
 from ddev.cli.ci.tests.progress import ExecutionState
-from ddev.cli.ci.tests.status import conclusion_to_status, has_started_running, is_queued
+from ddev.cli.ci.tests.status import (
+    Status,
+    batch_status,
+    has_started_running,
+    is_queued,
+    job_status,
+)
 from ddev.event_bus.exceptions import FatalProcessingError
 from ddev.event_bus.orchestrator import AsyncProcessor
 from ddev.monitoring import ComponentMonitor
@@ -29,6 +35,7 @@ from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import Artifact, WorkflowJob, WorkflowRun
 from ddev.utils.github_async.models.workflow import WorkflowJobStatus
 from ddev.utils.github_async.retry import SAFE_RETRY, on_status
+from ddev.utils.platform import PlatformName
 
 # A cancelled job has roughly ten seconds before it is killed, and there may be several runs to stop.
 # The retry policy bounds the ladder, not a socket, so a GitHub that accepts the connection and then
@@ -119,27 +126,33 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         self._artifact_client = artifact_client
         self._options = options
         self._runs_in_flight: dict[str, int] = {}
+        # Each batch's latest queued/running counts by platform, so the gauges can sum concurrent
+        # batches; a completed batch keeps its platforms at zero.
+        self._job_activity_by_batch: dict[str, dict[PlatformName, list[int]]] = {}
         self._queue_durations_reported: set[int] = set()
+        # Separate from `_queue_durations_reported`: a job can be seen starting but never finishing.
+        self._finished_jobs_reported: set[int] = set()
         self._logger = monitor.logger
         self.monitor = monitor
         self._metrics = MetricsHelper(monitor.metrics)
 
     def _response_failure(
-        self, operation: str, batch_id: str, run_id: int | None, error: ValidationError
+        self, action: str, batch_id: str, run_id: int | None, error: ValidationError, *, operation: Operation
     ) -> FatalProcessingError:
         """Log every validation error and return a bounded, contextual failure."""
         run = f", run {run_id}" if run_id is not None else ""
         self._logger.error(
             "Invalid GitHub response while %s (batch %s%s):\n%s",
-            operation,
+            action,
             batch_id,
             run,
             error,
+            operation=operation,
         )
         count = error.error_count()
         reason = " ".join(
             (
-                f"Invalid GitHub response while {operation} (batch {batch_id}{run}): "
+                f"Invalid GitHub response while {action} (batch {batch_id}{run}): "
                 f"{count} validation error{'s' if count != 1 else ''} in {error.title}. See logs for details."
             ).split()
         )
@@ -177,9 +190,14 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             )
         except ValidationError as error:
             self._metrics.record_operation(Operation.DISPATCH_BATCH, failed=True)
-            raise self._response_failure("dispatching the batch", message.batch_id, None, error) from error
+            raise self._response_failure(
+                "dispatching the batch", message.batch_id, None, error, operation=Operation.DISPATCH_BATCH
+            ) from error
         except Exception:
             self._metrics.record_operation(Operation.DISPATCH_BATCH, failed=True)
+            self._metrics.log_failed_operation(
+                Operation.DISPATCH_BATCH, self._logger, "Failed to dispatch batch %s", message.batch_id, exc_info=True
+            )
             raise
         self._metrics.record_operation(Operation.DISPATCH_BATCH, failed=False)
         run_id = dispatch.data.workflow_run_id
@@ -219,7 +237,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         )
         jobs = await self._reconcile_final_jobs(run_id, message, jobs)
         batch_jobs = BatchJobResult.correlate(message.job_list, jobs, artifact_dirs)
-        status = conclusion_to_status(conclusion)
+        status = batch_status(conclusion, jobs)
         self.submit_message(
             BatchFinished(
                 id=message.id,
@@ -243,9 +261,10 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             metrics.count('jobs.count', 1, **job_fields(job))
 
     def _report_job_activity(self, batch: TestBatch, known_jobs: Mapping[str, WorkflowJob]) -> None:
-        """Gauge the batch's planned jobs waiting for a runner or running, by platform.
+        """Gauge the run's planned jobs waiting for a runner or running, totaled by platform.
 
-        Every platform the batch plans gets a sample, so an empty queue is a zero rather than a gap.
+        The gauges have no batch tag, so each batch's latest counts are kept and summed. Every
+        platform planned so far gets a sample, so an empty queue is a zero rather than a gap.
         """
         planned = {job.name: job.platform for job in batch.job_list}
         counts = {platform: [0, 0] for platform in planned.values()}
@@ -256,9 +275,16 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 counts[platform][0] += 1
             elif workflow_job.status is WorkflowJobStatus.IN_PROGRESS:
                 counts[platform][1] += 1
-        for platform, (queued, running) in counts.items():
-            self.monitor.metrics.gauge('jobs.queued', queued, platform=platform, batch_id=batch.batch_id)
-            self.monitor.metrics.gauge('jobs.running', running, platform=platform, batch_id=batch.batch_id)
+        self._job_activity_by_batch[batch.batch_id] = counts
+        totals: dict[PlatformName, list[int]] = {}
+        for per_batch in self._job_activity_by_batch.values():
+            for platform, (queued, running) in per_batch.items():
+                total = totals.setdefault(platform, [0, 0])
+                total[0] += queued
+                total[1] += running
+        for platform, (queued, running) in totals.items():
+            self.monitor.metrics.gauge('jobs.queued', queued, platform=platform)
+            self.monitor.metrics.gauge('jobs.running', running, platform=platform)
 
     def _report_queue_durations(self, batch: TestBatch, observed: Iterable[WorkflowJob]) -> None:
         """Emit each planned job's runner wait once, at its first observation of having started.
@@ -282,6 +308,35 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 continue
             self._queue_durations_reported.add(workflow_job.id)
             self.monitor.metrics.distribution('job.queue.duration', duration, **job_fields(job))
+
+    def _report_finished_jobs(self, batch: TestBatch, observed: Iterable[WorkflowJob]) -> None:
+        """Report each planned job's duration and completion once per GitHub job ID, at the first listing
+        showing it completed.
+
+        Unusable timing is not retried on a later listing.
+        """
+        planned = {job.name: job for job in batch.job_list}
+        for workflow_job in observed:
+            job = planned.get(workflow_job.name)
+            if (
+                job is None
+                or workflow_job.status is not WorkflowJobStatus.COMPLETED
+                or workflow_job.id in self._finished_jobs_reported
+            ):
+                continue
+            self._finished_jobs_reported.add(workflow_job.id)
+            fields = job_fields(job, workflow_job)
+            duration = fields.get('job_duration_seconds')
+            if duration is not None:
+                self.monitor.metrics.distribution('job.duration', duration, **fields)
+            status = job_status(workflow_job)
+            log = (
+                self._logger.info
+                if status in (Status.SUCCESS, Status.SKIPPED, Status.CANCELLED)
+                else self._logger.warning
+            )
+            summary = status.value if duration is None else f"{status.value} in {duration:g}s"
+            log("Job %s completed: %s", job.name, summary, **fields)
 
     async def cancel_dispatched_runs(self) -> None:
         """Concurrently cancel all tracked unfinished runs."""
@@ -323,9 +378,19 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 run = await self._client.get_workflow_run(self._options.owner, self._options.repo, run_id)
             except ValidationError as error:
                 self._metrics.record_operation(Operation.FETCH_WORKFLOW, failed=True)
-                raise self._response_failure("polling workflow status", message.batch_id, run_id, error) from error
+                raise self._response_failure(
+                    "polling workflow status", message.batch_id, run_id, error, operation=Operation.FETCH_WORKFLOW
+                ) from error
             except Exception:
                 self._metrics.record_operation(Operation.FETCH_WORKFLOW, failed=True)
+                self._metrics.log_failed_operation(
+                    Operation.FETCH_WORKFLOW,
+                    self._logger,
+                    "Failed to fetch workflow run %s for batch %s",
+                    run_id,
+                    message.batch_id,
+                    exc_info=True,
+                )
                 raise
             self._metrics.record_operation(Operation.FETCH_WORKFLOW, failed=False)
             completed = run.data.is_completed
@@ -347,9 +412,10 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 previous_state = progress.state
             await self._refresh_jobs(run_id, known_jobs, message.batch_id, "listing workflow jobs")
             # A completed workflow has nothing queued or running, whatever a failed or lagging final
-            # listing left in `known_jobs`, and this is the batch series' last point.
+            # listing left in `known_jobs`, and this is the batch's last sample.
             self._report_job_activity(message, {} if completed else known_jobs)
             self._report_queue_durations(message, known_jobs.values())
+            self._report_finished_jobs(message, known_jobs.values())
             self._publish_job_progress(message.id, progress, known_jobs, next(sequences))
 
             if completed:
@@ -383,18 +449,16 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             run_id=run_id,
             workflow_url=run.html_url,
             state=state,
-            status=conclusion_to_status(run.conclusion) if run.is_completed else None,
+            status=batch_status(run.conclusion, known_jobs.values()) if run.is_completed else None,
             sequence=sequence,
             jobs=tuple(known_jobs.values()),
         )
         self.submit_message(progress)
         return progress
 
-    async def _refresh_jobs(
-        self, run_id: int, known_jobs: dict[str, WorkflowJob], batch_id: str, operation: str
-    ) -> None:
+    async def _refresh_jobs(self, run_id: int, known_jobs: dict[str, WorkflowJob], batch_id: str, action: str) -> None:
         # A failed or incomplete listing must not remove jobs we already know about.
-        for job in await self._list_jobs(run_id, batch_id, operation):
+        for job in await self._list_jobs(run_id, batch_id, action):
             previous = known_jobs.get(job.name)
             # A rerun has a new job ID. An older state for the same job must not erase its completed result.
             if (
@@ -428,12 +492,14 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         known_jobs = {job.name: job for job in observed_jobs}
         # The jobs response may lag behind the workflow status. Refresh it after downloading artifacts.
         await self._refresh_jobs(run_id, known_jobs, batch.batch_id, "reconciling final workflow jobs")
-        # A job first seen here can still have waited for a runner, so it gets its queue sample too.
+        # The listing can lag the run, so a job may first be seen started or finished here.
         self._report_queue_durations(batch, known_jobs.values())
-        # An unfinished job has no result yet. Do not mistake that for a test failure.
-        return [job for job in known_jobs.values() if job.status is WorkflowJobStatus.COMPLETED]
+        self._report_finished_jobs(batch, known_jobs.values())
+        # The run is over, so a job not seen COMPLETED is a stale observation. The gatherer decides
+        # what that means.
+        return list(known_jobs.values())
 
-    async def _list_jobs(self, run_id: int, batch_id: str, operation: str) -> list[WorkflowJob]:
+    async def _list_jobs(self, run_id: int, batch_id: str, action: str) -> list[WorkflowJob]:
         """Fetch the run's jobs. If a later page fails, keep the jobs already fetched."""
         jobs: list[WorkflowJob] = []
         try:
@@ -443,10 +509,12 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                 jobs.extend(page.data.jobs)
         except ValidationError as error:
             self._metrics.record_operation(Operation.REFRESH_JOBS, failed=True)
-            raise self._response_failure(operation, batch_id, run_id, error) from error
+            raise self._response_failure(action, batch_id, run_id, error, operation=Operation.REFRESH_JOBS) from error
         except Exception:
-            self._logger.warning("Failed to list workflow jobs", exc_info=True)
             self._metrics.record_operation(Operation.REFRESH_JOBS, failed=True)
+            self._metrics.log_failed_operation(
+                Operation.REFRESH_JOBS, self._logger, "Failed to list workflow jobs", recovered=True, exc_info=True
+            )
         else:
             self._metrics.record_operation(Operation.REFRESH_JOBS, failed=False)
         return jobs
@@ -499,10 +567,12 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         """
         artifact_dirs: dict[str, Path] = {}
         failures: list[tuple[int, str]] = []
+        # Listed without a usable download: the operation still needs its one failure record.
+        unavailable: list[str] = []
         with self._metrics.time_operation(
             Operation.COLLECT_ARTIFACTS, duration_metric='artifacts.download.duration'
         ) as result:
-            degraded = False
+            listing_failed = False
             try:
                 async for page in self._artifact_client.list_workflow_run_artifacts(
                     self._options.owner, self._options.repo, run_id, per_page=100
@@ -510,7 +580,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                     for artifact in page.data.artifacts:
                         url = self._artifact_download_url(artifact)
                         if url is None:
-                            degraded = True
+                            unavailable.append(artifact.name)
                             continue
                         target = await self._download_artifact(artifact, url)
                         if target is None:
@@ -518,20 +588,42 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
                         else:
                             artifact_dirs[artifact.name] = target
             except ValidationError as error:
-                raise self._response_failure("listing workflow artifacts", batch_id, run_id, error) from error
+                raise self._response_failure(
+                    "listing workflow artifacts", batch_id, run_id, error, operation=Operation.COLLECT_ARTIFACTS
+                ) from error
             except Exception:
-                self._logger.warning("Failed to list workflow run artifacts", exc_info=True)
-                degraded = True
-            # An incomplete listing degrades the collection like a failed download does.
-            result.failed = degraded or bool(failures)
+                self._metrics.log_failed_operation(
+                    Operation.COLLECT_ARTIFACTS,
+                    self._logger,
+                    "Failed to list workflow run artifacts",
+                    recovered=True,
+                    exc_info=True,
+                )
+                listing_failed = True
+            # An incomplete or unusable listing fails the collection like a failed download does.
+            result.failed = listing_failed or bool(failures) or bool(unavailable)
         if failures:
-            self._logger.warning(
+            self._metrics.log_failed_operation(
+                Operation.COLLECT_ARTIFACTS,
+                self._logger,
                 "Failed to download %s %s for workflow run %s",
                 len(failures),
                 "artifact" if len(failures) == 1 else "artifacts",
                 run_id,
+                recovered=True,
                 failure_count=len(failures),
                 failed_artifacts=failures,
+            )
+        elif unavailable and not listing_failed:
+            # A failed listing already logged the operation's record.
+            self._metrics.log_failed_operation(
+                Operation.COLLECT_ARTIFACTS,
+                self._logger,
+                "Skipped %s unavailable %s for workflow run %s (expired or without a download URL)",
+                len(unavailable),
+                "artifact" if len(unavailable) == 1 else "artifacts",
+                run_id,
+                recovered=True,
             )
         return artifact_dirs
 

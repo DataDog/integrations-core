@@ -44,13 +44,19 @@ class _BaseClient:
 class OrchestratorClient(_BaseClient):
     """HTTP client for the HPE Aruba EdgeConnect orchestrator API."""
 
-    def __init__(self, http: RequestsWrapper, orch_ip: str) -> None:
+    def __init__(self, http: RequestsWrapper, orch_ip: str, login_type: int | None = None) -> None:
         super().__init__(http, f'https://{orch_ip}')
+        self._login_type = login_type
 
     def _do_login(self, username: str, password: str) -> None:
+        payload: dict[str, Any] = {'user': username, 'password': password}
+        # Selects the authentication backend that verifies the credentials (local, RADIUS, TACACS+).
+        # Omitted when unconfigured so the Orchestrator applies its own default.
+        if self._login_type is not None:
+            payload['loginType'] = self._login_type
         resp = self._http.post(
             f'{self._base_url}/gms/rest/authentication/login',
-            json={'user': username, 'password': password},
+            json=payload,
         )
         resp.raise_for_status()
         csrf_token = self._http.session.cookies.get('orchCsrfToken')
