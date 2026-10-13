@@ -105,7 +105,75 @@ ORDER BY role_oid, database_name, setting_name
 """
 
 
-QUERY_DEFAULT_PRIVILEGES = """
+# Schemas role collection never reports: system catalogs, the information schema, the agent's own schema, and
+# TOAST and temporary schemas.
+EXCLUDED_SCHEMAS = ("pg_catalog", "information_schema", "datadog")
+EXCLUDED_SCHEMA_PREFIXES = ("pg_toast", "pg_temp")
+
+
+def _collected_schema(namespace: str) -> str:
+    """Return the SQL condition that `namespace`, a `pg_namespace` alias, is a schema role collection reports.
+
+    Every query branch filters through this one definition, so an object's privileges are always filtered like the
+    object itself.
+    """
+    names = ", ".join(f"'{name}'" for name in EXCLUDED_SCHEMAS)
+    conditions = [f"{namespace}.nspname NOT IN ({names})"]
+    conditions.extend(f"{namespace}.nspname NOT LIKE '{prefix}%'" for prefix in EXCLUDED_SCHEMA_PREFIXES)
+    return "\n      AND ".join(conditions)
+
+
+RELATION_TYPE = """CASE relation.relkind
+               WHEN 'r' THEN 'table'
+               WHEN 'p' THEN 'partitioned_table'
+               WHEN 'v' THEN 'view'
+               WHEN 'm' THEN 'materialized_view'
+               WHEN 'f' THEN 'foreign_table'
+               WHEN 'S' THEN 'sequence'
+           END"""
+
+# Base, composite, domain, enum, and range types; multiranges and pseudo-types are created by Postgres. Composite
+# types that are a table's or view's row type belong to that relation, and array types are created alongside each
+# type.
+COLLECTED_TYPE = """type.typtype IN ('b', 'c', 'd', 'e', 'r')
+      AND (
+          type.typrelid = 0
+          OR EXISTS (
+              SELECT 1
+              FROM pg_catalog.pg_class AS relation
+              WHERE relation.oid = type.typrelid
+                AND relation.relkind = 'c'
+          )
+      )
+      AND NOT EXISTS (
+          SELECT 1
+          FROM pg_catalog.pg_type AS element
+          WHERE element.typarray = type.oid
+      )"""
+
+# PostgreSQL 11 added procedures and replaced proisagg and proiswindow with prokind. Earlier versions derive the
+# same kind codes, so routine branches report the same object types on every version.
+ROUTINE_KIND_PG11_PLUS = "routine.prokind"
+ROUTINE_KIND_PRE_PG11 = "(CASE WHEN routine.proisagg THEN 'a' WHEN routine.proiswindow THEN 'w' ELSE 'f' END)"
+
+
+def _routine_type(routine_kind: str) -> str:
+    return f"""CASE {routine_kind}
+               WHEN 'p' THEN 'procedure'
+               WHEN 'a' THEN 'aggregate'
+               ELSE 'function'
+           END"""
+
+
+ROUTINE_NAME = """(
+               routine.proname
+               || '('
+               || pg_catalog.oidvectortypes(routine.proargtypes)
+               || ')'
+           )::text"""
+
+
+QUERY_DEFAULT_PRIVILEGES = f"""
 SELECT default_acl.defaclrole::bigint AS owner_oid,
        COALESCE(namespace.nspname::text, '') AS schema_name,
        CASE default_acl.defaclobjtype
@@ -127,21 +195,20 @@ WHERE default_acl.defaclobjtype IN ('r', 'S', 'f', 'T', 'n')
   AND (
       default_acl.defaclnamespace = 0
       OR (
-          namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
-          AND namespace.nspname NOT LIKE 'pg_toast%'
-          AND namespace.nspname NOT LIKE 'pg_temp%'
+          {_collected_schema("namespace")}
       )
   )
 """
 
 
-# Rows carry no owner: every object they refer to is in `objects`, from the same snapshot, with its `owner_oid`.
-# Only explicitly stored ACLs are collected. An object with a NULL ACL has the compiled-in default privileges for
-# its type and owner; it is reported in `objects` with `has_default_acl` so the backend can resolve them, rather
-# than shipping the same owner and PUBLIC rows for every untouched object.
-# Column grants are stored only on columns granted individually: table-level grants never populate `attacl`, and
-# columns have no default privileges. A column row adds access on top of the relation's own privileges.
-QUERY_OBJECT_PRIVILEGES = """
+def _object_privileges_query(routine_kind: str) -> str:
+    # Rows carry no owner: every object they refer to is in `objects`, from the same snapshot, with its `owner_oid`.
+    # Only explicitly stored ACLs are collected. An object with a NULL ACL has the compiled-in default privileges for
+    # its type and owner; it is reported in `objects` with `has_default_acl` so the backend can resolve them, rather
+    # than shipping the same owner and PUBLIC rows for every untouched object.
+    # Column grants are stored only on columns granted individually: table-level grants never populate `attacl`, and
+    # columns have no default privileges. A column row adds access on top of the relation's own privileges.
+    return f"""
 SELECT privileges.object_type,
        privileges.schema_name,
        privileges.object_name,
@@ -151,14 +218,7 @@ SELECT privileges.object_type,
        privileges.privilege,
        privileges.is_grantable
 FROM (
-    SELECT CASE relation.relkind
-               WHEN 'r' THEN 'table'
-               WHEN 'p' THEN 'partitioned_table'
-               WHEN 'v' THEN 'view'
-               WHEN 'm' THEN 'materialized_view'
-               WHEN 'f' THEN 'foreign_table'
-               WHEN 'S' THEN 'sequence'
-           END AS object_type,
+    SELECT {RELATION_TYPE} AS object_type,
            namespace.nspname::text AS schema_name,
            relation.relname::text AS object_name,
            ''::text AS column_name,
@@ -171,19 +231,11 @@ FROM (
       ON namespace.oid = relation.relnamespace
     CROSS JOIN LATERAL pg_catalog.aclexplode(relation.relacl) AS acl
     WHERE relation.relkind IN ('r', 'p', 'v', 'm', 'f', 'S')
-      AND namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
-      AND namespace.nspname NOT LIKE 'pg_toast%'
-      AND namespace.nspname NOT LIKE 'pg_temp%'
+      AND {_collected_schema("namespace")}
 
     UNION ALL
 
-    SELECT CASE relation.relkind
-               WHEN 'r' THEN 'table'
-               WHEN 'p' THEN 'partitioned_table'
-               WHEN 'v' THEN 'view'
-               WHEN 'm' THEN 'materialized_view'
-               WHEN 'f' THEN 'foreign_table'
-           END AS object_type,
+    SELECT {RELATION_TYPE} AS object_type,
            namespace.nspname::text AS schema_name,
            relation.relname::text AS object_name,
            attribute.attname::text AS column_name,
@@ -201,9 +253,7 @@ FROM (
       AND attribute.attnum > 0
       AND NOT attribute.attisdropped
       AND attribute.attacl IS NOT NULL
-      AND namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
-      AND namespace.nspname NOT LIKE 'pg_toast%'
-      AND namespace.nspname NOT LIKE 'pg_temp%'
+      AND {_collected_schema("namespace")}
 
     UNION ALL
 
@@ -217,9 +267,7 @@ FROM (
            acl.is_grantable AS is_grantable
     FROM pg_catalog.pg_namespace AS namespace
     CROSS JOIN LATERAL pg_catalog.aclexplode(namespace.nspacl) AS acl
-    WHERE namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
-      AND namespace.nspname NOT LIKE 'pg_toast%'
-      AND namespace.nspname NOT LIKE 'pg_temp%'
+    WHERE {_collected_schema("namespace")}
 
     UNION ALL
 
@@ -235,42 +283,14 @@ FROM (
     JOIN pg_catalog.pg_namespace AS namespace
       ON namespace.oid = type.typnamespace
     CROSS JOIN LATERAL pg_catalog.aclexplode(type.typacl) AS acl
-    -- Base, composite, domain, enum, and range types; multiranges and pseudo-types are created by Postgres.
-    WHERE type.typtype IN ('b', 'c', 'd', 'e', 'r')
-      -- Composite types that are a table's or view's row type belong to that relation.
-      AND (
-          type.typrelid = 0
-          OR EXISTS (
-              SELECT 1
-              FROM pg_catalog.pg_class AS relation
-              WHERE relation.oid = type.typrelid
-                AND relation.relkind = 'c'
-          )
-      )
-      -- Array types are created alongside each type.
-      AND NOT EXISTS (
-          SELECT 1
-          FROM pg_catalog.pg_type AS element
-          WHERE element.typarray = type.oid
-      )
-      AND namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
-      AND namespace.nspname NOT LIKE 'pg_toast%'
-      AND namespace.nspname NOT LIKE 'pg_temp%'
+    WHERE {COLLECTED_TYPE}
+      AND {_collected_schema("namespace")}
 
     UNION ALL
 
-    SELECT CASE {routine_kind}
-               WHEN 'p' THEN 'procedure'
-               WHEN 'a' THEN 'aggregate'
-               ELSE 'function'
-           END AS object_type,
+    SELECT {_routine_type(routine_kind)} AS object_type,
            namespace.nspname::text AS schema_name,
-           (
-               routine.proname
-               || '('
-               || pg_catalog.oidvectortypes(routine.proargtypes)
-               || ')'
-           )::text AS object_name,
+           {ROUTINE_NAME} AS object_name,
            ''::text AS column_name,
            acl.grantee::bigint AS grantee_oid,
            acl.grantor::bigint AS grantor_oid,
@@ -281,9 +301,7 @@ FROM (
       ON namespace.oid = routine.pronamespace
     CROSS JOIN LATERAL pg_catalog.aclexplode(routine.proacl) AS acl
     WHERE {routine_kind} IN ('f', 'p', 'a', 'w')
-      AND namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
-      AND namespace.nspname NOT LIKE 'pg_toast%'
-      AND namespace.nspname NOT LIKE 'pg_temp%'
+      AND {_collected_schema("namespace")}
 
     UNION ALL
 
@@ -302,7 +320,8 @@ FROM (
 """
 
 
-QUERY_OBJECTS = """
+def _objects_query(routine_kind: str) -> str:
+    return f"""
 SELECT objects.object_type,
        objects.schema_name,
        objects.object_name,
@@ -312,14 +331,7 @@ SELECT objects.object_type,
        objects.security_invoker,
        objects.has_default_acl
 FROM (
-    SELECT CASE relation.relkind
-               WHEN 'r' THEN 'table'
-               WHEN 'p' THEN 'partitioned_table'
-               WHEN 'v' THEN 'view'
-               WHEN 'm' THEN 'materialized_view'
-               WHEN 'f' THEN 'foreign_table'
-               WHEN 'S' THEN 'sequence'
-           END AS object_type,
+    SELECT {RELATION_TYPE} AS object_type,
            namespace.nspname::text AS schema_name,
            relation.relname::text AS object_name,
            relation.oid::bigint AS object_oid,
@@ -342,9 +354,7 @@ FROM (
     JOIN pg_catalog.pg_namespace AS namespace
       ON namespace.oid = relation.relnamespace
     WHERE relation.relkind IN ('r', 'p', 'v', 'm', 'f', 'S')
-      AND namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
-      AND namespace.nspname NOT LIKE 'pg_toast%'
-      AND namespace.nspname NOT LIKE 'pg_temp%'
+      AND {_collected_schema("namespace")}
 
     UNION ALL
 
@@ -357,9 +367,7 @@ FROM (
            false AS security_invoker,
            namespace.nspacl IS NULL AS has_default_acl
     FROM pg_catalog.pg_namespace AS namespace
-    WHERE namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
-      AND namespace.nspname NOT LIKE 'pg_toast%'
-      AND namespace.nspname NOT LIKE 'pg_temp%'
+    WHERE {_collected_schema("namespace")}
 
     UNION ALL
 
@@ -374,42 +382,14 @@ FROM (
     FROM pg_catalog.pg_type AS type
     JOIN pg_catalog.pg_namespace AS namespace
       ON namespace.oid = type.typnamespace
-    -- Base, composite, domain, enum, and range types; multiranges and pseudo-types are created by Postgres.
-    WHERE type.typtype IN ('b', 'c', 'd', 'e', 'r')
-      -- Composite types that are a table's or view's row type belong to that relation.
-      AND (
-          type.typrelid = 0
-          OR EXISTS (
-              SELECT 1
-              FROM pg_catalog.pg_class AS relation
-              WHERE relation.oid = type.typrelid
-                AND relation.relkind = 'c'
-          )
-      )
-      -- Array types are created alongside each type.
-      AND NOT EXISTS (
-          SELECT 1
-          FROM pg_catalog.pg_type AS element
-          WHERE element.typarray = type.oid
-      )
-      AND namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
-      AND namespace.nspname NOT LIKE 'pg_toast%'
-      AND namespace.nspname NOT LIKE 'pg_temp%'
+    WHERE {COLLECTED_TYPE}
+      AND {_collected_schema("namespace")}
 
     UNION ALL
 
-    SELECT CASE {routine_kind}
-               WHEN 'p' THEN 'procedure'
-               WHEN 'a' THEN 'aggregate'
-               ELSE 'function'
-           END AS object_type,
+    SELECT {_routine_type(routine_kind)} AS object_type,
            namespace.nspname::text AS schema_name,
-           (
-               routine.proname
-               || '('
-               || pg_catalog.oidvectortypes(routine.proargtypes)
-               || ')'
-           )::text AS object_name,
+           {ROUTINE_NAME} AS object_name,
            routine.oid::bigint AS object_oid,
            routine.proowner::bigint AS owner_oid,
            routine.prosecdef AS is_security_definer,
@@ -419,9 +399,7 @@ FROM (
     JOIN pg_catalog.pg_namespace AS namespace
       ON namespace.oid = routine.pronamespace
     WHERE {routine_kind} IN ('f', 'p', 'a', 'w')
-      AND namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
-      AND namespace.nspname NOT LIKE 'pg_toast%'
-      AND namespace.nspname NOT LIKE 'pg_temp%'
+      AND {_collected_schema("namespace")}
 
     UNION ALL
 
@@ -439,27 +417,25 @@ FROM (
 """
 
 
-# PostgreSQL 11 added procedures and replaced proisagg and proiswindow with prokind. Earlier versions derive the
-# same kind codes, so routine branches report the same object types on every version.
-ROUTINE_KIND_PG11_PLUS = "routine.prokind"
-ROUTINE_KIND_PRE_PG11 = "(CASE WHEN routine.proisagg THEN 'a' WHEN routine.proiswindow THEN 'w' ELSE 'f' END)"
-
-
-def _routine_kind(pg11_plus: bool) -> str:
-    return ROUTINE_KIND_PG11_PLUS if pg11_plus else ROUTINE_KIND_PRE_PG11
+# Both variants are built once, when the module loads; the collector selects one for the server version.
+OBJECT_PRIVILEGES_QUERIES = {
+    True: _object_privileges_query(ROUTINE_KIND_PG11_PLUS),
+    False: _object_privileges_query(ROUTINE_KIND_PRE_PG11),
+}
+OBJECTS_QUERIES = {True: _objects_query(ROUTINE_KIND_PG11_PLUS), False: _objects_query(ROUTINE_KIND_PRE_PG11)}
 
 
 def object_privileges_query(*, pg11_plus: bool) -> str:
     """Select the object privilege query for the connected server version."""
-    return QUERY_OBJECT_PRIVILEGES.format(routine_kind=_routine_kind(pg11_plus))
+    return OBJECT_PRIVILEGES_QUERIES[pg11_plus]
 
 
 def objects_query(*, pg11_plus: bool) -> str:
     """Select the object query for the connected server version."""
-    return QUERY_OBJECTS.format(routine_kind=_routine_kind(pg11_plus))
+    return OBJECTS_QUERIES[pg11_plus]
 
 
-QUERY_OBJECT_DEPENDENCIES = """
+QUERY_OBJECT_DEPENDENCIES = f"""
 SELECT DISTINCT
        CASE dependent.relkind
            WHEN 'v' THEN 'view'
@@ -494,10 +470,6 @@ WHERE dependent.relkind IN ('v', 'm')
   AND dependency.deptype = 'n'
   AND referenced.relkind IN ('r', 'p', 'v', 'm', 'f', 'S')
   AND referenced.oid <> dependent.oid
-  AND dependent_namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
-  AND dependent_namespace.nspname NOT LIKE 'pg_toast%'
-  AND dependent_namespace.nspname NOT LIKE 'pg_temp%'
-  AND referenced_namespace.nspname NOT IN ('pg_catalog', 'information_schema', 'datadog')
-  AND referenced_namespace.nspname NOT LIKE 'pg_toast%'
-  AND referenced_namespace.nspname NOT LIKE 'pg_temp%'
+  AND {_collected_schema("dependent_namespace")}
+  AND {_collected_schema("referenced_namespace")}
 """
