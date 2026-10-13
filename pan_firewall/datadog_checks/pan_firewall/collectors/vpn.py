@@ -40,10 +40,10 @@ def parse_vpn(flow: Element, gateway: Element, log: CheckLoggingAdapter) -> VpnS
     if flow_result is None or gateway_result is None:
         log.warning('`show vpn flow` or `show vpn gateway` has no result: no IPSec metrics are sent')
         return VpnSnapshot()
+    gateway_entries = gateway_result.findall('./entries/entry')
+    # Only for the tunnels' `gateway` tag: an entry without an id or a name still counts in the total.
     gateways = {
-        gwid: name
-        for entry in gateway_result.findall('./entries/entry')
-        if (gwid := text(entry, 'id')) and (name := text(entry, 'name'))
+        gwid: name for entry in gateway_entries if (gwid := text(entry, 'id')) and (name := text(entry, 'name'))
     }
     entries = flow_result.findall('./IPSec/entry')
     snapshot = VpnSnapshot()
@@ -72,7 +72,7 @@ def parse_vpn(flow: Element, gateway: Element, log: CheckLoggingAdapter) -> VpnS
         ('ipsec.tunnels.active', counts['active']),
         ('ipsec.tunnels.inactive', counts['inactive']),
         ('ipsec.tunnels.init', counts['init']),
-        ('ipsec.gateways.total', len(gateways)),
+        ('ipsec.gateways.total', len(gateway_entries)),
     )
     snapshot.samples[:0] = [Sample(name, value, (), 'gauge') for name, value in totals]
     return snapshot

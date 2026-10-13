@@ -102,6 +102,17 @@ def test_gateway_tag_is_omitted_when_gwid_matches_no_gateway():
     )
 
 
+def test_gateway_total_counts_gateways_without_an_id_or_a_name():
+    gateway = load('fw-a', VPN_GATEWAY_CMD)
+    entries = gateway.findall('./result/entries/entry')
+    entries[0].remove(entries[0].find('id'))
+    entries[1].remove(entries[1].find('name'))
+
+    snapshot = parse_vpn(load('fw-a', VPN_FLOW_CMD), gateway, mock.Mock())
+
+    assert series(snapshot.samples)[('ipsec.gateways.total', ())] == (len(entries), 'gauge')
+
+
 def test_unknown_shape_warns_and_sends_nothing():
     log = mock.Mock()
     empty = parse_response(b'<response status="success"/>')
