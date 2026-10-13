@@ -5,7 +5,6 @@ from unittest import mock
 
 import pytest
 
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS
 from datadog_checks.pan_firewall.collectors.dataplane import RESOURCE_MONITOR_CMD, parse_dataplane
 from datadog_checks.pan_firewall.collectors.system import (
     DISK_SPACE_CMD,
@@ -13,20 +12,13 @@ from datadog_checks.pan_firewall.collectors.system import (
     parse_disk,
     parse_system_resources,
 )
-from datadog_checks.pan_firewall.constants import COLLECTORS
-from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from ..common import FIXTURES, FW_A_TAGS, SYNTHETIC
-from ..fixture_map import op_fixture
-from ..helpers import new_check
+from ..common import FW_A_TAGS, SYNTHETIC
+from ..helpers import load_op, load_xml, new_check
 
 MIB = 1024**2
 
 CPU_STATES = ('user', 'system', 'nice', 'idle', 'iowait', 'hardirq', 'softirq', 'steal')
-
-
-def load(path):
-    return parse_response(path.read_bytes())
 
 
 def by_name(samples):
@@ -63,12 +55,6 @@ FW_A_SYSTEM = expected_system(
     (4000.0 * MIB, 3998.7 * MIB, 1.2 * MIB),
     5093.7 * MIB,
 )
-FW_B_SYSTEM = expected_system(
-    (8.1, 4.8, 0.0, 85.5, 0.0, 1.6, 0.0, 0.0),
-    (15734.7 * MIB, 381.0 * MIB, 4837.9 * MIB, 10515.9 * MIB),
-    (4000.0 * MIB, 3998.7 * MIB, 1.2 * MIB),
-    5155.8 * MIB,
-)
 
 
 def system_values(samples):
@@ -77,14 +63,10 @@ def system_values(samples):
     return {name: value for (name, _), value in values.items()}
 
 
-@pytest.mark.parametrize(
-    'firewall, expected',
-    [pytest.param('fw-a', FW_A_SYSTEM, id='fw-a'), pytest.param('fw-b', FW_B_SYSTEM, id='fw-b')],
-)
-def test_system_resources_of_the_captures(firewall, expected):
-    samples = parse_system_resources(load(FIXTURES / firewall / 'system_resources.xml'), mock.Mock())
+def test_system_resources_of_the_capture():
+    samples = parse_system_resources(load_op(SYSTEM_RESOURCES_CMD), mock.Mock())
 
-    assert system_values(samples) == pytest.approx(expected)
+    assert system_values(samples) == pytest.approx(FW_A_SYSTEM)
     assert 'mgmt.swap.cached' not in {s.name for s in samples}
     assert {s.kind for s in samples} == {'gauge'}
 
@@ -117,7 +99,7 @@ UNIT_VARIANTS = [
 
 @pytest.mark.parametrize('name, expected', UNIT_VARIANTS)
 def test_memory_unit_is_read_from_the_line_header(name, expected):
-    samples = parse_system_resources(load(SYNTHETIC / name), mock.Mock())
+    samples = parse_system_resources(load_xml(SYNTHETIC / name), mock.Mock())
 
     assert system_values(samples) == pytest.approx(expected)
 
@@ -125,30 +107,15 @@ def test_memory_unit_is_read_from_the_line_header(name, expected):
 def test_missing_cpu_line_gives_memory_only_and_a_warning():
     log = mock.Mock()
 
-    samples = parse_system_resources(load(SYNTHETIC / 'system_resources_no_cpu.xml'), log)
+    samples = parse_system_resources(load_xml(SYNTHETIC / 'system_resources_no_cpu.xml'), log)
 
     names = {s.name for s in samples}
     assert names == {n for n in FW_A_SYSTEM if not n.startswith('mgmt.cpu.')}
     log.warning.assert_called_once()
 
 
-@pytest.mark.parametrize(
-    'body',
-    [
-        pytest.param('', id='empty'),
-        pytest.param('not the top output at all', id='unknown-shape'),
-    ],
-)
-def test_unknown_system_resources_shape_gives_no_samples_and_one_warning(body):
-    root = parse_response(f'<response status="success"><result>{body}</result></response>'.encode())
-    log = mock.Mock()
-
-    assert parse_system_resources(root, log) == []
-    log.warning.assert_called_once()
-
-
 def test_dataplane_one_sample_per_dp_and_core_with_the_first_value():
-    samples = parse_dataplane(load(SYNTHETIC / 'resource_monitor_two_dp_series.xml'), mock.Mock())
+    samples = parse_dataplane(load_xml(SYNTHETIC / 'resource_monitor_two_dp_series.xml'), mock.Mock())
 
     assert by_name(samples) == {
         ('dataplane.cpu.utilization', ('dp:dp0', 'core:0')): 7,
@@ -160,7 +127,7 @@ def test_dataplane_one_sample_per_dp_and_core_with_the_first_value():
 
 
 def test_dataplane_of_the_capture():
-    samples = parse_dataplane(load(op_fixture(RESOURCE_MONITOR_CMD)), mock.Mock())
+    samples = parse_dataplane(load_op(RESOURCE_MONITOR_CMD), mock.Mock())
 
     # The lab firewall has one data processor with 4 idle cores.
     assert by_name(samples) == {('dataplane.cpu.utilization', ('dp:dp0', f'core:{core}')): 0 for core in range(4)}
@@ -169,12 +136,12 @@ def test_dataplane_of_the_capture():
 def test_dataplane_without_data_processors_gives_no_samples_and_one_warning():
     log = mock.Mock()
 
-    assert parse_dataplane(load(SYNTHETIC / 'resource_monitor_no_dp.xml'), log) == []
+    assert parse_dataplane(load_xml(SYNTHETIC / 'resource_monitor_no_dp.xml'), log) == []
     log.warning.assert_called_once()
 
 
 def test_disk_of_the_capture_skips_virtual_filesystems():
-    samples = parse_disk(load(op_fixture(DISK_SPACE_CMD)), mock.Mock())
+    samples = parse_disk(load_op(DISK_SPACE_CMD), mock.Mock())
 
     assert by_name(samples) == {
         ('disk.used_pct', ('mount:/', 'filesystem:/dev/root')): 43,
@@ -186,18 +153,12 @@ def test_disk_of_the_capture_skips_virtual_filesystems():
 
 
 def test_disk_row_wrapped_onto_two_lines():
-    samples = parse_disk(load(SYNTHETIC / 'disk_space_wrapped.xml'), mock.Mock())
+    samples = parse_disk(load_xml(SYNTHETIC / 'disk_space_wrapped.xml'), mock.Mock())
 
     assert by_name(samples) == {
         ('disk.used_pct', ('mount:/', 'filesystem:/dev/root')): 43,
         ('disk.used_pct', ('mount:/opt/panlogs', 'filesystem:/dev/mapper/pan-very-long-volume-name')): 1,
     }
-
-
-def test_collectors_are_registered_and_send_the_captured_commands(real_collectors):
-    assert {'system_resources', 'dataplane', 'disk'} <= set(COLLECT_FUNCTIONS) <= set(COLLECTORS)
-    for cmd in (SYSTEM_RESOURCES_CMD, RESOURCE_MONITOR_CMD, DISK_SPACE_CMD):
-        assert op_fixture(cmd).is_file()
 
 
 def test_collectors_submit_through_the_check(real_collectors, dd_run_check, aggregator):

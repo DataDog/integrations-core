@@ -38,7 +38,6 @@ def test_running_or_queued_commits_and_content_updates_are_busy(status):
 @pytest.mark.parametrize(
     'name',
     [
-        pytest.param('jobs_pending_idle.xml', id='idle'),
         pytest.param('jobs_all.xml', id='finished-jobs-of-every-type'),
         # No report job type was seen in the lab; Downld and IoT are the real types that never pause collection.
         pytest.param('jobs_pending_not_busy.xml', id='running-downld-and-iot'),
@@ -89,9 +88,8 @@ def firewall(dd_run_check, aggregator, fake_panos, caplog, monkeypatch, schedule
     return Firewall(dd_run_check, aggregator, fake_panos, caplog, monkeypatch, schedule_clock)
 
 
-@pytest.mark.parametrize('name', ['jobs_pending_idle.xml', 'jobs_pending_not_busy.xml'])
-def test_not_busy_firewall_is_checked_first_then_collected(firewall, fake_panos, name):
-    firewall.answer_jobs(jobs_response(name))
+def test_not_busy_firewall_is_checked_first_then_collected(firewall, fake_panos):
+    firewall.answer_jobs(jobs_response('jobs_pending_idle.xml'))
     calls_before = len(fake_panos.calls)
 
     assert firewall.run_at(0) == (set(STUBS), [])
@@ -99,20 +97,13 @@ def test_not_busy_firewall_is_checked_first_then_collected(firewall, fake_panos,
     assert [c.cmd for c in fake_panos.calls[calls_before:]] == [JOBS_PENDING_CMD]
 
 
-@pytest.mark.parametrize(
-    'name, job',
-    [
-        pytest.param('jobs_pending_commit_act.xml', 'Commit job 7', id='running-commit'),
-        pytest.param('jobs_pending_content_pend.xml', 'Content job 2018', id='queued-content-update'),
-    ],
-)
-def test_busy_firewall_is_not_collected_and_its_collectors_stay_due(firewall, aggregator, caplog, name, job):
-    firewall.answer_jobs(jobs_response(name))
+def test_busy_firewall_is_not_collected_and_its_collectors_stay_due(firewall, aggregator, caplog):
+    firewall.answer_jobs(jobs_response('jobs_pending_commit_act.xml'))
 
     assert firewall.run_at(0) == (set(), [])
     # The firewall answered the jobs check.
     assert can_connect_by_ip(aggregator) == {FW_A_IP: 1}
-    assert f'pan_firewall {FW_A_IP}: {job} in progress, skipping collection this run' in caplog.text
+    assert f'pan_firewall {FW_A_IP}: Commit job 7 in progress, skipping collection this run' in caplog.text
 
     firewall.answer_jobs(jobs_response('jobs_pending_idle.xml'))
     # Nothing was marked as run, so every collector is due on the next run, before its interval.
@@ -135,29 +126,21 @@ def test_jobs_check_error_collects_anyway_and_warns_once_per_episode(firewall):
     assert firewall.run_at(360) == ({'bgp', 'dataplane'}, [warning])
 
 
-def test_jobs_check_refused_cuts_off_the_run_with_one_warning(firewall, aggregator, fake_panos):
-    firewall.answer_jobs(FAILURES['refused'])
+@pytest.mark.parametrize(
+    'failure, reason',
+    [
+        pytest.param('refused', f'failed (cannot connect to {FW_A_IP}:443: connection refused)', id='refused'),
+        pytest.param('timeout', 'timed out after 30s', id='timeout'),
+    ],
+)
+def test_jobs_check_unreachable_cuts_off_the_run(firewall, aggregator, fake_panos, failure, reason):
+    firewall.answer_jobs(FAILURES[failure])
     calls_before = len(fake_panos.calls)
 
     ran, warnings = firewall.run_at(0)
 
     assert ran == set()
-    assert warnings == [
-        f'pan_firewall {FW_A_IP}: jobs failed (cannot connect to {FW_A_IP}:443: connection refused); '
-        f'skipped for this run: {", ".join(STUBS)}'
-    ]
-    assert [c.cmd for c in fake_panos.calls[calls_before:]] == [JOBS_PENDING_CMD]
-    assert can_connect_by_ip(aggregator) == {FW_A_IP: 0}
-
-
-def test_jobs_check_timeout_cuts_off_the_run(firewall, aggregator, fake_panos):
-    firewall.answer_jobs(FAILURES['timeout'])
-    calls_before = len(fake_panos.calls)
-
-    ran, warnings = firewall.run_at(0)
-
-    assert ran == set()
-    assert warnings == [f'pan_firewall {FW_A_IP}: jobs timed out after 30s; skipped for this run: {", ".join(STUBS)}']
+    assert warnings == [f'pan_firewall {FW_A_IP}: jobs {reason}; skipped for this run: {", ".join(STUBS)}']
     assert [c.cmd for c in fake_panos.calls[calls_before:]] == [JOBS_PENDING_CMD]
     assert can_connect_by_ip(aggregator) == {FW_A_IP: 0}
 

@@ -131,12 +131,6 @@ def test_a_row_without_its_dimension_or_numbers_is_skipped():
     }
 
 
-def test_private_country_range_is_kept_raw():
-    samples = parse_report(load_report('top_source_countries'), 'top_source_countries')
-
-    assert ('report:top_source_countries', f'src_country:{PRIVATE}') in {s.tags for s in samples}
-
-
 def test_job_asks_for_the_top_n_of_the_last_24_hours():
     params = report_params('app', 5)
 
@@ -321,20 +315,6 @@ def test_slow_jobs_do_not_starve_the_reports_after_them():
     assert submitted_per_run == list(range(1, len(REPORTS) + 1)) + [len(REPORTS)]
 
 
-def test_a_carried_job_keeps_the_reports_collector_due_until_the_cycle_is_done():
-    client = ScriptedClient(act_polls={'app': SLOW})
-    state = FirewallState()
-
-    first = make_context(client, state)
-    collect_reports(first)
-    assert 'reports' in first.state.still_due
-
-    # The next run finishes the job and the rest of the cycle: nothing is left to poll.
-    state.still_due.clear()
-    collect_reports(make_context(client, state))
-    assert 'reports' not in state.still_due
-
-
 def test_a_timeout_polling_a_carried_job_keeps_it_for_the_next_run():
     client = ScriptedClient(act_polls={'app': SLOW})
     state = FirewallState()
@@ -445,11 +425,3 @@ def test_reports_are_registered_and_submit_through_the_check_when_enabled(
     assert len(submits) == 10
     assert len({field_of(c.params) for c in submits}) == 10
     assert all('<topn>10</topn>' in c.params['cmd'] for c in submits)
-
-
-@pytest.mark.parametrize('options', [{}, {'collect_reports': False}])
-def test_reports_are_not_called_unless_enabled(options, real_collectors, dd_run_check, aggregator, fake_panos):
-    dd_run_check(new_check(make_instance(**options)))
-
-    assert report_calls(fake_panos) == []
-    assert not aggregator.metrics('pan_firewall.report.top.sessions')

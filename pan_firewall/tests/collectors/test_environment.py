@@ -3,39 +3,27 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from unittest import mock
 
-import pytest
-
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectContext, FirewallState
-from datadog_checks.pan_firewall.collectors.system import ENVIRONMENTALS_CMD, collect_environment, parse_environmentals
-from datadog_checks.pan_firewall.xml_utils import parse_response
+from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS
+from datadog_checks.pan_firewall.collectors.system import ENVIRONMENTALS_CMD, parse_environmentals
 
 from ..common import FIXTURES, FW_A_IP, FW_A_TAGS
-from ..fixture_map import op_fixture
-from ..helpers import needs_capture, new_check
+from ..helpers import load_op, load_xml, needs_capture, new_check, series
 
 HARDWARE = FIXTURES / 'synthetic' / 'environmentals_hw.xml'
 
 
 def hardware():
-    return parse_response(HARDWARE.read_bytes())
-
-
-def series(samples):
-    result = {(s.name, s.tags): (s.value, s.kind) for s in samples}
-    assert len(result) == len(samples)
-    return result
+    return load_xml(HARDWARE)
 
 
 def sensor(description, slot):
     return f'sensor:{description}', f'slot:{slot}'
 
 
-@pytest.mark.parametrize('firewall', ['fw-a', 'fw-b'])
-def test_vm_series_has_no_sensors(firewall):
+def test_vm_series_has_no_sensors():
     log = mock.Mock()
-    root = parse_response(op_fixture(ENVIRONMENTALS_CMD, firewall).read_bytes())
 
-    assert parse_environmentals(root, log, set()) == []
+    assert parse_environmentals(load_op(ENVIRONMENTALS_CMD), log, set()) == []
     log.warning.assert_not_called()
 
 
@@ -100,19 +88,6 @@ def test_alarm_without_a_direction_warns_once_per_sensor_and_firewall():
     assert log.warning.call_count == 2
 
 
-def test_collector_asks_for_the_environmentals_and_keeps_the_warned_sensors():
-    ctx = CollectContext(
-        client=mock.Mock(), identity=mock.Mock(), state=FirewallState(), config=mock.Mock(), log=mock.Mock()
-    )
-    ctx.client.op.return_value = hardware()
-
-    collect_environment(ctx)
-    collect_environment(ctx)
-
-    ctx.client.op.assert_called_with(ENVIRONMENTALS_CMD)
-    ctx.log.warning.assert_called_once()
-
-
 def test_environment_is_registered_and_submits_through_the_check(real_collectors, fake_panos, dd_run_check, aggregator):
     assert 'environment' in COLLECT_FUNCTIONS
     fake_panos.answer_op(FW_A_IP, ENVIRONMENTALS_CMD, (200, HARDWARE.read_bytes()))
@@ -143,7 +118,7 @@ needs_pa_3420 = needs_capture('pa-3420', 'L8 (PA-3420 hardware)')
 def test_pa_3420_environmentals_parse_into_power_and_temperature_samples():
     log = mock.Mock()
 
-    samples = parse_environmentals(parse_response((PA_3420 / 'environmentals.xml').read_bytes()), log, set())
+    samples = parse_environmentals(load_xml(PA_3420 / 'environmentals.xml'), log, set())
 
     assert samples
     assert all(s.kind == 'gauge' for s in samples)

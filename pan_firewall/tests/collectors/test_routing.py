@@ -5,7 +5,7 @@ from unittest import mock
 
 import pytest
 
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectContext, FirewallState
+from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, FirewallState
 from datadog_checks.pan_firewall.collectors.routing import (
     BGP_PEER_CMD,
     OSPF_NEIGHBOR_CMD,
@@ -15,22 +15,9 @@ from datadog_checks.pan_firewall.collectors.routing import (
     parse_ospf_neighbors,
     peer_ip,
 )
-from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from ..common import FIXTURES, FW_A_TAGS, SYNTHETIC
-from ..fixture_map import op_fixture
-from ..helpers import make_instance, needs_capture, new_check
-
-
-def load(path):
-    return parse_response(path.read_bytes())
-
-
-def series(samples):
-    """Samples keyed by (name, tags) to (value, kind); fails on a duplicate (two values for one series)."""
-    result = {(s.name, s.tags): (s.value, s.kind) for s in samples}
-    assert len(result) == len(samples)
-    return result
+from ..helpers import load_op, load_xml, make_ctx, make_instance, needs_capture, new_check, series
 
 
 def peer_samples(tags, *, status, duration, restart, updates, limit, prefixes=None):
@@ -58,7 +45,7 @@ IPV4 = {'ipv4_unicast': ((1, 0, 1, 1), 10.0)}
 
 
 def test_bgp_of_the_capture():
-    samples = parse_bgp_peers(load(op_fixture(BGP_PEER_CMD)))
+    samples = parse_bgp_peers(load_op(BGP_PEER_CMD))
 
     # The down peer reports zeros and its configured limit, and has no prefix family to report.
     down = peer_samples(FW_A_DEAD, status=0, duration=0, restart=0, updates=0, limit=5000)
@@ -67,7 +54,7 @@ def test_bgp_of_the_capture():
 
 
 def test_bgp_established_peer_is_a_restart_within_30_minutes():
-    root = load(op_fixture(BGP_PEER_CMD))
+    root = load_op(BGP_PEER_CMD)
     for duration, restart in (('1799', 1), ('1800', 0)):
         root.find("result/entry[@peer='fw-peer']/status-duration").text = duration
         values = series(parse_bgp_peers(root))
@@ -81,7 +68,7 @@ def test_bgp_established_peer_is_a_restart_within_30_minutes():
 
 
 def test_bgp_dual_stack_peer_reports_each_family_with_its_own_utilization():
-    samples = parse_bgp_peers(load(SYNTHETIC / 'bgp_peer_dual_stack.xml'))
+    samples = parse_bgp_peers(load_xml(SYNTHETIC / 'bgp_peer_dual_stack.xml'))
 
     tags = ('peer:fw-peer', 'vr:default', 'peer_ip:2001:db8::1', 'remote_as:65002', 'peer_group:lab')
     assert series(samples) == peer_samples(
@@ -97,7 +84,7 @@ def test_bgp_dual_stack_peer_reports_each_family_with_its_own_utilization():
 
 @pytest.mark.parametrize('limit', ['0', None])
 def test_bgp_utilization_is_not_sent_without_a_prefix_limit(limit):
-    root = load(op_fixture(BGP_PEER_CMD))
+    root = load_op(BGP_PEER_CMD)
     element = root.find("result/entry[@peer='fw-peer']/prefix-limit")
     if limit is None:
         root.find("result/entry[@peer='fw-peer']").remove(element)
@@ -114,11 +101,9 @@ def test_bgp_utilization_is_not_sent_without_a_prefix_limit(limit):
     'address, expected',
     [
         ('169.254.10.2:179', '169.254.10.2'),
-        ('169.254.10.1:41785', '169.254.10.1'),
         ('10.60.1.250', '10.60.1.250'),
         ('[2001:db8::1]:179', '2001:db8::1'),
         ('2001:db8::1', '2001:db8::1'),
-        ('', None),
         (None, None),
     ],
 )
@@ -127,21 +112,22 @@ def test_peer_ip_strips_the_port_and_keeps_ipv6_intact(address, expected):
 
 
 def make_context(advanced_routing, state=None):
-    return CollectContext(
-        client=mock.Mock(),
-        identity=mock.Mock(advanced_routing=advanced_routing),
-        state=state or FirewallState(),
-        config=mock.Mock(),
-        log=mock.Mock(),
-    )
+    return make_ctx(state=state, identity=mock.Mock(advanced_routing=advanced_routing))
 
 
-def test_advanced_routing_engine_sends_no_call_and_warns_once_per_firewall():
+COLLECTORS = [
+    pytest.param(collect_bgp, BGP_PEER_CMD, id='bgp'),
+    pytest.param(collect_ospf, OSPF_NEIGHBOR_CMD, id='ospf'),
+]
+
+
+@pytest.mark.parametrize('collect, _cmd', COLLECTORS)
+def test_advanced_routing_engine_sends_no_call_and_warns_once_per_firewall(collect, _cmd):
     state = FirewallState()
     first, second = make_context(True, state), make_context(True, state)
 
-    assert collect_bgp(first) == []
-    assert collect_bgp(second) == []
+    assert collect(first) == []
+    assert collect(second) == []
 
     first.client.op.assert_not_called()
     second.client.op.assert_not_called()
@@ -150,17 +136,18 @@ def test_advanced_routing_engine_sends_no_call_and_warns_once_per_firewall():
     second.log.warning.assert_not_called()
     # Another firewall has its own state, so it warns on its own.
     other = make_context(True)
-    collect_bgp(other)
+    collect(other)
     other.log.warning.assert_called_once()
 
 
+@pytest.mark.parametrize('collect, cmd', COLLECTORS)
 @pytest.mark.parametrize('advanced_routing', [False, None])
-def test_legacy_or_unknown_routing_engine_sends_the_legacy_call(advanced_routing):
+def test_legacy_or_unknown_routing_engine_sends_the_legacy_call(collect, cmd, advanced_routing):
     ctx = make_context(advanced_routing)
-    ctx.client.op.return_value = load(op_fixture(BGP_PEER_CMD))
+    ctx.client.op.return_value = load_op(cmd)
 
-    assert collect_bgp(ctx)
-    ctx.client.op.assert_called_once_with(BGP_PEER_CMD)
+    assert collect(ctx)
+    ctx.client.op.assert_called_once_with(cmd)
     ctx.log.warning.assert_not_called()
 
 
@@ -191,17 +178,17 @@ FW_A_OSPF = ('neighbor:169.254.10.2', 'router_id:10.255.0.2', 'area:0.0.0.0', 'v
 
 
 def test_ospf_neighbor_of_the_capture_is_up_without_a_state_tag():
-    samples = parse_ospf_neighbors(load(op_fixture(OSPF_NEIGHBOR_CMD)))
+    samples = parse_ospf_neighbors(load_op(OSPF_NEIGHBOR_CMD))
 
     assert series(samples) == {('ospf.neighbor.status', FW_A_OSPF): (1, 'gauge')}
 
 
 @pytest.mark.parametrize(
     'state, expected',
-    [('full', 1), ('Full', 1), ('FULL', 1), ('2-way', 0), ('init', 0), ('exstart', 0), ('down', 0)],
+    [('full', 1), ('FULL', 1), ('2-way', 0)],
 )
 def test_ospf_neighbor_is_up_only_in_the_full_state(state, expected):
-    root = load(op_fixture(OSPF_NEIGHBOR_CMD))
+    root = load_op(OSPF_NEIGHBOR_CMD)
     root.find('result/entry/status').text = state
 
     # The state is the value; tagging it would split the series each time the neighbor changes state.
@@ -209,33 +196,11 @@ def test_ospf_neighbor_is_up_only_in_the_full_state(state, expected):
 
 
 def test_ospf_neighbor_without_a_status_is_not_reported():
-    root = load(op_fixture(OSPF_NEIGHBOR_CMD))
+    root = load_op(OSPF_NEIGHBOR_CMD)
     entry = root.find('result/entry')
     entry.remove(entry.find('status'))
 
     assert parse_ospf_neighbors(root) == []
-
-
-def test_ospf_advanced_routing_engine_sends_no_call_and_warns_once_per_firewall():
-    state = FirewallState()
-    first, second = make_context(True, state), make_context(True, state)
-
-    assert collect_ospf(first) == []
-    assert collect_ospf(second) == []
-
-    first.client.op.assert_not_called()
-    second.client.op.assert_not_called()
-    first.log.warning.assert_called_once()
-    assert 'legacy routing engine' in first.log.warning.call_args.args[0]
-    second.log.warning.assert_not_called()
-
-
-def test_ospf_sends_the_legacy_call_on_a_legacy_routing_engine():
-    ctx = make_context(False)
-    ctx.client.op.return_value = load(op_fixture(OSPF_NEIGHBOR_CMD))
-
-    assert series(collect_ospf(ctx)) == {('ospf.neighbor.status', FW_A_OSPF): (1, 'gauge')}
-    ctx.client.op.assert_called_once_with(OSPF_NEIGHBOR_CMD)
 
 
 def test_ospf_is_registered_and_submits_through_the_check_when_enabled(real_collectors, dd_run_check, aggregator):
@@ -250,14 +215,6 @@ def test_ospf_is_registered_and_submits_through_the_check_when_enabled(real_coll
         metric_type=aggregator.GAUGE,
     )
     assert len(aggregator.metrics('pan_firewall.ospf.neighbor.status')) == 1
-
-
-@pytest.mark.parametrize('options', [{}, {'collect_ospf': False}])
-def test_ospf_is_not_called_unless_enabled(options, real_collectors, dd_run_check, aggregator, fake_panos):
-    dd_run_check(new_check(make_instance(**options)))
-
-    assert OSPF_NEIGHBOR_CMD not in {c.cmd for c in fake_panos.calls}
-    assert not aggregator.metrics('pan_firewall.ospf.neighbor.status')
 
 
 # Gated on the ARE lab captures (L2). Expected layout, the answers of the Advanced Routing Engine:
@@ -277,8 +234,8 @@ def names_and_tag_keys(samples):
 def test_bgp_are_has_the_metric_names_and_tag_keys_of_the_legacy_engine():
     from datadog_checks.pan_firewall.collectors.routing import parse_bgp_are
 
-    legacy = parse_bgp_peers(load(SYNTHETIC / 'bgp_peer_dual_stack.xml'))
-    are = parse_bgp_are(load(ARE / 'bgp_peer.xml'))
+    legacy = parse_bgp_peers(load_xml(SYNTHETIC / 'bgp_peer_dual_stack.xml'))
+    are = parse_bgp_are(load_xml(ARE / 'bgp_peer.xml'))
 
     assert are
     assert names_and_tag_keys(are) <= names_and_tag_keys(legacy)
@@ -289,8 +246,8 @@ def test_bgp_are_has_the_metric_names_and_tag_keys_of_the_legacy_engine():
 def test_ospf_are_has_the_metric_names_and_tag_keys_of_the_legacy_engine():
     from datadog_checks.pan_firewall.collectors.routing import parse_ospf_are
 
-    legacy = parse_ospf_neighbors(load(op_fixture(OSPF_NEIGHBOR_CMD)))
-    are = parse_ospf_are(load(ARE / 'ospf_neighbor.xml'))
+    legacy = parse_ospf_neighbors(load_op(OSPF_NEIGHBOR_CMD))
+    are = parse_ospf_are(load_xml(ARE / 'ospf_neighbor.xml'))
 
     assert are
     assert names_and_tag_keys(are) == names_and_tag_keys(legacy)

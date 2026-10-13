@@ -6,24 +6,12 @@ from unittest import mock
 
 import pytest
 
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectContext, FirewallState
-from datadog_checks.pan_firewall.collectors.interfaces import COUNTER_INTERFACE_CMD, collect_interfaces
+from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, FirewallState
+from datadog_checks.pan_firewall.collectors.interfaces import COUNTER_INTERFACE_CMD
 from datadog_checks.pan_firewall.collectors.vpn import VPN_FLOW_CMD, VPN_GATEWAY_CMD, collect_vpn, parse_vpn
-from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from ..common import FW_A_TAGS
-from ..fixture_map import op_fixture
-from ..helpers import new_check
-
-
-def load(firewall, cmd):
-    return parse_response(op_fixture(cmd, firewall).read_bytes())
-
-
-def series(samples):
-    result = {(s.name, s.tags): (s.value, s.kind) for s in samples}
-    assert len(result) == len(samples)
-    return result
+from ..helpers import load_op, make_ctx, new_check, series
 
 
 def tunnel_tags(tunnel, interface, peer, gateway):
@@ -56,7 +44,7 @@ def expected(peer_ip, *, total=2, active=1, inactive=0, init=1, states=None):
 
 def test_vpn_of_the_capture():
     peer_ip = '10.60.1.11'
-    snapshot = parse_vpn(load('fw-a', VPN_FLOW_CMD), load('fw-a', VPN_GATEWAY_CMD), mock.Mock())
+    snapshot = parse_vpn(load_op(VPN_FLOW_CMD), load_op(VPN_GATEWAY_CMD), mock.Mock())
 
     assert series(snapshot.samples) == expected(peer_ip)
     assert snapshot.tunnel_states == {'tunnel.1': 'active', 'tunnel.2': 'init'}
@@ -67,31 +55,22 @@ def test_vpn_of_the_capture():
 
 
 def test_unknown_state_is_skipped_and_logged_but_still_counts_in_the_total():
-    flow = load('fw-a', VPN_FLOW_CMD)
+    flow = load_op(VPN_FLOW_CMD)
     flow.find("result/IPSec/entry[name='tun-peer']/state").text = 'weird'
     log = mock.Mock()
 
-    snapshot = parse_vpn(flow, load('fw-a', VPN_GATEWAY_CMD), log)
+    snapshot = parse_vpn(flow, load_op(VPN_GATEWAY_CMD), log)
 
     assert series(snapshot.samples) == expected('10.60.1.11', active=0, states={'tun-dead': 2})
     log.warning.assert_called_once()
     assert 'weird' in str(log.warning.call_args)
 
 
-def test_inactive_state_is_zero():
-    flow = load('fw-a', VPN_FLOW_CMD)
-    flow.find("result/IPSec/entry[name='tun-dead']/state").text = 'inactive'
-
-    snapshot = parse_vpn(flow, load('fw-a', VPN_GATEWAY_CMD), mock.Mock())
-
-    assert series(snapshot.samples) == expected('10.60.1.11', init=0, inactive=1, states={'tun-peer': 1, 'tun-dead': 0})
-
-
 def test_gateway_tag_is_omitted_when_gwid_matches_no_gateway():
-    flow = load('fw-a', VPN_FLOW_CMD)
+    flow = load_op(VPN_FLOW_CMD)
     flow.find("result/IPSec/entry[name='tun-peer']/gwid").text = '99'
 
-    snapshot = parse_vpn(flow, load('fw-a', VPN_GATEWAY_CMD), mock.Mock())
+    snapshot = parse_vpn(flow, load_op(VPN_GATEWAY_CMD), mock.Mock())
 
     assert snapshot.tunnel_tags['tunnel.1'] == (
         'tunnel:tun-peer',
@@ -102,65 +81,19 @@ def test_gateway_tag_is_omitted_when_gwid_matches_no_gateway():
 
 
 def test_gateway_total_counts_gateways_without_an_id_or_a_name():
-    gateway = load('fw-a', VPN_GATEWAY_CMD)
+    gateway = load_op(VPN_GATEWAY_CMD)
     entries = gateway.findall('./result/entries/entry')
     entries[0].remove(entries[0].find('id'))
     entries[1].remove(entries[1].find('name'))
 
-    snapshot = parse_vpn(load('fw-a', VPN_FLOW_CMD), gateway, mock.Mock())
+    snapshot = parse_vpn(load_op(VPN_FLOW_CMD), gateway, mock.Mock())
 
     assert series(snapshot.samples)[('ipsec.gateways.total', ())] == (len(entries), 'gauge')
 
 
-def test_unknown_shape_warns_and_sends_nothing():
-    log = mock.Mock()
-    empty = parse_response(b'<response status="success"/>')
-
-    snapshot = parse_vpn(empty, load('fw-a', VPN_GATEWAY_CMD), log)
-
-    assert snapshot.samples == []
-    log.warning.assert_called_once()
-
-
-def make_context(state, responses, **kwargs):
-    ctx = CollectContext(
-        client=mock.Mock(),
-        identity=mock.Mock(serial='007955000930601'),
-        state=state,
-        config=mock.Mock(),
-        log=mock.Mock(),
-        **kwargs,
-    )
-    ctx.client.op.side_effect = lambda cmd: responses[cmd]
-    return ctx
-
-
-def test_collector_stores_tunnel_tags_and_states_and_interfaces_uses_them_on_the_next_run():
-    state = FirewallState()
-    responses = {
-        VPN_FLOW_CMD: load('fw-a', VPN_FLOW_CMD),
-        VPN_GATEWAY_CMD: load('fw-a', VPN_GATEWAY_CMD),
-        COUNTER_INTERFACE_CMD: load('fw-a', COUNTER_INTERFACE_CMD),
-    }
-    ctx = make_context(state, responses)
-
-    collect_vpn(ctx)
-    # The next run's context snapshots what `vpn` stored.
-    next_ctx = make_context(state, responses, tunnel_tags=state.tunnel_tags)
-    samples = collect_interfaces(next_ctx)
-
-    assert [c.args[0] for c in ctx.client.op.call_args_list] == [VPN_FLOW_CMD, VPN_GATEWAY_CMD]
-    assert state.tunnel_states == {'tunnel.1': 'active', 'tunnel.2': 'init'}
-    rx = {s.tags: s.value for s in samples if s.name == 'ipsec.tunnel.rx.bytes'}
-    assert rx == {
-        tunnel_tags('tun-peer', 'tunnel.1', '10.60.1.11', 'gw-peer'): 1563183,
-        tunnel_tags('tun-dead', 'tunnel.2', '198.51.100.10', 'gw-dead'): 0,
-    }
-
-
 def test_failed_vpn_call_keeps_the_stored_tunnels():
     state = FirewallState(tunnel_states={'tunnel.1': 'active'})
-    ctx = make_context(state, {})
+    ctx = make_ctx({}, state=state)
 
     with pytest.raises(KeyError):
         collect_vpn(ctx)

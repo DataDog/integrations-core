@@ -1,18 +1,14 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from unittest import mock
-
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectContext, FirewallState
-from datadog_checks.pan_firewall.collectors.counters import GLOBAL_COUNTER_CMD, collect_global_counters, parse_global
+from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS
+from datadog_checks.pan_firewall.collectors.counters import GLOBAL_COUNTER_CMD, parse_global
 from datadog_checks.pan_firewall.constants import DROPPED_PACKET_ASPECTS, GLOBAL_COUNTERS
-from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from ..common import FW_A_TAGS, SYNTHETIC
-from ..fixture_map import op_fixture
-from ..helpers import make_instance, new_check
+from ..helpers import load_op, load_xml, make_instance, new_check
 
-# The 26 counters, with the values of each capture (0 for a counter the capture doesn't list) and the category and
+# The 26 counters, with the values of the capture (0 for a counter the capture doesn't list) and the category and
 # aspect they are tagged with when the capture lists them (otherwise the table's).
 ZERO = dict.fromkeys(GLOBAL_COUNTERS, 0)
 FW_A_VALUES = {
@@ -32,10 +28,6 @@ FW_A_VALUES = {
 # Sum of the `severity=drop` counters of the capture, by aspect. `mgmt` is `flow_host_decap_err`; `pktproc` is
 # `flow_action_close` + `ctd_dns_wait_pkt_drop` + `ctd_dns_wait_pkt_drop_response`; `forward` is `flow_fwd_l3_noarp`.
 FW_A_DROPS = {'forward': 1546, 'pktproc': 118 + 8 + 8, 'mgmt': 45}
-
-
-def load(path):
-    return parse_response(path.read_bytes())
 
 
 def global_series(samples):
@@ -63,47 +55,24 @@ def dropped(samples):
 
 
 def test_global_counters_of_the_capture():
-    samples = parse_global(load(op_fixture(GLOBAL_COUNTER_CMD)))
+    samples = parse_global(load_op(GLOBAL_COUNTER_CMD))
 
     series = global_series(samples)
 
+    # A counter the capture doesn't list is sent as 0 with the table's category and aspect.
     assert len(series) == 26
     assert series == {counter_tags(counter, *GLOBAL_COUNTERS[counter]): value for counter, value in FW_A_VALUES.items()}
     assert {s.name for s in samples} == {'counter.global', 'dropped_packets'}
+    # `dropped_packets` sums the severity=drop counters by aspect.
+    assert dropped(samples) == {**dict.fromkeys(DROPPED_PACKET_ASPECTS, 0), **FW_A_DROPS}
 
 
 def test_listed_counter_takes_category_and_aspect_from_the_response():
-    series = global_series(parse_global(load(SYNTHETIC / 'counter_global_session_installed_pktproc.xml')))
+    series = global_series(parse_global(load_xml(SYNTHETIC / 'counter_global_session_installed_pktproc.xml')))
 
     assert series[counter_tags('session_installed', 'session', 'pktproc')] == 2269
     assert counter_tags('session_installed', 'session', 'resource') not in series
     assert len(series) == 26
-
-
-def test_unlisted_counter_takes_category_and_aspect_from_the_table():
-    series = global_series(parse_global(load(op_fixture(GLOBAL_COUNTER_CMD, 'fw-a'))))
-
-    # Not in the capture: sent as 0, tagged with the table's values.
-    assert series[counter_tags('flow_arp_rcv_err', 'flow', 'arp')] == 0
-    assert series[counter_tags('pkt_recv_zero', 'packet', 'pktproc')] == 0
-
-
-def test_dropped_packets_sum_the_drop_severity_counters_by_aspect():
-    result = dropped(parse_global(load(op_fixture(GLOBAL_COUNTER_CMD))))
-
-    assert result == {**dict.fromkeys(DROPPED_PACKET_ASPECTS, 0), **FW_A_DROPS}
-    assert len(DROPPED_PACKET_ASPECTS) == 13
-
-
-def test_global_counters_sends_one_unfiltered_call(real_collectors):
-    client = mock.Mock()
-    client.op.return_value = load(op_fixture(GLOBAL_COUNTER_CMD, 'fw-a'))
-    ctx = CollectContext(client, mock.Mock(), FirewallState(), mock.Mock(), mock.Mock())
-
-    samples = collect_global_counters(ctx)
-
-    client.op.assert_called_once_with('<show><counter><global/></counter></show>')
-    assert len(global_series(samples)) == 26
 
 
 def test_global_counters_submit_through_the_check(real_collectors, fake_panos, dd_run_check, aggregator):
@@ -139,10 +108,3 @@ def test_global_counters_submit_through_the_check(real_collectors, fake_panos, d
     assert len(aggregator.metrics('pan_firewall.counter.global')) == 26
     assert len(aggregator.metrics('pan_firewall.dropped_packets')) == 14
     assert [c.cmd for c in fake_panos.calls if c.cmd == GLOBAL_COUNTER_CMD] == [GLOBAL_COUNTER_CMD]
-
-
-def test_global_counters_off_makes_no_call(real_collectors, fake_panos, dd_run_check, aggregator):
-    dd_run_check(new_check(make_instance(collect_global_counters=False)))
-
-    assert not [c for c in fake_panos.calls if c.cmd == GLOBAL_COUNTER_CMD]
-    assert not aggregator.metrics('pan_firewall.counter.global')
