@@ -2,4 +2,5 @@
 - template: instances/http
   overrides:
     request_size.value.example: 10
+    max_line_size.value.display_default: 16384
 - template: instances/default

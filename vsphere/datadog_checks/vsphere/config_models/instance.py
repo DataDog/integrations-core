@@ -117,6 +117,7 @@ class RestApiOptions(BaseModel):
     kerberos_keytab: Optional[str] = None
     kerberos_principal: Optional[str] = None
     log_requests: Optional[bool] = None
+    max_line_size: Optional[float] = None
     ntlm_domain: Optional[str] = None
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
