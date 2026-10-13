@@ -8,8 +8,253 @@ files:
     - template: init_config/default
   - template: instances
     options:
+    - name: panorama_host
+      fleet_configurable: true
+      description: |
+        Hostname or IP address of a Panorama management server. When set, the Agent discovers the connected
+        firewalls through Panorama and polls each one directly. Set either `panorama_host` or `firewalls`, not both.
+        Panorama requires `panorama_username` and `panorama_password`, or `panorama_api_key`.
+      value:
+        type: string
+        example: panorama.example.com
+        display_default: null
+    - name: panorama_username
+      fleet_configurable: true
+      description: Username of a Panorama admin account with XML API Operational Requests access.
+      value:
+        type: string
+        example: <PANORAMA_USERNAME>
+    - name: panorama_password
+      fleet_configurable: true
+      secret: true
+      description: Password for `panorama_username`.
+      value:
+        type: string
+        example: <PANORAMA_PASSWORD>
+    - name: panorama_api_key
+      fleet_configurable: true
+      secret: true
+      description: |
+        API key for Panorama. Use it instead of `panorama_username` and `panorama_password`.
+      value:
+        type: string
+        example: <PANORAMA_API_KEY>
+    - name: firewall_ips
+      fleet_configurable: true
+      description: |
+        Filters for the firewalls discovered through Panorama. Entries are IP addresses or CIDR blocks.
+        If no filters are configured, all connected firewalls are polled.
+        Use `include` to poll only matching firewalls and `exclude` to skip them. `exclude` takes precedence.
+      value:
+        type: object
+        properties:
+        - name: include
+          type: array
+          items:
+            type: string
+        - name: exclude
+          type: array
+          items:
+            type: string
+        example:
+          include:
+          - 10.0.0.0/24
+          exclude:
+          - 10.0.0.99
+    - name: firewall_ip_overrides
+      fleet_configurable: true
+      description: |
+        Map of firewall serial number to the IP address the Agent uses to reach that firewall,
+        instead of the IP address Panorama reports. Use it when the Agent reaches the firewalls through
+        a different network than Panorama does.
+      value:
+        type: object
+        additionalProperties:
+          type: string
+        example:
+          '007951000123456': 192.0.2.10
+    - name: firewalls
+      fleet_configurable: true
+      description: |
+        List of firewall IP addresses to poll. Set either `firewalls` or `panorama_host`, not both.
+        Every firewall must match an entry in `firewall_credentials`.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+        - 10.0.0.1
+        - 10.0.0.2
+    - name: firewall_credentials
+      fleet_configurable: true
+      description: |
+        Credentials used to log in to the firewalls. The Agent uses the first entry whose `cidr` contains the
+        firewall IP. An entry without `cidr` matches every firewall. Each entry must set either `username` and
+        `password`, or `api_key`, but not both. The same credentials apply to the firewalls found through Panorama.
+      value:
+        type: array
+        items:
+          type: object
+          properties:
+          - name: cidr
+            type: string
+          - name: username
+            type: string
+          - name: password
+            type: string
+            secret: true
+          - name: api_key
+            type: string
+            secret: true
+        example:
+        - cidr: 10.0.0.0/24
+          username: <USERNAME>
+          password: <PASSWORD>
+        - api_key: <API_KEY>
+    - name: port
+      fleet_configurable: true
+      description: HTTPS port of the firewall management interface.
+      value:
+        type: integer
+        default: 443
+        example: 443
+    - name: namespace
+      fleet_configurable: true
+      description: Namespace to use for NDM device metadata.
+      value:
+        type: string
+        default: default
+        example: default
+    - template: instances/http
+      overrides:
+        tls_verify.value.default: true
+        tls_verify.description: |
+          Instructs the check to validate the TLS certificate of the firewall management interface.
+          PAN-OS management interfaces ship with a self-signed certificate. Either install a certificate signed
+          by a CA you trust and set `tls_ca_cert`, or set this to `false` to accept the self-signed certificate.
+        tls_ca_cert.description: |
+          The path to a file of concatenated CA certificates in PEM format, or to a directory of
+          PEM certificates processed with `openssl rehash`. Use it when the firewall management certificate
+          is signed by a private CA, or to trust a self-signed certificate directly.
+        timeout.value.default: 30
+        timeout.value.example: 30
+        timeout.description: Timeout in seconds for each request to a firewall or Panorama.
+        proxy.hidden: true
+        skip_proxy.hidden: true
+        auth_type.hidden: true
+        use_legacy_auth_encoding.hidden: true
+        username.hidden: true
+        password.hidden: true
+        ntlm_domain.hidden: true
+        kerberos_auth.hidden: true
+        kerberos_cache.hidden: true
+        kerberos_delegate.hidden: true
+        kerberos_force_initiate.hidden: true
+        kerberos_hostname.hidden: true
+        kerberos_principal.hidden: true
+        kerberos_keytab.hidden: true
+        auth_token.hidden: true
+        aws_region.hidden: true
+        aws_host.hidden: true
+        aws_service.hidden: true
+        tls_use_host_header.hidden: true
+        tls_cert.hidden: true
+        tls_private_key.hidden: true
+        tls_protocols_allowed.hidden: true
+        tls_ciphers.hidden: true
+        headers.hidden: true
+        extra_headers.hidden: true
+        connect_timeout.hidden: true
+        read_timeout.hidden: true
+        request_size.hidden: true
+        log_requests.hidden: true
+        persist_connections.hidden: true
+        allow_redirects.hidden: true
+    - name: max_concurrency
+      fleet_configurable: true
+      description: Maximum number of firewalls to poll concurrently.
+      value:
+        type: integer
+        minimum: 1
+        default: 5
+        example: 5
     - template: instances/default
+      overrides:
+        min_collection_interval.value.example: 60
+        min_collection_interval.value.display_default: 60
+        min_collection_interval.description: |
+          Changes the collection interval of the check. For more information, see
+          https://docs.datadoghq.com/developers/write_agent_check/#collection-interval.
+          The default is 60 seconds. Each PAN-OS call has its own interval, from 2 minutes to 24 hours,
+          so a more frequent run does not collect additional data. Values above 120 delay the calls
+          that run every 2 or 3 minutes.
+    - name: vsys
+      fleet_configurable: true
+      description: |
+        List of virtual systems to collect from. A virtual system without interfaces is not detected
+        automatically, so list it here.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+        - vsys1
+    - name: collect_threats
+      fleet_configurable: true
+      description: Set to `true` to count threat log entries by severity and type.
+      value:
+        type: boolean
+        default: true
+        example: true
+    - name: security_rule_filter
+      fleet_configurable: true
+      description: |
+        List of regular expressions. Only security rules whose name matches one of them are reported.
+        If not set, all security rules are reported.
+      value:
+        type: array
+        items:
+          type: string
+        example:
+        - ^allow-.*
+    - name: collect_global_counters
+      fleet_configurable: true
+      description: Set to `true` to collect the PAN-OS global counters.
+      value:
+        type: boolean
+        default: false
+        example: false
+    - name: collect_ospf
+      fleet_configurable: true
+      description: Set to `true` to collect OSPF neighbor status.
+      value:
+        type: boolean
+        default: false
+        example: false
+    - name: collect_reports
+      fleet_configurable: true
+      description: Set to `true` to collect the PAN-OS predefined reports.
+      value:
+        type: boolean
+        default: false
+        example: false
+    - name: report_top_n
+      fleet_configurable: true
+      description: Number of entries to keep from each report.
+      value:
+        type: integer
+        minimum: 1
+        default: 10
+        example: 10
+    - name: send_ndm_metadata
+      fleet_configurable: true
+      description: Set to `true` to send Network Device Monitoring metadata for the firewalls.
+      value:
+        type: boolean
+        default: true
+        example: true
   - template: logs
+    required: true
     example:
     - type: tcp
       port: 10518

@@ -5,6 +5,17 @@ from pathlib import Path
 
 FIXTURES = Path(__file__).parent / 'fixtures'
 
-INSTANCE = {
-    'firewalls': [{'host': 'fw-a.example.com', 'username': 'dummy-user', 'password': 'dummy-password'}],
+CREDENTIALS = [{'username': 'dummy-user', 'password': 'dummy-password'}]
+
+STATIC_INSTANCE = {
+    'firewalls': ['192.0.2.10'],
+    'firewall_credentials': CREDENTIALS,
 }
+
+PANORAMA_INSTANCE = {
+    'panorama_host': 'panorama.example.com',
+    'panorama_api_key': 'dummy-api-key',
+    'firewall_credentials': CREDENTIALS,
+}
+
+INSTANCE = STATIC_INSTANCE
