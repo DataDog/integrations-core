@@ -38,6 +38,7 @@ def _text_response(text: str, *, content_type: str = 'text/plain') -> FakeHTTPRe
     return FakeHTTPResponse(
         content=text.encode('utf-8'),
         headers={'Content-Type': content_type},
+        encoding='utf-8',
     )
 
 

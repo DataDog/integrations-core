@@ -100,7 +100,7 @@ def test_fake_http_response_builds_and_registers_text_response(fake_http_respons
     assert response.content == b'first\nsecond'
     assert response.text == 'first\nsecond'
     assert list(response.iter_content()) == [b'first\nsecond']
-    assert list(response.iter_lines()) == ['first', 'second']
+    assert list(response.iter_lines(decode_unicode=True)) == ['first', 'second']
 
 
 @pytest.mark.parametrize(
