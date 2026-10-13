@@ -26,6 +26,16 @@ PANORAMA_INSTANCE = {
 
 INSTANCE = STATIC_INSTANCE
 
+# The docker fakes (see `docker/docker-compose.yaml`): the Agent container joins the `pan-firewall-e2e` network and
+# reaches each fake on port 443 at its own address.
+E2E_NETWORK = 'pan-firewall-e2e'
+E2E_SUBNET = '172.29.84.0/24'
+E2E_FIREWALL_IPS = {'fw-a': '172.29.84.10', 'fw-b': '172.29.84.11'}
+E2E_PANORAMA_IP = '172.29.84.12'
+PANORAMA_CREDENTIALS = {'username': 'dummy-panorama-user', 'password': 'dummy-panorama-password'}
+# The serials the synthetic Panorama device list gives the two firewalls (the real P1 entries).
+E2E_FIREWALL_SERIALS = {'fw-a': '007955000930601', 'fw-b': '007955000930602'}
+
 LAB_HOSTS_VAR = 'PANOS_LAB_HOSTS'
 LAB_USERNAME_VAR = 'PANOS_LAB_USERNAME'
 LAB_PASSWORD_VAR = 'PANOS_PASSWORD'

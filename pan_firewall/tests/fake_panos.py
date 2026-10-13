@@ -31,7 +31,8 @@ PANORAMA_HOSTS = {'panorama.example.com'}
 
 # The keygen success shape (`result/key`) from the PAN-OS XML API docs ("Get Your API Key"), with a dummy key. Kept
 # inline rather than in `fixtures/synthetic/`: fixture files must hold no `<key>` (see `test_fixtures_hold_no_secrets`).
-KEYGEN_OK = b'<response status="success"><result><key>FAKE-KEY-0000</key></result></response>'
+FAKE_KEY = 'FAKE-KEY-0000'
+KEYGEN_OK = f'<response status="success"><result><key>{FAKE_KEY}</key></result></response>'.encode()
 INVALID_CREDENTIAL = (FIXTURES / 'synthetic' / 'auth_invalid_credential.xml').read_bytes()
 # Stand-in for a command the fixture set has no capture for (for example `show interface all` on fw-b): PAN-OS
 # answers commands it cannot run with `status="error"`.

@@ -8,10 +8,58 @@ from typing import Any
 import pytest
 
 from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.dev import docker_run, get_here
+from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS
 
-from .common import INSTANCE, build_lab_instance
+from .common import (
+    CREDENTIALS,
+    E2E_FIREWALL_IPS,
+    E2E_FIREWALL_SERIALS,
+    E2E_NETWORK,
+    E2E_PANORAMA_IP,
+    E2E_SUBNET,
+    INSTANCE,
+    PANORAMA_CREDENTIALS,
+    build_lab_instance,
+)
 from .fake_panos import FakePanos
+
+COMPOSE_FILE = os.path.join(get_here(), 'docker', 'docker-compose.yaml')
+
+
+SERVICES = ('fw-a', 'fw-b', 'panorama')
+
+
+def docker_environment():
+    """Start the docker fakes (two firewalls and a Panorama) and yield an Agent instance per mode.
+
+    The static instance polls both fake firewalls; the Panorama one discovers them through the fake Panorama, whose
+    reported 10.60.x addresses are not reachable, so `firewall_ip_overrides` points each serial at its fake.
+    """
+    firewalls = list(E2E_FIREWALL_IPS.values())
+    env_vars = {
+        'PANOS_USERNAME': CREDENTIALS[0]['username'],
+        'PANOS_PASSWORD': CREDENTIALS[0]['password'],
+        'PANORAMA_USERNAME': PANORAMA_CREDENTIALS['username'],
+        'PANORAMA_PASSWORD': PANORAMA_CREDENTIALS['password'],
+        'FW_A_IP': E2E_FIREWALL_IPS['fw-a'],
+        'FW_B_IP': E2E_FIREWALL_IPS['fw-b'],
+        'PANORAMA_IP': E2E_PANORAMA_IP,
+        'E2E_SUBNET': E2E_SUBNET,
+    }
+    static = {'firewalls': firewalls, 'firewall_credentials': CREDENTIALS, 'tls_verify': False}
+    panorama = {
+        'panorama_host': E2E_PANORAMA_IP,
+        'panorama_username': PANORAMA_CREDENTIALS['username'],
+        'panorama_password': PANORAMA_CREDENTIALS['password'],
+        'firewall_credentials': CREDENTIALS,
+        'firewall_ip_overrides': {E2E_FIREWALL_SERIALS[name]: ip for name, ip in E2E_FIREWALL_IPS.items()},
+        'tls_verify': False,
+    }
+    ready = [CheckDockerLogs(COMPOSE_FILE, 'Running on all addresses', service=service) for service in SERVICES]
+    with docker_run(compose_file=COMPOSE_FILE, build=True, conditions=ready, env_vars=env_vars):
+        yield {'instances': [static, panorama]}, {'docker_network': E2E_NETWORK}
 
 
 @pytest.fixture(scope='session')
@@ -46,7 +94,7 @@ def dd_environment():
         yield {'instances': [build_lab_instance()]}
     else:
         # The docker environment is added in a later task.
-        yield
+        yield from docker_environment()
 
 
 @pytest.fixture
