@@ -10,13 +10,16 @@ class PanosError(Exception):
 class PanosApiError(PanosError):
     """PAN-OS answered with status="error", or with a body that is not XML.
 
-    `code` is the response's `code` attribute (for example `'400'`), or `'parse'` for a non-XML body.
+    `code` is the response's `code` attribute (for example `'400'`), `'parse'` for a body that is not a PAN-OS
+    response, or the HTTP status for an HTTP error with such a body. `panos_response` is False when the body was not a
+    PAN-OS XML response (for example a proxy's HTML error page): PAN-OS itself did not answer.
     """
 
-    def __init__(self, code: str, msg: str):
+    def __init__(self, code: str, msg: str, panos_response: bool = True):
         super().__init__(f'PAN-OS API error {code}: {msg}')
         self.code = code
         self.msg = msg
+        self.panos_response = panos_response
 
 
 class PanosAuthError(PanosApiError):

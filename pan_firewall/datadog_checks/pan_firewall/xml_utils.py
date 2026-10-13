@@ -17,7 +17,7 @@ def parse_response(body: bytes) -> Element:
     try:
         root = ET.fromstring(body)
     except ET.ParseError as e:
-        raise PanosApiError(PARSE_ERROR_CODE, f'response is not valid XML: {e}') from e
+        raise PanosApiError(PARSE_ERROR_CODE, f'response is not valid XML: {e}', panos_response=False) from e
     return check_response(root)
 
 
@@ -27,7 +27,9 @@ def check_response(root: Element) -> Element:
     The tag check rejects well-formed XML that is not from PAN-OS, such as a proxy's XHTML error page.
     """
     if root.tag != 'response':
-        raise PanosApiError(PARSE_ERROR_CODE, f'unexpected root element <{root.tag}>, expected <response>')
+        raise PanosApiError(
+            PARSE_ERROR_CODE, f'unexpected root element <{root.tag}>, expected <response>', panos_response=False
+        )
     if root.get('status') == 'error':
         msg = ' '.join(t.strip() for m in root.iter('msg') for t in m.itertext() if t.strip())
         raise PanosApiError(root.get('code') or '', msg)

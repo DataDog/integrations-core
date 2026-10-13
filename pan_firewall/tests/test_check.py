@@ -64,7 +64,9 @@ def test_good_run_collects_identity_and_reports_connected(dd_run_check, aggregat
     assert re.search(rf'pan_firewall {re.escape(FW_A_IP)}: 2 calls in \d+\.\d\ds', caplog.text)
 
 
-@pytest.mark.parametrize('failure', ['timeout', 'refused', 'tls'])
+# Transport failures, and HTTP errors whose body is not a PAN-OS response: none of them means the firewall API answered,
+# and none of them says anything about the credentials.
+@pytest.mark.parametrize('failure', ['timeout', 'refused', 'tls', 'html_502', 'html_403'])
 def test_unreachable_on_first_run_reports_disconnected_without_device_id(dd_run_check, aggregator, fake_panos, failure):
     fake_panos.fail(FW_A_IP, failure)
     check = new_check()
@@ -72,6 +74,7 @@ def test_unreachable_on_first_run_reports_disconnected_without_device_id(dd_run_
     dd_run_check(check)
 
     assert only_value_and_tags(aggregator, 'can_connect') == (0, BASE_TAGS)
+    assert only_value_and_tags(aggregator, 'api.authentication.status') == (0, BASE_TAGS)
     # The next run tries again: the identity is still missing, so system info is due.
     calls_before = len(fake_panos.calls)
     dd_run_check(check)

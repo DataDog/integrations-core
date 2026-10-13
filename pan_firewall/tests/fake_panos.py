@@ -38,6 +38,9 @@ FAILURES: dict[str, Answer] = {
     'tls': requests.exceptions.SSLError('certificate verify failed'),
     'http_403': (403, INVALID_CREDENTIAL),
     'code_403': (200, INVALID_CREDENTIAL),
+    # Non-PAN-OS bodies, such as a reverse proxy's or a hung management web server's error page.
+    'html_502': (502, b'<html><body><h1>502 Bad Gateway</h1></body></html>'),
+    'html_403': (403, b'<html><body><h1>403 Forbidden</h1></body></html>'),
 }
 
 

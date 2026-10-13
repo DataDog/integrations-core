@@ -94,15 +94,21 @@ def read_response(resp: Response) -> Element:
 
 
 def _classify(status_code: int, error: PanosApiError) -> PanosApiError:
-    """An HTTP 403, or a `code` PAN-OS uses for a rejected key, is an auth failure whatever the body says."""
+    """A PAN-OS response with HTTP 403, or with a `code` PAN-OS uses for a rejected key, is an auth failure.
+
+    A body that is not a PAN-OS response (a proxy's HTML page, for example) is never an auth failure, whatever its
+    HTTP status: it says nothing about the key, so it triggers no renewal and no invalid-credentials state.
+    """
+    if not error.panos_response:
+        if status_code >= 400:
+            return PanosApiError(str(status_code), f'HTTP {status_code}: {error.msg}', panos_response=False)
+        return error
     if status_code == 403 or error.code in AUTH_ERROR_CODES:
         # open question: PAN's docs say code 16 means the API role lacks permission for the command, so
         # regenerating the key may not help. It is handled like an expired key, as the plan specifies; the
         # retry is bounded to one, so the cost is one keygen per rejected call.
         code = error.code if error.code in AUTH_ERROR_CODES else '403'
         return PanosAuthError(code, error.msg or f'HTTP {status_code}')
-    if error.code == PARSE_ERROR_CODE and status_code >= 400:
-        return PanosApiError(str(status_code), f'HTTP {status_code}: {error.msg}')
     return error
 
 
@@ -111,8 +117,8 @@ class CallStats:
     """The outcome of the calls a client made since the last `PanosClient.take_stats()`.
 
     `answered` is True once any call got a PAN-OS response, successful or `status="error"` (an auth rejection
-    included); only transport failures and non-PAN-OS bodies leave it False. `auth_rejected` is True once a call
-    failed with PanosAuthError after the key renewal.
+    included); transport failures and bodies that are not PAN-OS XML (`panos_response` False) leave it False.
+    `auth_rejected` is True once a call failed with PanosAuthError after the key renewal.
     """
 
     calls: int = 0
@@ -213,7 +219,7 @@ class PanosClient:
     def _record(self, error: PanosError | None) -> None:
         with self._stats_lock:
             self._stats.calls += 1
-            if error is None or (isinstance(error, PanosApiError) and error.code != PARSE_ERROR_CODE):
+            if error is None or (isinstance(error, PanosApiError) and error.panos_response):
                 self._stats.answered = True
             if isinstance(error, PanosAuthError):
                 self._stats.auth_rejected = True
@@ -253,7 +259,7 @@ class PanosClient:
             events = self._stream_events(resp)
             first = next(events, None)
             if first is None:
-                raise PanosApiError(PARSE_ERROR_CODE, 'response is empty')
+                raise PanosApiError(PARSE_ERROR_CODE, 'response is empty', panos_response=False)
             root = first[1]
             if root.tag != 'response' or root.get('status') == 'error':
                 for _ in events:
@@ -277,7 +283,7 @@ class PanosClient:
             parser.close()
             yield from _element_events(parser)
         except ET.ParseError as e:
-            raise PanosApiError(PARSE_ERROR_CODE, f'response is not valid XML: {e}') from None
+            raise PanosApiError(PARSE_ERROR_CODE, f'response is not valid XML: {e}', panos_response=False) from None
 
 
 def _element_events(parser: ET.XMLPullParser[Element]) -> Iterator[tuple[str, Element]]:

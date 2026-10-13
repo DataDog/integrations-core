@@ -215,6 +215,20 @@ def test_rejected_keygen_is_not_retried_until_reset():
     assert keys.auth_failed is False
 
 
+def test_non_panos_http_403_is_not_an_auth_failure():
+    # A proxy's 403 page says nothing about the PAN-OS key or credentials: no renewal, no invalid-credentials state.
+    http = FakeHttp(keygen=[(200, KEYGEN_OK)], api=[(403, b'<html><body>403 Forbidden</body></html>')])
+    client, keys = make_client(http)
+
+    with pytest.raises(PanosApiError) as exc_info:
+        client.op(SYSTEM_INFO_CMD)
+
+    assert not isinstance(exc_info.value, PanosAuthError)
+    assert exc_info.value.code == '403'
+    assert len(http.calls_of('keygen')) == 1
+    assert keys.auth_failed is False
+
+
 def test_static_key_is_never_regenerated():
     http = FakeHttp(api=[(403, INVALID_CREDENTIAL)])
     client, keys = make_client(http, STATIC_CREDS)
