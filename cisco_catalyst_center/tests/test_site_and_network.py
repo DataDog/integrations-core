@@ -5,10 +5,12 @@
 
 from __future__ import annotations
 
+import pytest
+
 from datadog_checks.cisco_catalyst_center.collectors import collect_network_health, collect_site_health
 
 from .common import client_from_payload as _client
-from .common import load_captured, metric_values, with_value
+from .common import load_captured, load_captured_reservable, metric_values, with_value
 
 # -- site health ------------------------------------------------------------------
 
@@ -61,3 +63,16 @@ def test_collect_network_health_given_the_captured_payload_emits_the_expected_se
 
     assert metric_values(aggregator, 'cisco_catalyst_center.network.device.total.count') == [4]
     assert metric_values(aggregator, 'cisco_catalyst_center.network.category.health', 'category:Access') == [100]
+
+
+@pytest.mark.parametrize(
+    'metric', ['cisco_catalyst_center.network.health', 'cisco_catalyst_center.network.category.health']
+)
+def test_collect_network_health_given_no_scored_device_skips_the_score(aggregator, instance, check, metric):
+    # Recorded while the newest five-minute bucket was still open: one device, no health data for
+    # it, and a score of 0. A score over no scored device is not a measurement, and 0 is critical.
+    payload = load_captured_reservable('intent_network_health_zero_score')
+
+    collect_network_health(check, _client(instance, payload))
+
+    aggregator.assert_metric(metric, count=0)
