@@ -1,7 +1,12 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+from collections.abc import Mapping
 from pathlib import Path
+from typing import Any
+
+import pytest
 
 FIXTURES = Path(__file__).parent / 'fixtures'
 
@@ -19,3 +24,25 @@ PANORAMA_INSTANCE = {
 }
 
 INSTANCE = STATIC_INSTANCE
+
+LAB_HOSTS_VAR = 'PANOS_LAB_HOSTS'
+LAB_USERNAME_VAR = 'PANOS_LAB_USERNAME'
+LAB_PASSWORD_VAR = 'PANOS_PASSWORD'
+
+
+def lab_hosts(environ: Mapping[str, str] = os.environ) -> list[str]:
+    return [host.strip() for host in environ.get(LAB_HOSTS_VAR, '').split(',') if host.strip()]
+
+
+def build_lab_instance(environ: Mapping[str, str] = os.environ) -> dict[str, Any]:
+    """Build the single lab instance from the environment only; fail naming (never showing) missing variables."""
+    missing = [name for name in (LAB_HOSTS_VAR, LAB_USERNAME_VAR, LAB_PASSWORD_VAR) if not environ.get(name)]
+    if not lab_hosts(environ):
+        missing = sorted({*missing, LAB_HOSTS_VAR}, key=(LAB_HOSTS_VAR, LAB_USERNAME_VAR, LAB_PASSWORD_VAR).index)
+    if missing:
+        pytest.fail(f'USE_PANOS_LAB is set but these environment variables are missing or empty: {", ".join(missing)}')
+    return {
+        'firewalls': lab_hosts(environ),
+        'firewall_credentials': [{'username': environ[LAB_USERNAME_VAR], 'password': environ[LAB_PASSWORD_VAR]}],
+        'tls_verify': False,
+    }
