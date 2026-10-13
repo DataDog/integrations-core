@@ -31,6 +31,9 @@ class KeyManager:
 
     `auth_failed` is True once the device rejected the credentials: a keygen answered with an auth error, or the
     static `api_key` was rejected. A successful keygen resets it.
+
+    A rejected keygen latches: until `reset_failure()` is called, `key()` and `regenerate()` raise PanosAuthError
+    without contacting the device, so bad credentials cost one login attempt per run and never trigger a lockout.
     """
 
     def __init__(self, http: RequestsWrapper, base_url: str, creds: Credentials):
@@ -42,12 +45,14 @@ class KeyManager:
         self._creds = creds
         self._key: str | None = creds.api_key
         self._lock = threading.Lock()
+        self._keygen_rejected = False
         self.auth_failed = False
 
     def key(self) -> str:
         """Return the current key, generating one if none is held."""
         with self._lock:
             if self._key is None:
+                self._raise_if_rejected()
                 self._key = self._keygen()
             return self._key
 
@@ -57,10 +62,20 @@ class KeyManager:
             if self._creds.api_key is not None:
                 self.auth_failed = True
                 raise PanosAuthError('403', f'{self._host} rejected the configured API key, which is never renewed')
-            # The rejected key is dropped first, so a failed keygen leaves no key and the next call retries keygen.
+            self._raise_if_rejected()
+            # The rejected key is dropped first, so a failed keygen leaves no key to retry with.
             self._key = None
             self._key = self._keygen()
             return self._key
+
+    def reset_failure(self) -> None:
+        """Allow one new keygen after a rejected one. Called once at the start of each run; `auth_failed` is kept."""
+        with self._lock:
+            self._keygen_rejected = False
+
+    def _raise_if_rejected(self) -> None:
+        if self._keygen_rejected:
+            raise PanosAuthError('403', f'{self._host} rejected the credentials earlier; not retrying keygen')
 
     def _keygen(self) -> str:
         # The credentials go in the POST body, never in the URL.
@@ -70,6 +85,7 @@ class KeyManager:
             root = read_response(resp)
         except PanosAuthError as e:
             # A 403 from keygen itself means the credentials are wrong: retrying cannot help.
+            self._keygen_rejected = True
             self.auth_failed = True
             raise PanosAuthError(e.code, f'{self._host} rejected the credentials: {e.msg}') from None
         key = text(root, './result/key')

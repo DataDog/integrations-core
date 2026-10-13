@@ -193,6 +193,28 @@ def test_keygen_rejection_marks_credentials_invalid_without_retry():
     assert http.calls_of('api') == []
 
 
+def test_rejected_keygen_is_not_retried_until_reset():
+    http = FakeHttp(
+        keygen=[(200, KEYGEN_OK), (403, INVALID_CREDENTIAL), (200, KEYGEN_OK)],
+        api=[(403, INVALID_CREDENTIAL), (200, SYSTEM_INFO)],
+    )
+    client, keys = make_client(http)
+
+    # The key is revoked and the credentials changed mid-run: the renewal keygen is rejected, and the later
+    # call of the same run (or a second call in flight with the same key) must not log in again.
+    for _ in range(2):
+        with pytest.raises(PanosAuthError):
+            client.op(SYSTEM_INFO_CMD)
+    assert len(http.calls_of('keygen')) == 2
+    assert keys.auth_failed is True
+
+    keys.reset_failure()
+    client.op(SYSTEM_INFO_CMD)
+
+    assert len(http.calls_of('keygen')) == 3
+    assert keys.auth_failed is False
+
+
 def test_static_key_is_never_regenerated():
     http = FakeHttp(api=[(403, INVALID_CREDENTIAL)])
     client, keys = make_client(http, STATIC_CREDS)
