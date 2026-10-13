@@ -3,17 +3,19 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import inspect
 import logging
 import os
 import re
 import socket
 import warnings
+import weakref
 from collections import ChainMap
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from hashlib import sha256
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from urllib.parse import quote, urljoin, urlparse, urlunparse
 
 import lazy_loader
@@ -36,6 +38,7 @@ from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
 
 if TYPE_CHECKING:
     from cryptography.x509 import Certificate
+    from urllib3.response import BaseHTTPResponse
 
 # See Performance Optimizations in this package's README.md.
 requests_kerberos = lazy_loader.load('requests_kerberos')
@@ -61,6 +64,9 @@ DEFAULT_EXPIRATION = 300
 # https://www.bittorrent.org/beps/bep_0003.html
 DEFAULT_CHUNK_SIZE = 16
 
+# `iter_lines` buffers a line until its end, so lines are limited (in KiB) to avoid buffering an unbounded response
+DEFAULT_MAX_LINE_SIZE = 4096
+
 STANDARD_FIELDS = {
     'allow_redirects': True,
     'auth_token': None,
@@ -79,6 +85,7 @@ STANDARD_FIELDS = {
     'kerberos_keytab': None,
     'kerberos_principal': None,
     'log_requests': False,
+    'max_line_size': DEFAULT_MAX_LINE_SIZE,
     'ntlm_domain': None,
     'password': None,
     'persist_connections': False,
@@ -229,6 +236,61 @@ class _SSLContextAdapter(requests.adapters.HTTPAdapter):
         # See: https://github.com/psf/requests/blob/7341690e842a23cf18ded0abd9229765fa88c4e2/src/requests/adapters.py#L419-L423
         host_params, _ = super().build_connection_pool_key_attributes(request, verify, cert)
         return host_params, {"ssl_context": self.ssl_context}
+
+
+class ResponseLineTooLongError(ValueError):
+    pass
+
+
+def limit_line_size(response: requests.Response, max_line_size: int) -> None:
+    """Make reading `response` raise `ResponseLineTooLongError` once a line grows past `max_line_size` bytes."""
+    raw = getattr(response, 'raw', None)
+    # Only urllib3 responses are read through a `stream` method, other objects such as test doubles are left alone.
+    # Once replaced, `raw.stream` is no longer a method, so the limit is installed only once.
+    if inspect.ismethod(getattr(raw, 'stream', None)):
+        raw.stream = LineSizeLimitedStream(raw, max_line_size)
+
+
+class LineSizeLimitedStream:
+    """
+    Replacement for `HTTPResponse.stream` that raises `ResponseLineTooLongError` once a line grows past
+    `max_line_size` bytes.
+
+    `requests` reads every response body through `raw.stream`, and `iter_lines` buffers a line until its end,
+    so checking the chunks here bounds the memory used by a response without line breaks.
+    """
+
+    def __init__(self, raw: BaseHTTPResponse, max_line_size: int):
+        # This object replaces `raw.stream`, and a bound method references its object. Holding the original method
+        # strongly would create a `raw` -> this object -> method -> `raw` cycle that only the cyclic GC could free.
+        self._stream = weakref.WeakMethod(raw.stream)
+        self._max_line_size = max_line_size
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Iterator[bytes]:
+        stream = self._stream()
+        if stream is None:
+            raise ReferenceError('The response was garbage collected before being read')
+
+        # Number of bytes since the last line break, carried over from one chunk to the next
+        line_size = 0
+        for chunk in stream(*args, **kwargs):
+            newline = chunk.find(b'\n')
+            if newline < 0:
+                # The line continues past this chunk
+                line_size += len(chunk)
+            elif line_size + newline <= self._max_line_size:
+                # The pending line ends in this chunk and fits. Lines that start and end inside this chunk are not
+                # measured, they are bounded by the chunk size. Only the part after the last line break carries over.
+                line_size = len(chunk) - chunk.rfind(b'\n') - 1
+            else:
+                # The pending line ends in this chunk but is already too long
+                line_size += newline
+            if line_size > self._max_line_size:
+                raise ResponseLineTooLongError(
+                    f'Response contains a line longer than {self._max_line_size} bytes, '
+                    'the limit can be raised with the `max_line_size` option'
+                )
+            yield chunk
 
 
 class ResponseWrapper(ObjectProxy):
@@ -404,6 +466,7 @@ class RequestsWrapper(object):
         'request_hooks',
         'auth_token_handler',
         'request_size',
+        'max_line_size',
         'tls_protocols_allowed',
         'aia_chasing_max_depth',
         'tls_config',
@@ -570,6 +633,9 @@ class RequestsWrapper(object):
         self.ignore_tls_warning = is_affirmative(config['tls_ignore_warning'])
 
         self.request_size = int(float(config['request_size']) * KIBIBYTE)
+        self.max_line_size = int(float(config['max_line_size']) * KIBIBYTE)
+        if self.max_line_size <= 0:
+            raise ConfigurationError('The `max_line_size` setting must be greater than 0')
 
         self.aia_chasing_max_depth = DEFAULT_AIA_CHASING_MAX_DEPTH
 

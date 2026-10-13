@@ -19,7 +19,7 @@ from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_familie
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http import RequestsWrapper, limit_line_size
 
 
 class OpenMetricsScraperMixin(object):
@@ -860,7 +860,9 @@ class OpenMetricsScraperMixin(object):
 
         http_handler = self.get_http_handler(scraper_config)
 
-        return http_handler.get(endpoint, stream=True, **kwargs)
+        response = http_handler.get(endpoint, stream=True, **kwargs)
+        limit_line_size(response, http_handler.max_line_size)
+        return response
 
     def get_hostname_for_sample(self, sample, scraper_config):
         """
