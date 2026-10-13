@@ -43,3 +43,10 @@ BUSY_JOB_STATUSES = frozenset({'ACT', 'PEND'})
 BUSY_JOB_TYPES = frozenset({'Commit', 'AutoCom', 'Content', 'Antivirus', 'WildFire'})
 # After this many seconds of continuously skipping a busy firewall, the check collects it anyway.
 COMMIT_SKIP_MAX_SECONDS = 600
+
+# Threat logs: entries asked per `type=log` job (the PAN-OS maximum), how often a job is polled and how long to wait
+# between polls before it is left for the next run, and the minimum seconds between two `seqno` reset checks.
+THREAT_PAGE_SIZE = 5000
+THREAT_JOB_POLLS = 5
+THREAT_JOB_POLL_DELAY = 1.0
+THREAT_RESET_CHECK_SECONDS = 1800

@@ -58,3 +58,49 @@ def find_op_fixture(cmd: str, firewall: str) -> Path | None:
         return op_fixture(cmd, firewall)
     relative = PARTIAL_OP_FIXTURES.get(cmd, {}).get(firewall)
     return FIXTURES / relative if relative else None
+
+
+# `type=log` queries to the fixture answering them: (response file, submit file) under FIXTURES, per set. The key is
+# `(dir, query, skip)`; `nlogs` is not part of it, so a test can change the page size. `query` is None when the request
+# has none. Each `forward` query is the one the threats collector sends for a watermark one below its `seqno geq`.
+PROBE_SEQNO_START = 7691899338913581588
+# `nlogs` of the real `probe-seqno` capture: pages p0-p18 hold 20 entries and p19 holds 5.
+PROBE_SEQNO_PAGE_SIZE = 20
+PROBE_SEQNO_PAGES = 20
+# `seqno` of the newest log of `probe/threat_back_p0.xml`, and the lowest of each set's `threat_log_5m.xml`.
+BACKWARD_NEWEST_SEQNO = 7691899338913581520
+THREAT_LOG_FIRST_SEQNO = {'fw-a': 7691899338913480957, 'fw-b': 7691899334618513665}
+
+
+def seqno_query(seqno: int) -> str:
+    return f'(seqno geq {seqno})'
+
+
+LOG_FIXTURES: dict[str, dict[tuple[str, str | None, int], tuple[str, str]]] = {
+    'fw-a': {
+        ('backward', None, 0): ('probe/threat_back_p0.xml', 'probe/threat_back_p0_submit.xml'),
+        ('forward', seqno_query(THREAT_LOG_FIRST_SEQNO['fw-a']), 0): (
+            'fw-a/threat_log_5m.xml',
+            'fw-a/threat_log_5m_submit.xml',
+        ),
+        **{
+            ('forward', seqno_query(PROBE_SEQNO_START), page * PROBE_SEQNO_PAGE_SIZE): (
+                f'probe-seqno/seq_0_p{page}.xml',
+                f'probe-seqno/seq_0_p{page}_submit.xml',
+            )
+            for page in range(PROBE_SEQNO_PAGES)
+        },
+    },
+    'fw-b': {
+        ('forward', seqno_query(THREAT_LOG_FIRST_SEQNO['fw-b']), 0): (
+            'fw-b/threat_log_5m.xml',
+            'fw-b/threat_log_5m_submit.xml',
+        ),
+    },
+}
+
+
+def find_log_fixture(direction: str, query: str | None, skip: int, firewall: str) -> tuple[Path, Path] | None:
+    """Return the (response, submit) fixtures answering a `type=log` query for the firewall set, or None."""
+    paths = LOG_FIXTURES.get(firewall, {}).get((direction, query, skip))
+    return (FIXTURES / paths[0], FIXTURES / paths[1]) if paths else None

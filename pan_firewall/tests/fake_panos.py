@@ -11,14 +11,17 @@ with `FakePanos.fail()`, replace the answer to one command with `FakePanos.answe
 from __future__ import annotations
 
 import io
-from dataclasses import dataclass
+import itertools
+import re
+from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, Literal
 from urllib.parse import urlsplit
 
 import requests
 
 from .common import FIXTURES
-from .fixture_map import find_op_fixture
+from .fixture_map import find_log_fixture, find_op_fixture
 
 # Firewall IP -> fixture set.
 FIREWALL_SETS = {'192.0.2.10': 'fw-a', '192.0.2.11': 'fw-b'}
@@ -31,7 +34,12 @@ INVALID_CREDENTIAL = (FIXTURES / 'synthetic' / 'auth_invalid_credential.xml').re
 # answers commands it cannot run with `status="error"`.
 NO_CAPTURE = b'<response status="error" code="400"><msg><line>no capture for this command</line></msg></response>'
 
+SUBMIT_TEMPLATE = (
+    b'<response status="success" code="19"><result><msg><line>query job enqueued with jobid %s</line></msg>'
+    b'<job>%s</job></result></response>'
+)
 Answer = tuple[int, bytes] | Exception
+LogBody = bytes | Path | Answer
 
 FAILURES: dict[str, Answer] = {
     'timeout': requests.exceptions.ReadTimeout('read timed out'),
@@ -52,6 +60,7 @@ class Call:
     cmd: str | None
     action: str | None
     key_sent: bool
+    params: dict[str, str] = field(default_factory=dict)
 
 
 class FakePanos:
@@ -59,6 +68,11 @@ class FakePanos:
         self.calls: list[Call] = []
         self._failures: dict[tuple[str, str], Answer] = {}
         self._op_answers: dict[tuple[str, str], Answer] = {}
+        # `type=log` jobs: the bodies a `get` of the job answers in turn (the last one repeats), by (host, job id).
+        self._log_overrides: dict[tuple[str, str, str | None, int], list[LogBody]] = {}
+        self._log_jobs: dict[tuple[str, str], list[LogBody]] = {}
+        self._log_reads: dict[tuple[str, str], int] = {}
+        self._job_ids = itertools.count(9000)
 
     def fail(self, host: str, failure: str, on: Literal['all', 'keygen', 'api'] = 'all') -> None:
         """Answer every later request of kind `on` to `host` with the named entry of FAILURES."""
@@ -69,9 +83,18 @@ class FakePanos:
         """Answer every later `type=op&cmd=<cmd>` request to `host` with `answer`; `fail()` still takes precedence."""
         self._op_answers[host, cmd] = answer
 
+    def answer_log(self, host: str, direction: str, query: str | None, skip: int, *bodies: LogBody) -> None:
+        """Answer `type=log` submits of (`dir`, `query`, `skip`) to `host` with a new job whose `get`s answer `bodies`.
+
+        The bodies are served one per `get` (`get_job` or `iter_log_entries`), the last one repeating, so a job can
+        be `ACT` for a while and then finish. A body is bytes, a fixture path, or an `Answer` (a failure).
+        """
+        self._log_overrides[host, direction, query, skip] = list(bodies)
+
     def recover(self, host: str) -> None:
         self._failures = {k: v for k, v in self._failures.items() if k[0] != host}
         self._op_answers = {k: v for k, v in self._op_answers.items() if k[0] != host}
+        self._log_overrides = {k: v for k, v in self._log_overrides.items() if k[0] != host}
 
     def calls_to(self, host: str) -> list[Call]:
         return [c for c in self.calls if c.host == host]
@@ -87,11 +110,13 @@ class FakePanos:
                 cmd=data.get('cmd'),
                 action=data.get('action'),
                 key_sent='X-PAN-KEY' in (options.get('extra_headers') or {}),
+                params=dict(data),
             )
         )
         answer = (
             self._failures.get((host, kind))
             or (data.get('type') == 'op' and self._op_answers.get((host, data.get('cmd', ''))))
+            or (data.get('type') == 'log' and self._answer_log(host, data))
             or self._answer(host, data)
         )
         if isinstance(answer, Exception):
@@ -105,6 +130,40 @@ class FakePanos:
             return requests.exceptions.ConnectionError(f'no fake firewall at {host}')
         path = find_op_fixture(data['cmd'], FIREWALL_SETS[host]) if data.get('type') == 'op' else None
         return (200, path.read_bytes()) if path else (200, NO_CAPTURE)
+
+    def _answer_log(self, host: str, data: dict[str, str]) -> Answer | None:
+        """Answer a `type=log` submit or `action=get`; None for anything else, which `_answer` then handles."""
+        if host not in FIREWALL_SETS:
+            return None
+        if data.get('action') == 'get':
+            return self._read_log_job(host, data.get('job-id', ''))
+        direction, query, skip = data.get('dir', ''), data.get('query'), int(data.get('skip', '0'))
+        bodies = self._log_overrides.get((host, direction, query, skip))
+        if bodies is not None:
+            job_id = str(next(self._job_ids))
+            submit = SUBMIT_TEMPLATE % (job_id.encode(), job_id.encode())
+        else:
+            fixture = find_log_fixture(direction, query, skip, FIREWALL_SETS[host])
+            if fixture is None:
+                return 200, NO_CAPTURE
+            response, submit_path = fixture
+            submit = submit_path.read_bytes()
+            job_id = re.search(rb'<job>(\d+)</job>', submit).group(1).decode()  # type: ignore[union-attr]
+            bodies = [response]
+        self._log_jobs[host, job_id] = bodies
+        self._log_reads[host, job_id] = 0
+        return 200, submit
+
+    def _read_log_job(self, host: str, job_id: str) -> Answer:
+        bodies = self._log_jobs.get((host, job_id))
+        if bodies is None:
+            return 200, NO_CAPTURE
+        index = self._log_reads[host, job_id]
+        self._log_reads[host, job_id] = index + 1
+        body = bodies[min(index, len(bodies) - 1)]
+        if isinstance(body, Path):
+            return 200, body.read_bytes()
+        return (200, body) if isinstance(body, bytes) else body
 
 
 def _response(url: str, status: int, body: bytes) -> requests.Response:

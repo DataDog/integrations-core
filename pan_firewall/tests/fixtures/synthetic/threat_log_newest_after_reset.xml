@@ -1,0 +1,28 @@
+<!-- Synthetic `dir=backward&nlogs=1` job read after a seqno reset (reboot or HA failover, unconfirmed on a real firewall): the newest log has seqno 12. Entries are fw-a/threat_log_5m.xml's first entry (logid, serial, rule, app, vsys, severity, action, threatid), trimmed to the fields the threats collector reads plus identifying ones. The envelope is fw-a/threat_log_5m.xml's. -->
+<response status="success"><result>
+  <job>
+    <status>FIN</status>
+    <id>91</id>
+  </job>
+  <log>
+    <logs count="1" progress="100">
+      <entry logid="7691853494432563439">
+        <domain>1</domain>
+        <receive_time>2026/10/02 05:30:00</receive_time>
+        <serial>007955000930601</serial>
+        <seqno>12</seqno>
+        <type>THREAT</type>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 05:30:00</time_generated>
+        <src>10.60.2.100</src>
+        <dst>8.8.8.8</dst>
+        <rule>trust-out</rule>
+        <app>dns-base</app>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+        <threatid>generic:test-malware.testpanw.com</threatid>
+      </entry>
+    </logs>
+  </log>
+</result></response>

@@ -24,6 +24,7 @@ from .collectors import (  # noqa: F401  (importing the modules registers their 
     routing,
     rules,
     system,
+    threats,
     vpn,
 )
 from .collectors.jobs import busy_jobs
@@ -216,7 +217,16 @@ class FirewallPoller:
         Collectors share the client's 2 in-flight slots. `iter_log_entries` holds one slot until exhausted, so a
         collector must never call `client.op()` while iterating log entries.
         """
-        ctx = CollectContext(client=self.client, identity=identity, state=self.state, config=self.config, log=self.log)
+        ctx = CollectContext(
+            client=self.client,
+            identity=identity,
+            state=self.state,
+            config=self.config,
+            log=self.log,
+            clock=self.schedule.now,
+            read_cache=self.check.read_persistent_cache,
+            write_cache=self.check.write_persistent_cache,
+        )
         with ThreadPoolExecutor(max_workers=COLLECTOR_WORKERS, thread_name_prefix=f'pan_firewall-{self.ip}') as pool:
             futures = {name: pool.submit(self._run_collector, name, ctx) for name in names}
         outcome = CollectorRun()
