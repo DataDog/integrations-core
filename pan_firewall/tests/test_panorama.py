@@ -195,8 +195,8 @@ def test_firewall_ips_filter_the_polled_ip(dd_run_check, fake_panos, filters, ex
 
 @pytest.mark.parametrize(
     'key',
-    [7955000930601, 7955000930601.0, '7955000930601', '7.955000930601e+12'],
-    ids=['int', 'float', 'digits-without-zeros', 'scientific'],
+    [7955000930601, 7955000930601.0],
+    ids=['int', 'float'],
 )
 def test_override_key_read_as_a_number_matches_the_serial_and_warns_once(dd_run_check, fake_panos, caplog, key):
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, REAL_CAPTURE.read_bytes()))
@@ -209,6 +209,36 @@ def test_override_key_read_as_a_number_matches_the_serial_and_warns_once(dd_run_
     warnings = [r.getMessage() for r in caplog.records if 'was read as a number' in r.getMessage()]
     assert len(warnings) == 1
     assert 'quote serials' in warnings[0]
+
+
+@pytest.mark.parametrize('key', ['7.955000930601e+12', '7955000930601'], ids=['scientific', 'digits-without-zeros'])
+def test_quoted_override_key_without_leading_zeros_matches_without_a_warning(dd_run_check, fake_panos, caplog, key):
+    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, REAL_CAPTURE.read_bytes()))
+
+    dd_run_check(new_check(firewall_ip_overrides={key: FW_A_POLLED}))
+
+    assert polled_hosts(fake_panos) == {FW_A_POLLED, FW_B_REPORTED}
+    assert 'was read as a number' not in caplog.text
+
+
+def test_override_key_read_as_octal_matches_the_serial(dd_run_check, fake_panos):
+    # YAML 1.1 reads an unquoted `0123` as the octal number 83.
+    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml(('0123', 'octal', '10.60.0.40', 'yes')))
+
+    dd_run_check(new_check(firewall_ip_overrides={0o123: FW_A_POLLED}))
+
+    assert polled_hosts(fake_panos) == {FW_A_POLLED}
+
+
+def test_unmatched_numeric_override_key_warns_once(dd_run_check, fake_panos, caplog):
+    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, REAL_CAPTURE.read_bytes()))
+    check = new_check(firewall_ip_overrides={7955000930699: FW_A_POLLED})
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    assert polled_hosts(fake_panos) == {FW_A_REPORTED, FW_B_REPORTED}
+    assert caplog.text.count('was read as a number') == 1
 
 
 def test_quoted_override_key_matches_without_a_warning(dd_run_check, fake_panos, caplog):
