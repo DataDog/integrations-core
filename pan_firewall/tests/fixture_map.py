@@ -104,3 +104,10 @@ def find_log_fixture(direction: str, query: str | None, skip: int, firewall: str
     """Return the (response, submit) fixtures answering a `type=log` query for the firewall set, or None."""
     paths = LOG_FIXTURES.get(firewall, {}).get((direction, query, skip))
     return (FIXTURES / paths[0], FIXTURES / paths[1]) if paths else None
+
+
+def find_report_fixture(field: str, firewall: str) -> tuple[Path, Path] | None:
+    """Return the (response, submit) fixtures of the custom report aggregated by `field`, or None."""
+    response = FIXTURES / firewall / f'report_custom_{field}.xml'
+    submit = FIXTURES / firewall / f'report_custom_{field}_submit.xml'
+    return (response, submit) if response.exists() and submit.exists() else None

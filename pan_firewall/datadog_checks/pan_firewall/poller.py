@@ -24,6 +24,7 @@ from .collectors import (  # noqa: F401  (importing the modules registers their 
     ha,
     interfaces,
     licenses,
+    reports,
     routing,
     rules,
     system,

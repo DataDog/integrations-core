@@ -51,6 +51,25 @@ THREAT_JOB_POLLS = 5
 THREAT_JOB_POLL_DELAY = 1.0
 THREAT_RESET_CHECK_SECONDS = 1800
 
+# Top-N reports: report name -> (PAN-OS field the custom report aggregates by, dimension tag of its metrics). There is
+# no HTTP-only report (decision 15). A job is polled this many times, this many seconds apart, before it is left for
+# the next run; one that stays active through this many carry-overs is dropped.
+REPORTS = {
+    'top_applications': ('app', 'app'),
+    'top_application_categories': ('category-of-app', 'app_category'),
+    'top_technology_categories': ('technology-of-app', 'app_technology'),
+    'top_sources': ('src', 'src'),
+    'top_destinations': ('dst', 'dst'),
+    'top_source_countries': ('srcloc', 'src_country'),
+    'top_destination_countries': ('dstloc', 'dst_country'),
+    'top_ingress_zones': ('from', 'src_zone'),
+    'top_egress_zones': ('to', 'dst_zone'),
+    'top_rules': ('rule', 'rule'),
+}
+REPORT_JOB_POLLS = 10
+REPORT_JOB_POLL_DELAY = 0.5
+REPORT_MAX_CARRIES = 3
+
 # NDM metadata values (the `vendor` here differs from the `device_vendor` tag).
 NDM_INTEGRATION = 'pan_firewall'
 NDM_VENDOR = 'Palo Alto Networks'

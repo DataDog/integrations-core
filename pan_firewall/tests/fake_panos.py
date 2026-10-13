@@ -21,7 +21,7 @@ from urllib.parse import urlsplit
 import requests
 
 from .common import FIXTURES
-from .fixture_map import find_log_fixture, find_op_fixture
+from .fixture_map import find_log_fixture, find_op_fixture, find_report_fixture
 
 # Firewall IP -> fixture set.
 FIREWALL_SETS = {'192.0.2.10': 'fw-a', '192.0.2.11': 'fw-b'}
@@ -73,6 +73,10 @@ class FakePanos:
         self._log_jobs: dict[tuple[str, str], list[LogBody]] = {}
         self._log_reads: dict[tuple[str, str], int] = {}
         self._job_ids = itertools.count(9000)
+        # `type=report` jobs, like the log ones: overrides by (host, aggregate-by field), bodies by (host, job id).
+        self._report_overrides: dict[tuple[str, str], list[LogBody]] = {}
+        self._report_jobs: dict[tuple[str, str], list[LogBody]] = {}
+        self._report_reads: dict[tuple[str, str], int] = {}
 
     def fail(self, host: str, failure: str, on: Literal['all', 'keygen', 'api'] = 'all') -> None:
         """Answer every later request of kind `on` to `host` with the named entry of FAILURES."""
@@ -91,10 +95,15 @@ class FakePanos:
         """
         self._log_overrides[host, direction, query, skip] = list(bodies)
 
+    def answer_report(self, host: str, field: str, *bodies: LogBody) -> None:
+        """Answer report submits aggregated by `field` to `host` with a new job whose `get`s answer `bodies` in turn."""
+        self._report_overrides[host, field] = list(bodies)
+
     def recover(self, host: str) -> None:
         self._failures = {k: v for k, v in self._failures.items() if k[0] != host}
         self._op_answers = {k: v for k, v in self._op_answers.items() if k[0] != host}
         self._log_overrides = {k: v for k, v in self._log_overrides.items() if k[0] != host}
+        self._report_overrides = {k: v for k, v in self._report_overrides.items() if k[0] != host}
 
     def calls_to(self, host: str) -> list[Call]:
         return [c for c in self.calls if c.host == host]
@@ -117,6 +126,7 @@ class FakePanos:
             self._failures.get((host, kind))
             or (data.get('type') == 'op' and self._op_answers.get((host, data.get('cmd', ''))))
             or (data.get('type') == 'log' and self._answer_log(host, data))
+            or (data.get('type') == 'report' and self._answer_report(host, data))
             or self._answer(host, data)
         )
         if isinstance(answer, Exception):
@@ -154,12 +164,42 @@ class FakePanos:
         self._log_reads[host, job_id] = 0
         return 200, submit
 
+    def _answer_report(self, host: str, data: dict[str, str]) -> Answer | None:
+        """Answer a `type=report` submit or `action=get`; None for an unknown host, which `_answer` then handles."""
+        if host not in FIREWALL_SETS:
+            return None
+        if data.get('action') == 'get':
+            return self._read_job(self._report_jobs, self._report_reads, host, data.get('job-id', ''))
+        match = re.search(r'<aggregate-by><member>([^<]+)</member>', data.get('cmd', ''))
+        field = match.group(1) if match else ''
+        bodies = self._report_overrides.get((host, field))
+        if bodies is not None:
+            job_id = str(next(self._job_ids))
+            submit = SUBMIT_TEMPLATE % (job_id.encode(), job_id.encode())
+        else:
+            fixture = find_report_fixture(field, FIREWALL_SETS[host])
+            if fixture is None:
+                return 200, NO_CAPTURE
+            response, submit_path = fixture
+            submit = submit_path.read_bytes()
+            job_id = re.search(rb'<job>(\d+)</job>', submit).group(1).decode()  # type: ignore[union-attr]
+            bodies = [response]
+        self._report_jobs[host, job_id] = bodies
+        self._report_reads[host, job_id] = 0
+        return 200, submit
+
     def _read_log_job(self, host: str, job_id: str) -> Answer:
-        bodies = self._log_jobs.get((host, job_id))
+        return self._read_job(self._log_jobs, self._log_reads, host, job_id)
+
+    @staticmethod
+    def _read_job(
+        jobs: dict[tuple[str, str], list[LogBody]], reads: dict[tuple[str, str], int], host: str, job_id: str
+    ) -> Answer:
+        bodies = jobs.get((host, job_id))
         if bodies is None:
             return 200, NO_CAPTURE
-        index = self._log_reads[host, job_id]
-        self._log_reads[host, job_id] = index + 1
+        index = reads[host, job_id]
+        reads[host, job_id] = index + 1
         body = bodies[min(index, len(bodies) - 1)]
         if isinstance(body, Path):
             return 200, body.read_bytes()

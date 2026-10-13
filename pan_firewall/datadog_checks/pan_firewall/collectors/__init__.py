@@ -80,6 +80,21 @@ class ThreatState:
 
 
 @dataclass
+class ReportJob:
+    """A report job still running when a run ended: the report it belongs to and how many runs it has been carried."""
+
+    report: str
+    job_id: str
+    carries: int = 1
+
+
+@dataclass
+class ReportState:
+    pending: ReportJob | None = None  # polled first next run, never submitted again
+    warned: set[str] = field(default_factory=set)  # reports whose job failed, warned once per firewall
+
+
+@dataclass
 class FirewallState:
     """What the poller keeps about one firewall between runs. Later collectors add their own fields."""
 
@@ -101,6 +116,7 @@ class FirewallState:
     ha_warned: bool = False
     warned_sensors: set[str] = field(default_factory=set)
     counters_warned: bool = False  # `show counter global` in an unknown shape, warned once
+    reports: ReportState = field(default_factory=ReportState)
 
 
 @dataclass
