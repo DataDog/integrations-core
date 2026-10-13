@@ -197,6 +197,24 @@ def role_catalog(roles_instance):
             )
 
 
+def _flatten_role_event(event):
+    """Return a nested `pg_roles` payload as flat roles, memberships, and settings arrays.
+
+    Each membership gains `member_role_oid` and each setting `role_oid` from the role it is nested under.
+    """
+    flat = {k: v for k, v in event.items() if k != 'roles'}
+    flat['roles'] = [{k: v for k, v in role.items() if k not in ('member_of', 'settings')} for role in event['roles']]
+    flat['memberships'] = [
+        membership | {'member_role_oid': role['role_oid']}
+        for role in event['roles']
+        for membership in role['member_of']
+    ]
+    flat['settings'] = [
+        setting | {'role_oid': role['role_oid']} for role in event['roles'] for setting in role['settings']
+    ]
+    return flat
+
+
 def _flatten_privilege_event(event):
     """Return a nested `pg_role_privileges` payload as flat arrays, one row per privilege, dependency, or grant.
 
@@ -389,7 +407,50 @@ def test_collect_roles_payload_contract(integration_check, roles_instance, role_
     assert role_event['collection_payloads_count'] == 1
     assert role_event['collection_payload_index'] == 0
     assert role_event['collection_interval'] == 600
-    assert role_event['roles']
+    assert set(role_event) == {
+        'host',
+        'database_instance',
+        'agent_version',
+        'dbms',
+        'dbms_version',
+        'kind',
+        'collection_interval',
+        'tags',
+        'cloud_metadata',
+        'collection_started_at',
+        'timestamp',
+        'collection_payload_index',
+        'collection_payloads_count',
+        'roles',
+    }
+    assert {frozenset(membership) for role in role_event['roles'] for membership in role['member_of']} == {
+        frozenset({'group_role_oid', 'grantor_role_oid', 'admin_option', 'member_can_inherit', 'member_can_set'})
+    }
+    assert {frozenset(setting) for role in role_event['roles'] for setting in role['settings']} == {
+        frozenset({'database_name', 'setting_name', 'setting_value'})
+    }
+    assert {frozenset(role) for role in role_event['roles']} == {
+        frozenset(
+            {
+                'role_name',
+                'role_oid',
+                'is_super',
+                'can_inherit',
+                'can_create_role',
+                'can_create_db',
+                'can_login',
+                'is_replication',
+                'can_bypass_rls',
+                'conn_limit',
+                'valid_until',
+                'member_of',
+                'settings',
+            }
+        )
+    }
+    # Every role appears, with empty arrays when it has no memberships or settings.
+    assert any(not role['member_of'] and not role['settings'] for role in role_event['roles'])
+    role_event = _flatten_role_event(role_event)
     assert role_event['memberships']
     assert set(role_event['roles'][0]) == {
         'role_name',
@@ -626,7 +687,7 @@ def test_collect_roles_redacts_custom_setting_values(integration_check, roles_in
     metadata = aggregator.get_event_platform_events('dbm-metadata')
     assert 'dd-role-obs-secret' not in json.dumps(metadata)
     assert 'dd-role-obs-mixed-case-secret' not in json.dumps(metadata)
-    role_event = next(event for event in metadata if event['kind'] == 'pg_roles')
+    role_event = _flatten_role_event(next(event for event in metadata if event['kind'] == 'pg_roles'))
     oid = _role_oids(role_event)
 
     assert {
@@ -671,8 +732,8 @@ def test_collect_roles_keeps_membership_with_dropped_grantor(integration_check, 
 
         run_one_check(check)
 
-        role_event = next(
-            event for event in aggregator.get_event_platform_events('dbm-metadata') if event['kind'] == 'pg_roles'
+        role_event = _flatten_role_event(
+            next(event for event in aggregator.get_event_platform_events('dbm-metadata') if event['kind'] == 'pg_roles')
         )
         oid = _role_oids(role_event)
         assert [

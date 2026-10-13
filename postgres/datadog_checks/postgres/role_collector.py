@@ -19,12 +19,10 @@ from .filters import regex_exclude_clauses, regex_include_clause
 from .role_queries import (
     NESTED_ELEMENT_MARKERS,
     QUERY_DEFAULT_PRIVILEGES,
-    QUERY_ROLE_SETTINGS,
-    QUERY_ROLES,
     ROLE_SETTING_VALUE_PREFIXES,
     list_databases_query,
-    memberships_query,
     objects_query,
+    roles_query,
 )
 from .util import payload_pg_version
 from .version_utils import V11, V16
@@ -33,7 +31,7 @@ if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
 
 
-INSTANCE_ARRAYS = ("roles", "memberships", "settings")
+INSTANCE_ARRAYS = ("roles",)
 DATABASE_ARRAYS = ("objects", "default_privileges")
 PAYLOAD_CHUNK_SIZE = 10_000
 # The intake accepts batches of up to 5 MB of uncompressed data; the margin leaves room for the forwarder to batch
@@ -278,9 +276,11 @@ class PostgresRoleCollector:
                     conn,
                     cursors,
                     [
-                        ("roles", QUERY_ROLES, ()),
-                        ("memberships", memberships_query(pg16_plus=self._check.version >= V16), ()),
-                        ("settings", QUERY_ROLE_SETTINGS, (list(ROLE_SETTING_VALUE_PREFIXES),)),
+                        (
+                            "roles",
+                            roles_query(pg16_plus=self._check.version >= V16),
+                            (list(ROLE_SETTING_VALUE_PREFIXES),),
+                        ),
                     ],
                 )
                 for array_name, cursor in results:

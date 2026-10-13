@@ -21,7 +21,26 @@ def list_databases_query(database_filter: str = "TRUE") -> str:
     return QUERY_LIST_DATABASES.format(database_filter=database_filter)
 
 
-QUERY_ROLES = """
+# Built-in settings have no dot in their name. Every dotted setting belongs to an extension or application, and
+# those can hold secrets such as `pgrst.jwt_secret` or `anon.salt`, whether or not a loaded module registers them.
+# Dotted settings are collected only for extensions known to hold no secrets; all others are skipped entirely.
+ROLE_SETTING_VALUE_PREFIXES = ("auto_explain", "pg_hint_plan", "pg_stat_statements", "pgaudit", "plpgsql")
+
+# Before PostgreSQL 16, inheritance is a property of the member, and every membership allows SET ROLE to the group.
+MEMBERSHIP_OPTIONS_PRE_PG16 = """',"member_can_inherit":' || member_role.rolinherit::text
+               || ',"member_can_set":true}'"""
+MEMBERSHIP_OPTIONS_PG16_PLUS = """',"member_can_inherit":' || membership.inherit_option::text
+               || ',"member_can_set":' || membership.set_option::text || '}'"""
+
+
+def _roles_query(membership_options: str, member_role_join: str) -> str:
+    # One row per role, with the memberships where it is the member and its settings nested as JSON text. Both are
+    # aggregated once per role and joined: pg_db_role_setting has no index on the role alone, so looking settings up
+    # per role would scan the whole table for every role. Dropping a role leaves memberships it granted pointing at
+    # its OID before PostgreSQL 16, so a grantor OID can be missing from `roles`. setrole 0 holds settings that apply
+    # to every role in a database. The settings allowlist is the query's only parameter; prefixes are matched
+    # case-insensitively because custom setting names keep the case they were written in.
+    return f"""
 SELECT r.rolname::text AS role_name,
        r.oid::bigint AS role_oid,
        r.rolsuper AS is_super,
@@ -32,77 +51,60 @@ SELECT r.rolname::text AS role_name,
        r.rolreplication AS is_replication,
        r.rolbypassrls AS can_bypass_rls,
        r.rolconnlimit AS conn_limit,
-       pg_catalog.to_json(r.rolvaliduntil) AS valid_until
+       pg_catalog.to_json(r.rolvaliduntil) AS valid_until,
+       '[' || COALESCE(memberships.entries, '') || ']' AS member_of,
+       '[' || COALESCE(role_settings.entries, '') || ']' AS settings
 FROM pg_catalog.pg_roles AS r
-ORDER BY role_name
+LEFT JOIN (
+    SELECT membership.member,
+           pg_catalog.string_agg(
+               '{{"group_role_oid":' || membership.roleid::bigint::text
+               || ',"grantor_role_oid":' || membership.grantor::bigint::text
+               || ',"admin_option":' || membership.admin_option::text
+               || {membership_options},
+               ',') AS entries
+    FROM pg_catalog.pg_auth_members AS membership{member_role_join}
+    GROUP BY membership.member
+) AS memberships
+  ON memberships.member = r.oid
+LEFT JOIN (
+    SELECT settings.setrole,
+           pg_catalog.string_agg(
+               '{{"database_name":' || pg_catalog.to_json(COALESCE(database.datname::text, ''))::text
+               || ',"setting_name":' || pg_catalog.to_json(parsed.setting_name)::text
+               || ',"setting_value":' || pg_catalog.to_json(parsed.setting_value)::text || '}}',
+               ',') AS entries
+    FROM pg_catalog.pg_db_role_setting AS settings
+    CROSS JOIN LATERAL unnest(settings.setconfig) AS setting
+    CROSS JOIN LATERAL (
+        SELECT split_part(setting, '=', 1) AS setting_name,
+               substr(setting, strpos(setting, '=') + 1) AS setting_value
+    ) AS parsed
+    LEFT JOIN pg_catalog.pg_database AS database
+      ON database.oid = settings.setdatabase
+    WHERE settings.setrole <> 0
+      AND (
+          strpos(parsed.setting_name, '.') = 0
+          OR lower(split_part(parsed.setting_name, '.', 1)) = ANY(%s)
+      )
+    GROUP BY settings.setrole
+) AS role_settings
+  ON role_settings.setrole = r.oid
 """
 
 
-# Before PostgreSQL 16, inheritance is a property of the member, and every membership allows SET ROLE to the
-# group. Dropping a role also leaves memberships it granted pointing at its OID, so a grantor OID can be missing
-# from `roles`.
-QUERY_MEMBERSHIPS_PRE_PG16 = """
-SELECT membership.roleid::bigint AS group_role_oid,
-       membership.member::bigint AS member_role_oid,
-       membership.grantor::bigint AS grantor_role_oid,
-       membership.admin_option AS admin_option,
-       member_role.rolinherit AS member_can_inherit,
-       true AS member_can_set
-FROM pg_catalog.pg_auth_members AS membership
-JOIN pg_catalog.pg_roles AS member_role
-  ON member_role.oid = membership.member
-ORDER BY group_role_oid, member_role_oid, grantor_role_oid
-"""
+ROLES_QUERIES = {
+    True: _roles_query(MEMBERSHIP_OPTIONS_PG16_PLUS, ""),
+    False: _roles_query(
+        MEMBERSHIP_OPTIONS_PRE_PG16,
+        "\n    JOIN pg_catalog.pg_roles AS member_role\n      ON member_role.oid = membership.member",
+    ),
+}
 
 
-# PostgreSQL 16 records whether each membership allows inheriting the group's privileges and SET ROLE to it.
-QUERY_MEMBERSHIPS_PG16_PLUS = """
-SELECT membership.roleid::bigint AS group_role_oid,
-       membership.member::bigint AS member_role_oid,
-       membership.grantor::bigint AS grantor_role_oid,
-       membership.admin_option AS admin_option,
-       membership.inherit_option AS member_can_inherit,
-       membership.set_option AS member_can_set
-FROM pg_catalog.pg_auth_members AS membership
-ORDER BY group_role_oid, member_role_oid, grantor_role_oid
-"""
-
-
-def memberships_query(*, pg16_plus: bool) -> str:
-    """Select the membership query for the connected server version."""
-    if pg16_plus:
-        return QUERY_MEMBERSHIPS_PG16_PLUS
-    return QUERY_MEMBERSHIPS_PRE_PG16
-
-
-# Built-in settings have no dot in their name. Every dotted setting belongs to an extension or application, and
-# those can hold secrets such as `pgrst.jwt_secret` or `anon.salt`, whether or not a loaded module registers them.
-# Dotted settings are collected only for extensions known to hold no secrets; all others are skipped entirely.
-ROLE_SETTING_VALUE_PREFIXES = ("auto_explain", "pg_hint_plan", "pg_stat_statements", "pgaudit", "plpgsql")
-
-# Takes the allowed prefixes as its only parameter. Prefixes are matched case-insensitively because custom setting
-# names keep the case they were written in.
-QUERY_ROLE_SETTINGS = """
-SELECT settings.setrole::bigint AS role_oid,
-       COALESCE(database.datname::text, '') AS database_name,
-       parsed.setting_name,
-       parsed.setting_value
-FROM pg_catalog.pg_db_role_setting AS settings
-CROSS JOIN LATERAL unnest(settings.setconfig) AS setting
-CROSS JOIN LATERAL (
-    SELECT split_part(setting, '=', 1) AS setting_name,
-           substr(setting, strpos(setting, '=') + 1) AS setting_value
-) AS parsed
-LEFT JOIN pg_catalog.pg_database AS database
-  ON database.oid = settings.setdatabase
--- setrole 0 holds settings that apply to every role in a database.
-WHERE settings.setrole <> 0
-  AND (
-      strpos(parsed.setting_name, '.') = 0
-      OR lower(split_part(parsed.setting_name, '.', 1)) = ANY(%s)
-  )
-ORDER BY role_oid, database_name, setting_name
-"""
+def roles_query(*, pg16_plus: bool) -> str:
+    """Select the roles query for the connected server version."""
+    return ROLES_QUERIES[pg16_plus]
 
 
 # Schemas role collection never reports: system catalogs, the information schema, the agent's own schema, and
@@ -194,6 +196,8 @@ NESTED_ELEMENT_MARKERS = {
     "privileges": '{"column_name":',
     "reads_from": '{"schema_name":',
     "grants": '{"grantee_oid":',
+    "member_of": '{"group_role_oid":',
+    "settings": '{"database_name":',
 }
 
 
