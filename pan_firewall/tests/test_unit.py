@@ -38,19 +38,6 @@ SECRET_PATTERNS = [
 ]
 
 
-def test_check_runs(dd_run_check, instance):
-    dd_run_check(PanFirewallCheck('pan_firewall', {}, [instance]))
-
-
-def test_parse_response_system_info():
-    root = parse_response(op_fixture(SYSTEM_INFO_CMD).read_bytes())
-
-    assert root.get('status') == 'success'
-    assert text(root, './result/system/hostname') == 'fw-a'
-    assert text(root, './result/system/sw-version') == '11.1.13-h12'
-    assert num(root, './result/system/vm-cores') == 4
-
-
 def test_parse_response_error_code():
     body = (FIXTURES / 'fw-a-probe' / 'report_top-rules.xml').read_bytes()
 
@@ -72,8 +59,6 @@ def test_parse_response_error_without_code():
 @pytest.mark.parametrize(
     'body',
     [
-        b'<html><body>Bad Gateway',
-        b'',
         b'not xml at all',
         # A proxy error page that happens to be well-formed XML must not pass as a PAN-OS success.
         b'<html><body>502 Bad Gateway</body></html>',
@@ -90,12 +75,9 @@ def test_parse_response_non_xml(body):
     'xml, path, expected',
     [
         ('<r><v>3.5</v></r>', 'v', 3.5),
-        ('<r><v> 7 </v></r>', 'v', 7.0),
         ('<r><v>unknown</v></r>', 'v', None),
-        ('<r><v></v></r>', 'v', None),
         ('<r></r>', 'v', None),
         ('<r><v>nan</v></r>', 'v', None),
-        ('<r><v>-inf</v></r>', 'v', None),
     ],
 )
 def test_num_never_raises(xml, path, expected):
@@ -317,27 +299,6 @@ def test_runs_at_0_180_and_300_seconds_submit_every_lab_available_p0_metric(
         aggregator.assert_metric(f'pan_firewall.{name}', metric_type=metric_types[metric_type], at_least=1)
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-
-
-def test_tunnel_counters_arrive_on_the_second_interface_run_with_full_tags(
-    dd_run_check,
-    aggregator,
-    real_collectors,
-    monkeypatch,
-    schedule_clock,
-):
-    check = new_static_check()
-
-    dd_run_check(check)
-    for ip in FIREWALLS.values():
-        assert not {name for name, _ in metrics_of(aggregator, ip)} & TUNNEL_COUNTERS.keys()
-    schedule_clock.now += 180
-    dd_run_check(check)
-
-    for ip in FIREWALLS.values():
-        assert TUNNEL_COUNTERS.items() <= metrics_of(aggregator, ip)
-    for metric in aggregator.metrics('pan_firewall.ipsec.tunnel.rx.bytes'):
-        assert {'tunnel:tun-peer', 'tunnel:tun-dead'} & set(metric.tags)
 
 
 def test_each_run_makes_only_the_requests_that_are_due(

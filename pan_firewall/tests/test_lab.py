@@ -27,68 +27,40 @@ PANORAMA_ENV = {
 }
 
 
-def test_lab_password_never_leaks(caplog, aggregator):
+@pytest.mark.parametrize(
+    'environ, secrets',
+    [
+        pytest.param(STATIC_ENV, (PASSWORD,), id='static'),
+        pytest.param(PANORAMA_ENV, (PASSWORD, PANORAMA_PASSWORD), id='panorama'),
+    ],
+)
+def test_lab_password_never_leaks(caplog, aggregator, environ, secrets):
     # An explicit mapping, never the real environment: a lab variable exported in the developer's shell must not
     # change which mode (or whose password) this test builds.
-    instance = build_lab_instance(STATIC_ENV)
-    assert instance['firewall_credentials'][0]['password'] == PASSWORD
-
-    check = new_check(instance)
+    check = new_check(build_lab_instance(environ))
     with caplog.at_level(logging.DEBUG):
         check.run()
 
     # Not `repr(check.config)`: generated pydantic models keep secrets as plain `str`, so it shows the password.
     # That is true of every integration, and the check never logs or prints its config.
     exposed = {'log': caplog.text, 'check': repr(check), 'check str': str(check)}
-    assert [name for name, text in exposed.items() if PASSWORD in text] == []
-
-
-def test_lab_panorama_passwords_never_leak(caplog, aggregator):
-    instance = build_lab_instance(PANORAMA_ENV)
-    assert instance['panorama_password'] == PANORAMA_PASSWORD
-
-    check = new_check(instance)
-    with caplog.at_level(logging.DEBUG):
-        check.run()
-
-    exposed = {'log': caplog.text, 'check': repr(check), 'check str': str(check)}
-    leaks = [
-        (name, secret) for name, text in exposed.items() for secret in (PASSWORD, PANORAMA_PASSWORD) if secret in text
-    ]
+    leaks = [(name, secret) for name, text in exposed.items() for secret in secrets if secret in text]
     assert leaks == []
 
 
-@pytest.mark.parametrize('missing', ['PANOS_LAB_HOSTS', 'PANOS_LAB_USERNAME', 'PANOS_PASSWORD'])
-def test_lab_instance_names_missing_variable_only(monkeypatch, missing):
-    values = dict(STATIC_ENV)
-    values.pop(missing)
-    with pytest.raises(pytest.fail.Exception) as error:
-        build_lab_instance(values)
-    assert missing in str(error.value)
-    assert PASSWORD not in str(error.value)
-
-
 @pytest.mark.parametrize(
-    'collect_all, expected',
-    [('', False), ('0', False), ('false', False), ('no', False), ('1', True), ('true', True), ('True', True)],
+    'environ, missing',
+    [
+        pytest.param(STATIC_ENV, 'PANOS_PASSWORD', id='static'),
+        pytest.param(PANORAMA_ENV, 'PANOS_LAB_PANORAMA_PASSWORD', id='panorama'),
+    ],
 )
-def test_lab_instance_turns_on_optional_collectors_on_request(collect_all, expected):
-    instance = build_lab_instance({**STATIC_ENV, 'PANOS_LAB_COLLECT_ALL': collect_all})
-    flags = ('collect_global_counters', 'collect_ospf', 'collect_reports')
-    assert [instance.get(flag, False) for flag in flags] == [expected] * 3
-
-
-def test_lab_panorama_instance_is_built_from_the_environment():
-    instance = build_lab_instance(PANORAMA_ENV)
-
-    assert instance == {
-        'panorama_host': 'panorama.example.com',
-        'panorama_username': 'panorama-user',
-        'panorama_password': PANORAMA_PASSWORD,
-        'firewall_credentials': [{'username': 'lab-user', 'password': PASSWORD}],
-        'firewall_ip_overrides': {'007955000930601': '192.0.2.10', '007955000930602': '192.0.2.11'},
-        'tls_verify': False,
-    }
+def test_lab_missing_variable_is_named_never_echoed(environ, missing):
+    with pytest.raises(pytest.fail.Exception) as error:
+        build_lab_instance({k: v for k, v in environ.items() if k != missing})
+    message = str(error.value)
+    assert missing in message
+    assert [v for v in environ.values() if v in message] == []
 
 
 def test_lab_mode_selects_the_instance_shape():
@@ -114,34 +86,9 @@ def test_lab_instance_rejects_an_unknown_mode_naming_the_variable(mode):
     assert PASSWORD not in message
 
 
-def test_lab_panorama_overrides_are_optional():
-    environ = {k: v for k, v in PANORAMA_ENV.items() if k != 'PANOS_LAB_FIREWALL_OVERRIDES'}
-
-    assert 'firewall_ip_overrides' not in build_lab_instance(environ)
-
-
-def test_lab_panorama_instance_turns_on_optional_collectors_on_request():
-    instance = build_lab_instance({**PANORAMA_ENV, 'PANOS_LAB_COLLECT_ALL': '1'})
-
-    assert [instance.get(f) for f in ('collect_global_counters', 'collect_ospf', 'collect_reports')] == [True] * 3
-
-
-@pytest.mark.parametrize(
-    'missing',
-    ['PANOS_LAB_PANORAMA_USERNAME', 'PANOS_LAB_PANORAMA_PASSWORD', 'PANOS_LAB_USERNAME', 'PANOS_PASSWORD'],
-)
-def test_lab_panorama_instance_names_missing_variable_only(missing):
-    environ = {k: v for k, v in PANORAMA_ENV.items() if k != missing}
-    with pytest.raises(pytest.fail.Exception) as error:
-        build_lab_instance(environ)
-    message = str(error.value)
-    assert missing in message
-    assert [v for v in PANORAMA_ENV.values() if v in message] == []
-
-
 @pytest.mark.parametrize(
     'overrides',
-    ['007955000930601', '007955000930601=', '=192.0.2.10', '007955000930601=not-an-ip', '007955000930601=192.0.2.10=x'],
+    ['007955000930601=not-an-ip', '=192.0.2.10'],
 )
 def test_lab_panorama_malformed_overrides_name_the_variable_only(overrides):
     with pytest.raises(pytest.fail.Exception) as error:

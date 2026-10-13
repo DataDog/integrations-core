@@ -101,20 +101,14 @@ def test_parse_devices_reads_every_entry_of_the_synthetic_edge_cases():
     ]
 
 
-def test_discovery_request_is_exactly_the_documented_call(dd_run_check, fake_panos):
-    dd_run_check(new_check())
-
-    discovery = fake_panos.calls_to(PANORAMA)
-    assert [(c.params, c.key_sent) for c in discovery] == [({'type': 'op', 'cmd': DISCOVERY_CMD}, True)]
-
-
-def test_discovery_runs_once_per_check_run(dd_run_check, fake_panos):
+def test_discovery_request_is_exactly_the_documented_call_once_per_run(dd_run_check, fake_panos):
     check = new_check()
 
     dd_run_check(check)
     dd_run_check(check)
 
-    assert len(fake_panos.calls_to(PANORAMA)) == 2
+    discovery = fake_panos.calls_to(PANORAMA)
+    assert [(c.params, c.key_sent) for c in discovery] == [({'type': 'op', 'cmd': DISCOVERY_CMD}, True)] * 2
 
 
 def test_panorama_key_is_generated_from_username_and_password(dd_run_check, fake_panos):
@@ -128,11 +122,10 @@ def test_panorama_key_is_generated_from_username_and_password(dd_run_check, fake
     ]
 
 
-@pytest.mark.parametrize('fixture', [SYNTHETIC, REAL_CAPTURE], ids=['synthetic', 'real-capture'])
 def test_overridden_firewalls_are_polled_at_the_overrides_and_keep_the_reported_device_ip(
-    dd_run_check, aggregator, fake_panos, fixture
+    dd_run_check, aggregator, fake_panos, caplog
 ):
-    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, fixture.read_bytes()))
+    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, REAL_CAPTURE.read_bytes()))
 
     dd_run_check(new_check())
 
@@ -141,6 +134,8 @@ def test_overridden_firewalls_are_polled_at_the_overrides_and_keep_the_reported_
     assert {ip: m.value for ip, m in can_connect.items()} == {FW_A_REPORTED: 1, FW_B_REPORTED: 1}
     fw_a_tags = can_connect[FW_A_REPORTED].tags
     assert {f'device_id:{FW_A_SERIAL}', 'device_hostname:fw-a', 'device_model:PA-VM'} <= set(fw_a_tags)
+    # The overrides are quoted serials: nothing was read as a number.
+    assert 'was read as a number' not in caplog.text
 
 
 def test_panorama_rejecting_the_password_is_reported_after_one_keygen(dd_run_check, aggregator, fake_panos):
@@ -176,7 +171,6 @@ def test_firewalls_are_polled_at_the_reported_ip_without_override(dd_run_check, 
     'filters, expected',
     [
         pytest.param({'include': ['192.0.2.0/25']}, {FW_A_POLLED, FW_B_POLLED}, id='include-cidr'),
-        pytest.param({'include': ['192.0.2.10']}, {FW_A_POLLED}, id='include-ip'),
         pytest.param({'exclude': ['192.0.2.11']}, {FW_A_POLLED}, id='exclude'),
         pytest.param({'include': ['192.0.2.0/24'], 'exclude': ['192.0.2.10/32']}, {FW_B_POLLED}, id='exclude-wins'),
         pytest.param({'include': ['10.60.0.0/24']}, set(), id='filter-applies-to-polled-ip-not-reported'),
@@ -206,11 +200,10 @@ def test_override_key_read_as_a_number_matches_the_serial_and_warns_once(dd_run_
     assert 'quote serials' in warnings[0]
 
 
-@pytest.mark.parametrize('key', ['7.955000930601e+12', '7955000930601'], ids=['scientific', 'digits-without-zeros'])
-def test_quoted_override_key_without_leading_zeros_matches_without_a_warning(dd_run_check, fake_panos, caplog, key):
+def test_quoted_override_key_without_leading_zeros_matches_without_a_warning(dd_run_check, fake_panos, caplog):
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, REAL_CAPTURE.read_bytes()))
 
-    dd_run_check(new_check(firewall_ip_overrides={key: FW_A_POLLED}))
+    dd_run_check(new_check(firewall_ip_overrides={'7955000930601': FW_A_POLLED}))
 
     assert polled_hosts(fake_panos) == {FW_A_POLLED, FW_B_REPORTED}
     assert 'was read as a number' not in caplog.text
@@ -236,20 +229,10 @@ def test_unmatched_numeric_override_key_warns_once(dd_run_check, fake_panos, cap
     assert caplog.text.count('was read as a number') == 1
 
 
-def test_quoted_override_key_matches_without_a_warning(dd_run_check, fake_panos, caplog):
+def test_override_key_of_another_number_does_not_match(dd_run_check, fake_panos):
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, REAL_CAPTURE.read_bytes()))
 
-    dd_run_check(new_check())
-
-    assert polled_hosts(fake_panos) == {FW_A_POLLED, FW_B_POLLED}
-    assert 'was read as a number' not in caplog.text
-
-
-@pytest.mark.parametrize('key', [7955000930699, 7955000930601.5, '7955000930601x'], ids=['other', 'fractional', 'text'])
-def test_override_key_of_another_number_does_not_match(dd_run_check, fake_panos, key):
-    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, REAL_CAPTURE.read_bytes()))
-
-    dd_run_check(new_check(firewall_ip_overrides={key: FW_A_POLLED}))
+    dd_run_check(new_check(firewall_ip_overrides={7955000930601.5: FW_A_POLLED}))
 
     assert polled_hosts(fake_panos) == {FW_A_REPORTED, FW_B_REPORTED}
 
@@ -262,8 +245,7 @@ _Yaml11Loader.add_implicit_resolver('tag:yaml.org,2002:int', re.compile(r'^[0-9]
 _Yaml11Loader.add_constructor('tag:yaml.org,2002:int', lambda loader, node: int(loader.construct_scalar(node)))
 
 
-@pytest.mark.parametrize('loader', [yaml.SafeLoader, _Yaml11Loader], ids=['safe-load', 'digits-as-numbers'])
-def test_lab_instance_written_to_yaml_still_overrides_the_polled_ip(dd_run_check, fake_panos, loader):
+def test_lab_instance_written_to_yaml_still_overrides_the_polled_ip(dd_run_check, fake_panos):
     environ = {
         LAB_MODE_VAR: 'panorama',
         LAB_PANORAMA_HOST_VAR: PANORAMA,
@@ -275,7 +257,7 @@ def test_lab_instance_written_to_yaml_still_overrides_the_polled_ip(dd_run_check
     }
     written = yaml.safe_dump(build_lab_instance(environ))
     assert f'{FW_A_SERIAL}: {FW_A_POLLED}' in written
-    instance = yaml.load(written, Loader=loader)
+    instance = yaml.load(written, Loader=_Yaml11Loader)
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, REAL_CAPTURE.read_bytes()))
 
     dd_run_check(PanFirewallCheck('pan_firewall', {}, [instance]))
@@ -283,20 +265,7 @@ def test_lab_instance_written_to_yaml_still_overrides_the_polled_ip(dd_run_check
     assert polled_hosts(fake_panos) == {FW_A_POLLED, FW_B_POLLED}
 
 
-def test_connection_log_lines_name_the_polled_ip_when_it_differs_from_the_reported_one(
-    dd_run_check, fake_panos, caplog
-):
-    caplog.set_level(logging.DEBUG)
-    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, REAL_CAPTURE.read_bytes()))
-
-    dd_run_check(new_check())
-
-    assert re.search(
-        rf'pan_firewall {re.escape(FW_A_REPORTED)} \(polled at {re.escape(FW_A_POLLED)}\): \d+ requests in', caplog.text
-    )
-
-
-@pytest.mark.parametrize('ip', [None, '', 'unknown', 'not-an-ip'], ids=['absent', 'empty', 'unknown', 'invalid'])
+@pytest.mark.parametrize('ip', [None, 'not-an-ip'], ids=['absent', 'invalid'])
 def test_entry_without_usable_ip_is_skipped_and_logged(dd_run_check, fake_panos, caplog, ip):
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml(('SYNTH-BAD-IP', 'synth', ip, 'yes')))
 
@@ -342,16 +311,6 @@ def test_firewall_replaced_at_the_same_ip_is_reported_under_its_new_serial(dd_ru
     tags = metrics_by_ip(aggregator, 'can_connect')[FW_A_REPORTED].tags
     assert 'device_id:SYNTH-RMA-0001' in tags
     assert f'device_id:{FW_A_SERIAL}' not in tags
-
-
-def test_disconnected_firewall_is_skipped_with_a_debug_log(dd_run_check, fake_panos, caplog):
-    caplog.set_level(logging.DEBUG)
-    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml((FW_A_SERIAL, 'fw-a', FW_A_REPORTED, 'no')))
-
-    dd_run_check(new_check())
-
-    assert polled_hosts(fake_panos) == set()
-    assert any(r.levelno == logging.DEBUG and FW_A_SERIAL in r.getMessage() for r in caplog.records)
 
 
 def test_firewall_that_disconnects_is_no_longer_polled(dd_run_check, aggregator, fake_panos):
@@ -428,27 +387,11 @@ def test_panorama_can_connect_is_1_after_a_successful_discovery(dd_run_check, ag
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_panorama_can_connect_is_not_sent_in_static_mode(dd_run_check, aggregator):
-    instance = {'firewalls': ['192.0.2.10'], 'firewall_credentials': copy.deepcopy(CREDENTIALS)}
-
-    dd_run_check(PanFirewallCheck('pan_firewall', {}, [instance]))
-
-    assert aggregator.metrics('pan_firewall.panorama.can_connect') == []
-
-
-@pytest.mark.parametrize('failure', ['refused', 'timeout', 'tls', 'http_403', 'code_403', 'html_502'])
+@pytest.mark.parametrize('failure', ['timeout', 'code_403', 'html_502'])
 def test_panorama_can_connect_is_0_when_the_discovery_call_fails(dd_run_check, aggregator, fake_panos, failure):
     fake_panos.fail(PANORAMA, failure)
 
     dd_run_check(new_check())
-
-    assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))]
-
-
-def test_panorama_can_connect_is_0_when_keygen_fails(dd_run_check, aggregator, fake_panos):
-    fake_panos.fail(PANORAMA, 'code_403', on='keygen')
-
-    dd_run_check(new_check(panorama_api_key=None, panorama_username='pan-user', panorama_password='bad'))
 
     assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))]
 

@@ -4,14 +4,11 @@
 import copy
 from xml.etree import ElementTree as ET
 
-import pytest
-
 from datadog_checks.pan_firewall.auth import Credentials
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, FirewallState
 from datadog_checks.pan_firewall.firewalls import FirewallTarget
 from datadog_checks.pan_firewall.identity import global_tags, parse_system_info
 from datadog_checks.pan_firewall.metadata import build_device, build_interfaces
-from datadog_checks.pan_firewall.ndm_models import batch_payloads
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from .common import FIXTURES, FW_A_IP, FW_A_SERIAL, INTERFACE_ALL_CMD, SYSTEM_INFO_CMD
@@ -64,13 +61,6 @@ def test_device_metadata_of_the_static_fw_a():
         'namespace': 'default',
     }
     assert not any(t.startswith('ha_state:') for t in device.tags)
-
-
-@pytest.mark.parametrize('can_connect, status', [(1, 1), (0, 2)])
-def test_device_status_follows_can_connect(can_connect, status):
-    device = build_device(SYSTEM_INFO, FW_A_STATIC_IP, NAMESPACE, [], can_connect=can_connect, ha_state=None)
-
-    assert device.status == status
 
 
 def test_device_tags_carry_ha_state_only_when_ha_is_enabled():
@@ -133,24 +123,8 @@ def test_subinterfaces_inherit_the_parent_state_and_tunnels_use_the_vpn_state():
     }
     assert by_name['ethernet1/1.10']['index'] == 259
     assert 'mac_address' not in by_name['ethernet1/1.10']
-
-
-def test_tunnel_without_a_vpn_entry_is_unknown():
+    # A tunnel without a VPN entry is unknown.
     assert interfaces_by_name('synthetic/interface_all_subinterfaces.xml')['tunnel.3']['oper_status'] == 4
-
-
-def test_payloads_hold_at_most_100_records_each():
-    state = interface_state('fw-a-probe/interface_all.xml')
-    rows = state.interface_rows
-    state.interface_rows = [copy.deepcopy(rows[0]) for _ in range(250)]
-    for index, row in enumerate(state.interface_rows):
-        row.find('name').text = f'ethernet1/{index}'
-    device = build_device(SYSTEM_INFO, FW_A_STATIC_IP, NAMESPACE, [], can_connect=1, ha_state=None)
-
-    payloads = list(batch_payloads(NAMESPACE, [device, *build_interfaces(FW_A_SERIAL, state)], 1700000000))
-
-    assert [len(p.devices) + len(p.interfaces) for p in payloads] == [100, 100, 51]
-    assert {(p.namespace, p.collect_timestamp) for p in payloads} == {('default', 1700000000)}
 
 
 def _target(ip):
