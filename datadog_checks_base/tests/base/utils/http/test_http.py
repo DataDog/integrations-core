@@ -359,11 +359,13 @@ def _gzip_response(body):
     return response
 
 
+# Chunks of 4 bytes and a limit of 10 bytes
 @pytest.mark.parametrize(
     'body, lines',
     [
         pytest.param(b'1234567\n' * 100, 100, id='long body with short lines'),
         pytest.param(b'x' * 10 + b'\ny', 2, id='line at the limit'),
+        pytest.param(b'x' * 10, 1, id='last line at the limit'),
     ],
 )
 def test_iter_lines_allows_lines_up_to_limit(body, lines):
@@ -374,7 +376,8 @@ def test_iter_lines_allows_lines_up_to_limit(body, lines):
     'body',
     [
         pytest.param(b'x' * 11, id='no line break'),
-        pytest.param(b'x' * 12 + b'\ny', id='line break more than a chunk after the limit'),
+        pytest.param(b'x' * 11 + b'\ny', id='line break in the chunk after the limit'),
+        pytest.param(b'y\n' + b'x' * 11 + b'\ny', id='line that starts in a chunk'),
     ],
 )
 def test_iter_lines_limits_line_size(body):
@@ -383,11 +386,11 @@ def test_iter_lines_limits_line_size(body):
 
 
 def test_iter_lines_uses_configured_line_size():
-    # Chunks of 256 bytes, so that a line longer than the limit is detected at the end of a chunk
+    # Chunks of 256 bytes, smaller than the limit of 1 KiB
     http = RequestsWrapper({'max_line_size': 1, 'request_size': 0.25}, {})
 
     with mock.patch('requests.Session.get', return_value=_gzip_response(b'x' * 1024 + b'\ny\n')):
         assert len(list(http.get('https://www.google.com', stream=True).iter_lines())) == 2
-    with mock.patch('requests.Session.get', return_value=_gzip_response(b'x' * 1300 + b'\ny\n')):
-        with pytest.raises(ResponseLineTooLongError, match='`max_line_size` option'):
+    with mock.patch('requests.Session.get', return_value=_gzip_response(b'x' * 1025 + b'\ny\n')):
+        with pytest.raises(ResponseLineTooLongError, match=r'`max_line_size` option \(in KiB\)'):
             list(http.get('https://www.google.com', stream=True).iter_lines())

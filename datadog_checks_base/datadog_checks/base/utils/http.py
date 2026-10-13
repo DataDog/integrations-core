@@ -258,17 +258,18 @@ class LineCappedRawResponse(ObjectProxy):
         self._self_max_line_size = max_line_size
 
     def stream(self, *args: Any, **kwargs: Any) -> Iterator[bytes]:
-        # Bytes since the last line break, checked at the end of each chunk, so a line can exceed the limit by up to
-        # one chunk. Lines that start and end inside a chunk are bounded by the chunk size.
+        # Only the line continued from the previous chunk is checked: `RequestsWrapper` doesn't allow chunks longer
+        # than the limit, so lines that start in a chunk can't be longer than the limit before the chunk ends.
         line_size = 0
         for chunk in self.__wrapped__.stream(*args, **kwargs):
-            newline = chunk.rfind(b'\n')
-            line_size = line_size + len(chunk) if newline < 0 else len(chunk) - newline - 1
-            if line_size > self._self_max_line_size:
+            newline = chunk.find(b'\n')
+            first_line_size = line_size + (len(chunk) if newline < 0 else newline)
+            if first_line_size > self._self_max_line_size:
                 raise ResponseLineTooLongError(
                     f'Response contains a line longer than {self._self_max_line_size} bytes, '
-                    'the limit can be raised with the `max_line_size` option'
+                    'the limit can be raised with the `max_line_size` option (in KiB)'
                 )
+            line_size = first_line_size if newline < 0 else len(chunk) - chunk.rfind(b'\n') - 1
             yield chunk
 
 
@@ -618,8 +619,8 @@ class RequestsWrapper(object):
 
         self.request_size = int(float(config['request_size']) * KIBIBYTE)
         self.max_line_size = int(float(config['max_line_size']) * KIBIBYTE)
-        if self.max_line_size <= 0:
-            raise ConfigurationError('The `max_line_size` setting must be greater than 0')
+        if self.max_line_size < self.request_size:
+            raise ConfigurationError('The `max_line_size` setting must be at least `request_size`')
 
         self.aia_chasing_max_depth = DEFAULT_AIA_CHASING_MAX_DEPTH
 
