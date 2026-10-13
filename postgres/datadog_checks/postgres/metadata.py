@@ -64,7 +64,7 @@ FROM pg_catalog.pg_extension left join pg_catalog.pg_namespace on extnamespace =
 # Every function and type is qualified with the extension's schema and arguments are cast to the exact
 # signature. Otherwise a user able to create objects in a schema on the monitoring role's search_path could
 # shadow them with an overload (e.g. armor(text) beats armor(bytea) for an untyped literal) and run arbitrary
-# SQL as the monitoring role. The shared main connection rules out pinning search_path for this query instead.
+# SQL as the monitoring role
 PG_EXTENSION_LOADER_QUERY = {
     'pg_trgm': "SELECT {schema}.word_similarity('foo'::pg_catalog.text, 'bar'::pg_catalog.text);",
     'plpgsql': "DO $$ BEGIN PERFORM 1; END$$;",
