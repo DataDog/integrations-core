@@ -50,4 +50,11 @@ excluded_paths = [
   # Windows script launcher templates used only by legacy setuptools script installation;
   # not needed at Agent runtime.
   "setuptools/*.exe",
+
+  # --- jsonpatch ---
+  # jsonpatch >= 1.35 declares its CLI as console_scripts, which the Agent's wheel
+  # installer turns into ~106 KiB launcher .exe files on Windows. The Agent only uses
+  # jsonpatch as a library (through openstacksdk), so the CLI is not needed.
+  "jsonpatch-*.dist-info/entry_points.txt",
+  "jsonpatch_cli.py",
 ]
