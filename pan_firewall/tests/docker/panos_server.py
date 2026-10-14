@@ -7,14 +7,13 @@ It answers from `tests/fixture_map.py`, the map the unit fake (`tests/fake_panos
 credentials and returns a dummy key; every other call must carry that key in `X-PAN-KEY`.
 """
 
-import re
 import threading
 from collections.abc import Callable
 from pathlib import Path
 
 from flask import Flask, Response, request
 
-from tests.fixture_map import FAKE_KEY, INVALID_CREDENTIAL, KEYGEN_OK, NO_CAPTURE
+from tests.fixture_map import FAKE_KEY, INVALID_CREDENTIAL, KEYGEN_OK, NO_CAPTURE, submit_job_id
 
 CERT_FILE = '/app/certs/cert.pem'
 KEY_FILE = '/app/certs/key.pem'
@@ -74,13 +73,12 @@ def create_app(
             return _xml(NO_CAPTURE)
         response, submit = fixtures
         submit_body = submit.read_bytes()
-        match = re.search(rb'<job>(\d+)</job>', submit_body)
-        if match is None:
+        submitted = submit_job_id(submit_body)
+        if submitted is None:
             return _xml(NO_CAPTURE)
-        job_id = match.group(1).decode()
         with lock:
-            finished[kind, job_id] = response
-            reads[kind, job_id] = 0
+            finished[kind, submitted] = response
+            reads[kind, submitted] = 0
         return _xml(submit_body)
 
     return app

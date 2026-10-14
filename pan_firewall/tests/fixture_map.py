@@ -7,6 +7,7 @@ Shared by the unit fake transport and the docker fakes, so both answer from the 
 it without the test dependencies, so it imports nothing from the other test modules.
 """
 
+import re
 from collections.abc import Mapping
 from pathlib import Path
 
@@ -161,3 +162,26 @@ def find_report_fixture(field: str, firewall: str) -> tuple[Path, Path] | None:
     response = set_fixture(f'report_custom_{field}.xml', firewall)
     submit = set_fixture(f'report_custom_{field}_submit.xml', firewall)
     return (response, submit) if response.exists() and submit.exists() else None
+
+
+def report_field(cmd: str) -> str | None:
+    """The field a custom report submit (`type=report`) aggregates by, or None."""
+    match = re.search(r'<aggregate-by><member>([^<]+)</member>', cmd)
+    return match.group(1) if match else None
+
+
+def log_job_fixture(params: Mapping[str, str], firewall: str) -> tuple[Path, Path] | None:
+    """The (response, submit) fixtures answering the `type=log` submit with these form `params`, or None."""
+    return find_log_fixture(params.get('dir', ''), params.get('query'), int(params.get('skip', '0')), firewall)
+
+
+def report_job_fixture(params: Mapping[str, str], firewall: str) -> tuple[Path, Path] | None:
+    """The (response, submit) fixtures answering the `type=report` submit with these form `params`, or None."""
+    field = report_field(params.get('cmd', ''))
+    return find_report_fixture(field, firewall) if field else None
+
+
+def submit_job_id(submit: bytes) -> str | None:
+    """The job id a job submit answer announces, or None."""
+    match = re.search(rb'<job>(\d+)</job>', submit)
+    return match.group(1).decode() if match else None

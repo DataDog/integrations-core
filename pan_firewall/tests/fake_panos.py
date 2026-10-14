@@ -11,7 +11,6 @@ with `FakePanos.fail()`, replace the answer to one command with `FakePanos.answe
 from __future__ import annotations
 
 import itertools
-import re
 import ssl
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -25,10 +24,12 @@ from .fixture_map import (
     INVALID_CREDENTIAL,
     KEYGEN_OK,
     NO_CAPTURE,
-    find_log_fixture,
     find_op_fixture,
-    find_report_fixture,
+    log_job_fixture,
     panorama_op_answer,
+    report_field,
+    report_job_fixture,
+    submit_job_id,
 )
 
 # Firewall IP -> fixture set.
@@ -170,7 +171,7 @@ class FakePanos:
             self._log_reads,
             host,
             self._log_overrides.get((host, direction, query, skip)),
-            find_log_fixture(direction, query, skip, FIREWALL_SETS[host]),
+            log_job_fixture(data, FIREWALL_SETS[host]),
         )
 
     def _answer_report(self, host: str, data: dict[str, str]) -> Answer | None:
@@ -181,14 +182,12 @@ class FakePanos:
             return self._read_job(self._report_jobs, self._report_reads, host, data.get('job-id', ''))
         if data.get('async') != 'yes':  # PAN-OS refuses a report submit that is not asynchronous
             return 200, NO_CAPTURE
-        match = re.search(r'<aggregate-by><member>([^<]+)</member>', data.get('cmd', ''))
-        field = match.group(1) if match else ''
         return self._open_job(
             self._report_jobs,
             self._report_reads,
             host,
-            self._report_overrides.get((host, field)),
-            find_report_fixture(field, FIREWALL_SETS[host]),
+            self._report_overrides.get((host, report_field(data.get('cmd', '')) or '')),
+            report_job_fixture(data, FIREWALL_SETS[host]),
         )
 
     def _open_job(
@@ -209,7 +208,7 @@ class FakePanos:
             response, submit_path = fixture
             bodies = [response]
             submit = submit_path.read_bytes()
-            job_id = re.search(rb'<job>(\d+)</job>', submit).group(1).decode()  # type: ignore[union-attr]
+            job_id = submit_job_id(submit) or ''
         else:
             return 200, NO_CAPTURE
         jobs[host, job_id] = bodies

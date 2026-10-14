@@ -19,6 +19,12 @@ def run(dd_run_check, instance: dict[str, Any]) -> PanFirewallCheck:
     return check
 
 
+def instance_with(base, changes):
+    """`base` with `changes` applied; a change to None removes the option."""
+    instance = {**copy.deepcopy(base), **changes}
+    return {k: v for k, v in instance.items() if v is not None}
+
+
 @pytest.mark.parametrize(
     'base, changes',
     [
@@ -40,84 +46,64 @@ def run(dd_run_check, instance: dict[str, Any]) -> PanFirewallCheck:
     ],
 )
 def test_valid_config_loads(dd_run_check, base, changes):
-    instance = {**copy.deepcopy(base), **changes}
-    instance = {k: v for k, v in instance.items() if v is not None}
-
-    run(dd_run_check, instance)
+    run(dd_run_check, instance_with(base, changes))
 
 
 @pytest.mark.parametrize(
-    'base, changes, message',
+    'changes, message',
     [
+        pytest.param({'firewalls': None}, 'One of `firewalls` or `panorama_host` is required', id='neither-mode'),
+        pytest.param({'panorama_host': 'pan.example.com'}, 'not both', id='both-modes'),
+        pytest.param({'firewalls': ['fw.example.com']}, '`fw.example.com` is not a valid IP', id='non-ip-entry'),
+        pytest.param({'firewalls': ['192.0.2.10', '192.0.2.10']}, '`192.0.2.10` is duplicated', id='duplicate-ip'),
+        pytest.param({'firewall_credentials': [{'username': 'u'}]}, 'entry 0 must set', id='credential-username-only'),
         pytest.param(
-            STATIC_INSTANCE, {'firewalls': None}, 'One of `firewalls` or `panorama_host` is required', id='neither-mode'
-        ),
-        pytest.param(STATIC_INSTANCE, {'panorama_host': 'pan.example.com'}, 'not both', id='both-modes'),
-        pytest.param(
-            STATIC_INSTANCE, {'firewalls': ['fw.example.com']}, '`fw.example.com` is not a valid IP', id='non-ip-entry'
-        ),
-        pytest.param(
-            STATIC_INSTANCE,
-            {'firewalls': ['192.0.2.10', '192.0.2.10']},
-            '`192.0.2.10` is duplicated',
-            id='duplicate-ip',
-        ),
-        pytest.param(
-            STATIC_INSTANCE,
-            {'firewall_credentials': [{'username': 'u'}]},
-            'entry 0 must set',
-            id='credential-username-only',
-        ),
-        pytest.param(
-            STATIC_INSTANCE,
             {'firewall_credentials': [{'username': 'u', 'password': 'p', 'api_key': 'k'}]},
             'entry 0 must set',
             id='credential-both',
         ),
         pytest.param(
-            STATIC_INSTANCE,
             {'firewall_credentials': [{'username': 'u', 'api_key': 'k'}]},
             'entry 0 must set',
             id='credential-key-and-username',
         ),
         pytest.param(
-            STATIC_INSTANCE,
             {'firewall_credentials': [{'cidr': '192.0.2.0/99', 'username': 'u', 'password': 'p'}]},
             'invalid `cidr`: `192.0.2.0/99`',
             id='bad-cidr',
         ),
         pytest.param(
-            STATIC_INSTANCE,
             {'firewall_credentials': [{'cidr': '10.0.0.0/8', 'username': 'u', 'password': 'p'}]},
             'matches the firewall `192.0.2.10`',
             id='unmatched-ip',
         ),
-        pytest.param(STATIC_INSTANCE, {'max_concurrency': 0}, 'max_concurrency', id='max-concurrency-zero'),
-        pytest.param(STATIC_INSTANCE, {'report_top_n': 0}, 'report_top_n', id='report-top-n-zero'),
+        pytest.param({'max_concurrency': 0}, 'max_concurrency', id='max-concurrency-zero'),
+        pytest.param({'report_top_n': 0}, 'report_top_n', id='report-top-n-zero'),
         pytest.param(
-            STATIC_INSTANCE,
             {'security_rule_filter': ['^ok-', '[unclosed']},
             r'`security_rule_filter` entry `\[unclosed` is not a valid regular expression',
             id='bad-rule-filter-pattern',
         ),
-        pytest.param(PANORAMA_INSTANCE, {'panorama_api_key': None}, '`panorama_host` requires', id='no-auth'),
-        pytest.param(
-            PANORAMA_INSTANCE,
-            {'panorama_username': 'u', 'panorama_password': 'p'},
-            '`panorama_host` requires',
-            id='login-and-key',
-        ),
-        pytest.param(
-            PANORAMA_INSTANCE, {'firewall_ips': {'include': ['not-a-cidr']}}, 'firewall_ips.include', id='bad-include'
-        ),
     ],
 )
-def test_invalid_config(dd_run_check, base, changes, message):
-    instance = {**copy.deepcopy(base), **changes}
-    instance = {k: v for k, v in instance.items() if v is not None}
-
+def test_invalid_static_config(dd_run_check, changes, message):
     with pytest.raises(Exception, match=message):
-        run(dd_run_check, instance)
+        run(dd_run_check, instance_with(STATIC_INSTANCE, changes))
+
+
+@pytest.mark.parametrize(
+    'changes, message',
+    [
+        pytest.param({'panorama_api_key': None}, '`panorama_host` requires', id='no-auth'),
+        pytest.param(
+            {'panorama_username': 'u', 'panorama_password': 'p'}, '`panorama_host` requires', id='login-and-key'
+        ),
+        pytest.param({'firewall_ips': {'include': ['not-a-cidr']}}, 'firewall_ips.include', id='bad-include'),
+    ],
+)
+def test_invalid_panorama_config(dd_run_check, changes, message):
+    with pytest.raises(Exception, match=message):
+        run(dd_run_check, instance_with(PANORAMA_INSTANCE, changes))
 
 
 CONF_EXAMPLE = Path(__file__).parent.parent / 'datadog_checks' / 'pan_firewall' / 'data' / 'conf.yaml.example'

@@ -95,6 +95,11 @@ class Context:
         raw = self.cache.get(CACHE_KEY)
         return json.loads(raw)['seqno'] if raw else None
 
+    def answer_forward(self, watermark, *bodies, **seed):
+        """Cache the watermark `watermark`, and answer the first page of the query from it with `bodies` in turn."""
+        self.seed(watermark, **seed)
+        self.fake.answer_log(self.host, 'forward', seqno_query(watermark + 1), 0, *bodies)
+
     def submits(self):
         return [c.params for c in self.fake.calls_to(self.host) if c.type == 'log' and c.action is None]
 
@@ -201,8 +206,7 @@ def test_same_window_again_counts_nothing(firewall, monkeypatch):
 
 
 def test_logs_at_or_below_the_watermark_are_dropped(firewall):
-    firewall.seed(1000)
-    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1001), 0, log_page([999, 1000, 1001, 1003]))
+    firewall.answer_forward(1000, log_page([999, 1000, 1001, 1003]))
 
     samples = firewall.collect()
 
@@ -211,9 +215,8 @@ def test_logs_at_or_below_the_watermark_are_dropped(firewall):
 
 
 def test_a_full_page_of_5000_asks_for_the_next_one(firewall):
-    firewall.seed(1000)
     first = log_page(range(1001, 6001))
-    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1001), 0, first)
+    firewall.answer_forward(1000, first)
     firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1001), 5000, log_page(range(6001, 6004)))
 
     samples = firewall.collect()
@@ -268,8 +271,7 @@ def test_failure_halfway_keeps_the_watermark_and_the_next_run_starts_over(firewa
 
 
 def test_clock_going_back_counts_every_log_once_with_no_warning_or_extra_job(firewall):
-    firewall.seed(1000)
-    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1001), 0, CLOCK_BACK)
+    firewall.answer_forward(1000, CLOCK_BACK)
 
     samples = firewall.collect()
 
@@ -280,30 +282,27 @@ def test_clock_going_back_counts_every_log_once_with_no_warning_or_extra_job(fir
 
 
 def nothing_new(firewall, watermark=1000, last_reset_check=0.0, newest=None):
-    firewall.seed(watermark, last_reset_check)
-    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(watermark + 1), 0, EMPTY)
+    firewall.answer_forward(watermark, EMPTY, last_reset_check=last_reset_check)
     if newest is not None:
         firewall.fake.answer_log(FW_A_IP, 'backward', None, 0, newest)
 
 
-def test_seqno_reset_rebaselines_the_watermark_and_warns_once(firewall):
-    nothing_new(firewall, newest=NEWEST_AFTER_RESET)
+@pytest.mark.parametrize(
+    'watermark, warnings',
+    [
+        # The newest seqno, 12, is below the watermark: seqno went backwards, the watermark is re-baselined.
+        pytest.param(1000, 1, id='seqno-reset'),
+        pytest.param(12, 0, id='newest-equal-to-the-watermark'),
+    ],
+)
+def test_newest_seqno_below_the_watermark_rebaselines_it_with_one_warning(firewall, watermark, warnings):
+    nothing_new(firewall, watermark=watermark, newest=NEWEST_AFTER_RESET)
 
     assert firewall.collect() == []
 
     assert firewall.watermark == 12
     assert len(firewall.backward_jobs()) == 1
-    firewall.ctx.log.warning.assert_called_once()
-
-
-def test_newest_seqno_equal_to_the_watermark_changes_nothing(firewall):
-    nothing_new(firewall, watermark=12, newest=NEWEST_AFTER_RESET)
-
-    assert firewall.collect() == []
-
-    assert firewall.watermark == 12
-    assert len(firewall.backward_jobs()) == 1
-    firewall.ctx.log.warning.assert_not_called()
+    assert firewall.ctx.log.warning.call_count == warnings
 
 
 def test_reset_check_runs_at_most_every_30_minutes(firewall):
@@ -350,8 +349,7 @@ def test_a_pass_with_nothing_new_runs_the_reset_check_only_when_due(firewall, se
     ],
 )
 def test_cached_watermark_younger_than_an_hour_is_used(firewall, written):
-    firewall.seed(1000, updated=firewall.wall_clock.now + written)
-    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1001), 0, log_page([1001, 1002]))
+    firewall.answer_forward(1000, log_page([1001, 1002]), updated=firewall.wall_clock.now + written)
 
     samples = firewall.collect()
 
@@ -408,8 +406,7 @@ def test_quiet_firewall_keeps_a_fresh_enough_watermark_through_a_restart(firewal
 
 
 def test_a_pass_that_counted_logs_runs_no_reset_check(firewall):
-    firewall.seed(1000)
-    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1001), 0, log_page([1001]))
+    firewall.answer_forward(1000, log_page([1001]))
 
     firewall.collect()
 
@@ -417,8 +414,7 @@ def test_a_pass_that_counted_logs_runs_no_reset_check(firewall):
 
 
 def test_job_still_active_is_polled_next_run_without_resubmitting(firewall):
-    firewall.seed(1000)
-    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1001), 0, ACT, ACT, log_page([1001, 1002]))
+    firewall.answer_forward(1000, ACT, ACT, log_page([1001, 1002]))
 
     assert firewall.collect() == []
     assert firewall.watermark == 1000
@@ -430,9 +426,8 @@ def test_job_still_active_is_polled_next_run_without_resubmitting(firewall):
 
 
 def test_failed_job_clears_the_pending_job_and_counts_nothing(firewall):
-    firewall.seed(1000)
     failed = ACT.replace(b'<status>ACT</status>', b'<status>FAIL</status>')
-    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1001), 0, failed)
+    firewall.answer_forward(1000, failed)
 
     with pytest.raises(PanosApiError, match='ended with status FAIL'):
         firewall.collect()
@@ -443,8 +438,7 @@ def test_failed_job_clears_the_pending_job_and_counts_nothing(firewall):
 
 def test_pages_counted_before_a_job_is_still_active_are_kept(firewall, monkeypatch):
     monkeypatch.setattr(constants, 'THREAT_PAGE_SIZE', 2)
-    firewall.seed(1000)
-    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1001), 0, log_page([1001, 1002]))
+    firewall.answer_forward(1000, log_page([1001, 1002]))
     firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1001), 2, ACT, ACT, log_page([1003]))
 
     assert firewall.collect() == []
@@ -468,9 +462,8 @@ def test_a_missing_severity_action_subtype_or_vsys_leaves_the_tag_out(firewall):
         for name in ('severity', 'action', 'subtype', 'vsys'):
             entry.remove(entry.find(name))
 
-    firewall.seed(1000)
     page = edit_entries(log_page([1001]), drop)
-    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1001), 0, page)
+    firewall.answer_forward(1000, page)
 
     assert series(firewall.collect()) == {('threat.count', (), 'count'): 1}
 
@@ -480,9 +473,8 @@ def test_entries_without_a_valid_seqno_are_skipped_and_logged_at_debug(firewall)
         if entry.findtext('seqno') == '1002':
             entry.find('seqno').text = 'abc'
 
-    firewall.seed(1000)
     page = edit_entries(log_page([1001, 1002]), break_seqno)
-    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1001), 0, page)
+    firewall.answer_forward(1000, page)
 
     samples = firewall.collect()
 
@@ -492,8 +484,7 @@ def test_entries_without_a_valid_seqno_are_skipped_and_logged_at_debug(firewall)
 
 
 def test_vsys_tag_is_vsys_n(firewall):
-    firewall.seed(1000)
-    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1001), 0, log_page([1001], vsys='2'))
+    firewall.answer_forward(1000, log_page([1001], vsys='2'))
 
     assert series(firewall.collect()) == expected({('medium', 'drop', 'spyware', 'vsys2'): 1})
 
