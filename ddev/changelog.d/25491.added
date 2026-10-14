@@ -1,0 +1,1 @@
+Log Dispatcher operation failures from the component that owns them, and log every finished job with its target, status and duration.

@@ -1,3 +1,40 @@
+## Datadog Agent version [7.84.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7840)
+
+### Integration Updates
+* Amazon Kafka [7.9.0](https://github.com/DataDog/integrations-core/blob/master/amazon_msk/CHANGELOG.md)
+* Argo Workflows [3.5.0](https://github.com/DataDog/integrations-core/blob/master/argo_workflows/CHANGELOG.md)
+* Datadog Checks Base [38.3.1](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+* Datadog Checks Downloader [9.4.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_downloader/CHANGELOG.md)
+* Cilium [7.0.0](https://github.com/DataDog/integrations-core/blob/master/cilium/CHANGELOG.md) **BREAKING CHANGE**
+* Cisco ACI [6.0.0](https://github.com/DataDog/integrations-core/blob/master/cisco_aci/CHANGELOG.md) **BREAKING CHANGE**
+* Citrix Hypervisor [6.4.1](https://github.com/DataDog/integrations-core/blob/master/citrix_hypervisor/CHANGELOG.md)
+* ClickHouse [7.3.0](https://github.com/DataDog/integrations-core/blob/master/clickhouse/CHANGELOG.md)
+* Datadog Cluster Agent [6.6.0](https://github.com/DataDog/integrations-core/blob/master/datadog_cluster_agent/CHANGELOG.md)
+* DO Query Actions [1.3.0](https://github.com/DataDog/integrations-core/blob/master/do_query_actions/CHANGELOG.md)
+* Envoy [6.8.0](https://github.com/DataDog/integrations-core/blob/master/envoy/CHANGELOG.md)
+* etcd [9.5.0](https://github.com/DataDog/integrations-core/blob/master/etcd/CHANGELOG.md)
+* Gearman [5.5.0](https://github.com/DataDog/integrations-core/blob/master/gearmand/CHANGELOG.md)
+* IBM ACE [4.6.1](https://github.com/DataDog/integrations-core/blob/master/ibm_ace/CHANGELOG.md)
+* Kafka Actions [2.10.0](https://github.com/DataDog/integrations-core/blob/master/kafka_actions/CHANGELOG.md)
+* Kafka Consumer [9.1.1](https://github.com/DataDog/integrations-core/blob/master/kafka_consumer/CHANGELOG.md)
+* KrakenD [2.1.0](https://github.com/DataDog/integrations-core/blob/master/krakend/CHANGELOG.md)
+* Kueue [2.0.0](https://github.com/DataDog/integrations-core/blob/master/kueue/CHANGELOG.md) **BREAKING CHANGE**
+* Kuma [2.5.0](https://github.com/DataDog/integrations-core/blob/master/kuma/CHANGELOG.md)
+* Linux proc extras [4.4.0](https://github.com/DataDog/integrations-core/blob/master/linux_proc_extras/CHANGELOG.md)
+* LiteLLM [2.6.0](https://github.com/DataDog/integrations-core/blob/master/litellm/CHANGELOG.md)
+* MongoDB [10.13.0](https://github.com/DataDog/integrations-core/blob/master/mongo/CHANGELOG.md)
+* MySQL [15.21.0](https://github.com/DataDog/integrations-core/blob/master/mysql/CHANGELOG.md)
+* OpenStack Controller [9.8.0](https://github.com/DataDog/integrations-core/blob/master/openstack_controller/CHANGELOG.md)
+* PGBouncer [8.12.0](https://github.com/DataDog/integrations-core/blob/master/pgbouncer/CHANGELOG.md)
+* Postgres [23.12.0](https://github.com/DataDog/integrations-core/blob/master/postgres/CHANGELOG.md)
+* Prefect [1.2.0](https://github.com/DataDog/integrations-core/blob/master/prefect/CHANGELOG.md)
+* Redis [8.10.0](https://github.com/DataDog/integrations-core/blob/master/redisdb/CHANGELOG.md)
+* RiakCS [4.15.0](https://github.com/DataDog/integrations-core/blob/master/riakcs/CHANGELOG.md)
+* SQL Server [23.5.0](https://github.com/DataDog/integrations-core/blob/master/sqlserver/CHANGELOG.md)
+* Vault [7.5.0](https://github.com/DataDog/integrations-core/blob/master/vault/CHANGELOG.md)
+* VoltDB [6.5.0](https://github.com/DataDog/integrations-core/blob/master/voltdb/CHANGELOG.md)
+* Weaviate [4.5.0](https://github.com/DataDog/integrations-core/blob/master/weaviate/CHANGELOG.md)
+
 ## Datadog Agent version [7.83.3](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7833)
 
 * There were no integration updates for this version of the Agent.

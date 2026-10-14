@@ -1,0 +1,1 @@
+Fix `ddev env start` not enabling the logs Agent on Linux and macOS when the E2E environment mounts logs.

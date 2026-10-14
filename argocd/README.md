@@ -325,7 +325,6 @@ instances:
     genresources_auth_token: <ARGOCD_API_TOKEN>
 
     ## Poll all three resource types every five minutes.
-    genresources_stream_applications_enabled: false
     genresources_application_full_scrape_interval_seconds: 300
     genresources_application_poll_interval_seconds: 300
     genresources_cluster_scrape_interval_seconds: 300
@@ -343,9 +342,8 @@ The available options are:
 | `collect_genresources`                                 | `false`  | Enables entity collection. Required.                                                                                                                                                       |
 | `genresources_endpoint`                                | none     | Base URL of the Argo CD REST API. Required. This is not a Prometheus metrics URL.                                                                                                          |
 | `genresources_auth_token`                              | none     | Bearer token used to authenticate against the Argo CD API. When unset, the collector uses the authentication configured on the instance.                                                    |
-| `genresources_stream_applications_enabled`             | `true`   | Streams Application changes from the Argo CD API in near real time. Set it to `false` to poll instead and let the notifications webhook carry changes between polls.                        |
 | `genresources_application_full_scrape_interval_seconds` | `600`    | Interval between full Application scrapes. Every Application is resubmitted, which refreshes its expiry.                                                                                    |
-| `genresources_application_poll_interval_seconds`       | `120`    | Interval between Application polls that submit only what changed. Applies only when streaming is disabled. Set it to the full scrape interval to collect Applications on a single cadence.  |
+| `genresources_application_poll_interval_seconds`       | `120`    | Interval between Application polls that submit only what changed. Set it to the full scrape interval to collect Applications on a single cadence.                                          |
 | `genresources_cluster_scrape_interval_seconds`         | `300`    | Interval between full Cluster scrapes.                                                                                                                                                     |
 | `genresources_repository_scrape_interval_seconds`      | `300`    | Interval between full Repository scrapes.                                                                                                                                                  |
 | `genresources_ttl_seconds`                             | `1800`   | How long a resource is retained after it was last observed. Keep it at or above the longest scrape interval; otherwise, resources expire before they are refreshed. The check logs a warning when this value is too low. |

@@ -1,0 +1,1 @@
+Improve Dispatcher outcome metrics: report runs whose tests failed separately from runs the Dispatcher could not complete, count exactly one outcome per run, and count passed batches when their results are gathered.

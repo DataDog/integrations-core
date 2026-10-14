@@ -10,7 +10,8 @@ from contextlib import AbstractContextManager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from ddev.cli.ci.tests.dispatcher_attributes import batch_fields, job_fields, message_fields, run_fields
+from ddev.cli.ci.tests.dispatcher_attributes import batch_fields, message_fields, run_fields
+from ddev.cli.ci.tests.execution_metrics import ExecutionOutcome
 from ddev.cli.ci.tests.messages import BatchFinished, BatchProgressUpdate, TestBatch, UpdatePRComment
 from ddev.cli.ci.tests.pr_comment import render_run_summary, summary_line
 from ddev.cli.ci.tests.rate_limiting import RateLimiterFactory
@@ -50,17 +51,24 @@ class DispatcherOutcome:
     shutdown: ShutdownRequest | None = None
 
     @property
-    def successful(self) -> bool:
-        """Whether all batches finished without failure and the final report was published.
+    def execution_outcome(self) -> ExecutionOutcome:
+        """The run's single terminal outcome.
 
-        Any shutdown request makes the outcome unsuccessful.
+        Tests only count as failed once the Dispatcher finished every batch and published the final
+        report: a failed batch nobody was told about is a Dispatcher failure. After that a test
+        failure outranks a cancelled batch, and a cancelled batch outranks a pass.
         """
-        return (
-            self.shutdown is None
-            and self.final_report_published
-            and self.progress.done
-            and all(batch.status is not Status.FAILURE for batch in self.progress.batches)
-        )
+        if self.cancelled:
+            return ExecutionOutcome.CANCELLED
+        if self.timed_out:
+            return ExecutionOutcome.TIMED_OUT
+        if self.shutdown is not None or not (self.final_report_published and self.progress.done):
+            return ExecutionOutcome.FAILED
+        if self.progress.has_failure:
+            return ExecutionOutcome.TESTS_FAILED
+        if any(batch.status is Status.CANCELLED for batch in self.progress.batches):
+            return ExecutionOutcome.CANCELLED
+        return ExecutionOutcome.PASSED
 
     @property
     def cancelled(self) -> bool:
@@ -170,7 +178,9 @@ class Dispatcher(EventBusOrchestrator):
         request = self.shutdown_request
         try:
             # Processors have drained; report their results even if remote cleanup fails.
-            self._report_incomplete_jobs()
+            self._gatherer.report_unfinished(
+                [batch for batch in self._batches if batch.run_id is not None], cancelled=self.cancelled
+            )
             if request is not None:
                 await self._shutdown_cleanup(request)
             progress = self._gatherer.progress
@@ -184,25 +194,6 @@ class Dispatcher(EventBusOrchestrator):
                 write_step_summary(render_run_summary(body, pr_comment_failed=self._reporter.pr_comment_failed))
         finally:
             await self._client.aclose()
-
-    def _report_incomplete_jobs(self) -> None:
-        """Best-effort accounting: reporting errors must not prevent shutdown cleanup."""
-        try:
-            progress_by_batch = {batch.batch_id: batch for batch in self._gatherer.progress.batches}
-            metrics = self._monitor.metrics
-            for batch in self._batches:
-                if batch.run_id is None:
-                    continue
-                final = progress_by_batch[batch.batch_id]
-                collected = {
-                    job_progress.job.name
-                    for job_progress in final.jobs_progress
-                    if job_progress.collected_result is not None
-                }
-                for job in batch.job_list:
-                    metrics.count('jobs.incomplete', int(job.name not in collected), **job_fields(job))
-        except Exception:
-            self._logger.exception('Failed to report incomplete jobs')
 
     async def _shutdown_cleanup(self, request: ShutdownRequest) -> None:
         """Attempt terminal reporting and remote cancellation without either abandoning the other."""
