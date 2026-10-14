@@ -250,12 +250,12 @@ def _get_matching_rules(wheel_name: str) -> list[dict]:
     return matching
 
 
-def _strip_docstrings(source: str) -> str:
+def _strip_docstrings(source: str, filename: str) -> str:
     """Empty Python docstrings without rewriting executable code or license comments."""
     data = source.encode('utf-8')
     offsets = list(accumulate((len(line) + 1 for line in data.split(b'\n')), initial=0))
     spans = []
-    for node in ast.walk(ast.parse(source)):
+    for node in ast.walk(ast.parse(source, filename=filename)):
         if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
             if ast.get_docstring(node, clean=False) is not None:
                 doc = node.body[0]
@@ -311,7 +311,7 @@ def _strip_lines_from_dir(unpacked_dir: Path, rules: list[dict]) -> bool:
 
             updated_content = ''.join(kept_lines)
             if rule.get('strip_docstrings', False):
-                updated_content = _strip_docstrings(updated_content)
+                updated_content = _strip_docstrings(updated_content, str(py_file))
             if updated_content != original_content:
                 py_file.write_text(updated_content, encoding='utf-8')
                 modified = True
