@@ -6,9 +6,9 @@ import threading
 from typing import Any
 
 import pytest
-import requests
 from urllib3.exceptions import ProtocolError
 
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.pan_firewall.api import (
     PanosApiError,
     PanosAuthError,
@@ -22,7 +22,7 @@ from datadog_checks.pan_firewall.api import (
 from datadog_checks.pan_firewall.auth import Credentials, KeyManager
 
 from .common import FIXTURES
-from .fake_panos import response
+from .fake_panos import TRANSPORT_ERRORS, response
 from .fixture_map import op_fixture
 
 HOST = '192.0.2.10'
@@ -49,7 +49,7 @@ AUTH_FAILURES = [
     pytest.param(200, CODE_16, id='code-16'),
 ]
 
-type Answer = tuple[int, bytes] | Exception | requests.Response
+type Answer = tuple[int, bytes] | Exception | MockResponse
 
 
 class FakeHttp:
@@ -60,15 +60,15 @@ class FakeHttp:
         self.api = list(api or [])
         self.calls: list[dict[str, Any]] = []
 
-    def post(self, url: str, **options: Any) -> requests.Response:
+    def post(self, url: str, **options: Any) -> MockResponse:
         self.calls.append({'url': url, **options})
         queue = self.keygen if options['data'].get('type') == 'keygen' else self.api
         answer = queue.pop(0)
         if isinstance(answer, Exception):
             raise answer
-        if isinstance(answer, requests.Response):
+        if isinstance(answer, MockResponse):
             return answer
-        return response(URL, *answer)
+        return response(*answer)
 
     def calls_of(self, kind: str) -> list[dict[str, Any]]:
         return [c for c in self.calls if (c['data'].get('type') == 'keygen') == (kind == 'keygen')]
@@ -118,7 +118,7 @@ def test_key_never_leaks_into_urls_logs_or_errors(caplog):
             (200, THREAT_LOGS),
             (403, INVALID_CREDENTIAL),
             (403, INVALID_CREDENTIAL),
-            requests.exceptions.ConnectionError('refused'),
+            TRANSPORT_ERRORS['refused'],
         ],
     )
     client, keys = make_client(http)
@@ -257,16 +257,14 @@ def test_static_key_is_never_regenerated():
 @pytest.mark.parametrize(
     'raised, expected, message',
     [
-        pytest.param(requests.exceptions.ReadTimeout('read timed out'), PanosTimeout, 'timed out', id='timeout'),
+        pytest.param(TRANSPORT_ERRORS['timeout'], PanosTimeout, 'timed out', id='timeout'),
         pytest.param(
-            requests.exceptions.ConnectionError('connection refused'),
+            TRANSPORT_ERRORS['refused'],
             PanosConnectionError,
             'cannot connect',
             id='refused',
         ),
-        pytest.param(
-            requests.exceptions.SSLError('certificate verify failed'), PanosConnectionError, 'TLS error', id='tls'
-        ),
+        pytest.param(TRANSPORT_ERRORS['tls'], PanosConnectionError, 'TLS error', id='tls'),
     ],
 )
 def test_transport_errors_are_typed_and_name_the_host(raised, expected, message):
@@ -291,13 +289,13 @@ def read_log_job(client, job_id):
     [
         pytest.param(
             lambda client: client.op(SYSTEM_INFO_CMD),
-            requests.exceptions.ReadTimeout('read timed out'),
+            TRANSPORT_ERRORS['timeout'],
             PanosTimeout,
             id='op-timeout',
         ),
         pytest.param(
             lambda client: read_log_job(client, '2'),
-            requests.exceptions.ConnectionError('refused'),
+            TRANSPORT_ERRORS['refused'],
             PanosConnectionError,
             id='log-job-refused',
         ),
@@ -330,7 +328,7 @@ def test_stream_that_breaks_mid_way_makes_the_next_calls_fail_fast():
         def close(self):
             pass
 
-    resp = response(URL, 200, b'')
+    resp = response(200, b'')
     resp.raw = BrokenRaw()
     http = FakeHttp(api=[resp, (200, SYSTEM_INFO)])
     client, _ = make_client(http, STATIC_CREDS)
@@ -358,7 +356,7 @@ class ConcurrencyProbe:
         self.entered = threading.Semaphore(0)
         self.release = threading.Event()
 
-    def post(self, url: str, **options: Any) -> requests.Response:
+    def post(self, url: str, **options: Any) -> MockResponse:
         with self.lock:
             self.in_flight += 1
             self.peak = max(self.peak, self.in_flight)
@@ -366,7 +364,7 @@ class ConcurrencyProbe:
         self.release.wait(timeout=5)
         with self.lock:
             self.in_flight -= 1
-        return response(URL, 200, SYSTEM_INFO)
+        return response(200, SYSTEM_INFO)
 
 
 def test_at_most_two_calls_in_flight():

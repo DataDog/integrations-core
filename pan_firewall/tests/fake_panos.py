@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""An in-process PAN-OS XML API for unit tests, patched in place of `RequestsWrapper.post`.
+"""An in-process PAN-OS XML API for unit tests, patched in place of `requests.Session.post`, so `RequestsWrapper` runs.
 
 Each firewall IP answers from a fixture set (`FIREWALL_SETS`) through `fixture_map`. Tests inject failures per host
 with `FakePanos.fail()`, replace the answer to one command with `FakePanos.answer_op()`, and inspect
@@ -10,7 +10,6 @@ with `FakePanos.fail()`, replace the answer to one command with `FakePanos.answe
 
 from __future__ import annotations
 
-import io
 import itertools
 import re
 from dataclasses import dataclass, field
@@ -20,8 +19,18 @@ from urllib.parse import urlsplit
 
 import requests
 
-from .common import FIXTURES
-from .fixture_map import find_log_fixture, find_op_fixture, find_report_fixture, panorama_op_answer
+from datadog_checks.dev.http import MockResponse
+
+from .fixture_map import (
+    FIXTURES,
+    INVALID_CREDENTIAL,
+    KEYGEN_OK,
+    NO_CAPTURE,
+    find_log_fixture,
+    find_op_fixture,
+    find_report_fixture,
+    panorama_op_answer,
+)
 
 # Firewall IP -> fixture set.
 FIREWALL_SETS = {'192.0.2.10': 'fw-a', '192.0.2.11': 'fw-b'}
@@ -31,14 +40,6 @@ FIREWALL_SETS = {'192.0.2.10': 'fw-a', '192.0.2.11': 'fw-b'}
 PANORAMA_HOSTS = {'panorama.example.com'}
 PANORAMA_FIREWALL_IPS = {'fw-a': '192.0.2.10', 'fw-b': '192.0.2.11'}
 
-# The keygen success shape (`result/key`) from the PAN-OS XML API docs ("Get Your API Key"), with a dummy key. Kept
-# inline rather than in `fixtures/synthetic/`: fixture files must hold no `<key>` (see `test_fixtures_hold_no_secrets`).
-FAKE_KEY = 'FAKE-KEY-0000'
-KEYGEN_OK = f'<response status="success"><result><key>{FAKE_KEY}</key></result></response>'.encode()
-INVALID_CREDENTIAL = (FIXTURES / 'synthetic' / 'auth_invalid_credential.xml').read_bytes()
-# Stand-in for a command the fixture set has no capture for (for example `show interface all` on fw-b): PAN-OS
-# answers commands it cannot run with `status="error"`.
-NO_CAPTURE = b'<response status="error" code="400"><msg><line>no capture for this command</line></msg></response>'
 
 SUBMIT_TEMPLATE = (
     b'<response status="success" code="19"><result><msg><line>query job enqueued with jobid %s</line></msg>'
@@ -47,10 +48,16 @@ SUBMIT_TEMPLATE = (
 Answer = tuple[int, bytes] | Exception
 LogBody = bytes | Path | Answer
 
-FAILURES: dict[str, Answer] = {
+# What the transport raises when a device cannot be reached: the only `requests` types the tests use.
+TRANSPORT_ERRORS: dict[str, Exception] = {
     'timeout': requests.exceptions.ReadTimeout('read timed out'),
+    'connect_timeout': requests.exceptions.ConnectTimeout('connect timed out'),
     'refused': requests.exceptions.ConnectionError('connection refused'),
     'tls': requests.exceptions.SSLError('certificate verify failed'),
+}
+
+FAILURES: dict[str, Answer] = {
+    **TRANSPORT_ERRORS,
     'http_403': (403, INVALID_CREDENTIAL),
     'code_403': (200, INVALID_CREDENTIAL),
     # The real Panorama answer to a keygen with a wrong password (lab task P1).
@@ -116,7 +123,7 @@ class FakePanos:
     def calls_to(self, host: str) -> list[Call]:
         return [c for c in self.calls if c.host == host]
 
-    def post(self, url: str, **options: Any) -> requests.Response:
+    def post(self, url: str, **options: Any) -> MockResponse:
         host = urlsplit(url).hostname or ''
         data: dict[str, str] = options['data']
         kind = 'keygen' if data.get('type') == 'keygen' else 'api'
@@ -126,7 +133,7 @@ class FakePanos:
                 type=data.get('type', ''),
                 cmd=data.get('cmd'),
                 action=data.get('action'),
-                key_sent='X-PAN-KEY' in (options.get('extra_headers') or {}),
+                key_sent='X-PAN-KEY' in (options.get('headers') or {}),
                 params=dict(data),
             )
         )
@@ -139,7 +146,7 @@ class FakePanos:
         )
         if isinstance(answer, Exception):
             raise answer
-        return response(url, *answer)
+        return response(*answer)
 
     def _answer(self, host: str, data: dict[str, str]) -> Answer:
         if data.get('type') == 'keygen':
@@ -147,7 +154,7 @@ class FakePanos:
         if host in PANORAMA_HOSTS:
             return 200, panorama_op_answer(data.get('cmd', ''), PANORAMA_FIREWALL_IPS) or NO_CAPTURE
         if host not in FIREWALL_SETS:
-            return requests.exceptions.ConnectionError(f'no fake firewall at {host}')
+            return TRANSPORT_ERRORS['refused']
         path = find_op_fixture(data['cmd'], FIREWALL_SETS[host]) if data.get('type') == 'op' else None
         return (200, path.read_bytes()) if path else (200, NO_CAPTURE)
 
@@ -227,9 +234,5 @@ class FakePanos:
         return (200, body) if isinstance(body, bytes) else body
 
 
-def response(url: str, status: int, body: bytes) -> requests.Response:
-    resp = requests.Response()
-    resp.status_code = status
-    resp.raw = io.BytesIO(body)
-    resp.url = url
-    return resp
+def response(status: int, body: bytes) -> MockResponse:
+    return MockResponse(content=body.decode(), status_code=status, normalize_content=False)

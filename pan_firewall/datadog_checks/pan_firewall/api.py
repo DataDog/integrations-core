@@ -13,7 +13,6 @@ from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import Element
 
 import requests
-from requests import Response
 
 from datadog_checks.base.utils.http import RequestsWrapper
 
@@ -30,6 +29,8 @@ from .errors import (
 from .xml_utils import check_response, parse_response, text
 
 if TYPE_CHECKING:
+    from requests import Response
+
     from datadog_checks.base import AgentCheck
     from datadog_checks.base.log import CheckLoggingAdapter
 

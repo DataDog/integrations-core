@@ -7,7 +7,6 @@ import threading
 
 import pytest
 
-from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.pan_firewall import PanFirewallCheck
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, Sample, once_log, warn_once
 from datadog_checks.pan_firewall.collectors.jobs import JOBS_PENDING_CMD
@@ -320,18 +319,35 @@ def test_unexpected_poller_error_does_not_stop_other_firewalls(dd_run_check, agg
         pytest.param({'timeout': 5}, (5.0, 5.0), id='configured'),
     ],
 )
-def test_calls_use_the_instance_timeout(dd_run_check, fake_panos, monkeypatch, options, expected):
+def test_calls_use_the_instance_timeout(dd_run_check, fake_panos, mocker, options, expected):
     timeouts = set()
 
-    def post(self, url, **kwargs):
-        timeouts.add(self.options['timeout'])
+    def post(url, **kwargs):
+        timeouts.add(kwargs['timeout'])
         return fake_panos.post(url, **kwargs)
 
-    monkeypatch.setattr(RequestsWrapper, 'post', post)
+    mocker.patch('requests.Session.post', side_effect=post)
 
     dd_run_check(new_check(make_instance(**options)))
 
     assert timeouts == {expected}
+
+
+def test_calls_to_a_firewall_go_through_one_session(dd_run_check, fake_panos, mocker):
+    sessions = []
+
+    def post(session, url, **kwargs):
+        sessions.append(session)
+        return fake_panos.post(url, **kwargs)
+
+    # A plain function, unlike the fixture's mock, is bound to the session it is called on.
+    mocker.patch('requests.Session.post', new=post)
+
+    dd_run_check(new_check())
+
+    # Keygen and `show system info` at least; the list keeps every session alive, so `is` cannot match a reused id.
+    assert len(sessions) >= 2
+    assert all(session is sessions[0] for session in sessions)
 
 
 def test_system_info_without_serial_keeps_the_cached_identity(dd_run_check, aggregator, fake_panos, monkeypatch):

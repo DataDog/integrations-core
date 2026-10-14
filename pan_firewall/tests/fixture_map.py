@@ -1,15 +1,25 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Maps a PAN-OS API request to a captured fixture file.
+"""Maps a PAN-OS API request to a captured fixture file, and holds the fake API's fixed answers.
 
-Shared by the unit fake transport and the docker fakes, so both answer from the same data.
+Shared by the unit fake transport and the docker fakes, so both answer from the same data. The docker fakes import
+it without the test dependencies, so it imports nothing from the other test modules.
 """
 
 from collections.abc import Mapping
 from pathlib import Path
 
-from .common import FIXTURES
+FIXTURES = Path(__file__).parent / 'fixtures'
+
+# The keygen success shape (`result/key`) from the PAN-OS XML API docs ("Get Your API Key"), with a dummy key. Kept
+# inline rather than in `fixtures/synthetic/`: fixture files must hold no `<key>` (see `test_fixtures_hold_no_secrets`).
+FAKE_KEY = 'FAKE-KEY-0000'
+KEYGEN_OK = f'<response status="success"><result><key>{FAKE_KEY}</key></result></response>'.encode()
+INVALID_CREDENTIAL = (FIXTURES / 'synthetic' / 'auth_invalid_credential.xml').read_bytes()
+# Stand-in for a command the fixture set has no capture for (for example `show interface all` on fw-b): PAN-OS
+# answers commands it cannot run with `status="error"`.
+NO_CAPTURE = b'<response status="error" code="400"><msg><line>no capture for this command</line></msg></response>'
 
 # `type=op` commands, as sent by the live captures, to the fixture file name.
 OP_FIXTURES = {

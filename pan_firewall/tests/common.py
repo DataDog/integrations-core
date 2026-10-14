@@ -4,12 +4,12 @@
 import ipaddress
 import os
 from collections.abc import Mapping
-from pathlib import Path
 from typing import Any
 
 import pytest
 
-FIXTURES = Path(__file__).parent / 'fixtures'
+from .fixture_map import FIXTURES
+
 SYNTHETIC = FIXTURES / 'synthetic'
 
 CREDENTIALS = [{'username': 'dummy-user', 'password': 'dummy-password'}]

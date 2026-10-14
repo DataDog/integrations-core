@@ -5,7 +5,6 @@ import os
 
 import pytest
 
-from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev import docker_run, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.pan_firewall import poller as poller_module
@@ -79,13 +78,14 @@ def dd_environment():
 
 
 @pytest.fixture(autouse=True)
-def fake_panos(monkeypatch, datadog_agent) -> FakePanos:
-    """Serve every HTTP POST from the fake PAN-OS API, so no unit test reaches the network.
+def fake_panos(mocker, datadog_agent) -> FakePanos:
+    """Serve every HTTP POST from the fake PAN-OS API, so no unit test reaches the network. `RequestsWrapper` runs
+    as in production (timeout, headers, TLS options, session); only the session's `post` is replaced.
 
     Requesting `datadog_agent` resets the stubbed persistent cache between tests.
     """
     fake = FakePanos()
-    monkeypatch.setattr(RequestsWrapper, 'post', lambda _self, url, **options: fake.post(url, **options))
+    mocker.patch('requests.Session.post', side_effect=fake.post)
     return fake
 
 

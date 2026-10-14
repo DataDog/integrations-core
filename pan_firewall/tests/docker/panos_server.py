@@ -14,7 +14,7 @@ from pathlib import Path
 
 from flask import Flask, Response, request
 
-from tests.fake_panos import FAKE_KEY, INVALID_CREDENTIAL, KEYGEN_OK, NO_CAPTURE
+from tests.fixture_map import FAKE_KEY, INVALID_CREDENTIAL, KEYGEN_OK, NO_CAPTURE
 
 CERT_FILE = '/app/certs/cert.pem'
 KEY_FILE = '/app/certs/key.pem'
