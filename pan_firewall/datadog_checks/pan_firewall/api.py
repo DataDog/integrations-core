@@ -68,23 +68,6 @@ def transport_errors(url: str) -> Iterator[None]:
         raise PanosUnreachable(f'could not reach {host}: {e}', reason=str(e)) from None
 
 
-class RequestCounter:
-    """Counts every request `post_api` sends, keygen and retries included."""
-
-    def __init__(self) -> None:
-        self._count = 0
-        self._lock = threading.Lock()
-
-    def add(self) -> None:
-        with self._lock:
-            self._count += 1
-
-    def take(self) -> int:
-        with self._lock:
-            count, self._count = self._count, 0
-        return count
-
-
 def post_api(
     http: RequestsWrapper,
     url: str,
@@ -92,14 +75,11 @@ def post_api(
     *,
     key: str | None = None,
     stream: bool = False,
-    counter: RequestCounter | None = None,
 ) -> Response:
     """POST form `data` to the XML API. The key, when given, goes only in the `X-PAN-KEY` header."""
     options: dict[str, Any] = {'data': data, 'stream': stream}
     if key is not None:
         options['extra_headers'] = {KEY_HEADER: key}
-    if counter is not None:
-        counter.add()
     with transport_errors(url):
         return http.post(url, **options)
 
@@ -155,14 +135,12 @@ class PanosClient:
         keys: KeyManager,
         log: CheckLoggingAdapter,
         max_in_flight: int = 2,
-        counter: RequestCounter | None = None,
     ):
         self._http = http
         self._host = host
         self._url = api_url(host)
         self._keys = keys
         self._log = log
-        self._counter = counter
         self._slots = threading.BoundedSemaphore(max_in_flight)
         self._renew_lock = threading.Lock()
         self._stats = CallStats()
@@ -214,9 +192,7 @@ class PanosClient:
     def _call(self, params: dict[str, str]) -> Element:
         with self._slots:
             self._fail_fast_if_unreachable()
-            return self._authorized(
-                lambda key: read_response(post_api(self._http, self._url, params, key=key, counter=self._counter))
-            )
+            return self._authorized(lambda key: read_response(post_api(self._http, self._url, params, key=key)))
 
     def start_run(self) -> None:
         """Start the stats of a new run, which also ends the fail-fast state. Call it at the start of each run."""
@@ -288,7 +264,7 @@ class PanosClient:
     def _open_stream(self, params: dict[str, str], key: str) -> tuple[Response, Element, Iterator[tuple[str, Element]]]:
         """Send a streamed request and read up to the root. An error response is raised here, inside `_authorized`, so
         a rejected key is renewed before any entry reaches the caller."""
-        resp = post_api(self._http, self._url, params, key=key, stream=True, counter=self._counter)
+        resp = post_api(self._http, self._url, params, key=key, stream=True)
         try:
             if resp.status_code >= 400:
                 with transport_errors(self._url):

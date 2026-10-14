@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from .api import PanosClient, RequestCounter
+from .api import PanosClient
 from .auth import KeyManager
 from .collectors import (  # noqa: F401  (importing the modules registers their collectors)
     COLLECT_FUNCTIONS,
@@ -79,9 +79,8 @@ class FirewallPoller:
         self.ip = device_ip(target)
         # Keyed by device IP: before a static firewall first answers, its IP is all the check knows.
         self._cache_key = f'identity:{self.ip}'
-        self._requests = RequestCounter()
-        self.keys = KeyManager(check.http, target.ip, target.credentials, self._requests)
-        self.client = PanosClient(check.http, target.ip, self.keys, check.log, counter=self._requests)
+        self.keys = KeyManager(check.http, target.ip, target.credentials)
+        self.client = PanosClient(check.http, target.ip, self.keys, check.log)
         self.schedule = FirewallSchedule()
         self.state = FirewallState()
         self.identity = self._load_identity()
@@ -100,12 +99,10 @@ class FirewallPoller:
         start = time.monotonic()
         # Clears what a run that raised may have left, such as the failure that makes every call fail fast.
         self.client.start_run()
-        self._requests.take()
         try:
             self._run()
         finally:
-            requests = self._requests.take()
-            self.log.debug('%s: %d requests in %.2fs', self.ip, requests, time.monotonic() - start)
+            self.log.debug('%s: %d calls in %.2fs', self.ip, self.client.stats.calls, time.monotonic() - start)
 
     def _run(self) -> None:
         # One keygen attempt per run after a rejected one (the KeyManager latches until then).

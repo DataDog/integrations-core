@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-import re
 import threading
 
 import pytest
@@ -34,9 +33,7 @@ def only_value_and_tags(aggregator, name):
     return metric.value, sorted(metric.tags)
 
 
-def test_good_run_collects_identity_and_reports_connected(dd_run_check, aggregator, fake_panos, caplog):
-    caplog.set_level(logging.DEBUG)
-
+def test_good_run_collects_identity_and_reports_connected(dd_run_check, aggregator, fake_panos):
     dd_run_check(new_check())
 
     assert only_value_and_tags(aggregator, 'can_connect') == (1, FW_A_TAGS)
@@ -47,7 +44,6 @@ def test_good_run_collects_identity_and_reports_connected(dd_run_check, aggregat
         ('op', SYSTEM_INFO_CMD, True),
         ('op', INTERFACE_ALL_CMD, True),
     ]
-    assert re.search(rf'{re.escape(FW_A_IP)}: 4 requests in \d+\.\d\ds', caplog.text)
 
 
 # Transport failures, and HTTP errors whose body is not a PAN-OS response: none of them means the firewall API answered,

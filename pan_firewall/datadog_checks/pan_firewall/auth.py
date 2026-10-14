@@ -7,7 +7,7 @@ import threading
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from .api import RequestCounter, api_url, post_api, read_response
+from .api import api_url, post_api, read_response
 from .constants import PARSE_ERROR_CODE
 from .errors import PanosApiError, PanosAuthError
 from .xml_utils import text
@@ -30,12 +30,11 @@ class KeyManager:
     loop, though one a minute can still reach a PAN-OS lockout threshold.
     """
 
-    def __init__(self, http: RequestsWrapper, host: str, creds: Credentials, counter: RequestCounter | None = None):
+    def __init__(self, http: RequestsWrapper, host: str, creds: Credentials):
         self._http = http
         self._host = host
         self._url = api_url(host)
         self._creds = creds
-        self._counter = counter
         self._key: str | None = creds.api_key
         self._lock = threading.Lock()
         self._keygen_rejected = False
@@ -70,7 +69,7 @@ class KeyManager:
     def _keygen(self) -> str:
         # The credentials go in the POST body, never in the URL.
         data = {'type': 'keygen', 'user': self._creds.username or '', 'password': self._creds.password or ''}
-        resp = post_api(self._http, self._url, data, counter=self._counter)
+        resp = post_api(self._http, self._url, data)
         try:
             root = read_response(resp)
         except PanosAuthError as e:
