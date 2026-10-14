@@ -38,28 +38,33 @@
       }
     }
   ],
-  "additional_config_fields": [
+  "dataflow_config": [
     {
-      "key": "collect_alerts",
-      "label": "Collect Alerts",
-      "editable": true,
-      "required": false,
-      "checkbox": {
-        "default": true
+      "dataflow_id": "valence-security-alert-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Alerts",
+        "help": "Collects Valence Security alerts.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "collect_alerts",
+        "should_map_legacy_fields": true
       }
     },
     {
-      "key": "collect_audit_logs",
-      "label": "Collect Audit Logs",
-      "editable": true,
-      "required": false,
-      "checkbox": {
-        "default": true
+      "dataflow_id": "valence-security-audit-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Audit Logs",
+        "help": "Collects Valence Security audit logs.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "collect_audit_logs",
+        "should_map_legacy_fields": true
       }
     }
-  ],
-  "dataflow_config": [
-    { "dataflow_id": "valence-security-logs" }
   ],
   "health_probe": {
     "http_method": "GET",
