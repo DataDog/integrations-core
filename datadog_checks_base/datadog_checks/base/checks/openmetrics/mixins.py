@@ -837,7 +837,7 @@ class OpenMetricsScraperMixin(object):
 
         try:
             response = self.send_request(endpoint, scraper_config, headers)
-        # Checks without AGNOSTIC_HTTP raise requests exceptions, which the agnostic types do not match.
+        # Checks with AGNOSTIC_HTTP raise the agnostic types. Checks without it raise requests exceptions.
         except (requests.exceptions.SSLError, HTTPClientSSLError):
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise

@@ -96,7 +96,7 @@ class OpenMetricsBaseCheckV2(AgentCheck):
             with self.adopt_namespace(scraper.namespace):
                 try:
                     scraper.scrape()
-                # Checks without AGNOSTIC_HTTP raise requests exceptions, which the agnostic types do not match.
+                # Checks with AGNOSTIC_HTTP raise the agnostic types. Checks without it raise requests exceptions.
                 except (ConnectionError, RequestException, HTTPClientError) as e:
                     self.log.error("There was an error scraping endpoint %s: %s", endpoint, str(e))
                     raise type(e)("There was an error scraping endpoint {}: {}".format(endpoint, e)) from None
