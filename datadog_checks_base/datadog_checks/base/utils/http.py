@@ -61,9 +61,9 @@ DEFAULT_EXPIRATION = 300
 # https://www.bittorrent.org/beps/bep_0003.html
 DEFAULT_CHUNK_SIZE = 16
 
-# `iter_lines` buffers a line until its end, so OpenMetrics checks limit lines (in KiB) by default to avoid buffering
-# an unbounded response
-DEFAULT_OPENMETRICS_MAX_LINE_SIZE = 16384
+# `iter_lines` buffers a line until its end, so OpenMetrics checks limit lines (in KiB) to avoid buffering an unbounded
+# response
+OPENMETRICS_MAX_LINE_SIZE = 16384
 
 STANDARD_FIELDS = {
     'allow_redirects': True,
@@ -83,7 +83,6 @@ STANDARD_FIELDS = {
     'kerberos_keytab': None,
     'kerberos_principal': None,
     'log_requests': False,
-    'max_line_size': None,
     'ntlm_domain': None,
     'password': None,
     'persist_connections': False,
@@ -269,10 +268,7 @@ class LineCappedRawResponse(ObjectProxy):
             newline = chunk.find(b'\n')
             first_line_size = line_size + (len(chunk) if newline < 0 else newline)
             if first_line_size > self._self_max_line_size:
-                raise ResponseLineTooLongError(
-                    f'Response contains a line longer than {self._self_max_line_size} bytes, '
-                    'the limit can be raised with the `max_line_size` option (in KiB)'
-                )
+                raise ResponseLineTooLongError(f'Response contains a line longer than {self._self_max_line_size} bytes')
             line_size = first_line_size if newline < 0 else len(chunk) - chunk.rfind(b'\n') - 1
             group.append(chunk)
             if newline >= 0:
@@ -300,10 +296,8 @@ class ResponseWrapper(ObjectProxy):
         if chunk_size is None:
             chunk_size = self.__default_chunk_size
 
-        if self.__max_line_size is not None:
-            # Not implemented yet for custom delimiters, which no check uses
-            if delimiter is not None:
-                raise ConfigurationError('The `max_line_size` setting is not supported with a custom delimiter')
+        # Not implemented yet for custom delimiters, which no check uses
+        if delimiter is None and self.__max_line_size is not None:
             limit_line_size(self.__wrapped__, self.__max_line_size)
 
         return self.__wrapped__.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter)
@@ -629,11 +623,8 @@ class RequestsWrapper(object):
         self.ignore_tls_warning = is_affirmative(config['tls_ignore_warning'])
 
         self.request_size = int(float(config['request_size']) * KIBIBYTE)
+        # Set in bytes by checks that limit the size of lines read with `iter_lines`
         self.max_line_size = None
-        if config['max_line_size'] is not None:
-            self.max_line_size = int(float(config['max_line_size']) * KIBIBYTE)
-            if self.max_line_size < self.request_size:
-                raise ConfigurationError('The `max_line_size` setting must be at least `request_size`')
 
         self.aia_chasing_max_depth = DEFAULT_AIA_CHASING_MAX_DEPTH
 

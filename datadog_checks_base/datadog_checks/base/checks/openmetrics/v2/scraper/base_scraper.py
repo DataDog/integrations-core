@@ -10,6 +10,7 @@ from itertools import chain
 from math import isinf, isnan
 from typing import List  # noqa: F401
 
+from binary import KIBIBYTE
 from prometheus_client import Metric
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
 from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
@@ -24,7 +25,7 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
-from datadog_checks.base.utils.http import DEFAULT_OPENMETRICS_MAX_LINE_SIZE, RequestsWrapper
+from datadog_checks.base.utils.http import OPENMETRICS_MAX_LINE_SIZE, RequestsWrapper
 
 
 class OpenMetricsScraper:
@@ -218,11 +219,8 @@ class OpenMetricsScraper:
 
             self.raw_line_filter = re.compile('|'.join(raw_line_filters))
 
-        # A new mapping, because `config` can be the instance itself
-        http_config = {'max_line_size': DEFAULT_OPENMETRICS_MAX_LINE_SIZE, **config}
-        self.http = RequestsWrapper(
-            http_config, self.check.init_config, self.check.HTTP_CONFIG_REMAPPER, self.check.log
-        )
+        self.http = RequestsWrapper(config, self.check.init_config, self.check.HTTP_CONFIG_REMAPPER, self.check.log)
+        self.http.max_line_size = OPENMETRICS_MAX_LINE_SIZE * KIBIBYTE
 
         self._content_type = ''
         self._use_latest_spec = is_affirmative(config.get('use_latest_spec', False))

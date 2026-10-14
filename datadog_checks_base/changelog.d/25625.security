@@ -1,1 +1,1 @@
-Limit lines read by OpenMetrics checks to 16 MiB by default so that a response without line breaks is no longer buffered in memory in its entirety. The limit can be changed, or set for other checks, with the new `max_line_size` option (in KiB).
+Limit lines read by OpenMetrics checks to 16 MiB so that a response without line breaks is no longer buffered in memory in its entirety.
