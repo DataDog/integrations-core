@@ -1,0 +1,1 @@
+Retry transient 404 responses when the Dispatcher first fetches a newly dispatched workflow run.
