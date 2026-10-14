@@ -460,7 +460,11 @@ class OpenMetricsScraper:
                 if response.encoding is None:
                     response.encoding = 'utf-8'
 
-                self.submit_telemetry_endpoint_response_size(response)
+                try:
+                    self.submit_telemetry_endpoint_response_size(response)
+                except Exception:
+                    response.close()
+                    raise
 
                 return response
 

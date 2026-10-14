@@ -30,6 +30,8 @@ def test_telemetry_does_not_read_long_lines(check_class, instance, dd_run_check)
         headers={'Content-Encoding': 'gzip'},
         preload_content=False,
     )
-    with mock.patch('requests.Session.get', return_value=response):
+    with mock.patch('requests.Session.get', return_value=response), mock.patch.object(response, 'close') as close:
         with pytest.raises(Exception, match=f'line longer than {MAX_LINE_SIZE} bytes'):
             dd_run_check(check_class('test', {}, [instance]))
+
+    close.assert_called()
