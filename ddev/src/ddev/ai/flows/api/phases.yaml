@@ -16,8 +16,20 @@
 
 - type: phase
   config:
+    name: api_scaffold
+    description: Create the integration scaffold with ddev from the design identity.
+    class: AgenticPhase
+    agent: api_scaffolder
+    variables:
+      - name: integration
+    tasks:
+      - name: scaffold
+        prompt_ref: api_scaffold_task
+
+- type: phase
+  config:
     name: api_build
-    description: Scaffold the integration, implement API collection, and generate configuration.
+    description: Implement API collection and generate configuration in the scaffolded integration.
     class: AgenticPhase
     agent: api_builder
     variables:
@@ -25,11 +37,8 @@
       - name: prd
       - name: docker_path
     tasks:
-      - name: scaffold
-        prompt_ref: api_scaffold_task
       - name: implement
         prompt_ref: api_implement_task
-        clear_context_before: true
       - name: configuration
         prompt_ref: api_configuration_task
         compact_context_before: true

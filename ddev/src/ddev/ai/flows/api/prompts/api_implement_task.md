@@ -17,10 +17,8 @@ If the design is BLOCKED or the target is not the designed scaffold, stop withou
 
 Implement the focused custom client, check orchestration, metric submissions, metadata.csv, and any
 designed API-log collection according to your standing builder contract. Remove scaffold examples.
-Declare each product option the code reads in spec.yaml with its type, `default`, and constraints
-from the design handoff, then run ddev_validate config and models with sync=true so
-`self.config.<option>` is typed. Read options without fallback defaults or range checks, and keep
-internal bounds as module constants. The next task completes shared templates, logs, the manifest,
+Declare each product option the code reads in spec.yaml per your configuration contract, then run
+ddev_validate config and models with sync=true so `self.config.<option>` is typed. The next task completes shared templates, logs, the manifest,
 and final validation. It starts from a compacted summary of this conversation, so record decisions
 it must honor in files and state deviations and known limitations in your final response.
 

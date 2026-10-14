@@ -12,8 +12,7 @@ separately and can inspect current code. Carry forward implementation decisions 
 test-critical contracts, evidence locations, and gaps without duplicating large endpoint, metric,
 or configuration catalogs. Use compact tables and shared rules. Include local probe method/URL/
 body or Docker command, observed status/outcome, and saved response path where relevant; cite
-reusable evidence once. The handoff is context, not authority: the tester must inspect current
-code and verify evidence relevant to each asserted contract, resolving disagreements.
+reusable evidence once.
 
 Include:
 

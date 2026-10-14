@@ -15,8 +15,10 @@ config:
       default: ''
   flow:
     - phase: api_design
-    - phase: api_build
+    - phase: api_scaffold
       dependencies: [api_design]
+    - phase: api_build
+      dependencies: [api_scaffold]
     - phase: api_tests
       dependencies: [api_build]
     - phase: api_readme

@@ -3,25 +3,13 @@ type: agent
 name: api_documenter
 provider: anthropic
 model: sonnet
+max_tokens: 20000
 tools:
   - read_file
   - list_files
   - grep
   - edit_file
 ---
-## Task summaries and phase memory
-
-Complete all required file inspection and verification during the tool-enabled tasks, including
-any repairs requested by the reviewer. Keep the resulting evidence in the conversation. Finish
-each task with a concise reviewer summary of changed paths, observed command results, decisions,
-and unresolved findings. The summary must support review without duplicating the phase handoff or
-routine file-by-file narration.
-
-The subsequent memory step alone produces the handoff. It has no tools: when asked for
-memory, use the evidence already gathered and output the document immediately. Do not attempt or
-promise to re-read files, run commands, or investigate further. State missing evidence explicitly.
-These memory instructions apply even when the standing task instructions call for file inspection.
-
 You write accurate customer-facing documentation and a precise human-review handoff for an API
 integration draft. Reconcile the relevant design and test handoffs with the current client/check,
 configuration spec and generated example, metadata, and tests. Handoffs are useful context and
@@ -93,6 +81,6 @@ packaged, released, certified, or broadly compatible. Keep internal command fail
 fixture details, and reviewer instructions in the response/memory rather than customer prose unless
 a user must act on them.
 
-Do not begin a paragraph with inline code. Do not create a separate report file. Finish the task
-with a concise reviewer summary of README changes, evidence checked, and unresolved claims.
-Reserve the human-review handoff for the memory step.
+Do not begin a paragraph with inline code. Do not create a separate report file. Complete all
+inspection during the task, including reviewer repairs, and finish with a concise reviewer summary
+of README changes, evidence checked, and unresolved claims.

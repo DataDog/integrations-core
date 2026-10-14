@@ -32,38 +32,22 @@ merely mirrors the implementation is not success: derive expected requests, resp
 logs, state transitions, and failures from the design evidence, then use current code to locate the
 boundaries under test. Keep repairs scoped to the target integration.
 
-## Task summaries and phase memory
+## Task summaries
 
-Complete all required file inspection and verification during the tool-enabled tasks, including
-any repairs requested by the reviewer. Keep the resulting evidence in the conversation. Finish
-each task with a concise reviewer summary of changed paths, observed command results, decisions,
-and unresolved findings. The summary must support review, but must not duplicate the full phase
+Complete all required file inspection and verification during each task, including any repairs
+requested by the reviewer. Finish each task with a concise reviewer summary of changed paths,
+observed command results with counts, decisions, and unresolved findings, without the full phase
 handoff or its contract tables.
 
 ## Evidence from earlier tasks
 
-Task summaries and phase handoffs are relevant evidence, not authoritative conclusions. Inspect
-the current integration, tests, and relevant environment assets before relying on one. Preserve a
-recorded command result instead of rerunning it merely because a later task or goal reviewer has
-fresh context. A reusable result identifies the exact tool/arguments or test selection, outcome
-(including collected/pass/skip/fail counts), and any setup or external error. It includes the
-observed output in the conversation or a durable run-log path/identifier a reviewer can read, and
-identifies the relevant files or environment condition inspected when the result was obtained.
-
-Reuse a result only after checking that no relevant implementation, test, configuration, Docker,
-or environment asset has changed and that there is no evidence the external condition changed.
-Treat it as stale and rerun the affected selection after a relevant repair or asset change. Repeat
-an external failure only when a relevant environment repair was made or there is concrete evidence
-that the failure was transient or its prerequisite is now available. An independent review is not
-such evidence. If a summary lacks enough detail, first retrieve its recorded tool output or run
-log. Run the missing affected selection when it is attainable. Report a tier as unverified only
-when the necessary evidence cannot be retrieved and the selection is genuinely unavailable; never
-infer a pass from a summary claim alone.
-
-The subsequent memory step alone produces the focused handoff. It has no tools: when asked for
-memory, use the evidence already gathered and output the document immediately. Do not attempt or
-promise to re-read files, run commands, or investigate further. State missing evidence explicitly.
-These memory instructions apply even when the standing task instructions call for file inspection.
+Handoffs and task summaries are evidence, not conclusions: inspect the current integration, tests,
+and environment assets before relying on one. If the conversation or run log shows the exact test
+selection or command, with its outcome and counts, after the last edit to relevant code, tests,
+configuration, or Docker assets, cite that record and do not rerun it. Otherwise run the affected
+selection when attainable; never infer a pass from a summary claim without such a record. Retry an
+external failure only after a relevant environment change or concrete evidence that it was
+transient.
 
 ## Maintain two strict unit-test layers
 
@@ -145,7 +129,7 @@ During live verification, use `docker` to inspect service state, ports, mounts, 
 Use the prepared Compose project for any necessary startup or repair; leave unrelated and
 pre-existing services intact. Prefer ddev tools for the normal test lifecycle. Verify new or
 changed local API requests with `http_get`/`http_post`, checking HTTP status and saving evidence.
-Reuse still-valid results. API reachability alone does not establish an Agent E2E pass.
+API reachability alone does not establish an Agent E2E pass.
 
 The environment-preparation skill may have supplied the integration's Docker information. Read the
 actual tests/docker Dockerfile/compose and existing conftest before writing live tests. Create or
@@ -170,6 +154,12 @@ code: map a `hatch.toml` axis to them through `[envs.default.overrides]` (see ex
 integrations), set to the version the prepared assets use, and read it from the environment where
 tests need it, with no hard-coded fallback. Set this up before the first ddev_env_show, because it
 renames the environment.
+
+Two harness details commonly break these tests. E2E sessions skip the body of `dd_environment`, so
+an instance built inside it (for example one with a free port) must be stored with `dd_save_state`
+and read back with `dd_get_state` in the fixtures E2E tests use. `RequestsWrapper` defines
+`__slots__`, so `mock.patch.object(check.http, 'get')` fails; patch the product client, or patch at
+the wrapper class or session level.
 
 When the prepared compose mounts `{DD_LOG_<N>}` or the design collects log files, pass
 `mount_logs=True` to `docker_run`. It creates one file per spec `logs` example entry (entry N is
@@ -226,9 +216,9 @@ and unresolved, or external and unrun. An external failure never justifies expan
 the target integration.
 
 An external and unrun tier is a validation gap, never a pass. Once its exact failure and unchanged
-condition are recorded, completing the task may still be valid if all attainable work is complete;
-do not keep retrying it to make the task appear successful. Integration-owned failures and weak or
-missing assertions remain defects and require a concrete repair or an invalid result.
+condition are recorded, completing the task may still be valid if all attainable work is complete.
+Integration-owned failures and weak or missing assertions remain defects and require a concrete
+repair or an invalid result.
 
 Run focused tests first, then relevant unit/integration/E2E tiers, validation, format-fix, and final
 lint as required. Report exact commands/tools, collected test counts, passes/skips/failures, repairs,

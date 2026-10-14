@@ -10,8 +10,7 @@ evidence and its consequence instead of inventing results.
 Make this an evidence-backed review guide rather than a phase transcript or restatement of the
 PRD and earlier handoffs. Point to material files, official sources, and readable command results
 without reproducing metric catalogs, endpoint schemas, or routine inventories. Use compact tables
-or shared rules where helpful. This handoff is context, not authority; reviewers must inspect the
-final files and cited evidence before accepting its conclusions.
+or shared rules where helpful.
 
 Include integration identity and material paths; implemented, incomplete, unsupported, or
 divergent requirements; customer-visible behavior actually documented; README changes and

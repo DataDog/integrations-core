@@ -12,8 +12,7 @@ documenter receives the PRD and earlier handoffs separately and can inspect curr
 forward customer-visible findings, supporting validation evidence, and unresolved gaps without
 repeating test assertions, fixture catalogs, or prior contracts. Use compact tables and shared
 rules. Include local probe method/URL/body or Docker command, observed status/outcome, and saved
-response path where relevant; cite reusable evidence once. The handoff is context, not authority:
-the documenter must check current README inputs and evidence relevant to each claim.
+response path where relevant; cite reusable evidence once.
 
 Include:
 

@@ -21,10 +21,6 @@ saved responses once, under build and validation focus. Paraphrase documentation
 pasting fetched excerpts. State each rule once, where it applies. State missing evidence and its
 consequence rather than inventing results.
 
-The handoff is context, not authority. Downstream agents should inspect current files and verify
-the cited evidence relevant to each contract they implement, test, or document, especially when
-evidence is missing or contradictory. They need not re-read every source wholesale.
-
 Use these headings:
 
 1. **Status, scope, and open items** — READY or BLOCKED; identity, compatibility, assumptions,

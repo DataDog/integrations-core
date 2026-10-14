@@ -19,7 +19,6 @@ tools:
   - edit_file
   - mkdir
   - copy_path
-  - ddev_create
   - ddev_validate
   - ddev_lint
 ---
@@ -33,23 +32,17 @@ use targeted reads of large schemas and catalogs. Correct/report any disagreemen
 the new integration directory. Reference mature integrations without editing them. Stop rather than
 modifying an unrelated existing integration or proceeding from a design whose status is BLOCKED.
 
-## Task summaries and phase memory
+## Task summaries
 
-Complete all required file inspection and verification during the tool-enabled tasks, including
-any repairs requested by the reviewer. Keep the resulting evidence in the conversation. Finish
-each task with a concise reviewer summary of changed paths, observed command results, decisions,
-and unresolved findings. The summary must support review without duplicating the phase handoff or
-routine file-by-file narration.
-
-The subsequent memory step alone produces the handoff. It has no tools: when asked for
-memory, use the evidence already gathered and output the document immediately. Do not attempt or
-promise to re-read files, run commands, or investigate further. State missing evidence explicitly.
-These memory instructions apply even when the standing task instructions call for file inspection.
+Complete all required file inspection and verification during each task, including any repairs
+requested by the reviewer. Finish each task with a concise reviewer summary of changed paths,
+observed command results, decisions, and unresolved findings, without routine file-by-file
+narration.
 
 ## Task ownership
 
-Keep the build tasks deliberately narrow. The scaffold task creates the initial integration and
-inventories environment assets. The implementation task may change production Python, internal
+Keep the build tasks deliberately narrow. The preceding scaffold phase created the initial
+integration with ddev. The implementation task may change production Python, internal
 helpers, constants, and metadata needed for the designed collection, and declares each product
 option the code reads in `assets/configuration/spec.yaml`, regenerating models so the code
 type-checks. The configuration task completes and reconciles the spec (shared templates, overrides,
@@ -211,7 +204,9 @@ credentials. Compare with the specs of a couple of existing API integrations bef
 
 Declare each option once, in its spec `value`: type, `default`, and constraints such as `minimum`,
 `maximum`, `enum`, or `pattern` (supported keys: `OPENAPI_SCHEMA_PROPERTIES` in
-`datadog_checks_dev/datadog_checks/dev/tooling/configuration/constants.py`). The generated models
+`datadog_checks_dev/datadog_checks/dev/tooling/configuration/constants.py`). Constrain a value only
+as far as the vendor contract does: for example, a base URL may include a path prefix, such as a
+virtual directory or reverse-proxy path, so a pattern must not limit it to scheme and host. The generated models
 enforce them, so check code reads `self.config.<option>` without default constants, fallbacks, or
 range checks. Never put a constraint the spec can express in `config_models/validators.py`; use it
 only for the rest, raising `ValueError` and returning the hook's input. `instance_<option>(value,
@@ -242,4 +237,3 @@ scoping, `cachetools.TTLCache`, and `AgentCheck.register_secret`. For another ge
 Use only ddev tools scoped to the target integration. Run generation, validation, formatting, and
 linting required by the active task, inspect their real output, and fix owned problems. Do not start
 Docker or vendor services in this build phase. Do not create changelogs, commit, push, or open a PR.
-Finish every task with changed paths, decisions, exact command outcomes, and unresolved gaps.

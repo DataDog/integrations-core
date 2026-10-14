@@ -24,6 +24,11 @@ The goal is met only when:
   requirement is honestly reported;
 - a focused custom client wraps self.http and owns exact request, response, pagination, polling,
   and download behavior without a second HTTP stack;
+- authentication uses the shared HTTP options (`headers`, `auth_token`, `username`/`password`, and
+  their template overrides), with no custom credential option, unless the official API requires a
+  product-specific login or token flow;
+- vendor records are validated once at the client or collector boundary; collectors work with the
+  validated data and do not re-check field types at every use;
 - check orchestration, joins, tags, values, failures, and metric submission semantics satisfy the
   requirements and verified API behavior, with justified departures from the design recorded;
 - metadata names follow one consistent naming scheme and match every emitted metric's name,
