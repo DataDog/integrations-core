@@ -102,7 +102,6 @@ def test_valid_config_loads(dd_run_check, base, changes):
         pytest.param(
             PANORAMA_INSTANCE, {'firewall_ips': {'include': ['not-a-cidr']}}, 'firewall_ips.include', id='bad-include'
         ),
-        pytest.param(PANORAMA_INSTANCE, {'firewall_ip_overrides': {'SERIAL1': 'host'}}, '`SERIAL1`', id='bad-override'),
     ],
 )
 def test_invalid_config(dd_run_check, base, changes, message):

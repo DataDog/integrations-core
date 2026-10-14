@@ -22,7 +22,7 @@ KEY_HEADER = 'X-PAN-KEY'
 
 ACTIVE_JOB = b'<response status="success"><result><job><id>%s</id><status>ACT</status></job></result></response>'
 
-OpAnswer = Callable[[str], Path | None]
+OpAnswer = Callable[[str], bytes | None]
 JobFixtures = Callable[[dict[str, str]], tuple[Path, Path] | None]
 
 
@@ -33,7 +33,8 @@ def _xml(body: bytes, status: int = 200) -> Response:
 def create_app(
     username: str, password: str, op_fixture: OpAnswer, log_fixtures: JobFixtures, report_fixtures: JobFixtures
 ) -> Flask:
-    """Build the app. Each fixture callback returns the file answering a request, or None when there is no capture."""
+    """Build the app. `op_fixture` returns the body answering an op command, the job callbacks the files answering a
+    job; each returns None when there is no capture."""
     app = Flask(__name__)
     # A job answers `ACT` to its first `get` and its fixture from the second on, so the check's polling is exercised.
     reads: dict[tuple[str, str], int] = {}
@@ -52,8 +53,7 @@ def create_app(
             return _xml(INVALID_CREDENTIAL, 403)
         kind = data.get('type', '')
         if kind == 'op':
-            path = op_fixture(data.get('cmd', ''))
-            return _xml(path.read_bytes() if path else NO_CAPTURE)
+            return _xml(op_fixture(data.get('cmd', '')) or NO_CAPTURE)
         if kind in ('log', 'report'):
             return _job(kind, data)
         return _xml(NO_CAPTURE)

@@ -73,8 +73,8 @@ def e2e_addresses(subnet: str) -> tuple[dict[str, str], str]:
 E2E_SUBNET = os.environ.get('PANOS_E2E_SUBNET', DEFAULT_E2E_SUBNET)
 E2E_FIREWALL_IPS, E2E_PANORAMA_IP = e2e_addresses(E2E_SUBNET)
 PANORAMA_CREDENTIALS = {'username': 'dummy-panorama-user', 'password': 'dummy-panorama-password'}
-# The serials the synthetic Panorama device list gives the two firewalls (the real P1 entries).
-E2E_FIREWALL_SERIALS = {'fw-a': '007955000930601', 'fw-b': '007955000930602'}
+# The namespace of the E2E Panorama instance, which polls the same fake firewalls as the static one.
+E2E_PANORAMA_NAMESPACE = 'e2e-panorama'
 
 # `static` or `panorama`, set by the hatch env (`py3.13-lab` and `py3.13-lab-panorama`), never by hand.
 LAB_MODE_VAR = 'PANOS_LAB_MODE'
@@ -87,7 +87,6 @@ LAB_COLLECT_ALL_VAR = 'PANOS_LAB_COLLECT_ALL'
 LAB_PANORAMA_HOST_VAR = 'PANOS_LAB_PANORAMA_HOST'
 LAB_PANORAMA_USERNAME_VAR = 'PANOS_LAB_PANORAMA_USERNAME'
 LAB_PANORAMA_PASSWORD_VAR = 'PANOS_LAB_PANORAMA_PASSWORD'
-LAB_OVERRIDES_VAR = 'PANOS_LAB_FIREWALL_OVERRIDES'
 
 
 def lab_hosts(environ: Mapping[str, str] = os.environ) -> list[str]:
@@ -110,23 +109,6 @@ def _fail_missing(names: list[str]) -> None:
     pytest.fail(f'USE_PANOS_LAB is set but these environment variables are missing or empty: {", ".join(names)}')
 
 
-def _parse_overrides(environ: Mapping[str, str]) -> dict[str, str]:
-    """Parse `serial=ip,serial=ip`; a malformed string fails naming the variable, never echoing its value."""
-    overrides = {}
-    for entry in environ.get(LAB_OVERRIDES_VAR, '').split(','):
-        if not entry.strip():
-            continue
-        serial, separator, address = (part.strip() for part in entry.partition('='))
-        try:
-            ipaddress.ip_address(address)
-        except ValueError:
-            address = ''
-        if not (separator and serial and address and '=' not in address):
-            pytest.fail(f'{LAB_OVERRIDES_VAR} is malformed: expected `serial=ip,serial=ip`')
-        overrides[serial] = address
-    return overrides
-
-
 def build_lab_instance(environ: Mapping[str, str] = os.environ) -> dict[str, Any]:
     """Build the single lab instance from the environment only; fail naming (never showing) missing variables."""
     instance: dict[str, Any]
@@ -147,8 +129,6 @@ def build_lab_instance(environ: Mapping[str, str] = os.environ) -> dict[str, Any
             'firewall_credentials': [{'username': environ[LAB_USERNAME_VAR], 'password': environ[LAB_PASSWORD_VAR]}],
             'tls_verify': False,
         }
-        if overrides := _parse_overrides(environ):
-            instance['firewall_ip_overrides'] = overrides
     else:
         missing = [name for name in (LAB_USERNAME_VAR, LAB_PASSWORD_VAR) if not environ.get(name)]
         if not lab_hosts(environ):

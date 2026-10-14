@@ -76,10 +76,6 @@ def instance_persist_connections():
     return False
 
 
-def instance_port():
-    return 443
-
-
 def instance_report_top_n():
     return 10
 

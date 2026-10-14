@@ -16,12 +16,9 @@ from .fixture_map import op_fixture
 SYSTEM_INFO_CMD = '<show><system><info/></system></show>'
 SERIAL = '007955000930601'
 CREDS = Credentials(username='dummy-user', password='dummy-password', api_key=None)
-STATIC_TARGET = FirewallTarget(ip='198.51.100.7', port=443, credentials=CREDS)
-# A Panorama-discovered fw-a polled through a `firewall_ip_overrides` entry: it connects to the public IP, but the
-# device is the one Panorama reports.
-PANORAMA_TARGET = FirewallTarget(
-    ip='198.51.100.7', port=443, credentials=CREDS, serial=SERIAL, hostname='fw-a', reported_ip='198.51.100.8'
-)
+STATIC_TARGET = FirewallTarget(ip='198.51.100.7', credentials=CREDS)
+# A Panorama-discovered fw-a, polled at the IP Panorama reports for it.
+PANORAMA_TARGET = FirewallTarget(ip='10.60.0.10', credentials=CREDS, serial=SERIAL, hostname='fw-a')
 FW_A = parse_system_info(parse_response(op_fixture(SYSTEM_INFO_CMD).read_bytes()))
 
 
@@ -78,7 +75,7 @@ def test_global_tags_take_serial_and_hostname_from_panorama_discovery():
     assert sorted(tags) == sorted(
         [
             'device_namespace:default',
-            'device_ip:198.51.100.8',
+            'device_ip:10.60.0.10',
             f'device_id:{SERIAL}',
             'device_hostname:fw-a',
             f'device_serial:{SERIAL}',

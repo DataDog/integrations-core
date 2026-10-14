@@ -1,18 +1,21 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Fake Panorama: keygen and `show devices connected`, answered with the synthetic device list."""
+"""Fake Panorama: keygen and `show devices connected`, answered with the synthetic device list.
+
+The list reports fw-a and fw-b at the fake firewalls' addresses (`FW_A_IP`, `FW_B_IP`), which the check then polls.
+"""
 
 import os
 
-from tests.common import FIXTURES
 from tests.docker.panos_server import create_app, serve
-from tests.fixture_map import PANORAMA_OP_FIXTURES
+from tests.fixture_map import panorama_op_answer
+
+FIREWALL_IPS = {'fw-a': os.environ['FW_A_IP'], 'fw-b': os.environ['FW_B_IP']}
 
 
 def op_fixture(cmd):
-    relative = PANORAMA_OP_FIXTURES.get(cmd)
-    return FIXTURES / relative if relative else None
+    return panorama_op_answer(cmd, FIREWALL_IPS)
 
 
 app = create_app(

@@ -6,6 +6,7 @@
 Shared by the unit fake transport and the docker fakes, so both answer from the same data.
 """
 
+from collections.abc import Mapping
 from pathlib import Path
 
 from .common import FIXTURES
@@ -52,6 +53,26 @@ PARTIAL_OP_FIXTURES = {
 PANORAMA_OP_FIXTURES = {
     '<show><devices><connected/></devices></show>': 'synthetic/panorama_show_devices_connected.xml',
 }
+# The `ip-address` the Panorama device list reports for each firewall set: the lab's private addresses.
+PANORAMA_REPORTED_IPS = {'fw-a': '10.60.0.10', 'fw-b': '10.60.0.11'}
+
+
+def panorama_op_answer(cmd: str, firewall_ips: Mapping[str, str]) -> bytes | None:
+    """Return the Panorama answer to `cmd`, or None when there is none.
+
+    The check polls the `ip-address` Panorama reports, so the device list reports each set at the address its fake
+    answers on (`firewall_ips`, by set) instead of the captured lab address.
+    """
+    relative = PANORAMA_OP_FIXTURES.get(cmd)
+    if relative is None:
+        return None
+    body = (FIXTURES / relative).read_bytes()
+    for name, ip in firewall_ips.items():
+        body = body.replace(
+            f'<ip-address>{PANORAMA_REPORTED_IPS[name]}</ip-address>'.encode(),
+            f'<ip-address>{ip}</ip-address>'.encode(),
+        )
+    return body
 
 
 def set_fixture(name: str, firewall: str) -> Path:

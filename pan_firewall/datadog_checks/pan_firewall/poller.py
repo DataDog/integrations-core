@@ -87,18 +87,16 @@ class FirewallPoller:
         self.config = config
         self.log = check.log
         self.ip = device_ip(target)
-        # What the log lines about connecting name: the polled IP too when an override sends the polling elsewhere.
-        self._connect_label = self.ip if target.ip == self.ip else f'{self.ip} (polled at {target.ip})'
         # The log of the collectors: every message starts with the firewall it is about.
-        self.firewall_log = FirewallLog(check.log, self._connect_label)
+        self.firewall_log = FirewallLog(check.log, self.ip)
         # The model's default (30 s), not the wrapper's (10 s), applies when the instance sets no `timeout`.
         instance = {'timeout': config.timeout, **(check.instance or {})}
         http = RequestsWrapper(instance, check.init_config, check.HTTP_CONFIG_REMAPPER, check.log)
         http.persist_connections = True
         # Every request of the firewall, keygen included.
         self._requests = RequestCounter()
-        self.keys = KeyManager(http, api_url(target.ip, target.port), target.credentials, self._requests)
-        self.client = PanosClient(http, target.ip, target.port, self.keys, check.log, counter=self._requests)
+        self.keys = KeyManager(http, api_url(target.ip), target.credentials, self._requests)
+        self.client = PanosClient(http, target.ip, self.keys, check.log, counter=self._requests)
         self.schedule = FirewallSchedule()
         self.state = FirewallState()
         self.identity = self._load_identity()
@@ -128,9 +126,7 @@ class FirewallPoller:
             self._run()
         finally:
             requests = self._requests.take()
-            self.log.debug(
-                'pan_firewall %s: %d requests in %.2fs', self._connect_label, requests, time.monotonic() - start
-            )
+            self.log.debug('pan_firewall %s: %d requests in %.2fs', self.ip, requests, time.monotonic() - start)
 
     def _run(self) -> None:
         # One keygen attempt per run after a rejected one (the KeyManager latches until reset).
@@ -150,7 +146,7 @@ class FirewallPoller:
         if self.client.timed_out:
             self.log.warning(
                 'pan_firewall %s: %s timed out after %gs; skipped for this run: %s',
-                self._connect_label,
+                self.ip,
                 ', '.join(outcome.timed_out) or 'a call',
                 self.config.timeout,
                 ', '.join(outcome.skipped) or 'none',
@@ -158,7 +154,7 @@ class FirewallPoller:
         elif (connection_error := self.client.connection_error) is not None:
             self.log.warning(
                 'pan_firewall %s: %s failed (%s); skipped for this run: %s',
-                self._connect_label,
+                self.ip,
                 ', '.join(outcome.refused) or 'a call',
                 connection_error,
                 ', '.join(outcome.skipped) or 'none',

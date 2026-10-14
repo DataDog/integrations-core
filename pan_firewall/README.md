@@ -37,12 +37,12 @@ For Panorama discovery, create an admin role on Panorama that allows **Operation
 
 #### Network reach
 
-The Agent connects to the management interface of each firewall over HTTPS (port 443 by default). Make sure that:
+The Agent connects to the management interface of each firewall over HTTPS (port 443). Make sure that:
 
 - The management interface (or the interface that carries management traffic) has HTTPS enabled in its management profile.
 - If you restrict management access, the Agent host is in the **Permitted IP Addresses** list (`permitted-ip`) of the firewall, and in the admin role or account restrictions, if you use any.
 
-With Panorama discovery, the Agent must also reach the firewall IP addresses that Panorama reports, or the addresses you set in `firewall_ip_overrides`. Firewalls that Panorama shows as disconnected (`connected=no`) are not polled.
+With Panorama discovery, the Agent polls each firewall at the IP address that Panorama reports for it, so it must reach those addresses. Firewalls that Panorama shows as disconnected (`connected=no`) are not polled.
 
 #### TLS
 
@@ -85,7 +85,7 @@ instances:
     tls_verify: false
 ```
 
-Panorama discovery. Quote the serial numbers in `firewall_ip_overrides`: an unquoted serial can be read by YAML as a number, and the Agent then matches it by numeric value and logs a warning.
+Panorama discovery:
 
 ```yaml
 init_config:
@@ -96,8 +96,6 @@ instances:
     firewall_ips:
       include:
         - 192.0.2.0/24
-    firewall_ip_overrides:
-      "012345678901": 192.0.2.30
     firewall_credentials:
       - username: <USERNAME>
         password: <PASSWORD>
@@ -249,6 +247,7 @@ Additional helpful documentation, links, and articles:
 - If a reboot or an HA failover resets the threat log sequence number, up to about 35 minutes of threat logs may not be counted.
 - TLS settings apply per instance. Put firewalls with a different certificate setup in a separate instance.
 - Perpetual licenses report `license.expired` as 0 and no `license.days_left`.
+- A firewall whose Panorama-reported IP address the Agent can't reach (behind NAT, or connected to Panorama through a data interface) can't be polled from a Panorama instance. Add it to the `firewall_ips` exclude list of that instance, and poll it from a separate instance that lists its reachable IP address in `firewalls`.
 - Panorama discovery was tested live against Panorama 11.2.15 managing 2 VM-Series firewalls. Panorama-managed HA pairs and firewalls behind NAT were not tested.
 
 ## Troubleshooting

@@ -96,7 +96,6 @@ class InstanceConfig(BaseModel):
     enable_legacy_tags_normalization: Optional[bool] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     firewall_credentials: Optional[tuple[FirewallCredential, ...]] = None
-    firewall_ip_overrides: Optional[MappingProxyType[str, str]] = None
     firewall_ips: Optional[FirewallIps] = None
     firewalls: Optional[tuple[str, ...]] = None
     headers: Optional[MappingProxyType[str, Any]] = None
@@ -119,7 +118,6 @@ class InstanceConfig(BaseModel):
     panorama_username: Optional[str] = None
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
-    port: Optional[int] = None
     proxy: Optional[Proxy] = None
     read_timeout: Optional[float] = None
     report_top_n: Optional[int] = Field(None, ge=1)

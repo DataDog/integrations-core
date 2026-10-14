@@ -122,7 +122,7 @@ def test_jobs_check_error_collects_anyway_and_warns_once_per_episode(firewall):
 @pytest.mark.parametrize(
     'failure, reason',
     [
-        pytest.param('refused', f'failed (cannot connect to {FW_A_IP}:443: connection refused)', id='refused'),
+        pytest.param('refused', f'failed (cannot connect to {FW_A_IP}: connection refused)', id='refused'),
         pytest.param('timeout', 'timed out after 30s', id='timeout'),
     ],
 )

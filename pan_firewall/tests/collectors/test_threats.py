@@ -67,9 +67,9 @@ class Context:
         """New in-memory state over the same cache, as after an Agent restart."""
         log = self.log
         http = RequestsWrapper({}, {}, {}, log)
-        keys = KeyManager(http, api_url(self.host, 443), Credentials(username=None, password=None, api_key='key'))
+        keys = KeyManager(http, api_url(self.host), Credentials(username=None, password=None, api_key='key'))
         self.ctx = CollectContext(
-            client=PanosClient(http, self.host, 443, keys, log),
+            client=PanosClient(http, self.host, keys, log),
             identity=SimpleNamespace(serial=FW_A_SERIAL),
             state=FirewallState(),
             config=mock.Mock(),

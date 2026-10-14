@@ -6,8 +6,6 @@ from __future__ import annotations
 import dataclasses
 import ipaddress
 import json
-import math
-import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from xml.etree.ElementTree import Element
@@ -21,15 +19,11 @@ from .firewalls import FirewallTarget, resolve_credentials
 from .xml_utils import text
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from datadog_checks.base import AgentCheck
 
     from .config_models.instance import InstanceConfig
 
 DISCOVERY_CMD = '<show><devices><connected/></devices></show>'
-# A serial YAML 1.1 reads as an octal number: a leading zero and only the digits 0-7.
-OCTAL_SERIAL = re.compile(r'^0[0-7]+$')
 
 
 @dataclass(frozen=True)
@@ -82,14 +76,13 @@ class PanoramaFirewallSource:
         self._config = config
         self._log = check.log
         self._host = config.panorama_host or ''
-        self._port = config.port or 443
         self._cache_key = f'panorama_firewalls:{self._host}'
         instance = {'timeout': config.timeout, **(check.instance or {})}
         http = RequestsWrapper(instance, check.init_config, check.HTTP_CONFIG_REMAPPER, check.log)
         http.persist_connections = True
         credentials = Credentials(config.panorama_username, config.panorama_password, config.panorama_api_key)
-        self._keys = KeyManager(http, api_url(self._host, self._port), credentials)
-        self._client = PanosClient(http, self._host, self._port, self._keys, check.log)
+        self._keys = KeyManager(http, api_url(self._host), credentials)
+        self._client = PanosClient(http, self._host, self._keys, check.log)
         self._last_cached: str | None = None
         self._warned: set[str] = set()
 
@@ -97,24 +90,11 @@ class PanoramaFirewallSource:
         # One keygen attempt per run after a rejected one (the KeyManager latches until reset).
         self._keys.reset_failure()
         self._client.take_stats()
-        self._warn_about_numeric_overrides()
         devices = self._discover()
         self._check.gauge('panorama.can_connect', 0 if devices is None else 1, tags=self._tags())
         if devices is None:
             devices = self._load_cached()
         return self._targets(devices or [])
-
-    def _warn_about_numeric_overrides(self) -> None:
-        # The config model reads every key as a string, so the keys as the instance delivered them are checked.
-        raw = (self._check.instance or {}).get('firewall_ip_overrides')
-        for key in raw if isinstance(raw, dict) else ():
-            if not isinstance(key, str):
-                self._warn_once(
-                    f'numeric-override:{key}',
-                    'pan_firewall: `firewall_ip_overrides` key `%s` was read as a number, which can lose leading '
-                    'zeros; quote serials in `firewall_ip_overrides` (for example `\'007955000930601\': 192.0.2.10`)',
-                    key,
-                )
 
     def _discover(self) -> list[DiscoveredFirewall] | None:
         """Return the connected-devices list, or None (logged) when the call fails for any reason."""
@@ -182,16 +162,13 @@ class PanoramaFirewallSource:
         return list(targets.values())
 
     def _target(self, firewall: DiscoveredFirewall) -> FirewallTarget | None:
-        overrides: Mapping[str, str] = self._config.firewall_ip_overrides or {}
-        override = _find_override(overrides, firewall.serial)
-        polled = override or firewall.ip_address
-        address = _parse_ip(polled)
+        address = _parse_ip(firewall.ip_address)
         if address is None:
             self._warn_once(
                 f'no-ip:{firewall.serial}',
                 'pan_firewall: firewall %s has no usable IP address (Panorama reports `%s`), skipping it',
                 firewall.serial,
-                polled or '',
+                firewall.ip_address or '',
             )
             return None
         ip = str(address)
@@ -207,17 +184,14 @@ class PanoramaFirewallSource:
                 ip,
             )
             return None
-        reported = _parse_ip(firewall.ip_address)
         return FirewallTarget(
             ip=ip,
-            port=self._port,
             credentials=credentials,
             serial=firewall.serial,
             hostname=firewall.hostname,
             family=firewall.family,
             model=firewall.model,
             sw_version=firewall.sw_version,
-            reported_ip=str(reported) if reported else None,
         )
 
     def _passes_filters(self, address: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
@@ -234,42 +208,6 @@ class PanoramaFirewallSource:
         if key not in self._warned:
             self._warned.add(key)
             self._log.warning(message, *args)
-
-
-def _serial_number(value: object) -> int | None:
-    """The integer a serial-like key stands for, or None when it is not an exactly representable whole number."""
-    if isinstance(value, bool):
-        return None
-    if isinstance(value, int):
-        return value
-    try:
-        number = float(value) if isinstance(value, (str, float)) else None
-    except ValueError:
-        return None
-    # Below 2^53 every integer is exactly representable as a float, so no digit was silently rounded away.
-    if number is None or not math.isfinite(number) or number != int(number) or abs(number) >= 2**53:
-        return None
-    return int(number)
-
-
-def _find_override(overrides: Mapping[str, str], serial: str) -> str | None:
-    """Return the override for `serial`.
-
-    An exact key wins. Otherwise a key that YAML read as a number (`007955000930601` loses its leading zeros, and may
-    become `7955000930601.0` or `7.955000930601e+12`) matches a digit-only serial by integer value. A serial that
-    YAML 1.1 reads as octal (`0123` is 83) matches by its octal value too.
-    """
-    if serial in overrides:
-        return overrides[serial]
-    if not serial.isdigit():
-        return None
-    wanted = {int(serial)}
-    if OCTAL_SERIAL.match(serial):
-        wanted.add(int(serial, 8))
-    for key, ip in overrides.items():
-        if _serial_number(key) in wanted:
-            return ip
-    return None
 
 
 def _parse_ip(value: str | None) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:

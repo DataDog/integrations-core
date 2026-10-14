@@ -56,11 +56,11 @@ LOG_ENTRY_PATH = ['response', 'result', 'log', 'logs', 'entry']
 LOG_STATUS_PATH = ['response', 'result', 'job', 'status']
 
 
-def api_url(host: str, port: int) -> str:
-    """Return the XML API endpoint of a PAN-OS device."""
+def api_url(host: str) -> str:
+    """Return the XML API endpoint of a PAN-OS device, always on port 443."""
     if ':' in host and not host.startswith('['):
         host = f'[{host}]'
-    return f'https://{host}:{port}/api/'
+    return f'https://{host}/api/'
 
 
 @contextmanager
@@ -182,7 +182,6 @@ class PanosClient:
         self,
         http: RequestsWrapper,
         host: str,
-        port: int,
         keys: KeyManager,
         log: CheckLoggingAdapter,
         max_in_flight: int = 2,
@@ -190,7 +189,7 @@ class PanosClient:
     ):
         self._http = http
         self._host = host
-        self._url = api_url(host, port)
+        self._url = api_url(host)
         self._keys = keys
         self._log = log
         self._counter = counter

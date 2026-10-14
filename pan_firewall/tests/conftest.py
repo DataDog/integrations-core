@@ -15,9 +15,9 @@ from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 from .common import (
     CREDENTIALS,
     E2E_FIREWALL_IPS,
-    E2E_FIREWALL_SERIALS,
     E2E_NETWORK,
     E2E_PANORAMA_IP,
+    E2E_PANORAMA_NAMESPACE,
     E2E_SUBNET,
     PANORAMA_CREDENTIALS,
     build_lab_instance,
@@ -34,8 +34,9 @@ SERVICES = ('fw-a', 'fw-b', 'panorama')
 def docker_environment():
     """Start the docker fakes (two firewalls and a Panorama) and yield an Agent instance per mode.
 
-    The static instance polls both fake firewalls; the Panorama one discovers them through the fake Panorama, whose
-    reported 10.60.x addresses are not reachable, so `firewall_ip_overrides` points each serial at its fake.
+    The static instance polls both fake firewalls; the Panorama one discovers them through the fake Panorama, which
+    reports them at their own addresses, and polls them there. The Panorama instance has its own namespace, so the two
+    instances report each firewall as a different device.
     """
     firewalls = list(E2E_FIREWALL_IPS.values())
     env_vars = {
@@ -54,7 +55,7 @@ def docker_environment():
         'panorama_username': PANORAMA_CREDENTIALS['username'],
         'panorama_password': PANORAMA_CREDENTIALS['password'],
         'firewall_credentials': CREDENTIALS,
-        'firewall_ip_overrides': {E2E_FIREWALL_SERIALS[name]: ip for name, ip in E2E_FIREWALL_IPS.items()},
+        'namespace': E2E_PANORAMA_NAMESPACE,
         'tls_verify': False,
     }
     ready = [CheckDockerLogs(COMPOSE_FILE, 'Running on all addresses', service=service) for service in SERVICES]
@@ -70,8 +71,8 @@ def dd_environment():
         # PANOS_LAB_HOSTS=<ip1>,<ip2> PANOS_LAB_USERNAME=<user>`. Then `ddev env start pan_firewall py3.13-lab`,
         # `ddev env agent pan_firewall py3.13-lab check`, and `ddev env stop pan_firewall py3.13-lab` (ddev keeps the
         # password in its env config until the stop). Panorama: env `py3.13-lab-panorama`, with PANOS_LAB_PANORAMA_HOST,
-        # PANOS_LAB_PANORAMA_USERNAME, PANOS_LAB_PANORAMA_PASSWORD (read silently) and PANOS_LAB_FIREWALL_OVERRIDES
-        # (`<serial>=<ip>,...`) instead of PANOS_LAB_HOSTS. PANOS_LAB_COLLECT_ALL=1 enables the default-off collectors.
+        # PANOS_LAB_PANORAMA_USERNAME and PANOS_LAB_PANORAMA_PASSWORD (read silently) instead of PANOS_LAB_HOSTS; the
+        # Agent must reach the IPs Panorama reports. PANOS_LAB_COLLECT_ALL=1 enables the default-off collectors.
         yield {'instances': [build_lab_instance()]}
     else:
         yield from docker_environment()

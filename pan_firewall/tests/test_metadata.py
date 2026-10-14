@@ -117,7 +117,7 @@ def test_subinterfaces_inherit_the_parent_state_and_tunnels_use_the_vpn_state():
 
 
 def _target(ip):
-    return FirewallTarget(ip=ip, port=443, credentials=Credentials(username='u', password='p', api_key=None))
+    return FirewallTarget(ip=ip, credentials=Credentials(username='u', password='p', api_key=None))
 
 
 # End to end, through the check.

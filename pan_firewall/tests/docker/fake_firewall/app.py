@@ -12,6 +12,11 @@ from tests.fixture_map import find_log_fixture, find_op_fixture, find_report_fix
 FIREWALL_SET = os.environ['FIREWALL_SET']
 
 
+def op_fixture(cmd):
+    path = find_op_fixture(cmd, FIREWALL_SET)
+    return path.read_bytes() if path else None
+
+
 def log_fixtures(data):
     skip = int(data.get('skip', '0'))
     return find_log_fixture(data.get('dir', ''), data.get('query'), skip, FIREWALL_SET)
@@ -25,7 +30,7 @@ def report_fixtures(data):
 app = create_app(
     os.environ['PANOS_USERNAME'],
     os.environ['PANOS_PASSWORD'],
-    op_fixture=lambda cmd: find_op_fixture(cmd, FIREWALL_SET),
+    op_fixture=op_fixture,
     log_fixtures=log_fixtures,
     report_fixtures=report_fixtures,
 )

@@ -45,7 +45,6 @@ files:
         Filters for the firewalls discovered through Panorama. Entries are IP addresses or CIDR blocks.
         If no filters are configured, all connected firewalls are polled.
         Use `include` to poll only matching firewalls and `exclude` to skip them. `exclude` takes precedence.
-        The filters apply to the IP address the Agent polls, so a `firewall_ip_overrides` address is filtered too.
       value:
         type: object
         properties:
@@ -62,21 +61,6 @@ files:
           - 10.0.0.0/24
           exclude:
           - 10.0.0.99
-    - name: firewall_ip_overrides
-      fleet_configurable: true
-      description: |
-        Map of firewall serial number to the IP address the Agent uses to reach that firewall,
-        instead of the IP address Panorama reports. Use it when the Agent reaches the firewalls through
-        a different network than Panorama does.
-
-        Quote the serial numbers: unquoted, YAML reads a serial such as `007951000123456` as a number and
-        drops its leading zeros.
-      value:
-        type: object
-        additionalProperties:
-          type: string
-        example:
-          '007951000123456': 192.0.2.10
     - name: firewalls
       fleet_configurable: true
       description: |
@@ -115,13 +99,6 @@ files:
           username: <USERNAME>
           password: <PASSWORD>
         - api_key: <API_KEY>
-    - name: port
-      fleet_configurable: true
-      description: HTTPS port of the firewall management interface.
-      value:
-        type: integer
-        default: 443
-        example: 443
     - name: namespace
       fleet_configurable: true
       description: Namespace to use for NDM device metadata.

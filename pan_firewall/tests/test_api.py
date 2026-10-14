@@ -26,8 +26,7 @@ from .fake_panos import response
 from .fixture_map import op_fixture
 
 HOST = '192.0.2.10'
-PORT = 443
-URL = f'https://{HOST}:{PORT}/api/'
+URL = f'https://{HOST}/api/'
 SYSTEM_INFO_CMD = '<show><system><info/></system></show>'
 GENERATED_KEY = 'GENERATED-KEY-0123456789'
 STATIC_KEY = 'STATIC-KEY-9876543210'
@@ -76,8 +75,20 @@ class FakeHttp:
 
 
 def make_client(http: Any, creds: Credentials = PASSWORD_CREDS, log: Any = None) -> tuple[PanosClient, KeyManager]:
-    keys = KeyManager(http, api_url(HOST, PORT), creds)
-    return PanosClient(http, HOST, PORT, keys, log or logging.getLogger('test_api'), max_in_flight=2), keys
+    keys = KeyManager(http, api_url(HOST), creds)
+    return PanosClient(http, HOST, keys, log or logging.getLogger('test_api'), max_in_flight=2), keys
+
+
+@pytest.mark.parametrize(
+    'host, expected',
+    [
+        pytest.param('192.0.2.10', 'https://192.0.2.10/api/', id='ipv4'),
+        pytest.param('2001:db8::1', 'https://[2001:db8::1]/api/', id='ipv6-bracketed'),
+        pytest.param('panorama.example.com', 'https://panorama.example.com/api/', id='hostname'),
+    ],
+)
+def test_api_url_is_always_on_port_443(host, expected):
+    assert api_url(host) == expected
 
 
 def test_keygen_posts_credentials_in_body_and_key_only_in_header():

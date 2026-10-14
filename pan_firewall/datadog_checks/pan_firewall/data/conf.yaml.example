@@ -40,24 +40,12 @@ instances:
     ## Filters for the firewalls discovered through Panorama. Entries are IP addresses or CIDR blocks.
     ## If no filters are configured, all connected firewalls are polled.
     ## Use `include` to poll only matching firewalls and `exclude` to skip them. `exclude` takes precedence.
-    ## The filters apply to the IP address the Agent polls, so a `firewall_ip_overrides` address is filtered too.
     #
     # firewall_ips:
     #   include:
     #   - 10.0.0.0/24
     #   exclude:
     #   - 10.0.0.99
-
-    ## @param firewall_ip_overrides - mapping - optional
-    ## Map of firewall serial number to the IP address the Agent uses to reach that firewall,
-    ## instead of the IP address Panorama reports. Use it when the Agent reaches the firewalls through
-    ## a different network than Panorama does.
-    ##
-    ## Quote the serial numbers: unquoted, YAML reads a serial such as `007951000123456` as a number and
-    ## drops its leading zeros.
-    #
-    # firewall_ip_overrides:
-    #   007951000123456: 192.0.2.10
 
     ## @param firewalls - list of strings - optional
     ## List of firewall IP addresses to poll. Set either `firewalls` or `panorama_host`, not both.
@@ -77,11 +65,6 @@ instances:
     #     username: <USERNAME>
     #     password: <PASSWORD>
     #   - api_key: <API_KEY>
-
-    ## @param port - integer - optional - default: 443
-    ## HTTPS port of the firewall management interface.
-    #
-    # port: 443
 
     ## @param namespace - string - optional - default: default
     ## Namespace to use for NDM device metadata.

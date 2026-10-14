@@ -14,6 +14,8 @@ from datadog_checks.pan_firewall.xml_utils import parse_response
 from .common import (
     CREDENTIALS,
     FIXTURES,
+    FW_A_IP,
+    FW_B_IP,
 )
 from .fake_panos import INVALID_CREDENTIAL
 from .helpers import metrics_by_ip
@@ -24,10 +26,8 @@ SYNTHETIC = FIXTURES / 'synthetic' / 'panorama_show_devices_connected.xml'
 REAL_CAPTURE = FIXTURES / 'panorama' / 'show_devices_connected.xml'
 BAD_KEY_CAPTURE = FIXTURES / 'panorama' / 'op_bad_key.xml'
 FW_A_SERIAL, FW_B_SERIAL = '007955000930601', '007955000930602'
+# The `ip-address` values of the captures. The fake Panorama reports the fake firewalls (FW_A_IP, FW_B_IP) instead.
 FW_A_REPORTED, FW_B_REPORTED = '10.60.0.10', '10.60.0.11'
-# The fake firewalls (`FIREWALL_SETS`), at documentation IPs: where `firewall_ip_overrides` sends the polling.
-FW_A_POLLED, FW_B_POLLED = '192.0.2.10', '192.0.2.11'
-OVERRIDES = {FW_A_SERIAL: FW_A_POLLED, FW_B_SERIAL: FW_B_POLLED}
 PANORAMA_TAGS = ['device_namespace:default', f'panorama_host:{PANORAMA}', 'team:test']
 
 
@@ -36,7 +36,6 @@ def make_instance(**options):
         'panorama_host': PANORAMA,
         'panorama_api_key': 'dummy-api-key',
         'firewall_credentials': copy.deepcopy(CREDENTIALS),
-        'firewall_ip_overrides': dict(OVERRIDES),
         'tags': ['team:test'],
         **options,
     }
@@ -122,20 +121,6 @@ def test_panorama_key_is_generated_from_username_and_password(dd_run_check, fake
     ]
 
 
-def test_overridden_firewalls_are_polled_at_the_overrides_and_keep_the_reported_device_ip(
-    dd_run_check, aggregator, fake_panos, caplog
-):
-    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, REAL_CAPTURE.read_bytes()))
-
-    dd_run_check(new_check())
-
-    assert polled_hosts(fake_panos) == {FW_A_POLLED, FW_B_POLLED}
-    can_connect = metrics_by_ip(aggregator, 'can_connect')
-    assert {ip: m.value for ip, m in can_connect.items()} == {FW_A_REPORTED: 1, FW_B_REPORTED: 1}
-    fw_a_tags = can_connect[FW_A_REPORTED].tags
-    assert {f'device_id:{FW_A_SERIAL}', 'device_hostname:fw-a', 'device_model:PA-VM'} <= set(fw_a_tags)
-
-
 def test_panorama_rejecting_the_key_renews_it_once_and_retries_once(dd_run_check, aggregator, fake_panos):
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, BAD_KEY_CAPTURE.read_bytes()))
 
@@ -145,8 +130,20 @@ def test_panorama_rejecting_the_key_renews_it_once_and_retries_once(dd_run_check
     assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))]
 
 
-def test_firewalls_are_polled_at_the_reported_ip_without_override(dd_run_check, aggregator, fake_panos):
-    dd_run_check(new_check(firewall_ip_overrides=None))
+def test_firewalls_are_polled_at_the_reported_ip_which_is_their_device_ip(dd_run_check, aggregator, fake_panos):
+    dd_run_check(new_check())
+
+    assert polled_hosts(fake_panos) == {FW_A_IP, FW_B_IP}
+    can_connect = metrics_by_ip(aggregator, 'can_connect')
+    assert {ip: m.value for ip, m in can_connect.items()} == {FW_A_IP: 1, FW_B_IP: 1}
+    fw_a_tags = can_connect[FW_A_IP].tags
+    assert {f'device_id:{FW_A_SERIAL}', 'device_hostname:fw-a', 'device_model:PA-VM'} <= set(fw_a_tags)
+
+
+def test_firewall_at_an_unreachable_reported_ip_is_reported_down(dd_run_check, aggregator, fake_panos):
+    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, REAL_CAPTURE.read_bytes()))
+
+    dd_run_check(new_check())
 
     # Nothing answers at the private lab IPs from here.
     assert polled_hosts(fake_panos) == {FW_A_REPORTED, FW_B_REPORTED}
@@ -159,77 +156,26 @@ def test_firewalls_are_polled_at_the_reported_ip_without_override(dd_run_check, 
 @pytest.mark.parametrize(
     'filters, expected',
     [
-        pytest.param({'include': ['192.0.2.0/25']}, {FW_A_POLLED, FW_B_POLLED}, id='include-cidr'),
-        pytest.param({'exclude': ['192.0.2.11']}, {FW_A_POLLED}, id='exclude'),
-        pytest.param({'include': ['192.0.2.0/24'], 'exclude': ['192.0.2.10/32']}, {FW_B_POLLED}, id='exclude-wins'),
-        pytest.param({'include': ['10.60.0.0/24']}, set(), id='filter-applies-to-polled-ip-not-reported'),
+        pytest.param({'include': ['192.0.2.0/25']}, {FW_A_IP, FW_B_IP}, id='include-cidr'),
+        pytest.param({'exclude': ['192.0.2.11']}, {FW_A_IP}, id='exclude'),
+        pytest.param({'include': ['192.0.2.0/24'], 'exclude': ['192.0.2.10/32']}, {FW_B_IP}, id='exclude-wins'),
+        pytest.param({'include': ['10.60.0.0/24']}, set(), id='include-matches-nothing'),
     ],
 )
-def test_firewall_ips_filter_the_polled_ip(dd_run_check, fake_panos, filters, expected):
+def test_firewall_ips_filter_the_reported_ip(dd_run_check, fake_panos, filters, expected):
     dd_run_check(new_check(firewall_ips=filters))
 
     assert polled_hosts(fake_panos) == expected
 
 
-@pytest.mark.parametrize(
-    'overrides, answer, expected_hosts, warns',
-    [
-        pytest.param(
-            {7955000930601: FW_A_POLLED, FW_B_SERIAL: FW_B_POLLED},
-            (200, REAL_CAPTURE.read_bytes()),
-            {FW_A_POLLED, FW_B_POLLED},
-            True,
-            id='int-matches-the-serial',
-        ),
-        pytest.param(
-            {7955000930601.0: FW_A_POLLED, FW_B_SERIAL: FW_B_POLLED},
-            (200, REAL_CAPTURE.read_bytes()),
-            {FW_A_POLLED, FW_B_POLLED},
-            True,
-            id='float-matches-the-serial',
-        ),
-        pytest.param(
-            {'7955000930601': FW_A_POLLED},
-            (200, REAL_CAPTURE.read_bytes()),
-            {FW_A_POLLED, FW_B_REPORTED},
-            False,
-            id='quoted-matches-without-a-warning',
-        ),
-        # YAML 1.1 reads an unquoted `0123` as the octal number 83.
-        pytest.param(
-            {0o123: FW_A_POLLED},
-            devices_xml(('0123', 'octal', '10.60.0.40', 'yes')),
-            {FW_A_POLLED},
-            True,
-            id='octal-matches-the-serial',
-        ),
-        pytest.param(
-            {7955000930699: FW_A_POLLED},
-            (200, REAL_CAPTURE.read_bytes()),
-            {FW_A_REPORTED, FW_B_REPORTED},
-            True,
-            id='unmatched-number',
-        ),
-        pytest.param(
-            {7955000930601.5: FW_A_POLLED},
-            (200, REAL_CAPTURE.read_bytes()),
-            {FW_A_REPORTED, FW_B_REPORTED},
-            True,
-            id='another-number-does-not-match',
-        ),
-    ],
-)
-def test_numeric_override_key(dd_run_check, fake_panos, caplog, overrides, answer, expected_hosts, warns):
-    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, answer)
-    check = new_check(firewall_ip_overrides=overrides)
+def test_excluded_firewall_is_never_polled_and_gets_no_can_connect(dd_run_check, aggregator, fake_panos):
+    check = new_check(firewall_ips={'exclude': [FW_B_IP]})
 
     dd_run_check(check)
     dd_run_check(check)
 
-    assert polled_hosts(fake_panos) == expected_hosts
-    warnings = [r.getMessage() for r in caplog.records if 'was read as a number' in r.getMessage()]
-    assert len(warnings) == int(warns)
-    assert all('quote serials' in warning for warning in warnings)
+    assert FW_B_IP not in polled_hosts(fake_panos)
+    assert set(metrics_by_ip(aggregator, 'can_connect')) == {FW_A_IP}
 
 
 @pytest.mark.parametrize('ip', [None, 'not-an-ip'], ids=['absent', 'invalid'])
@@ -242,40 +188,30 @@ def test_entry_without_usable_ip_is_skipped_and_logged(dd_run_check, fake_panos,
     assert 'SYNTH-BAD-IP' in caplog.text
 
 
-def test_override_supplies_the_ip_of_an_entry_without_one(dd_run_check, aggregator, fake_panos):
-    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml((FW_A_SERIAL, 'fw-a', None, 'yes')))
-
-    dd_run_check(new_check())
-
-    assert polled_hosts(fake_panos) == {FW_A_POLLED}
-    # Panorama reported no IP, so the `device_ip` is the polled override.
-    assert set(metrics_by_ip(aggregator, 'can_connect')) == {FW_A_POLLED}
-
-
 def test_renamed_firewall_keeps_its_poller_and_gets_the_new_hostname(dd_run_check, fake_panos):
-    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml((FW_A_SERIAL, 'fw-a', FW_A_REPORTED, 'yes')))
+    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml((FW_A_SERIAL, 'fw-a', FW_A_IP, 'yes')))
     check = new_check()
     dd_run_check(check)
-    poller = check._pollers[FW_A_POLLED]
+    poller = check._pollers[FW_A_IP]
 
-    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml((FW_A_SERIAL, 'fw-renamed', FW_A_REPORTED, 'yes')))
+    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml((FW_A_SERIAL, 'fw-renamed', FW_A_IP, 'yes')))
     dd_run_check(check)
 
-    assert check._pollers[FW_A_POLLED] is poller
+    assert check._pollers[FW_A_IP] is poller
     assert poller.target.hostname == 'fw-renamed'
 
 
 def test_firewall_replaced_at_the_same_ip_is_reported_under_its_new_serial(dd_run_check, aggregator, fake_panos):
-    check = new_check(firewall_ip_overrides={**OVERRIDES, 'SYNTH-RMA-0001': FW_A_POLLED})
+    check = new_check()
     dd_run_check(check)
     aggregator.reset()
-    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml(('SYNTH-RMA-0001', 'fw-a', FW_A_REPORTED, 'yes')))
+    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml(('SYNTH-RMA-0001', 'fw-a', FW_A_IP, 'yes')))
     # The replacement has not answered yet: the fake would otherwise still reply as the old unit (fw-a's capture).
-    fake_panos.fail(FW_A_POLLED, 'refused')
+    fake_panos.fail(FW_A_IP, 'refused')
 
     dd_run_check(check)
 
-    tags = metrics_by_ip(aggregator, 'can_connect')[FW_A_REPORTED].tags
+    tags = metrics_by_ip(aggregator, 'can_connect')[FW_A_IP].tags
     assert 'device_id:SYNTH-RMA-0001' in tags
     assert f'device_id:{FW_A_SERIAL}' not in tags
 
@@ -284,10 +220,10 @@ def test_firewall_replaced_at_the_same_ip_is_reported_under_its_new_serial(dd_ru
     'devices',
     [
         pytest.param(
-            devices_xml((FW_A_SERIAL, 'fw-a', FW_A_REPORTED, 'yes'), (FW_B_SERIAL, 'fw-b', FW_B_REPORTED, 'no')),
+            devices_xml((FW_A_SERIAL, 'fw-a', FW_A_IP, 'yes'), (FW_B_SERIAL, 'fw-b', FW_B_IP, 'no')),
             id='disconnected',
         ),
-        pytest.param(devices_xml((FW_A_SERIAL, 'fw-a', FW_A_REPORTED, 'yes')), id='removed'),
+        pytest.param(devices_xml((FW_A_SERIAL, 'fw-a', FW_A_IP, 'yes')), id='removed'),
     ],
 )
 def test_firewall_that_disconnects_or_is_removed_is_no_longer_polled(dd_run_check, aggregator, fake_panos, devices):
@@ -299,20 +235,20 @@ def test_firewall_that_disconnects_or_is_removed_is_no_longer_polled(dd_run_chec
     dd_run_check(check)
 
     # A polled firewall reports `can_connect` on every run, even when nothing is due.
-    assert set(metrics_by_ip(aggregator, 'can_connect')) == {FW_A_REPORTED}
-    assert list(check._pollers) == [FW_A_POLLED]
+    assert set(metrics_by_ip(aggregator, 'can_connect')) == {FW_A_IP}
+    assert list(check._pollers) == [FW_A_IP]
 
 
-def test_credentials_are_matched_on_the_polled_ip(dd_run_check, fake_panos):
+def test_credentials_are_matched_on_the_reported_ip(dd_run_check, fake_panos):
     credentials = [
-        {'cidr': '192.0.2.0/24', 'username': 'public-user', 'password': 'p'},
-        {'cidr': '10.60.0.0/16', 'username': 'private-user', 'password': 'p'},
+        {'cidr': '192.0.2.10/32', 'username': 'fw-a-user', 'password': 'p'},
+        {'cidr': '192.0.2.0/24', 'username': 'subnet-user', 'password': 'p'},
     ]
 
     dd_run_check(new_check(firewall_credentials=credentials))
 
     keygen_users = {c.host: c.params['user'] for c in fake_panos.calls if c.type == 'keygen'}
-    assert keygen_users == {FW_A_POLLED: 'public-user', FW_B_POLLED: 'public-user'}
+    assert keygen_users == {FW_A_IP: 'fw-a-user', FW_B_IP: 'subnet-user'}
 
 
 def test_firewall_without_matching_credentials_is_skipped_with_one_warning_per_ip(
@@ -324,19 +260,19 @@ def test_firewall_without_matching_credentials_is_skipped_with_one_warning_per_i
     dd_run_check(check)
     dd_run_check(check)
 
-    assert polled_hosts(fake_panos) == {FW_A_POLLED}
-    assert set(metrics_by_ip(aggregator, 'can_connect')) == {FW_A_REPORTED}
-    warnings = [r for r in caplog.records if r.levelno == logging.WARNING and FW_B_POLLED in r.getMessage()]
+    assert polled_hosts(fake_panos) == {FW_A_IP}
+    assert set(metrics_by_ip(aggregator, 'can_connect')) == {FW_A_IP}
+    warnings = [r for r in caplog.records if r.levelno == logging.WARNING and FW_B_IP in r.getMessage()]
     assert len(warnings) == 1
 
 
 def test_can_connect_of_an_unreachable_discovered_firewall_carries_its_device_id(dd_run_check, aggregator, fake_panos):
-    fake_panos.fail(FW_A_POLLED, 'refused')
+    fake_panos.fail(FW_A_IP, 'refused')
 
     dd_run_check(new_check())
 
-    tags = metrics_by_ip(aggregator, 'can_connect')[FW_A_REPORTED].tags
-    assert metrics_by_ip(aggregator, 'can_connect')[FW_A_REPORTED].value == 0
+    tags = metrics_by_ip(aggregator, 'can_connect')[FW_A_IP].tags
+    assert metrics_by_ip(aggregator, 'can_connect')[FW_A_IP].value == 0
     # The family comes from discovery too, as the firewall never answered.
     expected = {f'device_id:{FW_A_SERIAL}', f'device_serial:{FW_A_SERIAL}', 'device_hostname:fw-a', 'device_family:vm'}
     assert expected <= set(tags)
@@ -395,7 +331,7 @@ def test_unreachable_panorama_keeps_polling_the_last_discovered_firewalls(dd_run
     # A new check instance has no list in memory: the persistent cache supplies it, as after an Agent restart.
     dd_run_check(new_check())
 
-    assert polled_hosts(fake_panos, skip=calls) == {FW_A_POLLED, FW_B_POLLED}
+    assert polled_hosts(fake_panos, skip=calls) == {FW_A_IP, FW_B_IP}
     assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))]
     assert any(r.levelno == logging.WARNING and PANORAMA in r.getMessage() for r in caplog.records)
 
@@ -412,11 +348,11 @@ def test_panorama_auth_failure_does_not_change_the_firewalls_auth_status(dd_run_
 
     assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))]
     assert [c.type for c in fake_panos.calls[calls:] if c.host == PANORAMA] == ['keygen']
-    assert polled_hosts(fake_panos, skip=calls) == {FW_A_POLLED, FW_B_POLLED}
+    assert polled_hosts(fake_panos, skip=calls) == {FW_A_IP, FW_B_IP}
     for name, value in (('api.authentication.status', 0), ('can_connect', 1)):
         assert {ip: m.value for ip, m in metrics_by_ip(aggregator, name).items()} == {
-            FW_A_REPORTED: value,
-            FW_B_REPORTED: value,
+            FW_A_IP: value,
+            FW_B_IP: value,
         }
 
 

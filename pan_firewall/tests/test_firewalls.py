@@ -32,13 +32,12 @@ def test_static_source_lists_targets_in_config_order():
         {
             'firewalls': ['192.0.2.7', '10.0.0.5', '10.0.0.4'],
             'firewall_credentials': [SUBNET.model_dump(), OTHER.model_dump()],
-            'port': 8443,
         },
-        context={'configured_fields': ['firewalls', 'firewall_credentials', 'port']},
+        context={'configured_fields': ['firewalls', 'firewall_credentials']},
     )
 
     assert StaticFirewallSource(config).list_firewalls() == [
-        FirewallTarget('192.0.2.7', 8443, Credentials(None, None, 'key2')),
-        FirewallTarget('10.0.0.5', 8443, Credentials('subnet', 'pw1', None)),
-        FirewallTarget('10.0.0.4', 8443, Credentials('subnet', 'pw1', None)),
+        FirewallTarget('192.0.2.7', Credentials(None, None, 'key2')),
+        FirewallTarget('10.0.0.5', Credentials('subnet', 'pw1', None)),
+        FirewallTarget('10.0.0.4', Credentials('subnet', 'pw1', None)),
     ]

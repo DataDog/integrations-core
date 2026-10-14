@@ -72,8 +72,8 @@ def _on_off(value: str | None) -> bool | None:
 
 
 def device_ip(target: FirewallTarget) -> str:
-    """The `device_ip` tag: the configured IP in static mode, the IP Panorama reports (not the override) otherwise."""
-    return target.reported_ip or target.ip
+    """The `device_ip` tag: the polled IP (the configured IP in static mode, the IP Panorama reports otherwise)."""
+    return target.ip
 
 
 def global_tags(

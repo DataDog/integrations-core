@@ -3,15 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import ipaddress
 import re
-from collections.abc import Mapping
 from typing import Any
-
-
-def instance_firewall_ip_overrides(value: Any, **kwargs: Any) -> Any:
-    """Read the keys as strings: YAML turns an unquoted serial such as `007955000930601` into a number."""
-    if isinstance(value, Mapping):
-        return {str(key): ip for key, ip in value.items()}
-    return value
 
 
 def check_instance(model: Any) -> Any:
@@ -96,13 +88,6 @@ def _check_discovery_filters(model: Any) -> None:
                 ipaddress.ip_network(pattern, strict=False)
             except ValueError:
                 raise ValueError(f'`firewall_ips.{field}` entry `{pattern}` is not an IP address or CIDR') from None
-    for serial, ip in (model.firewall_ip_overrides or {}).items():
-        try:
-            ipaddress.ip_address(ip)
-        except ValueError:
-            raise ValueError(
-                f'`firewall_ip_overrides` entry for `{serial}` is not a valid IP address: `{ip}`'
-            ) from None
 
 
 def _check_rule_filter(model: Any) -> None:
