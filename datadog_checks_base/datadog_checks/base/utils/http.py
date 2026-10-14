@@ -265,9 +265,7 @@ class LineCappedRawResponse(ObjectProxy):
         Yield the decoded body in chunks that each contain a line break, except possibly the last one. Raise
         `ResponseLineTooLongError` once a line is longer than `max_line_size` bytes.
         """
-        # Mirrors `urllib3.HTTPResponse.stream`: `amt` is the number of bytes read per chunk, 64 KiB by default.
-        # `None` reads the whole body at once. Only the line that continues from the previous chunk is checked, which
-        # is enough while chunks are not longer than the limit, so `amt` is capped at the limit.
+        # `amt` is the number of bytes read per chunk, 64 KiB by default (mirrors the urllib3 name)
         if amt is None or amt > self._self_max_line_size:
             amt = self._self_max_line_size
 
