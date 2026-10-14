@@ -13,17 +13,27 @@
       }
     }
   ],
-  "additional_config_fields": [
+  "supported_connection_methods": [
     {
-      "key": "region",
-      "label": "Region",
-      "editable": true,
-      "required": true,
-      "dropdown": {
-        "options": [
-          { "value": "us", "label": "US" },
-          { "value": "anz", "label": "ANZ" }
-        ]
+      "name": "Greenhouse Audit Log API",
+      "regional": {
+        "region_setting": {
+          "key": "region",
+          "label": "Region",
+          "editable": true,
+          "required": true,
+          "dropdown": {
+            "options": [
+              { "value": "us", "label": "US" },
+              { "value": "anz", "label": "ANZ" }
+            ],
+            "default": "us"
+          }
+        },
+        "region_base_urls": {
+          "us": "https://auditlog.us.greenhouse.io",
+          "anz": "https://auditlog.anz.greenhouse.io"
+        }
       }
     }
   ],
