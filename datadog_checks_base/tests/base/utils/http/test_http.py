@@ -16,7 +16,7 @@ import requests
 import requests_unixsocket
 import urllib3
 
-from datadog_checks.base import AgentCheck
+from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.http import (
     RequestsWrapper,
     ResponseLineTooLongError,
@@ -405,3 +405,23 @@ def test_stream_groups_chunks_up_to_a_line_break():
 
     # The chunks are b'y\nxx', b'xxxx', b'xxx\n' and b'y'
     assert list(response.raw.stream(4)) == [b'y\nxx', b'xxxxxxx\n', b'y']
+
+
+def test_iter_lines_rejects_custom_delimiter_with_limit():
+    with pytest.raises(ConfigurationError, match='not supported with a custom delimiter'):
+        ResponseWrapper(_gzip_response(b'x;y'), 4, 10).iter_lines(delimiter=b';')
+
+
+def test_iter_lines_allows_custom_delimiter_without_limit():
+    assert list(ResponseWrapper(_gzip_response(b'x;y'), 4, None).iter_lines(delimiter=b';')) == [b'x', b'y']
+
+
+def test_iter_lines_uses_configured_line_size():
+    # Chunks of 256 bytes, smaller than the limit of 0.5 KiB
+    http = RequestsWrapper({'max_line_size': 0.5, 'request_size': 0.25}, {})
+
+    with mock.patch('requests.Session.get', return_value=_gzip_response(b'x' * 512 + b'\ny\n')):
+        assert len(list(http.get('https://www.google.com', stream=True).iter_lines())) == 2
+    with mock.patch('requests.Session.get', return_value=_gzip_response(b'x' * 513 + b'\ny\n')):
+        with pytest.raises(ResponseLineTooLongError, match=r'`max_line_size` option \(in KiB\)'):
+            list(http.get('https://www.google.com', stream=True).iter_lines())
