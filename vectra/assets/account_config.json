@@ -27,27 +27,47 @@
       "editable": true,
       "required": true,
       "text": {}
-    },
-    {
-      "key": "collect_detections",
-      "label": "Collect Detections",
-      "editable": true,
-      "checkbox": { "default": true }
-    },
-    {
-      "key": "collect_entity_scoring_events",
-      "label": "Collect Entity Scoring Events",
-      "editable": true,
-      "checkbox": { "default": true }
-    },
-    {
-      "key": "collect_audit_events",
-      "label": "Collect Audit Events",
-      "editable": true,
-      "checkbox": { "default": true }
     }
   ],
   "dataflow_config": [
-    { "dataflow_id": "vectra-logs" }
+    {
+      "dataflow_id": "vectra-detection-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Detections",
+        "help": "Collects Vectra detections and detection events.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "collect_detections",
+        "should_map_legacy_fields": true
+      }
+    },
+    {
+      "dataflow_id": "vectra-entity-scoring-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Entity Scoring Events",
+        "help": "Collects Vectra account and host entity scoring events.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "collect_entity_scoring_events",
+        "should_map_legacy_fields": true
+      }
+    },
+    {
+      "dataflow_id": "vectra-audit-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Audit Events",
+        "help": "Collects Vectra audit events.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "collect_audit_events",
+        "should_map_legacy_fields": true
+      }
+    }
   ]
 }
