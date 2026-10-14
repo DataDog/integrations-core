@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import logging
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
@@ -14,6 +15,7 @@ from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.callbacks.callbacks import Callbacks, CallbackSet
 from ddev.ai.config.engine import ConfigurationEngine
 from ddev.ai.config.errors import ConfigError
+from ddev.ai.config.models import FlowInput
 from ddev.ai.constants import CORE_PHASES_DIR, CORE_PHASES_PACKAGE
 from ddev.ai.phases.base import Phase, PhaseOutcome
 from ddev.ai.phases.messages import PhaseFailedMessage, PhaseTrigger
@@ -176,6 +178,23 @@ async def test_on_initialize_registers_all_flow_phases(core_dir, make_orchestrat
 
     processors = orchestrator._subscribers.get(PhaseTrigger, [])
     assert {p.name for p in processors} == {"a", "b"}
+
+
+async def test_on_initialize_gives_phases_the_snapshot_path(core_dir, make_orchestrator, tmp_path):
+    source = tmp_path / "requirements.md"
+    source.write_text("requirements", encoding="utf-8")
+    orchestrator, _, _ = make_orchestrator(core_dir, runtime_variables={"spec": str(source)})
+    orchestrator._resolved_flow = replace(
+        orchestrator._resolved_flow,
+        inputs=[FlowInput(name="spec", label="Spec", input_type="path", snapshot=True)],
+    )
+
+    await orchestrator.on_initialize()
+
+    snapshot = tmp_path / "inputs" / "files" / "spec.md"
+    assert snapshot.read_text(encoding="utf-8") == "requirements"
+    processors = orchestrator._subscribers.get(PhaseTrigger, [])
+    assert [p._runtime_variables for p in processors] == [{"spec": str(snapshot)}] * len(processors)
 
 
 async def test_on_initialize_wires_dependencies(core_dir, make_orchestrator):
