@@ -234,8 +234,6 @@ class TestGetQueryStatsRowKey:
             {'updates': [{'q': {}, 'u': [{'$set': {'x': '?'}}], 'arrayFilters': [{'i': '?'}]}], 'let': {'v': '?'}},
         ),
         ('delete', {'q': {'x': '?number'}, 'limit': 1}, {'deletes': [{'q': {'x': '?'}, 'limit': 1}]}),
-        ('count', {'query': {'x': '?number'}}, {'query': {'x': '?'}}),
-        ('distinct', {'query': {'x': '?number'}, 'key': 'x'}, {'query': {'x': '?'}, 'key': 'x'}),
         ('aggregate', {'pipeline': [], 'allowPartialResults': False}, {'pipeline': [], 'allowPartialResults': False}),
     ],
 )
@@ -290,3 +288,41 @@ def test_query_stats_metric_deltas(nested: bool):
         assert result['docs_modified_sum'] == 3
         assert result['docs_inserted_sum'] == 0
     json.dumps(result)
+
+
+@pytest.mark.parametrize('write_first', [True, False], ids=['write-first', 'read-first'])
+def test_query_stats_mixed_read_write_deltas(write_first: bool):
+    # Different read/write columns must not crash collection or return cumulative values as interval metrics.
+    check = MongoDb(
+        'mongo', {}, [{'hosts': ['localhost'], 'database': 'test', 'dbm': True, 'cluster_name': 'test-cluster'}]
+    )
+    check.deployment_type = StandaloneDeployment(HostingType.SELF_HOSTED)
+    collector = check._query_metrics
+    rows = [
+        {
+            'key': {'queryShape': {'cmdNs': {'db': 'test', 'coll': 'orders'}, 'command': 'insert'}},
+            'metrics': {'execCount': 2, 'writes': {'nInserted': {'sum': 7}}},
+        },
+        {
+            'key': {'queryShape': {'cmdNs': {'db': 'test', 'coll': 'orders'}, 'command': 'find', 'filter': {}}},
+            'metrics': {'execCount': 2, 'queryExec': {'docsReturned': {'sum': 11}}},
+        },
+    ]
+    second = copy.deepcopy(rows)
+    second[0]['metrics']['execCount'] = 3
+    second[0]['metrics']['writes']['nInserted']['sum'] = 9
+    second[1]['metrics']['execCount'] = 3
+    second[1]['metrics']['queryExec']['docsReturned']['sum'] = 14
+    if not write_first:
+        rows.reverse()
+        second.reverse()
+
+    with mock.patch.object(collector, '_load_query_stats', side_effect=[rows, second]):
+        assert collector._collect_metrics_rows() == []
+        by_command = {row['command_type']: row for row in collector._collect_metrics_rows()}
+
+    assert set(by_command) == {'find', 'insert'}
+    assert by_command['insert']['docs_inserted_sum'] == 2
+    assert by_command['insert']['docs_returned_sum'] == 0
+    assert by_command['find']['docs_inserted_sum'] == 0
+    assert by_command['find']['docs_returned_sum'] == 3

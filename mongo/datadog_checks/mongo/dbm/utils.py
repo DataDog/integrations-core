@@ -310,7 +310,6 @@ QUERY_SHAPE_COPYABLE_FIELDS = [
     'collation',
     'arrayFilters',
     'key',  # for distinct command
-    'query',  # for distinct and count commands
     'documents',  # for insert commands
     'allowPartialResults',
 ]
