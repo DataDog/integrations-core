@@ -182,6 +182,7 @@ def test_excluded_firewall_is_never_polled_and_gets_no_can_connect(dd_run_check,
 
     assert FW_B_IP not in polled_hosts(fake_panos)
     assert set(metrics_by_ip(aggregator, 'can_connect')) == {FW_A_IP}
+    assert FW_B_IP not in check._pollers
 
 
 @pytest.mark.parametrize('ip', [None, 'not-an-ip'], ids=['absent', 'invalid'])

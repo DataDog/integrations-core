@@ -32,8 +32,8 @@ class PanFirewallCheck(AgentCheck, ConfigMixin):
         pollers = []
         for target in targets:
             poller = self._pollers.get(target.ip)
-            # A changed target (a replaced firewall at the same IP, or new credentials) gets a
-            # new poller, so its identity and tags are not stale. A rename or a new version only updates the target.
+            # A changed target (a replaced firewall at the same IP) gets a new poller, so its identity and tags are
+            # not stale. A rename or a new version only updates the target.
             if poller is None or poller.target.poller_key != target.poller_key:
                 poller = self._pollers[target.ip] = FirewallPoller(self, target, self.config)
             else:

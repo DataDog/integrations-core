@@ -248,7 +248,7 @@ Additional helpful documentation, links, and articles:
 - TLS settings apply per instance. Put firewalls with a different certificate setup in a separate instance.
 - Perpetual licenses report `license.expired` as 0 and no `license.days_left`.
 - A firewall whose Panorama-reported IP address the Agent can't reach (behind NAT, or connected to Panorama through a data interface) can't be polled from a Panorama instance. Add it to the `firewall_ips` exclude list of that instance, and poll it from a separate instance that lists its reachable IP address in `firewalls`.
-- Panorama discovery was tested live against Panorama 11.2.15 managing 2 VM-Series firewalls. Panorama-managed HA pairs and firewalls behind NAT were not tested.
+- Panorama discovery was tested live against Panorama 11.2.15 managing 2 VM-Series firewalls. Panorama-managed HA pairs were not tested.
 
 ## Troubleshooting
 
