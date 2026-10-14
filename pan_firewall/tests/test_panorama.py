@@ -334,6 +334,22 @@ def test_panorama_rejecting_the_password_is_reported_and_keygen_is_retried_once_
     assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))] * 2
 
 
+def test_panorama_that_answers_again_is_reported_and_its_firewalls_polled(dd_run_check, aggregator, fake_panos):
+    check = new_check()
+    fake_panos.fail(PANORAMA, 'timeout')
+    dd_run_check(check)
+    assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))]
+    fake_panos.recover(PANORAMA)
+    calls = len(fake_panos.calls)
+    aggregator.reset()
+
+    # The same check: the timeout of the last run must not make this run's discovery fail fast.
+    dd_run_check(check)
+
+    assert panorama_can_connect(aggregator) == [(1, sorted(PANORAMA_TAGS))]
+    assert polled_hosts(fake_panos, skip=calls) == {FW_A_IP, FW_B_IP}
+
+
 def test_unreachable_panorama_keeps_polling_the_last_discovered_firewalls(dd_run_check, aggregator, fake_panos, caplog):
     dd_run_check(new_check())
     fake_panos.fail(PANORAMA, 'refused')

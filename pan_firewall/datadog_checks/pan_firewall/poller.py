@@ -114,7 +114,7 @@ class FirewallPoller:
     def run(self) -> None:
         start = time.monotonic()
         # Clears what a run that raised may have left, such as the failure that makes every call fail fast.
-        self.client.take_stats()
+        self.client.start_run()
         self._requests.take()
         try:
             self._run()
@@ -123,8 +123,8 @@ class FirewallPoller:
             self.log.debug('pan_firewall %s: %d requests in %.2fs', self.ip, requests, time.monotonic() - start)
 
     def _run(self) -> None:
-        # One keygen attempt per run after a rejected one (the KeyManager latches until reset).
-        self.keys.reset_failure()
+        # One keygen attempt per run after a rejected one (the KeyManager latches until then).
+        self.keys.allow_one_keygen()
         due = self.schedule.due(self._enabled(), identity_missing=self.identity is None)
         outcome = CollectorRun()
         if due:
@@ -145,7 +145,7 @@ class FirewallPoller:
             )
         # Skipped collectors, and every collector of a busy run, stay due, so they run first thing next run.
         self.schedule.mark_run(outcome.ran)
-        stats = self.client.take_stats()
+        stats = self.client.stats
         if stats.key_regenerated:
             # A rejected key that had worked may mean another unit answers here: read the identity again next run.
             self.schedule.make_due(IDENTITY)

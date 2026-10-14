@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import dataclasses
 import threading
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
@@ -167,7 +168,7 @@ def _classify(status_code: int, error: PanosApiError) -> PanosApiError:
 
 @dataclass
 class CallStats:
-    """The outcome of the calls a client made since the last `PanosClient.take_stats()`.
+    """The outcome of the calls a client made since the last `PanosClient.start_run()`.
 
     `answered` is True once any call got a PAN-OS response, successful or `status="error"` (an auth rejection
     included); transport failures and bodies that are not PAN-OS XML (`panos_response` False) leave it False.
@@ -189,7 +190,7 @@ class PanosClient:
     the device never sees more than `max_in_flight` concurrent requests from this client.
 
     Once a call cannot reach the device, every later call raises PanosSkipped at once, without contacting it, until
-    the next `take_stats()`: a hung device costs one timeout per run, not one per call, and a refused one costs one
+    the next `start_run()`: a hung device costs one timeout per run, not one per call, and a refused one costs one
     attempt.
     """
 
@@ -268,15 +269,21 @@ class PanosClient:
                 lambda key: read_response(post_api(self._http, self._url, params, key=key, counter=self._counter))
             )
 
-    def take_stats(self) -> CallStats:
-        """Return the stats of the calls made since the previous call, and start new ones."""
+    def start_run(self) -> None:
+        """Start new call stats, which clears the fail-fast state. Call it once at the start of each run: until then,
+        after a call that could not reach the device, every call raises PanosSkipped."""
         with self._stats_lock:
-            stats, self._stats = self._stats, CallStats()
-        return stats
+            self._stats = CallStats()
+
+    @property
+    def stats(self) -> CallStats:
+        """A copy of the stats of the calls made since `start_run()`, read at the end of a run."""
+        with self._stats_lock:
+            return dataclasses.replace(self._stats)
 
     @property
     def unreachable(self) -> str | None:
-        """The reason of the first call that could not reach the device since the last `take_stats()`, or None. It is
+        """The reason of the first call that could not reach the device since `start_run()`, or None. It is
         set before the PanosUnreachable is raised."""
         with self._stats_lock:
             return self._stats.unreachable

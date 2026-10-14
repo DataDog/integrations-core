@@ -89,9 +89,9 @@ class PanoramaFirewallSource:
         self._warned: set[str] = set()
 
     def list_firewalls(self) -> list[FirewallTarget]:
-        # One keygen attempt per run after a rejected one (the KeyManager latches until reset).
-        self._keys.reset_failure()
-        self._client.take_stats()
+        # One keygen attempt per run after a rejected one (the KeyManager latches until then).
+        self._keys.allow_one_keygen()
+        self._client.start_run()
         devices = self._discover()
         self._check.gauge('panorama.can_connect', 0 if devices is None else 1, tags=self._tags())
         if devices is None:

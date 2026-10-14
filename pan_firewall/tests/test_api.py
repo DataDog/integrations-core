@@ -168,7 +168,7 @@ def test_rejected_key_is_regenerated_once_and_the_call_retried(status, body):
     assert root.findtext('./result/system/hostname') == 'fw-a'
     assert len(http.calls_of('keygen')) == 2
     assert [c['extra_headers']['X-PAN-KEY'] for c in http.calls_of('api')] == [KEY_1, KEY_2]
-    stats = client.take_stats()
+    stats = client.stats
     assert (stats.auth_rejected, stats.key_regenerated) == (False, True)
 
 
@@ -224,13 +224,15 @@ def test_rejected_keygen_is_not_retried_until_reset(keygen, api, keygens_before_
         with pytest.raises(PanosAuthError):
             client.op(SYSTEM_INFO_CMD)
     assert len(http.calls_of('keygen')) == keygens_before_reset
-    assert client.take_stats().auth_rejected is True
+    assert client.stats.auth_rejected is True
 
-    keys.reset_failure()
+    # The next run.
+    keys.allow_one_keygen()
+    client.start_run()
     client.op(SYSTEM_INFO_CMD)
 
     assert len(http.calls_of('keygen')) == keygens_before_reset + 1
-    assert client.take_stats().auth_rejected is False
+    assert client.stats.auth_rejected is False
 
 
 def test_calls_rejected_with_the_same_key_renew_it_once():
@@ -263,7 +265,7 @@ def test_error_that_is_not_an_auth_rejection_neither_renews_the_key_nor_invalida
     assert type(exc_info.value) is PanosApiError
     assert exc_info.value.code == code
     assert len(http.calls_of('keygen')) == 1
-    assert client.take_stats().auth_rejected is False
+    assert client.stats.auth_rejected is False
 
 
 def test_static_key_is_never_regenerated():
@@ -273,7 +275,7 @@ def test_static_key_is_never_regenerated():
     with pytest.raises(PanosAuthError):
         client.op(SYSTEM_INFO_CMD)
 
-    stats = client.take_stats()
+    stats = client.stats
     assert (stats.auth_rejected, stats.key_regenerated) == (True, False)
     assert http.calls_of('keygen') == []
     assert http.calls[0]['extra_headers'] == {'X-PAN-KEY': STATIC_KEY}
@@ -340,7 +342,7 @@ def read_log_job(client, job_id):
         ),
     ],
 )
-def test_calls_after_a_timeout_or_refusal_fail_fast_until_the_stats_are_taken(call, failure, error):
+def test_calls_after_a_timeout_or_refusal_fail_fast_until_the_next_run(call, failure, error):
     http = FakeHttp(api=[failure, (200, THREAT_LOGS)])
     client, _ = make_client(http, STATIC_CREDS)
     with pytest.raises(error):
@@ -351,7 +353,7 @@ def test_calls_after_a_timeout_or_refusal_fail_fast_until_the_stats_are_taken(ca
         call(client)
     assert len(http.calls) == 1
 
-    client.take_stats()
+    client.start_run()
     call(client)
     assert len(http.calls) == 2
 
@@ -381,7 +383,7 @@ def test_stream_that_breaks_mid_way_makes_the_next_calls_fail_fast():
         client.op(SYSTEM_INFO_CMD)
     assert len(http.calls) == 1
     # The call itself was answered: can_connect does not turn to 0 because the body broke.
-    stats = client.take_stats()
+    stats = client.stats
     assert (stats.calls, stats.answered) == (1, True)
 
 
