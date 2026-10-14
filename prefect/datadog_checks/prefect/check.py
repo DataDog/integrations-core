@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 
 from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 
-from datadog_checks.base import AgentCheck, ConfigurationError
+from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import pattern_filter
 from datadog_checks.base.utils.http import RequestsWrapper
 
@@ -51,14 +51,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         url = self.config.prefect_url.rstrip('/')
 
         if self.config.auth_string is not None:
-            auth_type = (self.config.auth_type or '').lower()
-            if self.config.username is not None or self.config.password is not None or auth_type != 'basic':
-                raise ConfigurationError('Use `auth_string` only with basic auth and without `username` or `password`.')
-            username, separator, password = self.config.auth_string.partition(':')
-            if not separator or not username or not password:
-                raise ConfigurationError(
-                    '`auth_string` must contain a non-empty username and password separated by `:`.'
-                )
+            username, _, password = self.config.auth_string.partition(':')
             http_config = dict(self.instance, username=username, password=password)
             self._http = RequestsWrapper(http_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log)
 
