@@ -46,8 +46,8 @@ CANCEL_REQUEST_TIMEOUT = 3.0
 # https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows
 WORKFLOW_INPUTS_LIMIT = 65535
 
-# GitHub can answer 404 for a newly dispatched run until the run and its jobs listing are visible.
-NEW_RUN_RETRY = SAFE_RETRY.also_on(on_status(404))
+# GitHub can answer 404 while a resource is becoming visible after a successful mutation.
+SAFE_RETRY_WITH_404 = SAFE_RETRY.also_on(on_status(404))
 
 
 class JobListTooLargeError(Exception):
@@ -363,7 +363,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             with self._metrics.operation(Operation.FETCH_WORKFLOW) as op:
                 try:
                     run = await self._client.get_workflow_run(
-                        self._options.owner, self._options.repo, run_id, retry=NEW_RUN_RETRY
+                        self._options.owner, self._options.repo, run_id, retry=SAFE_RETRY_WITH_404
                     )
                 except ValidationError as error:
                     raise self._response_failure(
@@ -484,7 +484,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         with self._metrics.operation(Operation.REFRESH_JOBS) as op:
             try:
                 async for page in self._client.list_workflow_jobs(
-                    self._options.owner, self._options.repo, run_id, per_page=100, retry=NEW_RUN_RETRY
+                    self._options.owner, self._options.repo, run_id, per_page=100, retry=SAFE_RETRY_WITH_404
                 ):
                     jobs.extend(page.data.jobs)
             except ValidationError as error:
