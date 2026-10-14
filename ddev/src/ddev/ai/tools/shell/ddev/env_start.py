@@ -19,7 +19,7 @@ class DdevEnvStartTool(CmdTool[EnvStartInput]):
     """Starts a Docker-based E2E test environment for an integration. Use
     `dev=true` to mount local check code into the container."""
 
-    timeout = 300
+    timeout = 1200
 
     @property
     def name(self) -> str:
