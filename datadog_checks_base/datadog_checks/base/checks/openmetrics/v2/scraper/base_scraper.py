@@ -220,7 +220,6 @@ class OpenMetricsScraper:
             self.raw_line_filter = re.compile('|'.join(raw_line_filters))
 
         self.http = RequestsWrapper(config, self.check.init_config, self.check.HTTP_CONFIG_REMAPPER, self.check.log)
-        self.http.max_line_size = OPENMETRICS_MAX_LINE_SIZE * KIBIBYTE
 
         self._content_type = ''
         self._use_latest_spec = is_affirmative(config.get('use_latest_spec', False))
@@ -471,8 +470,9 @@ class OpenMetricsScraper:
 
         kwargs['stream'] = True
         response = self.http.get(self.endpoint, **kwargs)
-        # Also limit reads that do not go through `iter_lines`, such as `response.content` for telemetry
-        limit_line_size(response, self.http.max_line_size)
+        # Limit the response rather than the client, so that `response.content` and clients replaced by checks are
+        # limited too
+        limit_line_size(response, OPENMETRICS_MAX_LINE_SIZE * KIBIBYTE)
         return response
 
     def set_dynamic_tags(self, *tags):

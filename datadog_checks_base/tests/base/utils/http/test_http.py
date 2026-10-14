@@ -20,7 +20,6 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http import (
     RequestsWrapper,
     ResponseLineTooLongError,
-    ResponseWrapper,
     is_uds_url,
     limit_line_size,
     quote_uds_url,
@@ -360,7 +359,13 @@ def _gzip_response(body):
     return response
 
 
-# Chunks of 4 bytes and a limit of 10 bytes
+def _limited_lines(body):
+    # Chunks of 4 bytes and a limit of 10 bytes
+    response = _gzip_response(body)
+    limit_line_size(response, 10)
+    return list(response.iter_lines(chunk_size=4))
+
+
 @pytest.mark.parametrize(
     'body, lines',
     [
@@ -370,7 +375,7 @@ def _gzip_response(body):
     ],
 )
 def test_iter_lines_allows_lines_up_to_limit(body, lines):
-    assert len(list(ResponseWrapper(_gzip_response(body), 4, 10).iter_lines())) == lines
+    assert len(_limited_lines(body)) == lines
 
 
 @pytest.mark.parametrize(
@@ -383,7 +388,7 @@ def test_iter_lines_allows_lines_up_to_limit(body, lines):
 )
 def test_iter_lines_limits_line_size(body):
     with pytest.raises(ResponseLineTooLongError, match='line longer than 10 bytes'):
-        list(ResponseWrapper(_gzip_response(body), 4, 10).iter_lines())
+        _limited_lines(body)
 
 
 def test_stream_groups_chunks_up_to_a_line_break():

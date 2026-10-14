@@ -396,7 +396,6 @@ class OpenMetricsScraperMixin(object):
         http_handler = self._http_handlers[prometheus_url] = RequestsWrapper(
             scraper_config, self.init_config, self.HTTP_CONFIG_REMAPPER, self.log
         )
-        http_handler.max_line_size = OPENMETRICS_MAX_LINE_SIZE * KIBIBYTE
 
         headers = http_handler.options['headers']
 
@@ -863,8 +862,9 @@ class OpenMetricsScraperMixin(object):
         http_handler = self.get_http_handler(scraper_config)
 
         response = http_handler.get(endpoint, stream=True, **kwargs)
-        # Also limit reads that do not go through `iter_lines`, such as `response.content` for telemetry
-        limit_line_size(response, http_handler.max_line_size)
+        # Limit the response rather than the client, so that `response.content` and clients replaced by checks are
+        # limited too
+        limit_line_size(response, OPENMETRICS_MAX_LINE_SIZE * KIBIBYTE)
         return response
 
     def get_hostname_for_sample(self, sample, scraper_config):

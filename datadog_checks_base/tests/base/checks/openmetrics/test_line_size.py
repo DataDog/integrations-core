@@ -21,7 +21,19 @@ V1 = (OpenMetricsBaseCheck, {'prometheus_url': URL, **OPTIONS})
 V2 = (OpenMetricsBaseCheckV2, {'openmetrics_endpoint': URL, **OPTIONS})
 
 
-@pytest.mark.parametrize('check_class, instance', [V1, V2], ids=['v1', 'v2'])
+class ReplacedClientCheck(OpenMetricsBaseCheckV2):
+    # Like `avi_vantage`, which scrapes with the client of the check
+    def create_scraper(self, config):
+        scraper = super().create_scraper(config)
+        scraper.http = self.http
+        return scraper
+
+
+@pytest.mark.parametrize(
+    'check_class, instance',
+    [V1, V2, (ReplacedClientCheck, V2[1])],
+    ids=['v1', 'v2', 'v2 with a replaced client'],
+)
 def test_telemetry_does_not_read_long_lines(check_class, instance, dd_run_check):
     response = requests.Response()
     response.status_code = 200
