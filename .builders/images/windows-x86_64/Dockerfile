@@ -85,11 +85,11 @@ RUN Get-RemoteFile `
     Approve-File -Path $($Env:USERPROFILE + '\.cargo\bin\rustc.exe') -Hash $Env:RUSTC_HASH
 
 # Install Python 3
-ENV PYTHON_VERSION="3.13.15"
+ENV PYTHON_VERSION="3.13.16"
 RUN Get-RemoteFile `
       -Uri https://www.python.org/ftp/python/$Env:PYTHON_VERSION/python-$Env:PYTHON_VERSION-amd64.exe `
       -Path python-$Env:PYTHON_VERSION-amd64.exe `
-      -Hash 'edec09c4853aeae9ac36efb8c9f95b6b8e2fee65eee56d9767a8b7c69c574403'; `
+      -Hash 'fb4f9f5d438b2396da0086dc70b935c530cb578e37adc6d354f7ad2037fee83b'; `
     Start-Process -Wait python-$Env:PYTHON_VERSION-amd64.exe -ArgumentList '/quiet', 'InstallAllUsers=1'; `
     Remove-Item python-$Env:PYTHON_VERSION-amd64.exe; `
     & 'C:\Program Files\Python313\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
@@ -156,11 +156,11 @@ ENV NINJA_VERSION="1.13.0"
 RUN python -m pip install --no-warn-script-location meson==$Env:MESON_VERSION ninja==$Env:NINJA_VERSION && `
     Add-ToPath -Append 'C:\Program Files\Python313\Scripts'
 # libpq and pg_config as needed by psycopg
-ENV PG_VERSION="18.3"
+ENV PG_VERSION="18.6"
 RUN Get-RemoteFile `
       -Uri https://ftp.postgresql.org/pub/source/v$Env:PG_VERSION/postgresql-$Env:PG_VERSION.tar.bz2 `
       -Path postgresql-$Env:PG_VERSION.tar.bz2 `
-      -Hash 'd95663fbbf3a80f81a9d98d895266bdcb74ba274bcc04ef6d76630a72dee016f'; `
+      -Hash '555610c24d53e4316da5b7d3fc25c279d96856d5e0e23ee308c328c5fa881d9f'; `
     7z x postgresql-$Env:PG_VERSION.tar.bz2 -r -y && `
     7z x postgresql-$Env:PG_VERSION.tar -oC:\postgresql_src
 RUN New-Item -ItemType Junction -Path C:\OpenSSL -Target 'C:\Program Files\OpenSSL'; `

@@ -1,0 +1,1 @@
+Resolve a job whose final state the GitHub jobs API could not confirm from the run's conclusion and the job's artifacts, instead of failing the batch.

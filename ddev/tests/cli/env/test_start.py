@@ -519,8 +519,16 @@ def test_env_vars_override_config(ddev, helpers, data_dir, write_result_file, mo
     )
 
 
-def test_logs_detection(ddev, helpers, data_dir, write_result_file, mocker):
-    metadata = {E2EMetadata.ENV_VARS: {f'{E2EEnvVars.LOGS_DIR_PREFIX}1': 'path'}}
+# `TempDir` lowercases the key suffix, and only Windows uppercases environment variable names
+@pytest.mark.parametrize(
+    'logs_dir_env_var',
+    [
+        pytest.param('DDEV_E2E_ENV_temp_dir_dd_log_1', id='posix'),
+        pytest.param('DDEV_E2E_ENV_TEMP_DIR_DD_LOG_1', id='windows'),
+    ],
+)
+def test_logs_detection(ddev, helpers, data_dir, write_result_file, mocker, logs_dir_env_var):
+    metadata = {E2EMetadata.ENV_VARS: {logs_dir_env_var: 'path'}}
     config = {}
     mocker.patch('subprocess.run', side_effect=write_result_file({'metadata': metadata, 'config': config}))
     start = mocker.patch('ddev.e2e.agent.docker.DockerAgent.start')

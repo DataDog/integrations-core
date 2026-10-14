@@ -30,6 +30,19 @@ instances:
     #
     orchestrator_password: <ORCHESTRATOR_PASSWORD>
 
+    ## @param orchestrator_login_type - integer - optional
+    ## Authentication backend the Orchestrator uses to verify `orchestrator_username` and
+    ## `orchestrator_password`. Set this when the account is defined on a remote authentication
+    ## server rather than locally on the Orchestrator:
+    ##
+    ## - `0` for a local Orchestrator account
+    ## - `1` for RADIUS
+    ## - `2` for TACACS+
+    ##
+    ## When unset, the Orchestrator applies its own default, which is local authentication.
+    #
+    # orchestrator_login_type: 2
+
     ## @param namespace - string - optional - default: default
     ## Namespace to use for NDM device metadata. Defaults to "default".
     #
