@@ -1,0 +1,1 @@
+Close the connection when the health check fails, so a broken connection is not reused and its error message does not grow indefinitely.
