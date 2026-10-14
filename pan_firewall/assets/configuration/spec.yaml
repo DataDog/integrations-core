@@ -120,8 +120,11 @@ files:
         timeout.value.default: 30
         timeout.value.example: 30
         timeout.description: Timeout in seconds for each request to a firewall or Panorama.
-        proxy.hidden: true
-        skip_proxy.hidden: true
+        persist_connections.value.default: true
+        persist_connections.value.example: true
+        persist_connections.description: |
+          Whether or not to persist cookies and use connection pooling for improved performance.
+          The check makes several requests to each firewall on every run, so connections are reused by default.
         auth_type.hidden: true
         use_legacy_auth_encoding.hidden: true
         username.hidden: true
@@ -138,19 +141,8 @@ files:
         aws_region.hidden: true
         aws_host.hidden: true
         aws_service.hidden: true
-        tls_use_host_header.hidden: true
-        tls_cert.hidden: true
-        tls_private_key.hidden: true
-        tls_protocols_allowed.hidden: true
-        tls_ciphers.hidden: true
         headers.hidden: true
         extra_headers.hidden: true
-        connect_timeout.hidden: true
-        read_timeout.hidden: true
-        request_size.hidden: true
-        log_requests.hidden: true
-        persist_connections.hidden: true
-        allow_redirects.hidden: true
     - name: max_concurrency
       fleet_configurable: true
       description: Maximum number of firewalls to poll concurrently.

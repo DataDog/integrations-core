@@ -71,6 +71,37 @@ instances:
     #
     # namespace: default
 
+    ## @param proxy - mapping - optional
+    ## This overrides the `proxy` setting in `init_config`.
+    ##
+    ## Set HTTP or HTTPS proxies for this instance. Use the `no_proxy` list
+    ## to specify hosts that must bypass proxies.
+    ##
+    ## The SOCKS protocol is also supported, for example:
+    ##
+    ##   socks5://user:pass@host:port
+    ##
+    ## Using the scheme `socks5` causes the DNS resolution to happen on the
+    ## client, rather than on the proxy server. This is in line with `curl`,
+    ## which uses the scheme to decide whether to do the DNS resolution on
+    ## the client or proxy. If you want to resolve the domains on the proxy
+    ## server, use `socks5h` as the scheme.
+    #
+    # proxy:
+    #   http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
+    #   https: https://<PROXY_SERVER_FOR_HTTPS>:<PORT>
+    #   no_proxy:
+    #   - <HOSTNAME_1>
+    #   - <HOSTNAME_2>
+
+    ## @param skip_proxy - boolean - optional - default: false
+    ## This overrides the `skip_proxy` setting in `init_config`.
+    ##
+    ## If set to `true`, this makes the check bypass any proxy
+    ## settings enabled and attempt to reach services directly.
+    #
+    # skip_proxy: false
+
     ## @param tls_verify - boolean - optional - default: true
     ## Instructs the check to validate the TLS certificate of the firewall management interface.
     ## PAN-OS management interfaces ship with a self-signed certificate. Either install a certificate signed
@@ -78,11 +109,29 @@ instances:
     #
     # tls_verify: true
 
+    ## @param tls_use_host_header - boolean - optional - default: false
+    ## If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).
+    #
+    # tls_use_host_header: false
+
     ## @param tls_ignore_warning - boolean - optional - default: false
     ## If `tls_verify` is disabled, security warnings are logged by the check.
     ## Disable those by setting `tls_ignore_warning` to true.
     #
     # tls_ignore_warning: false
+
+    ## @param tls_cert - string - optional
+    ## The path to a single file in PEM format containing a certificate as well as any
+    ## number of CA certificates needed to establish the certificate's authenticity for
+    ## use when connecting to services. It may also contain an unencrypted private key to use.
+    #
+    # tls_cert: <CERT_PATH>
+
+    ## @param tls_private_key - string - optional
+    ## The unencrypted private key to use for `tls_cert` when connecting to services. This is
+    ## required if `tls_cert` is set and it does not already contain a private key.
+    #
+    # tls_private_key: <PRIVATE_KEY_PATH>
 
     ## @param tls_ca_cert - string - optional
     ## The path to a file of concatenated CA certificates in PEM format, or to a directory of
@@ -91,10 +140,65 @@ instances:
     #
     # tls_ca_cert: <CA_CERT_PATH>
 
+    ## @param tls_protocols_allowed - list of strings - optional
+    ## The expected versions of TLS/SSL when fetching intermediate certificates.
+    ## Only `SSLv3`, `TLSv1.2`, `TLSv1.3` are allowed by default. The possible values are:
+    ##   SSLv3
+    ##   TLSv1
+    ##   TLSv1.1
+    ##   TLSv1.2
+    ##   TLSv1.3
+    #
+    # tls_protocols_allowed:
+    #   - SSLv3
+    #   - TLSv1.2
+    #   - TLSv1.3
+
+    ## @param tls_ciphers - list of strings - optional
+    ## The list of ciphers suites to use when connecting to an endpoint. If not specified, 
+    ## `ALL` ciphers are used. For list of ciphers see: 
+    ## https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+    #
+    # tls_ciphers:
+    #   - TLS_AES_256_GCM_SHA384
+    #   - TLS_CHACHA20_POLY1305_SHA256
+    #   - TLS_AES_128_GCM_SHA256
+
     ## @param timeout - number - optional - default: 30
     ## Timeout in seconds for each request to a firewall or Panorama.
     #
     # timeout: 30
+
+    ## @param connect_timeout - number - optional
+    ## The connect timeout for accessing services. Defaults to `timeout`.
+    #
+    # connect_timeout: <CONNECT_TIMEOUT>
+
+    ## @param read_timeout - number - optional
+    ## The read timeout for accessing services. Defaults to `timeout`.
+    #
+    # read_timeout: <READ_TIMEOUT>
+
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
+    ## @param log_requests - boolean - optional - default: false
+    ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
+    #
+    # log_requests: false
+
+    ## @param persist_connections - boolean - optional - default: true
+    ## Whether or not to persist cookies and use connection pooling for improved performance.
+    ## The check makes several requests to each firewall on every run, so connections are reused by default.
+    #
+    # persist_connections: true
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
 
     ## @param max_concurrency - integer - optional - default: 5
     ## Maximum number of firewalls to poll concurrently.
