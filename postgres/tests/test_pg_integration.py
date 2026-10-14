@@ -1318,15 +1318,19 @@ def test_automatic_diagnostics_tags(aggregator, integration_check, pg_instance, 
     check_common_metrics(aggregator, expected_tags)
 
 
-def test_connection_health_check_failure_closes_connection(pg_instance):
-    check = PostgreSql('postgres', {}, [pg_instance])
-    conn = mock.MagicMock()
-    conn.cursor().__enter__().execute.side_effect = psycopg.OperationalError('another command is already in progress')
-    check._db = conn
+def test_check_recovers_after_connection_health_check_failure(aggregator, integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+    aggregator.reset()
+
+    # Break the live connection the way libpq does when a command is left in flight.
+    broken = check._db
+    broken.cursor = mock.Mock(side_effect=psycopg.OperationalError('another command is already in progress'))
 
     with pytest.raises(DatabaseHealthCheckError, match='another command is already in progress'):
-        check._connection_health_check(conn)
+        check.check(pg_instance)
 
-    # the broken connection must be discarded so the next run reconnects
-    conn.close.assert_called_once()
-    assert check._db is None
+    # The next run must not reuse the broken connection.
+    check.check(pg_instance)
+    assert check._db is not broken
+    check_common_metrics(aggregator, _get_expected_tags(check, pg_instance))
