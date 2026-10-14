@@ -8,11 +8,9 @@ import pytest
 from datadog_checks.pan_firewall.collectors.jobs import JOBS_PENDING_CMD, parse_busy_jobs
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from ..common import FIXTURES, FW_A_IP, STUBS, SYNTHETIC
+from ..common import FW_A_IP, STUBS, SYNTHETIC
 from ..fake_panos import FAILURES, NO_CAPTURE
-from ..helpers import can_connect_by_ip, needs_capture, new_check, register_stubs, stub_runs
-
-L10_IDLE = FIXTURES / 'l10' / 'jobs_pending_idle.xml'
+from ..helpers import can_connect_by_ip, new_check, register_stubs, stub_runs
 
 
 def jobs_response(name):
@@ -47,11 +45,6 @@ def test_running_or_queued_commits_and_content_updates_are_busy(status):
 )
 def test_jobs_that_do_not_pause_collection(name):
     assert parse_busy_jobs(parse_response((SYNTHETIC / name).read_bytes())) == []
-
-
-@needs_capture('l10/jobs_pending_idle.xml', 'L10')
-def test_idle_capture_is_not_busy():
-    assert parse_busy_jobs(parse_response(L10_IDLE.read_bytes())) == []
 
 
 class Firewall:

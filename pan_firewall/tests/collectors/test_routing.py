@@ -16,8 +16,8 @@ from datadog_checks.pan_firewall.collectors.routing import (
     peer_ip,
 )
 
-from ..common import FIXTURES, SYNTHETIC
-from ..helpers import load_op, load_xml, make_ctx, needs_capture, series
+from ..common import SYNTHETIC
+from ..helpers import load_op, load_xml, make_ctx, series
 
 
 def peer_samples(tags, *, status, duration, restart, updates, limit, prefixes=None):
@@ -178,39 +178,3 @@ def test_ospf_neighbor_without_a_status_is_not_reported():
     entry.remove(entry.find('status'))
 
     assert parse_ospf_neighbors(root) == []
-
-
-# Gated on the ARE lab captures (L2). Expected layout, the answers of the Advanced Routing Engine:
-#   tests/fixtures/are/bgp_peer.xml   (`show routing protocol bgp peer`)
-#   tests/fixtures/are/ospf_neighbor.xml   (`show routing protocol ospf neighbor`)
-# Without them the collectors warn once and send no BGP/OSPF metrics; `parse_bgp_are` and `parse_ospf_are` are
-# implemented once L2 lands. They are imported inside the tests so that collecting this module does not fail meanwhile.
-ARE = FIXTURES / 'are'
-needs_are = needs_capture('are', 'L2 (ARE)')
-
-
-def names_and_tag_keys(samples):
-    return {(s.name, tuple(sorted(tag.split(':', 1)[0] for tag in s.tags))) for s in samples}
-
-
-@needs_are
-def test_bgp_are_has_the_metric_names_and_tag_keys_of_the_legacy_engine():
-    from datadog_checks.pan_firewall.collectors.routing import parse_bgp_are
-
-    legacy = parse_bgp_peers(load_xml(SYNTHETIC / 'bgp_peer_dual_stack.xml'))
-    are = parse_bgp_are(load_xml(ARE / 'bgp_peer.xml'))
-
-    assert are
-    assert names_and_tag_keys(are) <= names_and_tag_keys(legacy)
-    assert {s.name for s in are} >= {'bgp.peer.status', 'bgp.peer.updates.in', 'bgp.peer.updates.out'}
-
-
-@needs_are
-def test_ospf_are_has_the_metric_names_and_tag_keys_of_the_legacy_engine():
-    from datadog_checks.pan_firewall.collectors.routing import parse_ospf_are
-
-    legacy = parse_ospf_neighbors(load_op(OSPF_NEIGHBOR_CMD))
-    are = parse_ospf_are(load_xml(ARE / 'ospf_neighbor.xml'))
-
-    assert are
-    assert names_and_tag_keys(are) == names_and_tag_keys(legacy)

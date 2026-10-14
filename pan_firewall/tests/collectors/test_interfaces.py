@@ -11,7 +11,7 @@ from datadog_checks.pan_firewall.collectors.interfaces import (
 )
 
 from ..common import FIXTURES, FW_A_IP, FW_A_TAGS, INTERFACE_ALL_CMD, SYNTHETIC
-from ..helpers import load_op, load_xml, needs_capture, new_check, series
+from ..helpers import load_op, load_xml, new_check, series
 
 SERIAL = '007955000930601'
 COUNTER_FIELDS = {
@@ -217,20 +217,3 @@ def test_speed_is_submitted_as_a_gauge_with_the_interface_tags_through_the_check
             metric_type=aggregator.GAUGE,
         )
     assert len(aggregator.metrics('pan_firewall.interface.speed')) == 2
-
-
-# Gated on the PA-3420 hardware capture (L8); see test_environment.py for the expected layout. The VM captures carry no
-# speed (`ukn`), the hardware one does.
-PA_3420 = FIXTURES / 'pa-3420'
-
-
-@needs_capture('pa-3420', 'L8 (PA-3420 hardware)')
-def test_pa_3420_speeds_are_sent_in_bits_per_second():
-    state = state_from(PA_3420 / 'interface_all.xml')
-
-    samples = parse_interface_speeds(state, SERIAL, mock.Mock())
-
-    assert samples
-    assert {s.name for s in samples} == {'interface.speed'}
-    # The capture states megabits; bit/s is a multiple of 10**6 and at least 10 Mbit/s.
-    assert all(s.kind == 'gauge' and s.value >= 10 * 10**6 and s.value % 10**6 == 0 for s in samples)

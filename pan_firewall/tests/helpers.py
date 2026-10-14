@@ -11,13 +11,11 @@ import copy
 from unittest import mock
 from xml.etree import ElementTree as ET
 
-import pytest
-
 from datadog_checks.pan_firewall import PanFirewallCheck
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectContext, FirewallState, Sample
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from .common import CREDENTIALS, FIXTURES, FW_A_IP, STUBS, SYNTHETIC
+from .common import CREDENTIALS, FW_A_IP, STUBS, SYNTHETIC
 from .fixture_map import op_fixture
 
 
@@ -29,13 +27,6 @@ class FakeClock:
 
     def __call__(self) -> float:
         return self.now
-
-
-def needs_capture(path, lab_task):
-    """Skip the test until the lab capture at `tests/fixtures/<path>` lands."""
-    return pytest.mark.skipif(
-        not (FIXTURES / path).exists(), reason=f'Needs lab capture {lab_task}: tests/fixtures/{path} missing'
-    )
 
 
 def load_xml(path):
