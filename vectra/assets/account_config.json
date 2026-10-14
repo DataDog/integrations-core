@@ -20,13 +20,22 @@
       }
     }
   ],
-  "additional_config_fields": [
+  "supported_connection_methods": [
     {
-      "key": "sub_domain",
-      "label": "Sub Domain",
-      "editable": true,
-      "required": true,
-      "text": {}
+      "name": "Vectra Platform API",
+      "multitenant": {
+        "tenant_setting": {
+          "key": "sub_domain",
+          "label": "Sub Domain",
+          "help": "The Sub Domain from your Vectra Platform URL. For example, if your platform URL is example.portal.vectra.ai, enter example.",
+          "editable": true,
+          "required": true,
+          "text": {
+            "pattern": "^[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*$"
+          }
+        },
+        "base_url_format": "https://%s.portal.vectra.ai"
+      }
     }
   ],
   "dataflow_config": [
