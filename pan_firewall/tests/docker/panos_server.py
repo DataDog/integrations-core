@@ -41,10 +41,6 @@ def create_app(
     finished: dict[tuple[str, str], Path] = {}
     lock = threading.Lock()
 
-    @app.get('/health')
-    def health() -> str:
-        return 'ok'
-
     @app.post('/api/')
     def api() -> Response:
         data = request.form.to_dict()

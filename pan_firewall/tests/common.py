@@ -53,8 +53,6 @@ PANORAMA_INSTANCE = {
     'firewall_credentials': CREDENTIALS,
 }
 
-INSTANCE = STATIC_INSTANCE
-
 # The docker fakes (see `docker/docker-compose.yaml`): the Agent container joins the `pan-firewall-e2e` network and
 # reaches each fake on port 443 at its own address.
 E2E_NETWORK = 'pan-firewall-e2e'

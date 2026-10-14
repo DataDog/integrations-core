@@ -1,9 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import copy
 import os
-from typing import Any
 
 import pytest
 
@@ -21,7 +19,6 @@ from .common import (
     E2E_NETWORK,
     E2E_PANORAMA_IP,
     E2E_SUBNET,
-    INSTANCE,
     PANORAMA_CREDENTIALS,
     build_lab_instance,
 )
@@ -68,47 +65,16 @@ def docker_environment():
 @pytest.fixture(scope='session')
 def dd_environment():
     if os.environ.get('USE_PANOS_LAB'):
-        # Lab mode: one instance built from environment variables only, no docker fakes. The hatch env sets
-        # PANOS_LAB_MODE (`static` for py3.13-lab, `panorama` for py3.13-lab-panorama); do not set it yourself. Set
-        # the other variables in your own terminal (the password is read silently and never written to a file or to
-        # the shell history):
-        #
-        #   read -rs "PANOS_PASSWORD?Password: "
-        #   export PANOS_PASSWORD PANOS_LAB_HOSTS=<ip1>,<ip2> PANOS_LAB_USERNAME=<username>
-        #
-        # then run `ddev env start pan_firewall py3.13-lab`, `ddev env agent pan_firewall py3.13-lab check` and
-        # `ddev env test pan_firewall py3.13-lab`, and finish with `ddev env stop pan_firewall py3.13-lab`. The
-        # instance is never logged or printed, but ddev writes it, password included, to its env config until the
-        # `ddev env stop` step removes it, so do not skip that step.
-        #
-        # Set PANOS_LAB_COLLECT_ALL=1 (or `true`) to also run the collectors that are off by default (global
-        # counters, OSPF, reports). Any other value, including 0 and false, leaves them off.
-        #
-        # Panorama mode (the py3.13-lab-panorama env, where PANOS_LAB_HOSTS is not needed): the
-        # firewalls are discovered from Panorama, so set its host and credentials, plus the firewalls' own. Read
-        # BOTH passwords silently, in your own terminal:
-        #
-        #   read -rs "PANOS_LAB_PANORAMA_PASSWORD?Panorama password: "
-        #   read -rs "PANOS_PASSWORD?Firewall password: "
-        #   export PANOS_LAB_PANORAMA_PASSWORD PANOS_PASSWORD
-        #   export PANOS_LAB_PANORAMA_HOST=<host> PANOS_LAB_PANORAMA_USERNAME=<username> PANOS_LAB_USERNAME=<username>
-        #   export PANOS_LAB_FIREWALL_OVERRIDES=<serial>=<reachable-ip>,<serial>=<reachable-ip>
-        #
-        # PANOS_LAB_FIREWALL_OVERRIDES is only needed when the IPs Panorama reports are not reachable from where the
-        # Agent runs. Then run the `lab-panorama` env (its own name: hatch cannot make one env depend on either of
-        # two variables):
-        #
-        #   ddev env start pan_firewall py3.13-lab-panorama
-        #   ddev env test pan_firewall py3.13-lab-panorama
-        #   ddev env stop pan_firewall py3.13-lab-panorama
+        # Lab mode: one instance from environment variables, no docker fakes; the hatch env sets PANOS_LAB_MODE.
+        # In your own terminal: `read -rs "PANOS_PASSWORD?Password: "`, then `export PANOS_PASSWORD
+        # PANOS_LAB_HOSTS=<ip1>,<ip2> PANOS_LAB_USERNAME=<user>`. Then `ddev env start pan_firewall py3.13-lab`,
+        # `ddev env agent pan_firewall py3.13-lab check`, and `ddev env stop pan_firewall py3.13-lab` (ddev keeps the
+        # password in its env config until the stop). Panorama: env `py3.13-lab-panorama`, with PANOS_LAB_PANORAMA_HOST,
+        # PANOS_LAB_PANORAMA_USERNAME, PANOS_LAB_PANORAMA_PASSWORD (read silently) and PANOS_LAB_FIREWALL_OVERRIDES
+        # (`<serial>=<ip>,...`) instead of PANOS_LAB_HOSTS. PANOS_LAB_COLLECT_ALL=1 enables the default-off collectors.
         yield {'instances': [build_lab_instance()]}
     else:
         yield from docker_environment()
-
-
-@pytest.fixture
-def instance() -> dict[str, Any]:
-    return copy.deepcopy(INSTANCE)
 
 
 @pytest.fixture(autouse=True)

@@ -107,7 +107,6 @@ def test_tunnel_counters_wait_for_the_run_after_vpn_first_answers_whatever_the_c
     monkeypatch,
     schedule_clock,
 ):
-    # Force the ordering that used to leak: `interfaces` only starts once `vpn` has finished, on every run.
     vpn_done = threading.Event()
     real_vpn, real_interfaces = COLLECT_FUNCTIONS['vpn'], COLLECT_FUNCTIONS['interfaces']
 
