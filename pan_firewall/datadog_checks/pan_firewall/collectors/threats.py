@@ -50,7 +50,6 @@ def collect_threats(ctx: CollectContext) -> list[Sample]:
 
 
 def _load_watermark(ctx: CollectContext, state: ThreatState) -> None:
-    """Once per poller. A watermark too old is ignored, so the pass is a first run; a negative age counts as fresh."""
     if state.loaded:
         return
     state.loaded = True
@@ -59,15 +58,9 @@ def _load_watermark(ctx: CollectContext, state: ThreatState) -> None:
     if not raw:
         return
     try:
-        watermark = Watermark.from_json(raw)
+        state.watermark = Watermark.from_json(raw)
     except (ValueError, TypeError, KeyError) as e:
-        ctx.log.debug('ignoring the cached threat watermark of %s: %s', serial, e)
-        return
-    age = ctx.wall_clock() - watermark.updated
-    if age > constants.THREAT_WATERMARK_MAX_AGE_SECONDS:
-        ctx.log.debug('ignoring the cached threat watermark of %s, written %ds ago', serial, age)
-        return
-    state.watermark = watermark
+        ctx.log.debug('ignoring the cached threat watermark: %s', e)
 
 
 def _cache_key(serial: str) -> str:
@@ -75,7 +68,7 @@ def _cache_key(serial: str) -> str:
 
 
 def _store(ctx: CollectContext, state: ThreatState, seqno: int, last_reset_check: float) -> None:
-    watermark = state.watermark = Watermark(seqno, last_reset_check, ctx.wall_clock())
+    watermark = state.watermark = Watermark(seqno, last_reset_check)
     if serial := ctx.identity.serial:
         ctx.write_cache(_cache_key(serial), watermark.to_json())
 

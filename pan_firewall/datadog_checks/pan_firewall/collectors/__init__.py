@@ -42,24 +42,19 @@ class Sample(NamedTuple):
 @dataclass(frozen=True)
 class Watermark:
     """Where the threat collector resumes: the last `seqno` counted. `last_reset_check` is on the monotonic clock, so
-    a value ahead of it (after a restart) counts as due; `updated` is wall clock, to age the watermark."""
+    a value ahead of it (after a restart) counts as due."""
 
     seqno: int
     last_reset_check: float
-    updated: float
 
     def to_json(self) -> str:
-        return json.dumps({'seqno': self.seqno, 'last_reset_check': self.last_reset_check, 'updated': self.updated})
+        return json.dumps({'seqno': self.seqno, 'last_reset_check': self.last_reset_check})
 
     @classmethod
     def from_json(cls, raw: str) -> Watermark:
-        """Raises ValueError, TypeError or KeyError for anything else than `to_json()` wrote, `updated` missing too."""
+        """Raises ValueError, TypeError or KeyError for anything else than `to_json()` wrote."""
         data = json.loads(raw)
-        return cls(
-            seqno=int(data['seqno']),
-            last_reset_check=float(data['last_reset_check']),
-            updated=float(data['updated']),
-        )
+        return cls(seqno=int(data['seqno']), last_reset_check=float(data['last_reset_check']))
 
 
 @dataclass
@@ -129,7 +124,6 @@ class CollectContext:
     # whether they are sent does not depend on which of the parallel collectors finishes first.
     tunnel_tags: dict[str, tuple[str, ...]] | None = None
     clock: Callable[[], float] = time.monotonic
-    wall_clock: Callable[[], float] = time.time
     read_cache: Callable[[str], str] = lambda key: ''
     write_cache: Callable[[str, str], None] = lambda key, value: None
 

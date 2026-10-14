@@ -58,8 +58,6 @@ class Context:
         self.fake = fake_panos
         self.cache = {} if cache is None else cache
         self.clock = clock or FakeClock(100_000.0)
-        # The wall clock the watermark's `updated` comes from.
-        self.wall_clock = FakeClock(1_800_000_000.0)
         self.host = host
         self.log = mock.Mock()
         self.restart()
@@ -77,7 +75,6 @@ class Context:
             config=mock.Mock(),
             log=log,
             clock=self.clock,
-            wall_clock=self.wall_clock,
             read_cache=lambda key: self.cache.get(key, ''),
             write_cache=self.cache.__setitem__,
         )
@@ -85,10 +82,8 @@ class Context:
     def collect(self):
         return collect_threats(self.ctx)
 
-    def seed(self, seqno, last_reset_check=0.0, updated=None):
-        """Cache a watermark, written `updated` (by default now, on the wall clock)."""
-        updated = self.wall_clock.now if updated is None else updated
-        self.cache[CACHE_KEY] = json.dumps({'seqno': seqno, 'last_reset_check': last_reset_check, 'updated': updated})
+    def seed(self, seqno, last_reset_check=0.0):
+        self.cache[CACHE_KEY] = json.dumps({'seqno': seqno, 'last_reset_check': last_reset_check})
 
     @property
     def watermark(self):
@@ -257,11 +252,7 @@ def test_failure_halfway_keeps_the_watermark_and_the_next_run_starts_over(firewa
         firewall.collect()
 
     assert firewall.watermark == PROBE_SEQNO_START - 1
-    assert json.loads(firewall.cache[CACHE_KEY]) == {
-        'seqno': PROBE_SEQNO_START - 1,
-        'last_reset_check': 0.0,
-        'updated': firewall.wall_clock.now,
-    }
+    assert firewall.cache[CACHE_KEY] == json.dumps({'seqno': PROBE_SEQNO_START - 1, 'last_reset_check': 0.0})
     firewall.fake.recover(FW_A_IP)
     firewall.fake.calls.clear()
     samples = firewall.collect()
@@ -338,71 +329,6 @@ def test_a_pass_with_nothing_new_runs_the_reset_check_only_when_due(firewall, se
     assert firewall.collect() == []
 
     assert len(firewall.backward_jobs()) == jobs
-
-
-@pytest.mark.parametrize(
-    'written',
-    [
-        pytest.param(-59 * 60, id='59-minutes-ago'),
-        # The wall clock went back since the watermark was written.
-        pytest.param(3600, id='in-the-future'),
-    ],
-)
-def test_cached_watermark_younger_than_an_hour_is_used(firewall, written):
-    firewall.answer_forward(1000, log_page([1001, 1002]), updated=firewall.wall_clock.now + written)
-
-    samples = firewall.collect()
-
-    assert sum(s.value for s in samples) == 2
-    assert firewall.backward_jobs() == []
-
-
-@pytest.mark.parametrize(
-    'cached',
-    [
-        pytest.param(
-            {'seqno': 1000, 'last_reset_check': 0.0, 'updated': 1_800_000_000.0 - 61 * 60}, id='61-minutes-ago'
-        ),
-        pytest.param({'seqno': 1000, 'last_reset_check': 0.0}, id='no-updated'),
-    ],
-)
-def test_stale_cached_watermark_is_ignored_and_the_pass_starts_a_baseline(firewall, cached):
-    firewall.cache[CACHE_KEY] = json.dumps(cached)
-
-    assert firewall.collect() == []
-
-    (params,) = firewall.submits()
-    assert params['dir'] == 'backward'
-    assert firewall.watermark == BACKWARD_NEWEST_SEQNO
-    debug = [call.args for call in firewall.log.debug.call_args_list]
-    assert any('ignoring the cached threat watermark' in args[0] and FW_A_SERIAL in args for args in debug)
-
-
-def test_quiet_firewall_keeps_a_fresh_enough_watermark_through_a_restart(firewall):
-    """On a quiet firewall only the reset check rewrites the watermark, at most every 30 minutes: within the hour."""
-    nothing_new(firewall, newest=log_page([1000]))
-    written = []
-    for minutes in range(0, 35, 5):
-        firewall.clock.now = 100_000.0 + minutes * 60
-        firewall.wall_clock.now = 1_800_000_000.0 + minutes * 60
-        firewall.collect()
-        written.append(json.loads(firewall.cache[CACHE_KEY])['updated'])
-    assert sorted({updated - 1_800_000_000.0 for updated in written}) == [0, 30 * 60]
-
-    # Restarted 40 minutes after the last rewrite.
-    firewall.wall_clock.now = 1_800_000_000.0 + 70 * 60
-    firewall.restart()
-    submits_before = len(firewall.submits())
-    firewall.collect()
-
-    assert firewall.submits()[submits_before] == {
-        'type': 'log',
-        'log-type': 'threat',
-        'dir': 'forward',
-        'nlogs': str(constants.THREAT_PAGE_SIZE),
-        'skip': '0',
-        'query': seqno_query(1001),
-    }
 
 
 def test_a_pass_that_counted_logs_runs_no_reset_check(firewall):

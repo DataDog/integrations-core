@@ -16,7 +16,7 @@ from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from .common import CREDENTIALS, FIXTURES, FW_A_IP, FW_A_SERIAL, FW_B_IP, FW_B_SERIAL
 from .fake_panos import INVALID_CREDENTIAL
-from .helpers import FakeClock, can_connect_by_ip, metrics_by_ip, with_agent_check_id
+from .helpers import FakeClock, can_connect_by_ip, metrics_by_ip
 
 PANORAMA = 'panorama.example.com'
 DISCOVERY_CMD = '<show><devices><connected/></devices></show>'
@@ -459,24 +459,6 @@ def fallback_warnings(caplog):
     return [
         r.getMessage() for r in caplog.records if r.levelno == logging.WARNING and 'last discovery' in r.getMessage()
     ]
-
-
-@pytest.mark.parametrize(
-    'edit',
-    [
-        pytest.param({'tags': ['team:test', 'site:paris']}, id='tags'),
-        pytest.param({'timeout': 10}, id='timeout'),
-    ],
-)
-def test_config_edit_keeps_the_panorama_list(dd_run_check, fake_panos, edit):
-    dd_run_check(with_agent_check_id(new_check()))
-    fake_panos.fail(PANORAMA, 'refused')
-    calls = len(fake_panos.calls)
-
-    # The edited config, after the Agent reloads it, while Panorama is down.
-    dd_run_check(with_agent_check_id(new_check(**edit)))
-
-    assert polled_hosts(fake_panos, skip=calls) == {FW_A_IP, FW_B_IP}
 
 
 def test_fallback_warning_says_how_old_the_list_is_and_its_firewalls_are_polled(

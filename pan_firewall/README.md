@@ -245,6 +245,7 @@ Additional helpful documentation, links, and articles:
 - `device_id` is the firewall serial number, so a firewall does not merge with an SNMP record for the same device.
 - A virtual system with no interfaces is not detected automatically; list it in `vsys`.
 - If a reboot or an HA failover resets the threat log sequence number, up to about 35 minutes of threat logs may not be counted.
+- After a configuration change, threats logged in the last few minutes before it (at most one 5-minute interval) may not be counted.
 - TLS settings apply per instance. Put firewalls with a different certificate setup in a separate instance.
 - Perpetual licenses report `license.expired` as 0 and no `license.days_left`.
 - A firewall whose Panorama-reported IP address the Agent can't reach (behind NAT, or connected to Panorama through a data interface) can't be polled from a Panorama instance. Add it to the `firewall_ips` exclude list of that instance, and poll it from a separate instance that lists its reachable IP address in `firewalls`.
