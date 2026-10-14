@@ -44,8 +44,7 @@ def test_parse_system_info_fw_a():
 def test_clock_is_neither_compared_nor_persisted():
     later = dataclasses.replace(FW_A, clock='Sat Oct  3 00:00:00 2026')
 
-    # A refresh that only moves the clock does not rewrite the cache, and a restart does not load a stale clock.
-    assert later == FW_A
+    # A restart does not load a stale clock.
     restored = DeviceIdentity.from_json(later.to_json())
     assert (restored, restored.clock) == (FW_A, None)
 

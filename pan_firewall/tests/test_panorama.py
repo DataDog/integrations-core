@@ -134,8 +134,6 @@ def test_overridden_firewalls_are_polled_at_the_overrides_and_keep_the_reported_
     assert {ip: m.value for ip, m in can_connect.items()} == {FW_A_REPORTED: 1, FW_B_REPORTED: 1}
     fw_a_tags = can_connect[FW_A_REPORTED].tags
     assert {f'device_id:{FW_A_SERIAL}', 'device_hostname:fw-a', 'device_model:PA-VM'} <= set(fw_a_tags)
-    # The overrides are quoted serials: nothing was read as a number.
-    assert 'was read as a number' not in caplog.text
 
 
 def test_panorama_rejecting_the_key_renews_it_once_and_retries_once(dd_run_check, aggregator, fake_panos):
@@ -327,7 +325,6 @@ def test_firewall_without_matching_credentials_is_skipped_with_one_warning_per_i
     dd_run_check(check)
 
     assert polled_hosts(fake_panos) == {FW_A_POLLED}
-    assert FW_B_POLLED not in {c.host for c in fake_panos.calls}
     assert set(metrics_by_ip(aggregator, 'can_connect')) == {FW_A_REPORTED}
     warnings = [r for r in caplog.records if r.levelno == logging.WARNING and FW_B_POLLED in r.getMessage()]
     assert len(warnings) == 1

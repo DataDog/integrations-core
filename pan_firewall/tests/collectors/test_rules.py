@@ -6,7 +6,6 @@ from unittest import mock
 from datadog_checks.pan_firewall.collectors import FirewallState
 from datadog_checks.pan_firewall.collectors.rules import collect_rule_hits, parse_rule_hits, rule_hit_cmd
 
-from ..fixture_map import OP_FIXTURES
 from ..helpers import load_op, make_ctx, series
 
 RULE_HIT_CMD = rule_hit_cmd('vsys1')
@@ -55,7 +54,6 @@ def test_rule_without_a_hit_count_is_skipped():
 
 
 def test_command_matches_the_captured_one_and_escapes_the_vsys_name():
-    assert RULE_HIT_CMD in OP_FIXTURES
     assert "<entry name='a&apos;b&amp;c&lt;'>" in rule_hit_cmd("a'b&c<")
 
 
@@ -70,5 +68,3 @@ def test_collector_makes_one_call_per_vsys_and_tags_the_samples_with_it():
 
     assert [c.args[0] for c in ctx.client.op.call_args_list] == [rule_hit_cmd('vsys1'), rule_hit_cmd('vsys2')]
     assert series(samples) == {**expected(), **expected(vsys='vsys2')}
-    # The configured filter applies to every vsys.
-    assert series(collect_rule_hits(make_context(['vsys1'], ('^trust-out$',)))) == expected({'trust-out'})

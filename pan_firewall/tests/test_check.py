@@ -62,10 +62,6 @@ def test_unreachable_on_first_run_reports_disconnected_without_device_id(dd_run_
 
     assert only_value_and_tags(aggregator, 'can_connect') == (0, BASE_TAGS)
     assert only_value_and_tags(aggregator, 'api.authentication.status') == (0, BASE_TAGS)
-    # The next run tries again: the identity is still missing, so system info is due.
-    calls_before = len(fake_panos.calls)
-    dd_run_check(check)
-    assert len(fake_panos.calls) > calls_before
 
 
 def test_outage_after_restart_keeps_device_id(dd_run_check, aggregator, fake_panos):

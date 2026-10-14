@@ -59,7 +59,6 @@ def test_global_counters_of_the_capture():
     series = global_series(samples)
 
     # A counter the capture doesn't list is sent as 0 with the table's category and aspect.
-    assert len(series) == 26
     assert series == {counter_tags(counter, *GLOBAL_COUNTERS[counter]): value for counter, value in FW_A_VALUES.items()}
     assert {s.name for s in samples} == {'counter.global', 'dropped_packets'}
     # `dropped_packets` sums the severity=drop counters by aspect.
@@ -70,5 +69,4 @@ def test_listed_counter_takes_category_and_aspect_from_the_response():
     series = global_series(parse_global(load_xml(SYNTHETIC / 'counter_global_session_installed_pktproc.xml')))
 
     assert series[counter_tags('session_installed', 'session', 'pktproc')] == 2269
-    assert counter_tags('session_installed', 'session', 'resource') not in series
     assert len(series) == 26

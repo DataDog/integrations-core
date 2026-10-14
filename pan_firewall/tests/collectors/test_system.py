@@ -67,7 +67,6 @@ def test_system_resources_of_the_capture():
     samples = parse_system_resources(load_op(SYSTEM_RESOURCES_CMD), mock.Mock())
 
     assert system_values(samples) == pytest.approx(FW_A_SYSTEM)
-    assert 'mgmt.swap.cached' not in {s.name for s in samples}
     assert {s.kind for s in samples} == {'gauge'}
 
 

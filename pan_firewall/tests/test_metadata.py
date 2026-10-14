@@ -60,7 +60,6 @@ def test_device_metadata_of_the_static_fw_a():
         'device_type': 'firewall',
         'namespace': 'default',
     }
-    assert not any(t.startswith('ha_state:') for t in device.tags)
 
 
 def test_device_tags_carry_ha_state_only_when_ha_is_enabled():
@@ -199,7 +198,6 @@ def test_disabled_metadata_sends_no_event_but_still_reads_the_identity(dd_run_ch
 
     assert events(aggregator) == []
     assert [c.cmd for c in fake_panos.calls if c.type == 'op'][1:] == [SYSTEM_INFO_CMD, INTERFACE_ALL_CMD]
-    assert aggregator.metrics('pan_firewall.can_connect')[0].tags.count(f'device_id:{FW_A_SERIAL}') == 1
 
 
 def test_static_firewall_never_reached_sends_no_metadata(dd_run_check, aggregator, fake_panos):

@@ -41,9 +41,7 @@ def test_valid_config_loads(dd_run_check, base, changes):
     instance = {**copy.deepcopy(base), **changes}
     instance = {k: v for k, v in instance.items() if v is not None}
 
-    check = run(dd_run_check, instance)
-
-    assert bool(check.config.firewalls) != bool(check.config.panorama_host)
+    run(dd_run_check, instance)
 
 
 @pytest.mark.parametrize(

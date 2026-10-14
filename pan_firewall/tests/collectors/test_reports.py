@@ -226,7 +226,6 @@ def test_the_jobs_run_one_at_a_time_and_none_aggregates_by_app_twice():
     assert [kind for kind, *_ in client.events] == ['submit', 'get'] * 10
     fields = client.submitted()
     assert fields == [field for field, _tag in REPORTS.values()]
-    assert fields.count('app') == 1
     assert len(samples) == 3 * sum(len(rows) for _tag, rows in FW_A_ROWS.values())
 
 

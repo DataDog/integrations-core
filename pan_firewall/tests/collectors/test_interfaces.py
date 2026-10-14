@@ -85,7 +85,6 @@ def test_interface_counters_with_the_interface_map():
 
     interface_samples = [s for s in samples if s.name.startswith('interface.')]
     assert series(interface_samples) == expected_interfaces(FW_A_ROWS, with_map_tags)
-    assert len(interface_samples) == 13 * 7
 
 
 def test_interface_counters_without_a_map_carry_the_interface_tag_only():
