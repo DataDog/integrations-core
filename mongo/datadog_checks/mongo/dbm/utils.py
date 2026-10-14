@@ -369,6 +369,15 @@ def reconstruct_command_from_query_shape(query_shape: dict) -> dict:
     coll_name = cmd_ns.get('coll', '')
     command_type = query_shape.get('command', 'unknown')
 
+    # $currentOp and slow-query records contain individual write statements, not wire-command batches.
+    if command_type in ('update', 'delete'):
+        fields = (
+            ('q', 'u', 'c', 'arrayFilters', 'multi', 'upsert', 'collation')
+            if command_type == 'update'
+            else ('q', 'limit', 'collation')
+        )
+        return {field: normalize_query_stats_value(query_shape[field]) for field in fields if field in query_shape}
+
     # Build the command with command type as key and collection as value
     command = {
         command_type: coll_name,
@@ -379,18 +388,6 @@ def reconstruct_command_from_query_shape(query_shape: dict) -> dict:
     for field in QUERY_SHAPE_COPYABLE_FIELDS:
         if field in query_shape:
             command[field] = normalize_query_stats_value(query_shape[field])
-
-    # Write statistics describe individual statements, while wire commands use arrays.
-    if command_type in ('update', 'delete'):
-        fields = (
-            ('q', 'u', 'c', 'arrayFilters', 'multi', 'upsert', 'collation')
-            if command_type == 'update'
-            else ('q', 'limit', 'collation')
-        )
-        statement = {field: normalize_query_stats_value(query_shape[field]) for field in fields if field in query_shape}
-        for field in fields:
-            command.pop(field, None)
-        command['updates' if command_type == 'update' else 'deletes'] = [statement]
 
     return command
 

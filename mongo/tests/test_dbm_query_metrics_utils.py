@@ -223,24 +223,38 @@ class TestGetQueryStatsRowKey:
     'command,shape,expected',
     [
         ('insert', {'documents': ['?object']}, {'documents': ['?']}),
-        (
-            'update',
-            {'q': {'x': '?number'}, 'u': {'$set': {'y': '?string'}}, 'multi': False, 'upsert': True},
-            {'updates': [{'q': {'x': '?'}, 'u': {'$set': {'y': '?'}}, 'multi': False, 'upsert': True}]},
-        ),
-        (
-            'update',
-            {'q': {}, 'u': [{'$set': {'x': '?number'}}], 'arrayFilters': [{'i': '?number'}], 'let': {'v': '?number'}},
-            {'updates': [{'q': {}, 'u': [{'$set': {'x': '?'}}], 'arrayFilters': [{'i': '?'}]}], 'let': {'v': '?'}},
-        ),
-        ('delete', {'q': {'x': '?number'}, 'limit': 1}, {'deletes': [{'q': {'x': '?'}, 'limit': 1}]}),
         ('aggregate', {'pipeline': [], 'allowPartialResults': False}, {'pipeline': [], 'allowPartialResults': False}),
     ],
 )
 def test_reconstruct_query_stats_commands(command: str, shape: dict, expected: dict):
-    # Losing predicates or update expressions merges unrelated queries into one signature.
     shape = {'cmdNs': {'db': 'test', 'coll': 'orders'}, 'command': command, **shape}
     assert reconstruct_command_from_query_shape(shape) == {command: 'orders', '$db': 'test', **expected}
+
+
+@pytest.mark.parametrize(
+    'command,shape,expected',
+    [
+        (
+            'update',
+            {'q': {'x': '?number'}, 'u': {'$set': {'y': '?string'}}, 'multi': False, 'upsert': True},
+            {'q': {'x': '?'}, 'u': {'$set': {'y': '?'}}, 'multi': False, 'upsert': True},
+        ),
+        (
+            'update',
+            {'q': {}, 'u': [{'$set': {'x': '?number'}}], 'arrayFilters': [{'i': '?number'}], 'let': {'v': '?number'}},
+            {'q': {}, 'u': [{'$set': {'x': '?'}}], 'arrayFilters': [{'i': '?'}]},
+        ),
+        (
+            'delete',
+            {'q': {'x': '?number'}, 'limit': 1, 'collation': {'locale': 'en', 'strength': 2}},
+            {'q': {'x': '?'}, 'limit': 1, 'collation': {'locale': 'en', 'strength': 2}},
+        ),
+    ],
+)
+def test_reconstruct_write_query_stats_commands(command: str, shape: dict, expected: dict):
+    # Match MongoDB's observed per-statement command structure so writes can share signatures across sources.
+    shape = {'cmdNs': {'db': 'test', 'coll': 'orders'}, 'command': command, **shape}
+    assert reconstruct_command_from_query_shape(shape) == expected
 
 
 @pytest.mark.parametrize('nested', [False, True], ids=['mongodb8', 'mongodb9'])
