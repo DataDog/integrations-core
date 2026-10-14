@@ -162,7 +162,21 @@ def test_example_config_hides_only_the_http_auth_and_header_options():
 def test_persist_connections_is_on_by_default_and_can_be_turned_off(dd_run_check, base, changes, expected):
     check = run(dd_run_check, {**copy.deepcopy(base), **changes})
 
-    sessions = [poller.client._http for poller in check._pollers.values()]
+    clients = [poller.client for poller in check._pollers.values()]
     if check.config.panorama_host:
-        sessions.append(check._source._client._http)
-    assert sessions and {http.persist_connections for http in sessions} == {expected}
+        clients.append(check._source._client)
+    assert clients and all(client._http is check.http for client in clients)
+    assert check.http.persist_connections is expected
+
+
+@pytest.mark.parametrize(
+    'init_config, instance_timeout, expected',
+    [({}, None, 30), ({'timeout': 7}, None, 7), ({'timeout': 7}, 12, 12)],
+    ids=['default', 'init-config', 'instance-overrides-init-config'],
+)
+def test_timeout_comes_from_the_instance_then_init_config(init_config, instance_timeout, expected):
+    check = PanFirewallCheck(
+        'pan_firewall', init_config, [instance_with(STATIC_INSTANCE, {'timeout': instance_timeout})]
+    )
+
+    assert check.http.options['timeout'] == (expected, expected)

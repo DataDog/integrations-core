@@ -10,7 +10,7 @@ from xml.etree import ElementTree as ET
 import pytest
 
 from datadog_checks.pan_firewall import constants
-from datadog_checks.pan_firewall.api import PanosClient, new_http
+from datadog_checks.pan_firewall.api import PanosClient
 from datadog_checks.pan_firewall.auth import Credentials, KeyManager
 from datadog_checks.pan_firewall.collectors import CollectContext, FirewallState
 from datadog_checks.pan_firewall.collectors.threats import collect_threats
@@ -65,8 +65,7 @@ class Context:
     def restart(self):
         """New in-memory state over the same cache, as after an Agent restart."""
         log = self.log
-        check = SimpleNamespace(instance={}, init_config={}, HTTP_CONFIG_REMAPPER={}, log=log)
-        http = new_http(check, SimpleNamespace(timeout=30, persist_connections=True))
+        http = new_check().http
         keys = KeyManager(http, self.host, Credentials(username=None, password=None, api_key='key'))
         self.ctx = CollectContext(
             client=PanosClient(http, self.host, keys, log),

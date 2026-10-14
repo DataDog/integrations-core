@@ -20,11 +20,9 @@ from .errors import PanosApiError, PanosAuthError, PanosError, PanosSkipped, Pan
 from .xml_utils import check_response, parse_response, text
 
 if TYPE_CHECKING:
-    from datadog_checks.base import AgentCheck
     from datadog_checks.base.log import CheckLoggingAdapter
 
     from .auth import KeyManager
-    from .config_models.instance import InstanceConfig
 
 T = TypeVar('T')
 
@@ -55,16 +53,6 @@ def api_url(host: str) -> str:
     if ':' in host and not host.startswith('['):
         host = f'[{host}]'
     return f'https://{host}/api/'
-
-
-def new_http(check: AgentCheck, config: InstanceConfig) -> RequestsWrapper:
-    """An HTTP session for one device. The model's defaults (30 s timeout, persistent) win over the wrapper's."""
-    instance = {
-        'timeout': config.timeout,
-        'persist_connections': config.persist_connections,
-        **(check.instance or {}),
-    }
-    return RequestsWrapper(instance, check.init_config, check.HTTP_CONFIG_REMAPPER, check.log)
 
 
 @contextmanager

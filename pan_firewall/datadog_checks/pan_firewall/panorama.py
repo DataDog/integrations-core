@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 from xml.etree.ElementTree import Element
 
-from .api import PanosClient, new_http
+from .api import PanosClient
 from .auth import Credentials, KeyManager
 from .errors import PanosError
 from .firewalls import FirewallTarget, resolve_credentials
@@ -45,8 +45,6 @@ class DiscoveredFirewall:
 
 
 def parse_devices(root: Element) -> list[DiscoveredFirewall]:
-    """Only the direct children of `devices` are firewalls: each nests `entry` elements of its own (`vsys`,
-    `plugin_versions`). An entry without a serial is dropped."""
     firewalls = []
     for entry in root.findall('./result/devices/entry'):
         serial = text(entry, 'serial')
@@ -79,13 +77,11 @@ class PanoramaFirewallSource:
         # The validator refuses Panorama mode without `panorama_host`.
         self._host = cast(str, config.panorama_host)
         self._cache_key = f'panorama_firewalls:{self._host}'
-        http = new_http(check, config)
         credentials = Credentials(config.panorama_username, config.panorama_password, config.panorama_api_key)
-        self._keys = KeyManager(http, self._host, credentials)
-        self._client = PanosClient(http, self._host, self._keys, check.log)
+        self._keys = KeyManager(check.http, self._host, credentials)
+        self._client = PanosClient(check.http, self._host, self._keys, check.log)
 
     def list_firewalls(self) -> list[FirewallTarget]:
-        # One keygen attempt per run after a rejected one (the KeyManager latches until then).
         self._keys.allow_one_keygen()
         self._client.start_run()
         devices = self._discover()

@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from .api import PanosClient, RequestCounter, new_http
+from .api import PanosClient, RequestCounter
 from .auth import KeyManager
 from .collectors import (  # noqa: F401  (importing the modules registers their collectors)
     COLLECT_FUNCTIONS,
@@ -70,7 +70,7 @@ class CollectorRun:
 
 
 class FirewallPoller:
-    """Polls one firewall, and keeps what lasts between its runs: HTTP session, API key, schedule and state."""
+    """Polls one firewall, and keeps what lasts between its runs: API key, schedule and state."""
 
     def __init__(self, check: AgentCheck, target: FirewallTarget, config: InstanceConfig):
         self.check = check
@@ -81,10 +81,9 @@ class FirewallPoller:
         # Keyed by device IP: before a static firewall first answers, its IP is all the check knows.
         self._cache_key = f'identity:{self.ip}'
         self.firewall_log = FirewallLog(check.log, self.ip)
-        http = new_http(check, config)
         self._requests = RequestCounter()
-        self.keys = KeyManager(http, target.ip, target.credentials, self._requests)
-        self.client = PanosClient(http, target.ip, self.keys, check.log, counter=self._requests)
+        self.keys = KeyManager(check.http, target.ip, target.credentials, self._requests)
+        self.client = PanosClient(check.http, target.ip, self.keys, check.log, counter=self._requests)
         self.schedule = FirewallSchedule()
         self.state = FirewallState()
         self.identity = self._load_identity()
