@@ -14,11 +14,7 @@ from datadog_checks.base.utils.http_exceptions import (
     HTTPClientReadTimeoutError,
 )
 
-AGNOSTIC_CONNECTION_ERRORS = [
-    HTTPClientConnectionError,
-    HTTPClientConnectTimeoutError,
-    HTTPClientReadTimeoutError,
-]
+CONNECTION_ERRORS = [HTTPClientConnectionError, HTTPClientConnectTimeoutError]
 
 
 def _scraper(*, ignore_connection_errors):
@@ -29,7 +25,7 @@ def _scraper(*, ignore_connection_errors):
     return scraper
 
 
-@pytest.mark.parametrize('error_cls', AGNOSTIC_CONNECTION_ERRORS)
+@pytest.mark.parametrize('error_cls', CONNECTION_ERRORS)
 def test_connection_error_swallowed_when_ignored(caplog, error_cls):
     scraper = _scraper(ignore_connection_errors=True)
     scraper.get_connection = mock.Mock(side_effect=error_cls('refused'))
@@ -43,12 +39,21 @@ def test_connection_error_swallowed_when_ignored(caplog, error_cls):
     )
 
 
-@pytest.mark.parametrize('error_cls', AGNOSTIC_CONNECTION_ERRORS)
+@pytest.mark.parametrize('error_cls', CONNECTION_ERRORS)
 def test_connection_error_reraised_when_not_ignored(error_cls):
     scraper = _scraper(ignore_connection_errors=False)
     scraper.get_connection = mock.Mock(side_effect=error_cls('refused'))
 
     with pytest.raises(error_cls):
+        list(scraper.stream_connection_lines())
+
+
+def test_read_timeout_before_response_reraised_when_connection_errors_are_ignored():
+    # The endpoint accepted the connection, so it is running but not answering.
+    scraper = _scraper(ignore_connection_errors=True)
+    scraper.get_connection = mock.Mock(side_effect=HTTPClientReadTimeoutError('slow'))
+
+    with pytest.raises(HTTPClientReadTimeoutError, match='slow'):
         list(scraper.stream_connection_lines())
 
 

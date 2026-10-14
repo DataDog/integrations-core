@@ -24,7 +24,11 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
-from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientTimeoutError
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientReadTimeoutError,
+)
 
 
 class OpenMetricsScraper:
@@ -411,19 +415,29 @@ class OpenMetricsScraper:
         """
         Yield the connection line.
         """
+        # Checks without AGNOSTIC_HTTP raise requests exceptions, which the agnostic types do not match.
+        connection_errors = (RequestsConnectionError, HTTPClientConnectionError, HTTPClientConnectTimeoutError)
+        # A read timeout before the response arrives means the endpoint is running but not answering, so it fails
+        # the run. Once the body is streaming, requests reports a read timeout as a connection error, so it is
+        # ignored like one.
         try:
-            with self.get_connection() as connection:
-                # Media type will be used to select parser dynamically
-                self._content_type = connection.headers.get('Content-Type', '')
+            connection = self.get_connection()
+        except connection_errors:
+            if not self.ignore_connection_errors:
+                raise
+            self.log.warning("OpenMetrics endpoint %s is not accessible", self.endpoint)
+            return
+
+        with connection:
+            # Media type will be used to select parser dynamically
+            self._content_type = connection.headers.get('Content-Type', '')
+            try:
                 for line in connection.iter_lines(decode_unicode=True):
                     yield line
-        # A timeout at any phase means the endpoint is unreachable, same as a connection failure. Checks without
-        # AGNOSTIC_HTTP raise requests exceptions, which the agnostic types do not match.
-        except (RequestsConnectionError, HTTPClientConnectionError, HTTPClientTimeoutError):
-            if self.ignore_connection_errors:
+            except (*connection_errors, HTTPClientReadTimeoutError):
+                if not self.ignore_connection_errors:
+                    raise
                 self.log.warning("OpenMetrics endpoint %s is not accessible", self.endpoint)
-            else:
-                raise
 
     def filter_connection_lines(self, line_streamer):
         """

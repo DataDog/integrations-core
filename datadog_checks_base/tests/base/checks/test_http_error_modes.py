@@ -11,6 +11,7 @@ import requests
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.prometheus import PrometheusCheck
 from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectTimeoutError
 
 ENDPOINT = 'http://fake.endpoint:10055/metrics'
 
@@ -96,8 +97,39 @@ def test_openmetrics_v2_error_names_the_endpoint(dd_run_check, mock_http_respons
 
 
 @pytest.mark.usefixtures('http_mode')
-def test_openmetrics_v2_ignores_connection_errors_when_configured(dd_run_check, mocker):
-    mocker.patch('requests.Session.get', side_effect=requests.exceptions.ConnectionError('refused'))
+@pytest.mark.parametrize(
+    'error',
+    [requests.exceptions.ConnectionError('refused'), requests.exceptions.ConnectTimeout('connect timed out')],
+    ids=['refused', 'connect-timeout'],
+)
+def test_openmetrics_v2_ignores_connection_errors_when_configured(dd_run_check, mocker, error):
+    mocker.patch('requests.Session.get', side_effect=error)
     check = _openmetrics_v2_check(ignore_connection_errors=True)
+
+    dd_run_check(check)
+
+
+@pytest.mark.usefixtures('http_mode')
+def test_openmetrics_v2_read_timeout_fails_despite_ignore_connection_errors(dd_run_check, mocker):
+    # The endpoint accepted the connection, so it is running but not answering.
+    mocker.patch('requests.Session.get', side_effect=requests.exceptions.ReadTimeout('read timed out'))
+    check = _openmetrics_v2_check(ignore_connection_errors=True)
+
+    with pytest.raises(Exception, match='read timed out'):
+        dd_run_check(check)
+
+
+def test_openmetrics_v2_ignores_agnostic_connect_timeout_when_configured(dd_run_check, fake_http):
+    class AgnosticCheck(OpenMetricsBaseCheckV2):
+        AGNOSTIC_HTTP = True
+
+    instance = {
+        'openmetrics_endpoint': ENDPOINT,
+        'namespace': 'test',
+        'metrics': ['.+'],
+        'ignore_connection_errors': True,
+    }
+    check = AgnosticCheck('test', {}, [instance])
+    fake_http.register_response('GET', ENDPOINT, HTTPClientConnectTimeoutError('connect timed out'))
 
     dd_run_check(check)
