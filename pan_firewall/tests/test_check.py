@@ -107,6 +107,37 @@ def test_rejected_credentials_are_reported_and_a_rejected_keygen_is_tried_once_p
         assert [c.type for c in fake_panos.calls] == keygen_only_calls
 
 
+def auth_statuses(aggregator):
+    return [m.value for m in aggregator.metrics('pan_firewall.api.authentication.status')]
+
+
+def test_run_without_an_auth_verdict_keeps_the_last_auth_status(dd_run_check, aggregator, fake_panos):
+    fake_panos.fail(FW_A_IP, 'http_403', on='keygen')
+    check = new_check()
+    dd_run_check(check)
+    # The keygen times out: nothing says whether the password is right now.
+    fake_panos.fail(FW_A_IP, 'timeout', on='keygen')
+    dd_run_check(check)
+    fake_panos.recover(FW_A_IP)
+
+    dd_run_check(check)
+
+    assert auth_statuses(aggregator) == [1, 1, 0]
+    assert [m.value for m in aggregator.metrics('pan_firewall.can_connect')] == [1, 0, 1]
+
+
+def test_static_key_accepted_again_clears_the_auth_status(dd_run_check, aggregator, fake_panos):
+    check = new_check(make_instance(firewall_credentials=[{'api_key': 'dummy-api-key'}]))
+    fake_panos.fail(FW_A_IP, 'http_403', on='api')
+    dd_run_check(check)
+    fake_panos.recover(FW_A_IP)
+
+    dd_run_check(check)
+
+    assert auth_statuses(aggregator) == [1, 0]
+    assert [c for c in fake_panos.calls if c.type == 'keygen'] == []
+
+
 def test_nothing_due_repeats_last_status_without_calls(dd_run_check, aggregator, fake_panos):
     check = new_check()
     dd_run_check(check)

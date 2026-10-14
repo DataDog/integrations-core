@@ -82,7 +82,7 @@ class FakeHttp:
 
 
 def make_client(http: Any, creds: Credentials = PASSWORD_CREDS, log: Any = None) -> tuple[PanosClient, KeyManager]:
-    keys = KeyManager(http, api_url(HOST), creds)
+    keys = KeyManager(http, HOST, creds)
     return PanosClient(http, HOST, keys, log or logging.getLogger('test_api'), max_in_flight=2), keys
 
 
@@ -160,14 +160,15 @@ def test_key_never_leaks_into_urls_logs_or_errors(caplog):
 @pytest.mark.parametrize('status, body', AUTH_FAILURES)
 def test_rejected_key_is_regenerated_once_and_the_call_retried(status, body):
     http = FakeHttp(keygen=[(200, keygen_ok(KEY_1)), (200, keygen_ok(KEY_2))], api=[(status, body), (200, SYSTEM_INFO)])
-    client, keys = make_client(http)
+    client, _ = make_client(http)
 
     root = client.op(SYSTEM_INFO_CMD)
 
     assert root.findtext('./result/system/hostname') == 'fw-a'
     assert len(http.calls_of('keygen')) == 2
     assert [c['extra_headers']['X-PAN-KEY'] for c in http.calls_of('api')] == [KEY_1, KEY_2]
-    assert keys.auth_failed is False
+    stats = client.take_stats()
+    assert (stats.auth_rejected, stats.key_regenerated) == (False, True)
 
 
 def test_key_rejected_again_after_regeneration_raises():
@@ -222,13 +223,13 @@ def test_rejected_keygen_is_not_retried_until_reset(keygen, api, keygens_before_
         with pytest.raises(PanosAuthError):
             client.op(SYSTEM_INFO_CMD)
     assert len(http.calls_of('keygen')) == keygens_before_reset
-    assert keys.auth_failed is True
+    assert client.take_stats().auth_rejected is True
 
     keys.reset_failure()
     client.op(SYSTEM_INFO_CMD)
 
     assert len(http.calls_of('keygen')) == keygens_before_reset + 1
-    assert keys.auth_failed is False
+    assert client.take_stats().auth_rejected is False
 
 
 def test_calls_rejected_with_the_same_key_renew_it_once():
@@ -253,7 +254,7 @@ def test_calls_rejected_with_the_same_key_renew_it_once():
 )
 def test_error_that_is_not_an_auth_rejection_neither_renews_the_key_nor_invalidates_credentials(answer, code):
     http = FakeHttp(keygen=[(200, KEYGEN_OK)], api=[answer])
-    client, keys = make_client(http)
+    client, _ = make_client(http)
 
     with pytest.raises(PanosApiError) as exc_info:
         client.op(SYSTEM_INFO_CMD)
@@ -261,31 +262,20 @@ def test_error_that_is_not_an_auth_rejection_neither_renews_the_key_nor_invalida
     assert type(exc_info.value) is PanosApiError
     assert exc_info.value.code == code
     assert len(http.calls_of('keygen')) == 1
-    assert keys.auth_failed is False
+    assert client.take_stats().auth_rejected is False
 
 
 def test_static_key_is_never_regenerated():
     http = FakeHttp(api=[(403, INVALID_CREDENTIAL)])
-    client, keys = make_client(http, STATIC_CREDS)
+    client, _ = make_client(http, STATIC_CREDS)
 
     with pytest.raises(PanosAuthError):
         client.op(SYSTEM_INFO_CMD)
 
-    assert keys.auth_failed is True
+    stats = client.take_stats()
+    assert (stats.auth_rejected, stats.key_regenerated) == (True, False)
     assert http.calls_of('keygen') == []
     assert http.calls[0]['extra_headers'] == {'X-PAN-KEY': STATIC_KEY}
-
-
-def test_static_key_accepted_again_clears_the_auth_failure():
-    http = FakeHttp(api=[(403, INVALID_CREDENTIAL), (200, SYSTEM_INFO)])
-    client, keys = make_client(http, STATIC_CREDS)
-    with pytest.raises(PanosAuthError):
-        client.op(SYSTEM_INFO_CMD)
-    assert keys.auth_failed is True
-
-    client.op(SYSTEM_INFO_CMD)
-
-    assert keys.auth_failed is False
 
 
 @pytest.mark.parametrize(

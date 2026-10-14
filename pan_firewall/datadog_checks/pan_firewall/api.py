@@ -177,6 +177,7 @@ class CallStats:
     included); transport failures and bodies that are not PAN-OS XML (`panos_response` False) leave it False.
     `auth_rejected` is True once a call failed with PanosAuthError after the key renewal. `timed_out` is True once a
     call raised PanosTimeout, and `connection_error` is the message of the first PanosConnectionError.
+    `key_regenerated` is True once a rejected key was replaced with a new one.
     """
 
     calls: int = 0
@@ -184,6 +185,7 @@ class CallStats:
     auth_rejected: bool = False
     timed_out: bool = False
     connection_error: str | None = None
+    key_regenerated: bool = False
 
 
 class PanosClient:
@@ -339,13 +341,10 @@ class PanosClient:
         """Run `attempt` with the current key; on an auth failure, renew the key once and run it again."""
         key = self._keys.key()
         try:
-            result = attempt(key)
+            return attempt(key)
         except PanosAuthError as e:
             self._log.debug('PAN-OS %s rejected the API key (code %s), renewing it', self._host, e.code)
-            result = attempt(self._renew(key))
-        # A successful call proves the key is accepted, which is the only way a static key recovers.
-        self._keys.auth_failed = False
-        return result
+            return attempt(self._renew(key))
 
     def _renew(self, rejected: str) -> str:
         # Two calls in flight can be rejected with the same key; only the first regenerates it, and the other
@@ -354,7 +353,10 @@ class PanosClient:
             current = self._keys.key()
             if current != rejected:
                 return current
-            return self._keys.regenerate()
+            renewed = self._keys.regenerate()
+        with self._stats_lock:
+            self._stats.key_regenerated = True
+        return renewed
 
     def _open_stream(self, params: dict[str, str], key: str) -> tuple[Response, Element, Iterator[tuple[str, Element]]]:
         """Send a streamed request and read up to the root element.

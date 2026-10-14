@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 from xml.etree.ElementTree import Element
 
-from .api import PanosClient, api_url, new_http
+from .api import PanosClient, new_http
 from .auth import Credentials, KeyManager
 from .errors import PanosAuthError, PanosError
 from .firewalls import FirewallTarget, resolve_credentials
@@ -83,7 +83,7 @@ class PanoramaFirewallSource:
         self._cache_key = f'panorama_firewalls:{self._host}'
         http = new_http(check, config)
         credentials = Credentials(config.panorama_username, config.panorama_password, config.panorama_api_key)
-        self._keys = KeyManager(http, api_url(self._host), credentials)
+        self._keys = KeyManager(http, self._host, credentials)
         self._client = PanosClient(http, self._host, self._keys, check.log)
         self._last_cached: str | None = None
         self._warned: set[str] = set()

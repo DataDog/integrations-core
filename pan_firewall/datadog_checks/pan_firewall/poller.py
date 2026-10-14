@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from .api import PanosClient, RequestCounter, api_url, new_http
+from .api import PanosClient, RequestCounter, new_http
 from .auth import KeyManager
 from .collectors import (  # noqa: F401  (importing the modules registers their collectors)
     COLLECT_FUNCTIONS,
@@ -90,7 +90,7 @@ class FirewallPoller:
         http = new_http(check, config)
         # Every request of the firewall, keygen included.
         self._requests = RequestCounter()
-        self.keys = KeyManager(http, api_url(target.ip), target.credentials, self._requests)
+        self.keys = KeyManager(http, target.ip, target.credentials, self._requests)
         self.client = PanosClient(http, target.ip, self.keys, check.log, counter=self._requests)
         self.schedule = FirewallSchedule()
         self.state = FirewallState()
@@ -156,13 +156,18 @@ class FirewallPoller:
             )
         # Skipped collectors, and every collector of a busy run, stay due, so they run first thing next run.
         self.schedule.mark_run(outcome.ran)
-        if self.keys.take_regenerated():
+        stats = self.client.take_stats()
+        if stats.key_regenerated:
             # A rejected key that had worked may mean another unit answers here: read the identity again next run.
             self.schedule.make_due(IDENTITY)
-        stats = self.client.take_stats()
         if stats.calls:
             self._can_connect = 1 if stats.answered else 0
-            self._auth_status = 1 if self.keys.auth_failed or stats.auth_rejected else 0
+            # A run that got no verdict on the credentials (nothing answered) keeps the last one; the first run
+            # reports 0.
+            if stats.auth_rejected:
+                self._auth_status = 1
+            elif stats.answered or self._auth_status is None:
+                self._auth_status = 0
         # With nothing called this run, the last result is sent again.
         tags = self.tags()
         if self._can_connect is not None:
