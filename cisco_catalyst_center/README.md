@@ -86,6 +86,10 @@ The alert type is derived from the event's syslog severity:
 - Warning becomes a warning
 - Notice and Info become informational
 
+Catalyst Center 2.3.7.11 sends events without a severity. For a syslog event, the integration reads
+the severity from the message mnemonic instead: `%LINK-3-UPDOWN` is severity 3, Error. Events with
+no mnemonic, such as SNMP traps, are informational.
+
 Events are tagged with severity, device family, event name, device name, site, and SSID. Per-client
 identifiers appear in the event body rather than as tags.
 
@@ -94,7 +98,13 @@ identifiers appear in the event body rather than as tags.
 The Cisco Catalyst Center integration does not include any service checks. To alert on collection
 failures, use the `cisco_catalyst_center.collection.success` metric: it is 1 when every enabled
 collector completed a cycle and 0 when any of them failed, and it is submitted on failed cycles as
-well as successful ones.
+well as successful ones. Each failed collector also appears as a warning in the Agent status, and a
+cycle in which every collector fails is reported as a check error.
+
+Every cycle, the integration also reads the Catalyst Center device inventory, one request per 500
+devices, to fill in device reachability that Assurance leaves out. The inventory is not a collector
+you enable, so a failed read appears only as a warning in the Agent status and does not change
+`collection.success`.
 
 ## Troubleshooting
 
