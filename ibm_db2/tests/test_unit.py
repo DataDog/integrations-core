@@ -181,7 +181,7 @@ def test_query_metrics_recover_after_text_lookup_failure(instance: dict, aggrega
     check = IbmDb2Check('ibm_db2', {}, [instance])
     collector = check._query_metrics
     inserted = datetime(2026, 1, 1)
-    counters = ('count', 'time', 'cpu_time', 'rows_read', 'rows_returned')
+    counters = ('count', 'time', 'cpu_time', 'rows_read', 'rows_returned', 'lock_wait_time', 'lock_waits')
 
     def snapshot(cached_count: int, uncached_count: int) -> list[dict | bool]:
         return [
@@ -238,6 +238,8 @@ def test_query_metrics_recover_after_text_lookup_failure(instance: dict, aggrega
         assert row['cpu_time'] == expected * 1_000
         assert row['rows_read'] == expected
         assert row['rows_returned'] == expected
+        assert row['lock_wait_time'] == expected * 1_000_000
+        assert row['lock_waits'] == expected
 
 
 def test_full_query_text_refresh(instance: dict, aggregator: AggregatorStub):
