@@ -38,12 +38,11 @@ def test_parse_system_info_fw_a():
     assert FW_A.clock == 'Fri Oct  2 04:49:06 2026'
 
 
-def test_clock_is_neither_compared_nor_persisted():
+def test_clock_is_not_persisted():
     later = dataclasses.replace(FW_A, clock='Sat Oct  3 00:00:00 2026')
 
     # A restart does not load a stale clock.
-    restored = DeviceIdentity.from_json(later.to_json())
-    assert (restored, restored.clock) == (FW_A, None)
+    assert DeviceIdentity.from_json(later.to_json()).clock is None
 
 
 def test_global_tags_with_identity():

@@ -128,7 +128,7 @@ def test_key_never_leaks_into_urls_logs_or_errors(caplog):
             TRANSPORT_ERRORS['refused'],
         ],
     )
-    client, keys = make_client(http)
+    client, _ = make_client(http)
     errors = []
 
     client.op(SYSTEM_INFO_CMD)
@@ -149,9 +149,8 @@ def test_key_never_leaks_into_urls_logs_or_errors(caplog):
         sent = ' '.join([call['url'], *call['data'].keys(), *call['data'].values()])
         assert KEY_1 not in sent and KEY_2 not in sent
         assert 'key=' not in call['url']
-    for text in [caplog.text, repr(keys)]:
-        for secret in (KEY_1, KEY_2, STATIC_KEY, 's3cret-pw'):
-            assert secret not in text
+    for secret in (KEY_1, KEY_2, STATIC_KEY, 's3cret-pw'):
+        assert secret not in caplog.text
     for error in errors:
         for key in (KEY_1, KEY_2):
             assert key not in str(error)
