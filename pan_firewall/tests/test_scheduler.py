@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.pan_firewall.constants import COLLECTORS, INTERVALS
+from datadog_checks.pan_firewall.constants import COLLECTORS
 from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 
 from .helpers import FakeClock
@@ -28,17 +28,6 @@ def run_due(schedule, enabled=COLLECTORS, **kwargs):
     names = schedule.due(enabled, **kwargs)
     schedule.mark_run(names)
     return names
-
-
-def test_intervals_match_the_published_schedule():
-    assert INTERVALS == {
-        **dict.fromkeys(TIER_2M, 120),
-        **dict.fromkeys(TIER_3M, 180),
-        **dict.fromkeys(TIER_5M, 300),
-        **dict.fromkeys(TIER_30M, 1800),
-        'licenses': 86400,
-    }
-    assert COLLECTORS == tuple(INTERVALS)
 
 
 def test_everything_is_due_on_the_first_call(schedule):

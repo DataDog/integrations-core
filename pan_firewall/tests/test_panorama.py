@@ -302,6 +302,7 @@ def test_firewall_that_disconnects_or_is_removed_is_no_longer_polled(dd_run_chec
 
     # A polled firewall reports `can_connect` on every run, even when nothing is due.
     assert set(metrics_by_ip(aggregator, 'can_connect')) == {FW_A_REPORTED}
+    assert list(check._pollers) == [FW_A_POLLED]
 
 
 def test_credentials_are_matched_on_the_polled_ip(dd_run_check, fake_panos):

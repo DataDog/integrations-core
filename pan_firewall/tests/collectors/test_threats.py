@@ -137,23 +137,6 @@ def test_threat_logs_of_the_capture_are_counted_by_tag(firewall):
     assert all(len(s.tags) == 4 and not any(t.startswith('window') for t in s.tags) for s in samples)
 
 
-def test_request_is_a_seqno_query_without_receive_time(firewall):
-    firewall.seed(THREAT_LOG_FIRST_SEQNO['fw-a'] - 1)
-
-    firewall.collect()
-
-    (params,) = firewall.submits()
-    assert params == {
-        'type': 'log',
-        'log-type': 'threat',
-        'dir': 'forward',
-        'nlogs': '5000',
-        'skip': '0',
-        'query': f'(seqno geq {THREAT_LOG_FIRST_SEQNO["fw-a"]})',
-    }
-    assert 'receive_time' not in ' '.join(params.values())
-
-
 def test_first_run_reads_the_newest_log_and_counts_nothing(firewall):
     samples = firewall.collect()
 

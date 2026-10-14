@@ -156,17 +156,6 @@ def test_firewalls_are_polled_concurrently_up_to_max_concurrency(dd_run_check, a
     assert stub_runs(aggregator) == {(FW_A_IP, 'bgp'), (FW_B_IP, 'bgp'), (FW_C_IP, 'bgp')}
 
 
-def test_removed_firewall_poller_is_dropped(dd_run_check):
-    check = new_check(make_instance(firewalls=[FW_A_IP, FW_B_IP]))
-    dd_run_check(check)
-    remaining = [t for t in check._source.list_firewalls() if t.ip == FW_A_IP]
-    check._source = type('Source', (), {'list_firewalls': lambda self: remaining})()
-
-    dd_run_check(check)
-
-    assert list(check._pollers) == [FW_A_IP]
-
-
 @pytest.mark.parametrize(
     'failure, warning',
     [

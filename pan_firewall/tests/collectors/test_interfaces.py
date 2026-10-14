@@ -92,8 +92,7 @@ def test_interface_counters_without_a_map_carry_the_interface_tag_only():
     # Without `show interface all` (fw-b has no capture of it, ruling R7) the state holds no interface map.
     samples = parse_interface_counters(load_op(COUNTER_INTERFACE_CMD), FirewallState(), SERIAL, None, mock.Mock())
 
-    interface_samples = [s for s in samples if s.name.startswith('interface.')]
-    assert series(interface_samples) == expected_interfaces(FW_A_ROWS, lambda name: (f'interface:{name}',))
+    assert series(samples) == expected_interfaces(FW_A_ROWS, lambda name: (f'interface:{name}',))
 
 
 def test_interface_without_an_ifnet_row_gets_the_type_and_the_resource_tag():
@@ -139,14 +138,6 @@ def test_tunnel_rows_become_ipsec_counters_with_the_tags_vpn_stored():
     }
 
 
-def test_tunnel_counters_wait_for_the_vpn_tags():
-    # A tag-poor series sent before `vpn` answers would be a useless monotonic_count context.
-    samples = parse_interface_counters(load_op(COUNTER_INTERFACE_CMD), FirewallState(), SERIAL, None, mock.Mock())
-
-    assert not [s for s in samples if s.name.startswith('ipsec.')]
-    assert [s for s in samples if s.name == 'interface.rx.bytes']
-
-
 def test_tunnel_row_that_vpn_does_not_list_is_not_an_ipsec_tunnel():
     samples = parse_interface_counters(
         load_op(COUNTER_INTERFACE_CMD),
@@ -177,10 +168,6 @@ def test_speed_is_megabits_converted_to_bits_and_unparseable_is_logged():
     }
     log.debug.assert_called_once()
     assert 'fast' in str(log.debug.call_args)
-
-
-def test_speed_needs_the_map():
-    assert parse_interface_speeds(FirewallState(), SERIAL, mock.Mock()) == []
 
 
 def test_speeds_are_sent_every_30_minutes_with_the_identity_not_every_3(

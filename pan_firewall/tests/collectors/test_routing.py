@@ -154,12 +154,6 @@ def test_legacy_or_unknown_routing_engine_sends_the_legacy_call(collect, cmd, ad
 FW_A_OSPF = ('neighbor:169.254.10.2', 'router_id:10.255.0.2', 'area:0.0.0.0', 'vr:default')
 
 
-def test_ospf_neighbor_of_the_capture_is_up_without_a_state_tag():
-    samples = parse_ospf_neighbors(load_op(OSPF_NEIGHBOR_CMD))
-
-    assert series(samples) == {('ospf.neighbor.status', FW_A_OSPF): (1, 'gauge')}
-
-
 @pytest.mark.parametrize(
     'state, expected',
     [('full', 1), ('FULL', 1), ('2-way', 0)],

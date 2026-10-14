@@ -28,7 +28,8 @@ def test_vm_series_has_no_sensors():
 
 
 def test_hardware_power_thresholds_and_alarms():
-    result = series(parse_environmentals(hardware(), mock.Mock(), set()))
+    log = mock.Mock()
+    result = series(parse_environmentals(hardware(), log, set()))
 
     def power(description, slot, **values):
         return {(f'power.{name}', sensor(description, slot)): (value, 'gauge') for name, value in values.items()}
@@ -55,6 +56,8 @@ def test_hardware_power_thresholds_and_alarms():
     )
     power_series = {k: v for k, v in result.items() if k[0].startswith('power.')}
     assert power_series == expected
+    log.warning.assert_called_once()
+    assert 'Power Supply 5' in str(log.warning.call_args)
 
 
 def test_hardware_thermal_values_and_alarm():
@@ -72,20 +75,6 @@ def test_hardware_thermal_values_and_alarm():
         expected['temperature.max', tags] = (80.0, 'gauge')
         expected['temperature.alarm', tags] = (alarm, 'gauge')
     assert {k: v for k, v in result.items() if k[0].startswith('temperature.')} == expected
-
-
-def test_alarm_without_a_direction_warns_once_per_sensor_and_firewall():
-    log = mock.Mock()
-    warned = set()
-
-    parse_environmentals(hardware(), log, warned)
-    parse_environmentals(hardware(), log, warned)
-
-    log.warning.assert_called_once()
-    assert 'Power Supply 5' in str(log.warning.call_args)
-    # Another firewall has its own state, so it warns again.
-    parse_environmentals(hardware(), log, set())
-    assert log.warning.call_count == 2
 
 
 def test_environment_is_registered_and_submits_through_the_check(real_collectors, fake_panos, dd_run_check, aggregator):

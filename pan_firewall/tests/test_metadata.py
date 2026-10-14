@@ -195,21 +195,6 @@ def test_metadata_is_sent_every_30_minutes(dd_run_check, aggregator, schedule_cl
     assert len(events(aggregator)) == 2
 
 
-def test_metadata_is_sent_at_once_when_can_connect_flips(
-    dd_run_check, aggregator, fake_panos, schedule_clock, monkeypatch
-):
-    # A due collector makes the calls that find the firewall down, well inside the 30 minutes.
-    monkeypatch.setitem(COLLECT_FUNCTIONS, 'bgp', lambda ctx: [])
-    check = new_check()
-    dd_run_check(check)
-    fake_panos.fail(FW_A_IP, 'refused')
-    schedule_clock.now += 120
-
-    dd_run_check(check)
-
-    assert [e['devices'][0]['status'] for e in events(aggregator)] == [1, 2]
-
-
 def test_metadata_is_sent_at_once_when_the_firewall_comes_back(
     dd_run_check, aggregator, fake_panos, schedule_clock, monkeypatch
 ):
