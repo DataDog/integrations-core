@@ -1,5 +1,5 @@
 [env.collectors.datadog-checks]
-base-package-features = ["deps", "db"]
+base-package-features = ["deps", "db", "json"]
 
 [[envs.default.matrix]]
 python = ["3.13"]
