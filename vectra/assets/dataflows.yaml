@@ -1,4 +1,9 @@
 provides:
+  - id: vectra-logs
+    always_on: true
+    granular: false
+    data_type: logs
+    direction: inbound
   - id: vectra-detection-logs
     always_on: false
     granular: true
