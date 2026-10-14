@@ -157,9 +157,9 @@ def test_example_config_hides_only_the_http_auth_and_header_options():
 
 @pytest.mark.parametrize('base', [STATIC_INSTANCE, PANORAMA_INSTANCE], ids=['static', 'panorama'])
 @pytest.mark.parametrize(
-    'changes, expected', [({}, True), ({'persist_connections': False}, False)], ids=['default', 'turned-off']
+    'changes, expected', [({}, False), ({'persist_connections': True}, True)], ids=['default', 'turned-on']
 )
-def test_persist_connections_is_on_by_default_and_can_be_turned_off(dd_run_check, base, changes, expected):
+def test_persist_connections_is_off_by_default_and_can_be_turned_on(dd_run_check, base, changes, expected):
     check = run(dd_run_check, {**copy.deepcopy(base), **changes})
 
     clients = [poller.client for poller in check._pollers.values()]
@@ -169,14 +169,8 @@ def test_persist_connections_is_on_by_default_and_can_be_turned_off(dd_run_check
     assert check.http.persist_connections is expected
 
 
-@pytest.mark.parametrize(
-    'init_config, instance_timeout, expected',
-    [({}, None, 30), ({'timeout': 7}, None, 7), ({'timeout': 7}, 12, 12)],
-    ids=['default', 'init-config', 'instance-overrides-init-config'],
-)
-def test_timeout_comes_from_the_instance_then_init_config(init_config, instance_timeout, expected):
-    check = PanFirewallCheck(
-        'pan_firewall', init_config, [instance_with(STATIC_INSTANCE, {'timeout': instance_timeout})]
-    )
+@pytest.mark.parametrize('instance_timeout, expected', [(None, 30), (12, 12)], ids=['default', 'instance'])
+def test_timeout_defaults_to_30_seconds_and_comes_from_the_instance(instance_timeout, expected):
+    check = PanFirewallCheck('pan_firewall', {}, [instance_with(STATIC_INSTANCE, {'timeout': instance_timeout})])
 
     assert check.http.options['timeout'] == (expected, expected)

@@ -120,11 +120,6 @@ files:
         timeout.value.default: 30
         timeout.value.example: 30
         timeout.description: Timeout in seconds for each request to a firewall or Panorama.
-        persist_connections.value.default: true
-        persist_connections.value.example: true
-        persist_connections.description: |
-          Whether or not to persist cookies and use connection pooling for improved performance.
-          The check makes several requests to each firewall on every run, so connections are reused by default.
         auth_type.hidden: true
         use_legacy_auth_encoding.hidden: true
         username.hidden: true

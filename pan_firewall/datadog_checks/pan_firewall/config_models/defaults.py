@@ -73,7 +73,7 @@ def instance_namespace():
 
 
 def instance_persist_connections():
-    return True
+    return False
 
 
 def instance_report_top_n():

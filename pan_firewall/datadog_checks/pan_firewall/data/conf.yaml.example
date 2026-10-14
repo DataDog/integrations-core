@@ -189,11 +189,10 @@ instances:
     #
     # log_requests: false
 
-    ## @param persist_connections - boolean - optional - default: true
+    ## @param persist_connections - boolean - optional - default: false
     ## Whether or not to persist cookies and use connection pooling for improved performance.
-    ## The check makes several requests to each firewall on every run, so connections are reused by default.
     #
-    # persist_connections: true
+    # persist_connections: false
 
     ## @param allow_redirects - boolean - optional - default: true
     ## Whether or not to allow URL redirection.

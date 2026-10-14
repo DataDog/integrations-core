@@ -74,7 +74,6 @@ class PanoramaFirewallSource:
     def __init__(self, check: AgentCheck, config: InstanceConfig):
         self._check = check
         self._config = config
-        # The validator refuses Panorama mode without `panorama_host`.
         self._host = cast(str, config.panorama_host)
         self._cache_key = f'panorama_firewalls:{self._host}'
         credentials = Credentials(config.panorama_username, config.panorama_password, config.panorama_api_key)
@@ -108,7 +107,6 @@ class PanoramaFirewallSource:
         ]
 
     def _store(self, devices: list[DiscoveredFirewall]) -> None:
-        # Written on every successful discovery, so `discovered` is the time of the last one.
         raw = json.dumps({'discovered': time.time(), 'firewalls': [dataclasses.asdict(d) for d in devices]})
         self._check.write_persistent_cache(self._cache_key, raw)
 
@@ -159,8 +157,6 @@ class PanoramaFirewallSource:
         return list(targets.values())
 
     def _target(self, firewall: DiscoveredFirewall) -> FirewallTarget | None:
-        # A firewall left out for a config reason is warned about on every run, also in the Agent status: it is the
-        # only sign that the firewall is not monitored.
         polled = LAB_IP_OVERRIDES.get((firewall.serial, firewall.ip_address or ''), firewall.ip_address)
         address = _parse_ip(polled)
         if address is None:
@@ -203,7 +199,6 @@ class PanoramaFirewallSource:
 
 
 def readable_age(seconds: float) -> str:
-    """For example `3 days` or `1 minute`."""
     seconds = max(seconds, 0)
     units = (('day', 86400), ('hour', 3600), ('minute', 60))
     unit, size = next(((unit, size) for unit, size in units if seconds >= size), ('second', 1))

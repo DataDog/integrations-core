@@ -30,6 +30,9 @@ INTERVALS = {
     'licenses': 86400,
 }
 COLLECTORS = tuple(INTERVALS)
+# A collector that failed runs again after its interval or this, whichever is sooner, so one failed call does not cost
+# a long interval's data (a day of licenses).
+FAILURE_RETRY_SECONDS = 300
 
 # `device_vendor` tag value (decision 27; the NDM metadata `vendor` is a different string).
 DEVICE_VENDOR_TAG = 'paloaltonetworks'

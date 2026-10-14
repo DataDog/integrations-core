@@ -103,7 +103,14 @@ def test_busy_firewall_is_not_collected_and_its_collectors_stay_due(firewall, ag
     assert firewall.run_at(60) == (set(STUBS), [])
 
 
-def test_jobs_check_error_collects_anyway_and_warns_once_per_episode(firewall):
+def test_every_busy_job_is_named(firewall, caplog):
+    firewall.answer_jobs(jobs_response('jobs_pending_commit_act_content_pend.xml'))
+
+    assert firewall.run_at(0) == (set(), [])
+    assert f'{FW_A_IP}: Commit job 7, Content job 2018 in progress, skipping collection this run' in caplog.text
+
+
+def test_jobs_check_error_collects_anyway_and_warns_on_every_run(firewall):
     warning = (
         f'{FW_A_IP}: cannot check for a commit or content update in progress, collecting anyway: '
         'PAN-OS API error 400: no capture for this command'
@@ -111,12 +118,7 @@ def test_jobs_check_error_collects_anyway_and_warns_once_per_episode(firewall):
     firewall.answer_jobs((200, NO_CAPTURE))
 
     assert firewall.run_at(0) == (set(STUBS), [warning])
-    assert firewall.run_at(120) == ({'bgp', 'dataplane'}, [])
-    # An answer ends the episode; the next error starts a new one.
-    firewall.answer_jobs(jobs_response('jobs_pending_idle.xml'))
-    assert firewall.run_at(240) == ({'bgp', 'dataplane', 'interfaces', 'system_resources'}, [])
-    firewall.answer_jobs((200, NO_CAPTURE))
-    assert firewall.run_at(360) == ({'bgp', 'dataplane'}, [warning])
+    assert firewall.run_at(120) == ({'bgp', 'dataplane'}, [warning])
 
 
 @pytest.mark.parametrize(

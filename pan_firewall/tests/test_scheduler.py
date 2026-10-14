@@ -78,3 +78,15 @@ def test_identity_metadata_is_forced_while_identity_is_missing(schedule):
 
     assert schedule.due(enabled) == []
     assert schedule.due(enabled, identity_missing=True) == ['identity_metadata']
+
+
+def test_failed_collectors_are_retried_within_5_minutes(schedule, clock):
+    schedule.mark_failed(COLLECTORS)
+
+    # Collectors with a shorter interval keep it.
+    clock.now += 120
+    assert schedule.due(COLLECTORS) == TIER_2M
+    clock.now += 179
+    assert schedule.due(COLLECTORS) == TIER_2M + TIER_3M
+    clock.now += 1
+    assert schedule.due(COLLECTORS) == list(COLLECTORS)

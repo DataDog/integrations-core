@@ -14,15 +14,11 @@ from .poller import FirewallPoller
 
 class PanFirewallCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'pan_firewall'
+    # The documented default timeout (30 s) instead of the HTTP wrapper's (10 s).
+    HTTP_CONFIG_REMAPPER = {'timeout': {'name': 'timeout', 'default': 30}}
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        # The config model's defaults, which differ from the wrapper's (10 s, no persistence). Built per check because
-        # a remapped default wins over `init_config`, so the timeout's must be read from it.
-        self.HTTP_CONFIG_REMAPPER = {
-            'timeout': {'name': 'timeout', 'default': self.init_config.get('timeout', 30)},
-            'persist_connections': {'name': 'persist_connections', 'default': True},
-        }
         self._source: FirewallSource | None = None
         self._pollers: dict[str, FirewallPoller] = {}
 

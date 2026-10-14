@@ -356,23 +356,6 @@ def test_calls_use_the_instance_timeout(dd_run_check, fake_panos, mocker, option
     assert timeouts == {expected}
 
 
-def test_calls_to_a_firewall_go_through_one_session(dd_run_check, fake_panos, mocker):
-    sessions = []
-
-    def post(session, url, **kwargs):
-        sessions.append(session)
-        return fake_panos.post(url, **kwargs)
-
-    # A plain function, unlike the fixture's mock, is bound to the session it is called on.
-    mocker.patch('requests.Session.post', new=post)
-
-    dd_run_check(new_check())
-
-    # Keygen and `show system info` at least; the list keeps every session alive, so `is` cannot match a reused id.
-    assert len(sessions) >= 2
-    assert all(session is sessions[0] for session in sessions)
-
-
 def test_system_info_without_serial_keeps_the_cached_identity(dd_run_check, aggregator, fake_panos, monkeypatch):
     dd_run_check(new_check())
     no_serial = b'<response status="success"><result><system><hostname>other</hostname></system></result></response>'
@@ -425,6 +408,43 @@ def test_static_firewall_replaced_at_the_same_ip_is_tagged_and_tracked_as_the_ne
     assert f'device_id:{FW_A_SERIAL}' not in tags
     assert f'threat_watermark:{FW_B_SERIAL}' in watermark_reads
     assert f'threat_watermark:{FW_A_SERIAL}' not in watermark_reads
+
+
+def test_failed_collector_is_retried_after_5_minutes_not_after_its_interval(dd_run_check, monkeypatch, schedule_clock):
+    runs = []
+
+    def licenses(ctx):
+        runs.append(schedule_clock.now)
+        raise PanosApiError('400', 'bad command')
+
+    monkeypatch.setitem(COLLECT_FUNCTIONS, 'licenses', licenses)
+    check = new_check()
+    start = schedule_clock.now
+    dd_run_check(check)
+    schedule_clock.now += 299
+    dd_run_check(check)
+    schedule_clock.now += 1
+
+    dd_run_check(check)
+
+    # Licenses run once a day.
+    assert runs == [start, start + 300]
+
+
+def test_failed_identity_read_is_retried_after_5_minutes(dd_run_check, fake_panos, schedule_clock):
+    check = new_check()
+    dd_run_check(check)
+    fake_panos.answer_op(FW_A_IP, SYSTEM_INFO_CMD, FAILURES['html_502'])
+    schedule_clock.now += 1800
+    dd_run_check(check)
+    fake_panos.recover(FW_A_IP)
+    schedule_clock.now += 300
+    calls_before = len(fake_panos.calls)
+
+    dd_run_check(check)
+
+    # The identity is read every 30 minutes.
+    assert SYSTEM_INFO_CMD in [c.cmd for c in fake_panos.calls[calls_before:]]
 
 
 def test_identity_is_read_again_on_the_next_run_after_the_key_is_regenerated(
