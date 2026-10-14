@@ -46,14 +46,10 @@ telemetry, pin it with an explicit assertion — if a metric was dropped, assert
 emitted; if a label was renamed, assert the renamed tag appears and the original does not. The
 metadata cross-check stays the backbone; these are targeted additions on top of it.
 
-If the block below states there are no requirements (e.g. "nothing to require"), there are no
+The requirements are in `${prd}`. Read that file, in full, before you write any tests.
+
+If it states there are no requirements (e.g. "nothing to require"), there are no
 extra requirements to test — do not invent any.
-
-Requirements, verbatim:
-
-```
-${prd}
-```
 
 ## Inputs
 
