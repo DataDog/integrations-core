@@ -188,11 +188,6 @@ class HTTPClient(Protocol):
 
     def set_header(self, name: str, value: str) -> None: ...
 
-    # TODO: This currently has no callers; VoltDB and NiFi will use it in their backend-neutral HTTP migrations.
-    def disable_auth(self) -> None:
-        """Clear configured and .netrc auth without disabling other environment settings."""
-        ...
-
     def close(self) -> None: ...
 
     def get_cookie(self, name: str, default: str | None = None) -> str | None:
