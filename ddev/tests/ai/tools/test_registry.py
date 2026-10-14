@@ -269,8 +269,9 @@ async def test_from_names_scopes_delete_file_tool_to_integration_root(tmp_path):
         ([], []),
         (["read_file", "list_files"], ["read_file", "list_files"]),
         (["read_file", "stop_flow"], ["read_file"]),
+        (["read_file", "docker"], ["read_file"]),
     ],
-    ids=["mixed", "all_writes", "empty", "all_reads", "stop_flow_excluded"],
+    ids=["mixed", "all_writes", "empty", "all_reads", "stop_flow_excluded", "docker_excluded"],
 )
 def test_filter_read_only(input_names, expected):
     assert filter_read_only(input_names) == expected
