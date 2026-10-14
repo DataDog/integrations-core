@@ -20,26 +20,9 @@ if TYPE_CHECKING:
 LICENSE_INFO_CMD = '<request><license><info/></license></request>'
 
 # `expires` reads `October 22, 2026`. Parsed by hand: `strptime('%B')` follows the process locale.
-MONTHS = {
-    name: number
-    for number, name in enumerate(
-        (
-            'january',
-            'february',
-            'march',
-            'april',
-            'may',
-            'june',
-            'july',
-            'august',
-            'september',
-            'october',
-            'november',
-            'december',
-        ),
-        start=1,
-    )
-}
+MONTH_NAMES: tuple[str, ...] = ('january', 'february', 'march', 'april', 'may', 'june')
+MONTH_NAMES += ('july', 'august', 'september', 'october', 'november', 'december')
+MONTHS = {name: number for number, name in enumerate(MONTH_NAMES, start=1)}
 EXPIRY_DATE = re.compile(r'^(?P<month>[A-Za-z]+)\s+(?P<day>\d{1,2}),\s*(?P<year>\d{4})$')
 NON_ALNUM = re.compile(r'[^a-z0-9]+')
 

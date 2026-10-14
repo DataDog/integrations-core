@@ -18,8 +18,6 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class Credentials:
-    """Either `username` and `password` (a key is generated), or `api_key` (used as-is, never renewed)."""
-
     username: str | None
     password: str | None = field(repr=False)
     api_key: str | None = field(repr=False)

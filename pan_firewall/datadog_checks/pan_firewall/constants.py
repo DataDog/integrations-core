@@ -117,7 +117,7 @@ GLOBAL_COUNTERS = {
 # The aspects `dropped_packets` sends as 0 when no drop counter of the response has them. Source: the testbed RFC
 # draft and the metrics-tags doc (the plan counts 13 without listing them). Any other aspect with a drop counter,
 # such as `mgmt`, is sent too.
-DROPPED_PACKET_ASPECTS = (
+DROPPED_PACKET_ASPECTS: tuple[str, ...] = (
     'arp',
     'dos',
     'forward',
@@ -128,7 +128,5 @@ DROPPED_PACKET_ASPECTS = (
     'pktproc',
     'qos',
     'resource',
-    'session',
-    'system',
-    'tunnel',
 )
+DROPPED_PACKET_ASPECTS += ('session', 'system', 'tunnel')

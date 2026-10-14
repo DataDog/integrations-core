@@ -25,19 +25,10 @@ SYSTEM_RESOURCES_CMD = '<show><system><resources/></system></show>'
 DISK_SPACE_CMD = '<show><system><disk-space/></system></show>'
 ENVIRONMENTALS_CMD = '<show><system><environmentals/></system></show>'
 
-CPU_STATES = {
-    'us': 'user',
-    'sy': 'system',
-    'ni': 'nice',
-    'id': 'idle',
-    'wa': 'iowait',
-    'hi': 'hardirq',
-    'si': 'softirq',
-    'st': 'steal',
-}
+CPU_STATES = {'us': 'user', 'sy': 'system', 'ni': 'nice', 'id': 'idle'}
+CPU_STATES |= {'wa': 'iowait', 'hi': 'hardirq', 'si': 'softirq', 'st': 'steal'}
 # The unit top prints in the line header (`MiB Mem`, `KiB Swap`, ...).
 UNIT_BYTES = {name: 1024**power for power, name in enumerate(('B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB'))}
-# Filesystems that are not storage.
 VIRTUAL_FILESYSTEMS = frozenset({'none', 'tmpfs', 'cgroup_root'})
 
 ALARM_TRUE = frozenset({'true', 'yes'})

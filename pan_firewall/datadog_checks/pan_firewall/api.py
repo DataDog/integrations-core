@@ -26,19 +26,6 @@ if TYPE_CHECKING:
     from .auth import KeyManager
     from .config_models.instance import InstanceConfig
 
-__all__ = [
-    'CallStats',
-    'PanosApiError',
-    'PanosAuthError',
-    'PanosClient',
-    'PanosError',
-    'PanosSkipped',
-    'PanosUnreachable',
-    'RequestCounter',
-    'api_url',
-    'new_http',
-]
-
 T = TypeVar('T')
 
 KEY_HEADER = 'X-PAN-KEY'
@@ -111,7 +98,6 @@ class RequestCounter:
             self._count += 1
 
     def take(self) -> int:
-        """Return the requests counted since the previous call, and start again from zero."""
         with self._lock:
             count, self._count = self._count, 0
         return count
@@ -294,7 +280,6 @@ class PanosClient:
             raise PanosSkipped(f'not calling {self._host}: an earlier call could not reach it')
 
     def _authorized(self, attempt: Callable[[str], T]) -> T:
-        """Run `attempt` through `_with_renewal` and record its outcome in the call stats."""
         try:
             result = self._with_renewal(attempt)
         except PanosError as e:
