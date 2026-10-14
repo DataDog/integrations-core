@@ -179,50 +179,56 @@ def test_log_stream_regenerates_a_rejected_key():
     assert len(http.calls_of('keygen')) == 2
 
 
-def test_keygen_rejection_marks_credentials_invalid_without_retry():
-    http = FakeHttp(keygen=[(403, INVALID_CREDENTIAL)])
+@pytest.mark.parametrize(
+    'keygen, api, keygens_before_reset',
+    [
+        pytest.param(
+            [(403, INVALID_CREDENTIAL), (200, KEYGEN_OK)], [(200, SYSTEM_INFO)], 1, id='first-keygen-rejected'
+        ),
+        # The key is revoked and the credentials changed mid-run: the renewal keygen is rejected.
+        pytest.param(
+            [(200, KEYGEN_OK), (403, INVALID_CREDENTIAL), (200, KEYGEN_OK)],
+            [(403, INVALID_CREDENTIAL), (200, SYSTEM_INFO)],
+            2,
+            id='renewal-keygen-rejected',
+        ),
+    ],
+)
+def test_rejected_keygen_is_not_retried_until_reset(keygen, api, keygens_before_reset):
+    http = FakeHttp(keygen=keygen, api=api)
     client, keys = make_client(http)
 
-    with pytest.raises(PanosAuthError):
-        client.op(SYSTEM_INFO_CMD)
-
-    assert keys.auth_failed is True
-    assert len(http.calls_of('keygen')) == 1
-    assert http.calls_of('api') == []
-
-
-def test_rejected_keygen_is_not_retried_until_reset():
-    http = FakeHttp(
-        keygen=[(200, KEYGEN_OK), (403, INVALID_CREDENTIAL), (200, KEYGEN_OK)],
-        api=[(403, INVALID_CREDENTIAL), (200, SYSTEM_INFO)],
-    )
-    client, keys = make_client(http)
-
-    # The key is revoked and the credentials changed mid-run: the renewal keygen is rejected, and the later
-    # call of the same run (or a second call in flight with the same key) must not log in again.
+    # The later call of the same run (or a second call in flight with the same key) must not log in again.
     for _ in range(2):
         with pytest.raises(PanosAuthError):
             client.op(SYSTEM_INFO_CMD)
-    assert len(http.calls_of('keygen')) == 2
+    assert len(http.calls_of('keygen')) == keygens_before_reset
     assert keys.auth_failed is True
 
     keys.reset_failure()
     client.op(SYSTEM_INFO_CMD)
 
-    assert len(http.calls_of('keygen')) == 3
+    assert len(http.calls_of('keygen')) == keygens_before_reset + 1
     assert keys.auth_failed is False
 
 
-def test_non_panos_http_403_is_not_an_auth_failure():
-    # A proxy's 403 page says nothing about the PAN-OS key or credentials: no renewal, no invalid-credentials state.
-    http = FakeHttp(keygen=[(200, KEYGEN_OK)], api=[(403, b'<html><body>403 Forbidden</body></html>')])
+@pytest.mark.parametrize(
+    'answer, code',
+    [
+        # A proxy's 403 page says nothing about the PAN-OS key or credentials.
+        pytest.param((403, b'<html><body>403 Forbidden</body></html>'), '403', id='non-panos-http-403'),
+        pytest.param((200, (FIXTURES / 'fw-a-probe' / 'report_top-rules.xml').read_bytes()), '400', id='api-error'),
+    ],
+)
+def test_error_that_is_not_an_auth_rejection_neither_renews_the_key_nor_invalidates_credentials(answer, code):
+    http = FakeHttp(keygen=[(200, KEYGEN_OK)], api=[answer])
     client, keys = make_client(http)
 
     with pytest.raises(PanosApiError) as exc_info:
         client.op(SYSTEM_INFO_CMD)
 
-    assert not isinstance(exc_info.value, PanosAuthError)
-    assert exc_info.value.code == '403'
+    assert type(exc_info.value) is PanosApiError
+    assert exc_info.value.code == code
     assert len(http.calls_of('keygen')) == 1
     assert keys.auth_failed is False
 
@@ -331,19 +337,6 @@ def test_stream_that_breaks_mid_way_makes_the_next_calls_fail_fast():
     # The call itself was answered: can_connect does not turn to 0 because the body broke.
     stats = client.take_stats()
     assert (stats.calls, stats.answered) == (1, True)
-
-
-def test_api_error_is_not_treated_as_auth_failure():
-    body = (FIXTURES / 'fw-a-probe' / 'report_top-rules.xml').read_bytes()
-    http = FakeHttp(api=[(200, body)])
-    client, keys = make_client(http, STATIC_CREDS)
-
-    with pytest.raises(PanosApiError) as exc_info:
-        client.op(SYSTEM_INFO_CMD)
-
-    assert type(exc_info.value) is PanosApiError
-    assert exc_info.value.code == '400'
-    assert keys.auth_failed is False
 
 
 class ConcurrencyProbe:

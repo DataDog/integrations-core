@@ -137,8 +137,7 @@ def test_tunnel_rows_become_ipsec_counters_with_the_tags_vpn_stored():
         'interface:tunnel.2',
     }
 
-
-def test_tunnel_row_that_vpn_does_not_list_is_not_an_ipsec_tunnel():
+    # A tunnel row that `vpn` does not list is not an IPsec tunnel.
     samples = parse_interface_counters(
         load_op(COUNTER_INTERFACE_CMD),
         FirewallState(),
@@ -170,7 +169,7 @@ def test_speed_is_megabits_converted_to_bits_and_unparseable_is_logged():
     assert 'fast' in str(log.debug.call_args)
 
 
-def test_speeds_are_sent_every_30_minutes_with_the_identity_not_every_3(
+def test_speeds_are_sent_as_gauges_every_30_minutes_with_the_identity_not_every_3(
     dd_run_check,
     aggregator,
     fake_panos,
@@ -189,13 +188,6 @@ def test_speeds_are_sent_every_30_minutes_with_the_identity_not_every_3(
 
     # Two interfaces report a speed: sent on the first run and on the 30-minute run only.
     assert sent == [2, 0, 0, 2]
-
-
-def test_speed_is_submitted_as_a_gauge_with_the_interface_tags_through_the_check(dd_run_check, aggregator, fake_panos):
-    fake_panos.answer_op(FW_A_IP, INTERFACE_ALL_CMD, (200, (SYNTHETIC / 'interface_all_speeds.xml').read_bytes()))
-
-    dd_run_check(new_check())
-
     for name, speed in (('ethernet1/1', 1e9), ('ethernet1/2', 1e10)):
         aggregator.assert_metric(
             'pan_firewall.interface.speed',
@@ -203,4 +195,3 @@ def test_speed_is_submitted_as_a_gauge_with_the_interface_tags_through_the_check
             tags=sorted([*FW_A_TAGS, *with_map_tags(name)]),
             metric_type=aggregator.GAUGE,
         )
-    assert len(aggregator.metrics('pan_firewall.interface.speed')) == 2

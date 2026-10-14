@@ -4,6 +4,8 @@
 import datetime
 from unittest import mock
 
+import pytest
+
 from datadog_checks.pan_firewall.collectors.licenses import LICENSE_INFO_CMD, parse_licenses
 
 from ..helpers import load_op, series
@@ -52,20 +54,10 @@ def test_expired_license_reports_one_and_negative_days():
     assert result['license.days_left', ('feature:pa_vm',)] == (-8, 'gauge')
 
 
-def test_perpetual_license_has_no_days_left():
+@pytest.mark.parametrize('expires', ['Never', '22/10/2026'], ids=['perpetual', 'unparseable-date'])
+def test_license_without_a_usable_expiry_reports_only_expired(expires):
     root = load_op(LICENSE_INFO_CMD)
-    entry(root, 'PA-VM').find('expires').text = 'Never'
-
-    result = series(parse_licenses(root, mock.Mock(), TODAY))
-
-    assert result['license.expired', ('feature:pa_vm',)] == (0, 'gauge')
-    assert ('license.days_left', ('feature:pa_vm',)) not in result
-    assert len(result) == 27
-
-
-def test_unparseable_date_reports_only_expired():
-    root = load_op(LICENSE_INFO_CMD)
-    entry(root, 'PA-VM').find('expires').text = '22/10/2026'
+    entry(root, 'PA-VM').find('expires').text = expires
 
     result = series(parse_licenses(root, mock.Mock(), TODAY))
 

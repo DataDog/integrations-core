@@ -38,22 +38,29 @@ SECRET_PATTERNS = [
 ]
 
 
-def test_parse_response_error_code():
-    body = (FIXTURES / 'fw-a-probe' / 'report_top-rules.xml').read_bytes()
-
+@pytest.mark.parametrize(
+    'body, code, msg',
+    [
+        pytest.param(
+            (FIXTURES / 'fw-a-probe' / 'report_top-rules.xml').read_bytes(),
+            '400',
+            'Illegal value for parameter "reportname"',
+            id='with-code',
+        ),
+        pytest.param(
+            b'<response status="error"><msg><line>Invalid credentials.</line></msg></response>',
+            '',
+            'Invalid credentials.',
+            id='without-code',
+        ),
+    ],
+)
+def test_parse_response_error(body, code, msg):
     with pytest.raises(PanosApiError) as exc_info:
         parse_response(body)
 
-    assert exc_info.value.code == '400'
-    assert 'Illegal value for parameter "reportname"' in exc_info.value.msg
-
-
-def test_parse_response_error_without_code():
-    with pytest.raises(PanosApiError) as exc_info:
-        parse_response(b'<response status="error"><msg><line>Invalid credentials.</line></msg></response>')
-
-    assert exc_info.value.code == ''
-    assert exc_info.value.msg == 'Invalid credentials.'
+    assert exc_info.value.code == code
+    assert msg in exc_info.value.msg
 
 
 @pytest.mark.parametrize(

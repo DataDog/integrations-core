@@ -27,7 +27,7 @@ def test_vm_series_has_no_sensors():
     log.warning.assert_not_called()
 
 
-def test_hardware_power_thresholds_and_alarms():
+def test_hardware_power_thresholds_and_alarms_and_thermal_values():
     log = mock.Mock()
     result = series(parse_environmentals(hardware(), log, set()))
 
@@ -58,10 +58,6 @@ def test_hardware_power_thresholds_and_alarms():
     assert power_series == expected
     log.warning.assert_called_once()
     assert 'Power Supply 5' in str(log.warning.call_args)
-
-
-def test_hardware_thermal_values_and_alarm():
-    result = series(parse_environmentals(hardware(), mock.Mock(), set()))
 
     expected = {}
     for description, degrees, alarm in (

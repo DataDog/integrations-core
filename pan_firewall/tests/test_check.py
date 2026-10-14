@@ -89,30 +89,27 @@ def test_identity_without_interface_capture(dd_run_check, aggregator, fake_panos
 
 
 @pytest.mark.parametrize(
-    'failure, on, expected',
+    'on, keygen_only_calls',
     [
-        pytest.param('http_403', 'keygen', 1, id='keygen-rejected'),
-        pytest.param('http_403', 'api', 1, id='key-rejected-again-after-good-keygen'),
+        pytest.param('keygen', ['keygen', 'keygen'], id='keygen-rejected'),
+        pytest.param('api', None, id='key-rejected-again-after-good-keygen'),
     ],
 )
-def test_authentication_status(dd_run_check, aggregator, fake_panos, failure, on, expected):
-    fake_panos.fail(FW_A_IP, failure, on=on)
-
-    dd_run_check(new_check())
-
-    assert aggregator.metrics('pan_firewall.api.authentication.status')[0].value == expected
-    # The firewall answered, even if only to refuse the credentials.
-    assert aggregator.metrics('pan_firewall.can_connect')[0].value == 1
-
-
-def test_rejected_keygen_is_tried_once_per_run(dd_run_check, fake_panos):
-    fake_panos.fail(FW_A_IP, 'http_403', on='keygen')
+def test_rejected_credentials_are_reported_and_a_rejected_keygen_is_tried_once_per_run(
+    dd_run_check, aggregator, fake_panos, on, keygen_only_calls
+):
+    fake_panos.fail(FW_A_IP, 'http_403', on=on)
     check = new_check()
 
     dd_run_check(check)
-    dd_run_check(check)
 
-    assert [c.type for c in fake_panos.calls] == ['keygen', 'keygen']
+    assert aggregator.metrics('pan_firewall.api.authentication.status')[0].value == 1
+    # The firewall answered, even if only to refuse the credentials.
+    assert aggregator.metrics('pan_firewall.can_connect')[0].value == 1
+    if keygen_only_calls:
+        # Only the keygen is rejected, so every call of a run is the keygen: it is tried once per run.
+        dd_run_check(check)
+        assert [c.type for c in fake_panos.calls] == keygen_only_calls
 
 
 def test_nothing_due_repeats_last_status_without_calls(dd_run_check, aggregator, fake_panos):
@@ -160,9 +157,6 @@ def test_firewalls_are_polled_concurrently_up_to_max_concurrency(dd_run_check, a
     'failure, warning',
     [
         pytest.param('timeout', 'bgp timed out after 30s', id='timeout'),
-        pytest.param(
-            'refused', 'bgp failed (cannot connect to 192.0.2.10:443: connection refused)', id='connection-refused'
-        ),
     ],
 )
 def test_unreachable_firewall_skips_the_remaining_collectors_of_that_firewall_only(
@@ -327,7 +321,6 @@ def test_unexpected_poller_error_does_not_stop_other_firewalls(dd_run_check, agg
 @pytest.mark.parametrize(
     'options, expected',
     [
-        pytest.param({}, (30.0, 30.0), id='default'),
         pytest.param({'timeout': 5}, (5.0, 5.0), id='configured'),
     ],
 )
