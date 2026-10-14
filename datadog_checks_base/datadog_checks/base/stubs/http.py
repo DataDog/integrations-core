@@ -18,6 +18,7 @@ from datadog_checks.base.utils.http_protocol import HTTPHeaders, HTTPRequestOpti
 __all__ = ['FakeHTTPClient', 'FakeHTTPResponse', 'RecordedRequest']
 
 JSON_RESULT_UNSET = object()
+SUPPRESSED_AUTH = object()
 
 
 class UnsetResponseResult(Enum):
@@ -271,6 +272,9 @@ class FakeHTTPClient:
 
     def set_header(self, name: str, value: str) -> None:
         set_header_value(self.options['headers'], name, value)
+
+    def disable_auth(self) -> None:
+        self.options['auth'] = SUPPRESSED_AUTH
 
     def close(self) -> None:
         self.closed = True
