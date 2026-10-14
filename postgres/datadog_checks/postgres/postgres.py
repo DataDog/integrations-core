@@ -349,6 +349,9 @@ class PostgreSql(DatabaseCheck):
         except psycopg.Error as e:
             err_msg = f"Database {self._config.dbname} connection health check failed: {str(e)}"
             self.log.error(err_msg)
+            # The connection is in an unusable state (e.g. "another command is already in progress"). Discard it so
+            # the next run reconnects, otherwise libpq keeps appending to the connection's error message on every run.
+            self._close_db()
             raise DatabaseHealthCheckError(err_msg)
 
     @property

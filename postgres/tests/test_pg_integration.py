@@ -1316,3 +1316,17 @@ def test_automatic_diagnostics_tags(aggregator, integration_check, pg_instance, 
     # Just check we don't error out and get basic metrics
     expected_tags = _get_expected_tags(check, pg_instance)
     check_common_metrics(aggregator, expected_tags)
+
+
+def test_connection_health_check_failure_closes_connection(pg_instance):
+    check = PostgreSql('postgres', {}, [pg_instance])
+    conn = mock.MagicMock()
+    conn.cursor().__enter__().execute.side_effect = psycopg.OperationalError('another command is already in progress')
+    check._db = conn
+
+    with pytest.raises(DatabaseHealthCheckError, match='another command is already in progress'):
+        check._connection_health_check(conn)
+
+    # the broken connection must be discarded so the next run reconnects
+    conn.close.assert_called_once()
+    assert check._db is None
