@@ -262,19 +262,39 @@ def test_credentials_are_matched_on_the_reported_ip(dd_run_check, fake_panos):
     assert keygen_users == {FW_A_IP: 'fw-a-user', FW_B_IP: 'subnet-user'}
 
 
-def test_firewall_without_matching_credentials_is_skipped_with_one_warning_per_ip(
+FW_A_ONLY_CREDENTIALS = [{'cidr': '192.0.2.10/32', 'username': 'u', 'password': 'p'}]
+
+
+def warnings_about(caplog, ip):
+    return [r for r in caplog.records if r.levelno == logging.WARNING and ip in r.getMessage()]
+
+
+def test_firewall_without_matching_credentials_is_skipped_with_a_warning_on_every_run(
     dd_run_check, aggregator, fake_panos, caplog
 ):
-    credentials = [{'cidr': '192.0.2.10/32', 'username': 'u', 'password': 'p'}]
-    check = new_check(firewall_credentials=credentials)
+    check = new_check(firewall_credentials=FW_A_ONLY_CREDENTIALS)
 
     dd_run_check(check)
     dd_run_check(check)
 
     assert polled_hosts(fake_panos) == {FW_A_IP}
     assert set(metrics_by_ip(aggregator, 'can_connect')) == {FW_A_IP}
-    warnings = [r for r in caplog.records if r.levelno == logging.WARNING and FW_B_IP in r.getMessage()]
-    assert len(warnings) == 1
+    assert len(warnings_about(caplog, FW_B_IP)) == 2
+    # Also in the Agent status, which drains them after each run.
+    assert [w for w in check.get_warnings() if FW_B_IP in w] == [
+        f'pan_firewall: no entry in `firewall_credentials` matches the firewall {FW_B_SERIAL} at {FW_B_IP}, skipping it'
+    ] * 2
+
+
+def test_missing_credentials_warning_stops_once_the_config_is_fixed(dd_run_check, fake_panos, caplog):
+    dd_run_check(new_check(firewall_credentials=FW_A_ONLY_CREDENTIALS))
+    caplog.clear()
+
+    # The config with a matching entry, after the Agent reloads it.
+    dd_run_check(new_check())
+
+    assert warnings_about(caplog, FW_B_IP) == []
+    assert FW_B_IP in polled_hosts(fake_panos)
 
 
 def test_can_connect_of_an_unreachable_discovered_firewall_carries_its_device_id(dd_run_check, aggregator, fake_panos):

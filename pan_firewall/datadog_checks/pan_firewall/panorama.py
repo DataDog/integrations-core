@@ -87,7 +87,6 @@ class PanoramaFirewallSource:
         credentials = Credentials(config.panorama_username, config.panorama_password, config.panorama_api_key)
         self._keys = KeyManager(http, self._host, credentials)
         self._client = PanosClient(http, self._host, self._keys, check.log)
-        self._warned: set[str] = set()
 
     def list_firewalls(self) -> list[FirewallTarget]:
         # One keygen attempt per run after a rejected one (the KeyManager latches until then).
@@ -162,8 +161,7 @@ class PanoramaFirewallSource:
             if target is None:
                 continue
             if target.ip in targets:
-                self._warn_once(
-                    f'duplicate:{target.ip}',
+                self._check.warning(
                     'pan_firewall: firewalls %s and %s are both polled at %s; only the first is polled',
                     targets[target.ip].serial,
                     firewall.serial,
@@ -174,11 +172,13 @@ class PanoramaFirewallSource:
         return list(targets.values())
 
     def _target(self, firewall: DiscoveredFirewall) -> FirewallTarget | None:
+        """The target to poll, or None. A firewall left out for a config reason is warned about on every run, also in
+        the Agent status: it is the only sign that the firewall is not monitored, and it stops once the config is
+        fixed."""
         polled = LAB_IP_OVERRIDES.get((firewall.serial, firewall.ip_address or ''), firewall.ip_address)
         address = _parse_ip(polled)
         if address is None:
-            self._warn_once(
-                f'no-ip:{firewall.serial}',
+            self._check.warning(
                 'pan_firewall: firewall %s has no usable IP address (Panorama reports `%s`), skipping it',
                 firewall.serial,
                 polled or '',
@@ -192,8 +192,7 @@ class PanoramaFirewallSource:
             return None
         credentials = resolve_credentials(ip, self._config.firewall_credentials or ())
         if credentials is None:
-            self._warn_once(
-                f'credentials:{ip}',
+            self._check.warning(
                 'pan_firewall: no entry in `firewall_credentials` matches the firewall %s at %s, skipping it',
                 firewall.serial,
                 ip,
@@ -217,12 +216,6 @@ class PanoramaFirewallSource:
             return False
         include = filters.include or ()
         return not include or any(address in ipaddress.ip_network(p, strict=False) for p in include)
-
-    def _warn_once(self, key: str, message: str, *args: object) -> None:
-        # The discovery runs every check run: a persistent condition is warned about once, not every run.
-        if key not in self._warned:
-            self._warned.add(key)
-            self._check.log.warning(message, *args)
 
 
 def readable_age(seconds: float) -> str:
