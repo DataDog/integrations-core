@@ -53,7 +53,6 @@ JOBS_CHECK = 'jobs'
 # Collectors of one firewall run at once; the client's own semaphore caps the calls in flight at the same number.
 COLLECTOR_WORKERS = 2
 
-# Collectors behind an option, to the `InstanceConfig` field that enables them.
 OPTIONAL_COLLECTORS = {
     'global_counters': 'collect_global_counters',
     'ospf': 'collect_ospf',

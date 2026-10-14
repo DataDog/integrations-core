@@ -29,8 +29,7 @@ class PanFirewallCheck(AgentCheck, ConfigMixin):
             )
         targets = self._source.list_firewalls()
 
-        for ip in set(self._pollers) - {target.ip for target in targets}:
-            del self._pollers[ip]
+        self._remove_stale_pollers({target.ip for target in targets})
         pollers = []
 
         for target in targets:
@@ -48,3 +47,7 @@ class PanFirewallCheck(AgentCheck, ConfigMixin):
                     future.result()
                 except Exception as e:
                     self.log.warning('pan_firewall %s: polling failed: %s', futures[future].ip, e, exc_info=True)
+
+    def _remove_stale_pollers(self, current_ips: set[str]) -> None:
+        for ip in set(self._pollers) - current_ips:
+            del self._pollers[ip]
