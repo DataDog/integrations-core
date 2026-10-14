@@ -1,1 +1,1 @@
-Limit lines read by OpenMetrics checks to 16 MiB so that a response without line breaks is no longer buffered in memory in its entirety.
+Limit lines read by OpenMetrics checks to 16 MiB, however the response is read (including for the `telemetry.payload.size` metric), so that a response without line breaks is no longer buffered in memory in its entirety.

@@ -1,1 +1,0 @@
-Limit the size of lines read by OpenMetrics checks however the response is read, including for the `telemetry.payload.size` metric.
