@@ -195,7 +195,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "min:cisco_catalyst_center.device.reachable{$catalyst_center_host} by {catalyst_center_host,device_name}",
+                      "query": "min:cisco_catalyst_center.device.reachable{$catalyst_center_host} by {catalyst_center_host,device_uuid}",
                       "aggregator": "last"
                     }
                   ],
