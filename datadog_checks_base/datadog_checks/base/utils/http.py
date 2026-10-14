@@ -9,11 +9,11 @@ import re
 import socket
 import warnings
 from collections import ChainMap
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from hashlib import sha256
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from urllib.parse import quote, urljoin, urlparse, urlunparse
 
 import lazy_loader
@@ -60,6 +60,10 @@ DEFAULT_EXPIRATION = 300
 # 16 KiB seems optimal, and is also the standard chunk size of the Bittorrent protocol:
 # https://www.bittorrent.org/beps/bep_0003.html
 DEFAULT_CHUNK_SIZE = 16
+
+# `iter_lines` buffers a line until its end, so OpenMetrics checks limit lines (in KiB) to avoid buffering an unbounded
+# response
+OPENMETRICS_MAX_LINE_SIZE = 16384
 
 STANDARD_FIELDS = {
     'allow_redirects': True,
@@ -229,6 +233,49 @@ class _SSLContextAdapter(requests.adapters.HTTPAdapter):
         # See: https://github.com/psf/requests/blob/7341690e842a23cf18ded0abd9229765fa88c4e2/src/requests/adapters.py#L419-L423
         host_params, _ = super().build_connection_pool_key_attributes(request, verify, cert)
         return host_params, {"ssl_context": self.ssl_context}
+
+
+class ResponseLineTooLongError(ValueError):
+    pass
+
+
+def limit_line_size(response: requests.Response, max_line_size: int) -> None:
+    """Make reading `response` raise `ResponseLineTooLongError` once a line is longer than `max_line_size` bytes."""
+    raw = getattr(response, 'raw', None)
+    # Don't overwrite test mocks or responses that are already limited
+    if hasattr(raw, 'stream') and not isinstance(raw, LineCappedRawResponse):
+        response.raw = LineCappedRawResponse(raw, max_line_size)
+
+
+class LineCappedRawResponse(ObjectProxy):
+    """
+    Wraps a urllib3 response so that its decoded stream, which `requests` reads the body from, raises
+    `ResponseLineTooLongError` once a line is longer than `max_line_size` bytes. Everything else is forwarded.
+    """
+
+    def __init__(self, raw: Any, max_line_size: int):
+        super().__init__(raw)
+        self._self_max_line_size = max_line_size
+
+    def stream(self, *args: Any, **kwargs: Any) -> Iterator[bytes]:
+        """
+        Yield the decoded body in chunks that each contain a line break, except possibly the last one. Raise
+        `ResponseLineTooLongError` once a line is longer than `max_line_size` bytes.
+        """
+        line_size = 0
+        group: list[bytes] = []
+        for chunk in self.__wrapped__.stream(*args, **kwargs):
+            newline = chunk.find(b'\n')
+            first_line_size = line_size + (len(chunk) if newline < 0 else newline)
+            if first_line_size > self._self_max_line_size:
+                raise ResponseLineTooLongError(f'Response contains a line longer than {self._self_max_line_size} bytes')
+            line_size = first_line_size if newline < 0 else len(chunk) - chunk.rfind(b'\n') - 1
+            group.append(chunk)
+            if newline >= 0:
+                yield b''.join(group)
+                group.clear()
+        if group:
+            yield b''.join(group)
 
 
 class ResponseWrapper(ObjectProxy):

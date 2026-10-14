@@ -11,6 +11,7 @@ from os.path import isfile
 from re import compile
 
 import requests
+from binary import KIBIBYTE
 from prometheus_client.samples import Sample
 
 from datadog_checks.base.agent import datadog_agent
@@ -19,7 +20,7 @@ from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_familie
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import to_native_string
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http import OPENMETRICS_MAX_LINE_SIZE, RequestsWrapper, limit_line_size
 
 
 class OpenMetricsScraperMixin(object):
@@ -860,7 +861,11 @@ class OpenMetricsScraperMixin(object):
 
         http_handler = self.get_http_handler(scraper_config)
 
-        return http_handler.get(endpoint, stream=True, **kwargs)
+        response = http_handler.get(endpoint, stream=True, **kwargs)
+        # Limit the response rather than the client, so that `response.content` and clients replaced by checks are
+        # limited too
+        limit_line_size(response, OPENMETRICS_MAX_LINE_SIZE * KIBIBYTE)
+        return response
 
     def get_hostname_for_sample(self, sample, scraper_config):
         """

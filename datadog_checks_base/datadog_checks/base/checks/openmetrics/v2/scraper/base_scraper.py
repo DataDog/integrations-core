@@ -10,6 +10,7 @@ from itertools import chain
 from math import isinf, isnan
 from typing import List  # noqa: F401
 
+from binary import KIBIBYTE
 from prometheus_client import Metric
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
 from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
@@ -24,7 +25,7 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http import OPENMETRICS_MAX_LINE_SIZE, RequestsWrapper, limit_line_size
 
 
 class OpenMetricsScraper:
@@ -468,7 +469,11 @@ class OpenMetricsScraper:
         """
 
         kwargs['stream'] = True
-        return self.http.get(self.endpoint, **kwargs)
+        response = self.http.get(self.endpoint, **kwargs)
+        # Limit the response rather than the client, so that `response.content` and clients replaced by checks are
+        # limited too
+        limit_line_size(response, OPENMETRICS_MAX_LINE_SIZE * KIBIBYTE)
+        return response
 
     def set_dynamic_tags(self, *tags):
         """
