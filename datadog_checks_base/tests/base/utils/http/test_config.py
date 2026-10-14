@@ -61,12 +61,6 @@ class TestRequestSize:
 
 
 class TestMaxLineSize:
-    def test_config_correct(self):
-        http = RequestsWrapper({'max_line_size': 0.5, 'request_size': 0.5}, {})
-
-        assert isinstance(http.max_line_size, int)
-        assert http.max_line_size == 512
-
     @pytest.mark.parametrize('instance', [{'max_line_size': 0}, {'max_line_size': 1, 'request_size': 2}])
     def test_config_invalid(self, instance):
         with pytest.raises(ConfigurationError, match='`max_line_size` setting must be at least `request_size`'):

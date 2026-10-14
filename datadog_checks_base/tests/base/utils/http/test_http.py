@@ -404,11 +404,11 @@ def test_iter_lines_allows_custom_delimiter_without_limit():
 
 
 def test_iter_lines_uses_configured_line_size():
-    # Chunks of 256 bytes, smaller than the limit of 1 KiB
-    http = RequestsWrapper({'max_line_size': 1, 'request_size': 0.25}, {})
+    # Chunks of 256 bytes, smaller than the limit of 0.5 KiB
+    http = RequestsWrapper({'max_line_size': 0.5, 'request_size': 0.25}, {})
 
-    with mock.patch('requests.Session.get', return_value=_gzip_response(b'x' * 1024 + b'\ny\n')):
+    with mock.patch('requests.Session.get', return_value=_gzip_response(b'x' * 512 + b'\ny\n')):
         assert len(list(http.get('https://www.google.com', stream=True).iter_lines())) == 2
-    with mock.patch('requests.Session.get', return_value=_gzip_response(b'x' * 1025 + b'\ny\n')):
+    with mock.patch('requests.Session.get', return_value=_gzip_response(b'x' * 513 + b'\ny\n')):
         with pytest.raises(ResponseLineTooLongError, match=r'`max_line_size` option \(in KiB\)'):
             list(http.get('https://www.google.com', stream=True).iter_lines())
