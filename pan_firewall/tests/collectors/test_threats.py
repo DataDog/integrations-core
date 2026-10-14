@@ -354,6 +354,18 @@ def test_job_still_active_is_polled_next_run_without_resubmitting(firewall):
     assert firewall.watermark == 1002
 
 
+def test_failed_job_clears_the_pending_job_and_counts_nothing(firewall):
+    firewall.seed(1000)
+    failed = ACT.replace(b'<status>ACT</status>', b'<status>FAIL</status>')
+    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1001), 0, failed)
+
+    with pytest.raises(PanosApiError, match='ended with status FAIL'):
+        firewall.collect()
+
+    assert firewall.ctx.state.threats.pending is None
+    assert firewall.watermark == 1000
+
+
 def test_pages_counted_before_a_job_is_still_active_are_kept(firewall, monkeypatch):
     monkeypatch.setattr(constants, 'THREAT_PAGE_SIZE', 2)
     firewall.seed(1000)

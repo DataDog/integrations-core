@@ -4,10 +4,9 @@
 import threading
 from unittest import mock
 
-import pytest
-
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, FirewallState
 from datadog_checks.pan_firewall.collectors.vpn import VPN_FLOW_CMD, VPN_GATEWAY_CMD, collect_vpn, parse_vpn
+from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from ..common import FW_A_TAGS
 from ..helpers import load_op, make_ctx, new_check, series
@@ -90,14 +89,14 @@ def test_gateway_total_counts_gateways_without_an_id_or_a_name():
     assert series(snapshot.samples)[('ipsec.gateways.total', ())] == (len(entries), 'gauge')
 
 
-def test_failed_vpn_call_keeps_the_stored_tunnels():
-    state = FirewallState(tunnel_states={'tunnel.1': 'active'})
-    ctx = make_ctx({}, state=state)
+def test_vpn_answer_without_result_keeps_the_stored_tunnels():
+    tags = {'tunnel.1': ('tunnel:tun-peer', 'tunnel_interface:tunnel.1')}
+    state = FirewallState(tunnel_tags=dict(tags), tunnel_states={'tunnel.1': 'active'})
+    ctx = make_ctx(parse_response(b'<response status="success"/>'), state=state)
 
-    with pytest.raises(KeyError):
-        collect_vpn(ctx)
+    assert collect_vpn(ctx) == []
 
-    assert state.tunnel_states == {'tunnel.1': 'active'}
+    assert (state.tunnel_tags, state.tunnel_states) == (tags, {'tunnel.1': 'active'})
 
 
 def test_tunnel_counters_wait_for_the_run_after_vpn_first_answers_whatever_the_collector_order(

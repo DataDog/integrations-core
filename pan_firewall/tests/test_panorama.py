@@ -374,6 +374,22 @@ def test_unreachable_panorama_without_a_cached_list_polls_nothing_and_does_not_r
     assert any(r.levelno == logging.WARNING and 'no discovered firewalls' in r.getMessage() for r in caplog.records)
 
 
+def test_corrupt_cached_list_is_treated_as_no_cached_list(dd_run_check, aggregator, fake_panos, caplog):
+    check = new_check()
+    dd_run_check(check)
+    check.write_persistent_cache(f'panorama_firewalls:{PANORAMA}', '[{"serial": "007955000930601"')
+    fake_panos.fail(PANORAMA, 'refused')
+    calls = len(fake_panos.calls)
+    aggregator.reset()
+
+    # A new check instance reads the list from the persistent cache, as after an Agent restart.
+    dd_run_check(new_check())
+
+    assert polled_hosts(fake_panos, skip=calls) == set()
+    assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))]
+    assert any(r.levelno == logging.WARNING and 'no discovered firewalls' in r.getMessage() for r in caplog.records)
+
+
 def test_cached_list_holds_no_credentials(dd_run_check):
     check = new_check(panorama_api_key='secret-panorama-key')
     dd_run_check(check)

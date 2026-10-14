@@ -401,6 +401,13 @@ def test_slow_firewall_is_polled_every_run_until_all_reports_are_collected_then_
 
     assert len(report_calls(fake_panos)) == calls
 
+    # 30 minutes later the cycle starts again from the first report.
+    schedule_clock.now += 1800
+    dd_run_check(check)
+
+    submits = [c for c in report_calls(fake_panos)[calls:] if c.action is None]
+    assert submits and submits[0].params['cmd'] == report_calls(fake_panos)[0].params['cmd']
+
 
 def test_reports_are_registered_and_submit_through_the_check_when_enabled(
     real_collectors, dd_run_check, aggregator, fake_panos

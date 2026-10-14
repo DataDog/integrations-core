@@ -38,7 +38,7 @@ def test_lab_password_never_leaks(caplog, aggregator, environ, secrets):
     # change which mode (or whose password) this test builds.
     check = new_check(build_lab_instance(environ))
     with caplog.at_level(logging.DEBUG):
-        check.run()
+        assert check.run() == ''
 
     # Not `repr(check.config)`: generated pydantic models keep secrets as plain `str`, so it shows the password.
     # That is true of every integration, and the check never logs or prints its config.

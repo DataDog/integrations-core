@@ -39,8 +39,15 @@ THREAT_LOGS = (FIXTURES / 'fw-a' / 'threat_log_5m.xml').read_bytes()
 INVALID_CREDENTIAL = (FIXTURES / 'synthetic' / 'auth_invalid_credential.xml').read_bytes()
 CODE_16 = (FIXTURES / 'synthetic' / 'auth_code_16.xml').read_bytes()
 
-# The keygen success shape (`result/key`) from the PAN-OS XML API docs. Kept inline: fixture files must hold no key.
-KEYGEN_OK = f'<response status="success"><result><key>{GENERATED_KEY}</key></result></response>'.encode()
+
+def keygen_ok(key):
+    """The keygen success shape (`result/key`) from the PAN-OS XML API docs. Kept inline: fixture files hold no key."""
+    return f'<response status="success"><result><key>{key}</key></result></response>'.encode()
+
+
+KEYGEN_OK = keygen_ok(GENERATED_KEY)
+# A first key, then the one a renewal gets: a retry must carry the second.
+KEY_1, KEY_2 = 'GENERATED-KEY-1', 'GENERATED-KEY-2'
 
 # Auth rejections the client must treat as an expired key, with the HTTP status they arrive with.
 AUTH_FAILURES = [
@@ -110,7 +117,7 @@ def test_keygen_posts_credentials_in_body_and_key_only_in_header():
 def test_key_never_leaks_into_urls_logs_or_errors(caplog):
     caplog.set_level(logging.DEBUG)
     http = FakeHttp(
-        keygen=[(200, KEYGEN_OK), (200, KEYGEN_OK)],
+        keygen=[(200, keygen_ok(KEY_1)), (200, keygen_ok(KEY_2))],
         api=[
             (200, SYSTEM_INFO),
             (200, THREAT_SUBMIT),
@@ -136,28 +143,31 @@ def test_key_never_leaks_into_urls_logs_or_errors(caplog):
             errors.append(e)
 
     assert [type(e) for e in errors] == [PanosAuthError, PanosConnectionError]
+    # The retry after the first rejection carries the renewed key.
+    assert [c['extra_headers']['X-PAN-KEY'] for c in http.calls_of('api')][4:6] == [KEY_1, KEY_2]
     for call in http.calls:
         sent = ' '.join([call['url'], *call['data'].keys(), *call['data'].values()])
-        assert GENERATED_KEY not in sent
+        assert KEY_1 not in sent and KEY_2 not in sent
         assert 'key=' not in call['url']
     for text in [caplog.text, repr(keys)]:
-        for secret in (GENERATED_KEY, STATIC_KEY, 's3cret-pw'):
+        for secret in (KEY_1, KEY_2, STATIC_KEY, 's3cret-pw'):
             assert secret not in text
     for error in errors:
-        assert GENERATED_KEY not in str(error)
-        assert GENERATED_KEY not in repr(error)
+        for key in (KEY_1, KEY_2):
+            assert key not in str(error)
+            assert key not in repr(error)
 
 
 @pytest.mark.parametrize('status, body', AUTH_FAILURES)
 def test_rejected_key_is_regenerated_once_and_the_call_retried(status, body):
-    http = FakeHttp(keygen=[(200, KEYGEN_OK), (200, KEYGEN_OK)], api=[(status, body), (200, SYSTEM_INFO)])
+    http = FakeHttp(keygen=[(200, keygen_ok(KEY_1)), (200, keygen_ok(KEY_2))], api=[(status, body), (200, SYSTEM_INFO)])
     client, keys = make_client(http)
 
     root = client.op(SYSTEM_INFO_CMD)
 
     assert root.findtext('./result/system/hostname') == 'fw-a'
     assert len(http.calls_of('keygen')) == 2
-    assert len(http.calls_of('api')) == 2
+    assert [c['extra_headers']['X-PAN-KEY'] for c in http.calls_of('api')] == [KEY_1, KEY_2]
     assert keys.auth_failed is False
 
 
@@ -175,7 +185,7 @@ def test_key_rejected_again_after_regeneration_raises():
 
 
 def test_log_stream_regenerates_a_rejected_key():
-    http = FakeHttp(keygen=[(200, KEYGEN_OK), (200, KEYGEN_OK)], api=[(200, CODE_16), (200, THREAT_LOGS)])
+    http = FakeHttp(keygen=[(200, keygen_ok(KEY_1)), (200, keygen_ok(KEY_2))], api=[(200, CODE_16), (200, THREAT_LOGS)])
     client, _ = make_client(http)
 
     with client.open_log_job('2') as (status, entries):
@@ -185,6 +195,7 @@ def test_log_stream_regenerates_a_rejected_key():
     assert len(seqnos) == 39
     assert http.calls_of('api')[-1]['data'] == {'type': 'log', 'action': 'get', 'job-id': '2'}
     assert http.calls_of('api')[-1]['stream'] is True
+    assert [c['extra_headers']['X-PAN-KEY'] for c in http.calls_of('api')] == [KEY_1, KEY_2]
     assert len(http.calls_of('keygen')) == 2
 
 
@@ -207,7 +218,7 @@ def test_rejected_keygen_is_not_retried_until_reset(keygen, api, keygens_before_
     http = FakeHttp(keygen=keygen, api=api)
     client, keys = make_client(http)
 
-    # The later call of the same run (or a second call in flight with the same key) must not log in again.
+    # The later call of the same run must not log in again.
     for _ in range(2):
         with pytest.raises(PanosAuthError):
             client.op(SYSTEM_INFO_CMD)
@@ -219,6 +230,18 @@ def test_rejected_keygen_is_not_retried_until_reset(keygen, api, keygens_before_
 
     assert len(http.calls_of('keygen')) == keygens_before_reset + 1
     assert keys.auth_failed is False
+
+
+def test_calls_rejected_with_the_same_key_renew_it_once():
+    http = FakeHttp(keygen=[(200, keygen_ok(key)) for key in (KEY_1, KEY_2, 'GENERATED-KEY-3')])
+    client, keys = make_client(http)
+    assert keys.key() == KEY_1
+
+    # Two calls in flight both rejected with KEY-1: only the first regenerates, the second takes its key.
+    renewed = [client._renew(KEY_1), client._renew(KEY_1)]
+
+    assert renewed == [KEY_2, KEY_2]
+    assert len(http.calls_of('keygen')) == 2
 
 
 @pytest.mark.parametrize(
@@ -254,10 +277,24 @@ def test_static_key_is_never_regenerated():
     assert http.calls[0]['extra_headers'] == {'X-PAN-KEY': STATIC_KEY}
 
 
+def test_static_key_accepted_again_clears_the_auth_failure():
+    http = FakeHttp(api=[(403, INVALID_CREDENTIAL), (200, SYSTEM_INFO)])
+    client, keys = make_client(http, STATIC_CREDS)
+    with pytest.raises(PanosAuthError):
+        client.op(SYSTEM_INFO_CMD)
+    assert keys.auth_failed is True
+
+    client.op(SYSTEM_INFO_CMD)
+
+    assert keys.auth_failed is False
+
+
 @pytest.mark.parametrize(
     'raised, expected, message',
     [
         pytest.param(TRANSPORT_ERRORS['timeout'], PanosTimeout, 'timed out', id='timeout'),
+        # ConnectTimeout is both a Timeout and a ConnectionError: it is a timeout.
+        pytest.param(TRANSPORT_ERRORS['connect_timeout'], PanosTimeout, 'timed out', id='connect-timeout'),
         pytest.param(
             TRANSPORT_ERRORS['refused'],
             PanosConnectionError,

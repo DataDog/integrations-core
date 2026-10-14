@@ -20,13 +20,14 @@ from ..helpers import load_op, load_xml, make_ctx, series
 
 
 def peer_samples(tags, *, status, duration, restart, updates, limit, prefixes=None):
-    """The expected samples of one peer; `prefixes` maps a family tag to its four counters and utilization."""
+    """The expected samples of one peer; `updates` is (in, out); `prefixes` maps a family tag to its four counters
+    and utilization."""
     expected = {
         ('bgp.peer.status', tags): (status, 'gauge'),
         ('bgp.peer.status_duration', tags): (duration, 'gauge'),
         ('bgp.peer.restart', tags): (restart, 'gauge'),
-        ('bgp.peer.updates.in', tags): (updates, 'monotonic_count'),
-        ('bgp.peer.updates.out', tags): (updates, 'monotonic_count'),
+        ('bgp.peer.updates.in', tags): (updates[0], 'monotonic_count'),
+        ('bgp.peer.updates.out', tags): (updates[1], 'monotonic_count'),
         ('bgp.peer.prefix_limit', tags): (limit, 'gauge'),
     }
     names = ('incoming.total', 'incoming.rejected', 'outgoing.total', 'outgoing.advertised')
@@ -47,8 +48,8 @@ def test_bgp_of_the_capture():
     samples = parse_bgp_peers(load_op(BGP_PEER_CMD))
 
     # The down peer reports zeros and its configured limit, and has no prefix family to report.
-    down = peer_samples(FW_A_DEAD, status=0, duration=0, restart=0, updates=0, limit=5000)
-    up = peer_samples(FW_A_PEER, status=1, duration=4856, restart=0, updates=2, limit=10, prefixes=IPV4)
+    down = peer_samples(FW_A_DEAD, status=0, duration=0, restart=0, updates=(0, 0), limit=5000)
+    up = peer_samples(FW_A_PEER, status=1, duration=4856, restart=0, updates=(2, 2), limit=10, prefixes=IPV4)
     assert series(samples) == {**down, **up}
 
 
@@ -67,7 +68,10 @@ def test_bgp_established_peer_is_a_restart_within_30_minutes():
 
 
 def test_bgp_dual_stack_peer_reports_each_family_with_its_own_utilization():
-    samples = parse_bgp_peers(load_xml(SYNTHETIC / 'bgp_peer_dual_stack.xml'))
+    root = load_xml(SYNTHETIC / 'bgp_peer_dual_stack.xml')
+    # Different in and out counts, so a swap shows.
+    root.find("result/entry[@peer='fw-peer']/msg-update-out").text = '7'
+    samples = parse_bgp_peers(root)
 
     tags = ('peer:fw-peer', 'vr:default', 'peer_ip:2001:db8::1', 'remote_as:65002', 'peer_group:lab')
     assert series(samples) == peer_samples(
@@ -75,7 +79,7 @@ def test_bgp_dual_stack_peer_reports_each_family_with_its_own_utilization():
         status=1,
         duration=4856,
         restart=0,
-        updates=2,
+        updates=(2, 7),
         limit=4,
         prefixes={'ipv4_unicast': ((1, 0, 1, 1), 25.0), 'ipv6_unicast': ((3, 1, 5, 4), 75.0)},
     )

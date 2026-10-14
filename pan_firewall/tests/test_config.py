@@ -76,6 +76,12 @@ def test_valid_config_loads(dd_run_check, base, changes):
         ),
         pytest.param(
             STATIC_INSTANCE,
+            {'firewall_credentials': [{'username': 'u', 'api_key': 'k'}]},
+            'entry 0 must set',
+            id='credential-key-and-username',
+        ),
+        pytest.param(
+            STATIC_INSTANCE,
             {'firewall_credentials': [{'cidr': '192.0.2.0/99', 'username': 'u', 'password': 'p'}]},
             'invalid `cidr`: `192.0.2.0/99`',
             id='bad-cidr',

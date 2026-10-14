@@ -6,12 +6,13 @@ from xml.etree import ElementTree as ET
 
 from datadog_checks.pan_firewall.auth import Credentials
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, FirewallState
+from datadog_checks.pan_firewall.collectors.ha import HA_CMD, collect_ha
 from datadog_checks.pan_firewall.firewalls import FirewallTarget
 from datadog_checks.pan_firewall.identity import global_tags, parse_system_info
 from datadog_checks.pan_firewall.metadata import build_device, build_interfaces
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from .common import FIXTURES, FW_A_IP, FW_A_SERIAL, INTERFACE_ALL_CMD, SYSTEM_INFO_CMD
+from .common import FIXTURES, FW_A_IP, FW_A_SERIAL, INTERFACE_ALL_CMD, SYNTHETIC, SYSTEM_INFO_CMD
 from .fake_panos import FIREWALL_SETS
 from .helpers import make_instance, new_check
 
@@ -140,6 +141,16 @@ def test_first_run_sends_the_device_and_its_interfaces(dd_run_check, aggregator,
     )
     assert f'dd.internal.resource:ndm_device:{FW_A_SERIAL}' in device['tags']
     assert len(event['interfaces']) == 7
+
+
+def test_device_event_carries_the_ha_state_of_an_ha_firewall(dd_run_check, aggregator, fake_panos, monkeypatch):
+    monkeypatch.setitem(COLLECT_FUNCTIONS, 'ha', collect_ha)
+    fake_panos.answer_op(FW_A_IP, HA_CMD, (200, (SYNTHETIC / 'ha_all_enabled.xml').read_bytes()))
+
+    dd_run_check(new_check())
+
+    (device,) = [device for event in events(aggregator) for device in event.get('devices', [])]
+    assert 'ha_state:active' in device['tags']
 
 
 def test_250_interfaces_are_sent_in_three_events(dd_run_check, aggregator, fake_panos):
