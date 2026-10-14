@@ -40,6 +40,15 @@ def load_op(cmd, firewall='fw-a'):
     return load_xml(op_fixture(cmd, firewall))
 
 
+def interface_state(path):
+    """The state the identity step builds from the `show interface all` answer at `path`."""
+    root = load_xml(path)
+    return FirewallState(
+        interface_rows=root.findall('./result/ifnet/entry'),
+        interface_map={e.findtext('name') or '': e for e in root.findall('./result/hw/entry')},
+    )
+
+
 def series(samples):
     """Samples keyed by (name, tags) to (value, kind); fails on a duplicate (two values for one series)."""
     result = {(s.name, s.tags): (s.value, s.kind) for s in samples}

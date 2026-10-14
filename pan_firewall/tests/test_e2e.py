@@ -7,7 +7,15 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from .common import E2E_FIREWALL_IPS, E2E_PANORAMA_IP, E2E_PANORAMA_NAMESPACE, lab_hosts, lab_mode, lab_panorama_host
+from .common import (
+    E2E_FIREWALL_IPS,
+    E2E_PANORAMA_IP,
+    E2E_PANORAMA_NAMESPACE,
+    MIB,
+    lab_hosts,
+    lab_mode,
+    lab_panorama_host,
+)
 
 LAB = bool(os.environ.get('USE_PANOS_LAB'))
 
@@ -46,7 +54,6 @@ def test_lab(dd_agent_check):
 
 # Both instances poll each fake firewall at its container address, which the fake Panorama reports for it. The
 # Panorama instance has its own namespace, so the two instances stay distinguishable.
-MIB = 1024**2
 DOCKER_FIREWALLS = {
     'fw-a': {'ip': E2E_FIREWALL_IPS['fw-a'], 'cpu_user': 8.2},
     'fw-b': {'ip': E2E_FIREWALL_IPS['fw-b'], 'cpu_user': 8.1},

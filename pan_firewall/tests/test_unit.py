@@ -16,7 +16,7 @@ from datadog_checks.pan_firewall.errors import PanosApiError
 from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 from datadog_checks.pan_firewall.xml_utils import num, parse_response, text
 
-from .common import CREDENTIALS, FIXTURES, FW_A_SERIAL, FW_A_TAGS, SYSTEM_INFO_CMD
+from .common import CREDENTIALS, FIXTURES, FW_A_PEER, FW_A_SERIAL, FW_A_TAGS, FW_A_TUNNEL, SYSTEM_INFO_CMD
 from .fake_panos import FIREWALL_SETS
 from .fixture_map import (
     LOG_FIXTURES,
@@ -359,7 +359,6 @@ def test_a_threat_job_still_running_is_polled_again_on_the_next_run_not_in_5_min
 
 # One row per collector whose samples the check submits as they come: (metric, extra tags, type). The parser tests pin
 # every value; these rows pin that the check submits each collector's metrics with the right type and the global tags.
-PEER = ('peer:fw-peer', 'vr:default', 'peer_ip:169.254.10.2', 'remote_as:65002', 'peer_group:lab')
 ETHERNET1_1 = (
     'interface:ethernet1/1',
     'interface_type:ethernet',
@@ -368,18 +367,11 @@ ETHERNET1_1 = (
     'vr:default',
     f'dd.internal.resource:ndm_interface:{FW_A_SERIAL}',
 )
-TUN_PEER = (
-    'tunnel:tun-peer',
-    'tunnel_interface:tunnel.1',
-    'peer_ip:10.60.1.11',
-    'gateway:gw-peer',
-    'outer_interface:ethernet1/1',
-)
 CHECK_LEVEL_SERIES = [
     ('counter.global', ('counter:pkt_recv', 'category:packet', 'aspect:pktproc'), MONOTONIC),  # global_counters
     ('interface.rx.bytes', ETHERNET1_1, MONOTONIC),  # interfaces
     ('license.expired', ('feature:pan_db_url_filtering',), GAUGE),  # licenses
-    ('bgp.peer.status', PEER, GAUGE),  # bgp
+    ('bgp.peer.status', FW_A_PEER, GAUGE),  # bgp
     (
         'ospf.neighbor.status',
         ('neighbor:169.254.10.2', 'router_id:10.255.0.2', 'area:0.0.0.0', 'vr:default'),
@@ -389,7 +381,7 @@ CHECK_LEVEL_SERIES = [
     ('mgmt.cpu.user', (), GAUGE),  # system_resources
     ('dataplane.cpu.utilization', ('dp:dp0', 'core:2'), GAUGE),  # dataplane
     ('disk.used_pct', ('mount:/opt/pancfg', 'filesystem:/dev/nvme0n1p5'), GAUGE),  # disk
-    ('ipsec.tunnel.state', TUN_PEER, GAUGE),  # vpn
+    ('ipsec.tunnel.state', FW_A_TUNNEL, GAUGE),  # vpn
 ]
 
 

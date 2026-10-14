@@ -8,7 +8,7 @@ from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, FirewallSt
 from datadog_checks.pan_firewall.collectors.vpn import VPN_FLOW_CMD, VPN_GATEWAY_CMD, collect_vpn, parse_vpn
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from ..common import FW_A_TAGS
+from ..common import FW_A_TAGS, FW_A_TUNNEL
 from ..helpers import load_op, make_ctx, new_check, series
 
 
@@ -128,7 +128,7 @@ def test_tunnel_counters_wait_for_the_run_after_vpn_first_answers_whatever_the_c
 
     schedule_clock.now += 180
     dd_run_check(check)
-    full_tags = sorted([*FW_A_TAGS, *tunnel_tags('tun-peer', 'tunnel.1', '10.60.1.11', 'gw-peer')])
+    full_tags = sorted([*FW_A_TAGS, *FW_A_TUNNEL])
     aggregator.assert_metric(
         'pan_firewall.ipsec.tunnel.rx.bytes', 1563183, tags=full_tags, metric_type=aggregator.MONOTONIC_COUNT
     )

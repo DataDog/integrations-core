@@ -15,7 +15,7 @@ from datadog_checks.pan_firewall.collectors.routing import (
     peer_ip,
 )
 
-from ..common import SYNTHETIC
+from ..common import FW_A_PEER, SYNTHETIC
 from ..helpers import load_op, load_xml, make_ctx, series
 
 
@@ -40,7 +40,6 @@ def peer_samples(tags, *, status, duration, restart, updates, limit, prefixes=No
 
 
 FW_A_DEAD = ('peer:dead-peer', 'vr:default', 'peer_ip:10.60.1.250', 'remote_as:65099', 'peer_group:lab')
-FW_A_PEER = ('peer:fw-peer', 'vr:default', 'peer_ip:169.254.10.2', 'remote_as:65002', 'peer_group:lab')
 IPV4 = {'ipv4_unicast': ((1, 0, 1, 1), 10.0)}
 
 

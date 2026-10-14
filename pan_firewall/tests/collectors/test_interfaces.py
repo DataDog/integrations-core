@@ -10,10 +10,9 @@ from datadog_checks.pan_firewall.collectors.interfaces import (
     parse_interface_speeds,
 )
 
-from ..common import FIXTURES, FW_A_IP, FW_A_TAGS, INTERFACE_ALL_CMD, SYNTHETIC
-from ..helpers import load_op, load_xml, new_check, series
+from ..common import FW_A_INTERFACE_ALL, FW_A_IP, FW_A_SERIAL, FW_A_TAGS, INTERFACE_ALL_CMD, INTERFACE_NAMES, SYNTHETIC
+from ..helpers import interface_state, load_op, new_check, series
 
-SERIAL = '007955000930601'
 COUNTER_FIELDS = {
     'ibytes': 'interface.rx.bytes',
     'obytes': 'interface.tx.bytes',
@@ -32,13 +31,10 @@ COUNTER_FIELDS = {
 ZERO = dict.fromkeys(COUNTER_FIELDS, 0)
 # Values of the `ifnet/ifnet/entry` rows of the capture, in COUNTER_FIELDS order.
 FW_A_ROWS = {
+    **dict.fromkeys(INTERFACE_NAMES, (0,) * 13),
     'ethernet1/1': (153738451, 3120586, 119008, 30547, 0, 0, 0, 3, 0, 0, 0, 0, 0),
     'ethernet1/2': (2213914, 152466233, 25062, 110271, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-    'loopback': (0,) * 13,
-    'loopback.1': (0,) * 13,
-    'tunnel': (0,) * 13,
     'tunnel.1': (1563183, 919234, 11275, 5157, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-    'tunnel.2': (0,) * 13,
 }
 FW_A_TUNNELS = {'tunnel.1': (1563183, 919234, 11275, 5157), 'tunnel.2': (0, 0, 0, 0)}
 # interface, interface_type, zone, vsys, vr
@@ -55,16 +51,7 @@ MAP_TAGS = {
 
 def resource_tag(name):
     # Same shape as hpe_aruba_edgeconnect: the device id only, the `interface` tag identifies the port.
-    return f'dd.internal.resource:ndm_interface:{SERIAL}'
-
-
-def state_from(path):
-    """The state the identity step builds from a `show interface all` answer."""
-    root = load_xml(path)
-    state = FirewallState()
-    state.interface_rows = root.findall('./result/ifnet/entry')
-    state.interface_map = {e.findtext('name'): e for e in root.findall('./result/hw/entry')}
-    return state
+    return f'dd.internal.resource:ndm_interface:{FW_A_SERIAL}'
 
 
 def expected_interfaces(rows, tags_of):
@@ -80,8 +67,8 @@ def with_map_tags(name):
 
 
 def test_interface_counters_with_the_interface_map():
-    state = state_from(FIXTURES / 'fw-a-probe' / 'interface_all.xml')
-    samples = parse_interface_counters(load_op(COUNTER_INTERFACE_CMD), state, SERIAL, None, mock.Mock())
+    state = interface_state(FW_A_INTERFACE_ALL)
+    samples = parse_interface_counters(load_op(COUNTER_INTERFACE_CMD), state, FW_A_SERIAL, None, mock.Mock())
 
     interface_samples = [s for s in samples if s.name.startswith('interface.')]
     assert series(interface_samples) == expected_interfaces(FW_A_ROWS, with_map_tags)
@@ -89,23 +76,23 @@ def test_interface_counters_with_the_interface_map():
 
 def test_interface_counters_without_a_map_carry_the_interface_tag_only():
     # Without `show interface all` (fw-b has no capture of it, ruling R7) the state holds no interface map.
-    samples = parse_interface_counters(load_op(COUNTER_INTERFACE_CMD), FirewallState(), SERIAL, None, mock.Mock())
+    samples = parse_interface_counters(load_op(COUNTER_INTERFACE_CMD), FirewallState(), FW_A_SERIAL, None, mock.Mock())
 
     assert series(samples) == expected_interfaces(FW_A_ROWS, lambda name: (f'interface:{name}',))
 
 
 def test_interface_without_an_ifnet_row_gets_the_type_and_the_resource_tag():
-    state = state_from(FIXTURES / 'fw-a-probe' / 'interface_all.xml')
+    state = interface_state(FW_A_INTERFACE_ALL)
     state.interface_rows = [r for r in state.interface_rows if r.findtext('name') != 'ethernet1/2']
 
-    samples = parse_interface_counters(load_op(COUNTER_INTERFACE_CMD), state, SERIAL, None, mock.Mock())
+    samples = parse_interface_counters(load_op(COUNTER_INTERFACE_CMD), state, FW_A_SERIAL, None, mock.Mock())
 
     tags = {s.tags for s in samples if s.name == 'interface.rx.bytes' and 'interface:ethernet1/2' in s.tags}
     assert tags == {('interface:ethernet1/2', 'interface_type:ethernet', resource_tag('ethernet1/2'))}
 
 
 def test_resource_tag_is_omitted_without_a_serial():
-    state = state_from(FIXTURES / 'fw-a-probe' / 'interface_all.xml')
+    state = interface_state(FW_A_INTERFACE_ALL)
 
     samples = parse_interface_counters(load_op(COUNTER_INTERFACE_CMD), state, None, None, mock.Mock())
 
@@ -119,7 +106,7 @@ def tunnel_tags(name):
 def test_tunnel_rows_become_ipsec_counters_with_the_tags_vpn_stored():
     known = {name: tunnel_tags(name) for name in FW_A_TUNNELS}
 
-    samples = parse_interface_counters(load_op(COUNTER_INTERFACE_CMD), FirewallState(), SERIAL, known, mock.Mock())
+    samples = parse_interface_counters(load_op(COUNTER_INTERFACE_CMD), FirewallState(), FW_A_SERIAL, known, mock.Mock())
 
     ipsec = [s for s in samples if s.name.startswith('ipsec.')]
     expected = {}
@@ -140,7 +127,7 @@ def test_tunnel_rows_become_ipsec_counters_with_the_tags_vpn_stored():
     samples = parse_interface_counters(
         load_op(COUNTER_INTERFACE_CMD),
         FirewallState(),
-        SERIAL,
+        FW_A_SERIAL,
         {'tunnel.1': tunnel_tags('tunnel.1')},
         mock.Mock(),
     )
@@ -149,16 +136,16 @@ def test_tunnel_rows_become_ipsec_counters_with_the_tags_vpn_stored():
 
 
 def test_speeds_of_the_capture_are_not_sent():
-    state = state_from(FIXTURES / 'fw-a-probe' / 'interface_all.xml')
+    state = interface_state(FW_A_INTERFACE_ALL)
 
-    assert parse_interface_speeds(state, SERIAL, mock.Mock()) == []
+    assert parse_interface_speeds(state, FW_A_SERIAL, mock.Mock()) == []
 
 
 def test_speed_is_megabits_converted_to_bits_and_unparseable_is_logged():
-    state = state_from(SYNTHETIC / 'interface_all_speeds.xml')
+    state = interface_state(SYNTHETIC / 'interface_all_speeds.xml')
     log = mock.Mock()
 
-    samples = parse_interface_speeds(state, SERIAL, log)
+    samples = parse_interface_speeds(state, FW_A_SERIAL, log)
 
     assert series(samples) == {
         ('interface.speed', with_map_tags('ethernet1/1')): (1e9, 'gauge'),

@@ -24,6 +24,19 @@ SYSTEM_INFO_CMD = '<show><system><info/></system></show>'
 INTERFACE_ALL_CMD = '<show><interface>all</interface></show>'
 # The collectors `helpers.register_stubs` replaces with stubs.
 STUBS = ('bgp', 'dataplane', 'interfaces', 'system_resources')
+MIB = 1024**2
+# fw-a's `show interface all` (lab probe), and the interfaces it lists, in its order.
+FW_A_INTERFACE_ALL = FIXTURES / 'fw-a-probe' / 'interface_all.xml'
+INTERFACE_NAMES = ('ethernet1/1', 'ethernet1/2', 'loopback', 'loopback.1', 'tunnel', 'tunnel.1', 'tunnel.2')
+# The tags of fw-a's BGP peer and of its IPSec tunnel to that peer, in the captures.
+FW_A_PEER = ('peer:fw-peer', 'vr:default', 'peer_ip:169.254.10.2', 'remote_as:65002', 'peer_group:lab')
+FW_A_TUNNEL = (
+    'tunnel:tun-peer',
+    'tunnel_interface:tunnel.1',
+    'peer_ip:10.60.1.11',
+    'gateway:gw-peer',
+    'outer_interface:ethernet1/1',
+)
 
 BASE_TAGS = [f'device_ip:{FW_A_IP}', 'device_namespace:default', 'device_vendor:paloaltonetworks', 'team:test']
 FW_A_TAGS = sorted(

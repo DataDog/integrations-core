@@ -14,21 +14,15 @@ from datadog_checks.pan_firewall import panorama as panorama_module
 from datadog_checks.pan_firewall.panorama import DiscoveredFirewall, parse_devices, readable_age
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from .common import (
-    CREDENTIALS,
-    FIXTURES,
-    FW_A_IP,
-    FW_B_IP,
-)
+from .common import CREDENTIALS, FIXTURES, FW_A_IP, FW_A_SERIAL, FW_B_IP, FW_B_SERIAL
 from .fake_panos import INVALID_CREDENTIAL
-from .helpers import FakeClock, metrics_by_ip, with_agent_check_id
+from .helpers import FakeClock, can_connect_by_ip, metrics_by_ip, with_agent_check_id
 
 PANORAMA = 'panorama.example.com'
 DISCOVERY_CMD = '<show><devices><connected/></devices></show>'
 SYNTHETIC = FIXTURES / 'synthetic' / 'panorama_show_devices_connected.xml'
 REAL_CAPTURE = FIXTURES / 'panorama' / 'show_devices_connected.xml'
 BAD_KEY_CAPTURE = FIXTURES / 'panorama' / 'op_bad_key.xml'
-FW_A_SERIAL, FW_B_SERIAL = '007955000930601', '007955000930602'
 # The `ip-address` values of the captures. The fake Panorama reports the fake firewalls (FW_A_IP, FW_B_IP) instead.
 FW_A_REPORTED, FW_B_REPORTED = '10.60.0.10', '10.60.0.11'
 PANORAMA_TAGS = ['device_namespace:default', f'panorama_host:{PANORAMA}', 'team:test']
@@ -151,7 +145,7 @@ def test_firewall_at_an_unreachable_reported_ip_is_reported_down(dd_run_check, a
 
     # Nothing answers at a private IP from here.
     assert polled_hosts(fake_panos) == {'10.60.0.40'}
-    assert {ip: m.value for ip, m in metrics_by_ip(aggregator, 'can_connect').items()} == {'10.60.0.40': 0}
+    assert can_connect_by_ip(aggregator) == {'10.60.0.40': 0}
 
 
 # TEMPORARY: goes with `LAB_IP_OVERRIDES`.
@@ -316,46 +310,53 @@ def test_panorama_can_connect_is_1_after_a_successful_discovery(dd_run_check, ag
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
+PASSWORD_LOGIN = {'panorama_api_key': None, 'panorama_username': 'pan-user', 'panorama_password': 'bad'}
+
+
 @pytest.mark.parametrize(
-    'answer, error',
+    'failure, options, calls, error',
     [
         pytest.param(
             (200, b'<response status="error" code="12"><msg><line>Invalid command</line></msg></response>'),
+            {},
+            ['op', 'op'],
             'PAN-OS API error 12: Invalid command',
             id='api-error',
         ),
-        # Panorama uses a static `panorama_api_key` here: the message says it was rejected.
+        # A static `panorama_api_key` is never renewed: the message says it was rejected.
         pytest.param(
             (200, INVALID_CREDENTIAL),
+            {},
+            ['op', 'op'],
             f'PAN-OS API error 403: {PANORAMA} rejected the configured API key, which is never renewed',
             id='auth-failure',
+        ),
+        # The real answer to a keygen with a wrong password: one attempt per run, not a loop within a run.
+        pytest.param(
+            'capture_bad_password',
+            PASSWORD_LOGIN,
+            ['keygen', 'keygen'],
+            f'PAN-OS API error 403: {PANORAMA} rejected the credentials: API Error: Invalid Credential',
+            id='bad-password',
         ),
     ],
 )
 def test_panorama_can_connect_is_0_when_the_discovery_call_fails(
-    dd_run_check, aggregator, fake_panos, caplog, answer, error
+    dd_run_check, aggregator, fake_panos, caplog, failure, options, calls, error
 ):
-    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, answer)
+    if isinstance(failure, str):
+        fake_panos.fail(PANORAMA, failure, on='keygen')
+    else:
+        fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, failure)
+    check = new_check(**options)
 
-    dd_run_check(new_check())
+    dd_run_check(check)
+    dd_run_check(check)
 
-    assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))]
+    assert [c.type for c in fake_panos.calls_to(PANORAMA)] == calls
+    assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))] * 2
     warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
     assert f'pan_firewall: could not get the connected devices from Panorama {PANORAMA}: {error}' in warnings
-
-
-def test_panorama_rejecting_the_password_is_reported_and_keygen_is_retried_once_per_run(
-    dd_run_check, aggregator, fake_panos
-):
-    fake_panos.fail(PANORAMA, 'capture_bad_password', on='keygen')
-    check = new_check(panorama_api_key=None, panorama_username='pan-user', panorama_password='bad')
-
-    dd_run_check(check)
-    dd_run_check(check)
-
-    # One attempt per run, not a loop within a run.
-    assert [c.type for c in fake_panos.calls_to(PANORAMA)] == ['keygen', 'keygen']
-    assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))] * 2
 
 
 def test_panorama_that_answers_again_is_reported_and_its_firewalls_polled(dd_run_check, aggregator, fake_panos):

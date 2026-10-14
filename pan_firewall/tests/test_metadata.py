@@ -5,16 +5,25 @@ import copy
 from xml.etree import ElementTree as ET
 
 from datadog_checks.pan_firewall.auth import Credentials
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, FirewallState
+from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS
 from datadog_checks.pan_firewall.collectors.ha import HA_CMD, collect_ha
 from datadog_checks.pan_firewall.firewalls import FirewallTarget
 from datadog_checks.pan_firewall.identity import global_tags, parse_system_info
 from datadog_checks.pan_firewall.metadata import build_device, build_interfaces
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from .common import FIXTURES, FW_A_IP, FW_A_SERIAL, INTERFACE_ALL_CMD, SYNTHETIC, SYSTEM_INFO_CMD
+from .common import (
+    FIXTURES,
+    FW_A_INTERFACE_ALL,
+    FW_A_IP,
+    FW_A_SERIAL,
+    INTERFACE_ALL_CMD,
+    INTERFACE_NAMES,
+    SYNTHETIC,
+    SYSTEM_INFO_CMD,
+)
 from .fake_panos import FIREWALL_SETS
-from .helpers import make_instance, new_check
+from .helpers import interface_state, make_instance, new_check
 
 EVENT_TYPE = 'network-devices-metadata'
 FW_A_STATIC_IP = '198.51.100.7'
@@ -22,15 +31,7 @@ SYSTEM_INFO = parse_system_info(parse_response((FIXTURES / 'fw-a' / 'system_info
 NAMESPACE = 'default'
 
 
-def interface_state(path: str) -> FirewallState:
-    root = parse_response((FIXTURES / path).read_bytes())
-    return FirewallState(
-        interface_rows=root.findall('./result/ifnet/entry'),
-        interface_map={e.findtext('name') or '': e for e in root.findall('./result/hw/entry')},
-    )
-
-
-def interfaces_by_name(path: str, tunnel_states=None) -> dict:
+def interfaces_by_name(path, tunnel_states=None) -> dict:
     state = interface_state(path)
     state.tunnel_states = tunnel_states or {}
     return {i.name: i.model_dump(exclude_none=True) for i in build_interfaces(FW_A_SERIAL, state)}
@@ -71,9 +72,9 @@ def test_device_tags_carry_ha_state_only_when_ha_is_enabled():
 
 def test_interfaces_of_fw_a_capture():
     # The capture lists tunnel.1 (active) and tunnel.2 (init) once `vpn` has stored their state.
-    by_name = interfaces_by_name('fw-a-probe/interface_all.xml', {'tunnel.1': 'active', 'tunnel.2': 'init'})
+    by_name = interfaces_by_name(FW_A_INTERFACE_ALL, {'tunnel.1': 'active', 'tunnel.2': 'init'})
 
-    assert list(by_name) == ['ethernet1/1', 'ethernet1/2', 'loopback', 'loopback.1', 'tunnel', 'tunnel.1', 'tunnel.2']
+    assert tuple(by_name) == INTERFACE_NAMES
     assert by_name['ethernet1/1'] == {
         'integration': 'pan_firewall',
         'device_id': FW_A_SERIAL,
@@ -100,7 +101,7 @@ def test_interfaces_of_fw_a_capture():
 
 
 def test_subinterfaces_inherit_the_parent_state_and_tunnels_use_the_vpn_state():
-    by_name = interfaces_by_name('synthetic/interface_all_subinterfaces.xml', {'tunnel.3': 'inactive'})
+    by_name = interfaces_by_name(SYNTHETIC / 'interface_all_subinterfaces.xml', {'tunnel.3': 'inactive'})
 
     assert {n: i['oper_status'] for n, i in by_name.items()} == {
         'ethernet1/1': 1,
@@ -114,7 +115,7 @@ def test_subinterfaces_inherit_the_parent_state_and_tunnels_use_the_vpn_state():
     assert by_name['ethernet1/1.10']['index'] == 259
     assert 'mac_address' not in by_name['ethernet1/1.10']
     # A tunnel without a VPN entry is unknown.
-    assert interfaces_by_name('synthetic/interface_all_subinterfaces.xml')['tunnel.3']['oper_status'] == 4
+    assert interfaces_by_name(SYNTHETIC / 'interface_all_subinterfaces.xml')['tunnel.3']['oper_status'] == 4
 
 
 def _target(ip):
@@ -154,7 +155,7 @@ def test_device_event_carries_the_ha_state_of_an_ha_firewall(dd_run_check, aggre
 
 
 def test_250_interfaces_are_sent_in_three_events(dd_run_check, aggregator, fake_panos):
-    root = ET.fromstring((FIXTURES / 'fw-a-probe' / 'interface_all.xml').read_text())
+    root = ET.fromstring(FW_A_INTERFACE_ALL.read_text())
     ifnet, template = root.find('./result/ifnet'), root.find('./result/ifnet/entry')
     for entry in list(ifnet):
         ifnet.remove(entry)

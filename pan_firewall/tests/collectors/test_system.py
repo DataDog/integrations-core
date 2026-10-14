@@ -13,10 +13,8 @@ from datadog_checks.pan_firewall.collectors.system import (
     parse_system_resources,
 )
 
-from ..common import SYNTHETIC
+from ..common import MIB, SYNTHETIC
 from ..helpers import load_op, load_xml
-
-MIB = 1024**2
 
 CPU_STATES = ('user', 'system', 'nice', 'idle', 'iowait', 'hardirq', 'softirq', 'steal')
 

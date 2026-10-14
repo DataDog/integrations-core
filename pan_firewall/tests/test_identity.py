@@ -10,15 +10,13 @@ from datadog_checks.pan_firewall.firewalls import FirewallTarget
 from datadog_checks.pan_firewall.identity import DeviceIdentity, global_tags, parse_system_info, vsys_list
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from .common import FIXTURES
+from .common import FIXTURES, FW_A_SERIAL, SYSTEM_INFO_CMD
 from .fixture_map import op_fixture
 
-SYSTEM_INFO_CMD = '<show><system><info/></system></show>'
-SERIAL = '007955000930601'
 CREDS = Credentials(username='dummy-user', password='dummy-password', api_key=None)
 STATIC_TARGET = FirewallTarget(ip='198.51.100.7', credentials=CREDS)
 # A Panorama-discovered fw-a, polled at the IP Panorama reports for it.
-PANORAMA_TARGET = FirewallTarget(ip='10.60.0.10', credentials=CREDS, serial=SERIAL, hostname='fw-a')
+PANORAMA_TARGET = FirewallTarget(ip='10.60.0.10', credentials=CREDS, serial=FW_A_SERIAL, hostname='fw-a')
 FW_A = parse_system_info(parse_response(op_fixture(SYSTEM_INFO_CMD).read_bytes()))
 
 
@@ -28,7 +26,7 @@ def ifnet_rows(path):
 
 def test_parse_system_info_fw_a():
     assert (FW_A.serial, FW_A.hostname, FW_A.model, FW_A.family, FW_A.own_ip) == (
-        SERIAL,
+        FW_A_SERIAL,
         'fw-a',
         'PA-VM',
         'vm',
@@ -52,9 +50,9 @@ def test_global_tags_with_identity():
         [
             'device_namespace:default',
             'device_ip:198.51.100.7',
-            f'device_id:{SERIAL}',
+            f'device_id:{FW_A_SERIAL}',
             'device_hostname:fw-a',
-            f'device_serial:{SERIAL}',
+            f'device_serial:{FW_A_SERIAL}',
             'device_model:PA-VM',
             'device_family:vm',
             'device_vendor:paloaltonetworks',
@@ -62,8 +60,8 @@ def test_global_tags_with_identity():
             'multi_vsys:false',
             'advanced_routing:false',
             'env:lab',
-            f'dd.internal.resource:ndm_device:{SERIAL}',
-            f'dd.internal.resource:ndm_device_user_tags:{SERIAL}',
+            f'dd.internal.resource:ndm_device:{FW_A_SERIAL}',
+            f'dd.internal.resource:ndm_device_user_tags:{FW_A_SERIAL}',
         ]
     )
 
@@ -75,12 +73,12 @@ def test_global_tags_take_serial_and_hostname_from_panorama_discovery():
         [
             'device_namespace:default',
             'device_ip:10.60.0.10',
-            f'device_id:{SERIAL}',
+            f'device_id:{FW_A_SERIAL}',
             'device_hostname:fw-a',
-            f'device_serial:{SERIAL}',
+            f'device_serial:{FW_A_SERIAL}',
             'device_vendor:paloaltonetworks',
-            f'dd.internal.resource:ndm_device:{SERIAL}',
-            f'dd.internal.resource:ndm_device_user_tags:{SERIAL}',
+            f'dd.internal.resource:ndm_device:{FW_A_SERIAL}',
+            f'dd.internal.resource:ndm_device_user_tags:{FW_A_SERIAL}',
         ]
     )
 

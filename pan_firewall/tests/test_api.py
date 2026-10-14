@@ -22,13 +22,12 @@ from datadog_checks.pan_firewall.api import (
 )
 from datadog_checks.pan_firewall.auth import Credentials, KeyManager
 
-from .common import FIXTURES
+from .common import FIXTURES, SYSTEM_INFO_CMD
 from .fake_panos import TRANSPORT_ERRORS, response
 from .fixture_map import op_fixture
 
 HOST = '192.0.2.10'
 URL = f'https://{HOST}/api/'
-SYSTEM_INFO_CMD = '<show><system><info/></system></show>'
 GENERATED_KEY = 'GENERATED-KEY-0123456789'
 STATIC_KEY = 'STATIC-KEY-9876543210'
 PASSWORD_CREDS = Credentials(username='dummy-user', password='s3cret-pw', api_key=None)
