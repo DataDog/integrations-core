@@ -472,8 +472,7 @@ class OpenMetricsScraper:
         kwargs['stream'] = True
         response = self.http.get(self.endpoint, **kwargs)
         # Also limit reads that do not go through `iter_lines`, such as `response.content` for telemetry
-        if self.http.max_line_size is not None:
-            limit_line_size(response, self.http.max_line_size)
+        limit_line_size(response, self.http.max_line_size)
         return response
 
     def set_dynamic_tags(self, *tags):

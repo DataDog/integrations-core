@@ -864,8 +864,7 @@ class OpenMetricsScraperMixin(object):
 
         response = http_handler.get(endpoint, stream=True, **kwargs)
         # Also limit reads that do not go through `iter_lines`, such as `response.content` for telemetry
-        if http_handler.max_line_size is not None:
-            limit_line_size(response, http_handler.max_line_size)
+        limit_line_size(response, http_handler.max_line_size)
         return response
 
     def get_hostname_for_sample(self, sample, scraper_config):
