@@ -34,7 +34,7 @@ def test_query_metrics(
     """Collection resumes after a closed connection and reports the correct interval count and metadata."""
     monkeypatch.setenv('DBM_THREADED_JOB_RUN_SYNC', 'true')
     collection_interval = 0.0000001
-    monkeypatch.setattr(query_metrics, 'COLLECTION_INTERVAL', collection_interval)
+    instance['query_metrics'] = {'collection_interval': collection_interval, 'query_timeout': 7}
     instance['dbm'] = True
     check = IbmDb2Check('ibm_db2', {}, [instance])
     connection = Db2Connection(check, check._config)

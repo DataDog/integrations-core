@@ -26,6 +26,12 @@ def build_config(check: IbmDb2Check) -> InstanceConfig:
     instance = check.instance
     init_config = check.init_config
     args = dict(instance)
+    args['query_metrics'] = {
+        'enabled': True,
+        'collection_interval': 10,
+        'query_timeout': 10,
+        **instance.get('query_metrics', {}),
+    }
 
     custom_queries = list(instance.get('custom_queries', []))
     use_global_custom_queries = instance.get('use_global_custom_queries', True)
