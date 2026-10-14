@@ -19,6 +19,7 @@ from ddev.cli.application import Application
 from ddev.cli.ci.dispatch_run import resolve_run
 from ddev.cli.ci.dispatch_tests import RUN_OUTCOME_METRICS, attach_datadog_log_handler
 from ddev.cli.ci.tests.batching.exceptions import PlanningError
+from ddev.cli.ci.tests.changes import ChangeResolutionError
 from ddev.cli.ci.tests.dispatcher_attributes import metric_tag_mapping
 from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
 from ddev.cli.ci.tests.dispatcher_logging import dispatcher_datadog_formatter
@@ -544,9 +545,10 @@ def test_metric_delivery_follows_the_dispatch_mode(
             'agent_integrations.test_dispatcher.probe',
             'agent_integrations.test_dispatcher.runs.count',
         } <= {series['metric'] for series in submitter.series}
-        assert [series['metric'] for series in submitter.distributions] == [
-            'agent_integrations.test_dispatcher.run.duration'
-        ]
+        assert {series['metric'] for series in submitter.distributions} == {
+            'agent_integrations.test_dispatcher.operation.duration',
+            'agent_integrations.test_dispatcher.run.duration',
+        }
 
 
 def test_early_exit_disables_monitoring(
@@ -971,10 +973,16 @@ def test_an_executed_run_reports_its_execution_metrics(
     assert counted.tags['dispatcher.batch.job.target'] == 'ntp'
     assert counted.tags['dispatcher.batch.job.environment'] == 'py3.13'
     operation_failures = {}
+    operation_components = {}
     for record in sink.records_named('operations.failed'):
         operation = record.tags['dispatcher.operation']
         operation_failures[operation] = operation_failures.get(operation, 0) + record.value
+    for record in sink.records_named('operations.count'):
+        operation_components[record.tags['dispatcher.operation']] = record.tags['dispatcher.component']
     assert operation_failures == {
+        'resolve_run': 0,
+        'resolve_changes': 0,
+        'build_plan': 0,
         'dispatch_batch': 0,
         'fetch_workflow': 0,
         'refresh_jobs': 0,
@@ -982,8 +990,22 @@ def test_an_executed_run_reports_its_execution_metrics(
         'gather_batch_results': 0,
         'publish_report': 0,
     }
+    assert operation_components == {
+        'resolve_run': 'resolution',
+        'resolve_changes': 'resolution',
+        'build_plan': 'planner',
+        'dispatch_batch': 'test-runner',
+        'fetch_workflow': 'test-runner',
+        'refresh_jobs': 'test-runner',
+        'collect_artifacts': 'test-runner',
+        'gather_batch_results': 'test-gatherer',
+        'publish_report': 'run-reporter',
+    }
     attempted = {record.tags['dispatcher.operation'] for record in sink.records_named('operations.count')}
     assert attempted == {
+        'resolve_run',
+        'resolve_changes',
+        'build_plan',
         'dispatch_batch',
         'fetch_workflow',
         'refresh_jobs',
@@ -1104,6 +1126,15 @@ def test_a_planning_failure_is_reported_as_its_own_outcome(
     # No batch ran, so no batch outcome exists; there is no aggregate zero to invent.
     assert sink.records_named('batches.failed') == []
     assert not any(record.name.startswith('jobs.') for record in sink.records)
+    [failure] = [
+        record
+        for record in sink.records_named('operations.failed')
+        if record.tags['dispatcher.operation'] == 'build_plan'
+    ]
+    assert (failure.value, failure.tags['dispatcher.operation']) == (1, 'build_plan')
+    [operation_error] = [event for event in handler.events if event['level'] == 'error' and 'operation' in event]
+    assert operation_error['operation'] == 'build_plan'
+    assert operation_error['event'] == 'Operation build_plan failed: the plan is not valid'
     [finished] = [event for event in handler.events if event['event'] == 'Dispatcher run finished']
     assert finished['outcome'] == 'planning-failed'
     assert finished['level'] == 'error'
@@ -1169,6 +1200,34 @@ def test_an_interrupt_during_resolution_is_counted_as_cancellation(
     assert [record.value for record in sink.records_named('runs.count')] == [1]
     assert [record.value for record in sink.records_named('runs.cancelled')] == [1]
     assert [record.value for record in sink.records_named('runs.failed')] == [0]
+    # The interrupted step settles nothing.
+    assert {record.tags['dispatcher.operation'] for record in sink.records_named('operations.count')} == {'resolve_run'}
+
+
+def test_a_change_comparison_failure_fails_its_operation(
+    ddev: CliRunner, fake_async_github: FakeAsyncGitHubClient, mocker: MockerFixture, tmp_path: Path
+):
+    mocker.patch('ddev.utils.git.GitRepository.latest_commit', return_value=GitCommit('a-sha'))
+    mocker.patch(
+        'ddev.cli.ci.tests.changes.changes_in_commit',
+        side_effect=ChangeResolutionError('Could not compare a-sha with its parent'),
+    )
+    handler = RecordingJsonHandler()
+    sink = recording_runtime(mocker, handler=handler)
+
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--output-dir', str(tmp_path))
+
+    assert result.exit_code == 1, result.output
+    assert 'Could not compare a-sha with its parent' in result.output
+    [failure] = [
+        record
+        for record in sink.records_named('operations.failed')
+        if record.tags['dispatcher.operation'] == 'resolve_changes'
+    ]
+    assert (failure.value, failure.tags['dispatcher.operation']) == (1, 'resolve_changes')
+    [operation_error] = [event for event in handler.events if event['level'] == 'error' and 'operation' in event]
+    assert operation_error['operation'] == 'resolve_changes'
+    assert operation_error['event'] == 'Operation resolve_changes failed: Could not compare a-sha with its parent'
 
 
 @pytest.mark.parametrize('from_manifest', [False, True], ids=['resolution', 'manifest'])
@@ -1446,6 +1505,8 @@ def test_a_manifest_the_checkout_does_not_match_is_refused_before_planning(
 ):
     """Phase two refuses a different tree or a merge built from a different PR head."""
     merge_checkout(mocker, checked_out, parents)
+    handler = RecordingJsonHandler()
+    sink = recording_runtime(mocker, handler=handler)
     (tmp_path / 'run.json').write_text(json.dumps(PULL_REQUEST_RUN_MANIFEST), encoding='utf-8')
 
     result = ddev('ci', 'dispatch-tests', '--run-manifest', str(tmp_path / 'run.json'), '--dry-run')
@@ -1453,6 +1514,11 @@ def test_a_manifest_the_checkout_does_not_match_is_refused_before_planning(
     assert result.exit_code == 1
     assert message in result.output
     planned.assert_not_called()
+    [failure] = sink.records_named('operations.failed')
+    assert (failure.value, failure.tags['dispatcher.operation']) == (1, 'resolve_changes')
+    [operation_error] = [event for event in handler.events if event['level'] == 'error' and 'operation' in event]
+    assert operation_error['operation'] == 'resolve_changes'
+    assert message in operation_error['event']
 
 
 def test_an_all_target_run_round_trips_through_its_recorded_scope(
