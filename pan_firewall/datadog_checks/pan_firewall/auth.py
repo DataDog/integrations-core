@@ -24,12 +24,10 @@ class Credentials:
 
 
 class KeyManager:
-    """Holds the API key of one PAN-OS device, in memory only.
+    """The API key of one PAN-OS device, in memory only.
 
-    A rejected keygen latches: until `allow_one_keygen()` is called, `key()` and `regenerate()` raise PanosAuthError
-    without contacting the device. Bad credentials cost one login attempt per run (one a minute at the default
-    `min_collection_interval`) and never a retry loop within a run, but that rate can still reach a PAN-OS lockout
-    threshold.
+    A rejected keygen latches until `allow_one_keygen()`: bad credentials cost one login attempt per run, never a retry
+    loop, though one a minute can still reach a PAN-OS lockout threshold.
     """
 
     def __init__(self, http: RequestsWrapper, host: str, creds: Credentials, counter: RequestCounter | None = None):
@@ -43,7 +41,6 @@ class KeyManager:
         self._keygen_rejected = False
 
     def key(self) -> str:
-        """Return the current key, generating one if none is held."""
         with self._lock:
             if self._key is None:
                 self._raise_if_rejected()
@@ -51,7 +48,7 @@ class KeyManager:
             return self._key
 
     def regenerate(self) -> str:
-        """Replace a rejected key with a new one; raise PanosAuthError if that is impossible or keygen fails."""
+        """Replace a rejected key; raise PanosAuthError if that is impossible (a static key) or keygen fails."""
         with self._lock:
             if self._creds.api_key is not None:
                 raise PanosAuthError('403', f'{self._host} rejected the configured API key, which is never renewed')
@@ -62,7 +59,7 @@ class KeyManager:
             return self._key
 
     def allow_one_keygen(self) -> None:
-        """Allow one new keygen after a rejected one. Called once at the start of each run."""
+        """Allow one keygen after a rejected one; called at the start of each run."""
         with self._lock:
             self._keygen_rejected = False
 

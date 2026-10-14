@@ -3,14 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Interface counters (`show counter interface all`) and speeds (from the cached `show interface all`).
 
-The speeds are not collected here: they follow the identity step's 30-minute schedule, which refreshes the cache they
-come from (`parse_interface_speeds` is called by the poller).
-
-Every row is an interface, `tunnel.N` included. The `tunnel.N` rows are also the IPSec tunnel counters, tagged with
-what the `vpn` collector stored in the state on an earlier run: the collectors run in parallel, so the context
-carries the tags as they were when the run started, and `vpn`'s result of the same run is never used.
-Until `vpn` first answers the tunnel counters are not sent: a series with fewer tags would start a monotonic_count
-context that is dropped as soon as the full tags arrive.
+The poller sends the speeds, on the identity step's schedule. The `tunnel.N` rows are also the IPSec tunnel counters,
+tagged with what `vpn` stored on an earlier run (the collectors run in parallel). Until `vpn` first answers they are
+not sent: a series with fewer tags would start a monotonic_count context dropped once the full tags arrive.
 """
 
 from __future__ import annotations
@@ -70,10 +65,7 @@ def _rows_by_name(state: FirewallState) -> dict[str, Element]:
 def interface_tags(
     name: str, state: FirewallState, serial: str | None, rows: dict[str, Element] | None = None
 ) -> tuple[str, ...]:
-    """The tags of an interface. Without the cached `show interface all` only `interface` is known.
-
-    `rows` is the cached `ifnet` rows by name; callers tagging many interfaces build it once with `_rows_by_name`.
-    """
+    """Without the cached `show interface all` only `interface` is known. Pass `rows` when tagging many."""
     tags = [f'interface:{name}']
     if state.interface_map is None:
         return tuple(tags)
@@ -102,11 +94,7 @@ def parse_interface_counters(
     tunnel_tags: dict[str, tuple[str, ...]] | None,
     log: CheckLoggingAdapter,
 ) -> list[Sample]:
-    """Parse `counter interface all`: `interface.*` for each row, and `ipsec.tunnel.*` for each `tunnel.N` row too.
-
-    `tunnel_tags` is what `vpn` stored (None before it first answered, when no tunnel counters are sent). A `tunnel.N`
-    row it does not list is not an IPSec tunnel: only its `ipsec.tunnel.*` counters are withheld.
-    """
+    """`interface.*` for each row, and `ipsec.tunnel.*` for each `tunnel.N` row `vpn` listed in `tunnel_tags`."""
     rows = root.findall('./result/ifnet/ifnet/entry')
     if not rows:
         log.warning('`show counter interface all` has no interface rows: no interface counters are sent')

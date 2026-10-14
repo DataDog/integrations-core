@@ -35,7 +35,7 @@ class VpnSnapshot:
 
 
 def parse_vpn(flow: Element, gateway: Element, log: CheckLoggingAdapter) -> VpnSnapshot:
-    """Tunnel totals, gateway total and per-tunnel state. A reply without `result` gives no samples and a warning."""
+    """A reply without `result` gives no samples and a warning."""
     flow_result, gateway_result = flow.find('result'), gateway.find('result')
     if flow_result is None or gateway_result is None:
         log.warning('`show vpn flow` or `show vpn gateway` has no result: no IPSec metrics are sent')

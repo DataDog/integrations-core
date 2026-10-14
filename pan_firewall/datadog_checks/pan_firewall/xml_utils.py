@@ -10,10 +10,7 @@ from .errors import PanosApiError
 
 
 def parse_response(body: bytes) -> Element:
-    """Parse a PAN-OS XML API response and return its root `<response>` element.
-
-    Raises PanosApiError for `status="error"` responses and for bodies that are not a PAN-OS response.
-    """
+    """Return the root `<response>`; raise PanosApiError for an error response or a body that is not PAN-OS XML."""
     try:
         root = ET.fromstring(body)
     except ET.ParseError as e:
@@ -22,10 +19,7 @@ def parse_response(body: bytes) -> Element:
 
 
 def check_response(root: Element) -> Element:
-    """Return `root` if it is a successful `<response>`; raise PanosApiError otherwise.
-
-    The tag check rejects well-formed XML that is not from PAN-OS, such as a proxy's XHTML error page.
-    """
+    """The tag check rejects well-formed XML that is not from PAN-OS, such as a proxy's XHTML error page."""
     if root.tag != 'response':
         raise PanosApiError(
             PARSE_ERROR_CODE, f'unexpected root element <{root.tag}>, expected <response>', panos_response=False
@@ -37,7 +31,7 @@ def check_response(root: Element) -> Element:
 
 
 def text(elem: Element | None, path: str, default: str | None = None) -> str | None:
-    """Return the stripped text of the first element matching `path`, or `default` if absent or empty."""
+    """The stripped text at `path`, or `default` if absent or empty."""
     if elem is None:
         return default
     value = elem.findtext(path)
@@ -47,7 +41,7 @@ def text(elem: Element | None, path: str, default: str | None = None) -> str | N
 
 
 def num(elem: Element | None, path: str, default: float | None = None) -> float | None:
-    """Return the text at `path` as a float. Never raises: missing, unparseable or non-finite values give `default`."""
+    """The text at `path` as a float; `default` if missing, unparseable or not finite."""
     value = text(elem, path)
     if value is None:
         return default

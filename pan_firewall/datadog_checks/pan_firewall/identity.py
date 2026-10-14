@@ -17,11 +17,8 @@ from .xml_utils import text
 
 @dataclass
 class DeviceIdentity:
-    """What the check knows about a firewall, from `show system info`. Persisted as JSON across restarts.
-
-    `clock` changes on every read and is stale after a restart, so it is neither compared nor persisted: a refresh
-    that only moves the clock does not rewrite the cache.
-    """
+    """What the check knows about a firewall, from `show system info`, persisted as JSON. `clock` is neither compared
+    nor persisted, so a refresh that only moves it does not rewrite the cache."""
 
     serial: str | None
     hostname: str | None
@@ -40,16 +37,12 @@ class DeviceIdentity:
 
     @classmethod
     def from_json(cls, raw: str) -> DeviceIdentity:
-        """Load an identity written by `to_json()`. Raises ValueError or TypeError for anything else."""
+        """Raises ValueError or TypeError for anything `to_json()` did not write."""
         return cls(**json.loads(raw))
 
 
 def parse_system_info(root: Element) -> DeviceIdentity:
-    """Build the identity from a `<show><system><info/></system></show>` response.
-
-    Raises PanosApiError (code `parse`) for a reply without a serial: the serial is the device ID, and an identity
-    without one would drop the device tags.
-    """
+    """Raises PanosApiError for a reply without a serial: it is the device ID, and the device tags need it."""
     system = root.find('./result/system')
     if not text(system, 'serial'):
         raise PanosApiError(PARSE_ERROR_CODE, 'system info has no serial')
@@ -72,18 +65,15 @@ def _on_off(value: str | None) -> bool | None:
 
 
 def device_ip(target: FirewallTarget) -> str:
-    """The `device_ip` tag: the polled IP (the configured IP in static mode, the IP Panorama reports otherwise)."""
+    """The `device_ip` tag: the polled IP."""
     return target.ip
 
 
 def global_tags(
     identity: DeviceIdentity | None, target: FirewallTarget, namespace: str, user_tags: Iterable[str]
 ) -> list[str]:
-    """Tags on every metric of a firewall. Empty values are left out; the serial-based tags need a known serial.
-
-    `identity` is None before a static firewall first answers; Panorama discovery fills the serial, hostname,
-    family, model and version until the firewall's own answer is known.
-    """
+    """Tags on every metric of a firewall. `identity` is None before a static firewall first answers; until then
+    Panorama discovery fills in what it knows."""
     serial = (identity.serial if identity else None) or target.serial
     hostname = (identity.hostname if identity else None) or target.hostname
     values = {
@@ -113,11 +103,8 @@ def _bool_tag(value: bool | None) -> str | None:
 def vsys_list(
     identity: DeviceIdentity, interface_rows: Sequence[Element], configured: Sequence[str] | None
 ) -> list[str]:
-    """The vsys to poll, as `vsysN`: the `vsys` option if set, else detected from `show interface all`.
-
-    `interface_rows` are the `result/ifnet/entry` elements. A multi-vsys firewall whose rows are not known yet (the
-    call failed, or the identity came from the cache) falls back to `vsys1`, which always exists.
-    """
+    """The vsys to poll: the `vsys` option, else detected from the `show interface all` rows. Without rows, a
+    multi-vsys firewall falls back to `vsys1`, which always exists."""
     if configured:
         return [_normalize_vsys(v) for v in configured]
     if not identity.multi_vsys:

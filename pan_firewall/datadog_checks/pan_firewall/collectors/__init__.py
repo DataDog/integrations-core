@@ -1,11 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Shared types of the collectors, and the registry the poller runs them from.
-
-A collector is a plain function `collect(ctx) -> list[Sample]`, registered in COLLECT_FUNCTIONS under its name in
-`constants.COLLECTORS`.
-"""
+"""Shared types of the collectors, and their registry: a collector is a function `collect(ctx) -> list[Sample]`."""
 
 from __future__ import annotations
 
@@ -26,7 +22,7 @@ if TYPE_CHECKING:
 
 
 class FirewallLog(CheckLoggingAdapter):
-    """The check's log with `pan_firewall <firewall>: ` in front of every message, so a warning names its firewall."""
+    """The check's log with `pan_firewall <firewall>: ` in front of every message."""
 
     def __init__(self, log: CheckLoggingAdapter, firewall: str):
         super().__init__(log.logger, log.check_id)
@@ -45,12 +41,8 @@ class Sample(NamedTuple):
 
 @dataclass(frozen=True)
 class Watermark:
-    """Where the threat collector resumes: the `seqno` of the last log counted, and the last `seqno` reset check.
-
-    `last_reset_check` is a reading of the schedule's monotonic clock, so it means nothing after a restart: the
-    reset check treats a value ahead of the clock as due. `updated` is the wall-clock time the watermark was written,
-    which still means something after a restart.
-    """
+    """Where the threat collector resumes: the last `seqno` counted. `last_reset_check` is on the monotonic clock, so
+    a value ahead of it (after a restart) counts as due; `updated` is wall clock, to age the watermark."""
 
     seqno: int
     last_reset_check: float
@@ -61,8 +53,7 @@ class Watermark:
 
     @classmethod
     def from_json(cls, raw: str) -> Watermark:
-        """Load a watermark written by `to_json()`. Raises ValueError, TypeError or KeyError for anything else,
-        including a watermark without `updated`."""
+        """Raises ValueError, TypeError or KeyError for anything else than `to_json()` wrote, `updated` missing too."""
         data = json.loads(raw)
         return cls(
             seqno=int(data['seqno']),
@@ -73,11 +64,8 @@ class Watermark:
 
 @dataclass
 class ThreatJob:
-    """A threat log job, and what the pass it belongs to has gathered so far.
-
-    `purpose` is `baseline` (first run: newest log), `forward` (logs above `base_seqno`, page after page) or `reset`
-    (newest log, to detect a `seqno` reset). `job_id` is None until the job is submitted.
-    """
+    """A threat log job and what its pass has gathered: `baseline` (first run: newest log), `forward` (logs above
+    `base_seqno`, page after page) or `reset` (newest log, to detect a `seqno` reset)."""
 
     purpose: Literal['baseline', 'forward', 'reset']
     base_seqno: int = 0
@@ -99,7 +87,6 @@ class ThreatState:
 
 @dataclass
 class ReportJob:
-    """A report job still running when a run ended: the report it belongs to and how many runs it has been carried."""
 
     report: str
     job_id: str
@@ -114,25 +101,20 @@ class ReportState:
 
 @dataclass
 class FirewallState:
-    """What the poller keeps about one firewall between runs. Later collectors add their own fields."""
 
-    # `show interface all`: the `result/ifnet/entry` rows, and the `result/hw/entry` rows by interface name. Both
-    # keep their last value when the call fails; `interface_map` is None until the call first answers.
+    # `show interface all` rows, kept when the call fails; `interface_map` is None until it first answers.
     interface_rows: list[Element] = field(default_factory=list)
     interface_map: dict[str, Element] | None = None
     vsys: list[str] = field(default_factory=lambda: ['vsys1'])
     ha_state: str | None = None
-    # Written by `vpn`, read by `interfaces` (which owns the `counter interface all` call): the tags of each IPSec
-    # tunnel by its `tunnel.N` interface, None until `vpn` first answers, and the raw `show vpn flow` state by interface.
+    # Written by `vpn`, read by `interfaces`, which owns the tunnel counters: None until `vpn` first answers.
     tunnel_tags: dict[str, tuple[str, ...]] | None = None
     tunnel_states: dict[str, str] = field(default_factory=dict)
     threats: ThreatState = field(default_factory=ThreatState)
-    # Keys of the warnings already logged for this firewall (see `warn_once`): a condition that lasts is warned about
-    # once, not once per run.
+    # Keys of the warnings already logged for this firewall (see `warn_once`).
     warned: set[str] = field(default_factory=set)
     reports: ReportState = field(default_factory=ReportState)
-    # Collectors that ran but must stay due, as a job of theirs is still running: the poller leaves them out of
-    # `mark_run`, so they run again next run instead of after their interval.
+    # Collectors that ran but stay due, as a job of theirs is still running: they run again next run.
     still_due: set[str] = field(default_factory=set)
 
 
@@ -146,8 +128,6 @@ class CollectContext:
     # `state.tunnel_tags` as it was when the run started: what `interfaces` tags the tunnel counters with, so that
     # whether they are sent does not depend on which of the parallel collectors finishes first.
     tunnel_tags: dict[str, tuple[str, ...]] | None = None
-    # The schedule's monotonic clock, the wall clock, and the check's persistent cache (read returns '' for an unknown
-    # key).
     clock: Callable[[], float] = time.monotonic
     wall_clock: Callable[[], float] = time.time
     read_cache: Callable[[str], str] = lambda key: ''
@@ -156,12 +136,11 @@ class CollectContext:
 
 Collector = Callable[[CollectContext], list[Sample]]
 
-# Collector name -> function, filled by `@register(name)` when the collector module is imported.
 COLLECT_FUNCTIONS: dict[str, Collector] = {}
 
 
 def register(name: str) -> Callable[[Collector], Collector]:
-    """Register the decorated function as the collector `name`. The module defining it must be imported by `poller`."""
+    """The module defining the collector must be imported by `poller`."""
 
     def decorator(function: Collector) -> Collector:
         COLLECT_FUNCTIONS[name] = function
@@ -171,12 +150,11 @@ def register(name: str) -> Callable[[Collector], Collector]:
 
 
 def tag_tuple(*pairs: tuple[str, str | None]) -> tuple[str, ...]:
-    """The `name:value` tags of the pairs whose value is set, in order."""
     return tuple(f'{name}:{value}' for name, value in pairs if value)
 
 
 def warn_once(ctx: CollectContext, key: str, msg: str, *args: object) -> None:
-    """Log the warning the first time `key` is seen for this firewall, and at debug level after that."""
+    """Log the warning the first time `key` is seen for this firewall, at debug level after that."""
     if key in ctx.state.warned:
         ctx.log.debug(msg, *args)
         return
@@ -185,7 +163,7 @@ def warn_once(ctx: CollectContext, key: str, msg: str, *args: object) -> None:
 
 
 class _OnceLog:
-    """A logger whose `warning` is `warn_once` keyed by the formatted message; everything else is the context's log."""
+    """A logger whose `warning` is `warn_once`, keyed by the formatted message."""
 
     def __init__(self, ctx: CollectContext):
         self._ctx = ctx

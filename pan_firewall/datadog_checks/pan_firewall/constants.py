@@ -2,15 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-# Error code reported by PanosApiError when a response body is not parseable XML.
 PARSE_ERROR_CODE = 'parse'
 
 # `code` values PAN-OS uses for a rejected API key. 403 is lab-confirmed; 16 comes from the XML API error-codes doc
 # and was never seen in the lab.
 AUTH_ERROR_CODES = frozenset({'403', '16'})
 
-# Seconds between two runs of each collector, per firewall. `jobs` and the threat `seqno` reset check are not
-# scheduled collectors: the first runs whenever a collector is due, the second lives inside `threats`.
+# Seconds between two runs of each collector, per firewall. The jobs check runs whenever a collector is due.
 INTERVALS = {
     'bgp': 120,
     'dataplane': 120,
@@ -41,10 +39,9 @@ NDM_INTERFACE_RESOURCE_TAG = 'dd.internal.resource:ndm_interface'
 # collection.
 BUSY_JOB_STATUSES = frozenset({'ACT', 'PEND'})
 BUSY_JOB_TYPES = frozenset({'Commit', 'AutoCom', 'Content', 'Antivirus', 'WildFire'})
-# After this many seconds of continuously skipping a busy firewall, the check collects it anyway.
 COMMIT_SKIP_MAX_SECONDS = 600
 
-# The statuses of a log or report job that is still running (not the commit check's busy jobs above).
+# A log or report job still running.
 ACTIVE_STATUSES = frozenset({'ACT', 'PEND'})
 
 # Threat logs: entries asked per `type=log` job (the PAN-OS maximum), how often a job is polled and how long to wait
@@ -53,10 +50,8 @@ THREAT_PAGE_SIZE = 5000
 THREAT_JOB_POLLS = 5
 THREAT_JOB_POLL_DELAY = 1.0
 THREAT_RESET_CHECK_SECONDS = 1800
-# A cached threat watermark written longer ago than this (wall clock) is ignored when the poller starts: the firewall
-# may have been gone for a while, and counting every threat since then as one burst would be wrong. It must stay above
-# THREAT_RESET_CHECK_SECONDS: on a quiet firewall the watermark is only rewritten by the reset check, after a "nothing
-# new" pass.
+# An older cached watermark (wall clock) is ignored: counting every threat since a long absence as one burst would be
+# wrong. Keep it above THREAT_RESET_CHECK_SECONDS, the only rewrite a quiet firewall's watermark gets.
 THREAT_WATERMARK_MAX_AGE_SECONDS = 3600
 
 # Top-N reports: report name -> (PAN-OS field the custom report aggregates by, dimension tag of its metrics). There is
@@ -113,9 +108,8 @@ GLOBAL_COUNTERS = {
     'session_freed': ('session', 'resource'),
 }
 
-# The aspects `dropped_packets` sends as 0 when no drop counter of the response has them. Source: the testbed RFC
-# draft and the metrics-tags doc (the plan counts 13 without listing them). Any other aspect with a drop counter,
-# such as `mgmt`, is sent too.
+# The aspects `dropped_packets` sends as 0 when no drop counter has them (source: the RFC draft and the metrics-tags
+# doc). Another aspect with a drop counter, such as `mgmt`, is sent too.
 DROPPED_PACKET_ASPECTS: tuple[str, ...] = (
     'arp',
     'dos',

@@ -64,7 +64,6 @@ class NetworkDevicesMetadata(BaseModel):
 def batch_payloads(
     namespace: str, items: Iterable[DeviceMetadata | InterfaceMetadata], collect_timestamp: int | None = None
 ) -> Iterator[NetworkDevicesMetadata]:
-    """Group the records into payloads of at most `PAYLOAD_METADATA_BATCH_SIZE`, in order."""
     if collect_timestamp is None:
         collect_timestamp = int(time.time())
     payload = NetworkDevicesMetadata(namespace=namespace, collect_timestamp=collect_timestamp)

@@ -45,11 +45,8 @@ class DiscoveredFirewall:
 
 
 def parse_devices(root: Element) -> list[DiscoveredFirewall]:
-    """Read the `result/devices/entry` elements of a discovery response. An entry without a serial is dropped.
-
-    Only the direct children of `devices` are firewalls: each carries nested `entry` elements (`vsys`,
-    `plugin_versions`), and a `Total Connected Devices` text node follows the last one.
-    """
+    """Only the direct children of `devices` are firewalls: each nests `entry` elements of its own (`vsys`,
+    `plugin_versions`). An entry without a serial is dropped."""
     firewalls = []
     for entry in root.findall('./result/devices/entry'):
         serial = text(entry, 'serial')
@@ -72,9 +69,8 @@ def parse_devices(root: Element) -> list[DiscoveredFirewall]:
 class PanoramaFirewallSource:
     """The firewalls a Panorama manages, discovered on every run and polled directly.
 
-    When Panorama cannot be queried, the last list it returned (kept in the persistent cache with the time of that
-    discovery, without any credential) is used instead, however old: the firewalls are polled directly, and
-    `panorama.can_connect` reports the outage. It reports its own reachability as `panorama.can_connect`.
+    When Panorama cannot be queried, the last list it returned (cached, without credentials) is used, however old:
+    the firewalls are polled directly, and `panorama.can_connect` reports the outage.
     """
 
     def __init__(self, check: AgentCheck, config: InstanceConfig):
@@ -99,7 +95,6 @@ class PanoramaFirewallSource:
         return self._targets(devices or [])
 
     def _discover(self) -> list[DiscoveredFirewall] | None:
-        """Return the connected-devices list, or None (logged) when the call fails for any reason."""
         try:
             devices = parse_devices(self._client.op(DISCOVERY_CMD))
         except PanosError as e:
@@ -132,7 +127,7 @@ class PanoramaFirewallSource:
                 discovered = float(data['discovered'])
                 devices = [DiscoveredFirewall(**d) for d in data['firewalls']]
         except (ValueError, TypeError, KeyError) as e:
-            # Also a list in the old format (a bare list) or without `discovered`.
+            # Also the old format (a bare list).
             self._check.log.debug('pan_firewall: ignoring the cached Panorama firewall list: %s', e)
             devices = None
         if devices is None:
@@ -172,9 +167,8 @@ class PanoramaFirewallSource:
         return list(targets.values())
 
     def _target(self, firewall: DiscoveredFirewall) -> FirewallTarget | None:
-        """The target to poll, or None. A firewall left out for a config reason is warned about on every run, also in
-        the Agent status: it is the only sign that the firewall is not monitored, and it stops once the config is
-        fixed."""
+        # A firewall left out for a config reason is warned about on every run, also in the Agent status: it is the
+        # only sign that the firewall is not monitored.
         polled = LAB_IP_OVERRIDES.get((firewall.serial, firewall.ip_address or ''), firewall.ip_address)
         address = _parse_ip(polled)
         if address is None:
@@ -219,7 +213,7 @@ class PanoramaFirewallSource:
 
 
 def readable_age(seconds: float) -> str:
-    """`seconds` rounded to the largest unit it holds at least once, for example `3 days` or `1 minute`."""
+    """For example `3 days` or `1 minute`."""
     seconds = max(seconds, 0)
     units = (('day', 86400), ('hour', 3600), ('minute', 60))
     unit, size = next(((unit, size) for unit, size in units if seconds >= size), ('second', 1))

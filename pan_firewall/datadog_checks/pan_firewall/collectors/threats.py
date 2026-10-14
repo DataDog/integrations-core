@@ -23,10 +23,7 @@ from . import CollectContext, Sample, ThreatJob, ThreatState, Watermark, registe
 
 @register('threats')
 def collect_threats(ctx: CollectContext) -> list[Sample]:
-    """Run one pass: continue the job left running last time, or start from the watermark.
-
-    The samples are returned only when the pass is complete; any error discards the pass.
-    """
+    """Run one pass, from the job left running or the watermark. Samples come only from a complete pass."""
     state = ctx.state.threats
     _load_watermark(ctx, state)
     job: ThreatJob | None = state.pending or _first_job(state)
@@ -53,8 +50,7 @@ def collect_threats(ctx: CollectContext) -> list[Sample]:
 
 
 def _load_watermark(ctx: CollectContext, state: ThreatState) -> None:
-    """Read the watermark from the cache, once per poller. One older than THREAT_WATERMARK_MAX_AGE_SECONDS is ignored,
-    so the next pass is a first run; a negative age (the wall clock went back) counts as fresh."""
+    """Once per poller. A watermark too old is ignored, so the pass is a first run; a negative age counts as fresh."""
     if state.loaded:
         return
     state.loaded = True
@@ -104,12 +100,11 @@ def _params(job: ThreatJob) -> dict[str, str]:
 
 
 def _fetch(ctx: CollectContext, job: ThreatJob) -> bool:
-    """Submit the job if needed, wait for it, and add its entries to `job`. Return False if it is still running."""
+    """Return False if the job is still running."""
     client = ctx.client
     if job.job_id is None:
         job.job_id = client.submit_job(_params(job))
     for attempt in range(constants.THREAT_JOB_POLLS):
-        # One streamed request per poll: it reports the status and, once the job is finished, streams the entries.
         # No other call while it is open: it holds one of the client's in-flight slots.
         with client.open_log_job(job.job_id) as (status, entries):
             if status == 'FIN':
@@ -153,7 +148,6 @@ def _vsys(value: str | None) -> str:
 
 
 def _complete(ctx: CollectContext, state: ThreatState, job: ThreatJob) -> tuple[list[Sample], ThreatJob | None]:
-    """Apply a finished job: return the samples, and the follow-up job if there is one."""
     now = ctx.clock()
     watermark = state.watermark
     if job.purpose == 'baseline':
@@ -186,7 +180,6 @@ def _complete(ctx: CollectContext, state: ThreatState, job: ThreatJob) -> tuple[
 
 
 def _samples(job: ThreatJob) -> list[Sample]:
-    """One `threat.count` per tag set; a severity, action or subtype the log does not carry is left out."""
     return [
         Sample(
             'threat.count',

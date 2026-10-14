@@ -23,11 +23,9 @@ OPER_UP = 1
 OPER_DOWN = 2
 OPER_UNKNOWN = 4
 
-# `show interface all` hw `state` to the NDM operational status.
 HW_STATES = {'up': OPER_UP, 'down': OPER_DOWN}
 # `show vpn flow` state of a tunnel interface to the NDM operational status: only `active` is up.
 VPN_ACTIVE = 'active'
-# hw `type` of a physical port.
 HW_TYPE_PHYSICAL = '0'
 
 
@@ -39,10 +37,7 @@ def build_device(
     can_connect: int,
     ha_state: str | None,
 ) -> DeviceMetadata:
-    """The device record. `identity.serial` must be known: it is the device ID.
-
-    `ha_state` has no field in the NDM payload, so it rides in the device tags, only when HA is enabled.
-    """
+    """The device record; `identity.serial` must be known. `ha_state` has no NDM field, so it rides in the tags."""
     if identity.serial is None:
         raise ValueError('a device record needs the serial')
     return DeviceMetadata(
@@ -60,7 +55,6 @@ def build_device(
 
 
 def build_interfaces(serial: str, state: FirewallState) -> Iterator[InterfaceMetadata]:
-    """One record per `show interface all` row, in the firewall's order."""
     hw_rows = state.interface_map or {}
     for row in state.interface_rows:
         name = text(row, 'name')

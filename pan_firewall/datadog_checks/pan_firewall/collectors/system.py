@@ -53,10 +53,7 @@ def _percent(part: float, total: float) -> float | None:
 
 
 def parse_system_resources(root: Element, log: CheckLoggingAdapter) -> list[Sample]:
-    """Parse the `top` header of `show system resources`: CPU states, memory and swap.
-
-    A line that is missing or in an unknown shape drops its own metrics; one warning names the lines dropped.
-    """
+    """Parse the `top` header. A missing or unknown line drops its own metrics, with one warning for all of them."""
     output = text(root, 'result') or ''
     samples: list[Sample] = []
     missing = []
@@ -93,7 +90,6 @@ def parse_system_resources(root: Element, log: CheckLoggingAdapter) -> list[Samp
 
 
 def parse_disk(root: Element, log: CheckLoggingAdapter) -> list[Sample]:
-    """Parse `df` output: `disk.used_pct` per filesystem, without the virtual ones."""
     lines = (text(root, 'result') or '').splitlines()
     if not lines or not lines[0].startswith('Filesystem'):
         log.warning('`show system disk-space` is not df output: no disk usage is reported')
@@ -126,10 +122,7 @@ def _slot_number(slot: Element) -> str:
 
 
 def _entries(root: Element, section: str) -> Iterator[tuple[Element, str, str]]:
-    """Yield (entry, slot number, sensor name) for `result/<section>/<slot>/entry`.
-
-    The sensor is the entry's `description`; an entry without one is named after its slot element.
-    """
+    """Yield (entry, slot number, sensor name); an entry without a `description` is named after its slot."""
     container = root.find(f'result/{section}')
     for slot in container if container is not None else ():
         for entry in slot.iterfind('entry'):
@@ -137,7 +130,6 @@ def _entries(root: Element, section: str) -> Iterator[tuple[Element, str, str]]:
 
 
 def _alarm(entry: Element) -> bool | None:
-    """PAN's `alarm` field as a bool, None when absent or not a recognised value."""
     value = (text(entry, 'alarm') or '').lower()
     if value in ALARM_TRUE:
         return True
@@ -145,12 +137,8 @@ def _alarm(entry: Element) -> bool | None:
 
 
 def parse_environmentals(root: Element, log: CheckLoggingAdapter, warned: set[str]) -> list[Sample]:
-    """Parse `show system environmentals`: power rails and temperature sensors.
-
-    A VM-Series firewall answers with an empty `result`, so nothing is sent. The alarms are PAN's own `alarm` field,
-    never a comparison of the reading with the thresholds. A power alarm whose direction cannot be told sends no alarm
-    metric and logs one warning per sensor; `warned` holds the sensors already warned about for this firewall.
-    """
+    """Power rails and temperature sensors; empty on a VM-Series. The alarms are PAN's own `alarm` field, never a
+    comparison with the thresholds. A power alarm whose direction cannot be told is warned about, once per sensor."""
     samples: list[Sample] = []
     for entry, slot, name in _entries(root, 'power'):
         tags = (f'sensor:{name}', f'slot:{slot}')

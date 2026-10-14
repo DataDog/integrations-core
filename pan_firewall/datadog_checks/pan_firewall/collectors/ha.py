@@ -17,11 +17,7 @@ HA_CMD = '<show><high-availability><all/></high-availability></show>'
 
 @register('ha')
 def collect_ha(ctx: CollectContext) -> list[Sample]:
-    """Set `ctx.state.ha_state`, the local state of an HA firewall, or None when HA is off.
-
-    A standalone firewall answers `enabled` no with a `group/local-info` without a state (lab capture). For an
-    enabled firewall the state is read from `group/local-info/state`: unverified until the HA lab capture (L1).
-    """
+    """Set `ctx.state.ha_state`, None when HA is off. The enabled-HA path is unverified until lab capture L1."""
     root = ctx.client.op(HA_CMD)
     if (text(root, 'result/enabled') or '').lower() != 'yes':
         ctx.state.ha_state = None

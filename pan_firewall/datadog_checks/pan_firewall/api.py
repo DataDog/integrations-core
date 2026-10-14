@@ -30,7 +30,7 @@ T = TypeVar('T')
 
 KEY_HEADER = 'X-PAN-KEY'
 STREAM_CHUNK_SIZE = 64 * 1024
-# Element path, from the root, of the entries in a finished `type=log` job.
+# Paths, from the root, of a log job's entries and status.
 LOG_ENTRY_PATH = ['response', 'result', 'log', 'logs', 'entry']
 LOG_STATUS_PATH = ['response', 'result', 'job', 'status']
 
@@ -58,11 +58,7 @@ def api_url(host: str) -> str:
 
 
 def new_http(check: AgentCheck, config: InstanceConfig) -> RequestsWrapper:
-    """Return an HTTP session for one device, from the instance's `instances/http` options.
-
-    The model's defaults (`timeout` 30 s, `persist_connections` on), not the wrapper's (10 s, off), apply when the
-    instance does not set them.
-    """
+    """An HTTP session for one device. The model's defaults (30 s timeout, persistent) win over the wrapper's."""
     instance = {
         'timeout': config.timeout,
         'persist_connections': config.persist_connections,
@@ -73,11 +69,9 @@ def new_http(check: AgentCheck, config: InstanceConfig) -> RequestsWrapper:
 
 @contextmanager
 def transport_errors(url: str) -> Iterator[None]:
-    """Turn an OSError raised in the block (every `requests` exception is one) into PanosUnreachable.
+    """Turn any OSError in the block (every `requests` exception is one) into PanosUnreachable, keeping its text.
 
-    The check acts the same on a timeout, a refused connection and a TLS error; the message keeps the original text,
-    which says which it was. The original exception is dropped (`from None`): it holds the prepared request, whose
-    headers carry the key.
+    `from None`: the original exception holds the prepared request, whose headers carry the key.
     """
     host = urlsplit(url).netloc
     try:
@@ -87,7 +81,7 @@ def transport_errors(url: str) -> Iterator[None]:
 
 
 class RequestCounter:
-    """Counts the requests sent, keygen and retries included: what the device sees, as `post_api` is the one sender."""
+    """Counts every request `post_api` sends, keygen and retries included."""
 
     def __init__(self) -> None:
         self._count = 0
@@ -123,7 +117,6 @@ def post_api(
 
 
 def read_response(resp: Response) -> Element:
-    """Return the root of a successful response; raise PanosAuthError or PanosApiError for a failed one."""
     try:
         root = parse_response(resp.content)
     except PanosApiError as e:
@@ -134,19 +127,15 @@ def read_response(resp: Response) -> Element:
 
 
 def _classify(status_code: int, error: PanosApiError) -> PanosApiError:
-    """A PAN-OS response with HTTP 403, or with a `code` PAN-OS uses for a rejected key, is an auth failure.
-
-    A body that is not a PAN-OS response (a proxy's HTML page, for example) is never an auth failure, whatever its
-    HTTP status: it says nothing about the key, so it triggers no renewal and no invalid-credentials state.
-    """
+    """HTTP 403 or an auth `code` is an auth failure, but only in a PAN-OS response: a proxy's error page says nothing
+    about the key, so it must not trigger a renewal."""
     if not error.panos_response:
         if status_code >= 400:
             return PanosApiError(str(status_code), f'HTTP {status_code}: {error.msg}', panos_response=False)
         return error
     if status_code == 403 or error.code in AUTH_ERROR_CODES:
-        # open question: PAN's docs say code 16 means the API role lacks permission for the command, so
-        # regenerating the key may not help. It is handled like an expired key, as the plan specifies; the
-        # retry is bounded to one, so the cost is one keygen per rejected call.
+        # Open question: PAN's docs say code 16 means the role lacks permission, so a new key may not help. The plan
+        # treats it as an expired key; the retry is bounded to one.
         code = error.code if error.code in AUTH_ERROR_CODES else '403'
         return PanosAuthError(code, error.msg or f'HTTP {status_code}')
     return error
@@ -154,13 +143,8 @@ def _classify(status_code: int, error: PanosApiError) -> PanosApiError:
 
 @dataclass
 class CallStats:
-    """The outcome of the calls a client made since the last `PanosClient.start_run()`.
-
-    `answered` is True once any call got a PAN-OS response, successful or `status="error"` (an auth rejection
-    included); transport failures and bodies that are not PAN-OS XML (`panos_response` False) leave it False.
-    `auth_rejected` is True once a call failed with PanosAuthError after the key renewal. `unreachable` is the reason
-    of the first PanosUnreachable. `key_regenerated` is True once a rejected key was replaced with a new one.
-    """
+    """The calls since `PanosClient.start_run()`. `answered`: PAN-OS itself answered one, even with an error.
+    `auth_rejected`: one failed auth after the renewal. `unreachable`: the reason of the first PanosUnreachable."""
 
     calls: int = 0
     answered: bool = False
@@ -172,12 +156,8 @@ class CallStats:
 class PanosClient:
     """XML API client for one PAN-OS device (firewall or Panorama).
 
-    Every call holds one of `max_in_flight` slots for its whole duration, including any keygen and the retry, so
-    the device never sees more than `max_in_flight` concurrent requests from this client.
-
-    Once a call cannot reach the device, every later call raises PanosSkipped at once, without contacting it, until
-    the next `start_run()`: a hung device costs one timeout per run, not one per call, and a refused one costs one
-    attempt.
+    At most `max_in_flight` calls at once, keygen and retry included. Once a call cannot reach the device, every later
+    call raises PanosSkipped until `start_run()`: a hung device costs one timeout per run, not one per call.
     """
 
     def __init__(
@@ -221,12 +201,10 @@ class PanosClient:
 
     @contextmanager
     def open_log_job(self, job_id: str) -> Iterator[tuple[str, Iterator[Element]]]:
-        """Read a log job with one streamed request: yield its status (`ACT`, `FIN`, ...) and its entries.
+        """Read a log job with one streamed request: yield its status and, once `FIN`, its entries.
 
-        The status precedes `<log>` in the response and is read first. The entries are streamed and cleared one at
-        a time, so memory stays bounded per page: read what you need from an entry before advancing. For a job that
-        is not `FIN` the iterator is empty and the rest of the response is not read. The slot is held, and the
-        response open, for the `with` block: do not call the client again inside it.
+        Each entry is cleared when you advance, so read it first. The slot is held for the `with` block: do not call
+        the client inside it.
         """
         with self._slots:
             self._fail_fast_if_unreachable()
@@ -253,21 +231,19 @@ class PanosClient:
             )
 
     def start_run(self) -> None:
-        """Start new call stats, which clears the fail-fast state. Call it once at the start of each run: until then,
-        after a call that could not reach the device, every call raises PanosSkipped."""
+        """Start the stats of a new run, which also ends the fail-fast state. Call it at the start of each run."""
         with self._stats_lock:
             self._stats = CallStats()
 
     @property
     def stats(self) -> CallStats:
-        """A copy of the stats of the calls made since `start_run()`, read at the end of a run."""
+        """A copy of the stats since `start_run()`."""
         with self._stats_lock:
             return dataclasses.replace(self._stats)
 
     @property
     def unreachable(self) -> str | None:
-        """The reason of the first call that could not reach the device since `start_run()`, or None. It is
-        set before the PanosUnreachable is raised."""
+        """The reason of the run's first call that could not reach the device, or None."""
         with self._stats_lock:
             return self._stats.unreachable
 
@@ -302,7 +278,6 @@ class PanosClient:
                 self._stats.unreachable = error.reason
 
     def _with_renewal(self, attempt: Callable[[str], T]) -> T:
-        """Run `attempt` with the current key; on an auth failure, renew the key once and run it again."""
         key = self._keys.key()
         try:
             return attempt(key)
@@ -323,11 +298,8 @@ class PanosClient:
         return renewed
 
     def _open_stream(self, params: dict[str, str], key: str) -> tuple[Response, Element, Iterator[tuple[str, Element]]]:
-        """Send a streamed request and read up to the root element.
-
-        An error response is read to the end and raised here, inside `_authorized`, so a rejected key is renewed
-        before any entry reaches the caller.
-        """
+        """Send a streamed request and read up to the root. An error response is raised here, inside `_authorized`, so
+        a rejected key is renewed before any entry reaches the caller."""
         resp = post_api(self._http, self._url, params, key=key, stream=True, counter=self._counter)
         try:
             if resp.status_code >= 400:
@@ -364,11 +336,7 @@ class PanosClient:
 
 
 def _log_elements(root: Element, events: Iterator[tuple[str, Element]]) -> Iterator[Element]:
-    """Walk a log job response: yield `result/job/status` first, then each log entry.
-
-    An entry is cleared and detached once the consumer advances. A response whose entries come before its status
-    raises, because the status could not be reported first.
-    """
+    """Yield `result/job/status`, then each log entry, which is cleared once the consumer advances."""
     path: list[str] = [root.tag]
     parent: Element | None = None
     seen_status = False

@@ -22,12 +22,12 @@ if TYPE_CHECKING:
 
 @cache
 def _compile_filter(patterns: tuple[str, ...]) -> tuple[re.Pattern[str], ...]:
-    """The filter compiled once. Config validation has already rejected a pattern that does not compile."""
+    """Config validation has already rejected a pattern that does not compile."""
     return tuple(re.compile(p) for p in patterns)
 
 
 def rule_hit_cmd(vsys: str) -> str:
-    """The `show rule-hit-count` command for one vsys; the name is escaped for the single-quoted XML attribute."""
+    """The vsys name is escaped for the single-quoted XML attribute."""
     name = escape(vsys, {"'": '&apos;'})
     return (
         f"<show><rule-hit-count><vsys><vsys-name><entry name='{name}'><rule-base><entry name='security'>"
@@ -36,7 +36,6 @@ def rule_hit_cmd(vsys: str) -> str:
 
 
 def parse_rule_hits(root: Element, vsys: str, patterns: Sequence[str], log: CheckLoggingAdapter) -> list[Sample]:
-    """One `security_rule.hits` per rule whose name matches any of `patterns` (all rules when there are none)."""
     rules = root.find('result/rule-hit-count/vsys/entry/rule-base/entry/rules')
     if rules is None:
         log.warning('Unknown shape of `show rule-hit-count` for %s: no rules element, sending no rule metrics', vsys)

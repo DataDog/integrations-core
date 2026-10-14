@@ -27,7 +27,6 @@ class BusyJob(NamedTuple):
 
 
 def parse_busy_jobs(root: Element) -> list[BusyJob]:
-    """Return the jobs of a `show jobs` response that pause collection, in response order."""
     busy = []
     # Every `<job>` element, wherever it sits: the `show jobs pending` envelope is not captured yet (lab task L10).
     for job in root.iter('job'):
@@ -38,5 +37,4 @@ def parse_busy_jobs(root: Element) -> list[BusyJob]:
 
 
 def busy_jobs(client: PanosClient) -> list[BusyJob]:
-    """Call `show jobs pending` and return the jobs that pause collection."""
     return parse_busy_jobs(client.op(JOBS_PENDING_CMD))

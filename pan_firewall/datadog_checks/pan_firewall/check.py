@@ -22,11 +22,9 @@ class PanFirewallCheck(AgentCheck, ConfigMixin):
         self._pollers: dict[str, FirewallPoller] = {}
 
     def persistent_cache_id(self) -> str:
-        """A cache ID that only the namespace changes, unlike the default digest of the whole instance config.
+        """Keyed by namespace only, so a config edit keeps the threat watermarks, identities and Panorama list.
 
-        Editing the config (a firewall or a tag added, `timeout` changed) must not reset the threat watermarks, the
-        identities and the Panorama fallback list. It is safe: the keys hold the serial, the IP or the Panorama host,
-        and the base class still isolates the cache per check.
+        Safe: the keys hold the serial, IP or Panorama host, and the base class still isolates the cache per check.
         """
         namespace = self.config.namespace or 'default'
         return hashlib.sha256(f'pan_firewall:{namespace}'.encode()).hexdigest()[:16]
@@ -45,8 +43,7 @@ class PanFirewallCheck(AgentCheck, ConfigMixin):
         pollers = []
         for target in targets:
             poller = self._pollers.get(target.ip)
-            # A changed target (a replaced firewall at the same IP) gets a new poller, so its identity and tags are
-            # not stale. A rename or a new version only updates the target.
+            # A replaced firewall at the same IP gets a new poller, so its identity and tags are not stale.
             if poller is None or poller.target.poller_key != target.poller_key:
                 poller = self._pollers[target.ip] = FirewallPoller(self, target, self.config)
             else:

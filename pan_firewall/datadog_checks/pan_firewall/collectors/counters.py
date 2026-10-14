@@ -17,12 +17,8 @@ GLOBAL_COUNTER_CMD = '<show><counter><global/></counter></show>'
 
 
 def parse_global(root: Element) -> list[Sample] | None:
-    """Parse `show counter global`. Returns None when the response has no `result/global/counters` list.
-
-    A counter of the response without a numeric `value` is ignored. `counter.global` is sent for exactly the counters
-    of `GLOBAL_COUNTERS`: a listed one with the category and aspect of the response, an unlisted one with the
-    table's and the value 0. `dropped_packets` sums every `severity=drop` counter of the response by aspect.
-    """
+    """None when the response has no counters list. `counter.global` is sent for exactly `GLOBAL_COUNTERS`, an
+    unlisted one as 0; `dropped_packets` sums the `severity=drop` counters by aspect."""
     counters = root.find('result/global/counters')
     if counters is None:
         return None

@@ -1,11 +1,10 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Top-N traffic reports: one custom dynamic report per dimension over the last 24 hours (`reports`, opt-in).
+"""Top-N traffic reports: one custom report per dimension over the last 24 hours (opt-in).
 
-The firewall builds a report as an asynchronous job. The jobs run one at a time, each polled to its end before the
-next is submitted. A job still running after `REPORT_JOB_POLLS` polls is kept in `FirewallState.reports` and polled
-first by the next run, never submitted again; the run after it carries on with the next report of the cycle.
+Report jobs run one at a time. One still running after `REPORT_JOB_POLLS` polls is polled first by the next run,
+never submitted again.
 """
 
 from __future__ import annotations
@@ -26,7 +25,6 @@ CAPTION = 'datadog'
 
 
 def report_params(field: str, top_n: int) -> dict[str, str]:
-    """Return the request submitting a report of the `top_n` values of `field` by sessions, with their bytes."""
     return {
         'type': 'report',
         'reporttype': 'dynamic',
@@ -41,10 +39,7 @@ def report_params(field: str, top_n: int) -> dict[str, str]:
 
 
 def parse_report(root: Element, name: str) -> list[Sample]:
-    """Return sessions, bytes and bytes per session of each row; a row missing its value or numbers is skipped.
-
-    A country row can be a private range (`10.0.0.0-10.255.255.255`): it is kept as the firewall reports it.
-    """
+    """A row missing its value or numbers is skipped. A country row can be a private range, kept as reported."""
     field, dimension = constants.REPORTS[name]
     samples: list[Sample] = []
     for entry in root.iterfind('result/report/entry'):
@@ -61,12 +56,8 @@ def parse_report(root: Element, name: str) -> list[Sample]:
 
 @register('reports')
 def collect_reports(ctx: CollectContext) -> list[Sample]:
-    """Collect the reports of one cycle of `REPORTS`, resuming where the last run stopped.
-
-    A job still running after its polls keeps `reports` due (`still_due`), so the next run, not the next interval,
-    polls it and goes on with the reports after it; the 30-minute interval applies again once the cycle is complete.
-    A job pending is kept until it ends, so a timeout polling it loses nothing.
-    """
+    """Collect one cycle of `REPORTS`, resuming where the last run stopped. A job still running keeps `reports` due,
+    so the next run, not the next interval, carries on with the cycle."""
     state = ctx.state.reports
     samples: list[Sample] = []
 
@@ -106,7 +97,6 @@ def collect_reports(ctx: CollectContext) -> list[Sample]:
 
 
 def _poll(ctx: CollectContext, job: ReportJob) -> tuple[Literal['finished', 'running', 'failed'], Element | None]:
-    """Poll the job until it ends: `finished` with its response, `failed` (warned once) or still `running`."""
     key, name = f'report:{job.report}', f'{job.report} report job {job.job_id}'
     for attempt in range(constants.REPORT_JOB_POLLS):
         try:

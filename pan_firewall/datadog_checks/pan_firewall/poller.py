@@ -53,7 +53,7 @@ JOBS_CHECK = 'jobs'
 # Collectors of one firewall run at once; the client's own semaphore caps the calls in flight at the same number.
 COLLECTOR_WORKERS = 2
 
-# Collectors behind an opt-in or opt-out option, to the `InstanceConfig` field that enables them.
+# Collectors behind an option, to the `InstanceConfig` field that enables them.
 OPTIONAL_COLLECTORS = {
     'global_counters': 'collect_global_counters',
     'ospf': 'collect_ospf',
@@ -64,19 +64,14 @@ OPTIONAL_COLLECTORS = {
 
 @dataclass
 class CollectorRun:
-    """The outcome of `FirewallPoller.run_collectors()`."""
-
     ran: list[str] = field(default_factory=list)  # succeeded, failed, or could not reach the firewall
-    unreachable: list[str] = field(default_factory=list)  # the calls that could not reach the firewall
-    # Not run, or run but cut short, because an earlier call of the run could not reach the firewall.
+    unreachable: list[str] = field(default_factory=list)
+    # Not run, or cut short, because an earlier call of the run could not reach the firewall.
     skipped: list[str] = field(default_factory=list)
 
 
 class FirewallPoller:
-    """Polls one firewall: commit check, identity, due collectors, `can_connect` and `api.authentication.status`.
-
-    It owns everything kept per firewall between runs: the HTTP session, the API key, the schedule and the state.
-    """
+    """Polls one firewall, and keeps what lasts between its runs: HTTP session, API key, schedule and state."""
 
     def __init__(self, check: AgentCheck, target: FirewallTarget, config: InstanceConfig):
         self.check = check
@@ -86,10 +81,8 @@ class FirewallPoller:
         self.ip = device_ip(target)
         # Keyed by device IP: before a static firewall first answers, its IP is all the check knows.
         self._cache_key = f'identity:{self.ip}'
-        # The log of the collectors: every message starts with the firewall it is about.
         self.firewall_log = FirewallLog(check.log, self.ip)
         http = new_http(check, config)
-        # Every request of the firewall, keygen included.
         self._requests = RequestCounter()
         self.keys = KeyManager(http, target.ip, target.credentials, self._requests)
         self.client = PanosClient(http, target.ip, self.keys, check.log, counter=self._requests)
@@ -102,8 +95,7 @@ class FirewallPoller:
         self._auth_status: int | None = None
         # The `can_connect` the last metadata was sent with: a different one sends the metadata again at once.
         self._metadata_status: int | None = None
-        # Schedule-clock time of the first run of the current busy period: every jobs check since then listed a busy
-        # job. None while the firewall is not busy.
+        # Schedule-clock start of the current busy period, None while the firewall is not busy.
         self._busy_since: float | None = None
         self._busy_cap_warned = False
         self._jobs_error_warned = False
@@ -148,8 +140,7 @@ class FirewallPoller:
             self.schedule.make_due(IDENTITY)
         if stats.calls:
             self._can_connect = 1 if stats.answered else 0
-            # A run that got no verdict on the credentials (nothing answered) keeps the last one; the first run
-            # reports 0.
+            # A run with no verdict on the credentials (nothing answered) keeps the last one; the first reports 0.
             if stats.auth_rejected:
                 self._auth_status = 1
             elif stats.answered or self._auth_status is None:
@@ -163,10 +154,7 @@ class FirewallPoller:
         self._send_metadata(outcome)
 
     def _send_metadata(self, outcome: CollectorRun) -> None:
-        """Send the device and its interfaces: on the identity's schedule (30 min), and when `can_connect` flips.
-
-        Nothing is sent without a serial (a static firewall never reached), or when `send_ndm_metadata` is off.
-        """
+        """Send the device and its interfaces on the identity's schedule (30 min), and when `can_connect` flips."""
         identity = self.identity
         if not self.config.send_ndm_metadata or identity is None or identity.serial is None:
             return
@@ -182,12 +170,10 @@ class FirewallPoller:
             )
 
     def _busy(self) -> bool:
-        """Run the jobs check; return True to skip this run's collectors because a commit or update is in progress.
+        """Run the jobs check; True skips this run's collectors (a commit or update is in progress).
 
-        A busy firewall is skipped for at most COMMIT_SKIP_MAX_SECONDS of continuous skipping; after that it is
-        collected anyway while the same busy period lasts, with one warning. A jobs check that fails does not block
-        collection, and is warned about once per episode: on the first failure after a jobs check that answered.
-        A call that cannot reach the firewall returns False; `run()` cuts the run off.
+        Skipping lasts at most COMMIT_SKIP_MAX_SECONDS per busy period, then the firewall is collected with one
+        warning. A failed jobs check never blocks collection, and is warned about once per episode.
         """
         try:
             jobs = busy_jobs(self.client)
@@ -230,7 +216,6 @@ class FirewallPoller:
         return False
 
     def _collect(self, due: list[str]) -> CollectorRun:
-        """Refresh the identity if due, then run the due collectors."""
         outcome = CollectorRun()
         if IDENTITY in due:
             self._refresh_identity()
@@ -252,13 +237,8 @@ class FirewallPoller:
     def run_collectors(self, names: Iterable[str], identity: DeviceIdentity) -> CollectorRun:
         """Run the named collectors, `COLLECTOR_WORKERS` at a time, and submit their samples.
 
-        Once a call cannot reach the firewall, collectors not started yet are skipped, and the client fails every
-        later call at once: a hung firewall costs one timeout per call in flight. A collector whose call failed that
-        way is skipped too, and stays due. A collector failing, or returning a sample that
-        cannot be submitted, is logged and does not stop the others.
-
-        Collectors share the client's 2 in-flight slots. `open_log_job` holds one slot for its `with` block, so a
-        collector must never call `client.op()` inside it.
+        Once a call cannot reach the firewall, the rest are skipped and stay due. A failing collector is logged and
+        does not stop the others. `open_log_job` holds one of the 2 slots: never call `client.op()` inside it.
         """
         ctx = CollectContext(
             client=self.client,
@@ -299,7 +279,6 @@ class FirewallPoller:
         return outcome
 
     def _run_collector(self, name: str, ctx: CollectContext) -> list[Sample] | None:
-        """Run one collector, or return None without starting it once a call has failed to reach the firewall."""
         if self.client.unreachable is not None:
             return None
         return COLLECT_FUNCTIONS[name](ctx)

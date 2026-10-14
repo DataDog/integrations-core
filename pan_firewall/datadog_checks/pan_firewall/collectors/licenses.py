@@ -33,7 +33,6 @@ def feature_tag(feature: str) -> str:
 
 
 def parse_expiry(value: str) -> datetime.date | None:
-    """The expiry date, or None for a perpetual license (`Never`) or a date in an unknown format."""
     match = EXPIRY_DATE.match(value)
     month = MONTHS.get(match['month'].lower()) if match else None
     if not match or not month:
@@ -45,10 +44,7 @@ def parse_expiry(value: str) -> datetime.date | None:
 
 
 def parse_licenses(root: Element, log: CheckLoggingAdapter, today: datetime.date) -> list[Sample]:
-    """One `license.expired` per feature, and `license.days_left` when `expires` is a date.
-
-    A perpetual license (`Never`) or an unparseable date reports `expired` only: no day count is made up.
-    """
+    """A perpetual license (`Never`) or an unparseable date reports `expired` only: no day count is made up."""
     licenses = root.find('result/licenses')
     if licenses is None:
         log.warning('Unknown shape of `request license info`: no result/licenses, sending no license metrics')

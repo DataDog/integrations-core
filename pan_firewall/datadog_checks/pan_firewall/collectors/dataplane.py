@@ -21,7 +21,6 @@ RESOURCE_MONITOR_CMD = (
 
 
 def parse_dataplane(root: Element, log: CheckLoggingAdapter) -> list[Sample]:
-    """One `dataplane.cpu.utilization` per data processor and core: the first value of the minute series."""
     processors = root.find('result/resource-monitor/data-processors')
     if processors is None:
         log.warning('the resource monitor has no data processors: no dataplane CPU is reported')

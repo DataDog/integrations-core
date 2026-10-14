@@ -17,10 +17,8 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class FirewallTarget:
-    """A firewall to poll, at `ip` (the configured IP in static mode, the Panorama `ip-address` otherwise). `serial`,
-    `hostname`, `family`, `model` and `sw_version` come from Panorama discovery (None in static mode). The firewall's
-    own `show system info` takes over `hostname`, `family`, `model` and `sw_version` once it answers.
-    """
+    """A firewall to poll at `ip`. The other fields come from Panorama discovery (None in static mode), until the
+    firewall's own `show system info` answers."""
 
     ip: str
     credentials: Credentials
@@ -32,8 +30,7 @@ class FirewallTarget:
 
     @property
     def poller_key(self) -> tuple[object, ...]:
-        """What a poller is built from: a target with another key needs a new poller. The descriptive fields
-        (`hostname`, `family`, `model`, `sw_version`) can change on a poller that keeps running."""
+        """What a poller is built from: a change needs a new poller; the descriptive fields can change in place."""
         return (self.ip, self.credentials, self.serial)
 
 
@@ -50,8 +47,6 @@ def resolve_credentials(ip: str, entries: Sequence[FirewallCredential]) -> Crede
 
 
 class StaticFirewallSource:
-    """The firewalls listed in the `firewalls` option, in config order."""
-
     def __init__(self, config: InstanceConfig):
         self._targets = []
         for ip in config.firewalls or ():

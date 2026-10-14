@@ -38,11 +38,8 @@ BGP_PREFIXES = (
 
 
 def peer_ip(address: str | None) -> str | None:
-    """Return the address of a PAN-OS `peer-address`, without its port.
-
-    Seen as `169.254.10.2:179`; IPv6 is expected as `[2001:db8::1]:179` or bare. A bare IPv6 has several colons and
-    is returned as is, since the port cannot be told from an address group.
-    """
+    """`169.254.10.2:179` -> `169.254.10.2`. IPv6 is expected as `[2001:db8::1]:179` or bare; a bare one is kept as
+    is, since its port cannot be told from an address group."""
     if not address:
         return None
     if address.startswith('['):
@@ -94,7 +91,6 @@ def parse_bgp_peers(root: Element) -> list[Sample]:
 
 
 def parse_ospf_neighbors(root: Element) -> list[Sample]:
-    """One `ospf.neighbor.status` per neighbor: 1 when its state is `full`, else 0. No state, no sample."""
     samples: list[Sample] = []
     for entry in root.iterfind('result/entry'):
         state = text(entry, 'status')
