@@ -1,0 +1,6 @@
+provides:
+  - id: idira-endpoint-privilege-manager-logs
+    always_on: true
+    granular: true
+    data_type: logs
+    direction: inbound

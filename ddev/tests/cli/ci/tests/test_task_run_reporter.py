@@ -503,25 +503,49 @@ def test_a_write_that_settled_as_failed_reports_one_failed_operation():
     client.mock_response("list_issue_comments", comment_page(_marked_comment()))
     client.mock_response("update_issue_comment", _auth_error(403))
     client.mock_response("create_issue_comment", _auth_error(403))
-    monitoring, sink = recording_runtime()
+    handler = RecordingJsonHandler()
+    monitoring, sink = recording_runtime(handler)
     reporter = _reporter(client, monitor=monitoring.component("run-reporter"))
 
     asyncio.run(reporter.process_message(_update(1)))
 
     assert [record.value for record in sink.records_named("operations.count")] == [1]
     assert [record.value for record in sink.records_named("operations.failed")] == [1]
+    [warning] = [event for event in handler.events if event.get("operation") == "publish_report"]
+    assert warning["level"] == "warning"
+    assert warning["event"] == "PR comment not published for revision 1"
+    assert warning["component"] == "run-reporter"
 
 
 def test_an_escaped_write_error_fails_the_publication_operation_and_propagates():
     client = FakeAsyncGitHubClient()
     client.mock_response("create_issue_comment", RuntimeError("the comment API is down"))
-    monitoring, sink = recording_runtime()
+    handler = RecordingJsonHandler()
+    monitoring, sink = recording_runtime(handler)
     reporter = _reporter(client, monitor=monitoring.component("run-reporter"))
 
     with pytest.raises(RuntimeError, match="the comment API is down"):
         asyncio.run(reporter.process_message(_update(1)))
 
     assert [record.value for record in sink.records_named("operations.failed")] == [1]
+    [error] = [event for event in handler.events if event.get("operation") == "publish_report"]
+    assert error["level"] == "error"
+    assert error["event"] == "Failed to publish PR comment for revision 1"
+    assert "exception" in error
+
+
+@pytest.mark.parametrize("kind", list(ShutdownKind), ids=lambda kind: kind.value)
+async def test_unpublished_shutdown_report_warns(kind: ShutdownKind):
+    client = FakeAsyncGitHubClient()
+    client.mock_response("create_issue_comment", _http_error(500))
+    handler = RecordingJsonHandler()
+    reporter = _reporter(client, handler=handler)
+
+    await reporter.publish_shutdown(_shutdown_request(kind))
+
+    [warning] = [event for event in handler.events if event.get("operation") == "publish_report"]
+    assert warning["level"] == "warning"
+    assert warning["event"] == "Shutdown PR comment not published"
 
 
 @pytest.mark.parametrize(
@@ -876,7 +900,8 @@ async def test_a_stopped_run_is_reported_even_with_nothing_gathered(kind: Shutdo
 async def test_a_shutdown_report_that_never_landed_says_so_on_the_run_page(kind: ShutdownKind):
     """A failed terminal write remains visible to the run-summary publisher."""
     client = FakeAsyncGitHubClient()
-    reporter = _reporter(client)
+    handler = RecordingJsonHandler()
+    reporter = _reporter(client, handler=handler)
     await reporter.process_message(_update(1))
     for method in ("update_issue_comment", "create_issue_comment", "list_issue_comments"):
         client.mock_response(method, RateLimitWaitAbandoned(2.0, 58.0))
@@ -885,6 +910,9 @@ async def test_a_shutdown_report_that_never_landed_says_so_on_the_run_page(kind:
         await reporter.publish_shutdown(_shutdown_request(kind))
 
     assert reporter.pr_comment_failed
+    [error] = [event for event in handler.events if event.get("operation") == "publish_report"]
+    assert error["level"] == "error"
+    assert error["event"] == "Failed to publish the shutdown PR comment"
 
 
 @pytest.mark.parametrize("kind", list(ShutdownKind), ids=lambda kind: kind.value)
