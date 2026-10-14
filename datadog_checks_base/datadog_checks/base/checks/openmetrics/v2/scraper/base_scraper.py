@@ -10,6 +10,7 @@ from itertools import chain
 from math import isinf, isnan
 from typing import List  # noqa: F401
 
+from binary import KIBIBYTE
 from prometheus_client import Metric
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
 from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
@@ -24,7 +25,7 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http import OPENMETRICS_MAX_LINE_SIZE, RequestsWrapper, limit_line_size
 
 
 class OpenMetricsScraper:
@@ -219,6 +220,7 @@ class OpenMetricsScraper:
             self.raw_line_filter = re.compile('|'.join(raw_line_filters))
 
         self.http = RequestsWrapper(config, self.check.init_config, self.check.HTTP_CONFIG_REMAPPER, self.check.log)
+        self.http.max_line_size = OPENMETRICS_MAX_LINE_SIZE * KIBIBYTE
 
         self._content_type = ''
         self._use_latest_spec = is_affirmative(config.get('use_latest_spec', False))
@@ -468,7 +470,10 @@ class OpenMetricsScraper:
         """
 
         kwargs['stream'] = True
-        return self.http.get(self.endpoint, **kwargs)
+        response = self.http.get(self.endpoint, **kwargs)
+        # Also limit reads that do not go through `iter_lines`, such as `response.content` for telemetry
+        limit_line_size(response, self.http.max_line_size)
+        return response
 
     def set_dynamic_tags(self, *tags):
         """
