@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from typing import cast
 
 FIELD_TO_PARSE = object()
 
@@ -814,6 +815,8 @@ class AIConfig(LazilyParsedConfig):
 
         self._field_anthropic_api_key = FIELD_TO_PARSE
         self._field_flow_dirs = FIELD_TO_PARSE
+        self._field_use_ai_gateway = FIELD_TO_PARSE
+        self._field_models_catalog = FIELD_TO_PARSE
 
     @property
     def anthropic_api_key(self):
@@ -856,3 +859,48 @@ class AIConfig(LazilyParsedConfig):
     def flow_dirs(self, value):
         self.raw_data['flow_dirs'] = value
         self._field_flow_dirs = FIELD_TO_PARSE
+
+    @property
+    def use_ai_gateway(self) -> bool:
+        if self._field_use_ai_gateway is FIELD_TO_PARSE:
+            if 'use_ai_gateway' in self.raw_data:
+                # Accept the "true"/"false" strings so `ddev config set` entries stay parseable.
+                flag = self.raw_data['use_ai_gateway']
+                if isinstance(flag, bool):
+                    pass
+                elif isinstance(flag, str) and flag.lower() in ('true', 'false'):
+                    flag = flag.lower() == 'true'
+                else:
+                    self.raise_error('must be a boolean or the string "true"/"false"')
+
+                self._field_use_ai_gateway = flag
+            else:
+                self._field_use_ai_gateway = False
+
+        return cast(bool, self._field_use_ai_gateway)
+
+    @use_ai_gateway.setter
+    def use_ai_gateway(self, value: bool | str):
+        self.raw_data['use_ai_gateway'] = value
+        self._field_use_ai_gateway = FIELD_TO_PARSE
+
+    @property
+    def models_catalog(self) -> str | None:
+        if self._field_models_catalog is FIELD_TO_PARSE:
+            if 'models_catalog' in self.raw_data:
+                path = self.raw_data['models_catalog']
+                if not isinstance(path, str):
+                    self.raise_error('must be a string')
+                if not path.strip():
+                    self.raise_error('must be a non-empty string')
+
+                self._field_models_catalog = path
+            else:
+                self._field_models_catalog = None
+
+        return self._field_models_catalog
+
+    @models_catalog.setter
+    def models_catalog(self, value: str):
+        self.raw_data['models_catalog'] = value
+        self._field_models_catalog = FIELD_TO_PARSE
