@@ -319,7 +319,7 @@
           {
             "definition": {
               "type": "note",
-              "content": "Network health is the share of monitored devices that Catalyst Center rates healthy: below 90% is worth a look, and below 80% is critical. When it drops, find the category holding the fair and poor devices, then open the Devices and Interfaces dashboard to see which devices they are.",
+              "content": "Network health is the share of devices that Catalyst Center rates healthy, and a device with no health data counts against it: below 90% is worth a look, and below 80% is critical. When it drops, find the category holding the fair, poor, and unscored devices, then open the Devices and Interfaces dashboard to see which devices they are.",
               "background_color": "green",
               "font_size": "14",
               "text_align": "left",
