@@ -282,12 +282,11 @@ class LineCappedRawResponse(ObjectProxy):
 
 
 class ResponseWrapper(ObjectProxy):
-    def __init__(self, response, default_chunk_size, max_line_size: int | None = None):
+    def __init__(self, response, default_chunk_size):
         super(ResponseWrapper, self).__init__(response)
 
         # See https://github.com/psf/requests/pull/5942
         self.__default_chunk_size = default_chunk_size
-        self.__max_line_size = max_line_size
 
     def iter_content(self, chunk_size=None, decode_unicode=False):
         if chunk_size is None:
@@ -298,10 +297,6 @@ class ResponseWrapper(ObjectProxy):
     def iter_lines(self, chunk_size=None, decode_unicode=False, delimiter=None):
         if chunk_size is None:
             chunk_size = self.__default_chunk_size
-
-        # Not implemented yet for custom delimiters, which no check uses
-        if delimiter is None and self.__max_line_size is not None:
-            limit_line_size(self.__wrapped__, self.__max_line_size)
 
         return self.__wrapped__.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter)
 
@@ -626,7 +621,7 @@ class RequestsWrapper(object):
         self.ignore_tls_warning = is_affirmative(config['tls_ignore_warning'])
 
         self.request_size = int(float(config['request_size']) * KIBIBYTE)
-        # Set in bytes by checks that limit the size of lines read with `iter_lines`
+        # Set in bytes by checks that limit lines in streamed responses. Requests has already read non-streaming bodies.
         self.max_line_size: int | None = None
 
         self.aia_chasing_max_depth = DEFAULT_AIA_CHASING_MAX_DEPTH
@@ -733,7 +728,10 @@ class RequestsWrapper(object):
             else:
                 response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
 
-            return ResponseWrapper(response, self.request_size, self.max_line_size)
+            if self.max_line_size is not None:
+                limit_line_size(response, self.max_line_size)
+
+            return ResponseWrapper(response, self.request_size)
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
         try:

@@ -25,7 +25,7 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
-from datadog_checks.base.utils.http import OPENMETRICS_MAX_LINE_SIZE, RequestsWrapper, limit_line_size
+from datadog_checks.base.utils.http import OPENMETRICS_MAX_LINE_SIZE, RequestsWrapper
 
 
 class OpenMetricsScraper:
@@ -470,10 +470,7 @@ class OpenMetricsScraper:
         """
 
         kwargs['stream'] = True
-        response = self.http.get(self.endpoint, **kwargs)
-        # Also limit reads that do not go through `iter_lines`, such as `response.content` for telemetry
-        limit_line_size(response, self.http.max_line_size)
-        return response
+        return self.http.get(self.endpoint, **kwargs)
 
     def set_dynamic_tags(self, *tags):
         """

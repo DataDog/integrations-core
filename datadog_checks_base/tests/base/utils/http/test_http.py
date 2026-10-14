@@ -20,7 +20,6 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http import (
     RequestsWrapper,
     ResponseLineTooLongError,
-    ResponseWrapper,
     is_uds_url,
     limit_line_size,
     quote_uds_url,
@@ -352,7 +351,7 @@ class TestLogger:
             assert message != expected_message
 
 
-def _gzip_response(body):
+def _gzip_response(body: bytes) -> requests.Response:
     response = requests.Response()
     response.raw = urllib3.HTTPResponse(
         io.BytesIO(gzip.compress(body)), headers={'Content-Encoding': 'gzip'}, preload_content=False
@@ -370,7 +369,9 @@ def _gzip_response(body):
     ],
 )
 def test_iter_lines_allows_lines_up_to_limit(body, lines):
-    assert len(list(ResponseWrapper(_gzip_response(body), 4, 10).iter_lines())) == lines
+    response = _gzip_response(body)
+    limit_line_size(response, 10)
+    assert len(list(response.iter_lines(chunk_size=4))) == lines
 
 
 @pytest.mark.parametrize(
@@ -382,8 +383,32 @@ def test_iter_lines_allows_lines_up_to_limit(body, lines):
     ],
 )
 def test_iter_lines_limits_line_size(body):
+    response = _gzip_response(body)
+    limit_line_size(response, 10)
     with pytest.raises(ResponseLineTooLongError, match='line longer than 10 bytes'):
-        list(ResponseWrapper(_gzip_response(body), 4, 10).iter_lines())
+        list(response.iter_lines(chunk_size=4))
+
+
+@pytest.mark.parametrize('reader', ['content', 'iter_content', 'iter_lines'])
+@pytest.mark.parametrize('max_line_size', [None, 10])
+def test_request_limits_streamed_body(reader: str, max_line_size: int | None):
+    # Every body reader must enforce an opted-in limit, including direct handler calls outside OpenMetrics scraping.
+    body = b'x' * 11
+    http = RequestsWrapper({}, {})
+    http.max_line_size = max_line_size
+    with mock.patch('requests.Session.get', return_value=_gzip_response(body)):
+        response = http.get('http://example.test/metrics', stream=True)
+
+    def read_body() -> bytes:
+        if reader == 'content':
+            return response.content
+        return b''.join(getattr(response, reader)())
+
+    if max_line_size is None:
+        assert read_body() == body
+    else:
+        with pytest.raises(ResponseLineTooLongError, match='line longer than 10 bytes'):
+            read_body()
 
 
 def test_stream_groups_chunks_up_to_a_line_break():
