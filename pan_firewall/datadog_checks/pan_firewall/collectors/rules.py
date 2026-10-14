@@ -6,18 +6,14 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from functools import cache
-from typing import TYPE_CHECKING
 from xml.etree.ElementTree import Element
 from xml.sax.saxutils import escape
 
 from datadog_checks.pan_firewall.xml_utils import num
 
-from . import CollectContext, Sample, once_log, register
-
-if TYPE_CHECKING:
-    from datadog_checks.base.log import CheckLoggingAdapter
+from . import CollectContext, Sample, register
 
 
 @cache
@@ -35,10 +31,10 @@ def rule_hit_cmd(vsys: str) -> str:
     )
 
 
-def parse_rule_hits(root: Element, vsys: str, patterns: Sequence[str], log: CheckLoggingAdapter) -> list[Sample]:
+def parse_rule_hits(root: Element, vsys: str, patterns: Sequence[str], warn: Callable[..., None]) -> list[Sample]:
     rules = root.find('result/rule-hit-count/vsys/entry/rule-base/entry/rules')
     if rules is None:
-        log.warning('Unknown shape of `show rule-hit-count` for %s: no rules element, sending no rule metrics', vsys)
+        warn('Unknown shape of `show rule-hit-count` for %s: no rules element, sending no rule metrics', vsys)
         return []
 
     compiled = _compile_filter(tuple(patterns))
@@ -57,5 +53,5 @@ def collect_rule_hits(ctx: CollectContext) -> list[Sample]:
     patterns = ctx.config.security_rule_filter or ()
     samples: list[Sample] = []
     for vsys in ctx.state.vsys:
-        samples.extend(parse_rule_hits(ctx.client.op(rule_hit_cmd(vsys)), vsys, patterns, once_log(ctx)))
+        samples.extend(parse_rule_hits(ctx.client.op(rule_hit_cmd(vsys)), vsys, patterns, ctx.warning))
     return samples

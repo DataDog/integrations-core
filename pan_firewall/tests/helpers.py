@@ -62,6 +62,7 @@ def make_ctx(response=None, *, state=None, identity=None, config=None, **kwargs)
         state=FirewallState() if state is None else state,
         config=mock.Mock() if config is None else config,
         log=mock.Mock(),
+        ip=FW_A_IP,
         **kwargs,
     )
     if isinstance(response, dict):

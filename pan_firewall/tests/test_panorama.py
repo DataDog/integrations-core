@@ -276,7 +276,7 @@ def test_firewall_without_matching_credentials_is_skipped_with_a_warning_on_ever
     assert len(warnings_about(caplog, FW_B_IP)) == 2
     # Also in the Agent status, which drains them after each run.
     assert [w for w in check.get_warnings() if FW_B_IP in w] == [
-        f'pan_firewall: no entry in `firewall_credentials` matches the firewall {FW_B_SERIAL} at {FW_B_IP}, skipping it'
+        f'no entry in `firewall_credentials` matches the firewall {FW_B_SERIAL} at {FW_B_IP}, skipping it'
     ] * 2
 
 
@@ -356,7 +356,7 @@ def test_panorama_can_connect_is_0_when_the_discovery_call_fails(
     assert [c.type for c in fake_panos.calls_to(PANORAMA)] == calls
     assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))] * 2
     warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
-    assert f'pan_firewall: could not get the connected devices from Panorama {PANORAMA}: {error}' in warnings
+    assert f'could not get the connected devices from Panorama {PANORAMA}: {error}' in warnings
 
 
 def test_panorama_that_answers_again_is_reported_and_its_firewalls_polled(dd_run_check, aggregator, fake_panos):
@@ -473,7 +473,7 @@ def test_fallback_warning_says_how_old_the_list_is_and_its_firewalls_are_polled(
 
     assert fallback_warnings(caplog) == [
         # The 6 entries of the cached list, of which 2 are connected and have a usable IP.
-        f'pan_firewall: Panorama {PANORAMA} is unreachable; polling the 6 firewalls of the last discovery, 3 days ago'
+        f'Panorama {PANORAMA} is unreachable; polling the 6 firewalls of the last discovery, 3 days ago'
     ]
     assert polled_hosts(fake_panos, skip=calls) == {FW_A_IP, FW_B_IP}
 

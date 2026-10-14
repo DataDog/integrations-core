@@ -10,16 +10,12 @@ The hardware sensors (`show system environmentals`) answer with XML.
 from __future__ import annotations
 
 import re
-from collections.abc import Iterator
-from typing import TYPE_CHECKING
+from collections.abc import Callable, Iterator
 from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.xml_utils import num, text
 
-from . import CollectContext, Sample, once_log, register
-
-if TYPE_CHECKING:
-    from datadog_checks.base.log import CheckLoggingAdapter
+from . import CollectContext, Sample, register
 
 SYSTEM_RESOURCES_CMD = '<show><system><resources/></system></show>'
 DISK_SPACE_CMD = '<show><system><disk-space/></system></show>'
@@ -52,7 +48,7 @@ def _percent(part: float, total: float) -> float | None:
     return part / total * 100 if total else None
 
 
-def parse_system_resources(root: Element, log: CheckLoggingAdapter) -> list[Sample]:
+def parse_system_resources(root: Element, warn: Callable[..., None]) -> list[Sample]:
     """Parse the `top` header. A missing or unknown line drops its own metrics, with one warning for all of them."""
     output = text(root, 'result') or ''
     samples: list[Sample] = []
@@ -82,17 +78,17 @@ def parse_system_resources(root: Element, log: CheckLoggingAdapter) -> list[Samp
         if kind == 'Swap' and 'avail Mem' in fields:
             samples.append(Sample('mgmt.memory.available', fields['avail Mem'] * scale, (), 'gauge'))
     if missing:
-        log.warning(
+        warn(
             '`show system resources` has no usable %s line: the metrics of the line are not reported',
             ', '.join(missing),
         )
     return samples
 
 
-def parse_disk(root: Element, log: CheckLoggingAdapter) -> list[Sample]:
+def parse_disk(root: Element, warn: Callable[..., None]) -> list[Sample]:
     lines = (text(root, 'result') or '').splitlines()
     if not lines or not lines[0].startswith('Filesystem'):
-        log.warning('`show system disk-space` is not df output: no disk usage is reported')
+        warn('`show system disk-space` is not df output: no disk usage is reported')
         return []
     samples = []
     pending = ''
@@ -136,7 +132,7 @@ def _alarm(entry: Element) -> bool | None:
     return False if value in ALARM_FALSE else None
 
 
-def parse_environmentals(root: Element, log: CheckLoggingAdapter, warned: set[str]) -> list[Sample]:
+def parse_environmentals(root: Element, warn: Callable[..., None]) -> list[Sample]:
     """Power rails and temperature sensors; empty on a VM-Series. The alarms are PAN's own `alarm` field, never a
     comparison with the thresholds. A power alarm whose direction cannot be told is warned about, once per sensor."""
     samples: list[Sample] = []
@@ -162,15 +158,12 @@ def parse_environmentals(root: Element, log: CheckLoggingAdapter, warned: set[st
         elif low is not None and volts <= low:
             direction = (0, 1)
         else:
-            key = f'power-sensor:{slot}/{name}'
-            if key not in warned:
-                warned.add(key)
-                log.warning(
-                    'power sensor `%s` (slot %s) is in alarm but the voltage is not outside its '
-                    'thresholds: power.alarm.high and power.alarm.low are not reported for it',
-                    name,
-                    slot,
-                )
+            warn(
+                'power sensor `%s` (slot %s) is in alarm but the voltage is not outside its '
+                'thresholds: power.alarm.high and power.alarm.low are not reported for it',
+                name,
+                slot,
+            )
             continue
         samples.append(Sample('power.alarm.high', direction[0], tags, 'gauge'))
         samples.append(Sample('power.alarm.low', direction[1], tags, 'gauge'))
@@ -193,14 +186,14 @@ def parse_environmentals(root: Element, log: CheckLoggingAdapter, warned: set[st
 
 @register('system_resources')
 def collect_system_resources(ctx: CollectContext) -> list[Sample]:
-    return parse_system_resources(ctx.client.op(SYSTEM_RESOURCES_CMD), once_log(ctx))
+    return parse_system_resources(ctx.client.op(SYSTEM_RESOURCES_CMD), ctx.warning)
 
 
 @register('disk')
 def collect_disk(ctx: CollectContext) -> list[Sample]:
-    return parse_disk(ctx.client.op(DISK_SPACE_CMD), once_log(ctx))
+    return parse_disk(ctx.client.op(DISK_SPACE_CMD), ctx.warning)
 
 
 @register('environment')
 def collect_environment(ctx: CollectContext) -> list[Sample]:
-    return parse_environmentals(ctx.client.op(ENVIRONMENTALS_CMD), ctx.log, ctx.state.warned)
+    return parse_environmentals(ctx.client.op(ENVIRONMENTALS_CMD), ctx.warning)

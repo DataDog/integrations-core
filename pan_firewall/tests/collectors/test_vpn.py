@@ -55,13 +55,13 @@ def test_vpn_of_the_capture():
 def test_unknown_state_is_skipped_and_logged_but_still_counts_in_the_total():
     flow = load_op(VPN_FLOW_CMD)
     flow.find("result/IPSec/entry[name='tun-peer']/state").text = 'weird'
-    log = mock.Mock()
+    warn = mock.Mock()
 
-    snapshot = parse_vpn(flow, load_op(VPN_GATEWAY_CMD), log)
+    snapshot = parse_vpn(flow, load_op(VPN_GATEWAY_CMD), warn)
 
     assert series(snapshot.samples) == expected('10.60.1.11', active=0, states={'tun-dead': 2})
-    log.warning.assert_called_once()
-    assert 'weird' in str(log.warning.call_args)
+    warn.assert_called_once()
+    assert 'weird' in str(warn.call_args)
 
 
 def test_gateway_tag_is_omitted_when_gwid_matches_no_gateway():

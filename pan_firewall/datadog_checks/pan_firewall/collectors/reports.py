@@ -18,7 +18,7 @@ from datadog_checks.pan_firewall.constants import ACTIVE_STATUSES
 from datadog_checks.pan_firewall.errors import PanosError, PanosUnreachable
 from datadog_checks.pan_firewall.xml_utils import num, text
 
-from . import CollectContext, ReportJob, Sample, register, warn_once
+from . import CollectContext, ReportJob, Sample, register
 
 DEFAULT_TOP_N = 10
 CAPTION = 'datadog'
@@ -68,11 +68,12 @@ def collect_reports(ctx: CollectContext) -> list[Sample]:
             ctx.state.still_due.add('reports')
             return samples
         if outcome == 'running':
-            ctx.log.warning(
+            ctx.warning(
                 'the %s report job %s is still running after being carried over %d times: giving up on it',
                 job.report,
                 job.job_id,
                 job.carries,
+                once=False,
             )
         elif root is not None:
             samples += parse_report(root, job.report)
@@ -104,12 +105,12 @@ def _poll(ctx: CollectContext, job: ReportJob) -> tuple[Literal['finished', 'run
         except PanosUnreachable:
             raise
         except PanosError as e:
-            warn_once(ctx, key, 'polling the %s failed: no samples for it (%s)', name, e)
+            ctx.warning('polling the %s failed: no samples for it (%s)', name, e, key=key)
             return 'failed', None
         if status == 'FIN':
             return 'finished', root
         if status not in ACTIVE_STATUSES:
-            warn_once(ctx, key, 'the %s ended with status %s: no samples for it', name, status)
+            ctx.warning('the %s ended with status %s: no samples for it', name, status, key=key)
             return 'failed', None
         if attempt + 1 < constants.REPORT_JOB_POLLS:
             time.sleep(constants.REPORT_JOB_POLL_DELAY)

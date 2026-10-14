@@ -13,7 +13,7 @@ from datadog_checks.pan_firewall.constants import REPORTS
 from datadog_checks.pan_firewall.errors import PanosApiError, PanosUnreachable
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from ..common import FW_A_TAGS, SYNTHETIC
+from ..common import FW_A_IP, FW_A_TAGS, SYNTHETIC
 from ..fixture_map import find_report_fixture
 from ..helpers import make_instance, new_check
 
@@ -152,6 +152,7 @@ def make_context(client, state=None, top_n=None):
         state=state or FirewallState(),
         config=mock.Mock(report_top_n=top_n),
         log=mock.Mock(),
+        ip=FW_A_IP,
     )
 
 

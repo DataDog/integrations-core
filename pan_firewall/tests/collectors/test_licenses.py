@@ -34,7 +34,7 @@ def entry(root, feature):
 
 
 def test_licenses_of_the_capture():
-    samples = parse_licenses(load_op(LICENSE_INFO_CMD), mock.Mock(), TODAY)
+    samples = parse_licenses(load_op(LICENSE_INFO_CMD), mock.Mock(), mock.Mock(), TODAY)
 
     expected = {}
     for feature in FEATURES:
@@ -48,7 +48,7 @@ def test_expired_license_reports_one_and_negative_days():
     entry(root, 'PA-VM').find('expired').text = 'yes'
     entry(root, 'PA-VM').find('expires').text = 'October 01, 2026'
 
-    result = series(parse_licenses(root, mock.Mock(), TODAY))
+    result = series(parse_licenses(root, mock.Mock(), mock.Mock(), TODAY))
 
     assert result['license.expired', ('feature:pa_vm',)] == (1, 'gauge')
     assert result['license.days_left', ('feature:pa_vm',)] == (-8, 'gauge')
@@ -59,7 +59,7 @@ def test_license_without_a_usable_expiry_reports_only_expired(expires):
     root = load_op(LICENSE_INFO_CMD)
     entry(root, 'PA-VM').find('expires').text = expires
 
-    result = series(parse_licenses(root, mock.Mock(), TODAY))
+    result = series(parse_licenses(root, mock.Mock(), mock.Mock(), TODAY))
 
     assert result['license.expired', ('feature:pa_vm',)] == (0, 'gauge')
     assert ('license.days_left', ('feature:pa_vm',)) not in result

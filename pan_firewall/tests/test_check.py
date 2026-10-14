@@ -8,7 +8,7 @@ import threading
 import pytest
 
 from datadog_checks.pan_firewall import PanFirewallCheck
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, Sample, once_log, warn_once
+from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, Sample
 from datadog_checks.pan_firewall.collectors.jobs import JOBS_PENDING_CMD
 from datadog_checks.pan_firewall.errors import PanosApiError, PanosUnreachable
 from datadog_checks.pan_firewall.poller import FirewallPoller
@@ -47,7 +47,7 @@ def test_good_run_collects_identity_and_reports_connected(dd_run_check, aggregat
         ('op', SYSTEM_INFO_CMD, True),
         ('op', INTERFACE_ALL_CMD, True),
     ]
-    assert re.search(rf'pan_firewall {re.escape(FW_A_IP)}: 4 requests in \d+\.\d\ds', caplog.text)
+    assert re.search(rf'{re.escape(FW_A_IP)}: 4 requests in \d+\.\d\ds', caplog.text)
 
 
 # Transport failures, and HTTP errors whose body is not a PAN-OS response: none of them means the firewall API answered,
@@ -226,9 +226,7 @@ def test_unreachable_firewall_skips_the_remaining_collectors_of_that_firewall_on
     # The jobs check and the one call that failed: nothing else reached the firewall.
     assert len(fake_panos.calls_to(FW_A_IP)) - calls_before == 2
     warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
-    assert warnings == [
-        f'pan_firewall {FW_A_IP}: {warning}; skipped for this run: dataplane, interfaces, system_resources'
-    ]
+    assert warnings == [f'{FW_A_IP}: {warning}; skipped for this run: dataplane, interfaces, system_resources']
 
     # The skipped collectors stay due; the one that failed waits for its interval.
     fake_panos.recover(FW_A_IP)
@@ -253,7 +251,7 @@ def test_identity_timeout_skips_every_collector(dd_run_check, aggregator, fake_p
     assert only_value_and_tags(aggregator, 'can_connect') == (1, FW_A_TAGS)
     warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
     assert warnings == [
-        f'pan_firewall {FW_A_IP}: could not reach the firewall (timed out) during identity_metadata; '
+        f'{FW_A_IP}: could not reach the firewall (timed out) during identity_metadata; '
         f'skipped for this run: {", ".join(STUBS)}'
     ]
 
@@ -285,7 +283,7 @@ def test_failing_collector_does_not_stop_the_others(dd_run_check, aggregator, mo
     assert stub_runs(aggregator) == {(FW_A_IP, name) for name in STUBS if name != 'bgp'}
     assert only_value_and_tags(aggregator, 'can_connect') == (1, FW_A_TAGS)
     warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
-    assert warnings == [f'pan_firewall {FW_A_IP}: collector bgp failed: {error}']
+    assert warnings == [f'{FW_A_IP}: collector bgp failed: {error}']
 
 
 def test_timeout_a_collector_handles_itself_is_still_reported(dd_run_check, fake_panos, monkeypatch, caplog):
@@ -307,14 +305,13 @@ def test_timeout_a_collector_handles_itself_is_still_reported(dd_run_check, fake
 
     warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
     assert warnings == [
-        f'pan_firewall {FW_A_IP}: could not reach the firewall (timed out) during a call; skipped for this run: none'
+        f'{FW_A_IP}: could not reach the firewall (timed out) during a call; skipped for this run: none'
     ]
 
 
 def test_collector_warnings_name_the_firewall(dd_run_check, monkeypatch, caplog):
     def bgp(ctx):
-        warn_once(ctx, 'stub', 'something is off')
-        once_log(ctx).warning('unknown shape %s', 'x')
+        ctx.warning('unknown shape %s', 'x')
         return []
 
     register_stubs(monkeypatch, bgp=bgp)
@@ -322,11 +319,7 @@ def test_collector_warnings_name_the_firewall(dd_run_check, monkeypatch, caplog)
     dd_run_check(new_check(make_instance(firewalls=[FW_A_IP, FW_B_IP])))
 
     warnings = {r.getMessage() for r in caplog.records if r.levelno == logging.WARNING}
-    assert {
-        f'pan_firewall {ip}: {message}'
-        for ip in (FW_A_IP, FW_B_IP)
-        for message in ('something is off', 'unknown shape x')
-    } <= warnings
+    assert {f'{ip}: unknown shape x' for ip in (FW_A_IP, FW_B_IP)} <= warnings
 
 
 def test_unexpected_poller_error_does_not_stop_other_firewalls(dd_run_check, aggregator, monkeypatch, caplog):

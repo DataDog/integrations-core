@@ -52,7 +52,7 @@ class PanFirewallCheck(AgentCheck, ConfigMixin):
                 try:
                     future.result()
                 except Exception as e:
-                    self.log.warning('pan_firewall %s: polling failed: %s', futures[future].ip, e, exc_info=True)
+                    self.log.warning('%s: polling failed: %s', futures[future].ip, e, exc_info=True)
 
     def _remove_stale_pollers(self, current_ips: set[str]) -> None:
         for ip in set(self._pollers) - current_ips:

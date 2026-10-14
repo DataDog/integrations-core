@@ -15,7 +15,6 @@ from .auth import KeyManager
 from .collectors import (  # noqa: F401  (importing the modules registers their collectors)
     COLLECT_FUNCTIONS,
     CollectContext,
-    FirewallLog,
     FirewallState,
     Sample,
     counters,
@@ -80,7 +79,6 @@ class FirewallPoller:
         self.ip = device_ip(target)
         # Keyed by device IP: before a static firewall first answers, its IP is all the check knows.
         self._cache_key = f'identity:{self.ip}'
-        self.firewall_log = FirewallLog(check.log, self.ip)
         self._requests = RequestCounter()
         self.keys = KeyManager(check.http, target.ip, target.credentials, self._requests)
         self.client = PanosClient(check.http, target.ip, self.keys, check.log, counter=self._requests)
@@ -107,7 +105,7 @@ class FirewallPoller:
             self._run()
         finally:
             requests = self._requests.take()
-            self.log.debug('pan_firewall %s: %d requests in %.2fs', self.ip, requests, time.monotonic() - start)
+            self.log.debug('%s: %d requests in %.2fs', self.ip, requests, time.monotonic() - start)
 
     def _run(self) -> None:
         # One keygen attempt per run after a rejected one (the KeyManager latches until then).
@@ -124,7 +122,7 @@ class FirewallPoller:
         # Also when a collector caught the exception itself, so no name was recorded.
         if (reason := self.client.unreachable) is not None:
             self.log.warning(
-                'pan_firewall %s: could not reach the firewall (%s) during %s; skipped for this run: %s',
+                '%s: could not reach the firewall (%s) during %s; skipped for this run: %s',
                 self.ip,
                 reason,
                 ', '.join(outcome.unreachable) or 'a call',
@@ -183,7 +181,7 @@ class FirewallPoller:
             if not self._jobs_error_warned:
                 self._jobs_error_warned = True
                 self.log.warning(
-                    'pan_firewall %s: cannot check for a commit or content update in progress, collecting anyway: %s',
+                    '%s: cannot check for a commit or content update in progress, collecting anyway: %s',
                     self.ip,
                     e,
                 )
@@ -198,14 +196,12 @@ class FirewallPoller:
             self._busy_since = now
             self._busy_cap_warned = False
         if now - self._busy_since < COMMIT_SKIP_MAX_SECONDS:
-            self.log.debug(
-                'pan_firewall %s: %s job %s in progress, skipping collection this run', self.ip, job.type, job.id
-            )
+            self.log.debug('%s: %s job %s in progress, skipping collection this run', self.ip, job.type, job.id)
             return True
         if not self._busy_cap_warned:
             self._busy_cap_warned = True
             self.log.warning(
-                'pan_firewall %s: %s job %s still in progress after %ds of skipping; collecting anyway',
+                '%s: %s job %s still in progress after %ds of skipping; collecting anyway',
                 self.ip,
                 job.type,
                 job.id,
@@ -243,7 +239,8 @@ class FirewallPoller:
             identity=identity,
             state=self.state,
             config=self.config,
-            log=self.firewall_log,
+            log=self.log,
+            ip=self.ip,
             tunnel_tags=self.state.tunnel_tags,
             clock=self.schedule.now,
             read_cache=self.check.read_persistent_cache,
@@ -269,10 +266,10 @@ class FirewallPoller:
             except PanosUnreachable:
                 outcome.unreachable.append(name)
             except PanosError as e:
-                self.log.warning('pan_firewall %s: collector %s failed: %s', self.ip, name, e)
+                self.log.warning('%s: collector %s failed: %s', self.ip, name, e)
             except Exception as e:
                 # A bug or an unexpected shape: the traceback is what tells them apart.
-                self.log.warning('pan_firewall %s: collector %s failed: %s', self.ip, name, e, exc_info=True)
+                self.log.warning('%s: collector %s failed: %s', self.ip, name, e, exc_info=True)
             outcome.ran.append(name)
         return outcome
 
@@ -302,19 +299,19 @@ class FirewallPoller:
             # `run()` reports it, with the collectors it cuts off.
             return
         except PanosError as e:
-            self.log.warning('pan_firewall %s: cannot read the system info: %s', self.ip, e)
+            self.log.warning('%s: cannot read the system info: %s', self.ip, e)
             return
         previous = self.identity.serial if self.identity else None
         if previous and identity.serial != previous:
             # Another unit answers at this IP (a replaced static firewall). What was kept about the old one (pending
             # jobs, threat watermark, warnings, interface rows) does not apply to it; the collectors reload theirs.
-            self.log.info('pan_firewall %s: the serial changed from %s to %s', self.ip, previous, identity.serial)
+            self.log.info('%s: the serial changed from %s to %s', self.ip, previous, identity.serial)
             self.state = FirewallState()
         try:
             interfaces = self.client.op(INTERFACE_ALL_CMD)
         except PanosError as e:
             # The identity does not depend on it; interface tags and vsys detection keep their last value.
-            self.log.debug('pan_firewall %s: cannot read the interfaces: %s', self.ip, e)
+            self.log.debug('%s: cannot read the interfaces: %s', self.ip, e)
             fresh = False
         else:
             self.state.interface_rows = interfaces.findall('./result/ifnet/entry')
@@ -328,7 +325,11 @@ class FirewallPoller:
         self.identity = identity
         # `interface.speed` follows this step's 30-minute schedule, as it comes from the interfaces read here.
         if fresh:
-            self.submit(parse_interface_speeds(self.state, identity.serial, self.firewall_log))
+            self.submit(parse_interface_speeds(self.state, identity.serial, self._debug))
+
+    def _debug(self, msg: str, *args: object) -> None:
+        """The `debug` callable of the `parse_*` functions the poller calls itself, outside a `CollectContext`."""
+        self.log.debug('%s: %s', self.ip, msg % args if args else msg)
 
     def _load_identity(self) -> DeviceIdentity | None:
         raw = self.check.read_persistent_cache(self._cache_key)
@@ -337,10 +338,10 @@ class FirewallPoller:
         try:
             identity = DeviceIdentity.from_json(raw)
         except (ValueError, TypeError) as e:
-            self.log.debug('pan_firewall %s: ignoring the cached identity: %s', self.ip, e)
+            self.log.debug('%s: ignoring the cached identity: %s', self.ip, e)
             return None
         # The cache is keyed by IP: a different firewall now at this IP (a replaced unit) must not inherit it.
         if self.target.serial and identity.serial != self.target.serial:
-            self.log.debug('pan_firewall %s: ignoring the cached identity of another firewall', self.ip)
+            self.log.debug('%s: ignoring the cached identity of another firewall', self.ip)
             return None
         return identity

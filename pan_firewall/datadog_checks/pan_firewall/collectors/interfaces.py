@@ -11,16 +11,13 @@ not sent: a series with fewer tags would start a monotonic_count context dropped
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING
+from collections.abc import Callable
 from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.constants import NDM_INTERFACE_RESOURCE_TAG
 from datadog_checks.pan_firewall.xml_utils import num, text
 
-from . import CollectContext, FirewallState, Sample, once_log, register, tag_tuple
-
-if TYPE_CHECKING:
-    from datadog_checks.base.log import CheckLoggingAdapter
+from . import CollectContext, FirewallState, Sample, register, tag_tuple
 
 COUNTER_INTERFACE_CMD = '<show><counter><interface>all</interface></counter></show>'
 
@@ -92,12 +89,12 @@ def parse_interface_counters(
     state: FirewallState,
     serial: str | None,
     tunnel_tags: dict[str, tuple[str, ...]] | None,
-    log: CheckLoggingAdapter,
+    warn: Callable[..., None],
 ) -> list[Sample]:
     """`interface.*` for each row, and `ipsec.tunnel.*` for each `tunnel.N` row `vpn` listed in `tunnel_tags`."""
     rows = root.findall('./result/ifnet/ifnet/entry')
     if not rows:
-        log.warning('`show counter interface all` has no interface rows: no interface counters are sent')
+        warn('`show counter interface all` has no interface rows: no interface counters are sent')
         return []
     samples: list[Sample] = []
     by_name = _rows_by_name(state)
@@ -117,7 +114,7 @@ def parse_interface_counters(
     return samples
 
 
-def parse_interface_speeds(state: FirewallState, serial: str | None, log: CheckLoggingAdapter) -> list[Sample]:
+def parse_interface_speeds(state: FirewallState, serial: str | None, debug: Callable[..., None]) -> list[Sample]:
     """`interface.speed` in bit/s from the cached `hw/entry/speed`, which PAN-OS gives in Mbps (L8 confirms)."""
     samples = []
     by_name = _rows_by_name(state)
@@ -127,7 +124,7 @@ def parse_interface_speeds(state: FirewallState, serial: str | None, log: CheckL
             continue
         megabits = num(entry, 'speed')
         if megabits is None:
-            log.debug('interface %s has an unparseable speed %r: it is not sent', name, raw)
+            debug('interface %s has an unparseable speed %r: it is not sent', name, raw)
             continue
         samples.append(
             Sample('interface.speed', megabits * MEGABIT, interface_tags(name, state, serial, by_name), 'gauge')
@@ -138,4 +135,4 @@ def parse_interface_speeds(state: FirewallState, serial: str | None, log: CheckL
 @register('interfaces')
 def collect_interfaces(ctx: CollectContext) -> list[Sample]:
     root = ctx.client.op(COUNTER_INTERFACE_CMD)
-    return parse_interface_counters(root, ctx.state, ctx.identity.serial, ctx.tunnel_tags, once_log(ctx))
+    return parse_interface_counters(root, ctx.state, ctx.identity.serial, ctx.tunnel_tags, ctx.warning)

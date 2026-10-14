@@ -143,16 +143,16 @@ def test_speeds_of_the_capture_are_not_sent():
 
 def test_speed_is_megabits_converted_to_bits_and_unparseable_is_logged():
     state = interface_state(SYNTHETIC / 'interface_all_speeds.xml')
-    log = mock.Mock()
+    debug = mock.Mock()
 
-    samples = parse_interface_speeds(state, FW_A_SERIAL, log)
+    samples = parse_interface_speeds(state, FW_A_SERIAL, debug)
 
     assert series(samples) == {
         ('interface.speed', with_map_tags('ethernet1/1')): (1e9, 'gauge'),
         ('interface.speed', with_map_tags('ethernet1/2')): (1e10, 'gauge'),
     }
-    log.debug.assert_called_once()
-    assert 'fast' in str(log.debug.call_args)
+    debug.assert_called_once()
+    assert 'fast' in str(debug.call_args)
 
 
 def test_speeds_are_sent_as_gauges_every_30_minutes_with_the_identity_not_every_3(

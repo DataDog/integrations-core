@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from datadog_checks.pan_firewall.xml_utils import text
 
-from . import CollectContext, Sample, register, warn_once
+from . import CollectContext, Sample, register
 
 HA_CMD = '<show><high-availability><all/></high-availability></show>'
 
@@ -23,5 +23,5 @@ def collect_ha(ctx: CollectContext) -> list[Sample]:
         ctx.state.ha_state = None
         return []
     ctx.state.ha_state = text(root, 'result/group/local-info/state')
-    warn_once(ctx, 'ha', 'high availability is enabled; the HA link counters are not supported yet')
+    ctx.warning('high availability is enabled; the HA link counters are not supported yet', key='ha')
     return []

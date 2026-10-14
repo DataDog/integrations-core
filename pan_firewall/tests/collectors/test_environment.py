@@ -20,15 +20,15 @@ def sensor(description, slot):
 
 
 def test_vm_series_has_no_sensors():
-    log = mock.Mock()
+    warn = mock.Mock()
 
-    assert parse_environmentals(load_op(ENVIRONMENTALS_CMD), log, set()) == []
-    log.warning.assert_not_called()
+    assert parse_environmentals(load_op(ENVIRONMENTALS_CMD), warn) == []
+    warn.assert_not_called()
 
 
 def test_hardware_power_thresholds_and_alarms_and_thermal_values():
-    log = mock.Mock()
-    result = series(parse_environmentals(hardware(), log, set()))
+    warn = mock.Mock()
+    result = series(parse_environmentals(hardware(), warn))
 
     def power(description, slot, **values):
         return {(f'power.{name}', sensor(description, slot)): (value, 'gauge') for name, value in values.items()}
@@ -55,8 +55,8 @@ def test_hardware_power_thresholds_and_alarms_and_thermal_values():
     )
     power_series = {k: v for k, v in result.items() if k[0].startswith('power.')}
     assert power_series == expected
-    log.warning.assert_called_once()
-    assert 'Power Supply 5' in str(log.warning.call_args)
+    warn.assert_called_once()
+    assert 'Power Supply 5' in str(warn.call_args)
 
     expected = {}
     for description, degrees, alarm in (

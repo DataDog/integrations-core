@@ -73,6 +73,7 @@ class Context:
             state=FirewallState(),
             config=mock.Mock(),
             log=log,
+            ip=self.host,
             clock=self.clock,
             read_cache=lambda key: self.cache.get(key, ''),
             write_cache=self.cache.__setitem__,

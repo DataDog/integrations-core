@@ -96,7 +96,7 @@ def test_busy_firewall_is_not_collected_and_its_collectors_stay_due(firewall, ag
     assert firewall.run_at(0) == (set(), [])
     # The firewall answered the jobs check.
     assert can_connect_by_ip(aggregator) == {FW_A_IP: 1}
-    assert f'pan_firewall {FW_A_IP}: Commit job 7 in progress, skipping collection this run' in caplog.text
+    assert f'{FW_A_IP}: Commit job 7 in progress, skipping collection this run' in caplog.text
 
     firewall.answer_jobs(jobs_response('jobs_pending_idle.xml'))
     # Nothing was marked as run, so every collector is due on the next run, before its interval.
@@ -105,7 +105,7 @@ def test_busy_firewall_is_not_collected_and_its_collectors_stay_due(firewall, ag
 
 def test_jobs_check_error_collects_anyway_and_warns_once_per_episode(firewall):
     warning = (
-        f'pan_firewall {FW_A_IP}: cannot check for a commit or content update in progress, collecting anyway: '
+        f'{FW_A_IP}: cannot check for a commit or content update in progress, collecting anyway: '
         'PAN-OS API error 400: no capture for this command'
     )
     firewall.answer_jobs((200, NO_CAPTURE))
@@ -134,8 +134,7 @@ def test_jobs_check_unreachable_cuts_off_the_run(firewall, aggregator, fake_pano
 
     assert ran == set()
     assert warnings == [
-        f'pan_firewall {FW_A_IP}: could not reach the firewall ({reason}) during jobs; '
-        f'skipped for this run: {", ".join(STUBS)}'
+        f'{FW_A_IP}: could not reach the firewall ({reason}) during jobs; skipped for this run: {", ".join(STUBS)}'
     ]
     assert [c.cmd for c in fake_panos.calls[calls_before:]] == [JOBS_PENDING_CMD]
     assert can_connect_by_ip(aggregator) == {FW_A_IP: 0}
@@ -145,7 +144,7 @@ def test_jobs_check_unreachable_cuts_off_the_run(firewall, aggregator, fake_pano
 
 
 def test_busy_for_ten_minutes_collects_anyway_with_one_warning(firewall):
-    warning = f'pan_firewall {FW_A_IP}: Commit job 7 still in progress after 600s of skipping; collecting anyway'
+    warning = f'{FW_A_IP}: Commit job 7 still in progress after 600s of skipping; collecting anyway'
     firewall.answer_jobs(jobs_response('jobs_pending_commit_act.xml'))
 
     for seconds in range(0, 600, 60):
@@ -170,6 +169,4 @@ def test_idle_answer_restarts_the_ten_minute_window(firewall):
         assert firewall.run_at(seconds) == (set(), []), seconds
     ran, warnings = firewall.run_at(1080)
     assert ran == set(STUBS)
-    assert warnings == [
-        f'pan_firewall {FW_A_IP}: Content job 2018 still in progress after 600s of skipping; collecting anyway'
-    ]
+    assert warnings == [f'{FW_A_IP}: Content job 2018 still in progress after 600s of skipping; collecting anyway']

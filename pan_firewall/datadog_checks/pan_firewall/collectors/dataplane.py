@@ -5,25 +5,22 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from collections.abc import Callable
 from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.xml_utils import text
 
-from . import CollectContext, Sample, once_log, register
-
-if TYPE_CHECKING:
-    from datadog_checks.base.log import CheckLoggingAdapter
+from . import CollectContext, Sample, register
 
 RESOURCE_MONITOR_CMD = (
     '<show><running><resource-monitor><minute><last>1</last></minute></resource-monitor></running></show>'
 )
 
 
-def parse_dataplane(root: Element, log: CheckLoggingAdapter) -> list[Sample]:
+def parse_dataplane(root: Element, warn: Callable[..., None]) -> list[Sample]:
     processors = root.find('result/resource-monitor/data-processors')
     if processors is None:
-        log.warning('the resource monitor has no data processors: no dataplane CPU is reported')
+        warn('the resource monitor has no data processors: no dataplane CPU is reported')
         return []
     samples = []
     for dp in processors:
@@ -47,4 +44,4 @@ def _to_float(value: str) -> float | None:
 
 @register('dataplane')
 def collect_dataplane(ctx: CollectContext) -> list[Sample]:
-    return parse_dataplane(ctx.client.op(RESOURCE_MONITOR_CMD), once_log(ctx))
+    return parse_dataplane(ctx.client.op(RESOURCE_MONITOR_CMD), ctx.warning)

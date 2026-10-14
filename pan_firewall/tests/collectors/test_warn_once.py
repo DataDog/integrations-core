@@ -18,7 +18,8 @@ from datadog_checks.pan_firewall.collectors.system import collect_disk, collect_
 from datadog_checks.pan_firewall.collectors.vpn import collect_vpn
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from ..common import SYNTHETIC
+from ..common import FW_A_IP, SYNTHETIC
+from ..helpers import make_ctx
 
 EMPTY_RESULT = b'<response status="success"><result/></response>'
 NO_RESULT = b'<response status="success"/>'
@@ -52,6 +53,7 @@ def context(state, response, identity):
         state=state,
         config=SimpleNamespace(security_rule_filter=None),
         log=mock.Mock(),
+        ip=FW_A_IP,
     )
     ctx.client.op.return_value = parse_response(response)
     return ctx
@@ -72,3 +74,20 @@ def test_an_unknown_shape_is_warned_about_once_per_firewall_not_once_per_run(
     other = context(FirewallState(), response, identity)
     collect(other)
     assert other.log.warning.call_count == 1
+
+
+@pytest.mark.parametrize(
+    'once, warned, debugged',
+    [
+        pytest.param(True, ['a', 'b'], ['a'], id='once-per-key-then-debug'),
+        pytest.param(False, ['a', 'a', 'b'], [], id='every-time'),
+    ],
+)
+def test_a_warning_is_logged_once_per_key_then_at_debug_level_unless_once_is_false(once, warned, debugged):
+    ctx = make_ctx()
+
+    for sensor in ('a', 'a', 'b'):
+        ctx.warning('sensor %s is off', sensor, once=once)
+
+    assert ctx.log.warning.call_args_list == [mock.call('%s: sensor %s is off', FW_A_IP, s) for s in warned]
+    assert ctx.log.debug.call_args_list == [mock.call('%s: sensor %s is off', FW_A_IP, s) for s in debugged]

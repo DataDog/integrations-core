@@ -7,15 +7,12 @@ from __future__ import annotations
 
 import datetime
 import re
-from typing import TYPE_CHECKING
+from collections.abc import Callable
 from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.xml_utils import text
 
-from . import CollectContext, Sample, once_log, register
-
-if TYPE_CHECKING:
-    from datadog_checks.base.log import CheckLoggingAdapter
+from . import CollectContext, Sample, register
 
 LICENSE_INFO_CMD = '<request><license><info/></license></request>'
 
@@ -43,11 +40,13 @@ def parse_expiry(value: str) -> datetime.date | None:
         return None
 
 
-def parse_licenses(root: Element, log: CheckLoggingAdapter, today: datetime.date) -> list[Sample]:
+def parse_licenses(
+    root: Element, warn: Callable[..., None], debug: Callable[..., None], today: datetime.date
+) -> list[Sample]:
     """A perpetual license (`Never`) or an unparseable date reports `expired` only: no day count is made up."""
     licenses = root.find('result/licenses')
     if licenses is None:
-        log.warning('Unknown shape of `request license info`: no result/licenses, sending no license metrics')
+        warn('Unknown shape of `request license info`: no result/licenses, sending no license metrics')
         return []
 
     samples: list[Sample] = []
@@ -61,7 +60,7 @@ def parse_licenses(root: Element, log: CheckLoggingAdapter, today: datetime.date
         if expiry is not None:
             samples.append(Sample('license.days_left', (expiry - today).days, tags, 'gauge'))
         elif expires.lower() != 'never':
-            log.debug('License %s has an unparseable expiry date %r', feature, expires)
+            debug('License %s has an unparseable expiry date %r', feature, expires)
         expired = (text(entry, 'expired') or '').lower()
         if expired in ('yes', 'no'):
             samples.append(Sample('license.expired', int(expired == 'yes'), tags, 'gauge'))
@@ -70,4 +69,4 @@ def parse_licenses(root: Element, log: CheckLoggingAdapter, today: datetime.date
 
 @register('licenses')
 def collect_licenses(ctx: CollectContext, today: datetime.date | None = None) -> list[Sample]:
-    return parse_licenses(ctx.client.op(LICENSE_INFO_CMD), once_log(ctx), today or datetime.date.today())
+    return parse_licenses(ctx.client.op(LICENSE_INFO_CMD), ctx.warning, ctx.debug, today or datetime.date.today())

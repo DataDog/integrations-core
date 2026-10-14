@@ -10,26 +10,15 @@ import time
 from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Literal, NamedTuple, cast
+from typing import TYPE_CHECKING, Literal, NamedTuple
 from xml.etree.ElementTree import Element
 
-from datadog_checks.base.log import CheckLoggingAdapter
-
 if TYPE_CHECKING:
+    from datadog_checks.base.log import CheckLoggingAdapter
+
     from ..api import PanosClient
     from ..config_models.instance import InstanceConfig
     from ..identity import DeviceIdentity
-
-
-class FirewallLog(CheckLoggingAdapter):
-    """The check's log with `pan_firewall <firewall>: ` in front of every message."""
-
-    def __init__(self, log: CheckLoggingAdapter, firewall: str):
-        super().__init__(log.logger, log.check_id)
-        self._prefix = f'pan_firewall {firewall}: '
-
-    def process(self, msg: Any, kwargs: Any) -> tuple[Any, Any]:
-        return super().process(f'{self._prefix}{msg}', kwargs)
 
 
 class Sample(NamedTuple):
@@ -106,7 +95,7 @@ class FirewallState:
     tunnel_tags: dict[str, tuple[str, ...]] | None = None
     tunnel_states: dict[str, str] = field(default_factory=dict)
     threats: ThreatState = field(default_factory=ThreatState)
-    # Keys of the warnings already logged for this firewall (see `warn_once`).
+    # Keys of the warnings already logged for this firewall (see `CollectContext.warning`).
     warned: set[str] = field(default_factory=set)
     reports: ReportState = field(default_factory=ReportState)
     # Collectors that ran but stay due, as a job of theirs is still running: they run again next run.
@@ -119,13 +108,31 @@ class CollectContext:
     identity: DeviceIdentity
     state: FirewallState  # interface map, vpn cache, pending jobs, watermark, ha_state
     config: InstanceConfig
-    log: CheckLoggingAdapter
+    log: CheckLoggingAdapter  # the check's: log through `warning` and `debug`, which name the firewall
+    ip: str
     # `state.tunnel_tags` as it was when the run started: what `interfaces` tags the tunnel counters with, so that
     # whether they are sent does not depend on which of the parallel collectors finishes first.
     tunnel_tags: dict[str, tuple[str, ...]] | None = None
     clock: Callable[[], float] = time.monotonic
     read_cache: Callable[[str], str] = lambda key: ''
     write_cache: Callable[[str, str], None] = lambda key, value: None
+
+    def warning(self, msg: str, *args: object, key: str | None = None, once: bool = True) -> None:
+        """Log the warning the first time `key` (by default, the formatted message) is seen for this firewall, at debug
+        level after that. With `once=False`, log it at warning level every time."""
+        if not once:
+            self.log.warning('%s: ' + msg, self.ip, *args)
+            return
+        if key is None:
+            key = msg % args if args else msg
+        if key in self.state.warned:
+            self.debug(msg, *args)
+            return
+        self.state.warned.add(key)
+        self.log.warning('%s: ' + msg, self.ip, *args)
+
+    def debug(self, msg: str, *args: object) -> None:
+        self.log.debug('%s: ' + msg, self.ip, *args)
 
 
 Collector = Callable[[CollectContext], list[Sample]]
@@ -146,29 +153,3 @@ def register(name: str) -> Callable[[Collector], Collector]:
 def tag_tuple(*pairs: tuple[str, str | None]) -> tuple[str, ...]:
     return tuple(f'{name}:{value}' for name, value in pairs if value)
 
-
-def warn_once(ctx: CollectContext, key: str, msg: str, *args: object) -> None:
-    """Log the warning the first time `key` is seen for this firewall, at debug level after that."""
-    if key in ctx.state.warned:
-        ctx.log.debug(msg, *args)
-        return
-    ctx.state.warned.add(key)
-    ctx.log.warning(msg, *args)
-
-
-class _OnceLog:
-    """A logger whose `warning` is `warn_once`, keyed by the formatted message."""
-
-    def __init__(self, ctx: CollectContext):
-        self._ctx = ctx
-
-    def warning(self, msg: str, *args: object) -> None:
-        warn_once(self._ctx, msg % args if args else msg, msg, *args)
-
-    def __getattr__(self, name: str) -> Any:
-        return getattr(self._ctx.log, name)
-
-
-def once_log(ctx: CollectContext) -> CheckLoggingAdapter:
-    """The context's log for the `parse_*` functions, which warn about an unknown shape: once per firewall."""
-    return cast('CheckLoggingAdapter', _OnceLog(ctx))

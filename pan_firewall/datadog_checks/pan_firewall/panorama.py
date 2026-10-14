@@ -95,9 +95,7 @@ class PanoramaFirewallSource:
             devices = parse_devices(self._client.op(DISCOVERY_CMD))
         except PanosError as e:
             # The message says whether the credentials were rejected.
-            self._check.log.warning(
-                'pan_firewall: could not get the connected devices from Panorama %s: %s', self._host, e
-            )
+            self._check.log.warning('could not get the connected devices from Panorama %s: %s', self._host, e)
             return None
         self._store(devices)
         return devices
@@ -124,16 +122,16 @@ class PanoramaFirewallSource:
                 devices = [DiscoveredFirewall(**d) for d in data['firewalls']]
         except (ValueError, TypeError, KeyError) as e:
             # Also the old format (a bare list).
-            self._check.log.debug('pan_firewall: ignoring the cached Panorama firewall list: %s', e)
+            self._check.log.debug('ignoring the cached Panorama firewall list: %s', e)
             devices = None
         if devices is None:
             self._check.log.warning(
-                'pan_firewall: Panorama %s is unreachable and there are no discovered firewalls to fall back on',
+                'Panorama %s is unreachable and there are no discovered firewalls to fall back on',
                 self._host,
             )
         else:
             self._check.log.warning(
-                'pan_firewall: Panorama %s is unreachable; polling the %d firewalls of the last discovery, %s ago',
+                'Panorama %s is unreachable; polling the %d firewalls of the last discovery, %s ago',
                 self._host,
                 len(devices),
                 readable_age(time.time() - discovered),
@@ -144,16 +142,14 @@ class PanoramaFirewallSource:
         targets: dict[str, FirewallTarget] = {}
         for firewall in devices:
             if not firewall.connected:
-                self._check.log.debug(
-                    'pan_firewall: firewall %s is not connected to Panorama, skipping it', firewall.serial
-                )
+                self._check.log.debug('firewall %s is not connected to Panorama, skipping it', firewall.serial)
                 continue
             target = self._target(firewall)
             if target is None:
                 continue
             if target.ip in targets:
                 self._check.warning(
-                    'pan_firewall: firewalls %s and %s are both polled at %s; only the first is polled',
+                    'firewalls %s and %s are both polled at %s; only the first is polled',
                     targets[target.ip].serial,
                     firewall.serial,
                     target.ip,
@@ -169,21 +165,19 @@ class PanoramaFirewallSource:
         address = _parse_ip(polled)
         if address is None:
             self._check.warning(
-                'pan_firewall: firewall %s has no usable IP address (Panorama reports `%s`), skipping it',
+                'firewall %s has no usable IP address (Panorama reports `%s`), skipping it',
                 firewall.serial,
                 polled or '',
             )
             return None
         ip = str(address)
         if not self._passes_filters(address):
-            self._check.log.debug(
-                'pan_firewall: firewall %s at %s is filtered out by `firewall_ips`', firewall.serial, ip
-            )
+            self._check.log.debug('firewall %s at %s is filtered out by `firewall_ips`', firewall.serial, ip)
             return None
         credentials = resolve_credentials(ip, self._config.firewall_credentials or ())
         if credentials is None:
             self._check.warning(
-                'pan_firewall: no entry in `firewall_credentials` matches the firewall %s at %s, skipping it',
+                'no entry in `firewall_credentials` matches the firewall %s at %s, skipping it',
                 firewall.serial,
                 ip,
             )
