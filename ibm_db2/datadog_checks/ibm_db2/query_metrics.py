@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from binascii import hexlify, unhexlify
+from collections.abc import Iterator
 from copy import deepcopy
 from datetime import datetime
 from itertools import batched
@@ -33,6 +34,8 @@ if TYPE_CHECKING:
 # Provisional limit; validate against larger workloads. Db2 sizes its package cache in memory, not entry counts.
 TEXT_CACHE_SIZE = 10_000
 TEXT_FETCH_BATCH_SIZE = 500
+# Match the Agent DBM metrics pipeline default, as PostgreSQL does.
+METRICS_PAYLOAD_MAX_BYTES = 20_000_000
 FULL_QUERY_TEXT_CACHE_SIZE = 10_000
 FULL_QUERY_TEXT_REFRESH_INTERVAL = 3600
 NANOSECONDS_PER_MILLISECOND = 1_000_000
@@ -164,9 +167,27 @@ class QueryMetricsCollector(DBMAsyncJob):
                 'tags': self._check.tag_manager.get_tags(include_internal=False),
                 'ddagentversion': self._check.agent_version,
                 'ibm_db2_version': self._check.dbms_version,
-                'ibm_db2_rows': list(rows_by_signature.values()),
             }
-            self._check.database_monitoring_query_metrics(json.dumps(payload, default=default_json_event_encoding))
+            for batch in self._get_query_metrics_payloads(payload, list(rows_by_signature.values())):
+                self._check.database_monitoring_query_metrics(batch)
+
+    def _get_query_metrics_payloads(self, wrapper: dict, rows: list[dict]) -> Iterator[str | bytes]:
+        """Split complete rows into size-bounded JSON payloads, preserving the collection metadata."""
+        pending = [rows]
+        while pending:
+            current = pending.pop()
+            if not current:
+                continue
+            payload = json.dumps({**wrapper, 'ibm_db2_rows': current}, default=default_json_event_encoding)
+            # orjson returns bytes; the standard library returns str. Count UTF-8 bytes in either case.
+            size = len(payload.encode('utf-8')) if isinstance(payload, str) else len(payload)
+            if size < METRICS_PAYLOAD_MAX_BYTES:
+                yield payload
+            elif len(current) == 1:
+                self._check.log.warning('A single query metrics row is too large to send; dropping it. size=%d', size)
+            else:
+                midpoint = len(current) // 2
+                pending.extend((current[midpoint:], current[:midpoint]))
 
     def _submit_full_query_text(self, statement: ObfuscationResult) -> None:
         """Send obfuscated SQL at most once per cache lifetime for this database and signature."""
