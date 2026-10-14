@@ -157,12 +157,8 @@ def parse_environmentals(root: Element, log: CheckLoggingAdapter, warned: set[st
         volts = num(entry, 'Volts')
         if volts is None:
             continue
-        low = num(entry, 'min')
-        if low is None:
-            low = num(entry, 'min-volt')
-        high = num(entry, 'max')
-        if high is None:
-            high = num(entry, 'max-volt')
+        low = num(entry, 'min', num(entry, 'min-volt'))
+        high = num(entry, 'max', num(entry, 'max-volt'))
         samples.append(Sample('power.voltage', volts, tags, 'gauge'))
         if low is not None:
             samples.append(Sample('power.voltage.min', low, tags, 'gauge'))

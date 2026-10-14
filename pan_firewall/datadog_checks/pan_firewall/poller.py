@@ -84,6 +84,8 @@ class FirewallPoller:
         self.config = config
         self.log = check.log
         self.ip = device_ip(target)
+        # Keyed by device IP: before a static firewall first answers, its IP is all the check knows.
+        self._cache_key = f'identity:{self.ip}'
         # The log of the collectors: every message starts with the firewall it is about.
         self.firewall_log = FirewallLog(check.log, self.ip)
         http = new_http(check, config)
@@ -105,11 +107,6 @@ class FirewallPoller:
         self._busy_since: float | None = None
         self._busy_cap_warned = False
         self._jobs_error_warned = False
-
-    @property
-    def _cache_key(self) -> str:
-        # Keyed by device IP: before a static firewall first answers, its IP is all the check knows.
-        return f'identity:{self.ip}'
 
     def run(self) -> None:
         start = time.monotonic()

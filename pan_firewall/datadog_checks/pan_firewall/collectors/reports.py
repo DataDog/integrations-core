@@ -15,13 +15,13 @@ from typing import Literal
 from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall import constants
+from datadog_checks.pan_firewall.constants import ACTIVE_STATUSES
 from datadog_checks.pan_firewall.errors import PanosError, PanosUnreachable
 from datadog_checks.pan_firewall.xml_utils import num, text
 
 from . import CollectContext, ReportJob, Sample, register, warn_once
 
 DEFAULT_TOP_N = 10
-ACTIVE_STATUSES = frozenset({'ACT', 'PEND'})
 CAPTION = 'datadog'
 
 
@@ -107,32 +107,19 @@ def collect_reports(ctx: CollectContext) -> list[Sample]:
 
 def _poll(ctx: CollectContext, job: ReportJob) -> tuple[Literal['finished', 'running', 'failed'], Element | None]:
     """Poll the job until it ends: `finished` with its response, `failed` (warned once) or still `running`."""
+    key, name = f'report:{job.report}', f'{job.report} report job {job.job_id}'
     for attempt in range(constants.REPORT_JOB_POLLS):
         try:
             status, root = ctx.client.get_job('report', job.job_id)
         except PanosUnreachable:
             raise
         except PanosError as e:
-            warn_once(
-                ctx,
-                f'report:{job.report}',
-                'polling the %s report job %s failed: no samples for it (%s)',
-                job.report,
-                job.job_id,
-                e,
-            )
+            warn_once(ctx, key, 'polling the %s failed: no samples for it (%s)', name, e)
             return 'failed', None
         if status == 'FIN':
             return 'finished', root
         if status not in ACTIVE_STATUSES:
-            warn_once(
-                ctx,
-                f'report:{job.report}',
-                'the %s report job %s ended with status %s: no samples for it',
-                job.report,
-                job.job_id,
-                status,
-            )
+            warn_once(ctx, key, 'the %s ended with status %s: no samples for it', name, status)
             return 'failed', None
         if attempt + 1 < constants.REPORT_JOB_POLLS:
             time.sleep(constants.REPORT_JOB_POLL_DELAY)

@@ -14,13 +14,11 @@ import time
 from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall import constants
-from datadog_checks.pan_firewall.constants import PARSE_ERROR_CODE
+from datadog_checks.pan_firewall.constants import ACTIVE_STATUSES, PARSE_ERROR_CODE
 from datadog_checks.pan_firewall.errors import PanosApiError
 from datadog_checks.pan_firewall.xml_utils import text
 
 from . import CollectContext, Sample, ThreatJob, ThreatState, Watermark, register, tag_tuple
-
-ACTIVE_STATUSES = frozenset({'ACT', 'PEND'})
 
 
 @register('threats')
@@ -60,33 +58,30 @@ def _load_watermark(ctx: CollectContext, state: ThreatState) -> None:
     if state.loaded:
         return
     state.loaded = True
-    raw = _serial(ctx) and ctx.read_cache(_cache_key(ctx))
+    serial = ctx.identity.serial
+    raw = serial and ctx.read_cache(_cache_key(serial))
     if not raw:
         return
     try:
         watermark = Watermark.from_json(raw)
     except (ValueError, TypeError, KeyError) as e:
-        ctx.log.debug('ignoring the cached threat watermark of %s: %s', _serial(ctx), e)
+        ctx.log.debug('ignoring the cached threat watermark of %s: %s', serial, e)
         return
     age = ctx.wall_clock() - watermark.updated
     if age > constants.THREAT_WATERMARK_MAX_AGE_SECONDS:
-        ctx.log.debug('ignoring the cached threat watermark of %s, written %ds ago', _serial(ctx), age)
+        ctx.log.debug('ignoring the cached threat watermark of %s, written %ds ago', serial, age)
         return
     state.watermark = watermark
 
 
-def _serial(ctx: CollectContext) -> str | None:
-    return ctx.identity.serial
-
-
-def _cache_key(ctx: CollectContext) -> str:
-    return f'threat_watermark:{_serial(ctx)}'
+def _cache_key(serial: str) -> str:
+    return f'threat_watermark:{serial}'
 
 
 def _store(ctx: CollectContext, state: ThreatState, seqno: int, last_reset_check: float) -> None:
     watermark = state.watermark = Watermark(seqno, last_reset_check, ctx.wall_clock())
-    if _serial(ctx):
-        ctx.write_cache(_cache_key(ctx), watermark.to_json())
+    if serial := ctx.identity.serial:
+        ctx.write_cache(_cache_key(serial), watermark.to_json())
 
 
 def _first_job(state: ThreatState) -> ThreatJob:

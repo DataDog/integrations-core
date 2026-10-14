@@ -53,10 +53,6 @@ def parse_global(root: Element) -> list[Sample] | None:
 def collect_global_counters(ctx: CollectContext) -> list[Sample]:
     samples = parse_global(ctx.client.op(GLOBAL_COUNTER_CMD))
     if samples is None:
-        warn_once(
-            ctx,
-            'global_counters',
-            '`show counter global` has no counters list: no global counter is reported',
-        )
+        warn_once(ctx, 'global_counters', '`show counter global` has no counters list: no global counter is reported')
         return []
     return samples

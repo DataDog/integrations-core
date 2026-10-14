@@ -230,10 +230,11 @@ class PanosClient:
         """
         with self._slots:
             self._fail_fast_if_unreachable()
-            resp, root, events = self._authorized(lambda key: self._open_stream(self._log_get(job_id), key))
+            params = {'type': 'log', 'action': 'get', 'job-id': job_id}
+            resp, root, events = self._authorized(lambda key: self._open_stream(params, key))
             with resp:
                 try:
-                    elements = _log_elements(root, events, with_status=True)
+                    elements = _log_elements(root, events)
                     status_elem = next(elements, None)
                     if status_elem is None or status_elem.tag != 'status':
                         raise PanosApiError(PARSE_ERROR_CODE, f'log job {job_id} response has no status')
@@ -243,10 +244,6 @@ class PanosClient:
                     # The stream broke after `_authorized` recorded the call: the rest of the run must know.
                     self._record_unreachable(e)
                     raise
-
-    @staticmethod
-    def _log_get(job_id: str) -> dict[str, str]:
-        return {'type': 'log', 'action': 'get', 'job-id': job_id}
 
     def _call(self, params: dict[str, str]) -> Element:
         with self._slots:
@@ -366,8 +363,8 @@ class PanosClient:
             raise PanosApiError(PARSE_ERROR_CODE, f'response is not valid XML: {e}', panos_response=False) from None
 
 
-def _log_elements(root: Element, events: Iterator[tuple[str, Element]], with_status: bool) -> Iterator[Element]:
-    """Walk a log job response: yield `result/job/status` first when `with_status`, then each log entry.
+def _log_elements(root: Element, events: Iterator[tuple[str, Element]]) -> Iterator[Element]:
+    """Walk a log job response: yield `result/job/status` first, then each log entry.
 
     An entry is cleared and detached once the consumer advances. A response whose entries come before its status
     raises, because the status could not be reported first.
@@ -381,11 +378,11 @@ def _log_elements(root: Element, events: Iterator[tuple[str, Element]], with_sta
             if path == LOG_ENTRY_PATH[:-1]:
                 parent = elem
             continue
-        if with_status and path == LOG_STATUS_PATH:
+        if path == LOG_STATUS_PATH:
             seen_status = True
             yield elem
         elif path == LOG_ENTRY_PATH and parent is not None:
-            if with_status and not seen_status:
+            if not seen_status:
                 raise PanosApiError(PARSE_ERROR_CODE, 'log job response has entries before its status')
             yield elem
             elem.clear()

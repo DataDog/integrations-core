@@ -137,12 +137,8 @@ def parse_interface_speeds(state: FirewallState, serial: str | None, log: CheckL
         raw = text(entry, 'speed')
         if raw is None or raw in NO_SPEED:
             continue
-        try:
-            megabits = float(raw)
-        except ValueError:
-            log.debug('interface %s has an unparseable speed %r: it is not sent', name, raw)
-            continue
-        if megabits != megabits or megabits in (float('inf'), float('-inf')):
+        megabits = num(entry, 'speed')
+        if megabits is None:
             log.debug('interface %s has an unparseable speed %r: it is not sent', name, raw)
             continue
         samples.append(
