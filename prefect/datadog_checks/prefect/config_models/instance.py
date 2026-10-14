@@ -12,7 +12,7 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import Any, Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
@@ -97,7 +97,7 @@ class InstanceConfig(BaseModel):
         frozen=True,
     )
     allow_redirects: Optional[bool] = None
-    auth_string: Optional[str] = None
+    auth_string: Optional[str] = Field(None, pattern='^[^:]+:.+$')
     auth_token: Optional[AuthToken] = None
     auth_type: Optional[str] = None
     aws_host: Optional[str] = None
