@@ -15,6 +15,8 @@ from xml.etree.ElementTree import Element
 import requests
 from requests import Response
 
+from datadog_checks.base.utils.http import RequestsWrapper
+
 from .constants import AUTH_ERROR_CODES, PARSE_ERROR_CODE
 from .errors import (
     PanosApiError,
@@ -28,10 +30,11 @@ from .errors import (
 from .xml_utils import check_response, parse_response, text
 
 if TYPE_CHECKING:
+    from datadog_checks.base import AgentCheck
     from datadog_checks.base.log import CheckLoggingAdapter
-    from datadog_checks.base.utils.http import RequestsWrapper
 
     from .auth import KeyManager
+    from .config_models.instance import InstanceConfig
 
 __all__ = [
     'CallStats',
@@ -45,6 +48,7 @@ __all__ = [
     'PanosUnreachable',
     'RequestCounter',
     'api_url',
+    'new_http',
 ]
 
 T = TypeVar('T')
@@ -61,6 +65,20 @@ def api_url(host: str) -> str:
     if ':' in host and not host.startswith('['):
         host = f'[{host}]'
     return f'https://{host}/api/'
+
+
+def new_http(check: AgentCheck, config: InstanceConfig) -> RequestsWrapper:
+    """Return an HTTP session for one device, from the instance's `instances/http` options.
+
+    The model's defaults (`timeout` 30 s, `persist_connections` on), not the wrapper's (10 s, off), apply when the
+    instance does not set them.
+    """
+    instance = {
+        'timeout': config.timeout,
+        'persist_connections': config.persist_connections,
+        **(check.instance or {}),
+    }
+    return RequestsWrapper(instance, check.init_config, check.HTTP_CONFIG_REMAPPER, check.log)
 
 
 @contextmanager

@@ -161,3 +161,16 @@ def test_example_config_hides_only_the_http_auth_and_header_options():
 
     assert documented & set(HIDDEN_HTTP_OPTIONS) == set()
     assert set(VISIBLE_HTTP_OPTIONS) - documented == set()
+
+
+@pytest.mark.parametrize('base', [STATIC_INSTANCE, PANORAMA_INSTANCE], ids=['static', 'panorama'])
+@pytest.mark.parametrize(
+    'changes, expected', [({}, True), ({'persist_connections': False}, False)], ids=['default', 'turned-off']
+)
+def test_persist_connections_is_on_by_default_and_can_be_turned_off(dd_run_check, base, changes, expected):
+    check = run(dd_run_check, {**copy.deepcopy(base), **changes})
+
+    sessions = [poller.client._http for poller in check._pollers.values()]
+    if check.config.panorama_host:
+        sessions.append(check._source._client._http)
+    assert sessions and {http.persist_connections for http in sessions} == {expected}

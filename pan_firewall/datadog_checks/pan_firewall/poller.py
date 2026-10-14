@@ -10,9 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from datadog_checks.base.utils.http import RequestsWrapper
-
-from .api import PanosClient, RequestCounter, api_url
+from .api import PanosClient, RequestCounter, api_url, new_http
 from .auth import KeyManager
 from .collectors import (  # noqa: F401  (importing the modules registers their collectors)
     COLLECT_FUNCTIONS,
@@ -89,10 +87,7 @@ class FirewallPoller:
         self.ip = device_ip(target)
         # The log of the collectors: every message starts with the firewall it is about.
         self.firewall_log = FirewallLog(check.log, self.ip)
-        # The model's default (30 s), not the wrapper's (10 s), applies when the instance sets no `timeout`.
-        instance = {'timeout': config.timeout, **(check.instance or {})}
-        http = RequestsWrapper(instance, check.init_config, check.HTTP_CONFIG_REMAPPER, check.log)
-        http.persist_connections = True
+        http = new_http(check, config)
         # Every request of the firewall, keygen included.
         self._requests = RequestCounter()
         self.keys = KeyManager(http, api_url(target.ip), target.credentials, self._requests)

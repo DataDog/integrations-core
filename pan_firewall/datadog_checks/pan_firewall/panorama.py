@@ -7,12 +7,10 @@ import dataclasses
 import ipaddress
 import json
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 from xml.etree.ElementTree import Element
 
-from datadog_checks.base.utils.http import RequestsWrapper
-
-from .api import PanosClient, api_url
+from .api import PanosClient, api_url, new_http
 from .auth import Credentials, KeyManager
 from .errors import PanosAuthError, PanosError
 from .firewalls import FirewallTarget, resolve_credentials
@@ -74,12 +72,10 @@ class PanoramaFirewallSource:
     def __init__(self, check: AgentCheck, config: InstanceConfig):
         self._check = check
         self._config = config
-        self._log = check.log
-        self._host = config.panorama_host or ''
+        # The validator refuses Panorama mode without `panorama_host`.
+        self._host = cast(str, config.panorama_host)
         self._cache_key = f'panorama_firewalls:{self._host}'
-        instance = {'timeout': config.timeout, **(check.instance or {})}
-        http = RequestsWrapper(instance, check.init_config, check.HTTP_CONFIG_REMAPPER, check.log)
-        http.persist_connections = True
+        http = new_http(check, config)
         credentials = Credentials(config.panorama_username, config.panorama_password, config.panorama_api_key)
         self._keys = KeyManager(http, api_url(self._host), credentials)
         self._client = PanosClient(http, self._host, self._keys, check.log)
@@ -102,7 +98,7 @@ class PanoramaFirewallSource:
             devices = parse_devices(self._client.op(DISCOVERY_CMD))
         except PanosError as e:
             reason = 'rejected the credentials' if isinstance(e, PanosAuthError) else 'discovery failed'
-            self._log.warning('pan_firewall: Panorama %s %s (%s)', self._host, reason, e)
+            self._check.log.warning('pan_firewall: Panorama %s %s (%s)', self._host, reason, e)
             return None
         self._store(devices)
         return devices
@@ -125,15 +121,15 @@ class PanoramaFirewallSource:
         try:
             devices = [DiscoveredFirewall(**d) for d in json.loads(raw)] if raw else None
         except (ValueError, TypeError) as e:
-            self._log.debug('pan_firewall: ignoring the cached Panorama firewall list: %s', e)
+            self._check.log.debug('pan_firewall: ignoring the cached Panorama firewall list: %s', e)
             devices = None
         if devices is None:
-            self._log.warning(
+            self._check.log.warning(
                 'pan_firewall: Panorama %s is unreachable and there are no discovered firewalls to fall back on',
                 self._host,
             )
         else:
-            self._log.warning(
+            self._check.log.warning(
                 'pan_firewall: Panorama %s is unreachable; polling the %d firewalls of the last discovery',
                 self._host,
                 len(devices),
@@ -144,7 +140,9 @@ class PanoramaFirewallSource:
         targets: dict[str, FirewallTarget] = {}
         for firewall in devices:
             if not firewall.connected:
-                self._log.debug('pan_firewall: firewall %s is not connected to Panorama, skipping it', firewall.serial)
+                self._check.log.debug(
+                    'pan_firewall: firewall %s is not connected to Panorama, skipping it', firewall.serial
+                )
                 continue
             target = self._target(firewall)
             if target is None:
@@ -173,7 +171,9 @@ class PanoramaFirewallSource:
             return None
         ip = str(address)
         if not self._passes_filters(address):
-            self._log.debug('pan_firewall: firewall %s at %s is filtered out by `firewall_ips`', firewall.serial, ip)
+            self._check.log.debug(
+                'pan_firewall: firewall %s at %s is filtered out by `firewall_ips`', firewall.serial, ip
+            )
             return None
         credentials = resolve_credentials(ip, self._config.firewall_credentials or ())
         if credentials is None:
@@ -207,7 +207,7 @@ class PanoramaFirewallSource:
         # The discovery runs every check run: a persistent condition is warned about once, not every run.
         if key not in self._warned:
             self._warned.add(key)
-            self._log.warning(message, *args)
+            self._check.log.warning(message, *args)
 
 
 def _parse_ip(value: str | None) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:
