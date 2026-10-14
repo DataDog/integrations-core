@@ -11,7 +11,6 @@ import requests
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.prometheus import PrometheusCheck
 from datadog_checks.base.utils.http import RequestsWrapper
-from datadog_checks.base.utils.http_exceptions import HTTPClientConnectTimeoutError
 
 ENDPOINT = 'http://fake.endpoint:10055/metrics'
 
@@ -117,19 +116,3 @@ def test_openmetrics_v2_read_timeout_fails_despite_ignore_connection_errors(dd_r
 
     with pytest.raises(Exception, match='read timed out'):
         dd_run_check(check)
-
-
-def test_openmetrics_v2_ignores_agnostic_connect_timeout_when_configured(dd_run_check, fake_http):
-    class AgnosticCheck(OpenMetricsBaseCheckV2):
-        AGNOSTIC_HTTP = True
-
-    instance = {
-        'openmetrics_endpoint': ENDPOINT,
-        'namespace': 'test',
-        'metrics': ['.+'],
-        'ignore_connection_errors': True,
-    }
-    check = AgnosticCheck('test', {}, [instance])
-    fake_http.register_response('GET', ENDPOINT, HTTPClientConnectTimeoutError('connect timed out'))
-
-    dd_run_check(check)

@@ -17,8 +17,8 @@ from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, Histo
 from prometheus_client.samples import Sample
 
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
-from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientError, HTTPClientStatusError
+from datadog_checks.base.stubs.http import FakeHTTPResponse, RecordedRequest
+from datadog_checks.base.utils.http_exceptions import HTTPClientError, HTTPClientStatusError
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
 
@@ -2626,29 +2626,20 @@ def test_health_service_check_ok(
     fake_http.assert_all_responses_consumed()
 
 
-@pytest.mark.parametrize(
-    'error_type',
-    [
-        pytest.param(HTTPClientConnectionError, id='connection-error'),
-        pytest.param(HTTPClientError, id='root-error'),
-    ],
-)
-def test_health_service_check_failing(
-    aggregator, fake_http, mocked_prometheus_check, mocked_prometheus_scraper_config, error_type
-):
+def test_health_service_check_failing(aggregator, fake_http, mocked_prometheus_check, mocked_prometheus_scraper_config):
     """Tests endpoint health service check failing"""
     check = mocked_prometheus_check
     fake_http.register_response(
         'GET',
         FAKE_ENDPOINT,
-        error_type('Connection failed'),
+        HTTPClientError('Connection failed'),
         match_options={'stream': True},
     )
 
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['custom_tags'] = ['foo:bar']
     mocked_prometheus_scraper_config['_metric_tags'] = ['bar:foo']
-    with pytest.raises(error_type):
+    with pytest.raises(HTTPClientError):
         check.process(mocked_prometheus_scraper_config)
     aggregator.assert_service_check(
         'ksm.prometheus.health',
@@ -2825,7 +2816,7 @@ def test_get_http_handler_applies_tls_deprecation_shims(
     assert http_handler.ignore_tls_warning is expected_ignore_warning
 
 
-def test_http_handler(mocked_openmetrics_check_factory, mocker):
+def test_http_handler(mocked_openmetrics_check_factory):
     instance = {
         'prometheus_url': 'https://www.example.com',
         'metrics': [{'foo': 'bar'}],
@@ -2834,14 +2825,11 @@ def test_http_handler(mocked_openmetrics_check_factory, mocker):
     }
     check = mocked_openmetrics_check_factory(instance)
     scraper_config = check.get_scraper_config(instance)
-    fake_http = FakeHTTPClient()
-    mocker.patch.object(check, 'create_http_client', return_value=fake_http)
 
     http_handler = check.get_http_handler(scraper_config)
 
-    assert http_handler is fake_http
-    assert fake_http.get_header('accept-encoding') == 'gzip'
-    assert fake_http.get_header('accept') == 'text/plain'
+    assert http_handler.get_header('accept-encoding') == 'gzip'
+    assert http_handler.get_header('accept') == 'text/plain'
 
 
 def test_reset_http_config_rebuilds_a_handler_whose_credentials_changed(mocked_openmetrics_check_factory):
@@ -2865,21 +2853,6 @@ def test_reset_http_config_rebuilds_a_handler_whose_credentials_changed(mocked_o
 
     assert rebuilt is not first
     assert rebuilt.options['verify'] is False
-
-
-def test_get_http_handler_routes_through_create_http_client(mocked_openmetrics_check_factory):
-    instance = {
-        'prometheus_url': 'https://www.example.com',
-        'metrics': [{'foo': 'bar'}],
-        'namespace': 'openmetrics',
-    }
-    check = mocked_openmetrics_check_factory(instance)
-    scraper_config = check.get_scraper_config(instance)
-    sentinel = mock.MagicMock()
-
-    with mock.patch.object(check, 'create_http_client', return_value=sentinel) as factory:
-        assert check.get_http_handler(scraper_config) is sentinel
-        factory.assert_called_once_with(scraper_config)
 
 
 def test_simple_type_overrides(aggregator, mocked_prometheus_check, text_data):

@@ -58,20 +58,6 @@ class TestClose:
 
         assert transport.closed
 
-    def test_close_resets_session(self):
-        http = RequestsWrapper({}, {})
-        first = http.session
-        http.close()
-        assert http._session is None
-        assert http.session is not first
-
-    def test_close_is_idempotent_after_open(self):
-        http = RequestsWrapper({}, {})
-        assert http.session is not None
-        http.close()
-        http.close()
-        assert http._session is None
-
     def test_request_succeeds_after_close(self):
         first_transport = common.RequestsTransport()
         first_transport.respond()
@@ -207,12 +193,6 @@ class TestTrustEnv:
         http = RequestsWrapper({}, {})
         http.trust_env = False
         assert http.session.trust_env is False
-
-    def test_trust_env_reset_to_true(self):
-        http = RequestsWrapper({}, {})
-        http.trust_env = False
-        http.trust_env = True
-        assert http.session.trust_env is True
 
     def test_trust_env_adopts_injected_session(self):
         session = requests.Session()

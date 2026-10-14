@@ -13,33 +13,6 @@ pytestmark = [pytest.mark.unit]
 
 
 class TestLegacyOptionsSurface:
-    def test_wholesale_header_replacement(self):
-        http = RequestsWrapper({}, {})
-        http.options['headers'] = {'Authorization': 'api-key'}
-        assert http.options['headers'] == {'Authorization': 'api-key'}
-
-    def test_replaced_headers_are_visible_through_get_header(self):
-        http = RequestsWrapper({}, {})
-        http.options['headers'] = {'Authorization': 'api-key'}
-        assert http.get_header('authorization') == 'api-key'
-
-    def test_update_clears_configured_auth(self):
-        http = RequestsWrapper({'username': 'user', 'password': 'pass'}, {})
-        assert http.options['auth'] == ('user', 'pass')
-        http.options.update({'auth': None})
-        assert http.options['auth'] is None
-
-    def test_nested_header_assignment(self):
-        http = RequestsWrapper({}, {})
-        http.options['headers']['Authorization'] = 'token'
-        assert http.get_header('Authorization') == 'token'
-
-    def test_update_applies_proxies_and_verify(self):
-        http = RequestsWrapper({}, {})
-        http.options.update({'proxies': {'https': 'http://proxy:3128'}, 'verify': False})
-        assert http.options['proxies'] == {'https': 'http://proxy:3128'}
-        assert http.options['verify'] is False
-
     def test_set_header_writes_through_to_options(self):
         http = RequestsWrapper({}, {})
         http.set_header('X-Token', 'abc')

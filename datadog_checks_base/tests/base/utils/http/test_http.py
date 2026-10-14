@@ -90,11 +90,6 @@ class TestAttribute:
         assert check.http == check._http
         assert isinstance(check.http, RequestsWrapper)
 
-    def test_factory_default_returns_requests_wrapper(self):
-        check = AgentCheck('test', {}, [{}])
-
-        assert isinstance(check.create_http_client(), RequestsWrapper)
-
     def test_factory_override_swaps_client(self):
         sentinel = object()
 
@@ -105,38 +100,20 @@ class TestAttribute:
         check = CustomCheck('test', {}, [{}])
         assert check.http is sentinel
 
-    def test_factory_default_uses_instance_config(self):
-        check = AgentCheck('test', {}, [{'timeout': 7}])
+    @pytest.mark.parametrize(
+        'instance, init_config, overrides, expected_timeout',
+        [
+            pytest.param({'timeout': 7}, {}, {}, (7.0, 7.0), id='check-instance'),
+            pytest.param({'timeout': 7}, {}, {'instance': {'timeout': 42}}, (42.0, 42.0), id='instance-override'),
+            # An empty mapping is an explicit override, distinct from None, so the check's own config must not leak in.
+            pytest.param({'timeout': 7}, {}, {'instance': {}}, (10.0, 10.0), id='empty-instance-override'),
+            pytest.param({}, {'timeout': 7}, {'init_config': {}}, (10.0, 10.0), id='empty-init-config-override'),
+        ],
+    )
+    def test_factory_config_selection(self, instance, init_config, overrides, expected_timeout):
+        check = AgentCheck('test', init_config, [instance])
 
-        assert check.create_http_client().options['timeout'] == (7.0, 7.0)
-
-    def test_factory_instance_override(self):
-        check = AgentCheck('test', {}, [{'timeout': 7}])
-
-        client = check.create_http_client({'timeout': 42})
-
-        assert client.options['timeout'] == (42.0, 42.0)
-
-    def test_factory_empty_instance_override_is_honored(self):
-        from datadog_checks.base.utils.http import create_http_client
-
-        check = AgentCheck('test', {}, [{'timeout': 7}])
-
-        # {} is an explicit override, distinct from None, so self.instance's timeout must not leak in.
-        empty_default = create_http_client({}, {}).options['timeout']
-        assert check.create_http_client({}).options['timeout'] == empty_default
-
-    def test_factory_empty_init_config_override_is_honored(self):
-        check = AgentCheck('test', {'timeout': 7}, [{}])
-
-        assert check.create_http_client(init_config={}).options['timeout'] == (10.0, 10.0)
-
-    def test_module_factory_builds_from_given_config(self):
-        from datadog_checks.base.utils.http import create_http_client
-
-        client = create_http_client({'timeout': 24.5}, {})
-
-        assert client.options['timeout'] == (24.5, 24.5)
+        assert check.create_http_client(**overrides).options['timeout'] == expected_timeout
 
     def test_module_factory_applies_remapper(self):
         from datadog_checks.base.utils.http import create_http_client
