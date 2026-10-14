@@ -6,6 +6,7 @@ from __future__ import annotations
 import dataclasses
 import ipaddress
 import json
+import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 from xml.etree.ElementTree import Element
@@ -71,8 +72,9 @@ def parse_devices(root: Element) -> list[DiscoveredFirewall]:
 class PanoramaFirewallSource:
     """The firewalls a Panorama manages, discovered on every run and polled directly.
 
-    When Panorama cannot be queried, the last list it returned (kept in the persistent cache, without any
-    credential) is used instead. It reports its own reachability as `panorama.can_connect`.
+    When Panorama cannot be queried, the last list it returned (kept in the persistent cache with the time of that
+    discovery, without any credential) is used instead, however old: the firewalls are polled directly, and
+    `panorama.can_connect` reports the outage. It reports its own reachability as `panorama.can_connect`.
     """
 
     def __init__(self, check: AgentCheck, config: InstanceConfig):
@@ -85,7 +87,6 @@ class PanoramaFirewallSource:
         credentials = Credentials(config.panorama_username, config.panorama_password, config.panorama_api_key)
         self._keys = KeyManager(http, self._host, credentials)
         self._client = PanosClient(http, self._host, self._keys, check.log)
-        self._last_cached: str | None = None
         self._warned: set[str] = set()
 
     def list_firewalls(self) -> list[FirewallTarget]:
@@ -119,16 +120,20 @@ class PanoramaFirewallSource:
         ]
 
     def _store(self, devices: list[DiscoveredFirewall]) -> None:
-        raw = json.dumps([dataclasses.asdict(d) for d in devices])
-        if raw != self._last_cached:
-            self._check.write_persistent_cache(self._cache_key, raw)
-            self._last_cached = raw
+        # Written on every successful discovery, so `discovered` is the time of the last one.
+        raw = json.dumps({'discovered': time.time(), 'firewalls': [dataclasses.asdict(d) for d in devices]})
+        self._check.write_persistent_cache(self._cache_key, raw)
 
     def _load_cached(self) -> list[DiscoveredFirewall] | None:
         raw = self._check.read_persistent_cache(self._cache_key)
+        devices = None
         try:
-            devices = [DiscoveredFirewall(**d) for d in json.loads(raw)] if raw else None
-        except (ValueError, TypeError) as e:
+            if raw:
+                data = json.loads(raw)
+                discovered = float(data['discovered'])
+                devices = [DiscoveredFirewall(**d) for d in data['firewalls']]
+        except (ValueError, TypeError, KeyError) as e:
+            # Also a list in the old format (a bare list) or without `discovered`.
             self._check.log.debug('pan_firewall: ignoring the cached Panorama firewall list: %s', e)
             devices = None
         if devices is None:
@@ -138,9 +143,10 @@ class PanoramaFirewallSource:
             )
         else:
             self._check.log.warning(
-                'pan_firewall: Panorama %s is unreachable; polling the %d firewalls of the last discovery',
+                'pan_firewall: Panorama %s is unreachable; polling the %d firewalls of the last discovery, %s ago',
                 self._host,
                 len(devices),
+                readable_age(time.time() - discovered),
             )
         return devices
 
@@ -217,6 +223,15 @@ class PanoramaFirewallSource:
         if key not in self._warned:
             self._warned.add(key)
             self._check.log.warning(message, *args)
+
+
+def readable_age(seconds: float) -> str:
+    """`seconds` rounded to the largest unit it holds at least once, for example `3 days` or `1 minute`."""
+    seconds = max(seconds, 0)
+    units = (('day', 86400), ('hour', 3600), ('minute', 60))
+    unit, size = next(((unit, size) for unit, size in units if seconds >= size), ('second', 1))
+    count = round(seconds / size)
+    return f'{count} {unit}' if count == 1 else f'{count} {unit}s'
 
 
 def _parse_ip(value: str | None) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:

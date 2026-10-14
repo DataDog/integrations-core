@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import hashlib
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
@@ -19,6 +20,16 @@ class PanFirewallCheck(AgentCheck, ConfigMixin):
         super().__init__(*args, **kwargs)
         self._source: FirewallSource | None = None
         self._pollers: dict[str, FirewallPoller] = {}
+
+    def persistent_cache_id(self) -> str:
+        """A cache ID that only the namespace changes, unlike the default digest of the whole instance config.
+
+        Editing the config (a firewall or a tag added, `timeout` changed) must not reset the threat watermarks, the
+        identities and the Panorama fallback list. It is safe: the keys hold the serial, the IP or the Panorama host,
+        and the base class still isolates the cache per check.
+        """
+        namespace = self.config.namespace or 'default'
+        return hashlib.sha256(f'pan_firewall:{namespace}'.encode()).hexdigest()[:16]
 
     def check(self, _: Any) -> None:
         if self._source is None:

@@ -50,6 +50,11 @@ THREAT_PAGE_SIZE = 5000
 THREAT_JOB_POLLS = 5
 THREAT_JOB_POLL_DELAY = 1.0
 THREAT_RESET_CHECK_SECONDS = 1800
+# A cached threat watermark written longer ago than this (wall clock) is ignored when the poller starts: the firewall
+# may have been gone for a while, and counting every threat since then as one burst would be wrong. It must stay above
+# THREAT_RESET_CHECK_SECONDS: on a quiet firewall the watermark is only rewritten by the reset check, after a "nothing
+# new" pass.
+THREAT_WATERMARK_MAX_AGE_SECONDS = 3600
 
 # Top-N reports: report name -> (PAN-OS field the custom report aggregates by, dimension tag of its metrics). There is
 # no HTTP-only report (decision 15). A job is polled this many times, this many seconds apart, before it is left for

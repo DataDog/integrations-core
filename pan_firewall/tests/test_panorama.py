@@ -2,13 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import json
 import logging
+from types import SimpleNamespace
 
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.pan_firewall import PanFirewallCheck
-from datadog_checks.pan_firewall.panorama import DiscoveredFirewall, parse_devices
+from datadog_checks.pan_firewall import panorama as panorama_module
+from datadog_checks.pan_firewall.panorama import DiscoveredFirewall, parse_devices, readable_age
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from .common import (
@@ -18,7 +21,7 @@ from .common import (
     FW_B_IP,
 )
 from .fake_panos import INVALID_CREDENTIAL
-from .helpers import metrics_by_ip
+from .helpers import FakeClock, metrics_by_ip, with_agent_check_id
 
 PANORAMA = 'panorama.example.com'
 DISCOVERY_CMD = '<show><devices><connected/></devices></show>'
@@ -29,6 +32,7 @@ FW_A_SERIAL, FW_B_SERIAL = '007955000930601', '007955000930602'
 # The `ip-address` values of the captures. The fake Panorama reports the fake firewalls (FW_A_IP, FW_B_IP) instead.
 FW_A_REPORTED, FW_B_REPORTED = '10.60.0.10', '10.60.0.11'
 PANORAMA_TAGS = ['device_namespace:default', f'panorama_host:{PANORAMA}', 'team:test']
+CACHE_KEY = f'panorama_firewalls:{PANORAMA}'
 
 
 def make_instance(**options):
@@ -420,3 +424,100 @@ def test_cached_list_holds_no_credentials(dd_run_check):
     assert FW_A_SERIAL in raw
     assert 'secret-panorama-key' not in raw
     assert 'dummy-password' not in raw
+
+
+@pytest.fixture
+def wall_clock(monkeypatch) -> FakeClock:
+    """The wall clock the Panorama list's `discovered` time comes from."""
+    clock = FakeClock(1_800_000_000.0)
+    monkeypatch.setattr(panorama_module, 'time', SimpleNamespace(time=clock))
+    return clock
+
+
+def fallback_warnings(caplog):
+    return [
+        r.getMessage() for r in caplog.records if r.levelno == logging.WARNING and 'last discovery' in r.getMessage()
+    ]
+
+
+@pytest.mark.parametrize(
+    'edit',
+    [
+        pytest.param({'tags': ['team:test', 'site:paris']}, id='tags'),
+        pytest.param({'timeout': 10}, id='timeout'),
+    ],
+)
+def test_config_edit_keeps_the_panorama_list(dd_run_check, fake_panos, edit):
+    dd_run_check(with_agent_check_id(new_check()))
+    fake_panos.fail(PANORAMA, 'refused')
+    calls = len(fake_panos.calls)
+
+    # The edited config, after the Agent reloads it, while Panorama is down.
+    dd_run_check(with_agent_check_id(new_check(**edit)))
+
+    assert polled_hosts(fake_panos, skip=calls) == {FW_A_IP, FW_B_IP}
+
+
+def test_fallback_warning_says_how_old_the_list_is_and_its_firewalls_are_polled(
+    dd_run_check, fake_panos, caplog, wall_clock
+):
+    dd_run_check(new_check())
+    fake_panos.fail(PANORAMA, 'refused')
+    wall_clock.now += 3 * 86400
+    calls = len(fake_panos.calls)
+
+    dd_run_check(new_check())
+
+    assert fallback_warnings(caplog) == [
+        # The 6 entries of the cached list, of which 2 are connected and have a usable IP.
+        f'pan_firewall: Panorama {PANORAMA} is unreachable; polling the 6 firewalls of the last discovery, 3 days ago'
+    ]
+    assert polled_hosts(fake_panos, skip=calls) == {FW_A_IP, FW_B_IP}
+
+
+def test_successful_discovery_rewrites_the_discovery_time_even_when_the_list_is_unchanged(dd_run_check, wall_clock):
+    check = new_check()
+    dd_run_check(check)
+    first = json.loads(check.read_persistent_cache(CACHE_KEY))
+    wall_clock.now += 60
+
+    dd_run_check(check)
+
+    second = json.loads(check.read_persistent_cache(CACHE_KEY))
+    assert second['firewalls'] == first['firewalls']
+    assert second['discovered'] - first['discovered'] == 60
+
+
+@pytest.mark.parametrize(
+    'cached',
+    [
+        pytest.param('[{"serial": "007955000930601"}]', id='old-format-bare-list'),
+        pytest.param('{"firewalls": []}', id='without-discovered'),
+    ],
+)
+def test_cached_list_in_another_format_is_ignored(dd_run_check, fake_panos, caplog, cached):
+    check = new_check()
+    dd_run_check(check)
+    check.write_persistent_cache(CACHE_KEY, cached)
+    fake_panos.fail(PANORAMA, 'refused')
+    calls = len(fake_panos.calls)
+
+    dd_run_check(new_check())
+
+    assert polled_hosts(fake_panos, skip=calls) == set()
+    assert any(r.levelno == logging.WARNING and 'no discovered firewalls' in r.getMessage() for r in caplog.records)
+
+
+@pytest.mark.parametrize(
+    'seconds, expected',
+    [
+        pytest.param(-5, '0 seconds', id='clock-went-back'),
+        pytest.param(1, '1 second', id='second'),
+        pytest.param(59, '59 seconds', id='seconds'),
+        pytest.param(60, '1 minute', id='minute'),
+        pytest.param(5400, '2 hours', id='hours-rounded'),
+        pytest.param(3 * 86400, '3 days', id='days'),
+    ],
+)
+def test_readable_age(seconds, expected):
+    assert readable_age(seconds) == expected

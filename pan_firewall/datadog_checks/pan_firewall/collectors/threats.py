@@ -55,6 +55,8 @@ def collect_threats(ctx: CollectContext) -> list[Sample]:
 
 
 def _load_watermark(ctx: CollectContext, state: ThreatState) -> None:
+    """Read the watermark from the cache, once per poller. One older than THREAT_WATERMARK_MAX_AGE_SECONDS is ignored,
+    so the next pass is a first run; a negative age (the wall clock went back) counts as fresh."""
     if state.loaded:
         return
     state.loaded = True
@@ -62,9 +64,15 @@ def _load_watermark(ctx: CollectContext, state: ThreatState) -> None:
     if not raw:
         return
     try:
-        state.watermark = Watermark.from_json(raw)
+        watermark = Watermark.from_json(raw)
     except (ValueError, TypeError, KeyError) as e:
-        ctx.log.debug('ignoring the cached threat watermark: %s', e)
+        ctx.log.debug('ignoring the cached threat watermark of %s: %s', _serial(ctx), e)
+        return
+    age = ctx.wall_clock() - watermark.updated
+    if age > constants.THREAT_WATERMARK_MAX_AGE_SECONDS:
+        ctx.log.debug('ignoring the cached threat watermark of %s, written %ds ago', _serial(ctx), age)
+        return
+    state.watermark = watermark
 
 
 def _serial(ctx: CollectContext) -> str | None:
@@ -75,8 +83,8 @@ def _cache_key(ctx: CollectContext) -> str:
     return f'threat_watermark:{_serial(ctx)}'
 
 
-def _store(ctx: CollectContext, state: ThreatState, watermark: Watermark) -> None:
-    state.watermark = watermark
+def _store(ctx: CollectContext, state: ThreatState, seqno: int, last_reset_check: float) -> None:
+    watermark = state.watermark = Watermark(seqno, last_reset_check, ctx.wall_clock())
     if _serial(ctx):
         ctx.write_cache(_cache_key(ctx), watermark.to_json())
 
@@ -156,13 +164,13 @@ def _complete(ctx: CollectContext, state: ThreatState, job: ThreatJob) -> tuple[
     if job.purpose == 'baseline':
         # No log yet: the watermark stays unset and the next run tries again.
         if job.newest_seqno is not None:
-            _store(ctx, state, Watermark(job.newest_seqno, now))
+            _store(ctx, state, job.newest_seqno, now)
         return [], None
     assert watermark is not None
     if job.purpose == 'forward':
         if job.counted:
             assert job.newest_seqno is not None
-            _store(ctx, state, Watermark(job.newest_seqno, watermark.last_reset_check))
+            _store(ctx, state, job.newest_seqno, watermark.last_reset_check)
             return _samples(job), None
         due = (
             watermark.last_reset_check > now or now - watermark.last_reset_check >= constants.THREAT_RESET_CHECK_SECONDS
@@ -176,9 +184,9 @@ def _complete(ctx: CollectContext, state: ThreatState, job: ThreatJob) -> tuple[
             job.newest_seqno,
             watermark.seqno,
         )
-        _store(ctx, state, Watermark(job.newest_seqno, now))
+        _store(ctx, state, job.newest_seqno, now)
     else:
-        _store(ctx, state, Watermark(watermark.seqno, now))
+        _store(ctx, state, watermark.seqno, now)
     return [], None
 
 

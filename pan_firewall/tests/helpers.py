@@ -8,6 +8,8 @@ without the check installed, so none of those may import this one.
 """
 
 import copy
+import hashlib
+import json
 from unittest import mock
 from xml.etree import ElementTree as ET
 
@@ -68,6 +70,14 @@ def make_instance(ip=FW_A_IP, **options):
 
 def new_check(instance=None):
     return PanFirewallCheck('pan_firewall', {}, [instance or make_instance()])
+
+
+def with_agent_check_id(check):
+    """Give `check` the ID the Agent gives it, `<name>:<digest of the instance config>`. The tests leave it empty
+    otherwise, which makes every check share one persistent cache whatever its config."""
+    digest = hashlib.sha256(json.dumps(check.instance, sort_keys=True).encode()).hexdigest()[:16]
+    check.check_id = f'{check.name}:{digest}'
+    return check
 
 
 def stub_sample(name):

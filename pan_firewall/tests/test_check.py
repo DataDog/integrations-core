@@ -26,7 +26,17 @@ from .common import (
     SYSTEM_INFO_CMD,
 )
 from .fake_panos import FAILURES, FIREWALL_SETS
-from .helpers import can_connect_by_ip, make_instance, new_check, register_stubs, stub_runs, stub_sample
+from .fixture_map import THREAT_LOG_FIRST_SEQNO
+from .helpers import (
+    can_connect_by_ip,
+    log_page,
+    make_instance,
+    new_check,
+    register_stubs,
+    stub_runs,
+    stub_sample,
+    with_agent_check_id,
+)
 
 
 def only_value_and_tags(aggregator, name):
@@ -456,3 +466,43 @@ def test_identity_is_read_again_on_the_next_run_after_the_key_is_regenerated(
 
     # The identity is not due for 30 minutes, yet it is read.
     assert SYSTEM_INFO_CMD in [c.cmd for c in fake_panos.calls[calls_before:]]
+
+
+# What an edit to these options must not do: start from an empty persistent cache.
+CONFIG_EDITS = [
+    pytest.param({'tags': ['team:test', 'site:paris']}, id='tags'),
+    pytest.param({'timeout': 10}, id='timeout'),
+]
+
+
+@pytest.mark.parametrize('edit', CONFIG_EDITS)
+def test_config_edit_keeps_the_threat_watermark_and_the_identity(
+    dd_run_check, aggregator, fake_panos, real_collectors, edit
+):
+    # The first run sets the watermark just below the logs of fw-a's capture.
+    fake_panos.answer_log(FW_A_IP, 'backward', None, 0, log_page([THREAT_LOG_FIRST_SEQNO['fw-a'] - 1]))
+    dd_run_check(with_agent_check_id(new_check()))
+    fake_panos.recover(FW_A_IP)
+    aggregator.reset()
+
+    # The edited config, after the Agent reloads it.
+    dd_run_check(with_agent_check_id(new_check(make_instance(**edit))))
+
+    # Only the logs above the watermark, which are the 39 of the capture; a lost watermark would count nothing.
+    assert sum(m.value for m in aggregator.metrics('pan_firewall.threat.count')) == 39
+    fake_panos.fail(FW_A_IP, 'refused')
+    aggregator.reset()
+    dd_run_check(with_agent_check_id(new_check(make_instance(**edit))))
+    (can_connect,) = aggregator.metrics('pan_firewall.can_connect')
+    assert (can_connect.value, f'device_id:{FW_A_SERIAL}' in can_connect.tags) == (0, True)
+
+
+def test_instances_with_different_namespaces_get_different_cache_ids():
+    def cache_id(**options):
+        check = new_check(make_instance(**options))
+        check.load_configuration_models()
+        return check.persistent_cache_id()
+
+    assert cache_id() == cache_id(namespace='default') == cache_id(tags=['other:tag'], timeout=10)
+    assert cache_id(namespace='site-a') != cache_id(namespace='site-b')
+    assert cache_id(namespace='site-a') != cache_id()

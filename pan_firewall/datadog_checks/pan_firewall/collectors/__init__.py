@@ -48,20 +48,27 @@ class Watermark:
     """Where the threat collector resumes: the `seqno` of the last log counted, and the last `seqno` reset check.
 
     `last_reset_check` is a reading of the schedule's monotonic clock, so it means nothing after a restart: the
-    reset check treats a value ahead of the clock as due.
+    reset check treats a value ahead of the clock as due. `updated` is the wall-clock time the watermark was written,
+    which still means something after a restart.
     """
 
     seqno: int
     last_reset_check: float
+    updated: float
 
     def to_json(self) -> str:
-        return json.dumps({'seqno': self.seqno, 'last_reset_check': self.last_reset_check})
+        return json.dumps({'seqno': self.seqno, 'last_reset_check': self.last_reset_check, 'updated': self.updated})
 
     @classmethod
     def from_json(cls, raw: str) -> Watermark:
-        """Load a watermark written by `to_json()`. Raises ValueError, TypeError or KeyError for anything else."""
+        """Load a watermark written by `to_json()`. Raises ValueError, TypeError or KeyError for anything else,
+        including a watermark without `updated`."""
         data = json.loads(raw)
-        return cls(seqno=int(data['seqno']), last_reset_check=float(data['last_reset_check']))
+        return cls(
+            seqno=int(data['seqno']),
+            last_reset_check=float(data['last_reset_check']),
+            updated=float(data['updated']),
+        )
 
 
 @dataclass
@@ -139,8 +146,10 @@ class CollectContext:
     # `state.tunnel_tags` as it was when the run started: what `interfaces` tags the tunnel counters with, so that
     # whether they are sent does not depend on which of the parallel collectors finishes first.
     tunnel_tags: dict[str, tuple[str, ...]] | None = None
-    # The schedule's monotonic clock, and the check's persistent cache (read returns '' for an unknown key).
+    # The schedule's monotonic clock, the wall clock, and the check's persistent cache (read returns '' for an unknown
+    # key).
     clock: Callable[[], float] = time.monotonic
+    wall_clock: Callable[[], float] = time.time
     read_cache: Callable[[str], str] = lambda key: ''
     write_cache: Callable[[str, str], None] = lambda key, value: None
 
