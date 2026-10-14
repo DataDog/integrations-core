@@ -260,14 +260,20 @@ class LineCappedRawResponse(ObjectProxy):
         super().__init__(raw)
         self._self_max_line_size = max_line_size
 
-    def stream(self, *args: Any, **kwargs: Any) -> Iterator[bytes]:
+    def stream(self, amt: int | None = 2**16, *args: Any, **kwargs: Any) -> Iterator[bytes]:
         """
         Yield the decoded body in chunks that each contain a line break, except possibly the last one. Raise
         `ResponseLineTooLongError` once a line is longer than `max_line_size` bytes.
         """
+        # Mirrors `urllib3.HTTPResponse.stream`: `amt` is the number of bytes read per chunk, 64 KiB by default.
+        # `None` reads the whole body at once. Only the line that continues from the previous chunk is checked, which
+        # is enough while chunks are not longer than the limit, so `amt` is capped at the limit.
+        if amt is None or amt > self._self_max_line_size:
+            amt = self._self_max_line_size
+
         line_size = 0
         group: list[bytes] = []
-        for chunk in self.__wrapped__.stream(*args, **kwargs):
+        for chunk in self.__wrapped__.stream(amt, *args, **kwargs):
             newline = chunk.find(b'\n')
             first_line_size = line_size + (len(chunk) if newline < 0 else newline)
             if first_line_size > self._self_max_line_size:

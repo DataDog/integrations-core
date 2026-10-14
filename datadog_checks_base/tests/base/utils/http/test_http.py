@@ -386,6 +386,19 @@ def test_iter_lines_limits_line_size(body):
         list(ResponseWrapper(_gzip_response(body), 4, 10).iter_lines())
 
 
+# Chunks of 32 bytes, longer than the limit of 10 bytes
+@pytest.mark.parametrize(
+    'body',
+    [
+        pytest.param(b'a\n' + b'x' * 11 + b'\nb', id='line inside a chunk'),
+        pytest.param(b'a\n' + b'x' * 11, id='last line inside a chunk'),
+    ],
+)
+def test_iter_lines_limits_lines_inside_chunks(body):
+    with pytest.raises(ResponseLineTooLongError, match='line longer than 10 bytes'):
+        list(ResponseWrapper(_gzip_response(body), 32, 10).iter_lines())
+
+
 def test_stream_groups_chunks_up_to_a_line_break():
     response = _gzip_response(b'y\n' + b'x' * 9 + b'\ny')
     limit_line_size(response, 10)
