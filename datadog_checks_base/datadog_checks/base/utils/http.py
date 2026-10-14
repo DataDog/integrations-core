@@ -279,7 +279,7 @@ class LineCappedRawResponse(ObjectProxy):
 
 
 class ResponseWrapper(ObjectProxy):
-    def __init__(self, response, default_chunk_size, max_line_size=None):
+    def __init__(self, response, default_chunk_size, max_line_size: int | None = None):
         super(ResponseWrapper, self).__init__(response)
 
         # See https://github.com/psf/requests/pull/5942
