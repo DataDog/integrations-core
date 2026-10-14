@@ -991,7 +991,7 @@ def create_http_client(
     instance: dict | None,
     init_config: dict,
     remapper: dict | None = None,
-    logger: logging.Logger | None = None,
+    logger: logging.Logger | logging.LoggerAdapter | None = None,
     *,
     agnostic: bool = False,
 ) -> HTTPClient:
