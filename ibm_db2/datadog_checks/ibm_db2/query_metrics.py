@@ -59,7 +59,7 @@ STATEMENT_COUNTERS_QUERY = """
 /* DDIGNORE */
 SELECT MEMBER, EXECUTABLE_ID, INSERT_TIMESTAMP,
        NUM_COORD_EXEC_WITH_METRICS AS "count", COORD_STMT_EXEC_TIME AS "time",
-       TOTAL_CPU_TIME AS "cpu_time", ROWS_READ, ROWS_RETURNED
+       TOTAL_CPU_TIME AS "cpu_time", ROWS_READ, ROWS_RETURNED, LOCK_WAIT_TIME, LOCK_WAITS
 FROM TABLE(SYSPROC.MON_GET_PKG_CACHE_STMT(NULL, NULL, NULL, -1))
 """
 
@@ -104,7 +104,7 @@ class QueryMetricsCollector(DBMAsyncJob):
             maxsize=TEXT_CACHE_SIZE, obfuscate_options=OBFUSCATION_OPTIONS
         )
         self._query_stats = QueryStats(
-            counter_columns={'count', 'time', 'cpu_time', 'rows_read', 'rows_returned'},
+            counter_columns={'count', 'time', 'cpu_time', 'rows_read', 'rows_returned', 'lock_wait_time', 'lock_waits'},
             key=statement_key,
             execution_indicators={'count'},
         )
@@ -159,6 +159,8 @@ class QueryMetricsCollector(DBMAsyncJob):
                     'cpu_time': 0,
                     'rows_read': 0,
                     'rows_returned': 0,
+                    'lock_wait_time': 0,
+                    'lock_waits': 0,
                 },
             )
             output['count'] += row['count']
@@ -167,6 +169,8 @@ class QueryMetricsCollector(DBMAsyncJob):
             output['cpu_time'] += row['cpu_time'] * NANOSECONDS_PER_MICROSECOND
             output['rows_read'] += row['rows_read']
             output['rows_returned'] += row['rows_returned']
+            output['lock_wait_time'] += row['lock_wait_time'] * NANOSECONDS_PER_MILLISECOND
+            output['lock_waits'] += row['lock_waits']
 
         if rows_by_signature:
             payload = {
