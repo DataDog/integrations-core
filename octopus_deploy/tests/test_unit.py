@@ -2804,6 +2804,45 @@ def test_unified_service_tagging(
             aggregator.assert_metric_has_tag(metric, 'env:staging', count=0)
 
 
+@pytest.mark.parametrize(
+    ('mock_http_get', 'projects_config', 'expected_exception', 'can_connect'),
+    [
+        pytest.param(
+            {'http_error': {'/api/Spaces-1/projects': MockResponse(status_code=500)}},
+            {'include': ['.*']},
+            pytest.raises(Exception, match=r'Could not connect to octopus API.*'),
+            0,
+            id='projects discovery reports the failure',
+        ),
+        pytest.param(
+            {'http_error': {'/api/Spaces-1/projects': MockResponse(status_code=500)}},
+            None,
+            does_not_raise(),
+            1,
+            id='default listing only warns',
+        ),
+    ],
+    indirect=['mock_http_get'],
+)
+@pytest.mark.usefixtures('mock_http_get')
+@mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
+def test_projects_listing_failure(
+    get_current_datetime, dd_run_check, aggregator, instance, projects_config, expected_exception, can_connect
+):
+    instance = copy.deepcopy(instance)
+    if projects_config:
+        instance['projects'] = projects_config
+    check = OctopusDeployCheck('octopus_deploy', {}, [instance])
+    get_current_datetime.return_value = MOCKED_TIME1
+
+    with expected_exception:
+        dd_run_check(check)
+
+    # With a `projects` filter configured, a failed listing must not look like a healthy API with no projects.
+    aggregator.assert_metric('octopus_deploy.api.can_connect', can_connect, count=1)
+    aggregator.assert_metric('octopus_deploy.project.count', count=0)
+
+
 @pytest.mark.usefixtures('mock_http_get')
 @mock.patch("datadog_checks.octopus_deploy.check.get_current_datetime")
 def test_collection_does_not_scale_with_project_count(get_current_datetime, dd_run_check, mock_http_get, instance):

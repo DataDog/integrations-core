@@ -173,11 +173,21 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
                 key=lambda project_group: project_group.get("Name"),
             )
 
-    def _get_projects_by_group(self, space_id, project_group_id):
-        """Projects in a project group, from a per-run listing of every project in the space."""
+    def _get_projects_by_group(self, space_id, project_group_id, report_service_check=False):
+        """Projects in a project group, from a per-run listing of every project in the space.
+
+        With `report_service_check`, a failed listing sets `api.can_connect` to 0 and raises, as project
+        discovery did before; otherwise it is logged and the group has no projects.
+        """
         if space_id not in self._space_projects_cache:
+            response = self._process_paginated_endpoint(
+                f"api/{space_id}/projects", report_service_check=report_service_check
+            )
+            if 'Items' not in response:
+                # Not cached, so a later caller that reports the service check retries instead of reusing the failure.
+                return []
             projects_by_group = {}
-            for project in self._process_paginated_endpoint(f"api/{space_id}/projects").get('Items', []):
+            for project in response['Items']:
                 projects_by_group.setdefault(project.get("ProjectGroupId"), []).append(project)
             self._space_projects_cache[space_id] = projects_by_group
         return self._space_projects_cache[space_id].get(project_group_id, [])
@@ -188,7 +198,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self._default_projects_discovery[space_id] = {}
         if project_group_id not in self._default_projects_discovery[space_id]:
             self._default_projects_discovery[space_id][project_group_id] = Discovery(
-                lambda: self._get_projects_by_group(space_id, project_group_id),
+                lambda: self._get_projects_by_group(space_id, project_group_id, report_service_check=True),
                 limit=self.config.projects.limit,
                 include=normalize_discover_config_include(self.config.projects),
                 exclude=self.config.projects.exclude,
@@ -202,7 +212,7 @@ class OctopusDeployCheck(AgentCheck, ConfigMixin):
             self._projects_discovery[space_id] = {}
         if project_group_id not in self._projects_discovery[space_id]:
             self._projects_discovery[space_id][project_group_id] = Discovery(
-                lambda: self._get_projects_by_group(space_id, project_group_id),
+                lambda: self._get_projects_by_group(space_id, project_group_id, report_service_check=True),
                 limit=projects_config.limit,
                 include=normalize_discover_config_include(projects_config),
                 exclude=projects_config.exclude,
