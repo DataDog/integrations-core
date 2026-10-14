@@ -10,7 +10,7 @@ import pytest
 from datadog_checks.pan_firewall import PanFirewallCheck
 from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, Sample, once_log, warn_once
 from datadog_checks.pan_firewall.collectors.jobs import JOBS_PENDING_CMD
-from datadog_checks.pan_firewall.errors import PanosApiError, PanosTimeout
+from datadog_checks.pan_firewall.errors import PanosApiError, PanosUnreachable
 from datadog_checks.pan_firewall.poller import FirewallPoller
 
 from .common import (
@@ -182,7 +182,7 @@ def test_firewalls_are_polled_concurrently_up_to_max_concurrency(dd_run_check, a
 @pytest.mark.parametrize(
     'failure, warning',
     [
-        pytest.param('timeout', 'bgp timed out after 30s', id='timeout'),
+        pytest.param('timeout', 'could not reach the firewall (timed out) during bgp', id='timeout'),
     ],
 )
 def test_unreachable_firewall_skips_the_remaining_collectors_of_that_firewall_only(
@@ -253,7 +253,8 @@ def test_identity_timeout_skips_every_collector(dd_run_check, aggregator, fake_p
     assert only_value_and_tags(aggregator, 'can_connect') == (1, FW_A_TAGS)
     warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
     assert warnings == [
-        f'pan_firewall {FW_A_IP}: identity_metadata timed out after 30s; skipped for this run: {", ".join(STUBS)}'
+        f'pan_firewall {FW_A_IP}: could not reach the firewall (timed out) during identity_metadata; '
+        f'skipped for this run: {", ".join(STUBS)}'
     ]
 
 
@@ -291,7 +292,7 @@ def test_timeout_a_collector_handles_itself_is_still_reported(dd_run_check, fake
     def bgp(ctx):
         try:
             ctx.client.op(SYSTEM_INFO_CMD)
-        except PanosTimeout:
+        except PanosUnreachable:
             pass
         return [stub_sample('bgp')]
 
@@ -305,7 +306,9 @@ def test_timeout_a_collector_handles_itself_is_still_reported(dd_run_check, fake
     dd_run_check(check)
 
     warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
-    assert warnings == [f'pan_firewall {FW_A_IP}: a call timed out after 30s; skipped for this run: none']
+    assert warnings == [
+        f'pan_firewall {FW_A_IP}: could not reach the firewall (timed out) during a call; skipped for this run: none'
+    ]
 
 
 def test_collector_warnings_name_the_firewall(dd_run_check, monkeypatch, caplog):

@@ -12,7 +12,7 @@ from xml.etree.ElementTree import Element
 
 from .api import PanosClient, new_http
 from .auth import Credentials, KeyManager
-from .errors import PanosAuthError, PanosError
+from .errors import PanosError
 from .firewalls import FirewallTarget, resolve_credentials
 from .xml_utils import text
 
@@ -103,8 +103,10 @@ class PanoramaFirewallSource:
         try:
             devices = parse_devices(self._client.op(DISCOVERY_CMD))
         except PanosError as e:
-            reason = 'rejected the credentials' if isinstance(e, PanosAuthError) else 'discovery failed'
-            self._check.log.warning('pan_firewall: Panorama %s %s (%s)', self._host, reason, e)
+            # The message says whether the credentials were rejected.
+            self._check.log.warning(
+                'pan_firewall: could not get the connected devices from Panorama %s: %s', self._host, e
+            )
             return None
         self._store(devices)
         return devices

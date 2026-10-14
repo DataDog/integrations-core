@@ -12,12 +12,11 @@ from __future__ import annotations
 
 import itertools
 import re
+import ssl
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
 from urllib.parse import urlsplit
-
-import requests
 
 from datadog_checks.dev.http import MockResponse
 
@@ -48,12 +47,12 @@ SUBMIT_TEMPLATE = (
 Answer = tuple[int, bytes] | Exception
 LogBody = bytes | Path | Answer
 
-# What the transport raises when a device cannot be reached: the only `requests` types the tests use.
+# What the transport raises when a device cannot be reached. Every `requests` exception is an OSError, so the built-in
+# ones stand in for them; `test_api` runs the real `requests` types once.
 TRANSPORT_ERRORS: dict[str, Exception] = {
-    'timeout': requests.exceptions.ReadTimeout('read timed out'),
-    'connect_timeout': requests.exceptions.ConnectTimeout('connect timed out'),
-    'refused': requests.exceptions.ConnectionError('connection refused'),
-    'tls': requests.exceptions.SSLError('certificate verify failed'),
+    'timeout': TimeoutError('timed out'),
+    'refused': ConnectionRefusedError('connection refused'),
+    'tls': ssl.SSLError('certificate verify failed'),
 }
 
 FAILURES: dict[str, Answer] = {
@@ -154,7 +153,8 @@ class FakePanos:
         if host in PANORAMA_HOSTS:
             return 200, panorama_op_answer(data.get('cmd', ''), PANORAMA_FIREWALL_IPS) or NO_CAPTURE
         if host not in FIREWALL_SETS:
-            return TRANSPORT_ERRORS['refused']
+            # Not the `refused` failure: a mistyped host in a test must not pass for a refused connection.
+            return ConnectionRefusedError(f'no fake firewall at {host}')
         path = find_op_fixture(data['cmd'], FIREWALL_SETS[host]) if data.get('type') == 'op' else None
         return (200, path.read_bytes()) if path else (200, NO_CAPTURE)
 

@@ -293,26 +293,31 @@ def test_panorama_can_connect_is_1_after_a_successful_discovery(dd_run_check, ag
 
 
 @pytest.mark.parametrize(
-    'answer, reason, detail',
+    'answer, error',
     [
         pytest.param(
             (200, b'<response status="error" code="12"><msg><line>Invalid command</line></msg></response>'),
-            'discovery failed',
-            'Invalid command',
+            'PAN-OS API error 12: Invalid command',
             id='api-error',
         ),
-        pytest.param((200, INVALID_CREDENTIAL), 'rejected the credentials', 'API error 403', id='auth-failure'),
+        # Panorama uses a static `panorama_api_key` here: the message says it was rejected.
+        pytest.param(
+            (200, INVALID_CREDENTIAL),
+            f'PAN-OS API error 403: {PANORAMA} rejected the configured API key, which is never renewed',
+            id='auth-failure',
+        ),
     ],
 )
 def test_panorama_can_connect_is_0_when_the_discovery_call_fails(
-    dd_run_check, aggregator, fake_panos, caplog, answer, reason, detail
+    dd_run_check, aggregator, fake_panos, caplog, answer, error
 ):
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, answer)
 
     dd_run_check(new_check())
 
     assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))]
-    assert reason in caplog.text and detail in caplog.text
+    warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
+    assert f'pan_firewall: could not get the connected devices from Panorama {PANORAMA}: {error}' in warnings
 
 
 def test_panorama_rejecting_the_password_is_reported_and_keygen_is_retried_once_per_run(

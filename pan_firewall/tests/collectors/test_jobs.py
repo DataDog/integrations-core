@@ -122,8 +122,8 @@ def test_jobs_check_error_collects_anyway_and_warns_once_per_episode(firewall):
 @pytest.mark.parametrize(
     'failure, reason',
     [
-        pytest.param('refused', f'failed (cannot connect to {FW_A_IP}: connection refused)', id='refused'),
-        pytest.param('timeout', 'timed out after 30s', id='timeout'),
+        pytest.param('refused', 'connection refused', id='refused'),
+        pytest.param('timeout', 'timed out', id='timeout'),
     ],
 )
 def test_jobs_check_unreachable_cuts_off_the_run(firewall, aggregator, fake_panos, failure, reason):
@@ -133,7 +133,10 @@ def test_jobs_check_unreachable_cuts_off_the_run(firewall, aggregator, fake_pano
     ran, warnings = firewall.run_at(0)
 
     assert ran == set()
-    assert warnings == [f'pan_firewall {FW_A_IP}: jobs {reason}; skipped for this run: {", ".join(STUBS)}']
+    assert warnings == [
+        f'pan_firewall {FW_A_IP}: could not reach the firewall ({reason}) during jobs; '
+        f'skipped for this run: {", ".join(STUBS)}'
+    ]
     assert [c.cmd for c in fake_panos.calls[calls_before:]] == [JOBS_PENDING_CMD]
     assert can_connect_by_ip(aggregator) == {FW_A_IP: 0}
 

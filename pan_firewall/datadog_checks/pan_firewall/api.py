@@ -7,30 +7,18 @@ import threading
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar
 from urllib.parse import urlsplit
 from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import Element
 
-import requests
-
 from datadog_checks.base.utils.http import RequestsWrapper
 
 from .constants import AUTH_ERROR_CODES, PARSE_ERROR_CODE
-from .errors import (
-    PanosApiError,
-    PanosAuthError,
-    PanosConnectionError,
-    PanosError,
-    PanosSkipped,
-    PanosTimeout,
-    PanosUnreachable,
-)
+from .errors import PanosApiError, PanosAuthError, PanosError, PanosSkipped, PanosUnreachable
 from .xml_utils import check_response, parse_response, text
 
 if TYPE_CHECKING:
-    from requests import Response
-
     from datadog_checks.base import AgentCheck
     from datadog_checks.base.log import CheckLoggingAdapter
 
@@ -42,10 +30,8 @@ __all__ = [
     'PanosApiError',
     'PanosAuthError',
     'PanosClient',
-    'PanosConnectionError',
     'PanosError',
     'PanosSkipped',
-    'PanosTimeout',
     'PanosUnreachable',
     'RequestCounter',
     'api_url',
@@ -59,6 +45,21 @@ STREAM_CHUNK_SIZE = 64 * 1024
 # Element path, from the root, of the entries in a finished `type=log` job.
 LOG_ENTRY_PATH = ['response', 'result', 'log', 'logs', 'entry']
 LOG_STATUS_PATH = ['response', 'result', 'job', 'status']
+
+
+class Response(Protocol):
+    """What the client reads of the response `RequestsWrapper.post` returns."""
+
+    status_code: int
+    content: bytes
+
+    def iter_content(self, chunk_size: int) -> Iterator[bytes]: ...
+
+    def close(self) -> None: ...
+
+    def __enter__(self) -> Response: ...
+
+    def __exit__(self, *exc_info: object) -> None: ...
 
 
 def api_url(host: str) -> str:
@@ -84,22 +85,17 @@ def new_http(check: AgentCheck, config: InstanceConfig) -> RequestsWrapper:
 
 @contextmanager
 def transport_errors(url: str) -> Iterator[None]:
-    """Turn `requests` exceptions raised in the block into PanosTimeout or PanosConnectionError.
+    """Turn an OSError raised in the block (every `requests` exception is one) into PanosUnreachable.
 
-    The original exception is dropped (`from None`): it holds the prepared request, whose headers carry the key.
+    The check acts the same on a timeout, a refused connection and a TLS error; the message keeps the original text,
+    which says which it was. The original exception is dropped (`from None`): it holds the prepared request, whose
+    headers carry the key.
     """
     host = urlsplit(url).netloc
     try:
         yield
-    # SSLError and ConnectTimeout subclass ConnectionError, so they are matched first.
-    except requests.exceptions.SSLError as e:
-        raise PanosConnectionError(f'TLS error talking to {host}: {e}') from None
-    except requests.exceptions.Timeout:
-        raise PanosTimeout(f'timed out talking to {host}') from None
-    except requests.exceptions.ConnectionError as e:
-        raise PanosConnectionError(f'cannot connect to {host}: {e}') from None
-    except requests.exceptions.RequestException as e:
-        raise PanosConnectionError(f'request to {host} failed: {e}') from None
+    except OSError as e:
+        raise PanosUnreachable(f'could not reach {host}: {e}', reason=str(e)) from None
 
 
 class RequestCounter:
@@ -175,16 +171,14 @@ class CallStats:
 
     `answered` is True once any call got a PAN-OS response, successful or `status="error"` (an auth rejection
     included); transport failures and bodies that are not PAN-OS XML (`panos_response` False) leave it False.
-    `auth_rejected` is True once a call failed with PanosAuthError after the key renewal. `timed_out` is True once a
-    call raised PanosTimeout, and `connection_error` is the message of the first PanosConnectionError.
-    `key_regenerated` is True once a rejected key was replaced with a new one.
+    `auth_rejected` is True once a call failed with PanosAuthError after the key renewal. `unreachable` is the reason
+    of the first PanosUnreachable. `key_regenerated` is True once a rejected key was replaced with a new one.
     """
 
     calls: int = 0
     answered: bool = False
     auth_rejected: bool = False
-    timed_out: bool = False
-    connection_error: str | None = None
+    unreachable: str | None = None
     key_regenerated: bool = False
 
 
@@ -194,9 +188,9 @@ class PanosClient:
     Every call holds one of `max_in_flight` slots for its whole duration, including any keygen and the retry, so
     the device never sees more than `max_in_flight` concurrent requests from this client.
 
-    Once a call times out or cannot connect, every later call raises PanosSkipped at once, without contacting the
-    device, until the next `take_stats()`: a hung device costs one timeout per run, not one per call, and a refused
-    one costs one attempt.
+    Once a call cannot reach the device, every later call raises PanosSkipped at once, without contacting it, until
+    the next `take_stats()`: a hung device costs one timeout per run, not one per call, and a refused one costs one
+    attempt.
     """
 
     def __init__(
@@ -258,7 +252,7 @@ class PanosClient:
                         raise PanosApiError(PARSE_ERROR_CODE, f'log job {job_id} response has no status')
                     status = (status_elem.text or '').strip()
                     yield status, (elements if status == 'FIN' else iter(()))
-                except (PanosTimeout, PanosConnectionError) as e:
+                except PanosUnreachable as e:
                     # The stream broke after `_authorized` recorded the call: the rest of the run must know.
                     self._record_unreachable(e)
                     raise
@@ -281,31 +275,16 @@ class PanosClient:
         return stats
 
     @property
-    def timed_out(self) -> bool:
-        """True once a call timed out since the last `take_stats()`. It is set before the PanosTimeout is raised."""
+    def unreachable(self) -> str | None:
+        """The reason of the first call that could not reach the device since the last `take_stats()`, or None. It is
+        set before the PanosUnreachable is raised."""
         with self._stats_lock:
-            return self._stats.timed_out
-
-    @property
-    def connection_error(self) -> str | None:
-        """The message of the first call that could not connect since the last `take_stats()`."""
-        with self._stats_lock:
-            return self._stats.connection_error
-
-    @property
-    def unreachable(self) -> bool:
-        """True once a call timed out or could not connect since the last `take_stats()`."""
-        with self._stats_lock:
-            return self._stats.timed_out or self._stats.connection_error is not None
+            return self._stats.unreachable
 
     def _fail_fast_if_unreachable(self) -> None:
         # Checked once the slot is held: a call waiting for the slot of the call that failed does not go out either.
-        with self._stats_lock:
-            timed_out, connection_error = self._stats.timed_out, self._stats.connection_error
-        if timed_out:
-            raise PanosSkipped(f'not calling {self._host}: an earlier call timed out')
-        if connection_error is not None:
-            raise PanosSkipped(f'not calling {self._host}: an earlier call could not connect')
+        if self.unreachable is not None:
+            raise PanosSkipped(f'not calling {self._host}: an earlier call could not reach it')
 
     def _authorized(self, attempt: Callable[[str], T]) -> T:
         """Run `attempt` through `_with_renewal` and record its outcome in the call stats."""
@@ -317,13 +296,11 @@ class PanosClient:
         self._record(None)
         return result
 
-    def _record_unreachable(self, error: PanosTimeout | PanosConnectionError) -> None:
+    def _record_unreachable(self, error: PanosUnreachable) -> None:
         """Note a failure to reach the device that came after the call was recorded; it is not a call of its own."""
         with self._stats_lock:
-            if isinstance(error, PanosTimeout):
-                self._stats.timed_out = True
-            elif self._stats.connection_error is None:
-                self._stats.connection_error = str(error)
+            if self._stats.unreachable is None:
+                self._stats.unreachable = error.reason
 
     def _record(self, error: PanosError | None) -> None:
         with self._stats_lock:
@@ -332,10 +309,8 @@ class PanosClient:
                 self._stats.answered = True
             if isinstance(error, PanosAuthError):
                 self._stats.auth_rejected = True
-            if isinstance(error, PanosTimeout):
-                self._stats.timed_out = True
-            if isinstance(error, PanosConnectionError) and self._stats.connection_error is None:
-                self._stats.connection_error = str(error)
+            if isinstance(error, PanosUnreachable) and self._stats.unreachable is None:
+                self._stats.unreachable = error.reason
 
     def _with_renewal(self, attempt: Callable[[str], T]) -> T:
         """Run `attempt` with the current key; on an auth failure, renew the key once and run it again."""

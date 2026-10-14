@@ -33,7 +33,7 @@ from .collectors import (  # noqa: F401  (importing the modules registers their 
 from .collectors.interfaces import parse_interface_speeds
 from .collectors.jobs import busy_jobs
 from .constants import COMMIT_SKIP_MAX_SECONDS
-from .errors import PanosConnectionError, PanosError, PanosSkipped, PanosTimeout, PanosUnreachable
+from .errors import PanosError, PanosSkipped, PanosUnreachable
 from .identity import DeviceIdentity, device_ip, global_tags, parse_system_info, vsys_list
 from .metadata import build_device, build_interfaces
 from .ndm_models import DeviceMetadata, InterfaceMetadata, batch_payloads
@@ -48,7 +48,7 @@ if TYPE_CHECKING:
 SYSTEM_INFO_CMD = '<show><system><info/></system></show>'
 INTERFACE_ALL_CMD = '<show><interface>all</interface></show>'
 IDENTITY = 'identity_metadata'
-# Name of the commit check in the timeout warning.
+# Name of the commit check in the unreachable warning.
 JOBS_CHECK = 'jobs'
 # Collectors of one firewall run at once; the client's own semaphore caps the calls in flight at the same number.
 COLLECTOR_WORKERS = 2
@@ -66,10 +66,9 @@ OPTIONAL_COLLECTORS = {
 class CollectorRun:
     """The outcome of `FirewallPoller.run_collectors()`."""
 
-    ran: list[str] = field(default_factory=list)  # succeeded, failed, timed out or could not connect
-    timed_out: list[str] = field(default_factory=list)  # the call that waited for the timeout
-    refused: list[str] = field(default_factory=list)  # the call that could not connect
-    # Not run, or run but cut short, because an earlier call of the run timed out or could not connect.
+    ran: list[str] = field(default_factory=list)  # succeeded, failed, or could not reach the firewall
+    unreachable: list[str] = field(default_factory=list)  # the calls that could not reach the firewall
+    # Not run, or run but cut short, because an earlier call of the run could not reach the firewall.
     skipped: list[str] = field(default_factory=list)
 
 
@@ -114,7 +113,7 @@ class FirewallPoller:
 
     def run(self) -> None:
         start = time.monotonic()
-        # Clears what a run that raised may have left, such as the timeout that makes every call fail fast.
+        # Clears what a run that raised may have left, such as the failure that makes every call fail fast.
         self.client.take_stats()
         self._requests.take()
         try:
@@ -131,27 +130,17 @@ class FirewallPoller:
         if due:
             busy = self._busy()
             # The jobs check is the run's first call: if it fails to reach the firewall, the whole run is cut off.
-            if self.client.timed_out:
-                outcome = CollectorRun(timed_out=[JOBS_CHECK], skipped=due)
-            elif self.client.unreachable:
-                outcome = CollectorRun(refused=[JOBS_CHECK], skipped=due)
+            if self.client.unreachable is not None:
+                outcome = CollectorRun(unreachable=[JOBS_CHECK], skipped=due)
             elif not busy:
                 outcome = self._collect(due)
         # Also when a collector caught the exception itself, so no name was recorded.
-        if self.client.timed_out:
+        if (reason := self.client.unreachable) is not None:
             self.log.warning(
-                'pan_firewall %s: %s timed out after %gs; skipped for this run: %s',
+                'pan_firewall %s: could not reach the firewall (%s) during %s; skipped for this run: %s',
                 self.ip,
-                ', '.join(outcome.timed_out) or 'a call',
-                self.config.timeout,
-                ', '.join(outcome.skipped) or 'none',
-            )
-        elif (connection_error := self.client.connection_error) is not None:
-            self.log.warning(
-                'pan_firewall %s: %s failed (%s); skipped for this run: %s',
-                self.ip,
-                ', '.join(outcome.refused) or 'a call',
-                connection_error,
+                reason,
+                ', '.join(outcome.unreachable) or 'a call',
                 ', '.join(outcome.skipped) or 'none',
             )
         # Skipped collectors, and every collector of a busy run, stay due, so they run first thing next run.
@@ -201,7 +190,7 @@ class FirewallPoller:
         A busy firewall is skipped for at most COMMIT_SKIP_MAX_SECONDS of continuous skipping; after that it is
         collected anyway while the same busy period lasts, with one warning. A jobs check that fails does not block
         collection, and is warned about once per episode: on the first failure after a jobs check that answered.
-        A timeout or a refused connection returns False; `run()` cuts the run off.
+        A call that cannot reach the firewall returns False; `run()` cuts the run off.
         """
         try:
             jobs = busy_jobs(self.client)
@@ -250,26 +239,23 @@ class FirewallPoller:
             self._refresh_identity()
             outcome.ran.append(IDENTITY)
             # The jobs check answered, so a failure to reach the firewall now is the identity's.
-            if self.client.timed_out:
-                outcome.timed_out.append(IDENTITY)
-            elif self.client.unreachable:
-                outcome.refused.append(IDENTITY)
+            if self.client.unreachable is not None:
+                outcome.unreachable.append(IDENTITY)
         collectors = [name for name in due if name in COLLECT_FUNCTIONS]
-        if outcome.timed_out or outcome.refused:
+        if outcome.unreachable:
             outcome.skipped = collectors
         # Without an identity, metrics could not carry the device tags: leave the collectors due for the next run.
         elif self.identity is not None and collectors:
             collected = self.run_collectors(collectors, self.identity)
             outcome.ran.extend(collected.ran)
-            outcome.timed_out.extend(collected.timed_out)
-            outcome.refused.extend(collected.refused)
+            outcome.unreachable.extend(collected.unreachable)
             outcome.skipped = collected.skipped
         return outcome
 
     def run_collectors(self, names: Iterable[str], identity: DeviceIdentity) -> CollectorRun:
         """Run the named collectors, `COLLECTOR_WORKERS` at a time, and submit their samples.
 
-        Once a call times out or cannot connect, collectors not started yet are skipped, and the client fails every
+        Once a call cannot reach the firewall, collectors not started yet are skipped, and the client fails every
         later call at once: a hung firewall costs one timeout per call in flight. A collector whose call failed that
         way is skipped too, and stays due. A collector failing, or returning a sample that
         cannot be submitted, is logged and does not stop the others.
@@ -305,10 +291,8 @@ class FirewallPoller:
             except PanosSkipped:
                 outcome.skipped.append(name)
                 continue
-            except PanosTimeout:
-                outcome.timed_out.append(name)
-            except PanosConnectionError:
-                outcome.refused.append(name)
+            except PanosUnreachable:
+                outcome.unreachable.append(name)
             except PanosError as e:
                 self.log.warning('pan_firewall %s: collector %s failed: %s', self.ip, name, e)
             except Exception as e:
@@ -319,7 +303,7 @@ class FirewallPoller:
 
     def _run_collector(self, name: str, ctx: CollectContext) -> list[Sample] | None:
         """Run one collector, or return None without starting it once a call has failed to reach the firewall."""
-        if self.client.unreachable:
+        if self.client.unreachable is not None:
             return None
         return COLLECT_FUNCTIONS[name](ctx)
 

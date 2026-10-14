@@ -6,6 +6,7 @@ import threading
 from typing import Any
 
 import pytest
+import requests
 from urllib3.exceptions import ProtocolError
 
 from datadog_checks.dev.http import MockResponse
@@ -13,11 +14,11 @@ from datadog_checks.pan_firewall.api import (
     PanosApiError,
     PanosAuthError,
     PanosClient,
-    PanosConnectionError,
     PanosError,
     PanosSkipped,
-    PanosTimeout,
+    PanosUnreachable,
     api_url,
+    transport_errors,
 )
 from datadog_checks.pan_firewall.auth import Credentials, KeyManager
 
@@ -142,7 +143,7 @@ def test_key_never_leaks_into_urls_logs_or_errors(caplog):
         except PanosError as e:
             errors.append(e)
 
-    assert [type(e) for e in errors] == [PanosAuthError, PanosConnectionError]
+    assert [type(e) for e in errors] == [PanosAuthError, PanosUnreachable]
     # The retry after the first rejection carries the renewed key.
     assert [c['extra_headers']['X-PAN-KEY'] for c in http.calls_of('api')][4:6] == [KEY_1, KEY_2]
     for call in http.calls:
@@ -278,31 +279,43 @@ def test_static_key_is_never_regenerated():
     assert http.calls[0]['extra_headers'] == {'X-PAN-KEY': STATIC_KEY}
 
 
-@pytest.mark.parametrize(
-    'raised, expected, message',
-    [
-        pytest.param(TRANSPORT_ERRORS['timeout'], PanosTimeout, 'timed out', id='timeout'),
-        # ConnectTimeout is both a Timeout and a ConnectionError: it is a timeout.
-        pytest.param(TRANSPORT_ERRORS['connect_timeout'], PanosTimeout, 'timed out', id='connect-timeout'),
-        pytest.param(
-            TRANSPORT_ERRORS['refused'],
-            PanosConnectionError,
-            'cannot connect',
-            id='refused',
-        ),
-        pytest.param(TRANSPORT_ERRORS['tls'], PanosConnectionError, 'TLS error', id='tls'),
-    ],
-)
-def test_transport_errors_are_typed_and_name_the_host(raised, expected, message):
+@pytest.mark.parametrize('failure', ['timeout', 'refused', 'tls'])
+def test_transport_errors_are_unreachable_and_keep_the_original_text(failure):
+    raised = TRANSPORT_ERRORS[failure]
     http = FakeHttp(api=[raised])
     client, _ = make_client(http, STATIC_CREDS)
 
-    with pytest.raises(expected) as exc_info:
+    with pytest.raises(PanosUnreachable) as exc_info:
         client.op(SYSTEM_INFO_CMD)
 
-    assert type(exc_info.value) is expected
-    assert message in str(exc_info.value)
-    assert HOST in str(exc_info.value)
+    assert type(exc_info.value) is PanosUnreachable
+    assert str(exc_info.value) == f'could not reach {HOST}: {raised}'
+    assert client.unreachable == str(raised)
+
+
+@pytest.mark.parametrize(
+    'error_type, message',
+    [
+        pytest.param(requests.exceptions.ReadTimeout, 'Read timed out. (read timeout=30)', id='read-timeout'),
+        pytest.param(
+            requests.exceptions.ConnectTimeout, 'Connect timed out. (connect timeout=30)', id='connect-timeout'
+        ),
+        pytest.param(requests.exceptions.ConnectionError, 'Connection refused', id='refused'),
+        pytest.param(requests.exceptions.SSLError, 'certificate verify failed', id='tls'),
+    ],
+)
+def test_requests_exceptions_are_unreachable_without_the_key(error_type, message):
+    # The `requests` exception holds the prepared request, whose headers carry the key.
+    request = requests.Request('POST', URL, headers={'X-PAN-KEY': STATIC_KEY}).prepare()
+
+    with pytest.raises(PanosUnreachable) as exc_info, transport_errors(URL):
+        raise error_type(message, request=request)
+
+    error = exc_info.value
+    assert type(error) is PanosUnreachable
+    assert str(error) == f'could not reach {HOST}: {message}'
+    assert STATIC_KEY not in str(error) and STATIC_KEY not in repr(error)
+    assert error.__cause__ is None and error.__suppress_context__
 
 
 def read_log_job(client, job_id):
@@ -316,13 +329,13 @@ def read_log_job(client, job_id):
         pytest.param(
             lambda client: client.op(SYSTEM_INFO_CMD),
             TRANSPORT_ERRORS['timeout'],
-            PanosTimeout,
+            PanosUnreachable,
             id='op-timeout',
         ),
         pytest.param(
             lambda client: read_log_job(client, '2'),
             TRANSPORT_ERRORS['refused'],
-            PanosConnectionError,
+            PanosUnreachable,
             id='log-job-refused',
         ),
     ],
@@ -359,7 +372,7 @@ def test_stream_that_breaks_mid_way_makes_the_next_calls_fail_fast():
     http = FakeHttp(api=[resp, (200, SYSTEM_INFO)])
     client, _ = make_client(http, STATIC_CREDS)
 
-    with pytest.raises(PanosConnectionError), client.open_log_job('2') as (_, entries):
+    with pytest.raises(PanosUnreachable), client.open_log_job('2') as (_, entries):
         assert next(entries).findtext('seqno')
         next(entries)
 

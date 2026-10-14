@@ -10,7 +10,7 @@ from datadog_checks.pan_firewall import constants
 from datadog_checks.pan_firewall.collectors import CollectContext, FirewallState
 from datadog_checks.pan_firewall.collectors.reports import collect_reports, parse_report, report_params
 from datadog_checks.pan_firewall.constants import REPORTS
-from datadog_checks.pan_firewall.errors import PanosApiError, PanosTimeout
+from datadog_checks.pan_firewall.errors import PanosApiError, PanosUnreachable
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from ..common import FW_A_TAGS, SYNTHETIC
@@ -164,7 +164,7 @@ class ScriptedClient:
     captures.
 
     `act_polls` maps a report field to how many polls of each of its jobs answer ACT before FIN (a huge number never
-    finishes), `failing` lists the fields whose jobs answer FAIL, and `timeout` makes every poll raise PanosTimeout.
+    finishes), `failing` lists the fields whose jobs answer FAIL, and `timeout` makes every poll raise PanosUnreachable.
     """
 
     def __init__(self, act_polls=None, failing=(), firewall='fw-a'):
@@ -188,7 +188,7 @@ class ScriptedClient:
     def get_job(self, job_type, job_id):
         assert job_type == 'report'
         if self.timeout:
-            raise PanosTimeout('slow')
+            raise PanosUnreachable('slow')
         field = self._fields[job_id]
         if field in self.erroring:
             raise PanosApiError('400', 'bad job')
@@ -321,7 +321,7 @@ def test_a_timeout_polling_a_carried_job_keeps_it_for_the_next_run():
     carried = state.reports.pending
     client.timeout = True
 
-    with pytest.raises(PanosTimeout):
+    with pytest.raises(PanosUnreachable):
         collect_reports(make_context(client, state))
 
     assert state.reports.pending is carried
@@ -364,10 +364,10 @@ def test_an_api_error_polling_a_new_job_keeps_the_samples_already_gathered():
 
 def test_a_timeout_submitting_a_job_propagates():
     client = mock.Mock()
-    client.submit_job.side_effect = PanosTimeout('slow')
+    client.submit_job.side_effect = PanosUnreachable('slow')
     state = FirewallState()
 
-    with pytest.raises(PanosTimeout):
+    with pytest.raises(PanosUnreachable):
         collect_reports(make_context(client, state))
 
     assert state.reports.pending is None

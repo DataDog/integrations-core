@@ -27,19 +27,16 @@ class PanosAuthError(PanosApiError):
 
 
 class PanosUnreachable(PanosError):
-    """A call did not get to PAN-OS: it timed out, could not connect, or was not made because an earlier one failed so.
+    """A call did not get to PAN-OS: a timeout, a refused connection, DNS, TLS or a broken stream, all alike.
 
-    The rest of the run is cut off: `PanosClient` fails every later call at once, with `PanosSkipped`.
+    `reason` is the text of the underlying error, which says which it was (for example "Read timed out. (read
+    timeout=30)"). The rest of the run is cut off: `PanosClient` fails every later call at once, with `PanosSkipped`.
     """
 
-
-class PanosTimeout(PanosUnreachable):
-    """A call to PAN-OS did not answer within the configured timeout."""
-
-
-class PanosConnectionError(PanosUnreachable):
-    """PAN-OS could not be reached: connection refused, DNS, TLS handshake, or a broken stream."""
+    def __init__(self, msg: str, reason: str = ''):
+        super().__init__(msg)
+        self.reason = reason
 
 
 class PanosSkipped(PanosUnreachable):
-    """A call that was not made, because an earlier call of the run timed out or could not connect."""
+    """A call that was not made, because an earlier call of the run could not reach the device."""
