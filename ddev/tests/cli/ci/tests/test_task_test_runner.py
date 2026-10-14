@@ -199,7 +199,9 @@ async def test_healthy_attempts_report_zero_operation_failures(tmp_path: Path):
         "collect_artifacts": 0,
     }
     assert {record.tags['dispatcher.component'] for record in sink.records_named('operations.count')} == {'test-runner'}
-    assert [record.kind.value for record in sink.records_named('artifacts.download.duration')] == ['distribution']
+    durations = sink.records_named('operation.duration')
+    assert [record.kind.value for record in durations] == ['distribution'] * sum(counted.values())
+    assert {record.tags['dispatcher.operation.result'] for record in durations} == {'success'}
 
 
 async def test_polling_intervals_are_measured_between_polls_of_the_same_batch(
@@ -350,6 +352,50 @@ async def test_a_jobs_listing_not_yet_visible_after_dispatch_is_retried(
     assert failed_by_operation(sink) == {"refresh_jobs": 0}
 
 
+async def test_a_workflow_run_not_yet_visible_after_dispatch_is_retried(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    advance_clock_on_sleep(FakeClock(), monkeypatch)
+    responses = [
+        httpx.Response(404),
+        httpx.Response(200, json=make_workflow_run().model_dump(mode="json")),
+        httpx.Response(200, json=make_workflow_jobs_list([make_workflow_job(name="j1")]).model_dump(mode="json")),
+    ]
+    client = AsyncGitHubClient("token", transport=httpx.MockTransport(lambda request: responses.pop(0)))
+    monitoring, sink = recording_runtime()
+    runner = make_runner(client, tmp_path, monitor=monitoring.component("test-runner"))  # type: ignore[arg-type]
+
+    try:
+        run, jobs = await runner._poll_until_complete(make_batch(), 123)
+    finally:
+        await client.aclose()
+
+    assert run.data.id == 123
+    assert [job.name for job in jobs] == ["j1"]
+    assert failed_by_operation(sink) == {"fetch_workflow": 0, "refresh_jobs": 0}
+
+
+@pytest.mark.parametrize("status_code, attempts", [(404, 3), (403, 1)], ids=["not-found", "forbidden"])
+async def test_a_workflow_run_read_failure_stops_after_its_retry_budget(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, status_code: int, attempts: int
+):
+    advance_clock_on_sleep(FakeClock(), monkeypatch)
+    responses = [httpx.Response(status_code) for _ in range(attempts)]
+    client = AsyncGitHubClient("token", transport=httpx.MockTransport(lambda request: responses.pop(0)))
+    monitoring, sink = recording_runtime()
+    runner = make_runner(client, tmp_path, monitor=monitoring.component("test-runner"))  # type: ignore[arg-type]
+
+    try:
+        with pytest.raises(httpx.HTTPStatusError) as exc_info:
+            await runner._poll_until_complete(make_batch(), 123)
+    finally:
+        await client.aclose()
+
+    assert exc_info.value.response.status_code == status_code
+    assert responses == []
+    assert failed_by_operation(sink) == {"fetch_workflow": 1}
+
+
 async def test_a_dispatch_github_refuses_fails_the_dispatch_operation_only(tmp_path: Path):
     client = FakeAsyncGitHubClient()
     client.mock_response("create_workflow_dispatch", RuntimeError("dispatch refused"))
@@ -397,15 +443,9 @@ async def test_collection_publishes_outcomes_before_a_cancellable_artifact_reque
         with pytest.raises(asyncio.CancelledError):
             await task
 
-    # A cancelled download never settled, so it counts as no operation outcome at all, but the
-    # time it took is still reported.
-    settled = [
-        record
-        for record in sink.records_named("operations.count")
-        if record.tags["dispatcher.operation"] == "collect_artifacts"
-    ]
-    assert settled == []
-    assert [record.kind for record in sink.records_named("artifacts.download.duration")] == [MetricKind.DISTRIBUTION]
+    # A cancelled download never settled, so the collection produced no outcome at all.
+    collected = [record for record in sink.records if record.tags.get("dispatcher.operation") == "collect_artifacts"]
+    assert collected == []
 
     await runner.cancel_dispatched_runs()
     assert client.calls_to("cancel_workflow_run") == []
@@ -1348,7 +1388,13 @@ async def test_process_message_emits_batch_finished_when_listing_artifacts_fails
         "refresh_jobs": 0,
         "collect_artifacts": 1,
     }
-    assert [record.kind for record in sink.records_named("artifacts.download.duration")] == [MetricKind.DISTRIBUTION]
+    [duration] = [
+        record
+        for record in sink.records_named("operation.duration")
+        if record.tags["dispatcher.operation"] == "collect_artifacts"
+    ]
+    assert duration.kind is MetricKind.DISTRIBUTION
+    assert duration.tags["dispatcher.operation.result"] == "failure"
     [warning] = [event for event in handler.events if event.get("operation") == "collect_artifacts"]
     assert warning["level"] == "warning"
     assert warning["event"] == "Failed to list workflow run artifacts"
@@ -1382,11 +1428,18 @@ async def test_download_failure_for_one_artifact_does_not_abort_others(tmp_path:
     assert len(submitted) == 1
     assert submitted[0].status == "success"
     assert failed_by_operation(sink)["collect_artifacts"] == 1
-    assert [record.kind for record in sink.records_named("artifacts.download.duration")] == [MetricKind.DISTRIBUTION]
+    [duration] = [
+        record
+        for record in sink.records_named("operation.duration")
+        if record.tags["dispatcher.operation"] == "collect_artifacts"
+    ]
+    assert duration.kind is MetricKind.DISTRIBUTION
+    assert duration.tags["dispatcher.operation.result"] == "failure"
     [warning] = [event for event in handler.events if event.get("operation") == "collect_artifacts"]
     assert warning["level"] == "warning"
     assert warning["event"] == "Failed to download 1 artifact for workflow run 123"
-    assert warning["failure_count"] == 1
+    [failure] = warning["operation_failures"]
+    assert failure["failure_count"] == 1
 
 
 # ---------------------------------------------------------------------------
@@ -1543,19 +1596,18 @@ async def test_every_validation_error_is_logged_once_with_its_field(tmp_path: Pa
     assert "WorkflowJobsList" in reason
     assert "See logs for details." in reason
     assert exc_info.value.__cause__ is unparsable
-    [invalid] = [event for event in handler.events if event['event'].startswith('Invalid GitHub response while')]
-    assert invalid['level'] == 'error'
-    assert invalid['operation'] == 'refresh_jobs'
-    assert invalid['component'] == 'test-runner'
-    log_text = '\n'.join(event['event'] for event in handler.events)
-    assert "listing workflow jobs" in log_text
-    assert "batch-err" in log_text
-    assert "run 123" in log_text
-    assert log_text.count("jobs.0.steps.1.status") == 1
-    assert "paused" in log_text
-    assert "Input should be 'queued', 'in_progress', 'completed' or 'pending'" in log_text
-    assert log_text.count("jobs.2.id") == 1
-    assert "Field required" in log_text
+    # The settle line is the operation's only log line; the validation detail rides in its traceback.
+    [line] = [event for event in handler.events if event.get("operation") == "refresh_jobs"]
+    assert line["event"] == "Invalid GitHub response while listing workflow jobs (batch batch-err, run 123)"
+    assert line["level"] == "error"
+    assert line["component"] == "test-runner"
+    assert line["operation_result"] == "failure"
+    traceback = line["exception"]
+    assert traceback.count("jobs.0.steps.1.status") == 1
+    assert "paused" in traceback
+    assert "Input should be 'queued', 'in_progress', 'completed' or 'pending'" in traceback
+    assert traceback.count("jobs.2.id") == 1
+    assert "Field required" in traceback
 
 
 # ---------------------------------------------------------------------------
