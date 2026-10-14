@@ -57,7 +57,7 @@
           {
             "definition": {
               "type": "note",
-              "content": "## Cisco Catalyst Center\n\nThis drill-down companion to the [Cisco Catalyst Center Overview](/dash/integration/Cisco%20Catalyst%20Center%20Overview) dashboard shows which devices are unhealthy or short on resources, which interfaces are down or erroring, and where throughput goes, especially on uplinks. The stack, PoE, and AP radio groups stay empty until their collectors are enabled.\n\n**Filters:** `catalyst_center_host` and `device_ip` scope every widget. `site_hierarchy` also narrows device and interface widgets, except the per-device throughput and uplink rollups and the stack widgets. `device_family` narrows device and AP radio widgets only.\n\n**Useful links**\n- [Integration docs](https://docs.datadoghq.com/integrations/cisco_catalyst_center/)\n- [Integration tile](/integrations/cisco-catalyst-center)\n- [Cisco Catalyst Center](https://www.cisco.com/site/us/en/products/networking/catalyst-center/index.html)",
+              "content": "## Cisco Catalyst Center\n\nThis drill-down companion to the [Cisco Catalyst Center Overview](/dash/integration/Cisco%20Catalyst%20Center%20Overview) dashboard shows which devices are unhealthy or short on resources, which interfaces are down or erroring, and where throughput goes, especially on uplinks. The stack, PoE, and AP radio groups stay empty until their collectors are enabled.\n\n**Filters:** `catalyst_center_host` and `device_ip` scope every widget, `site_hierarchy` every widget except the stack widgets, and `device_family` the device, throughput, and wireless widgets.\n\n**Reading the numbers:** single values, lists, and tables show the latest reading unless the title or column says avg or peak, which cover the time frame.\n\n**Useful links**\n- [Integration docs](https://docs.datadoghq.com/integrations/cisco_catalyst_center/)\n- [Integration tile](/integrations/cisco-catalyst-center)\n- [Cisco Catalyst Center](https://www.cisco.com/site/us/en/products/networking/catalyst-center/index.html)",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -202,7 +202,7 @@
           },
           {
             "definition": {
-              "title": "Highest memory utilization",
+              "title": "Unreachable devices",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
@@ -212,37 +212,32 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "max:cisco_catalyst_center.device.memory.utilization{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy}",
+                      "query": "min:cisco_catalyst_center.device.reachable{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy} by {device_uuid}",
                       "aggregator": "last"
                     }
                   ],
                   "response_format": "scalar",
                   "formulas": [
                     {
-                      "formula": "query1"
+                      "formula": "count_nonzero(1 - query1)"
                     }
                   ],
                   "conditional_formats": [
                     {
                       "comparator": ">",
-                      "value": 80,
+                      "value": 0,
                       "palette": "white_on_red"
                     },
                     {
-                      "comparator": ">",
-                      "value": 70,
-                      "palette": "white_on_yellow"
-                    },
-                    {
                       "comparator": "<=",
-                      "value": 70,
+                      "value": 0,
                       "palette": "white_on_green"
                     }
                   ]
                 }
               ],
               "autoscale": true,
-              "precision": 1,
+              "precision": 0,
               "timeseries_background": {
                 "type": "bars",
                 "yaxis": {
@@ -321,7 +316,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "min:cisco_catalyst_center.interface.status{$catalyst_center_host,$device_ip,$site_hierarchy,uplink:true} by {device_ip,interface}",
+                      "query": "min:cisco_catalyst_center.interface.status{$catalyst_center_host,$device_ip,$site_hierarchy,uplink:true} by {device_ip,interface}.rollup(min)",
                       "aggregator": "last"
                     }
                   ],
@@ -434,12 +429,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:cisco_catalyst_center.device.uplink.throughput.rx{$catalyst_center_host,$device_ip}"
+                      "query": "sum:cisco_catalyst_center.device.uplink.throughput.rx{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:cisco_catalyst_center.device.uplink.throughput.tx{$catalyst_center_host,$device_ip}"
+                      "query": "sum:cisco_catalyst_center.device.uplink.throughput.tx{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -458,7 +453,7 @@
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "area"
+                  "display_type": "line"
                 }
               ]
             },
@@ -489,7 +484,7 @@
           {
             "definition": {
               "type": "note",
-              "content": "Health is Catalyst Center's composite score from 1 to 10: 8 to 10 is good, 4 to 7 fair, and 1 to 3 poor. Start with the lowest health, then check the component scores to see what pulls it down. A blank cell means no value was reported, not zero.",
+              "content": "Health is Catalyst Center's composite score from 1 to 10: 8 to 10 is good, 4 to 7 fair, and 1 to 3 poor. Start with the lowest health, then check the component scores to see what pulls it down. A blank cell means no value was reported, not zero: an unreachable device reports only Reachable, so it has no health to rank by.",
               "background_color": "green",
               "font_size": "14",
               "text_align": "left",
@@ -524,7 +519,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "min:cisco_catalyst_center.device.reachable{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy} by {device_name,device_ip,device_family}",
+                      "query": "min:cisco_catalyst_center.device.reachable{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy} by {device_name,device_ip,device_family}.rollup(min)",
                       "aggregator": "last"
                     },
                     {
@@ -1096,7 +1091,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "max:cisco_catalyst_center.device.temperature.max{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy} by {device_name}"
+                      "query": "max:cisco_catalyst_center.device.temperature.max{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy} by {device_name}.rollup(max)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1522,7 +1517,7 @@
                     "line_type": "solid",
                     "line_width": "normal"
                   },
-                  "display_type": "bars"
+                  "display_type": "line"
                 }
               ]
             },
@@ -1700,13 +1695,13 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "min:cisco_catalyst_center.interface.status{$catalyst_center_host,$device_ip,$site_hierarchy} by {device_ip,interface}",
+                      "query": "min:cisco_catalyst_center.interface.status{$catalyst_center_host,$device_ip,$site_hierarchy} by {device_ip,interface}.rollup(min)",
                       "aggregator": "last"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "min:cisco_catalyst_center.interface.admin_status{$catalyst_center_host,$device_ip,$site_hierarchy} by {device_ip,interface}",
+                      "query": "min:cisco_catalyst_center.interface.admin_status{$catalyst_center_host,$device_ip,$site_hierarchy} by {device_ip,interface}.rollup(min)",
                       "aggregator": "last"
                     },
                     {
@@ -1799,7 +1794,7 @@
           {
             "definition": {
               "type": "note",
-              "content": "Values are percentages of packets, not counts. Errors usually mean cabling, optics, or duplex faults; discards usually mean congestion.",
+              "content": "Percentages of packets; the table shows each interface's peak in the time frame. Errors point to cabling, optics, or duplex faults; discards above 1% to congestion.",
               "background_color": "orange",
               "font_size": "14",
               "text_align": "left",
@@ -1837,22 +1832,22 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "max:cisco_catalyst_center.interface.rx.error{$catalyst_center_host,$device_ip,$site_hierarchy}"
+                      "query": "max:cisco_catalyst_center.interface.rx.error{$catalyst_center_host,$device_ip,$site_hierarchy}.rollup(max)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "max:cisco_catalyst_center.interface.tx.error{$catalyst_center_host,$device_ip,$site_hierarchy}"
+                      "query": "max:cisco_catalyst_center.interface.tx.error{$catalyst_center_host,$device_ip,$site_hierarchy}.rollup(max)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "max:cisco_catalyst_center.interface.rx.discard{$catalyst_center_host,$device_ip,$site_hierarchy}"
+                      "query": "max:cisco_catalyst_center.interface.rx.discard{$catalyst_center_host,$device_ip,$site_hierarchy}.rollup(max)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "max:cisco_catalyst_center.interface.tx.discard{$catalyst_center_host,$device_ip,$site_hierarchy}"
+                      "query": "max:cisco_catalyst_center.interface.tx.discard{$catalyst_center_host,$device_ip,$site_hierarchy}.rollup(max)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1917,25 +1912,25 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "max:cisco_catalyst_center.interface.rx.error{$catalyst_center_host,$device_ip,$site_hierarchy} by {device_ip,interface}",
+                      "query": "max:cisco_catalyst_center.interface.rx.error{$catalyst_center_host,$device_ip,$site_hierarchy} by {device_ip,interface}.rollup(max)",
                       "aggregator": "max"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "max:cisco_catalyst_center.interface.tx.error{$catalyst_center_host,$device_ip,$site_hierarchy} by {device_ip,interface}",
+                      "query": "max:cisco_catalyst_center.interface.tx.error{$catalyst_center_host,$device_ip,$site_hierarchy} by {device_ip,interface}.rollup(max)",
                       "aggregator": "max"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "max:cisco_catalyst_center.interface.rx.discard{$catalyst_center_host,$device_ip,$site_hierarchy} by {device_ip,interface}",
+                      "query": "max:cisco_catalyst_center.interface.rx.discard{$catalyst_center_host,$device_ip,$site_hierarchy} by {device_ip,interface}.rollup(max)",
                       "aggregator": "max"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "max:cisco_catalyst_center.interface.tx.discard{$catalyst_center_host,$device_ip,$site_hierarchy} by {device_ip,interface}",
+                      "query": "max:cisco_catalyst_center.interface.tx.discard{$catalyst_center_host,$device_ip,$site_hierarchy} by {device_ip,interface}.rollup(max)",
                       "aggregator": "max"
                     }
                   ],
@@ -1943,41 +1938,41 @@
                   "formulas": [
                     {
                       "formula": "query1",
-                      "alias": "RX errors",
+                      "alias": "Peak RX errors",
                       "cell_display_mode": "number",
                       "conditional_formats": [
                         {
                           "comparator": ">",
-                          "value": 5,
+                          "value": 1,
                           "palette": "white_on_red"
                         },
                         {
                           "comparator": ">",
-                          "value": 1,
+                          "value": 0,
                           "palette": "white_on_yellow"
                         }
                       ]
                     },
                     {
                       "formula": "query2",
-                      "alias": "TX errors",
+                      "alias": "Peak TX errors",
                       "cell_display_mode": "number",
                       "conditional_formats": [
                         {
                           "comparator": ">",
-                          "value": 5,
+                          "value": 1,
                           "palette": "white_on_red"
                         },
                         {
                           "comparator": ">",
-                          "value": 1,
+                          "value": 0,
                           "palette": "white_on_yellow"
                         }
                       ]
                     },
                     {
                       "formula": "query3",
-                      "alias": "RX discards",
+                      "alias": "Peak RX discards",
                       "cell_display_mode": "number",
                       "conditional_formats": [
                         {
@@ -1994,7 +1989,7 @@
                     },
                     {
                       "formula": "query4",
-                      "alias": "TX discards",
+                      "alias": "Peak TX discards",
                       "cell_display_mode": "number",
                       "conditional_formats": [
                         {
@@ -2070,7 +2065,7 @@
           },
           {
             "definition": {
-              "title": "Busiest devices",
+              "title": "Busiest devices by avg throughput",
               "title_size": "16",
               "title_align": "left",
               "type": "toplist",
@@ -2080,13 +2075,13 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:cisco_catalyst_center.device.throughput.rx{$catalyst_center_host,$device_ip} by {device_ip}",
+                      "query": "avg:cisco_catalyst_center.device.throughput.rx{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy} by {device_name}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:cisco_catalyst_center.device.throughput.tx{$catalyst_center_host,$device_ip} by {device_ip}",
+                      "query": "avg:cisco_catalyst_center.device.throughput.tx{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy} by {device_name}",
                       "aggregator": "avg"
                     }
                   ],
@@ -2094,7 +2089,14 @@
                   "formulas": [
                     {
                       "formula": "query1 + query2",
-                      "alias": "Throughput"
+                      "alias": "Avg throughput",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "bit",
+                          "per_unit_name": "second"
+                        }
+                      }
                     }
                   ],
                   "sort": {
@@ -2125,7 +2127,7 @@
           },
           {
             "definition": {
-              "title": "Busiest interfaces",
+              "title": "Busiest interfaces by avg throughput",
               "title_size": "16",
               "title_align": "left",
               "type": "toplist",
@@ -2149,7 +2151,14 @@
                   "formulas": [
                     {
                       "formula": "query1 + query2",
-                      "alias": "Throughput"
+                      "alias": "Avg throughput",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "bit",
+                          "per_unit_name": "second"
+                        }
+                      }
                     }
                   ],
                   "sort": {
@@ -2360,7 +2369,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:cisco_catalyst_center.device.uplink.throughput.rx{$catalyst_center_host,$device_ip} by {device_ip}"
+                      "query": "avg:cisco_catalyst_center.device.uplink.throughput.rx{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy} by {device_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2407,7 +2416,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:cisco_catalyst_center.device.uplink.throughput.tx{$catalyst_center_host,$device_ip} by {device_ip}"
+                      "query": "avg:cisco_catalyst_center.device.uplink.throughput.tx{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy} by {device_name}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2445,31 +2454,31 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:cisco_catalyst_center.device.uplink.count{$catalyst_center_host,$device_ip} by {device_ip}",
+                      "query": "avg:cisco_catalyst_center.device.uplink.count{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy} by {device_name,device_ip}",
                       "aggregator": "last"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:cisco_catalyst_center.device.uplink.throughput.rx{$catalyst_center_host,$device_ip} by {device_ip}",
+                      "query": "avg:cisco_catalyst_center.device.uplink.throughput.rx{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy} by {device_name,device_ip}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "avg:cisco_catalyst_center.device.uplink.throughput.tx{$catalyst_center_host,$device_ip} by {device_ip}",
+                      "query": "avg:cisco_catalyst_center.device.uplink.throughput.tx{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy} by {device_name,device_ip}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "avg:cisco_catalyst_center.device.throughput.rx{$catalyst_center_host,$device_ip} by {device_ip}",
+                      "query": "avg:cisco_catalyst_center.device.throughput.rx{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy} by {device_name,device_ip}",
                       "aggregator": "avg"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query5",
-                      "query": "avg:cisco_catalyst_center.device.throughput.tx{$catalyst_center_host,$device_ip} by {device_ip}",
+                      "query": "avg:cisco_catalyst_center.device.throughput.tx{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy} by {device_name,device_ip}",
                       "aggregator": "avg"
                     }
                   ],
@@ -2482,22 +2491,22 @@
                     },
                     {
                       "formula": "query2",
-                      "alias": "Uplink RX",
+                      "alias": "Avg uplink RX",
                       "cell_display_mode": "number"
                     },
                     {
                       "formula": "query3",
-                      "alias": "Uplink TX",
+                      "alias": "Avg uplink TX",
                       "cell_display_mode": "number"
                     },
                     {
                       "formula": "query4",
-                      "alias": "Device RX",
+                      "alias": "Avg device RX",
                       "cell_display_mode": "number"
                     },
                     {
                       "formula": "query5",
-                      "alias": "Device TX",
+                      "alias": "Avg device TX",
                       "cell_display_mode": "number"
                     }
                   ],
@@ -2534,7 +2543,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "min:cisco_catalyst_center.interface.status{$catalyst_center_host,$device_ip,$site_hierarchy,uplink:true} by {device_ip,interface}",
+                      "query": "min:cisco_catalyst_center.interface.status{$catalyst_center_host,$device_ip,$site_hierarchy,uplink:true} by {device_ip,interface}.rollup(min)",
                       "aggregator": "last"
                     },
                     {
@@ -2582,7 +2591,7 @@
                     },
                     {
                       "formula": "query3",
-                      "alias": "RX utilization",
+                      "alias": "Avg RX utilization",
                       "cell_display_mode": "number",
                       "conditional_formats": [
                         {
@@ -2599,7 +2608,7 @@
                     },
                     {
                       "formula": "query4",
-                      "alias": "TX utilization",
+                      "alias": "Avg TX utilization",
                       "cell_display_mode": "number",
                       "conditional_formats": [
                         {
@@ -2783,22 +2792,22 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "min:cisco_catalyst_center.device.free_timer.score{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy}"
+                      "query": "min:cisco_catalyst_center.device.free_timer.score{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy}.rollup(min)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "min:cisco_catalyst_center.device.packet_pool.score{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy}"
+                      "query": "min:cisco_catalyst_center.device.packet_pool.score{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy}.rollup(min)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "min:cisco_catalyst_center.device.free_memory_buffer.score{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy}"
+                      "query": "min:cisco_catalyst_center.device.free_memory_buffer.score{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy}.rollup(min)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "min:cisco_catalyst_center.device.wqe_pool.score{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy}"
+                      "query": "min:cisco_catalyst_center.device.wqe_pool.score{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy}.rollup(min)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3036,22 +3045,22 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "min:cisco_catalyst_center.device.air_quality.score{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy}"
+                      "query": "min:cisco_catalyst_center.device.air_quality.score{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy}.rollup(min)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "min:cisco_catalyst_center.device.interference.score{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy}"
+                      "query": "min:cisco_catalyst_center.device.interference.score{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy}.rollup(min)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "min:cisco_catalyst_center.device.noise.score{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy}"
+                      "query": "min:cisco_catalyst_center.device.noise.score{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy}.rollup(min)"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query4",
-                      "query": "min:cisco_catalyst_center.device.utilization.score{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy}"
+                      "query": "min:cisco_catalyst_center.device.utilization.score{$catalyst_center_host,$device_ip,$device_family,$site_hierarchy}.rollup(min)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -3154,7 +3163,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "min:cisco_catalyst_center.device.stack.member.state{$catalyst_center_host,$device_ip} by {device_uuid,stack_member}",
+                      "query": "min:cisco_catalyst_center.device.stack.member.state{$catalyst_center_host,$device_ip} by {device_uuid,stack_member}.rollup(min)",
                       "aggregator": "last"
                     }
                   ],
@@ -3206,7 +3215,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "min:cisco_catalyst_center.device.stack.port.status{$catalyst_center_host,$device_ip} by {device_uuid,stack_port}",
+                      "query": "min:cisco_catalyst_center.device.stack.port.status{$catalyst_center_host,$device_ip} by {device_uuid,stack_port}.rollup(min)",
                       "aggregator": "last"
                     }
                   ],
@@ -3248,7 +3257,7 @@
           },
           {
             "definition": {
-              "title": "Member count change",
+              "title": "Member count change vs a day ago",
               "title_size": "16",
               "title_align": "left",
               "type": "change",
@@ -3296,7 +3305,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "min:cisco_catalyst_center.device.stack.member.state{$catalyst_center_host,$device_ip} by {device_name,stack_member}",
+                      "query": "min:cisco_catalyst_center.device.stack.member.state{$catalyst_center_host,$device_ip} by {device_name,stack_member}.rollup(min)",
                       "aggregator": "last"
                     },
                     {
@@ -3364,7 +3373,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "min:cisco_catalyst_center.device.stack.port.status{$catalyst_center_host,$device_ip} by {device_name,stack_port}",
+                      "query": "min:cisco_catalyst_center.device.stack.port.status{$catalyst_center_host,$device_ip} by {device_name,stack_port}.rollup(min)",
                       "aggregator": "last"
                     }
                   ],
@@ -3798,7 +3807,7 @@
           },
           {
             "definition": {
-              "title": "Highest channel utilization",
+              "title": "Highest avg channel utilization",
               "title_size": "16",
               "title_align": "left",
               "type": "toplist",
@@ -3816,7 +3825,7 @@
                   "formulas": [
                     {
                       "formula": "query1",
-                      "alias": "Channel utilization"
+                      "alias": "Avg channel utilization"
                     }
                   ],
                   "sort": {
@@ -3847,7 +3856,7 @@
           },
           {
             "definition": {
-              "title": "Highest interference",
+              "title": "Highest avg interference",
               "title_size": "16",
               "title_align": "left",
               "type": "toplist",
@@ -3865,7 +3874,7 @@
                   "formulas": [
                     {
                       "formula": "query1",
-                      "alias": "Interference"
+                      "alias": "Avg interference"
                     }
                   ],
                   "sort": {
@@ -3949,27 +3958,27 @@
                     },
                     {
                       "formula": "query2",
-                      "alias": "Channel utilization",
+                      "alias": "Avg channel utilization",
                       "cell_display_mode": "number"
                     },
                     {
                       "formula": "query3",
-                      "alias": "Wi-Fi traffic utilization",
+                      "alias": "Avg Wi-Fi traffic utilization",
                       "cell_display_mode": "number"
                     },
                     {
                       "formula": "query4",
-                      "alias": "Interference",
+                      "alias": "Avg interference",
                       "cell_display_mode": "number"
                     },
                     {
                       "formula": "query5",
-                      "alias": "Air quality",
+                      "alias": "Avg air quality",
                       "cell_display_mode": "number"
                     },
                     {
                       "formula": "query6",
-                      "alias": "Noise",
+                      "alias": "Avg noise",
                       "cell_display_mode": "number"
                     }
                   ],

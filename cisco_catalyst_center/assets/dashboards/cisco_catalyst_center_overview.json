@@ -833,7 +833,7 @@
           {
             "definition": {
               "type": "note",
-              "content": "Worst first: each list puts the devices that need attention at the top. A device Catalyst Center cannot reach is ranked by its time unreachable, not by a health score. Interface counts are Catalyst Center's own tally per device; for per-interface detail, open the [Devices and Interfaces dashboard](/dash/integration/Cisco%20Catalyst%20Center%20Devices%20and%20Interfaces).",
+              "content": "Worst first: each list puts the devices that need attention at the top. Time unreachable and the avg lists cover the selected time frame; the others show the latest value. A device Catalyst Center cannot reach has no health score, so find it under time unreachable. For per-interface detail, open the [Devices and Interfaces dashboard](/dash/integration/Cisco%20Catalyst%20Center%20Devices%20and%20Interfaces).",
               "background_color": "green",
               "font_size": "14",
               "text_align": "left",
@@ -980,7 +980,7 @@
           },
           {
             "definition": {
-              "title": "Highest CPU utilization",
+              "title": "Highest avg CPU utilization",
               "title_size": "16",
               "title_align": "left",
               "type": "toplist",
@@ -998,7 +998,7 @@
                   "formulas": [
                     {
                       "formula": "query1",
-                      "alias": "CPU utilization"
+                      "alias": "Avg CPU utilization"
                     }
                   ],
                   "sort": {
@@ -1041,7 +1041,7 @@
           },
           {
             "definition": {
-              "title": "Highest memory utilization",
+              "title": "Highest avg memory utilization",
               "title_size": "16",
               "title_align": "left",
               "type": "toplist",
@@ -1059,7 +1059,7 @@
                   "formulas": [
                     {
                       "formula": "query1",
-                      "alias": "Memory utilization"
+                      "alias": "Avg memory utilization"
                     }
                   ],
                   "sort": {
@@ -1317,7 +1317,7 @@
           },
           {
             "definition": {
-              "title": "Network health across sites",
+              "title": "Lowest site network health",
               "title_size": "16",
               "title_align": "left",
               "type": "timeseries",
@@ -1327,12 +1327,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "min:cisco_catalyst_center.site.network.health{$catalyst_center_host,$site_hierarchy}"
-                    },
-                    {
-                      "data_source": "metrics",
-                      "name": "query2",
-                      "query": "avg:cisco_catalyst_center.site.network.health{$catalyst_center_host,$site_hierarchy}"
+                      "query": "min:cisco_catalyst_center.site.network.health{$catalyst_center_host,$site_hierarchy}.rollup(min)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1341,10 +1336,6 @@
                     {
                       "formula": "query1",
                       "alias": "Lowest site"
-                    },
-                    {
-                      "formula": "query2",
-                      "alias": "Site average"
                     }
                   ],
                   "style": {
@@ -1622,7 +1613,7 @@
           {
             "definition": {
               "type": "note",
-              "content": "Catalyst Center's client health score and connected clients, where Overall covers wired and wireless together. Falling health with a steady client count points at connectivity or onboarding trouble.",
+              "content": "The share of clients Catalyst Center rates healthy, and connected clients, where Overall covers wired and wireless together. Falling health with a steady client count points at connectivity or onboarding trouble.",
               "background_color": "purple",
               "font_size": "14",
               "text_align": "left",
@@ -1641,7 +1632,7 @@
           },
           {
             "definition": {
-              "title": "Health score by connection type",
+              "title": "Clients in good health by connection type",
               "title_size": "16",
               "title_align": "left",
               "type": "timeseries",
@@ -1694,6 +1685,12 @@
                 "value"
               ],
               "legend_layout": "auto",
+              "yaxis": {
+                "include_zero": true,
+                "min": "0",
+                "max": "100",
+                "scale": "linear"
+              },
               "show_legend": true
             },
             "layout": {
@@ -2318,7 +2315,7 @@
           {
             "definition": {
               "type": "note",
-              "content": "Off by default: set `collect_events: true` to fill this group, so empty graphs mean it is disabled, not broken. Catalyst Center 2.3.7 events carry no severity, so they are broken down by device family and name.",
+              "content": "Off by default: set `collect_events: true` to fill this group, so empty graphs mean it is disabled, not broken. Counts cover the time frame; trap events carry no severity, so the breakdown is by device family and name.",
               "background_color": "orange",
               "font_size": "14",
               "text_align": "left",
@@ -2337,7 +2334,7 @@
           },
           {
             "definition": {
-              "title": "Events",
+              "title": "Events in time frame",
               "title_size": "16",
               "title_align": "left",
               "type": "query_value",
