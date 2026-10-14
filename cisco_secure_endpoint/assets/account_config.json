@@ -24,9 +24,10 @@
     {
       "key": "api_domain_name",
       "label": "API domain name",
+      "help": "The domain of your Cisco Secure Endpoint API, without a path. Cloud regions: api.amp.cisco.com (North America), api.eu.amp.cisco.com (Europe), api.apjc.amp.cisco.com (Asia Pacific, Japan, and China).",
       "editable": true,
       "required": true,
-      "domain": {}
+      "text": {}
     },
     {
       "key": "get_endpoint_details",
