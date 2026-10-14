@@ -246,7 +246,25 @@ def obfuscate_command(command: dict):
     obfuscated_command = command.copy()
     for key in COMMAND_KEYS_TO_REMOVE:
         obfuscated_command.pop(key, None)
+    if isinstance(command.get('q'), dict) and ('u' in command or 'limit' in command):
+        # Shards add this routing field to observed statements, but not to $queryStats shapes.
+        obfuscated_command.pop('includeQueryStatsMetricsForOpIndex', None)
+        obfuscated_command['q'] = _normalize_write_predicate(command['q'])
     return datadog_agent.obfuscate_mongodb_string(json_util.dumps(obfuscated_command))
+
+
+def _normalize_write_predicate(predicate: dict) -> dict:
+    # $queryStats makes shorthand equality explicit; use the same form across write collectors.
+    normalized = {}
+    for field, value in predicate.items():
+        if field in ('$and', '$or', '$nor') and isinstance(value, list):
+            value = [_normalize_write_predicate(item) if isinstance(item, dict) else item for item in value]
+        elif not field.startswith('$') and isinstance(value, dict) and set(value) == {'$eq'}:
+            # shortcut: only scalar equality is normalized; other predicate rewrites need server comparisons.
+            if not isinstance(value['$eq'], (dict, list, regex.Regex, re.Pattern)):
+                value = value['$eq']
+        normalized[field] = value
+    return normalized
 
 
 def obfuscate_explain_plan(plan):

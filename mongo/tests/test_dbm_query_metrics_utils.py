@@ -7,12 +7,14 @@ import json
 
 import mock
 import pytest
+from bson import json_util, regex
 
 from datadog_checks.mongo import MongoDb
 from datadog_checks.mongo.common import HostingType, StandaloneDeployment
 from datadog_checks.mongo.dbm.utils import (
     get_query_stats_row_key,
     normalize_query_stats_value,
+    obfuscate_command,
     reconstruct_command_from_query_shape,
 )
 
@@ -255,6 +257,43 @@ def test_reconstruct_write_query_stats_commands(command: str, shape: dict, expec
     # Match MongoDB's observed per-statement command structure so writes can share signatures across sources.
     shape = {'cmdNs': {'db': 'test', 'coll': 'orders'}, 'command': command, **shape}
     assert reconstruct_command_from_query_shape(shape) == expected
+
+
+@pytest.mark.parametrize('statement', [{'u': {'$set': {'value': 3}}, 'multi': False}, {'limit': 1}])
+@pytest.mark.parametrize('logical_operator', [None, '$and', '$or', '$nor'])
+def test_write_statement_equality_signature(statement: dict, logical_operator: str | None):
+    # Equivalent write predicates and shard bookkeeping must not split query metrics from samples.
+    shorthand = {'_id': 1}
+    explicit = {'_id': {'$eq': 1}}
+    if logical_operator:
+        shorthand = {logical_operator: [shorthand]}
+        explicit = {logical_operator: [explicit]}
+    observed = {'q': shorthand, 'includeQueryStatsMetricsForOpIndex': 0, **statement}
+    original = copy.deepcopy(observed)
+    assert json.loads(obfuscate_command(observed)) == json.loads(obfuscate_command({'q': explicit, **statement}))
+    assert observed == original
+
+
+def test_write_statement_preserves_other_expressions():
+    # Normalizing predicates must not rewrite literal objects, regexes, or update expressions.
+    command = {
+        'q': {
+            'document': {'$eq': {'nested': 1}},
+            'array': {'$eq': [1, 2]},
+            'regex': {'$eq': regex.Regex('a')},
+            'range': {'$gt': 1},
+            '$expr': {'$eq': ['$a', '$b']},
+        },
+        'u': [{'$set': {'equal': {'$eq': ['$a', '$b']}}}],
+    }
+    assert json_util.loads(obfuscate_command(command)) == command
+
+
+@pytest.mark.parametrize('command', ['find', 'distinct'])
+def test_read_statement_preserves_predicates(command: str):
+    # Write normalization must preserve existing read query signatures.
+    statement = {command: 'orders', 'filter': {'_id': {'$eq': 1}}, 'query': {'_id': {'$eq': 1}}}
+    assert json.loads(obfuscate_command(statement)) == statement
 
 
 @pytest.mark.parametrize('nested', [False, True], ids=['mongodb8', 'mongodb9'])
