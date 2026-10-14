@@ -2679,12 +2679,8 @@ def test_health_service_check_failing_on_status_error(
     aggregator, fake_http, mocked_prometheus_check, mocked_prometheus_scraper_config
 ):
     check = mocked_prometheus_check
-    fake_http.register_response(
-        'GET',
-        FAKE_ENDPOINT,
-        HTTPClientStatusError('503 Server Error'),
-        match_options={'stream': True},
-    )
+    response = FakeHTTPResponse(status_code=503)
+    fake_http.register_response('GET', FAKE_ENDPOINT, response, match_options={'stream': True})
 
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['custom_tags'] = ['foo:bar']
@@ -2697,6 +2693,7 @@ def test_health_service_check_failing_on_status_error(
         tags=['endpoint:http://fake.endpoint:10055/metrics', 'foo:bar'],
         count=1,
     )
+    assert response.closed
     fake_http.assert_requests([OPENMETRICS_REQUEST])
     fake_http.assert_all_responses_consumed()
 
