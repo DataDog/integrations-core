@@ -19,7 +19,6 @@ from textual.reactive import reactive
 
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.phases.registry import PhaseRegistry
-from ddev.cli.meta.ai.palette import STATUS_DONE, STATUS_FAILED, STATUS_PENDING, STATUS_RUNNING
 from ddev.cli.meta.ai.tui.messages import (
     AfterCompact,
     AfterGoalCheck,
@@ -38,7 +37,7 @@ from ddev.cli.meta.ai.tui.messages import (
     RunErrored,
 )
 from ddev.cli.meta.ai.tui.status import ExecutionStatus
-from ddev.cli.meta.ai.tui.theme import togo_markdown_theme, togo_theme
+from ddev.cli.meta.ai.tui.theme import STATUS_VARIABLE_KEYS, togo_markdown_theme, togo_theme
 
 if TYPE_CHECKING:
     from ddev.ai.config.engine import ConfigurationEngine
@@ -97,12 +96,7 @@ class TogoApp(App):
 
     def get_theme_variable_defaults(self) -> dict[str, str]:
         """Provide parse-time defaults for status variables so $status-* resolves in CSS."""
-        return {
-            "status-running": STATUS_RUNNING,
-            "status-pending": STATUS_PENDING,
-            "status-done": STATUS_DONE,
-            "status-failed": STATUS_FAILED,
-        }
+        return {key: togo_theme.variables[key] for key in STATUS_VARIABLE_KEYS}
 
     def on_mount(self) -> None:
         from ddev.cli.meta.ai.tui.screens.main import MainScreen
