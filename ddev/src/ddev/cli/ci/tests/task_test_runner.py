@@ -46,9 +46,8 @@ CANCEL_REQUEST_TIMEOUT = 3.0
 # https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows
 WORKFLOW_INPUTS_LIMIT = 65535
 
-# Jobs are listed right after the run is dispatched, before GitHub makes the run's jobs listing
-# visible, and until then that endpoint answers 404.
-JOBS_LISTING_RETRY = SAFE_RETRY.also_on(on_status(404))
+# GitHub can answer 404 for a newly dispatched run until the run and its jobs listing are visible.
+NEW_RUN_RETRY = SAFE_RETRY.also_on(on_status(404))
 
 
 class JobListTooLargeError(Exception):
@@ -363,7 +362,9 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             previous_poll = poll_started
             with self._metrics.operation(Operation.FETCH_WORKFLOW) as op:
                 try:
-                    run = await self._client.get_workflow_run(self._options.owner, self._options.repo, run_id)
+                    run = await self._client.get_workflow_run(
+                        self._options.owner, self._options.repo, run_id, retry=NEW_RUN_RETRY
+                    )
                 except ValidationError as error:
                     raise self._response_failure(
                         op, "polling workflow status", message.batch_id, run_id, error
@@ -483,7 +484,7 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         with self._metrics.operation(Operation.REFRESH_JOBS) as op:
             try:
                 async for page in self._client.list_workflow_jobs(
-                    self._options.owner, self._options.repo, run_id, per_page=100, retry=JOBS_LISTING_RETRY
+                    self._options.owner, self._options.repo, run_id, per_page=100, retry=NEW_RUN_RETRY
                 ):
                     jobs.extend(page.data.jobs)
             except ValidationError as error:

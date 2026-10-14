@@ -352,6 +352,30 @@ async def test_a_jobs_listing_not_yet_visible_after_dispatch_is_retried(
     assert failed_by_operation(sink) == {"refresh_jobs": 0}
 
 
+@pytest.mark.asyncio
+async def test_a_workflow_run_not_yet_visible_after_dispatch_is_retried(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    """GitHub answers 404 for a freshly dispatched run until the run becomes visible."""
+    advance_clock_on_sleep(FakeClock(), monkeypatch)
+    responses = [
+        httpx.Response(404),
+        httpx.Response(200, json=make_workflow_run().model_dump(mode="json")),
+        httpx.Response(200, json=make_workflow_jobs_list().model_dump(mode="json")),
+    ]
+    client = AsyncGitHubClient("token", transport=httpx.MockTransport(lambda request: responses.pop(0)))
+    runner = make_runner(client, tmp_path)  # type: ignore[arg-type]
+
+    try:
+        run, jobs = await runner._poll_until_complete(make_batch(), 123)
+    finally:
+        await client.aclose()
+
+    assert run.data.id == 123
+    assert jobs == []
+    assert responses == []
+
+
 async def test_a_dispatch_github_refuses_fails_the_dispatch_operation_only(tmp_path: Path):
     client = FakeAsyncGitHubClient()
     client.mock_response("create_workflow_dispatch", RuntimeError("dispatch refused"))
