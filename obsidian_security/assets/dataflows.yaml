@@ -1,4 +1,9 @@
 provides:
+  - id: obsidian-security-logs
+    always_on: true
+    granular: true
+    data_type: logs
+    direction: inbound
   - id: obsidian-security-alerts-logs
     always_on: false
     granular: true
