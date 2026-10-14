@@ -239,8 +239,11 @@ class ResponseLineTooLongError(ValueError):
     pass
 
 
-def limit_line_size(response: requests.Response, max_line_size: int) -> None:
+def limit_line_size(response: requests.Response, max_line_size: int | None) -> None:
     """Make reading `response` raise `ResponseLineTooLongError` once a line is longer than `max_line_size` bytes."""
+    if max_line_size is None:
+        return
+
     raw = getattr(response, 'raw', None)
     # Don't overwrite test mocks or responses that are already limited
     if hasattr(raw, 'stream') and not isinstance(raw, LineCappedRawResponse):
@@ -624,7 +627,7 @@ class RequestsWrapper(object):
 
         self.request_size = int(float(config['request_size']) * KIBIBYTE)
         # Set in bytes by checks that limit the size of lines read with `iter_lines`
-        self.max_line_size = None
+        self.max_line_size: int | None = None
 
         self.aia_chasing_max_depth = DEFAULT_AIA_CHASING_MAX_DEPTH
 
