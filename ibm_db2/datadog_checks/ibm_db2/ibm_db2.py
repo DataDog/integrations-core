@@ -62,6 +62,13 @@ class IbmDb2Check(DatabaseCheck):
         if self._config.dbm:
             self._query_metrics = self.register_async_job(QueryMetricsCollector(self, self._config))
 
+    def debug_stats_kwargs(self, tags: list[str] | None = None) -> dict:
+        return {
+            'tags': self.tag_manager.get_tags() + [f'agent_hostname:{self.agent_hostname}'] + (tags or []),
+            'hostname': self.reported_hostname,
+            'raw': True,
+        }
+
     def check(self, instance):
         if self._connection.conn is None:
             self._connection.connect()
