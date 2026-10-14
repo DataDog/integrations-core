@@ -8,12 +8,12 @@ import threading
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Protocol, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 from urllib.parse import urlsplit
 from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import Element
 
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http import RequestsWrapper, ResponseWrapper
 
 from .constants import AUTH_ERROR_CODES, PARSE_ERROR_CODE
 from .errors import PanosApiError, PanosAuthError, PanosError, PanosSkipped, PanosUnreachable
@@ -31,21 +31,6 @@ STREAM_CHUNK_SIZE = 64 * 1024
 # Paths, from the root, of a log job's entries and status.
 LOG_ENTRY_PATH = ['response', 'result', 'log', 'logs', 'entry']
 LOG_STATUS_PATH = ['response', 'result', 'job', 'status']
-
-
-class Response(Protocol):
-    """What the client reads of the response `RequestsWrapper.post` returns."""
-
-    status_code: int
-    content: bytes
-
-    def iter_content(self, chunk_size: int) -> Iterator[bytes]: ...
-
-    def close(self) -> None: ...
-
-    def __enter__(self) -> Response: ...
-
-    def __exit__(self, *exc_info: object) -> None: ...
 
 
 def api_url(host: str) -> str:
@@ -75,7 +60,7 @@ def post_api(
     *,
     key: str | None = None,
     stream: bool = False,
-) -> Response:
+) -> ResponseWrapper:
     """POST form `data` to the XML API. The key, when given, goes only in the `X-PAN-KEY` header."""
     options: dict[str, Any] = {'data': data, 'stream': stream}
     if key is not None:
@@ -84,7 +69,7 @@ def post_api(
         return http.post(url, **options)
 
 
-def read_response(resp: Response) -> Element:
+def read_response(resp: ResponseWrapper) -> Element:
     try:
         root = parse_response(resp.content)
     except PanosApiError as e:
@@ -261,7 +246,9 @@ class PanosClient:
             self._stats.key_regenerated = True
         return renewed
 
-    def _open_stream(self, params: dict[str, str], key: str) -> tuple[Response, Element, Iterator[tuple[str, Element]]]:
+    def _open_stream(
+        self, params: dict[str, str], key: str
+    ) -> tuple[ResponseWrapper, Element, Iterator[tuple[str, Element]]]:
         """Send a streamed request and read up to the root. An error response is raised here, inside `_authorized`, so
         a rejected key is renewed before any entry reaches the caller."""
         resp = post_api(self._http, self._url, params, key=key, stream=True)
@@ -286,7 +273,7 @@ class PanosClient:
             resp.close()
             raise
 
-    def _stream_events(self, resp: Response) -> Iterator[tuple[str, Element]]:
+    def _stream_events(self, resp: ResponseWrapper) -> Iterator[tuple[str, Element]]:
         parser: ET.XMLPullParser[Element] = ET.XMLPullParser(events=('start', 'end'))
         try:
             with transport_errors(self._url):

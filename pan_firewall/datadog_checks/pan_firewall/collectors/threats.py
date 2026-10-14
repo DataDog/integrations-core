@@ -16,6 +16,7 @@ from xml.etree.ElementTree import Element
 from datadog_checks.pan_firewall import constants
 from datadog_checks.pan_firewall.constants import ACTIVE_STATUSES, PARSE_ERROR_CODE
 from datadog_checks.pan_firewall.errors import PanosApiError
+from datadog_checks.pan_firewall.identity import normalize_vsys
 from datadog_checks.pan_firewall.xml_utils import text
 
 from . import CollectContext, Sample, ThreatJob, ThreatState, Watermark, register, tag_tuple
@@ -129,15 +130,9 @@ def _add(ctx: CollectContext, job: ThreatJob, entry: Element) -> None:
             text(entry, 'severity', ''),
             text(entry, 'action', ''),
             text(entry, 'subtype', ''),
-            _vsys(text(entry, 'vsys')),
+            normalize_vsys(text(entry, 'vsys')) or '',
         )
         job.counts[key] += 1  # type: ignore[index]
-
-
-def _vsys(value: str | None) -> str:
-    if not value:
-        return ''
-    return f'vsys{value}' if value.isdigit() else value.lower()
 
 
 def _complete(ctx: CollectContext, state: ThreatState, job: ThreatJob) -> tuple[list[Sample], ThreatJob | None]:

@@ -31,9 +31,9 @@ from .collectors import (  # noqa: F401  (importing the modules registers their 
 )
 from .collectors.interfaces import parse_interface_speeds
 from .collectors.jobs import busy_jobs
-from .constants import COMMIT_SKIP_MAX_SECONDS
+from .constants import COMMIT_SKIP_MAX_SECONDS, IDENTITY
 from .errors import PanosError, PanosSkipped, PanosUnreachable
-from .identity import DeviceIdentity, device_ip, global_tags, parse_system_info, vsys_list
+from .identity import DeviceIdentity, global_tags, parse_system_info, vsys_list
 from .metadata import build_device, build_interfaces
 from .ndm_models import DeviceMetadata, InterfaceMetadata, batch_payloads
 from .scheduler import FirewallSchedule
@@ -46,7 +46,6 @@ if TYPE_CHECKING:
 
 SYSTEM_INFO_CMD = '<show><system><info/></system></show>'
 INTERFACE_ALL_CMD = '<show><interface>all</interface></show>'
-IDENTITY = 'identity_metadata'
 # Name of the commit check in the unreachable warning.
 JOBS_CHECK = 'jobs'
 # Collectors of one firewall run at once; the client's own semaphore caps the calls in flight at the same number.
@@ -76,7 +75,7 @@ class FirewallPoller:
         self.target = target
         self.config = config
         self.log = check.log
-        self.ip = device_ip(target)
+        self.ip = target.ip
         # Keyed by device IP: before a static firewall first answers, its IP is all the check knows.
         self._cache_key = f'identity:{self.ip}'
         self.keys = KeyManager(check.http, target.ip, target.credentials)
@@ -277,9 +276,8 @@ class FirewallPoller:
 
     def submit(self, samples: Iterable[Sample]) -> None:
         tags = self.tags()
-        submit = {'gauge': self.check.gauge, 'monotonic_count': self.check.monotonic_count, 'count': self.check.count}
         for sample in samples:
-            submit[sample.kind](sample.name, sample.value, tags=[*tags, *sample.tags])
+            getattr(self.check, sample.kind)(sample.name, sample.value, tags=[*tags, *sample.tags])
 
     def tags(self) -> list[str]:
         return global_tags(self.identity, self.target, self.config.namespace or 'default', self.config.tags or ())

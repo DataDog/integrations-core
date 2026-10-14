@@ -9,6 +9,7 @@ from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
 from xml.etree.ElementTree import Element
 
+from .collectors import tag_tuple
 from .constants import DEVICE_VENDOR_TAG, NDM_DEVICE_RESOURCE_TAG, NDM_DEVICE_USER_TAGS_RESOURCE_TAG, PARSE_ERROR_CODE
 from .errors import PanosApiError
 from .firewalls import FirewallTarget
@@ -64,11 +65,6 @@ def _on_off(value: str | None) -> bool | None:
     return {'on': True, 'off': False}.get(value or '')
 
 
-def device_ip(target: FirewallTarget) -> str:
-    """The `device_ip` tag: the polled IP."""
-    return target.ip
-
-
 def global_tags(
     identity: DeviceIdentity | None, target: FirewallTarget, namespace: str, user_tags: Iterable[str]
 ) -> list[str]:
@@ -76,20 +72,21 @@ def global_tags(
     Panorama discovery fills in what it knows."""
     serial = (identity.serial if identity else None) or target.serial
     hostname = (identity.hostname if identity else None) or target.hostname
-    values = {
-        'device_namespace': namespace,
-        'device_ip': device_ip(target),
-        'device_id': serial,
-        'device_hostname': hostname,
-        'device_serial': serial,
-        'device_model': (identity.model if identity else None) or target.model,
-        'device_family': (identity.family if identity else None) or target.family,
-        'device_vendor': DEVICE_VENDOR_TAG,
-        'os_version': (identity.sw_version if identity else None) or target.sw_version,
-        'multi_vsys': _bool_tag(identity.multi_vsys) if identity else None,
-        'advanced_routing': _bool_tag(identity.advanced_routing) if identity else None,
-    }
-    tags = [f'{name}:{value}' for name, value in values.items() if value]
+    tags = list(
+        tag_tuple(
+            ('device_namespace', namespace),
+            ('device_ip', target.ip),
+            ('device_id', serial),
+            ('device_hostname', hostname),
+            ('device_serial', serial),
+            ('device_model', (identity.model if identity else None) or target.model),
+            ('device_family', (identity.family if identity else None) or target.family),
+            ('device_vendor', DEVICE_VENDOR_TAG),
+            ('os_version', (identity.sw_version if identity else None) or target.sw_version),
+            ('multi_vsys', _bool_tag(identity.multi_vsys) if identity else None),
+            ('advanced_routing', _bool_tag(identity.advanced_routing) if identity else None),
+        )
+    )
     tags.extend(user_tags)
     if serial:
         tags.extend([f'{NDM_DEVICE_RESOURCE_TAG}:{serial}', f'{NDM_DEVICE_USER_TAGS_RESOURCE_TAG}:{serial}'])
@@ -106,14 +103,18 @@ def vsys_list(
     """The vsys to poll: the `vsys` option, else detected from the `show interface all` rows. Without rows, a
     multi-vsys firewall falls back to `vsys1`, which always exists."""
     if configured:
-        return [_normalize_vsys(v) for v in configured]
+        return [v for value in configured if (v := normalize_vsys(value))]
     if not identity.multi_vsys:
         return ['vsys1']
-    detected = {_normalize_vsys(v) for row in interface_rows if (v := text(row, 'vsys'))}
+    detected = {v for row in interface_rows if (v := normalize_vsys(text(row, 'vsys')))}
     # By number, so vsys10 sorts after vsys2.
     return sorted(detected, key=lambda v: (len(v), v)) or ['vsys1']
 
 
-def _normalize_vsys(value: str) -> str:
-    value = value.strip()
-    return value if value.startswith('vsys') else f'vsys{value}'
+def normalize_vsys(value: str | None) -> str | None:
+    """`1` -> `vsys1`, `VSYS1` -> `vsys1`; None for a missing or blank value. PAN-OS gives the bare number in
+    `show interface all` and the name in threat logs."""
+    value = (value or '').strip()
+    if not value:
+        return None
+    return f'vsys{value}' if value.isdigit() else value.lower()

@@ -8,6 +8,9 @@ PARSE_ERROR_CODE = 'parse'
 # and was never seen in the lab.
 AUTH_ERROR_CODES = frozenset({'403', '16'})
 
+# The step that reads `show system info` and `show interface all`: scheduled like a collector, run by the poller.
+IDENTITY = 'identity_metadata'
+
 # Seconds between two runs of each collector, per firewall. The jobs check runs whenever a collector is due.
 INTERVALS = {
     'bgp': 120,
@@ -22,7 +25,7 @@ INTERVALS = {
     'environment': 300,
     'threats': 300,
     'disk': 1800,
-    'identity_metadata': 1800,
+    IDENTITY: 1800,
     'reports': 1800,
     'licenses': 86400,
 }

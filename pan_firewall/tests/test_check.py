@@ -265,8 +265,8 @@ def raise_(error):
         ),
         # Submitting it fails, after the collector returned.
         pytest.param(
-            lambda ctx: [Sample('stub', 1, (), 'histogram')],  # type: ignore[arg-type]
-            "'histogram'",
+            lambda ctx: [Sample('stub', 1, (), 'unknown')],  # type: ignore[arg-type]
+            "'PanFirewallCheck' object has no attribute 'unknown'",
             id='malformed-sample',
         ),
     ],

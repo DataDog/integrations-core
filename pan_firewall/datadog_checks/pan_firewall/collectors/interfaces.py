@@ -15,6 +15,7 @@ from collections.abc import Callable
 from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.constants import NDM_INTERFACE_RESOURCE_TAG
+from datadog_checks.pan_firewall.identity import normalize_vsys
 from datadog_checks.pan_firewall.xml_utils import num, text
 
 from . import CollectContext, FirewallState, Sample, register, tag_tuple
@@ -49,12 +50,6 @@ NO_SPEED = frozenset({'ukn', '[n/a]'})
 MEGABIT = 10**6
 
 
-def _vsys(value: str | None) -> str | None:
-    if not value:
-        return None
-    return value if value.startswith('vsys') else f'vsys{value}'
-
-
 def _rows_by_name(state: FirewallState) -> dict[str, Element]:
     return {name: row for row in state.interface_rows if (name := text(row, 'name'))}
 
@@ -75,7 +70,7 @@ def interface_tags(
         tags.extend(
             tag_tuple(
                 ('zone', text(row, 'zone')),
-                ('vsys', _vsys(text(row, 'vsys'))),
+                ('vsys', normalize_vsys(text(row, 'vsys'))),
                 ('vr', forward[3:] if forward.startswith('vr:') else None),
             )
         )

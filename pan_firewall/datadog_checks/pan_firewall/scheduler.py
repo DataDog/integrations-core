@@ -4,7 +4,7 @@
 import time
 from collections.abc import Callable, Collection, Iterable
 
-from .constants import COLLECTORS, INTERVALS
+from .constants import COLLECTORS, IDENTITY, INTERVALS
 
 
 class FirewallSchedule:
@@ -25,8 +25,7 @@ class FirewallSchedule:
         return [
             name
             for name in COLLECTORS
-            if (name in enabled and self._next_due.get(name, now) <= now)
-            or (name == 'identity_metadata' and identity_missing)
+            if (name in enabled and self._next_due.get(name, now) <= now) or (name == IDENTITY and identity_missing)
         ]
 
     def mark_run(self, names: Iterable[str]) -> None:
