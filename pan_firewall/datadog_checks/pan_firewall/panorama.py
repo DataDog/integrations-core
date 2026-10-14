@@ -22,6 +22,12 @@ if TYPE_CHECKING:
     from .config_models.instance import InstanceConfig
 
 DISCOVERY_CMD = '<show><devices><connected/></devices></show>'
+# TEMPORARY, to be removed: the lab firewalls report their private IPs to Panorama, and the Agent reaches them at
+# public ones. (serial, reported IP) -> polled IP; it matches nothing outside the lab.
+LAB_IP_OVERRIDES = {
+    ('007955000930601', '10.60.0.10'): '3.13.247.39',
+    ('007955000930602', '10.60.0.11'): '3.19.110.163',
+}
 
 
 @dataclass(frozen=True)
@@ -160,13 +166,14 @@ class PanoramaFirewallSource:
         return list(targets.values())
 
     def _target(self, firewall: DiscoveredFirewall) -> FirewallTarget | None:
-        address = _parse_ip(firewall.ip_address)
+        polled = LAB_IP_OVERRIDES.get((firewall.serial, firewall.ip_address or ''), firewall.ip_address)
+        address = _parse_ip(polled)
         if address is None:
             self._warn_once(
                 f'no-ip:{firewall.serial}',
                 'pan_firewall: firewall %s has no usable IP address (Panorama reports `%s`), skipping it',
                 firewall.serial,
-                firewall.ip_address or '',
+                polled or '',
             )
             return None
         ip = str(address)

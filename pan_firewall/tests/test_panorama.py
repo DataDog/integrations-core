@@ -141,16 +141,22 @@ def test_firewalls_are_polled_at_the_reported_ip_which_is_their_device_ip(dd_run
 
 
 def test_firewall_at_an_unreachable_reported_ip_is_reported_down(dd_run_check, aggregator, fake_panos):
+    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml(('SYNTH-PRIVATE-0001', 'synth', '10.60.0.40', 'yes')))
+
+    dd_run_check(new_check())
+
+    # Nothing answers at a private IP from here.
+    assert polled_hosts(fake_panos) == {'10.60.0.40'}
+    assert {ip: m.value for ip, m in metrics_by_ip(aggregator, 'can_connect').items()} == {'10.60.0.40': 0}
+
+
+# TEMPORARY: goes with `LAB_IP_OVERRIDES`.
+def test_lab_firewalls_are_polled_at_their_public_ips(dd_run_check, fake_panos):
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, REAL_CAPTURE.read_bytes()))
 
     dd_run_check(new_check())
 
-    # Nothing answers at the private lab IPs from here.
-    assert polled_hosts(fake_panos) == {FW_A_REPORTED, FW_B_REPORTED}
-    assert {ip: m.value for ip, m in metrics_by_ip(aggregator, 'can_connect').items()} == {
-        FW_A_REPORTED: 0,
-        FW_B_REPORTED: 0,
-    }
+    assert polled_hosts(fake_panos) == {'3.13.247.39', '3.19.110.163'}
 
 
 @pytest.mark.parametrize(
