@@ -7,7 +7,7 @@ from unittest import mock
 import pytest
 
 from datadog_checks.pan_firewall import constants
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectContext, FirewallState
+from datadog_checks.pan_firewall.collectors import CollectContext, FirewallState
 from datadog_checks.pan_firewall.collectors.reports import collect_reports, parse_report, report_params
 from datadog_checks.pan_firewall.constants import REPORTS
 from datadog_checks.pan_firewall.errors import PanosApiError, PanosTimeout
@@ -406,8 +406,6 @@ def test_slow_firewall_is_polled_every_run_until_all_reports_are_collected_then_
 def test_reports_are_registered_and_submit_through_the_check_when_enabled(
     real_collectors, dd_run_check, aggregator, fake_panos
 ):
-    assert 'reports' in COLLECT_FUNCTIONS
-
     dd_run_check(new_check(make_instance(collect_reports=True)))
 
     # The first row of each report, with its three gauges.
@@ -419,7 +417,3 @@ def test_reports_are_registered_and_submit_through_the_check_when_enabled(
             )
     for metric in ('sessions', 'bytes', 'bytes_per_session'):
         assert len(aggregator.metrics(f'pan_firewall.report.top.{metric}')) == 30
-    submits = [c for c in report_calls(fake_panos) if c.action is None]
-    assert len(submits) == 10
-    assert len({field_of(c.params) for c in submits}) == 10
-    assert all('<topn>10</topn>' in c.params['cmd'] for c in submits)

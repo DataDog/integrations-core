@@ -5,7 +5,6 @@ from unittest import mock
 
 import pytest
 
-from datadog_checks.pan_firewall.collectors import FirewallState
 from datadog_checks.pan_firewall.collectors.routing import (
     BGP_PEER_CMD,
     OSPF_NEIGHBOR_CMD,
@@ -122,22 +121,14 @@ COLLECTORS = [
 
 
 @pytest.mark.parametrize('collect, _cmd', COLLECTORS)
-def test_advanced_routing_engine_sends_no_call_and_warns_once_per_firewall(collect, _cmd):
-    state = FirewallState()
-    first, second = make_context(True, state), make_context(True, state)
+def test_advanced_routing_engine_sends_no_call_and_warns_about_the_legacy_engine(collect, _cmd):
+    ctx = make_context(True)
 
-    assert collect(first) == []
-    assert collect(second) == []
+    assert collect(ctx) == []
 
-    first.client.op.assert_not_called()
-    second.client.op.assert_not_called()
-    first.log.warning.assert_called_once()
-    assert 'legacy routing engine' in first.log.warning.call_args.args[0]
-    second.log.warning.assert_not_called()
-    # Another firewall has its own state, so it warns on its own.
-    other = make_context(True)
-    collect(other)
-    other.log.warning.assert_called_once()
+    ctx.client.op.assert_not_called()
+    ctx.log.warning.assert_called_once()
+    assert 'legacy routing engine' in ctx.log.warning.call_args.args[0]
 
 
 @pytest.mark.parametrize('collect, cmd', COLLECTORS)

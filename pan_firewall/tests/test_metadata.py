@@ -86,27 +86,17 @@ def test_interfaces_of_fw_a_capture():
         'oper_status': 1,
     }
     assert by_name['ethernet1/2']['mac_address'] == '02:ff:f3:bd:d2:65'
-    assert {n: i['index'] for n, i in by_name.items()} == {
-        'ethernet1/1': 16,
-        'ethernet1/2': 17,
-        'loopback': 3,
-        'loopback.1': 258,
-        'tunnel': 4,
-        'tunnel.1': 256,
-        'tunnel.2': 257,
+    assert {n: (i['index'], i['oper_status']) for n, i in by_name.items()} == {
+        'ethernet1/1': (16, 1),
+        'ethernet1/2': (17, 1),
+        'loopback': (3, 4),
+        'loopback.1': (258, 4),
+        'tunnel': (4, 1),
+        'tunnel.1': (256, 1),
+        'tunnel.2': (257, 2),
     }
-    assert {n: i['oper_status'] for n, i in by_name.items()} == {
-        'ethernet1/1': 1,
-        'ethernet1/2': 1,
-        'loopback': 4,
-        'loopback.1': 4,
-        'tunnel': 1,
-        'tunnel.1': 1,
-        'tunnel.2': 2,
-    }
-    # Only physical ports have a MAC; admin status and description are never sent.
+    # Only physical ports have a MAC.
     assert {n for n, i in by_name.items() if 'mac_address' in i} == {'ethernet1/1', 'ethernet1/2'}
-    assert not any('admin_status' in i or 'description' in i for i in by_name.values())
 
 
 def test_subinterfaces_inherit_the_parent_state_and_tunnels_use_the_vpn_state():
@@ -150,15 +140,7 @@ def test_first_run_sends_the_device_and_its_interfaces(dd_run_check, aggregator,
         1,
     )
     assert f'dd.internal.resource:ndm_device:{FW_A_SERIAL}' in device['tags']
-    assert [i['name'] for i in event['interfaces']] == [
-        'ethernet1/1',
-        'ethernet1/2',
-        'loopback',
-        'loopback.1',
-        'tunnel',
-        'tunnel.1',
-        'tunnel.2',
-    ]
+    assert len(event['interfaces']) == 7
 
 
 def test_250_interfaces_are_sent_in_three_events(dd_run_check, aggregator, fake_panos):

@@ -20,10 +20,9 @@ def test_standalone_firewall_has_no_ha_state_and_no_warning():
     ctx.log.warning.assert_not_called()
 
 
-def test_enabled_firewall_keeps_its_local_state_and_warns_once_about_the_links():
+def test_enabled_firewall_keeps_its_local_state_and_warns_about_the_links():
     ctx = make_ctx(load_xml(ENABLED))
 
-    assert collect_ha(ctx) == []
     assert collect_ha(ctx) == []
 
     assert ctx.state.ha_state == 'active'

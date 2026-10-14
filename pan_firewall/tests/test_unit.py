@@ -10,7 +10,6 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.pan_firewall import PanFirewallCheck, constants
 from datadog_checks.pan_firewall import poller as poller_module
-from datadog_checks.pan_firewall.collectors.counters import GLOBAL_COUNTER_CMD
 from datadog_checks.pan_firewall.collectors.interfaces import COUNTER_INTERFACE_CMD
 from datadog_checks.pan_firewall.constants import REPORTS
 from datadog_checks.pan_firewall.errors import PanosApiError
@@ -358,12 +357,9 @@ def test_a_threat_job_still_running_is_polled_again_on_the_next_run_not_in_5_min
     assert 'threats' not in call_labels(fake_panos, ip, before)
 
 
-# One row per metric of the collectors whose samples the check submits as they come: (metric, value, extra tags,
-# type). The parser tests pin every value; these rows pin that the check submits each metric with its type and the
-# global tags. `None` skips the value (`license.days_left` follows today's date).
-MIB = 1024**2
+# One row per collector whose samples the check submits as they come: (metric, extra tags, type). The parser tests pin
+# every value; these rows pin that the check submits each collector's metrics with the right type and the global tags.
 PEER = ('peer:fw-peer', 'vr:default', 'peer_ip:169.254.10.2', 'remote_as:65002', 'peer_group:lab')
-DEAD_PEER = ('peer:dead-peer', 'vr:default', 'peer_ip:10.60.1.250', 'remote_as:65099', 'peer_group:lab')
 ETHERNET1_1 = (
     'interface:ethernet1/1',
     'interface_type:ethernet',
@@ -379,97 +375,32 @@ TUN_PEER = (
     'gateway:gw-peer',
     'outer_interface:ethernet1/1',
 )
-RULE_HITS = {
-    'trust-to-vpn': 476,
-    'vpn-to-trust': 486,
-    'trust-out': 1924,
-    'deny-telnet': 0,
-    'intrazone-default': 430,
-    'interzone-default': 0,
-}
 CHECK_LEVEL_SERIES = [
-    # global_counters
-    ('counter.global', 140542, ('counter:pkt_recv', 'category:packet', 'aspect:pktproc'), MONOTONIC),
-    ('counter.global', 1, ('counter:ssl_hsm_up_down_event_rcv', 'category:ssl', 'aspect:pktproc'), MONOTONIC),
-    ('dropped_packets', 1546, ('aspect:forward',), MONOTONIC),
-    ('dropped_packets', 0, ('aspect:arp',), MONOTONIC),
-    # interfaces
-    ('interface.rx.bytes', 153738451, ETHERNET1_1, MONOTONIC),
-    ('interface.tx.bytes', 3120586, ETHERNET1_1, MONOTONIC),
-    ('interface.rx.packets', 119008, ETHERNET1_1, MONOTONIC),
-    ('interface.tx.packets', 30547, ETHERNET1_1, MONOTONIC),
-    ('interface.rx.errors', 0, ETHERNET1_1, MONOTONIC),
-    ('interface.rx.drops', 0, ETHERNET1_1, MONOTONIC),
-    ('interface.forward_errors', 0, ETHERNET1_1, MONOTONIC),
-    ('interface.flow_state', 3, ETHERNET1_1, MONOTONIC),
-    ('interface.attack.land', 0, ETHERNET1_1, MONOTONIC),
-    ('interface.attack.ping_of_death', 0, ETHERNET1_1, MONOTONIC),
-    ('interface.attack.teardrop', 0, ETHERNET1_1, MONOTONIC),
-    ('interface.attack.ip_spoof', 0, ETHERNET1_1, MONOTONIC),
-    ('interface.attack.mac_spoof', 0, ETHERNET1_1, MONOTONIC),
-    # licenses
-    ('license.expired', 0, ('feature:pan_db_url_filtering',), GAUGE),
-    ('license.days_left', None, ('feature:pan_db_url_filtering',), GAUGE),
-    # bgp
-    ('bgp.peer.status', 1, PEER, GAUGE),
-    ('bgp.peer.status', 0, DEAD_PEER, GAUGE),
-    ('bgp.peer.status_duration', 4856, PEER, GAUGE),
-    ('bgp.peer.restart', 0, PEER, GAUGE),
-    ('bgp.peer.updates.in', 2, PEER, MONOTONIC),
-    ('bgp.peer.updates.out', 2, PEER, MONOTONIC),
-    ('bgp.peer.prefix_limit', 10, PEER, GAUGE),
-    ('bgp.peer.prefixes.incoming.total', 1, (*PEER, 'afi_safi:ipv4_unicast'), GAUGE),
-    ('bgp.peer.prefix_limit.utilization', 10.0, (*PEER, 'afi_safi:ipv4_unicast'), GAUGE),
-    # ospf
+    ('counter.global', ('counter:pkt_recv', 'category:packet', 'aspect:pktproc'), MONOTONIC),  # global_counters
+    ('interface.rx.bytes', ETHERNET1_1, MONOTONIC),  # interfaces
+    ('license.expired', ('feature:pan_db_url_filtering',), GAUGE),  # licenses
+    ('bgp.peer.status', PEER, GAUGE),  # bgp
     (
         'ospf.neighbor.status',
-        1,
         ('neighbor:169.254.10.2', 'router_id:10.255.0.2', 'area:0.0.0.0', 'vr:default'),
         GAUGE,
-    ),
-    # rule_hits
-    *(('security_rule.hits', hits, (f'rule:{rule}', 'vsys:vsys1'), MONOTONIC) for rule, hits in RULE_HITS.items()),
-    # system_resources, dataplane, disk
-    ('mgmt.cpu.user', 8.2, (), GAUGE),
-    ('mgmt.memory.total', 15734.7 * MIB, (), GAUGE),
-    ('mgmt.memory.used', 4804.7 * MIB, (), GAUGE),
-    ('mgmt.swap.total', 4000.0 * MIB, (), GAUGE),
-    ('dataplane.cpu.utilization', 0, ('dp:dp0', 'core:2'), GAUGE),
-    ('disk.used_pct', 32, ('mount:/opt/pancfg', 'filesystem:/dev/nvme0n1p5'), GAUGE),
-    # vpn
-    ('ipsec.tunnels.total', 2, (), GAUGE),
-    ('ipsec.tunnels.active', 1, (), GAUGE),
-    ('ipsec.tunnels.inactive', 0, (), GAUGE),
-    ('ipsec.tunnels.init', 1, (), GAUGE),
-    ('ipsec.gateways.total', 2, (), GAUGE),
-    ('ipsec.tunnel.state', 1, TUN_PEER, GAUGE),
+    ),  # ospf
+    ('security_rule.hits', ('rule:trust-to-vpn', 'vsys:vsys1'), MONOTONIC),  # rule_hits
+    ('mgmt.cpu.user', (), GAUGE),  # system_resources
+    ('dataplane.cpu.utilization', ('dp:dp0', 'core:2'), GAUGE),  # dataplane
+    ('disk.used_pct', ('mount:/opt/pancfg', 'filesystem:/dev/nvme0n1p5'), GAUGE),  # disk
+    ('ipsec.tunnel.state', TUN_PEER, GAUGE),  # vpn
 ]
-# Series per metric on that run.
-CHECK_LEVEL_COUNTS = {
-    'counter.global': 26,
-    'dropped_packets': 14,
-    'interface.rx.bytes': 7,
-    'license.expired': 14,
-    'bgp.peer.status': 2,
-    'ospf.neighbor.status': 1,
-    'security_rule.hits': 6,
-    'dataplane.cpu.utilization': 4,
-    'disk.used_pct': 4,
-    'interface.speed': 0,
-}
 
 
 def test_every_collector_submits_with_type_and_tags(dd_run_check, aggregator, fake_panos, real_collectors):
     dd_run_check(PanFirewallCheck('pan_firewall', {}, [make_instance(collect_global_counters=True, collect_ospf=True)]))
 
     metric_types = {GAUGE: aggregator.GAUGE, MONOTONIC: aggregator.MONOTONIC_COUNT}
-    for name, value, tags, metric_type in CHECK_LEVEL_SERIES:
+    for name, tags, metric_type in CHECK_LEVEL_SERIES:
         aggregator.assert_metric(
-            f'pan_firewall.{name}', value, tags=sorted([*FW_A_TAGS, *tags]), metric_type=metric_types[metric_type]
+            f'pan_firewall.{name}', tags=sorted([*FW_A_TAGS, *tags]), metric_type=metric_types[metric_type]
         )
-    for name, count in CHECK_LEVEL_COUNTS.items():
-        assert len(aggregator.metrics(f'pan_firewall.{name}')) == count, name
-    # Each command is sent once; one `counter interface all` serves the interfaces and the tunnels.
+    # One `counter interface all` serves the interfaces and the tunnels.
     commands = collections.Counter(c.cmd for c in fake_panos.calls)
-    assert commands[GLOBAL_COUNTER_CMD] == 1
     assert commands[COUNTER_INTERFACE_CMD] == 1

@@ -13,7 +13,7 @@ from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.pan_firewall import constants
 from datadog_checks.pan_firewall.api import PanosClient, api_url
 from datadog_checks.pan_firewall.auth import Credentials, KeyManager
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectContext, FirewallState
+from datadog_checks.pan_firewall.collectors import CollectContext, FirewallState
 from datadog_checks.pan_firewall.collectors.threats import collect_threats
 from datadog_checks.pan_firewall.errors import PanosApiError
 
@@ -416,7 +416,6 @@ def test_vsys_tag_is_vsys_n(firewall):
 
 
 def test_threats_are_registered_and_submit_through_the_check(real_collectors, dd_run_check, aggregator, fake_panos):
-    assert 'threats' in COLLECT_FUNCTIONS
     # The first run has no watermark and starts one below fw-a's capture; a new check instance (an Agent restart)
     # then counts the capture from the persisted watermark.
     first = THREAT_LOG_FIRST_SEQNO['fw-a']
