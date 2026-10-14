@@ -29,6 +29,11 @@ CPU_STATES = {'us': 'user', 'sy': 'system', 'ni': 'nice', 'id': 'idle'}
 CPU_STATES |= {'wa': 'iowait', 'hi': 'hardirq', 'si': 'softirq', 'st': 'steal'}
 # The unit top prints in the line header (`MiB Mem`, `KiB Swap`, ...).
 UNIT_BYTES = {name: 1024**power for power, name in enumerate(('B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB'))}
+# `top` line -> (metric group, (label, metric name) of each value the line must have).
+MEMORY_LINES = {
+    'Mem': ('memory', (('total', 'total'), ('free', 'free'), ('used', 'used'), ('buff/cache', 'buff_cache'))),
+    'Swap': ('swap', (('total', 'total'), ('free', 'free'), ('used', 'used'))),
+}
 VIRTUAL_FILESYSTEMS = frozenset({'none', 'tmpfs', 'cgroup_root'})
 
 ALARM_TRUE = frozenset({'true', 'yes'})
@@ -65,30 +70,20 @@ def parse_system_resources(root: Element, log: CheckLoggingAdapter) -> list[Samp
         missing.append('%Cpu(s)')
 
     lines = {m['kind']: m for m in MEMORY_LINE.finditer(output)}
-    memory = _fields(lines['Mem']['values']) if 'Mem' in lines else {}
-    mem_scale = UNIT_BYTES.get(lines['Mem']['unit']) if 'Mem' in lines else None
-    if mem_scale and {'total', 'free', 'used', 'buff/cache'} <= memory.keys():
-        for label, name in (('total', 'total'), ('free', 'free'), ('used', 'used'), ('buff/cache', 'buff_cache')):
-            samples.append(Sample(f'mgmt.memory.{name}', memory[label] * mem_scale, (), 'gauge'))
-        used_pct = _percent(memory['used'], memory['total'])
+    for kind, (group, values) in MEMORY_LINES.items():
+        line = lines.get(kind)
+        fields = _fields(line['values']) if line else {}
+        scale = UNIT_BYTES.get(line['unit']) if line else None
+        if not scale or not {label for label, _ in values} <= fields.keys():
+            missing.append(kind)
+            continue
+        samples.extend(Sample(f'mgmt.{group}.{name}', fields[label] * scale, (), 'gauge') for label, name in values)
+        used_pct = _percent(fields['used'], fields['total'])
         if used_pct is not None:
-            samples.append(Sample('mgmt.memory.used_pct', used_pct, (), 'gauge'))
-    else:
-        missing.append('Mem')
-
-    swap = _fields(lines['Swap']['values']) if 'Swap' in lines else {}
-    swap_scale = UNIT_BYTES.get(lines['Swap']['unit']) if 'Swap' in lines else None
-    if swap_scale and {'total', 'free', 'used'} <= swap.keys():
-        for name in ('total', 'free', 'used'):
-            samples.append(Sample(f'mgmt.swap.{name}', swap[name] * swap_scale, (), 'gauge'))
-        used_pct = _percent(swap['used'], swap['total'])
-        if used_pct is not None:
-            samples.append(Sample('mgmt.swap.used_pct', used_pct, (), 'gauge'))
+            samples.append(Sample(f'mgmt.{group}.used_pct', used_pct, (), 'gauge'))
         # `avail Mem` is printed on the Swap line, in the unit of that line.
-        if 'avail Mem' in swap:
-            samples.append(Sample('mgmt.memory.available', swap['avail Mem'] * swap_scale, (), 'gauge'))
-    else:
-        missing.append('Swap')
+        if kind == 'Swap' and 'avail Mem' in fields:
+            samples.append(Sample('mgmt.memory.available', fields['avail Mem'] * scale, (), 'gauge'))
     if missing:
         log.warning(
             '`show system resources` has no usable %s line: the metrics of the line are not reported',

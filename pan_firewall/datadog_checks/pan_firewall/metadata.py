@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .constants import NDM_DEVICE_TYPE, NDM_OS_NAME, NDM_VENDOR
 from .ndm_models import DeviceMetadata, InterfaceMetadata
 from .xml_utils import num, text
 
@@ -56,9 +55,6 @@ def build_device(
         model=identity.model,
         serial_number=identity.serial,
         version=identity.sw_version,
-        vendor=NDM_VENDOR,
-        os_name=NDM_OS_NAME,
-        device_type=NDM_DEVICE_TYPE,
         namespace=namespace,
     )
 

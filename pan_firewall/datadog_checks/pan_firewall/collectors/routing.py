@@ -15,7 +15,7 @@ from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.xml_utils import num, text
 
-from . import CollectContext, Sample, register, warn_once
+from . import CollectContext, Sample, register, tag_tuple, warn_once
 
 BGP_PEER_CMD = '<show><routing><protocol><bgp><peer/></bgp></protocol></routing></show>'
 OSPF_NEIGHBOR_CMD = '<show><routing><protocol><ospf><neighbor/></ospf></protocol></routing></show>'
@@ -60,27 +60,23 @@ def afi_safi_tag(name: str) -> str:
 def parse_bgp_peers(root: Element) -> list[Sample]:
     samples: list[Sample] = []
     for entry in root.iterfind('result/entry'):
-        tags = [
-            f'{tag}:{value}'
-            for tag, value in (
-                ('peer', entry.get('peer')),
-                ('vr', entry.get('vr')),
-                ('peer_ip', peer_ip(text(entry, 'peer-address'))),
-                ('remote_as', text(entry, 'remote-as')),
-                ('peer_group', text(entry, 'peer-group')),
-            )
-            if value
-        ]
+        tags = tag_tuple(
+            ('peer', entry.get('peer')),
+            ('vr', entry.get('vr')),
+            ('peer_ip', peer_ip(text(entry, 'peer-address'))),
+            ('remote_as', text(entry, 'remote-as')),
+            ('peer_group', text(entry, 'peer-group')),
+        )
         established = text(entry, 'status') == 'Established'
         duration = num(entry, 'status-duration')
-        samples.append(Sample('bgp.peer.status', 1 if established else 0, tuple(tags), 'gauge'))
+        samples.append(Sample('bgp.peer.status', 1 if established else 0, tags, 'gauge'))
         if duration is not None:
             restart = established and duration < RESTART_WINDOW_SECONDS
-            samples.append(Sample('bgp.peer.restart', 1 if restart else 0, tuple(tags), 'gauge'))
+            samples.append(Sample('bgp.peer.restart', 1 if restart else 0, tags, 'gauge'))
         for name, path, kind in BGP_NUMBERS:
             value = num(entry, path)
             if value is not None:
-                samples.append(Sample(f'bgp.peer.{name}', value, tuple(tags), kind))
+                samples.append(Sample(f'bgp.peer.{name}', value, tags, kind))
 
         limit = num(entry, 'prefix-limit')
         for family in entry.iterfind('prefix-counter/entry'):
@@ -104,15 +100,11 @@ def parse_ospf_neighbors(root: Element) -> list[Sample]:
         state = text(entry, 'status')
         if state is None:
             continue
-        tags = tuple(
-            f'{tag}:{value}'
-            for tag, value in (
-                ('neighbor', text(entry, 'neighbor-address')),
-                ('router_id', text(entry, 'neighbor-router-id')),
-                ('area', text(entry, 'area-id')),
-                ('vr', text(entry, 'virtual-router')),
-            )
-            if value
+        tags = tag_tuple(
+            ('neighbor', text(entry, 'neighbor-address')),
+            ('router_id', text(entry, 'neighbor-router-id')),
+            ('area', text(entry, 'area-id')),
+            ('vr', text(entry, 'virtual-router')),
         )
         samples.append(Sample('ospf.neighbor.status', 1 if state.lower() == 'full' else 0, tags, 'gauge'))
     return samples

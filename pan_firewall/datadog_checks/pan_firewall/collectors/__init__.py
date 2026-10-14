@@ -170,6 +170,11 @@ def register(name: str) -> Callable[[Collector], Collector]:
     return decorator
 
 
+def tag_tuple(*pairs: tuple[str, str | None]) -> tuple[str, ...]:
+    """The `name:value` tags of the pairs whose value is set, in order."""
+    return tuple(f'{name}:{value}' for name, value in pairs if value)
+
+
 def warn_once(ctx: CollectContext, key: str, msg: str, *args: object) -> None:
     """Log the warning the first time `key` is seen for this firewall, and at debug level after that."""
     if key in ctx.state.warned:

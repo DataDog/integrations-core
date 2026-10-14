@@ -75,11 +75,7 @@ REPORT_JOB_POLLS = 10
 REPORT_JOB_POLL_DELAY = 0.5
 REPORT_MAX_CARRIES = 3
 
-# NDM metadata values (the `vendor` here differs from the `device_vendor` tag).
 NDM_INTEGRATION = 'pan_firewall'
-NDM_VENDOR = 'Palo Alto Networks'
-NDM_OS_NAME = 'PAN-OS'
-NDM_DEVICE_TYPE = 'firewall'
 
 # The 26 counters of `counter.global`: raw name -> (category, aspect). The values are used only for a counter that
 # `show counter global` doesn't list, so it is still sent as 0 with the same tags; a listed counter takes both from the

@@ -22,7 +22,7 @@ from xml.etree.ElementTree import Element
 from datadog_checks.pan_firewall.constants import NDM_INTERFACE_RESOURCE_TAG
 from datadog_checks.pan_firewall.xml_utils import num, text
 
-from . import CollectContext, FirewallState, Sample, once_log, register
+from . import CollectContext, FirewallState, Sample, once_log, register, tag_tuple
 
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
@@ -83,12 +83,13 @@ def interface_tags(
     row = (rows if rows is not None else _rows_by_name(state)).get(name)
     if row is not None:
         forward = text(row, 'fwd') or ''
-        values = (
-            ('zone', text(row, 'zone')),
-            ('vsys', _vsys(text(row, 'vsys'))),
-            ('vr', forward[3:] if forward.startswith('vr:') else None),
+        tags.extend(
+            tag_tuple(
+                ('zone', text(row, 'zone')),
+                ('vsys', _vsys(text(row, 'vsys'))),
+                ('vr', forward[3:] if forward.startswith('vr:') else None),
+            )
         )
-        tags.extend(f'{key}:{value}' for key, value in values if value)
     if serial:
         tags.append(f'{NDM_INTERFACE_RESOURCE_TAG}:{serial}')
     return tuple(tags)

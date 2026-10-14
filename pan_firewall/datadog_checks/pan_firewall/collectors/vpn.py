@@ -15,7 +15,7 @@ from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.xml_utils import text
 
-from . import CollectContext, Sample, once_log, register
+from . import CollectContext, Sample, once_log, register, tag_tuple
 
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
@@ -51,14 +51,13 @@ def parse_vpn(flow: Element, gateway: Element, log: CheckLoggingAdapter) -> VpnS
     for entry in entries:
         state = text(entry, 'state') or ''
         interface = text(entry, 'inner-if')
-        values = (
+        tags = tag_tuple(
             ('tunnel', text(entry, 'name')),
             ('tunnel_interface', interface),
             ('peer_ip', text(entry, 'peerip')),
             ('gateway', gateways.get(text(entry, 'gwid') or '')),
             ('outer_interface', text(entry, 'outer-if')),
         )
-        tags = tuple(f'{key}:{value}' for key, value in values if value)
         if interface:
             snapshot.tunnel_tags[interface] = tags
             snapshot.tunnel_states[interface] = state

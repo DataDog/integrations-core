@@ -24,9 +24,10 @@ class DeviceMetadata(BaseModel):
     model: str | None = None
     serial_number: str
     version: str | None = None
-    vendor: str
-    os_name: str
-    device_type: str
+    # Differs from the `device_vendor` tag (`paloaltonetworks`).
+    vendor: str = 'Palo Alto Networks'
+    os_name: str = 'PAN-OS'
+    device_type: str = 'firewall'
     namespace: str
 
 

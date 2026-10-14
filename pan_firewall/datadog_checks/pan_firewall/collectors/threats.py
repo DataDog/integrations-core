@@ -18,7 +18,7 @@ from datadog_checks.pan_firewall.constants import PARSE_ERROR_CODE
 from datadog_checks.pan_firewall.errors import PanosApiError
 from datadog_checks.pan_firewall.xml_utils import text
 
-from . import CollectContext, Sample, ThreatJob, ThreatState, Watermark, register
+from . import CollectContext, Sample, ThreatJob, ThreatState, Watermark, register, tag_tuple
 
 ACTIVE_STATUSES = frozenset({'ACT', 'PEND'})
 
@@ -196,11 +196,7 @@ def _samples(job: ThreatJob) -> list[Sample]:
         Sample(
             'threat.count',
             count,
-            tuple(
-                f'{name}:{value}'
-                for name, value in (('severity', severity), ('action', action), ('subtype', subtype), ('vsys', vsys))
-                if value
-            ),
+            tag_tuple(('severity', severity), ('action', action), ('subtype', subtype), ('vsys', vsys)),
             'count',
         )
         for (severity, action, subtype, vsys), count in sorted(job.counts.items())
