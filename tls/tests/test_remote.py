@@ -225,9 +225,9 @@ def test_cert_expired(aggregator, instance_remote_cert_expired):
     aggregator.assert_all_metrics_covered()
 
 
-def test_load_intermediate_certs_uses_shared_fetch_and_uri_cache(instance_remote_ok):
+def test_load_intermediate_certs_uses_shared_fetch_and_uri_cache(instance_remote_ok, mocker):
     c = TLSCheck('tls', {}, [instance_remote_ok])
-    c.get_tls_context = MagicMock(return_value=MagicMock())
+    validation_context = mocker.patch('datadog_checks.tls.tls_remote.SSLContext').return_value
     c._http = MagicMock(
         tls_config={'tls_ca_cert': '/path/to/ca.pem'}, options={'proxies': {'https': 'http://proxy:3128'}}
     )
@@ -247,7 +247,7 @@ def test_load_intermediate_certs_uses_shared_fetch_and_uri_cache(instance_remote
     fetch.assert_called_once_with(
         uri, c.checker.log, {'tls_ca_cert': '/path/to/ca.pem'}, {'proxies': {'https': 'http://proxy:3128'}}
     )
-    c.get_tls_context.return_value.load_verify_locations.assert_called_once_with(cadata=b'intermediate')
+    validation_context.load_verify_locations.assert_called_once_with(cadata=b'intermediate')
 
 
 def test_load_intermediate_certs_skips_when_shared_fetch_is_unavailable(instance_remote_ok):
@@ -389,7 +389,6 @@ def test_valid_version_with_critical_certificate_validation_and_critial_certific
 
     c = TLSCheck('tls', {}, [instance_remote_ok])
     check = TLSRemoteCheck(agent_check=c)
-    c.get_tls_context()
     with patch.object(check.agent_check, 'get_tls_context') as mock_get_tls_context:
         mock_tls_context = MagicMock()
         mock_get_tls_context.return_value = mock_tls_context
@@ -417,7 +416,6 @@ def test_valid_version_with_critical_certificate_validation_and_critial_certific
 def test_valid_version_and_critical_certificate_validation_due_to_socket_exception(aggregator, instance_remote_ok):
     c = TLSCheck('tls', {}, [instance_remote_ok])
     check = TLSRemoteCheck(agent_check=c)
-    c.get_tls_context()
     with patch.object(check.agent_check, 'get_tls_context') as mock_get_tls_context:
         mock_tls_context = MagicMock()
         mock_get_tls_context.return_value = mock_tls_context
@@ -446,7 +444,6 @@ def test_valid_version_and_critical_certificate_validation_due_to_socket_excepti
 def test_valid_version_and_critical_certificate_validation_due_to_parsing_error(aggregator, instance_remote_ok):
     c = TLSCheck('tls', {}, [instance_remote_ok])
     check = TLSRemoteCheck(agent_check=c)
-    c.get_tls_context()
     with patch.object(check.agent_check, 'get_tls_context') as mock_get_tls_context:
         mock_tls_context = MagicMock()
         mock_get_tls_context.return_value = mock_tls_context

@@ -5,6 +5,7 @@ import os
 import socket
 import ssl
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import ExitStack
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -16,7 +17,8 @@ from cryptography.x509.oid import AuthorityInformationAccessOID, NameOID
 from pytest_mock import MockerFixture
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.tls import TLSCheck
+from datadog_checks.base.utils import tls as tls_utils
+from datadog_checks.tls import TLSCheck, tls_remote
 from datadog_checks.tls.const import SERVICE_CHECK_VALIDATION
 
 pytestmark = pytest.mark.unit
@@ -85,23 +87,35 @@ def write_credentials(
 
 def peer_certificate(check: TLSCheck, server_context: ssl.SSLContext, mocker: MockerFixture) -> bytes:
     """Run a check against a real TLS peer and return the client certificate that peer received."""
-    client_socket, server_socket = socket.socketpair()
-    client_socket.settimeout(5)
-    server_socket.settimeout(5)
 
-    def accept() -> bytes:
+    def accept(server_socket: socket.socket) -> bytes:
         with server_context.wrap_socket(server_socket, server_side=True) as connection:
             return connection.getpeercert(binary_form=True)
 
-    with client_socket, server_socket, ThreadPoolExecutor(max_workers=1) as executor:
-        accepted = executor.submit(accept)
-        mocker.patch.object(check, 'create_connection', return_value=client_socket)
-        check.check(None)
-        return accepted.result(timeout=5)
+    connection_count = 2 if check.checker._fetch_intermediate_certs else 1
+    with ExitStack() as stack:
+        clients = []
+        servers = []
+        for _ in range(connection_count):
+            client_socket, server_socket = socket.socketpair()
+            for sock in (client_socket, server_socket):
+                sock.settimeout(5)
+                stack.enter_context(sock)
+            clients.append(client_socket)
+            servers.append(server_socket)
+        with ThreadPoolExecutor(max_workers=connection_count) as executor:
+            accepted = [executor.submit(accept, server_socket) for server_socket in servers]
+            mocker.patch.object(check, 'create_connection', side_effect=clients)
+            check.check(None)
+            certificates = [future.result(timeout=5) for future in accepted]
+            assert all(cert == certificates[-1] for cert in certificates)
+            return certificates[-1]
 
 
 @pytest.mark.parametrize('with_intermediate', [False, True])
-@pytest.mark.parametrize('config_style', ['modern', 'legacy', 'combined', 'encrypted'])
+@pytest.mark.parametrize(
+    'config_style', ['modern', 'legacy', 'combined', 'encrypted', 'combined_encrypted', 'prefixed', 'modern_precedence']
+)
 def test_rotated_client_certificate_is_presented(
     tmp_path: Path, mocker: MockerFixture, aggregator: AggregatorStub, config_style: str, with_intermediate: bool
 ):
@@ -116,17 +130,25 @@ def test_rotated_client_certificate_is_presented(
     server_cert, server_key = write_credentials(tmp_path, 'server', server)
     original_client = make_certificate('original-client', root)
     replacement_client = make_certificate('replacement-client', root)
-    combined = config_style == 'combined'
-    password = b'test-password' if config_style == 'encrypted' else None
+    combined = config_style in ('combined', 'combined_encrypted')
+    password = b'test-password' if config_style in ('encrypted', 'combined_encrypted', 'prefixed') else None
     client_cert, client_key = write_credentials(
         tmp_path, 'client', original_client, combined=combined, password=password
     )
-    instance = {'server': 'localhost', 'tls_ca_cert': root_path}
+    instance = {'server': 'localhost', 'tls_ca_cert': root_path, 'fetch_intermediate_certs': with_intermediate}
     instance['cert' if config_style == 'legacy' else 'tls_cert'] = client_cert
     if not combined:
         instance['private_key' if config_style == 'legacy' else 'tls_private_key'] = client_key
     if password:
         instance['tls_private_key_password'] = password.decode()
+    if config_style == 'prefixed':
+        instance['_tls_context_tls_cert'] = instance.pop('tls_cert')
+        instance['_tls_context_tls_private_key'] = instance.pop('tls_private_key')
+        instance['_tls_context_tls_private_key_password'] = instance.pop('tls_private_key_password')
+        instance['tls_private_key_password'] = 'unused-password'
+        instance['tls_cert'] = instance['tls_private_key'] = '/unused/modern/path'
+    elif config_style == 'modern_precedence':
+        instance['cert'] = instance['private_key'] = '/unused/legacy/path'
     check = TLSCheck('tls', {}, [instance])
 
     server_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
@@ -141,12 +163,29 @@ def test_rotated_client_certificate_is_presented(
             'datadog_checks.tls.tls_remote.fetch_intermediate_cert',
             return_value=intermediate[0].public_bytes(serialization.Encoding.DER),
         )
-        check.checker.load_intermediate_certs(server[0].public_bytes(serialization.Encoding.DER))
-        fetch.assert_called_once()
 
+    # Context construction and key decryption must be bounded by content changes, not run count.
+    builds = mocker.spy(tls_utils, 'create_ssl_context')
+    discovery_builds = mocker.spy(tls_remote, 'create_ssl_context')
+    load_cert_chain = ssl.SSLContext.load_cert_chain
+    loads = []
+
+    def tracked_load(context: ssl.SSLContext, *args, **kwargs) -> None:
+        loads.append(args)
+        load_cert_chain(context, *args, **kwargs)
+
+    mocker.patch.object(ssl.SSLContext, 'load_cert_chain', new=tracked_load)
     assert peer_certificate(check, server_context, mocker) == original_client[0].public_bytes(
         serialization.Encoding.DER
     )
+    context = check.get_tls_context()
+    assert peer_certificate(check, server_context, mocker) == original_client[0].public_bytes(
+        serialization.Encoding.DER
+    )
+    assert check.get_tls_context() is context
+    assert builds.call_count == 1
+    assert discovery_builds.call_count == int(with_intermediate)
+    assert len(loads) == 1 + int(with_intermediate)
     # Some rotators preserve timestamps; refresh must still notice the new credentials.
     original_stats = {path: Path(path).stat() for path in (client_cert, client_key)}
     write_credentials(tmp_path, 'client', replacement_client, combined=combined, password=password)
@@ -155,24 +194,40 @@ def test_rotated_client_certificate_is_presented(
     assert peer_certificate(check, server_context, mocker) == replacement_client[0].public_bytes(
         serialization.Encoding.DER
     )
-    aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=check.OK, count=2)
+    aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=check.OK, count=3)
+    assert builds.call_count == 2
+    assert discovery_builds.call_count == 2 * int(with_intermediate)
+    assert len(loads) == 2 * (1 + int(with_intermediate))
+    if with_intermediate:
+        fetch.assert_called_once()
 
 
 @pytest.mark.parametrize(
-    'config_style,failure',
+    'config_style,failure,initial_run',
     [
-        (style, failure)
+        (style, failure, False)
         for style in ('modern', 'legacy', 'combined')
         for failure in ('malformed', 'missing_cert', 'unreadable_cert')
     ]
     + [
-        (style, failure)
+        (style, failure, False)
         for style in ('modern', 'legacy')
         for failure in ('missing_key', 'unreadable_key', 'mismatched')
+    ]
+    + [
+        ('combined_encrypted', 'wrong_password', False),
+        ('combined_encrypted', 'wrong_password', True),
+        ('modern', 'missing_cert', True),
+        ('modern', 'malformed', True),
     ],
 )
 def test_invalid_rotated_client_certificate_reports_failure_and_recovers(
-    tmp_path: Path, mocker: MockerFixture, aggregator: AggregatorStub, failure: str, config_style: str
+    tmp_path: Path,
+    mocker: MockerFixture,
+    aggregator: AggregatorStub,
+    failure: str,
+    config_style: str,
+    initial_run: bool,
 ):
     # A bad replacement must not silently keep the previous credential or prevent recovery on the next run.
     root = make_certificate('Test Root', ca=True)
@@ -180,9 +235,12 @@ def test_invalid_rotated_client_certificate_reports_failure_and_recovers(
     server = make_certificate('localhost', root)
     server_cert, server_key = write_credentials(tmp_path, 'server', server)
     client = make_certificate('client', root)
-    combined = config_style == 'combined'
-    client_cert, client_key = write_credentials(tmp_path, 'client', client, combined=combined)
+    combined = config_style in ('combined', 'combined_encrypted')
+    password = b'test-password' if config_style == 'combined_encrypted' else None
+    client_cert, client_key = write_credentials(tmp_path, 'client', client, combined=combined, password=password)
     instance = {'server': 'localhost', 'tls_ca_cert': root_path}
+    if password:
+        instance['tls_private_key_password'] = password.decode()
     instance['cert' if config_style == 'legacy' else 'tls_cert'] = client_cert
     if not combined:
         instance['private_key' if config_style == 'legacy' else 'tls_private_key'] = client_key
@@ -193,7 +251,8 @@ def test_invalid_rotated_client_certificate_reports_failure_and_recovers(
     server_context.verify_mode = ssl.CERT_OPTIONAL
     server_context.load_verify_locations(cafile=root_path)
     server_context.load_cert_chain(server_cert, server_key)
-    peer_certificate(check, server_context, mocker)
+    if not initial_run:
+        peer_certificate(check, server_context, mocker)
     aggregator.reset()
 
     credential_path = Path(client_key if failure.endswith('_key') else client_cert)
@@ -204,6 +263,8 @@ def test_invalid_rotated_client_certificate_reports_failure_and_recovers(
         if os.access(credential_path, os.R_OK):
             credential_path.chmod(0o600)
             pytest.skip('This platform or user can read files with no read permissions')
+    elif failure == 'wrong_password':
+        write_credentials(tmp_path, 'client', client, combined=combined, password=b'wrong-password')
     elif failure == 'mismatched':
         client = make_certificate('replacement-client', root)
         Path(client_cert).write_bytes(client[0].public_bytes(serialization.Encoding.PEM))
@@ -211,7 +272,9 @@ def test_invalid_rotated_client_certificate_reports_failure_and_recovers(
         Path(client_cert).write_text('invalid certificate')
     with pytest.raises(ssl.SSLError):
         peer_certificate(check, server_context, mocker)
-    aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=check.CRITICAL, count=1)
+    aggregator.assert_service_check(
+        SERVICE_CHECK_VALIDATION, status=check.CRITICAL, count=1, message='Failed to load client certificate from '
+    )
     aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=check.OK, count=0)
     aggregator.assert_metric('tls.days_left', count=0)
     aggregator.assert_metric('tls.seconds_left', count=0)
@@ -225,8 +288,49 @@ def test_invalid_rotated_client_certificate_reports_failure_and_recovers(
             )
         )
     else:
-        write_credentials(tmp_path, 'client', client, combined=combined)
+        write_credentials(tmp_path, 'client', client, combined=combined, password=password)
     assert peer_certificate(check, server_context, mocker) == client[0].public_bytes(serialization.Encoding.DER)
+    aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=check.OK, count=1)
+
+
+def test_rotation_during_client_certificate_load_is_retried(
+    tmp_path: Path, mocker: MockerFixture, aggregator: AggregatorStub
+):
+    # A rotation between hashing and loading must not cache a context under the wrong file contents.
+    root = make_certificate('Test Root', ca=True)
+    root_path, _ = write_credentials(tmp_path, 'root', root)
+    server_cert, server_key = write_credentials(tmp_path, 'server', make_certificate('localhost', root))
+    client_cert, client_key = write_credentials(tmp_path, 'client', make_certificate('original-client', root))
+    replacement = make_certificate('replacement-client', root)
+    check = TLSCheck(
+        'tls',
+        {},
+        [{'server': 'localhost', 'tls_ca_cert': root_path, 'tls_cert': client_cert, 'tls_private_key': client_key}],
+    )
+    server_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    server_context.maximum_version = ssl.TLSVersion.TLSv1_2
+    server_context.verify_mode = ssl.CERT_REQUIRED
+    server_context.load_verify_locations(cafile=root_path)
+    server_context.load_cert_chain(server_cert, server_key)
+    load_cert_chain = ssl.SSLContext.load_cert_chain
+
+    def rotate_after_load(context: ssl.SSLContext, *args, **kwargs) -> None:
+        load_cert_chain(context, *args, **kwargs)
+        write_credentials(tmp_path, 'client', replacement)
+
+    patched_load = mocker.patch.object(ssl.SSLContext, 'load_cert_chain', new=rotate_after_load)
+    with pytest.raises(ssl.SSLError):
+        peer_certificate(check, server_context, mocker)
+    aggregator.assert_service_check(
+        SERVICE_CHECK_VALIDATION,
+        status=check.CRITICAL,
+        count=1,
+        message='Failed to load client certificate from .*Client credentials changed while loading',
+    )
+    aggregator.assert_metric('tls.days_left', count=0)
+    aggregator.assert_metric('tls.seconds_left', count=0)
+    mocker.stop(patched_load)
+    assert peer_certificate(check, server_context, mocker) == replacement[0].public_bytes(serialization.Encoding.DER)
     aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=check.OK, count=1)
 
 

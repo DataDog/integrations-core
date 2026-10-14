@@ -4,6 +4,8 @@
 from collections import ChainMap
 from hashlib import sha256
 from os.path import expanduser
+from pathlib import Path
+from ssl import PROTOCOL_TLS_CLIENT, SSLContext
 from struct import pack, unpack
 
 from cryptography.x509.base import load_der_x509_certificate
@@ -26,6 +28,10 @@ except ImportError:
 DEFAULT_AIA_CHASING_MAX_DEPTH = 5
 
 
+class ClientCertificateError(Exception):
+    pass
+
+
 class TLSRemoteCheck(object):
     def __init__(self, agent_check):
         self.agent_check = agent_check
@@ -44,6 +50,84 @@ class TLSRemoteCheck(object):
             # Convert minutes to seconds
             float(self.agent_check.instance.get('intermediate_cert_refresh_interval', 60)) * 60
         )
+        self._loaded_tls_state = None
+        self._tls_context_initialized = False
+        self._discovery_context = None
+        self._discovery_fingerprint = None
+
+        # Resolve the credential options owned by this integration, including the base API's
+        # higher-priority TLS options. Explicit modern values (even None) override legacy ones.
+        instance = self.agent_check.instance
+        self._client_cert = instance.get('_tls_context_tls_cert', instance.get('tls_cert', instance.get('cert')))
+        self._client_key = instance.get(
+            '_tls_context_tls_private_key', instance.get('tls_private_key', instance.get('private_key'))
+        )
+        self._client_password = instance.get(
+            '_tls_context_tls_private_key_password', instance.get('tls_private_key_password')
+        )
+
+    def _credential_fingerprint(self) -> tuple[bytes, ...]:
+        if not self._client_cert:
+            return ()
+        try:
+            return tuple(
+                sha256(Path(expanduser(path)).read_bytes()).digest()
+                for path in (self._client_cert, self._client_key)
+                if path
+            )
+        except OSError as e:
+            raise ClientCertificateError(f'Failed to load client certificate from {self._client_cert}: {e}') from e
+
+    def _get_tls_context(self) -> SSLContext:
+        fingerprint = self._credential_fingerprint()
+        state = (fingerprint, frozenset(self.agent_check._intermediate_cert_cache))
+        if state == self._loaded_tls_state:
+            return self.agent_check.get_tls_context()
+
+        # Only publish a successful load. A failed or concurrent rotation must be retried,
+        # even if the next run restores the exact previous bytes.
+        self._loaded_tls_state = None
+        # Use the public API to build trust without its lenient client-certificate loader.
+        # Cover modern, legacy and higher-priority names so credentials are loaded exactly once.
+        context = self.agent_check.get_tls_context(
+            refresh=self._tls_context_initialized,
+            overrides={'tls_cert': None, 'cert': None, '_tls_context_tls_cert': None},
+        )
+        self._tls_context_initialized = True
+        self._load_client_certificate(context, fingerprint)
+        for intermediate_cert in self.agent_check._intermediate_cert_cache.values():
+            context.load_verify_locations(cadata=intermediate_cert)
+        self._loaded_tls_state = state
+        return context
+
+    def _load_client_certificate(self, context: SSLContext, fingerprint: tuple[bytes, ...]) -> None:
+        if self._client_cert:
+            try:
+                context.load_cert_chain(
+                    expanduser(self._client_cert),
+                    keyfile=expanduser(self._client_key) if self._client_key else None,
+                    password=self._client_password,
+                )
+                if self._credential_fingerprint() != fingerprint:
+                    raise ValueError('Client credentials changed while loading; retrying on the next check')
+            except ClientCertificateError:
+                raise
+            except Exception as e:
+                raise ClientCertificateError(f'Failed to load client certificate from {self._client_cert}: {e}') from e
+
+    def _get_discovery_context(self) -> SSLContext:
+        fingerprint = self._credential_fingerprint()
+        if self._discovery_context is None or fingerprint != self._discovery_fingerprint:
+            context = create_ssl_context(
+                ChainMap(
+                    {'tls_verify': False, 'tls_cert': None, 'tls_private_key': None, 'tls_private_key_password': None},
+                    self.agent_check.http.tls_config,
+                )
+            )
+            self._load_client_certificate(context, fingerprint)
+            self._discovery_context = context
+            self._discovery_fingerprint = fingerprint
+        return self._discovery_context
 
     def check(self):
         if not self.agent_check._server:
@@ -70,23 +154,16 @@ class TLSRemoteCheck(object):
         with sock:
             self.log.debug('Getting cert and TLS protocol version')
             try:
-                # Certificate files can rotate while this check instance remains alive.
-                context = self.agent_check.get_tls_context(refresh=hasattr(self.agent_check, '_tls_context_wrapper'))
-                # The shared context factory tolerates missing client files. Load strictly here so
-                # rotation cannot silently downgrade a configured client to unauthenticated TLS.
-                config = self.agent_check._tls_context_wrapper.config
-                if config['tls_cert']:
-                    context.load_cert_chain(
-                        expanduser(config['tls_cert']),
-                        keyfile=expanduser(config['tls_private_key']) if config['tls_private_key'] else None,
-                        password=config['tls_private_key_password'],
-                    )
-                for intermediate_cert in self.agent_check._intermediate_cert_cache.values():
-                    context.load_verify_locations(cadata=intermediate_cert)
+                context = self._get_tls_context()
                 with context.wrap_socket(sock, server_hostname=self.agent_check._server_hostname) as secure_sock:
                     protocol_version = secure_sock.version()
                     der_cert = secure_sock.getpeercert(binary_form=True)
                     self.log.debug('Received serialized peer certificate and TLS protocol version %s', protocol_version)
+            except ClientCertificateError as e:
+                self.agent_check.service_check(
+                    SERVICE_CHECK_VALIDATION, self.agent_check.CRITICAL, tags=self.agent_check._tags, message=str(e)
+                )
+                return cert, protocol_version
             except Exception as e:
                 # https://docs.python.org/3/library/ssl.html#ssl.SSLCertVerificationError
                 err_code = getattr(e, 'verify_code', None)
@@ -200,7 +277,7 @@ class TLSRemoteCheck(object):
 
         with sock:
             try:
-                context = create_ssl_context(ChainMap({'tls_verify': False}, self.agent_check.http.tls_config))
+                context = self._get_discovery_context()
 
                 with context.wrap_socket(sock, server_hostname=self.agent_check._server_hostname) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
@@ -278,9 +355,8 @@ class TLSRemoteCheck(object):
             cert_id = sha256(intermediate_cert).digest()
             if cert_id not in self.agent_check._intermediate_cert_cache:
                 try:
-                    # Validate with OpenSSL before caching; the handshake uses a refreshed context.
-                    # `cadata` accepts DER bytes directly here (the base path uses PEM strings instead).
-                    self.agent_check.get_tls_context().load_verify_locations(cadata=intermediate_cert)
+                    # Validate with OpenSSL before caching, without mutating the live trust store.
+                    SSLContext(PROTOCOL_TLS_CLIENT).load_verify_locations(cadata=intermediate_cert)
                 except Exception as e:
                     self.log.error('Error loading intermediate certificate from `%s`: %s', uri, e)
                     continue
