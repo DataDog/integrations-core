@@ -33,6 +33,7 @@ files:
         instead of storing credentials in plain text.
       value:
         type: string
+        pattern: '^[^:]+:.+$'
         example: <USER>:<PASSWORD>
       secret: true
       fleet_configurable: false
