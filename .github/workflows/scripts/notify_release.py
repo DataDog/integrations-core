@@ -7,8 +7,14 @@ import http.client
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.request
+
+# dd-sts mints a fresh application key for every run, and it is used within a
+# second. A new key can be rejected with 401/403 until it propagates, so auth
+# errors are retried (~30s in total) before being reported as misconfiguration.
+AUTH_RETRY_DELAYS = (1, 2, 4, 8, 15)
 
 
 def escape_slack_text(value: str) -> str:
@@ -56,6 +62,15 @@ def report_config_error(error: str) -> None:
             summary.write(f"### \u274c Release notification failed\n\n{message}\n")
 
 
+def read_error_body(error: urllib.error.HTTPError) -> str:
+    """Return a short, single-line error response body for diagnostics."""
+    try:
+        body = error.read().decode("utf-8", errors="replace")
+    except (OSError, http.client.HTTPException, ValueError):
+        return ""
+    return " ".join(body.split())[:500]
+
+
 def post(api_url: str, api_key: str, app_key: str, text: str) -> bool:
     """Trigger the workflow; return False only on a persistent misconfiguration."""
     data = json.dumps({"meta": {"payload": {"text": text}}}).encode()
@@ -68,18 +83,27 @@ def post(api_url: str, api_key: str, app_key: str, text: str) -> bool:
             "DD-APPLICATION-KEY": app_key,
         },
     )
-    try:
-        urllib.request.urlopen(request, timeout=15).close()
-    except urllib.error.HTTPError as e:
-        if e.code == 429 or e.code >= 500:
-            print(f"::warning::Release notification failed (transient): HTTP {e.code}")
+    for attempt in range(len(AUTH_RETRY_DELAYS) + 1):
+        try:
+            urllib.request.urlopen(request, timeout=15).close()
+        except urllib.error.HTTPError as e:
+            body = read_error_body(e)
+            if e.code == 429 or e.code >= 500:
+                print(f"::warning::Release notification failed (transient): HTTP {e.code} {body}")
+                return True
+            if e.code in (401, 403) and attempt < len(AUTH_RETRY_DELAYS):
+                delay = AUTH_RETRY_DELAYS[attempt]
+                print(f"Release notification got HTTP {e.code} {body}; retrying in {delay}s (key propagation)")
+                time.sleep(delay)
+                continue
+            print(f"Release notification response: HTTP {e.code} {body}")
+            report_config_error(f"HTTP {e.code}")
+            return False
+        except (OSError, http.client.HTTPException, ValueError) as e:
+            print(f"::warning::Release notification request failed (transient): {e}")
             return True
-        report_config_error(f"HTTP {e.code}")
-        return False
-    except (OSError, http.client.HTTPException, ValueError) as e:
-        print(f"::warning::Release notification request failed (transient): {e}")
         return True
-    return True
+    return False  # pragma: no cover - the final attempt always returns above
 
 
 def main() -> None:

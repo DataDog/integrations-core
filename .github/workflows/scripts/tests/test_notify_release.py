@@ -1,5 +1,6 @@
 """Tests for notify_release."""
 import http.client
+import io
 import json
 import urllib.error
 from unittest.mock import MagicMock, patch
@@ -119,15 +120,58 @@ def test_post_warns_on_transient_http_error(code, capsys):
     assert "::error::" not in out
 
 
-@pytest.mark.parametrize("code", [400, 401, 403, 404])
-def test_post_fails_on_config_http_error(code, capsys, tmp_path, monkeypatch):
+def http_error(code, body=b""):
+    return urllib.error.HTTPError(WEBHOOK, code, "err", {}, io.BytesIO(body))
+
+
+@pytest.fixture
+def sleep():
+    with patch.object(notify_release.time, "sleep") as sleep:
+        yield sleep
+
+
+@pytest.mark.parametrize("code", [400, 404])
+def test_post_fails_on_config_http_error(code, capsys, tmp_path, monkeypatch, sleep):
     summary = tmp_path / "summary.md"
     monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary))
-    error = urllib.error.HTTPError(WEBHOOK, code, "err", {}, None)
-    with patch("urllib.request.urlopen", side_effect=error):
+    with patch("urllib.request.urlopen", side_effect=http_error(code, b'{"errors":["bad"]}')) as urlopen:
         result = notify_release.post(WEBHOOK, "api", "app", "hi")
     assert result is False
-    assert "::error::" in capsys.readouterr().out
+    assert urlopen.call_count == 1
+    sleep.assert_not_called()
+    out = capsys.readouterr().out
+    assert "::error::" in out
+    assert '{"errors":["bad"]}' in out
+    assert f"HTTP {code}" in summary.read_text()
+
+
+@pytest.mark.parametrize("code", [401, 403])
+def test_post_retries_auth_error_until_key_propagates(code, capsys, sleep):
+    responses = [http_error(code, b"Forbidden"), http_error(code, b"Forbidden"), MagicMock()]
+    with patch("urllib.request.urlopen", side_effect=responses) as urlopen:
+        result = notify_release.post(WEBHOOK, "api", "app", "hi")
+    assert result is True
+    assert urlopen.call_count == 3
+    assert [c.args[0] for c in sleep.call_args_list] == list(notify_release.AUTH_RETRY_DELAYS[:2])
+    out = capsys.readouterr().out
+    assert "::error::" not in out
+    assert f"HTTP {code}" in out
+
+
+@pytest.mark.parametrize("code", [401, 403])
+def test_post_fails_on_persistent_auth_error(code, capsys, tmp_path, monkeypatch, sleep):
+    summary = tmp_path / "summary.md"
+    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary))
+    attempts = len(notify_release.AUTH_RETRY_DELAYS) + 1
+    errors = [http_error(code, b'{"errors":["Forbidden"]}') for _ in range(attempts)]
+    with patch("urllib.request.urlopen", side_effect=errors) as urlopen:
+        result = notify_release.post(WEBHOOK, "api", "app", "hi")
+    assert result is False
+    assert urlopen.call_count == attempts
+    assert sleep.call_count == attempts - 1
+    out = capsys.readouterr().out
+    assert "::error::" in out
+    assert '{"errors":["Forbidden"]}' in out
     assert f"HTTP {code}" in summary.read_text()
 
 
