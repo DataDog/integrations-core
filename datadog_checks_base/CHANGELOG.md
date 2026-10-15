@@ -12,7 +12,7 @@
 
 * Make `assert_histogram_bucket` compare bucket bounds when they are given. ([#25378](https://github.com/DataDog/integrations-core/pull/25378))
 
-## 38.4.0 / 2026-10-01
+## 38.4.0 / 2026-10-01 / Agent 7.84.2
 
 ***Security***:
 
@@ -30,7 +30,7 @@
 * Remove embedded null characters by default before obfuscating SQL. ([#25343](https://github.com/DataDog/integrations-core/pull/25343))
 * Log query obfuscation failures with repr so an embedded null cannot crash the caller. ([#25344](https://github.com/DataDog/integrations-core/pull/25344))
 
-## 38.3.3 / 2026-10-09
+## 38.3.3 / 2026-10-09 / Agent 7.84.3
 
 ***Added***:
 
