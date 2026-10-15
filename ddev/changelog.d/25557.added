@@ -1,0 +1,1 @@
+Show the Agent container logs when the Kubernetes E2E Agent fails to restart.
