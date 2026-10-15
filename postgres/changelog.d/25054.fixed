@@ -1,0 +1,1 @@
+Add ``azure_sys`` to the default list of ignored databases so it is excluded from query metrics and samples on Azure.

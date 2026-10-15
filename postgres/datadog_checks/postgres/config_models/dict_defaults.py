@@ -15,6 +15,7 @@ DEFAULT_EXCLUDED_DATABASES = [
     "template1",
     "rdsadmin",
     "azure_maintenance",
+    "azure_sys",
     "cloudsqladmin",
     "alloydbadmin",
     "alloydbmetadata",
