@@ -181,6 +181,9 @@ jobs:
     needs: prepare
     if: needs.prepare.outputs.has_packages == 'true' && !inputs.dry-run
     runs-on: ubuntu-latest
+    # Records a deployment in the caller repository's `release` environment only when
+    # wheels are actually dispatched. The environment must have no required reviewers.
+    environment: release
 
     strategy:
       matrix:
