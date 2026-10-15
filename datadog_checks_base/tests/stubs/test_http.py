@@ -95,7 +95,7 @@ def test_fake_response_does_not_derive_metadata_or_json_from_content_or_headers(
 
     assert response.encoding is None
     assert response.links == {}
-    with pytest.raises(ValueError, match='No JSON result'):
+    with pytest.raises(AssertionError, match='No JSON result'):
         response.json()
 
 

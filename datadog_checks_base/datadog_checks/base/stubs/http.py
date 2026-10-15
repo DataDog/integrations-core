@@ -134,7 +134,7 @@ class FakeHTTPResponse:
         if self._json_error is not None:
             raise self._json_error
         if self._json_result is JSON_RESULT_UNSET:
-            raise ValueError('No JSON result was configured for this fake response.')
+            raise AssertionError('No JSON result was configured for this fake response.')
         return self._json_result
 
     def raise_for_status(self) -> None:
