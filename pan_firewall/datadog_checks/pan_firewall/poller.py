@@ -119,9 +119,7 @@ class FirewallPoller:
         )
 
     def _reschedule(self, results: dict[str, Result]) -> None:
-        """Push back what ran by its interval, and what failed by a shorter retry delay. The rest stays due."""
         self.schedule.mark_run(names_with(results, Result.RAN))
-        # The jobs check has no schedule: it is the first call of every run with something due.
         failed = names_with(results, Result.FAILED, Result.UNREACHABLE)
         self.schedule.mark_failed([name for name in failed if name in INTERVALS])
         if self.client.stats.key_regenerated:
@@ -129,7 +127,6 @@ class FirewallPoller:
             self.schedule.make_due(IDENTITY)
 
     def _send_health(self) -> None:
-        """Send `can_connect` and `api.authentication.status`. A run that made no call sends the last values again."""
         stats = self.client.stats
         if stats.calls:
             self._can_connect = 1 if stats.answered else 0
@@ -247,7 +244,6 @@ class FirewallPoller:
         with ThreadPoolExecutor(max_workers=COLLECTOR_WORKERS, thread_name_prefix=f'pan_firewall-{self.ip}') as pool:
             futures = {name: pool.submit(self._run_collector, name, ctx) for name in names}
         results = {}
-        # Samples are submitted from this thread, in collector order, once every collector is done.
         for name, future in futures.items():
             try:
                 self._submit(future.result())
