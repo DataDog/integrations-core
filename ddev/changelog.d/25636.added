@@ -1,1 +1,0 @@
-Add a Dispatcher metric counting GitHub requests that return a failure to the caller.
