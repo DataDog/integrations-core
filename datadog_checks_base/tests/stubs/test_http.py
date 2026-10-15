@@ -42,6 +42,7 @@ def test_fake_response_returns_only_configured_results():
     [
         (b'first line\nsecond line', None, 'first line\nsecond line'),
         (b'caf\xe9', 'latin-1', 'café'),
+        (b'\xff\xfebinary', None, '\ufffd\ufffdbinary'),
     ],
 )
 def test_fake_response_derives_text_and_stream_results_from_content(

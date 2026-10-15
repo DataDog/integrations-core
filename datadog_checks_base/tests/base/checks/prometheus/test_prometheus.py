@@ -45,8 +45,6 @@ def _file_response(file_path: str, *, content_type: str) -> FakeHTTPResponse:
     with open(file_path, 'rb') as fixture:
         return FakeHTTPResponse(
             content=fixture.read(),
-            # Protobuf is binary and not decodable as UTF-8, so opt out of deriving text from the content.
-            text='',
             content_chunks=(),
             lines=(),
             headers={'Content-Type': content_type},
@@ -376,7 +374,6 @@ def test_poll_protobuf(bin_data_path, fake_http, fake_http_response, mocked_prom
     fake_http_response(
         FAKE_ENDPOINT,
         content,
-        text='',
         content_chunks=(),
         lines=(),
         headers={'Content-Type': protobuf_content_type},

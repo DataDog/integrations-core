@@ -91,7 +91,9 @@ class FakeHTTPResponse:
         reason: str = '',
         peer_cert: bytes | dict | None = None,
     ) -> None:
-        resolved_text = content.decode(encoding or 'utf-8') if isinstance(text, UnsetResponseResult) else text
+        resolved_text = (
+            content.decode(encoding or 'utf-8', errors='replace') if isinstance(text, UnsetResponseResult) else text
+        )
         resolved_content_chunks = (
             ((content,) if content else ()) if isinstance(content_chunks, UnsetResponseResult) else content_chunks
         )
