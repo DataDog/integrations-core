@@ -108,7 +108,7 @@ class FirewallPoller:
 
         It reads the client rather than `results`: a collector that caught the error itself still lost the firewall.
         """
-        if (reason := self.client.unreachable) is None:
+        if (reason := self.client.stats.unreachable) is None:
             return
         self.log.warning(
             '%s: could not reach the firewall (%s) during %s; skipped for this run: %s',
@@ -205,7 +205,7 @@ class FirewallPoller:
         if not collectors:
             return results
 
-        if self.client.unreachable is not None:
+        if self.client.stats.unreachable is not None:
             results |= dict.fromkeys(collectors, Result.SKIPPED)
         # Without an identity, metrics could not carry the device tags: leave the collectors due for the next run.
         elif self.identity is not None:
@@ -268,7 +268,7 @@ class FirewallPoller:
         return results
 
     def _run_collector(self, name: str, ctx: CollectContext) -> list[Sample]:
-        if self.client.unreachable is not None:
+        if self.client.stats.unreachable is not None:
             raise PanosSkipped(f'not running {name}: an earlier call could not reach {self.ip}')
         return COLLECT_FUNCTIONS[name](ctx)
 

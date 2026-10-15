@@ -298,7 +298,7 @@ def test_transport_errors_are_unreachable_and_keep_the_original_text(failure):
 
     assert type(exc_info.value) is PanosUnreachable
     assert str(exc_info.value) == f'could not reach {HOST}: {raised}'
-    assert client.unreachable == str(raised)
+    assert client.stats.unreachable == str(raised)
 
 
 @pytest.mark.parametrize(
@@ -380,7 +380,7 @@ def test_stream_that_breaks_mid_way_makes_the_next_calls_fail_fast():
         client.read_log_job('2', lambda entry: seqnos.append(entry.findtext('seqno')))
 
     assert len(seqnos) == 1 and seqnos[0]
-    assert client.unreachable
+    assert client.stats.unreachable
     with pytest.raises(PanosSkipped):
         client.op(SYSTEM_INFO_CMD)
     assert len(http.calls) == 1

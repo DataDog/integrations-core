@@ -172,12 +172,6 @@ class PanosClient:
         with self._stats_lock:
             return dataclasses.replace(self._stats)
 
-    @property
-    def unreachable(self) -> str | None:
-        """The reason of the run's first call that could not reach the device, or None."""
-        with self._stats_lock:
-            return self._stats.unreachable
-
     def _send(self, params: dict[str, str], read: Callable[[ResponseWrapper], T], *, stream: bool = False) -> T:
         """Make one call and `read` its response, renewing a rejected key once."""
         with self._slots:
