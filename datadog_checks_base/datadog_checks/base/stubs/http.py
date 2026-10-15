@@ -11,6 +11,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Unpack
 
 from datadog_checks.base.utils.headers import get_default_headers
+from datadog_checks.base.utils.headers import get_header as get_header_value
 from datadog_checks.base.utils.headers import set_header as set_header_value
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.base.utils.http_protocol import HTTPHeaders, HTTPRequestOptions, HTTPResponse
@@ -18,6 +19,7 @@ from datadog_checks.base.utils.http_protocol import HTTPHeaders, HTTPRequestOpti
 __all__ = ['FakeHTTPClient', 'FakeHTTPResponse', 'RecordedRequest']
 
 JSON_RESULT_UNSET = object()
+OPTION_UNSET = object()
 
 
 class UnsetResponseResult(Enum):
@@ -263,11 +265,7 @@ class FakeHTTPClient:
         return self._request('OPTIONS', url, options)
 
     def get_header(self, name: str, default: str | None = None) -> str | None:
-        found = default
-        for header_name, value in self.options['headers'].items():
-            if header_name.lower() == name.lower():
-                found = value
-        return found
+        return get_header_value(self.options['headers'], name, default)
 
     def set_header(self, name: str, value: str) -> None:
         set_header_value(self.options['headers'], name, value)
@@ -320,8 +318,7 @@ class FakeHTTPClient:
             registered.method == request.method
             and registered.url == request.url
             and all(
-                request.options.get(name, JSON_RESULT_UNSET) == value
-                for name, value in registered.match_options.items()
+                request.options.get(name, OPTION_UNSET) == value for name, value in registered.match_options.items()
             )
         )
 

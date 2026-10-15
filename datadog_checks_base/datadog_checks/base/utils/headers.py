@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from collections.abc import MutableMapping
+from collections.abc import Mapping, MutableMapping
 
 from datadog_checks.base.agent import datadog_agent
 
@@ -24,6 +24,15 @@ def get_default_headers():
     headers = {'User-Agent': 'Datadog Agent/{}'.format(datadog_agent.get_version() or '0.0.0')}
     headers.update(_get_common_headers())
     return headers
+
+
+def get_header(headers: Mapping[str, str], name: str, default: str | None = None) -> str | None:
+    """Return the last case-insensitive match, which requests sends on the wire."""
+    found = default
+    for header_name, value in headers.items():
+        if header_name.lower() == name.lower():
+            found = value
+    return found
 
 
 def set_header(headers: MutableMapping[str, str], name: str, value: str) -> None:

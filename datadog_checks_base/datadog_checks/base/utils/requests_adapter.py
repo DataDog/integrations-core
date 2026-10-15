@@ -66,11 +66,11 @@ def _backend_compat_type[T: BaseException](agnostic: type[T], *backend: type[Bas
 
 
 # Requests must be first so its initializer populates request, response, and simplejson fields.
-_COMPAT_JSON_DECODE_ERROR = _backend_compat_type(requests_exceptions.JSONDecodeError, json.JSONDecodeError)
+COMPAT_JSON_DECODE_ERROR = _backend_compat_type(requests_exceptions.JSONDecodeError, json.JSONDecodeError)
 
 
 def _translate_json_decode_error(exc: requests_exceptions.JSONDecodeError) -> json.JSONDecodeError:
-    if isinstance(exc, _COMPAT_JSON_DECODE_ERROR):
+    if isinstance(exc, COMPAT_JSON_DECODE_ERROR):
         return cast(json.JSONDecodeError, exc)
 
     args: list[Any] = [exc.msg, exc.doc, exc.pos]
@@ -78,7 +78,7 @@ def _translate_json_decode_error(exc: requests_exceptions.JSONDecodeError) -> js
         args.append(end)
     return cast(
         json.JSONDecodeError,
-        _COMPAT_JSON_DECODE_ERROR(
+        COMPAT_JSON_DECODE_ERROR(
             *args,
             request=getattr(exc, 'request', None),
             response=getattr(exc, 'response', None),
@@ -137,10 +137,6 @@ def _translate_requests_exception(
         return _translated_http_error(HTTPClientReadTimeoutError, exc, response=response)
     if isinstance(exc, requests_exceptions.ConnectionError):
         return _translated_http_error(HTTPClientConnectionError, exc, response=response)
-    if isinstance(exc, requests_exceptions.InvalidHeader):
-        return _translated_http_error(HTTPClientRequestError, exc, response=response)
-    if isinstance(exc, requests_exceptions.ContentDecodingError):
-        return _translated_http_error(HTTPClientRequestError, exc, response=response)
     if isinstance(exc, requests_exceptions.HTTPError):
         return _translated_http_error(HTTPClientStatusError, exc, response=response)
     if isinstance(exc, requests_exceptions.RequestException):

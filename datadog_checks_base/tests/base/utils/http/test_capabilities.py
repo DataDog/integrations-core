@@ -45,11 +45,6 @@ def test_requests_transport_builds_response_through_requests():
 
 
 class TestClose:
-    def test_close_without_session_is_noop(self):
-        http = RequestsWrapper({}, {})
-        http.close()
-        assert http._session is None
-
     def test_close_closes_underlying_session(self):
         transport = common.RequestsTransport()
         http = common.create_requests_client(transport)

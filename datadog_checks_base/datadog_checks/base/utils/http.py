@@ -34,24 +34,9 @@ from datadog_checks.base.utils import _http_utils
 from . import requests_adapter
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
+from .headers import get_header as get_header_value
 from .headers import set_header as set_header_value
-from .http_exceptions import (  # noqa: F401
-    HTTPClientConnectionError,
-    HTTPClientConnectTimeoutError,
-    HTTPClientError,
-    HTTPClientInvalidURLError,
-    HTTPClientReadTimeoutError,
-    HTTPClientRequestError,
-    HTTPClientSSLError,
-    HTTPClientStatusError,
-    HTTPClientTimeoutError,
-)
-from .http_protocol import (  # noqa: F401
-    HTTPClient,
-    HTTPRequest,
-    HTTPRequestSnapshot,
-    HTTPResponse,
-)
+from .http_protocol import HTTPClient, HTTPResponse
 from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
 
@@ -124,7 +109,6 @@ AIA_TLS_CONFIG_FIELDS = frozenset(
     {'tls_ca_cert', 'tls_ciphers', 'tls_intermediate_ca_certs', 'tls_protocols_allowed', 'tls_validate_hostname'}
 )
 AIA_ALLOWED_SCHEMES = frozenset({'http', 'https'})
-AIA_REDIRECT_STATUS_CODES = frozenset({301, 302, 303, 307, 308})
 MAX_AIA_CERT_SIZE = 64 * 1024
 MAX_AIA_REDIRECTS = 10
 DEFAULT_AIA_CHASING_MAX_DEPTH = 5
@@ -310,8 +294,7 @@ def _fetch_aia_content(
     while _is_safe_aia_url(uri, logger):
         response = session.get(uri, **request_options)
         try:
-            is_redirect = getattr(response, 'is_redirect', response.status_code in AIA_REDIRECT_STATUS_CODES)
-            if is_redirect:
+            if response.is_redirect:
                 if not follow_redirects:
                     return None
 
@@ -639,12 +622,7 @@ class RequestsWrapper(object):
         return should_bypass_proxy(url, self.no_proxy_uris or [])
 
     def get_header(self, name: str, default: str | None = None) -> str | None:
-        """Return the last case-insensitive match, which requests sends on the wire."""
-        found = default
-        for key, value in self.options['headers'].items():
-            if key.lower() == name.lower():
-                found = value
-        return found
+        return get_header_value(self.options['headers'], name, default)
 
     def set_header(self, name: str, value: str) -> None:
         set_header_value(self.options['headers'], name, value)

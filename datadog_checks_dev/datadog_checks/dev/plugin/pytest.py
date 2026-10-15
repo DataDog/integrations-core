@@ -36,7 +36,7 @@ __aggregator = None
 __datadog_agent = None
 MockResponse = None
 
-_DEFAULT_MOCK_METHOD = 'requests.Session.get'
+DEFAULT_MOCK_METHOD = 'requests.Session.get'
 FAKE_HTTP_JSON_UNSET = object()
 
 
@@ -383,7 +383,7 @@ def mock_response():
 @pytest.fixture
 def mock_http_response(mocker, mock_response):
     yield lambda *args, **kwargs: mocker.patch(
-        kwargs.pop('method', _DEFAULT_MOCK_METHOD), return_value=mock_response(*args, **kwargs)
+        kwargs.pop('method', DEFAULT_MOCK_METHOD), return_value=mock_response(*args, **kwargs)
     )
 
 
@@ -477,7 +477,7 @@ def mock_http_response_per_endpoint(mocker, mock_response):
         responses_by_endpoint: Dict[str, list[Any]],
         mode: Literal['cycle', 'exhaust', 'default'] = 'cycle',
         default_response: Any = None,
-        method: str = _DEFAULT_MOCK_METHOD,
+        method: str = DEFAULT_MOCK_METHOD,
         url_arg_index: int = 1,
         url_kwarg_name: str = "url",
         strict: bool = True,
