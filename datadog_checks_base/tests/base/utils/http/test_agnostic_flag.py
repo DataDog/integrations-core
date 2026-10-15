@@ -17,20 +17,12 @@ class AgnosticCheck(AgentCheck):
     AGNOSTIC_HTTP_CLIENT = True
 
 
-def _default_client(transport: common.RequestsTransport) -> RequestsWrapper:
-    session = requests.Session()
-    session.mount('http://', transport)
-    client = RequestsWrapper({}, {}, session=session)
-    client.persist_connections = True
-    return client
-
-
 def test_default_client_returns_requests_responses():
     # Released checks read the raw response and test isinstance against requests.Response.
     transport = common.RequestsTransport()
     transport.respond(content=b'body')
 
-    response = _default_client(transport).get('http://example.test/')
+    response = common.create_requests_client(transport, agnostic=False).get('http://example.test/')
 
     assert isinstance(response, requests.Response)
     assert response.raw is transport.raw_responses[0]
@@ -42,7 +34,7 @@ def test_default_client_raises_request_errors_unchanged():
     transport.raise_exception(error)
 
     with pytest.raises(requests.exceptions.ConnectionError) as exc_info:
-        _default_client(transport).get('http://example.test/')
+        common.create_requests_client(transport, agnostic=False).get('http://example.test/')
 
     assert exc_info.value is error
 
@@ -50,7 +42,7 @@ def test_default_client_raises_request_errors_unchanged():
 def test_default_client_raises_requests_status_errors():
     transport = common.RequestsTransport()
     transport.respond(status_code=404)
-    response = _default_client(transport).get('http://example.test/')
+    response = common.create_requests_client(transport, agnostic=False).get('http://example.test/')
 
     with pytest.raises(requests.exceptions.HTTPError) as exc_info:
         response.raise_for_status()
