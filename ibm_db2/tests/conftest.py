@@ -10,7 +10,7 @@ from datadog_checks.dev import WaitFor, docker_run, run_command
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.ibm_db2.connection import get_connection_data
 
-from .common import COMPOSE_FILE, CONFIG, E2E_METADATA
+from .common import COMPOSE_FILE, CONFIG, DB2_VERSION, E2E_METADATA
 
 
 class DbManager(object):
@@ -67,9 +67,12 @@ class DbManager(object):
 def dd_environment():
     db = DbManager(CONFIG)
 
-    # The official image creates the Db2 instance at container start, which takes a few minutes.
-    setup_complete = CheckDockerLogs(COMPOSE_FILE, 'Setup has completed', attempts=60, wait=10)
-    with docker_run(COMPOSE_FILE, conditions=[setup_complete, db.initialize, WaitFor(db.connect)], attempts=2):
+    conditions = []
+    if DB2_VERSION != '11.1':
+        # Official images create the instance at startup; TASKANA's 11.1 image includes it.
+        conditions.append(CheckDockerLogs(COMPOSE_FILE, 'Setup has completed', attempts=60, wait=10))
+    conditions.extend([db.initialize, WaitFor(db.connect)])
+    with docker_run(COMPOSE_FILE, conditions=conditions, attempts=2):
         yield CONFIG, E2E_METADATA
 
 
