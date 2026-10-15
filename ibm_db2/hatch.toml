@@ -3,13 +3,17 @@ base-package-features = ["deps", "db", "json"]
 
 [[envs.default.matrix]]
 python = ["3.13"]
-version = ["11.5.5.1", "12.1.5.0"]
+version = ["11.1", "11.5.5.1", "12.1.5.0"]
 
 [envs.default.env-vars]
 IBM_DB_INSTALLER_URL = "https://ddintegrations.blob.core.windows.net/ibm-db2/"
 
 [envs.default.overrides]
-matrix.version.env-vars = "DB2_VERSION"
+matrix.version.env-vars = [
+  { key = "DB2_VERSION", value = "{matrix:version}" },
+  { key = "DB2_IMAGE", value = "taskana/db2:11.1", if = ["11.1"] },
+  { key = "DB2_IMAGE", value = "icr.io/db2_community/db2:{matrix:version}", if = ["11.5.5.1", "12.1.5.0"] },
+]
 
 [envs.default]
 dependencies = [
