@@ -1,9 +1,9 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Deprecated requests-backed ``datadog_checks.dev.http.MockResponse``.
+"""Deprecated requests-backed `datadog_checks.dev.http.MockResponse`.
 
-Isolated to keep ``requests`` out of ``http`` while downstream repositories test against
+Isolated to keep `requests` out of `http` while downstream repositories test against
 a released base without the agnostic HTTP protocol. Remove after those repositories migrate.
 """
 

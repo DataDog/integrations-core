@@ -387,11 +387,13 @@ def mock_http_response(mocker, mock_response):
     )
 
 
-def _create_fake_http_client_factory(fake_http: Any) -> Any:
+def _create_fake_http_client_factory(fake_http: Any) -> Callable[..., Any]:
     def create_client(check: Any, *_args: Any, **_kwargs: Any) -> Any:
         # The fake models the backend-neutral contract, which a check only gets in production by opting in.
         if not getattr(check, 'AGNOSTIC_HTTP_CLIENT', False):
-            raise AssertionError(f'{type(check).__name__} must set AGNOSTIC_HTTP_CLIENT = True to use the fake_http fixture.')
+            raise AssertionError(
+                f'{type(check).__name__} must set AGNOSTIC_HTTP_CLIENT = True to use the fake_http fixture.'
+            )
         return fake_http.create_client()
 
     return create_client
@@ -417,7 +419,7 @@ def fake_http(mocker):
 def fake_http_response(fake_http: Any) -> Callable[..., Any]:
     """Build and register a response on the base-owned HTTP fake.
 
-    The ``json_data`` argument sets both the serialized body and parsed result unless ``json_result`` is overridden.
+    The `json_data` argument sets both the serialized body and parsed result unless `json_result` is overridden.
     """
     FakeHTTPResponse = importlib.import_module('datadog_checks.base.stubs.http').FakeHTTPResponse
 

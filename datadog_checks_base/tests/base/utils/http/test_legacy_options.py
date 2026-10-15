@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Pin the public ``HTTPClient.options`` compatibility surface."""
+"""Pin the public `HTTPClient.options` compatibility surface."""
 
 import mock
 import pytest

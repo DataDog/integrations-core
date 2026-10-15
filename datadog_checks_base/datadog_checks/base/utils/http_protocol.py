@@ -155,31 +155,31 @@ class HTTPClient(Protocol):
     persist_connections: bool
 
     def get(self, url: str, **options: Unpack[HTTPRequestOptions]) -> HTTPResponse:
-        """Perform a GET request using :class:`HTTPRequestOptions`."""
+        """Perform a GET request using `HTTPRequestOptions`."""
         ...
 
     def post(self, url: str, **options: Unpack[HTTPRequestOptions]) -> HTTPResponse:
-        """Perform a POST request using :class:`HTTPRequestOptions`."""
+        """Perform a POST request using `HTTPRequestOptions`."""
         ...
 
     def head(self, url: str, **options: Unpack[HTTPRequestOptions]) -> HTTPResponse:
-        """Perform a HEAD request using :class:`HTTPRequestOptions`."""
+        """Perform a HEAD request using `HTTPRequestOptions`."""
         ...
 
     def put(self, url: str, **options: Unpack[HTTPRequestOptions]) -> HTTPResponse:
-        """Perform a PUT request using :class:`HTTPRequestOptions`."""
+        """Perform a PUT request using `HTTPRequestOptions`."""
         ...
 
     def patch(self, url: str, **options: Unpack[HTTPRequestOptions]) -> HTTPResponse:
-        """Perform a PATCH request using :class:`HTTPRequestOptions`."""
+        """Perform a PATCH request using `HTTPRequestOptions`."""
         ...
 
     def delete(self, url: str, **options: Unpack[HTTPRequestOptions]) -> HTTPResponse:
-        """Perform a DELETE request using :class:`HTTPRequestOptions`."""
+        """Perform a DELETE request using `HTTPRequestOptions`."""
         ...
 
     def options_method(self, url: str, **options: Unpack[HTTPRequestOptions]) -> HTTPResponse:
-        """Perform an OPTIONS request using :class:`HTTPRequestOptions`; suffixed to avoid the defaults attribute."""
+        """Perform an OPTIONS request using `HTTPRequestOptions`; suffixed to avoid the defaults attribute."""
         ...
 
     def get_header(self, name: str, default: str | None = None) -> str | None:

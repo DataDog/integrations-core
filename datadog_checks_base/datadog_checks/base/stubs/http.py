@@ -47,7 +47,7 @@ def _snapshot_options(options: Mapping[str, Any]) -> Mapping[str, Any]:
 
 @dataclass(frozen=True, slots=True)
 class RecordedRequest:
-    """A request captured by :class:`FakeHTTPClient`."""
+    """A request captured by `FakeHTTPClient`."""
 
     method: str
     url: str

@@ -10,7 +10,7 @@ import socket
 import warnings
 from collections import ChainMap
 from collections.abc import Mapping
-from contextlib import ExitStack, contextmanager, nullcontext
+from contextlib import AbstractContextManager, ExitStack, contextmanager, nullcontext
 from copy import deepcopy
 from hashlib import sha256
 from typing import TYPE_CHECKING
@@ -703,13 +703,15 @@ class RequestsWrapper(object):
                 return requests_adapter.RequestsResponseAdapter(response, self.request_size)
             return ResponseWrapper(response, self.request_size)
 
-    def _merge_extra_headers(self, explicit_headers, extra_headers):
+    def _merge_extra_headers(
+        self, explicit_headers: Mapping[str, str] | None, extra_headers: Mapping[str, str]
+    ) -> CaseInsensitiveDict:
         """Layer per-request extra headers over the request's headers, or the client's when it sets none."""
         headers = CaseInsensitiveDict(explicit_headers if explicit_headers is not None else self.options['headers'])
         headers.update(extra_headers)
         return headers
 
-    def _translate_errors(self):
+    def _translate_errors(self) -> AbstractContextManager[None]:
         """Raise backend-neutral errors in agnostic mode, and requests errors unchanged otherwise."""
         return requests_adapter.translate_http_errors() if self._agnostic else nullcontext()
 
