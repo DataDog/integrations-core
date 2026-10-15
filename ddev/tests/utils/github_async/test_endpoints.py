@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from contextlib import AbstractContextManager
 from contextlib import nullcontext as does_not_raise
 from typing import TYPE_CHECKING, Any
 
@@ -10,7 +11,7 @@ import httpx
 import pytest
 from pydantic import ValidationError
 
-from ddev.utils.github_async import GitHubResponse
+from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import (
     ArtifactsList,
     CheckRun,
@@ -38,7 +39,14 @@ from ddev.utils.github_async.models import (
     WorkflowRun,
 )
 from ddev.utils.github_errors import GitHubAuthenticationError, GitHubBodyTooLongError
-from tests.utils.github_async.helpers import ENDPOINT_CALLS, first_page, json_response, make_client
+from tests.utils.github_async.helpers import (
+    ENDPOINT_CALLS,
+    TOKEN,
+    RecordingObserver,
+    first_page,
+    json_response,
+    make_client,
+)
 from tests.utils.github_async.payloads import (
     artifact,
     check_run_payload,
@@ -877,13 +885,20 @@ async def test_endpoint_forwards_response_headers(case: EndpointCase) -> None:
         pytest.param(404, pytest.raises(httpx.HTTPStatusError), id="not_found"),
     ],
 )
-async def test_cancelling_a_run_that_already_finished_is_not_a_failure(status_code: int, expectation) -> None:
+async def test_cancelling_a_run_that_already_finished_is_not_a_failure(
+    status_code: int, expectation: AbstractContextManager[object]
+):
     """GitHub answers 409 once a run is terminal, which is the state the caller asked for.
 
     Treating it as a failure would have the caller report a cleanup step as broken for doing nothing,
     and a run finishing between the decision to cancel it and the call is ordinary.
     """
-    client = make_client(httpx.MockTransport(lambda request: httpx.Response(status_code)))
+    observer = RecordingObserver()
+    client = AsyncGitHubClient(
+        token=TOKEN, transport=httpx.MockTransport(lambda request: httpx.Response(status_code)), observer=observer
+    )
 
     with expectation:
         await client.cancel_workflow_run("DataDog", "integrations-core", 123)
+
+    assert len(observer.failures) == int(status_code == 404)

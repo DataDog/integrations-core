@@ -72,6 +72,7 @@ from ddev.utils.github_async.models import (
     WorkflowRun,
 )
 from ddev.utils.github_async.observer import RequestObserver
+from ddev.utils.github_async.retry import RetryPolicy
 from ddev.utils.rate_limiting import BucketEvent, InstrumentedAsyncLimiter, RateLimitEvent
 from tests.cli.ci.helpers import mock_job_result
 from tests.cli.ci.tests.helpers import (
@@ -546,8 +547,10 @@ def stop_from_inside_the_run(
     """Request a shutdown once a remote run is tracked."""
     got_workflow_run = client.get_workflow_run
 
-    async def stop_once_a_run_is_in_flight(owner: str, repo: str, run_id: int) -> GitHubResponse[WorkflowRun]:
-        response = await got_workflow_run(owner, repo, run_id)
+    async def stop_once_a_run_is_in_flight(
+        owner: str, repo: str, run_id: int, *, retry: RetryPolicy | None = None
+    ) -> GitHubResponse[WorkflowRun]:
+        response = await got_workflow_run(owner, repo, run_id, retry=retry)
         dispatcher.request_shutdown(request)
         return response
 

@@ -4,3 +4,18 @@ provides:
     granular: false
     data_type: logs
     direction: inbound
+  - id: vectra-detection-logs
+    always_on: false
+    granular: true
+    data_type: logs
+    direction: inbound
+  - id: vectra-entity-scoring-logs
+    always_on: false
+    granular: true
+    data_type: logs
+    direction: inbound
+  - id: vectra-audit-logs
+    always_on: false
+    granular: true
+    data_type: logs
+    direction: inbound
