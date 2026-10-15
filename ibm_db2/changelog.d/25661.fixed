@@ -1,0 +1,1 @@
+Reset Db2 query-metrics baselines and cached statement text when the connected database source changes.
