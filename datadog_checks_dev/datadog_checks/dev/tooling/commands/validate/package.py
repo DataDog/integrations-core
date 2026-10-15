@@ -1,12 +1,19 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import glob
+import os
 import re
+import sys
+import tempfile
+import zipfile
+from concurrent.futures import ThreadPoolExecutor
 from email.errors import InvalidHeaderDefect
 from email.headerregistry import Address
 
 import click
 
+from datadog_checks.dev import run_command
 from datadog_checks.dev.fs import basepath
 from datadog_checks.dev.tooling.commands.console import (
     CONTEXT_SETTINGS,
@@ -32,6 +39,18 @@ from datadog_checks.dev.tooling.utils import (
 # Some integrations aren't installable via the integration install command, so exclude them from the name requirements
 EXCLUDE_CHECKS = ["datadog_checks_downloader", "datadog_checks_dev", "datadog_checks_base", "ddev"]
 
+ALLOWED_DIST_INFO_FILES = frozenset(
+    {
+        'DESCRIPTION.rst',
+        'METADATA',
+        'RECORD',
+        'WHEEL',
+        'entry_points.txt',
+        'metadata.json',
+        'top_level.txt',
+    }
+)
+
 
 def read_project_name(check_name):
     if has_project_file(check_name):
@@ -55,6 +74,13 @@ def package(check):
 
     checks = process_checks_option(check, source='valid_checks', validate=True)
     echo_info(f'Validating files for {len(checks)} checks ...')
+
+    buildable_checks = [c for c in checks if c not in EXCLUDE_CHECKS]
+    wheels = {}
+    if buildable_checks:
+        with ThreadPoolExecutor(max_workers=16) as executor:
+            built = executor.map(_validate_wheel_contents, (read_project_name(c)[0] for c in buildable_checks))
+            wheels = dict(zip(buildable_checks, built))
 
     failed_checks = 0
     ok_checks = 0
@@ -104,6 +130,11 @@ def package(check):
                     )
                 )
 
+        wheel_errors = wheels.get(check, [])
+        if wheel_errors:
+            file_failed = True
+            display_queue.extend((echo_failure, error) for error in wheel_errors)
+
         if file_failed:
             failed_checks += 1
             # Display detailed info if file is invalid
@@ -120,6 +151,55 @@ def package(check):
     if failed_checks:
         echo_failure(f"{failed_checks} invalid files")
         abort()
+
+
+def _validate_wheel_contents(project_file):
+    """Verify the wheel built the same way as the wheels pipeline only contains files its in-toto root
+    layouts (e.g. `1.extras.root.layout`) allow: `datadog_checks/*` plus `ALLOWED_DIST_INFO_FILES` in the
+    `*.dist-info` directory, e.g. a `LICENSE` the build backend embeds as `*.dist-info/licenses/LICENSE`
+    would fail verification at release time.
+
+    The same rules apply in every repo, including marketplace: unlike core/extras, marketplace wheels are
+    built and attested by a different pipeline that verifies no in-toto layout, but we still hold them to
+    the same rules to keep shipped wheels minimal.
+
+    The wheel is built with `pip`'s default build isolation, so the backend version is resolved from
+    PyPI at validation time, exactly as the pipeline does at release time; a backend release between
+    the two can still change the embedded files, so a pass here is not a release guarantee.
+    """
+    with tempfile.TemporaryDirectory() as wheel_dir:
+        result = run_command(
+            [
+                sys.executable,
+                '-m',
+                'pip',
+                'wheel',
+                os.path.dirname(project_file),
+                '--ignore-requires-python',
+                '--no-deps',
+                f'--wheel-dir={wheel_dir}',
+            ],
+            capture=True,
+        )
+        if result.code != 0:
+            return [f'    Could not build the wheel: {result.stderr or result.stdout}']
+
+        wheels = glob.glob(os.path.join(wheel_dir, '*.whl'))
+        if len(wheels) != 1:
+            return [f'    Expected exactly one wheel from the build, found: {wheels}']
+
+        errors = []
+        with zipfile.ZipFile(wheels[0]) as wheel:
+            for path in wheel.namelist():
+                if path.endswith('/'):
+                    continue
+                top_level, _, file_name = path.partition('/')
+                if top_level == 'datadog_checks' or (
+                    top_level.endswith('.dist-info') and file_name in ALLOWED_DIST_INFO_FILES
+                ):
+                    continue
+                errors.append(f'    Unexpected file in wheel: {path}')
+        return errors
 
 
 def _validate_emails(check_name):
