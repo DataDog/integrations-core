@@ -1323,9 +1323,9 @@ def test_check_recovers_after_connection_health_check_failure(aggregator, integr
     check.check(pg_instance)
     aggregator.reset()
 
-    # Break the live connection the way libpq does when a command is left in flight.
     broken = check._db
-    broken.cursor = mock.Mock(side_effect=psycopg.OperationalError('another command is already in progress'))
+    # Leave a result unread so libpq reports "another command is already in progress".
+    broken.pgconn.send_query(b"SELECT 1")
 
     with pytest.raises(DatabaseHealthCheckError, match='another command is already in progress'):
         check.check(pg_instance)
