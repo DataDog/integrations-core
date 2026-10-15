@@ -27,7 +27,7 @@ from .collectors import (  # noqa: F401  (importing the modules registers their 
 )
 from .collectors.base import COLLECT_FUNCTIONS, CollectContext, FirewallState, Sample
 from .collectors.interfaces import parse_interface_speeds
-from .collectors.jobs import BusyJob, busy_jobs
+from .collectors.jobs import busy_jobs
 from .constants import IDENTITY, INTERVALS
 from .errors import PanosError, PanosSkipped, PanosUnreachable
 from .identity import DeviceIdentity, configured_vsys, global_tags, parse_system_info, vsys_list
@@ -161,29 +161,20 @@ class FirewallPoller:
     def _busy(self) -> bool:
         """Run the jobs check; True skips this run's collectors (a commit or update is in progress).
 
-        A failed jobs check never blocks collection. Raises PanosUnreachable when it cannot reach the firewall.
+        A failed jobs check is warned about every time and never blocks collection. Raises PanosUnreachable when it
+        cannot reach the firewall.
         """
         try:
-            jobs = self._busy_jobs()
+            jobs = busy_jobs(self.client)
         except PanosUnreachable:
             self._busy_gate.end()
-            raise
-        return self._busy_gate.skip(jobs, self.schedule.now())
-
-    def _busy_jobs(self) -> list[BusyJob]:
-        """The commits and updates in progress; none when the jobs check failed, which is warned about every time.
-
-        PanosUnreachable propagates: the caller skips the whole run.
-        """
-        try:
-            return busy_jobs(self.client)
-        except PanosUnreachable:
             raise
         except PanosError as e:
             self.log.warning(
                 '%s: cannot check for a commit or content update in progress, collecting anyway: %s', self.ip, e
             )
-            return []
+            jobs = []
+        return self._busy_gate.skip(jobs, self.schedule.now())
 
     def _collect(self, due: list[str]) -> dict[str, Result]:
         """Run the jobs check, then the due identity and collectors."""
