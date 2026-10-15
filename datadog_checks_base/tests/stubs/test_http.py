@@ -205,6 +205,22 @@ def test_fake_client_reads_configured_cookies_and_falls_back_for_missing_names()
     assert client.get_cookie('missing', 'fallback') == 'fallback'
 
 
+@pytest.mark.parametrize(
+    'bypass',
+    [
+        pytest.param(True, id='flag'),
+        pytest.param(lambda url: url.startswith('https://internal.'), id='callable'),
+    ],
+)
+def test_created_clients_follow_the_parent_proxy_bypass(bypass):
+    parent = FakeHTTPClient()
+    child = parent.create_client()
+
+    parent.set_should_bypass_proxy(bypass)
+
+    assert child.should_bypass_proxy('https://internal.example/') is True
+
+
 def test_fake_client_reports_unmatched_request_and_pending_responses():
     client = FakeHTTPClient()
     client.register_response('POST', 'https://example.test/items', FakeHTTPResponse())

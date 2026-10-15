@@ -216,15 +216,17 @@ class FakeHTTPClient:
         self.persist_connections = False
         self.closed = False
         self._cookies = dict(cookies or {})
-        self._should_bypass_proxy = should_bypass_proxy
+        # Shared with created clients so a setting changed after a check starts still reaches it.
+        self._proxy_bypass: dict[str, bool | Callable[[str], bool]] = {'value': should_bypass_proxy}
         self.requests: list[RecordedRequest] = []
         self._responses: list[RegisteredResponse] = []
 
     def create_client(self) -> FakeHTTPClient:
-        """Create an isolated client that shares registered responses and recorded requests."""
+        """Create an isolated client that shares registered responses, recorded requests and proxy bypass."""
         client = FakeHTTPClient()
         client.requests = self.requests
         client._responses = self._responses
+        client._proxy_bypass = self._proxy_bypass
         return client
 
     def register_response(
@@ -278,10 +280,13 @@ class FakeHTTPClient:
     def get_cookie(self, name: str, default: str | None = None) -> str | None:
         return self._cookies.get(name, default)
 
+    def set_should_bypass_proxy(self, value: bool | Callable[[str], bool]) -> None:
+        """Set what should_bypass_proxy returns, for this client and every client created from it."""
+        self._proxy_bypass['value'] = value
+
     def should_bypass_proxy(self, url: str) -> bool:
-        if callable(self._should_bypass_proxy):
-            return self._should_bypass_proxy(url)
-        return self._should_bypass_proxy
+        bypass = self._proxy_bypass['value']
+        return bypass(url) if callable(bypass) else bypass
 
     def assert_requests(self, expected: Iterable[RecordedRequest]) -> None:
         expected_requests = list(expected)
