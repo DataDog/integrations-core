@@ -8,6 +8,7 @@ import ipaddress
 import json
 import time
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, cast
 from xml.etree.ElementTree import Element
 
@@ -83,9 +84,21 @@ class PanoramaFirewallSource:
         self._client.start_run()
         devices = self._discover()
         self._check.gauge('panorama.can_connect', 0 if devices is None else 1, tags=self._tags())
-        if devices is None:
-            devices = self._load_cached()
-        return self._targets(devices or [])
+        if devices is not None:
+            return self._targets(devices)
+        cached = self._load_cached()
+        if cached is None:
+            return []
+        devices, discovered = cached
+        targets = self._targets(devices)
+        self._check.log.warning(
+            'Panorama %s is unreachable; polling %d of the %d firewalls of the last discovery, at %s',
+            self._host,
+            len(targets),
+            len(devices),
+            datetime.fromtimestamp(discovered, tz=timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC'),
+        )
+        return targets
 
     def _discover(self) -> list[DiscoveredFirewall] | None:
         try:
@@ -108,31 +121,21 @@ class PanoramaFirewallSource:
         raw = json.dumps({'discovered': time.time(), 'firewalls': [dataclasses.asdict(d) for d in devices]})
         self._check.write_persistent_cache(self._cache_key, raw)
 
-    def _load_cached(self) -> list[DiscoveredFirewall] | None:
+    def _load_cached(self) -> tuple[list[DiscoveredFirewall], float] | None:
+        """The last discovered firewalls and the time (epoch seconds) they were discovered, if usable."""
         raw = self._check.read_persistent_cache(self._cache_key)
-        devices = None
         try:
             if raw:
                 data = json.loads(raw)
-                discovered = float(data['discovered'])
-                devices = [DiscoveredFirewall(**d) for d in data['firewalls']]
+                return [DiscoveredFirewall(**d) for d in data['firewalls']], float(data['discovered'])
         except (ValueError, TypeError, KeyError) as e:
             # Also the old format (a bare list).
             self._check.log.debug('ignoring the cached Panorama firewall list: %s', e)
-            devices = None
-        if devices is None:
-            self._check.log.warning(
-                'Panorama %s is unreachable and there are no discovered firewalls to fall back on',
-                self._host,
-            )
-        else:
-            self._check.log.warning(
-                'Panorama %s is unreachable; polling the %d firewalls of the last discovery, %s ago',
-                self._host,
-                len(devices),
-                readable_age(time.time() - discovered),
-            )
-        return devices
+        self._check.log.warning(
+            'Panorama %s is unreachable and there are no discovered firewalls to fall back on',
+            self._host,
+        )
+        return None
 
     def _targets(self, devices: list[DiscoveredFirewall]) -> list[FirewallTarget]:
         targets: dict[str, FirewallTarget] = {}
@@ -194,14 +197,6 @@ class PanoramaFirewallSource:
             return False
         include = filters.include or ()
         return not include or any(address in ipaddress.ip_network(p, strict=False) for p in include)
-
-
-def readable_age(seconds: float) -> str:
-    seconds = max(seconds, 0)
-    units = (('day', 86400), ('hour', 3600), ('minute', 60))
-    unit, size = next(((unit, size) for unit, size in units if seconds >= size), ('second', 1))
-    count = round(seconds / size)
-    return f'{count} {unit}' if count == 1 else f'{count} {unit}s'
 
 
 def _parse_ip(value: str | None) -> ipaddress.IPv4Address | ipaddress.IPv6Address | None:

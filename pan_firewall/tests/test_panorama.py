@@ -11,7 +11,7 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.pan_firewall import PanFirewallCheck
 from datadog_checks.pan_firewall import panorama as panorama_module
-from datadog_checks.pan_firewall.panorama import DiscoveredFirewall, parse_devices, readable_age
+from datadog_checks.pan_firewall.panorama import DiscoveredFirewall, parse_devices
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from .common import CREDENTIALS, FIXTURES, FW_A_IP, FW_A_SERIAL, FW_B_IP, FW_B_SERIAL
@@ -430,9 +430,18 @@ def fallback_warnings(caplog):
     ]
 
 
-def test_fallback_warning_says_how_old_the_list_is_and_its_firewalls_are_polled(
+def test_fallback_warning_says_how_many_cached_firewalls_are_polled_and_when_they_were_discovered(
     dd_run_check, fake_panos, caplog, wall_clock
 ):
+    fake_panos.answer_op(
+        PANORAMA,
+        DISCOVERY_CMD,
+        devices_xml(
+            (FW_A_SERIAL, 'fw-a', FW_A_IP, 'yes'),
+            (FW_B_SERIAL, 'fw-b', FW_B_IP, 'yes'),
+            ('SYNTH-DISCONNECTED-0001', 'synth-disconnected', '192.0.2.12', 'no'),
+        ),
+    )
     dd_run_check(new_check())
     fake_panos.fail(PANORAMA, 'refused')
     wall_clock.now += 3 * 86400
@@ -441,7 +450,10 @@ def test_fallback_warning_says_how_old_the_list_is_and_its_firewalls_are_polled(
     dd_run_check(new_check())
 
     (warning,) = fallback_warnings(caplog)
-    assert warning.endswith('3 days ago')
+    assert warning == (
+        f'Panorama {PANORAMA} is unreachable; polling 2 of the 3 firewalls of the last discovery, '
+        'at 2027-01-15 08:00:00 UTC'
+    )
     assert polled_hosts(fake_panos, skip=calls) == {FW_A_IP, FW_B_IP}
 
 
@@ -456,18 +468,3 @@ def test_successful_discovery_rewrites_the_discovery_time_even_when_the_list_is_
     second = json.loads(check.read_persistent_cache(CACHE_KEY))
     assert second['firewalls'] == first['firewalls']
     assert second['discovered'] - first['discovered'] == 60
-
-
-@pytest.mark.parametrize(
-    'seconds, expected',
-    [
-        pytest.param(-5, '0 seconds', id='clock-went-back'),
-        pytest.param(1, '1 second', id='second'),
-        pytest.param(59, '59 seconds', id='seconds'),
-        pytest.param(60, '1 minute', id='minute'),
-        pytest.param(5400, '2 hours', id='hours-rounded'),
-        pytest.param(3 * 86400, '3 days', id='days'),
-    ],
-)
-def test_readable_age(seconds, expected):
-    assert readable_age(seconds) == expected
