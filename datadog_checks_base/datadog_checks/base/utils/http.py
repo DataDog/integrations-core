@@ -270,19 +270,24 @@ class LineCappedRawResponse(ObjectProxy):
             amt = self._self_max_line_size
 
         line_size = 0
-        group: list[bytes] = []
+        # A byte buffer rather than a list of chunks, because endpoints can send many tiny chunks
+        buffer = bytearray()
         for chunk in self.__wrapped__.stream(amt, *args, **kwargs):
             newline = chunk.find(b'\n')
             first_line_size = line_size + (len(chunk) if newline < 0 else newline)
             if first_line_size > self._self_max_line_size:
                 raise ResponseLineTooLongError(f'Response contains a line longer than {self._self_max_line_size} bytes')
             line_size = first_line_size if newline < 0 else len(chunk) - chunk.rfind(b'\n') - 1
-            group.append(chunk)
-            if newline >= 0:
-                yield b''.join(group)
-                group.clear()
-        if group:
-            yield b''.join(group)
+            if newline < 0:
+                buffer += chunk
+            elif buffer:
+                buffer += chunk
+                yield bytes(buffer)
+                buffer.clear()
+            else:
+                yield chunk
+        if buffer:
+            yield bytes(buffer)
 
 
 class ResponseWrapper(ObjectProxy):
