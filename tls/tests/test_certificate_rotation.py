@@ -35,6 +35,7 @@ def make_certificate(
     issuer: tuple[x509.Certificate, rsa.RSAPrivateKey] | None = None,
     *,
     ca: bool = False,
+    expired: bool = False,
     aia_uri: str | None = None,
 ) -> tuple[x509.Certificate, rsa.RSAPrivateKey]:
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
@@ -48,7 +49,7 @@ def make_certificate(
         .public_key(key.public_key())
         .serial_number(x509.random_serial_number())
         .not_valid_before(now - timedelta(days=1))
-        .not_valid_after(now + timedelta(days=30))
+        .not_valid_after(now - timedelta(hours=1) if expired else now + timedelta(days=30))
         .add_extension(x509.BasicConstraints(ca=ca, path_length=None), critical=True)
         .add_extension(x509.SubjectAlternativeName([x509.DNSName(name)]), critical=False)
     )
@@ -86,10 +87,10 @@ def write_credentials(
     return str(cert_path), str(key_path)
 
 
-def peer_certificate(check: TLSCheck, server_context: ssl.SSLContext, mocker: MockerFixture) -> bytes:
+def peer_certificate(check: TLSCheck, server_context: ssl.SSLContext, mocker: MockerFixture) -> bytes | None:
     """Run a check against a real TLS peer and return the client certificate that peer received."""
 
-    def accept(server_socket: socket.socket) -> bytes:
+    def accept(server_socket: socket.socket) -> bytes | None:
         with server_context.wrap_socket(server_socket, server_side=True) as connection:
             return connection.getpeercert(binary_form=True)
 
@@ -201,6 +202,51 @@ def test_rotated_client_certificate_is_presented(
     assert len(loads) == 2 * (1 + int(with_intermediate))
     if with_intermediate:
         fetch.assert_called_once()
+
+
+@pytest.mark.parametrize('fetch_intermediate_certs', [False, True])
+def test_expired_client_certificate_recovers_after_rotation(
+    tmp_path: Path, mocker: MockerFixture, aggregator: AggregatorStub, fetch_intermediate_certs: bool
+):
+    # The incident behind PR #25363: an expired cached client cert must stop being presented after rotation.
+    root = make_certificate('Test Root', ca=True)
+    root_path, _ = write_credentials(tmp_path, 'root', root)
+    server_cert, server_key = write_credentials(tmp_path, 'server', make_certificate('localhost', root))
+    client_cert, client_key = write_credentials(
+        tmp_path, 'client', make_certificate('expired-client', root, expired=True)
+    )
+    check = TLSCheck(
+        'tls',
+        {},
+        [
+            {
+                'server': 'localhost',
+                'tls_ca_cert': root_path,
+                'tls_cert': client_cert,
+                'tls_private_key': client_key,
+                'fetch_intermediate_certs': fetch_intermediate_certs,
+            }
+        ],
+    )
+    server_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    server_context.maximum_version = ssl.TLSVersion.TLSv1_2
+    server_context.verify_mode = ssl.CERT_REQUIRED
+    server_context.load_verify_locations(cafile=root_path)
+    server_context.load_cert_chain(server_cert, server_key)
+
+    with pytest.raises(ssl.SSLError, match='certificate has expired'):
+        peer_certificate(check, server_context, mocker)
+    aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=check.CRITICAL, count=1)
+    aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=check.OK, count=0)
+    aggregator.assert_metric('tls.days_left', count=0)
+    aggregator.assert_metric('tls.seconds_left', count=0)
+
+    replacement = make_certificate('renewed-client', root)
+    write_credentials(tmp_path, 'client', replacement)
+    assert peer_certificate(check, server_context, mocker) == replacement[0].public_bytes(serialization.Encoding.DER)
+    aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=check.OK, count=1)
+    aggregator.assert_metric('tls.days_left', count=1)
+    aggregator.assert_metric('tls.seconds_left', count=1)
 
 
 @pytest.mark.parametrize(
@@ -344,26 +390,22 @@ def test_missing_ca_during_client_rotation_recovers(
     aggregator.assert_metric('tls.seconds_left', count=1)
 
 
-@pytest.mark.parametrize('trust_source', ['directory_with_aia', 'trusted_leaf', 'verification_disabled'])
+@pytest.mark.parametrize('trust_source', ['directory', 'trusted_leaf', 'verification_disabled'])
 def test_ca_guard_preserves_supported_trust_sources(
     tmp_path: Path, mocker: MockerFixture, aggregator: AggregatorStub, trust_source: str
 ):
     # Empty eagerly loaded CA trust is valid with capath or verification disabled; a trusted leaf is not a CA.
     root = make_certificate('Test Root', ca=True)
     root_path, _ = write_credentials(tmp_path, 'root', root)
-    aia_uri = 'http://issuer.test/root.der'
-    server = make_certificate('localhost', None if trust_source == 'trusted_leaf' else root, aia_uri=aia_uri)
+    server = make_certificate('localhost', None if trust_source == 'trusted_leaf' else root)
     server_cert, server_key = write_credentials(tmp_path, 'server', server)
     instance = {'server': 'localhost', 'tls_ca_cert': root_path}
-    if trust_source == 'directory_with_aia':
+    if trust_source == 'directory':
         ca_directory = tmp_path / 'ca'
         ca_directory.mkdir()
         instance['tls_ca_cert'] = str(ca_directory)
-        instance['fetch_intermediate_certs'] = True
-        mocker.patch(
-            'datadog_checks.tls.tls_remote.fetch_intermediate_cert',
-            return_value=root[0].public_bytes(serialization.Encoding.DER),
-        )
+        # OpenSSL's subject hash for CN=Test Root, as reported by `openssl x509 -subject_hash`.
+        (ca_directory / '2faabc7f.0').write_bytes(root[0].public_bytes(serialization.Encoding.PEM))
     elif trust_source == 'trusted_leaf':
         instance['tls_ca_cert'] = server_cert
     else:
