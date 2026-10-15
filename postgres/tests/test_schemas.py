@@ -4,12 +4,13 @@
 
 from unittest import mock
 
+import psycopg
 import pytest
 
 from datadog_checks.postgres.schemas import PostgresSchemaCollector
 from datadog_checks.postgres.version_utils import VersionUtils
 
-from .common import POSTGRES_VERSION
+from .common import HOST, POSTGRES_VERSION
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -238,6 +239,49 @@ def test_tables_include_and_exclude_filter(dbm_instance, integration_check):
         'personsdup13',
     }
     assert set(tables) == expected
+
+
+def _collect_table_columns(collector, table_name):
+    with collector._get_cursor('datadog_test') as cursor:
+        rows = [row for row in cursor if row['table_name'] == table_name]
+    assert len(rows) == 1
+    database_object = collector._map_row({'name': 'datadog_test'}, rows[0])
+    return database_object['schemas'][0]['tables'][0]['columns']
+
+
+@pytest.fixture
+def table_without_columns():
+    with psycopg.connect(
+        host=HOST, dbname='datadog_test', user='postgres', password='datad0g', autocommit=True
+    ) as conn:
+        conn.execute('CREATE TABLE IF NOT EXISTS public.no_columns ()')
+        conn.execute('GRANT SELECT ON public.no_columns TO datadog')
+        try:
+            yield 'no_columns'
+        finally:
+            conn.execute('DROP TABLE public.no_columns')
+
+
+def test_table_without_columns(dbm_instance, integration_check, table_without_columns):
+    dbm_instance['collect_schemas']['include_tables'] = [f'^{table_without_columns}$']
+    check = integration_check(dbm_instance)
+    check.version = POSTGRES_VERSION
+    collector = PostgresSchemaCollector(check)
+
+    assert _collect_table_columns(collector, table_without_columns) == []
+
+
+def test_columns_truncated_to_max_columns(dbm_instance, integration_check):
+    dbm_instance['collect_schemas']['include_tables'] = ['^persons$']
+    dbm_instance['collect_schemas']['max_columns'] = 2
+    check = integration_check(dbm_instance)
+    check.version = POSTGRES_VERSION
+    collector = PostgresSchemaCollector(check)
+
+    columns = _collect_table_columns(collector, 'persons')
+
+    # persons has 5 columns; the limit keeps the first ones by name
+    assert [column['name'] for column in columns] == ['address', 'city']
 
 
 # def test_columns(dbm_instance, integration_check):
