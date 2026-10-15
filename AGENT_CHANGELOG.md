@@ -6,7 +6,6 @@
 ## Datadog Agent version [7.84.2](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7842)
 
 ### Integration Updates
-* Datadog Checks Base [38.4.0](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
 * Proxmox [2.6.1](https://github.com/DataDog/integrations-core/blob/master/proxmox/CHANGELOG.md)
 
 ## Datadog Agent version [7.84.1](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7841)

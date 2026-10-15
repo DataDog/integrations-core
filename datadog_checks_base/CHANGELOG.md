@@ -12,7 +12,7 @@
 
 * Make `assert_histogram_bucket` compare bucket bounds when they are given. ([#25378](https://github.com/DataDog/integrations-core/pull/25378))
 
-## 38.4.0 / 2026-10-01 / Agent 7.84.2
+## 38.4.0 / 2026-10-01
 
 ***Security***:
 

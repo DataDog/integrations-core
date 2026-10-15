@@ -296,7 +296,7 @@
 * datadog-cert-manager: 6.4.1
 * datadog-checkpoint-harmony-endpoint: 1.2.0
 * datadog-checkpoint-quantum-firewall: 1.3.0
-* datadog-checks-base: 38.4.0
+* datadog-checks-base: 38.3.1
 * datadog-checks-dependency-provider: 3.2.0
 * datadog-checks-downloader: 9.4.0
 * datadog-cilium: 7.0.0
