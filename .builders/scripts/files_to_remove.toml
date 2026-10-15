@@ -4,6 +4,17 @@ excluded_paths = [
   # contain the compiled extension modules instead.
   "psycopg_c/**/*.c",
 
+  # PyMongo wheels use compiled extensions; their C sources and headers are build inputs.
+  "bson/**/*.c",
+  "bson/**/*.h",
+  "pymongo/**/*.c",
+
+  # --- Unused PyMongo packages ---
+  # The Agent only uses the sync client, which does not depend on these. The eager
+  # imports of pymongo.asynchronous are removed in lines_to_remove.toml.
+  "/pymongo/asynchronous/",
+  "/gridfs/",
+
   # --- Type annotation ---
   "krb5/**/*.pyi",
   "krb5/**/py.typed",

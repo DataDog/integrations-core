@@ -1,0 +1,1 @@
+Fix per-database dynamic queries continuing to query dropped databases and skipping new ones when `database_autodiscovery` is enabled.
