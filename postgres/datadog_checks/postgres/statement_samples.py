@@ -506,14 +506,16 @@ class PostgresStatementSamples(DBMAsyncJob):
         rows = self._get_new_pg_stat_activity(pg_activity_cols, PG_STAT_ACTIVITY_COLS_MAPPING, collect_activity)
         rows = self._filter_and_normalize_statement_rows(rows)
         submitted_count = 0
+        # A row can be both plan-sampled and part of the activity snapshot, so dedupe raw statements across both
+        submitted_raw_statements = set()
         if self._explain_plan_coll_enabled:
-            for e in self._collect_plans(rows):
+            for e in self._collect_plans(rows, submitted_raw_statements):
                 self._check.database_monitoring_query_sample(json.dumps(e, default=default_json_event_encoding))
                 submitted_count += 1
 
         if collect_activity:
             active_connections = self._get_active_connections()
-            activity_event = self._create_activity_event(rows, active_connections)
+            activity_event = self._create_activity_event(rows, active_connections, submitted_raw_statements)
             self._check.database_monitoring_query_activity(
                 json.dumps(activity_event, default=default_json_event_encoding)
             )
@@ -603,7 +605,11 @@ class PostgresStatementSamples(DBMAsyncJob):
             if active_sessions_count >= self._activity_max_rows:
                 break
 
-    def _row_to_raw_statement_event(self, row):
+    def _row_to_raw_statement_event(self, row, submitted_raw_statements):
+        raw_statement_key = (row['query_signature'], row['raw_query_signature'])
+        if raw_statement_key in submitted_raw_statements:
+            return None
+        submitted_raw_statements.add(raw_statement_key)
         return {
             "timestamp": time.time() * 1000,
             "host": self._check.reported_hostname,
@@ -857,7 +863,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         )
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _collect_plan_for_statement(self, row):
+    def _collect_plan_for_statement(self, row, submitted_raw_statements):
         # limit the rate of explains done to the database
         cache_key = (row['datname'], row['query_signature'])
         if not self._explained_statements_ratelimiter.acquire(cache_key):
@@ -946,7 +952,9 @@ class PostgresStatementSamples(DBMAsyncJob):
                         obfuscated_plan_event['timestamp'] = get_timestamp(row['state_change']) * 1000
 
             if self._collect_raw_query_statement:
-                yield self._row_to_raw_statement_event(row)
+                raw_statement_event = self._row_to_raw_statement_event(row, submitted_raw_statements)
+                if raw_statement_event:
+                    yield raw_statement_event
             if self._collect_raw_query_statement and plan_signature:
                 # Emit RQP (raw query plan) event when raw query statement collection is enabled
                 raw_plan_event = copy.deepcopy(obfuscated_plan_event)
@@ -960,7 +968,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             yield obfuscated_plan_event
         return
 
-    def _collect_plans(self, rows):
+    def _collect_plans(self, rows, submitted_raw_statements):
         for row in rows:
             try:
                 if (
@@ -968,7 +976,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                     or (row.get('backend_type', 'client backend') or 'client backend') != 'client backend'
                 ):
                     continue
-                yield from self._collect_plan_for_statement(row)
+                yield from self._collect_plan_for_statement(row, submitted_raw_statements)
             except Exception:
                 self._log.exception(
                     "Crashed trying to collect execution plan for statement in dbname=%s", row['datname']
@@ -981,10 +989,16 @@ class PostgresStatementSamples(DBMAsyncJob):
                     raw=True,
                 )
 
-    def _create_activity_event(self, rows, active_connections):
+    def _create_activity_event(self, rows, active_connections, submitted_raw_statements):
         self._time_since_last_activity_event = time.time()
         active_sessions = []
         for row in self._create_active_sessions(rows):
+            if self._collect_raw_query_statement and row.get('raw_query_signature'):
+                raw_statement_event = self._row_to_raw_statement_event(row, submitted_raw_statements)
+                if raw_statement_event:
+                    self._check.database_monitoring_query_sample(
+                        json.dumps(raw_statement_event, default=default_json_event_encoding)
+                    )
             row = {key: val for key, val in row.items() if val is not None and key != 'query'}
             active_sessions.append(row)
         event = {

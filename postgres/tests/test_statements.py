@@ -1191,7 +1191,10 @@ def test_activity_snapshot_collection(
         conn.close()
 
 
-def test_activity_raw_statement_collection(aggregator, integration_check, dbm_instance, datadog_agent):
+@pytest.mark.parametrize("query_samples_enabled", [True, False])
+def test_activity_raw_statement_collection(
+    aggregator, integration_check, dbm_instance, datadog_agent, query_samples_enabled
+):
     if POSTGRES_VERSION.split('.')[0] == "9":
         # cannot catch any queries from other users
         # only can see own queries
@@ -1201,6 +1204,7 @@ def test_activity_raw_statement_collection(aggregator, integration_check, dbm_in
     dbm_instance['dbname'] = "datadog_test"
     dbm_instance['query_metrics']['enabled'] = False
     dbm_instance['collect_raw_query_statement'] = {'enabled': True}
+    dbm_instance['query_samples']['enabled'] = query_samples_enabled
     check = integration_check(dbm_instance)
     check._connect()
 
@@ -1226,6 +1230,14 @@ def test_activity_raw_statement_collection(aggregator, integration_check, dbm_in
         assert event['ddagentversion'] == datadog_agent.get_version()
         assert sorted(event['ddtags'].split(',')) == sorted(expected_tags)
         assert event['db']['raw_query_signature'], "missing raw query signature"
+
+        # activity rows reference raw statements by signature, so each one must resolve to a submitted rqt event
+        rqt_signatures = {e['db']['raw_query_signature'] for e in dbm_samples if e['dbm_type'] == 'rqt'}
+        activity_event = aggregator.get_event_platform_events("dbm-activity")[0]
+        bobs_rows = [r for r in activity_event['postgres_activity'] if r.get('usename') == 'bob']
+        assert bobs_rows
+        for row in bobs_rows:
+            assert row['raw_query_signature'] in rqt_signatures
     finally:
         conn.close()
 
