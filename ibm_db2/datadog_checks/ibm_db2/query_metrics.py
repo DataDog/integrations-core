@@ -63,6 +63,15 @@ SELECT MEMBER, EXECUTABLE_ID, INSERT_TIMESTAMP,
 FROM TABLE(SYSPROC.MON_GET_PKG_CACHE_STMT(NULL, NULL, NULL, -1))
 """
 
+COLLECTION_SOURCE_QUERY = """
+/* DDIGNORE */
+SELECT S.HOST_NAME, I.INST_NAME, D.MEMBER, D.DB_CONN_TIME,
+       COALESCE((SELECT MAX(HADR_ROLE) FROM TABLE(SYSPROC.MON_GET_HADR(-1))), 'STANDARD') AS HADR_ROLE
+FROM SYSIBMADM.ENV_SYS_INFO AS S
+CROSS JOIN SYSIBMADM.ENV_INST_INFO AS I
+CROSS JOIN TABLE(SYSPROC.MON_GET_DATABASE(-1)) AS D
+"""
+
 STATEMENT_TEXT_LOOKUP_QUERY = """
 /* DDIGNORE */
 WITH REQUESTED(EXECUTABLE_ID, MEMBER, INSERT_TIMESTAMP) AS (VALUES {key_rows})
@@ -99,6 +108,7 @@ class QueryMetricsCollector(DBMAsyncJob):
         # Each background job owns its connection.
         self._config = config
         self._connection = Db2Connection(check, config)
+        self._collection_source: dict | None = None
         self._full_query_text_cache = TTLCache(maxsize=FULL_QUERY_TEXT_CACHE_SIZE, ttl=FULL_QUERY_TEXT_REFRESH_INTERVAL)
         self._obfuscation_lookup: ObfuscationLookup[StatementKey] = ObfuscationLookup(
             maxsize=TEXT_CACHE_SIZE, obfuscate_options=OBFUSCATION_OPTIONS
@@ -117,6 +127,13 @@ class QueryMetricsCollector(DBMAsyncJob):
             # The runner logs expected connection errors but only emits health events for unexpected exceptions.
             self._check.health.submit_exception_health_event(error, data={'job_name': 'query-metrics'})
             raise
+        source = self._get_collection_source()
+        if source != self._collection_source:
+            # A configured endpoint can follow an HADR takeover to another server. Its package cache
+            # is independent, even if statement keys match. Ordinary reconnects retain their baseline.
+            self._query_stats.reset()
+            self._obfuscation_lookup.retain(set())
+            self._collection_source = source
         cursor = ibm_db.prepare(
             connection,
             STATEMENT_COUNTERS_QUERY,
@@ -141,6 +158,12 @@ class QueryMetricsCollector(DBMAsyncJob):
             fetch_texts=self._fetch_statement_texts,
             classify=classify_statement_text,
         )
+        # The driver can reroute between SQL calls. Never combine counters and text from different sources.
+        if self._get_collection_source() != source:
+            self._query_stats.reset()
+            self._obfuscation_lookup.retain(set())
+            self._collection_source = None
+            return
         self._emit_resolve_stats(resolved.stats)
         self._query_stats = query_stats
         rows_by_signature: dict[str, dict] = {}
@@ -184,6 +207,22 @@ class QueryMetricsCollector(DBMAsyncJob):
             }
             for batch in self._get_query_metrics_payloads(payload, list(rows_by_signature.values())):
                 self._check.database_monitoring_query_metrics(batch)
+
+    def _get_collection_source(self) -> dict:
+        """Identify the connected server and database lifetime without changing public DBM identity."""
+        cursor = ibm_db.prepare(
+            self._connection.conn,
+            COLLECTION_SOURCE_QUERY,
+            {ibm_db.SQL_ATTR_QUERY_TIMEOUT: self._config.query_metrics.query_timeout},
+        )
+        try:
+            ibm_db.execute(cursor)
+            source = ibm_db.fetch_assoc(cursor)
+            if source is False:
+                raise RuntimeError('Db2 returned no collection source')
+            return source
+        finally:
+            ibm_db.free_stmt(cursor)
 
     def _emit_resolve_stats(self, stats: ResolveStats) -> None:
         for name in ('hits', 'misses', 'fetched', 'ignored', 'failed', 'dropped'):
