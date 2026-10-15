@@ -89,9 +89,9 @@ endpoint retains its configured DBM identity across takeover, but starts a new c
 server, database activation, or HADR role changes. The first collection from the new source establishes
 that baseline rather than reporting executions accumulated before the switch.
 
-A readable standby can be monitored separately for queries executed on that standby. Give it a distinct
-database identifier; do not configure multiple collectors with the same identifier to collect the same
-workload. A standby without reads enabled cannot accept the SQL connection required for query metrics.
+A readable standby can be monitored separately for queries executed on that standby. Configure its own
+hostname so it has a distinct DBM identity. A standby without reads enabled cannot accept the SQL
+connection required for query metrics.
 
 To monitor the health of an instance, its associated databases, and database objects, enable the database system monitor switches for each of the objects you want to monitor:
 * Statement

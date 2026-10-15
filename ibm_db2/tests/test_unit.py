@@ -146,7 +146,9 @@ def test_query_metrics_statement_timeout(instance: dict, timeout: int | None):
         mock.patch.object(collector._connection, 'ensure_connected'),
         mock.patch('ibm_db.prepare') as prepare,
         mock.patch('ibm_db.execute'),
-        mock.patch('ibm_db.fetch_assoc', side_effect=[{'host_name': 'server-a'}, False, {'host_name': 'server-a'}, False]),
+        mock.patch(
+            'ibm_db.fetch_assoc', side_effect=[{'host_name': 'server-a'}, False, {'host_name': 'server-a'}, False]
+        ),
         mock.patch('ibm_db.free_stmt'),
     ):
         collector.run_job()
