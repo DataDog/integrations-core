@@ -26,7 +26,11 @@ set -e
 
 # Only build packages if there were new releases
 if [[ $status -eq 0 ]]; then
+    # Order matters: GitHub wheel publishing detects packages from the tags at HEAD.
+    # 1. Trigger the legacy build pipeline
+    # 2. Dispatch autonomous wheel publishing from the tagged commit
     ./.gitlab/tagger/build-packages.sh
+    ./.gitlab/tagger/dispatch-wheel-publishing.sh
 elif [[ $status -eq 2 ]]; then
     echo "No new releases, skipping the build pipeline trigger"
 else
