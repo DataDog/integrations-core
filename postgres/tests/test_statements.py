@@ -1238,6 +1238,11 @@ def test_activity_raw_statement_collection(
         assert bobs_rows
         for row in bobs_rows:
             assert row['raw_query_signature'] in rqt_signatures
+
+        bobs_plan_events = [e for e in dbm_samples if e['dbm_type'] == 'plan' and e['db']['user'] == 'bob']
+        assert len(bobs_plan_events) == (1 if query_samples_enabled else 0)
+        for e in bobs_plan_events:
+            assert e['db']['raw_query_signature'] in rqt_signatures
     finally:
         conn.close()
 

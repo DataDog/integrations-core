@@ -952,6 +952,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                         obfuscated_plan_event['timestamp'] = get_timestamp(row['state_change']) * 1000
 
             if self._collect_raw_query_statement:
+                obfuscated_plan_event["db"]["raw_query_signature"] = row['raw_query_signature']
                 raw_statement_event = self._row_to_raw_statement_event(row, submitted_raw_statements)
                 if raw_statement_event:
                     yield raw_statement_event
