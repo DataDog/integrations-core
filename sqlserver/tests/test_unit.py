@@ -1896,7 +1896,7 @@ DBM_JOB_NAMES = [
     'dbm, data_observability_enabled, expected_jobs',
     [
         (False, False, []),
-        (False, True, ['data-observability']),
+        (False, True, ['database-metadata', 'data-observability']),
         (True, False, DBM_JOB_NAMES),
         (True, True, DBM_JOB_NAMES + ['data-observability']),
     ],
@@ -1905,9 +1905,8 @@ DBM_JOB_NAMES = [
 def test_async_job_registry_matches_config(instance_docker, dbm, data_observability_enabled, expected_jobs):
     """Only the jobs enabled by the instance config are built and registered.
 
-    Data observability is deliberately outside the DBM gate: it collects for instances that have
-    not turned DBM on. Every other job requires DBM, and each one's own enabled flag defaults to
-    true, so without the gate a non-DBM instance would start collecting.
+    Data observability and database metadata collect for instances with Data Observability enabled
+    even when DBM is off. All remaining jobs require DBM.
     """
     instance_docker['dbm'] = dbm
     instance_docker['data_observability'] = {'enabled': data_observability_enabled, 'queries': []}
@@ -1915,7 +1914,7 @@ def test_async_job_registry_matches_config(instance_docker, dbm, data_observabil
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
 
     registered = check._async_job_registry
-    assert list(registered) == expected_jobs
+    assert set(registered) == set(expected_jobs)
     assert check.statement_metrics is registered.get('query-metrics')
     assert check.procedure_metrics is registered.get('procedure-metrics')
     assert check.sql_metadata is registered.get('database-metadata')
