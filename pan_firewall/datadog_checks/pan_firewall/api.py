@@ -127,7 +127,6 @@ class PanosClient:
         self._keys = keys
         self._log = log
         self._slots = threading.BoundedSemaphore(max_in_flight)
-        self._renew_lock = threading.Lock()
         self._stats = CallStats()
         self._stats_lock = threading.Lock()
 
@@ -237,13 +236,7 @@ class PanosClient:
             return attempt(self._renew(key))
 
     def _renew(self, rejected: str) -> str:
-        # Two calls in flight can be rejected with the same key; only the first regenerates it, and the other
-        # retries with the new key. A fresh keygen can invalidate the key the first call just got.
-        with self._renew_lock:
-            current = self._keys.key()
-            if current != rejected:
-                return current
-            renewed = self._keys.regenerate()
+        renewed = self._keys.renew(rejected)
         with self._stats_lock:
             self._stats.key_regenerated = True
         return renewed

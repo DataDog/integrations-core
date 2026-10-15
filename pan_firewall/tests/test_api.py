@@ -235,11 +235,11 @@ def test_rejected_keygen_is_not_retried_until_reset(keygen, api, keygens_before_
 
 def test_calls_rejected_with_the_same_key_renew_it_once():
     http = FakeHttp(keygen=[(200, keygen_ok(key)) for key in (KEY_1, KEY_2, 'GENERATED-KEY-3')])
-    client, keys = make_client(http)
+    keys = KeyManager(http, HOST, PASSWORD_CREDS)
     assert keys.key() == KEY_1
 
     # Two calls in flight both rejected with KEY-1: only the first regenerates, the second takes its key.
-    renewed = [client._renew(KEY_1), client._renew(KEY_1)]
+    renewed = [keys.renew(KEY_1), keys.renew(KEY_1)]
 
     assert renewed == [KEY_2, KEY_2]
     assert len(http.calls_of('keygen')) == 2

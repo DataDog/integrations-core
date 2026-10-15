@@ -46,9 +46,16 @@ class KeyManager:
                 self._key = self._keygen()
             return self._key
 
-    def regenerate(self) -> str:
-        """Replace a rejected key; raise PanosAuthError if that is impossible (a static key) or keygen fails."""
+    def renew(self, rejected: str) -> str:
+        """Return the key to retry with after `rejected` was refused; raise PanosAuthError if that is impossible (a
+        static key) or keygen fails.
+
+        Two calls in flight can be rejected with the same key: only the first regenerates it and the other gets the
+        new key, because a second keygen can invalidate the key the first call just got.
+        """
         with self._lock:
+            if self._key is not None and self._key != rejected:
+                return self._key
             if self._creds.api_key is not None:
                 raise PanosAuthError('403', f'{self._host} rejected the configured API key, which is never renewed')
             self._raise_if_rejected()
