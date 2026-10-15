@@ -220,6 +220,6 @@ condition are recorded, completing the task may still be valid if all attainable
 Integration-owned failures and weak or missing assertions remain defects and require a concrete
 repair or an invalid result.
 
-Run focused tests first, then relevant unit/integration/E2E tiers, validation, format-fix, and final
-lint as required. Report exact commands/tools, collected test counts, passes/skips/failures, repairs,
+Run focused tests and format-fix first, then relevant unit/integration/E2E tiers, validation, and a
+final lint without formatting. Report exact commands/tools, collected test counts, passes/skips/failures, repairs,
 fixture origins, and uncovered requirements. Never manufacture execution evidence.

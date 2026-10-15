@@ -29,8 +29,9 @@ only when the prepared environment assets define a runnable local API and its se
 behavior. Put the shared metric assertion helper in a test module so the E2E task can find and
 reuse it from files.
 
-Run explicit unit and integration selections with ddev_test. Run config, models, and metadata
-validation, then formatting and lint. Repair implementation, test, metadata, or spec ownership as
+Run ddev_lint with fmt=true before the Docker-backed integration selection, so formatting cannot
+invalidate a slow run. Then run explicit unit and integration selections with ddev_test, config,
+models, and metadata validation, and a final lint without formatting. Repair implementation, test, metadata, or spec ownership as
 needed; regenerate only through validation tools. Finish with test paths, client/check boundaries,
 fixture provenance, exact command outcomes and counts, repairs, failures, unrun work, and the
 specific environment information that the E2E task must inspect. Do not run ddev_env tools here.

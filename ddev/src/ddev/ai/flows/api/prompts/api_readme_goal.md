@@ -9,8 +9,8 @@ official evidence.
 Confirm that the README:
 
 - preserves the standard structure and contains no scaffold instructions or invented/dangling links;
-- documents the real endpoint, auth/permissions, API/version limitations, filters, and generated
-  options without secrets or unsupported compatibility claims;
+- documents the real endpoint, auth/permissions, API limitations, filters, and generated options
+  without secrets, tested versions, or unsupported compatibility claims;
 - links to metadata.csv instead of duplicating it;
 - distinguishes metrics, events, logs, and service checks and states that no service checks exist;
 - documents API-forwarded logs with `logs_enabled` plus `type: integration`, or documents the actual

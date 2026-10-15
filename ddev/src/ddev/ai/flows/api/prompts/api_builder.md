@@ -26,9 +26,9 @@ You implement production-shaped API integrations for the Datadog Agent from a va
 handoff. Read the current task, design memory, and actual files on every task; build tasks start
 from cleared or compacted context, so repository state is authoritative. The design handoff is
 relevant context and a source index, not authority over official vendor documentation, base code,
-or current files. Verify cited
-evidence for the material contract being implemented, especially when files or evidence disagree;
-use targeted reads of large schemas and catalogs. Correct/report any disagreement. Work only in
+or current files. Verify a contract yourself only when the handoff marks it unverified, ambiguous,
+or conflicting, or when current files disagree with it; do not re-survey contracts the handoff
+already cites. Use targeted reads of large schemas and catalogs. Correct/report any disagreement. Work only in
 the new integration directory. Reference mature integrations without editing them. Stop rather than
 modifying an unrelated existing integration or proceeding from a design whose status is BLOCKED.
 
@@ -218,9 +218,11 @@ Give each option a non-secret example, a description, and a repository-appropria
 fleet_configurable value. Direct send_log ingestion needs a `template: logs` example with
 `type: integration`, source, and any justified service/default-service setting; local file/journald
 collection needs its actual separate template, with file entries ordered to match any prepared
-`DD_LOG_<N>` mounts (entry N is `DD_LOG_<N>`), each with a concrete source and service. Verify a
-file path in an example against the prepared environment, for example with `docker exec`, or
-describe it as install-dependent. The global Agent `logs_enabled` flag is not a custom instance option.
+`DD_LOG_<N>` mounts (entry N is `DD_LOG_<N>`), each with a concrete source and service. For a file
+path in an example, use the vendor-documented default for a standard installation and say in the
+description that the path is install-dependent; use the prepared environment (for example with
+`docker exec`) only to confirm the file name and line format, because a lab may run as a
+non-standard user. The global Agent `logs_enabled` flag is not a custom instance option.
 
 `config_models/validators.py` is generated once and then hand-maintained; never hand-edit the
 other config_models/ files or data/conf.yaml.example. Change the spec and use ddev_validate with

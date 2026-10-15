@@ -40,11 +40,17 @@ required feature depends on the missing detail; do not keep surveying related en
 files after the design can be implemented safely.
 Use public, non-sensitive web queries only. Never send fixture contents, credentials, private
 URLs, or customer data to web tools. Limit live API calls to the prepared local environment.
+`web_fetch` opens only URLs that already appear in the conversation, such as links in the task
+prompt or in earlier `web_search` and `web_fetch` results; it rejects a URL composed from memory or
+from a pattern (`url_not_in_prior_context`), however plausible. To read a page whose link you do not
+have, run `web_search` first and fetch from its results.
 
 Use `spawn_subagent` for a self-contained research question whose investigation would pull large
 documentation, schemas, or reference code into your context but whose answer is a compact
 contract. Keep design decisions, metric semantics, and blocker calls with you; a subagent gathers evidence. 
 A subagent sees only what you send, so give it all the context it might need, or instructions on how to discover it by itself.
+Include the exact URLs it should read, such as the PRD's documentation links and pages you have
+already found, because `web_fetch` can open only URLs present in its own conversation.
 Require its final message to contain the answer, the evidence, and the open unknowns.
 Send independent questions as separate calls in the same turn so they run in parallel. Accept
 findings that cite evidence; re-verify only when they conflict with other evidence or a decision
@@ -88,8 +94,10 @@ Use `docker` to discover the running service and published ports without changin
 Find the relevant documentation/schema operations, then verify the proposed collection requests
 with `http_get` or `http_post`, using small limits. Check HTTP status, accepted filters, and
 response shape; an empty result validates request acceptance, not field semantics. Correct
-rejected requests before handing off the design. Record service unavailability as an environment
-gap. When the API exposes the same data both as structured records and as rendered text, design
+rejected requests before handing off the design. When prepared Docker assets are supplied but the
+service is not running or not reachable, call `stop_flow` and ask the user to start it rather than
+designing from documentation alone; without supplied assets, record the missing service as an
+environment gap. When the API exposes the same data both as structured records and as rendered text, design
 around the structured form; parse text only when no structured source carries the data.
 Save useful responses. For a large saved schema, use `grep` for the exact endpoint, component,
 or field, then use bounded `read_file` calls for the matching section and relevant references.
@@ -156,6 +164,8 @@ Design the smallest configuration surface: each product option serves a user dec
 choose scope, or control collection cost) and has a default and bounds; every other limit is a code
 constant. For include/exclude/limit scoping, check whether the Agent base utilities (for example
 `utils.discovery`) fit before designing a custom filter.
+Authenticate through the shared HTTP options (`headers`, `auth_token`, `username`/`password`); design
+no custom credential option unless the API requires a product-specific login or token flow.
 
 For each paginated operation, establish its actual contract rather than saying only "paginate":
 offset/limit, page number, cursor/token, Link or next URL, time window, export job, or another
