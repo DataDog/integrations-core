@@ -64,7 +64,7 @@ def test_device_metadata_of_the_static_fw_a():
     }
 
 
-def test_device_tags_carry_ha_state_only_when_ha_is_enabled():
+def test_device_tags_carry_the_ha_state():
     device = build_device(SYSTEM_INFO, FW_A_STATIC_IP, NAMESPACE, ['team:test'], can_connect=1, ha_state='active')
 
     assert device.tags == ['team:test', 'ha_state:active']
@@ -209,7 +209,7 @@ def test_disabled_metadata_sends_no_event_but_still_reads_the_identity(dd_run_ch
     dd_run_check(new_check(make_instance(send_ndm_metadata=False)))
 
     assert events(aggregator) == []
-    assert [c.cmd for c in fake_panos.calls if c.type == 'op'][1:] == [SYSTEM_INFO_CMD, INTERFACE_ALL_CMD]
+    assert {SYSTEM_INFO_CMD, INTERFACE_ALL_CMD} <= {c.cmd for c in fake_panos.calls}
 
 
 def test_static_firewall_never_reached_sends_no_metadata(dd_run_check, aggregator, fake_panos):

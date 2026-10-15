@@ -60,7 +60,7 @@ FAILURES: dict[str, Answer] = {
     **TRANSPORT_ERRORS,
     'http_403': (403, INVALID_CREDENTIAL),
     'code_403': (200, INVALID_CREDENTIAL),
-    # The real Panorama answer to a keygen with a wrong password (lab task P1).
+    # The real Panorama answer to a keygen with a wrong password.
     'capture_bad_password': (200, (FIXTURES / 'panorama' / 'keygen_bad_password.xml').read_bytes()),
     # Non-PAN-OS bodies, such as a reverse proxy's or a hung management web server's error page.
     'html_502': (502, b'<html><body><h1>502 Bad Gateway</h1></body></html>'),

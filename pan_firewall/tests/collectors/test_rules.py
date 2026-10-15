@@ -53,16 +53,20 @@ def test_rule_without_a_hit_count_is_skipped():
     assert series(samples) == {k: v for k, v in expected().items() if k[1][0] != 'rule:trust-out'}
 
 
-def test_command_matches_the_captured_one_and_escapes_the_vsys_name():
+def test_command_escapes_the_vsys_name():
     assert "<entry name='a&apos;b&amp;c&lt;'>" in rule_hit_cmd("a'b&c<")
 
 
-def make_context(vsys, patterns=None):
-    return make_ctx(load(), state=FirewallState(vsys=vsys), config=mock.Mock(security_rule_filter=patterns))
+def vsys2_answer():
+    """The capture as vsys2 would answer it: the same rules under `<entry name="vsys2">`."""
+    root = load()
+    root.find('result/rule-hit-count/vsys/entry').set('name', 'vsys2')
+    return root
 
 
 def test_collector_makes_one_call_per_vsys_and_tags_the_samples_with_it():
-    ctx = make_context(['vsys1', 'vsys2'])
+    answers = {rule_hit_cmd('vsys1'): load(), rule_hit_cmd('vsys2'): vsys2_answer()}
+    ctx = make_ctx(answers, state=FirewallState(vsys=['vsys1', 'vsys2']), config=mock.Mock(security_rule_filter=None))
 
     samples = collect_rule_hits(ctx)
 

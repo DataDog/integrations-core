@@ -47,11 +47,11 @@ OP_FIXTURES = {
 
 
 # `type=op` commands captured on some firewall sets only (lab probes), or answered from a synthetic stand-in until
-# captured, to the fixture path under FIXTURES, per set. A set missing here has no capture for the command (ruling
-# R7: fw-b has no `show interface all`). Unlike the other maps, a set missing here does not fall back to fw-a's file.
+# captured, to the fixture path under FIXTURES, per set. A set missing here has no capture for the command (fw-b has
+# no `show interface all`). Unlike the other maps, a set missing here does not fall back to fw-a's file.
 PARTIAL_OP_FIXTURES = {
     '<show><interface>all</interface></show>': {'fw-a': 'fw-a-probe/interface_all.xml'},
-    # Idle until lab task L10 captures `show jobs pending`.
+    # Idle until a real `show jobs pending` is captured.
     '<show><jobs><pending/></jobs></show>': {
         'fw-a': 'synthetic/jobs_pending_idle.xml',
         'fw-b': 'synthetic/jobs_pending_idle.xml',
@@ -60,7 +60,7 @@ PARTIAL_OP_FIXTURES = {
 
 
 # `type=op` commands a Panorama answers, to the fixture file under FIXTURES. The answer is the synthetic one: the two
-# real P1 entries plus the edge cases the lab lacks (`panorama/show_devices_connected.xml` is the unmodified capture).
+# real entries plus the edge cases the lab lacks (`panorama/show_devices_connected.xml` is the unmodified capture).
 PANORAMA_OP_FIXTURES = {
     '<show><devices><connected/></devices></show>': 'synthetic/panorama_show_devices_connected.xml',
 }

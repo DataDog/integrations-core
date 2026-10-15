@@ -1,4 +1,4 @@
-<!-- Hand-written; UNVERIFIED until the PA-3420 capture (lab task L8). Field names come from two sources.
+<!-- Hand-written; UNVERIFIED until a PA-3420 is captured. Field names come from two sources.
      NDM engineering page (`show system environmentals`): `Volts` on power entries, `DegreesC`, `min`, `max` and `alarm`
      on thermal entries, and `min-volt`/`max-volt` on power entries.
      Perl hardware-output parser (real PA hardware output): power entries carry plain `min`/`max` like thermal entries,

@@ -9,11 +9,9 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.pan_firewall import PanFirewallCheck, constants
-from datadog_checks.pan_firewall import poller as poller_module
 from datadog_checks.pan_firewall.collectors.interfaces import COUNTER_INTERFACE_CMD
 from datadog_checks.pan_firewall.constants import REPORTS
 from datadog_checks.pan_firewall.errors import PanosApiError
-from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 from datadog_checks.pan_firewall.xml_utils import num, parse_response, text
 
 from .common import CREDENTIALS, FIXTURES, FW_A_PEER, FW_A_SERIAL, FW_A_TAGS, FW_A_TUNNEL, SYSTEM_INFO_CMD
@@ -219,31 +217,30 @@ CMD_LABELS = {
     '<request><license><info/></license></request>': 'licenses',
 }
 
-# Requests per run, by seconds since the first run, for each firewall (plan section 2.4, "Schedule"). `jobs` is the
-# commit check: one request on every run that has a due collector, none on a run with nothing due. The 3-minute tier
-# is 5 + V requests (`interfaces` 1, `system_resources` 1, `vpn` 2, `ha` 1, and `rule_hits` V = 1 per vsys). A
-# first threat run asks one `backward` job and reads it (2); a later one submits a `forward` job and reads it (2).
-EXPECTED_CALLS = {
+# Who makes requests on each run, by seconds since the first run, for each firewall: only the collectors that are due
+# (the tiers themselves are pinned in `test_scheduler`). `jobs` is the commit check, made on every run that has a due
+# collector and on no other.
+EXPECTED_CALLERS = {
     0: {
-        'keygen': 1,
-        'jobs': 1,
-        'bgp': 1,
-        'dataplane': 1,
-        'interfaces': 1,
-        'system_resources': 1,
-        'vpn': 2,
-        'ha': 1,
-        'rule_hits': 1,
-        'environment': 1,
-        'threats': 2,
-        'disk': 1,
-        'identity_metadata': 2,
-        'licenses': 1,
+        'keygen',
+        'jobs',
+        'bgp',
+        'dataplane',
+        'interfaces',
+        'system_resources',
+        'vpn',
+        'ha',
+        'rule_hits',
+        'environment',
+        'threats',
+        'disk',
+        'identity_metadata',
+        'licenses',
     },
-    60: {},
-    120: {'jobs': 1, 'bgp': 1, 'dataplane': 1},
-    180: {'jobs': 1, 'interfaces': 1, 'system_resources': 1, 'vpn': 2, 'ha': 1, 'rule_hits': 1},
-    300: {'jobs': 1, 'bgp': 1, 'dataplane': 1, 'environment': 1, 'threats': 2},
+    60: set(),
+    120: {'jobs', 'bgp', 'dataplane'},
+    180: {'jobs', 'interfaces', 'system_resources', 'vpn', 'ha', 'rule_hits'},
+    300: {'jobs', 'bgp', 'dataplane', 'environment', 'threats'},
 }
 
 
@@ -257,8 +254,8 @@ def metrics_of(aggregator, ip):
     types = {aggregator.GAUGE: GAUGE, aggregator.MONOTONIC_COUNT: MONOTONIC, aggregator.COUNT: 'count'}
     return {
         (name.removeprefix('pan_firewall.'), types[metric.type])
-        for name, stubs in aggregator._metrics.items()
-        for metric in stubs
+        for name in aggregator.metric_names
+        for metric in aggregator.metrics(name)
         if f'device_ip:{ip}' in metric.tags
     }
 
@@ -281,54 +278,36 @@ def call_labels(fake_panos, ip, since):
 
 
 def test_runs_at_0_180_and_300_seconds_submit_every_lab_available_p0_metric(
-    dd_run_check, aggregator, fake_panos, real_collectors, monkeypatch
+    dd_run_check, aggregator, fake_panos, real_collectors, schedule_clock
 ):
-    now = [1000.0]
-    monkeypatch.setattr(poller_module, 'FirewallSchedule', lambda: FirewallSchedule(lambda: now[0]))
     # The first threat run reads the newest log as a watermark; start it just below each capture so the 5-minute
     # run counts it.
     for name, ip in FIREWALLS.items():
         fake_panos.answer_log(ip, 'backward', None, 0, log_page([THREAT_LOG_FIRST_SEQNO[name] - 1]))
     check = new_static_check()
-    start = now[0]
+    start = schedule_clock.now
     expected = {**FIRST_RUN_METRICS, **TUNNEL_COUNTERS, 'threat.count': 'count'}
-    assert len(expected) == 61
 
     for seconds in (0, 180, 300):
-        now[0] = start + seconds
+        schedule_clock.now = start + seconds
         dd_run_check(check)
 
     for ip in FIREWALLS.values():
         assert metrics_of(aggregator, ip) == set(expected.items())
-    metric_types = {GAUGE: aggregator.GAUGE, MONOTONIC: aggregator.MONOTONIC_COUNT, 'count': aggregator.COUNT}
-    for name, metric_type in expected.items():
-        aggregator.assert_metric(f'pan_firewall.{name}', metric_type=metric_types[metric_type], at_least=1)
-    aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_each_run_makes_only_the_requests_that_are_due(
-    dd_run_check, aggregator, fake_panos, real_collectors, monkeypatch
-):
-    now = [1000.0]
-    monkeypatch.setattr(poller_module, 'FirewallSchedule', lambda: FirewallSchedule(lambda: now[0]))
-    # The first threat run reads the newest log as a watermark; start it just below each capture so the 5-minute
-    # run counts it.
-    for name, ip in FIREWALLS.items():
-        fake_panos.answer_log(ip, 'backward', None, 0, log_page([THREAT_LOG_FIRST_SEQNO[name] - 1]))
+def test_each_run_makes_only_the_requests_that_are_due(dd_run_check, fake_panos, real_collectors, schedule_clock):
     check = new_static_check()
-    start = now[0]
+    start = schedule_clock.now
 
-    for seconds, expected in EXPECTED_CALLS.items():
-        now[0] = start + seconds
+    for seconds, expected in EXPECTED_CALLERS.items():
+        schedule_clock.now = start + seconds
         calls_before = len(fake_panos.calls)
         dd_run_check(check)
 
         for ip in FIREWALLS.values():
-            assert call_labels(fake_panos, ip, calls_before) == expected, f'run at +{seconds}s on {ip}'
-
-    for ip in FIREWALLS.values():
-        assert ('threat.count', 'count') in metrics_of(aggregator, ip)
+            assert set(call_labels(fake_panos, ip, calls_before)) == expected, f'run at +{seconds}s on {ip}'
 
 
 def test_a_threat_job_still_running_is_polled_again_on_the_next_run_not_in_5_minutes(

@@ -75,7 +75,7 @@ def test_interface_counters_with_the_interface_map():
 
 
 def test_interface_counters_without_a_map_carry_the_interface_tag_only():
-    # Without `show interface all` (fw-b has no capture of it, ruling R7) the state holds no interface map.
+    # Without `show interface all` (fw-b has no capture of it) the state holds no interface map.
     samples = parse_interface_counters(load_op(COUNTER_INTERFACE_CMD), FirewallState(), FW_A_SERIAL, None, mock.Mock())
 
     assert series(samples) == expected_interfaces(FW_A_ROWS, lambda name: (f'interface:{name}',))

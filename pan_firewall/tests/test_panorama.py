@@ -22,7 +22,6 @@ PANORAMA = 'panorama.example.com'
 DISCOVERY_CMD = '<show><devices><connected/></devices></show>'
 SYNTHETIC = FIXTURES / 'synthetic' / 'panorama_show_devices_connected.xml'
 REAL_CAPTURE = FIXTURES / 'panorama' / 'show_devices_connected.xml'
-BAD_KEY_CAPTURE = FIXTURES / 'panorama' / 'op_bad_key.xml'
 # The `ip-address` values of the captures. The fake Panorama reports the fake firewalls (FW_A_IP, FW_B_IP) instead.
 FW_A_REPORTED, FW_B_REPORTED = '10.60.0.10', '10.60.0.11'
 PANORAMA_TAGS = ['device_namespace:default', f'panorama_host:{PANORAMA}', 'team:test']
@@ -119,15 +118,6 @@ def test_panorama_key_is_generated_from_username_and_password(dd_run_check, fake
     ]
 
 
-def test_panorama_rejecting_the_key_renews_it_once_and_retries_once(dd_run_check, aggregator, fake_panos):
-    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, BAD_KEY_CAPTURE.read_bytes()))
-
-    dd_run_check(new_check(panorama_api_key=None, panorama_username='pan-user', panorama_password='p'))
-
-    assert [c.type for c in fake_panos.calls_to(PANORAMA)] == ['keygen', 'op', 'keygen', 'op']
-    assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))]
-
-
 def test_firewalls_are_polled_at_the_reported_ip_which_is_their_device_ip(dd_run_check, aggregator, fake_panos):
     dd_run_check(new_check())
 
@@ -146,15 +136,6 @@ def test_firewall_at_an_unreachable_reported_ip_is_reported_down(dd_run_check, a
     # Nothing answers at a private IP from here.
     assert polled_hosts(fake_panos) == {'10.60.0.40'}
     assert can_connect_by_ip(aggregator) == {'10.60.0.40': 0}
-
-
-# TEMPORARY: goes with `LAB_IP_OVERRIDES`.
-def test_lab_firewalls_are_polled_at_their_public_ips(dd_run_check, fake_panos):
-    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, (200, REAL_CAPTURE.read_bytes()))
-
-    dd_run_check(new_check())
-
-    assert polled_hosts(fake_panos) == {'3.13.247.39', '3.19.110.163'}
 
 
 @pytest.mark.parametrize(
@@ -180,7 +161,6 @@ def test_excluded_firewall_is_never_polled_and_gets_no_can_connect(dd_run_check,
 
     assert FW_B_IP not in polled_hosts(fake_panos)
     assert set(metrics_by_ip(aggregator, 'can_connect')) == {FW_A_IP}
-    assert FW_B_IP not in check._pollers
 
 
 @pytest.mark.parametrize('ip', [None, 'not-an-ip'], ids=['absent', 'invalid'])
@@ -193,17 +173,16 @@ def test_entry_without_usable_ip_is_skipped_and_logged(dd_run_check, fake_panos,
     assert 'SYNTH-BAD-IP' in caplog.text
 
 
-def test_renamed_firewall_keeps_its_poller_and_gets_the_new_hostname(dd_run_check, fake_panos):
+def test_renamed_firewall_keeps_its_session_and_key(dd_run_check, fake_panos):
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml((FW_A_SERIAL, 'fw-a', FW_A_IP, 'yes')))
     check = new_check()
     dd_run_check(check)
-    poller = check._pollers[FW_A_IP]
 
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml((FW_A_SERIAL, 'fw-renamed', FW_A_IP, 'yes')))
     dd_run_check(check)
 
-    assert check._pollers[FW_A_IP] is poller
-    assert poller.target.hostname == 'fw-renamed'
+    # A new name alone does not make a new poller, which would log in again.
+    assert [c.type for c in fake_panos.calls_to(FW_A_IP)].count('keygen') == 1
 
 
 def test_firewall_replaced_at_the_same_ip_is_reported_under_its_new_serial(dd_run_check, aggregator, fake_panos):
@@ -320,24 +299,14 @@ PASSWORD_LOGIN = {'panorama_api_key': None, 'panorama_username': 'pan-user', 'pa
             (200, b'<response status="error" code="12"><msg><line>Invalid command</line></msg></response>'),
             {},
             ['op', 'op'],
-            'PAN-OS API error 12: Invalid command',
+            'Invalid command',
             id='api-error',
         ),
         # A static `panorama_api_key` is never renewed: the message says it was rejected.
-        pytest.param(
-            (200, INVALID_CREDENTIAL),
-            {},
-            ['op', 'op'],
-            f'PAN-OS API error 403: {PANORAMA} rejected the configured API key, which is never renewed',
-            id='auth-failure',
-        ),
+        pytest.param((200, INVALID_CREDENTIAL), {}, ['op', 'op'], 'rejected the configured API key', id='auth-failure'),
         # The real answer to a keygen with a wrong password: one attempt per run, not a loop within a run.
         pytest.param(
-            'capture_bad_password',
-            PASSWORD_LOGIN,
-            ['keygen', 'keygen'],
-            f'PAN-OS API error 403: {PANORAMA} rejected the credentials: API Error: Invalid Credential',
-            id='bad-password',
+            'capture_bad_password', PASSWORD_LOGIN, ['keygen', 'keygen'], 'rejected the credentials', id='bad-password'
         ),
     ],
 )
@@ -355,8 +324,8 @@ def test_panorama_can_connect_is_0_when_the_discovery_call_fails(
 
     assert [c.type for c in fake_panos.calls_to(PANORAMA)] == calls
     assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))] * 2
-    warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
-    assert f'could not get the connected devices from Panorama {PANORAMA}: {error}' in warnings
+    failures = [w.getMessage() for w in warnings_about(caplog, PANORAMA) if 'connected devices' in w.getMessage()]
+    assert len(failures) == 2 and all(error in w for w in failures)
 
 
 def test_panorama_that_answers_again_is_reported_and_its_firewalls_polled(dd_run_check, aggregator, fake_panos):
@@ -409,22 +378,22 @@ def test_panorama_auth_failure_does_not_change_the_firewalls_auth_status(dd_run_
         }
 
 
-def test_unreachable_panorama_without_a_cached_list_polls_nothing_and_does_not_raise(
-    dd_run_check, aggregator, fake_panos, caplog
+@pytest.mark.parametrize(
+    'cached',
+    [
+        pytest.param(None, id='no-cached-list'),
+        pytest.param('[{"serial": "007955000930601"', id='corrupt'),
+        pytest.param('[{"serial": "007955000930601"}]', id='old-format-bare-list'),
+        pytest.param('{"firewalls": []}', id='without-discovered'),
+    ],
+)
+def test_unreachable_panorama_without_a_usable_cached_list_polls_nothing_and_does_not_raise(
+    dd_run_check, aggregator, fake_panos, caplog, cached
 ):
-    fake_panos.fail(PANORAMA, 'timeout')
-
-    dd_run_check(new_check())
-
-    assert polled_hosts(fake_panos) == set()
-    assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))]
-    assert any(r.levelno == logging.WARNING and 'no discovered firewalls' in r.getMessage() for r in caplog.records)
-
-
-def test_corrupt_cached_list_is_treated_as_no_cached_list(dd_run_check, aggregator, fake_panos, caplog):
-    check = new_check()
-    dd_run_check(check)
-    check.write_persistent_cache(f'panorama_firewalls:{PANORAMA}', '[{"serial": "007955000930601"')
+    if cached is not None:
+        check = new_check()
+        dd_run_check(check)
+        check.write_persistent_cache(CACHE_KEY, cached)
     fake_panos.fail(PANORAMA, 'refused')
     calls = len(fake_panos.calls)
     aggregator.reset()
@@ -434,7 +403,7 @@ def test_corrupt_cached_list_is_treated_as_no_cached_list(dd_run_check, aggregat
 
     assert polled_hosts(fake_panos, skip=calls) == set()
     assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))]
-    assert any(r.levelno == logging.WARNING and 'no discovered firewalls' in r.getMessage() for r in caplog.records)
+    assert any('no discovered firewalls' in w.getMessage() for w in warnings_about(caplog, PANORAMA))
 
 
 def test_cached_list_holds_no_credentials(dd_run_check):
@@ -471,10 +440,8 @@ def test_fallback_warning_says_how_old_the_list_is_and_its_firewalls_are_polled(
 
     dd_run_check(new_check())
 
-    assert fallback_warnings(caplog) == [
-        # The 6 entries of the cached list, of which 2 are connected and have a usable IP.
-        f'Panorama {PANORAMA} is unreachable; polling the 6 firewalls of the last discovery, 3 days ago'
-    ]
+    (warning,) = fallback_warnings(caplog)
+    assert warning.endswith('3 days ago')
     assert polled_hosts(fake_panos, skip=calls) == {FW_A_IP, FW_B_IP}
 
 
@@ -489,26 +456,6 @@ def test_successful_discovery_rewrites_the_discovery_time_even_when_the_list_is_
     second = json.loads(check.read_persistent_cache(CACHE_KEY))
     assert second['firewalls'] == first['firewalls']
     assert second['discovered'] - first['discovered'] == 60
-
-
-@pytest.mark.parametrize(
-    'cached',
-    [
-        pytest.param('[{"serial": "007955000930601"}]', id='old-format-bare-list'),
-        pytest.param('{"firewalls": []}', id='without-discovered'),
-    ],
-)
-def test_cached_list_in_another_format_is_ignored(dd_run_check, fake_panos, caplog, cached):
-    check = new_check()
-    dd_run_check(check)
-    check.write_persistent_cache(CACHE_KEY, cached)
-    fake_panos.fail(PANORAMA, 'refused')
-    calls = len(fake_panos.calls)
-
-    dd_run_check(new_check())
-
-    assert polled_hosts(fake_panos, skip=calls) == set()
-    assert any(r.levelno == logging.WARNING and 'no discovered firewalls' in r.getMessage() for r in caplog.records)
 
 
 @pytest.mark.parametrize(

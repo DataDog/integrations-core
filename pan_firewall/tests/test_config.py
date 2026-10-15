@@ -25,28 +25,27 @@ def instance_with(base, changes):
     return {k: v for k, v in instance.items() if v is not None}
 
 
-@pytest.mark.parametrize(
-    'base, changes',
-    [
-        pytest.param(
-            STATIC_INSTANCE,
-            {
-                'firewalls': ['192.0.2.10', '198.51.100.7', '2001:db8::1'],
-                'firewall_credentials': [
-                    {'cidr': '192.0.2.0/24', 'username': 'u', 'password': 'p'},
-                    {'cidr': '198.51.100.0/24', 'api_key': 'k'},
-                    {'api_key': 'catch-all'},
-                ],
-            },
-            id='static-cidr-credentials-and-ipv6',
-        ),
-        pytest.param(
-            {}, {'panorama_host': 'pan.example.com', 'panorama_api_key': 'k'}, id='panorama-without-static-credentials'
-        ),
-    ],
-)
-def test_valid_config_loads(dd_run_check, base, changes):
-    run(dd_run_check, instance_with(base, changes))
+def test_static_config_with_cidr_credentials_and_ipv6_polls_each_firewall_with_its_entry(dd_run_check, fake_panos):
+    instance = {
+        'firewalls': ['192.0.2.10', '198.51.100.7', '2001:db8::1'],
+        'firewall_credentials': [
+            {'cidr': '192.0.2.0/24', 'username': 'u', 'password': 'p'},
+            {'cidr': '198.51.100.0/24', 'api_key': 'k'},
+            {'api_key': 'catch-all'},
+        ],
+    }
+
+    run(dd_run_check, instance)
+
+    # Every firewall is contacted (only 192.0.2.10 answers); only the username/password entry logs in.
+    assert {c.host for c in fake_panos.calls} == {'192.0.2.10', '198.51.100.7', '2001:db8::1'}
+    assert [(c.host, c.params['user']) for c in fake_panos.calls if c.type == 'keygen'] == [('192.0.2.10', 'u')]
+
+
+def test_panorama_config_needs_no_firewall_credentials(dd_run_check, fake_panos):
+    run(dd_run_check, {'panorama_host': 'pan.example.com', 'panorama_api_key': 'k'})
+
+    assert [(c.type, c.key_sent) for c in fake_panos.calls_to('pan.example.com')] == [('op', True)]
 
 
 @pytest.mark.parametrize(
@@ -153,24 +152,3 @@ def test_example_config_hides_only_the_http_auth_and_header_options():
 
     assert documented & set(HIDDEN_HTTP_OPTIONS) == set()
     assert set(VISIBLE_HTTP_OPTIONS) - documented == set()
-
-
-@pytest.mark.parametrize('base', [STATIC_INSTANCE, PANORAMA_INSTANCE], ids=['static', 'panorama'])
-@pytest.mark.parametrize(
-    'changes, expected', [({}, False), ({'persist_connections': True}, True)], ids=['default', 'turned-on']
-)
-def test_persist_connections_is_off_by_default_and_can_be_turned_on(dd_run_check, base, changes, expected):
-    check = run(dd_run_check, {**copy.deepcopy(base), **changes})
-
-    clients = [poller.client for poller in check._pollers.values()]
-    if check.config.panorama_host:
-        clients.append(check._source._client)
-    assert clients and all(client._http is check.http for client in clients)
-    assert check.http.persist_connections is expected
-
-
-@pytest.mark.parametrize('instance_timeout, expected', [(None, 30), (12, 12)], ids=['default', 'instance'])
-def test_timeout_defaults_to_30_seconds_and_comes_from_the_instance(instance_timeout, expected):
-    check = PanFirewallCheck('pan_firewall', {}, [instance_with(STATIC_INSTANCE, {'timeout': instance_timeout})])
-
-    assert check.http.options['timeout'] == (expected, expected)

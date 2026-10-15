@@ -1,4 +1,4 @@
-<!-- Derived from fw-a/bgp_peer_legacy.xml: the `fw-peer` entry kept, with a second prefix-counter entry added for IPv6. The IPv6 afi-safi string `bgpAfiIpv6-unicast` and the counters are unconfirmed (lab task L5); the name follows the captured `bgpAfiIpv4-unicast`. The peer is given an IPv6 address `[2001:db8::1]:179` to cover the bracketed form, and prefix-limit 4 to give distinct utilizations. -->
+<!-- Derived from fw-a/bgp_peer_legacy.xml: the `fw-peer` entry kept, with a second prefix-counter entry added for IPv6. The IPv6 afi-safi string `bgpAfiIpv6-unicast` and the counters are unconfirmed; the name follows the captured `bgpAfiIpv4-unicast`. The peer is given an IPv6 address `[2001:db8::1]:179` to cover the bracketed form, and prefix-limit 4 to give distinct utilizations. -->
 <response status="success"><result>
 	<entry peer="fw-peer" vr="default">
 		<peer-group>lab</peer-group>

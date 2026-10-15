@@ -1,9 +1,9 @@
-<!-- derived from the real capture panorama/show_devices_connected.xml (Panorama 11.2.15, lab task P1, 2026-10-13): the two real
+<!-- derived from the real capture panorama/show_devices_connected.xml (Panorama 11.2.15, 2026-10-13): the two real
      entries (fw-a, fw-b) trimmed to the fields the check uses, with their nested vsys and plugin_versions entries kept
      (the real response nests entry elements there, and the text node "Total Connected Devices" sits inside devices).
      The SYNTH-* entries are hand-written edge cases the lab does not have: connected=no, no ip-address, ip-address
      unknown, and an ha element. The shape of ha is UNVERIFIED: the lab firewalls are standalone, so it is a guess until
-     lab task L1 captures an HA pair behind Panorama. -->
+     an HA pair behind Panorama is captured. -->
 <response status="success">
   <result>
     <devices>

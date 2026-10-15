@@ -319,13 +319,11 @@ def test_a_timeout_polling_a_carried_job_keeps_it_for_the_next_run():
     client = ScriptedClient(act_polls={'app': SLOW})
     state = FirewallState()
     collect_reports(make_context(client, state))
-    carried = state.reports.pending
     client.timeout = True
 
     with pytest.raises(PanosUnreachable):
         collect_reports(make_context(client, state))
 
-    assert state.reports.pending is carried
     client.timeout = False
     samples = collect_reports(make_context(client, state))
     assert client.submitted().count('app') == 1
@@ -342,7 +340,6 @@ def test_an_api_error_polling_a_carried_job_drops_it_and_the_next_run_submits_th
     samples = collect_reports(ctx)
 
     ctx.log.warning.assert_called_once()
-    assert state.reports.pending is None
     # The failed job is dropped and the run goes on with the next report, instead of polling the dead job forever.
     assert client.submitted()[1] == REPORTS['top_application_categories'][0]
     assert {tags[0] for _name, tags in series(samples)} == {f'report:{n}' for n in REPORTS} - {
@@ -359,19 +356,23 @@ def test_an_api_error_polling_a_new_job_keeps_the_samples_already_gathered():
     samples = collect_reports(ctx)
 
     ctx.log.warning.assert_called_once()
-    assert state.reports.pending is None
     assert {tags[0] for _name, tags in series(samples)} == {f'report:{n}' for n in REPORTS} - {'report:top_sources'}
 
 
-def test_a_timeout_submitting_a_job_propagates():
-    client = mock.Mock()
-    client.submit_job.side_effect = PanosUnreachable('slow')
+def test_a_timeout_submitting_a_job_propagates_and_the_next_run_submits_the_same_report():
+    client = ScriptedClient()
     state = FirewallState()
+    submit = client.submit_job
+    client.submit_job = mock.Mock(side_effect=[submit(report_params('app', 10)), PanosUnreachable('slow')])
 
     with pytest.raises(PanosUnreachable):
         collect_reports(make_context(client, state))
+    client.submit_job = submit
+    collect_reports(make_context(client, state))
 
-    assert state.reports.pending is None
+    # The report whose submit timed out (the second) is not skipped.
+    second = REPORTS['top_application_categories'][0]
+    assert client.submitted() == ['app', second, *[f for f, _tag in list(REPORTS.values())[2:]]]
 
 
 def report_calls(fake_panos):

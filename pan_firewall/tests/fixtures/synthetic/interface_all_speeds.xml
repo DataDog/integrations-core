@@ -1,4 +1,4 @@
-<!-- Derived from fw-a-probe/interface_all.xml: only the hw speeds differ (ethernet1/1 1000, ethernet1/2 10000, tunnel "fast", loopback keeps [n/a]). Assumes PAN-OS reports Mbps until lab task L8 confirms it on hardware. Only the ifnet rows of ethernet1/1 and ethernet1/2 are kept. -->
+<!-- Derived from fw-a-probe/interface_all.xml: only the hw speeds differ (ethernet1/1 1000, ethernet1/2 10000, tunnel "fast", loopback keeps [n/a]). Assumes PAN-OS reports Mbps until it is confirmed on hardware. Only the ifnet rows of ethernet1/1 and ethernet1/2 are kept. -->
 <response status="success"><result>
   <hw>
     <entry>

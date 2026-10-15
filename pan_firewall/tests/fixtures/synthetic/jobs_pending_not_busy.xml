@@ -2,7 +2,7 @@
      (id 2166) and IoT (id 1350) entries of synthetic/jobs_all.xml (lab `show jobs all`, 2026-10-09) verbatim, except
      `status` changed from FIN to ACT. No report job type was seen in the lab, so none is included.
      The `show jobs pending` envelope (`<response status="success"><result>` around the `<job>` entries) is
-     copied from `show jobs all` and is unverified until lab task L10 captures `show jobs pending`. -->
+     copied from `show jobs all` and is unverified until a real `show jobs pending` is captured. -->
 <response status="success"><result>
     <job><tenq>2026/10/09 13:15:27</tenq><tdeq>13:15:30</tdeq><id>2166</id><user></user><type>Downld</type><status>ACT</status><queued>NO</queued><stoppable>no</stoppable><result>OK</result><tfin>2026/10/09 13:15:34</tfin><description></description><positionInQ>0</positionInQ><progress>2026/10/09 13:15:34</progress><details><line>File successfully downloaded
 </line><line>Successfully downloaded</line><line> WildFire version: 1125096-1129727 </line></details><warnings></warnings></job>

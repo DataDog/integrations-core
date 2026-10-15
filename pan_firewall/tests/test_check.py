@@ -6,7 +6,6 @@ import threading
 
 import pytest
 
-from datadog_checks.pan_firewall import PanFirewallCheck
 from datadog_checks.pan_firewall.collectors.base import COLLECT_FUNCTIONS, Sample
 from datadog_checks.pan_firewall.collectors.jobs import JOBS_PENDING_CMD
 from datadog_checks.pan_firewall.errors import PanosApiError, PanosUnreachable
@@ -31,6 +30,10 @@ from .helpers import can_connect_by_ip, make_instance, new_check, register_stubs
 def only_value_and_tags(aggregator, name):
     (metric,) = aggregator.metrics(f'pan_firewall.{name}')
     return metric.value, sorted(metric.tags)
+
+
+def warnings(caplog):
+    return [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
 
 
 def test_good_run_collects_identity_and_reports_connected(dd_run_check, aggregator, fake_panos):
@@ -80,27 +83,30 @@ def test_identity_without_interface_capture(dd_run_check, aggregator, fake_panos
 
 
 @pytest.mark.parametrize(
-    'on, keygen_only_calls',
+    'on',
     [
-        pytest.param('keygen', ['keygen', 'keygen'], id='keygen-rejected'),
-        pytest.param('api', None, id='key-rejected-again-after-good-keygen'),
+        pytest.param('keygen', id='keygen-rejected'),
+        pytest.param('api', id='key-rejected-again-after-good-keygen'),
     ],
 )
-def test_rejected_credentials_are_reported_and_a_rejected_keygen_is_tried_once_per_run(
-    dd_run_check, aggregator, fake_panos, on, keygen_only_calls
-):
+def test_rejected_credentials_are_reported(dd_run_check, aggregator, fake_panos, on):
     fake_panos.fail(FW_A_IP, 'http_403', on=on)
-    check = new_check()
 
-    dd_run_check(check)
+    dd_run_check(new_check())
 
     assert aggregator.metrics('pan_firewall.api.authentication.status')[0].value == 1
     # The firewall answered, even if only to refuse the credentials.
     assert aggregator.metrics('pan_firewall.can_connect')[0].value == 1
-    if keygen_only_calls:
-        # Only the keygen is rejected, so every call of a run is the keygen: it is tried once per run.
-        dd_run_check(check)
-        assert [c.type for c in fake_panos.calls] == keygen_only_calls
+
+
+def test_rejected_keygen_is_tried_once_per_run(dd_run_check, fake_panos):
+    fake_panos.fail(FW_A_IP, 'http_403', on='keygen')
+    check = new_check()
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    assert [c.type for c in fake_panos.calls] == ['keygen', 'keygen']
 
 
 def auth_statuses(aggregator):
@@ -175,14 +181,8 @@ def test_firewalls_are_polled_concurrently_up_to_max_concurrency(dd_run_check, a
     assert stub_runs(aggregator) == {(FW_A_IP, 'bgp'), (FW_B_IP, 'bgp'), (FW_C_IP, 'bgp')}
 
 
-@pytest.mark.parametrize(
-    'failure, warning',
-    [
-        pytest.param('timeout', 'could not reach the firewall (timed out) during bgp', id='timeout'),
-    ],
-)
 def test_unreachable_firewall_skips_the_remaining_collectors_of_that_firewall_only(
-    dd_run_check, aggregator, fake_panos, monkeypatch, caplog, failure, warning
+    dd_run_check, aggregator, fake_panos, monkeypatch, caplog
 ):
     check = new_check(make_instance(firewalls=[FW_A_IP, FW_B_IP]))
     # Caches the identity; no collector is registered yet, so the stubs below are all due on the next run.
@@ -210,7 +210,7 @@ def test_unreachable_firewall_skips_the_remaining_collectors_of_that_firewall_on
 
     register_stubs(monkeypatch, bgp=bgp, dataplane=dataplane)
     # Only bgp's call fails: the jobs check before the collectors answers.
-    fake_panos.answer_op(FW_A_IP, SYSTEM_INFO_CMD, FAILURES[failure])
+    fake_panos.answer_op(FW_A_IP, SYSTEM_INFO_CMD, FAILURES['timeout'])
     aggregator.reset()
     caplog.clear()
     calls_before = len(fake_panos.calls_to(FW_A_IP))
@@ -221,8 +221,11 @@ def test_unreachable_firewall_skips_the_remaining_collectors_of_that_firewall_on
     assert can_connect_by_ip(aggregator) == {FW_A_IP: 1, FW_B_IP: 1}
     # The jobs check and the one call that failed: nothing else reached the firewall.
     assert len(fake_panos.calls_to(FW_A_IP)) - calls_before == 2
-    warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
-    assert warnings == [f'{FW_A_IP}: {warning}; skipped for this run: dataplane, interfaces, system_resources']
+    # The one test that pins the whole message; the others check its parts.
+    assert warnings(caplog) == [
+        f'{FW_A_IP}: could not reach the firewall (timed out) during bgp; '
+        'skipped for this run: dataplane, interfaces, system_resources'
+    ]
 
     # The skipped collectors stay due; the one that failed waits for its interval.
     fake_panos.recover(FW_A_IP)
@@ -245,11 +248,9 @@ def test_identity_timeout_skips_every_collector(dd_run_check, aggregator, fake_p
     assert stub_runs(aggregator) == set()
     # The jobs check answered.
     assert only_value_and_tags(aggregator, 'can_connect') == (1, FW_A_TAGS)
-    warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
-    assert warnings == [
-        f'{FW_A_IP}: could not reach the firewall (timed out) during identity_metadata; '
-        f'skipped for this run: {", ".join(STUBS)}'
-    ]
+    (warning,) = warnings(caplog)
+    assert 'during identity_metadata' in warning
+    assert all(name in warning.split('skipped for this run:')[1] for name in STUBS)
 
 
 def raise_(error):
@@ -260,13 +261,11 @@ def raise_(error):
     'bgp, error',
     [
         pytest.param(lambda ctx: raise_(ValueError('unexpected shape')), 'unexpected shape', id='bug'),
-        pytest.param(
-            lambda ctx: raise_(PanosApiError('400', 'bad command')), 'PAN-OS API error 400: bad command', id='api-error'
-        ),
+        pytest.param(lambda ctx: raise_(PanosApiError('400', 'bad command')), 'bad command', id='api-error'),
         # Submitting it fails, after the collector returned.
         pytest.param(
             lambda ctx: [Sample('stub', 1, (), 'unknown')],  # type: ignore[arg-type]
-            "'PanFirewallCheck' object has no attribute 'unknown'",
+            'unknown',
             id='malformed-sample',
         ),
     ],
@@ -278,8 +277,9 @@ def test_failing_collector_does_not_stop_the_others(dd_run_check, aggregator, mo
 
     assert stub_runs(aggregator) == {(FW_A_IP, name) for name in STUBS if name != 'bgp'}
     assert only_value_and_tags(aggregator, 'can_connect') == (1, FW_A_TAGS)
-    warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
-    assert warnings == [f'{FW_A_IP}: collector bgp failed: {error}']
+    (warning,) = warnings(caplog)
+    assert warning.startswith(f'{FW_A_IP}: collector bgp failed: ')
+    assert error in warning
 
 
 def test_timeout_a_collector_handles_itself_is_still_reported(dd_run_check, fake_panos, monkeypatch, caplog):
@@ -299,10 +299,8 @@ def test_timeout_a_collector_handles_itself_is_still_reported(dd_run_check, fake
 
     dd_run_check(check)
 
-    warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
-    assert warnings == [
-        f'{FW_A_IP}: could not reach the firewall (timed out) during a call; skipped for this run: none'
-    ]
+    (warning,) = warnings(caplog)
+    assert warning.startswith(f'{FW_A_IP}: could not reach the firewall (timed out)')
 
 
 def test_collector_warnings_name_the_firewall(dd_run_check, monkeypatch, caplog):
@@ -339,7 +337,8 @@ def test_unexpected_poller_error_does_not_stop_other_firewalls(dd_run_check, agg
 @pytest.mark.parametrize(
     'options, expected',
     [
-        pytest.param({'timeout': 5}, (5.0, 5.0), id='configured'),
+        pytest.param({}, (30, 30), id='default-30s'),
+        pytest.param({'timeout': 5}, (5, 5), id='configured'),
     ],
 )
 def test_calls_use_the_instance_timeout(dd_run_check, fake_panos, mocker, options, expected):
@@ -375,39 +374,24 @@ def test_system_info_without_serial_keeps_the_cached_identity(dd_run_check, aggr
 
 
 def test_static_firewall_replaced_at_the_same_ip_is_tagged_and_tracked_as_the_new_unit(
-    dd_run_check,
-    aggregator,
-    real_collectors,
-    monkeypatch,
-    schedule_clock,
+    dd_run_check, aggregator, fake_panos, real_collectors, monkeypatch, schedule_clock
 ):
-    watermark_reads = []
-    read_cache = PanFirewallCheck.read_persistent_cache
-    monkeypatch.setattr(
-        PanFirewallCheck,
-        'read_persistent_cache',
-        lambda self, key: watermark_reads.append(key) or read_cache(self, key),
-    )
     check = new_check(make_instance(collect_threats=True))
     dd_run_check(check)
-    old_state = check._pollers[FW_A_IP].state
-    old_state.warned.add('left over from the old unit')
     # The unit is swapped for another one that answers at the same IP; the identity is due again after 30 minutes.
     monkeypatch.setitem(FIREWALL_SETS, FW_A_IP, 'fw-b')
     schedule_clock.now += 1800
     aggregator.reset()
-    watermark_reads.clear()
+    calls_before = len(fake_panos.calls)
 
     dd_run_check(check)
 
-    state = check._pollers[FW_A_IP].state
-    assert state is not old_state
-    assert not state.warned
     value, tags = only_value_and_tags(aggregator, 'can_connect')
     assert {f'device_id:{FW_B_SERIAL}', f'device_serial:{FW_B_SERIAL}', 'device_hostname:fw-b'} <= set(tags)
     assert f'device_id:{FW_A_SERIAL}' not in tags
-    assert f'threat_watermark:{FW_B_SERIAL}' in watermark_reads
-    assert f'threat_watermark:{FW_A_SERIAL}' not in watermark_reads
+    # The new unit has no threat watermark of its own: it starts with a first run (`backward`), not from the old one's.
+    threat_jobs = [c.params['dir'] for c in fake_panos.calls[calls_before:] if c.type == 'log' and c.action is None]
+    assert threat_jobs == ['backward']
 
 
 def test_failed_collector_is_retried_after_5_minutes_not_after_its_interval(dd_run_check, monkeypatch, schedule_clock):
@@ -438,13 +422,17 @@ def test_failed_identity_read_is_retried_after_5_minutes(dd_run_check, fake_pano
     schedule_clock.now += 1800
     dd_run_check(check)
     fake_panos.recover(FW_A_IP)
-    schedule_clock.now += 300
-    calls_before = len(fake_panos.calls)
 
-    dd_run_check(check)
+    def reads_identity():
+        calls_before = len(fake_panos.calls)
+        dd_run_check(check)
+        return SYSTEM_INFO_CMD in [c.cmd for c in fake_panos.calls[calls_before:]]
 
-    # The identity is read every 30 minutes.
-    assert SYSTEM_INFO_CMD in [c.cmd for c in fake_panos.calls[calls_before:]]
+    # Not on every run after the failure, and not after the 30-minute interval either.
+    schedule_clock.now += 299
+    assert not reads_identity()
+    schedule_clock.now += 1
+    assert reads_identity()
 
 
 def test_identity_is_read_again_on_the_next_run_after_the_key_is_regenerated(

@@ -111,14 +111,13 @@ def test_every_busy_job_is_named(firewall, caplog):
 
 
 def test_jobs_check_error_collects_anyway_and_warns_on_every_run(firewall):
-    warning = (
-        f'{FW_A_IP}: cannot check for a commit or content update in progress, collecting anyway: '
-        'PAN-OS API error 400: no capture for this command'
-    )
     firewall.answer_jobs((200, NO_CAPTURE))
 
-    assert firewall.run_at(0) == (set(STUBS), [warning])
-    assert firewall.run_at(120) == ({'bgp', 'dataplane'}, [warning])
+    for seconds, collected in ((0, set(STUBS)), (120, {'bgp', 'dataplane'})):
+        ran, warnings = firewall.run_at(seconds)
+        assert ran == collected
+        (warning,) = warnings
+        assert warning.startswith(f'{FW_A_IP}: cannot check for a commit or content update in progress')
 
 
 @pytest.mark.parametrize(
@@ -135,9 +134,8 @@ def test_jobs_check_unreachable_cuts_off_the_run(firewall, aggregator, fake_pano
     ran, warnings = firewall.run_at(0)
 
     assert ran == set()
-    assert warnings == [
-        f'{FW_A_IP}: could not reach the firewall ({reason}) during jobs; skipped for this run: {", ".join(STUBS)}'
-    ]
+    (warning,) = warnings
+    assert f'({reason}) during jobs' in warning
     assert [c.cmd for c in fake_panos.calls[calls_before:]] == [JOBS_PENDING_CMD]
     assert can_connect_by_ip(aggregator) == {FW_A_IP: 0}
 

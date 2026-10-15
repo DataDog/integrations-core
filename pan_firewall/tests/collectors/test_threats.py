@@ -252,7 +252,6 @@ def test_failure_halfway_keeps_the_watermark_and_the_next_run_starts_over(firewa
         firewall.collect()
 
     assert firewall.watermark == PROBE_SEQNO_START - 1
-    assert firewall.cache[CACHE_KEY] == json.dumps({'seqno': PROBE_SEQNO_START - 1, 'last_reset_check': 0.0})
     firewall.fake.recover(FW_A_IP)
     firewall.fake.calls.clear()
     samples = firewall.collect()
@@ -286,7 +285,9 @@ def nothing_new(firewall, watermark=1000, last_reset_check=0.0, newest=None):
         pytest.param(12, 0, id='newest-equal-to-the-watermark'),
     ],
 )
-def test_newest_seqno_below_the_watermark_rebaselines_it_with_one_warning(firewall, watermark, warnings):
+def test_reset_check_rebaselines_with_a_warning_only_when_the_newest_seqno_is_below_the_watermark(
+    firewall, watermark, warnings
+):
     nothing_new(firewall, watermark=watermark, newest=NEWEST_AFTER_RESET)
 
     assert firewall.collect() == []
@@ -294,17 +295,6 @@ def test_newest_seqno_below_the_watermark_rebaselines_it_with_one_warning(firewa
     assert firewall.watermark == 12
     assert len(firewall.backward_jobs()) == 1
     assert firewall.ctx.log.warning.call_count == warnings
-
-
-def test_reset_check_runs_at_most_every_30_minutes(firewall):
-    nothing_new(firewall, newest=log_page([1000]))
-
-    for minutes in (0, 5, 29, 30):
-        firewall.clock.now = 100_000.0 + minutes * 60
-        firewall.collect()
-
-    # Due on the first pass (never checked), not again until 30 minutes after it, then due again.
-    assert len(firewall.backward_jobs()) == 2
 
 
 def test_reset_check_is_due_when_the_persisted_time_is_ahead_of_the_clock(firewall):
@@ -316,19 +306,18 @@ def test_reset_check_is_due_when_the_persisted_time_is_ahead_of_the_clock(firewa
     assert len(firewall.backward_jobs()) == 1
 
 
-@pytest.mark.parametrize(
-    'seconds_since_check, jobs',
-    [
-        pytest.param(constants.THREAT_RESET_CHECK_SECONDS, 1, id='due'),
-        pytest.param(constants.THREAT_RESET_CHECK_SECONDS - 1, 0, id='not-due-yet'),
-    ],
-)
-def test_a_pass_with_nothing_new_runs_the_reset_check_only_when_due(firewall, seconds_since_check, jobs):
-    nothing_new(firewall, last_reset_check=firewall.clock.now - seconds_since_check, newest=log_page([1000]))
+def test_reset_check_runs_at_most_every_30_minutes(firewall):
+    # The seeded watermark has never been checked (`last_reset_check` 0).
+    nothing_new(firewall, newest=log_page([1000]))
+    jobs = []
 
-    assert firewall.collect() == []
+    for minutes in (0, 29, 30):
+        firewall.clock.now = 100_000.0 + minutes * 60
+        assert firewall.collect() == []
+        jobs.append(len(firewall.backward_jobs()))
 
-    assert len(firewall.backward_jobs()) == jobs
+    # Due on the first pass, not again until 30 minutes after it.
+    assert jobs == [1, 1, 2]
 
 
 def test_a_pass_that_counted_logs_runs_no_reset_check(firewall):
@@ -351,15 +340,18 @@ def test_job_still_active_is_polled_next_run_without_resubmitting(firewall):
     assert firewall.watermark == 1002
 
 
-def test_failed_job_clears_the_pending_job_and_counts_nothing(firewall):
+def test_failed_job_counts_nothing_and_the_next_run_submits_a_new_one(firewall):
     failed = ACT.replace(b'<status>ACT</status>', b'<status>FAIL</status>')
     firewall.answer_forward(1000, failed)
 
     with pytest.raises(PanosApiError, match='ended with status FAIL'):
         firewall.collect()
 
-    assert firewall.ctx.state.threats.pending is None
     assert firewall.watermark == 1000
+    # The next run submits a new job rather than polling the failed one.
+    with pytest.raises(PanosApiError):
+        firewall.collect()
+    assert len(firewall.submits()) == 2
 
 
 def test_pages_counted_before_a_job_is_still_active_are_kept(firewall, monkeypatch):
