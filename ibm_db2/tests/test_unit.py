@@ -137,7 +137,7 @@ def test_query_metrics_collection_controls(instance: dict, monkeypatch: pytest.M
 
 @pytest.mark.parametrize('timeout', [None, 7])
 def test_query_metrics_statement_timeout(instance: dict, timeout: int | None):
-    """Both counter scans and text lookups apply the default or configured driver timeout."""
+    """Source checks, counter scans, and text lookups use the default or configured driver timeout."""
     instance['dbm'] = True
     if timeout is not None:
         instance['query_metrics'] = {'query_timeout': timeout}
@@ -146,12 +146,14 @@ def test_query_metrics_statement_timeout(instance: dict, timeout: int | None):
         mock.patch.object(collector._connection, 'ensure_connected'),
         mock.patch('ibm_db.prepare') as prepare,
         mock.patch('ibm_db.execute'),
-        mock.patch('ibm_db.fetch_assoc', return_value=False),
+        mock.patch(
+            'ibm_db.fetch_assoc', side_effect=[{'host_name': 'server-a'}, False, {'host_name': 'server-a'}, False]
+        ),
         mock.patch('ibm_db.free_stmt'),
     ):
         collector.run_job()
         collector._fetch_statement_texts({(0, '01', datetime(2026, 1, 1))})
-    assert len(prepare.call_args_list) == 2
+    assert len(prepare.call_args_list) == 4
     for call in prepare.call_args_list:
         assert call.args[2] == {query_metrics.ibm_db.SQL_ATTR_QUERY_TIMEOUT: timeout or 10}
 
@@ -176,6 +178,7 @@ def test_query_metrics_recover_after_text_lookup_failure(instance: dict, aggrega
 
     with (
         mock.patch.object(collector._connection, 'ensure_connected'),
+        mock.patch.object(collector, '_get_collection_source', return_value={'host_name': 'server-a'}),
         mock.patch('ibm_db.prepare'),
         mock.patch('ibm_db.execute'),
         mock.patch('ibm_db.free_stmt'),
@@ -220,6 +223,64 @@ def test_query_metrics_recover_after_text_lookup_failure(instance: dict, aggrega
         assert row['rows_returned'] == expected
         assert row['lock_wait_time'] == expected * 1_000_000
         assert row['lock_waits'] == expected
+
+
+@pytest.mark.parametrize('during_collection', [False, True])
+def test_query_metrics_source_change(instance: dict, aggregator: AggregatorStub, during_collection: bool):
+    """A server switch cannot reuse another server's counters or text, even when cache keys collide."""
+    instance['dbm'] = True
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    collector = check._query_metrics
+    inserted = datetime(2026, 1, 1)
+    source_a = {'host_name': 'server-a'}
+    source_b = {'host_name': 'server-b'}
+    snapshots = []
+    for count in (10, 12, 100, 105, 108):
+        snapshots.extend(
+            [
+                {
+                    'member': 0,
+                    'executable_id': b'\x01',
+                    'insert_timestamp': inserted,
+                    **dict.fromkeys(
+                        ('count', 'time', 'cpu_time', 'rows_read', 'rows_returned', 'lock_wait_time', 'lock_waits'),
+                        count,
+                    ),
+                },
+                False,
+            ]
+        )
+    sources = [source_a] * 4 + [source_a if during_collection else source_b, source_b] + [source_b] * 4
+    with (
+        mock.patch.object(collector._connection, 'ensure_connected'),
+        mock.patch.object(collector, '_get_collection_source', side_effect=sources),
+        mock.patch('ibm_db.prepare'),
+        mock.patch('ibm_db.execute'),
+        mock.patch('ibm_db.free_stmt'),
+        mock.patch('ibm_db.fetch_assoc', side_effect=snapshots),
+        mock.patch.object(
+            collector,
+            '_fetch_statement_texts',
+            side_effect=[{(0, '01', inserted): 'SELECT A FROM T'}, {(0, '01', inserted): 'SELECT B FROM T'}],
+        ),
+    ):
+        collector.run_job()
+        collector.run_job()
+        aggregator.reset()
+        collector.run_job()
+        assert not aggregator.get_event_platform_events('dbm-metrics')
+        assert not aggregator.get_event_platform_events('dbm-samples')
+        collector.run_job()
+        collector.run_job()
+
+    payloads = aggregator.get_event_platform_events('dbm-metrics')
+    rows = [row for payload in payloads for row in payload['ibm_db2_rows']]
+    assert {row['query'] for row in rows} == {'SELECT B FROM T'}
+    assert sum(row['count'] for row in rows) == (3 if during_collection else 8)
+    assert all(payload['database_instance'] == check.database_identifier for payload in payloads)
+    text_events = aggregator.get_event_platform_events('dbm-samples')
+    assert len(text_events) == 1
+    assert text_events[0]['db']['statement'] == 'SELECT B FROM T'
 
 
 def test_full_query_text_refresh(instance: dict, aggregator: AggregatorStub):

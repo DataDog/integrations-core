@@ -75,11 +75,23 @@ To monitor a Db2 instance, create a Db2 user with either the `EXECUTE` permissio
 * `DBADM` authority
 * `SQLADM` authority
 
-When enabling Database Monitoring (`dbm: true`), query metrics also require access to the `SYSPROC.MON_GET_PKG_CACHE_STMT` table function. If the Agent's Db2 user does not have one of the authorities listed above, have a database administrator run the following command in each monitored database, replacing `<DATADOG_USER>` with the Agent's Db2 username:
+When enabling Database Monitoring (`dbm: true`), query metrics also require package-cache access and the source information used to detect HADR server changes. If the Agent's Db2 user does not have one of the authorities listed above, have a database administrator run the following commands in each monitored database, replacing `<DATADOG_USER>` with the Agent's Db2 username:
 
 ```sql
 GRANT EXECUTE ON FUNCTION SYSPROC.MON_GET_PKG_CACHE_STMT TO USER <DATADOG_USER>;
+GRANT EXECUTE ON FUNCTION SYSPROC.MON_GET_HADR TO USER <DATADOG_USER>;
+GRANT SELECT ON SYSIBMADM.ENV_SYS_INFO TO USER <DATADOG_USER>;
+GRANT SELECT ON SYSIBMADM.ENV_INST_INFO TO USER <DATADOG_USER>;
 ```
+
+For HADR, configure one query-metrics collector per monitored endpoint. A collector following a primary
+endpoint retains its configured DBM identity across takeover, but starts a new counter baseline when its
+server, database activation, or HADR role changes. The first collection from the new source establishes
+that baseline rather than reporting executions accumulated before the switch.
+
+A readable standby can be monitored separately for queries executed on that standby. Configure its own
+hostname so it has a distinct DBM identity. A standby without reads enabled cannot accept the SQL
+connection required for query metrics.
 
 To monitor the health of an instance, its associated databases, and database objects, enable the database system monitor switches for each of the objects you want to monitor:
 * Statement
