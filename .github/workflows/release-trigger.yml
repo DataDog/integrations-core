@@ -62,12 +62,8 @@ jobs:
             echo "is-stable-release=false" >> "$GITHUB_OUTPUT"
           fi
 
-  # TODO: this notification currently runs before the approval gate, so it
-  # announces a *pending* release. Once the `release` environment gate is removed
-  # the release starts immediately — switch `needs` back to the release step and
-  # update the wording in notify_release.py to "release starting".
   notify:
-    name: Notify pending release
+    name: Notify release starting
     needs: context
     runs-on: ubuntu-latest
     permissions:
@@ -84,7 +80,7 @@ jobs:
         uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
         with:
           policy: integrations-core-release-notifications
-      - name: Notify pending release via Datadog workflow
+      - name: Notify release starting via Datadog workflow
         env:
           DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
           DD_APP_KEY: ${{ steps.dd-sts.outputs.app_key }}
@@ -95,17 +91,9 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: python3 .github/workflows/scripts/notify_release.py
 
-  approve:
-    name: Await release approval
-    needs: context
-    runs-on: ubuntu-latest
-    environment: release
-    steps:
-      - run: echo "Release approved"
-
   dispatch:
     name: Release
-    needs: [context, approve]
+    needs: context
     uses: ./.github/workflows/release-dispatch.yml
     with:
       source-repo: integrations-core

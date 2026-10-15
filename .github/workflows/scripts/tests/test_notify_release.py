@@ -16,36 +16,36 @@ def test_build_text_formats_package_list():
         "integrations-core", "abcdef1234567890", '["postgres", "mysql"]', "http://run"
     )
     assert text == (
-        ":hourglass_flowing_sand: *Approve wheel release*\n"
+        ":rocket: *Wheel release starting*\n"
         "`integrations-core` · `abcdef123456` · postgres, mysql\n"
-        "<http://run|Review and approve →>"
+        "<http://run|View release run →>"
     )
 
 
 def test_build_text_auto_detects_packages_and_defaults_ref():
     text = notify_release.build_text("marketplace", "", "", "http://run")
     assert text == (
-        ":hourglass_flowing_sand: *Approve wheel release*\n"
+        ":rocket: *Wheel release starting*\n"
         "`marketplace` · `—` · auto-detect from tags at HEAD\n"
-        "<http://run|Review and approve →>"
+        "<http://run|View release run →>"
     )
 
 
 def test_build_text_preserves_malformed_package_input():
     text = notify_release.build_text("integrations-core", "abcdef", "postgres, mysql", "http://run")
     assert text == (
-        ":hourglass_flowing_sand: *Approve wheel release*\n"
+        ":rocket: *Wheel release starting*\n"
         "`integrations-core` · `abcdef` · postgres, mysql\n"
-        "<http://run|Review and approve →>"
+        "<http://run|View release run →>"
     )
 
 
 def test_build_text_escapes_dynamic_slack_text():
     text = notify_release.build_text("core<&>", "<abc", '["postgres<&>"]', "http://run")
     assert text == (
-        ":hourglass_flowing_sand: *Approve wheel release*\n"
+        ":rocket: *Wheel release starting*\n"
         "`core&lt;&amp;&gt;` · `&lt;abc` · postgres&lt;&amp;&gt;\n"
-        "<http://run|Review and approve →>"
+        "<http://run|View release run →>"
     )
 
 

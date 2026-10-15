@@ -35,17 +35,17 @@ def format_packages(packages: str) -> str:
 def build_text(source_repo: str, ref: str, packages: str, run_url: str) -> str:
     """Return the release notification message body."""
     return (
-        ":hourglass_flowing_sand: *Approve wheel release*\n"
+        ":rocket: *Wheel release starting*\n"
         f"`{escape_slack_text(source_repo)}` · `{escape_slack_text(ref[:12] or '—')}` · "
         f"{format_packages(packages)}\n"
-        f"<{run_url}|Review and approve →>"
+        f"<{run_url}|View release run →>"
     )
 
 
 def report_config_error(error: str) -> None:
     """Surface a persistent misconfiguration loudly in the GitHub step summary."""
     message = (
-        f"Release notification misconfigured: {error}. The pending-release message was NOT delivered. "
+        f"Release notification misconfigured: {error}. The release-starting message was NOT delivered. "
         "Verify the dd-sts credentials (DD-APPLICATION-KEY with Actions API access), DD_WORKFLOW_ID, "
         "and DD_SITE."
     )
