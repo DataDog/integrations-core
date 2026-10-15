@@ -7,7 +7,6 @@ import json
 import time
 from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor
-from enum import Enum
 from typing import TYPE_CHECKING
 
 from .api import PanosClient
@@ -28,12 +27,12 @@ from .collectors import (  # noqa: F401  (importing the modules registers their 
 from .collectors.base import COLLECT_FUNCTIONS, CollectContext, FirewallState, Sample
 from .collectors.interfaces import parse_interface_speeds
 from .collectors.jobs import busy_jobs
-from .constants import IDENTITY, INTERVALS
+from .constants import IDENTITY
 from .errors import PanosError, PanosSkipped, PanosUnreachable
 from .identity import DeviceIdentity, configured_vsys, global_tags, parse_system_info, vsys_list
 from .metadata import build_device, build_interfaces
 from .ndm_models import DeviceMetadata, InterfaceMetadata, batch_payloads
-from .scheduler import BusyGate, FirewallSchedule
+from .scheduler import BusyGate, FirewallSchedule, Result
 
 if TYPE_CHECKING:
     from .check import PanFirewallCheck
@@ -52,15 +51,6 @@ OPTIONAL_COLLECTORS = {
     'reports': 'collect_reports',
     'threats': 'collect_threats',
 }
-
-
-class Result(Enum):
-    """What happened this run to the jobs check, the identity or a collector. A name with no result stays due."""
-
-    RAN = 'ran'
-    FAILED = 'failed'
-    UNREACHABLE = 'unreachable'  # failed, because the firewall could not be reached
-    SKIPPED = 'skipped'  # not run, or cut short, after another call could not reach the firewall: stays due
 
 
 class FirewallPoller:
@@ -99,7 +89,10 @@ class FirewallPoller:
         due = self.schedule.due(self._enabled(), identity_missing=self.identity is None)
         results = self._collect(due)
         self._warn_if_unreachable(results)
-        self._reschedule(results)
+        self.schedule.record(results)
+        if self.client.stats.key_regenerated:
+            # A rejected key that had worked may mean another unit answers here: read the identity again next run.
+            self.schedule.make_due(IDENTITY)
         self._send_health()
         self._send_metadata(identity_read=results.get(IDENTITY) is Result.RAN)
 
@@ -117,14 +110,6 @@ class FirewallPoller:
             ', '.join(names_with(results, Result.UNREACHABLE)) or 'a call',
             ', '.join(names_with(results, Result.SKIPPED)) or 'none',
         )
-
-    def _reschedule(self, results: dict[str, Result]) -> None:
-        self.schedule.mark_run(names_with(results, Result.RAN))
-        failed = names_with(results, Result.FAILED, Result.UNREACHABLE)
-        self.schedule.mark_failed([name for name in failed if name in INTERVALS])
-        if self.client.stats.key_regenerated:
-            # A rejected key that had worked may mean another unit answers here: read the identity again next run.
-            self.schedule.make_due(IDENTITY)
 
     def _send_health(self) -> None:
         stats = self.client.stats

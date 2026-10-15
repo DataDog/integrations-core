@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable, Collection, Iterable
+from enum import Enum
 from typing import TYPE_CHECKING
 
 from .constants import COLLECTORS, COMMIT_SKIP_MAX_SECONDS, FAILURE_RETRY_SECONDS, IDENTITY, INTERVALS
@@ -13,6 +14,15 @@ if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
 
     from .collectors.jobs import BusyJob
+
+
+class Result(Enum):
+    """What happened this run to the jobs check, the identity or a collector. A name with no result stays due."""
+
+    RAN = 'ran'
+    FAILED = 'failed'
+    UNREACHABLE = 'unreachable'  # failed, because the firewall could not be reached
+    SKIPPED = 'skipped'  # not run, or cut short, after another call could not reach the firewall: stays due
 
 
 class FirewallSchedule:
@@ -46,6 +56,16 @@ class FirewallSchedule:
         now = self._clock()
         for name in names:
             self._next_due[name] = now + min(INTERVALS[name], FAILURE_RETRY_SECONDS)
+
+    def record(self, results: dict[str, Result]) -> None:
+        """Set the timers from a run's results: RAN waits its interval, FAILED and UNREACHABLE retry within
+        `FAILURE_RETRY_SECONDS`, and anything else (SKIPPED, no result) stays due. The jobs check has no timer."""
+        self.mark_run(name for name, result in results.items() if result is Result.RAN)
+        self.mark_failed(
+            name
+            for name, result in results.items()
+            if result in (Result.FAILED, Result.UNREACHABLE) and name in INTERVALS
+        )
 
     def make_due(self, name: str) -> None:
         self._next_due.pop(name, None)

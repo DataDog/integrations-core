@@ -4,7 +4,7 @@
 import pytest
 
 from datadog_checks.pan_firewall.constants import COLLECTORS
-from datadog_checks.pan_firewall.scheduler import FirewallSchedule
+from datadog_checks.pan_firewall.scheduler import FirewallSchedule, Result
 
 from .helpers import FakeClock
 
@@ -89,4 +89,30 @@ def test_failed_collectors_are_retried_within_5_minutes(schedule, clock):
     clock.now += 179
     assert schedule.due(COLLECTORS) == TIER_2M + TIER_3M
     clock.now += 1
+    assert schedule.due(COLLECTORS) == list(COLLECTORS)
+
+
+@pytest.mark.parametrize(
+    'result, elapsed, is_due',
+    [
+        pytest.param(Result.RAN, 86399, False, id='ran-before-its-interval'),
+        pytest.param(Result.RAN, 86400, True, id='ran-after-its-interval'),
+        pytest.param(Result.FAILED, 299, False, id='failed-before-the-retry-delay'),
+        pytest.param(Result.FAILED, 300, True, id='failed-after-the-retry-delay'),
+        pytest.param(Result.UNREACHABLE, 299, False, id='unreachable-before-the-retry-delay'),
+        pytest.param(Result.UNREACHABLE, 300, True, id='unreachable-after-the-retry-delay'),
+        pytest.param(Result.SKIPPED, 0, True, id='skipped-stays-due'),
+    ],
+)
+def test_record_sets_the_timer_from_the_result(schedule, clock, result, elapsed, is_due):
+    # `licenses` runs once a day, so a retry delay shorter than its interval shows.
+    schedule.record({'licenses': result})
+
+    clock.now += elapsed
+    assert ('licenses' in schedule.due(COLLECTORS)) is is_due
+
+
+def test_record_gives_the_jobs_check_no_timer(schedule):
+    schedule.record({'jobs': Result.UNREACHABLE})
+
     assert schedule.due(COLLECTORS) == list(COLLECTORS)
