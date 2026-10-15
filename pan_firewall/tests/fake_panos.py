@@ -105,7 +105,7 @@ class FakePanos:
     def answer_log(self, host: str, direction: str, query: str | None, skip: int, *bodies: LogBody) -> None:
         """Answer `type=log` submits of (`dir`, `query`, `skip`) to `host` with a new job whose `get`s answer `bodies`.
 
-        The bodies are served one per `get` (`get_job` or `open_log_job`), the last one repeating, so a job can
+        The bodies are served one per `get` (`get_job` or `read_log_job`), the last one repeating, so a job can
         be `ACT` for a while and then finish. A body is bytes, a fixture path, or an `Answer` (a failure).
         """
         self._log_overrides[host, direction, query, skip] = list(bodies)

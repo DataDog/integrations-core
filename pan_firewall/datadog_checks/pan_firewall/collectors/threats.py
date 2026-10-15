@@ -99,13 +99,9 @@ def _fetch(ctx: CollectContext, job: ThreatJob) -> bool:
     if job.job_id is None:
         job.job_id = client.submit_job(_params(job))
     for attempt in range(constants.THREAT_JOB_POLLS):
-        # No other call while it is open: it holds one of the client's in-flight slots.
-        with client.open_log_job(job.job_id) as (status, entries):
-            if status == 'FIN':
-                for entry in entries:
-                    job.page_entries += 1
-                    _add(ctx, job, entry)
-                return True
+        status = client.read_log_job(job.job_id, lambda entry: _add(ctx, job, entry))
+        if status == 'FIN':
+            return True
         if status not in ACTIVE_STATUSES:
             raise PanosApiError(PARSE_ERROR_CODE, f'threat log job {job.job_id} ended with status {status}')
         if attempt + 1 < constants.THREAT_JOB_POLLS:
@@ -114,6 +110,7 @@ def _fetch(ctx: CollectContext, job: ThreatJob) -> bool:
 
 
 def _add(ctx: CollectContext, job: ThreatJob, entry: Element) -> None:
+    job.page_entries += 1
     try:
         seqno = int(entry.findtext('seqno') or '')
     except ValueError:

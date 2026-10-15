@@ -134,8 +134,7 @@ def test_key_never_leaks_into_urls_logs_or_errors(caplog):
     client.op(SYSTEM_INFO_CMD)
     client.submit_job({'type': 'log', 'log-type': 'threat'})
     client.get_job('log', '2')
-    with client.open_log_job('2') as (_, entries):
-        list(entries)
+    client.read_log_job('2', lambda _entry: None)
     for _ in range(2):
         try:
             client.op(SYSTEM_INFO_CMD)
@@ -187,9 +186,9 @@ def test_key_rejected_again_after_regeneration_raises():
 def test_log_stream_regenerates_a_rejected_key():
     http = FakeHttp(keygen=[(200, keygen_ok(KEY_1)), (200, keygen_ok(KEY_2))], api=[(200, CODE_16), (200, THREAT_LOGS)])
     client, _ = make_client(http)
+    seqnos = []
 
-    with client.open_log_job('2') as (status, entries):
-        seqnos = [entry.findtext('seqno') for entry in entries]
+    status = client.read_log_job('2', lambda entry: seqnos.append(entry.findtext('seqno')))
 
     assert status == 'FIN'
     assert len(seqnos) == 39
@@ -224,6 +223,8 @@ def test_rejected_keygen_is_not_retried_until_reset(keygen, api, keygens_before_
             client.op(SYSTEM_INFO_CMD)
     assert len(http.calls_of('keygen')) == keygens_before_reset
     assert client.stats.auth_rejected is True
+    # PAN-OS answered the keygen: the firewall is reachable even though the credentials are not accepted.
+    assert client.stats.answered is True
 
     # The next run.
     client.start_run()
@@ -246,6 +247,13 @@ def test_calls_rejected_with_the_same_key_renew_it_once():
 
 
 @pytest.mark.parametrize(
+    'call',
+    [
+        pytest.param(lambda client: client.op(SYSTEM_INFO_CMD), id='op'),
+        pytest.param(lambda client: client.read_log_job('2', lambda _entry: None), id='log-stream'),
+    ],
+)
+@pytest.mark.parametrize(
     'answer, code',
     [
         # A proxy's 403 page says nothing about the PAN-OS key or credentials.
@@ -253,12 +261,12 @@ def test_calls_rejected_with_the_same_key_renew_it_once():
         pytest.param((200, (FIXTURES / 'fw-a-probe' / 'report_top-rules.xml').read_bytes()), '400', id='api-error'),
     ],
 )
-def test_error_that_is_not_an_auth_rejection_neither_renews_the_key_nor_invalidates_credentials(answer, code):
+def test_error_that_is_not_an_auth_rejection_neither_renews_the_key_nor_invalidates_credentials(call, answer, code):
     http = FakeHttp(keygen=[(200, KEYGEN_OK)], api=[answer])
     client, _ = make_client(http)
 
     with pytest.raises(PanosApiError) as exc_info:
-        client.op(SYSTEM_INFO_CMD)
+        call(client)
 
     assert type(exc_info.value) is PanosApiError
     assert exc_info.value.code == code
@@ -318,11 +326,6 @@ def test_requests_exceptions_are_unreachable_without_the_key(error_type, message
     assert error.__cause__ is None and error.__suppress_context__
 
 
-def read_log_job(client, job_id):
-    with client.open_log_job(job_id) as (_, entries):
-        return list(entries)
-
-
 @pytest.mark.parametrize(
     'call, failure, error',
     [
@@ -333,7 +336,7 @@ def read_log_job(client, job_id):
             id='op-timeout',
         ),
         pytest.param(
-            lambda client: read_log_job(client, '2'),
+            lambda client: client.read_log_job('2', lambda _entry: None),
             TRANSPORT_ERRORS['refused'],
             PanosUnreachable,
             id='log-job-refused',
@@ -372,10 +375,11 @@ def test_stream_that_breaks_mid_way_makes_the_next_calls_fail_fast():
     http = FakeHttp(api=[resp, (200, SYSTEM_INFO)])
     client, _ = make_client(http, STATIC_CREDS)
 
-    with pytest.raises(PanosUnreachable), client.open_log_job('2') as (_, entries):
-        assert next(entries).findtext('seqno')
-        next(entries)
+    seqnos = []
+    with pytest.raises(PanosUnreachable):
+        client.read_log_job('2', lambda entry: seqnos.append(entry.findtext('seqno')))
 
+    assert len(seqnos) == 1 and seqnos[0]
     assert client.unreachable
     with pytest.raises(PanosSkipped):
         client.op(SYSTEM_INFO_CMD)
@@ -383,6 +387,23 @@ def test_stream_that_breaks_mid_way_makes_the_next_calls_fail_fast():
     # The call itself was answered: can_connect does not turn to 0 because the body broke.
     stats = client.stats
     assert (stats.calls, stats.answered) == (1, True)
+
+
+def test_failing_entry_callback_releases_the_slot_and_counts_the_call():
+    http = FakeHttp(api=[(200, THREAT_LOGS), (200, SYSTEM_INFO)])
+    keys = KeyManager(http, HOST, STATIC_CREDS)
+    # One slot: a call left holding it would block the next one forever.
+    client = PanosClient(http, HOST, keys, logging.getLogger('test_api'), max_in_flight=1)
+
+    def broken(_entry):
+        raise RuntimeError('collector bug')
+
+    with pytest.raises(RuntimeError):
+        client.read_log_job('2', broken)
+    client.op(SYSTEM_INFO_CMD)
+
+    stats = client.stats
+    assert (stats.calls, stats.answered) == (2, True)
 
 
 class ConcurrencyProbe:

@@ -229,7 +229,7 @@ class FirewallPoller:
 
         Once a call cannot reach the firewall, the rest are skipped and stay due. A failing collector is logged and
         does not stop the others. A collector whose job is still running gets no result, so it stays due.
-        `open_log_job` holds one of the `COLLECTOR_WORKERS` slots: never call `client.op()` inside it.
+        `read_log_job` holds one of the `COLLECTOR_WORKERS` slots while it calls back: never call the client from it.
         """
         ctx = CollectContext(
             client=self.client,

@@ -97,7 +97,8 @@ def _classify(status_code: int, error: PanosApiError) -> PanosApiError:
 @dataclass
 class CallStats:
     """The calls since `PanosClient.start_run()`. `answered`: PAN-OS itself answered one, even with an error.
-    `auth_rejected`: one failed auth after the renewal. `unreachable`: the reason of the first PanosUnreachable."""
+    `auth_rejected`: one failed auth after the renewal. `unreachable`: the reason of the first PanosUnreachable; once
+    set, every call raises PanosSkipped until the next run."""
 
     calls: int = 0
     answered: bool = False
@@ -131,11 +132,11 @@ class PanosClient:
         self._stats_lock = threading.Lock()
 
     def op(self, cmd: str) -> Element:
-        return self._call({'type': 'op', 'cmd': cmd})
+        return self._send({'type': 'op', 'cmd': cmd}, read_response)
 
     def submit_job(self, params: dict[str, str]) -> str:
         """Submit an asynchronous job (log query, report) and return its job id."""
-        root = self._call(params)
+        root = self._send(params, read_response)
         job_id = text(root, './result/job')
         if job_id is None:
             raise PanosApiError(PARSE_ERROR_CODE, 'job submission response has no job id')
@@ -143,40 +144,20 @@ class PanosClient:
 
     def get_job(self, job_type: str, job_id: str) -> tuple[str, Element]:
         """Return the job's status (`ACT`, `FIN`, ...) and the whole response."""
-        root = self._call({'type': job_type, 'action': 'get', 'job-id': job_id})
+        root = self._send({'type': job_type, 'action': 'get', 'job-id': job_id}, read_response)
         status = text(root, './result/job/status')
         if status is None:
             raise PanosApiError(PARSE_ERROR_CODE, f'{job_type} job {job_id} response has no status')
         return status, root
 
-    @contextmanager
-    def open_log_job(self, job_id: str) -> Iterator[tuple[str, Iterator[Element]]]:
-        """Read a log job with one streamed request: yield its status and, once `FIN`, its entries.
+    def read_log_job(self, job_id: str, on_entry: Callable[[Element], None]) -> str:
+        """Read a log job with one streamed request and return its status (`ACT`, `FIN`, ...).
 
-        Each entry is cleared when you advance, so read it first. The slot is held for the `with` block: do not call
-        the client inside it.
+        Once `FIN`, `on_entry` gets each entry, which is cleared when it returns. It runs while the call holds an
+        in-flight slot, so it must not call the client.
         """
-        with self._slots:
-            self._fail_fast_if_unreachable()
-            params = {'type': 'log', 'action': 'get', 'job-id': job_id}
-            resp, root, events = self._authorized(lambda key: self._open_stream(params, key))
-            with resp:
-                try:
-                    elements = _log_elements(root, events)
-                    status_elem = next(elements, None)
-                    if status_elem is None or status_elem.tag != 'status':
-                        raise PanosApiError(PARSE_ERROR_CODE, f'log job {job_id} response has no status')
-                    status = (status_elem.text or '').strip()
-                    yield status, (elements if status == 'FIN' else iter(()))
-                except PanosUnreachable as e:
-                    # The stream broke after `_authorized` recorded the call: the rest of the run must know.
-                    self._record_unreachable(e)
-                    raise
-
-    def _call(self, params: dict[str, str]) -> Element:
-        with self._slots:
-            self._fail_fast_if_unreachable()
-            return self._authorized(lambda key: read_response(post_api(self._http, self._url, params, key=key)))
+        params = {'type': 'log', 'action': 'get', 'job-id': job_id}
+        return self._send(params, lambda resp: self._read_log(resp, job_id, on_entry), stream=True)
 
     def start_run(self) -> None:
         """Start the stats of a new run, which also ends the fail-fast state and allows one keygen after a rejected one.
@@ -197,29 +178,30 @@ class PanosClient:
         with self._stats_lock:
             return self._stats.unreachable
 
-    def _fail_fast_if_unreachable(self) -> None:
-        # Checked once the slot is held: a call waiting for the slot of the call that failed does not go out either.
-        if self.unreachable is not None:
-            raise PanosSkipped(f'not calling {self._host}: an earlier call could not reach it')
-
-    def _authorized(self, attempt: Callable[[str], T]) -> T:
-        try:
-            result = self._with_renewal(attempt)
-        except PanosError as e:
-            self._record(e)
-            raise
-        self._record(None)
-        return result
-
-    def _record_unreachable(self, error: PanosUnreachable) -> None:
-        """Note a failure to reach the device that came after the call was recorded; it is not a call of its own."""
-        with self._stats_lock:
-            if self._stats.unreachable is None:
-                self._stats.unreachable = error.reason
+    def _send(self, params: dict[str, str], read: Callable[[ResponseWrapper], T], *, stream: bool = False) -> T:
+        """Make one call and `read` its response, renewing a rejected key once."""
+        with self._slots:
+            with self._stats_lock:
+                # Checked once the slot is held: a call waiting for the slot of the call that failed does not go out.
+                if self._stats.unreachable is not None:
+                    raise PanosSkipped(f'not calling {self._host}: an earlier call could not reach it')
+                self._stats.calls += 1
+            try:
+                key = self._keys.key()
+                try:
+                    result = read(post_api(self._http, self._url, params, key=key, stream=stream))
+                except PanosAuthError as e:
+                    self._log.debug('PAN-OS %s rejected the API key (code %s), renewing it', self._host, e.code)
+                    result = read(post_api(self._http, self._url, params, key=self._renew(key), stream=stream))
+            except PanosError as e:
+                self._record(e)
+                raise
+            self._record(None)
+            return result
 
     def _record(self, error: PanosError | None) -> None:
+        """Record how a call ended; None means PAN-OS answered."""
         with self._stats_lock:
-            self._stats.calls += 1
             if error is None or (isinstance(error, PanosApiError) and error.panos_response):
                 self._stats.answered = True
             if isinstance(error, PanosAuthError):
@@ -227,27 +209,15 @@ class PanosClient:
             if isinstance(error, PanosUnreachable) and self._stats.unreachable is None:
                 self._stats.unreachable = error.reason
 
-    def _with_renewal(self, attempt: Callable[[str], T]) -> T:
-        key = self._keys.key()
-        try:
-            return attempt(key)
-        except PanosAuthError as e:
-            self._log.debug('PAN-OS %s rejected the API key (code %s), renewing it', self._host, e.code)
-            return attempt(self._renew(key))
-
     def _renew(self, rejected: str) -> str:
         renewed = self._keys.renew(rejected)
         with self._stats_lock:
             self._stats.key_regenerated = True
         return renewed
 
-    def _open_stream(
-        self, params: dict[str, str], key: str
-    ) -> tuple[ResponseWrapper, Element, Iterator[tuple[str, Element]]]:
-        """Send a streamed request and read up to the root. An error response is raised here, inside `_authorized`, so
-        a rejected key is renewed before any entry reaches the caller."""
-        resp = post_api(self._http, self._url, params, key=key, stream=True)
-        try:
+    def _read_log(self, resp: ResponseWrapper, job_id: str, on_entry: Callable[[Element], None]) -> str:
+        """Check the response before the first entry, so a rejected key raises while `_send` can still renew it."""
+        with resp:
             if resp.status_code >= 400:
                 with transport_errors(self._url):
                     read_response(resp)
@@ -257,16 +227,24 @@ class PanosClient:
                 raise PanosApiError(PARSE_ERROR_CODE, 'response is empty', panos_response=False)
             root = first[1]
             if root.tag != 'response' or root.get('status') == 'error':
+                # The error message is in the body: read all of it first.
                 for _ in events:
                     pass
                 try:
                     check_response(root)
                 except PanosApiError as e:
                     raise _classify(resp.status_code, e) from None
-            return resp, root, events
-        except BaseException:
-            resp.close()
-            raise
+            # PAN-OS answered, even if the body breaks later on.
+            self._record(None)
+            elements = _log_elements(root, events)
+            status_elem = next(elements, None)
+            if status_elem is None or status_elem.tag != 'status':
+                raise PanosApiError(PARSE_ERROR_CODE, f'log job {job_id} response has no status')
+            status = (status_elem.text or '').strip()
+            if status == 'FIN':
+                for entry in elements:
+                    on_entry(entry)
+            return status
 
     def _stream_events(self, resp: ResponseWrapper) -> Iterator[tuple[str, Element]]:
         parser: ET.XMLPullParser[Element] = ET.XMLPullParser(events=('start', 'end'))
