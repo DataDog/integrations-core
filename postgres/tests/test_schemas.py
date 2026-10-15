@@ -2,21 +2,26 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from collections.abc import Callable, Iterator
+from typing import Any
 from unittest import mock
 
 import psycopg
 import pytest
 
+from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.schemas import PostgresSchemaCollector
 from datadog_checks.postgres.version_utils import VersionUtils
 
 from .common import HOST, POSTGRES_VERSION
 
+IntegrationCheck = Callable[..., PostgreSql]
+
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
 
 @pytest.fixture
-def dbm_instance(pg_instance):
+def dbm_instance(pg_instance: dict[str, Any]) -> dict[str, Any]:
     pg_instance['dbm'] = True
     pg_instance['min_collection_interval'] = 0.1
     pg_instance['query_samples'] = {'enabled': False}
@@ -28,7 +33,7 @@ def dbm_instance(pg_instance):
     return pg_instance
 
 
-def test_get_databases(dbm_instance, integration_check):
+def test_get_databases(dbm_instance: dict[str, Any], integration_check: IntegrationCheck):
     check = integration_check(dbm_instance)
     collector = PostgresSchemaCollector(check)
 
@@ -40,7 +45,7 @@ def test_get_databases(dbm_instance, integration_check):
     assert 'nope' not in datbase_names
 
 
-def test_databases_filters(dbm_instance, integration_check):
+def test_databases_filters(dbm_instance: dict[str, Any], integration_check: IntegrationCheck):
     dbm_instance['collect_schemas']['exclude_databases'] = ['^dogs$', 'dogs_[345]']
     check = integration_check(dbm_instance)
     collector = PostgresSchemaCollector(check)
@@ -54,7 +59,7 @@ def test_databases_filters(dbm_instance, integration_check):
     assert 'nope' not in datbase_names
 
 
-def test_databases_include_filter(dbm_instance, integration_check):
+def test_databases_include_filter(dbm_instance: dict[str, Any], integration_check: IntegrationCheck):
     dbm_instance['collect_schemas']['include_databases'] = ['^dogs_[0-9]$']
     check = integration_check(dbm_instance)
     collector = PostgresSchemaCollector(check)
@@ -68,7 +73,7 @@ def test_databases_include_filter(dbm_instance, integration_check):
     assert 'datadog_test' not in database_names
 
 
-def test_databases_include_and_exclude_filter(dbm_instance, integration_check):
+def test_databases_include_and_exclude_filter(dbm_instance: dict[str, Any], integration_check: IntegrationCheck):
     dbm_instance['collect_schemas']['exclude_databases'] = ['dogs_[345]']
     dbm_instance['collect_schemas']['include_databases'] = ['^dogs_[0-9]$', '^postgres$']
     check = integration_check(dbm_instance)
@@ -85,7 +90,7 @@ def test_databases_include_and_exclude_filter(dbm_instance, integration_check):
     assert 'datadog_test' not in database_names
 
 
-def test_databases_dbstrict(dbm_instance, integration_check):
+def test_databases_dbstrict(dbm_instance: dict[str, Any], integration_check: IntegrationCheck):
     dbm_instance['dbstrict'] = True
     check = integration_check(dbm_instance)
     collector = PostgresSchemaCollector(check)
@@ -95,7 +100,7 @@ def test_databases_dbstrict(dbm_instance, integration_check):
     assert database_names == [dbm_instance['dbname']]
 
 
-def test_databases_dbstrict_with_autodiscovery(dbm_instance, integration_check):
+def test_databases_dbstrict_with_autodiscovery(dbm_instance: dict[str, Any], integration_check: IntegrationCheck):
     dbm_instance['dbstrict'] = True
     dbm_instance['database_autodiscovery'] = {'enabled': True, 'include': ['^dogs_[0-9]$']}
     check = integration_check(dbm_instance)
@@ -107,7 +112,7 @@ def test_databases_dbstrict_with_autodiscovery(dbm_instance, integration_check):
     assert database_names == ['dogs_3']
 
 
-def test_get_cursor(dbm_instance, integration_check):
+def test_get_cursor(dbm_instance: dict[str, Any], integration_check: IntegrationCheck):
     check = integration_check(dbm_instance)
     check.version = POSTGRES_VERSION
     collector = PostgresSchemaCollector(check)
@@ -121,7 +126,7 @@ def test_get_cursor(dbm_instance, integration_check):
         assert set(schemas) == {'datadog', 'hstore', 'public', 'public2'}
 
 
-def test_schemas_filters(dbm_instance, integration_check):
+def test_schemas_filters(dbm_instance: dict[str, Any], integration_check: IntegrationCheck):
     dbm_instance['collect_schemas']['exclude_schemas'] = ['public', 'rdsadmin_test']
     check = integration_check(dbm_instance)
     check.version = POSTGRES_VERSION
@@ -136,7 +141,7 @@ def test_schemas_filters(dbm_instance, integration_check):
         assert set(schemas) == {'datadog', 'hstore'}
 
 
-def test_schemas_include_filter(dbm_instance, integration_check):
+def test_schemas_include_filter(dbm_instance: dict[str, Any], integration_check: IntegrationCheck):
     dbm_instance['collect_schemas']['include_schemas'] = ['^datadog$']
     check = integration_check(dbm_instance)
     check.version = POSTGRES_VERSION
@@ -151,7 +156,7 @@ def test_schemas_include_filter(dbm_instance, integration_check):
         assert set(schemas) == {'datadog'}
 
 
-def test_schemas_include_and_exclude_filter(dbm_instance, integration_check):
+def test_schemas_include_and_exclude_filter(dbm_instance: dict[str, Any], integration_check: IntegrationCheck):
     dbm_instance['collect_schemas']['exclude_schemas'] = ['^hstore$']
     dbm_instance['collect_schemas']['include_schemas'] = ['^datadog$', '^public2$']
     check = integration_check(dbm_instance)
@@ -167,7 +172,7 @@ def test_schemas_include_and_exclude_filter(dbm_instance, integration_check):
         assert set(schemas) == {'datadog', 'public2'}
 
 
-def test_tables(dbm_instance, integration_check):
+def test_tables(dbm_instance: dict[str, Any], integration_check: IntegrationCheck):
     check = integration_check(dbm_instance)
     check.version = POSTGRES_VERSION
     collector = PostgresSchemaCollector(check)
@@ -206,7 +211,7 @@ def test_tables(dbm_instance, integration_check):
     assert set(tables) == expected_tables
 
 
-def test_tables_include_filter(dbm_instance, integration_check):
+def test_tables_include_filter(dbm_instance: dict[str, Any], integration_check: IntegrationCheck):
     dbm_instance['collect_schemas']['include_tables'] = ['^persons$']
     check = integration_check(dbm_instance)
     check.version = POSTGRES_VERSION
@@ -219,7 +224,7 @@ def test_tables_include_filter(dbm_instance, integration_check):
     assert set(tables) == {'persons'}
 
 
-def test_tables_include_and_exclude_filter(dbm_instance, integration_check):
+def test_tables_include_and_exclude_filter(dbm_instance: dict[str, Any], integration_check: IntegrationCheck):
     dbm_instance['collect_schemas']['include_tables'] = ['^persons']
     dbm_instance['collect_schemas']['exclude_tables'] = ['^personsdup[1-9]$']
     check = integration_check(dbm_instance)
@@ -241,7 +246,7 @@ def test_tables_include_and_exclude_filter(dbm_instance, integration_check):
     assert set(tables) == expected
 
 
-def _collect_table_columns(collector, table_name):
+def _collect_table_columns(collector: PostgresSchemaCollector, table_name: str) -> list[dict[str, Any]]:
     with collector._get_cursor('datadog_test') as cursor:
         rows = [row for row in cursor if row['table_name'] == table_name]
     assert len(rows) == 1
@@ -250,7 +255,7 @@ def _collect_table_columns(collector, table_name):
 
 
 @pytest.fixture
-def table_without_columns():
+def table_without_columns() -> Iterator[str]:
     with psycopg.connect(
         host=HOST, dbname='datadog_test', user='postgres', password='datad0g', autocommit=True
     ) as conn:
@@ -262,7 +267,9 @@ def table_without_columns():
             conn.execute('DROP TABLE public.no_columns')
 
 
-def test_table_without_columns(dbm_instance, integration_check, table_without_columns):
+def test_table_without_columns(
+    dbm_instance: dict[str, Any], integration_check: IntegrationCheck, table_without_columns: str
+):
     dbm_instance['collect_schemas']['include_tables'] = [f'^{table_without_columns}$']
     check = integration_check(dbm_instance)
     check.version = POSTGRES_VERSION
@@ -271,7 +278,7 @@ def test_table_without_columns(dbm_instance, integration_check, table_without_co
     assert _collect_table_columns(collector, table_without_columns) == []
 
 
-def test_columns_truncated_to_max_columns(dbm_instance, integration_check):
+def test_columns_truncated_to_max_columns(dbm_instance: dict[str, Any], integration_check: IntegrationCheck):
     dbm_instance['collect_schemas']['include_tables'] = ['^persons$']
     dbm_instance['collect_schemas']['max_columns'] = 2
     check = integration_check(dbm_instance)
@@ -284,7 +291,7 @@ def test_columns_truncated_to_max_columns(dbm_instance, integration_check):
     assert [column['name'] for column in columns] == ['address', 'city']
 
 
-# def test_columns(dbm_instance, integration_check):
+# def test_columns(dbm_instance: dict[str, Any], integration_check: IntegrationCheck):
 #     check = integration_check(dbm_instance)
 #     check.version = POSTGRES_VERSION
 #     collector = PostgresSchemaCollector(check)
@@ -303,7 +310,7 @@ def test_columns_truncated_to_max_columns(dbm_instance, integration_check):
 #                 assert row['columns'][0]['name']
 
 
-# def test_indexes(dbm_instance, integration_check):
+# def test_indexes(dbm_instance: dict[str, Any], integration_check: IntegrationCheck):
 #     check = integration_check(dbm_instance)
 #     check.version = POSTGRES_VERSION
 #     collector = PostgresSchemaCollector(check)
@@ -322,7 +329,7 @@ def test_columns_truncated_to_max_columns(dbm_instance, integration_check):
 #                 assert row['indexes'][0]['name']
 
 
-def test_collect_schemas(dbm_instance, integration_check):
+def test_collect_schemas(dbm_instance: dict[str, Any], integration_check: IntegrationCheck):
     check = integration_check(dbm_instance)
     check.version = VersionUtils().parse_version(POSTGRES_VERSION)
     collector = PostgresSchemaCollector(check)

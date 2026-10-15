@@ -170,6 +170,12 @@ FROM   pg_catalog.pg_database db
 """
 
 
+def _strip_indentation(query: str) -> str:
+    # Only indentation is removed so whitespace within a line, such as in quoted values, is left intact. Newlines are
+    # kept so a `--` comment can't swallow the rest of the statement.
+    return "\n".join(line.lstrip() for line in query.splitlines())
+
+
 class PostgresSchemaCollectorConfig(SchemaCollectorConfig):
     max_tables: int
     exclude_databases: list[str]
@@ -227,7 +233,7 @@ class PostgresSchemaCollector(SchemaCollector):
 
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
-                cursor.execute(query, params)
+                cursor.execute(_strip_indentation(query), params)
                 return [dict(row) for row in cursor.fetchall()]
 
     @contextlib.contextmanager
@@ -238,7 +244,7 @@ class PostgresSchemaCollector(SchemaCollector):
                 with conn.transaction():
                     query, params = self.get_rows_query()
                     cursor.execute(f"SET LOCAL statement_timeout = '{self._config.max_query_duration}s';")
-                    cursor.execute(" ".join(query.split()), params)
+                    cursor.execute(_strip_indentation(query), params)
                 yield cursor
 
     def _get_schemas_query(self):
