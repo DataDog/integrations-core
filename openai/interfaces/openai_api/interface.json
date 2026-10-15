@@ -1,0 +1,9 @@
+{
+  "interface_type": "api",
+  "source_type_id": 10348,
+  "source_type_name": "OpenAI",
+  "interface_title": "Usage and Cost",
+  "is_primary": true,
+  "auto_install": true,
+  "creates_events": false
+}
