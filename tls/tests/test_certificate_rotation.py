@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+import re
 import socket
 import ssl
 from concurrent.futures import ThreadPoolExecutor
@@ -273,7 +274,10 @@ def test_invalid_rotated_client_certificate_reports_failure_and_recovers(
     with pytest.raises(ssl.SSLError):
         peer_certificate(check, server_context, mocker)
     aggregator.assert_service_check(
-        SERVICE_CHECK_VALIDATION, status=check.CRITICAL, count=1, message='Failed to load client certificate from '
+        SERVICE_CHECK_VALIDATION,
+        status=check.CRITICAL,
+        count=1,
+        message=re.escape(f'Failed to load client certificate from {credential_path}: '),
     )
     aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=check.OK, count=0)
     aggregator.assert_metric('tls.days_left', count=0)
@@ -291,6 +295,89 @@ def test_invalid_rotated_client_certificate_reports_failure_and_recovers(
         write_credentials(tmp_path, 'client', client, combined=combined, password=password)
     assert peer_certificate(check, server_context, mocker) == client[0].public_bytes(serialization.Encoding.DER)
     aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=check.OK, count=1)
+
+
+@pytest.mark.parametrize('ca_option', ['tls_ca_cert', 'ca_cert', '_tls_context_tls_ca_cert'])
+@pytest.mark.parametrize('initial_run', [False, True])
+def test_missing_ca_during_client_rotation_recovers(
+    tmp_path: Path, mocker: MockerFixture, aggregator: AggregatorStub, ca_option: str, initial_run: bool
+):
+    # A missing CA bundle during a rebuild must not leave the check stuck with an empty trust store.
+    root = make_certificate('Test Root', ca=True)
+    root_path, _ = write_credentials(tmp_path, 'root', root)
+    server_cert, server_key = write_credentials(tmp_path, 'server', make_certificate('localhost', root))
+    client_cert, client_key = write_credentials(tmp_path, 'client', make_certificate('original-client', root))
+    replacement = make_certificate('replacement-client', root)
+    instance = {'server': 'localhost', ca_option: root_path, 'tls_cert': client_cert, 'tls_private_key': client_key}
+    if ca_option == '_tls_context_tls_ca_cert':
+        instance['tls_ca_cert'] = '/unused/modern/ca.pem'
+    if ca_option != 'ca_cert':
+        instance['ca_cert'] = '/unused/legacy/ca.pem'
+    check = TLSCheck('tls', {}, [instance])
+    server_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    server_context.maximum_version = ssl.TLSVersion.TLSv1_2
+    server_context.verify_mode = ssl.CERT_REQUIRED
+    server_context.load_verify_locations(cafile=root_path)
+    server_context.load_cert_chain(server_cert, server_key)
+    if not initial_run:
+        peer_certificate(check, server_context, mocker)
+    aggregator.reset()
+
+    write_credentials(tmp_path, 'client', replacement)
+    Path(root_path).unlink()
+    with pytest.raises(ssl.SSLError):
+        peer_certificate(check, server_context, mocker)
+    aggregator.assert_service_check(
+        SERVICE_CHECK_VALIDATION,
+        status=check.CRITICAL,
+        count=1,
+        message=re.escape(f'Failed to load CA certificate from {root_path}: '),
+    )
+    aggregator.assert_metric('tls.days_left', count=0)
+    aggregator.assert_metric('tls.seconds_left', count=0)
+
+    # The client files do not change again: restoring trust alone must be enough to recover.
+    Path(root_path).write_bytes(root[0].public_bytes(serialization.Encoding.PEM))
+    peer_certificate(check, server_context, mocker)
+    aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=check.OK, count=1)
+    aggregator.assert_metric('tls.days_left', count=1)
+    aggregator.assert_metric('tls.seconds_left', count=1)
+
+
+@pytest.mark.parametrize('trust_source', ['directory_with_aia', 'trusted_leaf', 'verification_disabled'])
+def test_ca_guard_preserves_supported_trust_sources(
+    tmp_path: Path, mocker: MockerFixture, aggregator: AggregatorStub, trust_source: str
+):
+    # Empty eagerly loaded CA trust is valid with capath or verification disabled; a trusted leaf is not a CA.
+    root = make_certificate('Test Root', ca=True)
+    root_path, _ = write_credentials(tmp_path, 'root', root)
+    aia_uri = 'http://issuer.test/root.der'
+    server = make_certificate('localhost', None if trust_source == 'trusted_leaf' else root, aia_uri=aia_uri)
+    server_cert, server_key = write_credentials(tmp_path, 'server', server)
+    instance = {'server': 'localhost', 'tls_ca_cert': root_path}
+    if trust_source == 'directory_with_aia':
+        ca_directory = tmp_path / 'ca'
+        ca_directory.mkdir()
+        instance['tls_ca_cert'] = str(ca_directory)
+        instance['fetch_intermediate_certs'] = True
+        mocker.patch(
+            'datadog_checks.tls.tls_remote.fetch_intermediate_cert',
+            return_value=root[0].public_bytes(serialization.Encoding.DER),
+        )
+    elif trust_source == 'trusted_leaf':
+        instance['tls_ca_cert'] = server_cert
+    else:
+        instance['_tls_context_tls_verify'] = False
+        Path(root_path).unlink()
+    check = TLSCheck('tls', {}, [instance])
+    server_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    server_context.maximum_version = ssl.TLSVersion.TLSv1_2
+    server_context.load_cert_chain(server_cert, server_key)
+
+    peer_certificate(check, server_context, mocker)
+    aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=check.OK, count=1)
+    aggregator.assert_service_check(SERVICE_CHECK_VALIDATION, status=check.CRITICAL, count=0)
+    aggregator.assert_metric('tls.days_left', count=1)
 
 
 def test_rotation_during_client_certificate_load_is_retried(

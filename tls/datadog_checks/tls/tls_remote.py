@@ -5,7 +5,7 @@ from collections import ChainMap
 from hashlib import sha256
 from os.path import expanduser
 from pathlib import Path
-from ssl import PROTOCOL_TLS_CLIENT, SSLContext
+from ssl import CERT_NONE, PROTOCOL_TLS_CLIENT, SSLContext
 from struct import pack, unpack
 
 from cryptography.x509.base import load_der_x509_certificate
@@ -62,6 +62,7 @@ class TLSRemoteCheck(object):
         self._client_key = instance.get(
             '_tls_context_tls_private_key', instance.get('tls_private_key', instance.get('private_key'))
         )
+        self._ca_cert = instance.get('_tls_context_tls_ca_cert', instance.get('tls_ca_cert', instance.get('ca_cert')))
         self._client_password = instance.get(
             '_tls_context_tls_private_key_password', instance.get('tls_private_key_password')
         )
@@ -69,14 +70,15 @@ class TLSRemoteCheck(object):
     def _credential_fingerprint(self) -> tuple[bytes, ...]:
         if not self._client_cert:
             return ()
-        try:
-            return tuple(
-                sha256(Path(expanduser(path)).read_bytes()).digest()
-                for path in (self._client_cert, self._client_key)
-                if path
-            )
-        except OSError as e:
-            raise ClientCertificateError(f'Failed to load client certificate from {self._client_cert}: {e}') from e
+        fingerprints = []
+        for path in (self._client_cert, self._client_key):
+            if not path:
+                continue
+            try:
+                fingerprints.append(sha256(Path(expanduser(path)).read_bytes()).digest())
+            except OSError as e:
+                raise ClientCertificateError(f'Failed to load client certificate from {path}: {e}') from e
+        return tuple(fingerprints)
 
     def _get_tls_context(self) -> SSLContext:
         fingerprint = self._credential_fingerprint()
@@ -89,11 +91,23 @@ class TLSRemoteCheck(object):
         self._loaded_tls_state = None
         # Use the public API to build trust without its lenient client-certificate loader.
         # Cover modern, legacy and higher-priority names so credentials are loaded exactly once.
+        # Overrides only apply when the base wrapper is first created; refresh reuses its captured
+        # config. This method must remain the check's first caller of get_tls_context.
         context = self.agent_check.get_tls_context(
             refresh=self._tls_context_initialized,
             overrides={'tls_cert': None, 'cert': None, '_tls_context_tls_cert': None},
         )
         self._tls_context_initialized = True
+        # The base loader can swallow a missing CA file. Do not cache that incomplete context:
+        # retry on the next run even when only the CA bundle (not the client credentials) is restored.
+        # CA directories load lazily during handshakes, and disabled verification needs no CA trust.
+        if (
+            context.verify_mode != CERT_NONE
+            and self._ca_cert
+            and not Path(expanduser(self._ca_cert)).is_dir()
+            and not context.cert_store_stats()['x509']
+        ):
+            raise ClientCertificateError(f'Failed to load CA certificate from {self._ca_cert}: no certificates loaded')
         self._load_client_certificate(context, fingerprint)
         for intermediate_cert in self.agent_check._intermediate_cert_cache.values():
             context.load_verify_locations(cadata=intermediate_cert)
