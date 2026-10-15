@@ -7,6 +7,7 @@ import re
 
 import pytest
 import requests
+from urllib3.exceptions import ReadTimeoutError
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.prometheus import PrometheusCheck
@@ -116,3 +117,19 @@ def test_openmetrics_v2_read_timeout_fails_despite_ignore_connection_errors(dd_r
 
     with pytest.raises(Exception, match='read timed out'):
         dd_run_check(check)
+
+
+@pytest.mark.usefixtures('http_mode')
+def test_openmetrics_v2_ignores_mid_body_timeout_when_configured(dd_run_check, mocker, caplog):
+    # requests turns a read timeout while streaming the body into a connection error.
+    response = requests.Response()
+    response.status_code = 200
+    response.headers['Content-Type'] = 'text/plain'
+    response.raw = mocker.Mock()
+    response.raw.stream.side_effect = ReadTimeoutError(None, ENDPOINT, 'read timed out')
+    mocker.patch('requests.Session.get', return_value=response)
+    check = _openmetrics_v2_check(ignore_connection_errors=True)
+
+    dd_run_check(check)
+
+    assert f'OpenMetrics endpoint {ENDPOINT} is not accessible' in caplog.text
