@@ -6,7 +6,7 @@
 #
 init_config:
 
-    ## @param loader - string - optional - default: python
+    ## @param loader - string - optional - default: core
     ## Check loader to use for all instances.
     ##
     ## Available loaders:
@@ -192,7 +192,7 @@ instances:
     #
     # retries: 3
 
-    ## @param loader - string - optional - default: python
+    ## @param loader - string - optional - default: core
     ## Check loader to use. Available loaders:
     ## - core: (recommended) Uses new corecheck SNMP integration
     ## - python: Uses legacy python SNMP integration

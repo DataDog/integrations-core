@@ -22,7 +22,7 @@ files:
         value:
           example: core
           type: string
-          display_default: python
+          display_default: core
         fleet_configurable: true
       - name: use_device_id_as_hostname
         enabled: true
@@ -284,7 +284,7 @@ files:
         value:
           type: string
           example: core
-          display_default: python
+          display_default: core
       - name: use_device_id_as_hostname
         enabled: true
         fleet_configurable: true
