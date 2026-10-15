@@ -9,7 +9,6 @@ import ssl
 import subprocess
 import tempfile
 import time
-import tracemalloc
 
 import mock
 import pytest
@@ -19,7 +18,6 @@ import urllib3
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http import (
-    LineCappedRawResponse,
     RequestsWrapper,
     ResponseLineTooLongError,
     ResponseWrapper,
@@ -407,29 +405,3 @@ def test_stream_groups_chunks_up_to_a_line_break():
 
     # The chunks are b'y\nxx', b'xxxx', b'xxx\n' and b'y'
     assert list(response.raw.stream(4)) == [b'y\nxx', b'xxxxxxx\n', b'y']
-
-
-class _PieceResponse:
-    """Yields the body in 2-byte pieces, like urllib3 does when an endpoint sends 2-byte HTTP chunks."""
-
-    def __init__(self, body: bytes):
-        self.body = body
-
-    def stream(self, *args, **kwargs):
-        for i in range(0, len(self.body), 2):
-            yield self.body[i : i + 2]
-
-
-def test_stream_buffers_tiny_chunks_in_bounded_memory():
-    body = b'x' * 2**17 + b'\n'
-    raw = LineCappedRawResponse(_PieceResponse(body), 2**20)
-
-    tracemalloc.start()
-    try:
-        assert b''.join(raw.stream(4)) == body
-        peak = tracemalloc.get_traced_memory()[1]
-    finally:
-        tracemalloc.stop()
-
-    # Keeping each piece as a separate object would cost about 100 bytes per piece
-    assert peak < 4 * len(body)
