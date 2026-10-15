@@ -1,5 +1,5 @@
 {
-  "interface_type": "tracing_library",
+  "interface_type": "tracing-library",
   "source_type_id": 92087905,
   "source_type_name": "OpenAI APM",
   "interface_title": "APM",

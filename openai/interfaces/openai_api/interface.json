@@ -5,5 +5,10 @@
   "interface_title": "Usage and Cost",
   "is_primary": true,
   "auto_install": true,
-  "creates_events": false
+  "creates_events": false,
+  "metric_prefix": "openai.",
+  "metrics_to_check": [
+    "openai.request.duration",
+    "openai.completions.input_tokens"
+  ]
 }

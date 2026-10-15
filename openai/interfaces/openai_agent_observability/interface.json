@@ -1,5 +1,5 @@
 {
-  "interface_type": "tracing_library",
+  "interface_type": "tracing-library",
   "source_type_id": 92087906,
   "source_type_name": "OpenAI Agent Observability",
   "interface_title": "Agent Observability",
