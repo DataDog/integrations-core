@@ -1,0 +1,63 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "4e277530-ae7d-4e54-ab2f-f47fb4b6132a",
+  "app_id": "kata_containers",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect metrics from Kata Containers, a secure container runtime using lightweight virtual machines.",
+    "title": "Kata Containers",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::Containers",
+      "Category::Kubernetes",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 39847291,
+      "source_type_name": "Kata Containers",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "kata.",
+        "check": "kata.running_shim_count",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "kata-monitor",
+        "kata-runtime",
+        "containerd-shim-kata-v2"
+      ]
+    },
+    "logs": {
+      "source": "kata_containers"
+    },
+    "dashboards": {
+      "Kata Containers Overview": "assets/dashboards/kata_containers_dashboard.json"
+    },
+    "monitors": {
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
