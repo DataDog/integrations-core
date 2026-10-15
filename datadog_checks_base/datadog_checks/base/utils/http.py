@@ -9,11 +9,11 @@ import re
 import socket
 import warnings
 from collections import ChainMap
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from hashlib import sha256
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from urllib.parse import quote, urljoin, urlparse, urlunparse
 
 import lazy_loader
@@ -61,6 +61,9 @@ DEFAULT_EXPIRATION = 300
 # https://www.bittorrent.org/beps/bep_0003.html
 DEFAULT_CHUNK_SIZE = 16
 
+# `iter_lines` buffers a line until its end, so lines are limited (in KiB) to avoid buffering an unbounded response.
+DEFAULT_MAX_LINE_SIZE = 65536
+
 STANDARD_FIELDS = {
     'allow_redirects': True,
     'auth_token': None,
@@ -79,6 +82,7 @@ STANDARD_FIELDS = {
     'kerberos_keytab': None,
     'kerberos_principal': None,
     'log_requests': False,
+    'max_line_size': DEFAULT_MAX_LINE_SIZE,
     'ntlm_domain': None,
     'password': None,
     'persist_connections': False,
@@ -231,12 +235,51 @@ class _SSLContextAdapter(requests.adapters.HTTPAdapter):
         return host_params, {"ssl_context": self.ssl_context}
 
 
+class ResponseLineTooLongError(ValueError):
+    pass
+
+
+def limit_line_size(response: requests.Response, max_line_size: int) -> None:
+    """Make reading `response` raise `ResponseLineTooLongError` once a line is longer than `max_line_size` bytes."""
+    raw = getattr(response, 'raw', None)
+    # Don't overwrite test mocks or responses that are already limited
+    if hasattr(raw, 'stream') and not isinstance(raw, LineCappedRawResponse):
+        response.raw = LineCappedRawResponse(raw, max_line_size)
+
+
+class LineCappedRawResponse(ObjectProxy):
+    """
+    Wraps a urllib3 response so that its decoded stream, which `requests` reads the body from, raises
+    `ResponseLineTooLongError` once a line is longer than `max_line_size` bytes. Everything else is forwarded.
+    """
+
+    def __init__(self, raw: Any, max_line_size: int):
+        super().__init__(raw)
+        self._self_max_line_size = max_line_size
+
+    def stream(self, *args: Any, **kwargs: Any) -> Iterator[bytes]:
+        # Only the line continued from the previous chunk is checked: `RequestsWrapper` doesn't allow chunks longer
+        # than the limit, so lines that start in a chunk can't be longer than the limit before the chunk ends.
+        line_size = 0
+        for chunk in self.__wrapped__.stream(*args, **kwargs):
+            newline = chunk.find(b'\n')
+            first_line_size = line_size + (len(chunk) if newline < 0 else newline)
+            if first_line_size > self._self_max_line_size:
+                raise ResponseLineTooLongError(
+                    f'Response contains a line longer than {self._self_max_line_size} bytes, '
+                    'the limit can be raised with the `max_line_size` option (in KiB)'
+                )
+            line_size = first_line_size if newline < 0 else len(chunk) - chunk.rfind(b'\n') - 1
+            yield chunk
+
+
 class ResponseWrapper(ObjectProxy):
-    def __init__(self, response, default_chunk_size):
+    def __init__(self, response, default_chunk_size, max_line_size=DEFAULT_MAX_LINE_SIZE * KIBIBYTE):
         super(ResponseWrapper, self).__init__(response)
 
         # See https://github.com/psf/requests/pull/5942
         self.__default_chunk_size = default_chunk_size
+        self.__max_line_size = max_line_size
 
     def iter_content(self, chunk_size=None, decode_unicode=False):
         if chunk_size is None:
@@ -247,6 +290,10 @@ class ResponseWrapper(ObjectProxy):
     def iter_lines(self, chunk_size=None, decode_unicode=False, delimiter=None):
         if chunk_size is None:
             chunk_size = self.__default_chunk_size
+
+        # Not implemented yet for custom delimiters, which no check uses
+        if delimiter is None:
+            limit_line_size(self.__wrapped__, self.__max_line_size)
 
         return self.__wrapped__.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter)
 
@@ -404,6 +451,7 @@ class RequestsWrapper(object):
         'request_hooks',
         'auth_token_handler',
         'request_size',
+        'max_line_size',
         'tls_protocols_allowed',
         'aia_chasing_max_depth',
         'tls_config',
@@ -570,6 +618,9 @@ class RequestsWrapper(object):
         self.ignore_tls_warning = is_affirmative(config['tls_ignore_warning'])
 
         self.request_size = int(float(config['request_size']) * KIBIBYTE)
+        self.max_line_size = int(float(config['max_line_size']) * KIBIBYTE)
+        if self.max_line_size < self.request_size:
+            raise ConfigurationError('The `max_line_size` setting must be at least `request_size`')
 
         self.aia_chasing_max_depth = DEFAULT_AIA_CHASING_MAX_DEPTH
 
@@ -675,7 +726,7 @@ class RequestsWrapper(object):
             else:
                 response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
 
-            return ResponseWrapper(response, self.request_size)
+            return ResponseWrapper(response, self.request_size, self.max_line_size)
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
         try:
