@@ -201,6 +201,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             maxsize=1000,
             ttl=300,
         )
+
         self._explain_errors_cache = TTLCache(
             maxsize=self._config.query_samples.explain_errors_cache_maxsize,
             # only try to re-explain invalid statements once per day
