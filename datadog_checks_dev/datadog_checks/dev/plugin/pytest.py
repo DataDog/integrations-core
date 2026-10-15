@@ -390,8 +390,8 @@ def mock_http_response(mocker, mock_response):
 def _create_fake_http_client_factory(fake_http: Any) -> Any:
     def create_client(check: Any, *_args: Any, **_kwargs: Any) -> Any:
         # The fake models the backend-neutral contract, which a check only gets in production by opting in.
-        if not getattr(check, 'AGNOSTIC_HTTP', False):
-            raise AssertionError(f'{type(check).__name__} must set AGNOSTIC_HTTP = True to use the fake_http fixture.')
+        if not getattr(check, 'AGNOSTIC_HTTP_CLIENT', False):
+            raise AssertionError(f'{type(check).__name__} must set AGNOSTIC_HTTP_CLIENT = True to use the fake_http fixture.')
         return fake_http.create_client()
 
     return create_client
@@ -399,7 +399,7 @@ def _create_fake_http_client_factory(fake_http: Any) -> Any:
 
 @pytest.fixture
 def fake_http(mocker):
-    """Install a base-owned HTTP fake on checks created by the test, which must set AGNOSTIC_HTTP = True."""
+    """Install a base-owned HTTP fake on checks created by the test, which must set AGNOSTIC_HTTP_CLIENT = True."""
     AgentCheck = importlib.import_module('datadog_checks.base').AgentCheck
     FakeHTTPClient = importlib.import_module('datadog_checks.base.stubs.http').FakeHTTPClient
     client = FakeHTTPClient()

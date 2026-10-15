@@ -415,7 +415,7 @@ class OpenMetricsScraper:
         """
         Yield the connection line.
         """
-        # Checks with AGNOSTIC_HTTP raise the agnostic types. Checks without it raise requests exceptions.
+        # Checks with AGNOSTIC_HTTP_CLIENT raise the agnostic types. Checks without it raise requests exceptions.
         connection_errors = (RequestsConnectionError, HTTPClientConnectionError, HTTPClientConnectTimeoutError)
         # A read timeout before the response arrives means the endpoint is running but not answering, so it fails
         # the run. Once the body is streaming, requests reports a read timeout as a connection error, so it is

@@ -13,8 +13,8 @@ HERE = get_here()
 
 @pytest.fixture
 def agnostic_http(monkeypatch):
-    """Opt every check the test builds into AGNOSTIC_HTTP, which the fake_http fixture requires."""
-    monkeypatch.setattr(AgentCheck, 'AGNOSTIC_HTTP', True)
+    """Opt every check the test builds into AGNOSTIC_HTTP_CLIENT, which the fake_http fixture requires."""
+    monkeypatch.setattr(AgentCheck, 'AGNOSTIC_HTTP_CLIENT', True)
 
 
 @pytest.fixture(scope="session")

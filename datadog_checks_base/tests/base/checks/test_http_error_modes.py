@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Base check error handling must behave the same whether or not a check sets AGNOSTIC_HTTP."""
+"""Base check error handling must behave the same whether or not a check sets AGNOSTIC_HTTP_CLIENT."""
 
 import re
 
@@ -17,7 +17,7 @@ ENDPOINT = 'http://fake.endpoint:10055/metrics'
 
 @pytest.fixture(params=[False, True], ids=['default', 'agnostic'])
 def http_mode(request, monkeypatch, mocker):
-    monkeypatch.setattr(AgentCheck, 'AGNOSTIC_HTTP', request.param)
+    monkeypatch.setattr(AgentCheck, 'AGNOSTIC_HTTP_CLIENT', request.param)
     # Keeps SSL failures local instead of fetching intermediate certificates.
     mocker.patch.object(RequestsWrapper, 'fetch_intermediate_certs', return_value=[])
 

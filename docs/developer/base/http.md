@@ -47,11 +47,11 @@ response = self.http.get(url)
 
 ## Backend-neutral mode
 
-Set the `AGNOSTIC_HTTP` class attribute to opt a check into the interface this page describes:
+Set the `AGNOSTIC_HTTP_CLIENT` class attribute to opt a check into the interface this page describes:
 
 ```python
 class MyCheck(AgentCheck):
-    AGNOSTIC_HTTP = True
+    AGNOSTIC_HTTP_CLIENT = True
 ```
 
 With it set, every client the check creates through `self.http` or `create_http_client()`, including the clients its
@@ -67,7 +67,7 @@ For complete documentation of every option, see the associated configuration tem
 
 ## Errors
 
-With `AGNOSTIC_HTTP` set, a failed request raises one of the backend-neutral types in
+With `AGNOSTIC_HTTP_CLIENT` set, a failed request raises one of the backend-neutral types in
 `datadog_checks.base.utils.http_exceptions`, never an exception class belonging to the underlying HTTP library. Catch
 these instead:
 

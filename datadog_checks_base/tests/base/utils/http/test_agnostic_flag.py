@@ -14,7 +14,7 @@ from . import common
 
 
 class AgnosticCheck(AgentCheck):
-    AGNOSTIC_HTTP = True
+    AGNOSTIC_HTTP_CLIENT = True
 
 
 def _default_client(transport: common.RequestsTransport) -> RequestsWrapper:

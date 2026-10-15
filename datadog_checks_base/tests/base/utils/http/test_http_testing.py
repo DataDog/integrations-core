@@ -14,21 +14,21 @@ from datadog_checks.dev import http as http_testing
 
 
 class FixtureCheck(AgentCheck):
-    AGNOSTIC_HTTP = True
+    AGNOSTIC_HTTP_CLIENT = True
 
 
 class OpenMetricsFixtureCheck(OpenMetricsBaseCheck):
-    AGNOSTIC_HTTP = True
+    AGNOSTIC_HTTP_CLIENT = True
 
 
 class PrometheusFixtureCheck(PrometheusCheck):
-    AGNOSTIC_HTTP = True
+    AGNOSTIC_HTTP_CLIENT = True
 
 
 def test_fake_http_requires_the_check_to_opt_in(fake_http):
     check = AgentCheck('test', {}, [{}])
 
-    with pytest.raises(AssertionError, match='AGNOSTIC_HTTP = True'):
+    with pytest.raises(AssertionError, match='AGNOSTIC_HTTP_CLIENT = True'):
         check.create_http_client()
 
 
