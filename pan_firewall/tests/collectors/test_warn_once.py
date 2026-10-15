@@ -6,7 +6,7 @@ from unittest import mock
 
 import pytest
 
-from datadog_checks.pan_firewall.collectors import CollectContext, FirewallState
+from datadog_checks.pan_firewall.collectors.base import CollectContext, FirewallState
 from datadog_checks.pan_firewall.collectors.counters import collect_global_counters
 from datadog_checks.pan_firewall.collectors.dataplane import collect_dataplane
 from datadog_checks.pan_firewall.collectors.ha import collect_ha
@@ -19,7 +19,7 @@ from datadog_checks.pan_firewall.collectors.vpn import collect_vpn
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from ..common import FW_A_IP, SYNTHETIC
-from ..helpers import make_ctx
+from ..helpers import logged, make_ctx
 
 EMPTY_RESULT = b'<response status="success"><result/></response>'
 NO_RESULT = b'<response status="success"/>'
@@ -89,5 +89,5 @@ def test_a_warning_is_logged_once_per_key_then_at_debug_level_unless_once_is_fal
     for sensor in ('a', 'a', 'b'):
         ctx.warning('sensor %s is off', sensor, once=once)
 
-    assert ctx.log.warning.call_args_list == [mock.call('%s: sensor %s is off', FW_A_IP, s) for s in warned]
-    assert ctx.log.debug.call_args_list == [mock.call('%s: sensor %s is off', FW_A_IP, s) for s in debugged]
+    assert logged(ctx.log.warning) == [f'{FW_A_IP}: sensor {s} is off' for s in warned]
+    assert logged(ctx.log.debug) == [f'{FW_A_IP}: sensor {s} is off' for s in debugged]

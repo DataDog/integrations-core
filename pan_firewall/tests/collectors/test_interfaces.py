@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from unittest import mock
 
-from datadog_checks.pan_firewall.collectors import FirewallState
+from datadog_checks.pan_firewall.collectors.base import FirewallState
 from datadog_checks.pan_firewall.collectors.interfaces import (
     COUNTER_INTERFACE_CMD,
     parse_interface_counters,

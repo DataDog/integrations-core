@@ -39,7 +39,6 @@ class FirewallSource(Protocol):
 
 
 def resolve_credentials(ip: str, entries: Sequence[FirewallCredential]) -> Credentials | None:
-    """Return the credentials of the first entry matching `ip`, or None. An entry without `cidr` matches every IP."""
     entry = find_credential(ip, list(entries))
     if entry is None:
         return None

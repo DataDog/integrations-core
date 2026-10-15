@@ -37,7 +37,7 @@ class PanFirewallCheck(AgentCheck, ConfigMixin):
         for target in targets:
             poller = self._pollers.get(target.ip)
             if poller is None or poller.target.poller_key != target.poller_key:
-                poller = self._pollers[target.ip] = FirewallPoller(self, target, self.config)
+                poller = self._pollers[target.ip] = FirewallPoller(self, target)
             else:
                 poller.target = target
             pollers.append(poller)

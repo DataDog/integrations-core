@@ -9,7 +9,7 @@ from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
 from xml.etree.ElementTree import Element
 
-from .collectors import tag_tuple
+from .collectors.base import tag_tuple
 from .constants import DEVICE_VENDOR_TAG, NDM_DEVICE_RESOURCE_TAG, NDM_DEVICE_USER_TAGS_RESOURCE_TAG, PARSE_ERROR_CODE
 from .errors import PanosApiError
 from .firewalls import FirewallTarget
@@ -103,12 +103,17 @@ def vsys_list(
     """The vsys to poll: the `vsys` option, else detected from the `show interface all` rows. Without rows, a
     multi-vsys firewall falls back to `vsys1`, which always exists."""
     if configured:
-        return [v for value in configured if (v := normalize_vsys(value))]
+        return configured_vsys(configured)
     if not identity.multi_vsys:
         return ['vsys1']
     detected = {v for row in interface_rows if (v := normalize_vsys(text(row, 'vsys')))}
     # By number, so vsys10 sorts after vsys2.
     return sorted(detected, key=lambda v: (len(v), v)) or ['vsys1']
+
+
+def configured_vsys(configured: Sequence[str] | None) -> list[str]:
+    """The `vsys` option, normalized; empty when it is not set."""
+    return [v for value in configured or () if (v := normalize_vsys(value))]
 
 
 def normalize_vsys(value: str | None) -> str | None:

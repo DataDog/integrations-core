@@ -10,7 +10,7 @@ from xml.etree.ElementTree import Element
 from datadog_checks.pan_firewall.constants import DROPPED_PACKET_ASPECTS, GLOBAL_COUNTERS
 from datadog_checks.pan_firewall.xml_utils import num, text
 
-from . import CollectContext, Sample, register
+from .base import CollectContext, Sample, register
 
 # Never a filter: `value all` answers with 5,524 counters.
 GLOBAL_COUNTER_CMD = '<show><counter><global/></counter></show>'

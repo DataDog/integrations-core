@@ -40,15 +40,14 @@ NDM_DEVICE_RESOURCE_TAG = 'dd.internal.resource:ndm_device'
 NDM_DEVICE_USER_TAGS_RESOURCE_TAG = 'dd.internal.resource:ndm_device_user_tags'
 NDM_INTERFACE_RESOURCE_TAG = 'dd.internal.resource:ndm_interface'
 
-# A firewall is busy, and is not collected, while `show jobs pending` lists a job with one of these statuses and types.
+# A job still running: a log or report job being polled, or a job that makes the firewall busy.
+ACTIVE_STATUSES = frozenset({'ACT', 'PEND'})
+
+# A firewall is busy, and is not collected, while `show jobs pending` lists an active job of one of these types.
 # The type strings are the ones seen in the lab's `show jobs all`; `Downld` (hourly downloads) and `IoT` never pause
 # collection.
-BUSY_JOB_STATUSES = frozenset({'ACT', 'PEND'})
 BUSY_JOB_TYPES = frozenset({'Commit', 'AutoCom', 'Content', 'Antivirus', 'WildFire'})
 COMMIT_SKIP_MAX_SECONDS = 600
-
-# A log or report job still running.
-ACTIVE_STATUSES = frozenset({'ACT', 'PEND'})
 
 # Threat logs: entries asked per `type=log` job (the PAN-OS maximum), how often a job is polled and how long to wait
 # between polls before it is left for the next run, and the minimum seconds between two `seqno` reset checks.
@@ -75,8 +74,6 @@ REPORTS = {
 REPORT_JOB_POLLS = 10
 REPORT_JOB_POLL_DELAY = 0.5
 REPORT_MAX_CARRIES = 3
-
-NDM_INTEGRATION = 'pan_firewall'
 
 # The 26 counters of `counter.global`: raw name -> (category, aspect). The values are used only for a counter that
 # `show counter global` doesn't list, so it is still sent as 0 with the same tags; a listed counter takes both from the

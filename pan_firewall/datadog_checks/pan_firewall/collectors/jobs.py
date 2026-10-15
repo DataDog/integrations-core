@@ -11,7 +11,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, NamedTuple
 from xml.etree.ElementTree import Element
 
-from datadog_checks.pan_firewall.constants import BUSY_JOB_STATUSES, BUSY_JOB_TYPES
+from datadog_checks.pan_firewall.constants import ACTIVE_STATUSES, BUSY_JOB_TYPES
 from datadog_checks.pan_firewall.xml_utils import text
 
 if TYPE_CHECKING:
@@ -31,7 +31,7 @@ def parse_busy_jobs(root: Element) -> list[BusyJob]:
     # Every `<job>` element, wherever it sits: the `show jobs pending` envelope is not captured yet (lab task L10).
     for job in root.iter('job'):
         job_type = text(job, 'type')
-        if job_type in BUSY_JOB_TYPES and text(job, 'status') in BUSY_JOB_STATUSES:
+        if job_type in BUSY_JOB_TYPES and text(job, 'status') in ACTIVE_STATUSES:
             busy.append(BusyJob(job_type, text(job, 'id') or 'unknown'))
     return busy
 

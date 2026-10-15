@@ -13,7 +13,7 @@ from xml.sax.saxutils import escape
 
 from datadog_checks.pan_firewall.xml_utils import num
 
-from . import CollectContext, Sample, register
+from .base import CollectContext, Sample, register
 
 
 @cache

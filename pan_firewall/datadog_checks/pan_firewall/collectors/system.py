@@ -15,7 +15,7 @@ from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.xml_utils import num, text
 
-from . import CollectContext, Sample, register
+from .base import CollectContext, Sample, register
 
 SYSTEM_RESOURCES_CMD = '<show><system><resources/></system></show>'
 DISK_SPACE_CMD = '<show><system><disk-space/></system></show>'

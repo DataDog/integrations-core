@@ -4,7 +4,7 @@
 import threading
 from unittest import mock
 
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, FirewallState
+from datadog_checks.pan_firewall.collectors.base import COLLECT_FUNCTIONS, FirewallState
 from datadog_checks.pan_firewall.collectors.vpn import VPN_FLOW_CMD, VPN_GATEWAY_CMD, collect_vpn, parse_vpn
 from datadog_checks.pan_firewall.xml_utils import parse_response
 

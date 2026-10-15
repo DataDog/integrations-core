@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from unittest import mock
 
-from datadog_checks.pan_firewall.collectors import FirewallState
+from datadog_checks.pan_firewall.collectors.base import FirewallState
 from datadog_checks.pan_firewall.collectors.rules import collect_rule_hits, parse_rule_hits, rule_hit_cmd
 
 from ..helpers import load_op, make_ctx, series

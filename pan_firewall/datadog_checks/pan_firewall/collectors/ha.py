@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from datadog_checks.pan_firewall.xml_utils import text
 
-from . import CollectContext, Sample, register
+from .base import CollectContext, Sample, register
 
 HA_CMD = '<show><high-availability><all/></high-availability></show>'
 

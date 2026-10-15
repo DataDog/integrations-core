@@ -7,7 +7,7 @@ from unittest import mock
 import pytest
 
 from datadog_checks.pan_firewall import constants
-from datadog_checks.pan_firewall.collectors import CollectContext, FirewallState
+from datadog_checks.pan_firewall.collectors.base import CollectContext, FirewallState
 from datadog_checks.pan_firewall.collectors.reports import collect_reports, parse_report, report_params
 from datadog_checks.pan_firewall.constants import REPORTS
 from datadog_checks.pan_firewall.errors import PanosApiError, PanosUnreachable

@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.pan_firewall.collectors import FirewallState
+from datadog_checks.pan_firewall.collectors.base import FirewallState
 from datadog_checks.pan_firewall.collectors.ha import HA_CMD, collect_ha
 
 from ..common import FIXTURES

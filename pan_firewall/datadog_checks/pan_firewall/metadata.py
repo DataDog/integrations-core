@@ -7,21 +7,23 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .ndm_models import DeviceMetadata, InterfaceMetadata
+from .ndm_models import (
+    OPER_DOWN,
+    OPER_UNKNOWN,
+    OPER_UP,
+    STATUS_REACHABLE,
+    STATUS_UNREACHABLE,
+    DeviceMetadata,
+    InterfaceMetadata,
+)
 from .xml_utils import num, text
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from xml.etree.ElementTree import Element
 
-    from .collectors import FirewallState
+    from .collectors.base import FirewallState
     from .identity import DeviceIdentity
-
-STATUS_REACHABLE = 1
-STATUS_UNREACHABLE = 2
-OPER_UP = 1
-OPER_DOWN = 2
-OPER_UNKNOWN = 4
 
 HW_STATES = {'up': OPER_UP, 'down': OPER_DOWN}
 # `show vpn flow` state of a tunnel interface to the NDM operational status: only `active` is up.

@@ -12,7 +12,7 @@ from unittest import mock
 from xml.etree import ElementTree as ET
 
 from datadog_checks.pan_firewall import PanFirewallCheck
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, CollectContext, FirewallState, Sample
+from datadog_checks.pan_firewall.collectors.base import COLLECT_FUNCTIONS, CollectContext, FirewallState, Sample
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from .common import CREDENTIALS, FW_A_IP, STUBS, SYNTHETIC
@@ -130,3 +130,8 @@ def log_page(seqnos, **fields):
         '<response status="success"><result><job><status>FIN</status><id>1</id></job>'
         f'<log><logs count="{len(entries)}" progress="100">{"".join(entries)}</logs></log></result></response>'
     ).encode()
+
+
+def logged(log_method):
+    """The messages logged through a mock logger method, formatted."""
+    return [call.args[0] % call.args[1:] for call in log_method.call_args_list]

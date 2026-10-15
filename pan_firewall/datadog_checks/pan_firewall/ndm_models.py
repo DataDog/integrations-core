@@ -8,13 +8,18 @@ from collections.abc import Iterable, Iterator
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .constants import NDM_INTEGRATION
-
+INTEGRATION = 'pan_firewall'
 PAYLOAD_METADATA_BATCH_SIZE = 100
+
+STATUS_REACHABLE = 1
+STATUS_UNREACHABLE = 2
+OPER_UP = 1
+OPER_DOWN = 2
+OPER_UNKNOWN = 4
 
 
 class DeviceMetadata(BaseModel):
-    integration: str = NDM_INTEGRATION
+    integration: str = INTEGRATION
     id: str
     id_tags: list[str]
     tags: list[str]
@@ -32,7 +37,7 @@ class DeviceMetadata(BaseModel):
 
 
 class InterfaceMetadata(BaseModel):
-    integration: str = NDM_INTEGRATION
+    integration: str = INTEGRATION
     device_id: str
     raw_id: str
     raw_id_type: str = 'name'
@@ -46,7 +51,7 @@ class InterfaceMetadata(BaseModel):
 class NetworkDevicesMetadata(BaseModel):
     model_config = ConfigDict(validate_assignment=True)
 
-    integration: str = NDM_INTEGRATION
+    integration: str = INTEGRATION
     namespace: str
     devices: list[DeviceMetadata] = Field(default_factory=list)
     interfaces: list[InterfaceMetadata] = Field(default_factory=list)

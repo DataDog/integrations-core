@@ -8,7 +8,7 @@ import pytest
 from datadog_checks.dev import docker_run, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.pan_firewall import poller as poller_module
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS
+from datadog_checks.pan_firewall.collectors.base import COLLECT_FUNCTIONS
 from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 
 from .common import (

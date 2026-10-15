@@ -12,7 +12,7 @@ import pytest
 from datadog_checks.pan_firewall import constants
 from datadog_checks.pan_firewall.api import PanosClient
 from datadog_checks.pan_firewall.auth import Credentials, KeyManager
-from datadog_checks.pan_firewall.collectors import CollectContext, FirewallState
+from datadog_checks.pan_firewall.collectors.base import CollectContext, FirewallState
 from datadog_checks.pan_firewall.collectors.threats import collect_threats
 from datadog_checks.pan_firewall.errors import PanosApiError
 
@@ -27,7 +27,7 @@ from ..fixture_map import (
 )
 from ..helpers import THREAT_LOG_ACT as ACT
 from ..helpers import THREAT_LOG_CLOCK_BACK as CLOCK_BACK
-from ..helpers import FakeClock, log_page, make_instance, new_check
+from ..helpers import FakeClock, log_page, logged, make_instance, new_check
 
 CACHE_KEY = f'threat_watermark:{FW_A_SERIAL}'
 FW_A_LAST_SEQNO = 7691899338913481002
@@ -405,7 +405,7 @@ def test_entries_without_a_valid_seqno_are_skipped_and_logged_at_debug(firewall)
     samples = firewall.collect()
 
     assert sum(s.value for s in samples) == 1
-    assert any('invalid seqno' in call.args[0] for call in firewall.log.debug.call_args_list)
+    assert any('invalid seqno' in message for message in logged(firewall.log.debug))
     firewall.log.warning.assert_not_called()
 
 

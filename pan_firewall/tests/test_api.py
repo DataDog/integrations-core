@@ -226,7 +226,6 @@ def test_rejected_keygen_is_not_retried_until_reset(keygen, api, keygens_before_
     assert client.stats.auth_rejected is True
 
     # The next run.
-    keys.allow_one_keygen()
     client.start_run()
     client.op(SYSTEM_INFO_CMD)
 

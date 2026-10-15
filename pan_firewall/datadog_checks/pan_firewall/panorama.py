@@ -77,11 +77,9 @@ class PanoramaFirewallSource:
         self._host = cast(str, config.panorama_host)
         self._cache_key = f'panorama_firewalls:{self._host}'
         credentials = Credentials(config.panorama_username, config.panorama_password, config.panorama_api_key)
-        self._keys = KeyManager(check.http, self._host, credentials)
-        self._client = PanosClient(check.http, self._host, self._keys, check.log)
+        self._client = PanosClient(check.http, self._host, KeyManager(check.http, self._host, credentials), check.log)
 
     def list_firewalls(self) -> list[FirewallTarget]:
-        self._keys.allow_one_keygen()
         self._client.start_run()
         devices = self._discover()
         self._check.gauge('panorama.can_connect', 0 if devices is None else 1, tags=self._tags())

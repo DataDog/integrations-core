@@ -12,7 +12,7 @@ from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.xml_utils import text
 
-from . import CollectContext, Sample, register
+from .base import CollectContext, Sample, register
 
 LICENSE_INFO_CMD = '<request><license><info/></license></request>'
 

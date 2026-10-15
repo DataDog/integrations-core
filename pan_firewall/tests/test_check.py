@@ -7,7 +7,7 @@ import threading
 import pytest
 
 from datadog_checks.pan_firewall import PanFirewallCheck
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS, Sample
+from datadog_checks.pan_firewall.collectors.base import COLLECT_FUNCTIONS, Sample
 from datadog_checks.pan_firewall.collectors.jobs import JOBS_PENDING_CMD
 from datadog_checks.pan_firewall.errors import PanosApiError, PanosUnreachable
 from datadog_checks.pan_firewall.poller import FirewallPoller

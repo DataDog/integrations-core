@@ -18,7 +18,7 @@ from datadog_checks.pan_firewall.constants import ACTIVE_STATUSES
 from datadog_checks.pan_firewall.errors import PanosError, PanosUnreachable
 from datadog_checks.pan_firewall.xml_utils import num, text
 
-from . import CollectContext, ReportJob, Sample, register
+from .base import CollectContext, ReportJob, Sample, register
 
 DEFAULT_TOP_N = 10
 CAPTION = 'datadog'

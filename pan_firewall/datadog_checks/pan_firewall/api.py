@@ -180,7 +180,9 @@ class PanosClient:
             return self._authorized(lambda key: read_response(post_api(self._http, self._url, params, key=key)))
 
     def start_run(self) -> None:
-        """Start the stats of a new run, which also ends the fail-fast state. Call it at the start of each run."""
+        """Start the stats of a new run, which also ends the fail-fast state and allows one keygen after a rejected one.
+        Call it at the start of each run."""
+        self._keys.allow_one_keygen()
         with self._stats_lock:
             self._stats = CallStats()
 

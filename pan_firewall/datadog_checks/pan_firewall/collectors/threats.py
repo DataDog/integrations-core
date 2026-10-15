@@ -19,7 +19,7 @@ from datadog_checks.pan_firewall.errors import PanosApiError
 from datadog_checks.pan_firewall.identity import normalize_vsys
 from datadog_checks.pan_firewall.xml_utils import text
 
-from . import CollectContext, Sample, ThreatJob, ThreatState, Watermark, register, tag_tuple
+from .base import CollectContext, Sample, ThreatJob, ThreatState, Watermark, register, tag_tuple
 
 
 @register('threats')

@@ -10,7 +10,7 @@ from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.xml_utils import text
 
-from . import CollectContext, Sample, register
+from .base import CollectContext, Sample, register
 
 RESOURCE_MONITOR_CMD = (
     '<show><running><resource-monitor><minute><last>1</last></minute></resource-monitor></running></show>'

@@ -5,7 +5,7 @@ import copy
 from xml.etree import ElementTree as ET
 
 from datadog_checks.pan_firewall.auth import Credentials
-from datadog_checks.pan_firewall.collectors import COLLECT_FUNCTIONS
+from datadog_checks.pan_firewall.collectors.base import COLLECT_FUNCTIONS
 from datadog_checks.pan_firewall.collectors.ha import HA_CMD, collect_ha
 from datadog_checks.pan_firewall.firewalls import FirewallTarget
 from datadog_checks.pan_firewall.identity import global_tags, parse_system_info

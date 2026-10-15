@@ -7,16 +7,12 @@ import json
 import time
 from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass, field
+from enum import Enum
 from typing import TYPE_CHECKING
 
 from .api import PanosClient
 from .auth import KeyManager
 from .collectors import (  # noqa: F401  (importing the modules registers their collectors)
-    COLLECT_FUNCTIONS,
-    CollectContext,
-    FirewallState,
-    Sample,
     counters,
     dataplane,
     ha,
@@ -29,19 +25,18 @@ from .collectors import (  # noqa: F401  (importing the modules registers their 
     threats,
     vpn,
 )
+from .collectors.base import COLLECT_FUNCTIONS, CollectContext, FirewallState, Sample
 from .collectors.interfaces import parse_interface_speeds
 from .collectors.jobs import BusyJob, busy_jobs
-from .constants import COMMIT_SKIP_MAX_SECONDS, IDENTITY
+from .constants import IDENTITY, INTERVALS
 from .errors import PanosError, PanosSkipped, PanosUnreachable
-from .identity import DeviceIdentity, global_tags, parse_system_info, vsys_list
+from .identity import DeviceIdentity, configured_vsys, global_tags, parse_system_info, vsys_list
 from .metadata import build_device, build_interfaces
 from .ndm_models import DeviceMetadata, InterfaceMetadata, batch_payloads
-from .scheduler import FirewallSchedule
+from .scheduler import BusyGate, FirewallSchedule
 
 if TYPE_CHECKING:
-    from datadog_checks.base import AgentCheck
-
-    from .config_models.instance import InstanceConfig
+    from .check import PanFirewallCheck
     from .firewalls import FirewallTarget
 
 SYSTEM_INFO_CMD = '<show><system><info/></system></show>'
@@ -59,44 +54,41 @@ OPTIONAL_COLLECTORS = {
 }
 
 
-@dataclass
-class CollectorRun:
-    ran: list[str] = field(default_factory=list)  # succeeded
-    failed: list[str] = field(default_factory=list)  # failed, or could not reach the firewall
-    unreachable: list[str] = field(default_factory=list)
-    # Not run, or cut short, because an earlier call of the run could not reach the firewall.
-    skipped: list[str] = field(default_factory=list)
+class Result(Enum):
+    """What happened this run to the jobs check, the identity or a collector. A name with no result stays due."""
+
+    RAN = 'ran'
+    FAILED = 'failed'
+    UNREACHABLE = 'unreachable'  # failed, because the firewall could not be reached
+    SKIPPED = 'skipped'  # not run, or cut short, after another call could not reach the firewall: stays due
 
 
 class FirewallPoller:
-    """Polls one firewall, and keeps what lasts between its runs: API key, schedule and state."""
+    """Polls one firewall, and keeps what lasts between its runs: client, schedule, identity and state."""
 
-    def __init__(self, check: AgentCheck, target: FirewallTarget, config: InstanceConfig):
+    def __init__(self, check: PanFirewallCheck, target: FirewallTarget):
         self.check = check
         self.target = target
-        self.config = config
+        self.config = check.config
         self.log = check.log
-        self.ip = target.ip
-        # Keyed by device IP: before a static firewall first answers, its IP is all the check knows.
-        self._cache_key = f'identity:{self.ip}'
-        self._keys = KeyManager(check.http, target.ip, target.credentials)
-        self.client = PanosClient(check.http, target.ip, self._keys, check.log, max_in_flight=COLLECTOR_WORKERS)
+        self._cache_key = f'identity:{target.ip}'
+        keys = KeyManager(check.http, target.ip, target.credentials)
+        self.client = PanosClient(check.http, target.ip, keys, check.log, max_in_flight=COLLECTOR_WORKERS)
         self.schedule = FirewallSchedule()
-        self.state = FirewallState()
+        self._busy_gate = BusyGate(check.log, target.ip)
+        self.state = FirewallState(vsys=configured_vsys(self.config.vsys) or ['vsys1'])
         self.identity = self._load_identity()
-        if self.identity is not None:
-            self.state.vsys = vsys_list(self.identity, self.state.interface_rows, config.vsys)
         self._can_connect: int | None = None
         self._auth_status: int | None = None
         # The `can_connect` the last metadata was sent with: a different one sends the metadata again at once.
         self._metadata_status: int | None = None
-        # Schedule-clock start of the current busy period, None while the firewall is not busy.
-        self._busy_since: float | None = None
-        self._busy_cap_warned = False
+
+    @property
+    def ip(self) -> str:
+        return self.target.ip
 
     def run(self) -> None:
         start = time.monotonic()
-        # Clears what a run that raised may have left, such as the failure that makes every call fail fast.
         self.client.start_run()
         try:
             self._run()
@@ -104,46 +96,61 @@ class FirewallPoller:
             self.log.debug('%s: %d calls in %.2fs', self.ip, self.client.stats.calls, time.monotonic() - start)
 
     def _run(self) -> None:
-        self._keys.allow_one_keygen()
-        outcome = self._collect(self.schedule.due(self._enabled(), identity_missing=self.identity is None))
-        # Also when a collector caught the exception itself, so no name was recorded.
-        if (reason := self.client.unreachable) is not None:
-            self.log.warning(
-                '%s: could not reach the firewall (%s) during %s; skipped for this run: %s',
-                self.ip,
-                reason,
-                ', '.join(outcome.unreachable) or 'a call',
-                ', '.join(outcome.skipped) or 'none',
-            )
-        # Skipped collectors, and every collector of a busy run, stay due, so they run first thing next run.
-        self.schedule.mark_run(outcome.ran)
-        self.schedule.mark_failed(outcome.failed)
-        stats = self.client.stats
-        if stats.key_regenerated:
+        due = self.schedule.due(self._enabled(), identity_missing=self.identity is None)
+        results = self._collect(due)
+        self._warn_if_unreachable(results)
+        self._reschedule(results)
+        self._send_health()
+        self._send_metadata(identity_read=results.get(IDENTITY) is Result.RAN)
+
+    def _warn_if_unreachable(self, results: dict[str, Result]) -> None:
+        """One warning per run that lost the firewall, naming the calls that could not reach it and what was skipped.
+
+        It reads the client rather than `results`: a collector that caught the error itself still lost the firewall.
+        """
+        if (reason := self.client.unreachable) is None:
+            return
+        self.log.warning(
+            '%s: could not reach the firewall (%s) during %s; skipped for this run: %s',
+            self.ip,
+            reason,
+            ', '.join(names_with(results, Result.UNREACHABLE)) or 'a call',
+            ', '.join(names_with(results, Result.SKIPPED)) or 'none',
+        )
+
+    def _reschedule(self, results: dict[str, Result]) -> None:
+        """Push back what ran by its interval, and what failed by a shorter retry delay. The rest stays due."""
+        self.schedule.mark_run(names_with(results, Result.RAN))
+        # The jobs check has no schedule: it is the first call of every run with something due.
+        failed = names_with(results, Result.FAILED, Result.UNREACHABLE)
+        self.schedule.mark_failed([name for name in failed if name in INTERVALS])
+        if self.client.stats.key_regenerated:
             # A rejected key that had worked may mean another unit answers here: read the identity again next run.
             self.schedule.make_due(IDENTITY)
+
+    def _send_health(self) -> None:
+        """Send `can_connect` and `api.authentication.status`. A run that made no call sends the last values again."""
+        stats = self.client.stats
         if stats.calls:
             self._can_connect = 1 if stats.answered else 0
-            # A run with no verdict on the credentials (nothing answered) keeps the last one; the first reports 0.
+            # Only a run where the firewall answered says the credentials work; the first run reports 0 regardless.
             if stats.auth_rejected:
                 self._auth_status = 1
             elif stats.answered or self._auth_status is None:
                 self._auth_status = 0
-        # With nothing called this run, the last result is sent again.
         tags = self._tags()
         if self._can_connect is not None:
             self.check.gauge('can_connect', self._can_connect, tags=tags)
         if self._auth_status is not None:
             self.check.gauge('api.authentication.status', self._auth_status, tags=tags)
-        self._send_metadata(outcome)
 
-    def _send_metadata(self, outcome: CollectorRun) -> None:
+    def _send_metadata(self, identity_read: bool) -> None:
         """Send the device and its interfaces after each identity read that succeeds (30 min), and when `can_connect`
         flips. A failed read sends nothing rather than the last identity again."""
         identity = self.identity
         if not self.config.send_ndm_metadata or identity is None or identity.serial is None:
             return
-        if self._can_connect is None or (self._can_connect == self._metadata_status and IDENTITY not in outcome.ran):
+        if self._can_connect is None or (self._can_connect == self._metadata_status and not identity_read):
             return
         self._metadata_status = self._can_connect
         namespace = self.config.namespace or 'default'
@@ -157,79 +164,72 @@ class FirewallPoller:
     def _busy(self) -> bool:
         """Run the jobs check; True skips this run's collectors (a commit or update is in progress).
 
-        Skipping lasts at most COMMIT_SKIP_MAX_SECONDS per busy period, then the firewall is collected with one
-        warning. A failed jobs check never blocks collection.
+        A failed jobs check never blocks collection. Raises PanosUnreachable when it cannot reach the firewall.
         """
-        jobs = self._busy_jobs()
-        if not jobs:
-            self._busy_since = None
-            return False
-        jobs_text = ', '.join(f'{job.type} job {job.id}' for job in jobs)
-        now = self.schedule.now()
-        if self._busy_since is None:
-            self._busy_since = now
-            self._busy_cap_warned = False
-        if now - self._busy_since < COMMIT_SKIP_MAX_SECONDS:
-            self.log.debug('%s: %s in progress, skipping collection this run', self.ip, jobs_text)
-            return True
-        if not self._busy_cap_warned:
-            self._busy_cap_warned = True
-            self.log.warning(
-                '%s: %s still in progress after %ds of skipping; collecting anyway',
-                self.ip,
-                jobs_text,
-                COMMIT_SKIP_MAX_SECONDS,
-            )
-        return False
+        try:
+            jobs = self._busy_jobs()
+        except PanosUnreachable:
+            self._busy_gate.end()
+            raise
+        return self._busy_gate.skip(jobs, self.schedule.now())
 
     def _busy_jobs(self) -> list[BusyJob]:
-        """The commits and updates in progress; none when the jobs check failed, which is warned about every time."""
+        """The commits and updates in progress; none when the jobs check failed, which is warned about every time.
+
+        PanosUnreachable propagates: the caller skips the whole run.
+        """
         try:
             return busy_jobs(self.client)
         except PanosUnreachable:
-            # `_run()` reports it, and skips the collectors.
-            return []
+            raise
         except PanosError as e:
             self.log.warning(
                 '%s: cannot check for a commit or content update in progress, collecting anyway: %s', self.ip, e
             )
             return []
 
-    def _collect(self, due: list[str]) -> CollectorRun:
-        """Run the jobs check, then the due identity and collectors. What is not run stays due."""
-        outcome = CollectorRun()
+    def _collect(self, due: list[str]) -> dict[str, Result]:
+        """Run the jobs check, then the due identity and collectors."""
         if not due:
-            return outcome
-        busy = self._busy()
-        # The jobs check is the run's first call: if it fails to reach the firewall, the whole run is cut off.
-        if self.client.unreachable is not None:
-            outcome.unreachable.append(JOBS_CHECK)
-            outcome.skipped = due
-            return outcome
-        if busy:
-            return outcome
-        if IDENTITY in due:
-            if self._refresh_identity():
-                outcome.ran.append(IDENTITY)
-            else:
-                outcome.failed.append(IDENTITY)
-            # The jobs check answered, so a failure to reach the firewall now is the identity's.
-            if self.client.unreachable is not None:
-                outcome.unreachable.append(IDENTITY)
-        collectors = [name for name in due if name in COLLECT_FUNCTIONS]
-        if outcome.unreachable:
-            outcome.skipped = collectors
-        # Without an identity, metrics could not carry the device tags: leave the collectors due for the next run.
-        elif self.identity is not None and collectors:
-            self._run_collectors(collectors, self.identity, outcome)
-        return outcome
+            return {}
+        try:
+            if self._busy():
+                return {}
+        except PanosUnreachable:
+            return {JOBS_CHECK: Result.UNREACHABLE} | dict.fromkeys(due, Result.SKIPPED)
 
-    def _run_collectors(self, names: Iterable[str], identity: DeviceIdentity, outcome: CollectorRun) -> None:
-        """Run the named collectors, `COLLECTOR_WORKERS` at a time, submit their samples, and record each in `outcome`.
+        results = {}
+        if IDENTITY in due:
+            results[IDENTITY] = self._run_identity()
+        collectors = [name for name in due if name in COLLECT_FUNCTIONS]
+        if not collectors:
+            return results
+
+        if self.client.unreachable is not None:
+            results |= dict.fromkeys(collectors, Result.SKIPPED)
+        # Without an identity, metrics could not carry the device tags: leave the collectors due for the next run.
+        elif self.identity is not None:
+            results |= self._run_collectors(collectors, self.identity)
+        return results
+
+    def _run_identity(self) -> Result:
+        """Read the identity and the interfaces."""
+        try:
+            identity = self._read_system_info()
+        except PanosUnreachable:
+            return Result.UNREACHABLE
+        if identity is None:
+            return Result.FAILED
+        self._set_identity(identity)
+        self._read_interfaces(identity)
+        return Result.RAN
+
+    def _run_collectors(self, names: Iterable[str], identity: DeviceIdentity) -> dict[str, Result]:
+        """Run the named collectors, `COLLECTOR_WORKERS` at a time, and submit their samples.
 
         Once a call cannot reach the firewall, the rest are skipped and stay due. A failing collector is logged and
-        does not stop the others. `open_log_job` holds one of the `COLLECTOR_WORKERS` slots: never call `client.op()`
-        inside it.
+        does not stop the others. A collector whose job is still running gets no result, so it stays due.
+        `open_log_job` holds one of the `COLLECTOR_WORKERS` slots: never call `client.op()` inside it.
         """
         ctx = CollectContext(
             client=self.client,
@@ -246,25 +246,26 @@ class FirewallPoller:
         self.state.still_due.clear()
         with ThreadPoolExecutor(max_workers=COLLECTOR_WORKERS, thread_name_prefix=f'pan_firewall-{self.ip}') as pool:
             futures = {name: pool.submit(self._run_collector, name, ctx) for name in names}
+        results = {}
         # Samples are submitted from this thread, in collector order, once every collector is done.
         for name, future in futures.items():
             try:
                 self._submit(future.result())
             except PanosSkipped:
-                outcome.skipped.append(name)
+                results[name] = Result.SKIPPED
             except PanosUnreachable:
-                outcome.unreachable.append(name)
-                outcome.failed.append(name)
+                results[name] = Result.UNREACHABLE
             except PanosError as e:
                 self.log.warning('%s: collector %s failed: %s', self.ip, name, e)
-                outcome.failed.append(name)
+                results[name] = Result.FAILED
             except Exception as e:
                 # A bug or an unexpected shape: the traceback is what tells them apart.
                 self.log.warning('%s: collector %s failed: %s', self.ip, name, e, exc_info=True)
-                outcome.failed.append(name)
+                results[name] = Result.FAILED
             else:
                 if name not in self.state.still_due:
-                    outcome.ran.append(name)
+                    results[name] = Result.RAN
+        return results
 
     def _run_collector(self, name: str, ctx: CollectContext) -> list[Sample]:
         if self.client.unreachable is not None:
@@ -286,39 +287,44 @@ class FirewallPoller:
             if name not in OPTIONAL_COLLECTORS or getattr(self.config, OPTIONAL_COLLECTORS[name])
         } | {IDENTITY}
 
-    def _refresh_identity(self) -> bool:
-        """Read the identity and the interfaces; False when the identity could not be read."""
+    def _read_system_info(self) -> DeviceIdentity | None:
+        """The identity from `show system info`, or None when it could not be read. PanosUnreachable propagates."""
         try:
-            identity = parse_system_info(self.client.op(SYSTEM_INFO_CMD))
+            return parse_system_info(self.client.op(SYSTEM_INFO_CMD))
         except PanosUnreachable:
-            # `run()` reports it, with the collectors it cuts off.
-            return False
+            raise
         except PanosError as e:
             self.log.warning('%s: cannot read the system info: %s', self.ip, e)
-            return False
-        previous = self.identity.serial if self.identity else None
-        if previous and identity.serial != previous:
-            # Another unit answers at this IP (a replaced static firewall). What was kept about the old one (pending
-            # jobs, threat watermark, warnings, interface rows) does not apply to it; the collectors reload theirs.
-            self.log.info('%s: the serial changed from %s to %s', self.ip, previous, identity.serial)
+            return None
+
+    def _set_identity(self, identity: DeviceIdentity) -> None:
+        """Replace the known identity with one just read, and cache it."""
+        old = self.identity
+        if old is not None and old.serial and identity.serial != old.serial:
+            self.log.info('%s: the serial changed from %s to %s', self.ip, old.serial, identity.serial)
             self.state = FirewallState()
-        if identity != self.identity:
+        # The cache gives the next agent start the device tags before its first read.
+        if identity != old:
             self.check.write_persistent_cache(self._cache_key, identity.to_json())
         self.identity = identity
+
+    def _read_interfaces(self, identity: DeviceIdentity) -> None:
+        """Read `show interface all` into the state, send `interface.speed`, and detect the vsys.
+
+        When the read fails, interface tags and vsys detection keep the last rows read.
+        """
         try:
             interfaces = self.client.op(INTERFACE_ALL_CMD)
         except PanosError as e:
-            # The identity does not depend on it; interface tags and vsys detection keep their last value.
             self.log.debug('%s: cannot read the interfaces: %s', self.ip, e)
         else:
             self.state.interface_rows = interfaces.findall('./result/ifnet/entry')
             self.state.interface_map = {
                 name: entry for entry in interfaces.findall('./result/hw/entry') if (name := entry.findtext('name'))
             }
-            # `interface.speed` follows this step's 30-minute schedule, as it comes from the interfaces read here.
+            # `interface.speed` follows the identity's 30-minute schedule, as it comes from the interfaces read here.
             self._submit(parse_interface_speeds(self.state, identity.serial, self._debug))
         self.state.vsys = vsys_list(identity, self.state.interface_rows, self.config.vsys)
-        return True
 
     def _debug(self, msg: str, *args: object) -> None:
         """The `debug` callable of the `parse_*` functions the poller calls itself, outside a `CollectContext`."""
@@ -338,3 +344,7 @@ class FirewallPoller:
             self.log.debug('%s: ignoring the cached identity of another firewall', self.ip)
             return None
         return identity
+
+
+def names_with(results: dict[str, Result], *wanted: Result) -> list[str]:
+    return [name for name, result in results.items() if result in wanted]
