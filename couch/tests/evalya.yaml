@@ -1,0 +1,28 @@
+version: "1"
+
+tasks:
+  # Full metric-coverage fixture: a CouchDB 3.x server (CouchDB-overview
+  # dashboard) and a CouchDB 1.x server (CouchDBv1-overview dashboard) with a
+  # seed and a built-in workload, behind a TCP gateway. Point one check instance
+  # at DB_PORT (3.x, with DB_USERNAME/DB_PASSWORD) and one at DB_V1_PORT (1.x,
+  # no credentials). See ./README.md.
+  - id: couch-full
+    task: ./compose/full-coverage.compose@gateway
+    labels:
+      evalya.io/publish: "true"
+      evalya.io/provides.DB_HOST: "{{ .hostname }}"
+      evalya.io/provides.DB_PORT: "5984"
+      evalya.io/provides.DB_V1_PORT: "5985"
+      evalya.io/provides.DB_USERNAME: "${DB_USERNAME:-dduser}"
+      evalya.io/provides.DB_PASSWORD: "${DB_PASSWORD:-pawprint}"
+    env:
+      - name: DB_USERNAME
+        value: "${DB_USERNAME:-dduser}"
+      - name: DB_PASSWORD
+        value: "${DB_PASSWORD:-pawprint}"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null \"http://$$DB_USERNAME:$$DB_PASSWORD@127.0.0.1:5984/_node/_local/_stats\" && wget -q -O /dev/null http://127.0.0.1:5985/_stats"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
