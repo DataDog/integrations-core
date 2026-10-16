@@ -13,6 +13,7 @@ import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
 from copy import copy
+from types import ModuleType
 
 import mock
 import pytest
@@ -1038,6 +1039,45 @@ def test_sanitize_activity_row(dbm_instance, row):
     row = check.activity._obfuscate_and_sanitize_row(row)
     assert isinstance(row['query_hash'], str)
     assert isinstance(row['query_plan_hash'], str)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('failure', [None, 'statement', 'tail', 'missing_statement', 'empty_statement'])
+def test_activity_tail_text_is_not_sent(dbm_instance: dict, datadog_agent: ModuleType, failure: str | None):
+    # DBM-808: comment recovery must not send literal values from the SQL batch tail.
+    comment = "/*dddbs='orders-service'*/"
+    statement = 'SELECT 123'
+    tail = f"SELECT 'synthetic_private_tail_value'; {comment}"
+    row = {'statement_text': statement, 'tail_text': tail, 'text': "SELECT 'synthetic_private_batch_value'", 'id': 42}
+    if failure == 'missing_statement':
+        row['statement_text'] = None
+    elif failure == 'empty_statement':
+        row['statement_text'] = ''
+
+    def obfuscate(sql_query: str, options: str | None = None) -> str:
+        if (failure == 'statement' and sql_query == statement) or (failure == 'tail' and sql_query == tail):
+            raise ValueError('cannot obfuscate')
+        if not sql_query:
+            return json.dumps({'query': '', 'metadata': {}})
+        return json.dumps({'query': 'SELECT ?', 'metadata': {'comments': [comment] if sql_query == tail else []}})
+
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', side_effect=obfuscate):
+        result = check.activity._obfuscate_and_sanitize_row(row)
+
+    assert 'tail_text' not in result
+    assert 'synthetic_private_tail_value' not in json.dumps(result)
+    assert 'synthetic_private_batch_value' not in json.dumps(result)
+    assert result['id'] == 42
+    if failure is None:
+        assert result['text'] == 'SELECT ?'
+        assert result['dd_comments'] == [comment]
+    elif failure == 'missing_statement':
+        assert 'text' not in result
+    elif failure == 'empty_statement':
+        assert result['text'] == ''
+    else:
+        assert result['text'] == 'ERROR: failed to obfuscate'
 
 
 @pytest.mark.unit

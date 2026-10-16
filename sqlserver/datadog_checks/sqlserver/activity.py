@@ -443,13 +443,18 @@ class SqlserverActivity(DBMAsyncJob):
     def _sanitize_row(row, obfuscated_statement=None):
         # rename the statement_text field to 'text' because that
         # is what our backend is expecting
-        if obfuscated_statement:
+        if obfuscated_statement is not None:
             row['text'] = obfuscated_statement
+        else:
+            # Missing statement offsets must not leave the raw batch as a fallback.
+            row.pop('text', None)
         if 'query_hash' in row:
             row['query_hash'] = _hash_to_hex(row['query_hash'])
         if 'query_plan_hash' in row:
             row['query_plan_hash'] = _hash_to_hex(row['query_plan_hash'])
-        # remove deobfuscated sql text from event
+        # The batch tail is only used to recover comments; never send its raw SQL.
+        row.pop('tail_text', None)
+        # remove unobfuscated sql text from event
         if 'statement_text' in row:
             del row['statement_text']
         # convert `context_info` to string, since the default decoding format
