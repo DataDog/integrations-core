@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from xml.etree import ElementTree as ET
 
 import pytest
 
@@ -15,6 +16,35 @@ from ..helpers import can_connect_by_ip, new_check, register_stubs, stub_runs
 
 def jobs_response(name):
     return 200, (SYNTHETIC / name).read_bytes()
+
+
+def pending_jobs(*jobs):
+    """A `show jobs pending` answer made of the `jobs_all.xml` entries named by (id, status[, type]), in that order.
+
+    Every other job is dropped: a pending answer that lists finished jobs is not realistic. A type is set only for a
+    job type the lab never produced.
+    """
+    root = parse_response((SYNTHETIC / 'jobs_all.xml').read_bytes())
+    result = root.find('result')
+    by_id = {job.findtext('id'): job for job in result.findall('job')}
+    for job in by_id.values():
+        result.remove(job)
+    for job_id, status, *job_type in jobs:
+        job = by_id[job_id]
+        job.find('status').text = status
+        if job_type:
+            job.find('type').text = job_type[0]
+        result.append(job)
+    return ET.tostring(root)
+
+
+COMMIT_RUNNING = pending_jobs(('7', 'ACT'))
+CONTENT_PENDING = pending_jobs(('2018', 'PEND'))
+COMMIT_RUNNING_AND_CONTENT_PENDING = pending_jobs(('7', 'ACT'), ('2018', 'PEND'))
+DOWNLOAD_AND_IOT_RUNNING = pending_jobs(('2166', 'ACT'), ('1350', 'ACT'))
+# The type name is not from a capture: no report job was seen in `show jobs`, so it only stands for a type outside
+# the busy ones.
+REPORT_RUNNING = pending_jobs(('2166', 'ACT', 'Report'))
 
 
 @pytest.mark.parametrize('status', ['ACT', 'PEND'])
@@ -34,17 +64,17 @@ def test_running_or_queued_commits_and_content_updates_are_busy(status):
 
 
 @pytest.mark.parametrize(
-    'name',
+    'body',
     [
-        pytest.param('jobs_all.xml', id='finished-jobs-of-every-type'),
+        pytest.param((SYNTHETIC / 'jobs_all.xml').read_bytes(), id='finished-jobs-of-every-type'),
         # No report job type was seen in the lab; Downld and IoT are the real types that never pause collection.
-        pytest.param('jobs_pending_not_busy.xml', id='running-downld-and-iot'),
-        # A running report job (the type name is hand-written, see the fixture) is not one of the busy types.
-        pytest.param('jobs_pending_report_act.xml', id='running-report'),
+        pytest.param(DOWNLOAD_AND_IOT_RUNNING, id='running-downld-and-iot'),
+        # A running report job is not one of the busy types.
+        pytest.param(REPORT_RUNNING, id='running-report'),
     ],
 )
-def test_jobs_that_do_not_pause_collection(name):
-    assert parse_busy_jobs(parse_response((SYNTHETIC / name).read_bytes())) == []
+def test_jobs_that_do_not_pause_collection(body):
+    assert parse_busy_jobs(parse_response(body)) == []
 
 
 class Firewall:
@@ -91,7 +121,7 @@ def test_not_busy_firewall_is_checked_first_then_collected(firewall, fake_panos)
 
 
 def test_busy_firewall_is_not_collected_and_its_collectors_stay_due(firewall, aggregator, caplog):
-    firewall.answer_jobs(jobs_response('jobs_pending_commit_act.xml'))
+    firewall.answer_jobs((200, COMMIT_RUNNING))
 
     assert firewall.run_at(0) == (set(), [])
     # The firewall answered the jobs check.
@@ -104,7 +134,7 @@ def test_busy_firewall_is_not_collected_and_its_collectors_stay_due(firewall, ag
 
 
 def test_every_busy_job_is_named(firewall, caplog):
-    firewall.answer_jobs(jobs_response('jobs_pending_commit_act_content_pend.xml'))
+    firewall.answer_jobs((200, COMMIT_RUNNING_AND_CONTENT_PENDING))
 
     assert firewall.run_at(0) == (set(), [])
     assert f'{FW_A_IP}: Commit job 7, Content job 2018 in progress, skipping collection this run' in caplog.text
@@ -145,7 +175,7 @@ def test_jobs_check_unreachable_cuts_off_the_run(firewall, aggregator, fake_pano
 
 def test_busy_for_ten_minutes_collects_anyway_with_one_warning(firewall):
     warning = f'{FW_A_IP}: Commit job 7 still in progress after 600s of skipping; collecting anyway'
-    firewall.answer_jobs(jobs_response('jobs_pending_commit_act.xml'))
+    firewall.answer_jobs((200, COMMIT_RUNNING))
 
     for seconds in range(0, 600, 60):
         assert firewall.run_at(seconds) == (set(), []), seconds
@@ -157,14 +187,14 @@ def test_busy_for_ten_minutes_collects_anyway_with_one_warning(firewall):
 
 
 def test_idle_answer_restarts_the_ten_minute_window(firewall):
-    firewall.answer_jobs(jobs_response('jobs_pending_commit_act.xml'))
+    firewall.answer_jobs((200, COMMIT_RUNNING))
     for seconds in range(0, 360, 60):
         assert firewall.run_at(seconds) == (set(), []), seconds
     firewall.answer_jobs(jobs_response('jobs_pending_idle.xml'))
     assert firewall.run_at(360) == (set(STUBS), [])
 
     # A new busy period, from the next run with a due collector.
-    firewall.answer_jobs(jobs_response('jobs_pending_content_pend.xml'))
+    firewall.answer_jobs((200, CONTENT_PENDING))
     for seconds in range(480, 1080, 60):
         assert firewall.run_at(seconds) == (set(), []), seconds
     ran, warnings = firewall.run_at(1080)

@@ -1,6 +1,0 @@
-<!-- Synthetic `show jobs pending` response: one queued content update. The `<job>` entry is the Content entry (id 2018)
-     of synthetic/jobs_all.xml (lab `show jobs all`, 2026-10-09) verbatim, except `status` changed from FIN to PEND.
-     The `show jobs pending` envelope (`<response status="success"><result>` around the `<job>` entries) is
-     copied from `show jobs all` and is unverified until a real `show jobs pending` is captured. -->
-<response status="success"><result>
-    <job><tenq>2026/10/09 01:05:48</tenq><tdeq>01:05:48</tdeq><id>2018</id><user>Auto update agent</user><type>Content</type><status>PEND</status><queued>NO</queued><stoppable>no</stoppable><result>OK</result><tfin>2026/10/09 01:08:40</tfin><description></description><positionInQ>0</positionInQ><progress>2026/10/09 01:08:40</progress><details><line>Job completed successfully</line><line>Local configuration size: 27 KB</line><line>Predefined configuration size: 14 MB</line><line>Merged configuration size(local, panorama pushed, predefined): 19 MB</line><line>Maximum recommended merged configuration size: 47 MB (40% configured)</line></details><warnings></warnings></job></result></response>

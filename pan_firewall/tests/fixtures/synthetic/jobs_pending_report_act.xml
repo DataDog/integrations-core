@@ -1,6 +1,0 @@
-<!-- Synthetic `show jobs pending` response: one running report job. Hand-written from the Downld entry of
-     synthetic/jobs_all.xml (lab `show jobs all`, 2026-10-09), with `id` 4 and `status` ACT as in
-     synthetic/report_job_act.xml, and `type` Report. The type name is not from a capture: no report job was seen in
-     `show jobs`, so it only stands for a type outside the busy ones. The envelope is copied from jobs_all.xml. -->
-<response status="success"><result>
-    <job><tenq>2026/10/09 13:15:27</tenq><tdeq>13:15:30</tdeq><id>4</id><user></user><type>Report</type><status>ACT</status><queued>NO</queued><stoppable>no</stoppable><result>OK</result><tfin>2026/10/09 13:15:34</tfin><description></description><positionInQ>0</positionInQ><progress>40</progress><details></details><warnings></warnings></job></result></response>
