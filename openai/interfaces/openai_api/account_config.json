@@ -1,0 +1,47 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Admin API key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "Admin API Key",
+          "help": "An OpenAI Admin API key (starts with sk-admin-). Only organization owners can create one: in the OpenAI Platform go to Settings > Organization > Admin keys. Admin keys can read organization usage and costs but cannot call model endpoints, so they cannot run LLM evaluations.",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "custom_tags",
+      "label": "Tags",
+      "help": "Comma-separated tags added to the usage metrics collected with this key (not to cost data), for example team:ai,env:prod.",
+      "editable": true,
+      "required": false,
+      "tags": {}
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "openai-usage-metrics",
+      "additional_config_fields": []
+    },
+    {
+      "dataflow_id": "openai-cloud-cost-data",
+      "toggle": {
+        "default": false,
+        "label": "Collect cost data to view in Cloud Cost Management",
+        "help": "You must be subscribed to Cloud Cost Management to use this data.",
+        "editable": true
+      },
+      "additional_config_fields": [],
+      "legacy_flat_mapping": {
+        "enable_field": "ccm_enabled",
+        "should_map_legacy_fields": true
+      }
+    }
+  ]
+}
