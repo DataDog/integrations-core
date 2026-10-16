@@ -35,6 +35,7 @@ VIRTUAL_FILESYSTEMS = frozenset({'none', 'tmpfs', 'cgroup_root'})
 ALARM_TRUE = frozenset({'true', 'yes'})
 ALARM_FALSE = frozenset({'false', 'no'})
 
+# The `%Cpu(s)` line follows current load, not a since-boot average: verified in the lab on 2026-10-16.
 CPU_LINE = re.compile(r'^%Cpu\(s\):(?P<values>.*)$', re.MULTILINE)
 MEMORY_LINE = re.compile(r'^(?P<unit>\w+) (?P<kind>Mem|Swap)\s*:(?P<values>.*)$', re.MULTILINE)
 VALUE = re.compile(r'(?P<number>\d+(?:\.\d+)?)\s+(?P<label>[a-zA-Z/]+(?: Mem)?)')
