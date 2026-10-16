@@ -66,6 +66,17 @@ def test_openmetrics_v1_error_status_reports_critical(aggregator, mock_http_resp
 
 
 @pytest.mark.usefixtures('http_mode')
+def test_openmetrics_v1_connection_error_reports_critical(aggregator, mocker):
+    mocker.patch('requests.Session.get', side_effect=requests.exceptions.ConnectionError('refused'))
+    check, scraper_config = _openmetrics_v1_check()
+
+    with pytest.raises(requests.exceptions.ConnectionError):
+        check.poll(scraper_config)
+
+    aggregator.assert_service_check('test.prometheus.health', status=AgentCheck.CRITICAL, count=1)
+
+
+@pytest.mark.usefixtures('http_mode')
 def test_prometheus_ssl_error_skips_health_service_check(aggregator, mocker):
     mocker.patch('requests.Session.get', side_effect=requests.exceptions.SSLError('bad cert'))
     check = _prometheus_check()
@@ -82,6 +93,17 @@ def test_prometheus_error_status_reports_critical(aggregator, mock_http_response
     check = _prometheus_check()
 
     with pytest.raises(requests.exceptions.HTTPError):
+        check.poll(ENDPOINT)
+
+    aggregator.assert_service_check('test.prometheus.health', status=AgentCheck.CRITICAL, count=1)
+
+
+@pytest.mark.usefixtures('http_mode')
+def test_prometheus_connection_error_reports_critical(aggregator, mocker):
+    mocker.patch('requests.Session.get', side_effect=requests.exceptions.ConnectionError('refused'))
+    check = _prometheus_check()
+
+    with pytest.raises(requests.exceptions.ConnectionError):
         check.poll(ENDPOINT)
 
     aggregator.assert_service_check('test.prometheus.health', status=AgentCheck.CRITICAL, count=1)
