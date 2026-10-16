@@ -238,6 +238,57 @@ files:
             display_default: 20
           fleet_configurable: true
       fleet_configurable: true
+    - name: stored_procedures
+      description: |
+        Collect passive standalone procedure observations and recognized direct-call cursor metrics.
+        Requires Database Monitoring and Oracle 12c or newer. Disabled by default.
+        Grant SELECT on DBA_OBJECTS, or CDB_OBJECTS when connecting to the container root,
+        in addition to the existing Database Monitoring grants.
+        Direct-call metrics count recognized cursor executions, including dynamic SQL wrappers.
+        Editioned objects are excluded from text-based direct-call metrics.
+        Calls inside loops, branches, packages, functions, and arbitrary anonymous blocks do not
+        have inferred invocation counts. Observed-only procedures have no execution or timing counters.
+        Child query associations describe observed execution context or cursor origin, not exclusive ownership.
+        Multitenant databases use active-session observations for query links, including root connections.
+        PROGRAM_ID can retain another PDB's identity after its cursor disappears, so cursor-origin
+        inference is limited to non-CDB databases. Short statements may be missed between samples.
+        Update the installed DD_SESSION view and restart the check for procedure activity attribution,
+        or use direct sampling. Ambiguous schema-qualified calls shadowed by local objects or public
+        synonyms are excluded.
+        First observations and cursor reloads, invalidations, or counter resets establish a new baseline.
+      options:
+        - name: enabled
+          description: |
+            Enable passive standalone procedure collection. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+          fleet_configurable: true
+        - name: collection_interval
+          description: Positive interval in seconds between procedure collections.
+          value:
+            type: integer
+            example: 60
+            display_default: 60
+          fleet_configurable: true
+        - name: db_rows_limit
+          description: |
+            Positive maximum number of recent V$SQL cursors to inspect, ordered by total elapsed time.
+            This bounds coverage; procedures whose cursors have aged out or fall outside the limit may be absent.
+          value:
+            type: integer
+            example: 250
+            display_default: 250
+          fleet_configurable: true
+        - name: max_run_time
+          description: Positive deadline in seconds for each procedure collection and activity name resolution.
+          value:
+            type: integer
+            example: 5
+            display_default: 5
+          fleet_configurable: true
+      fleet_configurable: true
     - name: execution_plans
       description: Configure collection of execution plans.
       options:

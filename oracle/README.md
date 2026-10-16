@@ -365,6 +365,31 @@ To connect to Oracle through TCPS (TCP with SSL), uncomment the `protocol` confi
         protocol: TCPS
     ```
 
+#### Standalone procedure monitoring
+
+Agents that support `stored_procedures` can optionally collect standalone Oracle procedure observations. This feature is disabled by default and requires Database Monitoring and Oracle 12c or newer:
+
+```yaml
+instances:
+  - dbm: true
+    # Include the connection options configured above.
+    stored_procedures:
+      enabled: true
+      collection_interval: 60
+      db_rows_limit: 250
+      max_run_time: 5
+```
+
+In addition to the Database Monitoring grants, grant `SELECT` on `DBA_OBJECTS` for a PDB or non-CDB connection, or `CDB_OBJECTS` for a container-root connection. Root connections must retain the Database Monitoring setup's container visibility. Object lookups include the container ID, and procedure identities include the CDB/PDB, owner, and exact procedure name. Signatures preserve quoted-name case distinctions; metric display names are normalized, and the UI distinguishes colliding names with signature suffixes.
+
+Direct-call counters measure executions of recognized `CALL` statements and anonymous `BEGIN` blocks containing exactly one standalone procedure call with scalar arguments. They measure call-cursor attempts and inclusive elapsed/CPU time, including work performed by child SQL and procedures. They do not establish total calls across loops, branches, packages, functions, or arbitrary blocks. Editioned objects and schema-qualified calls shadowed by local objects or public synonyms are excluded from text-based attribution. A dynamically executed wrapper may qualify if its cursor independently meets these conditions; its origin is not assumed to be an external application call.
+
+Procedures seen only through cursor origin or activity have an observation marker and **no execution or timing counters**. Child-query links describe observed execution context or a recorded cursor origin, not exclusive ownership or an allocation of SQL counters. Active-session links use the entry/current standalone procedure and the current SQL signature from the same sample. Previous SQL, call wrappers, truncated SQL, and failed obfuscation do not create sampled links. Oracle can retain a stale first-caller `PROGRAM_ID`, and can copy it across cursors for identical SQL in different PDBs. That identity can remain after the original PDB's cursor disappears, so even complete current container visibility cannot validate it. Both root and PDB-local connections therefore use only sampled execution-context links in multitenant databases. Cursor-origin links remain available for non-CDB databases; unresolved identities have no links. Short statements can be missed between activity samples. Direct-call counters and session object-ID attribution remain independent of cursor-origin links.
+
+Collection examines a bounded set of recent cursors, ordered by accumulated elapsed time. Aged-out cursors and cursors outside the row limit may be absent. First observations, cursor reloads or invalidations, DDL changes, and decreasing counters establish a fresh baseline rather than emitting an inferred delta. This collection does not enable profiling, application hooks, or ASH.
+
+For entry/current procedure context in activity, rerun the Oracle setup to update `DD_SESSION`, then restart the check. An older installed view falls back to ordinary activity without procedure fields. Direct sampling also supports these fields; an already explicitly enabled ASH collection preserves its existing Oracle licensing requirements. Current-procedure context can be absent while Oracle executes SQL even when entry-procedure context is present. Older Agents continue their existing query collection and do not produce the new procedure payloads; update the Agent before enabling this option.
+
 ### Validation
 
 [Run the Agent's status subcommand][9] and look for `oracle` under the Checks section.
