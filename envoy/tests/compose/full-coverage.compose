@@ -1,0 +1,120 @@
+# Full metric-coverage environment for the envoy check (the `envoy-full` evalya
+# task). A front proxy, reused from the api_v3 test topology (service1/service2
+# sidecars and the xds control plane), plus a small `backend` that serves the
+# response shapes the dashboards chart (1xx/3xx/4xx/5xx, slow responses, failed
+# health checks). Both the legacy (`stats_url`) and the OpenMetrics
+# (`openmetrics_endpoint`) check modes read the same admin port, 8001.
+# See ../README.md.
+x-envoy-image: &envoy-image "envoyproxy/envoy:v${ENVOY_VERSION:-1.31.0}"
+
+services:
+  envoy-full:
+    image: *envoy-image
+    # envoy-full is the fixture entrypoint (the evalya task of the same name; the
+    # service name is also its hostname there). Gate it on the rest of the
+    # environment so a single dependency on it pulls everything up: the dynamic
+    # config seeded, its upstreams and control plane started, and the workload
+    # running (activity-gen waits for this proxy to be ready itself, since a
+    # depends_on in that direction would be a cycle).
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+      xds:
+        condition: service_started
+      service1:
+        condition: service_started
+      service2:
+        condition: service_started
+      backend:
+        condition: service_started
+      activity-gen:
+        condition: service_started
+    command: ["envoy", "-c", "/etc/envoy-full/front-envoy.yaml", "--service-cluster", "front-proxy"]
+    volumes:
+      - ./full-coverage:/etc/envoy-full:ro
+      - envoy-dynamic:/var/run/envoy-dynamic
+    # No host-port publish: consumers reach the admin port over the managed
+    # network via the ENVOY_HOST label, which avoids clashing with the pytest
+    # environment (8000/8001) or a local Envoy.
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8001 && printf 'GET /ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q LIVE <&3"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+  xds:
+    build:
+      context: ../docker/api_v3
+      dockerfile: Dockerfile-xds
+
+  service1:
+    build:
+      context: ../docker/api_v3
+      dockerfile: Dockerfile-service
+    volumes:
+      - ../docker/api_v3/service-envoy.yaml:/etc/service-envoy.yaml:ro
+    environment:
+      - SERVICE_NAME=1
+
+  service2:
+    build:
+      context: ../docker/api_v3
+      dockerfile: Dockerfile-service
+    volumes:
+      - ../docker/api_v3/service-envoy.yaml:/etc/service-envoy.yaml:ro
+    environment:
+      - SERVICE_NAME=2
+
+  backend:
+    image: python:3.12-alpine
+    command: ["python3", "-I", "/opt/backend.py"]
+    volumes:
+      - ./full-coverage/backend.py:/opt/backend.py:ro
+
+  # One-shot: writes the files Envoy reads from the shared volume: the file-based
+  # CDS that activity-gen re-publishes, the overload pressure file at 0, and a
+  # runtime directory nested past Envoy's walk limit (runtime.load_error).
+  seed:
+    image: *envoy-image
+    restart: "no"
+    entrypoint:
+      - sh
+      - -c
+      - |
+        set -e
+        echo 0 > /var/run/envoy-dynamic/pressure
+        cp /etc/envoy-full/cds.yaml /var/run/envoy-dynamic/cds.yaml
+        mkdir -p /var/run/envoy-dynamic/runtime/1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16/17/18
+        echo 1 > /var/run/envoy-dynamic/runtime/1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16/17/18/key
+        # activity-gen runs as an unprivileged user and rewrites these.
+        chmod -R a+rwX /var/run/envoy-dynamic
+        echo "seed-done"
+    volumes:
+      - ./full-coverage:/etc/envoy-full:ro
+      - envoy-dynamic:/var/run/envoy-dynamic
+
+  # Continuous workload so rate/counter metrics keep moving and the active-request
+  # gauges are non-zero at scrape time. It waits for envoy-full to be ready, primes
+  # the admin runtime layer once, then loops. See ../activity-gen.sh.
+  activity-gen:
+    image: curlimages/curl:8.10.1
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    environment:
+      ENVOY_HOST: envoy-full
+      ENVOY_PORT: "8001"
+      ENVOY_DYNAMIC_DIR: /var/run/envoy-dynamic
+      # Set ACTIVITY_GEN=0 (host env) for a quiescent envoy-full: the container
+      # stays up but generates no traffic. Defaults to on.
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+      ACTIVITY_DURATION: "${ACTIVITY_DURATION:-0}"
+    volumes:
+      - ../activity-gen.sh:/opt/activity-gen.sh:ro
+      - envoy-dynamic:/var/run/envoy-dynamic
+    entrypoint: ["sh", "/opt/activity-gen.sh"]
+
+volumes:
+  envoy-dynamic: {}
