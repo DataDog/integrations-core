@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import json
 import os
 
 import mock
@@ -11,7 +12,6 @@ from packaging import version
 
 from datadog_checks.base.utils.common import exclude_undefined_keys
 from datadog_checks.dev import WaitFor, docker_run
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.elastic import ESCheck
 
 from .common import (
@@ -129,8 +129,13 @@ def instance():
     return copy.deepcopy(INSTANCE)
 
 
+def _json_data_from_fixture(path: str) -> object:
+    with open(path, encoding='utf-8') as fixture:
+        return json.load(fixture)
+
+
 @pytest.fixture
-def mock_es_endpoints(mock_http_response_per_endpoint):
+def mock_es_endpoints(fake_http, fake_http_response):
     """
     Mock every endpoint a default `ESCheck.check()` run hits, with representative data, so unit tests can
     exercise the whole check through `dd_run_check` and target specific behavior purely through the instance
@@ -138,39 +143,51 @@ def mock_es_endpoints(mock_http_response_per_endpoint):
     """
 
     def setup(overrides=None):
-        responses = {
+        default_responses = {
             # `_get_es_version` probes the base URL.
-            URL: [MockResponse(json_data={'version': {'number': '8.8.0'}})],
+            URL: {'json_data': {'version': {'number': '8.8.0'}}},
             # Node stats: the local URL is used by default, the cluster-wide one when `cluster_stats` is on.
-            '{}/_nodes/_local/stats'.format(URL): [MockResponse(file_path=get_fixture_path('stats_v8.json'))],
-            '{}/_nodes/stats'.format(URL): [MockResponse(file_path=get_fixture_path('stats_v8.json'))],
-            '{}/_cat/templates?format=json'.format(URL): [MockResponse(file_path=get_fixture_path('templates.json'))],
+            '{}/_nodes/_local/stats'.format(URL): {
+                'json_data': _json_data_from_fixture(get_fixture_path('stats_v8.json'))
+            },
+            '{}/_nodes/stats'.format(URL): {'json_data': _json_data_from_fixture(get_fixture_path('stats_v8.json'))},
+            '{}/_cat/templates?format=json'.format(URL): {
+                'json_data': _json_data_from_fixture(get_fixture_path('templates.json'))
+            },
             # A single-node cluster reports `yellow`; `green` would make the health service check OK, and the
             # aggregator stub rejects an OK service check that carries a message.
-            '{}/_cluster/health'.format(URL): [
-                MockResponse(
-                    json_data={
-                        'cluster_name': 'test-cluster',
-                        'status': 'yellow',
-                        'active_primary_shards': 1,
-                        'active_shards': 1,
-                        'relocating_shards': 0,
-                        'initializing_shards': 0,
-                        'unassigned_shards': 1,
-                        'number_of_nodes': 1,
-                        'number_of_data_nodes': 1,
-                        'timed_out': False,
-                    }
-                )
-            ],
+            '{}/_cluster/health'.format(URL): {
+                'json_data': {
+                    'cluster_name': 'test-cluster',
+                    'status': 'yellow',
+                    'active_primary_shards': 1,
+                    'active_shards': 1,
+                    'relocating_shards': 0,
+                    'initializing_shards': 0,
+                    'unassigned_shards': 1,
+                    'number_of_nodes': 1,
+                    'number_of_data_nodes': 1,
+                    'timed_out': False,
+                }
+            },
             # `pending_task_stats` defaults to on, so the check always hits this endpoint.
-            '{}/_cluster/pending_tasks'.format(URL): [MockResponse(json_data={'tasks': []})],
+            '{}/_cluster/pending_tasks'.format(URL): {'json_data': {'tasks': []}},
             # The default `instance` fixture ships a `/_search` custom query.
-            '{}/_search'.format(URL): [MockResponse(json_data={'hits': {'total': {'value': 0, 'relation': 'eq'}}})],
+            '{}/_search'.format(URL): {'json_data': {'hits': {'total': {'value': 0, 'relation': 'eq'}}}},
         }
-        if overrides:
-            responses.update(overrides)
-        mock_http_response_per_endpoint(responses)
+        overrides = overrides or {}
+        for url, response_options in default_responses.items():
+            if url in overrides:
+                for response in overrides[url]:
+                    fake_http.register_response('GET', url, response)
+            else:
+                fake_http_response(url, **response_options)
+
+        for url, endpoint_responses in overrides.items():
+            if url in default_responses:
+                continue
+            for response in endpoint_responses:
+                fake_http.register_response('GET', url, response)
 
     return setup
 

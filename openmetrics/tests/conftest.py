@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
+from collections.abc import Iterator
 
 import pytest
 from prometheus_client import CollectorRegistry, Counter, Gauge
@@ -12,9 +13,12 @@ from prometheus_client.openmetrics.exposition import CONTENT_TYPE_LATEST as OPEN
 from prometheus_client.openmetrics.exposition import generate_latest as generate_openmetrics
 
 from datadog_checks.base import ensure_unicode
+from datadog_checks.base.stubs.http import FakeHTTPClient, RecordedRequest
 from datadog_checks.dev import docker_run
 
 from .common import HERE, INSTANCE
+
+TEST_METRICS_ENDPOINT = 'http://localhost:10249/metrics'
 
 
 @pytest.fixture(scope="session")
@@ -53,18 +57,26 @@ def openmetrics_payload(example_metrics_registry):
 
 
 @pytest.fixture
-def prometheus_poll_mock(mock_http_response, prometheus_payload):
-    mock_http_response(
+def prometheus_poll_mock(fake_http, fake_http_response, prometheus_payload) -> Iterator[FakeHTTPClient]:
+    fake_http_response(
+        TEST_METRICS_ENDPOINT,
         prometheus_payload,
-        normalize_content=False,
         headers={'Content-Type': PROMETHEUS_CONTENT_TYPE},
+        match_options={'stream': True},
     )
+    yield fake_http
+    fake_http.assert_requests([RecordedRequest('GET', TEST_METRICS_ENDPOINT, {'stream': True})])
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.fixture
-def openmetrics_poll_mock(mock_http_response, openmetrics_payload):
-    mock_http_response(
+def openmetrics_poll_mock(fake_http, fake_http_response, openmetrics_payload) -> Iterator[FakeHTTPClient]:
+    fake_http_response(
+        TEST_METRICS_ENDPOINT,
         openmetrics_payload,
-        normalize_content=False,
         headers={'Content-Type': OPENMETRICS_CONTENT_TYPE},
+        match_options={'stream': True},
     )
+    yield fake_http
+    fake_http.assert_requests([RecordedRequest('GET', TEST_METRICS_ENDPOINT, {'stream': True})])
+    fake_http.assert_all_responses_consumed()
