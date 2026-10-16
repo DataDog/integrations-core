@@ -380,7 +380,7 @@ class DBMAsyncJob(object):
         self._tags = tags
         self._tag_snapshot = tag_snapshot if tag_snapshot is not None else TagSnapshot.from_tags(tags)
         self._tags_str = ','.join(self._tags)
-        self._job_tags = self._tags + ["job:{}".format(self._job_name)]
+        self._job_tags = self._tag_snapshot.event_tags() + ["job:{}".format(self._job_name)]
         self._job_tags_str = ','.join(self._job_tags)
         self._last_check_run = time.time()
         if self._run_sync or is_affirmative(os.environ.get('DBM_THREADED_JOB_RUN_SYNC', "false")):
@@ -628,14 +628,6 @@ class TagSnapshot:
             database=tuple(groups[TagScope.DATABASE]),
         )
 
-    def telemetry_tags(self) -> list[str]:
-        """
-        Tags for the Agent's own DBM telemetry metrics (`dd.<dbms>.*`): instance tags only.
-
-        Telemetry describes the check rather than a logical database, and must not be linked to resources.
-        """
-        return list(self.instance)
-
     def metric_tags(self, database: str | None = None) -> list[str]:
         """
         Tags for metrics: instance, resource, and database tags.
@@ -647,11 +639,11 @@ class TagSnapshot:
 
     def event_tags(self, database: str | None = None) -> list[str]:
         """
-        Tags for DBM event payloads: instance tags only.
+        Tags for DBM event payloads and the Agent's own DBM telemetry metrics (`dd.<dbms>.*`): instance tags only.
 
         A payload about one logical database passes `database` to add its `db` tag; instance-wide payloads
         such as settings and schemas pass nothing. Resource tags are never included, because events bypass
-        the metrics pipeline that reads them.
+        the metrics pipeline that reads them and telemetry describes the check rather than a resource.
         """
         if database is None:
             return list(self.instance)
@@ -840,10 +832,6 @@ class TagManager:
     def event_tags(self, database: str | None = None) -> list[str]:
         """Tags for DBM event payloads. See `TagSnapshot.event_tags`."""
         return self.snapshot().event_tags(database)
-
-    def telemetry_tags(self) -> list[str]:
-        """Tags for DBM telemetry metrics. See `TagSnapshot.telemetry_tags`."""
-        return self.snapshot().telemetry_tags()
 
     def get_tags(self, include_internal: bool = True, include_db: bool = True) -> List[str]:
         """

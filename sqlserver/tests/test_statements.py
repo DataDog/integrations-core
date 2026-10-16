@@ -912,13 +912,15 @@ def test_obfuscate_xml_plan(test_file, obfuscated_file, datadog_agent):
 PORT = 1432
 
 
-def _expected_dbm_instance_tags(check):
-    return check._config.tags + [
+def _expected_dbm_instance_tags(check, include_resource=True):
+    tags = check._config.tags + [
         "database_hostname:{}".format("stubbed.hostname"),
         "database_instance:{}".format("stubbed.hostname"),
-        "dd.internal.resource:database_instance:{}".format("stubbed.hostname"),
         "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
+    if include_resource:
+        tags.append("dd.internal.resource:database_instance:{}".format("stubbed.hostname"))
+    return tags
 
 
 @pytest.mark.integration
@@ -930,7 +932,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     check.statement_metrics._job_loop_future.result()
     aggregator.assert_metric(
         "dd.sqlserver.async_job.inactive_stop",
-        tags=['job:query-metrics'] + _expected_dbm_instance_tags(check),
+        tags=['job:query-metrics'] + _expected_dbm_instance_tags(check, include_resource=False),
         hostname='',
     )
 
@@ -945,7 +947,7 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
     check.cancel()
     aggregator.assert_metric(
         "dd.sqlserver.async_job.cancel",
-        tags=_expected_dbm_instance_tags(check) + ['job:query-metrics'],
+        tags=_expected_dbm_instance_tags(check, include_resource=False) + ['job:query-metrics'],
     )
 
 

@@ -397,14 +397,15 @@ def test_dbm_async_job_enabled(enabled):
 
 def test_dbm_async_job_cancel(aggregator):
     job = JobForTesting(AgentCheck())
-    tags = ["hello:there"]
+    tags = ["hello:there", "db:postgres", "dd.internal.resource:database_instance:host1"]
     job.run_job_loop(tags)
     job.cancel()
     job._job_loop_future.result()
     assert not job._job_loop_future.running(), "thread should be stopped"
     # if the thread doesn't start until after the cancel signal is set then the db connection will never
     # be created in the first place
-    expected_tags = tags + ['job:test-job']
+    # Job telemetry describes the check, so it carries neither the connection's `db` tag nor resource tags.
+    expected_tags = ["hello:there", 'job:test-job']
     aggregator.assert_metric("dd.test-dbms.async_job.cancel", tags=expected_tags)
     aggregator.assert_metric("dbm.async_job_test.shutdown")
 
@@ -819,7 +820,6 @@ class TestTagManager:
 
         assert sorted(tag_manager.metric_tags(database)) == sorted(expected_metric_tags)
         assert sorted(tag_manager.event_tags(database)) == sorted(expected_event_tags)
-        assert sorted(tag_manager.telemetry_tags()) == ['env:prod', 'team_a']
 
     def test_snapshot_from_tags_scopes_like_set_tag(self):
         """Jobs started with only a tag list must route tags the same way as the check's `TagManager`"""
