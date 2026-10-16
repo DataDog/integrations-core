@@ -1,0 +1,27 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+"""High availability (`show high-availability all`): the local HA state, kept for the other collectors.
+
+The HA link counters are not collected yet (Task 5.1), so this collector never returns samples.
+"""
+
+from __future__ import annotations
+
+from datadog_checks.pan_firewall.xml_utils import text
+
+from .base import CollectContext, Sample, register
+
+HA_CMD = '<show><high-availability><all/></high-availability></show>'
+
+
+@register('ha')
+def collect_ha(ctx: CollectContext) -> list[Sample]:
+    """Set `ctx.state.ha_state`, None when HA is off. The enabled-HA path is not verified against a real HA pair yet."""
+    root = ctx.client.op(HA_CMD)
+    if (text(root, 'result/enabled') or '').lower() != 'yes':
+        ctx.state.ha_state = None
+        return []
+    ctx.state.ha_state = text(root, 'result/group/local-info/state')
+    ctx.warning('high availability is enabled; the HA link counters are not supported yet', key='ha')
+    return []

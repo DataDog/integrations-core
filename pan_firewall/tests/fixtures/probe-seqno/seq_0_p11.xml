@@ -1,0 +1,154 @@
+<response status="success"><result>
+<!-- Trimmed from a lab capture (2026-10-09): every entry kept, only the fields the check reads (seqno, severity, action, subtype, vsys). -->
+  <job>
+    <tenq>14:17:29</tenq>
+    <tdeq>14:17:29</tdeq>
+    <tlast>14:17:29</tlast>
+    <status>FIN</status>
+    <id>93</id>
+  </job>
+  <log>
+    <logs count="20" progress="100">
+      <entry logid="7694450540897376720">
+        <seqno>7691899338913581852</seqno>
+        <subtype>spyware</subtype>
+        <vsys>vsys1</vsys>
+        <action>drop</action>
+        <severity>medium</severity>
+      </entry>
+      <entry logid="7694450540897376721">
+        <seqno>7691899338913581854</seqno>
+        <subtype>vulnerability</subtype>
+        <vsys>vsys1</vsys>
+        <action>reset-both</action>
+        <severity>medium</severity>
+      </entry>
+      <entry logid="7694450540897376722">
+        <seqno>7691899338913581855</seqno>
+        <subtype>vulnerability</subtype>
+        <vsys>vsys1</vsys>
+        <action>reset-both</action>
+        <severity>critical</severity>
+      </entry>
+      <entry logid="7694450540897376723">
+        <seqno>7691899338913581856</seqno>
+        <subtype>spyware</subtype>
+        <vsys>vsys1</vsys>
+        <action>drop</action>
+        <severity>medium</severity>
+      </entry>
+      <entry logid="7694450540897376724">
+        <seqno>7691899338913581857</seqno>
+        <subtype>spyware</subtype>
+        <vsys>vsys1</vsys>
+        <action>drop</action>
+        <severity>medium</severity>
+      </entry>
+      <entry logid="7694450540897376725">
+        <seqno>7691899338913581858</seqno>
+        <subtype>spyware</subtype>
+        <vsys>vsys1</vsys>
+        <action>drop</action>
+        <severity>medium</severity>
+      </entry>
+      <entry logid="7694450540897376726">
+        <seqno>7691899338913581860</seqno>
+        <subtype>vulnerability</subtype>
+        <vsys>vsys1</vsys>
+        <action>reset-both</action>
+        <severity>medium</severity>
+      </entry>
+      <entry logid="7694450540897376727">
+        <seqno>7691899338913581861</seqno>
+        <subtype>vulnerability</subtype>
+        <vsys>vsys1</vsys>
+        <action>reset-both</action>
+        <severity>critical</severity>
+      </entry>
+      <entry logid="7694450540897376728">
+        <seqno>7691899338913581862</seqno>
+        <subtype>spyware</subtype>
+        <vsys>vsys1</vsys>
+        <action>drop</action>
+        <severity>medium</severity>
+      </entry>
+      <entry logid="7694450540897376729">
+        <seqno>7691899338913581863</seqno>
+        <subtype>spyware</subtype>
+        <vsys>vsys1</vsys>
+        <action>drop</action>
+        <severity>medium</severity>
+      </entry>
+      <entry logid="7694450540897376730">
+        <seqno>7691899338913581864</seqno>
+        <subtype>spyware</subtype>
+        <vsys>vsys1</vsys>
+        <action>drop</action>
+        <severity>medium</severity>
+      </entry>
+      <entry logid="7694450540897376731">
+        <seqno>7691899338913581866</seqno>
+        <subtype>vulnerability</subtype>
+        <vsys>vsys1</vsys>
+        <action>reset-both</action>
+        <severity>medium</severity>
+      </entry>
+      <entry logid="7694450540897376732">
+        <seqno>7691899338913581867</seqno>
+        <subtype>vulnerability</subtype>
+        <vsys>vsys1</vsys>
+        <action>reset-both</action>
+        <severity>critical</severity>
+      </entry>
+      <entry logid="7694450540897376733">
+        <seqno>7691899338913581868</seqno>
+        <subtype>spyware</subtype>
+        <vsys>vsys1</vsys>
+        <action>drop</action>
+        <severity>medium</severity>
+      </entry>
+      <entry logid="7694450540897376734">
+        <seqno>7691899338913581869</seqno>
+        <subtype>spyware</subtype>
+        <vsys>vsys1</vsys>
+        <action>drop</action>
+        <severity>medium</severity>
+      </entry>
+      <entry logid="7694450540897376735">
+        <seqno>7691899338913581870</seqno>
+        <subtype>spyware</subtype>
+        <vsys>vsys1</vsys>
+        <action>drop</action>
+        <severity>medium</severity>
+      </entry>
+      <entry logid="7694450540897376736">
+        <seqno>7691899338913581872</seqno>
+        <subtype>vulnerability</subtype>
+        <vsys>vsys1</vsys>
+        <action>reset-both</action>
+        <severity>medium</severity>
+      </entry>
+      <entry logid="7694450540897376737">
+        <seqno>7691899338913581873</seqno>
+        <subtype>vulnerability</subtype>
+        <vsys>vsys1</vsys>
+        <action>reset-both</action>
+        <severity>critical</severity>
+      </entry>
+      <entry logid="7694450540897376738">
+        <seqno>7691899338913581874</seqno>
+        <subtype>spyware</subtype>
+        <vsys>vsys1</vsys>
+        <action>drop</action>
+        <severity>medium</severity>
+      </entry>
+      <entry logid="7694450540897376739">
+        <seqno>7691899338913581875</seqno>
+        <subtype>spyware</subtype>
+        <vsys>vsys1</vsys>
+        <action>drop</action>
+        <severity>medium</severity>
+      </entry>
+    </logs>
+  </log>
+</result></response>

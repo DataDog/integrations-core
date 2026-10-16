@@ -1,0 +1,6 @@
+<!-- Synthetic `show jobs pending` response: one running commit. The `<job>` entry is the Commit entry (id 7) of
+     synthetic/jobs_all.xml (lab `show jobs all`, 2026-10-09) verbatim, except `status` changed from FIN to ACT.
+     The `show jobs pending` envelope (`<response status="success"><result>` around the `<job>` entries) is
+     copied from `show jobs all` and is unverified until a real `show jobs pending` is captured. -->
+<response status="success"><result>
+    <job><tenq>2026/10/02 03:28:53</tenq><tdeq>03:28:53</tdeq><id>7</id><user>admin</user><type>Commit</type><status>ACT</status><queued>NO</queued><stoppable>no</stoppable><result>OK</result><tfin>2026/10/02 03:29:57</tfin><description>ndm-lab-apply</description><positionInQ>0</positionInQ><progress>100</progress><details><line>Configuration committed successfully</line><line>Local configuration size: 27 KB</line><line>Predefined configuration size: 13 MB</line><line>Merged configuration size(local, panorama pushed, predefined): 17 MB</line><line>Maximum recommended merged configuration size: 47 MB (36% configured)</line></details><warnings><line>Warning: No valid threat content package exists</line><line>Warning: No valid Antivirus content package exists</line><line>(Module: device)</line></warnings></job></result></response>
