@@ -229,3 +229,19 @@ metrics:
     symbol:
       OID: 1.3.6.1.4.1.2620.1.1.25.4.0
       name: fwPeakNumConn
+    # High Availability / ClusterXL
+  - MIB: CHECKPOINT-MIB
+    metric_type: gauge
+    symbol:
+      OID: 1.3.6.1.4.1.2620.1.5.101
+      name: haStatCode
+  - MIB: CHECKPOINT-MIB
+    metric_type: monotonic_count
+    symbol:
+      OID: 1.3.6.1.4.1.2620.1.5.17
+      name: haClusterXLFailover
+
+metric_tags:
+  - tag: ha_state
+    OID: 1.3.6.1.4.1.2620.1.5.6
+    symbol: haState
