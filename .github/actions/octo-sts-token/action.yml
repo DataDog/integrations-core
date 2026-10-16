@@ -1,0 +1,15 @@
+name: 'Create Octo STS token'
+description: 'Pinned DataDog/dd-octo-sts-action wrapper; the pin lives here so bumping it does not flip the resolution inputs hashed by .builders/inputs_hash.py'
+outputs:
+  token:
+    description: 'The generated STS token'
+    value: ${{ steps.sts.outputs.token }}
+runs:
+  using: composite
+  steps:
+    - name: Create token
+      id: sts
+      uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+      with:
+        scope: DataDog/integrations-core
+        policy: self.resolve-build-deps.push
