@@ -1,1 +1,0 @@
-Track operation time for database metric executors so each collector reports its own duration.

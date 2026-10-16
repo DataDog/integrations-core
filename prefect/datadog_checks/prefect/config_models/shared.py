@@ -16,7 +16,17 @@ from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
 
-from . import validators
+from . import defaults, validators
+
+
+class Proxy(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    http: Optional[str] = None
+    https: Optional[str] = None
+    no_proxy: Optional[tuple[str, ...]] = None
 
 
 class SharedConfig(BaseModel):
@@ -25,7 +35,10 @@ class SharedConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    proxy: Optional[Proxy] = None
     service: Optional[str] = None
+    skip_proxy: Optional[bool] = None
+    timeout: Optional[float] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):
@@ -37,6 +50,8 @@ class SharedConfig(BaseModel):
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
             value = getattr(validators, f'shared_{info.field_name}', identity)(value, field=field)
+        else:
+            value = getattr(defaults, f'shared_{info.field_name}', lambda: value)()
 
         return validation.utils.make_immutable(value)
 

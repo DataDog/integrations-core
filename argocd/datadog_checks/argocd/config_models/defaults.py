@@ -85,7 +85,7 @@ def instance_genresources_repository_scrape_interval_seconds():
 
 
 def instance_genresources_stream_applications_enabled():
-    return True
+    return False
 
 
 def instance_genresources_stream_backoff_max_seconds():

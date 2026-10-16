@@ -1,0 +1,474 @@
+{
+  "response": [
+    {
+      "additionalInfo": [],
+      "id": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "Global",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c",
+      "siteNameHierarchy": "Global"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "addressInheritedFrom": "8fa764ec-2070-4eb5-a0cc-fbdf37c48f8c",
+            "type": "area"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "8fa764ec-2070-4eb5-a0cc-fbdf37c48f8c",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "potheri",
+      "parentId": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/8fa764ec-2070-4eb5-a0cc-fbdf37c48f8c",
+      "siteNameHierarchy": "Global/potheri"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "address": "Budapest, Balk\u00e1n Utca, 1107, Hungary",
+            "addressInheritedFrom": "ac7b980f-4352-4e27-b9b5-8ef86ad7210e",
+            "country": "Hungary",
+            "latitude": "47.472348185034576",
+            "longitude": "19.10921594987471",
+            "type": "building"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "ac7b980f-4352-4e27-b9b5-8ef86ad7210e",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "HU_B01",
+      "parentId": "fe0a9e81-771a-4575-885c-42dfb6a8e206",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/6413f3d5-e4ab-4430-9423-ecc8a2bfcb84/fe0a9e81-771a-4575-885c-42dfb6a8e206/ac7b980f-4352-4e27-b9b5-8ef86ad7210e",
+      "siteNameHierarchy": "Global/EU/Hungary/HU_B01"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "addressInheritedFrom": "6413f3d5-e4ab-4430-9423-ecc8a2bfcb84",
+            "type": "area"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "52c74c6a-7e6b-414a-b43d-ae0316df4433",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "HU",
+      "parentId": "6413f3d5-e4ab-4430-9423-ecc8a2bfcb84",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/6413f3d5-e4ab-4430-9423-ecc8a2bfcb84/52c74c6a-7e6b-414a-b43d-ae0316df4433",
+      "siteNameHierarchy": "Global/EU/HU"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "addressInheritedFrom": "6413f3d5-e4ab-4430-9423-ecc8a2bfcb84",
+            "type": "area"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "08004f6c-380c-4453-bc6d-43fbbb87eb97",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "NL",
+      "parentId": "6413f3d5-e4ab-4430-9423-ecc8a2bfcb84",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/6413f3d5-e4ab-4430-9423-ecc8a2bfcb84/08004f6c-380c-4453-bc6d-43fbbb87eb97",
+      "siteNameHierarchy": "Global/EU/NL"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "addressInheritedFrom": "59d22afa-32c5-426d-b20c-cf880e39d88a",
+            "type": "area"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "59d22afa-32c5-426d-b20c-cf880e39d88a",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "chennai",
+      "parentId": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/59d22afa-32c5-426d-b20c-cf880e39d88a",
+      "siteNameHierarchy": "Global/chennai"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "addressInheritedFrom": "6413f3d5-e4ab-4430-9423-ecc8a2bfcb84",
+            "type": "area"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "6413f3d5-e4ab-4430-9423-ecc8a2bfcb84",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "EU",
+      "parentId": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/6413f3d5-e4ab-4430-9423-ecc8a2bfcb84",
+      "siteNameHierarchy": "Global/EU"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "addressInheritedFrom": "6413f3d5-e4ab-4430-9423-ecc8a2bfcb84",
+            "type": "area"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "fe0a9e81-771a-4575-885c-42dfb6a8e206",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "Hungary",
+      "parentId": "6413f3d5-e4ab-4430-9423-ecc8a2bfcb84",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/6413f3d5-e4ab-4430-9423-ecc8a2bfcb84/fe0a9e81-771a-4575-885c-42dfb6a8e206",
+      "siteNameHierarchy": "Global/EU/Hungary"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "addressInheritedFrom": "02180418-d032-408c-bfc8-cc5eb177eca0",
+            "type": "area"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "02180418-d032-408c-bfc8-cc5eb177eca0",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "chengallpattu",
+      "parentId": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/02180418-d032-408c-bfc8-cc5eb177eca0",
+      "siteNameHierarchy": "Global/chengallpattu"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "address": "Grand Southern Trunk Road, 603202, Chengalpattu, Chengalpattu, Tamil Nadu, India",
+            "addressInheritedFrom": "c32312d6-cdfe-40ff-8b63-0337c652cbd6",
+            "country": "India",
+            "latitude": "12.825",
+            "longitude": "80.038",
+            "type": "building"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "c32312d6-cdfe-40ff-8b63-0337c652cbd6",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "DCC Aishwariya",
+      "parentId": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/c32312d6-cdfe-40ff-8b63-0337c652cbd6",
+      "siteNameHierarchy": "Global/DCC Aishwariya"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "address": "Nh Service Road, 603209, Chengalpattu, Chengalpattu, Tamil Nadu, India",
+            "addressInheritedFrom": "e3016f17-494d-4f41-8fd2-678612b8da4f",
+            "country": "India",
+            "latitude": "12.822914784049388",
+            "longitude": "80.04599747310192",
+            "type": "building"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "e3016f17-494d-4f41-8fd2-678612b8da4f",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "UB Building",
+      "parentId": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/e3016f17-494d-4f41-8fd2-678612b8da4f",
+      "siteNameHierarchy": "Global/UB Building"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "addressInheritedFrom": "a8b01547-2c0d-4625-9cc2-b15b14529ad2",
+            "type": "area"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "a8b01547-2c0d-4625-9cc2-b15b14529ad2",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "Bhagalpur",
+      "parentId": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/a8b01547-2c0d-4625-9cc2-b15b14529ad2",
+      "siteNameHierarchy": "Global/Bhagalpur"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "addressInheritedFrom": "3cb22748-0fe1-4109-8d22-51cff360fd8c",
+            "type": "area"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "3cb22748-0fe1-4109-8d22-51cff360fd8c",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "Bihar",
+      "parentId": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/3cb22748-0fe1-4109-8d22-51cff360fd8c",
+      "siteNameHierarchy": "Global/Bihar"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "address": "Mdr, 812007, TNB College, Bhagalpur, Bhagalpur, Bihar, India",
+            "addressInheritedFrom": "ba2f804f-de77-4100-9a01-e55be020fcdb",
+            "country": "India",
+            "latitude": "25.24",
+            "longitude": "86.95",
+            "type": "building"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "ba2f804f-de77-4100-9a01-e55be020fcdb",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "TNB college",
+      "parentId": "a8b01547-2c0d-4625-9cc2-b15b14529ad2",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/a8b01547-2c0d-4625-9cc2-b15b14529ad2/ba2f804f-de77-4100-9a01-e55be020fcdb",
+      "siteNameHierarchy": "Global/Bhagalpur/TNB college"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "addressInheritedFrom": "915f1bc1-8c72-451b-a77b-17ad921cd660",
+            "type": "area"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "88587242-dbb9-42ab-8380-7940d5d173f3",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "potheri",
+      "parentId": "915f1bc1-8c72-451b-a77b-17ad921cd660",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/915f1bc1-8c72-451b-a77b-17ad921cd660/88587242-dbb9-42ab-8380-7940d5d173f3",
+      "siteNameHierarchy": "Global/TamilNadu/potheri"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "addressInheritedFrom": "915f1bc1-8c72-451b-a77b-17ad921cd660",
+            "type": "area"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "5dedf680-1b4e-48dc-90d4-2d25f4a410df",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "SRM",
+      "parentId": "88587242-dbb9-42ab-8380-7940d5d173f3",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/915f1bc1-8c72-451b-a77b-17ad921cd660/88587242-dbb9-42ab-8380-7940d5d173f3/5dedf680-1b4e-48dc-90d4-2d25f4a410df",
+      "siteNameHierarchy": "Global/TamilNadu/potheri/SRM"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "addressInheritedFrom": "ce2397f0-5d04-4bc5-ba97-23965e6dcda9",
+            "type": "area"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "ce2397f0-5d04-4bc5-ba97-23965e6dcda9",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "Tamil Nadu",
+      "parentId": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/ce2397f0-5d04-4bc5-ba97-23965e6dcda9",
+      "siteNameHierarchy": "Global/Tamil Nadu"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "address": "Nh Service Road, 603209, Chengalpattu, Chengalpattu, Tamil Nadu, India",
+            "addressInheritedFrom": "6a138253-4d77-4639-b9b9-62e091cea03d",
+            "country": "India",
+            "latitude": "12.8203",
+            "longitude": "80.0396",
+            "type": "building"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "6a138253-4d77-4639-b9b9-62e091cea03d",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "TP-2",
+      "parentId": "ce2397f0-5d04-4bc5-ba97-23965e6dcda9",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/ce2397f0-5d04-4bc5-ba97-23965e6dcda9/6a138253-4d77-4639-b9b9-62e091cea03d",
+      "siteNameHierarchy": "Global/Tamil Nadu/TP-2"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "address": "Nh Service Road, 603209, Chengalpattu, Chengalpattu, Tamil Nadu, India",
+            "addressInheritedFrom": "b61d544f-0225-4029-b829-423524d32109",
+            "country": "India",
+            "latitude": "12.824752382229804",
+            "longitude": "80.04637387081647",
+            "type": "building"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "b61d544f-0225-4029-b829-423524d32109",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "tp1",
+      "parentId": "5dedf680-1b4e-48dc-90d4-2d25f4a410df",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/915f1bc1-8c72-451b-a77b-17ad921cd660/88587242-dbb9-42ab-8380-7940d5d173f3/5dedf680-1b4e-48dc-90d4-2d25f4a410df/b61d544f-0225-4029-b829-423524d32109",
+      "siteNameHierarchy": "Global/TamilNadu/potheri/SRM/tp1"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "floorIndex": "8",
+            "rfModel": "145145"
+          },
+          "nameSpace": "mapsSummary"
+        },
+        {
+          "attributes": {
+            "height": "10.0",
+            "length": "100.0",
+            "offsetX": "0.0",
+            "offsetY": "0.0",
+            "width": "100.0"
+          },
+          "nameSpace": "mapGeometry"
+        },
+        {
+          "attributes": {
+            "address": "Nh Service Road, 603209, Chengalpattu, Chengalpattu, Tamil Nadu, India",
+            "addressInheritedFrom": "b61d544f-0225-4029-b829-423524d32109",
+            "type": "floor"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "47503329-a160-41ae-bff0-d87c089eb8d9",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "Floor 8",
+      "parentId": "b61d544f-0225-4029-b829-423524d32109",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/915f1bc1-8c72-451b-a77b-17ad921cd660/88587242-dbb9-42ab-8380-7940d5d173f3/5dedf680-1b4e-48dc-90d4-2d25f4a410df/b61d544f-0225-4029-b829-423524d32109/47503329-a160-41ae-bff0-d87c089eb8d9",
+      "siteNameHierarchy": "Global/TamilNadu/potheri/SRM/tp1/Floor 8"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "address": "Nh Service Road, 603209, Chengalpattu, Chengalpattu, Tamil Nadu, India",
+            "addressInheritedFrom": "dbaa77bb-ac0c-4835-9d59-9f6b83d2a6d9",
+            "country": "India",
+            "latitude": "12.8203",
+            "longitude": "80.0396",
+            "type": "building"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "dbaa77bb-ac0c-4835-9d59-9f6b83d2a6d9",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "tp-2",
+      "parentId": "915f1bc1-8c72-451b-a77b-17ad921cd660",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/915f1bc1-8c72-451b-a77b-17ad921cd660/dbaa77bb-ac0c-4835-9d59-9f6b83d2a6d9",
+      "siteNameHierarchy": "Global/TamilNadu/tp-2"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "address": "Nh Service Road, 603209, Chengalpattu, Chengalpattu, Tamil Nadu, India",
+            "addressInheritedFrom": "68311ee5-52b2-4d97-abda-231b0cac0066",
+            "country": "India",
+            "latitude": "12.8203",
+            "longitude": "80.0396",
+            "type": "building"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "68311ee5-52b2-4d97-abda-231b0cac0066",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "tp-2",
+      "parentId": "88587242-dbb9-42ab-8380-7940d5d173f3",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/915f1bc1-8c72-451b-a77b-17ad921cd660/88587242-dbb9-42ab-8380-7940d5d173f3/68311ee5-52b2-4d97-abda-231b0cac0066",
+      "siteNameHierarchy": "Global/TamilNadu/potheri/tp-2"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "addressInheritedFrom": "915f1bc1-8c72-451b-a77b-17ad921cd660",
+            "type": "area"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "915f1bc1-8c72-451b-a77b-17ad921cd660",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "TamilNadu",
+      "parentId": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/915f1bc1-8c72-451b-a77b-17ad921cd660",
+      "siteNameHierarchy": "Global/TamilNadu"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "addressInheritedFrom": "1ea8467c-ab5a-4952-8275-4e58364a88a6",
+            "type": "area"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "1ea8467c-ab5a-4952-8275-4e58364a88a6",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "Navi Mumbai",
+      "parentId": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/1ea8467c-ab5a-4952-8275-4e58364a88a6",
+      "siteNameHierarchy": "Global/Navi Mumbai"
+    },
+    {
+      "additionalInfo": [
+        {
+          "attributes": {
+            "address": "Darave Road, Sector 28, 400614, Nerul, Navi Mumbai, Thane, Maharashtra, India",
+            "addressInheritedFrom": "29d2d169-7899-4614-b866-71a525b3031a",
+            "country": "India",
+            "latitude": "19.026701",
+            "longitude": "73.018125",
+            "type": "building"
+          },
+          "nameSpace": "Location"
+        }
+      ],
+      "id": "29d2d169-7899-4614-b866-71a525b3031a",
+      "instanceTenantId": "67b935c59155f50013515d1c",
+      "name": "VIR",
+      "parentId": "1ea8467c-ab5a-4952-8275-4e58364a88a6",
+      "siteHierarchy": "00f6df3f-c067-4d55-8ff3-059d35bbaa0c/1ea8467c-ab5a-4952-8275-4e58364a88a6/29d2d169-7899-4614-b866-71a525b3031a",
+      "siteNameHierarchy": "Global/Navi Mumbai/VIR"
+    }
+  ]
+}

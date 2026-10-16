@@ -1,45 +1,51 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Tests for the comparison a CI run diffs to find what it must test."""
+"""Tests for where a CI run gets the changes it must test."""
 
 from __future__ import annotations
 
 import pytest
 
-from ddev.cli.ci.tests.changes import CIContext, get_changed_files
+from ddev.cli.ci.tests.changes import ChangeResolutionError, changes_in_commit
 from ddev.utils.git import ChangedFile, ChangeType
 
 
 class RecordingGit:
     """Stand-in for `GitRepository` that records the comparison it was asked for."""
 
-    def __init__(self, changed=()):
+    def __init__(self, changed: tuple[ChangedFile, ...] = (), error: Exception | None = None):
         self.changed = list(changed)
+        self.error = error
         self.calls: list[tuple[str, str | None]] = []
 
-    def changed_files(self, base="origin/master", head=None):
+    def changed_files(self, base: str = "origin/master", head: str | None = None) -> list[ChangedFile]:
         self.calls.append((base, head))
+        if self.error is not None:
+            raise self.error
         return list(self.changed)
 
 
+def test_a_commit_is_compared_with_its_first_parent():
+    changed_file = ChangedFile(ChangeType.MODIFIED, "foo/bar.py")
+    git = RecordingGit((changed_file,))
+
+    assert changes_in_commit(git, "abc123") == [changed_file]
+    assert git.calls == [("abc123^1", "abc123")]
+
+
 @pytest.mark.parametrize(
-    ("context", "target_branch", "expected_call"),
+    ("error", "expected"),
     [
-        pytest.param(CIContext.PULL_REQUEST, "origin/master", ("origin/master", "abc123"), id="pull-request"),
-        pytest.param(CIContext.DEFAULT_BRANCH, None, ("abc123^1", "abc123"), id="default-branch"),
+        pytest.param(OSError("fatal: ambiguous argument 'abc123^1'"), "fetch-depth: 2", id="parent-missing"),
+        pytest.param(ValueError("Malformed diff line: 'M'"), "Could not read the diff", id="unparsable-diff"),
     ],
 )
-def test_get_changed_files_uses_the_right_comparison(context, target_branch, expected_call):
-    changed_file = ChangedFile(ChangeType.MODIFIED, "foo/bar.py")
-    git = RecordingGit([changed_file])
+def test_a_comparison_git_cannot_answer_is_reported_as_a_change_resolution_failure(error: Exception, expected: str):
+    """Both reach the CLI as a message: the depth-1 checkout that causes the first is the common
+    case and the message has to point at it, and neither should surface as a traceback.
+    """
+    git = RecordingGit(error=error)
 
-    changed = get_changed_files(git, "abc123", context=context, target_branch=target_branch)
-
-    assert git.calls == [expected_call]
-    assert changed == [changed_file]
-
-
-def test_get_changed_files_pull_request_requires_target_branch():
-    with pytest.raises(ValueError, match="target branch is required"):
-        get_changed_files(RecordingGit(), "abc123", context=CIContext.PULL_REQUEST, target_branch=None)
+    with pytest.raises(ChangeResolutionError, match=expected):
+        changes_in_commit(git, "abc123")

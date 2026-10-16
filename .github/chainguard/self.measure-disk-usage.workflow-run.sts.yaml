@@ -1,0 +1,13 @@
+issuer: https://token.actions.githubusercontent.com
+
+subject: repo:DataDog/integrations-core:ref:refs/heads/master
+
+claim_pattern:
+  event_name: workflow_run
+  ref: refs/heads/master
+  ref_protected: "true"
+  job_workflow_ref: DataDog/integrations-core/\.github/workflows/measure-disk-usage\.yml@refs/heads/master
+  repository: DataDog/integrations-core
+
+permissions:
+  pull_requests: write

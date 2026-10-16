@@ -9,6 +9,7 @@ from collections import Counter
 from typing import TYPE_CHECKING
 
 from ddev.cli.ci.tests.batching.exceptions import BatchValidationError
+from ddev.cli.ci.tests.batching.units import ALLOWED_RUNNER_LABELS
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -26,8 +27,8 @@ def validate_batches(
     """Enforce the batch-execution contract, so no strategy can emit an unrunnable plan.
 
     Rejects empty or over-capacity batches, duplicate job names or artifact identities within a
-    batch, any deviation from exact once-per-job coverage of `jobs`, and unjustified integration
-    splitting.
+    batch, anything but a single runner from `ALLOWED_RUNNER_LABELS`, any deviation from exact
+    once-per-job coverage of `jobs`, and unjustified integration splitting.
 
     Artifact identity is checked as well as the display name because sanitization can collapse two
     differently named jobs onto one artifact, whose files would then overwrite each other.
@@ -44,6 +45,9 @@ def validate_batches(
         artifact_names = [job.artifact_name() for job in group]
         if len(artifact_names) != len(set(artifact_names)):
             raise BatchValidationError(f"Batch at index {index} has duplicate artifact identities.")
+        for job in group:
+            if len(job.runner_labels) != 1 or job.runner_labels[0] not in ALLOWED_RUNNER_LABELS:
+                raise BatchValidationError(f"Job {job.name!r} runs on {list(job.runner_labels)}, not one known runner.")
 
     _validate_coverage(job_groups, jobs)
     _validate_splitting(job_groups, jobs, capacity=capacity, config=config)

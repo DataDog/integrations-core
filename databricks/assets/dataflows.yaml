@@ -7,6 +7,8 @@ provides:
   - id: databricks-reference-tables
     always_on: false
     granular: false
+    data_type: resources
   - id: databricks-metrics
     always_on: false
     granular: false
+    data_type: metrics
