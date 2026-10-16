@@ -16,17 +16,9 @@ from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.dev import TempDir
 from datadog_checks.dev.fs import read_file, write_file
 
-from .common import DEFAULT_OPTIONS, FIXTURE_PATH, RequestsTransport
+from .common import DEFAULT_OPTIONS, FIXTURE_PATH, RequestsTransport, create_requests_client
 
 pytestmark = [pytest.mark.unit]
-
-
-def _create_requests_client(instance: dict[str, object], transport: RequestsTransport) -> RequestsWrapper:
-    session = requests.Session()
-    session.mount('http://', transport)
-    http = RequestsWrapper(instance, {}, session=session)
-    http.persist_connections = True
-    return http
 
 
 class TestAuthTokenHandlerCreation:
@@ -613,7 +605,7 @@ class TestAuthTokenDCOS:
         )
         service_transport = RequestsTransport()
         service_transport.respond()
-        http = _create_requests_client(instance, service_transport)
+        http = create_requests_client(service_transport, instance, agnostic=False)
 
         with mock.patch.object(
             requests.adapters.HTTPAdapter,
@@ -687,7 +679,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
             }
             transport = RequestsTransport()
             transport.respond()
-            http = _create_requests_client(instance, transport)
+            http = create_requests_client(transport, instance, agnostic=False)
 
             write_file(token_file, '\nsecret1\n')
             response = http.get('http://www.google.com', extra_headers={'Accept': 'text/plain'})
@@ -710,7 +702,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
             transport.respond()
             transport.respond(status_code=401)
             transport.respond()
-            http = _create_requests_client(instance, transport)
+            http = create_requests_client(transport, instance, agnostic=False)
 
             write_file(token_file, '\nsecret1\n')
             http.get('http://www.google.com')
@@ -785,7 +777,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
             transport.respond()
             transport.raise_exception(requests.exceptions.ConnectionError('connection failed'))
             transport.respond()
-            http = _create_requests_client(instance, transport)
+            http = create_requests_client(transport, instance, agnostic=False)
 
             write_file(token_file, '\nsecret1\n')
             http.get('http://www.google.com')
@@ -812,7 +804,7 @@ class TestAuthTokenFileReaderWithHeaderWriter:
             transport.respond()
             transport.respond(status_code=500)
             transport.respond()
-            http = _create_requests_client(instance, transport)
+            http = create_requests_client(transport, instance, agnostic=False)
 
             write_file(token_file, '\nsecret1\n')
             http.get('http://www.google.com')

@@ -94,6 +94,8 @@ ddev validate config -s <INTEGRATION_NAME>
 ddev validate models -s <INTEGRATION_NAME>
 ```
 
+The exception is `config_models/validators.py`, which is generated once and never overwritten: edit it by hand for rules a single spec field cannot express, such as cross-field checks or URL parsing.
+
 ## Service Checks
 
 **Applicable to:** newly created integrations. Existing integrations that already submit service checks are exempt.
@@ -108,7 +110,9 @@ The one exception is the OpenMetrics base check, which still emits a service che
 
 Make HTTP requests through the backend-neutral HTTP layer in `datadog_checks_base`, documented in `docs/developer/base/http.md`. Checks should not depend on the underlying HTTP library, so another backend can replace it without rewriting every integration and its tests.
 
-- Set `AGNOSTIC_HTTP = True` on the check class. Without it, clients return `requests` responses and raise `requests` exceptions, so the rules below do not hold and the `fake_http` fixture fails the test.
+To use the layer:
+
+- Set `AGNOSTIC_HTTP_CLIENT = True` on the check class. Without it, clients return `requests` responses and raise `requests` exceptions, so the rules below do not hold and the `fake_http` fixture fails the test.
 - Send requests through `self.http`. Construct additional clients with `AgentCheck.create_http_client()` rather than instantiating `RequestsWrapper` or a `requests.Session`.
 - Catch the exceptions in `datadog_checks.base.utils.http_exceptions` (for example `HTTPClientError`), never `requests.exceptions` types.
 - Use only the `HTTPClient` and `HTTPResponse` members documented in `http.md`. Anything else is an implementation detail of the current backend.

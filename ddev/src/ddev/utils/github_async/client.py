@@ -745,16 +745,21 @@ class AsyncGitHubClient:
             retry: Defaults to the replayable policy, since cancelling twice cancels once. The ladder is
                 shortened because the caller is usually a run being torn down with seconds to spare.
         """
+        endpoint = f"/repos/{owner}/{repo}/actions/runs/{run_id}/cancel"
+        attempts = RequestAttempts()
         try:
             await self._request(
                 "POST",
-                f"/repos/{owner}/{repo}/actions/runs/{run_id}/cancel",
+                endpoint,
                 timeout=timeout,
                 retry=retry if retry is not None else self._retry_policies.safe.replace(timeout=CANCEL_RETRY_TIMEOUT),
+                attempts=attempts,
             )
-        except httpx.HTTPStatusError as error:
-            if error.response.status_code != RUN_ALREADY_TERMINAL_STATUS:
-                raise
+        except Exception as error:
+            if isinstance(error, httpx.HTTPStatusError) and error.response.status_code == RUN_ALREADY_TERMINAL_STATUS:
+                return
+            self._report_failure(attempts, "POST", endpoint, error)
+            raise
 
     async def list_workflow_run_artifacts(
         self,

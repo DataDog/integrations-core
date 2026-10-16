@@ -36,7 +36,7 @@ __aggregator = None
 __datadog_agent = None
 MockResponse = None
 
-_DEFAULT_MOCK_METHOD = 'requests.Session.get'
+DEFAULT_MOCK_METHOD = 'requests.Session.get'
 FAKE_HTTP_JSON_UNSET = object()
 
 
@@ -383,15 +383,17 @@ def mock_response():
 @pytest.fixture
 def mock_http_response(mocker, mock_response):
     yield lambda *args, **kwargs: mocker.patch(
-        kwargs.pop('method', _DEFAULT_MOCK_METHOD), return_value=mock_response(*args, **kwargs)
+        kwargs.pop('method', DEFAULT_MOCK_METHOD), return_value=mock_response(*args, **kwargs)
     )
 
 
-def _create_fake_http_client_factory(fake_http: Any) -> Any:
+def _create_fake_http_client_factory(fake_http: Any) -> Callable[..., Any]:
     def create_client(check: Any, *_args: Any, **_kwargs: Any) -> Any:
         # The fake models the backend-neutral contract, which a check only gets in production by opting in.
-        if not getattr(check, 'AGNOSTIC_HTTP', False):
-            raise AssertionError(f'{type(check).__name__} must set AGNOSTIC_HTTP = True to use the fake_http fixture.')
+        if not getattr(check, 'AGNOSTIC_HTTP_CLIENT', False):
+            raise AssertionError(
+                f'{type(check).__name__} must set AGNOSTIC_HTTP_CLIENT = True to use the fake_http fixture.'
+            )
         return fake_http.create_client()
 
     return create_client
@@ -399,7 +401,7 @@ def _create_fake_http_client_factory(fake_http: Any) -> Any:
 
 @pytest.fixture
 def fake_http(mocker):
-    """Install a base-owned HTTP fake on checks created by the test, which must set AGNOSTIC_HTTP = True."""
+    """Install a base-owned HTTP fake on checks created by the test, which must set AGNOSTIC_HTTP_CLIENT = True."""
     AgentCheck = importlib.import_module('datadog_checks.base').AgentCheck
     FakeHTTPClient = importlib.import_module('datadog_checks.base.stubs.http').FakeHTTPClient
     client = FakeHTTPClient()
@@ -417,7 +419,7 @@ def fake_http(mocker):
 def fake_http_response(fake_http: Any) -> Callable[..., Any]:
     """Build and register a response on the base-owned HTTP fake.
 
-    The ``json_data`` argument sets both the serialized body and parsed result unless ``json_result`` is overridden.
+    The `json_data` argument sets both the serialized body and parsed result unless `json_result` is overridden.
     """
     FakeHTTPResponse = importlib.import_module('datadog_checks.base.stubs.http').FakeHTTPResponse
 
@@ -477,7 +479,7 @@ def mock_http_response_per_endpoint(mocker, mock_response):
         responses_by_endpoint: Dict[str, list[Any]],
         mode: Literal['cycle', 'exhaust', 'default'] = 'cycle',
         default_response: Any = None,
-        method: str = _DEFAULT_MOCK_METHOD,
+        method: str = DEFAULT_MOCK_METHOD,
         url_arg_index: int = 1,
         url_kwarg_name: str = "url",
         strict: bool = True,

@@ -145,6 +145,8 @@ def _assert_include_split(indexes):
     assert indexes['ix_include']['included_columns'] == 'a,e'
     assert indexes['ix_prefix']['key_columns'] == 'c,a'
     assert indexes['ix_prefix']['included_columns'] == 'e'
+    assert indexes['ix_filtered']['filter_definition'] == '([e] IS NOT NULL)'
+    assert indexes['ix_include'].get('filter_definition') is None
 
 
 def _assert_key_order(indexes):

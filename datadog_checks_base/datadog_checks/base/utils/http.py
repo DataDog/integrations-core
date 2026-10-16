@@ -9,12 +9,11 @@ import re
 import socket
 import warnings
 from collections import ChainMap
-from collections.abc import Mapping
-from contextlib import ExitStack, contextmanager, nullcontext
+from collections.abc import Iterator, Mapping
+from contextlib import AbstractContextManager, ExitStack, contextmanager, nullcontext
 from copy import deepcopy
 from hashlib import sha256
-from types import MethodType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from urllib.parse import quote, urljoin, urlparse, urlunparse
 
 import lazy_loader
@@ -35,24 +34,9 @@ from datadog_checks.base.utils import _http_utils
 from . import requests_adapter
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
+from .headers import get_header as get_header_value
 from .headers import set_header as set_header_value
-from .http_exceptions import (  # noqa: F401
-    HTTPClientConnectionError,
-    HTTPClientConnectTimeoutError,
-    HTTPClientError,
-    HTTPClientInvalidURLError,
-    HTTPClientReadTimeoutError,
-    HTTPClientRequestError,
-    HTTPClientSSLError,
-    HTTPClientStatusError,
-    HTTPClientTimeoutError,
-)
-from .http_protocol import (  # noqa: F401
-    HTTPClient,
-    HTTPRequest,
-    HTTPRequestSnapshot,
-    HTTPResponse,
-)
+from .http_protocol import HTTPClient, HTTPResponse
 from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
 
@@ -82,6 +66,10 @@ DEFAULT_EXPIRATION = 300
 # 16 KiB seems optimal, and is also the standard chunk size of the Bittorrent protocol:
 # https://www.bittorrent.org/beps/bep_0003.html
 DEFAULT_CHUNK_SIZE = 16
+
+# `iter_lines` buffers a line until its end, so OpenMetrics checks limit lines (in KiB) to avoid buffering an unbounded
+# response
+OPENMETRICS_MAX_LINE_SIZE = 16384
 
 STANDARD_FIELDS = {
     'allow_redirects': True,
@@ -125,7 +113,6 @@ AIA_TLS_CONFIG_FIELDS = frozenset(
     {'tls_ca_cert', 'tls_ciphers', 'tls_intermediate_ca_certs', 'tls_protocols_allowed', 'tls_validate_hostname'}
 )
 AIA_ALLOWED_SCHEMES = frozenset({'http', 'https'})
-AIA_REDIRECT_STATUS_CODES = frozenset({301, 302, 303, 307, 308})
 MAX_AIA_CERT_SIZE = 64 * 1024
 MAX_AIA_REDIRECTS = 10
 DEFAULT_AIA_CHASING_MAX_DEPTH = 5
@@ -224,12 +211,68 @@ def get_tls_config_from_options(new_options):
     return tls_config
 
 
+class ResponseLineTooLongError(ValueError):
+    pass
+
+
+def limit_line_size(response: requests.Response, max_line_size: int | None) -> None:
+    """Make reading `response` raise `ResponseLineTooLongError` once a line is longer than `max_line_size` bytes."""
+    if max_line_size is None:
+        return
+
+    raw = getattr(response, 'raw', None)
+    # Don't overwrite test mocks or responses that are already limited
+    if hasattr(raw, 'stream') and not isinstance(raw, LineCappedRawResponse):
+        response.raw = LineCappedRawResponse(raw, max_line_size)
+
+
+class LineCappedRawResponse(ObjectProxy):
+    """
+    Wraps a urllib3 response so that its decoded stream, which `requests` reads the body from, raises
+    `ResponseLineTooLongError` once a line is longer than `max_line_size` bytes. Everything else is forwarded.
+    """
+
+    def __init__(self, raw: Any, max_line_size: int):
+        super().__init__(raw)
+        self._self_max_line_size = max_line_size
+
+    def stream(self, amt: int | None = 2**16, *args: Any, **kwargs: Any) -> Iterator[bytes]:
+        """
+        Yield the decoded body in chunks that each contain a line break, except possibly the last one. Raise
+        `ResponseLineTooLongError` once a line is longer than `max_line_size` bytes.
+        """
+        # `amt` is the number of bytes read per chunk, 64 KiB by default (mirrors the urllib3 name)
+        if amt is None or amt > self._self_max_line_size:
+            amt = self._self_max_line_size
+
+        line_size = 0
+        # A byte buffer rather than a list of chunks, because endpoints can send many tiny chunks
+        buffer = bytearray()
+        for chunk in self.__wrapped__.stream(amt, *args, **kwargs):
+            newline = chunk.find(b'\n')
+            first_line_size = line_size + (len(chunk) if newline < 0 else newline)
+            if first_line_size > self._self_max_line_size:
+                raise ResponseLineTooLongError(f'Response contains a line longer than {self._self_max_line_size} bytes')
+            line_size = first_line_size if newline < 0 else len(chunk) - chunk.rfind(b'\n') - 1
+            if newline < 0:
+                buffer += chunk
+            elif buffer:
+                buffer += chunk
+                yield bytes(buffer)
+                buffer.clear()
+            else:
+                yield chunk
+        if buffer:
+            yield bytes(buffer)
+
+
 class ResponseWrapper(ObjectProxy):
-    def __init__(self, response, default_chunk_size):
+    def __init__(self, response, default_chunk_size, max_line_size: int | None = None):
         super(ResponseWrapper, self).__init__(response)
 
         # See https://github.com/psf/requests/pull/5942
         self.__default_chunk_size = default_chunk_size
+        self.__max_line_size = max_line_size
 
     def iter_content(self, chunk_size=None, decode_unicode=False):
         if chunk_size is None:
@@ -240,6 +283,10 @@ class ResponseWrapper(ObjectProxy):
     def iter_lines(self, chunk_size=None, decode_unicode=False, delimiter=None):
         if chunk_size is None:
             chunk_size = self.__default_chunk_size
+
+        # Not implemented yet for custom delimiters, which no check uses
+        if delimiter is None and self.__max_line_size is not None:
+            limit_line_size(self.__wrapped__, self.__max_line_size)
 
         return self.__wrapped__.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter)
 
@@ -311,8 +358,7 @@ def _fetch_aia_content(
     while _is_safe_aia_url(uri, logger):
         response = session.get(uri, **request_options)
         try:
-            is_redirect = getattr(response, 'is_redirect', response.status_code in AIA_REDIRECT_STATUS_CODES)
-            if is_redirect:
+            if response.is_redirect:
                 if not follow_redirects:
                     return None
 
@@ -384,27 +430,6 @@ def _aia_fetch_session(
     return session
 
 
-def suppress_default_auth(request):
-    """Truthy no-op requests auth callable that leaves the prepared request unchanged."""
-    return request
-
-
-def _rebuild_auth_without_netrc(
-    session: requests.Session, prepared_request: requests.PreparedRequest, response: requests.Response
-) -> None:
-    original_request = response.request
-    assert original_request is not None
-    # Preserve Requests' cross-host credential stripping while deliberately omitting its .netrc lookup.
-    if 'Authorization' in prepared_request.headers and session.should_strip_auth(
-        original_request.url, prepared_request.url
-    ):
-        del prepared_request.headers['Authorization']
-
-
-def _suppress_netrc_auth(session: requests.Session) -> None:
-    session.rebuild_auth = MethodType(_rebuild_auth_without_netrc, session)
-
-
 class RequestsWrapper(object):
     __slots__ = (
         '_agnostic',
@@ -421,6 +446,7 @@ class RequestsWrapper(object):
         'request_hooks',
         'auth_token_handler',
         'request_size',
+        'max_line_size',
         'tls_protocols_allowed',
         'aia_chasing_max_depth',
         'tls_config',
@@ -588,6 +614,8 @@ class RequestsWrapper(object):
         self.ignore_tls_warning = is_affirmative(config['tls_ignore_warning'])
 
         self.request_size = int(float(config['request_size']) * KIBIBYTE)
+        # Set in bytes by checks that limit the size of lines read with `iter_lines`
+        self.max_line_size: int | None = None
 
         self.aia_chasing_max_depth = DEFAULT_AIA_CHASING_MAX_DEPTH
 
@@ -661,21 +689,10 @@ class RequestsWrapper(object):
         return should_bypass_proxy(url, self.no_proxy_uris or [])
 
     def get_header(self, name: str, default: str | None = None) -> str | None:
-        """Return the last case-insensitive match, which requests sends on the wire."""
-        found = default
-        for key, value in self.options['headers'].items():
-            if key.lower() == name.lower():
-                found = value
-        return found
+        return get_header_value(self.options['headers'], name, default)
 
     def set_header(self, name: str, value: str) -> None:
         set_header_value(self.options['headers'], name, value)
-
-    def disable_auth(self) -> None:
-        """Suppress configured and .netrc auth without disabling other environment settings."""
-        self.options['auth'] = suppress_default_auth
-        if self._session is not None:
-            _suppress_netrc_auth(self._session)
 
     def get(self, url, **options):
         return self._request('get', url, options)
@@ -750,16 +767,20 @@ class RequestsWrapper(object):
                 response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
 
             if self._agnostic:
+                # The adapter hides the raw stream from later limit_line_size calls, so cap every read here
+                limit_line_size(response, self.max_line_size)
                 return requests_adapter.RequestsResponseAdapter(response, self.request_size)
-            return ResponseWrapper(response, self.request_size)
+            return ResponseWrapper(response, self.request_size, self.max_line_size)
 
-    def _merge_extra_headers(self, explicit_headers, extra_headers):
+    def _merge_extra_headers(
+        self, explicit_headers: Mapping[str, str] | None, extra_headers: Mapping[str, str]
+    ) -> CaseInsensitiveDict:
         """Layer per-request extra headers over the request's headers, or the client's when it sets none."""
         headers = CaseInsensitiveDict(explicit_headers if explicit_headers is not None else self.options['headers'])
         headers.update(extra_headers)
         return headers
 
-    def _translate_errors(self):
+    def _translate_errors(self) -> AbstractContextManager[None]:
         """Raise backend-neutral errors in agnostic mode, and requests errors unchanged otherwise."""
         return requests_adapter.translate_http_errors() if self._agnostic else nullcontext()
 
@@ -942,8 +963,6 @@ class RequestsWrapper(object):
         We leave it to callers to mount any HTTPS adapters if necessary.
         """
         session = requests.Session()
-        if self.options['auth'] is suppress_default_auth:
-            _suppress_netrc_auth(session)
         # Enable Unix Domain Socket (UDS) support.
         # See: https://github.com/msabramo/requests-unixsocket
         session.mount('{}://'.format(UDS_SCHEME), requests_unixsocket.UnixAdapter())
@@ -991,7 +1010,7 @@ def create_http_client(
     instance: dict | None,
     init_config: dict,
     remapper: dict | None = None,
-    logger: logging.Logger | None = None,
+    logger: logging.Logger | logging.LoggerAdapter | None = None,
     *,
     agnostic: bool = False,
 ) -> HTTPClient:

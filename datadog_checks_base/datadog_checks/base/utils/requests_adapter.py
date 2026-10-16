@@ -66,11 +66,11 @@ def _backend_compat_type[T: BaseException](agnostic: type[T], *backend: type[Bas
 
 
 # Requests must be first so its initializer populates request, response, and simplejson fields.
-_COMPAT_JSON_DECODE_ERROR = _backend_compat_type(requests_exceptions.JSONDecodeError, json.JSONDecodeError)
+COMPAT_JSON_DECODE_ERROR = _backend_compat_type(requests_exceptions.JSONDecodeError, json.JSONDecodeError)
 
 
 def _translate_json_decode_error(exc: requests_exceptions.JSONDecodeError) -> json.JSONDecodeError:
-    if isinstance(exc, _COMPAT_JSON_DECODE_ERROR):
+    if isinstance(exc, COMPAT_JSON_DECODE_ERROR):
         return cast(json.JSONDecodeError, exc)
 
     args: list[Any] = [exc.msg, exc.doc, exc.pos]
@@ -78,7 +78,7 @@ def _translate_json_decode_error(exc: requests_exceptions.JSONDecodeError) -> js
         args.append(end)
     return cast(
         json.JSONDecodeError,
-        _COMPAT_JSON_DECODE_ERROR(
+        COMPAT_JSON_DECODE_ERROR(
             *args,
             request=getattr(exc, 'request', None),
             response=getattr(exc, 'response', None),
@@ -106,7 +106,7 @@ def _translated_http_error[T: HTTPClientError](
 
 
 def _translate_requests_exception(
-    exc: BaseException, *, response: HTTPResponse | None = None
+    exc: requests_exceptions.RequestException, *, response: HTTPResponse | None = None
 ) -> HTTPClientError | json.JSONDecodeError:
     """Map a requests exception to its agnostic compatibility type, most-specific first."""
     if isinstance(exc, HTTPClientError):
@@ -137,15 +137,9 @@ def _translate_requests_exception(
         return _translated_http_error(HTTPClientReadTimeoutError, exc, response=response)
     if isinstance(exc, requests_exceptions.ConnectionError):
         return _translated_http_error(HTTPClientConnectionError, exc, response=response)
-    if isinstance(exc, requests_exceptions.InvalidHeader):
-        return _translated_http_error(HTTPClientRequestError, exc, response=response)
-    if isinstance(exc, requests_exceptions.ContentDecodingError):
-        return _translated_http_error(HTTPClientRequestError, exc, response=response)
     if isinstance(exc, requests_exceptions.HTTPError):
         return _translated_http_error(HTTPClientStatusError, exc, response=response)
-    if isinstance(exc, requests_exceptions.RequestException):
-        return _translated_http_error(HTTPClientRequestError, exc, response=response)
-    return HTTPClientError(str(exc) or type(exc).__name__)
+    return _translated_http_error(HTTPClientRequestError, exc, response=response)
 
 
 @contextmanager
@@ -253,19 +247,12 @@ class RequestsResponseAdapter:
         with translate_http_errors():
             yield from self._response.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
 
-    def iter_lines(
-        self,
-        chunk_size: int | None = None,
-        decode_unicode: bool = False,
-        delimiter: bytes | str | None = None,
-    ) -> Iterator[bytes | str]:
+    def iter_lines(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes | str]:
         if chunk_size is None:
             chunk_size = self._default_chunk_size
 
         with translate_http_errors():
-            yield from self._response.iter_lines(
-                chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter
-            )
+            yield from self._response.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode)
 
     def __enter__(self) -> RequestsResponseAdapter:
         return self
