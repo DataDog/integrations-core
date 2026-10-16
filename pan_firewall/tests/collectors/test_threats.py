@@ -19,6 +19,7 @@ from datadog_checks.pan_firewall.errors import PanosApiError
 from ..common import FIXTURES, FW_A_IP, FW_A_SERIAL, FW_A_TAGS, SYNTHETIC
 from ..fixture_map import (
     BACKWARD_NEWEST_SEQNO,
+    PROBE_SEQNO_FIRST_PAGE,
     PROBE_SEQNO_PAGE_SIZE,
     PROBE_SEQNO_PAGES,
     PROBE_SEQNO_START,
@@ -32,7 +33,7 @@ from ..helpers import FakeClock, log_page, logged, make_instance, new_check
 CACHE_KEY = f'threat_watermark:{FW_A_SERIAL}'
 FW_A_LAST_SEQNO = 7691899338913481002
 PROBE_LAST_SEQNO = 7691899338913582049
-PROBE_ENTRIES = 19 * PROBE_SEQNO_PAGE_SIZE + 5
+PROBE_ENTRIES = (PROBE_SEQNO_PAGES - 1) * PROBE_SEQNO_PAGE_SIZE + 5
 EMPTY = (SYNTHETIC / 'threat_log_empty.xml').read_bytes()
 NEWEST_AFTER_RESET = SYNTHETIC / 'threat_log_newest_after_reset.xml'
 NO_CAPTURE = (200, b'<response status="error" code="400"><msg><line>no capture</line></msg></response>')
@@ -124,7 +125,7 @@ def expected(counts):
 def probe_counts():
     """Tag counts and seqnos of the `probe-seqno` pages, read from the fixtures."""
     counts, seqnos = Counter(), []
-    for page in range(PROBE_SEQNO_PAGES):
+    for page in range(PROBE_SEQNO_FIRST_PAGE, PROBE_SEQNO_FIRST_PAGE + PROBE_SEQNO_PAGES):
         root = ET.parse(FIXTURES / 'probe-seqno' / f'seq_0_p{page}.xml').getroot()
         for entry in root.iterfind('result/log/logs/entry'):
             counts[tuple(entry.findtext(f) for f in ('severity', 'action', 'subtype', 'vsys'))] += 1

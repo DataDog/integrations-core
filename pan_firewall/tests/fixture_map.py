@@ -112,10 +112,13 @@ def find_op_fixture(cmd: str, firewall: str) -> Path | None:
 # `type=log` queries to the fixture answering them: response file under FIXTURES, per set. The key is
 # `(dir, query, skip)`; `nlogs` is not part of it, so a test can change the page size. `query` is None when the request
 # has none. Each `forward` query is the one the threats collector sends for a watermark one below its `seqno geq`.
-PROBE_SEQNO_START = 7691899338913581588
-# `nlogs` of the real `probe-seqno` capture: pages p0-p18 hold 20 entries and p19 holds 5.
+PROBE_SEQNO_START = 7691899338913581948
+# `nlogs` of the real `probe-seqno` capture. These are the last five pages of the L11 capture
+# (`capture/probe-seqno-3-13-247-39/`), p15-p18 with 20 entries and p19 with 5, re-based on p15's first seqno. L11
+# showed the seqno query is exact and its pages stable, so this is what PAN-OS returns for that query.
 PROBE_SEQNO_PAGE_SIZE = 20
-PROBE_SEQNO_PAGES = 20
+PROBE_SEQNO_PAGES = 5
+PROBE_SEQNO_FIRST_PAGE = 15
 # `seqno` of the newest log of `probe/threat_back_p0.xml`, and the watermark + 1 each set's forward threat query starts
 # at. fw-b answers with fw-a's `threat_log_5m.xml` (every seqno in it is above both), but from its own seqno: a poller
 # that queried with the other firewall's watermark would get no answer, so a watermark shared between firewalls fails.
@@ -132,8 +135,10 @@ LOG_FIXTURES: dict[str, dict[tuple[str, str | None, int], str]] = {
         ('backward', None, 0): 'probe/threat_back_p0.xml',
         ('forward', seqno_query(THREAT_LOG_FIRST_SEQNO['fw-a']), 0): 'fw-a/threat_log_5m.xml',
         **{
-            ('forward', seqno_query(PROBE_SEQNO_START), page * PROBE_SEQNO_PAGE_SIZE): f'probe-seqno/seq_0_p{page}.xml'
-            for page in range(PROBE_SEQNO_PAGES)
+            ('forward', seqno_query(PROBE_SEQNO_START), (page - PROBE_SEQNO_FIRST_PAGE) * PROBE_SEQNO_PAGE_SIZE): (
+                f'probe-seqno/seq_0_p{page}.xml'
+            )
+            for page in range(PROBE_SEQNO_FIRST_PAGE, PROBE_SEQNO_FIRST_PAGE + PROBE_SEQNO_PAGES)
         },
     },
     'fw-b': {
