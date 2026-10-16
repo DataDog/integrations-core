@@ -59,41 +59,6 @@ jobs:
             echo "is-stable-release=false" >> "$GITHUB_OUTPUT"
           fi
 
-  notify:
-    name: Notify release starting
-    needs: context
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write  # federate a Datadog app key via dd-sts
-      contents: read
-    steps:
-      - name: Checkout notification script
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 1
-          sparse-checkout: .github/workflows/scripts
-      - name: Get Datadog credentials
-        id: dd-sts
-        uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
-        with:
-          policy: integrations-core-release-notifications
-      # dd-sts mints a new application key per run, and using it within ~1s is
-      # often rejected with HTTP 403 by the workflow API. agent-integrations-tuf
-      # uses the same workflow and an equivalent policy, posts 4-10s after
-      # minting (setup-uv + uv sync in between), and has never failed.
-      - name: Wait for Datadog application key to become usable
-        run: sleep 10
-      - name: Notify release starting via Datadog workflow
-        env:
-          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
-          DD_APP_KEY: ${{ steps.dd-sts.outputs.app_key }}
-          DD_WORKFLOW_ID: 8f4e31b8-8a2a-4e46-a0c3-9a25c989108e
-          SOURCE_REPO: integrations-core
-          REF: ${{ inputs.source-repo-ref }}
-          PACKAGES: ${{ inputs.packages || '' }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: python3 .github/workflows/scripts/notify_release.py
-
   dispatch:
     name: Release
     needs: context
