@@ -1174,9 +1174,44 @@ async def test_tool_batch_shows_activity_block_until_results(tool_names, expecte
         screen.on_agent_response_received(AgentResponseReceived(scope, response, 1))
         await pilot.pause()
 
-        assert [block.key for block in phase_log.query(ActivityBlock)] == ["phase_1:phase:1:tools"]
-        assert screen._active_activities["phase_1"]["phase_1:phase:1:tools"].text == expected_text
+        blocks = list(phase_log.query(ActivityBlock))
+        assert len(blocks) == 1
+        assert f" {expected_text} · " in str(blocks[0].content)
 
+        tool_call = response.tool_calls[0]
+        screen.on_agent_tool_called(AgentToolCalled(scope, tool_call, ToolResult(success=True, data="ok"), 1))
+        await pilot.pause()
+
+        assert len(phase_log.query(ActivityBlock)) == 0
+
+
+async def test_tool_result_arriving_before_banner_mounts_leaves_no_banner():
+    """A tool result handled before its banner finishes mounting still removes the banner."""
+    from ddev.ai.agent.scope import AgentRole, AgentScope
+    from ddev.ai.tools.core.types import ToolResult
+    from ddev.cli.meta.ai.tui.messages import AgentResponseReceived, AgentToolCalled
+    from ddev.cli.meta.ai.tui.screens import execution
+    from ddev.cli.meta.ai.tui.screens.phase_log import ActivityBlock, PhaseLogScreen
+
+    class _IdleOrchestrator:
+        async def run_async(self) -> None:
+            pass
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = execution.ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: _IdleOrchestrator())
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        phase_log = PhaseLogScreen(flow, "phase_1", screen._phase_logs["phase_1"], source=screen)
+        await app.push_screen(phase_log)
+        await pilot.pause()
+
+        scope = AgentScope(owner_id="phase_1", role=AgentRole.PHASE, phase_id="phase_1")
+        response = _make_tool_response(["read_file"])
+        screen.on_agent_response_received(AgentResponseReceived(scope, response, 1))
         tool_call = response.tool_calls[0]
         screen.on_agent_tool_called(AgentToolCalled(scope, tool_call, ToolResult(success=True, data="ok"), 1))
         await pilot.pause()

@@ -179,7 +179,7 @@ class PhaseLogScreen(TogoScreen):
 
     def stop_activity(self, key: str) -> None:
         block = self._activity_blocks.pop(key, None)
-        if block is not None and block.is_mounted:
+        if block is not None and block.parent is not None:
             block.remove()
 
     def _replay_entries(self, retry: bool = True) -> bool:
