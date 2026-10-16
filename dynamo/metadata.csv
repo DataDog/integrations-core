@@ -56,7 +56,7 @@ dynamo.component.time_to_first_response.seconds,gauge,,second,,Time from request
 dynamo.component.time_to_first_response.seconds.count,count,,,,Time from request receipt to first response sent (histogram observation count).,0,dynamo,,,
 dynamo.component.time_to_first_response.seconds.sum,count,,second,,Time from request receipt to first response sent (histogram sum in seconds).,0,dynamo,,,
 dynamo.component.uptime_seconds,gauge,,second,,Total uptime of the Dynamo runtime.,0,dynamo,,,
-dynamo.dynamo_component_model_load_time_seconds,gauge,,second,,Model load time in seconds.,0,dynamo,,,
+dynamo.component.model_load_time.seconds,gauge,,second,,Model load time in seconds.,0,dynamo,,,
 dynamo.frontend.active_requests,gauge,,,,Number of requests being handled by the frontend.,0,dynamo,,,
 dynamo.frontend.audio_per_request,gauge,,item,,Number of audio_url content parts per request (distribution).,0,dynamo,,,
 dynamo.frontend.audio_per_request.count,count,,,,Number of audio_url content parts per request (histogram observation count).,0,dynamo,,,
