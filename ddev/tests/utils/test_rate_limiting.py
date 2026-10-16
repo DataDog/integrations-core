@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import inspect
 import itertools
 from collections.abc import Callable
@@ -23,7 +24,11 @@ from ddev.utils.rate_limiting import (
     PacingReason,
     RateLimitEvent,
     RateLimitWaitAbandoned,
+    RelaxedRateLimits,
     SecondaryLimitEvent,
+    WaitEvent,
+    WaitOutcome,
+    WaitReason,
 )
 from tests.helpers.assertions import assert_blocks
 from tests.helpers.clock import FakeClock
@@ -73,6 +78,17 @@ def clock() -> FakeClock:
 @pytest.fixture
 def governor(clock: FakeClock) -> BudgetGovernor:
     return BudgetGovernor(now=clock, reserve_fraction=0.15)
+
+
+@pytest.fixture
+def monotonic_clock(clock: FakeClock, monkeypatch: pytest.MonkeyPatch) -> FakeClock:
+    """Measure elapsed waits on the fake clock too."""
+    monkeypatch.setattr("ddev.utils.rate_limiting.monotonic", clock)
+    return clock
+
+
+def wait_events(events: list[RateLimitEvent]) -> list[WaitEvent]:
+    return [event for event in events if isinstance(event, WaitEvent)]
 
 
 @pytest.fixture
@@ -487,7 +503,7 @@ async def test_two_sequential_paced_waits_are_spaced_by_one_interval(
 
 
 async def test_wait_extends_when_retry_after_observed_mid_wait(
-    clock: FakeClock, monkeypatch: pytest.MonkeyPatch
+    clock: FakeClock, monotonic_clock: FakeClock, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """A retry_after pause raised while a request is mid-wait must extend the wait (pause_until floor)."""
     events: list[RateLimitEvent] = []
@@ -515,6 +531,15 @@ async def test_wait_extends_when_retry_after_observed_mid_wait(
     assert clock.current - start == pytest.approx(interval + 50.0)
     pacing_events = [event for event in events if isinstance(event, PacingEvent)]
     assert pacing_events[-1] == PacingEvent(wait_seconds=pytest.approx(50.0), reason=PacingReason.SECONDARY_LIMIT)
+    # One wait, reported once for all of it, under the cause that held it last.
+    assert wait_events(events) == [
+        WaitEvent(
+            reason=WaitReason.SECONDARY_LIMIT,
+            elapsed_seconds=pytest.approx(interval + 50.0),
+            outcome=WaitOutcome.COMPLETED,
+            requested_seconds=pytest.approx(interval),
+        )
+    ]
 
 
 async def test_wait_raises_when_max_iterations_exceeded_without_hanging(
@@ -548,7 +573,7 @@ async def test_wait_abandons_immediately_when_exhausted_window_exceeds_budget(
 
 
 async def test_wait_abandons_when_flood_pushes_floor_past_budget(
-    clock: FakeClock, monkeypatch: pytest.MonkeyPatch
+    clock: FakeClock, monotonic_clock: FakeClock, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """A secondary-limit extension that crosses the budget mid-wait must raise, not be slept out."""
     events: list[RateLimitEvent] = []
@@ -576,6 +601,14 @@ async def test_wait_abandons_when_flood_pushes_floor_past_budget(
     assert exc_info.value.remaining_seconds == pytest.approx(100.0)
     abandoned = [e for e in events if isinstance(e, PacingEvent) and e.reason is PacingReason.ABANDONED]
     assert abandoned == [PacingEvent(wait_seconds=pytest.approx(100.0), reason=PacingReason.ABANDONED)]
+    assert wait_events(events) == [
+        WaitEvent(
+            reason=WaitReason.RATIONING,
+            elapsed_seconds=pytest.approx(interval),
+            outcome=WaitOutcome.ABANDONED,
+            requested_seconds=pytest.approx(interval),
+        )
+    ]
 
 
 async def test_wait_with_ample_budget_sleeps_identically_to_no_budget(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -661,6 +694,109 @@ async def test_wait_fires_pacing_event_with_reason(
     assert pacing_events == [PacingEvent(wait_seconds=pytest.approx(expected_wait_seconds), reason=expected_reason)]
 
 
+@pytest.mark.parametrize(
+    ("arm", "expected_reason"),
+    [
+        pytest.param(None, None, id="healthy"),
+        pytest.param(arm_rationing, WaitReason.RATIONING, id="rationing"),
+        pytest.param(
+            lambda clock, governor: governor.observe(make_snapshot(clock=clock, limit=100, remaining=0, reset_in=50)),
+            WaitReason.EXHAUSTED,
+            id="exhausted",
+        ),
+    ],
+)
+async def test_only_a_wait_that_blocked_is_reported_with_its_measured_time(
+    clock: FakeClock,
+    monotonic_clock: FakeClock,
+    slept: list[float],
+    arm: Callable[[FakeClock, BudgetGovernor], None] | None,
+    expected_reason: WaitReason | None,
+) -> None:
+    events: list[RateLimitEvent] = []
+    governor = BudgetGovernor(now=clock, buffer_seconds=1.0, on_event=events.append)
+    if arm is not None:
+        arm(clock, governor)
+
+    await governor.wait()
+
+    expected = (
+        []
+        if expected_reason is None
+        else [
+            WaitEvent(
+                reason=expected_reason,
+                elapsed_seconds=pytest.approx(sum(slept)),
+                outcome=WaitOutcome.COMPLETED,
+                requested_seconds=pytest.approx(sum(slept)),
+            )
+        ]
+    )
+    assert wait_events(events) == expected
+
+
+class FakeBucket:
+    """An empty bucket whose acquire takes *wait_seconds* on *clock*, then optionally is cancelled."""
+
+    def __init__(self, clock: FakeClock, wait_seconds: float, *, cancelled: bool) -> None:
+        self.clock = clock
+        self.wait_seconds = wait_seconds
+        self.cancelled = cancelled
+
+    def has_capacity(self) -> bool:
+        return False
+
+    async def __aenter__(self) -> None:
+        self.clock.advance(self.wait_seconds)
+        if self.cancelled:
+            raise asyncio.CancelledError
+
+
+@pytest.mark.parametrize("cancel_during", [None, "governor", "bucket"])
+async def test_a_cancelled_wait_is_still_reported_for_the_time_it_blocked(
+    clock: FakeClock, monotonic_clock: FakeClock, monkeypatch: pytest.MonkeyPatch, cancel_during: str | None
+) -> None:
+    """A wait cut short by cancellation was still time a request spent blocked."""
+    events: list[RateLimitEvent] = []
+    governor = BudgetGovernor(now=clock, buffer_seconds=1.0, on_event=events.append)
+    governor.observe(make_snapshot(retry_after=30.0))
+
+    async def fake_sleep(delay: float) -> None:
+        clock.advance(5.0)
+        if cancel_during == "governor":
+            raise asyncio.CancelledError
+        clock.advance(delay - 5.0)
+
+    monkeypatch.setattr(asyncio, "sleep", fake_sleep)
+    limiter = InstrumentedAsyncLimiter(
+        FakeBucket(clock, 2.0, cancelled=cancel_during == "bucket"),  # type: ignore[arg-type]
+        on_event=events.append,
+        budget_governor=governor,
+        name="github",
+    )
+
+    with pytest.raises(asyncio.CancelledError) if cancel_during else contextlib.nullcontext():
+        await limiter.__aenter__()
+
+    def outcome(stage: str) -> WaitOutcome:
+        return WaitOutcome.CANCELLED if cancel_during == stage else WaitOutcome.COMPLETED
+
+    expected = [
+        WaitEvent(
+            reason=WaitReason.SECONDARY_LIMIT,
+            elapsed_seconds=pytest.approx(5.0 if cancel_during == "governor" else 31.0),
+            outcome=outcome("governor"),
+            requested_seconds=pytest.approx(31.0),
+            name="github",
+        )
+    ]
+    if cancel_during != "governor":
+        expected.append(
+            WaitEvent(reason=WaitReason.BUCKET, elapsed_seconds=2.0, outcome=outcome("bucket"), name="github")
+        )
+    assert wait_events(events) == expected
+
+
 # ---------------------------------------------------------------------------
 # InstrumentedAsyncLimiter + BudgetGovernor wiring
 # ---------------------------------------------------------------------------
@@ -705,3 +841,51 @@ async def test_instrumented_limiter_does_not_consume_bucket_token_during_governo
 def test_instrumented_limiter_observe_without_governor_does_not_raise():
     limiter = InstrumentedAsyncLimiter(AsyncLimiter(max_rate=1, time_period=1000))
     limiter.observe(make_snapshot(limit=100, remaining=50, reset_at=2000.0))
+
+
+@pytest.mark.parametrize(
+    ("limits", "message"),
+    [
+        pytest.param({"max_wait_seconds": -1.0, "max_rate": 10.0}, "max_wait_seconds must be zero", id="negative_wait"),
+        pytest.param({"max_wait_seconds": 2.0, "max_rate": 0.0}, "max_rate must be greater", id="zero_rate"),
+    ],
+)
+def test_relaxed_limits_that_would_block_forever_are_rejected(limits: dict[str, float], message: str) -> None:
+    """A rate of zero hands out no slots, so it would surface as a hang rather than an error."""
+    with pytest.raises(ValueError, match=message):
+        RelaxedRateLimits(**limits)
+
+
+async def test_relaxing_stops_rationing_the_budget(clock: FakeClock, slept: list[float]) -> None:
+    """Pacing spreads what is left of the budget over the window, which outlasts a dying process.
+
+    A cancelled CI job has about ten seconds. Rationing a low budget over a half-hour window puts
+    every request after the first outside that, so the cleanup would land one call and lose the rest.
+    """
+    governor = BudgetGovernor(now=clock, reserve_fraction=0.15)
+    limiter = InstrumentedAsyncLimiter(AsyncLimiter(max_rate=10, time_period=60), budget_governor=governor)
+    governor.observe(make_snapshot(clock=clock, limit=1000, remaining=100, reset_in=1800))
+
+    limiter.relax(max_wait_seconds=2.0, max_rate=10_000)
+    for _ in range(8):
+        async with limiter:
+            pass
+
+    assert slept == []
+
+
+async def test_relaxing_gives_up_on_a_pause_it_cannot_outlast(clock: FakeClock, slept: list[float]) -> None:
+    """A provider pause is real and cannot be skipped, but blocking on it wastes the time left.
+
+    Failing at once lets the caller move to the next thing it wants to say before the kill arrives.
+    """
+    governor = BudgetGovernor(now=clock, reserve_fraction=0.15)
+    limiter = InstrumentedAsyncLimiter(AsyncLimiter(max_rate=10, time_period=60), budget_governor=governor)
+    governor.observe(make_snapshot(retry_after=60))
+
+    limiter.relax(max_wait_seconds=2.0, max_rate=10_000)
+
+    with pytest.raises(RateLimitWaitAbandoned):
+        async with limiter:
+            pass
+    assert slept == []

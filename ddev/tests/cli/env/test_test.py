@@ -8,6 +8,7 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
+from click.exceptions import Exit
 from click.testing import Result
 from pytest_mock import MockerFixture, MockType
 
@@ -144,6 +145,68 @@ def test_environment_runs_for_enabled_environments(
         result = ddev('env', 'test', 'postgres', environment)
         assert result.exit_code == 0, result.output
         assert_commands_run(mock_commands, command_call_count)
+
+
+@pytest.mark.parametrize(
+    'ignore_teardown_errors, cleanup_error, test_exit_code, expected_exit_code',
+    [
+        (False, Exit(1), None, 1),
+        (True, Exit(1), None, 0),
+        (True, Exit(1), 2, 2),
+        (True, RuntimeError('cleanup failed'), None, 0),
+    ],
+)
+def test_automatic_cleanup_failure(
+    ddev: CliRunner,
+    data_dir: Path,
+    write_result_file: Callable[[Mapping[str, Any]], None],
+    mocker: MockerFixture,
+    mock_commands: tuple[MockType, MockType, MockType],
+    ignore_teardown_errors: bool,
+    cleanup_error: Exception,
+    test_exit_code: int | None,
+    expected_exit_code: int,
+):
+    setup(mocker, write_result_file, hatch_json_output={'py3.12': BASE_ENV_CONFIG})
+    mocker.patch.object(EnvData, 'read_metadata', return_value={})
+    mock_commands[1].side_effect = cleanup_error
+    if test_exit_code is not None:
+        mock_commands[2].side_effect = SystemExit(test_exit_code)
+
+    args = ('--ignore-teardown-errors',) if ignore_teardown_errors else ()
+    result = ddev('env', 'test', *args, 'postgres', 'py3.12')
+
+    assert result.exit_code == expected_exit_code, result.output
+    if ignore_teardown_errors:
+        assert f'Automatic teardown failed for `postgres:py3.12` ({cleanup_error!r})' in result.output
+        assert 'The next environment may fail' not in result.output
+    assert_commands_run(mock_commands)
+
+
+@pytest.mark.parametrize('first_test_fails', [False, True])
+def test_automatic_cleanup_failure_in_multi_environment_run(
+    ddev: CliRunner,
+    data_dir: Path,
+    write_result_file: Callable[[Mapping[str, Any]], None],
+    mocker: MockerFixture,
+    mock_commands: tuple[MockType, MockType, MockType],
+    first_test_fails: bool,
+):
+    setup(mocker, write_result_file, hatch_json_output={'py3.12': BASE_ENV_CONFIG, 'py3.13': BASE_ENV_CONFIG})
+    mocker.patch.object(EnvData, 'read_metadata', return_value={})
+    mock_commands[1].side_effect = [Exit(1), None]
+    mock_commands[2].side_effect = [SystemExit(2)] if first_test_fails else [None, SystemExit(2)]
+
+    result = ddev('env', 'test', '--ignore-teardown-errors', 'postgres', 'all')
+
+    assert result.exit_code == 2, result.output
+    assert 'Automatic teardown failed for `postgres:py3.12` (Exit(1)).' in result.output
+    next_environment_warning = 'The next environment may fail to start if cleanup was incomplete.'
+    if first_test_fails:
+        assert next_environment_warning not in result.output
+    else:
+        assert next_environment_warning in result.output
+    assert_commands_run(mock_commands, 1 if first_test_fails else 2)
 
 
 def test_command_errors_out_when_cannot_parse_json_output_from_hatch(

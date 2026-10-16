@@ -116,7 +116,7 @@ jobs:
           > 1. Wait for the resolution workflow to finish and commit the lockfiles to this branch.
           > 2. Review the Agent build triggered by that commit (`default-pipeline` in GitLab), especially `static_quality_gate`.
           > 3. Get the PR approved.
-          > 4. Promote the wheels:
+          > 4. Ask an `agent-integrations` maintainer to promote the wheels. Promotion dispatches a workflow that requires write access to this repository, so only a maintainer can run it (an outside contributor cannot):
           >    ```
           >    ddev dep promote ${{ env.PR_URL }}
           >    ```

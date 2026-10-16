@@ -2,13 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 4.6.1 / 2026-08-20
+## 4.6.1 / 2026-08-20 / Agent 7.84.0
 
 ***Fixed***:
 
 * Fix a `KeyError` crash when ACE omits the `name` field on a resource identifier. ([#24826](https://github.com/DataDog/integrations-core/pull/24826))
 
-## 4.6.0 / 2026-08-05
+## 4.6.0 / 2026-08-05 / Agent 7.83.0
 
 ***Security***:
 

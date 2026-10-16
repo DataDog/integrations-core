@@ -3,7 +3,7 @@
   "app_uuid": "5b78ef11-8d43-4695-96de-b09e85959e9c",
   "app_id": "ping-one-aic",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

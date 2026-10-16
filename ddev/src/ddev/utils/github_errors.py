@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import math
+from typing import Self
 
 import httpx
 
@@ -40,6 +41,28 @@ def github_secondary_rate_limit_wait(response: httpx.Response) -> float | None:
     if isinstance(data, dict) and 'secondary rate limit' in str(data.get('message', '')).lower():
         return DEFAULT_SECONDARY_RATE_LIMIT_WAIT_SECONDS
     return None
+
+
+class GitHubUnexpectedRedirectError(httpx.HTTPStatusError):
+    """A GitHub endpoint answered with a redirect that is not part of its contract.
+
+    The client never follows one, because the `Authorization` header would travel to whatever host
+    `Location` names. Only the artifact download expects a redirect; anywhere else it is surfaced.
+    """
+
+    @classmethod
+    def from_response(cls, method: str, endpoint: str, response: httpx.Response) -> Self:
+        """Build the error for an unexpected redirect returned by *method* *endpoint*.
+
+        Only called for a response that carries a Location.
+        """
+        return cls(
+            f'{method} {endpoint} returned an unexpected redirect (HTTP {response.status_code}) to '
+            f'{response.headers["location"]}. This endpoint is not expected to redirect, so the client '
+            f'did not follow it and the GitHub token was not sent to the target.',
+            request=response.request,
+            response=response,
+        )
 
 
 class GitHubAuthenticationError(httpx.HTTPStatusError):
