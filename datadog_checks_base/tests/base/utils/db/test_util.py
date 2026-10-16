@@ -846,7 +846,7 @@ class TestTagManager:
         ]
 
     def test_snapshot_is_unaffected_by_later_changes(self):
-        """Async jobs hold a snapshot while `check()` keeps updating the live tags"""
+        """A snapshot shared with another thread does not change when the live tags are updated"""
         tag_manager = TagManager()
         tag_manager.set_tag('env', 'prod')
         snapshot = tag_manager.snapshot()
