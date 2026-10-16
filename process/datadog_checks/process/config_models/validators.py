@@ -34,6 +34,15 @@ def instance_thresholds(value, **kwargs):
         for index, bound in enumerate(bounds):
             _validate_threshold_bound(field, index, bound)
 
+        # Shorter lists are left to the model's `min_length`.
+        if len(bounds) >= 2:
+            lower, upper = (math.inf if bound == INF_SENTINEL else bound for bound in bounds[:2])
+            # Like an infinite lower bound, an inverted range makes every process count a breach.
+            if lower > upper:
+                raise ValueError(
+                    f"thresholds.{field} lower bound cannot exceed the upper bound, got {list(bounds[:2])!r}"
+                )
+
     return value
 
 

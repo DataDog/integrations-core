@@ -516,6 +516,8 @@ def test_thresholds_null_uses_default(mock_process_iter, aggregator, dd_run_chec
         pytest.param(
             {'warning': [float('-inf'), '.inf'], 'critical': [1, '.inf']}, ProcessCheck.OK, id='unbounded_lower'
         ),
+        # Equal bounds are a valid range: exactly that many processes.
+        pytest.param({'warning': [1, 1], 'critical': [1, '.inf']}, ProcessCheck.OK, id='equal_bounds'),
     ],
 )
 @patch('psutil.process_iter', return_value=[NamedMockProcess("foo", pid=123, cmdline=["foo"])])
@@ -554,7 +556,9 @@ INF_LOWER = "thresholds.warning lower bound cannot be infinite"
             [1, float('-inf')], "thresholds.warning upper bound cannot be negative infinity", id='neg_inf_upper'
         ),
         # Too large for a float: left to the model's error rather than an `OverflowError` here.
-        pytest.param([10**400, 5], 'thresholds -> warning', id='huge_int_lower'),
+        pytest.param([10**400, 10**401], 'thresholds -> warning', id='huge_int_lower'),
+        # An inverted range breaches for every process count.
+        pytest.param([10, 5], 'thresholds.warning lower bound cannot exceed the upper bound', id='inverted_range'),
         # Non-list shapes are left to the generated model's own error.
         pytest.param(5, 'thresholds -> warning', id='not_a_list'),
         pytest.param('.inf', 'thresholds -> warning', id='bare_inf_str'),
