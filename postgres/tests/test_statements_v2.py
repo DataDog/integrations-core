@@ -14,7 +14,7 @@ from unittest import mock
 import pytest
 from semver import VersionInfo
 
-from datadog_checks.base.utils.db.query_metrics import TextKind
+from datadog_checks.base.utils.db.query_metrics import ObfuscationResult, TextKind
 from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.config import build_config
 from datadog_checks.postgres.statements import (
@@ -190,6 +190,97 @@ class TestPostgresStatementMetricsV2:
         # Resolution still ran, which is what prunes cache entries for statements that have left
         # pg_stat_statements; skipping it on quiet cycles would let the cache grow unbounded.
         assert gauge_names.count('dd.postgres.statement_metrics.lookup.dropped') == 2
+
+    # --- non-monotonic statistics ---
+
+    def test_collect_metrics_rows_keeps_row_when_min_plan_time_decreases(self):
+        """A drop in min_plan_time must not discard the row.
+
+        min_plan_time, max_plan_time and mean_plan_time are summary statistics rather than
+        cumulative counters, so they move in both directions during normal operation: one faster
+        execution lowers min_plan_time while calls keeps climbing. Treating a decrease as a counter
+        reset silently drops the whole interval for that statement, losing calls, rows and timing.
+        """
+        v2 = self._make()
+
+        def snapshot(calls, min_plan_time):
+            return [
+                {
+                    'queryid': 1,
+                    'dbid': 1,
+                    'userid': 1,
+                    'datname': 'db',
+                    'rolname': 'r',
+                    'calls': calls,
+                    'total_exec_time': calls * 10.0,
+                    'min_plan_time': min_plan_time,
+                }
+            ]
+
+        obfuscation = ObfuscationResult(
+            obfuscated_query='SELECT ?',
+            query_signature='sig',
+            tables=None,
+            commands=None,
+            comments=None,
+        )
+
+        snapshots = iter([snapshot(10, 5.0), snapshot(12, 2.0)])
+
+        with (
+            mock.patch.object(v2, '_emit_pg_stat_statements_metrics'),
+            mock.patch.object(v2, '_emit_pg_stat_statements_dealloc'),
+            mock.patch.object(v2, '_emit_pg_stat_statements_max_warning'),
+            mock.patch.object(v2, '_sync_cache_sizes'),
+            mock.patch.object(v2, '_load_lightweight_snapshot', side_effect=lambda: next(snapshots)),
+            mock.patch.object(v2, '_resolve_obfuscations', return_value={(1, 1, 1): obfuscation}),
+        ):
+            v2._collect_metrics_rows()
+            rows = v2._collect_metrics_rows()
+
+        assert len(rows) == 1
+        assert rows[0]['calls'] == 2
+        assert rows[0]['total_exec_time'] == pytest.approx(20.0)
+        # Reported as it stands now, not as a difference: the interval did not shave 3ms off
+        # anything, the fastest plan ever seen for this statement is simply now 2ms.
+        assert rows[0]['min_plan_time'] == pytest.approx(2.0)
+
+    def test_merge_by_query_signature_combines_summary_statistics(self):
+        """Rows folded into one signature combine their summary statistics, rather than summing.
+
+        Distinct pg_stat_statements entries collapse into one output row whenever they obfuscate to
+        the same signature. Adding their minimums together would report a fastest plan slower than
+        any plan that actually ran.
+        """
+        rows = [
+            {
+                'query_signature': 'sig',
+                'datname': 'db',
+                'rolname': 'r',
+                'calls': 1,
+                'min_plan_time': 4.0,
+                'max_plan_time': 6.0,
+                'mean_plan_time': 5.0,
+            },
+            {
+                'query_signature': 'sig',
+                'datname': 'db',
+                'rolname': 'r',
+                'calls': 3,
+                'min_plan_time': 1.0,
+                'max_plan_time': 2.0,
+                'mean_plan_time': 1.0,
+            },
+        ]
+
+        merged = PostgresStatementMetricsV2._merge_by_query_signature(rows)
+
+        assert len(merged) == 1
+        assert merged[0]['calls'] == 4
+        assert merged[0]['min_plan_time'] == pytest.approx(1.0)
+        assert merged[0]['max_plan_time'] == pytest.approx(6.0)
+        # Weighted by each row's calls, so the three quick executions dominate the one slow one.
+        assert merged[0]['mean_plan_time'] == pytest.approx(2.0)
 
     # --- track_io_timing column exclusion ---
 

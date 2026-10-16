@@ -19,6 +19,8 @@ _OP_SPLIT = re.compile(r'\s*(?:(?<!-)\b(?:AND|OR)\b(?!-)|/|\+|\band/or\b)\s*', r
 # and may appear as LicenseRef-* / DocumentRef-*:LicenseRef-*
 _ID = re.compile(r"(DocumentRef-[A-Za-z0-9.+-]+:)?LicenseRef-[A-Za-z0-9.+-]+|[A-Za-z0-9.+-]+")
 
+DOWNLOAD_RETRIES = 2
+
 
 def format_attribution_line(package_name, license_id, package_copyright):
     if ',' in package_copyright:
@@ -70,18 +72,34 @@ def collect_source_url(package_data):
     return combined[0]
 
 
-def scrape_copyright_data(url_path):
-    """
-    Scrapes each tarfile for copyright attributions.
-    """
+def scrape_copyright_data(url_path: str) -> str | None:
+    """Download an archive with bounded connection retries and extract its copyright."""
+    import time
+
     import httpx
 
-    with httpx.stream('GET', url_path, follow_redirects=True) as resp:
-        resp.read()
-        for fcontents in pick_file_generator(url_path)(resp):
-            if cp := find_cpy(fcontents):
-                return cp
-    return None
+    attempt = 0
+    while True:
+        try:
+            # Keep the httpx.stream defaults so environment proxy support is preserved.
+            with httpx.stream('GET', url_path, follow_redirects=True) as resp:
+                resp.raise_for_status()
+                resp.read()
+                for fcontents in pick_file_generator(url_path)(resp):
+                    if cp := find_cpy(fcontents):
+                        return cp
+            return None
+        except (
+            httpx.ConnectError,
+            httpx.ConnectTimeout,
+            httpx.ReadError,
+            httpx.ReadTimeout,
+            httpx.RemoteProtocolError,
+        ):
+            if attempt == DOWNLOAD_RETRIES:
+                raise
+            time.sleep(2**attempt)
+            attempt += 1
 
 
 def find_cpy(data):

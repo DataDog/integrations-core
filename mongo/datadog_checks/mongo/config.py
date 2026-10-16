@@ -243,9 +243,8 @@ class MongoConfig(object):
     @property
     def query_metrics(self):
         # Query metrics requires MongoDB 8.0+ and uses $queryStats aggregation pipeline
-        # Disabled by default - must be explicitly enabled unlike other DBM features
         enabled = False
-        if self.dbm_enabled is True and is_affirmative(self._query_metrics_config.get('enabled', False)):
+        if self.dbm_enabled is True and is_affirmative(self._query_metrics_config.get('enabled', True)):
             enabled = True
         return {
             'enabled': enabled,

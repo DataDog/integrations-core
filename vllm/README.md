@@ -31,6 +31,17 @@ No additional installation is needed on your server.
 
 See [metadata.csv][6] for a list of metrics provided by this integration.
 
+The following metrics are collected only when [GPU Monitoring][8] is enabled:
+
+- `vllm.estimated_flops_per_gpu`
+- `vllm.external_prefix_cache`
+- `vllm.prompt_tokens.cached`
+- `vllm.request.decode_time`
+- `vllm.request.prefill_kv_computed_tokens`
+- `vllm.request.prefill_time`
+- `vllm.request.queue_time`
+- `vllm.spec_decode`
+
 ### Events
 
 The vLLM integration does not include any events.
@@ -62,6 +73,7 @@ Additional helpful documentation, links, and articles:
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
 [6]: https://github.com/DataDog/integrations-core/blob/master/vllm/metadata.csv
 [7]: https://github.com/DataDog/integrations-core/blob/master/vllm/assets/service_checks.json
+[8]: https://docs.datadoghq.com/gpu_monitoring/
 [9]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/containers/docker/log/?tab=containerinstallation#installation
 [11]: https://docs.datadoghq.com/containers/docker/log/?tab=hostagent#installation

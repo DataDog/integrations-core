@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
+
 from datadog_checks.base import OpenMetricsBaseCheckV2
 from datadog_checks.base.constants import ServiceCheck
 
@@ -29,6 +31,112 @@ def test_default_config(aggregator, dd_run_check, mock_http_response):
     )
 
     aggregator.assert_all_metrics_covered()
+
+
+@pytest.mark.parametrize(
+    ('instance_renames', 'expected_tags'),
+    [
+        pytest.param({'qux': 'corge'}, ['endpoint:test', 'bar:baz', 'corge:quux'], id='disjoint_keys_merged'),
+        pytest.param({'foo': 'corge'}, ['endpoint:test', 'corge:baz', 'qux:quux'], id='colliding_key_instance_wins'),
+        pytest.param({}, ['endpoint:test', 'bar:baz', 'qux:quux'], id='empty_instance_keeps_defaults'),
+    ],
+)
+def test_default_rename_labels_merged_with_instance(
+    aggregator, dd_run_check, mock_http_response, instance_renames, expected_tags
+):
+    """
+    A `rename_labels` default is merged with the instance's, entry by entry: disjoint keys union
+    together, and on a collision the instance's entry wins. Without the merge, the `ChainMap` would
+    let an instance that sets `rename_labels` at all shadow the class default wholesale.
+    """
+
+    class Check(OpenMetricsBaseCheckV2):
+        __NAMESPACE__ = 'test'
+
+        def get_default_config(self):
+            return {'metrics': ['.+'], 'rename_labels': {'foo': 'bar'}}
+
+    mock_http_response(
+        """
+        # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+        # TYPE go_memstats_alloc_bytes gauge
+        go_memstats_alloc_bytes{foo="baz",qux="quux"} 6.396288e+06
+        """
+    )
+    check = Check('test', {}, [{'openmetrics_endpoint': 'test', 'rename_labels': instance_renames}])
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'test.go_memstats_alloc_bytes',
+        6396288,
+        metric_type=aggregator.GAUGE,
+        tags=expected_tags,
+    )
+
+    aggregator.assert_all_metrics_covered()
+
+
+def test_default_config_mapping_not_shared_between_scrapers(aggregator, dd_run_check, mock_http_response):
+    """
+    One scraper's merged renames must not leak into another. The merge builds a fresh mapping per
+    scraper rather than writing back into the dict `get_default_config` returns.
+    """
+    default_renames = {'foo': 'bar'}
+
+    class Check(OpenMetricsBaseCheckV2):
+        __NAMESPACE__ = 'test'
+
+        def __init__(self, name, init_config, instances):
+            super().__init__(name, init_config, instances)
+            self.scraper_configs = [
+                {'openmetrics_endpoint': 'test1', 'rename_labels': {'qux': 'corge'}},
+                {'openmetrics_endpoint': 'test2', 'rename_labels': {}},
+            ]
+
+        def get_default_config(self):
+            return {'metrics': ['.+'], 'rename_labels': default_renames}
+
+    mock_http_response(
+        """
+        # HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+        # TYPE go_memstats_alloc_bytes gauge
+        go_memstats_alloc_bytes{qux="quux"} 6.396288e+06
+        """
+    )
+    check = Check('test', {}, [{'openmetrics_endpoint': 'test1'}])
+    dd_run_check(check)
+
+    # A leak would surface `qux` as `corge:quux` on the second scraper too.
+    aggregator.assert_metric(
+        'test.go_memstats_alloc_bytes', 6396288, metric_type=aggregator.GAUGE, tags=['endpoint:test1', 'corge:quux']
+    )
+    aggregator.assert_metric(
+        'test.go_memstats_alloc_bytes', 6396288, metric_type=aggregator.GAUGE, tags=['endpoint:test2', 'qux:quux']
+    )
+
+    # The merge must not have mutated the dict `get_default_config` returned.
+    assert default_renames == {'foo': 'bar'}
+
+
+def test_default_config_only_rename_labels_is_merged():
+    """
+    Only `rename_labels` is merged. Other mapping-valued options keep wholesale-replace semantics, so
+    an instance can still disable a check's `share_labels` default by passing `{}`.
+    """
+
+    class Check(OpenMetricsBaseCheckV2):
+        __NAMESPACE__ = 'test'
+
+        def get_default_config(self):
+            return {'rename_labels': {'foo': 'bar'}, 'share_labels': {'cp_info': {'labels': ['version']}}}
+
+    check = Check('test', {}, [{'openmetrics_endpoint': 'test'}])
+    resolved = check.get_config_with_defaults(
+        {'openmetrics_endpoint': 'test', 'rename_labels': {'qux': 'corge'}, 'share_labels': {}}
+    )
+
+    assert resolved['rename_labels'] == {'foo': 'bar', 'qux': 'corge'}
+    assert resolved['share_labels'] == {}
 
 
 def test_tag_by_endpoint(aggregator, dd_run_check, mock_http_response):

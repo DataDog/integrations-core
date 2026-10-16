@@ -6,7 +6,7 @@ version = ["11.1"]
 
 [envs.default.env-vars]
 DB2_VERSION = "{matrix:version:11.1}"
-IBM_DB_INSTALLER_URL = "https://ddintegrations.blob.core.windows.net/ibm-db2/"
+IBM_DB_INSTALLER_URL = "https://agent-integrations-ci-fixtures.s3.us-east-1.amazonaws.com/fixtures/ibm-db2/"
 
 [envs.default]
 dependencies = [

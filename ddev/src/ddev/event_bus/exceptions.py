@@ -17,6 +17,7 @@ class HookName(StrEnum):
     ON_FINALIZE = auto()
     ON_MESSAGE_RECEIVED = auto()
     ON_SUCCESS = auto()
+    ON_ERROR = auto()
 
 
 class ProcessorQueueError(Exception):

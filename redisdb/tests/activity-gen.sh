@@ -11,6 +11,13 @@ DURATION="${ACTIVITY_DURATION:-0}"   # 0 = run forever
 
 log() { echo "activity-gen: $*"; }
 
+# Opt out of the workload for a quiescent redis-full: ACTIVITY_GEN=0 keeps the
+# container running (so dependents still start) but generates no traffic.
+if [ "${ACTIVITY_GEN:-1}" = "0" ]; then
+  log "disabled via ACTIVITY_GEN=0; idling"
+  exec sleep infinity
+fi
+
 # Eviction ceiling + policy (matches the compose master; re-set so the script
 # also works against a plain Redis) and a slowlog threshold above ordinary
 # commands but below the DEBUG SLEEP below.
