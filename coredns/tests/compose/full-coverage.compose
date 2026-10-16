@@ -40,10 +40,14 @@ services:
     image: alpine:3.20
     restart: unless-stopped
     environment:
-      DNS_HOST: coredns
+      # Service name under plain compose; evalya aliases the entrypoint by its
+      # task id instead. activity-gen.sh uses whichever answers first.
+      DNS_HOSTS: "coredns coredns-full"
       # Set ACTIVITY_GEN=0 (host env) for a quiescent coredns-full: the
       # container stays up but generates no traffic. Defaults to on.
       ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+      # Seconds before the workload stops; 0 (default) runs forever.
+      ACTIVITY_DURATION: "${ACTIVITY_DURATION:-0}"
     volumes:
       - ../activity-gen.sh:/opt/activity-gen.sh:ro
     entrypoint: ["sh", "/opt/activity-gen.sh"]
