@@ -100,7 +100,7 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
         self._lock = asyncio.Lock()
         self._logger = monitor.logger
         self.monitor = monitor
-        self._metrics = MetricsHelper(monitor.metrics)
+        self._metrics = MetricsHelper(monitor)
 
     @property
     def latest_body(self) -> str | None:
@@ -142,29 +142,18 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                 self._logger.info("No pull request to update: %s", summary_line(message.progress), published=False)
                 published = True
             else:
-                self._pr_comment_failed = True
-                try:
-                    published = await self._write(pr_number, body, message.progress, revision=message.revision, now=now)
-                except Exception:
-                    self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=True)
-                    self._metrics.log_failed_operation(
-                        Operation.PUBLISH_REPORT,
-                        self._logger,
-                        "Failed to publish PR comment for revision %s",
-                        message.revision,
-                        exc_info=True,
-                    )
-                    raise
-                self._pr_comment_failed = not published
-                self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=not published)
-                if not published:
-                    self._metrics.log_failed_operation(
-                        Operation.PUBLISH_REPORT,
-                        self._logger,
-                        "PR comment not published for revision %s",
-                        message.revision,
-                        recovered=True,
-                    )
+                with self._metrics.operation(Operation.PUBLISH_REPORT) as op:
+                    self._pr_comment_failed = True
+                    try:
+                        published = await self._write(
+                            pr_number, body, message.progress, revision=message.revision, now=now
+                        )
+                    except Exception:
+                        op.fail("Failed to publish PR comment for revision %s", message.revision)
+                        raise
+                    self._pr_comment_failed = not published
+                    if not published:
+                        op.fail("PR comment not published for revision %s", message.revision)
 
             if message.progress.done and published:
                 self._final_report_published = True
@@ -194,26 +183,15 @@ class TaskRunReporter(AsyncProcessor["UpdatePRComment"]):
                     return
 
                 self._pr_comment_failed = True
-                try:
-                    published = await self._write(pr_number, body, progress, shutdown=request, now=now)
-                except Exception:
-                    self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=True)
-                    self._metrics.log_failed_operation(
-                        Operation.PUBLISH_REPORT,
-                        self._logger,
-                        "Failed to publish the shutdown PR comment",
-                        exc_info=True,
-                    )
-                    raise
-                self._pr_comment_failed = not published
-                self._metrics.record_operation(Operation.PUBLISH_REPORT, failed=not published)
-                if not published:
-                    self._metrics.log_failed_operation(
-                        Operation.PUBLISH_REPORT,
-                        self._logger,
-                        "Shutdown PR comment not published",
-                        recovered=True,
-                    )
+                with self._metrics.operation(Operation.PUBLISH_REPORT) as op:
+                    try:
+                        published = await self._write(pr_number, body, progress, shutdown=request, now=now)
+                    except Exception:
+                        op.fail("Failed to publish the shutdown PR comment")
+                        raise
+                    self._pr_comment_failed = not published
+                    if not published:
+                        op.fail("Shutdown PR comment not published")
                 if published:
                     self._logger.info("Run reported as %s", request.kind.value, published=True)
 

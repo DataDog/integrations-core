@@ -9,6 +9,7 @@ import asyncio
 import json
 import logging
 import secrets
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -21,13 +22,7 @@ from ddev.cli.ci.tests import messages, task_test_runner
 from ddev.cli.ci.tests.dispatcher_attributes import run_fields
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, TestBatch
 from ddev.cli.ci.tests.progress import ExecutionState
-from ddev.cli.ci.tests.status import (
-    Status,
-    conclusion_to_status,
-    has_finished_running,
-    has_started_running,
-    is_queued,
-)
+from ddev.cli.ci.tests.status import Status
 from ddev.cli.ci.tests.task_test_runner import (
     CANCEL_REQUEST_TIMEOUT,
     WORKFLOW_INPUTS_LIMIT,
@@ -46,6 +41,7 @@ from ddev.utils.github_async.models import (
     WorkflowJobStatus,
     WorkflowRun,
 )
+from ddev.utils.platform import PlatformName
 from tests.cli.ci.helpers import decode_job_list
 from tests.cli.ci.tests.helpers import (
     RecordingBus,
@@ -53,6 +49,7 @@ from tests.cli.ci.tests.helpers import (
     invalid_response_error,
     make_job,
     recording_runtime,
+    timed_out_job,
 )
 from tests.helpers.clock import FakeClock, advance_clock_on_sleep
 from tests.helpers.github_async import (
@@ -202,7 +199,9 @@ async def test_healthy_attempts_report_zero_operation_failures(tmp_path: Path):
         "collect_artifacts": 0,
     }
     assert {record.tags['dispatcher.component'] for record in sink.records_named('operations.count')} == {'test-runner'}
-    assert [record.kind.value for record in sink.records_named('artifacts.download.duration')] == ['distribution']
+    durations = sink.records_named('operation.duration')
+    assert [record.kind.value for record in durations] == ['distribution'] * sum(counted.values())
+    assert {record.tags['dispatcher.operation.result'] for record in durations} == {'success'}
 
 
 async def test_polling_intervals_are_measured_between_polls_of_the_same_batch(
@@ -298,55 +297,6 @@ async def test_a_completed_workflow_without_timing_reports_no_batch_duration(tmp
 
 
 # ---------------------------------------------------------------------------
-# conclusion_to_status
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.parametrize(
-    ("conclusion", "expected"),
-    [
-        ("success", Status.SUCCESS),
-        ("skipped", Status.SKIPPED),
-        ("failure", Status.FAILURE),
-        ("cancelled", Status.FAILURE),
-        ("timed_out", Status.FAILURE),
-        ("action_required", Status.FAILURE),
-        ("neutral", Status.FAILURE),
-        (None, Status.FAILURE),
-    ],
-)
-def test_conclusion_to_status(conclusion: str | None, expected: Status):
-    result = conclusion_to_status(conclusion)
-    assert result is expected
-    assert isinstance(result, Status)
-
-
-@pytest.mark.parametrize(
-    ("status", "conclusion", "queued", "started", "finished"),
-    [
-        pytest.param(WorkflowJobStatus.QUEUED, None, True, False, False, id="queued"),
-        pytest.param(WorkflowJobStatus.WAITING, None, True, False, False, id="waiting"),
-        pytest.param(WorkflowJobStatus.PENDING, None, True, False, False, id="pending"),
-        pytest.param(WorkflowJobStatus.REQUESTED, None, False, False, False, id="requested"),
-        pytest.param(WorkflowJobStatus.IN_PROGRESS, None, False, True, False, id="in-progress"),
-        pytest.param(WorkflowJobStatus.COMPLETED, WorkflowJobConclusion.SUCCESS, False, True, True, id="success"),
-        pytest.param(WorkflowJobStatus.COMPLETED, WorkflowJobConclusion.FAILURE, False, True, True, id="failure"),
-        pytest.param(WorkflowJobStatus.COMPLETED, WorkflowJobConclusion.TIMED_OUT, False, True, True, id="timed-out"),
-        pytest.param(WorkflowJobStatus.COMPLETED, WorkflowJobConclusion.SKIPPED, False, False, False, id="skipped"),
-        pytest.param(WorkflowJobStatus.COMPLETED, WorkflowJobConclusion.CANCELLED, False, False, False, id="cancelled"),
-        pytest.param(WorkflowJobStatus.COMPLETED, WorkflowJobConclusion.NEUTRAL, False, False, False, id="neutral"),
-    ],
-)
-def test_a_jobs_state_on_a_runner(
-    status: WorkflowJobStatus, conclusion: WorkflowJobConclusion | None, queued: bool, started: bool, finished: bool
-):
-    """Only a job that ran has timing worth measuring; `requested` is not a wait for a runner."""
-    job = make_workflow_job(status=status, conclusion=conclusion)
-
-    assert (is_queued(job), has_started_running(job), has_finished_running(job)) == (queued, started, finished)
-
-
-# ---------------------------------------------------------------------------
 # process_message — happy path (one concern per test)
 # ---------------------------------------------------------------------------
 
@@ -402,6 +352,50 @@ async def test_a_jobs_listing_not_yet_visible_after_dispatch_is_retried(
     assert failed_by_operation(sink) == {"refresh_jobs": 0}
 
 
+async def test_a_workflow_run_not_yet_visible_after_dispatch_is_retried(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    advance_clock_on_sleep(FakeClock(), monkeypatch)
+    responses = [
+        httpx.Response(404),
+        httpx.Response(200, json=make_workflow_run().model_dump(mode="json")),
+        httpx.Response(200, json=make_workflow_jobs_list([make_workflow_job(name="j1")]).model_dump(mode="json")),
+    ]
+    client = AsyncGitHubClient("token", transport=httpx.MockTransport(lambda request: responses.pop(0)))
+    monitoring, sink = recording_runtime()
+    runner = make_runner(client, tmp_path, monitor=monitoring.component("test-runner"))  # type: ignore[arg-type]
+
+    try:
+        run, jobs = await runner._poll_until_complete(make_batch(), 123)
+    finally:
+        await client.aclose()
+
+    assert run.data.id == 123
+    assert [job.name for job in jobs] == ["j1"]
+    assert failed_by_operation(sink) == {"fetch_workflow": 0, "refresh_jobs": 0}
+
+
+@pytest.mark.parametrize("status_code, attempts", [(404, 3), (403, 1)], ids=["not-found", "forbidden"])
+async def test_a_workflow_run_read_failure_stops_after_its_retry_budget(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, status_code: int, attempts: int
+):
+    advance_clock_on_sleep(FakeClock(), monkeypatch)
+    responses = [httpx.Response(status_code) for _ in range(attempts)]
+    client = AsyncGitHubClient("token", transport=httpx.MockTransport(lambda request: responses.pop(0)))
+    monitoring, sink = recording_runtime()
+    runner = make_runner(client, tmp_path, monitor=monitoring.component("test-runner"))  # type: ignore[arg-type]
+
+    try:
+        with pytest.raises(httpx.HTTPStatusError) as exc_info:
+            await runner._poll_until_complete(make_batch(), 123)
+    finally:
+        await client.aclose()
+
+    assert exc_info.value.response.status_code == status_code
+    assert responses == []
+    assert failed_by_operation(sink) == {"fetch_workflow": 1}
+
+
 async def test_a_dispatch_github_refuses_fails_the_dispatch_operation_only(tmp_path: Path):
     client = FakeAsyncGitHubClient()
     client.mock_response("create_workflow_dispatch", RuntimeError("dispatch refused"))
@@ -449,15 +443,9 @@ async def test_collection_publishes_outcomes_before_a_cancellable_artifact_reque
         with pytest.raises(asyncio.CancelledError):
             await task
 
-    # A cancelled download never settled, so it counts as no operation outcome at all, but the
-    # time it took is still reported.
-    settled = [
-        record
-        for record in sink.records_named("operations.count")
-        if record.tags["dispatcher.operation"] == "collect_artifacts"
-    ]
-    assert settled == []
-    assert [record.kind for record in sink.records_named("artifacts.download.duration")] == [MetricKind.DISTRIBUTION]
+    # A cancelled download never settled, so the collection produced no outcome at all.
+    collected = [record for record in sink.records if record.tags.get("dispatcher.operation") == "collect_artifacts"]
+    assert collected == []
 
     await runner.cancel_dispatched_runs()
     assert client.calls_to("cancel_workflow_run") == []
@@ -808,11 +796,38 @@ async def test_queued_and_running_gauges_track_each_poll_and_settle_at_zero(tmp_
     assert [record.value for record in queued] == [1, 0, 0]
     assert [record.value for record in running] == [0, 1, 0]
     assert {record.kind for record in queued + running} == {MetricKind.GAUGE}
-    # The batch is part of each series' identity, so concurrent batches of one run do not overwrite each other.
-    assert {
-        (record.tags["dispatcher.batch.job.platform"], record.tags["dispatcher.batch.id"])
-        for record in queued + running
-    } == {("linux", "batch-07")}
+    assert {record.tags["dispatcher.batch.job.platform"] for record in queued + running} == {"linux"}
+
+
+def test_job_gauges_sum_batches_per_platform(tmp_path: Path):
+    """The gauges have no batch tag: concurrent batches sum, and a completed batch counts zero."""
+    monitoring, sink = recording_runtime()
+    runner = make_runner(FakeAsyncGitHubClient(), tmp_path, monitor=monitoring.component("test-runner"))
+    first = batch_with(make_job("j1"), batch_id="batch-1")
+    second = batch_with(make_job("j2"), batch_id="batch-2")
+    idle = batch_with(make_job("j3", platform=PlatformName.WINDOWS), batch_id="batch-3")
+
+    def samples(name: str, platform: str = "linux") -> list[float]:
+        return [
+            record.value
+            for record in sink.records_named(name)
+            if record.tags["dispatcher.batch.job.platform"] == platform
+        ]
+
+    runner._report_job_activity(first, {"j1": make_workflow_job(name="j1", status=WorkflowJobStatus.IN_PROGRESS)})
+    runner._report_job_activity(second, {"j2": make_workflow_job(name="j2", status=WorkflowJobStatus.QUEUED)})
+    assert samples("jobs.queued") == [0, 1]
+    assert samples("jobs.running") == [1, 1]
+
+    # A platform planned but never observed gets its zero sample.
+    runner._report_job_activity(idle, {})
+    assert samples("jobs.queued", "windows") == [0]
+    assert samples("jobs.queued") == [0, 1, 1]
+
+    # The completed batch keeps its platform in the series but stops counting its jobs.
+    runner._report_job_activity(first, {})
+    assert samples("jobs.queued") == [0, 1, 1, 1]
+    assert samples("jobs.running") == [1, 1, 1, 0]
 
 
 async def test_a_completed_workflow_ends_its_gauges_at_zero_when_the_final_listing_fails(tmp_path: Path):
@@ -894,7 +909,7 @@ async def test_a_job_that_never_ran_reports_no_queue_wait(tmp_path: Path):
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run())
     job = make_job()
-    mock_jobs(fake, [make_workflow_job(name=job.name, conclusion=WorkflowJobConclusion.CANCELLED)])
+    mock_jobs(fake, [make_workflow_job(name=job.name, conclusion=WorkflowJobConclusion.CANCELLED, runner_name=None)])
     mock_artifacts(fake, [])
     monitoring, sink = recording_runtime()
     runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
@@ -1012,23 +1027,60 @@ async def test_job_first_seen_finished_in_reconcile_listing(tmp_path: Path):
 
 
 @pytest.mark.parametrize(
-    ("conclusion", "status", "level", "has_duration"),
+    ("workflow_job", "status", "level", "expected_duration"),
     [
-        pytest.param(WorkflowJobConclusion.SUCCESS, "success", "info", True, id="success"),
-        pytest.param(WorkflowJobConclusion.SKIPPED, "skipped", "info", False, id="skipped"),
-        pytest.param(WorkflowJobConclusion.FAILURE, "failure", "warning", True, id="failure"),
-        pytest.param(WorkflowJobConclusion.CANCELLED, "failure", "warning", False, id="cancelled"),
-        pytest.param(WorkflowJobConclusion.TIMED_OUT, "failure", "warning", True, id="timed-out"),
+        pytest.param(
+            lambda name: make_workflow_job(name=name, conclusion=WorkflowJobConclusion.SUCCESS),
+            "success",
+            "info",
+            DEFAULT_DURATION_SECONDS,
+            id="success",
+        ),
+        pytest.param(
+            lambda name: make_workflow_job(name=name, conclusion=WorkflowJobConclusion.SKIPPED),
+            "skipped",
+            "info",
+            None,
+            id="skipped",
+        ),
+        pytest.param(
+            lambda name: make_workflow_job(name=name, conclusion=WorkflowJobConclusion.FAILURE),
+            "failure",
+            "warning",
+            DEFAULT_DURATION_SECONDS,
+            id="failure",
+        ),
+        pytest.param(
+            lambda name: make_workflow_job(name=name, conclusion=WorkflowJobConclusion.CANCELLED, runner_name=None),
+            "cancelled",
+            "info",
+            None,
+            id="cancelled-while-queued",
+        ),
+        pytest.param(
+            lambda name: make_workflow_job(name=name, conclusion=WorkflowJobConclusion.TIMED_OUT),
+            "failure",
+            "warning",
+            DEFAULT_DURATION_SECONDS,
+            id="concluded-timed-out",
+        ),
+        pytest.param(timed_out_job, "failure", "warning", 7230.0, id="timed-out-by-the-limit"),
     ],
 )
 async def test_finished_report_by_outcome(
-    tmp_path: Path, conclusion: WorkflowJobConclusion, status: str, level: str, has_duration: bool
+    tmp_path: Path,
+    workflow_job: Callable[[str], WorkflowJob],
+    status: str,
+    level: str,
+    expected_duration: float | None,
 ):
-    """Skipped and cancelled jobs never ran, so they have no duration."""
+    """Skipped jobs and jobs cancelled while queued never ran, so they have no duration. A job
+    stopped by its timeout is a failure internally, whatever its `cancelled` conclusion."""
     fake = FakeAsyncGitHubClient()
     fake.mock_response("get_workflow_run", make_workflow_run())
     job = make_job()
-    mock_jobs(fake, [make_workflow_job(name=job.name, conclusion=conclusion)])
+    observed = workflow_job(job.name)
+    mock_jobs(fake, [observed])
     mock_artifacts(fake, [])
     handler = RecordingJsonHandler()
     monitoring, sink = recording_runtime(handler)
@@ -1039,9 +1091,10 @@ async def test_finished_report_by_outcome(
     [record] = _finished_records(handler)
     assert record["level"] == level
     assert record["job_status"] == status
-    assert record["job_conclusion"] == conclusion.value
-    assert ("job_duration_seconds" in record) is has_duration
-    assert (len(sink.records_named("job.duration")) == 1) is has_duration
+    assert record["job_conclusion"] == observed.conclusion.value
+    assert record.get("job_duration_seconds") == expected_duration
+    durations = sink.records_named("job.duration")
+    assert [sample.value for sample in durations] == ([expected_duration] if expected_duration is not None else [])
 
 
 async def test_unusable_timing_not_retried(tmp_path: Path):
@@ -1335,7 +1388,13 @@ async def test_process_message_emits_batch_finished_when_listing_artifacts_fails
         "refresh_jobs": 0,
         "collect_artifacts": 1,
     }
-    assert [record.kind for record in sink.records_named("artifacts.download.duration")] == [MetricKind.DISTRIBUTION]
+    [duration] = [
+        record
+        for record in sink.records_named("operation.duration")
+        if record.tags["dispatcher.operation"] == "collect_artifacts"
+    ]
+    assert duration.kind is MetricKind.DISTRIBUTION
+    assert duration.tags["dispatcher.operation.result"] == "failure"
     [warning] = [event for event in handler.events if event.get("operation") == "collect_artifacts"]
     assert warning["level"] == "warning"
     assert warning["event"] == "Failed to list workflow run artifacts"
@@ -1369,11 +1428,18 @@ async def test_download_failure_for_one_artifact_does_not_abort_others(tmp_path:
     assert len(submitted) == 1
     assert submitted[0].status == "success"
     assert failed_by_operation(sink)["collect_artifacts"] == 1
-    assert [record.kind for record in sink.records_named("artifacts.download.duration")] == [MetricKind.DISTRIBUTION]
+    [duration] = [
+        record
+        for record in sink.records_named("operation.duration")
+        if record.tags["dispatcher.operation"] == "collect_artifacts"
+    ]
+    assert duration.kind is MetricKind.DISTRIBUTION
+    assert duration.tags["dispatcher.operation.result"] == "failure"
     [warning] = [event for event in handler.events if event.get("operation") == "collect_artifacts"]
     assert warning["level"] == "warning"
     assert warning["event"] == "Failed to download 1 artifact for workflow run 123"
-    assert warning["failure_count"] == 1
+    [failure] = warning["operation_failures"]
+    assert failure["failure_count"] == 1
 
 
 # ---------------------------------------------------------------------------
@@ -1530,19 +1596,18 @@ async def test_every_validation_error_is_logged_once_with_its_field(tmp_path: Pa
     assert "WorkflowJobsList" in reason
     assert "See logs for details." in reason
     assert exc_info.value.__cause__ is unparsable
-    [invalid] = [event for event in handler.events if event['event'].startswith('Invalid GitHub response while')]
-    assert invalid['level'] == 'error'
-    assert invalid['operation'] == 'refresh_jobs'
-    assert invalid['component'] == 'test-runner'
-    log_text = '\n'.join(event['event'] for event in handler.events)
-    assert "listing workflow jobs" in log_text
-    assert "batch-err" in log_text
-    assert "run 123" in log_text
-    assert log_text.count("jobs.0.steps.1.status") == 1
-    assert "paused" in log_text
-    assert "Input should be 'queued', 'in_progress', 'completed' or 'pending'" in log_text
-    assert log_text.count("jobs.2.id") == 1
-    assert "Field required" in log_text
+    # The settle line is the operation's only log line; the validation detail rides in its traceback.
+    [line] = [event for event in handler.events if event.get("operation") == "refresh_jobs"]
+    assert line["event"] == "Invalid GitHub response while listing workflow jobs (batch batch-err, run 123)"
+    assert line["level"] == "error"
+    assert line["component"] == "test-runner"
+    assert line["operation_result"] == "failure"
+    traceback = line["exception"]
+    assert traceback.count("jobs.0.steps.1.status") == 1
+    assert "paused" in traceback
+    assert "Input should be 'queued', 'in_progress', 'completed' or 'pending'" in traceback
+    assert traceback.count("jobs.2.id") == 1
+    assert "Field required" in traceback
 
 
 # ---------------------------------------------------------------------------

@@ -41,6 +41,7 @@ class InstanceConfig(BaseModel):
     collect_client_metrics: Optional[bool] = None
     command_stats: Optional[bool] = None
     db: Optional[int] = None
+    disable_config_get: Optional[bool] = None
     disable_connection_cache: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
