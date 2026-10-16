@@ -96,13 +96,8 @@ class HTTPResponse(Protocol):
         ...
 
     def iter_content(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes | str]: ...
-    def iter_lines(
-        self,
-        chunk_size: int | None = None,
-        decode_unicode: bool = False,
-        delimiter: bytes | str | None = None,
-    ) -> Iterator[bytes | str]:
-        """Iterate records with requests-compatible line and delimiter boundaries."""
+    def iter_lines(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes | str]:
+        """Iterate the body line by line, with requests-compatible line boundaries."""
         ...
 
     def __enter__(self) -> HTTPResponse: ...

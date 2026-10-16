@@ -219,22 +219,17 @@ def _requests_response(content: bytes) -> RequestsResponseAdapter:
     ],
 )
 @pytest.mark.parametrize(
-    ('content', 'delimiter', 'decode_unicode', 'expected', 'element_type'),
+    ('content', 'decode_unicode', 'expected', 'element_type'),
     [
-        (b'', None, False, [], bytes),
-        (b'', b'||', False, [], bytes),
-        (b'a\n', None, False, [b'a'], bytes),
-        (b'a\n\n', None, False, [b'a', b''], bytes),
-        (b'a|', b'||', False, [b'a|'], bytes),
-        (b'a||', b'||', False, [b'a', b''], bytes),
-        ('café\n\n'.encode('utf-8'), None, True, ['café', ''], str),
-        ('café||'.encode('utf-8'), '||', True, ['café', ''], str),
+        (b'', False, [], bytes),
+        (b'a\n', False, [b'a'], bytes),
+        (b'a\n\n', False, [b'a', b''], bytes),
+        ('café\n\n'.encode('utf-8'), True, ['café', ''], str),
     ],
 )
 def test_iter_lines_contract(
     make_response: Callable[[bytes], HTTPResponse],
     content: bytes,
-    delimiter: bytes | str | None,
     decode_unicode: bool,
     expected: list[bytes | str],
     element_type: type[bytes] | type[str],
@@ -244,7 +239,7 @@ def test_iter_lines_contract(
     if decode_unicode:
         response.encoding = 'utf-8'
 
-    actual = list(response.iter_lines(decode_unicode=decode_unicode, delimiter=delimiter))
+    actual = list(response.iter_lines(decode_unicode=decode_unicode))
 
     assert actual == expected
     assert [type(line) for line in actual] == [element_type] * len(expected)

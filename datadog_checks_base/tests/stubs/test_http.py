@@ -31,7 +31,7 @@ def test_fake_response_returns_only_configured_results():
     assert response.text == 'configured text'
     assert response.json(parse_float=str) is json_result
     assert list(response.iter_content(chunk_size=1, decode_unicode=True)) == [b'complete ', b'body']
-    assert list(response.iter_lines(chunk_size=1, decode_unicode=True, delimiter='|')) == ['first', 'second']
+    assert list(response.iter_lines(chunk_size=1, decode_unicode=True)) == ['first', 'second']
     assert list(response) == [b'complete ', b'body']
     assert response.get_peer_cert(binary_form=True) == b'certificate'
     assert response.headers['x-test'] == 'value'

@@ -249,19 +249,12 @@ class RequestsResponseAdapter:
         with translate_http_errors():
             yield from self._response.iter_content(chunk_size=chunk_size, decode_unicode=decode_unicode)
 
-    def iter_lines(
-        self,
-        chunk_size: int | None = None,
-        decode_unicode: bool = False,
-        delimiter: bytes | str | None = None,
-    ) -> Iterator[bytes | str]:
+    def iter_lines(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes | str]:
         if chunk_size is None:
             chunk_size = self._default_chunk_size
 
         with translate_http_errors():
-            yield from self._response.iter_lines(
-                chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter
-            )
+            yield from self._response.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode)
 
     def __enter__(self) -> RequestsResponseAdapter:
         return self
