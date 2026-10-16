@@ -165,10 +165,11 @@ class FakeHTTPResponse:
     ) -> Iterator[bytes | str]:
         if self._lines is not None:
             yield from self._lines
-        elif decode_unicode and self.encoding is not None:
-            yield from self.content.decode(self.encoding).splitlines()
         else:
-            yield from self.content.splitlines()
+            body = self.content.decode(self.encoding) if decode_unicode and self.encoding is not None else self.content
+            # requests yields no records for an empty body, even with a delimiter.
+            if body:
+                yield from body.split(delimiter) if delimiter else body.splitlines()
         if self._stream_error is not None:
             raise self._stream_error
 

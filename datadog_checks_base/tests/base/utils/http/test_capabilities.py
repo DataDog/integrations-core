@@ -1,13 +1,16 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections.abc import Callable
 from datetime import timedelta
 
 import mock
 import pytest
 import requests
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http_protocol import HTTPResponse
 from datadog_checks.base.utils.requests_adapter import RequestsResponseAdapter
 
 from . import common
@@ -201,10 +204,25 @@ def test_requests_decode_unicode_yields_bytes_when_the_encoding_is_undetermined(
     ]
 
 
+def _requests_response(content: bytes) -> RequestsResponseAdapter:
+    transport = common.RequestsTransport()
+    transport.respond(content=content)
+    http = common.create_requests_client(transport)
+    return http.get('http://example.test/items', stream=True)
+
+
+@pytest.mark.parametrize(
+    'make_response',
+    [
+        pytest.param(_requests_response, id='requests'),
+        pytest.param(lambda content: FakeHTTPResponse(content=content), id='fake'),
+    ],
+)
 @pytest.mark.parametrize(
     ('content', 'delimiter', 'decode_unicode', 'expected', 'element_type'),
     [
         (b'', None, False, [], bytes),
+        (b'', b'||', False, [], bytes),
         (b'a\n', None, False, [b'a'], bytes),
         (b'a\n\n', None, False, [b'a', b''], bytes),
         (b'a|', b'||', False, [b'a|'], bytes),
@@ -213,17 +231,15 @@ def test_requests_decode_unicode_yields_bytes_when_the_encoding_is_undetermined(
         ('café||'.encode('utf-8'), '||', True, ['café', ''], str),
     ],
 )
-def test_requests_iter_lines_contract(
+def test_iter_lines_contract(
+    make_response: Callable[[bytes], HTTPResponse],
     content: bytes,
     delimiter: bytes | str | None,
     decode_unicode: bool,
     expected: list[bytes | str],
     element_type: type[bytes] | type[str],
-) -> None:
-    transport = common.RequestsTransport()
-    transport.respond(content=content)
-    http = common.create_requests_client(transport)
-    response = http.get('http://example.test/items', stream=True)
+):
+    response = make_response(content)
 
     if decode_unicode:
         response.encoding = 'utf-8'
