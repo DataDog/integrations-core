@@ -800,9 +800,15 @@ def test_statement_samples_collect(
             if len(matching) > 0:
                 event = matching[0]
                 assert event['db']['plan']['definition'] is None, "did not expect to collect an execution plan"
+            # Explain errors are tagged with the explained database. Without the explain function's schema, the
+            # function-based activity view cannot be read, so the error is collection-wide and has no `db` tag.
+            if expected_error_tag == 'error:explain-no_plans_possible' and pg_stat_activity_view != 'pg_stat_activity':
+                error_tags = _get_expected_tags(check, dbm_instance, with_host=False, **additional_tags)
+            else:
+                error_tags = tags
             aggregator.assert_metric(
                 "dd.postgres.statement_samples.error",
-                tags=tags + [expected_error_tag, 'agent_hostname:stubbed.hostname'],
+                tags=error_tags + [expected_error_tag, 'agent_hostname:stubbed.hostname'],
                 hostname='stubbed.hostname',
             )
         else:
@@ -1821,7 +1827,7 @@ def test_statement_metrics_database_errors(
         run_one_check(check)
 
     expected_tags = _get_expected_tags(
-        check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
+        check, dbm_instance, with_host=False, with_db=False, agent_hostname='stubbed.hostname'
     ) + [expected_error_tag]
 
     aggregator.assert_metric(
@@ -1867,7 +1873,7 @@ def test_statement_metrics_database_extension_errors(
             cur.execute("CREATE EXTENSION IF NOT EXISTS pg_stat_statements SCHEMA public;")
 
     expected_tags = _get_expected_tags(
-        check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
+        check, dbm_instance, with_host=False, with_db=False, agent_hostname='stubbed.hostname'
     ) + [expected_error_tag]
 
     aggregator.assert_metric(
@@ -1907,7 +1913,7 @@ def test_statement_metrics_attributes_undefined_table_to_not_loaded_when_spl_mis
         run_one_check(check)
 
     expected_tags = _get_expected_tags(
-        check, dbm_instance, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
+        check, dbm_instance, with_host=False, with_db=False, agent_hostname='stubbed.hostname'
     ) + ['error:database-UndefinedTable-pg_stat_statements_not_loaded']
 
     aggregator.assert_metric(

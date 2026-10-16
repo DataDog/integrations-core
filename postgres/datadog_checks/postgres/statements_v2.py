@@ -155,6 +155,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
         self.batch_max_content_size = config.query_metrics.batch_max_content_size
         self._tags_no_db: list[str] | None = None
         self.tags: list[str] | None = None
+        self._pg_stat_statements_tags: list[str] = []
 
         self._query_stats: QueryStats[PgssKey] = QueryStats(
             counter_columns=PG_STAT_STATEMENTS_COUNTER_COLUMNS,
@@ -231,13 +232,13 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
             self._check.gauge(
                 "pg_stat_statements.max",
                 self._check.pg_settings.get("pg_stat_statements.max", 0),
-                tags=self.tags,
+                tags=self._pg_stat_statements_tags,
                 hostname=self._check.reported_hostname,
             )
             self._check.count(
                 "pg_stat_statements.count",
                 count,
-                tags=self.tags,
+                tags=self._pg_stat_statements_tags,
                 hostname=self._check.reported_hostname,
             )
         except psycopg.Error as e:
@@ -252,7 +253,7 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
                 self._check.monotonic_count(
                     "pg_stat_statements.dealloc",
                     rows[0][0],
-                    tags=self.tags,
+                    tags=self._pg_stat_statements_tags,
                     hostname=self._check.reported_hostname,
                 )
         except psycopg.Error as e:
@@ -450,8 +451,11 @@ class PostgresStatementMetricsV2(DBMAsyncJob):
     # -- Main collection pipeline -----------------------------------------
 
     def run_job(self):
-        self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
-        self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
+        self.tags = self._tag_snapshot.event_tags()
+        self._tags_no_db = self._tag_snapshot.event_tags()
+        # The pg_stat_statements metrics keep the connection's `db` tag and no resource tags until their tag
+        # set is decided.
+        self._pg_stat_statements_tags = [*self._tag_snapshot.instance, *self._tag_snapshot.database]
         self.collect_per_statement_metrics()
 
     @tracked_method(agent_check_getter=agent_check_getter)

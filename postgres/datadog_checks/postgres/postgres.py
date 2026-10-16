@@ -255,37 +255,25 @@ class PostgreSql(DatabaseCheck):
 
     def set_resource_tags(self):
         if self._config.gcp.project_id and self._config.gcp.instance_id:
-            self.tag_manager.set_tag(
-                "dd.internal.resource",
-                "gcp_sql_database_instance:{}:{}".format(self._config.gcp.project_id, self._config.gcp.instance_id),
+            self.tag_manager.set_resource_tag(
+                "gcp_sql_database_instance",
+                "{}:{}".format(self._config.gcp.project_id, self._config.gcp.instance_id),
             )
         if self._config.aws.instance_endpoint:
-            self.tag_manager.set_tag(
-                "dd.internal.resource",
-                "aws_rds_instance:{}".format(self._config.aws.instance_endpoint),
-            )
+            self.tag_manager.set_resource_tag("aws_rds_instance", self._config.aws.instance_endpoint)
         elif AWS_RDS_HOSTNAME_SUFFIX in self.resolved_hostname:
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
-            self.tag_manager.set_tag(
-                "dd.internal.resource",
-                "aws_rds_instance:{}".format(self.resolved_hostname),
-            )
+            self.tag_manager.set_resource_tag("aws_rds_instance", self.resolved_hostname)
         if self._config.azure.deployment_type and self._config.azure.fully_qualified_domain_name:
             deployment_type = self._config.azure.deployment_type
             # some `deployment_type`s map to multiple `resource_type`s
             resource_type = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPE.get(deployment_type)
             if resource_type:
-                self.tag_manager.set_tag(
-                    "dd.internal.resource",
-                    "{}:{}".format(resource_type, self._config.azure.fully_qualified_domain_name),
-                )
+                self.tag_manager.set_resource_tag(resource_type, self._config.azure.fully_qualified_domain_name)
         # finally, tag the `database_instance` resource for this instance
         # metrics intake will use this tag to add all the tags for the instance
-        self.tag_manager.set_tag(
-            "dd.internal.resource",
-            "database_instance:{}".format(self.database_identifier),
-        )
+        self.tag_manager.set_resource_tag("database_instance", self.database_identifier)
 
     def _new_query_executor(self, queries, db):
         return QueryExecutor(
@@ -1191,7 +1179,7 @@ class PostgreSql(DatabaseCheck):
                 "collection_interval": self._config.database_instance_collection_interval,
                 'dbms_version': self.dbms_version,
                 'integration_version': __version__,
-                "tags": self.tag_manager.get_tags(include_internal=False, include_db=False),
+                "tags": self.tag_manager.event_tags(),
                 "timestamp": time() * 1000,
                 "cloud_metadata": self.cloud_metadata,
                 "metadata": {

@@ -136,9 +136,8 @@ class PostgresDataObservability(DBMAsyncJob):
         return due
 
     def _build_base_tags(self) -> list[str]:
-        # self._tags is set by run_job_loop(tags) in the DBMAsyncJob parent; it may be
-        # None if run_job() is called directly (e.g. in tests), so we guard with a fallback.
-        tags = [t for t in self._tags if not t.startswith('dd.internal')] if self._tags else []
+        # Monitor metrics keep the connection's `db` tag and no resource tags until their tag set is decided.
+        tags = [*self._tag_snapshot.instance, *self._tag_snapshot.database]
         config_id = self._do_config.config_id
         if config_id:
             tags.append(f'config_id:{config_id}')

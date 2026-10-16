@@ -162,9 +162,8 @@ class PostgresMetadata(DBMAsyncJob):
         return self._compiled_patterns_cache[pattern_str]
 
     def run_job(self):
-        # do not emit any dd.internal metrics for DBM specific check code
-        self.tags = [t for t in self._tags if not t.startswith("dd.internal")]
-        self._tags_no_db = [t for t in self.tags if not t.startswith("db:")]
+        self.tags = self._tag_snapshot.event_tags()
+        self._tags_no_db = self._tag_snapshot.event_tags()
         self.report_postgres_metadata()
         self.report_postgres_extensions()
 

@@ -220,6 +220,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
         self.batch_max_content_size = config.query_metrics.batch_max_content_size
         self._tags_no_db = None
         self.tags = None
+        self._pg_stat_statements_tags: list[str] = []
         self._state = StatementMetrics()
         self._stat_column_cache = []
         self._track_io_timing_cache = None
@@ -281,9 +282,11 @@ class PostgresStatementMetrics(DBMAsyncJob):
         return col_names
 
     def run_job(self):
-        # do not emit any dd.internal metrics for DBM specific check code
-        self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
-        self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
+        self.tags = self._tag_snapshot.event_tags()
+        self._tags_no_db = self._tag_snapshot.event_tags()
+        # The pg_stat_statements metrics keep the connection's `db` tag and no resource tags until their tag
+        # set is decided.
+        self._pg_stat_statements_tags = [*self._tag_snapshot.instance, *self._tag_snapshot.database]
         self.collect_per_statement_metrics()
 
     @tracked_method(agent_check_getter=agent_check_getter)
@@ -512,7 +515,7 @@ class PostgresStatementMetrics(DBMAsyncJob):
                 self._check.monotonic_count(
                     "pg_stat_statements.dealloc",
                     dealloc,
-                    tags=self.tags,
+                    tags=self._pg_stat_statements_tags,
                     hostname=self._check.reported_hostname,
                 )
         except psycopg.Error as e:
@@ -531,13 +534,13 @@ class PostgresStatementMetrics(DBMAsyncJob):
             self._check.gauge(
                 "pg_stat_statements.max",
                 self._check.pg_settings.get("pg_stat_statements.max", 0),
-                tags=self.tags,
+                tags=self._pg_stat_statements_tags,
                 hostname=self._check.reported_hostname,
             )
             self._check.count(
                 "pg_stat_statements.count",
                 count,
-                tags=self.tags,
+                tags=self._pg_stat_statements_tags,
                 hostname=self._check.reported_hostname,
             )
         except psycopg.Error as e:

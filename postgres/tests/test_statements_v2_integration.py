@@ -260,7 +260,7 @@ def test_statement_metrics_database_errors_v2(
         run_one_check(check)
 
     expected_tags = _get_expected_tags(
-        check, dbm_instance_v2, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
+        check, dbm_instance_v2, with_host=False, with_db=False, agent_hostname='stubbed.hostname'
     ) + [expected_error_tag]
 
     aggregator.assert_metric(
@@ -281,7 +281,7 @@ def test_statement_metrics_pgss_not_created_v2(aggregator, integration_check, db
         cur.execute("CREATE EXTENSION IF NOT EXISTS pg_stat_statements SCHEMA public;")
 
     expected_tags = _get_expected_tags(
-        check, dbm_instance_v2, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
+        check, dbm_instance_v2, with_host=False, with_db=False, agent_hostname='stubbed.hostname'
     ) + ['error:database-UndefinedTable-pg_stat_statements_not_created']
 
     aggregator.assert_metric(
@@ -423,7 +423,7 @@ def test_internal_telemetry_gauges_v2(aggregator, integration_check, dbm_instanc
     run_one_check(check, cancel=False)
 
     debug_tags = check._get_debug_tags()
-    expected_tags = _get_expected_tags(check, dbm_instance_v2, with_host=False, with_db=True)
+    expected_tags = _get_expected_tags(check, dbm_instance_v2, with_host=False, with_db=False)
 
     aggregator.assert_metric(
         "dd.postgres.statement_metrics.delta.derivative_rows",
@@ -461,7 +461,7 @@ def test_statement_metrics_pgss_not_loaded_v2(aggregator, integration_check, dbm
         run_one_check(check)
 
     expected_tags = _get_expected_tags(
-        check, dbm_instance_v2, with_host=False, with_db=True, agent_hostname='stubbed.hostname'
+        check, dbm_instance_v2, with_host=False, with_db=False, agent_hostname='stubbed.hostname'
     ) + ['error:database-ObjectNotInPrerequisiteState-pg_stat_statements_not_loaded']
 
     aggregator.assert_metric(
