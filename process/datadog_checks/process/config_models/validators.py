@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import math
+from typing import Any
 
 # Here you can include additional config validators or transformers
 #
@@ -17,7 +18,7 @@ import math
 INF_SENTINEL = '.inf'
 
 
-def instance_thresholds(value, **kwargs):
+def instance_thresholds(value: object, **kwargs: Any) -> object:
     # Runs on the raw config, before pydantic's lax float parsing would accept strings like
     # 'inf' or '5' that the check reads from the raw instance and can't compare.
     if not isinstance(value, dict):

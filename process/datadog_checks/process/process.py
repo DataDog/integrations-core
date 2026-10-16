@@ -15,6 +15,7 @@ from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.platform import Platform
 
 from .cache import DEFAULT_SHARED_PROCESS_LIST_CACHE_DURATION, ProcessListCache
+from .config_models.validators import INF_SENTINEL
 
 try:
     import datadog_agent
@@ -523,12 +524,12 @@ class ProcessCheck(AgentCheck):
     @staticmethod
     def _coerce_threshold_bound(value):
         # Remote Config transmits `thresholds` as JSON, which can't represent a
-        # raw float infinity -- the UI sends the sentinel string ".inf" instead
+        # raw float infinity, so its payloads use the string '.inf' instead
         # (matching the YAML `.inf` literal documented in spec.yaml). Coerce it
         # back to a real float here so the comparisons below work either way.
         # `config_models.validators.instance_thresholds` guarantees it's the only
         # string that can reach this point.
-        return float('inf') if value == '.inf' else value
+        return float('inf') if value == INF_SENTINEL else value
 
     def _process_service_check(self, name, nb_procs, bounds, tags):
         """

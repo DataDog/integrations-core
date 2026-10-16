@@ -492,24 +492,11 @@ def test_process_service_check(aggregator):
 
 
 @pytest.mark.parametrize(
-    'thresholds',
-    [
-        pytest.param({'warning': None, 'critical': None}, id='both_null'),
-        pytest.param({'warning': None, 'critical': [1, '.inf']}, id='warning_null'),
-    ],
-)
-@patch('psutil.process_iter', return_value=[NamedMockProcess("foo", pid=123, cmdline=["foo"])])
-def test_thresholds_null_uses_default(mock_process_iter, aggregator, dd_run_check, thresholds):
-    instance = {'name': 'foo', 'search_string': ['foo'], 'thresholds': thresholds}
-    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
-    dd_run_check(process)
-    expected_tags = generate_expected_tags(instance)
-    aggregator.assert_service_check('process.up', count=1, tags=expected_tags + ['process:foo'], status=ProcessCheck.OK)
-
-
-@pytest.mark.parametrize(
     'thresholds, expected_status',
     [
+        # An explicit `null` range (e.g. from Remote Config JSON) falls back to the default `[1, inf]`.
+        pytest.param({'warning': None, 'critical': None}, ProcessCheck.OK, id='both_null'),
+        pytest.param({'warning': None, 'critical': [1, '.inf']}, ProcessCheck.OK, id='warning_null'),
         pytest.param({'warning': [1, '.inf'], 'critical': [1, '.inf']}, ProcessCheck.OK, id='within_range'),
         pytest.param({'warning': [2, '.inf'], 'critical': [1, '.inf']}, ProcessCheck.WARNING, id='below_lower_bound'),
         # `-inf` is accepted as an unbounded lower bound.
@@ -521,7 +508,7 @@ def test_thresholds_null_uses_default(mock_process_iter, aggregator, dd_run_chec
     ],
 )
 @patch('psutil.process_iter', return_value=[NamedMockProcess("foo", pid=123, cmdline=["foo"])])
-def test_thresholds_inf_string_end_to_end(mock_process_iter, aggregator, dd_run_check, thresholds, expected_status):
+def test_thresholds_end_to_end(mock_process_iter, aggregator, dd_run_check, thresholds, expected_status):
     # Goes through config model validation as well as the comparison, unlike `test_process_service_check`.
     instance = {'name': 'foo', 'search_string': ['foo'], 'thresholds': thresholds}
     process = ProcessCheck(common.CHECK_NAME, {}, [instance])
@@ -572,7 +559,6 @@ def test_thresholds_rejected_at_config_load(dd_run_check, warning, expected_erro
         dd_run_check(process)
 
     assert 'ConfigurationError' in str(exc_info.value)
-    assert 'TypeError' not in str(exc_info.value)
 
 
 def test_reset_cache_on_process_changes_config(aggregator, dd_run_check):

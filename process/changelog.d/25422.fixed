@@ -1,1 +1,1 @@
-Accept the `.inf` string for an unbounded `thresholds` upper bound so it survives JSON transport from Remote Config, and treat an explicit `null` threshold range as the default instead of crashing the check run.
+Accept the `.inf` string for an unbounded `thresholds` upper bound so it survives JSON transport from Remote Config, treat an explicit `null` threshold range as the default, and reject numeric strings such as `'5'` or `'inf'` at configuration load, instead of crashing the check run.
