@@ -1739,7 +1739,7 @@ def test_async_job_inactive_stop(aggregator, integration_check, dbm_instance):
     for job in ['query-metrics', 'query-samples']:
         aggregator.assert_metric(
             "dd.postgres.async_job.inactive_stop",
-            tags=_get_expected_tags(check, dbm_instance, with_db=True, job=job),
+            tags=_get_expected_tags(check, dbm_instance, with_host=False, job=job),
         )
 
 
@@ -1757,7 +1757,7 @@ def test_async_job_cancel_cancel(aggregator, integration_check, dbm_instance):
     for job in ['query-metrics', 'query-samples']:
         aggregator.assert_metric(
             "dd.postgres.async_job.cancel",
-            tags=_get_expected_tags(check, dbm_instance, with_db=True, job=job),
+            tags=_get_expected_tags(check, dbm_instance, with_host=False, job=job),
         )
 
 

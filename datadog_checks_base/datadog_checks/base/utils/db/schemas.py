@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, TypedDict
 
 from datadog_checks.base.utils.serialization import json
 
-from .utils import now_ms
+from .utils import TagManager, now_ms
 
 if TYPE_CHECKING:
     from datadog_checks.base.checks.db import DatabaseCheck
@@ -48,6 +48,9 @@ class SchemaCollector(ABC):
         self._check = check
         self._log = check.log
         self._config = config
+        # Checks without a `TagManager`, such as SAP HANA, send `check.tags` unchanged.
+        tag_manager = getattr(check, "tag_manager", None)
+        self._tag_manager = tag_manager if isinstance(tag_manager, TagManager) else None
         self._reset()
 
     def _reset(self):
@@ -137,6 +140,13 @@ class SchemaCollector(ABC):
         return f"dd.{self._check.dbms}.schema.tables_count"
 
     @property
+    def event_tags(self) -> list[str]:
+        """Tags for schema payloads, which describe the whole instance and so carry no `db` or resource tags."""
+        if self._tag_manager is None:
+            return self._check.tags
+        return self._tag_manager.event_tags()
+
+    @property
     def base_event(self):
         return {
             "host": self._check.reported_hostname,
@@ -146,7 +156,7 @@ class SchemaCollector(ABC):
             "collection_interval": self._config.collection_interval,
             "dbms": self._check.dbms,
             "dbms_version": str(self._check.dbms_version),
-            "tags": self._check.tags,
+            "tags": self.event_tags,
             "cloud_metadata": self._check.cloud_metadata,
             "collection_started_at": self._collection_started_at,
         }
