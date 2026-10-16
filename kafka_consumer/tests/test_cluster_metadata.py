@@ -1166,7 +1166,7 @@ def test_fetch_earliest_offsets_cached_across_calls(check):
 
 
 def test_fetch_earliest_offsets_refetches_when_cache_missing_partitions(check):
-    """A fresh cache that doesn't cover every requested partition triggers a full refetch, keeping the same TTL."""
+    """A fresh cache that doesn't cover every requested partition fetches only the missing ones, keeping the TTL."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
         'enable_kafka_console': True,
@@ -1185,10 +1185,13 @@ def test_fetch_earliest_offsets_refetches_when_cache_missing_partitions(check):
     result = collector.fetch_earliest_offsets(topic_partitions)
 
     assert result == {('test-topic', 0): 10, ('test-topic', 1): 20}
-    assert mock_kafka_client.kafka_client.list_offsets.call_count == 1
+    list_offsets = mock_kafka_client.kafka_client.list_offsets
+    assert list_offsets.call_count == 1
+    assert {(tp.topic, tp.partition) for tp in list_offsets.call_args[0][0]} == {('test-topic', 1)}
 
     saved = json.loads(kafka_consumer_check.write_persistent_cache.call_args[0][1])
     assert saved['expire_at'] == expire_at
+    assert sorted(saved['offsets']) == [['test-topic', 0, 10], ['test-topic', 1, 20]]
 
 
 def test_fetch_earliest_offsets_drops_negative_offsets(check, caplog):
