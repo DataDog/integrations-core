@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import re
 import time
+from typing import TYPE_CHECKING
 
 import psycopg
 from psycopg.rows import dict_row
@@ -13,13 +14,6 @@ from psycopg.rows import dict_row
 from .column_statistics import PostgresColumnStatisticsCollector
 from .schemas import PostgresSchemaCollector
 from .util import collection_interval_gcd
-
-try:
-    import datadog_agent  # type: ignore
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
@@ -59,20 +53,25 @@ case when source = 'session' then reset_val else setting end as setting,
 source,
 sourcefile,
 pending_restart
-FROM pg_settings
+FROM pg_catalog.pg_settings
 """
 
 PG_EXTENSIONS_QUERY = """
 SELECT extname, nspname schemaname
-FROM pg_extension left join pg_namespace on extnamespace = pg_namespace.oid;
+FROM pg_catalog.pg_extension left join pg_catalog.pg_namespace on extnamespace = pg_namespace.oid;
 """
 
+# Every function and type is qualified with the extension's schema and arguments are cast to the exact
+# signature. Otherwise a user able to create objects in a schema on the monitoring role's search_path could
+# shadow them with an overload (e.g. armor(text) beats armor(bytea) for an untyped literal) and run arbitrary
+# SQL as the monitoring role
 PG_EXTENSION_LOADER_QUERY = {
-    'pg_trgm': "SELECT word_similarity('foo', 'bar');",
+    'pg_trgm': "SELECT {schema}.word_similarity('foo'::pg_catalog.text, 'bar'::pg_catalog.text);",
     'plpgsql': "DO $$ BEGIN PERFORM 1; END$$;",
-    'pgcrypto': "SELECT armor('foo');",
-    'hstore': "SELECT 'a=>1'::hstore;",
+    'pgcrypto': "SELECT {schema}.armor('foo'::pg_catalog.bytea);",
+    'hstore': "SELECT 'a=>1'::{schema}.hstore;",
 }
+PG_EXTENSION_LOADER_SCHEMAS = ('pg_catalog', 'public')
 
 
 def agent_check_getter(self):
@@ -178,7 +177,7 @@ class PostgresMetadata(DBMAsyncJob):
             event = {
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
-                "agent_version": datadog_agent.get_version(),
+                "agent_version": self._check.agent_version,
                 "dbms": self._check.dbms,
                 "kind": "pg_extension",
                 "collection_interval": self.pg_extensions_collection_interval,
@@ -215,7 +214,7 @@ class PostgresMetadata(DBMAsyncJob):
             event = {
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
-                "agent_version": datadog_agent.get_version(),
+                "agent_version": self._check.agent_version,
                 "dbms": self._check.dbms,
                 "kind": "pg_settings",
                 "collection_interval": self.pg_settings_collection_interval,
@@ -241,10 +240,8 @@ class PostgresMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_schemas(self):
-        started = self._schema_collector.collect_schemas()
-        if not started:
-            # TODO: Emit health event for over-long collection
-            self._log.warning("Previous schema collection still in progress, skipping this collection")
+        self._last_schemas_query_time = time.time()
+        self._schema_collector.collect_schemas()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_postgres_settings(self):
@@ -259,8 +256,10 @@ class PostgresMetadata(DBMAsyncJob):
                 for row in rows:
                     extension = row['extname']
                     if extension in PG_EXTENSION_LOADER_QUERY:
-                        if row['schemaname'] in ['pg_catalog', 'public']:
-                            query = PG_EXTENSION_LOADER_QUERY[extension] + "\n" + query
+                        # The schema is interpolated into SQL, so it must stay restricted to this fixed allowlist.
+                        if row['schemaname'] in PG_EXTENSION_LOADER_SCHEMAS:
+                            loader = PG_EXTENSION_LOADER_QUERY[extension].format(schema=row['schemaname'])
+                            query = loader + "\n" + query
                         else:
                             self._log.debug(
                                 "unable to collect settings for extension %s in schema %s",

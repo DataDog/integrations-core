@@ -22,11 +22,6 @@ from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 from datadog_checks.sqlserver.utils import is_statement_proc, needs_comment_recovery, raise_if_cancelled
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 DEFAULT_COLLECTION_INTERVAL = 10
 MAX_PAYLOAD_BYTES = 19e6
 
@@ -323,7 +318,7 @@ class SqlserverActivity(DBMAsyncJob):
                 "timestamp": time.time() * 1000,
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
-                "ddagentversion": datadog_agent.get_version(),
+                "ddagentversion": self._check.agent_version,
                 "ddsource": "sqlserver",
                 "dbm_type": "rqt",
                 "ddtags": ",".join(self._check.tag_manager.get_tags()),
@@ -471,7 +466,7 @@ class SqlserverActivity(DBMAsyncJob):
         event = {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
-            "ddagentversion": datadog_agent.get_version(),
+            "ddagentversion": self._check.agent_version,
             "ddsource": "sqlserver",
             "dbm_type": "activity",
             "collection_interval": self.collection_interval,

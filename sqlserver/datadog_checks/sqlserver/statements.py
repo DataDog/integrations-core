@@ -23,14 +23,8 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.utils import is_azure_sql_database, needs_comment_recovery, raise_if_cancelled
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
+from datadog_checks.sqlserver.utils import is_azure_sql_database, needs_comment_recovery, raise_if_cancelled
 
 DEFAULT_COLLECTION_INTERVAL = 60
 
@@ -531,7 +525,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
-            'ddagentversion': datadog_agent.get_version(),
+            'ddagentversion': self._check.agent_version,
             'service': self._config.service,
         }
 
@@ -591,7 +585,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 "timestamp": time.time() * 1000,
                 "host": self._check.reported_hostname,
                 "database_instance": self._check.database_identifier,
-                "ddagentversion": datadog_agent.get_version(),
+                "ddagentversion": self._check.agent_version,
                 "ddsource": "sqlserver",
                 "ddtags": ",".join(tags),
                 "dbm_type": "fqt",
@@ -632,6 +626,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_plans(self, rows, cursor, deadline):
+        attempted_plan_keys = set()
         for row in rows:
             if self.enforce_collection_interval_deadline and time.time() > deadline:
                 self.log.debug("ending plan collection early because check deadline has been exceeded")
@@ -643,9 +638,25 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             # we use the plan handle
             if row['is_proc'] or row['is_encrypted']:
                 plan_key = row['plan_handle']
-            if self._seen_plans_ratelimiter.acquire(plan_key):
-                raise_if_cancelled(self._cancel_event)
+            # Skip duplicates in this pass without suppressing failed keys in later passes.
+            if (
+                plan_key in attempted_plan_keys
+                or plan_key in self._seen_plans_ratelimiter
+                or len(self._seen_plans_ratelimiter) >= self._seen_plans_ratelimiter.maxsize
+            ):
+                continue
+            attempted_plan_keys.add(plan_key)
+            raise_if_cancelled(self._cancel_event)
+            try:
                 raw_plan, is_plan_encrypted = self._load_plan(row['plan_handle'], cursor)
+            except Exception as e:
+                # A connection closed during cancellation may surface as a database error.
+                raise_if_cancelled(self._cancel_event)
+                self.log.debug("Failed to load plan. plan_handle=%s error=%s", row['plan_handle'], e)
+                error_tags = ["error:load-plan-{}".format(type(e))]
+                self._check.count("dd.sqlserver.statements.error", 1, **self._check.debug_stats_kwargs(tags=error_tags))
+                continue
+            if self._seen_plans_ratelimiter.acquire(plan_key):
                 obfuscated_plan = None
                 collection_errors = []
 
@@ -657,7 +668,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         "query_signature=[{0}] query_hash=[{1}] query_plan_hash=[{2}] plan_handle=[{3}] err=[{4}]"
                     ).format(row['query_signature'], row['query_hash'], row['query_plan_hash'], row['plan_handle'], e)
                     if self._config.log_unobfuscated_plans:
-                        self.log.warning("Failed to obfuscate plan=[%s] | %s", raw_plan, context)
+                        self.log.warning("Failed to obfuscate plan=[%s] | %s", repr(raw_plan), context)
                     else:
                         self.log.debug("Failed to obfuscate plan | %s", context)
                     collection_errors.append({'code': "obfuscate_xml_plan_error", 'message': str(e)})
@@ -692,7 +703,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 obfuscated_plan_event = {
                     "host": self._check.reported_hostname,
                     "database_instance": self._check.database_identifier,
-                    "ddagentversion": datadog_agent.get_version(),
+                    "ddagentversion": self._check.agent_version,
                     "ddsource": "sqlserver",
                     "ddtags": ",".join(tags),
                     "timestamp": time.time() * 1000,

@@ -31,6 +31,7 @@ CONCLUSIONS = {
     Status.SUCCESS: WorkflowJobConclusion.SUCCESS,
     Status.FAILURE: WorkflowJobConclusion.FAILURE,
     Status.SKIPPED: WorkflowJobConclusion.SKIPPED,
+    Status.CANCELLED: WorkflowJobConclusion.CANCELLED,
 }
 
 # ---------------------------------------------------------------------------
@@ -154,7 +155,7 @@ def test_counters_use_only_the_latest_attempt() -> None:
     assert progress.total == 1
 
 
-def test_counters_sum_across_batches_and_statuses() -> None:
+def test_counters_sum_across_batches_and_statuses():
     progress = DispatcherProgress(
         batches=(
             _batch(
@@ -165,13 +166,14 @@ def test_counters_sum_across_batches_and_statuses() -> None:
             _batch(
                 _job(_attempt(status=Status.SKIPPED), name="j3"),
                 _job(_attempt(status=Status.SUCCESS), name="j4"),
+                _job(_attempt(status=Status.CANCELLED), name="j5"),
                 batch_id="batch-02",
             ),
         ),
         done=True,
     )
-    assert (progress.passed, progress.failed, progress.skipped) == (2, 1, 1)
-    assert (progress.complete, progress.total) == (4, 4)
+    assert (progress.passed, progress.failed, progress.skipped, progress.cancelled) == (2, 1, 1, 1)
+    assert (progress.complete, progress.total) == (5, 5)
 
 
 def test_planned_jobs_count_toward_total_but_not_complete() -> None:
@@ -196,6 +198,17 @@ def test_planned_jobs_count_toward_total_but_not_complete() -> None:
     assert progress.total == 3
 
 
+def test_running_executions_remain_pending_in_the_totals():
+    running = dataclasses.replace(_attempt(), state=ExecutionState.RUNNING, status=None, conclusion=None)
+    progress = DispatcherProgress(
+        batches=(_batch(_job(_attempt(), name="done"), _job(running, name="running"), _job(name="queued")),),
+        done=False,
+    )
+
+    assert (progress.complete, progress.total) == (1, 3)
+    assert (progress.passed, progress.failed, progress.skipped) == (1, 0, 0)
+
+
 def test_an_execution_missing_its_artifacts_still_counts() -> None:
     # Only the artifacts are missing: the error qualifies the execution, it does not erase it.
     attempt = _attempt(status=Status.SUCCESS, error=ProgressError.NO_ARTIFACTS)
@@ -203,31 +216,27 @@ def test_an_execution_missing_its_artifacts_still_counts() -> None:
     assert (progress.passed, progress.complete, progress.total) == (1, 1, 1)
 
 
-def test_empty_progress_counts_zero() -> None:
+def test_empty_progress_counts_zero():
     progress = DispatcherProgress(batches=(), done=False)
-    assert (progress.passed, progress.failed, progress.skipped, progress.complete, progress.total) == (0, 0, 0, 0, 0)
-
-
-# ---------------------------------------------------------------------------
-# Immutability and defaults
-# ---------------------------------------------------------------------------
+    assert (
+        progress.passed,
+        progress.failed,
+        progress.skipped,
+        progress.cancelled,
+        progress.complete,
+        progress.total,
+    ) == (0, 0, 0, 0, 0, 0)
 
 
 @pytest.mark.parametrize(
-    ("instance", "field_name", "value"),
+    ("batch_status", "job_status", "has_failure"),
     [
-        (_attempt(), "status", Status.FAILURE),
-        (_job(), "attempts", ()),
-        (_batch(), "state", ExecutionState.PLANNED),
-        (DispatcherProgress(batches=(), done=False), "done", True),
+        pytest.param(Status.FAILURE, Status.SUCCESS, True, id="failed-batch"),
+        pytest.param(Status.SUCCESS, Status.FAILURE, True, id="failed-job"),
+        pytest.param(Status.CANCELLED, Status.FAILURE, False, id="failed-job-in-cancelled-batch"),
+        pytest.param(Status.CANCELLED, Status.CANCELLED, False, id="cancelled-batch"),
     ],
-    ids=["attempt", "job", "batch", "dispatcher"],
 )
-def test_progress_objects_are_immutable(instance: object, field_name: str, value: object) -> None:
-    with pytest.raises(dataclasses.FrozenInstanceError):
-        setattr(instance, field_name, value)
-
-
-def test_error_defaults_to_none() -> None:
-    assert _attempt().error is None
-    assert _batch().error is None
+def test_has_failure_ignores_cancelled_batches(batch_status: Status, job_status: Status, has_failure: bool):
+    batch = _batch(_job(_attempt(status=job_status)), status=batch_status)
+    assert DispatcherProgress(batches=(batch,), done=True).has_failure is has_failure

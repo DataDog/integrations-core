@@ -1,0 +1,38 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API client token",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_token",
+          "label": "API client token",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "region",
+      "label": "Region",
+      "editable": true,
+      "required": true,
+      "dropdown": {
+        "options": [
+          { "value": "US", "label": "US" },
+          { "value": "EU", "label": "EU" },
+          { "value": "JP", "label": "JP" },
+          { "value": "SG", "label": "SG" },
+          { "value": "AU", "label": "AU" },
+          { "value": "IL", "label": "IL" }
+        ]
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "workato-logs" },
+    { "dataflow_id": "workato-metrics" }
+  ]
+}

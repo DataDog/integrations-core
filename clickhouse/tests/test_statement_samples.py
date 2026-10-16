@@ -123,9 +123,7 @@ def test_create_samples_event(check_with_dbm):
 
     active_connections = [{'user': 'default', 'query_kind': 'Select', 'current_database': 'default', 'connections': 5}]
 
-    with mock.patch('datadog_checks.clickhouse.statement_samples.datadog_agent') as mock_agent:
-        mock_agent.get_version.return_value = '7.64.0'
-        event = samples._create_samples_event(rows, active_connections)
+    event = samples._create_samples_event(rows, active_connections)
 
     # Verify event structure
     assert event['ddsource'] == 'clickhouse'
@@ -646,9 +644,7 @@ def test_create_buffer_event(check_with_dbm):
         }
     ]
 
-    with mock.patch('datadog_checks.clickhouse.statement_samples.datadog_agent') as mock_agent:
-        mock_agent.get_version.return_value = '7.64.0'
-        payload = samples._create_buffer_event(buffer_snapshot)
+    payload = samples._create_buffer_event(buffer_snapshot)
 
     # Verify event structure
     assert payload['ddsource'] == 'clickhouse'

@@ -1,0 +1,1 @@
+Add `disable_config_get` and stop retrying rejected `CONFIG GET` commands for the lifetime of the check instance.

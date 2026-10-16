@@ -55,12 +55,26 @@ instances:
     #
     # gitaly_server_endpoint: http://<GITALY-URL>:9236/metrics
 
+    ## @param workhorse_endpoint - string - optional
+    ## Endpoint exposing the GitLab Workhorse Prometheus metrics (only available when `openmetrics_endpoint` is
+    ## used). Workhorse serves these on its own listener, configured by
+    ## `gitlab_workhorse['prometheus_listen_addr']`, not on the Rails metrics endpoint.
+    #
+    # workhorse_endpoint: http://<WORKHORSE-URL>:9229/metrics
+
     ## @param gitlab_url - string - optional
     ## The GitLab external URL to probe for service health status
     ## If authentication is required, use this URL with
     ## the authorization token: http://localhost/?access_token=<TOKEN>
     #
     # gitlab_url: <GITLAB_URL>
+
+    ## @param sidekiq_endpoint - string - optional
+    ## Endpoint exposing the Sidekiq exporter's Prometheus metrics (only available when `openmetrics_endpoint` is
+    ## used). Requires `sidekiq['metrics_enabled']` and is served on its own port, not on the Rails metrics
+    ## endpoint.
+    #
+    # sidekiq_endpoint: http://<SIDEKIQ-URL>:8082/metrics
 
     ## @param api_token - string - optional
     ## The GitLab API token for this instance

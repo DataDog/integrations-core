@@ -1,0 +1,8 @@
+{
+  "response": {
+    "detail": "deviceId is not in UUID format bogus-uuid",
+    "errorCode": "Bad request",
+    "message": "Invalid input request"
+  },
+  "version": "1.0"
+}

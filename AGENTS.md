@@ -9,6 +9,7 @@ Some directories have their own `AGENTS.md`/`CLAUDE.md` with narrower, directory
 - [Maintaining This File](#maintaining-this-file)
 - [Python Code Style](#python-code-style)
 - [Configuration Models](#configuration-models)
+- [Service Checks](#service-checks)
 - [Development Workflow](#development-workflow)
 - [Pull Requests](#pull-requests)
 - [Documentation](#documentation)
@@ -92,7 +93,29 @@ ddev validate config -s <INTEGRATION_NAME>
 ddev validate models -s <INTEGRATION_NAME>
 ```
 
+The exception is `config_models/validators.py`, which is generated once and never overwritten: edit it by hand for rules a single spec field cannot express, such as cross-field checks or URL parsing.
+
+## Service Checks
+
+**Applicable to:** newly created integrations. Existing integrations that already submit service checks are exempt.
+
+New integrations should not add their own service checks. Use metrics and metric-based monitors instead.
+
+The one exception is the OpenMetrics base check, which still emits a service check (e.g. `<check>.openmetrics.health`) itself. This is inherited automatically from the base class rather than something an integration author chooses to add, and is expected to change in the future. It is not a reason to add further, integration-specific service checks on top of it.
+
 ## Development Workflow
+
+### Dispatcher Run Identity
+
+Use the same identity names across Dispatcher models, manifests, CLI options, workflow inputs, and monitoring fields:
+
+- `checkout_sha` is the immutable commit checked out and tested. For a pull request, this is GitHub's synthetic merge commit.
+- `head_sha` and `head_branch` identify the pull request source. For a master push, they identify the pushed commit and `master`.
+- `base_sha` and `base_branch` identify the pull request target metadata reported by GitHub. They are unset for a master push.
+
+For a synthetic merge, `checkout_sha^1` is the target commit GitHub used to build the merge and `checkout_sha^2` is `head_sha`. Do not assume `checkout_sha^1 == base_sha`: GitHub's recorded pull request base snapshot may lag the target commit used for a newly generated synthetic merge.
+
+Use `head_branch` and `base_branch` within the Dispatcher. Reserve `ref` for external GitHub API fields and values that may identify something other than a branch.
 
 ### Worktrees
 
@@ -232,7 +255,7 @@ Before writing a `.changed` entry, stop and confirm the change is genuinely brea
 echo "Bump OpenSSL in confluent-kafka to 3.4.1 on Windows." > kafka_consumer/changelog.d/23700.added
 
 # Bug fix for sqlserver in PR #23701
-echo "Fix a bug where ``tempdb`` is wrongly excluded from database files metrics." > sqlserver/changelog.d/23701.fixed
+echo 'Fix a bug where `tempdb` is wrongly excluded from database files metrics.' > sqlserver/changelog.d/23701.fixed
 ```
 
 ## Review Guidelines
@@ -245,10 +268,11 @@ These guidelines apply to automated code review (the Codex review bot). They do 
 
 ## Pull Requests
 
-- Open PRs in draft mode unless explicitly asked otherwise; mark them ready for review once the work is complete and CI passes.
-- Always populate the PR body using the repository's template at `.github/PULL_REQUEST_TEMPLATE.md`. Read the template first and fill in every section (`What does this PR do?`, `Motivation`, `Review checklist`). Do not omit, rename, or reorder the template sections, and do not add unrelated sections on top.
+- Always open PRs in draft mode unless the user explicitly asks otherwise. Never mark a PR ready for review or request reviewers yourself: that notifies code owners, so it is the human author's decision. Tell the user once all CI checks pass (`gh pr checks <PR> --repo DataDog/integrations-core --watch`; relaunch it if it times out).
+- Always populate the PR body using `.github/PULL_REQUEST_TEMPLATE.md`, keep its visible text at or below 3,000 characters, and make the required sections minimal but complete. In `Motivation`, explain how the change fits into any larger project or related PRs, and link the references a reviewer needs to evaluate the change (e.g. the Jira ticket, upstream docs or changelog for a behavior or version change, related PRs), not every source you consulted. Do not omit, rename, or reorder the template sections, or add unrelated sections.
+- Before handing the PR to the user, check each item in the template's `Checklist before requesting review` by following the `How to verify` instructions hidden under it, and tick only the items you verified. Tell the user about anything you could not verify. Never tick the human-author item; only the human author may tick it. The `pr-description` validation fails until every item is ticked and the description is within the length limit.
 - Keep PR titles short and descriptive in plain words. Do not use conventional-commit prefixes (`feat:`, `fix:`, `chore:`).
-- Every PR must declare a QA decision via a label. Add `qa/required` if the PR ships changes that need QA validation, or `qa/skip-qa` if it does not (e.g., docs, tests, developer tooling, or no agent-impacting changes). The `validate-all` CI check fails until exactly one of those labels is set. Tick the matching checkbox in the PR template.
+- Every PR must declare a QA decision via a label. Set exactly one of `qa/required` or `qa/skip-qa`; the `qa-label` validation fails until one is set. Whether a change needs QA is a team decision, not something to infer from the diff. PRs that only change code owned exclusively by `@DataDog/agent-integrations` in `.github/CODEOWNERS` always use `qa/skip-qa`, never `qa/required`. Otherwise, unless another rule in your context settles it, ask the user which label to use.
 - Push the branch and open the PR before adding the changelog entry so the entry filename can reference the real PR number.
 
 ## Documentation
@@ -260,3 +284,8 @@ When a new file is added, make sure to make it available through the navigation 
 ### Style
 
 Maintain a consistent style: technical and professional. Do not start lines or paragraphs with an inline code span.
+
+Repository prose is Markdown, not reStructuredText. Use Markdown single-backtick inline code in documentation,
+comments, docstrings, changelog entries, and similar prose; do not use reStructuredText double-backtick inline
+literals or roles. Existing uses are legacy, not a style precedent. Update them only when the surrounding prose is
+otherwise in scope.

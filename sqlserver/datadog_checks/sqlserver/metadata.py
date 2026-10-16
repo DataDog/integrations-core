@@ -13,16 +13,11 @@ from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import (
     DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
+    STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_VERSION,
 )
 from datadog_checks.sqlserver.schemas import SQLServerSchemaCollector
 from datadog_checks.sqlserver.utils import raise_if_cancelled
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
-from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 
 # default settings collection interval in seconds
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
@@ -153,7 +148,7 @@ class SqlserverMetadata(DBMAsyncJob):
                 event = {
                     "host": self._check.reported_hostname,
                     "database_instance": self._check.database_identifier,
-                    "agent_version": datadog_agent.get_version(),
+                    "agent_version": self._check.agent_version,
                     "dbms": self._check.dbms,
                     "kind": "sqlserver_configs",
                     "collection_interval": self.collection_interval,

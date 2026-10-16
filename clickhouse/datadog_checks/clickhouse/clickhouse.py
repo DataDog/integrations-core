@@ -38,12 +38,6 @@ from .utils import (
     cluster_nodes_query,
 )
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
-
 # Database instance collection interval in seconds (not user-configurable)
 DATABASE_INSTANCE_COLLECTION_INTERVAL = 300
 
@@ -240,7 +234,7 @@ class ClickhouseCheck(DatabaseCheck):
                 "port": self._config.port,
                 "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
-                "agent_version": datadog_agent.get_version(),
+                "agent_version": self.agent_version,
                 "ddagenthostname": self.agent_hostname,
                 "dbms": self.dbms,
                 "kind": "database_instance",
@@ -258,6 +252,7 @@ class ClickhouseCheck(DatabaseCheck):
     def check(self, _):
         self.connect()
         self._dbms_version = self.select_version()
+        self.set_version_metadata(self.dbms_version)
 
         # Must run before the query manager is built and before the DBM jobs are handed
         # self.tags below, since both snapshot the tag list.
@@ -265,14 +260,12 @@ class ClickhouseCheck(DatabaseCheck):
             self.tag_manager.set_tag(CLUSTER_TAG, self.cluster_name, replace=True)
         self.tag_manager.set_tag(HOSTING_TYPE_TAG, self.hosting_type, replace=True)
 
+        self._send_database_instance_metadata()
+
         if self._query_manager is None or self._query_manager_version != self.dbms_version:
             self._query_manager = self._build_query_manager()
             self._query_manager_version = self.dbms_version
         self._query_manager.execute()
-        self.set_version_metadata(self.dbms_version)
-
-        # Send database instance metadata
-        self._send_database_instance_metadata()
 
         self.run_async_jobs(self.tags)
 

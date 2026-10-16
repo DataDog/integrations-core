@@ -1,0 +1,1 @@
+Fix `mongodb.system.cpu.percent` not being submitted for self-hosted MongoDB, and the repeated warnings logged on Windows when the mongod process cannot be resolved.

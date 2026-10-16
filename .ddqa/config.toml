@@ -1,4 +1,4 @@
-global_config_source = "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0RhdGFEb2cvZ2l0aHViLW1ldGFkYXRhL21hc3Rlci9qaXJhLnRvbWw="
+datastore_id = "7f3990d4-3670-4d78-b9d2-ea94d2f20ee9"
 qa_statuses = [
   "To Do",
   "In Progress",
