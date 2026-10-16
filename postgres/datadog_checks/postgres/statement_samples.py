@@ -182,7 +182,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._config = config
         self._conn_ttl_ms = self._config.idle_connection_timeout
         self._tags_no_db = None
-        self.tags = None
+        self.tags: list[str] = []
         self._activity_last_query_start = None
         # The value is loaded when connecting to the main database
         self._explain_function = config.query_samples.explain_function
@@ -245,17 +245,6 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._explained_statements_ratelimiter = None
         self._seen_samples_ratelimiter = None
         self._raw_statement_text_cache = None
-
-    def _dbtags(self, db, *extra_tags):
-        """
-        Returns the default instance tags with the initial "db" tag replaced with the provided tag
-        """
-        t = ["db:" + db]
-        if extra_tags:
-            t.extend(extra_tags)
-        if self._tags_no_db:
-            t.extend(self._tags_no_db)
-        return t
 
     @tracked_method(agent_check_getter=agent_check_getter, track_result_length=True)
     def _get_active_connections(self):
@@ -435,7 +424,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
-                tags=self._dbtags(row['datname'], "error:sql-obfuscate") + self._check._get_debug_tags(),
+                tags=self.tags + ["error:sql-obfuscate"] + self._check._get_debug_tags(),
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
@@ -635,7 +624,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             "ddagentversion": self._check.agent_version,
             "ddsource": "postgres",
             "dbm_type": "rqt",
-            "ddtags": ",".join(self._dbtags(row["datname"])),
+            "ddtags": ",".join(self._tag_snapshot.event_tags(database=row["datname"])),
             'service': self._config.service,
             "db": {
                 "instance": row['datname'],
@@ -756,7 +745,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 self._check.histogram(
                     "dd.postgres.run_explain.time",
                     (time.time() - start_time) * 1000,
-                    tags=self._dbtags(dbname) + self._check._get_debug_tags(),
+                    tags=self.tags + self._check._get_debug_tags(),
                     hostname=self._check.reported_hostname,
                     raw=True,
                 )
@@ -776,7 +765,7 @@ class PostgresStatementSamples(DBMAsyncJob):
             self._check.count(
                 "dd.postgres.statement_samples.error",
                 1,
-                tags=self._dbtags(dbname, err_tag) + self._check._get_debug_tags(),
+                tags=self.tags + [err_tag] + self._check._get_debug_tags(),
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
@@ -876,8 +865,7 @@ class PostgresStatementSamples(DBMAsyncJob):
         self._check.count(
             "dd.postgres.run_explain.error",
             1,
-            tags=self._dbtags(dbname, "error:explain-{}-{}".format(err_code.value, type(err)))
-            + self._check._get_debug_tags(),
+            tags=self.tags + ["error:explain-{}-{}".format(err_code.value, type(err))] + self._check._get_debug_tags(),
             hostname=self._check.reported_hostname,
             raw=True,
         )
@@ -925,7 +913,7 @@ class PostgresStatementSamples(DBMAsyncJob):
                 "dbm_type": "plan",
                 "ddagentversion": self._check.agent_version,
                 "ddsource": "postgres",
-                "ddtags": ",".join(self._dbtags(row['datname'])),
+                "ddtags": ",".join(self._tag_snapshot.event_tags(database=row['datname'])),
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self._check.cloud_metadata,
                 'service': self._config.service,

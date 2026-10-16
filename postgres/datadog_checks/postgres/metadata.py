@@ -142,17 +142,6 @@ class PostgresMetadata(DBMAsyncJob):
         self._column_statistics_collector = None
         self._compiled_patterns_cache = None
 
-    def _dbtags(self, db, *extra_tags):
-        """
-        Returns the default instance tags with the initial "db" tag replaced with the provided tag
-        """
-        t = ["db:" + db]
-        if extra_tags:
-            t.extend(extra_tags)
-        if self._tags_no_db:
-            t.extend(self._tags_no_db)
-        return t
-
     def _get_compiled_pattern(self, pattern_str):
         """
         Get a compiled regex pattern from cache, compiling it if not already cached.
