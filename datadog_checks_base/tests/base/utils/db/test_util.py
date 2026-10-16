@@ -19,6 +19,7 @@ from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
     RateLimitingTTLCache,
     TagManager,
+    TagScope,
     TagType,
     default_json_event_encoding,
     get_agent_host_tags,
@@ -778,6 +779,83 @@ class TestTagManager:
 
         tag_manager.set_tag('service', 'web')
         assert sorted(tag_manager.get_tags(include_internal=False)) == sorted(['env:prod', 'service:web'])
+
+    @pytest.mark.parametrize(
+        'database,expected_metric_tags,expected_event_tags',
+        [
+            pytest.param(
+                None,
+                [
+                    'env:prod',
+                    'team_a',
+                    'dd.internal.resource:database_instance:host1',
+                    'dd.internal.resource:aws_rds_instance:endpoint',
+                    'db:postgres',
+                ],
+                ['env:prod', 'team_a'],
+                id='instance scope',
+            ),
+            pytest.param(
+                'orders',
+                [
+                    'env:prod',
+                    'team_a',
+                    'dd.internal.resource:database_instance:host1',
+                    'dd.internal.resource:aws_rds_instance:endpoint',
+                    'db:orders',
+                ],
+                ['env:prod', 'team_a', 'db:orders'],
+                id='logical database scope',
+            ),
+        ],
+    )
+    def test_metric_and_event_tags(self, database, expected_metric_tags, expected_event_tags):
+        """Events never get resource tags or the stored `db` tag; `database` sets the one `db` tag either reader adds"""
+        tag_manager = TagManager()
+        tag_manager.set_tags_from_list(['env:prod', 'team_a', 'db:postgres'])
+        tag_manager.set_tag('dd.internal.resource', 'database_instance:host1')
+        tag_manager.set_resource_tag('aws_rds_instance', 'endpoint')
+
+        assert sorted(tag_manager.metric_tags(database)) == sorted(expected_metric_tags)
+        assert sorted(tag_manager.event_tags(database)) == sorted(expected_event_tags)
+
+    @pytest.mark.parametrize(
+        'key,scope',
+        [
+            pytest.param('env', TagScope.RESOURCE, id='key already has another scope'),
+            pytest.param(None, TagScope.DATABASE, id='keyless tag outside instance scope'),
+        ],
+    )
+    def test_set_tag_rejects_conflicting_scope(self, key, scope):
+        tag_manager = TagManager()
+        tag_manager.set_tag('env', 'prod')
+
+        with pytest.raises(ValueError):
+            tag_manager.set_tag(key, 'value', scope=scope)
+        assert tag_manager.event_tags() == ['env:prod']
+
+    def test_set_resource_tag_replaces_only_its_resource_type(self):
+        tag_manager = TagManager()
+        tag_manager.set_resource_tag('database_instance', 'old-host')
+        tag_manager.set_resource_tag('aws_rds_instance', 'endpoint')
+        tag_manager.set_resource_tag('database_instance', 'new-host')
+
+        assert sorted(tag_manager.metric_tags()) == [
+            'dd.internal.resource:aws_rds_instance:endpoint',
+            'dd.internal.resource:database_instance:new-host',
+        ]
+
+    def test_snapshot_is_unaffected_by_later_changes(self):
+        """Async jobs hold a snapshot while `check()` keeps updating the live tags"""
+        tag_manager = TagManager()
+        tag_manager.set_tag('env', 'prod')
+        snapshot = tag_manager.snapshot()
+
+        tag_manager.set_tag('env', 'staging', replace=True)
+        tag_manager.set_tag('service', 'web')
+
+        assert snapshot.event_tags() == ['env:prod']
+        assert sorted(tag_manager.event_tags()) == ['env:staging', 'service:web']
 
     def test_set_tag_replace_noop_preserves_cache(self):
         """Re-setting a tag with replace=True and the same value must not invalidate the cache"""

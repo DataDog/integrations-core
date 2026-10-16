@@ -11,6 +11,7 @@ import socket
 import threading
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
+from dataclasses import dataclass
 from enum import Enum, auto
 from ipaddress import IPv4Address, IPv6Address, ip_address
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union  # noqa: F401
@@ -569,38 +570,101 @@ class TagType(Enum):
 # go through that pipeline, such as DBM metadata events.
 INTERNAL_TAG_PREFIX = "dd.internal"
 
+# Key prefix for agent resource tags. Each resource type is stored under its own key,
+# "dd.internal.resource:<resource_type>", and renders as "dd.internal.resource:<resource_type>:<value>".
+RESOURCE_TAG_KEY = "dd.internal.resource"
+
 # Key used for the per-database tag. DBM checks exclude this from instance-level views because
 # the data is collected across all databases and the `db` tag is re-applied during ingestion.
 DB_TAG_KEY = "db"
+
+
+class TagScope(Enum):
+    """Where a stored tag may be sent. Each key has one scope, fixed when the key is first set."""
+
+    #: Describes the database instance. Sent on metrics and on DBM events.
+    INSTANCE = auto()
+    #: Read by the Agent's metrics pipeline to link metrics to a resource. Sent on metrics only.
+    RESOURCE = auto()
+    #: The logical database the check connects to. Sent on metrics only, and replaced when a reader
+    #: passes `database`.
+    DATABASE = auto()
+
+
+def _default_scope(key: Union[str, TagType]) -> TagScope:
+    # Keys set without an explicit scope keep the routing `get_tags()` has always applied to them.
+    if key == DB_TAG_KEY:
+        return TagScope.DATABASE
+    if isinstance(key, str) and key.startswith(INTERNAL_TAG_PREFIX):
+        return TagScope.RESOURCE
+    return TagScope.INSTANCE
+
+
+@dataclass(frozen=True)
+class TagSnapshot:
+    """
+    An immutable view of a `TagManager`'s rendered tags, grouped by scope.
+
+    Read tags through `metric_tags` or `event_tags`, which are named for where the tags are sent, rather
+    than combining the scope groups by hand.
+    """
+
+    instance: tuple[str, ...] = ()
+    resource: tuple[str, ...] = ()
+    database: tuple[str, ...] = ()
+
+    def metric_tags(self, database: str | None = None) -> list[str]:
+        """
+        Tags for metrics: instance, resource, and database tags.
+
+        Passing `database` tags the metric with that logical database instead of the stored `db` tag.
+        """
+        db_tags = self.database if database is None else (f"{DB_TAG_KEY}:{database}",)
+        return [*self.instance, *self.resource, *db_tags]
+
+    def event_tags(self, database: str | None = None) -> list[str]:
+        """
+        Tags for DBM event payloads: instance tags only.
+
+        A payload about one logical database passes `database` to add its `db` tag; instance-wide payloads
+        such as settings and schemas pass nothing. Resource tags are never included, because events bypass
+        the metrics pipeline that reads them.
+        """
+        if database is None:
+            return list(self.instance)
+        return [*self.instance, f"{DB_TAG_KEY}:{database}"]
 
 
 class TagManager:
     """
     Manages tags for a check. Tags are stored as a dictionary of key-value pairs
     for key-value tags and as a list of values for keyless tags useful for easy update and deletion.
-    There's an internal cache of the rendered tag lists to avoid generating the tag strings
-    multiple times.
+    Each key has a `TagScope` that decides which readers return it: `metric_tags` and `event_tags`
+    pick tags by destination, so a tag reaches a payload only if its scope allows it.
+    The rendered tags are cached as a `TagSnapshot` to avoid generating the tag strings multiple times.
     """
 
     def __init__(self, normalizer: Optional[Callable[[Union[str, bytes]], str]] = None) -> None:
         self._tags: Dict[Union[str, TagType], List[str]] = {}
-        # Rendered tag strings split into three disjoint buckets. Each tag string is stored exactly
-        # once, and a single render pass populates all three:
-        #   - _internal_tags: keys prefixed with "dd.internal"
-        #   - _db_tags: the per-database "db" key
-        #   - _base_tags: everything else (including keyless tags)
-        # get_tags() returns _base_tags merged with the requested optional buckets.
-        self._base_tags: tuple[str, ...] = ()
-        self._internal_tags: tuple[str, ...] = ()
-        self._db_tags: tuple[str, ...] = ()
+        self._scopes: Dict[Union[str, TagType], TagScope] = {}
+        self._snapshot: TagSnapshot = TagSnapshot()
         self._cache_valid: bool = False
+        # Async jobs read tags on their own threads while `check()` updates them.
+        self._lock = threading.RLock()
         self._keyless: TagType = TagType.KEYLESS
         self._normalizer = normalizer
 
     def _invalidate_cache(self) -> None:
         self._cache_valid = False
 
-    def set_tag(self, key: Optional[str], value: str, replace: bool = False, normalize: bool = False) -> None:
+    def set_tag(
+        self,
+        key: Optional[str],
+        value: str,
+        replace: bool = False,
+        normalize: bool = False,
+        scope: TagScope | None = None,
+    ) -> None:
         """
         Set a tag with the given key and value.
         If key is None or empty, the value is stored as a keyless tag.
@@ -610,6 +674,12 @@ class TagManager:
             replace (bool): If True, replaces all existing values for this key
                            If False, appends the value if it doesn't exist
             normalize (bool): If True, applies tag normalization using the configured normalizer
+            scope (TagScope): Where the tag may be sent. If omitted, an existing key keeps its scope, and a
+                new key gets `DATABASE` for `db`, `RESOURCE` for keys prefixed with "dd.internal", and
+                `INSTANCE` otherwise. Keyless tags are always `INSTANCE`.
+        Raises:
+            ValueError: If `scope` differs from the scope the key already has, or is not `INSTANCE` for a
+                keyless tag.
         """
         if normalize and self._normalizer:
             value = self._normalizer(value)
@@ -617,19 +687,38 @@ class TagManager:
         if not key:
             key = self._keyless
 
-        if replace or key not in self._tags:
-            # Skip the cache invalidation if the value is unchanged. Dynamic tags (e.g. version,
-            # replication_role) are re-set with replace=True every check run but rarely change, so
-            # this lets the cached tag lists survive across runs.
-            if self._tags.get(key) == [value]:
-                return
-            self._tags[key] = [value]
-            # Invalidate the caches since tags have changed
-            self._invalidate_cache()
-        elif value not in self._tags[key]:
-            self._tags[key].append(value)
-            # Invalidate the caches since tags have changed
-            self._invalidate_cache()
+        with self._lock:
+            current_scope = self._scopes.get(key)
+            if scope is None:
+                scope = current_scope or _default_scope(key)
+            elif current_scope is not None and scope is not current_scope:
+                raise ValueError(f"Tag key {key!r} has scope {current_scope.name}, cannot set it as {scope.name}")
+            if key is self._keyless and scope is not TagScope.INSTANCE:
+                raise ValueError(f"Keyless tags must have scope {TagScope.INSTANCE.name}, not {scope.name}")
+
+            if replace or key not in self._tags:
+                # Skip the cache invalidation if the value is unchanged. Dynamic tags (e.g. version,
+                # replication_role) are re-set with replace=True every check run but rarely change, so
+                # this lets the cached tag lists survive across runs.
+                if self._tags.get(key) == [value]:
+                    return
+                self._tags[key] = [value]
+                self._scopes[key] = scope
+                # Invalidate the caches since tags have changed
+                self._invalidate_cache()
+            elif value not in self._tags[key]:
+                self._tags[key].append(value)
+                # Invalidate the caches since tags have changed
+                self._invalidate_cache()
+
+    def set_resource_tag(self, resource_type: str, value: str) -> None:
+        """
+        Set the agent resource tag for `resource_type`, replacing any previous value for that type.
+
+        Renders as "dd.internal.resource:<resource_type>:<value>" and is sent on metrics only, where the
+        Agent uses it to link the metrics to that resource.
+        """
+        self.set_tag(f"{RESOURCE_TAG_KEY}:{resource_type}", value, replace=True, scope=TagScope.RESOURCE)
 
     def set_tags_from_list(self, tag_list: List[str], replace: bool = False, normalize: bool = False) -> None:
         """
@@ -640,16 +729,18 @@ class TagManager:
             replace (bool): If True, replaces all existing tags with the new tags list
             normalize (bool): If True, applies tag normalization using the configured normalizer
         """
-        if replace:
-            self._tags.clear()
-            self._invalidate_cache()
+        with self._lock:
+            if replace:
+                self._tags.clear()
+                self._scopes.clear()
+                self._invalidate_cache()
 
-        for tag in tag_list:
-            if ':' in tag:
-                key, value = tag.split(':', 1)
-                self.set_tag(key, value, normalize=normalize)
-            else:
-                self.set_tag(None, tag, normalize=normalize)
+            for tag in tag_list:
+                if ':' in tag:
+                    key, value = tag.split(':', 1)
+                    self.set_tag(key, value, normalize=normalize)
+                else:
+                    self.set_tag(None, tag, normalize=normalize)
 
     def delete_tag(self, key: Optional[str], value: Optional[str] = None, normalize: bool = False) -> bool:
         """
@@ -669,73 +760,81 @@ class TagManager:
         if not key:
             key = self._keyless
 
-        if key not in self._tags:
-            return False
+        with self._lock:
+            if key not in self._tags:
+                return False
 
-        if value is None:
-            # Delete the entire key
-            del self._tags[key]
-            # Invalidate the caches
-            self._invalidate_cache()
-            return True
-        else:
-            # Delete specific value if it exists
-            if value in self._tags[key]:
-                self._tags[key].remove(value)
-                # Clean up empty lists
-                if not self._tags[key]:
-                    del self._tags[key]
+            if value is None:
+                # Delete the entire key
+                del self._tags[key]
+                del self._scopes[key]
                 # Invalidate the caches
                 self._invalidate_cache()
                 return True
-        return False
+            else:
+                # Delete specific value if it exists
+                if value in self._tags[key]:
+                    self._tags[key].remove(value)
+                    # Clean up empty lists
+                    if not self._tags[key]:
+                        del self._tags[key]
+                        del self._scopes[key]
+                    # Invalidate the caches
+                    self._invalidate_cache()
+                    return True
+            return False
 
     def _rebuild_cache(self) -> None:
         """
-        Render the tags dict into the three disjoint buckets (base, internal, db) in a single pass.
+        Render the tags dict into a `TagSnapshot` in a single pass, grouping each tag by its key's scope.
         For key-value tags the rendered form is "key:value"; for keyless tags it's just the value.
         """
-        base: List[str] = []
-        internal: List[str] = []
-        db: List[str] = []
+        rendered: Dict[TagScope, List[str]] = {scope: [] for scope in TagScope}
         for key, values in self._tags.items():
+            bucket = rendered[self._scopes[key]]
             if key == self._keyless:
-                base.extend(values)
-                continue
-            if isinstance(key, str) and key.startswith(INTERNAL_TAG_PREFIX):
-                bucket = internal
-            elif key == DB_TAG_KEY:
-                bucket = db
+                bucket.extend(values)
             else:
-                bucket = base
-            bucket.extend("{}:{}".format(key, value) for value in values)
-        self._base_tags = tuple(base)
-        self._internal_tags = tuple(internal)
-        self._db_tags = tuple(db)
+                bucket.extend("{}:{}".format(key, value) for value in values)
+        self._snapshot = TagSnapshot(
+            instance=tuple(rendered[TagScope.INSTANCE]),
+            resource=tuple(rendered[TagScope.RESOURCE]),
+            database=tuple(rendered[TagScope.DATABASE]),
+        )
         self._cache_valid = True
+
+    def snapshot(self) -> TagSnapshot:
+        """Return the current tags as an immutable `TagSnapshot`, which is safe to share across threads."""
+        with self._lock:
+            if not self._cache_valid:
+                self._rebuild_cache()
+            return self._snapshot
+
+    def metric_tags(self, database: str | None = None) -> list[str]:
+        """Tags for metrics. See `TagSnapshot.metric_tags`."""
+        return self.snapshot().metric_tags(database)
+
+    def event_tags(self, database: str | None = None) -> list[str]:
+        """Tags for DBM event payloads. See `TagSnapshot.event_tags`."""
+        return self.snapshot().event_tags(database)
 
     def get_tags(self, include_internal: bool = True, include_db: bool = True) -> List[str]:
         """
-        Get a list of tag strings.
+        Get a list of tag strings. Prefer `metric_tags` or `event_tags`, which choose tags by destination.
         For key-value tags, returns "key:value" format.
         For keyless tags, returns just the value.
         Args:
-            include_internal (bool): If False, excludes internal resource tags (keys prefixed with
-                "dd.internal"). Useful for payloads that don't go through the agent's metric
-                submission pipeline, such as DBM metadata events.
-            include_db (bool): If False, excludes the per-database tag (the "db" key). Useful for
-                instance-level metrics and DBM events where the database is determined per-row or
-                during ingestion.
+            include_internal (bool): If False, excludes `RESOURCE` tags.
+            include_db (bool): If False, excludes `DATABASE` tags.
         Returns:
             list: List of tag strings
         """
-        if not self._cache_valid:
-            self._rebuild_cache()
-        tags = list(self._base_tags)
+        snapshot = self.snapshot()
+        tags = list(snapshot.instance)
         if include_internal:
-            tags.extend(self._internal_tags)
+            tags.extend(snapshot.resource)
         if include_db:
-            tags.extend(self._db_tags)
+            tags.extend(snapshot.database)
         return tags
 
 
