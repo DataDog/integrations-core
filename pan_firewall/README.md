@@ -65,6 +65,8 @@ The Palo Alto Networks Firewall integration collects the logs that PAN-OS forwar
     ```yaml
     logs_enabled: true
     ```
+
+   **Note**: Install the Agent on a host that the firewall can reach on the syslog port and that can connect to the internet.
 2. Edit the logs configuration block in your `pan_firewall.d/conf.yaml` file. For example:
 
     ```yaml
@@ -95,6 +97,7 @@ The Palo Alto Networks Firewall integration collects the logs that PAN-OS forwar
     | GlobalProtect Log | <details> <summary><i> View Payload </i></summary> <p><code>timestamp=$receive_time, serial=$serial, type=$type, subtype=$subtype, time_generated=$time_generated, vsys=$vsys, evt.name=$eventid, stage=$stage, auth_method=$auth_method, tunnel_type=$tunnel_type, usr.id=$srcuser, srcregion=$srcregion, machinename=$machinename, public_ip=$public_ip, public_ipv6=$public_ipv6, private_ip=$private_ip, private_ipv6=$private_ipv6, hostid=$hostid, serialnumber=$serialnumber, client_ver=$client_ver, client_os=$client_os, client_os_ver=$client_os_ver, repeatcnt=$repeatcnt, reason=$reason, error=$error, opaque=$opaque, status=$status, location=$location, login_duration=$login_duration, connect_method=$connect_method, error_code=$error_code, portal=$portal, seqno=$seqno, actionflags=$actionflags, selection_type=$selection_type, response_time=$response_time, priority=$priority, attempted_gateways=$attempted_gateways, gateway=$gateway, dg_hier_level_1=$dg_hier_level_1, dg_hier_level_2=$dg_hier_level_2, dg_hier_level_3=$dg_hier_level_3, dg_hier_level_4=$dg_hier_level_4, vsys_name=$vsys_name, device_name=$device_name, vsys_id=$vsys_id</code></p> </details> |
 
 5. Go to **Objects > Log Forwarding**, and add a log forwarding profile that sends the required log types to the syslog server profile.
+6. [Restart the Agent][5].
 
 ### Events
 
