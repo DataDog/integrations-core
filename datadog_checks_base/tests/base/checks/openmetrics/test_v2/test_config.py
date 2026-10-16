@@ -5,6 +5,8 @@ import pytest
 
 from .utils import get_check
 
+LATEST_SPEC_ACCEPT = 'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
+
 
 class TestPrometheusEndpoint:
     def test_not_string(self, dd_run_check):
@@ -417,12 +419,24 @@ class TestUseLatestSpec:
         check = get_check({'use_latest_spec': True})
         check.configure_scrapers()
         scraper = check.scrapers['test']
-        assert scraper.http.options['headers']['Accept'] == (
-            'application/openmetrics-text;version=1.0.0,application/openmetrics-text;version=0.0.1'
-        )
+        assert scraper.http.get_header('Accept') == LATEST_SPEC_ACCEPT
 
     def test_dynamic_spec(self, dd_run_check):
         check = get_check({'use_latest_spec': False})
         check.configure_scrapers()
         scraper = check.scrapers['test']
-        assert scraper.http.options['headers']['Accept'] == 'text/plain'
+        assert scraper.http.get_header('Accept') == 'text/plain'
+
+    @pytest.mark.parametrize(
+        'option',
+        [
+            pytest.param({'headers': {'Accept': 'application/json'}}, id='headers'),
+            pytest.param({'extra_headers': {'accept': 'application/json'}}, id='lowercase-extra-headers'),
+        ],
+    )
+    def test_configured_accept_header_is_preserved(self, dd_run_check, option):
+        check = get_check({'use_latest_spec': True, **option})
+        check.configure_scrapers()
+        scraper = check.scrapers['test']
+
+        assert scraper.http.get_header('Accept') == 'application/json'
