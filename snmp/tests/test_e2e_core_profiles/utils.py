@@ -168,12 +168,17 @@ def assert_extend_cisco_bgp4_peer3(aggregator, common_tags):
         "neighbor:10.0.0.1",
         "vrf_name:blue",
     ]
-    gauges = [
+    metrics = [
         "cbgpPeer3AdminStatus",
         "cbgpPeer3NegotiatedVersion",
         "cbgpPeer3RemoteAs",
         "cbgpPeer3LocalAs",
         "cbgpPeer3State",
+        "cbgpPeer3InUpdates",
+        "cbgpPeer3OutUpdates",
+        "cbgpPeer3InTotalMessages",
+        "cbgpPeer3OutTotalMessages",
+        "cbgpPeer3FsmEstablishedTransitions",
         "cbgpPeer3FsmEstablishedTime",
         "cbgpPeer3ConnectRetryInterval",
         "cbgpPeer3HoldTime",
@@ -183,17 +188,8 @@ def assert_extend_cisco_bgp4_peer3(aggregator, common_tags):
         "cbgpPeer3MinASOriginationInterval",
         "cbgpPeer3MinRouteAdvertisementInterval",
     ]
-    counts = [
-        "cbgpPeer3InUpdates",
-        "cbgpPeer3OutUpdates",
-        "cbgpPeer3InTotalMessages",
-        "cbgpPeer3OutTotalMessages",
-        "cbgpPeer3FsmEstablishedTransitions",
-    ]
-    for metric in gauges:
+    for metric in metrics:
         aggregator.assert_metric("snmp." + metric, metric_type=aggregator.GAUGE, tags=tags)
-    for metric in counts:
-        aggregator.assert_metric("snmp." + metric, metric_type=aggregator.COUNT, tags=tags)
 
 
 def assert_extend_cisco_cpu_memory(aggregator, common_tags):
