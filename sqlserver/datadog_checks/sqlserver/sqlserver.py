@@ -303,24 +303,19 @@ class SQLServer(DatabaseCheck):
 
     def set_resource_tags(self):
         if self.cloud_metadata.get("gcp") is not None:
-            self.tag_manager.set_tag(
-                "dd.internal.resource:gcp_sql_database_instance",
+            self.tag_manager.set_resource_tag(
+                "gcp_sql_database_instance",
                 "{}:{}".format(
                     self.cloud_metadata.get("gcp")["project_id"],
                     self.cloud_metadata.get("gcp")["instance_id"],
                 ),
-                replace=True,
             )
         if self.cloud_metadata.get("aws") is not None:
-            self.tag_manager.set_tag(
-                "dd.internal.resource:aws_rds_instance",
-                self.cloud_metadata.get("aws")["instance_endpoint"],
-                replace=True,
-            )
+            self.tag_manager.set_resource_tag("aws_rds_instance", self.cloud_metadata.get("aws")["instance_endpoint"])
         elif AWS_RDS_HOSTNAME_SUFFIX in self.resolved_hostname:
             # allow for detecting if the host is an RDS host, and emit
             # the resource properly even if the `aws` config is unset
-            self.tag_manager.set_tag("dd.internal.resource:aws_rds_instance", self.resolved_hostname, replace=True)
+            self.tag_manager.set_resource_tag("aws_rds_instance", self.resolved_hostname)
             self.cloud_metadata["aws"] = {
                 "instance_endpoint": self.resolved_hostname,
             }
@@ -337,17 +332,11 @@ class SQLServer(DatabaseCheck):
             resource_types = AZURE_DEPLOYMENT_TYPE_TO_RESOURCE_TYPES.get(deployment_type).split(",")
             for r_type in resource_types:
                 if "azure_sql_server_database" in r_type and db_instance:
-                    self.tag_manager.set_tag(
-                        "dd.internal.resource:{}".format(r_type), "{}".format(db_instance), replace=True
-                    )
+                    self.tag_manager.set_resource_tag(r_type, db_instance)
                 else:
-                    self.tag_manager.set_tag("dd.internal.resource:{}".format(r_type), "{}".format(name), replace=True)
+                    self.tag_manager.set_resource_tag(r_type, name)
         # finally, emit a `database_instance` resource for this instance
-        self.tag_manager.set_tag(
-            "dd.internal.resource:database_instance",
-            self.database_identifier,
-            replace=True,
-        )
+        self.tag_manager.set_resource_tag("database_instance", self.database_identifier)
 
     @property
     def host_and_port(self):
@@ -510,7 +499,7 @@ class SQLServer(DatabaseCheck):
             self.set_resource_tags()
 
     def debug_tags(self):
-        return self.tag_manager.get_tags() + ["agent_hostname:{}".format(self.agent_hostname)]
+        return self.tag_manager.event_tags() + ["agent_hostname:{}".format(self.agent_hostname)]
 
     def debug_stats_kwargs(self, tags=None):
         tags = tags if tags else []
@@ -1206,7 +1195,7 @@ class SQLServer(DatabaseCheck):
                 "collection_interval": self._config.database_instance_collection_interval,
                 "dbms_version": self.dbms_version,
                 "integration_version": __version__,
-                "tags": self.tag_manager.get_tags(),
+                "tags": self.tag_manager.event_tags(),
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self.cloud_metadata,
                 "metadata": {

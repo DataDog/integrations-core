@@ -273,7 +273,7 @@ class Deadlocks(DBMAsyncJob):
             "ddsource": "sqlserver",
             "dbm_type": "deadlocks",
             "collection_interval": self.collection_interval,
-            "ddtags": self._check.tag_manager.get_tags(),
+            "ddtags": self._check.tag_manager.event_tags(),
             "timestamp": time() * 1000,
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),

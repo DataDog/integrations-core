@@ -170,7 +170,7 @@ class SqlServerDataObservability(DBMAsyncJob):
         return due
 
     def _build_base_tags(self) -> list[str]:
-        tags = [t for t in self._tags if not t.startswith('dd.internal')] if self._tags else []
+        tags = self._tag_snapshot.event_tags()
         config_id = self._do_config.config_id
         if config_id:
             tags.append(f'config_id:{config_id}')

@@ -156,7 +156,7 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
             'ddagentversion': self._check.agent_version,
             'service': self._config.service,
-            'tags': self._check.tag_manager.get_tags(),
+            'tags': self._check.tag_manager.event_tags(),
         }
 
     @tracked_method(agent_check_getter=agent_check_getter)

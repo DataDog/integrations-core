@@ -519,7 +519,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             "database_instance": self._check.database_identifier,
             'timestamp': time.time() * 1000,
             'min_collection_interval': self.collection_interval,
-            'tags': self._check.tag_manager.get_tags(),
+            'tags': self._check.tag_manager.event_tags(),
             'kind': 'query_metrics',
             'cloud_metadata': self._check.cloud_metadata,
             'sqlserver_rows': [self._to_metrics_payload_row(r) for r in rows],
@@ -578,9 +578,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             if query_cache_key in self._full_statement_text_cache:
                 continue
             self._full_statement_text_cache[query_cache_key] = True
-            tags = self._check.tag_manager.get_tags()
-            if 'database_name' in row:
-                tags += ["db:{}".format(row['database_name'])]
+            tags = self._check.tag_manager.event_tags(database=row.get('database_name'))
             yield {
                 "timestamp": time.time() * 1000,
                 "host": self._check.reported_hostname,
@@ -677,7 +675,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         1,
                         **self._check.debug_stats_kwargs(tags=["error:obfuscate-xml-plan-{}".format(type(e))]),
                     )
-                tags = self._check.tag_manager.get_tags()
+                tags = self._check.tag_manager.event_tags(database=row.get('database_name'))
 
                 if is_plan_encrypted:
                     collection_errors.append({'code': "plan_encrypted", 'message': "cannot collect encrypted plan"})
@@ -698,8 +696,6 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 # procedure_signature
                 if row['is_proc']:
                     query_signature = None
-                if 'database_name' in row:
-                    tags += ["db:{}".format(row['database_name'])]
                 obfuscated_plan_event = {
                     "host": self._check.reported_hostname,
                     "database_instance": self._check.database_identifier,

@@ -305,7 +305,10 @@ def assert_metrics(
         aggregator.assert_metric(mname, hostname=hostname)
     aggregator.assert_service_check('sqlserver.can_connect', status=SQLServer.OK, tags=service_tags)
 
-    operation_time_metric_tags = check_tags + ['agent_hostname:{}'.format(hostname)]
+    # Telemetry carries the check's tags without resource tags.
+    operation_time_metric_tags = [t for t in check_tags if not t.startswith('dd.internal.resource:')] + [
+        'agent_hostname:{}'.format(hostname)
+    ]
     for operation_name in get_operation_time_metrics(instance):
         aggregator.assert_metric(
             OPERATION_TIME_METRIC_NAME,

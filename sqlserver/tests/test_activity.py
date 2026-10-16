@@ -126,7 +126,6 @@ def test_collect_load_activity(
     expected_instance_tags = {t for t in instance_tags if not t.startswith('dd.internal')}
     expected_instance_tags.add("database_hostname:stubbed.hostname")
     expected_instance_tags.add("database_instance:stubbed.hostname")
-    expected_instance_tags.add("dd.internal.resource:database_instance:stubbed.hostname")
     if collect_raw_query_statement:
         instance["collect_raw_query_statement"] = {"enabled": True}
         expected_instance_tags.add("raw_query_statement:enabled")
@@ -897,15 +896,12 @@ def _get_conn_for_user(instance_docker, user, _autocommit=False):
     return conn
 
 
-def _expected_dbm_instance_tags(check, include_resource=True):
-    tags = check._config.tags + [
+def _expected_dbm_instance_tags(check):
+    return check._config.tags + [
         "database_hostname:{}".format("stubbed.hostname"),
         "database_instance:{}".format("stubbed.hostname"),
         "sqlserver_servername:{}".format(check.static_info_cache[STATIC_INFO_SERVERNAME].lower()),
     ]
-    if include_resource:
-        tags.append("dd.internal.resource:database_instance:{}".format("stubbed.hostname"))
-    return tags
 
 
 @pytest.mark.parametrize(
@@ -930,7 +926,7 @@ def test_async_job_inactive_stop(aggregator, dd_run_check, dbm_instance):
     check.activity._job_loop_future.result()
     aggregator.assert_metric(
         "dd.sqlserver.async_job.inactive_stop",
-        tags=['job:query-activity'] + _expected_dbm_instance_tags(check, include_resource=False),
+        tags=['job:query-activity'] + _expected_dbm_instance_tags(check),
         hostname='',
     )
 
@@ -945,7 +941,7 @@ def test_async_job_cancel_cancel(aggregator, dd_run_check, dbm_instance):
     check.cancel()
     aggregator.assert_metric(
         "dd.sqlserver.async_job.cancel",
-        tags=_expected_dbm_instance_tags(check, include_resource=False) + ['job:query-activity'],
+        tags=_expected_dbm_instance_tags(check) + ['job:query-activity'],
     )
 
 
