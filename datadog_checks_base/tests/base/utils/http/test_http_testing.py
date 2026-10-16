@@ -1,11 +1,14 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import importlib
+import sys
 from typing import Any
 
 import pytest
 import requests
 
+import datadog_checks.dev
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.openmetrics.base_check import OpenMetricsBaseCheck
 from datadog_checks.base.checks.prometheus.prometheus_base import PrometheusCheck
@@ -208,19 +211,18 @@ def test_fake_http_preserves_prometheus_handler_cache_and_isolation(fake_http):
     assert second_handler.get_header('X-First-Only') is None
 
 
-def test_legacy_mock_response_is_a_requests_response_without_loading_base_fakes(mocker):
-    real_import_module = http_testing.importlib.import_module
+def test_legacy_mock_response_is_a_requests_response_without_loading_base_fakes(monkeypatch):
+    # Suites testing against an older base, which lacks the fakes, still import MockResponse.
+    for name in ('datadog_checks.dev.http', 'datadog_checks.dev.http_legacy', 'datadog_checks.base.stubs.http'):
+        monkeypatch.delitem(sys.modules, name, raising=False)
+    monkeypatch.setattr(datadog_checks.dev, 'http', http_testing)
 
-    def import_legacy(name):
-        if name == 'datadog_checks.base.stubs.http':
-            raise AssertionError('legacy compatibility must not load the base HTTP fakes')
-        return real_import_module(name)
-
-    mocker.patch.object(http_testing.importlib, 'import_module', side_effect=import_legacy)
+    fresh_http_testing = importlib.import_module('datadog_checks.dev.http')
     with pytest.warns(DeprecationWarning, match='FakeHTTPResponse'):
-        legacy = http_testing.MockResponse
+        legacy = fresh_http_testing.MockResponse
 
     assert issubclass(legacy, requests.Response)
+    assert 'datadog_checks.base.stubs.http' not in sys.modules
 
 
 def test_mock_response_fixture_builds_requests_response(tmp_path, mock_response):
