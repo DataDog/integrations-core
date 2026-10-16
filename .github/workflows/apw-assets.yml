@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - .github/workflows/apw-assets.yml
-      - scripts/*apw_assets.py
+      - scripts/apw/**
   workflow_dispatch:
   schedule:
     # Every 15 minutes, offset from the busiest start-of-hour period.
@@ -28,18 +28,18 @@ jobs:
         with:
           persist-credentials: false
       - name: Test packaging and release handling
-        run: python3 -m unittest discover -s scripts -p 'test_*apw_assets.py' -v
+        run: python3 -m unittest discover -s scripts/apw -p 'test_*apw_assets.py' -v
       - name: Check for a complete release
         id: release
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: python3 scripts/release_apw_assets.py check --commit "$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+        run: python3 scripts/apw/release_apw_assets.py check --commit "$GITHUB_SHA" >> "$GITHUB_OUTPUT"
       - name: Export committed assets
         id: export
         if: steps.release.outputs.package != 'false'
-        run: python3 scripts/package_apw_assets.py --commit "$GITHUB_SHA" --output dist
+        run: python3 scripts/apw/package_apw_assets.py --commit "$GITHUB_SHA" --output dist
       - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         if: steps.export.outcome == 'success'
         with:
@@ -70,4 +70,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: python3 scripts/release_apw_assets.py publish --commit "$GITHUB_SHA" --directory dist
+        run: python3 scripts/apw/release_apw_assets.py publish --commit "$GITHUB_SHA" --directory dist
