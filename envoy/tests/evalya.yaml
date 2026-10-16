@@ -1,0 +1,27 @@
+version: "1"
+
+tasks:
+  # Full metric-coverage fixture: a front proxy with the routes, clusters, runtime
+  # layers, and overload action that drive every metric in the envoy dashboards
+  # and recommended monitor, plus a built-in workload that keeps rate/counter
+  # metrics moving. Point both check modes at the admin port: the legacy
+  # `stats_url` and the OpenMetrics `openmetrics_endpoint`. See README.md.
+  - id: envoy-full
+    task: ./compose/full-coverage.compose@envoy-full
+    labels:
+      evalya.io/publish: "true"
+      evalya.io/provides.ENVOY_HOST: "{{ .hostname }}"
+      evalya.io/provides.ENVOY_PORT: "8001"
+      evalya.io/provides.ENVOY_OPENMETRICS_ENDPOINT: "http://{{ .hostname }}:8001/stats/prometheus"
+      evalya.io/provides.ENVOY_STATS_URL: "http://{{ .hostname }}:8001/stats"
+    env:
+      - name: ENVOY_VERSION
+        value: "1.31.0"
+      - name: ACTIVITY_GEN
+        value: "1"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8001 && printf 'GET /ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q LIVE <&3"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
