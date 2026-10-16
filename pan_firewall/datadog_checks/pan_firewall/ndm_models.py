@@ -16,6 +16,8 @@ STATUS_UNREACHABLE = 2
 OPER_UP = 1
 OPER_DOWN = 2
 OPER_UNKNOWN = 4
+ADMIN_UP = 1
+ADMIN_DOWN = 2
 
 
 class DeviceMetadata(BaseModel):
@@ -45,6 +47,8 @@ class InterfaceMetadata(BaseModel):
     name: str
     index: int | None = None
     mac_address: str | None = None
+    description: str | None = None
+    admin_status: int | None = None
     oper_status: int
 
 

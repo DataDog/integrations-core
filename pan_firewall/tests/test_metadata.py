@@ -9,6 +9,7 @@ from datadog_checks.pan_firewall.collectors.base import COLLECT_FUNCTIONS
 from datadog_checks.pan_firewall.collectors.ha import HA_CMD, collect_ha
 from datadog_checks.pan_firewall.firewalls import FirewallTarget
 from datadog_checks.pan_firewall.identity import global_tags, parse_system_info
+from datadog_checks.pan_firewall.interface_config import parse_interface_config
 from datadog_checks.pan_firewall.metadata import build_device, build_interfaces
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
@@ -23,17 +24,22 @@ from .common import (
     SYSTEM_INFO_CMD,
 )
 from .fake_panos import FIREWALL_SETS
-from .helpers import interface_state, make_instance, new_check
+from .helpers import interface_state, load_xml, make_instance, new_check
 
 EVENT_TYPE = 'network-devices-metadata'
 FW_A_STATIC_IP = '198.51.100.7'
+FW_A_INTERFACE_CONFIG = FIXTURES / 'fw-a-probe' / 'config_running_interface.xml'
+SYNTHETIC_INTERFACES = SYNTHETIC / 'interface_all_subinterfaces.xml'
+SYNTHETIC_CONFIG = SYNTHETIC / 'config_running_interface_set.xml'
 SYSTEM_INFO = parse_system_info(parse_response((FIXTURES / 'fw-a' / 'system_info.xml').read_bytes()))
 NAMESPACE = 'default'
 
 
-def interfaces_by_name(path, tunnel_states=None) -> dict:
+def interfaces_by_name(path, tunnel_states=None, config_path=None) -> dict:
     state = interface_state(path)
     state.tunnel_states = tunnel_states or {}
+    if config_path is not None:
+        state.interface_config = parse_interface_config(load_xml(config_path))
     return {i.name: i.model_dump(exclude_none=True) for i in build_interfaces(FW_A_SERIAL, state)}
 
 
@@ -116,6 +122,35 @@ def test_subinterfaces_inherit_the_parent_state_and_tunnels_use_the_vpn_state():
     assert 'mac_address' not in by_name['ethernet1/1.10']
     # A tunnel without a VPN entry is unknown.
     assert interfaces_by_name(SYNTHETIC / 'interface_all_subinterfaces.xml')['tunnel.3']['oper_status'] == 4
+
+
+def test_admin_status_and_description_of_the_synthetic_set():
+    by_name = interfaces_by_name(SYNTHETIC_INTERFACES, config_path=SYNTHETIC_CONFIG)
+
+    assert {n: (i['admin_status'], i.get('description')) for n, i in by_name.items()} == {
+        # link-state up is still enabled.
+        'ethernet1/1': (1, 'Uplink & <ISP> — São Paulo'),
+        'ethernet1/1.10': (1, 'Guest VLAN'),
+        # The parent ethernet1/2 is link-state down.
+        'ethernet1/2.20': (2, None),
+        'loopback.1': (1, 'router-id'),
+        'tunnel.3': (1, 'to DC2'),
+        # An aggregate has no link-state.
+        'ae1': (1, 'LACP to core'),
+    }
+
+
+def test_interfaces_of_fw_a_capture_with_its_config():
+    by_name = interfaces_by_name(FW_A_INTERFACE_ALL, config_path=FW_A_INTERFACE_CONFIG)
+
+    assert {n: i['admin_status'] for n, i in by_name.items()} == dict.fromkeys(INTERFACE_NAMES, 1)
+    assert not any('description' in i for i in by_name.values())
+
+
+def test_no_config_read_omits_admin_status_and_description():
+    by_name = interfaces_by_name(FW_A_INTERFACE_ALL)
+
+    assert not any({'admin_status', 'description'} & i.keys() for i in by_name.values())
 
 
 def _target(ip):

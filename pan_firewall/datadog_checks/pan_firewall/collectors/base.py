@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from datadog_checks.pan_firewall.api import PanosClient
     from datadog_checks.pan_firewall.config_models.instance import InstanceConfig
     from datadog_checks.pan_firewall.identity import DeviceIdentity
+    from datadog_checks.pan_firewall.interface_config import InterfaceConfig
 
 
 class Sample(NamedTuple):
@@ -86,6 +87,8 @@ class FirewallState:
     # `show interface all` rows, kept when the call fails; `interface_map` is None until it first answers.
     interface_rows: list[Element] = field(default_factory=list)
     interface_map: dict[str, Element] | None = None
+    # `show config running` interface settings, kept when the read fails; None until it first answers.
+    interface_config: dict[str, InterfaceConfig] | None = None
     vsys: list[str] = field(default_factory=lambda: ['vsys1'])
     ha_state: str | None = None
     # Written by `vpn`, read by `interfaces`, which owns the tunnel counters: None until `vpn` first answers.

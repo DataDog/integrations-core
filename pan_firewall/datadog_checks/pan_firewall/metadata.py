@@ -7,7 +7,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from .interface_config import LINK_STATE_DOWN, InterfaceConfig
 from .ndm_models import (
+    ADMIN_DOWN,
+    ADMIN_UP,
     OPER_DOWN,
     OPER_UNKNOWN,
     OPER_UP,
@@ -58,6 +61,7 @@ def build_device(
 
 def build_interfaces(serial: str, state: FirewallState) -> Iterator[InterfaceMetadata]:
     hw_rows = state.interface_map or {}
+    config = state.interface_config
     for row in state.interface_rows:
         name = text(row, 'name')
         if not name:
@@ -72,8 +76,19 @@ def build_interfaces(serial: str, state: FirewallState) -> Iterator[InterfaceMet
             name=name,
             index=int(index) if index is not None else None,
             mac_address=text(hw, 'mac') if physical else None,
+            description=config.get(name, InterfaceConfig()).comment if config is not None else None,
+            admin_status=_admin_status(name, config) if config is not None else None,
             oper_status=_oper_status(name, hw_rows, state.tunnel_states),
         )
+
+
+def _admin_status(name: str, config: dict[str, InterfaceConfig]) -> int:
+    # Only physical ethernet has `link-state`. A subinterface takes its parent's, as in `_oper_status`.
+    for key in (name, name.split('.', 1)[0]):
+        setting = config.get(key)
+        if setting is not None and setting.link_state is not None:
+            return ADMIN_DOWN if setting.link_state == LINK_STATE_DOWN else ADMIN_UP
+    return ADMIN_UP
 
 
 def _oper_status(name: str, hw_rows: dict[str, Element], tunnel_states: dict[str, str]) -> int:
