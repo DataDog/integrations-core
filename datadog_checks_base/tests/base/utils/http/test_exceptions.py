@@ -6,7 +6,7 @@ import json
 import mock
 import pytest
 import requests
-from urllib3.exceptions import ReadTimeoutError
+from urllib3.exceptions import ProtocolError, ReadTimeoutError
 
 from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.base.utils.http_exceptions import (
@@ -64,6 +64,7 @@ def test_raise_for_status_maps_to_status_error():
         pytest.param(requests.exceptions.ConnectionError('refused'), HTTPClientConnectionError, id='connection-error'),
         pytest.param(requests.exceptions.ProxyError('proxy'), HTTPClientConnectionError, id='proxy-error'),
         pytest.param(requests.exceptions.ContentDecodingError('decode'), HTTPClientRequestError, id='content-decoding'),
+        pytest.param(requests.exceptions.ChunkedEncodingError('broken'), HTTPClientRequestError, id='chunked-encoding'),
         pytest.param(requests.exceptions.HTTPError('500'), HTTPClientStatusError, id='http-error'),
         pytest.param(requests.exceptions.RequestException('generic'), HTTPClientRequestError, id='request-exception'),
     ],
@@ -215,8 +216,8 @@ def test_translate_converts_raw_request_to_agnostic_snapshot():
 @pytest.mark.parametrize(
     'raised, expected',
     [
-        pytest.param(requests.exceptions.ConnectionError('dropped'), HTTPClientConnectionError, id='connection-error'),
-        pytest.param(requests.exceptions.ReadTimeout('slow'), HTTPClientReadTimeoutError, id='read-timeout'),
+        pytest.param(ProtocolError('connection broken'), HTTPClientRequestError, id='connection-broken'),
+        pytest.param(ReadTimeoutError(None, None, 'slow'), HTTPClientReadTimeoutError, id='read-timeout'),
     ],
 )
 @pytest.mark.parametrize('iter_method', ['iter_content', 'iter_lines'])
@@ -256,11 +257,11 @@ def test_response_adapter_maps_requests_wrapped_mid_stream_read_timeout() -> Non
 )
 def test_buffered_seam_maps_exceptions(read):
     transport = common.RequestsTransport()
-    transport.respond(stream_error=requests.exceptions.ConnectionError('dropped'))
+    transport.respond(stream_error=ProtocolError('connection broken'))
     http = common.create_requests_client(transport)
     wrapped = http.get('http://example.test/', stream=True)
 
-    with pytest.raises(HTTPClientConnectionError):
+    with pytest.raises(HTTPClientRequestError):
         read(wrapped)
 
 
@@ -322,10 +323,10 @@ def test_direct_iteration_maps_mid_stream_exceptions():
     transport = common.RequestsTransport()
     transport.respond(
         content_chunks=(b'first',),
-        stream_error=requests.exceptions.ConnectionError('dropped'),
+        stream_error=ProtocolError('connection broken'),
     )
     http = common.create_requests_client(transport)
     wrapped = http.get('http://example.test/', stream=True)
 
-    with pytest.raises(HTTPClientConnectionError):
+    with pytest.raises(HTTPClientRequestError):
         list(wrapped)
