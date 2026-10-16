@@ -67,9 +67,9 @@ For complete documentation of every option, see the associated configuration tem
 
 ## Errors
 
-With `AGNOSTIC_HTTP_CLIENT` set, a failed request raises one of the backend-neutral types in
-`datadog_checks.base.utils.http_exceptions`, never an exception class belonging to the underlying HTTP library. Catch
-these instead:
+With `AGNOSTIC_HTTP_CLIENT` set, a failed request raises one of the backend-neutral types from the
+module `datadog_checks.base.utils.http_exceptions`, never an exception class belonging to the underlying HTTP
+library. Catch these instead:
 
 | Exception | Raised when |
 | --- | --- |
