@@ -167,7 +167,7 @@ class FakeHTTPResponse:
         if self._stream_error is not None:
             raise self._stream_error
 
-    def __enter__(self) -> HTTPResponse:
+    def __enter__(self) -> FakeHTTPResponse:
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> bool | None:
