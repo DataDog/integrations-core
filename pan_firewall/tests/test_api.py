@@ -282,6 +282,20 @@ def test_error_that_is_not_an_auth_rejection_neither_renews_the_key_nor_invalida
     assert client.stats.auth_rejected is False
 
 
+@pytest.mark.parametrize('status, body', AUTH_FAILURES)
+def test_op_without_renewal_does_not_renew_on_403(status, body):
+    http = FakeHttp(keygen=[(200, KEYGEN_OK)], api=[(status, body)])
+    client, _ = make_client(http)
+
+    with pytest.raises(PanosApiError) as exc_info:
+        client.op(SYSTEM_INFO_CMD, renew_on_auth_error=False)
+
+    # A permission refusal of an optional call, not a rejected key.
+    assert type(exc_info.value) is PanosApiError
+    assert len(http.calls_of('keygen')) == 1
+    assert (client.stats.auth_rejected, client.stats.key_regenerated) == (False, False)
+
+
 def test_static_key_is_never_regenerated():
     http = FakeHttp(api=[(403, INVALID_CREDENTIAL)])
     client, _ = make_client(http, STATIC_CREDS)

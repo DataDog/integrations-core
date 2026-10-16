@@ -22,6 +22,7 @@ FW_A_SERIAL = '007900000000001'
 FW_B_SERIAL = '007900000000002'
 SYSTEM_INFO_CMD = '<show><system><info/></system></show>'
 INTERFACE_ALL_CMD = '<show><interface>all</interface></show>'
+INTERFACE_CONFIG_CMD = '<show><config><running><xpath>devices/entry/network/interface</xpath></running></config></show>'
 # The collectors `helpers.register_stubs` replaces with stubs.
 STUBS = ('bgp', 'dataplane', 'interfaces', 'system_resources')
 MIB = 1024**2
