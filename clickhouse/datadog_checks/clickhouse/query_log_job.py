@@ -577,9 +577,8 @@ class ClickhouseQueryLogJob(DBMAsyncJob):
         """
         Main job entry point. Sets up tags and calls subclass collection logic.
         """
-        # Do not emit any dd.internal metrics for DBM specific check code
-        self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
-        self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
+        self.tags = self._tag_snapshot.event_tags()
+        self._tags_no_db = self._tag_snapshot.event_tags()
         self._collect_and_submit()
 
     def _normalize_query(self, row: dict) -> dict | None:

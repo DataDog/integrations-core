@@ -388,10 +388,7 @@ class ClickhouseStatementMetrics(ClickhouseQueryLogJob):
             db = row.get('databases', 'default')
             user = row.get('user', 'default')
 
-            row_tags = self._tags_no_db + [
-                "db:{}".format(db),
-                "user:{}".format(user),
-            ]
+            row_tags = self._tag_snapshot.event_tags(database=db) + ["user:{}".format(user)]
 
             yield {
                 "timestamp": time.time() * 1000,

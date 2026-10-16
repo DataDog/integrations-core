@@ -123,11 +123,8 @@ class ClickhouseTableMetrics(DBMAsyncJob):
             self._log.exception("Failed to collect clickhouse table sizes")
             return
 
-        # Drop the instance-level `db:` base tag (the connection database) so each
-        # per-table series carries exactly one `db:` tag — the table's own database.
-        base_tags = [t for t in self._check.tags if not t.startswith('db:')]
         for database, name, total_rows, total_bytes in rows:
-            entity_tags = base_tags + [f'db:{database}', f'table:{name}']
+            entity_tags = self._check.tag_manager.metric_tags(database=database) + [f'table:{name}']
             self._check.gauge('table.rows', int(total_rows or 0), tags=entity_tags)
             self._check.gauge('table.bytes', int(total_bytes or 0), tags=entity_tags)
 
@@ -142,11 +139,12 @@ class ClickhouseTableMetrics(DBMAsyncJob):
             self._handle_view_refreshes_error(e)
             return
 
-        # Drop the instance-level `db:` base tag (the connection database) so each
-        # per-view series carries exactly one `db:` tag — the view's own database.
-        base_tags = [t for t in self._check.tags if not t.startswith('db:')]
         for database, view_name, host, status, _exception, last_time, next_time, written_rows, written_bytes in rows:
-            view_tags = base_tags + [f'db:{database}', f'view:{view_name}', f'host:{host}', f'clickhouse_node:{host}']
+            view_tags = self._check.tag_manager.metric_tags(database=database) + [
+                f'view:{view_name}',
+                f'host:{host}',
+                f'clickhouse_node:{host}',
+            ]
             refresh_status = _VIEW_REFRESH_STATUS_MAP.get(status, AgentCheck.UNKNOWN)
             self._check.gauge('view.refresh.status', refresh_status, tags=view_tags)
             self._check.gauge('view.refresh.last_time', int(last_time or 0), tags=view_tags)

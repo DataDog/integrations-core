@@ -218,8 +218,7 @@ class ClickhouseCheck(DatabaseCheck):
         """Send database instance metadata to the metadata intake."""
         current_time = time()
         if current_time - self._database_instance_last_emitted >= DATABASE_INSTANCE_COLLECTION_INTERVAL:
-            # Get tags without db: prefix for metadata
-            tags_no_db = [t for t in self.tags if not t.startswith('db:')]
+            tags_no_db = self.tag_manager.event_tags()
 
             metadata = {
                 "dbm": self._config.dbm,

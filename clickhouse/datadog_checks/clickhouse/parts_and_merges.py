@@ -245,6 +245,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         self._collection_interval = collection_interval
         self._tags_no_db: list[str] | None = None
         self.tags: list[str] | None = None
+        self._metric_tags: list[str] = []
 
         self._include_partition_tag: bool = bool(config.table_metrics_include_partition_tag)
         self._max_tables: int = config.table_metrics_max_tables
@@ -673,7 +674,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         for key, agg in sorted_parts[: self._max_tables]:
             if self._include_partition_tag:
                 database, table, server_node, partition = key
-                tags = self.tags + [
+                tags = self._metric_tags + [
                     f'database:{database}',
                     f'table:{table}',
                     f'clickhouse_node:{server_node}',
@@ -681,7 +682,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
                 ]
             else:
                 database, table, server_node = key
-                tags = self.tags + [
+                tags = self._metric_tags + [
                     f'database:{database}',
                     f'table:{table}',
                     f'clickhouse_node:{server_node}',
@@ -729,7 +730,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
             agg['progress_count'] += 1
 
         for (database, table, server_node), agg in merges_agg.items():
-            tags = self.tags + [
+            tags = self._metric_tags + [
                 f'database:{database}',
                 f'table:{table}',
                 f'clickhouse_node:{server_node}',
@@ -744,7 +745,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
 
         # --- Mutations (server-side aggregated) ---
         for row in mutations_aggregated:
-            tags = self.tags + [
+            tags = self._metric_tags + [
                 f'database:{row["database"]}',
                 f'table:{row["table"]}',
                 f'clickhouse_node:{row.get("server_node", "")}',
@@ -758,7 +759,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
 
         # --- Replication queue (server-side aggregated) ---
         for row in replication_aggregated:
-            tags = self.tags + [
+            tags = self._metric_tags + [
                 f'database:{row["database"]}',
                 f'table:{row["table"]}',
                 f'clickhouse_node:{row.get("server_node", "")}',
@@ -782,7 +783,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
             agg[row['reason_category']] += row['detached_count']
 
         for (database, table, server_node), agg in detached_agg.items():
-            tags = self.tags + [
+            tags = self._metric_tags + [
                 f'database:{database}',
                 f'table:{table}',
                 f'clickhouse_node:{server_node}',
@@ -795,7 +796,7 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         # --- Thresholds (server-level MergeTree settings) ---
         for row in thresholds or []:
             server_node = row.get('server_node', '')
-            tags = self.tags + [f'clickhouse_node:{server_node}']
+            tags = self._metric_tags + [f'clickhouse_node:{server_node}']
             if row['name'] == 'parts_to_delay_insert':
                 self._check.gauge('parts.threshold.delay_insert', row['value'], tags=tags)
             elif row['name'] == 'parts_to_throw_insert':
@@ -894,8 +895,11 @@ class ClickhousePartsAndMerges(DBMAsyncJob):
         )
 
     def run_job(self):
-        self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
-        self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
+        self.tags = self._tag_snapshot.event_tags()
+        self._tags_no_db = self._tag_snapshot.event_tags()
+        # Table, parts and merges metrics keep the connection's `db` tag and no resource tags until their tag set
+        # is decided.
+        self._metric_tags = [*self._tag_snapshot.instance, *self._tag_snapshot.database]
 
         try:
             self._collect_and_emit()

@@ -693,9 +693,8 @@ class ClickhouseStatementSamples(DBMAsyncJob):
         """
         Main job execution method called by DBMAsyncJob.
         """
-        # Filter out internal tags
-        self.tags = [t for t in self._tags if not t.startswith('dd.internal')]
-        self._tags_no_db = [t for t in self.tags if not t.startswith('db:')]
+        self.tags = self._tag_snapshot.event_tags()
+        self._tags_no_db = self._tag_snapshot.event_tags()
 
         try:
             now = time.time()

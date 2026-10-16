@@ -7,6 +7,7 @@ from unittest import mock
 
 import pytest
 
+from datadog_checks.base.utils.db.utils import TagSnapshot
 from datadog_checks.clickhouse import ClickhouseCheck
 from datadog_checks.clickhouse.config_models.instance import PartsAndMerges as PartsAndMergesConfig
 from datadog_checks.clickhouse.parts_and_merges import (
@@ -1031,11 +1032,12 @@ def test_obfuscate_mutation_command_falls_back_to_none_on_error(check):
     assert job._obfuscate_mutation_command(None) is None
 
 
-def test_run_job_strips_internal_tags(check):
+def test_run_job_scopes_tags(check):
+    """Telemetry and payloads carry neither `db` nor resource tags; table metrics keep the connection's `db` tag"""
     job = check.parts_and_merges
-    job._tags = ['test:clickhouse', 'dd.internal:some_tag', 'db:default']
+    job._tag_snapshot = TagSnapshot.from_tags(['test:clickhouse', 'dd.internal:some_tag', 'db:default'])
     with mock.patch.object(job, '_collect_and_emit'):
         job.run_job()
-    assert 'dd.internal:some_tag' not in job.tags
-    assert 'test:clickhouse' in job.tags
-    assert 'db:default' not in job._tags_no_db
+    assert job.tags == ['test:clickhouse']
+    assert job._tags_no_db == ['test:clickhouse']
+    assert job._metric_tags == ['test:clickhouse', 'db:default']
