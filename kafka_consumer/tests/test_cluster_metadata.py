@@ -180,10 +180,8 @@ def seed_mock_kafka_client(cluster_id='test-cluster-id'):
         return result
 
     mock_admin_client.list_offsets.side_effect = mock_list_offsets
-    client.consumer_get_cluster_id_and_list_topics.return_value = (cluster_id, [('test-topic', [0, 1])])
+    client.get_cluster_id.return_value = cluster_id
     client.list_consumer_group_offsets.return_value = []
-    client.open_consumer.return_value = None
-    client.close_consumer.return_value = None
 
     return client
 
