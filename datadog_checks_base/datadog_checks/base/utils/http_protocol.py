@@ -33,6 +33,9 @@ class HTTPHeaders(Mapping[str, str]):
     def __len__(self) -> int:
         return len(self._values)
 
+    def __repr__(self) -> str:
+        return f'{type(self).__name__}({dict(self)!r})'
+
 
 class HTTPRequest(Protocol):
     @property
