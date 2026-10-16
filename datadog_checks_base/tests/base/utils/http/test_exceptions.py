@@ -66,14 +66,12 @@ def test_raise_for_status_maps_to_status_error():
         pytest.param(requests.exceptions.ContentDecodingError('decode'), HTTPClientRequestError, id='content-decoding'),
         pytest.param(requests.exceptions.HTTPError('500'), HTTPClientStatusError, id='http-error'),
         pytest.param(requests.exceptions.RequestException('generic'), HTTPClientRequestError, id='request-exception'),
-        pytest.param(RuntimeError('not-requests'), HTTPClientError, id='non-requests-fallback'),
     ],
 )
 def test_translate_maps_requests_to_agnostic(raised, expected):
     result = _translate_requests_exception(raised)
     assert isinstance(result, expected)
-    if isinstance(raised, requests.exceptions.RequestException):
-        assert isinstance(result, type(raised))
+    assert isinstance(result, type(raised))
 
 
 @pytest.mark.parametrize(

@@ -106,7 +106,7 @@ def _translated_http_error[T: HTTPClientError](
 
 
 def _translate_requests_exception(
-    exc: BaseException, *, response: HTTPResponse | None = None
+    exc: requests_exceptions.RequestException, *, response: HTTPResponse | None = None
 ) -> HTTPClientError | json.JSONDecodeError:
     """Map a requests exception to its agnostic compatibility type, most-specific first."""
     if isinstance(exc, HTTPClientError):
@@ -139,9 +139,7 @@ def _translate_requests_exception(
         return _translated_http_error(HTTPClientConnectionError, exc, response=response)
     if isinstance(exc, requests_exceptions.HTTPError):
         return _translated_http_error(HTTPClientStatusError, exc, response=response)
-    if isinstance(exc, requests_exceptions.RequestException):
-        return _translated_http_error(HTTPClientRequestError, exc, response=response)
-    return HTTPClientError(str(exc) or type(exc).__name__)
+    return _translated_http_error(HTTPClientRequestError, exc, response=response)
 
 
 @contextmanager
