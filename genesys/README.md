@@ -4,7 +4,7 @@
 
 [Genesys][1] is a comprehensive cloud-based contact center platform that enables businesses to manage and optimize customer interactions across multiple channels, including voice, chat, email, social media, and messaging. It's known for its flexibility, scalability, and integration capabilities, helping businesses improve customer experience and streamline operations.
 
-The Genesys integration collects conversations (Voice, Email, Message, Callback, Chat) analytics metrics and audit logs and ingests them into Datadog for comprehensive analysis.
+The Genesys integration collects conversations (Voice, Email, Message, Callback, Chat) analytics metrics, conversation quality (MOS) metrics, and audit logs and ingests them into Datadog for comprehensive analysis.
 
 ## Setup
 
@@ -47,6 +47,7 @@ The Genesys integration collects conversations (Voice, Email, Message, Callback,
     |Get Email Metrics| Enable to collect Email Metrics from Genesys. By default, it is enabled. |
     |Get Message Metrics| Enable to collect Message Metrics from Genesys. By default, it is enabled. |
     |Get Voice Metrics| Enable to collect Voice Metrics from Genesys. By default, it is enabled. |
+    |Get MOS Metrics| Enable to collect conversation quality (Mean Opinion Score) metrics from Genesys. By default, it is enabled. |
 
 4. Click the **Save** button to save your settings.
 
