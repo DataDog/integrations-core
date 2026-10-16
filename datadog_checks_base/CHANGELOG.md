@@ -2,6 +2,71 @@
 
 <!-- towncrier release notes start -->
 
+## 38.5.0 / 2026-10-13
+
+***Added***:
+
+* Add the `collect_histograms_as_distributions` OpenMetrics V2 option, which submits histogram buckets as distributions without the `upper_bound` and `lower_bound` tags on Agents that support it. ([#25378](https://github.com/DataDog/integrations-core/pull/25378))
+
+***Fixed***:
+
+* Make `assert_histogram_bucket` compare bucket bounds when they are given. ([#25378](https://github.com/DataDog/integrations-core/pull/25378))
+
+## 38.4.0 / 2026-10-01
+
+***Security***:
+
+* Fetch AIA intermediate certificates with a fresh credential-free HTTP session over http(s) endpoints only, trying TLS first then plain HTTP, and capping the response size. ([#24154](https://github.com/DataDog/integrations-core/pull/24154))
+
+***Added***:
+
+* Update dependencies ([#25284](https://github.com/DataDog/integrations-core/pull/25284))
+
+***Fixed***:
+
+* Add `get_agent_embedded_path` helper to resolve paths under the agent's embedded directory regardless of install location. ([#23644](https://github.com/DataDog/integrations-core/pull/23644))
+* Fix concurrent memory profiling crashes in DBM background jobs. ([#25090](https://github.com/DataDog/integrations-core/pull/25090))
+* Fix a bug where OpenMetrics histogram buckets with a zero upper bound (e.g. `le="0.0"`) were silently dropped when `histogram_buckets_as_distributions` is enabled. ([#25283](https://github.com/DataDog/integrations-core/pull/25283))
+* Remove embedded null characters by default before obfuscating SQL. ([#25343](https://github.com/DataDog/integrations-core/pull/25343))
+* Log query obfuscation failures with repr so an embedded null cannot crash the caller. ([#25344](https://github.com/DataDog/integrations-core/pull/25344))
+
+## 38.3.3 / 2026-10-09 / Agent 7.84.3
+
+***Added***:
+
+* Add the `collect_histograms_as_distributions` OpenMetrics V2 option, which submits histogram buckets as distributions without the `upper_bound` and `lower_bound` tags on Agents that support it. ([#25378](https://github.com/DataDog/integrations-core/pull/25378))
+
+***Fixed***:
+
+* Fix a bug where OpenMetrics histogram buckets with a zero upper bound (e.g. `le="0.0"`) were silently dropped when `histogram_buckets_as_distributions` is enabled. ([#25283](https://github.com/DataDog/integrations-core/pull/25283))
+* Make `assert_histogram_bucket` compare bucket bounds when they are given. ([#25378](https://github.com/DataDog/integrations-core/pull/25378))
+* Bump pyjwt to 2.14.0. ([#25510](https://github.com/DataDog/integrations-core/pull/25510))
+* Bump urllib3 to 2.8.0. ([#25514](https://github.com/DataDog/integrations-core/pull/25514))
+
+## 38.3.2 / 2026-09-10
+
+***Fixed***:
+
+* Allow schema collectors to report object-specific count telemetry. ([#24947](https://github.com/DataDog/integrations-core/pull/24947))
+
+## 38.3.1 / 2026-09-03 / Agent 7.84.0
+
+***Fixed***:
+
+* Bump ddtrace to 4.13.2 to fix a ``SIGSEGV`` crash (CrashLoopBackOff) that occurs when integration profiling is enabled and the interpreter is embedded. ([#25048](https://github.com/DataDog/integrations-core/pull/25048))
+
+## 38.3.0 / 2026-09-02
+
+***Added***:
+
+* Improve docstrings in metrics_mapping module for cleaner API reference rendering. ([#22773](https://github.com/DataDog/integrations-core/pull/22773))
+* Add an Agent Health issue when OpenMetrics checks drop metrics at the configured limit. ([#24819](https://github.com/DataDog/integrations-core/pull/24819))
+
+***Fixed***:
+
+* Fix OpenMetrics V2 checks flushing a monotonic counter's full raw value on the scrape following its first observation, when ``share_labels``/``target_info`` is configured and the shared-label source metric is ordered after the metrics it tags in the scrape payload. ([#24884](https://github.com/DataDog/integrations-core/pull/24884))
+* Stop an OpenMetrics V2 instance that configures ``rename_labels`` from silently discarding the renames its check declares in ``get_default_config``. The instance's renames are now merged with the check's declared renames entry by entry, with the instance's own entries taking precedence, instead of replacing them wholesale. ([#24921](https://github.com/DataDog/integrations-core/pull/24921))
+
 ## 38.2.0 / 2026-08-27
 
 ***Added***:
@@ -21,7 +86,13 @@
 * Fix AIA chasing crashing when the CA Issuers response is DER-encoded. ([#24683](https://github.com/DataDog/integrations-core/pull/24683))
 * Stop the check logging adapter from holding a reference to the check, so a cancelled check is reclaimed without waiting for a garbage collection pass. ([#24914](https://github.com/DataDog/integrations-core/pull/24914))
 
-## 38.0.2 / 2026-08-26
+## 38.0.3 / 2026-09-10 / Agent 7.83.2
+
+***Fixed***:
+
+* Bump ddtrace to 4.13.2 to fix a ``SIGSEGV`` crash (CrashLoopBackOff) that occurs when integration profiling is enabled and the interpreter is embedded. ([#25048](https://github.com/DataDog/integrations-core/pull/25048))
+
+## 38.0.2 / 2026-08-26 / Agent 7.83.0
 
 ***Fixed***:
 

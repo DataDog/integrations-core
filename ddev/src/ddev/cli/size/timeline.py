@@ -42,7 +42,7 @@ MINIMUM_LENGTH_COMMIT = 7
 console = Console(stderr=True)
 
 
-@click.command()
+@click.command(short_help='Show size evolution over time')
 @click.argument("type", type=click.Choice(["integration", "dependency"]))
 @click.argument("name")
 @click.option("--initial-commit", help="Initial commit to analyze. If not specified, will start from the first commit")

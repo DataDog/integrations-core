@@ -10,6 +10,9 @@ on:
   pull_request:
     branches:
       - master
+    paths:
+      - '*/datadog_checks/**'
+      - '.deps/resolved/**'
 
 jobs:
   trigger:

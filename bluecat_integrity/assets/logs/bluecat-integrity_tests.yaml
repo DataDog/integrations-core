@@ -98,6 +98,7 @@ tests:
         src_endpoint:
           ip: "10.10.10.10"
           port: 57895
+          uid: "10.10.10.10"
         time: 1772082904884
       payloadType: "dnstap"
       requestData:
@@ -283,6 +284,7 @@ tests:
         src_endpoint:
           ip: "10.10.10.10"
           port: 39927
+          uid: "10.10.10.10"
         time: 1771522140526
       payloadType: "dnstap"
       responseAddress: "10.1.1.1"
@@ -530,6 +532,7 @@ tests:
         src_endpoint:
           ip: "10.10.10.10"
           port: 18456
+          uid: "10.10.10.10"
         time: 1772001594423
       payloadType: "dnstap"
       queryZone: "google.local."
@@ -828,6 +831,7 @@ tests:
         src_endpoint:
           ip: "10.10.10.10"
           port: 39927
+          uid: "10.10.10.10"
         time: 1771522140526
       payloadType: "dnstap"
       requestData:

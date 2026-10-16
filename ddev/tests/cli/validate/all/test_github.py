@@ -12,7 +12,7 @@ from ddev.cli.validate.all.github import (
     parse_pr_number_from_event,
     parse_pr_number_from_ref,
 )
-from ddev.cli.validate.all.orchestrator import ValidationConfig, ValidationResult
+from ddev.cli.validate.all.orchestrator import VALIDATIONS, ValidationConfig, ValidationResult
 
 CONFIGS = {
     "ci": ValidationConfig(description="Validate CI configuration and code coverage settings", repo_wide=True),
@@ -224,6 +224,30 @@ def test_format_pr_comment_does_not_include_output():
     }
     comment = format_pr_comment(results, CONFIGS, None, list(results))
     assert "secret error output" not in comment
+
+
+def test_failure_guidance_rendered_in_failed_description_cell():
+    configs = {"config": ValidationConfig(description="d", failure_guidance="Guidance for fixing config.")}
+    failed = {"config": ValidationResult(name="config", success=False, stdout="", stderr="", duration=1.0)}
+    row = "| `config` | d<br><br>Guidance for fixing config. | ❌ |"
+    assert row in format_pr_comment(failed, configs, None, list(failed))
+    assert row in format_step_summary(failed, configs, None, list(failed))
+
+    passed = {"config": ValidationResult(name="config", success=True, stdout="", stderr="", duration=1.0)}
+    assert "Guidance for fixing config." not in format_pr_comment(passed, configs, None, list(passed))
+    assert "Guidance for fixing config." not in format_step_summary(passed, configs, None, list(passed))
+
+
+def test_qa_label_manifest_guidance_includes_both_choices():
+    configs = {"qa-label": VALIDATIONS["qa-label"]}
+    results = {
+        "qa-label": ValidationResult(name="qa-label", success=False, stdout="", stderr="", duration=1.0),
+    }
+    comment = format_pr_comment(results, configs, None, list(results))
+    assert "**To fix:** Choose exactly one QA label:" in comment
+    assert "`qa/required` if the PR needs QA validation." in comment
+    assert "`qa/skip-qa` if the PR does not need QA validation." in comment
+    assert "<br><br>" in comment
 
 
 def test_format_pr_comment_missing_config_uses_empty_description():

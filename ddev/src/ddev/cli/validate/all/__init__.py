@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import click
@@ -41,6 +42,11 @@ def _load_validations(app: Application) -> dict[str, ValidationConfig]:
 @click.option(
     "--subprocess-timeout", type=float, default=580, help="Timeout in seconds for each validation subprocess."
 )
+@click.option(
+    "--pr-comment-output",
+    type=click.Path(dir_okay=False, writable=True, path_type=Path),
+    help="Write the formatted pull request comment to this file instead of posting it to the pull request.",
+)
 @click.pass_obj
 def all(
     app: Application,
@@ -49,15 +55,16 @@ def all(
     grace_period: float,
     max_timeout: float,
     subprocess_timeout: float,
+    pr_comment_output: Path | None,
 ) -> None:
     """Run all validations in parallel.
 
     If TARGET is provided (e.g. 'changed'), per-integration validations are
     scoped to that target. Repo-wide validations always run without a target.
     """
-    from ddev.cli.validate.all.github import get_pr_number
+    from ddev.cli.validate.all.github import format_pr_comment, get_pr_number
     from ddev.cli.validate.all.orchestrator import ValidationOrchestrator
-    from ddev.utils.github_actions import write_step_summary
+    from ddev.utils.github_actions import get_workflow_run_url, write_step_summary
 
     selected = _load_validations(app)
     if not selected:
@@ -67,6 +74,11 @@ def all(
         )
         app.display_error(msg)
         write_step_summary(f"## Validation Report\n\n> **Error:** {msg}")
+        if pr_comment_output is not None:
+            comment_body = format_pr_comment({}, {}, target, [], error=msg)
+            if run_url := get_workflow_run_url():
+                comment_body += f"\n\n[View full run]({run_url})"
+            pr_comment_output.write_text(comment_body, encoding="utf-8")
         app.abort()
 
     pr_number = get_pr_number(app)
@@ -79,6 +91,7 @@ def all(
         grace_period=grace_period,
         max_timeout=max_timeout,
         subprocess_timeout=subprocess_timeout,
+        pr_comment_output=pr_comment_output,
     )
     orchestrator.run()
 
