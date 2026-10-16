@@ -7,8 +7,9 @@ Catalyst Center signals "no data" four different ways -- `null`, `-1`, `{}`, and
 string -- and which one appears depends on the field and the device family. Emitting `0` for
 any of them reads as a healthy zero on a graph.
 
-There are two helpers rather than one so that the `-1` rule stays confined to scores. A radio
-noise floor is legitimately around -95 dBm, and a blanket sentinel filter would silently drop it.
+There are two helpers rather than one so that the negative-sentinel rule stays confined to
+scores. A radio noise floor is legitimately around -95 dBm, and a blanket filter would silently
+drop it.
 """
 
 from __future__ import annotations
@@ -45,9 +46,13 @@ def emit_gauge(check: AgentCheck, name: str, value: Any, tags: list[str]) -> Non
 
 
 def emit_score(check: AgentCheck, name: str, value: Any, tags: list[str]) -> None:
-    """Submit a 1-10 health score, additionally treating -1 as absent."""
+    """Submit a 1-10 health score, additionally treating any negative value as absent.
+
+    A real score is never negative. Catalyst Center scores a device it has no data for as -1, and
+    one it cannot reach as -2.
+    """
     numeric = to_number(value)
-    if numeric is None or numeric == -1:
+    if numeric is None or numeric < 0:
         return
     check.gauge(name, numeric, tags=tags)
 

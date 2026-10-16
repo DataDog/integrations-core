@@ -854,6 +854,10 @@ files:
           value:
             type: string
             example: sql_database
+            enum:
+            - sql_database
+            - managed_instance
+            - virtual_machine
           fleet_configurable: false
         - name: fully_qualified_domain_name
           description: |
