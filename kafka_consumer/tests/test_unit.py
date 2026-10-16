@@ -12,6 +12,8 @@ from contextlib import nullcontext as does_not_raise
 import mock
 import pytest
 from confluent_kafka import ConsumerGroupTopicPartitions, KafkaError, KafkaException, TopicPartition
+from confluent_kafka.admin import AdminClient, ClusterMetadata, PartitionMetadata, TopicMetadata
+from confluent_kafka.cimpl import _AdminClientImpl
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.kafka_consumer import KafkaCheck
@@ -411,6 +413,126 @@ def test_when_partition_not_in_partitions_then_emit_warning_log(
     )
 
     assert expected_warning in caplog.text
+
+
+FAKE_COMMITTED_OFFSET = 5
+
+
+class _FakeBroker(_AdminClientImpl):
+    """Answers AdminClient's broker round-trips from an in-memory topic -> partitions map.
+
+    It sits after AdminClient in the MRO, so AdminClient's own request validation and
+    future handling run unchanged and only the network call is replaced.
+    """
+
+    def list_topics(self, topic=None, timeout=-1):
+        metadata = ClusterMetadata()
+        for name, partitions in self.cluster_topics.items():
+            topic_metadata = TopicMetadata()
+            topic_metadata.topic = name
+            for partition in partitions:
+                partition_metadata = PartitionMetadata()
+                partition_metadata.id = partition
+                topic_metadata.partitions[partition] = partition_metadata
+            metadata.topics[name] = topic_metadata
+        return metadata
+
+    def list_consumer_group_offsets(self, request, future, **kwargs):
+        future.set_result(
+            [
+                ConsumerGroupTopicPartitions(
+                    req.group_id,
+                    [TopicPartition(tp.topic, tp.partition, FAKE_COMMITTED_OFFSET) for tp in req.topic_partitions],
+                )
+                for req in request
+            ]
+        )
+
+
+class _FakeAdminClient(AdminClient, _FakeBroker):
+    def __init__(self, cluster_topics, config, **kwargs):
+        self.cluster_topics = cluster_topics
+        super().__init__(config, **kwargs)
+
+
+@pytest.fixture
+def fake_cluster(monkeypatch):
+    """Topic -> partitions map served by every AdminClient the check creates. Mutate it to change the cluster."""
+    cluster_topics = {}
+    monkeypatch.setattr(
+        'datadog_checks.kafka_consumer.client.AdminClient',
+        lambda config, **kwargs: _FakeAdminClient(cluster_topics, config, **kwargs),
+    )
+    return cluster_topics
+
+
+def check_against_fake_cluster(check, monkeypatch, consumer_groups):
+    """A check that uses the real KafkaClient admin code path; only the highwater consumer is stubbed."""
+    instance = {'kafka_connect_str': 'localhost:1', 'tags': ['optional:tag1'], 'consumer_groups': consumer_groups}
+    kafka_consumer_check = check(instance)
+    client = kafka_consumer_check.client
+    monkeypatch.setattr(client, 'open_consumer', lambda consumer_group: None)
+    monkeypatch.setattr(client, 'close_consumer', lambda: None)
+    monkeypatch.setattr(client, 'consumer_get_cluster_id_and_list_topics', lambda consumer_group: ('cluster_id', []))
+    monkeypatch.setattr(client, 'get_partition_offsets', fake_get_partition_offsets)
+    return kafka_consumer_check
+
+
+def consumer_tags(consumer_group, topic, partition):
+    return [
+        'optional:tag1',
+        'kafka_cluster_id:cluster_id',
+        f'consumer_group:{consumer_group}',
+        f'topic:{topic}',
+        f'partition:{partition}',
+    ]
+
+
+def test_configured_topic_missing_from_cluster_does_not_block_other_groups(
+    check, fake_cluster, monkeypatch, dd_run_check, aggregator
+):
+    fake_cluster['topic1'] = [0]
+    kafka_consumer_check = check_against_fake_cluster(
+        check,
+        monkeypatch,
+        {'healthy_group': {'topic1': []}, 'other_group': {'missing_topic': []}},
+    )
+
+    dd_run_check(kafka_consumer_check)
+
+    aggregator.assert_metric(
+        'kafka.consumer_offset',
+        value=FAKE_COMMITTED_OFFSET,
+        count=1,
+        tags=consumer_tags('healthy_group', 'topic1', 0),
+    )
+    aggregator.assert_metric(
+        'kafka.consumer_lag',
+        value=80 - FAKE_COMMITTED_OFFSET,
+        count=1,
+        tags=consumer_tags('healthy_group', 'topic1', 0),
+    )
+
+
+def test_configured_topic_created_after_first_run_is_collected(
+    check, fake_cluster, monkeypatch, dd_run_check, aggregator
+):
+    kafka_consumer_check = check_against_fake_cluster(check, monkeypatch, {'consumer_group1': {'new_topic': []}})
+
+    dd_run_check(kafka_consumer_check)
+    aggregator.assert_metric('kafka.consumer_offset', count=0)
+
+    fake_cluster['new_topic'] = [0, 1]
+    aggregator.reset()
+    dd_run_check(kafka_consumer_check)
+
+    for partition in (0, 1):
+        aggregator.assert_metric(
+            'kafka.consumer_offset',
+            value=FAKE_COMMITTED_OFFSET,
+            count=1,
+            tags=consumer_tags('consumer_group1', 'new_topic', partition),
+        )
 
 
 def test_when_highwater_metric_count_hit_context_limit_then_no_more_highwater_metrics(
