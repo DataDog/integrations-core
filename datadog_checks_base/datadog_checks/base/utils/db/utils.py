@@ -330,6 +330,7 @@ class DBMAsyncJob(object):
         self._cancel_event = threading.Event()
         self._tags = None
         self._tags_no_db = None
+        self._tag_snapshot: TagSnapshot = TagSnapshot()
         self._run_sync = None
         self._db_hostname = None
         self._last_check_run = 0
@@ -366,10 +367,10 @@ class DBMAsyncJob(object):
             self._job_loop_future.result()
             self._job_loop_future = None
 
-    def run_job_loop(self, tags):
+    def run_job_loop(self, tags, tag_snapshot: "TagSnapshot | None" = None):
         """
-        :param tags:
-        :return:
+        :param tags: The check's tags, kept as `self._tags` for jobs that have not moved to `self._tag_snapshot`.
+        :param tag_snapshot: The check's scoped tags. Built from `tags` when not passed.
         """
         if not self._enabled:
             self._log.debug("[job=%s] Job not enabled.", self._job_name)
@@ -377,6 +378,7 @@ class DBMAsyncJob(object):
         if not self._db_hostname:
             self._db_hostname = resolve_db_host(self._config_host)
         self._tags = tags
+        self._tag_snapshot = tag_snapshot if tag_snapshot is not None else TagSnapshot.from_tags(tags)
         self._tags_str = ','.join(self._tags)
         self._job_tags = self._tags + ["job:{}".format(self._job_name)]
         self._job_tags_str = ','.join(self._job_tags)
@@ -613,6 +615,27 @@ class TagSnapshot:
     resource: tuple[str, ...] = ()
     database: tuple[str, ...] = ()
 
+    @classmethod
+    def from_tags(cls, tags: list[str]) -> "TagSnapshot":
+        """Build a snapshot from rendered tags, scoping each by its key as `TagManager.set_tag` does by default."""
+        groups: Dict[TagScope, List[str]] = {scope: [] for scope in TagScope}
+        for tag in tags:
+            key = tag.split(':', 1)[0] if ':' in tag else TagType.KEYLESS
+            groups[_default_scope(key)].append(tag)
+        return cls(
+            instance=tuple(groups[TagScope.INSTANCE]),
+            resource=tuple(groups[TagScope.RESOURCE]),
+            database=tuple(groups[TagScope.DATABASE]),
+        )
+
+    def telemetry_tags(self) -> list[str]:
+        """
+        Tags for the Agent's own DBM telemetry metrics (`dd.<dbms>.*`): instance tags only.
+
+        Telemetry describes the check rather than a logical database, and must not be linked to resources.
+        """
+        return list(self.instance)
+
     def metric_tags(self, database: str | None = None) -> list[str]:
         """
         Tags for metrics: instance, resource, and database tags.
@@ -817,6 +840,10 @@ class TagManager:
     def event_tags(self, database: str | None = None) -> list[str]:
         """Tags for DBM event payloads. See `TagSnapshot.event_tags`."""
         return self.snapshot().event_tags(database)
+
+    def telemetry_tags(self) -> list[str]:
+        """Tags for DBM telemetry metrics. See `TagSnapshot.telemetry_tags`."""
+        return self.snapshot().telemetry_tags()
 
     def get_tags(self, include_internal: bool = True, include_db: bool = True) -> List[str]:
         """

@@ -20,6 +20,7 @@ from datadog_checks.base.utils.db.utils import (
     RateLimitingTTLCache,
     TagManager,
     TagScope,
+    TagSnapshot,
     TagType,
     default_json_event_encoding,
     get_agent_host_tags,
@@ -818,6 +819,19 @@ class TestTagManager:
 
         assert sorted(tag_manager.metric_tags(database)) == sorted(expected_metric_tags)
         assert sorted(tag_manager.event_tags(database)) == sorted(expected_event_tags)
+        assert sorted(tag_manager.telemetry_tags()) == ['env:prod', 'team_a']
+
+    def test_snapshot_from_tags_scopes_like_set_tag(self):
+        """Jobs started with only a tag list must route tags the same way as the check's `TagManager`"""
+        snapshot = TagSnapshot.from_tags(
+            ['env:prod', 'team_a', 'db:postgres', 'dd.internal.resource:database_instance:host1', 'dbms_flavor:x']
+        )
+
+        assert snapshot == TagSnapshot(
+            instance=('env:prod', 'team_a', 'dbms_flavor:x'),
+            resource=('dd.internal.resource:database_instance:host1',),
+            database=('db:postgres',),
+        )
 
     @pytest.mark.parametrize(
         'key,scope',

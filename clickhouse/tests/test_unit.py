@@ -1019,7 +1019,7 @@ def test_configured_jobs_are_the_jobs_that_run(instance, dbm_enabled, expected):
 
     started = []
     with mock.patch.object(
-        DBMAsyncJob, 'run_job_loop', autospec=True, side_effect=lambda self, tags: started.append(self._job_name)
+        DBMAsyncJob, 'run_job_loop', autospec=True, side_effect=lambda self, *args: started.append(self._job_name)
     ):
         check.run_async_jobs(check.tags)
 
