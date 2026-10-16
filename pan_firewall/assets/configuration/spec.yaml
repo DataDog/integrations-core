@@ -201,7 +201,12 @@ files:
         example: false
     - name: collect_reports
       fleet_configurable: true
-      description: Set to `true` to collect the 10 top-N traffic reports (custom dynamic reports over the last 24 hours).
+      description: |
+        Set to `true` to collect the 10 top-N traffic reports (custom dynamic reports over the last 24 hours).
+        The reports run one at a time, and the Agent polls each one up to 10 times, 0.5 seconds apart, until it
+        finishes. In the worst case, where every report finishes only on its last poll, this adds about 45 seconds
+        of waiting, plus the time of the requests themselves, to one run every 30 minutes per firewall. A report
+        that is still running after its polls is picked up again by the next run.
       value:
         type: boolean
         default: false
