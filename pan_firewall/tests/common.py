@@ -106,10 +106,6 @@ def lab_hosts(environ: Mapping[str, str] = os.environ) -> list[str]:
     return [host.strip() for host in environ.get(LAB_HOSTS_VAR, '').split(',') if host.strip()]
 
 
-def lab_panorama_host(environ: Mapping[str, str] = os.environ) -> str | None:
-    return environ.get(LAB_PANORAMA_HOST_VAR) or None
-
-
 def lab_mode(environ: Mapping[str, str] = os.environ) -> str:
     """Return the lab mode from `PANOS_LAB_MODE`; fail naming the variable (not echoing its value) if it is invalid."""
     mode = environ.get(LAB_MODE_VAR, '')

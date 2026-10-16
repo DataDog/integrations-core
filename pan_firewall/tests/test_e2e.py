@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import os
-
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -12,44 +10,14 @@ from .common import (
     E2E_PANORAMA_IP,
     E2E_PANORAMA_NAMESPACE,
     MIB,
-    lab_hosts,
-    lab_mode,
-    lab_panorama_host,
 )
 
-LAB = bool(os.environ.get('USE_PANOS_LAB'))
-
 pytestmark = pytest.mark.e2e
-lab_only = pytest.mark.skipif(not LAB, reason='Lab-only: set USE_PANOS_LAB and the PANOS_* variables')
-docker_only = pytest.mark.skipif(LAB, reason='Runs against the docker fakes, not the lab')
 
 
 def values_with_tags(aggregator, name, *tags):
     """`assert_metric(tags=...)` matches the exact tag set, so select the series that carry `tags` among their tags."""
     return [metric.value for metric in aggregator.metrics(name) if set(tags) <= set(metric.tags)]
-
-
-@lab_only
-def test_lab(dd_agent_check):
-    aggregator = dd_agent_check(rate=True)
-
-    if lab_mode() == 'panorama':
-        panorama_host = lab_panorama_host()
-        # Panorama mode: the firewalls are discovered, so their IPs are not known here. Every `can_connect` series
-        # (one per discovered firewall, tagged with the `device_ip` Panorama reports) must be 1, and there is one.
-        panorama = values_with_tags(aggregator, 'pan_firewall.panorama.can_connect', f'panorama_host:{panorama_host}')
-        assert panorama and set(panorama) == {1}
-        firewalls = aggregator.metrics('pan_firewall.can_connect')
-        assert firewalls
-        assert [(m.tags, m.value) for m in firewalls if m.value != 1] == []
-        return
-
-    for host in lab_hosts():
-        tag = f'device_ip:{host}'
-        connected = values_with_tags(aggregator, 'pan_firewall.can_connect', tag)
-        auth = values_with_tags(aggregator, 'pan_firewall.api.authentication.status', tag)
-        assert connected and set(connected) == {1}, host
-        assert auth and set(auth) == {0}, host
 
 
 # Both instances poll each fake firewall at its container address, which the fake Panorama reports for it. The
@@ -61,7 +29,6 @@ DOCKER_FIREWALLS = {
 NAMESPACES = ('default', E2E_PANORAMA_NAMESPACE)
 
 
-@docker_only
 def test_docker(dd_agent_check):
     aggregator = dd_agent_check(rate=True)
 

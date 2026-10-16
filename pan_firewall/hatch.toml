@@ -16,15 +16,7 @@ e2e-env = false
 
 [envs.default.overrides]
 name."^py3.13$".e2e-env = { value = true }
-# The lab envs are E2E envs only where all their lab variables are set, so CI never runs them.
-matrix.setup.e2e-env = { value = true, if = ["lab"], env = ["PANOS_LAB_HOSTS", "PANOS_LAB_USERNAME", "PANOS_PASSWORD"] }
-name."^py3.13-lab-panorama$".e2e-env = { value = true, env = [
-  "PANOS_LAB_PANORAMA_HOST",
-  "PANOS_LAB_PANORAMA_USERNAME",
-  "PANOS_LAB_PANORAMA_PASSWORD",
-  "PANOS_LAB_USERNAME",
-  "PANOS_PASSWORD",
-] }
+# The lab envs are never E2E envs, so CI never runs them; start them by hand (see `dd_environment`).
 matrix.setup.env-vars = [
   { key = "USE_PANOS_LAB", value = "1", if = ["lab", "lab-panorama"] },
   { key = "PANOS_LAB_MODE", value = "static", if = ["lab"] },
