@@ -564,7 +564,7 @@ MarkdownH3 {
     padding: 0 1;
 }
 
-.phase-log-thinking {
+.phase-log-activity {
     color: $status-running;
     text-style: bold;
     border: round $status-running;
