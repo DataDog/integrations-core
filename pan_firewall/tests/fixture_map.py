@@ -109,7 +109,7 @@ def find_op_fixture(cmd: str, firewall: str) -> Path | None:
     return FIXTURES / relative if relative else None
 
 
-# `type=log` queries to the fixture answering them: (response file, submit file) under FIXTURES, per set. The key is
+# `type=log` queries to the fixture answering them: response file under FIXTURES, per set. The key is
 # `(dir, query, skip)`; `nlogs` is not part of it, so a test can change the page size. `query` is None when the request
 # has none. Each `forward` query is the one the threats collector sends for a watermark one below its `seqno geq`.
 PROBE_SEQNO_START = 7691899338913581588
@@ -127,41 +127,31 @@ def seqno_query(seqno: int) -> str:
     return f'(seqno geq {seqno})'
 
 
-LOG_FIXTURES: dict[str, dict[tuple[str, str | None, int], tuple[str, str]]] = {
+LOG_FIXTURES: dict[str, dict[tuple[str, str | None, int], str]] = {
     'fw-a': {
-        ('backward', None, 0): ('probe/threat_back_p0.xml', 'probe/threat_back_p0_submit.xml'),
-        ('forward', seqno_query(THREAT_LOG_FIRST_SEQNO['fw-a']), 0): (
-            'fw-a/threat_log_5m.xml',
-            'fw-a/threat_log_5m_submit.xml',
-        ),
+        ('backward', None, 0): 'probe/threat_back_p0.xml',
+        ('forward', seqno_query(THREAT_LOG_FIRST_SEQNO['fw-a']), 0): 'fw-a/threat_log_5m.xml',
         **{
-            ('forward', seqno_query(PROBE_SEQNO_START), page * PROBE_SEQNO_PAGE_SIZE): (
-                f'probe-seqno/seq_0_p{page}.xml',
-                f'probe-seqno/seq_0_p{page}_submit.xml',
-            )
+            ('forward', seqno_query(PROBE_SEQNO_START), page * PROBE_SEQNO_PAGE_SIZE): f'probe-seqno/seq_0_p{page}.xml'
             for page in range(PROBE_SEQNO_PAGES)
         },
     },
     'fw-b': {
-        ('forward', seqno_query(THREAT_LOG_FIRST_SEQNO['fw-b']), 0): (
-            'fw-a/threat_log_5m.xml',
-            'fw-a/threat_log_5m_submit.xml',
-        ),
+        ('forward', seqno_query(THREAT_LOG_FIRST_SEQNO['fw-b']), 0): 'fw-a/threat_log_5m.xml',
     },
 }
 
 
-def find_log_fixture(direction: str, query: str | None, skip: int, firewall: str) -> tuple[Path, Path] | None:
-    """Return the (response, submit) fixtures answering a `type=log` query for the firewall set, or None."""
-    paths = LOG_FIXTURES.get(firewall, {}).get((direction, query, skip))
-    return (FIXTURES / paths[0], FIXTURES / paths[1]) if paths else None
+def find_log_fixture(direction: str, query: str | None, skip: int, firewall: str) -> Path | None:
+    """Return the fixture answering a `type=log` query for the firewall set, or None."""
+    relative = LOG_FIXTURES.get(firewall, {}).get((direction, query, skip))
+    return FIXTURES / relative if relative else None
 
 
-def find_report_fixture(field: str, firewall: str) -> tuple[Path, Path] | None:
-    """Return the (response, submit) fixtures of the custom report aggregated by `field`, or None."""
+def find_report_fixture(field: str, firewall: str) -> Path | None:
+    """Return the fixture of the custom report aggregated by `field`, or None."""
     response = set_fixture(f'report_custom_{field}.xml', firewall)
-    submit = set_fixture(f'report_custom_{field}_submit.xml', firewall)
-    return (response, submit) if response.exists() and submit.exists() else None
+    return response if response.exists() else None
 
 
 def report_field(cmd: str) -> str | None:
@@ -170,18 +160,30 @@ def report_field(cmd: str) -> str | None:
     return match.group(1) if match else None
 
 
-def log_job_fixture(params: Mapping[str, str], firewall: str) -> tuple[Path, Path] | None:
-    """The (response, submit) fixtures answering the `type=log` submit with these form `params`, or None."""
+def log_job_fixture(params: Mapping[str, str], firewall: str) -> Path | None:
+    """The fixture answering the `type=log` submit with these form `params`, or None."""
     return find_log_fixture(params.get('dir', ''), params.get('query'), int(params.get('skip', '0')), firewall)
 
 
-def report_job_fixture(params: Mapping[str, str], firewall: str) -> tuple[Path, Path] | None:
-    """The (response, submit) fixtures answering the `type=report` submit with these form `params`, or None."""
+def report_job_fixture(params: Mapping[str, str], firewall: str) -> Path | None:
+    """The fixture answering the `type=report` submit with these form `params`, or None."""
     field = report_field(params.get('cmd', ''))
     return find_report_fixture(field, firewall) if field else None
 
 
-def submit_job_id(submit: bytes) -> str | None:
-    """The job id a job submit answer announces, or None."""
-    match = re.search(rb'<job>(\d+)</job>', submit)
-    return match.group(1).decode() if match else None
+# The two captured submit answers every fake builds its own from: a log submit and a report submit. The client reads
+# only the job id from them, so each fake numbers its jobs itself. Each capture announces its id twice.
+SUBMIT_TEMPLATES = {'log': 'fw-a/threat_log_5m_submit.xml', 'report': 'fw-a/report_custom_app_submit.xml'}
+SUBMIT_TEMPLATE_IDS = {'log': '2', 'report': '4'}
+
+
+def submit_answer(kind: str, job_id: str) -> bytes:
+    """The submit answer of a `log` or `report` job numbered `job_id`: the capture with its id replaced in the message
+    text (`jobid <n>`) and in `<job><n></job>`, and nothing else changed."""
+    capture_id = SUBMIT_TEMPLATE_IDS[kind]
+    return (
+        (FIXTURES / SUBMIT_TEMPLATES[kind])
+        .read_bytes()
+        .replace(f'jobid {capture_id}<'.encode(), f'jobid {job_id}<'.encode())
+        .replace(f'<job>{capture_id}</job>'.encode(), f'<job>{job_id}</job>'.encode())
+    )

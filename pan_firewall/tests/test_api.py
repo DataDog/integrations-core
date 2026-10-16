@@ -24,7 +24,7 @@ from datadog_checks.pan_firewall.auth import Credentials, KeyManager
 
 from .common import FIXTURES, SYSTEM_INFO_CMD
 from .fake_panos import TRANSPORT_ERRORS, response
-from .fixture_map import op_fixture
+from .fixture_map import op_fixture, submit_answer
 
 HOST = '192.0.2.10'
 URL = f'https://{HOST}/api/'
@@ -112,6 +112,16 @@ def test_keygen_posts_credentials_in_body_and_key_only_in_header():
     assert op['url'] == URL
     assert op['data'] == {'type': 'op', 'cmd': SYSTEM_INFO_CMD}
     assert op['extra_headers'] == {'X-PAN-KEY': GENERATED_KEY}
+
+
+@pytest.mark.parametrize('kind', ['log', 'report'])
+def test_submit_job_returns_the_job_id_of_the_submit_answer(kind):
+    # The job id is the only thing the client reads from a submit answer, so a fake numbering its own jobs must be
+    # able to choose it.
+    http = FakeHttp(keygen=[(200, KEYGEN_OK)], api=[(200, submit_answer(kind, '9001'))])
+    client, _ = make_client(http)
+
+    assert client.submit_job({'type': kind}) == '9001'
 
 
 def test_key_never_leaks_into_urls_logs_or_errors(caplog):

@@ -1,8 +1,0 @@
-<response status="success"><result>
-    <msg>
-      <line>
-        <report>Report job enqueued with jobid 7</report>
-      </line>
-    </msg>
-    <job>7</job>
-  </result></response>

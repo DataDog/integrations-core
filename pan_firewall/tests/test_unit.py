@@ -21,9 +21,12 @@ from .fixture_map import (
     OP_FIXTURES,
     PANORAMA_OP_FIXTURES,
     PARTIAL_OP_FIXTURES,
+    SUBMIT_TEMPLATE_IDS,
+    SUBMIT_TEMPLATES,
     THREAT_LOG_FIRST_SEQNO,
     find_report_fixture,
     op_fixture,
+    submit_answer,
 )
 from .helpers import THREAT_LOG_ACT, log_page, make_instance
 
@@ -105,11 +108,20 @@ def test_fixture_map_points_at_existing_files():
         for relative in paths.values():
             assert (FIXTURES / relative).is_file()
     for jobs in LOG_FIXTURES.values():
-        for response, submit in jobs.values():
+        for response in jobs.values():
             assert (FIXTURES / response).is_file()
-            assert (FIXTURES / submit).is_file()
+    for relative in SUBMIT_TEMPLATES.values():
+        assert (FIXTURES / relative).is_file()
     for relative in PANORAMA_OP_FIXTURES.values():
         assert (FIXTURES / relative).is_file()
+
+
+@pytest.mark.parametrize('kind', ['log', 'report'])
+def test_submit_answer_with_the_captures_own_id_is_the_capture(kind):
+    # A substitution that touched anything but the two id occurrences would make the fakes answer with a different
+    # shape than the one PAN-OS sent.
+    capture = (FIXTURES / SUBMIT_TEMPLATES[kind]).read_bytes()
+    assert submit_answer(kind, SUBMIT_TEMPLATE_IDS[kind]) == capture
 
 
 def test_fixtures_hold_no_secrets():

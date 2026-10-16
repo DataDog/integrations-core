@@ -7,13 +7,14 @@ It answers from `tests/fixture_map.py`, the map the unit fake (`tests/fake_panos
 credentials and returns a dummy key; every other call must carry that key in `X-PAN-KEY`.
 """
 
+import itertools
 import threading
 from collections.abc import Callable
 from pathlib import Path
 
 from flask import Flask, Response, request
 
-from tests.fixture_map import FAKE_KEY, INVALID_CREDENTIAL, KEYGEN_OK, NO_CAPTURE, submit_job_id
+from tests.fixture_map import FAKE_KEY, INVALID_CREDENTIAL, KEYGEN_OK, NO_CAPTURE, submit_answer
 
 CERT_FILE = '/app/certs/cert.pem'
 KEY_FILE = '/app/certs/key.pem'
@@ -22,7 +23,7 @@ KEY_HEADER = 'X-PAN-KEY'
 ACTIVE_JOB = b'<response status="success"><result><job><id>%s</id><status>ACT</status></job></result></response>'
 
 OpAnswer = Callable[[str], bytes | None]
-JobFixtures = Callable[[dict[str, str]], tuple[Path, Path] | None]
+JobFixtures = Callable[[dict[str, str]], Path | None]
 
 
 def _xml(body: bytes, status: int = 200) -> Response:
@@ -39,6 +40,7 @@ def create_app(
     reads: dict[tuple[str, str], int] = {}
     # The finished-job fixture by (kind, job id), set by the submit that opened the job.
     finished: dict[tuple[str, str], Path] = {}
+    job_ids = itertools.count(1)
     lock = threading.Lock()
 
     @app.post('/api/')
@@ -68,18 +70,14 @@ def create_app(
             return _xml(ACTIVE_JOB % job_id.encode() if read == 1 else response.read_bytes())
         if kind == 'report' and data.get('async') != 'yes':  # PAN-OS refuses a report submit that is not asynchronous
             return _xml(NO_CAPTURE)
-        fixtures = (log_fixtures if kind == 'log' else report_fixtures)(data)
-        if fixtures is None:
-            return _xml(NO_CAPTURE)
-        response, submit = fixtures
-        submit_body = submit.read_bytes()
-        submitted = submit_job_id(submit_body)
-        if submitted is None:
+        response = (log_fixtures if kind == 'log' else report_fixtures)(data)
+        if response is None:
             return _xml(NO_CAPTURE)
         with lock:
-            finished[kind, submitted] = response
-            reads[kind, submitted] = 0
-        return _xml(submit_body)
+            job_id = str(next(job_ids))
+            finished[kind, job_id] = response
+            reads[kind, job_id] = 0
+        return _xml(submit_answer(kind, job_id))
 
     return app
 

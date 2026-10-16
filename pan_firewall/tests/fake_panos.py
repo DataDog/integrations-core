@@ -29,7 +29,7 @@ from .fixture_map import (
     panorama_op_answer,
     report_field,
     report_job_fixture,
-    submit_job_id,
+    submit_answer,
 )
 
 # Firewall IP -> fixture set.
@@ -41,10 +41,6 @@ PANORAMA_HOSTS = {'panorama.example.com'}
 PANORAMA_FIREWALL_IPS = {'fw-a': '192.0.2.10', 'fw-b': '192.0.2.11'}
 
 
-SUBMIT_TEMPLATE = (
-    b'<response status="success" code="19"><result><msg><line>query job enqueued with jobid %s</line></msg>'
-    b'<job>%s</job></result></response>'
-)
 Answer = tuple[int, bytes] | Exception
 LogBody = bytes | Path | Answer
 
@@ -167,6 +163,7 @@ class FakePanos:
             return self._read_log_job(host, data.get('job-id', ''))
         direction, query, skip = data.get('dir', ''), data.get('query'), int(data.get('skip', '0'))
         return self._open_job(
+            'log',
             self._log_jobs,
             self._log_reads,
             host,
@@ -183,6 +180,7 @@ class FakePanos:
         if data.get('async') != 'yes':  # PAN-OS refuses a report submit that is not asynchronous
             return 200, NO_CAPTURE
         return self._open_job(
+            'report',
             self._report_jobs,
             self._report_reads,
             host,
@@ -192,25 +190,23 @@ class FakePanos:
 
     def _open_job(
         self,
+        kind: Literal['log', 'report'],
         jobs: dict[tuple[str, str], list[LogBody]],
         reads: dict[tuple[str, str], int],
         host: str,
         override: list[LogBody] | None,
-        fixture: tuple[Path, Path] | None,
+        fixture: Path | None,
     ) -> Answer:
         """Register a job in `jobs` and return its submit answer: a new job answering the `override` bodies in turn, or
-        the job of the (response, submit) `fixture` pair; `NO_CAPTURE` when there is neither."""
+        the job answering the `fixture`; `NO_CAPTURE` when there is neither."""
         if override is not None:
             bodies = override
-            job_id = str(next(self._job_ids))
-            submit = SUBMIT_TEMPLATE % (job_id.encode(), job_id.encode())
         elif fixture is not None:
-            response, submit_path = fixture
-            bodies = [response]
-            submit = submit_path.read_bytes()
-            job_id = submit_job_id(submit) or ''
+            bodies = [fixture]
         else:
             return 200, NO_CAPTURE
+        job_id = str(next(self._job_ids))
+        submit = submit_answer(kind, job_id)
         jobs[host, job_id] = bodies
         reads[host, job_id] = 0
         return 200, submit

@@ -74,7 +74,7 @@ FW_A_ROWS = {
 
 def load_report(name):
     field, _tag = REPORTS[name]
-    response, _submit = find_report_fixture(field, 'fw-a')
+    response = find_report_fixture(field, 'fw-a')
     return parse_response(response.read_bytes())
 
 
@@ -195,7 +195,7 @@ class ScriptedClient:
             raise PanosApiError('400', 'bad job')
         self.events.append(('get', field, job_id))
         self._polls[job_id] += 1
-        response, _submit = find_report_fixture(field, self.firewall)
+        response = find_report_fixture(field, self.firewall)
         if field in self.failing:
             return 'FAIL', parse_response(response.read_bytes())
         if self._polls[job_id] <= self.act_polls.get(field, 0):
@@ -384,7 +384,7 @@ def test_slow_firewall_is_polled_every_run_until_all_reports_are_collected_then_
 ):
     act = SYNTHETIC / 'report_job_act.xml'
     for field, _tag in REPORTS.values():
-        response, _submit = find_report_fixture(field, 'fw-a')
+        response = find_report_fixture(field, 'fw-a')
         fake_panos.answer_report('192.0.2.10', field, *[act] * constants.REPORT_JOB_POLLS, response)
     check = new_check(make_instance(collect_reports=True))
 
