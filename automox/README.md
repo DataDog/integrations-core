@@ -18,7 +18,7 @@ With the out-of-the-box logs pipeline, the logs are parsed, enriched, and mapped
 ### Generate an API key in Automox
 
 1. Log in to the [Automox console][2].
-2. Go to **Settings** > **Keys**, and create an API key. An organization API key is sufficient. A [global API key][3] also works.
+2. Go to **Settings** > **Keys**, and create an API key without an expiration. An organization API key is sufficient. A [global API key][3] also works.
 3. Copy the API key.
 
 ### Find your organization ID
