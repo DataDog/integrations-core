@@ -173,6 +173,40 @@ class PostgresConnectionArgs:
         return kwargs
 
 
+def configure_connection(
+    conn: Connection,
+    *,
+    sqlascii_encodings: Optional[list] = None,
+    statement_timeout: Optional[int] = None,
+) -> None:
+    """Configure a psycopg connection for use with the Datadog Postgres integration.
+
+    Sets autocommit, SQL_ASCII text decoding, CommenterCursor cursor factory, and an
+    optional statement timeout. Extracted as a standalone function so it can be shared
+    by LRUConnectionPoolManager and the standalone integration-setup CLI without
+    either duplicating logic or requiring a pool instance.
+
+    Args:
+        conn: An open psycopg Connection to configure.
+        sqlascii_encodings: Encodings to pass to SQLASCIITextLoader when the
+            server encoding is SQL_ASCII. Pass None to leave the loader default.
+        statement_timeout: Statement timeout in milliseconds, or None to skip.
+    """
+    conn.autocommit = True
+
+    if conn.info.encoding.lower() in ('ascii', 'sqlascii', 'sql_ascii'):
+        text_loader = SQLASCIITextLoader
+        text_loader.encodings = sqlascii_encodings
+        for typ in ("text", "varchar", "name", "regclass"):
+            conn.adapters.register_loader(typ, text_loader)
+
+    conn.cursor_factory = CommenterCursor
+
+    if statement_timeout is not None:
+        with conn.cursor() as cur:
+            cur.execute("SET statement_timeout = %s", (statement_timeout,))
+
+
 class LRUConnectionPoolManager:
     """
     Manages a fixed-size set of psycopg3 ConnectionPools, one per database name (dbname),
@@ -226,19 +260,11 @@ class LRUConnectionPoolManager:
         self._closed = False
 
     def _configure_connection(self, conn: Connection) -> None:
-        conn.autocommit = True
-
-        if conn.info.encoding.lower() in ['ascii', 'sqlascii', 'sql_ascii']:
-            text_loader = SQLASCIITextLoader
-            text_loader.encodings = self.sqlascii_encodings
-            for typ in ["text", "varchar", "name", "regclass"]:
-                conn.adapters.register_loader(typ, text_loader)
-
-        conn.cursor_factory = CommenterCursor
-
-        with conn.cursor() as cur:
-            if self.statement_timeout is not None:
-                cur.execute("SET statement_timeout = %s", (self.statement_timeout,))
+        configure_connection(
+            conn,
+            sqlascii_encodings=self.sqlascii_encodings,
+            statement_timeout=self.statement_timeout,
+        )
 
     def _create_pool(self, dbname: str) -> ConnectionPool:
         """

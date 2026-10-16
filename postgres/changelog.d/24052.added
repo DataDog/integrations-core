@@ -1,0 +1,1 @@
+Add the DBM setup module (`datadog_checks.postgres.setup`) used by the `datadog-agent integration setup postgres` CLI, and extract `configure_connection` as a standalone function so setup reuses the integration's connection layer.
