@@ -12,7 +12,7 @@ The integration collects metrics across multiple layers of the firewall, includi
 
 - **Firewall inventory**: Discovers firewalls from a static list or from Panorama, and reports them to NDM with their serial number, model, software version, and HA state.
 - **System resources**: Reports management plane CPU, memory, swap, and disk usage, and data plane CPU utilization, to detect overloaded firewalls. Hardware firewalls also report power and temperature sensors.
-- **Network interfaces**: Provides traffic, errors, drops, and attack counters per interface.
+- **Network interfaces**: Provides traffic, errors, drops, and attack counters per interface. Reports each interface to NDM with its description (the interface comment) and admin status (the link state), which the Agent reads from the interface section of the running configuration with the same read-only role.
 - **IPsec tunnels**: Reports tunnel state and traffic, and the number of active, inactive, and initializing tunnels.
 - **Routing**: Reports BGP peer state and prefix counts, and OSPF neighbor state, to detect a routing peer going down.
 - **Licenses**: Reports expiration status and days left for each subscription.
@@ -33,6 +33,8 @@ No additional installation is needed on your server.
 ### Configuration
 
 1. Create an account for the Agent on each firewall. In PAN-OS, go to **Device > Admin Roles** and add a role profile with an **XML API** tab that allows **Operational Requests**, **Report**, and **Log**. Then go to **Device > Administrators**, add an account that uses this role, and commit the changes.
+
+   **Note**: The Agent reads the interface description and admin status from the running configuration of each firewall. Interfaces that a Panorama template defines may be missing from it, and are then reported without a description and as admin up.
 
    **Note**: For Panorama discovery, also create an account on Panorama with a role that allows **Operational Requests** in the XML API tab. The Agent uses it only to list the managed firewalls, and polls each firewall with the matching `firewall_credentials` entry.
 

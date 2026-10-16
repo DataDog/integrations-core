@@ -14,7 +14,16 @@ from datadog_checks.pan_firewall.constants import REPORTS
 from datadog_checks.pan_firewall.errors import PanosApiError
 from datadog_checks.pan_firewall.xml_utils import num, parse_response, text
 
-from .common import CREDENTIALS, FIXTURES, FW_A_PEER, FW_A_SERIAL, FW_A_TAGS, FW_A_TUNNEL, SYSTEM_INFO_CMD
+from .common import (
+    CREDENTIALS,
+    FIXTURES,
+    FW_A_PEER,
+    FW_A_SERIAL,
+    FW_A_TAGS,
+    FW_A_TUNNEL,
+    INTERFACE_CONFIG_CMD,
+    SYSTEM_INFO_CMD,
+)
 from .fake_panos import FIREWALL_SETS
 from .fixture_map import (
     LOG_FIXTURES,
@@ -214,6 +223,7 @@ CMD_LABELS = {
     '<show><system><disk-space/></system></show>': 'disk',
     '<show><system><info/></system></show>': 'identity_metadata',
     '<show><interface>all</interface></show>': 'identity_metadata',
+    INTERFACE_CONFIG_CMD: 'identity_metadata',
     '<request><license><info/></license></request>': 'licenses',
 }
 

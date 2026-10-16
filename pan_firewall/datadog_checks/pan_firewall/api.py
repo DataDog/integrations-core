@@ -131,8 +131,10 @@ class PanosClient:
         self._stats = CallStats()
         self._stats_lock = threading.Lock()
 
-    def op(self, cmd: str) -> Element:
-        return self._send({'type': 'op', 'cmd': cmd}, read_response)
+    def op(self, cmd: str, *, renew_on_auth_error: bool = True) -> Element:
+        """`renew_on_auth_error=False` is for an optional call whose permission refusal must not count as a rejected
+        key: an auth error is raised as a plain PanosApiError, without renewing the key."""
+        return self._send({'type': 'op', 'cmd': cmd}, read_response, renew_on_auth_error=renew_on_auth_error)
 
     def submit_job(self, params: dict[str, str]) -> str:
         """Submit an asynchronous job (log query, report) and return its job id."""
@@ -172,8 +174,15 @@ class PanosClient:
         with self._stats_lock:
             return dataclasses.replace(self._stats)
 
-    def _send(self, params: dict[str, str], read: Callable[[ResponseWrapper], T], *, stream: bool = False) -> T:
-        """Make one call and `read` its response, renewing a rejected key once."""
+    def _send(
+        self,
+        params: dict[str, str],
+        read: Callable[[ResponseWrapper], T],
+        *,
+        stream: bool = False,
+        renew_on_auth_error: bool = True,
+    ) -> T:
+        """Make one call and `read` its response, renewing a rejected key once (unless `renew_on_auth_error` is off)."""
         with self._slots:
             with self._stats_lock:
                 # Checked once the slot is held: a call waiting for the slot of the call that failed does not go out.
@@ -185,6 +194,8 @@ class PanosClient:
                 try:
                     result = read(post_api(self._http, self._url, params, key=key, stream=stream))
                 except PanosAuthError as e:
+                    if not renew_on_auth_error:
+                        raise PanosApiError(e.code, e.msg) from None
                     self._log.debug('PAN-OS %s rejected the API key (code %s), renewing it', self._host, e.code)
                     result = read(post_api(self._http, self._url, params, key=self._renew(key), stream=stream))
             except PanosError as e:

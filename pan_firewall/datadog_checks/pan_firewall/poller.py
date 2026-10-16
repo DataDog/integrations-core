@@ -30,6 +30,7 @@ from .collectors.jobs import busy_jobs
 from .constants import IDENTITY
 from .errors import PanosError, PanosSkipped, PanosUnreachable
 from .identity import DeviceIdentity, configured_vsys, global_tags, parse_system_info, vsys_list
+from .interface_config import INTERFACE_CONFIG_CMD, parse_interface_config
 from .metadata import build_device, build_interfaces
 from .ndm_models import DeviceMetadata, InterfaceMetadata, batch_payloads
 from .scheduler import BusyGate, FirewallSchedule, Result
@@ -285,7 +286,8 @@ class FirewallPoller:
         self.identity = identity
 
     def _read_interfaces(self, identity: DeviceIdentity) -> None:
-        """Read `show interface all` into the state, send `interface.speed`, and detect the vsys.
+        """Read `show interface all` into the state, send `interface.speed`, detect the vsys, and read the interface
+        config for the metadata.
 
         When the read fails, interface tags and vsys detection keep the last rows read.
         """
@@ -301,6 +303,19 @@ class FirewallPoller:
             # `interface.speed` follows the identity's 30-minute schedule, as it comes from the interfaces read here.
             self._submit(parse_interface_speeds(self.state, identity.serial, self._debug))
         self.state.vsys = vsys_list(identity, self.state.interface_rows, self.config.vsys)
+        self._read_interface_config()
+
+    def _read_interface_config(self) -> None:
+        """Read the interface comments and link states for the metadata. When the read fails, keep the last ones."""
+        if not self.config.send_ndm_metadata or self.client.stats.unreachable is not None:
+            return
+        try:
+            # A refusal is the role lacking a permission, not a rejected key: it must not renew the key.
+            root = self.client.op(INTERFACE_CONFIG_CMD, renew_on_auth_error=False)
+        except PanosError as e:
+            self.log.debug('%s: cannot read the interface config: %s', self.ip, e)
+        else:
+            self.state.interface_config = parse_interface_config(root)
 
     def _debug(self, msg: str, *args: object) -> None:
         """The `debug` callable of the `parse_*` functions the poller calls itself, outside a `CollectContext`."""

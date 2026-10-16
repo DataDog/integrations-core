@@ -20,6 +20,7 @@ from .common import (
     FW_B_SERIAL,
     FW_C_IP,
     INTERFACE_ALL_CMD,
+    INTERFACE_CONFIG_CMD,
     STUBS,
     SYSTEM_INFO_CMD,
 )
@@ -46,6 +47,7 @@ def test_good_run_collects_identity_and_reports_connected(dd_run_check, aggregat
         ('op', JOBS_PENDING_CMD, True),
         ('op', SYSTEM_INFO_CMD, True),
         ('op', INTERFACE_ALL_CMD, True),
+        ('op', INTERFACE_CONFIG_CMD, True),
     ]
 
 

@@ -51,6 +51,9 @@ OP_FIXTURES = {
 # no `show interface all`). Unlike the other maps, a set missing here does not fall back to fw-a's file.
 PARTIAL_OP_FIXTURES = {
     '<show><interface>all</interface></show>': {'fw-a': 'fw-a-probe/interface_all.xml'},
+    '<show><config><running><xpath>devices/entry/network/interface</xpath></running></config></show>': {
+        'fw-a': 'fw-a-probe/config_running_interface.xml'
+    },
     # Idle until a real `show jobs pending` is captured.
     '<show><jobs><pending/></jobs></show>': {
         'fw-a': 'synthetic/jobs_pending_idle.xml',

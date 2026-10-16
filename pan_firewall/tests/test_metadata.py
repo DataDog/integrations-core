@@ -19,11 +19,13 @@ from .common import (
     FW_A_IP,
     FW_A_SERIAL,
     INTERFACE_ALL_CMD,
+    INTERFACE_CONFIG_CMD,
     INTERFACE_NAMES,
     SYNTHETIC,
     SYSTEM_INFO_CMD,
 )
 from .fake_panos import FIREWALL_SETS
+from .fixture_map import NO_CAPTURE
 from .helpers import interface_state, load_xml, make_instance, new_check
 
 EVENT_TYPE = 'network-devices-metadata'
@@ -255,3 +257,56 @@ def test_static_firewall_never_reached_sends_no_metadata(dd_run_check, aggregato
     dd_run_check(check)
 
     assert events(aggregator) == []
+
+
+def test_first_run_sends_admin_status_from_the_interface_config(dd_run_check, aggregator, fake_panos):
+    fake_panos.answer_op(FW_A_IP, INTERFACE_ALL_CMD, (200, SYNTHETIC_INTERFACES.read_bytes()))
+    fake_panos.answer_op(FW_A_IP, INTERFACE_CONFIG_CMD, (200, SYNTHETIC_CONFIG.read_bytes()))
+
+    dd_run_check(new_check())
+
+    by_name = {i['name']: i for e in events(aggregator) for i in e.get('interfaces', [])}
+    assert (by_name['ethernet1/2.20']['admin_status'], by_name['ae1']['description']) == (2, 'LACP to core')
+    assert INTERFACE_CONFIG_CMD in {c.cmd for c in fake_panos.calls}
+
+
+def test_refused_interface_config_sends_interfaces_without_admin_status(dd_run_check, aggregator, fake_panos):
+    # What fw-a answers a role without the permission, with the same HTTP 403.
+    fake_panos.answer_op(
+        FW_A_IP, INTERFACE_CONFIG_CMD, (403, (FIXTURES / 'fw-a-probe' / 'config_refused.xml').read_bytes())
+    )
+
+    dd_run_check(new_check())
+
+    (event,) = events(aggregator)
+    assert len(event['interfaces']) == 7
+    assert all('admin_status' not in i and i['oper_status'] for i in event['interfaces'])
+    # The refusal is not a rejected key: no renewal, and the authentication status stays OK.
+    assert [c.type for c in fake_panos.calls].count('keygen') == 1
+    (auth,) = aggregator.metrics('pan_firewall.api.authentication.status')
+    assert auth.value == 0
+
+
+def test_failed_interface_config_read_keeps_the_last_one(dd_run_check, aggregator, fake_panos, schedule_clock):
+    fake_panos.answer_op(FW_A_IP, INTERFACE_ALL_CMD, (200, SYNTHETIC_INTERFACES.read_bytes()))
+    fake_panos.answer_op(FW_A_IP, INTERFACE_CONFIG_CMD, (200, SYNTHETIC_CONFIG.read_bytes()))
+    check = new_check()
+    dd_run_check(check)
+    fake_panos.answer_op(FW_A_IP, INTERFACE_CONFIG_CMD, (200, NO_CAPTURE))
+
+    schedule_clock.now += 1800
+    dd_run_check(check)
+
+    assert len(events(aggregator)) == 2
+    last = {i['name']: i for i in events(aggregator)[-1]['interfaces']}
+    assert last['ethernet1/2.20']['admin_status'] == 2
+
+
+def test_no_interface_config_call_without_ndm_metadata(dd_run_check, fake_panos):
+    dd_run_check(new_check(make_instance(send_ndm_metadata=False)))
+
+    assert INTERFACE_CONFIG_CMD not in {c.cmd for c in fake_panos.calls}
+
+
+def test_the_interface_config_call_never_reads_the_whole_config():
+    assert '<xpath>devices/entry/network/interface</xpath>' in INTERFACE_CONFIG_CMD
