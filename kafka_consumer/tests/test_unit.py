@@ -6,10 +6,12 @@ import json
 import logging
 import marshal
 from collections import defaultdict
+from concurrent.futures import Future
 from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
+from confluent_kafka import TopicPartition
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.kafka_consumer import KafkaCheck
@@ -526,6 +528,68 @@ def test_client_init(kafka_instance, check, dd_run_check):
     dd_run_check(check)
 
     assert check.client.open_consumer.mock_calls == [mock.call("datadog-agent")]
+
+
+class FakeAdminClient:
+    """Stands in for librdkafka's AdminClient so the real KafkaClient can run without a broker."""
+
+    def __init__(self, metadata):
+        self.metadata = metadata
+        self.list_topics_calls = 0
+
+    @staticmethod
+    def _done(value):
+        future = Future()
+        future.set_result(value)
+        return future
+
+    def list_topics(self, topic=None, timeout=None):
+        self.list_topics_calls += 1
+        return self.metadata
+
+    def list_consumer_group_offsets(self, requests):
+        return {
+            r.group_id: self._done(
+                mock.Mock(
+                    group_id=r.group_id,
+                    topic_partitions=[TopicPartition(tp.topic, tp.partition, 5) for tp in r.topic_partitions],
+                )
+            )
+            for r in requests
+        }
+
+    def list_offsets(self, request, **_kwargs):
+        return {tp: self._done(mock.Mock(offset=80)) for tp in request}
+
+    def poll(self, timeout):
+        return 0
+
+
+def test_highwater_collection_reads_cluster_id_without_a_consumer(kafka_instance, check, dd_run_check, aggregator):
+    """
+    The cluster id is part of the metadata the AdminClient already fetches at the start of each run,
+    so collecting highwater offsets must not build a librdkafka Consumer just to fetch it again.
+    """
+    metadata = mock.Mock(cluster_id='admin-metadata-cluster', topics={'marvel': mock.Mock(partitions={0: None})})
+    admin = FakeAdminClient(metadata)
+    consumer_cls = mock.MagicMock()
+    consumer_cls.return_value.list_topics.return_value = metadata
+
+    with (
+        mock.patch('datadog_checks.kafka_consumer.client.AdminClient', return_value=admin),
+        mock.patch('datadog_checks.kafka_consumer.client.Consumer', consumer_cls),
+    ):
+        kafka_check = check(kafka_instance)
+        dd_run_check(kafka_check)
+        dd_run_check(kafka_check)
+
+    assert consumer_cls.call_count == 0, f"a librdkafka Consumer was created {consumer_cls.call_count} time(s)"
+    assert admin.list_topics_calls == 2, "expected exactly one cluster metadata request per run"
+    aggregator.assert_metric(
+        'kafka.broker_offset',
+        value=80,
+        tags=['topic:marvel', 'partition:0', 'kafka_cluster_id:admin-metadata-cluster', 'optional:tag1'],
+    )
 
 
 def test_check_clears_cache_on_partial_reset(kafka_instance, check, dd_run_check):
