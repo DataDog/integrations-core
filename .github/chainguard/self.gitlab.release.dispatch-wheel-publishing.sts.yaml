@@ -1,0 +1,19 @@
+# Allows the protected integrations-core GitLab release-auto job to dispatch the
+# post-tag GitHub wheel workflow (release-trigger.yml). GitHub exposes workflow
+# dispatch through the repository-wide actions:write permission; the token cannot
+# write contents or tags.
+#
+# Usage in .gitlab/tagger/dispatch-wheel-publishing.sh:
+#   dd-octo-sts token --scope DataDog/integrations-core --policy self.gitlab.release.dispatch-wheel-publishing
+issuer: https://gitlab.ddbuild.io
+subject_pattern: project_path:DataDog/integrations-core:ref_type:branch:ref:(master|\d+\.\d+\.x)
+
+claim_pattern:
+  ci_config_ref_uri: gitlab\.ddbuild\.io/DataDog/integrations-core//\.gitlab-ci\.yml@refs/heads/(master|\d+\.\d+\.x)
+  pipeline_source: push
+  project_path: DataDog/integrations-core
+  ref_protected: "true"
+  ref_path: refs/heads/(master|\d+\.\d+\.x)
+
+permissions:
+  actions: write

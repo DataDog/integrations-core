@@ -61,7 +61,7 @@ release-auto:
     - ddev --version
     - ddev config override
     # Prefix every line with a timestamp
-    - ./.gitlab/tagger/tag-release.sh 2>&1 | ts "[%H:%M:%S %Z]  "
+    - set -o pipefail; ./.gitlab/tagger/tag-release.sh 2>&1 | ts "[%H:%M:%S %Z]  "
   tags: [ "arch:amd64" ]
   needs: []
 
