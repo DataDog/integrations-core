@@ -18,20 +18,20 @@ files:
 
     - name: orchestrator_username
       fleet_configurable: true
-      required: true
       description: |
-        Username for the Orchestrator. If no appliance-specific credentials are provided,
-        this username is used as the default for appliances.
+        Username for the Orchestrator. Required unless `orchestrator_api_key` is set, and must not
+        be set together with it. If no appliance-specific credentials are provided, this username is
+        also used to log in to the appliances.
       value:
         type: string
 
     - name: orchestrator_password
       fleet_configurable: true
-      required: true
       secret: true
       description: |
-        Password for the Orchestrator. If no appliance-specific credentials are provided,
-        this password is used as the default for appliances.
+        Password for the Orchestrator. Required unless `orchestrator_api_key` is set, and must not
+        be set together with it. If no appliance-specific credentials are provided, this password is
+        also used to log in to the appliances.
       value:
         type: string
 
@@ -47,6 +47,7 @@ files:
         - `2` for TACACS+
 
         When unset, the Orchestrator applies its own default, which is local authentication.
+        Not used with `orchestrator_api_key`.
       value:
         type: integer
         enum:
@@ -55,6 +56,21 @@ files:
         - 2
         example: 2
         display_default: null
+
+    - name: orchestrator_api_key
+      fleet_configurable: true
+      secret: true
+      description: |
+        API key used to authenticate to the Orchestrator instead of `orchestrator_username` and
+        `orchestrator_password`. Create it in Orchestrator under Users & Authentication > API Keys.
+        Read-Only permission is enough.
+
+        Do not set `orchestrator_username` and `orchestrator_password` with this option.
+        Appliances do not accept API keys, so configure the appliance credentials in
+        `appliance_credentials_overrides`. To use the same credentials for every appliance, add a
+        single entry with `cidr: 0.0.0.0/0`.
+      value:
+        type: string
 
     - name: namespace
       fleet_configurable: true

@@ -35,6 +35,8 @@ No additional installation is needed on your server.
 
    **Note**: Monitor permissions are enough to collect most metrics. Admin permissions are required to collect the `hpe_aruba_edgeconnect.device.cpu.usage` metric on the appliances. If the configured credentials do not have admin access, the Agent skips this metric, but collects the rest of the metrics.
 
+   To authenticate to the Orchestrator with an API key instead of a username and password, set `orchestrator_api_key` and leave `orchestrator_username` and `orchestrator_password` unset. Create the key in Orchestrator under **Users & Authentication > API Keys**; Read-Only permission is enough. Appliances do not accept API keys, so configure their credentials in `appliance_credentials_overrides`. To use the same credentials for every appliance, add a single entry with `cidr: 0.0.0.0/0`. API keys expire, so rotate the key before its expiration date to avoid collection failures.
+
    It is recommended to configure `appliance_ips` with an explicit include list that matches your known appliance IP ranges. This helps ensure that the check only connects to expected appliances.
 
 2. [Restart the Agent][5].
