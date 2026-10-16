@@ -6,7 +6,6 @@
 import mock
 import pytest
 
-from datadog_checks.base.stubs.http import FakeHTTPClient
 from datadog_checks.base.utils.http import RequestsWrapper
 
 pytestmark = [pytest.mark.unit]
@@ -41,13 +40,3 @@ class TestOptionsReachTheWire:
             http.get('https://www.example.com')
 
         assert get.call_args.kwargs['verify'] is False
-
-
-class TestFakeHttpLegacyOptions:
-    def test_header_views_share_storage(self):
-        http = FakeHTTPClient()
-        http.options['headers']['X-Token'] = 'abc'
-        assert http.get_header('x-token') == 'abc'
-
-        http.set_header('X-Other', 'def')
-        assert http.options['headers']['X-Other'] == 'def'

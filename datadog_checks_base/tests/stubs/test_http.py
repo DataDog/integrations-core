@@ -304,3 +304,13 @@ def test_fake_client_records_a_body_that_cannot_be_copied():
     client.post(url, data=body)
 
     assert client.requests[0].options['data'] is body
+
+
+class TestFakeHttpLegacyOptions:
+    def test_header_views_share_storage(self):
+        http = FakeHTTPClient()
+        http.options['headers']['X-Token'] = 'abc'
+        assert http.get_header('x-token') == 'abc'
+
+        http.set_header('X-Other', 'def')
+        assert http.options['headers']['X-Other'] == 'def'
