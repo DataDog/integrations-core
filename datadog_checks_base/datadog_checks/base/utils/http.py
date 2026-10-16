@@ -767,6 +767,8 @@ class RequestsWrapper(object):
                 response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
 
             if self._agnostic:
+                # The adapter hides the raw stream from later limit_line_size calls, so cap every read here
+                limit_line_size(response, self.max_line_size)
                 return requests_adapter.RequestsResponseAdapter(response, self.request_size)
             return ResponseWrapper(response, self.request_size, self.max_line_size)
 
