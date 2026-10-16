@@ -45,6 +45,8 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         self.queues_by_name = {}
         self.pools_by_name = {}
         self.deployments_by_id = {}
+        self.deployment_tags_by_id: dict[str, list[str]] = {}
+        self.flows_by_id: dict[str, str] = {}
         self.completed_flow_runs: set[str] = set()
 
     def _parse_config(self):
@@ -70,6 +72,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             work_pool_names=_to_dict(self.config.work_pool_names),
             work_queue_names=_to_dict(self.config.work_queue_names),
             deployment_names=_to_dict(self.config.deployment_names),
+            flow_names=_to_dict(self.config.flow_names),
             event_names=_to_dict(self.config.event_names),
         )
 
@@ -138,6 +141,8 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         self.queues_by_name = {}
         self.pools_by_name = {}
         self.deployments_by_id = {}
+        self.deployment_tags_by_id = {}
+        self.flows_by_id = {}
 
         try:
             self.set_metadata('version', self.client.get("/version"))
@@ -153,6 +158,10 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         self._collect_work_pool_metrics(now)
 
         self._collect_work_queue_metrics(now)
+
+        self._collect_concurrency_limit_metrics()
+
+        self._collect_flows()
 
         self._collect_deployment_metrics()
 
@@ -257,6 +266,37 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                     'concurrency_limit': (q.get('concurrency_limit') or 0.0),
                 }
 
+    def _collect_concurrency_limit_metrics(self):
+        """
+        Collects concurrency_limit.limit, active_slots and is_active for global and task run (tag) limits.
+
+        Global limits come from the v2 endpoint. Prefect 3 also stores task run limits there as
+        `tag:<tag>`, so those entries are skipped to avoid double counting. Task run limits are read
+        from the v1 endpoint instead, which also returns tag limits not yet migrated to v2.
+        """
+        for cl in self.client.paginate_filter("/v2/concurrency_limits/filter"):
+            if cl.get('name', '').startswith('tag:'):
+                continue
+            cltags = [
+                f"concurrency_limit_id:{cl.get('id', '')}",
+                f"concurrency_limit_name:{cl.get('name', '')}",
+                "concurrency_limit_type:global",
+            ]
+            self._clean_and_emit_metric("concurrency_limit.limit", cl.get('limit', 0), cltags)
+            self._clean_and_emit_metric("concurrency_limit.active_slots", cl.get('active_slots', 0), cltags)
+            # A metric rather than a tag so that toggling a limit doesn't split its series
+            self._clean_and_emit_metric("concurrency_limit.is_active", 1.0 if cl.get('active') else 0.0, cltags)
+
+        for cl in self.client.paginate_filter("/concurrency_limits/filter"):
+            cltags = [
+                f"concurrency_limit_id:{cl.get('id', '')}",
+                f"concurrency_limit_name:{cl.get('tag', '')}",
+                "concurrency_limit_type:tag",
+            ]
+            self._clean_and_emit_metric("concurrency_limit.limit", cl.get('concurrency_limit', 0), cltags)
+            # v1 returns the IDs of the task runs holding a slot rather than a count
+            self._clean_and_emit_metric("concurrency_limit.active_slots", len(cl.get('active_slots') or []), cltags)
+
     def _collect_worker_metrics(self, now: datetime, pool: dict):
         pname = pool['name']
 
@@ -274,20 +314,31 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             )
             self._add_worker_heartbeat_age_seconds(w, now, wtags)
 
+    def _collect_flows(self):
+        # Flow runs and deployments only reference flows by ID, so resolve names once per check run
+        flows = self.client.paginate_filter("/flows/filter")
+        for f in flows:
+            self.flows_by_id[f.get('id', '')] = f.get('name', '')
+
+        # Populates the flow filter cache used by deployments, flow runs, task runs and events
+        self.filter_metrics.filter_flows(flows)
+
     def _collect_deployment_metrics(self):
         all_deployments = self.client.paginate_filter("/deployments/filter")
 
         # the mapping needs to happen before filtering to ensure that flow_runs have the correct deployment name
         for d in all_deployments:
             self.deployments_by_id[d.get('id', '')] = d.get('name', '')
+            self.deployment_tags_by_id[d.get('id', '')] = [f"prefect_tag:{t}" for t in d.get('tags') or []]
 
-        deployments = self.filter_metrics.filter_deployments(all_deployments)
+        deployments = self.filter_metrics.filter_deployments(all_deployments, self.flows_by_id)
 
         for d in deployments:
             dtags = [
                 f"deployment_id:{d.get('id', '')}",
                 f"deployment_name:{d.get('name', '')}",
                 f"flow_id:{d.get('flow_id', '')}",
+                f"flow_name:{self.flows_by_id.get(d.get('flow_id', ''), '')}",
                 f"work_pool_name:{d.get('work_pool_name', '')}",
                 f"work_pool_id:{self.pools_by_name.get(d.get('work_pool_name', ''), {}).get('id', '')}",
                 f"work_queue_name:{d.get('work_queue_name', '')}",
@@ -297,6 +348,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                     )
                 }",
                 f"is_paused:{d.get('paused', '')}",
+                *self.deployment_tags_by_id.get(d.get('id', ''), []),
             ]
 
             self._clean_and_emit_metric("deployment.is_ready", 1.0 if d.get('status', '') == 'READY' else 0.0, dtags)
@@ -318,7 +370,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         if type == "flow_runs":
             for fr in all_runs:
                 self._define_flow_run_tags(fr)
-            return self.filter_metrics.filter_flow_runs(all_runs, self.deployments_by_id)
+            return self.filter_metrics.filter_flow_runs(all_runs, self.deployments_by_id, self.flows_by_id)
         else:
             return self.filter_metrics.filter_task_runs(all_runs, self.flow_runs_tags)
 
@@ -326,6 +378,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         d_id = fr.get('deployment_id', '')
         d_name = self.deployments_by_id.get(d_id, '')
         fr_id = fr.get('id', '')
+        fname = self.flows_by_id.get(fr.get('flow_id', ''))
         fr_tags = [
             f"work_pool_id:{fr.get('work_pool_id', '')}",
             f"work_pool_name:{fr.get('work_pool_name', '')}",
@@ -334,8 +387,12 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             f"deployment_id:{d_id}",
             f"deployment_name:{d_name}",
             f"flow_id:{fr.get('flow_id', '')}",
+            *([f"flow_name:{fname}"] if fname else []),
+            *self.deployment_tags_by_id.get(d_id, []),
         ]
-        if fr_id not in self.flow_runs_tags:
+        # Refresh entries cached while the flow name could not be resolved (e.g. /flows/filter failed)
+        cached = self.flow_runs_tags.get(fr_id)
+        if cached is None or (fname and not any(t.startswith('flow_name:') for t in cached)):
             self.flow_runs_tags[fr_id] = tuple(sorted(fr_tags))
 
         if fr.get('state_type', '') == 'COMPLETED':
@@ -422,10 +479,16 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             start_time = _parse_time(tr.get('start_time'), self.log)
             expected_start_time = _parse_time(tr.get('expected_start_time'), self.log)
 
+            # Task runs use their own tags rather than the deployment's, as those are what tag concurrency limits match
             tr_tags_list = sorted(
                 [
-                    *self.flow_runs_tags.get(tr.get('flow_run_id', ''), ()),
+                    *(
+                        t
+                        for t in self.flow_runs_tags.get(tr.get('flow_run_id', ''), ())
+                        if not t.startswith('prefect_tag:')
+                    ),
                     f"task_key:{tr.get('task_key', '')}",
+                    *(f"prefect_tag:{t}" for t in tr.get('tags') or []),
                 ]
             )
             task_tags.add(tuple(tr_tags_list))
@@ -522,7 +585,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                 return
             retry_gap = (event.occurred - await_retry_timestamp).total_seconds()
 
-            flow_run_tags = event.flow_tags
+            flow_run_tags = event.flow_tags + self._deployment_tags(event)
             self._clean_and_emit_metric("flow_runs.retry_gaps_duration", retry_gap, flow_run_tags)
 
     def _collect_task_run_metrics_from_events(self, event: Event) -> None:
@@ -596,6 +659,9 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                     self.log.error(
                         "Could not find last dependency finished time or occurred time for event %s", event.id
                     )
+
+    def _deployment_tags(self, event: Event) -> list[str]:
+        return self.deployment_tags_by_id.get(event.event_related.get('deployment', {}).get('id', ''), [])
 
     def _emit_aggregated_metrics(self):
         """
@@ -753,6 +819,7 @@ class PrefectFilterMetrics:
         work_queue_names: dict[str, list[str]] | None = None,
         deployment_names: dict[str, list[str]] | None = None,
         event_names: dict[str, list[str]] | None = None,
+        flow_names: dict[str, list[str]] | None = None,
     ):
         self.log = log
 
@@ -760,10 +827,12 @@ class PrefectFilterMetrics:
         self.work_queue_names = work_queue_names or {}
         self.deployment_names = deployment_names or {}
         self.event_names = event_names or {}
+        self.flow_names = flow_names or {}
 
         self.work_pool_cache: dict[str, bool] = {}
         self.work_queue_cache: dict[str, bool] = {}
         self.deployment_cache: dict[str, bool] = {}
+        self.flow_cache: dict[str, bool] = {}
         self.flow_run_cache: dict[str, bool] = {}
         self.task_run_cache: dict[str, bool] = {}
         self.event_cache: dict[str, bool] = {}
@@ -785,19 +854,29 @@ class PrefectFilterMetrics:
             },
         )
 
-    def filter_deployments(self, deployments: list[dict[str, str]]) -> list[dict[str, str]]:
+    def filter_flows(self, flows: list[dict[str, str]]) -> list[dict[str, str]]:
+        return self._filter_metric(
+            self.flow_names,
+            flows,
+            {"name": (self.flow_cache, True, None)},
+        )
+
+    def filter_deployments(
+        self, deployments: list[dict[str, str]], flows_by_id: dict[str, str]
+    ) -> list[dict[str, str]]:
         return self._filter_metric(
             self.deployment_names,
             deployments,
             {
                 "work_pool_name": (self.work_pool_cache, False, None),
                 "work_queue_name": (self.work_queue_cache, False, None),
+                "flow_name": (self.flow_cache, False, lambda e: flows_by_id.get(e.get('flow_id', ''))),
                 "name": (self.deployment_cache, True, None),
             },
         )
 
     def filter_flow_runs(
-        self, flow_runs: list[dict[str, str]], deployments_by_id: dict[str, str]
+        self, flow_runs: list[dict[str, str]], deployments_by_id: dict[str, str], flows_by_id: dict[str, str]
     ) -> list[dict[str, str]]:
         return self._filter_metric(
             None,
@@ -810,6 +889,7 @@ class PrefectFilterMetrics:
                     False,
                     lambda e: deployments_by_id.get(e.get('deployment_id', '')),
                 ),
+                "flow_name": (self.flow_cache, False, lambda e: flows_by_id.get(e.get('flow_id', ''))),
             },
         )
 
@@ -827,6 +907,7 @@ class PrefectFilterMetrics:
                 "work_pool_name": (self.work_pool_cache, False, lambda e: _resolve_from_tags(e, "work_pool_name")),
                 "work_queue_name": (self.work_queue_cache, False, lambda e: _resolve_from_tags(e, "work_queue_name")),
                 "deployment_name": (self.deployment_cache, False, lambda e: _resolve_from_tags(e, "deployment_name")),
+                "flow_name": (self.flow_cache, False, lambda e: _resolve_from_tags(e, "flow_name")),
             },
         )
 
@@ -847,6 +928,10 @@ class PrefectFilterMetrics:
         if deployment_name:
             fields["deployment_name"] = deployment_name
             caches["deployment_name"] = (self.deployment_cache, False, None)
+        flow_name = event.event_related.get("flow", {}).get("name")
+        if flow_name:
+            fields["flow_name"] = flow_name
+            caches["flow_name"] = (self.flow_cache, False, None)
 
         return bool(
             self._filter_metric(
@@ -964,6 +1049,7 @@ class Event:
                 f"deployment_id:{self.event_related.get('deployment', {}).get('id', '')}",
                 f"deployment_name:{self.event_related.get('deployment', {}).get('name', '')}",
                 f"flow_id:{self.event_related.get('flow', {}).get('id', '')}",
+                f"flow_name:{self.event_related.get('flow', {}).get('name', '')}",
             ]
         else:
             return []
@@ -971,8 +1057,10 @@ class Event:
     @cached_property
     def task_tags(self) -> list[str]:
         if self.event_type.startswith('prefect.task-run'):
+            task_run = self.payload.get('task_run', {})
             return self.flow_tags + [
-                f"task_key:{self.payload.get('task_run', {}).get('task_key', '')}",
+                f"task_key:{task_run.get('task_key', '')}",
+                *(f"prefect_tag:{t}" for t in task_run.get('tags') or []),
             ]
         else:
             return []
