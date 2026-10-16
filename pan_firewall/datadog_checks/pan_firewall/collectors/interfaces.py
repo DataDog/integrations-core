@@ -99,6 +99,7 @@ def parse_interface_counters(
             continue
         series = [(INTERFACE_METRICS, interface_tags(name, state, serial, by_name))]
         # Without the tags a tunnel series would be a useless monotonic_count context: wait for `vpn`.
+        # The tags lag `vpn` by a run: see the `tunnel_tags` snapshot in `poller.py`.
         if TUNNEL_INTERFACE.match(name) and (tags := (tunnel_tags or {}).get(name)) is not None:
             series.append((TUNNEL_METRICS, tags))
         for metrics, kind_tags in series:

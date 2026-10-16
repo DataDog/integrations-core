@@ -1,5 +1,6 @@
 <response status="success"><result>
 <!-- Trimmed from capture/live-fw-a/threat_log_5m.xml (lab, 2026-10-02): every entry kept, only the fields the check reads (seqno, severity, action, subtype, vsys). -->
+<!-- Entries are newest first, as captured; the check asks with `dir=forward` (oldest first) but does not depend on the order: it takes the maximum seqno and drops entries at or below the watermark. -->
   <job>
     <tenq>04:49:13</tenq>
     <tdeq>04:49:13</tdeq>

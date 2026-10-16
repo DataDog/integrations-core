@@ -211,6 +211,10 @@ class FirewallPoller:
             config=self.config,
             log=self.log,
             ip=self.ip,
+            # `interfaces` uses the tags `vpn` stored on an earlier run: the first run sends no tunnel counters, and a
+            # new or renamed tunnel gets its tags one run late. Deliberate: a tunnel series without its tags would be a
+            # useless monotonic_count context, and making `interfaces` wait for `vpn` would couple the two collectors'
+            # schedules.
             tunnel_tags=self.state.tunnel_tags,
             clock=self.schedule.now,
             read_cache=self.check.read_persistent_cache,

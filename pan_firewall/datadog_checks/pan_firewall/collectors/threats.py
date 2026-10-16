@@ -124,12 +124,12 @@ def _add(ctx: CollectContext, job: ThreatJob, entry: Element) -> None:
     if job.purpose == 'forward':
         job.counted += 1
         key = (
-            text(entry, 'severity', ''),
-            text(entry, 'action', ''),
-            text(entry, 'subtype', ''),
+            text(entry, 'severity') or '',
+            text(entry, 'action') or '',
+            text(entry, 'subtype') or '',
             normalize_vsys(text(entry, 'vsys')) or '',
         )
-        job.counts[key] += 1  # type: ignore[index]
+        job.counts[key] += 1
 
 
 def _complete(ctx: CollectContext, state: ThreatState, job: ThreatJob) -> tuple[list[Sample], ThreatJob | None]:
