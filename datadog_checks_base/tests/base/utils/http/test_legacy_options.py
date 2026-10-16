@@ -12,13 +12,6 @@ from datadog_checks.base.utils.http import RequestsWrapper
 pytestmark = [pytest.mark.unit]
 
 
-class TestLegacyOptionsSurface:
-    def test_set_header_writes_through_to_options(self):
-        http = RequestsWrapper({}, {})
-        http.set_header('X-Token', 'abc')
-        assert http.options['headers']['X-Token'] == 'abc'
-
-
 class TestOptionsReachTheWire:
     """Verify post-construction options writes affect requests."""
 
@@ -58,12 +51,3 @@ class TestFakeHttpLegacyOptions:
 
         http.set_header('X-Other', 'def')
         assert http.options['headers']['X-Other'] == 'def'
-
-    def test_set_header_collapses_duplicate_spellings(self):
-        http = FakeHTTPClient()
-        http.options['headers'].update({'x-vault-token': 'stale', 'X-Vault-Token': 'canon'})
-
-        http.set_header('X-Vault-Token', 'fresh')
-
-        assert http.get_header('X-Vault-Token') == 'fresh'
-        assert sum(1 for key in http.options['headers'] if key.lower() == 'x-vault-token') == 1

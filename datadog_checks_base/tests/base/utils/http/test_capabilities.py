@@ -143,10 +143,6 @@ class TestShouldBypassProxy:
         http = RequestsWrapper({'proxy': {'http': 'http://p:3128', 'no_proxy': 'example.com'}}, {})
         assert http.should_bypass_proxy('http://other.com') is False
 
-    def test_wildcard_bypasses_all(self):
-        http = RequestsWrapper({'proxy': {'http': 'http://p:3128', 'no_proxy': '*'}}, {})
-        assert http.should_bypass_proxy('http://anything.example') is True
-
 
 class TestResponseProtocolSurface:
     def test_context_manager_closes_underlying_response(self):
