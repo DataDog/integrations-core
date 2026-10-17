@@ -33,6 +33,25 @@ No additional installation is needed on your server.
 
 2. [Restart the Agent][7].
 
+#### Authentication
+
+For a self-hosted server using `PREFECT_SERVER_API_AUTH_STRING`, set the
+`auth_string` option to the same `user:password` secret used by Prefect clients
+in `PREFECT_API_AUTH_STRING`. The integration does not read Prefect environment
+variables automatically. For example, reference a secret resolved by the
+[Agent secret management mechanism][11]:
+
+```yaml
+instances:
+  - prefect_url: https://prefect.example/api
+    auth_string: ENC[prefect_api_auth_string]
+```
+
+Passwords may contain colons. Alternatively, keep using the existing separate
+`username` and `password` options. Do not combine them with `auth_string`, and
+use `auth_string` only with basic authentication. Use HTTPS when sending credentials
+to a remote server.
+
 ### Validation
 
 [Run the Agent's status subcommand][8] and look for `prefect` under the Checks section.
@@ -83,4 +102,5 @@ Need help? Contact [Datadog support][10].
 [7]: https://docs.datadoghq.com/agent/configuration/agent-commands/#start-stop-and-restart-the-agent
 [8]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/prefect/metadata.csv
+[11]: https://docs.datadoghq.com/agent/configuration/secrets-management/
 [10]: https://docs.datadoghq.com/help/
