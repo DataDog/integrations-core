@@ -1,0 +1,55 @@
+# Fake PAN-OS devices for the E2E environment. The Agent container joins this network (see `dd_environment`), so each
+# fake serves HTTPS on port 443, the only port the check uses, at its own IP.
+services:
+  fw-a:
+    build:
+      context: .
+    command: ["python", "/app/tests/docker/fake_firewall/app.py"]
+    volumes:
+      - ..:/app/tests:ro
+    environment:
+      FIREWALL_SET: fw-a
+      PANOS_USERNAME: "${PANOS_USERNAME}"
+      PANOS_PASSWORD: "${PANOS_PASSWORD}"
+    networks:
+      default:
+        ipv4_address: "${FW_A_IP}"
+    restart: "no"
+
+  fw-b:
+    build:
+      context: .
+    command: ["python", "/app/tests/docker/fake_firewall/app.py"]
+    volumes:
+      - ..:/app/tests:ro
+    environment:
+      FIREWALL_SET: fw-b
+      PANOS_USERNAME: "${PANOS_USERNAME}"
+      PANOS_PASSWORD: "${PANOS_PASSWORD}"
+    networks:
+      default:
+        ipv4_address: "${FW_B_IP}"
+    restart: "no"
+
+  panorama:
+    build:
+      context: .
+    command: ["python", "/app/tests/docker/fake_panorama/app.py"]
+    volumes:
+      - ..:/app/tests:ro
+    environment:
+      PANORAMA_USERNAME: "${PANORAMA_USERNAME}"
+      PANORAMA_PASSWORD: "${PANORAMA_PASSWORD}"
+      FW_A_IP: "${FW_A_IP}"
+      FW_B_IP: "${FW_B_IP}"
+    networks:
+      default:
+        ipv4_address: "${PANORAMA_IP}"
+    restart: "no"
+
+networks:
+  default:
+    name: pan-firewall-e2e
+    ipam:
+      config:
+        - subnet: "${E2E_SUBNET}"

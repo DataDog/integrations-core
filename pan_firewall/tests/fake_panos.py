@@ -1,0 +1,233 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+"""An in-process PAN-OS XML API for unit tests, patched in place of `requests.Session.post`, so `RequestsWrapper` runs.
+
+Each firewall IP answers from a fixture set (`FIREWALL_SETS`) through `fixture_map`. Tests inject failures per host
+with `FakePanos.fail()`, replace the answer to one command with `FakePanos.answer_op()`, and inspect
+`FakePanos.calls`, which records what was asked but never the key itself.
+"""
+
+from __future__ import annotations
+
+import itertools
+import ssl
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Literal
+from urllib.parse import urlsplit
+
+from datadog_checks.dev.http import MockResponse
+
+from .fixture_map import (
+    FIXTURES,
+    INVALID_CREDENTIAL,
+    KEYGEN_OK,
+    NO_CAPTURE,
+    find_op_fixture,
+    log_job_fixture,
+    panorama_op_answer,
+    report_field,
+    report_job_fixture,
+    submit_answer,
+)
+
+# Firewall IP -> fixture set.
+FIREWALL_SETS = {'192.0.2.10': 'fw-a', '192.0.2.11': 'fw-b'}
+
+# Hosts answering as a Panorama: keygen and the commands of PANORAMA_OP_FIXTURES. Their device list reports each
+# fixture set at its fake firewall's IP.
+PANORAMA_HOSTS = {'panorama.example.com'}
+PANORAMA_FIREWALL_IPS = {'fw-a': '192.0.2.10', 'fw-b': '192.0.2.11'}
+
+
+Answer = tuple[int, bytes] | Exception
+LogBody = bytes | Path | Answer
+
+# What the transport raises when a device cannot be reached. Every `requests` exception is an OSError, so the built-in
+# ones stand in for them; `test_api` runs the real `requests` types once.
+TRANSPORT_ERRORS: dict[str, Exception] = {
+    'timeout': TimeoutError('timed out'),
+    'refused': ConnectionRefusedError('connection refused'),
+    'tls': ssl.SSLError('certificate verify failed'),
+}
+
+FAILURES: dict[str, Answer] = {
+    **TRANSPORT_ERRORS,
+    'http_403': (403, INVALID_CREDENTIAL),
+    'code_403': (200, INVALID_CREDENTIAL),
+    # The real Panorama answer to a keygen with a wrong password.
+    'capture_bad_password': (200, (FIXTURES / 'panorama' / 'keygen_bad_password.xml').read_bytes()),
+    # Non-PAN-OS bodies, such as a reverse proxy's or a hung management web server's error page.
+    'html_502': (502, b'<html><body><h1>502 Bad Gateway</h1></body></html>'),
+    'html_403': (403, b'<html><body><h1>403 Forbidden</h1></body></html>'),
+}
+
+
+@dataclass(frozen=True)
+class Call:
+    host: str
+    type: str
+    cmd: str | None
+    action: str | None
+    key_sent: bool
+    params: dict[str, str] = field(default_factory=dict)
+
+
+class FakePanos:
+    def __init__(self) -> None:
+        self.calls: list[Call] = []
+        self._failures: dict[tuple[str, str], Answer] = {}
+        self._op_answers: dict[tuple[str, str], Answer] = {}
+        # `type=log` jobs: the bodies a `get` of the job answers in turn (the last one repeats), by (host, job id).
+        self._log_overrides: dict[tuple[str, str, str | None, int], list[LogBody]] = {}
+        self._log_jobs: dict[tuple[str, str], list[LogBody]] = {}
+        self._log_reads: dict[tuple[str, str], int] = {}
+        self._job_ids = itertools.count(9000)
+        # `type=report` jobs, like the log ones: overrides by (host, aggregate-by field), bodies by (host, job id).
+        self._report_overrides: dict[tuple[str, str], list[LogBody]] = {}
+        self._report_jobs: dict[tuple[str, str], list[LogBody]] = {}
+        self._report_reads: dict[tuple[str, str], int] = {}
+
+    def fail(self, host: str, failure: str, on: Literal['all', 'keygen', 'api'] = 'all') -> None:
+        """Answer every later request of kind `on` to `host` with the named entry of FAILURES."""
+        for kind in ('keygen', 'api') if on == 'all' else (on,):
+            self._failures[host, kind] = FAILURES[failure]
+
+    def answer_op(self, host: str, cmd: str, answer: Answer) -> None:
+        """Answer every later `type=op&cmd=<cmd>` request to `host` with `answer`; `fail()` still takes precedence."""
+        self._op_answers[host, cmd] = answer
+
+    def answer_log(self, host: str, direction: str, query: str | None, skip: int, *bodies: LogBody) -> None:
+        """Answer `type=log` submits of (`dir`, `query`, `skip`) to `host` with a new job whose `get`s answer `bodies`.
+
+        The bodies are served one per `get` (`get_job` or `read_log_job`), the last one repeating, so a job can
+        be `ACT` for a while and then finish. A body is bytes, a fixture path, or an `Answer` (a failure).
+        """
+        self._log_overrides[host, direction, query, skip] = list(bodies)
+
+    def answer_report(self, host: str, field: str, *bodies: LogBody) -> None:
+        """Answer report submits aggregated by `field` to `host` with a new job whose `get`s answer `bodies` in turn."""
+        self._report_overrides[host, field] = list(bodies)
+
+    def recover(self, host: str) -> None:
+        self._failures = {k: v for k, v in self._failures.items() if k[0] != host}
+        self._op_answers = {k: v for k, v in self._op_answers.items() if k[0] != host}
+        self._log_overrides = {k: v for k, v in self._log_overrides.items() if k[0] != host}
+        self._report_overrides = {k: v for k, v in self._report_overrides.items() if k[0] != host}
+
+    def calls_to(self, host: str) -> list[Call]:
+        return [c for c in self.calls if c.host == host]
+
+    def post(self, url: str, **options: Any) -> MockResponse:
+        host = urlsplit(url).hostname or ''
+        data: dict[str, str] = options['data']
+        kind = 'keygen' if data.get('type') == 'keygen' else 'api'
+        self.calls.append(
+            Call(
+                host=host,
+                type=data.get('type', ''),
+                cmd=data.get('cmd'),
+                action=data.get('action'),
+                key_sent='X-PAN-KEY' in (options.get('headers') or {}),
+                params=dict(data),
+            )
+        )
+        answer = (
+            self._failures.get((host, kind))
+            or (data.get('type') == 'op' and self._op_answers.get((host, data.get('cmd', ''))))
+            or (data.get('type') == 'log' and self._answer_log(host, data))
+            or (data.get('type') == 'report' and self._answer_report(host, data))
+            or self._answer(host, data)
+        )
+        if isinstance(answer, Exception):
+            raise answer
+        return response(*answer)
+
+    def _answer(self, host: str, data: dict[str, str]) -> Answer:
+        if data.get('type') == 'keygen':
+            return 200, KEYGEN_OK
+        if host in PANORAMA_HOSTS:
+            return 200, panorama_op_answer(data.get('cmd', ''), PANORAMA_FIREWALL_IPS) or NO_CAPTURE
+        if host not in FIREWALL_SETS:
+            # Not the `refused` failure: a mistyped host in a test must not pass for a refused connection.
+            return ConnectionRefusedError(f'no fake firewall at {host}')
+        path = find_op_fixture(data['cmd'], FIREWALL_SETS[host]) if data.get('type') == 'op' else None
+        return (200, path.read_bytes()) if path else (200, NO_CAPTURE)
+
+    def _answer_log(self, host: str, data: dict[str, str]) -> Answer | None:
+        """Answer a `type=log` submit or `action=get`; None for anything else, which `_answer` then handles."""
+        if host not in FIREWALL_SETS:
+            return None
+        if data.get('action') == 'get':
+            return self._read_log_job(host, data.get('job-id', ''))
+        direction, query, skip = data.get('dir', ''), data.get('query'), int(data.get('skip', '0'))
+        return self._open_job(
+            'log',
+            self._log_jobs,
+            self._log_reads,
+            host,
+            self._log_overrides.get((host, direction, query, skip)),
+            log_job_fixture(data, FIREWALL_SETS[host]),
+        )
+
+    def _answer_report(self, host: str, data: dict[str, str]) -> Answer | None:
+        """Answer a `type=report` submit or `action=get`; None for an unknown host, which `_answer` then handles."""
+        if host not in FIREWALL_SETS:
+            return None
+        if data.get('action') == 'get':
+            return self._read_job(self._report_jobs, self._report_reads, host, data.get('job-id', ''))
+        if data.get('async') != 'yes':  # PAN-OS refuses a report submit that is not asynchronous
+            return 200, NO_CAPTURE
+        return self._open_job(
+            'report',
+            self._report_jobs,
+            self._report_reads,
+            host,
+            self._report_overrides.get((host, report_field(data.get('cmd', '')) or '')),
+            report_job_fixture(data, FIREWALL_SETS[host]),
+        )
+
+    def _open_job(
+        self,
+        kind: Literal['log', 'report'],
+        jobs: dict[tuple[str, str], list[LogBody]],
+        reads: dict[tuple[str, str], int],
+        host: str,
+        override: list[LogBody] | None,
+        fixture: Path | None,
+    ) -> Answer:
+        """Register a job in `jobs` and return its submit answer: a new job answering the `override` bodies in turn, or
+        the job answering the `fixture`; `NO_CAPTURE` when there is neither."""
+        if override is not None:
+            bodies = override
+        elif fixture is not None:
+            bodies = [fixture]
+        else:
+            return 200, NO_CAPTURE
+        job_id = str(next(self._job_ids))
+        submit = submit_answer(kind, job_id)
+        jobs[host, job_id] = bodies
+        reads[host, job_id] = 0
+        return 200, submit
+
+    def _read_log_job(self, host: str, job_id: str) -> Answer:
+        return self._read_job(self._log_jobs, self._log_reads, host, job_id)
+
+    @staticmethod
+    def _read_job(
+        jobs: dict[tuple[str, str], list[LogBody]], reads: dict[tuple[str, str], int], host: str, job_id: str
+    ) -> Answer:
+        bodies = jobs.get((host, job_id))
+        if bodies is None:
+            return 200, NO_CAPTURE
+        index = reads[host, job_id]
+        reads[host, job_id] = index + 1
+        body = bodies[min(index, len(bodies) - 1)]
+        if isinstance(body, Path):
+            return 200, body.read_bytes()
+        return (200, body) if isinstance(body, bytes) else body
+
+
+def response(status: int, body: bytes) -> MockResponse:
+    return MockResponse(content=body.decode(), status_code=status, normalize_content=False)

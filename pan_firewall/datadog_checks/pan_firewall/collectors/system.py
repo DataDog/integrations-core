@@ -1,0 +1,200 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+"""Management-plane resources (`show system resources`) and filesystem usage (`show system disk-space`).
+
+Both commands answer with the output of a Linux tool as text under `result`, so they are parsed by line.
+The hardware sensors (`show system environmentals`) answer with XML.
+"""
+
+from __future__ import annotations
+
+import re
+from collections.abc import Callable, Iterator
+from xml.etree.ElementTree import Element
+
+from datadog_checks.pan_firewall.xml_utils import num, text
+
+from .base import CollectContext, Sample, register
+
+SYSTEM_RESOURCES_CMD = '<show><system><resources/></system></show>'
+DISK_SPACE_CMD = '<show><system><disk-space/></system></show>'
+ENVIRONMENTALS_CMD = '<show><system><environmentals/></system></show>'
+
+CPU_STATES = {'us': 'user', 'sy': 'system', 'ni': 'nice', 'id': 'idle'}
+CPU_STATES |= {'wa': 'iowait', 'hi': 'hardirq', 'si': 'softirq', 'st': 'steal'}
+# The unit top prints in the line header (`MiB Mem`, `KiB Swap`, ...).
+UNIT_BYTES = {name: 1024**power for power, name in enumerate(('B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB'))}
+# `top` line -> (metric group, (label, metric name) of each value the line must have).
+MEMORY_LINES = {
+    'Mem': ('memory', (('total', 'total'), ('free', 'free'), ('used', 'used'), ('buff/cache', 'buff_cache'))),
+    'Swap': ('swap', (('total', 'total'), ('free', 'free'), ('used', 'used'))),
+}
+VIRTUAL_FILESYSTEMS = frozenset({'none', 'tmpfs', 'cgroup_root'})
+
+ALARM_TRUE = frozenset({'true', 'yes'})
+ALARM_FALSE = frozenset({'false', 'no'})
+
+# The `%Cpu(s)` line follows current load, not a since-boot average: verified in the lab on 2026-10-16.
+CPU_LINE = re.compile(r'^%Cpu\(s\):(?P<values>.*)$', re.MULTILINE)
+MEMORY_LINE = re.compile(r'^(?P<unit>\w+) (?P<kind>Mem|Swap)\s*:(?P<values>.*)$', re.MULTILINE)
+VALUE = re.compile(r'(?P<number>\d+(?:\.\d+)?)\s+(?P<label>[a-zA-Z/]+(?: Mem)?)')
+
+
+def _fields(line: str) -> dict[str, float]:
+    return {m['label']: float(m['number']) for m in VALUE.finditer(line)}
+
+
+def _percent(part: float, total: float) -> float | None:
+    return part / total * 100 if total else None
+
+
+def parse_system_resources(root: Element, warn: Callable[..., None]) -> list[Sample]:
+    """Parse the `top` header. A missing or unknown line drops its own metrics, with one warning for all of them."""
+    output = text(root, 'result') or ''
+    samples: list[Sample] = []
+    missing = []
+
+    cpu = CPU_LINE.search(output)
+    states = _fields(cpu['values']) if cpu else {}
+    if CPU_STATES.keys() <= states.keys():
+        samples.extend(Sample(f'mgmt.cpu.{name}', states[label], (), 'gauge') for label, name in CPU_STATES.items())
+        samples.append(Sample('mgmt.cpu.used', 100 - states['id'], (), 'gauge'))
+    else:
+        missing.append('%Cpu(s)')
+
+    lines = {m['kind']: m for m in MEMORY_LINE.finditer(output)}
+    for kind, (group, values) in MEMORY_LINES.items():
+        line = lines.get(kind)
+        fields = _fields(line['values']) if line else {}
+        scale = UNIT_BYTES.get(line['unit']) if line else None
+        if not scale or not {label for label, _ in values} <= fields.keys():
+            missing.append(kind)
+            continue
+        samples.extend(Sample(f'mgmt.{group}.{name}', fields[label] * scale, (), 'gauge') for label, name in values)
+        used_pct = _percent(fields['used'], fields['total'])
+        if used_pct is not None:
+            samples.append(Sample(f'mgmt.{group}.used_pct', used_pct, (), 'gauge'))
+        # `avail Mem` is printed on the Swap line, in the unit of that line.
+        if kind == 'Swap' and 'avail Mem' in fields:
+            samples.append(Sample('mgmt.memory.available', fields['avail Mem'] * scale, (), 'gauge'))
+    if missing:
+        warn(
+            '`show system resources` has no usable %s line: the metrics of the line are not reported',
+            ', '.join(missing),
+        )
+    return samples
+
+
+def parse_disk(root: Element, warn: Callable[..., None]) -> list[Sample]:
+    lines = (text(root, 'result') or '').splitlines()
+    if not lines or not lines[0].startswith('Filesystem'):
+        warn('`show system disk-space` is not df output: no disk usage is reported')
+        return []
+    samples = []
+    pending = ''
+    for line in lines[1:]:
+        # df wraps a row whose filesystem name is too long for its column onto the next line.
+        row = (pending + ' ' + line).split(None, 5)
+        pending = ''
+        if len(row) == 1:
+            pending = row[0]
+            continue
+        if len(row) < 6 or not row[4].endswith('%'):
+            continue
+        filesystem, _size, _used, _avail, use, mount = row
+        if filesystem in VIRTUAL_FILESYSTEMS:
+            continue
+        try:
+            value = float(use[:-1])
+        except ValueError:
+            continue
+        samples.append(Sample('disk.used_pct', value, (f'mount:{mount}', f'filesystem:{filesystem}'), 'gauge'))
+    return samples
+
+
+def _slot_number(slot: Element) -> str:
+    """`Slot1` -> `1`; any other element name is used whole."""
+    return slot.tag[4:] if slot.tag.lower().startswith('slot') and len(slot.tag) > 4 else slot.tag
+
+
+def _entries(root: Element, section: str) -> Iterator[tuple[Element, str, str]]:
+    """Yield (entry, slot number, sensor name); an entry without a `description` is named after its slot."""
+    container = root.find(f'result/{section}')
+    for slot in container if container is not None else ():
+        for entry in slot.iterfind('entry'):
+            yield entry, _slot_number(slot), text(entry, 'description') or slot.tag
+
+
+def _alarm(entry: Element) -> bool | None:
+    value = (text(entry, 'alarm') or '').lower()
+    if value in ALARM_TRUE:
+        return True
+    return False if value in ALARM_FALSE else None
+
+
+def parse_environmentals(root: Element, warn: Callable[..., None]) -> list[Sample]:
+    """Power rails and temperature sensors; empty on a VM-Series. The alarms are PAN's own `alarm` field, never a
+    comparison with the thresholds. A power alarm whose direction cannot be told is warned about, once per sensor."""
+    samples: list[Sample] = []
+    for entry, slot, name in _entries(root, 'power'):
+        tags = (f'sensor:{name}', f'slot:{slot}')
+        volts = num(entry, 'Volts')
+        if volts is None:
+            continue
+        low = num(entry, 'min', num(entry, 'min-volt'))
+        high = num(entry, 'max', num(entry, 'max-volt'))
+        samples.append(Sample('power.voltage', volts, tags, 'gauge'))
+        if low is not None:
+            samples.append(Sample('power.voltage.min', low, tags, 'gauge'))
+        if high is not None:
+            samples.append(Sample('power.voltage.max', high, tags, 'gauge'))
+        alarm = _alarm(entry)
+        if alarm is None:
+            continue
+        if not alarm:
+            direction = (0, 0)
+        elif high is not None and volts >= high:
+            direction = (1, 0)
+        elif low is not None and volts <= low:
+            direction = (0, 1)
+        else:
+            warn(
+                'power sensor `%s` (slot %s) is in alarm but the voltage is not outside its '
+                'thresholds: power.alarm.high and power.alarm.low are not reported for it',
+                name,
+                slot,
+            )
+            continue
+        samples.append(Sample('power.alarm.high', direction[0], tags, 'gauge'))
+        samples.append(Sample('power.alarm.low', direction[1], tags, 'gauge'))
+
+    for entry, slot, name in _entries(root, 'thermal'):
+        tags = (f'sensor:{name}', f'slot:{slot}')
+        for metric, field in (
+            ('temperature.current', 'DegreesC'),
+            ('temperature.min', 'min'),
+            ('temperature.max', 'max'),
+        ):
+            value = num(entry, field)
+            if value is not None:
+                samples.append(Sample(metric, value, tags, 'gauge'))
+        alarm = _alarm(entry)
+        if alarm is not None:
+            samples.append(Sample('temperature.alarm', int(alarm), tags, 'gauge'))
+    return samples
+
+
+@register('system_resources')
+def collect_system_resources(ctx: CollectContext) -> list[Sample]:
+    return parse_system_resources(ctx.client.op(SYSTEM_RESOURCES_CMD), ctx.warning)
+
+
+@register('disk')
+def collect_disk(ctx: CollectContext) -> list[Sample]:
+    return parse_disk(ctx.client.op(DISK_SPACE_CMD), ctx.warning)
+
+
+@register('environment')
+def collect_environment(ctx: CollectContext) -> list[Sample]:
+    return parse_environmentals(ctx.client.op(ENVIRONMENTALS_CMD), ctx.warning)

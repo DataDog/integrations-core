@@ -1,0 +1,24 @@
+[env.collectors.datadog-checks]
+check-types = true
+mypy-args = [
+    "--explicit-package-bases",
+]
+
+[[envs.default.matrix]]
+python = ["3.13"]
+
+[[envs.default.matrix]]
+python = ["3.13"]
+setup = ["lab", "lab-panorama"]
+
+[envs.default]
+e2e-env = false
+
+[envs.default.overrides]
+name."^py3.13$".e2e-env = { value = true }
+# The lab envs are never E2E envs, so CI never runs them; start them by hand (see `dd_environment`).
+matrix.setup.env-vars = [
+  { key = "USE_PANOS_LAB", value = "1", if = ["lab", "lab-panorama"] },
+  { key = "PANOS_LAB_MODE", value = "static", if = ["lab"] },
+  { key = "PANOS_LAB_MODE", value = "panorama", if = ["lab-panorama"] },
+]
