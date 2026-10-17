@@ -583,6 +583,40 @@ instances:
         # exclude_tables:
         #   - customer.*
 
+    ## Enable collection of database roles.
+    #
+    # collect_roles:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of database roles. Requires `dbm: true`.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 600
+        ## The database role collection interval (in seconds).
+        #
+        # collection_interval: 600
+
+        ## @param max_query_duration - number - optional - default: 60
+        ## Maximum duration of the query to collect role information in seconds.
+        #
+        # max_query_duration: 60
+
+        ## @param include_databases - list of strings - optional
+        ## A list of regex patterns to include databases.
+        ## Any database whose name matches any one of these patterns will be included.
+        ## If empty, all databases matching other filters are included.
+        #
+        # include_databases: []
+
+        ## @param exclude_databases - list of strings - optional - default: ['template0', 'template1', 'rdsadmin', 'azure_maintenance', 'cloudsqladmin', 'alloydbadmin', 'alloydbmetadata']
+        ## A list of regex patterns to exclude databases.
+        ## Any database whose name matches any one of these patterns will be excluded.
+        ## If empty, all databases matching other filters are included.
+        #
+        # exclude_databases:
+        #   - privatedb.*
+
     ## Enable collection of column statistics from pg_stats.
     ## Requires the `datadog.column_statistics()` function to be created in the database.
     #
