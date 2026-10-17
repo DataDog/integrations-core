@@ -21,6 +21,12 @@ SSH_REMOTE_VERSION_PATTERN = re.compile(
     re.VERBOSE,
 )
 
+PRIVATE_KEY_CLASSES = {
+    'rsa': paramiko.RSAKey,
+    'ecdsa': paramiko.ECDSAKey,
+    'ed25519': paramiko.Ed25519Key,
+}
+
 
 class CheckSSH(AgentCheck):
     SSH_SERVICE_CHECK_NAME = 'ssh.can_connect'
@@ -33,7 +39,15 @@ class CheckSSH(AgentCheck):
         self.username = self.instance['username']
         self.password = self.instance.get('password')
         self.private_key_file = self.instance.get('private_key_file')
-        self.private_key_type = self.instance.get('private_key_type', 'rsa')
+        self.private_key_type = (self.instance.get('private_key_type') or 'rsa').lower()
+        if self.private_key_type not in PRIVATE_KEY_CLASSES:
+            # Unknown values have always been loaded as RSA; keep that behavior but make it visible.
+            self.log.warning(
+                "Unknown private_key_type `%s`, falling back to `rsa`. Supported types: %s",
+                self.private_key_type,
+                ', '.join(PRIVATE_KEY_CLASSES),
+            )
+            self.private_key_type = 'rsa'
         self.sftp_check = is_affirmative(self.instance.get('sftp_check', True))
         self.add_missing_keys = is_affirmative(self.instance.get('add_missing_keys'))
         self.base_tags = self.instance.get('tags', [])
@@ -49,10 +63,8 @@ class CheckSSH(AgentCheck):
 
         if self.private_key_file is not None:
             try:
-                if self.private_key_type == 'ecdsa':
-                    private_key = paramiko.ECDSAKey.from_private_key_file(self.private_key_file, password=self.password)
-                else:
-                    private_key = paramiko.RSAKey.from_private_key_file(self.private_key_file, password=self.password)
+                key_class = PRIVATE_KEY_CLASSES[self.private_key_type]
+                private_key = key_class.from_private_key_file(self.private_key_file, password=self.password)
             except IOError:
                 self.warning("Unable to find private key file: %s", self.private_key_file)
             except paramiko.ssh_exception.PasswordRequiredException:
