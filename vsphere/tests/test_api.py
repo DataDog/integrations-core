@@ -624,74 +624,77 @@ def test_vsan_metrics_reports_every_failed_cluster_in_a_single_warning(vsan_api)
     assert 'Session is not authenticated.' in warnings[0]
 
 
-# A VsanPerfQueryClusterHealthResponse whose <returnval> items carry no xsi:type, which is what
-# vCenter 9.0.x returns. pyvmomi 8.0.3.0.1 declared the result type of VsanPerfQueryClusterHealth as
-# the abstract vmodl.DynamicData[] instead of vim.cluster.VsanClusterHealthGroup[], so it could only
-# learn the concrete type from xsi:type. Without it, the items were bound to vmodl.DynamicData --
-# whose property table is only (dynamicType, dynamicProperty) -- and pyVmomi raised
-# AttributeError('groupId') while deserializing, inside QueryClusterHealth(). See AGENT-17358.
-VSAN_HEALTH_RESPONSE_WITHOUT_XSI_TYPE = (
-    '<?xml version="1.0" encoding="UTF-8"?>'
-    '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"'
-    ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><soapenv:Body>'
-    '<VsanPerfQueryClusterHealthResponse xmlns="urn:vsan"><returnval>'
-    '<groupId>com.vmware.vsan.health.test.perfsvc</groupId>'
-    '<groupName>Performance service</groupName>'
-    '<groupHealth>green</groupHealth>'
-    '<groupTests>'
-    '<testId>com.vmware.vsan.health.test.statsdb</testId>'
-    '<testHealth>green</testHealth>'
-    '</groupTests>'
-    '</returnval></VsanPerfQueryClusterHealthResponse>'
-    '</soapenv:Body></soapenv:Envelope>'
-)
+# A VsanPerfQueryClusterHealthResponse as vCenter returns it. vCenter 9.0.x omits `xsi:type` on the
+# `returnval` items; 8.0.x includes it. pyvmomi 8.0.3.0.1 declared this method's result type as the
+# abstract `vmodl.DynamicData[]`, so without `xsi:type` it had no concrete type to bind the items to
+# and raised `AttributeError: groupId` while deserializing, inside `QueryClusterHealth()`, losing all
+# vSAN metrics for the vCenter. See AGENT-17358.
+def vsan_health_response(xsi_type=''):
+    returnval = '<returnval xsi:type="{}">'.format(xsi_type) if xsi_type else '<returnval>'
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"'
+        ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><soapenv:Body>'
+        '<VsanPerfQueryClusterHealthResponse xmlns="urn:vsan">'
+        + returnval
+        + '<groupId>com.vmware.vsan.health.test.perfsvc</groupId>'
+        '<groupName>Performance service</groupName>'
+        '<groupHealth>green</groupHealth>'
+        '<groupTests>'
+        '<testId>com.vmware.vsan.health.test.statsdb</testId>'
+        '<testHealth>green</testHealth>'
+        '</groupTests>'
+        '</returnval></VsanPerfQueryClusterHealthResponse>'
+        '</soapenv:Body></soapenv:Envelope>'
+    )
 
 
-class StubVsanAdapter:
-    """Supplies the vSAN vmodl version the check negotiates, which drives type resolution."""
+class VsanStubAdapter:
+    """A vSAN stub that answers `QueryClusterHealth` by deserializing a real vCenter response.
 
-    def __init__(self):
+    The mocked `VsanPerformanceManager` used elsewhere in this file returns ready-made objects and so
+    cannot exercise deserialization, which is where AGENT-17358 failed.
+    """
+
+    def __init__(self, response):
         self.version = vsanapiutils.VSAN_VMODL_VERSION
+        self.response = response
 
     def SupportServerGUIDs(self):
         return False
 
+    def InvokeAccessor(self, managed_object, info):
+        return 'CLUSTER01'
 
-def query_cluster_health_result_type():
-    info = vim.cluster.VsanPerformanceManager._GetMethodInfo('QueryClusterHealth')
-    return info.result[1] if isinstance(info.result, tuple) else info.result
-
-
-def test_query_cluster_health_declares_concrete_result_type():
-    """The binding must declare the concrete group type, not an abstract base.
-
-    pyvmomi <= 8.0.3.0.1 declared vmodl.DynamicData[], which has no `groupId` and makes correct
-    deserialization depend on the server sending xsi:type.
-    """
-    assert query_cluster_health_result_type() is vim.cluster.VsanClusterHealthGroup.Array
+    def InvokeMethod(self, managed_object, info, args):
+        if info.wsdlName != 'VsanPerfQueryClusterHealth':
+            return []
+        result_type = info.result[1] if isinstance(info.result, tuple) else info.result
+        return SoapResponseDeserializer(self).Deserialize(self.response, result_type)
 
 
-def test_vsan_cluster_health_parses_without_xsi_type():
-    """A vCenter 9.0.x health response must deserialize even without xsi:type on the items."""
-    deserializer = SoapResponseDeserializer(StubVsanAdapter())
+@pytest.mark.parametrize(
+    'xsi_type, vcenter',
+    [('', 'vCenter 9.0.x, which omits xsi:type'), ('VsanClusterHealthGroup', 'vCenter 8.0.x, which sends it')],
+    ids=['without_xsi_type', 'with_xsi_type'],
+)
+def test_vsan_health_metrics_are_collected_from_a_real_response(realtime_instance, xsi_type, vcenter):
+    """vSAN health metrics must be collected from the health response as vCenter actually sends it."""
+    realtime_instance['collect_vsan_data'] = True
+    with patch('datadog_checks.vsphere.api.connect'):
+        api = VSphereAPI(VSphereConfig(realtime_instance, {}, MagicMock()), MagicMock())
+    stub = VsanStubAdapter(vsan_health_response(xsi_type))
+    api._vsan_stub = stub
+    cluster = vim.ClusterComputeResource('domain-c99', stub)
 
-    groups = deserializer.Deserialize(VSAN_HEALTH_RESPONSE_WITHOUT_XSI_TYPE, query_cluster_health_result_type())
-
-    assert len(groups) == 1
-    assert isinstance(groups[0], vim.cluster.VsanClusterHealthGroup)
-    # These reads are what _get_cluster_vsan_metrics does with the result.
-    assert groups[0].groupId == 'com.vmware.vsan.health.test.perfsvc'
-    assert groups[0].groupHealth == 'green'
-    assert [test.testId for test in groups[0].groupTests] == ['com.vmware.vsan.health.test.statsdb']
-
-
-def test_vsan_cluster_health_parses_with_xsi_type():
-    """A vCenter 8.0.x health response, which does carry xsi:type, must keep working."""
-    payload = VSAN_HEALTH_RESPONSE_WITHOUT_XSI_TYPE.replace(
-        '<returnval>', '<returnval xsi:type="VsanClusterHealthGroup">'
+    health_metrics, _ = api.get_vsan_metrics(
+        {cluster: ['nested-id-1']}, ENTITY_REF_IDS, ID_TO_TAGS, dt.datetime(2024, 1, 1)
     )
-    deserializer = SoapResponseDeserializer(StubVsanAdapter())
 
-    groups = deserializer.Deserialize(payload, query_cluster_health_result_type())
-
-    assert groups[0].groupId == 'com.vmware.vsan.health.test.perfsvc'
+    assert len(health_metrics) == 1
+    assert health_metrics[0]['vsphere.vsan.cluster.health.count'] == {
+        'group_id': 'com.vmware.vsan.health.test.perfsvc',
+        'status': 'green',
+        'vsphere_cluster': 'CLUSTER01',
+    }
+    assert 'vsphere.vsan.cluster.health.statsdb.count' in health_metrics[0]
