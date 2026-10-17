@@ -240,3 +240,39 @@ ray_vllm:cache_config_info{block_size="16",cache_dtype="auto",cpu_kvcache_space_
 # HELP ray_vllm:num_preemptions_total Cumulative number of preemption from the engine.
 # TYPE ray_vllm:num_preemptions_total counter
 ray_vllm:num_preemptions_total{model_name="facebook/opt-125m"} 0.0
+# HELP ray_vllm:nixl_xfer_time_seconds Histogram of transfer duration for NIXL KV Cache transfers.
+# TYPE ray_vllm:nixl_xfer_time_seconds histogram
+ray_vllm:nixl_xfer_time_seconds_bucket{engine="0",le="0.001",model_name="facebook/opt-125m"} 1
+ray_vllm:nixl_xfer_time_seconds_bucket{engine="0",le="+Inf",model_name="facebook/opt-125m"} 2
+ray_vllm:nixl_xfer_time_seconds_count{engine="0",model_name="facebook/opt-125m"} 2
+ray_vllm:nixl_xfer_time_seconds_sum{engine="0",model_name="facebook/opt-125m"} 0.0028
+# HELP ray_vllm:nixl_post_time_seconds Histogram of transfer post time for NIXL KV Cache transfers.
+# TYPE ray_vllm:nixl_post_time_seconds histogram
+ray_vllm:nixl_post_time_seconds_bucket{engine="0",le="0.001",model_name="facebook/opt-125m"} 2
+ray_vllm:nixl_post_time_seconds_bucket{engine="0",le="+Inf",model_name="facebook/opt-125m"} 2
+ray_vllm:nixl_post_time_seconds_count{engine="0",model_name="facebook/opt-125m"} 2
+ray_vllm:nixl_post_time_seconds_sum{engine="0",model_name="facebook/opt-125m"} 0.0004
+# HELP ray_vllm:nixl_bytes_transferred Histogram of bytes transferred per NIXL KV Cache transfers.
+# TYPE ray_vllm:nixl_bytes_transferred histogram
+ray_vllm:nixl_bytes_transferred_bucket{engine="0",le="8.388608e+06",model_name="facebook/opt-125m"} 2
+ray_vllm:nixl_bytes_transferred_bucket{engine="0",le="+Inf",model_name="facebook/opt-125m"} 2
+ray_vllm:nixl_bytes_transferred_count{engine="0",model_name="facebook/opt-125m"} 2
+ray_vllm:nixl_bytes_transferred_sum{engine="0",model_name="facebook/opt-125m"} 1.048576e+07
+# HELP ray_vllm:nixl_num_descriptors Histogram of number of descriptors per NIXL KV Cache transfers.
+# TYPE ray_vllm:nixl_num_descriptors histogram
+ray_vllm:nixl_num_descriptors_bucket{engine="0",le="1000.0",model_name="facebook/opt-125m"} 2
+ray_vllm:nixl_num_descriptors_bucket{engine="0",le="+Inf",model_name="facebook/opt-125m"} 2
+ray_vllm:nixl_num_descriptors_count{engine="0",model_name="facebook/opt-125m"} 2
+ray_vllm:nixl_num_descriptors_sum{engine="0",model_name="facebook/opt-125m"} 640
+# HELP ray_vllm:nixl_num_failed_transfers_total Number of failed NIXL KV Cache transfers, including handshake and notification failures.
+# TYPE ray_vllm:nixl_num_failed_transfers_total counter
+ray_vllm:nixl_num_failed_transfers_total{engine="0",model_name="facebook/opt-125m"} 1
+# HELP ray_vllm:nixl_num_failed_notifications_total Number of failed NIXL KV Cache notifications.
+# TYPE ray_vllm:nixl_num_failed_notifications_total counter
+ray_vllm:nixl_num_failed_notifications_total{engine="0",model_name="facebook/opt-125m"} 1
+# HELP ray_vllm:nixl_num_kv_expired_reqs_total Number of requests that had their KV expire.
+# TYPE ray_vllm:nixl_num_kv_expired_reqs_total counter
+ray_vllm:nixl_num_kv_expired_reqs_total{engine="0",model_name="facebook/opt-125m"} 1
+# HELP ray_vllm:nixl_num_notifications_after_expiry_total Number of completion notifications received after the request's KV lease expired.
+# TYPE ray_vllm:nixl_num_notifications_after_expiry_total counter
+ray_vllm:nixl_num_notifications_after_expiry_total{engine="0",model_name="facebook/opt-125m"} 1
