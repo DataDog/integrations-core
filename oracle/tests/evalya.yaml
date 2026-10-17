@@ -1,0 +1,35 @@
+version: "1"
+
+tasks:
+  # Full metric-coverage fixture: Oracle Database Free with a seeded Datadog user
+  # and a built-in workload that keeps the per-second sysmetrics moving, behind a
+  # plain TCP forwarder that gates on the whole environment. Point the check at
+  # DB_HOST:DB_PORT, service name FREE, with `dbm: true`. See README.md.
+  - id: oracle-full
+    task: ./compose/full-coverage.compose@oracle-full
+    labels:
+      evalya.io/publish: "true"
+      evalya.io/provides.DB_HOST: "{{ .hostname }}"
+      evalya.io/provides.DB_PORT: "1521"
+      evalya.io/provides.DB_SERVICE_NAME: FREE
+      evalya.io/provides.DB_USERNAME: c##datadog
+      evalya.io/provides.DB_PASSWORD: datadog
+    env:
+      - name: ORACLE_VERSION
+        value: "23.26.3"
+      - name: ORACLE_PASSWORD
+        value: datad0g
+      - name: DB_USERNAME
+        value: c##datadog
+      - name: DB_PASSWORD
+        value: datadog
+      - name: ACTIVITY_GEN
+        value: "1"
+    # The forwarder only starts once `seed` has verified that DB_USERNAME can log
+    # in and read V$SYSMETRIC, so a listening port means the check can be served.
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z -w 3 127.0.0.1 1521"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
