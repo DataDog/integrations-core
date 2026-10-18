@@ -1,0 +1,240 @@
+# Deliberate misconfigurations for istio-full. Each object exists to move one
+# istiod gauge off 0; a healthy mesh reports these at 0. Objects live in the
+# uninjected `drill` namespace unless the gauge needs a mesh proxy, and none of
+# them changes how client reaches web. churn.yaml keeps them recorded.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: drill
+---
+# pilot_eds_no_instances: a service whose selector matches no pod.
+apiVersion: v1
+kind: Service
+metadata:
+  name: empty
+  namespace: drill
+spec:
+  selector:
+    app: nothing
+  ports:
+    - name: http
+      port: 80
+---
+# pilot_endpoint_not_ready: istiod only consults endpoint readiness for a proxy
+# that no Service selects, through a selector-less Service's endpoints. The
+# `notready` pod is sidecar-injected but unselected; seed.sh and activity-gen.sh
+# keep the `notready-1` EndpointSlice pointing at its IP with `ready: false`.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notready
+  namespace: mesh
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notready
+  template:
+    metadata:
+      labels:
+        app: notready
+    spec:
+      containers:
+        - name: notready
+          image: nginx:1.27-alpine
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notready
+  namespace: mesh
+spec:
+  ports:
+    - name: http
+      port: 80
+---
+# endpoint_no_pod: an endpoint whose targetRef names a pod that does not exist.
+apiVersion: v1
+kind: Service
+metadata:
+  name: nopod
+  namespace: drill
+spec:
+  ports:
+    - name: http
+      port: 80
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: nopod-1
+  namespace: drill
+  labels:
+    kubernetes.io/service-name: nopod
+addressType: IPv4
+ports:
+  - name: http
+    port: 80
+    protocol: TCP
+endpoints:
+  - addresses: ["10.42.0.250"]
+    conditions:
+      ready: true
+    targetRef:
+      kind: Pod
+      name: ghost
+      namespace: drill
+---
+# pilot_destrule_subsets: a second destination rule for the same host with the
+# same subset name as the `web` rule in istio-config.yaml.
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: web-duplicate-subset
+  namespace: mesh
+spec:
+  host: web.mesh.svc.cluster.local
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+---
+# pilot_duplicate_envoy_clusters: an EnvoyFilter that adds a second cluster
+# named like the client sidecar's built-in inbound passthrough cluster. istiod
+# drops the duplicate before sending CDS, so Envoy's config is unchanged.
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: duplicate-cluster
+  namespace: mesh
+spec:
+  workloadSelector:
+    labels:
+      app: client
+  configPatches:
+    - applyTo: CLUSTER
+      match:
+        context: SIDECAR_INBOUND
+      patch:
+        operation: ADD
+        value:
+          name: InboundPassthroughCluster
+          type: ORIGINAL_DST
+          lb_policy: CLUSTER_PROVIDED
+          connect_timeout: 1s
+---
+# pilot_conflict_outbound_listener_tcp_over_current_tcp: two address-less TCP
+# service entries on one port both claim the 0.0.0.0:9999 outbound listener.
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: conflict-tcp-a
+  namespace: drill
+spec:
+  hosts: ["a.conflict.example.com"]
+  location: MESH_EXTERNAL
+  resolution: DNS
+  ports:
+    - number: 9999
+      name: tcp
+      protocol: TCP
+---
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: conflict-tcp-b
+  namespace: drill
+spec:
+  hosts: ["b.conflict.example.com"]
+  location: MESH_EXTERNAL
+  resolution: DNS
+  ports:
+    - number: 9999
+      name: tcp
+      protocol: TCP
+---
+# pilot_conflict_inbound_listener: a second service selecting web's port 80 as
+# TCP while the `web` service declares it HTTP.
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-tcp
+  namespace: mesh
+spec:
+  selector:
+    app: web
+  ports:
+    - name: tcp
+      port: 9080
+      targetPort: 80
+---
+# pilot_vservice_dup_domain: two virtual services claiming the same host.
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: dup-domain
+  namespace: drill
+spec:
+  hosts: ["dup.example.com"]
+  location: MESH_EXTERNAL
+  resolution: DNS
+  ports:
+    - number: 80
+      name: http
+      protocol: HTTP
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: dup-domain-a
+  namespace: drill
+spec:
+  hosts: ["dup.example.com"]
+  http:
+    - route:
+        - destination:
+            host: dup.example.com
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: dup-domain-b
+  namespace: drill
+spec:
+  hosts: ["dup.example.com"]
+  http:
+    - route:
+        - destination:
+            host: dup.example.com
+---
+# galley_validation_config_update_error: while the validating webhook carries the
+# `istio-full/deny-istiod-update` label (set and cleared by activity-gen.sh),
+# reject istiod's own updates to it, so its reconcile fails with Forbidden.
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: istio-full-deny-webhook-update
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["admissionregistration.k8s.io"]
+        apiVersions: ["v1"]
+        operations: ["UPDATE"]
+        resources: ["validatingwebhookconfigurations"]
+        resourceNames: ["istio-validator-istio-system"]
+  validations:
+    - expression: >-
+        request.userInfo.username != "system:serviceaccount:istio-system:istiod" ||
+        !has(oldObject.metadata.labels) ||
+        !("istio-full/deny-istiod-update" in oldObject.metadata.labels)
+      reason: Forbidden
+      message: istio-full drill is denying istiod's webhook update
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: istio-full-deny-webhook-update
+spec:
+  policyName: istio-full-deny-webhook-update
+  validationActions: [Deny]

@@ -1,0 +1,140 @@
+# Full metric-coverage environment for the istio check.
+#
+# Istio needs Kubernetes, so a single-node k3s cluster runs inside the compose
+# network. `seed` installs the Istio control plane (istiod) at ${ISTIO_VERSION},
+# deploys a sidecar-injected client/web workload, and applies the Istio config
+# the pilot gauges count. `activity-gen` keeps HTTP/TCP mesh traffic, config
+# pushes, and sidecar injections moving. `gateway` is the entrypoint: it routes
+# the live istiod and sidecar endpoints out of the cluster and serves the
+# integration's recorded payloads (../fixtures) for the Istio <= 1.5 components
+# (Mixer, Galley, Citadel, standalone Pilot, and the 1.5 pilot-agent) that no
+# longer exist in a current Istio, both as recorded and through replay.js, which
+# scales their counters per request. See ../README.md.
+services:
+  k3s:
+    image: "rancher/k3s:${K3S_VERSION:-v1.31.6-k3s1}"
+    # k3s runs containerd, kube-proxy, and CNI, which need a privileged container.
+    privileged: true
+    command:
+      - server
+      - --disable=traefik
+      - --disable=metrics-server
+      - --tls-san=k3s
+      - --node-name=istio-full
+    environment:
+      K3S_KUBECONFIG_OUTPUT: /output/kubeconfig.yaml
+      K3S_KUBECONFIG_MODE: "644"
+    volumes:
+      - kubeconfig:/output
+    networks:
+      - network1
+    healthcheck:
+      test: ["CMD-SHELL", "kubectl get --raw=/readyz >/dev/null 2>&1 && kubectl get nodes | grep -q ' Ready'"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 10s
+
+  # The istioctl image runs as uid 1000, which cannot write a fresh named
+  # volume, so open the shared tools volume up first.
+  tools-init:
+    image: "rancher/k3s:${K3S_VERSION:-v1.31.6-k3s1}"
+    restart: "no"
+    entrypoint: ["sh", "-c", "chmod 0777 /tools"]
+    volumes:
+      - tools:/tools
+
+  # Copies istioctl out of the official image so seed, which runs on the k3s
+  # image for its kubectl, installs the same release.
+  istioctl-bin:
+    image: "istio/istioctl:${ISTIO_VERSION:-1.29.2}"
+    depends_on:
+      tools-init:
+        condition: service_completed_successfully
+    restart: "no"
+    entrypoint: ["sh", "-c", "cp /usr/local/bin/istioctl /tools/istioctl"]
+    volumes:
+      - tools:/tools
+
+  # One-shot: installs istiod, deploys the mesh workload and NodePorts, and
+  # applies the Istio config and drills behind the pilot/injection gauges.
+  seed:
+    image: "rancher/k3s:${K3S_VERSION:-v1.31.6-k3s1}"
+    depends_on:
+      k3s:
+        condition: service_healthy
+      istioctl-bin:
+        condition: service_completed_successfully
+    restart: "no"
+    entrypoint: ["sh", "/opt/istio-full/seed.sh"]
+    environment:
+      ISTIO_VERSION: "${ISTIO_VERSION:-1.29.2}"
+    volumes:
+      - kubeconfig:/kubeconfig:ro
+      - tools:/tools:ro
+      - ../seed.sh:/opt/istio-full/seed.sh:ro
+      - ./full-coverage:/opt/istio-full/manifests:ro
+    networks:
+      - network1
+
+  # Continuous workload so the counter and histogram metrics keep moving across
+  # scrapes. See ../activity-gen.sh.
+  activity-gen:
+    image: "rancher/k3s:${K3S_VERSION:-v1.31.6-k3s1}"
+    depends_on:
+      k3s:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    entrypoint: ["sh", "/opt/istio-full/activity-gen.sh"]
+    environment:
+      # Set ACTIVITY_GEN=0 (host env) for a quiescent istio-full: the container
+      # stays up but generates no traffic. Defaults to on.
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+      ACTIVITY_DURATION: "${ACTIVITY_DURATION:-0}"
+    volumes:
+      - kubeconfig:/kubeconfig:ro
+      - ../activity-gen.sh:/opt/istio-full/activity-gen.sh:ro
+      - ./full-coverage:/opt/istio-full/manifests:ro
+    networks:
+      - network1
+
+  # Fixture entrypoint (published as istio-full). Gated on the cluster and the
+  # seed so a single dependency on it pulls up and keeps alive the cluster, the
+  # control plane, and the workload.
+  gateway:
+    image: nginx:1.27-alpine
+    depends_on:
+      k3s:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+      activity-gen:
+        condition: service_started
+    volumes:
+      - ./full-coverage/gateway.conf:/etc/nginx/nginx.conf:ro
+      - ./full-coverage/replay.js:/etc/nginx/replay.js:ro
+      - ../fixtures:/usr/share/nginx/fixtures:ro
+    # No host-port publish: consumers reach the gateway over the compose network
+    # through the provides labels in ../evalya.yaml.
+    networks:
+      - network1
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          wget -qO- http://127.0.0.1:15014/istiod/metrics | grep -q '^pilot_xds' &&
+          wget -qO- http://127.0.0.1:15014/mesh/stats/prometheus | grep -q '^istio_requests_total'
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+
+volumes:
+  kubeconfig:
+  tools:
+
+networks:
+  network1:
+    name: istio-full-coverage_default
