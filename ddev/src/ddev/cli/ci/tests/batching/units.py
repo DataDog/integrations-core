@@ -26,9 +26,6 @@ class PlatformSpec(NamedTuple):
     image: str
 
 
-# Kept in sync by hand with `ci_matrix.PLATFORMS`, which CI still uses and which cannot import from
-# here because it has to run standalone. A runner image changed in one place and not the other makes
-# the two plans disagree.
 PLATFORMS: dict[PlatformName, PlatformSpec] = {
     PlatformName.LINUX: PlatformSpec("Linux", "ubuntu-22.04"),
     PlatformName.WINDOWS: PlatformSpec("Windows", "windows-2022"),

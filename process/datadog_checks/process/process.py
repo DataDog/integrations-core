@@ -78,6 +78,9 @@ class ProcessCheck(AgentCheck):
         self.try_sudo = self.instance.get('try_sudo', False)
         self.use_oneshot = is_affirmative(self.instance.get('use_oneshot', True))
 
+        # Platform capability, computed once rather than per check run.
+        self._has_native_ppid_map = hasattr(psutil._psplatform, 'ppid_map')
+
         # ad stands for access denied
         # We cache the PIDs getting this error and don't iterate on them more often than `access_denied_cache_duration``
         # This cache is for all PIDs so it's global, but it should be refreshed by instance
@@ -387,16 +390,35 @@ class ProcessCheck(AgentCheck):
         return (int(i) for i in data.split()[9:13])
 
     def _get_child_processes(self, pids):
+        if self._has_native_ppid_map:
+            # Single fast call, same as Process.children(recursive=True) uses internally.
+            ppid_map = psutil._psplatform.ppid_map()
+        else:
+            # No native bulk lookup (eg. AIX). Build it per-pid instead, skipping pids we
+            # can't read rather than aborting the whole batch like psutil's own fallback does.
+            ppid_map = {}
+            for p in psutil.pids():
+                try:
+                    ppid_map[p] = psutil.Process(p).ppid()
+                except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
+                    self.log.debug('Could not read ppid for pid %s, excluded from child collection: %s', p, e)
+                    continue
+
+        reverse_ppid_map = defaultdict(list)
+        for pid, ppid in ppid_map.items():
+            reverse_ppid_map[ppid].append(pid)
+
         children_pids = set()
         for pid in pids:
-            try:
-                children = psutil.Process(pid).children(recursive=True)
-                self.log.debug('%s children were collected for process %s', len(children), pid)
-                for child in children:
-                    children_pids.add(child.pid)
-            except psutil.NoSuchProcess:
-                self.log.debug("Unable to get children for process because process %s does not exist", pid)
+            stack = [pid]
+            while stack:
+                current = stack.pop()
+                for child_pid in reverse_ppid_map.get(current, ()):
+                    if child_pid not in children_pids:
+                        children_pids.add(child_pid)
+                        stack.append(child_pid)
 
+        self.log.debug('%s children were collected for %s pids', len(children_pids), len(pids))
         return children_pids
 
     def check(self, _):

@@ -5,6 +5,8 @@ import logging
 from unittest import mock
 
 import pytest
+from packaging.version import Version
+from pymongo import MongoClient
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.mongo import MongoDb
@@ -292,3 +294,38 @@ def test_propagate_agent_tags(
                 f'database_instance:{check._resolved_hostname}',
             ] + agent_tags
             aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK, tags=expected_tags)
+
+
+@pytest.mark.skipif(Version(common.MONGODB_VERSION) < Version('9.0'), reason='Requires MongoDB 9.0 query statistics')
+def test_mongodb9_query_stats_read_and_write_metrics(check, instance, dd_run_check):
+    # Real BSON responses must produce interval metrics for reads and each kind of write.
+    instance.update({'database': 'test'})
+    mongo_check = check(instance)
+    dd_run_check(mongo_check)
+    collector = mongo_check._query_metrics
+    with MongoClient(common.HOST, common.PORT1) as client:
+        parameters = ('internalQueryStatsSampleRate', 'internalQueryStatsWriteCmdSampleRate')
+        previous = client.admin.command('getParameter', 1, **dict.fromkeys(parameters, 1))
+        client.admin.command('setParameter', 1, **dict.fromkeys(parameters, 1.0))
+        collection = client.test.query_stats_compatibility
+        try:
+            # The first insert creates the collection and may not record query statistics.
+            collection.insert_one({'value': 0})
+            for _ in range(2):
+                collection.insert_one({'value': 1})
+                list(collection.find({'value': 1}))
+                collection.update_one({'value': 1}, {'$set': {'value': 2}})
+                collection.delete_one({'value': 2})
+                rows = collector._collect_metrics_rows()
+            by_command = {row['command_type']: row for row in rows if row['collection'] == collection.name}
+            assert set(by_command) == {'find', 'insert', 'update', 'delete'}
+            for row in by_command.values():
+                assert row['exec_count'] == 1
+                assert row['total_exec_micros_sum'] >= 0
+            assert by_command['find']['docs_returned_sum'] == 1
+            assert by_command['insert']['docs_inserted_sum'] == 1
+            assert by_command['update']['docs_modified_sum'] == 1
+            assert by_command['delete']['docs_deleted_sum'] == 1
+        finally:
+            client.admin.command('setParameter', 1, **{name: previous[name] for name in parameters})
+            collection.drop()

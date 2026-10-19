@@ -12,9 +12,13 @@ from .common import (
     CUSTOM_TAGS,
     GITALY_METRICS,
     GITLAB_GITALY_PROMETHEUS_ENDPOINT,
+    GITLAB_SIDEKIQ_PROMETHEUS_ENDPOINT,
     GITLAB_TAGS,
+    GITLAB_WORKHORSE_PROMETHEUS_ENDPOINT,
+    SIDEKIQ_EXPORTER_METRICS,
     V1_METRICS,
     V2_METRICS,
+    WORKHORSE_METRICS,
     assert_check,
 )
 
@@ -52,6 +56,24 @@ def test_check_gitaly(dd_run_check, aggregator, mock_data, gitlab_check, get_con
         status=GitlabCheckV2.OK,
         tags=GITLAB_TAGS + CUSTOM_TAGS + ['endpoint:{}'.format(GITLAB_GITALY_PROMETHEUS_ENDPOINT)],
     )
+
+
+def test_check_workhorse_and_sidekiq_given_endpoints_configured_collects_their_metrics(
+    dd_run_check, aggregator, mock_data, gitlab_check, get_config
+):
+    config = get_config(True)
+    instance = config['instances'][0]
+    instance["openmetrics_endpoint"] = instance["prometheus_url"]
+    instance["workhorse_endpoint"] = GITLAB_WORKHORSE_PROMETHEUS_ENDPOINT
+    instance["sidekiq_endpoint"] = GITLAB_SIDEKIQ_PROMETHEUS_ENDPOINT
+
+    check = gitlab_check(config)
+    dd_run_check(check)
+    dd_run_check(check)
+
+    assert_check(aggregator, V2_METRICS + WORKHORSE_METRICS + SIDEKIQ_EXPORTER_METRICS, True)
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 @pytest.mark.parametrize(

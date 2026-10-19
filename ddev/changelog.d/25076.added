@@ -1,1 +1,0 @@
-Add a shutdown mode to the async GitHub client that caps request timeouts and stops retrying.

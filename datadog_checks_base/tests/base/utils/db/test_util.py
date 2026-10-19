@@ -306,6 +306,12 @@ def test_obfuscate_sql_with_metadata(obfuscator_return_value, expected_value):
             "SELECT * FROM randomtable where name = '123\x00'",
             False,
         ),
+        # Default strips, so a null cannot reach the agent binding and raise ValueError.
+        (
+            "SELECT * FROM randomtable where name = '123\x00'",
+            "SELECT * FROM randomtable where name = '123'",
+            None,
+        ),
     ],
 )
 def test_obfuscate_sql_with_metadata_replace_null_character(input_query, expected_query, replace_null_character):
@@ -315,7 +321,10 @@ def test_obfuscate_sql_with_metadata_replace_null_character(input_query, expecte
     # Check that it can handle null characters
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = _mock_obfuscate_sql
-        statement = obfuscate_sql_with_metadata(input_query, None, replace_null_character=replace_null_character)
+        if replace_null_character is None:
+            statement = obfuscate_sql_with_metadata(input_query, None)
+        else:
+            statement = obfuscate_sql_with_metadata(input_query, None, replace_null_character=replace_null_character)
         assert statement['query'] == expected_query
 
 

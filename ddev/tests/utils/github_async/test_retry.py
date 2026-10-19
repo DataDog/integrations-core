@@ -15,6 +15,7 @@ import httpx
 import pytest
 
 from ddev.utils.github_async import AsyncGitHubClient
+from ddev.utils.github_async.observer import RequestAttempt, RequestFailure, RequestFault
 from ddev.utils.github_async.retry import (
     DEFAULT_ATTEMPTS,
     MUTATION_RETRY,
@@ -26,7 +27,13 @@ from ddev.utils.github_async.retry import (
     on_transport_error,
 )
 from ddev.utils.github_errors import GitHubUnexpectedRedirectError
-from tests.utils.github_async.helpers import ENDPOINT_CALLS, TOKEN, json_response, recording_transport
+from tests.utils.github_async.helpers import (
+    ENDPOINT_CALLS,
+    TOKEN,
+    RecordingObserver,
+    json_response,
+    recording_transport,
+)
 from tests.utils.github_async.payloads import (
     full_pull_request_payload,
     issue_comment_payload,
@@ -300,6 +307,69 @@ async def test_a_retry_is_reported_with_its_cause(caplog: pytest.LogCaptureFixtu
     assert "/repos/o/r/actions/runs/42" in records[0].getMessage()
     assert "503" in records[0].getMessage()
     assert records[0].attempt == 2
+
+
+async def test_an_observer_is_shown_every_send_and_the_log_does_not_repeat_it(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """A monitor counts sends from these reports, so each one has to arrive once with its outcome."""
+    transport, _ = recording_transport(
+        [httpx.Response(503), httpx.ConnectTimeout("slow"), json_response(workflow_run_payload())]
+    )
+    observer = RecordingObserver()
+    logger = logging.getLogger("test-github-client")
+    client = AsyncGitHubClient(token=TOKEN, transport=transport, logger=logger, observer=observer)
+
+    with caplog.at_level(logging.WARNING, logger="test-github-client"):
+        await client.get_workflow_run("o", "r", 42)
+
+    assert [(attempt.number, attempt.fault) for attempt in observer.attempts] == [
+        (1, RequestFault.SERVER_ERROR),
+        (2, RequestFault.TIMEOUT),
+        (3, RequestFault.NONE),
+    ]
+    assert {attempt.endpoint for attempt in observer.attempts} == {"/repos/o/r/actions/runs/42"}
+    assert observer.failures == []
+    assert not [record for record in caplog.records if record.name == "test-github-client"]
+
+
+@pytest.mark.parametrize(
+    ("responses", "expected_attempts"),
+    [
+        pytest.param([httpx.Response(404)], 1, id="not-retryable"),
+        pytest.param([httpx.Response(503)], DEFAULT_ATTEMPTS, id="retries-exhausted"),
+    ],
+)
+async def test_a_request_that_fails_for_good_is_reported_once(
+    responses: list[httpx.Response], expected_attempts: int
+) -> None:
+    transport, _ = recording_transport(responses)
+    observer = RecordingObserver()
+    client = AsyncGitHubClient(token=TOKEN, transport=transport, observer=observer)
+
+    with pytest.raises(httpx.HTTPStatusError) as exc_info:
+        await client.get_workflow_run("o", "r", 42)
+
+    assert len(observer.attempts) == expected_attempts
+    [failure] = observer.failures
+    assert failure.error is exc_info.value
+    assert failure.last_attempt is observer.attempts[-1]
+
+
+async def test_a_failing_observer_does_not_fail_the_request() -> None:
+    """Monitoring is secondary to the request it watches."""
+
+    class BrokenObserver:
+        def attempt_finished(self, attempt: RequestAttempt) -> None:
+            raise RuntimeError("monitor down")
+
+        def request_failed(self, failure: RequestFailure) -> None:
+            raise RuntimeError("monitor down")
+
+    transport, _ = recording_transport([json_response(workflow_run_payload())])
+    client = AsyncGitHubClient(token=TOKEN, transport=transport, observer=BrokenObserver())
+
+    assert (await client.get_workflow_run("o", "r", 42)).data.id == 42
 
 
 # ---------------------------------------------------------------------------

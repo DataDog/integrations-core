@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 # Install NFS client
 apt update && apt install -y nfs-common
 

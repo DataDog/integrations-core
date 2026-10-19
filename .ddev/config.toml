@@ -1,3 +1,8 @@
+# Other files merged into this configuration, relative to `.ddev/`. Each top-level table lives in
+# exactly one file.
+#   dispatcher.toml: `ddev ci dispatch-tests` settings.
+imports = ["dispatcher.toml"]
+
 # Validations to run with `ddev validate all`.
 # Each entry must match a known validation name.
 # Remove an entry to skip that validation for this repo.
@@ -22,8 +27,13 @@ validations = [
     "readmes",
     "saved-views",
     "version",
-    "qa-label"
+    "qa-label",
+    "pr-description"
 ]
+
+# GitHub organization that owns this repository, used for GitHub API operations. Defaults to `DataDog`.
+[github]
+owner = "DataDog"
 
 [overrides.display-name]
 datadog_checks_base = "Datadog Checks Base"
@@ -49,6 +59,7 @@ control_m = "Control-M"
 nifi = "Apache NiFi"
 dell_powerflex = "Dell Powerflex"
 dynamo = "Dynamo"
+intersystems_iris = "InterSystems IRIS"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
@@ -61,6 +72,7 @@ nifi = "nifi."
 dell_powerflex = "dell_powerflex."
 hpe_aruba_edgeconnect = "hpe_aruba_edgeconnect."
 dynamo = "dynamo."
+intersystems_iris = "intersystems_iris."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -212,6 +224,9 @@ exclude = [
     'pysnmp',          # Breaking snmp tests
     'aerospike',       # v8+ breaks agent build.
     'confluent-kafka',
+    # Newer drivers query system.settings.readonly, which ClickHouse 18 lacks.
+    # Remove once https://datadoghq.atlassian.net/browse/DBMON-6930 is resolved.
+    'clickhouse-connect',
     # https://github.com/DataDog/integrations-core/pull/16080
     'lxml',
     'psutil',
@@ -263,7 +278,7 @@ __pycache__ = false
   "datadog-prefect",
 ]
 
-# Explicitely add the platforms supported by an integration for those where the manifest has been
+# Explicitly add the platforms supported by an integration for those where the manifest has been
 # removed.
 # This is a temporary fix while we implement a metadata.json file that we can add to each integration
 # that replaces the manifest.
@@ -280,4 +295,5 @@ nifi = ["linux", "windows", "mac_os"]
 dell_powerflex = ["linux", "windows", "mac_os"]
 hpe_aruba_edgeconnect = ["linux", "windows", "mac_os"]
 dynamo = ["linux", "windows", "mac_os"]
+intersystems_iris = ["linux", "windows", "mac_os"]
 

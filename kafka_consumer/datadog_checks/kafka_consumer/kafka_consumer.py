@@ -88,7 +88,7 @@ class KafkaCheck(AgentCheck):
         try:
             self.client.request_metadata_update()
         except Exception as e:
-            if self.config._cluster_monitoring_enabled:
+            if self.config._kafka_console_enabled:
                 try:
                     self._send_cluster_monitoring_connection_error(str(e))
                 except Exception:
@@ -114,13 +114,13 @@ class KafkaCheck(AgentCheck):
         persistent_cache_key = "broker_timestamps_"
         consumer_contexts_count = self.count_consumer_contexts(consumer_offsets)
         try:
-            # Cluster monitoring always requires highwater offsets (for topic.message_rate and other
+            # Kafka Console always requires highwater offsets (for topic.message_rate and other
             # cluster metadata metrics), so bypass the consumer context limit in that case.
-            if consumer_contexts_count < self._context_limit or self.config._cluster_monitoring_enabled:
+            if consumer_contexts_count < self._context_limit or self.config._kafka_console_enabled:
                 # Fetch highwater offsets
                 # Build partitions list or use all if configured
-                # If cluster monitoring is enabled, always fetch all broker highwater marks
-                if self.config._cluster_monitoring_enabled or self.config._monitor_all_broker_highwatermarks:
+                # If Kafka Console is enabled, always fetch all broker highwater marks
+                if self.config._kafka_console_enabled or self.config._monitor_all_broker_highwatermarks:
                     partitions = None
                 else:
                     partitions = set()
@@ -129,7 +129,7 @@ class KafkaCheck(AgentCheck):
                             partitions.add((topic, partition))
                 # Expected format: ({(topic, partition): offset}, cluster_id)
                 highwater_offsets, cluster_id = self.get_highwater_offsets(partitions)
-                if self.config._cluster_monitoring_enabled:
+                if self.config._kafka_console_enabled:
                     topic_partitions = self.client.get_topic_partitions()
                     low_watermark_offsets = self.metadata_collector.fetch_earliest_offsets(topic_partitions)
                 if self._data_streams_enabled:
@@ -157,10 +157,10 @@ class KafkaCheck(AgentCheck):
             consumer_offsets,
             highwater_offsets,
         )
-        # When cluster monitoring is enabled, all offsets and lag metrics are reported regardless
+        # When Kafka Console is enabled, all offsets and lag metrics are reported regardless
         # of context count so that the full cluster picture is always available.
-        reporting_limit = float('inf') if self.config._cluster_monitoring_enabled else self._context_limit
-        if total_contexts >= self._context_limit and not self.config._cluster_monitoring_enabled:
+        reporting_limit = float('inf') if self.config._kafka_console_enabled else self._context_limit
+        if total_contexts >= self._context_limit and not self.config._kafka_console_enabled:
             self.warning(
                 """Discovered %s metric contexts - this exceeds the maximum number of %s contexts permitted by the
                 check. Please narrow your target by specifying in your kafka_consumer.yaml the consumer groups, topics
@@ -184,7 +184,7 @@ class KafkaCheck(AgentCheck):
         )
 
         # Collect cluster metadata if enabled
-        if self.config._cluster_monitoring_enabled:
+        if self.config._kafka_console_enabled:
             connect_status = self._collect_connect_status(cluster_id)
             self._send_cluster_monitoring_heartbeat(total_contexts, cluster_id, connect_status)
 
@@ -289,10 +289,17 @@ class KafkaCheck(AgentCheck):
 
     def _get_consumer_groups(self):
         # Get all consumer groups to monitor
-        if self.config._monitor_unlisted_consumer_groups or self.config._consumer_groups_compiled_regex:
+        if self.config._monitor_unlisted_consumer_groups:
             return [grp for grp in self.client.list_consumer_groups() if grp]
-        else:
-            return self.config._consumer_groups
+
+        if self.config._consumer_groups_compiled_regex:
+            return [
+                grp
+                for grp in self.client.list_consumer_groups()
+                if grp and self.config._consumer_groups_compiled_group_regex.fullmatch(grp)
+            ]
+
+        return self.config._consumer_groups
 
     def _get_offsets_for_groups(self, consumer_groups):
         groups = []

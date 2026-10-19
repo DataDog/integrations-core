@@ -21,6 +21,10 @@ from .common import (
 
 USE_EDGECONNECT_LAB = os.environ.get('USE_EDGECONNECT_LAB')
 
+# The fake Orchestrator only accepts this backend, so the E2E login fails unless the check
+# actually sends `loginType`.
+ORCH_LOGIN_TYPE = 2
+
 
 HERE = get_here()
 HOST = get_docker_hostname()
@@ -74,6 +78,7 @@ def dd_environment(instance, dd_save_state):
             orch_ip,
             connect_timeout=2,
             appliance_ips={'exclude': [f'{EXCLUDED_APPLIANCE_IP}/32']},
+            orchestrator_login_type=ORCH_LOGIN_TYPE,
         )
 
         with docker_run(
@@ -85,6 +90,7 @@ def dd_environment(instance, dd_save_state):
                 'APPLIANCE_PORT': str(appliance_port),
                 'ORCH_USERNAME': 'admin',
                 'ORCH_PASSWORD': '',
+                'ORCH_LOGIN_TYPE': str(ORCH_LOGIN_TYPE),
                 'APPLIANCE_USERNAME': 'admin',
                 'APPLIANCE_PASSWORD': '',
             },

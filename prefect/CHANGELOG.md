@@ -2,13 +2,19 @@
 
 <!-- towncrier release notes start -->
 
-## 1.2.0 / 2026-09-02
+## 2.0.0 / 2026-10-01
+
+***Changed***:
+
+* Add support for standard HTTP configuration options (TLS, authentication, proxy, timeouts, headers) and remove the `custom_headers` option in favor of the standard `headers`/`extra_headers` options. ([#25259](https://github.com/DataDog/integrations-core/pull/25259))
+
+## 1.2.0 / 2026-09-02 / Agent 7.84.0
 
 ***Added***:
 
 * Add ``metrics_prefix`` to the ``discovery`` block of ``auto_conf.yaml``. ([#24861](https://github.com/DataDog/integrations-core/pull/24861))
 
-## 1.1.0 / 2026-08-05
+## 1.1.0 / 2026-08-05 / Agent 7.83.0
 
 ***Added***:
 

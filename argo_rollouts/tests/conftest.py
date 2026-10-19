@@ -6,10 +6,14 @@ import os
 import pytest
 
 from datadog_checks.dev import get_here
+from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.subprocess import run_command
 
 HERE = get_here()
+CHECK_ROOT = os.path.dirname(HERE)
+
+KUBECONFIG_STATE = 'argo_rollouts_kubeconfig'
 
 
 def setup_argo_rollouts():
@@ -30,6 +34,19 @@ def dd_environment():
             {'openmetrics_endpoint': 'http://argo-rollouts-metrics.argo-rollouts.svc.cluster.local:8090/metrics'}
         ]
 
-        metadata = {'agent_type': 'kubernetes', 'kubernetes': {'kubeconfig': kubeconfig}}
+        save_state(KUBECONFIG_STATE, kubeconfig)
+
+        metadata = {
+            'agent_type': 'kubernetes',
+            'kubernetes': {
+                'kubeconfig': kubeconfig,
+                'auto_conf': os.path.join(CHECK_ROOT, 'datadog_checks', 'argo_rollouts', 'data', 'auto_conf.yaml'),
+            },
+        }
 
         yield {'instances': instances}, metadata
+
+
+@pytest.fixture(scope='session')
+def argo_rollouts_kubeconfig():
+    return get_state(KUBECONFIG_STATE)
