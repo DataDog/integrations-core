@@ -23,7 +23,9 @@ class TestDatabaseCheck(DatabaseCheck):
         self._database_identifier = "test_database_identifier"
         self._dbms_version = "test_dbms_version"
         self._agent_version = "test_agent_version"
-        self._tags = ["test_tag"]
+        self.tag_manager.set_tags_from_list(
+            ["test_tag", "db:test_db", "dd.internal.resource:database_instance:test_hostname"]
+        )
         self._cloud_metadata = {"test_cloud_metadata": "test_cloud_metadata"}
 
     @property
@@ -43,12 +45,20 @@ class TestDatabaseCheck(DatabaseCheck):
         return self._agent_version
 
     @property
-    def tags(self):
-        return self._tags
-
-    @property
     def cloud_metadata(self):
         return self._cloud_metadata
+
+
+class TestCheckWithoutTagManager(TestDatabaseCheck):
+    __test__ = False
+
+    def __init__(self):
+        super().__init__()
+        self.tag_manager = None
+
+    @property
+    def tags(self):
+        return ["test_tag", "db:test_db"]
 
 
 class TestSchemaCollector(SchemaCollector):
@@ -174,10 +184,22 @@ def test_schema_collector(aggregator):
     assert event['agent_version'] == datadog_agent.get_version()
     assert event['collection_interval'] == collector._config.collection_interval
     assert event['dbms_version'] == check.dbms_version
-    assert event['tags'] == check.tags
+    # The payload describes the whole instance and is not a metric, so it carries neither the per-database tag nor
+    # internal resource tags.
+    assert event['tags'] == ['test_tag']
     assert event['cloud_metadata'] == check.cloud_metadata
     assert event['metadata'][0]['name'] == 'test_database'
     assert event['metadata'][0]['tables'][0]['table_name'] == 'test_table'
+
+
+@pytest.mark.unit
+def test_schema_collector_uses_check_tags_without_tag_manager(aggregator):
+    """Checks that keep their own tag list, rather than a `TagManager`, still send those tags."""
+    check = TestCheckWithoutTagManager()
+    TestSchemaCollector(check, SchemaCollectorConfig()).collect_schemas()
+
+    events = aggregator.get_event_platform_events("dbm-metadata")
+    assert events[0]['tags'] == check.tags
 
 
 @pytest.mark.unit

@@ -146,10 +146,18 @@ class SchemaCollector(ABC):
             "collection_interval": self._config.collection_interval,
             "dbms": self._check.dbms,
             "dbms_version": str(self._check.dbms_version),
-            "tags": self._check.tags,
+            "tags": self._event_tags(),
             "cloud_metadata": self._check.cloud_metadata,
             "collection_started_at": self._collection_started_at,
         }
+
+    def _event_tags(self) -> list[str]:
+        # The payload describes the whole instance, so it leaves out the per-database `db` tag. It is not a metric,
+        # so internal resource tags would not be enriched by metrics intake.
+        tag_manager = getattr(self._check, "tag_manager", None)
+        if tag_manager is None:
+            return self._check.tags
+        return tag_manager.get_tags(include_internal=False, include_db=False)
 
     def maybe_flush(self, is_last_payload):
         if is_last_payload or len(self._queued_rows) >= self._config.payload_chunk_size:

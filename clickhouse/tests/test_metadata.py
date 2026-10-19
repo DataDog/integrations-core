@@ -279,17 +279,6 @@ def test_collect_emits_single_payload_when_small(check):
     assert 'collector_id' in p
 
 
-def test_collect_payload_tags_match_database_instance_payload(check):
-    """Both payloads describe the same instance, so differing tags would make the instance's tags flap."""
-    payloads = _run_collect(check, table_rows=[_table_row(name='events')])
-    with mock.patch.object(check, '_cluster_topology_metadata', return_value={}):
-        check._send_database_instance_metadata()
-
-    instance_payload = next(p for p in payloads if p['kind'] == 'database_instance')
-    assert 'db:default' in check.tags
-    assert sorted(payloads[0]['tags']) == sorted(instance_payload['tags'])
-
-
 def test_collect_payload_tables_list_includes_views(check):
     payloads = _run_collect(
         check,

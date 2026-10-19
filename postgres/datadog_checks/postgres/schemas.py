@@ -204,13 +204,6 @@ class PostgresSchemaCollector(SchemaCollector):
     def kind(self):
         return "pg_databases"
 
-    @property
-    def base_event(self):
-        event = super().base_event
-        # Schemas describe the whole instance, so they carry the same tags as the `database_instance` payload.
-        event["tags"] = self._check.tag_manager.get_tags(include_internal=False, include_db=False)
-        return event
-
     def _get_databases(self):
         query = DATABASE_INFORMATION_QUERY
         params: list[str] = []

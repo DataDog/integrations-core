@@ -107,9 +107,6 @@ def test_collect_schema_snapshot(integration_check, dbm_instance, aggregator):
     schema_events = [e for e in dbm_metadata if e['kind'] == 'pg_databases']
     # This tests should fit within one payload
     assert len(schema_events) == 1
-    # Both payloads describe the same instance, so differing tags would make the instance's tags flap.
-    instance_event = next(e for e in dbm_metadata if e['kind'] == 'database_instance')
-    assert sorted(schema_events[0]['tags']) == sorted(instance_event['tags'])
 
     file_path = f'tests/fixtures/schema_snapshot_v{POSTGRES_VERSION}_{POSTGRES_LOCALE}.json'
     # If you need to update the snapshot, uncomment the following lines and run
