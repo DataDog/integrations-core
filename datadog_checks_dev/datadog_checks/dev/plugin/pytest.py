@@ -537,7 +537,9 @@ def mock_http(mocker):
 
 def _opted_in_mock_handler(client: Any, fixture: str) -> Callable[..., Any]:
     # Returns the client directly rather than through create_http_client, which some suites patch again.
-    def get_http_handler(check: Any, *_args: Any, **_kwargs: Any) -> Any:
+    def get_http_handler(owner: Any, *_args: Any, **_kwargs: Any) -> Any:
+        # The mixin also runs on PrometheusScraper, which is not a check and defers to the one it wraps.
+        check = owner if hasattr(owner, 'AGNOSTIC_HTTP_CLIENT') else owner.check
         _require_agnostic_http_client(check, fixture)
         return client
 
