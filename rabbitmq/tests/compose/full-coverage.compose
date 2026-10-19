@@ -10,7 +10,7 @@
 #
 # Services:
 #   - rabbitmq-broker  the broker (both endpoints).
-#   - seed       one-shot: vhosts, static queues/exchanges/bindings, cluster name.
+#   - seed       one-shot: static queues/exchanges/bindings on the default vhost.
 #   - load       continuous AMQP workload (perf-test): drives channels,
 #                connections, publish/deliver/ack counters, and queue depth.
 #   - activity-gen  periodic queue declare/delete churn for the
