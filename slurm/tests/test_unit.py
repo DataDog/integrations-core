@@ -394,7 +394,7 @@ def test_metadata(mock_get_subprocess_out, collect_sinfo_stats, instance, datado
     mock_sinfo_output = mock_output('sinfo_version.txt')
 
     # Only the metadata call matters here; fail every metric collection command.
-    def subprocess_output(cmd):
+    def subprocess_output(cmd: list[str]) -> tuple[str, str, int]:
         if cmd[-1] == '--version':
             return mock_sinfo_output, "", 0
         return "", "", 1
