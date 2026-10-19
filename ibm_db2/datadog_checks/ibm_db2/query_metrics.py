@@ -30,7 +30,6 @@ if TYPE_CHECKING:
     from .config_models import InstanceConfig
     from .ibm_db2 import IbmDb2Check
 
-COLLECTION_INTERVAL = 10
 # Provisional limit; validate against larger workloads. Db2 sizes its package cache in memory, not entry counts.
 TEXT_CACHE_SIZE = 10_000
 TEXT_FETCH_BATCH_SIZE = 500
@@ -85,7 +84,8 @@ class QueryMetricsCollector(DBMAsyncJob):
             config_host=config.host,
             expected_db_exceptions=(Db2ConnectionError,),
             min_collection_interval=config.min_collection_interval,
-            rate_limit=1 / COLLECTION_INTERVAL,
+            enabled=config.query_metrics.enabled,
+            rate_limit=1 / config.query_metrics.collection_interval,
             dbms=check.dbms,
             job_name='query-metrics',
         )
@@ -104,7 +104,11 @@ class QueryMetricsCollector(DBMAsyncJob):
 
     def run_job(self) -> None:
         connection = self._connection.ensure_connected()
-        cursor = ibm_db.prepare(connection, STATEMENT_COUNTERS_QUERY, {ibm_db.SQL_ATTR_QUERY_TIMEOUT: 10})
+        cursor = ibm_db.prepare(
+            connection,
+            STATEMENT_COUNTERS_QUERY,
+            {ibm_db.SQL_ATTR_QUERY_TIMEOUT: self._config.query_metrics.query_timeout},
+        )
         try:
             ibm_db.execute(cursor)
             snapshot = []
@@ -156,7 +160,7 @@ class QueryMetricsCollector(DBMAsyncJob):
                 'host': self._check.reported_hostname,
                 'database_instance': self._check.database_identifier,
                 'timestamp': time() * 1000,
-                'min_collection_interval': COLLECTION_INTERVAL,
+                'min_collection_interval': self._config.query_metrics.collection_interval,
                 'tags': self._check.tag_manager.get_tags(include_internal=False),
                 'ddagentversion': self._check.agent_version,
                 'ibm_db2_version': self._check.dbms_version,
@@ -199,7 +203,9 @@ class QueryMetricsCollector(DBMAsyncJob):
             for member, executable_id, inserted in batch:
                 # Match REQUESTED's column order, converting our hex ID back to Db2's binary ID.
                 params.extend((unhexlify(executable_id), member, inserted))
-            cursor = ibm_db.prepare(self._connection.conn, query, {ibm_db.SQL_ATTR_QUERY_TIMEOUT: 10})
+            cursor = ibm_db.prepare(
+                self._connection.conn, query, {ibm_db.SQL_ATTR_QUERY_TIMEOUT: self._config.query_metrics.query_timeout}
+            )
             try:
                 ibm_db.execute(cursor, tuple(params))
                 while (row := ibm_db.fetch_assoc(cursor)) is not False:
