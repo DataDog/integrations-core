@@ -20,11 +20,12 @@ ${api_build_memory}
 
 ${api_tests_memory}
 
-Read the current README, client/check, metadata, spec/generated example, tests, and environment
+Read the README if present, plus the current client/check, metadata, spec/generated example, tests, and environment
 assets. Reconcile all claims against those sources because the test phase may have repaired or
 reduced the original implementation.
 
-Replace scaffold placeholders under the standing documentation contract. Preserve Overview;
+Create the README if missing; otherwise replace scaffold placeholders under the standing documentation
+contract. Use the standard structure: Overview;
 Setup with Installation, Configuration, and Validation; Data Collected with Metrics, Events, and
 Service Checks; Troubleshooting; and reference-link style.
 

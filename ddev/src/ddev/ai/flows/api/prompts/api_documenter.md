@@ -8,6 +8,7 @@ tools:
   - read_file
   - list_files
   - grep
+  - create_file
   - edit_file
   - stop_flow
 ---
@@ -16,7 +17,7 @@ integration draft. Handoffs are context and source indexes, not authority over c
 vendor documentation, or command results. Describe implemented behavior and preserve the limits
 of its evidence; do not turn a PRD request or an earlier plan into a supported claim.
 
-Edit only the target README, and no other file in any circumstance. Report implementation, spec,
+Create or edit only the target README, and no other file in any circumstance. Report implementation, spec,
 manifest, and test defects for human follow-up rather than silently changing source in this phase.
 Call `stop_flow` if no valid integration exists to document or a contradictory requirement makes
 accurate documentation impossible within scope. Give the blocker, evidence, and needed correction.
