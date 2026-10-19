@@ -1,14 +1,76 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from datetime import datetime
+
 import mock
 import pytest
 
+from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.ibm_db2 import IbmDb2Check
 from datadog_checks.ibm_db2.connection import Db2ConnectionError, get_connection_data
 from datadog_checks.ibm_db2.utils import scrub_connection_string
 
 pytestmark = pytest.mark.unit
+
+
+def test_query_metrics_recover_after_text_lookup_failure(instance: dict, aggregator: AggregatorStub):
+    instance['dbm'] = True
+    collector = IbmDb2Check('ibm_db2', {}, [instance])._query_metrics
+    inserted = datetime(2026, 1, 1)
+    counters = ('count', 'time', 'cpu_time', 'rows_read', 'rows_returned')
+
+    def snapshot(cached_count: int, uncached_count: int) -> list[dict | bool]:
+        return [
+            {
+                'member': 0,
+                'executable_id': executable_id,
+                'insert_timestamp': inserted,
+                **dict.fromkeys(counters, count),
+            }
+            for executable_id, count in ((b'\x01', cached_count), (b'\x02', uncached_count))
+        ] + [False]
+
+    with (
+        mock.patch.object(collector._connection, 'ensure_connected'),
+        mock.patch('ibm_db.prepare'),
+        mock.patch('ibm_db.execute'),
+        mock.patch('ibm_db.free_stmt'),
+        mock.patch(
+            'ibm_db.fetch_assoc',
+            side_effect=snapshot(10, 10) + snapshot(12, 10) + snapshot(15, 15) + snapshot(18, 18),
+        ),
+        mock.patch.object(
+            collector,
+            '_fetch_statement_texts',
+            side_effect=[
+                {(0, '01', inserted): 'SELECT A FROM T'},
+                Db2ConnectionError('text lookup failed'),
+                {(0, '02', inserted): 'SELECT B FROM T'},
+            ],
+        ),
+    ):
+        collector.run_job()
+        collector.run_job()
+        assert len(aggregator.get_event_platform_events('dbm-metrics')) == 1
+
+        with pytest.raises(Db2ConnectionError, match='text lookup failed'):
+            collector.run_job()
+        assert len(aggregator.get_event_platform_events('dbm-metrics')) == 1
+
+        collector.run_job()
+
+    payloads = aggregator.get_event_platform_events('dbm-metrics')
+    assert len(payloads) == 2
+    rows = {row['query']: row for row in payloads[-1]['ibm_db2_rows']}
+    assert set(rows) == {'SELECT A FROM T', 'SELECT B FROM T'}
+    for query, expected in (('SELECT A FROM T', 6), ('SELECT B FROM T', 8)):
+        row = rows[query]
+        assert row['count'] == expected
+        assert row['time'] == expected * 1_000_000
+        assert row['cpu_time'] == expected * 1_000
+        assert row['rows_read'] == expected
+        assert row['rows_returned'] == expected
 
 
 class TestPasswordScrubber:
