@@ -18,6 +18,7 @@ except ImportError:
 
 
 class Vault(OpenMetricsBaseCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
     CHECK_NAME = 'vault'
     EVENT_LEADER_CHANGE = 'vault.leader_change'

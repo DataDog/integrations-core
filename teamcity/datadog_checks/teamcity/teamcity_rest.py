@@ -29,6 +29,7 @@ from .metrics import build_metric
 
 
 class TeamCityRest(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'teamcity'
 
     HTTP_CONFIG_REMAPPER = {

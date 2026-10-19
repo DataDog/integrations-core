@@ -13,6 +13,7 @@ TO_SNAKE_CASE_PATTERN = re.compile('(?!^)([A-Z]+)')
 
 
 class ImpalaCheck(OpenMetricsBaseCheckV2, ConfigMixin):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'impala'
 
     DEFAULT_METRIC_LIMIT = 0

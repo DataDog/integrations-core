@@ -13,6 +13,7 @@ from datadog_checks.control_m.metrics import UP_STATES, JobCollector
 
 
 class ControlMCheck(AgentCheck, ConfigMixin):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = "control_m"
 
     def __init__(self, name: str, init_config: dict[str, Any], instances: list[dict[str, Any]]) -> None:

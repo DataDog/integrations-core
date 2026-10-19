@@ -15,6 +15,8 @@ class KubeDNSCheck(OpenMetricsBaseCheck):
     Collect kube-dns metrics from Prometheus
     """
 
+    AGNOSTIC_HTTP_CLIENT = True
+
     DEFAULT_METRIC_LIMIT = 0
 
     # Set up metric_transformers

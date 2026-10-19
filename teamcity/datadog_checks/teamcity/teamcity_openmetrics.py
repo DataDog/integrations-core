@@ -10,6 +10,7 @@ from .metrics import METRIC_MAP
 
 
 class TeamCityOpenMetrics(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'teamcity'
     DEFAULT_METRIC_LIMIT = 0
 

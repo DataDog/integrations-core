@@ -16,6 +16,7 @@ STATUS_NUMBER_TO_VALUE = {0: "SUCCESS", 1: "WARNING", 2: "ERROR"}
 
 
 class SonatypeNexusCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = "sonatype_nexus"
 
     def __init__(self, name, init_config, instances):

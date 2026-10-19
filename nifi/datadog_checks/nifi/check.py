@@ -25,6 +25,7 @@ from .constants import (
 
 
 class NifiCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'nifi'
 
     def __init__(self, name, init_config, instances):

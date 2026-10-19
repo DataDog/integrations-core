@@ -19,6 +19,7 @@ NEW_1_24_COUNTERS = {
 
 
 class KubeControllerManagerCheck(KubeLeaderElectionMixin, SliMetricsScraperMixin, OpenMetricsBaseCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
     DEFAULT_IGNORE_DEPRECATED = False
 

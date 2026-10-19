@@ -53,6 +53,7 @@ def malloc_trim():
 
 
 class KafkaCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'kafka'
 
     def __init__(self, name, init_config, instances):

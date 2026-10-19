@@ -55,6 +55,7 @@ def resource_type_for_event_type(event_type):
 
 
 class ProxmoxCheck(AgentCheck, ConfigMixin):
+    AGNOSTIC_HTTP_CLIENT = True
     HA_SUPPORTED = True
     __NAMESPACE__ = 'proxmox'
 

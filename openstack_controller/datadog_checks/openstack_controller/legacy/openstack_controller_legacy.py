@@ -107,6 +107,7 @@ def get_http_status_code(exc: object) -> int | None:
 
 
 class OpenStackControllerLegacyCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     HYPERVISOR_STATE_UP = 'up'
     HYPERVISOR_STATE_DOWN = 'down'
     NETWORK_STATE_UP = 'UP'

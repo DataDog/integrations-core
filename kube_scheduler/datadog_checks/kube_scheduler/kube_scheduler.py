@@ -141,6 +141,7 @@ IGNORE_METRICS = [
 
 
 class KubeSchedulerCheck(KubeLeaderElectionMixin, SliMetricsScraperMixin, OpenMetricsBaseCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
 
     KUBE_SCHEDULER_NAMESPACE = "kube_scheduler"

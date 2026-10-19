@@ -20,6 +20,7 @@ from datadog_checks.base.utils.http_exceptions import (
 
 
 class HDFSNameNode(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     HTTP_CONFIG_REMAPPER = {'disable_ssl_validation': {'name': 'tls_verify', 'default': False, 'invert': True}}
 
     # Service check names

@@ -12,6 +12,8 @@ from datadog_checks.base.utils.http_exceptions import (
 
 
 class DruidCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
+
     def check(self, _):
         custom_tags = self.instance.get('tags', [])
 

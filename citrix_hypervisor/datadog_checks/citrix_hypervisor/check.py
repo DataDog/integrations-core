@@ -30,6 +30,7 @@ def _safely_process_metrics_response(data: HTTPResponse) -> dict[str, dict]:
 
 
 class CitrixHypervisorCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'citrix_hypervisor'
     SERVICE_CHECK_CONNECT = 'can_connect'
 

@@ -15,6 +15,8 @@ CONFIGURATION_OPTIONS = (
 
 
 class TorchserveCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
+
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 

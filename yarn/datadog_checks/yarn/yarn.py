@@ -178,6 +178,8 @@ class YarnCheck(AgentCheck):
     Extract statistics from YARN's ResourceManger REST API
     """
 
+    AGNOSTIC_HTTP_CLIENT = True
+
     HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}}
 
     _ALLOWED_APPLICATION_TAGS = ['applicationTags', 'applicationType', 'name', 'queue', 'user']

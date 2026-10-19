@@ -13,6 +13,7 @@ from datadog_checks.base.utils.http_exceptions import (
 
 
 class Marathon(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_TIMEOUT = 5
     SERVICE_CHECK_NAME = 'marathon.can_connect'
     ACS_TOKEN = None

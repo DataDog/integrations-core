@@ -26,6 +26,7 @@ from .utils import is_resource_included
 
 
 class MarklogicCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'marklogic'
     SERVICE_CHECK_CONNECT = 'can_connect'
 

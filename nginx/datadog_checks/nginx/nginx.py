@@ -38,6 +38,8 @@ class Nginx(AgentCheck):
 
     """
 
+    AGNOSTIC_HTTP_CLIENT = True
+
     HTTP_CONFIG_REMAPPER = {'ssl_validation': {'name': 'tls_verify'}, 'user': {'name': 'username'}}
 
     def __init__(self, name, init_config, instances):

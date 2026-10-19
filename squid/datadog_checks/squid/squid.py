@@ -87,6 +87,7 @@ SQUID_VERSION_PATTERN = re.compile(
 
 
 class SquidCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     HTTP_CONFIG_REMAPPER = {'cachemgr_username': {'name': 'username'}, 'cachemgr_password': {'name': 'password'}}
 
     def check(self, instance):

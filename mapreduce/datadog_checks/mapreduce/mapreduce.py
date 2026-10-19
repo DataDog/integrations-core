@@ -25,6 +25,7 @@ from datadog_checks.mapreduce.metrics import (
 
 
 class MapReduceCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}}
 
     # Default Settings

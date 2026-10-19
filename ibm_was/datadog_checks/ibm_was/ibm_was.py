@@ -16,6 +16,7 @@ from . import metrics, validation
 
 
 class IbmWasCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     SERVICE_CHECK_CONNECT = "ibm_was.can_connect"
     METRIC_PREFIX = 'ibm_was'
 

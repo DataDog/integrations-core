@@ -17,6 +17,8 @@ class KyotoTycoonCheck(AgentCheck):
     database server (http://fallabs.com/kyototycoon/)
     """
 
+    AGNOSTIC_HTTP_CLIENT = True
+
     SOURCE_TYPE_NAME = 'kyoto tycoon'
     SERVICE_CHECK_NAME = 'kyototycoon.can_connect'
 

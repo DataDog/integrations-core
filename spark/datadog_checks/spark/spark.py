@@ -58,6 +58,7 @@ from .constants import (
 
 
 class SparkCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     HTTP_CONFIG_REMAPPER = {
         'ssl_verify': {'name': 'tls_verify'},
         'ssl_cert': {'name': 'tls_cert'},

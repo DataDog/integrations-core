@@ -41,6 +41,8 @@ class Couchbase(AgentCheck):
     http://docs.couchbase.com/couchbase-manual-2.0/#using-the-rest-api
     """
 
+    AGNOSTIC_HTTP_CLIENT = True
+
     HTTP_CONFIG_REMAPPER = {'user': {'name': 'username'}, 'ssl_verify': {'name': 'tls_verify'}}
 
     def __init__(self, name, init_config, instances):

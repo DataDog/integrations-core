@@ -17,6 +17,8 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
     Collect Gitlab Runner metrics from Prometheus and validates that the connectivity with Gitlab
     """
 
+    AGNOSTIC_HTTP_CLIENT = True
+
     EVENT_TYPE = SOURCE_TYPE_NAME = 'gitlab_runner'
     MASTER_SERVICE_CHECK_NAME = 'gitlab_runner.can_connect'
     PROMETHEUS_SERVICE_CHECK_NAME = 'gitlab_runner.prometheus_endpoint_up'

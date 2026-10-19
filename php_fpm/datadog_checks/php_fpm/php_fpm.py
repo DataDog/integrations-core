@@ -46,6 +46,8 @@ class PHPFPMCheck(AgentCheck):
     See http://www.php.net/manual/de/install.fpm.configuration.php#pm.status-path for more details
     """
 
+    AGNOSTIC_HTTP_CLIENT = True
+
     SERVICE_CHECK_NAME = 'php_fpm.can_ping'
     STATUS_DURATION_NAME = 'php_fpm.status.duration'
 

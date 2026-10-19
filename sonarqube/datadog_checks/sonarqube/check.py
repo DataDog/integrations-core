@@ -11,6 +11,7 @@ from .constants import CATEGORIES, MAX_PAGES, NUMERIC_TYPES
 
 
 class SonarqubeCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'sonarqube'
     SERVICE_CHECK_CONNECT = 'api_access'
     _DEFAULT_COMPONENTS_DISCOVERY_LIMIT = 10

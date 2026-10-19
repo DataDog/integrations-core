@@ -25,6 +25,7 @@ from .utils import get_version, scrub_connection_string, status_to_service_check
 
 
 class IbmDb2Check(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     METRIC_PREFIX = 'ibm_db2'
     SERVICE_CHECK_CONNECT = '{}.can_connect'.format(METRIC_PREFIX)
     SERVICE_CHECK_STATUS = '{}.status'.format(METRIC_PREFIX)

@@ -90,6 +90,7 @@ EPHEMERAL_STORAGE_GAUGE_METRICS = {
 
 
 class FargateCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     HTTP_CONFIG_REMAPPER = {'timeout': {'name': 'timeout', 'default': DEFAULT_TIMEOUT}}
 
     def __init__(self, name, init_config, instances):

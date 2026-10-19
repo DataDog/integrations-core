@@ -11,6 +11,7 @@ from .metrics import METRIC_MAP
 
 
 class ArangodbCheck(OpenMetricsBaseCheckV2, ConfigMixin):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'arangodb'
 
     DEFAULT_METRIC_LIMIT = 0

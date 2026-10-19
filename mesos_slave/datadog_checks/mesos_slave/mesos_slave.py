@@ -16,6 +16,7 @@ DEFAULT_MASTER_PORT = 5050
 
 
 class MesosSlave(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     GAUGE = AgentCheck.gauge
     MONOTONIC_COUNT = AgentCheck.monotonic_count
     SERVICE_CHECK_NAME = "mesos_slave.can_connect"

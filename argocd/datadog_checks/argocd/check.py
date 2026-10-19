@@ -35,6 +35,7 @@ from .resources import ArgocdResourceCollector
 
 
 class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):

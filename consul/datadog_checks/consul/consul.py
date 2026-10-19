@@ -50,6 +50,7 @@ NodeStatus = namedtuple('NodeStatus', ['node_id', 'service_name', 'service_tags_
 
 
 class ConsulCheck(OpenMetricsBaseCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):

@@ -18,6 +18,8 @@ AIRFLOW_STABLE_STATUS_OK = "healthy"
 
 
 class AirflowCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
+
     def __init__(self, name, init_config, instances):
         super(AirflowCheck, self).__init__(name, init_config, instances)
 

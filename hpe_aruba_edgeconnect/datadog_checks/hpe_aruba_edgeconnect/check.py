@@ -37,6 +37,7 @@ from .utils import parse_speed
 
 
 class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'hpe_aruba_edgeconnect'
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:

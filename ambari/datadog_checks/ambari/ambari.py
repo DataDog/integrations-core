@@ -27,6 +27,8 @@ METRICS_FIELD = "metrics"
 
 
 class AmbariCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
+
     def __init__(self, name, init_config, instances):
         super(AmbariCheck, self).__init__(name, init_config, instances)
 

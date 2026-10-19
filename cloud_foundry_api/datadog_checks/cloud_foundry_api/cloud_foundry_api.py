@@ -30,6 +30,7 @@ from .utils import date_to_ts, get_next_url, join_url
 
 
 class CloudFoundryApiCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = "cloud_foundry_api"
 
     def __init__(self, name, init_config, instances):

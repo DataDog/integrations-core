@@ -24,6 +24,8 @@ MAX_ELEMENTS = 300
 
 
 class ActiveMQXML(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
+
     def check(self, _):
         url = self.instance.get("url")
         custom_tags = self.instance.get('tags', [])

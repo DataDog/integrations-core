@@ -16,6 +16,7 @@ DEFAULT_READY_PATH = '/healthz/readiness'
 
 
 class N8nCheck(OpenMetricsBaseCheckV2, ConfigMixin):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'n8n'
     DEFAULT_METRIC_LIMIT = 0
 

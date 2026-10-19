@@ -49,6 +49,7 @@ EVENT_TO_ALERT_TYPE = {
 
 
 class OctopusDeployCheck(AgentCheck, ConfigMixin):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'octopus_deploy'
 
     def __init__(self, name, init_config, instances):

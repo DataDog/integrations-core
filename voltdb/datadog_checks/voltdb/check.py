@@ -13,6 +13,7 @@ from .types import Instance
 
 
 class VoltDBCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'voltdb'
 
     def __init__(self, name, init_config, instances):

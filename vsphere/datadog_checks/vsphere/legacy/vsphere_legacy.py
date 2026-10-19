@@ -93,6 +93,8 @@ class VSphereLegacyCheck(AgentCheck):
     The other calls are performed synchronously.
     """
 
+    AGNOSTIC_HTTP_CLIENT = True
+
     SERVICE_CHECK_NAME = 'vcenter.can_connect'
     pool = None
 

@@ -13,6 +13,7 @@ from .metrics import METRIC_MAP, ROUTE_METRICS_TO_TRANSFORM, construct_metrics_c
 
 
 class VaultCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'vault'
 
     DEFAULT_METRIC_LIMIT = 0

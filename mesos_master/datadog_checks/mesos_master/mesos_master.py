@@ -15,6 +15,7 @@ from datadog_checks.base.utils.http_exceptions import HTTPClientTimeoutError
 
 
 class MesosMaster(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     GAUGE = AgentCheck.gauge
     MONOTONIC_COUNT = AgentCheck.monotonic_count
     SERVICE_CHECK_NAME = "mesos_master.can_connect"

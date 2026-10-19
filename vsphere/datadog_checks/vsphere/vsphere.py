@@ -73,6 +73,7 @@ SERVICE_CHECK_NAME = 'can_connect'
 
 
 class VSphereCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'vsphere'
     HA_SUPPORTED = True
 

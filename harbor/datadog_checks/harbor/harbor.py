@@ -14,6 +14,8 @@ STATUS = 'harbor.status'
 
 
 class HarborCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
+
     def _check_health(self, api, base_tags):
         """Submits service checks for Harbor individual components."""
         health = api.health()

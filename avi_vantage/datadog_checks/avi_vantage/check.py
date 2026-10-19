@@ -36,6 +36,7 @@ class AviVantageScraper(OpenMetricsScraper):
 
 
 class AviVantageCheck(OpenMetricsBaseCheckV2, ConfigMixin):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = "avi_vantage"
 
     DEFAULT_METRIC_LIMIT = 0

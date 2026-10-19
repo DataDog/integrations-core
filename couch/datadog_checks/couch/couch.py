@@ -15,6 +15,7 @@ from datadog_checks.couch import errors
 
 
 class CouchDb(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     HTTP_CONFIG_REMAPPER = {'user': {'name': 'username'}}
     TIMEOUT = 5
     SERVICE_CHECK_NAME = 'couchdb.can_connect'
