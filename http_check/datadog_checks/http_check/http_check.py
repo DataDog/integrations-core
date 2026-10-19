@@ -47,6 +47,7 @@ def get_error_http_outcome(error):
 
 
 class HTTPCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     SOURCE_TYPE_NAME = "system"
     SC_STATUS = "http.can_connect"
     SC_SSL_CERT = "http.ssl_cert"

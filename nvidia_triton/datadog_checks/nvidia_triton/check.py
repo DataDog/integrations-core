@@ -13,6 +13,8 @@ DEFAULT_HEALTH_ENDPOINT = DEFAULT_METADATA_ENDPOINT + '/health/ready'
 
 class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
     # This will be the prefix of every metric and service check the integration sends
+    AGNOSTIC_HTTP_CLIENT = True
+
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'nvidia_triton'
 
