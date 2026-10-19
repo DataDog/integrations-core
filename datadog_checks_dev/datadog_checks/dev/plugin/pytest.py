@@ -469,6 +469,7 @@ def mock_http(mocker):
     """Autospec HTTPClient for remainder migrations not yet on fake_http_response."""
     from datadog_checks.base.checks.base import AgentCheck
     from datadog_checks.base.utils.headers import set_header
+    from datadog_checks.base.utils.http import STANDARD_FIELDS
     from datadog_checks.base.utils.http_protocol import HTTPClient
 
     client = create_autospec(HTTPClient)
@@ -488,11 +489,13 @@ def mock_http(mocker):
         'verify': True,
         'allow_redirects': True,
     }
-    # Empty, matching a client built with no tls_ configuration. A test that needs it populates it.
-    client.tls_config = {}
+    # The defaults a client built with no tls_ configuration carries. A test that needs others sets them.
+    client.tls_config = {key: value for key, value in STANDARD_FIELDS.items() if key.startswith('tls_')}
     client.trust_env = True
     client.ignore_tls_warning = False
     client.persist_connections = False
+    # Not on the protocol, but the OpenMetrics scrapers set and read it on the clients they create.
+    client.max_line_size = None
 
     def _get_header(name, default=None):
         found = default
@@ -532,6 +535,15 @@ def mock_http(mocker):
     return client
 
 
+def _opted_in_mock_handler(client: Any, fixture: str) -> Callable[..., Any]:
+    # Returns the client directly rather than through create_http_client, which some suites patch again.
+    def get_http_handler(check: Any, *_args: Any, **_kwargs: Any) -> Any:
+        _require_agnostic_http_client(check, fixture)
+        return client
+
+    return get_http_handler
+
+
 @pytest.fixture
 def mock_openmetrics_http(mock_http, mocker):
     """OpenMetrics HTTP mock with dual interception:
@@ -543,7 +555,7 @@ def mock_openmetrics_http(mock_http, mocker):
     mocker.patch(
         'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
         autospec=True,
-        side_effect=lambda check, *_args, **_kwargs: check.create_http_client(),
+        side_effect=_opted_in_mock_handler(mock_http, 'mock_openmetrics_http'),
     )
     return mock_http
 
@@ -554,7 +566,7 @@ def mock_prometheus_http(mock_http, mocker):
     mocker.patch(
         'datadog_checks.base.checks.prometheus.mixins.PrometheusScraperMixin.get_http_handler',
         autospec=True,
-        side_effect=lambda check, *_args, **_kwargs: check.create_http_client(),
+        side_effect=_opted_in_mock_handler(mock_http, 'mock_prometheus_http'),
     )
     return mock_http
 
