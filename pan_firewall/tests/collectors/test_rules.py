@@ -3,8 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from unittest import mock
 
+import pytest
+
 from datadog_checks.pan_firewall.collectors.base import FirewallState
 from datadog_checks.pan_firewall.collectors.rules import collect_rule_hits, parse_rule_hits, rule_hit_cmd
+from datadog_checks.pan_firewall.errors import PanosApiError
 
 from ..helpers import load_op, make_ctx, series
 
@@ -72,3 +75,26 @@ def test_collector_makes_one_call_per_vsys_and_tags_the_samples_with_it():
 
     assert [c.args[0] for c in ctx.client.op.call_args_list] == [rule_hit_cmd('vsys1'), rule_hit_cmd('vsys2')]
     assert series(samples) == {**expected(), **expected(vsys='vsys2')}
+
+
+def _raise(error):
+    raise error
+
+
+def test_a_refused_vsys_does_not_drop_the_others():
+    ctx = make_ctx(state=FirewallState(vsys=['vsys1', 'vsys2']), config=mock.Mock(security_rule_filter=None))
+    good = load()
+    ctx.client.op.side_effect = lambda cmd: good if cmd == rule_hit_cmd('vsys1') else _raise(PanosApiError('7', 'no'))
+
+    samples = collect_rule_hits(ctx)
+
+    assert series(samples) == expected()
+    ctx.log.warning.assert_called_once()
+
+
+def test_every_vsys_refused_fails_the_collector():
+    ctx = make_ctx(state=FirewallState(vsys=['vsys1', 'vsys2']), config=mock.Mock(security_rule_filter=None))
+    ctx.client.op.side_effect = PanosApiError('7', 'no')
+
+    with pytest.raises(PanosApiError):
+        collect_rule_hits(ctx)
