@@ -18,6 +18,7 @@ from ddev.ai.tools.fs.file_access_policy import FileAccessPolicy
 from ddev.ai.tools.http.base import HttpRequestInput, HttpRequestTool
 from ddev.ai.tools.http.response_format import BufferedResponse
 from tests.ai.config.utils import make_agent_config
+from tests.ai.tools.http.helpers import parse_result
 
 
 def make_resources(tmp_path: Path, run_root: Path) -> RunResources:
@@ -59,7 +60,6 @@ async def test_http_artifacts_are_shared_across_agent_runtimes_and_preserved_on_
             received_bytes=len(body),
             body=body,
             charset="utf-8",
-            complete=True,
             fetched_at=datetime.now(UTC),
         )
 
@@ -69,16 +69,14 @@ async def test_http_artifacts_are_shared_across_agent_runtimes_and_preserved_on_
     get_runtime = build_runtime(first_launch, "design", ["http_get"])
     post_runtime = build_runtime(first_launch, "build", ["http_post", "read_file"])
 
-    get_result = await get_runtime.tool_registry.run(
-        "http_get", {"url": "http://localhost:4200/api/openapi.json", "save_response": True}
-    )
+    get_result = await get_runtime.tool_registry.run("http_get", {"url": "http://localhost:4200/api/openapi.json"})
     post_result = await post_runtime.tool_registry.run(
-        "http_post", {"url": "http://localhost:4200/api/task_runs/filter", "json": {}, "save_response": True}
+        "http_post", {"url": "http://localhost:4200/api/task_runs/filter", "json": {}}
     )
 
     assert get_result.success and post_result.success
-    get_path = Path(json.loads(get_result.data)["saved_to"])
-    post_path = Path(json.loads(post_result.data)["saved_to"])
+    get_path = Path(parse_result(get_result.data)[0]["saved_to"])
+    post_path = Path(parse_result(post_result.data)[0]["saved_to"])
     assert get_path.parent == post_path.parent
     assert get_path.parent.parent == run_root / HTTP_RESPONSES_DIR_NAME
     assert get_path != post_path
@@ -88,11 +86,9 @@ async def test_http_artifacts_are_shared_across_agent_runtimes_and_preserved_on_
 
     resumed = make_resources(tmp_path, run_root)
     resumed_runtime = build_runtime(resumed, "review", ["http_get"])
-    resumed_result = await resumed_runtime.tool_registry.run(
-        "http_get", {"url": "http://localhost:4200/api/health", "save_response": True}
-    )
+    resumed_result = await resumed_runtime.tool_registry.run("http_get", {"url": "http://localhost:4200/api/health"})
 
     assert resumed_result.success
-    resumed_path = Path(json.loads(resumed_result.data)["saved_to"])
+    resumed_path = Path(parse_result(resumed_result.data)[0]["saved_to"])
     assert resumed_path.parent != get_path.parent
     assert get_path.exists() and post_path.exists() and resumed_path.exists()
