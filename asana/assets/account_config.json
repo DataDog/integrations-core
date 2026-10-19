@@ -1,0 +1,28 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Service account PAT",
+      "bearer_token": {
+        "password_setting": {
+          "key": "service_account_pat",
+          "label": "Service account PAT",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "workspace_id",
+      "label": "Workspace ID",
+      "editable": true,
+      "required": true,
+      "integer": {}
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "asana-logs" }
+  ]
+}

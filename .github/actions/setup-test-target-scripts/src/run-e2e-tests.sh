@@ -30,6 +30,12 @@ else
   E2E_FLAGS="--dev"
 fi
 
+# Only core is guaranteed to run a ddev with --ignore-teardown-errors, since it installs ddev from
+# the checkout. Other repos install from PyPI and may pin an older ddev to support older Pythons.
+if [[ "$INPUT_REPO" == 'core' ]]; then
+  E2E_FLAGS="$E2E_FLAGS --ignore-teardown-errors"
+fi
+
 # Build target arguments
 # For latest: INPUT_TARGET already contains "target:latest", no separate env
 # For regular: INPUT_TARGET is just the target, INPUT_TARGET_ENV is the env
@@ -58,7 +64,7 @@ fi
 
 set +e
 set -x
-ddev env test $E2E_FLAGS --ignore-teardown-errors --junit $TARGET_ARGS -- "$@" -k "not fips"
+ddev env test $E2E_FLAGS --junit $TARGET_ARGS -- "$@" -k "not fips"
 exit_code=$?
 set +x
 
