@@ -45,3 +45,7 @@ EXPECTED_METRICS = {
         "fluxcd.workqueue.unfinished_work",
     },
 }
+
+KSM_METRICS = {
+    "fluxcd.gotk.resource.info",
+}

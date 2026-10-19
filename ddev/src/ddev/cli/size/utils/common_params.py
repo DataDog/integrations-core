@@ -1,7 +1,10 @@
 import functools
 from collections.abc import Callable
+from typing import Literal, get_args
 
 import click
+
+WheelsStorageTier = Literal["dev", "stable"]
 
 
 def common_params(func: Callable) -> Callable:
@@ -26,11 +29,12 @@ def common_params(func: Callable) -> Callable:
     # This keeps CI invocations aligned with the GitLab variable of the same name.
     @click.option(
         "--wheels-storage",
-        type=click.Choice(["dev", "stable"]),
+        type=click.Choice(get_args(WheelsStorageTier)),
         default='dev',  # 'dev' is a strict superset of 'stable', so we're more likely to find wheels there.
         envvar="INTEGRATIONS_WHEELS_STORAGE",
         help=(
-            "Which wheel storage tier to resolve dependency URLs against. "
+            "Which wheel storage tier to prefer when resolving dependency URLs. "
+            "If the preferred tier doesn't have a wheel, the other tier is used instead. "
             "Can also be set via the INTEGRATIONS_WHEELS_STORAGE env var."
         ),
     )
@@ -41,7 +45,7 @@ def common_params(func: Callable) -> Callable:
         compressed: bool,
         format: list[str],
         show_gui: bool,
-        wheels_storage: str,
+        wheels_storage: WheelsStorageTier,
         *args,
         **kwargs,
     ):

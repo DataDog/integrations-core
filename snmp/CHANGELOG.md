@@ -2,7 +2,47 @@
 
 <!-- towncrier release notes start -->
 
-## 13.0.0 / 2026-06-09
+## 13.4.0 / 2026-10-01
+
+***Added***:
+
+* Add ``sfos_ip_sec_vpn_conn_status`` and ``sfos_ip_sec_vpn_active_status`` tags for Sophos XGS Firewall V20 IPsec VPN tunnels. ([#25008](https://github.com/DataDog/integrations-core/pull/25008))
+* Add ``ENTITY-SENSOR-MIB`` (thermal and fan sensor) support to the Palo Alto profile. ([#25009](https://github.com/DataDog/integrations-core/pull/25009))
+
+***Fixed***:
+
+* Load SNMP profiles with the libyaml-backed YAML loader when available, and stop the discovery loop when the check is no longer running. ([#25334](https://github.com/DataDog/integrations-core/pull/25334))
+
+## 13.3.0 / 2026-08-21 / Agent 7.83.0
+
+***Security***:
+
+* Bump pyasn1 from 0.6.3 to 0.6.4 to remediate CVE-2026-59884, CVE-2026-59885, CVE-2026-59886, and PYSEC-2026-3455 (denial-of-service in BER/CER/DER decoding). ([#24727](https://github.com/DataDog/integrations-core/pull/24727))
+
+## 13.2.0 / 2026-08-05
+
+***Added***:
+
+* Add NetScout switch SNMP profile for CPU and memory metrics. ([#24283](https://github.com/DataDog/integrations-core/pull/24283))
+* Add the `use_remote_config_profiles` option to the SNMP configuration spec so it is accepted by config validation and Remote Configuration. ([#24528](https://github.com/DataDog/integrations-core/pull/24528))
+
+## 13.1.1 / 2026-07-23 / Agent 7.82.0
+
+***Fixed***:
+
+* Rename mem_pool_index tag to mem in cisco-firepower-asa profile. ([#24582](https://github.com/DataDog/integrations-core/pull/24582))
+
+## 13.1.0 / 2026-07-08
+
+***Added***:
+
+* Route Cisco Catalyst 1200/1300/1300X and Cisco Business 350 (CBS350) devices to the ``cisco-sb`` SNMP profile, and add ``serial_number`` device metadata for them through ``entPhysicalSerialNum.67109120``. ([#23939](https://github.com/DataDog/integrations-core/pull/23939))
+
+***Fixed***:
+
+* Fix Cisco ASAv memory coverage in the `cisco-firepower-asa` SNMP profile by replacing hardcoded single-pool scalar OIDs with a full table walk of `cempMemPoolTable` tagged by pool name. ([#24107](https://github.com/DataDog/integrations-core/pull/24107))
+
+## 13.0.0 / 2026-06-09 / Agent 7.81.0
 
 ***Changed***:
 

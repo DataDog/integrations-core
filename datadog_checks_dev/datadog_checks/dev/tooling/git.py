@@ -11,6 +11,8 @@ from datadog_checks.dev.subprocess import SubprocessResult, run_command
 
 from .constants import get_root
 
+RELEASE_BRANCH_PATTERN = re.compile(r'^\d+\.\d+\.x$')
+
 
 def get_git_root():
     """
@@ -225,3 +227,65 @@ def get_git_user():
 def get_git_email():
     result = run_command('git config --get user.email', capture=True, check=True)
     return result.stdout.strip()
+
+
+def get_base_ref() -> str:
+    """Return the git ref to compare files against when validating license headers.
+
+    Priority:
+    1. GITHUB_BASE_REF (set by GitHub Actions for pull requests — the target branch).
+    2. GITHUB_REF_NAME when it is master or a release branch (push events directly to those branches).
+    3. Closest ancestor among master and release branches, found via merge-base timestamps.
+    """
+    github_base_ref = os.environ.get('GITHUB_BASE_REF')
+    if github_base_ref:
+        return f'origin/{github_base_ref}'
+
+    github_ref_name = os.environ.get('GITHUB_REF_NAME', '')
+    if github_ref_name == 'master' or RELEASE_BRANCH_PATTERN.match(github_ref_name):
+        return f'origin/{github_ref_name}'
+
+    return _find_closest_base_ref()
+
+
+def _find_closest_base_ref() -> str:
+    """Find the closest ancestor among master and release branches using merge-base timestamps."""
+    with chdir(get_root()):
+        result = run_command('git for-each-ref --format=%(refname:short) refs/remotes/origin/', capture='out')
+        if result.code != 0:
+            return 'origin/master'
+
+        candidates = [
+            ref
+            for ref in result.stdout.strip().splitlines()
+            if ref == 'origin/master' or RELEASE_BRANCH_PATTERN.match(ref.removeprefix('origin/'))
+        ]
+
+        if not candidates:
+            return 'origin/master'
+
+        best_ref = 'origin/master'
+        best_timestamp = -1
+
+        for ref in candidates:
+            merge_base_result = run_command(f'git merge-base {ref} HEAD', capture='both')
+            if merge_base_result.code != 0:
+                continue
+            merge_base = merge_base_result.stdout.strip()
+            if not merge_base:
+                continue
+
+            timestamp_result = run_command(f'git show -s --format=%ct {merge_base}', capture='out')
+            if timestamp_result.code != 0:
+                continue
+
+            try:
+                timestamp = int(timestamp_result.stdout.strip())
+            except ValueError:
+                continue
+
+            if timestamp > best_timestamp:
+                best_timestamp = timestamp
+                best_ref = ref
+
+        return best_ref

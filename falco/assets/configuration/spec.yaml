@@ -2,6 +2,12 @@ name: Falco
 fleet_configurable: true
 files:
 - name: falco.yaml
+  discovery:
+    strategies:
+    - template: discovery/openmetrics_from_ports
+      overrides:
+        port_hints:
+        - 8765
   options:
   - template: init_config
     options:
@@ -9,3 +15,11 @@ files:
   - template: instances
     options:
     - template: instances/openmetrics
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - falco
+  - template: auto_conf/discovery

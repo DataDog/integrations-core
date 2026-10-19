@@ -11,7 +11,13 @@ from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsCompati
 from datadog_checks.gitlab.config_models import ConfigMixin
 
 from .common import get_gitlab_version, get_tags
-from .metrics import GITALY_METRICS_MAP, METRICS_MAP, construct_metrics_config
+from .metrics import (
+    GITALY_METRICS_MAP,
+    METRICS_MAP,
+    SIDEKIQ_METRICS_MAP,
+    WORKHORSE_METRICS_MAP,
+    construct_metrics_config,
+)
 
 
 class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
@@ -125,16 +131,21 @@ class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
         if self.is_metadata_collection_enabled() and not self.instance.get("api_token"):
             self.warning("GitLab token not found; please add one in your config to enable version metadata collection.")
 
-        gitaly_server_endpoint = self.instance.get("gitaly_server_endpoint")
+        # Each component exposes its metrics on its own listener, so every
+        # configured endpoint gets its own scraper with its own namespace.
+        for endpoint_option, metrics_map, namespace in (
+            ("gitaly_server_endpoint", GITALY_METRICS_MAP, "gitlab.gitaly"),
+            ("workhorse_endpoint", WORKHORSE_METRICS_MAP, "gitlab.workhorse"),
+            ("sidekiq_endpoint", SIDEKIQ_METRICS_MAP, "gitlab.sidekiq"),
+        ):
+            endpoint = self.instance.get(endpoint_option)
 
-        if gitaly_server_endpoint:
-            # We create another config to scrape Gitaly metrics, so we have two different scrapers:
-            # one for the main GitLab and another one for the Gitaly endpoint.
-            config = copy.deepcopy(self.instance)
-            config['openmetrics_endpoint'] = gitaly_server_endpoint
-            config['metrics'] = [GITALY_METRICS_MAP]
-            config['namespace'] = 'gitlab.gitaly'
-            self.scraper_configs.append(config)
+            if endpoint:
+                config = copy.deepcopy(self.instance)
+                config['openmetrics_endpoint'] = endpoint
+                config['metrics'] = [metrics_map]
+                config['namespace'] = namespace
+                self.scraper_configs.append(config)
 
     def parse_readiness_service_checks(self, response):
         self.log.debug("Parsing readiness output")

@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 2.7.0 / 2026-10-01
+
+***Added***:
+
+* Add `proxmox.vm.cpu.max` and `proxmox.node.cpu.max` to report the vCPU count of each virtual machine and the logical processor count of each node. ([#25188](https://github.com/DataDog/integrations-core/pull/25188))
+
+## 2.6.1 / 2026-09-30 / Agent 7.84.2
+
+***Fixed***:
+
+* Handle null and error Proxmox API responses. Failures on the performance metrics, HA, or task endpoints are reported as check warnings instead of stopping the other collectors, and task collection failures are isolated per node. ([#24693](https://github.com/DataDog/integrations-core/pull/24693))
+
+## 2.6.0 / 2026-07-08 / Agent 7.82.0
+
+***Added***:
+
+* Add infra_mode tag to proxmox metrics. ([#24008](https://github.com/DataDog/integrations-core/pull/24008))
+
 ## 2.5.2 / 2026-05-14 / Agent 7.80.0
 
 ***Fixed***:

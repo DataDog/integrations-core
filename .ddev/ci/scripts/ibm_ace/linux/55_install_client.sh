@@ -7,7 +7,7 @@
 set -ex
 
 TMP_DIR=/tmp/mq
-MQ_URL=https://ddintegrations.blob.core.windows.net/ibm-mq/mqadv_dev90_linux_x86-64.tar.gz
+MQ_URL=https://agent-integrations-ci-fixtures.s3.us-east-1.amazonaws.com/fixtures/ibm-mq/mqadv_dev90_linux_x86-64.tar.gz
 MQ_PACKAGES="MQSeriesRuntime-*.rpm MQSeriesServer-*.rpm MQSeriesMsg*.rpm MQSeriesJava*.rpm MQSeriesJRE*.rpm MQSeriesGSKit*.rpm"
 
 if [ -e /opt/mqm/inc/cmqc.h ]; then

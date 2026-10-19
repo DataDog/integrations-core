@@ -62,7 +62,7 @@ jobs:
       id-token: write
     steps:
     - name: Checkout code
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 0
 
@@ -137,11 +137,12 @@ jobs:
       CARGO_BUILD_TARGET: ${{ matrix.job.target }}
       PYAPP_REPO: pyapp
       PYAPP_VERSION: "0.24.0"
+      PYAPP_SHA256: "10cd152500685ddea610a8e280f3ca5502c4cff072bfb344cb9abd88a0c40928"
       PYAPP_PIP_EXTERNAL: "1"
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 0
 
@@ -159,19 +160,27 @@ jobs:
         dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
 
     - name: Fetch PyApp
-      run: >-
-        mkdir $PYAPP_REPO && curl -L
-        https://github.com/ofek/pyapp/releases/download/v$PYAPP_VERSION/source.tar.gz
-        |
-        tar --strip-components=1 -xzf - -C $PYAPP_REPO
+      run: |-
+        set -euo pipefail
+        mkdir "$PYAPP_REPO"
+        curl -fsSL -o pyapp.tar.gz \
+          "https://github.com/ofek/pyapp/releases/download/v$PYAPP_VERSION/source.tar.gz"
+        # sha256sum on Linux/Windows-bash; shasum on macOS (Git-for-Windows bash lacks shasum)
+        if command -v sha256sum >/dev/null 2>&1; then
+          echo "$PYAPP_SHA256 *pyapp.tar.gz" | sha256sum -c -
+        else
+          echo "$PYAPP_SHA256 *pyapp.tar.gz" | shasum -a 256 -c -
+        fi
+        tar --strip-components=1 -xzf pyapp.tar.gz -C "$PYAPP_REPO"
+        rm pyapp.tar.gz
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
     - name: Install uv
-      uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
       with:
         enable-cache: false
 
@@ -184,7 +193,7 @@ jobs:
     # picks up the fix from https://github.com/pypa/hatch/pull/2196 and now
     # *requires* virtualenv>=21, so they must be bumped together.
     - name: Install Hatch
-      run: uv pip install --system "hatch==1.16.5" "virtualenv==21.3.3"
+      run: uv pip install --system "hatch==1.17.1" "virtualenv==21.7.1"
 
     - name: Install Hatch environment collector plugin
       run: uv pip install --system -e . --no-deps
@@ -341,7 +350,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Get Datadog credentials
       id: dd-sts
       uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
@@ -356,7 +365,7 @@ jobs:
         dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
@@ -464,7 +473,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
     - name: Get Datadog credentials
       id: dd-sts
@@ -480,7 +489,7 @@ jobs:
         dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
@@ -552,7 +561,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
     - name: Get Datadog credentials
       id: dd-sts
@@ -568,7 +577,7 @@ jobs:
         dd_api_key: ${{ steps.dd-sts.outputs.api_key }}
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: ${{ env.PYTHON_VERSION }}
 
@@ -578,11 +587,14 @@ jobs:
     - name: Install rcodesign
       env:
         ARCHIVE_NAME: "apple-codesign-0.27.0-x86_64-apple-darwin"
-      run: >-
-        curl -L
-        "https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign%2F0.27.0/$ARCHIVE_NAME.tar.gz"
-        |
-        tar --strip-components=1 -xzf - -C /usr/local/bin "$ARCHIVE_NAME/rcodesign"
+        RCODESIGN_SHA256: "bca6e648afaddd48f1c3d5dd25aa516659992cbbd2ba7131ba6add739aa895d3"
+      run: |-
+        set -euo pipefail
+        curl -fsSL -o rcodesign.tar.gz \
+          "https://github.com/indygreg/apple-platform-rs/releases/download/apple-codesign%2F0.27.0/$ARCHIVE_NAME.tar.gz"
+        echo "$RCODESIGN_SHA256 *rcodesign.tar.gz" | shasum -a 256 -c -
+        tar --strip-components=1 -xzf rcodesign.tar.gz -C /usr/local/bin "$ARCHIVE_NAME/rcodesign"
+        rm rcodesign.tar.gz
 
     - name: Write credentials
       env:
@@ -783,14 +795,14 @@ jobs:
     # extract-release-notes succeeding; the body it consumes may be empty.
     steps:
     - name: Checkout code
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
     - name: Initialize empty release notes
       working-directory: .
       run: ': > release-notes.md'
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       continue-on-error: true
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
@@ -847,7 +859,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
     - name: Get Datadog credentials
       id: dd-sts
@@ -896,12 +908,12 @@ jobs:
     # workflow file name, environment and repository the request is comming from to
     # provide the valid JWT token.
     - name: Push Python artifacts to PyPI
-      uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
+      uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
       with:
         skip-existing: true
 
     - name: Add assets to current release
-      uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+      uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
       with:
         body_path: release-notes/release-notes.md
         files: |-

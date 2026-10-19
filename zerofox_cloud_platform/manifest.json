@@ -3,7 +3,7 @@
     "app_uuid": "c00f61a4-82bf-47d9-a15c-f498c3a83be0",
     "app_id": "zerofox-cloud-platform",
     "owner": "saas-integrations",
-    "display_on_public_website": false,
+    "display_on_public_website": true,
     "tile": {
         "overview": "README.md#Overview",
         "configuration": "README.md#Setup",

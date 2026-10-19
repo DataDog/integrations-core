@@ -20,7 +20,16 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
-SECURE_FIELD_NAMES = frozenset(['ssl_cert', 'ssl_key', 'ssl_root_cert'])
+SECURE_FIELD_NAMES = frozenset(['data_directory', 'ssl_cert', 'ssl_key', 'ssl_root_cert'])
+
+
+class AutomaticDiagnostics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = None
+    interval: Optional[float] = None
 
 
 class ManagedAuthentication(BaseModel):
@@ -335,6 +344,7 @@ class InstanceConfig(BaseModel):
     )
     activity_metrics_excluded_aggregations: Optional[tuple[str, ...]] = None
     application_name: Optional[str] = None
+    automatic_diagnostics: Optional[AutomaticDiagnostics] = None
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
     collect_activity_metrics: Optional[bool] = None
@@ -381,7 +391,7 @@ class InstanceConfig(BaseModel):
     password: Optional[str] = None
     pg_stat_activity_view: Optional[str] = None
     pg_stat_statements_view: Optional[str] = None
-    port: Optional[int] = None
+    port: Optional[int] = Field(None, ge=1, le=65535)
     propagate_agent_tags: Optional[bool] = None
     query_activity: Optional[QueryActivity] = None
     query_encodings: Optional[tuple[str, ...]] = None

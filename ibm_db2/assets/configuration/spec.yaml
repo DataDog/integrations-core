@@ -65,6 +65,7 @@ files:
         fleet_configurable: true
         value:
           type: string
+          require_trusted_provider: true
       - name: connection_timeout
         description: |
           Connection timeout in seconds

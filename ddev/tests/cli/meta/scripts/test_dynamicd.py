@@ -7,6 +7,8 @@ These tests verify that dashboard parsing correctly extracts metrics, tags,
 and tag values from real integration dashboards.
 """
 
+from unittest.mock import MagicMock
+
 import pytest
 
 from ddev.repo.core import Repository
@@ -139,6 +141,41 @@ class TestBuildContext:
         assert isinstance(prompt, str)
         assert len(prompt) > 0
         assert 'redis' in prompt.lower()
+
+
+class TestGetApiKeys:
+    """Tests for _get_api_keys helper."""
+
+    def _make_app(self, anthropic_api_key: str, dd_api_key: str) -> MagicMock:
+        app = MagicMock()
+        app.config.ai.anthropic_api_key = anthropic_api_key
+        app.config.org.config = {"api_key": dd_api_key}
+        return app
+
+    def test_returns_both_keys_when_configured(self):
+        from ddev.cli.meta.scripts._dynamicd.cli import _get_api_keys
+
+        app = self._make_app("sk-ant-test", "dd-key-123")
+        llm_key, dd_key = _get_api_keys(app)
+
+        assert llm_key == "sk-ant-test"
+        assert dd_key == "dd-key-123"
+
+    def test_aborts_when_llm_key_missing(self):
+        from ddev.cli.meta.scripts._dynamicd.cli import _get_api_keys
+
+        app = self._make_app("", "dd-key-123")
+        _get_api_keys(app)
+
+        app.abort.assert_called_once()
+
+    def test_aborts_when_dd_key_missing(self):
+        from ddev.cli.meta.scripts._dynamicd.cli import _get_api_keys
+
+        app = self._make_app("sk-ant-test", "")
+        _get_api_keys(app)
+
+        app.abort.assert_called_once()
 
 
 class TestReadMetrics:

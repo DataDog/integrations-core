@@ -14,7 +14,7 @@ class DcgmCheck(OpenMetricsBaseCheckV2):
         return {
             "metrics": [METRIC_MAP],
             "rename_labels": RENAME_LABELS_MAP,
-            "ignored_tags": IGNORED_TAGS,
+            "ignore_tags": IGNORED_TAGS,
         }
 
     def configure_scrapers(self):

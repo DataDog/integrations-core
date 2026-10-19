@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-import os
 from typing import TYPE_CHECKING
 
 import click
@@ -78,19 +77,15 @@ def _get_api_keys(app: Application) -> tuple[str, str]:
 
     Returns (llm_api_key, dd_api_key) or aborts if not configured.
     """
-    # Get LLM API key from config or environment variable
-    llm_api_key = app.config.raw_data.get("dynamicd", {}).get("llm_api_key")
-    if not llm_api_key:
-        llm_api_key = os.environ.get("ANTHROPIC_API_KEY")
+    llm_api_key = app.config.ai.anthropic_api_key
     if not llm_api_key:
         app.display_error(
-            "LLM API key not configured. Either:\n"
-            "  1. Set env var: export ANTHROPIC_API_KEY=<your-key>\n"
-            "  2. Or run: ddev config set dynamicd.llm_api_key <your-key>"
+            "Anthropic API key not configured. Either:\n"
+            "  1. Set env var: export ANTHROPIC_API_KEY=<your-key> (or DD_ANTHROPIC_API_KEY)\n"
+            "  2. Or run: ddev config set ai.anthropic_api_key <your-key>"
         )
         app.abort()
 
-    # Get Datadog API key from org config
     dd_api_key = app.config.org.config.get("api_key")
     if not dd_api_key:
         app.display_error(

@@ -131,16 +131,6 @@ def update_ddev_pyproject_file(app: Application, new_version: str, old_version: 
     new_version = f"py{new_version.replace('.', '')}"
     old_version = f"py{old_version.replace('.', '')}"
 
-    if black_config := config.get('tool', {}).get('black', {}):
-        target_version = black_config.get('target-version', [])
-
-        for index, version in enumerate(target_version):
-            if version == old_version:
-                target_version[index] = new_version
-                tracker.success()
-                changed = True
-                break
-
     if ruff_config := config.get('tool', {}).get('ruff', {}):
         if ruff_config.get('target-version') == old_version:
             ruff_config['target-version'] = new_version

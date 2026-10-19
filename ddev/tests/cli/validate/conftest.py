@@ -1,8 +1,12 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from unittest.mock import MagicMock
+
+import httpx
 import pytest
 from datadog_checks.dev.tooling.constants import set_root
+from pytest_mock import MockerFixture
 
 from ddev.repo.core import Repository
 from tests.helpers.api import write_file
@@ -76,6 +80,16 @@ def _fake_repo(tmp_path_factory, config_file, name, files_to_write):
         write_file(repo_path / file_path, file_name, content)
 
     return repo
+
+
+@pytest.fixture
+def mock_http(mocker: MockerFixture) -> MagicMock:
+    """Default-deny mock at the `httpx.HTTPTransport.handle_request` boundary."""
+
+    def reject_unexpected_request(request: httpx.Request) -> httpx.Response:
+        raise AssertionError(f'Unexpected HTTP request in test: {request.url}')
+
+    return mocker.patch.object(httpx.HTTPTransport, 'handle_request', side_effect=reject_unexpected_request)
 
 
 @pytest.fixture

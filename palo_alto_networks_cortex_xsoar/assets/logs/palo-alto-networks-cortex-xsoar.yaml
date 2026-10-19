@@ -1,0 +1,1002 @@
+id: palo-alto-networks-cortex-xsoar
+metric_id: palo-alto-networks-cortex-xsoar
+backend_only: false
+facets:
+  - groups:
+      - Event
+    name: Event Name
+    path: evt.name
+    source: log
+  - groups:
+      - Event
+    name: Event Outcome
+    path: evt.outcome
+    source: log
+  - groups:
+      - Web Access
+    name: User-Agent
+    path: http.useragent
+    source: log
+  - groups:
+      - Web Access
+    name: Browser
+    path: http.useragent_details.browser.family
+    source: log
+  - groups:
+      - Web Access
+    name: Device
+    path: http.useragent_details.device.family
+    source: log
+  - groups:
+      - Web Access
+    name: OS
+    path: http.useragent_details.os.family
+    source: log
+  - groups:
+      - Geoip
+    name: City Name
+    path: network.client.geoip.city.name
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Code
+    path: network.client.geoip.continent.code
+    source: log
+  - groups:
+      - Geoip
+    name: Continent Name
+    path: network.client.geoip.continent.name
+    source: log
+  - groups:
+      - Geoip
+    name: Country ISO Code
+    path: network.client.geoip.country.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Country Name
+    path: network.client.geoip.country.name
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision ISO Code
+    path: network.client.geoip.subdivision.iso_code
+    source: log
+  - groups:
+      - Geoip
+    name: Subdivision Name
+    path: network.client.geoip.subdivision.name
+    source: log
+  - groups:
+      - Web Access
+    name: Client IP
+    path: network.client.ip
+    source: log
+  - groups:
+      - User
+    name: User Email
+    path: usr.email
+    source: log
+  - groups:
+      - User
+    name: User Name
+    path: usr.name
+    source: log
+pipeline:
+  type: pipeline
+  name: Palo Alto Networks Cortex XSOAR
+  enabled: true
+  filter:
+    query: source:palo-alto-networks-cortex-xsoar
+  processors:
+    - type: category-processor
+      name: For `modified`
+      enabled: true
+      categories:
+        - filter:
+            query: '@modified:"1970-01-01T00:00:00Z"'
+          name: N/A
+      target: modified
+    - type: pipeline
+      name: Parse modified
+      enabled: true
+      filter:
+        query: -@modified:"N/A"
+      processors:
+        - type: attribute-remapper
+          name: Map `modified` to `timestamp`
+          enabled: true
+          sources:
+            - modified
+          sourceType: attribute
+          target: timestamp
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `created` to `timestamp`
+      enabled: true
+      sources:
+        - created
+      sourceType: attribute
+      target: timestamp
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: date-remapper
+      name: Define `timestamp` and `AUDIT_INSERT_TIME` as the official date of the log
+      enabled: true
+      sources:
+        - timestamp
+        - AUDIT_INSERT_TIME
+    - type: pipeline
+      name: Parse Incident logs
+      enabled: true
+      filter:
+        query: "@vendor.endpoint:incidents"
+      processors:
+        - type: date-remapper
+          name: Define `timestamp` as the official date of the log
+          enabled: true
+          sources:
+            - timestamp
+        - type: message-remapper
+          name: Define `details` as the official message of the log
+          enabled: true
+          sources:
+            - details
+        - name: Lookup on `severity` to `severity_value`
+          enabled: true
+          source: severity
+          target: severity_value
+          lookupTable: |-
+            0,Unknown
+            0.5,Informational
+            1,Low
+            2,Medium
+            3,High
+            4,Critical
+          type: lookup-processor
+        - name: Lookup on `status` to `status_value`
+          enabled: true
+          source: status
+          target: status_value
+          lookupTable: |-
+            0,Pending
+            1,Active
+            2,Closed
+          type: lookup-processor
+        - type: attribute-remapper
+          name: Map `owner` to `usr.name`
+          enabled: true
+          sources:
+            - owner
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - name: Lookup on `severity_value` to `incident_severity`
+          enabled: true
+          source: severity_value
+          target: incident_severity
+          lookupTable: |-
+            Unknown,info
+            Informational,info
+            Low,notice
+            Medium,warning
+            High,warning
+            Critical,critical
+          type: lookup-processor
+        - type: status-remapper
+          name: Define `incident_severity` as the official status of the log
+          enabled: true
+          sources:
+            - incident_severity
+    - type: pipeline
+      name: Parse Audit logs
+      enabled: true
+      filter:
+        query: "@vendor.endpoint:audit-logs"
+      processors:
+        - type: date-remapper
+          name: Define `AUDIT_INSERT_TIME` as the official date of the log
+          enabled: true
+          sources:
+            - AUDIT_INSERT_TIME
+        - type: message-remapper
+          name: Define `AUDIT_DESCRIPTION` as the official message of the log
+          enabled: true
+          sources:
+            - AUDIT_DESCRIPTION
+        - type: attribute-remapper
+          name: Map `AUDIT_OWNER_NAME` to `usr.name`
+          enabled: true
+          sources:
+            - AUDIT_OWNER_NAME
+          sourceType: attribute
+          target: usr.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `AUDIT_OWNER_EMAIL` to `usr.email`
+          enabled: true
+          sources:
+            - AUDIT_OWNER_EMAIL
+          sourceType: attribute
+          target: usr.email
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `AUDIT_ENTITY` to `evt.name`
+          enabled: true
+          sources:
+            - AUDIT_ENTITY
+          sourceType: attribute
+          target: evt.name
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `AUDIT_RESULT` to `evt.outcome`
+          enabled: true
+          sources:
+            - AUDIT_RESULT
+          sourceType: attribute
+          target: evt.outcome
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: "Map `AUDIT_SOURCE_IP` to `network.client.ip` "
+          enabled: true
+          sources:
+            - AUDIT_SOURCE_IP
+          sourceType: attribute
+          target: network.client.ip
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `AUDIT_USER_AGENT` to `http.useragent`
+          enabled: true
+          sources:
+            - AUDIT_USER_AGENT
+          sourceType: attribute
+          target: http.useragent
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: user-agent-parser
+          name: Extracting useragent details from http.useragent
+          enabled: true
+          sources:
+            - http.useragent
+          target: http.useragent_details
+          encoded: false
+          combineVersionDetails: false
+        - type: geo-ip-parser
+          name: Extract Geolocation information from Client IP
+          enabled: true
+          sources:
+            - network.client.ip
+          target: network.client.geoip
+          ip_processing_behavior: do-nothing
+    - type: pipeline
+      name: " OCSF pre transformations"
+      enabled: true
+      filter:
+        query: ""
+      processors:
+        - type: string-builder-processor
+          name: Add product name
+          enabled: true
+          template: Cortex XSOAR
+          target: ocsf.metadata.product.name
+          replaceMissing: false
+        - type: string-builder-processor
+          name: Add product vendor
+          enabled: true
+          template: Palo Alto Networks
+          target: ocsf.metadata.product.vendor_name
+          replaceMissing: false
+        - type: grok-parser
+          name: Convert timestamp to Epoch
+          enabled: true
+          source: timestamp
+          samples:
+            - 2026-03-25T09:23:17.684Z
+            - 2026-03-25T09:23:17.68Z
+          grok:
+            supportRules: ""
+            matchRules: |-
+              time_1 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSZ"):ocsf.time}
+              time_2 %{date("yyyy-MM-dd'T'HH:mm:ss.SSZ"):ocsf.time}
+    - type: pipeline
+      name: OCSF sub pipeline for class Incident Finding [2005]
+      enabled: true
+      filter:
+        query: "@vendor.endpoint:incidents"
+      processors:
+        - type: attribute-remapper
+          name: Map `id` to `ocsf.finding_info.uid`
+          enabled: true
+          sources:
+            - id
+          sourceType: attribute
+          target: ocsf.finding_info.uid
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `name` to `ocsf.finding_info.title`
+          enabled: true
+          sources:
+            - name
+          sourceType: attribute
+          target: ocsf.finding_info.title
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `type` to `ocsf.finding_info.types`
+          enabled: true
+          sources:
+            - type
+          sourceType: attribute
+          target: ocsf.finding_info.types
+          targetType: attribute
+          preserveSource: true
+          overrideOnConflict: false
+        - type: schema-processor
+          name: Apply OCSF schema for 2005
+          enabled: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Incident Finding
+            classUid: 2005
+            extensions: []
+            profiles: []
+          mappers:
+            - name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              sourceType: attribute
+              target: ocsf.time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `owner` to `ocsf.assignee.name`
+              sources:
+                - owner
+              sourceType: attribute
+              target: ocsf.assignee.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `closeNotes` to `ocsf.comment`
+              sources:
+                - closeNotes
+              sourceType: attribute
+              target: ocsf.comment
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `openDuration` to `ocsf.duration`
+              sources:
+                - openDuration
+              sourceType: attribute
+              target: ocsf.duration
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              sourceType: attribute
+              target: ocsf.metadata.product.name
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              sourceType: attribute
+              target: ocsf.metadata.product.vendor_name
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `modified` to `ocsf.metadata.modified_time`
+              sources:
+                - modified
+              sourceType: attribute
+              target: ocsf.metadata.modified_time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `account` to `ocsf.metadata.tenant_uid`
+              sources:
+                - account
+              sourceType: attribute
+              target: ocsf.metadata.tenant_uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `rawJSON` to `ocsf.raw_data`
+              sources:
+                - rawJSON
+              sourceType: attribute
+              target: ocsf.raw_data
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@status_value:Closed"
+                  name: Close
+                  id: 3
+                - filter:
+                    query: -"@status_value:Closed"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values:
+                  ocsf.activity_id: "99"
+                  ocsf.activity_name: Other
+                sources:
+                  ocsf.activity_name:
+                    - status_value
+              type: schema-category-mapper
+            - name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@severity_value:Informational"
+                  name: Informational
+                  id: 1
+                - filter:
+                    query: "@severity_value:Unknown"
+                  name: Unknown
+                  id: 0
+                - filter:
+                    query: "@severity_value:Low"
+                  name: Low
+                  id: 2
+                - filter:
+                    query: "@severity_value:Medium"
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: "@severity_value:High"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@severity_value:Critical"
+                  name: Critical
+                  id: 5
+                - filter:
+                    query: -@severity_value:(Informational OR Unknown OR Low OR Medium OR High OR
+                      Critical)
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values:
+                  ocsf.severity: Other
+                  ocsf.severity_id: "99"
+                sources:
+                  ocsf.severity:
+                    - severity_value
+              type: schema-category-mapper
+            - name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@status_value:Active"
+                  name: In Progress
+                  id: 2
+                - filter:
+                    query: "@status_value:Pending"
+                  name: On Hold
+                  id: 3
+                - filter:
+                    query: "@status_value:Closed"
+                  name: Closed
+                  id: 5
+                - filter:
+                    query: -@status_value:(Active OR Closed OR Pending)
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status: Other
+                  ocsf.status_id: "99"
+                sources:
+                  ocsf.status:
+                    - status_value
+              type: schema-category-mapper
+            - name: Map `closeReason` to `ocsf.status_detail`
+              sources:
+                - closeReason
+              sourceType: attribute
+              target: ocsf.status_detail
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+        - type: array-processor
+          name: Move attributes into ocsf.finding_info_list
+          enabled: true
+          operation:
+            source: ocsf.finding_info
+            target: ocsf.finding_info_list
+            preserveSource: false
+            type: append
+    - type: pipeline
+      name: OCSF sub pipeline for class Authentication [3002]
+      enabled: true
+      filter:
+        query: "@vendor.endpoint:audit-logs @AUDIT_ENTITY:AUTH"
+      processors:
+        - type: schema-processor
+          name: Apply OCSF schema for 3002
+          enabled: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Authentication
+            classUid: 3002
+            extensions: []
+            profiles: []
+          mappers:
+            - name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              sourceType: attribute
+              target: ocsf.time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@AUDIT_ENTITY_SUBTYPE:Login"
+                  name: Logon
+                  id: 1
+                - filter:
+                    query: "@AUDIT_ENTITY_SUBTYPE:Logout"
+                  name: Logoff
+                  id: 2
+                - filter:
+                    query: -@AUDIT_ENTITY_SUBTYPE:(Login OR Logout)
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values:
+                  ocsf.activity_id: "99"
+                  ocsf.activity_name: Other
+                sources:
+                  ocsf.activity_name:
+                    - AUDIT_ENTITY_SUBTYPE
+              type: schema-category-mapper
+            - name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@AUDIT_SEVERITY:*INFO"
+                  name: Informational
+                  id: 1
+                - filter:
+                    query: "@AUDIT_SEVERITY:*LOW"
+                  name: Low
+                  id: 2
+                - filter:
+                    query: "@AUDIT_SEVERITY:*HIGH"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@AUDIT_SEVERITY:*MEDIUM"
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: "@AUDIT_SEVERITY:*CRITICAL"
+                  name: Critical
+                  id: 5
+                - filter:
+                    query: -@AUDIT_SEVERITY:(*INFO OR *LOW OR *HIGH OR *MEDIUM OR *CRITICAL)
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values:
+                  ocsf.severity: Other
+                  ocsf.severity_id: "99"
+                sources:
+                  ocsf.severity:
+                    - AUDIT_SEVERITY
+              type: schema-category-mapper
+            - name: Map `AUDIT_INSERT_TIME` to `ocsf.time`
+              sources:
+                - AUDIT_INSERT_TIME
+              sourceType: attribute
+              target: ocsf.time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@AUDIT_RESULT:SUCCESS"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@AUDIT_RESULT:FAIL"
+                  name: Failure
+                  id: 2
+                - filter:
+                    query: -@AUDIT_RESULT:(SUCCESS OR FAIL)
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status: Other
+                  ocsf.status_id: "99"
+                sources:
+                  ocsf.status:
+                    - AUDIT_RESULT
+              type: schema-category-mapper
+            - name: Map `ocsf.metadata.product.name` to `ocsf.service.name`
+              sources:
+                - ocsf.metadata.product.name
+              sourceType: attribute
+              target: ocsf.service.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              sourceType: attribute
+              target: ocsf.metadata.product.name
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              sourceType: attribute
+              target: ocsf.metadata.product.vendor_name
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUDIT_OWNER_NAME` to `ocsf.user.name`
+              sources:
+                - AUDIT_OWNER_NAME
+              sourceType: attribute
+              target: ocsf.user.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUDIT_OWNER_EMAIL` to `ocsf.user.email_addr`
+              sources:
+                - AUDIT_OWNER_EMAIL
+              sourceType: attribute
+              target: ocsf.user.email_addr
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUDIT_ID` to `ocsf.metadata.uid`
+              sources:
+                - AUDIT_ID
+              sourceType: attribute
+              target: ocsf.metadata.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUDIT_REASON` to `ocsf.status_detail`
+              sources:
+                - AUDIT_REASON
+              sourceType: attribute
+              target: ocsf.status_detail
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUDIT_USER_AGENT` to `ocsf.http_request.user_agent`
+              sources:
+                - AUDIT_USER_AGENT
+              sourceType: attribute
+              target: ocsf.http_request.user_agent
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUDIT_HOSTNAME` to `ocsf.src_endpoint.hostname`
+              sources:
+                - AUDIT_HOSTNAME
+              sourceType: attribute
+              target: ocsf.src_endpoint.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUDIT_SOURCE_IP` to `ocsf.src_endpoint.ip`
+              sources:
+                - AUDIT_SOURCE_IP
+              sourceType: attribute
+              target: ocsf.src_endpoint.ip
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+    - type: pipeline
+      name: OCSF sub pipeline for class Entity Management [3004]
+      enabled: true
+      filter:
+        query: "@vendor.endpoint:audit-logs -@AUDIT_ENTITY:AUTH"
+      processors:
+        - type: schema-processor
+          name: Apply OCSF schema for 3004
+          enabled: true
+          schema:
+            schemaType: ocsf
+            version: 1.5.0
+            className: Entity Management
+            classUid: 3004
+            extensions: []
+            profiles: []
+          mappers:
+            - name: Map `ocsf.time` to `ocsf.time`
+              sources:
+                - ocsf.time
+              sourceType: attribute
+              target: ocsf.time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.activity_id
+              categories:
+                - filter:
+                    query: "@AUDIT_ENTITY_SUBTYPE:Add*"
+                  name: Create
+                  id: 1
+                - filter:
+                    query: "@AUDIT_ENTITY_SUBTYPE:(Read* OR View*)"
+                  name: Read
+                  id: 2
+                - filter:
+                    query: "@AUDIT_ENTITY_SUBTYPE:Edit*"
+                  name: Update
+                  id: 3
+                - filter:
+                    query: "@AUDIT_ENTITY_SUBTYPE:Delete*"
+                  name: Delete
+                  id: 4
+                - filter:
+                    query: -@AUDIT_ENTITY_SUBTYPE:(Add* OR Delete* OR Edit* OR View* OR Read*)
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.activity_name
+                id: ocsf.activity_id
+              fallback:
+                values:
+                  ocsf.activity_id: "99"
+                  ocsf.activity_name: Other
+                sources:
+                  ocsf.activity_name:
+                    - AUDIT_ENTITY_SUBTYPE
+              type: schema-category-mapper
+            - name: ocsf.severity_id
+              categories:
+                - filter:
+                    query: "@AUDIT_SEVERITY:*INFO"
+                  name: Informational
+                  id: 1
+                - filter:
+                    query: "@AUDIT_SEVERITY:*LOW"
+                  name: Low
+                  id: 2
+                - filter:
+                    query: "@AUDIT_SEVERITY:*MEDIUM"
+                  name: Medium
+                  id: 3
+                - filter:
+                    query: "@AUDIT_SEVERITY:*HIGH"
+                  name: High
+                  id: 4
+                - filter:
+                    query: "@AUDIT_SEVERITY:*CRITICAL"
+                  name: Critical
+                  id: 5
+                - filter:
+                    query: -@AUDIT_SEVERITY:(*INFO OR *LOW OR *MEDIUM OR *HIGH OR *CRITICAL)
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.severity
+                id: ocsf.severity_id
+              fallback:
+                values:
+                  ocsf.severity: Other
+                  ocsf.severity_id: "99"
+                sources:
+                  ocsf.severity:
+                    - AUDIT_SEVERITY
+              type: schema-category-mapper
+            - name: Map `AUDIT_INSERT_TIME` to `ocsf.time`
+              sources:
+                - AUDIT_INSERT_TIME
+              sourceType: attribute
+              target: ocsf.time
+              targetFormat: integer
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.status_id
+              categories:
+                - filter:
+                    query: "@AUDIT_RESULT:SUCCESS"
+                  name: Success
+                  id: 1
+                - filter:
+                    query: "@AUDIT_RESULT:FAIL"
+                  name: Failure
+                  id: 2
+                - filter:
+                    query: -@AUDIT_RESULT:(SUCCESS OR FAIL)
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.status
+                id: ocsf.status_id
+              fallback:
+                values:
+                  ocsf.status: Other
+                  ocsf.status_id: "99"
+                sources:
+                  ocsf.status:
+                    - AUDIT_RESULT
+              type: schema-category-mapper
+            - name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+              sources:
+                - ocsf.metadata.product.name
+              sourceType: attribute
+              target: ocsf.metadata.product.name
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+              sources:
+                - ocsf.metadata.product.vendor_name
+              sourceType: attribute
+              target: ocsf.metadata.product.vendor_name
+              targetFormat: string
+              preserveSource: false
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: ocsf.entity.type_id
+              categories:
+                - filter:
+                    query: "@AUDIT_ENTITY:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.entity.type
+                id: ocsf.entity.type_id
+              fallback:
+                values:
+                  ocsf.entity.type: Other
+                  ocsf.entity.type_id: "99"
+                sources:
+                  ocsf.entity.type:
+                    - AUDIT_ENTITY
+              type: schema-category-mapper
+            - name: Map `AUDIT_OBJECT_ID` to `ocsf.entity.uid`
+              sources:
+                - AUDIT_OBJECT_ID
+              sourceType: attribute
+              target: ocsf.entity.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUDIT_ID` to `ocsf.metadata.uid`
+              sources:
+                - AUDIT_ID
+              sourceType: attribute
+              target: ocsf.metadata.uid
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUDIT_SOURCE_IP` to `ocsf.src_endpoint.ip`
+              sources:
+                - AUDIT_SOURCE_IP
+              sourceType: attribute
+              target: ocsf.src_endpoint.ip
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUDIT_HOSTNAME` to `ocsf.src_endpoint.hostname`
+              sources:
+                - AUDIT_HOSTNAME
+              sourceType: attribute
+              target: ocsf.src_endpoint.hostname
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUDIT_REASON` to `ocsf.status_detail`
+              sources:
+                - AUDIT_REASON
+              sourceType: attribute
+              target: ocsf.status_detail
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUDIT_USER_AGENT` to `ocsf.http_request.user_agent`
+              sources:
+                - AUDIT_USER_AGENT
+              sourceType: attribute
+              target: ocsf.http_request.user_agent
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUDIT_OWNER_NAME` to `ocsf.entity.user.name`
+              sources:
+                - AUDIT_OWNER_NAME
+              sourceType: attribute
+              target: ocsf.entity.user.name
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper
+            - name: Map `AUDIT_OWNER_EMAIL` to `ocsf.entity.user.email_addr`
+              sources:
+                - AUDIT_OWNER_EMAIL
+              sourceType: attribute
+              target: ocsf.entity.user.email_addr
+              targetFormat: string
+              preserveSource: true
+              overrideOnConflict: true
+              type: schema-remapper

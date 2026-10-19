@@ -9,6 +9,7 @@ from datadog_checks.marklogic.parsers.health import parse_summary_health
 from datadog_checks.marklogic.parsers.request import _parse_request_metrics
 from datadog_checks.marklogic.parsers.resources import parse_resources
 from datadog_checks.marklogic.parsers.status import (
+    parse_per_resource_status_metrics,
     parse_summary_status_base_metrics,
     parse_summary_status_resource_metrics,
 )
@@ -410,6 +411,27 @@ def test_parse_summary_status_resource_metrics():
     result = list(parse_summary_status_resource_metrics('forest', status_resource_data, ['foo:bar']))
 
     assert sorted(result) == sorted(EXPECTED_RESULT)
+
+
+def test_parse_per_resource_status_metrics_excludes_entity_references():
+    # type: () -> None
+    # MarkLogic 11 can serialize forest reference fields as measurable `{units, value}`
+    # structures. Their values are entity IDs, not measurements, so they must be skipped.
+    forest_status_data = {
+        'forest-status': {
+            'status-properties': {
+                'nonblocking-timestamp': {'units': 'quantity', 'value': 42},
+                'master-forest': {'units': 'quantity', 'value': '12071080823545438404'},
+                'current-master-forest': {'units': 'quantity', 'value': '12071080823545438404'},
+                'current-foreign-master-forest': {'units': 'quantity', 'value': '12071080823545438404'},
+                'current-foreign-master-database': {'units': 'quantity', 'value': '4956568826694528552'},
+            }
+        }
+    }
+
+    result = list(parse_per_resource_status_metrics('forest', forest_status_data, ['foo:bar']))
+
+    assert result == [('gauge', 'forests.nonblocking-timestamp', 42, ['foo:bar'])]
 
 
 def test__parse_request_metrics():

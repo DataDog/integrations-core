@@ -143,6 +143,23 @@ def test_code_coverage_file_missing(ddev, repository, helpers):
     assert "Unable to find the code coverage config file" in helpers.remove_trailing_spaces(result.output)
 
 
+def test_code_coverage_skipped_for_extras(ddev, repository, helpers, config_file):
+    config_file.model.repos['extras'] = str(repository.path)
+    config_file.model.repo = 'extras'
+    config_file.save()
+
+    # Remove the coverage file entirely — extras should not care
+    coverage_file = repository.path / 'code-coverage.datadog.yml'
+    if coverage_file.exists():
+        coverage_file.unlink()
+
+    result = ddev('validate', 'ci', '--sync')
+    assert result.exit_code == 0, result.output
+
+    result = ddev('validate', 'ci')
+    assert result.exit_code == 0, result.output
+
+
 @pytest.mark.parametrize(
     'repo_name',
     [

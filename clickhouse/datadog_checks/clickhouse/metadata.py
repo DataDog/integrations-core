@@ -30,7 +30,7 @@ class ClickhouseMetadata(DBMAsyncJob):
             rate_limit=1 / collection_interval,
             run_sync=check._config.collect_schemas.run_sync,
             enabled=check._config.collect_schemas.enabled,
-            dbms='clickhouse',
+            dbms=check.dbms,
             min_collection_interval=check._config.min_collection_interval,
             expected_db_exceptions=(DatabaseError,),
             job_name='clickhouse-metadata',
@@ -40,9 +40,12 @@ class ClickhouseMetadata(DBMAsyncJob):
         self._schema_collector = ClickhouseSchemaCollector(check)
         self._schema_collector._cancel_event = self._cancel_event
 
-    def cancel(self):
-        super(ClickhouseMetadata, self).cancel()
-        self._schema_collector.close()
+    def shutdown(self) -> None:
+        if self._schema_collector is not None:
+            self._schema_collector.close()
+        # The collector holds the check too, so dropping it here releases both.
+        self._schema_collector = None
+        self._check = None
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def run_job(self):

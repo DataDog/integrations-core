@@ -24,6 +24,14 @@ files:
                 - true
                 - false
 
+              Services can also be selectively monitored by whether they are Windows per-user services,
+              which are instantiated per user logon session and named `<service name>_<LUID>`
+              (for example `OneSyncSvc_443f50`). The possible values for `per_user` are:
+                - true
+                - false
+              To exclude per-user services from collection, monitor only non-per-user services with
+              `per_user: false`.
+
               If any service is set to `ALL`, all services registered with the SCM will be monitored, and
               all other patterns provided in this instance will be ignored.
 
@@ -45,6 +53,7 @@ files:
                 - name: <SERVICE_NAME_2>
                 - startup_type: automatic
                   trigger_start: false
+                - per_user: false
           - name: disable_legacy_service_tag
             description: |
               Whether or not to stop submitting the tag `service` that has been renamed
@@ -78,6 +87,20 @@ files:
               Example of the default `windows_service` tag and `display_name` tag:
               windows_service:wuauserv
               display_name:windows_update
+            fleet_configurable: true
+            value:
+              type: boolean
+              example: false
+          - name: group_per_user_services
+            description: |
+              Whether or not to group Windows per-user services under their template name.
+
+              Per-user services are instantiated per user logon session and named
+              `<service name>_<LUID>` (for example `OneSyncSvc_443f50`), which creates high
+              cardinality in the `windows_service` and `display_name` tags. When enabled, the
+              LUID suffix is stripped so all instances of a per-user service report under the
+              same template name.
+              See https://learn.microsoft.com/en-us/windows/application-management/per-user-services-in-windows
             fleet_configurable: true
             value:
               type: boolean

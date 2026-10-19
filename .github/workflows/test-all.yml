@@ -61,6 +61,12 @@ on:
         default: "standard"
         type: string
 
+permissions:
+  # needed for compute-matrix in test-target.yml
+  contents: read
+  # needed for dd-sts in test-target.yml
+  id-token: write
+
 jobs:
   jd316aba:
     uses: ./.github/workflows/test-target.yml
@@ -683,6 +689,26 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
+  jef39ca4:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Cisco Catalyst Center
+      target: cisco_catalyst_center
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
   jafd4d40:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -737,6 +763,7 @@ jobs:
         - py3.13-24.8
         - py3.13-25.3
         - py3.13-25.8
+        - py3.13-26.3
       fail-fast: false
   j4131274:
     uses: ./.github/workflows/test-target.yml
@@ -1118,6 +1145,26 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
+  j7545925:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Dynamo
+      target: dynamo
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
   j562bfe5:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -1263,6 +1310,26 @@ jobs:
     with:
       job-name: Falco
       target: falco
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
+  j7f02532:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: flink
+      target: flink
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
@@ -1898,6 +1965,26 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
+  j0839eef:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: InterSystems IRIS
+      target: intersystems_iris
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
   j0c16521:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -2338,6 +2425,26 @@ jobs:
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
+  j3c620e6:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: Kueue
+      target: kueue
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
   j739f9be:
     uses: ./.github/workflows/test-target.yml
     with:
@@ -2722,6 +2829,10 @@ jobs:
         - py3.13-8.0-shard
         - py3.13-8.0-auth
         - py3.13-8.0-tls
+        - py3.13-9.0-standalone
+        - py3.13-9.0-shard
+        - py3.13-9.0-auth
+        - py3.13-9.0-tls
         - py3.13-8.0-standalone-newyork
       fail-fast: false
   j211906c:
@@ -2752,12 +2863,15 @@ jobs:
         - py3.13-8.0.18
         - py3.13-8.0.36
         - py3.13-8.4.0
+        - py3.13-9.7.2
         - py3.13-8.0-group
         - py3.13-8.0-hybrid
         - py3.13-mariadb-10.5
         - py3.13-mariadb-10.6
         - py3.13-mariadb-10.11
         - py3.13-mariadb-11.4
+        - py3.13-mariadb-12.0
+        - py3.13-mariadb-13
         - py3.13-percona-8.0.42
         - py3.13-percona-8.4
       fail-fast: false
@@ -3490,6 +3604,26 @@ jobs:
     with:
       job-name: Scylla
       target: scylla
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: "${{ inputs.repo }}"
+      context: ${{ inputs.context }}
+      python-version: "${{ inputs.python-version }}"
+      latest: ${{ inputs.latest }}
+      agent-image: "${{ inputs.agent-image }}"
+      agent-image-py2: "${{ inputs.agent-image-py2 }}"
+      agent-image-windows: "${{ inputs.agent-image-windows }}"
+      agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
+      test-py2: ${{ inputs.test-py2 }}
+      test-py3: ${{ inputs.test-py3 }}
+      minimum-base-package: ${{ inputs.minimum-base-package }}
+      pytest-args: ${{ inputs.pytest-args }}
+    secrets: inherit
+  j620457a:
+    uses: ./.github/workflows/test-target.yml
+    with:
+      job-name: SGLang
+      target: sglang
       platform: linux
       runner: '["ubuntu-22.04"]'
       repo: "${{ inputs.repo }}"
@@ -4281,9 +4415,22 @@ jobs:
       agent-image-windows-py2: "${{ inputs.agent-image-windows-py2 }}"
       test-py2: ${{ inputs.test-py2 }}
       test-py3: ${{ inputs.test-py3 }}
+      target-env: ${{ matrix.target-env }}
       minimum-base-package: ${{ inputs.minimum-base-package }}
       pytest-args: ${{ inputs.pytest-args }}
     secrets: inherit
+    strategy:
+      matrix:
+        target-env:
+        - py3.13-8.4-with-tls-native
+        - py3.13-8.4-with-tls-http
+        - py3.13-8.4-without-tls-native
+        - py3.13-8.4-without-tls-http
+        - py3.13-10.0-with-tls-native
+        - py3.13-10.0-with-tls-http
+        - py3.13-10.0-without-tls-native
+        - py3.13-10.0-without-tls-http
+      fail-fast: false
   j269c8a5:
     uses: ./.github/workflows/test-target.yml
     with:

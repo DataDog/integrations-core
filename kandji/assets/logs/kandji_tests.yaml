@@ -29,6 +29,7 @@ tests:
         first_name: "John"
         last_name: "Carter"
         role: "admin"
+        email: john.carter@crestdata.ai
       occurred_at: "2025-09-23T09:01:37.420577Z"
       target_component: "user"
       target_id: "4b3b6c16-2728-4037-8d4a-342538cad637"
@@ -36,6 +37,35 @@ tests:
       usr:
         email: "john.carter@crestdata.ai"
         name: "John Carter"
+      ocsf:
+        severity: Informational
+        activity_name: update
+        metadata:
+          uid: 01K5TWX6CQ07HFHKSMYQYRDKAB
+          product:
+            name: Iru
+            vendor_name: Iru
+          version: 1.5.0
+        category_uid: 3
+        category_name: Identity & Access Management
+        actor:
+          user:
+            uid: aa2ec25a-a125-45b5-9489-b9cd66d2d60f
+            type_id: 1
+            type: User
+        status_id: 1
+        class_uid: 3001
+        activity_id: 99
+        time: 1758618097420
+        severity_id: 1
+        user:
+          uid: 4b3b6c16-2728-4037-8d4a-342538cad637
+          type_id: 2
+          name: John Carter
+          type: Admin
+          email_addr: john.carter@crestdata.ai
+        class_name: Account Change
+        status: Success
     message: |-
       {
         "occurred_at" : "2025-09-23T09:01:37.420577Z",
@@ -55,7 +85,7 @@ tests:
       }
     service: "audit"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1758618097420
   -
    sample: |-
@@ -167,13 +197,13 @@ tests:
         event:
           action: "threat-detected"
           category:
-           - "file"
-           - "threat"
-           - "malware"
+            - "file"
+            - "threat"
+            - "malware"
           created: "2025-09-23T07:16:07.444310+00:00"
           kind: "event"
           type:
-           - "indicator"
+            - "indicator"
         file:
           device: "16777222"
           directory: "/Users/Shared/AppStore.app/Contents/MacOS"
@@ -186,9 +216,9 @@ tests:
         host:
           id: "3a867771-949f-4065-9bc2-e79634af48b9"
           mac:
-           - "38:f9:d3:1c:9c:bb"
-           - "F0:18:98:B6:75:AE"
-           - "38:f9:d3:1c:9c:bb"
+            - "38:f9:d3:1c:9c:bb"
+            - "F0:18:98:B6:75:AE"
+            - "38:f9:d3:1c:9c:bb"
           name: "ITs-MacBook-Air-2.local"
           os:
             family: "sonoma"
@@ -205,6 +235,64 @@ tests:
       usr:
         id: "501"
         name: "it"
+      ocsf:
+        severity: High
+        activity_name: Create
+        metadata:
+          uid: 01K5TPW1DEFFM2SYK7HYJ5TPAB
+          product:
+            name: Iru
+            vendor_name: Iru
+          version: 1.5.0
+          profiles:
+            - security_control
+        category_uid: 2
+        malware:
+          - classification_ids:
+              - 17
+            uid: 4131d4737fe8dfe66d407bfd0a0df18a4a77b89347471cc012da8efc93c661aB
+            name: SpyDok
+            provider: Kandji
+            classifications:
+              - Spyware
+        category_name: Findings
+        finding_info:
+          uid: 3a867771-949f-4065-9bc2-e79634af48b9.16777220.558457
+          title: SpyDok detected in AppStore
+          desc: SpyDok is spyware designed to stealthily collect sensitive information such as login credentials, browsing history, and other personal data. It operates by monitoring user activity, exfiltrating stolen data to remote servers controlled by attackers, and maintaining persistence to evade detection.
+          first_seen_time: 1758611767444
+        status_id: 1
+        class_uid: 2004
+        activity_id: 1
+        time: 1758611767444
+        severity_id: 4
+        class_name: Detection Finding
+        device:
+          uid: 3a867771-949f-4065-9bc2-e79634af48b1
+          hostname: ITs-MacBook-Air-2
+          os:
+            name: Sonoma
+            version: 14.7.6
+            type_id: 300
+            type: macOS
+          type_id: 0
+          name: IT’s MacBook Air
+          hw_info:
+            serial_number: C02XPHAYJK12
+          model: MacBook Air
+          type: Unknown
+        status: New
+        evidences:
+          - file:
+              path: /Users/Shared/AppStore.app/Contents/MacOS/AppStore
+              type_id: 1
+              name: AppStore
+              type: Regular File
+        is_alert: true
+        disposition: No Action
+        policy:
+          uid: d239708c-d890-48de-b5f5-f5b5ecc555ca
+        disposition_id: 16
     message: |-
       {
         "occurred_at" : "2025-09-23T07:16:07.444310Z",
@@ -281,7 +369,7 @@ tests:
       }
     service: "audit"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1758611767444
   -
    sample: |-
@@ -327,6 +415,35 @@ tests:
       target_component: "enrollment"
       target_id: "3fce591e-393c-49cc-91f2-f3eb608404dp"
       target_type: "device"
+      ocsf:
+        severity: Informational
+        activity_name: Enroll
+        metadata:
+          uid: 01K4SVQ3MR2BSPB21TWNWJAJA2
+          product:
+            name: Iru
+            vendor_name: Iru
+          version: 1.5.0
+        category_uid: 3
+        category_name: Identity & Access Management
+        message: create device (enrollment)
+        actor:
+          user:
+            uid: kandji
+            type_id: 3
+            type: System
+        status_id: 1
+        class_uid: 3004
+        activity_id: 6
+        time: 1757509553181
+        severity_id: 1
+        class_name: Entity Management
+        entity:
+          uid: 3fce591e-393c-49cc-91f2-f3eb608404dp
+          type_id: 1
+          name: No name
+          type: Device
+        status: Success
     message: |-
       {
         "occurred_at" : "2025-09-10T13:05:53.181373Z",
@@ -351,7 +468,7 @@ tests:
       }
     service: "audit"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1757509553181
   -
    sample: |-
@@ -427,20 +544,20 @@ tests:
         event:
           action: "vulnerability_detect"
           category:
-           - "vulnerability"
+            - "vulnerability"
           id: "e7268916397088438050fdd671054aab"
           kind: "alert"
           type:
-           - "info"
+            - "info"
         file:
           name: "Safari"
           path: "/Applications/Safari.app"
         host:
           id: "1e5e3ea1-20d1-4c2c-8b8d-3411608aebab"
           mac:
-           - "f0:18:98:ad:89:bc"
-           - "F0:18:98:A5:3C:A7"
-           - "f0:18:98:ad:89:bc"
+            - "f0:18:98:ad:89:bc"
+            - "F0:18:98:A5:3C:A7"
+            - "f0:18:98:ad:89:bc"
           name: "IT’s MacBook Air"
           os:
             name: "macOS"
@@ -459,6 +576,51 @@ tests:
       occurred_at: "2025-09-09T07:47:49.172851Z"
       target_id: "e7268916397088438050fdd671054aab"
       target_type: "vulnerability"
+      ocsf:
+        severity: Medium
+        activity_name: Create
+        metadata:
+          uid: 01K4PQ40BTQPZVS52FJXD0GFB3
+          product:
+            name: Iru
+            vendor_name: Iru
+          version: 1.5.0
+        category_uid: 2
+        category_name: Findings
+        finding_info:
+          uid: e7268916397088438050fdd671054aab
+          title: CVE-2024-44187 identified in Safari
+          desc: A cross-origin issue existed with "iframe" elements. This was addressed with improved tracking of security origins. This issue is fixed in Safari 18, visionOS 2, watchOS 11, macOS Sequoia 15, iOS 18 and iPadOS 18, tvOS 18. A malicious website may exfiltrate data cross-origin.
+        status_id: 1
+        class_uid: 2002
+        activity_id: 1
+        vulnerabilities:
+          - severity: Medium
+            cve:
+              uid: CVE-2024-44187
+              desc: A cross-origin issue existed with "iframe" elements. This was addressed with improved tracking of security origins. This issue is fixed in Safari 18, visionOS 2, watchOS 11, macOS Sequoia 15, iOS 18 and iPadOS 18, tvOS 18. A malicious website may exfiltrate data cross-origin.
+              epss:
+                score: '8.6E-4'
+              cvss:
+                - severity: Medium
+                  base_score: 6.5
+                  version: '3.1'
+            vendor_name: Kandji
+            desc: A cross-origin issue existed with "iframe" elements. This was addressed with improved tracking of security origins. This issue is fixed in Safari 18, visionOS 2, watchOS 11, macOS Sequoia 15, iOS 18 and iPadOS 18, tvOS 18. A malicious website may exfiltrate data cross-origin.
+        time: 1757404069172
+        severity_id: 3
+        class_name: Vulnerability Finding
+        device:
+          uid: 1e5e3ea1-20d1-4c2c-8b8d-3411608aebab
+          os:
+            name: macOS
+            version: Sonoma
+            type_id: 300
+            type: macOS
+          type_id: 0
+          name: IT’s MacBook Air
+          type: Unknown
+        status: New
     message: |-
       {
         "occurred_at" : "2025-09-09T07:47:49.172851Z",
@@ -515,7 +677,7 @@ tests:
     service: "audit"
     status: "warn"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1757404069172
   -
    sample: |-
@@ -550,18 +712,45 @@ tests:
       id: "01K4PJA0E0EQEC7QRXTH6WAJ12"
       new_state:
         library_items_added:
-         -
-          id: "00722363-0b8b-4fdb-9806-5cf49dd4c4eb"
-          name: "Bloxone"
+          - id: "00722363-0b8b-4fdb-9806-5cf49dd4c4eb"
+            name: "Bloxone"
         library_items_scoped:
-         -
-          id: "e6f2f3bf-56ef-4f2f-9613-fc362f29adab"
-          name: "Liftoff-test"
+          - id: "e6f2f3bf-56ef-4f2f-9613-fc362f29adab"
+            name: "Liftoff-test"
         name: "DDS-Test"
       occurred_at: "2025-09-09T06:23:43.383914Z"
       target_component: "library_items"
       target_id: "41b6cc51-7905-436a-9e33-b1468ceeb08a"
       target_type: "blueprint"
+      ocsf:
+        severity: Informational
+        activity_name: Update
+        metadata:
+          uid: 01K4PJA0E0EQEC7QRXTH6WAJ12
+          product:
+            name: Iru
+            vendor_name: Iru
+          version: 1.5.0
+        category_uid: 3
+        category_name: Identity & Access Management
+        message: update blueprint (library_items)
+        actor:
+          user:
+            uid: ffc0f98d-5429-4e7a-8d26-9dd015a974ef
+            type_id: 1
+            type: User
+        status_id: 1
+        class_uid: 3004
+        activity_id: 3
+        time: 1757399023383
+        severity_id: 1
+        class_name: Entity Management
+        entity:
+          uid: 41b6cc51-7905-436a-9e33-b1468ceeb08a
+          type_id: 99
+          name: DDS-Test
+          type: blueprint
+        status: Success
     message: |-
       {
         "occurred_at" : "2025-09-09T06:23:43.383914Z",
@@ -586,7 +775,7 @@ tests:
       }
     service: "audit"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1757399023383
   -
    sample: |-
@@ -634,9 +823,400 @@ tests:
       path: "/Applications/Google Chrome.app"
       severity: "High"
       version: "140.0.7339.81"
+      ocsf:
+        severity: High
+        activity_name: Create
+        metadata:
+          product:
+            name: Iru
+            vendor_name: Iru
+          version: 1.5.0
+          uid: 1e5e3ea1-20d1-4c2c-8b8d-3411608aebab-com.google.Chrome-CVE-2025-10892
+        category_uid: 2
+        category_name: Findings
+        finding_info:
+          uid: 1e5e3ea1-20d1-4c2c-8b8d-3411608aebab-com.google.Chrome-CVE-2025-10892
+          src_url: https://nvd.nist.gov/vuln/detail/CVE-2025-10892
+          title: CVE-2025-10892 identified in Google Chrome
+        status_id: 1
+        class_uid: 2002
+        activity_id: 1
+        vulnerabilities:
+          - cve:
+              uid: CVE-2025-10892
+              cvss:
+                - base_score: 8.8
+                  version: '3.1'
+                  severity: High
+              created_time: 1758734139940
+              modified_time: 1758815741970
+            severity: High
+        time: 1758740254914
+        severity_id: 4
+        class_name: Vulnerability Finding
+        device:
+          uid: 1e5e3ea1-20d1-4c2c-8b8d-3411608aebab
+          os:
+            version: 14.7.8
+            type_id: 300
+            name: macOS
+            type: macOS
+          type_id: 0
+          name: IT’s MacBook Air
+          hw_info:
+            serial_number: C02XMF5VJK7A
+          model: MacBook Air (Retina, 13-inch, 2018)
+          type: Unknown
+          groups:
+            - uid: 41b6cc51-7905-436a-9e33-b1468ceeb08d
+              name: Blueprint-Test
+        status: New
     message: "Integer overflow in V8 in Google Chrome prior to 140.0.7339.207 allowed a remote attacker to potentially exploit heap corruption via a crafted HTML page. (Chromium security severity: High)"
     service: "detection"
     status: "warn"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1758740254914
+  -
+   sample: |-
+    {
+      "metadata" : {
+        "run_details" : [ "Checking for the ability of admins to unlock a user's active session...", "Checking authorizationdb...", "authorizationdb was admin unlock enabled. Updated config.", "Done." ]
+      },
+      "actor_type" : "device",
+      "target_type" : "device",
+      "target_id" : "3a867771-949f-4065-9bc2-e79634af48b1",
+      "event_category" : "endpoint_management",
+      "occurred_at" : "2025-09-24T10:15:02.113045Z",
+      "target_component" : "remediation",
+      "device_name" : "IT's MacBook Air",
+      "event_type" : "update.device.remediation",
+      "action" : "update",
+      "new_state" : {
+        "run_time" : "2025-09-24T10:15:01.880000Z",
+        "parameter_name" : "Disable the ability to login to another user's active and locked session",
+        "device" : {
+          "name" : "IT's MacBook Air",
+          "id" : "3a867771-949f-4065-9bc2-e79634af48b1"
+        }
+      },
+      "id" : "01K5W2Q8ZR4M7T1N3D6XVB0PKC",
+      "actor_id" : "3a867771-949f-4065-9bc2-e79634af48b1"
+    }
+   service: "audit"
+   result:
+     custom:
+       action: "update"
+       actor_id: "3a867771-949f-4065-9bc2-e79634af48b1"
+       actor_type: "device"
+       device_name: "IT's MacBook Air"
+       event_category: "endpoint_management"
+       event_type: "update.device.remediation"
+       id: "01K5W2Q8ZR4M7T1N3D6XVB0PKC"
+       metadata:
+         run_details:
+           - "Checking for the ability of admins to unlock a user's active session..."
+           - "Checking authorizationdb..."
+           - "authorizationdb was admin unlock enabled. Updated config."
+           - "Done."
+       new_state:
+         device:
+           id: "3a867771-949f-4065-9bc2-e79634af48b1"
+           name: "IT's MacBook Air"
+         parameter_name: "Disable the ability to login to another user's active and locked session"
+         run_time: "2025-09-24T10:15:01.880000Z"
+       occurred_at: "2025-09-24T10:15:02.113045Z"
+       ocsf:
+         activity_id: 3
+         activity_name: "Close"
+         category_name: "Findings"
+         category_uid: 2
+         class_name: "Compliance Finding"
+         class_uid: 2003
+         compliance:
+           control: "Disable the ability to login to another user's active and locked session"
+           status: "Fail"
+           status_id: 3
+         device:
+           hostname: "IT's MacBook Air"
+           name: "IT's MacBook Air"
+           type: "Unknown"
+           type_id: 0
+           uid: "3a867771-949f-4065-9bc2-e79634af48b1"
+         finding_info:
+           title: "Disable the ability to login to another user's active and locked session"
+           uid: "3a867771-949f-4065-9bc2-e79634af48b1-Disable the ability to login to another user's active and locked session"
+         message: "remediation: Disable the ability to login to another user's active and locked session"
+         metadata:
+           product:
+             name: "Iru"
+             vendor_name: "Iru"
+           uid: "01K5W2Q8ZR4M7T1N3D6XVB0PKC"
+           version: "1.5.0"
+         severity: "Informational"
+         severity_id: 1
+         status: "Resolved"
+         status_id: 4
+         time: 1758708902113
+       target_component: "remediation"
+       target_id: "3a867771-949f-4065-9bc2-e79634af48b1"
+       target_type: "device"
+     message: |-
+       {
+         "metadata" : {
+           "run_details" : [ "Checking for the ability of admins to unlock a user's active session...", "Checking authorizationdb...", "authorizationdb was admin unlock enabled. Updated config.", "Done." ]
+         },
+         "actor_type" : "device",
+         "target_type" : "device",
+         "target_id" : "3a867771-949f-4065-9bc2-e79634af48b1",
+         "event_category" : "endpoint_management",
+         "occurred_at" : "2025-09-24T10:15:02.113045Z",
+         "target_component" : "remediation",
+         "device_name" : "IT's MacBook Air",
+         "event_type" : "update.device.remediation",
+         "action" : "update",
+         "new_state" : {
+           "run_time" : "2025-09-24T10:15:01.880000Z",
+           "parameter_name" : "Disable the ability to login to another user's active and locked session",
+           "device" : {
+             "name" : "IT's MacBook Air",
+             "id" : "3a867771-949f-4065-9bc2-e79634af48b1"
+           }
+         },
+         "id" : "01K5W2Q8ZR4M7T1N3D6XVB0PKC",
+         "actor_id" : "3a867771-949f-4065-9bc2-e79634af48b1"
+       }
+     service: "audit"
+     tags:
+       - "source:LOGS_SOURCE"
+     timestamp: 1758708902113
+  -
+   sample: |-
+    {
+      "metadata" : {
+        "has_enabled_params" : true
+      },
+      "actor_type" : "device",
+      "target_type" : "device",
+      "blueprint_name" : "DDS-Test",
+      "target_id" : "3a867771-949f-4065-9bc2-e79634af48b1",
+      "event_category" : "endpoint_management",
+      "occurred_at" : "2025-09-24T09:02:44.512300Z",
+      "target_component" : "first_runs",
+      "device_name" : "IT's MacBook Air",
+      "event_type" : "create.device.first_runs",
+      "action" : "create",
+      "new_state" : {
+        "blueprint" : {
+          "name" : "DDS-Test",
+          "id" : "41b6cc51-7905-436a-9e33-b1468ceeb08a"
+        },
+        "parameter_names" : {
+          "incompatible" : [ "Enable System Integrity Protection (SIP)" ],
+          "passed" : [ "Disable File Sharing", "Disable Bluetooth Sharing", "Application Blocking", "Disable the \"root\" user" ]
+        },
+        "counts" : {
+          "alerts" : 0,
+          "remediated" : 0,
+          "incompatible" : 1,
+          "passed" : 4,
+          "muted" : 0
+        },
+        "task_datetime" : "2025-09-24T09:02:40.000000Z",
+        "device" : {
+          "name" : "IT's MacBook Air",
+          "id" : "3a867771-949f-4065-9bc2-e79634af48b1"
+        }
+      },
+      "id" : "01K5W0J5MB8E2Q9F4A7HTY3RNZ",
+      "actor_id" : "3a867771-949f-4065-9bc2-e79634af48b1"
+    }
+   service: "audit"
+   result:
+     custom:
+       action: "create"
+       actor_id: "3a867771-949f-4065-9bc2-e79634af48b1"
+       actor_type: "device"
+       blueprint_name: "DDS-Test"
+       device_name: "IT's MacBook Air"
+       event_category: "endpoint_management"
+       event_type: "create.device.first_runs"
+       id: "01K5W0J5MB8E2Q9F4A7HTY3RNZ"
+       metadata:
+         has_enabled_params: true
+       new_state:
+         blueprint:
+           id: "41b6cc51-7905-436a-9e33-b1468ceeb08a"
+           name: "DDS-Test"
+         counts:
+           alerts: 0
+           incompatible: 1
+           muted: 0
+           passed: 4
+           remediated: 0
+         device:
+           id: "3a867771-949f-4065-9bc2-e79634af48b1"
+           name: "IT's MacBook Air"
+         parameter_names:
+           incompatible:
+             - "Enable System Integrity Protection (SIP)"
+           passed:
+             - "Disable File Sharing"
+             - "Disable Bluetooth Sharing"
+             - "Application Blocking"
+             - 'Disable the "root" user'
+         task_datetime: "2025-09-24T09:02:40.000000Z"
+       occurred_at: "2025-09-24T09:02:44.512300Z"
+       ocsf:
+         activity_id: 1
+         activity_name: "Create"
+         category_name: "Findings"
+         category_uid: 2
+         class_name: "Compliance Finding"
+         class_uid: 2003
+         compliance:
+           status: "Fail"
+           status_id: 3
+           requirements:
+             - Disable File Sharing
+             - Disable Bluetooth Sharing
+             - Application Blocking
+             - Disable the "root" user
+           control: DDS-Test
+         device:
+           hostname: "IT's MacBook Air"
+           name: "IT's MacBook Air"
+           type: "Unknown"
+           type_id: 0
+           uid: "3a867771-949f-4065-9bc2-e79634af48b1"
+           groups:
+             - name: DDS-Test
+         finding_info:
+           title: "Compliance run for blueprint DDS-Test"
+           uid: "3a867771-949f-4065-9bc2-e79634af48b1-DDS-Test"
+         message: "first_runs: "
+         metadata:
+           product:
+             name: "Iru"
+             vendor_name: "Iru"
+           uid: "01K5W0J5MB8E2Q9F4A7HTY3RNZ"
+           version: "1.5.0"
+         severity: "Low"
+         severity_id: 2
+         status: "New"
+         status_id: 1
+         time: 1758704564512
+       target_component: "first_runs"
+       target_id: "3a867771-949f-4065-9bc2-e79634af48b1"
+       target_type: "device"
+     message: |-
+       {
+         "metadata" : {
+           "has_enabled_params" : true
+         },
+         "actor_type" : "device",
+         "target_type" : "device",
+         "blueprint_name" : "DDS-Test",
+         "target_id" : "3a867771-949f-4065-9bc2-e79634af48b1",
+         "event_category" : "endpoint_management",
+         "occurred_at" : "2025-09-24T09:02:44.512300Z",
+         "target_component" : "first_runs",
+         "device_name" : "IT's MacBook Air",
+         "event_type" : "create.device.first_runs",
+         "action" : "create",
+         "new_state" : {
+           "blueprint" : {
+             "name" : "DDS-Test",
+             "id" : "41b6cc51-7905-436a-9e33-b1468ceeb08a"
+           },
+           "parameter_names" : {
+             "incompatible" : [ "Enable System Integrity Protection (SIP)" ],
+             "passed" : [ "Disable File Sharing", "Disable Bluetooth Sharing", "Application Blocking", "Disable the \"root\" user" ]
+           },
+           "counts" : {
+             "alerts" : 0,
+             "remediated" : 0,
+             "incompatible" : 1,
+             "passed" : 4,
+             "muted" : 0
+           },
+           "task_datetime" : "2025-09-24T09:02:40.000000Z",
+           "device" : {
+             "name" : "IT's MacBook Air",
+             "id" : "3a867771-949f-4065-9bc2-e79634af48b1"
+           }
+         },
+         "id" : "01K5W0J5MB8E2Q9F4A7HTY3RNZ",
+         "actor_id" : "3a867771-949f-4065-9bc2-e79634af48b1"
+       }
+     service: "audit"
+     tags:
+       - "source:LOGS_SOURCE"
+     timestamp: 1758704564512
+  -
+   sample: |-
+    {
+      "occurred_at" : "2025-09-24T11:44:19.002001Z",
+      "target_component" : "settings",
+      "event_type" : "update.tenant.settings",
+      "actor_type" : "user",
+      "target_type" : "tenant",
+      "action" : "update",
+      "new_state" : {
+        "name" : "Example Org"
+      },
+      "target_id" : "9d618261-86dd-4a4f-89bc-147f052878fc",
+      "id" : "01K5W4T1XP6C0V8B2S5MJQ7WDE",
+      "actor_id" : "ffc0f98d-5429-4e7a-8d26-9dd015a974ef",
+      "event_category" : "endpoint_management"
+    }
+   service: "audit"
+   result:
+     custom:
+       action: "update"
+       actor_id: "ffc0f98d-5429-4e7a-8d26-9dd015a974ef"
+       actor_type: "user"
+       event_category: "endpoint_management"
+       event_type: "update.tenant.settings"
+       id: "01K5W4T1XP6C0V8B2S5MJQ7WDE"
+       new_state:
+         name: "Example Org"
+       occurred_at: "2025-09-24T11:44:19.002001Z"
+       ocsf:
+         activity_id: 99
+         activity_name: "update"
+         category_uid: 0
+         class_name: "Base Event"
+         class_uid: 0
+         metadata:
+           product:
+             name: "Iru"
+             vendor_name: "Iru"
+           uid: "01K5W4T1XP6C0V8B2S5MJQ7WDE"
+           version: "1.5.0"
+         severity: "Informational"
+         severity_id: 1
+         time: 1758714259002
+       target_component: "settings"
+       target_id: "9d618261-86dd-4a4f-89bc-147f052878fc"
+       target_type: "tenant"
+     message: |-
+       {
+         "occurred_at" : "2025-09-24T11:44:19.002001Z",
+         "target_component" : "settings",
+         "event_type" : "update.tenant.settings",
+         "actor_type" : "user",
+         "target_type" : "tenant",
+         "action" : "update",
+         "new_state" : {
+           "name" : "Example Org"
+         },
+         "target_id" : "9d618261-86dd-4a4f-89bc-147f052878fc",
+         "id" : "01K5W4T1XP6C0V8B2S5MJQ7WDE",
+         "actor_id" : "ffc0f98d-5429-4e7a-8d26-9dd015a974ef",
+         "event_category" : "endpoint_management"
+       }
+     service: "audit"
+     tags:
+       - "source:LOGS_SOURCE"
+     timestamp: 1758714259002

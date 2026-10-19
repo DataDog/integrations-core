@@ -27,6 +27,14 @@ instances:
     ##   - true
     ##   - false
     ##
+    ## Services can also be selectively monitored by whether they are Windows per-user services,
+    ## which are instantiated per user logon session and named `<service name>_<LUID>`
+    ## (for example `OneSyncSvc_443f50`). The possible values for `per_user` are:
+    ##   - true
+    ##   - false
+    ## To exclude per-user services from collection, monitor only non-per-user services with
+    ## `per_user: false`.
+    ##
     ## If any service is set to `ALL`, all services registered with the SCM will be monitored, and
     ## all other patterns provided in this instance will be ignored.
     ##
@@ -41,6 +49,7 @@ instances:
       - name: <SERVICE_NAME_2>
       - startup_type: automatic
         trigger_start: false
+      - per_user: false
 
     ## @param disable_legacy_service_tag - boolean - optional - default: false
     ## Whether or not to stop submitting the tag `service` that has been renamed
@@ -72,6 +81,18 @@ instances:
     ## display_name:windows_update
     #
     # collect_display_name_as_tag: false
+
+    ## @param group_per_user_services - boolean - optional - default: false
+    ## Whether or not to group Windows per-user services under their template name.
+    ##
+    ## Per-user services are instantiated per user logon session and named
+    ## `<service name>_<LUID>` (for example `OneSyncSvc_443f50`), which creates high
+    ## cardinality in the `windows_service` and `display_name` tags. When enabled, the
+    ## LUID suffix is stripped so all instances of a per-user service report under the
+    ## same template name.
+    ## See https://learn.microsoft.com/en-us/windows/application-management/per-user-services-in-windows
+    #
+    # group_per_user_services: false
 
     ## @param tags - list of strings - optional
     ## A list of tags to attach to every metric and service check emitted by this instance.

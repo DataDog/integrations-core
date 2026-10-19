@@ -1,1 +1,0 @@
-Lazy load the validation package (core, security, utils) on import of datadog_checks.checks.

@@ -85,11 +85,11 @@ RUN Get-RemoteFile `
     Approve-File -Path $($Env:USERPROFILE + '\.cargo\bin\rustc.exe') -Hash $Env:RUSTC_HASH
 
 # Install Python 3
-ENV PYTHON_VERSION="3.13.14"
+ENV PYTHON_VERSION="3.13.16"
 RUN Get-RemoteFile `
       -Uri https://www.python.org/ftp/python/$Env:PYTHON_VERSION/python-$Env:PYTHON_VERSION-amd64.exe `
       -Path python-$Env:PYTHON_VERSION-amd64.exe `
-      -Hash 'c54d9b9bbb8a36e6489363ddd01139707fd781d72f1f9e90c7ec65d0061368e0'; `
+      -Hash 'fb4f9f5d438b2396da0086dc70b935c530cb578e37adc6d354f7ad2037fee83b'; `
     Start-Process -Wait python-$Env:PYTHON_VERSION-amd64.exe -ArgumentList '/quiet', 'InstallAllUsers=1'; `
     Remove-Item python-$Env:PYTHON_VERSION-amd64.exe; `
     & 'C:\Program Files\Python313\python.exe' -m pip install --no-warn-script-location --upgrade pip; `
@@ -127,11 +127,11 @@ RUN Get-RemoteFile `
     Add-ToPath -Append "C:\nasm\nasm-$Env:NASM_VERSION" && `
     Remove-Item "nasm-$Env:NASM_VERSION-win64.zip"
 
-ENV OPENSSL_VERSION="3.6.2"
+ENV OPENSSL_VERSION="3.6.4"
 RUN Get-RemoteFile `
       -Uri https://www.openssl.org/source/openssl-$Env:OPENSSL_VERSION.tar.gz `
       -Path openssl-$Env:OPENSSL_VERSION.tar.gz `
-      -Hash 'aaf51a1fe064384f811daeaeb4ec4dce7340ec8bd893027eee676af31e83a04f'; `
+      -Hash '9bffaa1ad1e07b354c21bd3324ec02fa15579f45a7d0494b3e74bc449b7333ef'; `
     7z x openssl-$Env:OPENSSL_VERSION.tar.gz -r -y && `
     7z x openssl-$Env:OPENSSL_VERSION.tar -oC:\openssl_3 && `
     cd C:\openssl_3\openssl-$Env:OPENSSL_VERSION && `
@@ -149,14 +149,18 @@ RUN Get-RemoteFile `
     Remove-Item win_flex_bison-$Env:WINFLEXBISON_VERSION.zip && `
     Add-ToPath -Append 'C:\winflexbison'
 # Meson + Ninja for building PostgreSQL 18+ on Windows
-RUN python -m pip install --no-warn-script-location meson ninja && `
+# renovate: datasource=pypi depName=meson
+ENV MESON_VERSION="1.11.1"
+# renovate: datasource=pypi depName=ninja
+ENV NINJA_VERSION="1.13.0"
+RUN python -m pip install --no-warn-script-location meson==$Env:MESON_VERSION ninja==$Env:NINJA_VERSION && `
     Add-ToPath -Append 'C:\Program Files\Python313\Scripts'
 # libpq and pg_config as needed by psycopg
-ENV PG_VERSION="18.3"
+ENV PG_VERSION="18.6"
 RUN Get-RemoteFile `
       -Uri https://ftp.postgresql.org/pub/source/v$Env:PG_VERSION/postgresql-$Env:PG_VERSION.tar.bz2 `
       -Path postgresql-$Env:PG_VERSION.tar.bz2 `
-      -Hash 'd95663fbbf3a80f81a9d98d895266bdcb74ba274bcc04ef6d76630a72dee016f'; `
+      -Hash '555610c24d53e4316da5b7d3fc25c279d96856d5e0e23ee308c328c5fa881d9f'; `
     7z x postgresql-$Env:PG_VERSION.tar.bz2 -r -y && `
     7z x postgresql-$Env:PG_VERSION.tar -oC:\postgresql_src
 RUN New-Item -ItemType Junction -Path C:\OpenSSL -Target 'C:\Program Files\OpenSSL'; `
@@ -166,7 +170,7 @@ RUN New-Item -ItemType Junction -Path C:\OpenSSL -Target 'C:\Program Files\OpenS
     RunOnVSConsole -Command 'ninja -C C:\pgbuild install' && `
     Add-ToPath -Append "C:\postgresql\bin"
 
-ENV CURL_VERSION="8.20.0"
+ENV CURL_VERSION="8.21.0"
 
 # Set up runner
 COPY runner_dependencies.txt C:\runner_dependencies.txt
