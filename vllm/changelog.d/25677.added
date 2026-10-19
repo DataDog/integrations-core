@@ -1,1 +1,1 @@
-Add vLLM NIXL KV cache transfer metrics for GPU Monitoring.
+Collect the current vLLM names for KV cache usage, inter-token latency, and time per output token, and add prefix cache metrics for GPU Monitoring.
