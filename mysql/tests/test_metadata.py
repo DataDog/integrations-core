@@ -87,6 +87,8 @@ def test_collect_mysql_settings(aggregator, dbm_instance, dd_run_check):
     assert event['database_instance'] == "stubbed.hostname"
     assert event['dbms'] == "mysql"
     assert len(event["metadata"]) > 0
+    instance_event = next(e for e in dbm_metadata if e['kind'] == 'database_instance')
+    assert sorted(event['tags']) == sorted(instance_event['tags'])
 
 
 @pytest.mark.unit
