@@ -9,7 +9,8 @@ python = ["3.13"]
 features = ["db", "deps", "http", "json", "kube"]
 dependencies = [
   "datadog_checks_tests_helper @ {root:uri}/../datadog_checks_tests_helper",
-  "hypothesis",
+  # Pinned until https://github.com/HypothesisWorks/hypothesis/issues/4918 is fixed.
+  "hypothesis<6.170.1",
 ]
 e2e-env = false
 
