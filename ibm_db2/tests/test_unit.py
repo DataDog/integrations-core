@@ -5,9 +5,11 @@ from datetime import datetime
 
 import mock
 import pytest
+from cachetools import TTLCache
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
-from datadog_checks.ibm_db2 import IbmDb2Check
+from datadog_checks.base.utils.db.query_metrics import ObfuscationResult
+from datadog_checks.ibm_db2 import IbmDb2Check, query_metrics
 from datadog_checks.ibm_db2.connection import Db2ConnectionError, get_connection_data
 from datadog_checks.ibm_db2.utils import scrub_connection_string
 
@@ -71,6 +73,43 @@ def test_query_metrics_recover_after_text_lookup_failure(instance: dict, aggrega
         assert row['cpu_time'] == expected * 1_000
         assert row['rows_read'] == expected
         assert row['rows_returned'] == expected
+
+
+def test_full_query_text_refresh(instance: dict, aggregator: AggregatorStub):
+    """Text events retain query identity and metadata, suppress repeats, and refresh after the TTL."""
+    instance.update(dbm=True, service='db2-test', tags=['team:dbm', 'dd.internal.secret:test'])
+    clock = mock.Mock(return_value=0)
+    with mock.patch.object(query_metrics, 'TTLCache', side_effect=lambda **kwargs: TTLCache(timer=clock, **kwargs)):
+        check = IbmDb2Check('ibm_db2', {}, [instance])
+    statement = ObfuscationResult(
+        obfuscated_query='SELECT ID FROM APP.ORDERS WHERE ID > ?',
+        query_signature='test-signature',
+        tables=['APP.ORDERS'],
+        commands=['SELECT'],
+        comments=None,
+    )
+    check._query_metrics._submit_full_query_text(statement)
+    check._query_metrics._submit_full_query_text(statement)
+    events = aggregator.get_event_platform_events('dbm-samples')
+    assert len(events) == 1
+    event = events[0]
+    assert event['dbm_type'] == 'fqt'
+    assert event['ddsource'] == 'ibm_db2'
+    assert event['database_instance'] == check.database_identifier
+    assert event['host'] == check.reported_hostname
+    assert event['service'] == 'db2-test'
+    assert event['ddagentversion'] == check.agent_version
+    assert event['timestamp'] > 0
+    assert set(event['ddtags'].split(',')) == {'team:dbm', f"db:{instance['db']}"}
+    assert event['db'] == {
+        'instance': instance['db'],
+        'query_signature': 'test-signature',
+        'statement': 'SELECT ID FROM APP.ORDERS WHERE ID > ?',
+        'metadata': {'tables': ['APP.ORDERS'], 'commands': ['SELECT']},
+    }
+    clock.return_value = query_metrics.FULL_QUERY_TEXT_REFRESH_INTERVAL
+    check._query_metrics._submit_full_query_text(statement)
+    assert len(aggregator.get_event_platform_events('dbm-samples')) == 2
 
 
 class TestPasswordScrubber:
