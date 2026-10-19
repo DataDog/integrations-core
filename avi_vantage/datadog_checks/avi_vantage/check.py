@@ -9,7 +9,6 @@ from datadog_checks.avi_vantage import metrics
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
 from datadog_checks.base.errors import CheckException
-from datadog_checks.base.utils.headers import DEFAULT_ACCEPT
 
 from .config_models import ConfigMixin
 
@@ -31,7 +30,7 @@ class AviVantageScraper(OpenMetricsScraper):
         would instead pick which representation the controller is asked to return.
         """
         extra_headers = kwargs.setdefault('extra_headers', {})
-        extra_headers.setdefault('Accept', self.http.get_header('Accept', DEFAULT_ACCEPT))
+        extra_headers.setdefault('Accept', self.http.get_header('Accept', '*/*'))
         return super().send_request(**kwargs)
 
 

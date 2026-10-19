@@ -8,6 +8,8 @@ from keystoneauth1.identity import v3
 from openstack import connection
 from openstack.config import loader
 
+from datadog_checks.base import is_affirmative
+from datadog_checks.base.utils.requests_adapter import create_https_adapter
 from datadog_checks.openstack_controller.api.api import Api
 from datadog_checks.openstack_controller.api.catalog import Catalog
 from datadog_checks.openstack_controller.components.component import Component
@@ -87,9 +89,14 @@ class ApiSdk(Api):
             cert=self.http.options['cert'],
             additional_headers=self.http.options['headers'],
         )
-        # verify and cert cannot express the TLS options that live on the SSLContext, so hand the
-        # transport to the HTTP client and let it apply the full TLS configuration.
-        self.http.apply_tls_to_requests_session(keystone_session.session)
+        # verify and cert cannot express the TLS options that live on the SSLContext, so mount the
+        # adapter the HTTP client would use for the same TLS configuration.
+        use_host_header = (
+            is_affirmative(self.http.tls_config.get('tls_use_host_header')) and self.http.get_header('Host') is not None
+        )
+        keystone_session.session.mount(
+            'https://', create_https_adapter(self.http.tls_config, use_host_header=use_host_header)
+        )
         # keystoneauth1 takes no proxy or auth argument, so its transport is the only place they can
         # go. Every auth type, including NTLM and Kerberos, resolves to one handler the HTTP client
         # keeps under auth, and a transport carrying none of its own lets requests fall back to
