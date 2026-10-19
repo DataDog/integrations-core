@@ -91,6 +91,10 @@ class FirewallPoller:
         results = self._collect(due)
         self._warn_if_unreachable(results)
         self.schedule.record(results)
+        if results.get(IDENTITY) is Result.RAN and self.state.interface_map is None:
+            # The identity was read but not the interfaces: try again soon rather than in 30 minutes, as the interface
+            # tags and the NDM interfaces depend on it.
+            self.schedule.mark_failed([IDENTITY])
         if self.client.stats.key_regenerated:
             # A rejected key that had worked may mean another unit answers here: read the identity again next run.
             self.schedule.make_due(IDENTITY)
@@ -294,7 +298,7 @@ class FirewallPoller:
         try:
             interfaces = self.client.op(INTERFACE_ALL_CMD)
         except PanosError as e:
-            self.log.debug('%s: cannot read the interfaces: %s', self.ip, e)
+            self.log.warning('%s: cannot read the interfaces: %s', self.ip, e)
         else:
             self.state.interface_rows, self.state.interface_map = parse_interface_all(interfaces)
             # `interface.speed` follows the identity's 30-minute schedule, as it comes from the interfaces read here.

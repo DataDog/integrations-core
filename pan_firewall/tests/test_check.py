@@ -25,6 +25,7 @@ from .common import (
     SYSTEM_INFO_CMD,
 )
 from .fake_panos import FAILURES, FIREWALL_SETS
+from .fixture_map import NO_CAPTURE
 from .helpers import can_connect_by_ip, make_instance, new_check, register_stubs, stub_runs, stub_sample
 
 
@@ -82,6 +83,48 @@ def test_identity_without_interface_capture(dd_run_check, aggregator, fake_panos
     value, tags = only_value_and_tags(aggregator, 'can_connect')
     assert value == 1
     assert {'device_id:007900000000002', 'device_hostname:fw-b'} <= set(tags)
+
+
+def interface_reads(fake_panos, since=0):
+    return sum(1 for c in fake_panos.calls[since:] if c.cmd == INTERFACE_ALL_CMD)
+
+
+def test_failed_interface_read_is_warned(dd_run_check, fake_panos, caplog):
+    dd_run_check(new_check(make_instance(ip=FW_B_IP)))
+
+    assert any(m.startswith(f'{FW_B_IP}: cannot read the interfaces:') for m in warnings(caplog))
+
+
+def test_interface_read_is_retried_within_five_minutes_until_it_answers(dd_run_check, fake_panos, schedule_clock):
+    check = new_check(make_instance(ip=FW_B_IP))
+    start = schedule_clock.now
+    dd_run_check(check)
+    assert interface_reads(fake_panos) == 1
+
+    schedule_clock.now = start + 240
+    calls_before = len(fake_panos.calls)
+    dd_run_check(check)
+    assert interface_reads(fake_panos, calls_before) == 0
+
+    schedule_clock.now = start + 300
+    calls_before = len(fake_panos.calls)
+    dd_run_check(check)
+    assert interface_reads(fake_panos, calls_before) == 1
+
+
+def test_failed_interface_read_after_a_good_one_waits_the_identity_interval(dd_run_check, fake_panos, schedule_clock):
+    check = new_check()
+    start = schedule_clock.now
+    dd_run_check(check)
+    fake_panos.answer_op(FW_A_IP, INTERFACE_ALL_CMD, (200, NO_CAPTURE))
+
+    schedule_clock.now = start + 1800
+    dd_run_check(check)
+    schedule_clock.now = start + 2100
+    calls_before = len(fake_panos.calls)
+    dd_run_check(check)
+
+    assert interface_reads(fake_panos, calls_before) == 0
 
 
 @pytest.mark.parametrize(

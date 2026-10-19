@@ -275,7 +275,8 @@ def test_missing_credentials_warning_stops_once_the_config_is_fixed(dd_run_check
     # The config with a matching entry, after the Agent reloads it.
     dd_run_check(new_check())
 
-    assert warnings_about(caplog, FW_B_IP) == []
+    # Not the credentials warning: fw-b has no `show interface all` capture, so its interface read warns.
+    assert [w for w in warnings_about(caplog, FW_B_IP) if 'firewall_credentials' in w.getMessage()] == []
     assert FW_B_IP in polled_hosts(fake_panos)
 
 
