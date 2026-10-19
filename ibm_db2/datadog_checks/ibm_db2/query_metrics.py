@@ -159,7 +159,7 @@ class QueryMetricsCollector(DBMAsyncJob):
             classify=classify_statement_text,
         )
         # The driver can reroute between SQL calls. Never combine counters and text from different sources.
-        if self._get_collection_source() != source:
+        if self._get_collection_source() != self._collection_source:
             self._query_stats.reset()
             self._obfuscation_lookup.retain(set())
             self._collection_source = None
