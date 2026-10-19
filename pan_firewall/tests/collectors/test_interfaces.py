@@ -2,10 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from unittest import mock
+from xml.etree import ElementTree as ET
 
 from datadog_checks.pan_firewall.collectors.base import FirewallState
 from datadog_checks.pan_firewall.collectors.interfaces import (
     COUNTER_INTERFACE_CMD,
+    parse_interface_all,
     parse_interface_counters,
     parse_interface_speeds,
 )
@@ -181,3 +183,17 @@ def test_speeds_are_sent_as_gauges_every_30_minutes_with_the_identity_not_every_
             tags=sorted([*FW_A_TAGS, *with_map_tags(name)]),
             metric_type=aggregator.GAUGE,
         )
+
+
+def test_interface_all_skips_hardware_entries_without_a_name():
+    root = ET.fromstring(
+        '<response status="success"><result>'
+        '<ifnet><entry><name>ethernet1/1</name></entry></ifnet>'
+        '<hw><entry><name>ethernet1/1</name></entry><entry><name></name></entry><entry/></hw>'
+        '</result></response>'
+    )
+
+    rows, by_name = parse_interface_all(root)
+
+    assert [row.findtext('name') for row in rows] == ['ethernet1/1']
+    assert list(by_name) == ['ethernet1/1']

@@ -25,7 +25,7 @@ from .collectors import (  # noqa: F401  (importing the modules registers their 
     vpn,
 )
 from .collectors.base import COLLECT_FUNCTIONS, CollectContext, FirewallState, Sample
-from .collectors.interfaces import parse_interface_speeds
+from .collectors.interfaces import parse_interface_all, parse_interface_speeds
 from .collectors.jobs import busy_jobs
 from .constants import IDENTITY
 from .errors import PanosError, PanosSkipped, PanosUnreachable
@@ -296,10 +296,7 @@ class FirewallPoller:
         except PanosError as e:
             self.log.debug('%s: cannot read the interfaces: %s', self.ip, e)
         else:
-            self.state.interface_rows = interfaces.findall('./result/ifnet/entry')
-            self.state.interface_map = {
-                name: entry for entry in interfaces.findall('./result/hw/entry') if (name := entry.findtext('name'))
-            }
+            self.state.interface_rows, self.state.interface_map = parse_interface_all(interfaces)
             # `interface.speed` follows the identity's 30-minute schedule, as it comes from the interfaces read here.
             self._submit(parse_interface_speeds(self.state, identity.serial, self._debug))
         self.state.vsys = vsys_list(identity, self.state.interface_rows, self.config.vsys)

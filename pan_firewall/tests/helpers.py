@@ -13,6 +13,7 @@ from xml.etree import ElementTree as ET
 
 from datadog_checks.pan_firewall import PanFirewallCheck
 from datadog_checks.pan_firewall.collectors.base import COLLECT_FUNCTIONS, CollectContext, FirewallState, Sample
+from datadog_checks.pan_firewall.collectors.interfaces import parse_interface_all
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from .common import CREDENTIALS, FW_A_IP, STUBS, SYNTHETIC
@@ -40,11 +41,8 @@ def load_op(cmd, firewall='fw-a'):
 
 def interface_state(path):
     """The state the identity step builds from the `show interface all` answer at `path`."""
-    root = load_xml(path)
-    return FirewallState(
-        interface_rows=root.findall('./result/ifnet/entry'),
-        interface_map={e.findtext('name') or '': e for e in root.findall('./result/hw/entry')},
-    )
+    rows, by_name = parse_interface_all(load_xml(path))
+    return FirewallState(interface_rows=rows, interface_map=by_name)
 
 
 def series(samples):

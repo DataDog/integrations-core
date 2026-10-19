@@ -50,6 +50,14 @@ NO_SPEED = frozenset({'ukn', '[n/a]'})
 MEGABIT = 10**6
 
 
+def parse_interface_all(root: Element) -> tuple[list[Element], dict[str, Element]]:
+    """The `ifnet` rows and the `hw` entries by name of a `show interface all` answer; unnamed `hw` entries are
+    skipped."""
+    rows = root.findall('./result/ifnet/entry')
+    by_name = {name: entry for entry in root.findall('./result/hw/entry') if (name := entry.findtext('name'))}
+    return rows, by_name
+
+
 def _rows_by_name(state: FirewallState) -> dict[str, Element]:
     return {name: row for row in state.interface_rows if (name := text(row, 'name'))}
 
