@@ -23,12 +23,14 @@ if TYPE_CHECKING:
 
 COLLECTION_INTERVAL = 10
 NANOSECONDS_PER_MILLISECOND = 1_000_000
+NANOSECONDS_PER_MICROSECOND = 1_000
 OBFUSCATION_OPTIONS = to_native_string(json.dumps({'obfuscation_mode': 'obfuscate_and_normalize', 'dbms': 'ibm_db2'}))
 
 QUERY_METRICS = """
 /* DDIGNORE */
 SELECT MEMBER, EXECUTABLE_ID, INSERT_TIMESTAMP,
-       NUM_COORD_EXEC_WITH_METRICS AS "count", COORD_STMT_EXEC_TIME AS "time", STMT_TEXT
+       NUM_COORD_EXEC_WITH_METRICS AS "count", COORD_STMT_EXEC_TIME AS "time",
+       TOTAL_CPU_TIME AS "cpu_time", ROWS_READ, ROWS_RETURNED, STMT_TEXT
 FROM TABLE(SYSPROC.MON_GET_PKG_CACHE_STMT(NULL, NULL, NULL, -1))
 """
 
@@ -51,7 +53,9 @@ class QueryMetricsCollector(DBMAsyncJob):
         # Each background job owns its connection.
         self._connection = Db2Connection(check, config)
         self._query_stats = QueryStats(
-            counter_columns={'count', 'time'}, key=statement_key, execution_indicators={'count'}
+            counter_columns={'count', 'time', 'cpu_time', 'rows_read', 'rows_returned'},
+            key=statement_key,
+            execution_indicators={'count'},
         )
 
     def run_job(self) -> None:
@@ -81,11 +85,17 @@ class QueryMetricsCollector(DBMAsyncJob):
                     'query_signature': obfuscated.query_signature,
                     'count': 0,
                     'time': 0,
+                    'cpu_time': 0,
+                    'rows_read': 0,
+                    'rows_returned': 0,
                 },
             )
             output['count'] += row['count']
             # Db2 coordinator time is milliseconds; the DBM payload uses nanoseconds.
             output['time'] += row['time'] * NANOSECONDS_PER_MILLISECOND
+            output['cpu_time'] += row['cpu_time'] * NANOSECONDS_PER_MICROSECOND
+            output['rows_read'] += row['rows_read']
+            output['rows_returned'] += row['rows_returned']
 
         if rows_by_signature:
             payload = {
