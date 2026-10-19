@@ -1,0 +1,1 @@
+Send the same tags on schema payloads as on the `database_instance` payload, dropping the `db` tag.
