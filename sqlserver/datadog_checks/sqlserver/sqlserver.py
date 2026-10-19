@@ -1206,7 +1206,7 @@ class SQLServer(DatabaseCheck):
                 "collection_interval": self._config.database_instance_collection_interval,
                 "dbms_version": self.dbms_version,
                 "integration_version": __version__,
-                "tags": self.tag_manager.get_tags(include_internal=False),
+                "tags": self.tag_manager.get_tags(include_internal=False, include_db=False),
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self.cloud_metadata,
                 "metadata": {

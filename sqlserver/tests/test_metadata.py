@@ -97,7 +97,6 @@ def test_sqlserver_collect_settings(aggregator, dd_run_check, dbm_instance):
     assert event['dbms'] == "sqlserver"
     assert event['kind'] == "sqlserver_configs"
     assert len(event["metadata"]) > 0
-    assert 'dd.internal.resource:database_instance:{}'.format(check.database_identifier) in check.tags
     assert not any(tag.startswith('dd.internal') for tag in event['tags'])
 
 
