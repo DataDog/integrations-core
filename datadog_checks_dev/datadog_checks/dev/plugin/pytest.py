@@ -11,7 +11,7 @@ from base64 import urlsafe_b64encode
 from collections import namedtuple  # Not using dataclasses for Py2 compatibility
 from io import open
 from typing import Any, Callable, Dict, List, Literal, Mapping, Optional, Tuple, overload  # noqa: F401
-from unittest.mock import PropertyMock, create_autospec, seal
+from unittest.mock import create_autospec, seal
 
 import pytest
 
@@ -396,13 +396,17 @@ def mock_http_response(mocker, mock_response):
     )
 
 
+def _require_agnostic_http_client(check: Any, fixture: str) -> None:
+    # The test doubles model the backend-neutral contract, which a check only gets in production by opting in.
+    if not getattr(check, 'AGNOSTIC_HTTP_CLIENT', False):
+        raise AssertionError(
+            f'{type(check).__name__} must set AGNOSTIC_HTTP_CLIENT = True to use the {fixture} fixture.'
+        )
+
+
 def _create_fake_http_client_factory(fake_http: Any) -> Callable[..., Any]:
     def create_client(check: Any, *_args: Any, **_kwargs: Any) -> Any:
-        # The fake models the backend-neutral contract, which a check only gets in production by opting in.
-        if not getattr(check, 'AGNOSTIC_HTTP_CLIENT', False):
-            raise AssertionError(
-                f'{type(check).__name__} must set AGNOSTIC_HTTP_CLIENT = True to use the fake_http fixture.'
-            )
+        _require_agnostic_http_client(check, 'fake_http')
         return fake_http.create_client()
 
     return create_client
@@ -518,8 +522,13 @@ def mock_http(mocker):
     client.get_cookie.side_effect = _get_cookie
     client.close.return_value = None
     seal(client)
-    mocker.patch.object(AgentCheck, 'http', new_callable=PropertyMock, return_value=client)
-    mocker.patch.object(AgentCheck, 'create_http_client', return_value=client)
+
+    def opted_in_client(check, *_args, **_kwargs):
+        _require_agnostic_http_client(check, 'mock_http')
+        return client
+
+    mocker.patch.object(AgentCheck, 'http', new=property(opted_in_client))
+    mocker.patch.object(AgentCheck, 'create_http_client', autospec=True, side_effect=opted_in_client)
     return client
 
 
@@ -533,7 +542,8 @@ def mock_openmetrics_http(mock_http, mocker):
     """
     mocker.patch(
         'datadog_checks.base.checks.openmetrics.mixins.OpenMetricsScraperMixin.get_http_handler',
-        return_value=mock_http,
+        autospec=True,
+        side_effect=lambda check, *_args, **_kwargs: check.create_http_client(),
     )
     return mock_http
 
@@ -543,7 +553,8 @@ def mock_prometheus_http(mock_http, mocker):
     """mock_http with PrometheusScraperMixin.get_http_handler patched to return it."""
     mocker.patch(
         'datadog_checks.base.checks.prometheus.mixins.PrometheusScraperMixin.get_http_handler',
-        return_value=mock_http,
+        autospec=True,
+        side_effect=lambda check, *_args, **_kwargs: check.create_http_client(),
     )
     return mock_http
 
