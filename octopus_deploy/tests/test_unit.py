@@ -2808,14 +2808,14 @@ def test_unified_service_tagging(
     ('mock_http_get', 'projects_config', 'expected_exception', 'can_connect'),
     [
         pytest.param(
-            {'http_error': {'/api/Spaces-1/projects': MockResponse(status_code=500)}},
+            {'http_error': {'/api/Spaces-1/projects': MockHTTPResponse(status_code=500)}},
             {'include': ['.*']},
             pytest.raises(Exception, match=r'Could not connect to octopus API.*'),
             0,
             id='projects discovery reports the failure',
         ),
         pytest.param(
-            {'http_error': {'/api/Spaces-1/projects': MockResponse(status_code=500)}},
+            {'http_error': {'/api/Spaces-1/projects': MockHTTPResponse(status_code=500)}},
             None,
             does_not_raise(),
             1,
@@ -2907,38 +2907,31 @@ def test_bulk_lookup_bounded_when_ids_filter_is_ignored(
         pytest.param({}, 1.0, id='no retry-after header'),
     ],
 )
-def test_throttled_request_waits_then_succeeds(instance, retry_after, expected_wait):
+def test_throttled_request_waits_then_succeeds(instance, mock_http, retry_after, expected_wait):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     check.load_configuration_models()
-    responses = [
-        MockResponse(status_code=429, headers=retry_after),
-        MockResponse(json_data={'Items': ['a space']}, status_code=200),
+    mock_http.get.side_effect = [
+        MockHTTPResponse(status_code=429, headers=retry_after),
+        MockHTTPResponse(json_data={'Items': ['a space']}, status_code=200),
     ]
 
-    with (
-        mock.patch('requests.Session.get', side_effect=responses) as http_get,
-        mock.patch('datadog_checks.octopus_deploy.check.time.sleep') as sleep,
-    ):
+    with mock.patch('datadog_checks.octopus_deploy.check.time.sleep') as sleep:
         assert check._process_endpoint('api/spaces') == {'Items': ['a space']}
 
-    assert http_get.call_count == 2
+    assert mock_http.get.call_count == 2
     sleep.assert_called_once_with(expected_wait)
 
 
-def test_throttled_request_gives_up_after_bounded_retries(instance, caplog):
+def test_throttled_request_gives_up_after_bounded_retries(instance, mock_http, caplog):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     check.load_configuration_models()
     caplog.set_level(logging.WARNING)
+    mock_http.get.return_value = MockHTTPResponse(status_code=429, headers={'Retry-After': '1'})
 
-    with (
-        mock.patch(
-            'requests.Session.get', return_value=MockResponse(status_code=429, headers={'Retry-After': '1'})
-        ) as http_get,
-        mock.patch('datadog_checks.octopus_deploy.check.time.sleep') as sleep,
-    ):
+    with mock.patch('datadog_checks.octopus_deploy.check.time.sleep') as sleep:
         assert check._process_endpoint('api/spaces') == {}
 
     # Three retries after the initial attempt, then the throttled response is surfaced instead of retrying forever.
-    assert http_get.call_count == 4
+    assert mock_http.get.call_count == 4
     assert sleep.call_count == 3
     assert 'Failed to access endpoint: api/spaces' in caplog.text

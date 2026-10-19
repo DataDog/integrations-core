@@ -679,7 +679,7 @@ def test_ha_metrics(dd_run_check, aggregator, instance):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/ha/status/current': MockResponse(
+                    '/api2/json/cluster/ha/status/current': MockHTTPResponse(
                         status_code=200,
                         json_data={'data': None},
                     )
@@ -705,7 +705,7 @@ def test_ha_metrics_null_data(dd_run_check, aggregator, instance):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/metrics/export': MockResponse(
+                    '/api2/json/cluster/metrics/export': MockHTTPResponse(
                         status_code=200,
                         json_data={'data': {'data': None}},
                     )
@@ -745,19 +745,25 @@ def task_calls(mock_http_get):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/resources': MockResponse(status_code=403, json_data=PERMISSION_DENIED_RESPONSE)
+                    '/api2/json/cluster/resources': MockHTTPResponse(
+                        status_code=403, json_data=PERMISSION_DENIED_RESPONSE
+                    )
                 }
             },
             r'HTTP 403 for .*/cluster/resources: Permission check failed \(/ , Sys.Audit\)',
             id='with-message',
         ),
         pytest.param(
-            {'http_error': {'/api2/json/cluster/resources': MockResponse(status_code=403, json_data={'data': None})}},
+            {
+                'http_error': {
+                    '/api2/json/cluster/resources': MockHTTPResponse(status_code=403, json_data={'data': None})
+                }
+            },
             r'HTTP 403 for .*/cluster/resources',
             id='without-message',
         ),
         pytest.param(
-            {'http_error': {'/api2/json/cluster/resources': MockResponse(status_code=502, content='Bad Gateway')}},
+            {'http_error': {'/api2/json/cluster/resources': MockHTTPResponse(status_code=502, content='Bad Gateway')}},
             r'HTTP 502 for .*/cluster/resources',
             id='non-json-body',
         ),
@@ -778,7 +784,7 @@ def test_resources_api_error_response(dd_run_check, instance, expected_error):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/metrics/export': MockResponse(
+                    '/api2/json/cluster/metrics/export': MockHTTPResponse(
                         status_code=403, json_data=PERMISSION_DENIED_RESPONSE
                     )
                 }
@@ -791,7 +797,7 @@ def test_resources_api_error_response(dd_run_check, instance, expected_error):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/ha/status/current': MockResponse(
+                    '/api2/json/cluster/ha/status/current': MockHTTPResponse(
                         status_code=403, json_data=PERMISSION_DENIED_RESPONSE
                     )
                 }
@@ -834,7 +840,7 @@ def test_optional_collection_error_does_not_block_other_collectors(
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/resources': MockResponse(
+                    '/api2/json/cluster/resources': MockHTTPResponse(
                         status_code=200,
                         json_data={'data': None},
                     )
@@ -859,7 +865,7 @@ def test_required_null_data(dd_run_check, instance):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/nodes/ip-122-82-3-112/tasks': MockResponse(
+                    '/api2/json/nodes/ip-122-82-3-112/tasks': MockHTTPResponse(
                         status_code=200,
                         json_data={'data': None},
                     )
@@ -886,7 +892,7 @@ def test_tasks_null_data(dd_run_check, aggregator, instance):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/nodes/ip-122-82-3-112/tasks': MockResponse(
+                    '/api2/json/nodes/ip-122-82-3-112/tasks': MockHTTPResponse(
                         status_code=403,
                         json_data=PERMISSION_DENIED_RESPONSE,
                     )
@@ -918,7 +924,7 @@ def test_tasks_api_error_response(dd_run_check, instance):
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/resources': MockResponse(status_code=200, json_data=TWO_NODE_RESOURCES)
+                    '/api2/json/cluster/resources': MockHTTPResponse(status_code=200, json_data=TWO_NODE_RESOURCES)
                 }
             },
             id='two-nodes',
@@ -934,13 +940,13 @@ def test_failed_node_retries_from_last_successful_collection(
     monkeypatch.setattr('datadog_checks.proxmox.check.get_current_datetime', mock.MagicMock(side_effect=collect_times))
 
     def tasks_response(endtime):
-        return MockResponse(status_code=200, json_data={'data': [{'type': 'aptupdate', 'endtime': endtime}]})
+        return MockHTTPResponse(status_code=200, json_data={'data': [{'type': 'aptupdate', 'endtime': endtime}]})
 
     # node-1 is unavailable on the first run while it runs a task, then recovers; node-2 always succeeds.
     task_responses = {
         '/nodes/node-1/tasks': iter(
             [
-                MockResponse(status_code=500, json_data={'data': None, 'message': 'node unavailable'}),
+                MockHTTPResponse(status_code=500, json_data={'data': None, 'message': 'node unavailable'}),
                 tasks_response(150),
             ]
         ),
@@ -985,11 +991,11 @@ def test_failed_node_retries_from_last_successful_collection(
         pytest.param(
             {
                 'http_error': {
-                    '/api2/json/cluster/resources': MockResponse(status_code=200, json_data=TWO_NODE_RESOURCES),
-                    '/api2/json/nodes/node-1/tasks': MockResponse(
+                    '/api2/json/cluster/resources': MockHTTPResponse(status_code=200, json_data=TWO_NODE_RESOURCES),
+                    '/api2/json/nodes/node-1/tasks': MockHTTPResponse(
                         status_code=200, json_data={'data': [{'type': 'vzstart'}, {'type': 'vzstop'}]}
                     ),
-                    '/api2/json/nodes/node-2/tasks': MockResponse(
+                    '/api2/json/nodes/node-2/tasks': MockHTTPResponse(
                         status_code=200, json_data={'data': [{'type': 'vzstart'}]}
                     ),
                 }
