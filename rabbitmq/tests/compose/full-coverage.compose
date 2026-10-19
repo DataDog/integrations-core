@@ -47,8 +47,11 @@ services:
       ALARM_DRILL: "${ALARM_DRILL:-1}"
       ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
     # The drill runs in the broker container so rabbitmqctl reaches the node with
-    # its own cookie and node name.
-    command: ["sh", "-c", "sh /opt/alarm-drill.sh & exec rabbitmq-server"]
+    # its own cookie and node name. The broker goes through docker-entrypoint.sh
+    # so it still drops to the rabbitmq user. The drill runs as that user too: as
+    # root, its first rabbitmqctl call can create the Erlang cookie root-owned
+    # before the broker starts, and the broker then fails to read it.
+    command: ["sh", "-c", "gosu rabbitmq sh /opt/alarm-drill.sh & exec docker-entrypoint.sh rabbitmq-server"]
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
       interval: 10s
