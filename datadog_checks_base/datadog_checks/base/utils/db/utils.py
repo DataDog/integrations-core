@@ -367,10 +367,9 @@ class DBMAsyncJob(object):
             self._job_loop_future.result()
             self._job_loop_future = None
 
-    def run_job_loop(self, tags, tag_snapshot: "TagSnapshot | None" = None):
+    def run_job_loop(self, tags):
         """
         :param tags: The check's tags, kept as `self._tags` for jobs that have not moved to `self._tag_snapshot`.
-        :param tag_snapshot: The check's scoped tags. Built from `tags` when not passed.
         """
         if not self._enabled:
             self._log.debug("[job=%s] Job not enabled.", self._job_name)
@@ -378,7 +377,7 @@ class DBMAsyncJob(object):
         if not self._db_hostname:
             self._db_hostname = resolve_db_host(self._config_host)
         self._tags = tags
-        self._tag_snapshot = tag_snapshot if tag_snapshot is not None else TagSnapshot.from_tags(tags)
+        self._tag_snapshot = self._snapshot_tags(tags)
         self._tags_str = ','.join(self._tags)
         self._job_tags = self._tag_snapshot.event_tags() + ["job:{}".format(self._job_name)]
         self._job_tags_str = ','.join(self._job_tags)
@@ -423,6 +422,13 @@ class DBMAsyncJob(object):
                     )
 
             self._log.debug("Job loop already running. job=%s", self._job_name)
+
+    def _snapshot_tags(self, tags: list[str]) -> "TagSnapshot":
+        # Checks without a `TagManager`, such as Mongo, only have the tag list they pass in.
+        tag_manager = getattr(self._check, "tag_manager", None)
+        if isinstance(tag_manager, TagManager):
+            return tag_manager.snapshot()
+        return TagSnapshot.from_tags(tags)
 
     def _job_loop(self):
         try:

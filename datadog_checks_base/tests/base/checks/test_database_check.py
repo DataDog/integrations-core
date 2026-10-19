@@ -202,7 +202,7 @@ def test_run_async_jobs_starts_only_enabled_jobs(registry_check, enabled):
     assert (job._job_loop_future is not None) == enabled
 
 
-def test_run_async_jobs_passes_tag_snapshot(registry_check):
+def test_async_jobs_read_tags_from_check_tag_manager(registry_check):
     registry_check.tag_manager.set_tags_from_list(["env:prod", "db:postgres"])
     job = registry_check.register_async_job(RegistryTestJob(registry_check))
 

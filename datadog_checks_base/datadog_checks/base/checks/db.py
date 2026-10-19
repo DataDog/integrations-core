@@ -58,7 +58,7 @@ class DatabaseCheck(AgentCheck):
 
     def run_async_jobs(self, tags: List[str]) -> None:
         """
-        Run each registered job's loop, forwarding ``tags`` and a snapshot of :attr:`tag_manager` to every job.
+        Run each registered job's loop, forwarding ``tags`` to every job.
 
         No-op once the check has been cancelled, so a ``check()`` that was in flight when the
         cancel arrived does not restart the loops :meth:`cancel_async_jobs` has just stopped.
@@ -66,9 +66,8 @@ class DatabaseCheck(AgentCheck):
         if self._cancelled:
             self.log.debug("Not running async jobs, check has been cancelled")
             return
-        tag_snapshot = self.tag_manager.snapshot()
         for job in self._async_job_registry.values():
-            job.run_job_loop(tags, tag_snapshot)
+            job.run_job_loop(tags)
 
     def cancel_async_jobs(self) -> None:
         """
