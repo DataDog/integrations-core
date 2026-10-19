@@ -161,24 +161,32 @@ def test_collect_interfaces_given_device_records_tags_throughput_without_reachab
 
 
 @pytest.mark.parametrize(
-    ('reported', 'inventory'),
+    ('devices', 'inventory'),
     [
-        pytest.param('UNREACHABLE', None, id='data-api-reports-it'),
+        pytest.param(
+            with_value(load_captured('data_network_devices'), 'response.0.reachabilityHealthStatus', 'UNREACHABLE'),
+            None,
+            id='data-api-reports-it',
+        ),
         # The data API left it null, so the inventory answers, as it does for the device's metrics.
         pytest.param(
-            None,
+            with_value(load_captured('data_network_devices'), 'response.0.reachabilityHealthStatus', None),
             {'aa754801-8895-41e8-8ca5-27ee415c9c42': {'reachabilityStatus': 'Unreachable'}},
             id='inventory-reports-it',
+        ),
+        # The data API left the device out while it re-indexes, so only the inventory knows of it.
+        pytest.param(
+            {'response': load_captured('data_network_devices')['response'][1:]},
+            {'aa754801-8895-41e8-8ca5-27ee415c9c42': {'reachabilityStatus': 'Unreachable'}},
+            id='data-api-drops-it',
         ),
     ],
 )
 def test_collect_interfaces_given_an_unreachable_device_skips_its_interfaces(
-    aggregator, instance, check, reported, inventory
+    aggregator, instance, check, devices, inventory
 ):
     # Catalyst Center cannot poll a device it cannot reach, so any interface reading it serves for
     # one is a last-known value: the same staleness that withholds the device's own metrics.
-    devices = with_value(load_captured('data_network_devices'), 'response.0.reachabilityHealthStatus', reported)
-
     collect_interfaces(
         check,
         _client(instance, CONFIG_ONLY),

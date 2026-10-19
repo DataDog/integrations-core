@@ -65,6 +65,23 @@ def _route(check: CiscoCatalystCenterCheck, devices, inventory) -> None:
     )
 
 
+def _route_with_interfaces(check: CiscoCatalystCenterCheck, devices) -> None:
+    """Like `_route`, plus the captured interfaces, which the throughput rollups are built from."""
+    check.client.http = ViewRoutedHttp(
+        by_view={
+            'configuration': load_captured('data_interfaces_configuration'),
+            'statistics': load_captured('data_interfaces_statistics'),
+        },
+        by_path={
+            NETWORK_DEVICES_ENDPOINT: devices,
+            INVENTORY_PATH: load_captured('intent_network_device'),
+            INTENT_INTERFACES_ENDPOINT: {'response': []},
+            NETWORK_HEALTH_ENDPOINT: {},
+            CLIENT_HEALTH_ENDPOINT: {'response': []},
+        },
+    )
+
+
 def _inventory_with(hostname: str, status: str):
     """The captured inventory with one device's reachability replaced."""
     inventory = load_captured('intent_network_device')
@@ -226,6 +243,7 @@ def test_check_given_no_data_api_reachability_reports_the_inventory_status(
     assert metric_values(aggregator, 'cisco_catalyst_center.device.reachable', 'device_name:sw1') == [0]
 
 
+@pytest.mark.parametrize('status', [pytest.param('', id='empty'), pytest.param('Unknown', id='unknown')])
 @pytest.mark.parametrize(
     'devices',
     [
@@ -236,13 +254,18 @@ def test_check_given_no_data_api_reachability_reports_the_inventory_status(
         pytest.param({'response': []}, id='inventory-only'),
     ],
 )
-def test_check_given_an_empty_inventory_reachability_reports_no_reachability(
-    dd_run_check: Callable[..., None], aggregator: AggregatorStub, instance: InstanceType, devices: dict[str, Any]
+def test_check_given_an_empty_or_unknown_inventory_reachability_reports_no_reachability(
+    dd_run_check: Callable[..., None],
+    aggregator: AggregatorStub,
+    instance: InstanceType,
+    devices: dict[str, Any],
+    status: str,
 ):
-    # The empty string is absent data from the inventory just as from the data API. Reporting it as
-    # not reachable would page on a device that nothing says is down.
+    # The empty string is absent data from the inventory just as from the data API, and an unknown
+    # status says nothing about whether the device is up. Reporting either as not reachable would
+    # page on a device that nothing says is down.
     check = _core_only(instance)
-    _route(check, devices=devices, inventory=_inventory_with('sw1', ''))
+    _route(check, devices=devices, inventory=_inventory_with('sw1', status))
 
     dd_run_check(check)
 
@@ -307,23 +330,77 @@ def test_check_given_interface_statistics_tags_device_throughput_with_the_device
     # site nor label a device by name.
     instance.update(collect_stacks=False, collect_site_health=False, collect_client_experience=False)
     check = CiscoCatalystCenterCheck('cisco_catalyst_center', {}, [instance])
-    check.client.http = ViewRoutedHttp(
-        by_view={
-            'configuration': load_captured('data_interfaces_configuration'),
-            'statistics': load_captured('data_interfaces_statistics'),
-        },
-        by_path={
-            NETWORK_DEVICES_ENDPOINT: load_captured('data_network_devices'),
-            INVENTORY_PATH: load_captured('intent_network_device'),
-            INTENT_INTERFACES_ENDPOINT: {'response': []},
-            NETWORK_HEALTH_ENDPOINT: {},
-            CLIENT_HEALTH_ENDPOINT: {'response': []},
-        },
-    )
+    _route_with_interfaces(check, devices=load_captured('data_network_devices'))
 
     dd_run_check(check)
 
     aggregator.assert_metric_has_tag('cisco_catalyst_center.device.throughput.rx', 'device_name:sw1')
+
+
+def test_check_given_a_device_only_the_inventory_lists_tags_its_reachability_from_the_inventory(
+    dd_run_check: Callable[..., None], aggregator: AggregatorStub, instance: InstanceType
+) -> None:
+    # The inventory reports the same family, role, series, platform, OS and version values as the
+    # data API, so a device the data API leaves out can still be found by those filters.
+    check = _core_only(instance)
+    _route(check, devices={'response': []}, inventory=load_captured('intent_network_device'))
+
+    dd_run_check(check)
+
+    assert metric_values(
+        aggregator, 'cisco_catalyst_center.device.reachable', 'device_name:sw1', 'device_family:Switches and Hubs'
+    ) == [1]
+
+
+def test_check_given_a_device_the_data_api_drops_keeps_the_site_it_last_reported(
+    dd_run_check: Callable[..., None], aggregator: AggregatorStub, instance: InstanceType
+) -> None:
+    # The inventory has no site, so the site the data API reported in an earlier cycle is the only
+    # way a site filter still finds the device once the data API drops it.
+    check = _core_only(instance)
+    _route(check, devices=load_captured('data_network_devices'), inventory=load_captured('intent_network_device'))
+    dd_run_check(check)
+    aggregator.reset()
+    _route(check, devices={'response': []}, inventory=load_captured('intent_network_device'))
+
+    dd_run_check(check)
+
+    assert metric_values(
+        aggregator, 'cisco_catalyst_center.device.reachable', 'device_name:sw1', 'site_hierarchy:Global'
+    ) == [1]
+
+
+def test_check_given_a_device_the_data_api_drops_keeps_its_tags_on_throughput(
+    dd_run_check: Callable[..., None], aggregator: AggregatorStub, instance: InstanceType
+) -> None:
+    # Interface records can still arrive for a device the device list leaves out. Its throughput
+    # takes the same fallback tags as its reachability, so filtering by name or site still finds it.
+    instance.update(collect_stacks=False, collect_site_health=False, collect_client_experience=False)
+    check = CiscoCatalystCenterCheck('cisco_catalyst_center', {}, [instance])
+    _route_with_interfaces(check, devices=load_captured('data_network_devices'))
+    dd_run_check(check)
+    aggregator.reset()
+    _route_with_interfaces(check, devices={'response': []})
+
+    dd_run_check(check)
+
+    aggregator.assert_metric_has_tags(
+        'cisco_catalyst_center.device.throughput.rx', ['device_name:sw1', 'site_hierarchy:Global']
+    )
+
+
+def test_check_given_an_unknown_data_api_reachability_reports_the_inventory_status(
+    dd_run_check: Callable[..., None], aggregator: AggregatorStub, instance: InstanceType
+) -> None:
+    # Cisco documents UNKNOWN as a reachability. It says nothing about whether the device is up, so
+    # it falls back to the inventory as a null does instead of paging as unreachable.
+    check = _core_only(instance)
+    devices = with_value(load_captured('data_network_devices'), 'response.0.reachabilityHealthStatus', 'UNKNOWN')
+    _route(check, devices=devices, inventory=load_captured('intent_network_device'))
+
+    dd_run_check(check)
+
+    assert metric_values(aggregator, 'cisco_catalyst_center.device.reachable', 'device_name:sw1') == [1]
 
 
 def test_check_given_two_cycles_polls_consecutive_windows(

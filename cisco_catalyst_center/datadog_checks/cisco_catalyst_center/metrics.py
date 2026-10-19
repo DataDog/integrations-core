@@ -175,6 +175,11 @@ SCORE_FIELDS: Final[frozenset[str]] = frozenset(
     }
 )
 
+# The SCORE_FIELDS that are scores from 1 to 10, on which 0 is no reading either.
+# `wanLinkUtilization` is left out: it shares the -1 sentinel but is a percentage, where 0 is an
+# idle link.
+HEALTH_SCORE_FIELDS: Final[frozenset[str]] = SCORE_FIELDS - {'wanLinkUtilization'}
+
 # FabricSiteSummary and VirtualNetworkSummary. Both schemas are large and almost entirely
 # `<kpi><Good|Fair|Poor>HealthDeviceCount` variations, so only the top-level rollups are mapped.
 FABRIC_SITE_METRICS: Final[dict[str, str]] = {

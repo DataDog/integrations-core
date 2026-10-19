@@ -38,6 +38,7 @@ from .constants import (
     INTENT_INTERFACES_ENDPOINT,
     INTENT_NETWORK_DEVICES_ENDPOINT,
     INTERFACES_ENDPOINT,
+    INVENTORY_DEVICE_TAG_FIELDS,
     ISSUE_DEFAULT_ALERT_TYPE,
     ISSUE_DETAIL_FIELDS,
     ISSUE_EVENT_TYPE,
@@ -57,6 +58,7 @@ from .constants import (
     STACK_MEMBER_READY_STATES,
     STACK_PORT_OK_VALUES,
     STACKABLE_DEVICE_FAMILIES,
+    UNKNOWN_REACHABILITY_VALUES,
     UNREACHABLE_VALUES,
     UP_VALUES,
     VIRTUAL_NETWORK_HEALTH_ENDPOINT,
@@ -75,6 +77,7 @@ from .metrics import (
     EVENT_BREAKDOWNS,
     FABRIC_SITE_METRICS,
     FABRIC_SITE_PERCENTAGE_FIELDS,
+    HEALTH_SCORE_FIELDS,
     INTERFACE_POE_WATT_METRICS,
     INTERFACE_STATISTICS_METRICS,
     NETWORK_CATEGORY_METRICS,
@@ -130,10 +133,33 @@ def device_tags(record: dict[str, Any], namespace: str = DEFAULT_NAMESPACE) -> l
             tag('platform_id', record.get('platformId')),
             tag('os_type', record.get('osType')),
             tag('software_version', record.get('softwareVersion')),
-            tag('site_id', record.get('siteId')),
-            tag('site_hierarchy', record.get('siteHierarchy')),
+            *device_site_tags(record),
         ]
     )
+
+
+def device_site_tags(record: dict[str, Any]) -> list[str]:
+    """The site tags of one data API device record.
+
+    Separate from `device_tags` because the inventory has no site: a device only the inventory
+    reports borrows these from the last cycle in which the data API returned it.
+    """
+    return compact([tag('site_id', record.get('siteId')), tag('site_hierarchy', record.get('siteHierarchy'))])
+
+
+def inventory_device_tags(entry: dict[str, Any], namespace: str, device_sites: dict[str, list[str]]) -> list[str]:
+    """Tags for a device that only the inventory reports, matching what `device_tags` would give it.
+
+    The inventory names its fields differently but holds the same values for the ones in
+    `INVENTORY_DEVICE_TAG_FIELDS`. It has no site, so the site tags the data API last reported for
+    the device come from `device_sites`, when there are any.
+    """
+    return compact(
+        [
+            *device_identity_tags(namespace, entry.get('managementIpAddress'), entry.get('id')),
+            *(tag(tag_key, entry.get(field)) for field, tag_key in INVENTORY_DEVICE_TAG_FIELDS),
+        ]
+    ) + device_sites.get(entry.get('id') or '', [])
 
 
 def list_device_inventory(client: CatalystCenterClient) -> dict[str, dict[str, Any]]:
@@ -153,13 +179,22 @@ def device_reachability(record: dict[str, Any], inventory: dict[str, dict[str, A
     callers -- the reachability gauge, the stack fan-out and the NDM status -- so they cannot
     drift apart.
     """
-    # The empty string is one of Catalyst Center's encodings of absent data, so from either source
-    # it is treated as null.
-    reported = record.get('reachabilityHealthStatus') or None
+    reported = _known_reachability(record.get('reachabilityHealthStatus'))
     device_id = record.get('id')
     if reported is not None or device_id is None:
         return reported
-    return (inventory.get(device_id) or {}).get('reachabilityStatus') or None
+    return _known_reachability((inventory.get(device_id) or {}).get('reachabilityStatus'))
+
+
+def _known_reachability(value: Any) -> str | None:
+    """A reachability, or None when either source reports none.
+
+    The empty string is one of Catalyst Center's encodings of absent data, and an unknown status
+    says nothing about whether the device is up, so both are treated as null.
+    """
+    if not value or value in UNKNOWN_REACHABILITY_VALUES:
+        return None
+    return value
 
 
 def is_unreachable(reachability: str | None) -> bool:
@@ -176,24 +211,21 @@ def collect_inventory_reachability(
     entries: Iterable[dict[str, Any]],
     base_tags: list[str] | None = None,
     namespace: str = DEFAULT_NAMESPACE,
+    device_sites: dict[str, list[str]] | None = None,
 ) -> None:
     """Emit reachability for inventory devices that the data API did not return.
 
-    Only the identity tags and the name come from the inventory record, because those are the
-    ones known to match what the data API reports for the same device.
+    Tagged by `inventory_device_tags`, so the family and site filters on a dashboard still find
+    the device: `device_sites` holds the site tags the data API last reported for each device.
     """
     base_tags = base_tags or []
+    device_sites = device_sites or {}
     for entry in entries:
-        # An empty status is absent data, as in `device_reachability`, not a device that is down.
-        reachability = entry.get('reachabilityStatus') or None
+        # Absent data, as in `device_reachability`, is not a device that is down.
+        reachability = _known_reachability(entry.get('reachabilityStatus'))
         if reachability is None:
             continue
-        tags = base_tags + compact(
-            [
-                *device_identity_tags(namespace, entry.get('managementIpAddress'), entry.get('id')),
-                tag('device_name', entry.get('hostname')),
-            ]
-        )
+        tags = base_tags + inventory_device_tags(entry, namespace, device_sites)
         check.gauge('device.reachable', int(reachability in REACHABLE_VALUES), tags=tags)
 
 
@@ -274,7 +306,7 @@ def collect_devices(
         for field, metric_name in DEVICE_METRICS_DETAILS.items():
             value = metrics_details.get(field)
             if field in SCORE_FIELDS:
-                emit_score(check, metric_name, value, tags)
+                emit_score(check, metric_name, value, tags, minimum=1 if field in HEALTH_SCORE_FIELDS else 0)
             else:
                 emit_gauge(check, metric_name, value, tags)
 
@@ -377,6 +409,7 @@ def collect_interfaces(
     namespace: str = DEFAULT_NAMESPACE,
     devices: list[dict[str, Any]] | None = None,
     inventory: dict[str, dict[str, Any]] | None = None,
+    device_sites: dict[str, list[str]] | None = None,
 ) -> dict[str, dict[str, Any]]:
     """Collect port health, returning the merged records keyed by interface id.
 
@@ -395,14 +428,18 @@ def collect_interfaces(
         devices: The device records from `collect_devices`, which give the per-device throughput
             rollups the same tags as every other device metric.
         inventory: The device inventory, keyed by device id, which supplies the reachability of
-            any device the data API reports without one.
+            any device the data API reports without one, and the throughput tags of any device it
+            leaves out.
+        device_sites: The site tags the data API last reported for each device, for the
+            throughput of a device it leaves out.
 
-    A device with an explicit unreachable status emits no interface metrics. Catalyst Center cannot
-    poll it, so whatever it serves for the device's interfaces is a last-known value, the same
-    staleness that withholds the device's own metrics. Its records are still returned, so NDM keeps
-    its interfaces alongside the device it reports as unreachable.
+    A device with an explicit unreachable status, from either source, emits no interface metrics.
+    Catalyst Center cannot poll it, so whatever it serves for the device's interfaces is a
+    last-known value, the same staleness that withholds the device's own metrics. Its records are
+    still returned, so NDM keeps its interfaces alongside the device it reports as unreachable.
     """
     base_tags = base_tags or []
+    inventory = inventory or {}
     merged = _merge_views(client, views)
     _enrich_metadata(client, merged)
 
@@ -410,7 +447,14 @@ def collect_interfaces(
     unreachable = {
         device_id
         for device_id, device in devices_by_id.items()
-        if is_unreachable(device_reachability(device, inventory or {}))
+        if is_unreachable(device_reachability(device, inventory))
+    }
+    # The interface views can still list a device the data API's device list leaves out, and for
+    # one the inventory reports as unreachable, its readings are just as stale.
+    unreachable |= {
+        device_id
+        for device_id, entry in inventory.items()
+        if device_id not in devices_by_id and is_unreachable(entry.get('reachabilityStatus'))
     }
     current = [record for record in merged.values() if record.get('networkDeviceId') not in unreachable]
 
@@ -438,7 +482,7 @@ def collect_interfaces(
         for field, metric_name in INTERFACE_POE_WATT_METRICS.items():
             emit_watts(check, metric_name, record.get(field), tags)
 
-    _emit_device_rollups(check, current, base_tags, namespace, devices_by_id)
+    _emit_device_rollups(check, current, base_tags, namespace, devices_by_id, inventory, device_sites or {})
 
     return merged
 
@@ -465,6 +509,8 @@ def _emit_device_rollups(
     base_tags: list[str],
     namespace: str,
     devices_by_id: dict[str, dict[str, Any]],
+    inventory: dict[str, dict[str, Any]],
+    device_sites: dict[str, list[str]],
 ) -> None:
     """Roll per-interface rates up to per-device and per-uplink totals.
 
@@ -509,8 +555,12 @@ def _emit_device_rollups(
         # returned the device, its record supplies the name and site, so throughput can be
         # filtered and labelled like every other device metric.
         device = devices_by_id.get(bucket.device_uuid or '')
+        entry = inventory.get(bucket.device_uuid or '')
         if device is not None:
             tags = base_tags + device_tags(device, namespace)
+        elif entry is not None:
+            # A device the data API left out is tagged as its reachability is, from the inventory.
+            tags = base_tags + inventory_device_tags(entry, namespace, device_sites)
         else:
             tags = base_tags + compact(device_identity_tags(namespace, device_ip, bucket.device_uuid))
         check.gauge('device.throughput.rx', bucket.rx, tags=tags)

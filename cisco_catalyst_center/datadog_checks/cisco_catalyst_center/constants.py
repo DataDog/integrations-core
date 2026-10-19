@@ -88,6 +88,23 @@ REACHABLE_VALUES: Final[frozenset[str]] = frozenset({'REACHABLE', 'Reachable', '
 # `ONLY_PING_REACHABLE` and `UNKNOWN`, and neither means the readings are stale.
 UNREACHABLE_VALUES: Final[frozenset[str]] = frozenset({'UNREACHABLE', 'Unreachable', 'unreachable'})
 
+# A reachability Catalyst Center reports before it has determined one. It says nothing about whether
+# the device is up, so it is treated as absent, like a null: the inventory's status is used instead.
+UNKNOWN_REACHABILITY_VALUES: Final[frozenset[str]] = frozenset({'UNKNOWN', 'Unknown', 'unknown'})
+
+# Inventory fields that hold the same value as the data API field each device tag is built from, as
+# (inventory field, tag key). Compared on captures of both for the same devices; the inventory has no
+# site, which is why a device only it reports borrows the site the data API last gave it.
+INVENTORY_DEVICE_TAG_FIELDS: Final[tuple[tuple[str, str], ...]] = (
+    ('hostname', 'device_name'),
+    ('family', 'device_family'),
+    ('series', 'device_series'),
+    ('role', 'device_role'),
+    ('platformId', 'platform_id'),
+    ('softwareType', 'os_type'),
+    ('softwareVersion', 'software_version'),
+)
+
 # L3 topology types the endpoint serves.
 L3_TOPOLOGY_TYPES: Final[tuple[str, ...]] = ('ospf', 'isis', 'static')
 

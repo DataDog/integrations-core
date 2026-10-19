@@ -45,14 +45,15 @@ def emit_gauge(check: AgentCheck, name: str, value: Any, tags: list[str]) -> Non
     check.gauge(name, numeric, tags=tags)
 
 
-def emit_score(check: AgentCheck, name: str, value: Any, tags: list[str]) -> None:
-    """Submit a 1-10 health score, additionally treating any negative value as absent.
+def emit_score(check: AgentCheck, name: str, value: Any, tags: list[str], minimum: float = 0) -> None:
+    """Submit a score, additionally treating any value below `minimum` as absent.
 
     A real score is never negative. Catalyst Center scores a device it has no data for as -1, and
-    one it cannot reach as -2.
+    one it cannot reach as -2. The 1-10 health scores pass `minimum=1`, since 0 is no score on them
+    either; a percentage keeps the default, because 0% is a real reading.
     """
     numeric = to_number(value)
-    if numeric is None or numeric < 0:
+    if numeric is None or numeric < minimum:
         return
     check.gauge(name, numeric, tags=tags)
 

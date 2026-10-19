@@ -56,18 +56,32 @@ def test_collect_devices_maps_reachability_to_a_gauge(aggregator, instance, chec
         pytest.param('cpuScore', -1, 'cisco_catalyst_center.device.cpu.score', id='no-data'),
         # What the reservable sandbox scored a powered-off switch, recorded 2026-10-05.
         pytest.param('overallHealthScore', -2, 'cisco_catalyst_center.device.health', id='unreachable'),
+        pytest.param('overallHealthScore', 0, 'cisco_catalyst_center.device.health', id='zero'),
     ],
 )
-def test_collect_devices_given_a_negative_sentinel_score_skips_that_metric(
+def test_collect_devices_given_a_score_outside_one_to_ten_skips_that_metric(
     aggregator, instance, check, field, sentinel, metric
 ):
     # Scores run from 1 to 10, and Catalyst Center encodes "no data" as -1 and "unreachable" as
-    # -2. Emitting either graphs a false value, and -2 drags any average below the poor band.
+    # -2. Emitting either graphs a false value, and -2 drags any average below the poor band. A 0
+    # is no score either, and would read as the worst possible one.
     payload = with_value(load_captured('data_network_devices'), f'response.0.metricsDetails.{field}', sentinel)
 
     collect_devices(check, _client(instance, payload), collect_wireless=False)
 
     aggregator.assert_metric(metric, count=3)
+
+
+def test_collect_devices_given_a_wan_link_utilization_of_zero_reports_it(aggregator, instance, check):
+    # WAN link utilization shares the scores' -1 sentinel but is a percentage, where 0 is an idle
+    # link rather than a missing reading.
+    payload = load_captured('data_network_devices')
+    metrics_details = {**payload['response'][0]['metricsDetails'], 'wanLinkUtilization': 0}
+    payload = with_value(payload, 'response.0.metricsDetails', metrics_details)
+
+    collect_devices(check, _client(instance, payload), collect_wireless=False)
+
+    assert metric_values(aggregator, 'cisco_catalyst_center.device.wan_link.utilization', 'device_name:sw1') == [0]
 
 
 def test_collect_devices_given_an_unreachable_device_reports_only_its_reachability(aggregator, instance, check):

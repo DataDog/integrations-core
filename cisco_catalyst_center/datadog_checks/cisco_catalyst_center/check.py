@@ -30,6 +30,7 @@ from .collectors import (
     collect_stacks,
     collect_topology,
     device_reachability,
+    device_site_tags,
     list_device_inventory,
     list_sites,
 )
@@ -63,6 +64,10 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         # cycle merely degraded or failed outright.
         self._collectors_succeeded = 0
         self._failed_collectors: list[str] = []
+        # The site tags the data API last reported for each device, by device id. The inventory has
+        # no site, so a device the data API drops borrows its tags from here, for as long as the
+        # inventory still lists it.
+        self._device_sites: dict[str, list[str]] = {}
 
     @property
     def client(self) -> CatalystCenterClient:
@@ -219,7 +224,13 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         # the inventory still lists them, so their reachability can still be reported.
         returned = {record.get('id') for record in devices}
         unlisted = [entry for device_id, entry in inventory.items() if device_id not in returned]
-        collect_inventory_reachability(self, unlisted, base_tags=base_tags, namespace=namespace)
+        if inventory_read:
+            # Forget devices the inventory no longer lists, so the map cannot outgrow the estate.
+            self._device_sites = {key: tags for key, tags in self._device_sites.items() if key in inventory}
+        self._device_sites.update({record['id']: device_site_tags(record) for record in devices if record.get('id')})
+        collect_inventory_reachability(
+            self, unlisted, base_tags=base_tags, namespace=namespace, device_sites=self._device_sites
+        )
         if inventory_read or devices_read:
             # Counted across both sources, because device.count is the number of managed devices.
             self.gauge('device.count', len(devices) + len(unlisted), tags=base_tags)
@@ -246,6 +257,7 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
                     namespace=namespace,
                     devices=devices,
                     inventory=inventory,
+                    device_sites=self._device_sites,
                 )
 
             healthy &= self._run('interfaces', _interfaces)
