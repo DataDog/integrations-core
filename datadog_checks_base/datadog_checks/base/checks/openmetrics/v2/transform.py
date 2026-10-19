@@ -3,8 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import re
 from copy import deepcopy
+from typing import Any
 
 from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.errors import ConfigurationError
 
 from . import transformers
 
@@ -19,8 +21,12 @@ class MetricTransformer:
         self.collect_counters_with_distributions = is_affirmative(
             config.get('collect_counters_with_distributions', False)
         )
-        self.histogram_buckets_as_distributions = self.collect_counters_with_distributions or is_affirmative(
-            config.get('histogram_buckets_as_distributions', False)
+        # `collect_histograms_as_distributions` sends distributions without bound tags and implies the options below
+        self.omit_histogram_bound_tags = self.parse_collect_histograms_as_distributions(config)
+        self.histogram_buckets_as_distributions = (
+            self.collect_counters_with_distributions
+            or self.omit_histogram_bound_tags
+            or is_affirmative(config.get('histogram_buckets_as_distributions', False))
         )
         self.collect_histogram_buckets = self.histogram_buckets_as_distributions or is_affirmative(
             config.get('collect_histogram_buckets', True)
@@ -35,6 +41,8 @@ class MetricTransformer:
             'collect_histogram_buckets': self.collect_histogram_buckets,
             'histogram_buckets_as_distributions': self.histogram_buckets_as_distributions,
             'non_cumulative_histogram_buckets': self.non_cumulative_histogram_buckets,
+            'omit_histogram_bound_tags': self.omit_histogram_bound_tags,
+            'histogram_bound_tag_prefixes': self.get_histogram_bound_tag_prefixes(config),
         }
 
         metrics_config = deepcopy(self.normalize_metric_config(config))
@@ -115,6 +123,27 @@ class MetricTransformer:
             return True
 
         return False
+
+    def parse_collect_histograms_as_distributions(self, config: dict[str, Any]) -> bool:
+        """Parse `collect_histograms_as_distributions` and fail if the Agent cannot drop the bound tags."""
+        if not is_affirmative(config.get('collect_histograms_as_distributions', False)):
+            return False
+
+        if reason := self.check.multiple_histogram_buckets_unsupported_reason():
+            raise ConfigurationError(f'`collect_histograms_as_distributions` {reason}')
+
+        return True
+
+    @staticmethod
+    def get_histogram_bound_tag_prefixes(config: dict[str, Any]) -> tuple[str, str]:
+        """Return the bucket bound tag prefixes, using the `rename_labels` name for `upper_bound` if it has one."""
+        # The scraper renames labels while building tags, but adds `lower_bound` afterwards, so only `upper_bound`
+        # can be renamed. `rename_labels` is validated later by the scraper, so tolerate a malformed value here.
+        rename_labels = config.get('rename_labels')
+        upper_bound = (
+            rename_labels.get('upper_bound', 'upper_bound') if isinstance(rename_labels, dict) else 'upper_bound'
+        )
+        return f'{upper_bound}:', 'lower_bound:'
 
     @staticmethod
     def normalize_metric_config(check_config):

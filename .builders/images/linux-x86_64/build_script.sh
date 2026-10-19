@@ -32,6 +32,10 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
     
     # We need to build cryptography for FIPS support
     always_build+=("cryptography")
+
+    # PyPI's manylinux pymongo wheels ship C extensions with DWARF debug info (~0.7 MiB);
+    # building from source applies our LDFLAGS=-Wl,--strip-debug.
+    always_build+=("pymongo")
 fi
 
 # package names passed to PIP_NO_BINARY need to be separated by commas
