@@ -795,7 +795,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         # even if it fails and thus should not stop the check from running.
         try:
             # slurm 21.08.6\n
-            out, err, ret = get_subprocess_output([self.sinfo_partition_cmd[0], '--version'])
+            out, err, ret = get_subprocess_output(self.get_slurm_command('sinfo', ['--version']))
             if ret != 0:
                 self.log.error("Error running sinfo --version: %s", err)
             elif out:
