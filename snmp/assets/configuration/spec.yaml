@@ -14,11 +14,22 @@ files:
       - name: loader
         enabled: true
         description: |
-            Check loader to use for all instances.
+            Check implementation to use for all instances:
+            - core: Recommended Go SNMP check built into the Datadog Agent.
+            - python: Legacy Python SNMP check.
 
-            Available loaders:
-            - core: (recommended) Uses new corecheck SNMP integration (faster and lower memory usage)
-            - python: Uses the legacy python SNMP integration
+            An instance-level loader overrides this setting.
+
+            When loader is omitted from both init_config and the instance, the Agent
+            tries implementations in priority order. On Agent 7.69+, the global
+            prioritize_go_check_loader setting in datadog.yaml controls that order:
+            true (the default) tries core first. false tries Python first.
+            If the first implementation cannot load or configure the instance,
+            the Agent tries the other implementation. For SNMP, legacy profiles
+            or metrics can trigger fallback from core to Python.
+
+            Setting loader explicitly selects only that implementation.
+            If it cannot load or configure the instance, no fallback is attempted.
         value:
           example: core
           type: string
@@ -278,9 +289,16 @@ files:
         enabled: true
         fleet_configurable: true
         description: |
-          Check loader to use. Available loaders:
-          - core: (recommended) Uses new corecheck SNMP integration
-          - python: Uses legacy python SNMP integration
+          Check implementation to use for this instance:
+          - core: Recommended Go SNMP check built into the Datadog Agent.
+          - python: Legacy Python SNMP check.
+
+          Overrides init_config.loader. If neither level specifies a loader,
+          the Agent uses its loader priority and fallback behavior, described
+          under init_config.loader.
+
+          Setting loader explicitly selects only that implementation,
+          without fallback.
         value:
           type: string
           example: core
