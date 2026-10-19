@@ -57,7 +57,7 @@
           {
             "definition": {
               "type": "note",
-              "content": "## Cisco Catalyst Center\n\nThis drill-down companion to the [Cisco Catalyst Center Overview](/dash/integration/Cisco%20Catalyst%20Center%20Overview) dashboard shows which devices are unhealthy or short on resources, which interfaces are down or erroring, and where throughput goes, especially on uplinks. The stack, PoE, and AP radio groups stay empty until their collectors are enabled.\n\n**Filters:** `catalyst_center_host` and `device_ip` scope every widget, `site_hierarchy` every widget except the stack widgets, and `device_family` the device, throughput, and wireless widgets.\n\n**Reading the numbers:** single values, lists, and tables show the latest reading unless the title or column says avg or peak, which cover the time frame.\n\n**Useful links**\n- [Integration docs](https://docs.datadoghq.com/integrations/cisco_catalyst_center/)\n- [Integration tile](/integrations/cisco-catalyst-center)\n- [Cisco Catalyst Center](https://www.cisco.com/site/us/en/products/networking/catalyst-center/index.html)",
+              "content": "## Cisco Catalyst Center\n\nThis drill-down companion to the [Cisco Catalyst Center Overview](/dash/integration/Cisco%20Catalyst%20Center%20Overview) dashboard shows which devices are unhealthy or short on resources, which interfaces are down or erroring, and where throughput goes, especially on uplinks. The stack, PoE, and AP radio groups stay empty until their collectors are enabled.\n\n**Filters:** `catalyst_center_host` and `device_ip` scope every widget, `site_hierarchy` every widget except the stack widgets, and `device_family` the device, throughput, and wireless widgets. While Catalyst Center re-indexes, a device it reports only through its inventory can lack family and site tags, so those two filters can leave it out.\n\n**Reading the numbers:** single values, lists, and tables show the latest reading unless the title or column says avg or peak, which cover the time frame. A device Catalyst Center cannot reach reports only its reachability: it counts in Unreachable devices and is missing, not down, in the interface and uplink widgets.\n\n**Useful links**\n- [Integration docs](https://docs.datadoghq.com/integrations/cisco_catalyst_center/)\n- [Integration tile](/integrations/cisco-catalyst-center)\n- [Cisco Catalyst Center](https://www.cisco.com/site/us/en/products/networking/catalyst-center/index.html)",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",
@@ -110,7 +110,7 @@
                   "response_format": "scalar",
                   "formulas": [
                     {
-                      "formula": "count_not_null(cutoff_max(query1, 7))"
+                      "formula": "count_not_null(cutoff_max(cutoff_min(query1, 1), 7))"
                     }
                   ],
                   "conditional_formats": [
@@ -1610,7 +1610,7 @@
           {
             "definition": {
               "type": "note",
-              "content": "1 is up and 0 is down. Admin down means shut on purpose; down with admin up is unexpected, though unused access ports report it too.",
+              "content": "1 is up and 0 is down. Admin down means shut on purpose; down with admin up is unexpected, though unused access ports report it too. An unreachable device's interfaces are missing here rather than down; see Unreachable devices.",
               "background_color": "orange",
               "font_size": "14",
               "text_align": "left",
@@ -2331,7 +2331,7 @@
           {
             "definition": {
               "type": "note",
-              "content": "Uplinks are interfaces Catalyst Center flags as WAN links or, where it does not say, whose description contains \"uplink\". Devices with neither report no uplinks and stay out of these widgets.",
+              "content": "Uplinks are interfaces Catalyst Center flags as WAN links or, where it does not say, whose description contains \"uplink\". Devices with neither report no uplinks and stay out of these widgets, and so do unreachable devices; see Unreachable devices.",
               "background_color": "purple",
               "font_size": "14",
               "text_align": "left",
