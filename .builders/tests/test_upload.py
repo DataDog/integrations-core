@@ -700,3 +700,22 @@ def test_upload(setup_targets_dir, setup_fake_hash):
 
     assert 'dev/external/test-pkg/test_pkg-1.0.0-py3-none-any.whl' in uploaded_files
     assert 'test-pkg @ https://agent-int-packages.datadoghq.com/${INTEGRATIONS_WHEELS_STORAGE}/external/test-pkg/test_pkg-1.0.0-py3-none-any.whl#sha256=abc123' in lockfiles['linux-x86_64'][0]
+
+
+@pytest.mark.parametrize(
+    'raw, expected',
+    [
+        ('', []),
+        ('   ', []),
+        ('linux-x86_64', ['linux-x86_64']),
+        ('linux-x86_64 linux-aarch64', ['linux-x86_64', 'linux-aarch64']),
+        ('linux-x86_64,linux-aarch64', ['linux-x86_64', 'linux-aarch64']),
+        ('linux-x86_64, macos-aarch64', ['linux-x86_64', 'macos-aarch64']),
+    ],
+)
+def test_per_check_resolution_targets_parsing(raw, expected):
+    assert upload.per_check_resolution_targets({upload.PER_CHECK_RESOLUTION_TARGETS_ENV: raw}) == expected
+
+
+def test_per_check_resolution_targets_defaults_to_off_without_env_var():
+    assert upload.per_check_resolution_targets({}) == []

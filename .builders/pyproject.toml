@@ -24,6 +24,7 @@ module = [
     "delocate.*",
     "pathspec",
     "dotenv",
+    "generate_per_check_requirements",
     "utils",
 ]
 ignore_missing_imports = true

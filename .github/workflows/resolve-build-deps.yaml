@@ -26,6 +26,10 @@ env:
   DIRECT_DEPENDENCY_FILE: agent_requirements.in
   # https://reproducible-builds.org/specs/source-date-epoch/
   SOURCE_DATE_EPOCH: "1580601600"
+  # Builder targets (e.g. linux-x86_64) that additionally resolve one wheel
+  # closure per integration. Empty means off; .builders/upload.py reads the
+  # same value to gate lockfile emission.
+  PER_CHECK_RESOLUTION_TARGETS: ""
 
 jobs:
   gate:
@@ -222,13 +226,22 @@ jobs:
 
     - name: Build image and wheels
       if: matrix.job.rebuild == 'true'
-      run: python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --constraints .constraints/constraints.txt
+      run: |
+        per_check_flag=""
+        if [[ " ${PER_CHECK_RESOLUTION_TARGETS} " == *" ${{ matrix.job.image }} "* ]]; then
+          per_check_flag="--per-check-resolutions"
+        fi
+        python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --constraints .constraints/constraints.txt $per_check_flag
 
     - name: Pull image and build wheels
       if: matrix.job.rebuild == 'false'
       run: |
+        per_check_flag=""
+        if [[ " ${PER_CHECK_RESOLUTION_TARGETS} " == *" ${{ matrix.job.image }} "* ]]; then
+          per_check_flag="--per-check-resolutions"
+        fi
         digest=$(jq -r '.["${{ matrix.job.image }}"]' .deps/image_digests.json)
-        python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest --constraints .constraints/constraints.txt
+        python .builders/build.py ${{ matrix.job.image }} --python 3 ${{ env.OUT_DIR }}/py3 --digest $digest --constraints .constraints/constraints.txt $per_check_flag
 
     - name: Publish image
       if: matrix.job.rebuild == 'true'
@@ -327,12 +340,16 @@ jobs:
         MACOSX_DEPLOYMENT_TARGET: "12.0" # https://docs.datadoghq.com/agent/supported_platforms/?tab=macos
         CACHE_HIT: ${{ steps.cache-builder-root.outputs.cache-hit }}
       run: |
+        per_check_flag=""
+        if [[ " ${PER_CHECK_RESOLUTION_TARGETS} " == *" ${{ env.TARGET_NAME }} "* ]]; then
+          per_check_flag="--per-check-resolutions"
+        fi
         # If we hit the cache, we can skip the builder setup
         if [[ ${CACHE_HIT} == "true" ]]; then
-          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --skip-setup --constraints .constraints/constraints.txt
+          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --skip-setup --constraints .constraints/constraints.txt $per_check_flag
         else
           mkdir ~/builder_root
-          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --constraints .constraints/constraints.txt
+          ${DD_PYTHON3} .builders/build.py ${{ env.TARGET_NAME }} --builder-root ~/builder_root --python 3 ${{ env.OUT_DIR }}/py3 --constraints .constraints/constraints.txt $per_check_flag
         fi
 
     - name: Save inputs hash into output

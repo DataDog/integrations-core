@@ -23,6 +23,7 @@ from zipfile import ZipFile
 import pathspec
 import urllib3
 from dotenv import dotenv_values
+from generate_per_check_requirements import resolve_closure
 from utils import iter_wheels
 
 
@@ -363,6 +364,28 @@ def clean_wheel(wheel_path: Path) -> bool:
     return True
 
 
+def write_per_check_resolutions(
+    checks: dict[str, list[str]],
+    wheel_dirs: list[Path],
+    python_path: Path,
+) -> None:
+    """Resolve and write the wheel closure of every check to `MOUNT_DIR/resolutions`.
+
+    `checks` maps check directory names to requirement lines, prepared by
+    build.py from the repository's pyproject.toml files. Resolution happens
+    against the final staged wheel directories so every closure is a subset
+    of the wheels this build publishes.
+    """
+    resolutions_dir = MOUNT_DIR / 'resolutions'
+    resolutions_dir.mkdir(parents=True, exist_ok=True)
+    for check, requirements in checks.items():
+        closure = resolve_closure(requirements, wheel_dirs, python_path, check_process)
+        output_file = resolutions_dir / f'{check}.json'
+        with output_file.open('w', encoding='utf-8') as f:
+            json.dump([wheel._asdict() for wheel in closure], f, indent=2)
+        print(f'Resolved {check}: {len(closure)} wheels', file=sys.stderr)
+
+
 def add_dependency(dependencies: dict[str, str], sizes: dict[str, VersionedWheelSizes], wheel: Path) -> None:
     project_metadata = extract_metadata(wheel)
     project_name = normalize_project_name(project_metadata['Name'])
@@ -382,6 +405,14 @@ def main():
     parser = argparse.ArgumentParser(prog='wheel-builder', allow_abbrev=False)
     parser.add_argument('--python', required=True)
     parser.add_argument('--use-built-index', action='store_true', default=False)
+    parser.add_argument(
+        '--per-check-resolutions',
+        action='store_true',
+        default=False,
+        help='Resolve one wheel closure per check against the staged wheelhouse '
+        'and write them to resolutions/ next to frozen.txt. Requires '
+        'per_check_requirements.json in the mount directory.',
+    )
     args = parser.parse_args()
 
     python_version = args.python
@@ -513,6 +544,10 @@ def main():
     with final_requirements.open('w', encoding='utf-8') as f:
         for project_name, project_version in sorted(dependencies.items()):
             f.write(f'{project_name}=={project_version}\n')
+
+    if args.per_check_resolutions:
+        checks = json.loads((MOUNT_DIR / 'per_check_requirements.json').read_text(encoding='utf-8'))
+        write_per_check_resolutions(checks, [built_wheels_dir, external_wheels_dir], python_path)
 
 
 if __name__ == '__main__':

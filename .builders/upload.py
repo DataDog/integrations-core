@@ -3,8 +3,10 @@ from __future__ import annotations
 import argparse
 import email.message
 import json
+import os
 import re
 import time
+from collections.abc import Mapping
 from hashlib import sha256
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
@@ -22,10 +24,25 @@ BUILDER_DIR = Path(__file__).parent
 REPO_DIR = BUILDER_DIR.parent
 RESOLUTION_DIR = REPO_DIR / '.deps'
 LOCK_FILE_DIR = RESOLUTION_DIR / 'resolved'
+PER_CHECK_LOCK_FILE_DIR = RESOLUTION_DIR / 'resolved-integrations'
+PER_CHECK_RESOLUTION_TARGETS_ENV = 'PER_CHECK_RESOLUTION_TARGETS'
 CACHE_CONTROL = 'public, max-age=15'
 VALID_PROJECT_NAME = re.compile(r'^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$', re.IGNORECASE)
 UNNORMALIZED_PROJECT_NAME_CHARS = re.compile(r'[-_.]+')
 CURRENT_PYTHON_VERSION = "3.13"
+
+def per_check_resolution_targets(environ: Mapping[str, str] | None = None) -> list[str]:
+    """Return the builder targets per-check lockfile emission is enabled for.
+
+    The list lives in the PER_CHECK_RESOLUTION_TARGETS env var set by
+    resolve-build-deps.yaml, so build steps and this reader share one
+    activation point.
+    """
+    if environ is None:
+        environ = os.environ
+    raw = environ.get(PER_CHECK_RESOLUTION_TARGETS_ENV, '')
+    return [target for target in re.split(r'[\s,]+', raw) if target]
+
 
 def is_valid_project_name(project_name: str) -> bool:
     # https://peps.python.org/pep-0508/#names
