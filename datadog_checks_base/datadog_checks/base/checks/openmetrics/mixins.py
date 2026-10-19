@@ -10,6 +10,8 @@ from math import isinf, isnan
 from os.path import isfile
 from re import compile
 
+import requests
+from binary import KIBIBYTE
 from prometheus_client.samples import Sample
 
 from datadog_checks.base.agent import datadog_agent
@@ -18,6 +20,7 @@ from datadog_checks.base.checks.libs.prometheus import text_fd_to_metric_familie
 from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.utils.common import to_native_string
+from datadog_checks.base.utils.http import OPENMETRICS_MAX_LINE_SIZE, limit_line_size
 from datadog_checks.base.utils.http_exceptions import (
     HTTPClientError,
     HTTPClientSSLError,
@@ -396,6 +399,7 @@ class OpenMetricsScraperMixin(object):
             scraper_config.setdefault('tls_ignore_warning', True)
 
         http_handler = self._http_handlers[prometheus_url] = self.create_http_client(scraper_config)
+        http_handler.max_line_size = OPENMETRICS_MAX_LINE_SIZE * KIBIBYTE
 
         headers = http_handler.options['headers']
 
@@ -499,13 +503,14 @@ class OpenMetricsScraperMixin(object):
         Poll the data from Prometheus and return the metrics as a generator.
         """
         response = self.poll(scraper_config)
-        if scraper_config['telemetry']:
-            if 'content-length' in response.headers:
-                content_len = int(response.headers['content-length'])
-            else:
-                content_len = len(response.content)
-            self._send_telemetry_gauge(self.TELEMETRY_GAUGE_MESSAGE_SIZE, content_len, scraper_config)
         try:
+            if scraper_config['telemetry']:
+                if 'content-length' in response.headers:
+                    content_len = int(response.headers['content-length'])
+                else:
+                    content_len = len(response.content)
+                self._send_telemetry_gauge(self.TELEMETRY_GAUGE_MESSAGE_SIZE, content_len, scraper_config)
+
             # no dry run if no label joins
             if not scraper_config['label_joins']:
                 scraper_config['_dry_run'] = False
@@ -836,7 +841,8 @@ class OpenMetricsScraperMixin(object):
 
         try:
             response = self.send_request(endpoint, scraper_config, headers)
-        except HTTPClientSSLError:
+        # Checks with AGNOSTIC_HTTP_CLIENT raise the agnostic types. Checks without it raise requests exceptions.
+        except (requests.exceptions.SSLError, HTTPClientSSLError):
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise
         except (IOError, HTTPClientError):
@@ -848,7 +854,7 @@ class OpenMetricsScraperMixin(object):
             if health_service_check:
                 self.service_check(service_check_name, AgentCheck.OK, tags=service_check_tags)
             return response
-        except HTTPClientStatusError:
+        except (requests.HTTPError, HTTPClientStatusError):
             response.close()
             if health_service_check:
                 self.service_check(service_check_name, AgentCheck.CRITICAL, tags=service_check_tags)
@@ -861,7 +867,10 @@ class OpenMetricsScraperMixin(object):
 
         http_handler = self.get_http_handler(scraper_config)
 
-        return http_handler.get(endpoint, stream=True, **kwargs)
+        response = http_handler.get(endpoint, stream=True, **kwargs)
+        # Also limit reads that do not go through `iter_lines`, such as `response.content` for telemetry
+        limit_line_size(response, http_handler.max_line_size)
+        return response
 
     def get_hostname_for_sample(self, sample, scraper_config):
         """

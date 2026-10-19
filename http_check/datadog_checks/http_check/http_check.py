@@ -161,7 +161,7 @@ class HTTPCheck(AgentCheck):
                 (
                     self.SC_STATUS,
                     AgentCheck.CRITICAL,
-                    "{}. Connection failed after {} ms".format(str(e), length),
+                    "{}. Connection failed after {} ms".format(str(e).rstrip('.'), length),
                 )
             )
 

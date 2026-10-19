@@ -45,6 +45,20 @@ url = 'unix:///var/run/docker.sock'
 response = self.http.get(url)
 ```
 
+## Backend-neutral mode
+
+Set the `AGNOSTIC_HTTP_CLIENT` class attribute to opt a check into the interface this page describes:
+
+```python
+class MyCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
+```
+
+With it set, every client the check creates through `self.http` or `create_http_client()`, including the clients its
+OpenMetrics and Prometheus scrapers build, returns responses that expose only the documented members and raises the
+errors listed under [Errors](#errors). The `fake_http` test fixture requires it. Without it, clients return `requests`
+responses and raise `requests` exceptions unchanged.
+
 ## Options
 
 Some options can be set globally in `init_config` (with `instances` taking precedence).
@@ -53,8 +67,9 @@ For complete documentation of every option, see the associated configuration tem
 
 ## Errors
 
-A failed request raises one of the backend-agnostic types in `datadog_checks.base.utils.http_exceptions`, never an
-exception class belonging to the underlying HTTP library. Catch these instead:
+With `AGNOSTIC_HTTP_CLIENT` set, a failed request raises one of the backend-neutral types from the
+module `datadog_checks.base.utils.http_exceptions`, never an exception class belonging to the underlying HTTP
+library. Catch these instead:
 
 | Exception | Raised when |
 | --- | --- |
@@ -68,7 +83,7 @@ exception class belonging to the underlying HTTP library. Catch these instead:
 | `HTTPClientReadTimeoutError` | The timeout elapsed while waiting for response data. |
 | `HTTPClientStatusError` | An error status was raised through `raise_for_status()`. |
 
-A check reporting connectivity therefore looks like this:
+For example, a check that skips optional data when its endpoint is unavailable looks like this:
 
 ```python
 from datadog_checks.base.utils.http_exceptions import HTTPClientError
@@ -77,12 +92,11 @@ try:
     response = self.http.get(url)
     response.raise_for_status()
 except HTTPClientError as e:
-    self.service_check('can_connect', AgentCheck.CRITICAL, message=str(e))
-else:
-    self.service_check('can_connect', AgentCheck.OK)
+    self.log.debug('Could not retrieve version metadata: %s', e)
+    return
 ```
 
-Body decoding is the one exception to that rule. Calling `response.json()` on a body that is not valid JSON raises the
+Decoding the body is the only failure outside this tree. Calling `response.json()` on a body that is not valid JSON raises the
 standard library's `json.JSONDecodeError`, a subclass of `ValueError` that is not part of the tree above, so handle it
 separately from the types listed here.
 

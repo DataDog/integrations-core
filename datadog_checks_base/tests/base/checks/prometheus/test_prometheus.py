@@ -11,11 +11,12 @@ from contextlib import contextmanager
 import mock
 import pytest
 
-from datadog_checks.base.checks import AgentCheck
-from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
-from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientError, HTTPClientStatusError
-from datadog_checks.checks.prometheus import PrometheusCheck, PrometheusScraper, UnknownFormatError
+from datadog_checks.base.stubs.http import FakeHTTPResponse, RecordedRequest
+from datadog_checks.base.utils.http_exceptions import HTTPClientError, HTTPClientStatusError
+from datadog_checks.checks.prometheus import PrometheusCheck, UnknownFormatError
 from datadog_checks.utils.prometheus import metrics_pb2, parse_metric_family
+
+pytestmark = pytest.mark.usefixtures('agnostic_http')
 
 protobuf_content_type = 'application/vnd.google.protobuf; proto=io.prometheus.client.MetricFamily; encoding=delimited'
 FAKE_ENDPOINT = 'http://fake.endpoint:10055/metrics'
@@ -36,6 +37,7 @@ def _text_response(text: str, *, content_type: str = 'text/plain') -> FakeHTTPRe
     return FakeHTTPResponse(
         content=text.encode('utf-8'),
         headers={'Content-Type': content_type},
+        encoding='utf-8',
     )
 
 
@@ -43,8 +45,6 @@ def _file_response(file_path: str, *, content_type: str) -> FakeHTTPResponse:
     with open(file_path, 'rb') as fixture:
         return FakeHTTPResponse(
             content=fixture.read(),
-            # Protobuf is binary and not decodable as UTF-8, so opt out of deriving text from the content.
-            text='',
             content_chunks=(),
             lines=(),
             headers={'Content-Type': content_type},
@@ -374,7 +374,6 @@ def test_poll_protobuf(bin_data_path, fake_http, fake_http_response, mocked_prom
     fake_http_response(
         FAKE_ENDPOINT,
         content,
-        text='',
         content_chunks=(),
         lines=(),
         headers={'Content-Type': protobuf_content_type},
@@ -1898,26 +1897,19 @@ def test_health_service_check_ok(fake_http, fake_http_response, ksm_text):
     fake_http.assert_all_responses_consumed()
 
 
-@pytest.mark.parametrize(
-    'error_type',
-    [
-        pytest.param(HTTPClientConnectionError, id='connection-error'),
-        pytest.param(HTTPClientError, id='root-error'),
-    ],
-)
-def test_health_service_check_failing(fake_http, error_type):
+def test_health_service_check_failing(fake_http):
     """Tests endpoint health service check failing"""
     fake_http.register_response(
         'GET',
         FAKE_ENDPOINT,
-        error_type('Connection failed'),
+        HTTPClientError('Connection failed'),
         match_options=PROMETHEUS_REQUEST_OPTIONS,
     )
     check = PrometheusCheck('prometheus_check', {}, {}, {})
     check.NAMESPACE = 'ksm'
     check.health_service_check = True
     check.service_check = mock.MagicMock()
-    with pytest.raises(error_type):
+    with pytest.raises(HTTPClientError):
         check.process(FAKE_ENDPOINT)
     check.service_check.assert_called_with(
         "ksm.prometheus.health", PrometheusCheck.CRITICAL, tags=["endpoint:http://fake.endpoint:10055/metrics"]
@@ -1927,12 +1919,8 @@ def test_health_service_check_failing(fake_http, error_type):
 
 
 def test_health_service_check_failing_on_status_error(fake_http):
-    fake_http.register_response(
-        'GET',
-        FAKE_ENDPOINT,
-        HTTPClientStatusError('503 Server Error'),
-        match_options=PROMETHEUS_REQUEST_OPTIONS,
-    )
+    response = FakeHTTPResponse(status_code=503)
+    fake_http.register_response('GET', FAKE_ENDPOINT, response, match_options=PROMETHEUS_REQUEST_OPTIONS)
     check = PrometheusCheck('prometheus_check', {}, {}, {})
     check.NAMESPACE = 'ksm'
     check.health_service_check = True
@@ -1944,6 +1932,7 @@ def test_health_service_check_failing_on_status_error(fake_http):
     check.service_check.assert_called_with(
         "ksm.prometheus.health", PrometheusCheck.CRITICAL, tags=["endpoint:http://fake.endpoint:10055/metrics"]
     )
+    assert response.closed
     fake_http.assert_requests([PROMETHEUS_REQUEST])
     fake_http.assert_all_responses_consumed()
 
@@ -1989,21 +1978,17 @@ def test_text_filter_input():
     assert filtered == expected_out
 
 
-def test_ssl_ca_cert_false_disables_verification(mocked_prometheus_check, mocker):
+def test_ssl_ca_cert_false_disables_verification(mocked_prometheus_check):
     check = mocked_prometheus_check
     check.ssl_ca_cert = False
-    fake_http = FakeHTTPClient()
-    create_http_client = mocker.patch.object(check, 'create_http_client', return_value=fake_http)
 
-    check.get_http_handler('https://httpbin.org/get', None)
+    handler = check.get_http_handler('https://httpbin.org/get', None)
 
-    http_config = create_http_client.call_args.args[0]
-    assert http_config['ssl_ca_cert'] is False
-    assert http_config['ssl_ignore_warning'] is True
-    assert http_config['ssl_verify'] is False
+    assert handler.options['verify'] is False
+    assert handler.ignore_tls_warning is True
 
 
-def test_prometheus_http_config(mocker):
+def test_get_http_handler_applies_config():
     instance_http = {
         'prometheus_endpoint': 'http://localhost:8080',
         'extra_headers': {'foo': 'bar'},
@@ -2014,72 +1999,14 @@ def test_prometheus_http_config(mocker):
     }
     init_config_http = {'timeout': 42}
     check = PrometheusCheck('prometheus_check', init_config_http, {}, [instance_http])
-    fake_http = FakeHTTPClient()
-    for _ in range(2):
-        fake_http.register_response(
-            'GET',
-            instance_http['prometheus_endpoint'],
-            FakeHTTPResponse(),
-            match_options=PROMETHEUS_REQUEST_OPTIONS,
-        )
-    create_http_client = mocker.patch.object(check, 'create_http_client', return_value=fake_http)
 
-    check.poll(instance_http['prometheus_endpoint'], instance=instance_http)
-    check.poll(instance_http['prometheus_endpoint'])
+    handler = check.get_http_handler(instance_http['prometheus_endpoint'], instance_http)
 
-    expected_http_config = {
-        **instance_http,
-        'headers': {},
-        'ssl_cert': None,
-        'ssl_private_key': None,
-        'ssl_verify': True,
-        'ssl_ignore_warning': False,
-        'ssl_ca_cert': None,
-    }
-    create_http_client.assert_called_once_with(expected_http_config)
-    expected_request = RecordedRequest(
-        'GET',
-        instance_http['prometheus_endpoint'],
-        PROMETHEUS_REQUEST_OPTIONS,
-    )
-    fake_http.assert_requests([expected_request, expected_request])
-    fake_http.assert_all_responses_consumed()
-
-
-def test_composed_prometheus_scraper_uses_owner_client_factory():
-    owner = mock.MagicMock()
-    fake_http = FakeHTTPClient()
-    owner.create_http_client.return_value = fake_http
-    scraper = PrometheusScraper(owner)
-    scraper.extra_headers = {}
-    scraper.ssl_cert = None
-    scraper.ssl_private_key = None
-    scraper.ssl_ca_cert = None
-
-    http_handler = scraper.get_http_handler(FAKE_ENDPOINT, {})
-
-    assert http_handler is fake_http
-    owner.create_http_client.assert_called_once()
-
-
-def test_composed_prometheus_scraper_applies_own_http_remapper():
-    owner = AgentCheck('test', {}, [{}])
-    scraper = PrometheusScraper(owner)
-    scraper.extra_headers = {}
-    scraper.ssl_cert = None
-    scraper.ssl_private_key = None
-    scraper.ssl_ca_cert = None
-
-    http_handler = scraper.get_http_handler(
-        FAKE_ENDPOINT,
-        {
-            'prometheus_timeout': 37,
-            'ssl_verify': False,
-        },
-    )
-
-    assert http_handler.options['timeout'] == (37.0, 37.0)
-    assert http_handler.options['verify'] is False
+    assert check.get_http_handler(instance_http['prometheus_endpoint'], None) is handler
+    assert handler.options['timeout'] == (42.0, 42.0)
+    assert handler.options['auth'].username == 'data'
+    assert handler.options['cert'] == '/path/to/cert'
+    assert handler.get_header('foo') == 'bar'
 
 
 def test_get_http_handler_negotiates_over_seeded_default_headers(p_check):

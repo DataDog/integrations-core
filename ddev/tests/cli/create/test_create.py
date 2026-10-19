@@ -30,6 +30,20 @@ def test_default_create_writes_manifest_without_overrides(ddev, empty_repo, subc
     'subcommand',
     ['check', 'jmx', 'logs', 'event', 'metrics-crawler'],
 )
+def test_default_create_includes_owner_placeholder(ddev, empty_repo, subcommand):
+    """Every generated manifest must include an owner key, matching every shipped manifest."""
+    result = ddev('create', subcommand, 'my_integration')
+    assert result.exit_code == 0, result.output
+
+    manifest_path = empty_repo.path / 'my_integration' / 'manifest.json'
+    manifest = json.loads(manifest_path.read_text())
+    assert manifest['owner'] == '<FILL IN>'
+
+
+@pytest.mark.parametrize(
+    'subcommand',
+    ['check', 'jmx', 'logs', 'event', 'metrics-crawler'],
+)
 def test_skip_manifest_does_not_affect_new_integration_scaffolding(ddev, empty_repo, subcommand):
     result = ddev('create', subcommand, 'my_integration', '--skip-manifest')
     assert result.exit_code == 0, result.output
@@ -41,12 +55,6 @@ def test_skip_manifest_does_not_affect_new_integration_scaffolding(ddev, empty_r
     json.loads(manifest_path.read_text())
     assert not (empty_repo.path / '.ddev' / 'config.toml').exists()
     assert 'deprecated' not in result.output.lower()
-
-
-def test_dropped_type_aborts_with_confluence_link(ddev, empty_repo):
-    result = ddev('create', 'foo', '--type', 'tile', '--dry-run')
-    assert result.exit_code != 0
-    assert '6248108729' in result.output
 
 
 @pytest.mark.parametrize('dropped', ['tile', 'snmp_tile', 'marketplace'])
@@ -271,7 +279,7 @@ def test_type_shim_accepts_legacy_prefix_position(ddev, empty_repo, type_args):
 
 
 def test_type_shim_prefix_position_aborts_for_dropped_type(ddev, empty_repo):
-    """A dropped type in the legacy prefix position still aborts with the manifest-less pointer."""
+    """A dropped type in the legacy prefix position still aborts."""
     result = ddev('create', '--type', 'tile', 'my_integration')
     assert result.exit_code != 0
     assert 'no longer supported' in result.output

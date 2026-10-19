@@ -59,7 +59,7 @@ def test_legacy_cadvisor_http_client_is_isolated_from_kubelet_config():
     assert check.http.options['proxies'] == proxy
     assert check._cadvisor_http.options['auth'] is None
     assert check._cadvisor_http.get_header('Authorization') is None
-    assert check._cadvisor_http.options['proxies'] == {'http': '', 'https': ''}
+    assert check._cadvisor_http.options['proxies'] is None
 
 
 def test_legacy_cadvisor_requests_use_isolated_http_client(fake_http, fake_http_response):

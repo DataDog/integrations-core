@@ -10,6 +10,7 @@ Some directories have their own `AGENTS.md`/`CLAUDE.md` with narrower, directory
 - [Python Code Style](#python-code-style)
 - [Configuration Models](#configuration-models)
 - [Service Checks](#service-checks)
+- [HTTP Requests](#http-requests)
 - [Development Workflow](#development-workflow)
 - [Pull Requests](#pull-requests)
 - [Documentation](#documentation)
@@ -93,6 +94,8 @@ ddev validate config -s <INTEGRATION_NAME>
 ddev validate models -s <INTEGRATION_NAME>
 ```
 
+The exception is `config_models/validators.py`, which is generated once and never overwritten: edit it by hand for rules a single spec field cannot express, such as cross-field checks or URL parsing.
+
 ## Service Checks
 
 **Applicable to:** newly created integrations. Existing integrations that already submit service checks are exempt.
@@ -100,6 +103,20 @@ ddev validate models -s <INTEGRATION_NAME>
 New integrations should not add their own service checks. Use metrics and metric-based monitors instead.
 
 The one exception is the OpenMetrics base check, which still emits a service check (e.g. `<check>.openmetrics.health`) itself. This is inherited automatically from the base class rather than something an integration author chooses to add, and is expected to change in the future. It is not a reason to add further, integration-specific service checks on top of it.
+
+## HTTP Requests
+
+**Applicable to:** new integrations, and any new or modified HTTP code in existing integrations. Existing code that still uses `requests` directly doesn't need to be migrated as part of an unrelated change.
+
+Make HTTP requests through the backend-neutral HTTP layer in `datadog_checks_base`, documented in `docs/developer/base/http.md`. Checks should not depend on the underlying HTTP library, so another backend can replace it without rewriting every integration and its tests.
+
+To use the layer:
+
+- Set `AGNOSTIC_HTTP_CLIENT = True` on the check class. Without it, clients return `requests` responses and raise `requests` exceptions, so the rules below do not hold and the `fake_http` fixture fails the test.
+- Send requests through `self.http`. Construct additional clients with `AgentCheck.create_http_client()` rather than instantiating `RequestsWrapper` or a `requests.Session`.
+- Catch the exceptions in `datadog_checks.base.utils.http_exceptions` (for example `HTTPClientError`), never `requests.exceptions` types.
+- Use only the `HTTPClient` and `HTTPResponse` members documented in `http.md`. Anything else is an implementation detail of the current backend.
+- In tests, use the `fake_http` and `fake_http_response` fixtures, or `FakeHTTPClient` and `FakeHTTPResponse` from `datadog_checks.base.stubs.http`, instead of patching `requests` or using the legacy `MockResponse`.
 
 ## Development Workflow
 
@@ -266,10 +283,11 @@ These guidelines apply to automated code review (the Codex review bot). They do 
 
 ## Pull Requests
 
-- Open PRs in draft mode unless explicitly asked otherwise; mark them ready for review once the work is complete and CI passes.
-- Always populate the PR body using the repository's template at `.github/PULL_REQUEST_TEMPLATE.md`. Read the template first and fill in every section (`What does this PR do?`, `Motivation`, `Review checklist`). Do not omit, rename, or reorder the template sections, and do not add unrelated sections on top.
+- Always open PRs in draft mode unless the user explicitly asks otherwise. Never mark a PR ready for review or request reviewers yourself: that notifies code owners, so it is the human author's decision. Tell the user once all CI checks pass (`gh pr checks <PR> --repo DataDog/integrations-core --watch`; relaunch it if it times out).
+- Always populate the PR body using `.github/PULL_REQUEST_TEMPLATE.md`, keep its visible text at or below 3,000 characters, and make the required sections minimal but complete. In `Motivation`, explain how the change fits into any larger project or related PRs, and link the references a reviewer needs to evaluate the change (e.g. the Jira ticket, upstream docs or changelog for a behavior or version change, related PRs), not every source you consulted. Do not omit, rename, or reorder the template sections, or add unrelated sections.
+- Before handing the PR to the user, check each item in the template's `Checklist before requesting review` by following the `How to verify` instructions hidden under it, and tick only the items you verified. Tell the user about anything you could not verify. Never tick the human-author item; only the human author may tick it. The `pr-description` validation fails until every item is ticked and the description is within the length limit.
 - Keep PR titles short and descriptive in plain words. Do not use conventional-commit prefixes (`feat:`, `fix:`, `chore:`).
-- Every PR must declare a QA decision via a label. Add `qa/required` if the PR ships changes that need QA validation, or `qa/skip-qa` if it does not (e.g., docs, tests, developer tooling, or no agent-impacting changes). The `validate-all` CI check fails until exactly one of those labels is set. Tick the matching checkbox in the PR template.
+- Every PR must declare a QA decision via a label. Set exactly one of `qa/required` or `qa/skip-qa`; the `qa-label` validation fails until one is set. Whether a change needs QA is a team decision, not something to infer from the diff. PRs that only change code owned exclusively by `@DataDog/agent-integrations` in `.github/CODEOWNERS` always use `qa/skip-qa`, never `qa/required`. Otherwise, unless another rule in your context settles it, ask the user which label to use.
 - Push the branch and open the PR before adding the changelog entry so the entry filename can reference the real PR number.
 
 ## Documentation

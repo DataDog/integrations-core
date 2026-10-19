@@ -45,7 +45,7 @@ class HTTPClientRequestError(HTTPClientError):
 class HTTPClientStatusError(HTTPClientError):
     """An error status on a received response.
 
-    This is a sibling of HTTPClientRequestError. ``response`` may be None outside ``raise_for_status``.
+    This is a sibling of HTTPClientRequestError. `response` may be None outside `raise_for_status`.
     """
 
 
@@ -64,7 +64,7 @@ class HTTPClientReadTimeoutError(HTTPClientTimeoutError):
 class HTTPClientConnectionError(HTTPClientRequestError):
     """A connection failure, excluding timeouts.
 
-    Ports of ``except requests.ConnectionError`` usually also need ``HTTPClientTimeoutError``.
+    Ports of `except requests.ConnectionError` usually also need `HTTPClientTimeoutError`.
     """
 
 

@@ -68,14 +68,6 @@ def test_config_extra_headers_string_values():
     assert http.options['headers'] == complete_headers
 
 
-def test_config_extra_headers_non_canonical_case_takes_precedence_over_the_seeded_default():
-    instance = {'extra_headers': {'accept': 'application/openmetrics-text'}}
-    init_config = {}
-    http = RequestsWrapper(instance, init_config)
-
-    assert http.get_header('Accept') == 'application/openmetrics-text'
-
-
 def test_config_extra_headers_override_config_headers_across_case():
     instance = {'headers': {'x-token': 'from-headers'}, 'extra_headers': {'X-Token': 'from-extra-headers'}}
     init_config = {}
@@ -84,13 +76,14 @@ def test_config_extra_headers_override_config_headers_across_case():
     assert http.get_header('X-Token') == 'from-extra-headers'
 
 
-def test_get_header_reports_the_value_that_reaches_the_wire():
+def test_non_canonically_cased_extra_header_overrides_the_seeded_default_on_the_wire():
     http = RequestsWrapper({'extra_headers': {'accept': 'application/openmetrics-text'}}, {})
 
     with mock.patch('requests.Session.get') as get:
         http.get('http://example.com/hello')
 
-    assert get.call_args.kwargs['headers']['accept'] == http.get_header('Accept')
+    assert http.get_header('Accept') == 'application/openmetrics-text'
+    assert get.call_args.kwargs['headers']['accept'] == 'application/openmetrics-text'
 
 
 def test_config_headers_keep_every_configured_spelling():
@@ -155,6 +148,15 @@ def test_request_headers_override_defaults_before_extra_headers():
     assert wire_headers['X-Extra'] == 'extra'
     assert wire_headers['X-Precedence'] == 'extra'
     assert wire_headers['X-Default'] == 'default'
+
+
+def test_explicit_none_headers_reach_requests_unchanged():
+    http = RequestsWrapper({}, {})
+
+    with mock.patch('requests.Session.get') as get:
+        http.get('http://example.com/hello', headers=None)
+
+    assert get.call_args.kwargs['headers'] is None
 
 
 def test_a_per_request_mapping_keeps_the_configured_headers():

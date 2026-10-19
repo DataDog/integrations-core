@@ -11,13 +11,15 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Unpack
 
 from datadog_checks.base.utils.headers import get_default_headers
+from datadog_checks.base.utils.headers import get_header as get_header_value
+from datadog_checks.base.utils.headers import set_header as set_header_value
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.base.utils.http_protocol import HTTPHeaders, HTTPRequestOptions, HTTPResponse
 
 __all__ = ['FakeHTTPClient', 'FakeHTTPResponse', 'RecordedRequest']
 
 JSON_RESULT_UNSET = object()
-SUPPRESSED_AUTH = object()
+OPTION_UNSET = object()
 
 
 class UnsetResponseResult(Enum):
@@ -45,7 +47,7 @@ def _snapshot_options(options: Mapping[str, Any]) -> Mapping[str, Any]:
 
 @dataclass(frozen=True, slots=True)
 class RecordedRequest:
-    """A request captured by :class:`FakeHTTPClient`."""
+    """A request captured by `FakeHTTPClient`."""
 
     method: str
     url: str
@@ -89,11 +91,12 @@ class FakeHTTPResponse:
         reason: str = '',
         peer_cert: bytes | dict | None = None,
     ) -> None:
-        resolved_text = content.decode(encoding or 'utf-8') if isinstance(text, UnsetResponseResult) else text
+        resolved_text = (
+            content.decode(encoding or 'utf-8', errors='replace') if isinstance(text, UnsetResponseResult) else text
+        )
         resolved_content_chunks = (
             ((content,) if content else ()) if isinstance(content_chunks, UnsetResponseResult) else content_chunks
         )
-        resolved_lines = tuple(resolved_text.splitlines()) if isinstance(lines, UnsetResponseResult) else lines
         if status_error is None and status_code >= 400:
             error_kind = 'Client Error' if status_code < 500 else 'Server Error'
             status_error = HTTPClientStatusError(f'{status_code} {error_kind}')
@@ -114,7 +117,8 @@ class FakeHTTPResponse:
         self._json_result = json_result
         self._json_error = json_error
         self._content_chunks = tuple(resolved_content_chunks)
-        self._lines = tuple(resolved_lines)
+        # Derived lines are resolved on read because callers may set the encoding after the response is created.
+        self._lines = None if isinstance(lines, UnsetResponseResult) else tuple(lines)
         self._stream_error = stream_error
         self._status_error = status_error
         self._reason = reason
@@ -132,7 +136,7 @@ class FakeHTTPResponse:
         if self._json_error is not None:
             raise self._json_error
         if self._json_result is JSON_RESULT_UNSET:
-            raise ValueError('No JSON result was configured for this fake response.')
+            raise AssertionError('No JSON result was configured for this fake response.')
         return self._json_result
 
     def raise_for_status(self) -> None:
@@ -153,17 +157,17 @@ class FakeHTTPResponse:
         if self._stream_error is not None:
             raise self._stream_error
 
-    def iter_lines(
-        self,
-        chunk_size: int | None = None,
-        decode_unicode: bool = False,
-        delimiter: bytes | str | None = None,
-    ) -> Iterator[bytes | str]:
-        yield from self._lines
+    def iter_lines(self, chunk_size: int | None = None, decode_unicode: bool = False) -> Iterator[bytes | str]:
+        if self._lines is not None:
+            yield from self._lines
+        elif decode_unicode and self.encoding is not None:
+            yield from self.content.decode(self.encoding).splitlines()
+        else:
+            yield from self.content.splitlines()
         if self._stream_error is not None:
             raise self._stream_error
 
-    def __enter__(self) -> HTTPResponse:
+    def __enter__(self) -> FakeHTTPResponse:
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> bool | None:
@@ -207,15 +211,17 @@ class FakeHTTPClient:
         self.persist_connections = False
         self.closed = False
         self._cookies = dict(cookies or {})
-        self._should_bypass_proxy = should_bypass_proxy
+        # Shared with created clients so a setting changed after a check starts still reaches it.
+        self._proxy_bypass: dict[str, bool | Callable[[str], bool]] = {'value': should_bypass_proxy}
         self.requests: list[RecordedRequest] = []
         self._responses: list[RegisteredResponse] = []
 
     def create_client(self) -> FakeHTTPClient:
-        """Create an isolated client that shares registered responses and recorded requests."""
+        """Create an isolated client that shares registered responses, recorded requests and proxy bypass."""
         client = FakeHTTPClient()
         client.requests = self.requests
         client._responses = self._responses
+        client._proxy_bypass = self._proxy_bypass
         return client
 
     def register_response(
@@ -258,25 +264,10 @@ class FakeHTTPClient:
         return self._request('OPTIONS', url, options)
 
     def get_header(self, name: str, default: str | None = None) -> str | None:
-        found = default
-        for header_name, value in self.options['headers'].items():
-            if header_name.lower() == name.lower():
-                found = value
-        return found
+        return get_header_value(self.options['headers'], name, default)
 
     def set_header(self, name: str, value: str) -> None:
-        matching_names = [header_name for header_name in self.options['headers'] if header_name.lower() == name.lower()]
-        if not matching_names:
-            self.options['headers'][name] = value
-            return
-
-        retained_name = matching_names[0]
-        self.options['headers'][retained_name] = value
-        for duplicate_name in matching_names[1:]:
-            del self.options['headers'][duplicate_name]
-
-    def disable_auth(self) -> None:
-        self.options['auth'] = SUPPRESSED_AUTH
+        set_header_value(self.options['headers'], name, value)
 
     def close(self) -> None:
         self.closed = True
@@ -284,10 +275,13 @@ class FakeHTTPClient:
     def get_cookie(self, name: str, default: str | None = None) -> str | None:
         return self._cookies.get(name, default)
 
+    def set_should_bypass_proxy(self, value: bool | Callable[[str], bool]) -> None:
+        """Set what should_bypass_proxy returns, for this client and every client created from it."""
+        self._proxy_bypass['value'] = value
+
     def should_bypass_proxy(self, url: str) -> bool:
-        if callable(self._should_bypass_proxy):
-            return self._should_bypass_proxy(url)
-        return self._should_bypass_proxy
+        bypass = self._proxy_bypass['value']
+        return bypass(url) if callable(bypass) else bypass
 
     def assert_requests(self, expected: Iterable[RecordedRequest]) -> None:
         expected_requests = list(expected)
@@ -326,8 +320,7 @@ class FakeHTTPClient:
             registered.method == request.method
             and registered.url == request.url
             and all(
-                request.options.get(name, JSON_RESULT_UNSET) == value
-                for name, value in registered.match_options.items()
+                request.options.get(name, OPTION_UNSET) == value for name, value in registered.match_options.items()
             )
         )
 

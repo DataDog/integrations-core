@@ -78,6 +78,7 @@ WORKER_METRICS_MOCK = [
     'component.request_bytes.count',
     'component.response_bytes.count',
     'component.inflight_requests',
+    'dynamo_component_model_load_time_seconds',
     'component.errors.count',
     'component.cancellation.count',
     'component.queue_depth',

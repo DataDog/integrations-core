@@ -2,6 +2,15 @@ name: Tekton
 fleet_configurable: true
 files:
 - name: tekton.yaml
+  discovery:
+    strategies:
+    - strategy: local:from_tekton_kube_container_name
+      provides:
+      - endpoints
+      inputs: {}
+      candidates:
+      - pipelines_controller_endpoint: "{endpoints.pipelines_controller_endpoint}"
+        triggers_controller_endpoint: "{endpoints.triggers_controller_endpoint}"
   options:
   - template: init_config
     options:
@@ -28,3 +37,13 @@ files:
       overrides:
         openmetrics_endpoint.required: false
         openmetrics_endpoint.hidden: true
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      # tektoncd/pipeline/
+      - controller-10a3e32792f33651396d02b6855a6e36
+      # tektoncd/triggers/
+      - controller-f656ca31de179ab913fa76abc255c315
+  - template: auto_conf/discovery

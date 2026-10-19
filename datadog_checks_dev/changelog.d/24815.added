@@ -1,1 +1,0 @@
-Add fixtures backed by the base-owned HTTP fakes for backend-neutral check tests, and deprecate ``MockResponse``.

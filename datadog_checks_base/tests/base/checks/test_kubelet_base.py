@@ -12,6 +12,8 @@ from datadog_checks.base.checks.kubelet_base.base import KubeletBase, KubeletCre
 from datadog_checks.base.stubs.http import RecordedRequest
 from datadog_checks.dev import get_here
 
+pytestmark = pytest.mark.usefixtures('agnostic_http')
+
 HERE = get_here()
 
 
@@ -46,35 +48,29 @@ def test_retrieve_pod_list_success(fake_http, fake_http_response):
     fake_http.assert_all_responses_consumed()
 
 
-def test_retrieve_pod_list_parses_via_json(fake_http, fake_http_response):
-    url = 'http://kubelet:10255/pods'
-    fake_http_response(url, b'{"items": [{"name": "p1"}]}')
-    check = KubeletBase('kubelet', {}, [{}])
-    check.pod_list_url = url
-    check.kubelet_credentials = KubeletCredentials({})
-
-    pod_list = check.retrieve_pod_list()
-    assert pod_list['items'] == [{'name': 'p1'}]
-    fake_http.assert_requests(
-        [
-            RecordedRequest(
-                method='GET',
-                url=url,
-                options={'verify': None, 'cert': None, 'headers': None, 'params': {'verbose': True}, 'stream': True},
-            )
-        ]
-    )
-    fake_http.assert_all_responses_consumed()
-
-
+@pytest.mark.parametrize(
+    'credentials, expected_options',
+    [
+        pytest.param(
+            {'token': 'tkn', 'ca_cert': '/ca.pem', 'client_crt': '/crt.pem', 'client_key': '/key.pem'},
+            {'verify': '/ca.pem', 'cert': ('/crt.pem', '/key.pem'), 'headers': None},
+            id='client-cert-wins-over-token',
+        ),
+        pytest.param(
+            {'token': 'tkn'},
+            {'verify': None, 'cert': None, 'headers': {'Authorization': 'Bearer tkn'}},
+            id='bearer-token',
+        ),
+    ],
+)
 @pytest.mark.parametrize('verbose', [True, False], ids=['verbose', 'terse'])
-def test_perform_kubelet_query_forwards_credentials_and_verbosity(fake_http, fake_http_response, verbose):
+def test_perform_kubelet_query_forwards_credentials_and_verbosity(
+    fake_http, fake_http_response, credentials, expected_options, verbose
+):
     url = 'https://kubelet:10250/healthz'
     response = fake_http_response(url, status_code=200)
     check = KubeletBase('kubelet', {}, [{}])
-    check.kubelet_credentials = KubeletCredentials(
-        {'token': 'tkn', 'ca_cert': '/ca.pem', 'client_crt': '/crt.pem', 'client_key': '/key.pem'}
-    )
+    check.kubelet_credentials = KubeletCredentials(credentials)
 
     assert check.perform_kubelet_query(url, verbose=verbose) is response
 
@@ -83,39 +79,7 @@ def test_perform_kubelet_query_forwards_credentials_and_verbosity(fake_http, fak
             RecordedRequest(
                 method='GET',
                 url=url,
-                options={
-                    'verify': '/ca.pem',
-                    'cert': ('/crt.pem', '/key.pem'),
-                    'headers': None,
-                    'params': {'verbose': verbose},
-                    'stream': False,
-                },
-            )
-        ]
-    )
-    fake_http.assert_all_responses_consumed()
-
-
-def test_perform_kubelet_query_forwards_the_bearer_token(fake_http, fake_http_response):
-    url = 'https://kubelet:10250/healthz'
-    fake_http_response(url, status_code=200)
-    check = KubeletBase('kubelet', {}, [{}])
-    check.kubelet_credentials = KubeletCredentials({'token': 'tkn'})
-
-    check.perform_kubelet_query(url)
-
-    fake_http.assert_requests(
-        [
-            RecordedRequest(
-                method='GET',
-                url=url,
-                options={
-                    'verify': None,
-                    'cert': None,
-                    'headers': {'Authorization': 'Bearer tkn'},
-                    'params': {'verbose': True},
-                    'stream': False,
-                },
+                options={**expected_options, 'params': {'verbose': verbose}, 'stream': False},
             )
         ]
     )

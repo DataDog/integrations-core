@@ -1,0 +1,19 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Access token",
+      "bearer_token": {
+        "password_setting": {
+          "key": "access_token",
+          "label": "Access token",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "forcepoint-security-service-edge-logs" }
+  ]
+}

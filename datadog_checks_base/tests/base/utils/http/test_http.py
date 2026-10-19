@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import gzip
+import io
 import logging
 import os
 import ssl
@@ -12,10 +14,17 @@ import mock
 import pytest
 import requests
 import requests_unixsocket
+import urllib3
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http import RequestsWrapper, is_uds_url, quote_uds_url
-from datadog_checks.base.utils.http_exceptions import HTTPClientSSLError, HTTPClientTimeoutError
+from datadog_checks.base.utils.http import (
+    RequestsWrapper,
+    ResponseLineTooLongError,
+    ResponseWrapper,
+    is_uds_url,
+    limit_line_size,
+    quote_uds_url,
+)
 from datadog_checks.dev.utils import ON_WINDOWS
 
 
@@ -91,11 +100,6 @@ class TestAttribute:
         assert check.http == check._http
         assert isinstance(check.http, RequestsWrapper)
 
-    def test_factory_default_returns_requests_wrapper(self):
-        check = AgentCheck('test', {}, [{}])
-
-        assert isinstance(check.create_http_client(), RequestsWrapper)
-
     def test_factory_override_swaps_client(self):
         sentinel = object()
 
@@ -106,33 +110,20 @@ class TestAttribute:
         check = CustomCheck('test', {}, [{}])
         assert check.http is sentinel
 
-    def test_factory_default_uses_instance_config(self):
-        check = AgentCheck('test', {}, [{'timeout': 7}])
+    @pytest.mark.parametrize(
+        'instance, init_config, overrides, expected_timeout',
+        [
+            pytest.param({'timeout': 7}, {}, {}, (7.0, 7.0), id='check-instance'),
+            pytest.param({'timeout': 7}, {}, {'instance': {'timeout': 42}}, (42.0, 42.0), id='instance-override'),
+            # An empty mapping is an explicit override, distinct from None, so the check's own config must not leak in.
+            pytest.param({'timeout': 7}, {}, {'instance': {}}, (10.0, 10.0), id='empty-instance-override'),
+            pytest.param({}, {'timeout': 7}, {'init_config': {}}, (10.0, 10.0), id='empty-init-config-override'),
+        ],
+    )
+    def test_factory_config_selection(self, instance, init_config, overrides, expected_timeout):
+        check = AgentCheck('test', init_config, [instance])
 
-        assert check.create_http_client().options['timeout'] == (7.0, 7.0)
-
-    def test_factory_instance_override(self):
-        check = AgentCheck('test', {}, [{'timeout': 7}])
-
-        client = check.create_http_client({'timeout': 42})
-
-        assert client.options['timeout'] == (42.0, 42.0)
-
-    def test_factory_empty_instance_override_is_honored(self):
-        from datadog_checks.base.utils.http import create_http_client
-
-        check = AgentCheck('test', {}, [{'timeout': 7}])
-
-        # {} is an explicit override, distinct from None, so self.instance's timeout must not leak in.
-        empty_default = create_http_client({}, {}).options['timeout']
-        assert check.create_http_client({}).options['timeout'] == empty_default
-
-    def test_module_factory_builds_from_given_config(self):
-        from datadog_checks.base.utils.http import create_http_client
-
-        client = create_http_client({'timeout': 24.5}, {})
-
-        assert client.options['timeout'] == (24.5, 24.5)
+        assert check.create_http_client(**overrides).options['timeout'] == expected_timeout
 
     def test_module_factory_applies_remapper(self):
         from datadog_checks.base.utils.http import create_http_client
@@ -202,7 +193,7 @@ class TestTLSCiphers:
         init_config = {}
         http = RequestsWrapper(instance, init_config)
         assert http.session.verify == cert_path  # The session attribute instantiates the SSLContext
-        with pytest.raises(HTTPClientSSLError):
+        with pytest.raises(requests.exceptions.SSLError):
             http.get(url)
 
     def test_http_failure_with_ssl_defaults(self, openssl_https_server):
@@ -219,7 +210,7 @@ class TestTLSCiphers:
         # Mock SSL set_ciphers to disable it and use the default ciphers
         with mock.patch.object(ssl.SSLContext, 'set_ciphers'):
             http = RequestsWrapper(instance, init_config)
-            with pytest.raises(HTTPClientSSLError):
+            with pytest.raises(requests.exceptions.SSLError):
                 http.get(url)
 
 
@@ -314,13 +305,21 @@ class TestSession:
             assert getattr(http.session, key) == value
 
     def test_timeout(self):
-        """Forward the configured timeout and translate backend timeout errors."""
+        """
+        Respect the request timeout.
+
+        Here we test two things:
+        - We pass the timeout option correctly to the requests library.
+        - We let the requests.exceptions.Timeout bubble up from the requests library.
+
+        We trust requests to respect the timeout so we mock its response.
+        """
 
         mock_session = mock.create_autospec(requests.Session)
         mock_session.get.side_effect = requests.exceptions.Timeout()
         http = RequestsWrapper({'persist_connections': True}, {'timeout': 0.08}, session=mock_session)
 
-        with pytest.raises(HTTPClientTimeoutError):
+        with pytest.raises(requests.exceptions.Timeout):
             http.get('https://foobar.com')
 
         assert 'timeout' in mock_session.get.call_args.kwargs, mock_session.get.call_args.kwargs
@@ -383,3 +382,58 @@ class TestLogger:
         expected_message = 'Sending GET request to https://www.google.com'
         for _, _, message in caplog.record_tuples:
             assert message != expected_message
+
+
+def _gzip_response(body):
+    response = requests.Response()
+    response.raw = urllib3.HTTPResponse(
+        io.BytesIO(gzip.compress(body)), headers={'Content-Encoding': 'gzip'}, preload_content=False
+    )
+    return response
+
+
+# Chunks of 4 bytes and a limit of 10 bytes
+@pytest.mark.parametrize(
+    'body, lines',
+    [
+        pytest.param(b'1234567\n' * 100, 100, id='long body with short lines'),
+        pytest.param(b'x' * 10 + b'\ny', 2, id='line at the limit'),
+        pytest.param(b'x' * 10, 1, id='last line at the limit'),
+    ],
+)
+def test_iter_lines_allows_lines_up_to_limit(body, lines):
+    assert len(list(ResponseWrapper(_gzip_response(body), 4, 10).iter_lines())) == lines
+
+
+@pytest.mark.parametrize(
+    'body',
+    [
+        pytest.param(b'x' * 11, id='no line break'),
+        pytest.param(b'x' * 11 + b'\ny', id='line break in the chunk after the limit'),
+        pytest.param(b'y\n' + b'x' * 11 + b'\ny', id='line that starts in a chunk'),
+    ],
+)
+def test_iter_lines_limits_line_size(body):
+    with pytest.raises(ResponseLineTooLongError, match='line longer than 10 bytes'):
+        list(ResponseWrapper(_gzip_response(body), 4, 10).iter_lines())
+
+
+# Chunks of 32 bytes, longer than the limit of 10 bytes
+@pytest.mark.parametrize(
+    'body',
+    [
+        pytest.param(b'a\n' + b'x' * 11 + b'\nb', id='line inside a chunk'),
+        pytest.param(b'a\n' + b'x' * 11, id='last line inside a chunk'),
+    ],
+)
+def test_iter_lines_limits_lines_inside_chunks(body):
+    with pytest.raises(ResponseLineTooLongError, match='line longer than 10 bytes'):
+        list(ResponseWrapper(_gzip_response(body), 32, 10).iter_lines())
+
+
+def test_stream_groups_chunks_up_to_a_line_break():
+    response = _gzip_response(b'y\n' + b'x' * 9 + b'\ny')
+    limit_line_size(response, 10)
+
+    # The chunks are b'y\nxx', b'xxxx', b'xxx\n' and b'y'
+    assert list(response.raw.stream(4)) == [b'y\nxx', b'xxxxxxx\n', b'y']

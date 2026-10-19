@@ -117,7 +117,10 @@ async def collect_workflow_state(client: AsyncGitHubClient, workflow: Dispatched
     return WorkflowState(
         label=workflow.label,
         run_id=workflow.run_id,
-        status=run.status,
+        # GitHub declares `status` nullable, and a run without one has not reached a
+        # reportable state yet, which is what this monitor seeds runs with before its
+        # first poll.
+        status=run.status or 'queued',
         conclusion=run.conclusion,
         html_url=run.html_url or workflow.html_url,
         jobs=jobs,

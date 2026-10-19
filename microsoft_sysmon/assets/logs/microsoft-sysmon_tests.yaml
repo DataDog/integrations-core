@@ -316,6 +316,7 @@ tests:
           hostname: agent-http-intake.logs.datadoghq.com
         src_endpoint:
           hostname: zero-test.zeroad.local
+          uid: zero-test.zeroad.local
         rcode: NoError
         message: Dns query
         actor:

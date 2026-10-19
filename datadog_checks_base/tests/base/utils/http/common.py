@@ -129,10 +129,13 @@ class RequestsTransport(HTTPAdapter):
         return self.build_response(request, outcome)
 
 
-def create_requests_client(transport: RequestsTransport) -> RequestsWrapper:
+def create_requests_client(
+    transport: RequestsTransport, instance: dict[str, Any] | None = None, *, agnostic: bool = True
+) -> RequestsWrapper:
+    """Return a client that sends requests through the transport, in agnostic mode unless told otherwise."""
     session = requests.Session()
     session.mount('http://', transport)
-    client = RequestsWrapper({}, {}, session=session)
+    client = RequestsWrapper(instance or {}, {}, session=session, agnostic=agnostic)
     client.persist_connections = True
     return client
 

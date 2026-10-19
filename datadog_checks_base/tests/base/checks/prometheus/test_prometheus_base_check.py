@@ -1,3 +1,5 @@
+import pytest
+
 from datadog_checks.checks.prometheus import GenericPrometheusCheck
 
 
@@ -53,10 +55,14 @@ def test_composed_scraper_applies_legacy_http_options():
     assert handler.options['verify'] is False
 
 
-def test_composed_scraper_accepts_missing_init_config():
+@pytest.mark.parametrize(
+    'init_config',
+    [pytest.param(None, id='missing'), pytest.param({'timeout': 99}, id='http-settings')],
+)
+def test_composed_scraper_ignores_check_init_config(init_config):
     endpoint = 'https://example.test/metrics'
     instance = {'prometheus_url': endpoint, 'namespace': 'test', 'metrics': ['test_metric']}
-    check = GenericPrometheusCheck('prometheus_check', None, {}, [instance])
+    check = GenericPrometheusCheck('prometheus_check', init_config, {}, [instance])
 
     handler = check.get_scraper(instance).get_http_handler(endpoint, instance)
 
