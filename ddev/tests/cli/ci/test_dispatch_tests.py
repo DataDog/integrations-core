@@ -19,6 +19,7 @@ from ddev.cli.application import Application
 from ddev.cli.ci.dispatch_run import resolve_run
 from ddev.cli.ci.dispatch_tests import RUN_OUTCOME_METRICS, attach_datadog_log_handler
 from ddev.cli.ci.tests.batching.exceptions import PlanningError
+from ddev.cli.ci.tests.batching.jobs import AgentImageOverride
 from ddev.cli.ci.tests.changes import ChangeResolutionError
 from ddev.cli.ci.tests.dispatcher_attributes import metric_tag_mapping
 from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
@@ -1390,7 +1391,7 @@ def test_console_lines_show_operational_context_without_large_payloads(ddev: Cli
 
 
 PULL_REQUEST_RUN_MANIFEST = {
-    'schema_version': 2,
+    'schema_version': 3,
     'repository': 'DataDog/integrations-core',
     'checkout_sha': MERGE_SHA,
     'head_sha': HEAD_SHA,
@@ -1400,6 +1401,9 @@ PULL_REQUEST_RUN_MANIFEST = {
     'base_branch': 'a-target-branch',
     'base_sha': BASE_SHA,
     'is_fork': False,
+    'targets': [],
+    'exclude_targets': [],
+    'context': 'pr',
 }
 
 COMMIT_RUN_MANIFEST = {
@@ -1410,6 +1414,7 @@ COMMIT_RUN_MANIFEST = {
     'pr_number': None,
     'base_branch': None,
     'base_sha': None,
+    'context': 'master',
 }
 
 
@@ -1430,6 +1435,24 @@ def merge_checkout(mocker, head: str = MERGE_SHA, parents: dict[str, str] | None
     ('options', 'pr_head_repo', 'expected'),
     [
         pytest.param(['--commit', 'a-sha'], None, COMMIT_RUN_MANIFEST, id='commit'),
+        pytest.param(
+            ['--commit', 'a-sha', '--targets', 'ntp,redis', '--tags', 'context:nightly team:platform'],
+            None,
+            {**COMMIT_RUN_MANIFEST, 'targets': ['ntp', 'redis'], 'context': 'nightly'},
+            id='commit-with-targets-and-context',
+        ),
+        pytest.param(
+            ['--commit', 'a-sha', '--all', '--exclude-targets', 'ddev'],
+            None,
+            {**COMMIT_RUN_MANIFEST, 'all_targets': True, 'exclude_targets': ['ddev']},
+            id='commit-with-exclusions',
+        ),
+        pytest.param(
+            ['--pr', str(PR_NUMBER), '--tags', 'context:nightly'],
+            None,
+            PULL_REQUEST_RUN_MANIFEST,
+            id='pull-request-context-is-always-pr',
+        ),
         pytest.param(
             ['--pr', str(PR_NUMBER)],
             'contributor/integrations-core',
@@ -1553,9 +1576,20 @@ def test_an_all_target_run_round_trips_through_its_recorded_scope(
         pytest.param('{not json', 'is not a valid run', id='malformed-json'),
         pytest.param(b'\xff', 'is not a valid run', id='invalid-utf8'),
         pytest.param(
-            json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'schema_version': 3}),
+            json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'schema_version': 4}),
             'is not a valid run',
             id='newer-schema',
+        ),
+        pytest.param(
+            json.dumps(
+                {
+                    key: value
+                    for key, value in {**PULL_REQUEST_RUN_MANIFEST, 'schema_version': 2}.items()
+                    if key not in ('targets', 'exclude_targets', 'context')
+                }
+            ),
+            'is not a valid run',
+            id='older-schema',
         ),
         pytest.param(
             json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'repository': 'DataDog/integrations-extras'}),
@@ -1579,7 +1613,18 @@ def test_an_unusable_manifest_is_refused(ddev, planned, tmp_path, content: str |
 
 
 @pytest.mark.parametrize(
-    'option', ['--pr', '--commit', '--all', '--pr-head-sha', '--pr-head-repo', '--pr-head-branch', '--pr-base-branch']
+    'option',
+    [
+        '--pr',
+        '--commit',
+        '--all',
+        '--pr-head-sha',
+        '--pr-head-repo',
+        '--pr-head-branch',
+        '--pr-base-branch',
+        '--targets',
+        '--exclude-targets',
+    ],
 )
 def test_a_manifest_cannot_also_select_the_run(ddev, github, planned, option: str):
     """The manifest decides the run; also passing a selection option would leave the choice ambiguous."""
@@ -1615,3 +1660,163 @@ def test_resolve_only_warns_when_dry_run_is_redundant(ddev, planned, tmp_path):
     assert '`--dry-run` has no effect with `--resolve-only`.' in result.output
     assert (tmp_path / 'run.json').exists()
     planned.assert_not_called()
+
+
+def test_explicit_targets_reach_the_plan_and_are_shown(ddev, planned, resolved_changes):
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--targets', 'ntp,redis', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    kwargs = planned.call_args.kwargs
+    assert (kwargs['all_targets'], kwargs['targets'], kwargs['exclude_targets']) == (False, ('ntp', 'redis'), ())
+    assert 'ntp, redis' in result.output
+
+
+@pytest.mark.parametrize(
+    ('options', 'all_targets'),
+    [
+        pytest.param(['--all'], True, id='all'),
+        pytest.param([], False, id='change-based'),
+    ],
+)
+def test_exclusions_filter_the_selection_without_changing_it(
+    ddev, planned, resolved_changes, options: list[str], all_targets: bool
+):
+    """`--exclude-targets` alone keeps the change-based selection; only `--all` asks for everything."""
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', *options, '--exclude-targets', 'ddev,ntp', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    kwargs = planned.call_args.kwargs
+    assert (kwargs['all_targets'], kwargs['targets'], kwargs['exclude_targets']) == (all_targets, (), ('ddev', 'ntp'))
+    assert 'ddev, ntp' in result.output
+
+
+def test_without_target_options_the_selection_is_unchanged(ddev, planned, resolved_changes):
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    kwargs = planned.call_args.kwargs
+    assert (kwargs['all_targets'], kwargs['targets'], kwargs['exclude_targets']) == (False, (), ())
+    assert kwargs['changed_files'] == resolved_changes.return_value
+
+
+def test_all_and_explicit_targets_cannot_be_combined(ddev, planned, resolved_changes):
+    """Neither option silently wins: the caller may not have meant the combination."""
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--all', '--targets', 'ntp', '--dry-run')
+
+    assert result.exit_code == 2
+    assert '`--all` and `--targets` cannot be combined' in result.output
+    planned.assert_not_called()
+    resolved_changes.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    'pr_option', ['--pr', '--pr-head-sha', '--pr-head-repo', '--pr-head-branch', '--pr-base-branch']
+)
+def test_explicit_targets_cannot_be_combined_with_pr_options(ddev, github, planned, pr_option: str):
+    """A pull request run tests what the pull request changed."""
+    result = ddev('ci', 'dispatch-tests', pr_option, 'a-value', '--targets', 'ntp', '--dry-run')
+
+    assert result.exit_code == 2
+    assert '`--targets` cannot be combined with PR options' in result.output
+    planned.assert_not_called()
+
+
+def test_exclusions_apply_to_a_pull_request(ddev, github, planned):
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--exclude-targets', 'ddev', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    assert planned.call_args.kwargs['exclude_targets'] == ('ddev',)
+
+
+@pytest.mark.parametrize('option', ['--targets', '--exclude-targets'])
+@pytest.mark.parametrize('value', ['', ',', 'ntp,,redis', ',ntp', 'ntp,', 'ntp, redis'])
+def test_a_malformed_target_list_is_refused(ddev, planned, resolved_changes, option: str, value: str):
+    """An empty or padded name would match no target and quietly test less than asked."""
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', option, value, '--dry-run')
+
+    assert result.exit_code == 2
+    assert 'comma-separated list of target names' in result.output
+    planned.assert_not_called()
+
+
+def test_a_target_cannot_be_both_requested_and_excluded(ddev, planned, resolved_changes):
+    result = ddev(
+        'ci', 'dispatch-tests', '--commit', 'a-sha', '--targets', 'ntp,redis', '--exclude-targets', 'redis', '--dry-run'
+    )
+
+    assert result.exit_code == 2
+    assert 'both requested and excluded: redis' in result.output
+    planned.assert_not_called()
+
+
+def test_duplicate_target_names_are_planned_once(ddev, planned, resolved_changes):
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--targets', 'ntp,redis,ntp', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    assert planned.call_args.kwargs['targets'] == ('ntp', 'redis')
+
+
+@pytest.mark.parametrize(
+    ('options', 'expected', 'shown'),
+    [
+        pytest.param(
+            ['--agent-image', 'registry/agent:7.85.0', '--agent-image-windows', 'registry/agent:7.85.0-servercore'],
+            AgentImageOverride(linux='registry/agent:7.85.0', windows='registry/agent:7.85.0-servercore'),
+            ['registry/agent:7.85.0', 'registry/agent:7.85.0-servercore'],
+            id='both',
+        ),
+        pytest.param(
+            ['--agent-image', 'registry/agent:7.85.0'],
+            AgentImageOverride(linux='registry/agent:7.85.0'),
+            ['registry/agent:7.85.0'],
+            id='linux-only',
+        ),
+        pytest.param([], None, [], id='none'),
+    ],
+)
+def test_agent_image_overrides_reach_the_plan_and_are_shown(
+    ddev, planned, resolved_changes, options: list[str], expected: AgentImageOverride | None, shown: list[str]
+):
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', *options, '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    assert planned.call_args.kwargs['agent_image_resolver'] == expected
+    for image in shown:
+        assert image in result.output
+    assert ('Agent image' in result.output) is bool(shown)
+
+
+def test_a_called_run_round_trips_its_scope_and_context(ddev, planned, resolved_changes, mocker, tmp_path):
+    """Phase two plans what phase one resolved, and tags it with the caller's context."""
+    mocker.patch('ddev.utils.git.GitRepository.current_branch', return_value='7.85.x')
+    first = ddev(
+        'ci',
+        'dispatch-tests',
+        '--commit',
+        'a-sha',
+        '--targets',
+        'ntp',
+        '--tags',
+        'context:test-agent',
+        '--resolve-only',
+        '--output-dir',
+        str(tmp_path),
+    )
+    assert first.exit_code == 0, first.output
+
+    second = ddev(
+        'ci',
+        'dispatch-tests',
+        '--run-manifest',
+        str(tmp_path / 'run.json'),
+        '--agent-image',
+        'registry/agent:7.85.0',
+        '--dry-run',
+        '--output-dir',
+        str(tmp_path),
+    )
+
+    assert second.exit_code == 0, second.output
+    kwargs = planned.call_args.kwargs
+    assert (kwargs['targets'], kwargs['all_targets']) == (('ntp',), False)
+    assert kwargs['agent_image_resolver'] == AgentImageOverride(linux='registry/agent:7.85.0')
