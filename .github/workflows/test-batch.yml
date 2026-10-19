@@ -182,17 +182,21 @@ jobs:
 
       # A status, not a check run: a check run at a SHA this workflow was not dispatched at gets filed
       # under whichever workflow already has a check suite there.
+      # The PR status keeps one stable name; other runs are named by context so runs on one commit do
+      # not overwrite each other's status.
       - name: Mark the batch pending
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BATCH_ID: ${{ inputs.batch_id }}
+          STATUS_CONTEXT: ${{
+            inputs.pr_number != '' && format('Dispatcher / {0} (beta, non-blocking)', inputs.batch_id) ||
+            format('Dispatcher ({0}) / {1} (beta, non-blocking)', inputs.context, inputs.batch_id) }}
           HEAD_SHA: ${{ inputs.head_sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           JOB_COUNT: ${{ steps.decode.outputs.count }}
         run: |
           set -euo pipefail
           gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
-            -f "context=Dispatcher / ${BATCH_ID} (beta, non-blocking)" \
+            -f "context=${STATUS_CONTEXT}" \
             -f "state=pending" \
             -f "description=Running ${JOB_COUNT} job(s)" \
             -f "target_url=${RUN_URL}" \
@@ -452,7 +456,9 @@ jobs:
       - name: Settle the batch's result
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BATCH_ID: ${{ inputs.batch_id }}
+          STATUS_CONTEXT: ${{
+            inputs.pr_number != '' && format('Dispatcher / {0} (beta, non-blocking)', inputs.batch_id) ||
+            format('Dispatcher ({0}) / {1} (beta, non-blocking)', inputs.context, inputs.batch_id) }}
           HEAD_SHA: ${{ inputs.head_sha }}
           TEST_RESULT: ${{ inputs.is_fork == 'true' && needs.test_fork.result || needs.test.result }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
@@ -467,7 +473,7 @@ jobs:
           esac
 
           gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
-            -f "context=Dispatcher / ${BATCH_ID} (beta, non-blocking)" \
+            -f "context=${STATUS_CONTEXT}" \
             -f "state=${state}" \
             -f "description=${description}" \
             -f "target_url=${RUN_URL}" \
