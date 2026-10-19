@@ -26,7 +26,7 @@ CONFIG = {
 
 E2E_METADATA = {
     'env_vars': {
-        'IBM_DB_INSTALLER_URL': 'https://ddintegrations.blob.core.windows.net/ibm-db2/',
+        'IBM_DB_INSTALLER_URL': 'https://agent-integrations-ci-fixtures.s3.us-east-1.amazonaws.com/fixtures/ibm-db2/',
     },
     'docker_volumes': ['{}/requirements.txt:/dev/requirements.txt'.format(os.path.join(HERE, 'docker'))],
     'start_commands': [

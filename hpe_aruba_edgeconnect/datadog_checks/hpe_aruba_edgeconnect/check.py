@@ -59,7 +59,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
     def _get_orch_client(self) -> OrchestratorClient:
         if self._orch_client is not None:
             return self._orch_client
-        client = OrchestratorClient(self.http, self.config.orchestrator_ip)
+        client = OrchestratorClient(self.http, self.config.orchestrator_ip, self.config.orchestrator_login_type)
         client.login(self.config.orchestrator_username, self.config.orchestrator_password)
         self._orch_client = client
         return client

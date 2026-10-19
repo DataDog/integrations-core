@@ -5,6 +5,8 @@ import contextlib
 import copy
 import functools
 import os
+from collections import defaultdict
+from collections.abc import Callable
 from time import time
 
 import psycopg
@@ -316,13 +318,25 @@ class PostgreSql(DatabaseCheck):
         """
         db context manager that yields a healthy connection to the main database
         """
+        if self._db and not self._db.closed:
+            transaction_status = self._db.info.transaction_status
+            if transaction_status == psycopg.pq.TransactionStatus.ACTIVE:
+                # A previous command was interrupted without its result being consumed (for example, a socket
+                # error raised by psycopg while waiting on the server). libpq still considers it in flight and
+                # rejects every new command with "another command is already in progress", so the connection
+                # can't be reused.
+                self.log.warning(
+                    "Connection to the database %s was left with a command in progress, reconnecting",
+                    self._config.dbname,
+                )
+                self._close_db()
+            elif transaction_status in (psycopg.pq.TransactionStatus.INTRANS, psycopg.pq.TransactionStatus.INERROR):
+                self._db.rollback()
         if not self._db or self._db.closed:
             # if the connection is closed, we need to reinitialize the connection
             self._db = self._new_connection(self._config.dbname)
             # once the connection is reinitialized, we need to reload the pg_settings
             self._load_pg_settings(self._db)
-        if self._db.info.status != psycopg.pq.ConnStatus.OK:
-            self._db.rollback()
         try:
             yield self._db
         except (psycopg.InterfaceError, InterruptedError):
@@ -463,7 +477,9 @@ class PostgreSql(DatabaseCheck):
                 per_database_queries.append(query)
 
         if self.autodiscovery:
-            self._collect_dynamic_queries_autodiscovery(per_database_queries)
+            # Executors compiled from previous definitions must not be reused.
+            self._per_database_query_defs = per_database_queries
+            self._per_database_executors = {}
         else:
             queries.extend(per_database_queries)
         self._dynamic_queries.append(self._new_query_executor(queries, db=self.db))
@@ -497,6 +513,8 @@ class PostgreSql(DatabaseCheck):
         self.log.debug("Cleaning state")
         self.metrics_cache.clean_state()
         self._dynamic_queries = []
+        self._per_database_query_defs: list[dict] = []
+        self._per_database_executors: dict[str, QueryExecutor] = {}
 
     def _get_debug_tags(self):
         return ['agent_hostname:{}'.format(self.agent_hostname)]
@@ -692,11 +710,11 @@ class PostgreSql(DatabaseCheck):
                         # if this is a relation-specific query, we need to list all relations last
                         if is_relations:
                             schema_field = get_schema_field(descriptors)
-                            formatted_query = self._relations_manager.filter_relation_query(query, schema_field)
-                            cursor.execute(formatted_query)
+                            query = self._relations_manager.filter_relation_query(query, schema_field)
                         else:
-                            self.log.debug("Running query: %s", str(query))
-                            cursor.execute(query.replace(r'%', r'%%'))
+                            query = query.replace(r'%', r'%%')
+                        self.log.debug("Running query: %s", query)
+                        cursor.execute(query)
 
                         results = cursor.fetchall()
                         if not results:
@@ -832,19 +850,60 @@ class PostgreSql(DatabaseCheck):
 
         self.metrics_cache.table_activity_metrics[db][tablename][metric_name] = value
 
-    def _collect_metric_autodiscovery(self, instance_tags, scopes, scope_type):
-        if not self.autodiscovery:
+    def _collect_metric_autodiscovery(self, collectors: list[tuple[str, Callable[[str], None]]]):
+        """
+        Collect metrics for every autodiscovered database, visiting each database once so its
+        connection pool stays warm across all of its queries.
+
+        Each `collectors` entry pairs a telemetry scope type with a function that collects that group
+        for one database; time is reported per group. A group that raises for one database does not
+        skip that database's remaining groups.
+        """
+        if not self.autodiscovery or not collectors:
             return
 
-        start_time = time()
+        elapsed_ms_by_scope_type = defaultdict(float)
         databases = self.autodiscovery.get_items()
+        self._prune_per_database_executors(databases)
         for db in databases:
-            try:
-                for scope in scopes:
-                    self._query_scope(scope, instance_tags, False, dbname=db)
-            except Exception as e:
-                self.log.error("Error collecting metrics for database %s %s", db, str(e))
-        elapsed_ms = (time() - start_time) * 1000
+            for scope_type, collect in collectors:
+                start_time = time()
+                try:
+                    collect(db)
+                except Exception as e:
+                    self.log.error("Error collecting metrics for database %s %s", db, str(e))
+                finally:
+                    elapsed_ms_by_scope_type[scope_type] += (time() - start_time) * 1000
+
+        for scope_type, _ in collectors:
+            self._report_autodiscovery_timing(scope_type, elapsed_ms_by_scope_type[scope_type])
+
+    def _collect_scopes(self, scopes: list[dict], instance_tags: list[str], dbname: str) -> None:
+        for scope in scopes:
+            self._query_scope(scope, instance_tags, False, dbname=dbname)
+
+    def _execute_per_database_queries(self, dbname: str) -> None:
+        self._per_database_executor(dbname).execute()
+
+    def _per_database_executor(self, dbname: str) -> QueryExecutor:
+        """
+        Executors are kept per database because each `Query` tracks its own last execution time;
+        a shared executor would run `collection_interval` queries for only the first database.
+        """
+        executor = self._per_database_executors.get(dbname)
+        if executor is None:
+            executor = self._new_query_executor(
+                self._per_database_query_defs, db=functools.partial(self.db_pool.get_connection, dbname)
+            )
+            executor.compile_queries()
+            self._per_database_executors[dbname] = executor
+        return executor
+
+    def _prune_per_database_executors(self, databases: list[str]) -> None:
+        for dbname in self._per_database_executors.keys() - set(databases):
+            del self._per_database_executors[dbname]
+
+    def _report_autodiscovery_timing(self, scope_type: str, elapsed_ms: float) -> None:
         self.histogram(
             f"dd.postgres.{scope_type}.time",
             elapsed_ms,
@@ -866,15 +925,6 @@ class PostgreSql(DatabaseCheck):
                     min_collection_interval=self._config.min_collection_interval,
                 ),
             )
-
-    def _collect_dynamic_queries_autodiscovery(self, queries):
-        if not self.autodiscovery:
-            return
-
-        databases = self.autodiscovery.get_items()
-        for dbname in databases:
-            db = functools.partial(self.db_pool.get_connection, dbname=dbname)
-            self._dynamic_queries.append(self._new_query_executor(queries, db=db))
 
     def _emit_running_metric(self):
         self.gauge("running", 1, tags=self.tags_without_db, hostname=self.reported_hostname)
@@ -914,22 +964,18 @@ class PostgreSql(DatabaseCheck):
             metric_scope.append(SLRU_METRICS)
 
         # Do we need relation-specific metrics?
+        relations_scopes = []
         if self._config.relations:
             relations_scopes = list(RELATION_METRICS)
 
             if self._config.collect_bloat_metrics:
                 relations_scopes.extend([INDEX_BLOAT, TABLE_BLOAT])
 
-            # If autodiscovery is enabled, get relation metrics from all databases found
-            if self.autodiscovery:
-                self._collect_metric_autodiscovery(
-                    instance_tags,
-                    scopes=relations_scopes,
-                    scope_type='_collect_relations_autodiscovery',
-                )
-            # otherwise, continue just with dbname
-            else:
+            # If autodiscovery is enabled, relation metrics are collected from all databases found
+            # in the single autodiscovery pass below. Otherwise, continue just with dbname.
+            if not self.autodiscovery:
                 metric_scope.extend(relations_scopes)
+                relations_scopes = []
 
         replication_metrics = self.metrics_cache.get_replication_metrics(self.version, self.is_aurora)
         if replication_metrics:
@@ -965,17 +1011,32 @@ class PostgreSql(DatabaseCheck):
             activity_metrics = self.metrics_cache.get_activity_metrics(self.version)
             self._query_scope(activity_metrics, instance_tags, False)
 
-        if per_database_metric_scope:
-            # if autodiscovery is enabled, get per-database metrics from all databases found
-            if self.autodiscovery:
-                self._collect_metric_autodiscovery(
-                    instance_tags,
-                    scopes=per_database_metric_scope,
-                    scope_type='_collect_stat_autodiscovery',
+        # Must be built before the autodiscovery pass, which uses the per-database query definitions.
+        dynamic_queries = self.dynamic_queries
+
+        # With autodiscovery, every per-database scope is collected in a single pass over the
+        # database list so that each database is visited once. Without it, continue just with dbname.
+        if self.autodiscovery:
+            collectors = []
+            if relations_scopes:
+                collectors.append(
+                    (
+                        '_collect_relations_autodiscovery',
+                        functools.partial(self._collect_scopes, relations_scopes, instance_tags),
+                    )
                 )
-            else:
-                # otherwise, continue just with dbname
-                metric_scope.extend(per_database_metric_scope)
+            if per_database_metric_scope:
+                collectors.append(
+                    (
+                        '_collect_stat_autodiscovery',
+                        functools.partial(self._collect_scopes, per_database_metric_scope, instance_tags),
+                    )
+                )
+            if self._per_database_query_defs:
+                collectors.append(('_collect_dynamic_autodiscovery', self._execute_per_database_queries))
+            self._collect_metric_autodiscovery(collectors)
+        elif per_database_metric_scope:
+            metric_scope.extend(per_database_metric_scope)
 
         for scope in list(metric_scope):
             self._query_scope(scope, instance_tags, False)
@@ -983,8 +1044,8 @@ class PostgreSql(DatabaseCheck):
         for scope in self._config.custom_metrics:
             self._query_scope(scope, instance_tags, True)
 
-        if self.dynamic_queries:
-            for dynamic_query in self.dynamic_queries:
+        if dynamic_queries:
+            for dynamic_query in dynamic_queries:
                 dynamic_query.execute()
 
     def build_token_provider(self) -> TokenProvider:
@@ -1123,7 +1184,7 @@ class PostgreSql(DatabaseCheck):
                 "port": self._config.port,
                 "database_instance": self.database_identifier,
                 "database_hostname": self.database_hostname,
-                "agent_version": datadog_agent.get_version(),
+                "agent_version": self.agent_version,
                 "ddagenthostname": self.agent_hostname,
                 "dbms": self.dbms,
                 "kind": "database_instance",

@@ -4,7 +4,9 @@
 import gc
 import linecache
 import os
+import threading
 from datetime import datetime, timezone
+from typing import Any, Callable, Mapping, Sequence
 
 from binary import BinaryUnits, convert_units
 
@@ -29,6 +31,9 @@ VALID_PACKAGE_ROOTS = ('datadog_checks', 'site-packages', 'lib', 'Lib')
 
 # Starting in Python 3.7 frames are sorted from the oldest to the most recent
 MOST_RECENT_FRAME = -1
+
+# The lock is an ownership token for process-global state. Contenders never wait for it.
+_profile_memory_lock = threading.Lock()
 
 
 class MemoryProfileMetric(object):
@@ -211,14 +216,38 @@ def profile_memory(f, config, namespaces=None, args=(), kwargs=None):
     if kwargs is None:
         kwargs = {}
 
-    frames = int(config.get('profile_memory_frames', DEFAULT_FRAMES))
-    run_gc = bool(int(config.get('profile_memory_gc', DEFAULT_GC)))
+    if not _profile_memory_lock.acquire(blocking=False):
+        f(*args, **kwargs)
+        return []
 
     try:
-        gc.disable()
+        return _profile_memory_owner(f, config, namespaces, args, kwargs)
+    finally:
+        _profile_memory_lock.release()
+
+
+def _profile_memory_owner(
+    f: Callable[..., Any],
+    config: Mapping[str, Any],
+    namespaces: Sequence[str] | None,
+    args: Sequence[Any],
+    kwargs: Mapping[str, Any],
+) -> list[MemoryProfileMetric]:
+    """Run profiling and snapshot processing while the caller owns the global lock."""
+    gc_disabled = False
+    tracemalloc_started = False
+
+    try:
+        frames = int(config.get('profile_memory_frames', DEFAULT_FRAMES))
+        run_gc = bool(int(config.get('profile_memory_gc', DEFAULT_GC)))
+
+        if gc.isenabled():
+            gc.disable()
+            gc_disabled = True
         gc.collect()
 
         tracemalloc.start(frames)
+        tracemalloc_started = True
 
         f(*args, **kwargs)
 
@@ -227,8 +256,10 @@ def profile_memory(f, config, namespaces=None, args=(), kwargs=None):
 
         snapshot = tracemalloc.take_snapshot()
     finally:
-        tracemalloc.stop()
-        gc.enable()
+        if tracemalloc_started:
+            tracemalloc.stop()
+        if gc_disabled:
+            gc.enable()
 
     verbose = bool(int(config.get('profile_memory_verbose', DEFAULT_VERBOSITY)))
     if not verbose:

@@ -21,7 +21,7 @@ from datadog_checks.snmp.utils import transform_index
 
 from . import common
 
-pytestmark = common.snmp_integration_only
+pytestmark = common.python_suite_only
 
 
 @pytest.mark.unit

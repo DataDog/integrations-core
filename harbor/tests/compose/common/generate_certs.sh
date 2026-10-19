@@ -30,7 +30,7 @@ openssl req -new -key "$CERT_DIR/server.key" -out "$CERT_DIR/server.csr" \
     -addext "subjectAltName=DNS:localhost,DNS:harbor-core,DNS:harbor-registry,DNS:harbor-chartmuseum,IP:127.0.0.1,IP:0.0.0.0"
 
 # Generate server certificate signed by CA
-openssl x509 -req -days 365 -in "$CERT_DIR/server.csr" -CA "$CERT_DIR/ca.crt" -CAkey "$CERT_DIR/ca.key" \
+openssl x509 -req -days 3650 -in "$CERT_DIR/server.csr" -CA "$CERT_DIR/ca.crt" -CAkey "$CERT_DIR/ca.key" \
     -CAcreateserial -out "$CERT_DIR/server.crt" \
     -extfile <(cat <<EOF
 basicConstraints=CA:false

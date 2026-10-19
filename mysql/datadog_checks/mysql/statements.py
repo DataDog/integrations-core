@@ -22,11 +22,6 @@ from datadog_checks.mysql.cursor import CommenterDictCursor
 
 from .util import DatabaseConfigurationError, ManagedAuthConnectionMixin, warning_with_tags
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 PyMysqlRow = Dict[str, Any]
 Row = Dict[str, Any]
 RowKey = Tuple[Any]
@@ -205,7 +200,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
             'timestamp': time.time() * 1000,
             'mysql_version': self._check.version.version + '+' + self._check.version.build,
             'mysql_flavor': self._check.version.flavor,
-            'ddagentversion': datadog_agent.get_version(),
+            'ddagentversion': self._check.agent_version,
             'min_collection_interval': self._metric_collection_interval,
             'tags': tags,
             'cloud_metadata': self._config.cloud_metadata,
@@ -378,7 +373,8 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
                 statement = obfuscate_sql_with_metadata(row['digest_text'], self._obfuscate_options)
                 obfuscated_statement = statement['query'] if row['digest_text'] is not None else None
             except Exception as e:
-                self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['digest_text'], e)
+                # repr so a query containing a null cannot make this handler raise inside the agent log binding.
+                self.log.warning("Failed to obfuscate query=[%s] | err=[%s]", repr(row['digest_text']), e)
                 continue
 
             normalized_row['digest_text'] = obfuscated_statement
@@ -418,7 +414,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
             yield {
                 "timestamp": time.time() * 1000,
                 "host": self._check.reported_hostname,
-                "ddagentversion": datadog_agent.get_version(),
+                "ddagentversion": self._check.agent_version,
                 "ddsource": "mysql",
                 "ddtags": ",".join(row_tags),
                 "dbm_type": "fqt",

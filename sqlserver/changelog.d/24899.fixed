@@ -1,1 +1,0 @@
-Fix DBM<>APM correlation comments being dropped from Query Samples and Query Metrics for non-stored-procedure statements.

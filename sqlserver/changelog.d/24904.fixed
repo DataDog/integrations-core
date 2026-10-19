@@ -1,1 +1,0 @@
-Fix a connection leak in ``stored_procedure`` metric collection when the procedure call raises an exception.

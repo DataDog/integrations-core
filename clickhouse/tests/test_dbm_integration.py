@@ -120,7 +120,7 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     event = events[-1]
     assert event['host'] is not None
     assert event['database_instance'] is not None
-    assert event['ddagentversion'] == datadog_agent.get_version()
+    assert event['ddagentversion'] == '0.0.0'
     assert event['timestamp'] > 0
     assert event['min_collection_interval'] is not None
     assert 'tags' in event
@@ -164,7 +164,7 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     assert 'commands' in fqt_event['db']['metadata']
     assert fqt_event['timestamp'] > 0
     assert fqt_event['host'] is not None
-    assert fqt_event['ddagentversion'] == datadog_agent.get_version()
+    assert fqt_event['ddagentversion'] == '0.0.0'
 
 
 def test_statement_metrics_with_metadata(aggregator, dbm_instance, dd_run_check, datadog_agent):
@@ -296,9 +296,7 @@ def test_samples_event_structure(instance):
     ]
     active_connections = [{'user': 'default', 'query_kind': 'Select', 'current_database': 'default', 'connections': 1}]
 
-    with mock.patch('datadog_checks.clickhouse.statement_samples.datadog_agent') as mock_agent:
-        mock_agent.get_version.return_value = '7.64.0'
-        event = samples._create_samples_event(rows, active_connections)
+    event = samples._create_samples_event(rows, active_connections)
 
     assert event['ddsource'] == 'clickhouse'
     assert event['dbm_type'] == 'activity'
@@ -410,7 +408,7 @@ def test_explain_plan_collected(aggregator, instance, dd_run_check, datadog_agen
     assert plan_event['ddsource'] == 'clickhouse'
     assert plan_event['host'] is not None
     assert plan_event['database_instance'] is not None
-    assert plan_event['ddagentversion'] == datadog_agent.get_version()
+    assert plan_event['ddagentversion'] == '0.0.0'
     assert plan_event['timestamp'] > 0
 
     db = plan_event['db']

@@ -467,6 +467,29 @@ def test_discovery_rejects_blank_port_names():
     )
 
 
+def test_discovery_rejects_non_boolean_fallback():
+    spec = get_spec(
+        """
+        version: 0.0.0
+        files:
+        - name: test.yaml
+          example_name: test.yaml.example
+          discovery:
+            strategies:
+            - strategy: from_ports
+              fallback: nope
+              candidates:
+              - openmetrics_endpoint: http://{service.host}:{port.number}/metrics
+          options:
+          - template: init_config
+          - template: instances
+        """
+    )
+    spec.load()
+
+    assert 'test, test.yaml, discovery, strategy #1: Attribute `fallback` must be true or false' in spec.errors
+
+
 def test_discovery_unsupported_strategy():
     spec = get_spec(
         """

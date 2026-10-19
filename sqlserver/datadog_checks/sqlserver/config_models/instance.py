@@ -13,6 +13,7 @@ from types import MappingProxyType
 from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -44,7 +45,7 @@ class Azure(BaseModel):
         frozen=True,
     )
     aggregate_sql_databases: Optional[bool] = None
-    deployment_type: Optional[str] = None
+    deployment_type: Optional[Literal['sql_database', 'managed_instance', 'virtual_machine']] = None
     fully_qualified_domain_name: Optional[str] = None
 
 

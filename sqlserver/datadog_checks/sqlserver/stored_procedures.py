@@ -13,12 +13,6 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
 from datadog_checks.sqlserver.utils import raise_if_cancelled
 
@@ -160,7 +154,7 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
             'sqlserver_rows': rows,
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
-            'ddagentversion': datadog_agent.get_version(),
+            'ddagentversion': self._check.agent_version,
             'service': self._config.service,
             'tags': self._check.tag_manager.get_tags(),
         }
