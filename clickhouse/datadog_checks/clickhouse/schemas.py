@@ -111,6 +111,8 @@ class ClickhouseSchemaCollector(SchemaCollector):
     def base_event(self) -> dict[str, Any]:
         event = super().base_event
         event['collector_id'] = self._check.check_id
+        # Schemas describe the whole instance, so they carry the same tags as the `database_instance` payload.
+        event['tags'] = self._check.tag_manager.get_tags(include_db=False)
         return event
 
     def close(self) -> None:
