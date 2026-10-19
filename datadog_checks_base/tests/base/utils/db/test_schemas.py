@@ -184,8 +184,6 @@ def test_schema_collector(aggregator):
     assert event['agent_version'] == datadog_agent.get_version()
     assert event['collection_interval'] == collector._config.collection_interval
     assert event['dbms_version'] == check.dbms_version
-    # The payload describes the whole instance and is not a metric, so it carries neither the per-database tag nor
-    # internal resource tags.
     assert event['tags'] == ['test_tag']
     assert event['cloud_metadata'] == check.cloud_metadata
     assert event['metadata'][0]['name'] == 'test_database'
