@@ -7,6 +7,7 @@ from datadog_checks.base import OpenMetricsBaseCheckV2
 
 
 class ArgoWorkflowsCheck(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = "argo_workflows"
     DEFAULT_METRIC_LIMIT = 0
 

@@ -92,6 +92,7 @@ def get_value_from_path(value, path):
 
 
 class ESCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     HTTP_CONFIG_REMAPPER = {
         'aws_service': {'name': 'aws_service', 'default': 'es'},
         'ssl_verify': {'name': 'tls_verify'},

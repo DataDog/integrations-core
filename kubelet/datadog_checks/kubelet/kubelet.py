@@ -150,6 +150,8 @@ class KubeletCheck(
     Collect metrics from Kubelet.
     """
 
+    AGNOSTIC_HTTP_CLIENT = True
+
     DEFAULT_METRIC_LIMIT = 0
 
     COUNTER_METRICS = {

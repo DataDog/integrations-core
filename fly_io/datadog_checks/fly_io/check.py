@@ -30,6 +30,7 @@ from .metrics import HISTOGRAM_METRICS, METRICS, RENAME_LABELS_MAP
 
 
 class FlyIoCheck(OpenMetricsBaseCheckV2, ConfigMixin):
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'fly_io'
 

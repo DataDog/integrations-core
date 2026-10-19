@@ -13,6 +13,7 @@ from .metrics import GPU_METRIC_MAP, METRIC_MAP, RAY_GPU_METRIC_MAP, RAY_METRIC_
 
 
 class vLLMCheck(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'vllm'

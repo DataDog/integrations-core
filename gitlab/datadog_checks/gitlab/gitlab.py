@@ -18,6 +18,8 @@ class GitlabCheck(OpenMetricsBaseCheck):
     Collect Gitlab metrics from Prometheus and validates that the connectivity with Gitlab
     """
 
+    AGNOSTIC_HTTP_CLIENT = True
+
     # Readiness signals ability to serve traffic, liveness that Gitlab is healthy overall
     ALLOWED_SERVICE_CHECKS = ['readiness', 'liveness', 'health']
     EVENT_TYPE = SOURCE_TYPE_NAME = 'gitlab'

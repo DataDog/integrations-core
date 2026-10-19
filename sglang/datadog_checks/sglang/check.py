@@ -13,6 +13,7 @@ from datadog_checks.base.errors import SkipInstanceError
 
 
 class SglangCheck(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'sglang'
 

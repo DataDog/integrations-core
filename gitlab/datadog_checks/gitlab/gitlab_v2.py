@@ -20,6 +20,7 @@ from .metrics import (
 
 
 class GitlabCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
+    AGNOSTIC_HTTP_CLIENT = True
     READINESS_SERVICE_CHECKS = {
         'master_check': 'master',
         'db_check': 'database',

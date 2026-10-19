@@ -35,6 +35,8 @@ class RabbitMQManagement(AgentCheck):
     Management Plugin (http://www.rabbitmq.com/management.html)
     """
 
+    AGNOSTIC_HTTP_CLIENT = True
+
     HTTP_CONFIG_REMAPPER = {
         'rabbitmq_user': {'name': 'username'},
         'rabbitmq_pass': {'name': 'password'},
