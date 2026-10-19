@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, TypedDict
 
 from datadog_checks.base.utils.serialization import json
 
-from .utils import now_ms
+from .utils import TagManager, now_ms
 
 if TYPE_CHECKING:
     from datadog_checks.base.checks.db import DatabaseCheck
@@ -155,7 +155,7 @@ class SchemaCollector(ABC):
         # The payload describes the whole instance, so it leaves out the per-database `db` tag. It is not a metric,
         # so internal resource tags would not be enriched by metrics intake.
         tag_manager = getattr(self._check, "tag_manager", None)
-        if tag_manager is None:
+        if not isinstance(tag_manager, TagManager):
             return self._check.tags
         return tag_manager.get_tags(include_internal=False, include_db=False)
 
