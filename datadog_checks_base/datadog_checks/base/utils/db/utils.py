@@ -424,11 +424,10 @@ class DBMAsyncJob(object):
             self._log.debug("Job loop already running. job=%s", self._job_name)
 
     def _snapshot_tags(self, tags: list[str]) -> "TagSnapshot":
-        # Checks without a `TagManager`, such as Mongo, only have the tag list they pass in.
-        tag_manager = getattr(self._check, "tag_manager", None)
-        if isinstance(tag_manager, TagManager):
-            return tag_manager.snapshot()
-        return TagSnapshot.from_tags(tags)
+        tag_manager = get_tag_manager(self._check)
+        if tag_manager is None:
+            return TagSnapshot.from_tags(tags)
+        return tag_manager.snapshot()
 
     def _job_loop(self):
         try:
@@ -857,6 +856,17 @@ class TagManager:
         if include_db:
             tags.extend(snapshot.database)
         return tags
+
+
+def get_tag_manager(check) -> TagManager | None:
+    """
+    Return the check's current `TagManager`, or None if the check keeps its own tag list.
+
+    Call this each time tags are needed rather than storing the result, because a check may replace its
+    `tag_manager` after creating the objects that read it.
+    """
+    tag_manager = getattr(check, "tag_manager", None)
+    return tag_manager if isinstance(tag_manager, TagManager) else None
 
 
 def now_ms() -> int:

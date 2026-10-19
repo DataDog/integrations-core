@@ -7,6 +7,7 @@ import pytest
 
 from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
+from datadog_checks.base.utils.db.utils import TagManager
 
 try:
     import datadog_agent  # type: ignore
@@ -48,7 +49,7 @@ class TestDatabaseCheck(DatabaseCheck):
 
 
 class CheckWithoutTagManager(TestDatabaseCheck):
-    """A check that keeps its own tag list instead of a `TagManager`, as SAP HANA does."""
+    """A check that keeps its own tag list instead of a `TagManager`."""
 
     __test__ = False
 
@@ -198,6 +199,20 @@ def test_schema_collector_uses_check_tags_without_tag_manager(aggregator):
 
     events = aggregator.get_event_platform_events("dbm-metadata")
     assert events[0]['tags'] == ["test_tag", "port:30015"]
+
+
+@pytest.mark.unit
+def test_schema_collector_reads_tag_manager_replaced_after_construction(aggregator):
+    """Payloads use the check's current `TagManager`, even if the check replaced it after creating the collector."""
+    check = TestDatabaseCheck()
+    collector = TestSchemaCollector(check, SchemaCollectorConfig())
+    check.tag_manager = TagManager()
+    check.tag_manager.set_tags_from_list(["env:prod"])
+
+    collector.collect_schemas()
+
+    events = aggregator.get_event_platform_events("dbm-metadata")
+    assert events[0]['tags'] == ["env:prod"]
 
 
 @pytest.mark.unit
