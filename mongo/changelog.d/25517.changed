@@ -1,0 +1,1 @@
+Upgrade PyMongo to 4.18.2, raising the minimum supported MongoDB server version to 4.4.

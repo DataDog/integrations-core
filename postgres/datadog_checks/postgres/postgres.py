@@ -318,13 +318,25 @@ class PostgreSql(DatabaseCheck):
         """
         db context manager that yields a healthy connection to the main database
         """
+        if self._db and not self._db.closed:
+            transaction_status = self._db.info.transaction_status
+            if transaction_status == psycopg.pq.TransactionStatus.ACTIVE:
+                # A previous command was interrupted without its result being consumed (for example, a socket
+                # error raised by psycopg while waiting on the server). libpq still considers it in flight and
+                # rejects every new command with "another command is already in progress", so the connection
+                # can't be reused.
+                self.log.warning(
+                    "Connection to the database %s was left with a command in progress, reconnecting",
+                    self._config.dbname,
+                )
+                self._close_db()
+            elif transaction_status in (psycopg.pq.TransactionStatus.INTRANS, psycopg.pq.TransactionStatus.INERROR):
+                self._db.rollback()
         if not self._db or self._db.closed:
             # if the connection is closed, we need to reinitialize the connection
             self._db = self._new_connection(self._config.dbname)
             # once the connection is reinitialized, we need to reload the pg_settings
             self._load_pg_settings(self._db)
-        if self._db.info.status != psycopg.pq.ConnStatus.OK:
-            self._db.rollback()
         try:
             yield self._db
         except (psycopg.InterfaceError, InterruptedError):
