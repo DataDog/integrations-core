@@ -2,7 +2,7 @@
 type: goal
 name: api_build_goal
 ---
-Evaluate the complete new integration, not only the configuration task's last edits. Read its
+Evaluate the complete target integration, not only the configuration task's last edits. Read its
 client/helpers, check, metadata.csv, spec, generated models/example, manifest, and the READY
 design contract.
 

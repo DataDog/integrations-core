@@ -30,7 +30,7 @@ relevant context and a source index, not authority over official vendor document
 or current files. Verify a contract yourself only when the handoff marks it unverified, ambiguous,
 or conflicting, or when current files disagree with it; do not re-survey contracts the handoff
 already cites. Use targeted reads of large schemas and catalogs. Correct/report any disagreement. Work only in
-the new integration directory. Reference mature integrations without editing them. Call `stop_flow`
+the target integration directory. Reference other integrations without editing them. Call `stop_flow`
 if implementation reveals a new blocker that cannot be resolved within scope, such as an unrelated
 target or an unsupported required API operation. Give the evidence and required correction.
 Repairable defects follow the normal build/review loop; reported validation gaps alone do not

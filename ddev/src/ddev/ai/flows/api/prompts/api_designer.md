@@ -65,13 +65,9 @@ source. Datadog Agent behavior requires repository/base-code evidence. Metric na
 configuration UX, cursor strategy, and other decisions are design choices with rationale, not
 vendor facts.
 
-Resolve the integration identity once. Lowercase the supplied display name, replace runs of
-non-alphanumeric characters with an underscore, and trim outer underscores for the directory and
-default metric namespace. The result must be a Python identifier beginning with a letter. Honor an
-explicit PRD namespace and record it separately. Check for an existing integration directory and
-never plan to overwrite it, including any integration used as a repository reference.
-If normalization produces an invalid Python identifier or collides with an existing directory,
-mark the design BLOCKED and request an explicit identity correction rather than inventing a prefix.
+Scaffolding derives the integration directory from the display name
+using ddev's naming rules. Do not choose a directory or block the design because one already exists.
+Choose and record the metric namespace in the design, honoring an explicit PRD namespace when provided.
 
 Design a normal AgentCheck using generated ConfigMixin and a focused product client that receives
 the check's shared self.http RequestsWrapper. The client owns transport details, endpoint methods,

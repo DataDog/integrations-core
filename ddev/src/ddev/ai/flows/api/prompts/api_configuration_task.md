@@ -12,6 +12,13 @@ ${prd}
 
 ${api_design_memory}
 
+## Scaffold handoff
+
+${api_scaffold_memory}
+
+Use this handoff for the target directory and pre-existing-file warnings, and the design for the metric namespace.
+Its inventory describes the start of the build, not the current file state.
+
 This task starts from a compacted summary of the implementation task: use it for decisions,
 deviations, and known limitations, but not as evidence of file contents. Re-read the final client,
 check, metadata, spec, generated files, and manifest, and correct and report any material

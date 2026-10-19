@@ -12,11 +12,17 @@ ${prd}
 
 ${api_design_memory}
 
-This task starts with fresh context. Read the complete handoff and current scaffold before editing.
-If the target is not the designed scaffold, call `stop_flow` before editing.
+## Scaffold handoff
+
+${api_scaffold_memory}
+
+This task starts with fresh context. Read both handoffs and the current target before editing.
+Use the scaffold handoff's directory and the design handoff's metric namespace.
+For an existing directory, inspect and preserve prior work, reconcile missing files, and adapt the
+implementation to the design. Existing files are not necessarily scaffold examples.
 
 Implement the focused custom client, check orchestration, metric submissions, metadata.csv, and any
-designed API-log collection according to your standing builder contract. Remove scaffold examples.
+designed API-log collection according to your standing builder contract. Replace remaining scaffold examples.
 Declare each product option the code reads in spec.yaml, then run ddev_validate config and models
 with sync=true so `self.config.<option>` is typed. The next task completes shared templates, logs,
 the manifest, and final validation from a compacted conversation; preserve decisions in files.

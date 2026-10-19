@@ -16,7 +16,7 @@ claim as an open question. Missing evidence remains an explicit gap.
 
 Use these four sections, without an additional recap:
 
-1. **Status, scope, and open items** — READY or BLOCKED; directory, namespace, compatibility,
+1. **Status, scope, and open items** — READY or BLOCKED; display name, chosen metric namespace, compatibility,
    unsupported or partial requirements, assumptions, and blockers. READY requires an implementable
    contract for every required behavior. Separate representative live-data gaps from facts still
    needed to implement safely; name the affected requirement and follow-up.
