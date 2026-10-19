@@ -369,7 +369,7 @@ class DBMAsyncJob(object):
 
     def run_job_loop(self, tags):
         """
-        :param tags: The check's tags, kept as `self._tags` for jobs that have not moved to `self._tag_snapshot`.
+        :param tags: The check's tags, stored as `self._tags`.
         """
         if not self._enabled:
             self._log.debug("[job=%s] Job not enabled.", self._job_name)
