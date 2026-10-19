@@ -6,6 +6,7 @@ import csv
 import hashlib
 import importlib
 import io
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -129,3 +130,53 @@ def placeholder():
     assert namespace['query_async'].__doc__ == ('' if strip_docstrings else 'Async documentation.')
     if not strip_docstrings:
         assert path.read_bytes() == source.replace('\n', newline).encode('utf-8')
+
+
+def test_write_per_check_resolutions_resolves_and_writes_each_check(tmp_path, monkeypatch):
+    monkeypatch.setattr(build_wheels, 'MOUNT_DIR', tmp_path)
+    invocations = []
+
+    def fake_check_process(command, **kwargs):
+        invocations.append(
+            {
+                'requirements': Path(command[command.index('-r') + 1]).read_text(encoding='utf-8'),
+                'find_links': [command[i + 1] for i, arg in enumerate(command) if arg == '--find-links'],
+            }
+        )
+        report_path = Path(command[command.index('--report') + 1])
+        report_path.write_text(
+            json.dumps(
+                {
+                    'install': [
+                        {
+                            'metadata': {'name': 'binary', 'version': '1.0.2'},
+                            'download_info': {'url': 'file:///wheels/binary-1.0.2-py3-none-any.whl'},
+                        }
+                    ]
+                }
+            ),
+            encoding='utf-8',
+        )
+
+    monkeypatch.setattr(build_wheels, 'check_process', fake_check_process)
+    checks = {'postgres': ['binary==1.0.2', 'psycopg[c,pool]==3.3.4'], 'redisdb': ['binary==1.0.2']}
+    wheel_dirs = [tmp_path / 'built', tmp_path / 'external']
+
+    build_wheels.write_per_check_resolutions(checks, wheel_dirs, Path('/py3/bin/python'))
+
+    assert invocations == [
+        {
+            'requirements': 'binary==1.0.2\npsycopg[c,pool]==3.3.4\n',
+            'find_links': [str(wheel_dirs[0]), str(wheel_dirs[1])],
+        },
+        {
+            'requirements': 'binary==1.0.2\n',
+            'find_links': [str(wheel_dirs[0]), str(wheel_dirs[1])],
+        },
+    ]
+    expected_closure = [
+        {'name': 'binary', 'version': '1.0.2', 'wheel_file': 'binary-1.0.2-py3-none-any.whl'}
+    ]
+    for check in checks:
+        closure = json.loads((tmp_path / 'resolutions' / f'{check}.json').read_text(encoding='utf-8'))
+        assert closure == expected_closure
