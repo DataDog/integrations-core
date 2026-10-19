@@ -3,7 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """High availability (`show high-availability all`): the local HA state, kept for the other collectors.
 
-The HA link counters are not collected yet (Task 5.1), so this collector never returns samples.
+The HA link counters are not collected yet, so this collector never returns samples.
 """
 
 from __future__ import annotations

@@ -29,25 +29,21 @@ def collect_threats(ctx: CollectContext) -> list[Sample]:
     _load_watermark(ctx, state)
     job: ThreatJob | None = state.pending or _first_job(state)
     state.pending = None
-    try:
-        while job is not None:
-            if not _fetch(ctx, job):
-                state.pending = job
-                ctx.state.still_due.add('threats')
-                ctx.debug('threat log job %s still running, polled again next run', job.job_id)
-                return []
-            if job.purpose == 'forward' and job.page_entries >= job.page_size:
-                job.skip += job.page_size
-                job.job_id = None
-                job.page_entries = 0
-                continue
-            samples, job = _complete(ctx, state, job)
-            if job is None:
-                return samples
-        return []
-    except BaseException:
-        state.pending = None
-        raise
+    while job is not None:
+        if not _fetch(ctx, job):
+            state.pending = job
+            ctx.state.still_due.add('threats')
+            ctx.debug('threat log job %s still running, polled again next run', job.job_id)
+            return []
+        if job.purpose == 'forward' and job.page_entries >= job.page_size:
+            job.skip += job.page_size
+            job.job_id = None
+            job.page_entries = 0
+            continue
+        samples, job = _complete(ctx, state, job)
+        if job is None:
+            return samples
+    return []
 
 
 def _load_watermark(ctx: CollectContext, state: ThreatState) -> None:
