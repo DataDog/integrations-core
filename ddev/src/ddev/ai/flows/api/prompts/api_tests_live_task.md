@@ -17,21 +17,28 @@ ${api_design_memory}
 ${api_build_memory}
 
 Start from current files and actual prepared environment assets. Do not repeat or weaken offline
-assertions from the preceding task. If the design is BLOCKED, make no edits or test claims.
+assertions from the preceding task.
 
-Use ddev_env_show first unless a still-applicable discovery result is recorded. If discovery
-identifies an applicable environment, inspect its Docker assets and run ddev_env_test for that
-exact environment, following your standing rule on reusing recorded results. A shared setup failure
-may explain why E2E is unavailable, but an integration-test pass cannot establish an E2E pass.
-Repair only defects demonstrated by the environment or its E2E tests,
-with a single repair attempt each, then rerun the focused test. An E2E assertion must observe
-Agent-produced telemetry through the repository's Agent test helpers, or file-log tailing in the
-Agent status, not merely a reachable vendor container. Find and reuse the shared metric assertion
-helper in the integration's test modules: every deterministically produced metric with expected
-tags, justified exclusions only, symmetric metadata, and all metrics covered. Do not invent a
-topology, compose variable, endpoint, or environment name, and do not rename or add an environment
-to escape existing ddev lifecycle state. If no applicable environment exists, state E2E as
-unavailable/unrun and explain the evidence; do not call an E2E tool speculatively.
+Use ddev_env_show to discover valid E2E environments unless a still-applicable result is recorded.
+If applicable environments exist, use ddev_env_test for real Agent E2E; otherwise record E2E as
+unavailable/unrun and do not call it.
+The test tool runs with local integration code and manages environment lifecycle; use a specific
+discovered environment when appropriate. An E2E test must use dd_agent_check and assert telemetry/
+log behavior observable from the Agent. A healthy vendor container is environment validation, not a
+passed E2E test. A skipped E2E test, Docker failure, image pull failure, or unavailable environment
+is not a pass—report it accurately.
+
+dd_agent_check cannot observe file logs. When log files are mounted, start the environment with
+ddev_env_start (`dev=true`), check the Agent status inside its `dd_<integration>_<environment>`
+container with `docker exec` until each file is tailed with bytes read, run ddev_env_test for it,
+and always finish with ddev_env_stop. Use only commands that return; never follow or stream logs. If
+tailing cannot be observed, report log collection as unverified.
+
+Reuse the shared metric assertion helper from the integration's test modules under the standing
+assertion contract. A shared setup failure may explain E2E unavailability; an integration-test pass
+cannot establish an E2E pass. Repair defects demonstrated by this task under the standing repair
+policy, then rerun the affected selection. Do not invent topology, compose variables, endpoints,
+or environment names.
 
 Check generated integration artifacts against applicable repository guidance, and report any
 build-phase defect rather than rewriting it here. Finish with a concise reviewer summary that

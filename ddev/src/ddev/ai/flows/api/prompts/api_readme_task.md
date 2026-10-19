@@ -22,12 +22,11 @@ ${api_tests_memory}
 
 Read the current README, client/check, metadata, spec/generated example, tests, and environment
 assets. Reconcile all claims against those sources because the test phase may have repaired or
-reduced the original implementation. If the design remained BLOCKED and
-no valid integration was built, make no edits and preserve the blockers.
+reduced the original implementation.
 
-Apply your standing documentation contract to replace scaffold placeholders while preserving the
-standard README structure. Document only implemented metrics, events, service checks, log mechanism,
-configuration, permissions, versions, and customer-visible limitations supported by evidence.
+Replace scaffold placeholders under the standing documentation contract. Preserve Overview;
+Setup with Installation, Configuration, and Validation; Data Collected with Metrics, Events, and
+Service Checks; Troubleshooting; and reference-link style.
 
-Finish with a concise reviewer summary of the README path, changes, evidence checked, and
-remaining gaps. Do not create a separate report file.
+In the reviewer summary, identify evidence checked and unresolved claims without repeating the
+README or phase handoffs.

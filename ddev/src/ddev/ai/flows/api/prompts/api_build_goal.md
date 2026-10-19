@@ -3,7 +3,7 @@ type: goal
 name: api_build_goal
 ---
 Evaluate the complete new integration, not only the configuration task's last edits. Read its
-client/helpers, check, metadata.csv, spec, generated models/example, copied fixtures, and the READY
+client/helpers, check, metadata.csv, spec, generated models/example, manifest, and the READY
 design contract.
 
 Use the design handoff to locate relevant decisions and evidence, not as proof of API behavior.
@@ -33,6 +33,9 @@ The goal is met only when:
   requirements and verified API behavior, with justified departures from the design recorded;
 - metadata names follow one consistent naming scheme and match every emitted metric's name,
   units, and backend type;
+- manifest.json satisfies applicable repository guidance, has no instructional placeholders,
+  matches the implemented identity, namespace, check metric, and telemetry, and references existing
+  local assets; unresolved required fields or identity decisions are build defects;
 - both init_config/http and instances/http templates are present alongside default templates;
 - each product option serves a connect, scope, or collection-cost need, declares its default and
   bounds once in spec.yaml (custom rules in validators.py), and agrees with generated configuration
@@ -47,6 +50,9 @@ The goal is met only when:
 - direct API logs, when required, are guarded by logs_enabled, use an integration logs stanza,
   stable streams, get_log_cursor/send_log, compound next-resume cursors where needed, bounded work,
   and contiguous commit behavior that cannot skip a failed page/file;
+- reaching a log work budget preserves the next unprocessed position, including within a source
+  artifact; later runs and restarts can deliver the remainder before marking the source complete.
+  Truncating at the budget and warning does not satisfy resumption;
 - manual persistent cache does not duplicate or outrun the send_log delivery cursor;
 - command results are reported truthfully, including failures and unrun work.
 

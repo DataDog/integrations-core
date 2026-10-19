@@ -28,8 +28,13 @@ The goal is met only when:
    work bound.
 5. Implemented API logs are tested with logs enabled and disabled, actual payload assertions,
    stable independent streams, designed cursor/tie-breaker progression, fresh-instance restart,
-   bounded first run, and no advancement past failed pages/files/jobs. Tests do not claim exactly
-   once when the design promises at-least-once.
+   bounded first run, and no advancement past failed pages/files/jobs. For each implemented work
+   budget, an oversized input proves the first run stays bounded and leaves work pending, later
+   runs and a fresh-instance restart deliver the remainder, and completion follows the last
+   record. Cover mid-artifact resumption where applicable and assert delivered identities.
+   A test accepting truncation with a warning and completed cursor fails this criterion; retention
+   and poison-record drops are separate policies. Do not claim exactly-once delivery when the
+   design promises at-least-once.
 6. Synthetic data is identified; vendor captures are unchanged; every network operation is
    mocked in unit tests.
 7. ddev_test ran explicit unit and Docker-backed integration selections where those tiers are
