@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.5.0 / 2026-10-01
+
+***Added***:
+
+* Add Autodiscovery support via `ad_identifiers`. ([#25310](https://github.com/DataDog/integrations-core/pull/25310))
+
 ## 3.4.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:

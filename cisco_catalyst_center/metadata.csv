@@ -10,7 +10,7 @@ cisco_catalyst_center.application.throughput,gauge,,bit,second,Application throu
 cisco_catalyst_center.application.usage,gauge,,byte,,Data transferred by the application at a site.,0,cisco_catalyst_center,application usage,,"application,site_id"
 cisco_catalyst_center.client.count,gauge,,,,Clients of a given connection type.,0,cisco_catalyst_center,client count,,client_type
 cisco_catalyst_center.client.data_rate.avg,gauge,,bit,second,Average client data rate in bits per second.,1,cisco_catalyst_center,client data rate,,"ssid,band"
-cisco_catalyst_center.client.health,gauge,,,,Client health score from 1 to 10 for a connection type.,1,cisco_catalyst_center,client health,,client_type
+cisco_catalyst_center.client.health,gauge,,percent,,Percentage of clients in good health for a connection type.,1,cisco_catalyst_center,client health,,client_type
 cisco_catalyst_center.client.observed.count,gauge,,,,Distinct clients observed in the group.,0,cisco_catalyst_center,clients observed,,"ssid,band"
 cisco_catalyst_center.client.onboarding.assoc.duration,gauge,,millisecond,,Average time spent in the association phase of onboarding.,-1,cisco_catalyst_center,assoc duration,,"ssid,band"
 cisco_catalyst_center.client.onboarding.auth.duration,gauge,,millisecond,,Average time spent in the authentication phase of onboarding.,-1,cisco_catalyst_center,auth duration,,"ssid,band"
@@ -118,7 +118,7 @@ cisco_catalyst_center.network.category.device.count,gauge,,,,Devices in the cate
 cisco_catalyst_center.network.category.device.fair.count,gauge,,,,Devices in the category in fair health.,-1,cisco_catalyst_center,network category fair,,category
 cisco_catalyst_center.network.category.device.good.count,gauge,,,,Devices in the category in good health.,1,cisco_catalyst_center,network category good,,category
 cisco_catalyst_center.network.category.device.no_health.count,gauge,,,,Devices in the category with no health data.,-1,cisco_catalyst_center,network category no health,,category
-cisco_catalyst_center.network.category.health,gauge,,,,Health score for a device category such as Access or Core.,1,cisco_catalyst_center,network category health,,category
+cisco_catalyst_center.network.category.health,gauge,,percent,,Percentage of network devices in good health within a device category such as Access or Core.,1,cisco_catalyst_center,network category health,,category
 cisco_catalyst_center.network.device.contributing.count,gauge,,,,Devices contributing to the overall health score.,0,cisco_catalyst_center,network device contributing,,catalyst_center_host
 cisco_catalyst_center.network.device.fair.count,gauge,,,,Monitored devices in fair health.,-1,cisco_catalyst_center,network device fair,,catalyst_center_host
 cisco_catalyst_center.network.device.healthy.count,gauge,,,,Monitored devices in good health.,1,cisco_catalyst_center,network device healthy,,catalyst_center_host
@@ -128,7 +128,7 @@ cisco_catalyst_center.network.device.not_applicable.count,gauge,,,,Devices for w
 cisco_catalyst_center.network.device.poor.count,gauge,,,,Monitored devices in poor health.,-1,cisco_catalyst_center,network device poor,,catalyst_center_host
 cisco_catalyst_center.network.device.total.count,gauge,,,,Total devices known to Catalyst Center.,0,cisco_catalyst_center,network device total,,catalyst_center_host
 cisco_catalyst_center.network.device.unhealthy.count,gauge,,,,Monitored devices reported as unhealthy.,-1,cisco_catalyst_center,network device unhealthy,,catalyst_center_host
-cisco_catalyst_center.network.health,gauge,,,,Latest overall network health score from 1 to 10.,1,cisco_catalyst_center,network health,,catalyst_center_host
+cisco_catalyst_center.network.health,gauge,,percent,,Percentage of all network devices in good health.,1,cisco_catalyst_center,network health,,catalyst_center_host
 cisco_catalyst_center.security.rogue.count,gauge,,,,Detected rogue access points and clients grouped by threat level.,-1,cisco_catalyst_center,rogue count,,threat_level
 cisco_catalyst_center.security.rogue.total.count,gauge,,,,Detected rogue access points and clients across the whole deployment.,-1,cisco_catalyst_center,rogue total,,catalyst_center_host
 cisco_catalyst_center.security.threat.count,gauge,,,,aWIPS wireless intrusion threats detected grouped by threat type.,-1,cisco_catalyst_center,threat count,,threat_type

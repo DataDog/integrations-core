@@ -10,6 +10,7 @@ from glob import glob
 
 import pytest
 import yaml
+from tenacity import retry, stop_before_delay, wait_fixed
 
 from datadog_checks.base.stubs import tagger
 from datadog_checks.dev.kind import kind_run
@@ -266,8 +267,12 @@ def wait_for_queues_active():
         )
 
 
-def setup_kueue():
-    preload_workload_images()
+@retry(stop=stop_before_delay(240), wait=wait_fixed(10), reraise=True)
+def apply_kueue_manifests():
+    """Download Kueue's release YAML from GitHub and apply it to the test cluster.
+
+    Retry the whole kubectl command because fetching the YAML can fail transiently.
+    """
     kubectl(
         [
             'apply',
@@ -277,6 +282,10 @@ def setup_kueue():
         ]
     )
 
+
+def setup_kueue():
+    preload_workload_images()
+    apply_kueue_manifests()
     disable_visibility_server()
 
     # Ensure the controller is ready
