@@ -342,6 +342,7 @@ class DBMAsyncJob(object):
         self._enabled = enabled
         self._expected_db_exceptions = expected_db_exceptions
         self._job_name = job_name
+        self._job_name_tag = f"job:{job_name}"
         self._enable_missed_collection_event = enable_missed_collection_event
         self._features = features
         if self._features is None:
@@ -379,7 +380,7 @@ class DBMAsyncJob(object):
         self._tags = tags
         self._tag_snapshot = self._snapshot_tags(tags)
         self._tags_str = ','.join(self._tags)
-        self._job_tags = self._tag_snapshot.event_tags() + ["job:{}".format(self._job_name)]
+        self._job_tags = [*self._tag_snapshot.event_tags(), self._job_name_tag]
         self._job_tags_str = ','.join(self._job_tags)
         self._last_check_run = time.time()
         if self._run_sync or is_affirmative(os.environ.get('DBM_THREADED_JOB_RUN_SYNC', "false")):
