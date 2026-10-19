@@ -16,7 +16,12 @@ from typing import Generator
 from packaging.requirements import InvalidRequirement, Requirement
 
 HERE = Path(__file__).parent
-REQUIREMENTS_FILE = HERE.parent / 'agent_requirements.in'
+REPO_ROOT = HERE.parent
+REQUIREMENTS_FILE = REPO_ROOT / 'agent_requirements.in'
+
+sys.path.insert(0, str(HERE / 'scripts'))
+
+from generate_per_check_requirements import per_check_requirements  # noqa: E402
 
 if sys.platform == 'win32':
 
@@ -77,6 +82,17 @@ def pull_image_with_retry(image_name: str, *, attempts: int = 5, backoff_seconds
         sys.exit(process.returncode)
 
 
+def write_per_check_requirements(mount_dir: Path) -> None:
+    """Write the per-check requirement sets into the builder mount directory.
+
+    The repository's pyproject.toml files are only visible on the host, so the
+    builder consumes this precomputed map rather than enumerating them itself.
+    """
+    checks = per_check_requirements(REPO_ROOT)
+    with (mount_dir / 'per_check_requirements.json').open('w', encoding='utf-8') as f:
+        json.dump(checks, f, indent=2, sort_keys=True)
+
+
 @contextmanager
 def temporary_directory() -> Generator[Path, None, None]:
     with TemporaryDirectory() as directory:
@@ -111,6 +127,8 @@ def build_macos():
                         help='Skip builder setup, assuming it has already been set up.')
     parser.add_argument('--constraints',
                         help='Path to a pip constraints file for pinning transitive dependency versions.')
+    parser.add_argument('--per-check-resolutions', action='store_true', default=False,
+                        help='Resolve one wheel closure per check and write them to resolutions/ in the output directory.')
     args = parser.parse_args()
 
     image: str = args.image
@@ -138,6 +156,8 @@ def build_macos():
 
         dependency_file = mount_dir / 'requirements.in'
         dependency_file.write_text('\n'.join(chain.from_iterable(read_dependencies().values())))
+        if args.per_check_resolutions:
+            write_per_check_requirements(mount_dir)
         shutil.copy(HERE / 'deps' / 'build_dependencies.txt', mount_dir)
         shutil.copytree(HERE / 'scripts', mount_dir / 'scripts')
         shutil.copytree(HERE / 'patches', mount_dir / 'patches')
@@ -173,8 +193,12 @@ def build_macos():
                 cwd=builder_root,
             )
 
+        build_wheels_command = [os.environ['DD_PYTHON3'], str(mount_dir / 'scripts' / 'build_wheels.py'), '--python', args.python]
+        if args.per_check_resolutions:
+            build_wheels_command.append('--per-check-resolutions')
+
         check_process(
-            [os.environ['DD_PYTHON3'], str(mount_dir / 'scripts' / 'build_wheels.py'), '--python', args.python],
+            build_wheels_command,
             env=env,
             cwd=builder_root,
         )
@@ -196,6 +220,9 @@ def build_macos():
         dependency_sizes_dir = mount_dir / 'sizes.json'
         shutil.move(dependency_sizes_dir, output_dir)
 
+        if args.per_check_resolutions:
+            shutil.move(mount_dir / 'resolutions', output_dir / 'resolutions')
+
 
 def build_image():
     parser = argparse.ArgumentParser(prog='builder', allow_abbrev=False)
@@ -208,6 +235,8 @@ def build_image():
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('--constraints',
                         help='Path to a pip constraints file for pinning transitive dependency versions.')
+    parser.add_argument('--per-check-resolutions', action='store_true', default=False,
+                        help='Resolve one wheel closure per check and write them to resolutions/ in the output directory.')
     args = parser.parse_args()
 
     image: str = args.image
@@ -251,6 +280,8 @@ def build_image():
 
             dependency_file = mount_dir / 'requirements.in'
             dependency_file.write_text('\n'.join(chain.from_iterable(read_dependencies().values())))
+            if args.per_check_resolutions:
+                write_per_check_requirements(mount_dir)
             shutil.copy(HERE / 'deps' / 'build_dependencies.txt', mount_dir)
             shutil.copytree(HERE / 'scripts', mount_dir / 'scripts')
             shutil.copytree(HERE / 'patches', mount_dir / 'patches')
@@ -277,6 +308,9 @@ def build_image():
             if args.digest:
                 script_args.append('--use-built-index')
 
+            if args.per_check_resolutions:
+                script_args.append('--per-check-resolutions')
+
             check_process([
                 'docker', 'run', '--rm',
                 '-v', f'{mount_dir}:{internal_mount_dir}',
@@ -298,6 +332,9 @@ def build_image():
 
             # Move the dependency sizes to the output directory
             shutil.move(mount_dir / 'sizes.json', output_dir)
+
+            if args.per_check_resolutions:
+                shutil.move(mount_dir / 'resolutions', output_dir / 'resolutions')
 
 
 def main():
