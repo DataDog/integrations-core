@@ -72,6 +72,27 @@ instances:
     #
     # dbm: false
 
+    ## Configure collection of DBM query metrics and full query text.
+    #
+    # query_metrics:
+
+        ## @param enabled - boolean - optional - default: true
+        ## Enable query metrics and full query text collection. Requires `dbm: true`.
+        #
+        # enabled: true
+
+        ## @param collection_interval - number - optional - default: 10
+        ## The interval between query metrics collections, in seconds. Must be greater than zero.
+        #
+        # collection_interval: 10
+
+        ## @param query_timeout - integer - optional - default: 10
+        ## Timeout in seconds for each query metrics counter scan or statement text lookup.
+        ## This does not limit the total collection duration or affect other collectors.
+        ## Must be greater than zero.
+        #
+        # query_timeout: 10
+
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.
     ## Only metrics specified in `custom_queries` will be collected.

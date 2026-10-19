@@ -16,6 +16,47 @@ from datadog_checks.ibm_db2.utils import scrub_connection_string
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize('enabled', [True, False])
+def test_query_metrics_collection_controls(instance: dict, monkeypatch: pytest.MonkeyPatch, enabled: bool):
+    """Disabling metrics prevents collection; enabled jobs respect the configured cadence."""
+    monkeypatch.setenv('DBM_THREADED_JOB_RUN_SYNC', 'true')
+    instance.update(dbm=True, query_metrics={'enabled': enabled, 'collection_interval': 30})
+    collector = IbmDb2Check('ibm_db2', {}, [instance])._query_metrics
+    with (
+        mock.patch.object(collector, 'run_job') as collect,
+        mock.patch('datadog_checks.base.utils.db.utils.time.time', return_value=100) as clock,
+    ):
+        collector.run_job_loop([])
+        assert collect.call_count == int(enabled)
+        clock.return_value = 129
+        collector.run_job_loop([])
+        assert collect.call_count == int(enabled)
+        clock.return_value = 130
+        collector.run_job_loop([])
+        assert collect.call_count == 2 * int(enabled)
+
+
+@pytest.mark.parametrize('timeout', [None, 7])
+def test_query_metrics_statement_timeout(instance: dict, timeout: int | None):
+    """Both counter scans and text lookups apply the default or configured driver timeout."""
+    instance['dbm'] = True
+    if timeout is not None:
+        instance['query_metrics'] = {'query_timeout': timeout}
+    collector = IbmDb2Check('ibm_db2', {}, [instance])._query_metrics
+    with (
+        mock.patch.object(collector._connection, 'ensure_connected'),
+        mock.patch('ibm_db.prepare') as prepare,
+        mock.patch('ibm_db.execute'),
+        mock.patch('ibm_db.fetch_assoc', return_value=False),
+        mock.patch('ibm_db.free_stmt'),
+    ):
+        collector.run_job()
+        collector._fetch_statement_texts({(0, '01', datetime(2026, 1, 1))})
+    assert len(prepare.call_args_list) == 2
+    for call in prepare.call_args_list:
+        assert call.args[2] == {query_metrics.ibm_db.SQL_ATTR_QUERY_TIMEOUT: timeout or 10}
+
+
 def test_query_metrics_recover_after_text_lookup_failure(instance: dict, aggregator: AggregatorStub):
     instance['dbm'] = True
     collector = IbmDb2Check('ibm_db2', {}, [instance])._query_metrics
