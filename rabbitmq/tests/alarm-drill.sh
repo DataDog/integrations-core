@@ -13,8 +13,9 @@
 # values read at startup. While an alarm is active the broker blocks every
 # publishing connection, so the publish/confirm counters stall for that window.
 # WINDOW is above the 15s scrape interval (management stats lag the alarm by up
-# to ~8s at both ends, so the visible window keeps its length) and below
-# perf-test's 30s confirm timeout.
+# to ~8s at both ends, so the visible window keeps its length). The real block
+# also includes the serial rabbitmqctl calls, so the load service raises
+# perf-test's confirm timeout to 60s.
 set -u
 
 WINDOW=25

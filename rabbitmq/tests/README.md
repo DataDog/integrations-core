@@ -161,9 +161,10 @@ raising the alarms again.
 
 The window is sized against the scrapers: the DD check and the OTel `rabbitmqreceiver`
 both default to 15s, and `/api/nodes` reports the alarm about 8s late at both ends, so a
-25s window always holds at least one scrape per collector. It stays under perf-test's 30s
-confirm timeout: evalya ignores `restart:` policies, so a perf-test that exited would stay
-down.
+25s window always holds at least one scrape per collector. With the serial `rabbitmqctl`
+calls the real block runs about 27s, close to perf-test's 30s default confirm timeout, so
+`load` sets `--confirm-timeout 60`: evalya ignores `restart:` policies, so a perf-test that
+exited would stay down.
 
 Side effects, measured on 4.0.9 (ten `-t 2` runs 21s apart; one landed in a window):
 

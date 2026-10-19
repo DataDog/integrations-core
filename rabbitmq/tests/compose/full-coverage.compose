@@ -95,7 +95,7 @@ services:
           --queue-pattern perf-%d --queue-pattern-from 1 --queue-pattern-to 4 \
           --auto-delete false \
           --variable-rate 30:60 --variable-rate 90:60 --consumer-rate 45 \
-          --confirm 10 --multi-ack-every 5 --qos 50 \
+          --confirm 10 --confirm-timeout 60 --multi-ack-every 5 --qos 50 \
           --queue-args x-max-length=2000
   # Producer-only publisher to a routing key nothing is bound to, so the
   # unroutable-dropped counters advance. Long-lived AMQP, since the per-channel
