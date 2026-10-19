@@ -120,10 +120,10 @@ class FirewallPoller:
         stats = self.client.stats
         if stats.calls:
             self._can_connect = 1 if stats.answered else 0
-            # Only a run where the firewall answered says the credentials work; the first run reports 0 regardless.
+            # Only a run where the firewall answered says whether the credentials work; until one does, nothing is sent.
             if stats.auth_rejected:
                 self._auth_status = 1
-            elif stats.answered or self._auth_status is None:
+            elif stats.answered:
                 self._auth_status = 0
         tags = self._tags()
         if self._can_connect is not None:
