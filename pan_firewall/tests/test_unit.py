@@ -8,9 +8,14 @@ from xml.etree import ElementTree as ET
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.pan_firewall import PanFirewallCheck, constants
+from datadog_checks.pan_firewall import (
+    PanFirewallCheck,
+    constants,
+    poller,  # noqa: F401  (importing it registers the collectors)
+)
+from datadog_checks.pan_firewall.collectors.base import COLLECT_FUNCTIONS
 from datadog_checks.pan_firewall.collectors.interfaces import COUNTER_INTERFACE_CMD
-from datadog_checks.pan_firewall.constants import REPORTS
+from datadog_checks.pan_firewall.constants import IDENTITY, INTERVALS, REPORTS
 from datadog_checks.pan_firewall.errors import PanosApiError
 from datadog_checks.pan_firewall.xml_utils import num, parse_response, text
 
@@ -384,6 +389,12 @@ CHECK_LEVEL_SERIES = [
     ('disk.used_pct', ('mount:/opt/pancfg', 'filesystem:/dev/nvme0n1p5'), GAUGE),  # disk
     ('ipsec.tunnel.state', FW_A_TUNNEL, GAUGE),  # vpn
 ]
+
+
+def test_every_scheduled_collector_is_registered(real_collectors):
+    # A collector runs only when it has an interval, is registered, and `poller` imports its module; a name missing
+    # from either side would never run, and nothing else would say so.
+    assert set(COLLECT_FUNCTIONS) | {IDENTITY} == set(INTERVALS)
 
 
 def test_every_collector_submits_with_type_and_tags(dd_run_check, aggregator, fake_panos, real_collectors):
