@@ -4,6 +4,6 @@
   "source_type_name": "OpenAI APM",
   "interface_title": "APM",
   "is_primary": false,
-  "auto_install": true,
+  "auto_install": false,
   "creates_events": false
 }
