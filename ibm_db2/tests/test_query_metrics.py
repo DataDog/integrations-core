@@ -136,6 +136,14 @@ def test_query_metrics(
             ]
             assert sum(row['count'] for row in matching) == 4
             assert sum(row['rows_returned'] for row in matching) == 8
+            text_events = [
+                event
+                for event in aggregator.get_event_platform_events('dbm-samples')
+                if event['db']['query_signature'] == matching[0]['query_signature']
+            ]
+            assert len(text_events) == 1
+            assert text_events[0]['db']['statement'] == matching[0]['query']
+            assert text_events[0]['database_instance'] == instance_metadata['database_instance']
             key = (before['member'], hexlify(before['executable_id']).decode('ascii'), before['insert_timestamp'])
             assert all(key not in call.args[0] for call in fetch.call_args_list)
     finally:
