@@ -1146,10 +1146,11 @@ files:
           fleet_configurable: true
         - name: collect_views
           description: |
-            Enable collection of SQL Server views when schema collection is enabled. Defaults to true.
+            Enable collection of SQL Server views when schema collection is enabled. View definitions are sent
+            as written, without obfuscation. Defaults to false.
           value:
             type: boolean
-            example: true
+            example: false
           fleet_configurable: false
         - name: collection_interval
           description: |

@@ -161,9 +161,9 @@ def _assert_key_order(indexes):
 
 def _legacy_indexes(collector, table_row):
     table_id = str(table_row['table_id'])
-    collector._pre_2017_cursor.execute(INDEX_QUERY_PRE_2017.replace("schema_tables.table_id", table_id))
+    collector._legacy_cursor.execute(INDEX_QUERY_PRE_2017.replace("schema_tables.table_id", table_id))
     indexes = {}
-    for row in collector._pre_2017_cursor.fetchall_dict():
+    for row in collector._legacy_cursor.fetchall_dict():
         lowered = {str(key).lower(): value for key, value in row.items()}
         indexes[lowered['name']] = lowered
     return indexes
@@ -186,6 +186,7 @@ def test_collect_views(aggregator, dbm_instance, integration_check, sa_conn):
             )
         )
 
+    dbm_instance['collect_schemas']['collect_views'] = True
     try:
         check = integration_check(dbm_instance)
         check.sql_metadata.collect_schemas()
@@ -218,7 +219,7 @@ def test_collect_views(aggregator, dbm_instance, integration_check, sa_conn):
         assert view_name in view['definition']
         assert {column['name'] for column in view['columns']} == {'id', 'name', 'population'}
         for column in view['columns']:
-            assert set(column) == {'name', 'data_type', 'default', 'nullable', 'ordinal_position'}
+            assert set(column) == {'name', 'data_type', 'nullable', 'ordinal_position'}
         assert [column['ordinal_position'] for column in view['columns']] == ['1', '2', '3']
     finally:
         with sa_conn.cursor() as cursor:
@@ -242,7 +243,7 @@ def test_indexes_pre_2017(dbm_instance, integration_check):
     collector = create_schema_collector(check)
 
     with collector._get_cursor(SCHEMA_DATABASE) as cursor:
-        assert collector._is_2016_or_earlier
+        assert collector._use_legacy_query
         rows = {row['table_name']: row for row in cursor.fetchall_dict()}
         _assert_include_split(_legacy_indexes(collector, rows['index_coverage']))
         _assert_key_order(_legacy_indexes(collector, rows['key_order']))

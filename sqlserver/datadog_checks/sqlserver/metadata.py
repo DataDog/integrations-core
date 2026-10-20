@@ -174,6 +174,9 @@ class SqlserverMetadata(DBMAsyncJob):
             return
         raise_if_cancelled(self._cancel_event)
         self._last_schemas_collection_time = time.time()
-        self._schema_collector.collect_schemas()
-        if self._schema_config.get('collect_views', True):
-            self._view_collector.collect_schemas()
+        # Views are a separate collection run, so a table collection failure must not skip them.
+        try:
+            self._schema_collector.collect_schemas()
+        finally:
+            if self._schema_config.get('collect_views', False):
+                self._view_collector.collect_schemas()

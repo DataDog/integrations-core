@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import contextlib
+from abc import abstractmethod
 from typing import TYPE_CHECKING, TypedDict
 
 from datadog_checks.base.utils.serialization import json
@@ -75,7 +76,14 @@ class SQLServerDatabaseObject(DatabaseObject):
     schemas: list[SchemaObject]
 
 
-class SQLServerSchemaCollector(SchemaCollector):
+class SQLServerObjectCollector(SchemaCollector):
+    """
+    Collects one kind of SQL Server catalog object, one database at a time.
+
+    This class owns the database list, the connection used for each database, and the extra connection that the
+    legacy query path uses for per-object detail queries. Subclasses provide the catalog query and the row mapping.
+    """
+
     _check: SQLServer
 
     def __init__(self, check: SQLServer):
@@ -83,15 +91,10 @@ class SQLServerSchemaCollector(SchemaCollector):
         config.collection_interval = check._config.schema_config.get(
             "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
-        config.max_tables = check._config.schema_config.get('max_tables', 300)
-        self._is_2016_or_earlier = None
+        self._use_legacy_query = None
         self._database_compatibility_levels: dict[str, int] = {}
-        self._pre_2017_cursor = None
+        self._legacy_cursor = None
         super().__init__(check, config)
-
-    @property
-    def kind(self):
-        return "sqlserver_databases"
 
     def _get_databases(self) -> list[DatabaseInfo]:
         database_names = self._check.get_databases()
@@ -113,39 +116,74 @@ class SQLServerSchemaCollector(SchemaCollector):
                 cursor = stack.enter_context(self._check.connection.get_managed_cursor(KEY_PREFIX))
                 switch_db_statement = construct_use_statement(database_name)
                 cursor.execute(switch_db_statement)
-                self._is_2016_or_earlier = self._should_use_legacy_schema_query(database_name)
+                self._use_legacy_query = self._should_use_legacy_query(database_name)
 
-                if self._is_2016_or_earlier:
+                if self._use_legacy_query:
                     stack.enter_context(self._check.connection.open_managed_default_connection(KEY_PREFIX_PRE_2017))
-                    self._pre_2017_cursor = stack.enter_context(
+                    self._legacy_cursor = stack.enter_context(
                         self._check.connection.get_managed_cursor(KEY_PREFIX_PRE_2017)
                     )
-                    self._pre_2017_cursor.execute(switch_db_statement)
+                    self._legacy_cursor.execute(switch_db_statement)
 
-                query = self._get_tables_query()
+                query = self._get_query()
                 cursor.execute(query)
                 yield cursor
             finally:
-                self._pre_2017_cursor = None
+                self._legacy_cursor = None
 
     def _record_database_compatibility_levels(self, databases: list[DatabaseInfo]) -> None:
         self._database_compatibility_levels = {}
         for database in databases:
             self._database_compatibility_levels[database["name"]] = int(database["compatibility_level"])
 
-    def _should_use_legacy_schema_query(self, database_name: str) -> bool:
+    def _should_use_legacy_query(self, database_name: str) -> bool:
         """
-        Return whether the current database needs the legacy schema query.
+        Return whether the current database needs the legacy query.
 
-        The modern schema query depends on two SQL Server features:
-        - STRING_AGG, used to build index column lists. On self-managed SQL Server, this requires SQL Server 2017
-          or later. Azure SQL Database and Azure SQL Managed Instance report ProductMajorVersion 12 while still
-          supporting STRING_AGG, so only self-managed SQL Server uses this version gate.
-        - JSON output, used for column, index, and foreign key metadata. This is controlled by each database's
-          compatibility_level and requires level 130 or higher.
+        The modern query builds column metadata with JSON output, which is controlled by each database's
+        compatibility_level and requires level 130 or higher. If the level was not recorded, use the legacy query
+        because JSON support cannot be confirmed.
+        """
+        compatibility_level = self._database_compatibility_levels.get(database_name)
+        if compatibility_level is None:
+            self._check.log.debug(
+                "compatibility_level is not available for SQL Server database %s, using legacy schema query",
+                database_name,
+            )
+            return True
+        return compatibility_level < MINIMUM_JSON_COMPATIBILITY_LEVEL
 
-        If ProductMajorVersion is missing, use the legacy query because we cannot confirm that STRING_AGG is
-        available.
+    @abstractmethod
+    def _get_query(self) -> str:
+        """
+        Returns the catalog query for the current database.
+        Implementations return the legacy form when `self._use_legacy_query` is set.
+        """
+
+    def _get_next(self, cursor):
+        return cursor.fetchone_dict()
+
+    def _get_all(self, cursor):
+        return cursor.fetchall_dict()
+
+
+class SQLServerSchemaCollector(SQLServerObjectCollector):
+    def __init__(self, check: SQLServer):
+        super().__init__(check)
+        self._max_tables = check._config.schema_config.get('max_tables', 300)
+
+    @property
+    def kind(self):
+        return "sqlserver_databases"
+
+    def _should_use_legacy_query(self, database_name: str) -> bool:
+        """
+        Return whether the current database needs the legacy table query.
+
+        Besides JSON output, the modern table query uses STRING_AGG to build index column lists. On self-managed
+        SQL Server, this requires SQL Server 2017 or later. Azure SQL Database and Azure SQL Managed Instance report
+        ProductMajorVersion 12 while still supporting STRING_AGG, so only self-managed SQL Server uses this version
+        gate. If ProductMajorVersion is missing, use the legacy query because STRING_AGG support cannot be confirmed.
         """
         engine_edition = self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
         if not is_azure_database(engine_edition):
@@ -155,18 +193,10 @@ class SQLServerSchemaCollector(SchemaCollector):
                 return True
             if major_version <= 13:
                 return True
+        return super()._should_use_legacy_query(database_name)
 
-        compatibility_level = self._database_compatibility_levels.get(database_name)
-        if compatibility_level is None:
-            self._check.log.debug(
-                "compatibility_level is not available for SQL Server database %s, using pre-2017 schema query",
-                database_name,
-            )
-            return True
-        return compatibility_level < MINIMUM_JSON_COMPATIBILITY_LEVEL
-
-    def _get_tables_query(self):
-        limit = int(self._config.max_tables or 1_000_000)
+    def _get_query(self) -> str:
+        limit = int(self._max_tables or 1_000_000)
 
         # Note that we INNER JOIN tables to omit schemas with no tables
         # This is a simple way to omit the system tables like db_blah
@@ -186,7 +216,7 @@ class SQLServerSchemaCollector(SchemaCollector):
                 ORDER BY schemas.schema_name, tables.table_name
             )
         """
-        if self._is_2016_or_earlier:
+        if self._use_legacy_query:
             query += """
             SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.owner_name,
                 schema_tables.table_name, schema_tables.table_id
@@ -208,18 +238,12 @@ class SQLServerSchemaCollector(SchemaCollector):
         """
         return query
 
-    def _get_next(self, cursor):
-        return cursor.fetchone_dict()
-
-    def _get_all(self, cursor):
-        return cursor.fetchall_dict()
-
     def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
         object = super()._map_row(database, cursor_row)
-        if self._is_2016_or_earlier:
+        if self._use_legacy_query:
             # We need to fetch the related data for each table
             # Use a separate connection to avoid conflicts with the main cursor while it streams table rows.
-            cursor = self._pre_2017_cursor
+            cursor = self._legacy_cursor
             if cursor is None:
                 raise RuntimeError("pre-2017 schema cursor is not initialized")
 
