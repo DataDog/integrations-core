@@ -314,7 +314,15 @@ class FirewallPoller:
             # A refusal is the role lacking a permission, not a rejected key: it must not renew the key.
             root = self.client.op(INTERFACE_CONFIG_CMD, renew_on_auth_error=False)
         except PanosError as e:
-            self.log.debug('%s: cannot read the interface config: %s', self.ip, e)
+            # Warned once per firewall: a role without the permission would otherwise repeat it every 30 minutes.
+            key = 'interface_config'
+            log = self.log.debug if key in self.state.warned else self.log.warning
+            self.state.warned.add(key)
+            log(
+                '%s: cannot read the interface config, so interfaces have no admin status or description: %s',
+                self.ip,
+                e,
+            )
         else:
             self.state.interface_config = parse_interface_config(root)
 

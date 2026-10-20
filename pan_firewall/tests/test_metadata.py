@@ -282,6 +282,21 @@ def test_refused_interface_config_sends_interfaces_without_admin_status(dd_run_c
     assert auth.value == 0
 
 
+def test_refused_interface_config_is_warned_once(dd_run_check, fake_panos, schedule_clock, caplog):
+    fake_panos.answer_op(
+        FW_A_IP, INTERFACE_CONFIG_CMD, (403, (FIXTURES / 'fw-a-probe' / 'config_refused.xml').read_bytes())
+    )
+    caplog.set_level('DEBUG')
+    check = new_check()
+
+    dd_run_check(check)
+    schedule_clock.now += 1800
+    dd_run_check(check)
+
+    refusals = [r for r in caplog.records if 'cannot read the interface config' in r.getMessage()]
+    assert [r.levelname for r in refusals] == ['WARNING', 'DEBUG']
+
+
 def test_failed_interface_config_read_keeps_the_last_one(dd_run_check, aggregator, fake_panos, schedule_clock):
     fake_panos.answer_op(FW_A_IP, INTERFACE_ALL_CMD, (200, SYNTHETIC_INTERFACES.read_bytes()))
     fake_panos.answer_op(FW_A_IP, INTERFACE_CONFIG_CMD, (200, SYNTHETIC_CONFIG.read_bytes()))
