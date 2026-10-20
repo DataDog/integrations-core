@@ -1,0 +1,1 @@
+Rename the internal `omit_histogram_bound_tags` setting in the OpenMetrics V2 transformer to `collect_histograms_as_distributions`.

@@ -221,3 +221,24 @@ vllm:spec_decode_num_accepted_tokens_per_pos_total{model_name="facebook/opt-125m
 # HELP vllm:spec_decode_num_draft_tokens_total Draft speculative tokens.
 # TYPE vllm:spec_decode_num_draft_tokens_total counter
 vllm:spec_decode_num_draft_tokens_total{model_name="facebook/opt-125m"} 10
+# HELP vllm:kv_cache_usage_perc KV-cache usage. 1 means 100 percent usage.
+# TYPE vllm:kv_cache_usage_perc gauge
+vllm:kv_cache_usage_perc{model_name="facebook/opt-125m"} 0.25
+# HELP vllm:inter_token_latency_seconds Histogram of inter-token latency in seconds.
+# TYPE vllm:inter_token_latency_seconds histogram
+vllm:inter_token_latency_seconds_bucket{le="0.05",model_name="facebook/opt-125m"} 3
+vllm:inter_token_latency_seconds_bucket{le="+Inf",model_name="facebook/opt-125m"} 4
+vllm:inter_token_latency_seconds_count{model_name="facebook/opt-125m"} 4
+vllm:inter_token_latency_seconds_sum{model_name="facebook/opt-125m"} 0.12
+# HELP vllm:request_time_per_output_token_seconds Histogram of time_per_output_token_seconds per request.
+# TYPE vllm:request_time_per_output_token_seconds histogram
+vllm:request_time_per_output_token_seconds_bucket{le="0.05",model_name="facebook/opt-125m"} 1
+vllm:request_time_per_output_token_seconds_bucket{le="+Inf",model_name="facebook/opt-125m"} 1
+vllm:request_time_per_output_token_seconds_count{model_name="facebook/opt-125m"} 1
+vllm:request_time_per_output_token_seconds_sum{model_name="facebook/opt-125m"} 0.03
+# HELP vllm:prefix_cache_queries_total Prefix cache queries, in terms of number of queried tokens.
+# TYPE vllm:prefix_cache_queries_total counter
+vllm:prefix_cache_queries_total{model_name="facebook/opt-125m"} 100
+# HELP vllm:prefix_cache_hits_total Prefix cache hits, in terms of number of cached tokens.
+# TYPE vllm:prefix_cache_hits_total counter
+vllm:prefix_cache_hits_total{model_name="facebook/opt-125m"} 60
