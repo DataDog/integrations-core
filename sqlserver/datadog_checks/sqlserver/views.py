@@ -80,7 +80,7 @@ class SQLServerViewCollector(SQLServerObjectCollector):
                 ORDER BY schemas.schema_name, views.view_name
             )
         """
-        if self._use_legacy_query:
+        if self._is_2016_or_earlier:
             query += """
             SELECT schema_views.schema_id, schema_views.schema_name, schema_views.owner_name,
                 schema_views.view_name, schema_views.view_id,
@@ -101,10 +101,10 @@ class SQLServerViewCollector(SQLServerObjectCollector):
         return query
 
     def _map_row(self, database: DatabaseInfo, cursor_row) -> ViewDatabaseObject:
-        if self._use_legacy_query:
-            cursor = self._legacy_cursor
+        if self._is_2016_or_earlier:
+            cursor = self._pre_2017_cursor
             if cursor is None:
-                raise RuntimeError("legacy view cursor is not initialized")
+                raise RuntimeError("pre-2017 view cursor is not initialized")
             view_id = str(cursor_row.get("view_id"))
             columns_query = VIEW_COLUMN_QUERY.replace("schema_views.view_id", view_id)
             cursor.execute(columns_query)

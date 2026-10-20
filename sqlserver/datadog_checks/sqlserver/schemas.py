@@ -89,9 +89,9 @@ class SQLServerObjectCollector(SchemaCollector):
         config.collection_interval = check._config.schema_config.get(
             "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
-        self._use_legacy_query = None
+        self._is_2016_or_earlier = None
         self._database_compatibility_levels: dict[str, int] = {}
-        self._legacy_cursor = None
+        self._pre_2017_cursor = None
         super().__init__(check, config)
 
     def _get_databases(self) -> list[DatabaseInfo]:
@@ -114,27 +114,27 @@ class SQLServerObjectCollector(SchemaCollector):
                 cursor = stack.enter_context(self._check.connection.get_managed_cursor(KEY_PREFIX))
                 switch_db_statement = construct_use_statement(database_name)
                 cursor.execute(switch_db_statement)
-                self._use_legacy_query = self._should_use_legacy_query(database_name)
+                self._is_2016_or_earlier = self._should_use_legacy_schema_query(database_name)
 
-                if self._use_legacy_query:
+                if self._is_2016_or_earlier:
                     stack.enter_context(self._check.connection.open_managed_default_connection(KEY_PREFIX_PRE_2017))
-                    self._legacy_cursor = stack.enter_context(
+                    self._pre_2017_cursor = stack.enter_context(
                         self._check.connection.get_managed_cursor(KEY_PREFIX_PRE_2017)
                     )
-                    self._legacy_cursor.execute(switch_db_statement)
+                    self._pre_2017_cursor.execute(switch_db_statement)
 
                 query = self._get_query()
                 cursor.execute(query)
                 yield cursor
             finally:
-                self._legacy_cursor = None
+                self._pre_2017_cursor = None
 
     def _record_database_compatibility_levels(self, databases: list[DatabaseInfo]) -> None:
         self._database_compatibility_levels = {}
         for database in databases:
             self._database_compatibility_levels[database["name"]] = int(database["compatibility_level"])
 
-    def _should_use_legacy_query(self, database_name: str) -> bool:
+    def _should_use_legacy_schema_query(self, database_name: str) -> bool:
         """
         Return whether the current database needs the legacy query.
 
@@ -145,7 +145,7 @@ class SQLServerObjectCollector(SchemaCollector):
         compatibility_level = self._database_compatibility_levels.get(database_name)
         if compatibility_level is None:
             self._check.log.debug(
-                "compatibility_level is not available for SQL Server database %s, using legacy schema query",
+                "compatibility_level is not available for SQL Server database %s, using pre-2017 schema query",
                 database_name,
             )
             return True
@@ -155,7 +155,7 @@ class SQLServerObjectCollector(SchemaCollector):
     def _get_query(self) -> str:
         """
         Returns the catalog query for the current database.
-        Implementations return the legacy form when `self._use_legacy_query` is set.
+        Implementations return the legacy form when `self._is_2016_or_earlier` is set.
         """
 
     def _get_next(self, cursor):
@@ -174,7 +174,7 @@ class SQLServerSchemaCollector(SQLServerObjectCollector):
     def kind(self):
         return "sqlserver_databases"
 
-    def _should_use_legacy_query(self, database_name: str) -> bool:
+    def _should_use_legacy_schema_query(self, database_name: str) -> bool:
         """
         Return whether the current database needs the legacy table query.
 
@@ -191,7 +191,7 @@ class SQLServerSchemaCollector(SQLServerObjectCollector):
                 return True
             if major_version <= 13:
                 return True
-        return super()._should_use_legacy_query(database_name)
+        return super()._should_use_legacy_schema_query(database_name)
 
     def _get_query(self) -> str:
         limit = int(self._max_tables or 1_000_000)
@@ -214,7 +214,7 @@ class SQLServerSchemaCollector(SQLServerObjectCollector):
                 ORDER BY schemas.schema_name, tables.table_name
             )
         """
-        if self._use_legacy_query:
+        if self._is_2016_or_earlier:
             query += """
             SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.owner_name,
                 schema_tables.table_name, schema_tables.table_id
@@ -238,12 +238,12 @@ class SQLServerSchemaCollector(SQLServerObjectCollector):
 
     def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
         object = super()._map_row(database, cursor_row)
-        if self._use_legacy_query:
+        if self._is_2016_or_earlier:
             # We need to fetch the related data for each table
             # Use a separate connection to avoid conflicts with the main cursor while it streams table rows.
-            cursor = self._legacy_cursor
+            cursor = self._pre_2017_cursor
             if cursor is None:
-                raise RuntimeError("legacy schema cursor is not initialized")
+                raise RuntimeError("pre-2017 schema cursor is not initialized")
 
             table_id = str(cursor_row.get("table_id"))
             columns_query = COLUMN_QUERY.replace("schema_tables.table_id", table_id)

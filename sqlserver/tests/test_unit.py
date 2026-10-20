@@ -170,7 +170,7 @@ def test_schema_collectors_apply_their_own_object_limit(
 ):
     check = create_schema_collector(schema_config={'max_tables': 25, 'max_views': 7})._check
     collector = collector_class(check)
-    collector._use_legacy_query = False
+    collector._is_2016_or_earlier = False
 
     assert expected_limit in collector._get_query()
 
@@ -261,7 +261,7 @@ def test_view_collector_legacy_query_detection(
     if compatibility_level is not None:
         collector._database_compatibility_levels = {"datadog_test": compatibility_level}
 
-    assert collector._should_use_legacy_query("datadog_test") is expected_legacy
+    assert collector._should_use_legacy_schema_query("datadog_test") is expected_legacy
 
 
 def test_schema_collector_records_database_compatibility_levels() -> None:
@@ -360,7 +360,7 @@ def test_schema_collector_legacy_query_detection(
     )
     collector._database_compatibility_levels = {"datadog_test": compatibility_level}
 
-    assert collector._should_use_legacy_query("datadog_test") is expected_legacy
+    assert collector._should_use_legacy_schema_query("datadog_test") is expected_legacy
 
 
 @pytest.mark.parametrize(
@@ -381,7 +381,7 @@ def test_schema_collector_uses_legacy_query_when_compatibility_level_is_not_reco
         }
     )
 
-    assert collector._should_use_legacy_query("datadog_test") is True
+    assert collector._should_use_legacy_schema_query("datadog_test") is True
 
 
 @pytest.mark.parametrize(
@@ -420,7 +420,7 @@ def test_schema_collector_uses_database_compatibility_level_for_schema_query(
         pass
 
     tables_query = main_cursor.execute.call_args_list[1][0][0]
-    assert collector._use_legacy_query is expected_legacy
+    assert collector._is_2016_or_earlier is expected_legacy
     assert ("STRING_AGG" in tables_query) is not expected_legacy
     assert (detail_cursor.execute.call_count == 1) is expected_legacy
 
@@ -471,7 +471,7 @@ def test_schema_collector_reuses_pre_2017_connection_for_table_detail_queries() 
     assert detail_cursor.execute.call_args_list[0] == mock.call("USE [datadog_test];")
     assert detail_cursor.execute.call_args_list.count(mock.call("USE [datadog_test];")) == 1
     assert detail_cursor.execute.call_count == 9
-    assert collector._legacy_cursor is None
+    assert collector._pre_2017_cursor is None
     assert [row["schemas"][0]["tables"][0]["partitions"]["partition_count"] for row in mapped_rows] == [1, 2]
 
 
@@ -530,7 +530,7 @@ def test_schema_collector_uses_new_pre_2017_connection_for_each_database() -> No
     ]
     assert detail_cursor_1.execute.call_args_list[0] == mock.call("USE [datadog_test_1];")
     assert detail_cursor_2.execute.call_args_list[0] == mock.call("USE [datadog_test_2];")
-    assert collector._legacy_cursor is None
+    assert collector._pre_2017_cursor is None
 
 
 def test_schema_collector_does_not_open_pre_2017_connection_for_modern_query() -> None:
@@ -562,14 +562,14 @@ def test_schema_collector_does_not_open_pre_2017_connection_for_modern_query() -
 
     assert collector._check.connection.open_managed_default_connection.call_args_list == [mock.call(KEY_PREFIX)]
     assert collector._check.connection.get_managed_cursor.call_args_list == [mock.call(KEY_PREFIX)]
-    assert collector._legacy_cursor is None
+    assert collector._pre_2017_cursor is None
     assert mapped_row["schemas"][0]["tables"][0]["columns"] == [{"name": "id"}]
 
 
 def test_view_collector_maps_view_metadata():
     check = create_schema_collector()._check
     collector = SQLServerViewCollector(check)
-    collector._use_legacy_query = False
+    collector._is_2016_or_earlier = False
     database = {"name": "datadog_test", "id": "1", "collation": "SQL_Latin1_General_CP1_CI_AS", "owner": "dbo"}
     row = {
         "schema_name": "test_schema",
@@ -608,7 +608,7 @@ def test_view_collector_maps_view_metadata():
 def test_view_collector_legacy_query_fetches_only_columns():
     check = create_schema_collector()._check
     collector = SQLServerViewCollector(check)
-    collector._use_legacy_query = True
+    collector._is_2016_or_earlier = True
     detail_cursor = mock.Mock()
     detail_cursor.fetchall_dict.return_value = [
         {
@@ -618,7 +618,7 @@ def test_view_collector_legacy_query_fetches_only_columns():
             "ordinal_position": "1",
         }
     ]
-    collector._legacy_cursor = detail_cursor
+    collector._pre_2017_cursor = detail_cursor
     database = {"name": "datadog_test", "id": "1", "collation": "SQL_Latin1_General_CP1_CI_AS", "owner": "dbo"}
     row = {
         "schema_name": "test_schema",

@@ -161,9 +161,9 @@ def _assert_key_order(indexes):
 
 def _legacy_indexes(collector, table_row):
     table_id = str(table_row['table_id'])
-    collector._legacy_cursor.execute(INDEX_QUERY_PRE_2017.replace("schema_tables.table_id", table_id))
+    collector._pre_2017_cursor.execute(INDEX_QUERY_PRE_2017.replace("schema_tables.table_id", table_id))
     indexes = {}
-    for row in collector._legacy_cursor.fetchall_dict():
+    for row in collector._pre_2017_cursor.fetchall_dict():
         lowered = {str(key).lower(): value for key, value in row.items()}
         indexes[lowered['name']] = lowered
     return indexes
@@ -234,7 +234,7 @@ def test_indexes_pre_2017(dbm_instance, integration_check):
     collector = create_schema_collector(check)
 
     with collector._get_cursor(SCHEMA_DATABASE) as cursor:
-        assert collector._use_legacy_query
+        assert collector._is_2016_or_earlier
         rows = {row['table_name']: row for row in cursor.fetchall_dict()}
         _assert_include_split(_legacy_indexes(collector, rows['index_coverage']))
         _assert_key_order(_legacy_indexes(collector, rows['key_order']))
