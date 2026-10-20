@@ -1,0 +1,23 @@
+diff --git a/src/rdkafka_partition.c b/src/rdkafka_partition.c
+index ce4f01b..30e5a40 100644
+--- a/src/rdkafka_partition.c
++++ b/src/rdkafka_partition.c
+@@ -2703,10 +2703,16 @@ rd_kafka_topic_partition_update(rd_kafka_topic_partition_t *dst,
+         dst->err    = src->err;
+ 
+         if (src->metadata_size > 0) {
+-                dst->metadata      = rd_malloc(src->metadata_size);
++                /* Allocate one extra byte and NUL-terminate the copied
++                 * metadata. librdkafka stores metadata as a sized buffer, but
++                 * callers such as confluent-kafka read it as a C string
++                 * (strlen/strdup); without the terminator they read past the
++                 * allocation. The wire parser (rd_kafka_handle_OffsetFetch)
++                 * already does this; the copy must match. */
++                dst->metadata      = rd_malloc(src->metadata_size + 1);
+                 dst->metadata_size = src->metadata_size;
+-                ;
+                 memcpy(dst->metadata, src->metadata, dst->metadata_size);
++                ((char *)dst->metadata)[dst->metadata_size] = '\0';
+         }
+ 
+         if ((srcpriv = src->_private)) {
