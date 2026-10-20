@@ -199,19 +199,22 @@ class HttpRequestTool(BaseTool[HttpRequestInput]):
                 async for chunk in chunks:
                     fetched.received_bytes += len(chunk)
                     if fetched.received_bytes > MAX_BUFFER_BYTES:
-                        saved, received_bytes = await self._store.save_stream(
-                            chunks=_with_prefix(body, chunk, chunks),
-                            charset=fetched.charset,
-                            metadata=response_metadata(
-                                tool_input,
-                                method=method,
-                                fetched=fetched,
-                                representation=stream_representation(content_type),
-                                note="Streamed response saved as received text without JSON parsing or formatting",
-                            ),
-                            stem=method.lower(),
-                            max_bytes=MAX_DOWNLOAD_BYTES,
-                        )
+                        try:
+                            saved, received_bytes = await self._store.save_stream(
+                                chunks=_with_prefix(body, chunk, chunks),
+                                charset=fetched.charset,
+                                metadata=response_metadata(
+                                    tool_input,
+                                    method=method,
+                                    fetched=fetched,
+                                    representation=stream_representation(content_type),
+                                    note="Streamed response saved as received text without JSON parsing or formatting",
+                                ),
+                                stem=method.lower(),
+                                max_bytes=MAX_DOWNLOAD_BYTES,
+                            )
+                        except ResponseStoreError as e:
+                            raise ResponseStoreError(f"HTTP {fetched.status}: {e}") from e
                         return StreamedResponse(
                             url=fetched.url,
                             status=fetched.status,
