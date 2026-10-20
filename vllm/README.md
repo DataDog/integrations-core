@@ -35,6 +35,7 @@ The following metrics are collected only when [GPU Monitoring][8] is enabled:
 
 - `vllm.estimated_flops_per_gpu`
 - `vllm.external_prefix_cache`
+- `vllm.prefix_cache`
 - `vllm.prompt_tokens.cached`
 - `vllm.request.decode_time`
 - `vllm.request.prefill_kv_computed_tokens`
