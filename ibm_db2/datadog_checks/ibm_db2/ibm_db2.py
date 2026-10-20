@@ -7,6 +7,7 @@ from time import time as timestamp
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.db import DatabaseCheck
+from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.utils import default_json_event_encoding
 from datadog_checks.base.utils.db.utils import resolve_db_host as agent_host_resolver
 from datadog_checks.base.utils.platform import Platform
@@ -24,6 +25,7 @@ from .__about__ import __version__
 from .config import build_config
 from .connection import Db2Connection, Db2ConnectionError
 from .custom_metrics import CustomMetricsCollector
+from .health import Db2Health
 from .metrics import MetricsCollector
 from .query_metrics import QueryMetricsCollector
 from .utils import get_version
@@ -60,6 +62,7 @@ class IbmDb2Check(DatabaseCheck):
         )
         self._custom_metrics = self.register_async_job(CustomMetricsCollector(self, self._config))
         if self._config.dbm:
+            self.health = Db2Health(self)
             self._query_metrics = self.register_async_job(QueryMetricsCollector(self, self._config))
 
     def debug_stats_kwargs(self, tags: list[str] | None = None) -> dict:
@@ -69,7 +72,25 @@ class IbmDb2Check(DatabaseCheck):
             'raw': True,
         }
 
+    def _submit_initialization_health_event(self) -> None:
+        if not self._config.dbm:
+            return
+        try:
+            self.health.submit_health_event(
+                name=HealthEvent.INITIALIZATION,
+                status=HealthStatus.OK,
+                cooldown_time=6 * 60 * 60,
+                data={
+                    'features': [
+                        {'key': 'query_metrics', 'name': 'Query Metrics', 'enabled': self._config.query_metrics.enabled}
+                    ],
+                },
+            )
+        except Exception:
+            self.log.exception('Failed to submit initialization health event')
+
     def check(self, instance):
+        self._submit_initialization_health_event()
         if self._connection.conn is None:
             self._connection.connect()
         self.emit_connection_service_checks()

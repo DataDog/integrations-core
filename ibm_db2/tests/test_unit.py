@@ -9,12 +9,82 @@ import pytest
 from cachetools import TTLCache
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.query_metrics import ObfuscationResult
 from datadog_checks.ibm_db2 import IbmDb2Check, query_metrics
 from datadog_checks.ibm_db2.connection import Db2ConnectionError, get_connection_data
 from datadog_checks.ibm_db2.utils import scrub_connection_string
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize('dbm, enabled', [(False, True), (True, False), (True, True)])
+def test_query_metrics_initialization_health(instance: dict, aggregator: AggregatorStub, dbm: bool, enabled: bool):
+    """Initialization carries the assigned check ID and feature state, without duplicate events on subsequent runs."""
+    instance.update(dbm=dbm, query_metrics={'enabled': enabled})
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    check.check_id = 'ibm_db2:assigned-id'
+    with mock.patch.object(check._connection, 'connect'):
+        check.check(instance)
+        check.check(instance)
+    events = aggregator.get_event_platform_events('dbm-health')
+    assert len(events) == int(dbm)
+    if dbm:
+        event = events[0]
+        assert event['name'] == 'initialization'
+        assert event['status'] == 'ok'
+        assert event['check_id'] == 'ibm_db2:assigned-id'
+        assert event['data']['database_instance'] == check.database_identifier
+        assert event['data']['features'] == [{'key': 'query_metrics', 'name': 'Query Metrics', 'enabled': enabled}]
+        assert instance['password'] not in stdlib_json.dumps(event)
+
+
+def test_query_metrics_health_tags(instance: dict, aggregator: AggregatorStub):
+    """Health events exclude internal tags from both configuration and the runner, retaining ordinary tags."""
+    instance.update(dbm=True, tags=['env:test', 'dd.internal.resource:configured'])
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    check.health.submit_health_event(
+        name=HealthEvent.MISSED_COLLECTION,
+        status=HealthStatus.WARNING,
+        tags=['job:query-metrics', 'dd.internal.resource:runner'],
+    )
+    event = aggregator.get_event_platform_events('dbm-health')[0]
+    assert 'env:test' in event['tags']
+    assert 'job:query-metrics' in event['tags']
+    assert not any(tag.startswith('dd.internal') for tag in event['tags'])
+
+
+@pytest.mark.parametrize(
+    'error, sqlstate',
+    [
+        (Exception('SQL0551N SECRET SQLSTATE=42501 SQLCODE=-551'), '42501'),
+        (Exception('SQL0952N SECRET SQLSTATE=57014 SQLCODE=-952'), '57014'),
+        (Db2ConnectionError('SECRET'), None),
+    ],
+)
+def test_query_metrics_error_health(instance: dict, aggregator: AggregatorStub, error: Exception, sqlstate: str | None):
+    """Actual job failures emit database identity and SQLSTATE without copying potentially sensitive error text."""
+    instance['dbm'] = True
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    collector = check._query_metrics
+    with (
+        mock.patch.object(collector._connection, 'ensure_connected') as connect,
+        mock.patch('ibm_db.prepare') as prepare,
+    ):
+        if isinstance(error, Db2ConnectionError):
+            connect.side_effect = error
+        else:
+            prepare.side_effect = error
+        collector.run_job_loop([])
+        collector.wait_for_completion()
+    events = [event for event in aggregator.get_event_platform_events('dbm-health') if event['name'] == 'unknown_error']
+    assert len(events) == 1
+    event = events[0]
+    assert event['status'] == 'error'
+    assert event['data']['database_instance'] == check.database_identifier
+    assert event['data']['job_name'] == 'query-metrics'
+    assert event['data'].get('sqlstate') == sqlstate
+    assert 'SECRET' not in stdlib_json.dumps(event)
 
 
 @pytest.mark.parametrize('as_bytes', [False, True])
