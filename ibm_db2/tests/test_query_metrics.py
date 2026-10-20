@@ -3,7 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from binascii import hexlify
 from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
+from time import sleep
 from unittest.mock import patch
 from uuid import uuid4
 
@@ -110,6 +112,8 @@ def test_query_metrics(
             assert row['cpu_time'] == cpu_microseconds * 1_000
             assert row['rows_read'] == 9
             assert row['rows_returned'] == 6
+            assert row['lock_wait_time'] == 0
+            assert row['lock_waits'] == 0
             assert row['query_signature'] == compute_sql_signature(query)
             assert payload['host'] == check.reported_hostname
             assert payload['database_instance'] == instance_metadata['database_instance']
@@ -185,3 +189,93 @@ def test_query_text_lookup_matches_lifetime(instance: dict, monkeypatch: pytest.
         assert collector._fetch_statement_texts(set(expected) | {stale_key}) == expected
     finally:
         collector.shutdown()
+
+
+def test_query_metrics_lock_waits(instance: dict, aggregator: AggregatorStub):
+    """A completed blocked statement emits its lock-count delta and wait duration in nanoseconds."""
+    instance['dbm'] = True
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    collector = check._query_metrics
+    observer = collector._connection.ensure_connected()
+    blocker = Db2Connection(check, check._config)
+    waiter = Db2Connection(check, check._config)
+    table = f'DBM_LOCK_WAITS_{uuid4().hex.upper()}'
+    query = f'UPDATE {table} SET VALUE = VALUE + 1 WHERE ID = 1'
+
+    def execute(connection: object, sql: str, parameters: tuple = ()) -> dict | bool:
+        cursor = ibm_db.prepare(connection, sql)
+        try:
+            ibm_db.execute(cursor, parameters)
+            return ibm_db.fetch_assoc(cursor) if ibm_db.num_fields(cursor) else False
+        finally:
+            ibm_db.free_stmt(cursor)
+
+    def counters() -> dict:
+        row = execute(
+            observer,
+            """/* DDIGNORE */
+            SELECT LOCK_WAIT_TIME, LOCK_WAITS
+            FROM TABLE(SYSPROC.MON_GET_PKG_CACHE_STMT(NULL, NULL, NULL, -1))
+            WHERE VARCHAR(STMT_TEXT, 1000) = ?
+            """,
+            (query,),
+        )
+        assert row is not False
+        return row
+
+    execute(observer, f'CREATE TABLE {table} (ID INTEGER NOT NULL PRIMARY KEY, VALUE INTEGER)')
+    try:
+        execute(observer, f'INSERT INTO {table} VALUES (1, 0)')
+        waiter.ensure_connected()
+        blocker.ensure_connected()
+        execute(waiter.conn, 'SET CURRENT LOCK TIMEOUT 5')
+        execute(waiter.conn, query)
+        before = counters()
+        collector.run_job()
+        handle = execute(waiter.conn, 'VALUES MON_GET_APPLICATION_HANDLE()')
+        waiter_handle = next(iter(handle.values()))
+        ibm_db.autocommit(blocker.conn, ibm_db.SQL_AUTOCOMMIT_OFF)
+        execute(blocker.conn, f'UPDATE {table} SET VALUE = VALUE + 10 WHERE ID = 1')
+
+        def assert_blocked() -> None:
+            assert execute(
+                observer,
+                """/* DDIGNORE */
+                SELECT REQ_APPLICATION_HANDLE FROM TABLE(SYSPROC.MON_GET_APPL_LOCKWAIT(NULL, -1))
+                WHERE REQ_APPLICATION_HANDLE = ?
+                """,
+                (waiter_handle,),
+            )
+
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            pending = executor.submit(execute, waiter.conn, query)
+            try:
+                WaitFor(assert_blocked, attempts=20, wait=0.1)()
+                # Keep the observed wait above the counter's millisecond resolution.
+                sleep(0.05)
+            finally:
+                ibm_db.rollback(blocker.conn)
+            pending.result(timeout=10)
+
+        after = counters()
+        assert after['lock_waits'] - before['lock_waits'] == 1
+        wait_ms = after['lock_wait_time'] - before['lock_wait_time']
+        assert wait_ms > 0
+        collector.run_job()
+        rows = [
+            row
+            for payload in aggregator.get_event_platform_events('dbm-metrics')
+            for row in payload['ibm_db2_rows']
+            if row['query'] == query
+        ]
+        assert len(rows) == 1
+        assert rows[0]['count'] == 1
+        assert rows[0]['lock_waits'] == 1
+        assert rows[0]['lock_wait_time'] == wait_ms * 1_000_000
+    finally:
+        blocker.close()
+        waiter.close()
+        try:
+            execute(observer, f'DROP TABLE {table}')
+        finally:
+            collector.shutdown()
