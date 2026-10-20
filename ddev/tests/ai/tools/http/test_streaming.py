@@ -154,11 +154,13 @@ async def test_storage_failure_cleans_spilled_body(tmp_path: Path, monkeypatch: 
         return file
 
     monkeypatch.setattr(Path, "open", fail_storage)
-    transport = respond(httpx.Response(200, text="prefix-and-tail"))
+    transport = respond(httpx.Response(422, text="prefix-and-tail"))
 
     result = await HttpGetTool(store, transport=transport).run({"url": TARGET})
 
     assert result.success is False
+    # The request already completed, so the agent must still learn the server's verdict.
+    assert "HTTP 422" in result.error
     assert "disk full" in result.error if failure == "append" else "metadata" in result.error
     assert saved_files(store.root) == []
     assert len(transport.requests) == 1
