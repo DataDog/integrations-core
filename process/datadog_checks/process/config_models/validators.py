@@ -48,7 +48,15 @@ def instance_thresholds(value: object, **kwargs: Any) -> object:
 
 
 def _validate_threshold_bound(field: str, index: int, bound: object) -> None:
-    label = ('lower bound', 'upper bound')[index] if index < 2 else f'bound at index {index}'
+    if index >= 2:
+        # Elements past the two bounds are never read, so neither infinity nor the '.inf'
+        # sentinel has a meaning there: hold them to finite numbers. The chained comparison
+        # also rejects NaN, and comparing a huge int with a float doesn't overflow.
+        if isinstance(bound, bool) or not isinstance(bound, (int, float)) or not -math.inf < bound < math.inf:
+            raise ValueError(f"thresholds.{field} bound at index {index} must be a finite number, got {bound!r}")
+        return
+
+    label = ('lower bound', 'upper bound')[index]
 
     if bound != INF_SENTINEL and (
         isinstance(bound, bool)

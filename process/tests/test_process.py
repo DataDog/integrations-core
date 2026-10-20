@@ -519,6 +519,7 @@ def test_thresholds_end_to_end(mock_process_iter, aggregator, dd_run_check, thre
 
 NOT_A_NUMBER = "thresholds.warning {} must be a number or the string '.inf'"
 INF_LOWER = "thresholds.warning lower bound cannot be infinite"
+EXTRA_NOT_FINITE = "thresholds.warning bound at index 2 must be a finite number"
 
 
 @pytest.mark.parametrize(
@@ -533,8 +534,11 @@ INF_LOWER = "thresholds.warning lower bound cannot be infinite"
         pytest.param([1, None], NOT_A_NUMBER.format('upper bound'), id='null_bound'),
         pytest.param([True, 5], NOT_A_NUMBER.format('lower bound'), id='bool'),
         # The model accepts lists longer than two, so extra elements are checked too.
-        pytest.param([1, 2, 'inf'], NOT_A_NUMBER.format('bound at index 2'), id='extra_inf_str'),
-        pytest.param([1, 2, float('nan')], NOT_A_NUMBER.format('bound at index 2'), id='extra_nan_float'),
+        pytest.param([1, 2, 'inf'], EXTRA_NOT_FINITE, id='extra_inf_str'),
+        pytest.param([1, 2, float('nan')], EXTRA_NOT_FINITE, id='extra_nan_float'),
+        pytest.param([1, 2, float('inf')], EXTRA_NOT_FINITE, id='extra_inf_float'),
+        pytest.param([1, 2, float('-inf')], EXTRA_NOT_FINITE, id='extra_neg_inf_float'),
+        pytest.param([1, 2, '.inf'], EXTRA_NOT_FINITE, id='extra_inf_sentinel'),
         pytest.param(['.inf', 5], INF_LOWER, id='inf_lower'),
         # Unquoted YAML `.inf` arrives as a float.
         pytest.param([float('inf'), 5], INF_LOWER, id='inf_float_lower'),
