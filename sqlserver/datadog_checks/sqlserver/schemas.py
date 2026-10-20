@@ -79,9 +79,7 @@ class SQLServerDatabaseObject(DatabaseObject):
 class SQLServerObjectCollector(SchemaCollector):
     """
     Collects one kind of SQL Server catalog object, one database at a time.
-
-    This class owns the database list, the connection used for each database, and the extra connection that the
-    legacy query path uses for per-object detail queries. Subclasses provide the catalog query and the row mapping.
+    Tables and views collection is implemented by subclasses.
     """
 
     _check: SQLServer
