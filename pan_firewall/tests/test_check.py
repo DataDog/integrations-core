@@ -41,8 +41,10 @@ def warnings(caplog):
 def test_good_run_collects_identity_and_reports_connected(dd_run_check, aggregator, fake_panos):
     dd_run_check(new_check())
 
-    assert only_value_and_tags(aggregator, 'can_connect') == (1, FW_A_TAGS)
-    assert only_value_and_tags(aggregator, 'api.authentication.status') == (0, FW_A_TAGS)
+    aggregator.assert_metric('pan_firewall.can_connect', value=1, tags=FW_A_TAGS, metric_type=aggregator.GAUGE, count=1)
+    aggregator.assert_metric(
+        'pan_firewall.api.authentication.status', value=0, tags=FW_A_TAGS, metric_type=aggregator.GAUGE, count=1
+    )
     assert [(c.type, c.cmd, c.key_sent) for c in fake_panos.calls] == [
         ('keygen', None, False),
         ('op', JOBS_PENDING_CMD, True),
@@ -61,7 +63,7 @@ def test_unreachable_on_first_run_reports_disconnected_without_device_id(dd_run_
 
     dd_run_check(check)
 
-    assert only_value_and_tags(aggregator, 'can_connect') == (0, BASE_TAGS)
+    aggregator.assert_metric('pan_firewall.can_connect', value=0, tags=BASE_TAGS, metric_type=aggregator.GAUGE, count=1)
     # Nothing has said whether the credentials work yet.
     assert aggregator.metrics('pan_firewall.api.authentication.status') == []
 
@@ -77,7 +79,9 @@ def test_auth_status_is_sent_from_the_first_answer(dd_run_check, aggregator, fak
 
     dd_run_check(check)
 
-    assert only_value_and_tags(aggregator, 'api.authentication.status') == (0, FW_A_TAGS)
+    aggregator.assert_metric(
+        'pan_firewall.api.authentication.status', value=0, tags=FW_A_TAGS, metric_type=aggregator.GAUGE, count=1
+    )
 
 
 def test_outage_after_restart_keeps_device_id(dd_run_check, aggregator, fake_panos):
@@ -88,7 +92,7 @@ def test_outage_after_restart_keeps_device_id(dd_run_check, aggregator, fake_pan
     # A new check instance with the same config shares the persistent cache, as after an Agent restart.
     dd_run_check(new_check())
 
-    assert only_value_and_tags(aggregator, 'can_connect') == (0, FW_A_TAGS)
+    aggregator.assert_metric('pan_firewall.can_connect', value=0, tags=FW_A_TAGS, metric_type=aggregator.GAUGE, count=1)
 
 
 def test_identity_without_interface_capture(dd_run_check, aggregator, fake_panos):
@@ -209,8 +213,10 @@ def test_nothing_due_repeats_last_status_without_calls(dd_run_check, aggregator,
     dd_run_check(check)
 
     assert len(fake_panos.calls) == calls
-    assert only_value_and_tags(aggregator, 'can_connect') == (1, FW_A_TAGS)
-    assert only_value_and_tags(aggregator, 'api.authentication.status') == (0, FW_A_TAGS)
+    aggregator.assert_metric('pan_firewall.can_connect', value=1, tags=FW_A_TAGS, metric_type=aggregator.GAUGE, count=1)
+    aggregator.assert_metric(
+        'pan_firewall.api.authentication.status', value=0, tags=FW_A_TAGS, metric_type=aggregator.GAUGE, count=1
+    )
 
 
 def test_firewalls_are_polled_concurrently_up_to_max_concurrency(dd_run_check, aggregator, monkeypatch):
@@ -307,7 +313,7 @@ def test_identity_timeout_skips_every_collector(dd_run_check, aggregator, fake_p
 
     assert stub_runs(aggregator) == set()
     # The jobs check answered.
-    assert only_value_and_tags(aggregator, 'can_connect') == (1, FW_A_TAGS)
+    aggregator.assert_metric('pan_firewall.can_connect', value=1, tags=FW_A_TAGS, metric_type=aggregator.GAUGE, count=1)
     (warning,) = warnings(caplog)
     assert 'during identity_metadata' in warning
     assert all(name in warning.split('skipped for this run:')[1] for name in STUBS)
@@ -336,7 +342,7 @@ def test_failing_collector_does_not_stop_the_others(dd_run_check, aggregator, mo
     dd_run_check(new_check())
 
     assert stub_runs(aggregator) == {(FW_A_IP, name) for name in STUBS if name != 'bgp'}
-    assert only_value_and_tags(aggregator, 'can_connect') == (1, FW_A_TAGS)
+    aggregator.assert_metric('pan_firewall.can_connect', value=1, tags=FW_A_TAGS, metric_type=aggregator.GAUGE, count=1)
     (warning,) = warnings(caplog)
     assert warning.startswith(f'{FW_A_IP}: collector bgp failed: ')
     assert error in warning
@@ -425,12 +431,12 @@ def test_system_info_without_serial_keeps_the_cached_identity(dd_run_check, aggr
     # A restart loads the cached identity and refreshes it on its first run.
     dd_run_check(new_check())
 
-    assert only_value_and_tags(aggregator, 'can_connect') == (1, FW_A_TAGS)
+    aggregator.assert_metric('pan_firewall.can_connect', value=1, tags=FW_A_TAGS, metric_type=aggregator.GAUGE, count=1)
     # The persistent cache still holds the good identity.
     fake_panos.fail(FW_A_IP, 'refused')
     aggregator.reset()
     dd_run_check(new_check())
-    assert only_value_and_tags(aggregator, 'can_connect') == (0, FW_A_TAGS)
+    aggregator.assert_metric('pan_firewall.can_connect', value=0, tags=FW_A_TAGS, metric_type=aggregator.GAUGE, count=1)
 
 
 def test_static_firewall_replaced_at_the_same_ip_is_tagged_and_tracked_as_the_new_unit(

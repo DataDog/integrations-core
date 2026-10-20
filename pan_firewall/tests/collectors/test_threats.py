@@ -28,7 +28,7 @@ from ..fixture_map import (
 )
 from ..helpers import THREAT_LOG_ACT as ACT
 from ..helpers import THREAT_LOG_CLOCK_BACK as CLOCK_BACK
-from ..helpers import FakeClock, log_page, logged, make_instance, new_check
+from ..helpers import FakeClock, log_page, logged, make_instance, new_check, series
 
 CACHE_KEY = f'threat_watermark:{FW_A_SERIAL}'
 FW_A_LAST_SEQNO = 7691899338913481002
@@ -108,18 +108,12 @@ def firewall(fake_panos):
     return Context(fake_panos)
 
 
-def series(samples):
-    result = {(s.name, s.tags, s.kind): s.value for s in samples}
-    assert len(result) == len(samples)
-    return result
-
-
 def tags(severity, action, subtype, vsys):
     return (f'severity:{severity}', f'action:{action}', f'subtype:{subtype}', f'vsys:{vsys}')
 
 
 def expected(counts):
-    return {('threat.count', tags(*key), 'count'): n for key, n in counts.items()}
+    return {('threat.count', tags(*key)): (n, 'count') for key, n in counts.items()}
 
 
 def probe_counts():
@@ -384,7 +378,7 @@ def test_a_missing_severity_action_subtype_or_vsys_leaves_the_tag_out(firewall):
     page = edit_entries(log_page([1001]), drop)
     firewall.answer_forward(1000, page)
 
-    assert series(firewall.collect()) == {('threat.count', (), 'count'): 1}
+    assert series(firewall.collect()) == {('threat.count', ()): (1, 'count')}
 
 
 def test_entries_without_a_valid_seqno_are_skipped_and_logged_at_debug(firewall):

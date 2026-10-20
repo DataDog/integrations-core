@@ -15,7 +15,7 @@ from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from ..common import FW_A_IP, FW_A_TAGS, SYNTHETIC
 from ..fixture_map import find_report_fixture
-from ..helpers import make_instance, new_check
+from ..helpers import make_instance, new_check, series
 
 PRIVATE = '10.0.0.0-10.255.255.255'
 
@@ -79,23 +79,15 @@ def load_report(name):
 
 
 def expected_samples(name, expected_rows):
-    """The three gauges of each row: sessions, bytes, and their ratio (0 without sessions)."""
+    """The three gauges of each row: sessions, bytes, and their ratio (0 without sessions), as `series` gives them."""
     dimension, rows = expected_rows
     expected = {}
     for value, sessions, size in rows:
         tags = (f'report:{name}', f'{dimension}:{value}')
-        expected['report.top.sessions', tags] = sessions
-        expected['report.top.bytes', tags] = size
-        expected['report.top.bytes_per_session', tags] = size / sessions if sessions else 0
+        expected['report.top.sessions', tags] = (sessions, 'gauge')
+        expected['report.top.bytes', tags] = (size, 'gauge')
+        expected['report.top.bytes_per_session', tags] = (size / sessions if sessions else 0, 'gauge')
     return expected
-
-
-def series(samples):
-    """Samples keyed by (name, tags) to value; every one is a gauge. Fails on a duplicate series."""
-    assert {s.kind for s in samples} <= {'gauge'}
-    result = {(s.name, s.tags): s.value for s in samples}
-    assert len(result) == len(samples)
-    return result
 
 
 @pytest.mark.parametrize('name', list(REPORTS))
@@ -108,14 +100,14 @@ def test_report_of_the_capture(name):
 def test_bytes_per_session_is_the_average_and_zero_without_sessions():
     root = load_report('top_applications')
     ping = ('report:top_applications', 'app:ping')
-    assert series(parse_report(root, 'top_applications'))['report.top.bytes_per_session', ping] == 196.0
+    assert series(parse_report(root, 'top_applications'))['report.top.bytes_per_session', ping] == (196.0, 'gauge')
 
     root.find('result/report/entry/sessions').text = '0'
     values = series(parse_report(root, 'top_applications'))
 
-    assert values['report.top.sessions', ping] == 0
-    assert values['report.top.bytes', ping] == 105056
-    assert values['report.top.bytes_per_session', ping] == 0
+    assert values['report.top.sessions', ping] == (0, 'gauge')
+    assert values['report.top.bytes', ping] == (105056, 'gauge')
+    assert values['report.top.bytes_per_session', ping] == (0, 'gauge')
 
 
 def test_a_row_without_its_dimension_or_numbers_is_skipped():
@@ -419,7 +411,7 @@ def test_reports_are_registered_and_submit_through_the_check_when_enabled(
     # The first row of each report, with its three gauges.
     for name, (dimension, rows) in FW_A_ROWS.items():
         first = expected_samples(name, (dimension, rows[:1]))
-        for (metric, tags), value in first.items():
+        for (metric, tags), (value, _kind) in first.items():
             aggregator.assert_metric(
                 f'pan_firewall.{metric}', value, tags=sorted([*FW_A_TAGS, *tags]), metric_type=aggregator.GAUGE
             )

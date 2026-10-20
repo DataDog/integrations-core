@@ -14,16 +14,9 @@ from datadog_checks.pan_firewall.collectors.system import (
 )
 
 from ..common import MIB, SYNTHETIC
-from ..helpers import load_op, load_xml
+from ..helpers import load_op, load_xml, series
 
 CPU_STATES = ('user', 'system', 'nice', 'idle', 'iowait', 'hardirq', 'softirq', 'steal')
-
-
-def by_name(samples):
-    """Samples keyed by (name, tags); fails on a duplicate, which would be two values for one series."""
-    result = {(s.name, s.tags): s.value for s in samples}
-    assert len(result) == len(samples)
-    return result
 
 
 def expected_system(cpu, mem, swap, avail):
@@ -56,16 +49,15 @@ FW_A_SYSTEM = expected_system(
 
 
 def system_values(samples):
-    values = by_name(samples)
-    assert all(tags == () for _, tags in values)
-    return {name: value for (name, _), value in values.items()}
+    values = series(samples)
+    assert all(tags == () and kind == 'gauge' for (_, tags), (_, kind) in values.items())
+    return {name: value for (name, _), (value, _) in values.items()}
 
 
 def test_system_resources_of_the_capture():
     samples = parse_system_resources(load_op(SYSTEM_RESOURCES_CMD), mock.Mock())
 
     assert system_values(samples) == pytest.approx(FW_A_SYSTEM)
-    assert {s.kind for s in samples} == {'gauge'}
 
 
 GIB = 1024**3
@@ -114,20 +106,21 @@ def test_missing_cpu_line_gives_memory_only_and_a_warning():
 def test_dataplane_one_sample_per_dp_and_core_with_the_first_value():
     samples = parse_dataplane(load_xml(SYNTHETIC / 'resource_monitor_two_dp_series.xml'), mock.Mock())
 
-    assert by_name(samples) == {
-        ('dataplane.cpu.utilization', ('dp:dp0', 'core:0')): 7,
-        ('dataplane.cpu.utilization', ('dp:dp0', 'core:1')): 0,
-        ('dataplane.cpu.utilization', ('dp:dp1', 'core:0')): 31,
-        ('dataplane.cpu.utilization', ('dp:dp1', 'core:1')): 12,
+    assert series(samples) == {
+        ('dataplane.cpu.utilization', ('dp:dp0', 'core:0')): (7, 'gauge'),
+        ('dataplane.cpu.utilization', ('dp:dp0', 'core:1')): (0, 'gauge'),
+        ('dataplane.cpu.utilization', ('dp:dp1', 'core:0')): (31, 'gauge'),
+        ('dataplane.cpu.utilization', ('dp:dp1', 'core:1')): (12, 'gauge'),
     }
-    assert {s.kind for s in samples} == {'gauge'}
 
 
 def test_dataplane_of_the_capture():
     samples = parse_dataplane(load_op(RESOURCE_MONITOR_CMD), mock.Mock())
 
     # The lab firewall has one data processor with 4 idle cores.
-    assert by_name(samples) == {('dataplane.cpu.utilization', ('dp:dp0', f'core:{core}')): 0 for core in range(4)}
+    assert series(samples) == {
+        ('dataplane.cpu.utilization', ('dp:dp0', f'core:{core}')): (0, 'gauge') for core in range(4)
+    }
 
 
 def test_dataplane_without_data_processors_gives_no_samples_and_one_warning():
@@ -140,19 +133,18 @@ def test_dataplane_without_data_processors_gives_no_samples_and_one_warning():
 def test_disk_of_the_capture_skips_virtual_filesystems():
     samples = parse_disk(load_op(DISK_SPACE_CMD), mock.Mock())
 
-    assert by_name(samples) == {
-        ('disk.used_pct', ('mount:/', 'filesystem:/dev/root')): 43,
-        ('disk.used_pct', ('mount:/opt/pancfg', 'filesystem:/dev/nvme0n1p5')): 32,
-        ('disk.used_pct', ('mount:/opt/panrepo', 'filesystem:/dev/nvme0n1p6')): 30,
-        ('disk.used_pct', ('mount:/opt/panlogs', 'filesystem:/dev/nvme0n1p8')): 1,
+    assert series(samples) == {
+        ('disk.used_pct', ('mount:/', 'filesystem:/dev/root')): (43, 'gauge'),
+        ('disk.used_pct', ('mount:/opt/pancfg', 'filesystem:/dev/nvme0n1p5')): (32, 'gauge'),
+        ('disk.used_pct', ('mount:/opt/panrepo', 'filesystem:/dev/nvme0n1p6')): (30, 'gauge'),
+        ('disk.used_pct', ('mount:/opt/panlogs', 'filesystem:/dev/nvme0n1p8')): (1, 'gauge'),
     }
-    assert {s.kind for s in samples} == {'gauge'}
 
 
 def test_disk_row_wrapped_onto_two_lines():
     samples = parse_disk(load_xml(SYNTHETIC / 'disk_space_wrapped.xml'), mock.Mock())
 
-    assert by_name(samples) == {
-        ('disk.used_pct', ('mount:/', 'filesystem:/dev/root')): 43,
-        ('disk.used_pct', ('mount:/opt/panlogs', 'filesystem:/dev/mapper/pan-very-long-volume-name')): 1,
+    assert series(samples) == {
+        ('disk.used_pct', ('mount:/', 'filesystem:/dev/root')): (43, 'gauge'),
+        ('disk.used_pct', ('mount:/opt/panlogs', 'filesystem:/dev/mapper/pan-very-long-volume-name')): (1, 'gauge'),
     }
