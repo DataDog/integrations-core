@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import uuid
+from collections.abc import AsyncIterator
 from pathlib import Path
 from unittest.mock import patch
 
@@ -20,24 +21,36 @@ def save(store: ResponseStore, body: str = "{}", metadata: dict | None = None) -
 def test_save_writes_body_and_metadata(tmp_path: Path):
     saved = save(ResponseStore(tmp_path / "exec"), '{"a": 1}\n')
 
-    assert saved.path.read_text() == '{"a": 1}\n'
-    assert json.loads(saved.metadata_path.read_text()) == {"status": 200}
+    assert saved.path.read_text(encoding="utf-8") == '{"a": 1}\n'
+    assert json.loads(saved.metadata_path.read_text(encoding="utf-8")) == {"status": 200}
     assert saved.path.parent == tmp_path / "exec"
 
 
 @pytest.mark.parametrize("existing_suffix", [".json", ".meta.json"])
-def test_existing_file_is_never_overwritten_and_failed_save_leaves_nothing(tmp_path: Path, existing_suffix: str):
+@pytest.mark.parametrize("streamed", [False, True])
+async def test_existing_file_is_never_overwritten_and_failed_save_leaves_nothing(
+    tmp_path: Path, existing_suffix: str, streamed: bool
+):
     store = ResponseStore(tmp_path / "exec")
     fixed = uuid.UUID(int=0)
-    existing = store.root / f"0001-get-{fixed.hex[:8]}{existing_suffix}"
+    suffix = ".txt" if streamed and existing_suffix == ".json" else existing_suffix
+    existing = store.root / f"0001-get-{fixed.hex[:8]}{suffix}"
     existing.parent.mkdir(parents=True)
     existing.write_text("earlier evidence")
 
+    async def chunks() -> AsyncIterator[bytes]:
+        yield b"new"
+
     with patch("ddev.ai.tools.http.response_store.uuid.uuid4", return_value=fixed):
         with pytest.raises(ResponseStoreError, match="overwrite"):
-            save(store, "new")
+            if streamed:
+                await store.save_stream(
+                    chunks=chunks(), charset=None, metadata={"status": 200}, stem="get", max_bytes=64
+                )
+            else:
+                save(store, "new")
 
-    assert existing.read_text() == "earlier evidence"
+    assert existing.read_text(encoding="utf-8") == "earlier evidence"
     assert saved_files(store.root) == [existing]
 
 
@@ -58,5 +71,32 @@ def test_lone_surrogates_are_saved_as_json_escapes(tmp_path: Path):
         metadata={"request_body": value},
     )
 
-    assert json.loads(saved.path.read_text()) == value
-    assert json.loads(saved.metadata_path.read_text()) == {"request_body": value}
+    assert json.loads(saved.path.read_text(encoding="utf-8")) == value
+    assert json.loads(saved.metadata_path.read_text(encoding="utf-8")) == {"request_body": value}
+
+
+@pytest.mark.parametrize(
+    "chunks,lines",
+    [
+        ([], 0),
+        ([b"a"], 1),
+        ([b"a\n"], 1),
+        ([b"a\nb"], 2),
+        ([b"a", b"\n", b"b\n"], 2),
+        ([b"a\n", b""], 1),
+    ],
+)
+@pytest.mark.parametrize("streamed", [False, True])
+async def test_line_count_matches_grep_numbering(tmp_path: Path, chunks: list[bytes], lines: int, streamed: bool):
+    store = ResponseStore(tmp_path / "exec")
+
+    async def stream() -> AsyncIterator[bytes]:
+        for chunk in chunks:
+            yield chunk
+
+    if streamed:
+        saved, _ = await store.save_stream(chunks=stream(), charset=None, metadata={}, stem="get", max_bytes=64)
+    else:
+        saved = save(store, b"".join(chunks).decode())
+
+    assert saved.lines == lines
