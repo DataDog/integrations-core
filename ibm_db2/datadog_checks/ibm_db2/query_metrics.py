@@ -8,6 +8,7 @@ from collections.abc import Iterator
 from copy import deepcopy
 from datetime import datetime
 from itertools import batched
+from operator import attrgetter
 from time import time
 from typing import TYPE_CHECKING
 
@@ -19,11 +20,13 @@ from datadog_checks.base.utils.db.query_metrics import (
     ObfuscationLookup,
     ObfuscationResult,
     QueryStats,
+    ResolveStats,
     TextKind,
     resolve_obfuscations,
 )
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.tracking import tracked_method
 
 from .connection import Db2Connection, Db2ConnectionError
 
@@ -105,6 +108,7 @@ class QueryMetricsCollector(DBMAsyncJob):
             execution_indicators={'count'},
         )
 
+    @tracked_method(agent_check_getter=attrgetter('_check'))
     def run_job(self) -> None:
         connection = self._connection.ensure_connected()
         cursor = ibm_db.prepare(
@@ -131,7 +135,7 @@ class QueryMetricsCollector(DBMAsyncJob):
             fetch_texts=self._fetch_statement_texts,
             classify=classify_statement_text,
         )
-        self._check.log.debug('Query text resolution: %s', resolved.stats)
+        self._emit_resolve_stats(resolved.stats)
         self._query_stats = query_stats
         rows_by_signature: dict[str, dict] = {}
         for row in delta.derivative_rows:
@@ -171,6 +175,14 @@ class QueryMetricsCollector(DBMAsyncJob):
             for batch in self._get_query_metrics_payloads(payload, list(rows_by_signature.values())):
                 self._check.database_monitoring_query_metrics(batch)
 
+    def _emit_resolve_stats(self, stats: ResolveStats) -> None:
+        for name in ('hits', 'misses', 'fetched', 'ignored', 'failed', 'dropped'):
+            self._check.gauge(
+                f'dd.ibm_db2.statement_metrics.lookup.{name}',
+                getattr(stats, name),
+                **self._check.debug_stats_kwargs(),
+            )
+
     def _get_query_metrics_payloads(self, wrapper: dict, rows: list[dict]) -> Iterator[str | bytes]:
         """Split complete rows into size-bounded JSON payloads, preserving the collection metadata."""
         pending = [rows]
@@ -185,6 +197,11 @@ class QueryMetricsCollector(DBMAsyncJob):
                 yield payload
             elif len(current) == 1:
                 self._check.log.warning('A single query metrics row is too large to send; dropping it. size=%d', size)
+                self._check.count(
+                    'dd.ibm_db2.statement_metrics.rows_dropped',
+                    1,
+                    **self._check.debug_stats_kwargs(tags=['reason:payload_too_large']),
+                )
             else:
                 midpoint = len(current) // 2
                 pending.extend((current[midpoint:], current[:midpoint]))
@@ -212,6 +229,7 @@ class QueryMetricsCollector(DBMAsyncJob):
         self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))
         self._full_query_text_cache[statement.query_signature] = True
 
+    @tracked_method(agent_check_getter=attrgetter('_check'), track_result_length=True)
     def _fetch_statement_texts(self, keys: set[StatementKey]) -> dict[StatementKey, str]:
         """Fetch each requested cache entry's text only if its insertion lifetime still matches."""
         texts = {}

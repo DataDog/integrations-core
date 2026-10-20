@@ -45,7 +45,7 @@ def test_query_metrics_payload_batches(instance: dict, monkeypatch: pytest.Monke
     assert decoded_rows == rows
 
 
-def test_query_metrics_oversized_row(instance: dict, monkeypatch: pytest.MonkeyPatch):
+def test_query_metrics_oversized_row(instance: dict, monkeypatch: pytest.MonkeyPatch, aggregator: AggregatorStub):
     """An oversized row is dropped without losing its neighboring rows or logging SQL text."""
     instance['dbm'] = True
     check = IbmDb2Check('ibm_db2', {}, [instance])
@@ -57,6 +57,12 @@ def test_query_metrics_oversized_row(instance: dict, monkeypatch: pytest.MonkeyP
     assert actual == [rows[0], rows[2]]
     warning.assert_called_once()
     assert rows[1]['query'] not in str(warning.call_args)
+    aggregator.assert_metric(
+        'dd.ibm_db2.statement_metrics.rows_dropped',
+        value=1,
+        hostname=check.reported_hostname,
+        tags=check.debug_stats_kwargs(tags=['reason:payload_too_large'])['tags'],
+    )
 
 
 @pytest.mark.parametrize('enabled', [True, False])
@@ -102,7 +108,8 @@ def test_query_metrics_statement_timeout(instance: dict, timeout: int | None):
 
 def test_query_metrics_recover_after_text_lookup_failure(instance: dict, aggregator: AggregatorStub):
     instance['dbm'] = True
-    collector = IbmDb2Check('ibm_db2', {}, [instance])._query_metrics
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    collector = check._query_metrics
     inserted = datetime(2026, 1, 1)
     counters = ('count', 'time', 'cpu_time', 'rows_read', 'rows_returned')
 
@@ -148,6 +155,10 @@ def test_query_metrics_recover_after_text_lookup_failure(instance: dict, aggrega
 
     payloads = aggregator.get_event_platform_events('dbm-metrics')
     assert len(payloads) == 2
+    aggregator.assert_metric('dd.ibm_db2.operation.error', value=1, hostname=check.reported_hostname)
+    aggregator.assert_metric('dd.ibm_db2.operation.time', hostname=check.reported_hostname)
+    for name in ('hits', 'misses', 'fetched'):
+        aggregator.assert_metric(f'dd.ibm_db2.statement_metrics.lookup.{name}', value=1)
     rows = {row['query']: row for row in payloads[-1]['ibm_db2_rows']}
     assert set(rows) == {'SELECT A FROM T', 'SELECT B FROM T'}
     for query, expected in (('SELECT A FROM T', 6), ('SELECT B FROM T', 8)):
