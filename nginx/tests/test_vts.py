@@ -1,12 +1,14 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nginx import VTS_METRIC_MAP
 
-from .common import TAGS_WITH_HOST_AND_PORT, USING_VTS, VTS_MOCKED_METRICS, mock_http_responses
+from .common import FIXTURES_PATH, TAGS_WITH_HOST_AND_PORT, USING_VTS, VTS_MOCKED_METRICS
 
 pytestmark = [pytest.mark.skipif(not USING_VTS, reason='Not using VTS')]
 
@@ -48,8 +50,11 @@ def test_vts(check, instance_vts, aggregator):
 
 
 @pytest.mark.unit
-def test_vts_unit(dd_run_check, aggregator, mocked_instance_vts, check, mock_http):
-    mock_http.get.side_effect = mock_http_responses
+def test_vts_unit(dd_run_check, aggregator, mocked_instance_vts, check, fake_http_response):
+    with open(os.path.join(FIXTURES_PATH, 'vts.json'), 'rb') as f:
+        fake_http_response(
+            mocked_instance_vts['nginx_status_url'], f.read(), headers={'content-type': 'application/json'}
+        )
     c = check(mocked_instance_vts)
     dd_run_check(c)
 

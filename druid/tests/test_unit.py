@@ -24,12 +24,10 @@ def test_missing_url_config(aggregator):
         check.check({})
 
 
-def test_service_check_can_connect_success(aggregator, instance, mock_http):
+def test_service_check_can_connect_success(aggregator, instance, fake_http_response):
     check = DruidCheck('druid', {}, [instance])
 
-    mock_resp = mock.MagicMock(status_code=200)
-    mock_resp.json.return_value = {'abc': '123'}
-    mock_http.get.return_value = mock_resp
+    fake_http_response('http://hello-world.com:8899/status/properties', json_data={'abc': '123'})
 
     resp = check._get_process_properties('http://hello-world.com:8899', ['foo:bar'])
     assert resp == {'abc': '123'}
@@ -56,10 +54,10 @@ def test_service_check_can_connect_success(aggregator, instance, mock_http):
         ),
     ],
 )
-def test_make_request_timeout_warning(instance, mock_http, error_type, expected_warning):
+def test_make_request_timeout_warning(instance, fake_http, error_type, expected_warning):
     check = DruidCheck('druid', {}, [instance])
     error = error_type('timed out')
-    mock_http.get.side_effect = error
+    fake_http.register_response('GET', 'http://hello-world.com:8899/status', error)
 
     with mock.patch.object(check, 'warning') as warning:
         assert check._make_request('http://hello-world.com:8899/status') is None
@@ -72,11 +70,10 @@ def test_make_request_timeout_warning(instance, mock_http, error_type, expected_
     [HTTPClientConnectionError('boom'), HTTPClientTimeoutError('boom')],
     ids=["connection_error", "timeout"],
 )
-def test_service_check_can_connect_failure(aggregator, instance, mock_http, exception):
+def test_service_check_can_connect_failure(aggregator, instance, fake_http, exception):
     check = DruidCheck('druid', {}, [instance])
 
-    attrs = {'raise_for_status.side_effect': exception}
-    mock_http.get.side_effect = [mock.MagicMock(status_code=500, **attrs)]
+    fake_http.register_response('GET', 'http://hello-world.com:8899/status/properties', exception)
 
     with pytest.raises(CheckException):
         properties = check._get_process_properties('http://hello-world.com:8899', ['foo:bar'])

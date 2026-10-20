@@ -23,8 +23,10 @@ def test_health_check_success(dd_run_check, aggregator, mock_instance, mock_http
     aggregator.assert_metric("nutanix.health.up", value=1, count=1, tags=BASE_TAGS)
 
 
-def test_health_check_failure(dd_run_check, aggregator, mock_instance, mock_http):
-    mock_http.get.side_effect = HTTPClientConnectionError("Connection failed")
+def test_health_check_failure(dd_run_check, aggregator, mock_instance, fake_http):
+    fake_http.register_response(
+        'GET', 'https://10.0.0.197:9440/console', HTTPClientConnectionError("Connection failed")
+    )
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 

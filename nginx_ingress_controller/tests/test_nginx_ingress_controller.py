@@ -5,7 +5,6 @@ import os
 
 import pytest
 
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nginx_ingress_controller import NginxIngressControllerCheck
 
@@ -16,11 +15,11 @@ NAMESPACE = 'nginx_ingress'
 
 
 @pytest.fixture()
-def mock_data(mock_openmetrics_http):
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(
-        file_path=os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt'),
-        headers={'Content-Type': 'text/plain'},
-    )
+def mock_data(fake_http, fake_http_response):
+    with open(os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt'), 'rb') as f:
+        fake_http_response(INSTANCE_HISTO['prometheus_url'], f.read(), headers={'Content-Type': 'text/plain'})
+    yield
+    fake_http.assert_all_responses_consumed()
 
 
 EXPECTED_METRICS = [

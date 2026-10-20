@@ -8,7 +8,6 @@ import pytest
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev._env import get_state, save_state
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.subprocess import run_command
 from datadog_checks.fluxcd import FluxcdCheck
@@ -111,34 +110,31 @@ def check(instance):
     return FluxcdCheck("fluxcd", {}, [instance])
 
 
-@pytest.fixture()
-def mock_metrics_v1(mock_http):
-    fixture_file = os.path.join(os.path.dirname(__file__), "fixtures", "metrics-v1.txt")
+def register_metrics(fake_http_response, fixture_name, *endpoints):
+    fixture_file = os.path.join(os.path.dirname(__file__), "fixtures", fixture_name)
 
-    with open(fixture_file, "r") as f:
+    with open(fixture_file, "rb") as f:
         content = f.read()
 
-    mock_http.get.return_value = MockHTTPResponse(content=content, headers={"Content-Type": "text/plain"})
+    for endpoint in endpoints:
+        fake_http_response(endpoint, content, headers={"Content-Type": "text/plain"})
+
+
+@pytest.fixture()
+def mock_metrics_v1(fake_http_response, instance):
+    register_metrics(fake_http_response, "metrics-v1.txt", instance["openmetrics_endpoint"])
     yield
 
 
 @pytest.fixture()
-def mock_metrics_v2(mock_http):
-    fixture_file = os.path.join(os.path.dirname(__file__), "fixtures", "metrics-v2.txt")
-
-    with open(fixture_file, "r") as f:
-        content = f.read()
-
-    mock_http.get.return_value = MockHTTPResponse(content=content, headers={"Content-Type": "text/plain"})
+def mock_metrics_v2(fake_http_response, instance):
+    register_metrics(fake_http_response, "metrics-v2.txt", instance["openmetrics_endpoint"])
     yield
 
 
 @pytest.fixture()
-def mock_metrics_ksm(mock_http):
-    fixture_file = os.path.join(os.path.dirname(__file__), "fixtures", "metrics-ksm.txt")
-
-    with open(fixture_file, "r") as f:
-        content = f.read()
-
-    mock_http.get.return_value = MockHTTPResponse(content=content, headers={"Content-Type": "text/plain"})
+def mock_metrics_ksm(fake_http_response):
+    register_metrics(
+        fake_http_response, "metrics-ksm.txt", "http://localhost:3000/metrics", "http://localhost:3001/metrics"
+    )
     yield

@@ -4,7 +4,6 @@
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.falco import FalcoCheck
 
@@ -20,10 +19,9 @@ def test_empty_instance(dd_run_check):
         dd_run_check(check)
 
 
-def test_check_falco(dd_run_check, aggregator, instance, mock_http):
-    mock_http.get.side_effect = [
-        MockHTTPResponse(file_path=get_fixture_path("falco_metrics.txt")),
-    ]
+def test_check_falco(dd_run_check, aggregator, instance, fake_http_response):
+    with open(get_fixture_path("falco_metrics.txt"), 'rb') as f:
+        fake_http_response(instance['openmetrics_endpoint'], f.read())
     dd_run_check(FalcoCheck('falco', {}, [instance]))
 
     for metric in METRICS:
@@ -34,11 +32,12 @@ def test_check_falco(dd_run_check, aggregator, instance, mock_http):
     aggregator.assert_service_check("falco.openmetrics.health", ServiceCheck.OK)
 
 
-def test_version_metadata(datadog_agent, dd_run_check, mock_http, instance):
+def test_version_metadata(datadog_agent, dd_run_check, fake_http_response, instance):
     """
     Test metadata version collection with V2 implementation
     """
-    mock_http.get.return_value = MockHTTPResponse(file_path=get_fixture_path('falco_metrics.txt'))
+    with open(get_fixture_path('falco_metrics.txt'), 'rb') as f:
+        fake_http_response(instance['openmetrics_endpoint'], f.read())
     check = FalcoCheck('falco', {}, [instance])
     check.check_id = 'falco_test'
     dd_run_check(check)

@@ -9,7 +9,7 @@ from contextlib import nullcontext as does_not_raise
 import mock
 import pytest
 
-from datadog_checks.dev.http import MockHTTPResponse
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.octopus_deploy import OctopusDeployCheck
 
@@ -33,7 +33,7 @@ from .constants import (
         pytest.param(
             {
                 'http_error': {
-                    '/api/spaces': MockHTTPResponse(status_code=500),
+                    '/api/spaces': FakeHTTPResponse(status_code=500),
                 }
             },
             pytest.raises(Exception, match=r'Could not connect to octopus API.*'),
@@ -1038,7 +1038,7 @@ def test_empty_include(get_current_datetime, dd_run_check, aggregator):
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/tasks': MockHTTPResponse(status_code=500),
+                    '/api/Spaces-1/tasks': FakeHTTPResponse(status_code=500),
                 }
             },
             'Failed to access endpoint: api/Spaces-1/tasks: 500 Server Error',
@@ -1101,7 +1101,7 @@ def test_server_node_metrics(get_current_datetime, dd_run_check, aggregator, ins
         pytest.param(
             {
                 'http_error': {
-                    '/api/octopusservernodes': MockHTTPResponse(status_code=500),
+                    '/api/octopusservernodes': FakeHTTPResponse(status_code=500),
                 }
             },
             'Failed to access endpoint: api/octopusservernodes: 500 Server Error',
@@ -1545,7 +1545,7 @@ def test_environments_discovery_include_invalid(get_current_datetime, dd_run_che
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/environments': MockHTTPResponse(status_code=500),
+                    '/api/Spaces-1/environments': FakeHTTPResponse(status_code=500),
                 }
             },
             'Failed to access endpoint: api/Spaces-1/environments: 500 Server Error',
@@ -1651,7 +1651,7 @@ def test_environments_metrics_http_failure(
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/releases/Releases-3': MockHTTPResponse(status_code=500),
+                    '/api/Spaces-1/releases/Releases-3': FakeHTTPResponse(status_code=500),
                 }
             },
             'Failed to access endpoint: api/Spaces-1/releases/Releases-3: 500 Server Error',
@@ -1879,8 +1879,8 @@ def test_deployment_metrics_releases_http_failure(
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/deployments': MockHTTPResponse(status_code=500),
-                    '/api/Spaces-1/deployments/Deployments-18': MockHTTPResponse(status_code=500),
+                    '/api/Spaces-1/deployments': FakeHTTPResponse(status_code=500),
+                    '/api/Spaces-1/deployments/Deployments-18': FakeHTTPResponse(status_code=500),
                 }
             },
             'Failed to access endpoint: api/Spaces-1/deployments/Deployments-18: 500 Server Error',
@@ -2112,7 +2112,7 @@ def test_deployment_metrics_deployments_http_failure(
         pytest.param(
             {
                 'http_error': {
-                    '/api/Spaces-1/environments': MockHTTPResponse(status_code=500),
+                    '/api/Spaces-1/environments': FakeHTTPResponse(status_code=500),
                 }
             },
             'Failed to access endpoint: api/Spaces-1/environments: 500 Server Error',
@@ -2157,11 +2157,10 @@ def test_deployments_caching(get_current_datetime, dd_run_check, mock_http_get, 
 
     args_list = []
     bulk_deployment_ids = []
-    for call in mock_http_get.call_args_list:
-        args, kwargs = call
-        args_list += list(args)
-        if args[0] == 'http://localhost:80/api/Spaces-1/deployments':
-            bulk_deployment_ids.append(kwargs.get('params', {}).get('ids'))
+    for request in mock_http_get.requests:
+        args_list += [request.url]
+        if request.url == 'http://localhost:80/api/Spaces-1/deployments':
+            bulk_deployment_ids.append(request.options.get('params', {}).get('ids'))
 
     # Deployments are looked up in bulk, only on the run that first sees them.
     assert bulk_deployment_ids == [['Deployments-18', 'Deployments-19'], ['Deployments-16', 'Deployments-17']]
@@ -2195,13 +2194,11 @@ def test_paginated_limit_octopusservernodes(
     dd_run_check(check)
 
     args_list = []
-    for call in mock_http_get.call_args_list:
-        args, _ = call
-        args_list += list(args)
-        args, kwargs = call
-        take = kwargs.get('params', {}).get('take')
-        skip = kwargs.get('params', {}).get('skip')
-        args_list += [(args[0], take, skip)]
+    for request in mock_http_get.requests:
+        args_list += [request.url]
+        take = request.options.get('params', {}).get('take')
+        skip = request.options.get('params', {}).get('skip')
+        args_list += [(request.url, take, skip)]
 
     assert args_list.count(('http://localhost:80/api/octopusservernodes', paginated_limit, 0)) == 1
 
@@ -2285,13 +2282,11 @@ def test_paginated_limit_events(
     dd_run_check(check)
 
     skip_take_args = []
-    for call in mock_http_get.call_args_list:
-        args, kwargs = call
-        take = kwargs.get('params', {}).get('take')
-        skip = kwargs.get('params', {}).get('skip')
-        if 'events' in args[0]:
-            print(kwargs)
-            skip_take_args += [(list(args), skip, take)]
+    for request in mock_http_get.requests:
+        take = request.options.get('params', {}).get('take')
+        skip = request.options.get('params', {}).get('skip')
+        if 'events' in request.url:
+            skip_take_args += [([request.url], skip, take)]
 
     assert skip_take_args == expected_skip_take_args
 
@@ -2332,12 +2327,11 @@ def test_paginated_limit_spaces(
     dd_run_check(check)
 
     skip_take_args = []
-    for call in mock_http_get.call_args_list:
-        args, kwargs = call
-        take = kwargs.get('params', {}).get('take')
-        skip = kwargs.get('params', {}).get('skip')
-        if 'http://localhost:80/api/spaces' == args[0]:
-            skip_take_args += [(list(args), skip, take)]
+    for request in mock_http_get.requests:
+        take = request.options.get('params', {}).get('take')
+        skip = request.options.get('params', {}).get('skip')
+        if 'http://localhost:80/api/spaces' == request.url:
+            skip_take_args += [([request.url], skip, take)]
 
     assert skip_take_args == expected_skip_take_args
 
@@ -2376,12 +2370,11 @@ def test_paginated_limit_project_groups(
     dd_run_check(check)
 
     skip_take_args = []
-    for call in mock_http_get.call_args_list:
-        args, kwargs = call
-        take = kwargs.get('params', {}).get('take')
-        skip = kwargs.get('params', {}).get('skip')
-        if 'http://localhost:80/api/Spaces-1/projectgroups' == args[0]:
-            skip_take_args += [(list(args), skip, take)]
+    for request in mock_http_get.requests:
+        take = request.options.get('params', {}).get('take')
+        skip = request.options.get('params', {}).get('skip')
+        if 'http://localhost:80/api/Spaces-1/projectgroups' == request.url:
+            skip_take_args += [([request.url], skip, take)]
 
     assert skip_take_args == expected_skip_take_args
 
@@ -2420,12 +2413,11 @@ def test_paginated_limit_projects(
     dd_run_check(check)
 
     skip_take_args = []
-    for call in mock_http_get.call_args_list:
-        args, kwargs = call
-        take = kwargs.get('params', {}).get('take')
-        skip = kwargs.get('params', {}).get('skip')
-        if 'http://localhost:80/api/Spaces-1/projects' == args[0]:
-            skip_take_args += [(list(args), skip, take)]
+    for request in mock_http_get.requests:
+        take = request.options.get('params', {}).get('take')
+        skip = request.options.get('params', {}).get('skip')
+        if 'http://localhost:80/api/Spaces-1/projects' == request.url:
+            skip_take_args += [([request.url], skip, take)]
 
     assert skip_take_args == expected_skip_take_args
 
@@ -2465,12 +2457,11 @@ def test_paginated_limit_tasks(
     dd_run_check(check)
 
     skip_take_args = []
-    for call in mock_http_get.call_args_list:
-        args, kwargs = call
-        take = kwargs.get('params', {}).get('take')
-        skip = kwargs.get('params', {}).get('skip')
-        if 'http://localhost:80/api/Spaces-1/tasks' == args[0]:
-            skip_take_args += [(list(args), skip, take)]
+    for request in mock_http_get.requests:
+        take = request.options.get('params', {}).get('take')
+        skip = request.options.get('params', {}).get('skip')
+        if 'http://localhost:80/api/Spaces-1/tasks' == request.url:
+            skip_take_args += [([request.url], skip, take)]
 
     assert skip_take_args == expected_skip_take_args
 
@@ -2508,12 +2499,11 @@ def test_paginated_limit_environments(
     dd_run_check(check)
 
     skip_take_args = []
-    for call in mock_http_get.call_args_list:
-        args, kwargs = call
-        take = kwargs.get('params', {}).get('take')
-        skip = kwargs.get('params', {}).get('skip')
-        if 'http://localhost:80/api/Spaces-1/environments' == args[0]:
-            skip_take_args += [(list(args), skip, take)]
+    for request in mock_http_get.requests:
+        take = request.options.get('params', {}).get('take')
+        skip = request.options.get('params', {}).get('skip')
+        if 'http://localhost:80/api/Spaces-1/environments' == request.url:
+            skip_take_args += [([request.url], skip, take)]
 
     assert skip_take_args == expected_skip_take_args
 
@@ -2646,12 +2636,11 @@ def test_machines_pagination(
     dd_run_check(check)
 
     skip_take_args = []
-    for call in mock_http_get.call_args_list:
-        args, kwargs = call
-        take = kwargs.get('params', {}).get('take')
-        skip = kwargs.get('params', {}).get('skip')
-        if 'http://localhost:80/api/Spaces-1/machines' == args[0]:
-            skip_take_args += [(list(args), skip, take)]
+    for request in mock_http_get.requests:
+        take = request.options.get('params', {}).get('take')
+        skip = request.options.get('params', {}).get('skip')
+        if 'http://localhost:80/api/Spaces-1/machines' == request.url:
+            skip_take_args += [([request.url], skip, take)]
 
     assert skip_take_args == expected_skip_take_args
 
@@ -2808,14 +2797,14 @@ def test_unified_service_tagging(
     ('mock_http_get', 'projects_config', 'expected_exception', 'can_connect'),
     [
         pytest.param(
-            {'http_error': {'/api/Spaces-1/projects': MockHTTPResponse(status_code=500)}},
+            {'http_error': {'/api/Spaces-1/projects': FakeHTTPResponse(status_code=500)}},
             {'include': ['.*']},
             pytest.raises(Exception, match=r'Could not connect to octopus API.*'),
             0,
             id='projects discovery reports the failure',
         ),
         pytest.param(
-            {'http_error': {'/api/Spaces-1/projects': MockHTTPResponse(status_code=500)}},
+            {'http_error': {'/api/Spaces-1/projects': FakeHTTPResponse(status_code=500)}},
             None,
             does_not_raise(),
             1,
@@ -2850,7 +2839,7 @@ def test_collection_does_not_scale_with_project_count(get_current_datetime, dd_r
     get_current_datetime.return_value = MOCKED_TIME1
     dd_run_check(check)
 
-    urls = [call[0][0] for call in mock_http_get.call_args_list]
+    urls = [request.url for request in mock_http_get.requests]
 
     # The space holds four projects across three project groups, but each collection is listed once for the space.
     assert urls.count('http://localhost:80/api/Spaces-1/projects') == 1
@@ -2885,7 +2874,7 @@ def test_bulk_lookup_bounded_when_ids_filter_is_ignored(
     get_current_datetime.return_value = MOCKED_TIME1
     dd_run_check(check)
 
-    urls = [call[0][0] for call in mock_http_get.call_args_list]
+    urls = [request.url for request in mock_http_get.requests]
 
     # A single request rather than a walk through all 16 pages of deployment history.
     assert urls.count('http://localhost:80/api/Spaces-1/deployments') == 1
@@ -2907,31 +2896,32 @@ def test_bulk_lookup_bounded_when_ids_filter_is_ignored(
         pytest.param({}, 1.0, id='no retry-after header'),
     ],
 )
-def test_throttled_request_waits_then_succeeds(instance, mock_http, retry_after, expected_wait):
+def test_throttled_request_waits_then_succeeds(instance, fake_http, fake_http_response, retry_after, expected_wait):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     check.load_configuration_models()
-    mock_http.get.side_effect = [
-        MockHTTPResponse(status_code=429, headers=retry_after),
-        MockHTTPResponse(json_data={'Items': ['a space']}, status_code=200),
-    ]
+    spaces_url = f"{instance['octopus_endpoint']}/api/spaces"
+    fake_http_response(spaces_url, status_code=429, headers=retry_after)
+    fake_http_response(spaces_url, json_data={'Items': ['a space']})
 
     with mock.patch('datadog_checks.octopus_deploy.check.time.sleep') as sleep:
         assert check._process_endpoint('api/spaces') == {'Items': ['a space']}
 
-    assert mock_http.get.call_count == 2
+    fake_http.assert_all_responses_consumed()
     sleep.assert_called_once_with(expected_wait)
 
 
-def test_throttled_request_gives_up_after_bounded_retries(instance, mock_http, caplog):
+def test_throttled_request_gives_up_after_bounded_retries(instance, fake_http, fake_http_response, caplog):
     check = OctopusDeployCheck('octopus_deploy', {}, [instance])
     check.load_configuration_models()
     caplog.set_level(logging.WARNING)
-    mock_http.get.return_value = MockHTTPResponse(status_code=429, headers={'Retry-After': '1'})
+    # The initial attempt and three retries. A further retry would find no registered response and fail the test.
+    for _ in range(4):
+        fake_http_response(f"{instance['octopus_endpoint']}/api/spaces", status_code=429, headers={'Retry-After': '1'})
 
     with mock.patch('datadog_checks.octopus_deploy.check.time.sleep') as sleep:
         assert check._process_endpoint('api/spaces') == {}
 
     # Three retries after the initial attempt, then the throttled response is surfaced instead of retrying forever.
-    assert mock_http.get.call_count == 4
+    fake_http.assert_all_responses_consumed()
     assert sleep.call_count == 3
     assert 'Failed to access endpoint: api/spaces' in caplog.text

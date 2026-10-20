@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
 import os
 from copy import deepcopy
 from urllib.parse import urljoin
@@ -10,7 +11,6 @@ import pytest
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.yarn import YarnCheck
 from datadog_checks.yarn.yarn import YARN_APPS_PATH, YARN_CLUSTER_METRICS_PATH, YARN_NODES_PATH, YARN_SCHEDULER_PATH
 
@@ -52,17 +52,12 @@ def instance():
 
 
 @pytest.fixture
-def mocked_request(mock_http):
-    mock_http.get.side_effect = requests_get_mock
-    yield
-
-
-def requests_get_mock(url, *args, **kwargs):
-    if url == YARN_CLUSTER_METRICS_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'cluster_metrics'))
-    elif url == YARN_APPS_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'apps_metrics'))
-    elif url == YARN_NODES_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'nodes_metrics'))
-    elif url == YARN_SCHEDULER_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'scheduler_metrics'))
+def mocked_request(fake_http_response):
+    for url, fixture in (
+        (YARN_CLUSTER_METRICS_URL, 'cluster_metrics'),
+        (YARN_APPS_URL, 'apps_metrics'),
+        (YARN_NODES_URL, 'nodes_metrics'),
+        (YARN_SCHEDULER_URL, 'scheduler_metrics'),
+    ):
+        with open(os.path.join(FIXTURE_DIR, fixture)) as f:
+            fake_http_response(url, json_data=json.load(f))

@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import mock
 import pytest
 
-from datadog_checks.dev.http import MockHTTPResponse
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.vault import Vault
 from datadog_checks.vault.common import DEFAULT_API_VERSION
 from datadog_checks.vault.errors import ApiUnreachable
@@ -18,6 +18,11 @@ from .metrics import MERKLE_WAL_METRICS, MERKLE_WAL_QUANTILES
 from .utils import assert_all_metrics, get_fixture_path
 
 pytestmark = pytest.mark.usefixtures('dd_environment')
+
+
+def register_metrics_fixture(fake_http_response, check, fixture_name):
+    with open(get_fixture_path(fixture_name), 'rb') as f:
+        fake_http_response(check._scraper_config['prometheus_url'], f.read())
 
 
 class TestVault:
@@ -103,16 +108,16 @@ class TestVault:
             count=1,
         )
 
-    def test_service_check_500_fail(self, aggregator, dd_run_check, global_tags):
+    def test_service_check_500_fail(self, aggregator, dd_run_check, global_tags, fake_http):
         instance = {'use_openmetrics': False}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        with mock.patch.object(type(c.http), 'get', return_value=MockHTTPResponse(status_code=500)):
-            with pytest.raises(
-                Exception, match=r'^The Vault endpoint `{}.+?` returned 500$'.format(re.escape(instance['api_url']))
-            ):
-                dd_run_check(c, extract_message=True)
+        fake_http.register_response('GET', instance['api_url'] + '/sys/leader', FakeHTTPResponse(status_code=500))
+        with pytest.raises(
+            Exception, match=r'^The Vault endpoint `{}.+?` returned 500$'.format(re.escape(instance['api_url']))
+        ):
+            dd_run_check(c, extract_message=True)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, tags=global_tags, count=1)
 
@@ -144,12 +149,17 @@ class TestVault:
 
         def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockHTTPResponse(
-                    json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
+                return FakeHTTPResponse(
+                    json_result={
+                        'ha_enabled': False,
+                        'is_self': True,
+                        'leader_address': '',
+                        'leader_cluster_address': '',
+                    }
                 )
             elif url == instance['api_url'] + '/sys/health':
-                return MockHTTPResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
                         'initialized': True,
@@ -187,8 +197,8 @@ class TestVault:
 
         def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
-                return MockHTTPResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
                         'initialized': False,
@@ -228,12 +238,17 @@ class TestVault:
 
         def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockHTTPResponse(
-                    json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
+                return FakeHTTPResponse(
+                    json_result={
+                        'ha_enabled': False,
+                        'is_self': True,
+                        'leader_address': '',
+                        'leader_cluster_address': '',
+                    }
                 )
             elif url == instance['api_url'] + '/sys/health':
-                return MockHTTPResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
                         'initialized': True,
@@ -271,8 +286,8 @@ class TestVault:
 
         def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
-                return MockHTTPResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
                         'initialized': False,
@@ -302,12 +317,17 @@ class TestVault:
 
         def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockHTTPResponse(
-                    json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
+                return FakeHTTPResponse(
+                    json_result={
+                        'ha_enabled': False,
+                        'is_self': True,
+                        'leader_address': '',
+                        'leader_cluster_address': '',
+                    }
                 )
             elif url == instance['api_url'] + '/sys/health':
-                return MockHTTPResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
                         'initialized': True,
@@ -343,8 +363,8 @@ class TestVault:
 
         def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
-                return MockHTTPResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
                         'initialized': False,
@@ -380,8 +400,8 @@ class TestVault:
 
         def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
-                return MockHTTPResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
                         'initialized': False,
@@ -426,8 +446,8 @@ class TestVault:
                 else:
                     replication_dr_mode = 'secondary'
 
-                return MockHTTPResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
                         'initialized': False,
@@ -479,8 +499,8 @@ class TestVault:
 
         def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockHTTPResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'ha_enabled': False,
                         'is_self': True,
                         'leader_address': next_leader.leader_addr,
@@ -520,8 +540,8 @@ class TestVault:
 
         def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockHTTPResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'ha_enabled': False,
                         'is_self': False,
                         'leader_address': 'bar',
@@ -546,8 +566,8 @@ class TestVault:
 
         def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockHTTPResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'ha_enabled': False,
                         'is_self': True,
                         'leader_address': 'bar',
@@ -572,8 +592,8 @@ class TestVault:
 
         def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockHTTPResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'ha_enabled': False,
                         'is_self': False,
                         'leader_address': 'bar',
@@ -599,8 +619,8 @@ class TestVault:
 
         def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
-                return MockHTTPResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
                         'initialized': False,
@@ -633,7 +653,7 @@ class TestVault:
 
         def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockHTTPResponse(json_data={'errors': ["Vault is sealed"]}, status_code=503)
+                return FakeHTTPResponse(json_result={'errors': ["Vault is sealed"]}, status_code=503)
             return real_get(url, *args, **kwargs)
 
         with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
@@ -721,16 +741,14 @@ class TestVault:
         if use_openmetrics:
             aggregator.assert_service_check('vault.openmetrics.health', status=c.CRITICAL, count=0)
 
-    def test_route_transform(self, aggregator, no_token_instance, global_tags, mock_openmetrics_http):
+    def test_route_transform(self, aggregator, no_token_instance, global_tags, fake_http_response):
         instance = no_token_instance.copy()
         instance['use_openmetrics'] = False
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         c.parse_config()
 
-        mock_openmetrics_http.get.return_value = MockHTTPResponse(
-            file_path=get_fixture_path('route_transform_metrics.txt')
-        )
+        register_metrics_fixture(fake_http_response, c, 'route_transform_metrics.txt')
 
         c.process(c._scraper_config, c._metric_transformers)
 
@@ -757,12 +775,12 @@ class TestVault:
         aggregator.assert_all_metrics_covered()
         aggregator.assert_no_duplicate_metrics()
 
-    def test_wal_merkle_metrics(self, aggregator, no_token_instance, global_tags, mock_openmetrics_http):
+    def test_wal_merkle_metrics(self, aggregator, no_token_instance, global_tags, fake_http_response):
         instance = no_token_instance.copy()
         instance['use_openmetrics'] = False
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         c.parse_config()
-        mock_openmetrics_http.get.return_value = MockHTTPResponse(file_path=get_fixture_path('merkle_wal_metrics.txt'))
+        register_metrics_fixture(fake_http_response, c, 'merkle_wal_metrics.txt')
 
         c.process(c._scraper_config, c._metric_transformers)
 
@@ -792,12 +810,12 @@ def test_x_vault_request_header_is_set(instance, dd_run_check, use_openmetrics):
         assert http.get_header('X-Vault-Request') == 'true'
         requested.append(url)
         if url.endswith('/sys/leader'):
-            return MockHTTPResponse(
-                json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
+            return FakeHTTPResponse(
+                json_result={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
             )
         if url.endswith('/sys/health'):
-            return MockHTTPResponse(
-                json_data={
+            return FakeHTTPResponse(
+                json_result={
                     'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                     'cluster_name': 'vault-cluster-f5f44063',
                     'initialized': True,
@@ -809,7 +827,7 @@ def test_x_vault_request_header_is_set(instance, dd_run_check, use_openmetrics):
                     'version': '0.10.2',
                 }
             )
-        return MockHTTPResponse(content='', status_code=200)
+        return FakeHTTPResponse()
 
     with mock.patch.object(type(c.http), 'get', autospec=True, side_effect=mock_get) as mock_get_call:
         dd_run_check(c)

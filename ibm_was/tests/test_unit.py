@@ -98,8 +98,8 @@ def test_critical_service_check(instance, check, aggregator):
 
 
 @pytest.mark.parametrize('error_cls', [HTTPClientConnectTimeoutError, HTTPClientReadTimeoutError])
-def test_make_request_catches_timeouts(instance, check, aggregator, mock_http, error_cls):
-    mock_http.get.side_effect = error_cls('timed out')
+def test_make_request_catches_timeouts(instance, check, aggregator, fake_http, error_cls):
+    fake_http.register_response('GET', instance['servlet_url'], error_cls('timed out'))
     check = check(instance)
 
     with pytest.raises(error_cls, match='timed out'):

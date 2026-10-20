@@ -1,25 +1,26 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import logging
 import os
 import ssl
 import threading
 import time
 from http import server as BaseHTTPServer
-from urllib.parse import parse_qsl, unquote_plus, urlencode, urljoin, urlparse, urlunparse
+from urllib.parse import urljoin
 
 import mock
 import pytest
 import urllib3
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import (
     HTTPClientConnectionError,
     HTTPClientConnectTimeoutError,
     HTTPClientReadTimeoutError,
     HTTPClientRequestError,
 )
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.spark import SparkCheck
 
@@ -78,237 +79,92 @@ def join_url_dir(url, *args):
     return url
 
 
-class Url(object):
-    """A url object that can be compared with other url orbjects
-    without regard to the vagaries of encoding, escaping, and ordering
-    of parameters in query strings."""
-
-    def __init__(self, url):
-        parts = urlparse(url)
-        _query = frozenset(parse_qsl(parts.query))
-        _path = unquote_plus(parts.path)
-        parts = parts._replace(query=_query, path=_path)
-        self.parts = parts
-
-    def __eq__(self, other):
-        return self.parts == other.parts
-
-    def __hash__(self):
-        return hash(self.parts)
-
-
-# PATH to Spark Version
-VERSION_PATH = Url(urljoin(SPARK_APP_URL, VERSION_PATH))
-
-# YARN Service URLs
-YARN_APP_URL = Url(urljoin(SPARK_YARN_URL, YARN_APPS_PATH) + '?states=RUNNING&applicationTypes=SPARK')
-YARN_SPARK_APP_URL = Url(join_url_dir(SPARK_YARN_URL, 'proxy', YARN_APP_ID, SPARK_REST_PATH))
-YARN_SPARK_JOB_URL = Url(join_url_dir(SPARK_YARN_URL, 'proxy', YARN_APP_ID, SPARK_REST_PATH, SPARK_APP_ID, 'jobs'))
-YARN_SPARK_STAGE_URL = Url(join_url_dir(SPARK_YARN_URL, 'proxy', YARN_APP_ID, SPARK_REST_PATH, SPARK_APP_ID, 'stages'))
-YARN_SPARK_EXECUTOR_URL = Url(
-    join_url_dir(SPARK_YARN_URL, 'proxy', YARN_APP_ID, SPARK_REST_PATH, SPARK_APP_ID, 'executors')
-)
-YARN_SPARK_RDD_URL = Url(
-    join_url_dir(SPARK_YARN_URL, 'proxy', YARN_APP_ID, SPARK_REST_PATH, SPARK_APP_ID, 'storage/rdd')
-)
-YARN_SPARK_STREAMING_STATISTICS_URL = Url(
-    join_url_dir(SPARK_YARN_URL, 'proxy', YARN_APP_ID, SPARK_REST_PATH, SPARK_APP_ID, 'streaming/statistics')
-)
-YARN_SPARK_METRICS_JSON_URL = Url(join_url_dir(SPARK_YARN_URL, 'proxy', YARN_APP_ID, 'metrics/json'))
-
-# Mesos Service URLs
-MESOS_APP_URL = Url(urljoin(SPARK_MESOS_URL, MESOS_APPS_PATH))
-MESOS_SPARK_APP_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH))
-MESOS_SPARK_JOB_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'jobs'))
-MESOS_SPARK_STAGE_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'stages'))
-MESOS_SPARK_EXECUTOR_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'executors'))
-MESOS_SPARK_RDD_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'storage/rdd'))
-MESOS_SPARK_STREAMING_STATISTICS_URL = Url(
-    join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'streaming/statistics')
-)
-MESOS_SPARK_METRICS_JSON_URL = Url(join_url_dir(SPARK_APP_URL, 'metrics/json'))
-
-# Driver Service URLs
-DRIVER_APP_URL = Url(urljoin(SPARK_APP_URL, SPARK_REST_PATH))
-DRIVER_SPARK_APP_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH))
-DRIVER_SPARK_JOB_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'jobs'))
-DRIVER_SPARK_STAGE_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'stages'))
-DRIVER_SPARK_EXECUTOR_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'executors'))
-DRIVER_SPARK_RDD_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'storage/rdd'))
-DRIVER_SPARK_STREAMING_STATISTICS_URL = Url(
-    join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'streaming/statistics')
-)
-DRIVER_SPARK_METRICS_JSON_URL = Url(join_url_dir(SPARK_APP_URL, 'metrics/json'))
-
-# Spark Standalone Service URLs
-STANDALONE_APP_URL = Url(urljoin(STANDALONE_URL, STANDALONE_APPS_PATH))
-STANDALONE_APP_HTML_URL = Url(urljoin(STANDALONE_URL, STANDALONE_APP_PATH_HTML) + '?appId=' + SPARK_APP_ID)
-STANDALONE_SPARK_APP_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH))
-STANDALONE_SPARK_JOB_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'jobs'))
-STANDALONE_SPARK_STAGE_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'stages'))
-STANDALONE_SPARK_EXECUTOR_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'executors'))
-STANDALONE_SPARK_RDD_URL = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'storage/rdd'))
-STANDALONE_SPARK_STREAMING_STATISTICS_URL = Url(
-    join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, SPARK_APP_ID, 'streaming/statistics')
-)
-STANDALONE_SPARK_METRICS_JSON_URL = Url(join_url_dir(SPARK_APP_URL, 'metrics/json'))
-
-STANDALONE_SPARK_JOB_URL_PRE20 = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, APP_NAME, 'jobs'))
-STANDALONE_SPARK_STAGE_URL_PRE20 = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, APP_NAME, 'stages'))
-STANDALONE_SPARK_EXECUTOR_URL_PRE20 = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, APP_NAME, 'executors'))
-STANDALONE_SPARK_RDD_URL_PRE20 = Url(join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, APP_NAME, 'storage/rdd'))
-STANDALONE_SPARK_STREAMING_STATISTICS_URL_PRE20 = Url(
-    join_url_dir(SPARK_APP_URL, SPARK_REST_PATH, APP_NAME, 'streaming/statistics')
-)
-STANDALONE_SPARK_METRICS_JSON_URL_PRE20 = Url(join_url_dir(SPARK_APP_URL, 'metrics/json'))
+YARN_APPS_URL = urljoin(SPARK_YARN_URL, YARN_APPS_PATH) + '?states=RUNNING&applicationTypes=SPARK'
+YARN_TRACKING_URL = join_url_dir(SPARK_YARN_URL, 'proxy', YARN_APP_ID)
+MESOS_APPS_URL = urljoin(SPARK_MESOS_URL, MESOS_APPS_PATH)
+STANDALONE_APPS_URL = urljoin(STANDALONE_URL, STANDALONE_APPS_PATH)
+STANDALONE_APP_HTML_URL = urljoin(STANDALONE_URL, STANDALONE_APP_PATH_HTML) + '?appId=' + SPARK_APP_ID
+DRIVER_VERSION_URL = join_url_dir(SPARK_APP_URL, VERSION_PATH)
+DRIVER_APPS_URL = join_url_dir(SPARK_APP_URL, SPARK_REST_PATH)
 
 FIXTURE_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
 CERTIFICATE_DIR = os.path.join(os.path.dirname(__file__), 'certificate')
 
-DEFAULT_RESPONSES = {
-    '/jobs': MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'job_metrics')),
-    '/stages': MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'stage_metrics')),
-    '/executors': MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'executor_metrics')),
-    '/storage/rdd': MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'rdd_metrics')),
-    '/streaming/statistics': MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'streaming_statistics')),
-    '/metrics/json': MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json')),
-    '/api/v1/version': MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'version')),
+APP_PROPERTY_FIXTURES = {
+    'jobs': 'job_metrics',
+    'stages': 'stage_metrics',
+    'executors': 'executor_metrics',
+    'storage/rdd': 'rdd_metrics',
+    'streaming/statistics': 'streaming_statistics',
 }
 
 
-def get_default_mock(url):
-    for k, v in DEFAULT_RESPONSES.items():
-        if url.endswith(k):
-            return v
-    raise KeyError(f"{url} does not match any response fixtures.")
+def read_fixture(name):
+    with open(os.path.join(FIXTURE_DIR, name)) as f:
+        return f.read()
 
 
-def yarn_requests_get_mock(url, *args, **kwargs):
-    arg_url = Url(url)
-
-    if arg_url == YARN_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'yarn_apps'))
-    elif arg_url == YARN_SPARK_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps'))
-    return get_default_mock(url)
+def json_response(name):
+    content = read_fixture(name)
+    return FakeHTTPResponse(content=content.encode(), json_result=json.loads(content))
 
 
-def mesos_requests_get_mock(url, *args, **kwargs):
-    arg_url = Url(url)
-
-    if arg_url == MESOS_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'mesos_apps'))
-    elif arg_url == MESOS_SPARK_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps'))
-    elif arg_url == MESOS_SPARK_JOB_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'job_metrics'))
-    elif arg_url == MESOS_SPARK_STAGE_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'stage_metrics'))
-    elif arg_url == MESOS_SPARK_EXECUTOR_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'executor_metrics'))
-    elif arg_url == MESOS_SPARK_RDD_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'rdd_metrics'))
-    elif arg_url == MESOS_SPARK_STREAMING_STATISTICS_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'streaming_statistics'))
-    elif arg_url == MESOS_SPARK_METRICS_JSON_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
+def non_json_response(content, **kwargs):
+    return FakeHTTPResponse(
+        content=content.encode(), json_error=json.JSONDecodeError('Expecting value', content, 0), **kwargs
+    )
 
 
-def driver_requests_get_mock(url, *args, **kwargs):
-    arg_url = Url(url)
-
-    if arg_url == DRIVER_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps'))
-    elif arg_url == DRIVER_SPARK_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps'))
-    elif arg_url == DRIVER_SPARK_JOB_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'job_metrics'))
-    elif arg_url == DRIVER_SPARK_STAGE_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'stage_metrics'))
-    elif arg_url == DRIVER_SPARK_EXECUTOR_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'executor_metrics'))
-    elif arg_url == DRIVER_SPARK_RDD_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'rdd_metrics'))
-    elif arg_url == DRIVER_SPARK_STREAMING_STATISTICS_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'streaming_statistics'))
-    elif arg_url == DRIVER_SPARK_METRICS_JSON_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
+def app_responses(tracking_url, app_ids, apps_fixture='spark_apps', property_overrides=None):
+    """Responses served by a Spark application UI for each app it hosts."""
+    property_overrides = property_overrides or {}
+    responses = [(join_url_dir(tracking_url, VERSION_PATH), json_response('version'))]
+    if apps_fixture is not None:
+        responses.append((join_url_dir(tracking_url, SPARK_REST_PATH), json_response(apps_fixture)))
+    for app_id in app_ids:
+        for prop, fixture in APP_PROPERTY_FIXTURES.items():
+            response = property_overrides.get((app_id, prop), None)
+            if response is None:
+                response = json_response(fixture)
+            responses.append((join_url_dir(tracking_url, SPARK_REST_PATH, app_id, prop), response))
+        responses.append((join_url_dir(tracking_url, 'metrics/json'), json_response('metrics_json')))
+    return responses
 
 
-def standalone_requests_get_mock(url, *args, **kwargs):
-    arg_url = Url(url)
-
-    if arg_url == STANDALONE_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_standalone_apps'))
-    elif arg_url == STANDALONE_APP_HTML_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_standalone_app'))
-    elif arg_url == STANDALONE_SPARK_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps'))
-    elif arg_url == STANDALONE_SPARK_JOB_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'job_metrics'))
-    elif arg_url == STANDALONE_SPARK_STAGE_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'stage_metrics'))
-    elif arg_url == STANDALONE_SPARK_EXECUTOR_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'executor_metrics'))
-    elif arg_url == STANDALONE_SPARK_RDD_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'rdd_metrics'))
-    elif arg_url == STANDALONE_SPARK_STREAMING_STATISTICS_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'streaming_statistics'))
-    elif arg_url == STANDALONE_SPARK_METRICS_JSON_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
+def yarn_responses():
+    return [(YARN_APPS_URL, json_response('yarn_apps'))] + app_responses(YARN_TRACKING_URL, [SPARK_APP_ID])
 
 
-def standalone_requests_pre20_get_mock(url, *args, **kwargs):
-    arg_url = Url(url)
-
-    if arg_url == STANDALONE_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_standalone_apps'))
-    elif arg_url == STANDALONE_APP_HTML_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_standalone_app'))
-    elif arg_url == STANDALONE_SPARK_APP_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'spark_apps_pre20'))
-    elif arg_url == STANDALONE_SPARK_JOB_URL:
-        return MockHTTPResponse(status_code=404)
-    elif arg_url == STANDALONE_SPARK_STAGE_URL:
-        return MockHTTPResponse(status_code=404)
-    elif arg_url == STANDALONE_SPARK_EXECUTOR_URL:
-        return MockHTTPResponse(status_code=404)
-    elif arg_url == STANDALONE_SPARK_RDD_URL:
-        return MockHTTPResponse(status_code=404)
-    elif arg_url == STANDALONE_SPARK_STREAMING_STATISTICS_URL:
-        return MockHTTPResponse(status_code=404)
-    elif arg_url == STANDALONE_SPARK_JOB_URL_PRE20:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'job_metrics'))
-    elif arg_url == STANDALONE_SPARK_STAGE_URL_PRE20:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'stage_metrics'))
-    elif arg_url == STANDALONE_SPARK_EXECUTOR_URL_PRE20:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'executor_metrics'))
-    elif arg_url == STANDALONE_SPARK_RDD_URL_PRE20:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'rdd_metrics'))
-    elif arg_url == STANDALONE_SPARK_STREAMING_STATISTICS_URL_PRE20:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'streaming_statistics'))
-    elif arg_url == VERSION_PATH:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'version'))
-    elif arg_url == STANDALONE_SPARK_METRICS_JSON_URL_PRE20:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'metrics_json'))
+def mesos_responses():
+    return [(MESOS_APPS_URL, json_response('mesos_apps'))] + app_responses(SPARK_APP_URL, [SPARK_APP_ID])
 
 
-def proxy_with_warning_page_mock(url, *args, **kwargs):
-    cookies = kwargs.get('cookies') or {}
-    proxy_cookie = cookies.get('proxy_cookie')
-    url_parts = list(urlparse(url))
-    query = dict(parse_qsl(url_parts[4]))
-    if proxy_cookie and query.get('proxyapproved') == 'true':
-        del query['proxyapproved']
-        url_parts[4] = urlencode(query)
-        return standalone_requests_get_mock(urlunparse(url_parts), *args, **kwargs)
-    else:
-        # Display the html warning page with the redirect link
-        query['proxyapproved'] = 'true'
-        url_parts[4] = urlencode(query)
-        with open(os.path.join(FIXTURE_DIR, 'html_warning_page'), 'r') as f:
-            body = f.read().replace('$REDIRECT_URL$', urlunparse(url_parts))
-            return MockHTTPResponse(body, cookies={'proxy_cookie': 'foo'})
+def driver_responses():
+    return app_responses(SPARK_APP_URL, [SPARK_APP_ID])
+
+
+def standalone_responses():
+    return [
+        (STANDALONE_APPS_URL, json_response('spark_standalone_apps')),
+        (STANDALONE_APP_HTML_URL, non_json_response(read_fixture('spark_standalone_app'))),
+    ] + app_responses(SPARK_APP_URL, [SPARK_APP_ID], apps_fixture=None)
+
+
+def standalone_pre20_responses():
+    return [
+        (STANDALONE_APPS_URL, json_response('spark_standalone_apps')),
+        (STANDALONE_APP_HTML_URL, non_json_response(read_fixture('spark_standalone_app'))),
+    ] + app_responses(SPARK_APP_URL, [APP_NAME], apps_fixture='spark_apps_pre20')
+
+
+def register_responses(fake_http, responses, **kwargs):
+    for url, response in responses:
+        fake_http.register_response('GET', url, response, **kwargs)
+
+
+def register_errors(fake_http, error, *urls):
+    for url in urls:
+        fake_http.register_response('GET', url, error)
 
 
 CHECK_NAME = 'spark'
@@ -682,8 +538,8 @@ def _assert(aggregator, values_and_tags):
 
 
 @pytest.mark.unit
-def test_yarn(aggregator, dd_run_check, mock_http):
-    mock_http.get.side_effect = yarn_requests_get_mock
+def test_yarn(aggregator, dd_run_check, fake_http):
+    register_responses(fake_http, yarn_responses())
     c = SparkCheck('spark', {}, [YARN_CONFIG])
     dd_run_check(c)
 
@@ -743,8 +599,8 @@ def test_auth_yarn_config():
 
 
 @pytest.mark.unit
-def test_auth_yarn(aggregator, dd_run_check, mock_http):
-    mock_http.get.side_effect = yarn_requests_get_mock
+def test_auth_yarn(aggregator, dd_run_check, fake_http):
+    register_responses(fake_http, yarn_responses())
     c = SparkCheck('spark', {}, [YARN_AUTH_CONFIG])
     dd_run_check(c)
     for sc in aggregator.service_checks(YARN_SERVICE_CHECK):
@@ -754,8 +610,8 @@ def test_auth_yarn(aggregator, dd_run_check, mock_http):
 
 
 @pytest.mark.unit
-def test_mesos(aggregator, dd_run_check, mock_http):
-    mock_http.get.side_effect = mesos_requests_get_mock
+def test_mesos(aggregator, dd_run_check, fake_http):
+    register_responses(fake_http, mesos_responses())
     c = SparkCheck('spark', {}, [MESOS_CONFIG])
     dd_run_check(c)
     _assert(
@@ -813,8 +669,8 @@ def test_mesos(aggregator, dd_run_check, mock_http):
 
 
 @pytest.mark.unit
-def test_mesos_filter(aggregator, dd_run_check, mock_http):
-    mock_http.get.side_effect = mesos_requests_get_mock
+def test_mesos_filter(aggregator, dd_run_check, fake_http):
+    register_responses(fake_http, mesos_responses())
     c = SparkCheck('spark', {}, [MESOS_FILTERED_CONFIG])
     dd_run_check(c)
 
@@ -826,8 +682,8 @@ def test_mesos_filter(aggregator, dd_run_check, mock_http):
 
 
 @pytest.mark.unit
-def test_driver_unit(aggregator, dd_run_check, mock_http):
-    mock_http.get.side_effect = driver_requests_get_mock
+def test_driver_unit(aggregator, dd_run_check, fake_http):
+    register_responses(fake_http, driver_responses())
     c = SparkCheck('spark', {}, [DRIVER_CONFIG])
     dd_run_check(c)
 
@@ -886,8 +742,8 @@ def test_driver_unit(aggregator, dd_run_check, mock_http):
 
 
 @pytest.mark.unit
-def test_standalone_unit(aggregator, dd_run_check, mock_http):
-    mock_http.get.side_effect = standalone_requests_get_mock
+def test_standalone_unit(aggregator, dd_run_check, fake_http):
+    register_responses(fake_http, standalone_responses())
     c = SparkCheck('spark', {}, [STANDALONE_CONFIG])
     dd_run_check(c)
 
@@ -938,8 +794,8 @@ def test_standalone_unit(aggregator, dd_run_check, mock_http):
 
 
 @pytest.mark.unit
-def test_standalone_stage_disabled_unit(aggregator, dd_run_check, mock_http):
-    mock_http.get.side_effect = standalone_requests_get_mock
+def test_standalone_stage_disabled_unit(aggregator, dd_run_check, fake_http):
+    register_responses(fake_http, standalone_responses())
     c = SparkCheck('spark', {}, [STANDALONE_CONFIG_STAGE_DISABLED])
     dd_run_check(c)
 
@@ -986,8 +842,21 @@ def test_standalone_stage_disabled_unit(aggregator, dd_run_check, mock_http):
 
 
 @pytest.mark.unit
-def test_standalone_unit_with_proxy_warning_page(aggregator, dd_run_check, mock_http):
-    mock_http.get.side_effect = proxy_with_warning_page_mock
+def test_standalone_unit_with_proxy_warning_page(aggregator, dd_run_check, fake_http):
+    redirect_url = STANDALONE_APPS_URL + '?proxyapproved=true'
+    warning_page = read_fixture('html_warning_page').replace('$REDIRECT_URL$', redirect_url)
+    fake_http.register_response(
+        'GET', STANDALONE_APPS_URL, non_json_response(warning_page, cookies={'proxy_cookie': 'foo'})
+    )
+    # Once the warning page sets the cookie, every request must approve the proxy and send the cookie back.
+    register_responses(
+        fake_http,
+        [
+            (url + ('&' if '?' in url else '?') + 'proxyapproved=true', response)
+            for url, response in standalone_responses()
+        ],
+        match_options={'cookies': {'proxy_cookie': 'foo'}},
+    )
     c = SparkCheck('spark', {}, [STANDALONE_CONFIG])
     dd_run_check(c)
 
@@ -1039,8 +908,8 @@ def test_standalone_unit_with_proxy_warning_page(aggregator, dd_run_check, mock_
 
 
 @pytest.mark.unit
-def test_standalone_pre20(aggregator, dd_run_check, mock_http):
-    mock_http.get.side_effect = standalone_requests_pre20_get_mock
+def test_standalone_pre20(aggregator, dd_run_check, fake_http):
+    register_responses(fake_http, standalone_pre20_responses())
     c = SparkCheck('spark', {}, [STANDALONE_CONFIG_PRE_20])
     dd_run_check(c)
 
@@ -1092,8 +961,8 @@ def test_standalone_pre20(aggregator, dd_run_check, mock_http):
 
 
 @pytest.mark.unit
-def test_metadata(aggregator, datadog_agent, dd_run_check, mock_http):
-    mock_http.get.side_effect = standalone_requests_pre20_get_mock
+def test_metadata(aggregator, datadog_agent, dd_run_check, fake_http):
+    register_responses(fake_http, standalone_pre20_responses())
     c = SparkCheck(CHECK_NAME, {}, [STANDALONE_CONFIG_PRE_20])
     c.check_id = "test:123"
     dd_run_check(c)
@@ -1115,11 +984,11 @@ def test_metadata(aggregator, datadog_agent, dd_run_check, mock_http):
 
 
 @pytest.mark.unit
-def test_disable_legacy_cluster_tags(aggregator, dd_run_check, mock_http):
+def test_disable_legacy_cluster_tags(aggregator, dd_run_check, fake_http):
     instance = MESOS_FILTERED_CONFIG
     instance['disable_legacy_cluster_tag'] = True
 
-    mock_http.get.side_effect = mesos_requests_get_mock
+    register_responses(fake_http, mesos_responses())
     c = SparkCheck('spark', {}, [instance])
     dd_run_check(c)
 
@@ -1133,22 +1002,22 @@ def test_disable_legacy_cluster_tags(aggregator, dd_run_check, mock_http):
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "instance, requests_get_mock, base_tags",
+    "instance, responses, base_tags",
     [
-        (DRIVER_CONFIG, driver_requests_get_mock, COMMON_TAGS + CUSTOM_TAGS),
-        (YARN_CONFIG, yarn_requests_get_mock, COMMON_TAGS + CUSTOM_TAGS),
-        (MESOS_CONFIG, mesos_requests_get_mock, COMMON_TAGS + CUSTOM_TAGS),
-        (STANDALONE_CONFIG, standalone_requests_get_mock, COMMON_TAGS),
-        (STANDALONE_CONFIG_PRE_20, standalone_requests_pre20_get_mock, COMMON_TAGS),
+        (DRIVER_CONFIG, driver_responses, COMMON_TAGS + CUSTOM_TAGS),
+        (YARN_CONFIG, yarn_responses, COMMON_TAGS + CUSTOM_TAGS),
+        (MESOS_CONFIG, mesos_responses, COMMON_TAGS + CUSTOM_TAGS),
+        (STANDALONE_CONFIG, standalone_responses, COMMON_TAGS),
+        (STANDALONE_CONFIG_PRE_20, standalone_pre20_responses, COMMON_TAGS),
     ],
     ids=["driver", "yarn", "mesos", "standalone", "standalone_pre_20"],
 )
 def test_enable_query_name_tag_for_structured_streaming(
-    aggregator, dd_run_check, mock_http, instance, requests_get_mock, base_tags
+    aggregator, dd_run_check, fake_http, instance, responses, base_tags
 ):
     instance['enable_query_name_tag'] = True
 
-    mock_http.get.side_effect = requests_get_mock
+    register_responses(fake_http, responses())
     c = SparkCheck('spark', {}, [instance])
     dd_run_check(c)
 
@@ -1184,7 +1053,7 @@ def test_driver_startup_message_default_retries(aggregator, caplog):
     from json import JSONDecodeError
 
     check = SparkCheck('spark', {}, [DRIVER_CONFIG])
-    response = MockHTTPResponse(content="Spark is starting up. Please wait a while until it's ready.")
+    response = non_json_response("Spark is starting up. Please wait a while until it's ready.")
 
     with caplog.at_level(logging.DEBUG):
         with mock.patch.object(check, '_rest_request', return_value=response):
@@ -1218,7 +1087,7 @@ def test_driver_startup_message_disabled(aggregator, retries_value):
     config = DRIVER_CONFIG.copy()
     config['startup_wait_retries'] = retries_value
     check = SparkCheck('spark', {}, [config])
-    response = MockHTTPResponse(content="Spark is starting up. Please wait a while until it's ready.")
+    response = non_json_response("Spark is starting up. Please wait a while until it's ready.")
 
     with mock.patch.object(check, '_rest_request', return_value=response):
         with pytest.raises(JSONDecodeError):
@@ -1239,7 +1108,7 @@ def test_driver_startup_message_limited_retries(aggregator, caplog):
     config = DRIVER_CONFIG.copy()
     config['startup_wait_retries'] = 3
     check = SparkCheck('spark', {}, [config])
-    response = MockHTTPResponse(content="Spark is starting up. Please wait a while until it's ready.")
+    response = non_json_response("Spark is starting up. Please wait a while until it's ready.")
 
     with caplog.at_level(logging.DEBUG):
         with mock.patch.object(check, '_rest_request', return_value=response):
@@ -1271,8 +1140,8 @@ def test_driver_startup_retry_counter_resets_on_success(caplog):
     config = DRIVER_CONFIG.copy()
     config['startup_wait_retries'] = 2
     check = SparkCheck('spark', {}, [config])
-    startup_response = MockHTTPResponse(content="Spark is starting up. Please wait a while until it's ready.")
-    success_response = MockHTTPResponse(json_data=[{"id": "app_001", "name": "TestApp"}])
+    startup_response = non_json_response("Spark is starting up. Please wait a while until it's ready.")
+    success_response = FakeHTTPResponse(json_result=[{"id": "app_001", "name": "TestApp"}])
 
     with caplog.at_level(logging.DEBUG):
         with mock.patch.object(check, '_rest_request', return_value=startup_response):
@@ -1339,18 +1208,19 @@ def test_do_not_crash_on_single_app_failure():
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "instance,service_check",
+    "instance,service_check,urls",
     [
-        (DRIVER_CONFIG, "driver"),
-        (YARN_CONFIG, "resource_manager"),
-        (MESOS_CONFIG, "mesos_master"),
-        (STANDALONE_CONFIG, "standalone_master"),
-        (STANDALONE_CONFIG_PRE_20, "standalone_master"),
+        (DRIVER_CONFIG, "driver", [DRIVER_VERSION_URL, DRIVER_APPS_URL]),
+        (YARN_CONFIG, "resource_manager", [YARN_APPS_URL]),
+        (MESOS_CONFIG, "mesos_master", [MESOS_APPS_URL]),
+        (STANDALONE_CONFIG, "standalone_master", [STANDALONE_APPS_URL]),
+        (STANDALONE_CONFIG_PRE_20, "standalone_master", [STANDALONE_APPS_URL]),
     ],
     ids=["driver", "yarn", "mesos", "standalone", "standalone_pre_20"],
 )
-def test_no_running_apps(aggregator, dd_run_check, instance, service_check, caplog, mock_http):
-    mock_http.get.return_value = MockHTTPResponse("{}")
+def test_no_running_apps(aggregator, dd_run_check, instance, service_check, urls, caplog, fake_http_response):
+    for url in urls:
+        fake_http_response(url, json_data={})
     with caplog.at_level(logging.WARNING):
         dd_run_check(SparkCheck('spark', {}, [instance]))
 
@@ -1367,76 +1237,61 @@ def test_no_running_apps(aggregator, dd_run_check, instance, service_check, capl
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "mock_response",
+    "property_response",
     [
-        pytest.param(MockHTTPResponse(content=""), id="Invalid JSON"),  # this triggers json parsing error,
-        pytest.param(MockHTTPResponse(status_code=404), id="property not found"),
-        pytest.param(
-            MockHTTPResponse(status_code=500), id="Spark internal server error"
-        ),  # reported by users in the wild
+        pytest.param(non_json_response(''), id="Invalid JSON"),
+        pytest.param(FakeHTTPResponse(status_code=404), id="property not found"),
+        # reported by users in the wild
+        pytest.param(FakeHTTPResponse(status_code=500), id="Spark internal server error"),
     ],
 )
 @pytest.mark.parametrize(
-    'property_url, missing_metrics',
+    'app_property, missing_metrics',
     [
-        pytest.param(YARN_SPARK_JOB_URL, SPARK_JOB_RUNNING_METRIC_VALUES, id='jobs'),
-        pytest.param(YARN_SPARK_STAGE_URL, SPARK_STAGE_RUNNING_METRIC_VALUES, id='stages'),
+        pytest.param('jobs', SPARK_JOB_RUNNING_METRIC_VALUES, id='jobs'),
+        pytest.param('stages', SPARK_STAGE_RUNNING_METRIC_VALUES, id='stages'),
         pytest.param(
-            YARN_SPARK_EXECUTOR_URL,
+            'executors',
             SPARK_EXECUTOR_METRIC_VALUES.keys() | SPARK_EXECUTOR_LEVEL_METRIC_VALUES.keys(),
             id='executors',
         ),
-        pytest.param(YARN_SPARK_RDD_URL, SPARK_RDD_METRIC_VALUES, id='storage/rdd'),
-        pytest.param(
-            YARN_SPARK_STREAMING_STATISTICS_URL, SPARK_STREAMING_STATISTICS_METRIC_VALUES, id='streaming/statistics'
-        ),
+        pytest.param('storage/rdd', SPARK_RDD_METRIC_VALUES, id='storage/rdd'),
+        pytest.param('streaming/statistics', SPARK_STREAMING_STATISTICS_METRIC_VALUES, id='streaming/statistics'),
     ],
 )
 def test_yarn_no_json_for_app_properties(
-    aggregator, dd_run_check, mock_http, mock_response, property_url, missing_metrics
+    aggregator, dd_run_check, fake_http, fake_http_response, property_response, app_property, missing_metrics
 ):
     """
     In some yarn deployments apps stop exposing properties (such as jobs and stages) by the time we query them.
     In these cases we skip only the specific missing apps and metrics while collecting all others.
     """
+    attempts = [
+        {
+            "startTime": "2016-04-12T12:48:17.576GMT",
+            "endTime": "1969-12-31T23:59:59.999GMT",
+            "sparkUser": "",
+            "completed": False,
+        }
+    ]
+    fake_http_response(
+        join_url_dir(YARN_TRACKING_URL, SPARK_REST_PATH),
+        json_data=[
+            {"id": SPARK_APP_ID, "name": "PySparkShell", "attempts": attempts},
+            {"id": SPARK_APP2_ID, "name": "PySparkShell2", "attempts": attempts},
+        ],
+    )
+    register_responses(
+        fake_http,
+        [(YARN_APPS_URL, json_response('yarn_apps'))]
+        + app_responses(
+            YARN_TRACKING_URL,
+            [SPARK_APP_ID, SPARK_APP2_ID],
+            apps_fixture=None,
+            property_overrides={(SPARK_APP_ID, app_property): property_response},
+        ),
+    )
 
-    def get_without_json(url, *args, **kwargs):
-        arg_url = Url(url)
-        if arg_url == property_url:
-            return mock_response
-        elif arg_url == YARN_SPARK_APP_URL:
-            return MockHTTPResponse(
-                json_data=[
-                    {
-                        "id": SPARK_APP_ID,
-                        "name": "PySparkShell",
-                        "attempts": [
-                            {
-                                "startTime": "2016-04-12T12:48:17.576GMT",
-                                "endTime": "1969-12-31T23:59:59.999GMT",
-                                "sparkUser": "",
-                                "completed": False,
-                            }
-                        ],
-                    },
-                    {
-                        "id": SPARK_APP2_ID,
-                        "name": "PySparkShell2",
-                        "attempts": [
-                            {
-                                "startTime": "2016-04-12T12:48:17.576GMT",
-                                "endTime": "1969-12-31T23:59:59.999GMT",
-                                "sparkUser": "",
-                                "completed": False,
-                            }
-                        ],
-                    },
-                ]
-            )
-        else:
-            return yarn_requests_get_mock(url, *args, **kwargs)
-
-    mock_http.get.side_effect = get_without_json
     dd_run_check(SparkCheck('spark', {}, [YARN_CONFIG]))
     for m in missing_metrics:
         aggregator.assert_metric_has_tag(m, 'app_name:PySparkShell', count=0)
@@ -1579,15 +1434,18 @@ def test_integration_driver_2(aggregator, dd_run_check):
 
 
 @pytest.mark.unit
-def test_debounce_connection_failure(aggregator, dd_run_check, caplog, mock_http):
-    # Mock connection failure
-    def connection_failure_mock(*args, **kwargs):
-        raise HTTPClientConnectionError("Connection refused")
-
+def test_debounce_connection_failure(aggregator, dd_run_check, caplog, fake_http):
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Running']
 
-    mock_http.get.side_effect = connection_failure_mock
+    # The first run stops after the debounced version request, the second also reaches the app list.
+    register_errors(
+        fake_http,
+        HTTPClientConnectionError("Connection refused"),
+        DRIVER_VERSION_URL,
+        DRIVER_VERSION_URL,
+        DRIVER_APPS_URL,
+    )
     c = SparkCheck('spark', {}, [instance])
 
     # First run: expect warning, no CRITICAL check
@@ -1612,14 +1470,11 @@ def test_debounce_connection_failure(aggregator, dd_run_check, caplog, mock_http
 
 
 @pytest.mark.unit
-def test_connection_failure_non_k8s(aggregator, dd_run_check, mock_http):
-    def connection_failure_mock(*args, **kwargs):
-        raise HTTPClientConnectionError("Connection refused")
-
+def test_connection_failure_non_k8s(aggregator, dd_run_check, fake_http):
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', []))
 
-    mock_http.get.side_effect = connection_failure_mock
+    register_errors(fake_http, HTTPClientConnectionError("Connection refused"), DRIVER_VERSION_URL, DRIVER_APPS_URL)
     c = SparkCheck('spark', {}, [instance])
 
     with pytest.raises(Exception) as excinfo:
@@ -1633,7 +1488,7 @@ def test_connection_failure_non_k8s(aggregator, dd_run_check, mock_http):
 
 
 @pytest.mark.unit
-def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_http):
+def test_malformed_header_still_reports_critical(aggregator, dd_run_check, fake_http):
     """A server-sent malformed header must still emit spark.driver.can_connect.
 
     A multi-valued Content-Length makes the backend reject the response header. The translator has
@@ -1641,7 +1496,7 @@ def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_
     last arm has to name that type.
     """
     message = 'Content-Length contained multiple unmatching values'
-    mock_http.get.side_effect = HTTPClientRequestError(message)
+    register_errors(fake_http, HTTPClientRequestError(message), DRIVER_VERSION_URL, DRIVER_APPS_URL)
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', []))
     c = SparkCheck('spark', {}, [instance])
@@ -1658,14 +1513,11 @@ def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_
 
 
 @pytest.mark.unit
-def test_debounce_connection_failure_terminal_phase(aggregator, dd_run_check, caplog, mock_http):
-    def connection_failure_mock(*args, **kwargs):
-        raise HTTPClientConnectionError("Connection refused")
-
+def test_debounce_connection_failure_terminal_phase(aggregator, dd_run_check, caplog, fake_http):
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Failed']
 
-    mock_http.get.side_effect = connection_failure_mock
+    register_errors(fake_http, HTTPClientConnectionError("Connection refused"), DRIVER_VERSION_URL, DRIVER_APPS_URL)
     c = SparkCheck('spark', {}, [instance])
 
     with caplog.at_level(logging.DEBUG):
@@ -1679,18 +1531,14 @@ def test_debounce_connection_failure_terminal_phase(aggregator, dd_run_check, ca
 
 
 @pytest.mark.unit
-def test_debounce_connection_recovery(aggregator, dd_run_check, caplog, mock_http):
-    # Mock connection failure
-    def connection_failure_mock(*args, **kwargs):
-        raise HTTPClientConnectionError("Connection refused")
-
+def test_debounce_connection_recovery(aggregator, dd_run_check, caplog, fake_http):
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Running']
 
     c = SparkCheck('spark', {}, [instance])
 
     # 1. Fail (Debounce)
-    mock_http.get.side_effect = connection_failure_mock
+    register_errors(fake_http, HTTPClientConnectionError("Connection refused"), DRIVER_VERSION_URL)
     with caplog.at_level(logging.WARNING):
         dd_run_check(c)
 
@@ -1703,7 +1551,7 @@ def test_debounce_connection_recovery(aggregator, dd_run_check, caplog, mock_htt
     aggregator.reset()
 
     # 2. Success (Reset)
-    mock_http.get.side_effect = driver_requests_get_mock
+    register_responses(fake_http, driver_responses())
     dd_run_check(c)
 
     # Verify success
@@ -1718,7 +1566,7 @@ def test_debounce_connection_recovery(aggregator, dd_run_check, caplog, mock_htt
     aggregator.reset()
 
     # 3. Fail (Debounce again)
-    mock_http.get.side_effect = connection_failure_mock
+    register_errors(fake_http, HTTPClientConnectionError("Connection refused"), DRIVER_VERSION_URL)
     with caplog.at_level(logging.WARNING):
         dd_run_check(c)
 
@@ -1733,16 +1581,13 @@ def test_debounce_connection_recovery(aggregator, dd_run_check, caplog, mock_htt
     "pod_phase",
     ["Failed", "Succeeded", "Unknown"],
 )
-def test_debounce_connection_failure_all_terminal_phases(aggregator, dd_run_check, caplog, mock_http, pod_phase):
+def test_debounce_connection_failure_all_terminal_phases(aggregator, dd_run_check, caplog, fake_http, pod_phase):
     """Test that all terminal pod phases suppress connection errors."""
-
-    def connection_failure_mock(*args, **kwargs):
-        raise HTTPClientConnectionError("Connection refused")
 
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:{}'.format(pod_phase)]
 
-    mock_http.get.side_effect = connection_failure_mock
+    register_errors(fake_http, HTTPClientConnectionError("Connection refused"), DRIVER_VERSION_URL, DRIVER_APPS_URL)
     c = SparkCheck('spark', {}, [instance])
 
     with caplog.at_level(logging.DEBUG):
@@ -1755,16 +1600,13 @@ def test_debounce_connection_failure_all_terminal_phases(aggregator, dd_run_chec
 
 
 @pytest.mark.unit
-def test_debounce_no_route_to_host(aggregator, dd_run_check, caplog, mock_http):
+def test_debounce_no_route_to_host(aggregator, dd_run_check, caplog, fake_http):
     """Test that 'No route to host' errors are also debounced."""
-
-    def connection_failure_mock(*args, **kwargs):
-        raise HTTPClientConnectionError("No route to host")
 
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Running']
 
-    mock_http.get.side_effect = connection_failure_mock
+    register_errors(fake_http, HTTPClientConnectionError("No route to host"), DRIVER_VERSION_URL)
     c = SparkCheck('spark', {}, [instance])
 
     # First run: expect warning, no CRITICAL check
@@ -1778,9 +1620,9 @@ def test_debounce_no_route_to_host(aggregator, dd_run_check, caplog, mock_http):
 
 
 @pytest.mark.unit
-def test_read_timeout_terminal_phase_suppressed(aggregator, dd_run_check, caplog, mock_http):
+def test_read_timeout_terminal_phase_suppressed(aggregator, dd_run_check, caplog, fake_http):
     """requests raised a body-phase read timeout as a ConnectionError, so it was suppression-eligible."""
-    mock_http.get.side_effect = HTTPClientReadTimeoutError("Read timed out")
+    register_errors(fake_http, HTTPClientReadTimeoutError("Read timed out"), DRIVER_VERSION_URL, DRIVER_APPS_URL)
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Failed']
     c = SparkCheck('spark', {}, [instance])
@@ -1793,9 +1635,11 @@ def test_read_timeout_terminal_phase_suppressed(aggregator, dd_run_check, caplog
 
 
 @pytest.mark.unit
-def test_connect_timeout_terminal_phase_still_alerts(aggregator, dd_run_check, mock_http):
+def test_connect_timeout_terminal_phase_still_alerts(aggregator, dd_run_check, fake_http):
     """A connect timeout was never suppression-eligible, so the terminal phase must not silence it."""
-    mock_http.get.side_effect = HTTPClientConnectTimeoutError("Connection timed out")
+    register_errors(
+        fake_http, HTTPClientConnectTimeoutError("Connection timed out"), DRIVER_VERSION_URL, DRIVER_APPS_URL
+    )
     instance = DRIVER_CONFIG.copy()
     instance['tags'] = list(instance.get('tags', [])) + ['pod_phase:Failed']
     c = SparkCheck('spark', {}, [instance])

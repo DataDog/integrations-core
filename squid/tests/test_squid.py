@@ -4,8 +4,6 @@
 
 import pytest
 
-from datadog_checks.dev.http import MockHTTPResponse
-
 from . import common
 
 
@@ -79,8 +77,8 @@ def test_check_ok(aggregator, check, instance):
     ],
 )
 @pytest.mark.usefixtures("dd_environment")
-def test_version_metadata(check, instance, datadog_agent, mock_http, raw_version, version_metadata, count):
-    mock_http.get.return_value = MockHTTPResponse(headers={'Server': raw_version})
+def test_version_metadata(check, instance, datadog_agent, fake_http_response, raw_version, version_metadata, count):
+    fake_http_response(common.URL, headers={'Server': raw_version})
 
     check.check_id = 'test:123'
     check.check(instance)

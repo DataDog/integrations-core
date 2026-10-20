@@ -9,8 +9,8 @@ import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.openstack.openstack import (
     IncompleteAuthScope,
     IncompleteConfig,
@@ -30,8 +30,11 @@ init_config = common.MOCK_CONFIG['init_config']
 openstack_check = OpenStackCheck('openstack', init_config, instances=[instance])
 
 
-MOCK_HTTP_RESPONSE = MockHTTPResponse(json_data=common.EXAMPLE_AUTH_RESPONSE, headers={"X-Subject-Token": "fake_token"})
-MOCK_HTTP_PROJECTS_RESPONSE = MockHTTPResponse(json_data=common.EXAMPLE_PROJECTS_RESPONSE)
+KEYSTONE_TOKENS_URL = 'http://10.0.2.15:5000/v3/auth/tokens'
+KEYSTONE_PROJECTS_URL = 'http://10.0.2.15:5000/v3/auth/projects'
+MOCK_HTTP_RESPONSE = FakeHTTPResponse(
+    json_result=common.EXAMPLE_AUTH_RESPONSE, headers={"X-Subject-Token": "fake_token"}
+)
 
 
 def _test_bad_auth_scope(scope):
@@ -123,7 +126,7 @@ def test_keystone_auth_and_api_calls_default_tls_differently(ssl_verify_config, 
     assert check.http.options['verify'] is client_verify
 
 
-def test_unscoped_from_config(mock_http):
+def test_unscoped_from_config(fake_http, fake_http_response):
     init_config = {'keystone_server_url': 'http://10.0.2.15:5000', 'nova_api_version': 'v2'}
 
     good_instance_config = {
@@ -137,14 +140,14 @@ def test_unscoped_from_config(mock_http):
     # Answer at the client rather than patching the three keystone calls out. The token fetch, the
     # project list and the per-project token each issue their own request, and a scope that comes back
     # whole is only reachable if all three were handed a usable client.
-    mock_http.post.side_effect = [
-        MockHTTPResponse(json_data=unscoped_auth_response, headers={'X-Subject-Token': 'fake_token'}),
-        MOCK_HTTP_RESPONSE,
-    ]
-    mock_http.get.return_value = MOCK_HTTP_PROJECTS_RESPONSE
+    fake_http_response(
+        KEYSTONE_TOKENS_URL, method='POST', json_data=unscoped_auth_response, headers={'X-Subject-Token': 'fake_token'}
+    )
+    fake_http_response(KEYSTONE_PROJECTS_URL, json_data=common.EXAMPLE_PROJECTS_RESPONSE)
+    fake_http.register_response('POST', KEYSTONE_TOKENS_URL, MOCK_HTTP_RESPONSE)
 
     append_config = dict(good_instance_config, append_tenant_id=True)
-    scope = OpenStackUnscoped.from_config(init_config, append_config, mock_http)
+    scope = OpenStackUnscoped.from_config(init_config, append_config, fake_http)
     assert isinstance(scope, OpenStackUnscoped)
 
     assert scope.auth_token == 'fake_token'
@@ -207,13 +210,13 @@ def test_ensure_auth_scope(aggregator):
         openstack_check.get_scope_for_instance(instance)
 
 
-def test_ensure_auth_scope_hands_the_client_to_the_scoped_keystone_call(aggregator, mock_http):
+def test_ensure_auth_scope_hands_the_client_to_the_scoped_keystone_call(aggregator, fake_http):
     # The scoped branch is where the check's own client reaches the keystone call. Answering at the
     # client rather than patching the token fetch out is what makes that handover observable: without a
     # client the call raises AttributeError, which nothing on this path catches, so the identity service
     # check never reports and every metric for the instance disappears.
     check = OpenStackCheck('openstack', {'keystone_server_url': 'http://10.0.2.15:5000'}, instances=[instance])
-    mock_http.post.return_value = MOCK_HTTP_RESPONSE
+    fake_http.register_response('POST', KEYSTONE_TOKENS_URL, MOCK_HTTP_RESPONSE)
 
     scope = check.ensure_auth_scope(instance)
 
@@ -223,7 +226,7 @@ def test_ensure_auth_scope_hands_the_client_to_the_scoped_keystone_call(aggregat
     )
 
 
-def test_auth_fallback_drops_the_scope_on_401():
+def test_auth_fallback_drops_the_scope_on_401(fake_http_response):
     # 401 is the one status this handler recovers from: the scope goes away so the next run
     # authenticates again. All three mapped statuses are read off the raised error, so a handler that
     # could not reach them would propagate instead of recovering.
@@ -231,26 +234,26 @@ def test_auth_fallback_drops_the_scope_on_401():
     expired_scope = mock.MagicMock()
     check._current_scope = expired_scope
     check.set_scope_for_instance(instance, expired_scope)
-    unauthorized = MockHTTPResponse(status_code=401, json_data={'error': 'token expired'})
+    fake_http_response('http://10.0.2.15:8774/v2.1/servers', status_code=401, json_data={'error': 'token expired'})
 
-    with mock.patch.object(type(check.http), 'get', autospec=True, return_value=unauthorized):
-        check._make_request_with_auth_fallback('http://10.0.2.15:8774/v2.1/servers')
+    check._make_request_with_auth_fallback('http://10.0.2.15:8774/v2.1/servers')
 
     with pytest.raises(KeyError):
         check.get_scope_for_instance(instance)
 
 
-def test_auth_fallback_reraises_a_status_error_carrying_no_response():
+def test_auth_fallback_reraises_a_status_error_carrying_no_response(fake_http):
     # The auth-token poll runs before the request is sent and raises without a response, so no status
     # exists to dispatch on and nothing local to the call holds one either. None of the three mapped
     # statuses can apply, so the error has to reach the caller.
     check = OpenStackCheck('openstack', {'keystone_server_url': 'http://10.0.2.15:5000'}, instances=[instance])
 
-    with mock.patch.object(
-        type(check.http), 'get', autospec=True, side_effect=HTTPClientStatusError('failed to fetch auth token')
-    ):
-        with pytest.raises(HTTPClientStatusError):
-            check._make_request_with_auth_fallback('http://10.0.2.15:8774/v2.1/servers')
+    fake_http.register_response(
+        'GET', 'http://10.0.2.15:8774/v2.1/servers', HTTPClientStatusError('failed to fetch auth token')
+    )
+
+    with pytest.raises(HTTPClientStatusError):
+        check._make_request_with_auth_fallback('http://10.0.2.15:8774/v2.1/servers')
 
 
 def test_single_server_keeps_its_cache_entry_when_the_status_is_unknown():

@@ -10,7 +10,6 @@ from datadog_checks.apache import Apache
 from datadog_checks.base.utils.http import create_http_client
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
-from datadog_checks.dev.http import MockHTTPResponse
 
 from .common import AUTO_STATUS_URL, BASE_URL, CHECK_NAME, HERE, STATUS_CONFIG, STATUS_URL
 
@@ -51,18 +50,10 @@ def check_status_page_ready():
 
 
 @pytest.fixture
-def mock_hide_server_version(mock_http):
-    def filter_server_version(url, *args, **kwargs):
-        r = http_client.get(url, **kwargs)
-        content = '\n'.join(line for line in r.text.splitlines() if 'ServerVersion' not in line)
-        return MockHTTPResponse(
-            content=content,
-            status_code=r.status_code,
-            headers=dict(r.headers),
-            url=r.url,
-        )
-
-    mock_http.get.side_effect = filter_server_version
+def mock_hide_server_version(dd_environment, fake_http_response):
+    r = http_client.get(AUTO_STATUS_URL)
+    content = '\n'.join(line for line in r.text.splitlines() if 'ServerVersion' not in line)
+    fake_http_response(AUTO_STATUS_URL, content, status_code=r.status_code, headers=dict(r.headers))
     yield
 
 

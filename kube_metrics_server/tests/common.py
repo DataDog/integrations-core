@@ -2,15 +2,19 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from unittest.mock import MagicMock
 
 from datadog_checks.dev import get_here
-from datadog_checks.dev.http import MockHTTPResponse
 
 HERE = get_here()
 
+PROMETHEUS_URL = 'https://localhost:443/metrics'
+HEALTH_URL = 'https://localhost:443/livez'
 
-def make_mock_metrics(mock_openmetrics_http: MagicMock, fixture_filename: str) -> MagicMock:
-    f_name = os.path.join(HERE, 'fixtures', fixture_filename)
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(file_path=f_name, headers={'Content-Type': 'text/plain'})
-    return mock_openmetrics_http
+
+def register_metrics(fake_http_response, fixture_filename, check_runs=1):
+    """Serve the fixture and a healthy health endpoint for each check run."""
+    with open(os.path.join(HERE, 'fixtures', fixture_filename), 'rb') as f:
+        content = f.read()
+    for _ in range(check_runs):
+        fake_http_response(PROMETHEUS_URL, content, headers={'Content-Type': 'text/plain'})
+        fake_http_response(HEALTH_URL)

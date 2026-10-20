@@ -42,10 +42,10 @@ def test_flatten_service_metrics():
         ),
     ],
 )
-def test_make_request_timeout_warning(mock_http, init_config, instance, error_type, expected_warning, includes_error):
+def test_make_request_timeout_warning(fake_http, init_config, instance, error_type, expected_warning, includes_error):
     check = AmbariCheck('Ambari', init_config, [instance])
     error = error_type('timed out')
-    mock_http.get.side_effect = error
+    fake_http.register_response('GET', 'http://localhost/api', error)
     check.warning = warning = MagicMock()
 
     assert check._make_request('http://localhost/api') is None

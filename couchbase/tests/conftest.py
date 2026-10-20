@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
 import os
 import subprocess
 import time
@@ -13,7 +14,6 @@ import requests
 from datadog_checks.couchbase import Couchbase
 from datadog_checks.dev import WaitFor, docker_run
 from datadog_checks.dev.docker import get_container_ip
-from datadog_checks.dev.http import MockHTTPResponse  # noqa: F401
 
 from .common import (
     BUCKET_NAME,
@@ -311,19 +311,16 @@ def bucket_stats():
     return stats['op']['lastTStamp'] != 0
 
 
-def mock_http_responses(url, **_params):
-    mapping = {
-        'http://localhost:8091/pools/default': 'pools/default/default.json',
-        'http://localhost:8091/pools/default/buckets?v=62866031&uuid=f66f28b255e70b6f2618c15228238797': 'pools/default/buckets.json',  # noqa
-        'http://localhost:8091/pools/default/buckets/cb_bucket/stats': 'pools/default/buckets/cb_buckets/stats.json',
-        'http://localhost:8091/pools/default/tasks': 'pools/default/tasks.json',
-        'http://localhost:8093/admin/vitals': 'admin/vitals.json',
-    }
+MOCKED_RESPONSE_FIXTURES = {
+    'http://localhost:8091/pools/default': 'pools/default/default.json',
+    'http://localhost:8091/pools/default/buckets?v=62866031&uuid=f66f28b255e70b6f2618c15228238797': 'pools/default/buckets.json',  # noqa
+    'http://localhost:8091/pools/default/buckets/cb_bucket/stats': 'pools/default/buckets/cb_buckets/stats.json',
+    'http://localhost:8091/pools/default/tasks': 'pools/default/tasks.json',
+}
+QUERY_RESPONSE_FIXTURES = {'http://localhost:8093/admin/vitals': 'admin/vitals.json'}
 
-    metrics_file = mapping.get(url)
 
-    if not metrics_file:
-        pytest.fail("url `{url}` not registered".format(url=url))
-
-    with open(os.path.join(HERE, 'fixtures', metrics_file)) as f:
-        return MockHTTPResponse(content=f.read())
+def register_responses(fake_http_response, url_to_fixture):
+    for url, metrics_file in url_to_fixture.items():
+        with open(os.path.join(HERE, 'fixtures', metrics_file)) as f:
+            fake_http_response(url, json_data=json.load(f))

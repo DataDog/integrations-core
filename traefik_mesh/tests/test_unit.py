@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from itertools import cycle
-
 import mock
 import pytest
 
@@ -12,7 +10,6 @@ from datadog_checks.base.utils.http_exceptions import HTTPClientConnectTimeoutEr
 from datadog_checks.base.utils.http_exceptions import HTTPClientReadTimeoutError as _HTTPReadTimeoutError
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.base.utils.http_exceptions import HTTPClientTimeoutError as _HTTPTimeoutError
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 from datadog_checks.traefik_mesh import TraefikMeshCheck
 
@@ -27,9 +24,16 @@ from .common import (
     read_json_fixture,
 )
 
+METRICS_URL = 'http://localhost:8080/metrics'
 
-def test_check_mock_traefik_mesh_openmetrics(dd_run_check, aggregator, mock_http):
-    mock_http.get.return_value = MockHTTPResponse(file_path=get_fixture_path('traefik_proxy.txt'))
+
+def register_metrics(fake_http_response, fixture):
+    with open(get_fixture_path(fixture), 'rb') as f:
+        fake_http_response(METRICS_URL, f.read(), headers={'Content-Type': 'text/plain'})
+
+
+def test_check_mock_traefik_mesh_openmetrics(dd_run_check, aggregator, fake_http_response):
+    register_metrics(fake_http_response, 'traefik_proxy.txt')
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)
 
@@ -44,8 +48,8 @@ def test_check_mock_traefik_mesh_openmetrics(dd_run_check, aggregator, mock_http
     assert_service_checks(aggregator)
 
 
-def test_check_mock_traefik_mesh_openmetrics_v3(dd_run_check, aggregator, mock_http):
-    mock_http.get.return_value = MockHTTPResponse(file_path=get_fixture_path('traefik_proxy_v3.txt'))
+def test_check_mock_traefik_mesh_openmetrics_v3(dd_run_check, aggregator, fake_http_response):
+    register_metrics(fake_http_response, 'traefik_proxy_v3.txt')
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)
 
@@ -61,8 +65,8 @@ def test_check_mock_traefik_mesh_openmetrics_v3(dd_run_check, aggregator, mock_h
     assert_service_checks(aggregator)
 
 
-def test_check_mock_invalid_traefik_mesh_openmetrics(dd_run_check, aggregator, mock_http):
-    mock_http.get.return_value = MockHTTPResponse(status_code=503)
+def test_check_mock_invalid_traefik_mesh_openmetrics(dd_run_check, aggregator, fake_http_response):
+    fake_http_response(METRICS_URL, status_code=503)
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
     with pytest.raises(Exception, match='There was an error scraping endpoint http://localhost:8080/metrics'):
         dd_run_check(check)
@@ -80,8 +84,9 @@ def test_empty_instance(dd_run_check):
         dd_run_check(check)
 
 
-def test_submit_node_ready_status(aggregator, dd_run_check, mock_http):
-    mock_http.get.return_value = MockHTTPResponse(file_path=get_fixture_path('traefik_proxy.txt'))
+def test_submit_node_ready_status(aggregator, dd_run_check, fake_http_response):
+    register_metrics(fake_http_response, 'traefik_proxy.txt')
+    fake_http_response('http://localhost:8081/api/status/readiness')
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE_CONTROLLER])
 
     with mock.patch(
@@ -100,46 +105,33 @@ def test_submit_node_ready_status(aggregator, dd_run_check, mock_http):
     aggregator.assert_metric('traefik_mesh.node.ready', count=3)
 
 
-def test_valid_controller_service_check(aggregator, mock_http):
-    mock_http.get.return_value = MockHTTPResponse(status_code=200)
+def test_valid_controller_service_check(aggregator, fake_http_response):
+    fake_http_response('http://localhost:8081/api/status/readiness', status_code=200)
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE_CONTROLLER])
 
     check.submit_controller_readiness_service_check()
     aggregator.assert_service_check('traefik_mesh.controller.ready', ServiceCheck.OK)
 
 
-def test_invalid_controller_service_check(aggregator, mock_http):
-    mock_http.get.return_value = MockHTTPResponse(status_code=500)
+def test_invalid_controller_service_check(aggregator, fake_http_response):
+    fake_http_response('http://localhost:8081/api/status/readiness', status_code=500)
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE_CONTROLLER])
 
     check.submit_controller_readiness_service_check()
     aggregator.assert_service_check('traefik_mesh.controller.ready', ServiceCheck.CRITICAL)
 
 
-def test_get_version(datadog_agent, dd_run_check, mock_http):
+def test_get_version(datadog_agent, dd_run_check, fake_http_response):
     instance = {
-        'openmetrics_endpoint': 'http://localhost:8080/metrics',
+        'openmetrics_endpoint': METRICS_URL,
         'traefik_proxy_api_endpoint': 'http://localhost:8080',
         'tags': ['test:traefik_mesh'],
     }
     check = TraefikMeshCheck('traefik_mesh', {}, [instance])
     check.check_id = 'test:123'
 
-    response_cycles = {
-        'http://localhost:8080/metrics': cycle([MockHTTPResponse(file_path=get_fixture_path('traefik_proxy.txt'))]),
-        'http://localhost:8080/api/version': cycle(
-            [MockHTTPResponse(file_path=get_fixture_path('mesh_proxy_version.json'))]
-        ),
-    }
-
-    def get_response(url: str, **_kwargs: object) -> MockHTTPResponse:
-        try:
-            responses = response_cycles[url]
-        except KeyError:
-            raise ValueError(f"Endpoint {url} not found in mocked responses") from None
-        return next(responses)
-
-    mock_http.get.side_effect = get_response
+    register_metrics(fake_http_response, 'traefik_proxy.txt')
+    fake_http_response('http://localhost:8080/api/version', json_data=read_json_fixture('mesh_proxy_version.json'))
     dd_run_check(check)
 
     datadog_agent.assert_metadata(
@@ -154,9 +146,9 @@ def test_get_version(datadog_agent, dd_run_check, mock_http):
     )
 
 
-def test_submit_version(datadog_agent, dd_run_check, mock_http):
+def test_submit_version(datadog_agent, dd_run_check, fake_http_response):
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
-    mock_http.get.return_value = MockHTTPResponse(file_path=get_fixture_path('traefik_proxy.txt'))
+    register_metrics(fake_http_response, 'traefik_proxy.txt')
 
     check.get_version = mock.MagicMock(return_value='2.6.7')
     check.check_id = 'test:123'
@@ -173,15 +165,15 @@ def test_submit_version(datadog_agent, dd_run_check, mock_http):
     datadog_agent.assert_metadata('test:123', version_metadata)
 
 
-def test_get_json_handles_http_status_error(mock_http):
+def test_get_json_handles_http_status_error(fake_http):
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
-    mock_http.get.side_effect = HTTPClientStatusError('404 Client Error')
+    fake_http.register_response('GET', 'http://example.com/api', HTTPClientStatusError('404 Client Error'))
     assert check._get_json('http://example.com/api') is None
 
 
-def test_get_json_handles_http_connection_error(mock_http):
+def test_get_json_handles_http_connection_error(fake_http):
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
-    mock_http.get.side_effect = _HTTPConnectionError('Connection refused')
+    fake_http.register_response('GET', 'http://example.com/api', _HTTPConnectionError('Connection refused'))
     assert check._get_json('http://example.com/api') is None
 
 
@@ -200,10 +192,10 @@ def test_get_json_handles_http_connection_error(mock_http):
         ),
     ],
 )
-def test_get_json_timeout_warning(mock_http, error_type, expected_warning):
+def test_get_json_timeout_warning(fake_http, error_type, expected_warning):
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
     error = error_type('timed out')
-    mock_http.get.side_effect = error
+    fake_http.register_response('GET', 'http://example.com/api', error)
 
     with mock.patch.object(check, 'warning') as warning:
         assert check._get_json('http://example.com/api') is None
@@ -211,7 +203,7 @@ def test_get_json_timeout_warning(mock_http, error_type, expected_warning):
     warning.assert_called_once_with(expected_warning, 'http://example.com/api', error)
 
 
-def test_get_json_handles_http_timeout_error(mock_http):
+def test_get_json_handles_http_timeout_error(fake_http):
     check = TraefikMeshCheck('traefik_mesh', {}, [OM_MOCKED_INSTANCE])
-    mock_http.get.side_effect = _HTTPTimeoutError('Read timed out')
+    fake_http.register_response('GET', 'http://example.com/api', _HTTPTimeoutError('Read timed out'))
     assert check._get_json('http://example.com/api') is None

@@ -3,15 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import os
-from unittest.mock import MagicMock
-
-from datadog_checks.dev.http import MockHTTPResponse
 
 APISERVER_INSTANCE_BEARER_TOKEN = "XXX"
 HERE = os.path.dirname(os.path.abspath(__file__))
 
+PROMETHEUS_URL = 'https://localhost:443/metrics'
+SLI_URL = PROMETHEUS_URL + '/slis'
 
-def make_mock_metrics(mock_openmetrics_http: MagicMock, fixture_filename: str) -> MagicMock:
-    f_name = os.path.join(HERE, 'fixtures', fixture_filename)
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(file_path=f_name, headers={'Content-Type': 'text/plain'})
-    return mock_openmetrics_http
+
+def register_metrics(fake_http_response, file_path, check_runs=1):
+    """Serve the fixture to the SLI probe in `__init__`, then to both endpoints on each check run."""
+    with open(file_path, 'rb') as f:
+        content = f.read()
+    for url in [SLI_URL] + [PROMETHEUS_URL, SLI_URL] * check_runs:
+        fake_http_response(url, content, headers={'Content-Type': 'text/plain'})

@@ -6,8 +6,6 @@ from copy import deepcopy
 
 import pytest
 
-from datadog_checks.dev.http import MockHTTPResponse
-
 INSTANCE = {'prometheus_url': 'http://localhost:5000/metrics'}
 
 
@@ -22,9 +20,12 @@ def instance():
 
 
 @pytest.fixture()
-def mock_metrics_endpoint(mock_openmetrics_http):
+def mock_metrics_endpoint(fake_http, fake_http_response):
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(content=text_data, headers={'Content-Type': 'text/plain'})
+    with open(f_name, 'rb') as f:
+        content = f.read()
+    # test_check runs the check twice
+    for _ in range(2):
+        fake_http_response(INSTANCE['prometheus_url'], content, headers={'Content-Type': 'text/plain'})
     yield
+    fake_http.assert_all_responses_consumed()

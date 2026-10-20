@@ -6,10 +6,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import (
     HTTPClientConnectionError,
     HTTPClientReadTimeoutError,
-    HTTPClientStatusError,
 )
 from datadog_checks.marathon import Marathon
 
@@ -116,7 +116,7 @@ def test_config(test_case, init_config, extra_config, expected_http_kwargs):
         assert check.http.options[key] == value
 
 
-def test_get_json_timeout_emits_critical_service_check(aggregator, mock_http):
+def test_get_json_timeout_emits_critical_service_check(aggregator, fake_http):
     """
     A timeout must still submit marathon.can_connect. With neither read_timeout nor
     connect_timeout configured, __init__ stores a bare number in options['timeout'],
@@ -126,9 +126,8 @@ def test_get_json_timeout_emits_critical_service_check(aggregator, mock_http):
     # Precondition: without the guard below the test would exercise the tuple path only.
     assert not isinstance(check.http.options['timeout'], tuple)
 
-    mock_http.get.side_effect = HTTPClientReadTimeoutError('read timed out')
-
     url = 'http://localhost:8080/v2/apps'
+    fake_http.register_response('GET', url, HTTPClientReadTimeoutError('read timed out'))
     with pytest.raises(Exception, match='Timeout when hitting'):
         check.get_json(url, None, [])
 
@@ -137,14 +136,11 @@ def test_get_json_timeout_emits_critical_service_check(aggregator, mock_http):
     )
 
 
-def test_get_json_error_status_emits_critical_service_check(aggregator, mock_http):
+def test_get_json_error_status_emits_critical_service_check(aggregator, fake_http):
     """An error status must submit marathon.can_connect CRITICAL and report the status it saw."""
     check = Marathon('marathon', {}, [deepcopy(INSTANCE_INTEGRATION)])
-    response = MagicMock(status_code=500)
-    response.raise_for_status.side_effect = HTTPClientStatusError('500 Server Error')
-    mock_http.get.return_value = response
-
     url = 'http://localhost:8080/v2/apps'
+    fake_http.register_response('GET', url, FakeHTTPResponse(status_code=500))
     with pytest.raises(Exception, match='Got 500 when hitting'):
         check.get_json(url, None, [])
 
@@ -153,12 +149,11 @@ def test_get_json_error_status_emits_critical_service_check(aggregator, mock_htt
     )
 
 
-def test_get_json_connection_error_emits_critical_service_check(aggregator, mock_http):
+def test_get_json_connection_error_emits_critical_service_check(aggregator, fake_http):
     """A refused connection must submit marathon.can_connect CRITICAL rather than escape unreported."""
     check = Marathon('marathon', {}, [deepcopy(INSTANCE_INTEGRATION)])
-    mock_http.get.side_effect = HTTPClientConnectionError('connection refused')
-
     url = 'http://localhost:8080/v2/apps'
+    fake_http.register_response('GET', url, HTTPClientConnectionError('connection refused'))
     with pytest.raises(Exception, match='Connection refused when hitting'):
         check.get_json(url, None, [])
 
@@ -167,46 +162,43 @@ def test_get_json_connection_error_emits_critical_service_check(aggregator, mock
     )
 
 
-def test_get_json_success_emits_ok_service_check(aggregator, mock_http):
+def test_get_json_success_emits_ok_service_check(aggregator, fake_http):
     """A successful fetch must submit marathon.can_connect OK and hand back the decoded payload."""
     check = Marathon('marathon', {}, [deepcopy(INSTANCE_INTEGRATION)])
-    response = MagicMock(status_code=200)
-    response.json.return_value = {'apps': []}
-    mock_http.get.return_value = response
-
     url = 'http://localhost:8080/v2/apps'
+    fake_http.register_response('GET', url, FakeHTTPResponse(json_result={'apps': []}))
     assert check.get_json(url, None, []) == {'apps': []}
 
     aggregator.assert_service_check('marathon.can_connect', status=Marathon.OK, tags=['url:{}'.format(url)], count=1)
 
 
-def test_get_json_refreshes_acs_token_when_unauthorized(mock_http):
+def test_get_json_refreshes_acs_token_when_unauthorized(fake_http):
     """A 401 under ACS auth must refresh the token and retry, so an expired token recovers on its own."""
     check = Marathon('marathon', {}, [deepcopy(INSTANCE_INTEGRATION)])
     # Already holding a token, so the refresh under test is the one the 401 drives rather than the
     # first-call fetch that runs when no token is held yet.
     check.ACS_TOKEN = 'stale-token'
-    unauthorized = MagicMock(status_code=401)
-    authorized = MagicMock(status_code=200)
-    authorized.json.return_value = {'apps': []}
-    mock_http.get.side_effect = [unauthorized, authorized]
-    token_response = MagicMock(status_code=200)
-    token_response.json.return_value = {'token': 'refreshed-token'}
-    mock_http.post.return_value = token_response
+    url = 'http://localhost:8080/v2/apps'
+    fake_http.register_response('GET', url, FakeHTTPResponse(status_code=401))
+    fake_http.register_response(
+        'POST',
+        'http://acs.example.com/acs/api/v1/auth/login',
+        FakeHTTPResponse(json_result={'token': 'refreshed-token'}),
+    )
+    fake_http.register_response('GET', url, FakeHTTPResponse(json_result={'apps': []}))
 
-    assert check.get_json('http://localhost:8080/v2/apps', 'http://acs.example.com', []) == {'apps': []}
+    assert check.get_json(url, 'http://acs.example.com', []) == {'apps': []}
 
     assert check.ACS_TOKEN == 'refreshed-token'
 
 
-def test_refresh_acs_token_error_status_emits_critical_service_check(aggregator, mock_http):
+def test_refresh_acs_token_error_status_emits_critical_service_check(aggregator, fake_http):
     """A rejected ACS login must submit marathon.can_connect CRITICAL against the ACS url."""
     check = Marathon('marathon', {}, [deepcopy(INSTANCE_INTEGRATION)])
-    response = MagicMock(status_code=403)
-    response.raise_for_status.side_effect = HTTPClientStatusError('403 Forbidden')
-    mock_http.post.return_value = response
-
     acs_url = 'http://acs.example.com'
+    fake_http.register_response(
+        'POST', 'http://acs.example.com/acs/api/v1/auth/login', FakeHTTPResponse(status_code=403)
+    )
     with pytest.raises(Exception, match='Got 403 when hitting'):
         check.refresh_acs_token(acs_url, [])
 

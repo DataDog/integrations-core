@@ -26,6 +26,7 @@ from .common import (
     YARN_APPS_ALL_STATES,
     YARN_AUTH_CONFIG,
     YARN_CLUSTER_METRICS_TAGS,
+    YARN_CLUSTER_METRICS_URL,
     YARN_CLUSTER_METRICS_VALUES,
     YARN_CLUSTER_TAG,
     YARN_COLLECT_APPS_ALL_STATES_CONFIG,
@@ -276,8 +277,8 @@ def test_ssl_verification_configuration(config, expected_tls_verify):
     assert yarn.http.options['verify'] is expected_tls_verify
 
 
-def test_ssl_verification_error(aggregator, mock_http):
-    mock_http.get.side_effect = HTTPClientSSLError("certificate verification failed")
+def test_ssl_verification_error(aggregator, fake_http):
+    fake_http.register_response('GET', YARN_CLUSTER_METRICS_URL, HTTPClientSSLError("certificate verification failed"))
     instance = YARN_SSL_VERIFY_TRUE_CONFIG['instances'][0]
     yarn = YarnCheck('yarn', {}, [instance])
 
@@ -292,7 +293,7 @@ def test_ssl_verification_error(aggregator, mock_http):
     )
 
 
-def test_malformed_header_still_reports_critical(aggregator, mock_http):
+def test_malformed_header_still_reports_critical(aggregator, fake_http):
     """A server-sent malformed header must still emit yarn.can_connect.
 
     A multi-valued Content-Length makes the backend reject the response header. The translator has
@@ -300,7 +301,7 @@ def test_malformed_header_still_reports_critical(aggregator, mock_http):
     last arm has to name that type.
     """
     message = 'Content-Length contained multiple unmatching values'
-    mock_http.get.side_effect = HTTPClientRequestError(message)
+    fake_http.register_response('GET', YARN_CLUSTER_METRICS_URL, HTTPClientRequestError(message))
     instance = YARN_SSL_VERIFY_TRUE_CONFIG['instances'][0]
     yarn = YarnCheck('yarn', {}, [instance])
 

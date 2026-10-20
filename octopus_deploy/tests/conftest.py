@@ -1,20 +1,20 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import copy
 import json
 import os
+from datetime import timedelta
 from pathlib import Path
-from unittest.mock import MagicMock
 from urllib.parse import urlparse
 
 import pytest
 
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 from datadog_checks.dev.fs import get_here
-from datadog_checks.dev.http import MockHTTPResponse
 
 from .constants import COMPOSE_FILE, INSTANCE, LAB_INSTANCE, USE_OCTOPUS_LAB
 
@@ -72,13 +72,35 @@ PARAMS_TO_FILENAME_MAPPING = {
 BULK_ID_ENDPOINTS = ('deployments',)
 
 
-class _CopyingMock(MagicMock):
-    """Deep-copy args at record time so mutable params aren't modified after the call."""
+class OctopusEmulatorHTTPClient(FakeHTTPClient):
+    """Suite-local Octopus API emulator. Responses depend on request params and time windows, and the caching tests
+    need many check runs, which explicit per-request registration cannot express."""
 
-    def __call__(self, /, *args, **kwargs):
-        args = copy.deepcopy(args)
-        kwargs = copy.deepcopy(kwargs)
-        return super().__call__(*args, **kwargs)
+    def __init__(self, resolve, http_error, mock_data, elapsed_total_seconds):
+        super().__init__()
+        self._resolve = resolve
+        self._http_error = http_error
+        self._mock_data = mock_data
+        self._elapsed_total_seconds = elapsed_total_seconds
+
+    def get(self, url, **options):
+        self.register_response('GET', url, self._emulate(get_url_path(url), options))
+        return super().get(url, **options)
+
+    def _emulate(self, path, options):
+        if path in self._http_error:
+            return self._http_error[path]
+        if path in self._mock_data:
+            return json_response(self._mock_data[path])
+        try:
+            json_data = self._resolve('GET', path, headers=options.get('headers'), params=options.get('params'))
+        except HTTPClientStatusError as e:
+            return e
+        return json_response(json_data, elapsed=timedelta(seconds=self._elapsed_total_seconds.get(path, 0.0)))
+
+
+def json_response(json_data, **kwargs):
+    return FakeHTTPResponse(content=json.dumps(json_data).encode(), json_result=json_data, **kwargs)
 
 
 @pytest.fixture(scope='session')
@@ -183,31 +205,26 @@ def mock_http_call(mock_responses):
         response = mock_responses(method, url, file=file, headers=headers, params=params)
         if response is not None:
             return response
-        raise HTTPClientStatusError('404 Client Error', response=MockHTTPResponse(status_code=404, url=url))
+        raise HTTPClientStatusError('404 Client Error', response=FakeHTTPResponse(status_code=404, url=url))
 
     yield call
 
 
 @pytest.fixture
-def mock_http_get(request, mock_http, mock_http_call):
+def mock_http_get(request, mocker, mock_http_call):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
-    http_error = param.pop('http_error', {})
-    data = param.pop('mock_data', {})
-    elapsed_total_seconds = param.pop('elapsed_total_seconds', {})
+    client = OctopusEmulatorHTTPClient(
+        mock_http_call,
+        http_error=param.pop('http_error', {}),
+        mock_data=param.pop('mock_data', {}),
+        elapsed_total_seconds=param.pop('elapsed_total_seconds', {}),
+    )
 
-    def get(url, *args, **kwargs):
-        kwargs = copy.deepcopy(kwargs)
-        method = 'GET'
-        url = get_url_path(url)
-        if http_error and url in http_error:
-            return http_error[url]
-        if data and url in data:
-            return MockHTTPResponse(json_data=data[url])
-        headers = kwargs.get('headers')
-        params = kwargs.get('params')
-        json_data = mock_http_call(method, url, headers=headers, params=params)
-        return MockHTTPResponse(json_data=json_data, elapsed_seconds=elapsed_total_seconds.get(url, 0.0))
+    def create_client(check, *_args, **_kwargs):
+        # Same guard as the fake_http fixture: the fake models the contract a check only gets by opting in.
+        if not getattr(check, 'AGNOSTIC_HTTP_CLIENT', False):
+            raise AssertionError(f'{type(check).__name__} must set AGNOSTIC_HTTP_CLIENT = True to use mock_http_get.')
+        return client
 
-    copying_mock = _CopyingMock(side_effect=get)
-    mock_http.get = copying_mock
-    return copying_mock
+    mocker.patch.object(AgentCheck, 'create_http_client', autospec=True, side_effect=create_client)
+    return client

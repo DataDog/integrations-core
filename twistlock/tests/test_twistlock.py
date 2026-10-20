@@ -2,14 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
+from pathlib import Path
 
-import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev import get_here
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.twistlock import TwistlockCheck
 
@@ -34,20 +32,31 @@ customtag = "custom:tag"
 HERE = get_here()
 
 
-def mock_get_factory(fixture_group):
-    def mock_get(url, *args, **kwargs):
-        split_url = url.split('/')
-        path = split_url[-1]
-        return MockHTTPResponse(file_path=os.path.join(HERE, 'fixtures', fixture_group, '{}.json'.format(path)))
+API_PATHS = [
+    '/api/v1/settings/license',
+    '/api/v1/registry',
+    '/api/v1/images',
+    '/api/v1/hosts',
+    '/api/v1/containers',
+    '/api/v1/stats/vulnerabilities',
+]
 
-    return mock_get
+
+def register_check_run(fake_http_response, instance, fixture_group, fixture_overrides=None, **options):
+    """Register one response per endpoint queried by a single check run."""
+    fixture_overrides = fixture_overrides or {}
+    for path in API_PATHS:
+        name = path.rsplit('/', 1)[-1]
+        fixture = fixture_overrides.get(name, Path(HERE, 'fixtures', fixture_group, f'{name}.json'))
+        fake_http_response(instance['url'] + path, fixture.read_bytes(), **options)
 
 
 @pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])
-def test_check(aggregator, instance, fixture_group, mock_http):
+def test_check(aggregator, instance, fixture_group, fake_http_response):
     check = TwistlockCheck('twistlock', {}, [instance])
 
-    mock_http.get.side_effect = mock_get_factory(fixture_group)
+    for _ in range(2):
+        register_check_run(fake_http_response, instance, fixture_group)
     check.check(instance)
     check.check(instance)
 
@@ -60,7 +69,7 @@ def test_check(aggregator, instance, fixture_group, mock_http):
 
 
 @pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])
-def test_config_project(aggregator, instance, fixture_group, mock_http):
+def test_config_project(aggregator, instance, fixture_group, fake_http, fake_http_response):
     project = 'foo'
     project_tag = 'project:{}'.format(project)
     qparams = {'project': project}
@@ -68,11 +77,11 @@ def test_config_project(aggregator, instance, fixture_group, mock_http):
     instance['project'] = project
     check = TwistlockCheck('twistlock', {}, [instance])
 
-    mock_http.get.side_effect = mock_get_factory(fixture_group)
+    register_check_run(fake_http_response, instance, fixture_group)
     check.check(instance)
 
     # project config option propagates to the params query string
-    mock_http.get.assert_called_with(mock.ANY, params=qparams)
+    assert [request.options for request in fake_http.requests] == [{'params': qparams}] * len(API_PATHS)
 
     # Check if metrics are tagged with the project.
     for metric in METRICS:
@@ -80,26 +89,24 @@ def test_config_project(aggregator, instance, fixture_group, mock_http):
 
 
 @pytest.mark.parametrize('fixture_group', ['twistlock', 'prisma_cloud'])
-def test_report_image_scan_empty_instances(aggregator, instance, fixture_group, mock_http):
+def test_report_image_scan_empty_instances(aggregator, instance, fixture_group, fake_http_response):
     check = TwistlockCheck('twistlock', {}, [instance])
 
-    def mock_get(url, *args, **kwargs):
-        split_url = url.split('/')
-        path = split_url[-1]
-
-        if path != 'images':
-            return MockHTTPResponse(file_path=os.path.join(HERE, 'fixtures', fixture_group, '{}.json'.format(path)))
-        return MockHTTPResponse(file_path=os.path.join(HERE, 'fixtures', 'empty_images.json'))
-
-    mock_http.get.side_effect = mock_get
+    for _ in range(2):
+        register_check_run(
+            fake_http_response,
+            instance,
+            fixture_group,
+            fixture_overrides={'images': Path(HERE, 'fixtures', 'empty_images.json')},
+        )
     check.check(instance)
     check.check(instance)
 
 
-def test_err_response(aggregator, instance, mock_http):
+def test_err_response(aggregator, instance, fake_http_response):
     check = TwistlockCheck('twistlock', {}, [instance])
 
-    mock_http.get.return_value = MockHTTPResponse('{"err": "invalid credentials"}')
+    fake_http_response(instance['url'] + '/api/v1/settings/license', '{"err": "invalid credentials"}')
     with pytest.raises(Exception, match='^Error in response'):
         check.check(instance)
 

@@ -6,7 +6,7 @@ import os
 import mock
 import pytest
 
-from datadog_checks.dev.http import MockHTTPResponse
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.kubernetes_state import KubernetesState
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -216,8 +216,8 @@ ZERO_METRICS = [
 ]
 
 
-def mock_response(content: bytes, content_type: str = 'text/plain') -> MockHTTPResponse:
-    return MockHTTPResponse(content=content, headers={'Content-Type': content_type})
+def mock_response(content: bytes, content_type: str = 'text/plain') -> FakeHTTPResponse:
+    return FakeHTTPResponse(content=content, headers={'Content-Type': content_type}, encoding='utf-8')
 
 
 def mock_from_file(fname):

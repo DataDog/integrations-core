@@ -6,9 +6,10 @@ import logging
 
 import pytest
 
-from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientStatusError
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
 from datadog_checks.dell_powerflex import DellPowerflexCheck
-from datadog_checks.dev.http import MockHTTPResponse
+from datadog_checks.dell_powerflex.api import TOKEN_PATH
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
@@ -60,18 +61,18 @@ def assert_bwc_metrics(aggregator, bwc_metrics, tags, value=0):
         aggregator.assert_metric(f'{metric_prefix}.num_occured', value=value, tags=tags)
 
 
-def test_can_connect_down(dd_run_check, aggregator, instance, mock_http):
-    mock_http.post.side_effect = HTTPClientConnectionError('connection refused')
+def test_can_connect_down(dd_run_check, aggregator, instance, fake_http):
+    fake_http.register_response(
+        'POST', f'{DEFAULT_GATEWAY_URL}{TOKEN_PATH}', HTTPClientConnectionError('connection refused')
+    )
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=0, tags=BASE_TAGS)
 
 
-def test_auth_response_missing_access_token(dd_run_check, aggregator, instance, mock_http, caplog):
-    mock_http.post.side_effect = lambda *a, **k: MockHTTPResponse(
-        json_data={'error': 'unauthorized_client'}, status_code=200
-    )
+def test_auth_response_missing_access_token(dd_run_check, aggregator, instance, fake_http_response, caplog):
+    fake_http_response(f'{DEFAULT_GATEWAY_URL}{TOKEN_PATH}', method='POST', json_data={'error': 'unauthorized_client'})
     caplog.set_level(logging.WARNING)
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -80,8 +81,8 @@ def test_auth_response_missing_access_token(dd_run_check, aggregator, instance, 
     assert 'Auth response missing access_token' in caplog.text
 
 
-def test_version_failure(dd_run_check, aggregator, instance, mock_auth, mock_http, caplog):
-    mock_http.get.side_effect = HTTPClientStatusError('500 Server Error', response=MockHTTPResponse(status_code=500))
+def test_version_failure(dd_run_check, aggregator, instance, mock_auth, fake_http, caplog):
+    fake_http.register_response('GET', f'{DEFAULT_GATEWAY_URL}/api/version', FakeHTTPResponse(status_code=500))
 
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     caplog.set_level(logging.WARNING)
@@ -91,23 +92,23 @@ def test_version_failure(dd_run_check, aggregator, instance, mock_auth, mock_htt
     assert 'Could not connect to PowerFlex Gateway' in caplog.text
 
 
-def test_can_connect_up(dd_run_check, aggregator, instance, mock_auth, mock_http):
-    mock_http.get.side_effect = lambda *a, **k: MockHTTPResponse(json_data={}, status_code=200)
+def test_can_connect_up(dd_run_check, aggregator, instance, mock_auth, fake_http_response):
+    fake_http_response(f'{DEFAULT_GATEWAY_URL}/api/version', json_data={})
+    for resource_type in ('System', 'Volume', 'StoragePool', 'ProtectionDomain', 'Sds', 'Sdc', 'Device'):
+        fake_http_response(f'{DEFAULT_GATEWAY_URL}/api/types/{resource_type}/instances', json_data={})
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1, tags=BASE_TAGS)
 
 
-def test_unauthenticated_mode(dd_run_check, aggregator, mock_http_call, mock_http):
+def test_unauthenticated_mode(dd_run_check, aggregator, register_api_responses, fake_http):
     instance = {'powerflex_gateway_url': DEFAULT_GATEWAY_URL}
-    mock_http.get.side_effect = lambda url, *args, **kwargs: MockHTTPResponse(
-        json_data=mock_http_call(url), status_code=200
-    )
+    register_api_responses()
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
 
-    mock_http.post.assert_not_called()
+    assert [request for request in fake_http.requests if request.method == 'POST'] == []
     aggregator.assert_metric('dell_powerflex.api.can_connect', value=1)
     aggregator.assert_metric('dell_powerflex.capacity.in_use_in_kb', at_least=1)
     aggregator.assert_metric('dell_powerflex.system.count', at_least=1)
@@ -122,11 +123,13 @@ def test_token_refresh_uses_min_collection_interval(dd_run_check, instance, mock
     spy = mocker.spy(check._api, '_authenticate')
 
     # Token still valid — no re-auth
+    mock_http_get()
     dd_run_check(check)
     assert spy.call_count == 0
 
     # Simulate token nearing expiry
     mocker.patch('datadog_checks.dell_powerflex.api.time', return_value=check._api._token_expiry - 10)
+    mock_http_get()
     dd_run_check(check)
     assert spy.call_count == 1
 
@@ -346,7 +349,7 @@ def test_collect_devices(dd_run_check, aggregator, instance, mock_http_get):
 
 
 def test_collect_system_with_name(dd_run_check, aggregator, instance, mock_http_get, mock_responses):
-    mock_responses(f'{DEFAULT_GATEWAY_URL}/api/types/System/instances')[0]['name'] = 'my-powerflex'
+    mock_responses['/api/types/System/instances'][0]['name'] = 'my-powerflex'
 
     check = DellPowerflexCheck('dell_powerflex', {}, [instance])
     dd_run_check(check)
@@ -627,6 +630,7 @@ def test_collect_events_subsequent_run_uses_cached_time(dd_run_check, aggregator
 
     cached_timestamp = check.read_persistent_cache('last_event_timestamp')
     spy = mocker.spy(check._api, 'get_events')
+    mock_http_get()
     dd_run_check(check)
 
     assert spy.call_args.kwargs['since'] == cached_timestamp
@@ -639,6 +643,7 @@ def test_collect_alerts_subsequent_run_uses_cached_time(dd_run_check, aggregator
 
     cached_timestamp = check.read_persistent_cache('last_alert_timestamp')
     spy = mocker.spy(check._api, 'get_alerts')
+    mock_http_get()
     dd_run_check(check)
 
     assert spy.call_args.kwargs['since'] == cached_timestamp
@@ -671,6 +676,7 @@ def test_collect_failure(
     dd_run_check(check)  # initialize persistent cache prefix
     previous_timestamp = '2020-01-01T00:00:00.000000Z'
     check.write_persistent_cache(cache_key, previous_timestamp)
+    mock_http_get()
     dd_run_check(check)
     assert log_message in caplog.text
     assert len(aggregator.events) == 0

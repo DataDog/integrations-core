@@ -162,17 +162,17 @@ def test_get_nodes_with_service_critical(aggregator):
     aggregator.assert_metric('consul.catalog.services_count', value=1, tags=expected_tags)
 
 
-def test_consul_request(aggregator, instance, mocker, mock_http, mock_http_response_cls):
+def test_consul_request(aggregator, instance, mocker, fake_http, fake_http_response):
     consul_check = ConsulCheck(common.CHECK_NAME, {}, [consul_mocks.MOCK_CONFIG])
     mocker.patch("datadog_checks.base.utils.serialization.json.loads")
-    mock_http.get.return_value = mock_http_response_cls()
+    url = "{}/{}".format(instance["url"], "foo")
+    fake_http_response(url)
 
     consul_check.consul_request("foo")
-    url = "{}/{}".format(instance["url"], "foo")
     aggregator.assert_service_check("consul.can_connect", ConsulCheck.OK, tags=["url:{}".format(url)], count=1)
 
     aggregator.reset()
-    mock_http.get.side_effect = Exception("message")
+    fake_http.register_response('GET', url, Exception("message"))
     with pytest.raises(Exception):
         consul_check.consul_request("foo")
     aggregator.assert_service_check(

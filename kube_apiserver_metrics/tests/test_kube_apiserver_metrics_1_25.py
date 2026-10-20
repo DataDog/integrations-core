@@ -2,11 +2,13 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
+
 import pytest
 
 from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
 
-from .common import make_mock_metrics
+from .common import HERE, register_metrics
 
 customtag = "custom:tag"
 
@@ -18,8 +20,10 @@ instance = {
 
 
 @pytest.fixture()
-def mock_get(mock_openmetrics_http):
-    return make_mock_metrics(mock_openmetrics_http, 'metrics_1.25.3.txt')
+def mock_get(fake_http, fake_http_response):
+    register_metrics(fake_http_response, os.path.join(HERE, 'fixtures', 'metrics_1.25.3.txt'), check_runs=2)
+    yield
+    fake_http.assert_all_responses_consumed()
 
 
 class TestKubeAPIServerMetrics:

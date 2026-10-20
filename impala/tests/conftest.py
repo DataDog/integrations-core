@@ -9,7 +9,6 @@ import pytest
 from datadog_checks.dev import EnvVars, TempDir, docker_run, get_docker_hostname, get_here
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.impala import ImpalaCheck
 
 
@@ -92,14 +91,14 @@ def catalog_check(catalog_instance):
 
 
 @pytest.fixture()
-def mock_metrics(request, mock_http):
+def mock_metrics(request, fake_http_response):
     metrics_file = request.node.get_closest_marker("metrics_file")
-    with open(
-        os.path.join(os.path.dirname(__file__), "fixtures", metrics_file.args[0], metrics_file.args[1]), "r"
-    ) as fixture_file:
+    service_type, file_name = metrics_file.args
+    with open(os.path.join(os.path.dirname(__file__), "fixtures", service_type, file_name), "r") as fixture_file:
         content = fixture_file.read()
 
-    mock_http.get.return_value = MockHTTPResponse(content=content, headers={"Content-Type": "text/plain"})
+    endpoint = request.getfixturevalue(f"{service_type}_instance")["openmetrics_endpoint"]
+    fake_http_response(endpoint, content, headers={"Content-Type": "text/plain"})
     yield
 
 

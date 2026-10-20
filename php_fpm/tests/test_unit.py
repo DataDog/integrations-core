@@ -1,9 +1,10 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import mock
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.php_fpm.php_fpm import BadConfigError, PHPFPMCheck
 
 
@@ -33,42 +34,37 @@ def test_bad_ping(aggregator, dd_run_check):
     aggregator.all_metrics_asserted()
 
 
-def test_should_not_retry(check, instance, mock_http):
+def test_should_not_retry(check, instance, fake_http):
     """
     backoff only works when response code is 503, otherwise the error
     should bubble up
     """
-    mock_http.get.side_effect = FooException("Generic http error here")
+    fake_http.register_response('GET', instance['status_url'], FooException("Generic http error here"))
     with pytest.raises(FooException):
         check._process_status(instance['status_url'], [], None, False)
 
 
-def test_should_bail_out(check, instance, mock_http):
+def test_should_bail_out(check, instance, fake_http):
     """
     backoff should give up after 3 attempts
     """
-    attrs = {'raise_for_status.side_effect': FooException()}
-    mock_http.get.side_effect = [
-        mock.MagicMock(status_code=503, **attrs),
-        mock.MagicMock(status_code=503, **attrs),
-        mock.MagicMock(status_code=503, **attrs),
-        mock.MagicMock(status_code=200),
-    ]
-    with pytest.raises(FooException):
+    for _ in range(3):
+        fake_http.register_response('GET', instance['status_url'], FakeHTTPResponse(status_code=503))
+    fake_http.register_response('GET', instance['status_url'], FakeHTTPResponse(status_code=200, json_result={}))
+    with pytest.raises(HTTPClientStatusError):
         check._process_status(instance['status_url'], [], None, False)
 
+    assert len(fake_http.requests) == 3
 
-def test_backoff_success(check, instance, aggregator, payload, mock_http):
+
+def test_backoff_success(check, instance, aggregator, payload, fake_http, fake_http_response):
     """
     Success after 2 failed attempts
     """
     instance['ping_url'] = None
-    attrs = {'json.return_value': payload}
-    mock_http.get.side_effect = [
-        mock.MagicMock(status_code=503),
-        mock.MagicMock(status_code=503),
-        mock.MagicMock(status_code=200, **attrs),
-    ]
+    for _ in range(2):
+        fake_http.register_response('GET', instance['status_url'], FakeHTTPResponse(status_code=503))
+    fake_http_response(instance['status_url'], json_data=payload)
     pool_name = check._process_status(instance['status_url'], [], None, False)
     assert pool_name == 'www'
 

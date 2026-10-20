@@ -3,20 +3,20 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
-from typing import Any, AnyStr
-from urllib.parse import urlparse
+from pathlib import Path
 
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPClient
 from datadog_checks.dev import docker_run, get_docker_hostname, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs
-from datadog_checks.dev.http import MockHTTPResponse
 
 HERE = get_here()
 
 NO_TENANT_METRICS_FOLDER = 'no_tenant'
 ADMIN_TENANT_METRICS_FOLDER = 'admin_tenant'
 MULTIPLE_TENANTS_METRICS_FOLDER = 'multiple_tenants'
+ENTITIES = ('controller', 'pool', 'serviceengine', 'virtualservice')
 
 
 @pytest.fixture(scope='session')
@@ -55,33 +55,32 @@ def get_expected_metrics():
     return _get_metrics
 
 
+@pytest.fixture(autouse=True)
+def fake_http_max_line_size(mocker):
+    # The check hands its own client to the scrapers, so they read max_line_size from a client the
+    # OpenMetrics scraper never configured. The real client defaults it to None, the fake has no such attribute.
+    mocker.patch.object(FakeHTTPClient, 'max_line_size', None, create=True)
+
+
 @pytest.fixture
-def mock_client(mock_http):
-    def mock_get(url: AnyStr, *__: Any, **___: Any):
-        parsed = urlparse(url)
-        resource = [part for part in parsed.path.split('/') if len(part) > 0][-1]
-        query_params = parsed.query
+def mock_client(fake_http, fake_http_response):
+    """Register one controller session for the unit instance, scraping each entity once."""
+    base_url = 'https://34.123.32.255'
 
-        path = {}
-
-        path['tenant=admin'] = ADMIN_TENANT_METRICS_FOLDER
-        path['tenant=admin%2Ctenant_a%2Ctenant_b'] = MULTIPLE_TENANTS_METRICS_FOLDER
-
-        if query_params:
-            return MockHTTPResponse(
-                file_path=os.path.join(HERE, 'compose', 'fixtures', path[query_params], f'{resource}_metrics')
+    def register(metrics_folder=NO_TENANT_METRICS_FOLDER, tenant_query=''):
+        fake_http_response(f'{base_url}/login', method='POST', json_data={'results': []})
+        # Version metadata is best effort, the unit tests only cover the scraped metrics.
+        fake_http_response(f'{base_url}/api/cluster/version', status_code=404)
+        for entity in ENTITIES:
+            url = f'{base_url}/api/analytics/prometheus-metrics/{entity}'
+            if tenant_query:
+                url += f'/?{tenant_query}'
+            fake_http_response(
+                url, (Path(HERE) / 'compose' / 'fixtures' / metrics_folder / f'{entity}_metrics').read_bytes()
             )
 
-        return MockHTTPResponse(
-            file_path=os.path.join(HERE, 'compose', 'fixtures', NO_TENANT_METRICS_FOLDER, f'{resource}_metrics')
-        )
-
-    def mock_post(url: AnyStr, *__: Any, **___: Any):
-        return MockHTTPResponse(json_data={"results": []})
-
-    mock_http.get.side_effect = mock_get
-    mock_http.post.side_effect = mock_post
-    yield
+    yield register
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.fixture(scope='session')

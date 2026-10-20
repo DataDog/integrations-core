@@ -9,7 +9,7 @@ import pytest
 from datadog_checks.amazon_msk import AmazonMskCheck
 from datadog_checks.amazon_msk.metrics import JMX_METRICS_MAP, NODE_METRICS_MAP, NODE_METRICS_OVERRIDES
 
-from .common import INSTANCE, INSTANCE_LEGACY, assert_jmx_metrics
+from .common import INSTANCE, INSTANCE_LEGACY, assert_jmx_metrics, register_metrics
 
 
 @pytest.mark.usefixtures('mock_data')
@@ -209,8 +209,8 @@ def assert_node_metrics(aggregator, tags, is_enabled=True):
             aggregator.assert_metric(metric, count=0)
 
 
-@pytest.mark.usefixtures('mock_data')
-def test_custom_metric_path(aggregator, instance_legacy, mock_client):
+def test_custom_metric_path(aggregator, instance_legacy, mock_client, fake_http_response):
+    register_metrics(fake_http_response, metrics_path='/')
     instance_legacy['prometheus_metrics_path'] = '/'
     c = AmazonMskCheck('amazon_msk', {}, [instance_legacy])
     assert not c.run()

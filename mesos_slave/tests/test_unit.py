@@ -3,10 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import deepcopy
 
-import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientReadTimeoutError
 from datadog_checks.mesos_slave import MesosSlave
 
@@ -123,34 +123,40 @@ def test_config(check, instance, test_case, extra_config, expected_http_kwargs):
 
 additional_tags = ['instance:mytag1']
 cluster_name_tag = ['mesos_cluster:test-cluster']
-slave_attrs = {'json.return_value': {"master_hostname": "localhost", "frameworks": []}}
-master_attrs = {'json.return_value': {"cluster": "test-cluster"}}
+STATE_URL = 'http://hello.com/state'
+LEGACY_STATE_URL = 'http://hello.com/state.json'
+STATS_URL = 'http://hello.com/stats.json'
+# The check only emits the OK service check for a non-empty payload, and iterates frameworks for the configured tasks.
+STATE_RESPONSE = FakeHTTPResponse(json_result={'frameworks': []})
+SLAVE_STATE_RESPONSE = FakeHTTPResponse(json_result={"master_hostname": "localhost", "frameworks": []})
+MASTER_STATE_RESPONSE = FakeHTTPResponse(json_result={"cluster": "test-cluster"})
+STATS_RESPONSE = FakeHTTPResponse(json_result={'slave/tasks_failed': 0})
 
 state_test_data = [
     (
         'OK for /state',
-        [mock.MagicMock(status_code=200, content='{}')],
+        [(STATE_URL, STATE_RESPONSE)],
         ['url:http://hello.com/state'] + additional_tags,
         False,
         AgentCheck.OK,
     ),
     (
         'failing for /state, OK for /state.json',
-        [Exception, mock.MagicMock(status_code=200, content='{}')],
+        [(STATE_URL, Exception('boom')), (LEGACY_STATE_URL, STATE_RESPONSE)],
         ['url:http://hello.com/state.json'] + additional_tags,
         False,
         AgentCheck.OK,
     ),
     (
         'failing for /state and failing for /state.json',
-        [Exception, Exception],
+        [(STATE_URL, Exception('boom')), (LEGACY_STATE_URL, Exception('boom'))],
         ['url:http://hello.com/state.json'] + additional_tags,
         True,
         AgentCheck.CRITICAL,
     ),
     (
         'OK for /state, OK for /state-summary',
-        [mock.MagicMock(status_code=200, **slave_attrs), mock.MagicMock(status_code=200, **master_attrs)],
+        [(STATE_URL, SLAVE_STATE_RESPONSE), ('http://localhost:5050/state-summary', MASTER_STATE_RESPONSE)],
         ['url:http://hello.com/state'] + additional_tags + cluster_name_tag,
         False,
         AgentCheck.OK,
@@ -160,14 +166,14 @@ state_test_data = [
 stats_test_data = [
     (
         'OK for /stats.json',
-        [mock.MagicMock(status_code=200, content='{}')],
+        [(STATS_URL, STATS_RESPONSE)],
         ['url:http://hello.com/stats.json'] + additional_tags,
         False,
         AgentCheck.OK,
     ),
     (
         'Failing for /stats.json',
-        [Exception],
+        [(STATS_URL, Exception('boom'))],
         ['url:http://hello.com/stats.json'] + additional_tags,
         True,
         AgentCheck.CRITICAL,
@@ -180,15 +186,16 @@ stats_test_data = [
 def test_can_connect_service_check_state(
     instance,
     aggregator,
-    mock_http,
+    fake_http,
     test_case_name,
-    request_mock_effects,
+    responses,
     expected_tags,
     expect_exception,
     expected_status,
 ):
     check = MesosSlave('mesos_slave', {}, [instance])
-    mock_http.get.side_effect = request_mock_effects
+    for url, response in responses:
+        fake_http.register_response('GET', url, response)
     try:
         check._process_state_info('http://hello.com', instance['tasks'], 5050, instance['tags'])
         assert not expect_exception
@@ -200,12 +207,12 @@ def test_can_connect_service_check_state(
 
 
 @pytest.mark.integration
-def test_can_connect_service_with_instance_cluster_name(instance, aggregator, mock_http):
+def test_can_connect_service_with_instance_cluster_name(instance, aggregator, fake_http):
     instance['cluster_name'] = 'test-cluster'
     expected_tags = ['url:http://hello.com/state'] + cluster_name_tag + additional_tags
     expected_status = AgentCheck.OK
     check = MesosSlave('mesos_slave', {}, [instance])
-    mock_http.get.side_effect = [mock.MagicMock(status_code=200, content='{}')]
+    fake_http.register_response('GET', STATE_URL, STATE_RESPONSE)
     try:
         check._process_state_info('http://hello.com', instance['tasks'], 5050, instance['tags'])
         assert not False
@@ -221,15 +228,16 @@ def test_can_connect_service_with_instance_cluster_name(instance, aggregator, mo
 def test_can_connect_service_check_stats(
     instance,
     aggregator,
-    mock_http,
+    fake_http,
     test_case_name,
-    request_mock_effects,
+    responses,
     expected_tags,
     expect_exception,
     expected_status,
 ):
     check = MesosSlave('mesos_slave', {}, [instance])
-    mock_http.get.side_effect = request_mock_effects
+    for url, response in responses:
+        fake_http.register_response('GET', url, response)
     try:
         check._process_stats_info('http://hello.com', instance['tags'])
         assert not expect_exception
@@ -247,14 +255,14 @@ def test_can_connect_service_check_stats(
         pytest.param(HTTPClientConnectionError('connection refused'), "Couldn't connect to URL", id='connection error'),
     ],
 )
-def test_get_json_warns_by_failure_kind_and_propagates(instance, mock_http, error, expected_warning):
+def test_get_json_warns_by_failure_kind_and_propagates(instance, fake_http, error, expected_warning):
     """A timeout is reported as a timeout, and anything else as a connection failure.
 
     Both arms re-raise, because the callers turn the exception into the can_connect service check, and a
     swallowed failure would report the slave as healthy.
     """
     check = MesosSlave('mesos_slave', {}, [instance])
-    mock_http.get.side_effect = error
+    fake_http.register_response('GET', STATE_URL, error)
 
     with pytest.raises(type(error)):
         check._get_json('http://hello.com/state')

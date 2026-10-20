@@ -8,7 +8,7 @@ from datadog_checks.couchbase import Couchbase
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import MOCKED_COUCHBASE_METRICS, QUERY_STATS
-from .conftest import mock_http_responses
+from .conftest import MOCKED_RESPONSE_FIXTURES, QUERY_RESPONSE_FIXTURES, register_responses
 
 
 def test_camel_case_to_joined_lower(instance):
@@ -124,8 +124,8 @@ def test_extract_index_tags(instance, test_input, expected_tags):
     assert eval(str(test_output)) == expected_tags
 
 
-def test_unit(dd_run_check, check, instance, mock_http, aggregator):
-    mock_http.get.side_effect = mock_http_responses
+def test_unit(dd_run_check, check, instance, fake_http_response, aggregator):
+    register_responses(fake_http_response, MOCKED_RESPONSE_FIXTURES)
 
     dd_run_check(check(instance))
 
@@ -140,8 +140,8 @@ def test_unit(dd_run_check, check, instance, mock_http, aggregator):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_unit_query_metrics(dd_run_check, check, instance_query, mock_http, aggregator):
-    mock_http.get.side_effect = mock_http_responses
+def test_unit_query_metrics(dd_run_check, check, instance_query, fake_http_response, aggregator):
+    register_responses(fake_http_response, {**MOCKED_RESPONSE_FIXTURES, **QUERY_RESPONSE_FIXTURES})
 
     dd_run_check(check(instance_query))
 

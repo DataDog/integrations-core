@@ -2,21 +2,25 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import os
 from collections import namedtuple
 
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
 
-from .common import make_mock_metrics
+from .common import HERE, SLI_URL, register_metrics
 
 # Constants
 CHECK_NAME = "kube_apiserver"
 
 
 @pytest.fixture()
-def mock_metrics(mock_openmetrics_http):
-    return make_mock_metrics(mock_openmetrics_http, 'metrics_slis_1.27.3.txt')
+def mock_metrics(fake_http, fake_http_response):
+    register_metrics(fake_http_response, os.path.join(HERE, 'fixtures', 'metrics_slis_1.27.3.txt'))
+    yield
+    fake_http.assert_all_responses_consumed()
 
 
 def test_check_metrics_slis(aggregator, mock_metrics, instance):
@@ -99,11 +103,9 @@ def test_detect_sli_endpoint(aggregator, mock_metrics, instance):
     aggregator.assert_all_metrics_covered()
 
 
-def test_detect_sli_endpoint_404(aggregator, instance, mock_openmetrics_http, mock_http_response_cls):
-    mock_openmetrics_http.get.side_effect = [
-        mock_http_response_cls(status_code=404),
-        mock_http_response_cls(status_code=200),
-    ]
+def test_detect_sli_endpoint_404(aggregator, instance, fake_http):
+    fake_http.register_response('GET', SLI_URL, FakeHTTPResponse(status_code=404))
+    fake_http.register_response('GET', instance['prometheus_url'], FakeHTTPResponse(status_code=200))
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
     SLIMetric = namedtuple("SLIMetric", ["name", "count"])
@@ -116,11 +118,9 @@ def test_detect_sli_endpoint_404(aggregator, instance, mock_openmetrics_http, mo
         aggregator.assert_metric("{}.{}".format(CHECK_NAME, metric.name), count=metric.count)
 
 
-def test_detect_sli_endpoint_403(aggregator, instance, mock_openmetrics_http, mock_http_response_cls):
-    mock_openmetrics_http.get.side_effect = [
-        mock_http_response_cls(status_code=403),
-        mock_http_response_cls(status_code=200),
-    ]
+def test_detect_sli_endpoint_403(aggregator, instance, fake_http):
+    fake_http.register_response('GET', SLI_URL, FakeHTTPResponse(status_code=403))
+    fake_http.register_response('GET', instance['prometheus_url'], FakeHTTPResponse(status_code=200))
     c = KubeAPIServerMetricsCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
     SLIMetric = namedtuple("SLIMetric", ["name", "count"])

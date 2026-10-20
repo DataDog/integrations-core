@@ -10,6 +10,11 @@ from datadog_checks.base.utils.http_exceptions import HTTPClientConnectTimeoutEr
 
 from . import common
 
+HEALTH_URL = common.URL + '/api/v1/health'
+EXPERIMENTAL_URL = common.URL + '/api/experimental/test'
+TASK_INSTANCES_URL = common.URL + '/api/v1/dags/~/dagRuns/~/taskInstances?state=running'
+HEALTHY_STABLE = {'metadatabase': {'status': 'healthy'}, 'scheduler': {'status': 'healthy'}}
+
 
 def test_service_checks_cannot_connect(aggregator):
     check = AirflowCheck('airflow', {}, [common.INSTANCE_WRONG_URL])
@@ -38,10 +43,10 @@ def test_service_checks_cannot_connect(aggregator):
         ),
     ],
 )
-def test_get_json_timeout_warning(mock_http, error_type, expected_warning):
+def test_get_json_timeout_warning(fake_http, error_type, expected_warning):
     check = AirflowCheck('airflow', common.FULL_CONFIG, common.FULL_CONFIG['instances'])
     error = error_type('timed out')
-    mock_http.get.side_effect = error
+    fake_http.register_response('GET', 'http://localhost:8080/api', error)
 
     with mock.patch.object(check, 'warning') as warning:
         assert check._get_json('http://localhost:8080/api') is None
@@ -53,13 +58,13 @@ def test_get_json_timeout_warning(mock_http, error_type, expected_warning):
     'json_resp, expected_healthy_status, expected_healthy_value',
     [({'status': 'OK'}, AgentCheck.OK, 1), ({'status': 'KO'}, AgentCheck.CRITICAL, 0), ({}, AgentCheck.CRITICAL, 0)],
 )
-def test_service_checks_healthy_exp(aggregator, mock_http, json_resp, expected_healthy_status, expected_healthy_value):
+def test_service_checks_healthy_exp(
+    aggregator, fake_http_response, json_resp, expected_healthy_status, expected_healthy_value
+):
     instance = common.FULL_CONFIG['instances'][0]
     check = AirflowCheck('airflow', common.FULL_CONFIG, [instance])
 
-    mock_resp = mock.MagicMock(status_code=200)
-    mock_resp.json.side_effect = [json_resp]
-    mock_http.get.return_value = mock_resp
+    fake_http_response(EXPERIMENTAL_URL, json_data=json_resp)
 
     with mock.patch('datadog_checks.airflow.airflow.AirflowCheck._get_version', return_value=None):
         check.check(None)
@@ -79,17 +84,15 @@ def test_service_checks_healthy_exp(aggregator, mock_http, json_resp, expected_h
     ],
 )
 def test_service_checks_healthy_stable(
-    aggregator, mock_http, metadb_status, scheduler_status, expected_healthy_status, expected_healthy_value
+    aggregator, fake_http_response, metadb_status, scheduler_status, expected_healthy_status, expected_healthy_value
 ):  # Stable is only defined in the context of Airflow 2
     instance = common.FULL_CONFIG['instances'][0]
     check = AirflowCheck('airflow', common.FULL_CONFIG, [instance])
 
-    mock_resp = mock.MagicMock(status_code=200)
-    mock_resp.json.side_effect = [
-        {'metadatabase': {'status': metadb_status}, 'scheduler': {'status': scheduler_status}},
-        {'status': 'OK'},
-    ]
-    mock_http.get.return_value = mock_resp
+    fake_http_response(
+        HEALTH_URL, json_data={'metadatabase': {'status': metadb_status}, 'scheduler': {'status': scheduler_status}}
+    )
+    fake_http_response(TASK_INSTANCES_URL, json_data={'status': 'OK'})
 
     with mock.patch('datadog_checks.airflow.airflow.AirflowCheck._get_version', return_value='2.6.2'):
         check.check(None)
@@ -100,16 +103,12 @@ def test_service_checks_healthy_stable(
     aggregator.assert_metric('airflow.healthy', expected_healthy_value, tags=tags, count=1)
 
 
-def test_dag_total_tasks(aggregator, mock_http, task_instance):
+def test_dag_total_tasks(aggregator, fake_http_response, task_instance):
     instance = common.FULL_CONFIG['instances'][0]
     check = AirflowCheck('airflow', common.FULL_CONFIG, [instance])
 
-    mock_resp = mock.MagicMock(status_code=200)
-    mock_resp.json.side_effect = [
-        {'metadatabase': {'status': 'healthy'}, 'scheduler': {'status': 'healthy'}},
-        task_instance,
-    ]
-    mock_http.get.return_value = mock_resp
+    fake_http_response(HEALTH_URL, json_data=HEALTHY_STABLE)
+    fake_http_response(TASK_INSTANCES_URL, json_data=task_instance)
 
     with mock.patch('datadog_checks.airflow.airflow.AirflowCheck._get_version', return_value='2.6.2'):
         check.check(None)
@@ -117,15 +116,11 @@ def test_dag_total_tasks(aggregator, mock_http, task_instance):
     aggregator.assert_metric('airflow.dag.task.total_running', value=1, count=1)
 
 
-def test_dag_task_ongoing_duration(aggregator, mock_http, task_instance):
+def test_dag_task_ongoing_duration(aggregator, fake_http_response, task_instance):
     instance = common.FULL_CONFIG['instances'][0]
     check = AirflowCheck('airflow', common.FULL_CONFIG, [instance])
 
-    mock_resp = mock.MagicMock(status_code=200)
-    mock_resp.json.side_effect = [
-        {'metadatabase': {'status': 'healthy'}, 'scheduler': {'status': 'healthy'}},
-    ]
-    mock_http.get.return_value = mock_resp
+    fake_http_response(HEALTH_URL, json_data=HEALTHY_STABLE)
 
     with mock.patch('datadog_checks.airflow.airflow.AirflowCheck._get_version', return_value='2.6.2'):
         with mock.patch(
@@ -161,15 +156,11 @@ def test_dag_task_ongoing_duration(aggregator, mock_http, task_instance):
         ),
     ],
 )
-def test_config_collect_ongoing_duration(mock_http, collect_ongoing_duration, should_call_method):
+def test_config_collect_ongoing_duration(fake_http_response, collect_ongoing_duration, should_call_method):
     instance = {**common.FULL_CONFIG['instances'][0], 'collect_ongoing_duration': collect_ongoing_duration}
     check = AirflowCheck('airflow', common.FULL_CONFIG, [instance])
 
-    mock_resp = mock.MagicMock(status_code=200)
-    mock_resp.json.side_effect = [
-        {'metadatabase': {'status': 'healthy'}, 'scheduler': {'status': 'healthy'}},
-    ]
-    mock_http.get.return_value = mock_resp
+    fake_http_response(HEALTH_URL, json_data=HEALTHY_STABLE)
 
     with mock.patch('datadog_checks.airflow.airflow.AirflowCheck._get_version', return_value='2.6.2'):
         with mock.patch(

@@ -2,13 +2,16 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
+
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import HTTPClientRequestError
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.mapreduce import MapReduceCheck
 
 from .common import (
+    CLUSTER_INFO_URL,
     CLUSTER_TAGS,
     COMMON_TAGS,
     CUSTOM_TAGS,
@@ -27,6 +30,7 @@ from .common import (
     RM_URI,
     TEST_PASSWORD,
     TEST_USERNAME,
+    YARN_APPS_URL,
 )
 
 
@@ -96,9 +100,15 @@ def test_check(aggregator, dd_run_check, mocked_request):
     aggregator.assert_all_metrics_covered()
 
 
-def test_json_parse_failure_keeps_url_in_service_check(aggregator, dd_run_check, mock_http):
+def test_json_parse_failure_keeps_url_in_service_check(aggregator, dd_run_check, fake_http):
     """The URL is the only per-endpoint discriminator, so a non-JSON body must still name it."""
-    mock_http.get.side_effect = lambda url, *args, **kwargs: MockHTTPResponse(content='<html>not json</html>')
+    body = '<html>not json</html>'
+    for url in (CLUSTER_INFO_URL, YARN_APPS_URL):
+        fake_http.register_response(
+            'GET',
+            url,
+            FakeHTTPResponse(content=body.encode(), json_error=json.JSONDecodeError('Expecting value', body, 0)),
+        )
     instance = MR_CONFIG['instances'][0]
     mapreduce = MapReduceCheck('mapreduce', INIT_CONFIG, [instance])
 
@@ -174,7 +184,7 @@ def test_disable_legacy_cluster_tag(aggregator, dd_run_check, mocked_request):
         )
 
 
-def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_http):
+def test_malformed_header_still_reports_critical(aggregator, dd_run_check, fake_http):
     """A server-sent malformed header must still emit mapreduce.resource_manager.can_connect.
 
     A multi-valued Content-Length makes the backend reject the response header. The translator has
@@ -182,7 +192,8 @@ def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_
     last arm has to name that type.
     """
     message = 'Content-Length contained multiple unmatching values'
-    mock_http.get.side_effect = HTTPClientRequestError(message)
+    for url in (CLUSTER_INFO_URL, YARN_APPS_URL):
+        fake_http.register_response('GET', url, HTTPClientRequestError(message))
     instance = MR_CONFIG['instances'][0]
     mapreduce = MapReduceCheck('mapreduce', INIT_CONFIG, [instance])
 

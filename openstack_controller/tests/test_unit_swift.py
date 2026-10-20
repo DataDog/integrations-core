@@ -11,7 +11,7 @@ import pytest
 
 import tests.configs as configs
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.http import MockHTTPResponse
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 from tests.metrics import (
@@ -85,15 +85,13 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     args_list = []
-    for call in mock_http_post.call_args_list:
-        args, kwargs = call
-        args_list += list(args)
+    for request in mock_http_post.recorded('POST'):
+        args_list += [request.url]
     assert args_list.count('http://127.0.0.1:6002/v1') == 0
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_post.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_post.recorded('POST'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
     if api_type == ApiType.SDK:
         assert openstack_connection.call_count == 4
@@ -106,8 +104,8 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         pytest.param(
             {
                 'http_error': {
-                    '/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': MockHTTPResponse(status_code=500),
-                    '/v1/AUTH_6e39099cccde4f809b003d9e0dd09304': MockHTTPResponse(status_code=500),
+                    '/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': FakeHTTPResponse(status_code=500),
+                    '/v1/AUTH_6e39099cccde4f809b003d9e0dd09304': FakeHTTPResponse(status_code=500),
                 }
             },
             configs.REST,
@@ -116,8 +114,8 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         pytest.param(
             {
                 'http_error': {
-                    '/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': MockHTTPResponse(status_code=500),
-                    '/v1/AUTH_6e39099cccde4f809b003d9e0dd09304': MockHTTPResponse(status_code=500),
+                    '/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': FakeHTTPResponse(status_code=500),
+                    '/v1/AUTH_6e39099cccde4f809b003d9e0dd09304': FakeHTTPResponse(status_code=500),
                 }
             },
             configs.SDK,
@@ -139,9 +137,8 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     args_list = []
-    for call in mock_http_get.call_args_list:
-        args, kwargs = call
-        args_list += list(args)
+    for request in mock_http_get.recorded('GET'):
+        args_list += [request.url]
     assert args_list.count('http://127.0.0.1:6002/v1') == 0
 
 
@@ -185,9 +182,8 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     args_list = []
-    for call in mock_http_get.call_args_list:
-        args, kwargs = call
-        args_list += [(list(args), kwargs.get('params', None))]
+    for request in mock_http_get.recorded('GET'):
+        args_list += [([request.url], request.options.get('params', None))]
     assert args_list.count((['http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15'], None)) == 1
 
 
@@ -197,8 +193,8 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
         pytest.param(
             {
                 'http_error': {
-                    '/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': MockHTTPResponse(status_code=500),
-                    '/v1/AUTH_6e39099cccde4f809b003d9e0dd09304': MockHTTPResponse(status_code=500),
+                    '/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15': FakeHTTPResponse(status_code=500),
+                    '/v1/AUTH_6e39099cccde4f809b003d9e0dd09304': FakeHTTPResponse(status_code=500),
                 },
             },
             None,
@@ -211,8 +207,8 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
             {
                 'http_error': {
                     'containers': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockHTTPResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockHTTPResponse(status_code=500),
+                        '1e6e233e637d4d55a50a62b63398ad15': FakeHTTPResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': FakeHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -231,9 +227,8 @@ def test_containers_exception(aggregator, check, dd_run_check, mock_http_get, co
         count=0,
     )
     args_list = []
-    for call in mock_http_get.call_args_list:
-        args, kwargs = call
-        args_list += [(list(args), kwargs.get('params', None))]
+    for request in mock_http_get.recorded('GET'):
+        args_list += [([request.url], request.options.get('params', None))]
     if api_type == ApiType.REST:
         assert (
             args_list.count((['http://127.0.0.1:6002/v1/AUTH_6e39099cccde4f809b003d9e0dd09304'], {'format': 'json'}))
@@ -316,12 +311,11 @@ def test_containers_pagination_limit_1(
     dd_run_check(openstack_controller_check(paginated_instance))
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
-            params = kwargs.get('params', {})
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
+            params = request.options.get('params', {})
             limit = params.get('limit')
-            args_list += [(args[0], limit)]
+            args_list += [(request.url, limit)]
         assert args_list.count(('http://127.0.0.1:6002/v1/AUTH_6e39099cccde4f809b003d9e0dd09304', 1)) == 2
         assert args_list.count(('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15', 1)) == 3
     else:
@@ -381,12 +375,11 @@ def test_containers_pagination_limit_1000(
     dd_run_check(openstack_controller_check(paginated_instance))
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
-            params = kwargs.get('params', {})
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
+            params = request.options.get('params', {})
             limit = params.get('limit')
-            args_list += [(args[0], limit)]
+            args_list += [(request.url, limit)]
         assert args_list.count(('http://127.0.0.1:6002/v1/AUTH_6e39099cccde4f809b003d9e0dd09304', 1000)) == 2
         assert args_list.count(('http://127.0.0.1:6002/v1/AUTH_1e6e233e637d4d55a50a62b63398ad15', 1000)) == 2
     else:

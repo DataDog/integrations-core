@@ -17,9 +17,11 @@ from .conftest import (
     EXTRA_EXPECTED_CONTAINER_METRICS_LINUX,
     EXTRA_NETWORK_METRICS,
     INSTANCE_TAGS,
+    LINUX_STATS_FIXTURE_V4,
+    fixture_response,
     mocked_get_tags_v4,
     mocked_is_excluded,
-    mocked_requests_get_linux_v4,
+    register_check_responses,
 )
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -37,12 +39,14 @@ def test_no_config(aggregator, dd_run_check):
 
 
 @pytest.mark.integration
-def test_successful_check_linux_v4(check, aggregator, dd_run_check, mock_http):
+def test_successful_check_linux_v4(check, aggregator, dd_run_check, fake_http):
     """
     Testing successful fargate check on Linux on ECS ENDPOINT API v4.
     """
 
-    mock_http.get.side_effect = mocked_requests_get_linux_v4
+    register_check_responses(
+        fake_http, check, fixture_response('metadata_v4.json'), fixture_response(LINUX_STATS_FIXTURE_V4)
+    )
     with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags_v4):
         with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
             dd_run_check(check)

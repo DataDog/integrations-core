@@ -8,7 +8,7 @@ from typing import Optional  # noqa: F401
 import pytest
 
 from datadog_checks.base import ConfigurationError
-from datadog_checks.dev.http import MockHTTPResponse
+from datadog_checks.base.stubs.http import SUPPRESSED_AUTH
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.voltdb.check import VoltDBCheck, _parse_query
 from datadog_checks.voltdb.config import Config
@@ -402,18 +402,20 @@ def test_http_client_raise_for_status():
         client.raise_for_status(bad)
 
 
-def test_http_mode_disables_http_auth(mock_http):
+def test_http_mode_disables_http_auth(fake_http):
     # VoltDB authenticates via query params, so the check disables HTTP-level auth (config-derived and .netrc).
-    VoltDBCheck('voltdb', {}, [{'url': 'http://vmc.example:8080', 'username': 'doggo', 'password': 'doggopass'}])
+    check = VoltDBCheck(
+        'voltdb', {}, [{'url': 'http://vmc.example:8080', 'username': 'doggo', 'password': 'doggopass'}]
+    )
 
-    mock_http.disable_auth.assert_called_once_with()
+    assert check.http.options['auth'] is SUPPRESSED_AUTH
 
 
-def test_native_mode_leaves_http_auth_alone(mock_http):
+def test_native_mode_leaves_http_auth_alone(fake_http):
     # The native transport never touches self.http, so it must not disable auth either.
-    VoltDBCheck('voltdb', {}, [{'host': 'db-1.example', 'username': 'doggo', 'password': 'doggopass'}])
+    check = VoltDBCheck('voltdb', {}, [{'host': 'db-1.example', 'username': 'doggo', 'password': 'doggopass'}])
 
-    assert not mock_http.disable_auth.called
+    assert check.http.options['auth'] is not SUPPRESSED_AUTH
 
 
 @pytest.mark.parametrize(
@@ -423,7 +425,9 @@ def test_native_mode_leaves_http_auth_alone(mock_http):
         pytest.param(True, 'Hashedpassword', 'Password', id='hashed'),
     ],
 )
-def test_http_mode_wires_credentials_into_query_params(mock_http, password_hashed, password_field, absent_field):
+def test_http_mode_wires_credentials_into_query_params(
+    fake_http, fake_http_response, password_hashed, password_field, absent_field
+):
     # Only the through-the-check path proves config.password_hashed selects the right field.
     instance = {
         'url': 'http://vmc.example:8080',
@@ -432,12 +436,13 @@ def test_http_mode_wires_credentials_into_query_params(mock_http, password_hashe
         'password_hashed': password_hashed,
     }
 
-    mock_http.get.return_value = MockHTTPResponse(json_data={'status': 1, 'results': []})
+    fake_http_response('http://vmc.example:8080/api/1.0/', json_data={'status': 1, 'results': []})
 
     check = VoltDBCheck('voltdb', {}, [instance])
     check._client.call_procedure('@SystemInformation', ['OVERVIEW'])
 
-    _, options = mock_http.get.call_args
+    [request] = fake_http.requests
+    options = request.options
     assert 'auth' not in options  # no per-call auth override alongside the query params
     params = options['params']
     assert params['User'] == 'admin'

@@ -23,12 +23,14 @@ from .common import (
     PERF_METRIC_ID,
     PROPERTIES_EX,
     REALTIME_INSTANCE,
+    TAG_ASSOCIATIONS,
     TOPOLOGY_TAG_ASSOCIATIONS,
     VM_INVALID_GATEWAY_PROPERTIES_EX,
     VM_INVALID_PROPERTIES_EX,
     VM_PROPERTIES_EX,
     VSPHERE_VERSION,
-    configure_vsphere_rest_mock_http,
+    VSphereRestMockState,
+    register_vsphere_rest_session,
 )
 from .mocked_api import MockedAPI
 
@@ -244,17 +246,26 @@ def service_instance(
         yield mock_si
 
 
-def inject_rest_http_client(mock_http, mocker, tag_associations):
-    state = configure_vsphere_rest_mock_http(mock_http, tag_associations=tag_associations)
-    mocker.patch('datadog_checks.vsphere.api_rest.create_http_client', return_value=mock_http)
+def inject_rest_http_client(fake_http, mocker, tag_associations):
+    state = VSphereRestMockState(
+        exceptions={}, tag_associations=TAG_ASSOCIATIONS if tag_associations is None else tag_associations
+    )
+
+    def create_rest_client(*_args, **_kwargs):
+        # Registering when the client is built lets a test configure exceptions on the state beforehand.
+        register_vsphere_rest_session(fake_http, state)
+        return fake_http.create_client()
+
+    # The REST client is built with the module-level factory rather than the check's, so it is patched directly.
+    mocker.patch('datadog_checks.vsphere.api_rest.create_http_client', side_effect=create_rest_client)
     return state
 
 
 @pytest.fixture
-def mock_http_api(mock_http, mocker):
-    return inject_rest_http_client(mock_http, mocker, tag_associations=None)
+def mock_http_api(fake_http, mocker):
+    return inject_rest_http_client(fake_http, mocker, tag_associations=None)
 
 
 @pytest.fixture
-def mock_rest_api(mock_http, mocker):
-    return inject_rest_http_client(mock_http, mocker, tag_associations=TOPOLOGY_TAG_ASSOCIATIONS)
+def mock_rest_api(fake_http, mocker):
+    return inject_rest_http_client(fake_http, mocker, tag_associations=TOPOLOGY_TAG_ASSOCIATIONS)

@@ -10,7 +10,6 @@ from datadog_checks.cilium import CiliumCheck
 from datadog_checks.dev import TempDir, run_command
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.fs import path_join
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.utils import get_active_env
 
@@ -235,18 +234,18 @@ def operator_instance_use_openmetrics():
 
 
 @pytest.fixture()
-def mock_agent_data(mock_openmetrics_http):
+def mock_agent_data(fake_http, fake_http_response):
     f_name = os.path.join(os.path.dirname(__file__), "fixtures", "agent_metrics.txt")
-    with open(f_name, "r") as f:
-        text_data = f.read()
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(content=text_data, headers={"Content-Type": "text/plain"})
+    with open(f_name, "rb") as f:
+        fake_http_response(AGENT_URL, f.read(), headers={"Content-Type": "text/plain"})
     yield
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.fixture()
-def mock_operator_data(mock_openmetrics_http):
+def mock_operator_data(fake_http, fake_http_response):
     f_name = os.path.join(os.path.dirname(__file__), "fixtures", "operator_metrics.txt")
-    with open(f_name, "r") as f:
-        text_data = f.read()
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(content=text_data, headers={"Content-Type": "text/plain"})
+    with open(f_name, "rb") as f:
+        fake_http_response(OPERATOR_URL, f.read(), headers={"Content-Type": "text/plain"})
     yield
+    fake_http.assert_all_responses_consumed()

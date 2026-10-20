@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.sonatype_nexus import constants
 from datadog_checks.sonatype_nexus.check import SonatypeNexusCheck
@@ -11,8 +10,10 @@ from datadog_checks.sonatype_nexus.errors import EmptyResponseError
 
 from .conftest import instance
 
+STATUS_URL = "https://example.com/service/rest/v1/status/check"
 
-def test_successful_metrics_collection(dd_run_check, mock_http, aggregator):
+
+def test_successful_metrics_collection(dd_run_check, fake_http_response, aggregator):
     status_response_data = {key: {"healthy": True} for key in constants.STATUS_METRICS_MAP.keys()}
     analytics_response_data = {
         "gauges": {
@@ -22,22 +23,8 @@ def test_successful_metrics_collection(dd_run_check, mock_http, aggregator):
         }
     }
 
-    responses = {
-        "https://example.com/service/rest/v1/status/check": MockHTTPResponse(
-            status_code=200, json_data=status_response_data
-        ),
-        "https://example.com/service/metrics/data": MockHTTPResponse(
-            status_code=200, json_data=analytics_response_data
-        ),
-    }
-
-    def get_response(url: str, **_kwargs: object) -> MockHTTPResponse:
-        try:
-            return responses[url]
-        except KeyError:
-            raise ValueError(f"Endpoint {url} not found in mocked responses") from None
-
-    mock_http.get.side_effect = get_response
+    fake_http_response(STATUS_URL, json_data=status_response_data)
+    fake_http_response("https://example.com/service/metrics/data", json_data=analytics_response_data)
 
     check = SonatypeNexusCheck("sonatype_nexus", {}, [instance])
     dd_run_check(check)
@@ -94,8 +81,9 @@ def test_empty_instance(dd_run_check):
         dd_run_check(check)
 
 
-def test_invalid_credentials(dd_run_check, mock_http):
-    mock_http.get.return_value = MockHTTPResponse(
+def test_invalid_credentials(dd_run_check, fake_http_response):
+    fake_http_response(
+        STATUS_URL,
         json_data={"error": "Invalid credentials"},
         status_code=401,
     )
@@ -113,8 +101,9 @@ def test_invalid_credentials(dd_run_check, mock_http):
     assert "InvalidAPICredentialsError" in str(excinfo.value)
 
 
-def test_bad_request_error(dd_run_check, mock_http):
-    mock_http.get.return_value = MockHTTPResponse(
+def test_bad_request_error(dd_run_check, fake_http_response):
+    fake_http_response(
+        STATUS_URL,
         json_data={"error": "Bad request"},
         status_code=400,
     )
@@ -125,8 +114,9 @@ def test_bad_request_error(dd_run_check, mock_http):
     assert "BadRequestError" in str(excinfo.value)
 
 
-def test_license_expired_error(dd_run_check, mock_http):
-    mock_http.get.return_value = MockHTTPResponse(
+def test_license_expired_error(dd_run_check, fake_http_response):
+    fake_http_response(
+        STATUS_URL,
         json_data={"error": "License expired"},
         status_code=402,
     )
@@ -137,8 +127,9 @@ def test_license_expired_error(dd_run_check, mock_http):
     assert "LicenseExpiredError" in str(excinfo.value)
 
 
-def test_insufficient_permission_error(dd_run_check, mock_http):
-    mock_http.get.return_value = MockHTTPResponse(
+def test_insufficient_permission_error(dd_run_check, fake_http_response):
+    fake_http_response(
+        STATUS_URL,
         json_data={"error": "Insufficient permissions"},
         status_code=403,
     )
@@ -149,8 +140,9 @@ def test_insufficient_permission_error(dd_run_check, mock_http):
     assert "InsufficientAPIPermissionError" in str(excinfo.value)
 
 
-def test_not_found_error(dd_run_check, mock_http):
-    mock_http.get.return_value = MockHTTPResponse(
+def test_not_found_error(dd_run_check, fake_http_response):
+    fake_http_response(
+        STATUS_URL,
         json_data={"error": "Resource not found"},
         status_code=404,
     )
@@ -161,8 +153,9 @@ def test_not_found_error(dd_run_check, mock_http):
     assert "NotFoundError" in str(excinfo.value)
 
 
-def test_server_error(dd_run_check, mock_http):
-    mock_http.get.return_value = MockHTTPResponse(
+def test_server_error(dd_run_check, fake_http_response):
+    fake_http_response(
+        STATUS_URL,
         json_data={"error": "Internal server error"},
         status_code=500,
     )
@@ -173,8 +166,9 @@ def test_server_error(dd_run_check, mock_http):
     assert "ServerError" in str(excinfo.value)
 
 
-def test_timeout_error(dd_run_check, mock_http):
-    mock_http.get.return_value = MockHTTPResponse(
+def test_timeout_error(dd_run_check, fake_http_response):
+    fake_http_response(
+        STATUS_URL,
         json_data={"error": "TimeoutError"},
         status_code=408,
     )

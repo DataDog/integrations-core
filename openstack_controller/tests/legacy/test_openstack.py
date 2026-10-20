@@ -46,8 +46,9 @@ def test_parse_uptime_string(aggregator):
     assert uptime_parsed == [0.04, 0.14, 0.19]
 
 
-def test_api_error_log_no_password(check, instance, caplog, mock_http):
-    mock_http.post.side_effect = HTTPClientStatusError('not found')
+def test_api_error_log_no_password(check, instance, caplog, fake_http):
+    # The instance sets no keystone_server_url, so the auth URL stays relative.
+    fake_http.register_response('POST', 'v3/auth/tokens', HTTPClientStatusError('not found'))
     with caplog.at_level(logging.DEBUG):
         with pytest.raises(KeystoneUnreachable):
             check._api = SimpleApi(check.log, instance.get("keystone_server_url"), check.http)

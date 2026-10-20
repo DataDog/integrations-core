@@ -1,18 +1,17 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import json
 import os
-import re
 from dataclasses import dataclass
-from typing import Any, Callable
-from urllib.parse import urlparse
+from typing import Any
 
 import mock
 from pyVmomi import vim, vmodl
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.time import get_current_datetime
-from datadog_checks.dev.http import MockHTTPResponse
-from datadog_checks.vsphere.api_rest import VSphereRestAPI
+from datadog_checks.vsphere.api_rest import VSphereRestAPI, VSphereRestClient
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -1135,142 +1134,55 @@ class VSphereRestMockState:
     tag_associations: list[dict[str, Any]]
 
 
-def configure_vsphere_rest_mock_http(
-    mock_http: Any, tag_associations: list[dict[str, Any]] | None = None
-) -> VSphereRestMockState:
-    state = VSphereRestMockState(
-        exceptions={},
-        tag_associations=TAG_ASSOCIATIONS if tag_associations is None else tag_associations,
+JSON_REQUEST_OPTIONS = {'extra_headers': VSphereRestClient.JSON_REQUEST_HEADERS}
+
+
+def _json_response(data: Any) -> FakeHTTPResponse:
+    return FakeHTTPResponse(content=json.dumps(data).encode(), json_result=data)
+
+
+def register_vsphere_rest_session(fake_http: Any, state: VSphereRestMockState) -> None:
+    """Register the requests one REST client makes: login, one tag association batch, and each tag and category.
+
+    The fake vCenter only serves the API flavor of `VSPHERE_VERSION`, so logging in to the other one fails.
+    A configured exception replaces the response of the endpoint whose URL path (and query) it is keyed by.
+    """
+    current = VSPHERE_VERSION.startswith('7.')
+    endpoints = VSphereRestClient.API_ENDPOINTS['current' if current else 'deprecated']
+    base_url = f'https://{VSPHERE_URL}/api/' if current else f'https://{VSPHERE_URL}/rest/com/vmware/cis/'
+    other_base_url = f'https://{VSPHERE_URL}/rest/com/vmware/cis/' if current else f'https://{VSPHERE_URL}/api/'
+
+    def wrap(value: Any) -> Any:
+        return value if current else {'value': value}
+
+    def register(method: str, url: str, response: FakeHTTPResponse, match_options: Any = None) -> None:
+        subpath = url.removeprefix(f'https://{VSPHERE_URL}/')
+        outcome = state.exceptions[subpath] if subpath in state.exceptions else response
+        fake_http.register_response(method, url, outcome, match_options=match_options)
+
+    register('POST', other_base_url + 'session', FakeHTTPResponse(status_code=404), JSON_REQUEST_OPTIONS)
+    register('POST', base_url + endpoints['session'], _json_response(wrap('dummy-token')), JSON_REQUEST_OPTIONS)
+    register(
+        'POST',
+        base_url + endpoints['tag-association-action'],
+        _json_response(wrap(state.tag_associations)),
+        JSON_REQUEST_OPTIONS,
     )
-
-    if VSPHERE_VERSION.startswith('7.'):
-        mock_http.get.side_effect = make_mock_http_v7_get(state)
-        mock_http.post.side_effect = make_mock_http_v7_post(state)
-    else:
-        mock_http.get.side_effect = make_mock_http_v6_get(state)
-        mock_http.post.side_effect = make_mock_http_v6_post(state)
-
-    return state
-
-
-def raise_if_rest_exception_configured(state: VSphereRestMockState, url: str) -> None:
-    parsed_url = urlparse(url)
-    path_and_args = parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
-    path_parts = path_and_args.split('/')
-    subpath = os.path.join(*path_parts)
-    if subpath in state.exceptions:
-        raise state.exceptions[subpath]
-
-
-def make_mock_http_v6_get(state: VSphereRestMockState) -> Callable[..., MockHTTPResponse]:
-    def get(url: str, **kwargs: Any) -> MockHTTPResponse:
-        if '/api/' in url:
-            return MockHTTPResponse(json_data={}, status_code=404)
-        raise_if_rest_exception_configured(state, url)
-        if re.match(r'.*/category/id:.*$', url):
-            parts = url.split('_')
-            num = parts[len(parts) - 1]
-            return MockHTTPResponse(
-                json_data={
-                    "value": {
-                        "name": "my_cat_name_{}".format(num),
-                        "description": "",
-                        "id": "cat_id_{}".format(num),
-                        "used_by": [],
-                        "cardinality": "SINGLE",
-                    }
-                },
-                status_code=200,
-            )
-        elif re.match(r'.*/tagging/tag/id:.*$', url):
-            parts = url.split('_')
-            num = parts[len(parts) - 1]
-            return MockHTTPResponse(
-                json_data={
-                    "value": {
-                        "category_id": "cat_id_{}".format(num),
-                        "name": "my_tag_name_{}".format(num),
-                        "description": "",
-                        "id": "xxx",
-                        "used_by": [],
-                    }
-                },
-                status_code=200,
-            )
-        raise Exception("Rest api mock request not matched: method={}, url={}".format('get', url))
-
-    return get
-
-
-def make_mock_http_v6_post(state: VSphereRestMockState) -> Callable[..., MockHTTPResponse]:
-    def post(url: str, **kwargs: Any) -> MockHTTPResponse:
-        if '/api/' in url:
-            return MockHTTPResponse(json_data={}, status_code=404)
-        assert kwargs['extra_headers']['Content-Type'] == 'application/json'
-        raise_if_rest_exception_configured(state, url)
-        if re.match(r'.*/session$', url):
-            return MockHTTPResponse(
-                json_data={"value": "dummy-token"},
-                status_code=200,
-            )
-        elif re.match(r'.*/tagging/tag-association\?~action=list-attached-tags-on-objects$', url):
-            return MockHTTPResponse(
-                json_data={"value": state.tag_associations},
-                status_code=200,
-            )
-        raise Exception("Rest api mock request not matched: method={}, url={}".format('post', url))
-
-    return post
-
-
-def make_mock_http_v7_get(state: VSphereRestMockState) -> Callable[..., MockHTTPResponse]:
-    def get(url: str, **kwargs: Any) -> MockHTTPResponse:
-        raise_if_rest_exception_configured(state, url)
-        if re.match(r'.*/category/.*$', url):
-            parts = url.split('_')
-            num = parts[len(parts) - 1]
-            return MockHTTPResponse(
-                json_data={
-                    'name': 'my_cat_name_{}'.format(num),
-                    'description': 'VM category description',
-                    'id': 'cat_id_{}'.format(num),
-                    'used_by': [],
-                    'cardinality': 'SINGLE',
-                },
-                status_code=200,
-            )
-        elif re.match(r'.*/tagging/tag/.*$', url):
-            parts = url.split('_')
-            num = parts[len(parts) - 1]
-            return MockHTTPResponse(
-                json_data={
-                    'category_id': 'cat_id_{}'.format(num),
-                    'name': 'my_tag_name_{}'.format(num),
-                    'description': '',
-                    'id': 'tag_id_{}'.format(num),
-                    'used_by': [],
-                },
-                status_code=200,
-            )
-        raise Exception("Rest api mock request not matched: method={}, url={}".format('get', url))
-
-    return get
-
-
-def make_mock_http_v7_post(state: VSphereRestMockState) -> Callable[..., MockHTTPResponse]:
-    def post(url: str, **kwargs: Any) -> MockHTTPResponse:
-        assert kwargs['extra_headers']['Content-Type'] == 'application/json'
-        raise_if_rest_exception_configured(state, url)
-        if re.match(r'.*/session$', url):
-            return MockHTTPResponse(
-                json_data="dummy-token",
-                status_code=200,
-            )
-        elif re.match(r'.*/tagging/tag-association\?action=list-attached-tags-on-objects$', url):
-            return MockHTTPResponse(
-                json_data=state.tag_associations,
-                status_code=200,
-            )
-        raise Exception("Rest api mock request not matched: method={}, url={}".format('post', url))
-
-    return post
+    for tag_id in sorted({tag_id for association in state.tag_associations for tag_id in association['tag_ids']}):
+        num = tag_id.split('_')[-1]
+        tag = {
+            'category_id': f'cat_id_{num}',
+            'name': f'my_tag_name_{num}',
+            'description': '',
+            'id': tag_id if current else 'xxx',
+            'used_by': [],
+        }
+        category = {
+            'name': f'my_cat_name_{num}',
+            'description': 'VM category description' if current else '',
+            'id': f'cat_id_{num}',
+            'used_by': [],
+            'cardinality': 'SINGLE',
+        }
+        register('GET', base_url + endpoints['tags-get'].format(tag_id), _json_response(wrap(tag)))
+        register('GET', base_url + endpoints['category-get'].format(f'cat_id_{num}'), _json_response(wrap(category)))

@@ -19,7 +19,6 @@ from datadog_checks.dev import (
 )
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.temporal import TemporalCheck
 
 INSTANCE = {
@@ -90,9 +89,9 @@ def check(instance):
 
 
 @pytest.fixture()
-def mock_metrics(mock_http):
+def mock_metrics(fake_http, fake_http_response, instance):
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    mock_http.get.return_value = MockHTTPResponse(content=text_data, headers={'Content-Type': 'text/plain'})
+    with open(f_name, 'rb') as f:
+        fake_http_response(instance['openmetrics_endpoint'], f.read(), headers={'Content-Type': 'text/plain'})
     yield
+    fake_http.assert_all_responses_consumed()

@@ -6,14 +6,18 @@ import pytest
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from ..conftest import mock_http_responses
+from ..conftest import read_fixture
 from .metrics import METRICS
 
 pytestmark = pytest.mark.unit
 
 
-def test_check(dd_run_check, aggregator, check, mocked_openmetrics_instance, mock_http):
-    mock_http.get.side_effect = mock_http_responses()
+def test_check(dd_run_check, aggregator, check, mocked_openmetrics_instance, fake_http_response):
+    fake_http_response(
+        'http://torchserve:8082/metrics',
+        read_fixture('openmetrics/metrics.txt'),
+        headers={'Content-Type': 'text/plain'},
+    )
     dd_run_check(check(mocked_openmetrics_instance))
 
     for name, expected_values in METRICS.items():

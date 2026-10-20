@@ -6,14 +6,13 @@ import os
 import pytest
 
 from datadog_checks.cert_manager import CertManagerCheck
-from datadog_checks.dev.http import MockHTTPResponse
 
 from .common import ACME_METRICS, CERT_METRICS, CONTROLLER_METRICS, MOCK_INSTANCE
 
 
 @pytest.fixture()
-def mock_http_error_response(mock_http):
-    mock_http.get.return_value = MockHTTPResponse(status_code=502, headers={'Content-Type': "text/plain"})
+def mock_http_error_response(fake_http_response):
+    fake_http_response(MOCK_INSTANCE['openmetrics_endpoint'], status_code=502, headers={'Content-Type': "text/plain"})
     yield
 
 
@@ -24,13 +23,11 @@ def test_config():
 
 
 @pytest.mark.unit
-def test_check(aggregator, dd_run_check, mock_http):
+def test_check(aggregator, dd_run_check, fake_http_response):
     check = CertManagerCheck('cert_manager', {}, [MOCK_INSTANCE])
 
-    def mock_requests_get(url, *args, **kwargs):
-        return MockHTTPResponse(file_path=os.path.join(os.path.dirname(__file__), 'fixtures', 'cert_manager.txt'))
-
-    mock_http.get.side_effect = mock_requests_get
+    with open(os.path.join(os.path.dirname(__file__), 'fixtures', 'cert_manager.txt'), 'rb') as f:
+        fake_http_response(MOCK_INSTANCE['openmetrics_endpoint'], f.read())
     dd_run_check(check)
 
     expected_metrics = dict(CERT_METRICS)

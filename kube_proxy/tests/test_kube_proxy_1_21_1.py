@@ -6,7 +6,7 @@ import pytest
 
 from datadog_checks.kube_proxy import KubeProxyCheck
 
-from .common import make_mock_metrics
+from .common import register_metrics
 
 instance = {'prometheus_url': 'http://localhost:10249/metrics'}
 
@@ -16,16 +16,20 @@ NAMESPACE = 'kubeproxy'
 
 
 @pytest.fixture()
-def mock_iptables(mock_openmetrics_http):
-    return make_mock_metrics(mock_openmetrics_http, 'metrics_iptables_1.21.1.txt')
+def mock_iptables(fake_http, fake_http_response):
+    register_metrics(fake_http_response, 'metrics_iptables_1.21.1.txt')
+    yield
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.fixture()
-def mock_userspace(mock_openmetrics_http):
-    return make_mock_metrics(mock_openmetrics_http, 'metrics_userspace_1.21.1.txt')
+def mock_userspace(fake_http, fake_http_response):
+    register_metrics(fake_http_response, 'metrics_userspace_1.21.1.txt')
+    yield
+    fake_http.assert_all_responses_consumed()
 
 
-def test_check_iptables(aggregator, mock_iptables, mock_healthcheck_wrapper):
+def test_check_iptables(aggregator, mock_iptables):
     """
     Testing Kube_proxy in iptables mode.
     """
@@ -57,7 +61,7 @@ def test_check_iptables(aggregator, mock_iptables, mock_healthcheck_wrapper):
     aggregator.assert_all_metrics_covered()
 
 
-def test_check_userspace(aggregator, mock_userspace, mock_healthcheck_wrapper):
+def test_check_userspace(aggregator, mock_userspace):
     """
     Testing Kube_proxy in userspace mode.
     """

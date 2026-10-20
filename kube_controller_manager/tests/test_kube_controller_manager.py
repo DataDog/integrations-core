@@ -1,17 +1,18 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from copy import deepcopy
 
 import mock
 import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientStatusError
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.kube_controller_manager import KubeControllerManagerCheck
 
-from .common import make_mock_metrics
+from .common import register_metrics
 
 instance = {
     'prometheus_url': 'http://localhost:10252/metrics',
@@ -33,8 +34,10 @@ NAMESPACE = 'kube_controller_manager'
 
 
 @pytest.fixture()
-def mock_metrics(mock_openmetrics_http):
-    return make_mock_metrics(mock_openmetrics_http, 'metrics.txt')
+def mock_metrics(fake_http, fake_http_response):
+    register_metrics(fake_http_response, 'metrics.txt', instance['prometheus_url'])
+    yield
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.fixture()
@@ -51,16 +54,19 @@ def mock_leader():
         yield
 
 
-def test_check_metrics_with_deprecated(aggregator, mock_metrics, mock_leader, mock_healthcheck_wrapper):
-    c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
-    c.check(instance)
+def test_check_metrics_with_deprecated(aggregator, mock_metrics, mock_leader):
+    # __init__ mutates the instance it is given, so a copy keeps the requests the same whatever the test order
+    check_instance = deepcopy(instance)
+    c = KubeControllerManagerCheck(CHECK_NAME, {}, [check_instance])
+    c.check(check_instance)
 
     generic_check_metrics(aggregator, True)
 
 
-def test_check_metrics_without_deprecated(aggregator, mock_metrics, mock_leader, mock_healthcheck_wrapper):
-    c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
-    c.check(instance2)
+def test_check_metrics_without_deprecated(aggregator, mock_metrics, mock_leader):
+    check_instance = deepcopy(instance2)
+    c = KubeControllerManagerCheck(CHECK_NAME, {}, [check_instance])
+    c.check(check_instance)
 
     generic_check_metrics(aggregator, False)
 
@@ -133,11 +139,11 @@ def generic_check_metrics(aggregator, check_deprecated):
     ],
     ids=['ok', 'http_error', 'http_connection_error'],
 )
-def test_service_check(monkeypatch, mock_openmetrics_http, side_effect, expected_status, expected_message):
+def test_service_check(monkeypatch, fake_http, side_effect, expected_status, expected_message):
     instance = {'prometheus_url': 'http://localhost:10252/metrics'}
-    # mock_openmetrics_http satisfies detect_sli_endpoint during __init__
-    # the service-check path under test is driven by the seeded _http_handlers below
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(status_code=200)
+    # The SLI probe in __init__ goes through the fake, the service-check path under test is driven by the seeded
+    # _http_handlers below
+    fake_http.register_response('GET', 'http://localhost:10252/metrics/slis', FakeHTTPResponse(status_code=200))
 
     check = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
     monkeypatch.setattr(check, 'service_check', mock.Mock())

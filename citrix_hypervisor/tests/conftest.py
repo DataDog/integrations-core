@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
 import ssl
 import subprocess
@@ -10,8 +11,8 @@ from xmlrpc.server import SimpleXMLRPCServer
 
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import find_free_port
 
 from . import common
@@ -38,24 +39,25 @@ def instance(request):
     return request.param
 
 
-def mock_requests_get(url, *args, **kwargs):
-    url_parts = url.split('/')
-    print(url_parts)
-
-    if url_parts[0] == 'wrong':
-        return MockHTTPResponse(status_code=404)
-
-    json_file = f"rrd_updates_{url_parts[0]}.json" if url_parts[1] == "rrd_updates" else f"{url_parts[1]}.json"
-    path = os.path.join(common.HERE, 'fixtures', 'standalone', json_file)
-    if not os.path.exists(path):
-        return MockHTTPResponse(status_code=404)
-
-    return MockHTTPResponse(file_path=path)
+def fixture_response(json_file):
+    with open(os.path.join(common.HERE, 'fixtures', 'standalone', json_file), 'rb') as f:
+        content = f.read()
+    try:
+        return FakeHTTPResponse(content=content, json_result=json.loads(content))
+    except json.JSONDecodeError as e:
+        # Older hypervisors return malformed JSON, which the check parses with yaml instead.
+        return FakeHTTPResponse(content=content, json_error=e)
 
 
 @pytest.fixture
-def mock_responses(mock_http):
-    mock_http.get.side_effect = mock_requests_get
+def mock_responses(fake_http):
+    # Each base URL is used by at most one check run per test, and each request consumes one response.
+    for base_url in ('valid_json', 'broken_json', 'mocked'):
+        fake_http.register_response('GET', f'{base_url}/host_rrd', fixture_response('host_rrd.json'))
+    for base_url in ('valid_json', 'broken_json'):
+        fake_http.register_response('GET', f'{base_url}/rrd_updates', fixture_response(f'rrd_updates_{base_url}.json'))
+    for endpoint in ('host_rrd', 'rrd_updates'):
+        fake_http.register_response('GET', f'wrong/{endpoint}', FakeHTTPResponse(status_code=404))
     yield
 
 

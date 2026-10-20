@@ -8,7 +8,6 @@ import pytest
 
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
-from datadog_checks.dev.http import MockHTTPResponse
 
 from .common import (
     CONFIG,
@@ -18,7 +17,6 @@ from .common import (
     GITLAB_RUNNER_URL,
     GITLAB_TEST_TOKEN,
     HERE,
-    HOST,
 )
 
 # Needed to mount volume for logging
@@ -61,21 +59,13 @@ def dd_environment():
         yield CONFIG, E2E_METADATA
 
 
-def _mocked_requests_get(*args, **kwargs):
-    url = args[0]
-
-    if url == 'http://{}:{}/metrics'.format(HOST, GITLAB_LOCAL_RUNNER_PORT):
-        fixtures_path = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
-        with open(fixtures_path, 'r') as f:
-            text_data = f.read()
-            return MockHTTPResponse(content=text_data, headers={'Content-Type': 'text/plain'})
-    elif url == 'http://{}:{}/ci'.format(HOST, GITLAB_LOCAL_MASTER_PORT):
-        return MockHTTPResponse()
-
-    return MockHTTPResponse(status_code=404)
-
-
 @pytest.fixture()
-def mock_data(mock_openmetrics_http):
-    mock_openmetrics_http.get.side_effect = _mocked_requests_get
+def mock_data(fake_http, fake_http_response):
+    with open(os.path.join(HERE, 'fixtures', 'metrics.txt'), 'rb') as f:
+        metrics = f.read()
+    # Each check run hits the master health endpoint and scrapes the runner once, and the test runs the check twice.
+    for _ in range(2):
+        fake_http_response('{}/ci'.format(GITLAB_MASTER_URL))
+        fake_http_response(GITLAB_RUNNER_URL, metrics, headers={'Content-Type': 'text/plain'})
     yield
+    fake_http.assert_all_responses_consumed()

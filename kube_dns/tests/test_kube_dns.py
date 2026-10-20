@@ -9,7 +9,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientStatusError
 from datadog_checks.kube_dns import KubeDNSCheck
 
-from .common import make_mock_metrics
+from .common import register_metrics
 
 customtag = "custom:tag"
 
@@ -17,8 +17,10 @@ instance = {'prometheus_endpoint': 'http://localhost:10055/metrics', 'tags': [cu
 
 
 @pytest.fixture()
-def mock_get(mock_openmetrics_http):
-    return make_mock_metrics(mock_openmetrics_http, 'metrics.txt')
+def mock_get(fake_http, fake_http_response):
+    register_metrics(fake_http_response, 'metrics.txt', check_runs=3)
+    yield
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.fixture
@@ -49,7 +51,7 @@ class TestKubeDNS:
         NAMESPACE + '.cachemiss_count.count',
     ]
 
-    def test_check(self, aggregator, mock_get, mock_healthcheck_wrapper):
+    def test_check(self, aggregator, mock_get):
         """
         Testing kube_dns check.
         """

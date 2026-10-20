@@ -6,7 +6,6 @@ import os
 import pytest
 
 from datadog_checks.dev import docker_run, get_docker_hostname, get_e2e_discovery_metadata, get_here
-from datadog_checks.dev.http import MockHTTPResponse
 
 HERE = get_here()
 HOST = get_docker_hostname()
@@ -34,7 +33,7 @@ def instance():
 
 
 @pytest.fixture()
-def mock_db_data(mock_openmetrics_http):
+def mock_db_data(fake_http_response):
     if os.environ['SCYLLA_VERSION'].startswith('5.'):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'scylla_5_metrics.txt')
     elif os.environ['SCYLLA_VERSION'].startswith('3.3'):
@@ -42,7 +41,9 @@ def mock_db_data(mock_openmetrics_http):
     elif os.environ['SCYLLA_VERSION'].startswith('3.1'):
         f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'scylla_metrics.txt')
 
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(content=text_data, headers={'Content-Type': 'text/plain'})
+    with open(f_name, 'rb') as f:
+        metrics = f.read()
+    # Tests that run the check scrape the endpoint once per run, and they run it twice.
+    for _ in range(2):
+        fake_http_response(INSTANCE_URL, metrics, headers={'Content-Type': 'text/plain'})
     yield

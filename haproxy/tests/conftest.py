@@ -15,7 +15,6 @@ import requests
 from packaging import version
 
 from datadog_checks.dev import TempDir, WaitFor, docker_run, get_e2e_discovery_metadata
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.haproxy import HAProxyCheck
 from datadog_checks.haproxy.metrics import METRIC_MAP
 
@@ -33,6 +32,8 @@ from .legacy.common import (
     CHECK_CONFIG,
     CHECK_CONFIG_OPEN,
     CONFIG_TCPSOCKET,
+    MOCK_STATS_URL,
+    MOCK_URL,
     PASSWORD,
     STATS_URL,
     STATS_URL_OPEN,
@@ -206,11 +207,13 @@ def instancev2():
 
 
 @pytest.fixture
-def haproxy_mock(mock_http):
+def haproxy_mock(fake_http_response):
     filepath = os.path.join(HERE, 'fixtures', 'mock_data')
     with open(filepath, 'rb') as f:
         data = f.read()
-    mock_http.get.return_value = MockHTTPResponse(content=data)
+    # A legacy check run reads the stats page for version info before fetching the CSV.
+    fake_http_response(MOCK_URL, data)
+    fake_http_response(MOCK_STATS_URL, data)
     yield
 
 
@@ -223,20 +226,21 @@ def mock_data():
 
 
 @pytest.fixture
-def haproxy_mock_evil(mock_http):
+def haproxy_mock_evil(fake_http_response):
     filepath = os.path.join(HERE, 'fixtures', 'mock_data_evil')
     with open(filepath, 'rb') as f:
         data = f.read()
-    mock_http.get.return_value = MockHTTPResponse(content=data)
+    fake_http_response(MOCK_URL, data)
+    fake_http_response(MOCK_STATS_URL, data)
     yield
 
 
 @pytest.fixture
-def haproxy_mock_enterprise_version_info(mock_http):
+def haproxy_mock_enterprise_version_info(fake_http_response):
     filepath = os.path.join(HERE, 'fixtures', 'enterprise_version_info.html')
     with open(filepath, 'rb') as f:
         data = f.read()
-    mock_http.get.return_value = MockHTTPResponse(content=data)
+    fake_http_response('http://the_url_does_not_matter/', data)
     yield
 
 

@@ -5,7 +5,7 @@ import os
 
 from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
 
-from .common import HERE
+from .common import HERE, register_metrics
 
 OM_RESPONSE_FIXTURES = os.path.join(HERE, 'fixtures', 'metrics_1.28.0.txt')
 
@@ -87,12 +87,12 @@ class TestKubeAPIServerMetrics:
         'apiserver_request_terminations_total.count',
     ]
 
-    def test_check(self, dd_run_check, aggregator, mock_openmetrics_http, mock_http_response_cls):
+    def test_check(self, dd_run_check, aggregator, fake_http_response):
         """
         Testing kube_apiserver_metrics metrics collection.
         """
         NAMESPACE = 'kube_apiserver'
-        mock_openmetrics_http.get.return_value = mock_http_response_cls(file_path=OM_RESPONSE_FIXTURES)
+        register_metrics(fake_http_response, OM_RESPONSE_FIXTURES, check_runs=2)
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [instance])
         dd_run_check(check)
 

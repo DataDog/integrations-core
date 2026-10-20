@@ -2,13 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
-from urllib.parse import urlparse
 
 import mock
 import pytest
 
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.http import MockHTTPResponse
 
 from . import common
 
@@ -25,15 +23,9 @@ def dd_environment():
         yield common.INSTANCE, common.E2E_METADATA
 
 
-def route_metrics_fixture(url, *args, **kwargs):
-    exporter_type = 'jmx' if urlparse(url).port == common.JMX_PORT else 'node'
-    return MockHTTPResponse(file_path=common.get_metrics_fixture_path(exporter_type))
-
-
 @pytest.fixture
-def mock_data(mock_openmetrics_http):
-    mock_openmetrics_http.get.side_effect = route_metrics_fixture
-    yield
+def mock_data(fake_http_response):
+    common.register_metrics(fake_http_response)
 
 
 @pytest.fixture

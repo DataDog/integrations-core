@@ -4,18 +4,18 @@
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from ..conftest import mock_http_responses
+from ..conftest import register_management_responses
 from .common import METRICS
 
 pytestmark = pytest.mark.unit
 
 
-def test_check(dd_run_check, aggregator, check, mocked_management_instance, mock_http):
-    mock_http.get.side_effect = mock_http_responses()
+def test_check(dd_run_check, aggregator, check, mocked_management_instance, fake_http, fake_http_response):
+    register_management_responses(fake_http_response)
     dd_run_check(check(mocked_management_instance))
+    fake_http.assert_all_responses_consumed()
 
     for metric in METRICS:
         aggregator.assert_metric(
@@ -33,18 +33,12 @@ def test_check(dd_run_check, aggregator, check, mocked_management_instance, mock
     assert len(aggregator.events) == 0
 
 
-def test_check_fails_on_one_model(dd_run_check, aggregator, check, mocked_management_instance, mock_http):
-    def custom_mock_http_responses(url, **_params):
-        if url in (
-            'http://torchserve:8081/models/linear_regression_1_1/all',
-            'http://torchserve:8081/models/linear_regression_2_2/all',
-        ):
-            return MockHTTPResponse(status_code=500)
-
-        return mock_http_responses()(url)
-
-    mock_http.get.side_effect = custom_mock_http_responses
+def test_check_fails_on_one_model(
+    dd_run_check, aggregator, check, mocked_management_instance, fake_http, fake_http_response
+):
+    register_management_responses(fake_http_response, failing=('linear_regression_1_1', 'linear_regression_2_2'))
     dd_run_check(check(mocked_management_instance))
+    fake_http.assert_all_responses_consumed()
 
     # We should not get anything for these models
     aggregator.assert_metric(
@@ -155,13 +149,23 @@ def test_check_fails_on_one_model(dd_run_check, aggregator, check, mocked_manage
     ],
 )
 def test_check_with_discovery(
-    dd_run_check, aggregator, check, mocked_management_instance, mock_http, include, exclude, limit, expected_models
+    dd_run_check,
+    aggregator,
+    check,
+    mocked_management_instance,
+    fake_http,
+    fake_http_response,
+    include,
+    exclude,
+    limit,
+    expected_models,
 ):
-    mock_http.get.side_effect = mock_http_responses()
+    register_management_responses(fake_http_response, models=expected_models)
     mocked_management_instance["limit"] = limit
     mocked_management_instance["exclude"] = exclude
     mocked_management_instance["include"] = include
     dd_run_check(check(mocked_management_instance))
+    fake_http.assert_all_responses_consumed()
 
     for metric in METRICS:
         aggregator.assert_metric(
@@ -302,20 +306,30 @@ def metric_should_be_exposed(metric, expected_models):
     ],
 )
 def test_check_with_events(
-    dd_run_check, datadog_agent, aggregator, check, mocked_management_instance, mock_http, new_response, expected_events
+    dd_run_check,
+    datadog_agent,
+    aggregator,
+    check,
+    mocked_management_instance,
+    fake_http,
+    fake_http_response,
+    new_response,
+    expected_events,
 ):
     # We generate a cache to save the models, so clear it to make sure we won't get the data from a previous test.
     datadog_agent.reset()
 
     check_instance = check(mocked_management_instance)
-    mock_http.get.side_effect = mock_http_responses()
+    for _ in range(2):
+        register_management_responses(fake_http_response)
     dd_run_check(check_instance)
     dd_run_check(check_instance)
 
     assert len(aggregator.events) == 0
 
-    mock_http.get.side_effect = mock_http_responses(new_response)
+    register_management_responses(fake_http_response, new_response)
     dd_run_check(check_instance)
+    fake_http.assert_all_responses_consumed()
 
     for expected_event, actual_event in zip(expected_events, aggregator.events, strict=True):
         assert "timestamp" in actual_event and actual_event["timestamp"]
@@ -332,19 +346,23 @@ def test_check_with_events(
         )
 
 
-def test_check_disable_events(dd_run_check, datadog_agent, aggregator, check, mocked_management_instance, mock_http):
+def test_check_disable_events(
+    dd_run_check, datadog_agent, aggregator, check, mocked_management_instance, fake_http, fake_http_response
+):
     # We generate a cache to save the models, so clear it to make sure we won't get the data from a previous test.
     datadog_agent.reset()
     mocked_management_instance["submit_events"] = False
 
     check_instance = check(mocked_management_instance)
-    mock_http.get.side_effect = mock_http_responses()
+    for _ in range(2):
+        register_management_responses(fake_http_response)
     dd_run_check(check_instance)
     dd_run_check(check_instance)
 
     assert len(aggregator.events) == 0
 
-    mock_http.get.side_effect = mock_http_responses("management/events/models_all_dropped.json")
+    register_management_responses(fake_http_response, "management/events/models_all_dropped.json")
     dd_run_check(check_instance)
+    fake_http.assert_all_responses_consumed()
 
     assert len(aggregator.events) == 0

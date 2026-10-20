@@ -72,10 +72,10 @@ def test_config(check, instance, test_case, extra_config, expected_http_kwargs):
         assert c.http.options[key] == value
 
 
-def test_no_version(check, instance, caplog, mock_http):
+def test_no_version(check, instance, caplog, fake_http_response):
     c = check(instance)
 
-    mock_http.get.return_value = mock.MagicMock(status_code=200, content=b'{}', headers={'server': 'nginx'})
+    fake_http_response(instance['nginx_status_url'], b'{}', headers={'server': 'nginx'})
 
     c.check(instance)
 

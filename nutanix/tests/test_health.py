@@ -11,8 +11,10 @@ from datadog_checks.nutanix import NutanixCheck
 pytestmark = [pytest.mark.unit]
 
 
-def test_connection_error_reports_health_down(dd_run_check, aggregator, mock_instance, mock_http):
-    mock_http.get.side_effect = HTTPClientConnectionError("Connection refused")
+def test_connection_error_reports_health_down(dd_run_check, aggregator, mock_instance, fake_http):
+    fake_http.register_response(
+        'GET', 'https://10.0.0.197:9440/console', HTTPClientConnectionError("Connection refused")
+    )
     check = NutanixCheck('nutanix', {}, [mock_instance])
     dd_run_check(check)
 

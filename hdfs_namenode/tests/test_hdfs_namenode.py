@@ -1,11 +1,13 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+
 import mock
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import HTTPClientRequestError
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.hdfs_namenode import HDFSNameNode
 
 from .common import (
@@ -17,6 +19,7 @@ from .common import (
     HDFS_NAMESYSTEM_MUTUAL_METRICS_VALUES,
     HDFS_NAMESYSTEM_STATE_METRICS_VALUES,
     HDFS_RAW_VERSION,
+    NAME_SYSTEM_STATE_URL,
     NAMENODE_URI,
     TEST_PASSWORD,
     TEST_USERNAME,
@@ -77,9 +80,14 @@ def test_metadata(aggregator, dd_run_check, mocked_request, datadog_agent):
     datadog_agent.assert_metadata_count(6)
 
 
-def test_json_parse_failure_keeps_url_in_service_check(aggregator, dd_run_check, mock_http):
+def test_json_parse_failure_keeps_url_in_service_check(aggregator, dd_run_check, fake_http):
     """The URL is the only per-bean discriminator, so a non-JSON body must still name it."""
-    mock_http.get.side_effect = lambda url, *args, **kwargs: MockHTTPResponse(content='<html>not json</html>')
+    body = '<html>not json</html>'
+    fake_http.register_response(
+        'GET',
+        NAME_SYSTEM_STATE_URL,
+        FakeHTTPResponse(content=body.encode(), json_error=json.JSONDecodeError('Expecting value', body, 0)),
+    )
     instance = HDFS_NAMENODE_CONFIG['instances'][0]
     hdfs_namenode = HDFSNameNode('hdfs_namenode', {}, [instance])
 
@@ -91,7 +99,7 @@ def test_json_parse_failure_keeps_url_in_service_check(aggregator, dd_run_check,
     assert message.startswith('JSON Parse failed: {}'.format(NAMENODE_URI))
 
 
-def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_http):
+def test_malformed_header_still_reports_critical(aggregator, dd_run_check, fake_http):
     """A server-sent malformed header must still emit hdfs.namenode.jmx.can_connect.
 
     A multi-valued Content-Length makes the backend reject the response header. The translator has
@@ -99,7 +107,7 @@ def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_
     last arm has to name that type.
     """
     message = 'Content-Length contained multiple unmatching values'
-    mock_http.get.side_effect = HTTPClientRequestError(message)
+    fake_http.register_response('GET', NAME_SYSTEM_STATE_URL, HTTPClientRequestError(message))
     instance = HDFS_NAMENODE_CONFIG['instances'][0]
     hdfs_namenode = HDFSNameNode('hdfs_namenode', {}, [instance])
 

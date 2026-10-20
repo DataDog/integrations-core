@@ -9,7 +9,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientStatusError
 from datadog_checks.kube_metrics_server import KubeMetricsServerCheck
 
-from .common import make_mock_metrics
+from .common import register_metrics
 
 instance = {
     'prometheus_url': 'https://localhost:443/metrics',
@@ -23,11 +23,13 @@ NAMESPACE = 'kube_metrics_server'
 
 
 @pytest.fixture()
-def mock_metrics(mock_openmetrics_http):
-    return make_mock_metrics(mock_openmetrics_http, 'metrics.txt')
+def mock_metrics(fake_http, fake_http_response):
+    register_metrics(fake_http_response, 'metrics.txt')
+    yield
+    fake_http.assert_all_responses_consumed()
 
 
-def test_check_metrics(aggregator, mock_metrics, mock_healthcheck_wrapper):
+def test_check_metrics(aggregator, mock_metrics):
     c = KubeMetricsServerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 

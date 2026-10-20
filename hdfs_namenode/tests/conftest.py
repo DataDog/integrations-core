@@ -1,12 +1,12 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
 
 import pytest
 
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.hdfs_namenode import HDFSNameNode
 
 from .common import (
@@ -40,15 +40,11 @@ def check():
 
 
 @pytest.fixture
-def mocked_request(mock_http):
-    mock_http.get.side_effect = requests_get_mock
-    yield
-
-
-def requests_get_mock(url, *args, **kwargs):
-    if url == NAME_SYSTEM_STATE_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'hdfs_namesystem_state.json'))
-    elif url == NAME_SYSTEM_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'hdfs_namesystem.json'))
-    elif url == NAME_SYSTEM_METADATA_URL:
-        return MockHTTPResponse(file_path=os.path.join(FIXTURE_DIR, 'hdfs_namesystem_info.json'))
+def mocked_request(fake_http_response):
+    for url, fixture in (
+        (NAME_SYSTEM_STATE_URL, 'hdfs_namesystem_state.json'),
+        (NAME_SYSTEM_URL, 'hdfs_namesystem.json'),
+        (NAME_SYSTEM_METADATA_URL, 'hdfs_namesystem_info.json'),
+    ):
+        with open(os.path.join(FIXTURE_DIR, fixture)) as f:
+            fake_http_response(url, json_data=json.load(f))

@@ -5,6 +5,7 @@
 import json
 import os
 import re
+from datetime import timedelta
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -14,11 +15,13 @@ import pytest
 import yaml
 
 import tests.configs as configs
+from datadog_checks.base import AgentCheck
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse
+from datadog_checks.base.utils.http import STANDARD_FIELDS
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.fs import get_here
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.openstack_controller import OpenStackControllerCheck
 
 from .endpoints import IRONIC_ENDPOINTS, NOVA_ENDPOINTS
@@ -174,7 +177,7 @@ def mock_http_call(mock_responses):
         response = mock_responses(method, url, file=file, headers=headers, params=params)
         if response is not None:
             return response
-        raise HTTPClientStatusError("404 Not Found", response=MockHTTPResponse(status_code=404, url=url))
+        raise HTTPClientStatusError("404 Not Found", response=FakeHTTPResponse(status_code=404, url=url))
 
     yield call
 
@@ -985,38 +988,95 @@ def get_url_path(url):
     return parsed_url.path + "?" + parsed_url.query if parsed_url.query else parsed_url.path
 
 
+class FixtureTreeHTTPClient(FakeHTTPClient):
+    """Suite-local response emulator. The suite drives full check runs (~31k requests) whose responses depend on
+    path, params and client headers, which explicit registration cannot express.
+
+    Each request is answered by the responder installed for its method, registered and then consumed through the
+    fake, so every request is still recorded in `requests`.
+    """
+
+    def __init__(self, responders):
+        # The SDK path reads tls_verify and friends off tls_config, which a real client always seeds.
+        super().__init__(tls_config={key: value for key, value in STANDARD_FIELDS.items() if key.startswith('tls_')})
+        self.responders = responders
+
+    def create_client(self):
+        # Answers are registered and consumed on the same client, so only the recorded requests need sharing.
+        client = FixtureTreeHTTPClient(self.responders)
+        client.requests = self.requests
+        return client
+
+    def recorded(self, method):
+        return [request for request in self.requests if request.method == method]
+
+    def emulate(self, method, url, options):
+        responder = self.responders.get(method)
+        if responder is not None:
+            self.register_response(method, url, responder(self, url, options))
+
+    def get(self, url, **options):
+        self.emulate('GET', url, options)
+        return super().get(url, **options)
+
+    def post(self, url, **options):
+        self.emulate('POST', url, options)
+        return super().post(url, **options)
+
+
 @pytest.fixture
-def mock_http_get(request, mock_http_call, mock_http):
+def fake_openstack_http(mocker):
+    client = FixtureTreeHTTPClient({})
+
+    def create_client(check, *_args, **_kwargs):
+        if not getattr(check, 'AGNOSTIC_HTTP_CLIENT', False):
+            raise AssertionError(f'{type(check).__name__} must set AGNOSTIC_HTTP_CLIENT = True to use the HTTP fake.')
+        return client.create_client()
+
+    mocker.patch.object(AgentCheck, 'create_http_client', autospec=True, side_effect=create_client)
+    return client
+
+
+def fixture_tree_lookup(mock_http_call, method, path, file='response', headers=None, params=None):
+    try:
+        return mock_http_call(method, path, file, headers=headers, params=params)
+    except HTTPClientStatusError as e:
+        return e
+
+
+@pytest.fixture
+def mock_http_get(request, mock_http_call, fake_openstack_http):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     http_error = param.pop('http_error', {})
     data = param.pop('mock_data', {})
     elapsed_total_seconds = param.pop('elapsed_total_seconds', {})
 
-    def get(url, **options):
+    def get(client, url, options):
         path = get_url_path(url)
         if http_error and path in http_error:
             return http_error[path]
         if data and path in data:
-            return MockHTTPResponse(json_data=data[path], status_code=200)
-        headers = {**mock_http.options.get('headers', {}), **(options.get('headers') or {})}
-        params = options.get('params')
-        return MockHTTPResponse(
-            json_data=mock_http_call('GET', path, headers=headers, params=params),
-            status_code=200,
-            elapsed_seconds=elapsed_total_seconds.get(path, 0.0),
+            return FakeHTTPResponse(json_result=data[path])
+        headers = {**client.options['headers'], **(options.get('headers') or {})}
+        json_data = fixture_tree_lookup(mock_http_call, 'GET', path, headers=headers, params=options.get('params'))
+        if isinstance(json_data, Exception):
+            return json_data
+        return FakeHTTPResponse(
+            json_result=json_data,
+            elapsed=timedelta(seconds=elapsed_total_seconds.get(path, 0.0)),
         )
 
-    mock_http.get.side_effect = get
-    return mock_http.get
+    fake_openstack_http.responders['GET'] = get
+    return fake_openstack_http
 
 
 @pytest.fixture
-def mock_http_post(request, mock_http_call, mock_http):
+def mock_http_post(request, mock_http_call, fake_openstack_http):
     param = request.param if hasattr(request, 'param') and request.param is not None else {}
     replace = param.get('replace')
     http_error = param.get('http_error')
 
-    def post(url, **options):
+    def post(client, url, options):
         method = 'POST'
         path = get_url_path(url)
         if http_error and path in http_error:
@@ -1030,13 +1090,15 @@ def mock_http_post(request, mock_http_call, mock_http):
                     file = 'system'
                 else:
                     file = file.get('project', {}).get('id')
-            json_data = mock_http_call(method, path, file, headers=mock_http.options.get('headers'))
+            json_data = fixture_tree_lookup(mock_http_call, method, path, file, headers=client.options['headers'])
             headers = {'X-Subject-Token': f'token_{file}'}
         else:
-            json_data = mock_http_call(method, path)
+            json_data = fixture_tree_lookup(mock_http_call, method, path)
+        if isinstance(json_data, Exception):
+            return json_data
         if replace and path in replace:
             json_data = replace[path](json_data)
-        return MockHTTPResponse(json_data=json_data, status_code=200, headers=headers)
+        return FakeHTTPResponse(json_result=json_data, headers=headers)
 
-    mock_http.post.side_effect = post
-    return mock_http.post
+    fake_openstack_http.responders['POST'] = post
+    return fake_openstack_http

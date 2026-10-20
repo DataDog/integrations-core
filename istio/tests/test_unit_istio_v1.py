@@ -1,19 +1,20 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.istio import Istio
 
 from . import common
 from .utils import _assert_tags_excluded, get_response
 
 
-def test_legacy_istiod(aggregator, dd_run_check, mock_openmetrics_http):
+def test_legacy_istiod(aggregator, dd_run_check, fake_http_response):
     """
     Test the istiod deployment endpoint for v1.5+ check for OpenMetricsV1 implementation
     """
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(
-        content=get_response('1.5', 'istiod.txt'), headers={'Content-Type': 'text/plain'}
+    fake_http_response(
+        common.MOCK_LEGACY_ISTIOD_INSTANCE['istiod_endpoint'],
+        get_response('1.5', 'istiod.txt'),
+        headers={'Content-Type': 'text/plain'},
     )
     check = Istio('istio', {}, [common.MOCK_LEGACY_ISTIOD_INSTANCE])
     dd_run_check(check)
@@ -24,12 +25,14 @@ def test_legacy_istiod(aggregator, dd_run_check, mock_openmetrics_http):
     aggregator.assert_all_metrics_covered()
 
 
-def test_legacy_proxy_mesh(aggregator, dd_run_check, mock_openmetrics_http):
+def test_legacy_proxy_mesh(aggregator, dd_run_check, fake_http_response):
     """
     Test proxy mesh check for OpenMetricsV1 implementation
     """
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(
-        content=get_response('1.5', 'istio-proxy.txt'), headers={'Content-Type': 'text/plain'}
+    fake_http_response(
+        common.MOCK_LEGACY_MESH_INSTANCE['istio_mesh_endpoint'],
+        get_response('1.5', 'istio-proxy.txt'),
+        headers={'Content-Type': 'text/plain'},
     )
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_LEGACY_MESH_INSTANCE])
     dd_run_check(check)
@@ -42,12 +45,14 @@ def test_legacy_proxy_mesh(aggregator, dd_run_check, mock_openmetrics_http):
     aggregator.assert_all_metrics_covered()
 
 
-def test_legacy_proxy_mesh_exclude(aggregator, dd_run_check, mock_openmetrics_http):
+def test_legacy_proxy_mesh_exclude(aggregator, dd_run_check, fake_http_response):
     """
     Test proxy mesh check for OpenMetricsV1 implementation
     """
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(
-        content=get_response('1.5', 'istio-proxy.txt'), headers={'Content-Type': 'text/plain'}
+    fake_http_response(
+        common.MOCK_LEGACY_MESH_INSTANCE['istio_mesh_endpoint'],
+        get_response('1.5', 'istio-proxy.txt'),
+        headers={'Content-Type': 'text/plain'},
     )
     exclude_tags = ['destination_app', 'destination_principal']
     instance = common.MOCK_LEGACY_MESH_INSTANCE
@@ -64,9 +69,11 @@ def test_legacy_proxy_mesh_exclude(aggregator, dd_run_check, mock_openmetrics_ht
     aggregator.assert_all_metrics_covered()
 
 
-def test_legacy_version_metadata(datadog_agent, dd_run_check, mock_openmetrics_http):
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(
-        content=get_response('1.5', 'istiod.txt'), headers={'Content-Type': 'text/plain'}
+def test_legacy_version_metadata(datadog_agent, dd_run_check, fake_http_response):
+    fake_http_response(
+        common.MOCK_LEGACY_ISTIOD_INSTANCE['istiod_endpoint'],
+        get_response('1.5', 'istiod.txt'),
+        headers={'Content-Type': 'text/plain'},
     )
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_LEGACY_ISTIOD_INSTANCE])
     check.check_id = 'test:123'

@@ -8,8 +8,8 @@ import os
 import mock
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientTimeoutError
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.ecs_fargate import FargateCheck
 from datadog_checks.ecs_fargate.ecs_fargate import CGROUP_NO_VALUE, c_is_excluded
 
@@ -20,41 +20,24 @@ from .conftest import (
     EXTRA_EXPECTED_CONTAINER_METRICS_LINUX,
     EXTRA_NETWORK_METRICS,
     INSTANCE_TAGS,
+    LINUX_STATS_FIXTURE,
+    LINUX_STATS_FIXTURE_V4,
+    WINDOWS_STATS_FIXTURE,
+    fixture_response,
     mocked_get_tags,
     mocked_is_excluded,
-    mocked_requests_get_linux,
-    mocked_requests_get_linux_v4,
-    mocked_requests_get_sys_delta,
-    mocked_requests_get_windows,
+    register_check_responses,
 )
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
-def metadata_only_side_effect(metadata):
-    def side_effect(*args, **kwargs):
-        if args[0].endswith('/metadata'):
-            return MockHTTPResponse(json_data=metadata)
-        return MockHTTPResponse('{}', status_code=200)
-
-    return side_effect
+def empty_stats_response():
+    return FakeHTTPResponse(content=b'{}', json_result={})
 
 
-def metadata_fixture_then_stats_side_effect(stats_behavior):
-    def side_effect(*args, **kwargs):
-        if args[0].endswith('/metadata'):
-            return MockHTTPResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata.json'))
-        return stats_behavior()
-
-    return side_effect
-
-
-def raise_timeout():
-    raise HTTPClientTimeoutError('timed out')
-
-
-def raise_connection_error():
-    raise HTTPClientConnectionError('connection refused')
+def invalid_json_response():
+    return FakeHTTPResponse(content=b'not-json', json_error=ValueError('not-json'))
 
 
 @pytest.mark.unit
@@ -66,33 +49,33 @@ def test_no_config(aggregator, dd_run_check):
 
 
 @pytest.mark.unit
-def test_failing_check(check, aggregator, dd_run_check, mock_http):
+def test_failing_check(check, aggregator, dd_run_check, fake_http):
     """
     Testing fargate metadata endpoint error.
     """
-    mock_http.get.return_value = MockHTTPResponse('{}', status_code=500)
+    register_check_responses(fake_http, check, FakeHTTPResponse(content=b'{}', status_code=500))
     dd_run_check(check)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.CRITICAL, tags=INSTANCE_TAGS, count=1)
 
 
 @pytest.mark.unit
-def test_invalid_response_check(check, aggregator, dd_run_check, mock_http):
+def test_invalid_response_check(check, aggregator, dd_run_check, fake_http):
     """
     Testing invalid fargate metadata payload.
     """
-    mock_http.get.return_value = MockHTTPResponse('{}', status_code=200)
+    register_check_responses(fake_http, check, empty_stats_response())
     dd_run_check(check)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.WARNING, tags=INSTANCE_TAGS, count=1)
 
 
 @pytest.mark.integration
-def test_successful_check_linux(check, aggregator, dd_run_check, mock_http):
+def test_successful_check_linux(check, aggregator, dd_run_check, fake_http):
     """
     Testing successful fargate check on Linux.
     """
-    mock_http.get.side_effect = mocked_requests_get_linux
+    register_check_responses(fake_http, check, fixture_response('metadata.json'), fixture_response(LINUX_STATS_FIXTURE))
     with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
         with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
             dd_run_check(check)
@@ -167,11 +150,13 @@ def test_successful_check_linux(check, aggregator, dd_run_check, mock_http):
 
 
 @pytest.mark.integration
-def test_successful_check_windows(check, aggregator, dd_run_check, mock_http):
+def test_successful_check_windows(check, aggregator, dd_run_check, fake_http):
     """
     Testing successful fargate check on Windows.
     """
-    mock_http.get.side_effect = mocked_requests_get_windows
+    register_check_responses(
+        fake_http, check, fixture_response('metadata.json'), fixture_response(WINDOWS_STATS_FIXTURE)
+    )
     with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
         with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
             dd_run_check(check)
@@ -225,11 +210,13 @@ def test_successful_check_windows(check, aggregator, dd_run_check, mock_http):
 
 
 @pytest.mark.integration
-def test_successful_check_wrong_sys_delta(check, aggregator, dd_run_check, mock_http):
+def test_successful_check_wrong_sys_delta(check, aggregator, dd_run_check, fake_http):
     """
     Testing successful fargate check.
     """
-    mock_http.get.side_effect = mocked_requests_get_sys_delta
+    register_check_responses(
+        fake_http, check, fixture_response('metadata.json'), fixture_response('stats_wrong_system_delta.json')
+    )
     with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.get_tags", side_effect=mocked_get_tags):
         with mock.patch("datadog_checks.ecs_fargate.ecs_fargate.c_is_excluded", side_effect=mocked_is_excluded):
             dd_run_check(check)
@@ -330,87 +317,87 @@ def test_cgroup_no_value_constant():
 
 
 @pytest.mark.unit
-def test_metadata_timeout_triggers_critical(check, aggregator, dd_run_check, mock_http):
+def test_metadata_timeout_triggers_critical(check, aggregator, dd_run_check, fake_http):
     # Kills the core/ExceptionReplacer mutant at ecs_fargate.py:119 (except HTTPClientTimeoutError).
-    mock_http.get.side_effect = HTTPClientTimeoutError('timed out')
+    register_check_responses(fake_http, check, HTTPClientTimeoutError('timed out'))
     dd_run_check(check)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.CRITICAL, tags=INSTANCE_TAGS, count=1)
 
 
 @pytest.mark.unit
-def test_metadata_connection_error_triggers_critical(check, aggregator, dd_run_check, mock_http):
+def test_metadata_connection_error_triggers_critical(check, aggregator, dd_run_check, fake_http):
     # Kills the core/ExceptionReplacer mutant at ecs_fargate.py:126 (except HTTPClientError).
-    mock_http.get.side_effect = HTTPClientConnectionError('connection refused')
+    register_check_responses(fake_http, check, HTTPClientConnectionError('connection refused'))
     dd_run_check(check)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.CRITICAL, tags=INSTANCE_TAGS, count=1)
 
 
 @pytest.mark.unit
-def test_metadata_status_code_100_triggers_critical(check, aggregator, dd_run_check, mock_http):
+def test_metadata_status_code_100_triggers_critical(check, aggregator, dd_run_check, fake_http):
     # Kills the core/ReplaceComparisonOperator_NotEq_Gt mutant at ecs_fargate.py:132: a code
     # below 200 is `!= 200` (should alert) but not `> 200`, unlike the existing 500 case.
-    mock_http.get.return_value = MockHTTPResponse('{}', status_code=100)
+    register_check_responses(fake_http, check, FakeHTTPResponse(content=b'{}', status_code=100))
     dd_run_check(check)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.CRITICAL, tags=INSTANCE_TAGS, count=1)
 
 
 @pytest.mark.unit
-def test_metadata_invalid_json_triggers_warning(check, aggregator, dd_run_check, mock_http):
+def test_metadata_invalid_json_triggers_warning(check, aggregator, dd_run_check, fake_http):
     # Kills the core/ExceptionReplacer mutant at ecs_fargate.py:140 (except ValueError around
     # request.json() for the metadata endpoint), distinct from the missing-keys case below.
-    mock_http.get.return_value = MockHTTPResponse('not-json', status_code=200)
+    register_check_responses(fake_http, check, invalid_json_response())
     dd_run_check(check)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.WARNING, tags=INSTANCE_TAGS, count=1)
 
 
 @pytest.mark.unit
-def test_stats_timeout_triggers_warning(check, aggregator, dd_run_check, mock_http):
+def test_stats_timeout_triggers_warning(check, aggregator, dd_run_check, fake_http):
     # Kills the core/ExceptionReplacer mutant at ecs_fargate.py:205 (except HTTPClientTimeoutError).
-    side_effect = metadata_fixture_then_stats_side_effect(raise_timeout)
-    mock_http.get.side_effect = side_effect
+    register_check_responses(fake_http, check, fixture_response('metadata.json'), HTTPClientTimeoutError('timed out'))
     dd_run_check(check)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.WARNING, tags=INSTANCE_TAGS, count=1)
 
 
 @pytest.mark.unit
-def test_stats_connection_error_triggers_warning(check, aggregator, dd_run_check, mock_http):
+def test_stats_connection_error_triggers_warning(check, aggregator, dd_run_check, fake_http):
     # Kills the core/ExceptionReplacer mutant at ecs_fargate.py:210 (except HTTPClientError).
-    side_effect = metadata_fixture_then_stats_side_effect(raise_connection_error)
-    mock_http.get.side_effect = side_effect
+    register_check_responses(
+        fake_http, check, fixture_response('metadata.json'), HTTPClientConnectionError('connection refused')
+    )
     dd_run_check(check)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.WARNING, tags=INSTANCE_TAGS, count=1)
 
 
 @pytest.mark.unit
-def test_stats_status_code_100_triggers_warning(check, aggregator, dd_run_check, mock_http):
+def test_stats_status_code_100_triggers_warning(check, aggregator, dd_run_check, fake_http):
     # Kills the core/ReplaceComparisonOperator_NotEq_Gt mutant at ecs_fargate.py:216, same
     # reasoning as the metadata endpoint's status-code check above.
-    side_effect = metadata_fixture_then_stats_side_effect(lambda: MockHTTPResponse('{}', status_code=100))
-    mock_http.get.side_effect = side_effect
+    register_check_responses(
+        fake_http, check, fixture_response('metadata.json'), FakeHTTPResponse(content=b'{}', status_code=100)
+    )
     dd_run_check(check)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.WARNING, tags=INSTANCE_TAGS, count=1)
 
 
 @pytest.mark.unit
-def test_stats_invalid_json_still_reports_ok_service_check(check, aggregator, dd_run_check, mock_http):
+def test_stats_invalid_json_still_reports_ok_service_check(check, aggregator, dd_run_check, fake_http):
     # Kills the core/ExceptionReplacer mutant at ecs_fargate.py:225 (except ValueError around
     # request.json() for the stats endpoint); the check logs a warning but keeps running.
-    side_effect = metadata_fixture_then_stats_side_effect(lambda: MockHTTPResponse('not-json', status_code=200))
-    mock_http.get.side_effect = side_effect
+    register_check_responses(fake_http, check, fixture_response('metadata.json'), invalid_json_response())
     dd_run_check(check)
 
     aggregator.assert_service_check("fargate_check", status=FargateCheck.OK, tags=INSTANCE_TAGS, count=1)
 
 
 @pytest.mark.unit
-def test_container_cpu_limit_boundary_values(check, aggregator, dd_run_check, mock_http):
+def test_container_cpu_limit_boundary_values(check, aggregator, dd_run_check, fake_http):
     # Kills the core/ReplaceComparisonOperator_Gt_* and core/NumberReplacer mutants at
     # ecs_fargate.py:175 across a missing-key, positive, and negative container CPU limit.
     metadata = {
@@ -422,19 +409,19 @@ def test_container_cpu_limit_boundary_values(check, aggregator, dd_run_check, mo
         ],
     }
 
-    mock_http.get.side_effect = metadata_only_side_effect(metadata)
+    register_check_responses(fake_http, check, FakeHTTPResponse(json_result=metadata), empty_stats_response())
     dd_run_check(check)
 
     aggregator.assert_metric("ecs.fargate.cpu.limit", value=50, tags=INSTANCE_TAGS, count=1)
 
 
 @pytest.mark.unit
-def test_task_limits_missing_are_not_reported(check, aggregator, dd_run_check, mock_http):
+def test_task_limits_missing_are_not_reported(check, aggregator, dd_run_check, fake_http):
     # Kills the core/ReplaceComparisonOperator_Gt_* and core/NumberReplacer mutants at
     # ecs_fargate.py:197,200 (the task-level `.get(..., 0) > 0` default-value guards).
     metadata = {"Cluster": "test-cluster", "Containers": []}
 
-    mock_http.get.side_effect = metadata_only_side_effect(metadata)
+    register_check_responses(fake_http, check, FakeHTTPResponse(json_result=metadata), empty_stats_response())
     dd_run_check(check)
 
     aggregator.assert_metric("ecs.fargate.cpu.task.limit", count=0)
@@ -442,11 +429,11 @@ def test_task_limits_missing_are_not_reported(check, aggregator, dd_run_check, m
 
 
 @pytest.mark.unit
-def test_task_limits_negative_are_not_reported(check, aggregator, dd_run_check, mock_http):
+def test_task_limits_negative_are_not_reported(check, aggregator, dd_run_check, fake_http):
     # Kills the core/ReplaceComparisonOperator_Gt_* mutants at ecs_fargate.py:197,200.
     metadata = {"Cluster": "test-cluster", "Containers": [], "Limits": {"CPU": -4, "Memory": -8}}
 
-    mock_http.get.side_effect = metadata_only_side_effect(metadata)
+    register_check_responses(fake_http, check, FakeHTTPResponse(json_result=metadata), empty_stats_response())
     dd_run_check(check)
 
     aggregator.assert_metric("ecs.fargate.cpu.task.limit", count=0)
@@ -454,12 +441,12 @@ def test_task_limits_negative_are_not_reported(check, aggregator, dd_run_check, 
 
 
 @pytest.mark.unit
-def test_task_limits_positive_use_exact_multipliers(check, aggregator, dd_run_check, mock_http):
+def test_task_limits_positive_use_exact_multipliers(check, aggregator, dd_run_check, fake_http):
     # Kills the core/NumberReplacer mutants at ecs_fargate.py:198,201 (the `* 10**9` CPU and
     # `* 1024**2` memory unit conversions).
     metadata = {"Cluster": "test-cluster", "Containers": [], "Limits": {"CPU": 4, "Memory": 8}}
 
-    mock_http.get.side_effect = metadata_only_side_effect(metadata)
+    register_check_responses(fake_http, check, FakeHTTPResponse(json_result=metadata), empty_stats_response())
     dd_run_check(check)
 
     aggregator.assert_metric("ecs.fargate.cpu.task.limit", value=4 * 10**9, count=1)
@@ -467,13 +454,15 @@ def test_task_limits_positive_use_exact_multipliers(check, aggregator, dd_run_ch
 
 
 @pytest.mark.unit
-def test_ephemeral_storage_metrics_v4(aggregator, dd_run_check, monkeypatch, mock_http):
+def test_ephemeral_storage_metrics_v4(aggregator, dd_run_check, monkeypatch, fake_http):
     # Kills the core/AddNot and core/ZeroIterationForLoop mutants at ecs_fargate.py:191,193
     # (the EphemeralStorageMetrics gate/loop), which only the v4 metadata payload exercises.
     monkeypatch.setenv('ECS_CONTAINER_METADATA_URI_V4', 'http://169.254.170.2/v4/xxx-xxx')
     check = FargateCheck('ecs_fargate', {}, [{}])
 
-    mock_http.get.side_effect = mocked_requests_get_linux_v4
+    register_check_responses(
+        fake_http, check, fixture_response('metadata_v4.json'), fixture_response(LINUX_STATS_FIXTURE_V4)
+    )
     dd_run_check(check)
 
     aggregator.assert_metric("ecs.fargate.ephemeral_storage.utilized", value=2925, count=1)

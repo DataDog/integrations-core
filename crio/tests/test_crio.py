@@ -13,11 +13,11 @@ NAMESPACE = 'crio'
 
 
 @pytest.fixture()
-def mock_data(mock_openmetrics_http, mock_http_response_cls):
-    mock_openmetrics_http.get.return_value = mock_http_response_cls(
-        file_path=os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt'),
-        headers={'Content-Type': 'text/plain'},
-    )
+def mock_data(fake_http, fake_http_response, instance):
+    with open(os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt'), 'rb') as f:
+        fake_http_response(instance['prometheus_url'], f.read(), headers={'Content-Type': 'text/plain'})
+    yield
+    fake_http.assert_all_responses_consumed()
 
 
 def test_crio(aggregator, mock_data, instance):

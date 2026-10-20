@@ -8,7 +8,6 @@ import pytest
 import yaml
 
 from datadog_checks.dev import get_here, run_command
-from datadog_checks.dev.http import MockHTTPResponse  # noqa: F401
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 
@@ -93,16 +92,12 @@ def healthz_path():
     return os.path.join(get_here(), "fixtures", "healthz.txt")
 
 
-def mock_http_responses(url, **_params):
+@pytest.fixture
+def endpoint_responses(fake_http_response):
     mapping = {
         "https://10.244.0.38:443/healthz": "healthz.txt",
         "https://10.244.0.38:443/metrics": "metrics.txt",
     }
-
-    fixtures_file = mapping.get(url)
-
-    if not fixtures_file:
-        raise Exception(f"url `{url}` not registered")
-
-    with open(os.path.join(HERE, "fixtures", fixtures_file)) as f:
-        return MockHTTPResponse(content=f.read())
+    for url, fixtures_file in mapping.items():
+        with open(os.path.join(HERE, "fixtures", fixtures_file), "rb") as f:
+            fake_http_response(url, f.read())

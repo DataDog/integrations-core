@@ -8,7 +8,7 @@ import pytest
 from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation
 from datadog_checks.kube_scheduler import KubeSchedulerCheck
 
-from .common import make_mock_metrics
+from .common import register_metrics
 
 instance = {'prometheus_url': 'http://localhost:10251/metrics', 'send_histograms_buckets': True}
 
@@ -18,8 +18,10 @@ NAMESPACE = 'kube_scheduler'
 
 
 @pytest.fixture()
-def mock_metrics(mock_openmetrics_http):
-    return make_mock_metrics(mock_openmetrics_http, 'metrics_1.23.6.txt')
+def mock_metrics(fake_http, fake_http_response):
+    register_metrics(fake_http_response, 'metrics_1.23.6.txt')
+    yield
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.fixture()
@@ -37,7 +39,7 @@ def mock_leader():
         yield
 
 
-def test_check_metrics_1_23(aggregator, mock_metrics, mock_leader, mock_healthcheck_wrapper):
+def test_check_metrics_1_23(aggregator, mock_metrics, mock_leader):
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 

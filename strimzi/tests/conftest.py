@@ -10,7 +10,6 @@ import pytest
 
 from datadog_checks.dev import run_command
 from datadog_checks.dev._env import get_state, save_state
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.strimzi import StrimziCheck
 
@@ -176,17 +175,14 @@ def strimzi_kubeconfig():
     return get_state("strimzi_kubeconfig")
 
 
-def mock_http_responses(url, **_params):
+def register_metrics_responses(fake_http_response):
+    """Register one scrape of every mocked endpoint."""
     mapping = {
         "http://cluster-operator:8080/metrics": "cluster_operator_metrics.txt",
         "http://entity-operator:8080/metrics": "topic_operator_metrics.txt",
         "http://entity-operator:8081/metrics": "user_operator_metrics.txt",
     }
 
-    metrics_file = mapping.get(url)
-
-    if not metrics_file:
-        pytest.fail(f"url `{url}` not registered")
-
-    with open(os.path.join(HERE, "fixtures", STRIMZI_VERSION, metrics_file)) as f:
-        return MockHTTPResponse(content=f.read())
+    for url, metrics_file in mapping.items():
+        with open(os.path.join(HERE, "fixtures", STRIMZI_VERSION, metrics_file), 'rb') as f:
+            fake_http_response(url, f.read())

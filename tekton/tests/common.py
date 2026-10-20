@@ -4,7 +4,6 @@
 import os
 
 from datadog_checks.dev import get_here
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.tekton import TektonCheck
 
 HERE = get_here()
@@ -140,16 +139,13 @@ def check(instance):
     return TektonCheck('tekton', {}, [instance])
 
 
-def mock_http_responses(url, **_params):
+def register_metrics_responses(fake_http_response):
+    """Register one scrape of every mocked endpoint."""
     mapping = {
         'http://tekton-pipelines:9090': 'pipelines.txt',
         'http://tekton-triggers:9000': 'triggers.txt',
     }
 
-    metrics_file = mapping.get(url)
-
-    if not metrics_file:
-        raise Exception(f"url `{url}` not registered")
-
-    with open(os.path.join(HERE, 'fixtures', metrics_file)) as f:
-        return MockHTTPResponse(content=f.read())
+    for url, metrics_file in mapping.items():
+        with open(os.path.join(HERE, 'fixtures', metrics_file), 'rb') as f:
+            fake_http_response(url, f.read())

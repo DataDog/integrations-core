@@ -8,15 +8,17 @@ import pytest
 from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation
 from datadog_checks.kube_scheduler import KubeSchedulerCheck
 
-from .common import make_mock_metrics
+from .common import register_metrics
 
 # Constants
 CHECK_NAME = 'kube_scheduler'
 
 
 @pytest.fixture()
-def mock_metrics(mock_openmetrics_http):
-    return make_mock_metrics(mock_openmetrics_http, 'metrics_1.26.0.txt')
+def mock_metrics(fake_http, fake_http_response):
+    register_metrics(fake_http_response, 'metrics_1.26.0.txt')
+    yield
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.fixture()
@@ -34,7 +36,7 @@ def mock_leader():
         yield
 
 
-def test_check_metrics_1_26(aggregator, mock_metrics, mock_leader, instance, mock_healthcheck_wrapper):
+def test_check_metrics_1_26(aggregator, mock_metrics, mock_leader, instance):
     c = KubeSchedulerCheck(CHECK_NAME, {}, [instance])
     c.check(instance)
 

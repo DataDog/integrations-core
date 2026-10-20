@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from datadog_checks.dev.http import MockHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
 from datadog_checks.dev.kubernetes import assert_all_discovery_candidates_stable_kubernetes
 from datadog_checks.linkerd import LinkerdCheck
 
@@ -35,12 +35,12 @@ def get_response(filename):
     return response
 
 
-def test_linkerd(aggregator, dd_run_check, mock_openmetrics_http):
+def test_linkerd(aggregator, dd_run_check, fake_http_response):
     """
     Test the full check
     """
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(
-        content=get_response('linkerd.txt'), headers={'Content-Type': 'text/plain'}
+    fake_http_response(
+        MOCK_INSTANCE['prometheus_url'], get_response('linkerd.txt'), headers={'Content-Type': 'text/plain'}
     )
     check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE])
     dd_run_check(check)
@@ -57,9 +57,9 @@ def test_linkerd(aggregator, dd_run_check, mock_openmetrics_http):
     )
 
 
-def test_linkerd_v2(aggregator, dd_run_check, mock_openmetrics_http):
-    mock_openmetrics_http.get.return_value = MockHTTPResponse(
-        content=get_response('linkerd_v2.txt'), headers={'Content-Type': 'text/plain'}
+def test_linkerd_v2(aggregator, dd_run_check, fake_http_response):
+    fake_http_response(
+        MOCK_INSTANCE['prometheus_url'], get_response('linkerd_v2.txt'), headers={'Content-Type': 'text/plain'}
     )
     check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE])
     dd_run_check(check)
@@ -74,9 +74,11 @@ def test_linkerd_v2(aggregator, dd_run_check, mock_openmetrics_http):
     )
 
 
-def test_linkerd_v2_new(aggregator, dd_run_check, mock_http):
-    mock_http.get.return_value = MockHTTPResponse(
-        file_path=get_fixture_path('linkerd_v2.txt'), headers={'Content-Type': 'text/plain'}
+def test_linkerd_v2_new(aggregator, dd_run_check, fake_http_response):
+    fake_http_response(
+        MOCK_INSTANCE_NEW['openmetrics_endpoint'],
+        get_response('linkerd_v2.txt'),
+        headers={'Content-Type': 'text/plain'},
     )
     check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE_NEW])
     dd_run_check(check)
@@ -91,8 +93,8 @@ def test_linkerd_v2_new(aggregator, dd_run_check, mock_http):
     )
 
 
-def test_openmetrics_error(dd_run_check, mock_openmetrics_http):
-    mock_openmetrics_http.get.side_effect = Exception("test error")
+def test_openmetrics_error(dd_run_check, fake_http):
+    fake_http.register_response('GET', MOCK_INSTANCE['prometheus_url'], HTTPClientConnectionError('test error'))
     check = LinkerdCheck('linkerd', {}, [MOCK_INSTANCE])
     with pytest.raises(Exception):
         dd_run_check(check)

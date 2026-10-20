@@ -4,8 +4,8 @@
 
 from __future__ import annotations
 
-from itertools import cycle
-from unittest.mock import Mock, patch
+from copy import deepcopy
+from unittest.mock import patch
 
 import pytest
 
@@ -15,7 +15,7 @@ from datadog_checks.argocd.resources_constants import (
     GENRESOURCES_API_UP_METRIC,
     REPOSITORY_INCLUDE,
 )
-from datadog_checks.dev.http import MockHTTPResponse
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse
 
 from . import common
 
@@ -53,22 +53,15 @@ def _repository(repo: str, *, username: str = "", password: str = "", ssh_key: s
     return {"repo": repo, "username": username, "password": password, "sshPrivateKey": ssh_key, "type": "git"}
 
 
-def _items_response(items: list[dict], status_code: int = 200) -> MockHTTPResponse:
-    return MockHTTPResponse(json_data={"items": items}, status_code=status_code)
+def _items_response(items: list[dict], status_code: int = 200) -> FakeHTTPResponse:
+    # Copy so a response registered twice never sees items the collector sanitized in place.
+    return FakeHTTPResponse(json_result={"items": deepcopy(items)}, status_code=status_code)
 
 
-def _mock_responses(mock_http: Mock, responses_by_endpoint: dict[str, list[MockHTTPResponse]]) -> Mock:
-    response_cycles = {url: cycle(responses) for url, responses in responses_by_endpoint.items()}
-
-    def get_response(url: str, **_kwargs: object) -> MockHTTPResponse:
-        try:
-            responses = response_cycles[url]
-        except KeyError:
-            raise ValueError(f"Endpoint {url} not found in mocked responses") from None
-        return next(responses)
-
-    mock_http.get.side_effect = get_response
-    return mock_http.get
+def _register_responses(fake_http: FakeHTTPClient, responses_by_endpoint: dict[str, list[FakeHTTPResponse]]) -> None:
+    for url, responses in responses_by_endpoint.items():
+        for response in responses:
+            fake_http.register_response("GET", url, response)
 
 
 def build_check(**overrides):
@@ -77,9 +70,9 @@ def build_check(**overrides):
     return common.build_check(**overrides)
 
 
-def test_collect_emits_applications_clusters_and_repositories(aggregator, mock_http):
-    _mock_responses(
-        mock_http,
+def test_collect_emits_applications_clusters_and_repositories(aggregator, fake_http):
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response([_application("checkout")])],
             CLUSTERS_URL: [_items_response([_cluster("https://cluster-a.example")])],
@@ -143,14 +136,14 @@ def test_application_include_contains_deployment_history_and_operation_fields():
     } <= set(APPLICATION_INCLUDE["paths"])
 
 
-def test_collect_scrubs_credentials_from_operation_state_message(mock_http):
+def test_collect_scrubs_credentials_from_operation_state_message(fake_http):
     app = _application("broken")
     app["status"]["operationState"] = {
         "phase": "Failed",
         "message": "sync failed: https://oauth2:t0ken@github.com/org/repo: auth required",
     }
-    _mock_responses(
-        mock_http,
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response([app])],
             CLUSTERS_URL: [_items_response([])],
@@ -168,11 +161,11 @@ def test_collect_scrubs_credentials_from_operation_state_message(mock_http):
     assert "https://github.com/org/repo" in message
 
 
-def test_collect_strips_credentials_from_external_urls(mock_http):
+def test_collect_strips_credentials_from_external_urls(fake_http):
     app = _application("web")
     app["status"]["summary"] = {"externalURLs": ["https://user:t0ken@app.example.com"]}
-    _mock_responses(
-        mock_http,
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response([app])],
             CLUSTERS_URL: [_items_response([])],
@@ -188,7 +181,7 @@ def test_collect_strips_credentials_from_external_urls(mock_http):
     assert app_call.kwargs["fields"]["status"]["summary"]["externalURLs"] == ["https://app.example.com"]
 
 
-def test_real_helper_ships_multisource_history_and_scrubs_its_repo_urls(aggregator, mock_http):
+def test_real_helper_ships_multisource_history_and_scrubs_its_repo_urls(aggregator, fake_http):
     # Runs the real helper: proves nested [*] (history[*].sources[*]) projects AND history repoURLs are scrubbed.
     app = _application("checkout")
     app["status"]["history"] = [
@@ -198,8 +191,8 @@ def test_real_helper_ships_multisource_history_and_scrubs_its_repo_urls(aggregat
             "sources": [{"repoURL": "https://oauth2:t0ken@github.com/org/multi", "path": "base"}],
         }
     ]
-    _mock_responses(
-        mock_http,
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response([app])],
             CLUSTERS_URL: [_items_response([])],
@@ -235,13 +228,13 @@ def test_repository_include_contains_connection_and_capability_flags():
     } <= set(REPOSITORY_INCLUDE["paths"])
 
 
-def test_application_key_uses_app_identity_not_destination(mock_http):
+def test_application_key_uses_app_identity_not_destination(fake_http):
     apps = [
         _application("web", namespace="team-a", cluster="https://remote", dest_namespace="prod"),
         _application("web", namespace="team-b", cluster="https://remote", dest_namespace="prod"),
     ]
-    _mock_responses(
-        mock_http,
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response(apps)],
             CLUSTERS_URL: [_items_response([])],
@@ -257,10 +250,10 @@ def test_application_key_uses_app_identity_not_destination(mock_http):
     assert keys == {"argocd.example.com|team-a|web", "argocd.example.com|team-b|web"}
 
 
-def test_collect_appends_extra_include_paths_to_every_type(mock_http):
+def test_collect_appends_extra_include_paths_to_every_type(fake_http):
     extra = ["metadata.generation"]
-    _mock_responses(
-        mock_http,
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response([_application("checkout")])],
             CLUSTERS_URL: [_items_response([_cluster("https://cluster-a.example")])],
@@ -276,9 +269,9 @@ def test_collect_appends_extra_include_paths_to_every_type(mock_http):
         assert call.kwargs["include"]["paths"][-1] == extra[0]
 
 
-def test_collect_isolates_per_endpoint_failures(aggregator, mock_http):
-    _mock_responses(
-        mock_http,
+def test_collect_isolates_per_endpoint_failures(aggregator, fake_http):
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response([_application("checkout")])],
             CLUSTERS_URL: [_items_response([], status_code=403)],
@@ -297,10 +290,10 @@ def test_collect_isolates_per_endpoint_failures(aggregator, mock_http):
     aggregator.assert_metric(GENRESOURCES_API_UP_METRIC, value=1, tags=["resource_type:argocd_repository"])
 
 
-def test_collect_skips_malformed_items_without_poisoning_cycle(mock_http, caplog):
+def test_collect_skips_malformed_items_without_poisoning_cycle(fake_http, caplog):
     malformed = {"spec": {}}
-    _mock_responses(
-        mock_http,
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response([_application("checkout"), malformed, _application("payments")])],
             CLUSTERS_URL: [_items_response([])],
@@ -317,9 +310,9 @@ def test_collect_skips_malformed_items_without_poisoning_cycle(mock_http, caplog
     assert any("skipping malformed argocd_application" in rec.message for rec in caplog.records)
 
 
-def test_collect_caps_per_type_with_warning(mock_http, caplog):
-    _mock_responses(
-        mock_http,
+def test_collect_caps_per_type_with_warning(fake_http, caplog):
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response([_application(f"app-{i}") for i in range(7)])],
             CLUSTERS_URL: [_items_response([])],
@@ -341,9 +334,9 @@ def test_collect_caps_per_type_with_warning(mock_http, caplog):
     assert "capped at 3" in warning
 
 
-def test_collect_logs_submit_failures_distinctly_from_malformed(mock_http, caplog):
-    _mock_responses(
-        mock_http,
+def test_collect_logs_submit_failures_distinctly_from_malformed(fake_http, caplog):
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response([_application("checkout")])],
             CLUSTERS_URL: [_items_response([])],
@@ -359,12 +352,12 @@ def test_collect_logs_submit_failures_distinctly_from_malformed(mock_http, caplo
     assert not any("skipping malformed" in rec.message for rec in caplog.records)
 
 
-def test_collect_strips_credentials_from_repo_urls(mock_http):
+def test_collect_strips_credentials_from_repo_urls(fake_http):
     app = _application("web")
     app["spec"]["source"] = {"repoURL": "https://user:t0ken@github.com/org/repo"}
     repo = {"repo": "https://user:t0ken@github.com/org/repo", "type": "git"}
-    _mock_responses(
-        mock_http,
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response([app])],
             CLUSTERS_URL: [_items_response([])],
@@ -382,7 +375,7 @@ def test_collect_strips_credentials_from_repo_urls(mock_http):
     assert by_type["argocd_repository"]["key"] == "argocd.example.com|https://github.com/org/repo"
 
 
-def test_collect_scrubs_credentials_from_condition_messages(mock_http):
+def test_collect_scrubs_credentials_from_condition_messages(fake_http):
     app = _application("broken")
     app["status"]["conditions"] = [
         {
@@ -390,8 +383,8 @@ def test_collect_scrubs_credentials_from_condition_messages(mock_http):
             "message": "failed to fetch https://oauth2:t0ken@github.com/org/repo: auth required",
         }
     ]
-    _mock_responses(
-        mock_http,
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response([app])],
             CLUSTERS_URL: [_items_response([])],
@@ -410,14 +403,14 @@ def test_collect_scrubs_credentials_from_condition_messages(mock_http):
     assert "https://github.com/org/repo" in conditions[0]["message"]
 
 
-def test_collect_scrubs_credentials_from_cluster_connection_state(mock_http):
+def test_collect_scrubs_credentials_from_cluster_connection_state(fake_http):
     cluster = _cluster("https://cluster-a.example")
     cluster["connectionState"] = {
         "status": "Failed",
         "message": "dial https://oauth2:t0ken@cluster-a.example: connection refused",
     }
-    _mock_responses(
-        mock_http,
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response([])],
             CLUSTERS_URL: [_items_response([cluster])],
@@ -436,15 +429,14 @@ def test_collect_scrubs_credentials_from_cluster_connection_state(mock_http):
     assert "https://cluster-a.example" in connection["message"]
 
 
-def test_collect_emits_api_up_zero_when_endpoint_missing(aggregator, mock_http, caplog):
-    captured = _mock_responses(mock_http, {})
+def test_collect_emits_api_up_zero_when_endpoint_missing(aggregator, fake_http, caplog):
     check = build_check(genresources_endpoint=None)
 
     with patch.object(check, "submit_generic_resource") as submit:
         check._resource_collector.collect()
 
     assert submit.call_count == 0
-    assert captured.call_count == 0  # no HTTP calls attempted when the endpoint is unset
+    assert fake_http.requests == []  # no HTTP calls attempted when the endpoint is unset
     for resource_type in ("argocd_application", "argocd_cluster", "argocd_repository"):
         aggregator.assert_metric(GENRESOURCES_API_UP_METRIC, value=0, tags=[f"resource_type:{resource_type}"])
     assert any(
@@ -452,13 +444,13 @@ def test_collect_emits_api_up_zero_when_endpoint_missing(aggregator, mock_http, 
     )
 
 
-def test_collect_skips_unchanged_resources_on_second_cycle(mock_http):
+def test_collect_skips_unchanged_resources_on_second_cycle(fake_http):
     app = _application("checkout")
     app["metadata"]["resourceVersion"] = "100"
-    _mock_responses(
-        mock_http,
+    _register_responses(
+        fake_http,
         {
-            APPLICATIONS_URL: [_items_response([app])],
+            APPLICATIONS_URL: [_items_response([app]), _items_response([app])],
             CLUSTERS_URL: [_items_response([])],
             REPOSITORIES_URL: [_items_response([])],
         },
@@ -476,13 +468,13 @@ def test_collect_skips_unchanged_resources_on_second_cycle(mock_http):
     assert after_second == 1  # unchanged app is not re-submitted on the next cycle
 
 
-def test_collect_resubmits_application_when_resource_version_changes(mock_http):
+def test_collect_resubmits_application_when_resource_version_changes(fake_http):
     app_v1 = _application("checkout")
     app_v1["metadata"]["resourceVersion"] = "100"
     app_v2 = _application("checkout")
     app_v2["metadata"]["resourceVersion"] = "200"
-    _mock_responses(
-        mock_http,
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response([app_v1]), _items_response([app_v2])],
             CLUSTERS_URL: [_items_response([])],
@@ -502,13 +494,13 @@ def test_collect_resubmits_application_when_resource_version_changes(mock_http):
     assert after_second == 2  # resourceVersion changed, so the app is re-submitted
 
 
-def test_collect_resubmits_unchanged_resources_on_ttl_sweep(mock_http):
+def test_collect_resubmits_unchanged_resources_on_ttl_sweep(fake_http):
     app = _application("checkout")
     app["metadata"]["resourceVersion"] = "100"
-    _mock_responses(
-        mock_http,
+    _register_responses(
+        fake_http,
         {
-            APPLICATIONS_URL: [_items_response([app])],
+            APPLICATIONS_URL: [_items_response([app]), _items_response([app])],
             CLUSTERS_URL: [_items_response([])],
             REPOSITORIES_URL: [_items_response([])],
         },
@@ -527,13 +519,13 @@ def test_collect_resubmits_unchanged_resources_on_ttl_sweep(mock_http):
     assert after_second == 2  # the full scrape re-submits even unchanged resources to refresh their TTL
 
 
-def test_collect_respects_application_poll_interval(mock_http):
+def test_collect_respects_application_poll_interval(fake_http):
     app_v1 = _application("checkout")
     app_v1["metadata"]["resourceVersion"] = "100"
     app_v2 = _application("checkout")
     app_v2["metadata"]["resourceVersion"] = "200"
-    _mock_responses(
-        mock_http,
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response([app_v1]), _items_response([app_v2])],
             CLUSTERS_URL: [_items_response([])],
@@ -556,9 +548,9 @@ def _application_include(submit) -> dict:
     return next(c.kwargs["include"] for c in submit.call_args_list if c.kwargs["type"] == "argocd_application")
 
 
-def test_collect_excludes_listed_leaf_path_from_allow_list(mock_http):
-    _mock_responses(
-        mock_http,
+def test_collect_excludes_listed_leaf_path_from_allow_list(fake_http):
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response([_application("checkout")])],
             CLUSTERS_URL: [_items_response([])],
@@ -575,9 +567,9 @@ def test_collect_excludes_listed_leaf_path_from_allow_list(mock_http):
     assert "status.conditions[*].type" in paths  # sibling leaf is untouched
 
 
-def test_collect_exclude_drops_whole_subtree_given_parent_path(mock_http):
-    _mock_responses(
-        mock_http,
+def test_collect_exclude_drops_whole_subtree_given_parent_path(fake_http):
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response([_application("checkout")])],
             CLUSTERS_URL: [_items_response([])],
@@ -594,9 +586,9 @@ def test_collect_exclude_drops_whole_subtree_given_parent_path(mock_http):
     assert "status.sync.status" in paths  # unrelated path is retained
 
 
-def test_collect_exclude_removes_map_path(mock_http):
-    _mock_responses(
-        mock_http,
+def test_collect_exclude_removes_map_path(fake_http):
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response([_application("checkout")])],
             CLUSTERS_URL: [_items_response([])],
@@ -611,9 +603,9 @@ def test_collect_exclude_removes_map_path(mock_http):
     assert _application_include(submit)["map_paths"] == []
 
 
-def test_collect_exclude_overrides_extra_include_path(mock_http):
-    _mock_responses(
-        mock_http,
+def test_collect_exclude_overrides_extra_include_path(fake_http):
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response([_application("checkout")])],
             CLUSTERS_URL: [_items_response([])],
@@ -631,7 +623,7 @@ def test_collect_exclude_overrides_extra_include_path(mock_http):
     assert "metadata.generation" not in _application_include(submit)["paths"]
 
 
-def test_real_helper_strips_secrets_and_excluded_fields(aggregator, mock_http):
+def test_real_helper_strips_secrets_and_excluded_fields(aggregator, fake_http):
     # Exercises the real submit_generic_resource (unmocked): proves the allow-list projection strips
     # secrets and that genresources_exclude_paths actually removes a field from the shipped payload.
     cluster = _cluster("https://k8s.example", name="prod")
@@ -642,8 +634,8 @@ def test_real_helper_strips_secrets_and_excluded_fields(aggregator, mock_http):
     cluster["connectionState"] = {"status": "Successful", "message": ""}
     app = _application("checkout")
     app["status"]["conditions"] = [{"type": "ComparisonError", "message": "EXCLUDEDMARKER"}]
-    _mock_responses(
-        mock_http,
+    _register_responses(
+        fake_http,
         {
             APPLICATIONS_URL: [_items_response([app])],
             CLUSTERS_URL: [_items_response([cluster])],
@@ -675,22 +667,22 @@ def test_collector_warns_when_ttl_shorter_than_longest_scrape_interval(caplog):
     assert any("shorter than the longest scrape interval" in rec.message for rec in caplog.records)
 
 
-def test_fetch_adds_bearer_via_extra_headers_so_configured_auth_is_preserved(mock_http):
+def test_fetch_adds_bearer_via_extra_headers_so_configured_auth_is_preserved(fake_http):
     check = build_check(genresources_auth_token="tok")
-    mock_http.get.return_value = MockHTTPResponse(json_data={"items": []})
+    fake_http.register_response("GET", APPLICATIONS_URL, _items_response([]))
     check._resource_collector._fetch("/api/v1/applications")
 
-    kwargs = mock_http.get.call_args.kwargs
+    kwargs = fake_http.requests[0].options
     assert kwargs.get("extra_headers") == {"Authorization": "Bearer tok"}  # merged into configured headers
     assert "headers" not in kwargs  # never pass `headers`; it would shadow the HTTP client's configured auth
 
 
-def test_fetch_inherits_http_client_auth_when_no_genresources_token(mock_http):
+def test_fetch_inherits_http_client_auth_when_no_genresources_token(fake_http):
     check = build_check(genresources_auth_token=None)  # rely on the instance's HTTP auth (headers / auth_token)
-    mock_http.get.return_value = MockHTTPResponse(json_data={"items": []})
+    fake_http.register_response("GET", APPLICATIONS_URL, _items_response([]))
     check._resource_collector._fetch("/api/v1/applications")
 
-    kwargs = mock_http.get.call_args.kwargs
+    kwargs = fake_http.requests[0].options
     assert "headers" not in kwargs  # must not clobber the HTTP client's configured headers
     assert (
         "extra_headers" not in kwargs

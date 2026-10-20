@@ -1,15 +1,18 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+
 import mock
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.base.utils.http_exceptions import HTTPClientRequestError
-from datadog_checks.dev.http import MockHTTPResponse
 from datadog_checks.hdfs_datanode import HDFSDataNode
 
 from .common import (
     CUSTOM_TAGS,
+    DATANODE_INFO_URL,
     DATANODE_URI,
     HDFS_DATANODE_AUTH_CONFIG,
     HDFS_DATANODE_CONFIG,
@@ -46,7 +49,7 @@ def test_check(aggregator, mocked_request):
         aggregator.assert_metric(metric, value=value, tags=HDFS_DATANODE_METRIC_TAGS + CUSTOM_TAGS, count=1)
 
 
-def test_metadata(aggregator, mocked_request, mocked_metadata_request, datadog_agent):
+def test_metadata(aggregator, mocked_request, datadog_agent):
     """
     Test that we get the metadata we are expecting
     """
@@ -78,9 +81,14 @@ def test_metadata(aggregator, mocked_request, mocked_metadata_request, datadog_a
     datadog_agent.assert_metadata_count(6)
 
 
-def test_json_parse_failure_keeps_url_in_service_check(aggregator, mock_http):
+def test_json_parse_failure_keeps_url_in_service_check(aggregator, fake_http):
     """The URL is the only per-bean discriminator, so a non-JSON body must still name it."""
-    mock_http.get.side_effect = lambda url, *args, **kwargs: MockHTTPResponse(content='<html>not json</html>')
+    body = '<html>not json</html>'
+    fake_http.register_response(
+        'GET',
+        DATANODE_INFO_URL,
+        FakeHTTPResponse(content=body.encode(), json_error=json.JSONDecodeError('Expecting value', body, 0)),
+    )
     instance = HDFS_DATANODE_CONFIG['instances'][0]
     hdfs_datanode = HDFSDataNode('hdfs_datanode', {}, [instance])
 
@@ -99,7 +107,7 @@ def test_auth():
     assert hdfs_datanode.http.options['auth'] == (TEST_USERNAME, TEST_PASSWORD)
 
 
-def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_http):
+def test_malformed_header_still_reports_critical(aggregator, dd_run_check, fake_http):
     """A server-sent malformed header must still emit hdfs.datanode.jmx.can_connect.
 
     A multi-valued Content-Length makes the backend reject the response header. The translator has
@@ -107,7 +115,7 @@ def test_malformed_header_still_reports_critical(aggregator, dd_run_check, mock_
     last arm has to name that type.
     """
     message = 'Content-Length contained multiple unmatching values'
-    mock_http.get.side_effect = HTTPClientRequestError(message)
+    fake_http.register_response('GET', DATANODE_INFO_URL, HTTPClientRequestError(message))
     instance = HDFS_DATANODE_CONFIG['instances'][0]
     hdfs_datanode = HDFSDataNode('hdfs_datanode', {}, [instance])
 

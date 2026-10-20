@@ -9,7 +9,6 @@ from prometheus_client import CollectorRegistry, Counter, Gauge, generate_latest
 
 from datadog_checks.base import ensure_unicode
 from datadog_checks.dev import docker_run, get_docker_hostname
-from datadog_checks.dev.http import MockHTTPResponse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -50,7 +49,7 @@ def dd_environment(e2e_instance):
 
 
 @pytest.fixture
-def poll_mock(mock_prometheus_http):
+def poll_mock(fake_http, fake_http_response):
     registry = CollectorRegistry()
     # pylint: disable=E1123,E1101
     g1 = Gauge('metric1', 'processor usage', ['matched_label', 'node', 'flavor'], registry=registry)
@@ -63,5 +62,10 @@ def poll_mock(mock_prometheus_http):
     g3.labels(matched_label="foobar", node="host2", timestamp="456").set(float('inf'))
 
     content = ensure_unicode(generate_latest(registry))
-    mock_prometheus_http.get.return_value = MockHTTPResponse(content=content, headers={'Content-Type': 'text/plain'})
-    yield
+
+    def register(url=INSTANCE_UNIT['prometheus_url'], times=1):
+        for _ in range(times):
+            fake_http_response(url, content, headers={'Content-Type': 'text/plain'})
+
+    yield register
+    fake_http.assert_all_responses_consumed()
