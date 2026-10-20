@@ -22,6 +22,19 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
     # Luckily we can patch it here so that it does.
     install_name_tool -change liblmdb.so "${DD_PREFIX_PATH}/lib/liblmdb.so" "${DD_PREFIX_PATH}/lib/librdkafka.1.dylib"
     install_name_tool -change /usr/local/lib/libzstd.1.dylib "${DD_PREFIX_PATH}/lib/libzstd.1.dylib" "${DD_PREFIX_PATH}/lib/librdkafka.1.dylib"
+
+    # confluent-kafka's C extension reads offset commit metadata with strdup() although it is not
+    # NUL-terminated. Build the extension from a patched copy of the sdist instead of the PyPI one.
+    confluent_kafka_src="/tmp/confluent_kafka-${kafka_version}"
+    curl -L "https://files.pythonhosted.org/packages/source/c/confluent-kafka/confluent_kafka-${kafka_version}.tar.gz" \
+        -o "${confluent_kafka_src}.tar.gz"
+    echo "619d10d1d77c9821ba913b3e42a33ade7f889f3573c7f3c17b57c3056e3310f5  ${confluent_kafka_src}.tar.gz" | sha256sum --check
+    rm -rf "${confluent_kafka_src}"
+    tar -C /tmp -xzf "${confluent_kafka_src}.tar.gz"
+    patch -d "${confluent_kafka_src}" -p1 -i "${DD_MOUNT_DIR}/patches/confluent-kafka-fix-metadata-overread.patch"
+    # -i.bak keeps this working with both BSD and GNU sed
+    sed -i.bak "s|^confluent-kafka==.*|confluent-kafka @ file://${confluent_kafka_src}|" "${DD_MOUNT_DIR}/requirements.in"
+    rm "${DD_MOUNT_DIR}/requirements.in.bak"
     always_build+=("confluent-kafka")
 
     # ddtrace publishes macosx_14_0 wheels because upstream builds its extensions against the

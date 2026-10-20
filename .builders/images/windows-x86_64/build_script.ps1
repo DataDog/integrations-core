@@ -72,3 +72,17 @@ Copy-Item "${srcdir}\librdkafka.lib","${srcdir}\librdkafkacpp.lib" -Destination 
 New-Item -Path $includedir\librdkafka -ItemType Directory
 Copy-Item -Path ".\src\*" -Filter *.h -Destination $includedir\librdkafka
 
+# confluent-kafka's C extension reads offset commit metadata with strdup() although it is not
+# NUL-terminated. Build the extension from a patched copy of the sdist instead of the PyPI one.
+$confluent_kafka_src = "C:\confluent_kafka-${kafka_version}"
+Get-RemoteFile `
+  -Uri "https://files.pythonhosted.org/packages/source/c/confluent-kafka/confluent_kafka-${kafka_version}.tar.gz" `
+  -Path "C:\confluent_kafka-${kafka_version}.tar.gz" `
+  -Hash '619d10d1d77c9821ba913b3e42a33ade7f889f3573c7f3c17b57c3056e3310f5'
+7z x "C:\confluent_kafka-${kafka_version}.tar.gz" -o"C:\"
+7z x "C:\confluent_kafka-${kafka_version}.tar" -o"C:\"
+Remove-Item "C:\confluent_kafka-${kafka_version}.tar.gz","C:\confluent_kafka-${kafka_version}.tar"
+git -C $confluent_kafka_src apply --verbose "C:\mnt\patches\confluent-kafka-fix-metadata-overread.patch"
+(Get-Content 'C:\mnt\requirements.in') -replace '^confluent-kafka==.*', "confluent-kafka @ file:///C:/confluent_kafka-${kafka_version}" |
+  Set-Content 'C:\mnt\requirements.in'
+
