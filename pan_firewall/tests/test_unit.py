@@ -437,7 +437,6 @@ def test_every_metadata_metric_is_emitted(dd_run_check, aggregator, fake_panos, 
         schedule_clock.now = start + seconds
         dd_run_check(check)
 
-    for name in get_metadata_metrics():
-        aggregator.assert_metric(name)
-    aggregator.assert_all_metrics_covered()
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+    aggregator.assert_metrics_using_metadata(
+        get_metadata_metrics(), check_symmetric_inclusion=True, check_submission_type=True
+    )
