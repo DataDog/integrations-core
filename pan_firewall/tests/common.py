@@ -90,7 +90,7 @@ PANORAMA_CREDENTIALS = {'username': 'dummy-panorama-user', 'password': 'dummy-pa
 # The namespace of the E2E Panorama instance, which polls the same fake firewalls as the static one.
 E2E_PANORAMA_NAMESPACE = 'e2e-panorama'
 
-# `static` or `panorama`, set by the hatch env (`py3.13-lab` and `py3.13-lab-panorama`), never by hand.
+# `static` or `panorama`, set by the hatch env (`lab` and `lab-panorama`), never by hand.
 LAB_MODE_VAR = 'PANOS_LAB_MODE'
 LAB_MODES = ('static', 'panorama')
 LAB_HOSTS_VAR = 'PANOS_LAB_HOSTS'
@@ -111,7 +111,7 @@ def lab_mode(environ: Mapping[str, str] = os.environ) -> str:
     """Return the lab mode from `PANOS_LAB_MODE`; fail naming the variable (not echoing its value) if it is invalid."""
     mode = environ.get(LAB_MODE_VAR, '')
     if mode not in LAB_MODES:
-        pytest.fail(f'{LAB_MODE_VAR} must be one of: {", ".join(LAB_MODES)} (the py3.13-lab* hatch envs set it)')
+        pytest.fail(f'{LAB_MODE_VAR} must be one of: {", ".join(LAB_MODES)} (the lab* hatch envs set it)')
     return mode
 
 

@@ -68,9 +68,9 @@ def dd_environment():
     if os.environ.get('USE_PANOS_LAB'):
         # Lab mode: one instance from environment variables, no docker fakes; the hatch env sets PANOS_LAB_MODE.
         # In your own terminal: `read -rs "PANOS_PASSWORD?Password: "`, then `export PANOS_PASSWORD
-        # PANOS_LAB_HOSTS=<ip1>,<ip2> PANOS_LAB_USERNAME=<user>`. Then `ddev env start pan_firewall py3.13-lab`,
-        # `ddev env agent pan_firewall py3.13-lab check`, and `ddev env stop pan_firewall py3.13-lab` (ddev keeps the
-        # password in its env config until the stop). Panorama: env `py3.13-lab-panorama`, with PANOS_LAB_PANORAMA_HOST,
+        # PANOS_LAB_HOSTS=<ip1>,<ip2> PANOS_LAB_USERNAME=<user>`. Then `ddev env start pan_firewall lab`,
+        # `ddev env agent pan_firewall lab check`, and `ddev env stop pan_firewall lab` (ddev keeps the
+        # password in its env config until the stop). Panorama: env `lab-panorama`, with PANOS_LAB_PANORAMA_HOST,
         # PANOS_LAB_PANORAMA_USERNAME and PANOS_LAB_PANORAMA_PASSWORD (read silently) instead of PANOS_LAB_HOSTS; the
         # Agent must reach the IPs Panorama reports, or PANOS_LAB_IP_OVERRIDES=<reported>=<polled>,... maps them to
         # addresses it can reach. PANOS_LAB_COLLECT_ALL=1 enables the default-off collectors.

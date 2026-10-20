@@ -7,18 +7,24 @@ mypy-args = [
 [[envs.default.matrix]]
 python = ["3.13"]
 
-[[envs.default.matrix]]
-python = ["3.13"]
-setup = ["lab", "lab-panorama"]
-
 [envs.default]
 e2e-env = false
 
 [envs.default.overrides]
 name."^py3.13$".e2e-env = { value = true }
-# The lab envs are never E2E envs, so CI never runs them; start them by hand (see `dd_environment`).
-matrix.setup.env-vars = [
-  { key = "USE_PANOS_LAB", value = "1", if = ["lab", "lab-panorama"] },
-  { key = "PANOS_LAB_MODE", value = "static", if = ["lab"] },
-  { key = "PANOS_LAB_MODE", value = "panorama", if = ["lab-panorama"] },
-]
+
+# The lab envs run the check against a real firewall: they are outside the default matrix, so `ddev test` and CI never
+# run them, and they are not E2E envs. Start them by hand (see `dd_environment`).
+[envs.lab]
+python = "3.13"
+
+[envs.lab.env-vars]
+USE_PANOS_LAB = "1"
+PANOS_LAB_MODE = "static"
+
+[envs.lab-panorama]
+python = "3.13"
+
+[envs.lab-panorama.env-vars]
+USE_PANOS_LAB = "1"
+PANOS_LAB_MODE = "panorama"
