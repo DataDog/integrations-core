@@ -14,7 +14,9 @@ from datadog_checks.pan_firewall import (
     poller,  # noqa: F401  (importing it registers the collectors)
 )
 from datadog_checks.pan_firewall.collectors.base import COLLECT_FUNCTIONS
+from datadog_checks.pan_firewall.collectors.ha import HA_CMD
 from datadog_checks.pan_firewall.collectors.interfaces import COUNTER_INTERFACE_CMD
+from datadog_checks.pan_firewall.collectors.system import ENVIRONMENTALS_CMD
 from datadog_checks.pan_firewall.constants import IDENTITY, INTERVALS, REPORTS
 from datadog_checks.pan_firewall.errors import PanosApiError
 from datadog_checks.pan_firewall.xml_utils import num, parse_response, text
@@ -26,10 +28,12 @@ from .common import (
     FW_A_SERIAL,
     FW_A_TAGS,
     FW_A_TUNNEL,
+    INTERFACE_ALL_CMD,
     INTERFACE_CONFIG_CMD,
+    SYNTHETIC,
     SYSTEM_INFO_CMD,
 )
-from .fake_panos import FIREWALL_SETS
+from .fake_panos import FIREWALL_SETS, PANORAMA_HOSTS
 from .fixture_map import (
     LOG_FIXTURES,
     OP_FIXTURES,
@@ -152,78 +156,75 @@ def test_fixtures_hold_no_secrets():
 
 FIREWALLS = {name: ip for ip, name in FIREWALL_SETS.items()}
 
-GAUGE = 'gauge'
-MONOTONIC = 'monotonic_count'
-
-# The P0 metrics the captured lab firewalls produce on their first default run, with their types. Absent on purpose:
-# `ha.interface.*` (standalone firewalls), `power.*` and `temperature.*` (VM-Series has no sensors),
-# `interface.speed` (VM-Series reports no speed). `threat.count` and the tunnel counters are not on the first run:
-# the first threat run only records the newest log as a watermark, and `interfaces` sends the tunnel counters once
-# `vpn` has stored the tunnel tags, so from the second 3-minute tier.
+# The P0 metrics the captured lab firewalls produce on their first default run; `test_every_metadata_metric_is_emitted`
+# checks their types. Absent on purpose: `ha.interface.*` (standalone firewalls), `power.*` and `temperature.*`
+# (VM-Series has no sensors), `interface.speed` (VM-Series reports no speed). `threat.count` and the tunnel counters
+# are not on the first run: the first threat run only records the newest log as a watermark, and `interfaces` sends
+# the tunnel counters once `vpn` has stored the tunnel tags, so from the second 3-minute tier.
 TUNNEL_COUNTERS = {
-    'ipsec.tunnel.rx.bytes': MONOTONIC,
-    'ipsec.tunnel.rx.packets': MONOTONIC,
-    'ipsec.tunnel.tx.bytes': MONOTONIC,
-    'ipsec.tunnel.tx.packets': MONOTONIC,
+    'ipsec.tunnel.rx.bytes',
+    'ipsec.tunnel.rx.packets',
+    'ipsec.tunnel.tx.bytes',
+    'ipsec.tunnel.tx.packets',
 }
 
 FIRST_RUN_METRICS = {
-    'api.authentication.status': GAUGE,
-    'bgp.peer.prefix_limit': GAUGE,
-    'bgp.peer.prefix_limit.utilization': GAUGE,
-    'bgp.peer.prefixes.incoming.rejected': GAUGE,
-    'bgp.peer.prefixes.incoming.total': GAUGE,
-    'bgp.peer.prefixes.outgoing.advertised': GAUGE,
-    'bgp.peer.prefixes.outgoing.total': GAUGE,
-    'bgp.peer.restart': GAUGE,
-    'bgp.peer.status': GAUGE,
-    'bgp.peer.status_duration': GAUGE,
-    'bgp.peer.updates.in': MONOTONIC,
-    'bgp.peer.updates.out': MONOTONIC,
-    'can_connect': GAUGE,
-    'dataplane.cpu.utilization': GAUGE,
-    'disk.used_pct': GAUGE,
-    'interface.attack.ip_spoof': MONOTONIC,
-    'interface.attack.land': MONOTONIC,
-    'interface.attack.mac_spoof': MONOTONIC,
-    'interface.attack.ping_of_death': MONOTONIC,
-    'interface.attack.teardrop': MONOTONIC,
-    'interface.flow_state': MONOTONIC,
-    'interface.forward_errors': MONOTONIC,
-    'interface.rx.bytes': MONOTONIC,
-    'interface.rx.drops': MONOTONIC,
-    'interface.rx.errors': MONOTONIC,
-    'interface.rx.packets': MONOTONIC,
-    'interface.tx.bytes': MONOTONIC,
-    'interface.tx.packets': MONOTONIC,
-    'ipsec.gateways.total': GAUGE,
-    'ipsec.tunnel.state': GAUGE,
-    'ipsec.tunnels.active': GAUGE,
-    'ipsec.tunnels.inactive': GAUGE,
-    'ipsec.tunnels.init': GAUGE,
-    'ipsec.tunnels.total': GAUGE,
-    'license.days_left': GAUGE,
-    'license.expired': GAUGE,
-    'mgmt.cpu.hardirq': GAUGE,
-    'mgmt.cpu.idle': GAUGE,
-    'mgmt.cpu.iowait': GAUGE,
-    'mgmt.cpu.nice': GAUGE,
-    'mgmt.cpu.softirq': GAUGE,
-    'mgmt.cpu.steal': GAUGE,
-    'mgmt.cpu.system': GAUGE,
-    'mgmt.cpu.used': GAUGE,
-    'mgmt.cpu.user': GAUGE,
-    'mgmt.memory.available': GAUGE,
-    'mgmt.memory.buff_cache': GAUGE,
-    'mgmt.memory.free': GAUGE,
-    'mgmt.memory.total': GAUGE,
-    'mgmt.memory.used': GAUGE,
-    'mgmt.memory.used_pct': GAUGE,
-    'mgmt.swap.free': GAUGE,
-    'mgmt.swap.total': GAUGE,
-    'mgmt.swap.used': GAUGE,
-    'mgmt.swap.used_pct': GAUGE,
-    'security_rule.hits': MONOTONIC,
+    'api.authentication.status',
+    'bgp.peer.prefix_limit',
+    'bgp.peer.prefix_limit.utilization',
+    'bgp.peer.prefixes.incoming.rejected',
+    'bgp.peer.prefixes.incoming.total',
+    'bgp.peer.prefixes.outgoing.advertised',
+    'bgp.peer.prefixes.outgoing.total',
+    'bgp.peer.restart',
+    'bgp.peer.status',
+    'bgp.peer.status_duration',
+    'bgp.peer.updates.in',
+    'bgp.peer.updates.out',
+    'can_connect',
+    'dataplane.cpu.utilization',
+    'disk.used_pct',
+    'interface.attack.ip_spoof',
+    'interface.attack.land',
+    'interface.attack.mac_spoof',
+    'interface.attack.ping_of_death',
+    'interface.attack.teardrop',
+    'interface.flow_state',
+    'interface.forward_errors',
+    'interface.rx.bytes',
+    'interface.rx.drops',
+    'interface.rx.errors',
+    'interface.rx.packets',
+    'interface.tx.bytes',
+    'interface.tx.packets',
+    'ipsec.gateways.total',
+    'ipsec.tunnel.state',
+    'ipsec.tunnels.active',
+    'ipsec.tunnels.inactive',
+    'ipsec.tunnels.init',
+    'ipsec.tunnels.total',
+    'license.days_left',
+    'license.expired',
+    'mgmt.cpu.hardirq',
+    'mgmt.cpu.idle',
+    'mgmt.cpu.iowait',
+    'mgmt.cpu.nice',
+    'mgmt.cpu.softirq',
+    'mgmt.cpu.steal',
+    'mgmt.cpu.system',
+    'mgmt.cpu.used',
+    'mgmt.cpu.user',
+    'mgmt.memory.available',
+    'mgmt.memory.buff_cache',
+    'mgmt.memory.free',
+    'mgmt.memory.total',
+    'mgmt.memory.used',
+    'mgmt.memory.used_pct',
+    'mgmt.swap.free',
+    'mgmt.swap.total',
+    'mgmt.swap.used',
+    'mgmt.swap.used_pct',
+    'security_rule.hits',
 }
 
 # Which collector (or step) a request belongs to, by the `cmd` it sends. `type=log` requests are the threat jobs.
@@ -279,10 +280,9 @@ def new_static_check():
 
 
 def metrics_of(aggregator, ip):
-    """The (name without prefix, type) of every metric submitted for the firewall."""
-    types = {aggregator.GAUGE: GAUGE, aggregator.MONOTONIC_COUNT: MONOTONIC, aggregator.COUNT: 'count'}
+    """The name, without prefix, of every metric submitted for the firewall."""
     return {
-        (name.removeprefix('pan_firewall.'), types[metric.type])
+        name.removeprefix('pan_firewall.')
         for name in aggregator.metric_names
         for metric in aggregator.metrics(name)
         if f'device_ip:{ip}' in metric.tags
@@ -315,14 +315,14 @@ def test_runs_at_0_180_and_300_seconds_submit_every_lab_available_p0_metric(
         fake_panos.answer_log(ip, 'backward', None, 0, log_page([THREAT_LOG_FIRST_SEQNO[name] - 1]))
     check = new_static_check()
     start = schedule_clock.now
-    expected = {**FIRST_RUN_METRICS, **TUNNEL_COUNTERS, 'threat.count': 'count'}
+    expected = FIRST_RUN_METRICS | TUNNEL_COUNTERS | {'threat.count'}
 
     for seconds in (0, 180, 300):
         schedule_clock.now = start + seconds
         dd_run_check(check)
 
     for ip in FIREWALLS.values():
-        assert metrics_of(aggregator, ip) == set(expected.items())
+        assert metrics_of(aggregator, ip) == expected
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
@@ -366,8 +366,8 @@ def test_a_threat_job_still_running_is_polled_again_on_the_next_run_not_in_5_min
     assert 'threats' not in call_labels(fake_panos, ip, before)
 
 
-# One row per collector whose samples the check submits as they come: (metric, extra tags, type). The parser tests pin
-# every value; these rows pin that the check submits each collector's metrics with the right type and the global tags.
+# One row per collector whose samples the check submits as they come: (metric, extra tags). The parser tests pin every
+# value; these rows pin that the check submits each collector's metrics with the global tags.
 ETHERNET1_1 = (
     'interface:ethernet1/1',
     'interface_type:ethernet',
@@ -377,20 +377,19 @@ ETHERNET1_1 = (
     f'dd.internal.resource:ndm_interface:{FW_A_SERIAL}',
 )
 CHECK_LEVEL_SERIES = [
-    ('counter.global', ('counter:pkt_recv', 'category:packet', 'aspect:pktproc'), MONOTONIC),  # global_counters
-    ('interface.rx.bytes', ETHERNET1_1, MONOTONIC),  # interfaces
-    ('license.expired', ('feature:pan_db_url_filtering',), GAUGE),  # licenses
-    ('bgp.peer.status', FW_A_PEER, GAUGE),  # bgp
+    ('counter.global', ('counter:pkt_recv', 'category:packet', 'aspect:pktproc')),  # global_counters
+    ('interface.rx.bytes', ETHERNET1_1),  # interfaces
+    ('license.expired', ('feature:pan_db_url_filtering',)),  # licenses
+    ('bgp.peer.status', FW_A_PEER),  # bgp
     (
         'ospf.neighbor.status',
         ('neighbor:169.254.10.2', 'router_id:10.255.0.2', 'area:0.0.0.0', 'vr:default'),
-        GAUGE,
     ),  # ospf
-    ('security_rule.hits', ('rule:trust-to-vpn', 'vsys:vsys1'), MONOTONIC),  # rule_hits
-    ('mgmt.cpu.user', (), GAUGE),  # system_resources
-    ('dataplane.cpu.utilization', ('dp:dp0', 'core:2'), GAUGE),  # dataplane
-    ('disk.used_pct', ('mount:/opt/pancfg', 'filesystem:/dev/nvme0n1p5'), GAUGE),  # disk
-    ('ipsec.tunnel.state', FW_A_TUNNEL, GAUGE),  # vpn
+    ('security_rule.hits', ('rule:trust-to-vpn', 'vsys:vsys1')),  # rule_hits
+    ('mgmt.cpu.user', ()),  # system_resources
+    ('dataplane.cpu.utilization', ('dp:dp0', 'core:2')),  # dataplane
+    ('disk.used_pct', ('mount:/opt/pancfg', 'filesystem:/dev/nvme0n1p5')),  # disk
+    ('ipsec.tunnel.state', FW_A_TUNNEL),  # vpn
 ]
 
 
@@ -400,14 +399,56 @@ def test_every_scheduled_collector_is_registered(real_collectors):
     assert set(COLLECT_FUNCTIONS) | {IDENTITY} == set(INTERVALS)
 
 
-def test_every_collector_submits_with_type_and_tags(dd_run_check, aggregator, fake_panos, real_collectors):
+def test_every_collector_submits_with_the_global_tags(dd_run_check, aggregator, fake_panos, real_collectors):
     dd_run_check(PanFirewallCheck('pan_firewall', {}, [make_instance(collect_global_counters=True, collect_ospf=True)]))
 
-    metric_types = {GAUGE: aggregator.GAUGE, MONOTONIC: aggregator.MONOTONIC_COUNT}
-    for name, tags, metric_type in CHECK_LEVEL_SERIES:
-        aggregator.assert_metric(
-            f'pan_firewall.{name}', tags=sorted([*FW_A_TAGS, *tags]), metric_type=metric_types[metric_type]
-        )
+    for name, tags in CHECK_LEVEL_SERIES:
+        aggregator.assert_metric(f'pan_firewall.{name}', tags=sorted([*FW_A_TAGS, *tags]))
     # One `counter interface all` serves the interfaces and the tunnels.
     commands = collections.Counter(c.cmd for c in fake_panos.calls)
     assert commands[COUNTER_INTERFACE_CMD] == 1
+
+
+# Not emitted yet: the HA collector reads the HA state but not the HA link counters.
+NOT_EMITTED_METRICS = {
+    'pan_firewall.ha.interface.rx.bytes',
+    'pan_firewall.ha.interface.rx.drops',
+    'pan_firewall.ha.interface.rx.errors',
+    'pan_firewall.ha.interface.rx.packets',
+    'pan_firewall.ha.interface.tx.bytes',
+    'pan_firewall.ha.interface.tx.packets',
+}
+# The synthetic answers for what the lab VMs lack: sensors, interface speeds and an HA pair.
+HARDWARE_ANSWERS = {
+    ENVIRONMENTALS_CMD: SYNTHETIC / 'environmentals_hw.xml',
+    INTERFACE_ALL_CMD: SYNTHETIC / 'interface_all_speeds.xml',
+    HA_CMD: SYNTHETIC / 'ha_all_enabled.xml',
+}
+
+
+def test_every_metadata_metric_is_emitted(dd_run_check, aggregator, fake_panos, real_collectors, schedule_clock):
+    for name, ip in FIREWALLS.items():
+        fake_panos.answer_log(ip, 'backward', None, 0, log_page([THREAT_LOG_FIRST_SEQNO[name] - 1]))
+        for cmd, path in HARDWARE_ANSWERS.items():
+            fake_panos.answer_op(ip, cmd, (200, path.read_bytes()))
+    # A Panorama instance, as only it sends `panorama.can_connect`; it discovers and polls both fake firewalls.
+    instance = {
+        'panorama_host': next(iter(PANORAMA_HOSTS)),
+        'panorama_api_key': 'dummy-api-key',
+        'firewall_credentials': CREDENTIALS,
+        'collect_global_counters': True,
+        'collect_ospf': True,
+        'collect_reports': True,
+    }
+    check = PanFirewallCheck('pan_firewall', {}, [instance])
+    start = schedule_clock.now
+
+    for seconds in (0, 180, 300):
+        schedule_clock.now = start + seconds
+        dd_run_check(check)
+
+    metadata = {name: kind for name, kind in get_metadata_metrics().items() if name not in NOT_EMITTED_METRICS}
+    for name in metadata:
+        aggregator.assert_metric(name, at_least=1)
+    aggregator.assert_metrics_using_metadata(metadata, check_symmetric_inclusion=True, check_submission_type=True)
+    aggregator.assert_all_metrics_covered()
