@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json as stdlib_json
 from datetime import datetime
 
 import mock
@@ -14,6 +15,48 @@ from datadog_checks.ibm_db2.connection import Db2ConnectionError, get_connection
 from datadog_checks.ibm_db2.utils import scrub_connection_string
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize('as_bytes', [False, True])
+def test_query_metrics_payload_batches(instance: dict, monkeypatch: pytest.MonkeyPatch, as_bytes: bool):
+    """Splitting respects encoded byte limits without losing rows, counters, or collection metadata."""
+    instance['dbm'] = True
+    collector = IbmDb2Check('ibm_db2', {}, [instance])._query_metrics
+    wrapper = {'host': 'db2-test', 'database_instance': 'db2-test', 'timestamp': 1234, 'min_collection_interval': 10}
+    rows = [
+        {'query': 'SELECT "' + '表' * 60 + '"', 'query_signature': str(i), 'count': i + 1, 'time': (i + 1) * 1000}
+        for i in range(4)
+    ]
+
+    def serialize(value: dict, **kwargs) -> str | bytes:
+        text = stdlib_json.JSONEncoder(ensure_ascii=False, **kwargs).encode(value)
+        return text.encode('utf-8') if as_bytes else text
+
+    monkeypatch.setattr(query_metrics, 'METRICS_PAYLOAD_MAX_BYTES', 700)
+    with mock.patch.object(query_metrics.json, 'dumps', side_effect=serialize):
+        payloads = list(collector._get_query_metrics_payloads(wrapper, rows))
+    assert len(payloads) > 1
+    decoded_rows = []
+    for payload in payloads:
+        assert len(payload.encode('utf-8') if isinstance(payload, str) else payload) < 700
+        decoded = stdlib_json.loads(payload)
+        decoded_rows.extend(decoded.pop('ibm_db2_rows'))
+        assert decoded == wrapper
+    assert decoded_rows == rows
+
+
+def test_query_metrics_oversized_row(instance: dict, monkeypatch: pytest.MonkeyPatch):
+    """An oversized row is dropped without losing its neighboring rows or logging SQL text."""
+    instance['dbm'] = True
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    rows = [{'query': 'SELECT A', 'count': 1}, {'query': 'X' * 1000, 'count': 2}, {'query': 'SELECT B', 'count': 3}]
+    monkeypatch.setattr(query_metrics, 'METRICS_PAYLOAD_MAX_BYTES', 200)
+    with mock.patch.object(check.log, 'warning') as warning:
+        payloads = list(check._query_metrics._get_query_metrics_payloads({'host': 'db2-test'}, rows))
+    actual = [row for payload in payloads for row in stdlib_json.loads(payload)['ibm_db2_rows']]
+    assert actual == [rows[0], rows[2]]
+    warning.assert_called_once()
+    assert rows[1]['query'] not in str(warning.call_args)
 
 
 @pytest.mark.parametrize('enabled', [True, False])
