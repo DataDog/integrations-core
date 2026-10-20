@@ -7,7 +7,7 @@ import pytest
 
 from datadog_checks.pan_firewall.collectors.base import FirewallState
 from datadog_checks.pan_firewall.collectors.rules import collect_rule_hits, parse_rule_hits, rule_hit_cmd
-from datadog_checks.pan_firewall.errors import PanosApiError
+from datadog_checks.pan_firewall.errors import PanosApiError, PanosAuthError
 
 from ..helpers import load_op, make_ctx, series
 
@@ -96,4 +96,15 @@ def test_every_vsys_refused_fails_the_collector():
     ctx.client.op.side_effect = PanosApiError('7', 'no')
 
     with pytest.raises(PanosApiError):
+        collect_rule_hits(ctx)
+
+
+def test_a_rejected_key_fails_the_collector_even_when_another_vsys_answers():
+    ctx = make_ctx(state=FirewallState(vsys=['vsys1', 'vsys2']), config=mock.Mock(security_rule_filter=None))
+    good = load()
+    ctx.client.op.side_effect = (
+        lambda cmd: good if cmd == rule_hit_cmd('vsys1') else _raise(PanosAuthError('403', 'no'))
+    )
+
+    with pytest.raises(PanosAuthError):
         collect_rule_hits(ctx)

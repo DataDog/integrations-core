@@ -11,7 +11,7 @@ from functools import cache
 from xml.etree.ElementTree import Element
 from xml.sax.saxutils import escape
 
-from datadog_checks.pan_firewall.errors import PanosApiError
+from datadog_checks.pan_firewall.errors import PanosApiError, PanosAuthError
 from datadog_checks.pan_firewall.xml_utils import num
 
 from .base import CollectContext, Sample, register
@@ -59,8 +59,10 @@ def collect_rule_hits(ctx: CollectContext) -> list[Sample]:
     for vsys in ctx.state.vsys:
         try:
             root = ctx.client.op(rule_hit_cmd(vsys))
+        except PanosAuthError:
+            raise
         except PanosApiError as e:
-            ctx.warning('cannot read the rule hits of %s: %s', vsys, e)
+            ctx.warning('cannot read the rule hits of %s: %s', vsys, e, key=f'rule_hits:{vsys}')
             error = e
             continue
         answered += 1
