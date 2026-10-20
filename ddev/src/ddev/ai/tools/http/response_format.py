@@ -284,11 +284,16 @@ def _representation(content_type: str, text: str) -> tuple[str, str, str | None]
     except ValueError:
         return "text", text, "Content-Type is JSON but the body is not valid JSON; saved as received text"
     try:
-        formatted = json.dumps(parsed, indent=2, ensure_ascii=False) + "\n"
+        chunks: list[str] = []
+        formatted_chars = 1
+        for chunk in json.JSONEncoder(indent=2, ensure_ascii=False).iterencode(parsed):
+            formatted_chars += len(chunk)
+            if formatted_chars > MAX_FORMATTED_CHARS:
+                return "json", text, "Formatted JSON exceeded the size limit; saved as received"
+            chunks.append(chunk)
+        formatted = "".join(chunks) + "\n"
     except RecursionError:
         return "json", text, "JSON nesting too deep to format; saved as received"
-    if len(formatted) > MAX_FORMATTED_CHARS:
-        return "json", text, "Formatted JSON exceeded the size limit; saved as received"
     # A formatted representation, not an exact wire-byte capture.
     return "formatted_json", formatted, None
 
