@@ -19,6 +19,7 @@ from datadog_checks.pan_firewall.collectors.interfaces import COUNTER_INTERFACE_
 from datadog_checks.pan_firewall.collectors.system import ENVIRONMENTALS_CMD
 from datadog_checks.pan_firewall.constants import IDENTITY, INTERVALS, REPORTS
 from datadog_checks.pan_firewall.errors import PanosApiError
+from datadog_checks.pan_firewall.poller import OPTIONAL_COLLECTORS
 from datadog_checks.pan_firewall.xml_utils import num, parse_response, text
 
 from .common import (
@@ -396,6 +397,8 @@ def test_every_scheduled_collector_is_registered():
     # A collector runs only when it has an interval, is registered, and `poller` imports its module; a name missing
     # from either side would never run, and nothing else would say so.
     assert set(COLLECT_FUNCTIONS) | {IDENTITY} == set(INTERVALS)
+    # An optional collector that is not registered would be read from the config and never run.
+    assert set(OPTIONAL_COLLECTORS) <= set(COLLECT_FUNCTIONS)
 
 
 def test_every_collector_submits_with_the_global_tags(dd_run_check, aggregator, fake_panos):
