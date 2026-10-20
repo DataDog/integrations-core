@@ -100,7 +100,6 @@ def test_vpn_answer_without_result_keeps_the_stored_tunnels():
 
 
 def test_tunnel_counters_wait_for_the_run_after_vpn_first_answers_whatever_the_collector_order(
-    real_collectors,
     dd_run_check,
     aggregator,
     monkeypatch,

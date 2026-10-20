@@ -402,7 +402,7 @@ def test_vsys_tag_is_vsys_n(firewall):
     assert series(firewall.collect()) == expected({('medium', 'drop', 'spyware', 'vsys2'): 1})
 
 
-def test_threats_are_registered_and_submit_through_the_check(real_collectors, dd_run_check, aggregator, fake_panos):
+def test_threats_are_registered_and_submit_through_the_check(dd_run_check, aggregator, fake_panos):
     # The first run has no watermark and starts one below fw-a's capture; a new check instance (an Agent restart)
     # then counts the capture from the persisted watermark.
     first = THREAT_LOG_FIRST_SEQNO['fw-a']
@@ -426,7 +426,7 @@ def test_threats_are_registered_and_submit_through_the_check(real_collectors, dd
     assert json.loads(check.read_persistent_cache(CACHE_KEY))['seqno'] == FW_A_LAST_SEQNO
 
 
-def test_collect_threats_false_makes_no_log_call(real_collectors, dd_run_check, aggregator, fake_panos):
+def test_collect_threats_false_makes_no_log_call(dd_run_check, aggregator, fake_panos):
     dd_run_check(new_check(make_instance(collect_threats=False)))
 
     assert [c for c in fake_panos.calls if c.type == 'log'] == []

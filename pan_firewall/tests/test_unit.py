@@ -307,7 +307,7 @@ def call_labels(fake_panos, ip, since):
 
 
 def test_runs_at_0_180_and_300_seconds_submit_every_lab_available_p0_metric(
-    dd_run_check, aggregator, fake_panos, real_collectors, schedule_clock
+    dd_run_check, aggregator, fake_panos, schedule_clock
 ):
     # The first threat run reads the newest log as a watermark; start it just below each capture so the 5-minute
     # run counts it.
@@ -326,7 +326,7 @@ def test_runs_at_0_180_and_300_seconds_submit_every_lab_available_p0_metric(
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_each_run_makes_only_the_requests_that_are_due(dd_run_check, fake_panos, real_collectors, schedule_clock):
+def test_each_run_makes_only_the_requests_that_are_due(dd_run_check, fake_panos, schedule_clock):
     check = new_static_check()
     start = schedule_clock.now
 
@@ -343,7 +343,6 @@ def test_each_run_makes_only_the_requests_that_are_due(dd_run_check, fake_panos,
 def test_a_threat_job_still_running_is_polled_again_on_the_next_run_not_in_5_minutes(
     dd_run_check,
     fake_panos,
-    real_collectors,
     monkeypatch,
     schedule_clock,
 ):
@@ -393,13 +392,13 @@ CHECK_LEVEL_SERIES = [
 ]
 
 
-def test_every_scheduled_collector_is_registered(real_collectors):
+def test_every_scheduled_collector_is_registered():
     # A collector runs only when it has an interval, is registered, and `poller` imports its module; a name missing
     # from either side would never run, and nothing else would say so.
     assert set(COLLECT_FUNCTIONS) | {IDENTITY} == set(INTERVALS)
 
 
-def test_every_collector_submits_with_the_global_tags(dd_run_check, aggregator, fake_panos, real_collectors):
+def test_every_collector_submits_with_the_global_tags(dd_run_check, aggregator, fake_panos):
     dd_run_check(PanFirewallCheck('pan_firewall', {}, [make_instance(collect_global_counters=True, collect_ospf=True)]))
 
     for name, tags in CHECK_LEVEL_SERIES:
@@ -426,7 +425,7 @@ HARDWARE_ANSWERS = {
 }
 
 
-def test_every_metadata_metric_is_emitted(dd_run_check, aggregator, fake_panos, real_collectors, schedule_clock):
+def test_every_metadata_metric_is_emitted(dd_run_check, aggregator, fake_panos, schedule_clock):
     for name, ip in FIREWALLS.items():
         fake_panos.answer_log(ip, 'backward', None, 0, log_page([THREAT_LOG_FIRST_SEQNO[name] - 1]))
         for cmd, path in HARDWARE_ANSWERS.items():

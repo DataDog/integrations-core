@@ -72,7 +72,7 @@ def test_hardware_power_thresholds_and_alarms_and_thermal_values():
     assert {k: v for k, v in result.items() if k[0].startswith('temperature.')} == expected
 
 
-def test_environment_is_registered_and_submits_through_the_check(real_collectors, fake_panos, dd_run_check, aggregator):
+def test_environment_is_registered_and_submits_through_the_check(fake_panos, dd_run_check, aggregator):
     fake_panos.answer_op(FW_A_IP, ENVIRONMENTALS_CMD, (200, HARDWARE.read_bytes()))
 
     dd_run_check(new_check())

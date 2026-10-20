@@ -17,7 +17,6 @@ from .common import (
     FW_A_SERIAL,
     FW_A_TAGS,
     FW_B_IP,
-    FW_B_SERIAL,
     FW_C_IP,
     INTERFACE_ALL_CMD,
     INTERFACE_CONFIG_CMD,
@@ -27,6 +26,9 @@ from .common import (
 from .fake_panos import FAILURES, FIREWALL_SETS
 from .fixture_map import NO_CAPTURE
 from .helpers import can_connect_by_ip, make_instance, new_check, register_stubs, stub_runs, stub_sample
+
+# These tests run the poller with the stub collectors they register.
+pytestmark = pytest.mark.stub_collectors
 
 
 def only_value_and_tags(aggregator, name):
@@ -437,27 +439,6 @@ def test_system_info_without_serial_keeps_the_cached_identity(dd_run_check, aggr
     aggregator.reset()
     dd_run_check(new_check())
     aggregator.assert_metric('pan_firewall.can_connect', value=0, tags=FW_A_TAGS, metric_type=aggregator.GAUGE, count=1)
-
-
-def test_static_firewall_replaced_at_the_same_ip_is_tagged_and_tracked_as_the_new_unit(
-    dd_run_check, aggregator, fake_panos, real_collectors, monkeypatch, schedule_clock
-):
-    check = new_check(make_instance(collect_threats=True))
-    dd_run_check(check)
-    # The unit is swapped for another one that answers at the same IP; the identity is due again after 30 minutes.
-    monkeypatch.setitem(FIREWALL_SETS, FW_A_IP, 'fw-b')
-    schedule_clock.now += 1800
-    aggregator.reset()
-    calls_before = len(fake_panos.calls)
-
-    dd_run_check(check)
-
-    value, tags = only_value_and_tags(aggregator, 'can_connect')
-    assert {f'device_id:{FW_B_SERIAL}', f'device_serial:{FW_B_SERIAL}', 'device_hostname:fw-b'} <= set(tags)
-    assert f'device_id:{FW_A_SERIAL}' not in tags
-    # The new unit has no threat watermark of its own: it starts with a first run (`backward`), not from the old one's.
-    threat_jobs = [c.params['dir'] for c in fake_panos.calls[calls_before:] if c.type == 'log' and c.action is None]
-    assert threat_jobs == ['backward']
 
 
 def test_failed_collector_is_retried_after_5_minutes_not_after_its_interval(dd_run_check, monkeypatch, schedule_clock):

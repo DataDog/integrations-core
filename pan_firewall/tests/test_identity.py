@@ -10,8 +10,10 @@ from datadog_checks.pan_firewall.firewalls import FirewallTarget
 from datadog_checks.pan_firewall.identity import DeviceIdentity, global_tags, parse_system_info, vsys_list
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from .common import FIXTURES, FW_A_SERIAL, SYSTEM_INFO_CMD
+from .common import FIXTURES, FW_A_IP, FW_A_SERIAL, FW_B_SERIAL, SYSTEM_INFO_CMD
+from .fake_panos import FIREWALL_SETS
 from .fixture_map import op_fixture
+from .helpers import make_instance, new_check
 
 CREDS = Credentials(username='dummy-user', password='dummy-password', api_key=None)
 STATIC_TARGET = FirewallTarget(ip='198.51.100.7', credentials=CREDS)
@@ -116,3 +118,24 @@ def test_global_tags_use_discovery_model_and_version_until_the_firewall_answers(
 )
 def test_vsys_list(identity, rows_file, configured, expected):
     assert vsys_list(identity, ifnet_rows(FIXTURES / rows_file), configured) == expected
+
+
+def test_static_firewall_replaced_at_the_same_ip_is_tagged_and_tracked_as_the_new_unit(
+    dd_run_check, aggregator, fake_panos, monkeypatch, schedule_clock
+):
+    check = new_check(make_instance(collect_threats=True))
+    dd_run_check(check)
+    # The unit is swapped for another one that answers at the same IP; the identity is due again after 30 minutes.
+    monkeypatch.setitem(FIREWALL_SETS, FW_A_IP, 'fw-b')
+    schedule_clock.now += 1800
+    aggregator.reset()
+    calls_before = len(fake_panos.calls)
+
+    dd_run_check(check)
+
+    (can_connect,) = aggregator.metrics('pan_firewall.can_connect')
+    assert {f'device_id:{FW_B_SERIAL}', f'device_serial:{FW_B_SERIAL}', 'device_hostname:fw-b'} <= set(can_connect.tags)
+    assert f'device_id:{FW_A_SERIAL}' not in can_connect.tags
+    # The new unit has no threat watermark of its own: it starts with a first run (`backward`), not from the old one's.
+    threat_jobs = [c.params['dir'] for c in fake_panos.calls[calls_before:] if c.type == 'log' and c.action is None]
+    assert threat_jobs == ['backward']

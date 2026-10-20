@@ -95,15 +95,15 @@ def fake_panos(mocker, datadog_agent) -> FakePanos:
     return fake
 
 
-@pytest.fixture
-def real_collectors():
-    """Request it to keep the real collectors registered, which the other tests replace with stubs."""
+def pytest_configure(config):
+    config.addinivalue_line('markers', 'stub_collectors: start each test with an empty collector registry')
 
 
 @pytest.fixture(autouse=True)
-def only_test_collectors(request, monkeypatch):
-    """Start every test with an empty collector registry, so a test runs the collectors it registers and no others."""
-    if 'real_collectors' not in request.fixturenames:
+def stub_collectors(request, monkeypatch):
+    """Empty the collector registry for the tests marked `stub_collectors`, which test the poller framework with the
+    stub collectors they register (`helpers.register_stubs`) and no others."""
+    if request.node.get_closest_marker('stub_collectors'):
         for name in list(COLLECT_FUNCTIONS):
             monkeypatch.delitem(COLLECT_FUNCTIONS, name)
 

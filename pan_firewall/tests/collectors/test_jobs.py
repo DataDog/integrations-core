@@ -13,6 +13,9 @@ from ..common import FW_A_IP, STUBS, SYNTHETIC
 from ..fake_panos import FAILURES, NO_CAPTURE
 from ..helpers import can_connect_by_ip, new_check, register_stubs, stub_runs
 
+# These tests run the poller with the stub collectors they register.
+pytestmark = pytest.mark.stub_collectors
+
 
 def jobs_response(name):
     return 200, (SYNTHETIC / name).read_bytes()

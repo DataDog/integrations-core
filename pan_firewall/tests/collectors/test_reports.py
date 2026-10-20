@@ -372,7 +372,7 @@ def report_calls(fake_panos):
 
 
 def test_slow_firewall_is_polled_every_run_until_all_reports_are_collected_then_every_30_minutes(
-    real_collectors, dd_run_check, aggregator, fake_panos, schedule_clock
+    dd_run_check, aggregator, fake_panos, schedule_clock
 ):
     act = SYNTHETIC / 'report_job_act.xml'
     for field, _tag in REPORTS.values():
@@ -403,9 +403,7 @@ def test_slow_firewall_is_polled_every_run_until_all_reports_are_collected_then_
     assert submits and submits[0].params['cmd'] == report_calls(fake_panos)[0].params['cmd']
 
 
-def test_reports_are_registered_and_submit_through_the_check_when_enabled(
-    real_collectors, dd_run_check, aggregator, fake_panos
-):
+def test_reports_are_registered_and_submit_through_the_check_when_enabled(dd_run_check, aggregator, fake_panos):
     dd_run_check(new_check(make_instance(collect_reports=True)))
 
     # The first row of each report, with its three gauges.

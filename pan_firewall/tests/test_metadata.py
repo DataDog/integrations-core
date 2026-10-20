@@ -5,8 +5,7 @@ import copy
 from xml.etree import ElementTree as ET
 
 from datadog_checks.pan_firewall.auth import Credentials
-from datadog_checks.pan_firewall.collectors.base import COLLECT_FUNCTIONS
-from datadog_checks.pan_firewall.collectors.ha import HA_CMD, collect_ha
+from datadog_checks.pan_firewall.collectors.ha import HA_CMD
 from datadog_checks.pan_firewall.firewalls import FirewallTarget
 from datadog_checks.pan_firewall.identity import global_tags, parse_system_info
 from datadog_checks.pan_firewall.interface_config import parse_interface_config
@@ -181,8 +180,7 @@ def test_first_run_sends_the_device_and_its_interfaces(dd_run_check, aggregator,
     assert len(event['interfaces']) == 7
 
 
-def test_device_event_carries_the_ha_state_of_an_ha_firewall(dd_run_check, aggregator, fake_panos, monkeypatch):
-    monkeypatch.setitem(COLLECT_FUNCTIONS, 'ha', collect_ha)
+def test_device_event_carries_the_ha_state_of_an_ha_firewall(dd_run_check, aggregator, fake_panos):
     fake_panos.answer_op(FW_A_IP, HA_CMD, (200, (SYNTHETIC / 'ha_all_enabled.xml').read_bytes()))
 
     dd_run_check(new_check())
@@ -225,10 +223,7 @@ def test_metadata_is_sent_every_30_minutes(dd_run_check, aggregator, schedule_cl
     assert len(events(aggregator)) == 2
 
 
-def test_metadata_is_sent_at_once_when_the_firewall_comes_back(
-    dd_run_check, aggregator, fake_panos, schedule_clock, monkeypatch
-):
-    monkeypatch.setitem(COLLECT_FUNCTIONS, 'bgp', lambda ctx: [])
+def test_metadata_is_sent_at_once_when_the_firewall_comes_back(dd_run_check, aggregator, fake_panos, schedule_clock):
     check = new_check()
     dd_run_check(check)
     fake_panos.fail(FW_A_IP, 'refused')
