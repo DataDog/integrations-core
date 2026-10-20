@@ -20,25 +20,15 @@
       }
     }
   ],
-  "supported_connection_methods": [
-    {
-      "name": "Cisco Secure Endpoint API",
-      "multitenant": {
-        "tenant_setting": {
-          "key": "api_domain_name",
-          "label": "API domain name",
-          "help": "The domain of your Cisco Secure Endpoint API, without a scheme or path. Cloud regions: api.amp.cisco.com (North America), api.eu.amp.cisco.com (Europe), api.apjc.amp.cisco.com (Asia Pacific, Japan, and China).",
-          "editable": true,
-          "required": true,
-          "text": {
-            "pattern": "^[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)+(:[0-9]{1,5})?$"
-          }
-        },
-        "base_url_format": "https://%s"
-      }
-    }
-  ],
   "additional_config_fields": [
+    {
+      "key": "api_domain_name",
+      "label": "API domain name",
+      "help": "The domain of your Cisco Secure Endpoint API, without a path. Cloud regions: api.amp.cisco.com (North America), api.eu.amp.cisco.com (Europe), api.apjc.amp.cisco.com (Asia Pacific, Japan, and China).",
+      "editable": true,
+      "required": true,
+      "text": {}
+    },
     {
       "key": "get_endpoint_details",
       "label": "Collect endpoint metadata for Cisco Secure Endpoint event logs",
