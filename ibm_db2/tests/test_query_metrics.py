@@ -23,7 +23,6 @@ from .common import DB2_VERSION
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.usefixtures('dd_environment'),
-    pytest.mark.skipif(not (DB2_VERSION or '').startswith('12.1.'), reason='Query metrics are tested on Db2 12.1'),
 ]
 
 
@@ -120,7 +119,8 @@ def test_query_metrics(
             assert payload['timestamp'] > 0
             assert payload['ddagentversion'] == check.agent_version
             assert payload['min_collection_interval'] == collection_interval
-            assert payload['ibm_db2_version'].startswith('12.01.')
+            major, minor = DB2_VERSION.split('.')[:2]
+            assert payload['ibm_db2_version'].startswith(f'{int(major):02}.{int(minor):02}.')
             assert f"db:{instance['db']}" in payload['tags']
 
         WaitFor(assert_query_metric, attempts=20, wait=1)()
