@@ -223,7 +223,7 @@ class SQLServerSchemaCollector(SQLServerObjectCollector):
         """
             return query
 
-        # For 2017 and later we can get all the data in one query
+        # SQL Server 2017 and later, at compatibility level 130 or higher, can get all the data in one query
         query += f"""
             SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.owner_name,
                 schema_tables.table_name
@@ -243,7 +243,7 @@ class SQLServerSchemaCollector(SQLServerObjectCollector):
             # Use a separate connection to avoid conflicts with the main cursor while it streams table rows.
             cursor = self._legacy_cursor
             if cursor is None:
-                raise RuntimeError("pre-2017 schema cursor is not initialized")
+                raise RuntimeError("legacy schema cursor is not initialized")
 
             table_id = str(cursor_row.get("table_id"))
             columns_query = COLUMN_QUERY.replace("schema_tables.table_id", table_id)

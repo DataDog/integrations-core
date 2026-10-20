@@ -191,24 +191,15 @@ def test_collect_views(aggregator, dbm_instance, integration_check, sa_conn):
         check = integration_check(dbm_instance)
         check.sql_metadata.collect_schemas()
 
-        views = [
-            view
+        schema, view = next(
+            (schema, view)
             for event in aggregator.get_event_platform_events('dbm-metadata')
             if event['kind'] == 'sqlserver_views'
             for database in event['metadata']
             if database['name'] == SCHEMA_DATABASE
             for schema in database['schemas']
-            for view in schema.get('views', [])
-        ]
-        view = next(view for view in views if view['name'] == view_name)
-        schema = next(
-            schema
-            for event in aggregator.get_event_platform_events('dbm-metadata')
-            if event['kind'] == 'sqlserver_views'
-            for database in event['metadata']
-            if database['name'] == SCHEMA_DATABASE
-            for schema in database['schemas']
-            if any(candidate['name'] == view_name for candidate in schema['views'])
+            for view in schema['views']
+            if view['name'] == view_name
         )
 
         assert schema['tables'] == []

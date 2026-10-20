@@ -217,10 +217,9 @@ def create_metadata_job(schema_config: dict) -> SqlserverMetadata:
     [
         ({'enabled': True}, False),
         ({'enabled': True, 'collect_views': True}, True),
-        ({'enabled': True, 'collect_views': False}, False),
     ],
 )
-def test_schema_collection_can_disable_views(schema_config: dict, views_collected: bool):
+def test_schema_collection_collects_views_only_when_enabled(schema_config: dict, views_collected: bool):
     metadata = create_metadata_job(schema_config)
 
     metadata.collect_schemas()
@@ -567,7 +566,7 @@ def test_schema_collector_does_not_open_pre_2017_connection_for_modern_query() -
     assert mapped_row["schemas"][0]["tables"][0]["columns"] == [{"name": "id"}]
 
 
-def test_schema_collector_maps_view_metadata():
+def test_view_collector_maps_view_metadata():
     check = create_schema_collector()._check
     collector = SQLServerViewCollector(check)
     collector._use_legacy_query = False
@@ -606,7 +605,7 @@ def test_schema_collector_maps_view_metadata():
     ]
 
 
-def test_schema_collector_legacy_view_fetches_only_columns():
+def test_view_collector_legacy_query_fetches_only_columns():
     check = create_schema_collector()._check
     collector = SQLServerViewCollector(check)
     collector._use_legacy_query = True

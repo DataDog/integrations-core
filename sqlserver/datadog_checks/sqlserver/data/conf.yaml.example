@@ -846,7 +846,8 @@ instances:
         # max_tables: 300
 
         ## @param max_views - integer - optional - default: 1000
-        ## Set the maximum number of views to collect. Defaults to 1000.
+        ## Set the maximum number of views to collect from each database when `collect_views` is enabled.
+        ## Defaults to 1000.
         #
         # max_views: 1000
 
