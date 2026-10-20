@@ -119,12 +119,25 @@ def test_post_warns_on_transient_http_error(code, capsys):
     assert "::error::" not in out
 
 
+def test_post_retries_forbidden_until_app_key_propagates():
+    # A freshly minted dd-sts app key returns 403 until it propagates.
+    forbidden = urllib.error.HTTPError(WEBHOOK, 403, "err", {}, None)
+    with (
+        patch("urllib.request.urlopen", side_effect=[forbidden, forbidden, MagicMock()]) as urlopen,
+        patch("time.sleep") as sleep,
+    ):
+        result = notify_release.post(WEBHOOK, "api", "app", "hi")
+    assert result is True
+    assert urlopen.call_count == 3
+    assert [c.args[0] for c in sleep.call_args_list] == list(notify_release.FORBIDDEN_RETRY_DELAYS[:2])
+
+
 @pytest.mark.parametrize("code", [400, 401, 403, 404])
 def test_post_fails_on_config_http_error(code, capsys, tmp_path, monkeypatch):
     summary = tmp_path / "summary.md"
     monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary))
     error = urllib.error.HTTPError(WEBHOOK, code, "err", {}, None)
-    with patch("urllib.request.urlopen", side_effect=error):
+    with patch("urllib.request.urlopen", side_effect=error), patch("time.sleep"):
         result = notify_release.post(WEBHOOK, "api", "app", "hi")
     assert result is False
     assert "::error::" in capsys.readouterr().out
