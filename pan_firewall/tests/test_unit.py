@@ -157,10 +157,10 @@ def test_fixtures_hold_no_secrets():
 FIREWALLS = {name: ip for ip, name in FIREWALL_SETS.items()}
 
 # The P0 metrics the captured lab firewalls produce on their first default run; `test_every_metadata_metric_is_emitted`
-# checks their types. Absent on purpose: `ha.interface.*` (standalone firewalls), `power.*` and `temperature.*`
-# (VM-Series has no sensors), `interface.speed` (VM-Series reports no speed). `threat.count` and the tunnel counters
-# are not on the first run: the first threat run only records the newest log as a watermark, and `interfaces` sends
-# the tunnel counters once `vpn` has stored the tunnel tags, so from the second 3-minute tier.
+# checks their types. Absent on purpose: `power.*` and `temperature.*` (VM-Series has no sensors), `interface.speed`
+# (VM-Series reports no speed). `threat.count` and the tunnel counters are not on the first run: the first threat run
+# only records the newest log as a watermark, and `interfaces` sends the tunnel counters once `vpn` has stored the
+# tunnel tags, so from the second 3-minute tier.
 TUNNEL_COUNTERS = {
     'ipsec.tunnel.rx.bytes',
     'ipsec.tunnel.rx.packets',
@@ -408,15 +408,6 @@ def test_every_collector_submits_with_the_global_tags(dd_run_check, aggregator, 
     assert commands[COUNTER_INTERFACE_CMD] == 1
 
 
-# Not emitted yet: the HA collector reads the HA state but not the HA link counters.
-NOT_EMITTED_METRICS = {
-    'pan_firewall.ha.interface.rx.bytes',
-    'pan_firewall.ha.interface.rx.drops',
-    'pan_firewall.ha.interface.rx.errors',
-    'pan_firewall.ha.interface.rx.packets',
-    'pan_firewall.ha.interface.tx.bytes',
-    'pan_firewall.ha.interface.tx.packets',
-}
 # The synthetic answers for what the lab VMs lack: sensors, interface speeds and an HA pair.
 HARDWARE_ANSWERS = {
     ENVIRONMENTALS_CMD: SYNTHETIC / 'environmentals_hw.xml',
@@ -446,8 +437,7 @@ def test_every_metadata_metric_is_emitted(dd_run_check, aggregator, fake_panos, 
         schedule_clock.now = start + seconds
         dd_run_check(check)
 
-    metadata = {name: kind for name, kind in get_metadata_metrics().items() if name not in NOT_EMITTED_METRICS}
-    for name in metadata:
-        aggregator.assert_metric(name, at_least=1)
-    aggregator.assert_metrics_using_metadata(metadata, check_symmetric_inclusion=True, check_submission_type=True)
+    for name in get_metadata_metrics():
+        aggregator.assert_metric(name)
     aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
