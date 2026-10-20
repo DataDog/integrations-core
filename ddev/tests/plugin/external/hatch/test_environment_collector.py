@@ -209,3 +209,23 @@ def test_lint_commands_survive_whitespace_checkout(fake_checkout, monkeypatch, t
             # ruff's config path is always joined with `/`, regardless of platform.
             config_path = f'{integrations_core}/pyproject.toml'
             assert config_path == tokens[tokens.index('--config') + 1]
+
+
+def test_lint_env_pydantic_follows_agent_requirements(fake_checkout):
+    integrations_core, integration_root = fake_checkout()
+    (integrations_core / 'agent_requirements.in').write_text('ddtrace==1.0.0\npydantic==9.9.9\n')
+
+    collector = DatadogChecksEnvironmentCollector(integration_root, {})
+    dependencies = collector.get_initial_config()['lint']['dependencies']
+
+    assert [dep for dep in dependencies if dep.startswith('pydantic')] == ['pydantic==9.9.9']
+
+
+def test_lint_env_pydantic_stays_pinned_without_agent_requirements(fake_checkout):
+    _, integration_root = fake_checkout()
+
+    collector = DatadogChecksEnvironmentCollector(integration_root, {})
+    dependencies = collector.get_initial_config()['lint']['dependencies']
+
+    [pydantic] = [dep for dep in dependencies if dep.startswith('pydantic')]
+    assert pydantic.startswith('pydantic==')

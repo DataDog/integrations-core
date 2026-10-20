@@ -2,7 +2,18 @@
 
 <!-- towncrier release notes start -->
 
-## 23.12.0 / 2026-09-02
+## 23.13.0 / 2026-10-01
+
+***Added***:
+
+* Update dependencies ([#25284](https://github.com/DataDog/integrations-core/pull/25284))
+
+***Fixed***:
+
+* Fix a bug where schemas were collected more often than ``collect_schemas.collection_interval`` when another metadata collection interval was configured lower. ([#25121](https://github.com/DataDog/integrations-core/pull/25121))
+* Fix Postgres query metrics dropping statements when plan time statistics decrease. ([#25210](https://github.com/DataDog/integrations-core/pull/25210))
+
+## 23.12.0 / 2026-09-02 / Agent 7.84.0
 
 ***Security***:
 
@@ -29,7 +40,7 @@
 * Build and cache relation queries once instead of rebuilding them for each database on every check run. ([#25052](https://github.com/DataDog/integrations-core/pull/25052))
 * Collect per-database autodiscovery metrics in a single pass over the discovered databases to reduce connection pool churn. ([#25061](https://github.com/DataDog/integrations-core/pull/25061))
 
-## 23.11.0 / 2026-08-05
+## 23.11.0 / 2026-08-05 / Agent 7.83.0
 
 ***Security***:
 

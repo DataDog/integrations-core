@@ -1,0 +1,37 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "API key",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "host_region",
+      "label": "Host region",
+      "editable": true,
+      "required": true,
+      "dropdown": {
+        "options": [
+          { "value": "au", "label": "Australia" },
+          { "value": "eu", "label": "European Union" },
+          { "value": "in", "label": "India" },
+          { "value": "jp", "label": "Japan" },
+          { "value": "sg", "label": "Singapore" },
+          { "value": "us", "label": "United States" }
+        ]
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "trend-micro-vision-one-xdr-logs" }
+  ]
+}

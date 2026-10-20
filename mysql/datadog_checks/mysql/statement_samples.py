@@ -400,7 +400,7 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
             # do not log raw sql_text to avoid leaking sensitive data into logs unless log_unobfuscated_queries is set
             # digest_text is safe as parameters are obfuscated by the database
             if self._config.log_unobfuscated_queries:
-                self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['sql_text'], e)
+                self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", repr(row['sql_text']), e)
             else:
                 self._log.debug("Failed to obfuscate query=[%s] | err=[%s]", row['digest_text'], e)
             self._check.count(
@@ -450,7 +450,7 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
                 obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
             except Exception as e:
                 if self._config.log_unobfuscated_plans:
-                    self._log.warning("Failed to obfuscate plan=[%s] | err=[%s]", plan, e)
+                    self._log.warning("Failed to obfuscate plan=[%s] | err=[%s]", repr(plan), e)
                 raise e
             plan_signature = compute_exec_plan_signature(normalized_plan)
 
