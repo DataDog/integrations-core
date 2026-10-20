@@ -149,11 +149,11 @@ files:
     - template: instances/default
       overrides:
         min_collection_interval.value.example: 60
-        min_collection_interval.value.display_default: 60
+        min_collection_interval.enabled: true
         min_collection_interval.description: |
           Changes the collection interval of the check. For more information, see
           https://docs.datadoghq.com/developers/write_agent_check/#collection-interval.
-          The default is 60 seconds. Each PAN-OS call has its own interval, from 2 minutes to 24 hours,
+          We recommend 60 seconds. Each PAN-OS call has its own interval, from 2 minutes to 24 hours,
           so a more frequent run does not collect additional data. Values above 120 delay the calls
           that run every 2 or 3 minutes.
     - name: vsys
