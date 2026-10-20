@@ -3,6 +3,9 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import ChainMap
 from hashlib import sha256
+from os.path import expanduser
+from pathlib import Path
+from ssl import CERT_NONE, PROTOCOL_TLS_CLIENT, SSLContext
 from struct import pack, unpack
 
 from cryptography.x509.base import load_der_x509_certificate
@@ -25,6 +28,10 @@ except ImportError:
 DEFAULT_AIA_CHASING_MAX_DEPTH = 5
 
 
+class ClientCertificateError(Exception):
+    pass
+
+
 class TLSRemoteCheck(object):
     def __init__(self, agent_check):
         self.agent_check = agent_check
@@ -43,11 +50,104 @@ class TLSRemoteCheck(object):
             # Convert minutes to seconds
             float(self.agent_check.instance.get('intermediate_cert_refresh_interval', 60)) * 60
         )
+        self._loaded_tls_state = None
+        self._tls_context_initialized = False
+        self._discovery_context = None
+        self._discovery_fingerprint = None
+
+        # Resolve the credential options owned by this integration, including the base API's
+        # higher-priority TLS options. Explicit modern values (even None) override legacy ones.
+        instance = self.agent_check.instance
+        self._client_cert = instance.get('_tls_context_tls_cert', instance.get('tls_cert', instance.get('cert')))
+        self._client_key = instance.get(
+            '_tls_context_tls_private_key', instance.get('tls_private_key', instance.get('private_key'))
+        )
+        self._ca_cert = instance.get('_tls_context_tls_ca_cert', instance.get('tls_ca_cert', instance.get('ca_cert')))
+        self._client_password = instance.get(
+            '_tls_context_tls_private_key_password', instance.get('tls_private_key_password')
+        )
+
+    def _credential_fingerprint(self) -> tuple[bytes, ...]:
+        if not self._client_cert:
+            return ()
+        fingerprints = []
+        for path in (self._client_cert, self._client_key):
+            if not path:
+                continue
+            try:
+                fingerprints.append(sha256(Path(expanduser(path)).read_bytes()).digest())
+            except OSError as e:
+                raise ClientCertificateError(f'Failed to load client certificate from {path}: {e}') from e
+        return tuple(fingerprints)
+
+    def _get_tls_context(self) -> SSLContext:
+        fingerprint = self._credential_fingerprint()
+        state = (fingerprint, frozenset(self.agent_check._intermediate_cert_cache))
+        if state == self._loaded_tls_state:
+            return self.agent_check.get_tls_context()
+
+        # Only publish a successful load. A failed or concurrent rotation must be retried,
+        # even if the next run restores the exact previous bytes.
+        self._loaded_tls_state = None
+        # Use the public API to build trust without its lenient client-certificate loader.
+        # Cover modern, legacy and higher-priority names so credentials are loaded exactly once.
+        # Overrides only apply when the base wrapper is first created; refresh reuses its captured
+        # config. This method must remain the check's first caller of get_tls_context.
+        context = self.agent_check.get_tls_context(
+            refresh=self._tls_context_initialized,
+            overrides={'tls_cert': None, 'cert': None, '_tls_context_tls_cert': None},
+        )
+        self._tls_context_initialized = True
+        # The base loader can swallow a missing CA file. Do not cache that incomplete context:
+        # retry on the next run even when only the CA bundle (not the client credentials) is restored.
+        # CA directories load lazily during handshakes, and disabled verification needs no CA trust.
+        if (
+            context.verify_mode != CERT_NONE
+            and self._ca_cert
+            and not Path(expanduser(self._ca_cert)).is_dir()
+            and not context.cert_store_stats()['x509']
+        ):
+            raise ClientCertificateError(f'Failed to load CA certificate from {self._ca_cert}: no certificates loaded')
+        self._load_client_certificate(context, fingerprint)
+        for intermediate_cert in self.agent_check._intermediate_cert_cache.values():
+            context.load_verify_locations(cadata=intermediate_cert)
+        self._loaded_tls_state = state
+        return context
+
+    def _load_client_certificate(self, context: SSLContext, fingerprint: tuple[bytes, ...]) -> None:
+        if self._client_cert:
+            try:
+                context.load_cert_chain(
+                    expanduser(self._client_cert),
+                    keyfile=expanduser(self._client_key) if self._client_key else None,
+                    password=self._client_password,
+                )
+                if self._credential_fingerprint() != fingerprint:
+                    raise ValueError('Client credentials changed while loading; retrying on the next check')
+            except ClientCertificateError:
+                raise
+            except Exception as e:
+                raise ClientCertificateError(f'Failed to load client certificate from {self._client_cert}: {e}') from e
+
+    def _get_discovery_context(self) -> SSLContext:
+        fingerprint = self._credential_fingerprint()
+        if self._discovery_context is None or fingerprint != self._discovery_fingerprint:
+            context = create_ssl_context(
+                ChainMap(
+                    {'tls_verify': False, 'tls_cert': None, 'tls_private_key': None, 'tls_private_key_password': None},
+                    self.agent_check.http.tls_config,
+                )
+            )
+            self._load_client_certificate(context, fingerprint)
+            self._discovery_context = context
+            self._discovery_fingerprint = fingerprint
+        return self._discovery_context
 
     def check(self):
         if not self.agent_check._server:
             raise ConfigurationError('You must specify `server` in your configuration file.')
 
+        self._expire_intermediate_certs()
         if self._fetch_intermediate_certs:
             self.fetch_intermediate_certs()
 
@@ -68,12 +168,16 @@ class TLSRemoteCheck(object):
         with sock:
             self.log.debug('Getting cert and TLS protocol version')
             try:
-                with self.agent_check.get_tls_context().wrap_socket(
-                    sock, server_hostname=self.agent_check._server_hostname
-                ) as secure_sock:
+                context = self._get_tls_context()
+                with context.wrap_socket(sock, server_hostname=self.agent_check._server_hostname) as secure_sock:
                     protocol_version = secure_sock.version()
                     der_cert = secure_sock.getpeercert(binary_form=True)
                     self.log.debug('Received serialized peer certificate and TLS protocol version %s', protocol_version)
+            except ClientCertificateError as e:
+                self.agent_check.service_check(
+                    SERVICE_CHECK_VALIDATION, self.agent_check.CRITICAL, tags=self.agent_check._tags, message=str(e)
+                )
+                return cert, protocol_version
             except Exception as e:
                 # https://docs.python.org/3/library/ssl.html#ssl.SSLCertVerificationError
                 err_code = getattr(e, 'verify_code', None)
@@ -187,7 +291,7 @@ class TLSRemoteCheck(object):
 
         with sock:
             try:
-                context = create_ssl_context(ChainMap({'tls_verify': False}, self.agent_check.http.tls_config))
+                context = self._get_discovery_context()
 
                 with context.wrap_socket(sock, server_hostname=self.agent_check._server_hostname) as secure_sock:
                     der_cert = secure_sock.getpeercert(binary_form=True)
@@ -202,10 +306,21 @@ class TLSRemoteCheck(object):
 
         self.load_intermediate_certs(der_cert)
 
+    def _expire_intermediate_certs(self) -> None:
+        now = get_timestamp()
+        for uri, (access_time, _) in list(self.agent_check._intermediate_cert_uri_cache.items()):
+            if now - access_time >= self._intermediate_cert_refresh_interval:
+                del self.agent_check._intermediate_cert_uri_cache[uri]
+        active_ids = {cert_id for _, cert_id in self.agent_check._intermediate_cert_uri_cache.values()}
+        for cert_id in list(self.agent_check._intermediate_cert_cache):
+            if cert_id not in active_ids:
+                del self.agent_check._intermediate_cert_cache[cert_id]
+
     def load_intermediate_certs(self, der_cert, max_depth=None):
         # https://tools.ietf.org/html/rfc3280#section-4.2.2.1
         # https://tools.ietf.org/html/rfc5280#section-5.2.7
         if max_depth is None:
+            self._expire_intermediate_certs()
             max_depth = DEFAULT_AIA_CHASING_MAX_DEPTH
         if max_depth <= 0:
             return
@@ -237,11 +352,11 @@ class TLSRemoteCheck(object):
                 continue
 
             uri = access_description.access_location.value
-            if (
-                uri in self.agent_check._intermediate_cert_uri_cache
-                and get_timestamp() - self.agent_check._intermediate_cert_uri_cache[uri]
-                < self._intermediate_cert_refresh_interval
-            ):
+            if uri in self.agent_check._intermediate_cert_uri_cache:
+                _, cert_id = self.agent_check._intermediate_cert_uri_cache[uri]
+                # An ancestor can expire before this URI. Keep chasing the cached chain
+                # so its expired parents can be fetched again.
+                self.load_intermediate_certs(self.agent_check._intermediate_cert_cache[cert_id], max_depth - 1)
                 continue
 
             intermediate_cert = fetch_intermediate_cert(
@@ -252,14 +367,14 @@ class TLSRemoteCheck(object):
             access_time = get_timestamp()
 
             cert_id = sha256(intermediate_cert).digest()
-            if cert_id not in self.agent_check._intermediate_cert_id_cache:
+            if cert_id not in self.agent_check._intermediate_cert_cache:
                 try:
-                    # `cadata` accepts DER bytes directly here (the base path uses PEM strings instead).
-                    self.agent_check.get_tls_context().load_verify_locations(cadata=intermediate_cert)
+                    # Validate with OpenSSL before caching, without mutating the live trust store.
+                    SSLContext(PROTOCOL_TLS_CLIENT).load_verify_locations(cadata=intermediate_cert)
                 except Exception as e:
                     self.log.error('Error loading intermediate certificate from `%s`: %s', uri, e)
                     continue
-                self.agent_check._intermediate_cert_id_cache.add(cert_id)
+                self.agent_check._intermediate_cert_cache[cert_id] = intermediate_cert
 
-            self.agent_check._intermediate_cert_uri_cache[uri] = access_time
+            self.agent_check._intermediate_cert_uri_cache[uri] = (access_time, cert_id)
             self.load_intermediate_certs(intermediate_cert, max_depth - 1)
