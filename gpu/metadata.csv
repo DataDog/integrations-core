@@ -26,6 +26,7 @@ gpu.decoder_active,gauge,16,percent,,Percentage of time the decoder was active,0
 gpu.decoder_utilization,gauge,16,percent,,"Percentage of time the decoder was active. Only emitted on Agent 7.76 and previous versions, replaced by `gpu.decoder_active` since 7.77",0,gpu,decoder_utilization,,
 gpu.device.needs_recovery,gauge,16,,,"Whether the GPU requires a recovery action (e.g. reset or reboot) as reported by NVML's GPU recovery action field. 0 means no action is needed, 1 means a recovery action is required. The recovery_action tag indicates the specific action.",0,gpu,device.needs_recovery,,
 gpu.device.total,gauge,16,device,,Number of GPU devices found in the host,0,gpu,device.total,,
+gpu.device.unavailable,gauge,16,,,"Whether the GPU is unavailable for the reason in the unavailable_reason tag. The lost reason means NVML reports the GPU as inaccessible (NVML_ERROR_GPU_IS_LOST, typically because it has fallen off the bus). 0 means available, 1 means unavailable.",0,gpu,device.unavailable,,
 gpu.device.unhealthy,gauge,16,,,Whether the GPU device is unhealthy,0,gpu,device.unhealthy,,
 gpu.dram_active,gauge,16,percent,,Percentage of time the DRAM was active,0,gpu,dram_active,,
 gpu.ecc.repair_pending.channel,gauge,16,,,Whether a channel repair is pending due to ECC errors,0,gpu,ecc.repair_pending.channel,,
