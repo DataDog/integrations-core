@@ -1,0 +1,1 @@
+Split oversized Db2 query metrics payloads into bounded batches.
