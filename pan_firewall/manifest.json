@@ -9,7 +9,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Monitor Palo Alto Networks firewalls: metrics, NDM device metadata and logs",
+    "description": "Monitor Palo Alto Networks firewalls: metrics, NDM device metadata, and logs",
     "title": "Palo Alto Networks Firewall",
     "media": [],
     "classifier_tags": [

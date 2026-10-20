@@ -12,7 +12,7 @@ The integration collects metrics across multiple layers of the firewall, includi
 
 - **Firewall inventory**: Discovers firewalls from a static list or from Panorama, and reports them to NDM with their serial number, model, software version, and HA state.
 - **System resources**: Reports management plane CPU, memory, swap, and disk usage, and data plane CPU utilization, to detect overloaded firewalls. Hardware firewalls also report power and temperature sensors.
-- **Network interfaces**: Provides traffic, errors, drops, and attack counters per interface. Reports each interface to NDM with its description (the interface comment) and admin status (the link state), which the Agent reads from the interface section of the running configuration with the same read-only role.
+- **Network interfaces**: Provides traffic, errors, drops, and attack counters per interface. Reports each interface to NDM with its description and admin status.
 - **IPsec tunnels**: Reports tunnel state and traffic, and the number of active, inactive, and initializing tunnels.
 - **Routing**: Reports BGP peer state and prefix counts, and OSPF neighbor state, to detect a routing peer going down.
 - **Licenses**: Reports expiration status and days left for each subscription.
@@ -34,7 +34,7 @@ No additional installation is needed on your server.
 
 1. Create an account for the Agent on each firewall. In PAN-OS, go to **Device > Admin Roles** and add a role profile with an **XML API** tab that allows **Operational Requests**, **Report**, and **Log**. Then go to **Device > Administrators**, add an account that uses this role, and commit the changes.
 
-   **Note**: The Agent reads the interface description and admin status from the running configuration of each firewall. Interfaces that a Panorama template defines may be missing from it, and are then reported without a description and as admin up.
+   **Note**: The Agent reads the interface description and admin status from the running configuration of each firewall. Interfaces that a Panorama template defines may be missing from it. The Agent reports those interfaces without a description and with an admin status of up.
 
    **Note**: For Panorama discovery, also create an account on Panorama with a role that allows **Operational Requests** in the XML API tab. The Agent uses it only to list the managed firewalls, and polls each firewall with the matching `firewall_credentials` entry.
 
@@ -44,7 +44,7 @@ No additional installation is needed on your server.
 
    PAN-OS management interfaces ship with a self-signed certificate. Either install a certificate signed by a CA that the Agent trusts, or set `tls_verify` to `false`.
 
-   If you use Panorama discovery, it is recommended to configure `firewall_ips` with an explicit include list that matches your known firewall IP ranges. This helps ensure that the check only connects to expected firewalls.
+   If you use Panorama discovery, configure `firewall_ips` with an explicit include list that matches your known firewall IP ranges, so that the check only connects to expected firewalls.
 
 3. [Restart the Agent][5].
 
@@ -57,6 +57,14 @@ No additional installation is needed on your server.
 ### Metrics
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
+
+The integration submits a gauge only when its PAN-OS call runs, so each gauge series has one point per interval of its group. Size monitor evaluation windows to match:
+
+- Every 2 minutes: BGP peer metrics and data plane CPU utilization.
+- Every 3 minutes: management plane CPU, memory, and swap, IPsec tunnel and OSPF neighbor metrics.
+- Every 5 minutes: power and temperature sensors.
+- Every 30 minutes: disk usage, interface speed, and top-N report metrics.
+- Every 24 hours: license days left and expiration.
 
 ### Logs
 

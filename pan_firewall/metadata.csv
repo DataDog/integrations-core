@@ -1,21 +1,21 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
-pan_firewall.api.authentication.status,gauge,,,,"0 OK, 1 invalid credentials.",-1,palo_alto_networks_firewall,api authentication status,,
+pan_firewall.api.authentication.status,gauge,,,,"Whether the API rejected the credentials (1 = invalid credentials, 0 = OK).",-1,palo_alto_networks_firewall,api authentication status,,
 pan_firewall.bgp.peer.prefix_limit,gauge,,,,Configured maximum prefixes.,0,palo_alto_networks_firewall,bgp peer prefix limit,,"peer,vr,peer_ip,remote_as,peer_group"
-pan_firewall.bgp.peer.prefix_limit.utilization,gauge,,percent,,Received prefixes as % of the limit (derived).,-1,palo_alto_networks_firewall,bgp peer prefix limit utilization,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
+pan_firewall.bgp.peer.prefix_limit.utilization,gauge,,percent,,Received prefixes as a percentage of the configured limit.,-1,palo_alto_networks_firewall,bgp peer prefix limit utilization,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
 pan_firewall.bgp.peer.prefixes.incoming.rejected,gauge,,,,Prefixes rejected.,-1,palo_alto_networks_firewall,bgp peer prefixes incoming rejected,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
 pan_firewall.bgp.peer.prefixes.incoming.total,gauge,,,,Prefixes received.,0,palo_alto_networks_firewall,bgp peer prefixes incoming total,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
 pan_firewall.bgp.peer.prefixes.outgoing.advertised,gauge,,,,Prefixes advertised.,0,palo_alto_networks_firewall,bgp peer prefixes outgoing advertised,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
 pan_firewall.bgp.peer.prefixes.outgoing.total,gauge,,,,Prefixes to send.,0,palo_alto_networks_firewall,bgp peer prefixes outgoing total,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
-pan_firewall.bgp.peer.restart,gauge,,,,1 if the peer came up in the last 30 min (derived).,-1,palo_alto_networks_firewall,bgp peer restart,,"peer,vr,peer_ip,remote_as,peer_group"
+pan_firewall.bgp.peer.restart,gauge,,,,1 if the peer came up in the last 30 minutes.,-1,palo_alto_networks_firewall,bgp peer restart,,"peer,vr,peer_ip,remote_as,peer_group"
 pan_firewall.bgp.peer.status,gauge,,,,"1 if Established, else 0.",1,palo_alto_networks_firewall,bgp peer status,,"peer,vr,peer_ip,remote_as,peer_group"
 pan_firewall.bgp.peer.status_duration,gauge,,second,,Time in the current state.,0,palo_alto_networks_firewall,bgp peer status duration,,"peer,vr,peer_ip,remote_as,peer_group"
 pan_firewall.bgp.peer.updates.in,count,,message,,Update messages received.,0,palo_alto_networks_firewall,bgp peer updates in,,"peer,vr,peer_ip,remote_as,peer_group"
 pan_firewall.bgp.peer.updates.out,count,,message,,Update messages sent.,0,palo_alto_networks_firewall,bgp peer updates out,,"peer,vr,peer_ip,remote_as,peer_group"
 pan_firewall.can_connect,gauge,,,,"1 if the firewall API answered this run, else 0.",1,palo_alto_networks_firewall,can connect,,
-pan_firewall.counter.global,count,,,,PAN-OS global counter value (0 when not listed).,0,palo_alto_networks_firewall,counter global,,"counter,category,aspect"
-pan_firewall.dataplane.cpu.utilization,gauge,,percent,,Dataplane CPU per core.,-1,palo_alto_networks_firewall,dataplane cpu utilization,,"dp,core"
-pan_firewall.disk.used_pct,gauge,,percent,,Filesystem used (skip `none`/`tmpfs`/`cgroup_root`).,-1,palo_alto_networks_firewall,disk used pct,,"mount,filesystem"
-pan_firewall.dropped_packets,count,,packet,,"Dropped packets by aspect (13 sheet aspects, 0 when absent, plus any other, e.g. `mgmt`).",-1,palo_alto_networks_firewall,dropped packets,,aspect
+pan_firewall.counter.global,count,,,,"Increase of the PAN-OS global counter, tagged by counter name, category and aspect.",0,palo_alto_networks_firewall,counter global,,"counter,category,aspect"
+pan_firewall.dataplane.cpu.utilization,gauge,,percent,,Data plane CPU utilization per core.,-1,palo_alto_networks_firewall,dataplane cpu utilization,,"dp,core"
+pan_firewall.disk.used_pct,gauge,,percent,,"Percentage of filesystem space used, reported every 30 minutes. Not sent for none, tmpfs, or cgroup_root filesystems.",-1,palo_alto_networks_firewall,disk used pct,,"mount,filesystem"
+pan_firewall.dropped_packets,count,,packet,,"Packets dropped by the data plane, by drop aspect, such as mgmt. Known aspects report 0 when no packets are dropped.",-1,palo_alto_networks_firewall,dropped packets,,aspect
 pan_firewall.interface.attack.ip_spoof,count,,packet,,IP-spoofed packets.,-1,palo_alto_networks_firewall,interface attack ip spoof,,"interface,interface_type,zone,vsys,vr"
 pan_firewall.interface.attack.land,count,,packet,,LAND attack packets.,-1,palo_alto_networks_firewall,interface attack land,,"interface,interface_type,zone,vsys,vr"
 pan_firewall.interface.attack.mac_spoof,count,,packet,,MAC-spoofed packets.,-1,palo_alto_networks_firewall,interface attack mac spoof,,"interface,interface_type,zone,vsys,vr"
@@ -27,21 +27,21 @@ pan_firewall.interface.rx.bytes,count,,byte,,Bytes received.,0,palo_alto_network
 pan_firewall.interface.rx.drops,count,,packet,,Receive drops.,-1,palo_alto_networks_firewall,interface rx drops,,"interface,interface_type,zone,vsys,vr"
 pan_firewall.interface.rx.errors,count,,packet,,Receive errors.,-1,palo_alto_networks_firewall,interface rx errors,,"interface,interface_type,zone,vsys,vr"
 pan_firewall.interface.rx.packets,count,,packet,,Packets received.,0,palo_alto_networks_firewall,interface rx packets,,"interface,interface_type,zone,vsys,vr"
-pan_firewall.interface.speed,gauge,,bit,second,Interface speed (not sent on `ukn`/`[n/a]`).,0,palo_alto_networks_firewall,interface speed,,"interface,interface_type,zone,vsys,vr"
+pan_firewall.interface.speed,gauge,,bit,second,"Negotiated interface speed, reported every 30 minutes. Not reported when PAN-OS shows the speed as unknown.",0,palo_alto_networks_firewall,interface speed,,"interface,interface_type,zone,vsys,vr"
 pan_firewall.interface.tx.bytes,count,,byte,,Bytes sent.,0,palo_alto_networks_firewall,interface tx bytes,,"interface,interface_type,zone,vsys,vr"
 pan_firewall.interface.tx.packets,count,,packet,,Packets sent.,0,palo_alto_networks_firewall,interface tx packets,,"interface,interface_type,zone,vsys,vr"
 pan_firewall.ipsec.gateways.total,gauge,,,,IKE gateways configured.,0,palo_alto_networks_firewall,ipsec gateways total,,
-pan_firewall.ipsec.tunnel.rx.bytes,count,,byte,,Cumulative bytes into the tunnel.,0,palo_alto_networks_firewall,ipsec tunnel rx bytes,,"tunnel,tunnel_interface,peer_ip,gateway,outer_interface"
-pan_firewall.ipsec.tunnel.rx.packets,count,,packet,,Cumulative packets into the tunnel.,0,palo_alto_networks_firewall,ipsec tunnel rx packets,,"tunnel,tunnel_interface,peer_ip,gateway,outer_interface"
+pan_firewall.ipsec.tunnel.rx.bytes,count,,byte,,Bytes received through the IPsec tunnel.,0,palo_alto_networks_firewall,ipsec tunnel rx bytes,,"tunnel,tunnel_interface,peer_ip,gateway,outer_interface"
+pan_firewall.ipsec.tunnel.rx.packets,count,,packet,,Packets received through the IPsec tunnel.,0,palo_alto_networks_firewall,ipsec tunnel rx packets,,"tunnel,tunnel_interface,peer_ip,gateway,outer_interface"
 pan_firewall.ipsec.tunnel.state,gauge,,,,"0 inactive, 1 active, 2 init (unknown states not sent).",1,palo_alto_networks_firewall,ipsec tunnel state,,"tunnel,tunnel_interface,peer_ip,gateway,outer_interface"
-pan_firewall.ipsec.tunnel.tx.bytes,count,,byte,,Cumulative bytes out of the tunnel.,0,palo_alto_networks_firewall,ipsec tunnel tx bytes,,"tunnel,tunnel_interface,peer_ip,gateway,outer_interface"
-pan_firewall.ipsec.tunnel.tx.packets,count,,packet,,Cumulative packets out of the tunnel.,0,palo_alto_networks_firewall,ipsec tunnel tx packets,,"tunnel,tunnel_interface,peer_ip,gateway,outer_interface"
+pan_firewall.ipsec.tunnel.tx.bytes,count,,byte,,Bytes sent through the IPsec tunnel.,0,palo_alto_networks_firewall,ipsec tunnel tx bytes,,"tunnel,tunnel_interface,peer_ip,gateway,outer_interface"
+pan_firewall.ipsec.tunnel.tx.packets,count,,packet,,Packets sent through the IPsec tunnel.,0,palo_alto_networks_firewall,ipsec tunnel tx packets,,"tunnel,tunnel_interface,peer_ip,gateway,outer_interface"
 pan_firewall.ipsec.tunnels.active,gauge,,,,Tunnels active.,1,palo_alto_networks_firewall,ipsec tunnels active,,
 pan_firewall.ipsec.tunnels.inactive,gauge,,,,Tunnels inactive.,-1,palo_alto_networks_firewall,ipsec tunnels inactive,,
 pan_firewall.ipsec.tunnels.init,gauge,,,,Tunnels initializing.,0,palo_alto_networks_firewall,ipsec tunnels init,,
-pan_firewall.ipsec.tunnels.total,gauge,,,,IPSec tunnels configured.,0,palo_alto_networks_firewall,ipsec tunnels total,,
-pan_firewall.license.days_left,gauge,,day,,Days until the license expires. Not sent for perpetual licenses.,1,palo_alto_networks_firewall,license days left,,feature
-pan_firewall.license.expired,gauge,,,,"Whether the license has expired (1 = expired, 0 = not expired).",-1,palo_alto_networks_firewall,license expired,,feature
+pan_firewall.ipsec.tunnels.total,gauge,,,,IPsec tunnels configured.,0,palo_alto_networks_firewall,ipsec tunnels total,,
+pan_firewall.license.days_left,gauge,,day,,"Days until the license expires, reported every 24 hours. Not sent for perpetual licenses.",1,palo_alto_networks_firewall,license days left,,feature
+pan_firewall.license.expired,gauge,,,,"Whether the license has expired (1 = expired, 0 = not expired), reported every 24 hours.",-1,palo_alto_networks_firewall,license expired,,feature
 pan_firewall.mgmt.cpu.hardirq,gauge,,percent,,"Management-plane CPU, hardware interrupts.",-1,palo_alto_networks_firewall,mgmt cpu hardirq,,
 pan_firewall.mgmt.cpu.idle,gauge,,percent,,"Management-plane CPU, idle.",1,palo_alto_networks_firewall,mgmt cpu idle,,
 pan_firewall.mgmt.cpu.iowait,gauge,,percent,,"Management-plane CPU, I/O wait.",-1,palo_alto_networks_firewall,mgmt cpu iowait,,
@@ -49,7 +49,7 @@ pan_firewall.mgmt.cpu.nice,gauge,,percent,,"Management-plane CPU, nice.",0,palo_
 pan_firewall.mgmt.cpu.softirq,gauge,,percent,,"Management-plane CPU, software interrupts.",-1,palo_alto_networks_firewall,mgmt cpu softirq,,
 pan_firewall.mgmt.cpu.steal,gauge,,percent,,CPU stolen by the hypervisor (VM-Series).,-1,palo_alto_networks_firewall,mgmt cpu steal,,
 pan_firewall.mgmt.cpu.system,gauge,,percent,,"Management-plane CPU, system.",-1,palo_alto_networks_firewall,mgmt cpu system,,
-pan_firewall.mgmt.cpu.used,gauge,,percent,,Management-plane CPU used (derived).,-1,palo_alto_networks_firewall,mgmt cpu used,,
+pan_firewall.mgmt.cpu.used,gauge,,percent,,Management-plane CPU used.,-1,palo_alto_networks_firewall,mgmt cpu used,,
 pan_firewall.mgmt.cpu.user,gauge,,percent,,"Management-plane CPU, user.",-1,palo_alto_networks_firewall,mgmt cpu user,,
 pan_firewall.mgmt.memory.available,gauge,,byte,,Memory available for new processes without swapping.,1,palo_alto_networks_firewall,mgmt memory available,,
 pan_firewall.mgmt.memory.buff_cache,gauge,,byte,,Buffers and cache.,0,palo_alto_networks_firewall,mgmt memory buff cache,,
@@ -68,9 +68,9 @@ pan_firewall.power.alarm.low,gauge,,,,1 if in alarm below the minimum.,-1,palo_a
 pan_firewall.power.voltage,gauge,,volt,,Current voltage.,0,palo_alto_networks_firewall,power voltage,,"sensor,slot"
 pan_firewall.power.voltage.max,gauge,,volt,,Maximum voltage threshold.,0,palo_alto_networks_firewall,power voltage max,,"sensor,slot"
 pan_firewall.power.voltage.min,gauge,,volt,,Minimum voltage threshold.,0,palo_alto_networks_firewall,power voltage min,,"sensor,slot"
-pan_firewall.report.top.bytes,gauge,,byte,,Traffic in the last 24 h.,0,palo_alto_networks_firewall,report top bytes,,"report,app,app_category,app_technology,src,dst,src_country,dst_country,src_zone,dst_zone,rule"
-pan_firewall.report.top.bytes_per_session,gauge,,byte,,Average traffic per session (derived).,0,palo_alto_networks_firewall,report top bytes per session,,"report,app,app_category,app_technology,src,dst,src_country,dst_country,src_zone,dst_zone,rule"
-pan_firewall.report.top.sessions,gauge,,session,,Sessions in the last 24 h.,0,palo_alto_networks_firewall,report top sessions,,"report,app,app_category,app_technology,src,dst,src_country,dst_country,src_zone,dst_zone,rule"
+pan_firewall.report.top.bytes,gauge,,byte,,"Traffic in the last 24 hours, reported every 30 minutes.",0,palo_alto_networks_firewall,report top bytes,,"report,app,app_category,app_technology,src,dst,src_country,dst_country,src_zone,dst_zone,rule"
+pan_firewall.report.top.bytes_per_session,gauge,,byte,,"Average traffic per session, reported every 30 minutes.",0,palo_alto_networks_firewall,report top bytes per session,,"report,app,app_category,app_technology,src,dst,src_country,dst_country,src_zone,dst_zone,rule"
+pan_firewall.report.top.sessions,gauge,,session,,"Sessions in the last 24 hours, reported every 30 minutes.",0,palo_alto_networks_firewall,report top sessions,,"report,app,app_category,app_technology,src,dst,src_country,dst_country,src_zone,dst_zone,rule"
 pan_firewall.security_rule.hits,count,,hit,,Hits per security rule.,0,palo_alto_networks_firewall,security rule hits,,"rule,vsys"
 pan_firewall.temperature.alarm,gauge,,,,"Whether the temperature sensor is in alarm (1 = in alarm, 0 = not in alarm).",-1,palo_alto_networks_firewall,temperature alarm,,"sensor,slot"
 pan_firewall.temperature.current,gauge,,degree celsius,,Current temperature.,0,palo_alto_networks_firewall,temperature current,,"sensor,slot"
