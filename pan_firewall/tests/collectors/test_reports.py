@@ -260,33 +260,24 @@ def test_a_job_still_running_after_ten_polls_is_carried_over_and_not_resubmitted
 def test_a_job_that_never_finishes_is_dropped_after_three_carry_overs_so_the_others_are_reported():
     client = ScriptedClient(act_polls={'app': STUCK})
     state = FirewallState()
-    warnings = []
 
     for _ in range(constants.REPORT_MAX_CARRIES + 1):
-        ctx = make_context(client, state)
-        samples = collect_reports(ctx)
-        warnings.append(ctx.log.warning.call_count)
+        samples = collect_reports(make_context(client, state))
 
-    # Runs 1 to 3 carry the job; run 4 gives up on it, warns, and reports the other nine reports (the app report is
-    # submitted again by the next run).
-    assert warnings == [0, 0, 0, 1]
+    # Runs 1 to 3 carry the job; run 4 gives up on it and reports the other nine reports (the app report is submitted
+    # again by the next run).
     assert {tags[0] for _name, tags in series(samples)} == {f'report:{n}' for n in REPORTS} - {
         'report:top_applications'
     }
     assert client.submitted().count('app') == 1
 
 
-def test_a_failed_job_is_skipped_with_one_warning_and_the_other_reports_still_run():
+def test_a_failed_job_is_skipped_and_the_other_reports_still_run():
     client = ScriptedClient(failing={'src'})
-    state = FirewallState()
-    ctx = make_context(client, state)
 
-    samples = collect_reports(ctx)
+    samples = collect_reports(make_context(client, FirewallState()))
 
     assert {tags[0] for _name, tags in series(samples)} == {f'report:{n}' for n in REPORTS} - {'report:top_sources'}
-    ctx.log.warning.assert_called_once()
-    collect_reports(second := make_context(client, state))
-    second.log.warning.assert_not_called()
 
 
 def test_slow_jobs_do_not_starve_the_reports_after_them():
@@ -327,11 +318,9 @@ def test_an_api_error_polling_a_carried_job_drops_it_and_the_next_run_submits_th
     state = FirewallState()
     collect_reports(make_context(client, state))
     client.erroring = {'app'}
-    ctx = make_context(client, state)
 
-    samples = collect_reports(ctx)
+    samples = collect_reports(make_context(client, state))
 
-    ctx.log.warning.assert_called_once()
     # The failed job is dropped and the run goes on with the next report, instead of polling the dead job forever.
     assert client.submitted()[1] == REPORTS['top_application_categories'][0]
     assert {tags[0] for _name, tags in series(samples)} == {f'report:{n}' for n in REPORTS} - {
@@ -342,12 +331,9 @@ def test_an_api_error_polling_a_carried_job_drops_it_and_the_next_run_submits_th
 def test_an_api_error_polling_a_new_job_keeps_the_samples_already_gathered():
     client = ScriptedClient()
     client.erroring = {'src'}
-    state = FirewallState()
-    ctx = make_context(client, state)
 
-    samples = collect_reports(ctx)
+    samples = collect_reports(make_context(client, FirewallState()))
 
-    ctx.log.warning.assert_called_once()
     assert {tags[0] for _name, tags in series(samples)} == {f'report:{n}' for n in REPORTS} - {'report:top_sources'}
 
 

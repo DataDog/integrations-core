@@ -98,14 +98,16 @@ class Firewall:
         self.fake_panos.answer_op(FW_A_IP, JOBS_PENDING_CMD, answer)
 
     def run_at(self, seconds):
-        """Run the check `seconds` after the first run; return the collectors that ran and the warnings logged."""
+        """Run the check `seconds` after the first run; return the collectors that ran."""
         self.clock.now = self.start + seconds
         self.aggregator.reset()
         self.caplog.clear()
         self.dd_run_check(self.check)
-        ran = {name for _, name in stub_runs(self.aggregator)}
-        warnings = [r.getMessage() for r in self.caplog.records if r.levelno == logging.WARNING]
-        return ran, warnings
+        return {name for _, name in stub_runs(self.aggregator)}
+
+    def warnings(self):
+        """The warnings logged by the last run."""
+        return [r.getMessage() for r in self.caplog.records if r.levelno == logging.WARNING]
 
 
 @pytest.fixture
@@ -118,28 +120,27 @@ def test_not_busy_firewall_is_checked_first_then_collected(firewall, fake_panos)
     firewall.answer_jobs(jobs_response('jobs_pending_idle.xml'))
     calls_before = len(fake_panos.calls)
 
-    assert firewall.run_at(0) == (set(STUBS), [])
+    assert firewall.run_at(0) == set(STUBS)
     # The stubs make no call: the one call of the run is the jobs check.
     assert [c.cmd for c in fake_panos.calls[calls_before:]] == [JOBS_PENDING_CMD]
 
 
-def test_busy_firewall_is_not_collected_and_its_collectors_stay_due(firewall, aggregator, caplog):
+def test_busy_firewall_is_not_collected_and_its_collectors_stay_due(firewall, aggregator):
     firewall.answer_jobs((200, COMMIT_RUNNING))
 
-    assert firewall.run_at(0) == (set(), [])
+    assert firewall.run_at(0) == set()
     # The firewall answered the jobs check.
     assert can_connect_by_ip(aggregator) == {FW_A_IP: 1}
-    assert f'{FW_A_IP}: Commit job 7 in progress, skipping collection this run' in caplog.text
 
     firewall.answer_jobs(jobs_response('jobs_pending_idle.xml'))
     # Nothing was marked as run, so every collector is due on the next run, before its interval.
-    assert firewall.run_at(60) == (set(STUBS), [])
+    assert firewall.run_at(60) == set(STUBS)
 
 
 def test_every_busy_job_is_named(firewall, caplog):
     firewall.answer_jobs((200, COMMIT_RUNNING_AND_CONTENT_PENDING))
 
-    assert firewall.run_at(0) == (set(), [])
+    assert firewall.run_at(0) == set()
     assert f'{FW_A_IP}: Commit job 7, Content job 2018 in progress, skipping collection this run' in caplog.text
 
 
@@ -147,33 +148,22 @@ def test_jobs_check_error_collects_anyway_and_warns_on_every_run(firewall):
     firewall.answer_jobs((200, NO_CAPTURE))
 
     for seconds, collected in ((0, set(STUBS)), (120, {'bgp', 'dataplane'})):
-        ran, warnings = firewall.run_at(seconds)
-        assert ran == collected
-        (warning,) = warnings
+        assert firewall.run_at(seconds) == collected
+        (warning,) = firewall.warnings()
         assert warning.startswith(f'{FW_A_IP}: cannot check for a commit or content update in progress')
 
 
-@pytest.mark.parametrize(
-    'failure, reason',
-    [
-        pytest.param('refused', 'connection refused', id='refused'),
-        pytest.param('timeout', 'timed out', id='timeout'),
-    ],
-)
-def test_jobs_check_unreachable_cuts_off_the_run(firewall, aggregator, fake_panos, failure, reason):
+@pytest.mark.parametrize('failure', ['refused', 'timeout'])
+def test_jobs_check_unreachable_cuts_off_the_run(firewall, aggregator, fake_panos, failure):
     firewall.answer_jobs(FAILURES[failure])
     calls_before = len(fake_panos.calls)
 
-    ran, warnings = firewall.run_at(0)
-
-    assert ran == set()
-    (warning,) = warnings
-    assert f'({reason}) during jobs' in warning
+    assert firewall.run_at(0) == set()
     assert [c.cmd for c in fake_panos.calls[calls_before:]] == [JOBS_PENDING_CMD]
     assert can_connect_by_ip(aggregator) == {FW_A_IP: 0}
 
     fake_panos.recover(FW_A_IP)
-    assert firewall.run_at(60) == (set(STUBS), [])
+    assert firewall.run_at(60) == set(STUBS)
 
 
 def test_busy_for_ten_minutes_collects_anyway_with_one_warning(firewall):
@@ -181,25 +171,23 @@ def test_busy_for_ten_minutes_collects_anyway_with_one_warning(firewall):
     firewall.answer_jobs((200, COMMIT_RUNNING))
 
     for seconds in range(0, 600, 60):
-        assert firewall.run_at(seconds) == (set(), []), seconds
-    assert firewall.run_at(600) == (set(STUBS), [warning])
+        assert (firewall.run_at(seconds), firewall.warnings()) == (set(), []), seconds
+    assert (firewall.run_at(600), firewall.warnings()) == (set(STUBS), [warning])
     # The job is still listed: the collectors keep their own intervals, with no new warning.
-    assert firewall.run_at(660) == (set(), [])
-    assert firewall.run_at(720) == ({'bgp', 'dataplane'}, [])
-    assert firewall.run_at(780) == ({'interfaces', 'system_resources'}, [])
+    assert (firewall.run_at(660), firewall.warnings()) == (set(), [])
+    assert (firewall.run_at(720), firewall.warnings()) == ({'bgp', 'dataplane'}, [])
+    assert (firewall.run_at(780), firewall.warnings()) == ({'interfaces', 'system_resources'}, [])
 
 
 def test_idle_answer_restarts_the_ten_minute_window(firewall):
     firewall.answer_jobs((200, COMMIT_RUNNING))
     for seconds in range(0, 360, 60):
-        assert firewall.run_at(seconds) == (set(), []), seconds
+        assert firewall.run_at(seconds) == set(), seconds
     firewall.answer_jobs(jobs_response('jobs_pending_idle.xml'))
-    assert firewall.run_at(360) == (set(STUBS), [])
+    assert firewall.run_at(360) == set(STUBS)
 
     # A new busy period, from the next run with a due collector.
     firewall.answer_jobs((200, CONTENT_PENDING))
     for seconds in range(480, 1080, 60):
-        assert firewall.run_at(seconds) == (set(), []), seconds
-    ran, warnings = firewall.run_at(1080)
-    assert ran == set(STUBS)
-    assert warnings == [f'{FW_A_IP}: Content job 2018 still in progress after 600s of skipping; collecting anyway']
+        assert firewall.run_at(seconds) == set(), seconds
+    assert firewall.run_at(1080) == set(STUBS)

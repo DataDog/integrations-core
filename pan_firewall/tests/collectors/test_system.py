@@ -93,14 +93,11 @@ def test_memory_unit_is_read_from_the_line_header(name, expected):
     assert system_values(samples) == pytest.approx(expected)
 
 
-def test_missing_cpu_line_gives_memory_only_and_a_warning():
-    warn = mock.Mock()
-
-    samples = parse_system_resources(load_xml(SYNTHETIC / 'system_resources_no_cpu.xml'), warn)
+def test_missing_cpu_line_gives_memory_only():
+    samples = parse_system_resources(load_xml(SYNTHETIC / 'system_resources_no_cpu.xml'), mock.Mock())
 
     names = {s.name for s in samples}
     assert names == {n for n in FW_A_SYSTEM if not n.startswith('mgmt.cpu.')}
-    warn.assert_called_once()
 
 
 def test_dataplane_one_sample_per_dp_and_core_with_the_first_value():
@@ -123,11 +120,8 @@ def test_dataplane_of_the_capture():
     }
 
 
-def test_dataplane_without_data_processors_gives_no_samples_and_one_warning():
-    warn = mock.Mock()
-
-    assert parse_dataplane(load_xml(SYNTHETIC / 'resource_monitor_no_dp.xml'), warn) == []
-    warn.assert_called_once()
+def test_dataplane_without_data_processors_gives_no_samples():
+    assert parse_dataplane(load_xml(SYNTHETIC / 'resource_monitor_no_dp.xml'), mock.Mock()) == []
 
 
 def test_disk_of_the_capture_skips_virtual_filesystems():

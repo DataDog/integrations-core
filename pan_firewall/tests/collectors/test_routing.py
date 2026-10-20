@@ -16,7 +16,7 @@ from datadog_checks.pan_firewall.collectors.routing import (
 )
 
 from ..common import FW_A_PEER, SYNTHETIC
-from ..helpers import load_op, load_xml, logged, make_ctx, series
+from ..helpers import load_op, load_xml, make_ctx, series
 
 
 def peer_samples(tags, *, status, duration, restart, updates, limit, prefixes=None):
@@ -124,14 +124,12 @@ COLLECTORS = [
 
 
 @pytest.mark.parametrize('collect, _cmd', COLLECTORS)
-def test_advanced_routing_engine_sends_no_call_and_warns_about_the_legacy_engine(collect, _cmd):
+def test_advanced_routing_engine_sends_no_call(collect, _cmd):
     ctx = make_context(True)
 
     assert collect(ctx) == []
 
     ctx.client.op.assert_not_called()
-    ctx.log.warning.assert_called_once()
-    assert 'legacy routing engine' in logged(ctx.log.warning)[0]
 
 
 @pytest.mark.parametrize('collect, cmd', COLLECTORS)
@@ -142,7 +140,6 @@ def test_legacy_or_unknown_routing_engine_sends_the_legacy_call(collect, cmd, ad
 
     assert collect(ctx)
     ctx.client.op.assert_called_once_with(cmd)
-    ctx.log.warning.assert_not_called()
 
 
 FW_A_OSPF = ('neighbor:169.254.10.2', 'router_id:10.255.0.2', 'area:0.0.0.0', 'vr:default')

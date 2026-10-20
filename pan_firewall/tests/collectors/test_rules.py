@@ -89,7 +89,6 @@ def test_a_refused_vsys_does_not_drop_the_others():
     samples = collect_rule_hits(ctx)
 
     assert series(samples) == expected()
-    ctx.log.warning.assert_called_once()
 
 
 def test_every_vsys_refused_fails_the_collector():

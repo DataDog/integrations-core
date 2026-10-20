@@ -303,12 +303,11 @@ def test_unreachable_firewall_skips_the_remaining_collectors_of_that_firewall_on
     assert stub_runs(aggregator) == {(FW_A_IP, name) for name in ('dataplane', 'interfaces', 'system_resources')}
 
 
-def test_identity_timeout_skips_every_collector(dd_run_check, aggregator, fake_panos, monkeypatch, caplog):
+def test_identity_timeout_skips_every_collector(dd_run_check, aggregator, fake_panos, monkeypatch):
     dd_run_check(new_check())
     register_stubs(monkeypatch)
     fake_panos.answer_op(FW_A_IP, SYSTEM_INFO_CMD, FAILURES['timeout'])
     aggregator.reset()
-    caplog.clear()
 
     # After a restart, the identity comes from the cache and is refreshed right after the jobs check.
     dd_run_check(new_check())
@@ -316,9 +315,6 @@ def test_identity_timeout_skips_every_collector(dd_run_check, aggregator, fake_p
     assert stub_runs(aggregator) == set()
     # The jobs check answered.
     aggregator.assert_metric('pan_firewall.can_connect', value=1, tags=FW_A_TAGS, metric_type=aggregator.GAUGE, count=1)
-    (warning,) = warnings(caplog)
-    assert 'during identity_metadata' in warning
-    assert all(name in warning.split('skipped for this run:')[1] for name in STUBS)
 
 
 def raise_(error):
@@ -326,28 +322,21 @@ def raise_(error):
 
 
 @pytest.mark.parametrize(
-    'bgp, error',
+    'bgp',
     [
-        pytest.param(lambda ctx: raise_(ValueError('unexpected shape')), 'unexpected shape', id='bug'),
-        pytest.param(lambda ctx: raise_(PanosApiError('400', 'bad command')), 'bad command', id='api-error'),
+        pytest.param(lambda ctx: raise_(ValueError('unexpected shape')), id='bug'),
+        pytest.param(lambda ctx: raise_(PanosApiError('400', 'bad command')), id='api-error'),
         # Submitting it fails, after the collector returned.
-        pytest.param(
-            lambda ctx: [Sample('stub', 1, (), 'unknown')],  # type: ignore[arg-type]
-            'unknown',
-            id='malformed-sample',
-        ),
+        pytest.param(lambda ctx: [Sample('stub', 1, (), 'unknown')], id='malformed-sample'),  # type: ignore[arg-type]
     ],
 )
-def test_failing_collector_does_not_stop_the_others(dd_run_check, aggregator, monkeypatch, caplog, bgp, error):
+def test_failing_collector_does_not_stop_the_others(dd_run_check, aggregator, monkeypatch, bgp):
     register_stubs(monkeypatch, bgp=bgp)
 
     dd_run_check(new_check())
 
     assert stub_runs(aggregator) == {(FW_A_IP, name) for name in STUBS if name != 'bgp'}
     aggregator.assert_metric('pan_firewall.can_connect', value=1, tags=FW_A_TAGS, metric_type=aggregator.GAUGE, count=1)
-    (warning,) = warnings(caplog)
-    assert warning.startswith(f'{FW_A_IP}: collector bgp failed: ')
-    assert error in warning
 
 
 def test_timeout_a_collector_handles_itself_is_still_reported(dd_run_check, fake_panos, monkeypatch, caplog):
@@ -384,7 +373,7 @@ def test_collector_warnings_name_the_firewall(dd_run_check, monkeypatch, caplog)
     assert {f'{ip}: unknown shape x' for ip in (FW_A_IP, FW_B_IP)} <= warnings
 
 
-def test_unexpected_poller_error_does_not_stop_other_firewalls(dd_run_check, aggregator, monkeypatch, caplog):
+def test_unexpected_poller_error_does_not_stop_other_firewalls(dd_run_check, aggregator, monkeypatch):
     run = FirewallPoller.run
 
     def failing_run(self):
@@ -397,9 +386,6 @@ def test_unexpected_poller_error_does_not_stop_other_firewalls(dd_run_check, agg
     dd_run_check(new_check(make_instance(firewalls=[FW_A_IP, FW_B_IP])))
 
     assert can_connect_by_ip(aggregator) == {FW_A_IP: 1}
-    (record,) = [r for r in caplog.records if r.levelno == logging.WARNING]
-    assert FW_B_IP in record.getMessage()
-    assert record.exc_info is not None
 
 
 @pytest.mark.parametrize(

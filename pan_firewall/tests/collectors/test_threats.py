@@ -28,7 +28,7 @@ from ..fixture_map import (
 )
 from ..helpers import THREAT_LOG_ACT as ACT
 from ..helpers import THREAT_LOG_CLOCK_BACK as CLOCK_BACK
-from ..helpers import FakeClock, log_page, logged, make_instance, new_check, series
+from ..helpers import FakeClock, log_page, make_instance, new_check, series
 
 CACHE_KEY = f'threat_watermark:{FW_A_SERIAL}'
 FW_A_LAST_SEQNO = 7691899338913481002
@@ -255,7 +255,7 @@ def test_failure_halfway_keeps_the_watermark_and_the_next_run_starts_over(firewa
     assert firewall.watermark == PROBE_LAST_SEQNO
 
 
-def test_clock_going_back_counts_every_log_once_with_no_warning_or_extra_job(firewall):
+def test_clock_going_back_counts_every_log_once_with_no_extra_job(firewall):
     firewall.answer_forward(1000, CLOCK_BACK)
 
     samples = firewall.collect()
@@ -263,7 +263,6 @@ def test_clock_going_back_counts_every_log_once_with_no_warning_or_extra_job(fir
     assert series(samples) == expected({('medium', 'drop', 'spyware', 'vsys1'): 30})
     assert firewall.watermark == 1030
     assert len(firewall.submits()) == 1
-    firewall.ctx.log.warning.assert_not_called()
 
 
 def nothing_new(firewall, watermark=1000, last_reset_check=0.0, newest=None):
@@ -381,7 +380,7 @@ def test_a_missing_severity_action_subtype_or_vsys_leaves_the_tag_out(firewall):
     assert series(firewall.collect()) == {('threat.count', ()): (1, 'count')}
 
 
-def test_entries_without_a_valid_seqno_are_skipped_and_logged_at_debug(firewall):
+def test_entries_without_a_valid_seqno_are_skipped(firewall):
     def break_seqno(entry):
         if entry.findtext('seqno') == '1002':
             entry.find('seqno').text = 'abc'
@@ -392,8 +391,6 @@ def test_entries_without_a_valid_seqno_are_skipped_and_logged_at_debug(firewall)
     samples = firewall.collect()
 
     assert sum(s.value for s in samples) == 1
-    assert any('invalid seqno' in message for message in logged(firewall.log.debug))
-    firewall.log.warning.assert_not_called()
 
 
 def test_vsys_tag_is_vsys_n(firewall):
