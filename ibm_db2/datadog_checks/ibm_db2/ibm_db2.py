@@ -64,7 +64,6 @@ class IbmDb2Check(DatabaseCheck):
         if self._config.dbm:
             self.health = Db2Health(self)
             self._query_metrics = self.register_async_job(QueryMetricsCollector(self, self._config))
-            self._submit_initialization_health_event()
 
     def debug_stats_kwargs(self, tags: list[str] | None = None) -> dict:
         return {

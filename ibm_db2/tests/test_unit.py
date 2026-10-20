@@ -9,6 +9,7 @@ import pytest
 from cachetools import TTLCache
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.query_metrics import ObfuscationResult
 from datadog_checks.ibm_db2 import IbmDb2Check, query_metrics
 from datadog_checks.ibm_db2.connection import Db2ConnectionError, get_connection_data
@@ -19,19 +20,38 @@ pytestmark = pytest.mark.unit
 
 @pytest.mark.parametrize('dbm, enabled', [(False, True), (True, False), (True, True)])
 def test_query_metrics_initialization_health(instance: dict, aggregator: AggregatorStub, dbm: bool, enabled: bool):
-    """Only DBM instances emit initialization health, with the effective query-metrics feature state."""
+    """Initialization carries the assigned check ID and feature state, without duplicate events on subsequent runs."""
     instance.update(dbm=dbm, query_metrics={'enabled': enabled})
     check = IbmDb2Check('ibm_db2', {}, [instance])
-    check._submit_initialization_health_event()
+    check.check_id = 'ibm_db2:assigned-id'
+    with mock.patch.object(check._connection, 'connect'):
+        check.check(instance)
+        check.check(instance)
     events = aggregator.get_event_platform_events('dbm-health')
     assert len(events) == int(dbm)
     if dbm:
         event = events[0]
         assert event['name'] == 'initialization'
         assert event['status'] == 'ok'
+        assert event['check_id'] == 'ibm_db2:assigned-id'
         assert event['data']['database_instance'] == check.database_identifier
         assert event['data']['features'] == [{'key': 'query_metrics', 'name': 'Query Metrics', 'enabled': enabled}]
         assert instance['password'] not in stdlib_json.dumps(event)
+
+
+def test_query_metrics_health_tags(instance: dict, aggregator: AggregatorStub):
+    """Health events exclude internal tags from both configuration and the runner, retaining ordinary tags."""
+    instance.update(dbm=True, tags=['env:test', 'dd.internal.resource:configured'])
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    check.health.submit_health_event(
+        name=HealthEvent.MISSED_COLLECTION,
+        status=HealthStatus.WARNING,
+        tags=['job:query-metrics', 'dd.internal.resource:runner'],
+    )
+    event = aggregator.get_event_platform_events('dbm-health')[0]
+    assert 'env:test' in event['tags']
+    assert 'job:query-metrics' in event['tags']
+    assert not any(tag.startswith('dd.internal') for tag in event['tags'])
 
 
 @pytest.mark.parametrize(

@@ -6,6 +6,7 @@ from __future__ import annotations
 import re
 
 from datadog_checks.base.utils.db.health import Health, HealthEvent, HealthStatus
+from datadog_checks.base.utils.db.utils import INTERNAL_TAG_PREFIX
 
 
 class Db2Health(Health):
@@ -20,7 +21,11 @@ class Db2Health(Health):
         super().submit_health_event(
             name=name,
             status=status,
-            tags=self.check.tag_manager.get_tags(include_internal=False) + (tags or []),
+            tags=[
+                tag
+                for tag in self.check.tag_manager.get_tags() + (tags or [])
+                if not tag.startswith(INTERNAL_TAG_PREFIX)
+            ],
             data={
                 'database_instance': self.check.database_identifier,
                 'ddagenthostname': self.check.agent_hostname,
