@@ -338,7 +338,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
                 f"deployment_id:{d.get('id', '')}",
                 f"deployment_name:{d.get('name', '')}",
                 f"flow_id:{d.get('flow_id', '')}",
-                f"flow_name:{self.flows_by_id.get(d.get('flow_id', ''), '')}",
+                *self._flow_name_tags(d.get('flow_id', '')),
                 f"work_pool_name:{d.get('work_pool_name', '')}",
                 f"work_pool_id:{self.pools_by_name.get(d.get('work_pool_name', ''), {}).get('id', '')}",
                 f"work_queue_name:{d.get('work_queue_name', '')}",
@@ -374,11 +374,16 @@ class PrefectCheck(AgentCheck, ConfigMixin):
         else:
             return self.filter_metrics.filter_task_runs(all_runs, self.flow_runs_tags)
 
+    def _flow_name_tags(self, flow_id: str) -> list[str]:
+        # Omitted rather than empty when unresolved, so _clean_and_emit_metric doesn't log an error per metric
+        fname = self.flows_by_id.get(flow_id)
+        return [f"flow_name:{fname}"] if fname else []
+
     def _define_flow_run_tags(self, fr: dict[str, str]) -> list[str]:
         d_id = fr.get('deployment_id', '')
         d_name = self.deployments_by_id.get(d_id, '')
         fr_id = fr.get('id', '')
-        fname = self.flows_by_id.get(fr.get('flow_id', ''))
+        flow_name_tags = self._flow_name_tags(fr.get('flow_id', ''))
         fr_tags = [
             f"work_pool_id:{fr.get('work_pool_id', '')}",
             f"work_pool_name:{fr.get('work_pool_name', '')}",
@@ -387,12 +392,12 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             f"deployment_id:{d_id}",
             f"deployment_name:{d_name}",
             f"flow_id:{fr.get('flow_id', '')}",
-            *([f"flow_name:{fname}"] if fname else []),
+            *flow_name_tags,
             *self.deployment_tags_by_id.get(d_id, []),
         ]
         # Refresh entries cached while the flow name could not be resolved (e.g. /flows/filter failed)
         cached = self.flow_runs_tags.get(fr_id)
-        if cached is None or (fname and not any(t.startswith('flow_name:') for t in cached)):
+        if cached is None or (flow_name_tags and not any(t.startswith('flow_name:') for t in cached)):
             self.flow_runs_tags[fr_id] = tuple(sorted(fr_tags))
 
         if fr.get('state_type', '') == 'COMPLETED':
