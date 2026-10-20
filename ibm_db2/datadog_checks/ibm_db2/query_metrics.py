@@ -94,6 +94,7 @@ class QueryMetricsCollector(DBMAsyncJob):
             rate_limit=1 / config.query_metrics.collection_interval,
             dbms=check.dbms,
             job_name='query-metrics',
+            features=['query_metrics'],
         )
         # Each background job owns its connection.
         self._config = config
@@ -110,7 +111,12 @@ class QueryMetricsCollector(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def run_job(self) -> None:
-        connection = self._connection.ensure_connected()
+        try:
+            connection = self._connection.ensure_connected()
+        except Db2ConnectionError as error:
+            # The runner logs expected connection errors but only emits health events for unexpected exceptions.
+            self._check.health.submit_exception_health_event(error, data={'job_name': 'query-metrics'})
+            raise
         cursor = ibm_db.prepare(
             connection,
             STATEMENT_COUNTERS_QUERY,
