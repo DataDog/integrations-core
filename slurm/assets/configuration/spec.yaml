@@ -75,6 +75,17 @@ files:
       value:
         type: boolean
         example: False
+    - name: collect_job_events
+      description: |
+        Whether or not to send job lifecycle events (submitted, pending, started, finished, preempted, requeued
+        and suspended), based on polling sacct for jobs active since the previous check run. Requires GPU
+        monitoring to be enabled in the Agent (`gpu.enabled: true`); otherwise this option is ignored.
+        Pending reasons come from squeue and require `collect_squeue_stats`.
+        The first check run only records the current jobs and does not send events for them.
+      fleet_configurable: true
+      value:
+        type: boolean
+        example: False
     - name: sinfo_collection_level
       description: |
         The level of detail to collect from the sinfo command. The default is 'basic'. Available options are 1, 2 and
