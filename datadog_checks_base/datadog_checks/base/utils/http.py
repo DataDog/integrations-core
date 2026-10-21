@@ -744,7 +744,7 @@ class RequestsWrapper(object):
             return ResponseWrapper(response, self.request_size, self.max_line_size)
 
     @staticmethod
-    def _with_extra_headers(options, extra_headers):
+    def _with_extra_headers(options: ChainMap[str, Any], extra_headers: Mapping[str, str] | None) -> ChainMap[str, Any]:
         # Merge at send time, because the auth token writer updates the default headers in place.
         if extra_headers is None:
             return options
