@@ -251,8 +251,9 @@ reroute (ACR) for each configured database, host, and port:
 ```
 
 Apply this to the driver configuration used by the Agent, not your application's driver.
-Restart the Agent after changing it. See [IBM's client reroute configuration documentation][18]
-for driver configuration details. Enabling `enableAlternateServerListFirstConnect` implicitly
+Set `DB2DSDRIVER_CFG_PATH` in the Agent process environment to the absolute path of this
+file, or use the driver's [default configuration location][19]. Restart the Agent after
+changing it. See [IBM's client reroute configuration documentation][18] for details. Enabling `enableAlternateServerListFirstConnect` implicitly
 allows rerouting even when other ACR settings disable it.
 
 #### High availability disaster recovery (HADR)
@@ -388,3 +389,4 @@ Additional helpful documentation, links, and articles:
 [17]: https://www.ibm.com/docs/en/db2oc?topic=views-monitor-procedures-functions
 
 [18]: https://www.ibm.com/docs/en/db2/12.1.x?topic=njcshacd-configuration-db2-automatic-client-reroute-support-applications-other-than-java
+[19]: https://www.ibm.com/docs/en/db2/12.1.x?topic=file-data-server-driver-configuration-location

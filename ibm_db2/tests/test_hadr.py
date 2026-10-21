@@ -6,6 +6,8 @@
 Set DB2_HADR_PRIMARY_HOST, DB2_HADR_STANDBY_HOST, and DB2_HADR_STANDBY_CONTAINER.
 Both servers use the integration's test credentials and port 50000. Configure the
 IBM driver with ACR disabled as in the README. The test swaps the servers' roles.
+Run it separately from the ordinary suite, which needs a writable primary:
+`ddev --no-interactive test ibm_db2:py3.13-12.1.5.0 -- tests/test_hadr.py`.
 """
 
 import os
