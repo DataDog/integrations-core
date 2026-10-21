@@ -45,8 +45,10 @@ python3 .claude/skills/onboard-evalya/scripts/asset_metrics.py <integration>
 ```
 
 If the tests fail, stop and report it: the coverage target may be wrong. The extractor resolves
-`<integration>` against the current directory and exits `0` even when nothing is found, so empty
-`dashboards` and `monitors` lists mean a wrong path or an integration with no assets; stop and ask.
+`<integration>` against the current directory and exits `0` even when nothing is found. If
+`target` is empty, stop and ask: the path is wrong, the integration has no assets, or its assets
+hold only log, event or security queries (true of 100+ log-only integrations). An empty target
+would make the coverage loop report full coverage for nothing.
 
 It prints `target` (the union of metrics across both asset types), `by_source` (which metrics came
 from dashboards vs monitors, so you can see what monitors added), `in_metadata` (with type), and
@@ -122,9 +124,9 @@ Follow `references/redis-exemplar.md`. Produce, under `<integration>/tests/`:
 2. An **`activity-gen.sh`** that loops the rate/counter workload, reads the connection details
    from its compose `environment:` (same variable names as the `provides.*` labels), supports
    `ACTIVITY_GEN=0` (idle but alive) and a duration cap, and logs progress. Keep it POSIX `sh`.
-3. **`tests/evalya.yaml`** with a `<integration>-full` task (use the service name when it differs
-   from the integration's, e.g. `redis-full` for `redisdb`) referencing the compose entrypoint
-   service (`./compose/<file>.compose@<service>`), with:
+3. **`tests/evalya.yaml`** with a `<integration>-full` task (use the product name when it differs
+   from the integration's: `redisdb` -> `redis-full`, whose entrypoint service is `info-proxy`)
+   referencing the compose entrypoint service (`./compose/<file>.compose@<service>`), with:
    - `labels`: `evalya.io/publish: "true"` and `evalya.io/provides.<VAR>` for host, port, **and the
      credentials** (`{{ .hostname }}` for the host). Publish the username and password under the
      same names the check config expects (e.g. `provides.DB_USERNAME` / `provides.DB_PASSWORD`, or
