@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 23.12.1 / 2026-10-20
+
+***Fixed***:
+
+* Qualify Postgres extension warming with schema ([#25618](https://github.com/DataDog/integrations-core/pull/25618))
+
 ## 23.12.0 / 2026-09-02
 
 ***Security***:
