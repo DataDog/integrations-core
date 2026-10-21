@@ -542,22 +542,15 @@ class KafkaCheck(AgentCheck):
             self.log.debug('No partitions to check for offsets')
             return {}, ""
 
-        dd_consumer_group = "datadog-agent"
+        cluster_id = self.client.get_cluster_id()
 
-        self.client.open_consumer(dd_consumer_group)
-        try:
-            cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
+        self.log.debug('Querying %s highwater offsets', len(topic_partitions_to_check))
 
-            self.log.debug('Querying %s highwater offsets', len(topic_partitions_to_check))
-
-            result = {}
-            for topic, partition, offset in self.client.get_partition_offsets(
-                partitions=topic_partitions_to_check, offset=HIGH_WATERMARK
-            ):
-                result[(topic, partition)] = offset
-        finally:
-            if self.config._close_admin_client:
-                self.client.close_consumer()
+        result = {}
+        for topic, partition, offset in self.client.get_partition_offsets(
+            partitions=topic_partitions_to_check, offset=HIGH_WATERMARK
+        ):
+            result[(topic, partition)] = offset
 
         self.log.debug('Got %s highwater offsets', len(result))
         return result, cluster_id
