@@ -1,0 +1,1 @@
+Use the shared malloc_trim helper from datadog_checks_base instead of a local copy.

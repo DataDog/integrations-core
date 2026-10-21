@@ -1,0 +1,1 @@
+Move the malloc_trim helper to datadog_checks.base.utils.native_memory so other integrations can reuse it.
