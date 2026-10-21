@@ -1,0 +1,1 @@
+Fix check initialization when the query metrics configuration block is empty.
