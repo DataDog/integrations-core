@@ -133,9 +133,10 @@ files:
                          use `.inf` for the upper bound.
 
           Each bound must be a number, or `.inf` for the upper bound, and the lower bound cannot exceed the upper
-          bound. A configuration that breaks these rules fails to load. In a local YAML file either `.inf` or the
-          quoted string `'.inf'` works. When the configuration is sent as JSON (for example through Remote Config
-          or Fleet Automation), use the string `'.inf'`, since JSON cannot represent infinity.
+          bound. Values after the first two are ignored, but they must be finite numbers, not `.inf`. A configuration
+          that breaks these rules fails to load. In a local YAML file either `.inf` or the quoted string `'.inf'`
+          works. When the configuration is sent as JSON (for example through Remote Config or Fleet Automation), use
+          the string `'.inf'`, since JSON cannot represent infinity.
         value:
           type: object
           properties:
