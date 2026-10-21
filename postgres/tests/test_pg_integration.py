@@ -727,6 +727,39 @@ def test_state_clears_on_connection_error(integration_check, pg_instance):
     assert_state_clean(check)
 
 
+def _leave_command_in_progress(conn):
+    conn.pgconn.send_query(b"SELECT 1")
+
+
+def _leave_transaction_in_error(conn):
+    conn.execute("BEGIN")
+    with pytest.raises(psycopg.errors.DivisionByZero):
+        conn.execute("SELECT 1/0")
+
+
+@pytest.mark.parametrize(
+    'leave_connection_unusable, expected_transaction_status',
+    [
+        pytest.param(_leave_command_in_progress, psycopg.pq.TransactionStatus.ACTIVE, id='command-in-progress'),
+        pytest.param(_leave_transaction_in_error, psycopg.pq.TransactionStatus.INERROR, id='transaction-in-error'),
+    ],
+)
+def test_main_connection_recovers_from_unusable_state(
+    aggregator, integration_check, pg_instance, leave_connection_unusable, expected_transaction_status
+):
+    check = integration_check(pg_instance)
+    check.check(pg_instance)
+
+    leave_connection_unusable(check._db)
+    assert check._db.info.transaction_status == expected_transaction_status
+
+    aggregator.reset()
+    check.check(pg_instance)
+
+    check_common_metrics(aggregator, expected_tags=_get_expected_tags(check, pg_instance))
+    assert check._db.info.transaction_status == psycopg.pq.TransactionStatus.IDLE
+
+
 def test_query_timeout(integration_check, pg_instance):
     pg_instance['query_timeout'] = 1000
     check = integration_check(pg_instance)

@@ -7,6 +7,7 @@ binary==1.0.2
 boto3==1.43.98
 botocore==1.43.98
 cachetools==7.2.0
+certifi==2026.10.19
 clickhouse-connect==1.6.0
 cm-client==45.0.4
 confluent-kafka==2.13.2
@@ -36,7 +37,7 @@ psycopg[c,pool]==3.3.4
 pyasn1==0.6.4
 pydantic==2.13.5
 pyjwt==2.14.0
-pymongo[srv]==4.8.0; python_version >= '3.9'
+pymongo==4.18.2
 pymqi==1.12.13
 pymysql==1.1.2
 pyodbc==5.3.0
@@ -47,7 +48,7 @@ pysocks==1.7.1
 python-binary-memcached==0.32.0
 python-dateutil==2.9.0.post0
 python3-gearman==0.1.0; sys_platform != 'win32'
-pyvmomi==8.0.3.0.1
+pyvmomi==9.0.0.0
 pywin32==312; sys_platform == 'win32'
 pyyaml==6.0.3
 redis==8.1.0
