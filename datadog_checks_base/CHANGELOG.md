@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 38.6.0 / 2026-10-20
+
+***Security***:
+
+* Pin `certifi` to 2026.10.19 to remove the eMudhra root whose intermediates were compromised. ([#25701](https://github.com/DataDog/integrations-core/pull/25701))
+
 ## 38.5.0 / 2026-10-13
 
 ***Added***:
