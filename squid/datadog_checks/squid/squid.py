@@ -4,9 +4,8 @@
 
 import re
 
-import requests
-
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http_exceptions import HTTPClientError
 
 EVENT_TYPE = SOURCE_TYPE_NAME = 'squid'
 
@@ -88,6 +87,7 @@ SQUID_VERSION_PATTERN = re.compile(
 
 
 class SquidCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     HTTP_CONFIG_REMAPPER = {'cachemgr_username': {'name': 'username'}, 'cachemgr_password': {'name': 'password'}}
 
     def check(self, instance):
@@ -111,7 +111,7 @@ class SquidCheck(AgentCheck):
             headers = res.headers
             self.submit_version(headers)
 
-        except requests.exceptions.RequestException as e:
+        except HTTPClientError as e:
             self.service_check(SERVICE_CHECK, AgentCheck.CRITICAL, tags=tags)
             self.log.error('There was an error connecting to squid at %s: %s', url, e)
             raise

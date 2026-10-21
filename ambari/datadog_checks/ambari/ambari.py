@@ -1,11 +1,15 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from requests.exceptions import ConnectionError, HTTPError, Timeout
-
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import CheckException
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientConnectTimeoutError,
+    HTTPClientStatusError,
+    HTTPClientTimeoutError,
+)
 
 from . import common
 
@@ -23,6 +27,8 @@ METRICS_FIELD = "metrics"
 
 
 class AmbariCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
+
     def __init__(self, name, init_config, instances):
         super(AmbariCheck, self).__init__(name, init_config, instances)
 
@@ -187,11 +193,11 @@ class AmbariCheck(AgentCheck):
         try:
             resp = self.http.get(url)
             return resp.json()
-        except (HTTPError, ConnectionError) as e:
+        except (HTTPClientStatusError, HTTPClientConnectionError, HTTPClientConnectTimeoutError) as e:
             self.warning(
                 "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable", url, e
             )
-        except Timeout:
+        except HTTPClientTimeoutError:
             self.warning("Connection timeout when connecting to %s", url)
         except Exception as e:
             self.warning("Couldn't connect to URL: %s with exception: %s.", url, e)

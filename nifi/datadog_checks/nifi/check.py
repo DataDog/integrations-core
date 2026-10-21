@@ -25,15 +25,16 @@ from .constants import (
 
 
 class NifiCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'nifi'
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
         # NiFi uses its own token-based auth (POST /access/token), not HTTP Basic Auth.
-        # Only disable RequestsWrapper's automatic auth when NiFi credentials are provided,
+        # Only disable the HTTP client's automatic auth when NiFi credentials are provided,
         # so that reverse-proxy auth configurations (Basic, Digest, Kerberos) still work.
         if self.instance.get('username') and self.instance.get('password'):
-            self.http.options['auth'] = None
+            self.http.disable_auth()
         self._api = None
 
     def _get_api(self):

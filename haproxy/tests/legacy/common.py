@@ -79,6 +79,9 @@ requires_legacy_environment = pytest.mark.skipif(
 
 CONFIG_UNIXSOCKET = {'collect_aggregates_only': False}
 
+MOCK_URL = 'http://localhost/admin?stats'
+MOCK_STATS_URL = MOCK_URL + '/;csv;norefresh'
+
 
 CONFIG_TCPSOCKET = {'url': STATS_SOCKET, 'collect_aggregates_only': False}
 

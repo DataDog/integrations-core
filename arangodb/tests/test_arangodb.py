@@ -1,15 +1,15 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import logging
 import os
 
 import mock
 import pytest
-from requests import HTTPError
 
 from datadog_checks.arangodb import ArangodbCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import METRICS
@@ -49,15 +49,18 @@ def test_invalid_endpoint(aggregator, instance_invalid_endpoint, dd_run_check):
         ),
     ],
 )
-def test_check(instance, dd_run_check, aggregator, tag_condition, base_tags):
+def test_check(instance, dd_run_check, aggregator, tag_condition, base_tags, fake_http, fake_http_response):
     check = ArangodbCheck('arangodb', {}, [instance])
 
-    def mock_requests_get(session, url, *args, **kwargs):
-        fixture = url.rsplit('/', 1)[-1]
-        return MockResponse(file_path=os.path.join(os.path.dirname(__file__), 'fixtures', tag_condition, fixture))
+    fixtures_dir = os.path.join(os.path.dirname(__file__), 'fixtures', tag_condition)
+    for endpoint in ArangodbCheck.SERVER_TAGS.values():
+        with open(os.path.join(fixtures_dir, endpoint.rsplit('/', 1)[-1])) as f:
+            fake_http_response(check.base_url + endpoint, json_data=json.load(f))
+    with open(os.path.join(fixtures_dir, 'v2'), 'rb') as f:
+        fake_http_response(instance['openmetrics_endpoint'], f.read())
 
-    with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
-        dd_run_check(check)
+    dd_run_check(check)
+    fake_http.assert_all_responses_consumed()
 
     aggregator.assert_service_check(
         'arangodb.openmetrics.health',
@@ -78,21 +81,23 @@ def test_check(instance, dd_run_check, aggregator, tag_condition, base_tags):
     'side_effect, log_message',
     [
         pytest.param(
-            HTTPError, "Unable to get server foo, skipping `server_foo` tag.", id="HTTPError getting server tag"
+            HTTPClientStatusError("error"),
+            "Unable to get server foo, skipping `server_foo` tag.",
+            id="HTTPClientStatusError getting server tag",
         ),
         pytest.param(
-            Exception,
+            Exception(),
             "Unable to query `http://localhost:8529/test_endpoint/foo` to collect `server_foo` tag, received error:",
             id="Exception getting server tag",
         ),
     ],
 )
-def test_get_server_tag(instance, caplog, side_effect, log_message):
+def test_get_server_tag(instance, caplog, side_effect, log_message, fake_http):
     caplog.clear()
     check = ArangodbCheck('arangodb', {}, [instance])
-    with mock.patch("datadog_checks.base.utils.http.RequestsWrapper.get", side_effect=side_effect):
-        caplog.set_level(logging.DEBUG)
-        check.get_server_tag('foo', '/test_endpoint/foo')
+    fake_http.register_response('GET', 'http://localhost:8529/test_endpoint/foo', side_effect)
+    caplog.set_level(logging.DEBUG)
+    check.get_server_tag('foo', '/test_endpoint/foo')
 
     assert log_message in caplog.text
 

@@ -18,6 +18,7 @@ WORKER_STATUSES = {
 
 
 class TorchserveManagementAPICheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'torchserve.management_api'
     SERVICE_CHECK_NAME = 'health'
     CHECK_NAME = "torchserve"

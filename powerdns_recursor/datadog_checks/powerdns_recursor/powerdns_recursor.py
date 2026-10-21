@@ -8,6 +8,8 @@ from datadog_checks.base import AgentCheck
 
 class PowerDNSRecursorCheck(AgentCheck):
     # See https://doc.powerdns.com/md/recursor/stats/ for metrics explanation
+    AGNOSTIC_HTTP_CLIENT = True
+
     GAUGE_METRICS = [
         'cache-entries',
         'concurrent-queries',

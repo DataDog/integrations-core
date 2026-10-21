@@ -9,6 +9,7 @@ from .metrics import METRIC_MAP
 
 
 class HAProxyCheck(OpenMetricsBaseCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
 
     def __new__(cls, name, init_config, instances):

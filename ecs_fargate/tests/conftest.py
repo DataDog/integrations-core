@@ -1,13 +1,14 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
 from copy import deepcopy
 
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.dev import get_here
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.ecs_fargate import FargateCheck
 
 HERE = get_here()
@@ -80,41 +81,17 @@ EXTRA_NETWORK_METRICS = [
 ]
 
 
-def mocked_requests_get_linux(*args, **kwargs):
-    # v2
-    if args[0].endswith("/metadata"):
-        return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata.json'))
-    elif args[0].endswith("/stats"):
-        return MockResponse(file_path=os.path.join(HERE, 'fixtures', LINUX_STATS_FIXTURE))
-    else:
-        return MockResponse(status_code=404)
+def fixture_response(fixture_name):
+    with open(os.path.join(HERE, 'fixtures', fixture_name), 'rb') as f:
+        content = f.read()
+    return FakeHTTPResponse(content=content, json_result=json.loads(content))
 
 
-def mocked_requests_get_linux_v4(*args, **kwargs):
-    if args[0].endswith("/task"):
-        return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata_v4.json'))
-    elif args[0].endswith("/task/stats"):
-        return MockResponse(file_path=os.path.join(HERE, 'fixtures', LINUX_STATS_FIXTURE_V4))
-    else:
-        return MockResponse(status_code=404)
-
-
-def mocked_requests_get_windows(*args, **kwargs):
-    if args[0].endswith("/metadata"):
-        return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata.json'))
-    elif args[0].endswith("/stats"):
-        return MockResponse(file_path=os.path.join(HERE, 'fixtures', WINDOWS_STATS_FIXTURE))
-    else:
-        return MockResponse(status_code=404)
-
-
-def mocked_requests_get_sys_delta(*args, **kwargs):
-    if args[0].endswith("/metadata"):
-        return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'metadata.json'))
-    elif args[0].endswith("/stats"):
-        return MockResponse(file_path=os.path.join(HERE, 'fixtures', 'stats_wrong_system_delta.json'))
-    else:
-        return MockResponse(status_code=404)
+def register_check_responses(fake_http, check, metadata, stats=None):
+    # The check resolves its v2 or v4 endpoint from the environment at construction time.
+    fake_http.register_response('GET', check.API_ENDPOINT + check.METADATA_ROUTE, metadata)
+    if stats is not None:
+        fake_http.register_response('GET', check.API_ENDPOINT + check.STATS_ROUTE, stats)
 
 
 def mocked_get_tags(entity, _):

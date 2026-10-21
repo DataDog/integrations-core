@@ -4,7 +4,6 @@
 import os
 from copy import deepcopy
 
-import mock
 import pytest
 
 INSTANCE = {'prometheus_url': 'http://localhost:5000/metrics'}
@@ -21,14 +20,12 @@ def instance():
 
 
 @pytest.fixture()
-def mock_metrics_endpoint():
+def mock_metrics_endpoint(fake_http, fake_http_response):
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
+    with open(f_name, 'rb') as f:
+        content = f.read()
+    # test_check runs the check twice
+    for _ in range(2):
+        fake_http_response(INSTANCE['prometheus_url'], content, headers={'Content-Type': 'text/plain'})
+    yield
+    fake_http.assert_all_responses_consumed()

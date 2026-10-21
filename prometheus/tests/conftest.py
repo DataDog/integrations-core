@@ -4,7 +4,6 @@
 
 import os
 
-import mock
 import pytest
 from prometheus_client import CollectorRegistry, Counter, Gauge, generate_latest
 
@@ -50,7 +49,7 @@ def dd_environment(e2e_instance):
 
 
 @pytest.fixture
-def poll_mock():
+def poll_mock(fake_http, fake_http_response):
     registry = CollectorRegistry()
     # pylint: disable=E1123,E1101
     g1 = Gauge('metric1', 'processor usage', ['matched_label', 'node', 'flavor'], registry=registry)
@@ -62,13 +61,11 @@ def poll_mock():
     g3 = Gauge('metric3', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
     g3.labels(matched_label="foobar", node="host2", timestamp="456").set(float('inf'))
 
-    poll_mock_patch = mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: ensure_unicode(generate_latest(registry)).split("\n"),
-            headers={'Content-Type': "text/plain"},
-        ),
-    )
-    with poll_mock_patch:
-        yield
+    content = ensure_unicode(generate_latest(registry))
+
+    def register(url=INSTANCE_UNIT['prometheus_url'], times=1):
+        for _ in range(times):
+            fake_http_response(url, content, headers={'Content-Type': 'text/plain'})
+
+    yield register
+    fake_http.assert_all_responses_consumed()

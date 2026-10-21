@@ -8,6 +8,7 @@ from .metrics import ACME_METRICS, CERT_METRICS, CONTROLLER_METRICS
 
 
 class CertManagerCheck(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'cert_manager'
 
     DEFAULT_METRIC_LIMIT = 0

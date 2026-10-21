@@ -9,7 +9,7 @@ import pytest
 
 from datadog_checks.kube_apiserver_metrics import KubeAPIServerMetricsCheck
 
-from .common import APISERVER_INSTANCE_BEARER_TOKEN, HERE
+from .common import APISERVER_INSTANCE_BEARER_TOKEN, HERE, register_metrics
 
 OM_RESPONSE_FIXTURES = os.path.join(HERE, 'fixtures', 'metrics.txt')
 
@@ -79,12 +79,12 @@ class TestKubeAPIServerMetrics:
         'authenticated_user_requests.count',
     ]
 
-    def test_check(self, dd_run_check, aggregator, mock_http_response):
+    def test_check(self, dd_run_check, aggregator, fake_http_response):
         """
         Testing kube_apiserver_metrics metrics collection.
         """
         NAMESPACE = 'kube_apiserver'
-        mock_http_response(file_path=OM_RESPONSE_FIXTURES)
+        register_metrics(fake_http_response, OM_RESPONSE_FIXTURES, check_runs=2)
         check = KubeAPIServerMetricsCheck('kube_apiserver_metrics', {}, [instance])
         dd_run_check(check)
 

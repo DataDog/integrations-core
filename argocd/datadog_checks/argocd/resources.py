@@ -16,8 +16,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse, urlunparse
 
-from datadog_checks.base.utils.http import RequestsWrapper
-
 try:
     import datadog_agent
 except ImportError:
@@ -318,12 +316,7 @@ class ArgocdResourceCollector:
                     auth_token=self._auth_token,
                     backoff_max_seconds=self._backoff_max,
                     read_timeout_seconds=self._stream_read_timeout,
-                    http=RequestsWrapper(
-                        self.check.instance,
-                        self.check.init_config,
-                        self.check.HTTP_CONFIG_REMAPPER,
-                        self.check.log,
-                    ),
+                    http=self.check.create_http_client(),
                 )
             if not self._listener.is_alive():
                 self._listener.start()
@@ -408,8 +401,8 @@ class ArgocdResourceCollector:
     def _fetch(self, api_path: str) -> list[dict]:
         url = self._endpoint.rstrip("/") + api_path
         # Pass a dedicated genresources token only when set, via extra_headers (merges with configured
-        # headers). Omit it otherwise: even an empty extra_headers makes RequestsWrapper snapshot the default
-        # headers before its auth_token handler writes the inherited token, which would drop that auth.
+        # headers). Omit it otherwise: even empty extra_headers forces a per-request header override before
+        # inherited auth headers are applied, which would drop that auth.
         kwargs: dict = {}
         headers = auth_headers(self._auth_token)
         if headers:

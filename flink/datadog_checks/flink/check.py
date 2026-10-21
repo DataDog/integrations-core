@@ -18,6 +18,8 @@ class FlinkCheck(OpenMetricsBaseCheckV2):
     Reporter; see the README for guidance on which collection mode to use.
     """
 
+    AGNOSTIC_HTTP_CLIENT = True
+
     __NAMESPACE__ = 'flink'
     DEFAULT_METRIC_LIMIT = 0
 

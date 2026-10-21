@@ -13,6 +13,7 @@ from .metrics import BLOCKSIZE_METRICS, METRICS, READ_WRITE_METRICS
 
 
 class SilkCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'silk'
 
     STATE_SERVICE_CHECK = "system.state"

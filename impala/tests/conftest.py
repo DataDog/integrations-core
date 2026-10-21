@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from contextlib import ExitStack, contextmanager
-from unittest import mock
 
 import pytest
 
@@ -92,22 +91,15 @@ def catalog_check(catalog_instance):
 
 
 @pytest.fixture()
-def mock_metrics(request):
+def mock_metrics(request, fake_http_response):
     metrics_file = request.node.get_closest_marker("metrics_file")
-    with open(
-        os.path.join(os.path.dirname(__file__), "fixtures", metrics_file.args[0], metrics_file.args[1]), "r"
-    ) as fixture_file:
+    service_type, file_name = metrics_file.args
+    with open(os.path.join(os.path.dirname(__file__), "fixtures", service_type, file_name), "r") as fixture_file:
         content = fixture_file.read()
 
-    with mock.patch(
-        "requests.Session.get",
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: content.split("\n"),
-            headers={"Content-Type": "text/plain"},
-        ),
-    ):
-        yield
+    endpoint = request.getfixturevalue(f"{service_type}_instance")["openmetrics_endpoint"]
+    fake_http_response(endpoint, content, headers={"Content-Type": "text/plain"})
+    yield
 
 
 @contextmanager

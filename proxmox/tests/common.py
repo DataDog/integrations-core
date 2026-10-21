@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+
 INSTANCE = {'proxmox_server': 'http://localhost:8006/api2/json', 'tags': ['testing']}
 
 BASE_TAGS = [f'proxmox_server:{INSTANCE["proxmox_server"]}'] + INSTANCE['tags']
@@ -12,6 +14,16 @@ BASE_TAGS = [f'proxmox_server:{INSTANCE["proxmox_server"]}'] + INSTANCE['tags']
 CLUSTER_RESOURCES_FIXTURE = (
     Path(__file__).parent / 'fixtures' / 'GET' / 'api2' / 'json' / 'cluster' / 'resources' / 'response.json'
 )
+
+
+def api_response(status_code: int = 200, json_data: Any = None, content: str = '') -> FakeHTTPResponse:
+    """Build a response whose `json()` parses its body, raising `JSONDecodeError` when it is not JSON."""
+    if json_data is not None:
+        return FakeHTTPResponse(status_code=status_code, content=json.dumps(json_data).encode(), json_result=json_data)
+    try:
+        return FakeHTTPResponse(status_code=status_code, content=content.encode(), json_result=json.loads(content))
+    except json.JSONDecodeError as e:
+        return FakeHTTPResponse(status_code=status_code, content=content.encode(), json_error=e)
 
 
 def _cluster_resources_fixture() -> dict[str, Any]:

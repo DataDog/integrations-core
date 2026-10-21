@@ -127,7 +127,7 @@ class Api:
         self.sessions = {}
 
     def close(self):
-        self.http.session.close()
+        self.http.close()
 
     def setup_cert_login(self, aci_url):
         session_wrapper = self.wrapper_factory(

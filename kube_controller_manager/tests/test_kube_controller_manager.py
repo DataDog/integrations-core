@@ -1,16 +1,18 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-
-import os
+from copy import deepcopy
 
 import mock
 import pytest
-import requests
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientStatusError
 from datadog_checks.kube_controller_manager import KubeControllerManagerCheck
+
+from .common import register_metrics
 
 instance = {
     'prometheus_url': 'http://localhost:10252/metrics',
@@ -32,17 +34,10 @@ NAMESPACE = 'kube_controller_manager'
 
 
 @pytest.fixture()
-def mock_metrics():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
+def mock_metrics(fake_http, fake_http_response):
+    register_metrics(fake_http_response, 'metrics.txt', instance['prometheus_url'])
+    yield
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.fixture()
@@ -60,15 +55,18 @@ def mock_leader():
 
 
 def test_check_metrics_with_deprecated(aggregator, mock_metrics, mock_leader):
-    c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
-    c.check(instance)
+    # __init__ mutates the instance it is given, so a copy keeps the requests the same whatever the test order
+    check_instance = deepcopy(instance)
+    c = KubeControllerManagerCheck(CHECK_NAME, {}, [check_instance])
+    c.check(check_instance)
 
     generic_check_metrics(aggregator, True)
 
 
 def test_check_metrics_without_deprecated(aggregator, mock_metrics, mock_leader):
-    c = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
-    c.check(instance2)
+    check_instance = deepcopy(instance2)
+    c = KubeControllerManagerCheck(CHECK_NAME, {}, [check_instance])
+    c.check(check_instance)
 
     generic_check_metrics(aggregator, False)
 
@@ -132,27 +130,59 @@ def generic_check_metrics(aggregator, check_deprecated):
     aggregator.assert_all_metrics_covered()
 
 
-def test_service_check_ok(monkeypatch):
+@pytest.mark.parametrize(
+    'side_effect, expected_status, expected_message',
+    [
+        (None, AgentCheck.OK, None),
+        (HTTPClientStatusError('health check failed'), AgentCheck.CRITICAL, 'health check failed'),
+        (HTTPClientConnectionError('connection refused'), AgentCheck.CRITICAL, 'connection refused'),
+    ],
+    ids=['ok', 'http_error', 'http_connection_error'],
+)
+def test_service_check(monkeypatch, fake_http, side_effect, expected_status, expected_message):
     instance = {'prometheus_url': 'http://localhost:10252/metrics'}
-    instance_tags = []
+    # The SLI probe in __init__ goes through the fake, the service-check path under test is driven by the seeded
+    # _http_handlers below
+    fake_http.register_response('GET', 'http://localhost:10252/metrics/slis', FakeHTTPResponse(status_code=200))
 
     check = KubeControllerManagerCheck(CHECK_NAME, {}, [instance])
-
     monkeypatch.setattr(check, 'service_check', mock.Mock())
 
-    calls = [
-        mock.call('kube_controller_manager.up', AgentCheck.OK, tags=instance_tags),
-        mock.call('kube_controller_manager.up', AgentCheck.CRITICAL, tags=instance_tags, message='health check failed'),
-    ]
+    healthcheck_url = 'http://localhost:10252/healthz'
+    handler = mock.MagicMock()
+    handler.get.return_value.raise_for_status = mock.Mock(side_effect=side_effect)
+    check._http_handlers[healthcheck_url] = handler
 
-    # successful health check
-    with mock.patch('requests.Session.get', return_value=mock.MagicMock(status_code=200)):
-        check._perform_service_check(instance)
+    check._perform_service_check(instance)
 
-    # failed health check
-    raise_error = mock.Mock()
-    raise_error.side_effect = requests.HTTPError('health check failed')
-    with mock.patch('requests.Session.get', return_value=mock.MagicMock(raise_for_status=raise_error)):
-        check._perform_service_check(instance)
+    if expected_message is None:
+        check.service_check.assert_called_with('kube_controller_manager.up', expected_status, tags=[])
+    else:
+        check.service_check.assert_called_with(
+            'kube_controller_manager.up', expected_status, tags=[], message=expected_message
+        )
 
-    check.service_check.assert_has_calls(calls)
+
+@pytest.mark.parametrize(
+    ('instance_overrides', 'expected_verify', 'expected_ignore_warning'),
+    [
+        pytest.param({}, False, True, id='no ca cert'),
+        pytest.param({'ssl_ca_cert': '/etc/ca.crt'}, '/etc/ca.crt', False, id='ca cert configured'),
+    ],
+)
+def test_healthcheck_client_carries_instance_tls_config(instance_overrides, expected_verify, expected_ignore_warning):
+    """The healthcheck builds its own client, so the instance TLS settings have to reach it.
+
+    With no CA certificate configured it falls back to an unverified connection with the warning
+    suppressed, which is what an endpoint serving a self-signed certificate depends on.
+    """
+    # slis_available short-circuits the SLI probe that __init__ would otherwise send.
+    check = KubeControllerManagerCheck(CHECK_NAME, {}, [{**instance, 'slis_available': False, **instance_overrides}])
+    health_url = check.instance['health_url']
+
+    handler = check._healthcheck_http_handler(check.instance, health_url)
+
+    assert handler.options['verify'] == expected_verify
+    assert handler.ignore_tls_warning is expected_ignore_warning
+    # Cached per endpoint, so repeated healthchecks reuse one client rather than building each time.
+    assert check._healthcheck_http_handler(check.instance, health_url) is handler

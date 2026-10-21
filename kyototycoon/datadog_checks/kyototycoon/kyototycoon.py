@@ -5,9 +5,8 @@
 import re
 from collections import defaultdict
 
-import requests
-
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 
 db_stats = re.compile(r'^db_(\d)+$')
 whitespace = re.compile(r'\s')
@@ -17,6 +16,8 @@ class KyotoTycoonCheck(AgentCheck):
     """Report statistics about the Kyoto Tycoon DBM-style
     database server (http://fallabs.com/kyototycoon/)
     """
+
+    AGNOSTIC_HTTP_CLIENT = True
 
     SOURCE_TYPE_NAME = 'kyoto tycoon'
     SERVICE_CHECK_NAME = 'kyototycoon.can_connect'
@@ -63,7 +64,7 @@ class KyotoTycoonCheck(AgentCheck):
         try:
             r = self.http.get(url)
             r.raise_for_status()
-        except requests.exceptions.HTTPError as e:
+        except HTTPClientStatusError as e:
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags, message=str(e))
             raise
         except Exception as e:

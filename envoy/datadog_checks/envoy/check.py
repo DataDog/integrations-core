@@ -154,6 +154,7 @@ METRIC_WITH_LABEL_NAME = {
 
 
 class EnvoyCheckV2(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'envoy'
 
     DEFAULT_METRIC_LIMIT = 0

@@ -23,6 +23,7 @@ from .config_models import ConfigMixin
 
 
 class OpenStackControllerCheck(AgentCheck, ConfigMixin):
+    AGNOSTIC_HTTP_CLIENT = True
     HA_SUPPORTED = True
 
     def __new__(cls, name, init_config, instances):

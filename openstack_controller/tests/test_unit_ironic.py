@@ -11,7 +11,7 @@ import pytest
 
 import tests.configs as configs
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 from tests.metrics import (
@@ -263,12 +263,11 @@ def test_ports_pagination(
     dd_run_check(openstack_controller_check(paginated_instance))
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
-            params = kwargs.get('params', {})
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
+            params = request.options.get('params', {})
             limit = params.get('limit')
-            args_list += [(args[0], limit)]
+            args_list += [(request.url, limit)]
         assert (
             args_list.count(('http://127.0.0.1:6385/baremetal/v1/ports/detail', paginated_limit)) == expected_api_calls
         )
@@ -369,15 +368,14 @@ def test_portgroups_pagination(
     count = 0
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
-            params = kwargs.get('params', {})
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
+            params = request.options.get('params', {})
             limit = params.get('limit')
-            args_list += [(args[0], limit)]
+            args_list += [(request.url, limit)]
             if (
-                'http://127.0.0.1:6385/baremetal/v1/nodes' in args[0]
-                and 'portgroups/detail' in args[0]
+                'http://127.0.0.1:6385/baremetal/v1/nodes' in request.url
+                and 'portgroups/detail' in request.url
                 and limit == paginated_limit
             ):
                 count += 1
@@ -562,12 +560,11 @@ def test_allocation_pagination(
     dd_run_check(openstack_controller_check(paginated_instance))
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
-            params = kwargs.get('params', {})
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
+            params = request.options.get('params', {})
             limit = params.get('limit')
-            args_list += [(args[0], limit)]
+            args_list += [(request.url, limit)]
         assert (
             args_list.count(('http://127.0.0.1:6385/baremetal/v1/allocations', paginated_limit)) == expected_api_calls
         )
@@ -658,15 +655,13 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     args_list = []
-    for call in mock_http_post.call_args_list:
-        args, kwargs = call
-        args_list += list(args)
+    for request in mock_http_post.recorded('POST'):
+        args_list += [request.url]
     assert args_list.count('http://127.0.0.1:6385/baremetal') == 0
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_post.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_post.recorded('POST'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
     if api_type == ApiType.SDK:
         assert openstack_connection.call_count == 4
@@ -677,12 +672,12 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
     ('mock_http_get', 'instance'),
     [
         pytest.param(
-            {'http_error': {'/baremetal': MockResponse(status_code=500)}},
+            {'http_error': {'/baremetal': FakeHTTPResponse(status_code=500)}},
             configs.REST,
             id='api rest',
         ),
         pytest.param(
-            {'http_error': {'/baremetal': MockResponse(status_code=500)}},
+            {'http_error': {'/baremetal': FakeHTTPResponse(status_code=500)}},
             configs.SDK,
             id='api sdk',
         ),
@@ -702,9 +697,8 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     args_list = []
-    for call in mock_http_get.call_args_list:
-        args, kwargs = call
-        args_list += list(args)
+    for request in mock_http_get.recorded('GET'):
+        args_list += [request.url]
     assert args_list.count('http://127.0.0.1:6385/baremetal') == 2
 
 
@@ -748,9 +742,8 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     args_list = []
-    for call in mock_http_get.call_args_list:
-        args, kwargs = call
-        args_list += list(args)
+    for request in mock_http_get.recorded('GET'):
+        args_list += [request.url]
     assert args_list.count('http://127.0.0.1:6385/baremetal') == 1
 
 
@@ -758,7 +751,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     ('mock_http_get', 'connection_baremetal', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/baremetal/v1/nodes/detail': MockResponse(status_code=500)}},
+            {'http_error': {'/baremetal/v1/nodes/detail': FakeHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -766,7 +759,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
         ),
         pytest.param(
             None,
-            {'http_error': {'nodes': MockResponse(status_code=500)}},
+            {'http_error': {'nodes': FakeHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -787,9 +780,8 @@ def test_nodes_exception(aggregator, check, dd_run_check, mock_http_get, connect
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:6385/baremetal/v1/nodes/detail') == 2
     if api_type == ApiType.SDK:
         assert connection_baremetal.nodes.call_count == 2
@@ -920,12 +912,11 @@ def test_volume_connector_pagination(
     dd_run_check(openstack_controller_check(paginated_instance))
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
-            params = kwargs.get('params', {})
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
+            params = request.options.get('params', {})
             limit = params.get('limit')
-            args_list += [(args[0], limit)]
+            args_list += [(request.url, limit)]
         assert (
             args_list.count(('http://127.0.0.1:6385/baremetal/v1/volume/connectors', paginated_limit))
             == expected_api_calls
@@ -1001,12 +992,11 @@ def test_volume_target_pagination(
     dd_run_check(openstack_controller_check(paginated_instance))
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
-            params = kwargs.get('params', {})
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
+            params = request.options.get('params', {})
             limit = params.get('limit')
-            args_list += [(args[0], limit)]
+            args_list += [(request.url, limit)]
         assert (
             args_list.count(('http://127.0.0.1:6385/baremetal/v1/volume/targets', paginated_limit))
             == expected_api_calls
@@ -1169,9 +1159,8 @@ def test_ironic_nodes_pagination(
         )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
 
         baremetal_url = (
             'http://127.0.0.1:6385/baremetal/v1/nodes/detail'
@@ -1220,7 +1209,7 @@ def test_pagination_invalid_no_exception(aggregator, openstack_controller_check,
     ('mock_http_get', 'connection_baremetal', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/baremetal/v1/conductors': MockResponse(status_code=500)}},
+            {'http_error': {'/baremetal/v1/conductors': FakeHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -1228,7 +1217,7 @@ def test_pagination_invalid_no_exception(aggregator, openstack_controller_check,
         ),
         pytest.param(
             None,
-            {'http_error': {'conductors': MockResponse(status_code=500)}},
+            {'http_error': {'conductors': FakeHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -1249,9 +1238,8 @@ def test_conductors_exception(aggregator, check, dd_run_check, mock_http_get, co
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:6385/baremetal/v1/conductors') == 2
     if api_type == ApiType.SDK:
         assert connection_baremetal.conductors.call_count == 2
@@ -1398,9 +1386,8 @@ def test_conductors_pagination(
         )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
 
         baremetal_url = 'http://127.0.0.1:6385/baremetal/v1/conductors'
         assert args_list.count(baremetal_url) == expected_api_call_count

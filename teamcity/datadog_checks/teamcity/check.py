@@ -7,6 +7,7 @@ from .teamcity_openmetrics import TeamCityOpenMetrics
 
 
 class TeamCityCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'teamcity'
 
     def __new__(cls, name, init_config, instances):

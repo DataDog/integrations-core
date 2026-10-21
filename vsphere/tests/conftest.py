@@ -23,14 +23,16 @@ from .common import (
     PERF_METRIC_ID,
     PROPERTIES_EX,
     REALTIME_INSTANCE,
+    TAG_ASSOCIATIONS,
+    TOPOLOGY_TAG_ASSOCIATIONS,
     VM_INVALID_GATEWAY_PROPERTIES_EX,
     VM_INVALID_PROPERTIES_EX,
     VM_PROPERTIES_EX,
     VSPHERE_VERSION,
-    MockHttpV6,
-    MockHttpV7,
+    VSphereRestMockState,
+    register_vsphere_rest_session,
 )
-from .mocked_api import MockedAPI, mock_http_rest_api_v6, mock_http_rest_api_v7
+from .mocked_api import MockedAPI
 
 try:
     from contextlib import ExitStack
@@ -244,34 +246,26 @@ def service_instance(
         yield mock_si
 
 
-@pytest.fixture
-def mock_http_api(monkeypatch):
-    if VSPHERE_VERSION.startswith('7.'):
-        http = MockHttpV7()
-    else:
-        http = MockHttpV6()
+def inject_rest_http_client(fake_http, mocker, tag_associations):
+    state = VSphereRestMockState(
+        exceptions={}, tag_associations=TAG_ASSOCIATIONS if tag_associations is None else tag_associations
+    )
 
-    def mock_get(*args, **kwargs):
-        return http.get(*args, **kwargs)
+    def create_rest_client(*_args, **_kwargs):
+        # Registering when the client is built lets a test configure exceptions on the state beforehand.
+        register_vsphere_rest_session(fake_http, state)
+        return fake_http.create_client()
 
-    def mock_post(*args, **kwargs):
-        import logging
-
-        logger = logging.getLogger(__name__)
-        logger.warning(args)
-
-        return http.post(*args, **kwargs)
-
-    monkeypatch.setattr('requests.Session.get', MagicMock(side_effect=mock_get))
-    monkeypatch.setattr('requests.Session.post', MagicMock(side_effect=mock_post))
-    yield http
+    # The REST client is built with the module-level factory rather than the check's, so it is patched directly.
+    mocker.patch('datadog_checks.vsphere.api_rest.create_http_client', side_effect=create_rest_client)
+    return state
 
 
 @pytest.fixture
-def mock_rest_api():
-    if VSPHERE_VERSION.startswith('7.'):
-        with patch('requests.Session.request', mock_http_rest_api_v7):
-            yield
-    else:
-        with patch('requests.Session.request', mock_http_rest_api_v6):
-            yield
+def mock_http_api(fake_http, mocker):
+    return inject_rest_http_client(fake_http, mocker, tag_associations=None)
+
+
+@pytest.fixture
+def mock_rest_api(fake_http, mocker):
+    return inject_rest_http_client(fake_http, mocker, tag_associations=TOPOLOGY_TAG_ASSOCIATIONS)

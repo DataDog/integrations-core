@@ -5,11 +5,11 @@ from __future__ import division
 
 import os
 
-import requests
 from dateutil import parser
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.common import round_value
+from datadog_checks.base.utils.http_exceptions import HTTPClientError, HTTPClientTimeoutError
 
 try:
     from tagger import get_tags
@@ -90,6 +90,7 @@ EPHEMERAL_STORAGE_GAUGE_METRICS = {
 
 
 class FargateCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     HTTP_CONFIG_REMAPPER = {'timeout': {'name': 'timeout', 'default': DEFAULT_TIMEOUT}}
 
     def __init__(self, name, init_config, instances):
@@ -116,14 +117,14 @@ class FargateCheck(AgentCheck):
 
         try:
             request = self.http.get(metadata_endpoint)
-        except requests.exceptions.Timeout:
+        except HTTPClientTimeoutError:
             msg = 'Fargate {} endpoint timed out after {} seconds'.format(
                 metadata_endpoint, self.http.options['timeout']
             )
             self.service_check('fargate_check', AgentCheck.CRITICAL, message=msg, tags=custom_tags)
             self.log.exception(msg)
             return
-        except requests.exceptions.RequestException:
+        except HTTPClientError:
             msg = 'Error fetching Fargate {} endpoint'.format(metadata_endpoint)
             self.service_check('fargate_check', AgentCheck.CRITICAL, message=msg, tags=custom_tags)
             self.log.exception(msg)
@@ -202,12 +203,12 @@ class FargateCheck(AgentCheck):
 
         try:
             request = self.http.get(stats_endpoint)
-        except requests.exceptions.Timeout:
+        except HTTPClientTimeoutError:
             msg = 'Fargate {} endpoint timed out after {} seconds'.format(stats_endpoint, self.http.options['timeout'])
             self.service_check('fargate_check', AgentCheck.WARNING, message=msg, tags=custom_tags)
             self.log.warning(msg, exc_info=True)
             return
-        except requests.exceptions.RequestException:
+        except HTTPClientError:
             msg = 'Error fetching Fargate {} endpoint'.format(stats_endpoint)
             self.service_check('fargate_check', AgentCheck.WARNING, message=msg, tags=custom_tags)
             self.log.warning(msg, exc_info=True)

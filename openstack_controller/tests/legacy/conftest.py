@@ -6,7 +6,6 @@ import os
 
 import pytest
 
-from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.dev.fs import get_here
@@ -60,9 +59,3 @@ def instance():
 @pytest.fixture
 def check(instance):
     return OpenStackControllerLegacyCheck(CHECK_NAME, {}, [instance])
-
-
-@pytest.fixture
-def requests_wrapper():
-    instance = {'timeout': 10, 'ssl_verify': False}
-    yield RequestsWrapper(instance, {})

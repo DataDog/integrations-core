@@ -13,6 +13,7 @@ from .types import Instance
 
 
 class VoltDBCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'voltdb'
 
     def __init__(self, name, init_config, instances):
@@ -27,6 +28,8 @@ class VoltDBCheck(AgentCheck):
         if self._config.password:
             self.register_secret(self._config.password)
         if self._config.mode == MODE_HTTP:
+            # VoltDB authenticates via query params, so suppress all HTTP-level auth including .netrc credentials.
+            self.http.disable_auth()
             self._client = HttpClient(
                 url=self._config.url,
                 http_get=self.http.get,

@@ -9,6 +9,7 @@ import mock
 import pytest
 
 import tests.legacy.common as common
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.openstack_controller.legacy.openstack_controller_legacy import OpenStackControllerLegacyCheck
 
 pytestmark = [
@@ -169,15 +170,6 @@ def make_request_responses(url, params=None, timeout=None):
         return json.loads(f.read())
 
 
-class MockHTTPResponse(object):
-    def __init__(self, response_dict, headers):
-        self.response_dict = response_dict
-        self.headers = headers
-
-    def json(self):
-        return self.response_dict
-
-
 @mock.patch(
     'datadog_checks.openstack_controller.legacy.api.SimpleApi._make_request', side_effect=make_request_responses
 )
@@ -189,8 +181,8 @@ def test_scenario(make_request, aggregator):
     auth_tokens_response_path = os.path.join(common.FIXTURES_DIR, "auth_tokens_response.json")
     with open(auth_tokens_response_path, 'r') as f:
         auth_tokens_response = json.loads(f.read())
-        auth_tokens_response = MockHTTPResponse(
-            response_dict=auth_tokens_response, headers={'X-Subject-Token': 'fake_token'}
+        auth_tokens_response = FakeHTTPResponse(
+            json_result=auth_tokens_response, headers={'X-Subject-Token': 'fake_token'}
         )
 
     auth_projects_response_path = os.path.join(common.FIXTURES_DIR, "auth_projects_response.json")
@@ -7155,8 +7147,8 @@ def test_auth_tokens(make_request, aggregator, auth_tokens_path):
     auth_tokens_response_path = os.path.join(common.FIXTURES_DIR, auth_tokens_path)
     with open(auth_tokens_response_path, 'r') as f:
         auth_tokens_response = json.loads(f.read())
-        auth_tokens_response = MockHTTPResponse(
-            response_dict=auth_tokens_response, headers={'X-Subject-Token': 'fake_token'}
+        auth_tokens_response = FakeHTTPResponse(
+            json_result=auth_tokens_response, headers={'X-Subject-Token': 'fake_token'}
         )
 
     auth_projects_response_path = os.path.join(common.FIXTURES_DIR, "auth_projects_response.json")

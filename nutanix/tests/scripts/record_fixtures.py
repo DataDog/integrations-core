@@ -2,6 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+# NOTE: Exclude this file from the requests -> agnostic HTTP client migration.
+# It is a standalone developer helper run by hand to record fixtures. It is not
+# shipped with the Agent and is not exercised in CI, so it may keep using the
+# requests library directly.
+
 """Script to record fixtures from a live Nutanix Prism Central instance.
 
 This script connects to the AWS_INSTANCE defined in conftest.py and records
@@ -221,7 +226,7 @@ def record_hosts(clusters: list[dict], save: bool = True) -> list[tuple[str, str
                     host_id = host.get("extId")
                     if host_id:
                         cluster_host_pairs.append((cluster_id, host_id))
-        except requests.exceptions.HTTPError as e:
+        except requests.exceptions.HTTPClientError as e:
             print(f"  ⚠ Failed to fetch hosts for this cluster: {e}")
             print("  (This is expected for Prism Central deployment clusters)")
 
@@ -265,7 +270,7 @@ def record_cluster_stats(clusters: list[dict]) -> None:
             # Use shortened cluster ID for filename
             short_cluster_id = cluster_id.split("-")[0]
             save_fixture(f"cluster_stats_{short_cluster_id}.json", data)
-        except requests.exceptions.HTTPError as e:
+        except requests.exceptions.HTTPClientError as e:
             print(f"  ⚠ Failed to fetch cluster stats: {e}")
 
 
@@ -303,7 +308,7 @@ def record_host_stats(cluster_host_pairs: list[tuple[str, str]]) -> None:
             short_cluster_id = cluster_id.split("-")[0]
             short_host_id = host_id.split("-")[0]
             save_fixture(f"host_stats_{short_cluster_id}_{short_host_id}.json", data)
-        except requests.exceptions.HTTPError as e:
+        except requests.exceptions.HTTPClientError as e:
             print(f"  ⚠ Failed to fetch host stats: {e}")
 
 
@@ -338,7 +343,7 @@ def record_vm_stats() -> None:
     try:
         pages = fetch_paginated_endpoint("api/vmm/v4.0/ahv/stats/vms", params=params)
         save_fixture("vms_stats.json", pages)
-    except requests.exceptions.HTTPError as e:
+    except requests.exceptions.HTTPClientError as e:
         print(f"  ⚠ Failed to fetch VM stats: {e}")
 
 
@@ -348,7 +353,7 @@ def record_disks() -> None:
     try:
         pages = fetch_paginated_endpoint("api/clustermgmt/v4.0/config/disks")
         save_fixture("disks.json", pages)
-    except requests.exceptions.HTTPError as e:
+    except requests.exceptions.HTTPClientError as e:
         print(f"  ⚠ Failed to fetch disks: {e}")
 
 
@@ -369,7 +374,7 @@ def record_events() -> None:
     try:
         pages = fetch_paginated_endpoint("api/monitoring/v4.0/serviceability/events", params=params)
         save_fixture("events.json", pages)
-    except requests.exceptions.HTTPError as e:
+    except requests.exceptions.HTTPClientError as e:
         print(f"  ⚠ Failed to fetch events: {e}")
 
 
@@ -390,7 +395,7 @@ def record_audits() -> None:
     try:
         pages = fetch_paginated_endpoint("api/monitoring/v4.0/serviceability/audits", params=params)
         save_fixture("audits.json", pages)
-    except requests.exceptions.HTTPError as e:
+    except requests.exceptions.HTTPClientError as e:
         print(f"  ⚠ Failed to fetch audits: {e}")
 
 
@@ -406,7 +411,7 @@ def record_alerts() -> None:
     try:
         pages = fetch_paginated_endpoint("api/monitoring/v4.0/serviceability/alerts", params=params)
         save_fixture("alerts.json", pages)
-    except requests.exceptions.HTTPError as e:
+    except requests.exceptions.HTTPClientError as e:
         print(f"  ⚠ alerts fetch failed: {e}")
 
 
@@ -427,7 +432,7 @@ def record_tasks() -> None:
     try:
         pages = fetch_paginated_endpoint("api/prism/v4.0/config/tasks", params=params)
         save_fixture("tasks.json", pages)
-    except requests.exceptions.HTTPError as e:
+    except requests.exceptions.HTTPClientError as e:
         print(f"  ⚠ Failed to fetch tasks: {e}")
 
 

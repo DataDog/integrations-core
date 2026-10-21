@@ -5,12 +5,15 @@
 import os
 
 from datadog_checks.dev import get_docker_hostname, get_here
+from datadog_checks.hdfs_datanode import HDFSDataNode
 
 HERE = get_here()
 HOST = get_docker_hostname()
 FIXTURE_DIR = os.path.join(HERE, 'fixtures')
 
 DATANODE_URI = 'http://{}:9870/'.format(HOST)
+DATANODE_INFO_URL = '{}jmx?qry={}'.format(DATANODE_URI, HDFSDataNode.HDFS_DATANODE_VERSION_NAME)
+DATANODE_BEANS_URL = '{}jmx?qry={}'.format(DATANODE_URI, HDFSDataNode.HDFS_DATANODE_BEAN_NAME)
 
 CUSTOM_TAGS = ['optional:tag1']
 

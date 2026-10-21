@@ -13,6 +13,7 @@ from .conftest import ADMIN_TENANT_METRICS_FOLDER, MULTIPLE_TENANTS_METRICS_FOLD
 
 @pytest.mark.unit
 def test_check(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
+    mock_client()
     check = AviVantageCheck('avi_vantage', {}, [unit_instance])
     dd_run_check(check)
     aggregator.assert_service_check("avi_vantage.can_connect", AviVantageCheck.OK)
@@ -24,6 +25,7 @@ def test_check(mock_client, get_expected_metrics, aggregator, unit_instance, dd_
 
 @pytest.mark.unit
 def test_check_with_default_tenants(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
+    mock_client()
     check = AviVantageCheck('avi_vantage', {}, [unit_instance])
     dd_run_check(check)
     aggregator.assert_service_check("avi_vantage.can_connect", AviVantageCheck.OK)
@@ -35,6 +37,7 @@ def test_check_with_default_tenants(mock_client, get_expected_metrics, aggregato
 
 @pytest.mark.unit
 def test_check_with_empty_tenant_name(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
+    mock_client()
     instance = deepcopy(unit_instance)
     instance["tenants"] = [""]
     check = AviVantageCheck('avi_vantage', {}, [instance])
@@ -48,6 +51,7 @@ def test_check_with_empty_tenant_name(mock_client, get_expected_metrics, aggrega
 
 @pytest.mark.unit
 def test_check_with_tenant_admin(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
+    mock_client(ADMIN_TENANT_METRICS_FOLDER, 'tenant=admin')
     instance = deepcopy(unit_instance)
     instance["tenants"] = ["admin"]
     check = AviVantageCheck('avi_vantage', {}, [instance])
@@ -61,6 +65,7 @@ def test_check_with_tenant_admin(mock_client, get_expected_metrics, aggregator, 
 
 @pytest.mark.unit
 def test_check_with_multiple_tenant(mock_client, get_expected_metrics, aggregator, unit_instance, dd_run_check):
+    mock_client(MULTIPLE_TENANTS_METRICS_FOLDER, 'tenant=admin%2Ctenant_a%2Ctenant_b')
     instance = deepcopy(unit_instance)
     instance["tenants"] = ["admin", "tenant_a", "tenant_b"]
     check = AviVantageCheck('avi_vantage', {}, [instance])
@@ -104,3 +109,30 @@ def test_e2e(dd_agent_check, integration_instance, get_expected_metrics):
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'instance_overrides',
+    [
+        pytest.param({}, id='default'),
+        pytest.param({'use_latest_spec': True}, id='use_latest_spec'),
+    ],
+)
+def test_scrape_asks_the_controller_for_any_representation(
+    unit_instance, instance_overrides, fake_http, fake_http_response
+):
+    """The controller is queried with the client's own Accept header.
+
+    The scraper runs against the check's authenticated client, so an exposition format negotiated
+    here would decide which representation the controller returns for every metric endpoint.
+    """
+    check = AviVantageCheck('avi_vantage', {}, [{**unit_instance, **instance_overrides}])
+    check.load_configuration_models()
+    check.configure_scrapers()
+    scraper = next(iter(check.scrapers.values()))
+    fake_http_response(scraper.endpoint)
+
+    scraper.send_request()
+
+    assert fake_http.requests[-1].options['extra_headers']['Accept'] == '*/*'

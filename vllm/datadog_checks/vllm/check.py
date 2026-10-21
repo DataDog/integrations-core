@@ -5,14 +5,15 @@ try:
     import datadog_agent
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
-from requests.exceptions import RequestException
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2, is_affirmative
+from datadog_checks.base.utils.http_exceptions import HTTPClientError
 
 from .metrics import GPU_METRIC_MAP, METRIC_MAP, RAY_GPU_METRIC_MAP, RAY_METRIC_MAP, RENAME_LABELS_MAP
 
 
 class vLLMCheck(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'vllm'
@@ -34,7 +35,7 @@ class vLLMCheck(OpenMetricsBaseCheckV2):
             response = self.http.get(endpoint)
             response.raise_for_status()
             data = response.json()
-        except (RequestException, ValueError) as e:
+        except (HTTPClientError, ValueError) as e:
             self.log.debug("Could not retrieve vLLM version metadata: %s", e)
             return
 

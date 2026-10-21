@@ -8,6 +8,7 @@ from datadog_checks.temporal.metrics import METRIC_MAP
 
 
 class TemporalCheck(OpenMetricsBaseCheckV2, ConfigMixin):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'temporal.server'
     DEFAULT_METRIC_LIMIT = 0
 

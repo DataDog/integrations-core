@@ -15,7 +15,7 @@ from packaging.version import Version
 import tests.configs as configs
 import tests.metrics as metrics
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 
@@ -422,15 +422,13 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     args_list = []
-    for call in mock_http_post.call_args_list:
-        args, kwargs = call
-        args_list += list(args)
+    for request in mock_http_post.recorded('POST'):
+        args_list += [request.url]
     assert args_list.count('http://127.0.0.1:8774/compute/v2.1') == 0
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_post.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_post.recorded('POST'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
     if api_type == ApiType.SDK:
         assert openstack_connection.call_count == 4
@@ -441,12 +439,12 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
     ('mock_http_get', 'instance'),
     [
         pytest.param(
-            {'http_error': {'/compute/v2.1': MockResponse(status_code=500)}},
+            {'http_error': {'/compute/v2.1': FakeHTTPResponse(status_code=500)}},
             configs.REST,
             id='api rest',
         ),
         pytest.param(
-            {'http_error': {'/compute/v2.1': MockResponse(status_code=500)}},
+            {'http_error': {'/compute/v2.1': FakeHTTPResponse(status_code=500)}},
             configs.SDK,
             id='api sdk',
         ),
@@ -466,9 +464,8 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     args_list = []
-    for call in mock_http_get.call_args_list:
-        args, _ = call
-        args_list += list(args)
+    for request in mock_http_get.recorded('GET'):
+        args_list += [request.url]
     assert args_list.count('http://127.0.0.1:8774/compute/v2.1') == 3
 
 
@@ -512,9 +509,8 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     args_list = []
-    for call in mock_http_get.call_args_list:
-        args, _ = call
-        args_list += list(args)
+    for request in mock_http_get.recorded('GET'):
+        args_list += [request.url]
     assert args_list.count('http://127.0.0.1:8774/compute/v2.1') == 1
 
 
@@ -524,7 +520,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
         pytest.param(
             {
                 'http_error': {
-                    '/compute/v2.1/limits': MockResponse(status_code=500),
+                    '/compute/v2.1/limits': FakeHTTPResponse(status_code=500),
                 }
             },
             None,
@@ -537,8 +533,8 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
             {
                 'http_error': {
                     'limits': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                        '1e6e233e637d4d55a50a62b63398ad15': FakeHTTPResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': FakeHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -570,10 +566,9 @@ def test_limits_exception(aggregator, check, dd_run_check, mock_http_get, connec
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            tenant_id = kwargs.get('params', {}).get('tenant_id')
-            args_list += [(list(args), tenant_id)]
+        for request in mock_http_get.recorded('GET'):
+            tenant_id = request.options.get('params', {}).get('tenant_id')
+            args_list += [([request.url], tenant_id)]
 
         assert args_list.count((['http://127.0.0.1:8774/compute/v2.1/limits'], '1e6e233e637d4d55a50a62b63398ad15')) == 1
         assert args_list.count((['http://127.0.0.1:8774/compute/v2.1/limits'], '6e39099cccde4f809b003d9e0dd09304')) == 1
@@ -842,7 +837,7 @@ def test_limits_metrics(aggregator, check, dd_run_check):
     ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/compute/v2.1/os-services': MockResponse(status_code=500)}},
+            {'http_error': {'/compute/v2.1/os-services': FakeHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -850,7 +845,7 @@ def test_limits_metrics(aggregator, check, dd_run_check):
         ),
         pytest.param(
             None,
-            {'http_error': {'services': MockResponse(status_code=500)}},
+            {'http_error': {'services': FakeHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -867,9 +862,8 @@ def test_services_exception(aggregator, check, dd_run_check, mock_http_get, conn
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8774/compute/v2.1/os-services') == 3
     if api_type == ApiType.SDK:
         assert connection_compute.services.call_count == 3
@@ -916,7 +910,7 @@ def test_services_metrics(aggregator, check, dd_run_check, metrics):
     ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/compute/v2.1/flavors/detail': MockResponse(status_code=500)}},
+            {'http_error': {'/compute/v2.1/flavors/detail': FakeHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -924,7 +918,7 @@ def test_services_metrics(aggregator, check, dd_run_check, metrics):
         ),
         pytest.param(
             None,
-            {'http_error': {'flavors': MockResponse(status_code=500)}},
+            {'http_error': {'flavors': FakeHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -941,9 +935,8 @@ def test_flavors_exception(aggregator, check, dd_run_check, mock_http_get, conne
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8774/compute/v2.1/flavors/detail') == 3
     if api_type == ApiType.SDK:
         assert connection_compute.flavors.call_count == 3
@@ -1195,7 +1188,7 @@ def test_flavors_metrics(aggregator, check, dd_run_check):
     ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/compute/v2.1/os-hypervisors/detail': MockResponse(status_code=500)}},
+            {'http_error': {'/compute/v2.1/os-hypervisors/detail': FakeHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -1203,7 +1196,7 @@ def test_flavors_metrics(aggregator, check, dd_run_check):
         ),
         pytest.param(
             None,
-            {'http_error': {'hypervisors': MockResponse(status_code=500)}},
+            {'http_error': {'hypervisors': FakeHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -1220,9 +1213,8 @@ def test_hypervisors_exception(aggregator, check, dd_run_check, mock_http_get, c
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8774/compute/v2.1/os-hypervisors/detail') == 3
     if api_type == ApiType.SDK:
         assert connection_compute.hypervisors.call_count == 3
@@ -1232,7 +1224,7 @@ def test_hypervisors_exception(aggregator, check, dd_run_check, mock_http_get, c
     ('mock_http_get', 'connection_compute', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/compute/v2.1/os-hypervisors/1/uptime': MockResponse(status_code=500)}},
+            {'http_error': {'/compute/v2.1/os-hypervisors/1/uptime': FakeHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -1240,7 +1232,7 @@ def test_hypervisors_exception(aggregator, check, dd_run_check, mock_http_get, c
         ),
         pytest.param(
             None,
-            {'http_error': {'hypervisor_uptime': {1: MockResponse(status_code=500)}}},
+            {'http_error': {'hypervisor_uptime': {1: FakeHTTPResponse(status_code=500)}}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -1278,9 +1270,8 @@ def test_hypervisor_uptime_exception(aggregator, check, dd_run_check, mock_http_
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8774/compute/v2.1/os-hypervisors/1/uptime') == 1
     if api_type == ApiType.SDK:
         assert connection_compute.get_hypervisor_uptime.call_count == 1
@@ -1566,8 +1557,8 @@ def test_disable_diagnostics_collect_for_all_servers(aggregator, dd_run_check, i
         pytest.param(
             {
                 'http_error': {
-                    '/compute/v2.1/os-quota-sets/1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                    '/compute/v2.1/os-quota-sets/6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                    '/compute/v2.1/os-quota-sets/1e6e233e637d4d55a50a62b63398ad15': FakeHTTPResponse(status_code=500),
+                    '/compute/v2.1/os-quota-sets/6e39099cccde4f809b003d9e0dd09304': FakeHTTPResponse(status_code=500),
                 }
             },
             None,
@@ -1580,8 +1571,8 @@ def test_disable_diagnostics_collect_for_all_servers(aggregator, dd_run_check, i
             {
                 'http_error': {
                     'quota_sets': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                        '1e6e233e637d4d55a50a62b63398ad15': FakeHTTPResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': FakeHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -1601,9 +1592,8 @@ def test_quota_sets_exception(aggregator, check, dd_run_check, mock_http_get, co
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8774/compute/v2.1/os-quota-sets/1e6e233e637d4d55a50a62b63398ad15') == 1
         assert args_list.count('http://127.0.0.1:8774/compute/v2.1/os-quota-sets/6e39099cccde4f809b003d9e0dd09304') == 1
     if api_type == ApiType.SDK:
@@ -1692,7 +1682,7 @@ def test_quota_sets_metrics_excluding_demo_project(aggregator, check, dd_run_che
         pytest.param(
             {
                 'http_error': {
-                    '/compute/v2.1/servers/detail': MockResponse(status_code=500),
+                    '/compute/v2.1/servers/detail': FakeHTTPResponse(status_code=500),
                 }
             },
             None,
@@ -1705,8 +1695,8 @@ def test_quota_sets_metrics_excluding_demo_project(aggregator, check, dd_run_che
             {
                 'http_error': {
                     'servers': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                        '1e6e233e637d4d55a50a62b63398ad15': FakeHTTPResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': FakeHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -1726,10 +1716,9 @@ def test_servers_exception(aggregator, check, dd_run_check, mock_http_get, conne
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            project_id = kwargs.get('params', {}).get('project_id')
-            args_list += [(list(args), project_id)]
+        for request in mock_http_get.recorded('GET'):
+            project_id = request.options.get('params', {}).get('project_id')
+            args_list += [([request.url], project_id)]
         assert (
             args_list.count((['http://127.0.0.1:8774/compute/v2.1/servers/detail'], '1e6e233e637d4d55a50a62b63398ad15'))
             == 1
@@ -1802,10 +1791,9 @@ def test_servers_disable_call(aggregator, check, dd_run_check, mock_http_get, co
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            project_id = kwargs.get('params', {}).get('project_id')
-            args_list += [(list(args), project_id)]
+        for request in mock_http_get.recorded('GET'):
+            project_id = request.options.get('params', {}).get('project_id')
+            args_list += [([request.url], project_id)]
 
         assert (
             args_list.count((['http://127.0.0.1:8774/compute/v2.1/servers/detail'], '1e6e233e637d4d55a50a62b63398ad15'))
@@ -1984,12 +1972,11 @@ def test_servers_pagination(
 
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            params = kwargs.get('params', {})
+        for request in mock_http_get.recorded('GET'):
+            params = request.options.get('params', {})
             project_id = params.get('project_id')
             limit = params.get('limit')
-            args_list += [(args[0], project_id, limit)]
+            args_list += [(request.url, project_id, limit)]
         servers_url = 'http://127.0.0.1:8774/compute/v2.1/servers/detail'
         assert (
             args_list.count((servers_url, '1e6e233e637d4d55a50a62b63398ad15', paginated_limit))
@@ -2143,7 +2130,7 @@ def test_servers_metrics_excluding_dev_servers(aggregator, check, dd_run_check, 
         pytest.param(
             {
                 'http_error': {
-                    '/compute/v2.1/flavors/c1': MockResponse(status_code=500),
+                    '/compute/v2.1/flavors/c1': FakeHTTPResponse(status_code=500),
                 }
             },
             None,
@@ -2156,7 +2143,7 @@ def test_servers_metrics_excluding_dev_servers(aggregator, check, dd_run_check, 
         pytest.param(
             {
                 'http_error': {
-                    '/compute/v2.1/flavors/c1': MockResponse(status_code=500),
+                    '/compute/v2.1/flavors/c1': FakeHTTPResponse(status_code=500),
                 }
             },
             None,
@@ -2171,7 +2158,7 @@ def test_servers_metrics_excluding_dev_servers(aggregator, check, dd_run_check, 
             {
                 'http_error': {
                     'flavors': {
-                        'c1': MockResponse(status_code=500),
+                        'c1': FakeHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -2186,7 +2173,7 @@ def test_servers_metrics_excluding_dev_servers(aggregator, check, dd_run_check, 
             {
                 'http_error': {
                     'flavors': {
-                        'c1': MockResponse(status_code=500),
+                        'c1': FakeHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -2214,9 +2201,8 @@ def test_server_flavors_exception(
         )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert (
             args_list.count(
                 'http://127.0.0.1:8774/compute/v2.1/servers/5102fbbf-7156-48dc-8355-af7ab992266f/diagnostics'
@@ -2293,9 +2279,8 @@ def test_server_disable_flavors(
         )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8774/compute/v2.1/flavors/c1') == get_flavor_calls
     if api_type == ApiType.SDK:
         assert connection_compute.get_flavor.call_args_list.count(mock.call('c1')) == get_flavor_calls
@@ -2307,7 +2292,7 @@ def test_server_disable_flavors(
         pytest.param(
             {
                 'http_error': {
-                    '/compute/v2.1/servers/5102fbbf-7156-48dc-8355-af7ab992266f/diagnostics': MockResponse(
+                    '/compute/v2.1/servers/5102fbbf-7156-48dc-8355-af7ab992266f/diagnostics': FakeHTTPResponse(
                         status_code=500
                     ),
                 }
@@ -2322,7 +2307,7 @@ def test_server_disable_flavors(
         pytest.param(
             {
                 'http_error': {
-                    '/compute/v2.1/servers/5102fbbf-7156-48dc-8355-af7ab992266f/diagnostics': MockResponse(
+                    '/compute/v2.1/servers/5102fbbf-7156-48dc-8355-af7ab992266f/diagnostics': FakeHTTPResponse(
                         status_code=500
                     ),
                 }
@@ -2339,7 +2324,7 @@ def test_server_disable_flavors(
             {
                 'http_error': {
                     'server_diagnostics': {
-                        '5102fbbf-7156-48dc-8355-af7ab992266f': MockResponse(status_code=500),
+                        '5102fbbf-7156-48dc-8355-af7ab992266f': FakeHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -2354,7 +2339,7 @@ def test_server_disable_flavors(
             {
                 'http_error': {
                     'server_diagnostics': {
-                        '5102fbbf-7156-48dc-8355-af7ab992266f': MockResponse(status_code=500),
+                        '5102fbbf-7156-48dc-8355-af7ab992266f': FakeHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -2382,9 +2367,8 @@ def test_server_diagnostics_exception(
         )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert (
             args_list.count(
                 'http://127.0.0.1:8774/compute/v2.1/servers/5102fbbf-7156-48dc-8355-af7ab992266f/diagnostics'
@@ -2449,9 +2433,8 @@ def test_server_disable_diagnostics(
         )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert (
             args_list.count(
                 'http://127.0.0.1:8774/compute/v2.1/servers/67ca710a-e73f-4801-a12f-d0c55ccb8955/diagnostics'

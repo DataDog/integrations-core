@@ -41,6 +41,7 @@ from .resource_filters import ResourceFilter, parse_resource_filters, should_col
 
 
 class DellPowerflexCheck(AgentCheck, ConfigMixin):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'dell_powerflex'
 
     def __init__(self, name: str, init_config: dict, instances: list) -> None:

@@ -6,8 +6,6 @@ from __future__ import division
 from itertools import chain
 from time import time as timestamp
 
-from requests import ConnectionError
-
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.containers import iter_unique
 from datadog_checks.base.utils.platform import Platform
@@ -27,6 +25,7 @@ from .utils import get_version, scrub_connection_string, status_to_service_check
 
 
 class IbmDb2Check(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     METRIC_PREFIX = 'ibm_db2'
     SERVICE_CHECK_CONNECT = '{}.can_connect'.format(METRIC_PREFIX)
     SERVICE_CHECK_STATUS = '{}.status'.format(METRIC_PREFIX)

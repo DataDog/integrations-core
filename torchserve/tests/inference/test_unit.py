@@ -6,14 +6,13 @@ import pytest
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from ..common import get_fixture_path
-from ..conftest import mock_http_responses
+from ..conftest import read_fixture
 
 pytestmark = pytest.mark.unit
 
 
-def test_check(dd_run_check, aggregator, check, mocked_inference_instance, mocker):
-    mocker.patch('requests.Session.get', wraps=mock_http_responses())
+def test_check(dd_run_check, aggregator, check, mocked_inference_instance, fake_http_response):
+    fake_http_response('http://torchserve:8080/ping', read_fixture('inference/healthy.json'))
     dd_run_check(check(mocked_inference_instance))
 
     aggregator.assert_service_check(
@@ -26,8 +25,8 @@ def test_check(dd_run_check, aggregator, check, mocked_inference_instance, mocke
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_check_unhealthy(dd_run_check, aggregator, check, mocked_inference_instance, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('inference/unhealthy.json'), status_code=500)
+def test_check_unhealthy(dd_run_check, aggregator, check, mocked_inference_instance, fake_http_response):
+    fake_http_response('http://torchserve:8080/ping', read_fixture('inference/unhealthy.json'), status_code=500)
 
     with pytest.raises(Exception, match="500 Server Error"):
         dd_run_check(check(mocked_inference_instance))

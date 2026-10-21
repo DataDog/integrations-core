@@ -8,6 +8,7 @@ from .metrics import METRIC_MAP, TYPE_OVERRIDES, construct_metrics_config
 
 
 class LinkerdCheckV2(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'linkerd'
 
     DEFAULT_METRIC_LIMIT = 0

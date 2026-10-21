@@ -6,9 +6,8 @@ from urllib.parse import urlparse
 
 import mock
 import pytest
-import requests
 
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.vault import Vault
 from datadog_checks.vault.common import DEFAULT_API_VERSION
 from datadog_checks.vault.errors import ApiUnreachable
@@ -19,6 +18,11 @@ from .metrics import MERKLE_WAL_METRICS, MERKLE_WAL_QUANTILES
 from .utils import assert_all_metrics, get_fixture_path
 
 pytestmark = pytest.mark.usefixtures('dd_environment')
+
+
+def register_metrics_fixture(fake_http_response, check, fixture_name):
+    with open(get_fixture_path(fixture_name), 'rb') as f:
+        fake_http_response(check._scraper_config['prometheus_url'], f.read())
 
 
 class TestVault:
@@ -72,33 +76,7 @@ class TestVault:
         instance = {'use_openmetrics': use_openmetrics}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
-
-        # Keep a reference for use during mock
-        requests_get = requests.get
-
-        def mock_requests_get(session, url, *args, **kwargs):
-            if url == instance['api_url'] + '/sys/leader':
-                return MockResponse(
-                    json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
-                )
-            elif url == instance['api_url'] + '/sys/health':
-                return MockResponse(
-                    json_data={
-                        'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
-                        'cluster_name': 'vault-cluster-f5f44063',
-                        'initialized': True,
-                        'replication_dr_mode': 'disabled',
-                        'replication_performance_mode': 'disabled',
-                        'sealed': False,
-                        'server_time_utc': 1529357080,
-                        'standby': False,
-                        'version': '0.10.2',
-                    }
-                )
-            return requests_get(url, *args, **kwargs)
-
-        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
-            dd_run_check(c)
+        dd_run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, tags=global_tags, count=1)
 
@@ -130,16 +108,16 @@ class TestVault:
             count=1,
         )
 
-    def test_service_check_500_fail(self, aggregator, dd_run_check, global_tags):
+    def test_service_check_500_fail(self, aggregator, dd_run_check, global_tags, fake_http):
         instance = {'use_openmetrics': False}
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        with mock.patch('requests.Session.get', return_value=MockResponse(status_code=500)):
-            with pytest.raises(
-                Exception, match=r'^The Vault endpoint `{}.+?` returned 500$'.format(re.escape(instance['api_url']))
-            ):
-                dd_run_check(c, extract_message=True)
+        fake_http.register_response('GET', instance['api_url'] + '/sys/leader', FakeHTTPResponse(status_code=500))
+        with pytest.raises(
+            Exception, match=r'^The Vault endpoint `{}.+?` returned 500$'.format(re.escape(instance['api_url']))
+        ):
+            dd_run_check(c, extract_message=True)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.CRITICAL, tags=global_tags, count=1)
 
@@ -166,17 +144,22 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(session, url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockResponse(
-                    json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
+                return FakeHTTPResponse(
+                    json_result={
+                        'ha_enabled': False,
+                        'is_self': True,
+                        'leader_address': '',
+                        'leader_cluster_address': '',
+                    }
                 )
             elif url == instance['api_url'] + '/sys/health':
-                return MockResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
                         'initialized': True,
@@ -188,9 +171,9 @@ class TestVault:
                         'version': '0.10.2',
                     }
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
             dd_run_check(c)
 
         expected_tags = [
@@ -209,13 +192,13 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(session, url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
-                return MockResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
                         'initialized': False,
@@ -228,9 +211,9 @@ class TestVault:
                     },
                     status_code=503,
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
             dd_run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_UNSEALED, status=Vault.CRITICAL, count=1)
@@ -250,17 +233,22 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(session, url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockResponse(
-                    json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
+                return FakeHTTPResponse(
+                    json_result={
+                        'ha_enabled': False,
+                        'is_self': True,
+                        'leader_address': '',
+                        'leader_cluster_address': '',
+                    }
                 )
             elif url == instance['api_url'] + '/sys/health':
-                return MockResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
                         'initialized': True,
@@ -272,9 +260,9 @@ class TestVault:
                         'version': '0.10.2',
                     }
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
             dd_run_check(c)
 
         expected_tags = [
@@ -293,13 +281,13 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(session, url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
-                return MockResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
                         'initialized': False,
@@ -312,9 +300,9 @@ class TestVault:
                     },
                     status_code=501,
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
             dd_run_check(c)
 
         aggregator.assert_service_check(Vault.SERVICE_CHECK_INITIALIZED, status=Vault.CRITICAL, count=1)
@@ -324,17 +312,22 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(session, url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockResponse(
-                    json_data={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
+                return FakeHTTPResponse(
+                    json_result={
+                        'ha_enabled': False,
+                        'is_self': True,
+                        'leader_address': '',
+                        'leader_cluster_address': '',
+                    }
                 )
             elif url == instance['api_url'] + '/sys/health':
-                return MockResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
                         'initialized': True,
@@ -346,9 +339,9 @@ class TestVault:
                         'version': '0.10.2',
                     }
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
             dd_run_check(c)
 
         expected_tags = [
@@ -365,13 +358,13 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         c.log.debug = mock.MagicMock()
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(session, url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
-                return MockResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
                         'initialized': False,
@@ -385,9 +378,9 @@ class TestVault:
                     },
                     status_code=200,
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
             dd_run_check(c)
             c.log.debug.assert_called_with(
                 "Detected vault in replication DR secondary mode, skipping Prometheus metric collection."
@@ -402,13 +395,13 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         c.log.debug = mock.MagicMock()
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(session, url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
-                return MockResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
                         'initialized': False,
@@ -422,11 +415,11 @@ class TestVault:
                     },
                     status_code=200,
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
         metric_collection = 'OpenMetrics' if use_openmetrics else 'Prometheus'
 
-        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
             dd_run_check(c)
             c.log.debug.assert_called_with(
                 "Detected vault in replication DR secondary mode but also detected that "
@@ -442,19 +435,19 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         c.log.debug = mock.MagicMock()
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(session, url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
-                if getattr(mock_requests_get, 'first_health_call', True):
-                    mock_requests_get.first_health_call = False
+                if getattr(mock_get, 'first_health_call', True):
+                    mock_get.first_health_call = False
                     replication_dr_mode = 'primary'
                 else:
                     replication_dr_mode = 'secondary'
 
-                return MockResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
                         'initialized': False,
@@ -468,9 +461,9 @@ class TestVault:
                     },
                     status_code=200,
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
             dd_run_check(c)
             assert not c._skip_dr_metric_collection
             aggregator.assert_service_check(Vault.SERVICE_CHECK_CONNECT, status=Vault.OK, count=1)
@@ -501,22 +494,22 @@ class TestVault:
             c._previous_leader = Leader('foo', '')
             next_leader = Leader('bar', '')
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(session, url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'ha_enabled': False,
                         'is_self': True,
                         'leader_address': next_leader.leader_addr,
                         'leader_cluster_address': next_leader.leader_cluster_addr,
                     }
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
             dd_run_check(c)
 
         assert len(aggregator.events) > 0
@@ -542,22 +535,22 @@ class TestVault:
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         c._previous_leader = Leader('foo', '')
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(session, url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'ha_enabled': False,
                         'is_self': False,
                         'leader_address': 'bar',
                         'leader_cluster_address': '',
                     }
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
             dd_run_check(c)
 
         assert len(aggregator.events) == 0
@@ -568,22 +561,22 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(session, url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'ha_enabled': False,
                         'is_self': True,
                         'leader_address': 'bar',
                         'leader_cluster_address': '',
                     }
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
             dd_run_check(c)
 
         aggregator.assert_metric('vault.is_leader', 1)
@@ -594,22 +587,22 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(session, url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'ha_enabled': False,
                         'is_self': False,
                         'leader_address': 'bar',
                         'leader_cluster_address': '',
                     }
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
             dd_run_check(c)
 
         aggregator.assert_metric('vault.is_leader', 0)
@@ -621,13 +614,13 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(session, url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/health':
-                return MockResponse(
-                    json_data={
+                return FakeHTTPResponse(
+                    json_result={
                         'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
                         'cluster_name': 'vault-cluster-f5f44063',
                         'initialized': False,
@@ -641,9 +634,9 @@ class TestVault:
                     },
                     status_code=status_code,
                 )
-            return requests_get(url, *args, **kwargs)
+            return real_get(url, *args, **kwargs)
 
-        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
             dd_run_check(c)
 
         aggregator.assert_metric('vault.is_leader', 1)
@@ -655,15 +648,15 @@ class TestVault:
         instance.update(INSTANCES['main'])
         c = Vault(Vault.CHECK_NAME, {}, [instance])
 
-        # Keep a reference for use during mock
-        requests_get = requests.get
+        # Keep a reference to the real client so unmocked endpoints hit the container
+        real_get = c.http.get
 
-        def mock_requests_get(session, url, *args, **kwargs):
+        def mock_get(url, *args, **kwargs):
             if url == instance['api_url'] + '/sys/leader':
-                return MockResponse(json_data={'errors': ["Vault is sealed"]}, status_code=503)
-            return requests_get(url, *args, **kwargs)
+                return FakeHTTPResponse(json_result={'errors': ["Vault is sealed"]}, status_code=503)
+            return real_get(url, *args, **kwargs)
 
-        with mock.patch('requests.Session.get', side_effect=mock_requests_get, autospec=True):
+        with mock.patch.object(type(c.http), 'get', side_effect=mock_get):
             dd_run_check(c)
 
         aggregator.assert_metric('vault.is_leader', count=0)
@@ -748,13 +741,14 @@ class TestVault:
         if use_openmetrics:
             aggregator.assert_service_check('vault.openmetrics.health', status=c.CRITICAL, count=0)
 
-    def test_route_transform(self, aggregator, no_token_instance, global_tags, mock_http_response):
-        no_token_instance['use_openmetrics'] = False
-        c = Vault(Vault.CHECK_NAME, {}, [no_token_instance])
+    def test_route_transform(self, aggregator, no_token_instance, global_tags, fake_http_response):
+        instance = no_token_instance.copy()
+        instance['use_openmetrics'] = False
+        c = Vault(Vault.CHECK_NAME, {}, [instance])
 
         c.parse_config()
 
-        mock_http_response(file_path=get_fixture_path('route_transform_metrics.txt'))
+        register_metrics_fixture(fake_http_response, c, 'route_transform_metrics.txt')
 
         c.process(c._scraper_config, c._metric_transformers)
 
@@ -781,11 +775,12 @@ class TestVault:
         aggregator.assert_all_metrics_covered()
         aggregator.assert_no_duplicate_metrics()
 
-    def test_wal_merkle_metrics(self, aggregator, instance, dd_run_check, global_tags, mock_http_response):
-        instance = instance()
+    def test_wal_merkle_metrics(self, aggregator, no_token_instance, global_tags, fake_http_response):
+        instance = no_token_instance.copy()
+        instance['use_openmetrics'] = False
         c = Vault(Vault.CHECK_NAME, {}, [instance])
         c.parse_config()
-        mock_http_response(file_path=get_fixture_path('merkle_wal_metrics.txt'))
+        register_metrics_fixture(fake_http_response, c, 'merkle_wal_metrics.txt')
 
         c.process(c._scraper_config, c._metric_transformers)
 
@@ -804,16 +799,39 @@ class TestVault:
 def test_x_vault_request_header_is_set(instance, dd_run_check, use_openmetrics):
     instance = instance()
     instance['use_openmetrics'] = use_openmetrics
+    c = Vault(Vault.CHECK_NAME, {}, [instance])
+    requested = []
 
-    def mock_requests_get(url, *args, **kwargs):
-        return requests.get(url, *args, **kwargs)
+    # Return canned responses so the assertion targets the header, not the live metrics endpoint.
+    def mock_get(http, url, *args, **kwargs):
+        # Read the header off the client that made this call. The API calls and the metrics scrape run
+        # on separate clients, each with its own header mapping, so an assertion pinned to one of them
+        # leaves the other free to omit the header. get_header reads the value that reaches the wire.
+        assert http.get_header('X-Vault-Request') == 'true'
+        requested.append(url)
+        if url.endswith('/sys/leader'):
+            return FakeHTTPResponse(
+                json_result={'ha_enabled': False, 'is_self': True, 'leader_address': '', 'leader_cluster_address': ''}
+            )
+        if url.endswith('/sys/health'):
+            return FakeHTTPResponse(
+                json_result={
+                    'cluster_id': '9e25ccdb-09ea-8bd8-0521-34cf3ef7a4cc',
+                    'cluster_name': 'vault-cluster-f5f44063',
+                    'initialized': True,
+                    'replication_dr_mode': 'disabled',
+                    'replication_performance_mode': 'disabled',
+                    'sealed': False,
+                    'server_time_utc': 1529357080,
+                    'standby': False,
+                    'version': '0.10.2',
+                }
+            )
+        return FakeHTTPResponse()
 
-    with mock.patch('datadog_checks.base.utils.http.requests.Session.get', side_effect=mock_requests_get) as mock_get:
-        c = Vault(Vault.CHECK_NAME, {}, [instance])
+    with mock.patch.object(type(c.http), 'get', autospec=True, side_effect=mock_get) as mock_get_call:
         dd_run_check(c)
 
-        assert mock_get.call_count > 0
-        for call in mock_get.call_args_list:
-            headers = dict(call.kwargs['headers'])
-            assert 'X-Vault-Request' in headers
-            assert headers['X-Vault-Request'] == 'true'
+    assert mock_get_call.call_count > 0
+    # Without the scrape among the calls the header would only ever be read off the API client.
+    assert any(url.endswith('/sys/metrics?format=prometheus') for url in requested)

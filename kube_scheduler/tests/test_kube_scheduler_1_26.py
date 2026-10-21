@@ -2,32 +2,23 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
-
 import mock
 import pytest
 
 from datadog_checks.base.checks.kube_leader import ElectionRecordAnnotation
 from datadog_checks.kube_scheduler import KubeSchedulerCheck
 
-from .common import HERE
+from .common import register_metrics
 
 # Constants
 CHECK_NAME = 'kube_scheduler'
 
 
 @pytest.fixture()
-def mock_metrics():
-    f_name = os.path.join(HERE, 'fixtures', 'metrics_1.26.0.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    ):
-        yield
+def mock_metrics(fake_http, fake_http_response):
+    register_metrics(fake_http_response, 'metrics_1.26.0.txt')
+    yield
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.fixture()

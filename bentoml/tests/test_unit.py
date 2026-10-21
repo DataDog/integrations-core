@@ -1,11 +1,12 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from pathlib import Path
+
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.bentoml import BentomlCheck
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from .common import (
@@ -15,9 +16,14 @@ from .common import (
     get_fixture_path,
 )
 
+METRICS_URL = 'http://bentoml:3000/metrics'
+HEALTH_URLS = ['http://bentoml:3000//livez', 'http://bentoml:3000//readyz']
 
-def test_bentoml_mock_metrics(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+
+def test_bentoml_mock_metrics(dd_run_check, aggregator, fake_http_response):
+    fake_http_response(METRICS_URL, Path(get_fixture_path('metrics.txt')).read_bytes())
+    for url in HEALTH_URLS:
+        fake_http_response(url)
 
     check = BentomlCheck('bentoml', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)
@@ -34,8 +40,8 @@ def test_bentoml_mock_metrics(dd_run_check, aggregator, mock_http_response):
     aggregator.assert_service_check('bentoml.openmetrics.health', ServiceCheck.OK)
 
 
-def test_bentoml_mock_invalid_endpoint(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(status_code=503)
+def test_bentoml_mock_invalid_endpoint(dd_run_check, aggregator, fake_http_response):
+    fake_http_response(METRICS_URL, status_code=503)
     check = BentomlCheck('bentoml', {}, [OM_MOCKED_INSTANCE])
     with pytest.raises(Exception):
         dd_run_check(check)
@@ -43,14 +49,10 @@ def test_bentoml_mock_invalid_endpoint(dd_run_check, aggregator, mock_http_respo
     aggregator.assert_service_check('bentoml.openmetrics.health', ServiceCheck.CRITICAL)
 
 
-def test_bentoml_mock_valid_endpoint_invalid_health(dd_run_check, aggregator, mock_http_response_per_endpoint):
-    mock_http_response_per_endpoint(
-        {
-            'http://bentoml:3000/metrics': [MockResponse(file_path=get_fixture_path('metrics.txt'))],
-            'http://bentoml:3000//livez': [MockResponse(status_code=500)],
-            'http://bentoml:3000//readyz': [MockResponse(status_code=500)],
-        }
-    )
+def test_bentoml_mock_valid_endpoint_invalid_health(dd_run_check, aggregator, fake_http_response):
+    fake_http_response(METRICS_URL, Path(get_fixture_path('metrics.txt')).read_bytes())
+    for url in HEALTH_URLS:
+        fake_http_response(url, status_code=500)
 
     check = BentomlCheck('bentoml', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)

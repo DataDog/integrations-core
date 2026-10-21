@@ -8,6 +8,7 @@ from datadog_checks.bentoml.metrics import ENDPOINT_METRICS, LABEL_RENAME_MAP, M
 
 
 class BentomlCheck(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'bentoml'
     DEFAULT_METRIC_LIMIT = 0
 

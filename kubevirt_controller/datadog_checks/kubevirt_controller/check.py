@@ -9,6 +9,7 @@ from .metrics import METRICS_MAP
 
 
 class KubeVirtControllerCheck(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = "kubevirt_controller"
     DEFAULT_METRIC_LIMIT = 0
 

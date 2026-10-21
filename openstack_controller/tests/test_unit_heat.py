@@ -11,7 +11,7 @@ import pytest
 
 import tests.configs as configs
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 from tests.metrics import (
@@ -85,15 +85,13 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     args_list = []
-    for call in mock_http_post.call_args_list:
-        args, kwargs = call
-        args_list += list(args)
+    for request in mock_http_post.recorded('POST'):
+        args_list += [request.url]
     assert args_list.count('http://127.0.0.1:8004/heat-api') == 0
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_post.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_post.recorded('POST'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
     if api_type == ApiType.SDK:
         assert openstack_connection.call_count == 4
@@ -104,12 +102,12 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
     ('mock_http_get', 'instance'),
     [
         pytest.param(
-            {'http_error': {'/heat-api': MockResponse(status_code=500)}},
+            {'http_error': {'/heat-api': FakeHTTPResponse(status_code=500)}},
             configs.REST,
             id='api rest',
         ),
         pytest.param(
-            {'http_error': {'/heat-api': MockResponse(status_code=500)}},
+            {'http_error': {'/heat-api': FakeHTTPResponse(status_code=500)}},
             configs.SDK,
             id='api sdk',
         ),
@@ -129,9 +127,8 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     args_list = []
-    for call in mock_http_get.call_args_list:
-        args, kwargs = call
-        args_list += list(args)
+    for request in mock_http_get.recorded('GET'):
+        args_list += [request.url]
     assert args_list.count('http://127.0.0.1:8004/heat-api') == 3
 
 
@@ -175,9 +172,8 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     args_list = []
-    for call in mock_http_get.call_args_list:
-        args, kwargs = call
-        args_list += list(args)
+    for request in mock_http_get.recorded('GET'):
+        args_list += [request.url]
     assert args_list.count('http://127.0.0.1:8004/heat-api') == 1
 
 
@@ -187,8 +183,8 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
         pytest.param(
             {
                 'http_error': {
-                    '/heat-api/v1/1e6e233e637d4d55a50a62b63398ad15/stacks': MockResponse(status_code=500),
-                    '/heat-api/v1/6e39099cccde4f809b003d9e0dd09304/stacks': MockResponse(status_code=500),
+                    '/heat-api/v1/1e6e233e637d4d55a50a62b63398ad15/stacks': FakeHTTPResponse(status_code=500),
+                    '/heat-api/v1/6e39099cccde4f809b003d9e0dd09304/stacks': FakeHTTPResponse(status_code=500),
                 }
             },
             None,
@@ -201,8 +197,8 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
             {
                 'http_error': {
                     'stacks': {
-                        '1e6e233e637d4d55a50a62b63398ad15': MockResponse(status_code=500),
-                        '6e39099cccde4f809b003d9e0dd09304': MockResponse(status_code=500),
+                        '1e6e233e637d4d55a50a62b63398ad15': FakeHTTPResponse(status_code=500),
+                        '6e39099cccde4f809b003d9e0dd09304': FakeHTTPResponse(status_code=500),
                     }
                 }
             },
@@ -222,9 +218,8 @@ def test_stacks_exception(aggregator, check, dd_run_check, mock_http_get, connec
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8004/heat-api/v1/1e6e233e637d4d55a50a62b63398ad15/stacks') == 1
     if api_type == ApiType.SDK:
         assert connection_heat.stacks.call_count == 2
@@ -313,12 +308,11 @@ def test_stacks_pagination(
     dd_run_check(openstack_controller_check(paginated_instance))
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
-            params = kwargs.get('params', {})
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
+            params = request.options.get('params', {})
             limit = params.get('limit')
-            args_list += [(args[0], limit)]
+            args_list += [(request.url, limit)]
         assert (
             args_list.count(
                 ('http://127.0.0.1:8004/heat-api/v1/1e6e233e637d4d55a50a62b63398ad15/stacks', paginated_limit)

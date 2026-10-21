@@ -19,6 +19,7 @@ from .common import (
     PROPERTIES_EX_VM_OFF,
     REALTIME_INSTANCE,
     VSPHERE_VERSION,
+    register_vsphere_rest_session,
 )
 
 pytestmark = [pytest.mark.unit]
@@ -2126,13 +2127,17 @@ def test_rest_api_tags_session_exception(aggregator, dd_run_check, historical_in
     )
 
 
-def test_rest_api_tags_tag_association_exception(aggregator, dd_run_check, historical_instance, mock_http_api):
+def test_rest_api_tags_tag_association_exception(
+    aggregator, dd_run_check, historical_instance, mock_http_api, fake_http
+):
     if VSPHERE_VERSION.startswith('7.'):
         mock_http_api.exceptions = {'api/cis/tagging/tag-association?action=list-attached-tags-on-objects': Exception()}
     else:
         mock_http_api.exceptions = {
             'rest/com/vmware/cis/tagging/tag-association?~action=list-attached-tags-on-objects': Exception()
         }
+    # The failed tag association is retried once after logging in again, which needs a second session.
+    register_vsphere_rest_session(fake_http, mock_http_api)
     historical_instance['collect_tags'] = True
     check = VSphereCheck('vsphere', {}, [historical_instance])
     dd_run_check(check)

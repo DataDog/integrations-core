@@ -11,7 +11,7 @@ import pytest
 
 import tests.configs as configs
 from datadog_checks.base import AgentCheck
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.openstack_controller.api.type import ApiType
 from tests.common import remove_service_from_catalog
 
@@ -352,15 +352,13 @@ def test_not_in_catalog(aggregator, check, dd_run_check, caplog, mock_http_post,
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     args_list = []
-    for call in mock_http_post.call_args_list:
-        args, kwargs = call
-        args_list += list(args)
+    for request in mock_http_post.recorded('POST'):
+        args_list += [request.url]
     assert args_list.count('http://127.0.0.1:8080/identity') == 0
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_post.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_post.recorded('POST'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8080/identity/v3/auth/tokens') == 4
     if api_type == ApiType.SDK:
         assert openstack_connection.call_count == 4
@@ -409,12 +407,12 @@ def test_region_id_in_tags(aggregator, dd_run_check, instance, openstack_control
     ('mock_http_get', 'instance'),
     [
         pytest.param(
-            {'http_error': {'/identity': MockResponse(status_code=500)}},
+            {'http_error': {'/identity': FakeHTTPResponse(status_code=500)}},
             configs.REST,
             id='api rest',
         ),
         pytest.param(
-            {'http_error': {'/identity': MockResponse(status_code=500)}},
+            {'http_error': {'/identity': FakeHTTPResponse(status_code=500)}},
             configs.SDK,
             id='api sdk',
         ),
@@ -444,9 +442,8 @@ def test_response_time_exception(aggregator, check, dd_run_check, mock_http_get)
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     args_list = []
-    for call in mock_http_get.call_args_list:
-        args, _ = call
-        args_list += list(args)
+    for request in mock_http_get.recorded('GET'):
+        args_list += [request.url]
     assert args_list.count('http://127.0.0.1:8080/identity') == 3
 
 
@@ -490,9 +487,8 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
         tags=['keystone_server:http://127.0.0.1:8080/identity'],
     )
     args_list = []
-    for call in mock_http_get.call_args_list:
-        args, kwargs = call
-        args_list += list(args)
+    for request in mock_http_get.recorded('GET'):
+        args_list += [request.url]
     assert args_list.count('http://127.0.0.1:8080/identity') == 1
 
 
@@ -500,7 +496,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
     ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/identity/v3/regions': MockResponse(status_code=500)}},
+            {'http_error': {'/identity/v3/regions': FakeHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -508,7 +504,7 @@ def test_response_time(aggregator, check, dd_run_check, mock_http_get):
         ),
         pytest.param(
             None,
-            {'http_error': {'regions': MockResponse(status_code=500)}},
+            {'http_error': {'regions': FakeHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -529,9 +525,8 @@ def test_regions_exception(aggregator, check, dd_run_check, mock_http_get, conne
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8080/identity/v3/regions') == 3
     if api_type == ApiType.SDK:
         assert connection_identity.regions.call_count == 3
@@ -575,7 +570,7 @@ def test_regions_metrics(aggregator, check, dd_run_check):
     ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/identity/v3/domains': MockResponse(status_code=500)}},
+            {'http_error': {'/identity/v3/domains': FakeHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -583,7 +578,7 @@ def test_regions_metrics(aggregator, check, dd_run_check):
         ),
         pytest.param(
             None,
-            {'http_error': {'domains': MockResponse(status_code=500)}},
+            {'http_error': {'domains': FakeHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -604,9 +599,8 @@ def test_domains_exception(aggregator, check, dd_run_check, mock_http_get, conne
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8080/identity/v3/domains') == 3
     if api_type == ApiType.SDK:
         assert connection_identity.domains.call_count == 3
@@ -670,7 +664,7 @@ def test_domains_metrics(aggregator, check, dd_run_check):
     ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/identity/v3/projects': MockResponse(status_code=500)}},
+            {'http_error': {'/identity/v3/projects': FakeHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -678,7 +672,7 @@ def test_domains_metrics(aggregator, check, dd_run_check):
         ),
         pytest.param(
             None,
-            {'http_error': {'projects': MockResponse(status_code=500)}},
+            {'http_error': {'projects': FakeHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -699,9 +693,8 @@ def test_projects_exception(aggregator, check, dd_run_check, mock_http_get, conn
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8080/identity/v3/projects') == 3
     if api_type == ApiType.SDK:
         assert connection_identity.projects.call_count == 3
@@ -829,7 +822,7 @@ def test_projects_metrics(aggregator, check, dd_run_check):
     ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/identity/v3/users': MockResponse(status_code=500)}},
+            {'http_error': {'/identity/v3/users': FakeHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -837,7 +830,7 @@ def test_projects_metrics(aggregator, check, dd_run_check):
         ),
         pytest.param(
             None,
-            {'http_error': {'users': MockResponse(status_code=500)}},
+            {'http_error': {'users': FakeHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -854,9 +847,8 @@ def test_users_exception(aggregator, check, dd_run_check, mock_http_get, connect
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8080/identity/v3/users') == 3
     if api_type == ApiType.SDK:
         assert connection_identity.users.call_count == 3
@@ -1024,7 +1016,7 @@ def test_users_metrics(aggregator, check, dd_run_check):
     ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/identity/v3/groups': MockResponse(status_code=500)}},
+            {'http_error': {'/identity/v3/groups': FakeHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -1032,7 +1024,7 @@ def test_users_metrics(aggregator, check, dd_run_check):
         ),
         pytest.param(
             None,
-            {'http_error': {'groups': MockResponse(status_code=500)}},
+            {'http_error': {'groups': FakeHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -1049,9 +1041,8 @@ def test_groups_exception(aggregator, check, dd_run_check, mock_http_get, connec
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8080/identity/v3/groups') == 3
     if api_type == ApiType.SDK:
         assert connection_identity.groups.call_count == 3
@@ -1063,7 +1054,7 @@ def test_groups_exception(aggregator, check, dd_run_check, mock_http_get, connec
         pytest.param(
             {
                 'http_error': {
-                    '/identity/v3/groups/89b36a4c32c44b0ea8856b6357f101ea/users': MockResponse(status_code=500)
+                    '/identity/v3/groups/89b36a4c32c44b0ea8856b6357f101ea/users': FakeHTTPResponse(status_code=500)
                 }
             },
             None,
@@ -1073,7 +1064,7 @@ def test_groups_exception(aggregator, check, dd_run_check, mock_http_get, connec
         ),
         pytest.param(
             None,
-            {'http_error': {'group_users': {'89b36a4c32c44b0ea8856b6357f101ea': MockResponse(status_code=500)}}},
+            {'http_error': {'group_users': {'89b36a4c32c44b0ea8856b6357f101ea': FakeHTTPResponse(status_code=500)}}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -1126,9 +1117,8 @@ def test_group_users_exception(aggregator, check, dd_run_check, mock_http_get, c
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, _ = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8080/identity/v3/groups/89b36a4c32c44b0ea8856b6357f101ea/users') == 1
         assert args_list.count('http://127.0.0.1:8080/identity/v3/groups/9acda6caf16e4828935f4f681ee8b3e5/users') == 1
     if api_type == ApiType.SDK:
@@ -1199,7 +1189,7 @@ def test_groups_metrics(aggregator, check, dd_run_check):
     ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/identity/v3/services': MockResponse(status_code=500)}},
+            {'http_error': {'/identity/v3/services': FakeHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -1207,7 +1197,7 @@ def test_groups_metrics(aggregator, check, dd_run_check):
         ),
         pytest.param(
             None,
-            {'http_error': {'services': MockResponse(status_code=500)}},
+            {'http_error': {'services': FakeHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -1224,9 +1214,8 @@ def test_services_exception(aggregator, check, dd_run_check, mock_http_get, conn
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8080/identity/v3/services') == 3
     if api_type == ApiType.SDK:
         assert connection_identity.services.call_count == 3
@@ -1344,7 +1333,7 @@ def test_services_metrics(aggregator, check, dd_run_check):
     ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/identity/v3/registered_limits': MockResponse(status_code=500)}},
+            {'http_error': {'/identity/v3/registered_limits': FakeHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -1352,7 +1341,7 @@ def test_services_metrics(aggregator, check, dd_run_check):
         ),
         pytest.param(
             None,
-            {'http_error': {'registered_limits': MockResponse(status_code=500)}},
+            {'http_error': {'registered_limits': FakeHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -1376,9 +1365,8 @@ def test_registered_limits_exception(aggregator, check, dd_run_check, mock_http_
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8080/identity/v3/registered_limits') == 3
     if api_type == ApiType.SDK:
         assert connection_identity.registered_limits.call_count == 3
@@ -1388,7 +1376,7 @@ def test_registered_limits_exception(aggregator, check, dd_run_check, mock_http_
     ('mock_http_get', 'connection_identity', 'instance', 'api_type'),
     [
         pytest.param(
-            {'http_error': {'/identity/v3/limits': MockResponse(status_code=500)}},
+            {'http_error': {'/identity/v3/limits': FakeHTTPResponse(status_code=500)}},
             None,
             configs.REST,
             ApiType.REST,
@@ -1396,7 +1384,7 @@ def test_registered_limits_exception(aggregator, check, dd_run_check, mock_http_
         ),
         pytest.param(
             None,
-            {'http_error': {'limits': MockResponse(status_code=500)}},
+            {'http_error': {'limits': FakeHTTPResponse(status_code=500)}},
             configs.SDK,
             ApiType.SDK,
             id='api sdk',
@@ -1420,9 +1408,8 @@ def test_limits_exception(aggregator, check, dd_run_check, mock_http_get, connec
     )
     if api_type == ApiType.REST:
         args_list = []
-        for call in mock_http_get.call_args_list:
-            args, kwargs = call
-            args_list += list(args)
+        for request in mock_http_get.recorded('GET'):
+            args_list += [request.url]
         assert args_list.count('http://127.0.0.1:8080/identity/v3/limits') == 3
     if api_type == ApiType.SDK:
         assert connection_identity.limits.call_count == 3

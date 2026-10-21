@@ -7,6 +7,7 @@ from .metrics import METRIC_MAP, RENAME_LABELS_MAP
 
 
 class NvidiaNIMCheck(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'nvidia_nim'

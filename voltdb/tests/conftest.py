@@ -56,7 +56,7 @@ def dd_environment(instance):
         # Must refer to a path within the Agent container.
         instance = instance.copy()
         if common.VOLTDB_TRANSPORT == 'http':
-            # The HTTP transport runs through the framework's RequestsWrapper,
+            # The HTTP transport runs through the framework's HTTP client,
             # which picks up `tls_ca_cert` (and friends) automatically.
             instance['tls_ca_cert'] = '/tmp/voltdb-certs/ca.pem'
         else:
@@ -92,8 +92,8 @@ def instance():
 
     if common.TLS_ENABLED:
         if common.VOLTDB_TRANSPORT == 'http':
-            # HTTPSConnectionPool needs `tls_ca_cert` to trust the self-signed
-            # server cert under the framework's RequestsWrapper.
+            # The framework's HTTP client needs `tls_ca_cert` to trust the
+            # self-signed server cert.
             instance['tls_ca_cert'] = common.TLS_CONFIG_FILE
         else:
             instance['use_ssl'] = True

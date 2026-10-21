@@ -95,6 +95,8 @@ class KubeAPIServerMetricsCheck(SliMetricsScraperMixin, OpenMetricsBaseCheck):
     See https://github.com/kubernetes/apiserver
     """
 
+    AGNOSTIC_HTTP_CLIENT = True
+
     DEFAULT_METRIC_LIMIT = 0
     # Set up metrics_transformers
     metric_transformers = {}

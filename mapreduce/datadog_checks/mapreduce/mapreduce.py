@@ -1,12 +1,19 @@
 # (C) Datadog, Inc. 2010-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+from json import JSONDecodeError as StdJSONDecodeError
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
-from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
 from simplejson import JSONDecodeError
 
 from datadog_checks.base import AgentCheck, ConfigurationError, is_affirmative
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientInvalidURLError,
+    HTTPClientRequestError,
+    HTTPClientStatusError,
+    HTTPClientTimeoutError,
+)
 from datadog_checks.mapreduce.metrics import (
     HISTOGRAM,
     INCREMENT,
@@ -18,6 +25,7 @@ from datadog_checks.mapreduce.metrics import (
 
 
 class MapReduceCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}}
 
     # Default Settings
@@ -411,19 +419,21 @@ class MapReduceCheck(AgentCheck):
             response.raise_for_status()
             response_json = response.json()
 
-        except Timeout as e:
+        except HTTPClientTimeoutError as e:
             self._critical_service(service_name, service_check_tags, "Request timeout: {}, {}".format(url, e))
             raise
 
-        except (HTTPError, InvalidURL, ConnectionError) as e:
+        except (HTTPClientStatusError, HTTPClientInvalidURLError, HTTPClientConnectionError) as e:
             self._critical_service(service_name, service_check_tags, "Request failed: {}, {}".format(url, e))
             raise
 
-        except JSONDecodeError as e:
+        except (JSONDecodeError, StdJSONDecodeError) as e:
             self._critical_service(service_name, service_check_tags, "JSON Parse failed: {}, {}".format(url, e))
             raise
 
-        except ValueError as e:
+        # HTTPClientRequestError is the translator's fallthrough type, so it carries the malformed-header
+        # and malformed-body failures that have no more specific agnostic equivalent.
+        except (ValueError, HTTPClientRequestError) as e:
             self._critical_service(service_name, service_check_tags, str(e))
             raise
 

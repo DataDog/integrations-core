@@ -2,12 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import os
-
-import mock
 import pytest
 
 from datadog_checks.kube_proxy import KubeProxyCheck
+
+from .common import register_metrics
 
 instance = {'prometheus_url': 'http://localhost:10249/metrics'}
 
@@ -17,33 +16,17 @@ NAMESPACE = 'kubeproxy'
 
 
 @pytest.fixture()
-def mock_iptables():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics_iptables_1.21.1.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    mock_iptables = mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    )
-    yield mock_iptables.start()
-    mock_iptables.stop()
+def mock_iptables(fake_http, fake_http_response):
+    register_metrics(fake_http_response, 'metrics_iptables_1.21.1.txt')
+    yield
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.fixture()
-def mock_userspace():
-    f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics_userspace_1.21.1.txt')
-    with open(f_name, 'r') as f:
-        text_data = f.read()
-    mock_userspace = mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={'Content-Type': "text/plain"}
-        ),
-    )
-    yield mock_userspace.start()
-    mock_userspace.stop()
+def mock_userspace(fake_http, fake_http_response):
+    register_metrics(fake_http_response, 'metrics_userspace_1.21.1.txt')
+    yield
+    fake_http.assert_all_responses_consumed()
 
 
 def test_check_iptables(aggregator, mock_iptables):

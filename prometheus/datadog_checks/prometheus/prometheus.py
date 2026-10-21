@@ -5,4 +5,5 @@ from datadog_checks.base.checks.prometheus import GenericPrometheusCheck
 
 
 class PrometheusCheck(GenericPrometheusCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     pass

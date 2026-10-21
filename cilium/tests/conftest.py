@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
-import mock
 import pytest
 
 from datadog_checks.base.utils.common import get_docker_hostname
@@ -235,28 +234,18 @@ def operator_instance_use_openmetrics():
 
 
 @pytest.fixture()
-def mock_agent_data():
+def mock_agent_data(fake_http, fake_http_response):
     f_name = os.path.join(os.path.dirname(__file__), "fixtures", "agent_metrics.txt")
-    with open(f_name, "r") as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={"Content-Type": "text/plain"}
-        ),
-    ):
-        yield
+    with open(f_name, "rb") as f:
+        fake_http_response(AGENT_URL, f.read(), headers={"Content-Type": "text/plain"})
+    yield
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.fixture()
-def mock_operator_data():
+def mock_operator_data(fake_http, fake_http_response):
     f_name = os.path.join(os.path.dirname(__file__), "fixtures", "operator_metrics.txt")
-    with open(f_name, "r") as f:
-        text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200, iter_lines=lambda **kwargs: text_data.split("\n"), headers={"Content-Type": "text/plain"}
-        ),
-    ):
-        yield
+    with open(f_name, "rb") as f:
+        fake_http_response(OPERATOR_URL, f.read(), headers={"Content-Type": "text/plain"})
+    yield
+    fake_http.assert_all_responses_consumed()

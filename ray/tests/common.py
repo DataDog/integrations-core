@@ -5,7 +5,6 @@
 import os
 
 from datadog_checks.dev import get_docker_hostname, get_here
-from datadog_checks.dev.http import MockResponse
 
 HERE = get_here()
 
@@ -321,16 +320,13 @@ OPTIONAL_METRICS = [
 OPTIONAL_METRICS = ['ray.' + m for m in OPTIONAL_METRICS]
 
 
-def mock_http_responses(url, **_params):
+def register_metrics_responses(fake_http_response):
+    """Register one scrape of every mocked endpoint."""
     mapping = {
         'http://ray-head:8080': 'ray_head.txt',
         'http://ray-worker:8081': 'ray_worker.txt',
     }
 
-    metrics_file = mapping.get(url)
-
-    if not metrics_file:
-        raise Exception(f"url `{url}` not registered")
-
-    with open(os.path.join(HERE, 'fixtures', metrics_file)) as f:
-        return MockResponse(content=f.read())
+    for url, metrics_file in mapping.items():
+        with open(os.path.join(HERE, 'fixtures', metrics_file), 'rb') as f:
+            fake_http_response(url, f.read())

@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
 
 from datadog_checks.amazon_msk.metrics import JMX_METRICS_MAP, JMX_METRICS_OVERRIDES
@@ -106,3 +107,19 @@ def assert_jmx_metrics(aggregator, tags, is_enabled=True):
                 aggregator.assert_metric_has_tag(metric, tag)
         else:
             aggregator.assert_metric(metric, count=0)
+
+
+def register_metrics(fake_http_response, metrics_path='/metrics'):
+    """Register one scrape of each exporter on every broker endpoint listed by the mocked API."""
+    payloads = {}
+    for exporter_type in ('jmx', 'node'):
+        with open(get_metrics_fixture_path(exporter_type), 'rb') as f:
+            payloads[exporter_type] = f.read()
+
+    for node_info in json.loads(read_api_fixture())['NodeInfoList']:
+        broker_info = node_info.get('BrokerNodeInfo')
+        if broker_info is None:
+            continue
+        for endpoint in broker_info['Endpoints']:
+            for port, exporter_type in ((JMX_PORT, 'jmx'), (NODE_PORT, 'node')):
+                fake_http_response('http://{}:{}{}'.format(endpoint, port, metrics_path), payloads[exporter_type])

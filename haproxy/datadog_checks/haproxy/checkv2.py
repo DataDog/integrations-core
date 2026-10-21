@@ -8,6 +8,7 @@ from .metrics import METRIC_MAP, construct_metrics_config
 
 
 class HaproxyCheckV2(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'haproxy'
 
     DEFAULT_METRIC_LIMIT = 0
