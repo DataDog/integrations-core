@@ -189,8 +189,8 @@ server, including after a failover:
 - Set `host` and `port` to the server's direct address. Do not use a primary-following
   virtual IP, load balancer, or DNS name that switches between servers.
 - Disable automatic client reroute for the Agent's IBM driver connections, as described below.
-- Give each server a distinct, stable `reported_hostname`. Keep it unchanged when the
-  server's primary or standby role changes. Do not reuse a logical cluster name for both servers.
+- Keep each server's host identity stable when its primary or standby role changes.
+  Do not use a shared cluster identity for both servers.
 - Do not configure another Agent or check instance to collect the same database on that server.
 
 For example, one Agent monitoring two servers uses:
@@ -203,7 +203,6 @@ instances:
     username: datadog
     password: <PASSWORD>
     dbm: true
-    reported_hostname: db2-a.example.com
 
   - db: appdb
     host: db2-b.example.com
@@ -211,7 +210,6 @@ instances:
     username: datadog
     password: <PASSWORD>
     dbm: true
-    reported_hostname: db2-b.example.com
 ```
 
 If each server runs its own Agent, put only that server's entry in its configuration.
