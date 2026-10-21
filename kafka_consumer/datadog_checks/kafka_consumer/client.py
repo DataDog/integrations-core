@@ -279,11 +279,14 @@ class KafkaClient:
             topic_partitions = (
                 topic_partitions if topic_partitions is None else [TopicPartition(t, p) for t, p in topic_partitions]
             )
-            futures.append(
-                self.kafka_client.list_consumer_group_offsets(
-                    [ConsumerGroupTopicPartitions(group_id=consumer_group, topic_partitions=topic_partitions)]
-                )[consumer_group]
-            )
+            try:
+                futures.append(
+                    self.kafka_client.list_consumer_group_offsets(
+                        [ConsumerGroupTopicPartitions(group_id=consumer_group, topic_partitions=topic_partitions)]
+                    )[consumer_group]
+                )
+            except Exception as e:
+                self.log.warning("Failed to request consumer offsets for consumer group %s: %s", consumer_group, e)
         offsets = []
         coordinator_error = False
         for completed in as_completed(futures):
