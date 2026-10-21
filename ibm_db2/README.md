@@ -75,12 +75,6 @@ To monitor a Db2 instance, create a Db2 user with either the `EXECUTE` permissio
 * `DBADM` authority
 * `SQLADM` authority
 
-When enabling Database Monitoring (`dbm: true`), query metrics also require access to the `SYSPROC.MON_GET_PKG_CACHE_STMT` table function. If the Agent's Db2 user does not have one of the authorities listed above, have a database administrator run the following command in each monitored database, replacing `<DATADOG_USER>` with the Agent's Db2 username:
-
-```sql
-GRANT EXECUTE ON FUNCTION SYSPROC.MON_GET_PKG_CACHE_STMT TO USER <DATADOG_USER>;
-```
-
 To monitor the health of an instance, its associated databases, and database objects, enable the database system monitor switches for each of the objects you want to monitor:
 * Statement
 * Lock
@@ -179,6 +173,106 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
+
+### Database Monitoring
+
+Database Monitoring (`dbm: true`) collects query execution counts, elapsed time, CPU time,
+rows read and returned, lock waits, and obfuscated SQL from each database's package cache.
+Configure each database you want to monitor separately.
+
+#### Connect to a fixed server
+
+Configure exactly one check instance for each database on each monitored server. The Agent
+can run on the database server or remotely. Its connection must always reach the same
+server, including after a failover:
+
+- Set `host` and `port` to the server's direct address. Do not use a primary-following
+  virtual IP, load balancer, or DNS name that switches between servers.
+- Disable automatic client reroute for the Agent's IBM driver connections, as described below.
+- Keep each server's host identity stable when its primary or standby role changes.
+  Do not use a shared cluster identity for both servers.
+- Do not configure another Agent or check instance to collect the same database on that server.
+
+For example, one Agent monitoring two servers uses:
+
+```yaml
+instances:
+  - db: appdb
+    host: db2-a.example.com
+    port: 50000
+    username: datadog
+    password: <PASSWORD>
+    dbm: true
+
+  - db: appdb
+    host: db2-b.example.com
+    port: 50000
+    username: datadog
+    password: <PASSWORD>
+    dbm: true
+```
+
+If each server runs its own Agent, put only that server's entry in its configuration.
+See the [sample configuration][5] for collection intervals, query timeouts, and other options.
+
+#### Database permissions
+
+Query metrics require `EXECUTE` permission on `SYSPROC.MON_GET_PKG_CACHE_STMT`, in
+addition to the integration's monitoring permissions above. If the monitoring user does
+not already have an authority that grants access, run this in each monitored database:
+
+```sql
+GRANT EXECUTE ON FUNCTION SYSPROC.MON_GET_PKG_CACHE_STMT TO USER <DATADOG_USER>;
+```
+
+#### Disable automatic client reroute
+
+A direct address alone does not prevent the IBM driver from using an alternate server.
+In the `db2dsdriver.cfg` used by the Agent's IBM CLI driver, disable automatic client
+reroute (ACR) for each configured database, host, and port:
+
+```xml
+<configuration>
+  <databases>
+    <database name="appdb" host="db2-a.example.com" port="50000">
+      <acr>
+        <parameter name="enableAcr" value="false"/>
+        <parameter name="enableAlternateServerListFirstConnect" value="false"/>
+      </acr>
+    </database>
+    <database name="appdb" host="db2-b.example.com" port="50000">
+      <acr>
+        <parameter name="enableAcr" value="false"/>
+        <parameter name="enableAlternateServerListFirstConnect" value="false"/>
+      </acr>
+    </database>
+  </databases>
+</configuration>
+```
+
+Apply this to the driver configuration used by the Agent, not your application's driver.
+Set `DB2DSDRIVER_CFG_PATH` in the Agent process environment to the absolute path of this
+file, or use the driver's [default configuration location][19]. Restart the Agent after
+changing it. See [IBM's client reroute configuration documentation][18] for details. Enabling `enableAlternateServerListFirstConnect` implicitly
+allows rerouting even when other ACR settings disable it.
+
+#### High availability disaster recovery (HADR)
+
+Use the same fixed-server configuration for an HADR pair. Each collector reports queries
+executed on its own server; replication does not make a standby's query counters a copy
+of the primary's counters. A readable standby can report its own read workload. A standby
+without reads enabled cannot accept the SQL connections required for query metrics.
+
+During takeover, the collectors stay on their configured servers. Workload moves to the
+new primary, so its executions appear under that server's identity. The old primary retains
+its identity and can report its subsequent read workload if it becomes a readable standby.
+Connections may be interrupted during the transition; collection resumes when that same
+server accepts SQL connections again.
+
+Query metrics use differences between cumulative package-cache counters. New cache entries
+establish a baseline before reporting subsequent executions. Queries that disappear from the
+cache between collections may be missed. This is query-workload monitoring; it does not
+report replication lag, HADR health, or discover the current primary.
 
 ### Validation
 
@@ -293,3 +387,6 @@ Additional helpful documentation, links, and articles:
 [15]: https://docs.datadoghq.com/developers/guide/custom-python-package/?tab=linux
 [16]: https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/
 [17]: https://www.ibm.com/docs/en/db2oc?topic=views-monitor-procedures-functions
+
+[18]: https://www.ibm.com/docs/en/db2/12.1.x?topic=njcshacd-configuration-db2-automatic-client-reroute-support-applications-other-than-java
+[19]: https://www.ibm.com/docs/en/db2/12.1.x?topic=file-data-server-driver-configuration-location
