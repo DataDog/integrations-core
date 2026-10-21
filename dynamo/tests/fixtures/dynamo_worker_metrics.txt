@@ -272,20 +272,20 @@ dynamo_component_router_overlap_blocks_lost_count{dynamo_component="router",dyna
 dynamo_component_router_overlap_blocks_lost_sum{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill"} 42.0
 # HELP dynamo_component_router_kv_transfer_estimated_latency_seconds Upper-bound estimation of KV cache transfer latency in disaggregated serving (prefill_complete to first_token)
 # TYPE dynamo_component_router_kv_transfer_estimated_latency_seconds histogram
-dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.001"} 3
-dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.001931"} 6
-dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.003728"} 9
-dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.007197"} 12
-dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.01389"} 15
-dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.02683"} 18
-dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.05179"} 21
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0"} 3
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.0019"} 6
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.0037"} 9
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.0072"} 12
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.014"} 15
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.027"} 18
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.052"} 21
 dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.1"} 24
-dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.1931"} 27
-dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.3728"} 30
-dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.7197"} 33
-dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="1.389"} 36
-dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="2.683"} 39
-dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="5.179"} 42
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.19"} 27
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.37"} 30
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.72"} 33
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="1.4"} 36
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="2.7"} 39
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="5.2"} 42
 dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="10"} 45
 dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="+Inf"} 48
 dynamo_component_router_kv_transfer_estimated_latency_seconds_count{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345"} 48
