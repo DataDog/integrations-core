@@ -10,6 +10,7 @@ HERE = get_here()
 
 CHECK_NAME = 'kai_scheduler'
 INSTANCE_STATE_KEY = 'kai_scheduler_instance'
+KUBECONFIG_STATE_KEY = 'kai_scheduler_kubeconfig'
 
 SCHEDULER_ENDPOINT = 'http://scheduler:8080/metrics'
 QUEUE_CONTROLLER_ENDPOINT = 'http://queue-controller:8080/metrics'

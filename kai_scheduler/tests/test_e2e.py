@@ -4,16 +4,30 @@
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.dev._env import e2e_testing
+from datadog_checks.kai_scheduler import KaiSchedulerCheck
 
-from .common import INSTANCE_STATE_KEY, live_metadata_metrics
+from .common import CHECK_NAME, INSTANCE_STATE_KEY, KUBECONFIG_STATE_KEY, live_metadata_metrics
+from .kube import delete_preemption_pods, trigger_preemption
 
-pytestmark = [pytest.mark.e2e]
+pytestmark = [pytest.mark.e2e, pytest.mark.skipif(not e2e_testing(), reason='Not running E2E tests')]
 
 
-def test_e2e(dd_agent_check, dd_get_state):
+@pytest.fixture
+def live_instance(dd_get_state) -> dict:
     instance = dd_get_state(INSTANCE_STATE_KEY)
     assert instance, f'{INSTANCE_STATE_KEY} was not saved by dd_environment'
+    return instance
 
+
+@pytest.fixture
+def kubeconfig(dd_get_state, tmp_path, monkeypatch):
+    path = tmp_path / 'kubeconfig'
+    path.write_text(dd_get_state(KUBECONFIG_STATE_KEY))
+    monkeypatch.setenv('KUBECONFIG', str(path))
+
+
+def test_e2e(dd_agent_check, live_instance):
     aggregator = dd_agent_check(rate=True)
 
     metadata_metrics, config_gated = live_metadata_metrics()
@@ -29,5 +43,28 @@ def test_e2e(dd_agent_check, dd_get_state):
         aggregator.assert_service_check(
             'kai.openmetrics.health',
             ServiceCheck.OK,
-            tags=[f'endpoint:{instance[option]}', f'kai_component:{component}', 'test:e2e'],
+            tags=[f'endpoint:{live_instance[option]}', f'kai_component:{component}', 'test:e2e'],
         )
+
+
+def test_e2e_evicted_pods(dd_run_check, aggregator, live_instance, kubeconfig):
+    check = KaiSchedulerCheck(CHECK_NAME, {}, [{'scheduler_endpoint': live_instance['scheduler_endpoint']}])
+    delete_preemption_pods()
+    dd_run_check(check)
+
+    trigger_preemption()
+    aggregator.reset()
+    dd_run_check(check)
+
+    aggregator.assert_metric(
+        'kai.evicted_pods.count',
+        value=1,
+        count=1,
+        tags=[
+            f'endpoint:{live_instance["scheduler_endpoint"]}',
+            'action:preempt',
+            'kai_component:scheduler',
+            'kai_nodepool:default',
+            'kube_namespace:default',
+        ],
+    )

@@ -57,3 +57,17 @@ def wait_for_deployment(name: str) -> None:
 
 def wait_for_pod(name: str, condition: str) -> None:
     kubectl(['wait', f'pod/{name}', '-n', WORKLOAD_NAMESPACE, f'--for={condition}', f'--timeout={WAIT_TIMEOUT}'])
+
+
+def trigger_preemption() -> None:
+    """Run a preemptible pod, then a higher-priority pod that only fits in `team-a` by evicting it."""
+    retry_apply('preempt-low-pod.yaml')
+    wait_for_pod('preempt-low-pod', 'condition=Ready')
+    retry_apply('preempt-high-pod.yaml')
+    wait_for_pod('preempt-high-pod', 'condition=Ready')
+
+
+def delete_preemption_pods() -> None:
+    kubectl(
+        ['delete', 'pod', 'preempt-low-pod', 'preempt-high-pod', '-n', WORKLOAD_NAMESPACE, '--ignore-not-found'],
+    )

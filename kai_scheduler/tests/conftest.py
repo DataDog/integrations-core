@@ -15,8 +15,16 @@ from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 
-from .common import INSTANCE_STATE_KEY, MOCKED_INSTANCE
-from .kube import KAI_NAMESPACE, WAIT_TIMEOUT, manifest_path, retry_apply, wait_for_deployment, wait_for_pod
+from .common import INSTANCE_STATE_KEY, KUBECONFIG_STATE_KEY, MOCKED_INSTANCE
+from .kube import (
+    KAI_NAMESPACE,
+    WAIT_TIMEOUT,
+    manifest_path,
+    retry_apply,
+    trigger_preemption,
+    wait_for_deployment,
+    wait_for_pod,
+)
 
 KAI_VERSION_ENV = 'KAI_VERSION'
 KAI_CHART = 'oci://ghcr.io/kai-scheduler/kai-scheduler/kai-scheduler'
@@ -157,22 +165,12 @@ def install_kai():
         wait_for_deployment(service)
 
 
-def trigger_preemption():
-    """Run a preemptible pod, then a higher-priority pod that only fits in `team-a` by evicting it.
-
-    This runs at env start so the preemption and eviction counters are non-zero when the tests scrape.
-    """
-    retry_apply('preempt-low-pod.yaml')
-    wait_for_pod('preempt-low-pod', 'condition=Ready')
-    retry_apply('preempt-high-pod.yaml')
-    wait_for_pod('preempt-high-pod', 'condition=Ready')
-
-
 def setup_kai():
     install_kai()
     retry_apply('queues.yaml')
     retry_apply('workloads.yaml')
     wait_for_pod('running-pod', 'condition=Ready')
+    # Preempt at env start so the preemption counters and the eviction series exist when the tests scrape.
     trigger_preemption()
 
 
@@ -197,6 +195,8 @@ def dd_environment(dd_save_state):
             host, port = stack.enter_context(port_forward(kubeconfig, KAI_NAMESPACE, METRICS_PORT, 'service', service))
             instance[option] = f'http://{host}:{port}/metrics'
         dd_save_state(INSTANCE_STATE_KEY, instance)
+        with open(kubeconfig) as f:
+            dd_save_state(KUBECONFIG_STATE_KEY, f.read())
 
         yield {'instances': [instance]}
 
