@@ -1164,7 +1164,7 @@ def test_fetch_earliest_offsets_cached_across_calls(check):
 
 
 def test_fetch_earliest_offsets_refetches_when_cache_missing_partitions(check):
-    """A fresh cache that doesn't cover every requested partition triggers a full refetch, keeping the same TTL."""
+    """A fresh cache that doesn't cover every requested partition fetches only the missing ones, keeping the TTL."""
     instance = {
         'kafka_connect_str': 'localhost:9092',
         'enable_kafka_console': True,
@@ -1183,10 +1183,13 @@ def test_fetch_earliest_offsets_refetches_when_cache_missing_partitions(check):
     result = collector.fetch_earliest_offsets(topic_partitions)
 
     assert result == {('test-topic', 0): 10, ('test-topic', 1): 20}
-    assert mock_kafka_client.kafka_client.list_offsets.call_count == 1
+    list_offsets = mock_kafka_client.kafka_client.list_offsets
+    assert list_offsets.call_count == 1
+    assert {(tp.topic, tp.partition) for tp in list_offsets.call_args[0][0]} == {('test-topic', 1)}
 
     saved = json.loads(kafka_consumer_check.write_persistent_cache.call_args[0][1])
     assert saved['expire_at'] == expire_at
+    assert sorted(saved['offsets']) == [['test-topic', 0, 10], ['test-topic', 1, 20]]
 
 
 def test_fetch_earliest_offsets_drops_negative_offsets(check, caplog):
@@ -1220,6 +1223,48 @@ def test_fetch_earliest_offsets_drops_negative_offsets(check, caplog):
     # an operator after broker connectivity instead of the client library's 32-bit narrowing.
     assert "Failed to fetch earliest offset" not in caplog.text
     assert "Discarding 1/2 negative earliest offset(s)" in caplog.text
+
+
+def test_fetch_earliest_offsets_persistent_failure_keeps_cache_for_healthy_partitions(check):
+    """A partition whose earliest offset never resolves must not force a refetch of every other partition."""
+    instance = {
+        'kafka_connect_str': 'localhost:9092',
+        'enable_kafka_console': True,
+    }
+    kafka_consumer_check = check(instance)
+    mock_kafka_client = seed_mock_kafka_client()
+
+    def partition_1_always_fails(requests, **_kwargs):
+        futures = {}
+        for tp in requests:
+            future = mock.MagicMock()
+            if tp.partition == 1:
+                future.result.side_effect = Exception('NOT_LEADER_OR_FOLLOWER')
+            else:
+                future.result.return_value = mock.MagicMock(offset=10)
+            futures[tp] = future
+        return futures
+
+    mock_kafka_client.kafka_client.list_offsets.side_effect = partition_1_always_fails
+    kafka_consumer_check.client = mock_kafka_client
+    kafka_consumer_check.metadata_collector.client = mock_kafka_client
+
+    _wire_cache(kafka_consumer_check)
+
+    collector = kafka_consumer_check.metadata_collector
+    topic_partitions = {'test-topic': [0, 1, 2]}
+
+    first = collector.fetch_earliest_offsets(topic_partitions)
+    second = collector.fetch_earliest_offsets(topic_partitions)
+
+    expected = {('test-topic', 0): 10, ('test-topic', 2): 10}
+    assert first == expected
+    assert second == expected
+
+    list_offsets = mock_kafka_client.kafka_client.list_offsets
+    assert list_offsets.call_count == 2
+    second_request = {(tp.topic, tp.partition) for tp in list_offsets.call_args_list[1][0][0]}
+    assert second_request == {('test-topic', 1)}
 
 
 def test_schema_registry_oauth_oidc_token(check, dd_run_check, aggregator):
