@@ -401,6 +401,7 @@ class _FakeBroker(_AdminClientImpl):
 
     def list_topics(self, topic=None, timeout=-1):
         metadata = ClusterMetadata()
+        metadata.cluster_id = 'cluster_id'
         for name, partitions in self.cluster_topics.items():
             topic_metadata = TopicMetadata()
             topic_metadata.topic = name
@@ -441,13 +442,10 @@ def fake_cluster(monkeypatch):
 
 
 def check_against_fake_cluster(check, monkeypatch, consumer_groups):
-    """A check that uses the real KafkaClient admin code path; only the highwater consumer is stubbed."""
+    """A check that uses the real KafkaClient admin code path; only partition offset lookups are stubbed."""
     instance = {'kafka_connect_str': 'localhost:1', 'tags': ['optional:tag1'], 'consumer_groups': consumer_groups}
     kafka_consumer_check = check(instance)
     client = kafka_consumer_check.client
-    monkeypatch.setattr(client, 'open_consumer', lambda consumer_group: None)
-    monkeypatch.setattr(client, 'close_consumer', lambda: None)
-    monkeypatch.setattr(client, 'consumer_get_cluster_id_and_list_topics', lambda consumer_group: ('cluster_id', []))
     monkeypatch.setattr(client, 'get_partition_offsets', fake_get_partition_offsets)
     return kafka_consumer_check
 
