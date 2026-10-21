@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from contextlib import suppress
 
 import mock
 import pytest
@@ -91,6 +92,28 @@ def test_critical_service_check(instance, check, aggregator):
         check.check(instance)
 
     aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
+
+
+@pytest.mark.parametrize(
+    'request_result',
+    [
+        pytest.param({'return_value': mock_data('server.xml')}, id='successful run'),
+        pytest.param({'side_effect': requests.ConnectionError}, id='failed run'),
+    ],
+)
+def test_malloc_trim_runs_after_every_run(instance, check, request_result):
+    # The parsed XML tree's arena memory is only reclaimed if the trim runs on every path.
+    # Trimming solely after a successful run would leave RSS growing whenever the servlet
+    # is unreachable, which is how the growth in AGENT-17325 accumulated.
+    with (
+        mock.patch('datadog_checks.ibm_was.ibm_was.malloc_trim') as trim,
+        mock.patch('datadog_checks.ibm_was.IbmWasCheck.make_request', **request_result),
+    ):
+        check = check(instance)
+        with suppress(requests.ConnectionError):
+            check.check(instance)
+
+    trim.assert_called_once_with()
 
 
 def test_right_server_tag(instance, check, aggregator):
