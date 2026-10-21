@@ -1,0 +1,1 @@
+Pin `certifi` to 2026.10.19 to remove the eMudhra root whose intermediates were compromised.
