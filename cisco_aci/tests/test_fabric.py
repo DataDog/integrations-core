@@ -746,3 +746,59 @@ def test_fabric_topology_with_ip_mismatch(aggregator):
             assert link['remote']['interface']['dd_id'] is not None, (
                 "Remote interface should have dd_id even with IP mismatch"
             )
+
+
+class FakeSessionWrapperWithControllerInterfaces(common.FakeSessionWrapper):
+    """Session wrapper that serves all fixtures and returns a cnwPhysIf interface for APIC controllers"""
+
+    def make_request(self, path):
+        if path.endswith('/cnwPhysIf.json'):
+            return {
+                'totalCount': '1',
+                'imdata': [
+                    {
+                        'cnwPhysIf': {
+                            'attributes': {
+                                'adminSt': 'up',
+                                'operSt': 'up',
+                                'id': 'eth2/1',
+                                'name': 'eth2-1',
+                                'descr': '',
+                                'routerMac': '00:00:00:00:00:01',
+                                'dn': 'topology/pod-1/node-1/sys/cphys-[eth2/1]',
+                            }
+                        }
+                    }
+                ],
+            }
+        return super().make_request(path)
+
+
+def test_fabric_controller_interface_status(aggregator):
+    """Test that APIC controller interfaces submit a port status metric and do not abort the check run"""
+    check = CiscoACICheck(common.CHECK_NAME, {}, [common.CONFIG_WITH_TAGS])
+    api = Api(common.ACI_URLS, check.http, common.USERNAME, password=common.PASSWORD, log=check.log)
+    api.wrapper_factory = FakeSessionWrapperWithControllerInterfaces
+    check._api_cache[hash_mutable(common.CONFIG_WITH_TAGS)] = api
+
+    with freeze_time("2012-01-14 03:21:34"):
+        check.check({})
+
+    aggregator.assert_service_check('cisco_aci.can_connect', CiscoACICheck.OK, count=1)
+    aggregator.assert_metric(
+        'cisco_aci.fabric.port.status',
+        value=1,
+        count=1,
+        tags=[
+            'dd.internal.resource:ndm_device:{}:{}'.format(namespace, node1),
+            'dd.internal.resource:ndm_interface:{}:{}:cisco-aci-eth2-1'.format(namespace, node1),
+            'device_hostname:{}'.format(device_hn1),
+            'device_id:{}:{}'.format(namespace, node1),
+            'device_ip:{}'.format(node1),
+            'device_namespace:{}'.format(namespace),
+            'interface:eth2-1',
+            'status:up',
+        ],
+    )
+    # Capacity collection runs after fabric collection, so it is skipped if fabric collection raises
+    assert any(name.startswith('cisco_aci.capacity.') for name in aggregator.metric_names)
