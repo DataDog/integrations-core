@@ -5,8 +5,6 @@ services:
     platform: linux/amd64
     container_name: ibm_db2
     privileged: true
-    volumes:
-      - /database
     ports:
       - "${DB2_PORT:-50000}:50000"
     environment:
