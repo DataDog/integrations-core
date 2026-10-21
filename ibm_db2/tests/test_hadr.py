@@ -1,13 +1,14 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Opt-in takeover test against a disposable, readable-standby Db2 12.1 pair.
+"""Opt-in takeover test against a disposable, readable-standby Db2 pair.
 
 Set DB2_HADR_PRIMARY_HOST, DB2_HADR_STANDBY_HOST, and DB2_HADR_STANDBY_CONTAINER.
 Both servers use the integration's test credentials and port 50000. Configure the
 IBM driver with ACR disabled as in the README. The test swaps the servers' roles.
 Run it separately from the ordinary suite, which needs a writable primary:
 `ddev --no-interactive test ibm_db2:py3.13-12.1.5.0 -- tests/test_hadr.py`.
+Select the matrix environment matching both servers' version (11.1.4.7, 11.5.5.1, or 12.1.5.0).
 """
 
 import os
@@ -24,11 +25,13 @@ from datadog_checks.ibm_db2 import IbmDb2Check
 from datadog_checks.ibm_db2.connection import Db2Connection
 from datadog_checks.ibm_db2.query_metrics import QueryMetricsCollector
 
+from .common import DB2_VERSION
+
 HADR_HOSTS = (os.getenv('DB2_HADR_PRIMARY_HOST'), os.getenv('DB2_HADR_STANDBY_HOST'))
 STANDBY_CONTAINER = os.getenv('DB2_HADR_STANDBY_CONTAINER')
 pytestmark = [
     pytest.mark.integration,
-    pytest.mark.skipif(not all((*HADR_HOSTS, STANDBY_CONTAINER)), reason='Requires a disposable Db2 12.1 HADR pair'),
+    pytest.mark.skipif(not all((*HADR_HOSTS, STANDBY_CONTAINER)), reason='Requires a disposable Db2 HADR pair'),
 ]
 
 
@@ -69,7 +72,10 @@ def test_fixed_server_takeover(instance: dict, aggregator: AggregatorStub):
         for job, connection in zip(jobs, connections):
             cleanup.callback(job.shutdown)
             cleanup.callback(connection.close)
-            assert ibm_db.server_info(connection.ensure_connected()).DBMS_VER.startswith('12.01.')
+            major, minor = DB2_VERSION.split('.')[:2]
+            assert ibm_db.server_info(connection.ensure_connected()).DBMS_VER.startswith(
+                f'{int(major):02}.{int(minor):02}.'
+            )
         identities = [check.database_identifier for check in checks]
         assert len(set(identities)) == 2
         host_query = 'SELECT HOST_NAME FROM SYSIBMADM.ENV_SYS_INFO'

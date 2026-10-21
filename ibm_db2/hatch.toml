@@ -3,7 +3,7 @@ base-package-features = ["deps", "db", "json"]
 
 [[envs.default.matrix]]
 python = ["3.13"]
-version = ["11.1", "11.5.5.1", "12.1.5.0"]
+version = ["11.1.4.7", "11.5.5.1", "12.1.5.0"]
 
 [envs.default.env-vars]
 IBM_DB_INSTALLER_URL = "https://agent-integrations-ci-fixtures.s3.us-east-1.amazonaws.com/fixtures/ibm-db2/"
@@ -11,7 +11,7 @@ IBM_DB_INSTALLER_URL = "https://agent-integrations-ci-fixtures.s3.us-east-1.amaz
 [envs.default.overrides]
 matrix.version.env-vars = [
   { key = "DB2_VERSION", value = "{matrix:version}" },
-  { key = "DB2_IMAGE", value = "taskana/db2:11.1", if = ["11.1"] },
+  { key = "DB2_IMAGE", value = "registry.ddbuild.io/ibm-db2:v146571149-45cdad2-11.1.4.7", if = ["11.1.4.7"] },
   { key = "DB2_IMAGE", value = "icr.io/db2_community/db2:{matrix:version}", if = ["11.5.5.1", "12.1.5.0"] },
 ]
 
