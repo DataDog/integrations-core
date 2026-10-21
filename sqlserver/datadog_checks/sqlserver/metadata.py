@@ -16,7 +16,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_ENGINE_EDITION,
     STATIC_INFO_VERSION,
 )
-from datadog_checks.sqlserver.schemas import SQLServerSchemaCollector
+from datadog_checks.sqlserver.schemas import SQLServerObjectCollector, SQLServerSchemaCollector
 from datadog_checks.sqlserver.utils import raise_if_cancelled
 from datadog_checks.sqlserver.views import SQLServerViewCollector
 
@@ -82,18 +82,24 @@ class SqlserverMetadata(DBMAsyncJob):
         self._settings_query = None
         self._time_since_last_settings_query = 0
         self._max_query_metrics = self._config.statement_metrics_config.get("max_queries", 250)
-        self._schema_collector = SQLServerSchemaCollector(check)
-        self._view_collector = SQLServerViewCollector(check)
         self._schema_config = self._config.schema_config
         self._schema_collection_interval = self._schema_config.get(
             'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
         self._last_schemas_collection_time = 0
+        self._schema_collectors = self._build_schema_collectors(check)
+
+    def _build_schema_collectors(self, check) -> list[SQLServerObjectCollector]:
+        if not self._schema_config.get('enabled', False):
+            return []
+        collectors: list[SQLServerObjectCollector] = [SQLServerSchemaCollector(check)]
+        if self._schema_config.get('collect_views', False):
+            collectors.append(SQLServerViewCollector(check))
+        return collectors
 
     def shutdown(self) -> None:
-        # Both schema collectors hold the check, so release them during teardown.
-        self._schema_collector = None
-        self._view_collector = None
+        # The schema collectors hold the check, so release them during teardown.
+        self._schema_collectors = []
         self._check = None
 
     def _close_db_conn(self):
@@ -168,16 +174,13 @@ class SqlserverMetadata(DBMAsyncJob):
         self.collect_schemas()
 
     def collect_schemas(self):
-        if not self._schema_config.get('enabled', False):
+        if not self._schema_collectors:
             return
         if time.time() - self._last_schemas_collection_time < self._schema_collection_interval:
             return
-        raise_if_cancelled(self._cancel_event)
         self._last_schemas_collection_time = time.time()
-        collectors = [self._schema_collector]
-        if self._schema_config.get('collect_views', False):
-            collectors.append(self._view_collector)
-        for collector in collectors:
+        for collector in self._schema_collectors:
+            raise_if_cancelled(self._cancel_event)
             # Each collector is a separate run, so one failing must not skip the others or stop the job loop.
             # The collector already logs the error and reports it through its status:error telemetry.
             try:

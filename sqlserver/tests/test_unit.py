@@ -200,44 +200,56 @@ def test_schema_collectors_report_separate_object_counts(
     assert expected_metric in {call.args[0] for call in check.gauge.call_args_list}
 
 
-def create_metadata_job(schema_config: dict) -> SqlserverMetadata:
-    metadata = object.__new__(SqlserverMetadata)
-    metadata._schema_config = schema_config
-    metadata._schema_collection_interval = 0
-    metadata._last_schemas_collection_time = 0
-    metadata._cancel_event = mock.Mock()
-    metadata._cancel_event.is_set.return_value = False
-    metadata._schema_collector = mock.Mock()
-    metadata._view_collector = mock.Mock()
-    return metadata
+def create_metadata_job(instance: dict, schema_config: dict) -> SqlserverMetadata:
+    check = SQLServer(CHECK_NAME, {}, [{**instance, 'dbm': True, 'collect_schemas': schema_config}])
+    return check.sql_metadata
 
 
 @pytest.mark.parametrize(
-    ('schema_config', 'views_collected'),
+    ('schema_config', 'expected_kinds'),
     [
-        ({'enabled': True}, False),
-        ({'enabled': True, 'collect_views': True}, True),
+        ({}, []),
+        ({'collect_views': True}, []),
+        ({'enabled': True}, ['sqlserver_databases']),
+        ({'enabled': True, 'collect_views': True}, ['sqlserver_databases', 'sqlserver_views']),
     ],
 )
-def test_schema_collection_collects_views_only_when_enabled(schema_config: dict, views_collected: bool):
-    metadata = create_metadata_job(schema_config)
+def test_schema_collection_builds_collectors_from_config(
+    instance_docker: dict, schema_config: dict, expected_kinds: list[str]
+):
+    metadata = create_metadata_job(instance_docker, schema_config)
+
+    assert [collector.kind for collector in metadata._schema_collectors] == expected_kinds
+
+
+@pytest.mark.parametrize('failing_index', [0, 1])
+def test_schema_collection_failure_does_not_skip_other_collectors(instance_docker: dict, failing_index: int):
+    metadata = create_metadata_job(instance_docker, {'enabled': True, 'collect_views': True})
+    for collector in metadata._schema_collectors:
+        collector.collect_schemas = mock.Mock()
+    metadata._schema_collectors[failing_index].collect_schemas.side_effect = RuntimeError("collection failed")
 
     metadata.collect_schemas()
 
-    metadata._schema_collector.collect_schemas.assert_called_once_with()
-    assert metadata._view_collector.collect_schemas.called is views_collected
+    for collector in metadata._schema_collectors:
+        collector.collect_schemas.assert_called_once_with()
 
 
-@pytest.mark.parametrize('failing_collector', ['_schema_collector', '_view_collector'])
-def test_schema_collection_failure_does_not_skip_other_collectors(failing_collector: str):
-    metadata = create_metadata_job({'enabled': True, 'collect_views': True})
-    metadata.log = mock.Mock()
-    getattr(metadata, failing_collector).collect_schemas.side_effect = RuntimeError("collection failed")
+def test_schema_collection_stops_when_cancelled_between_collectors(instance_docker: dict):
+    metadata = create_metadata_job(instance_docker, {'enabled': True, 'collect_views': True})
+    tables, views = metadata._schema_collectors
 
-    metadata.collect_schemas()
+    def cancel_during_collection():
+        metadata.cancel()
+        raise RuntimeError("connection closed")
 
-    metadata._schema_collector.collect_schemas.assert_called_once_with()
-    metadata._view_collector.collect_schemas.assert_called_once_with()
+    tables.collect_schemas = mock.Mock(side_effect=cancel_during_collection)
+    views.collect_schemas = mock.Mock()
+
+    with pytest.raises(Exception, match="Job loop cancelled"):
+        metadata.collect_schemas()
+
+    views.collect_schemas.assert_not_called()
 
 
 @pytest.mark.parametrize(
