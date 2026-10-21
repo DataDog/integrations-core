@@ -712,15 +712,13 @@ class RequestsWrapper(object):
             self.logger.debug('An unverified HTTPS request is being made to %s', url)
 
         extra_headers = options.pop('extra_headers', None)
-        if extra_headers is not None:
-            new_options['headers'] = new_options['headers'].copy()
-            new_options['headers'].update(extra_headers)
 
         if is_uds_url(url):
             persist = True  # UDS support is only enabled on the shared session.
             url = quote_uds_url(url)
 
         self.handle_auth_token(method=method, url=url, default_options=self.options)
+        request_options = self._with_extra_headers(new_options, extra_headers)
 
         with ExitStack() as stack:
             for hook in self.request_hooks:
@@ -733,16 +731,26 @@ class RequestsWrapper(object):
 
             if self.auth_token_handler:
                 try:
-                    response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
+                    response = self.make_request_aia_chasing(request_method, method, url, request_options, persist)
                     response.raise_for_status()
                 except Exception as e:
                     self.logger.debug('Renewing auth token, as an error occurred: %s', e)
                     self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
-                    response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
+                    request_options = self._with_extra_headers(new_options, extra_headers)
+                    response = self.make_request_aia_chasing(request_method, method, url, request_options, persist)
             else:
-                response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
+                response = self.make_request_aia_chasing(request_method, method, url, request_options, persist)
 
             return ResponseWrapper(response, self.request_size, self.max_line_size)
+
+    @staticmethod
+    def _with_extra_headers(options, extra_headers):
+        # Merge at send time, because the auth token writer updates the default headers in place.
+        if extra_headers is None:
+            return options
+        headers = options['headers'].copy()
+        headers.update(extra_headers)
+        return options.new_child({'headers': headers})
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
         try:
