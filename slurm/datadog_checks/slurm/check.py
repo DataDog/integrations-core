@@ -44,9 +44,11 @@ from .job_events import (
     NO_PENDING_REASON,
     SACCT_JOB_EVENT_DONE_STATES,
     SACCT_JOB_EVENT_IDS_PER_QUERY,
+    SACCT_JOB_EVENT_MAX_LOOKBACK,
     SACCT_JOB_EVENT_PARAMS,
     SACCT_JOB_EVENT_WINDOW_OVERLAP,
     SacctJob,
+    array_job_id,
     job_event_tags,
     job_event_text,
     job_event_title,
@@ -257,21 +259,31 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         lookback = SACCT_JOB_EVENT_WINDOW_OVERLAP
         if self._job_events_last_poll is not None:
             lookback += int(poll_time - self._job_events_last_poll)
+        # Jobs that ended in the uncovered part of a longer gap are only reported if they were already known.
+        lookback = min(lookback, SACCT_JOB_EVENT_MAX_LOOKBACK)
         current_state = self._run_sacct_job_events([f'--starttime=now-{lookback}seconds'])
         if current_state is None:
             # Keep the previous state and poll time so the next poll covers this window too.
             return
 
         # The time window only returns jobs that were eligible to run during it, which leaves out held jobs, jobs
-        # waiting on a dependency or a begin time, and jobs cancelled in those states. Query those by ID: jobs
-        # that were alive in the previous poll, and pending jobs that squeue reports.
+        # waiting on a dependency or a begin time, and jobs cancelled in those states. Known jobs that squeue still
+        # reports as pending keep their previous record; the rest of the jobs missing from the window are queried
+        # by ID: those squeue reports as pending for the first time, and alive jobs that squeue no longer reports.
+        squeue_pending = self._squeue_pending_reasons
         window_ids = {job.job_id_raw for job in current_state.values()}
-        missing_ids = {
-            job.job_id_raw
-            for job in (self._job_event_state or {}).values()
-            if job.state not in SACCT_JOB_EVENT_DONE_STATES and job.job_id_raw not in window_ids
-        }
-        missing_ids.update(set(self._squeue_pending_reasons or {}) - window_ids)
+        known_ids = set()
+        missing_ids = set()
+        for key, job in (self._job_event_state or {}).items():
+            known_ids.add(job.job_id_raw)
+            if job.state in SACCT_JOB_EVENT_DONE_STATES or job.job_id_raw in window_ids:
+                continue
+            if squeue_pending is not None and job.job_id_raw in squeue_pending:
+                current_state[key] = job
+            else:
+                missing_ids.add(job.job_id_raw)
+        if squeue_pending is not None:
+            missing_ids.update(set(squeue_pending) - window_ids - known_ids)
 
         sorted_ids = sorted(missing_ids)
         for i in range(0, len(sorted_ids), SACCT_JOB_EVENT_IDS_PER_QUERY):
@@ -327,11 +339,18 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         if previous_state is None:
             return
 
+        # Each array task gets a record of its own once it is scheduled, but the array is submitted only once.
+        seen_arrays = {array_id for job in previous_state.values() if (array_id := array_job_id(job.job_id))}
         for key, job in current_state.items():
             previous = previous_state.get(key)
             reason = current_reasons.get(key)
+            array_id = array_job_id(job.job_id)
             for transition in job_transitions(previous, job):
+                if transition == 'submitted' and array_id in seen_arrays:
+                    continue
                 self.submit_job_event(transition, job, now, reason if transition == 'submitted' else None)
+            if array_id:
+                seen_arrays.add(array_id)
 
             # New jobs carry their reason in the submitted event; afterwards, only reason changes are reported.
             if squeue_reasons is not None and previous is not None and reason and reason != previous_reasons.get(key):

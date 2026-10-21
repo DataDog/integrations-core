@@ -145,30 +145,33 @@ See [metadata.csv][6] for a list of metrics provided by this integration.
 
 When `collect_job_events` is enabled and GPU monitoring is enabled in the Agent (`gpu.enabled: true`), the Slurm
 integration polls `sacct` for jobs active since the previous check run and sends Datadog events for job lifecycle
-transitions:
+transitions. The transition is in the `slurm_job_transition` tag:
 
-- `slurm.job.submitted`: a job appears after the check has initialized its state.
-- `slurm.job.pending`: the pending reason of a job changes, for example from `Priority` to `QOSMaxGRESPerUser`.
-  Reasons that are part of normal scheduling (`Priority`, `Resources`, `Dependency`, `BeginTime`) are sent as `info`,
-  any other reason as `warning`.
-- `slurm.job.started`: the job starts running, or starts again after a requeue. The event includes the queued wait time.
-- `slurm.job.finished`: the job reaches a terminal state (`COMPLETED`, `FAILED`, `CANCELLED`, `TIMEOUT`,
-  `OUT_OF_MEMORY`, `NODE_FAIL`, `BOOT_FAIL` or `DEADLINE`).
-- `slurm.job.preempted`, `slurm.job.requeued`, `slurm.job.suspended`: the job enters the matching state.
+- Submitted (`slurm_job_transition:submitted`): a job appears after the check has initialized its state. A job array
+  is reported once, not once per task.
+- Pending (`slurm_job_transition:pending`): the pending reason of a job changes, for example from `Priority` to
+  `QOSMaxGRESPerUser`. Reasons that are part of normal scheduling (`Priority`, `Resources`, `Dependency`, `BeginTime`)
+  are sent as `info`, any other reason as `warning`.
+- Started (`slurm_job_transition:started`): the job starts running, or starts again after a requeue. The event includes
+  the queued wait time.
+- Finished (`slurm_job_transition:finished`): the job reaches a terminal state (`COMPLETED`, `FAILED`, `CANCELLED`,
+  `TIMEOUT`, `OUT_OF_MEMORY`, `NODE_FAIL`, `BOOT_FAIL` or `DEADLINE`).
+- Preempted, requeued and suspended (`slurm_job_transition:preempted`, `requeued` and `suspended`): the job enters the
+  matching state.
 
-Jobs that start and finish between two check runs still produce all of their events. Use the `slurm_job_transition`
-tag (`submitted`, `pending`, `started`, `finished`, `preempted`, `requeued`, `suspended`) to filter events by type.
-Events are tagged with the job ID, name, user, account, partition, QOS, cluster, state, transition, and GPU count when
-GPUs are requested. Started and finished events include the node list, finished events include the exit code, and
-submitted and pending events include the pending reason (`slurm_job_reason`).
+Jobs that start and finish between two check runs still produce all of their events. Events are tagged with the job
+ID, name, user, account, partition, QOS, cluster, state, transition, and GPU count when GPUs are requested. Started and
+finished events include the node list, finished events include the exit code, and submitted and pending events include
+the pending reason (`slurm_job_reason`).
 
 The `sacct` time window only returns jobs that were eligible to run during it. Held jobs, jobs waiting on a
-dependency or a begin time, and jobs cancelled in those states are queried by ID instead, when they were seen in a
-previous check run or are reported as pending by `squeue`.
+dependency or a begin time, and jobs cancelled in those states are queried by ID instead, when they are reported as
+pending by `squeue` for the first time, or when a known job is no longer reported by `squeue`. The window covers at
+most the last hour: after a longer interruption, only jobs that were already known are reported for that gap.
 
 The first collection run seeds the job state and does not emit events for already existing jobs. Job events require
-Slurm accounting (`slurmdbd`). `sacct` does not report pending reasons, so they are taken from `squeue` and are only
-available when `collect_squeue_stats` is enabled.
+Slurm accounting (`slurmdbd`). The `sacct` command does not report pending reasons, so they are taken from `squeue` and
+are only available when `collect_squeue_stats` is enabled.
 
 ## Troubleshooting
 

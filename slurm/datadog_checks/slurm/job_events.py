@@ -34,6 +34,9 @@ SACCT_JOB_EVENT_PARAMS = ['-anXP', '-o', ','.join(SACCT_JOB_EVENT_FIELDS)]
 # after that poll are not missed. Already seen transitions are deduplicated against the stored state.
 SACCT_JOB_EVENT_WINDOW_OVERLAP = 60
 
+# Upper bound of the poll window, so that the first poll after a long sacct outage stays cheap.
+SACCT_JOB_EVENT_MAX_LOOKBACK = 3600
+
 # Jobs missing from the poll window are queried by ID in batches, to keep the command line short.
 SACCT_JOB_EVENT_IDS_PER_QUERY = 500
 
@@ -174,6 +177,12 @@ class SacctJob:
     @property
     def gpus(self) -> int:
         return gpu_count(self.alloc_tres) or gpu_count(self.req_tres)
+
+
+def array_job_id(job_id: str) -> str | None:
+    # Array tasks are listed as '<array>_<task>', and their pending remainder as '<array>_[<tasks>]'.
+    array_id, sep, _ = job_id.partition('_')
+    return array_id if sep else None
 
 
 def job_transitions(previous: SacctJob | None, current: SacctJob) -> list[str]:

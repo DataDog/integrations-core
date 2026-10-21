@@ -9,6 +9,7 @@ from datadog_checks.slurm import SlurmCheck
 from datadog_checks.slurm.job_events import (
     SACCT_JOB_EVENT_FIELDS,
     SACCT_JOB_EVENT_IDS_PER_QUERY,
+    SACCT_JOB_EVENT_MAX_LOOKBACK,
     SACCT_JOB_EVENT_PARAMS,
     SACCT_JOB_EVENT_WINDOW_OVERLAP,
     SacctJob,
@@ -144,6 +145,10 @@ def test_job_events_poll_window(mock_output, events_instance):
         mock_output.return_value = ('', '', 0)
         check.collect_sacct_job_events()
     mock_output.assert_called_with(base_cmd + [f'--starttime=now-{SACCT_JOB_EVENT_WINDOW_OVERLAP + 60}seconds'])
+
+    with mock.patch('datadog_checks.slurm.check.time.time', return_value=1060.0 + 10 * 3600):
+        check.collect_sacct_job_events()
+    mock_output.assert_called_with(base_cmd + [f'--starttime=now-{SACCT_JOB_EVENT_MAX_LOOKBACK}seconds'])
 
 
 @pytest.mark.usefixtures('gpu_monitoring_enabled')
@@ -338,20 +343,23 @@ def test_job_events_pending_reason_from_squeue_run(events_instance, aggregator, 
 
 
 @pytest.mark.usefixtures('gpu_monitoring_enabled')
-def test_job_events_held_job_queried_by_id(events_instance, aggregator):
+def test_job_events_held_job_queried_by_id_once_gone_from_squeue(events_instance, aggregator):
     check = SlurmCheck('slurm', {}, [events_instance])
     sacct = FakeSacct()
     pending = [sacct_line('1', 'PENDING')]
 
     poll(check, sacct, window=sacct_output(*pending), reasons={'1': 'Resources'})
-    # Holding the job removes it from the time window.
-    poll(check, sacct, by_id={'1': pending}, reasons={'1': 'JobHeldUser'})
-    assert sacct.queried_ids == [['1']]
+    # Holding the job removes it from the time window, while squeue still reports it as pending.
+    poll(check, sacct, reasons={'1': 'JobHeldUser'})
+    poll(check, sacct, reasons={'1': 'JobHeldUser'})
+    assert sacct.queried_ids == []
     poll(
         check,
         sacct,
         by_id={'1': [sacct_line('1', 'CANCELLED by 1001', start='None', end='2026-10-21T12:05:00')]},
+        reasons={},
     )
+    assert sacct.queried_ids == [['1']]
 
     assert [(e['msg_title'], e['alert_type']) for e in aggregator.events] == [
         ('Slurm job 1 (train) pending: JobHeldUser', 'warning'),
@@ -370,10 +378,36 @@ def test_job_events_pending_jobs_discovered_from_squeue(events_instance, aggrega
 
     poll(check, sacct, reasons={})
     poll(check, sacct, by_id={'5': [sacct_line('5', 'PENDING')]}, reasons={'5': 'Dependency'})
+    assert sacct.queried_ids == [['5']]
+    poll(check, sacct, reasons={'5': 'Dependency'})
+    assert sacct.queried_ids == []
 
     [event] = aggregator.events
     assert event['msg_title'] == 'Slurm job 5 (train) submitted'
     assert 'slurm_job_reason:Dependency' in event['tags']
+
+
+@pytest.mark.usefixtures('gpu_monitoring_enabled')
+def test_job_events_array_submitted_once(events_instance, aggregator):
+    check = SlurmCheck('slurm', {}, [events_instance])
+    run_polls(
+        check,
+        sacct_output(sacct_line('30', 'PENDING', JobID='30_[1-3]')),
+        sacct_output(
+            sacct_line('30', 'PENDING', JobID='30_[2-3]'),
+            sacct_line('31', 'RUNNING', start='2026-10-21T12:01:00', JobID='30_1'),
+            # An array first seen with all of its tasks already scheduled.
+            sacct_line('40', 'RUNNING', start='2026-10-21T12:01:00', JobID='40_1'),
+            sacct_line('41', 'RUNNING', start='2026-10-21T12:01:00', JobID='40_2'),
+        ),
+    )
+
+    assert [e['msg_title'] for e in aggregator.events] == [
+        'Slurm job 30_1 (train) started',
+        'Slurm job 40_1 (train) submitted',
+        'Slurm job 40_1 (train) started',
+        'Slurm job 40_2 (train) started',
+    ]
 
 
 @pytest.mark.usefixtures('gpu_monitoring_enabled')
