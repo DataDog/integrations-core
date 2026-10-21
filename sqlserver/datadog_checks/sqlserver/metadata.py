@@ -174,9 +174,13 @@ class SqlserverMetadata(DBMAsyncJob):
             return
         raise_if_cancelled(self._cancel_event)
         self._last_schemas_collection_time = time.time()
-        # Views are a separate collection run, so a table collection failure must not skip them.
-        try:
-            self._schema_collector.collect_schemas()
-        finally:
-            if self._schema_config.get('collect_views', False):
-                self._view_collector.collect_schemas()
+        collectors = [self._schema_collector]
+        if self._schema_config.get('collect_views', False):
+            collectors.append(self._view_collector)
+        for collector in collectors:
+            # Each collector is a separate run, so one failing must not skip the others or stop the job loop.
+            # The collector already logs the error and reports it through its status:error telemetry.
+            try:
+                collector.collect_schemas()
+            except Exception as e:
+                self.log.debug("Skipped remaining %s collection after error: %s", collector.kind, e)

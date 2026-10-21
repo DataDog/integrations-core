@@ -228,13 +228,15 @@ def test_schema_collection_collects_views_only_when_enabled(schema_config: dict,
     assert metadata._view_collector.collect_schemas.called is views_collected
 
 
-def test_schema_collection_collects_views_when_table_collection_fails():
+@pytest.mark.parametrize('failing_collector', ['_schema_collector', '_view_collector'])
+def test_schema_collection_failure_does_not_skip_other_collectors(failing_collector: str):
     metadata = create_metadata_job({'enabled': True, 'collect_views': True})
-    metadata._schema_collector.collect_schemas.side_effect = RuntimeError("table collection failed")
+    metadata.log = mock.Mock()
+    getattr(metadata, failing_collector).collect_schemas.side_effect = RuntimeError("collection failed")
 
-    with pytest.raises(RuntimeError, match="table collection failed"):
-        metadata.collect_schemas()
+    metadata.collect_schemas()
 
+    metadata._schema_collector.collect_schemas.assert_called_once_with()
     metadata._view_collector.collect_schemas.assert_called_once_with()
 
 
