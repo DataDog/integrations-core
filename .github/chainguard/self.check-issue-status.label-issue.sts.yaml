@@ -1,9 +1,9 @@
 # Trust policy for the check-issue-status workflow in DataDog/integrations-core
 #
 # This policy grants the workflow permission to remove the 'pending' and
-# 'waiting-on-author' labels from issues when the expected party comments:
+# 'waiting on author' labels from issues when the expected party comments:
 #   - a Datadog member commenting removes 'pending'
-#   - the issue author (non-member) commenting removes 'waiting-on-author'
+#   - the issue author (non-member) commenting removes 'waiting on author'
 #
 # Naming convention:
 #   self:                Only this repository (DataDog/integrations-core) can use this policy

@@ -17,11 +17,11 @@ jobs:
   check_comment:
     runs-on: ubuntu-latest
     # Process every issue comment, and comments on pull requests only when they carry
-    # the waiting-on-author label: the author replying to their PR removes the label
+    # the waiting on author label: the author replying to their PR removes the label
     # (like on issues), without running the job on the whole PR comment traffic.
     if: >-
       github.event.issue.pull_request == null ||
-      contains(github.event.issue.labels.*.name, 'waiting-on-author')
+      contains(github.event.issue.labels.*.name, 'waiting on author')
     permissions:
       id-token: write # Required for OIDC token federation with dd-octo-sts
     steps:
@@ -78,7 +78,7 @@ jobs:
               return;
             }
 
-            // The waiting-on-author label is removed when the author replies, whoever
+            // The waiting on author label is removed when the author replies, whoever
             // they are: comments from other people (including datadog members) do not
             // count as the author responding.
             if (commenter.login === issueAuthor) {
@@ -125,7 +125,7 @@ jobs:
               }
             }
 
-      - name: Remove the waiting-on-author label when the author comments
+      - name: Remove the waiting on author label when the author comments
         if: steps.classify-comment.outputs.is-author == 'true'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
@@ -140,7 +140,7 @@ jobs:
               issue_number: issueNumber
             });
             for (const label of labels.data) {
-              if (label.name === 'waiting-on-author') {
+              if (label.name === 'waiting on author') {
                 await github.rest.issues.removeLabel({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
