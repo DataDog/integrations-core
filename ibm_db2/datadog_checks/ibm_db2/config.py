@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import TYPE_CHECKING
 
 from datadog_checks.base import is_affirmative
@@ -26,12 +27,16 @@ def build_config(check: IbmDb2Check) -> InstanceConfig:
     instance = check.instance
     init_config = check.init_config
     args = dict(instance)
-    args['query_metrics'] = {
-        'enabled': True,
-        'collection_interval': 10,
-        'query_timeout': 10,
-        **instance.get('query_metrics', {}),
-    }
+    query_metrics = instance.get('query_metrics')
+    if query_metrics is None:
+        query_metrics = {}
+    if isinstance(query_metrics, Mapping):
+        args['query_metrics'] = {
+            'enabled': True,
+            'collection_interval': 10,
+            'query_timeout': 10,
+            **query_metrics,
+        }
 
     custom_queries = list(instance.get('custom_queries', []))
     use_global_custom_queries = instance.get('use_global_custom_queries', True)

@@ -8,6 +8,7 @@ import mock
 import pytest
 from cachetools import TTLCache
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.query_metrics import ObfuscationResult
@@ -135,11 +136,30 @@ def test_query_metrics_oversized_row(instance: dict, monkeypatch: pytest.MonkeyP
     )
 
 
-@pytest.mark.parametrize('enabled', [True, False])
-def test_query_metrics_collection_controls(instance: dict, monkeypatch: pytest.MonkeyPatch, enabled: bool):
+@pytest.mark.parametrize('query_metrics_config', [False, [], 0, ''])
+def test_invalid_query_metrics_config(instance: dict, query_metrics_config: object):
+    """Invalid query-metrics settings must fail initialization instead of enabling collection."""
+    instance.update(dbm=True, query_metrics=query_metrics_config)
+    with pytest.raises(ConfigurationError, match='query_metrics'):
+        IbmDb2Check('ibm_db2', {}, [instance])
+
+
+@pytest.mark.parametrize(
+    'config, enabled, interval',
+    [
+        ({}, True, 10),
+        ({'query_metrics': None}, True, 10),
+        ({'query_metrics': {}}, True, 10),
+        ({'query_metrics': {'enabled': True, 'collection_interval': 30}}, True, 30),
+        ({'query_metrics': {'enabled': False, 'collection_interval': 30}}, False, 30),
+    ],
+)
+def test_query_metrics_collection_controls(
+    instance: dict, monkeypatch: pytest.MonkeyPatch, config: dict, enabled: bool, interval: int
+):
     """Disabling metrics prevents collection; enabled jobs respect the configured cadence."""
     monkeypatch.setenv('DBM_THREADED_JOB_RUN_SYNC', 'true')
-    instance.update(dbm=True, query_metrics={'enabled': enabled, 'collection_interval': 30})
+    instance.update(dbm=True, **config)
     collector = IbmDb2Check('ibm_db2', {}, [instance])._query_metrics
     with (
         mock.patch.object(collector, 'run_job') as collect,
@@ -147,20 +167,26 @@ def test_query_metrics_collection_controls(instance: dict, monkeypatch: pytest.M
     ):
         collector.run_job_loop([])
         assert collect.call_count == int(enabled)
-        clock.return_value = 129
+        clock.return_value = 100 + interval - 1
         collector.run_job_loop([])
         assert collect.call_count == int(enabled)
-        clock.return_value = 130
+        clock.return_value = 100 + interval
         collector.run_job_loop([])
         assert collect.call_count == 2 * int(enabled)
 
 
-@pytest.mark.parametrize('timeout', [None, 7])
-def test_query_metrics_statement_timeout(instance: dict, timeout: int | None):
+@pytest.mark.parametrize(
+    'config, timeout',
+    [
+        ({}, 10),
+        ({'query_metrics': None}, 10),
+        ({'query_metrics': {}}, 10),
+        ({'query_metrics': {'query_timeout': 7}}, 7),
+    ],
+)
+def test_query_metrics_statement_timeout(instance: dict, config: dict, timeout: int):
     """Both counter scans and text lookups apply the default or configured driver timeout."""
-    instance['dbm'] = True
-    if timeout is not None:
-        instance['query_metrics'] = {'query_timeout': timeout}
+    instance.update(dbm=True, **config)
     collector = IbmDb2Check('ibm_db2', {}, [instance])._query_metrics
     with (
         mock.patch.object(collector._connection, 'ensure_connected'),
@@ -173,7 +199,7 @@ def test_query_metrics_statement_timeout(instance: dict, timeout: int | None):
         collector._fetch_statement_texts({(0, '01', datetime(2026, 1, 1))})
     assert len(prepare.call_args_list) == 2
     for call in prepare.call_args_list:
-        assert call.args[2] == {query_metrics.ibm_db.SQL_ATTR_QUERY_TIMEOUT: timeout or 10}
+        assert call.args[2] == {query_metrics.ibm_db.SQL_ATTR_QUERY_TIMEOUT: timeout}
 
 
 def test_query_metrics_recover_after_text_lookup_failure(instance: dict, aggregator: AggregatorStub):
