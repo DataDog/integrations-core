@@ -86,6 +86,7 @@ def hadr_hosts(tmp_path_factory: pytest.TempPathFactory) -> Iterator[list[str]]:
     with docker_run(
         HADR_COMPOSE_FILE,
         conditions=conditions,
+        capture=True,
         env_vars={'COMPOSE_PROJECT_NAME': f'ibm-db2-hadr-{uuid4().hex[:8]}'},
     ):
         hosts = []

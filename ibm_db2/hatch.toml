@@ -14,7 +14,6 @@ topology = ["hadr"]
 IBM_DB_INSTALLER_URL = "https://agent-integrations-ci-fixtures.s3.us-east-1.amazonaws.com/fixtures/ibm-db2/"
 
 [envs.default.overrides]
-matrix.topology.platforms = [{ value = "linux", if = ["hadr"] }]
 matrix.topology.e2e-env = { value = false, if = ["hadr"] }
 matrix.topology.env-vars = [
   { key = "DB2_HADR", value = "true", if = ["hadr"] },
