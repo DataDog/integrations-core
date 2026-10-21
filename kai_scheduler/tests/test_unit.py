@@ -80,77 +80,145 @@ def test_queue_metrics_share_units_and_tags(dd_run_check, aggregator, instance, 
     )
 
 
-def evictions_payload(series: dict[tuple[str, str], int]) -> str:
+def evictions_payload(series: dict[str, int]) -> str:
+    """Render `kai_pod_group_evicted_pods_total`, keyed by `<podgroup>` or `<podgroup>/<action>` (default `preempt`)."""
     lines = ['# TYPE kai_pod_group_evicted_pods_total counter']
-    for (podgroup, action), value in series.items():
-        labels = f'action="{action}",namespace="default",nodepool="default",podgroup="{podgroup}",uid="{podgroup}-uid"'
+    for key, value in series.items():
+        podgroup, _, action = key.partition('/')
+        labels = (
+            f'action="{action or "preempt"}",namespace="default",nodepool="default",'
+            f'podgroup="{podgroup}",uid="{podgroup}-uid"'
+        )
         lines.append(f'kai_pod_group_evicted_pods_total{{{labels}}} {value}')
     return '\n'.join(lines) + '\n'
 
 
+def submitted_evictions(aggregator, instance_tags: list[str]) -> dict[str, float]:
+    """Return the submitted `kai.evicted_pods.count` values by action, asserting one context per action."""
+    submitted: dict[str, float] = {}
+    for metric in aggregator.metrics('kai.evicted_pods.count'):
+        action = next(tag.removeprefix('action:') for tag in metric.tags if tag.startswith('action:'))
+        assert action not in submitted, f'more than one context for action `{action}`'
+        assert sorted(metric.tags) == sorted(
+            [
+                f'endpoint:{SCHEDULER_ENDPOINT}',
+                'kai_component:scheduler',
+                *instance_tags,
+                f'action:{action}',
+                'kai_nodepool:default',
+                'kube_namespace:default',
+            ]
+        )
+        submitted[action] = metric.value
+    return submitted
+
+
+# Each case is a list of check runs: the scrape served to the run (`None` for a failed request) and the evictions
+# that run must submit, by action. Cases with a cache size of 2 exercise the fallback to summed counters.
 @pytest.mark.parametrize(
-    'cache_size, scrapes, expected',
+    'cache_size, runs',
     [
-        pytest.param(10, [{('a', 'preempt'): 3}], {'preempt': 0}, id='first scrape is a baseline'),
+        pytest.param(10, [({'a': 3}, {'preempt': 0})], id='first scrape is a baseline'),
+        pytest.param(10, [({'a': 1}, {'preempt': 0}), ({'a': 3}, {'preempt': 2})], id='increase since last scrape'),
         pytest.param(
-            10, [{('a', 'preempt'): 1}, {('a', 'preempt'): 3}], {'preempt': 2}, id='increase since last scrape'
-        ),
-        pytest.param(
-            10,
-            [{('a', 'preempt'): 1}, {('a', 'preempt'): 1, ('b', 'preempt'): 2}],
-            {'preempt': 2},
-            id='new series counts from zero',
+            10, [({'a': 1}, {'preempt': 0}), ({'a': 1, 'b': 2}, {'preempt': 2})], id='new series counts from zero'
         ),
         pytest.param(
             10,
             [
-                {('a', 'preempt'): 1, ('b', 'preempt'): 1, ('c', 'reclaim'): 1},
-                {('a', 'preempt'): 2, ('b', 'preempt'): 3, ('c', 'reclaim'): 2},
+                ({'a': 1, 'b': 1, 'c/reclaim': 1}, {'preempt': 0, 'reclaim': 0}),
+                ({'a': 2, 'b': 3, 'c/reclaim': 2}, {'preempt': 3, 'reclaim': 1}),
             ],
-            {'preempt': 3, 'reclaim': 1},
             id='pod groups summed per action',
         ),
-        pytest.param(10, [{('a', 'preempt'): 3}, {('a', 'preempt'): 1}], {'preempt': 1}, id='counter reset'),
+        pytest.param(10, [({'a': 3}, {'preempt': 0}), ({'a': 1}, {'preempt': 1})], id='counter reset'),
         pytest.param(
             10,
-            [{('a', 'preempt'): 2, ('b', 'preempt'): 2}, {('b', 'preempt'): 3}],
-            {'preempt': 1},
+            [({'a': 2, 'b': 2}, {'preempt': 0}), ({'b': 3}, {'preempt': 1})],
             id='removed series does not decrease the sum',
         ),
+        # KAI releases after v0.18.6 create each series at zero before the first eviction.
+        pytest.param(10, [({'a': 0}, {'preempt': 0}), ({'a': 2}, {'preempt': 2})], id='zero series then evicted'),
         pytest.param(
-            1,
+            10,
+            [({'a': 1}, {'preempt': 0}), (None, {}), ({'a': 3, 'b': 2}, {'preempt': 4})],
+            id='failed scrape keeps the previous values',
+        ),
+        pytest.param(
+            10,
+            [(None, {}), ({'a': 3}, {'preempt': 0}), ({'a': 4}, {'preempt': 1})],
+            id='first successful scrape is a baseline',
+        ),
+        pytest.param(
+            2,
+            [({'a': 1, 'b': 1, 'c': 1}, {'preempt': 0}), ({'a': 2, 'b': 1, 'c': 1, 'd': 1}, {'preempt': 2})],
+            id='overflow on the first scrape is a baseline',
+        ),
+        pytest.param(
+            2,
             [
-                {('a', 'preempt'): 1},
-                {('a', 'preempt'): 1, ('b', 'preempt'): 1},
-                {('a', 'preempt'): 2, ('b', 'preempt'): 1},
+                ({'a': 1, 'b': 1}, {'preempt': 0}),
+                ({'a': 2, 'b': 1, 'c': 1}, {'preempt': 2}),
+                ({'a': 3, 'b': 1, 'c': 1}, {'preempt': 1}),
             ],
-            {'preempt': 0},
-            id='series evicted from a full cache are not counted again',
+            id='overflow reports the increase of the sums',
+        ),
+        pytest.param(
+            2,
+            [({'a': 1, 'b': 1, 'c': 5}, {'preempt': 0}), ({'a': 1, 'b': 1, 'd': 1, 'e': 1}, {'preempt': 0})],
+            id='overflow never reports a decrease',
+        ),
+        # The second run fits again but its cache was cleared, so it still reports the sums while rebuilding the
+        # cache; counting its series as new would report 3. The third run is exact; reusing values cached before the
+        # overflow, or not caching during the second run, would report 3 or 5 instead of 2.
+        pytest.param(
+            2,
+            [
+                ({'a': 1, 'b': 1, 'c': 1}, {'preempt': 0}),
+                ({'a': 2, 'b': 1}, {'preempt': 0}),
+                ({'a': 3, 'b': 2}, {'preempt': 2}),
+            ],
+            id='exact counting resumes once the cache is rebuilt',
+        ),
+        # Zero series do not use the cache, so both runs are exact. Counting them would overflow the first run, and
+        # the sums would hide the increase of `b` behind the removal of `c`.
+        pytest.param(
+            2,
+            [({'a': 0, 'b': 1, 'c': 1}, {'preempt': 0}), ({'a': 0, 'b': 2}, {'preempt': 1})],
+            id='zero series do not count toward the cache size',
         ),
     ],
 )
-def test_evicted_pods(
-    dd_run_check, aggregator, mock_http_response_per_endpoint, monkeypatch, cache_size, scrapes, expected
-):
+def test_evicted_pods(dd_run_check, aggregator, mock_http_response_per_endpoint, monkeypatch, cache_size, runs):
     monkeypatch.setattr('datadog_checks.kai_scheduler.evictions.CACHE_SIZE', cache_size)
     mock_http_response_per_endpoint(
-        {SCHEDULER_ENDPOINT: [MockResponse(content=evictions_payload(series)) for series in scrapes]}
+        {
+            SCHEDULER_ENDPOINT: [
+                MockResponse(status_code=500) if series is None else MockResponse(content=evictions_payload(series))
+                for series, _ in runs
+            ]
+        }
     )
     check = KaiSchedulerCheck(CHECK_NAME, {}, [{'scheduler_endpoint': SCHEDULER_ENDPOINT, 'tags': ['test:tag']}])
 
-    for _ in scrapes:
+    for run, (series, expected) in enumerate(runs):
         aggregator.reset()
-        dd_run_check(check)
+        if series is None:
+            with pytest.raises(Exception):
+                dd_run_check(check)
+        else:
+            dd_run_check(check)
+        assert submitted_evictions(aggregator, ['test:tag']) == expected, f'run {run}'
 
-    for action, value in expected.items():
-        tags = [
-            *endpoint_tags(SCHEDULER_ENDPOINT),
-            f'action:{action}',
-            'kai_nodepool:default',
-            'kube_namespace:default',
-        ]
-        aggregator.assert_metric('kai.evicted_pods.count', value=value, count=1, tags=tags)
-    assert len(aggregator.metrics('kai.evicted_pods.count')) == len(expected)
+
+def test_evicted_pods_keep_configured_tags(dd_run_check, aggregator, mock_http_response_per_endpoint):
+    # A configured tag that shares its name with a dropped pod group label must not be dropped with it.
+    mock_http_response_per_endpoint({SCHEDULER_ENDPOINT: [MockResponse(content=evictions_payload({'a': 1}))]})
+    check = KaiSchedulerCheck(CHECK_NAME, {}, [{'scheduler_endpoint': SCHEDULER_ENDPOINT, 'tags': ['podgroup:mine']}])
+
+    dd_run_check(check)
+
+    assert submitted_evictions(aggregator, ['podgroup:mine']) == {'preempt': 0}
 
 
 def test_queue_controller_only(dd_run_check, aggregator, mock_endpoints):

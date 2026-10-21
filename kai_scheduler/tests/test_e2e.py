@@ -4,13 +4,12 @@
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev._env import e2e_testing
 from datadog_checks.kai_scheduler import KaiSchedulerCheck
 
 from .common import CHECK_NAME, INSTANCE_STATE_KEY, KUBECONFIG_STATE_KEY, live_metadata_metrics
 from .kube import delete_preemption_pods, trigger_preemption
 
-pytestmark = [pytest.mark.e2e, pytest.mark.skipif(not e2e_testing(), reason='Not running E2E tests')]
+pytestmark = [pytest.mark.e2e]
 
 
 @pytest.fixture
@@ -47,7 +46,8 @@ def test_e2e(dd_agent_check, live_instance):
         )
 
 
-def test_e2e_evicted_pods(dd_run_check, aggregator, live_instance, kubeconfig):
+def test_e2e_evicted_pods(dd_agent_check, dd_run_check, aggregator, live_instance, kubeconfig):
+    # `dd_agent_check` is requested first only so that this test is skipped outside of E2E runs.
     check = KaiSchedulerCheck(CHECK_NAME, {}, [{'scheduler_endpoint': live_instance['scheduler_endpoint']}])
     delete_preemption_pods()
     dd_run_check(check)

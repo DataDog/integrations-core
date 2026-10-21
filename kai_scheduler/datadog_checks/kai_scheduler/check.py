@@ -94,12 +94,18 @@ class KaiSchedulerCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
         scraper = self.scrapers[endpoint]
         scraper.metric_transformer.add_custom_transformer(FAIR_SHARE_MEMORY_METRIC, fair_share_memory_transformer)
-        scraper.metric_transformer.add_custom_transformer(
-            EVICTED_PODS_METRIC, EvictedPodsTransformer(self, scraper.rename_labels)
-        )
+        scraper.metric_transformer.add_custom_transformer(EVICTED_PODS_METRIC, EvictedPodsTransformer(self, scraper))
 
 
 class KaiOpenMetricsScraper(OpenMetricsScraper):
+    def __init__(self, check, config):
+        super().__init__(check, config)
+        self.scraped_successfully = False
+
+    def scrape(self):
+        super().scrape()
+        self.scraped_successfully = True
+
     def generate_sample_data(self, metric):
         # KAI emits empty strings for unset labels, such as `queue_display_name` on a queue without a display name.
         # Every tag without a value is dropped, including configured ones.
