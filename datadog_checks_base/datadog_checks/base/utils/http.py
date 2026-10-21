@@ -726,22 +726,21 @@ class RequestsWrapper(object):
         if persist is None:
             persist = self.persist_connections
 
+        new_options = ChainMap(options, self.options)
+
+        if url.startswith('https') and not self.ignore_tls_warning and not new_options['verify']:
+            self.logger.debug('An unverified HTTPS request is being made to %s', url)
+
         extra_headers = options.pop('extra_headers', None)
-        explicit_headers = options.get('headers')
+        # Without extra headers, the caller's headers, including an explicit None, reach requests unchanged.
+        if extra_headers is not None:
+            new_options['headers'] = self._merge_extra_headers(options.get('headers'), extra_headers)
 
         if is_uds_url(url):
             persist = True  # UDS support is only enabled on the shared session.
             url = quote_uds_url(url)
 
         self.handle_auth_token(method=method, url=url, default_options=self.options)
-
-        new_options = ChainMap(options, self.options)
-        # Without extra headers, the caller's headers, including an explicit None, reach requests unchanged.
-        if extra_headers is not None:
-            new_options['headers'] = self._merge_extra_headers(explicit_headers, extra_headers)
-
-        if url.startswith('https') and not self.ignore_tls_warning and not new_options['verify']:
-            self.logger.debug('An unverified HTTPS request is being made to %s', url)
 
         with ExitStack() as stack:
             for hook in self.request_hooks:
@@ -759,9 +758,6 @@ class RequestsWrapper(object):
                 except Exception as e:
                     self.logger.debug('Renewing auth token, as an error occurred: %s', e)
                     self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
-                    # Rebuild so the merged headers carry the renewed token.
-                    if extra_headers is not None:
-                        new_options['headers'] = self._merge_extra_headers(explicit_headers, extra_headers)
                     response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
             else:
                 response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)

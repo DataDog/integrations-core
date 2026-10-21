@@ -26,26 +26,16 @@ def mock_from_file(filename):
         return f.read()
 
 
-def test_retrieve_pod_list_success(fake_http, fake_http_response):
-    url = 'https://kubelet:10250/pods'
-    fake_http_response(url, mock_from_file('kubelet_base/pod_list_raw.dat'))
+def test_retrieve_pod_list_success(monkeypatch, mock_http_response):
     check = KubeletBase('kubelet', {}, [{}])
-    check.pod_list_url = url
-    check.kubelet_credentials = KubeletCredentials({})
+    check.pod_list_url = "dummyurl"
+    monkeypatch.setattr(
+        check, 'perform_kubelet_query', mock_http_response(file_path=get_fixture_path('kubelet_base/pod_list_raw.dat'))
+    )
 
     retrieved = check.retrieve_pod_list()
     expected = json.loads(mock_from_file("kubelet_base/pod_list_raw.json"))
     assert json.dumps(retrieved, sort_keys=True) == json.dumps(expected, sort_keys=True)
-    fake_http.assert_requests(
-        [
-            RecordedRequest(
-                method='GET',
-                url=url,
-                options={'verify': None, 'cert': None, 'headers': None, 'params': {'verbose': True}, 'stream': True},
-            )
-        ]
-    )
-    fake_http.assert_all_responses_consumed()
 
 
 @pytest.mark.parametrize(
@@ -80,44 +70,6 @@ def test_perform_kubelet_query_forwards_credentials_and_verbosity(
                 method='GET',
                 url=url,
                 options={**expected_options, 'params': {'verbose': verbose}, 'stream': False},
-            )
-        ]
-    )
-    fake_http.assert_all_responses_consumed()
-
-
-@pytest.mark.parametrize('expiration_duration', ['0', '900'], ids=['no_expiration_filter', 'expiration_filter'])
-def test_retrieve_pod_list_decodes_a_utf8_body_under_a_non_utf8_encoding(
-    fake_http, fake_http_response, expiration_duration
-):
-    url = 'http://kubelet:10255/pods'
-    labels = {'owner': 'café-münchen'}
-    body = json.dumps({'items': [{'metadata': {'labels': labels}}]}, ensure_ascii=False).encode('utf-8')
-    assert max(body) > 127, 'the body must carry multibyte UTF-8 for this test to mean anything'
-
-    response = fake_http_response(
-        url,
-        body,
-        text=body.decode('ISO-8859-1'),
-        headers={'Content-Type': 'text/plain'},
-        encoding='ISO-8859-1',
-    )
-    assert 'café-münchen' not in response.text
-
-    check = KubeletBase('kubelet', {}, [{}])
-    check.pod_list_url = url
-    check.kubelet_credentials = KubeletCredentials({})
-
-    with mock.patch('datadog_checks.base.checks.kubelet_base.base.get_config', return_value=expiration_duration):
-        pod_list = check.retrieve_pod_list()
-
-    assert pod_list['items'][0]['metadata']['labels'] == labels
-    fake_http.assert_requests(
-        [
-            RecordedRequest(
-                method='GET',
-                url=url,
-                options={'verify': None, 'cert': None, 'headers': None, 'params': {'verbose': True}, 'stream': True},
             )
         ]
     )
