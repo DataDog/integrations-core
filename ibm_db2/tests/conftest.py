@@ -1,7 +1,9 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from copy import deepcopy
+from pathlib import Path
 
 import ibm_db
 import pytest
@@ -11,6 +13,15 @@ from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.ibm_db2.connection import get_connection_data
 
 from .common import COMPOSE_FILE, CONFIG, E2E_METADATA
+
+
+def pytest_ignore_collect(collection_path: Path) -> bool:
+    # Takeover changes roles; HADR environments collect only that test, even with CI's own -k filter.
+    return (
+        os.getenv('DB2_HADR') == 'true'
+        and collection_path.name.startswith('test_')
+        and collection_path.name != 'test_hadr.py'
+    )
 
 
 class DbManager(object):
