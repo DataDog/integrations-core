@@ -1,4 +1,4 @@
-# Trust policy for the agent_integrations_review_bot Rapid Slack review bot (staging)
+# Trust policy for the agent_integrations_review_bot Rapid Slack review bot (prod)
 #
 # Grants a scoped, ephemeral token to the review bot's Kubernetes pod. The bot
 # coordinates PR reviews in Slack: it reads a PR's draft state, labels, body, changed
@@ -20,16 +20,14 @@
 #   list needed.
 #
 # Identity: rapid-agent-integrations/agent-integrations-review-bot k8s service
-# account, staging datacenter (us1.staging.dog). Authenticates via the sycamore
-# (Ticino) OIDC issuer, not GitHub Actions.
-#
-# Staging only for now; a follow-up policy will add prod if the bot moves there.
+# account, prod datacenter (us1.prod.dog; the bot runs as one pod there). Authenticates
+# via the sycamore (Ticino) OIDC issuer, not GitHub Actions.
 
 issuer: https://ticino.identity.local-cluster.local-dc.fabric.dog:8443/v1/issuer/sycamore
-subject_pattern: "rapid-agent-integrations\\.agent-integrations-review-bot@kubernetes\\.us1\\.staging\\.dog"
+subject_pattern: "rapid-agent-integrations\\.agent-integrations-review-bot@kubernetes\\.us1\\.prod\\.dog"
 
 claim_pattern:
-  email: "rapid-agent-integrations\\.agent-integrations-review-bot@kubernetes\\.us1\\.staging\\.dog"
+  email: "rapid-agent-integrations\\.agent-integrations-review-bot@kubernetes\\.us1\\.prod\\.dog"
 
 permissions:
   checks: read

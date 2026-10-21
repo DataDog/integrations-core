@@ -704,7 +704,6 @@ instances:
     ## Enabling this option will allow the collection and ingestion of raw query statements 
     ## into Datadog, which can then become viewable in query samples.
     ## This option is disabled by default.
-    ## Note: Collection of raw query statements is currently in preview.
     ## This option only applies when dbm is enabled.
     #
     # collect_raw_query_statement:
@@ -829,6 +828,12 @@ instances:
         #
         # enabled: false
 
+        ## @param collect_views - boolean - optional - default: false
+        ## Enable collection of SQL Server views when schema collection is enabled. View definitions are sent
+        ## as written, without obfuscation. Defaults to false.
+        #
+        # collect_views: false
+
         ## @param collection_interval - number - optional - default: 600
         ## Set the database schema collection interval (in seconds). Defaults to 600 seconds.
         #
@@ -838,6 +843,12 @@ instances:
         ## Set the maximum number of tables to collect. Defaults to 300.
         #
         # max_tables: 300
+
+        ## @param max_views - integer - optional - default: 1000
+        ## Set the maximum number of views to collect from each database when `collect_views` is enabled.
+        ## Defaults to 1000.
+        #
+        # max_views: 1000
 
         ## @param max_execution_time - number - optional - default: 10
         ## Set the maximum time for schema collection (in seconds). Defaults to 10 seconds.
