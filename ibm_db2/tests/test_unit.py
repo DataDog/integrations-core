@@ -8,6 +8,7 @@ import mock
 import pytest
 from cachetools import TTLCache
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.db.health import HealthEvent, HealthStatus
 from datadog_checks.base.utils.db.query_metrics import ObfuscationResult
@@ -133,6 +134,14 @@ def test_query_metrics_oversized_row(instance: dict, monkeypatch: pytest.MonkeyP
         hostname=check.reported_hostname,
         tags=check.debug_stats_kwargs(tags=['reason:payload_too_large'])['tags'],
     )
+
+
+@pytest.mark.parametrize('query_metrics_config', [False, [], 0, ''])
+def test_invalid_query_metrics_config(instance: dict, query_metrics_config: object):
+    """Invalid query-metrics settings must fail initialization instead of enabling collection."""
+    instance.update(dbm=True, query_metrics=query_metrics_config)
+    with pytest.raises(ConfigurationError, match='query_metrics'):
+        IbmDb2Check('ibm_db2', {}, [instance])
 
 
 @pytest.mark.parametrize(
