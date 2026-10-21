@@ -30,7 +30,7 @@ def build_config(check: IbmDb2Check) -> InstanceConfig:
         'enabled': True,
         'collection_interval': 10,
         'query_timeout': 10,
-        **instance.get('query_metrics', {}),
+        **(instance.get('query_metrics') or {}),
     }
 
     custom_queries = list(instance.get('custom_queries', []))
