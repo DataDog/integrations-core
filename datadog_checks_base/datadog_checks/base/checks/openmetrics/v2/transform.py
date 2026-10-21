@@ -22,10 +22,10 @@ class MetricTransformer:
             config.get('collect_counters_with_distributions', False)
         )
         # `collect_histograms_as_distributions` sends distributions without bound tags and implies the options below
-        self.omit_histogram_bound_tags = self.parse_collect_histograms_as_distributions(config)
+        self.collect_histograms_as_distributions = self.parse_collect_histograms_as_distributions(config)
         self.histogram_buckets_as_distributions = (
             self.collect_counters_with_distributions
-            or self.omit_histogram_bound_tags
+            or self.collect_histograms_as_distributions
             or is_affirmative(config.get('histogram_buckets_as_distributions', False))
         )
         self.collect_histogram_buckets = self.histogram_buckets_as_distributions or is_affirmative(
@@ -41,7 +41,7 @@ class MetricTransformer:
             'collect_histogram_buckets': self.collect_histogram_buckets,
             'histogram_buckets_as_distributions': self.histogram_buckets_as_distributions,
             'non_cumulative_histogram_buckets': self.non_cumulative_histogram_buckets,
-            'omit_histogram_bound_tags': self.omit_histogram_bound_tags,
+            'collect_histograms_as_distributions': self.collect_histograms_as_distributions,
             'histogram_bound_tag_prefixes': self.get_histogram_bound_tag_prefixes(config),
         }
 

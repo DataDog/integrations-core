@@ -13,6 +13,12 @@
 * Fix a bug where schemas were collected more often than ``collect_schemas.collection_interval`` when another metadata collection interval was configured lower. ([#25121](https://github.com/DataDog/integrations-core/pull/25121))
 * Fix Postgres query metrics dropping statements when plan time statistics decrease. ([#25210](https://github.com/DataDog/integrations-core/pull/25210))
 
+## 23.12.1 / 2026-10-20
+
+***Fixed***:
+
+* Qualify Postgres extension warming with schema ([#25618](https://github.com/DataDog/integrations-core/pull/25618))
+
 ## 23.12.0 / 2026-09-02 / Agent 7.84.0
 
 ***Security***:
