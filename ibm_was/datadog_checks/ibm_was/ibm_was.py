@@ -7,7 +7,6 @@ import requests
 from lxml import etree
 
 from datadog_checks.base import AgentCheck, ConfigurationError, ensure_unicode, is_affirmative
-from datadog_checks.base.utils.native_memory import malloc_trim
 
 from . import metrics, validation
 
@@ -42,15 +41,6 @@ class IbmWasCheck(AgentCheck):
             raise ConfigurationError("Please specify a servlet_url in the configuration file")
 
     def check(self, _):
-        # Parsing the PerfServlet response builds a full libxml2 tree, which frees into the
-        # calling thread's glibc arena. Checks run on a different thread each time, so without
-        # an explicit trim that memory is never reused and RSS grows by one tree per run.
-        try:
-            self._run_check()
-        finally:
-            malloc_trim()
-
-    def _run_check(self):
         data = self.make_request()
 
         try:

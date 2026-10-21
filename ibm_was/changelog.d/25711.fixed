@@ -1,1 +1,0 @@
-Call malloc_trim after each run to return the parsed XML tree's per-arena free memory to the OS and curb agent memory growth.
