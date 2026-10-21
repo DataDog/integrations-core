@@ -117,7 +117,7 @@ class SchemaCollector(ABC):
                 raw=True,
             )
             self._check.gauge(
-                self.object_count_metric_name,
+                f"dd.{self._check.dbms}.schema.tables_count",
                 self._total_rows_count,
                 tags=telemetry_tags,
                 hostname=self._check.reported_hostname,
@@ -132,10 +132,6 @@ class SchemaCollector(ABC):
             )
             self._reset()
         return True
-
-    @property
-    def object_count_metric_name(self) -> str:
-        return f"dd.{self._check.dbms}.schema.tables_count"
 
     @property
     def base_event(self):

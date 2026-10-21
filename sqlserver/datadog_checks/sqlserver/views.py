@@ -58,10 +58,6 @@ class SQLServerViewCollector(SQLServerObjectCollector):
     def kind(self) -> str:
         return "sqlserver_views"
 
-    @property
-    def object_count_metric_name(self) -> str:
-        return f"dd.{self._check.dbms}.schema.views_count"
-
     def _get_query(self) -> str:
         limit = int(self._max_views or 1_000_000)
         query = f"""

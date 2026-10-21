@@ -175,31 +175,6 @@ def test_schema_collectors_apply_their_own_object_limit(
     assert expected_limit in collector._get_query()
 
 
-@pytest.mark.parametrize(
-    ('collector_class', 'expected_metric'),
-    [
-        (SQLServerSchemaCollector, 'dd.sqlserver.schema.tables_count'),
-        (SQLServerViewCollector, 'dd.sqlserver.schema.views_count'),
-    ],
-)
-def test_schema_collectors_report_separate_object_counts(
-    collector_class: type[SQLServerObjectCollector], expected_metric: str
-):
-    check = mock.Mock()
-    check._config.schema_config = {}
-    check.log = mock.Mock()
-    check.static_info_cache = {}
-    check.dbms = 'sqlserver'
-    check.tags = []
-    check.reported_hostname = 'test-host'
-    collector = collector_class(check)
-    collector._get_databases = mock.Mock(return_value=[])
-
-    collector.collect_schemas()
-
-    assert expected_metric in {call.args[0] for call in check.gauge.call_args_list}
-
-
 def create_metadata_job(schema_config: dict) -> SqlserverMetadata:
     metadata = object.__new__(SqlserverMetadata)
     metadata._schema_config = schema_config
