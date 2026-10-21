@@ -1,0 +1,53 @@
+name: KAI Scheduler
+fleet_configurable: true
+files:
+- name: kai_scheduler.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - name: scheduler_endpoint
+      description: |
+        Endpoint exposing the KAI scheduler's Prometheus metrics. The scheduler serves scheduling cycle, action,
+        preemption, and queue fair share metrics.
+      fleet_configurable: true
+      value:
+        display_default: null
+        example: http://kai-scheduler-default.kai-scheduler.svc:8080/metrics
+        type: string
+    - name: queue_controller_endpoint
+      description: |
+        Endpoint exposing the KAI queue-controller's Prometheus metrics. The queue-controller serves queue quota and
+        allocation metrics.
+      fleet_configurable: true
+      value:
+        display_default: null
+        example: http://queue-controller.kai-scheduler.svc:8080/metrics
+        type: string
+    - name: binder_endpoint
+      description: |
+        Endpoint exposing the KAI binder's Prometheus metrics. The binder only serves generic controller-runtime,
+        Go, and process metrics.
+      fleet_configurable: true
+      value:
+        display_default: null
+        example: http://binder.kai-scheduler.svc:8080/metrics
+        type: string
+    - name: cluster_check
+      description: |
+        Set to true when configuring this integration as a Cluster Agent cluster check.
+      value:
+        type: boolean
+        example: true
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.required: false
+        openmetrics_endpoint.hidden: true
+        histogram_buckets_as_distributions.value.example: true
+  - template: logs
+    example:
+    - type: docker
+      source: kai_scheduler
+      service: <SERVICE>
