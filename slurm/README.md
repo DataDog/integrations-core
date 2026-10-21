@@ -162,7 +162,7 @@ Events are tagged with the job ID, name, user, account, partition, QOS, cluster,
 GPUs are requested. Started and finished events include the node list, finished events include the exit code, and
 submitted and pending events include the pending reason (`slurm_job_reason`).
 
-`sacct` only returns jobs that were eligible to run during the polled time window. Held jobs, jobs waiting on a
+The `sacct` time window only returns jobs that were eligible to run during it. Held jobs, jobs waiting on a
 dependency or a begin time, and jobs cancelled in those states are queried by ID instead, when they were seen in a
 previous check run or are reported as pending by `squeue`.
 

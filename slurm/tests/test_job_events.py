@@ -78,8 +78,13 @@ class FakeSacct:
         self.by_id = {}
         self.queried_ids = []
         self.fail_id_queries = False
+        self.squeue = ''
 
     def __call__(self, cmd):
+        if cmd[0].endswith('squeue'):
+            return self.squeue, '', 0
+        if not cmd[0].endswith('sacct') or '-anXP' not in cmd:
+            return '', '', 0
         if '-j' not in cmd:
             return self.window, '', 0
         if self.fail_id_queries:
@@ -99,30 +104,25 @@ def poll(check, sacct, window='', by_id=None, reasons=None):
 
 
 @pytest.mark.parametrize(
-    'collect_job_events, gpu_enabled, expected',
+    'collect_job_events, gpu_enabled, polled',
     [
         pytest.param(True, True, True, id='flag and gpu enabled'),
         pytest.param(True, False, False, id='gpu disabled'),
         pytest.param(False, True, False, id='flag disabled'),
     ],
 )
-def test_job_events_gated_by_gpu_monitoring(instance, datadog_agent, caplog, collect_job_events, gpu_enabled, expected):
+@mock.patch('datadog_checks.slurm.check.get_subprocess_output')
+def test_job_events_gated_by_gpu_monitoring(
+    mock_output, instance, datadog_agent, dd_run_check, caplog, collect_job_events, gpu_enabled, polled
+):
+    mock_output.return_value = ('', '', 0)
     instance['collect_job_events'] = collect_job_events
     with mock.patch.dict(datadog_agent._config, {'gpu.enabled': gpu_enabled}):
         check = SlurmCheck('slurm', {}, [instance])
-
-    assert check.collect_job_events is expected
-    assert ('requires GPU monitoring' in caplog.text) is (collect_job_events and not gpu_enabled)
-
-
-@mock.patch('datadog_checks.slurm.check.get_subprocess_output')
-def test_job_events_not_polled_when_gpu_disabled(mock_output, events_instance, datadog_agent, dd_run_check):
-    mock_output.return_value = ('', '', 0)
-    with mock.patch.dict(datadog_agent._config, {'gpu.enabled': False}):
-        check = SlurmCheck('slurm', {}, [events_instance])
     dd_run_check(check)
 
-    assert not any('-anXP' in call.args[0] for call in mock_output.call_args_list)
+    assert any('-anXP' in call.args[0] for call in mock_output.call_args_list) is polled
+    assert ('requires GPU monitoring' in caplog.text) is (collect_job_events and not gpu_enabled)
 
 
 @pytest.mark.usefixtures('gpu_monitoring_enabled')
@@ -321,20 +321,20 @@ def test_job_events_pending_reason_changes(events_instance, aggregator):
 
 
 @pytest.mark.usefixtures('gpu_monitoring_enabled')
-def test_squeue_collects_pending_reasons(events_instance):
+def test_job_events_pending_reason_from_squeue_run(events_instance, aggregator, dd_run_check):
     events_instance['collect_squeue_stats'] = True
     check = SlurmCheck('slurm', {}, [events_instance])
-    check.process_squeue(mock_output_file('squeue.txt'))
+    sacct = FakeSacct()
+    sacct.window = sacct_output(sacct_line('45', 'PENDING'))
 
-    assert check._squeue_pending_reasons == {'45': 'Resources', '46': 'Priority'}
+    with mock.patch('datadog_checks.slurm.check.get_subprocess_output', side_effect=sacct):
+        sacct.squeue = '45|root|train|PENDING||1|(Priority)|gres/gpu:2|gpu\n'
+        dd_run_check(check)
+        sacct.squeue = mock_output_file('squeue.txt')
+        dd_run_check(check)
 
-
-def test_squeue_does_not_collect_pending_reasons_without_job_events(instance):
-    instance['collect_squeue_stats'] = True
-    check = SlurmCheck('slurm', {}, [instance])
-    check.process_squeue(mock_output_file('squeue.txt'))
-
-    assert check._squeue_pending_reasons is None
+    [event] = aggregator.events
+    assert event['msg_title'] == 'Slurm job 45 (train) pending: Resources'
 
 
 @pytest.mark.usefixtures('gpu_monitoring_enabled')
@@ -410,12 +410,11 @@ def test_job_events_failed_id_query_keeps_state(events_instance, aggregator):
     pending = [sacct_line('1', 'PENDING')]
 
     poll(check, sacct, window=sacct_output(*pending))
-    last_poll = check._job_events_last_poll
     sacct.fail_id_queries = True
     poll(check, sacct)
-    assert check._job_events_last_poll == last_poll
     sacct.fail_id_queries = False
-    poll(check, sacct, by_id={'1': pending})
+    # Had the failed poll replaced the state, the job would be reported as newly submitted.
+    poll(check, sacct, window=sacct_output(*pending))
 
     assert aggregator.events == []
 
