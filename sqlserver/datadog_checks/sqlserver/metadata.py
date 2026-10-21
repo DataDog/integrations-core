@@ -156,7 +156,7 @@ class SqlserverMetadata(DBMAsyncJob):
                         self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
                         self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
                     ),
-                    "tags": self._check.tag_manager.get_tags(),
+                    "tags": self._check.tag_manager.get_tags(include_internal=False, include_db=False),
                     "timestamp": time.time() * 1000,
                     "cloud_metadata": self._check.cloud_metadata,
                     "metadata": settings_rows,

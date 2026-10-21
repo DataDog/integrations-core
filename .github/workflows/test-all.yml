@@ -2829,6 +2829,10 @@ jobs:
         - py3.13-8.0-shard
         - py3.13-8.0-auth
         - py3.13-8.0-tls
+        - py3.13-9.0-standalone
+        - py3.13-9.0-shard
+        - py3.13-9.0-auth
+        - py3.13-9.0-tls
         - py3.13-8.0-standalone-newyork
       fail-fast: false
   j211906c:

@@ -81,6 +81,7 @@ class GitHubMonitor:
             fields['reason'] = last.fault
             if last.response is not None:
                 fields['status_code'] = last.response.status_code
+        self._metrics.count('requests.failed', 1, status_code=fields.get('status_code'))
         self._logger.error(
             'GitHub request failed',
             method=failure.method,
