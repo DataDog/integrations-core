@@ -36,15 +36,17 @@ The target integration is given as the argument (`/onboard-evalya <integration>`
 The coverage target is the metrics the integration puts in front of users: everything referenced
 in its OOTB **dashboards** (`assets/dashboards/*.json`) and its recommended **monitors**
 (`assets/monitors/*.json`). Monitors routinely alert on metrics no dashboard plots, so they are a
-first-class input, not an afterthought. Run the extractor (policy: **all** dashboard + monitor
-metrics). Check the extractor first, then run it:
+first-class input, not an afterthought. From the repository root, test the extractor, then run it
+(policy: **all** dashboard + monitor metrics):
 
 ```shell
 python3 .claude/skills/onboard-evalya/scripts/test_asset_metrics.py
 python3 .claude/skills/onboard-evalya/scripts/asset_metrics.py <integration>
 ```
 
-If the tests fail, stop and report it: the coverage target would be wrong.
+If the tests fail, stop and report it: the coverage target may be wrong. The extractor resolves
+`<integration>` against the current directory and exits `0` even when nothing is found, so empty
+`dashboards` and `monitors` lists mean a wrong path or an integration with no assets; stop and ask.
 
 It prints `target` (the union of metrics across both asset types), `by_source` (which metrics came
 from dashboards vs monitors, so you can see what monitors added), `in_metadata` (with type), and
@@ -117,10 +119,11 @@ Follow `references/redis-exemplar.md`. Produce, under `<integration>/tests/`:
      and have the broker, the healthcheck, `seed`, and `activity-gen` all read that one var, so it
      stays consistent in one place. Prefer this to a bare hardcoded literal, which runs as-is but
      can't be overridden without editing the compose.
-2. An **`activity-gen.sh`** that loops the rate/counter workload, consumes the connection details
-   from the `provides.*` env, supports `ACTIVITY_GEN=0` (idle but alive) and a duration cap, and
-   logs progress. Keep it POSIX `sh`.
-3. **`tests/evalya.yaml`** with a `<integration>-full` task referencing the compose entrypoint
+2. An **`activity-gen.sh`** that loops the rate/counter workload, reads the connection details
+   from its compose `environment:` (same variable names as the `provides.*` labels), supports
+   `ACTIVITY_GEN=0` (idle but alive) and a duration cap, and logs progress. Keep it POSIX `sh`.
+3. **`tests/evalya.yaml`** with a `<integration>-full` task (use the service name when it differs
+   from the integration's, e.g. `redis-full` for `redisdb`) referencing the compose entrypoint
    service (`./compose/<file>.compose@<service>`), with:
    - `labels`: `evalya.io/publish: "true"` and `evalya.io/provides.<VAR>` for host, port, **and the
      credentials** (`{{ .hostname }}` for the host). Publish the username and password under the
@@ -146,8 +149,9 @@ Mechanism and exact commands: `references/coverage-loop.md`. In short:
 
 1. Stand up the fixture and point the Agent at it.
 2. Run the check and capture emitted metric names **and their values**:
-   `ddev env agent <integration> <env> check <integration> --json` (verify the JSON shape at
-   runtime; fall back to `references/coverage-loop.md`'s alternatives if the flag differs).
+   `ddev env agent <integration> <env> check <integration> -t 2 --json` (`-t 2` is mandatory for
+   OpenMetrics checks; verify the JSON shape at runtime and fall back to
+   `references/coverage-loop.md`'s alternatives if the flag differs).
 3. A metric counts as covered only when it reports a **non-zero** value in some scrape; a metric
    seen only at `0` is a gap, not a win (see `references/coverage-loop.md`). Diff the non-zero
    emitted set against the achievable target. For each uncovered metric — absent or zero-only —
@@ -175,15 +179,17 @@ Mechanism and exact commands: `references/coverage-loop.md`. In short:
 - Add/extend `<integration>/tests/README.md`: what `<integration>-full` is, the services, the
   configurable inputs with their defaults (`<SERVICE>_VERSION`, the credential vars, `ACTIVITY_GEN`)
   and how to override them, and any documented-unreachable metrics.
-- Lint any Python you added under `<integration>/` (the workload is usually `sh`):
-  `ddev test -fs <integration>`. It does not reach the skill's own scripts; those are checked by
-  `test_asset_metrics.py` in step 1.
-- Changelog: **open the PR first**, then add `<integration>/changelog.d/<PR>.added` by hand (see
-  `AGENTS.md`; do not use `ddev release changelog new`). Test/fixture-only changes still touch files
-  shipped with the Agent only if they live under `datadog_checks/` — a `tests/` fixture usually does
-  not require an entry; confirm against `AGENTS.md` before deciding.
-- Open the PR as a **draft** using `.github/PULL_REQUEST_TEMPLATE.md`, set a `qa/*` label, and leave
-  it in draft. Do not mark ready for review.
+- If you added Python under `<integration>/` (the workload is usually `sh`), fix formatting and
+  lint with `ddev test -fs <integration>` (it rewrites files), then confirm with
+  `ddev test -s <integration>`. Neither reaches the skill's own scripts: step 1 tests the
+  extractor's behavior, and no automated check lints or formats them.
+- Open the PR as a **draft** using `.github/PULL_REQUEST_TEMPLATE.md`, set exactly one of
+  `qa/required` or `qa/skip-qa` (see `AGENTS.md` for which), and leave it in draft. Do not mark it
+  ready for review.
+- Changelog: a fixture limited to `tests/` needs no entry, and CI's `check_changelog` job rejects
+  an unneeded one. Add an entry only if you changed `datadog_checks/` or `pyproject.toml`, and then
+  only after the PR exists: create `<integration>/changelog.d/<PR>.<type>` by hand (see `AGENTS.md`;
+  do not use `ddev release changelog new`).
 
 ## Guardrails
 

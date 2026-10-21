@@ -14,7 +14,7 @@ Invoke with `/onboard-evalya <integration>` (or ask to "onboard <x> to evalya").
 | `references/redis-exemplar.md` | Annotated walkthrough of the redisdb fixture. |
 | `references/coverage-loop.md` | The non-zero-vs-target diff mechanism, the `-t 2` rule, multi-instance handling. |
 | `scripts/asset_metrics.py` | Deterministic extractor: dashboard + monitor metrics joined to `metadata.csv`. |
-| `scripts/test_asset_metrics.py` | Extractor tests. The skill runs them before extracting; run them by hand after editing the extractor: `python3 .claude/skills/onboard-evalya/scripts/test_asset_metrics.py` (or `pytest` on the file). |
+| `scripts/test_asset_metrics.py` | Extractor behavior tests. The skill runs them before extracting; run them by hand after editing the extractor: `python3 .claude/skills/onboard-evalya/scripts/test_asset_metrics.py` (or `pytest` on the file). No automated check runs them or lints/formats these scripts: `ddev` skips hidden directories such as `.claude/`. |
 
 ## Workflow
 
@@ -85,13 +85,14 @@ The only cycle is step 5 (the coverage loop); everything else is linear.
    ┌─────────────────────────────────────────────◄──┘
    │ 6. DOCUMENT + FINISH                        │
    │    tests/README.md · lint                  │
-   │    open PR (draft) ──► add changelog        │
+   │    open PR (draft) · changelog per step 6   │
    └────────────────────────────────────────────┘
 ```
 
 ## Worked example: rabbitmq
 
-The coverage loop, traced against a real run over the **dashboard** target (56 metrics):
+The coverage loop, traced against a real run over the **dashboard** target (56 achievable metrics;
+the extractor also returns two cross-integration `data_streams.*` metrics):
 
 | Coverage | What moved it |
 |---|---|
