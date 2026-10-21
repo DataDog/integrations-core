@@ -62,8 +62,8 @@ instances:
     #
     # tls_cert: <TLS_CERT>
 
-    ## @param connection_timeout - integer - optional - default: 10
-    ## Connection timeout in seconds
+    ## @param connection_timeout - integer - optional
+    ## Connection timeout in seconds. If unset, use the driver's default timeout.
     #
     # connection_timeout: 10
 
@@ -72,26 +72,18 @@ instances:
     #
     # dbm: false
 
-    ## Configure collection of DBM query metrics and full query text.
+    ## @param query_metrics - mapping - optional
+    ## Configure collection of DBM query metrics and full query text. Requires `dbm: true`.
+    ## Omitted or null settings use the defaults shown below.
+    ## Set `enabled` to false to disable this collection.
+    ## The `collection_interval` is the interval between collections in seconds and must be greater than zero.
+    ## The `query_timeout` is the timeout in seconds for each counter scan or statement text lookup and must be
+    ## greater than zero. It does not limit the total collection duration or affect other collectors.
     #
     # query_metrics:
-
-        ## @param enabled - boolean - optional - default: true
-        ## Enable query metrics and full query text collection. Requires `dbm: true`.
-        #
-        # enabled: true
-
-        ## @param collection_interval - number - optional - default: 10
-        ## The interval between query metrics collections, in seconds. Must be greater than zero.
-        #
-        # collection_interval: 10
-
-        ## @param query_timeout - integer - optional - default: 10
-        ## Timeout in seconds for each query metrics counter scan or statement text lookup.
-        ## This does not limit the total collection duration or affect other collectors.
-        ## Must be greater than zero.
-        #
-        # query_timeout: 10
+    #   enabled: true
+    #   collection_interval: 10
+    #   query_timeout: 10
 
     ## @param only_custom_queries - boolean - optional - default: false
     ## Set this parameter to `true` if you want to skip the integration's default metrics collection.

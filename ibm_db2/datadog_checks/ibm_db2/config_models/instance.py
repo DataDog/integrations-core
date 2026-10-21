@@ -49,9 +49,9 @@ class QueryMetrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    collection_interval: Optional[float] = Field(None, gt=0.0)
-    enabled: Optional[bool] = None
-    query_timeout: Optional[int] = Field(None, gt=0)
+    collection_interval: Optional[float] = Field(10, gt=0.0)
+    enabled: Optional[bool] = True
+    query_timeout: Optional[int] = Field(10, gt=0)
 
 
 class InstanceConfig(BaseModel):
@@ -69,7 +69,7 @@ class InstanceConfig(BaseModel):
     enable_legacy_tags_normalization: Optional[bool] = None
     host: Optional[str] = None
     metric_patterns: Optional[MetricPatterns] = None
-    min_collection_interval: Optional[float] = None
+    min_collection_interval: Optional[float] = Field(None, gt=0.0)
     only_custom_queries: Optional[bool] = None
     password: str
     port: Optional[int] = None

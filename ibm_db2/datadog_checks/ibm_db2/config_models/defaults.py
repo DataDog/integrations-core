@@ -8,10 +8,6 @@
 #     ddev -x validate models -s <INTEGRATION_NAME>
 
 
-def instance_connection_timeout():
-    return 10
-
-
 def instance_dbm():
     return False
 
@@ -38,6 +34,10 @@ def instance_only_custom_queries():
 
 def instance_port():
     return 50000
+
+
+def instance_query_metrics():
+    return {}
 
 
 def instance_security():

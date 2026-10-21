@@ -68,11 +68,12 @@ files:
           require_trusted_provider: true
       - name: connection_timeout
         description: |
-          Connection timeout in seconds
+          Connection timeout in seconds. If unset, use the driver's default timeout.
         fleet_configurable: true
         value:
           type: integer
           example: 10
+          display_default: null
       - name: dbm
         fleet_configurable: true
         description: |
@@ -83,33 +84,34 @@ files:
           display_default: false
 
       - name: query_metrics
-        description: Configure collection of DBM query metrics and full query text.
+        description: |
+          Configure collection of DBM query metrics and full query text. Requires `dbm: true`.
+          Omitted or null settings use the defaults shown below.
+          Set `enabled` to false to disable this collection.
+          The `collection_interval` is the interval between collections in seconds and must be greater than zero.
+          The `query_timeout` is the timeout in seconds for each counter scan or statement text lookup and must be
+          greater than zero. It does not limit the total collection duration or affect other collectors.
         fleet_configurable: true
-        options:
-          - name: enabled
-            description: |
-              Enable query metrics and full query text collection. Requires `dbm: true`.
-            fleet_configurable: true
-            value:
+        value:
+          type: object
+          default: {}
+          display_default: null
+          properties:
+            - name: enabled
               type: boolean
-              example: true
-          - name: collection_interval
-            description: The interval between query metrics collections, in seconds. Must be greater than zero.
-            fleet_configurable: true
-            value:
+              default: true
+            - name: collection_interval
               type: number
               exclusiveMinimum: 0
-              example: 10
-          - name: query_timeout
-            description: |
-              Timeout in seconds for each query metrics counter scan or statement text lookup.
-              This does not limit the total collection duration or affect other collectors.
-              Must be greater than zero.
-            fleet_configurable: true
-            value:
+              default: 10
+            - name: query_timeout
               type: integer
               exclusiveMinimum: 0
-              example: 10
+              default: 10
+          example:
+            enabled: true
+            collection_interval: 10
+            query_timeout: 10
 
       - template: instances/db
         overrides:
@@ -162,6 +164,8 @@ files:
               tags:
                 - test:ibm_db2
       - template: instances/default
+        overrides:
+          min_collection_interval.value.exclusiveMinimum: 0
   - template: logs
     example:
       - type: file

@@ -144,12 +144,58 @@ def test_invalid_query_metrics_config(instance: dict, query_metrics_config: obje
         IbmDb2Check('ibm_db2', {}, [instance])
 
 
+@pytest.mark.parametrize('interval', [0, -1, 'invalid'])
+def test_invalid_collection_interval(instance: dict, interval: int | str):
+    """Reject invalid scheduling intervals during validation, before constructing async jobs."""
+    instance['min_collection_interval'] = interval
+    with pytest.raises(ConfigurationError, match='min_collection_interval'):
+        IbmDb2Check('ibm_db2', {}, [instance])
+
+
+@pytest.mark.parametrize('interval', [None, '2.5'])
+def test_custom_queries_collection_interval(instance: dict, monkeypatch: pytest.MonkeyPatch, interval: str | None):
+    """Null intervals use the default and numeric strings are parsed before scheduling custom queries."""
+    monkeypatch.setenv('DBM_THREADED_JOB_RUN_SYNC', 'true')
+    instance.update(min_collection_interval=interval, custom_queries=[{'query': 'SELECT 1'}])
+    collector = IbmDb2Check('ibm_db2', {}, [instance])._custom_metrics
+    expected_interval = 15 if interval is None else 2.5
+    with (
+        mock.patch.object(collector, 'run_job') as collect,
+        mock.patch('datadog_checks.base.utils.db.utils.time.time', return_value=100) as clock,
+    ):
+        collector.run_job_loop([])
+        clock.return_value = 100 + expected_interval - 1
+        collector.run_job_loop([])
+        assert collect.call_count == 1
+        clock.return_value = 100 + expected_interval
+        collector.run_job_loop([])
+        assert collect.call_count == 2
+
+
+@pytest.mark.parametrize(
+    'config, timeout_option',
+    [({}, ''), ({'connection_timeout': None}, ''), ({'connection_timeout': '3'}, ';connecttimeout=3')],
+)
+def test_connection_timeout_configuration(instance: dict, config: dict, timeout_option: str):
+    """Use the driver's timeout unless an explicit configured timeout is supplied."""
+    instance.update(config)
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    with mock.patch('ibm_db.connect') as connect:
+        check._connection.connect()
+    connection_string = connect.call_args.args[0]
+    if timeout_option:
+        assert connection_string.endswith(timeout_option)
+    else:
+        assert 'connecttimeout=' not in connection_string
+
+
 @pytest.mark.parametrize(
     'config, enabled, interval',
     [
         ({}, True, 10),
         ({'query_metrics': None}, True, 10),
         ({'query_metrics': {}}, True, 10),
+        ({'query_metrics': {'enabled': None, 'collection_interval': None}}, True, 10),
         ({'query_metrics': {'enabled': True, 'collection_interval': 30}}, True, 30),
         ({'query_metrics': {'enabled': False, 'collection_interval': 30}}, False, 30),
     ],
@@ -181,6 +227,7 @@ def test_query_metrics_collection_controls(
         ({}, 10),
         ({'query_metrics': None}, 10),
         ({'query_metrics': {}}, 10),
+        ({'query_metrics': {'query_timeout': None}}, 10),
         ({'query_metrics': {'query_timeout': 7}}, 7),
     ],
 )
