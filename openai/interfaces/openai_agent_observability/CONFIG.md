@@ -10,7 +10,7 @@ For Python:
 pip install ddtrace
 ```
 
-For Node.js and PHP, follow the corresponding [tracing library setup][1].
+For Node.js, follow the [tracing library setup][1].
 
 **Step 2: Start your application with Agent Observability enabled**
 
