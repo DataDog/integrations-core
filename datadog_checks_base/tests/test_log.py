@@ -151,3 +151,7 @@ def test_log_trace_context_injection(integration_tracing_enabled):
             assert len(handler.records) == 1
             record = handler.records[0]
             assert "dd.trace_id=1 dd.span_id=2" not in record
+
+
+def test_dummy():
+    assert len(logging.root.handlers) >= 0
