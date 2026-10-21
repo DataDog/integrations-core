@@ -48,9 +48,10 @@ from pathlib import Path
 # (`"query": "postgresql.rows_inserted{$scope}"`) with the aggregator in a sibling field.
 # Dotless names (e.g. otel's `otelcol_receiver_refused_spans`) are matched only after an
 # aggregator prefix, so tag-grouping keywords (`by {host}`) are not mistaken for metrics.
+# Percentile prefixes (`p95:`, `p99.9:`) count as aggregators for distribution metrics.
 # The trailing `{` avoids catching template vars (`$scope`), formula operands (`a / b`), and
 # monitor window functions (`avg(last_5m)`).
-_AGG = r"(?:avg|sum|min|max|count|last|pct|percentile|median|stddev|normalize|weight):"
+_AGG = r"(?:avg|sum|min|max|count|last|pct|percentile|median|stddev|normalize|weight|p\d+(?:\.\d+)?):"
 _METRIC_QUERY = re.compile(
     rf"(?:(?:{_AGG})?([a-z_][a-z0-9_.]*\.[a-z0-9_.]+)|{_AGG}([a-z_][a-z0-9_]*))\s*\{{",
     re.IGNORECASE,

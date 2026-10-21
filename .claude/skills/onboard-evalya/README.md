@@ -14,6 +14,7 @@ Invoke with `/onboard-evalya <integration>` (or ask to "onboard <x> to evalya").
 | `references/redis-exemplar.md` | Annotated walkthrough of the redisdb fixture. |
 | `references/coverage-loop.md` | The non-zero-vs-target diff mechanism, the `-t 2` rule, multi-instance handling. |
 | `scripts/asset_metrics.py` | Deterministic extractor: dashboard + monitor metrics joined to `metadata.csv`. |
+| `scripts/test_asset_metrics.py` | Extractor tests. The skill runs them before extracting; run them by hand after editing the extractor: `python3 .claude/skills/onboard-evalya/scripts/test_asset_metrics.py` (or `pytest` on the file). |
 
 ## Workflow
 

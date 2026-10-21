@@ -37,11 +37,14 @@ The coverage target is the metrics the integration puts in front of users: every
 in its OOTB **dashboards** (`assets/dashboards/*.json`) and its recommended **monitors**
 (`assets/monitors/*.json`). Monitors routinely alert on metrics no dashboard plots, so they are a
 first-class input, not an afterthought. Run the extractor (policy: **all** dashboard + monitor
-metrics):
+metrics). Check the extractor first, then run it:
 
 ```shell
+python3 .claude/skills/onboard-evalya/scripts/test_asset_metrics.py
 python3 .claude/skills/onboard-evalya/scripts/asset_metrics.py <integration>
 ```
+
+If the tests fail, stop and report it: the coverage target would be wrong.
 
 It prints `target` (the union of metrics across both asset types), `by_source` (which metrics came
 from dashboards vs monitors, so you can see what monitors added), `in_metadata` (with type), and
@@ -172,8 +175,9 @@ Mechanism and exact commands: `references/coverage-loop.md`. In short:
 - Add/extend `<integration>/tests/README.md`: what `<integration>-full` is, the services, the
   configurable inputs with their defaults (`<SERVICE>_VERSION`, the credential vars, `ACTIVITY_GEN`)
   and how to override them, and any documented-unreachable metrics.
-- Lint touched Python (the workload is usually `sh`, but the extractor and any helper are Python):
-  `ddev test -fs <integration>` where applicable.
+- Lint any Python you added under `<integration>/` (the workload is usually `sh`):
+  `ddev test -fs <integration>`. It does not reach the skill's own scripts; those are checked by
+  `test_asset_metrics.py` in step 1.
 - Changelog: **open the PR first**, then add `<integration>/changelog.d/<PR>.added` by hand (see
   `AGENTS.md`; do not use `ddev release changelog new`). Test/fixture-only changes still touch files
   shipped with the Agent only if they live under `datadog_checks/` — a `tests/` fixture usually does
