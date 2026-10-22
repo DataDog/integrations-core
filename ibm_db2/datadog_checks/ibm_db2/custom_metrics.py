@@ -23,7 +23,7 @@ class CustomMetricsCollector(DBMAsyncJob):
             check,
             config_host=config.host,
             min_collection_interval=config.min_collection_interval,
-            rate_limit=1 / float(config.min_collection_interval),
+            rate_limit=1 / float(config.min_collection_interval) if config.min_collection_interval else 0,
             dbms=check.dbms,
             enabled=bool(config.custom_queries),
             job_name='custom-queries',

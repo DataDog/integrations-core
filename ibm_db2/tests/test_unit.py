@@ -238,6 +238,29 @@ def test_query_metrics_collection_controls(
         assert collect.call_count == 2 * int(enabled)
 
 
+@pytest.mark.parametrize('interval', [0, 15])
+def test_custom_queries_collection_interval(
+    instance: dict, aggregator: AggregatorStub, monkeypatch: pytest.MonkeyPatch, interval: int
+):
+    """Custom queries retain their metric prefix and respect the interval, including no delay at zero."""
+    monkeypatch.setenv('DBM_THREADED_JOB_RUN_SYNC', 'true')
+    instance.update(
+        min_collection_interval=interval,
+        custom_queries=[{'metric_prefix': 'app', 'query': 'SELECT 1', 'columns': [{'name': 'value', 'type': 'gauge'}]}],
+    )
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    check._custom_metrics._connection.conn = mock.Mock()
+    with (
+        mock.patch.object(check._custom_metrics._connection, 'iter_rows', side_effect=lambda *args: iter([(1,)])),
+        mock.patch('datadog_checks.base.utils.db.utils.time.time', return_value=100) as clock,
+    ):
+        check.run_async_jobs(check.tags)
+        check.run_async_jobs(check.tags)
+        clock.return_value += 15
+        check.run_async_jobs(check.tags)
+    aggregator.assert_metric('app.value', value=1, count=3 if interval == 0 else 2)
+
+
 @pytest.mark.parametrize(
     'config, timeout',
     [
