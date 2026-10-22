@@ -1,6 +1,6 @@
 {
     "author_name": "Datadog",
-    "description": "This dashboard provides a high-level view of your VMware vSphere environment, with in-depth resource utilization metrics from your hosts and VMs, along with the status of your vCenter Server. For further reading on monitoring vSphere: \n\n- [How to monitor vSphere and application metrics with Datadog](https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/) \n\n- [Datadog's vSphere integration docs](https://docs.datadoghq.com/integrations/vsphere/#pagetitle). \n\nClone this template dashboard to make changes and add your own graph widgets. ",
+    "description": "This dashboard provides a high-level view of your VMware vSphere environment, with in-depth resource utilization metrics from your hosts and VMs, along with the status of your vCenter Server. For further reading on monitoring vSphere: \n\n- [How to monitor vSphere and application metrics with Datadog](https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/) \n\n- [Datadog's vSphere integration docs](https://docs.datadoghq.com/integrations/vsphere/#pagetitle). \n\nClone this template dashboard to make changes and add your own graph widgets.",
     "layout_type": "ordered",
     "template_variables": [
         {
@@ -35,13 +35,13 @@
                 "banner_img": "/static/images/logos/vsphere_large.svg",
                 "layout_type": "ordered",
                 "show_title": false,
-                "title": "New group",
+                "title": "Introduction",
                 "type": "group",
                 "widgets": [
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**vSphere**\n\nThis dashboard provides a high-level view of your VMware vSphere environment, with in-depth resource utilization metrics from your hosts and VMs, along with the status of your vCenter Server. ",
+                            "content": "**vSphere**\n\nThis dashboard provides a high-level view of your VMware vSphere environment, with in-depth resource utilization metrics from your hosts and VMs, along with the status of your vCenter Server.",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": false,
@@ -62,7 +62,7 @@
                     {
                         "definition": {
                             "background_color": "white",
-                            "content": "**Useful Links**\n\n- [How to monitor vSphere and application metrics with Datadog](https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/) \n\n- [Datadog's vSphere integration docs](https://docs.datadoghq.com/integrations/vsphere/#pagetitle). \n\n- [vSphere docs](https://www.vmware.com/products/cloud-infrastructure/vsphere)",
+                            "content": "**Useful links**\n\n- [How to monitor vSphere and application metrics with Datadog](https://www.datadoghq.com/blog/unified-vsphere-app-monitoring-datadog/)\n\n- [Datadog's vSphere integration docs](https://docs.datadoghq.com/integrations/vsphere/)\n\n- [VMware vSphere product page](https://www.vmware.com/products/cloud-infrastructure/vsphere)",
                             "font_size": "16",
                             "has_padding": true,
                             "show_tick": false,
@@ -204,7 +204,7 @@
                             "provider": "vsphere",
                             "query_string": "",
                             "show_empty_groups": false,
-                            "title": "",
+                            "title": "vSphere infrastructure map",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "cloudcraft"
@@ -276,7 +276,7 @@
                 "background_color": "vivid_green",
                 "layout_type": "ordered",
                 "show_title": true,
-                "title": "ESXi Hosts",
+                "title": "ESXi hosts",
                 "type": "group",
                 "widgets": [
                     {
@@ -515,7 +515,7 @@
                 "background_color": "green",
                 "layout_type": "ordered",
                 "show_title": true,
-                "title": "Virtual Machines",
+                "title": "Virtual machines",
                 "type": "group",
                 "widgets": [
                     {
@@ -962,7 +962,7 @@
                 "background_color": "green",
                 "layout_type": "ordered",
                 "show_title": true,
-                "title": "vSAN Clusters",
+                "title": "vSAN clusters",
                 "type": "group",
                 "widgets": [
                     {
@@ -1021,7 +1021,7 @@
                                     }
                                 }
                             ],
-                            "title": "vSAN Cluster Health Status (Top 25)",
+                            "title": "vSAN cluster health status (Top 25)",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_table"
@@ -1076,7 +1076,7 @@
                                     }
                                 }
                             ],
-                            "title": "vSAN Cluster I/O Rates (Top 25)",
+                            "title": "vSAN cluster I/O rates (Top 25)",
                             "title_align": "left",
                             "title_size": "16",
                             "type": "query_table"
