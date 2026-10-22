@@ -15,13 +15,15 @@ from datadog_checks.ibm_db2.connection import get_connection_data
 from .common import COMPOSE_FILE, CONFIG, E2E_METADATA
 
 
-def pytest_ignore_collect(collection_path: Path) -> bool:
+def pytest_ignore_collect(collection_path: Path) -> bool | None:
     # Takeover changes roles; HADR environments collect only that test, even with CI's own -k filter.
-    return (
+    if (
         os.getenv('DB2_HADR') == 'true'
         and collection_path.name.startswith('test_')
         and collection_path.name != 'test_hadr.py'
-    )
+    ):
+        return True
+    return None
 
 
 class DbManager(object):
