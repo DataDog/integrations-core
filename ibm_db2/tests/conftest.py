@@ -1,7 +1,9 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from copy import deepcopy
+from pathlib import Path
 
 import ibm_db
 import pytest
@@ -10,7 +12,18 @@ from datadog_checks.dev import WaitFor, docker_run, run_command
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.ibm_db2.connection import get_connection_data
 
-from .common import COMPOSE_FILE, CONFIG, DB2_VERSION, E2E_METADATA
+from .common import COMPOSE_FILE, CONFIG, E2E_METADATA
+
+
+def pytest_ignore_collect(collection_path: Path) -> bool | None:
+    # Takeover changes roles; HADR environments collect only that test, even with CI's own -k filter.
+    if (
+        os.getenv('DB2_HADR') == 'true'
+        and collection_path.name.startswith('test_')
+        and collection_path.name != 'test_hadr.py'
+    ):
+        return True
+    return None
 
 
 class DbManager(object):
@@ -67,12 +80,13 @@ class DbManager(object):
 def dd_environment():
     db = DbManager(CONFIG)
 
-    conditions = []
-    if DB2_VERSION != '11.1':
-        # Official images create the instance at startup; TASKANA's 11.1 image includes it.
-        conditions.append(CheckDockerLogs(COMPOSE_FILE, 'Setup has completed', attempts=60, wait=10))
-    conditions.extend([db.initialize, WaitFor(db.connect)])
-    with docker_run(COMPOSE_FILE, conditions=conditions, attempts=2):
+    # All images use IBM's entrypoint to create the instance; this fixture creates the database.
+    conditions = [
+        CheckDockerLogs(COMPOSE_FILE, r'\(\*\) Setup has completed\.', attempts=60, wait=10),
+        db.initialize,
+        WaitFor(db.connect),
+    ]
+    with docker_run(COMPOSE_FILE, conditions=conditions, attempts=2, capture=True):
         yield CONFIG, E2E_METADATA
 
 

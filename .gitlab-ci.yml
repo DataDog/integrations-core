@@ -1,6 +1,7 @@
 include:
   - /.gitlab/software_composition_analysis.yaml
   - /.gitlab/build_agent.yaml
+  - /.gitlab/ibm_db2.yaml
   - local: .evalya/gitlab-ci.yaml
 
 variables:

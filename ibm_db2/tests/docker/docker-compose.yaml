@@ -2,6 +2,7 @@ services:
 
   ibm_db2:
     image: ${DB2_IMAGE}
+    platform: linux/amd64
     container_name: ibm_db2
     privileged: true
     ports:
