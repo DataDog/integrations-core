@@ -16,8 +16,11 @@ def test_malloc_trim_is_safe_to_call():
     malloc_trim()
 
 
-@pytest.mark.skipif(platform.system() != 'Linux', reason='glibc is only expected on Linux')
-def test_malloc_trim_is_bound_on_linux():
+@pytest.mark.skipif(
+    platform.system() != 'Linux' or not platform.libc_ver()[0],
+    reason='malloc_trim is only expected to bind on glibc',
+)
+def test_malloc_trim_is_bound_on_glibc():
     # Guards the ctypes binding itself: a wrong symbol name or signature would surface here
     # rather than silently degrading to a no-op on the platforms that need the trim.
     trim = load_malloc_trim()
