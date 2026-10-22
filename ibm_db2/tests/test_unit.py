@@ -95,6 +95,7 @@ def test_query_metrics_initialization_health(instance: dict, aggregator: Aggrega
     assert len(events) == int(dbm)
     if dbm:
         event = events[0]
+        assert event['category'] == 'ibm_db2'
         assert event['name'] == 'initialization'
         assert event['status'] == 'ok'
         assert event['check_id'] == 'ibm_db2:assigned-id'
@@ -113,6 +114,7 @@ def test_query_metrics_health_tags(instance: dict, aggregator: AggregatorStub):
         tags=['job:query-metrics', 'dd.internal.resource:runner'],
     )
     event = aggregator.get_event_platform_events('dbm-health')[0]
+    assert event['category'] == 'ibm_db2'
     assert 'env:test' in event['tags']
     assert 'job:query-metrics' in event['tags']
     assert not any(tag.startswith('dd.internal') for tag in event['tags'])
@@ -144,6 +146,7 @@ def test_query_metrics_error_health(instance: dict, aggregator: AggregatorStub, 
     events = [event for event in aggregator.get_event_platform_events('dbm-health') if event['name'] == 'unknown_error']
     assert len(events) == 1
     event = events[0]
+    assert event['category'] == 'ibm_db2'
     assert event['status'] == 'error'
     assert event['data']['database_instance'] == check.database_identifier
     assert event['data']['job_name'] == 'query-metrics'

@@ -32,6 +32,7 @@ from .utils import get_version
 
 
 class IbmDb2Check(DatabaseCheck):
+    __NAMESPACE__ = 'ibm_db2'
     DBMS = 'ibm_db2'
     METRIC_PREFIX = 'ibm_db2'
     SERVICE_CHECK_CONNECT = '{}.can_connect'.format(METRIC_PREFIX)
@@ -224,10 +225,7 @@ class IbmDb2Check(DatabaseCheck):
                 self.CRITICAL,
                 tags=self.tags,
                 message="Unable to create new connection to database: {}".format(self._config.db),
+                raw=True,
             )
         else:
-            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self.tags)
-
-    @classmethod
-    def m(cls, metric):
-        return '{}.{}'.format(cls.METRIC_PREFIX, metric)
+            self.service_check(self.SERVICE_CHECK_CONNECT, self.OK, tags=self.tags, raw=True)

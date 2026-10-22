@@ -136,4 +136,4 @@ class CustomMetricsCollector(DBMAsyncJob):
                 else:
                     for info in metric_info:
                         metric, value, method = info
-                        getattr(self._check, method)(metric, value, tags=query_tags)
+                        getattr(self._check, method)(metric, value, tags=query_tags, raw=True)
