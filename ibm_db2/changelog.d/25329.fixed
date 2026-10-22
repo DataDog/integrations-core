@@ -1,1 +1,1 @@
-Tag Db2 metrics and events with database identity and include table and command metadata in query metrics.
+Tag Db2 metrics and events with database identity, include table and command metadata in query metrics, and omit database tags from instance metadata.

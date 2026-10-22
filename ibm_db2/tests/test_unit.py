@@ -67,6 +67,8 @@ def test_database_identifier_payloads(
         events = aggregator.get_event_platform_events(stream)
         assert [event['database_instance'] for event in events] == expected
         assert all(event['host'] == 'db2.example.com' for event in events)
+        if stream == 'dbm-metadata':
+            assert all(f"db:{instance['db']}" not in event['tags'] for event in events)
     for identifier in expected:
         aggregator.assert_metric(
             'ibm_db2.connection.active',
