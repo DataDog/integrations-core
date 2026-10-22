@@ -1,0 +1,56 @@
+---
+.ibm-db2-tests:
+  stage: validate
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:24.0.4-gbi-focal
+  tags: ["arch:amd64"]
+  needs: []
+  cache: []
+  timeout: 1h
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_COMMIT_BRANCH == "master"
+    - changes:
+        - ibm_db2/**/*
+        - datadog_checks_base/**/*
+        - datadog_checks_dev/**/*
+        - ddev/**/*
+        - .gitlab-ci.yml
+        - .gitlab/ibm_db2.yaml
+        - .ddev/**/*
+        - .coveragerc
+  variables:
+    UV_HTTP_RETRIES: "10"
+    UV_INSTALL_DIR: /usr/local/bin
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends build-essential libxml2-dev libxslt1-dev docker-compose-plugin
+    - curl -LsSf https://astral.sh/uv/0.11.16/install.sh | sh
+    - uv venv --python 3.13 /tmp/db2-ci
+    - . /tmp/db2-ci/bin/activate
+    - uv pip install ./datadog_checks_dev[cli] ./ddev
+    - ddev config override
+    - docker info
+    - docker compose version
+  artifacts:
+    when: always
+    paths:
+      - ibm_db2/junit/
+      - ibm_db2/coverage.xml
+    reports:
+      junit: ibm_db2/junit/*.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: ibm_db2/coverage.xml
+
+ibm-db2:tests:
+  extends: .ibm-db2-tests
+  script:
+    - ddev --no-interactive test --lint ibm_db2
+    # Hatch owns the version/topology matrix; do not duplicate it in CI.
+    - ddev --no-interactive test --cov --junit ibm_db2
+    - ddev --no-interactive env test --base --new-env --junit ibm_db2 all
+
+ibm-db2:minimum-base-package:
+  extends: .ibm-db2-tests
+  script:
+    - ddev --no-interactive test --compat --junit ibm_db2

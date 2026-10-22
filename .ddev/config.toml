@@ -94,6 +94,10 @@ platforms = ["linux", "windows"]
 [overrides.ci.hyperv]
 exclude = true
 
+[overrides.ci.ibm_db2]
+# The full matrix runs in .gitlab/ibm_db2.yaml, where the internal image registry is reachable.
+exclude = true
+
 [overrides.ci.ibm_mq]
 platforms = ["linux", "windows"]
 
