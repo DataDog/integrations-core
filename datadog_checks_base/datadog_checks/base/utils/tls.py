@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, AnyStr, Dict, Optional  # noqa: F401
 from pydantic import BaseModel
 
 from datadog_checks.base.config import is_affirmative
-from datadog_checks.base.utils._certificate_distrust import CertificateDistrustSSLObject, CertificateDistrustSSLSocket
+from datadog_checks.base.utils._certificate_distrust import attach_distrust_check
 
 if TYPE_CHECKING:
     from datadog_checks.base.types import InstanceType  # noqa: F401
@@ -129,8 +129,7 @@ def create_ssl_context(config):
     # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS_CLIENT
     context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
     # Reject verified chains containing a distrusted CA key, whichever trust store made them verify.
-    context.sslsocket_class = CertificateDistrustSSLSocket
-    context.sslobject_class = CertificateDistrustSSLObject
+    attach_distrust_check(context)
 
     LOGGER.debug('Creating SSL context with config: %s', config)
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname

@@ -12,9 +12,9 @@ explicit handshakes. Known limits:
 - A caller that disables `do_handshake_on_connect` and lets the first read or write complete the handshake
   implicitly bypasses it.
 - With mutual TLS, the client certificate has already been sent when the check rejects the server.
-- It only applies to contexts built by `create_ssl_context`. Requests that the HTTP wrapper sends through
-  requests' default adapter, such as uppercase `HTTPS://` URLs or http-to-https redirects without persistent
-  connections, are not checked.
+- It applies to contexts built by `create_ssl_context` and to the TLS connection the HTTP wrapper opens to an
+  HTTPS proxy. Requests that the HTTP wrapper sends through requests' default adapter, such as uppercase
+  `HTTPS://` URLs or http-to-https redirects without persistent connections, are not checked.
 """
 
 import hashlib
@@ -66,6 +66,13 @@ class CertificateDistrustSSLObject(ssl.SSLObject):
     def do_handshake(self) -> None:
         super().do_handshake()
         _check_verified_chain(self)
+
+
+def attach_distrust_check(context: ssl.SSLContext) -> ssl.SSLContext:
+    """Make the connections created from `context` reject verified chains that contain a distrusted CA key."""
+    context.sslsocket_class = CertificateDistrustSSLSocket
+    context.sslobject_class = CertificateDistrustSSLObject
+    return context
 
 
 def find_distrusted_key(chain: Iterable[bytes]) -> tuple[str, str] | None:

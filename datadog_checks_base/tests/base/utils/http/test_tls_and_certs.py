@@ -21,7 +21,7 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import AuthorityInformationAccessOID, ExtendedKeyUsageOID, NameOID
-from requests.exceptions import SSLError
+from requests.exceptions import ProxyError, SSLError
 
 from datadog_checks.base.utils import http as http_module
 from datadog_checks.base.utils._certificate_distrust import (
@@ -85,7 +85,22 @@ def build_cert(aia_uri=None, common_name='example.test', issuer_name=None):
     return builder.sign(key, hashes.SHA256()).public_bytes(serialization.Encoding.DER)
 
 
+def key_usage(*, cert_sign):
+    return x509.KeyUsage(
+        digital_signature=not cert_sign,
+        content_commitment=False,
+        key_encipherment=not cert_sign,
+        data_encipherment=False,
+        key_agreement=False,
+        key_cert_sign=cert_sign,
+        crl_sign=cert_sign,
+        encipher_only=False,
+        decipher_only=False,
+    )
+
+
 def build_chain(aia_uri):
+    # Key identifiers and key usage keep the chain valid under `VERIFY_X509_STRICT`, which urllib3's own contexts set.
     root_key, intermediate_key, leaf_key = private_key(), private_key(), private_key()
     root_name = cert_name('Test Root')
     intermediate_name = cert_name('Test Intermediate')
@@ -94,18 +109,27 @@ def build_chain(aia_uri):
     root = (
         cert_builder(root_name, root_name, root_key)
         .add_extension(x509.BasicConstraints(ca=True, path_length=1), critical=True)
+        .add_extension(key_usage(cert_sign=True), critical=True)
+        .add_extension(x509.SubjectKeyIdentifier.from_public_key(root_key.public_key()), critical=False)
         .sign(root_key, hashes.SHA256())
     )
     intermediate = (
         cert_builder(intermediate_name, root_name, intermediate_key)
         .add_extension(x509.BasicConstraints(ca=True, path_length=0), critical=True)
+        .add_extension(key_usage(cert_sign=True), critical=True)
+        .add_extension(x509.SubjectKeyIdentifier.from_public_key(intermediate_key.public_key()), critical=False)
+        .add_extension(x509.AuthorityKeyIdentifier.from_issuer_public_key(root_key.public_key()), critical=False)
         .sign(root_key, hashes.SHA256())
     )
     leaf = (
         cert_builder(leaf_name, intermediate_name, leaf_key)
         .add_extension(x509.BasicConstraints(ca=False, path_length=None), critical=True)
+        .add_extension(key_usage(cert_sign=False), critical=True)
         .add_extension(x509.SubjectAlternativeName([x509.DNSName('localhost')]), critical=False)
         .add_extension(x509.ExtendedKeyUsage([ExtendedKeyUsageOID.SERVER_AUTH]), critical=False)
+        .add_extension(
+            x509.AuthorityKeyIdentifier.from_issuer_public_key(intermediate_key.public_key()), critical=False
+        )
         .add_extension(aia_extension(aia_uri), critical=False)
         .sign(intermediate_key, hashes.SHA256())
     )
@@ -1193,18 +1217,32 @@ class QuietHTTPServer(ThreadingHTTPServer):
         pass
 
 
+class RecordingProxyHandler(BaseHTTPRequestHandler):
+    def do_CONNECT(self):
+        self.server.headers.append(dict(self.headers))
+        self.send_response(502)
+        self.end_headers()
+
+    def log_message(self, *args):
+        pass
+
+
 @contextmanager
-def https_server(
-    pki: DistrustPki, tmp_path: Path, maximum_version: ssl.TLSVersion | None = None, send_intermediate: bool = True
-) -> Iterator[int]:
-    """Serve the PKI's leaf, and optionally its intermediate, over TLS on localhost and yield the port."""
+def tls_server(
+    pki: DistrustPki,
+    tmp_path: Path,
+    handler: type[BaseHTTPRequestHandler] = RecordingHandler,
+    maximum_version: ssl.TLSVersion | None = None,
+    send_intermediate: bool = True,
+) -> Iterator[ThreadingHTTPServer]:
+    """Serve the PKI's leaf, and optionally its intermediate, over TLS on localhost."""
     chain_path = tmp_path / 'chain.pem'
     key_path = tmp_path / 'leaf.key'
     sent_certs = (pki.leaf, pki.intermediate) if send_intermediate else (pki.leaf,)
     chain_path.write_bytes(b''.join(cert.public_bytes(serialization.Encoding.PEM) for cert in sent_certs))
     write_key(key_path, pki.leaf_key)
 
-    server = QuietHTTPServer(('127.0.0.1', 0), RecordingHandler)
+    server = QuietHTTPServer(('127.0.0.1', 0), handler)
     server.headers = []
     server.body = b'ok'
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
@@ -1213,7 +1251,31 @@ def https_server(
     context.load_cert_chain(str(chain_path), str(key_path))
     server.socket = context.wrap_socket(server.socket, server_side=True)
     with run_server(server):
+        yield server
+
+
+@contextmanager
+def https_server(
+    pki: DistrustPki, tmp_path: Path, maximum_version: ssl.TLSVersion | None = None, send_intermediate: bool = True
+) -> Iterator[int]:
+    """Serve the PKI's chain with a handler that answers every GET and yield the port."""
+    with tls_server(pki, tmp_path, maximum_version=maximum_version, send_intermediate=send_intermediate) as server:
         yield server.server_port
+
+
+@pytest.fixture
+def https_proxy(
+    distrust_pki: DistrustPki, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> Iterator[ThreadingHTTPServer]:
+    """An HTTPS proxy presenting the PKI's chain that records CONNECT requests and refuses every tunnel."""
+    # The TLS connection to the proxy uses the OS trust store, so make that store trust the test root.
+    monkeypatch.setenv('SSL_CERT_FILE', distrust_pki.root_path)
+    with tls_server(distrust_pki, tmp_path, RecordingProxyHandler) as proxy:
+        yield proxy
+
+
+def proxied_requests_wrapper(proxy: ThreadingHTTPServer) -> RequestsWrapper:
+    return RequestsWrapper({'proxy': {'https': 'https://user:secret@localhost:{}'.format(proxy.server_port)}}, {})
 
 
 def connect_with_socket(context: ssl.SSLContext, port: int) -> None:
@@ -1271,6 +1333,27 @@ def test_requests_wrapper_given_distrusted_ca_key_in_aia_recovered_chain_skips_i
             http.get('https://localhost:{}'.format(port))
 
     assert 'still incomplete' not in caplog.text
+
+
+def test_requests_wrapper_given_https_proxy_with_distrusted_ca_key_rejects_before_sending_credentials(
+    distrust_pki, distrust, https_proxy
+):
+    distrust(distrust_pki.intermediate)
+
+    with pytest.raises(ProxyError) as excinfo:
+        proxied_requests_wrapper(https_proxy).get('https://origin.test/')
+
+    # The proxy never received the CONNECT request, so the proxy credentials were not sent to it.
+    assert https_proxy.headers == []
+    assert 'Test Distrusted CA' in str(excinfo.value)
+
+
+def test_requests_wrapper_given_https_proxy_without_distrusted_ca_key_sends_connect(https_proxy):
+    # The test proxy refuses every tunnel; only the CONNECT request it receives matters here.
+    with pytest.raises(ProxyError):
+        proxied_requests_wrapper(https_proxy).get('https://origin.test/')
+
+    assert [headers['Proxy-Authorization'] for headers in https_proxy.headers] == ['Basic dXNlcjpzZWNyZXQ=']
 
 
 def test_requests_wrapper_given_verification_disabled_and_distrusted_ca_key_returns_response(
