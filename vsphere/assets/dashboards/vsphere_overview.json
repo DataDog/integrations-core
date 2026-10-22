@@ -243,7 +243,7 @@
                                     "query": {
                                         "data_source": "event_stream",
                                         "event_size": "l",
-                                        "query_string": "source:vsphere $vcenter_server.value $vcenter_datacenter.value"
+                                        "query_string": "source:vsphere $vcenter_server $vcenter_datacenter $vsphere_host $VM"
                                     },
                                     "response_format": "event_list"
                                 }
