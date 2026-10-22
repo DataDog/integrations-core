@@ -154,6 +154,8 @@ class QueryMetricsCollector(DBMAsyncJob):
                 {
                     'query': obfuscated.obfuscated_query,
                     'query_signature': obfuscated.query_signature,
+                    'dd_tables': obfuscated.tables,
+                    'dd_commands': obfuscated.commands,
                     'count': 0,
                     'time': 0,
                     'cpu_time': 0,

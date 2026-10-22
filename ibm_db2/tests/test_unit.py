@@ -339,10 +339,10 @@ def test_query_metrics_recover_after_text_lookup_failure(instance: dict, aggrega
         ({'service': 'shared'}, {'service': ''}, 'shared'),
     ],
 )
-def test_query_metrics_service(
+def test_query_metrics_service_and_metadata(
     instance: dict, aggregator: AggregatorStub, init_config: dict, instance_config: dict, expected: str
 ):
-    """Metrics and FQT preserve configured service, with instance values taking precedence over shared config."""
+    """Metrics carry query metadata; instance service overrides shared service in both metrics and FQT."""
     instance.update(dbm=True, **instance_config)
     check = IbmDb2Check('ibm_db2', init_config, [instance])
     inserted = datetime(2026, 1, 1)
@@ -359,6 +359,10 @@ def test_query_metrics_service(
         mock.patch('ibm_db.free_stmt'),
         mock.patch('ibm_db.fetch_assoc', side_effect=[snapshots[0], False, snapshots[1], False]),
         mock.patch.object(collector, '_fetch_statement_texts', return_value={(0, '01', inserted): 'SELECT ID FROM T'}),
+        mock.patch(
+            'datadog_checks.base.utils.db.query_metrics.obfuscation.obfuscate_sql_with_metadata',
+            return_value={'query': 'SELECT ID FROM T', 'metadata': {'tables': ['T'], 'commands': ['SELECT']}},
+        ),
     ):
         collector.run_job()
         collector.run_job()
@@ -366,6 +370,9 @@ def test_query_metrics_service(
         events = aggregator.get_event_platform_events(stream)
         assert len(events) == 1
         assert events[0]['service'] == expected
+    row = aggregator.get_event_platform_events('dbm-metrics')[0]['ibm_db2_rows'][0]
+    assert row['dd_tables'] == ['T']
+    assert row['dd_commands'] == ['SELECT']
 
 
 def test_full_query_text_refresh(instance: dict, aggregator: AggregatorStub):
