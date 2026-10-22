@@ -87,6 +87,8 @@ TOOL_MANIFEST: dict[str, ToolSpec] = {
     "docker": ToolSpec("shell.docker", "DockerTool", read_only=False),
     "mkdir": ToolSpec("fs.mkdir", "MkdirTool", factory=_file_policy_factory, read_only=False),
     "http_get": ToolSpec("http.http_get", "HttpGetTool", read_only=True),
+    # POST may mutate state; reviewers inspect saved responses with read_file/grep.
+    "http_post": ToolSpec("http.http_post", "HttpPostTool", read_only=False),
     # read_only=False because a reviewer must never be able to end the run on its own.
     "stop_flow": ToolSpec("stop_flow", "StopFlowTool", read_only=False),
     "ddev_create": ToolSpec("shell.ddev.create", "DdevCreateTool", read_only=False),

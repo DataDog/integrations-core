@@ -22,7 +22,7 @@ class DdevTestTool(CmdTool[DdevTestInput]):
     to pass extra pytest arguments (e.g. `["-k", "test_my_func"]`) to run specific
     tests instead of the full suite."""
 
-    timeout = 600
+    timeout = 1200
 
     @property
     def name(self) -> str:
