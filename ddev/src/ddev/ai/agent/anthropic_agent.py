@@ -122,10 +122,11 @@ class AnthropicAgent(BaseAgent[MessageParam]):
         blocks: list[Any] = [
             block.model_dump(exclude_none=True) if isinstance(block, BaseModel) else block for block in content
         ]
-        return MessageParam(
-            role=message["role"],
-            content=[b for b in blocks if b["type"] not in {"thinking", "redacted_thinking"}],
-        )
+        kept = [b for b in blocks if b["type"] not in {"thinking", "redacted_thinking"}]
+        # MessageParam is a union of per-role TypedDicts, so each branch builds the dict for one role.
+        if message["role"] == "user":
+            return {"role": "user", "content": kept}
+        return {"role": "assistant", "content": kept}
 
     async def compact(self) -> AgentResponse | None:
         """Collapse history to the original task plus an LLM summary.
