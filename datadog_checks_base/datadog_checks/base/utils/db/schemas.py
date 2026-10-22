@@ -108,24 +108,25 @@ class SchemaCollector(ABC):
             self._log.error("Error collecting schema: %s", e)
             raise e
         finally:
+            telemetry_tags = self._check.tags + ["status:" + status, "kind:" + self.kind]
             self._check.histogram(
                 f"dd.{self._check.dbms}.schema.time",
                 now_ms() - run_started_at,
-                tags=self._check.tags + ["status:" + status],
+                tags=telemetry_tags,
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
             self._check.gauge(
                 self.object_count_metric_name,
                 self._total_rows_count,
-                tags=self._check.tags + ["status:" + status],
+                tags=telemetry_tags,
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
             self._check.gauge(
                 f"dd.{self._check.dbms}.schema.payloads_count",
                 total_payloads_count,
-                tags=self._check.tags + ["status:" + status],
+                tags=telemetry_tags,
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
