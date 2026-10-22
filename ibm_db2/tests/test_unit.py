@@ -38,7 +38,7 @@ pytestmark = pytest.mark.unit
 def test_database_identifier_payloads(
     instance: dict, aggregator: AggregatorStub, monkeypatch: pytest.MonkeyPatch, config: dict, expected: list[str]
 ):
-    """Templates distinguish colocated instances consistently across DBM streams; defaults retain hostname identity."""
+    """Templates distinguish colocated instances across metrics and DBM streams; defaults retain hostname identity."""
     instance.update(dbm=True, host='db2.internal', tags=['team:test'], **config)
     monkeypatch.setattr('datadog_checks.ibm_db2.ibm_db2.agent_host_resolver', lambda host: 'db2.example.com')
     checks = [IbmDb2Check('ibm_db2', {}, [{**instance, 'port': port}]) for port in (50000, 50001)]
@@ -46,6 +46,8 @@ def test_database_identifier_payloads(
     inserted = datetime(2026, 1, 1)
     key = (0, '01', inserted)
     for check in checks:
+        with mock.patch.object(check._connection, 'iter_rows', return_value=[{'total_connections': 1}]):
+            check._metrics.query_instance()
         check._send_database_instance_metadata()
         snapshots = [
             {'member': 0, 'executable_id': b'\x01', 'insert_timestamp': inserted, **dict.fromkeys(counters, count)}
@@ -65,6 +67,17 @@ def test_database_identifier_payloads(
         events = aggregator.get_event_platform_events(stream)
         assert [event['database_instance'] for event in events] == expected
         assert all(event['host'] == 'db2.example.com' for event in events)
+    for identifier in expected:
+        aggregator.assert_metric(
+            'ibm_db2.connection.active',
+            value=1,
+            tags=[
+                'team:test',
+                f"db:{instance['db']}",
+                'database_hostname:db2.example.com',
+                f'database_instance:{identifier}',
+            ],
+        )
 
 
 @pytest.mark.parametrize('dbm, enabled', [(False, True), (True, False), (True, True)])
