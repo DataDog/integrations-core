@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 23.13.1 / 2026-10-21
+
+***Fixed***:
+
+* Qualify extension names with their schema when warming Postgres extensions. ([#25618](https://github.com/DataDog/integrations-core/pull/25618))
+
 ## 23.13.0 / 2026-10-01
 
 ***Added***:
