@@ -6,7 +6,7 @@
 
 ***Fixed***:
 
-* Look up a consumer group's coordinator again after a `NOT_COORDINATOR` or `COORDINATOR_NOT_AVAILABLE` error, so that with `close_admin_client: false` the group's offsets resume on the next check run after its coordinator moves to another broker. ([#25485](https://github.com/DataDog/integrations-core/pull/25485))
+* Look up a consumer group's coordinator again after a `NOT_COORDINATOR` or `COORDINATOR_NOT_AVAILABLE` error. With `close_admin_client: false`, the group's offsets resume on the next check run after its coordinator moves to another broker. ([#25485](https://github.com/DataDog/integrations-core/pull/25485))
 
 ## 9.2.1 / 2026-10-13
 
