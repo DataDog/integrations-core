@@ -28,6 +28,7 @@ from .custom_metrics import CustomMetricsCollector
 from .health import Db2Health
 from .metrics import MetricsCollector
 from .query_metrics import QueryMetricsCollector
+from .schemas import Db2SchemaCollectionJob
 from .utils import get_version
 
 
@@ -64,6 +65,7 @@ class IbmDb2Check(DatabaseCheck):
         if self._config.dbm:
             self.health = Db2Health(self)
             self._query_metrics = self.register_async_job(QueryMetricsCollector(self, self._config))
+            self._schema_collection = self.register_async_job(Db2SchemaCollectionJob(self, self._config))
 
     def debug_stats_kwargs(self, tags: list[str] | None = None) -> dict:
         return {
@@ -138,7 +140,11 @@ class IbmDb2Check(DatabaseCheck):
 
     @property
     def database_identifier_params(self) -> dict[str, str]:
-        return {'resolved_hostname': self.reported_hostname}
+        return {
+            'resolved_hostname': self.reported_hostname,
+            'host': str(self._config.host),
+            'port': str(self._config.port),
+        }
 
     @property
     def dbms_version(self) -> str | None:
