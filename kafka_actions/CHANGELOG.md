@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.11.0 / 2026-10-21
+
+***Added***:
+
+* Upgrade pymongo to 4.18.2 ([#25517](https://github.com/DataDog/integrations-core/pull/25517))
+
 ## 2.10.1 / 2026-10-01
 
 ***Fixed***:
