@@ -8,8 +8,13 @@ that reuse a distrusted key are rejected as well. The check runs after OpenSSL v
 applies whichever trust store made the chain verify.
 
 The check runs when `do_handshake()` completes, which covers the default `do_handshake_on_connect=True` and
-explicit handshakes. A caller that disables `do_handshake_on_connect` and lets the first read or write complete
-the handshake implicitly bypasses it.
+explicit handshakes. Known limits:
+- A caller that disables `do_handshake_on_connect` and lets the first read or write complete the handshake
+  implicitly bypasses it.
+- With mutual TLS, the client certificate has already been sent when the check rejects the server.
+- It only applies to contexts built by `create_ssl_context`. Requests that the HTTP wrapper sends through
+  requests' default adapter, such as uppercase `HTTPS://` URLs or http-to-https redirects without persistent
+  connections, are not checked.
 """
 
 import hashlib
@@ -21,25 +26,24 @@ from collections.abc import Iterable
 # (https://github.com/rustls/webpki/commit/f3caaa9f2ba94a42dcd31767e367688a416a3d87) and the Datadog Agent
 # distrust the same keys.
 DISTRUSTED_SPKI_SHA256 = {
-    'ebed6475c2c2d80fcb199f3fe8dd6e6b3ce60b77eb15d4e42c3dec0c6f5b5105': 'EM DV TLS CA - G3B',
-    '49dd353dc2b919a3770645117d0e60c16115e7d1bc259eefe734b00ea434fe5f': 'EM DV TLS CA - G3C',
-    'e0254c7fcdc265e2f0f8a428dabb75ab4ae039b4872d62f5ee57f0877d5a8a41': 'EM EV TLS CA - G3B',
-    '5c0660a2b164910d8ff589c18e14552e9e0ec237dcefe2cb736d41a4811f81a0': 'EM EV TLS CA - G3C',
-    '43bffa19d6ef651451f6841e019931e96f6f2eaeff28ab4b6f1ce4576de2717b': 'EM OV TLS CA - G3B',
-    '63ecefee431d49523bc1136c4e72d0206a477086caf606cd5cf025686c109cf8': 'EM OV TLS CA - G3C',
-    'ec4ffa1ad0ac88081314b7aaffef6a91f97cd57291bb5ba686c5415f5eb4f6b6': 'EM OV CS CA - G3B',
-    '92c063d67e8f14db71d288e11266ffdaf69cbf115f7bab14f3bc2f68d25e0e30': 'EM OV CS CA - G3C',
+    'ebed6475c2c2d80fcb199f3fe8dd6e6b3ce60b77eb15d4e42c3dec0c6f5b5105': 'EM DV TLS CA - G3B (eMudhra)',
+    '49dd353dc2b919a3770645117d0e60c16115e7d1bc259eefe734b00ea434fe5f': 'EM DV TLS CA - G3C (eMudhra)',
+    'e0254c7fcdc265e2f0f8a428dabb75ab4ae039b4872d62f5ee57f0877d5a8a41': 'EM EV TLS CA - G3B (eMudhra)',
+    '5c0660a2b164910d8ff589c18e14552e9e0ec237dcefe2cb736d41a4811f81a0': 'EM EV TLS CA - G3C (eMudhra)',
+    '43bffa19d6ef651451f6841e019931e96f6f2eaeff28ab4b6f1ce4576de2717b': 'EM OV TLS CA - G3B (eMudhra)',
+    '63ecefee431d49523bc1136c4e72d0206a477086caf606cd5cf025686c109cf8': 'EM OV TLS CA - G3C (eMudhra)',
+    'ec4ffa1ad0ac88081314b7aaffef6a91f97cd57291bb5ba686c5415f5eb4f6b6': 'EM OV CS CA - G3B (eMudhra)',
+    '92c063d67e8f14db71d288e11266ffdaf69cbf115f7bab14f3bc2f68d25e0e30': 'EM OV CS CA - G3C (eMudhra)',
 }
 
 # OpenSSL's `X509_V_ERR_APPLICATION_VERIFICATION`: the application rejected a chain that OpenSSL accepted.
 X509_V_ERR_APPLICATION_VERIFICATION = 50
 
-DER_SEQUENCE = 0x30
 DER_EXPLICIT_VERSION = 0xA0
 
 
 class CertificateDistrustError(ssl.SSLCertVerificationError):
-    """The verified certificate chain could not be trusted because of a distrusted CA public key."""
+    """The verified certificate chain contains a distrusted CA public key, or could not be checked for one."""
 
 
 class CertificateDistrustSSLSocket(ssl.SSLSocket):
@@ -47,7 +51,13 @@ class CertificateDistrustSSLSocket(ssl.SSLSocket):
 
     def do_handshake(self, block: bool = False) -> None:
         super().do_handshake(block)
-        _check_verified_chain(self)
+        try:
+            _check_verified_chain(self)
+        except CertificateDistrustError:
+            # The handshake has already completed, so close the connection: a caller that swallows the error must
+            # not be able to send data to the distrusted peer.
+            self.close()
+            raise
 
 
 class CertificateDistrustSSLObject(ssl.SSLObject):
@@ -58,22 +68,18 @@ class CertificateDistrustSSLObject(ssl.SSLObject):
         _check_verified_chain(self)
 
 
-def distrusted_ca_name(spki_sha256: str) -> str | None:
-    """Return the name of the CA whose public key has this SHA-256, if that key is distrusted."""
-    return DISTRUSTED_SPKI_SHA256.get(spki_sha256)
-
-
 def find_distrusted_key(chain: Iterable[bytes]) -> tuple[str, str] | None:
     """Return the CA name and SPKI SHA-256 of the first distrusted key in a chain of DER certificates."""
     for cert_der in chain:
         try:
             spki = _subject_public_key_info(cert_der)
         except ValueError:
-            # A distrusted key always arrives in a CA-signed certificate that parses, so skipping a certificate
-            # that can't be read cannot hide one, while failing would reject unusual but valid chains.
+            # OpenSSL re-encodes each certificate's unsigned outer header and returns its signed contents unchanged,
+            # so the DER certificates carrying the distrusted keys always parse. Skipping a certificate that can't be
+            # read therefore cannot hide one, while failing would reject unusual but valid chains.
             continue
         spki_sha256 = hashlib.sha256(spki).hexdigest()
-        if (ca_name := distrusted_ca_name(spki_sha256)) is not None:
+        if (ca_name := _distrusted_ca_name(spki_sha256)) is not None:
             return ca_name, spki_sha256
     return None
 
@@ -95,6 +101,11 @@ def caused_by_certificate_distrust(error: BaseException) -> bool:
             return True
         pending.extend(link for link in (current.__cause__, current.__context__) if link is not None)
     return False
+
+
+def _distrusted_ca_name(spki_sha256: str) -> str | None:
+    """Return the name of the CA whose public key has this SHA-256, if that key is distrusted."""
+    return DISTRUSTED_SPKI_SHA256.get(spki_sha256)
 
 
 def _check_verified_chain(connection: ssl.SSLSocket | ssl.SSLObject) -> None:
@@ -129,34 +140,27 @@ def _certificate_distrust_error(verify_message: str) -> CertificateDistrustError
 
 def _subject_public_key_info(cert_der: bytes) -> bytes:
     """Return the `SubjectPublicKeyInfo` of a DER certificate, exactly as encoded."""
-    tag, cert_start, cert_end = _der_tlv(cert_der, 0, len(cert_der))
-    if tag != DER_SEQUENCE:
-        raise ValueError('certificate is not a SEQUENCE')
-    tag, offset, tbs_end = _der_tlv(cert_der, cert_start, cert_end)
-    if tag != DER_SEQUENCE:
-        raise ValueError('tbsCertificate is not a SEQUENCE')
+    offset, end = _der_tlv(cert_der, 0, len(cert_der))  # Certificate
+    offset, end = _der_tlv(cert_der, offset, end)  # tbsCertificate
     # The version is omitted from v1 certificates.
-    if offset < tbs_end and cert_der[offset] == DER_EXPLICIT_VERSION:
-        _, _, offset = _der_tlv(cert_der, offset, tbs_end)
+    if offset < end and cert_der[offset] == DER_EXPLICIT_VERSION:
+        _, offset = _der_tlv(cert_der, offset, end)
     # serialNumber, signature, issuer, validity and subject precede the subjectPublicKeyInfo.
     for _ in range(5):
-        _, _, offset = _der_tlv(cert_der, offset, tbs_end)
-    tag, _, spki_end = _der_tlv(cert_der, offset, tbs_end)
-    if tag != DER_SEQUENCE:
-        raise ValueError('subjectPublicKeyInfo is not a SEQUENCE')
+        _, offset = _der_tlv(cert_der, offset, end)
+    _, spki_end = _der_tlv(cert_der, offset, end)
     return cert_der[offset:spki_end]
 
 
-def _der_tlv(data: bytes, offset: int, end: int) -> tuple[int, int, int]:
-    """Return the tag and content offsets of the TLV at `offset`, which must fit before `end`."""
+def _der_tlv(data: bytes, offset: int, end: int) -> tuple[int, int]:
+    """Return the content start and end offsets of the TLV at `offset`, which must fit before `end`."""
     if offset >= end:
         raise ValueError('truncated tag')
-    tag = data[offset]
     length, content_start = _der_length(data, offset + 1, end)
     content_end = content_start + length
     if content_end > end:
         raise ValueError('truncated value')
-    return tag, content_start, content_end
+    return content_start, content_end
 
 
 def _der_length(data: bytes, offset: int, end: int) -> tuple[int, int]:

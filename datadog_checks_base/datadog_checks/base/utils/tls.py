@@ -119,6 +119,12 @@ def _load_ca_certs(context, config):
 
 
 def create_ssl_context(config):
+    """Create an `ssl.SSLContext` from the TLS options in `config`.
+
+    Handshakes on its connections raise `CertificateDistrustError`, an `ssl.SSLCertVerificationError` with
+    `verify_code` 50, when the verified chain contains a distrusted CA key. See `_certificate_distrust` for the
+    limits of that check.
+    """
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
     # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS_CLIENT
     context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
