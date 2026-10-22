@@ -49,6 +49,7 @@ class IbmDb2Check(DatabaseCheck):
 
         # Add global database tag
         self.tag_manager.set_tag('db', self._config.db)
+        self._add_core_tags()
 
         # We'll connect on the first check run
         self._connection = Db2Connection(self, self._config, on_reconnect=self.emit_connection_service_checks)
@@ -129,6 +130,14 @@ class IbmDb2Check(DatabaseCheck):
             self.log.debug('Found ibm_db2 version: %s', raw_version)
         else:
             self.log.warning('Could not retrieve ibm_db2 version info: %s', raw_version)
+
+    def _add_core_tags(self) -> None:
+        """
+        Add identification tags that should be attached to every metric/event but which require check calculations
+        outside the config. The identifier is rendered from the tags set before this call.
+        """
+        self.tag_manager.set_tag('database_hostname', self.reported_hostname, replace=True)
+        self.tag_manager.set_tag('database_instance', self.database_identifier, replace=True)
 
     @property
     def reported_hostname(self) -> str:

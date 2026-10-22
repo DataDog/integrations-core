@@ -79,7 +79,14 @@ def test_custom_queries(aggregator, instance, dd_run_check, monkeypatch):
         aggregator.assert_metric(
             'ibm_db2.tablespace.files_closed',
             metric_type=3,
-            tags=['db:datadog', 'foo:bar', 'test:ibm_db2', 'tablespace:{}'.format(table_space)],
+            tags=[
+                'db:datadog',
+                'foo:bar',
+                'test:ibm_db2',
+                'tablespace:{}'.format(table_space),
+                f'database_hostname:{check.reported_hostname}',
+                f'database_instance:{check.database_identifier}',
+            ],
         )
     aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, count=1, status=check.OK)
 
@@ -112,7 +119,14 @@ def test_custom_queries_init_config(aggregator, instance, dd_run_check, monkeypa
         aggregator.assert_metric(
             'ibm_db2.tablespace.files_closed',
             metric_type=3,
-            tags=['db:datadog', 'foo:bar', 'test:ibm_db2', 'tablespace:{}'.format(table_space)],
+            tags=[
+                'db:datadog',
+                'foo:bar',
+                'test:ibm_db2',
+                'tablespace:{}'.format(table_space),
+                f'database_hostname:{check.reported_hostname}',
+                f'database_instance:{check.database_identifier}',
+            ],
         )
     aggregator.assert_service_check(check.SERVICE_CHECK_CONNECT, count=1, status=check.OK)
 
