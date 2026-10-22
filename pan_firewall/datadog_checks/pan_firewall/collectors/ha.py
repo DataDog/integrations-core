@@ -10,12 +10,11 @@ from __future__ import annotations
 
 from datadog_checks.pan_firewall.xml_utils import text
 
-from .base import CollectContext, Sample, register
+from .base import CollectContext, Sample
 
 HA_CMD = '<show><high-availability><all/></high-availability></show>'
 
 
-@register('ha')
 def collect_ha(ctx: CollectContext) -> list[Sample]:
     """Set `ctx.state.ha_state`, None when HA is off. The enabled-HA path is not verified against a real HA pair yet."""
     root = ctx.client.op(HA_CMD)

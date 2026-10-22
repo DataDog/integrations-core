@@ -8,7 +8,7 @@ import pytest
 from datadog_checks.dev import docker_run, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.pan_firewall import poller as poller_module
-from datadog_checks.pan_firewall.collectors.base import COLLECT_FUNCTIONS
+from datadog_checks.pan_firewall.collectors import COLLECTORS
 from datadog_checks.pan_firewall.panorama import IP_OVERRIDES_ENV_VAR
 from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 
@@ -104,8 +104,8 @@ def stub_collectors(request, monkeypatch):
     """Empty the collector registry for the tests marked `stub_collectors`, which test the poller framework with the
     stub collectors they register (`helpers.register_stubs`) and no others."""
     if request.node.get_closest_marker('stub_collectors'):
-        for name in list(COLLECT_FUNCTIONS):
-            monkeypatch.delitem(COLLECT_FUNCTIONS, name)
+        for name in list(COLLECTORS):
+            monkeypatch.delitem(COLLECTORS, name)
 
 
 @pytest.fixture

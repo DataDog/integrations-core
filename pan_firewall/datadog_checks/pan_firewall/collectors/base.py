@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Shared types of the collectors, and their registry: a collector is a function `collect(ctx) -> list[Sample]`."""
+"""Shared types of the collectors: a collector is a function `collect(ctx) -> list[Sample]`."""
 
 from __future__ import annotations
 
@@ -137,18 +137,6 @@ class CollectContext:
 
 
 Collector = Callable[[CollectContext], list[Sample]]
-
-COLLECT_FUNCTIONS: dict[str, Collector] = {}
-
-
-def register(name: str) -> Callable[[Collector], Collector]:
-    """The module defining the collector must be imported by `poller`."""
-
-    def decorator(function: Collector) -> Collector:
-        COLLECT_FUNCTIONS[name] = function
-        return function
-
-    return decorator
 
 
 def tag_tuple(*pairs: tuple[str, str | None]) -> tuple[str, ...]:

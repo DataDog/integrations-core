@@ -11,20 +11,8 @@ from typing import TYPE_CHECKING
 
 from .api import PanosClient
 from .auth import KeyManager
-from .collectors import (  # noqa: F401  (importing the modules registers their collectors)
-    counters,
-    dataplane,
-    ha,
-    interfaces,
-    licenses,
-    reports,
-    routing,
-    rules,
-    system,
-    threats,
-    vpn,
-)
-from .collectors.base import COLLECT_FUNCTIONS, CollectContext, FirewallState, Sample
+from .collectors import COLLECTORS
+from .collectors.base import CollectContext, FirewallState, Sample
 from .collectors.interfaces import parse_interface_all, parse_interface_speeds
 from .collectors.jobs import busy_jobs
 from .constants import IDENTITY
@@ -179,7 +167,7 @@ class FirewallPoller:
         results = {}
         if IDENTITY in due:
             results[IDENTITY] = self._run_identity()
-        collectors = [name for name in due if name in COLLECT_FUNCTIONS]
+        collectors = [name for name in due if name in COLLECTORS]
         if not collectors:
             return results
 
@@ -251,7 +239,7 @@ class FirewallPoller:
     def _run_collector(self, name: str, ctx: CollectContext) -> list[Sample]:
         if self.client.stats.unreachable is not None:
             raise PanosSkipped(f'not running {name}: an earlier call could not reach {self.ip}')
-        return COLLECT_FUNCTIONS[name](ctx)
+        return COLLECTORS[name](ctx)
 
     def _submit(self, samples: Iterable[Sample]) -> None:
         tags = self._tags()
@@ -264,7 +252,7 @@ class FirewallPoller:
     def _enabled(self) -> set[str]:
         return {
             name
-            for name in COLLECT_FUNCTIONS
+            for name in COLLECTORS
             if name not in OPTIONAL_COLLECTORS or getattr(self.config, OPTIONAL_COLLECTORS[name])
         } | {IDENTITY}
 
@@ -297,8 +285,14 @@ class FirewallPoller:
         """
         try:
             interfaces = self.client.op(INTERFACE_ALL_CMD)
+        except PanosUnreachable:
+            pass  # `_warn_if_unreachable` reports it.
         except PanosError as e:
-            self.log.warning('%s: cannot read the interfaces: %s', self.ip, e)
+            self._warn_once(
+                'interface_all',
+                'cannot read the interfaces, so metrics have no interface tags and NDM gets no interfaces: %s',
+                e,
+            )
         else:
             self.state.interface_rows, self.state.interface_map = parse_interface_all(interfaces)
             # `interface.speed` follows the identity's 30-minute schedule, as it comes from the interfaces read here.
@@ -314,17 +308,21 @@ class FirewallPoller:
             # A refusal is the role lacking a permission, not a rejected key: it must not renew the key.
             root = self.client.op(INTERFACE_CONFIG_CMD, renew_on_auth_error=False)
         except PanosError as e:
-            # Warned once per firewall: a role without the permission would otherwise repeat it every 30 minutes.
-            key = 'interface_config'
-            log = self.log.debug if key in self.state.warned else self.log.warning
-            self.state.warned.add(key)
-            log(
-                '%s: cannot read the interface config, so interfaces have no admin status or description: %s',
-                self.ip,
+            self._warn_once(
+                'interface_config',
+                'cannot read the interface config, so interfaces have no admin status or description. To send them, '
+                'allow `show config running` in the XML API Operational Requests of the Agent role: %s',
                 e,
             )
         else:
             self.state.interface_config = parse_interface_config(root)
+
+    def _warn_once(self, key: str, msg: str, *args: object) -> None:
+        """Log the warning the first time `key` is seen for this firewall, at debug level after that: a failure that
+        lasts, such as a role without a permission, would otherwise repeat it every 30 minutes."""
+        log = self.log.debug if key in self.state.warned else self.log.warning
+        self.state.warned.add(key)
+        log('%s: ' + msg, self.ip, *args)
 
     def _debug(self, msg: str, *args: object) -> None:
         """The `debug` callable of the `parse_*` functions the poller calls itself, outside a `CollectContext`."""

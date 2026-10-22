@@ -6,7 +6,8 @@ import threading
 
 import pytest
 
-from datadog_checks.pan_firewall.collectors.base import COLLECT_FUNCTIONS, Sample
+from datadog_checks.pan_firewall.collectors import COLLECTORS
+from datadog_checks.pan_firewall.collectors.base import Sample
 from datadog_checks.pan_firewall.collectors.jobs import JOBS_PENDING_CMD
 from datadog_checks.pan_firewall.errors import PanosApiError, PanosUnreachable
 from datadog_checks.pan_firewall.poller import FirewallPoller
@@ -110,10 +111,17 @@ def interface_reads(fake_panos, since=0):
     return sum(1 for c in fake_panos.calls[since:] if c.cmd == INTERFACE_ALL_CMD)
 
 
-def test_failed_interface_read_is_warned(dd_run_check, fake_panos, caplog):
-    dd_run_check(new_check(make_instance(ip=FW_B_IP)))
+def test_failed_interface_read_is_warned_once(dd_run_check, fake_panos, schedule_clock, caplog):
+    # The read is retried within five minutes; a failure that lasts must not warn on every retry.
+    caplog.set_level('DEBUG')
+    check = new_check(make_instance(ip=FW_B_IP))
 
-    assert any(m.startswith(f'{FW_B_IP}: cannot read the interfaces:') for m in warnings(caplog))
+    dd_run_check(check)
+    schedule_clock.now += 1800
+    dd_run_check(check)
+
+    failures = [r for r in caplog.records if r.getMessage().startswith(f'{FW_B_IP}: cannot read the interfaces,')]
+    assert [r.levelname for r in failures] == ['WARNING', 'DEBUG']
 
 
 def test_interface_read_is_retried_within_five_minutes_until_it_answers(dd_run_check, fake_panos, schedule_clock):
@@ -241,7 +249,7 @@ def test_firewalls_are_polled_concurrently_up_to_max_concurrency(dd_run_check, a
             in_flight -= 1
         return [stub_sample('bgp')]
 
-    monkeypatch.setitem(COLLECT_FUNCTIONS, 'bgp', collect)
+    monkeypatch.setitem(COLLECTORS, 'bgp', collect)
 
     dd_run_check(new_check(make_instance(firewalls=[FW_A_IP, FW_B_IP, FW_C_IP], max_concurrency=2)))
 
@@ -350,7 +358,7 @@ def test_timeout_a_collector_handles_itself_is_still_reported(dd_run_check, fake
     check = new_check()
     # Caches the identity, so bgp is the only due collector on the next run.
     dd_run_check(check)
-    monkeypatch.setitem(COLLECT_FUNCTIONS, 'bgp', bgp)
+    monkeypatch.setitem(COLLECTORS, 'bgp', bgp)
     fake_panos.answer_op(FW_A_IP, SYSTEM_INFO_CMD, FAILURES['timeout'])
     caplog.clear()
 
@@ -434,7 +442,7 @@ def test_failed_collector_is_retried_after_5_minutes_not_after_its_interval(dd_r
         runs.append(schedule_clock.now)
         raise PanosApiError('400', 'bad command')
 
-    monkeypatch.setitem(COLLECT_FUNCTIONS, 'licenses', licenses)
+    monkeypatch.setitem(COLLECTORS, 'licenses', licenses)
     check = new_check()
     start = schedule_clock.now
     dd_run_check(check)
@@ -471,7 +479,7 @@ def test_failed_identity_read_is_retried_after_5_minutes(dd_run_check, fake_pano
 def test_identity_is_read_again_on_the_next_run_after_the_key_is_regenerated(
     dd_run_check, fake_panos, monkeypatch, schedule_clock
 ):
-    monkeypatch.setitem(COLLECT_FUNCTIONS, 'bgp', lambda ctx: [])
+    monkeypatch.setitem(COLLECTORS, 'bgp', lambda ctx: [])
     check = new_check()
     dd_run_check(check)
     # A due collector makes the calls that the firewall now rejects, the key it just regenerated included.

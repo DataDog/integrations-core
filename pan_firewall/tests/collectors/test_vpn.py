@@ -4,7 +4,8 @@
 import threading
 from unittest import mock
 
-from datadog_checks.pan_firewall.collectors.base import COLLECT_FUNCTIONS, FirewallState
+from datadog_checks.pan_firewall.collectors import COLLECTORS
+from datadog_checks.pan_firewall.collectors.base import FirewallState
 from datadog_checks.pan_firewall.collectors.vpn import VPN_FLOW_CMD, VPN_GATEWAY_CMD, collect_vpn, parse_vpn
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
@@ -103,7 +104,7 @@ def test_tunnel_counters_wait_for_the_run_after_vpn_first_answers_whatever_the_c
     schedule_clock,
 ):
     vpn_done = threading.Event()
-    real_vpn, real_interfaces = COLLECT_FUNCTIONS['vpn'], COLLECT_FUNCTIONS['interfaces']
+    real_vpn, real_interfaces = COLLECTORS['vpn'], COLLECTORS['interfaces']
 
     def vpn_then_signal(ctx):
         try:
@@ -115,8 +116,8 @@ def test_tunnel_counters_wait_for_the_run_after_vpn_first_answers_whatever_the_c
         assert vpn_done.wait(10)
         return real_interfaces(ctx)
 
-    monkeypatch.setitem(COLLECT_FUNCTIONS, 'vpn', vpn_then_signal)
-    monkeypatch.setitem(COLLECT_FUNCTIONS, 'interfaces', interfaces_after_vpn)
+    monkeypatch.setitem(COLLECTORS, 'vpn', vpn_then_signal)
+    monkeypatch.setitem(COLLECTORS, 'interfaces', interfaces_after_vpn)
     check = new_check()
 
     dd_run_check(check)

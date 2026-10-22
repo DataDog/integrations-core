@@ -101,7 +101,7 @@ files:
         - api_key: <API_KEY>
     - name: namespace
       fleet_configurable: true
-      description: Namespace to use for NDM device metadata.
+      description: Namespace to use for Network Device Monitoring (NDM) device metadata.
       value:
         type: string
         default: default
@@ -154,7 +154,7 @@ files:
           Changes the collection interval of the check. For more information, see
           https://docs.datadoghq.com/developers/write_agent_check/#collection-interval.
           We recommend 60 seconds. Each PAN-OS call has its own interval, from 2 minutes to 24 hours,
-          so a more frequent run does not collect additional data. Values above 120 delay the calls
+          so a more frequent run does not collect additional data. Values above 120 seconds delay the calls
           that run every 2 or 3 minutes.
     - name: vsys
       fleet_configurable: true

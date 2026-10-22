@@ -8,12 +8,8 @@ from xml.etree import ElementTree as ET
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.pan_firewall import (
-    PanFirewallCheck,
-    constants,
-    poller,  # noqa: F401  (importing it registers the collectors)
-)
-from datadog_checks.pan_firewall.collectors.base import COLLECT_FUNCTIONS
+from datadog_checks.pan_firewall import PanFirewallCheck, constants
+from datadog_checks.pan_firewall.collectors import COLLECTORS
 from datadog_checks.pan_firewall.collectors.ha import HA_CMD
 from datadog_checks.pan_firewall.collectors.interfaces import COUNTER_INTERFACE_CMD
 from datadog_checks.pan_firewall.collectors.system import ENVIRONMENTALS_CMD
@@ -394,11 +390,11 @@ CHECK_LEVEL_SERIES = [
 
 
 def test_every_scheduled_collector_is_registered():
-    # A collector runs only when it has an interval, is registered, and `poller` imports its module; a name missing
-    # from either side would never run, and nothing else would say so.
-    assert set(COLLECT_FUNCTIONS) | {IDENTITY} == set(INTERVALS)
+    # A collector runs only when it has an interval and is in `COLLECTORS`; a name missing from either side would never
+    # run, and nothing else would say so.
+    assert set(COLLECTORS) | {IDENTITY} == set(INTERVALS)
     # An optional collector that is not registered would be read from the config and never run.
-    assert set(OPTIONAL_COLLECTORS) <= set(COLLECT_FUNCTIONS)
+    assert set(OPTIONAL_COLLECTORS) <= set(COLLECTORS)
 
 
 def test_every_collector_submits_with_the_global_tags(dd_run_check, aggregator, fake_panos):

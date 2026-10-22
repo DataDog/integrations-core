@@ -10,7 +10,7 @@ from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.xml_utils import text
 
-from .base import CollectContext, Sample, register
+from .base import CollectContext, Sample
 
 RESOURCE_MONITOR_CMD = (
     '<show><running><resource-monitor><minute><last>1</last></minute></resource-monitor></running></show>'
@@ -42,6 +42,5 @@ def _to_float(value: str) -> float | None:
         return None
 
 
-@register('dataplane')
 def collect_dataplane(ctx: CollectContext) -> list[Sample]:
     return parse_dataplane(ctx.client.op(RESOURCE_MONITOR_CMD), ctx.warning)

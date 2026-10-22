@@ -12,7 +12,7 @@ from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.xml_utils import text
 
-from .base import CollectContext, Sample, register
+from .base import CollectContext, Sample
 
 LICENSE_INFO_CMD = '<request><license><info/></license></request>'
 
@@ -67,6 +67,5 @@ def parse_licenses(
     return samples
 
 
-@register('licenses')
 def collect_licenses(ctx: CollectContext, today: datetime.date | None = None) -> list[Sample]:
     return parse_licenses(ctx.client.op(LICENSE_INFO_CMD), ctx.warning, ctx.debug, today or datetime.date.today())

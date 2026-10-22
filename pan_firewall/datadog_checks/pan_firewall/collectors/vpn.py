@@ -15,7 +15,7 @@ from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.xml_utils import text
 
-from .base import CollectContext, Sample, register, tag_tuple
+from .base import CollectContext, Sample, tag_tuple
 
 VPN_FLOW_CMD = '<show><vpn><flow/></vpn></show>'
 VPN_GATEWAY_CMD = '<show><vpn><gateway/></vpn></show>'
@@ -74,7 +74,6 @@ def parse_vpn(flow: Element, gateway: Element, warn: Callable[..., None]) -> Vpn
     return snapshot
 
 
-@register('vpn')
 def collect_vpn(ctx: CollectContext) -> list[Sample]:
     flow = ctx.client.op(VPN_FLOW_CMD)
     gateway = ctx.client.op(VPN_GATEWAY_CMD)

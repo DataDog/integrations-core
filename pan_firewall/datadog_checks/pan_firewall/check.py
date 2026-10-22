@@ -25,7 +25,7 @@ class PanFirewallCheck(AgentCheck, ConfigMixin):
     def check(self, _: Any) -> None:
         if self._source is None:
             self._source = (
-                PanoramaFirewallSource(self, self.config)
+                PanoramaFirewallSource(self, self.config, self.config.panorama_host)
                 if self.config.panorama_host
                 else StaticFirewallSource(self.config)
             )

@@ -10,7 +10,7 @@ from xml.etree.ElementTree import Element
 from datadog_checks.pan_firewall.constants import DROPPED_PACKET_ASPECTS, GLOBAL_COUNTERS
 from datadog_checks.pan_firewall.xml_utils import num, text
 
-from .base import CollectContext, Sample, register
+from .base import CollectContext, Sample
 
 # Never a filter: `value all` answers with 5,524 counters.
 GLOBAL_COUNTER_CMD = '<show><counter><global/></counter></show>'
@@ -45,7 +45,6 @@ def parse_global(root: Element) -> list[Sample] | None:
     return samples
 
 
-@register('global_counters')
 def collect_global_counters(ctx: CollectContext) -> list[Sample]:
     samples = parse_global(ctx.client.op(GLOBAL_COUNTER_CMD))
     if samples is None:

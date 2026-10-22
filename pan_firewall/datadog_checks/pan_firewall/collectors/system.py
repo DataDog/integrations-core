@@ -15,7 +15,7 @@ from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.xml_utils import num, text
 
-from .base import CollectContext, Sample, register
+from .base import CollectContext, Sample
 
 SYSTEM_RESOURCES_CMD = '<show><system><resources/></system></show>'
 DISK_SPACE_CMD = '<show><system><disk-space/></system></show>'
@@ -185,16 +185,13 @@ def parse_environmentals(root: Element, warn: Callable[..., None]) -> list[Sampl
     return samples
 
 
-@register('system_resources')
 def collect_system_resources(ctx: CollectContext) -> list[Sample]:
     return parse_system_resources(ctx.client.op(SYSTEM_RESOURCES_CMD), ctx.warning)
 
 
-@register('disk')
 def collect_disk(ctx: CollectContext) -> list[Sample]:
     return parse_disk(ctx.client.op(DISK_SPACE_CMD), ctx.warning)
 
 
-@register('environment')
 def collect_environment(ctx: CollectContext) -> list[Sample]:
     return parse_environmentals(ctx.client.op(ENVIRONMENTALS_CMD), ctx.warning)

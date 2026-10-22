@@ -4,6 +4,7 @@
 import copy
 from xml.etree import ElementTree as ET
 
+from datadog_checks.pan_firewall import interface_config
 from datadog_checks.pan_firewall.auth import Credentials
 from datadog_checks.pan_firewall.collectors.ha import HA_CMD
 from datadog_checks.pan_firewall.firewalls import FirewallTarget
@@ -319,4 +320,4 @@ def test_no_interface_config_call_without_ndm_metadata(dd_run_check, fake_panos)
 
 
 def test_the_interface_config_call_never_reads_the_whole_config():
-    assert '<xpath>devices/entry/network/interface</xpath>' in INTERFACE_CONFIG_CMD
+    assert '<xpath>devices/entry/network/interface</xpath>' in interface_config.INTERFACE_CONFIG_CMD

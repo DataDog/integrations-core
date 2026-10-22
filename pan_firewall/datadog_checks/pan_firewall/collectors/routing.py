@@ -15,7 +15,7 @@ from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.xml_utils import num, text
 
-from .base import CollectContext, Sample, register, tag_tuple
+from .base import CollectContext, Sample, tag_tuple
 
 BGP_PEER_CMD = '<show><routing><protocol><bgp><peer/></bgp></protocol></routing></show>'
 OSPF_NEIGHBOR_CMD = '<show><routing><protocol><ospf><neighbor/></ospf></protocol></routing></show>'
@@ -118,14 +118,12 @@ def legacy_routing_engine(ctx: CollectContext) -> bool:
     return False
 
 
-@register('bgp')
 def collect_bgp(ctx: CollectContext) -> list[Sample]:
     if not legacy_routing_engine(ctx):
         return []
     return parse_bgp_peers(ctx.client.op(BGP_PEER_CMD))
 
 
-@register('ospf')
 def collect_ospf(ctx: CollectContext) -> list[Sample]:
     if not legacy_routing_engine(ctx):
         return []

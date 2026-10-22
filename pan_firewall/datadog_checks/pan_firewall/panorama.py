@@ -10,7 +10,7 @@ import os
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 from xml.etree.ElementTree import Element
 
 from .api import PanosClient
@@ -76,10 +76,10 @@ class PanoramaFirewallSource:
     the firewalls are polled directly, and `panorama.can_connect` reports the outage.
     """
 
-    def __init__(self, check: AgentCheck, config: InstanceConfig):
+    def __init__(self, check: AgentCheck, config: InstanceConfig, host: str):
         self._check = check
         self._config = config
-        self._host = cast(str, config.panorama_host)
+        self._host = host
         self._cache_key = f'panorama_firewalls:{self._host}'
         credentials = Credentials(config.panorama_username, config.panorama_password, config.panorama_api_key)
         self._client = PanosClient(check.http, self._host, KeyManager(check.http, self._host, credentials), check.log)

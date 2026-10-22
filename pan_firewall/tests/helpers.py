@@ -12,7 +12,8 @@ from unittest import mock
 from xml.etree import ElementTree as ET
 
 from datadog_checks.pan_firewall import PanFirewallCheck
-from datadog_checks.pan_firewall.collectors.base import COLLECT_FUNCTIONS, CollectContext, FirewallState, Sample
+from datadog_checks.pan_firewall.collectors import COLLECTORS
+from datadog_checks.pan_firewall.collectors.base import CollectContext, FirewallState, Sample
 from datadog_checks.pan_firewall.collectors.interfaces import parse_interface_all
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
@@ -85,7 +86,7 @@ def stub_sample(name):
 def register_stubs(monkeypatch, **overrides):
     """Register a stub for each name in STUBS that submits `pan_firewall.stub` tagged `collector:<name>`."""
     for name in STUBS:
-        monkeypatch.setitem(COLLECT_FUNCTIONS, name, overrides.get(name, lambda ctx, name=name: [stub_sample(name)]))
+        monkeypatch.setitem(COLLECTORS, name, overrides.get(name, lambda ctx, name=name: [stub_sample(name)]))
 
 
 def stub_runs(aggregator):

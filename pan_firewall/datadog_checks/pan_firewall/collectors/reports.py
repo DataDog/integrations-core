@@ -18,7 +18,7 @@ from datadog_checks.pan_firewall.constants import ACTIVE_STATUSES
 from datadog_checks.pan_firewall.errors import PanosError, PanosUnreachable
 from datadog_checks.pan_firewall.xml_utils import num, text
 
-from .base import CollectContext, ReportJob, Sample, register
+from .base import CollectContext, ReportJob, Sample
 
 DEFAULT_TOP_N = 10
 CAPTION = 'datadog'
@@ -54,7 +54,6 @@ def parse_report(root: Element, name: str) -> list[Sample]:
     return samples
 
 
-@register('reports')
 def collect_reports(ctx: CollectContext) -> list[Sample]:
     """Collect one cycle of `REPORTS`, resuming where the last run stopped. A job still running keeps `reports` due,
     so the next run, not the next interval, carries on with the cycle."""

@@ -14,7 +14,7 @@ from xml.sax.saxutils import escape
 from datadog_checks.pan_firewall.errors import PanosApiError, PanosAuthError
 from datadog_checks.pan_firewall.xml_utils import num
 
-from .base import CollectContext, Sample, register
+from .base import CollectContext, Sample
 
 
 @cache
@@ -49,7 +49,6 @@ def parse_rule_hits(root: Element, vsys: str, patterns: Sequence[str], warn: Cal
     return samples
 
 
-@register('rule_hits')
 def collect_rule_hits(ctx: CollectContext) -> list[Sample]:
     """A vsys that answers with an API error is skipped with a warning; when every vsys does, the collector fails."""
     patterns = ctx.config.security_rule_filter or ()

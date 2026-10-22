@@ -18,7 +18,7 @@ from datadog_checks.pan_firewall.constants import NDM_INTERFACE_RESOURCE_TAG
 from datadog_checks.pan_firewall.identity import normalize_vsys
 from datadog_checks.pan_firewall.xml_utils import num, text
 
-from .base import CollectContext, FirewallState, Sample, register, tag_tuple
+from .base import CollectContext, FirewallState, Sample, tag_tuple
 
 COUNTER_INTERFACE_CMD = '<show><counter><interface>all</interface></counter></show>'
 
@@ -136,7 +136,6 @@ def parse_interface_speeds(state: FirewallState, serial: str | None, debug: Call
     return samples
 
 
-@register('interfaces')
 def collect_interfaces(ctx: CollectContext) -> list[Sample]:
     root = ctx.client.op(COUNTER_INTERFACE_CMD)
     return parse_interface_counters(root, ctx.state, ctx.identity.serial, ctx.tunnel_tags, ctx.warning)
