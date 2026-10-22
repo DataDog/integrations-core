@@ -12,7 +12,7 @@
 
 ***Security***:
 
-* Pin `certifi` to 2026.10.19 to remove the eMudhra root whose intermediates were compromised. ([#25701](https://github.com/DataDog/integrations-core/pull/25701))
+* Pin `certifi` to 2026.10.19 to remove the eMudhra root certificate whose intermediates were compromised. ([#25701](https://github.com/DataDog/integrations-core/pull/25701))
 
 ## 38.5.0 / 2026-10-13
 
