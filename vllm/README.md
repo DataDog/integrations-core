@@ -19,6 +19,8 @@ No additional installation is needed on your server.
 
 1. Edit the `vllm.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your vllm performance data. See the [sample vllm.d/conf.yaml][3] for all available configuration options.
 
+   When vLLM runs as an NVIDIA Dynamo backend worker, set `openmetrics_endpoint` to the worker's system status server (`DYN_SYSTEM_PORT`), which exposes vLLM's metrics.
+
 2. [Restart the Agent][4].
 
 ### Validation
