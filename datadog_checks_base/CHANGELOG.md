@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 38.7.0 / 2026-10-21
+
+***Security***:
+
+* Limit lines read by OpenMetrics checks to 16 MiB. ([#25625](https://github.com/DataDog/integrations-core/pull/25625))
+
 ## 38.6.0 / 2026-10-20
 
 ***Security***:
