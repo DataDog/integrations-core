@@ -72,6 +72,19 @@ instances:
     #
     # dbm: false
 
+    ## Controls how the database instance is identified in DBM. The default is the resolved hostname.
+    ## Each unique identifier appears as a separate billable instance.
+    ## Use a template including the port to distinguish multiple instances on the same host.
+    #
+    # database_identifier:
+
+        ## @param template - string - optional - default: $resolved_hostname
+        ## The template for the database identifier. Supports `$resolved_hostname`, `$host`, `$port`,
+        ## and keys from the `tags` configuration. The identifier is used as-is for the display name
+        ## and normalized when applied as the `database_instance` tag.
+        #
+        # template: $resolved_hostname:$port
+
     ## Configure collection of DBM query metrics and full query text.
     #
     # query_metrics:
