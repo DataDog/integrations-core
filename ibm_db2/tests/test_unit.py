@@ -380,7 +380,12 @@ def test_full_query_text_refresh(instance: dict, aggregator: AggregatorStub):
     assert event['service'] == 'db2-test'
     assert event['ddagentversion'] == check.agent_version
     assert event['timestamp'] > 0
-    assert set(event['ddtags'].split(',')) == {'team:dbm', f"db:{instance['db']}"}
+    assert set(event['ddtags'].split(',')) == {
+        'team:dbm',
+        f"db:{instance['db']}",
+        f'database_hostname:{check.reported_hostname}',
+        f'database_instance:{check.database_identifier}',
+    }
     assert event['db'] == {
         'instance': instance['db'],
         'query_signature': 'test-signature',

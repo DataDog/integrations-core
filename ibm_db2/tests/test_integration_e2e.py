@@ -31,4 +31,6 @@ def _assert_standard(aggregator):
     for metric in metrics.STANDARD:
         aggregator.assert_metric_has_tag(metric, 'db:datadog')
         aggregator.assert_metric_has_tag(metric, 'foo:bar')
+        aggregator.assert_metric_has_tag_prefix(metric, 'database_hostname:')
+        aggregator.assert_metric_has_tag_prefix(metric, 'database_instance:')
     aggregator.assert_all_metrics_covered()
