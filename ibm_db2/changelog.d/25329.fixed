@@ -1,1 +1,1 @@
-Fix Db2 database identity tags and query metadata, omit database tags from instance metadata, and preserve SQL comments for Agent workload attribution.
+Fix Db2 database identity tags and query metadata, omit database tags from instance metadata, and preserve SQL comments for Agent workload attribution. Clarify identifier templates for saved database aliases.

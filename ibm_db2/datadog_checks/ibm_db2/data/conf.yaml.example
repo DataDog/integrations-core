@@ -46,7 +46,8 @@ instances:
     # host: <HOSTNAME>
 
     ## @param port - integer - optional - default: 50000
-    ## The port used to connect to a remote or uncataloged database.
+    ## The port used to connect to a remote or uncataloged database. Ignored when `host` is unset;
+    ## Db2 then connects using the database name or saved alias in `db`.
     #
     # port: 50000
 
@@ -74,7 +75,8 @@ instances:
 
     ## Controls how the database instance is identified in DBM. The default is the resolved hostname.
     ## Each unique identifier appears as a separate billable instance.
-    ## Use a template including the port to distinguish multiple instances on the same host.
+    ## When connecting with `host` and `port`, include the port in the template to distinguish
+    ## multiple instances on the same host.
     #
     # database_identifier:
 
@@ -82,6 +84,9 @@ instances:
         ## The template for the database identifier. Supports `$resolved_hostname`, `$host`, `$port`,
         ## and keys from the `tags` configuration. The identifier is used as-is for the display name
         ## and normalized when applied as the `database_instance` tag.
+        ## The `$host` and `$port` variables reflect configuration values, not endpoints resolved
+        ## from saved database aliases. Use a literal identifier or configured tag to distinguish
+        ## separate instances when connecting through aliases.
         #
         # template: $resolved_hostname:$port
 
