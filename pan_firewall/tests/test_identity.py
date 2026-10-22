@@ -15,6 +15,8 @@ from .fake_panos import FIREWALL_SETS
 from .fixture_map import op_fixture
 from .helpers import make_instance, new_check
 
+pytestmark = pytest.mark.unit
+
 CREDS = Credentials(username='dummy-user', password='dummy-password', api_key=None)
 STATIC_TARGET = FirewallTarget(ip='198.51.100.7', credentials=CREDS)
 # A Panorama-discovered fw-a, polled at the IP Panorama reports for it.

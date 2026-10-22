@@ -4,6 +4,8 @@
 import threading
 from unittest import mock
 
+import pytest
+
 from datadog_checks.pan_firewall.collectors import COLLECTORS
 from datadog_checks.pan_firewall.collectors.base import FirewallState
 from datadog_checks.pan_firewall.collectors.vpn import VPN_FLOW_CMD, VPN_GATEWAY_CMD, collect_vpn, parse_vpn
@@ -11,6 +13,8 @@ from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from ..common import FW_A_TAGS, FW_A_TUNNEL
 from ..helpers import load_op, make_ctx, new_check, series
+
+pytestmark = pytest.mark.unit
 
 
 def tunnel_tags(tunnel, interface, peer, gateway):

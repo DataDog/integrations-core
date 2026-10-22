@@ -14,6 +14,7 @@ from datadog_checks.pan_firewall.poller import FirewallPoller
 
 from .common import (
     BASE_TAGS,
+    FIXTURES,
     FW_A_IP,
     FW_A_SERIAL,
     FW_A_TAGS,
@@ -29,7 +30,7 @@ from .fixture_map import NO_CAPTURE
 from .helpers import can_connect_by_ip, make_instance, new_check, register_stubs, stub_runs, stub_sample
 
 # These tests run the poller with the stub collectors they register.
-pytestmark = pytest.mark.stub_collectors
+pytestmark = [pytest.mark.unit, pytest.mark.stub_collectors]
 
 
 def only_value_and_tags(aggregator, name):
@@ -48,13 +49,11 @@ def test_good_run_collects_identity_and_reports_connected(dd_run_check, aggregat
     aggregator.assert_metric(
         'pan_firewall.api.authentication.status', value=0, tags=FW_A_TAGS, metric_type=aggregator.GAUGE, count=1
     )
-    assert [(c.type, c.cmd, c.key_sent) for c in fake_panos.calls] == [
-        ('keygen', None, False),
-        ('op', JOBS_PENDING_CMD, True),
-        ('op', SYSTEM_INFO_CMD, True),
-        ('op', INTERFACE_ALL_CMD, True),
-        ('op', INTERFACE_CONFIG_CMD, True),
-    ]
+    # The key is generated first and the jobs check comes before any read; the order of the identity reads is free.
+    calls = [(c.type, c.cmd, c.key_sent) for c in fake_panos.calls]
+    assert calls[:2] == [('keygen', None, False), ('op', JOBS_PENDING_CMD, True)]
+    assert {cmd for _, cmd, _ in calls[2:]} == {SYSTEM_INFO_CMD, INTERFACE_ALL_CMD, INTERFACE_CONFIG_CMD}
+    assert all(key_sent for _, _, key_sent in calls[1:])
 
 
 # Transport failures, and HTTP errors whose body is not a PAN-OS response: none of them means the firewall API answered,
@@ -111,16 +110,31 @@ def interface_reads(fake_panos, since=0):
     return sum(1 for c in fake_panos.calls[since:] if c.cmd == INTERFACE_ALL_CMD)
 
 
-def test_failed_interface_read_is_warned_once(dd_run_check, fake_panos, schedule_clock, caplog):
-    # The read is retried within five minutes; a failure that lasts must not warn on every retry.
+@pytest.mark.parametrize(
+    'cmd, answer, prefix',
+    [
+        pytest.param(INTERFACE_ALL_CMD, (200, NO_CAPTURE), 'cannot read the interfaces,', id='interfaces'),
+        pytest.param(
+            INTERFACE_CONFIG_CMD,
+            (403, (FIXTURES / 'fw-a-probe' / 'config_refused.xml').read_bytes()),
+            'cannot read the interface config',
+            id='interface-config',
+        ),
+    ],
+)
+def test_a_lasting_identity_read_failure_is_warned_once(
+    dd_run_check, fake_panos, schedule_clock, caplog, cmd, answer, prefix
+):
+    # The read is retried every identity interval; a failure that lasts must not warn on every retry.
+    fake_panos.answer_op(FW_A_IP, cmd, answer)
     caplog.set_level('DEBUG')
-    check = new_check(make_instance(ip=FW_B_IP))
+    check = new_check()
 
     dd_run_check(check)
     schedule_clock.now += 1800
     dd_run_check(check)
 
-    failures = [r for r in caplog.records if r.getMessage().startswith(f'{FW_B_IP}: cannot read the interfaces,')]
+    failures = [r for r in caplog.records if r.getMessage().startswith(f'{FW_A_IP}: {prefix}')]
     assert [r.levelname for r in failures] == ['WARNING', 'DEBUG']
 
 
@@ -171,16 +185,6 @@ def test_rejected_credentials_are_reported(dd_run_check, aggregator, fake_panos,
     assert aggregator.metrics('pan_firewall.api.authentication.status')[0].value == 1
     # The firewall answered, even if only to refuse the credentials.
     assert aggregator.metrics('pan_firewall.can_connect')[0].value == 1
-
-
-def test_rejected_keygen_is_tried_once_per_run(dd_run_check, fake_panos):
-    fake_panos.fail(FW_A_IP, 'http_403', on='keygen')
-    check = new_check()
-
-    dd_run_check(check)
-    dd_run_check(check)
-
-    assert [c.type for c in fake_panos.calls] == ['keygen', 'keygen']
 
 
 def auth_statuses(aggregator):

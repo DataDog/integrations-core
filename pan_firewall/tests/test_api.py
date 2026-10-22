@@ -26,6 +26,8 @@ from .common import FIXTURES, SYSTEM_INFO_CMD
 from .fake_panos import TRANSPORT_ERRORS, response
 from .fixture_map import op_fixture, submit_answer
 
+pytestmark = pytest.mark.unit
+
 HOST = '192.0.2.10'
 URL = f'https://{HOST}/api/'
 GENERATED_KEY = 'GENERATED-KEY-0123456789'

@@ -17,7 +17,10 @@ from pathlib import Path
 from typing import Any, Literal
 from urllib.parse import urlsplit
 
+import pytest
+
 from datadog_checks.dev.http import MockResponse
+from datadog_checks.pan_firewall.constants import REPORTS
 
 from .fixture_map import (
     FIXTURES,
@@ -31,6 +34,10 @@ from .fixture_map import (
     report_job_fixture,
     submit_answer,
 )
+
+# `show config running` holds secrets (hashes, keys), so the check may only read the interface subtree of it.
+CONFIG_RUNNING_PREFIX = '<show><config><running>'
+INTERFACE_CONFIG_XPATH = '<xpath>devices/entry/network/interface</xpath>'
 
 # Firewall IP -> fixture set.
 FIREWALL_SETS = {'192.0.2.10': 'fw-a', '192.0.2.11': 'fw-b'}
@@ -123,6 +130,10 @@ class FakePanos:
         host = urlsplit(url).hostname or ''
         data: dict[str, str] = options['data']
         kind = 'keygen' if data.get('type') == 'keygen' else 'api'
+        cmd = data.get('cmd') or ''
+        if data.get('type') == 'op' and cmd.startswith(CONFIG_RUNNING_PREFIX) and INTERFACE_CONFIG_XPATH not in cmd:
+            # `pytest.fail` is not an `Exception`, so the check's broad handlers cannot turn it into a warning.
+            pytest.fail(f'{host}: a running-config read must use the interface xpath, got {cmd}', pytrace=False)
         self.calls.append(
             Call(
                 host=host,
@@ -185,8 +196,18 @@ class FakePanos:
             self._report_reads,
             host,
             self._report_overrides.get((host, report_field(data.get('cmd', '')) or '')),
-            report_job_fixture(data, FIREWALL_SETS[host]),
+            self._report_fixture(data, FIREWALL_SETS[host]),
         )
+
+    @staticmethod
+    def _report_fixture(data: dict[str, str], firewall: str) -> Path | None:
+        """The fixture of the report submit, or a test failure when it is one of REPORTS and has no capture: answering
+        `NO_CAPTURE` would silently drop that report's coverage."""
+        fixture = report_job_fixture(data, firewall)
+        aggregated_by = report_field(data.get('cmd', ''))
+        if fixture is None and aggregated_by in {aggregate_by for aggregate_by, _tag in REPORTS.values()}:
+            pytest.fail(f'no `report_custom_{aggregated_by}.xml` fixture for {firewall}', pytrace=False)
+        return fixture
 
     def _open_job(
         self,

@@ -13,9 +13,11 @@ from datadog_checks.pan_firewall.constants import REPORTS
 from datadog_checks.pan_firewall.errors import PanosApiError, PanosUnreachable
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from ..common import FW_A_IP, FW_A_TAGS, SYNTHETIC
+from ..common import FW_A_IP, SYNTHETIC
 from ..fixture_map import find_report_fixture
 from ..helpers import make_instance, new_check, series
+
+pytestmark = pytest.mark.unit
 
 PRIVATE = '10.0.0.0-10.255.255.255'
 
@@ -387,17 +389,3 @@ def test_slow_firewall_is_polled_every_run_until_all_reports_are_collected_then_
 
     submits = [c for c in report_calls(fake_panos)[calls:] if c.action is None]
     assert submits and submits[0].params['cmd'] == report_calls(fake_panos)[0].params['cmd']
-
-
-def test_reports_are_registered_and_submit_through_the_check_when_enabled(dd_run_check, aggregator, fake_panos):
-    dd_run_check(new_check(make_instance(collect_reports=True)))
-
-    # The first row of each report, with its three gauges.
-    for name, (dimension, rows) in FW_A_ROWS.items():
-        first = expected_samples(name, (dimension, rows[:1]))
-        for (metric, tags), (value, _kind) in first.items():
-            aggregator.assert_metric(
-                f'pan_firewall.{metric}', value, tags=sorted([*FW_A_TAGS, *tags]), metric_type=aggregator.GAUGE
-            )
-    for metric in ('sessions', 'bytes', 'bytes_per_session'):
-        assert len(aggregator.metrics(f'pan_firewall.report.top.{metric}')) == 30

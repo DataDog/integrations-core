@@ -4,6 +4,8 @@
 from unittest import mock
 from xml.etree import ElementTree as ET
 
+import pytest
+
 from datadog_checks.pan_firewall.collectors.base import FirewallState
 from datadog_checks.pan_firewall.collectors.interfaces import (
     COUNTER_INTERFACE_CMD,
@@ -14,6 +16,8 @@ from datadog_checks.pan_firewall.collectors.interfaces import (
 
 from ..common import FW_A_INTERFACE_ALL, FW_A_IP, FW_A_SERIAL, FW_A_TAGS, INTERFACE_ALL_CMD, INTERFACE_NAMES, SYNTHETIC
 from ..helpers import interface_state, load_op, new_check, series
+
+pytestmark = pytest.mark.unit
 
 COUNTER_FIELDS = {
     'ibytes': 'interface.rx.bytes',

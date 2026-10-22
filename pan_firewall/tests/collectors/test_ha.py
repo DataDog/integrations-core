@@ -1,11 +1,15 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
+
 from datadog_checks.pan_firewall.collectors.base import FirewallState
 from datadog_checks.pan_firewall.collectors.ha import HA_CMD, collect_ha
 
 from ..common import FIXTURES
 from ..helpers import load_op, load_xml, make_ctx
+
+pytestmark = pytest.mark.unit
 
 ENABLED = FIXTURES / 'synthetic' / 'ha_all_enabled.xml'
 

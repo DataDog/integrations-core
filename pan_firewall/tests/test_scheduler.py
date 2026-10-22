@@ -8,6 +8,8 @@ from datadog_checks.pan_firewall.scheduler import FirewallSchedule, Result
 
 from .helpers import FakeClock
 
+pytestmark = pytest.mark.unit
+
 TIER_2M = ['bgp', 'dataplane']
 TIER_3M = ['interfaces', 'system_resources', 'vpn', 'ha', 'rule_hits', 'global_counters', 'ospf']
 TIER_5M = ['environment', 'threats']

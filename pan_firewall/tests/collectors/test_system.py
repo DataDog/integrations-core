@@ -16,6 +16,8 @@ from datadog_checks.pan_firewall.collectors.system import (
 from ..common import MIB, SYNTHETIC
 from ..helpers import load_op, load_xml, series
 
+pytestmark = pytest.mark.unit
+
 CPU_STATES = ('user', 'system', 'nice', 'idle', 'iowait', 'hardirq', 'softirq', 'steal')
 
 

@@ -4,7 +4,8 @@
 import copy
 from xml.etree import ElementTree as ET
 
-from datadog_checks.pan_firewall import interface_config
+import pytest
+
 from datadog_checks.pan_firewall.auth import Credentials
 from datadog_checks.pan_firewall.collectors.ha import HA_CMD
 from datadog_checks.pan_firewall.firewalls import FirewallTarget
@@ -27,6 +28,8 @@ from .common import (
 from .fake_panos import FIREWALL_SETS
 from .fixture_map import NO_CAPTURE
 from .helpers import interface_state, load_xml, make_instance, new_check
+
+pytestmark = pytest.mark.unit
 
 EVENT_TYPE = 'network-devices-metadata'
 FW_A_STATIC_IP = '198.51.100.7'
@@ -242,7 +245,10 @@ def test_disabled_metadata_sends_no_event_but_still_reads_the_identity(dd_run_ch
     dd_run_check(new_check(make_instance(send_ndm_metadata=False)))
 
     assert events(aggregator) == []
-    assert {SYSTEM_INFO_CMD, INTERFACE_ALL_CMD} <= {c.cmd for c in fake_panos.calls}
+    cmds = {c.cmd for c in fake_panos.calls}
+    assert {SYSTEM_INFO_CMD, INTERFACE_ALL_CMD} <= cmds
+    # The interface config only feeds the metadata, so it is not read without it.
+    assert INTERFACE_CONFIG_CMD not in cmds
 
 
 def test_static_firewall_never_reached_sends_no_metadata(dd_run_check, aggregator, fake_panos):
@@ -263,7 +269,6 @@ def test_first_run_sends_admin_status_from_the_interface_config(dd_run_check, ag
 
     by_name = {i['name']: i for e in events(aggregator) for i in e.get('interfaces', [])}
     assert (by_name['ethernet1/2.20']['admin_status'], by_name['ae1']['description']) == (2, 'LACP to core')
-    assert INTERFACE_CONFIG_CMD in {c.cmd for c in fake_panos.calls}
 
 
 def test_refused_interface_config_sends_interfaces_without_admin_status(dd_run_check, aggregator, fake_panos):
@@ -283,21 +288,6 @@ def test_refused_interface_config_sends_interfaces_without_admin_status(dd_run_c
     assert auth.value == 0
 
 
-def test_refused_interface_config_is_warned_once(dd_run_check, fake_panos, schedule_clock, caplog):
-    fake_panos.answer_op(
-        FW_A_IP, INTERFACE_CONFIG_CMD, (403, (FIXTURES / 'fw-a-probe' / 'config_refused.xml').read_bytes())
-    )
-    caplog.set_level('DEBUG')
-    check = new_check()
-
-    dd_run_check(check)
-    schedule_clock.now += 1800
-    dd_run_check(check)
-
-    refusals = [r for r in caplog.records if 'cannot read the interface config' in r.getMessage()]
-    assert [r.levelname for r in refusals] == ['WARNING', 'DEBUG']
-
-
 def test_failed_interface_config_read_keeps_the_last_one(dd_run_check, aggregator, fake_panos, schedule_clock):
     fake_panos.answer_op(FW_A_IP, INTERFACE_ALL_CMD, (200, SYNTHETIC_INTERFACES.read_bytes()))
     fake_panos.answer_op(FW_A_IP, INTERFACE_CONFIG_CMD, (200, SYNTHETIC_CONFIG.read_bytes()))
@@ -311,13 +301,3 @@ def test_failed_interface_config_read_keeps_the_last_one(dd_run_check, aggregato
     assert len(events(aggregator)) == 2
     last = {i['name']: i for i in events(aggregator)[-1]['interfaces']}
     assert last['ethernet1/2.20']['admin_status'] == 2
-
-
-def test_no_interface_config_call_without_ndm_metadata(dd_run_check, fake_panos):
-    dd_run_check(new_check(make_instance(send_ndm_metadata=False)))
-
-    assert INTERFACE_CONFIG_CMD not in {c.cmd for c in fake_panos.calls}
-
-
-def test_the_interface_config_call_never_reads_the_whole_config():
-    assert '<xpath>devices/entry/network/interface</xpath>' in interface_config.INTERFACE_CONFIG_CMD

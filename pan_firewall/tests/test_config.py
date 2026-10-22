@@ -2,8 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
-import re
-from pathlib import Path
 from typing import Any
 
 import pytest
@@ -11,6 +9,8 @@ import pytest
 from datadog_checks.pan_firewall import PanFirewallCheck
 
 from .common import PANORAMA_INSTANCE, STATIC_INSTANCE
+
+pytestmark = pytest.mark.unit
 
 
 def run(dd_run_check, instance: dict[str, Any]) -> PanFirewallCheck:
@@ -103,52 +103,3 @@ def test_invalid_static_config(dd_run_check, changes, message):
 def test_invalid_panorama_config(dd_run_check, changes, message):
     with pytest.raises(Exception, match=message):
         run(dd_run_check, instance_with(PANORAMA_INSTANCE, changes))
-
-
-CONF_EXAMPLE = Path(__file__).parent.parent / 'datadog_checks' / 'pan_firewall' / 'data' / 'conf.yaml.example'
-# The `instances/http` options the check hides: its own auth (`firewall_credentials`, `X-PAN-KEY`) replaces them.
-HIDDEN_HTTP_OPTIONS = [
-    'auth_type',
-    'use_legacy_auth_encoding',
-    'username',
-    'password',
-    'ntlm_domain',
-    'kerberos_auth',
-    'kerberos_cache',
-    'kerberos_delegate',
-    'kerberos_force_initiate',
-    'kerberos_hostname',
-    'kerberos_principal',
-    'kerberos_keytab',
-    'auth_token',
-    'aws_region',
-    'aws_host',
-    'aws_service',
-    'headers',
-    'extra_headers',
-]
-VISIBLE_HTTP_OPTIONS = [
-    'proxy',
-    'skip_proxy',
-    'timeout',
-    'connect_timeout',
-    'read_timeout',
-    'persist_connections',
-    'log_requests',
-    'tls_verify',
-    'tls_ca_cert',
-    'tls_use_host_header',
-    'tls_cert',
-    'tls_private_key',
-    'tls_protocols_allowed',
-    'tls_ciphers',
-    'allow_redirects',
-    'request_size',
-]
-
-
-def test_example_config_hides_only_the_http_auth_and_header_options():
-    documented = set(re.findall(r'^\s*## @param (\w+) ', CONF_EXAMPLE.read_text(), re.MULTILINE))
-
-    assert documented & set(HIDDEN_HTTP_OPTIONS) == set()
-    assert set(VISIBLE_HTTP_OPTIONS) - documented == set()

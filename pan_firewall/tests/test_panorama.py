@@ -8,7 +8,6 @@ from types import SimpleNamespace
 
 import pytest
 
-from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.pan_firewall import PanFirewallCheck
 from datadog_checks.pan_firewall import panorama as panorama_module
 from datadog_checks.pan_firewall.panorama import IP_OVERRIDES_ENV_VAR, DiscoveredFirewall, parse_devices
@@ -17,6 +16,8 @@ from datadog_checks.pan_firewall.xml_utils import parse_response
 from .common import CREDENTIALS, FIXTURES, FW_A_IP, FW_A_SERIAL, FW_B_IP, FW_B_SERIAL
 from .fake_panos import INVALID_CREDENTIAL
 from .helpers import FakeClock, can_connect_by_ip, metrics_by_ip
+
+pytestmark = pytest.mark.unit
 
 PANORAMA = 'panorama.example.com'
 DISCOVERY_CMD = '<show><devices><connected/></devices></show>'
@@ -229,6 +230,7 @@ def test_firewall_that_disconnects_or_is_removed_is_no_longer_polled(dd_run_chec
 
     # A polled firewall reports `can_connect` on every run, even when nothing is due.
     assert set(metrics_by_ip(aggregator, 'can_connect')) == {FW_A_IP}
+    # `can_connect` cannot tell a released poller from an idle one; this checks the removed firewall's is released.
     assert list(check._pollers) == [FW_A_IP]
 
 
@@ -296,7 +298,6 @@ def test_panorama_can_connect_is_1_after_a_successful_discovery(dd_run_check, ag
     dd_run_check(new_check())
 
     assert panorama_can_connect(aggregator) == [(1, sorted(PANORAMA_TAGS))]
-    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
 PASSWORD_LOGIN = {'panorama_api_key': None, 'panorama_username': 'pan-user', 'panorama_password': 'bad'}

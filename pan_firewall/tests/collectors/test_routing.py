@@ -18,6 +18,8 @@ from datadog_checks.pan_firewall.collectors.routing import (
 from ..common import FW_A_PEER, SYNTHETIC
 from ..helpers import load_op, load_xml, make_ctx, series
 
+pytestmark = pytest.mark.unit
+
 
 def peer_samples(tags, *, status, duration, restart, updates, limit, prefixes=None):
     """The expected samples of one peer; `updates` is (in, out); `prefixes` maps a family tag to its four counters

@@ -7,6 +7,8 @@ from datadog_checks.pan_firewall.auth import Credentials
 from datadog_checks.pan_firewall.config_models.instance import FirewallCredential, InstanceConfig
 from datadog_checks.pan_firewall.firewalls import FirewallTarget, StaticFirewallSource, resolve_credentials
 
+pytestmark = pytest.mark.unit
+
 SUBNET = FirewallCredential(cidr='10.0.0.0/24', username='subnet', password='pw1')
 OTHER = FirewallCredential(cidr='192.0.2.0/24', api_key='key2')
 DEFAULT = FirewallCredential(username='default', password='pw3')

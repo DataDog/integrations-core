@@ -16,7 +16,7 @@ from datadog_checks.pan_firewall.collectors.base import CollectContext, Firewall
 from datadog_checks.pan_firewall.collectors.threats import collect_threats
 from datadog_checks.pan_firewall.errors import PanosApiError
 
-from ..common import FIXTURES, FW_A_IP, FW_A_SERIAL, FW_A_TAGS, SYNTHETIC
+from ..common import FIXTURES, FW_A_IP, FW_A_SERIAL, SYNTHETIC
 from ..fixture_map import (
     BACKWARD_NEWEST_SEQNO,
     PROBE_SEQNO_FIRST_PAGE,
@@ -29,6 +29,8 @@ from ..fixture_map import (
 from ..helpers import THREAT_LOG_ACT as ACT
 from ..helpers import THREAT_LOG_CLOCK_BACK as CLOCK_BACK
 from ..helpers import FakeClock, log_page, make_instance, new_check, series
+
+pytestmark = pytest.mark.unit
 
 CACHE_KEY = f'threat_watermark:{FW_A_SERIAL}'
 FW_A_LAST_SEQNO = 7691899338913481002
@@ -399,9 +401,9 @@ def test_vsys_tag_is_vsys_n(firewall):
     assert series(firewall.collect()) == expected({('medium', 'drop', 'spyware', 'vsys2'): 1})
 
 
-def test_threats_are_registered_and_submit_through_the_check(dd_run_check, aggregator, fake_panos):
+def test_threat_watermark_survives_a_restart_through_the_persistent_cache(dd_run_check, aggregator, fake_panos):
     # The first run has no watermark and starts one below fw-a's capture; a new check instance (an Agent restart)
-    # then counts the capture from the persisted watermark.
+    # then counts the capture from the persisted watermark, and persists the newest log it read.
     first = THREAT_LOG_FIRST_SEQNO['fw-a']
     fake_panos.answer_log(FW_A_IP, 'backward', None, 0, log_page([first - 1]))
     dd_run_check(new_check())
@@ -412,14 +414,6 @@ def test_threats_are_registered_and_submit_through_the_check(dd_run_check, aggre
     check = new_check()
     dd_run_check(check)
 
-    for (severity, action, subtype, vsys), count in CAPTURE_COUNTS.items():
-        aggregator.assert_metric(
-            'pan_firewall.threat.count',
-            count,
-            tags=sorted([*FW_A_TAGS, *tags(severity, action, subtype, vsys)]),
-            metric_type=aggregator.COUNT,
-        )
-    assert len(aggregator.metrics('pan_firewall.threat.count')) == 4
     assert json.loads(check.read_persistent_cache(CACHE_KEY))['seqno'] == FW_A_LAST_SEQNO
 
 

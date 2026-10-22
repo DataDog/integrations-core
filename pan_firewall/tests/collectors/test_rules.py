@@ -11,6 +11,8 @@ from datadog_checks.pan_firewall.errors import PanosApiError, PanosAuthError
 
 from ..helpers import load_op, make_ctx, series
 
+pytestmark = pytest.mark.unit
+
 RULE_HIT_CMD = rule_hit_cmd('vsys1')
 HITS = {
     'trust-to-vpn': 476,

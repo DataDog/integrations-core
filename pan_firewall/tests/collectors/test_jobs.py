@@ -14,7 +14,7 @@ from ..fake_panos import FAILURES, NO_CAPTURE
 from ..helpers import can_connect_by_ip, new_check, register_stubs, stub_runs
 
 # These tests run the poller with the stub collectors they register.
-pytestmark = pytest.mark.stub_collectors
+pytestmark = [pytest.mark.unit, pytest.mark.stub_collectors]
 
 
 def jobs_response(name):

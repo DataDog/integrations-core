@@ -21,6 +21,8 @@ from datadog_checks.pan_firewall.xml_utils import parse_response
 from ..common import FW_A_IP, SYNTHETIC
 from ..helpers import logged, make_ctx
 
+pytestmark = pytest.mark.unit
+
 EMPTY_RESULT = b'<response status="success"><result/></response>'
 NO_RESULT = b'<response status="success"/>'
 TEXT_RESULT = b'<response status="success"><result>not what was expected</result></response>'

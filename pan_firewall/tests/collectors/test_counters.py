@@ -1,11 +1,15 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
+
 from datadog_checks.pan_firewall.collectors.counters import GLOBAL_COUNTER_CMD, parse_global
 from datadog_checks.pan_firewall.constants import DROPPED_PACKET_ASPECTS, GLOBAL_COUNTERS
 
 from ..common import SYNTHETIC
 from ..helpers import load_op, load_xml
+
+pytestmark = pytest.mark.unit
 
 # The 26 counters, with the values of the capture (0 for a counter the capture doesn't list) and the category and
 # aspect they are tagged with when the capture lists them (otherwise the table's).

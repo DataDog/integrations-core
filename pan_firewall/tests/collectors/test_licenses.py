@@ -10,6 +10,8 @@ from datadog_checks.pan_firewall.collectors.licenses import LICENSE_INFO_CMD, pa
 
 from ..helpers import load_op, series
 
+pytestmark = pytest.mark.unit
+
 TODAY = datetime.date(2026, 10, 9)
 FEATURES = {
     'adv_threat_prevention',
