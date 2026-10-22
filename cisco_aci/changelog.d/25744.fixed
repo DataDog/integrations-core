@@ -1,1 +1,1 @@
-Fix a `TypeError` when submitting APIC controller interface status that aborted fabric, capacity, and fault collection when `send_ndm_metadata` is enabled.
+Fix a `TypeError` in APIC controller interface collection that stopped fabric, capacity, and fault collection when `send_ndm_metadata` is enabled.

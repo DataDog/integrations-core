@@ -775,7 +775,7 @@ class FakeSessionWrapperWithControllerInterfaces(common.FakeSessionWrapper):
 
 
 def test_fabric_controller_interface_status(aggregator):
-    """Test that APIC controller interfaces submit a port status metric and do not abort the check run"""
+    """Regression test for #25744: APIC controller interfaces must not abort the check run (TypeError from #24707)"""
     check = CiscoACICheck(common.CHECK_NAME, {}, [common.CONFIG_WITH_TAGS])
     api = Api(common.ACI_URLS, check.http, common.USERNAME, password=common.PASSWORD, log=check.log)
     api.wrapper_factory = FakeSessionWrapperWithControllerInterfaces
@@ -800,5 +800,9 @@ def test_fabric_controller_interface_status(aggregator):
             'status:up',
         ],
     )
-    # Capacity collection runs after fabric collection, so it is skipped if fabric collection raises
-    assert any(name.startswith('cisco_aci.capacity.') for name in aggregator.metric_names)
+    ndm_interfaces = [
+        (interface['device_id'], interface['raw_id'])
+        for event in aggregator.get_event_platform_events("network-devices-metadata")
+        for interface in event.get('interfaces', [])
+    ]
+    assert ('{}:{}'.format(namespace, node1), 'eth2-1') in ndm_interfaces
