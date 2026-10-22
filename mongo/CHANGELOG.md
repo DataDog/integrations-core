@@ -6,7 +6,7 @@
 
 ***Changed***:
 
-* Upgrade PyMongo to 4.18.2, raising the minimum supported MongoDB server version to 4.4. ([#25517](https://github.com/DataDog/integrations-core/pull/25517))
+* Upgrade PyMongo to 4.18.2. The minimum supported MongoDB server version is 4.4. ([#25517](https://github.com/DataDog/integrations-core/pull/25517))
 
 ***Added***:
 
