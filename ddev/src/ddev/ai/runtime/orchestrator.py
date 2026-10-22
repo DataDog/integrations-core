@@ -96,6 +96,7 @@ class PhaseOrchestrator(EventBusOrchestrator):
             file_access_policy=self._file_access_policy,
             agents=self._resolved_flow.agents,
             callbacks=run_callbacks,
+            run_root=checkpoint_manager.root,
         )
         context = FlowContext(
             runtime_variables=self._runtime_variables,
