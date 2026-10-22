@@ -363,8 +363,11 @@ def test_query_metrics_service_and_metadata(
         mock.patch.object(collector, '_fetch_statement_texts', return_value={(0, '01', inserted): 'SELECT ID FROM T'}),
         mock.patch(
             'datadog_checks.base.utils.db.query_metrics.obfuscation.obfuscate_sql_with_metadata',
-            return_value={'query': 'SELECT ID FROM T', 'metadata': {'tables': ['T'], 'commands': ['SELECT']}},
-        ),
+            return_value={
+                'query': 'SELECT ID FROM T',
+                'metadata': {'tables': ['T'], 'commands': ['SELECT'], 'comments': ["/* service='datadog-agent' */"]},
+            },
+        ) as obfuscate,
     ):
         collector.run_job()
         collector.run_job()
@@ -375,6 +378,9 @@ def test_query_metrics_service_and_metadata(
     row = aggregator.get_event_platform_events('dbm-metrics')[0]['ibm_db2_rows'][0]
     assert row['dd_tables'] == ['T']
     assert row['dd_commands'] == ['SELECT']
+    assert stdlib_json.loads(obfuscate.call_args.args[1])['collect_comments'] is True
+    event = aggregator.get_event_platform_events('dbm-samples')[0]
+    assert event['db']['metadata']['comments'] == ["/* service='datadog-agent' */"]
 
 
 def test_full_query_text_refresh(instance: dict, aggregator: AggregatorStub):
@@ -412,7 +418,7 @@ def test_full_query_text_refresh(instance: dict, aggregator: AggregatorStub):
         'instance': instance['db'],
         'query_signature': 'test-signature',
         'statement': 'SELECT ID FROM APP.ORDERS WHERE ID > ?',
-        'metadata': {'tables': ['APP.ORDERS'], 'commands': ['SELECT']},
+        'metadata': {'tables': ['APP.ORDERS'], 'commands': ['SELECT'], 'comments': None},
     }
     clock.return_value = query_metrics.FULL_QUERY_TEXT_REFRESH_INTERVAL
     check._query_metrics._submit_full_query_text(statement)
@@ -444,12 +450,15 @@ def test_retry_connection(aggregator, instance):
     def mock_exception(*args, **kwargs):
         raise Db2ConnectionError("[IBM][CLI Driver] CLI0106E  Connection is closed. SQLSTATE=08003")
 
-    with mock.patch('ibm_db.exec_immediate', side_effect=mock_exception):
+    with mock.patch('ibm_db.exec_immediate', side_effect=mock_exception) as execute:
         with mock.patch('ibm_db.connect', return_value=mock.MagicMock()):
             with pytest.raises(Db2ConnectionError, match='CLI0106E  Connection is closed. SQLSTATE=08003'):
                 ibmdb2.check(instance)
         # new connection made
         assert ibmdb2._connection.conn != conn1
+    assert execute.call_count == 2
+    for call in execute.call_args_list:
+        assert call.args[1].startswith("/* service='datadog-agent' */ SELECT ")
     aggregator.assert_service_check(IbmDb2Check.SERVICE_CHECK_CONNECT, IbmDb2Check.OK)
 
 

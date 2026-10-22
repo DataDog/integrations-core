@@ -51,6 +51,7 @@ OBFUSCATION_OPTIONS = to_native_string(
             'return_json_metadata': True,
             'table_names': True,
             'collect_commands': True,
+            'collect_comments': True,
         }
     )
 )
@@ -236,7 +237,11 @@ class QueryMetricsCollector(DBMAsyncJob):
                 'instance': self._config.db,
                 'query_signature': statement.query_signature,
                 'statement': statement.obfuscated_query,
-                'metadata': {'tables': statement.tables, 'commands': statement.commands},
+                'metadata': {
+                    'tables': statement.tables,
+                    'commands': statement.commands,
+                    'comments': statement.comments,
+                },
             },
         }
         self._check.database_monitoring_query_sample(json.dumps(event, default=default_json_event_encoding))

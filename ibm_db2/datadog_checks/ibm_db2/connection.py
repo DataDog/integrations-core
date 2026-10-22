@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING, Any, Callable, Iterator
 
 import ibm_db
 
+from datadog_checks.base.utils.db.sql_commenter import add_sql_comment
+
 from .utils import scrub_connection_string
 
 if TYPE_CHECKING:
@@ -99,6 +101,7 @@ class Db2Connection:
         If execution fails, reconnects once, calls `on_reconnect`, and retries. Raises
         `Db2ConnectionError` if the reconnect fails.
         """
+        query = add_sql_comment(query, service='datadog-agent')
         # https://github.com/ibmdb/python-ibmdb/wiki/APIs
         try:
             cursor = ibm_db.exec_immediate(self.conn, query)
