@@ -132,6 +132,10 @@ class IbmDb2Check(DatabaseCheck):
 
     @property
     def reported_hostname(self) -> str:
+        return self.resolved_hostname
+
+    @property
+    def resolved_hostname(self) -> str:
         if self._resolved_hostname is None:
             self._resolved_hostname = agent_host_resolver(self._config.host)
         return self._resolved_hostname
@@ -144,7 +148,7 @@ class IbmDb2Check(DatabaseCheck):
     @property
     def database_identifier_params(self) -> dict[str, str]:
         return {
-            'resolved_hostname': self.reported_hostname,
+            'resolved_hostname': self.resolved_hostname,
             'host': str(self._config.host),
             'port': str(self._config.port),
         }
