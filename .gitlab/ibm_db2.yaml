@@ -2,7 +2,8 @@
 .ibm-db2-tests:
   stage: validate
   image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/docker:24.0.4-gbi-focal
-  tags: ["arch:amd64"]
+  # Container tests need the Docker-in-Docker pool, as in dd-trace-java's testcontainers jobs.
+  tags: ["docker-in-docker:amd64"]
   needs: []
   cache: []
   timeout: 1h
