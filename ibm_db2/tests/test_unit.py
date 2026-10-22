@@ -19,6 +19,54 @@ from datadog_checks.ibm_db2.utils import scrub_connection_string
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize(
+    'config, expected',
+    [
+        ({}, ['db2.example.com', 'db2.example.com']),
+        ({'database_identifier': None}, ['db2.example.com', 'db2.example.com']),
+        ({'database_identifier': {}}, ['db2.example.com', 'db2.example.com']),
+        (
+            {'database_identifier': {'template': '$resolved_hostname:$port'}},
+            ['db2.example.com:50000', 'db2.example.com:50001'],
+        ),
+        (
+            {'database_identifier': {'template': '$team-$host:$port'}},
+            ['test-db2.internal:50000', 'test-db2.internal:50001'],
+        ),
+    ],
+)
+def test_database_identifier_payloads(
+    instance: dict, aggregator: AggregatorStub, monkeypatch: pytest.MonkeyPatch, config: dict, expected: list[str]
+):
+    """Templates distinguish colocated instances consistently across DBM streams; defaults retain hostname identity."""
+    instance.update(dbm=True, host='db2.internal', tags=['team:test'], **config)
+    monkeypatch.setattr('datadog_checks.ibm_db2.ibm_db2.agent_host_resolver', lambda host: 'db2.example.com')
+    checks = [IbmDb2Check('ibm_db2', {}, [{**instance, 'port': port}]) for port in (50000, 50001)]
+    counters = ('count', 'time', 'cpu_time', 'rows_read', 'rows_returned', 'lock_wait_time', 'lock_waits')
+    inserted = datetime(2026, 1, 1)
+    key = (0, '01', inserted)
+    for check in checks:
+        check._send_database_instance_metadata()
+        snapshots = [
+            {'member': 0, 'executable_id': b'\x01', 'insert_timestamp': inserted, **dict.fromkeys(counters, count)}
+            for count in (1, 2)
+        ]
+        with (
+            mock.patch.object(check._query_metrics._connection, 'ensure_connected'),
+            mock.patch('ibm_db.prepare'),
+            mock.patch('ibm_db.execute'),
+            mock.patch('ibm_db.free_stmt'),
+            mock.patch('ibm_db.fetch_assoc', side_effect=[snapshots[0], False, snapshots[1], False]),
+            mock.patch.object(check._query_metrics, '_fetch_statement_texts', return_value={key: 'SELECT ID FROM T'}),
+        ):
+            check._query_metrics.run_job()
+            check._query_metrics.run_job()
+    for stream in ('dbm-metadata', 'dbm-metrics', 'dbm-samples'):
+        events = aggregator.get_event_platform_events(stream)
+        assert [event['database_instance'] for event in events] == expected
+        assert all(event['host'] == 'db2.example.com' for event in events)
+
+
 @pytest.mark.parametrize('dbm, enabled', [(False, True), (True, False), (True, True)])
 def test_query_metrics_initialization_health(instance: dict, aggregator: AggregatorStub, dbm: bool, enabled: bool):
     """Initialization carries the assigned check ID and feature state, without duplicate events on subsequent runs."""
