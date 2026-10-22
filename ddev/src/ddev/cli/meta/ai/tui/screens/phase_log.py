@@ -5,7 +5,9 @@
 
 from __future__ import annotations
 
+import time
 from collections.abc import Iterator, Sequence
+from dataclasses import dataclass, field
 from typing import Protocol
 
 from rich.console import RenderableType
@@ -62,15 +64,33 @@ class PhaseLogBlock(Vertical):
         yield _selectable_widget(self._renderable)
 
 
-class ThinkingBlock(Static):
-    """Transient block shown while an agent response is pending."""
+@dataclass(frozen=True)
+class Activity:
+    """A pending operation shown live in the phase log, such as a model turn or a tool batch."""
+
+    text: str
+    started_at: float = field(default_factory=time.monotonic)
+
+
+def format_elapsed(seconds: float) -> str:
+    minutes, secs = divmod(int(seconds), 60)
+    if minutes == 0:
+        return f"{secs}s"
+    hours, minutes = divmod(minutes, 60)
+    if hours == 0:
+        return f"{minutes}m{secs}s"
+    return f"{hours}h{minutes}m"
+
+
+class ActivityBlock(Static):
+    """Transient block shown while an activity is pending, with a spinner and elapsed time."""
 
     frame: reactive[int] = reactive(0)
 
-    def __init__(self, key: str, label: str) -> None:
-        super().__init__("", classes="phase-log-block phase-log-thinking")
+    def __init__(self, key: str, activity: Activity) -> None:
+        super().__init__("", classes="phase-log-block phase-log-activity")
         self.key = key
-        self._label = label
+        self._activity = activity
 
     def on_mount(self) -> None:
         self.set_interval(0.1, self._tick)
@@ -83,7 +103,8 @@ class ThinkingBlock(Static):
         self.frame = (self.frame + 1) % len(SPINNER_FRAMES)
 
     def _update(self) -> None:
-        self.update(f"{SPINNER_FRAMES[self.frame]} thinking · {self._label}")
+        elapsed = format_elapsed(time.monotonic() - self._activity.started_at)
+        self.update(f"{SPINNER_FRAMES[self.frame]} {self._activity.text} · {elapsed}")
 
 
 class PhaseLogSource(Protocol):
@@ -116,7 +137,7 @@ class PhaseLogScreen(TogoScreen):
         self._source = source
         self._replayed_entries = False
         self._written_entry_ids: set[int] = set()
-        self._thinking_blocks: dict[str, ThinkingBlock] = {}
+        self._activity_blocks: dict[str, ActivityBlock] = {}
         self._togo_title = f"{flow.name or 'Flow'} · {phase_id} log"
 
     def compose_body(self) -> Iterator[Widget]:
@@ -142,23 +163,23 @@ class PhaseLogScreen(TogoScreen):
         except Exception:
             pass
 
-    def start_thinking(self, key: str, label: str) -> None:
+    def start_activity(self, key: str, activity: Activity) -> None:
         try:
             output = self.query_one("#phase-log-output", VerticalScroll)
         except Exception:
             return
-        if key in self._thinking_blocks:
+        if key in self._activity_blocks:
             return
-        block = ThinkingBlock(key, label)
-        self._thinking_blocks[key] = block
+        block = ActivityBlock(key, activity)
+        self._activity_blocks[key] = block
         should_scroll = output.is_vertical_scroll_end
         output.mount(block)
         if should_scroll:
             output.call_after_refresh(output.scroll_end, animate=False)
 
-    def stop_thinking(self, key: str) -> None:
-        block = self._thinking_blocks.pop(key, None)
-        if block is not None and block.is_mounted:
+    def stop_activity(self, key: str) -> None:
+        block = self._activity_blocks.pop(key, None)
+        if block is not None and block.parent is not None:
             block.remove()
 
     def _replay_entries(self, retry: bool = True) -> bool:
