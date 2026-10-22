@@ -201,6 +201,34 @@
         },
         {
             "definition": {
+                "group_by": [
+                    "vsphere_vcenter",
+                    "vsphere_datacenter",
+                    "vsphere_cluster",
+                    "tag:service"
+                ],
+                "highlighted": "",
+                "overlay": "Default",
+                "overlay_filter": "",
+                "projection": "isometric",
+                "provider": "vsphere",
+                "query_string": "",
+                "show_empty_groups": false,
+                "title": "",
+                "title_align": "left",
+                "title_size": "16",
+                "type": "cloudcraft"
+            },
+            "id": 841967170746317,
+            "layout": {
+                "height": 4,
+                "width": 4,
+                "x": 6,
+                "y": 7
+            }
+        },
+        {
+            "definition": {
                 "background_color": "green",
                 "layout_type": "ordered",
                 "show_title": true,
@@ -240,7 +268,7 @@
                 "height": 5,
                 "width": 12,
                 "x": 0,
-                "y": 7
+                "y": 11
             }
         },
         {
@@ -315,6 +343,54 @@
                     {
                         "definition": {
                             "custom_links": [],
+                            "legend_size": "0",
+                            "requests": [
+                                {
+                                    "display_type": "area",
+                                    "formulas": [
+                                        {
+                                            "formula": "top(query1, 25, \"mean\", \"desc\")"
+                                        }
+                                    ],
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "query1",
+                                            "query": "sum:vsphere.net.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:host} by {host}"
+                                        }
+                                    ],
+                                    "response_format": "timeseries",
+                                    "style": {
+                                        "line_type": "solid",
+                                        "line_width": "normal",
+                                        "palette": "dog_classic"
+                                    }
+                                }
+                            ],
+                            "show_legend": false,
+                            "title": "Total network utilization of hosts (Top 25)",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "timeseries",
+                            "yaxis": {
+                                "include_zero": true,
+                                "label": "",
+                                "max": "auto",
+                                "min": "auto",
+                                "scale": "linear"
+                            }
+                        },
+                        "id": 8725553841850596,
+                        "layout": {
+                            "height": 3,
+                            "width": 6,
+                            "x": 6,
+                            "y": 0
+                        }
+                    },
+                    {
+                        "definition": {
+                            "custom_links": [],
                             "requests": [
                                 {
                                     "conditional_formats": [
@@ -373,7 +449,7 @@
                             "height": 4,
                             "width": 6,
                             "x": 6,
-                            "y": 0
+                            "y": 3
                         }
                     },
                     {
@@ -423,54 +499,6 @@
                             "x": 0,
                             "y": 4
                         }
-                    },
-                    {
-                        "definition": {
-                            "custom_links": [],
-                            "legend_size": "0",
-                            "requests": [
-                                {
-                                    "display_type": "area",
-                                    "formulas": [
-                                        {
-                                            "formula": "top(query1, 25, \"mean\", \"desc\")"
-                                        }
-                                    ],
-                                    "queries": [
-                                        {
-                                            "data_source": "metrics",
-                                            "name": "query1",
-                                            "query": "sum:vsphere.net.usage.avg{$vcenter_server,$vcenter_datacenter,vsphere_type:host} by {host}"
-                                        }
-                                    ],
-                                    "response_format": "timeseries",
-                                    "style": {
-                                        "line_type": "solid",
-                                        "line_width": "normal",
-                                        "palette": "dog_classic"
-                                    }
-                                }
-                            ],
-                            "show_legend": false,
-                            "title": "Total network utilization of hosts (Top 25)",
-                            "title_align": "left",
-                            "title_size": "16",
-                            "type": "timeseries",
-                            "yaxis": {
-                                "include_zero": true,
-                                "label": "",
-                                "max": "auto",
-                                "min": "auto",
-                                "scale": "linear"
-                            }
-                        },
-                        "id": 8725553841850596,
-                        "layout": {
-                            "height": 3,
-                            "width": 6,
-                            "x": 6,
-                            "y": 4
-                        }
                     }
                 ]
             },
@@ -479,7 +507,7 @@
                 "height": 8,
                 "width": 12,
                 "x": 0,
-                "y": 12
+                "y": 16
             }
         },
         {
@@ -730,7 +758,7 @@
                 "height": 8,
                 "width": 12,
                 "x": 0,
-                "y": 20
+                "y": 24
             }
         },
         {
@@ -844,7 +872,6 @@
                                 }
                             ],
                             "show_legend": false,
-                            "time": {},
                             "title": "Number of writes by VMFS ID",
                             "title_align": "left",
                             "title_size": "16",
@@ -900,7 +927,6 @@
                                 }
                             ],
                             "show_legend": false,
-                            "time": {},
                             "title": "Number of reads by VMFS ID",
                             "title_align": "left",
                             "title_size": "16",
@@ -928,7 +954,7 @@
                 "height": 7,
                 "width": 12,
                 "x": 0,
-                "y": 28
+                "y": 32
             }
         },
         {
@@ -1070,7 +1096,7 @@
                 "height": 4,
                 "width": 12,
                 "x": 0,
-                "y": 35
+                "y": 39
             }
         }
     ]
