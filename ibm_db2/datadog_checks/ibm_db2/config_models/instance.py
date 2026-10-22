@@ -35,6 +35,14 @@ class CustomQuery(BaseModel):
     tags: Optional[tuple[str, ...]] = None
 
 
+class DatabaseIdentifier(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    template: Optional[str] = None
+
+
 class MetricPatterns(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -62,6 +70,7 @@ class InstanceConfig(BaseModel):
     )
     connection_timeout: Optional[int] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
+    database_identifier: Optional[DatabaseIdentifier] = None
     db: str
     dbm: Optional[bool] = None
     disable_generic_tags: Optional[bool] = None
