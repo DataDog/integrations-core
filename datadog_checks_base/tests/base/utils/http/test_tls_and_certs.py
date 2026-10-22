@@ -1,10 +1,15 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import asyncio
 import datetime
+import hashlib
 import logging
+import os
+import socket
 import ssl
 from contextlib import contextmanager
+from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from threading import Thread
 
@@ -17,9 +22,17 @@ from cryptography.x509.oid import AuthorityInformationAccessOID, ExtendedKeyUsag
 from requests.exceptions import SSLError
 
 from datadog_checks.base.utils import http as http_module
+from datadog_checks.base.utils._certificate_distrust import (
+    DISTRUSTED_SPKI_SHA256,
+    CertificateDistrustError,
+    caused_by_certificate_distrust,
+    find_distrusted_key,
+)
 from datadog_checks.base.utils.http import RequestsWrapper, load_x509_certificates
-from datadog_checks.base.utils.tls import TlsConfig
+from datadog_checks.base.utils.tls import TlsConfig, TlsContextWrapper
 from datadog_checks.dev.utils import ON_WINDOWS
+
+from .common import FIXTURE_PATH
 
 pytestmark = [pytest.mark.unit]
 
@@ -1036,3 +1049,246 @@ class TestSSLContextAdapter:
                 http.get('https://example.com', verify=True)
 
                 assert http._https_adapters == {default_config_key: adapter, new_config_key: new_adapter}
+
+
+DV_G3B = ('EM DV TLS CA - G3B', 'ebed6475c2c2d80fcb199f3fe8dd6e6b3ce60b77eb15d4e42c3dec0c6f5b5105')
+
+
+def load_distrust_fixture(name):
+    with open(os.path.join(FIXTURE_PATH, 'certificate_distrust', f'{name}.pem')) as f:
+        return ssl.PEM_cert_to_DER_cert(f.read())
+
+
+@pytest.mark.parametrize(
+    'fixture, expected',
+    [
+        pytest.param('em-dv-tls-ca-g3b', DV_G3B, id='dv-g3b'),
+        pytest.param(
+            'em-dv-tls-ca-g3c',
+            ('EM DV TLS CA - G3C', '49dd353dc2b919a3770645117d0e60c16115e7d1bc259eefe734b00ea434fe5f'),
+            id='dv-g3c',
+        ),
+        pytest.param(
+            'em-ev-tls-ca-g3b',
+            ('EM EV TLS CA - G3B', 'e0254c7fcdc265e2f0f8a428dabb75ab4ae039b4872d62f5ee57f0877d5a8a41'),
+            id='ev-g3b',
+        ),
+        pytest.param(
+            'em-ev-tls-ca-g3c',
+            ('EM EV TLS CA - G3C', '5c0660a2b164910d8ff589c18e14552e9e0ec237dcefe2cb736d41a4811f81a0'),
+            id='ev-g3c',
+        ),
+        pytest.param(
+            'em-ov-tls-ca-g3b',
+            ('EM OV TLS CA - G3B', '43bffa19d6ef651451f6841e019931e96f6f2eaeff28ab4b6f1ce4576de2717b'),
+            id='ov-g3b',
+        ),
+        pytest.param(
+            'em-ov-tls-ca-g3c',
+            ('EM OV TLS CA - G3C', '63ecefee431d49523bc1136c4e72d0206a477086caf606cd5cf025686c109cf8'),
+            id='ov-g3c',
+        ),
+        pytest.param(
+            'em-ov-cs-ca-g3b',
+            ('EM OV CS CA - G3B', 'ec4ffa1ad0ac88081314b7aaffef6a91f97cd57291bb5ba686c5415f5eb4f6b6'),
+            id='ov-cs-g3b',
+        ),
+        pytest.param(
+            'em-ov-cs-ca-g3c',
+            ('EM OV CS CA - G3C', '92c063d67e8f14db71d288e11266ffdaf69cbf115f7bab14f3bc2f68d25e0e30'),
+            id='ov-cs-g3c',
+        ),
+        # The same key cross-signed by AAA Certificate Services, which the Windows ROOT store trusts.
+        pytest.param('em-dv-tls-ca-g3b-aaa', DV_G3B, id='dv-g3b-aaa-cross-sign'),
+        pytest.param('emsign-root-ca-g1', None, id='emsign-root-ca-g1-not-distrusted'),
+    ],
+)
+def test_find_distrusted_key_given_logged_ca_certificate_returns_expected_match(fixture, expected):
+    assert find_distrusted_key([load_distrust_fixture(fixture)]) == expected
+
+
+@pytest.mark.parametrize(
+    'mangle',
+    [
+        pytest.param(lambda der: b'', id='empty'),
+        pytest.param(lambda der: der[:-1], id='truncated'),
+        pytest.param(lambda der: der[:1] + b'\x80' + der[2:], id='indefinite-length'),
+        pytest.param(lambda der: der[:1] + b'\x85' + der[2:], id='over-long-length'),
+        pytest.param(lambda der: b'\x31' + der[1:], id='not-a-sequence'),
+    ],
+)
+def test_find_distrusted_key_given_unparseable_certificate_first_returns_later_match(mangle):
+    der = load_distrust_fixture('em-dv-tls-ca-g3b')
+
+    assert find_distrusted_key([mangle(der), der]) == DV_G3B
+
+
+def test_caused_by_certificate_distrust_given_cyclic_exception_chain_returns_false():
+    original = ssl.SSLError('certificate verify failed')
+    wrapper = SSLError('request failed')
+    # Python only breaks cycles in `__context__`, so wrapping an error with `raise ... from` and then re-raising the
+    # original links the two both ways.
+    wrapper.__cause__ = original
+    original.__context__ = wrapper
+
+    assert caused_by_certificate_distrust(wrapper) is False
+
+
+@dataclass
+class DistrustPki:
+    root: x509.Certificate
+    intermediate: x509.Certificate
+    leaf: x509.Certificate
+    leaf_key: rsa.RSAPrivateKey
+    root_path: str
+    issuer: ThreadingHTTPServer
+
+
+@pytest.fixture
+def distrust_pki(tmp_path):
+    """A localhost chain under a test root, with the leaf's AIA pointing at a server that records requests."""
+    issuer = ThreadingHTTPServer(('127.0.0.1', 0), RecordingHandler)
+    issuer.headers = []
+    with run_server(issuer):
+        root, intermediate, leaf, leaf_key = build_chain('http://127.0.0.1:{}/ca.der'.format(issuer.server_port))
+        issuer.body = intermediate.public_bytes(serialization.Encoding.DER)
+        root_path = tmp_path / 'root.pem'
+        write_cert(root_path, root)
+        yield DistrustPki(root, intermediate, leaf, leaf_key, str(root_path), issuer)
+
+
+@pytest.fixture
+def distrust(monkeypatch):
+    def distrust_key_of(cert):
+        # Tests cannot sign with the real eMudhra keys, so distrust the key of a generated certificate.
+        spki = cert.public_key().public_bytes(
+            serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+        monkeypatch.setitem(DISTRUSTED_SPKI_SHA256, hashlib.sha256(spki).hexdigest(), 'Test Distrusted CA')
+
+    return distrust_key_of
+
+
+class QuietHTTPServer(ThreadingHTTPServer):
+    def handle_error(self, request, client_address):
+        # Clients that reject the chain drop the connection, which would otherwise print a traceback per test.
+        pass
+
+
+@contextmanager
+def https_server(pki, tmp_path, maximum_version=None, send_intermediate=True):
+    """Serve the PKI's leaf, and optionally its intermediate, over TLS on localhost and yield the port."""
+    chain_path = tmp_path / 'chain.pem'
+    key_path = tmp_path / 'leaf.key'
+    sent_certs = (pki.leaf, pki.intermediate) if send_intermediate else (pki.leaf,)
+    chain_path.write_bytes(b''.join(cert.public_bytes(serialization.Encoding.PEM) for cert in sent_certs))
+    write_key(key_path, pki.leaf_key)
+
+    server = QuietHTTPServer(('127.0.0.1', 0), RecordingHandler)
+    server.headers = []
+    server.body = b'ok'
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    if maximum_version is not None:
+        context.maximum_version = maximum_version
+    context.load_cert_chain(str(chain_path), str(key_path))
+    server.socket = context.wrap_socket(server.socket, server_side=True)
+    with run_server(server):
+        yield server.server_port
+
+
+def connect_with_socket(context, port):
+    with socket.create_connection(('localhost', port)) as sock:
+        context.wrap_socket(sock, server_hostname='localhost').close()
+
+
+def connect_with_asyncio(context, port):
+    async def connect():
+        _, writer = await asyncio.open_connection('localhost', port, ssl=context, server_hostname='localhost')
+        writer.close()
+        await writer.wait_closed()
+
+    asyncio.run(connect())
+
+
+@pytest.mark.parametrize(
+    'send_intermediate',
+    [
+        pytest.param(True, id='sent-by-server'),
+        # Only the retry after AIA chasing fetches the omitted intermediate builds a chain containing its key.
+        pytest.param(False, id='recovered-by-aia-chasing'),
+    ],
+)
+def test_requests_wrapper_given_distrusted_ca_key_in_chain_raises_ssl_error(
+    distrust_pki, distrust, tmp_path, send_intermediate
+):
+    distrust(distrust_pki.intermediate)
+    http = RequestsWrapper({'tls_ca_cert': distrust_pki.root_path, 'skip_proxy': True}, {})
+
+    with https_server(distrust_pki, tmp_path, send_intermediate=send_intermediate) as port:
+        with pytest.raises(SSLError, match='Test Distrusted CA'):
+            http.get('https://localhost:{}'.format(port))
+
+
+def test_requests_wrapper_given_distrusted_ca_key_in_chain_skips_aia_chasing(distrust_pki, distrust, tmp_path):
+    distrust(distrust_pki.intermediate)
+    http = RequestsWrapper({'tls_ca_cert': distrust_pki.root_path, 'skip_proxy': True}, {})
+
+    with https_server(distrust_pki, tmp_path) as port:
+        with pytest.raises(SSLError):
+            http.get('https://localhost:{}'.format(port))
+
+    assert distrust_pki.issuer.headers == []
+
+
+@pytest.mark.parametrize(
+    'verify, distrusted',
+    [
+        pytest.param(False, True, id='verification-disabled'),
+        pytest.param(True, False, id='no-distrusted-key'),
+    ],
+)
+def test_requests_wrapper_given_distrust_check_not_applicable_returns_response(
+    distrust_pki, distrust, tmp_path, verify, distrusted
+):
+    if distrusted:
+        distrust(distrust_pki.intermediate)
+    tls_options = {'tls_ca_cert': distrust_pki.root_path} if verify else {'tls_verify': False}
+    http = RequestsWrapper({**tls_options, 'skip_proxy': True}, {})
+
+    with https_server(distrust_pki, tmp_path) as port:
+        assert http.get('https://localhost:{}'.format(port)).status_code == 200
+
+
+@pytest.mark.parametrize(
+    'distrusted_cert, connect',
+    [
+        pytest.param('intermediate', connect_with_socket, id='intermediate-wrap-socket'),
+        # The server does not send the root, so only the verified chain contains its key.
+        pytest.param('root', connect_with_socket, id='unsent-trust-anchor'),
+        pytest.param('intermediate', connect_with_asyncio, id='intermediate-wrap-bio'),
+    ],
+)
+def test_tls_context_given_distrusted_ca_key_in_verified_chain_raises_certificate_distrust_error(
+    distrust_pki, distrust, tmp_path, distrusted_cert, connect
+):
+    distrust(getattr(distrust_pki, distrusted_cert))
+    context = TlsContextWrapper({'tls_ca_cert': distrust_pki.root_path}).tls_context
+
+    with https_server(distrust_pki, tmp_path) as port:
+        with pytest.raises(CertificateDistrustError, match='Test Distrusted CA') as excinfo:
+            connect(context, port)
+
+    assert excinfo.value.verify_code == 50
+
+
+def test_tls_context_given_resumed_session_raises_certificate_distrust_error(distrust_pki, tmp_path):
+    context = TlsContextWrapper({'tls_ca_cert': distrust_pki.root_path}).tls_context
+
+    # TLS 1.2 hands the client its session ticket during the handshake.
+    with https_server(distrust_pki, tmp_path, maximum_version=ssl.TLSVersion.TLSv1_2) as port:
+        with socket.create_connection(('localhost', port)) as sock:
+            with context.wrap_socket(sock, server_hostname='localhost') as tls_sock:
+                session = tls_sock.session
+        with socket.create_connection(('localhost', port)) as sock:
+            with pytest.raises(CertificateDistrustError, match='could not be checked'):
+                context.wrap_socket(sock, server_hostname='localhost', session=session)
