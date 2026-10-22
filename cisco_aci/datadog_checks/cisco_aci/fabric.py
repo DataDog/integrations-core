@@ -180,7 +180,7 @@ class Fabric:
                 ),
             )
             tags.append('interface:{}'.format(interface_metadata.name))
-            self.submit_interface_status_metric(interface_metadata.status, tags, device_hostname)
+            self.submit_interface_status_metric(interface_metadata.status, tags)
         self.log.info("finished processing controller ethernet ports for %s", node['id'])
         return interfaces
 
