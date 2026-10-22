@@ -1,0 +1,1 @@
+Keep the `lower_bound` tag of a negative first histogram bucket as `-inf` outside distributions, collapsing it only for the distribution sketch.

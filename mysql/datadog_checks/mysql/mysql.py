@@ -259,6 +259,15 @@ class MySql(DatabaseCheck):
         return self._cloud_metadata
 
     @property
+    def dbms_version(self) -> str:
+        # Mirrors the version string used by the other DBM metadata events
+        # (database_instance, mysql_variables). Returns an empty string until
+        # the check has run and populated `self.version`.
+        if self.version is None:
+            return ""
+        return self.version.version + '+' + self.version.build
+
+    @property
     def database_identifier_template(self) -> str:
         return self._config.database_identifier.get('template') or '$resolved_hostname'
 
@@ -1437,7 +1446,7 @@ class MySql(DatabaseCheck):
                 "collection_interval": self._config.database_instance_collection_interval,
                 'dbms_version': self.version.version + '+' + self.version.build,
                 'integration_version': __version__,
-                "tags": self.tag_manager.get_tags(),
+                "tags": self.tag_manager.get_tags(include_internal=False, include_db=False),
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
                 "metadata": {

@@ -2,7 +2,20 @@
 
 <!-- towncrier release notes start -->
 
-## 9.1.1 / 2026-09-03
+## 9.2.1 / 2026-10-13
+
+***Fixed***:
+
+* Avoid fetching offsets for consumer groups that do not match the configured group pattern. consumer_groups_regex patterns now match the complete group ID; patterns spanning the group/topic comma no longer select a group. ([#25232](https://github.com/DataDog/integrations-core/pull/25232))
+
+## 9.2.0 / 2026-10-01
+
+***Added***:
+
+* Add the ``enable_kafka_console`` option as a replacement for ``enable_cluster_monitoring`` while preserving the old option as an alias. ([#25215](https://github.com/DataDog/integrations-core/pull/25215))
+* Update dependencies ([#25284](https://github.com/DataDog/integrations-core/pull/25284))
+
+## 9.1.1 / 2026-09-03 / Agent 7.84.0
 
 ***Fixed***:
 

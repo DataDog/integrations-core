@@ -23,8 +23,6 @@ from ddev.cli.create.jmx import jmx
 from ddev.cli.create.logs import logs
 from ddev.cli.create.metrics_crawler import metrics_crawler
 
-CONFLUENCE_NO_MANIFEST_URL = 'https://datadoghq.atlassian.net/wiki/spaces/AI/pages/6248108729/'
-
 LEGACY_TYPE_TO_SUBCOMMAND: dict[str, str] = {
     'check': 'check',
     'check_only': 'check-only',
@@ -69,10 +67,7 @@ class _CreateGroup(click.Group):
             )
 
         if legacy_type in DROPPED_LEGACY_TYPES:
-            app.abort(
-                f'`--type={legacy_type}` is no longer supported. '
-                f'Use the manifest-less workflow described at {CONFLUENCE_NO_MANIFEST_URL}.'
-            )
+            app.abort(f'`--type={legacy_type}` is no longer supported.')
 
         # mypy doesn't propagate `app.abort`'s NoReturn through the typed `ctx.obj`
         # assignment, so narrow explicitly here.

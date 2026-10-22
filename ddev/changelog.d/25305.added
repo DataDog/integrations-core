@@ -1,1 +1,0 @@
-Allow Linux Docker E2E Agents to join an existing Docker network through the `docker_network` environment metadata option.

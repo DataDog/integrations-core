@@ -57,12 +57,6 @@ def test_skip_manifest_does_not_affect_new_integration_scaffolding(ddev, empty_r
     assert 'deprecated' not in result.output.lower()
 
 
-def test_dropped_type_aborts_with_confluence_link(ddev, empty_repo):
-    result = ddev('create', 'foo', '--type', 'tile', '--dry-run')
-    assert result.exit_code != 0
-    assert '6248108729' in result.output
-
-
 @pytest.mark.parametrize('dropped', ['tile', 'snmp_tile', 'marketplace'])
 def test_all_dropped_types_abort(ddev, empty_repo, dropped):
     result = ddev('create', 'foo', '--type', dropped, '--dry-run')
@@ -285,7 +279,7 @@ def test_type_shim_accepts_legacy_prefix_position(ddev, empty_repo, type_args):
 
 
 def test_type_shim_prefix_position_aborts_for_dropped_type(ddev, empty_repo):
-    """A dropped type in the legacy prefix position still aborts with the manifest-less pointer."""
+    """A dropped type in the legacy prefix position still aborts."""
     result = ddev('create', '--type', 'tile', 'my_integration')
     assert result.exit_code != 0
     assert 'no longer supported' in result.output

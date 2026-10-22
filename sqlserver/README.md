@@ -91,11 +91,9 @@ To configure this check for an Agent running on a host:
 
 ##### Linux
 
-Extra configuration steps are required to get the SQL Server integration running on a Linux host:
+The Agent on Linux ships Microsoft ODBC Driver 18 and FreeTDS and registers them in `embedded/etc/odbcinst.ini` inside the Agent install directory. A package install uses `/opt/datadog-agent`. After a Fleet Automation upgrade the install directory is `/opt/datadog-packages/datadog-agent/stable`. The check reads that file, and falls back to the Agent's default registration when it is absent.
 
-1. Install an ODBC SQL Server driver, for example the [Microsoft ODBC driver][9] or the [FreeTDS driver][10].
-2. Copy the `odbc.ini` and `odbcinst.ini` files into the `/opt/datadog-agent/embedded/etc` folder.
-3. Configure the `conf.yaml` file to use the `odbc` connector and specify the proper driver as indicated in the `odbcinst.ini` file.
+To use a different driver, such as a host install of the [Microsoft ODBC driver][9] or [FreeTDS][10], edit `odbcinst.ini` in that directory or set `ODBCSYSINI` to a directory that contains your own `odbcinst.ini`. Then set the `conf.yaml` `driver` value to the driver name from that file.
 
 ##### Log collection
 

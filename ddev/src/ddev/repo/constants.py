@@ -7,8 +7,11 @@ FULL_NAMES = {
     'core': 'integrations-core',
     'extras': 'integrations-extras',
     'marketplace': 'marketplace',
+    'internal': 'integrations-internal',
     'agent': 'datadog-agent',
 }
+
+DEFAULT_GITHUB_OWNER = 'DataDog'
 
 # This is automatically maintained
 PYTHON_VERSION = '3.13'

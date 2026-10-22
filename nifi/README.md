@@ -4,7 +4,7 @@
 
 This check monitors [Apache NiFi][1] through the Datadog Agent.
 
-Apache NiFi is a data integration and automation platform for moving data between systems. This integration collects JVM health, flow throughput, queue backpressure, processor status, and bulletin events from the NiFi REST API, providing visibility into data pipeline health without requiring NiFi-side configuration.
+Apache NiFi is a data integration and automation platform for moving data between systems. This integration uses the NiFi REST API to collect JVM health, flow throughput, queue backpressure, processor status, and bulletin events, and it collects application logs from `nifi-app.log`. Together, this data provides visibility into data pipeline health without requiring NiFi-side configuration.
 
 ## Setup
 
@@ -31,6 +31,28 @@ No additional installation is needed on your server.
 
 3. [Restart the Agent][5].
 
+### Log collection
+
+1. Collecting logs is disabled by default in the Datadog Agent. Enable it in your `datadog.yaml` file:
+
+   ```yaml
+   logs_enabled: true
+   ```
+
+2. Add the following configuration block to your `nifi.d/conf.yaml` file to start collecting your NiFi logs:
+
+   ```yaml
+   logs:
+     - type: file
+       path: /opt/nifi/logs/nifi-app.log
+       source: nifi
+       service: nifi
+   ```
+
+   Change the `path` and `service` parameter values based on your environment. See the [sample nifi.d/conf.yaml][4] for all available configuration options.
+
+3. [Restart the Agent][5].
+
 ### Validation
 
 [Run the Agent's status subcommand][6] and look for `nifi` under the Checks section.
@@ -46,6 +68,10 @@ Per-connection and per-processor metrics are opt-in to control cardinality. Enab
 ### Events
 
 NiFi bulletins (errors and warnings from processors and system components) are forwarded as Datadog events when `collect_bulletins` is enabled (default: true). Filter by severity with `bulletin_min_level` (default: WARNING).
+
+### Logs
+
+The NiFi integration can collect application logs from `nifi-app.log`, including startup and shutdown events, processor errors, and audit trail entries. See [Log collection](#log-collection) for setup instructions.
 
 ### Service Checks
 

@@ -181,6 +181,17 @@ def test_schema_collector(aggregator):
 
 
 @pytest.mark.unit
+def test_schema_collector_tags_telemetry_with_kind(aggregator):
+    check = TestDatabaseCheck()
+    collector = TestSchemaCollector(check, SchemaCollectorConfig())
+    collector.collect_schemas()
+
+    tags = check.tags + ["status:success", "kind:test_databases"]
+    for metric in ("schema.time", "schema.tables_count", "schema.payloads_count"):
+        aggregator.assert_metric(f"dd.{check.dbms}.{metric}", tags=tags, hostname=check.reported_hostname)
+
+
+@pytest.mark.unit
 def test_schema_collector_empty_last_database(aggregator):
     """Verify that each database sends its own terminal payload, even when it returns 0 rows."""
     check = TestDatabaseCheck()
