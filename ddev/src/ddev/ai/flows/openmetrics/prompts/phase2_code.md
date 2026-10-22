@@ -24,14 +24,10 @@ in this task — and only the changes they call for. Common shapes and how to ho
 - **Force a config default or option** (a label rename, an exclude, a namespace, …) — set it in
   `check.py` (via `get_default_config`) and/or `spec.yaml`, whichever is appropriate.
 
-If the block below states there are no requirements (e.g. "nothing to require"), proceed with
+The requirements are in `${prd}`. Read that file, in full, before you write any code.
+
+If it states there are no requirements (e.g. "nothing to require"), proceed with
 the standard build and do **not** invent any.
-
-Requirements, verbatim:
-
-```
-${prd}
-```
 
 ## Mapping and metadata handoff
 
