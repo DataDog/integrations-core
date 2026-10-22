@@ -188,6 +188,34 @@
                             "x": 4,
                             "y": 0
                         }
+                    },
+                    {
+                        "definition": {
+                            "group_by": [
+                                "vsphere_vcenter",
+                                "vsphere_datacenter",
+                                "vsphere_cluster",
+                                "tag:service"
+                            ],
+                            "highlighted": "",
+                            "overlay": "Default",
+                            "overlay_filter": "",
+                            "projection": "isometric",
+                            "provider": "vsphere",
+                            "query_string": "",
+                            "show_empty_groups": false,
+                            "title": "",
+                            "title_align": "left",
+                            "title_size": "16",
+                            "type": "cloudcraft"
+                        },
+                        "id": 841967170746317,
+                        "layout": {
+                            "height": 5,
+                            "width": 6,
+                            "x": 0,
+                            "y": 2
+                        }
                     }
                 ]
             },
@@ -197,34 +225,6 @@
                 "width": 6,
                 "x": 6,
                 "y": 0
-            }
-        },
-        {
-            "definition": {
-                "group_by": [
-                    "vsphere_vcenter",
-                    "vsphere_datacenter",
-                    "vsphere_cluster",
-                    "tag:service"
-                ],
-                "highlighted": "",
-                "overlay": "Default",
-                "overlay_filter": "",
-                "projection": "isometric",
-                "provider": "vsphere",
-                "query_string": "",
-                "show_empty_groups": false,
-                "title": "",
-                "title_align": "left",
-                "title_size": "16",
-                "type": "cloudcraft"
-            },
-            "id": 841967170746317,
-            "layout": {
-                "height": 4,
-                "width": 4,
-                "x": 6,
-                "y": 7
             }
         },
         {
