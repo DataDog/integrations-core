@@ -7,8 +7,6 @@ from collections import defaultdict
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
-from cachetools import LRUCache
-
 from datadog_checks.base import AgentCheck
 
 if TYPE_CHECKING:
@@ -27,18 +25,19 @@ class EvictedPodsTransformer:
 
     KAI counts evictions per pod group and never deletes those series, so they grow with every pod group ever evicted.
     Summing the raw counters would go backwards whenever a series disappears, so the increase of each series since the
-    previous scrape is summed instead, using a bounded LRU cache of the previous non-zero values.
+    previous scrape is summed instead. The previous non-zero values are cached, and the cache is rebuilt from every
+    scrape so that it never keeps series that disappeared.
 
-    When the non-zero series do not fit in the cache, the increase of each group's raw sum is reported instead. This is
-    exact while no series disappears, and otherwise undercounts the groups that lost series. Exact counting resumes once
-    a scrape that fits has rebuilt the cache.
+    When there are more than `CACHE_SIZE` non-zero series, the increase of each group's raw sum is reported instead.
+    This is exact while no series disappears, and otherwise undercounts the groups that lost series. Exact counting
+    resumes once a scrape that fits has rebuilt the cache.
     """
 
     def __init__(self, check: AgentCheck, scraper: KaiOpenMetricsScraper):
         self.check = check
         self.scraper = scraper
         self.group_prefixes = tuple(f'{scraper.rename_labels.get(name, name)}:' for name in GROUP_LABELS)
-        self.previous_values: LRUCache[int, float] = LRUCache(maxsize=CACHE_SIZE)
+        self.previous_values: dict[int, float] = {}
         self.cache_complete = False
         self.overflowed = False
         self.previous_group_sums: dict[Group, float] = {}
@@ -46,19 +45,18 @@ class EvictedPodsTransformer:
     def __call__(self, metric, sample_data: Iterable, runtime_data: dict) -> None:
         samples = list(sample_data)
         nonzero = sum(1 for sample, _, _ in samples if sample.value)
-        fits = nonzero <= self.previous_values.maxsize
+        fits = nonzero <= CACHE_SIZE
         if not fits and not self.overflowed:
             self.check.log.warning(
                 'Tracking %d non-zero pod group eviction series, more than the cache size of %d. Reporting the '
                 'increase of the summed counters instead, which undercounts evictions when series disappear.',
                 nonzero,
-                self.previous_values.maxsize,
+                CACHE_SIZE,
             )
         self.overflowed = not fits
 
         exact = fits and self.cache_complete
-        if not fits:
-            self.previous_values.clear()
+        current_values: dict[int, float] = {}
 
         # Before the first successful scrape, a series or group missing from the previous state may be old.
         count_new = self.scraper.scraped_successfully
@@ -74,9 +72,9 @@ class EvictedPodsTransformer:
                 continue
 
             key = hash(tuple(sorted(sample.labels.items())))
-            previous = self.previous_values.pop(key, None)
+            previous = self.previous_values.get(key)
             if sample.value:
-                self.previous_values[key] = sample.value
+                current_values[key] = sample.value
             if not exact:
                 continue
 
@@ -97,6 +95,7 @@ class EvictedPodsTransformer:
                 else:
                     increases[group] = max(total - previous_sum, 0)
 
+        self.previous_values = current_values
         self.cache_complete = fits
         self.previous_group_sums = dict(group_sums)
         for (hostname, tags), increase in increases.items():

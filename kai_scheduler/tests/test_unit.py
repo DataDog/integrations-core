@@ -187,6 +187,13 @@ def submitted_evictions(aggregator, instance_tags: list[str]) -> dict[str, float
             [({'a': 0, 'b': 1, 'c': 1}, {'preempt': 0}), ({'a': 0, 'b': 2}, {'preempt': 1})],
             id='zero series do not count toward the cache size',
         ),
+        # `b` disappears and `c` is scraped before `a`. Caching `c` while `b` is still cached must not evict `a`, or
+        # its whole counter would be reported again.
+        pytest.param(
+            2,
+            [({'a': 1, 'b': 1}, {'preempt': 0}), ({'c': 1, 'a': 1}, {'preempt': 1})],
+            id='new series do not evict current ones',
+        ),
     ],
 )
 def test_evicted_pods(dd_run_check, aggregator, mock_http_response_per_endpoint, monkeypatch, cache_size, runs):
