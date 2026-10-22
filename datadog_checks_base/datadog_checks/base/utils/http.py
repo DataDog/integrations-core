@@ -22,7 +22,6 @@ from binary import KIBIBYTE
 from requests import auth as requests_auth
 from requests import cookies as requests_cookies
 from requests.exceptions import SSLError
-from requests.structures import CaseInsensitiveDict
 from urllib3.exceptions import InsecureRequestWarning
 from wrapt import ObjectProxy
 
@@ -732,15 +731,13 @@ class RequestsWrapper(object):
             self.logger.debug('An unverified HTTPS request is being made to %s', url)
 
         extra_headers = options.pop('extra_headers', None)
-        # Without extra headers, the caller's headers, including an explicit None, reach requests unchanged.
-        if extra_headers is not None:
-            new_options['headers'] = self._merge_extra_headers(options.get('headers'), extra_headers)
 
         if is_uds_url(url):
             persist = True  # UDS support is only enabled on the shared session.
             url = quote_uds_url(url)
 
         self.handle_auth_token(method=method, url=url, default_options=self.options)
+        request_options = self._with_extra_headers(new_options, extra_headers)
 
         with ExitStack() as stack:
             for hook in self.request_hooks:
@@ -753,14 +750,15 @@ class RequestsWrapper(object):
 
             if self.auth_token_handler:
                 try:
-                    response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
+                    response = self.make_request_aia_chasing(request_method, method, url, request_options, persist)
                     response.raise_for_status()
                 except Exception as e:
                     self.logger.debug('Renewing auth token, as an error occurred: %s', e)
                     self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
-                    response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
+                    request_options = self._with_extra_headers(new_options, extra_headers)
+                    response = self.make_request_aia_chasing(request_method, method, url, request_options, persist)
             else:
-                response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
+                response = self.make_request_aia_chasing(request_method, method, url, request_options, persist)
 
             if self._agnostic:
                 # The adapter hides the raw stream from later limit_line_size calls, so cap every read here
@@ -768,13 +766,14 @@ class RequestsWrapper(object):
                 return requests_adapter.RequestsResponseAdapter(response, self.request_size)
             return ResponseWrapper(response, self.request_size, self.max_line_size)
 
-    def _merge_extra_headers(
-        self, explicit_headers: Mapping[str, str] | None, extra_headers: Mapping[str, str]
-    ) -> CaseInsensitiveDict:
-        """Layer per-request extra headers over the request's headers, or the client's when it sets none."""
-        headers = CaseInsensitiveDict(explicit_headers if explicit_headers is not None else self.options['headers'])
+    @staticmethod
+    def _with_extra_headers(options: ChainMap[str, Any], extra_headers: Mapping[str, str] | None) -> ChainMap[str, Any]:
+        # Merge at send time, because the auth token writer updates the default headers in place.
+        if extra_headers is None:
+            return options
+        headers = options['headers'].copy()
         headers.update(extra_headers)
-        return headers
+        return options.new_child({'headers': headers})
 
     def _translate_errors(self) -> AbstractContextManager[None]:
         """Raise backend-neutral errors in agnostic mode, and requests errors unchanged otherwise."""

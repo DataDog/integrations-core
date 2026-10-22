@@ -716,6 +716,49 @@ class TestAuthTokenFileReaderWithHeaderWriter:
 
                 assert http.options['headers'] == expected_headers
 
+    def test_extra_headers_carry_the_first_token(self):
+        with TempDir() as temp_dir:
+            token_file = os.path.join(temp_dir, 'token.txt')
+            instance = {
+                'auth_token': {
+                    'reader': {'type': 'file', 'path': token_file},
+                    'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+                }
+            }
+            http = RequestsWrapper(instance, {})
+
+            with mock.patch('requests.Session.get') as get:
+                write_file(token_file, '\nsecret1\n')
+                http.get('https://www.google.com', extra_headers={'Accept': 'text/plain'})
+
+            headers = get.call_args.kwargs['headers']
+            assert headers['Accept'] == 'text/plain'
+            assert headers['Authorization'] == 'Bearer secret1'
+
+    def test_extra_headers_carry_the_refreshed_token_on_retry(self):
+        with TempDir() as temp_dir:
+            token_file = os.path.join(temp_dir, 'token.txt')
+            instance = {
+                'auth_token': {
+                    'reader': {'type': 'file', 'path': token_file},
+                    'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
+                }
+            }
+            transport = RequestsTransport()
+            transport.respond()
+            transport.raise_exception(requests.exceptions.ConnectionError('connection failed'))
+            transport.respond()
+            http = create_requests_client(transport, instance, agnostic=False)
+
+            write_file(token_file, '\nsecret1\n')
+            http.get('http://www.google.com')
+
+            write_file(token_file, '\nsecret2\n')
+            http.get('http://www.google.com', extra_headers={'Accept': 'text/plain'})
+
+            assert transport.requests[2].headers['Accept'] == 'text/plain'
+            assert transport.requests[2].headers['Authorization'] == 'Bearer secret2'
+
     def test_refresh_after_connection_error(self):
         with TempDir() as temp_dir:
             token_file = os.path.join(temp_dir, 'token.txt')
