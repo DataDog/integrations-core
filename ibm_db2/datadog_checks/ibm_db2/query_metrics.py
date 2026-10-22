@@ -179,6 +179,7 @@ class QueryMetricsCollector(DBMAsyncJob):
                 'timestamp': time() * 1000,
                 'min_collection_interval': self._config.query_metrics.collection_interval,
                 'tags': self._check.tag_manager.get_tags(include_internal=False),
+                'service': self._config.service,
                 'ddagentversion': self._check.agent_version,
                 'ibm_db2_version': self._check.dbms_version,
             }
