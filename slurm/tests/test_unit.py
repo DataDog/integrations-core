@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import time
+from collections.abc import Callable
 from unittest.mock import patch
 
 import pytest
@@ -34,8 +35,17 @@ from .common import (
     mock_output,
 )
 
-# Every check run first calls `sinfo --version` for metadata.
-MOCK_METADATA_OUTPUT = ("", "", 1)
+
+def with_metadata_output(outputs: list[tuple[str, str, int]]) -> Callable[[list[str]], tuple[str, str, int]]:
+    """Mock `get_subprocess_output`: answer `sinfo --version` quietly and return `outputs` in order otherwise."""
+    remaining = iter(outputs)
+
+    def subprocess_output(cmd: list[str]) -> tuple[str, str, int]:
+        if cmd[-1] == '--version':
+            return "", "", 0
+        return next(remaining)
+
+    return subprocess_output
 
 
 @pytest.mark.parametrize(
@@ -160,7 +170,7 @@ def test_squeue_processing(mock_get_subprocess_output, instance, aggregator):
     instance['collect_squeue_stats'] = True
     check = SlurmCheck('slurm', {}, [instance])
     mock_output_main = (mock_output('squeue.txt'), "", 0)
-    mock_get_subprocess_output.side_effect = [MOCK_METADATA_OUTPUT, mock_output_main]
+    mock_get_subprocess_output.side_effect = with_metadata_output([mock_output_main])
     check.check(None)
     for metric in SQUEUE_MAP['metrics']:
         aggregator.assert_metric(name=metric['name'], value=metric['value'], tags=metric['tags'])
@@ -172,7 +182,7 @@ def test_sacct_processing(mock_get_subprocess_output, instance, aggregator):
     instance['collect_sacct_stats'] = True
     check = SlurmCheck('slurm', {}, [instance])
     mock_output_main = (mock_output('sacct.txt'), "", 0)
-    mock_get_subprocess_output.side_effect = [MOCK_METADATA_OUTPUT, MOCK_METADATA_OUTPUT, mock_output_main]
+    mock_get_subprocess_output.side_effect = with_metadata_output([mock_output_main])
     # This one doesn't collect anything on the first run. It only collects on the second run.
     check.check(None)
     check.check(None)
@@ -186,7 +196,7 @@ def test_sshare_processing(mock_get_subprocess_output, instance, aggregator):
     instance['collect_sshare_stats'] = True
     check = SlurmCheck('slurm', {}, [instance])
     mock_output_main = (mock_output('sshare.txt'), "", 0)
-    mock_get_subprocess_output.side_effect = [MOCK_METADATA_OUTPUT, mock_output_main]
+    mock_get_subprocess_output.side_effect = with_metadata_output([mock_output_main])
     check.check(None)
     for metric in SSHARE_MAP['metrics']:
         aggregator.assert_metric(name=metric['name'], value=metric['value'], tags=metric['tags'])
@@ -198,7 +208,7 @@ def test_sdiag_processing(mock_get_subprocess_output, instance, aggregator):
     instance['collect_sdiag_stats'] = True
     check = SlurmCheck('slurm', {}, [instance])
     mock_output_main = (mock_output('sdiag.txt'), "", 0)
-    mock_get_subprocess_output.side_effect = [MOCK_METADATA_OUTPUT, mock_output_main]
+    mock_get_subprocess_output.side_effect = with_metadata_output([mock_output_main])
     from unittest.mock import patch as patch_time
 
     # Patch time.time only for sdiag to make the test deterministic
@@ -224,13 +234,14 @@ def test_scontrol_processing(mock_get_subprocess_output, instance, aggregator):
     # The below essentially mocks the return of all the function calls in the scontrol method. The first call mocks
     # the scontrol command output. The second mocks the hostname check. The third and fourth mock the squeue command
     # output when the 2 lines of scontrol are iterated over for metric submission.
-    mock_get_subprocess_output.side_effect = [
-        MOCK_METADATA_OUTPUT,
-        mock_output_main,
-        mock_output_node,
-        mock_output_squeue,
-        mock_output_squeue2,
-    ]
+    mock_get_subprocess_output.side_effect = with_metadata_output(
+        [
+            mock_output_main,
+            mock_output_node,
+            mock_output_squeue,
+            mock_output_squeue2,
+        ]
+    )
     check.check(None)
     for metric in SCONTROL_MAP['metrics']:
         aggregator.assert_metric(name=metric['name'], value=metric['value'], tags=metric['tags'])
@@ -251,13 +262,14 @@ def test_scontrol_processing_resolves_host_pid(mock_get_subprocess_output, insta
     (other_process / "status").write_text("Name:\tother\n")
     monkeypatch.setenv("HOST_PROC", str(host_proc))
 
-    mock_get_subprocess_output.side_effect = [
-        MOCK_METADATA_OUTPUT,
-        (mock_output('scontrol.txt'), "", 0),
-        ("c1", "", 0),
-        (mock_output('scontrol_squeue.txt'), "", 0),
-        (mock_output('scontrol_squeue2.txt'), "", 0),
-    ]
+    mock_get_subprocess_output.side_effect = with_metadata_output(
+        [
+            (mock_output('scontrol.txt'), "", 0),
+            ("c1", "", 0),
+            (mock_output('scontrol_squeue.txt'), "", 0),
+            (mock_output('scontrol_squeue2.txt'), "", 0),
+        ]
+    )
 
     check.check(None)
 
@@ -322,13 +334,14 @@ def test_scontrol_processing_does_not_resolve_host_pid_by_default(
     (host_process / "status").write_text("Name:\tjob\nNSpid:\t12345\t3771\n")
     monkeypatch.setenv("HOST_PROC", str(host_proc))
 
-    mock_get_subprocess_output.side_effect = [
-        MOCK_METADATA_OUTPUT,
-        (mock_output('scontrol.txt'), "", 0),
-        ("c1", "", 0),
-        (mock_output('scontrol_squeue.txt'), "", 0),
-        (mock_output('scontrol_squeue2.txt'), "", 0),
-    ]
+    mock_get_subprocess_output.side_effect = with_metadata_output(
+        [
+            (mock_output('scontrol.txt'), "", 0),
+            ("c1", "", 0),
+            (mock_output('scontrol_squeue.txt'), "", 0),
+            (mock_output('scontrol_squeue2.txt'), "", 0),
+        ]
+    )
 
     check.check(None)
 
@@ -366,13 +379,14 @@ def test_scontrol_processing_gets_process_tags_for_host_pid_only(
     (host_process / "status").write_text("Name:\tjob\nNSpid:\t12345\t3771\n")
     monkeypatch.setenv("HOST_PROC", str(host_proc))
     mock_get_process_tags.return_value = []
-    mock_get_subprocess_output.side_effect = [
-        MOCK_METADATA_OUTPUT,
-        (mock_output('scontrol.txt'), "", 0),
-        ("c1", "", 0),
-        (mock_output('scontrol_squeue.txt'), "", 0),
-        (mock_output('scontrol_squeue2.txt'), "", 0),
-    ]
+    mock_get_subprocess_output.side_effect = with_metadata_output(
+        [
+            (mock_output('scontrol.txt'), "", 0),
+            ("c1", "", 0),
+            (mock_output('scontrol_squeue.txt'), "", 0),
+            (mock_output('scontrol_squeue2.txt'), "", 0),
+        ]
+    )
 
     check.check(None)
 
@@ -551,7 +565,7 @@ def command_records(caplog, level, command):
 def test_scontrol_given_idle_node_logs_debug_instead_of_error(mock_get_subprocess_output, instance, caplog):
     instance['collect_scontrol_stats'] = True
     check = SlurmCheck('slurm', {}, [instance])
-    mock_get_subprocess_output.side_effect = [MOCK_METADATA_OUTPUT, ("", SCONTROL_IDLE_STDERR, 1)]
+    mock_get_subprocess_output.side_effect = with_metadata_output([("", SCONTROL_IDLE_STDERR, 1)])
 
     check.check(None)
 
@@ -562,12 +576,12 @@ def test_scontrol_given_idle_node_logs_debug_instead_of_error(mock_get_subproces
 def test_scontrol_given_missing_spool_dir_warns_once_across_runs(mock_get_subprocess_output, instance, caplog):
     instance['collect_scontrol_stats'] = True
     check = SlurmCheck('slurm', {}, [instance])
-    mock_get_subprocess_output.side_effect = [
-        MOCK_METADATA_OUTPUT,
-        ("", SCONTROL_MISSING_SPOOLDIR_STDERR, 1),
-        MOCK_METADATA_OUTPUT,
-        ("", SCONTROL_MISSING_SPOOLDIR_STDERR, 1),
-    ]
+    mock_get_subprocess_output.side_effect = with_metadata_output(
+        [
+            ("", SCONTROL_MISSING_SPOOLDIR_STDERR, 1),
+            ("", SCONTROL_MISSING_SPOOLDIR_STDERR, 1),
+        ]
+    )
 
     check.check(None)
     check.check(None)
@@ -582,7 +596,7 @@ def test_scontrol_given_unreadable_spool_dir_still_logs_error(mock_get_subproces
     # mistaken for one. The check would otherwise collect nothing and say nothing.
     instance['collect_scontrol_stats'] = True
     check = SlurmCheck('slurm', {}, [instance])
-    mock_get_subprocess_output.side_effect = [MOCK_METADATA_OUTPUT, ("", SCONTROL_UNREADABLE_SPOOLDIR_STDERR, 1)]
+    mock_get_subprocess_output.side_effect = with_metadata_output([("", SCONTROL_UNREADABLE_SPOOLDIR_STDERR, 1)])
 
     check.check(None)
 
