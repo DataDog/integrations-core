@@ -6,7 +6,7 @@
 
 ***Added***:
 
-* Upgrade pymongo to 4.18.2 ([#25517](https://github.com/DataDog/integrations-core/pull/25517))
+* Upgrade PyMongo to 4.18.2. ([#25517](https://github.com/DataDog/integrations-core/pull/25517))
 
 ## 2.10.1 / 2026-10-01
 
