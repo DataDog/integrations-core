@@ -170,6 +170,25 @@ async def test_run_command_timeout():
     proc.kill.assert_called_once()
 
 
+async def test_run_command_cancellation_kills_child():
+    started: asyncio.Future[asyncio.subprocess.Process] = asyncio.get_running_loop().create_future()
+    real_exec = asyncio.create_subprocess_exec
+
+    async def capture_exec(*args, **kwargs):
+        proc = await real_exec(*args, **kwargs)
+        started.set_result(proc)
+        return proc
+
+    with patch("asyncio.create_subprocess_exec", new=capture_exec):
+        task = asyncio.create_task(run_command(["sleep", "30"], timeout=300))
+        proc = await asyncio.wait_for(started, timeout=5)
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+
+    assert proc.returncode is not None
+
+
 async def test_run_command_unexpected_exception():
     with patch("asyncio.create_subprocess_exec", side_effect=OSError("permission denied")):
         result = await run_command(["cmd"])
