@@ -176,6 +176,8 @@ Collecting logs is disabled by default in the Datadog Agent. To enable it, see [
 
 ### Database Monitoring
 
+**Note**: Database Monitoring for IBM Db2 is in Preview. To request access, contact your Datadog account team.
+
 Database Monitoring (`dbm: true`) collects query execution counts, elapsed time, CPU time,
 rows read and returned, lock waits, and obfuscated SQL from each database's package cache.
 Configure each database you want to monitor separately.
@@ -250,11 +252,13 @@ reroute (ACR) for each configured database, host, and port:
 </configuration>
 ```
 
-Apply this to the driver configuration used by the Agent, not your application's driver.
-Set `DB2DSDRIVER_CFG_PATH` in the Agent process environment to the absolute path of this
-file, or use the driver's [default configuration location][19]. Restart the Agent after
-changing it. See [IBM's client reroute configuration documentation][18] for details. Enabling `enableAlternateServerListFirstConnect` implicitly
-allows rerouting even when other ACR settings disable it.
+Apply these settings to the Agent's driver configuration, not your application's driver
+configuration. Set `DB2DSDRIVER_CFG_PATH` in the Agent process environment to the absolute
+path of this file, or use the driver's [default configuration location][19]. Restart the
+Agent after changing it. See [IBM's client reroute configuration documentation][18] for details.
+
+**Note**: If `enableAlternateServerListFirstConnect` is `true`, the driver can reroute even
+when other ACR settings disable rerouting. Set both parameters to `false`.
 
 #### High availability disaster recovery (HADR)
 
@@ -264,15 +268,16 @@ of the primary's counters. A readable standby can report its own read workload. 
 without reads enabled cannot accept the SQL connections required for query metrics.
 
 During takeover, the collectors stay on their configured servers. Workload moves to the
-new primary, so its executions appear under that server's identity. The old primary retains
-its identity and can report its subsequent read workload if it becomes a readable standby.
-Connections may be interrupted during the transition; collection resumes when that same
+new primary, so Datadog reports those queries under the new primary's identity. The old
+primary retains its identity and can report its subsequent read workload if it becomes a
+readable standby. Connections can drop during the transition. Collection resumes when the
 server accepts SQL connections again.
 
 Query metrics use differences between cumulative package-cache counters. New cache entries
-establish a baseline before reporting subsequent executions. Queries that disappear from the
-cache between collections may be missed. This is query-workload monitoring; it does not
-report replication lag, HADR health, or discover the current primary.
+establish a baseline before reporting subsequent executions. The Agent can miss executions
+of queries that leave the package cache between collections. Query metrics monitor query
+workload only. They do not report replication lag or HADR health, and they do not identify
+the current primary.
 
 ### Validation
 
