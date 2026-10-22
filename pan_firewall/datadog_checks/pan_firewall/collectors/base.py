@@ -49,36 +49,17 @@ class Watermark:
 @dataclass
 class ThreatJob:
     """A threat log job and what its pass has gathered: `baseline` (first run: newest log), `forward` (logs above
-    `base_seqno`, page after page) or `reset` (newest log, to detect a `seqno` reset).
-
-    `newest_seqno` and `counts` cover the finished pages. The `page_*` fields cover the page being read and are merged
-    by `finish_page()`, so a page that fails halfway can be read again without counting its first entries twice.
-    """
+    `base_seqno`, page after page) or `reset` (newest log, to detect a `seqno` reset)."""
 
     purpose: Literal['baseline', 'forward', 'reset']
     base_seqno: int = 0
     page_size: int = 1
     skip: int = 0
     job_id: str | None = None
-    newest_seqno: int | None = None
-    counts: Counter[tuple[str, str, str, str]] = field(default_factory=Counter)
     page_entries: int = 0
-    page_newest_seqno: int | None = None
-    page_counts: Counter[tuple[str, str, str, str]] = field(default_factory=Counter)
-
-    def finish_page(self) -> None:
-        if self.page_newest_seqno is not None and (
-            self.newest_seqno is None or self.page_newest_seqno > self.newest_seqno
-        ):
-            self.newest_seqno = self.page_newest_seqno
-        self.counts.update(self.page_counts)
-
-    def new_page(self) -> None:
-        """Submit a new job on the next fetch, for the next page or for the page that failed."""
-        self.job_id = None
-        self.page_entries = 0
-        self.page_newest_seqno = None
-        self.page_counts = Counter()
+    newest_seqno: int | None = None
+    counted: int = 0
+    counts: Counter[tuple[str, str, str, str]] = field(default_factory=Counter)
 
 
 @dataclass

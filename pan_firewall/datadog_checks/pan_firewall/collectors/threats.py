@@ -5,9 +5,7 @@
 
 Logs are read by `seqno`, never by time: the query asks for every log from `watermark + 1` on, oldest first, paged
 with `skip`. The watermark is the `seqno` of the last log counted; it is persisted by firewall serial and only moves
-after a pass that read every page. A page that fails is read again on the next run, and the pages finished before it
-are kept in memory, so a failure costs one page, not the whole pass. An Agent restart in between drops that progress
-and reads the pass again from the watermark: no log is lost or counted twice either way.
+after a pass that read every page, so a failure halfway leaves it, and the counts, where they were.
 """
 
 from __future__ import annotations
@@ -38,22 +36,17 @@ def collect_threats(ctx: CollectContext) -> list[Sample]:
                 ctx.state.still_due.add('threats')
                 ctx.debug('threat log job %s still running, polled again next run', job.job_id)
                 return []
-            job.finish_page()
             if job.purpose == 'forward' and job.page_entries >= job.page_size:
                 job.skip += job.page_size
-                job.new_page()
+                job.job_id = None
+                job.page_entries = 0
                 continue
             samples, job = _complete(ctx, state, job)
             if job is None:
                 return samples
         return []
     except BaseException:
-        # A forward pass keeps its finished pages and reads the failed one again next run.
-        if job is not None and job.purpose == 'forward':
-            job.new_page()
-            state.pending = job
-        else:
-            state.pending = None
+        state.pending = None
         raise
 
 
@@ -126,16 +119,17 @@ def _add(ctx: CollectContext, job: ThreatJob, entry: Element) -> None:
     # A log at or below the watermark should not come back from the query; drop it if it does.
     if job.purpose == 'forward' and seqno <= job.base_seqno:
         return
-    if job.page_newest_seqno is None or seqno > job.page_newest_seqno:
-        job.page_newest_seqno = seqno
+    if job.newest_seqno is None or seqno > job.newest_seqno:
+        job.newest_seqno = seqno
     if job.purpose == 'forward':
+        job.counted += 1
         key = (
             text(entry, 'severity') or '',
             text(entry, 'action') or '',
             text(entry, 'subtype') or '',
             normalize_vsys(text(entry, 'vsys')) or '',
         )
-        job.page_counts[key] += 1
+        job.counts[key] += 1
 
 
 def _complete(ctx: CollectContext, state: ThreatState, job: ThreatJob) -> tuple[list[Sample], ThreatJob | None]:
@@ -148,7 +142,7 @@ def _complete(ctx: CollectContext, state: ThreatState, job: ThreatJob) -> tuple[
         return [], None
     assert watermark is not None
     if job.purpose == 'forward':
-        if job.counts:
+        if job.counted:
             assert job.newest_seqno is not None
             _store(ctx, state, job.newest_seqno, watermark.last_reset_check)
             return _samples(job), None

@@ -243,13 +243,10 @@ def test_unreadable_cache_is_a_first_run(firewall):
     assert firewall.watermark == BACKWARD_NEWEST_SEQNO
 
 
-def test_page_failing_halfway_is_read_again_next_run_and_every_log_is_counted_once(firewall, monkeypatch):
+def test_failure_halfway_keeps_the_watermark_and_the_next_run_starts_over(firewall, monkeypatch):
     monkeypatch.setattr(constants, 'THREAT_PAGE_SIZE', PROBE_SEQNO_PAGE_SIZE)
     firewall.seed(PROBE_SEQNO_START - 1)
-    # The third page breaks off after some of its entries were read.
-    third_page = (FIXTURES / 'probe-seqno' / 'seq_0_p2.xml').read_bytes()
-    truncated = third_page[: len(third_page) * 2 // 3]
-    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(PROBE_SEQNO_START), 40, truncated)
+    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(PROBE_SEQNO_START), 40, NO_CAPTURE)
 
     with pytest.raises(PanosApiError):
         firewall.collect()
@@ -258,25 +255,8 @@ def test_page_failing_halfway_is_read_again_next_run_and_every_log_is_counted_on
     firewall.fake.recover(FW_A_IP)
     firewall.fake.calls.clear()
     samples = firewall.collect()
-    assert firewall.submits()[0]['skip'] == '40'
-    assert series(samples) == expected(probe_counts()[0])
-    assert firewall.watermark == PROBE_LAST_SEQNO
-
-
-def test_restart_after_a_failed_page_reads_the_pass_again_from_the_watermark(firewall, monkeypatch):
-    monkeypatch.setattr(constants, 'THREAT_PAGE_SIZE', PROBE_SEQNO_PAGE_SIZE)
-    firewall.seed(PROBE_SEQNO_START - 1)
-    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(PROBE_SEQNO_START), 40, NO_CAPTURE)
-    with pytest.raises(PanosApiError):
-        firewall.collect()
-    firewall.restart()
-    firewall.fake.recover(FW_A_IP)
-    firewall.fake.calls.clear()
-
-    samples = firewall.collect()
-
-    assert firewall.submits()[0]['skip'] == '0'
     assert sum(s.value for s in samples) == PROBE_ENTRIES
+    assert firewall.submits()[0]['skip'] == '0'
     assert firewall.watermark == PROBE_LAST_SEQNO
 
 
