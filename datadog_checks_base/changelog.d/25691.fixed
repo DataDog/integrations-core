@@ -1,0 +1,1 @@
+Exclude the `db` tag and internal resource tags from schema payload tags, since the payload describes the whole database instance.
