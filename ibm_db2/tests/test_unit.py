@@ -268,6 +268,45 @@ def test_query_metrics_recover_after_text_lookup_failure(instance: dict, aggrega
         assert row['lock_waits'] == expected
 
 
+@pytest.mark.parametrize(
+    'init_config, instance_config, expected',
+    [
+        ({}, {}, ''),
+        ({}, {'service': 'orders'}, 'orders'),
+        ({'service': 'shared'}, {}, 'shared'),
+        ({'service': 'shared'}, {'service': 'orders'}, 'orders'),
+        ({'service': 'shared'}, {'service': ''}, 'shared'),
+    ],
+)
+def test_query_metrics_service(
+    instance: dict, aggregator: AggregatorStub, init_config: dict, instance_config: dict, expected: str
+):
+    """Metrics and FQT preserve configured service, with instance values taking precedence over shared config."""
+    instance.update(dbm=True, **instance_config)
+    check = IbmDb2Check('ibm_db2', init_config, [instance])
+    inserted = datetime(2026, 1, 1)
+    counters = ('count', 'time', 'cpu_time', 'rows_read', 'rows_returned', 'lock_wait_time', 'lock_waits')
+    snapshots = [
+        {'member': 0, 'executable_id': b'\x01', 'insert_timestamp': inserted, **dict.fromkeys(counters, count)}
+        for count in (1, 2)
+    ]
+    collector = check._query_metrics
+    with (
+        mock.patch.object(collector._connection, 'ensure_connected'),
+        mock.patch('ibm_db.prepare'),
+        mock.patch('ibm_db.execute'),
+        mock.patch('ibm_db.free_stmt'),
+        mock.patch('ibm_db.fetch_assoc', side_effect=[snapshots[0], False, snapshots[1], False]),
+        mock.patch.object(collector, '_fetch_statement_texts', return_value={(0, '01', inserted): 'SELECT ID FROM T'}),
+    ):
+        collector.run_job()
+        collector.run_job()
+    for stream in ('dbm-metrics', 'dbm-samples'):
+        events = aggregator.get_event_platform_events(stream)
+        assert len(events) == 1
+        assert events[0]['service'] == expected
+
+
 def test_full_query_text_refresh(instance: dict, aggregator: AggregatorStub):
     """Text events retain query identity and metadata, suppress repeats, and refresh after the TTL."""
     instance.update(dbm=True, service='db2-test', tags=['team:dbm', 'dd.internal.secret:test'])

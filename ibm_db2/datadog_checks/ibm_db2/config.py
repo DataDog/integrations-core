@@ -27,6 +27,7 @@ def build_config(check: IbmDb2Check) -> InstanceConfig:
     instance = check.instance
     init_config = check.init_config
     args = dict(instance)
+    args['service'] = instance.get('service') or init_config.get('service') or ''
     query_metrics = instance.get('query_metrics')
     if query_metrics is None:
         query_metrics = {}
