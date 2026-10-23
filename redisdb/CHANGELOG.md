@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 5.3.2 / 2026-10-23
+
+***Added***:
+
+* Add support of Redis 8 ([#20227](https://github.com/DataDog/integrations-core/pull/20227))
+
 ## 5.3.1 / 2024-03-05
 
 ***Fixed***:
