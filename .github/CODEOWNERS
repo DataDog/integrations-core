@@ -376,6 +376,11 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /mailchimp/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /mailchimp/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 
+/mailgun/                                                           @DataDog/saas-integrations
+/mailgun/*.md                                                       @DataDog/saas-integrations @DataDog/documentation
+/mailgun/manifest.json                                              @DataDog/saas-integrations @DataDog/documentation
+/mailgun/assets/logs/                                               @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
 /metabase/                                                          @DataDog/saas-integrations
 /metabase/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /metabase/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
