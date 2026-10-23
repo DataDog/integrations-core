@@ -8,6 +8,7 @@ from unittest.mock import call
 
 import httpx
 import pytest
+import yaml
 
 from ddev.cli.release.branch.build_agent import ensure_build_agent_yaml_updated
 from ddev.cli.release.branch.create import compute_next_milestone, update_release_json
@@ -100,6 +101,39 @@ def test_ensure_build_agent_yaml_updated(mocker, tmp_path):
     app_mock.repo.git.capture.assert_not_called()
 
 
+@pytest.mark.parametrize(
+    'agent_branch_exists, expected_agent_branch',
+    [
+        pytest.param(True, '7.99.x', id='agent_branch_exists'),
+        pytest.param(False, 'main', id='agent_branch_missing'),
+    ],
+)
+def test_ensure_build_agent_yaml_updated_points_compare_to_at_release_branch(
+    mocker, tmp_path, local_repo, agent_branch_exists, expected_agent_branch
+):
+    """Branches cut from the release branch must compare their dependency changes against it, even before the
+    matching Agent branch exists."""
+    build_agent_path = Path(tmp_path / '.gitlab' / 'build_agent.yaml')
+    build_agent_path.parent.ensure_dir_exists()
+    build_agent_path.write_text((local_repo / '.gitlab' / 'build_agent.yaml').read_text())
+
+    app_mock = mocker.MagicMock()
+    mocker.patch('ddev.cli.release.branch.build_agent.agent_branch_exists', return_value=agent_branch_exists)
+
+    with Path(tmp_path).as_cwd():
+        result = ensure_build_agent_yaml_updated(app_mock, '7.99.x')
+
+    assert result is True
+    config = yaml.safe_load(build_agent_path.read_text())
+    assert config['.build-agent-tpl']['trigger']['branch'] == expected_agent_branch
+    compare_to = [
+        rule['changes']['compare_to']
+        for rule in config['build-agent-auto']['rules']
+        if 'compare_to' in rule.get('changes', {})
+    ]
+    assert compare_to == ['refs/heads/7.99.x']
+
+
 def test_ensure_build_agent_yaml_updated_ignores_unrelated_main_branch(mocker, tmp_path):
     build_agent_path = Path(tmp_path / '.gitlab' / 'build_agent.yaml')
     build_agent_path.parent.ensure_dir_exists()
@@ -148,6 +182,7 @@ def test_ensure_build_agent_yaml_updated_aborts_on_multiple_template_main_branch
 
     app_mock = mocker.MagicMock()
     app_mock.abort.side_effect = RuntimeError('abort')
+    mocker.patch('ddev.cli.release.branch.build_agent.agent_branch_exists', return_value=False)
 
     with Path(tmp_path).as_cwd(), pytest.raises(RuntimeError, match='abort'):
         ensure_build_agent_yaml_updated(app_mock, '7.99.x')
@@ -156,6 +191,9 @@ def test_ensure_build_agent_yaml_updated_aborts_on_multiple_template_main_branch
     app_mock.abort.assert_called_once_with(
         'Expected exactly one `.build-agent-tpl` branch pointing to `main` in `.gitlab/build_agent.yaml`; found 2.'
     )
+    # The missing Agent branch is reported alongside the error instead of surfacing on the next run.
+    app_mock.display_warning.assert_called_once()
+    assert '7.99.x' in app_mock.display_warning.call_args[0][0]
 
 
 def test_ensure_build_agent_yaml_updated_already_on_release_branch(mocker, tmp_path):
