@@ -104,7 +104,7 @@ VALIDATIONS: dict[str, ValidationConfig] = {
         description="Validate OpenMetrics integrations disable the metric limit",
     ),
     "package": ValidationConfig(
-        description="Validate Python package metadata and naming",
+        description="Validate Python package metadata, naming, and wheel contents",
     ),
     "pr-description": ValidationConfig(
         description="Validate the pull request checklist and visible description length",
