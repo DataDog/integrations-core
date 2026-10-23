@@ -58,16 +58,28 @@ def test_e2e_workload_events(dd_agent_check, aggregator, kubectl_env, dd_get_sta
 
     retry_apply('event-pending-workload.yaml', env=kubectl_env)
     pending_workload = wait_for_job_workload_condition('event-pending-workload', 'QuotaReserved=False', env=kubectl_env)
-    assert_workload_event(check, aggregator, 'pending', pending_workload)
+    pending_index = assert_workload_event(check, aggregator, 'pending', pending_workload)
+    assert [
+        workload_event_index(aggregator, 'created', pending_workload),
+        pending_index,
+    ] == [0, 1]
 
     retry_apply('event-workload.yaml', env=kubectl_env)
     admitted_workload = wait_for_job_workload_condition('event-workload', 'Admitted=True', env=kubectl_env)
-    for transition in ('created', 'quota_reserved', 'admitted'):
+    admitted_indexes = [
         assert_workload_event(check, aggregator, transition, admitted_workload)
+        for transition in ('created', 'quota_reserved', 'admitted')
+    ]
+    assert admitted_indexes == [0, 1, 2]
 
     retry_apply('event-finish-workload.yaml', env=kubectl_env)
     finished_workload = wait_for_job_workload_condition('event-finish-workload', 'Finished=True', env=kubectl_env)
-    assert_workload_event(check, aggregator, 'finished', finished_workload)
+    finished_index = assert_workload_event(check, aggregator, 'finished', finished_workload)
+    earlier_indexes = [
+        workload_event_index(aggregator, transition, finished_workload)
+        for transition in ('created', 'quota_reserved', 'admitted')
+    ]
+    assert earlier_indexes + [finished_index] == sorted(set(earlier_indexes + [finished_index]))
 
 
 def run_check(check):
@@ -84,7 +96,10 @@ def live_instance(dd_get_state):
 
 
 def assert_workload_event(check, aggregator, transition, workload_name):
-    """Poll the check until the workload event for a transition shows up."""
+    """Poll the check until the workload event for a transition shows up.
+
+    Returns that event's per-workload index.
+    """
     alert_type = 'warning' if transition == 'pending' else 'info'
     for attempt in range(EVENT_POLL_ATTEMPTS):
         run_check(check)
@@ -96,11 +111,24 @@ def assert_workload_event(check, aggregator, transition, workload_name):
                 source_type_name='kueue',
                 alert_type=alert_type,
             )
-            return
+            return workload_event_index(aggregator, transition, workload_name)
         except AssertionError:
             if attempt == EVENT_POLL_ATTEMPTS - 1:
                 raise
             time.sleep(1)
+
+
+def workload_event_index(aggregator, transition, workload_name):
+    needle = f'Workload default/{workload_name} {transition.replace("_", " ")}.'
+    indexes = []
+    for event in aggregator.events:
+        if needle not in event['msg_text']:
+            continue
+        index_tags = [tag for tag in event['tags'] if tag.startswith('kueue_workload_event_index:')]
+        assert len(index_tags) == 1, event
+        indexes.append(int(index_tags[0].rsplit(':', 1)[1]))
+    assert len(indexes) == 1, f'expected one {transition} event for {workload_name}, found {indexes}'
+    return indexes[0]
 
 
 @pytest.fixture
