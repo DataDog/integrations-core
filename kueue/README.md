@@ -113,6 +113,13 @@ Events are tagged with the Workload namespace, name, UID, LocalQueue, transition
 available. Eviction events also include the eviction reason, and preemption events include the Kueue preemption reason
 when available. Pending events include the reason reported by Kueue.
 
+Each event also carries `kueue_workload_event_index`, a per-Workload integer that increases for every event the check
+emits for that Workload. Kueue often stamps several transitions with the same second-resolution timestamp; sort by
+`timestamp`, then by `kueue_workload_event_index` as an integer, to order those events. The index is kept in the Agent
+persistent cache so a process restart continues the sequence for Workloads still present in the API. The cache is
+cleared when the check configuration changes, and a new pod starts the sequence at `0` because the run directory is
+not preserved across container recreation.
+
 The first collection run seeds the Workload state and does not emit events for already existing transitions.
 
 ## Troubleshooting
