@@ -24,13 +24,12 @@ from datadog_checks.pan_firewall.auth import Credentials, KeyManager
 
 from .common import FIXTURES, SYSTEM_INFO_CMD
 from .fake_panos import TRANSPORT_ERRORS, response
-from .fixture_map import op_fixture
+from .fixture_map import FAKE_KEY, INVALID_CREDENTIAL, KEYGEN_OK, op_fixture
 
 pytestmark = pytest.mark.unit
 
 HOST = '192.0.2.10'
 URL = f'https://{HOST}/api/'
-GENERATED_KEY = 'GENERATED-KEY-0123456789'
 STATIC_KEY = 'STATIC-KEY-9876543210'
 PASSWORD_CREDS = Credentials(username='dummy-user', password='s3cret-pw', api_key=None)
 STATIC_CREDS = Credentials(username=None, password=None, api_key=STATIC_KEY)
@@ -38,7 +37,6 @@ STATIC_CREDS = Credentials(username=None, password=None, api_key=STATIC_KEY)
 SYSTEM_INFO = op_fixture(SYSTEM_INFO_CMD).read_bytes()
 THREAT_SUBMIT = (FIXTURES / 'fw-a' / 'threat_log_5m_submit.xml').read_bytes()
 THREAT_LOGS = (FIXTURES / 'fw-a' / 'threat_log_5m.xml').read_bytes()
-INVALID_CREDENTIAL = (FIXTURES / 'synthetic' / 'auth_invalid_credential.xml').read_bytes()
 CODE_16 = (FIXTURES / 'synthetic' / 'auth_code_16.xml').read_bytes()
 
 
@@ -47,7 +45,6 @@ def keygen_ok(key):
     return f'<response status="success"><result><key>{key}</key></result></response>'.encode()
 
 
-KEYGEN_OK = keygen_ok(GENERATED_KEY)
 # A first key, then the one a renewal gets: a retry must carry the second.
 KEY_1, KEY_2 = 'GENERATED-KEY-1', 'GENERATED-KEY-2'
 
@@ -112,7 +109,7 @@ def test_keygen_posts_credentials_in_body_and_key_only_in_header():
     assert 'extra_headers' not in keygen
     assert op['url'] == URL
     assert op['data'] == {'type': 'op', 'cmd': SYSTEM_INFO_CMD}
-    assert op['extra_headers'] == {'X-PAN-KEY': GENERATED_KEY}
+    assert op['extra_headers'] == {'X-PAN-KEY': FAKE_KEY}
 
 
 def test_key_never_leaks_into_urls_logs_or_errors(caplog):

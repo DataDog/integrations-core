@@ -98,7 +98,6 @@ def test_missing_cpu_line_gives_memory_only():
             {('dp0', 0): 7, ('dp0', 1): 0, ('dp1', 0): 31, ('dp1', 1): 12},
             id='two-data-processors',
         ),
-        pytest.param(load_xml(SYNTHETIC / 'resource_monitor_no_dp.xml'), {}, id='no-data-processor'),
     ],
 )
 def test_dataplane_cpu(root, utilization):

@@ -48,6 +48,7 @@ def test_licenses_of_the_capture():
         pytest.param('yes', 'October 01, 2026', {'license.expired': 1, 'license.days_left': -8}, id='expired'),
         pytest.param('no', 'Never', {'license.expired': 0}, id='perpetual'),
         pytest.param('no', '22/10/2026', {'license.expired': 0}, id='unparseable-date'),
+        pytest.param('no', 'February 30, 2026', {'license.expired': 0}, id='impossible-date'),
     ],
 )
 def test_license_expiry(expired, expires, expected):

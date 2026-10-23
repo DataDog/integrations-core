@@ -6,7 +6,7 @@ from __future__ import annotations
 import dataclasses
 import json
 from collections.abc import Iterable, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from xml.etree.ElementTree import Element
 
 from .collectors.base import tag_tuple
@@ -18,8 +18,7 @@ from .xml_utils import text
 
 @dataclass
 class DeviceIdentity:
-    """What the check knows about a firewall, from `show system info`, persisted as JSON. `clock` is neither compared
-    nor persisted, so a refresh that only moves it does not rewrite the cache."""
+    """What the check knows about a firewall, from `show system info`, persisted as JSON."""
 
     serial: str | None
     hostname: str | None
@@ -29,12 +28,9 @@ class DeviceIdentity:
     own_ip: str | None
     multi_vsys: bool | None
     advanced_routing: bool | None
-    clock: str | None = field(default=None, compare=False)  # system info <time>, firewall-local
 
     def to_json(self) -> str:
-        data = dataclasses.asdict(self)
-        del data['clock']
-        return json.dumps(data)
+        return json.dumps(dataclasses.asdict(self))
 
     @classmethod
     def from_json(cls, raw: str) -> DeviceIdentity:
@@ -56,7 +52,6 @@ def parse_system_info(root: Element) -> DeviceIdentity:
         own_ip=text(system, 'ip-address'),
         multi_vsys=_on_off(text(system, 'multi-vsys')),
         advanced_routing=_on_off(text(system, 'advanced-routing')),
-        clock=text(system, 'time'),
     )
 
 

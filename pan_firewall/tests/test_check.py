@@ -92,7 +92,7 @@ def test_outage_after_restart_keeps_device_id(dd_run_check, aggregator, fake_pan
     aggregator.assert_metric('pan_firewall.can_connect', value=0, tags=FW_A_TAGS, metric_type=aggregator.GAUGE, count=1)
 
 
-def test_identity_without_interface_capture(dd_run_check, aggregator, fake_panos):
+def test_identity_without_interface_capture(dd_run_check, aggregator):
     # fw-b has no `show interface all` capture, so the fake answers it with an error.
     dd_run_check(new_check(make_instance(ip=FW_B_IP)))
 
@@ -403,6 +403,21 @@ def test_calls_use_the_instance_timeout(dd_run_check, fake_panos, mocker, option
     assert timeouts == {expected}
 
 
+@pytest.mark.parametrize('cached', ['not json', '{"unknown": 1}'], ids=['not-json', 'unknown-field'])
+def test_unreadable_cached_identity_is_ignored(dd_run_check, aggregator, fake_panos, cached):
+    fake_panos.fail(FW_A_IP, 'refused')
+    check = new_check()
+    # The cache id comes from the configuration, which the first run loads.
+    dd_run_check(check)
+    check.write_persistent_cache(f'identity:{FW_A_IP}', cached)
+    aggregator.reset()
+
+    # A restart reads the cache.
+    dd_run_check(new_check())
+
+    aggregator.assert_metric('pan_firewall.can_connect', value=0, tags=BASE_TAGS, count=1)
+
+
 def test_system_info_without_serial_keeps_the_cached_identity(dd_run_check, aggregator, fake_panos, monkeypatch):
     dd_run_check(new_check())
     no_serial = b'<response status="success"><result><system><hostname>other</hostname></system></result></response>'
@@ -421,19 +436,25 @@ def test_system_info_without_serial_keeps_the_cached_identity(dd_run_check, aggr
     aggregator.assert_metric('pan_firewall.can_connect', value=0, tags=FW_A_TAGS, metric_type=aggregator.GAUGE, count=1)
 
 
-def test_failed_collector_is_retried_after_5_minutes_not_after_its_interval(dd_run_check, monkeypatch, schedule_clock):
+@pytest.mark.parametrize(
+    'error',
+    [pytest.param(PanosApiError('400', 'bad command'), id='api-error'), pytest.param(ValueError('bug'), id='bug')],
+)
+def test_failed_collector_is_retried_after_5_minutes_not_after_its_interval(
+    dd_run_check, monkeypatch, schedule_clock, error
+):
     runs = []
 
     def licenses(ctx):
         runs.append(schedule_clock.now)
-        raise PanosApiError('400', 'bad command')
+        raise error
 
     monkeypatch.setitem(COLLECTORS, 'licenses', licenses)
     check = new_check()
     start = schedule_clock.now
-    dd_run_check(check)
-    schedule_clock.now += 300
-    dd_run_check(check)
+    for seconds in (0, 299, 300):
+        schedule_clock.now = start + seconds
+        dd_run_check(check)
 
     # Licenses run once a day.
     assert runs == [start, start + 300]

@@ -9,9 +9,11 @@ import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.pan_firewall import PanFirewallCheck, constants
+from datadog_checks.pan_firewall.collectors.counters import GLOBAL_COUNTER_CMD
 from datadog_checks.pan_firewall.collectors.ha import HA_CMD
 from datadog_checks.pan_firewall.collectors.interfaces import COUNTER_INTERFACE_CMD
 from datadog_checks.pan_firewall.collectors.jobs import JOBS_PENDING_CMD
+from datadog_checks.pan_firewall.collectors.routing import OSPF_NEIGHBOR_CMD
 from datadog_checks.pan_firewall.collectors.system import ENVIRONMENTALS_CMD
 from datadog_checks.pan_firewall.errors import PanosApiError
 from datadog_checks.pan_firewall.xml_utils import num, parse_response, text
@@ -142,6 +144,27 @@ def test_a_threat_job_still_running_is_polled_again_on_the_next_run_not_in_5_min
     assert run_after_a_minute() == [('op', JOBS_PENDING_CMD), ('log', None)]
     # The job finished: the collector is on its 5-minute interval again.
     assert ('log', None) not in run_after_a_minute()
+
+
+# Each optional collector: its default, and whether a request is one of its own.
+OPTIONAL_COLLECTORS = {
+    'collect_global_counters': (False, lambda call: call.cmd == GLOBAL_COUNTER_CMD),
+    'collect_ospf': (False, lambda call: call.cmd == OSPF_NEIGHBOR_CMD),
+    'collect_reports': (False, lambda call: call.type == 'report'),
+    'collect_rule_hits': (True, lambda call: 'rule-hit-count' in (call.cmd or '')),
+    'collect_threats': (True, lambda call: call.type == 'log'),
+}
+
+
+@pytest.mark.parametrize('flipped', [False, True], ids=['default', 'flipped'])
+@pytest.mark.parametrize('option', OPTIONAL_COLLECTORS)
+def test_optional_collectors_follow_their_option(dd_run_check, fake_panos, option, flipped):
+    # A default turned on would start, among others, 10 report jobs per firewall on every install.
+    default, is_its_call = OPTIONAL_COLLECTORS[option]
+
+    dd_run_check(PanFirewallCheck('pan_firewall', {}, [make_instance(**({option: not default} if flipped else {}))]))
+
+    assert any(is_its_call(call) for call in fake_panos.calls) is (default != flipped)
 
 
 # One row per collector whose samples the check submits as they come: (metric, extra tags). The parser tests pin every

@@ -79,6 +79,18 @@ def test_jobs_check_error_collects_anyway_and_warns_on_every_run(run_at, fake_pa
     assert all(w.startswith(f'{FW_A_IP}: cannot check for a commit or content update in progress') for w in warnings)
 
 
+def test_losing_the_firewall_ends_the_busy_period(run_at, fake_panos):
+    fake_panos.answer_op(FW_A_IP, JOBS_PENDING_CMD, COMMIT_RUNNING)
+    assert run_at(0) == set()
+    fake_panos.answer_op(FW_A_IP, JOBS_PENDING_CMD, FAILURES['refused'])
+    run_at(60)
+    fake_panos.answer_op(FW_A_IP, JOBS_PENDING_CMD, COMMIT_RUNNING)
+
+    # A new busy period starts at 120 s, so at 600 s it is still within its 10 minutes.
+    assert run_at(120) == set()
+    assert run_at(600) == set()
+
+
 def test_jobs_check_unreachable_cuts_off_the_run(run_at, aggregator, fake_panos):
     fake_panos.answer_op(FW_A_IP, JOBS_PENDING_CMD, FAILURES['refused'])
     calls_before = len(fake_panos.calls)

@@ -7,7 +7,7 @@ import pytest
 
 from datadog_checks.pan_firewall.auth import Credentials
 from datadog_checks.pan_firewall.firewalls import FirewallTarget
-from datadog_checks.pan_firewall.identity import DeviceIdentity, global_tags, parse_system_info, vsys_list
+from datadog_checks.pan_firewall.identity import global_tags, parse_system_info, vsys_list
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from .common import FIXTURES, FW_A_IP, FW_A_SERIAL, FW_A_TAGS, FW_B_SERIAL, SYSTEM_INFO_CMD
@@ -36,14 +36,6 @@ def test_parse_system_info_fw_a():
         '10.20.0.10',
     )
     assert (FW_A.sw_version, FW_A.multi_vsys, FW_A.advanced_routing) == ('11.1.13-h12', False, False)
-    assert FW_A.clock == 'Fri Oct  2 04:49:06 2026'
-
-
-def test_clock_is_not_persisted():
-    later = dataclasses.replace(FW_A, clock='Sat Oct  3 00:00:00 2026')
-
-    # A restart does not load a stale clock.
-    assert DeviceIdentity.from_json(later.to_json()).clock is None
 
 
 def test_global_tags_with_identity():

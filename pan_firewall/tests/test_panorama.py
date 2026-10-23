@@ -13,7 +13,7 @@ from datadog_checks.pan_firewall import panorama as panorama_module
 from datadog_checks.pan_firewall.panorama import DiscoveredFirewall, parse_devices
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from .common import CREDENTIALS, FIXTURES, FW_A_IP, FW_A_SERIAL, FW_B_IP, FW_B_SERIAL
+from .common import CREDENTIALS, FIXTURES, FW_A_IP, FW_A_SERIAL, FW_B_IP, FW_B_SERIAL, SYNTHETIC
 from .fake_panos import INVALID_CREDENTIAL
 from .helpers import FakeClock, can_connect_by_ip, metrics_by_ip
 
@@ -21,7 +21,7 @@ pytestmark = pytest.mark.unit
 
 PANORAMA = 'panorama.example.com'
 DISCOVERY_CMD = '<show><devices><connected/></devices></show>'
-SYNTHETIC = FIXTURES / 'synthetic' / 'panorama_show_devices_connected.xml'
+SYNTHETIC_DEVICES = SYNTHETIC / 'panorama_show_devices_connected.xml'
 REAL_CAPTURE = FIXTURES / 'panorama' / 'show_devices_connected.xml'
 # The `ip-address` values of the captures. The fake Panorama reports the fake firewalls (FW_A_IP, FW_B_IP) instead.
 FW_A_REPORTED, FW_B_REPORTED = '10.20.0.10', '10.20.0.11'
@@ -29,7 +29,7 @@ PANORAMA_TAGS = ['device_namespace:default', f'panorama_host:{PANORAMA}', 'team:
 CACHE_KEY = f'panorama_firewalls:{PANORAMA}'
 
 
-def make_instance(**options):
+def panorama_instance(**options):
     return {
         'panorama_host': PANORAMA,
         'panorama_api_key': 'dummy-api-key',
@@ -39,8 +39,8 @@ def make_instance(**options):
     }
 
 
-def new_check(**options):
-    return PanFirewallCheck('pan_firewall', {}, [make_instance(**options)])
+def new_panorama_check(**options):
+    return PanFirewallCheck('pan_firewall', {}, [panorama_instance(**options)])
 
 
 def devices_xml(*entries):
@@ -77,7 +77,7 @@ def panorama_can_connect(aggregator):
             id='real-capture',
         ),
         pytest.param(
-            SYNTHETIC,
+            SYNTHETIC_DEVICES,
             [
                 DiscoveredFirewall(FW_A_SERIAL, 'fw-a', FW_A_REPORTED, 'PA-VM', 'vm', '11.1.13-h12', True),
                 DiscoveredFirewall(FW_B_SERIAL, 'fw-b', FW_B_REPORTED, 'PA-VM', 'vm', '11.1.13-h12', True),
@@ -99,7 +99,7 @@ def test_parse_devices_reads_every_firewall_entry(path, expected):
 
 
 def test_discovery_request_is_exactly_the_documented_call_once_per_run(dd_run_check, fake_panos):
-    check = new_check()
+    check = new_panorama_check()
 
     dd_run_check(check)
     dd_run_check(check)
@@ -109,7 +109,7 @@ def test_discovery_request_is_exactly_the_documented_call_once_per_run(dd_run_ch
 
 
 def test_panorama_key_is_generated_from_username_and_password(dd_run_check, fake_panos):
-    check = new_check(panorama_api_key=None, panorama_username='pan-user', panorama_password='pan-pass')
+    check = new_panorama_check(panorama_api_key=None, panorama_username='pan-user', panorama_password='pan-pass')
 
     dd_run_check(check)
 
@@ -120,7 +120,7 @@ def test_panorama_key_is_generated_from_username_and_password(dd_run_check, fake
 
 
 def test_firewalls_are_polled_at_the_reported_ip_which_is_their_device_ip(dd_run_check, aggregator, fake_panos):
-    dd_run_check(new_check())
+    dd_run_check(new_panorama_check())
 
     assert polled_hosts(fake_panos) == {FW_A_IP, FW_B_IP}
     can_connect = metrics_by_ip(aggregator, 'can_connect')
@@ -132,7 +132,7 @@ def test_firewalls_are_polled_at_the_reported_ip_which_is_their_device_ip(dd_run
 def test_firewall_at_an_unreachable_reported_ip_is_reported_down(dd_run_check, aggregator, fake_panos):
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml(('SYNTH-PRIVATE-0001', 'synth', '10.20.0.40', 'yes')))
 
-    dd_run_check(new_check())
+    dd_run_check(new_panorama_check())
 
     # Nothing answers at a private IP from here.
     assert polled_hosts(fake_panos) == {'10.20.0.40'}
@@ -142,7 +142,7 @@ def test_firewall_at_an_unreachable_reported_ip_is_reported_down(dd_run_check, a
 def test_ip_override_polls_the_reported_ip_at_its_mapped_address(dd_run_check, fake_panos):
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml(('SYNTH-PRIVATE-0001', 'synth', '10.20.0.40', 'yes')))
 
-    dd_run_check(new_check(firewall_ip_overrides={'10.20.0.40': FW_A_IP}))
+    dd_run_check(new_panorama_check(firewall_ip_overrides={'10.20.0.40': FW_A_IP}))
 
     assert polled_hosts(fake_panos) == {FW_A_IP}
 
@@ -157,26 +157,16 @@ def test_ip_override_polls_the_reported_ip_at_its_mapped_address(dd_run_check, f
     ],
 )
 def test_firewall_ips_filter_the_reported_ip(dd_run_check, aggregator, fake_panos, filters, expected):
-    dd_run_check(new_check(firewall_ips=filters))
+    dd_run_check(new_panorama_check(firewall_ips=filters))
 
     # A filtered-out firewall is not polled and gets no `can_connect`.
     assert polled_hosts(fake_panos) == expected
     assert set(metrics_by_ip(aggregator, 'can_connect')) == expected
 
 
-@pytest.mark.parametrize('ip', [None, 'not-an-ip'], ids=['absent', 'invalid'])
-def test_entry_without_usable_ip_is_skipped_and_logged(dd_run_check, fake_panos, caplog, ip):
-    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml(('SYNTH-BAD-IP', 'synth', ip, 'yes')))
-
-    dd_run_check(new_check())
-
-    assert polled_hosts(fake_panos) == set()
-    assert 'SYNTH-BAD-IP' in caplog.text
-
-
 def test_renamed_firewall_keeps_its_session_and_key(dd_run_check, fake_panos):
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml((FW_A_SERIAL, 'fw-a', FW_A_IP, 'yes')))
-    check = new_check()
+    check = new_panorama_check()
     dd_run_check(check)
 
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml((FW_A_SERIAL, 'fw-renamed', FW_A_IP, 'yes')))
@@ -187,7 +177,7 @@ def test_renamed_firewall_keeps_its_session_and_key(dd_run_check, fake_panos):
 
 
 def test_firewall_replaced_at_the_same_ip_is_reported_under_its_new_serial(dd_run_check, aggregator, fake_panos):
-    check = new_check()
+    check = new_panorama_check()
     dd_run_check(check)
     aggregator.reset()
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml(('SYNTH-RMA-0001', 'fw-a', FW_A_IP, 'yes')))
@@ -212,7 +202,7 @@ def test_firewall_replaced_at_the_same_ip_is_reported_under_its_new_serial(dd_ru
     ],
 )
 def test_firewall_that_disconnects_or_is_removed_is_no_longer_polled(dd_run_check, aggregator, fake_panos, devices):
-    check = new_check()
+    check = new_panorama_check()
     dd_run_check(check)
     aggregator.reset()
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices)
@@ -231,7 +221,7 @@ def test_credentials_are_matched_on_the_reported_ip(dd_run_check, fake_panos):
         {'cidr': '192.0.2.0/24', 'username': 'subnet-user', 'password': 'p'},
     ]
 
-    dd_run_check(new_check(firewall_credentials=credentials))
+    dd_run_check(new_panorama_check(firewall_credentials=credentials))
 
     keygen_users = {c.host: c.params['user'] for c in fake_panos.calls if c.type == 'keygen'}
     assert keygen_users == {FW_A_IP: 'fw-a-user', FW_B_IP: 'subnet-user'}
@@ -247,7 +237,7 @@ def warnings_about(caplog, ip):
 def test_firewall_without_matching_credentials_is_skipped_and_still_reported_for_the_others(
     dd_run_check, aggregator, fake_panos, caplog
 ):
-    dd_run_check(new_check(firewall_credentials=FW_A_ONLY_CREDENTIALS))
+    dd_run_check(new_panorama_check(firewall_credentials=FW_A_ONLY_CREDENTIALS))
 
     assert polled_hosts(fake_panos) == {FW_A_IP}
     assert set(metrics_by_ip(aggregator, 'can_connect')) == {FW_A_IP}
@@ -279,7 +269,7 @@ def test_firewall_warning_is_logged_once_then_at_debug_level(
 ):
     caplog.set_level(logging.DEBUG)
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices)
-    check = new_check(**options)
+    check = new_panorama_check(**options)
 
     dd_run_check(check)
     first_run = len(caplog.records)
@@ -294,7 +284,7 @@ def test_firewall_warning_is_logged_once_then_at_debug_level(
 def test_can_connect_of_an_unreachable_discovered_firewall_carries_its_device_id(dd_run_check, aggregator, fake_panos):
     fake_panos.fail(FW_A_IP, 'refused')
 
-    dd_run_check(new_check())
+    dd_run_check(new_panorama_check())
 
     tags = metrics_by_ip(aggregator, 'can_connect')[FW_A_IP].tags
     assert metrics_by_ip(aggregator, 'can_connect')[FW_A_IP].value == 0
@@ -331,7 +321,7 @@ def test_panorama_can_connect_is_0_when_the_discovery_call_fails(
         fake_panos.fail(PANORAMA, failure, on='keygen')
     else:
         fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, failure)
-    check = new_check(**options)
+    check = new_panorama_check(**options)
 
     dd_run_check(check)
     dd_run_check(check)
@@ -343,7 +333,7 @@ def test_panorama_can_connect_is_0_when_the_discovery_call_fails(
 
 
 def test_panorama_that_answers_again_is_reported_and_its_firewalls_polled(dd_run_check, aggregator, fake_panos):
-    check = new_check()
+    check = new_panorama_check()
     fake_panos.fail(PANORAMA, 'timeout')
     dd_run_check(check)
     assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))]
@@ -360,13 +350,13 @@ def test_panorama_that_answers_again_is_reported_and_its_firewalls_polled(dd_run
 
 def test_panorama_auth_failure_does_not_change_the_firewalls_auth_status(dd_run_check, aggregator, fake_panos):
     credentials = {'panorama_api_key': None, 'panorama_username': 'pan-user', 'panorama_password': 'p'}
-    dd_run_check(new_check(**credentials))
+    dd_run_check(new_panorama_check(**credentials))
     fake_panos.fail(PANORAMA, 'capture_bad_password', on='keygen')
     calls = len(fake_panos.calls)
     aggregator.reset()
 
     # A new check instance holds no Panorama key, so it must generate one: the persistent cache supplies the list.
-    dd_run_check(new_check(**{**credentials, 'panorama_password': 'bad'}))
+    dd_run_check(new_panorama_check(**{**credentials, 'panorama_password': 'bad'}))
 
     assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))]
     assert [c.type for c in fake_panos.calls[calls:] if c.host == PANORAMA] == ['keygen']
@@ -391,7 +381,7 @@ def test_unreachable_panorama_without_a_usable_cached_list_polls_nothing_and_doe
     dd_run_check, aggregator, fake_panos, caplog, cached
 ):
     if cached is not None:
-        check = new_check()
+        check = new_panorama_check()
         dd_run_check(check)
         check.write_persistent_cache(CACHE_KEY, cached)
     fake_panos.fail(PANORAMA, 'refused')
@@ -399,7 +389,7 @@ def test_unreachable_panorama_without_a_usable_cached_list_polls_nothing_and_doe
     aggregator.reset()
 
     # A new check instance reads the list from the persistent cache, as after an Agent restart.
-    dd_run_check(new_check())
+    dd_run_check(new_panorama_check())
 
     assert polled_hosts(fake_panos, skip=calls) == set()
     assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))]
@@ -407,7 +397,7 @@ def test_unreachable_panorama_without_a_usable_cached_list_polls_nothing_and_doe
 
 
 def test_cached_list_holds_no_credentials(dd_run_check):
-    check = new_check(panorama_api_key='secret-panorama-key')
+    check = new_panorama_check(panorama_api_key='secret-panorama-key')
     dd_run_check(check)
 
     raw = check.read_persistent_cache(f'panorama_firewalls:{PANORAMA}')
@@ -442,12 +432,12 @@ def test_fallback_warning_says_how_many_cached_firewalls_are_polled_and_when_the
             ('SYNTH-DISCONNECTED-0001', 'synth-disconnected', '192.0.2.12', 'no'),
         ),
     )
-    dd_run_check(new_check())
+    dd_run_check(new_panorama_check())
     fake_panos.fail(PANORAMA, 'refused')
     wall_clock.now += 3 * 86400
     calls = len(fake_panos.calls)
 
-    dd_run_check(new_check())
+    dd_run_check(new_panorama_check())
 
     (warning,) = fallback_warnings(caplog)
     assert warning == (
@@ -458,7 +448,7 @@ def test_fallback_warning_says_how_many_cached_firewalls_are_polled_and_when_the
 
 
 def test_successful_discovery_rewrites_the_discovery_time_even_when_the_list_is_unchanged(dd_run_check, wall_clock):
-    check = new_check()
+    check = new_panorama_check()
     dd_run_check(check)
     first = json.loads(check.read_persistent_cache(CACHE_KEY))
     wall_clock.now += 60

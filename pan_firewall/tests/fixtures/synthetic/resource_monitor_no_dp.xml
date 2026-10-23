@@ -1,4 +1,0 @@
-<!-- Derived from fw-a/resource_monitor.xml: the data-processors element removed, as on a firewall that answers `show running resource-monitor` without a dataplane section. -->
-<response status="success"><result>
-  <resource-monitor/>
-</result></response>

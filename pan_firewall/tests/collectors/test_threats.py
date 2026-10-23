@@ -19,6 +19,7 @@ from datadog_checks.pan_firewall.errors import PanosApiError
 from ..common import FIXTURES, FW_A_IP, FW_A_SERIAL, SYNTHETIC
 from ..fixture_map import (
     BACKWARD_NEWEST_SEQNO,
+    NO_CAPTURE,
     PROBE_SEQNO_FIRST_PAGE,
     PROBE_SEQNO_PAGE_SIZE,
     PROBE_SEQNO_PAGES,
@@ -28,7 +29,7 @@ from ..fixture_map import (
 )
 from ..helpers import THREAT_LOG_ACT as ACT
 from ..helpers import THREAT_LOG_CLOCK_BACK as CLOCK_BACK
-from ..helpers import FakeClock, log_page, make_instance, new_check, series
+from ..helpers import FakeClock, log_page, new_check, series
 
 pytestmark = pytest.mark.unit
 
@@ -38,7 +39,6 @@ PROBE_LAST_SEQNO = 7691899338913582049
 PROBE_ENTRIES = (PROBE_SEQNO_PAGES - 1) * PROBE_SEQNO_PAGE_SIZE + 5
 EMPTY = (SYNTHETIC / 'threat_log_empty.xml').read_bytes()
 NEWEST_AFTER_RESET = SYNTHETIC / 'threat_log_newest_after_reset.xml'
-NO_CAPTURE = (200, b'<response status="error" code="400"><msg><line>no capture</line></msg></response>')
 # What fw-a's `threat_log_5m.xml` holds: (severity, action, subtype, vsys) -> logs. 39 logs.
 CAPTURE_COUNTS = {
     ('medium', 'drop', 'spyware', 'vsys1'): 22,
@@ -120,7 +120,11 @@ def test_threat_logs_of_the_capture_are_counted_by_tag(firewall):
     assert series(firewall.collect()) == expected(CAPTURE_COUNTS)
 
 
-def test_first_run_reads_the_newest_log_and_counts_nothing(firewall):
+@pytest.mark.parametrize('cached', [None, 'not json'], ids=['no-watermark', 'unreadable-watermark'])
+def test_first_run_reads_the_newest_log_and_counts_nothing(firewall, cached):
+    if cached is not None:
+        firewall.cache[CACHE_KEY] = cached
+
     assert firewall.collect() == []
 
     assert firewall.submits() == [{'type': 'log', 'log-type': 'threat', 'dir': 'backward', 'nlogs': '1'}]
@@ -138,14 +142,6 @@ def test_first_run_on_a_firewall_without_threat_logs_tries_again_next_run(firewa
     assert firewall.watermark == BACKWARD_NEWEST_SEQNO
 
 
-def test_unreadable_cache_is_a_first_run(firewall):
-    firewall.cache[CACHE_KEY] = 'not json'
-
-    firewall.collect()
-
-    assert firewall.watermark == BACKWARD_NEWEST_SEQNO
-
-
 def answer_probe_pages(firewall, failing_page=None):
     """Answer the real `probe-seqno` pages, each from the newest `seqno` of the page before.
 
@@ -157,7 +153,7 @@ def answer_probe_pages(firewall, failing_page=None):
     for page in range(PROBE_SEQNO_FIRST_PAGE, PROBE_SEQNO_FIRST_PAGE + PROBE_SEQNO_PAGES):
         path = FIXTURES / 'probe-seqno' / f'seq_0_p{page}.xml'
         queries.append(query)
-        firewall.fake.answer_log(FW_A_IP, 'forward', query, NO_CAPTURE if page == failing_page else path)
+        firewall.fake.answer_log(FW_A_IP, 'forward', query, (200, NO_CAPTURE) if page == failing_page else path)
         entries = list(ET.parse(path).getroot().iterfind('result/log/logs/entry'))
         for entry in entries:
             counts[tuple(entry.findtext(f) for f in ('severity', 'action', 'subtype', 'vsys'))] += 1
@@ -328,7 +324,7 @@ def test_a_pass_that_counted_logs_runs_no_reset_check(firewall):
     assert firewall.backward_jobs() == []
 
 
-def test_threat_watermark_survives_a_restart_through_the_persistent_cache(dd_run_check, aggregator, fake_panos):
+def test_threat_watermark_survives_a_restart_through_the_persistent_cache(dd_run_check, fake_panos):
     # The first run has no watermark and starts one below fw-a's capture; a new check instance (an Agent restart)
     # then counts the capture from the persisted watermark, and persists the newest log it read.
     first = THREAT_LOG_FIRST_SEQNO['fw-a']
@@ -340,9 +336,3 @@ def test_threat_watermark_survives_a_restart_through_the_persistent_cache(dd_run
     dd_run_check(check)
 
     assert json.loads(check.read_persistent_cache(CACHE_KEY))['seqno'] == FW_A_LAST_SEQNO
-
-
-def test_collect_threats_false_makes_no_log_call(dd_run_check, fake_panos):
-    dd_run_check(new_check(make_instance(collect_threats=False)))
-
-    assert [c for c in fake_panos.calls if c.type == 'log'] == []
