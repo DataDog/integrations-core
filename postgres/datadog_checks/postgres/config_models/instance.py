@@ -336,6 +336,14 @@ class Relations(BaseModel):
     schemas: Optional[tuple[str, ...]] = None
 
 
+class RemoteQueries(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    timeout_ms: Optional[int] = Field(None, ge=1)
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
@@ -399,6 +407,7 @@ class InstanceConfig(BaseModel):
     query_samples: Optional[QuerySamples] = None
     query_timeout: Optional[int] = None
     relations: Optional[tuple[Union[str, Relations], ...]] = None
+    remote_queries: Optional[RemoteQueries] = None
     reported_hostname: Optional[str] = None
     service: Optional[str] = None
     ssl: Optional[str] = None
