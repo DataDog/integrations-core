@@ -86,6 +86,20 @@ def test_all_command_shows_both_stdout_and_stderr_on_failure(ddev):
     assert "stderr output" in result.output
 
 
+def test_all_command_shows_failure_output_verbatim(ddev):
+    """Captured output is plain text; parsing it as Rich markup drops bracketed text such as TOML table names."""
+
+    def fake_run(cmd, **kwargs):
+        if "config" in cmd:
+            return completed_process(returncode=1, stdout="Add it to the `[overrides.is-integration]` table.")
+        return completed_process(returncode=0, stdout="ok")
+
+    with patch("subprocess.run", side_effect=fake_run):
+        result = ddev("validate", "all", *FAST_ORCHESTRATOR_OPTS)
+
+    assert "Add it to the `[overrides.is-integration]` table." in result.output
+
+
 def test_all_command_passes_target_to_per_integration_validations(ddev):
     captured: dict[str, list[str]] = {}
 
