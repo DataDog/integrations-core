@@ -15,6 +15,9 @@
 # Permissions granted:
 #   - issues: write        - Mark issues stale and close them
 #   - pull_requests: write - Mark pull requests stale and close them
+#   - actions: write       - Manage the action's skip-state cache (listed/deleted through
+#                             the actions cache API with the workflow token; without it
+#                             every run restores the first run's state)
 #
 # Usage in workflows:
 #   - uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
@@ -34,5 +37,6 @@ claim_pattern:
   repository: DataDog/integrations-core
 
 permissions:
+  actions: write
   issues: write
   pull_requests: write
