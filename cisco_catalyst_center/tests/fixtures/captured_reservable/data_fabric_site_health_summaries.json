@@ -1,0 +1,44 @@
+{
+  "response": [
+    {
+      "infraGoodHealthDeviceCount": 0,
+      "fairHealthDeviceCount": 0,
+      "infraTotalHealthDeviceCount": 0,
+      "infraFairHealthDeviceCount": 0,
+      "id": "b8ef1c34-99eb-4eae-95a7-31f77c7c870e",
+      "goodHealthDeviceCount": 0,
+      "associatedL3VnCount": 0,
+      "controlPlaneTotalHealthDeviceCount": 0,
+      "goodHealthPercentage": 0.0,
+      "poorHealthDeviceCount": 0,
+      "connectivityPoorHealthDeviceCount": 0,
+      "totalDeviceCount": 0,
+      "controlPlaneGoodHealthPercentage": 0.0,
+      "associatedL2VnCount": 0,
+      "controlPlaneGoodHealthDeviceCount": 0,
+      "controlPlaneFairHealthDeviceCount": 0,
+      "totalHealthDeviceCount": 0,
+      "infraGoodHealthPercentage": 0.0,
+      "name": "Global/Datadog Lab/Lab Building/Floor 1",
+      "controlPlanePoorHealthDeviceCount": 0,
+      "connectivityTotalHealthDeviceCount": 0,
+      "connectivityGoodHealthDeviceCount": 0,
+      "infraPoorHealthDeviceCount": 0,
+      "connectivityGoodHealthPercentage": 0.0,
+      "connectivityFairHealthDeviceCount": 0,
+      "networkProtocol": "LISP_PUBSUB"
+    }
+  ],
+  "page": {
+    "limit": 100,
+    "offset": 1,
+    "count": 1,
+    "sortBy": [
+      {
+        "name": "id",
+        "order": "asc"
+      }
+    ]
+  },
+  "version": "1.0.0"
+}

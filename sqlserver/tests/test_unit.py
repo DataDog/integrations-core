@@ -33,20 +33,27 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_VERSION,
 )
 from datadog_checks.sqlserver.database_metrics import SqlserverDatabaseStatsMetrics
+from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, SqlFractionMetric, SqlSimpleMetric
-from datadog_checks.sqlserver.schemas import KEY_PREFIX, KEY_PREFIX_PRE_2017, SQLServerSchemaCollector
+from datadog_checks.sqlserver.schemas import (
+    KEY_PREFIX,
+    KEY_PREFIX_PRE_2017,
+    SQLServerObjectCollector,
+    SQLServerSchemaCollector,
+)
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
+    DRIVER_CONFIG_DIR,
     Database,
     construct_use_statement,
     extract_sql_comments_and_procedure_name,
     get_unixodbc_sysconfig,
-    is_non_empty_file,
     needs_comment_recovery,
     parse_sqlserver_major_version,
     parse_sqlserver_year,
     set_default_driver_conf,
 )
+from datadog_checks.sqlserver.views import SQLServerViewCollector
 
 from .common import CHECK_NAME, DOCKER_SERVER, assert_metrics
 from .utils import not_windows_ci, windows_ci
@@ -141,12 +148,134 @@ def test_execute_query_raw_collects_multiple_result_sets(instance_docker):
     assert cursor.fetchall.call_count == 2
 
 
-def create_schema_collector(static_info_cache: dict | None = None) -> SQLServerSchemaCollector:
+def create_schema_collector(
+    static_info_cache: dict | None = None, schema_config: dict | None = None
+) -> SQLServerSchemaCollector:
     check = mock.Mock()
-    check._config.schema_config = {}
+    check._config.schema_config = schema_config or {}
     check.log = mock.Mock()
     check.static_info_cache = static_info_cache or {}
     return SQLServerSchemaCollector(check)
+
+
+@pytest.mark.parametrize(
+    ('collector_class', 'expected_limit'),
+    [
+        (SQLServerSchemaCollector, 'SELECT TOP 25'),
+        (SQLServerViewCollector, 'SELECT TOP 7'),
+    ],
+)
+def test_schema_collectors_apply_their_own_object_limit(
+    collector_class: type[SQLServerObjectCollector], expected_limit: str
+):
+    check = create_schema_collector(schema_config={'max_tables': 25, 'max_views': 7})._check
+    collector = collector_class(check)
+    collector._is_2016_or_earlier = False
+
+    assert expected_limit in collector._get_query()
+
+
+@pytest.mark.parametrize(
+    ('collector_class', 'expected_metric'),
+    [
+        (SQLServerSchemaCollector, 'dd.sqlserver.schema.tables_count'),
+        (SQLServerViewCollector, 'dd.sqlserver.schema.views_count'),
+    ],
+)
+def test_schema_collectors_report_separate_object_counts(
+    collector_class: type[SQLServerObjectCollector], expected_metric: str
+):
+    check = mock.Mock()
+    check._config.schema_config = {}
+    check.log = mock.Mock()
+    check.static_info_cache = {}
+    check.dbms = 'sqlserver'
+    check.tags = []
+    check.reported_hostname = 'test-host'
+    collector = collector_class(check)
+    collector._get_databases = mock.Mock(return_value=[])
+
+    collector.collect_schemas()
+
+    assert expected_metric in {call.args[0] for call in check.gauge.call_args_list}
+
+
+def create_metadata_job(instance: dict, schema_config: dict) -> SqlserverMetadata:
+    check = SQLServer(CHECK_NAME, {}, [{**instance, 'dbm': True, 'collect_schemas': schema_config}])
+    return check.sql_metadata
+
+
+@pytest.mark.parametrize(
+    ('schema_config', 'expected_kinds'),
+    [
+        ({}, []),
+        ({'collect_views': True}, []),
+        ({'enabled': True}, ['sqlserver_databases']),
+        ({'enabled': True, 'collect_views': True}, ['sqlserver_databases', 'sqlserver_views']),
+    ],
+)
+def test_schema_collection_builds_collectors_from_config(
+    instance_docker: dict, schema_config: dict, expected_kinds: list[str]
+):
+    metadata = create_metadata_job(instance_docker, schema_config)
+
+    assert [collector.kind for collector in metadata._schema_collectors] == expected_kinds
+
+
+@pytest.mark.parametrize('failing_index', [0, 1])
+def test_schema_collection_failure_does_not_skip_other_collectors(instance_docker: dict, failing_index: int):
+    metadata = create_metadata_job(instance_docker, {'enabled': True, 'collect_views': True})
+    for collector in metadata._schema_collectors:
+        collector.collect_schemas = mock.Mock()
+    metadata._schema_collectors[failing_index].collect_schemas.side_effect = RuntimeError("collection failed")
+
+    metadata.collect_schemas()
+
+    for collector in metadata._schema_collectors:
+        collector.collect_schemas.assert_called_once_with()
+
+
+def test_schema_collection_stops_when_cancelled_between_collectors(instance_docker: dict):
+    metadata = create_metadata_job(instance_docker, {'enabled': True, 'collect_views': True})
+    tables, views = metadata._schema_collectors
+
+    def cancel_during_collection():
+        metadata.cancel()
+        raise RuntimeError("connection closed")
+
+    tables.collect_schemas = mock.Mock(side_effect=cancel_during_collection)
+    views.collect_schemas = mock.Mock()
+
+    with pytest.raises(Exception, match="Job loop cancelled"):
+        metadata.collect_schemas()
+
+    views.collect_schemas.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    'engine_edition, major_version, compatibility_level, expected_legacy',
+    [
+        (ENGINE_EDITION_STANDARD, 13, 130, False),
+        (ENGINE_EDITION_STANDARD, 0, 130, False),
+        (ENGINE_EDITION_STANDARD, 15, 120, True),
+        (ENGINE_EDITION_SQL_DATABASE, 12, 130, False),
+        (ENGINE_EDITION_STANDARD, 15, None, True),
+    ],
+)
+def test_view_collector_legacy_query_detection(
+    engine_edition: int, major_version: int, compatibility_level: int | None, expected_legacy: bool
+):
+    check = create_schema_collector(
+        {
+            STATIC_INFO_ENGINE_EDITION: engine_edition,
+            STATIC_INFO_MAJOR_VERSION: major_version,
+        }
+    )._check
+    collector = SQLServerViewCollector(check)
+    if compatibility_level is not None:
+        collector._database_compatibility_levels = {"datadog_test": compatibility_level}
+
+    assert collector._should_use_legacy_schema_query("datadog_test") is expected_legacy
 
 
 def test_schema_collector_records_database_compatibility_levels() -> None:
@@ -449,6 +578,86 @@ def test_schema_collector_does_not_open_pre_2017_connection_for_modern_query() -
     assert collector._check.connection.get_managed_cursor.call_args_list == [mock.call(KEY_PREFIX)]
     assert collector._pre_2017_cursor is None
     assert mapped_row["schemas"][0]["tables"][0]["columns"] == [{"name": "id"}]
+
+
+def test_view_collector_maps_view_metadata():
+    check = create_schema_collector()._check
+    collector = SQLServerViewCollector(check)
+    collector._is_2016_or_earlier = False
+    database = {"name": "datadog_test", "id": "1", "collation": "SQL_Latin1_General_CP1_CI_AS", "owner": "dbo"}
+    row = {
+        "schema_name": "test_schema",
+        "schema_id": 1,
+        "owner_name": "dbo",
+        "view_name": "city_names",
+        "view_id": 201,
+        "create_date": "2026-08-19T10:15:00",
+        "modify_date": "2026-08-19T11:30:00",
+        "definition": "CREATE VIEW test_schema.city_names AS SELECT id, name FROM test_schema.cities",
+        "columns": ('[{"name":"id","data_type":"int","nullable":false,"ordinal_position":"1"}]'),
+    }
+
+    mapped_row = collector._map_row(database, row)
+
+    assert mapped_row["schemas"][0]["tables"] == []
+    assert mapped_row["schemas"][0]["views"] == [
+        {
+            "id": "201",
+            "name": "city_names",
+            "create_date": "2026-08-19T10:15:00",
+            "modify_date": "2026-08-19T11:30:00",
+            "definition": "CREATE VIEW test_schema.city_names AS SELECT id, name FROM test_schema.cities",
+            "columns": [
+                {
+                    "name": "id",
+                    "data_type": "int",
+                    "nullable": False,
+                    "ordinal_position": "1",
+                }
+            ],
+        }
+    ]
+
+
+def test_view_collector_legacy_query_fetches_only_columns():
+    check = create_schema_collector()._check
+    collector = SQLServerViewCollector(check)
+    collector._is_2016_or_earlier = True
+    detail_cursor = mock.Mock()
+    detail_cursor.fetchall_dict.return_value = [
+        {
+            "name": "id",
+            "data_type": "int",
+            "nullable": False,
+            "ordinal_position": "1",
+        }
+    ]
+    collector._pre_2017_cursor = detail_cursor
+    database = {"name": "datadog_test", "id": "1", "collation": "SQL_Latin1_General_CP1_CI_AS", "owner": "dbo"}
+    row = {
+        "schema_name": "test_schema",
+        "schema_id": 1,
+        "owner_name": "dbo",
+        "view_name": "city_names",
+        "view_id": 201,
+        "create_date": "2026-08-19T10:15:00",
+        "modify_date": "2026-08-19T11:30:00",
+        "definition": None,
+    }
+
+    mapped_row = collector._map_row(database, row)
+
+    detail_cursor.execute.assert_called_once()
+    assert "201" in detail_cursor.execute.call_args.args[0]
+    assert mapped_row["schemas"][0]["views"][0]["definition"] is None
+    assert mapped_row["schemas"][0]["views"][0]["columns"] == [
+        {
+            "name": "id",
+            "data_type": "int",
+            "nullable": False,
+            "ordinal_position": "1",
+        }
+    ]
 
 
 def test_get_cursor(instance_docker):
@@ -1209,49 +1418,84 @@ def _mock_database_list_azure():
     return fetchall_results, mock_cursor
 
 
-def test_set_default_driver_conf():
-    # Docker Agent with ODBCSYSINI env var
-    # The only case where we set ODBCSYSINI to the the default odbcinst.ini folder
-    with EnvVars({'DOCKER_DD_AGENT': 'true'}, ignore=['ODBCSYSINI']):
-        set_default_driver_conf()
-        assert os.environ['ODBCSYSINI'].endswith(os.path.join('data', 'driver_config'))
+@pytest.fixture
+def odbc_dirs(tmp_path):
+    """Patch the Agent embedded/etc and embedded/share/odbc lookups to empty temp directories."""
+    sysconfig = tmp_path / 'embedded' / 'etc'
+    agent_default = tmp_path / 'embedded' / 'share' / 'odbc'
+    sysconfig.mkdir(parents=True)
+    agent_default.mkdir(parents=True)
+    with mock.patch('datadog_checks.sqlserver.utils.get_unixodbc_sysconfig', return_value=str(sysconfig)):
+        with mock.patch(
+            'datadog_checks.sqlserver.utils.get_agent_default_driver_config', return_value=str(agent_default)
+        ):
+            with mock.patch('datadog_checks.base.utils.platform.Platform.is_linux', return_value=True):
+                yield sysconfig, agent_default
 
-    with mock.patch("datadog_checks.base.utils.platform.Platform.is_linux", return_value=True):
-        with EnvVars({}, ignore=['ODBCSYSINI']):
-            set_default_driver_conf()
-            assert 'ODBCSYSINI' in os.environ, "ODBCSYSINI should be set"
-            assert os.environ['ODBCSYSINI'].endswith(os.path.join('data', 'driver_config'))
 
-    # `set_default_driver_conf` have no effect on the cases below
+def test_set_default_driver_conf_keeps_preset_odbcsysini():
     with EnvVars({'ODBCSYSINI': 'ABC', 'DOCKER_DD_AGENT': 'true'}):
         set_default_driver_conf()
         assert os.environ['ODBCSYSINI'] == 'ABC'
 
     with mock.patch("datadog_checks.base.utils.platform.Platform.is_linux", return_value=True):
-        with EnvVars({}):
-            set_default_driver_conf()
-            assert 'ODBCSYSINI' in os.environ
-            assert os.environ['ODBCSYSINI'].endswith(os.path.join('tests', 'odbc'))
-
         with EnvVars({'ODBCSYSINI': 'ABC'}):
             set_default_driver_conf()
             assert os.environ['ODBCSYSINI'] == 'ABC'
 
+        # hatch.toml presets ODBCSYSINI for the test environment.
+        with EnvVars({}):
+            set_default_driver_conf()
+            assert os.environ['ODBCSYSINI'].endswith(os.path.join('tests', 'odbc'))
+
+
+def test_set_default_driver_conf_prefers_embedded_etc(odbc_dirs):
+    sysconfig, agent_default = odbc_dirs
+    (sysconfig / 'odbcinst.ini').write_text('[FreeTDS]\nDriver=/opt/datadog-agent/embedded/lib/libtdsodbc.so\n')
+    (agent_default / 'odbcinst.ini').write_text('[FreeTDS]\nDriver=/unused\n')
+
+    with EnvVars({}, ignore=['ODBCSYSINI', 'TDSVER']):
+        set_default_driver_conf()
+        assert os.environ['ODBCSYSINI'] == str(sysconfig)
+        assert os.environ['TDSVER'] == '8.0'
+
+
+def test_set_default_driver_conf_falls_back_to_agent_default(odbc_dirs):
+    _, agent_default = odbc_dirs
+    (agent_default / 'odbcinst.ini').write_text('[FreeTDS]\nDriver=/opt/datadog-agent/embedded/lib/libtdsodbc.so\n')
+
+    with EnvVars({}, ignore=['ODBCSYSINI']):
+        set_default_driver_conf()
+        assert os.environ['ODBCSYSINI'] == str(agent_default)
+
+
+def test_set_default_driver_conf_falls_back_to_bundled_ini(odbc_dirs):
+    with EnvVars({}, ignore=['ODBCSYSINI']):
+        set_default_driver_conf()
+        assert os.environ['ODBCSYSINI'] == DRIVER_CONFIG_DIR
+
+
+def test_set_default_driver_conf_docker_skips_tdsver(odbc_dirs):
+    _, agent_default = odbc_dirs
+    (agent_default / 'odbcinst.ini').write_text('[FreeTDS]\nDriver=/opt/datadog-agent/embedded/lib/libtdsodbc.so\n')
+
+    with EnvVars({'DOCKER_DD_AGENT': 'true'}, ignore=['ODBCSYSINI', 'TDSVER']):
+        set_default_driver_conf()
+        assert os.environ['ODBCSYSINI'] == str(agent_default)
+        assert 'TDSVER' not in os.environ
+
 
 @not_windows_ci
-def test_set_default_driver_conf_linux():
-    odbc_config_dir = os.path.expanduser('~')
-    with mock.patch("datadog_checks.sqlserver.utils.get_unixodbc_sysconfig", return_value=odbc_config_dir):
-        with EnvVars({}, ignore=['ODBCSYSINI']):
-            odbc_inst = os.path.join(odbc_config_dir, "odbcinst.ini")
-            odbc_ini = os.path.join(odbc_config_dir, "odbc.ini")
-            for file in [odbc_inst, odbc_ini]:
-                if os.path.exists(file):
-                    os.remove(file)
-            with open(odbc_ini, "x") as file:
-                file.write("dummy-content")
-            set_default_driver_conf()
-            assert is_non_empty_file(odbc_inst), "odbc_inst should have been created when a non empty odbc.ini exists"
+def test_set_default_driver_conf_registers_drivers_next_to_odbc_ini(odbc_dirs):
+    sysconfig, agent_default = odbc_dirs
+    default_ini = '[FreeTDS]\nDriver=/opt/datadog-agent/embedded/lib/libtdsodbc.so\n'
+    (agent_default / 'odbcinst.ini').write_text(default_ini)
+    (sysconfig / 'odbc.ini').write_text('[mydsn]\nDriver=FreeTDS\n')
+
+    with EnvVars({}, ignore=['ODBCSYSINI']):
+        set_default_driver_conf()
+        assert os.environ['ODBCSYSINI'] == str(sysconfig)
+        assert (sysconfig / 'odbcinst.ini').read_text() == default_ini
 
 
 @windows_ci

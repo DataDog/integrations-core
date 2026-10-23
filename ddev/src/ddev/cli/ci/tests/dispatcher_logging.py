@@ -47,9 +47,14 @@ def _stringify(value: Any) -> str:
     return stringify(redact_value(value))
 
 
+def ci_pipeline_id() -> str | None:
+    """The ID of the GitHub Actions workflow running the Dispatcher, which a rerun keeps."""
+    return os.getenv('GITHUB_RUN_ID') or None
+
+
 def ci_attributes() -> dict[str, str]:
     """Describe the GitHub Actions workflow running the Dispatcher."""
-    run_id = os.getenv('GITHUB_RUN_ID')
+    run_id = ci_pipeline_id()
     if not run_id:
         return {}
 
@@ -73,7 +78,7 @@ def ci_attributes() -> dict[str, str]:
 
 def get_dispatcher_logs_url(*, terminal: bool = False, now: datetime | None = None) -> str | None:
     """Link to this run's logs, freezing the time window for terminal reports."""
-    run_id = os.getenv('GITHUB_RUN_ID')
+    run_id = ci_pipeline_id()
     if not run_id:
         return None
     from_ts: int | str

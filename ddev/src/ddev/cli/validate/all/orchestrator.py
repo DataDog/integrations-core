@@ -104,7 +104,15 @@ VALIDATIONS: dict[str, ValidationConfig] = {
         description="Validate OpenMetrics integrations disable the metric limit",
     ),
     "package": ValidationConfig(
-        description="Validate Python package metadata and naming",
+        description="Validate Python package metadata, naming, and wheel contents",
+    ),
+    "pr-description": ValidationConfig(
+        description="Validate the pull request checklist and visible description length",
+        repo_wide=True,
+        failure_guidance=(
+            "**To fix:** Tick every item in `.github/PULL_REQUEST_TEMPLATE.md` and keep the description under "
+            "3,000 visible characters."
+        ),
     ),
     "qa-label": ValidationConfig(
         description="Validate the pull request declares whether it needs QA for the next Agent release",

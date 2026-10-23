@@ -8,7 +8,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Dict, Iterable
 
 from ddev.integration.core import Integration
-from ddev.repo.constants import CONFIG_DIRECTORY, FULL_NAMES
+from ddev.repo.constants import CONFIG_DIRECTORY, DEFAULT_GITHUB_OWNER, FULL_NAMES
 from ddev.utils.fs import Path
 from ddev.utils.git import Comparison, GitRepository
 
@@ -91,12 +91,16 @@ class Repository:
         self.__integrations = IntegrationRegistry(self)
 
     def __derive_full_name(self) -> str:
+        # A known alias names the canonical repository regardless of how it was cloned. The remote
+        # only identifies checkouts ddev has no alias for, such as `--here` or custom `[repos]` keys.
+        if self.__name in FULL_NAMES:
+            return FULL_NAMES[self.__name]
         remote_url = _read_origin_url_from_git_config(self.__path)
         if remote_url:
             parsed = parse_remote_url(remote_url)
             if parsed is not None:
                 return parsed
-        return FULL_NAMES.get(self.__name, self.__name)
+        return self.__name
 
     @property
     def name(self) -> str:
@@ -123,6 +127,12 @@ class Repository:
         from ddev.repo.config import RepositoryConfig
 
         return RepositoryConfig(self.path / CONFIG_DIRECTORY / 'config.toml')
+
+    @cached_property
+    def github_owner(self) -> str:
+        # The origin remote is not consulted: it may be a personal fork while GitHub operations
+        # still target the upstream repository.
+        return self.config.get('/github/owner', DEFAULT_GITHUB_OWNER)
 
     @cached_property
     def agent_requirements(self) -> Path:

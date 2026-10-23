@@ -1,0 +1,65 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "263e8c06-360c-46b6-90f5-303c56b58562",
+  "app_id": "nifi",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor Apache NiFi data flow health, JVM performance, queue backpressure, and processor status.",
+    "title": "Apache NiFi",
+    "media": [],
+    "classifier_tags": [
+      "Category::Orchestration",
+      "Category::Log Collection",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Offering::Integration",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Events",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 74883045,
+      "source_type_name": "NiFi",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "metrics": {
+        "prefix": "nifi.",
+        "check": "nifi.can_connect",
+        "metadata_path": "metadata.csv"
+      },
+      "process_signatures": [
+        "org.apache.nifi.NiFi"
+      ]
+    },
+    "dashboards": {
+      "NiFi Overview": "assets/dashboards/nifi_overview.json"
+    },
+    "monitors": {
+      "NiFi API is unreachable": "assets/monitors/nifi_api_unreachable.json",
+      "NiFi cluster is degraded": "assets/monitors/nifi_cluster_degraded.json",
+      "NiFi processors are in an invalid state": "assets/monitors/processors_invalid_state.json"
+    },
+    "logs": {
+      "source": "nifi"
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

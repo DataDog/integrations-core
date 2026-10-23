@@ -8,17 +8,18 @@ from __future__ import annotations
 import json
 import logging
 import subprocess
-from collections import Counter
 from functools import partial
 from typing import TYPE_CHECKING, Any
 from unittest.mock import ANY
 
+import httpx
 import pytest
 
 from ddev.cli.application import Application
 from ddev.cli.ci.dispatch_run import resolve_run
-from ddev.cli.ci.dispatch_tests import attach_datadog_log_handler
+from ddev.cli.ci.dispatch_tests import RUN_OUTCOME_METRICS, attach_datadog_log_handler
 from ddev.cli.ci.tests.batching.exceptions import PlanningError
+from ddev.cli.ci.tests.changes import ChangeResolutionError
 from ddev.cli.ci.tests.dispatcher_attributes import metric_tag_mapping
 from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
 from ddev.cli.ci.tests.dispatcher_logging import dispatcher_datadog_formatter
@@ -26,10 +27,19 @@ from ddev.monitoring import MonitoringRuntime
 from ddev.monitoring.datadog import DatadogLogHandler
 from ddev.monitoring.datadog_metrics import DatadogMetricsSink
 from ddev.utils.git import ChangedFile, ChangeType, GitCommit
-from ddev.utils.github_async.models import PullRequest, WorkflowRun
+from ddev.utils.github_async import async_github_client
+from ddev.utils.github_async.models import PullRequest, PullRequestState
+from ddev.utils.rate_limiting import BudgetGovernor
 from tests.cli.ci.helpers import HEAD_SHA, PR_NUMBER, decode_job_list, listed_pull_request, mock_job_result, pulls_page
 from tests.cli.ci.tests.helpers import make_batch, make_job
+from tests.helpers.clock import FakeClock, advance_clock_on_sleep
 from tests.helpers.datadog import FakeLogSubmitter, FakeMetricsSubmitter
+from tests.helpers.github_async import (
+    make_pull_request,
+    make_pull_request_ref,
+    make_pull_request_repo,
+    make_workflow_run,
+)
 from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink, projector_for
 
 if TYPE_CHECKING:
@@ -62,7 +72,7 @@ PARENTS = {f'{MERGE_SHA}^1': 'current-master-sha-ccc', f'{MERGE_SHA}^2': HEAD_SH
 
 
 def pull_request(
-    state: str = 'open',
+    state: PullRequestState = PullRequestState.OPEN,
     number: int = PR_NUMBER,
     head_sha: str = HEAD_SHA,
     base_branch: str = 'a-target-branch',
@@ -70,17 +80,15 @@ def pull_request(
     head_repo: str | None = 'DataDog/integrations-core',
     merge_commit_sha: str | None = MERGE_SHA,
 ) -> PullRequest:
-    return PullRequest(
+    return make_pull_request(
         number=number,
-        html_url=f'https://github.com/DataDog/integrations-core/pull/{number}',
         state=state,
-        head={
-            'ref': 'hs/a-branch',
-            'sha': head_sha,
-            'repo': {'full_name': head_repo} if head_repo is not None else None,
-        },
-        base={'ref': base_branch, 'sha': base_sha},
-        changed_files=1,
+        head=make_pull_request_ref(
+            ref='hs/a-branch',
+            sha=head_sha,
+            repo=None if head_repo is None else make_pull_request_repo(full_name=head_repo),
+        ),
+        base=make_pull_request_ref(ref=base_branch, sha=base_sha, repo=None),
         merge_commit_sha=merge_commit_sha,
     )
 
@@ -326,7 +334,7 @@ def test_a_numbered_pull_request_must_match_its_base_constraint(ddev, github, pl
 
 def test_a_pull_request_that_is_no_longer_open_dispatches_nothing(ddev, github, planned):
     """Nothing to test at that point, and no open pull request to report to either."""
-    github.mock_response('get_pull_request', pull_request(state='closed'))
+    github.mock_response('get_pull_request', pull_request(state=PullRequestState.CLOSED))
 
     result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER))
 
@@ -537,9 +545,10 @@ def test_metric_delivery_follows_the_dispatch_mode(
             'agent_integrations.test_dispatcher.probe',
             'agent_integrations.test_dispatcher.runs.count',
         } <= {series['metric'] for series in submitter.series}
-        assert [series['metric'] for series in submitter.distributions] == [
-            'agent_integrations.test_dispatcher.run.duration'
-        ]
+        assert {series['metric'] for series in submitter.distributions} == {
+            'agent_integrations.test_dispatcher.operation.duration',
+            'agent_integrations.test_dispatcher.run.duration',
+        }
 
 
 def test_early_exit_disables_monitoring(
@@ -613,6 +622,77 @@ def test_resolved_identity_reaches_planning_even_when_there_are_no_targets(
         'team': 'agent-integrations',
         'component': 'planner',
     }
+
+
+@pytest.mark.parametrize(
+    ('environ', 'pipeline_id'),
+    [
+        ({'GITHUB_RUN_ID': '111', 'GITHUB_RUN_ATTEMPT': '1'}, '111'),
+        ({'GITHUB_RUN_ID': '111', 'GITHUB_RUN_ATTEMPT': '2'}, '111'),
+        ({'GITHUB_RUN_ID': '222', 'GITHUB_RUN_ATTEMPT': '1'}, '222'),
+        ({}, None),
+    ],
+    ids=['first-attempt', 'rerun', 'another-workflow', 'outside-github-actions'],
+)
+def test_metrics_are_tagged_with_the_workflow_running_the_dispatcher(
+    ddev, fake_async_github, resolved_changes, mocker, monkeypatch, environ: dict[str, str], pipeline_id: str | None
+):
+    """A rerun reports as the same emitter, since it cannot run concurrently with the attempt it replaces."""
+    for variable in ('GITHUB_RUN_ID', 'GITHUB_RUN_ATTEMPT'):
+        monkeypatch.delenv(variable, raising=False)
+    for variable, value in environ.items():
+        monkeypatch.setenv(variable, value)
+    sink = recording_runtime(mocker)
+
+    def observe_plan(app: Application, *, monitor: ComponentMonitor, **kwargs: Any) -> list[TestBatch]:
+        monitor.metrics.count('plan')
+        return []
+
+    mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', observe_plan)
+
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--tags', 'ci_pipeline_id:forged')
+
+    assert result.exit_code == 0, result.output
+    assert sink.records_named('plan')
+    assert {record.tags.get('ci.pipeline.id') for record in sink.records} == {pipeline_id}
+
+
+def test_pull_request_resolution_meters_the_rate_limit_wait_it_sits_out(ddev, resolved_changes, mocker, monkeypatch):
+    """Resolution builds its own client before the Dispatcher's exists, so its waits need their own wiring."""
+    clock = FakeClock()
+    advance_clock_on_sleep(clock, monkeypatch)
+    monkeypatch.setattr('ddev.utils.rate_limiting.monotonic', clock)
+    monkeypatch.setattr('ddev.utils.github_async.defaults.BudgetGovernor', partial(BudgetGovernor, now=clock))
+    responses = [
+        httpx.Response(429, headers={'retry-after': '30'}),
+        httpx.Response(200, json=pull_request().model_dump(mode='json')),
+    ]
+    transport = httpx.MockTransport(lambda request: responses.pop(0))
+    mocker.patch('ddev.utils.github_async.async_github_client', partial(async_github_client, transport=transport))
+    mocker.patch.dict('os.environ', {'DD_GITHUB_TOKEN': 'ghp_test'})
+    mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', return_value=[])
+    monkeypatch.setenv('GITHUB_RUN_ID', '12345')
+    handler = RecordingJsonHandler()
+    sink = recording_runtime(mocker, handler)
+
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER))
+
+    assert result.exit_code == 0, result.output
+    # The 30 seconds GitHub asked for, plus the governor's one-second buffer.
+    assert [(record.value, dict(record.tags)) for record in sink.records_named('throttle.wait.duration')] == [
+        (31, {'ci.pipeline.id': '12345', 'dispatcher.reason': 'secondary_limit', 'dispatcher.rate_limiter': 'github'})
+    ]
+    # Resolution's own requests are observed too, under the same pipeline ID.
+    assert [
+        (record.value, record.tags.get('ci.pipeline.id')) for record in sink.records_named('requests.throttled')
+    ] == [
+        (1, '12345'),
+        (0, '12345'),
+    ]
+    assert [event['event'] for event in handler.events if event['level'] == 'warning'] == [
+        'GitHub secondary rate limit hit: asked to retry after 30s, pausing all requests for 31s',
+        'rate limit secondary pause: waiting 31.0s before the next request',
+    ]
 
 
 @pytest.mark.usefixtures('resolved_changes')
@@ -811,7 +891,7 @@ def test_command_metrics_project_centralized_tags(
     )
 
     def observe_plan(app: Application, *, monitor: ComponentMonitor, **kwargs: Any) -> list[TestBatch]:
-        monitor.metrics.count('planned', environment='py3.13', integration='ntp', blob='unselected')
+        monitor.metrics.count('planned', environment='py3.13', target='ntp', blob='unselected')
         return []
 
     mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', observe_plan)
@@ -823,7 +903,7 @@ def test_command_metrics_project_centralized_tags(
     assert series['type'] == 1
     tags = series['tags']
     assert 'dispatcher.batch.job.environment:py3.13' in tags
-    assert 'dispatcher.batch.job.integration:ntp' in tags
+    assert 'dispatcher.batch.job.target:ntp' in tags
     assert 'git.repository.id_v2:github.com/datadog/integrations-core' in tags
     assert 'dispatcher.context:pr' in tags
     assert not any('pr.number' in tag for tag in tags)
@@ -852,6 +932,15 @@ def fast_dispatcher_config(mocker: MockerFixture) -> None:
     mocker.patch.object(DispatcherConfig, 'from_repo_config', return_value=config)
 
 
+def run_outcome_counts(sink) -> dict[str, float]:
+    return {record.name: record.value for record in sink.records if record.name in RUN_OUTCOME_METRICS.values()}
+
+
+def only_outcome(metric: str) -> dict[str, int]:
+    """Every run outcome counter, with only *metric* counting the run."""
+    return {name: int(name == metric) for name in RUN_OUTCOME_METRICS.values()}
+
+
 @pytest.mark.parametrize('global_options', [(), ('-qq',)], ids=['normal', 'quiet'])
 def test_an_executed_run_reports_its_execution_metrics(
     ddev: CliRunner,
@@ -872,27 +961,8 @@ def test_an_executed_run_reports_its_execution_metrics(
     result = ddev(*global_options, 'ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--output-dir', str(tmp_path))
 
     assert result.exit_code == 0, result.output
-    cohort = Counter(record.name for record in sink.records if not record.name.startswith('operations.'))
-    assert cohort == Counter(
-        {
-            'batches.count': 1,
-            'batch.jobs.count': 1,
-            'jobs.count': 1,
-            'batch.duration': 1,
-            'artifacts.download.duration': 1,
-            'runs.count': 1,
-            'runs.failed': 1,
-            'runs.planning_failed': 1,
-            'runs.cancelled': 1,
-            'runs.timed_out': 1,
-            'runs.no_op': 1,
-            'run.duration': 1,
-            'jobs.incomplete': 1,
-            'batches.failed': 1,
-            'jobs.failed': 1,
-            'jobs.skipped': 1,
-        }
-    )
+    assert run_outcome_counts(sink) == only_outcome('runs.passed')
+    assert sink.records_named('run.duration')[0].tags['dispatcher.outcome'] == 'passed'
     runs = sink.records_named('runs.count')[0]
     assert runs.tags['dispatcher.context'] == 'pr'
     assert runs.tags['git.repository.id_v2'] == 'github.com/datadog/integrations-core'
@@ -900,13 +970,19 @@ def test_an_executed_run_reports_its_execution_metrics(
     # Run-level records carry no job dimensions: a mixed batch must not split them per integration.
     assert not any(tag.startswith('dispatcher.batch.job') for tag in runs.tags)
     counted = sink.records_named('jobs.count')[0]
-    assert counted.tags['dispatcher.batch.job.integration'] == 'ntp'
+    assert counted.tags['dispatcher.batch.job.target'] == 'ntp'
     assert counted.tags['dispatcher.batch.job.environment'] == 'py3.13'
     operation_failures = {}
+    operation_components = {}
     for record in sink.records_named('operations.failed'):
         operation = record.tags['dispatcher.operation']
         operation_failures[operation] = operation_failures.get(operation, 0) + record.value
+    for record in sink.records_named('operations.count'):
+        operation_components[record.tags['dispatcher.operation']] = record.tags['dispatcher.component']
     assert operation_failures == {
+        'resolve_run': 0,
+        'resolve_changes': 0,
+        'build_plan': 0,
         'dispatch_batch': 0,
         'fetch_workflow': 0,
         'refresh_jobs': 0,
@@ -914,8 +990,22 @@ def test_an_executed_run_reports_its_execution_metrics(
         'gather_batch_results': 0,
         'publish_report': 0,
     }
+    assert operation_components == {
+        'resolve_run': 'resolution',
+        'resolve_changes': 'resolution',
+        'build_plan': 'planner',
+        'dispatch_batch': 'test-runner',
+        'fetch_workflow': 'test-runner',
+        'refresh_jobs': 'test-runner',
+        'collect_artifacts': 'test-runner',
+        'gather_batch_results': 'test-gatherer',
+        'publish_report': 'run-reporter',
+    }
     attempted = {record.tags['dispatcher.operation'] for record in sink.records_named('operations.count')}
     assert attempted == {
+        'resolve_run',
+        'resolve_changes',
+        'build_plan',
         'dispatch_batch',
         'fetch_workflow',
         'refresh_jobs',
@@ -925,7 +1015,7 @@ def test_an_executed_run_reports_its_execution_metrics(
     }
 
 
-def test_a_failed_run_reports_failure_metrics_and_counts_itself_once(
+def test_a_run_with_failed_tests_is_counted_as_a_test_failure(
     ddev: CliRunner,
     github: FakeAsyncGitHubClient,
     planned: MagicMock,
@@ -938,13 +1028,7 @@ def test_a_failed_run_reports_failure_metrics_and_counts_itself_once(
     mock_job_result(github, job, 'failure')
     github.mock_response(
         'get_workflow_run',
-        WorkflowRun(
-            id=123,
-            name='test-batch',
-            status='completed',
-            conclusion='failure',
-            html_url='https://github.com/DataDog/integrations-core/actions/runs/123',
-        ),
+        make_workflow_run(name='test-batch', conclusion='failure'),
     )
     sink = recording_runtime(mocker)
     fast_dispatcher_config(mocker)
@@ -955,13 +1039,47 @@ def test_a_failed_run_reports_failure_metrics_and_counts_itself_once(
     assert result.exit_code == 1, result.output
     assert 'Dispatcher tests failed.' in result.output
     assert [record.value for record in sink.records_named('runs.count')] == [1]
-    assert [record.value for record in sink.records_named('runs.failed')] == [1]
+    assert run_outcome_counts(sink) == only_outcome('runs.tests_failed')
     assert [record.value for record in sink.records_named('batches.failed')] == [1]
     failed = sink.records_named('jobs.failed')
     assert [record.value for record in failed] == [1]
-    assert failed[0].tags['dispatcher.batch.job.integration'] == 'ntp'
+    assert failed[0].tags['dispatcher.batch.job.target'] == 'ntp'
     assert [record.value for record in sink.records_named('jobs.incomplete')] == [0]
     assert [record.value for record in sink.records_named('jobs.skipped')] == [0]
+
+
+def test_cancelled_run_output(
+    ddev: CliRunner,
+    github: FakeAsyncGitHubClient,
+    planned: MagicMock,
+    mocker: MockerFixture,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    step_summary: Path,
+):
+    """A run that observes its batches cancelled ends cancelled, not failed."""
+    job = planned.return_value[0].job_list[0]
+    mock_job_result(github, job, 'cancelled')
+    github.mock_response(
+        'get_workflow_run',
+        make_workflow_run(name='test-batch', conclusion='cancelled'),
+    )
+    sink = recording_runtime(mocker)
+    fast_dispatcher_config(mocker)
+    monkeypatch.setattr('ddev.utils.github_async.AsyncGitHubClient', lambda token, rate_limiter=None, **kwargs: github)
+
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--output-dir', str(tmp_path))
+
+    assert result.exit_code == 1, result.output
+    assert 'Dispatcher tests were cancelled.' in result.output
+    assert 'Dispatcher tests failed.' not in result.output
+    assert [record.value for record in sink.records_named('runs.count')] == [1]
+    assert run_outcome_counts(sink) == only_outcome('runs.cancelled')
+    assert [record.value for record in sink.records_named('batches.cancelled')] == [1]
+    assert [record.value for record in sink.records_named('batches.failed')] == [0]
+    assert [record.value for record in sink.records_named('jobs.cancelled')] == [1]
+    assert [record.value for record in sink.records_named('jobs.failed')] == [0]
+    assert [record.value for record in sink.records_named('jobs.incomplete')] == [0]
 
 
 def test_a_run_whose_final_report_fails_is_counted_failed_without_invented_job_outcomes(
@@ -985,7 +1103,7 @@ def test_a_run_whose_final_report_fails_is_counted_failed_without_invented_job_o
 
     assert result.exit_code == 1, result.output
     assert [record.value for record in sink.records_named('runs.count')] == [1]
-    assert [record.value for record in sink.records_named('runs.failed')] == [1]
+    assert run_outcome_counts(sink) == only_outcome('runs.failed')
     assert [record.value for record in sink.records_named('batches.failed')] == [0]
     assert [record.value for record in sink.records_named('jobs.failed')] == [0]
     assert [record.value for record in sink.records_named('jobs.skipped')] == [0]
@@ -1004,12 +1122,19 @@ def test_a_planning_failure_is_reported_as_its_own_outcome(
     assert result.exit_code == 1, result.output
     assert 'Could not build a test plan: the plan is not valid' in result.output
     assert [record.value for record in sink.records_named('runs.count')] == [1]
-    assert [record.value for record in sink.records_named('runs.planning_failed')] == [1]
-    assert [record.value for record in sink.records_named('runs.failed')] == [1]
-    assert [record.value for record in sink.records_named('runs.no_op')] == [0]
+    assert run_outcome_counts(sink) == only_outcome('runs.planning_failed')
     # No batch ran, so no batch outcome exists; there is no aggregate zero to invent.
     assert sink.records_named('batches.failed') == []
     assert not any(record.name.startswith('jobs.') for record in sink.records)
+    [failure] = [
+        record
+        for record in sink.records_named('operations.failed')
+        if record.tags['dispatcher.operation'] == 'build_plan'
+    ]
+    assert (failure.value, failure.tags['dispatcher.operation']) == (1, 'build_plan')
+    [operation_error] = [event for event in handler.events if event['level'] == 'error' and 'operation' in event]
+    assert operation_error['operation'] == 'build_plan'
+    assert operation_error['event'] == 'Operation build_plan failed: the plan is not valid'
     [finished] = [event for event in handler.events if event['event'] == 'Dispatcher run finished']
     assert finished['outcome'] == 'planning-failed'
     assert finished['level'] == 'error'
@@ -1075,6 +1200,34 @@ def test_an_interrupt_during_resolution_is_counted_as_cancellation(
     assert [record.value for record in sink.records_named('runs.count')] == [1]
     assert [record.value for record in sink.records_named('runs.cancelled')] == [1]
     assert [record.value for record in sink.records_named('runs.failed')] == [0]
+    # The interrupted step settles nothing.
+    assert {record.tags['dispatcher.operation'] for record in sink.records_named('operations.count')} == {'resolve_run'}
+
+
+def test_a_change_comparison_failure_fails_its_operation(
+    ddev: CliRunner, fake_async_github: FakeAsyncGitHubClient, mocker: MockerFixture, tmp_path: Path
+):
+    mocker.patch('ddev.utils.git.GitRepository.latest_commit', return_value=GitCommit('a-sha'))
+    mocker.patch(
+        'ddev.cli.ci.tests.changes.changes_in_commit',
+        side_effect=ChangeResolutionError('Could not compare a-sha with its parent'),
+    )
+    handler = RecordingJsonHandler()
+    sink = recording_runtime(mocker, handler=handler)
+
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--output-dir', str(tmp_path))
+
+    assert result.exit_code == 1, result.output
+    assert 'Could not compare a-sha with its parent' in result.output
+    [failure] = [
+        record
+        for record in sink.records_named('operations.failed')
+        if record.tags['dispatcher.operation'] == 'resolve_changes'
+    ]
+    assert (failure.value, failure.tags['dispatcher.operation']) == (1, 'resolve_changes')
+    [operation_error] = [event for event in handler.events if event['level'] == 'error' and 'operation' in event]
+    assert operation_error['operation'] == 'resolve_changes'
+    assert operation_error['event'] == 'Operation resolve_changes failed: Could not compare a-sha with its parent'
 
 
 @pytest.mark.parametrize('from_manifest', [False, True], ids=['resolution', 'manifest'])
@@ -1082,9 +1235,11 @@ def test_a_resolution_failure_keeps_unresolved_metric_dimensions(
     ddev: CliRunner,
     fake_async_github: FakeAsyncGitHubClient,
     mocker: MockerFixture,
+    monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
     from_manifest: bool,
 ):
+    monkeypatch.setenv('GITHUB_RUN_ID', '12345')
     mocker.patch('ddev.cli.ci.dispatch_run.MERGE_COMMIT_REFRESH_SECONDS', 0.0)
     fake_async_github.mock_response('get_pull_request', pull_request(merge_commit_sha=None))
     handler = RecordingJsonHandler()
@@ -1115,6 +1270,7 @@ def test_a_resolution_failure_keeps_unresolved_metric_dimensions(
         'git.branch': 'unresolved',
         'dispatcher.base_branch': 'unresolved',
         'dispatcher.run.is_fork': 'unresolved',
+        'ci.pipeline.id': '12345',
         'dispatcher.component': 'dispatcher',
     }
     [started] = [event for event in handler.events if event['event'] == 'Dispatcher invocation started']
@@ -1349,6 +1505,8 @@ def test_a_manifest_the_checkout_does_not_match_is_refused_before_planning(
 ):
     """Phase two refuses a different tree or a merge built from a different PR head."""
     merge_checkout(mocker, checked_out, parents)
+    handler = RecordingJsonHandler()
+    sink = recording_runtime(mocker, handler=handler)
     (tmp_path / 'run.json').write_text(json.dumps(PULL_REQUEST_RUN_MANIFEST), encoding='utf-8')
 
     result = ddev('ci', 'dispatch-tests', '--run-manifest', str(tmp_path / 'run.json'), '--dry-run')
@@ -1356,6 +1514,11 @@ def test_a_manifest_the_checkout_does_not_match_is_refused_before_planning(
     assert result.exit_code == 1
     assert message in result.output
     planned.assert_not_called()
+    [failure] = sink.records_named('operations.failed')
+    assert (failure.value, failure.tags['dispatcher.operation']) == (1, 'resolve_changes')
+    [operation_error] = [event for event in handler.events if event['level'] == 'error' and 'operation' in event]
+    assert operation_error['operation'] == 'resolve_changes'
+    assert message in operation_error['event']
 
 
 def test_an_all_target_run_round_trips_through_its_recorded_scope(

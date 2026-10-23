@@ -62,7 +62,6 @@ class KafkaCheck(AgentCheck):
         self._data_streams_enabled = self.config._data_streams_enabled
         self._max_timestamps = int(self.instance.get('timestamp_history_size', MAX_TIMESTAMPS))
         self.client = KafkaClient(self.config, self.log)
-        self.topic_partition_cache = {}
         self.broker_timestamps = None
         self.broker_timestamps_last_save = 0
         self.check_initializations.insert(0, self.config.validate_config)
@@ -289,10 +288,17 @@ class KafkaCheck(AgentCheck):
 
     def _get_consumer_groups(self):
         # Get all consumer groups to monitor
-        if self.config._monitor_unlisted_consumer_groups or self.config._consumer_groups_compiled_regex:
+        if self.config._monitor_unlisted_consumer_groups:
             return [grp for grp in self.client.list_consumer_groups() if grp]
-        else:
-            return self.config._consumer_groups
+
+        if self.config._consumer_groups_compiled_regex:
+            return [
+                grp
+                for grp in self.client.list_consumer_groups()
+                if grp and self.config._consumer_groups_compiled_group_regex.fullmatch(grp)
+            ]
+
+        return self.config._consumer_groups
 
     def _get_offsets_for_groups(self, consumer_groups):
         groups = []
@@ -312,10 +318,14 @@ class KafkaCheck(AgentCheck):
 
             for topic, partitions in topics.items():
                 if not partitions:
-                    if topic in self.topic_partition_cache:
-                        partitions = self.topic_partition_cache[topic]
-                    else:
-                        partitions = self.topic_partition_cache[topic] = self.client.get_partitions_for_topic(topic)
+                    partitions = self.client.get_partitions_for_topic(topic)
+                    if not partitions:
+                        self.log.warning(
+                            "Topic %s configured for consumer group %s has no partitions in the cluster, skipping it",
+                            topic,
+                            consumer_group,
+                        )
+                        continue
                 topic_partitions = [(topic, p) for p in partitions]
 
                 groups.append((consumer_group, topic_partitions))
@@ -532,22 +542,15 @@ class KafkaCheck(AgentCheck):
             self.log.debug('No partitions to check for offsets')
             return {}, ""
 
-        dd_consumer_group = "datadog-agent"
+        cluster_id = self.client.get_cluster_id()
 
-        self.client.open_consumer(dd_consumer_group)
-        try:
-            cluster_id, _ = self.client.consumer_get_cluster_id_and_list_topics(dd_consumer_group)
+        self.log.debug('Querying %s highwater offsets', len(topic_partitions_to_check))
 
-            self.log.debug('Querying %s highwater offsets', len(topic_partitions_to_check))
-
-            result = {}
-            for topic, partition, offset in self.client.get_partition_offsets(
-                partitions=topic_partitions_to_check, offset=HIGH_WATERMARK
-            ):
-                result[(topic, partition)] = offset
-        finally:
-            if self.config._close_admin_client:
-                self.client.close_consumer()
+        result = {}
+        for topic, partition, offset in self.client.get_partition_offsets(
+            partitions=topic_partitions_to_check, offset=HIGH_WATERMARK
+        ):
+            result[(topic, partition)] = offset
 
         self.log.debug('Got %s highwater offsets', len(result))
         return result, cluster_id

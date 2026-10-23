@@ -320,7 +320,8 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$model,$token_type,$organization_name,$user_name,$email} by {workspace_name,model}"
+                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$model,$token_type,$organization_name,$user_name,$email} by {workspace_name,model}",
+                      "aggregator": "sum"
                     }
                   ],
                   "response_format": "scalar",
@@ -360,7 +361,8 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$model,$token_type,$organization_name,$user_name,$email} by {token_type,model_name,workspace_name}"
+                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$model,$token_type,$organization_name,$user_name,$email} by {token_type,model_name,workspace_name}",
+                      "aggregator": "sum"
                     }
                   ],
                   "response_format": "scalar",
@@ -397,7 +399,8 @@
                     {
                       "data_source": "cloud_cost",
                       "name": "query1",
-                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$model,$token_type,$organization_name,$user_name,$email} by {model,workspace_name}"
+                      "query": "sum:all.cost{providername:Anthropic,$workspace_name,$model,$token_type,$organization_name,$user_name,$email} by {model,workspace_name}",
+                      "aggregator": "sum"
                     }
                   ],
                   "response_format": "scalar",

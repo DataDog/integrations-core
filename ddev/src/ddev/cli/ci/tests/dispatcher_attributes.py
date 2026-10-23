@@ -11,10 +11,14 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 from ddev.cli.ci.tests.messages import BatchFinished, BatchJob, BatchProgressUpdate, TestBatch
+from ddev.cli.ci.tests.status import has_run, job_status
 from ddev.event_bus.orchestrator import BaseMessage
+from ddev.utils.github_async.models.workflow import WorkflowJobStatus
 
 if TYPE_CHECKING:
     from ddev.cli.ci.dispatch_run import ResolvedRun
+    from ddev.monitoring import Metrics
+    from ddev.utils.github_async.models import WorkflowJob
 
 
 DEFAULT_TEAM = 'agent-integrations'
@@ -46,6 +50,12 @@ class AttributeSpec:
 # Compact operational context helps read a line; payloads and run-wide identity do not, so they
 # stay console-hidden and remain available in the structured event.
 ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
+    # Logs take the pipeline ID from `ci_attributes`, with the rest of the workflow's identity.
+    'ci_pipeline_id': AttributeSpec(
+        'ci.pipeline.id',
+        log_tag=False,
+        metric_tag=True,
+    ),
     'repo': AttributeSpec(
         'git.repository.id_v2',
         metric_tag=True,
@@ -101,6 +111,18 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
         'dispatcher.operation',
         console_tag=True,
         metric_tag=True,
+    ),
+    'operation_result': AttributeSpec(
+        'dispatcher.operation.result',
+        console_tag=True,
+        metric_tag=True,
+    ),
+    'operation_duration_seconds': AttributeSpec(
+        'dispatcher.operation.duration_seconds',
+    ),
+    # One entry per cause, each with its own fields, so causes of one operation never overwrite each other.
+    'operation_failures': AttributeSpec(
+        'dispatcher.operation.failures',
     ),
     'outcome': AttributeSpec(
         'dispatcher.outcome',
@@ -195,8 +217,24 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
         console_tag=True,
         metric_tag=True,
     ),
-    'integration': AttributeSpec(
-        'dispatcher.batch.job.integration',
+    # Off the console line: the finished-job message already states the outcome and duration.
+    'job_conclusion': AttributeSpec(
+        'dispatcher.batch.job.conclusion',
+    ),
+    'job_id': AttributeSpec(
+        'dispatcher.batch.job.id',
+    ),
+    'job_url': AttributeSpec(
+        'dispatcher.batch.job.url',
+    ),
+    'job_duration_seconds': AttributeSpec(
+        'dispatcher.batch.job.duration_seconds',
+    ),
+    'job_queue_duration_seconds': AttributeSpec(
+        'dispatcher.batch.job.queue_duration_seconds',
+    ),
+    'target': AttributeSpec(
+        'dispatcher.batch.job.target',
         console_tag=True,
         test_tag=True,
         metric_tag=True,
@@ -308,6 +346,15 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
         console_tag=True,
         metric_tag=True,
     ),
+    'status_code': AttributeSpec(
+        'http.status_code',
+    ),
+    'rate_limit_resource': AttributeSpec(
+        'github.rate_limit.resource',
+    ),
+    'rate_limiter': AttributeSpec(
+        'dispatcher.rate_limiter',
+    ),
     'error': AttributeSpec(
         'error.message',
         console_tag=True,
@@ -320,6 +367,7 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
 PROTECTED_RUN_FIELDS = frozenset(
     {
         'team',
+        'ci_pipeline_id',
         'repo',
         'repository_url',
         'head_branch',
@@ -411,6 +459,27 @@ def metric_tag_mapping(fields: Mapping[str, Any]) -> dict[str, str]:
     return _policy_mapping(fields, lambda spec: spec.metric_tag, _stringify_value)
 
 
+# The GitHub request metrics are sampled per attempt, so every run, batch or job dimension the
+# context holds would multiply their series. They carry only these, whatever else is bound.
+GITHUB_METRIC_FIELDS = frozenset({'ci_pipeline_id', 'status_code', 'reason', 'rate_limit_resource', 'rate_limiter'})
+
+
+def github_metric_tag_mapping(fields: Mapping[str, Any]) -> dict[str, str]:
+    """Render the few dimensions the GitHub request and throttle metrics carry."""
+    return attribute_mapping({name: value for name, value in fields.items() if name in GITHUB_METRIC_FIELDS})
+
+
+def github_metrics(metrics: Metrics) -> Metrics:
+    """A view of *metrics* for the GitHub request and throttle family.
+
+    Only the pipeline ID may come from the context. Every other allowlisted dimension describes one
+    emission, so a caller's `--tags` or an enclosing scope must not supply it.
+    """
+    return metrics.with_tag_projector(github_metric_tag_mapping).bind(
+        **dict.fromkeys(GITHUB_METRIC_FIELDS - PROTECTED_RUN_FIELDS)
+    )
+
+
 def tag_fields(tags: Sequence[str]) -> dict[str, str]:
     fields: dict[str, str] = {}
     for tag in tags:
@@ -464,10 +533,14 @@ def batch_fields(batch: TestBatch) -> dict[str, Any]:
     }
 
 
-def job_fields(job: BatchJob) -> dict[str, Any]:
+def job_fields(job: BatchJob, workflow_job: WorkflowJob | None = None) -> dict[str, Any]:
+    """The planned job's fields, plus the attempt's GitHub identity, outcome and timing when `workflow_job` is given.
+
+    Timing is omitted when the job never ran on a runner or GitHub's timestamps are unusable.
+    """
     fields: dict[str, Any] = {
         'job': job.name,
-        'integration': job.target,
+        'target': job.target,
         'platform': job.platform,
         'python_version': job.python_version,
         'unit_tests': job.unit_tests,
@@ -478,6 +551,18 @@ def job_fields(job: BatchJob) -> dict[str, Any]:
         fields['environment'] = job.environment
     if job.agent_image is not None:
         fields['agent_image'] = job.agent_image
+    if workflow_job is not None:
+        if workflow_job.status is WorkflowJobStatus.COMPLETED:
+            fields['job_status'] = job_status(workflow_job).value
+        if workflow_job.conclusion is not None:
+            fields['job_conclusion'] = workflow_job.conclusion
+        fields['job_id'] = workflow_job.id
+        if workflow_job.html_url is not None:
+            fields['job_url'] = workflow_job.html_url
+        if (queue_duration := workflow_job.queue_duration_seconds) is not None:
+            fields['job_queue_duration_seconds'] = queue_duration
+        if has_run(workflow_job) and (duration := workflow_job.duration_seconds) is not None:
+            fields['job_duration_seconds'] = duration
     return fields
 
 
