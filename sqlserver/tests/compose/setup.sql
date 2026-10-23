@@ -293,6 +293,101 @@ GRANT EXECUTE on nullCharTest to bob;
 GRANT EXECUTE on nullCharTest to fred;
 GO
 
+-- Column statistics: a database where the datadog user can run the column statistics procedure but can't read
+-- the table. Data is deterministic so tests can assert exact statistics.
+CREATE DATABASE datadog_test_column_stats;
+GO
+USE datadog_test_column_stats;
+GO
+CREATE TABLE dbo.orders (
+    id INT NOT NULL PRIMARY KEY,
+    customer_id INT NOT NULL,
+    status VARCHAR(20) NULL,
+    note NVARCHAR(100) NULL
+);
+CREATE INDEX ix_customer ON dbo.orders (customer_id);
+CREATE INDEX ix_status ON dbo.orders (status);
+INSERT INTO dbo.orders (id, customer_id, status, note)
+SELECT n,
+    CASE WHEN n % 10 < 3 THEN 7 ELSE n % 500 END,
+    CASE WHEN n % 10 = 0 THEN NULL WHEN n % 10 IN (1, 2) THEN 'pending' ELSE 'shipped' END,
+    REPLICATE(N'x', 20 + n % 21)
+FROM (SELECT TOP 10000 ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS n FROM sys.all_objects a CROSS JOIN sys.all_objects b) numbers;
+CREATE STATISTICS st_note ON dbo.orders (note);
+UPDATE STATISTICS dbo.orders WITH FULLSCAN;
+GO
+CREATE USER datadog FOR LOGIN datadog;
+GO
+CREATE SCHEMA datadog AUTHORIZATION dbo;
+GO
+CREATE OR ALTER PROCEDURE datadog.column_statistics @max_tables INT = 500
+WITH EXECUTE AS OWNER
+AS
+BEGIN
+    SET NOCOUNT ON;
+    -- One statistics object per column: unfiltered, on the column as its leading key, the most fully sampled.
+    SELECT object_id, stats_id, column_id, [rows], rows_sampled, last_updated, CAST(NULL AS FLOAT) AS avg_width
+    INTO #stats
+    FROM (
+        SELECT st.object_id, st.stats_id, sc.column_id, sp.[rows], sp.rows_sampled, sp.last_updated,
+            ROW_NUMBER() OVER (PARTITION BY st.object_id, sc.column_id ORDER BY sp.rows_sampled DESC, sp.last_updated DESC) AS rn
+        FROM (SELECT TOP (@max_tables) object_id FROM sys.tables WHERE is_ms_shipped = 0 ORDER BY SCHEMA_NAME(schema_id), name) t
+        JOIN sys.stats st ON st.object_id = t.object_id AND st.has_filter = 0
+        JOIN sys.stats_columns sc ON sc.object_id = st.object_id AND sc.stats_id = st.stats_id AND sc.stats_column_id = 1
+        CROSS APPLY sys.dm_db_stats_properties(st.object_id, st.stats_id) sp
+        WHERE sp.[rows] > 0
+    ) s
+    WHERE rn = 1;
+
+    -- The average width is only in the density vector, which only DBCC SHOW_STATISTICS returns.
+    CREATE TABLE #density (all_density FLOAT, average_length FLOAT, columns NVARCHAR(4000));
+    DECLARE @object_id INT, @stats_id INT, @column_name SYSNAME, @sql NVARCHAR(MAX);
+    DECLARE stats_cursor CURSOR LOCAL FAST_FORWARD FOR SELECT object_id, stats_id, COL_NAME(object_id, column_id) FROM #stats;
+    OPEN stats_cursor;
+    FETCH NEXT FROM stats_cursor INTO @object_id, @stats_id, @column_name;
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        TRUNCATE TABLE #density;
+        SET @sql = N'DBCC SHOW_STATISTICS (N''' + REPLACE(QUOTENAME(OBJECT_SCHEMA_NAME(@object_id)) + N'.' + QUOTENAME(OBJECT_NAME(@object_id)), N'''', N'''''')
+            + N''', N''' + REPLACE((SELECT name FROM sys.stats WHERE object_id = @object_id AND stats_id = @stats_id), N'''', N'''''')
+            + N''') WITH DENSITY_VECTOR, NO_INFOMSGS';
+        INSERT INTO #density EXEC (@sql);
+        UPDATE #stats SET avg_width = (SELECT TOP 1 average_length FROM #density WHERE columns = @column_name)
+        WHERE object_id = @object_id AND stats_id = @stats_id;
+        FETCH NEXT FROM stats_cursor INTO @object_id, @stats_id, @column_name;
+    END;
+    CLOSE stats_cursor;
+    DEALLOCATE stats_cursor;
+
+    -- Only counts and frequencies are returned, never the histogram's values. A common value is one with more rows
+    -- than the column's average per value, as Postgres keeps in most_common_freqs.
+    SELECT OBJECT_SCHEMA_NAME(s.object_id) AS schema_name, OBJECT_NAME(s.object_id) AS table_name,
+        COL_NAME(s.object_id, s.column_id) AS column_name,
+        DATEDIFF(SECOND, s.last_updated, SYSDATETIME()) AS stats_age,
+        h.n_distinct, h.null_rows / s.[rows] AS null_frac, s.avg_width, m.most_common_freqs
+    FROM #stats s
+    CROSS APPLY (
+        SELECT SUM(CASE WHEN hh.range_high_key IS NULL THEN 0 ELSE 1 + hh.distinct_range_rows END) AS n_distinct,
+            SUM(CASE WHEN hh.range_high_key IS NULL THEN CAST(hh.equal_rows AS FLOAT) ELSE 0 END) AS null_rows
+        FROM sys.dm_db_stats_histogram(s.object_id, s.stats_id) hh
+    ) h
+    OUTER APPLY (
+        SELECT STRING_AGG(f.freq, ',') WITHIN GROUP (ORDER BY f.equal_rows DESC) AS most_common_freqs
+        FROM (
+            SELECT hh.equal_rows, CONVERT(VARCHAR(32), CAST(hh.equal_rows AS FLOAT) / s.[rows], 3) AS freq
+            FROM sys.dm_db_stats_histogram(s.object_id, s.stats_id) hh
+            WHERE hh.range_high_key IS NOT NULL AND h.n_distinct > 0
+                AND hh.equal_rows > (s.[rows] - h.null_rows) / h.n_distinct
+        ) f
+    ) m
+    ORDER BY schema_name, table_name, column_name;
+END;
+GO
+GRANT EXECUTE ON datadog.column_statistics TO datadog;
+GO
+USE master;
+GO
+
 -- create an offline database to have an unavailable database to test with
 CREATE DATABASE unavailable_db;
 GO
