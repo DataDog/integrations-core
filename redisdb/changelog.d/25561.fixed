@@ -1,0 +1,1 @@
+Skip `redis.persist.percent` and `redis.expires.percent` for databases with no keys instead of failing the check with `ZeroDivisionError`.
