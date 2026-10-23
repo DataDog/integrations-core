@@ -66,3 +66,18 @@ Values in cells are the payload `dbm_type` / `kind` discriminators.
 | `read_/write_persistent_cache` | clickhouse | Checkpoints (µs): `query_metrics_last_checkpoint_microseconds`, `query_errors_last_checkpoint_microseconds`, `query_completions_last_checkpoint_microseconds`, `async_insert_flush_log_last_checkpoint_microseconds`, plus `<key>_node_checkpoints` (JSON) |
 | `get_hostname` | mysql / sqlserver / mongo | mysql: `agent_hostname:` tag; sqlserver: reported hostname fallback; mongo: replica set local-node hostname |
 | `get_version` | mongo | `agent_version` / `ddagentversion` in instance, schema, samples, slow-op, query-metrics payloads |
+## 6. Inherited from `AgentCheck` / `DatabaseCheck`
+These run for every DBM integration regardless of integration code.
+| FFI call | Trigger | Frequency | Details |
+|---|---|---|---|
+| `datadog_agent.get_config` | Module import of `checks/base.py` | Once per process | `integration_tracing`, `integration_tracing_futures`, `integration_profiling` |
+| `datadog_agent.get_config` | Logging init | Once per process | `log_level` |
+| `datadog_agent.get_hostname` | `AgentCheck.__init__` | Once per check instance | Sets deprecated `self.hostname` |
+| `datadog_agent.get_config` | `load_configuration_models` → `security_config` | First run | `integration_trusted_providers`, `integration_ignore_untrusted_file_params`, `integration_file_paths_allowlist`, `integration_security_excluded_checks` |
+| `datadog_agent.tracemalloc_enabled` (+ `get_config` for tracemalloc include/exclude) | `run()` and `DBMAsyncJob` loop → `should_profile_memory()` | Every run / job iteration | Memory profiling gate |
+| `datadog_agent.get_config` | `set_metadata` → `is_metadata_collection_enabled()` | Per `set_metadata` call | `enable_metadata_collection` |
+| `datadog_agent.log` | `AgentLogHandler` | Per log record | All `self.log.*` output |
+| `datadog_agent.get_hostname` / `get_version` | `DatabaseCheck.agent_hostname` / `agent_version` | Cached after first access | Used in DBM payloads |
+| `aggregator.submit_metric` (`gauge`) | `run()` debug metrics | Per run, when `debug_metrics.metric_contexts` is enabled | Metric limiter context counts |
+
+Available on the base class but not reached by any DBM integration: `emit_agent_telemetry` (genresources), `send_log`, `set_external_tags`, `report_issue`, `resolve_issue`, `get_config('logs_enabled')`, `get_config('proxy')`.
