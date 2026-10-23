@@ -1,0 +1,55 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "40d251a6-a42d-42e2-8d06-75f7aac35dc7",
+  "app_id": "mailgun",
+  "owner": "saas-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Cloud based email service that helps developers send, track, and receive emails",
+    "title": "Mailgun",
+    "media": [],
+    "classifier_tags": [
+      "Category::Log Collection",
+      "Category::Metrics",
+      "Offering::Integration"
+    ],
+    "resources": [
+      {
+        "resource_type": "blog",
+        "url": "https://www.datadoghq.com/blog/email-performance-integrations/"
+      }
+    ]
+  },
+  "assets": {
+    "dashboards": {
+      "mailgun": "assets/dashboards/mailgun_overview.json"
+    },
+    "integration": {
+      "auto_install": true,
+      "source_type_name": "Mailgun",
+      "configuration": {},
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "mailgun.",
+        "check": "mailgun.emails.accepted.total",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "source_type_id": 623
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

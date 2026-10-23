@@ -1,0 +1,68 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "API key",
+          "help": "Private API key for your Mailgun account.",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "supported_connection_methods": [
+    {
+      "name": "Mailgun API",
+      "regional": {
+        "region_setting": {
+          "key": "region",
+          "label": "Region",
+          "help": "The region in which the domain was created.",
+          "editable": true,
+          "required": true,
+          "dropdown": {
+            "options": [
+              {
+                "value": "US",
+                "label": "US"
+              },
+              {
+                "value": "EU",
+                "label": "EU"
+              }
+            ]
+          }
+        },
+        "region_base_urls": {
+          "US": "https://api.mailgun.net",
+          "EU": "https://api.eu.mailgun.net"
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "domain",
+      "label": "Domain",
+      "help": "The name of your emailing domain, for example my_domain.mailgun.org.",
+      "editable": true,
+      "required": true,
+      "text": {}
+    },
+    {
+      "key": "custom_tags",
+      "label": "Tags",
+      "editable": true,
+      "required": false,
+      "tags": {}
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "mailgun-metrics" },
+    { "dataflow_id": "mailgun-logs" }
+  ]
+}
