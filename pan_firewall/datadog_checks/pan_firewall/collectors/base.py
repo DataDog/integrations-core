@@ -49,14 +49,15 @@ class Watermark:
 @dataclass
 class ThreatJob:
     """A threat log job and what its pass has gathered: `baseline` (first run: newest log), `forward` (logs above
-    `base_seqno`, page after page) or `reset` (newest log, to detect a `seqno` reset)."""
+    `base_seqno`, page after page; `base_seqno` moves to the newest log read as each page ends) or `reset` (newest
+    log, to detect a `seqno` reset)."""
 
     purpose: Literal['baseline', 'forward', 'reset']
     base_seqno: int = 0
     page_size: int = 1
-    skip: int = 0
     job_id: str | None = None
     page_entries: int = 0
+    pages_read: int = 0  # full pages already read by this pass, across runs
     newest_seqno: int | None = None
     counted: int = 0
     counts: Counter[tuple[str, str, str, str]] = field(default_factory=Counter)

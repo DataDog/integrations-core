@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import threading
 from unittest import mock
+from xml.etree.ElementTree import Element
 
 import pytest
 
@@ -40,6 +41,68 @@ def test_vpn_of_the_capture():
     assert series(snapshot.samples) == FW_A_VPN
     assert snapshot.tunnel_states == {'tunnel.1': 'active', 'tunnel.2': 'init'}
     assert snapshot.tunnel_tags == {'tunnel.1': FW_A_TUNNEL, 'tunnel.2': FW_A_DEAD_TUNNEL}
+
+
+def _flow(*tunnels: tuple[str, str, str, str]) -> Element:
+    entries = ''.join(
+        f'<entry><name>{name}</name><gwid>1</gwid><inner-if>{inner}</inner-if><outer-if>{outer}</outer-if>'
+        f'<peerip>10.20.1.{i}</peerip><state>{state}</state></entry>'
+        for i, (name, inner, outer, state) in enumerate(tunnels, 1)
+    )
+    return parse_response(f'<response status="success"><result><IPSec>{entries}</IPSec></result></response>'.encode())
+
+
+@pytest.mark.parametrize(
+    'tunnels, expected_tags, expected_states',
+    [
+        pytest.param(
+            (
+                ('tun-a', 'tunnel.1', 'ethernet1/1', 'init'),
+                ('tun-b', 'tunnel.1', 'ethernet1/1', 'active'),
+                ('tun-c', 'tunnel.2', 'ethernet1/2', 'inactive'),
+            ),
+            {
+                'tunnel.1': ('tunnel_interface:tunnel.1', 'outer_interface:ethernet1/1'),
+                'tunnel.2': (
+                    'tunnel:tun-c',
+                    'tunnel_interface:tunnel.2',
+                    'peer_ip:10.20.1.3',
+                    'gateway:gw-peer',
+                    'outer_interface:ethernet1/2',
+                ),
+            },
+            {'tunnel.1': 'active', 'tunnel.2': 'inactive'},
+            id='shared-interface-is-up-if-any-tunnel-is-active',
+        ),
+        pytest.param(
+            (
+                ('tun-a', 'tunnel.1', 'ethernet1/1', 'inactive'),
+                ('tun-b', 'tunnel.1', 'ethernet1/2', 'init'),
+            ),
+            {'tunnel.1': ('tunnel_interface:tunnel.1',)},
+            {'tunnel.1': 'init'},
+            id='shared-interface-with-different-outer-interfaces-has-no-outer-tag',
+        ),
+        pytest.param(
+            (
+                ('tun-a', 'tunnel.1', 'ethernet1/1', 'weird'),
+                ('tun-b', 'tunnel.1', 'ethernet1/1', 'inactive'),
+            ),
+            {'tunnel.1': ('tunnel_interface:tunnel.1', 'outer_interface:ethernet1/1')},
+            {'tunnel.1': 'inactive'},
+            id='unknown-state-ranks-below-the-known-ones',
+        ),
+    ],
+)
+def test_tunnels_sharing_an_interface_are_tagged_and_stated_per_interface(tunnels, expected_tags, expected_states):
+    snapshot = parse_vpn(_flow(*tunnels), load_op(VPN_GATEWAY_CMD), mock.Mock())
+
+    assert snapshot.tunnel_tags == expected_tags
+    assert snapshot.tunnel_states == expected_states
+    # Each flow entry still reports its own state.
+    assert sum(1 for name, _ in series(snapshot.samples) if name == 'ipsec.tunnel.state') == len(
+        {n for n in tunnels if n[3] != 'weird'}
+    )
 
 
 def test_unknown_state_is_skipped_but_still_counts_in_the_total():

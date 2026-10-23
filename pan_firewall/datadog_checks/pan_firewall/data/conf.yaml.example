@@ -259,9 +259,16 @@ instances:
     #
     # collect_threats: true
 
+    ## @param collect_rule_hits - boolean - optional - default: true
+    ## Set to `false` to stop collecting security rule hit counts.
+    #
+    # collect_rule_hits: true
+
     ## @param security_rule_filter - list of strings - optional
     ## List of regular expressions. Only security rules whose name matches one of them are reported.
-    ## If not set, all security rules are reported.
+    ## If not set, all security rules are reported. Without a filter, one `security_rule.hits` series is sent
+    ## per security rule, summed over all virtual systems and including the two default rules, which can be
+    ## thousands on a large rulebase.
     #
     # security_rule_filter:
     #   - ^allow-.*

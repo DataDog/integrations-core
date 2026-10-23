@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import hashlib
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
@@ -21,6 +22,15 @@ class PanFirewallCheck(AgentCheck, ConfigMixin):
         super().__init__(*args, **kwargs)
         self._source: FirewallSource | None = None
         self._pollers: dict[str, FirewallPoller] = {}
+
+    def persistent_cache_id(self) -> str:
+        # The cache keys already name their device (serial, IP, Panorama host), so the namespace (and the Panorama
+        # host) is enough to keep instances apart. Unlike the default config digest, editing credentials, tags or
+        # tuning options keeps the threat watermarks, the Panorama firewall list and the device identities.
+        parts = [self.config.namespace or 'default']
+        if self.config.panorama_host:
+            parts.append(self.config.panorama_host)
+        return hashlib.md5('|'.join(parts).encode()).hexdigest()[:16]
 
     def check(self, _: Any) -> None:
         if self._source is None:

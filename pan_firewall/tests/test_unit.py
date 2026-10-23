@@ -29,7 +29,7 @@ from .common import (
 )
 from .fake_panos import FIREWALL_SETS, PANORAMA_HOSTS
 from .fixture_map import THREAT_LOG_FIRST_SEQNO
-from .helpers import THREAT_LOG_ACT, log_page, make_instance
+from .helpers import THREAT_LOG_ACT, log_page, make_instance, new_check
 
 pytestmark = pytest.mark.unit
 
@@ -128,7 +128,7 @@ def test_a_threat_job_still_running_is_polled_again_on_the_next_run_not_in_5_min
     monkeypatch.setattr(constants, 'THREAT_JOB_POLLS', 1)
     monkeypatch.setattr(constants, 'THREAT_JOB_POLL_DELAY', 0)
     ip = FIREWALLS['fw-a']
-    fake_panos.answer_log(ip, 'backward', None, 0, THREAT_LOG_ACT, log_page([1]))
+    fake_panos.answer_log(ip, 'backward', None, THREAT_LOG_ACT, log_page([1]))
     check = new_static_check()
     dd_run_check(check)
 
@@ -198,7 +198,7 @@ HARDWARE_ANSWERS = {
 
 def test_every_metadata_metric_is_emitted(dd_run_check, aggregator, fake_panos, schedule_clock):
     for name, ip in FIREWALLS.items():
-        fake_panos.answer_log(ip, 'backward', None, 0, log_page([THREAT_LOG_FIRST_SEQNO[name] - 1]))
+        fake_panos.answer_log(ip, 'backward', None, log_page([THREAT_LOG_FIRST_SEQNO[name] - 1]))
         for cmd, path in HARDWARE_ANSWERS.items():
             fake_panos.answer_op(ip, cmd, (200, path.read_bytes()))
     # A Panorama instance, as only it sends `panorama.can_connect`; it discovers and polls both fake firewalls.
@@ -224,3 +224,29 @@ def test_every_metadata_metric_is_emitted(dd_run_check, aggregator, fake_panos, 
     for ip in FIREWALLS.values():
         for name in ('can_connect', 'threat.count'):
             assert any(f'device_ip:{ip}' in m.tags for m in aggregator.metrics(f'pan_firewall.{name}')), (name, ip)
+
+
+@pytest.mark.parametrize(
+    'other, same_id',
+    [
+        pytest.param({'tags': ['team:other']}, True, id='tags'),
+        pytest.param({'max_concurrency': 2}, True, id='max_concurrency'),
+        pytest.param(
+            {'firewall_credentials': [{'username': 'rotated', 'password': 'rotated'}]}, True, id='credentials'
+        ),
+        pytest.param({'namespace': 'other'}, False, id='namespace'),
+        pytest.param(
+            {'panorama_host': 'panorama.example.com', 'panorama_api_key': 'k', 'firewalls': None},
+            False,
+            id='panorama_host',
+        ),
+    ],
+)
+def test_persistent_cache_id_survives_config_edits_but_not_a_different_target(other, same_id):
+    # A changed ID drops the threat watermarks and the Panorama firewall list, so only the target may change it.
+    def cache_id(instance):
+        check = new_check(instance)
+        check.load_configuration_models()
+        return check.persistent_cache_id()
+
+    assert (cache_id(make_instance(**other)) == cache_id(make_instance())) is same_id

@@ -92,7 +92,7 @@ class Context:
     def answer_forward(self, watermark, *bodies, **seed):
         """Cache the watermark `watermark`, and answer the first page of the query from it with `bodies` in turn."""
         self.seed(watermark, **seed)
-        self.fake.answer_log(FW_A_IP, 'forward', seqno_query(watermark + 1), 0, *bodies)
+        self.fake.answer_log(FW_A_IP, 'forward', seqno_query(watermark + 1), *bodies)
 
     def submits(self):
         return [c.params for c in self.fake.calls_to(FW_A_IP) if c.type == 'log' and c.action is None]
@@ -128,7 +128,7 @@ def test_first_run_reads_the_newest_log_and_counts_nothing(firewall):
 
 
 def test_first_run_on_a_firewall_without_threat_logs_tries_again_next_run(firewall):
-    firewall.fake.answer_log(FW_A_IP, 'backward', None, 0, EMPTY)
+    firewall.fake.answer_log(FW_A_IP, 'backward', None, EMPTY)
 
     firewall.collect()
     assert firewall.watermark is None
@@ -146,49 +146,89 @@ def test_unreadable_cache_is_a_first_run(firewall):
     assert firewall.watermark == BACKWARD_NEWEST_SEQNO
 
 
-def test_seqno_paging_fetches_every_page_in_order_without_duplicates(firewall, monkeypatch):
-    monkeypatch.setattr(constants, 'THREAT_PAGE_SIZE', PROBE_SEQNO_PAGE_SIZE)
-    firewall.seed(PROBE_SEQNO_START - 1)
+def answer_probe_pages(firewall, failing_page=None):
+    """Answer the real `probe-seqno` pages, each from the newest `seqno` of the page before.
+
+    Return the counts of their logs and the query each page is asked with.
+    """
     counts = Counter()
+    queries = []
+    query = seqno_query(PROBE_SEQNO_START)
     for page in range(PROBE_SEQNO_FIRST_PAGE, PROBE_SEQNO_FIRST_PAGE + PROBE_SEQNO_PAGES):
-        root = ET.parse(FIXTURES / 'probe-seqno' / f'seq_0_p{page}.xml').getroot()
-        for entry in root.iterfind('result/log/logs/entry'):
+        path = FIXTURES / 'probe-seqno' / f'seq_0_p{page}.xml'
+        queries.append(query)
+        firewall.fake.answer_log(FW_A_IP, 'forward', query, NO_CAPTURE if page == failing_page else path)
+        entries = list(ET.parse(path).getroot().iterfind('result/log/logs/entry'))
+        for entry in entries:
             counts[tuple(entry.findtext(f) for f in ('severity', 'action', 'subtype', 'vsys'))] += 1
+        query = seqno_query(max(int(e.findtext('seqno')) for e in entries) + 1)
+    return counts, queries
+
+
+@pytest.fixture
+def probe_pages(firewall, monkeypatch):
+    monkeypatch.setattr(constants, 'THREAT_PAGE_SIZE', PROBE_SEQNO_PAGE_SIZE)
+    monkeypatch.setattr(constants, 'THREAT_MAX_PAGES', PROBE_SEQNO_PAGES)
+    firewall.seed(PROBE_SEQNO_START - 1)
+
+
+def test_seqno_paging_asks_each_page_from_the_newest_seqno_read(firewall, probe_pages):
+    counts, queries = answer_probe_pages(firewall)
 
     samples = firewall.collect()
 
-    assert [(p['skip'], p['query']) for p in firewall.submits()] == [
-        (str(page * PROBE_SEQNO_PAGE_SIZE), seqno_query(PROBE_SEQNO_START)) for page in range(PROBE_SEQNO_PAGES)
-    ]
+    assert [p['query'] for p in firewall.submits()] == queries
     assert series(samples) == expected(counts)
     assert firewall.watermark == PROBE_LAST_SEQNO
 
 
-def test_failure_halfway_keeps_the_watermark_and_the_next_run_starts_over(firewall, monkeypatch):
-    monkeypatch.setattr(constants, 'THREAT_PAGE_SIZE', PROBE_SEQNO_PAGE_SIZE)
-    firewall.seed(PROBE_SEQNO_START - 1)
-    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(PROBE_SEQNO_START), 40, NO_CAPTURE)
+def test_failure_halfway_keeps_the_watermark_and_the_next_run_starts_over(firewall, probe_pages):
+    answer_probe_pages(firewall, failing_page=PROBE_SEQNO_FIRST_PAGE + 2)
 
     with pytest.raises(PanosApiError):
         firewall.collect()
 
     assert firewall.watermark == PROBE_SEQNO_START - 1
+    assert firewall.ctx.state.still_due == set()
     firewall.fake.recover(FW_A_IP)
     firewall.fake.calls.clear()
+    answer_probe_pages(firewall)
     samples = firewall.collect()
     assert sum(s.value for s in samples) == PROBE_ENTRIES
-    assert firewall.submits()[0]['skip'] == '0'
+    assert firewall.submits()[0]['query'] == seqno_query(PROBE_SEQNO_START)
+
+
+def test_a_run_reads_at_most_the_page_cap_and_the_next_run_continues_from_there(firewall, monkeypatch):
+    monkeypatch.setattr(constants, 'THREAT_PAGE_SIZE', 2)
+    assert constants.THREAT_MAX_PAGES == 2
+    firewall.answer_forward(1000, log_page([1001, 1002]))
+    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1003), log_page([1003, 1004]))
+    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1005), log_page([1005]))
+
+    first = firewall.collect()
+
+    assert sum(s.value for s in first) == 4
+    assert firewall.watermark == 1004
+    assert firewall.ctx.state.still_due == {'threats'}
+    assert len(firewall.submits()) == 2
+
+    firewall.ctx.state.still_due.clear()
+    second = firewall.collect()
+
+    assert sum(s.value for s in second) == 1
+    assert firewall.watermark == 1005
+    assert [p['query'] for p in firewall.submits()][2] == seqno_query(1005)
 
 
 def test_pages_counted_before_a_job_is_still_active_are_kept(firewall, monkeypatch):
     monkeypatch.setattr(constants, 'THREAT_PAGE_SIZE', 2)
     firewall.answer_forward(1000, log_page([1001, 1002]))
-    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1001), 2, ACT, ACT, log_page([1003]))
+    firewall.fake.answer_log(FW_A_IP, 'forward', seqno_query(1003), ACT, ACT, log_page([1003]))
 
     assert firewall.collect() == []
     samples = firewall.collect()
 
-    assert [p['skip'] for p in firewall.submits()] == ['0', '2']
+    assert [p['query'] for p in firewall.submits()] == [seqno_query(1001), seqno_query(1003)]
     assert sum(s.value for s in samples) == 3
     assert firewall.watermark == 1003
 
@@ -255,7 +295,7 @@ def test_reset_check_rebaselines_with_a_warning_only_when_the_newest_seqno_is_be
     firewall, watermark, warnings
 ):
     firewall.answer_forward(watermark, EMPTY)
-    firewall.fake.answer_log(FW_A_IP, 'backward', None, 0, NEWEST_AFTER_RESET)
+    firewall.fake.answer_log(FW_A_IP, 'backward', None, NEWEST_AFTER_RESET)
 
     assert firewall.collect() == []
 
@@ -292,7 +332,7 @@ def test_threat_watermark_survives_a_restart_through_the_persistent_cache(dd_run
     # The first run has no watermark and starts one below fw-a's capture; a new check instance (an Agent restart)
     # then counts the capture from the persisted watermark, and persists the newest log it read.
     first = THREAT_LOG_FIRST_SEQNO['fw-a']
-    fake_panos.answer_log(FW_A_IP, 'backward', None, 0, log_page([first - 1]))
+    fake_panos.answer_log(FW_A_IP, 'backward', None, log_page([first - 1]))
     dd_run_check(new_check())
     fake_panos.recover(FW_A_IP)
 

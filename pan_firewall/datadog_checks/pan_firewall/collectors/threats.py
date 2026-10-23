@@ -3,9 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Threat log counts (`threat.count`).
 
-Logs are read by `seqno`, never by time: the query asks for every log from `watermark + 1` on, oldest first, paged
-with `skip`. The watermark is the `seqno` of the last log counted; it is persisted by firewall serial and only moves
-after a pass that read every page, so a failure halfway leaves it, and the counts, where they were.
+Logs are read by `seqno`, never by time or by offset: the query asks for every log from `watermark + 1` on, oldest
+first, and each next page asks from the newest `seqno` read so far, plus one. This relies on PAN-OS returning the logs
+of a `dir=forward` query in ascending `seqno` order.
+
+A run reads at most `THREAT_MAX_PAGES` pages, so a large backlog is worked off over several runs instead of blocking
+the check. The watermark is the `seqno` of the last log counted; it is persisted by firewall serial and moves at the
+end of each run that read its pages fully, whether it reached the end of the logs or hit the cap (the next run then
+continues from there). A failure halfway leaves the watermark, and the counts, where they were.
 """
 
 from __future__ import annotations
@@ -23,7 +28,7 @@ from .base import CollectContext, Sample, ThreatJob, ThreatState, Watermark, tag
 
 
 def collect_threats(ctx: CollectContext) -> list[Sample]:
-    """Run one pass, from the job left running or the watermark. Samples come only from a complete pass."""
+    """Run one pass, from the job left running or the watermark. Samples come only from a run that read its pages."""
     state = ctx.state.threats
     _load_watermark(ctx, state)
     job: ThreatJob | None = state.pending or _first_job(state)
@@ -34,12 +39,22 @@ def collect_threats(ctx: CollectContext) -> list[Sample]:
             ctx.state.still_due.add('threats')
             ctx.debug('threat log job %s still running, polled again next run', job.job_id)
             return []
-        if job.purpose == 'forward' and job.page_entries >= job.page_size:
-            job.skip += job.page_size
-            job.job_id = None
-            job.page_entries = 0
-            continue
+        full_page = job.purpose == 'forward' and job.page_entries >= job.page_size
+        # A full page that moved nothing forward (no valid `seqno` above the base) would be asked again forever.
+        if full_page and job.newest_seqno is not None:
+            job.pages_read += 1
+            if job.pages_read < constants.THREAT_MAX_PAGES:
+                job.base_seqno = job.newest_seqno
+                job.job_id = None
+                job.page_entries = 0
+                continue
+            capped = True
+        else:
+            capped = False
         samples, job = _complete(ctx, state, job)
+        if capped:
+            # More logs are likely waiting: run again on the next check run instead of after the interval.
+            ctx.state.still_due.add('threats')
         if job is None:
             return samples
     return []
@@ -82,7 +97,6 @@ def _params(job: ThreatJob) -> dict[str, str]:
             **params,
             'dir': 'forward',
             'nlogs': str(job.page_size),
-            'skip': str(job.skip),
             'query': f'(seqno geq {job.base_seqno + 1})',
         }
     return {**params, 'dir': 'backward', 'nlogs': '1'}

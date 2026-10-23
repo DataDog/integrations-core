@@ -61,6 +61,18 @@ files:
           - 10.0.0.0/24
           exclude:
           - 10.0.0.99
+    - name: firewall_ip_overrides
+      hidden: true
+      fleet_configurable: false
+      description: |
+        Mapping from the IP address Panorama reports for a firewall to the IP address the Agent polls instead.
+        For test labs where the Agent cannot reach the IPs Panorama reports. Ignored without `panorama_host`.
+      value:
+        type: object
+        additionalProperties:
+          type: string
+        example:
+          10.20.0.40: 192.0.2.10
     - name: firewalls
       fleet_configurable: true
       description: |
@@ -174,11 +186,20 @@ files:
         type: boolean
         default: true
         example: true
+    - name: collect_rule_hits
+      fleet_configurable: true
+      description: Set to `false` to stop collecting security rule hit counts.
+      value:
+        type: boolean
+        default: true
+        example: true
     - name: security_rule_filter
       fleet_configurable: true
       description: |
         List of regular expressions. Only security rules whose name matches one of them are reported.
-        If not set, all security rules are reported.
+        If not set, all security rules are reported. Without a filter, one `security_rule.hits` series is sent
+        per security rule, summed over all virtual systems and including the two default rules, which can be
+        thousands on a large rulebase.
       value:
         type: array
         items:

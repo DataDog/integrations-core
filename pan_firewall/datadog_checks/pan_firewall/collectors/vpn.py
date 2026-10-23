@@ -23,12 +23,19 @@ VPN_GATEWAY_CMD = '<show><vpn><gateway/></vpn></show>'
 # `show vpn flow` state -> `ipsec.tunnel.state` value.
 STATE_VALUES = {'inactive': 0, 'active': 1, 'init': 2}
 
+# Most-up first: an interface shared by several tunnels takes the best state among them. An unknown state ranks last.
+STATE_RANK = ('active', 'init', 'inactive')
+
 
 @dataclass
 class VpnSnapshot:
     samples: list[Sample] = field(default_factory=list)
     tunnel_tags: dict[str, tuple[str, ...]] = field(default_factory=dict)  # by inner interface
     tunnel_states: dict[str, str] = field(default_factory=dict)  # raw state by inner interface
+
+
+def _state_rank(state: str) -> int:
+    return STATE_RANK.index(state) if state in STATE_RANK else len(STATE_RANK)
 
 
 def parse_vpn(flow: Element, gateway: Element, warn: Callable[..., None]) -> VpnSnapshot:
@@ -44,6 +51,7 @@ def parse_vpn(flow: Element, gateway: Element, warn: Callable[..., None]) -> Vpn
     }
     entries = flow_result.findall('./IPSec/entry')
     snapshot = VpnSnapshot()
+    by_interface: dict[str, list[tuple[str, tuple[str, ...], str | None]]] = {}
     counts = dict.fromkeys(STATE_VALUES, 0)
     for entry in entries:
         state = text(entry, 'state') or ''
@@ -56,13 +64,25 @@ def parse_vpn(flow: Element, gateway: Element, warn: Callable[..., None]) -> Vpn
             ('outer_interface', text(entry, 'outer-if')),
         )
         if interface:
-            snapshot.tunnel_tags[interface] = tags
-            snapshot.tunnel_states[interface] = state
+            by_interface.setdefault(interface, []).append((state, tags, text(entry, 'outer-if')))
         if state not in STATE_VALUES:
             warn('IPSec tunnel %s has an unknown state %r: its state is not sent', tags, state)
             continue
         counts[state] += 1
         snapshot.samples.append(Sample('ipsec.tunnel.state', STATE_VALUES[state], tags, 'gauge'))
+    # PAN-OS counts per tunnel interface, and several tunnels can share one (next-hop tunnel binding, or one tunnel
+    # with several proxy IDs). The interface-wide counters then can't be attributed to one tunnel: an interface
+    # shared by several entries is tagged with the interface only, and is up if any of its tunnels is.
+    for interface, tunnels in by_interface.items():
+        snapshot.tunnel_states[interface] = min((state for state, _, _ in tunnels), key=_state_rank)
+        if len(tunnels) == 1:
+            snapshot.tunnel_tags[interface] = tunnels[0][1]
+        else:
+            outer_interfaces = {outer for _, _, outer in tunnels}
+            snapshot.tunnel_tags[interface] = tag_tuple(
+                ('tunnel_interface', interface),
+                ('outer_interface', outer_interfaces.pop() if len(outer_interfaces) == 1 else None),
+            )
     totals = (
         ('ipsec.tunnels.total', len(entries)),
         ('ipsec.tunnels.active', counts['active']),

@@ -97,6 +97,7 @@ LAB_HOSTS_VAR = 'PANOS_LAB_HOSTS'
 LAB_USERNAME_VAR = 'PANOS_LAB_USERNAME'
 LAB_PASSWORD_VAR = 'PANOS_PASSWORD'
 LAB_COLLECT_ALL_VAR = 'PANOS_LAB_COLLECT_ALL'
+LAB_IP_OVERRIDES_VAR = 'PANOS_LAB_IP_OVERRIDES'
 # Panorama mode: these replace the static `PANOS_LAB_HOSTS`.
 LAB_PANORAMA_HOST_VAR = 'PANOS_LAB_PANORAMA_HOST'
 LAB_PANORAMA_USERNAME_VAR = 'PANOS_LAB_PANORAMA_USERNAME'
@@ -105,6 +106,11 @@ LAB_PANORAMA_PASSWORD_VAR = 'PANOS_LAB_PANORAMA_PASSWORD'
 
 def lab_hosts(environ: Mapping[str, str] = os.environ) -> list[str]:
     return [host.strip() for host in environ.get(LAB_HOSTS_VAR, '').split(',') if host.strip()]
+
+
+def lab_ip_overrides(environ: Mapping[str, str] = os.environ) -> dict[str, str]:
+    pairs = (entry.split('=', 1) for entry in environ.get(LAB_IP_OVERRIDES_VAR, '').split(',') if '=' in entry)
+    return {reported.strip(): polled.strip() for reported, polled in pairs}
 
 
 def lab_mode(environ: Mapping[str, str] = os.environ) -> str:
@@ -139,6 +145,9 @@ def build_lab_instance(environ: Mapping[str, str] = os.environ) -> dict[str, Any
             'firewall_credentials': [{'username': environ[LAB_USERNAME_VAR], 'password': environ[LAB_PASSWORD_VAR]}],
             'tls_verify': False,
         }
+        # Optional `<reported>=<polled>,...`: poll the IPs Panorama reports at addresses the Agent can reach.
+        if overrides := lab_ip_overrides(environ):
+            instance['firewall_ip_overrides'] = overrides
     else:
         missing = [name for name in (LAB_USERNAME_VAR, LAB_PASSWORD_VAR) if not environ.get(name)]
         if not lab_hosts(environ):

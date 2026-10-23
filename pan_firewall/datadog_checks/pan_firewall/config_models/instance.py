@@ -89,6 +89,7 @@ class InstanceConfig(BaseModel):
     collect_global_counters: Optional[bool] = None
     collect_ospf: Optional[bool] = None
     collect_reports: Optional[bool] = None
+    collect_rule_hits: Optional[bool] = None
     collect_threats: Optional[bool] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
@@ -96,6 +97,7 @@ class InstanceConfig(BaseModel):
     enable_legacy_tags_normalization: Optional[bool] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
     firewall_credentials: Optional[tuple[FirewallCredential, ...]] = None
+    firewall_ip_overrides: Optional[MappingProxyType[str, str]] = None
     firewall_ips: Optional[FirewallIps] = None
     firewalls: Optional[tuple[str, ...]] = None
     headers: Optional[MappingProxyType[str, Any]] = None

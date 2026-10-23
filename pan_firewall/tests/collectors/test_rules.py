@@ -9,7 +9,7 @@ from datadog_checks.pan_firewall.collectors.base import FirewallState
 from datadog_checks.pan_firewall.collectors.rules import collect_rule_hits, parse_rule_hits, rule_hit_cmd
 from datadog_checks.pan_firewall.errors import PanosApiError, PanosAuthError
 
-from ..helpers import load_op, make_ctx, series
+from ..helpers import load_op, make_ctx, make_instance, new_check, series
 
 pytestmark = pytest.mark.unit
 
@@ -98,3 +98,10 @@ def test_a_refused_vsys_does_not_drop_the_others():
 def test_the_collector_fails(vsys1, vsys2, error):
     with pytest.raises(error):
         collect(vsys1, vsys2)
+
+
+def test_collect_rule_hits_false_makes_no_rule_hit_call(dd_run_check, aggregator, fake_panos):
+    dd_run_check(new_check(make_instance(collect_rule_hits=False)))
+
+    assert [c for c in fake_panos.calls if 'rule-hit-count' in (c.cmd or '')] == []
+    aggregator.assert_metric('pan_firewall.security_rule.hits', count=0)

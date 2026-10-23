@@ -28,6 +28,10 @@ def instance_collect_reports():
     return False
 
 
+def instance_collect_rule_hits():
+    return True
+
+
 def instance_collect_threats():
     return True
 

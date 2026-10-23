@@ -6,7 +6,6 @@ from __future__ import annotations
 import dataclasses
 import ipaddress
 import json
-import os
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -25,9 +24,6 @@ if TYPE_CHECKING:
     from .config_models.instance import InstanceConfig
 
 DISCOVERY_CMD = '<show><devices><connected/></devices></show>'
-# Test-lab hook, unset in production: lab firewalls can report private IPs to Panorama that the Agent reaches at other
-# addresses. Comma-separated `reported_ip=polled_ip` pairs.
-IP_OVERRIDES_ENV_VAR = 'PANOS_LAB_IP_OVERRIDES'
 
 
 @dataclass(frozen=True)
@@ -41,12 +37,6 @@ class DiscoveredFirewall:
     family: str | None
     sw_version: str | None
     connected: bool
-
-
-def parse_ip_overrides(value: str) -> dict[str, str]:
-    """Parse `reported_ip=polled_ip` pairs separated by commas; entries without `=` are ignored."""
-    pairs = (entry.split('=', 1) for entry in value.split(',') if '=' in entry)
-    return {reported.strip(): polled.strip() for reported, polled in pairs}
 
 
 def parse_devices(root: Element) -> list[DiscoveredFirewall]:
@@ -83,7 +73,8 @@ class PanoramaFirewallSource:
         self._cache_key = f'panorama_firewalls:{self._host}'
         credentials = Credentials(config.panorama_username, config.panorama_password, config.panorama_api_key)
         self._client = PanosClient(check.http, self._host, KeyManager(check.http, self._host, credentials), check.log)
-        self._ip_overrides = parse_ip_overrides(os.environ.get(IP_OVERRIDES_ENV_VAR, ''))
+        self._ip_overrides = dict(config.firewall_ip_overrides or {})
+        self._warned: set[str] = set()
 
     def list_firewalls(self) -> list[FirewallTarget]:
         self._client.start_run()
@@ -152,7 +143,8 @@ class PanoramaFirewallSource:
             if target is None:
                 continue
             if target.ip in targets:
-                self._check.warning(
+                self._warn_once(
+                    f'duplicate_ip:{firewall.serial}',
                     'firewalls %s and %s are both polled at %s; only the first is polled',
                     targets[target.ip].serial,
                     firewall.serial,
@@ -166,7 +158,8 @@ class PanoramaFirewallSource:
         polled = self._ip_overrides.get(firewall.ip_address or '', firewall.ip_address)
         address = _parse_ip(polled)
         if address is None:
-            self._check.warning(
+            self._warn_once(
+                f'no_ip:{firewall.serial}',
                 'firewall %s has no usable IP address (Panorama reports `%s`), skipping it',
                 firewall.serial,
                 polled or '',
@@ -178,7 +171,8 @@ class PanoramaFirewallSource:
             return None
         credentials = resolve_credentials(ip, self._config.firewall_credentials or ())
         if credentials is None:
-            self._check.warning(
+            self._warn_once(
+                f'no_credentials:{firewall.serial}',
                 'no entry in `firewall_credentials` matches the firewall %s at %s, skipping it',
                 firewall.serial,
                 ip,
@@ -193,6 +187,13 @@ class PanoramaFirewallSource:
             model=firewall.model,
             sw_version=firewall.sw_version,
         )
+
+    def _warn_once(self, key: str, msg: str, *args: object) -> None:
+        """Log the warning the first time `key` is seen, at debug level after that: a condition that lasts would
+        otherwise repeat it on every run."""
+        log = self._check.log.debug if key in self._warned else self._check.log.warning
+        self._warned.add(key)
+        log(msg, *args)
 
     def _passes_filters(self, address: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
         filters = self._config.firewall_ips

@@ -9,7 +9,6 @@ from datadog_checks.dev import docker_run, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.pan_firewall import poller as poller_module
 from datadog_checks.pan_firewall.collectors import COLLECTORS
-from datadog_checks.pan_firewall.panorama import IP_OVERRIDES_ENV_VAR
 from datadog_checks.pan_firewall.scheduler import FirewallSchedule
 
 from .common import (
@@ -73,12 +72,9 @@ def dd_environment():
         # password in its env config until the stop). Panorama: env `lab-panorama`, with PANOS_LAB_PANORAMA_HOST,
         # PANOS_LAB_PANORAMA_USERNAME and PANOS_LAB_PANORAMA_PASSWORD (read silently) instead of PANOS_LAB_HOSTS; the
         # Agent must reach the IPs Panorama reports, or PANOS_LAB_IP_OVERRIDES=<reported>=<polled>,... maps them to
-        # addresses it can reach. PANOS_LAB_COLLECT_ALL=1 enables the default-off collectors.
-        overrides = os.environ.get(IP_OVERRIDES_ENV_VAR)
-        yield (
-            {'instances': [build_lab_instance()]},
-            {'env_vars': {IP_OVERRIDES_ENV_VAR: overrides} if overrides else {}},
-        )
+        # addresses it can reach (it becomes the instance's `firewall_ip_overrides`). PANOS_LAB_COLLECT_ALL=1 enables
+        # the default-off collectors.
+        yield {'instances': [build_lab_instance()]}
     else:
         yield from docker_environment()
 

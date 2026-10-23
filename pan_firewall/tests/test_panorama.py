@@ -10,7 +10,7 @@ import pytest
 
 from datadog_checks.pan_firewall import PanFirewallCheck
 from datadog_checks.pan_firewall import panorama as panorama_module
-from datadog_checks.pan_firewall.panorama import IP_OVERRIDES_ENV_VAR, DiscoveredFirewall, parse_devices
+from datadog_checks.pan_firewall.panorama import DiscoveredFirewall, parse_devices
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from .common import CREDENTIALS, FIXTURES, FW_A_IP, FW_A_SERIAL, FW_B_IP, FW_B_SERIAL
@@ -139,11 +139,10 @@ def test_firewall_at_an_unreachable_reported_ip_is_reported_down(dd_run_check, a
     assert can_connect_by_ip(aggregator) == {'10.20.0.40': 0}
 
 
-def test_ip_override_polls_the_reported_ip_at_its_mapped_address(dd_run_check, fake_panos, monkeypatch):
-    monkeypatch.setenv(IP_OVERRIDES_ENV_VAR, f'10.20.0.40={FW_A_IP}, malformed')
+def test_ip_override_polls_the_reported_ip_at_its_mapped_address(dd_run_check, fake_panos):
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices_xml(('SYNTH-PRIVATE-0001', 'synth', '10.20.0.40', 'yes')))
 
-    dd_run_check(new_check())
+    dd_run_check(new_check(firewall_ip_overrides={'10.20.0.40': FW_A_IP}))
 
     assert polled_hosts(fake_panos) == {FW_A_IP}
 
@@ -245,21 +244,51 @@ def warnings_about(caplog, ip):
     return [r for r in caplog.records if r.levelno == logging.WARNING and ip in r.getMessage()]
 
 
-def test_firewall_without_matching_credentials_is_skipped_with_a_warning_on_every_run(
+def test_firewall_without_matching_credentials_is_skipped_and_still_reported_for_the_others(
     dd_run_check, aggregator, fake_panos, caplog
 ):
-    check = new_check(firewall_credentials=FW_A_ONLY_CREDENTIALS)
-
-    dd_run_check(check)
-    dd_run_check(check)
+    dd_run_check(new_check(firewall_credentials=FW_A_ONLY_CREDENTIALS))
 
     assert polled_hosts(fake_panos) == {FW_A_IP}
     assert set(metrics_by_ip(aggregator, 'can_connect')) == {FW_A_IP}
-    assert len(warnings_about(caplog, FW_B_IP)) == 2
-    # Also in the Agent status, which drains them after each run.
-    assert [w for w in check.get_warnings() if FW_B_IP in w] == [
+    assert [w.getMessage() for w in warnings_about(caplog, FW_B_IP)] == [
         f'no entry in `firewall_credentials` matches the firewall {FW_B_SERIAL} at {FW_B_IP}, skipping it'
-    ] * 2
+    ]
+
+
+@pytest.mark.parametrize(
+    'devices, options, marker',
+    [
+        pytest.param(
+            devices_xml((FW_A_SERIAL, 'fw-a', FW_A_IP, 'yes'), ('SYNTH-DUP', 'dup', FW_A_IP, 'yes')),
+            {},
+            'SYNTH-DUP',
+            id='duplicate-ip',
+        ),
+        pytest.param(devices_xml(('SYNTH-NO-IP', 'no-ip', 'not-an-ip', 'yes')), {}, 'SYNTH-NO-IP', id='no-ip'),
+        pytest.param(
+            devices_xml((FW_B_SERIAL, 'fw-b', FW_B_IP, 'yes')),
+            {'firewall_credentials': FW_A_ONLY_CREDENTIALS},
+            FW_B_SERIAL,
+            id='no-credentials',
+        ),
+    ],
+)
+def test_firewall_warning_is_logged_once_then_at_debug_level(
+    dd_run_check, fake_panos, caplog, devices, options, marker
+):
+    caplog.set_level(logging.DEBUG)
+    fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices)
+    check = new_check(**options)
+
+    dd_run_check(check)
+    first_run = len(caplog.records)
+    dd_run_check(check)
+
+    about = [(i, r.levelno) for i, r in enumerate(caplog.records) if marker in r.getMessage()]
+    # A condition that lasts must not warn on every run (every 60 s), but stays visible at debug level.
+    assert [level for i, level in about if i < first_run] == [logging.WARNING]
+    assert [level for i, level in about if i >= first_run] == [logging.DEBUG]
 
 
 def test_can_connect_of_an_unreachable_discovered_firewall_carries_its_device_id(dd_run_check, aggregator, fake_panos):

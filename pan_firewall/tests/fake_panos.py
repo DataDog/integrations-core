@@ -87,7 +87,7 @@ class FakePanos:
         self._failures: dict[tuple[str, str], Answer] = {}
         self._op_answers: dict[tuple[str, str], Answer] = {}
         # `type=log` jobs: the bodies a `get` of the job answers in turn (the last one repeats), by (host, job id).
-        self._log_overrides: dict[tuple[str, str, str | None, int], list[LogBody]] = {}
+        self._log_overrides: dict[tuple[str, str, str | None], list[LogBody]] = {}
         self._log_jobs: dict[tuple[str, str], list[LogBody]] = {}
         self._log_reads: dict[tuple[str, str], int] = {}
         self._job_ids = itertools.count(9000)
@@ -105,13 +105,13 @@ class FakePanos:
         """Answer every later `type=op&cmd=<cmd>` request to `host` with `answer`; `fail()` still takes precedence."""
         self._op_answers[host, cmd] = answer
 
-    def answer_log(self, host: str, direction: str, query: str | None, skip: int, *bodies: LogBody) -> None:
-        """Answer `type=log` submits of (`dir`, `query`, `skip`) to `host` with a new job whose `get`s answer `bodies`.
+    def answer_log(self, host: str, direction: str, query: str | None, *bodies: LogBody) -> None:
+        """Answer `type=log` submits of (`dir`, `query`) to `host` with a new job whose `get`s answer `bodies`.
 
         The bodies are served one per `get` (`get_job` or `read_log_job`), the last one repeating, so a job can
         be `ACT` for a while and then finish. A body is bytes, a fixture path, or an `Answer` (a failure).
         """
-        self._log_overrides[host, direction, query, skip] = list(bodies)
+        self._log_overrides[host, direction, query] = list(bodies)
 
     def answer_report(self, host: str, field: str, *bodies: LogBody) -> None:
         """Answer report submits aggregated by `field` to `host` with a new job whose `get`s answer `bodies` in turn."""
@@ -172,13 +172,13 @@ class FakePanos:
             return None
         if data.get('action') == 'get':
             return self._read_log_job(host, data.get('job-id', ''))
-        direction, query, skip = data.get('dir', ''), data.get('query'), int(data.get('skip', '0'))
+        direction, query = data.get('dir', ''), data.get('query')
         return self._open_job(
             'log',
             self._log_jobs,
             self._log_reads,
             host,
-            self._log_overrides.get((host, direction, query, skip)),
+            self._log_overrides.get((host, direction, query)),
             log_job_fixture(data, FIREWALL_SETS[host]),
         )
 

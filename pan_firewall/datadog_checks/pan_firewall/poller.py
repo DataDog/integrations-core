@@ -38,6 +38,7 @@ OPTIONAL_COLLECTORS = {
     'global_counters': 'collect_global_counters',
     'ospf': 'collect_ospf',
     'reports': 'collect_reports',
+    'rule_hits': 'collect_rule_hits',
     'threats': 'collect_threats',
 }
 

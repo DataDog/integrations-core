@@ -113,12 +113,13 @@ def find_op_fixture(cmd: str, firewall: str) -> Path | None:
 
 
 # `type=log` queries to the fixture answering them: response file under FIXTURES, per set. The key is
-# `(dir, query, skip)`; `nlogs` is not part of it, so a test can change the page size. `query` is None when the request
-# has none. Each `forward` query is the one the threats collector sends for a watermark one below its `seqno geq`.
+# `(dir, query)`; `nlogs` is not part of it, so a test can change the page size. `query` is None when the request has
+# none. Each `forward` query is the one the threats collector sends for a watermark one below its `seqno geq`.
 PROBE_SEQNO_START = 7691899338913581948
-# `nlogs` of the real `probe-seqno` capture. These are the last five pages of the L11 capture
-# (`capture/probe-seqno-3-13-247-39/`), p15-p18 with 20 entries and p19 with 5, re-based on p15's first seqno. L11
-# showed the seqno query is exact and its pages stable, so this is what PAN-OS returns for that query.
+# `nlogs` of the real `probe-seqno` capture, whose pages the threats tests answer themselves. These are the last five
+# pages of the L11 capture (`capture/probe-seqno-3-13-247-39/`), p15-p18 with 20 entries and p19 with 5, re-based
+# on p15's first seqno. L11 showed the seqno query is exact and its pages stable, so this is what PAN-OS returns for
+# that query.
 PROBE_SEQNO_PAGE_SIZE = 20
 PROBE_SEQNO_PAGES = 5
 PROBE_SEQNO_FIRST_PAGE = 15
@@ -133,26 +134,20 @@ def seqno_query(seqno: int) -> str:
     return f'(seqno geq {seqno})'
 
 
-LOG_FIXTURES: dict[str, dict[tuple[str, str | None, int], str]] = {
+LOG_FIXTURES: dict[str, dict[tuple[str, str | None], str]] = {
     'fw-a': {
-        ('backward', None, 0): 'probe/threat_back_p0.xml',
-        ('forward', seqno_query(THREAT_LOG_FIRST_SEQNO['fw-a']), 0): 'fw-a/threat_log_5m.xml',
-        **{
-            ('forward', seqno_query(PROBE_SEQNO_START), (page - PROBE_SEQNO_FIRST_PAGE) * PROBE_SEQNO_PAGE_SIZE): (
-                f'probe-seqno/seq_0_p{page}.xml'
-            )
-            for page in range(PROBE_SEQNO_FIRST_PAGE, PROBE_SEQNO_FIRST_PAGE + PROBE_SEQNO_PAGES)
-        },
+        ('backward', None): 'probe/threat_back_p0.xml',
+        ('forward', seqno_query(THREAT_LOG_FIRST_SEQNO['fw-a'])): 'fw-a/threat_log_5m.xml',
     },
     'fw-b': {
-        ('forward', seqno_query(THREAT_LOG_FIRST_SEQNO['fw-b']), 0): 'fw-a/threat_log_5m.xml',
+        ('forward', seqno_query(THREAT_LOG_FIRST_SEQNO['fw-b'])): 'fw-a/threat_log_5m.xml',
     },
 }
 
 
-def find_log_fixture(direction: str, query: str | None, skip: int, firewall: str) -> Path | None:
+def find_log_fixture(direction: str, query: str | None, firewall: str) -> Path | None:
     """Return the fixture answering a `type=log` query for the firewall set, or None."""
-    relative = LOG_FIXTURES.get(firewall, {}).get((direction, query, skip))
+    relative = LOG_FIXTURES.get(firewall, {}).get((direction, query))
     return FIXTURES / relative if relative else None
 
 
@@ -170,7 +165,7 @@ def report_field(cmd: str) -> str | None:
 
 def log_job_fixture(params: Mapping[str, str], firewall: str) -> Path | None:
     """The fixture answering the `type=log` submit with these form `params`, or None."""
-    return find_log_fixture(params.get('dir', ''), params.get('query'), int(params.get('skip', '0')), firewall)
+    return find_log_fixture(params.get('dir', ''), params.get('query'), firewall)
 
 
 def report_job_fixture(params: Mapping[str, str], firewall: str) -> Path | None:
