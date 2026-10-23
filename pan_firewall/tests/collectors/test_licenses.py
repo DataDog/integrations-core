@@ -13,7 +13,8 @@ from ..helpers import load_op, series
 pytestmark = pytest.mark.unit
 
 TODAY = datetime.date(2026, 10, 9)
-FEATURES = {
+# Every license of the capture expires on October 22, 2026.
+FEATURES = (
     'adv_threat_prevention',
     'advanced_dns_security',
     'advanced_url_filtering',
@@ -28,41 +29,33 @@ FEATURES = {
     'threat_prevention',
     'virtual_systems',
     'wildfire_license',
-}
-
-
-def entry(root, feature):
-    return next(e for e in root.iterfind('result/licenses/entry') if e.findtext('feature') == feature)
+)
 
 
 def test_licenses_of_the_capture():
     samples = parse_licenses(load_op(LICENSE_INFO_CMD), mock.Mock(), mock.Mock(), TODAY)
 
-    expected = {}
-    for feature in FEATURES:
-        expected['license.days_left', (f'feature:{feature}',)] = (13, 'gauge')
-        expected['license.expired', (f'feature:{feature}',)] = (0, 'gauge')
-    assert series(samples) == expected
+    assert series(samples) == {
+        (name, (f'feature:{feature}',)): (value, 'gauge')
+        for feature in FEATURES
+        for name, value in (('license.days_left', 13), ('license.expired', 0))
+    }
 
 
-def test_expired_license_reports_one_and_negative_days():
+@pytest.mark.parametrize(
+    'expired, expires, expected',
+    [
+        pytest.param('yes', 'October 01, 2026', {'license.expired': 1, 'license.days_left': -8}, id='expired'),
+        pytest.param('no', 'Never', {'license.expired': 0}, id='perpetual'),
+        pytest.param('no', '22/10/2026', {'license.expired': 0}, id='unparseable-date'),
+    ],
+)
+def test_license_expiry(expired, expires, expected):
     root = load_op(LICENSE_INFO_CMD)
-    entry(root, 'PA-VM').find('expired').text = 'yes'
-    entry(root, 'PA-VM').find('expires').text = 'October 01, 2026'
+    entry = root.find("result/licenses/entry[feature='PA-VM']")
+    entry.find('expired').text = expired
+    entry.find('expires').text = expires
 
-    result = series(parse_licenses(root, mock.Mock(), mock.Mock(), TODAY))
+    samples = parse_licenses(root, mock.Mock(), mock.Mock(), TODAY)
 
-    assert result['license.expired', ('feature:pa_vm',)] == (1, 'gauge')
-    assert result['license.days_left', ('feature:pa_vm',)] == (-8, 'gauge')
-
-
-@pytest.mark.parametrize('expires', ['Never', '22/10/2026'], ids=['perpetual', 'unparseable-date'])
-def test_license_without_a_usable_expiry_reports_only_expired(expires):
-    root = load_op(LICENSE_INFO_CMD)
-    entry(root, 'PA-VM').find('expires').text = expires
-
-    result = series(parse_licenses(root, mock.Mock(), mock.Mock(), TODAY))
-
-    assert result['license.expired', ('feature:pa_vm',)] == (0, 'gauge')
-    assert ('license.days_left', ('feature:pa_vm',)) not in result
-    assert len(result) == 27
+    assert {s.name: s.value for s in samples if s.tags == ('feature:pa_vm',)} == expected

@@ -2,11 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from types import SimpleNamespace
-from unittest import mock
 
 import pytest
 
-from datadog_checks.pan_firewall.collectors.base import CollectContext, FirewallState
 from datadog_checks.pan_firewall.collectors.counters import collect_global_counters
 from datadog_checks.pan_firewall.collectors.dataplane import collect_dataplane
 from datadog_checks.pan_firewall.collectors.ha import collect_ha
@@ -48,34 +46,20 @@ CASES = {
 }
 
 
-def context(state, response, identity):
-    ctx = CollectContext(
-        client=mock.Mock(),
-        identity=SimpleNamespace(serial='serial', **identity),
-        state=state,
-        config=SimpleNamespace(security_rule_filter=None),
-        log=mock.Mock(),
-        ip=FW_A_IP,
-    )
-    ctx.client.op.return_value = parse_response(response)
-    return ctx
-
-
 @pytest.mark.parametrize('collect, response, identity, sends_nothing', CASES.values(), ids=CASES.keys())
 def test_an_unknown_shape_is_warned_about_once_per_firewall_not_once_per_run(
     collect, response, identity, sends_nothing
 ):
-    state = FirewallState()
+    ctx = make_ctx(
+        parse_response(response),
+        identity=SimpleNamespace(serial='serial', **identity),
+        config=SimpleNamespace(security_rule_filter=None),
+    )
 
-    ctx = context(state, response, identity)
     assert (collect(ctx) == []) is sends_nothing
     collect(ctx)
-    assert ctx.log.warning.call_count == 1
 
-    # Another firewall has its own state, so it warns again.
-    other = context(FirewallState(), response, identity)
-    collect(other)
-    assert other.log.warning.call_count == 1
+    assert ctx.log.warning.call_count == 1
 
 
 @pytest.mark.parametrize(

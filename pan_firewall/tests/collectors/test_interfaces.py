@@ -2,47 +2,43 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from unittest import mock
-from xml.etree import ElementTree as ET
 
 import pytest
 
 from datadog_checks.pan_firewall.collectors.base import FirewallState
 from datadog_checks.pan_firewall.collectors.interfaces import (
     COUNTER_INTERFACE_CMD,
-    parse_interface_all,
+    INTERFACE_METRICS,
+    TUNNEL_METRICS,
+    interface_tags,
     parse_interface_counters,
     parse_interface_speeds,
 )
 
-from ..common import FW_A_INTERFACE_ALL, FW_A_IP, FW_A_SERIAL, FW_A_TAGS, INTERFACE_ALL_CMD, INTERFACE_NAMES, SYNTHETIC
+from ..common import (
+    FW_A_INTERFACE_ALL,
+    FW_A_IP,
+    FW_A_SERIAL,
+    FW_A_TAGS,
+    FW_A_TUNNEL,
+    INTERFACE_ALL_CMD,
+    INTERFACE_NAMES,
+    SYNTHETIC,
+)
 from ..helpers import interface_state, load_op, new_check, series
 
 pytestmark = pytest.mark.unit
 
-COUNTER_FIELDS = {
-    'ibytes': 'interface.rx.bytes',
-    'obytes': 'interface.tx.bytes',
-    'ipackets': 'interface.rx.packets',
-    'opackets': 'interface.tx.packets',
-    'ierrors': 'interface.rx.errors',
-    'idrops': 'interface.rx.drops',
-    'ifwderrors': 'interface.forward_errors',
-    'flowstate': 'interface.flow_state',
-    'land': 'interface.attack.land',
-    'pod': 'interface.attack.ping_of_death',
-    'teardrop': 'interface.attack.teardrop',
-    'ipspoof': 'interface.attack.ip_spoof',
-    'macspoof': 'interface.attack.mac_spoof',
-}
-ZERO = dict.fromkeys(COUNTER_FIELDS, 0)
-# Values of the `ifnet/ifnet/entry` rows of the capture, in COUNTER_FIELDS order.
+SPEEDS = SYNTHETIC / 'interface_all_speeds.xml'
+# The device id only: the `interface` tag identifies the port (same shape as hpe_aruba_edgeconnect).
+RESOURCE_TAG = f'dd.internal.resource:ndm_interface:{FW_A_SERIAL}'
+# Values of the `ifnet/ifnet/entry` rows of the capture, in INTERFACE_METRICS order.
 FW_A_ROWS = {
     **dict.fromkeys(INTERFACE_NAMES, (0,) * 13),
     'ethernet1/1': (153738451, 3120586, 119008, 30547, 0, 0, 0, 3, 0, 0, 0, 0, 0),
     'ethernet1/2': (2213914, 152466233, 25062, 110271, 0, 0, 0, 0, 0, 0, 0, 0, 0),
     'tunnel.1': (1563183, 919234, 11275, 5157, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 }
-FW_A_TUNNELS = {'tunnel.1': (1563183, 919234, 11275, 5157), 'tunnel.2': (0, 0, 0, 0)}
 # interface, interface_type, zone, vsys, vr
 MAP_TAGS = {
     'ethernet1/1': ('interface:ethernet1/1', 'interface_type:ethernet', 'zone:untrust', 'vsys:vsys1', 'vr:default'),
@@ -55,146 +51,80 @@ MAP_TAGS = {
 }
 
 
-def resource_tag(name):
-    # Same shape as hpe_aruba_edgeconnect: the device id only, the `interface` tag identifies the port.
-    return f'dd.internal.resource:ndm_interface:{FW_A_SERIAL}'
-
-
-def expected_interfaces(rows, tags_of):
-    expected = {}
-    for name, values in rows.items():
-        for metric, value in zip(COUNTER_FIELDS.values(), values):
-            expected[metric, tags_of(name)] = (value, 'monotonic_count')
-    return expected
-
-
 def with_map_tags(name):
-    return (*MAP_TAGS[name], resource_tag(name))
+    return (*MAP_TAGS[name], RESOURCE_TAG)
 
 
-def test_interface_counters_with_the_interface_map():
+def test_interface_counters_of_the_capture():
     state = interface_state(FW_A_INTERFACE_ALL)
-    samples = parse_interface_counters(load_op(COUNTER_INTERFACE_CMD), state, FW_A_SERIAL, None, mock.Mock())
-
-    interface_samples = [s for s in samples if s.name.startswith('interface.')]
-    assert series(interface_samples) == expected_interfaces(FW_A_ROWS, with_map_tags)
-
-
-def test_interface_counters_without_a_map_carry_the_interface_tag_only():
-    # Without `show interface all` (fw-b has no capture of it) the state holds no interface map.
-    samples = parse_interface_counters(load_op(COUNTER_INTERFACE_CMD), FirewallState(), FW_A_SERIAL, None, mock.Mock())
-
-    assert series(samples) == expected_interfaces(FW_A_ROWS, lambda name: (f'interface:{name}',))
-
-
-def test_interface_without_an_ifnet_row_gets_the_type_and_the_resource_tag():
-    state = interface_state(FW_A_INTERFACE_ALL)
-    state.interface_rows = [r for r in state.interface_rows if r.findtext('name') != 'ethernet1/2']
 
     samples = parse_interface_counters(load_op(COUNTER_INTERFACE_CMD), state, FW_A_SERIAL, None, mock.Mock())
-
-    tags = {s.tags for s in samples if s.name == 'interface.rx.bytes' and 'interface:ethernet1/2' in s.tags}
-    assert tags == {('interface:ethernet1/2', 'interface_type:ethernet', resource_tag('ethernet1/2'))}
-
-
-def test_resource_tag_is_omitted_without_a_serial():
-    state = interface_state(FW_A_INTERFACE_ALL)
-
-    samples = parse_interface_counters(load_op(COUNTER_INTERFACE_CMD), state, None, None, mock.Mock())
-
-    assert not any('dd.internal.resource' in t for s in samples for t in s.tags)
-
-
-def tunnel_tags(name):
-    return (f'tunnel:tun-{name}', f'tunnel_interface:{name}', 'peer_ip:10.0.0.1', 'gateway:gw', 'outer_interface:e1')
-
-
-def test_tunnel_rows_become_ipsec_counters_with_the_tags_vpn_stored():
-    known = {name: tunnel_tags(name) for name in FW_A_TUNNELS}
-
-    samples = parse_interface_counters(load_op(COUNTER_INTERFACE_CMD), FirewallState(), FW_A_SERIAL, known, mock.Mock())
-
-    ipsec = [s for s in samples if s.name.startswith('ipsec.')]
-    expected = {}
-    for name, values in FW_A_TUNNELS.items():
-        for metric, value in zip(
-            ('ipsec.tunnel.rx.bytes', 'ipsec.tunnel.tx.bytes', 'ipsec.tunnel.rx.packets', 'ipsec.tunnel.tx.packets'),
-            values,
-        ):
-            expected[metric, tunnel_tags(name)] = (value, 'monotonic_count')
-    assert series(ipsec) == expected
-    # The same rows are also interfaces, tunnels included.
-    assert {s.tags[0] for s in samples if s.name == 'interface.rx.bytes'} >= {
-        'interface:tunnel.1',
-        'interface:tunnel.2',
-    }
-
-    # A tunnel row that `vpn` does not list is not an IPsec tunnel.
-    samples = parse_interface_counters(
-        load_op(COUNTER_INTERFACE_CMD),
-        FirewallState(),
-        FW_A_SERIAL,
-        {'tunnel.1': tunnel_tags('tunnel.1')},
-        mock.Mock(),
-    )
-
-    assert {s.tags for s in samples if s.name == 'ipsec.tunnel.rx.bytes'} == {tunnel_tags('tunnel.1')}
-
-
-def test_speeds_of_the_capture_are_not_sent():
-    state = interface_state(FW_A_INTERFACE_ALL)
-
-    assert parse_interface_speeds(state, FW_A_SERIAL, mock.Mock()) == []
-
-
-def test_speed_is_megabits_converted_to_bits_and_unparseable_is_skipped():
-    state = interface_state(SYNTHETIC / 'interface_all_speeds.xml')
-
-    samples = parse_interface_speeds(state, FW_A_SERIAL, mock.Mock())
 
     assert series(samples) == {
-        ('interface.speed', with_map_tags('ethernet1/1')): (1e9, 'gauge'),
-        ('interface.speed', with_map_tags('ethernet1/2')): (1e10, 'gauge'),
+        (metric, with_map_tags(name)): (value, 'monotonic_count')
+        for name, values in FW_A_ROWS.items()
+        for metric, value in zip(INTERFACE_METRICS.values(), values)
     }
 
 
-def test_speeds_are_sent_as_gauges_every_30_minutes_with_the_identity_not_every_3(
-    dd_run_check,
-    aggregator,
-    fake_panos,
-    monkeypatch,
-    schedule_clock,
-):
-    fake_panos.answer_op(FW_A_IP, INTERFACE_ALL_CMD, (200, (SYNTHETIC / 'interface_all_speeds.xml').read_bytes()))
+@pytest.mark.parametrize(
+    'state, serial, tags',
+    [
+        pytest.param(FirewallState(), FW_A_SERIAL, ('interface:ethernet1/1',), id='without-show-interface-all'),
+        pytest.param(
+            FirewallState(interface_map={}),
+            FW_A_SERIAL,
+            ('interface:ethernet1/1', 'interface_type:ethernet', RESOURCE_TAG),
+            id='without-an-ifnet-row',
+        ),
+        pytest.param(interface_state(FW_A_INTERFACE_ALL), None, MAP_TAGS['ethernet1/1'], id='without-a-serial'),
+    ],
+)
+def test_interface_tags(state, serial, tags):
+    assert interface_tags('ethernet1/1', state, serial) == tags
+
+
+def test_tunnel_rows_vpn_listed_are_ipsec_counters():
+    # `tunnel.2` is a tunnel row too, but `vpn` did not list it.
+    tunnel_tags = {'tunnel.1': FW_A_TUNNEL}
+
+    samples = parse_interface_counters(
+        load_op(COUNTER_INTERFACE_CMD), FirewallState(), FW_A_SERIAL, tunnel_tags, mock.Mock()
+    )
+
+    assert series([s for s in samples if s.name.startswith('ipsec.')]) == {
+        (metric, FW_A_TUNNEL): (value, 'monotonic_count')
+        for metric, value in zip(TUNNEL_METRICS.values(), FW_A_ROWS['tunnel.1'])
+    }
+
+
+@pytest.mark.parametrize(
+    'path, speeds',
+    [
+        pytest.param(FW_A_INTERFACE_ALL, {}, id='unknown-and-not-applicable'),
+        pytest.param(SPEEDS, {'ethernet1/1': 1e9, 'ethernet1/2': 1e10}, id='megabits-and-unparseable'),
+    ],
+)
+def test_interface_speeds(path, speeds):
+    samples = parse_interface_speeds(interface_state(path), FW_A_SERIAL, mock.Mock())
+
+    assert series(samples) == {('interface.speed', with_map_tags(n)): (s, 'gauge') for n, s in speeds.items()}
+
+
+def test_speeds_are_sent_with_the_identity_every_30_minutes(dd_run_check, aggregator, fake_panos, schedule_clock):
+    fake_panos.answer_op(FW_A_IP, INTERFACE_ALL_CMD, (200, SPEEDS.read_bytes()))
     check = new_check()
+    start = schedule_clock.now
 
     sent = []
-    for seconds in (0, 180, 1799, 1800):
-        schedule_clock.now = 1000.0 + seconds
+    for seconds in (0, 1799, 1800):
+        schedule_clock.now = start + seconds
         before = len(aggregator.metrics('pan_firewall.interface.speed'))
         dd_run_check(check)
         sent.append(len(aggregator.metrics('pan_firewall.interface.speed')) - before)
 
-    # Two interfaces report a speed: sent on the first run and on the 30-minute run only.
-    assert sent == [2, 0, 0, 2]
-    for name, speed in (('ethernet1/1', 1e9), ('ethernet1/2', 1e10)):
-        aggregator.assert_metric(
-            'pan_firewall.interface.speed',
-            speed,
-            tags=sorted([*FW_A_TAGS, *with_map_tags(name)]),
-            metric_type=aggregator.GAUGE,
-        )
-
-
-def test_interface_all_skips_hardware_entries_without_a_name():
-    root = ET.fromstring(
-        '<response status="success"><result>'
-        '<ifnet><entry><name>ethernet1/1</name></entry></ifnet>'
-        '<hw><entry><name>ethernet1/1</name></entry><entry><name></name></entry><entry/></hw>'
-        '</result></response>'
+    # Two interfaces have a speed; the interfaces collector runs in between and does not send them.
+    assert sent == [2, 0, 2]
+    aggregator.assert_metric(
+        'pan_firewall.interface.speed', 1e9, tags=sorted([*FW_A_TAGS, *with_map_tags('ethernet1/1')])
     )
-
-    rows, by_name = parse_interface_all(root)
-
-    assert [row.findtext('name') for row in rows] == ['ethernet1/1']
-    assert list(by_name) == ['ethernet1/1']

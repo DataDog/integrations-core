@@ -54,18 +54,24 @@ def test_bgp_of_the_capture():
     assert series(samples) == {**down, **up}
 
 
-def test_bgp_established_peer_is_a_restart_within_30_minutes():
+@pytest.mark.parametrize(
+    'status, duration, up, restart',
+    [
+        pytest.param('Established', '1799', 1, 1, id='up-for-less-than-30-minutes'),
+        pytest.param('Established', '1800', 1, 0, id='up-for-30-minutes'),
+        # A peer that is not Established has not come up, however short its time in the state.
+        pytest.param('Active', '5', 0, 0, id='not-established'),
+    ],
+)
+def test_bgp_restart_is_an_established_peer_up_for_less_than_30_minutes(status, duration, up, restart):
     root = load_op(BGP_PEER_CMD)
-    for duration, restart in (('1799', 1), ('1800', 0)):
-        root.find("result/entry[@peer='fw-peer']/status-duration").text = duration
-        values = series(parse_bgp_peers(root))
-        assert values['bgp.peer.restart', FW_A_PEER] == (restart, 'gauge')
-    # A peer that is not Established has not come up, however short its time in the state.
-    root.find("result/entry[@peer='fw-peer']/status").text = 'Active'
-    root.find("result/entry[@peer='fw-peer']/status-duration").text = '5'
+    root.find("result/entry[@peer='fw-peer']/status").text = status
+    root.find("result/entry[@peer='fw-peer']/status-duration").text = duration
+
     values = series(parse_bgp_peers(root))
-    assert values['bgp.peer.status', FW_A_PEER] == (0, 'gauge')
-    assert values['bgp.peer.restart', FW_A_PEER] == (0, 'gauge')
+
+    assert values['bgp.peer.status', FW_A_PEER] == (up, 'gauge')
+    assert values['bgp.peer.restart', FW_A_PEER] == (restart, 'gauge')
 
 
 def test_bgp_dual_stack_peer_reports_each_family_with_its_own_utilization():
@@ -115,42 +121,27 @@ def test_peer_ip_strips_the_port_and_keeps_ipv6_intact(address, expected):
     assert peer_ip(address) == expected
 
 
-def make_context(advanced_routing, state=None):
-    return make_ctx(state=state, identity=mock.Mock(advanced_routing=advanced_routing))
+@pytest.mark.parametrize('collect, cmd', [(collect_bgp, BGP_PEER_CMD), (collect_ospf, OSPF_NEIGHBOR_CMD)])
+@pytest.mark.parametrize(
+    'advanced_routing, called',
+    [
+        pytest.param(True, False, id='advanced-routing-engine'),
+        pytest.param(False, True, id='legacy-routing-engine'),
+        pytest.param(None, True, id='unknown-routing-engine'),
+    ],
+)
+def test_only_the_legacy_or_unknown_routing_engine_is_asked(collect, cmd, advanced_routing, called):
+    ctx = make_ctx(load_op(cmd), identity=mock.Mock(advanced_routing=advanced_routing))
 
+    collect(ctx)
 
-COLLECTORS = [
-    pytest.param(collect_bgp, BGP_PEER_CMD, id='bgp'),
-    pytest.param(collect_ospf, OSPF_NEIGHBOR_CMD, id='ospf'),
-]
-
-
-@pytest.mark.parametrize('collect, _cmd', COLLECTORS)
-def test_advanced_routing_engine_sends_no_call(collect, _cmd):
-    ctx = make_context(True)
-
-    assert collect(ctx) == []
-
-    ctx.client.op.assert_not_called()
-
-
-@pytest.mark.parametrize('collect, cmd', COLLECTORS)
-@pytest.mark.parametrize('advanced_routing', [False, None])
-def test_legacy_or_unknown_routing_engine_sends_the_legacy_call(collect, cmd, advanced_routing):
-    ctx = make_context(advanced_routing)
-    ctx.client.op.return_value = load_op(cmd)
-
-    assert collect(ctx)
-    ctx.client.op.assert_called_once_with(cmd)
+    assert ctx.client.op.called is called
 
 
 FW_A_OSPF = ('neighbor:169.254.10.2', 'router_id:10.255.0.2', 'area:0.0.0.0', 'vr:default')
 
 
-@pytest.mark.parametrize(
-    'state, expected',
-    [('full', 1), ('FULL', 1), ('2-way', 0)],
-)
+@pytest.mark.parametrize('state, expected', [('full', 1), ('FULL', 1), ('2-way', 0)])
 def test_ospf_neighbor_is_up_only_in_the_full_state(state, expected):
     root = load_op(OSPF_NEIGHBOR_CMD)
     root.find('result/entry/status').text = state

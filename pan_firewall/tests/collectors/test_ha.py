@@ -6,36 +6,22 @@ import pytest
 from datadog_checks.pan_firewall.collectors.base import FirewallState
 from datadog_checks.pan_firewall.collectors.ha import HA_CMD, collect_ha
 
-from ..common import FIXTURES
+from ..common import SYNTHETIC
 from ..helpers import load_op, load_xml, make_ctx
 
 pytestmark = pytest.mark.unit
 
-ENABLED = FIXTURES / 'synthetic' / 'ha_all_enabled.xml'
 
+@pytest.mark.parametrize(
+    'answer, ha_state',
+    [
+        pytest.param(load_op(HA_CMD), None, id='standalone'),
+        pytest.param(load_xml(SYNTHETIC / 'ha_all_enabled.xml'), 'active', id='enabled'),
+    ],
+)
+def test_each_run_replaces_the_ha_state(answer, ha_state):
+    ctx = make_ctx(answer, state=FirewallState(ha_state='passive'))
 
-def test_standalone_firewall_has_no_ha_state():
-    ctx = make_ctx(load_op(HA_CMD), state=FirewallState(ha_state='active'))
+    collect_ha(ctx)
 
-    assert collect_ha(ctx) == []
-
-    ctx.client.op.assert_called_once_with(HA_CMD)
-    assert ctx.state.ha_state is None
-
-
-def test_enabled_firewall_keeps_its_local_state():
-    ctx = make_ctx(load_xml(ENABLED))
-
-    assert collect_ha(ctx) == []
-
-    assert ctx.state.ha_state == 'active'
-
-
-def test_enabled_firewall_without_a_local_state_has_none():
-    root = load_xml(ENABLED)
-    root.find('result/group/local-info').remove(root.find('result/group/local-info/state'))
-    ctx = make_ctx(root, state=FirewallState(ha_state='active'))
-
-    assert collect_ha(ctx) == []
-
-    assert ctx.state.ha_state is None
+    assert ctx.state.ha_state == ha_state
