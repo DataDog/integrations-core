@@ -61,7 +61,7 @@ def instance_enable_legacy_tags_normalization():
 
 
 def instance_histogram_buckets_as_distributions():
-    return True
+    return False
 
 
 def instance_ignore_connection_errors():

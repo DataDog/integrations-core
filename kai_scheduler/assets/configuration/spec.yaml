@@ -45,7 +45,6 @@ files:
       overrides:
         openmetrics_endpoint.required: false
         openmetrics_endpoint.hidden: true
-        histogram_buckets_as_distributions.value.example: true
   - template: logs
     example:
     - type: docker
