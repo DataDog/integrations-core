@@ -147,7 +147,7 @@ def test_a_threat_job_still_running_is_polled_again_on_the_next_run_not_in_5_min
 
 
 # Each optional collector: its default, and whether a request is one of its own.
-OPTIONAL_COLLECTORS = {
+OPTIONAL_COLLECTOR_CALLS = {
     'collect_global_counters': (False, lambda call: call.cmd == GLOBAL_COUNTER_CMD),
     'collect_ospf': (False, lambda call: call.cmd == OSPF_NEIGHBOR_CMD),
     'collect_reports': (False, lambda call: call.type == 'report'),
@@ -157,10 +157,10 @@ OPTIONAL_COLLECTORS = {
 
 
 @pytest.mark.parametrize('flipped', [False, True], ids=['default', 'flipped'])
-@pytest.mark.parametrize('option', OPTIONAL_COLLECTORS)
+@pytest.mark.parametrize('option', OPTIONAL_COLLECTOR_CALLS)
 def test_optional_collectors_follow_their_option(dd_run_check, fake_panos, option, flipped):
     # A default turned on would start, among others, 10 report jobs per firewall on every install.
-    default, is_its_call = OPTIONAL_COLLECTORS[option]
+    default, is_its_call = OPTIONAL_COLLECTOR_CALLS[option]
 
     dd_run_check(PanFirewallCheck('pan_firewall', {}, [make_instance(**({option: not default} if flipped else {}))]))
 
