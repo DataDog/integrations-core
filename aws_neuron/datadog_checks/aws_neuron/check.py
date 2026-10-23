@@ -6,6 +6,7 @@ from datadog_checks.base import OpenMetricsBaseCheckV2
 
 
 class AwsNeuronCheck(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'aws_neuron'
 
     DEFAULT_METRIC_LIMIT = 0

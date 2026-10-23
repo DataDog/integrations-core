@@ -20,6 +20,7 @@ METRIC_WITH_LABEL_NAME = {
 
 
 class CockroachdbCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'cockroachdb'
 
     DEFAULT_METRIC_LIMIT = 0

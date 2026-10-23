@@ -27,6 +27,7 @@ class KumaOpenMetricsScraper(OpenMetricsScraper):
 
 
 class KumaCheck(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = "kuma"
 
