@@ -349,6 +349,10 @@ integration/cloud_foundry_api:
 - changed-files:
   - any-glob-to-any-file:
     - cloud_foundry_api/**/*
+integration/cloud_spanner:
+- changed-files:
+  - any-glob-to-any-file:
+    - cloud_spanner/**/*
 integration/cloudera:
 - changed-files:
   - any-glob-to-any-file:

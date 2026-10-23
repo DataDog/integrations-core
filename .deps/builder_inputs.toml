@@ -11,7 +11,7 @@
 # Hash inputs are defined in .builders/inputs_hash.py (SHARED_INPUTS,
 # RESOLUTION_INPUTS).
 [resolution]
-hash = "808e13cea1f11236aba3c5971c420093493d2f76d72fdf9a44f0d419a65e7d4c"
+hash = "c3a06754a8d223ca6173c5c6246ef644d1aeb4bed5318d99d711a24eb24eaa86"
 
 [images]
 linux-aarch64 = "e3f812679bbb492ceedb90d0df61e359a83134ba46a7c80bfb8525d062e71a46"
