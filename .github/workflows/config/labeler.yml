@@ -809,6 +809,10 @@ integration/kafka_consumer:
 - changed-files:
   - any-glob-to-any-file:
     - kafka_consumer/**/*
+integration/kai_scheduler:
+- changed-files:
+  - any-glob-to-any-file:
+    - kai_scheduler/**/*
 integration/kandji:
 - changed-files:
   - any-glob-to-any-file:

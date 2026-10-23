@@ -650,6 +650,8 @@ plaid/assets/logs/                                                  @DataDog/saa
 /infiniband/*.md                                                     @DataDog/accelerator-telemetry @DataDog/documentation
 /infiniband/manifest.json                                            @DataDog/accelerator-telemetry @DataDog/agent-integrations @DataDog/documentation
 
+/kai_scheduler/                                                      @DataDog/accelerator-telemetry
+/kai_scheduler/*.md                                                  @DataDog/accelerator-telemetry @DataDog/documentation
 /kueue/                                                                @DataDog/gpu-monitoring-agent
 /kueue/*.md                                                            @DataDog/gpu-monitoring-agent @DataDog/documentation
 /kueue/manifest.json                                                   @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation

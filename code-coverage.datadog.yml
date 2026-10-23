@@ -377,6 +377,9 @@ services:
 - id: kafka_consumer
   paths:
   - kafka_consumer/datadog_checks/kafka_consumer/
+- id: kai_scheduler
+  paths:
+  - kai_scheduler/datadog_checks/kai_scheduler/
 - id: karpenter
   paths:
   - karpenter/datadog_checks/karpenter/
