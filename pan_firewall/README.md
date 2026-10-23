@@ -38,11 +38,28 @@ No additional installation is needed on your server.
 
 2. Edit the `pan_firewall.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your Palo Alto Networks firewall performance data. See the [sample pan_firewall.d/conf.yaml][4] for all available configuration options.
 
+   Choose how the Agent finds the firewalls: list them in `firewalls`, or set `panorama_host` with `panorama_username` and `panorama_password` (or `panorama_api_key`) to discover every firewall connected to Panorama. Set one or the other, not both.
+
+   In both modes, the Agent logs in to each firewall with an entry of `firewall_credentials`. It uses the first entry whose `cidr` contains the firewall IP, and an entry without `cidr` matches every firewall. Each entry sets either `username` and `password`, or `api_key`:
+
+   ```yaml
+   instances:
+     - panorama_host: panorama.example.com
+       panorama_api_key: <PANORAMA_API_KEY>
+       firewall_credentials:
+         - cidr: 10.0.0.0/24
+           username: <USERNAME>
+           password: <PASSWORD>
+         - api_key: <API_KEY>
+   ```
+
    **Note**: The Agent connects to the management interface of each firewall over HTTPS. HTTPS must be enabled in the management profile of that interface, and if you restrict management access, the Agent host must be in the **Permitted IP Addresses** list. With Panorama discovery, the Agent polls each firewall at the IP address that Panorama reports for it.
 
    PAN-OS management interfaces ship with a self-signed certificate. Either install a certificate signed by a certificate authority (CA) that the Agent trusts, or set `tls_verify` to `false`.
 
    If you use Panorama discovery, configure `firewall_ips` with an explicit include list that matches your known firewall IP ranges, so that the check only connects to expected firewalls.
+
+   With Panorama discovery, the Agent polls every connected firewall directly. The `max_concurrency` option (default `5`) sets how many firewalls are polled in parallel. In environments with many firewalls, raise `max_concurrency` so that a collection run completes within its interval.
 
 3. [Restart the Agent][5].
 
