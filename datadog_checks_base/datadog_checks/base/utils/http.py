@@ -237,7 +237,15 @@ class _SSLContextAdapter(requests.adapters.HTTPAdapter):
 
 
 class ResponseLineTooLongError(ValueError):
-    pass
+    def __init__(self, max_line_size: int):
+        super().__init__(max_line_size)
+        self.max_line_size = max_line_size
+
+    def __str__(self) -> str:
+        return (
+            f'Response contains a line longer than {self.max_line_size} bytes, '
+            'the limit can be raised with the `max_line_size` option (in KiB)'
+        )
 
 
 def limit_line_size(response: requests.Response, max_line_size: int | None) -> None:
@@ -277,10 +285,7 @@ class LineCappedRawResponse(ObjectProxy):
             newline = chunk.find(b'\n')
             first_line_size = line_size + (len(chunk) if newline < 0 else newline)
             if first_line_size > self._self_max_line_size:
-                raise ResponseLineTooLongError(
-                    f'Response contains a line longer than {self._self_max_line_size} bytes, '
-                    'the limit can be raised with the `max_line_size` option (in KiB)'
-                )
+                raise ResponseLineTooLongError(self._self_max_line_size)
             line_size = first_line_size if newline < 0 else len(chunk) - chunk.rfind(b'\n') - 1
             if newline < 0:
                 buffer += chunk
