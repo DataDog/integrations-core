@@ -173,7 +173,7 @@ def labeler(app: Application, sync: bool):
     if tracker.errors:  # no cov
         message = (
             'To fix this, run `ddev validate labeler --sync`. Every integration folder needs a PR label, '
-            'including integrations without an Agent check, such as SaaS integrations.\n'
+            'including integrations without an Agent check, such as logs-only or tile-only integrations.\n'
             '\n'
             'If a reported folder is not an integration, for example shared code or tooling such as '
             '`datadog_checks_base` or `ddev`, mark it in `.ddev/config.toml` instead:\n'
