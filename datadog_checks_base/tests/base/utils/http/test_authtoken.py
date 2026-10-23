@@ -1,21 +1,22 @@
 # (C) Datadog, Inc. 2022-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import os
 import re
 
 import jwt
 import mock
 import pytest
+import requests
 
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.http import DEFAULT_EXPIRATION, RequestsWrapper
 from datadog_checks.base.utils.time import get_timestamp
 from datadog_checks.dev import TempDir
 from datadog_checks.dev.fs import read_file, write_file
-from datadog_checks.dev.http import MockResponse
 
-from .common import DEFAULT_OPTIONS, FIXTURE_PATH
+from .common import DEFAULT_OPTIONS, FIXTURE_PATH, RequestsTransport, create_requests_client
 
 pytestmark = [pytest.mark.unit]
 
@@ -580,13 +581,15 @@ class TestAuthTokenDCOS:
     def test_token_auth(self):
         priv_key_path = os.path.join(FIXTURE_PATH, 'dcos', 'private-key.pem')
         pub_key_path = os.path.join(FIXTURE_PATH, 'dcos', 'public-key.pem')
+        login_url = 'https://leader.mesos/acs/api/v1/auth/login'
+        service_url = 'http://leader.mesos/service/some-service'
 
         exp = 3600
         instance = {
             'auth_token': {
                 'reader': {
                     'type': 'dcos_auth',
-                    'login_url': 'https://leader.mesos/acs/api/v1/auth/login',
+                    'login_url': login_url,
                     'service_account': 'datadog_agent',
                     'private_key_path': priv_key_path,
                     'expiration': exp,
@@ -594,31 +597,41 @@ class TestAuthTokenDCOS:
                 'writer': {'type': 'header', 'name': 'Authorization', 'value': 'token=<TOKEN>'},
             }
         }
-        init_config = {}
 
-        def login(*args, **kwargs):
-            if kwargs['url'] == 'https://leader.mesos/acs/api/v1/auth/login':
-                json = kwargs['json']
-                assert json['uid'] == 'datadog_agent'
+        login_transport = RequestsTransport()
+        login_transport.respond(
+            content=b'{"token": "auth-token"}',
+            headers={'Content-Type': 'application/json'},
+        )
+        service_transport = RequestsTransport()
+        service_transport.respond()
+        http = create_requests_client(service_transport, instance, agnostic=False)
 
-                public_key = read_file(pub_key_path)
-                decoded = jwt.decode(json['token'], public_key, algorithms='RS256')
-                assert decoded['uid'] == 'datadog_agent'
-                assert isinstance(decoded['exp'], int)
-                assert abs(decoded['exp'] - (get_timestamp() + exp)) < 10
+        with mock.patch.object(
+            requests.adapters.HTTPAdapter,
+            'send',
+            autospec=True,
+            side_effect=lambda _, request, **kwargs: login_transport.send(request, **kwargs),
+        ):
+            response = http.get(service_url)
 
-                return MockResponse(json_data={'token': 'auth-token'})
-            return MockResponse(status_code=404)
+        assert response.status_code == 200
+        assert len(login_transport.requests) == 1
+        login_request = login_transport.requests[0]
+        assert login_request.url == login_url
+        payload = json.loads(login_request.body)
+        assert payload['uid'] == 'datadog_agent'
 
-        def auth(*args, **kwargs):
-            if args[0] == 'https://leader.mesos/service/some-service':
-                assert kwargs['headers']['Authorization'] == 'token=auth-token'
-                return MockResponse(json_data={})
-            return MockResponse(status_code=404)
+        public_key = read_file(pub_key_path)
+        decoded = jwt.decode(payload['token'], public_key, algorithms='RS256')
+        assert decoded['uid'] == 'datadog_agent'
+        assert isinstance(decoded['exp'], int)
+        assert abs(decoded['exp'] - (get_timestamp() + exp)) < 10
 
-        with mock.patch('requests.post', side_effect=login), mock.patch('requests.Session.get', side_effect=auth):
-            http = RequestsWrapper(instance, init_config)
-            http.get('https://leader.mesos/service/some-service')
+        assert len(service_transport.requests) == 1
+        service_request = service_transport.requests[0]
+        assert service_request.url == service_url
+        assert service_request.headers['Authorization'] == 'token=auth-token'
 
 
 class TestAuthTokenWriteHeader:
@@ -731,24 +744,20 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                     'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
                 }
             }
-            http = RequestsWrapper(instance, {})
+            transport = RequestsTransport()
+            transport.respond()
+            transport.raise_exception(requests.exceptions.ConnectionError('connection failed'))
+            transport.respond()
+            http = create_requests_client(transport, instance, agnostic=False)
 
-            with mock.patch('requests.Session.get'):
-                write_file(token_file, '\nsecret1\n')
-                http.get('https://www.google.com')
+            write_file(token_file, '\nsecret1\n')
+            http.get('http://www.google.com')
 
-            def raise_error_once(*args, **kwargs):
-                if get.call_count == 1:
-                    raise Exception
-                return MockResponse()
+            write_file(token_file, '\nsecret2\n')
+            http.get('http://www.google.com', extra_headers={'Accept': 'text/plain'})
 
-            with mock.patch('requests.Session.get', side_effect=raise_error_once) as get:
-                write_file(token_file, '\nsecret2\n')
-                http.get('https://www.google.com', extra_headers={'Accept': 'text/plain'})
-
-            headers = get.call_args.kwargs['headers']
-            assert headers['Accept'] == 'text/plain'
-            assert headers['Authorization'] == 'Bearer secret2'
+            assert transport.requests[2].headers['Accept'] == 'text/plain'
+            assert transport.requests[2].headers['Authorization'] == 'Bearer secret2'
 
     def test_refresh_after_connection_error(self):
         with TempDir() as temp_dir:
@@ -759,41 +768,23 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                     'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
                 }
             }
-            init_config = {}
-            http = RequestsWrapper(instance, init_config)
+            transport = RequestsTransport()
+            transport.respond()
+            transport.raise_exception(requests.exceptions.ConnectionError('connection failed'))
+            transport.respond()
+            http = create_requests_client(transport, instance, agnostic=False)
 
-            with mock.patch('requests.Session.get'):
-                write_file(token_file, '\nsecret1\n')
-                http.get('https://www.google.com')
+            write_file(token_file, '\nsecret1\n')
+            http.get('http://www.google.com')
 
-            counter = {'errors': 0}
+            write_file(token_file, '\nsecret2\n')
+            response = http.get('http://www.google.com')
 
-            def raise_error_once(*args, **kwargs):
-                counter['errors'] += 1
-                if counter['errors'] <= 1:
-                    raise Exception
-
-                return MockResponse()
-
+            assert response.status_code == 200
             expected_headers = {'Authorization': 'Bearer secret2'}
             expected_headers.update(DEFAULT_OPTIONS['headers'])
-            with mock.patch('requests.Session.get', side_effect=raise_error_once) as get:
-                write_file(token_file, '\nsecret2\n')
-
-                http.get('https://www.google.com')
-
-                get.assert_called_with(
-                    'https://www.google.com',
-                    headers=expected_headers,
-                    auth=None,
-                    cert=None,
-                    proxies=None,
-                    timeout=(10.0, 10.0),
-                    verify=True,
-                    allow_redirects=True,
-                )
-
-                assert http.options['headers'] == expected_headers
+            assert transport.requests[2].headers['Authorization'] == 'Bearer secret2'
+            assert http.options['headers'] == expected_headers
 
     def test_refresh_after_bad_status_code(self):
         with TempDir() as temp_dir:
@@ -804,31 +795,20 @@ class TestAuthTokenFileReaderWithHeaderWriter:
                     'writer': {'type': 'header', 'name': 'Authorization', 'value': 'Bearer <TOKEN>'},
                 }
             }
-            init_config = {}
-            http = RequestsWrapper(instance, init_config)
+            transport = RequestsTransport()
+            transport.respond()
+            transport.respond(status_code=500)
+            transport.respond()
+            http = create_requests_client(transport, instance, agnostic=False)
 
-            with mock.patch('requests.Session.get'):
-                write_file(token_file, '\nsecret1\n')
-                http.get('https://www.google.com')
+            write_file(token_file, '\nsecret1\n')
+            http.get('http://www.google.com')
 
-            def error():
-                raise Exception()
+            write_file(token_file, '\nsecret2\n')
+            response = http.get('http://www.google.com')
 
+            assert response.status_code == 200
             expected_headers = {'Authorization': 'Bearer secret2'}
             expected_headers.update(DEFAULT_OPTIONS['headers'])
-            with mock.patch('requests.Session.get', return_value=mock.MagicMock(raise_for_status=error)) as get:
-                write_file(token_file, '\nsecret2\n')
-                http.get('https://www.google.com')
-
-                get.assert_called_with(
-                    'https://www.google.com',
-                    headers=expected_headers,
-                    auth=None,
-                    cert=None,
-                    proxies=None,
-                    timeout=(10.0, 10.0),
-                    verify=True,
-                    allow_redirects=True,
-                )
-
-                assert http.options['headers'] == expected_headers
+            assert transport.requests[2].headers['Authorization'] == 'Bearer secret2'
+            assert http.options['headers'] == expected_headers
