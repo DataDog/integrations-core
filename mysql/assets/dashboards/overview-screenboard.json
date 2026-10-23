@@ -691,7 +691,7 @@
             "id": 3682098355889932,
             "definition": {
               "type": "note",
-              "content": "\nMost of the metrics and monitoring strategies outlined here also apply to MySQL-compatible technologies such MariaDB and Percona Server, with some notable differences. For instance, some of the features in the MySQL Workbench are not compatible with currently available versions of MariaDB.\n\nAmazon RDS users should check out our specialized monitoring guides for [MySQL on RDS](https://www.datadoghq.com/blog/monitoring-rds-mysql-performance-metrics/) and for the MySQL-compatible [Amazon Aurora](https://www.datadoghq.com/blog/monitoring-amazon-aurora-performance-metrics/).\n\n",
+              "content": "\nMost of the metrics and monitoring strategies outlined here also apply to MySQL-compatible technologies such as MariaDB and Percona Server, with some notable differences. For instance, some of the features in the MySQL Workbench are not compatible with currently available versions of MariaDB.\n\nAmazon RDS users should check out our specialized monitoring guides for [MySQL on RDS](https://www.datadoghq.com/blog/monitoring-rds-mysql-performance-metrics/) and for the MySQL-compatible [Amazon Aurora](https://www.datadoghq.com/blog/monitoring-amazon-aurora-performance-metrics/).\n\n",
               "background_color": "green",
               "font_size": "14",
               "text_align": "left",
