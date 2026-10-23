@@ -183,8 +183,9 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
         if self.collect_job_events:
             self.sacct_job_events_cmd = self.get_slurm_command('sacct', SACCT_JOB_EVENT_PARAMS)
-        # Jobs seen in the last successful poll, keyed by cluster and raw job ID. None until the first poll
-        # seeds it, so that jobs that already existed when the check started do not produce events.
+        # Jobs seen in the last successful poll, keyed by raw job ID. None until the first poll seeds it, so that
+        # jobs that already existed when the check started do not produce events. Raw job IDs are unique within a
+        # federation, and a federated job reports the cluster that runs it, which changes once a sibling starts it.
         self._job_event_state: dict[str, SacctJob] | None = None
         self._job_events_first_poll: float | None = None
         self._job_events_last_poll: float | None = None
@@ -273,19 +274,18 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         # reports as pending keep their previous record; the rest of the jobs missing from the window are queried
         # by ID: those squeue reports as pending for the first time, and alive jobs that squeue no longer reports.
         squeue_pending = self._squeue_pending_reasons
-        window_ids = {job.job_id_raw for job in current_state.values()}
-        known_ids = set()
+        previous_state = self._job_event_state or {}
+        window_ids = set(current_state)
         missing_ids = set()
-        for key, job in (self._job_event_state or {}).items():
-            known_ids.add(job.job_id_raw)
-            if job.state in SACCT_JOB_EVENT_DONE_STATES or job.job_id_raw in window_ids:
+        for job_id, job in previous_state.items():
+            if job.state in SACCT_JOB_EVENT_DONE_STATES or job_id in window_ids:
                 continue
-            if squeue_pending is not None and job.job_id_raw in squeue_pending:
-                current_state[key] = job
+            if squeue_pending is not None and job_id in squeue_pending:
+                current_state[job_id] = job
             else:
-                missing_ids.add(job.job_id_raw)
+                missing_ids.add(job_id)
         if squeue_pending is not None:
-            missing_ids.update(set(squeue_pending) - window_ids - known_ids)
+            missing_ids.update(set(squeue_pending) - window_ids - set(previous_state))
 
         sorted_ids = sorted(missing_ids)
         for i in range(0, len(sorted_ids), SACCT_JOB_EVENT_IDS_PER_QUERY):
@@ -294,7 +294,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             if jobs is None:
                 return
             # Querying an array job by ID also returns its tasks, which may have finished long ago.
-            current_state.update({key: job for key, job in jobs.items() if job.job_id_raw in missing_ids})
+            current_state.update({job_id: job for job_id, job in jobs.items() if job_id in missing_ids})
 
         self.process_job_events(current_state, poll_time)
         self._job_events_last_poll = poll_time
@@ -317,7 +317,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             if job is None:
                 self.log.debug("Skipping unexpected sacct job events line: %s", line)
                 continue
-            jobs[job.key] = job
+            jobs[job.job_id_raw] = job
         return jobs
 
     def process_job_events(self, current_state: dict[str, SacctJob], now: float) -> None:
@@ -326,12 +326,14 @@ class SlurmCheck(AgentCheck, ConfigMixin):
 
         squeue_reasons = self._squeue_pending_reasons
         if squeue_reasons is None:
-            current_reasons = {key: reason for key, reason in self._job_pending_reasons.items() if key in current_state}
+            current_reasons = {
+                job_id: reason for job_id, reason in self._job_pending_reasons.items() if job_id in current_state
+            }
         else:
             current_reasons = {
-                job.key: squeue_reasons[job.job_id_raw]
-                for job in current_state.values()
-                if squeue_reasons.get(job.job_id_raw, NO_PENDING_REASON) != NO_PENDING_REASON
+                job_id: squeue_reasons[job_id]
+                for job_id in current_state
+                if squeue_reasons.get(job_id, NO_PENDING_REASON) != NO_PENDING_REASON
             }
 
         previous_state = self._job_event_state
@@ -378,7 +380,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 'event_type': f'slurm.job.{transition}',
                 'msg_title': job_event_title(transition, job, pending_reason),
                 'msg_text': job_event_text(transition, job, pending_reason),
-                'aggregation_key': f'slurm_job:{job.key}',
+                'aggregation_key': f'slurm_job:{job.cluster}:{job.job_id_raw}',
                 'alert_type': transition_alert_type(transition, job, pending_reason),
                 'tags': job_event_tags(transition, job, self.tags, pending_reason),
             }

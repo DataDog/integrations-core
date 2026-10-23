@@ -276,6 +276,20 @@ def test_job_events_requeue(events_instance, aggregator):
     ]
 
 
+@pytest.mark.usefixtures('gpu_monitoring_enabled')
+def test_job_events_federated_job_started_on_sibling_cluster(events_instance, aggregator):
+    check = SlurmCheck('slurm', {}, [events_instance])
+    run_polls(
+        check,
+        sacct_output(sacct_line('67108865', 'PENDING', Cluster='origin')),
+        sacct_output(sacct_line('67108865', 'RUNNING', start='2026-10-21T12:01:00', Cluster='sibling')),
+    )
+
+    [event] = aggregator.events
+    assert event['msg_title'] == 'Slurm job 67108865 (train) started'
+    assert 'slurm_cluster_name:sibling' in event['tags']
+
+
 @pytest.mark.parametrize(
     'state, end, timestamp',
     [
@@ -436,7 +450,7 @@ def test_job_events_pending_jobs_discovered_from_squeue(events_instance, aggrega
 
 
 @pytest.mark.usefixtures('gpu_monitoring_enabled')
-def test_job_events_array_and_heterogeneous_job_submitted_once(events_instance, aggregator):
+def test_job_events_array_submitted_once(events_instance, aggregator):
     check = SlurmCheck('slurm', {}, [events_instance])
     run_polls(
         check,

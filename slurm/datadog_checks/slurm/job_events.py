@@ -107,7 +107,6 @@ def gpu_count(tres: str) -> int:
 
 @dataclass(frozen=True)
 class SacctJob:
-    key: str
     job_id_raw: str
     job_id: str
     cluster: str
@@ -154,7 +153,6 @@ class SacctJob:
         state_name, _, state_detail = state.strip().partition(' ')
 
         return cls(
-            key=f'{cluster}:{job_id_raw}',
             job_id_raw=job_id_raw,
             job_id=job_id,
             cluster=cluster,
