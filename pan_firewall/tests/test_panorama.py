@@ -247,25 +247,30 @@ def test_firewall_without_matching_credentials_is_skipped_and_still_reported_for
 
 
 @pytest.mark.parametrize(
-    'devices, options, marker',
+    'devices, options, marker, polled',
     [
         pytest.param(
             devices_xml((FW_A_SERIAL, 'fw-a', FW_A_IP, 'yes'), ('SYNTH-DUP', 'dup', FW_A_IP, 'yes')),
             {},
             'SYNTH-DUP',
+            {FW_A_IP},
             id='duplicate-ip',
         ),
-        pytest.param(devices_xml(('SYNTH-NO-IP', 'no-ip', 'not-an-ip', 'yes')), {}, 'SYNTH-NO-IP', id='no-ip'),
+        pytest.param(devices_xml(('SYNTH-NO-IP', 'no-ip', None, 'yes')), {}, 'SYNTH-NO-IP', set(), id='no-ip'),
+        pytest.param(
+            devices_xml(('SYNTH-BAD-IP', 'bad-ip', 'not-an-ip', 'yes')), {}, 'SYNTH-BAD-IP', set(), id='invalid-ip'
+        ),
         pytest.param(
             devices_xml((FW_B_SERIAL, 'fw-b', FW_B_IP, 'yes')),
             {'firewall_credentials': FW_A_ONLY_CREDENTIALS},
             FW_B_SERIAL,
+            set(),
             id='no-credentials',
         ),
     ],
 )
-def test_firewall_warning_is_logged_once_then_at_debug_level(
-    dd_run_check, fake_panos, caplog, devices, options, marker
+def test_unusable_firewall_is_skipped_and_warned_once_then_at_debug_level(
+    dd_run_check, fake_panos, caplog, devices, options, marker, polled
 ):
     caplog.set_level(logging.DEBUG)
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices)
@@ -275,6 +280,7 @@ def test_firewall_warning_is_logged_once_then_at_debug_level(
     first_run = len(caplog.records)
     dd_run_check(check)
 
+    assert polled_hosts(fake_panos) == polled
     about = [(i, r.levelno) for i, r in enumerate(caplog.records) if marker in r.getMessage()]
     # A condition that lasts must not warn on every run (every 60 s), but stays visible at debug level.
     assert [level for i, level in about if i < first_run] == [logging.WARNING]
