@@ -26,8 +26,8 @@ class TestPackage:
         self.git('config', 'commit.gpgSign', 'false')
         self.git('config', 'core.hooksPath', '/dev/null')
 
-    def git(self, *args: str) -> str:
-        return subprocess.check_output(['git', '-C', str(self.repo), *args]).decode().strip()
+    def git(self, *args: str, input: bytes | None = None) -> str:
+        return subprocess.check_output(['git', '-C', str(self.repo), *args], input=input).decode().strip()
 
     def commit(self, files: dict[str, bytes]) -> str:
         for name, content in files.items():
@@ -77,14 +77,19 @@ class TestPackage:
                 'example/future-format/definition.bin': bytes(range(256)),
                 'example/future-format/.metadata': b'new format metadata',
                 'example/tests/test_check.py': b'test code',
-                'example/' + 'long-name-' * 15 + '.json': b'{}',
                 'example/images/screenshot with spaces.png': b'image',
             }
         )
-        (self.repo / 'scripts/package.py').chmod(0o755)
-        (self.repo / 'example/link.json').symlink_to('manifest.json')
-        self.git('add', '.')
-        self.git('commit', '--quiet', '-m', 'Executable and symlink')
+        # Store special entries in Git without depending on Windows path limits,
+        # symlink privileges, or filesystem executable-bit support.
+        for mode, name, content in (
+            ('100644', 'example/' + 'long-name-' * 15 + '.json', b'{}'),
+            ('120000', 'example/link.json', b'manifest.json'),
+        ):
+            blob = self.git('hash-object', '-w', '--stdin', input=content)
+            self.git('update-index', '--add', '--cacheinfo', mode, blob, name)
+        self.git('update-index', '--chmod=+x', 'scripts/package.py')
+        self.git('commit', '--quiet', '-m', 'Long path, executable, and symlink')
         commit = self.git('rev-parse', 'HEAD')
         package(self.repo, 'DataDog/integrations-core', commit, self.root / 'snapshot')
         original = subprocess.check_output(
