@@ -1,8 +1,12 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from unittest import mock
+
 import pytest
 
+from datadog_checks.base.errors import SkipInstanceError
+from datadog_checks.base.stubs import datadog_agent
 from datadog_checks.dev.http import MockResponse
 from datadog_checks.kai_scheduler import KaiSchedulerCheck
 
@@ -244,3 +248,9 @@ def test_queue_controller_only(dd_run_check, aggregator, mock_endpoints):
 def test_no_endpoint_raises(dd_run_check):
     with pytest.raises(Exception, match='Must specify at least one of the following'):
         dd_run_check(KaiSchedulerCheck(CHECK_NAME, {}, [{}]))
+
+
+def test_skipped_when_gpu_monitoring_disabled(instance):
+    with mock.patch.dict(datadog_agent._config, {'gpu.enabled': False}):
+        with pytest.raises(SkipInstanceError):
+            KaiSchedulerCheck(CHECK_NAME, {}, [instance])

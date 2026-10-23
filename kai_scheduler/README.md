@@ -15,6 +15,15 @@ No additional installation is required on your server.
 
 ### Configuration
 
+This integration is part of GPU Monitoring. Enable GPU Monitoring in the configuration of the Agent that runs the check, which is the Cluster Check Runner or node Agent that the cluster check is dispatched to:
+
+```yaml
+gpu:
+  enabled: true
+```
+
+The equivalent environment variable is `DD_GPU_ENABLED=true`. When GPU Monitoring is disabled, the Agent skips every configured KAI Scheduler instance.
+
 KAI Scheduler exposes its metrics from two deployments in the `kai-scheduler` namespace. Each one serves Prometheus metrics over plain HTTP on port `8080`:
 
 - The scheduler, through the `kai-scheduler-<shard>` service (`kai-scheduler-default` for the default shard), serves scheduling cycle, action, preemption, and queue fair share metrics.

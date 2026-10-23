@@ -49,6 +49,10 @@ instances:
     ## @param scheduler_endpoint - string - optional
     ## Endpoint exposing the KAI scheduler's Prometheus metrics. The scheduler serves scheduling cycle, action,
     ## preemption, and queue fair share metrics.
+    ##
+    ## This integration is part of GPU Monitoring and only runs when GPU Monitoring is enabled in the
+    ## configuration of the Agent running the check (`gpu.enabled: true`, or `DD_GPU_ENABLED=true`). When GPU
+    ## Monitoring is disabled, every instance configured here is skipped.
     #
     # scheduler_endpoint: http://kai-scheduler-default.kai-scheduler.svc:8080/metrics
 

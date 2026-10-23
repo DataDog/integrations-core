@@ -6,6 +6,7 @@ import os
 import tempfile
 from collections.abc import Iterator
 from contextlib import ExitStack, contextmanager
+from unittest import mock
 
 import pytest
 import yaml
@@ -31,6 +32,7 @@ KAI_CHART = 'oci://ghcr.io/kai-scheduler/kai-scheduler/kai-scheduler'
 KIND_SUBNETS_ENV = 'KAI_KIND_SUBNETS'
 SUBNET_CANDIDATES = [f'10.{octet}.0.0/16' for octet in range(255, -1, -1)]
 METRICS_PORT = 8080
+E2E_METADATA = {'env_vars': {'DD_GPU_ENABLED': 'true'}}
 
 # Services created by the KAI operator, keyed by the instance option that scrapes them.
 METRICS_SERVICES = {
@@ -198,7 +200,14 @@ def dd_environment(dd_save_state):
         with open(kubeconfig) as f:
             dd_save_state(KUBECONFIG_STATE_KEY, f.read())
 
-        yield {'instances': [instance]}
+        yield {'instances': [instance]}, E2E_METADATA
+
+
+@pytest.fixture(autouse=True)
+def gpu_monitoring_enabled(datadog_agent):
+    # Requesting `datadog_agent` resets the stub first, which would otherwise drop this setting.
+    with mock.patch.dict(datadog_agent._config, {'gpu.enabled': True}):
+        yield
 
 
 @pytest.fixture

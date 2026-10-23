@@ -3,8 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import NamedTuple
 
-from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
+from datadog_checks.base import ConfigurationError, OpenMetricsBaseCheckV2, is_affirmative
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
+from datadog_checks.base.errors import SkipInstanceError
 
 from .config_models import ConfigMixin
 from .evictions import EVICTED_PODS_METRIC, EvictedPodsTransformer
@@ -54,6 +60,9 @@ class KaiSchedulerCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     DEFAULT_METRIC_LIMIT = 0
 
     def __init__(self, name, init_config, instances):
+        # KAI Scheduler ships as part of the GPU monitoring SKU; only run it when GPU monitoring is on.
+        if not is_affirmative(datadog_agent.get_config('gpu.enabled')):
+            raise SkipInstanceError("GPU monitoring (gpu.enabled) is not enabled.")
         super().__init__(name, init_config, instances)
         self.check_initializations.appendleft(self.parse_config)
         self.check_initializations.append(self.configure_scheduler_transformers)
