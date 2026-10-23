@@ -969,6 +969,10 @@ integration/mailchimp:
 - changed-files:
   - any-glob-to-any-file:
     - mailchimp/**/*
+integration/mailgun:
+- changed-files:
+  - any-glob-to-any-file:
+    - mailgun/**/*
 integration/mapr:
 - changed-files:
   - any-glob-to-any-file:
