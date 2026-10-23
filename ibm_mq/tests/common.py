@@ -131,6 +131,9 @@ INSTANCE_COLLECT_ALL = {
     'password': PASSWORD,
     'auto_discover_queues': True,
     'collect_statistics_metrics': True,
+    # collect_connection_metrics now defaults to False (AGENT-16599 issue 6), so enable it
+    # explicitly here where the suite asserts the full metric set (incl. ibm_mq.channel.conn_status).
+    'collect_connection_metrics': True,
     'channels': [CHANNEL, BAD_CHANNEL],
 }
 
