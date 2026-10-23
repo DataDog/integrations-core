@@ -1,0 +1,1 @@
+Add `hostname_source` option to use the Proxmox-configured VM name instead of the QEMU Guest Agent's hostname.
