@@ -21,9 +21,9 @@
     "changelog": "CHANGELOG.md",
     "media": [],
     "classifier_tags": [
-      "Offering::Integration",
-      "Submitted Data Type::Logs",
-      "Category::Log Collection"
+      "Category::Content Delivery Network",
+      "Category::Cost Management",
+      "Offering::Integration"
     ]
   },
   "assets": {
