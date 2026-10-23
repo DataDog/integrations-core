@@ -1189,6 +1189,35 @@ files:
             type: number
             example: 10
           fleet_configurable: false
+    - name: collect_column_statistics
+      description: |
+        Configure collection of column statistics, which the query benchmarker uses to generate data shaped like
+        yours. Requires the `datadog.column_statistics` procedure in each database, as described in the setup
+        documentation. Only counts and frequencies are collected, never column values. If `database_autodiscovery`
+        is not enabled, data is collected only for the database configured with `database` parameter.
+        Requires SQL Server 2017 or later.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of column statistics. Requires `dbm: true`. Defaults to false.
+          value:
+            type: boolean
+            example: false
+          fleet_configurable: false
+        - name: collection_interval
+          description: |
+            Set the column statistics collection interval (in seconds). Defaults to 3600 seconds.
+          value:
+            type: number
+            example: 3600
+          fleet_configurable: false
+        - name: max_tables
+          description: |
+            Set the maximum number of tables to collect column statistics for in each database. Defaults to 500.
+          value:
+            type: integer
+            example: 500
+          fleet_configurable: false
     - name: schemas_collection
       deprecation:
         Agent version: 7.70.0
