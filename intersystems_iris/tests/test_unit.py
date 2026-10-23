@@ -3,11 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 from collections.abc import Callable
+from pathlib import Path
+from typing import Any
 
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.stubs.http import FakeHTTPClient
 from datadog_checks.base.types import InstanceType
 from datadog_checks.intersystems_iris import IrisCheck
 
@@ -114,16 +117,17 @@ def test_health_service_check_critical_then_ok(
     dd_run_check: Callable[..., None],
     aggregator: AggregatorStub,
     instance: InstanceType,
-    mock_http_response: Callable[..., None],
+    fake_http: FakeHTTPClient,
+    fake_http_response: Callable[..., Any],
 ) -> None:
     """
     `enable_health_service_check` is left at the framework default, so a connection/parse
     failure must report CRITICAL and a subsequent successful scrape must return it to OK.
     """
-    mock_http_response(status_code=500)
+    fake_http_response(instance['openmetrics_endpoint'], status_code=500)
     check = IrisCheck('intersystems_iris', {}, [instance])
     # `dd_run_check` re-raises the check's failure as a bare `Exception` carrying the formatted
-    # traceback, so the concrete `requests.HTTPError` never reaches us -- match on the message to
+    # traceback, so the concrete HTTPClientStatusError never reaches us. Match on the message to
     # confirm the scrape really is what failed, rather than accepting any error at all.
     with pytest.raises(Exception, match='500 Server Error'):
         dd_run_check(check)
@@ -131,7 +135,8 @@ def test_health_service_check_critical_then_ok(
     aggregator.assert_service_check('intersystems_iris.openmetrics.health', ServiceCheck.CRITICAL)
 
     aggregator.reset()
-    mock_http_response(file_path=FIXTURE_PATH)
+    fake_http_response(instance['openmetrics_endpoint'], Path(FIXTURE_PATH).read_bytes())
     dd_run_check(check)
 
+    fake_http.assert_all_responses_consumed()
     aggregator.assert_service_check('intersystems_iris.openmetrics.health', ServiceCheck.OK)

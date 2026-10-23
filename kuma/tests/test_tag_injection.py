@@ -14,13 +14,15 @@ from datadog_checks.kuma.check import KumaOpenMetricsScraper
 
 
 @pytest.fixture
-def setup_check(dd_run_check, instance, mock_http_response):
-    """Fixture to set up and run the KumaCheck with a mocked HTTP response."""
-    mock_http_response(
-        file_path=Path(__file__).parent.absolute() / "fixtures" / "metrics" / "control_plane" / "metrics_code_class.txt"
+def setup_check(dd_run_check, instance, fake_http, fake_http_response):
+    """Run the check against the code-class exposition."""
+    fake_http_response(
+        instance['openmetrics_endpoint'],
+        (Path(__file__).parent / 'fixtures' / 'metrics' / 'control_plane' / 'metrics_code_class.txt').read_bytes(),
     )
     check = KumaCheck('kuma', {}, [instance])
     dd_run_check(check)
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.mark.parametrize(

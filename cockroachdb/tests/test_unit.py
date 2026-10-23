@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from pathlib import Path
+
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
@@ -37,11 +39,14 @@ from .common import (
         'unstable',
     ],
 )
-def test_fixture_metrics(aggregator, instance, dd_run_check, mock_http_response, fixture):
-    mock_http_response(file_path=get_fixture_path('{}_metrics.txt'.format(fixture)))
+def test_fixture_metrics(aggregator, instance, dd_run_check, fake_http, fake_http_response, fixture):
+    fake_http_response(
+        instance['openmetrics_endpoint'], Path(get_fixture_path('{}_metrics.txt'.format(fixture))).read_bytes()
+    )
 
     check = CockroachdbCheck('cockroachdb', {}, [instance])
     dd_run_check(check)
+    fake_http.assert_all_responses_consumed()
     assert_metrics(aggregator)
 
     aggregator.assert_service_check('cockroachdb.openmetrics.health', ServiceCheck.OK)
@@ -64,9 +69,10 @@ def test_fixture_metrics(aggregator, instance, dd_run_check, mock_http_response,
         pytest.param('sql_metrics.txt', SQL_METRICS, id='sql'),
     ],
 )
-def test_metrics(aggregator, instance, dd_run_check, mock_http_response, file, metrics):
-    mock_http_response(file_path=get_fixture_path(file))
+def test_metrics(aggregator, instance, dd_run_check, fake_http, fake_http_response, file, metrics):
+    fake_http_response(instance['openmetrics_endpoint'], Path(get_fixture_path(file)).read_bytes())
     dd_run_check(CockroachdbCheck('cockroachdb', {}, [instance]))
+    fake_http.assert_all_responses_consumed()
 
     tags = ['cluster:cockroachdb-cluster', 'endpoint:http://localhost:8080/_status/vars', 'node:1', 'node_id:1']
 

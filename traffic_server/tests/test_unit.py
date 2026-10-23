@@ -2,12 +2,38 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
+from collections.abc import Callable
 
 import pytest
 
+from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.stubs.http import FakeHTTPClient
+from datadog_checks.base.types import InstanceType
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.traffic_server import TrafficServerCheck, metrics
 
 logger = logging.getLogger(__name__)
+
+
+@pytest.mark.unit
+def test_check_cant_reach_url(
+    aggregator: AggregatorStub,
+    instance_bad_url: InstanceType,
+    fake_http: FakeHTTPClient,
+    fake_http_response: Callable,
+):
+    endpoint = instance_bad_url['traffic_server_url']
+    fake_http_response(endpoint, status_code=404)
+    check = TrafficServerCheck('traffic_server', {}, [instance_bad_url])
+
+    with pytest.raises(HTTPClientStatusError, match='404 Client Error'):
+        check.check(None)
+
+    aggregator.assert_service_check(
+        'traffic_server.can_connect', TrafficServerCheck.CRITICAL, tags=instance_bad_url['tags']
+    )
+    aggregator.assert_all_metrics_covered()
+    fake_http.assert_all_responses_consumed()
 
 
 @pytest.mark.unit

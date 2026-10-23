@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import pytest
 
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientTimeoutError
 from datadog_checks.lighttpd import Lighttpd
 
 from . import common
@@ -53,11 +54,14 @@ def test_version_metadata(check, instance, datadog_agent):
     datadog_agent.assert_metadata_count(len(version_metadata))
 
 
-def test_service_check_ko(aggregator, check, instance):
-    instance['lighttpd_status_url'] = 'http://localhost:1337'
+@pytest.mark.parametrize('error_type', [HTTPClientConnectionError, HTTPClientTimeoutError])
+def test_service_check_ko(aggregator, check, instance, fake_http, error_type):
+    instance = {**instance, 'lighttpd_status_url': 'http://localhost:1337'}
+    fake_http.register_response('GET', instance['lighttpd_status_url'], error_type('Status endpoint unavailable'))
     tags = ['host:localhost', 'port:1337', 'instance:first']
-    with pytest.raises(Exception):
+    with pytest.raises(error_type, match='Status endpoint unavailable'):
         check.check(instance)
+    fake_http.assert_all_responses_consumed()
     aggregator.assert_service_check(check.SERVICE_CHECK_NAME, status=Lighttpd.CRITICAL, tags=tags)
 
 

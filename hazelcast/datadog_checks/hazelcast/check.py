@@ -7,6 +7,7 @@ from . import utils
 
 
 class HazelcastCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'hazelcast'
     SERVICE_CHECK_CONNECT = 'can_connect'
     SERVICE_CHECK_MC_CLUSTER_STATE = 'mc_cluster_state'

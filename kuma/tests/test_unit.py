@@ -20,14 +20,15 @@ from .test_metrics import (
 
 
 @pytest.fixture()
-def setup_kuma_check(dd_run_check, instance, mock_http_response):
-    mock_http_response(
-        file_path=Path(__file__).parent.absolute() / "fixtures" / "metrics" / "control_plane" / "metrics.txt"
-    )
+def setup_kuma_check(dd_run_check, instance, fake_http, fake_http_response):
+    content = (Path(__file__).parent / 'fixtures' / 'metrics' / 'control_plane' / 'metrics.txt').read_bytes()
+    for _ in range(2):
+        fake_http_response(instance['openmetrics_endpoint'], content)
     check = KumaCheck('kuma', {}, [instance])
 
     dd_run_check(check)
     dd_run_check(check)  # Run check again to ensure that shared tags are set.
+    fake_http.assert_all_responses_consumed()
 
 
 EXPECTED_SHARED_TAGS = ['instance_id:kuma-control-plane-749c9bbc86-67tqs-7184', 'kuma_version:2.10.1']

@@ -9,6 +9,7 @@ from .metrics import METRIC_MAP
 
 
 class Etcd(OpenMetricsBaseCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
 
     DEFAULT_TIMEOUT = 5

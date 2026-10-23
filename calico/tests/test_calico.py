@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from pathlib import Path
+
 import pytest
 
 from datadog_checks.calico import CalicoCheck
@@ -12,8 +14,10 @@ from .utils import get_fixture_path
 
 
 @pytest.mark.unit
-def test_check(aggregator, dd_run_check, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('calico.txt'))
+def test_check(aggregator, dd_run_check, fake_http, fake_http_response):
+    fake_http_response(
+        common.MOCK_CALICO_INSTANCE['openmetrics_endpoint'], Path(get_fixture_path('calico.txt')).read_bytes()
+    )
     check = CalicoCheck('calico', {}, [common.MOCK_CALICO_INSTANCE])
     dd_run_check(check)
 
@@ -36,5 +40,6 @@ def test_check(aggregator, dd_run_check, mock_http_response):
     aggregator.assert_metric("calico.felix.iptables.save_errors.count", metric_type=aggregator.MONOTONIC_COUNT)
     aggregator.assert_metric("calico.felix.int_dataplane_failures.count", metric_type=aggregator.MONOTONIC_COUNT)
 
+    fake_http.assert_all_responses_consumed()
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

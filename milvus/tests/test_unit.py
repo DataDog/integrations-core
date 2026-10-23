@@ -2,6 +2,8 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from pathlib import Path
+
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
@@ -10,8 +12,8 @@ from datadog_checks.milvus import MilvusCheck
 from .common import STANDALONE_TEST_METRICS, get_fixture_path
 
 
-def test_check(dd_run_check, aggregator, instance, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('milvus_payload.txt'))
+def test_check(dd_run_check, aggregator, instance, fake_http, fake_http_response):
+    fake_http_response(instance['openmetrics_endpoint'], Path(get_fixture_path('milvus_payload.txt')).read_bytes())
 
     check = MilvusCheck('milvus', {}, [instance])
     dd_run_check(check)
@@ -20,6 +22,7 @@ def test_check(dd_run_check, aggregator, instance, mock_http_response):
         aggregator.assert_metric(metric, metric_type=aggregator.METRIC_ENUM_MAP[metric_type])
         aggregator.assert_metric_has_tag(metric, 'test:tag')
 
+    fake_http.assert_all_responses_consumed()
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 

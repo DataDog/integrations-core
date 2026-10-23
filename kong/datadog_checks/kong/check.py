@@ -7,6 +7,7 @@ from .metrics import METRIC_MAP
 
 
 class KongCheck(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'kong'
 
     DEFAULT_METRIC_LIMIT = 0

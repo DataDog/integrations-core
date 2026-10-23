@@ -8,6 +8,7 @@ from datadog_checks.litellm.metrics import METRICS
 
 
 class LitellmCheck(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'litellm'
 
     DEFAULT_METRIC_LIMIT = 0

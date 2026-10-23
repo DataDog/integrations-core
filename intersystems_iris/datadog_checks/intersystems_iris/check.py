@@ -39,6 +39,7 @@ class IrisCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     connection/parse failure reports `CRITICAL`, as required.
     """
 
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'intersystems_iris'
     DEFAULT_METRIC_LIMIT = 0
 

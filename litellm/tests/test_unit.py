@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+from pathlib import Path
+
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
@@ -17,11 +20,12 @@ from .common import (
 )
 
 
-def test_litellm_mock_metrics(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+def test_litellm_mock_metrics(dd_run_check, aggregator, fake_http, fake_http_response):
+    fake_http_response(OM_MOCKED_INSTANCE['openmetrics_endpoint'], Path(get_fixture_path('metrics.txt')).read_bytes())
     check = LitellmCheck('litellm', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)
 
+    fake_http.assert_all_responses_consumed()
     for metric in METRICS:
         aggregator.assert_metric(metric)
     aggregator.assert_all_metrics_covered()
@@ -29,23 +33,27 @@ def test_litellm_mock_metrics(dd_run_check, aggregator, mock_http_response):
     aggregator.assert_service_check('litellm.openmetrics.health', ServiceCheck.OK)
 
 
-def test_litellm_mock_invalid_endpoint(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(status_code=503)
+def test_litellm_mock_invalid_endpoint(dd_run_check, aggregator, fake_http, fake_http_response):
+    fake_http_response(OM_MOCKED_INSTANCE['openmetrics_endpoint'], status_code=503)
     check = LitellmCheck('litellm', {}, [OM_MOCKED_INSTANCE])
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match='503 Server Error'):
         dd_run_check(check)
+    fake_http.assert_all_responses_consumed()
 
     aggregator.assert_service_check('litellm.openmetrics.health', ServiceCheck.CRITICAL)
 
 
-def test_litellm_health_endpoint(aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('health.txt'))
+def test_litellm_health_endpoint(aggregator, fake_http, fake_http_response):
+    fake_http_response(
+        'http://litellm:4000/health', json_data=json.loads(Path(get_fixture_path('health.txt')).read_bytes())
+    )
 
     instance = OM_MOCKED_INSTANCE.copy()
     instance['litellm_health_endpoint'] = 'http://litellm:4000/health'
 
     check = LitellmCheck('litellm', {}, [instance])
     check.check_health_endpoint()
+    fake_http.assert_all_responses_consumed()
 
     for metric in ENDPOINT_METRICS:
         aggregator.assert_metric(metric)
@@ -92,11 +100,14 @@ def test__extract_error_type_not_found():
     assert check._extract_error_type(error_msg) == 'unknown'
 
 
-def test_litellm_v1_95_metrics(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('metrics_v1_95.txt'))
+def test_litellm_v1_95_metrics(dd_run_check, aggregator, fake_http, fake_http_response):
+    fake_http_response(
+        OM_MOCKED_INSTANCE['openmetrics_endpoint'], Path(get_fixture_path('metrics_v1_95.txt')).read_bytes()
+    )
     check = LitellmCheck('litellm', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)
 
+    fake_http.assert_all_responses_consumed()
     for metric in METRICS_V1_95:
         aggregator.assert_metric(metric)
     aggregator.assert_all_metrics_covered()
@@ -104,11 +115,14 @@ def test_litellm_v1_95_metrics(dd_run_check, aggregator, mock_http_response):
     aggregator.assert_service_check('litellm.openmetrics.health', ServiceCheck.OK)
 
 
-def test_litellm_renamed_metrics(dd_run_check, aggregator, mock_http_response):
+def test_litellm_renamed_metrics(dd_run_check, aggregator, fake_http, fake_http_response):
     # Some metrics were renamed here: https://github.com/BerriAI/litellm/pull/13271
-    mock_http_response(file_path=get_fixture_path('renamed_metrics.txt'))
+    fake_http_response(
+        OM_MOCKED_INSTANCE['openmetrics_endpoint'], Path(get_fixture_path('renamed_metrics.txt')).read_bytes()
+    )
     check = LitellmCheck('litellm', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)
+    fake_http.assert_all_responses_consumed()
     for metric in RENAMED_METRICS_V1_75:
         aggregator.assert_metric(metric)
     aggregator.assert_all_metrics_covered()
