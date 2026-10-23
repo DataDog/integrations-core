@@ -188,10 +188,7 @@ Mechanism and exact commands: `references/coverage-loop.md`. In short:
 - Open the PR as a **draft** using `.github/PULL_REQUEST_TEMPLATE.md`, set exactly one of
   `qa/required` or `qa/skip-qa` (see `AGENTS.md` for which), and leave it in draft. Do not mark it
   ready for review.
-- Changelog: a fixture limited to `tests/` needs no entry, and CI's `check_changelog` job rejects
-  an unneeded one. Add an entry only if you changed `datadog_checks/` or `pyproject.toml`, and then
-  only after the PR exists: create `<integration>/changelog.d/<PR>.<type>` by hand (see `AGENTS.md`;
-  do not use `ddev release changelog new`).
+- Changelog: follow `AGENTS.md` (Changelog Management).
 
 ## Guardrails
 
