@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 from contextlib import ExitStack, contextmanager
-from unittest import mock
 
 import pytest
 
@@ -92,22 +91,19 @@ def catalog_check(catalog_instance):
 
 
 @pytest.fixture()
-def mock_metrics(request):
+def mock_metrics(request, fake_http, fake_http_response):
     metrics_file = request.node.get_closest_marker("metrics_file")
     with open(
         os.path.join(os.path.dirname(__file__), "fixtures", metrics_file.args[0], metrics_file.args[1]), "r"
     ) as fixture_file:
         content = fixture_file.read()
 
-    with mock.patch(
-        "requests.Session.get",
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: content.split("\n"),
-            headers={"Content-Type": "text/plain"},
-        ),
-    ):
-        yield
+    port = {'daemon': 25000, 'statestore': 25010, 'catalog': 25020}[metrics_file.args[0]]
+    endpoint = f'http://{get_docker_hostname()}:{port}/metrics_prometheus'
+    fake_http_response(endpoint, content, headers={'Content-Type': 'text/plain'})
+    yield
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == [('GET', endpoint)]
 
 
 @contextmanager

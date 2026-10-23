@@ -32,6 +32,7 @@ SEVERITY_TAGS = {
 
 
 class TwistlockCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     NAMESPACE = 'twistlock'
 
     HTTP_CONFIG_REMAPPER = {'ssl_verify': {'name': 'tls_verify'}}

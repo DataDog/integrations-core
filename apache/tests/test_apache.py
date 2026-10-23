@@ -120,6 +120,7 @@ def test_metadata_in_header(check, datadog_agent, mock_hide_server_version):
     """For older Apache versions, the version is not in the output. This test asserts that
     the check can fallback to the headers."""
     check = check(AUTO_CONFIG)
+    mock_hide_server_version(check)
     check.check_id = 'test:123'
     major, minor, patch = APACHE_VERSION.split('.')
     version_metadata = {

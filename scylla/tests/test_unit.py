@@ -79,7 +79,7 @@ def test_instance_full_additional_check_omv2(aggregator, mock_db_data, dd_run_ch
     aggregator.assert_service_check('scylla.openmetrics.health', status=AgentCheck.OK)
 
 
-def test_instance_invalid_group_check_omv2(aggregator, mock_db_data, dd_run_check, instance):
+def test_instance_invalid_group_check_omv2(aggregator, dd_run_check, instance):
     additional_metric_groups = ['scylla.bogus', 'scylla.sstables']
 
     inst = deepcopy(instance)
@@ -92,7 +92,7 @@ def test_instance_invalid_group_check_omv2(aggregator, mock_db_data, dd_run_chec
     aggregator.assert_service_check('scylla.openmetrics.health', count=0)
 
 
-def test_invalid_instance_omv2(aggregator, mock_db_data, instance):
+def test_invalid_instance_omv2(aggregator, instance):
     inst = deepcopy(instance)
     inst.pop('openmetrics_endpoint')
 

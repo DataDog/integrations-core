@@ -4,10 +4,9 @@
 
 import pytest
 
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kubevirt_controller import KubeVirtControllerCheck
-
-from .conftest import mock_http_responses
 
 base_tags = [
     "pod_name:virt-controller-some-id",
@@ -15,8 +14,8 @@ base_tags = [
 ]
 
 
-def test_emits_can_connect_one_when_service_is_up(dd_run_check, aggregator, instance, mocker):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+def test_emits_can_connect_one_when_service_is_up(dd_run_check, aggregator, instance, http_responses):
+    http_responses('healthz', 'metrics')
     check = KubeVirtControllerCheck("kubevirt_controller", {}, [instance])
     dd_run_check(check)
     aggregator.assert_metric(
@@ -26,17 +25,21 @@ def test_emits_can_connect_one_when_service_is_up(dd_run_check, aggregator, inst
     )
 
 
-def test_emits_can_connect_zero_when_service_is_down(dd_run_check, aggregator, instance):
+def test_emits_can_connect_zero_when_service_is_down(dd_run_check, aggregator, instance, fake_http):
+    endpoint = instance['kubevirt_controller_healthz_endpoint']
+    fake_http.register_response('GET', endpoint, HTTPClientConnectionError('unavailable'))
     check = KubeVirtControllerCheck("kubevirt_controller", {}, [instance])
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match='unavailable'):
         dd_run_check(check)
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == [('GET', endpoint)]
     aggregator.assert_metric(
         "kubevirt_controller.can_connect", value=0, tags=["endpoint:https://10.244.0.38:443/healthz", *base_tags]
     )
 
 
-def test_check_collects_all_metrics(dd_run_check, aggregator, instance, mocker):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+def test_check_collects_all_metrics(dd_run_check, aggregator, instance, http_responses):
+    http_responses('healthz', 'metrics')
 
     check = KubeVirtControllerCheck("kubevirt_controller", {}, [instance])
 

@@ -6,7 +6,7 @@ import threading
 import time
 from random import randrange
 
-import requests
+from datadog_checks.base.utils.http import create_http_client
 
 
 def do_stuff(id, func, *args):
@@ -17,7 +17,7 @@ def do_stuff(id, func, *args):
 
 
 def run_prediction(model):
-    requests.post(
+    create_http_client({}, {}, agnostic=True).post(
         f"http://localhost:8080/predictions/{model}",
         data='{"input": 2.0}',
         headers={'Content-Type': 'application/json'},
@@ -26,7 +26,7 @@ def run_prediction(model):
 
 # Will generate 5xx errors
 def run_bad_prediction():
-    requests.post(
+    create_http_client({}, {}, agnostic=True).post(
         f"http://localhost:8080/predictions/{model}",
         data='{input": 2.0}',
         headers={'Content-Type': 'application/json'},
@@ -35,23 +35,27 @@ def run_bad_prediction():
 
 
 def add_remove_model():
-    requests.post("http://localhost:8081/models", params={"url": "linear_regression_3_3.mar"})
+    create_http_client({}, {}, agnostic=True).post(
+        "http://localhost:8081/models", params={"url": "linear_regression_3_3.mar"}
+    )
     time.sleep(150)
-    requests.delete("http://localhost:8081/models/linear_regression_3_3/1")
+    create_http_client({}, {}, agnostic=True).delete("http://localhost:8081/models/linear_regression_3_3/1")
     time.sleep(200)
 
 
 def change_default_version():
-    requests.put(f"http://localhost:8081/models/linear_regression_1_2/{randrange(1, 4)}/set-default")
+    create_http_client({}, {}, agnostic=True).put(
+        f"http://localhost:8081/models/linear_regression_1_2/{randrange(1, 4)}/set-default"
+    )
     time.sleep(randrange(200))
 
 
 def call_openmetrics_endpoint():
-    requests.get("http://localhost:8082/metrics")
+    create_http_client({}, {}, agnostic=True).get("http://localhost:8082/metrics")
 
 
 def run_bad_healthcheck():
-    requests.get("http://localhost:8080/pin")
+    create_http_client({}, {}, agnostic=True).get("http://localhost:8080/pin")
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ import pytest
 from confluent_kafka.admin import AdminClient
 from confluent_kafka.cimpl import NewTopic
 
+from datadog_checks.base.utils.http_protocol import HTTPClient, HTTPResponse
 from datadog_checks.dev import TempDir, WaitFor, docker_run
 from datadog_checks.dev._env import e2e_testing
 from datadog_checks.dev.ci import running_on_ci
@@ -68,7 +69,7 @@ def run_connect_check(check, kafka_instance, dd_run_check, datadog_agent):
 
     Returns the check instance and the mocked Connect HTTP client so tests can assert on
     emitted metrics/events (through the aggregator) and on the outbound Connect requests.
-    Depends on ``datadog_agent`` so the persistent cache is reset between tests.
+    Depends on `datadog_agent` so the persistent cache is reset between tests.
     """
 
     def _run(
@@ -94,7 +95,7 @@ def run_connect_check(check, kafka_instance, dd_run_check, datadog_agent):
         state = {'run': 0}
 
         def default_get(url, **kwargs):
-            response = mock.MagicMock()
+            response = mock.MagicMock(spec=HTTPResponse)
             if 'connector-plugins' in url:
                 response.json.return_value = [] if plugins_response is None else plugins_response
             elif '/topics' in url:
@@ -106,12 +107,12 @@ def run_connect_check(check, kafka_instance, dd_run_check, datadog_agent):
                 response.json.return_value = {} if current is None else current
             return response
 
-        http = mock.MagicMock()
+        http = mock.MagicMock(spec=HTTPClient)
         http.get.side_effect = get_side_effect or default_get
         if post_side_effect is not None:
             http.post.side_effect = post_side_effect
         elif post_response is not None:
-            post = mock.MagicMock()
+            post = mock.MagicMock(spec=HTTPResponse)
             post.json.return_value = post_response
             http.post.return_value = post
         kafka_consumer_check._connector_collector.http = http

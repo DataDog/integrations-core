@@ -14,6 +14,7 @@ class ScyllaCheck(OpenMetricsBaseCheck):
     This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
     """
 
+    AGNOSTIC_HTTP_CLIENT = True
     METRIC_PREFIX = 'scylla.'
 
     """

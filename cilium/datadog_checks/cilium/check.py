@@ -12,6 +12,7 @@ CILIUM_VERSION = {"cilium_version": {"type": "metadata", "label": "version", "na
 
 
 class CiliumCheckV2(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = "cilium"
 
     DEFAULT_METRIC_LIMIT = 0

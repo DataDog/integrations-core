@@ -63,6 +63,7 @@ class PHPFPMCheck(AgentCheck):
         'slow requests': 'php_fpm.requests.slow',
     }
 
+    AGNOSTIC_HTTP_CLIENT = True
     HTTP_CONFIG_REMAPPER = {
         'user': {'name': 'username'},
         'disable_ssl_validation': {'name': 'tls_verify', 'invert': True, 'default': False},

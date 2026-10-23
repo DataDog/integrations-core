@@ -11,9 +11,9 @@ from copy import deepcopy
 
 import mock
 import pytest
-import requests
 from packaging import version
 
+from datadog_checks.base.utils.http import create_http_client
 from datadog_checks.dev import TempDir, WaitFor, docker_run, get_e2e_discovery_metadata
 from datadog_checks.haproxy import HAProxyCheck
 from datadog_checks.haproxy.metrics import METRIC_MAP
@@ -125,12 +125,13 @@ def prometheus_metricsv2(prometheus_metrics):
 
 
 def wait_for_haproxy():
-    res = requests.get(STATS_URL, auth=(USERNAME, PASSWORD))
+    http = create_http_client({'username': USERNAME, 'password': PASSWORD}, {}, agnostic=True)
+    res = http.get(STATS_URL)
     res.raise_for_status()
 
 
 def wait_for_haproxy_open():
-    res_open = requests.get(STATS_URL_OPEN)
+    res_open = create_http_client({}, {}, agnostic=True).get(STATS_URL_OPEN)
     res_open.raise_for_status()
 
 
@@ -204,14 +205,17 @@ def instancev2():
     return instance
 
 
-@pytest.fixture(scope="module")
-def haproxy_mock():
+@pytest.fixture
+def haproxy_mock(fake_http, fake_http_response):
     filepath = os.path.join(HERE, 'fixtures', 'mock_data')
     with open(filepath, 'rb') as f:
         data = f.read()
-    p = mock.patch('requests.Session.get', return_value=mock.Mock(content=data))
-    yield p.start()
-    p.stop()
+    endpoints = ['http://localhost/admin?stats', 'http://localhost/admin?stats/;csv;norefresh']
+    for endpoint in endpoints:
+        fake_http_response(endpoint, data)
+    yield
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == [('GET', endpoint) for endpoint in endpoints]
 
 
 @pytest.fixture(scope="module")
@@ -222,23 +226,29 @@ def mock_data():
     return data.split('\n')
 
 
-@pytest.fixture(scope="module")
-def haproxy_mock_evil():
+@pytest.fixture
+def haproxy_mock_evil(fake_http, fake_http_response):
     filepath = os.path.join(HERE, 'fixtures', 'mock_data_evil')
     with open(filepath, 'rb') as f:
         data = f.read()
-    p = mock.patch('requests.Session.get', return_value=mock.Mock(content=data))
-    yield p.start()
-    p.stop()
+    endpoints = ['http://localhost/admin?stats', 'http://localhost/admin?stats/;csv;norefresh']
+    for endpoint in endpoints:
+        fake_http_response(endpoint, data)
+    yield
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == [('GET', endpoint) for endpoint in endpoints]
 
 
-@pytest.fixture(scope="module")
-def haproxy_mock_enterprise_version_info():
+@pytest.fixture
+def haproxy_mock_enterprise_version_info(fake_http, fake_http_response):
     filepath = os.path.join(HERE, 'fixtures', 'enterprise_version_info.html')
     with open(filepath, 'rb') as f:
         data = f.read()
-    with mock.patch('requests.Session.get', return_value=mock.Mock(content=data)) as p:
-        yield p
+    endpoint = 'http://the_url_does_not_matter/'
+    fake_http_response(endpoint, data)
+    yield
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == [('GET', endpoint)]
 
 
 @pytest.fixture(scope="session")

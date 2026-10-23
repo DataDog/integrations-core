@@ -7,18 +7,18 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kubevirt_api import KubeVirtApiCheck
 
-from .conftest import mock_http_responses
 from .constants import BAD_METRICS_HOSTNAME_INSTANCE, HEALTHZ_TAGS
 from .mock_response import GET_VMIS_RESPONSE, GET_VMS_RESPONSE
 
 pytestmark = [pytest.mark.unit]
 
 
-def test_check_collects_all_metrics(dd_run_check, aggregator, instance, mocker):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+def test_check_collects_all_metrics(dd_run_check, aggregator, instance, http_responses):
+    http_responses('healthz', 'metrics')
 
     check = KubeVirtApiCheck("kubevirt_api", {}, [instance])
 
@@ -94,8 +94,8 @@ def test_check_collects_all_metrics(dd_run_check, aggregator, instance, mocker):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
 
-def test_check_sends_zero_count_for_vms(dd_run_check, aggregator, instance, mocker):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+def test_check_sends_zero_count_for_vms(dd_run_check, aggregator, instance, http_responses):
+    http_responses('healthz', 'metrics')
 
     check = KubeVirtApiCheck("kubevirt_api", {}, [instance])
 
@@ -115,8 +115,8 @@ def test_check_sends_zero_count_for_vms(dd_run_check, aggregator, instance, mock
     aggregator.assert_metric("kubevirt_api.vm.count", value=0)
 
 
-def test_check_sends_zero_count_for_vmis(dd_run_check, aggregator, instance, mocker):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+def test_check_sends_zero_count_for_vmis(dd_run_check, aggregator, instance, http_responses):
+    http_responses('healthz', 'metrics')
 
     check = KubeVirtApiCheck("kubevirt_api", {}, [instance])
 
@@ -136,15 +136,19 @@ def test_check_sends_zero_count_for_vmis(dd_run_check, aggregator, instance, moc
     aggregator.assert_metric("kubevirt_api.vmi.count", value=0)
 
 
-def test_emits_zero_can_connect_when_service_is_down(dd_run_check, aggregator, instance):
+def test_emits_zero_can_connect_when_service_is_down(dd_run_check, aggregator, instance, fake_http):
+    endpoint = instance['kubevirt_api_healthz_endpoint']
+    fake_http.register_response('GET', endpoint, HTTPClientConnectionError('health unavailable'))
     check = KubeVirtApiCheck("kubevirt_api", {}, [instance])
     check._setup_kube_client = lambda: None
     check.kube_client = MagicMock()
     check.kube_client.get_vms.return_value = []
     check.kube_client.get_vmis.return_value = []
 
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match='health unavailable'):
         dd_run_check(check)
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == [('GET', endpoint)]
 
     aggregator.assert_metric(
         "kubevirt_api.can_connect",
@@ -153,8 +157,8 @@ def test_emits_zero_can_connect_when_service_is_down(dd_run_check, aggregator, i
     )
 
 
-def test_emits_one_can_connect_when_service_is_up(dd_run_check, aggregator, instance, mocker):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+def test_emits_one_can_connect_when_service_is_up(dd_run_check, aggregator, instance, http_responses):
+    http_responses('healthz', 'metrics')
 
     check = KubeVirtApiCheck("kubevirt_api", {}, [instance])
     check._setup_kube_client = lambda: None
@@ -170,8 +174,13 @@ def test_emits_one_can_connect_when_service_is_up(dd_run_check, aggregator, inst
     )
 
 
-def test_raise_exception_when_metrics_endpoint_is_bad(dd_run_check, aggregator, instance, mocker):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+def test_raise_exception_when_metrics_endpoint_is_bad(
+    dd_run_check, aggregator, instance, fake_http, fake_http_response
+):
+    health = instance['kubevirt_api_healthz_endpoint']
+    metrics = BAD_METRICS_HOSTNAME_INSTANCE['kubevirt_api_metrics_endpoint']
+    fake_http_response(health, 'ok')
+    fake_http.register_response('GET', metrics, HTTPClientConnectionError('metrics unavailable'))
 
     check = KubeVirtApiCheck("kubevirt_api", {}, [BAD_METRICS_HOSTNAME_INSTANCE])
     check._setup_kube_client = lambda: None
@@ -179,8 +188,10 @@ def test_raise_exception_when_metrics_endpoint_is_bad(dd_run_check, aggregator, 
     check.kube_client.get_vms.return_value = GET_VMS_RESPONSE["items"]
     check.kube_client.get_vmis.return_value = GET_VMIS_RESPONSE["items"]
 
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match='metrics unavailable'):
         dd_run_check(check)
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == [('GET', health), ('GET', metrics)]
 
     aggregator.assert_metric(
         "kubevirt_api.can_connect",
@@ -189,8 +200,8 @@ def test_raise_exception_when_metrics_endpoint_is_bad(dd_run_check, aggregator, 
     )
 
 
-def test_raise_exception_cannot_connect_to_kubernetes_api(dd_run_check, aggregator, instance, mocker, caplog):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+def test_raise_exception_cannot_connect_to_kubernetes_api(dd_run_check, aggregator, instance, http_responses, caplog):
+    http_responses('healthz')
 
     check = KubeVirtApiCheck("kubevirt_api", {}, [instance])
     with pytest.raises(
@@ -201,8 +212,8 @@ def test_raise_exception_cannot_connect_to_kubernetes_api(dd_run_check, aggregat
     assert "Cannot connect to Kubernetes API:" in caplog.text
 
 
-def test_log_warning_healthz_endpoint_not_provided(dd_run_check, aggregator, instance, mocker, caplog):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+def test_log_warning_healthz_endpoint_not_provided(dd_run_check, aggregator, instance, http_responses, caplog):
+    http_responses('metrics')
 
     new_instance = deepcopy(instance)
     new_instance.pop("kubevirt_api_healthz_endpoint")

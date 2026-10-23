@@ -8,6 +8,7 @@ from copy import deepcopy
 import mock
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
 from datadog_checks.nginx import Nginx
 
 from .common import FIXTURES_PATH, HOST, PORT
@@ -62,40 +63,26 @@ def test_nest_payload(check, instance):
         ("legacy ssl config False", {'ssl_validation': False}, {'verify': False}),
     ],
 )
-def test_config(check, instance, test_case, extra_config, expected_http_kwargs):
+def test_config(check, instance, test_case, extra_config, expected_http_kwargs, mocker):
     instance = deepcopy(instance)
     instance.update(extra_config)
 
     c = check(instance)
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200, content=b'{}')
-
-        c.check(instance)
-
-        http_wargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_wargs.update(expected_http_kwargs)
-
-        r.get.assert_called_with('http://localhost:8080/nginx_status', **http_wargs)
+    get = mocker.patch.object(type(c.http), 'get', return_value=FakeHTTPResponse(content=b'{}'))
+    c.check(instance)
+    get.assert_called_once_with('http://localhost:8080/nginx_status')
+    for option, expected in expected_http_kwargs.items():
+        assert c.http.options[option] == expected
 
 
-def test_no_version(check, instance, caplog):
+def test_no_version(fake_http, fake_http_response, check, instance, caplog):
     c = check(instance)
-
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200, content=b'{}', headers={'server': 'nginx'})
-
-        c.check(instance)
+    endpoint = 'http://localhost:8080/nginx_status'
+    fake_http_response(endpoint, b'{}', headers={'server': 'nginx'})
+    c.check(instance)
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == [('GET', endpoint)]
 
     errors = [record for record in caplog.records if record.levelname == "ERROR"]
     assert not errors

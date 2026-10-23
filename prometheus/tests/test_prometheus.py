@@ -15,6 +15,7 @@ def test_prometheus_check(aggregator, instance, poll_mock):
     """
     Testing prometheus check.
     """
+    poll_mock()
 
     c = PrometheusCheck('prometheus', None, {}, [instance])
     c.check(instance)
@@ -39,6 +40,7 @@ def test_prometheus_check_counter_gauge(aggregator, instance, poll_mock):
     Testing prometheus check.
     """
 
+    poll_mock()
     instance["send_monotonic_counter"] = False
     c = PrometheusCheck('prometheus', None, {}, [instance])
     c.check(instance)
@@ -60,6 +62,7 @@ def test_invalid_metric(aggregator, poll_mock):
     """
     Testing that invalid values of metrics are discarded
     """
+    poll_mock()
     bad_metric_instance = {
         'prometheus_url': 'http://localhost:10249/metrics',
         'namespace': 'prometheus',
@@ -72,6 +75,7 @@ def test_invalid_metric(aggregator, poll_mock):
 
 
 def test_prometheus_wildcard(aggregator, instance, poll_mock):
+    poll_mock()
     instance_wildcard = {
         'prometheus_url': 'http://localhost:10249/metrics',
         'namespace': 'prometheus',
@@ -97,6 +101,7 @@ def test_prometheus_default_instance(aggregator, poll_mock):
     """
     Testing prometheus with default instance
     """
+    poll_mock('http://custom:1337/metrics')
 
     c = PrometheusCheck(
         CHECK_NAME,
@@ -130,6 +135,7 @@ def test_prometheus_mixed_instance(aggregator, poll_mock):
     """
     Testing prometheus with default instance
     """
+    poll_mock('http://custom:1337/metrics', count=2)
 
     c = PrometheusCheck(
         CHECK_NAME,

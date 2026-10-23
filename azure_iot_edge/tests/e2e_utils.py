@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from typing import Any  # noqa: F401
 
-import requests
-
+from datadog_checks.base.utils.http import create_http_client
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev.docker import ComposeFileDown, ComposeFileUp
 from datadog_checks.dev.structures import LazyFunction
 from datadog_checks.dev.subprocess import run_command
@@ -43,9 +43,9 @@ class IoTEdgeDown(LazyFunction):
 def edge_hub_endpoint_ready():
     # type: () -> bool
     try:
-        response = requests.get(common.E2E_EDGE_HUB_PROMETHEUS_URL)
+        response = create_http_client({}, {}, agnostic=True).get(common.E2E_EDGE_HUB_PROMETHEUS_URL)
         response.raise_for_status()
-    except requests.HTTPError:
+    except HTTPClientStatusError:
         return False
     else:
         return response.status_code == 200
@@ -54,9 +54,9 @@ def edge_hub_endpoint_ready():
 def edge_agent_endpoint_ready():
     # type: () -> bool
     try:
-        response = requests.get(common.E2E_EDGE_AGENT_PROMETHEUS_URL)
+        response = create_http_client({}, {}, agnostic=True).get(common.E2E_EDGE_AGENT_PROMETHEUS_URL)
         response.raise_for_status()
-    except requests.HTTPError:
+    except HTTPClientStatusError:
         return False
     else:
         return response.status_code == 200

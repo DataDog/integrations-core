@@ -9,6 +9,7 @@ from .metrics import ADDITIONAL_METRICS_MAP, INSTANCE_DEFAULT_METRICS, construct
 
 
 class ScyllaCheckV2(OpenMetricsBaseCheckV2, ConfigMixin):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = "scylla"
 
     DEFAULT_METRIC_LIMIT = 0

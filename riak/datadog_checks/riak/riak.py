@@ -13,6 +13,7 @@ from .keys import KEYS, SEARCH_LATENCY_KEYS, STAT_KEYS, VNODEQ_KEYS
 
 
 class Riak(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     SERVICE_CHECK_NAME = 'riak.can_connect'
 
     HTTP_CONFIG_REMAPPER = {
