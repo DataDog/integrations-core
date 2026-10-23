@@ -1,0 +1,37 @@
+version: "1"
+
+tasks:
+  # Full metric-coverage fixture: istiod and a sidecar-injected workload on a
+  # single-node k3s cluster, with a built-in workload that keeps the mesh,
+  # control-plane, and injection counters moving. The gateway exposes the live
+  # istiod and sidecar endpoints plus the integration's recorded payloads for
+  # the Istio <= 1.5 components on one port, both as recorded and replayed with
+  # increasing counters. Istio metrics need no credentials.
+  # See ./README.md.
+  - id: istio-full
+    task: ./compose/full-coverage.compose@gateway
+    labels:
+      evalya.io/publish: "true"
+      evalya.io/provides.ISTIO_HOST: "{{ .hostname }}"
+      evalya.io/provides.ISTIO_PORT: "15014"
+      evalya.io/provides.ISTIOD_ENDPOINT: "http://{{ .hostname }}:15014/istiod/metrics"
+      evalya.io/provides.ISTIO_MESH_ENDPOINT: "http://{{ .hostname }}:15014/mesh/stats/prometheus"
+      evalya.io/provides.ISTIO_FIXTURES_URL: "http://{{ .hostname }}:15014/fixtures"
+      evalya.io/provides.ISTIO_REPLAY_URL: "http://{{ .hostname }}:15014/replay"
+    env:
+      - name: ISTIO_VERSION
+        value: "1.29.2"
+      - name: K3S_VERSION
+        value: v1.31.6-k3s1
+      - name: ACTIVITY_GEN
+        value: "1"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          wget -qO- http://127.0.0.1:15014/istiod/metrics | grep -q '^pilot_xds' &&
+          wget -qO- http://127.0.0.1:15014/mesh/stats/prometheus | grep -q '^istio_requests_total'
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
