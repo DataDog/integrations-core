@@ -100,6 +100,7 @@ class InstanceConfig(BaseModel):
     cluster_operator_endpoint: Optional[str] = None
     collect_counters_with_distributions: Optional[bool] = None
     collect_histogram_buckets: Optional[bool] = None
+    collect_histograms_as_distributions: Optional[bool] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
