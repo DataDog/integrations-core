@@ -33,13 +33,13 @@ PRESERVED_FILES = {
 }
 
 
-def _record_contents(files: dict[str, bytes]) -> bytes:
+def _record_contents(files: dict[str, bytes], record_path: str = RECORD_PATH) -> bytes:
     output = io.StringIO(newline='')
     writer = csv.writer(output, lineterminator='\n')
     for path, contents in files.items():
         digest = base64.urlsafe_b64encode(hashlib.sha256(contents).digest()).rstrip(b'=').decode()
         writer.writerow((path, f'sha256={digest}', len(contents)))
-    writer.writerow((RECORD_PATH, '', ''))
+    writer.writerow((record_path, '', ''))
     return output.getvalue().encode()
 
 
@@ -75,6 +75,35 @@ def test_clean_wheel_removes_all_psycopg_c_sources(tmp_path: Path):
     recorded_paths = {row[0] for row in record_rows}
     assert REMOVED_PATHS.isdisjoint(recorded_paths)
     assert PRESERVED_FILES.keys() <= recorded_paths
+
+
+def test_clean_wheel_removes_jsonpatch_console_scripts(tmp_path: Path):
+    dist_info = 'jsonpatch-1.35.dist-info'
+    record_path = f'{dist_info}/RECORD'
+    removed = {f'{dist_info}/entry_points.txt', 'jsonpatch_cli.py'}
+    files = {
+        'jsonpatch.py': b'def make_patch(src, dst): ...\n',
+        'jsonpatch_cli.py': b'def jsonpatch_main(): ...\n',
+        f'{dist_info}/entry_points.txt': b'[console_scripts]\njsonpatch = jsonpatch_cli:jsonpatch_main\n',
+        f'{dist_info}/METADATA': b'Metadata-Version: 2.1\nName: jsonpatch\nVersion: 1.35\n',
+        f'{dist_info}/WHEEL': b'Wheel-Version: 1.0\nGenerator: test\nRoot-Is-Purelib: true\nTag: py3-none-any\n',
+    }
+    wheel_path = tmp_path / 'jsonpatch-1.35-py3-none-any.whl'
+    with ZipFile(wheel_path, 'w', compression=ZIP_DEFLATED) as wheel:
+        for name, contents in files.items():
+            wheel.writestr(name, contents)
+        wheel.writestr(record_path, _record_contents(files, record_path))
+
+    assert build_wheels.clean_wheel(wheel_path)
+
+    with ZipFile(wheel_path) as wheel:
+        installed_paths = set(wheel.namelist())
+        recorded_paths = {row[0] for row in csv.reader(io.TextIOWrapper(wheel.open(record_path), encoding='utf-8'))}
+
+    assert removed.isdisjoint(installed_paths)
+    assert removed.isdisjoint(recorded_paths)
+    assert 'jsonpatch.py' in installed_paths
+    assert 'jsonpatch.py' in recorded_paths
 
 
 @pytest.mark.parametrize('newline', ['\n', '\r\n'])
