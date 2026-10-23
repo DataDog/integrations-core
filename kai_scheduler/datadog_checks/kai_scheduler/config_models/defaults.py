@@ -37,7 +37,7 @@ def instance_cluster_check():
 
 
 def instance_collect_counters_with_distributions():
-    return False
+    return True
 
 
 def instance_collect_histogram_buckets():
@@ -61,7 +61,7 @@ def instance_enable_legacy_tags_normalization():
 
 
 def instance_histogram_buckets_as_distributions():
-    return False
+    return True
 
 
 def instance_ignore_connection_errors():

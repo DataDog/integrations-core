@@ -42,10 +42,17 @@ def endpoint_tags(endpoint: str) -> list[str]:
 def test_check(dd_run_check, aggregator, instance, mock_endpoints):
     dd_run_check(KaiSchedulerCheck(CHECK_NAME, {}, [instance]))
 
-    metadata_metrics, config_gated = live_metadata_metrics()
+    metadata_metrics, config_gated, distributions = live_metadata_metrics()
     aggregator.assert_metrics_using_metadata(
         metadata_metrics, check_submission_type=True, check_symmetric_inclusion=True, exclude=config_gated
     )
+    # Every histogram also submits its `.sum` counter, which identifies the submitted distributions.
+    submitted_distributions = {
+        name.removesuffix('.sum')
+        for name in aggregator.metric_names
+        if name.endswith('.sum') and aggregator.histogram_bucket(name.removesuffix('.sum'))
+    }
+    assert submitted_distributions == set(distributions)
 
     for metric_name in aggregator.metric_names:
         for metric in aggregator.metrics(metric_name):

@@ -29,7 +29,8 @@ def kubeconfig(dd_get_state, tmp_path, monkeypatch):
 def test_e2e(dd_agent_check, live_instance):
     aggregator = dd_agent_check(rate=True)
 
-    metadata_metrics, config_gated = live_metadata_metrics()
+    # The Agent's check output does not include distributions, so only the unit tests check them.
+    metadata_metrics, config_gated, _ = live_metadata_metrics()
     aggregator.assert_metrics_using_metadata(
         metadata_metrics, check_submission_type=True, check_symmetric_inclusion=True, exclude=config_gated
     )

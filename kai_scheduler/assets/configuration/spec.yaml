@@ -45,6 +45,22 @@ files:
       overrides:
         openmetrics_endpoint.required: false
         openmetrics_endpoint.hidden: true
+        histogram_buckets_as_distributions.value.example: true
+        histogram_buckets_as_distributions.description: |
+          Whether or not to send histogram buckets as Datadog distribution metrics. This implicitly
+          enables the `collect_histogram_buckets` and `non_cumulative_histogram_buckets` options.
+
+          This integration enables this option by default.
+
+          Learn more about distribution metrics:
+          https://docs.datadoghq.com/developers/metrics/types/?tab=distribution#metric-types
+        collect_counters_with_distributions.value.example: true
+        collect_counters_with_distributions.description: |
+          Whether or not to also collect the observation counter metrics ending in `.sum` and `.count`
+          when sending histogram buckets as Datadog distribution metrics. This implicitly enables the
+          `histogram_buckets_as_distributions` option.
+
+          This integration enables this option by default.
   - template: logs
     example:
     - type: docker

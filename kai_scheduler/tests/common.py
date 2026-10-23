@@ -37,13 +37,21 @@ def get_fixture_path(filename: str) -> str:
     return os.path.join(HERE, 'fixtures', filename)
 
 
-def live_metadata_metrics() -> tuple[dict, list[str]]:
-    """Return the metadata.csv metrics the e2e environment emits, plus the config-gated names to exclude.
+def live_metadata_metrics() -> tuple[dict, list[str], list[str]]:
+    """Return the metadata.csv metrics the e2e environment emits, the config-gated names to exclude, and the
+    distributions it emits.
 
     Splitting them allows asserting symmetric inclusion: every other metadata.csv row has to be emitted, and every
     emitted metric has to have a row. `exclude` alone is not enough, because `assert_metrics_using_metadata` only
     applies it to submitted metrics, never to the metadata.csv keys it checks for absence.
+
+    Distributions are split out because they are recorded as histogram buckets, which
+    `assert_metrics_using_metadata` does not check. They are the rows with a `.sum` row of the same name, since
+    summaries have no row for their base name.
     """
     all_metadata = get_metadata_metrics()
     config_gated = [name for name in all_metadata if name.startswith(CONFIG_GATED_METRIC_PREFIXES)]
-    return {name: metadata for name, metadata in all_metadata.items() if name not in config_gated}, config_gated
+    distributions = [name for name in all_metadata if f'{name}.sum' in all_metadata and name not in config_gated]
+    excluded = {*config_gated, *distributions}
+    live = {name: metadata for name, metadata in all_metadata.items() if name not in excluded}
+    return live, config_gated, distributions

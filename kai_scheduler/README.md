@@ -63,6 +63,8 @@ KAI counts evicted pods per pod group and never deletes those series. To keep th
 
 The `kai.scheduling_cycle.latency.milliseconds`, `kai.session.*.latency.milliseconds`, `kai.action.latency.milliseconds`, and `kai.plugin.latency.milliseconds` gauges hold the duration of the most recent scheduling cycle only. The scheduler runs a cycle every second by default, so each check run samples one cycle and short spikes between check runs are not visible. A scheduler that is consistently slow is still visible in every sample.
 
+Histograms, such as `kai.task.scheduling_latency.milliseconds` and `kai.task.bind_latency.milliseconds`, are submitted as [distributions][12] so that percentiles can be queried, along with their `.count` and `.sum` counters. Set `histogram_buckets_as_distributions: false` to submit the buckets as `.bucket` counts instead.
+
 ### Events
 
 The KAI Scheduler integration does not include any events.
@@ -83,3 +85,4 @@ Need help? Contact [Datadog support][8].
 [8]: https://docs.datadoghq.com/help/
 [10]: https://docs.datadoghq.com/containers/cluster_agent/clusterchecks/?tab=helm#configuration-from-configuration-files
 [11]: https://docs.datadoghq.com/containers/troubleshooting/cluster-and-endpoint-checks/#dispatching-logic-in-the-cluster-agent
+[12]: https://docs.datadoghq.com/metrics/distributions/

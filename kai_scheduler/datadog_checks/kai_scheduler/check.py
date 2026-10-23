@@ -59,7 +59,12 @@ class KaiSchedulerCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         self.check_initializations.append(self.configure_scheduler_transformers)
 
     def get_default_config(self):
-        return {'rename_labels': dict(DEFAULT_RENAME_LABELS)}
+        return {
+            # Distributions make percentile aggregations available for the latency histograms.
+            'histogram_buckets_as_distributions': True,
+            'collect_counters_with_distributions': True,
+            'rename_labels': dict(DEFAULT_RENAME_LABELS),
+        }
 
     def parse_config(self):
         self.scraper_configs = [
