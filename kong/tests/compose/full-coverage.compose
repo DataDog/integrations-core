@@ -1,0 +1,161 @@
+# Full metric-coverage environment for the kong check.
+#
+# The kong OOTB dashboards plot three metric families that no single Kong node
+# emits, so the fixture runs two live DB-less nodes behind one entrypoint:
+#
+# - `kong` (Kong 3.x) emits the 3.0 Prometheus names (`bandwidth.bytes`,
+#   `http.requests`, `kong.latency.ms`, `nginx.connections.total`).
+# - `kong-legacy` (Kong 2.x) emits the pre-3.0 names that Kong 3.0 renamed
+#   (`bandwidth`, `http.status`, `http.consumer.status`, `latency`,
+#   `nginx.http.current_connections`).
+# - Both serve the legacy `/status` endpoint (`connections_*`, `total_requests`).
+#
+# Each node proxies a key-auth protected route to `upstream`, with the Prometheus
+# plugin enabled per consumer. `seed` creates every labelled series once, and
+# `activity-gen` keeps the counters moving. `gateway` is the entrypoint.
+x-kong-env: &kong-env
+  KONG_DATABASE: "off"
+  KONG_ADMIN_LISTEN: "0.0.0.0:8001"
+  KONG_PROXY_LISTEN: "0.0.0.0:8000"
+  KONG_PROXY_ACCESS_LOG: /dev/stdout
+  KONG_ADMIN_ACCESS_LOG: /dev/stdout
+  KONG_PROXY_ERROR_LOG: /dev/stderr
+  KONG_ADMIN_ERROR_LOG: /dev/stderr
+
+x-kong-healthcheck: &kong-healthcheck
+  test: ["CMD", "kong", "health"]
+  interval: 5s
+  timeout: 5s
+  retries: 20
+  start_period: 10s
+
+services:
+  upstream:
+    image: nginx:alpine
+    networks:
+      - kong-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  kong:
+    image: "kong:${KONG_VERSION:-3.9}"
+    depends_on:
+      upstream:
+        condition: service_healthy
+    networks:
+      - kong-net
+    environment:
+      <<: *kong-env
+      # Kong 3.x gates status, latency, bandwidth, and upstream health series
+      # behind plugin flags that default to false. Keep the folded block at one
+      # indent: Kong reads only the first line of a multi-line config string.
+      KONG_DECLARATIVE_CONFIG_STRING: >-
+        {"_format_version": "3.0",
+        "services": [{"name": "upstream", "url": "http://upstream:80",
+        "routes": [{"name": "default", "paths": ["/"]}]}],
+        "consumers": [{"username": "consumer1",
+        "keyauth_credentials": [{"key": "${KONG_CONSUMER_KEY:-devops-best-friend}"}]}],
+        "plugins": [
+        {"name": "key-auth", "service": "upstream"},
+        {"name": "prometheus", "config": {"per_consumer": true, "status_code_metrics": true,
+        "latency_metrics": true, "bandwidth_metrics": true, "upstream_health_metrics": true}}]}
+    healthcheck: *kong-healthcheck
+    restart: on-failure
+
+  kong-legacy:
+    image: "kong:${KONG_LEGACY_VERSION:-2.7}"
+    depends_on:
+      upstream:
+        condition: service_healthy
+    networks:
+      - kong-net
+    environment:
+      <<: *kong-env
+      KONG_DECLARATIVE_CONFIG_STRING: >-
+        {"_format_version": "2.1",
+        "services": [{"name": "upstream", "url": "http://upstream:80",
+        "routes": [{"name": "default", "paths": ["/"]}]}],
+        "consumers": [{"username": "consumer1",
+        "keyauth_credentials": [{"key": "${KONG_CONSUMER_KEY:-devops-best-friend}"}]}],
+        "plugins": [
+        {"name": "key-auth", "service": "upstream"},
+        {"name": "prometheus", "config": {"per_consumer": true}}]}
+    healthcheck: *kong-healthcheck
+    restart: on-failure
+
+  # Prometheus series only exist once a matching request has been proxied, so
+  # issue one request per series (authenticated 200, unauthenticated 401,
+  # authenticated 404) before the first scrape.
+  seed:
+    image: curlimages/curl:8.11.1
+    depends_on:
+      kong:
+        condition: service_healthy
+      kong-legacy:
+        condition: service_healthy
+    networks:
+      - kong-net
+    restart: "no"
+    environment:
+      KONG_CONSUMER_KEY: "${KONG_CONSUMER_KEY:-devops-best-friend}"
+    entrypoint:
+      - sh
+      - -c
+      - |
+        set -e
+        for node in kong kong-legacy; do
+          curl -fsS -o /dev/null -H "apikey: $$KONG_CONSUMER_KEY" "http://$$node:8000/"
+          curl -sS -o /dev/null "http://$$node:8000/"
+          curl -sS -o /dev/null -H "apikey: $$KONG_CONSUMER_KEY" "http://$$node:8000/missing"
+          curl -fsS -o /dev/null "http://$$node:8001/metrics"
+        done
+        echo "seed: done"
+
+  activity-gen:
+    image: curlimages/curl:8.11.1
+    depends_on:
+      kong:
+        condition: service_healthy
+      kong-legacy:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+    networks:
+      - kong-net
+    restart: unless-stopped
+    environment:
+      KONG_HOSTS: "kong kong-legacy"
+      KONG_PROXY_PORT: "8000"
+      KONG_CONSUMER_KEY: "${KONG_CONSUMER_KEY:-devops-best-friend}"
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+      ACTIVITY_DURATION: "${ACTIVITY_DURATION:-0}"
+    volumes:
+      - ../activity-gen.sh:/activity-gen.sh:ro
+    entrypoint: ["sh", "/activity-gen.sh"]
+
+  gateway:
+    image: nginx:alpine
+    depends_on:
+      kong:
+        condition: service_healthy
+      kong-legacy:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+      activity-gen:
+        condition: service_started
+    networks:
+      - kong-net
+    volumes:
+      - ./gateway.conf:/etc/nginx/nginx.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8001/status >/dev/null && wget -qO- http://127.0.0.1:8101/status >/dev/null"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+networks:
+  kong-net:
