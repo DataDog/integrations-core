@@ -160,3 +160,9 @@ promhttp_metric_handler_requests_in_flight 1
 promhttp_metric_handler_requests_total{code="200"} 0
 promhttp_metric_handler_requests_total{code="500"} 0
 promhttp_metric_handler_requests_total{code="503"} 0
+# HELP kyverno_deleting_controller_deletedobjects_total can be used to track the number of objects deleted by DeletingPolicy resources
+# TYPE kyverno_deleting_controller_deletedobjects_total counter
+kyverno_deleting_controller_deletedobjects_total{otel_scope_name="kyverno",otel_scope_version="",policy_name="cleanup-stale-jobs",policy_namespace="-",policy_type="DeletingPolicy",resource="jobs"} 12
+# HELP kyverno_deleting_controller_errors_total can be used to track the number of errors encountered while deleting objects through DeletingPolicy resources
+# TYPE kyverno_deleting_controller_errors_total counter
+kyverno_deleting_controller_errors_total{otel_scope_name="kyverno",otel_scope_version="",policy_name="cleanup-stale-jobs",policy_namespace="-",policy_type="DeletingPolicy",resource="jobs"} 2
