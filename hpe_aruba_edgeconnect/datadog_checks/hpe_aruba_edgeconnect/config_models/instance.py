@@ -108,10 +108,11 @@ class InstanceConfig(BaseModel):
     min_collection_interval: Optional[float] = None
     namespace: Optional[str] = None
     ntlm_domain: Optional[str] = None
+    orchestrator_api_key: Optional[str] = None
     orchestrator_ip: str
     orchestrator_login_type: Optional[Literal[0, 1, 2]] = None
-    orchestrator_password: str
-    orchestrator_username: str
+    orchestrator_password: Optional[str] = None
+    orchestrator_username: Optional[str] = None
     password: Optional[str] = None
     persist_connections: Optional[bool] = None
     proxy: Optional[Proxy] = None
