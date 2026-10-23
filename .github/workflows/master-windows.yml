@@ -28,13 +28,7 @@ on:
     - cron: '0 2 * * *'
 
 jobs:
-  cache:
-    uses: ./.github/workflows/cache-shared-deps.yml
-
   test:
-    needs:
-    - cache
-
     uses: ./.github/workflows/test-all-windows.yml
     with:
       repo: core
@@ -54,23 +48,6 @@ jobs:
        contents: read
        # needed for dd-sts in test-target.yml
        id-token: write
-
-  publish-test-results:
-
-    needs:
-    - test
-
-    if: success() || failure()
-    concurrency:
-      group: test-results
-
-    permissions:
-      checks: write
-      pull-requests: write
-      contents: write
-
-    uses: ./.github/workflows/test-results-master.yml
-    secrets: inherit
 
   upload-coverage:
     needs:
