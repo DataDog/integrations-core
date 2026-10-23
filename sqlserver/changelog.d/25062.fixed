@@ -1,0 +1,1 @@
+Fix query signature extraction from SQL Server deadlock events.
