@@ -19,7 +19,8 @@ from datadog_checks.slurm.job_events import (
 
 from .common import mock_output as mock_output_file
 
-NOW = parse_sacct_time('2026-10-21T12:30:00')
+# Time of every poll, so the first poll marks the check as started before all job times below.
+NOW = parse_sacct_time('2026-10-21T11:59:00')
 
 
 def sacct_line(job_id, state, start='Unknown', end='Unknown', name='train', exit_code='0:0', **overrides):
@@ -81,7 +82,7 @@ class FakeSacct:
         self.fail_id_queries = False
         self.squeue = ''
 
-    def __call__(self, cmd):
+    def __call__(self, cmd, env=None):
         if cmd[0].endswith('squeue'):
             return self.squeue, '', 0
         if not cmd[0].endswith('sacct') or '-anXP' not in cmd:
@@ -100,7 +101,10 @@ def poll(check, sacct, window='', by_id=None, reasons=None):
     sacct.by_id = by_id or {}
     sacct.queried_ids = []
     check._squeue_pending_reasons = reasons
-    with mock.patch('datadog_checks.slurm.check.get_subprocess_output', side_effect=sacct):
+    with (
+        mock.patch('datadog_checks.slurm.check.get_subprocess_output', side_effect=sacct),
+        mock.patch('datadog_checks.slurm.check.time.time', return_value=NOW),
+    ):
         check.collect_sacct_job_events()
 
 
@@ -130,12 +134,16 @@ def test_job_events_gated_by_gpu_monitoring(
 @mock.patch('datadog_checks.slurm.check.get_subprocess_output')
 def test_job_events_poll_window(mock_output, events_instance):
     check = SlurmCheck('slurm', {}, [events_instance])
-    base_cmd = ['/usr/bin/sacct'] + SACCT_JOB_EVENT_PARAMS
+
+    def assert_polled_from(lookback):
+        cmd, kwargs = mock_output.call_args.args[0], mock_output.call_args.kwargs
+        assert cmd == ['/usr/bin/sacct'] + SACCT_JOB_EVENT_PARAMS + [f'--starttime=now-{lookback}seconds']
+        assert kwargs['env']['SLURM_TIME_FORMAT'] == 'standard'
 
     with mock.patch('datadog_checks.slurm.check.time.time', return_value=1000.0):
         mock_output.return_value = ('', '', 0)
         check.collect_sacct_job_events()
-    mock_output.assert_called_with(base_cmd + [f'--starttime=now-{SACCT_JOB_EVENT_WINDOW_OVERLAP}seconds'])
+    assert_polled_from(SACCT_JOB_EVENT_WINDOW_OVERLAP)
 
     # A failed poll keeps the previous poll time so that the next window still covers it.
     with mock.patch('datadog_checks.slurm.check.time.time', return_value=1030.0):
@@ -144,16 +152,17 @@ def test_job_events_poll_window(mock_output, events_instance):
     with mock.patch('datadog_checks.slurm.check.time.time', return_value=1060.0):
         mock_output.return_value = ('', '', 0)
         check.collect_sacct_job_events()
-    mock_output.assert_called_with(base_cmd + [f'--starttime=now-{SACCT_JOB_EVENT_WINDOW_OVERLAP + 60}seconds'])
+    assert_polled_from(SACCT_JOB_EVENT_WINDOW_OVERLAP + 60)
 
     with mock.patch('datadog_checks.slurm.check.time.time', return_value=1060.0 + 10 * 3600):
         check.collect_sacct_job_events()
-    mock_output.assert_called_with(base_cmd + [f'--starttime=now-{SACCT_JOB_EVENT_MAX_LOOKBACK}seconds'])
+    assert_polled_from(SACCT_JOB_EVENT_MAX_LOOKBACK)
 
 
 @pytest.mark.usefixtures('gpu_monitoring_enabled')
 @mock.patch('datadog_checks.slurm.check.get_subprocess_output')
-def test_job_events_failed_poll_keeps_state(mock_output, events_instance, aggregator):
+@mock.patch('datadog_checks.slurm.check.time.time', return_value=NOW)
+def test_job_events_failed_poll_keeps_state(_, mock_output, events_instance, aggregator):
     check = SlurmCheck('slurm', {}, [events_instance])
 
     mock_output.return_value = (sacct_output(sacct_line('1', 'RUNNING', start='2026-10-21T12:01:00')), '', 0)
@@ -265,6 +274,45 @@ def test_job_events_requeue(events_instance, aggregator):
         ('slurm.job.requeued', 'warning'),
         ('slurm.job.started', 'info'),
     ]
+
+
+@pytest.mark.parametrize(
+    'state, end, timestamp',
+    [
+        pytest.param('PREEMPTED', '2026-10-21T12:05:00', parse_sacct_time('2026-10-21T12:05:00'), id='preempted'),
+        # sacct does not record when a job was suspended.
+        pytest.param('SUSPENDED', 'Unknown', NOW, id='suspended'),
+    ],
+)
+@pytest.mark.usefixtures('gpu_monitoring_enabled')
+def test_job_events_interruptions(events_instance, aggregator, state, end, timestamp):
+    check = SlurmCheck('slurm', {}, [events_instance])
+    run_polls(
+        check,
+        sacct_output(sacct_line('1', 'RUNNING', start='2026-10-21T12:01:00')),
+        sacct_output(sacct_line('1', state, start='2026-10-21T12:01:00', end=end)),
+    )
+
+    [event] = aggregator.events
+    assert event['msg_title'] == f'Slurm job 1 (train) {state.lower()}'
+    assert event['alert_type'] == 'warning'
+    assert event['timestamp'] == int(timestamp)
+    assert f'slurm_job_state:{state}' in event['tags']
+
+
+@pytest.mark.usefixtures('gpu_monitoring_enabled')
+def test_job_events_skip_transitions_before_first_poll(events_instance, aggregator):
+    check = SlurmCheck('slurm', {}, [events_instance])
+    # The job was submitted and started before the first poll, but slurmdbd only recorded it afterwards.
+    started_before_check = {'Submit': '2026-10-21T11:58:00', 'Start': '2026-10-21T11:58:30'}
+    run_polls(
+        check,
+        '',
+        sacct_output(sacct_line('1', 'RUNNING', **started_before_check)),
+        sacct_output(sacct_line('1', 'COMPLETED', end='2026-10-21T12:05:00', **started_before_check)),
+    )
+
+    assert [e['msg_title'] for e in aggregator.events] == ['Slurm job 1 (train) finished: COMPLETED']
 
 
 @pytest.mark.usefixtures('gpu_monitoring_enabled')
@@ -388,7 +436,7 @@ def test_job_events_pending_jobs_discovered_from_squeue(events_instance, aggrega
 
 
 @pytest.mark.usefixtures('gpu_monitoring_enabled')
-def test_job_events_array_submitted_once(events_instance, aggregator):
+def test_job_events_array_and_heterogeneous_job_submitted_once(events_instance, aggregator):
     check = SlurmCheck('slurm', {}, [events_instance])
     run_polls(
         check,
@@ -399,6 +447,8 @@ def test_job_events_array_submitted_once(events_instance, aggregator):
             # An array first seen with all of its tasks already scheduled.
             sacct_line('40', 'RUNNING', start='2026-10-21T12:01:00', JobID='40_1'),
             sacct_line('41', 'RUNNING', start='2026-10-21T12:01:00', JobID='40_2'),
+            sacct_line('50', 'RUNNING', start='2026-10-21T12:01:00', JobID='50+0'),
+            sacct_line('51', 'RUNNING', start='2026-10-21T12:01:00', JobID='50+1'),
         ),
     )
 
@@ -407,6 +457,9 @@ def test_job_events_array_submitted_once(events_instance, aggregator):
         'Slurm job 40_1 (train) submitted',
         'Slurm job 40_1 (train) started',
         'Slurm job 40_2 (train) started',
+        'Slurm job 50+0 (train) submitted',
+        'Slurm job 50+0 (train) started',
+        'Slurm job 50+1 (train) started',
     ]
 
 

@@ -41,6 +41,8 @@ SACCT_JOB_EVENT_MAX_LOOKBACK = 3600
 SACCT_JOB_EVENT_IDS_PER_QUERY = 500
 
 SACCT_TIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
+# sacct formats times according to this variable, which must not be inherited from the Agent environment.
+SACCT_TIME_FORMAT_ENV = {'SLURM_TIME_FORMAT': 'standard'}
 
 TERMINAL_STATES = frozenset(
     {
@@ -70,8 +72,6 @@ STATE_TRANSITIONS = {
 }
 
 TRANSITION_ALERT_TYPES = {
-    'submitted': 'info',
-    'started': 'info',
     'preempted': 'warning',
     'requeued': 'warning',
     'suspended': 'warning',
@@ -179,10 +179,14 @@ class SacctJob:
         return gpu_count(self.alloc_tres) or gpu_count(self.req_tres)
 
 
-def array_job_id(job_id: str) -> str | None:
+def parent_job_id(job_id: str) -> str | None:
     # Array tasks are listed as '<array>_<task>', and their pending remainder as '<array>_[<tasks>]'.
-    array_id, sep, _ = job_id.partition('_')
-    return array_id if sep else None
+    # Heterogeneous job components are listed as '<job>+<component>'.
+    for separator in ('_', '+'):
+        parent_id, found, _ = job_id.partition(separator)
+        if found:
+            return parent_id
+    return None
 
 
 def job_transitions(previous: SacctJob | None, current: SacctJob) -> list[str]:
@@ -214,16 +218,15 @@ def transition_alert_type(transition: str, job: SacctJob, pending_reason: str | 
     return TRANSITION_ALERT_TYPES.get(transition, 'info')
 
 
-def transition_timestamp(transition: str, job: SacctJob, now: float) -> float:
+def transition_time(transition: str, job: SacctJob) -> float | None:
+    """Return when `transition` happened according to sacct, or None if sacct does not record it."""
     if transition == 'submitted':
-        timestamp = job.submit
-    elif transition == 'started':
-        timestamp = job.start
-    elif transition in ('pending', 'suspended'):
-        timestamp = None
-    else:
-        timestamp = job.end
-    return timestamp if timestamp is not None else now
+        return job.submit
+    if transition == 'started':
+        return job.start
+    if transition in ('pending', 'suspended'):
+        return None
+    return job.end
 
 
 def job_event_title(transition: str, job: SacctJob, pending_reason: str | None = None) -> str:

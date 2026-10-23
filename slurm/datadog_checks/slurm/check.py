@@ -47,20 +47,21 @@ from .job_events import (
     SACCT_JOB_EVENT_MAX_LOOKBACK,
     SACCT_JOB_EVENT_PARAMS,
     SACCT_JOB_EVENT_WINDOW_OVERLAP,
+    SACCT_TIME_FORMAT_ENV,
     SacctJob,
-    array_job_id,
     job_event_tags,
     job_event_text,
     job_event_title,
     job_transitions,
+    parent_job_id,
     transition_alert_type,
-    transition_timestamp,
+    transition_time,
 )
 
 
-def get_subprocess_output(cmd):
+def get_subprocess_output(cmd, env=None):
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, env=env)
         return result.stdout, result.stderr, result.returncode
     except Exception as e:
         return None, f"Error running {cmd}: {e}", 1
@@ -185,6 +186,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         # Jobs seen in the last successful poll, keyed by cluster and raw job ID. None until the first poll
         # seeds it, so that jobs that already existed when the check started do not produce events.
         self._job_event_state: dict[str, SacctJob] | None = None
+        self._job_events_first_poll: float | None = None
         self._job_events_last_poll: float | None = None
         # sacct does not report pending reasons, so they come from the squeue metrics collection of the same run.
         # None when squeue produced nothing this run, so that the previously reported reasons are kept.
@@ -300,7 +302,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
     def _run_sacct_job_events(self, params: list[str]) -> dict[str, SacctJob] | None:
         cmd = self.sacct_job_events_cmd + params
         self.log.debug("Running sacct job events command: %s", cmd)
-        out, err, ret = get_subprocess_output(cmd)
+        out, err, ret = get_subprocess_output(cmd, env={**os.environ, **SACCT_TIME_FORMAT_ENV})
         if ret != 0:
             self._log_command_failure('sacct', err)
             return None
@@ -337,29 +339,42 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self._job_event_state = current_state
         self._job_pending_reasons = current_reasons
         if previous_state is None:
+            self._job_events_first_poll = now
             return
 
-        # Each array task gets a record of its own once it is scheduled, but the array is submitted only once.
-        seen_arrays = {array_id for job in previous_state.values() if (array_id := array_job_id(job.job_id))}
+        # Array tasks and heterogeneous job components each get a record of their own, but are submitted together.
+        seen_parents = {parent_id for job in previous_state.values() if (parent_id := parent_job_id(job.job_id))}
         for key, job in current_state.items():
             previous = previous_state.get(key)
             reason = current_reasons.get(key)
-            array_id = array_job_id(job.job_id)
+            parent_id = parent_job_id(job.job_id)
             for transition in job_transitions(previous, job):
-                if transition == 'submitted' and array_id in seen_arrays:
+                if transition == 'submitted' and parent_id in seen_parents:
                     continue
-                self.submit_job_event(transition, job, now, reason if transition == 'submitted' else None)
-            if array_id:
-                seen_arrays.add(array_id)
+                happened_at = transition_time(transition, job)
+                # A job the first poll missed, for example because slurmdbd had not recorded it yet, is new to the
+                # check but may have transitioned before the check started.
+                if happened_at is not None and happened_at < self._job_events_first_poll:
+                    continue
+                self.submit_job_event(
+                    transition,
+                    job,
+                    now if happened_at is None else happened_at,
+                    reason if transition == 'submitted' else None,
+                )
+            if parent_id:
+                seen_parents.add(parent_id)
 
             # New jobs carry their reason in the submitted event; afterwards, only reason changes are reported.
             if squeue_reasons is not None and previous is not None and reason and reason != previous_reasons.get(key):
                 self.submit_job_event('pending', job, now, reason)
 
-    def submit_job_event(self, transition: str, job: SacctJob, now: float, pending_reason: str | None = None) -> None:
+    def submit_job_event(
+        self, transition: str, job: SacctJob, timestamp: float, pending_reason: str | None = None
+    ) -> None:
         self.event(
             {
-                'timestamp': int(transition_timestamp(transition, job, now)),
+                'timestamp': int(timestamp),
                 'event_type': f'slurm.job.{transition}',
                 'msg_title': job_event_title(transition, job, pending_reason),
                 'msg_text': job_event_text(transition, job, pending_reason),
