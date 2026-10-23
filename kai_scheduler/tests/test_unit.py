@@ -245,9 +245,20 @@ def test_queue_controller_only(dd_run_check, aggregator, mock_endpoints):
     aggregator.assert_metric_has_tag('kai.queue.quota.cpu', 'kai_component:queue_controller')
 
 
-def test_no_endpoint_raises(dd_run_check):
-    with pytest.raises(Exception, match='Must specify at least one of the following'):
-        dd_run_check(KaiSchedulerCheck(CHECK_NAME, {}, [{}]))
+@pytest.mark.parametrize(
+    'instance, error',
+    [
+        pytest.param({}, 'Must specify at least one of the following', id='no endpoint'),
+        pytest.param(
+            {'scheduler_endpoint': SCHEDULER_ENDPOINT, 'binder_endpoint': SCHEDULER_ENDPOINT},
+            '`scheduler_endpoint`, `binder_endpoint` must be different endpoints',
+            id='shared endpoint',
+        ),
+    ],
+)
+def test_invalid_endpoints_raise(dd_run_check, instance, error):
+    with pytest.raises(Exception, match=error):
+        dd_run_check(KaiSchedulerCheck(CHECK_NAME, {}, [instance]))
 
 
 def test_skipped_when_gpu_monitoring_disabled(instance):

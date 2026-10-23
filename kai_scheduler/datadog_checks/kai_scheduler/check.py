@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections import defaultdict
 from typing import NamedTuple
 
 try:
@@ -76,14 +77,24 @@ class KaiSchedulerCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         }
 
     def parse_config(self):
-        self.scraper_configs = [
-            self.generate_config(component, endpoint)
+        endpoints = [
+            (component, endpoint)
             for component in COMPONENTS
             if (endpoint := self.instance.get(component.endpoint_option))
         ]
-        if not self.scraper_configs:
+        if not endpoints:
             options = '`, `'.join(component.endpoint_option for component in COMPONENTS)
             raise ConfigurationError(f'Must specify at least one of the following: `{options}`')
+
+        # Scrapers are keyed by endpoint, so a shared endpoint would silently drop all but one component.
+        options_by_endpoint: defaultdict[str, list[str]] = defaultdict(list)
+        for component, endpoint in endpoints:
+            options_by_endpoint[endpoint].append(component.endpoint_option)
+        for endpoint, options in options_by_endpoint.items():
+            if len(options) > 1:
+                raise ConfigurationError(f'`{"`, `".join(options)}` must be different endpoints, got `{endpoint}`')
+
+        self.scraper_configs = [self.generate_config(component, endpoint) for component, endpoint in endpoints]
 
     def generate_config(self, component: Component, endpoint: str) -> dict:
         return {
