@@ -11,6 +11,7 @@ from datadog_checks.base.errors import SkipInstanceError
 
 
 class DynamoCheck(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = 'dynamo'

@@ -7,6 +7,7 @@ from .metrics import METRIC_MAP, RENAME_LABELS_MAP
 
 
 class AppgateSDPCheck(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
     __NAMESPACE__ = 'appgate_sdp'
 
