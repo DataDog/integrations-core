@@ -4,11 +4,9 @@
 
 import os
 
-import mock
 import pytest
 from prometheus_client import CollectorRegistry, Counter, Gauge, generate_latest
 
-from datadog_checks.base import ensure_unicode
 from datadog_checks.dev import docker_run, get_docker_hostname
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -50,7 +48,7 @@ def dd_environment(e2e_instance):
 
 
 @pytest.fixture
-def poll_mock():
+def poll_mock(fake_http, fake_http_response):
     registry = CollectorRegistry()
     # pylint: disable=E1123,E1101
     g1 = Gauge('metric1', 'processor usage', ['matched_label', 'node', 'flavor'], registry=registry)
@@ -62,13 +60,13 @@ def poll_mock():
     g3 = Gauge('metric3', 'memory usage', ['matched_label', 'node', 'timestamp'], registry=registry)
     g3.labels(matched_label="foobar", node="host2", timestamp="456").set(float('inf'))
 
-    poll_mock_patch = mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: ensure_unicode(generate_latest(registry)).split("\n"),
-            headers={'Content-Type': "text/plain"},
-        ),
-    )
-    with poll_mock_patch:
-        yield
+    expected = []
+
+    def register(endpoint: str = INSTANCE_UNIT['prometheus_url'], count: int = 1) -> None:
+        for _ in range(count):
+            fake_http_response(endpoint, generate_latest(registry), headers={'Content-Type': 'text/plain'})
+            expected.append(('GET', endpoint))
+
+    yield register
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == expected

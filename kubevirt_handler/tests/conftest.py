@@ -7,7 +7,6 @@ from contextlib import ExitStack
 import pytest
 
 from datadog_checks.dev import get_here, run_command
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.dev.kube_port_forward import port_forward
 
@@ -77,16 +76,18 @@ def instance():
     }
 
 
-def mock_http_responses(url, **_params):
-    mapping = {
-        "https://127.0.0.1:8443/healthz": "healthz.txt",
-        "https://127.0.0.1:8443/metrics": "metrics.txt",
-    }
+@pytest.fixture
+def http_responses(fake_http, fake_http_response, instance):
+    expected = []
 
-    fixtures_file = mapping.get(url)
+    def register(*paths: str) -> None:
+        for path in paths:
+            endpoint = instance[f'kubevirt_handler_{path}_endpoint']
+            filename = 'metrics.txt' if path == 'metrics' else 'healthz.txt'
+            with open(os.path.join(HERE, 'fixtures', filename), 'rb') as f:
+                fake_http_response(endpoint, f.read())
+            expected.append(('GET', endpoint))
 
-    if not fixtures_file:
-        raise Exception(f"url `{url}` not registered")
-
-    with open(os.path.join(HERE, "fixtures", fixtures_file)) as f:
-        return MockResponse(content=f.read())
+    yield register
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == expected

@@ -12,8 +12,8 @@ from datadog_checks.amazon_msk.metrics import JMX_METRICS_MAP, NODE_METRICS_MAP,
 from .common import INSTANCE, INSTANCE_LEGACY, assert_jmx_metrics
 
 
-@pytest.mark.usefixtures('mock_data')
-def test_node_check_legacy(aggregator, instance_legacy, mock_client):
+def test_node_check_legacy(aggregator, instance_legacy, mock_client, mock_data):
+    mock_data(instance_legacy)
     c = AmazonMskCheck('amazon_msk', {}, [instance_legacy])
     assert not c.run()
 
@@ -59,6 +59,7 @@ def test_node_check_legacy(aggregator, instance_legacy, mock_client):
     ],
 )
 def test_disabled_exporter_legacy(
+    mock_data,
     aggregator,
     dd_run_check,
     instance_legacy,
@@ -77,6 +78,7 @@ def test_disabled_exporter_legacy(
             "node_exporter_port": node_exporter_port,
         }
     )
+    mock_data(inst)
     c = AmazonMskCheck('amazon_msk', {}, [inst])
     assert not c.run()
 
@@ -84,8 +86,8 @@ def test_disabled_exporter_legacy(
     assert_node_metrics(aggregator, [], is_enabled=assert_node_metrics_enabled)
 
 
-@pytest.mark.usefixtures('mock_data')
-def test_node_check(aggregator, dd_run_check, instance, mock_client):
+def test_node_check(aggregator, dd_run_check, instance, mock_client, mock_data):
+    mock_data(instance)
     c = AmazonMskCheck('amazon_msk', {}, [instance])
     dd_run_check(c)
 
@@ -134,6 +136,7 @@ def test_node_check(aggregator, dd_run_check, instance, mock_client):
     ],
 )
 def test_disabled_exporter_check(
+    mock_data,
     aggregator,
     dd_run_check,
     instance,
@@ -152,6 +155,7 @@ def test_disabled_exporter_check(
             "node_exporter_port": node_exporter_port,
         }
     )
+    mock_data(inst)
     c = AmazonMskCheck('amazon_msk', {}, [inst])
     dd_run_check(c)
 
@@ -209,9 +213,9 @@ def assert_node_metrics(aggregator, tags, is_enabled=True):
             aggregator.assert_metric(metric, count=0)
 
 
-@pytest.mark.usefixtures('mock_data')
-def test_custom_metric_path(aggregator, instance_legacy, mock_client):
+def test_custom_metric_path(aggregator, instance_legacy, mock_client, mock_data):
     instance_legacy['prometheus_metrics_path'] = '/'
+    mock_data(instance_legacy)
     c = AmazonMskCheck('amazon_msk', {}, [instance_legacy])
     assert not c.run()
 

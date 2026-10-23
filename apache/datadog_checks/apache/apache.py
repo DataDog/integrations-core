@@ -14,6 +14,7 @@ class Apache(AgentCheck):
     See http://httpd.apache.org/docs/2.2/mod/mod_status.html for more details
     """
 
+    AGNOSTIC_HTTP_CLIENT = True
     GAUGES = {
         'IdleWorkers': 'apache.performance.idle_workers',
         'BusyWorkers': 'apache.performance.busy_workers',

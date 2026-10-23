@@ -16,11 +16,11 @@ from .utils import _assert_tags_excluded, get_fixture_path
 FIXTURE_DIR = '{}/fixtures'.format(get_here())
 
 
-def test_istiod(aggregator, dd_run_check, mock_http_response):
+def test_istiod(aggregator, dd_run_check, metrics_response):
     """
     Test the istiod deployment endpoint for V2 implementation
     """
-    mock_http_response(file_path=get_fixture_path('1.5', 'istiod.txt'))
+    metrics_response('http://localhost:8080/metrics', get_fixture_path('1.5', 'istiod.txt'))
     check = Istio('istio', {}, [common.MOCK_V2_ISTIOD_INSTANCE])
     dd_run_check(check)
 
@@ -36,11 +36,11 @@ def test_istiod(aggregator, dd_run_check, mock_http_response):
     aggregator.assert_all_metrics_covered()
 
 
-def test_proxy_mesh(aggregator, dd_run_check, mock_http_response):
+def test_proxy_mesh(aggregator, dd_run_check, metrics_response):
     """
     Test proxy mesh check for V2 implementation
     """
-    mock_http_response(file_path=get_fixture_path('1.5', 'istio-proxy.txt'))
+    metrics_response('http://localhost:15090/metrics', get_fixture_path('1.5', 'istio-proxy.txt'))
 
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_MESH_INSTANCE])
     dd_run_check(check)
@@ -51,11 +51,11 @@ def test_proxy_mesh(aggregator, dd_run_check, mock_http_response):
     aggregator.assert_all_metrics_covered()
 
 
-def test_proxy_exclude_labels(aggregator, dd_run_check, mock_http_response):
+def test_proxy_exclude_labels(aggregator, dd_run_check, metrics_response):
     """
     Test proxy mesh check for V2 implementation
     """
-    mock_http_response(file_path=get_fixture_path('1.5', 'istio-proxy.txt'))
+    metrics_response('http://localhost:15090/metrics', get_fixture_path('1.5', 'istio-proxy.txt'))
     # Copy to prevent the instance in common from being overwritten
     instance = copy.copy(common.MOCK_V2_MESH_INSTANCE)
     instance['exclude_labels'] = common.CONFIG_EXCLUDE_LABELS
@@ -72,11 +72,11 @@ def test_proxy_exclude_labels(aggregator, dd_run_check, mock_http_response):
     aggregator.assert_all_metrics_covered()
 
 
-def test_type_override_proxy_mesh(aggregator, dd_run_check, mock_http_response):
+def test_type_override_proxy_mesh(aggregator, dd_run_check, metrics_response):
     """
     Test proxy mesh check for V2 implementation
     """
-    mock_http_response(file_path=get_fixture_path('1.5', 'istio-proxy.txt'))
+    metrics_response('http://localhost:15090/metrics', get_fixture_path('1.5', 'istio-proxy.txt'))
 
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_MESH_OVERRIDE_INSTANCE])
     dd_run_check(check)
@@ -89,11 +89,11 @@ def test_type_override_proxy_mesh(aggregator, dd_run_check, mock_http_response):
     aggregator.assert_all_metrics_covered()
 
 
-def test_version_metadata(datadog_agent, dd_run_check, mock_http_response):
+def test_version_metadata(datadog_agent, dd_run_check, metrics_response):
     """
     Test metadata version collection with V2 implementation
     """
-    mock_http_response(file_path=get_fixture_path('1.5', 'istiod.txt'))
+    metrics_response('http://localhost:8080/metrics', get_fixture_path('1.5', 'istiod.txt'))
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_LEGACY_ISTIOD_INSTANCE])
     check.check_id = 'test:123'
     dd_run_check(check)
@@ -112,11 +112,11 @@ def test_version_metadata(datadog_agent, dd_run_check, mock_http_response):
     datadog_agent.assert_metadata('test:123', version_metadata)
 
 
-def test_istio_agent(aggregator, dd_run_check, mock_http_response):
+def test_istio_agent(aggregator, dd_run_check, metrics_response):
     """
     Test the istiod deployment endpoint for V2 implementation
     """
-    mock_http_response(file_path=get_fixture_path('1.5', 'istio-merged.txt'))
+    metrics_response('http://localhost:15090/metrics', get_fixture_path('1.5', 'istio-merged.txt'))
     check = Istio('istio', {}, [common.MOCK_V2_MESH_INSTANCE])
     dd_run_check(check)
 
@@ -135,11 +135,11 @@ def test_istio_agent(aggregator, dd_run_check, mock_http_response):
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
-def test_istio_agent_dns_metrics(aggregator, dd_run_check, mock_http_response):
+def test_istio_agent_dns_metrics(aggregator, dd_run_check, metrics_response):
     """
     Test DNS metrics from istio-proxy merged endpoint
     """
-    mock_http_response(file_path=get_fixture_path('1.5', 'istio-merged.txt'))
+    metrics_response('http://localhost:15090/metrics', get_fixture_path('1.5', 'istio-merged.txt'))
     check = Istio('istio', {}, [common.MOCK_V2_MESH_INSTANCE])
     dd_run_check(check)
 
@@ -209,12 +209,12 @@ def test_exclude_labels(exclude_labels, expected_exclude_labels):
     assert check.instance["exclude_labels"] == expected_exclude_labels
 
 
-def test_non_conforming_metrics(aggregator, dd_run_check, mock_http_response):
+def test_non_conforming_metrics(aggregator, dd_run_check, metrics_response):
     """
     Test non conforming metrics for V2 implementation such as histograms and gauges
     ending with `_total`
     """
-    mock_http_response(file_path=get_fixture_path(FIXTURE_DIR, 'non-conforming.txt'))
+    metrics_response('http://localhost:8080/metrics', get_fixture_path(FIXTURE_DIR, 'non-conforming.txt'))
 
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_ISTIOD_INSTANCE])
     dd_run_check(check)
@@ -226,12 +226,12 @@ def test_non_conforming_metrics(aggregator, dd_run_check, mock_http_response):
     aggregator.assert_all_metrics_covered()
 
 
-def test_unverified_metrics(aggregator, dd_run_check, mock_http_response):
+def test_unverified_metrics(aggregator, dd_run_check, metrics_response):
     """
     Test non conforming metrics for V2 implementation such as histograms and gauges
     ending with `_total`
     """
-    mock_http_response(file_path=get_fixture_path(FIXTURE_DIR, 'unverified-metrics.txt'))
+    metrics_response('http://localhost:8080/metrics', get_fixture_path(FIXTURE_DIR, 'unverified-metrics.txt'))
 
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_ISTIOD_INSTANCE])
     dd_run_check(check)
@@ -243,8 +243,8 @@ def test_unverified_metrics(aggregator, dd_run_check, mock_http_response):
     aggregator.assert_all_metrics_covered()
 
 
-def test_all_labels_submitted(aggregator, dd_run_check, mock_http_response):
-    mock_http_response(file_path=get_fixture_path(FIXTURE_DIR, 'test-labels.txt'))
+def test_all_labels_submitted(aggregator, dd_run_check, metrics_response):
+    metrics_response('http://localhost:15090/metrics', get_fixture_path(FIXTURE_DIR, 'test-labels.txt'))
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_MESH_INSTANCE])
     dd_run_check(check)
 
@@ -255,9 +255,9 @@ def test_all_labels_submitted(aggregator, dd_run_check, mock_http_response):
 # --- Ambient mode (istio_mode: ambient) tests ---
 
 
-def test_ambient_ztunnel_metrics(aggregator, dd_run_check, mock_http_response, caplog):
+def test_ambient_ztunnel_metrics(aggregator, dd_run_check, metrics_response, caplog):
     """Ztunnel metrics collection in ambient mode against a real ztunnel exposition."""
-    mock_http_response(file_path=get_fixture_path('1.24', 'ztunnel.txt'))
+    metrics_response('http://localhost:15020/stats/prometheus', get_fixture_path('1.24', 'ztunnel.txt'))
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_AMBIENT_ZTUNNEL_INSTANCE])
     with caplog.at_level('WARNING'):
         dd_run_check(check)
@@ -273,12 +273,12 @@ def test_ambient_ztunnel_metrics(aggregator, dd_run_check, mock_http_response, c
     aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
 
 
-def test_ambient_ztunnel_legacy_parser_drops_counters(aggregator, dd_run_check, mock_http_response):
+def test_ambient_ztunnel_legacy_parser_drops_counters(aggregator, dd_run_check, metrics_response):
     """Pin the broken behavior: with the legacy Prometheus parser (use_latest_spec=False),
     ztunnel counter metrics are silently dropped because the parser does not add `_total`
     to a counter's allowed sample names when TYPE is declared with the base name. Gauges
     are unaffected by the same bug and still collected."""
-    mock_http_response(file_path=get_fixture_path('1.24', 'ztunnel.txt'))
+    metrics_response('http://localhost:15020/stats/prometheus', get_fixture_path('1.24', 'ztunnel.txt'))
     instance = dict(common.MOCK_V2_AMBIENT_ZTUNNEL_INSTANCE, use_latest_spec=False)
     check = Istio(common.CHECK_NAME, {}, [instance])
     dd_run_check(check)
@@ -289,10 +289,10 @@ def test_ambient_ztunnel_legacy_parser_drops_counters(aggregator, dd_run_check, 
         aggregator.assert_metric(metric)
 
 
-def test_ambient_warns_when_user_opts_out_of_openmetrics_parser(caplog, dd_run_check, mock_http_response):
+def test_ambient_warns_when_user_opts_out_of_openmetrics_parser(caplog, dd_run_check, metrics_response):
     """Setting `use_latest_spec: false` with ambient + ztunnel reintroduces the silent-drop bug;
     the integration must log a warning so the regression is not silent."""
-    mock_http_response(file_path=get_fixture_path('1.24', 'ztunnel.txt'))
+    metrics_response('http://localhost:15020/stats/prometheus', get_fixture_path('1.24', 'ztunnel.txt'))
     instance = dict(common.MOCK_V2_AMBIENT_ZTUNNEL_INSTANCE, use_latest_spec=False)
     check = Istio(common.CHECK_NAME, {}, [instance])
     with caplog.at_level('WARNING'):
@@ -301,9 +301,9 @@ def test_ambient_warns_when_user_opts_out_of_openmetrics_parser(caplog, dd_run_c
     assert "ztunnel" in caplog.text
 
 
-def test_ambient_waypoint_metrics(aggregator, dd_run_check, mock_http_response):
+def test_ambient_waypoint_metrics(aggregator, dd_run_check, metrics_response):
     """Test waypoint proxy metrics collection in ambient mode with default namespace."""
-    mock_http_response(file_path=get_fixture_path('1.5', 'waypoint.txt'))
+    metrics_response('http://localhost:15020/stats/prometheus', get_fixture_path('1.5', 'waypoint.txt'))
     check = Istio(common.CHECK_NAME, {}, [common.MOCK_V2_AMBIENT_WAYPOINT_INSTANCE])
     dd_run_check(check)
 
@@ -337,9 +337,9 @@ def test_ambient_requires_at_least_one_endpoint():
         check._parse_config()
 
 
-def test_ambient_auto_detect_with_ztunnel_endpoint(aggregator, dd_run_check, mock_http_response):
+def test_ambient_auto_detect_with_ztunnel_endpoint(aggregator, dd_run_check, metrics_response):
     """Test that ambient mode is auto-detected when ztunnel_endpoint is configured without explicit istio_mode."""
-    mock_http_response(file_path=get_fixture_path('1.24', 'ztunnel.txt'))
+    metrics_response('http://localhost:15020/stats/prometheus', get_fixture_path('1.24', 'ztunnel.txt'))
     instance = {
         'ztunnel_endpoint': 'http://localhost:15020/stats/prometheus',
         'use_openmetrics': True,
@@ -352,9 +352,9 @@ def test_ambient_auto_detect_with_ztunnel_endpoint(aggregator, dd_run_check, moc
         aggregator.assert_metric(metric)
 
 
-def test_ambient_auto_detect_with_waypoint_endpoint(aggregator, dd_run_check, mock_http_response):
+def test_ambient_auto_detect_with_waypoint_endpoint(aggregator, dd_run_check, metrics_response):
     """Test that ambient mode is auto-detected when waypoint_endpoint is configured without explicit istio_mode."""
-    mock_http_response(file_path=get_fixture_path('1.5', 'waypoint.txt'))
+    metrics_response('http://localhost:15020/stats/prometheus', get_fixture_path('1.5', 'waypoint.txt'))
     instance = {
         'waypoint_endpoint': 'http://localhost:15020/stats/prometheus',
         'use_openmetrics': True,
@@ -367,9 +367,10 @@ def test_ambient_auto_detect_with_waypoint_endpoint(aggregator, dd_run_check, mo
         aggregator.assert_metric(metric)
 
 
-def test_ambient_auto_detect_with_both_endpoints(aggregator, dd_run_check, mock_http_response):
+def test_ambient_auto_detect_with_both_endpoints(aggregator, dd_run_check, metrics_response):
     """Test that ambient mode is auto-detected when both ztunnel and waypoint endpoints are configured."""
-    mock_http_response(file_path=get_fixture_path('1.24', 'ztunnel.txt'))
+    metrics_response('http://localhost:15020/stats/prometheus', get_fixture_path('1.24', 'ztunnel.txt'))
+    metrics_response('http://localhost:15021/stats/prometheus', get_fixture_path('1.5', 'waypoint.txt'))
     instance = {
         'ztunnel_endpoint': 'http://localhost:15020/stats/prometheus',
         'waypoint_endpoint': 'http://localhost:15021/stats/prometheus',

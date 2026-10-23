@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
 import os
-from unittest import mock
 
 import pytest
 
@@ -112,54 +111,35 @@ def check(instance):
 
 
 @pytest.fixture()
-def mock_metrics_v1():
+def mock_metrics_v1(fake_http, fake_http_response, instance):
     fixture_file = os.path.join(os.path.dirname(__file__), "fixtures", "metrics-v1.txt")
-
-    with open(fixture_file, "r") as f:
+    with open(fixture_file) as f:
         content = f.read()
-
-    with mock.patch(
-        "requests.Session.get",
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: content.split("\n"),
-            headers={"Content-Type": "text/plain"},
-        ),
-    ):
-        yield
+    fake_http_response(instance['openmetrics_endpoint'], content, headers={'Content-Type': 'text/plain'})
+    yield
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == [('GET', instance['openmetrics_endpoint'])]
 
 
 @pytest.fixture()
-def mock_metrics_v2():
+def mock_metrics_v2(fake_http, fake_http_response, instance):
     fixture_file = os.path.join(os.path.dirname(__file__), "fixtures", "metrics-v2.txt")
-
-    with open(fixture_file, "r") as f:
+    with open(fixture_file) as f:
         content = f.read()
-
-    with mock.patch(
-        "requests.Session.get",
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: content.split("\n"),
-            headers={"Content-Type": "text/plain"},
-        ),
-    ):
-        yield
+    fake_http_response(instance['openmetrics_endpoint'], content, headers={'Content-Type': 'text/plain'})
+    yield
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == [('GET', instance['openmetrics_endpoint'])]
 
 
 @pytest.fixture()
-def mock_metrics_ksm():
+def mock_metrics_ksm(fake_http, fake_http_response, instance):
     fixture_file = os.path.join(os.path.dirname(__file__), "fixtures", "metrics-ksm.txt")
-
-    with open(fixture_file, "r") as f:
+    with open(fixture_file) as f:
         content = f.read()
-
-    with mock.patch(
-        "requests.Session.get",
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: content.split("\n"),
-            headers={"Content-Type": "text/plain"},
-        ),
-    ):
-        yield
+    endpoints = [instance['openmetrics_endpoint'], 'http://localhost:3001/metrics']
+    for endpoint in endpoints:
+        fake_http_response(endpoint, content, headers={'Content-Type': 'text/plain'})
+    yield
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == [('GET', endpoint) for endpoint in endpoints]

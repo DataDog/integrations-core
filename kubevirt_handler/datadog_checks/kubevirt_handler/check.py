@@ -10,6 +10,7 @@ from .metrics import METRICS_MAP
 
 
 class KubeVirtHandlerCheck(OpenMetricsBaseCheckV2):
+    AGNOSTIC_HTTP_CLIENT = True
     # This will be the prefix of every metric and service check the integration sends
     __NAMESPACE__ = "kubevirt_handler"
     DEFAULT_METRIC_LIMIT = 0

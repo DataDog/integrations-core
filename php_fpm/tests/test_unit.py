@@ -1,9 +1,10 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
-import mock
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.php_fpm.php_fpm import BadConfigError, PHPFPMCheck
 
 
@@ -33,50 +34,38 @@ def test_bad_ping(aggregator, dd_run_check):
     aggregator.all_metrics_asserted()
 
 
-def test_should_not_retry(check, instance):
-    """
-    backoff only works when response code is 503, otherwise the error
-    should bubble up
-    """
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.side_effect = FooException("Generic http error here")
-        with pytest.raises(FooException):
-            check._process_status(instance['status_url'], [], None, False)
+def test_should_not_retry(fake_http, check, instance):
+    """Non-503 errors must not be retried."""
+    endpoint = instance['status_url']
+    fake_http.register_response('GET', endpoint, FooException('Generic http error here'))
+    with pytest.raises(FooException):
+        check._process_status(endpoint, [], None, False)
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == [('GET', endpoint)]
 
 
-def test_should_bail_out(check, instance):
-    """
-    backoff should give up after 3 attempts
-    """
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        attrs = {'raise_for_status.side_effect': FooException()}
-        r.get.side_effect = [
-            mock.MagicMock(status_code=503, **attrs),
-            mock.MagicMock(status_code=503, **attrs),
-            mock.MagicMock(status_code=503, **attrs),
-            mock.MagicMock(status_code=200),
-        ]
-        with pytest.raises(FooException):
-            check._process_status(instance['status_url'], [], None, False)
+def test_should_bail_out(fake_http, fake_http_response, check, instance):
+    """Backoff gives up after three attempts."""
+    endpoint = instance['status_url']
+    for _ in range(3):
+        fake_http_response(endpoint, status_code=503)
+    with pytest.raises(HTTPClientStatusError):
+        check._process_status(endpoint, [], None, False)
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == [('GET', endpoint)] * 3
 
 
-def test_backoff_success(check, instance, aggregator, payload):
-    """
-    Success after 2 failed attempts
-    """
+def test_backoff_success(fake_http, fake_http_response, check, instance, aggregator, payload):
+    """Success after two failed attempts."""
     instance['ping_url'] = None
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        attrs = {'json.return_value': payload}
-        r.get.side_effect = [
-            mock.MagicMock(status_code=503),
-            mock.MagicMock(status_code=503),
-            mock.MagicMock(status_code=200, **attrs),
-        ]
-        pool_name = check._process_status(instance['status_url'], [], None, False)
-        assert pool_name == 'www'
+    endpoint = instance['status_url']
+    fake_http_response(endpoint, status_code=503)
+    fake_http_response(endpoint, status_code=503)
+    fake_http_response(endpoint, json_data=payload)
+    pool_name = check._process_status(endpoint, [], None, False)
+    assert pool_name == 'www'
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == [('GET', endpoint)] * 3
 
 
 @pytest.mark.parametrize(
@@ -101,25 +90,13 @@ def test_backoff_success(check, instance, aggregator, payload):
         ),
     ],
 )
-def test_config(test_case, extra_config, expected_http_kwargs, dd_run_check):
+def test_config(test_case, extra_config, expected_http_kwargs, dd_run_check, mocker):
     instance = {'ping_url': 'http://foo:9001/ping'}
     instance.update(extra_config)
     check = PHPFPMCheck('php_fpm', {}, instances=[instance])
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200)
-
-        dd_run_check(check)
-
-        http_kwargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_kwargs.update(expected_http_kwargs)
-        r.get.assert_called_with('http://foo:9001/ping', **http_kwargs)
+    get = mocker.patch.object(type(check.http), 'get', return_value=FakeHTTPResponse(text='pong'))
+    dd_run_check(check)
+    get.assert_called_once_with('http://foo:9001/ping')
+    for option, expected in expected_http_kwargs.items():
+        assert check.http.options[option] == expected

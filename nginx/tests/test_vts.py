@@ -6,7 +6,7 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.nginx import VTS_METRIC_MAP
 
-from .common import TAGS_WITH_HOST_AND_PORT, USING_VTS, VTS_MOCKED_METRICS, mock_http_responses
+from .common import TAGS_WITH_HOST_AND_PORT, USING_VTS, VTS_MOCKED_METRICS, register_vts_metrics
 
 pytestmark = [pytest.mark.skipif(not USING_VTS, reason='Not using VTS')]
 
@@ -48,10 +48,13 @@ def test_vts(check, instance_vts, aggregator):
 
 
 @pytest.mark.unit
-def test_vts_unit(dd_run_check, aggregator, mocked_instance_vts, check, mocker):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+def test_vts_unit(dd_run_check, aggregator, mocked_instance_vts, check, fake_http, fake_http_response):
+    endpoint = 'http://localhost:8080/vts_status'
+    register_vts_metrics(fake_http_response, endpoint)
     c = check(mocked_instance_vts)
     dd_run_check(c)
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == [('GET', endpoint)]
 
     for mapped in VTS_MOCKED_METRICS:
         aggregator.assert_metric(mapped)

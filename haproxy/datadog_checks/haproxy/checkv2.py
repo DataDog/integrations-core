@@ -10,6 +10,7 @@ from .metrics import METRIC_MAP, construct_metrics_config
 class HaproxyCheckV2(OpenMetricsBaseCheckV2):
     __NAMESPACE__ = 'haproxy'
 
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
 
     def get_default_config(self):

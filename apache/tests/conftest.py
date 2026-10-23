@@ -4,11 +4,11 @@
 
 import os
 
-import mock
 import pytest
-import requests
 
 from datadog_checks.apache import Apache
+from datadog_checks.base.stubs.http import FakeHTTPResponse
+from datadog_checks.base.utils.http import create_http_client
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
 
@@ -32,8 +32,9 @@ def dd_environment():
 
 
 def generate_metrics():
+    http = create_http_client({}, {}, agnostic=True)
     for _ in range(0, 100):
-        requests.get(BASE_URL)
+        http.get(BASE_URL)
 
 
 def check_status_page_ready():
@@ -41,26 +42,30 @@ def check_status_page_ready():
     Some status info we need for metrics do not appear immediately.
     This check help waiting for the full status page.
     """
-    resp = requests.get(AUTO_STATUS_URL)
+    resp = create_http_client({}, {}, agnostic=True).get(AUTO_STATUS_URL)
     data = resp.content.decode('utf-8')
     assert 'ReqPerSec: ' in data
     assert 'CPULoad: ' in data
 
 
 @pytest.fixture
-def mock_hide_server_version():
-    req = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=req):
+def mock_hide_server_version(mocker):
+    def install(check: Apache) -> None:
+        get = check.http.get
 
-        def mock_requests_get_headers(*args, **kwargs):
-            r = requests.get(*args, **kwargs)
-            old_iter = r.iter_lines
-            r.iter_lines = mock.MagicMock()
-            r.iter_lines.return_value = (l for l in old_iter(decode_unicode=True) if 'ServerVersion' not in l)
-            return r
+        def hide_version(url: str, **kwargs) -> FakeHTTPResponse:
+            response = get(url, **kwargs)
+            lines = [line for line in response.iter_lines(decode_unicode=True) if 'ServerVersion' not in line]
+            return FakeHTTPResponse(
+                content='\n'.join(lines).encode(),
+                encoding='utf-8',
+                status_code=response.status_code,
+                headers=response.headers,
+            )
 
-        req.get = mock_requests_get_headers
-        yield
+        mocker.patch.object(type(check.http), 'get', side_effect=hide_version)
+
+    return install
 
 
 @pytest.fixture

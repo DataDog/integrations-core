@@ -10,7 +10,6 @@ import pytest
 
 from datadog_checks.dev import run_command
 from datadog_checks.dev._env import get_state, save_state
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.kind import kind_run
 from datadog_checks.strimzi import StrimziCheck
 
@@ -176,7 +175,20 @@ def strimzi_kubeconfig():
     return get_state("strimzi_kubeconfig")
 
 
-def mock_http_responses(url, **_params):
+@pytest.fixture
+def http_metrics(fake_http, fake_http_response):
+    expected = []
+
+    def register(url: str) -> None:
+        register_metrics(fake_http_response, url)
+        expected.append(('GET', url))
+
+    yield register
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == expected
+
+
+def register_metrics(fake_http_response, url: str) -> None:
     mapping = {
         "http://cluster-operator:8080/metrics": "cluster_operator_metrics.txt",
         "http://entity-operator:8080/metrics": "topic_operator_metrics.txt",
@@ -189,4 +201,4 @@ def mock_http_responses(url, **_params):
         pytest.fail(f"url `{url}` not registered")
 
     with open(os.path.join(HERE, "fixtures", STRIMZI_VERSION, metrics_file)) as f:
-        return MockResponse(content=f.read())
+        fake_http_response(url, f.read())

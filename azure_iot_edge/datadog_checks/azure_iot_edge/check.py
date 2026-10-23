@@ -10,6 +10,7 @@ from .types import Instance
 
 
 class AzureIoTEdgeCheck(OpenMetricsBaseCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'azure.iot_edge'  # Child of `azure.` namespace.
 
     DEFAULT_METRIC_LIMIT = 0

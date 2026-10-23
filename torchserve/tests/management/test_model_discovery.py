@@ -4,9 +4,7 @@
 import json
 import os
 
-import mock
 import pytest
-from requests import HTTPError
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.torchserve.model_discovery import ModelDiscovery
@@ -95,35 +93,30 @@ pytestmark = pytest.mark.unit
         ),
     ],
 )
-def test_get_models(check, mocked_management_instance, expected_models, fixture_folder, status_codes):
-    # Build all the responses our mock will return
-    responses = []
-    full_path = get_fixture_path(os.path.join("management", "pagination", fixture_folder))
-    for index, file in enumerate(sorted(os.listdir(full_path))):
-        with open(os.path.join(full_path, file), 'r') as f:
-            # We only mock the number of calls we have in the status_code list
-            if len(status_codes) > index:
-                status_code = status_codes[index]
-                mock_resp = mock.MagicMock(status_code=status_code, headers={'Content-Type': "application/json"})
-                mock_resp.json.return_value = json.loads(f.read())
-                mock_resp.raise_for_status.side_effect = HTTPError() if status_code != 200 else None
-                responses.append(mock_resp)
+def test_get_models(
+    fake_http, fake_http_response, check, mocked_management_instance, expected_models, fixture_folder, status_codes
+):
+    endpoint = mocked_management_instance['management_api_url'] + '/models'
+    full_path = get_fixture_path(os.path.join('management', 'pagination', fixture_folder))
+    files = sorted(os.listdir(full_path))
+    expected_params = []
+    params = {'limit': 100}
+    for index, status_code in enumerate(status_codes):
+        with open(os.path.join(full_path, files[index])) as f:
+            payload = json.load(f)
+        expected_params.append(params)
+        fake_http_response(
+            endpoint,
+            json_data=payload,
+            status_code=status_code,
+            match_options={'params': params},
+        )
+        params = {'limit': 100, 'nextPageToken': payload.get('nextPageToken')}
 
-    req = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=req):
-        discovery = ModelDiscovery(check(mocked_management_instance), include=[".*"])
-        req.get.side_effect = responses
-        assert [('.*', model['modelName'], model, None) for model in expected_models] == list(discovery.get_items())
-        assert req.get.call_count == len(status_codes)
-
-        # Validate we used the right params
-        assert req.get.call_args_list[0].kwargs["params"] == {"limit": 100}
-
-        for index, _ in enumerate(status_codes[1:], start=1):
-            # The nextPageToken from the call n comes from the answer n-1
-            assert req.get.call_args_list[index].kwargs["params"] == {
-                "limit": 100,
-                "nextPageToken": responses[index - 1].json.return_value["nextPageToken"],
-            }
-
-        assert discovery.api_status == (AgentCheck.CRITICAL if status_codes[0] != 200 else AgentCheck.OK)
+    discovery = ModelDiscovery(check(mocked_management_instance), include=['.*'])
+    assert [('.*', model['modelName'], model, None) for model in expected_models] == list(discovery.get_items())
+    assert discovery.api_status == (AgentCheck.CRITICAL if status_codes[0] != 200 else AgentCheck.OK)
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url, dict(r.options)) for r in fake_http.requests] == [
+        ('GET', endpoint, {'params': params}) for params in expected_params
+    ]

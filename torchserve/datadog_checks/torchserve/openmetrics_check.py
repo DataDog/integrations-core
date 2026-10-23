@@ -9,6 +9,7 @@ from datadog_checks.torchserve.metrics import OPENMETRICS_METRIC_MAP
 
 
 class TorchserveOpenMetricsCheck(OpenMetricsBaseCheckV2, ConfigMixin):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'torchserve.openmetrics'
     DEFAULT_METRIC_LIMIT = 0
 

@@ -13,6 +13,7 @@ from .metrics import METRICS_MAP
 
 
 class KubeVirtApiCheck(OpenMetricsBaseCheckV2, ConfigMixin):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = "kubevirt_api"
     DEFAULT_METRIC_LIMIT = 0
 

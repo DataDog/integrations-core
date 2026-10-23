@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+import json
 import os
 from contextlib import contextmanager
 
@@ -10,7 +11,6 @@ import pytest
 from datadog_checks.dev import EnvVars, TempDir, docker_run, get_here
 from datadog_checks.dev._env import get_state, save_state
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.torchserve import TorchserveCheck
 
 from .common import (
@@ -115,29 +115,44 @@ def check():
     return lambda instance: TorchserveCheck('torchserve', {}, [instance])
 
 
-def mock_http_responses(all_models_file='management/models.json'):
-    def _mock_http_responses(url, **_params):
-        mapping = {
-            'http://torchserve:8080/ping': 'inference/healthy.json',
-            'http://torchserve:8081/models': all_models_file,
-            'http://torchserve:8081/models/linear_regression_1_1/all': 'management/models/linear_regression_1_1.json',
-            'http://torchserve:8081/models/linear_regression_1_2/all': 'management/models/linear_regression_1_2.json',
-            'http://torchserve:8081/models/linear_regression_2_2/all': 'management/models/linear_regression_2_2.json',
-            'http://torchserve:8081/models/linear_regression_2_3/all': 'management/models/linear_regression_2_3.json',
-            'http://torchserve:8081/models/linear_regression_3_2/all': 'management/models/linear_regression_3_2.json',
-            'http://torchserve:8081/models/linear_regression_3_3/all': 'management/models/linear_regression_3_3.json',
-            'http://torchserve:8082/metrics': 'openmetrics/metrics.txt',
-        }
+@pytest.fixture
+def http_responses(fake_http, fake_http_response):
+    expected = []
 
-        metrics_file = mapping.get(url)
+    def register(
+        instance: dict,
+        all_models_file: str = 'management/models.json',
+        expected_models: list[str] | None = None,
+        failed_models: tuple[str, ...] = (),
+    ) -> None:
+        def response(endpoint: str, filename: str, **options) -> dict | list | None:
+            with open(os.path.join(HERE, 'fixtures', filename), 'rb') as f:
+                content = f.read()
+            result = json.loads(content) if filename.endswith('.json') else None
+            fake_http_response(endpoint, content, json_result=result, **options)
+            expected.append(('GET', endpoint))
+            return result
 
-        if not metrics_file:
-            pytest.fail(f"url `{url}` not registered")
+        if 'inference_api_url' in instance:
+            response(instance['inference_api_url'] + '/ping', 'inference/healthy.json')
+        elif 'openmetrics_endpoint' in instance:
+            response(instance['openmetrics_endpoint'], 'openmetrics/metrics.txt')
+        else:
+            base = instance['management_api_url']
+            models = response(base + '/models', all_models_file, match_options={'params': {'limit': 100}})
+            for model in models.get('models', []):
+                name = model['modelName']
+                if expected_models is not None and name not in expected_models:
+                    continue
+                response(
+                    f'{base}/models/{name}/all',
+                    f'management/models/{name}.json',
+                    status_code=500 if name in failed_models else 200,
+                )
 
-        with open(os.path.join(HERE, 'fixtures', metrics_file)) as f:
-            return MockResponse(content=f.read())
-
-    return _mock_http_responses
+    yield register
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == expected
 
 
 @contextmanager

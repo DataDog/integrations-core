@@ -75,7 +75,7 @@ def test_instance_full_additional_check(aggregator, mock_db_data, dd_run_check, 
     aggregator.assert_service_check('scylla.prometheus.health', status=AgentCheck.OK)
 
 
-def test_instance_invalid_group_check(aggregator, mock_db_data, instance_legacy):
+def test_instance_invalid_group_check(aggregator, instance_legacy):
     additional_metric_groups = ['scylla.bogus', 'scylla.sstables']
 
     inst = deepcopy(instance_legacy)
@@ -87,7 +87,7 @@ def test_instance_invalid_group_check(aggregator, mock_db_data, instance_legacy)
     aggregator.assert_service_check('scylla.prometheus.health', count=0)
 
 
-def test_invalid_instance(aggregator, mock_db_data, instance_legacy):
+def test_invalid_instance(aggregator, instance_legacy):
     inst = deepcopy(instance_legacy)
     inst.pop('prometheus_url')
 

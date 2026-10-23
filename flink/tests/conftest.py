@@ -3,7 +3,6 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
 import os
-from unittest import mock
 
 import pytest
 
@@ -47,16 +46,13 @@ def check(instance):
 
 
 @pytest.fixture()
-def mock_metrics():
+def mock_metrics(fake_http, fake_http_response, instance):
     f_name = os.path.join(os.path.dirname(__file__), 'fixtures', 'metrics.txt')
     with open(f_name, 'r') as f:
         text_data = f.read()
-    with mock.patch(
-        'requests.Session.get',
-        return_value=mock.MagicMock(
-            status_code=200,
-            iter_lines=lambda **kwargs: text_data.split("\n"),
-            headers={'Content-Type': "text/plain"},
-        ),
-    ):
-        yield
+    fake_http_response(instance['openmetrics_endpoint'], text_data, headers={'Content-Type': 'text/plain'})
+    yield
+    fake_http.assert_all_responses_consumed()
+    assert [(request.method, request.url) for request in fake_http.requests] == [
+        ('GET', instance['openmetrics_endpoint'])
+    ]

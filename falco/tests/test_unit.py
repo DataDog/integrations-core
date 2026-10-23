@@ -1,12 +1,11 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from unittest import mock
+from pathlib import Path
 
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
-from datadog_checks.dev.http import MockResponse
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.falco import FalcoCheck
 
@@ -22,13 +21,11 @@ def test_empty_instance(dd_run_check):
         dd_run_check(check)
 
 
-def test_check_falco(dd_run_check, aggregator, instance):
-    mock_responses = [
-        MockResponse(file_path=get_fixture_path("falco_metrics.txt")),
-    ]
-
-    with mock.patch('requests.Session.get', side_effect=mock_responses):
-        dd_run_check(FalcoCheck('falco', {}, [instance]))
+def test_check_falco(dd_run_check, aggregator, instance, fake_http, fake_http_response):
+    fake_http_response(instance['openmetrics_endpoint'], Path(get_fixture_path('falco_metrics.txt')).read_bytes())
+    dd_run_check(FalcoCheck('falco', {}, [instance]))
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == [('GET', instance['openmetrics_endpoint'])]
 
     for metric in METRICS:
         aggregator.assert_metric(metric)
@@ -38,11 +35,11 @@ def test_check_falco(dd_run_check, aggregator, instance):
     aggregator.assert_service_check("falco.openmetrics.health", ServiceCheck.OK)
 
 
-def test_version_metadata(datadog_agent, dd_run_check, mock_http_response, instance):
+def test_version_metadata(datadog_agent, dd_run_check, fake_http, fake_http_response, instance):
     """
     Test metadata version collection with V2 implementation
     """
-    mock_http_response(file_path=get_fixture_path('falco_metrics.txt'))
+    fake_http_response(instance['openmetrics_endpoint'], Path(get_fixture_path('falco_metrics.txt')).read_bytes())
     check = FalcoCheck('falco', {}, [instance])
     check.check_id = 'falco_test'
     dd_run_check(check)
@@ -56,3 +53,5 @@ def test_version_metadata(datadog_agent, dd_run_check, mock_http_response, insta
     }
 
     datadog_agent.assert_metadata('falco_test', version_metadata)
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == [('GET', instance['openmetrics_endpoint'])]

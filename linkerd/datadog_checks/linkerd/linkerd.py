@@ -13,6 +13,7 @@ class LinkerdCheck(OpenMetricsBaseCheck):
     This is a legacy implementation that will be removed at some point, refer to check.py for the new implementation.
     """
 
+    AGNOSTIC_HTTP_CLIENT = True
     DEFAULT_METRIC_LIMIT = 0
     HEALTH_METRIC = 'linkerd.prometheus.health'
 

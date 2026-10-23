@@ -7,6 +7,7 @@ from datadog_checks.base import AgentCheck
 
 
 class TorchserveInferenceAPICheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
     __NAMESPACE__ = 'torchserve.inference_api'
     SERVICE_CHECK_NAME = 'health'
 

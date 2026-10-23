@@ -26,6 +26,20 @@ ISTIOD_METRICS_PORT = 15014
 
 
 @pytest.fixture
+def metrics_response(fake_http, fake_http_response):
+    expected = []
+
+    def register(endpoint: str, file_path: str) -> None:
+        with open(file_path, 'rb') as f:
+            fake_http_response(endpoint, f.read())
+        expected.append(('GET', endpoint))
+
+    yield register
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == expected
+
+
+@pytest.fixture
 def instance_openmetrics_v2(dd_get_state):
     openmetrics_v2 = deepcopy(dd_get_state('istio_instance', default={}))
     openmetrics_v2['use_openmetrics'] = 'true'

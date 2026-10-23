@@ -18,7 +18,6 @@ from .common import (
     TOPIC_OPERATOR_METRICS,
     USER_OPERATOR_METRICS,
 )
-from .conftest import mock_http_responses
 
 pytestmark = pytest.mark.unit
 
@@ -54,9 +53,9 @@ def test_check_unique_operator(
     instance,
     metrics,
     tag,
-    mocker,
+    http_metrics,
 ):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+    http_metrics(instance[f'{namespace}_endpoint'])
     dd_run_check(check(instance))
 
     for expected_metric in metrics:
@@ -75,8 +74,11 @@ def test_check_unique_operator(
     assert len(aggregator.service_check_names) == 1
 
 
-def test_check_all_operators(dd_run_check, aggregator, check, mocker):
-    mocker.patch("requests.Session.get", wraps=mock_http_responses)
+def test_check_all_operators(dd_run_check, aggregator, check, http_metrics):
+    for instance in (MOCKED_CLUSTER_OPERATOR_INSTANCE, MOCKED_TOPIC_OPERATOR_INSTANCE, MOCKED_USER_OPERATOR_INSTANCE):
+        for key, endpoint in instance.items():
+            if key.endswith('_endpoint'):
+                http_metrics(endpoint)
     dd_run_check(
         check(
             {

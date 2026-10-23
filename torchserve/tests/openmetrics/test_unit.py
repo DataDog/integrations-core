@@ -6,14 +6,13 @@ import pytest
 from datadog_checks.base import AgentCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 
-from ..conftest import mock_http_responses
 from .metrics import METRICS
 
 pytestmark = pytest.mark.unit
 
 
-def test_check(dd_run_check, aggregator, check, mocked_openmetrics_instance, mocker):
-    mocker.patch('requests.Session.get', wraps=mock_http_responses())
+def test_check(dd_run_check, aggregator, check, mocked_openmetrics_instance, http_responses):
+    http_responses(mocked_openmetrics_instance)
     dd_run_check(check(mocked_openmetrics_instance))
 
     for name, expected_values in METRICS.items():
