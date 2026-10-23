@@ -10,6 +10,17 @@ import pytest
 from pytest_mock import MockerFixture
 
 from ddev.utils import docker_registry
+from ddev.utils.network import REQUEST_ATTEMPTS
+
+TRANSIENT_ERROR_PARAMS = [
+    pytest.param(httpx.ConnectError('[WinError 10054] connection forcibly closed'), id='connect-error'),
+    pytest.param(httpx.ConnectTimeout('connect timed out'), id='connect-timeout'),
+    pytest.param(httpx.ReadError('read error'), id='read-error'),
+    pytest.param(httpx.ReadTimeout('read timed out'), id='read-timeout'),
+    pytest.param(httpx.RemoteProtocolError('peer closed connection'), id='remote-protocol-error'),
+]
+
+ATTEMPTS = REQUEST_ATTEMPTS
 
 
 def _response(
@@ -50,19 +61,49 @@ def test_manifest_exists_raises_on_other_errors(mocker: MockerFixture, status: i
         docker_registry.manifest_exists('agent', '7.80.0-rc.1')
 
 
-@pytest.mark.parametrize(
-    'exc',
-    [
-        pytest.param(httpx.ConnectError('connection refused'), id='connect-error'),
-        pytest.param(httpx.ReadTimeout('read timed out'), id='read-timeout'),
-        pytest.param(httpx.ConnectTimeout('connect timed out'), id='connect-timeout'),
-    ],
-)
+@pytest.mark.parametrize('exc', TRANSIENT_ERROR_PARAMS)
 def test_manifest_exists_propagates_network_errors(mocker: MockerFixture, exc: Exception) -> None:
-    mocker.patch('httpx.head', side_effect=exc)
+    """A failure that outlives the retries still surfaces, and the retries stay bounded."""
+    head = mocker.patch('httpx.head', side_effect=exc)
 
     with pytest.raises(type(exc)):
         docker_registry.manifest_exists('agent', '7.80.0-rc.1')
+
+    assert head.call_count == ATTEMPTS
+
+
+@pytest.mark.parametrize('exc', TRANSIENT_ERROR_PARAMS)
+def test_manifest_exists_retries_a_transient_failure(mocker: MockerFixture, exc: Exception) -> None:
+    head = mocker.patch('httpx.head', side_effect=[exc, _response(200, method='HEAD')])
+
+    assert docker_registry.manifest_exists('agent', '7.80.0-rc.1') is True
+    assert head.call_count == 2
+
+
+@pytest.mark.parametrize(
+    'status, expected',
+    [
+        pytest.param(404, False, id='withdrawn-tag'),
+        pytest.param(500, None, id='server-error'),
+    ],
+)
+def test_manifest_exists_does_not_retry_a_served_response(
+    mocker: MockerFixture, status: int, expected: bool | None
+) -> None:
+    """A status the registry actually served is final; only connection failures are retried.
+
+    Retrying a 404 would let a withdrawn tag look like a network blip and cost three
+    round trips to reach the same answer.
+    """
+    head = mocker.patch('httpx.head', return_value=_response(status, method='HEAD'))
+
+    if expected is None:
+        with pytest.raises(httpx.HTTPStatusError):
+            docker_registry.manifest_exists('agent', '7.80.0-rc.1')
+    else:
+        assert docker_registry.manifest_exists('agent', '7.80.0-rc.1') is expected
+
+    assert head.call_count == 1
 
 
 def test_manifest_exists_uses_custom_host(mocker: MockerFixture) -> None:
@@ -155,15 +196,43 @@ def test_list_tags_ignores_non_next_link_relations(mocker: MockerFixture) -> Non
     assert get.call_count == 1
 
 
-@pytest.mark.parametrize(
-    'exc',
-    [
-        pytest.param(httpx.ConnectError('connection refused'), id='connect-error'),
-        pytest.param(httpx.ReadTimeout('read timed out'), id='read-timeout'),
-    ],
-)
+@pytest.mark.parametrize('exc', TRANSIENT_ERROR_PARAMS)
 def test_list_tags_propagates_network_errors(mocker: MockerFixture, exc: Exception) -> None:
-    mocker.patch('httpx.get', side_effect=exc)
+    get = mocker.patch('httpx.get', side_effect=exc)
 
     with pytest.raises(type(exc)):
         docker_registry.list_tags('agent')
+
+    assert get.call_count == ATTEMPTS
+
+
+@pytest.mark.parametrize('exc', TRANSIENT_ERROR_PARAMS)
+def test_list_tags_retries_a_transient_failure(mocker: MockerFixture, exc: Exception) -> None:
+    get = mocker.patch('httpx.get', side_effect=[exc, _response(200, json_body={'name': 'agent', 'tags': ['a']})])
+
+    assert docker_registry.list_tags('agent') == ['a']
+    assert get.call_count == 2
+
+
+def test_list_tags_retries_each_page_independently(mocker: MockerFixture) -> None:
+    """A blip while fetching page 2 must not discard page 1 or restart pagination."""
+    page_1 = _response(
+        200,
+        json_body={'name': 'agent', 'tags': ['a']},
+        headers={'Link': '</v2/agent/tags/list?last=a>; rel="next"'},
+    )
+    page_2 = _response(200, json_body={'name': 'agent', 'tags': ['b']})
+    get = mocker.patch('httpx.get', side_effect=[page_1, httpx.ConnectError('connection reset'), page_2])
+
+    assert docker_registry.list_tags('agent') == ['a', 'b']
+    assert get.call_count == 3
+    assert get.call_args_list[2].args[0] == 'https://registry.datadoghq.com/v2/agent/tags/list?last=a'
+
+
+def test_list_tags_does_not_retry_a_served_error(mocker: MockerFixture) -> None:
+    get = mocker.patch('httpx.get', return_value=_response(503))
+
+    with pytest.raises(httpx.HTTPStatusError):
+        docker_registry.list_tags('agent')
+
+    assert get.call_count == 1
