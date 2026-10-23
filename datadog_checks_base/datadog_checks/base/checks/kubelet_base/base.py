@@ -41,7 +41,7 @@ class KubeletBase(AgentCheck):
         try:
             cutoff_date = self.compute_pod_expiration_datetime()
             with self.perform_kubelet_query(self.pod_list_url, stream=True) as r:
-                # text/* without a charset decodes as ISO-8859-1, so parse the bytes.
+                # The raw stream skips Content-Encoding decoding, so parse the decoded body.
                 if cutoff_date:
                     f = ExpiredPodFilter(cutoff_date)
                     pod_list = json.loads(r.content, object_hook=f.json_hook)

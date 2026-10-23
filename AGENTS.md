@@ -106,7 +106,7 @@ The one exception is the OpenMetrics base check, which still emits a service che
 
 ## HTTP Requests
 
-**Applicable to:** new integrations, and any new or modified HTTP code in existing integrations. Existing code that still uses `requests` directly doesn't need to be migrated as part of an unrelated change.
+**Applicable to:** new integrations, and PRs dedicated to moving an existing integration onto this layer (`AGNOSTIC_HTTP_CLIENT = True`). Opting in switches the whole check, so don't do it inside an unrelated change. Opted-in checks must require a `datadog-checks-base` version that includes this layer.
 
 Make HTTP requests through the backend-neutral HTTP layer in `datadog_checks_base`, documented in `docs/developer/base/http.md`. Checks should not depend on the underlying HTTP library, so another backend can replace it without rewriting every integration and its tests.
 
