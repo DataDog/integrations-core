@@ -8,6 +8,7 @@ from datadog_checks.dev.tooling.commands.release.tag import tag
 from datadog_checks.dev.tooling.commands.release.upload import upload
 
 from ddev.cli.release.agent import agent
+from ddev.cli.release.apw import apw
 from ddev.cli.release.branch import branch
 from ddev.cli.release.changelog import changelog
 from ddev.cli.release.list_versions import list_versions
@@ -25,6 +26,7 @@ def release():
 
 
 release.add_command(agent)
+release.add_command(apw)
 release.add_command(branch)
 release.add_command(build)
 release.add_command(changelog)
