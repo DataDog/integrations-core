@@ -12,7 +12,7 @@ from datadog_checks.base.utils.db.utils import default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.health import SqlServerHealthEvent
-from datadog_checks.sqlserver.utils import construct_use_statement, raise_if_cancelled
+from datadog_checks.sqlserver.utils import construct_use_statement, execute_query, raise_if_cancelled
 
 if TYPE_CHECKING:
     from datadog_checks.sqlserver import SQLServer
@@ -26,9 +26,21 @@ KEY_PREFIX = "dbm-column-statistics-"
 # procedure in each database; it runs as its owner and returns only counts and frequencies, never column values.
 COLUMN_STATISTICS_QUERY = "EXEC datadog.column_statistics @max_tables = {max_tables}"
 
-# The text of SQL Server errors 2812 and 229, which every driver passes through in its exception message.
-PROCEDURE_NOT_FOUND = "Could not find stored procedure"
-PERMISSION_DENIED = "EXECUTE permission was denied"
+# Setup problems the customer can fix, each matched on the text of the SQL Server error (2812, 229) that every driver
+# passes through in its exception message. That text is in the server's language, so on a non-English server these
+# are logged as other errors instead.
+SETUP_ERRORS = (
+    (
+        SqlServerHealthEvent.COLUMN_STATISTICS_PROCEDURE_NOT_FOUND,
+        "Could not find stored procedure",
+        "create it as described in the documentation",
+    ),
+    (
+        SqlServerHealthEvent.COLUMN_STATISTICS_INSUFFICIENT_PRIVILEGE,
+        "EXECUTE permission was denied",
+        "grant EXECUTE on it to the Agent's user",
+    ),
+)
 
 
 def agent_check_getter(self):
@@ -45,12 +57,7 @@ class SqlserverColumnStatisticsCollector:
         self._max_tables = int(config.get('max_tables', DEFAULT_MAX_TABLES))
         # The databases currently failing each way, so each warning and health event fires once and recovery is
         # reported when the last one is fixed.
-        self._failing_dbs: dict[SqlServerHealthEvent, set[str]] = {
-            SqlServerHealthEvent.COLUMN_STATISTICS_PROCEDURE_NOT_FOUND: set(),
-            SqlServerHealthEvent.COLUMN_STATISTICS_INSUFFICIENT_PRIVILEGE: set(),
-        }
-        self._queued_tables: list[dict] = []
-        self._queued_columns = 0
+        self._failing_dbs: dict[SqlServerHealthEvent, set[str]] = {event: set() for event, _, _ in SETUP_ERRORS}
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect(self, cancel_event: Event):
@@ -88,37 +95,28 @@ class SqlserverColumnStatisticsCollector:
             with self._check.connection.open_managed_default_connection(KEY_PREFIX):
                 with self._check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
                     cursor.execute(construct_use_statement(db_name))
-                    cursor.execute(COLUMN_STATISTICS_QUERY.format(max_tables=self._max_tables))
-                    names = [d[0] for d in cursor.description]
-                    rows = [dict(zip(names, row)) for row in cursor.fetchall()]
+                    rows = execute_query(COLUMN_STATISTICS_QUERY.format(max_tables=self._max_tables), cursor)
         except Exception as e:
             self._handle_error(db_name, e)
             return 0, 0
         self._handle_recovery(db_name)
 
         tables = group_by_table(db_name, rows)
+        batch: list[dict] = []
+        batch_columns = 0
         for table in tables:
-            self._queued_tables.append(table)
-            self._queued_columns += len(table["columns"])
-            if self._queued_columns >= PAYLOAD_MAX_COLUMNS:
-                self._flush()
-        self._flush()
+            batch.append(table)
+            batch_columns += len(table["columns"])
+            if batch_columns >= PAYLOAD_MAX_COLUMNS:
+                self._submit(batch)
+                batch, batch_columns = [], 0
+        if batch:
+            self._submit(batch)
         return len(tables), len(rows)
 
     def _handle_error(self, db_name: str, error: Exception):
         message = str(error)
-        for event, marker, fix in (
-            (
-                SqlServerHealthEvent.COLUMN_STATISTICS_PROCEDURE_NOT_FOUND,
-                PROCEDURE_NOT_FOUND,
-                "create it as described in the documentation",
-            ),
-            (
-                SqlServerHealthEvent.COLUMN_STATISTICS_INSUFFICIENT_PRIVILEGE,
-                PERMISSION_DENIED,
-                "grant EXECUTE on it to the Agent's user",
-            ),
-        ):
+        for event, marker, fix in SETUP_ERRORS:
             if marker not in message:
                 continue
             if db_name not in self._failing_dbs[event]:
@@ -141,14 +139,11 @@ class SqlserverColumnStatisticsCollector:
                 if not failing:
                     self._check.health.submit_health_event(name=event, status=HealthStatus.OK)
 
-    def _flush(self):
-        if not self._queued_tables:
-            return
+    def _submit(self, tables: list[dict]):
         event = {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
             "ddagentversion": self._check.agent_version,
-            # The benchmarker looks the events up by source.
             "ddsource": self._check.dbms,
             "dbms": self._check.dbms,
             "dbms_version": self._check.dbms_version,
@@ -157,11 +152,9 @@ class SqlserverColumnStatisticsCollector:
             "collection_interval": self.collection_interval,
             "tags": self._check.tag_manager.get_tags(include_internal=False, include_db=False),
             "timestamp": time.time() * 1000,
-            "column_statistics": self._queued_tables,
+            "column_statistics": tables,
         }
         self._check.database_monitoring_column_statistics(json.dumps(event, default=default_json_event_encoding))
-        self._queued_tables = []
-        self._queued_columns = 0
 
 
 def group_by_table(db_name: str, rows: list[dict]) -> list[dict]:

@@ -62,10 +62,11 @@ AS
 BEGIN
     SET NOCOUNT ON;
     -- One statistics object per column: unfiltered, on the column as its leading key, the most fully sampled.
-    SELECT object_id, stats_id, column_id, [rows], rows_sampled, last_updated, CAST(NULL AS FLOAT) AS avg_width
+    SELECT object_id, stats_id, stats_name, column_name, [rows], last_updated, CAST(NULL AS FLOAT) AS avg_width
     INTO #stats
     FROM (
-        SELECT st.object_id, st.stats_id, sc.column_id, sp.[rows], sp.rows_sampled, sp.last_updated,
+        SELECT st.object_id, st.stats_id, st.name AS stats_name, COL_NAME(sc.object_id, sc.column_id) AS column_name,
+            sp.[rows], sp.last_updated,
             ROW_NUMBER() OVER (PARTITION BY st.object_id, sc.column_id ORDER BY sp.rows_sampled DESC, sp.last_updated DESC) AS rn
         FROM (SELECT TOP (@max_tables) object_id FROM sys.tables WHERE is_ms_shipped = 0 ORDER BY SCHEMA_NAME(schema_id), name) t
         JOIN sys.stats st ON st.object_id = t.object_id AND st.has_filter = 0
@@ -74,31 +75,33 @@ BEGIN
         WHERE sp.[rows] > 0
     ) s
     WHERE rn = 1;
+    CREATE CLUSTERED INDEX ix_stats ON #stats (object_id, stats_id);
 
     -- The average width is only in the density vector, which only DBCC SHOW_STATISTICS returns.
     CREATE TABLE #density (all_density FLOAT, average_length FLOAT, columns NVARCHAR(4000));
-    DECLARE @object_id INT, @stats_id INT, @column_name SYSNAME, @sql NVARCHAR(MAX);
-    DECLARE stats_cursor CURSOR LOCAL FAST_FORWARD FOR SELECT object_id, stats_id, COL_NAME(object_id, column_id) FROM #stats;
+    DECLARE @object_id INT, @stats_id INT, @table NVARCHAR(300), @stats_name SYSNAME, @column_name SYSNAME;
+    DECLARE stats_cursor CURSOR LOCAL FAST_FORWARD FOR
+        SELECT object_id, stats_id, QUOTENAME(OBJECT_SCHEMA_NAME(object_id)) + N'.' + QUOTENAME(OBJECT_NAME(object_id)),
+            stats_name, column_name
+        FROM #stats;
     OPEN stats_cursor;
-    FETCH NEXT FROM stats_cursor INTO @object_id, @stats_id, @column_name;
+    FETCH NEXT FROM stats_cursor INTO @object_id, @stats_id, @table, @stats_name, @column_name;
     WHILE @@FETCH_STATUS = 0
     BEGIN
         TRUNCATE TABLE #density;
-        SET @sql = N'DBCC SHOW_STATISTICS (N''' + REPLACE(QUOTENAME(OBJECT_SCHEMA_NAME(@object_id)) + N'.' + QUOTENAME(OBJECT_NAME(@object_id)), N'''', N'''''')
-            + N''', N''' + REPLACE((SELECT name FROM sys.stats WHERE object_id = @object_id AND stats_id = @stats_id), N'''', N'''''')
-            + N''') WITH DENSITY_VECTOR, NO_INFOMSGS';
-        INSERT INTO #density EXEC (@sql);
+        INSERT INTO #density
+        EXEC sp_executesql N'DBCC SHOW_STATISTICS (@table, @stats_name) WITH DENSITY_VECTOR, NO_INFOMSGS',
+            N'@table NVARCHAR(300), @stats_name SYSNAME', @table, @stats_name;
         UPDATE #stats SET avg_width = (SELECT TOP 1 average_length FROM #density WHERE columns = @column_name)
         WHERE object_id = @object_id AND stats_id = @stats_id;
-        FETCH NEXT FROM stats_cursor INTO @object_id, @stats_id, @column_name;
+        FETCH NEXT FROM stats_cursor INTO @object_id, @stats_id, @table, @stats_name, @column_name;
     END;
     CLOSE stats_cursor;
     DEALLOCATE stats_cursor;
 
     -- Only counts and frequencies are returned, never the histogram's values. A common value is one with more rows
     -- than the column's average per value, as Postgres keeps in most_common_freqs.
-    SELECT OBJECT_SCHEMA_NAME(s.object_id) AS schema_name, OBJECT_NAME(s.object_id) AS table_name,
-        COL_NAME(s.object_id, s.column_id) AS column_name,
+    SELECT OBJECT_SCHEMA_NAME(s.object_id) AS schema_name, OBJECT_NAME(s.object_id) AS table_name, s.column_name,
         DATEDIFF(SECOND, s.last_updated, SYSDATETIME()) AS stats_age,
         h.n_distinct, h.null_rows / s.[rows] AS null_frac, s.avg_width, m.most_common_freqs
     FROM #stats s

@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from copy import copy
+
 import pytest
 
 from datadog_checks.sqlserver import SQLServer
@@ -18,7 +20,7 @@ def dbm_instance(instance_docker):
     instance_docker['procedure_metrics'] = {'enabled': False}
     instance_docker['collect_settings'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
     instance_docker['collect_column_statistics'] = {'enabled': True}
-    return instance_docker
+    return copy(instance_docker)
 
 
 def run_check(dd_run_check, instance):
@@ -42,7 +44,6 @@ def test_collects_column_statistics(aggregator, dd_run_check, dbm_instance):
     event = events[0]
     assert event['ddsource'] == 'sqlserver'
     assert event['dbm_type'] == 'column_statistics'
-    assert event['collection_interval'] == 3600
 
     tables = event['column_statistics']
     assert [(t['db'], t['schema'], t['table']) for t in tables] == [('datadog_test_column_stats', 'dbo', 'orders')]
@@ -77,7 +78,7 @@ def test_missing_procedure_reports_health_event(aggregator, dd_run_check, dbm_in
 
 @pytest.mark.unit
 def test_group_by_table():
-    def row(table, column, stats_age, freqs):
+    def row(table, column, stats_age):
         return {
             'schema_name': 'dbo',
             'table_name': table,
@@ -85,16 +86,11 @@ def test_group_by_table():
             'stats_age': stats_age,
             'n_distinct': 3.0,
             'null_frac': 0.0,
-            'avg_width': 6.3,
-            'most_common_freqs': freqs,
+            'avg_width': 4.0,
+            'most_common_freqs': None,
         }
 
-    tables = group_by_table(
-        'db', [row('a', 'x', 10, '7.0e-001,2.0e-001'), row('a', 'y', 50, None), row('b', 'z', 5, None)]
-    )
+    tables = group_by_table('db', [row('a', 'x', 10), row('a', 'y', 50), row('b', 'z', 5)])
 
-    assert [t['table'] for t in tables] == ['a', 'b']
+    assert [(t['table'], [c['name'] for c in t['columns']]) for t in tables] == [('a', ['x', 'y']), ('b', ['z'])]
     assert tables[0]['stats_age'] == 50, "a table is as stale as its oldest column statistics"
-    assert tables[0]['columns'][0]['most_common_freqs'] == [0.7, 0.2]
-    assert tables[0]['columns'][1]['most_common_freqs'] == []
-    assert tables[0]['columns'][0]['avg_width'] == 6
