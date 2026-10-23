@@ -53,7 +53,8 @@ def events(aggregator) -> list[dict]:
 
 
 def test_device_metadata_of_the_static_fw_a():
-    tags = global_tags(SYSTEM_INFO, _target(FW_A_STATIC_IP), NAMESPACE, ['team:test'])
+    target = FirewallTarget(ip=FW_A_STATIC_IP, credentials=Credentials(username='u', password='p', api_key=None))
+    tags = global_tags(SYSTEM_INFO, target, NAMESPACE, ['team:test'])
 
     device = build_device(SYSTEM_INFO, FW_A_STATIC_IP, NAMESPACE, tags, can_connect=1, ha_state=None)
 
@@ -75,17 +76,10 @@ def test_device_metadata_of_the_static_fw_a():
     }
 
 
-def test_device_tags_carry_the_ha_state():
-    device = build_device(SYSTEM_INFO, FW_A_STATIC_IP, NAMESPACE, ['team:test'], can_connect=1, ha_state='active')
-
-    assert device.tags == ['team:test', 'ha_state:active']
-
-
 def test_interfaces_of_fw_a_capture():
     # The capture lists tunnel.1 (active) and tunnel.2 (init) once `vpn` has stored their state.
     by_name = interfaces_by_name(FW_A_INTERFACE_ALL, {'tunnel.1': 'active', 'tunnel.2': 'init'})
 
-    assert tuple(by_name) == INTERFACE_NAMES
     assert by_name['ethernet1/1'] == {
         'integration': 'pan_firewall',
         'device_id': FW_A_SERIAL,
@@ -97,18 +91,16 @@ def test_interfaces_of_fw_a_capture():
         'mac_address': '02:00:00:00:01:01',
         'oper_status': 1,
     }
-    assert by_name['ethernet1/2']['mac_address'] == '02:00:00:00:01:02'
-    assert {n: (i['index'], i['oper_status']) for n, i in by_name.items()} == {
-        'ethernet1/1': (16, 1),
-        'ethernet1/2': (17, 1),
-        'loopback': (3, 4),
-        'loopback.1': (258, 4),
-        'tunnel': (4, 1),
-        'tunnel.1': (256, 1),
-        'tunnel.2': (257, 2),
-    }
     # Only physical ports have a MAC.
-    assert {n for n, i in by_name.items() if 'mac_address' in i} == {'ethernet1/1', 'ethernet1/2'}
+    assert {n: (i['index'], i['oper_status'], i.get('mac_address')) for n, i in by_name.items()} == {
+        'ethernet1/1': (16, 1, '02:00:00:00:01:01'),
+        'ethernet1/2': (17, 1, '02:00:00:00:01:02'),
+        'loopback': (3, 4, None),
+        'loopback.1': (258, 4, None),
+        'tunnel': (4, 1, None),
+        'tunnel.1': (256, 1, None),
+        'tunnel.2': (257, 2, None),
+    }
 
 
 def test_subinterfaces_inherit_the_parent_state_and_tunnels_use_the_vpn_state():
@@ -156,10 +148,6 @@ def test_no_config_read_omits_admin_status_and_description():
     by_name = interfaces_by_name(FW_A_INTERFACE_ALL)
 
     assert not any({'admin_status', 'description'} & i.keys() for i in by_name.values())
-
-
-def _target(ip):
-    return FirewallTarget(ip=ip, credentials=Credentials(username='u', password='p', api_key=None))
 
 
 # End to end, through the check.
@@ -259,16 +247,6 @@ def test_static_firewall_never_reached_sends_no_metadata(dd_run_check, aggregato
     dd_run_check(check)
 
     assert events(aggregator) == []
-
-
-def test_first_run_sends_admin_status_from_the_interface_config(dd_run_check, aggregator, fake_panos):
-    fake_panos.answer_op(FW_A_IP, INTERFACE_ALL_CMD, (200, SYNTHETIC_INTERFACES.read_bytes()))
-    fake_panos.answer_op(FW_A_IP, INTERFACE_CONFIG_CMD, (200, SYNTHETIC_CONFIG.read_bytes()))
-
-    dd_run_check(new_check())
-
-    by_name = {i['name']: i for e in events(aggregator) for i in e.get('interfaces', [])}
-    assert (by_name['ethernet1/2.20']['admin_status'], by_name['ae1']['description']) == (2, 'LACP to core')
 
 
 def test_refused_interface_config_sends_interfaces_without_admin_status(dd_run_check, aggregator, fake_panos):

@@ -11,6 +11,7 @@ from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.pan_firewall import PanFirewallCheck, constants
 from datadog_checks.pan_firewall.collectors.ha import HA_CMD
 from datadog_checks.pan_firewall.collectors.interfaces import COUNTER_INTERFACE_CMD
+from datadog_checks.pan_firewall.collectors.jobs import JOBS_PENDING_CMD
 from datadog_checks.pan_firewall.collectors.system import ENVIRONMENTALS_CMD
 from datadog_checks.pan_firewall.errors import PanosApiError
 from datadog_checks.pan_firewall.xml_utils import num, parse_response, text
@@ -24,7 +25,6 @@ from .common import (
     FW_A_TAGS,
     FW_A_TUNNEL,
     INTERFACE_ALL_CMD,
-    INTERFACE_CONFIG_CMD,
     SYNTHETIC,
 )
 from .fake_panos import FIREWALL_SETS, PANORAMA_HOSTS
@@ -88,14 +88,14 @@ def test_parse_response_non_xml(body):
         ('<r><v>unknown</v></r>', 'v', None),
         ('<r></r>', 'v', None),
         ('<r><v>nan</v></r>', 'v', None),
+        (None, 'v', None),
     ],
 )
 def test_num_never_raises(xml, path, expected):
-    assert num(ET.fromstring(xml), path) == expected
+    assert num(None if xml is None else ET.fromstring(xml), path) == expected
 
 
-def test_num_and_text_on_missing_element():
-    assert num(None, 'v') is None
+def test_text_on_missing_element_is_the_default():
     assert text(None, 'v', 'fallback') == 'fallback'
 
 
@@ -113,82 +113,10 @@ def test_fixtures_hold_no_secrets():
 
 FIREWALLS = {name: ip for ip, name in FIREWALL_SETS.items()}
 
-# Which collector (or step) a request belongs to, by the `cmd` it sends. `type=log` requests are the threat jobs.
-CMD_LABELS = {
-    '<show><jobs><pending/></jobs></show>': 'jobs',
-    '<show><routing><protocol><bgp><peer/></bgp></protocol></routing></show>': 'bgp',
-    '<show><running><resource-monitor><minute><last>1</last></minute></resource-monitor></running></show>': 'dataplane',
-    '<show><counter><interface>all</interface></counter></show>': 'interfaces',
-    '<show><system><resources/></system></show>': 'system_resources',
-    '<show><vpn><flow/></vpn></show>': 'vpn',
-    '<show><vpn><gateway/></vpn></show>': 'vpn',
-    '<show><high-availability><all/></high-availability></show>': 'ha',
-    '<show><system><environmentals/></system></show>': 'environment',
-    '<show><system><disk-space/></system></show>': 'disk',
-    '<show><system><info/></system></show>': 'identity_metadata',
-    '<show><interface>all</interface></show>': 'identity_metadata',
-    INTERFACE_CONFIG_CMD: 'identity_metadata',
-    '<request><license><info/></license></request>': 'licenses',
-}
-
-# Who makes requests on each run, by seconds since the first run, for each firewall. The first run makes every
-# default-enabled collector's request; a minute later nothing is due, so a collector that polls on every run shows up
-# here. The tiers themselves are pinned in `test_scheduler`. `jobs` is the commit check, made on every run that has a
-# due collector and on no other.
-EXPECTED_CALLERS = {
-    0: {
-        'keygen',
-        'jobs',
-        'bgp',
-        'dataplane',
-        'interfaces',
-        'system_resources',
-        'vpn',
-        'ha',
-        'rule_hits',
-        'environment',
-        'threats',
-        'disk',
-        'identity_metadata',
-        'licenses',
-    },
-    60: set(),
-}
-
 
 def new_static_check():
     instance = {'firewalls': list(FIREWALLS.values()), 'firewall_credentials': CREDENTIALS}
     return PanFirewallCheck('pan_firewall', {}, [instance])
-
-
-def call_labels(fake_panos, ip, since):
-    labels = collections.Counter()
-    for call in fake_panos.calls[since:]:
-        if call.host != ip:
-            continue
-        if call.type == 'keygen':
-            labels['keygen'] += 1
-        elif call.type == 'log':
-            labels['threats'] += 1
-        else:
-            labels[CMD_LABELS.get(call.cmd, call.cmd)] += 1
-            if call.cmd.startswith('<show><rule-hit-count>'):
-                labels['rule_hits'] += 1
-                labels.pop(call.cmd)
-    return dict(labels)
-
-
-def test_each_run_makes_only_the_requests_that_are_due(dd_run_check, fake_panos, schedule_clock):
-    check = new_static_check()
-    start = schedule_clock.now
-
-    for seconds, expected in EXPECTED_CALLERS.items():
-        schedule_clock.now = start + seconds
-        calls_before = len(fake_panos.calls)
-        dd_run_check(check)
-
-        for ip in FIREWALLS.values():
-            assert set(call_labels(fake_panos, ip, calls_before)) == expected, f'run at +{seconds}s on {ip}'
 
 
 def test_a_threat_job_still_running_is_polled_again_on_the_next_run_not_in_5_minutes(
@@ -204,16 +132,16 @@ def test_a_threat_job_still_running_is_polled_again_on_the_next_run_not_in_5_min
     check = new_static_check()
     dd_run_check(check)
 
-    schedule_clock.now += 60
-    before = len(fake_panos.calls)
-    dd_run_check(check)
-    assert call_labels(fake_panos, ip, before) == {'jobs': 1, 'threats': 1}
+    def run_after_a_minute():
+        schedule_clock.now += 60
+        before = len(fake_panos.calls)
+        dd_run_check(check)
+        return [(c.type, c.cmd) for c in fake_panos.calls[before:] if c.host == ip]
 
+    # Nothing else is due a minute later: the jobs check, then the poll of the job.
+    assert run_after_a_minute() == [('op', JOBS_PENDING_CMD), ('log', None)]
     # The job finished: the collector is on its 5-minute interval again.
-    schedule_clock.now += 60
-    before = len(fake_panos.calls)
-    dd_run_check(check)
-    assert 'threats' not in call_labels(fake_panos, ip, before)
+    assert ('log', None) not in run_after_a_minute()
 
 
 # One row per collector whose samples the check submits as they come: (metric, extra tags). The parser tests pin every

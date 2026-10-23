@@ -10,7 +10,7 @@ from datadog_checks.pan_firewall.firewalls import FirewallTarget
 from datadog_checks.pan_firewall.identity import DeviceIdentity, global_tags, parse_system_info, vsys_list
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from .common import FIXTURES, FW_A_IP, FW_A_SERIAL, FW_B_SERIAL, SYSTEM_INFO_CMD
+from .common import FIXTURES, FW_A_IP, FW_A_SERIAL, FW_A_TAGS, FW_B_SERIAL, SYSTEM_INFO_CMD
 from .fake_panos import FIREWALL_SETS
 from .fixture_map import op_fixture
 from .helpers import make_instance, new_check
@@ -18,7 +18,6 @@ from .helpers import make_instance, new_check
 pytestmark = pytest.mark.unit
 
 CREDS = Credentials(username='dummy-user', password='dummy-password', api_key=None)
-STATIC_TARGET = FirewallTarget(ip='198.51.100.7', credentials=CREDS)
 # A Panorama-discovered fw-a, polled at the IP Panorama reports for it.
 PANORAMA_TARGET = FirewallTarget(ip='10.20.0.10', credentials=CREDS, serial=FW_A_SERIAL, hostname='fw-a')
 FW_A = parse_system_info(parse_response(op_fixture(SYSTEM_INFO_CMD).read_bytes()))
@@ -48,26 +47,9 @@ def test_clock_is_not_persisted():
 
 
 def test_global_tags_with_identity():
-    tags = global_tags(FW_A, STATIC_TARGET, 'default', ['env:lab'])
+    tags = global_tags(FW_A, FirewallTarget(ip=FW_A_IP, credentials=CREDS), 'default', ['team:test'])
 
-    assert sorted(tags) == sorted(
-        [
-            'device_namespace:default',
-            'device_ip:198.51.100.7',
-            f'device_id:{FW_A_SERIAL}',
-            'device_hostname:fw-a',
-            f'device_serial:{FW_A_SERIAL}',
-            'device_model:PA-VM',
-            'device_family:vm',
-            'device_vendor:paloaltonetworks',
-            'os_version:11.1.13-h12',
-            'multi_vsys:false',
-            'advanced_routing:false',
-            'env:lab',
-            f'dd.internal.resource:ndm_device:{FW_A_SERIAL}',
-            f'dd.internal.resource:ndm_device_user_tags:{FW_A_SERIAL}',
-        ]
-    )
+    assert sorted(tags) == FW_A_TAGS
 
 
 def test_global_tags_take_serial_and_hostname_from_panorama_discovery():

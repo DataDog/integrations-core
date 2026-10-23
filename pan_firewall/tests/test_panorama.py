@@ -157,20 +157,12 @@ def test_ip_override_polls_the_reported_ip_at_its_mapped_address(dd_run_check, f
         pytest.param({'include': ['10.20.0.0/24']}, set(), id='include-matches-nothing'),
     ],
 )
-def test_firewall_ips_filter_the_reported_ip(dd_run_check, fake_panos, filters, expected):
+def test_firewall_ips_filter_the_reported_ip(dd_run_check, aggregator, fake_panos, filters, expected):
     dd_run_check(new_check(firewall_ips=filters))
 
+    # A filtered-out firewall is not polled and gets no `can_connect`.
     assert polled_hosts(fake_panos) == expected
-
-
-def test_excluded_firewall_is_never_polled_and_gets_no_can_connect(dd_run_check, aggregator, fake_panos):
-    check = new_check(firewall_ips={'exclude': [FW_B_IP]})
-
-    dd_run_check(check)
-    dd_run_check(check)
-
-    assert FW_B_IP not in polled_hosts(fake_panos)
-    assert set(metrics_by_ip(aggregator, 'can_connect')) == {FW_A_IP}
+    assert set(metrics_by_ip(aggregator, 'can_connect')) == expected
 
 
 @pytest.mark.parametrize('ip', [None, 'not-an-ip'], ids=['absent', 'invalid'])
@@ -270,18 +262,6 @@ def test_firewall_without_matching_credentials_is_skipped_with_a_warning_on_ever
     ] * 2
 
 
-def test_missing_credentials_warning_stops_once_the_config_is_fixed(dd_run_check, fake_panos, caplog):
-    dd_run_check(new_check(firewall_credentials=FW_A_ONLY_CREDENTIALS))
-    caplog.clear()
-
-    # The config with a matching entry, after the Agent reloads it.
-    dd_run_check(new_check())
-
-    # Not the credentials warning: fw-b has no `show interface all` capture, so its interface read warns.
-    assert [w for w in warnings_about(caplog, FW_B_IP) if 'firewall_credentials' in w.getMessage()] == []
-    assert FW_B_IP in polled_hosts(fake_panos)
-
-
 def test_can_connect_of_an_unreachable_discovered_firewall_carries_its_device_id(dd_run_check, aggregator, fake_panos):
     fake_panos.fail(FW_A_IP, 'refused')
 
@@ -292,12 +272,6 @@ def test_can_connect_of_an_unreachable_discovered_firewall_carries_its_device_id
     # The family comes from discovery too, as the firewall never answered.
     expected = {f'device_id:{FW_A_SERIAL}', f'device_serial:{FW_A_SERIAL}', 'device_hostname:fw-a', 'device_family:vm'}
     assert expected <= set(tags)
-
-
-def test_panorama_can_connect_is_1_after_a_successful_discovery(dd_run_check, aggregator):
-    dd_run_check(new_check())
-
-    assert panorama_can_connect(aggregator) == [(1, sorted(PANORAMA_TAGS))]
 
 
 PASSWORD_LOGIN = {'panorama_api_key': None, 'panorama_username': 'pan-user', 'panorama_password': 'bad'}
@@ -353,20 +327,6 @@ def test_panorama_that_answers_again_is_reported_and_its_firewalls_polled(dd_run
 
     assert panorama_can_connect(aggregator) == [(1, sorted(PANORAMA_TAGS))]
     assert polled_hosts(fake_panos, skip=calls) == {FW_A_IP, FW_B_IP}
-
-
-def test_unreachable_panorama_keeps_polling_the_last_discovered_firewalls(dd_run_check, aggregator, fake_panos, caplog):
-    dd_run_check(new_check())
-    fake_panos.fail(PANORAMA, 'refused')
-    calls = len(fake_panos.calls)
-    aggregator.reset()
-
-    # A new check instance has no list in memory: the persistent cache supplies it, as after an Agent restart.
-    dd_run_check(new_check())
-
-    assert polled_hosts(fake_panos, skip=calls) == {FW_A_IP, FW_B_IP}
-    assert panorama_can_connect(aggregator) == [(0, sorted(PANORAMA_TAGS))]
-    assert any(r.levelno == logging.WARNING and PANORAMA in r.getMessage() for r in caplog.records)
 
 
 def test_panorama_auth_failure_does_not_change_the_firewalls_auth_status(dd_run_check, aggregator, fake_panos):

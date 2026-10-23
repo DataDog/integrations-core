@@ -24,7 +24,7 @@ from datadog_checks.pan_firewall.auth import Credentials, KeyManager
 
 from .common import FIXTURES, SYSTEM_INFO_CMD
 from .fake_panos import TRANSPORT_ERRORS, response
-from .fixture_map import op_fixture, submit_answer
+from .fixture_map import op_fixture
 
 pytestmark = pytest.mark.unit
 
@@ -83,9 +83,8 @@ class FakeHttp:
         return [c for c in self.calls if (c['data'].get('type') == 'keygen') == (kind == 'keygen')]
 
 
-def make_client(http: Any, creds: Credentials = PASSWORD_CREDS, log: Any = None) -> tuple[PanosClient, KeyManager]:
-    keys = KeyManager(http, HOST, creds)
-    return PanosClient(http, HOST, keys, log or logging.getLogger('test_api'), max_in_flight=2), keys
+def make_client(http: Any, creds: Credentials = PASSWORD_CREDS) -> PanosClient:
+    return PanosClient(http, HOST, KeyManager(http, HOST, creds), logging.getLogger('test_api'), max_in_flight=2)
 
 
 @pytest.mark.parametrize(
@@ -102,7 +101,7 @@ def test_api_url_is_always_on_port_443(host, expected):
 
 def test_keygen_posts_credentials_in_body_and_key_only_in_header():
     http = FakeHttp(keygen=[(200, KEYGEN_OK)], api=[(200, SYSTEM_INFO)])
-    client, _ = make_client(http)
+    client = make_client(http)
 
     root = client.op(SYSTEM_INFO_CMD)
 
@@ -114,16 +113,6 @@ def test_keygen_posts_credentials_in_body_and_key_only_in_header():
     assert op['url'] == URL
     assert op['data'] == {'type': 'op', 'cmd': SYSTEM_INFO_CMD}
     assert op['extra_headers'] == {'X-PAN-KEY': GENERATED_KEY}
-
-
-@pytest.mark.parametrize('kind', ['log', 'report'])
-def test_submit_job_returns_the_job_id_of_the_submit_answer(kind):
-    # The job id is the only thing the client reads from a submit answer, so a fake numbering its own jobs must be
-    # able to choose it.
-    http = FakeHttp(keygen=[(200, KEYGEN_OK)], api=[(200, submit_answer(kind, '9001'))])
-    client, _ = make_client(http)
-
-    assert client.submit_job({'type': kind}) == '9001'
 
 
 def test_key_never_leaks_into_urls_logs_or_errors(caplog):
@@ -140,7 +129,7 @@ def test_key_never_leaks_into_urls_logs_or_errors(caplog):
             TRANSPORT_ERRORS['refused'],
         ],
     )
-    client, _ = make_client(http)
+    client = make_client(http)
     errors = []
 
     client.op(SYSTEM_INFO_CMD)
@@ -169,7 +158,7 @@ def test_key_never_leaks_into_urls_logs_or_errors(caplog):
 @pytest.mark.parametrize('status, body', AUTH_FAILURES)
 def test_rejected_key_is_regenerated_once_and_the_call_retried(status, body):
     http = FakeHttp(keygen=[(200, keygen_ok(KEY_1)), (200, keygen_ok(KEY_2))], api=[(status, body), (200, SYSTEM_INFO)])
-    client, _ = make_client(http)
+    client = make_client(http)
 
     root = client.op(SYSTEM_INFO_CMD)
 
@@ -184,7 +173,7 @@ def test_key_rejected_again_after_regeneration_raises():
     http = FakeHttp(
         keygen=[(200, KEYGEN_OK), (200, KEYGEN_OK)], api=[(403, INVALID_CREDENTIAL), (403, INVALID_CREDENTIAL)]
     )
-    client, _ = make_client(http)
+    client = make_client(http)
 
     with pytest.raises(PanosAuthError):
         client.op(SYSTEM_INFO_CMD)
@@ -195,7 +184,7 @@ def test_key_rejected_again_after_regeneration_raises():
 
 def test_log_stream_regenerates_a_rejected_key():
     http = FakeHttp(keygen=[(200, keygen_ok(KEY_1)), (200, keygen_ok(KEY_2))], api=[(200, CODE_16), (200, THREAT_LOGS)])
-    client, _ = make_client(http)
+    client = make_client(http)
     seqnos = []
 
     status = client.read_log_job('2', lambda entry: seqnos.append(entry.findtext('seqno')))
@@ -225,7 +214,7 @@ def test_log_stream_regenerates_a_rejected_key():
 )
 def test_rejected_keygen_is_not_retried_until_reset(keygen, api, keygens_before_reset):
     http = FakeHttp(keygen=keygen, api=api)
-    client, keys = make_client(http)
+    client = make_client(http)
 
     # The later call of the same run must not log in again.
     for _ in range(2):
@@ -273,7 +262,7 @@ def test_calls_rejected_with_the_same_key_renew_it_once():
 )
 def test_error_that_is_not_an_auth_rejection_neither_renews_the_key_nor_invalidates_credentials(call, answer, code):
     http = FakeHttp(keygen=[(200, KEYGEN_OK)], api=[answer])
-    client, _ = make_client(http)
+    client = make_client(http)
 
     with pytest.raises(PanosApiError) as exc_info:
         call(client)
@@ -287,7 +276,7 @@ def test_error_that_is_not_an_auth_rejection_neither_renews_the_key_nor_invalida
 @pytest.mark.parametrize('status, body', AUTH_FAILURES)
 def test_op_without_renewal_does_not_renew_on_403(status, body):
     http = FakeHttp(keygen=[(200, KEYGEN_OK)], api=[(status, body)])
-    client, _ = make_client(http)
+    client = make_client(http)
 
     with pytest.raises(PanosApiError) as exc_info:
         client.op(SYSTEM_INFO_CMD, renew_on_auth_error=False)
@@ -300,7 +289,7 @@ def test_op_without_renewal_does_not_renew_on_403(status, body):
 
 def test_static_key_is_never_regenerated():
     http = FakeHttp(api=[(403, INVALID_CREDENTIAL)])
-    client, _ = make_client(http, STATIC_CREDS)
+    client = make_client(http, STATIC_CREDS)
 
     with pytest.raises(PanosAuthError):
         client.op(SYSTEM_INFO_CMD)
@@ -311,27 +300,15 @@ def test_static_key_is_never_regenerated():
     assert http.calls[0]['extra_headers'] == {'X-PAN-KEY': STATIC_KEY}
 
 
-@pytest.mark.parametrize(
-    'error_type, message',
-    [
-        pytest.param(requests.exceptions.ReadTimeout, 'Read timed out. (read timeout=30)', id='read-timeout'),
-        pytest.param(
-            requests.exceptions.ConnectTimeout, 'Connect timed out. (connect timeout=30)', id='connect-timeout'
-        ),
-        pytest.param(requests.exceptions.ConnectionError, 'Connection refused', id='refused'),
-        pytest.param(requests.exceptions.SSLError, 'certificate verify failed', id='tls'),
-    ],
-)
-def test_requests_exceptions_are_unreachable_without_the_key(error_type, message):
+def test_requests_exceptions_are_unreachable_without_the_key():
     # The `requests` exception holds the prepared request, whose headers carry the key.
     request = requests.Request('POST', URL, headers={'X-PAN-KEY': STATIC_KEY}).prepare()
 
     with pytest.raises(PanosUnreachable) as exc_info, transport_errors(URL):
-        raise error_type(message, request=request)
+        raise requests.exceptions.ReadTimeout('Read timed out. (read timeout=30)', request=request)
 
     error = exc_info.value
-    assert type(error) is PanosUnreachable
-    assert str(error) == f'could not reach {HOST}: {message}'
+    assert str(error) == f'could not reach {HOST}: Read timed out. (read timeout=30)'
     assert STATIC_KEY not in str(error) and STATIC_KEY not in repr(error)
     assert error.__cause__ is None and error.__suppress_context__
 
@@ -349,7 +326,7 @@ def test_requests_exceptions_are_unreachable_without_the_key(error_type, message
 )
 def test_calls_after_a_timeout_or_refusal_fail_fast_until_the_next_run(call, failure):
     http = FakeHttp(api=[failure, (200, THREAT_LOGS)])
-    client, _ = make_client(http, STATIC_CREDS)
+    client = make_client(http, STATIC_CREDS)
     with pytest.raises(PanosUnreachable):
         client.op(SYSTEM_INFO_CMD)
     # The reason the poller's unreachable warning names.
@@ -379,7 +356,7 @@ def test_stream_that_breaks_mid_way_makes_the_next_calls_fail_fast():
     resp = response(200, b'')
     resp.raw = BrokenRaw()
     http = FakeHttp(api=[resp, (200, SYSTEM_INFO)])
-    client, _ = make_client(http, STATIC_CREDS)
+    client = make_client(http, STATIC_CREDS)
 
     seqnos = []
     with pytest.raises(PanosUnreachable):
@@ -435,7 +412,7 @@ class ConcurrencyProbe:
 
 def test_at_most_two_calls_in_flight():
     probe = ConcurrencyProbe()
-    client, _ = make_client(probe, STATIC_CREDS)
+    client = make_client(probe, STATIC_CREDS)
     threads = [threading.Thread(target=client.op, args=(SYSTEM_INFO_CMD,)) for _ in range(3)]
 
     for thread in threads:

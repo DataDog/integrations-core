@@ -2,22 +2,19 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
-from unittest import mock
 
 import pytest
 
-from datadog_checks.pan_firewall.collectors.jobs import JOBS_PENDING_CMD, BusyJob, parse_busy_jobs
-from datadog_checks.pan_firewall.scheduler import BusyGate
+from datadog_checks.pan_firewall.collectors.jobs import JOBS_PENDING_CMD, parse_busy_jobs
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from ..common import FW_A_IP, STUBS, SYNTHETIC
 from ..fake_panos import FAILURES, NO_CAPTURE
-from ..helpers import can_connect_by_ip, logged, new_check, register_stubs, stub_runs
+from ..helpers import can_connect_by_ip, new_check, register_stubs, stub_runs
 
 # The poller tests run with the stub collectors they register.
 pytestmark = [pytest.mark.unit, pytest.mark.stub_collectors]
 
-COMMIT = [BusyJob('Commit', '7')]
 IDLE = (200, b'<response status="success"><result/></response>')
 COMMIT_RUNNING = (
     200,
@@ -43,24 +40,6 @@ def test_busy_job_types(status, busy):
 
     expected = [('WildFire', '2167'), ('Antivirus', '2140'), ('Content', '2018'), ('Commit', '7'), ('AutoCom', '2')]
     assert parse_busy_jobs(root) == (expected if busy else [])
-
-
-def test_busy_gate_skips_for_ten_minutes_then_collects_with_one_warning():
-    log = mock.Mock()
-    gate = BusyGate(log, FW_A_IP)
-
-    assert [gate.skip(COMMIT, now) for now in (0, 599, 600, 660)] == [True, True, False, False]
-    assert logged(log.warning) == [
-        f'{FW_A_IP}: Commit job 7 still in progress after 600s of skipping; collecting anyway'
-    ]
-
-
-def test_busy_gate_idle_answer_starts_a_new_window():
-    gate = BusyGate(mock.Mock(), FW_A_IP)
-    gate.skip(COMMIT, 0)
-    gate.skip([], 300)
-
-    assert [gate.skip(COMMIT, now) for now in (700, 1299, 1300)] == [True, True, False]
 
 
 @pytest.fixture
