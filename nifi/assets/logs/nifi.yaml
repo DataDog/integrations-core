@@ -1,3 +1,6 @@
+# bypass-global-missing-date-remapper-checks
+# NiFi writes local time with no timezone, so the line's time is kept as text in
+# nifi.local_time instead of being remapped as the official log date (IR-62514).
 id: nifi
 metric_id: nifi
 backend_only: false
@@ -31,17 +34,12 @@ pipeline:
       grok:
         supportRules: ""
         matchRules: |
-          nifi %{date("yyyy-MM-dd HH:mm:ss,SSS"):timestamp}\s+%{word:level}\s+\[%{regex("[^\\]]*"):logger.thread_name}\]\s+%{notSpace:logger.name}\s+%{data:message}
+          nifi %{regex("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3}"):nifi.local_time}\s+%{word:level}\s+\[%{regex("[^\\]]*"):logger.thread_name}\]\s+%{notSpace:logger.name}\s+%{data:message}
     - type: message-remapper
       name: Define `message` as the official message of the log
       enabled: true
       sources:
         - message
-    - type: date-remapper
-      name: Define `timestamp` as the official date of the log
-      enabled: true
-      sources:
-        - timestamp
     - type: status-remapper
       name: Define `level` as the official status of the log
       enabled: true
