@@ -49,6 +49,10 @@ METRIC_MAP = {
     "insights_resyncer_event_time_processing": "insights_resyncer.event_time_processing",  # summary
     "insights_resyncer_event_time_to_process": "insights_resyncer.event_time_to_process",  # summary
     "insights_resyncer_processor_idle_time": "insights_resyncer.processor_idle_time",  # summary
+    "kds_delta_delivery": "kds.delta_delivery",  # summary
+    "kds_delta_generation_errors": "kds.delta_generation_errors",  # counter
+    "kds_delta_streams_active": "kds.delta_streams_active",  # gauge
+    "kds_resources_sync": "kds.resources_sync",  # histogram
     "leader": "leader",  # gauge
     "leader_election_master_status": "leader_election.master_status",  # gauge
     "mesh_cache": "mesh_cache",  # gauge
