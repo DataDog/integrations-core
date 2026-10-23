@@ -111,6 +111,7 @@ kubernetes_state.node.network_bandwidth_capacity,gauge,,,,The network bandwidth 
 kubernetes_state.node.pods_allocatable,gauge,,,,The allocatable memory of a node that is available for scheduling. Tags:`node` `resource` `unit`.,0,kubernetes_state_core,k8s_state.node.pods_allocatable,,
 kubernetes_state.node.pods_capacity,gauge,,,,The pods capacity of a node. Tags:`node` `resource` `unit`.,0,kubernetes_state_core,k8s_state.node.pods_capacity,,
 kubernetes_state.node.status,gauge,,,,Whether the node can schedule new pods. Tags:`node` `status`.,0,kubernetes_state_core,k8s_state.node.status,,
+kubernetes_state.node.taint,gauge,,,,The taint of a cluster node. Tags:`node` `key` `value` `effect`.,0,kubernetes_state_core,k8s_state.node.taint,,
 kubernetes_state.pdb.disruptions_allowed,gauge,,,,Number of pod disruptions that are currently allowed. Tags:`kube_namespace` `poddisruptionbudget`.,0,kubernetes_state_core,k8s_state.pdb.disruptions_allowed,,
 kubernetes_state.pdb.pods_desired,gauge,,,,Minimum desired number of healthy pods. Tags:`kube_namespace` `poddisruptionbudget`.,0,kubernetes_state_core,k8s_state.pdb.pods_desired,,
 kubernetes_state.pdb.pods_healthy,gauge,,,,Current number of healthy pods. Tags:`kube_namespace` `poddisruptionbudget`.,0,kubernetes_state_core,k8s_state.pdb.pods_healthy,,
