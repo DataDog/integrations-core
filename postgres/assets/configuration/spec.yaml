@@ -256,6 +256,7 @@ files:
           - 'template1'
           - rdsadmin
           - azure_maintenance
+          - azure_sys
           - cloudsqladmin
           - alloydbadmin
           - alloydbmetadata
@@ -264,6 +265,7 @@ files:
           - 'template1'
           - rdsadmin
           - azure_maintenance
+          - azure_sys
           - cloudsqladmin
           - alloydbadmin
           - alloydbmetadata
@@ -572,6 +574,7 @@ files:
               - "template1"
               - "rdsadmin"
               - "azure_maintenance"
+              - "azure_sys"
               - "cloudsqladmin"
               - "alloydbadmin"
               - "alloydbmetadata"
@@ -1051,6 +1054,7 @@ files:
               - "template1"
               - "rdsadmin"
               - "azure_maintenance"
+              - "azure_sys"
               - "cloudsqladmin"
               - "alloydbadmin"
               - "alloydbmetadata"
