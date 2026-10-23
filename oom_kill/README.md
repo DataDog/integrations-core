@@ -43,10 +43,15 @@ In addition, Windows and CentOS/RHEL versions earlier than 8 are not supported.
 
 In addition to mounting `system-probe.yaml` and `oom_kill.d/conf.yaml` as described above, do the following configuration:
 
-1. Mount the following volumes to the Agent container:
+1. Mount the following volume to the Agent container:
 
     ```
     -v /sys/kernel/debug:/sys/kernel/debug
+    ```
+
+    If the host kernel does not ship with BTF (`/sys/kernel/btf/vmlinux` is absent), system-probe compiles the eBPF program from kernel headers and the following volumes must also be mounted:
+
+    ```
     -v /lib/modules:/lib/modules
     -v /usr/src:/usr/src
     ```
