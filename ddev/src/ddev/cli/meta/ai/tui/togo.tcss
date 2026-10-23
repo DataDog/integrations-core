@@ -287,17 +287,31 @@ Collapsible {
     height: auto;
 }
 
-#flow-pipeline {
-    layers: connectors nodes;
+#flow-pipeline-column {
     width: 1fr;
     height: 1fr;
     margin: 0 0 1 0;
+}
+
+#flow-pipeline {
+    layers: connectors nodes;
+    height: 1fr;
     border: round $border;
     border-title-color: $secondary;
     border-title-align: left;
     background: $surface;
     padding: 1 2;
     overflow: auto auto;
+}
+
+#pipeline-legend {
+    height: auto;
+    color: $text-muted;
+    margin: 1 0 0 0;
+}
+
+#pipeline-legend.legend-error {
+    color: $status-failed;
 }
 
 #phase-configuration {
@@ -525,6 +539,10 @@ MarkdownH3 {
 .phase-node.status-done {
     border: round $status-done;
     color: $status-done;
+}
+
+.phase-node.status-checkpointed {
+    color: $status-checkpointed;
 }
 
 .phase-node.status-failed {
