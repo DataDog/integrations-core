@@ -2,9 +2,12 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from collections.abc import Callable, Iterator
+from pathlib import Path
 
 import pytest
 
+from datadog_checks.base.stubs.http import FakeHTTPClient
 from datadog_checks.dev import docker_run, get_docker_hostname, get_e2e_discovery_metadata, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 
@@ -39,9 +42,24 @@ def dd_environment():
 
 @pytest.fixture
 def instance():
-    return INSTANCE
+    return INSTANCE.copy()
 
 
 @pytest.fixture
 def metrics_path():
     return os.path.join(get_here(), "fixtures", "metrics.txt")
+
+
+@pytest.fixture
+def mock_metrics(
+    fake_http: FakeHTTPClient, fake_http_response: Callable, instance: dict, metrics_path: str
+) -> Iterator[None]:
+    diag_addr = f"{instance['teleport_url']}:{instance['diag_port']}"
+    fake_http_response(f'{diag_addr}/healthz')
+    fake_http_response(f'{diag_addr}/metrics', Path(metrics_path).read_bytes())
+    yield
+    fake_http.assert_all_responses_consumed()
+    assert [(r.method, r.url) for r in fake_http.requests] == [
+        ('GET', f'{diag_addr}/healthz'),
+        ('GET', f'{diag_addr}/metrics'),
+    ]

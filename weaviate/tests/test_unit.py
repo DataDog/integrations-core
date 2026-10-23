@@ -2,6 +2,10 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import json
+from pathlib import Path
+from urllib.parse import urljoin
+
 import pytest
 
 from datadog_checks.base.constants import ServiceCheck
@@ -13,11 +17,14 @@ from .common import API_METRICS, MOCKED_INSTANCE, OM_METRICS, OM_MOCKED_INSTANCE
 pytestmark = pytest.mark.unit
 
 
-def test_check_mock_weaviate_openmetrics(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('weaviate_openmetrics.txt'))
+def test_check_mock_weaviate_openmetrics(dd_run_check, aggregator, fake_http, fake_http_response):
+    fake_http_response(
+        OM_MOCKED_INSTANCE['openmetrics_endpoint'], Path(get_fixture_path('weaviate_openmetrics.txt')).read_bytes()
+    )
     check = WeaviateCheck('weaviate', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)
 
+    fake_http.assert_all_responses_consumed()
     for metric in OM_METRICS:
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, 'test:tag')
@@ -27,10 +34,14 @@ def test_check_mock_weaviate_openmetrics(dd_run_check, aggregator, mock_http_res
     aggregator.assert_service_check('weaviate.openmetrics.health', ServiceCheck.OK)
 
 
-def test_check_mock_weaviate_nodes(aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('weaviate_nodes_api.json'))
+def test_check_mock_weaviate_nodes(aggregator, fake_http, fake_http_response):
+    fake_http_response(
+        urljoin(MOCKED_INSTANCE['weaviate_api_endpoint'], '/v1/nodes'),
+        json_data=json.loads(Path(get_fixture_path('weaviate_nodes_api.json')).read_bytes()),
+    )
     check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE])
     check._submit_node_metrics()
+    fake_http.assert_all_responses_consumed()
 
     for metric in API_METRICS:
         aggregator.assert_metric(metric)
@@ -41,10 +52,11 @@ def test_check_mock_weaviate_nodes(aggregator, mock_http_response):
     aggregator.assert_service_check('weaviate.node.status', ServiceCheck.OK)
 
 
-def test_check_failed_liveness(aggregator, mock_http_response):
-    mock_http_response(status_code=404)
+def test_check_failed_liveness(aggregator, fake_http, fake_http_response):
+    fake_http_response(urljoin(MOCKED_INSTANCE['weaviate_api_endpoint'], '/v1/.well-known/live'), status_code=404)
     check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE])
     check._submit_liveness_metrics()
+    fake_http.assert_all_responses_consumed()
 
     # No metrics should be submitted
     aggregator.assert_all_metrics_covered()
@@ -77,11 +89,15 @@ def test_custom_validation(dd_run_check, instance):
             dd_run_check(check)
 
 
-def test_check_mock_weaviate_metadata(datadog_agent, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('weaviate_meta_api.json'))
+def test_check_mock_weaviate_metadata(datadog_agent, fake_http, fake_http_response):
+    fake_http_response(
+        urljoin(MOCKED_INSTANCE['weaviate_api_endpoint'], '/v1/meta'),
+        json_data=json.loads(Path(get_fixture_path('weaviate_meta_api.json')).read_bytes()),
+    )
     check = WeaviateCheck('weaviate', {}, [MOCKED_INSTANCE])
     check.check_id = 'test:123'
     check._submit_version_metadata()
+    fake_http.assert_all_responses_consumed()
     raw_version = '1.19.1'
 
     major, minor, patch = raw_version.split('.')

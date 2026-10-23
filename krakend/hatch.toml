@@ -10,7 +10,7 @@ matrix.krakend.env-vars = "KRAKEND_VERSION"
 matrix.krakend.dependencies = ["httpx"]
 
 [envs.lab]
-dependencies = ["click", "requests", "rich", "httpx", "pyyaml"]
+dependencies = ["click", "rich", "httpx", "pyyaml"]
 
 [envs.lab.scripts]
 start = "python -m tests.lab.traffic_generator start {args}"

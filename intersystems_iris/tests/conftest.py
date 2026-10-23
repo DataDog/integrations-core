@@ -4,11 +4,12 @@
 from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any
+from urllib.request import urlopen
 
 import pytest
-import requests
 
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.stubs.http import FakeHTTPClient
 from datadog_checks.base.types import InstanceType
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
@@ -29,9 +30,8 @@ def _interop_metrics_present(endpoint: str) -> None:
     # probes that the endpoint returns 200), so wait until the runtime-gated
     # `iris_interop_*` family actually shows up before yielding, otherwise the check may
     # scrape the endpoint before the production is running.
-    response = requests.get(endpoint, timeout=10)
-    response.raise_for_status()
-    assert 'iris_interop_hosts' in response.text, "interop metrics not present yet"
+    with urlopen(endpoint, timeout=10) as response:
+        assert b'iris_interop_hosts' in response.read(), "interop metrics not present yet"
 
 
 @pytest.fixture(scope='session')
@@ -70,13 +70,16 @@ def scraped_aggregator(
     dd_run_check: Callable[..., None],
     aggregator: AggregatorStub,
     instance: InstanceType,
-    mock_http_response: Callable[..., None],
+    fake_http: FakeHTTPClient,
+    fake_http_response: Callable[..., Any],
 ) -> AggregatorStub:
     # Aggregator populated from the offline exposition fixture. The check is run twice because
     # the counter and rate transformers need a previous sample before they submit anything, so a
     # single run would leave those families out of the aggregator entirely.
-    mock_http_response(file_path=FIXTURE_PATH)
+    for _ in range(2):
+        fake_http_response(instance['openmetrics_endpoint'], Path(FIXTURE_PATH).read_bytes())
     check = IrisCheck('intersystems_iris', {}, [instance])
     dd_run_check(check)
     dd_run_check(check)
+    fake_http.assert_all_responses_consumed()
     return aggregator

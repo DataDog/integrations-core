@@ -9,6 +9,7 @@ import pytest
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.aggregator import AggregatorStub
+from datadog_checks.base.stubs.http import FakeHTTPClient
 from datadog_checks.krakend import KrakendCheck
 from datadog_checks.krakend.check import RENAME_LABELS_MAP
 from tests.helpers import get_metrics_from_metadata
@@ -16,11 +17,19 @@ from tests.types import InstanceBuilder
 
 
 @pytest.fixture
-def ready_check(check: KrakendCheck, dd_run_check: Callable, mock_http_response: Callable, aggregator: AggregatorStub):
+def ready_check(
+    check: KrakendCheck,
+    dd_run_check: Callable,
+    fake_http: FakeHTTPClient,
+    fake_http_response: Callable,
+    aggregator: AggregatorStub,
+):
     mocked_metrics_path = Path(__file__).parent / "fixtures" / "metrics.txt"
-    mock_http_response(mocked_metrics_path.read_text())
+    for _ in range(2):
+        fake_http_response(check.instance['openmetrics_endpoint'], mocked_metrics_path.read_bytes())
     dd_run_check(check)
     dd_run_check(check)
+    fake_http.assert_all_responses_consumed()
 
 
 def go_and_process_expected_metrics(go: bool, process: bool) -> list[tuple[str, bool]]:

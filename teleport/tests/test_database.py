@@ -11,9 +11,7 @@ from .common import DATABASE_METRICS
 pytestmark = [pytest.mark.unit]
 
 
-def test_database_teleport_metrics(dd_run_check, aggregator, instance, mock_http_response, metrics_path):
-    mock_http_response(file_path=metrics_path)
-
+def test_database_teleport_metrics(dd_run_check, aggregator, instance, mock_metrics):
     check = TeleportCheck("teleport", {}, [instance])
     dd_run_check(check)
 

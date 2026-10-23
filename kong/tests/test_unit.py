@@ -4,9 +4,11 @@
 import json
 import os
 from collections import namedtuple
+from pathlib import Path
 
 import pytest
 
+from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kong import Kong
 from datadog_checks.kong.check import KongCheck
@@ -57,8 +59,8 @@ def get_fixture_path(filename):
     return os.path.join(HERE, 'fixtures', filename)
 
 
-def test_check_v3(aggregator, dd_run_check, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('prometheus-v3.txt'))
+def test_check_v3(aggregator, dd_run_check, fake_http, fake_http_response):
+    fake_http_response(METRICS_URL, Path(get_fixture_path('prometheus-v3.txt')).read_bytes())
     instance = {
         'openmetrics_endpoint': METRICS_URL,
         'extra_metrics': [{'kong_memory_workers_lua_vms_bytes': 'memory.workers.lua.vms.bytes'}],
@@ -67,6 +69,7 @@ def test_check_v3(aggregator, dd_run_check, mock_http_response):
     check = Kong('kong', {}, [instance])
     dd_run_check(check)
 
+    fake_http.assert_all_responses_consumed()
     for metric_name, metric_type in EXPECTED_METRICS_v3.items():
         aggregator.assert_metric(metric_name, metric_type=getattr(aggregator, metric_type.upper()))
 
@@ -79,8 +82,8 @@ def test_check_v3(aggregator, dd_run_check, mock_http_response):
     )
 
 
-def test_check(aggregator, dd_run_check, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('prometheus.txt'))
+def test_check(aggregator, dd_run_check, fake_http, fake_http_response):
+    fake_http_response(METRICS_URL, Path(get_fixture_path('prometheus.txt')).read_bytes())
     instance = {
         'openmetrics_endpoint': METRICS_URL,
         'extra_metrics': [{'kong_memory_workers_lua_vms_bytes': 'memory.workers.lua.vms.bytes'}],
@@ -92,6 +95,7 @@ def test_check(aggregator, dd_run_check, mock_http_response):
         'kong.openmetrics.health', status=Kong.OK, tags=['endpoint:{}'.format(METRICS_URL)], count=1
     )
 
+    fake_http.assert_all_responses_consumed()
     for metric_name, metric_type in EXPECTED_METRICS.items():
         aggregator.assert_metric(metric_name, metric_type=getattr(aggregator, metric_type.upper()))
 
@@ -168,16 +172,17 @@ def test_legacy_fetch_data_raises_when_status_url_missing():
 
 
 def test_legacy_fetch_data_can_connect_tags_use_default_port_and_appended_tags(
-    aggregator, dd_run_check, mock_http_response
+    aggregator, dd_run_check, fake_http, fake_http_response
 ):
     # Kills the core/NumberReplacer and ReplaceOrWithAnd mutants at kong.py:49 (default port 80 -> 79/81 or "or"->"and")
     # and the ReplaceBinaryOperator_Add_* / ReplaceBinaryOperator_Mod_* mutants at kong.py:51
     # (tag list "+" and the "%" string formatting inside it).
-    mock_http_response(json_data={'server': {}})
+    fake_http_response('http://myhost/status/', json_data={'server': {}})
     instance = {'kong_status_url': 'http://myhost/status/', 'tags': ['env:test']}
     check = Kong('kong', {}, [instance])
     dd_run_check(check)
 
+    fake_http.assert_all_responses_consumed()
     aggregator.assert_service_check(
         'kong.can_connect', status=Kong.OK, tags=['kong_host:myhost', 'kong_port:80', 'env:test'], count=1
     )
@@ -194,45 +199,49 @@ def test_legacy_parse_json_defaults_tags_and_prefixes_metric_names():
     assert output == [('kong.total_requests', 42, [])]
 
 
-def test_legacy_check_continues_after_metric_submission_error(aggregator, dd_run_check, mock_http_response):
+def test_legacy_check_continues_after_metric_submission_error(aggregator, dd_run_check, fake_http, fake_http_response):
     # Kills the core/ZeroIterationForLoop mutant at kong.py:34 and the ExceptionReplacer mutant at kong.py:38
     # (a bad metric value must not stop later metrics in the loop from being submitted).
-    mock_http_response(json_data={'server': {'bad_metric': 'oops', 'good_metric': 5}})
+    fake_http_response('http://myhost/status/', json_data={'server': {'bad_metric': 'oops', 'good_metric': 5}})
     instance = {'kong_status_url': 'http://myhost/status/', 'tags': []}
     check = Kong('kong', {}, [instance])
     dd_run_check(check)
 
+    fake_http.assert_all_responses_consumed()
     aggregator.assert_metric('kong.good_metric', value=5, count=1)
     aggregator.assert_metric('kong.bad_metric', count=0)
 
 
-def test_legacy_check_submits_critical_service_check_on_http_error(aggregator, mock_http_response):
+def test_legacy_check_submits_critical_service_check_on_http_error(aggregator, fake_http, fake_http_response):
     # Kills the core/ExceptionReplacer mutant at kong.py:58 (except Exception -> except CosmicRayTestingException).
-    mock_http_response(status_code=500)
+    fake_http_response('http://myhost/status/', status_code=500)
     instance = {'kong_status_url': 'http://myhost/status/', 'tags': []}
     check = Kong('kong', {}, [instance])
 
-    with pytest.raises(Exception):
+    with pytest.raises(HTTPClientStatusError, match='500 Server Error'):
         check.check(None)
+    fake_http.assert_all_responses_consumed()
 
     aggregator.assert_service_check('kong.can_connect', status=Kong.CRITICAL, count=1)
 
 
-def test_legacy_check_treats_status_code_below_200_as_critical(aggregator, mock_http_response):
+def test_legacy_check_treats_status_code_below_200_as_critical(aggregator, fake_http, fake_http_response):
     # Kills the core/ReplaceComparisonOperator_Eq_LtE mutant at kong.py:62 (status_code == 200 -> <= 200).
-    mock_http_response(status_code=100, json_data={'server': {}})
+    fake_http_response('http://myhost/status/', status_code=100, json_data={'server': {}})
     instance = {'kong_status_url': 'http://myhost/status/', 'tags': []}
     check = Kong('kong', {}, [instance])
     check.check(None)
+    fake_http.assert_all_responses_consumed()
 
     aggregator.assert_service_check('kong.can_connect', status=Kong.CRITICAL, count=1)
 
 
-def test_legacy_check_treats_status_code_above_200_as_critical(aggregator, mock_http_response):
+def test_legacy_check_treats_status_code_above_200_as_critical(aggregator, fake_http, fake_http_response):
     # Kills the core/ReplaceComparisonOperator_Eq_GtE mutant at kong.py:62 (status_code == 200 -> >= 200).
-    mock_http_response(status_code=204, json_data={'server': {}})
+    fake_http_response('http://myhost/status/', status_code=204, json_data={'server': {}})
     instance = {'kong_status_url': 'http://myhost/status/', 'tags': []}
     check = Kong('kong', {}, [instance])
     check.check(None)
+    fake_http.assert_all_responses_consumed()
 
     aggregator.assert_service_check('kong.can_connect', status=Kong.CRITICAL, count=1)

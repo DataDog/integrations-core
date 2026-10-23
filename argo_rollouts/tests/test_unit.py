@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from pathlib import Path
+
 import pytest
 
 from datadog_checks.argo_rollouts import ArgoRolloutsCheck
@@ -10,8 +12,10 @@ from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 from .common import OM_METRICS, OM_MOCKED_INSTANCE, get_fixture_path
 
 
-def test_check_mock_argo_rollouts_openmetrics(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('openmetrics.txt'))
+def test_check_mock_argo_rollouts_openmetrics(dd_run_check, aggregator, fake_http, fake_http_response):
+    fake_http_response(
+        OM_MOCKED_INSTANCE['openmetrics_endpoint'], Path(get_fixture_path('openmetrics.txt')).read_bytes()
+    )
     check = ArgoRolloutsCheck('argo_rollouts', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)
 
@@ -19,38 +23,45 @@ def test_check_mock_argo_rollouts_openmetrics(dd_run_check, aggregator, mock_htt
         aggregator.assert_metric(metric)
         aggregator.assert_metric_has_tag(metric, 'test:tag')
 
+    fake_http.assert_all_responses_consumed()
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check('argo_rollouts.openmetrics.health', ServiceCheck.OK)
     assert_service_checks(aggregator)
 
 
-def test_check_mock_invalid_argo_rollouts_openmetrics(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(status_code=503)
+def test_check_mock_invalid_argo_rollouts_openmetrics(dd_run_check, aggregator, fake_http, fake_http_response):
+    fake_http_response(OM_MOCKED_INSTANCE['openmetrics_endpoint'], status_code=503)
     check = ArgoRolloutsCheck('argo_rollouts', {}, [OM_MOCKED_INSTANCE])
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match='503 Server Error'):
         dd_run_check(check)
+    fake_http.assert_all_responses_consumed()
 
     aggregator.assert_service_check('argo_rollouts.openmetrics.health', ServiceCheck.CRITICAL)
     assert_service_checks(aggregator)
 
 
-def test_check_mock_labels_rename(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('label_rename.txt'))
+def test_check_mock_labels_rename(dd_run_check, aggregator, fake_http, fake_http_response):
+    fake_http_response(
+        OM_MOCKED_INSTANCE['openmetrics_endpoint'], Path(get_fixture_path('label_rename.txt')).read_bytes()
+    )
     check = ArgoRolloutsCheck('argo_rollouts', {}, [OM_MOCKED_INSTANCE])
     relabeled_tags = ['argo_rollouts_namespace:default', 'argo_rollouts_name:rollouts-demo', 'go_version:go1.20.12']
     dd_run_check(check)
 
+    fake_http.assert_all_responses_consumed()
     aggregator.assert_metric('argo_rollouts.rollout.info')
     for tag in relabeled_tags:
         aggregator.assert_metric_has_tag('argo_rollouts.rollout.info', tag)
 
 
-def test_version_metadata(datadog_agent, dd_run_check, mock_http_response):
+def test_version_metadata(datadog_agent, dd_run_check, fake_http, fake_http_response):
     """
     Test metadata version collection with V2 implementation
     """
-    mock_http_response(file_path=get_fixture_path('openmetrics.txt'))
+    fake_http_response(
+        OM_MOCKED_INSTANCE['openmetrics_endpoint'], Path(get_fixture_path('openmetrics.txt')).read_bytes()
+    )
     check = ArgoRolloutsCheck('argo_rollouts', {}, [OM_MOCKED_INSTANCE])
     check.check_id = 'test:123'
     dd_run_check(check)
@@ -65,4 +76,5 @@ def test_version_metadata(datadog_agent, dd_run_check, mock_http_response):
         'version.raw': 'v1.6.4+a312af9',
     }
 
+    fake_http.assert_all_responses_consumed()
     datadog_agent.assert_metadata('test:123', version_metadata)
