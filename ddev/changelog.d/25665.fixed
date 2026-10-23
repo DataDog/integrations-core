@@ -1,0 +1,1 @@
+Avoid generating invalid empty Windows CI workflows for repositories without Windows test targets.

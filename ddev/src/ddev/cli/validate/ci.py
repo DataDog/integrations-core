@@ -204,7 +204,9 @@ def ci(app: Application, sync: bool):
     manual_component = original_jobs_workflow.split('jobs:')[0].strip()
     windows_manual_component = original_windows_jobs_workflow.split('jobs:')[0].strip()
     expected_jobs_workflow = f'{manual_component}\n\n{jobs_component}'
-    expected_windows_jobs_workflow = f'{windows_manual_component}\n\n{windows_jobs_component}'
+    # GitHub rejects workflows with no jobs. Repositories without Windows
+    # targets should not acquire an empty workflow when CI is regenerated.
+    expected_windows_jobs_workflow = f'{windows_manual_component}\n\n{windows_jobs_component}' if windows_jobs else ''
     target_path = app.repo.path / '.github' / 'workflows' / 'test-all.yml'
     windows_target_path = app.repo.path / '.github' / 'workflows' / 'test-all-windows.yml'
 
@@ -219,7 +221,10 @@ def ci(app: Application, sync: bool):
             if original_jobs_workflow != expected_jobs_workflow:
                 target_path.write_text(expected_jobs_workflow)
             if original_windows_jobs_workflow != expected_windows_jobs_workflow:
-                windows_target_path.write_text(expected_windows_jobs_workflow)
+                if expected_windows_jobs_workflow:
+                    windows_target_path.write_text(expected_windows_jobs_workflow)
+                else:
+                    windows_target_path.unlink(missing_ok=True)
         else:
             app.abort('CI configuration is not in sync, try again with the `--sync` flag')
 

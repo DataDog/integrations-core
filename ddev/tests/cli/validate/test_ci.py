@@ -5,6 +5,36 @@ from pathlib import Path
 
 import pytest
 import yaml
+from pytest_mock import MockerFixture
+
+from ddev.repo.core import Repository
+from tests.helpers.runner import CliRunner
+
+
+@pytest.mark.parametrize('existing_windows_workflow', [None, '\n\njobs: {}\n', 'name: Windows\non: push\njobs: {}\n'])
+def test_no_windows_targets_does_not_generate_invalid_workflow(
+    ddev: CliRunner, fake_extras_repo: Repository, mocker: MockerFixture, existing_windows_workflow: str | None
+):
+    # Regresses the empty workflow generated in integrations-extras#3219.
+    workflows = fake_extras_repo.path / '.github' / 'workflows'
+    workflows.mkdir(parents=True, exist_ok=True)
+    (workflows / 'test-all.yml').write_text('name: Linux tests\non:\n  workflow_call:\njobs: {}\n')
+    windows_workflow = workflows / 'test-all-windows.yml'
+    if existing_windows_workflow is not None:
+        windows_workflow.write_text(existing_windows_workflow)
+    mocker.patch('ddev.utils.scripts.ci_matrix.get_all_targets', return_value=[])
+    mocker.patch(
+        'ddev.utils.scripts.ci_matrix.construct_job_matrix',
+        return_value=[{'name': 'Example', 'target': 'example', 'platform': 'linux', 'runner': ['ubuntu-22.04']}],
+    )
+
+    result = ddev('validate', 'ci', '--sync')
+    assert result.exit_code == 0, result.output
+    assert not windows_workflow.exists()
+    assert yaml.safe_load((workflows / 'test-all.yml').read_text())['jobs']
+
+    result = ddev('validate', 'ci')
+    assert result.exit_code == 0, result.output
 
 
 def test_missing_hatch_toml(ddev, repository, helpers):
