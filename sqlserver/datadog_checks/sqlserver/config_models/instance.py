@@ -323,7 +323,7 @@ class TaskSchedulerMetrics(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    enabled: Optional[bool] = Field(None, examples=[False])
+    enabled: Optional[bool] = Field(None, examples=[True])
 
 
 class TempdbFileSpaceUsageMetrics(BaseModel):
