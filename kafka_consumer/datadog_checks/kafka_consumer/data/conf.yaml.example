@@ -43,6 +43,12 @@ instances:
     #
   - kafka_connect_str: <KAFKA_CONNECT_STR>
 
+    ## @param allow_kafka_actions - boolean - optional - default: true
+    ## Set to `false` to prevent the Agent from running one-time Kafka actions against the cluster configured by
+    ## this instance. This does not disable Kafka consumer monitoring or other Remote Configuration features.
+    #
+    # allow_kafka_actions: true
+
     ## @param kafka_client_api_version - string - optional
     ## Specify the highest client protocol version supported by all brokers in the cluster.
     ##
