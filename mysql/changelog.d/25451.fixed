@@ -1,0 +1,1 @@
+Report databases without tables in schema payloads so the backend can remove their dropped tables.
