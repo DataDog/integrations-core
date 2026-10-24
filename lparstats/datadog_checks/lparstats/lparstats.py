@@ -58,11 +58,15 @@ class LPARStats(AgentCheck):
     SPURR_PROCESSOR_UTILIZATION_START_IDX = 3
     DEFAULT_TIMEOUT = 5
 
+    # 'not running as root' notice is logged once per check instance, not on every collection interval
+    _sudo_warned = False
+
     def check(self, instance: dict) -> None:
         sudo = instance.get('sudo', False)
         root = (hasattr(os, 'getuid') and os.getuid() == 0) or sudo
-        if not root:
+        if not root and not self._sudo_warned:
             self.log.info('Not running as root or sudo - entitlement and hypervisor metrics might be unavailable')
+            self._sudo_warned = True
 
         timeout = self.DEFAULT_TIMEOUT
         any_failed = False
