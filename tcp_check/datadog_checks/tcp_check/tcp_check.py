@@ -166,9 +166,8 @@ class TCPCheck(AgentCheck):
                         AgentCheck.CRITICAL, addr, "{}. Connection failed after {} ms".format(str(e), length)
                     )
 
-                if socket_type == socket.AF_INET:
-                    self.log.debug("Will attempt to re-resolve IP for %s:%d on next run", self.host, self.port)
-                    self._addrs = None
+                self.log.debug("Will attempt to re-resolve IP for %s:%d on next run", self.host, self.port)
+                self._addrs = None
 
     def report_as_service_check(self, status, addr, msg=None):
         # type: (AgentCheck.service_check, str, Optional[str]) -> None
