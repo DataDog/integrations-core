@@ -1,0 +1,1 @@
+Add a shared malloc_trim helper in datadog_checks.base.utils.native_memory for integrations that allocate heavily through C libraries.
