@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, AnyStr, Dict, Optional  # noqa: F401
 from pydantic import BaseModel
 
 from datadog_checks.base.config import is_affirmative
+from datadog_checks.base.utils._certificate_distrust import CertificateDistrustSSLObject, CertificateDistrustSSLSocket
 
 if TYPE_CHECKING:
     from datadog_checks.base.types import InstanceType  # noqa: F401
@@ -118,9 +119,18 @@ def _load_ca_certs(context, config):
 
 
 def create_ssl_context(config):
+    """Create an `ssl.SSLContext` from the TLS options in `config`.
+
+    Handshakes on its connections raise `CertificateDistrustError`, an `ssl.SSLCertVerificationError` with
+    `verify_code` 50, when the verified chain contains a distrusted CA key. See `_certificate_distrust` for the
+    limits of that check.
+    """
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext
     # https://docs.python.org/3/library/ssl.html#ssl.PROTOCOL_TLS_CLIENT
     context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
+    # Reject verified chains containing a distrusted CA key, whichever trust store made them verify.
+    context.sslsocket_class = CertificateDistrustSSLSocket
+    context.sslobject_class = CertificateDistrustSSLObject
 
     LOGGER.debug('Creating SSL context with config: %s', config)
     # https://docs.python.org/3/library/ssl.html#ssl.SSLContext.check_hostname

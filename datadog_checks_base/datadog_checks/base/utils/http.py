@@ -29,6 +29,7 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils import _http_utils
 
+from ._certificate_distrust import caused_by_certificate_distrust
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
 from .time import get_timestamp
@@ -756,7 +757,8 @@ class RequestsWrapper(object):
         try:
             response = request_method(url, **new_options)
         except SSLError as e:
-            if self.aia_chasing_max_depth <= 0:
+            # Fetching intermediate certificates cannot make a distrusted CA key trustworthy.
+            if self.aia_chasing_max_depth <= 0 or caused_by_certificate_distrust(e):
                 raise e
             self.logger.debug(
                 'AIA chasing: request to `%s` failed with an SSLError (%s); attempting to recover missing '
@@ -785,13 +787,15 @@ class RequestsWrapper(object):
             request_method = getattr(session, method)
             try:
                 response = request_method(url, **new_options)
-            except SSLError:
-                self.logger.error(
-                    'AIA chasing: request to `%s` still failed after mounting %d recovered intermediate '
-                    'certificate(s); the certificate chain is still incomplete',
-                    url,
-                    len(certs),
-                )
+            except SSLError as retry_error:
+                # A distrusted CA key in the recovered chain is reported by the raised error itself.
+                if not caused_by_certificate_distrust(retry_error):
+                    self.logger.error(
+                        'AIA chasing: request to `%s` still failed after mounting %d recovered intermediate '
+                        'certificate(s); the certificate chain is still incomplete',
+                        url,
+                        len(certs),
+                    )
                 raise
         return response
 
