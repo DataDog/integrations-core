@@ -12,7 +12,31 @@ def shared_collect_default_metrics():
     return False
 
 
+def shared_is_jmx():
+    return False
+
+
 def shared_new_gc_metrics():
+    return False
+
+
+def instance_allow_redirects():
+    return True
+
+
+def instance_auth_type():
+    return 'basic'
+
+
+def instance_cache_metric_wildcards():
+    return True
+
+
+def instance_cache_shared_labels():
+    return True
+
+
+def instance_collect_counters_with_distributions():
     return False
 
 
@@ -20,16 +44,76 @@ def instance_collect_default_jvm_metrics():
     return True
 
 
+def instance_collect_histogram_buckets():
+    return True
+
+
+def instance_disable_generic_tags():
+    return False
+
+
 def instance_empty_default_hostname():
     return False
 
 
+def instance_enable_health_service_check():
+    return True
+
+
+def instance_enable_legacy_tags_normalization():
+    return True
+
+
+def instance_histogram_buckets_as_distributions():
+    return False
+
+
+def instance_ignore_connection_errors():
+    return False
+
+
 def instance_is_jmx():
+    return True
+
+
+def instance_kerberos_auth():
+    return 'disabled'
+
+
+def instance_kerberos_delegate():
+    return False
+
+
+def instance_kerberos_force_initiate():
+    return False
+
+
+def instance_log_requests():
     return False
 
 
 def instance_min_collection_interval():
     return 15
+
+
+def instance_non_cumulative_histogram_buckets():
+    return False
+
+
+def instance_openmetrics_endpoint():
+    return 'http://%%host%%:9399/metrics'
+
+
+def instance_persist_connections():
+    return False
+
+
+def instance_port():
+    return 9010
+
+
+def instance_request_size():
+    return 16
 
 
 def instance_rmi_client_timeout():
@@ -41,4 +125,48 @@ def instance_rmi_connection_timeout():
 
 
 def instance_rmi_registry_ssl():
+    return False
+
+
+def instance_skip_proxy():
+    return False
+
+
+def instance_tag_by_endpoint():
+    return True
+
+
+def instance_telemetry():
+    return False
+
+
+def instance_timeout():
+    return 10
+
+
+def instance_tls_ignore_warning():
+    return False
+
+
+def instance_tls_use_host_header():
+    return False
+
+
+def instance_tls_verify():
+    return True
+
+
+def instance_use_latest_spec():
+    return False
+
+
+def instance_use_legacy_auth_encoding():
+    return True
+
+
+def instance_use_openmetrics():
+    return True
+
+
+def instance_use_process_start_time():
     return False
