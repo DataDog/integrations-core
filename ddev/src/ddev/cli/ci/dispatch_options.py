@@ -27,6 +27,8 @@ def validate_options(
     pr_base_branch: str | None,
     commit: str | None,
     all_targets: bool,
+    targets: tuple[str, ...],
+    exclude_targets: tuple[str, ...],
     dry_run: bool,
     resolve_only: bool,
     run_manifest: str | None,
@@ -42,7 +44,10 @@ def validate_options(
         pr_base_branch=pr_base_branch,
         commit=commit,
         all_targets=all_targets,
+        targets=targets,
+        exclude_targets=exclude_targets,
     )
+    _validate_target_selection(all_targets=all_targets, targets=targets, exclude_targets=exclude_targets)
 
     resolver = None
     if run_manifest is None:
@@ -55,6 +60,7 @@ def validate_options(
             pr_head_branch=pr_head_branch,
             pr_base_branch=pr_base_branch,
             commit=commit,
+            targets=targets,
         )
 
     token = _authentication_token(
@@ -83,6 +89,8 @@ def _validate_manifest_options(
     pr_base_branch: str | None,
     commit: str | None,
     all_targets: bool,
+    targets: tuple[str, ...],
+    exclude_targets: tuple[str, ...],
 ) -> None:
     if run_manifest is None:
         return
@@ -97,6 +105,8 @@ def _validate_manifest_options(
             '--pr-base-branch': pr_base_branch is not None,
             '--commit': commit is not None,
             '--all': all_targets,
+            '--targets': bool(targets),
+            '--exclude-targets': bool(exclude_targets),
         }.items()
         if present
     ]
@@ -104,6 +114,26 @@ def _validate_manifest_options(
         raise click.UsageError(
             f'`--run-manifest` supplies the resolved run, so it cannot be combined with `{"`, `".join(conflicting)}`.'
         )
+
+
+def _validate_target_selection(
+    *, all_targets: bool, targets: tuple[str, ...], exclude_targets: tuple[str, ...]
+) -> None:
+    # Neither option silently wins, because the caller may not have meant to pass both.
+    if all_targets and targets:
+        raise click.UsageError('`--all` and `--targets` cannot be combined.')
+    if overlap := [target for target in targets if target in exclude_targets]:
+        raise click.UsageError(f'Targets cannot be both requested and excluded: {", ".join(overlap)}.')
+
+
+def parse_target_list(ctx: click.Context, param: click.Parameter, value: str | None) -> tuple[str, ...]:
+    """Split a comma-separated list of target names, rejecting empty or padded names."""
+    if value is None:
+        return ()
+    names = value.split(',')
+    if any(not name or name != name.strip() for name in names):
+        raise click.BadParameter(f'expected a comma-separated list of target names, got {value!r}.')
+    return tuple(dict.fromkeys(names))
 
 
 def _pull_request_resolver(
@@ -116,6 +146,7 @@ def _pull_request_resolver(
     pr_head_branch: str | None,
     pr_base_branch: str | None,
     commit: str | None,
+    targets: tuple[str, ...],
 ) -> PullRequestResolver | None:
     from ddev.utils.github import parse_pull_request_reference
 
@@ -129,6 +160,8 @@ def _pull_request_resolver(
     is_pr_run = any(value is not None for value in pr_options.values())
     if commit is not None and is_pr_run:
         raise click.UsageError('`--commit` cannot be combined with PR options.')
+    if targets and is_pr_run:
+        raise click.UsageError('`--targets` cannot be combined with PR options.')
     if not is_pr_run:
         return None
 

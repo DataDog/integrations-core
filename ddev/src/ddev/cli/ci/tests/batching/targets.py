@@ -235,6 +235,23 @@ class AllTargetsRule:
         yield from facts.eligible_targets()
 
 
+@dataclass(frozen=True)
+class ExplicitTargetsRule:
+    """Select exactly the requested `targets`, whatever changed.
+
+    A requested target that is not testable raises `PlanningError`, because dropping it would test
+    less than the run was asked to.
+    """
+
+    targets: tuple[str, ...]
+
+    def __call__(self, changed_files: Sequence[ChangedFile], facts: RepositoryFacts) -> Iterator[str]:
+        untestable = [target for target in self.targets if not facts.is_testable_target(target)]
+        if untestable:
+            raise PlanningError(f"Requested targets are not testable: {', '.join(untestable)}.")
+        yield from self.targets
+
+
 def all_target_rules() -> tuple[TargetRule, ...]:
     """The rule set that tests every eligible target."""
     return (AllTargetsRule(),)

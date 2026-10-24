@@ -532,7 +532,7 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
             ),
             (),
             "master",
-            "master-sha",
+            "master-master-sha",
             False,
             id="master",
         ),
@@ -543,10 +543,11 @@ async def test_dispatches_workflow_with_job_list_payload(tmp_path: Path):
                 checkout_sha="agent-sha",
                 head_branch="test-agent",
                 all_targets=False,
+                context="test-agent",
             ),
-            ("context:test-agent",),
+            (),
             "test-agent",
-            "agent-sha",
+            "test-agent-agent-sha",
             False,
             id="custom-context",
         ),
@@ -584,8 +585,9 @@ def test_job_tags_keep_caller_values_inside_one_transport_field(tmp_path: Path):
         checkout_sha="agent-sha",
         head_branch="test-agent",
         all_targets=False,
+        context="release,candidate\nunsafe\rvalue",
     )
-    runner = make_runner(FakeAsyncGitHubClient(), tmp_path, run=run, tags=("context:release,candidate\nunsafe\rvalue",))
+    runner = make_runner(FakeAsyncGitHubClient(), tmp_path, run=run)
 
     inputs = runner._build_inputs(make_batch("batch-context"))
     [job] = decode_job_list(inputs["job_list"])

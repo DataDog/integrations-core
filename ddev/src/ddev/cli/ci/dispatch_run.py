@@ -129,7 +129,7 @@ class ResolvedRun(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra='forbid')
 
-    schema_version: Literal[2] = 2
+    schema_version: Literal[3] = 3
     repository: str
     checkout_sha: str
     head_sha: str
@@ -139,6 +139,11 @@ class ResolvedRun(BaseModel):
     base_branch: str | None = None
     base_sha: str | None = None
     is_fork: bool = False
+    # Explicit targets replace the selection; exclusions filter whichever selection applies.
+    targets: tuple[str, ...] = ()
+    exclude_targets: tuple[str, ...] = ()
+    # What the run was started for, such as `pr`, `master` or `nightly`. It tells apart runs on one commit.
+    context: str = 'master'
 
     @property
     def owner(self) -> str:
@@ -150,8 +155,12 @@ class ResolvedRun(BaseModel):
 
     @property
     def concurrency_key(self) -> str:
-        """New PR revisions must cancel old batches, so they key on the PR, not the merge SHA."""
-        return f'pr-{self.pr_number}' if self.pr_number is not None else self.head_sha
+        """New PR revisions must cancel old batches, so they key on the PR, not the merge SHA.
+
+        Other runs key on their context too, so a nightly run and a master push on one commit do not
+        cancel each other.
+        """
+        return f'pr-{self.pr_number}' if self.pr_number is not None else f'{self.context}-{self.head_sha}'
 
 
 def write_run_manifest(base_path: Path, *, run: ResolvedRun) -> None:
@@ -193,9 +202,15 @@ def resolve_run(
     commit: str | None,
     token: str,
     all_targets: bool,
+    targets: tuple[str, ...] = (),
+    exclude_targets: tuple[str, ...] = (),
+    context: str = 'master',
     monitor: ComponentMonitor | None = None,
 ) -> ResolvedRun | None:
-    """Resolve what to test, reporting why a run has nothing left to test before returning None."""
+    """Resolve what to test, reporting why a run has nothing left to test before returning None.
+
+    A pull request run's context is always `pr`, whatever *context* says.
+    """
     if pr_resolver is not None:
         return resolve_pull_request_run(
             app,
@@ -203,6 +218,7 @@ def resolve_run(
             resolver=pr_resolver,
             token=token,
             all_targets=all_targets,
+            exclude_targets=exclude_targets,
             monitor=monitor,
         )
 
@@ -216,6 +232,9 @@ def resolve_run(
         head_sha=tested_commit,
         head_branch=head_branch,
         all_targets=all_targets,
+        targets=targets,
+        exclude_targets=exclude_targets,
+        context=context,
     )
     if monitor is not None:
         monitor.logger.info(
@@ -230,9 +249,9 @@ def resolve_run(
 def changes_for_run(
     app: Application, *, run: ResolvedRun, monitor: ComponentMonitor | None = None
 ) -> list[ChangedFile] | None:
-    """The files the run is responsible for; `None` when the run covers every target."""
+    """The files the run is responsible for; `None` when the run names its targets instead."""
     validate_checkout(app, run=run)
-    if run.all_targets:
+    if run.all_targets or run.targets:
         return None
 
     from ddev.cli.ci.tests.changes import ChangeResolutionError, changes_in_commit
@@ -286,6 +305,7 @@ def resolve_pull_request_run(
     resolver: PullRequestResolver,
     token: str,
     all_targets: bool,
+    exclude_targets: tuple[str, ...] = (),
     monitor: ComponentMonitor | None = None,
 ) -> ResolvedRun | None:
     """Read the pull request from the API, in one client session."""
@@ -340,6 +360,8 @@ def resolve_pull_request_run(
                 base_branch=pull.base.ref,
                 base_sha=pull.base.sha,
                 is_fork=head_is_fork(pull.head, owner=resolver.owner, repo=resolver.repo),
+                exclude_targets=exclude_targets,
+                context='pr',
             )
             if monitor is not None:
                 monitor.logger.info(

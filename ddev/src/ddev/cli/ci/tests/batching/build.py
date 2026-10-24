@@ -22,10 +22,12 @@ from ddev.cli.ci.tests.batching.units import (
 )
 from ddev.cli.ci.tests.batching.validation import validate_batches
 from ddev.cli.ci.tests.messages import TestBatch
+from ddev.e2e.agent_images import get_agent_image
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from ddev.cli.ci.tests.batching.jobs import AgentImageResolver
     from ddev.cli.ci.tests.batching.targets import TargetRule
     from ddev.cli.ci.tests.batching.units import EnvironmentProvider
     from ddev.cli.ci.tests.dispatcher_config import BatchingConfig
@@ -43,13 +45,14 @@ def build_test_units(
     environment_provider: EnvironmentProvider,
     rules: Sequence[TargetRule] | None = None,
     infrastructure_targets: Sequence[str] = (),
+    exclude_targets: Sequence[str] = (),
     monitor: ComponentMonitor,
 ) -> list[TestUnit]:
     """Turn changed files into the complete, deterministic list of test units.
 
     Without explicit `rules`, the default set is used, with the repository-wide and infrastructure
     rules enabled only for the core repository. `infrastructure_targets` feeds the latter and is
-    ignored when `rules` is given.
+    ignored when `rules` is given. `exclude_targets` is removed from whatever the rules select.
     """
     if rules is None:
         rules = default_target_rules(is_core=repo.name == "core", infrastructure_targets=infrastructure_targets)
@@ -59,6 +62,9 @@ def build_test_units(
 
     definitions: list[TargetDefinition] = []
     for name in target_names:
+        if name in exclude_targets:
+            continue
+
         ci_override = repo.config.get(f"/overrides/ci/{name}", {}) or {}
         if ci_override.get("exclude", False):
             continue
@@ -105,6 +111,8 @@ def build_test_batches(
     config: BatchingConfig,
     strategy: BatchStrategy = default_strategy,
     rules: Sequence[TargetRule] | None = None,
+    exclude_targets: Sequence[str] = (),
+    agent_image_resolver: AgentImageResolver = get_agent_image,
     minimum_base_package: bool = False,
     monitor: ComponentMonitor,
 ) -> list[TestBatch]:
@@ -119,9 +127,12 @@ def build_test_batches(
         environment_provider=environment_provider,
         rules=rules,
         infrastructure_targets=config.test_infrastructure_targets,
+        exclude_targets=exclude_targets,
         monitor=monitor,
     )
-    jobs = expand_batch_jobs(units, minimum_base_package=minimum_base_package)
+    jobs = expand_batch_jobs(
+        units, agent_image_resolver=agent_image_resolver, minimum_base_package=minimum_base_package
+    )
     job_groups = strategy(jobs, config=config)
     validate_batches(job_groups, jobs, config=config)
     return create_test_batches(job_groups)

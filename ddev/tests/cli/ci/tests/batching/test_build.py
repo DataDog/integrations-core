@@ -25,6 +25,7 @@ from ddev.cli.ci.tests.batching.build import (
     supports_minimum_base_package,
 )
 from ddev.cli.ci.tests.batching.exceptions import BatchValidationError
+from ddev.cli.ci.tests.batching.targets import ExplicitTargetsRule, all_target_rules
 from ddev.cli.ci.tests.dispatcher_config import BatchingConfig
 from ddev.utils.platform import PlatformName
 
@@ -332,3 +333,62 @@ def test_build_only_expands_the_whole_repository_for_the_core_repo():
 
     assert targets(FakeRepo(integrations)) == {"postgres", "datadog_checks_base"}
     assert targets(FakeRepo(integrations, name="extras")) == {"datadog_checks_base"}
+
+
+@pytest.mark.parametrize(
+    ("rules", "changed", "expected"),
+    [
+        pytest.param(
+            None,
+            [modified("postgres/tests/test_a.py"), modified("redis/tests/test_b.py")],
+            {"postgres"},
+            id="change-based",
+        ),
+        pytest.param(all_target_rules(), [], {"postgres", "ntp"}, id="all"),
+    ],
+)
+def test_build_drops_excluded_targets_from_whatever_was_selected(rules, changed, expected):
+    """`--exclude-targets` filters the selection; it neither widens nor replaces it."""
+    repo = FakeRepo([FakeIntegration("postgres"), FakeIntegration("redis"), FakeIntegration("ntp")])
+    provider = FakeEnvironmentProvider({name: [env("py3.11")] for name in ("postgres", "redis", "ntp")})
+
+    units = build_test_units(repo, changed, environment_provider=provider, rules=rules, exclude_targets=("redis",))
+
+    assert {unit.target for unit in units} == expected
+
+
+def test_build_plans_every_environment_of_an_explicit_target():
+    """A named target runs all its environments, so no environment's failure goes unseen."""
+    repo = FakeRepo([FakeIntegration("postgres"), FakeIntegration("redis")])
+    provider = FakeEnvironmentProvider(
+        {
+            "postgres": [env("py3.11-16"), env("py3.11-17")],
+            "redis": [env("py3.11")],
+        }
+    )
+
+    units = build_test_units(repo, [], environment_provider=provider, rules=(ExplicitTargetsRule(("postgres",)),))
+
+    assert [(unit.target, unit.environment.name, unit.platform) for unit in units] == [
+        ("postgres", "py3.11-16", PlatformName.LINUX),
+        ("postgres", "py3.11-17", PlatformName.LINUX),
+    ]
+
+
+def test_build_batches_resolves_every_e2e_image_with_the_given_resolver():
+    """Catches an override that `build_test_batches` accepts but never hands to the job expansion."""
+    repo = FakeRepo([FakeIntegration("postgres")])
+    provider = FakeEnvironmentProvider({"postgres": [env("py3.11", e2e=True), env("py3.12", e2e=False)]})
+
+    [batch] = build_test_batches(
+        repo,
+        [modified("postgres/tests/test_a.py")],
+        environment_provider=provider,
+        config=BatchingConfig(),
+        agent_image_resolver=lambda python_version, platform: f"custom:{platform}",
+    )
+
+    assert [(job.environment, job.agent_image) for job in batch.job_list] == [
+        ("py3.11", "custom:linux"),
+        ("py3.12", None),
+    ]

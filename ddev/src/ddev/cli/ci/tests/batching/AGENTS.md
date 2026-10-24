@@ -23,7 +23,7 @@ them from git, and `../changes.py` decides which two commits a CI run compares.
 | --- | --- |
 | `build.py` | Composes the stages and adapts concrete `Repository`/`Integration` objects to them. The package's public entry point. |
 | `hatch_environments.py` | Reads and validates static Hatch environment settings and expands candidate environments. |
-| `targets.py` | Maps changed files to affected target names through ordered, independent rules. `AllTargetsRule` is the exception: it ignores the change set, for a run that tests everything. |
+| `targets.py` | Maps changed files to affected target names through ordered, independent rules. `AllTargetsRule` and `ExplicitTargetsRule` are the exceptions: they ignore the change set, for a run that tests everything or the targets it was given. |
 | `units.py` | Expands targets into `TestUnit` values: one target, one platform, one environment. |
 | `jobs.py` | Turns each unit into the concrete `BatchJob` the workflow runs. |
 | `strategy/` | Packs jobs into capacity-bounded groups. `types.py` is the contract, `default.py` the implementation. |
