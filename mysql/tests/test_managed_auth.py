@@ -143,7 +143,7 @@ def test_mixin_should_reconnect_ttl_expired(mock_connect):
     assert job._should_reconnect_for_managed_auth() is True
 
 
-@patch('datadog_checks.mysql.mysql.aws.generate_rds_iam_token')
+@patch('datadog_checks.mysql.aws.generate_rds_iam_token')
 def test_get_connection_args_with_aws_managed_auth(mock_generate_token):
     """Test that _get_connection_args generates IAM token for AWS managed auth."""
     mock_generate_token.return_value = "iam_token_123"
@@ -173,7 +173,7 @@ def test_get_connection_args_with_aws_managed_auth(mock_generate_token):
     )
 
 
-@patch('datadog_checks.mysql.mysql.aws.generate_rds_iam_token')
+@patch('datadog_checks.mysql.aws.generate_rds_iam_token')
 def test_get_connection_args_with_aws_managed_auth_and_role_arn(mock_generate_token):
     """Test that _get_connection_args passes role_arn when provided."""
     mock_generate_token.return_value = "iam_token_456"
