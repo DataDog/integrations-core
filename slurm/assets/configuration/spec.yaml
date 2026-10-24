@@ -85,6 +85,60 @@ files:
       value:
         type: integer
         example: 1
+    - name: slurm_rest_api_url
+      description: |
+        Base URL of the Slurm REST API (slurmrestd), for example http://slurm-restapi:6820.
+        When set, the check collects metrics over the REST API instead of executing the Slurm
+        CLI binaries. This lets the check run without co-located Slurm binaries or munge/auth
+        access (for example, as a cluster check against a containerized Slurm deployment such
+        as SUNK/Slinky). Leave unset to use the default CLI collection mode. slurmrestd is
+        optional in Slurm, so this mode requires it to be enabled on the cluster.
+      fleet_configurable: true
+      value:
+        type: string
+        display_default: null
+        example: http://slurm-restapi:6820
+    - name: slurm_openapi_version
+      description: |
+        The slurmrestd OpenAPI data_parser version to query (for example v0.0.42). Only used
+        when slurm_rest_api_url is set.
+      fleet_configurable: true
+      value:
+        type: string
+        example: v0.0.42
+    - name: slurm_rest_api_token
+      description: |
+        The Slurm JWT (auth/jwt) used to authenticate to slurmrestd, sent in the
+        X-SLURM-USER-TOKEN header. Only used when slurm_rest_api_url is set. Prefer
+        slurm_rest_api_token_file for tokens that are rotated.
+      fleet_configurable: false
+      value:
+        type: string
+        secret: true
+        example: <SLURM_JWT>
+    - name: slurm_rest_api_token_file
+      description: |
+        Path to a file containing the Slurm JWT used to authenticate to slurmrestd. The file is
+        re-read on every check run so rotated tokens are picked up. Takes precedence over
+        slurm_rest_api_token. Only used when slurm_rest_api_url is set.
+      fleet_configurable: true
+      value:
+        type: string
+        display_default: null
+        example: /etc/datadog-agent/slurm.d/token
+    - name: slurm_rest_api_user
+      description: |
+        Slurm username to send in the X-SLURM-USER-NAME header, in addition to the JWT token.
+        Only needed when slurmrestd sits behind an authenticating proxy that uses one shared
+        privileged token to act on behalf of multiple users (see
+        https://slurm.schedmd.com/jwt.html). Not needed for a JWT generated directly for a
+        single user (e.g. via `scontrol token`), since the token's own `sun` claim already
+        identifies the user in that case. Only used when slurm_rest_api_url is set.
+      fleet_configurable: true
+      value:
+        type: string
+        display_default: null
+        example: datadog
     - name: sinfo_path
       description: Full path to the sinfo binary.
       fleet_configurable: true

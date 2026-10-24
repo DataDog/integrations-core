@@ -112,6 +112,10 @@ def instance_sinfo_path():
     return '/usr/bin/sinfo'
 
 
+def instance_slurm_openapi_version():
+    return 'v0.0.42'
+
+
 def instance_squeue_path():
     return '/usr/bin/squeue'
 
