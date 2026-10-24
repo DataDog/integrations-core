@@ -20,9 +20,15 @@ from datadog_checks.base.utils.models import validation
 
 from . import defaults, validators
 
-
 SECURE_FIELD_NAMES = frozenset(
-    ['auth_token', 'kerberos_cache', 'kerberos_keytab', 'tls_ca_cert', 'tls_cert', 'tls_private_key']
+    [
+        'auth_token',
+        'kerberos_cache',
+        'kerberos_keytab',
+        'tls_ca_cert',
+        'tls_cert',
+        'tls_private_key',
+    ]
 )
 
 
@@ -112,17 +118,25 @@ class InstanceConfig(BaseModel):
     enable_legacy_tags_normalization: Optional[bool] = None
     exclude_labels: Optional[tuple[str, ...]] = None
     exclude_metrics: Optional[tuple[str, ...]] = None
-    exclude_metrics_by_labels: Optional[MappingProxyType[str, Union[bool, tuple[str, ...]]]] = None
+    exclude_metrics_by_labels: Optional[
+        MappingProxyType[str, Union[bool, tuple[str, ...]]]
+    ] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
-    extra_metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, ExtraMetrics]]], ...]] = None
-    genresources_application_full_scrape_interval_seconds: Optional[int] = Field(None, ge=1)
+    extra_metrics: Optional[
+        tuple[Union[str, MappingProxyType[str, Union[str, ExtraMetrics]]], ...]
+    ] = None
+    genresources_application_full_scrape_interval_seconds: Optional[int] = Field(
+        None, ge=1
+    )
     genresources_application_poll_interval_seconds: Optional[int] = Field(None, ge=1)
     genresources_auth_token: Optional[str] = None
     genresources_cluster_scrape_interval_seconds: Optional[int] = Field(None, ge=1)
+    genresources_collect_projects: Optional[bool] = None
     genresources_endpoint: Optional[str] = None
     genresources_exclude_paths: Optional[tuple[str, ...]] = None
     genresources_extra_include_paths: Optional[tuple[str, ...]] = None
     genresources_max_resources_per_cycle: Optional[int] = Field(None, ge=1)
+    genresources_project_scrape_interval_seconds: Optional[int] = Field(None, ge=1)
     genresources_repository_scrape_interval_seconds: Optional[int] = Field(None, ge=1)
     genresources_stream_applications_enabled: Optional[bool] = None
     genresources_stream_backoff_max_seconds: Optional[int] = Field(None, ge=1)
@@ -144,7 +158,9 @@ class InstanceConfig(BaseModel):
     kerberos_principal: Optional[str] = None
     log_requests: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
-    metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, Metrics]]], ...]] = None
+    metrics: Optional[
+        tuple[Union[str, MappingProxyType[str, Union[str, Metrics]]], ...]
+    ] = None
     min_collection_interval: Optional[float] = None
     namespace: Optional[str] = Field(None, pattern='\\w*')
     non_cumulative_histogram_buckets: Optional[bool] = None
@@ -182,14 +198,18 @@ class InstanceConfig(BaseModel):
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):
-        return validation.core.initialize_config(getattr(validators, 'initialize_instance', identity)(values))
+        return validation.core.initialize_config(
+            getattr(validators, 'initialize_instance', identity)(values)
+        )
 
     @field_validator('*', mode='before')
     def _validate(cls, value, info):
         field = cls.model_fields[info.field_name]
         field_name = field.alias or info.field_name
         if field_name in info.context['configured_fields']:
-            value = getattr(validators, f'instance_{info.field_name}', identity)(value, field=field)
+            value = getattr(validators, f'instance_{info.field_name}', identity)(
+                value, field=field
+            )
 
             if info.field_name in SECURE_FIELD_NAMES:
                 validation.security.check_field_trusted_provider(
@@ -202,4 +222,6 @@ class InstanceConfig(BaseModel):
 
     @model_validator(mode='after')
     def _final_validation(cls, model):
-        return validation.core.check_model(getattr(validators, 'check_instance', identity)(model))
+        return validation.core.check_model(
+            getattr(validators, 'check_instance', identity)(model)
+        )
