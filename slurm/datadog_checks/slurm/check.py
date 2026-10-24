@@ -8,6 +8,11 @@ import time
 from dataclasses import dataclass
 from datetime import timedelta
 
+try:
+    import datadog_agent
+except ImportError:
+    from datadog_checks.base.stubs import datadog_agent
+
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.tagging import tagger
 from datadog_checks.base.utils.time import get_timestamp
@@ -35,11 +40,28 @@ from .constants import (
     SSHARE_MAP,
     SSHARE_PARAMS,
 )
+from .job_events import (
+    NO_PENDING_REASON,
+    SACCT_JOB_EVENT_DONE_STATES,
+    SACCT_JOB_EVENT_IDS_PER_QUERY,
+    SACCT_JOB_EVENT_MAX_LOOKBACK,
+    SACCT_JOB_EVENT_PARAMS,
+    SACCT_JOB_EVENT_WINDOW_OVERLAP,
+    SACCT_TIME_FORMAT_ENV,
+    SacctJob,
+    job_event_tags,
+    job_event_text,
+    job_event_title,
+    job_transitions,
+    parent_job_id,
+    transition_alert_type,
+    transition_time,
+)
 
 
-def get_subprocess_output(cmd):
+def get_subprocess_output(cmd, env=None):
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, env=env)
         return result.stdout, result.stderr, result.returncode
     except Exception as e:
         return None, f"Error running {cmd}: {e}", 1
@@ -113,6 +135,10 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.collect_scontrol_stats = is_affirmative(self.instance.get('collect_scontrol_stats', False))
         self.collect_seff_stats = is_affirmative(self.instance.get('collect_seff_stats', False))
         self.resolve_scontrol_host_pids = is_affirmative(self.instance.get('resolve_scontrol_host_pids', False))
+        self.collect_job_events = is_affirmative(self.instance.get('collect_job_events', False))
+        if self.collect_job_events and not is_affirmative(datadog_agent.get_config('gpu.enabled')):
+            self.log.warning("collect_job_events requires GPU monitoring (gpu.enabled); job events are not collected.")
+            self.collect_job_events = False
 
         # Additional configurations
         self.gpu_stats = is_affirmative(self.instance.get('collect_gpu_stats', False))
@@ -155,6 +181,19 @@ class SlurmCheck(AgentCheck, ConfigMixin):
             self.scontrol_cmd = self.get_slurm_command('scontrol', SCONTROL_PARAMS)
             self.squeue_enrich_cmd = self.get_slurm_command('squeue', ["-j"])
 
+        if self.collect_job_events:
+            self.sacct_job_events_cmd = self.get_slurm_command('sacct', SACCT_JOB_EVENT_PARAMS)
+        # Jobs seen in the last successful poll, keyed by raw job ID. None until the first poll seeds it, so that
+        # jobs that already existed when the check started do not produce events. Raw job IDs are unique within a
+        # federation, and a federated job reports the cluster that runs it, which changes once a sibling starts it.
+        self._job_event_state: dict[str, SacctJob] | None = None
+        self._job_events_first_poll: float | None = None
+        self._job_events_last_poll: float | None = None
+        # sacct does not report pending reasons, so they come from the squeue metrics collection of the same run.
+        # None when squeue produced nothing this run, so that the previously reported reasons are kept.
+        self._squeue_pending_reasons: dict[str, str] | None = None
+        self._job_pending_reasons: dict[str, str] = {}
+
         # Commands that have already reported a static configuration problem, so that it
         # is logged once rather than on every collection interval.
         self._reported_config_failures = set()
@@ -176,6 +215,7 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.collect_metadata()
 
         commands = []
+        self._squeue_pending_reasons = None
 
         if self.collect_sinfo_stats:
             commands.append(('sinfo', self.sinfo_partition_cmd, self.process_sinfo_partition))
@@ -213,6 +253,138 @@ class SlurmCheck(AgentCheck, ConfigMixin):
                 process_func(out)
             else:
                 self.log.debug("No output from %s", name)
+
+        if self.collect_job_events:
+            self.collect_sacct_job_events()
+
+    def collect_sacct_job_events(self) -> None:
+        poll_time = time.time()
+        lookback = SACCT_JOB_EVENT_WINDOW_OVERLAP
+        if self._job_events_last_poll is not None:
+            lookback += int(poll_time - self._job_events_last_poll)
+        # Jobs that ended in the uncovered part of a longer gap are only reported if they were already known.
+        lookback = min(lookback, SACCT_JOB_EVENT_MAX_LOOKBACK)
+        current_state = self._run_sacct_job_events([f'--starttime=now-{lookback}seconds'])
+        if current_state is None:
+            # Keep the previous state and poll time so the next poll covers this window too.
+            return
+
+        # The time window only returns jobs that were eligible to run during it, which leaves out held jobs, jobs
+        # waiting on a dependency or a begin time, and jobs cancelled in those states. Known jobs that squeue still
+        # reports as pending keep their previous record; the rest of the jobs missing from the window are queried
+        # by ID: those squeue reports as pending for the first time, and alive jobs that squeue no longer reports.
+        squeue_pending = self._squeue_pending_reasons
+        previous_state = self._job_event_state or {}
+        window_ids = set(current_state)
+        missing_ids = set()
+        for job_id, job in previous_state.items():
+            if job.state in SACCT_JOB_EVENT_DONE_STATES or job_id in window_ids:
+                continue
+            if squeue_pending is not None and job_id in squeue_pending:
+                current_state[job_id] = job
+            else:
+                missing_ids.add(job_id)
+        if squeue_pending is not None:
+            missing_ids.update(set(squeue_pending) - window_ids - set(previous_state))
+
+        sorted_ids = sorted(missing_ids)
+        for i in range(0, len(sorted_ids), SACCT_JOB_EVENT_IDS_PER_QUERY):
+            ids = sorted_ids[i : i + SACCT_JOB_EVENT_IDS_PER_QUERY]
+            jobs = self._run_sacct_job_events(['-j', ','.join(ids)])
+            if jobs is None:
+                return
+            # Querying an array job by ID also returns its tasks, which may have finished long ago.
+            current_state.update({job_id: job for job_id, job in jobs.items() if job_id in missing_ids})
+
+        self.process_job_events(current_state, poll_time)
+        self._job_events_last_poll = poll_time
+
+    def _run_sacct_job_events(self, params: list[str]) -> dict[str, SacctJob] | None:
+        cmd = self.sacct_job_events_cmd + params
+        self.log.debug("Running sacct job events command: %s", cmd)
+        out, err, ret = get_subprocess_output(cmd, env={**os.environ, **SACCT_TIME_FORMAT_ENV})
+        if ret != 0:
+            self._log_command_failure('sacct', err)
+            return None
+        return self.parse_sacct_jobs(out or '')
+
+    def parse_sacct_jobs(self, output: str) -> dict[str, SacctJob]:
+        jobs = {}
+        for line in output.splitlines():
+            if not line.strip():
+                continue
+            job = SacctJob.from_sacct_line(line)
+            if job is None:
+                self.log.debug("Skipping unexpected sacct job events line: %s", line)
+                continue
+            jobs[job.job_id_raw] = job
+        return jobs
+
+    def process_job_events(self, current_state: dict[str, SacctJob], now: float) -> None:
+        if self.debug_sacct_stats:
+            self.log.debug("Processing %d jobs for sacct job events", len(current_state))
+
+        squeue_reasons = self._squeue_pending_reasons
+        if squeue_reasons is None:
+            current_reasons = {
+                job_id: reason for job_id, reason in self._job_pending_reasons.items() if job_id in current_state
+            }
+        else:
+            current_reasons = {
+                job_id: squeue_reasons[job_id]
+                for job_id in current_state
+                if squeue_reasons.get(job_id, NO_PENDING_REASON) != NO_PENDING_REASON
+            }
+
+        previous_state = self._job_event_state
+        previous_reasons = self._job_pending_reasons
+        self._job_event_state = current_state
+        self._job_pending_reasons = current_reasons
+        if previous_state is None:
+            self._job_events_first_poll = now
+            return
+
+        # Array tasks and heterogeneous job components each get a record of their own, but are submitted together.
+        seen_parents = {parent_id for job in previous_state.values() if (parent_id := parent_job_id(job.job_id))}
+        for key, job in current_state.items():
+            previous = previous_state.get(key)
+            reason = current_reasons.get(key)
+            parent_id = parent_job_id(job.job_id)
+            for transition in job_transitions(previous, job):
+                if transition == 'submitted' and parent_id in seen_parents:
+                    continue
+                happened_at = transition_time(transition, job)
+                # A job the first poll missed, for example because slurmdbd had not recorded it yet, is new to the
+                # check but may have transitioned before the check started.
+                if happened_at is not None and happened_at < self._job_events_first_poll:
+                    continue
+                self.submit_job_event(
+                    transition,
+                    job,
+                    now if happened_at is None else happened_at,
+                    reason if transition == 'submitted' else None,
+                )
+            if parent_id:
+                seen_parents.add(parent_id)
+
+            # New jobs carry their reason in the submitted event; afterwards, only reason changes are reported.
+            if squeue_reasons is not None and previous is not None and reason and reason != previous_reasons.get(key):
+                self.submit_job_event('pending', job, now, reason)
+
+    def submit_job_event(
+        self, transition: str, job: SacctJob, timestamp: float, pending_reason: str | None = None
+    ) -> None:
+        self.event(
+            {
+                'timestamp': int(timestamp),
+                'event_type': f'slurm.job.{transition}',
+                'msg_title': job_event_title(transition, job, pending_reason),
+                'msg_text': job_event_text(transition, job, pending_reason),
+                'aggregation_key': f'slurm_job:{job.cluster}:{job.job_id_raw}',
+                'alert_type': transition_alert_type(transition, job, pending_reason),
+                'tags': job_event_tags(transition, job, self.tags, pending_reason),
+            }
+        )
 
     def _log_command_failure(self, name: str, err: str) -> None:
         """Log a non-zero command exit at a severity matching what actually went wrong."""
@@ -330,8 +502,14 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         if self.debug_squeue_stats:
             self.log.debug("Processing squeue output: %s", lines)
 
+        if self.collect_job_events:
+            self._squeue_pending_reasons = {}
+
         for line in lines:
             job_data = line.split('|')
+
+            if self.collect_job_events and len(job_data) > 6 and job_data[3].strip() == 'PENDING':
+                self._squeue_pending_reasons[job_data[0].strip()] = job_data[6].strip().strip('()')
 
             tags = []
             tags.extend(self.tags)

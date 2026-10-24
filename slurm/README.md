@@ -2,7 +2,7 @@
 
 ## Overview
 
-This check monitors [Slurm][1] through the Datadog Agent. 
+This check monitors [Slurm][1] through the Datadog Agent.
 
 Slurm (Simple Linux Utility for Resource Management) is an open-source workload manager used to schedule and manage jobs on large-scale compute clusters. It allocates resources, monitors job queues, and ensures efficient execution of parallel and batch jobs in high-performance computing environments.
 
@@ -77,14 +77,14 @@ instances:
 
     ## @param sinfo_collection_level - integer - optional - default: 1
     ## The level of detail to collect from the sinfo command. The default is 'basic'. Available options are 1, 2 and
-    ## 3. Level 1 collects data only for partitions. Level 2 collects data from individual nodes. Level 3 
-    ## collects data from from individual nodes as well but is more verbose and includes data such as CPU and 
+    ## 3. Level 1 collects data only for partitions. Level 2 collects data from individual nodes. Level 3
+    ## collects data from from individual nodes as well but is more verbose and includes data such as CPU and
     ## memory usage as reported from the OS, as well as additional tags.
     #
     sinfo_collection_level: 3
 
     ## @param collect_scontrol_stats - boolean - optional - default: false
-    ## Whether or not to collect statistics from the scontrol command. This is mainly used in the worker 
+    ## Whether or not to collect statistics from the scontrol command. This is mainly used in the worker
     ## node to collect the list of running jobs along with their PIDs.
     collect_scontrol_stats: false # This should only be set on worker nodes and not the head node
 ```
@@ -112,9 +112,9 @@ init_config:
 
 instances:
 
-  - 
+  -
     ## @param collect_scontrol_stats - boolean - optional - default: false
-    ## Whether or not to collect statistics from the scontrol command. This is mainly used in the worker 
+    ## Whether or not to collect statistics from the scontrol command. This is mainly used in the worker
     ## node to collect the list of running jobs along with their PIDs.
     collect_scontrol_stats: true
 
@@ -143,7 +143,36 @@ See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 
-The Slurm integration does not include any events.
+When `collect_job_events` is enabled and GPU monitoring is enabled in the Agent (`gpu.enabled: true`), the Slurm
+integration polls `sacct` for jobs active since the previous check run and sends Datadog events for job lifecycle
+transitions. The transition is in the `slurm_job_transition` tag:
+
+- Submitted (`slurm_job_transition:submitted`): a job appears after the check has initialized its state. A job array
+  or heterogeneous job is reported once, not once per task or component.
+- Pending (`slurm_job_transition:pending`): the pending reason of a job changes, for example from `Priority` to
+  `QOSMaxGRESPerUser`. Reasons that are part of normal scheduling (`Priority`, `Resources`, `Dependency`, `BeginTime`)
+  are sent as `info`, any other reason as `warning`.
+- Started (`slurm_job_transition:started`): the job starts running, or starts again after a requeue. The event includes
+  the queued wait time.
+- Finished (`slurm_job_transition:finished`): the job reaches a terminal state (`COMPLETED`, `FAILED`, `CANCELLED`,
+  `TIMEOUT`, `OUT_OF_MEMORY`, `NODE_FAIL`, `BOOT_FAIL` or `DEADLINE`).
+- Preempted, requeued and suspended (`slurm_job_transition:preempted`, `requeued` and `suspended`): the job enters the
+  matching state.
+
+Jobs that start and finish between two check runs still produce all of their events. Events are tagged with the job
+ID, name, user, account, partition, QOS, cluster, state, transition, and GPU count when GPUs are requested. Started and
+finished events include the node list, finished events include the exit code, and submitted and pending events include
+the pending reason (`slurm_job_reason`).
+
+The `sacct` time window only returns jobs that were eligible to run during it. Held jobs, jobs waiting on a
+dependency or a begin time, and jobs cancelled in those states are queried by ID instead, when they are reported as
+pending by `squeue` for the first time, or when a known job is no longer reported by `squeue`. The window covers at
+most the last hour: after a longer interruption, only jobs that were already known are reported for that gap.
+
+The first collection run seeds the job state and does not emit events for already existing jobs, and transitions that
+happened before that run are never reported. Job events require
+Slurm accounting (`slurmdbd`). The `sacct` command does not report pending reasons, so they are taken from `squeue` and
+are only available when `collect_squeue_stats` is enabled.
 
 ## Troubleshooting
 
