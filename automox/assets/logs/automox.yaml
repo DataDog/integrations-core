@@ -1,0 +1,4499 @@
+id: automox
+metric_id: automox
+backend_only: false
+facets:
+- groups:
+  - Event
+  name: Event Name
+  path: evt.name
+  source: log
+- groups:
+  - Event
+  name: Event Outcome
+  path: evt.outcome
+  source: log
+- groups:
+  - User
+  name: User Email
+  path: usr.email
+  source: log
+- groups:
+  - User
+  name: User ID
+  path: usr.id
+  source: log
+- groups:
+  - OCSF
+  name: Activity ID
+  path: ocsf.activity_id
+  source: log
+  type: integer
+- groups:
+  - OCSF
+  name: Activity Name
+  path: ocsf.activity_name
+  source: log
+- groups:
+  - OCSF
+  name: Category
+  path: ocsf.category_name
+  source: log
+- groups:
+  - OCSF
+  name: Category ID
+  path: ocsf.category_uid
+  source: log
+  type: integer
+- groups:
+  - OCSF
+  name: Class
+  path: ocsf.class_name
+  source: log
+- groups:
+  - OCSF
+  name: Class ID
+  path: ocsf.class_uid
+  source: log
+  type: integer
+- groups:
+  - OCSF
+  name: Type Name
+  path: ocsf.type_name
+  source: log
+- groups:
+  - OCSF
+  name: Type ID
+  path: ocsf.type_uid
+  source: log
+  type: integer
+- groups:
+  - OCSF
+  name: Severity
+  path: ocsf.severity
+  source: log
+- groups:
+  - OCSF
+  name: Severity ID
+  path: ocsf.severity_id
+  source: log
+  type: integer
+- groups:
+  - OCSF
+  name: Status
+  path: ocsf.status
+  source: log
+- groups:
+  - OCSF
+  name: Status ID
+  path: ocsf.status_id
+  source: log
+  type: integer
+- groups:
+  - OCSF
+  name: Event Code
+  path: ocsf.metadata.event_code
+  source: log
+- groups:
+  - OCSF
+  name: Product Name
+  path: ocsf.metadata.product.name
+  source: log
+- groups:
+  - OCSF
+  name: Vendor Name
+  path: ocsf.metadata.product.vendor_name
+  source: log
+- groups:
+  - OCSF
+  name: Metadata Tenant UID
+  path: ocsf.metadata.tenant_uid
+  source: log
+- groups:
+  - OCSF
+  name: Email Address
+  path: ocsf.actor.user.email_addr
+  source: log
+- groups:
+  - OCSF
+  name: Unique ID
+  path: ocsf.actor.user.uid
+  source: log
+- groups:
+  - OCSF
+  name: Target Email Address
+  path: ocsf.user.email_addr
+  source: log
+- groups:
+  - OCSF
+  name: Target Unique ID
+  path: ocsf.user.uid
+  source: log
+- groups:
+  - OCSF
+  name: Entity Type
+  path: ocsf.entity.type
+  source: log
+- groups:
+  - OCSF
+  name: Entity Unique ID
+  path: ocsf.entity.uid
+  source: log
+- groups:
+  - OCSF
+  name: Entity Name
+  path: ocsf.entity.name
+  source: log
+- groups:
+  - OCSF
+  name: Entity Device Count
+  path: ocsf.entity.data.server_count
+  source: log
+  type: integer
+- groups:
+  - OCSF
+  name: Web Resource Type
+  path: ocsf.web_resources.type
+  source: log
+- groups:
+  - OCSF
+  name: Web Resource ID
+  path: ocsf.web_resources.uid
+  source: log
+- groups:
+  - OCSF
+  name: Web Resource Name
+  path: ocsf.web_resources.name
+  source: log
+- groups:
+  - OCSF
+  name: Web Resource Device Count
+  path: ocsf.web_resources.data.server_count
+  source: log
+  type: integer
+- groups:
+  - OCSF
+  name: Privileges
+  path: ocsf.privileges
+  source: log
+- groups:
+  - OCSF
+  name: Device Unique ID
+  path: ocsf.device.uid
+  source: log
+- groups:
+  - OCSF
+  name: Device Name
+  path: ocsf.device.name
+  source: log
+- groups:
+  - OCSF
+  name: Device Organization Unique ID
+  path: ocsf.device.org.uid
+  source: log
+- groups:
+  - OCSF
+  name: Application Name
+  path: ocsf.app.name
+  source: log
+- groups:
+  - OCSF
+  name: Policy Name
+  path: ocsf.unmapped.policy.name
+  source: log
+pipeline:
+  type: pipeline
+  name: Automox
+  enabled: true
+  filter:
+    query: source:automox
+  processors:
+  - type: grok-parser
+    name: Parse a console event's `create_time`, which is UTC without a zone
+    enabled: true
+    source: create_time
+    samples:
+    - '2026-09-20 00:20:26.280007'
+    grok:
+      supportRules: ''
+      matchRules: 'micros %{date("yyyy-MM-dd HH:mm:ss.SSSSSS"):automox.event_time}
+
+        seconds %{date("yyyy-MM-dd HH:mm:ss"):automox.event_time}
+
+        '
+  - type: date-remapper
+    name: Define `time` or `automox.event_time` as the official date of the log
+    enabled: true
+    sources:
+    - time
+    - automox.event_time
+  - type: category-processor
+    name: evt.category
+    enabled: true
+    categories:
+    - filter:
+        query: '@time:*'
+      name: audit
+    - filter:
+        query: '@create_time:*'
+      name: events
+    target: evt.category
+  - type: pipeline
+    name: Audit Trail
+    enabled: true
+    filter:
+      query: '@evt.category:audit'
+    processors:
+    - type: grok-parser
+      name: Copy the Automox message to `evt.name`
+      enabled: true
+      source: message
+      samples:
+      - Policy Created
+      grok:
+        supportRules: ''
+        matchRules: 'event_name %{data:evt.name}'
+    - type: grok-parser
+      name: Parse `raw_data` into `automox.raw`
+      enabled: true
+      source: raw_data
+      samples:
+      - '{"action":"remediateAll"}'
+      grok:
+        supportRules: ''
+        matchRules: raw_json %{data:automox.raw:json}
+  - type: pipeline
+    name: 'Audit Trail > Drop secrets: a 2FA verification code or the enrollment key'
+    enabled: true
+    filter:
+      query: '@evt.category:audit (@evt.name:("User Account 2FA Enabled for Email" OR "User Account 2FA Enabled for Mobile"
+        OR "User Account 2FA Disabled" OR "User Profile Password Change") OR @automox.raw.token:* OR @automox.raw.orgs.access_key:*)'
+    processors:
+    - type: exclude-attribute
+      name: Remove `raw_data`, which can hold a verification code or the enrollment key
+      enabled: true
+      attributeToExclude: raw_data
+  - type: pipeline
+    name: Audit Trail > Split a Splashtop error into its code and detail
+    enabled: true
+    filter:
+      query: '@evt.category:audit @automox.raw.error_code:*'
+    processors:
+    - type: grok-parser
+      name: Parse `automox.raw.error_code`
+      enabled: true
+      source: automox.raw.error_code
+      samples:
+      - '-1: Session failed to start'
+      grok:
+        supportRules: ''
+        matchRules: 'code_and_detail %{regex("-?[0-9]+"):automox.error.code}: %{data:automox.error.detail}
+
+          detail_only %{data:automox.error.detail}
+
+          '
+  - type: pipeline
+    name: Audit Trail > Take the actor from the observables when Automox sent no actor object
+    enabled: true
+    filter:
+      query: '@evt.category:audit -@actor.user.uid:* -@actor.user.email_addr:* -@unmapped.actor.user.uid:*'
+    processors:
+    - type: array-processor
+      name: Extract the email observable
+      enabled: true
+      operation:
+        source: observables
+        target: automox.observed.email
+        filter: type_id:5
+        valueToExtract: value
+        type: select
+    - type: array-processor
+      name: Extract the organization id observable
+      enabled: true
+      operation:
+        source: observables
+        target: automox.observed.org_uid
+        filter: type:"Organization ID"
+        valueToExtract: value
+        type: select
+    - type: array-processor
+      name: Extract the organization name observable
+      enabled: true
+      operation:
+        source: observables
+        target: automox.observed.org_name
+        filter: type:"Organization Name"
+        valueToExtract: value
+        type: select
+  - type: pipeline
+    name: Audit Trail > The email observable names the actor
+    enabled: true
+    filter:
+      query: '@evt.category:audit -@actor.user.uid:* -@actor.user.email_addr:* -@unmapped.actor.user.uid:* @automox.observed.email:*
+        -@automox.observed.email:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.observed.email` to `automox.actor.user.email_addr`
+      enabled: true
+      sources:
+      - automox.observed.email
+      sourceType: attribute
+      target: automox.actor.user.email_addr
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `automox.observed.org_uid` to `automox.actor.user.org.uid`
+      enabled: true
+      sources:
+      - automox.observed.org_uid
+      sourceType: attribute
+      target: automox.actor.user.org.uid
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > The organization name observable is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit -@actor.user.uid:* -@actor.user.email_addr:* -@unmapped.actor.user.uid:* @automox.observed.email:*
+        -@automox.observed.email:"" @automox.observed.org_name:* -@automox.observed.org_name:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.observed.org_name` to `automox.actor.user.org.name`
+      enabled: true
+      sources:
+      - automox.observed.org_name
+      sourceType: attribute
+      target: automox.actor.user.org.name
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Outcome, status and user
+    enabled: true
+    filter:
+      query: '@evt.category:audit'
+    processors:
+    - type: category-processor
+      name: automox.outcome
+      enabled: true
+      categories:
+      - filter:
+          query: '@automox.error.code:*'
+        name: failure
+      - filter:
+          query: '@status_id:2'
+        name: failure
+      - filter:
+          query: '@status_id:1'
+        name: success
+      - filter:
+          query: '*'
+        name: unknown
+      target: automox.outcome
+    - type: attribute-remapper
+      name: Map `automox.outcome` to `evt.outcome`
+      enabled: true
+      sources:
+      - automox.outcome
+      sourceType: attribute
+      target: evt.outcome
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: category-processor
+      name: automox.log_status
+      enabled: true
+      categories:
+      - filter:
+          query: '@evt.outcome:failure'
+        name: warn
+      - filter:
+          query: '*'
+        name: info
+      target: automox.log_status
+    - type: status-remapper
+      name: Define `automox.log_status` as the official status of the log
+      enabled: true
+      sources:
+      - automox.log_status
+    - type: attribute-remapper
+      name: Map `actor.user.email_addr`, `unmapped.actor.user.email_addr`, `automox.actor.user.email_addr` to `usr.email`
+      enabled: true
+      sources:
+      - actor.user.email_addr
+      - unmapped.actor.user.email_addr
+      - automox.actor.user.email_addr
+      sourceType: attribute
+      target: usr.email
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `actor.user.uid`, `unmapped.actor.user.uid` to `usr.id`
+      enabled: true
+      sources:
+      - actor.user.uid
+      - unmapped.actor.user.uid
+      sourceType: attribute
+      target: usr.id
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: OCSF pre transformations (Audit Trail)
+    enabled: true
+    ocsf:
+      isOcsf: true
+    filter:
+      query: '@evt.category:audit'
+    processors:
+    - type: string-builder-processor
+      name: Add product name
+      enabled: true
+      template: Automox
+      target: ocsf.metadata.product.name
+      replaceMissing: false
+    - type: string-builder-processor
+      name: Add product vendor
+      enabled: true
+      template: Automox
+      target: ocsf.metadata.product.vendor_name
+      replaceMissing: false
+    - type: string-builder-processor
+      name: Add log name
+      enabled: true
+      template: Audit Trail
+      target: ocsf.metadata.log_name
+      replaceMissing: false
+    - type: string-builder-processor
+      name: Add log provider
+      enabled: true
+      template: audit-service
+      target: ocsf.metadata.log_provider
+      replaceMissing: false
+    - type: grok-parser
+      name: Parse `message` to `ocsf.metadata.event_code`
+      enabled: true
+      source: message
+      samples:
+      - Policy Created
+      grok:
+        supportRules: ''
+        matchRules: event_code %{data:ocsf.metadata.event_code}
+    - type: attribute-remapper
+      name: Map `metadata.product.version` to `ocsf.metadata.product.version`
+      enabled: true
+      sources:
+      - metadata.product.version
+      sourceType: attribute
+      target: ocsf.metadata.product.version
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `metadata.uid` to `ocsf.metadata.uid`
+      enabled: true
+      sources:
+      - metadata.uid
+      sourceType: attribute
+      target: ocsf.metadata.uid
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+    - type: string-builder-processor
+      name: Add the original time
+      enabled: true
+      template: '%{time}'
+      target: ocsf.metadata.original_time
+      replaceMissing: false
+    - type: attribute-remapper
+      name: Map `time` to `ocsf.time`
+      enabled: true
+      sources:
+      - time
+      sourceType: attribute
+      target: ocsf.time
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Keep a tenant only when Automox sent one
+    enabled: true
+    filter:
+      query: '@evt.category:audit @metadata.tenant_uid:* -@metadata.tenant_uid:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `metadata.tenant_uid` to `ocsf.metadata.tenant_uid`
+      enabled: true
+      sources:
+      - metadata.tenant_uid
+      sourceType: attribute
+      target: ocsf.metadata.tenant_uid
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: OCSF sub pipeline for class Account Change [3001] (Audit Trail)
+    enabled: true
+    ocsf:
+      isOcsf: true
+    filter:
+      query: '@evt.category:audit @class_uid:3001'
+    processors:
+    - type: schema-processor
+      name: Apply OCSF schema for 3001
+      enabled: true
+      mappers:
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+        sources:
+        - ocsf.metadata.product.name
+        target: ocsf.metadata.product.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+        sources:
+        - ocsf.metadata.product.vendor_name
+        target: ocsf.metadata.product.vendor_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.version` to `ocsf.metadata.product.version`
+        sources:
+        - ocsf.metadata.product.version
+        target: ocsf.metadata.product.version
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+        sources:
+        - ocsf.metadata.log_name
+        target: ocsf.metadata.log_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+        sources:
+        - ocsf.metadata.log_provider
+        target: ocsf.metadata.log_provider
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+        sources:
+        - ocsf.metadata.event_code
+        target: ocsf.metadata.event_code
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+        sources:
+        - ocsf.metadata.uid
+        target: ocsf.metadata.uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+        sources:
+        - ocsf.metadata.original_time
+        target: ocsf.metadata.original_time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.tenant_uid` to `ocsf.metadata.tenant_uid`
+        sources:
+        - ocsf.metadata.tenant_uid
+        target: ocsf.metadata.tenant_uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.time` to `ocsf.time`
+        sources:
+        - ocsf.time
+        target: ocsf.time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.event_code` to `ocsf.message`
+        sources:
+        - ocsf.metadata.event_code
+        target: ocsf.message
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `count` to `ocsf.count`
+        sources:
+        - count
+        target: ocsf.count
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `timezone_offset` to `ocsf.timezone_offset`
+        sources:
+        - timezone_offset
+        target: ocsf.timezone_offset
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.error.code`, `status_code` to `ocsf.status_code`
+        sources:
+        - automox.error.code
+        - status_code
+        target: ocsf.status_code
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.error.detail`, `status_details` to `ocsf.status_detail`
+        sources:
+        - automox.error.detail
+        - status_details
+        target: ocsf.status_detail
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `actor`, `unmapped.actor`, `automox.actor` to `ocsf.actor`
+        sources:
+        - actor
+        - unmapped.actor
+        - automox.actor
+        target: ocsf.actor
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `actor.user.email_addr`, `unmapped.actor.user.email_addr`, `automox.actor.user.email_addr` to `ocsf.actor.user.name`
+        sources:
+        - actor.user.email_addr
+        - unmapped.actor.user.email_addr
+        - automox.actor.user.email_addr
+        target: ocsf.actor.user.name
+        preserveSource: true
+        overrideOnConflict: false
+      - type: schema-remapper
+        name: Map `user.email_addr` to `ocsf.user.email_addr`
+        sources:
+        - user.email_addr
+        target: ocsf.user.email_addr
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `user.email_addr` to `ocsf.user.name`
+        sources:
+        - user.email_addr
+        target: ocsf.user.name
+        preserveSource: true
+        overrideOnConflict: false
+      - type: schema-remapper
+        name: Map `user.uid` to `ocsf.user.uid_alt`
+        sources:
+        - user.uid
+        target: ocsf.user.uid_alt
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.tfa_type` to `ocsf.unmapped.tfa_type`
+        sources:
+        - automox.raw.tfa_type
+        target: ocsf.unmapped.tfa_type
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `raw_data` to `ocsf.raw_data`
+        sources:
+        - raw_data
+        target: ocsf.raw_data
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-category-mapper
+        name: ocsf.activity_id
+        categories:
+        - filter:
+            query: '@ocsf.metadata.event_code:"User Account 2FA Enabled for Email"'
+          name: MFA Factor Enable
+          id: 10
+        - filter:
+            query: '@ocsf.metadata.event_code:"User Account 2FA Enabled for Mobile"'
+          name: MFA Factor Enable
+          id: 10
+        - filter:
+            query: '@ocsf.metadata.event_code:"User Account 2FA Disabled"'
+          name: MFA Factor Disable
+          id: 11
+        - filter:
+            query: '@type_uid:300101'
+          name: Create
+          id: 1
+        - filter:
+            query: '@type_uid:300102'
+          name: Enable
+          id: 2
+        - filter:
+            query: '@type_uid:300103'
+          name: Password Change
+          id: 3
+        - filter:
+            query: '@type_uid:300104'
+          name: Password Reset
+          id: 4
+        - filter:
+            query: '@type_uid:300105'
+          name: Disable
+          id: 5
+        - filter:
+            query: '@type_uid:300106'
+          name: Delete
+          id: 6
+        - filter:
+            query: '@type_uid:300107'
+          name: Attach Policy
+          id: 7
+        - filter:
+            query: '@type_uid:300108'
+          name: Detach Policy
+          id: 8
+        - filter:
+            query: '@type_uid:300109'
+          name: Lock
+          id: 9
+        - filter:
+            query: '@type_uid:300110'
+          name: MFA Factor Enable
+          id: 10
+        - filter:
+            query: '@type_uid:300111'
+          name: MFA Factor Disable
+          id: 11
+        - filter:
+            query: '@type_uid:300112'
+          name: Unlock
+          id: 12
+        - filter:
+            query: '@activity_id:1'
+          name: Create
+          id: 1
+        - filter:
+            query: '@activity_id:2'
+          name: Enable
+          id: 2
+        - filter:
+            query: '@activity_id:3'
+          name: Password Change
+          id: 3
+        - filter:
+            query: '@activity_id:4'
+          name: Password Reset
+          id: 4
+        - filter:
+            query: '@activity_id:5'
+          name: Disable
+          id: 5
+        - filter:
+            query: '@activity_id:6'
+          name: Delete
+          id: 6
+        - filter:
+            query: '@activity_id:7'
+          name: Attach Policy
+          id: 7
+        - filter:
+            query: '@activity_id:8'
+          name: Detach Policy
+          id: 8
+        - filter:
+            query: '@activity_id:9'
+          name: Lock
+          id: 9
+        - filter:
+            query: '@activity_id:10'
+          name: MFA Factor Enable
+          id: 10
+        - filter:
+            query: '@activity_id:11'
+          name: MFA Factor Disable
+          id: 11
+        - filter:
+            query: '@activity_id:12'
+          name: Unlock
+          id: 12
+        - filter:
+            query: '@ocsf.metadata.event_code:*'
+          name: Other
+          id: 99
+        targets:
+          name: ocsf.activity_name
+          id: ocsf.activity_id
+        fallback:
+          values:
+            ocsf.activity_id: '99'
+            ocsf.activity_name: Other
+          sources:
+            ocsf.activity_name:
+            - ocsf.metadata.event_code
+      - type: schema-category-mapper
+        name: ocsf.status_id
+        categories:
+        - filter:
+            query: '@automox.error.code:*'
+          name: Failure
+          id: 2
+        - filter:
+            query: '@status_id:1'
+          name: Success
+          id: 1
+        - filter:
+            query: '@status_id:2'
+          name: Failure
+          id: 2
+        - filter:
+            query: '@status_id:99'
+          name: Other
+          id: 99
+        - filter:
+            query: '*'
+          name: Unknown
+          id: 0
+        targets:
+          name: ocsf.status
+          id: ocsf.status_id
+        fallback:
+          values:
+            ocsf.status_id: '99'
+            ocsf.status: Other
+          sources:
+            ocsf.status:
+            - status
+      - type: schema-category-mapper
+        name: ocsf.severity_id
+        categories:
+        - filter:
+            query: '@severity_id:1'
+          name: Informational
+          id: 1
+        - filter:
+            query: '@severity_id:2'
+          name: Low
+          id: 2
+        - filter:
+            query: '@severity_id:3'
+          name: Medium
+          id: 3
+        - filter:
+            query: '@severity_id:4'
+          name: High
+          id: 4
+        - filter:
+            query: '@severity_id:5'
+          name: Critical
+          id: 5
+        - filter:
+            query: '@severity_id:6'
+          name: Fatal
+          id: 6
+        - filter:
+            query: '@severity_id:99'
+          name: Other
+          id: 99
+        - filter:
+            query: '*'
+          name: Unknown
+          id: 0
+        targets:
+          name: ocsf.severity
+          id: ocsf.severity_id
+        fallback:
+          values:
+            ocsf.severity_id: '99'
+            ocsf.severity: Other
+          sources:
+            ocsf.severity:
+            - severity
+      schema:
+        schemaType: ocsf
+        version: 1.5.0
+        className: Account Change
+        classUid: 3001
+        extensions: []
+        profiles: []
+  - type: pipeline
+    name: OCSF sub pipeline for class Authentication [3002] (Audit Trail)
+    enabled: true
+    ocsf:
+      isOcsf: true
+    filter:
+      query: '@evt.category:audit @class_uid:3002'
+    processors:
+    - type: string-builder-processor
+      name: Add the service authenticated to
+      enabled: true
+      template: Automox Console
+      target: ocsf.service.name
+      replaceMissing: false
+    - type: schema-processor
+      name: Apply OCSF schema for 3002
+      enabled: true
+      mappers:
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+        sources:
+        - ocsf.metadata.product.name
+        target: ocsf.metadata.product.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+        sources:
+        - ocsf.metadata.product.vendor_name
+        target: ocsf.metadata.product.vendor_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.version` to `ocsf.metadata.product.version`
+        sources:
+        - ocsf.metadata.product.version
+        target: ocsf.metadata.product.version
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+        sources:
+        - ocsf.metadata.log_name
+        target: ocsf.metadata.log_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+        sources:
+        - ocsf.metadata.log_provider
+        target: ocsf.metadata.log_provider
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+        sources:
+        - ocsf.metadata.event_code
+        target: ocsf.metadata.event_code
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+        sources:
+        - ocsf.metadata.uid
+        target: ocsf.metadata.uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+        sources:
+        - ocsf.metadata.original_time
+        target: ocsf.metadata.original_time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.tenant_uid` to `ocsf.metadata.tenant_uid`
+        sources:
+        - ocsf.metadata.tenant_uid
+        target: ocsf.metadata.tenant_uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.time` to `ocsf.time`
+        sources:
+        - ocsf.time
+        target: ocsf.time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.event_code` to `ocsf.message`
+        sources:
+        - ocsf.metadata.event_code
+        target: ocsf.message
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `count` to `ocsf.count`
+        sources:
+        - count
+        target: ocsf.count
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `timezone_offset` to `ocsf.timezone_offset`
+        sources:
+        - timezone_offset
+        target: ocsf.timezone_offset
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.error.code`, `status_code` to `ocsf.status_code`
+        sources:
+        - automox.error.code
+        - status_code
+        target: ocsf.status_code
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.error.detail`, `status_details` to `ocsf.status_detail`
+        sources:
+        - automox.error.detail
+        - status_details
+        target: ocsf.status_detail
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `actor`, `unmapped.actor`, `automox.actor` to `ocsf.actor`
+        sources:
+        - actor
+        - unmapped.actor
+        - automox.actor
+        target: ocsf.actor
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `actor.user.email_addr`, `unmapped.actor.user.email_addr`, `automox.actor.user.email_addr` to `ocsf.actor.user.name`
+        sources:
+        - actor.user.email_addr
+        - unmapped.actor.user.email_addr
+        - automox.actor.user.email_addr
+        target: ocsf.actor.user.name
+        preserveSource: true
+        overrideOnConflict: false
+      - type: schema-remapper
+        name: Map `ocsf.service` to `ocsf.service`
+        sources:
+        - ocsf.service
+        target: ocsf.service
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `user.email_addr`, `actor.user.email_addr` to `ocsf.user.email_addr`
+        sources:
+        - user.email_addr
+        - actor.user.email_addr
+        target: ocsf.user.email_addr
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `user.email_addr`, `actor.user.email_addr` to `ocsf.user.name`
+        sources:
+        - user.email_addr
+        - actor.user.email_addr
+        target: ocsf.user.name
+        preserveSource: true
+        overrideOnConflict: false
+      - type: schema-remapper
+        name: Map `actor.user.uid` to `ocsf.user.uid`
+        sources:
+        - actor.user.uid
+        target: ocsf.user.uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `user.uid` to `ocsf.user.uid_alt`
+        sources:
+        - user.uid
+        target: ocsf.user.uid_alt
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `user.uid` to `ocsf.actor.user.uid_alt`
+        sources:
+        - user.uid
+        target: ocsf.actor.user.uid_alt
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-category-mapper
+        name: ocsf.activity_id
+        categories:
+        - filter:
+            query: '@type_uid:300201'
+          name: Logon
+          id: 1
+        - filter:
+            query: '@type_uid:300202'
+          name: Logoff
+          id: 2
+        - filter:
+            query: '@type_uid:300203'
+          name: Authentication Ticket
+          id: 3
+        - filter:
+            query: '@type_uid:300204'
+          name: Service Ticket Request
+          id: 4
+        - filter:
+            query: '@type_uid:300205'
+          name: Service Ticket Renew
+          id: 5
+        - filter:
+            query: '@type_uid:300206'
+          name: Preauth
+          id: 6
+        - filter:
+            query: '@activity_id:1'
+          name: Logon
+          id: 1
+        - filter:
+            query: '@activity_id:2'
+          name: Logoff
+          id: 2
+        - filter:
+            query: '@activity_id:3'
+          name: Authentication Ticket
+          id: 3
+        - filter:
+            query: '@activity_id:4'
+          name: Service Ticket Request
+          id: 4
+        - filter:
+            query: '@activity_id:5'
+          name: Service Ticket Renew
+          id: 5
+        - filter:
+            query: '@activity_id:6'
+          name: Preauth
+          id: 6
+        - filter:
+            query: '@ocsf.metadata.event_code:*'
+          name: Other
+          id: 99
+        targets:
+          name: ocsf.activity_name
+          id: ocsf.activity_id
+        fallback:
+          values:
+            ocsf.activity_id: '99'
+            ocsf.activity_name: Other
+          sources:
+            ocsf.activity_name:
+            - ocsf.metadata.event_code
+      - type: schema-category-mapper
+        name: ocsf.status_id
+        categories:
+        - filter:
+            query: '@automox.error.code:*'
+          name: Failure
+          id: 2
+        - filter:
+            query: '@status_id:1'
+          name: Success
+          id: 1
+        - filter:
+            query: '@status_id:2'
+          name: Failure
+          id: 2
+        - filter:
+            query: '@status_id:99'
+          name: Other
+          id: 99
+        - filter:
+            query: '*'
+          name: Unknown
+          id: 0
+        targets:
+          name: ocsf.status
+          id: ocsf.status_id
+        fallback:
+          values:
+            ocsf.status_id: '99'
+            ocsf.status: Other
+          sources:
+            ocsf.status:
+            - status
+      - type: schema-category-mapper
+        name: ocsf.severity_id
+        categories:
+        - filter:
+            query: '@severity_id:1'
+          name: Informational
+          id: 1
+        - filter:
+            query: '@severity_id:2'
+          name: Low
+          id: 2
+        - filter:
+            query: '@severity_id:3'
+          name: Medium
+          id: 3
+        - filter:
+            query: '@severity_id:4'
+          name: High
+          id: 4
+        - filter:
+            query: '@severity_id:5'
+          name: Critical
+          id: 5
+        - filter:
+            query: '@severity_id:6'
+          name: Fatal
+          id: 6
+        - filter:
+            query: '@severity_id:99'
+          name: Other
+          id: 99
+        - filter:
+            query: '*'
+          name: Unknown
+          id: 0
+        targets:
+          name: ocsf.severity
+          id: ocsf.severity_id
+        fallback:
+          values:
+            ocsf.severity_id: '99'
+            ocsf.severity: Other
+          sources:
+            ocsf.severity:
+            - severity
+      - type: schema-category-mapper
+        name: ocsf.auth_protocol_id
+        categories:
+        - filter:
+            query: '@auth_protocol_id:99'
+          name: Other
+          id: 99
+        - filter:
+            query: '*'
+          name: Unknown
+          id: 0
+        targets:
+          name: ocsf.auth_protocol
+          id: ocsf.auth_protocol_id
+        fallback:
+          values:
+            ocsf.auth_protocol_id: '99'
+            ocsf.auth_protocol: Other
+          sources:
+            ocsf.auth_protocol:
+            - auth_protocol
+      - type: schema-category-mapper
+        name: ocsf.logon_type_id
+        categories:
+        - filter:
+            query: '@logon_type_id:99'
+          name: Other
+          id: 99
+        - filter:
+            query: '*'
+          name: Unknown
+          id: 0
+        targets:
+          name: ocsf.logon_type
+          id: ocsf.logon_type_id
+        fallback:
+          values:
+            ocsf.logon_type_id: '99'
+            ocsf.logon_type: Other
+          sources:
+            ocsf.logon_type:
+            - logon_type
+      schema:
+        schemaType: ocsf
+        version: 1.5.0
+        className: Authentication
+        classUid: 3002
+        extensions: []
+        profiles: []
+  - type: pipeline
+    name: Audit Trail > Entity Management [3004] > Retype the policy in Policies Associated to Group
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:3004 @ocsf.metadata.event_code:"Policies Associated to Group"'
+    processors:
+    - type: string-builder-processor
+      name: Add entity type
+      enabled: true
+      template: Policy
+      target: automox.entity.type
+      replaceMissing: false
+  - type: pipeline
+    name: Audit Trail > Entity Management [3004] > When `automox.raw.created_at` is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:3004 @automox.raw.created_at:* -@automox.raw.created_at:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.created_at` to `automox.entity.data.created_at`
+      enabled: true
+      sources:
+      - automox.raw.created_at
+      sourceType: attribute
+      target: automox.entity.data.created_at
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Entity Management [3004] > When `automox.raw.expires_at` is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:3004 @automox.raw.expires_at:* -@automox.raw.expires_at:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.expires_at` to `automox.entity.data.expires_at`
+      enabled: true
+      sources:
+      - automox.raw.expires_at
+      sourceType: attribute
+      target: automox.entity.data.expires_at
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Entity Management [3004] > When `automox.raw.is_enabled` is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:3004 @automox.raw.is_enabled:* -@automox.raw.is_enabled:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.is_enabled` to `automox.entity.data.is_enabled`
+      enabled: true
+      sources:
+      - automox.raw.is_enabled
+      sourceType: attribute
+      target: automox.entity.data.is_enabled
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Entity Management [3004] > When `automox.raw.parent_server_group_id` is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:3004 @automox.raw.parent_server_group_id:* -@automox.raw.parent_server_group_id:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.parent_server_group_id` to `automox.entity.data.parent_server_group_id`
+      enabled: true
+      sources:
+      - automox.raw.parent_server_group_id
+      sourceType: attribute
+      target: automox.entity.data.parent_server_group_id
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Entity Management [3004] > When `automox.raw.policies` is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:3004 @automox.raw.policies:* -@automox.raw.policies:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.policies` to `automox.entity.data.policies`
+      enabled: true
+      sources:
+      - automox.raw.policies
+      sourceType: attribute
+      target: automox.entity.data.policies
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Entity Management [3004] > When `automox.raw.enable_os_auto_update` is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:3004 @automox.raw.enable_os_auto_update:* -@automox.raw.enable_os_auto_update:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.enable_os_auto_update` to `automox.entity.data.enable_os_auto_update`
+      enabled: true
+      sources:
+      - automox.raw.enable_os_auto_update
+      sourceType: attribute
+      target: automox.entity.data.enable_os_auto_update
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Entity Management [3004] > When `automox.raw.refresh_interval` is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:3004 @automox.raw.refresh_interval:* -@automox.raw.refresh_interval:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.refresh_interval` to `automox.entity.data.refresh_interval`
+      enabled: true
+      sources:
+      - automox.raw.refresh_interval
+      sourceType: attribute
+      target: automox.entity.data.refresh_interval
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Entity Management [3004] > When `automox.raw.notes` is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:3004 @automox.raw.notes:* -@automox.raw.notes:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.notes` to `automox.entity.data.notes`
+      enabled: true
+      sources:
+      - automox.raw.notes
+      sourceType: attribute
+      target: automox.entity.data.notes
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Entity Management [3004] > When `automox.raw.policy_type_name` is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:3004 @automox.raw.policy_type_name:* -@automox.raw.policy_type_name:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.policy_type_name` to `automox.entity.data.policy_type_name`
+      enabled: true
+      sources:
+      - automox.raw.policy_type_name
+      sourceType: attribute
+      target: automox.entity.data.policy_type_name
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Entity Management [3004] > When `automox.raw.server_groups` is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:3004 @automox.raw.server_groups:* -@automox.raw.server_groups:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.server_groups` to `automox.entity.data.server_groups`
+      enabled: true
+      sources:
+      - automox.raw.server_groups
+      sourceType: attribute
+      target: automox.entity.data.server_groups
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Entity Management [3004] > When `automox.raw.community_worklet_uuid` is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:3004 @automox.raw.community_worklet_uuid:* -@automox.raw.community_worklet_uuid:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.community_worklet_uuid` to `automox.entity.data.community_worklet_uuid`
+      enabled: true
+      sources:
+      - automox.raw.community_worklet_uuid
+      sourceType: attribute
+      target: automox.entity.data.community_worklet_uuid
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: OCSF sub pipeline for class Entity Management [3004] (Audit Trail)
+    enabled: true
+    ocsf:
+      isOcsf: true
+    filter:
+      query: '@evt.category:audit @class_uid:3004'
+    processors:
+    - type: string-builder-processor
+      name: Add API key owner name
+      enabled: true
+      template: '%{automox.raw.user.firstname} %{automox.raw.user.lastname}'
+      target: automox.entity_owner_name
+      replaceMissing: false
+    - type: attribute-remapper
+      name: Map `automox.raw.server_count` to `automox.entity.data.server_count`
+      enabled: true
+      sources:
+      - automox.raw.server_count
+      sourceType: attribute
+      target: automox.entity.data.server_count
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+    - type: schema-processor
+      name: Apply OCSF schema for 3004
+      enabled: true
+      mappers:
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+        sources:
+        - ocsf.metadata.product.name
+        target: ocsf.metadata.product.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+        sources:
+        - ocsf.metadata.product.vendor_name
+        target: ocsf.metadata.product.vendor_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.version` to `ocsf.metadata.product.version`
+        sources:
+        - ocsf.metadata.product.version
+        target: ocsf.metadata.product.version
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+        sources:
+        - ocsf.metadata.log_name
+        target: ocsf.metadata.log_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+        sources:
+        - ocsf.metadata.log_provider
+        target: ocsf.metadata.log_provider
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+        sources:
+        - ocsf.metadata.event_code
+        target: ocsf.metadata.event_code
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+        sources:
+        - ocsf.metadata.uid
+        target: ocsf.metadata.uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+        sources:
+        - ocsf.metadata.original_time
+        target: ocsf.metadata.original_time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.tenant_uid` to `ocsf.metadata.tenant_uid`
+        sources:
+        - ocsf.metadata.tenant_uid
+        target: ocsf.metadata.tenant_uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.time` to `ocsf.time`
+        sources:
+        - ocsf.time
+        target: ocsf.time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.event_code` to `ocsf.message`
+        sources:
+        - ocsf.metadata.event_code
+        target: ocsf.message
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `count` to `ocsf.count`
+        sources:
+        - count
+        target: ocsf.count
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `timezone_offset` to `ocsf.timezone_offset`
+        sources:
+        - timezone_offset
+        target: ocsf.timezone_offset
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.error.code`, `status_code` to `ocsf.status_code`
+        sources:
+        - automox.error.code
+        - status_code
+        target: ocsf.status_code
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.error.detail`, `status_details` to `ocsf.status_detail`
+        sources:
+        - automox.error.detail
+        - status_details
+        target: ocsf.status_detail
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `actor`, `unmapped.actor`, `automox.actor` to `ocsf.actor`
+        sources:
+        - actor
+        - unmapped.actor
+        - automox.actor
+        target: ocsf.actor
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `actor.user.email_addr`, `unmapped.actor.user.email_addr`, `automox.actor.user.email_addr` to `ocsf.actor.user.name`
+        sources:
+        - actor.user.email_addr
+        - unmapped.actor.user.email_addr
+        - automox.actor.user.email_addr
+        target: ocsf.actor.user.name
+        preserveSource: true
+        overrideOnConflict: false
+      - type: schema-remapper
+        name: Map `entity` to `ocsf.entity`
+        sources:
+        - entity
+        target: ocsf.entity
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-category-mapper
+        name: ocsf.entity.type_id
+        categories:
+        - filter:
+            query: '@automox.entity.type:Policy'
+          name: Policy
+          id: 5
+        - filter:
+            query: '@entity.type:Device'
+          name: Device
+          id: 1
+        - filter:
+            query: '@entity.type:User'
+          name: User
+          id: 2
+        - filter:
+            query: '@entity.type:Group'
+          name: Group
+          id: 3
+        - filter:
+            query: '@entity.type:Organization'
+          name: Organization
+          id: 4
+        - filter:
+            query: '@entity.type:Policy'
+          name: Policy
+          id: 5
+        - filter:
+            query: '@entity.type:*'
+          name: Other
+          id: 99
+        targets:
+          name: ocsf.entity.type
+          id: ocsf.entity.type_id
+        fallback:
+          values:
+            ocsf.entity.type_id: '99'
+            ocsf.entity.type: Other
+          sources:
+            ocsf.entity.type:
+            - automox.entity.type
+            - entity.type
+      - type: schema-remapper
+        name: Map `automox.entity.data` to `ocsf.entity.data`
+        sources:
+        - automox.entity.data
+        target: ocsf.entity.data
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.user.id` to `ocsf.entity.user.uid_alt`
+        sources:
+        - automox.raw.user.id
+        target: ocsf.entity.user.uid_alt
+        preserveSource: true
+        overrideOnConflict: true
+        targetFormat: string
+      - type: schema-remapper
+        name: Map `automox.raw.user.email` to `ocsf.entity.user.email_addr`
+        sources:
+        - automox.raw.user.email
+        target: ocsf.entity.user.email_addr
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.user.email` to `ocsf.entity.user.name`
+        sources:
+        - automox.raw.user.email
+        target: ocsf.entity.user.name
+        preserveSource: true
+        overrideOnConflict: false
+      - type: schema-remapper
+        name: Map `automox.entity_owner_name` to `ocsf.entity.user.full_name`
+        sources:
+        - automox.entity_owner_name
+        target: ocsf.entity.user.full_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.action` to `ocsf.unmapped.action`
+        sources:
+        - automox.raw.action
+        target: ocsf.unmapped.action
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.command_type_name` to `ocsf.unmapped.command_type_name`
+        sources:
+        - automox.raw.command_type_name
+        target: ocsf.unmapped.command_type_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.manual_approval` to `ocsf.unmapped.manual_approval`
+        sources:
+        - automox.raw.manual_approval
+        target: ocsf.unmapped.manual_approval
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.tfa_type` to `ocsf.unmapped.tfa_type`
+        sources:
+        - automox.raw.tfa_type
+        target: ocsf.unmapped.tfa_type
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.batch` to `ocsf.unmapped.batch`
+        sources:
+        - automox.raw.batch
+        target: ocsf.unmapped.batch
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.session_id` to `ocsf.unmapped.session_id`
+        sources:
+        - automox.raw.session_id
+        target: ocsf.unmapped.session_id
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.connection_type` to `ocsf.unmapped.connection_type`
+        sources:
+        - automox.raw.connection_type
+        target: ocsf.unmapped.connection_type
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.event` to `ocsf.unmapped.event`
+        sources:
+        - automox.raw.event
+        target: ocsf.unmapped.event
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.termination_reason` to `ocsf.unmapped.termination_reason`
+        sources:
+        - automox.raw.termination_reason
+        target: ocsf.unmapped.termination_reason
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.account_type` to `ocsf.unmapped.account_type`
+        sources:
+        - automox.raw.account_type
+        target: ocsf.unmapped.account_type
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.splashtop_url_generated` to `ocsf.unmapped.splashtop_url_generated`
+        sources:
+        - automox.raw.splashtop_url_generated
+        target: ocsf.unmapped.splashtop_url_generated
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.bulk` to `ocsf.unmapped.bulk`
+        sources:
+        - automox.raw.bulk
+        target: ocsf.unmapped.bulk
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.device_count` to `ocsf.unmapped.device_count`
+        sources:
+        - automox.raw.device_count
+        target: ocsf.unmapped.device_count
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.new_access_type` to `ocsf.unmapped.new_access_type`
+        sources:
+        - automox.raw.new_access_type
+        target: ocsf.unmapped.new_access_type
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.new_consent_required` to `ocsf.unmapped.new_consent_required`
+        sources:
+        - automox.raw.new_consent_required
+        target: ocsf.unmapped.new_consent_required
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.previous_access_type` to `ocsf.unmapped.previous_access_type`
+        sources:
+        - automox.raw.previous_access_type
+        target: ocsf.unmapped.previous_access_type
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.previous_consent_required` to `ocsf.unmapped.previous_consent_required`
+        sources:
+        - automox.raw.previous_consent_required
+        target: ocsf.unmapped.previous_consent_required
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `raw_data` to `ocsf.raw_data`
+        sources:
+        - raw_data
+        target: ocsf.raw_data
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-category-mapper
+        name: ocsf.activity_id
+        categories:
+        - filter:
+            query: '@ocsf.metadata.event_code:"API Key Enabled"'
+          name: Enable
+          id: 8
+        - filter:
+            query: '@ocsf.metadata.event_code:"API Key Disabled"'
+          name: Disable
+          id: 9
+        - filter:
+            query: '@type_uid:300401'
+          name: Create
+          id: 1
+        - filter:
+            query: '@type_uid:300402'
+          name: Read
+          id: 2
+        - filter:
+            query: '@type_uid:300403'
+          name: Update
+          id: 3
+        - filter:
+            query: '@type_uid:300404'
+          name: Delete
+          id: 4
+        - filter:
+            query: '@type_uid:300405'
+          name: Move
+          id: 5
+        - filter:
+            query: '@type_uid:300406'
+          name: Enroll
+          id: 6
+        - filter:
+            query: '@type_uid:300407'
+          name: Unenroll
+          id: 7
+        - filter:
+            query: '@type_uid:300408'
+          name: Enable
+          id: 8
+        - filter:
+            query: '@type_uid:300409'
+          name: Disable
+          id: 9
+        - filter:
+            query: '@type_uid:300410'
+          name: Activate
+          id: 10
+        - filter:
+            query: '@type_uid:300411'
+          name: Deactivate
+          id: 11
+        - filter:
+            query: '@type_uid:300412'
+          name: Suspend
+          id: 12
+        - filter:
+            query: '@type_uid:300413'
+          name: Resume
+          id: 13
+        - filter:
+            query: '@activity_id:1'
+          name: Create
+          id: 1
+        - filter:
+            query: '@activity_id:2'
+          name: Read
+          id: 2
+        - filter:
+            query: '@activity_id:3'
+          name: Update
+          id: 3
+        - filter:
+            query: '@activity_id:4'
+          name: Delete
+          id: 4
+        - filter:
+            query: '@activity_id:5'
+          name: Move
+          id: 5
+        - filter:
+            query: '@activity_id:6'
+          name: Enroll
+          id: 6
+        - filter:
+            query: '@activity_id:7'
+          name: Unenroll
+          id: 7
+        - filter:
+            query: '@activity_id:8'
+          name: Enable
+          id: 8
+        - filter:
+            query: '@activity_id:9'
+          name: Disable
+          id: 9
+        - filter:
+            query: '@activity_id:10'
+          name: Activate
+          id: 10
+        - filter:
+            query: '@activity_id:11'
+          name: Deactivate
+          id: 11
+        - filter:
+            query: '@activity_id:12'
+          name: Suspend
+          id: 12
+        - filter:
+            query: '@activity_id:13'
+          name: Resume
+          id: 13
+        - filter:
+            query: '@ocsf.metadata.event_code:*'
+          name: Other
+          id: 99
+        targets:
+          name: ocsf.activity_name
+          id: ocsf.activity_id
+        fallback:
+          values:
+            ocsf.activity_id: '99'
+            ocsf.activity_name: Other
+          sources:
+            ocsf.activity_name:
+            - ocsf.metadata.event_code
+      - type: schema-category-mapper
+        name: ocsf.status_id
+        categories:
+        - filter:
+            query: '@automox.error.code:*'
+          name: Failure
+          id: 2
+        - filter:
+            query: '@status_id:1'
+          name: Success
+          id: 1
+        - filter:
+            query: '@status_id:2'
+          name: Failure
+          id: 2
+        - filter:
+            query: '@status_id:99'
+          name: Other
+          id: 99
+        - filter:
+            query: '*'
+          name: Unknown
+          id: 0
+        targets:
+          name: ocsf.status
+          id: ocsf.status_id
+        fallback:
+          values:
+            ocsf.status_id: '99'
+            ocsf.status: Other
+          sources:
+            ocsf.status:
+            - status
+      - type: schema-category-mapper
+        name: ocsf.severity_id
+        categories:
+        - filter:
+            query: '@severity_id:1'
+          name: Informational
+          id: 1
+        - filter:
+            query: '@severity_id:2'
+          name: Low
+          id: 2
+        - filter:
+            query: '@severity_id:3'
+          name: Medium
+          id: 3
+        - filter:
+            query: '@severity_id:4'
+          name: High
+          id: 4
+        - filter:
+            query: '@severity_id:5'
+          name: Critical
+          id: 5
+        - filter:
+            query: '@severity_id:6'
+          name: Fatal
+          id: 6
+        - filter:
+            query: '@severity_id:99'
+          name: Other
+          id: 99
+        - filter:
+            query: '*'
+          name: Unknown
+          id: 0
+        targets:
+          name: ocsf.severity
+          id: ocsf.severity_id
+        fallback:
+          values:
+            ocsf.severity_id: '99'
+            ocsf.severity: Other
+          sources:
+            ocsf.severity:
+            - severity
+      schema:
+        schemaType: ocsf
+        version: 1.5.0
+        className: Entity Management
+        classUid: 3004
+        extensions: []
+        profiles: []
+  - type: pipeline
+    name: Audit Trail > User Access Management [3005] > The role applies to the organization
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:3005 @unmapped.scope:ORGANIZATION'
+    processors:
+    - type: attribute-remapper
+      name: Map `user.org.uid` to `automox.user.org.uid`
+      enabled: true
+      sources:
+      - user.org.uid
+      sourceType: attribute
+      target: automox.user.org.uid
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > User Access Management [3005] > The role applies to the account
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:3005 @unmapped.scope:ACCOUNT'
+    processors:
+    - type: attribute-remapper
+      name: Map `user.org.uid` to `automox.user.account.uid`
+      enabled: true
+      sources:
+      - user.org.uid
+      sourceType: attribute
+      target: automox.user.account.uid
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > User Access Management [3005] > The role applies globally
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:3005 @unmapped.scope:GLOBAL'
+    processors:
+    - type: attribute-remapper
+      name: Map `user.org.uid` to `automox.unmapped.scope_uid`
+      enabled: true
+      sources:
+      - user.org.uid
+      sourceType: attribute
+      target: automox.unmapped.scope_uid
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: OCSF sub pipeline for class User Access Management [3005] (Audit Trail)
+    enabled: true
+    ocsf:
+      isOcsf: true
+    filter:
+      query: '@evt.category:audit @class_uid:3005'
+    processors:
+    - type: array-processor
+      name: Move `resource` into a `resources` array
+      enabled: true
+      operation:
+        source: resource
+        target: automox.resources
+        preserveSource: true
+        type: append
+    - type: schema-processor
+      name: Apply OCSF schema for 3005
+      enabled: true
+      mappers:
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+        sources:
+        - ocsf.metadata.product.name
+        target: ocsf.metadata.product.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+        sources:
+        - ocsf.metadata.product.vendor_name
+        target: ocsf.metadata.product.vendor_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.version` to `ocsf.metadata.product.version`
+        sources:
+        - ocsf.metadata.product.version
+        target: ocsf.metadata.product.version
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+        sources:
+        - ocsf.metadata.log_name
+        target: ocsf.metadata.log_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+        sources:
+        - ocsf.metadata.log_provider
+        target: ocsf.metadata.log_provider
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+        sources:
+        - ocsf.metadata.event_code
+        target: ocsf.metadata.event_code
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+        sources:
+        - ocsf.metadata.uid
+        target: ocsf.metadata.uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+        sources:
+        - ocsf.metadata.original_time
+        target: ocsf.metadata.original_time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.tenant_uid` to `ocsf.metadata.tenant_uid`
+        sources:
+        - ocsf.metadata.tenant_uid
+        target: ocsf.metadata.tenant_uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.time` to `ocsf.time`
+        sources:
+        - ocsf.time
+        target: ocsf.time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.event_code` to `ocsf.message`
+        sources:
+        - ocsf.metadata.event_code
+        target: ocsf.message
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `count` to `ocsf.count`
+        sources:
+        - count
+        target: ocsf.count
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `timezone_offset` to `ocsf.timezone_offset`
+        sources:
+        - timezone_offset
+        target: ocsf.timezone_offset
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.error.code`, `status_code` to `ocsf.status_code`
+        sources:
+        - automox.error.code
+        - status_code
+        target: ocsf.status_code
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.error.detail`, `status_details` to `ocsf.status_detail`
+        sources:
+        - automox.error.detail
+        - status_details
+        target: ocsf.status_detail
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `actor`, `unmapped.actor`, `automox.actor` to `ocsf.actor`
+        sources:
+        - actor
+        - unmapped.actor
+        - automox.actor
+        target: ocsf.actor
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `actor.user.email_addr`, `unmapped.actor.user.email_addr`, `automox.actor.user.email_addr` to `ocsf.actor.user.name`
+        sources:
+        - actor.user.email_addr
+        - unmapped.actor.user.email_addr
+        - automox.actor.user.email_addr
+        target: ocsf.actor.user.name
+        preserveSource: true
+        overrideOnConflict: false
+      - type: schema-remapper
+        name: Map `user.uid` to `ocsf.user.uid`
+        sources:
+        - user.uid
+        target: ocsf.user.uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.user.org.uid` to `ocsf.user.org.uid`
+        sources:
+        - automox.user.org.uid
+        target: ocsf.user.org.uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.user.account.uid` to `ocsf.user.account.uid`
+        sources:
+        - automox.user.account.uid
+        target: ocsf.user.account.uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `privileges` to `ocsf.privileges`
+        sources:
+        - privileges
+        target: ocsf.privileges
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.resources` to `ocsf.resources`
+        sources:
+        - automox.resources
+        target: ocsf.resources
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `unmapped.scope` to `ocsf.unmapped.scope`
+        sources:
+        - unmapped.scope
+        target: ocsf.unmapped.scope
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.unmapped.scope_uid` to `ocsf.unmapped.scope_uid`
+        sources:
+        - automox.unmapped.scope_uid
+        target: ocsf.unmapped.scope_uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `raw_data` to `ocsf.raw_data`
+        sources:
+        - raw_data
+        target: ocsf.raw_data
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-category-mapper
+        name: ocsf.activity_id
+        categories:
+        - filter:
+            query: '@type_uid:300501'
+          name: Assign Privileges
+          id: 1
+        - filter:
+            query: '@type_uid:300502'
+          name: Revoke Privileges
+          id: 2
+        - filter:
+            query: '@activity_id:1'
+          name: Assign Privileges
+          id: 1
+        - filter:
+            query: '@activity_id:2'
+          name: Revoke Privileges
+          id: 2
+        - filter:
+            query: '@ocsf.metadata.event_code:*'
+          name: Other
+          id: 99
+        targets:
+          name: ocsf.activity_name
+          id: ocsf.activity_id
+        fallback:
+          values:
+            ocsf.activity_id: '99'
+            ocsf.activity_name: Other
+          sources:
+            ocsf.activity_name:
+            - ocsf.metadata.event_code
+      - type: schema-category-mapper
+        name: ocsf.status_id
+        categories:
+        - filter:
+            query: '@automox.error.code:*'
+          name: Failure
+          id: 2
+        - filter:
+            query: '@status_id:1'
+          name: Success
+          id: 1
+        - filter:
+            query: '@status_id:2'
+          name: Failure
+          id: 2
+        - filter:
+            query: '@status_id:99'
+          name: Other
+          id: 99
+        - filter:
+            query: '*'
+          name: Unknown
+          id: 0
+        targets:
+          name: ocsf.status
+          id: ocsf.status_id
+        fallback:
+          values:
+            ocsf.status_id: '99'
+            ocsf.status: Other
+          sources:
+            ocsf.status:
+            - status
+      - type: schema-category-mapper
+        name: ocsf.severity_id
+        categories:
+        - filter:
+            query: '@severity_id:1'
+          name: Informational
+          id: 1
+        - filter:
+            query: '@severity_id:2'
+          name: Low
+          id: 2
+        - filter:
+            query: '@severity_id:3'
+          name: Medium
+          id: 3
+        - filter:
+            query: '@severity_id:4'
+          name: High
+          id: 4
+        - filter:
+            query: '@severity_id:5'
+          name: Critical
+          id: 5
+        - filter:
+            query: '@severity_id:6'
+          name: Fatal
+          id: 6
+        - filter:
+            query: '@severity_id:99'
+          name: Other
+          id: 99
+        - filter:
+            query: '*'
+          name: Unknown
+          id: 0
+        targets:
+          name: ocsf.severity
+          id: ocsf.severity_id
+        fallback:
+          values:
+            ocsf.severity_id: '99'
+            ocsf.severity: Other
+          sources:
+            ocsf.severity:
+            - severity
+      schema:
+        schemaType: ocsf
+        version: 1.5.0
+        className: User Access Management
+        classUid: 3005
+        extensions: []
+        profiles: []
+  - type: pipeline
+    name: Audit Trail > Web Resources Activity [6001] > Extract the web resource
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:6001'
+    processors:
+    - type: array-processor
+      name: Extract the web resource's `type`
+      enabled: true
+      operation:
+        source: web_resources
+        target: automox.web_resource.type
+        filter: uid:*
+        valueToExtract: type
+        type: select
+    - type: array-processor
+      name: Extract the web resource's `uid`
+      enabled: true
+      operation:
+        source: web_resources
+        target: automox.web_resource.uid
+        filter: uid:*
+        valueToExtract: uid
+        type: select
+    - type: array-processor
+      name: Extract the web resource's `name`
+      enabled: true
+      operation:
+        source: web_resources
+        target: automox.web_resource.name
+        filter: uid:*
+        valueToExtract: name
+        type: select
+    - type: array-processor
+      name: Extract the web resource's `desc`
+      enabled: true
+      operation:
+        source: web_resources
+        target: automox.web_resource.desc
+        filter: uid:*
+        valueToExtract: desc
+        type: select
+    - type: array-processor
+      name: Extract the web resource's `url_string`
+      enabled: true
+      operation:
+        source: web_resources
+        target: automox.web_resource.url_string
+        filter: uid:*
+        valueToExtract: url_string
+        type: select
+  - type: pipeline
+    name: Audit Trail > Web Resources Activity [6001] > Drop an empty web resource name
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:6001 @automox.web_resource.name:""'
+    processors:
+    - type: exclude-attribute
+      name: Remove `automox.web_resource.name`
+      enabled: true
+      attributeToExclude: automox.web_resource.name
+  - type: pipeline
+    name: Audit Trail > Web Resources Activity [6001] > The Streamer install and uninstall act on the organization
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:6001 @ocsf.metadata.event_code:("Ad Hoc Splashtop Streamer Install Initiated"
+        OR "Ad Hoc Splashtop Streamer Uninstall Initiated")'
+    processors:
+    - type: string-builder-processor
+      name: Add web resource type
+      enabled: true
+      template: Organization
+      target: automox.web_resource.type
+      replaceMissing: false
+  - type: pipeline
+    name: Audit Trail > Web Resources Activity [6001] > When `automox.raw.custom_name` is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:6001 @automox.raw.custom_name:* -@automox.raw.custom_name:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.custom_name` to `automox.web_resource.data.custom_name`
+      enabled: true
+      sources:
+      - automox.raw.custom_name
+      sourceType: attribute
+      target: automox.web_resource.data.custom_name
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Web Resources Activity [6001] > When `automox.raw.tags` is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:6001 @automox.raw.tags:* -@automox.raw.tags:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.tags` to `automox.web_resource.data.tags`
+      enabled: true
+      sources:
+      - automox.raw.tags
+      sourceType: attribute
+      target: automox.web_resource.data.tags
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Web Resources Activity [6001] > When `automox.raw.server_group_id` is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:6001 @automox.raw.server_group_id:* -@automox.raw.server_group_id:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.server_group_id` to `automox.web_resource.data.server_group_id`
+      enabled: true
+      sources:
+      - automox.raw.server_group_id
+      sourceType: attribute
+      target: automox.web_resource.data.server_group_id
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Web Resources Activity [6001] > When `automox.raw.exception` is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:6001 @automox.raw.exception:* -@automox.raw.exception:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.exception` to `automox.web_resource.data.exception`
+      enabled: true
+      sources:
+      - automox.raw.exception
+      sourceType: attribute
+      target: automox.web_resource.data.exception
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Web Resources Activity [6001] > When `automox.raw.policy_type_name` is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:6001 @automox.raw.policy_type_name:* -@automox.raw.policy_type_name:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.policy_type_name` to `automox.web_resource.data.policy_type_name`
+      enabled: true
+      sources:
+      - automox.raw.policy_type_name
+      sourceType: attribute
+      target: automox.web_resource.data.policy_type_name
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Web Resources Activity [6001] > When `automox.raw.server_groups` is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:6001 @automox.raw.server_groups:* -@automox.raw.server_groups:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.server_groups` to `automox.web_resource.data.server_groups`
+      enabled: true
+      sources:
+      - automox.raw.server_groups
+      sourceType: attribute
+      target: automox.web_resource.data.server_groups
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Web Resources Activity [6001] > When `automox.raw.community_worklet_uuid` is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:6001 @automox.raw.community_worklet_uuid:* -@automox.raw.community_worklet_uuid:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.community_worklet_uuid` to `automox.web_resource.data.community_worklet_uuid`
+      enabled: true
+      sources:
+      - automox.raw.community_worklet_uuid
+      sourceType: attribute
+      target: automox.web_resource.data.community_worklet_uuid
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Web Resources Activity [6001] > When `automox.raw.target_zone_ids` is set
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:6001 @automox.raw.target_zone_ids:* -@automox.raw.target_zone_ids:""'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.target_zone_ids` to `automox.web_resource.data.target_zone_ids`
+      enabled: true
+      sources:
+      - automox.raw.target_zone_ids
+      sourceType: attribute
+      target: automox.web_resource.data.target_zone_ids
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: Audit Trail > Web Resources Activity [6001] > A clone's own name
+    enabled: true
+    filter:
+      query: '@evt.category:audit @class_uid:6001 @ocsf.metadata.event_code:"Cloned Policy Created"'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.name` to `automox.web_resource.data.name`
+      enabled: true
+      sources:
+      - automox.raw.name
+      sourceType: attribute
+      target: automox.web_resource.data.name
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: OCSF sub pipeline for class Web Resources Activity [6001] (Audit Trail)
+    enabled: true
+    ocsf:
+      isOcsf: true
+    filter:
+      query: '@evt.category:audit @class_uid:6001'
+    processors:
+    - type: attribute-remapper
+      name: Map `automox.raw.server_count` to `automox.web_resource.data.server_count`
+      enabled: true
+      sources:
+      - automox.raw.server_count
+      sourceType: attribute
+      target: automox.web_resource.data.server_count
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+    - type: array-processor
+      name: Move the web resource into an array
+      enabled: true
+      operation:
+        source: automox.web_resource
+        target: automox.web_resources
+        preserveSource: false
+        type: append
+    - type: schema-processor
+      name: Apply OCSF schema for 6001
+      enabled: true
+      mappers:
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+        sources:
+        - ocsf.metadata.product.name
+        target: ocsf.metadata.product.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+        sources:
+        - ocsf.metadata.product.vendor_name
+        target: ocsf.metadata.product.vendor_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.version` to `ocsf.metadata.product.version`
+        sources:
+        - ocsf.metadata.product.version
+        target: ocsf.metadata.product.version
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+        sources:
+        - ocsf.metadata.log_name
+        target: ocsf.metadata.log_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+        sources:
+        - ocsf.metadata.log_provider
+        target: ocsf.metadata.log_provider
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+        sources:
+        - ocsf.metadata.event_code
+        target: ocsf.metadata.event_code
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+        sources:
+        - ocsf.metadata.uid
+        target: ocsf.metadata.uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+        sources:
+        - ocsf.metadata.original_time
+        target: ocsf.metadata.original_time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.tenant_uid` to `ocsf.metadata.tenant_uid`
+        sources:
+        - ocsf.metadata.tenant_uid
+        target: ocsf.metadata.tenant_uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.time` to `ocsf.time`
+        sources:
+        - ocsf.time
+        target: ocsf.time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.event_code` to `ocsf.message`
+        sources:
+        - ocsf.metadata.event_code
+        target: ocsf.message
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `count` to `ocsf.count`
+        sources:
+        - count
+        target: ocsf.count
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `timezone_offset` to `ocsf.timezone_offset`
+        sources:
+        - timezone_offset
+        target: ocsf.timezone_offset
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.error.code`, `status_code` to `ocsf.status_code`
+        sources:
+        - automox.error.code
+        - status_code
+        target: ocsf.status_code
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.error.detail`, `status_details` to `ocsf.status_detail`
+        sources:
+        - automox.error.detail
+        - status_details
+        target: ocsf.status_detail
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `actor`, `unmapped.actor`, `automox.actor` to `ocsf.actor`
+        sources:
+        - actor
+        - unmapped.actor
+        - automox.actor
+        target: ocsf.actor
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `actor.user.email_addr`, `unmapped.actor.user.email_addr`, `automox.actor.user.email_addr` to `ocsf.actor.user.name`
+        sources:
+        - actor.user.email_addr
+        - unmapped.actor.user.email_addr
+        - automox.actor.user.email_addr
+        target: ocsf.actor.user.name
+        preserveSource: true
+        overrideOnConflict: false
+      - type: schema-remapper
+        name: Map `automox.web_resources` to `ocsf.web_resources`
+        sources:
+        - automox.web_resources
+        target: ocsf.web_resources
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.action` to `ocsf.unmapped.action`
+        sources:
+        - automox.raw.action
+        target: ocsf.unmapped.action
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.command_type_name` to `ocsf.unmapped.command_type_name`
+        sources:
+        - automox.raw.command_type_name
+        target: ocsf.unmapped.command_type_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.manual_approval` to `ocsf.unmapped.manual_approval`
+        sources:
+        - automox.raw.manual_approval
+        target: ocsf.unmapped.manual_approval
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.tfa_type` to `ocsf.unmapped.tfa_type`
+        sources:
+        - automox.raw.tfa_type
+        target: ocsf.unmapped.tfa_type
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.batch` to `ocsf.unmapped.batch`
+        sources:
+        - automox.raw.batch
+        target: ocsf.unmapped.batch
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.session_id` to `ocsf.unmapped.session_id`
+        sources:
+        - automox.raw.session_id
+        target: ocsf.unmapped.session_id
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.connection_type` to `ocsf.unmapped.connection_type`
+        sources:
+        - automox.raw.connection_type
+        target: ocsf.unmapped.connection_type
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.event` to `ocsf.unmapped.event`
+        sources:
+        - automox.raw.event
+        target: ocsf.unmapped.event
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.termination_reason` to `ocsf.unmapped.termination_reason`
+        sources:
+        - automox.raw.termination_reason
+        target: ocsf.unmapped.termination_reason
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.account_type` to `ocsf.unmapped.account_type`
+        sources:
+        - automox.raw.account_type
+        target: ocsf.unmapped.account_type
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.splashtop_url_generated` to `ocsf.unmapped.splashtop_url_generated`
+        sources:
+        - automox.raw.splashtop_url_generated
+        target: ocsf.unmapped.splashtop_url_generated
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.bulk` to `ocsf.unmapped.bulk`
+        sources:
+        - automox.raw.bulk
+        target: ocsf.unmapped.bulk
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.device_count` to `ocsf.unmapped.device_count`
+        sources:
+        - automox.raw.device_count
+        target: ocsf.unmapped.device_count
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.new_access_type` to `ocsf.unmapped.new_access_type`
+        sources:
+        - automox.raw.new_access_type
+        target: ocsf.unmapped.new_access_type
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.new_consent_required` to `ocsf.unmapped.new_consent_required`
+        sources:
+        - automox.raw.new_consent_required
+        target: ocsf.unmapped.new_consent_required
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.previous_access_type` to `ocsf.unmapped.previous_access_type`
+        sources:
+        - automox.raw.previous_access_type
+        target: ocsf.unmapped.previous_access_type
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.raw.previous_consent_required` to `ocsf.unmapped.previous_consent_required`
+        sources:
+        - automox.raw.previous_consent_required
+        target: ocsf.unmapped.previous_consent_required
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `raw_data` to `ocsf.raw_data`
+        sources:
+        - raw_data
+        target: ocsf.raw_data
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-category-mapper
+        name: ocsf.activity_id
+        categories:
+        - filter:
+            query: '@type_uid:600101'
+          name: Create
+          id: 1
+        - filter:
+            query: '@type_uid:600102'
+          name: Read
+          id: 2
+        - filter:
+            query: '@type_uid:600103'
+          name: Update
+          id: 3
+        - filter:
+            query: '@type_uid:600104'
+          name: Delete
+          id: 4
+        - filter:
+            query: '@type_uid:600105'
+          name: Search
+          id: 5
+        - filter:
+            query: '@type_uid:600106'
+          name: Import
+          id: 6
+        - filter:
+            query: '@type_uid:600107'
+          name: Export
+          id: 7
+        - filter:
+            query: '@type_uid:600108'
+          name: Share
+          id: 8
+        - filter:
+            query: '@activity_id:1'
+          name: Create
+          id: 1
+        - filter:
+            query: '@activity_id:2'
+          name: Read
+          id: 2
+        - filter:
+            query: '@activity_id:3'
+          name: Update
+          id: 3
+        - filter:
+            query: '@activity_id:4'
+          name: Delete
+          id: 4
+        - filter:
+            query: '@activity_id:5'
+          name: Search
+          id: 5
+        - filter:
+            query: '@activity_id:6'
+          name: Import
+          id: 6
+        - filter:
+            query: '@activity_id:7'
+          name: Export
+          id: 7
+        - filter:
+            query: '@activity_id:8'
+          name: Share
+          id: 8
+        - filter:
+            query: '@ocsf.metadata.event_code:*'
+          name: Other
+          id: 99
+        targets:
+          name: ocsf.activity_name
+          id: ocsf.activity_id
+        fallback:
+          values:
+            ocsf.activity_id: '99'
+            ocsf.activity_name: Other
+          sources:
+            ocsf.activity_name:
+            - ocsf.metadata.event_code
+      - type: schema-category-mapper
+        name: ocsf.status_id
+        categories:
+        - filter:
+            query: '@automox.error.code:*'
+          name: Failure
+          id: 2
+        - filter:
+            query: '@status_id:1'
+          name: Success
+          id: 1
+        - filter:
+            query: '@status_id:2'
+          name: Failure
+          id: 2
+        - filter:
+            query: '@status_id:99'
+          name: Other
+          id: 99
+        - filter:
+            query: '*'
+          name: Unknown
+          id: 0
+        targets:
+          name: ocsf.status
+          id: ocsf.status_id
+        fallback:
+          values:
+            ocsf.status_id: '99'
+            ocsf.status: Other
+          sources:
+            ocsf.status:
+            - status
+      - type: schema-category-mapper
+        name: ocsf.severity_id
+        categories:
+        - filter:
+            query: '@severity_id:1'
+          name: Informational
+          id: 1
+        - filter:
+            query: '@severity_id:2'
+          name: Low
+          id: 2
+        - filter:
+            query: '@severity_id:3'
+          name: Medium
+          id: 3
+        - filter:
+            query: '@severity_id:4'
+          name: High
+          id: 4
+        - filter:
+            query: '@severity_id:5'
+          name: Critical
+          id: 5
+        - filter:
+            query: '@severity_id:6'
+          name: Fatal
+          id: 6
+        - filter:
+            query: '@severity_id:99'
+          name: Other
+          id: 99
+        - filter:
+            query: '*'
+          name: Unknown
+          id: 0
+        targets:
+          name: ocsf.severity
+          id: ocsf.severity_id
+        fallback:
+          values:
+            ocsf.severity_id: '99'
+            ocsf.severity: Other
+          sources:
+            ocsf.severity:
+            - severity
+      schema:
+        schemaType: ocsf
+        version: 1.5.0
+        className: Web Resources Activity
+        classUid: 6001
+        extensions: []
+        profiles:
+        - host
+  - type: pipeline
+    name: OCSF sub pipeline for class Base Event [0] (Audit Trail)
+    enabled: true
+    ocsf:
+      isOcsf: true
+    filter:
+      query: '@evt.category:audit -@ocsf.category_uid:*'
+    processors:
+    - type: schema-processor
+      name: Apply OCSF schema for 0
+      enabled: true
+      mappers:
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+        sources:
+        - ocsf.metadata.product.name
+        target: ocsf.metadata.product.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+        sources:
+        - ocsf.metadata.product.vendor_name
+        target: ocsf.metadata.product.vendor_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.version` to `ocsf.metadata.product.version`
+        sources:
+        - ocsf.metadata.product.version
+        target: ocsf.metadata.product.version
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+        sources:
+        - ocsf.metadata.log_name
+        target: ocsf.metadata.log_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+        sources:
+        - ocsf.metadata.log_provider
+        target: ocsf.metadata.log_provider
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+        sources:
+        - ocsf.metadata.event_code
+        target: ocsf.metadata.event_code
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+        sources:
+        - ocsf.metadata.uid
+        target: ocsf.metadata.uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+        sources:
+        - ocsf.metadata.original_time
+        target: ocsf.metadata.original_time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.tenant_uid` to `ocsf.metadata.tenant_uid`
+        sources:
+        - ocsf.metadata.tenant_uid
+        target: ocsf.metadata.tenant_uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.time` to `ocsf.time`
+        sources:
+        - ocsf.time
+        target: ocsf.time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.event_code` to `ocsf.message`
+        sources:
+        - ocsf.metadata.event_code
+        target: ocsf.message
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `count` to `ocsf.count`
+        sources:
+        - count
+        target: ocsf.count
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `timezone_offset` to `ocsf.timezone_offset`
+        sources:
+        - timezone_offset
+        target: ocsf.timezone_offset
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.error.code`, `status_code` to `ocsf.status_code`
+        sources:
+        - automox.error.code
+        - status_code
+        target: ocsf.status_code
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.error.detail`, `status_details` to `ocsf.status_detail`
+        sources:
+        - automox.error.detail
+        - status_details
+        target: ocsf.status_detail
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `actor`, `unmapped.actor`, `automox.actor` to `ocsf.actor`
+        sources:
+        - actor
+        - unmapped.actor
+        - automox.actor
+        target: ocsf.actor
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `actor.user.email_addr`, `unmapped.actor.user.email_addr`, `automox.actor.user.email_addr` to `ocsf.actor.user.name`
+        sources:
+        - actor.user.email_addr
+        - unmapped.actor.user.email_addr
+        - automox.actor.user.email_addr
+        target: ocsf.actor.user.name
+        preserveSource: true
+        overrideOnConflict: false
+      - type: schema-remapper
+        name: Map `raw_data` to `ocsf.raw_data`
+        sources:
+        - raw_data
+        target: ocsf.raw_data
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-category-mapper
+        name: ocsf.activity_id
+        categories:
+        - filter:
+            query: '@ocsf.metadata.event_code:*'
+          name: Other
+          id: 99
+        targets:
+          name: ocsf.activity_name
+          id: ocsf.activity_id
+        fallback:
+          values:
+            ocsf.activity_id: '99'
+            ocsf.activity_name: Other
+          sources:
+            ocsf.activity_name:
+            - ocsf.metadata.event_code
+      - type: schema-category-mapper
+        name: ocsf.status_id
+        categories:
+        - filter:
+            query: '@automox.error.code:*'
+          name: Failure
+          id: 2
+        - filter:
+            query: '@status_id:1'
+          name: Success
+          id: 1
+        - filter:
+            query: '@status_id:2'
+          name: Failure
+          id: 2
+        - filter:
+            query: '@status_id:99'
+          name: Other
+          id: 99
+        - filter:
+            query: '*'
+          name: Unknown
+          id: 0
+        targets:
+          name: ocsf.status
+          id: ocsf.status_id
+        fallback:
+          values:
+            ocsf.status_id: '99'
+            ocsf.status: Other
+          sources:
+            ocsf.status:
+            - status
+      - type: schema-category-mapper
+        name: ocsf.severity_id
+        categories:
+        - filter:
+            query: '@severity_id:1'
+          name: Informational
+          id: 1
+        - filter:
+            query: '@severity_id:2'
+          name: Low
+          id: 2
+        - filter:
+            query: '@severity_id:3'
+          name: Medium
+          id: 3
+        - filter:
+            query: '@severity_id:4'
+          name: High
+          id: 4
+        - filter:
+            query: '@severity_id:5'
+          name: Critical
+          id: 5
+        - filter:
+            query: '@severity_id:6'
+          name: Fatal
+          id: 6
+        - filter:
+            query: '@severity_id:99'
+          name: Other
+          id: 99
+        - filter:
+            query: '*'
+          name: Unknown
+          id: 0
+        targets:
+          name: ocsf.severity
+          id: ocsf.severity_id
+        fallback:
+          values:
+            ocsf.severity_id: '99'
+            ocsf.severity: Other
+          sources:
+            ocsf.severity:
+            - severity
+      schema:
+        schemaType: ocsf
+        version: 1.5.0
+        className: Base Event
+        classUid: 0
+        extensions: []
+        profiles: []
+  - type: pipeline
+    name: Audit Trail > Drop an empty `ocsf.actor.user.email_addr`
+    enabled: true
+    filter:
+      query: '@evt.category:audit @ocsf.actor.user.email_addr:""'
+    processors:
+    - type: exclude-attribute
+      name: Remove `ocsf.actor.user.email_addr`
+      enabled: true
+      attributeToExclude: ocsf.actor.user.email_addr
+  - type: pipeline
+    name: Audit Trail > Drop an empty `ocsf.actor.user.name`
+    enabled: true
+    filter:
+      query: '@evt.category:audit @ocsf.actor.user.name:""'
+    processors:
+    - type: exclude-attribute
+      name: Remove `ocsf.actor.user.name`
+      enabled: true
+      attributeToExclude: ocsf.actor.user.name
+  - type: pipeline
+    name: Audit Trail > Drop an empty `ocsf.actor.user.uid`
+    enabled: true
+    filter:
+      query: '@evt.category:audit @ocsf.actor.user.uid:""'
+    processors:
+    - type: exclude-attribute
+      name: Remove `ocsf.actor.user.uid`
+      enabled: true
+      attributeToExclude: ocsf.actor.user.uid
+  - type: pipeline
+    name: Audit Trail > Drop an empty `ocsf.actor.user.uid_alt`
+    enabled: true
+    filter:
+      query: '@evt.category:audit @ocsf.actor.user.uid_alt:""'
+    processors:
+    - type: exclude-attribute
+      name: Remove `ocsf.actor.user.uid_alt`
+      enabled: true
+      attributeToExclude: ocsf.actor.user.uid_alt
+  - type: pipeline
+    name: Audit Trail > Drop an empty `ocsf.user.uid`
+    enabled: true
+    filter:
+      query: '@evt.category:audit @ocsf.user.uid:""'
+    processors:
+    - type: exclude-attribute
+      name: Remove `ocsf.user.uid`
+      enabled: true
+      attributeToExclude: ocsf.user.uid
+  - type: pipeline
+    name: Audit Trail > Drop an empty `ocsf.user.uid_alt`
+    enabled: true
+    filter:
+      query: '@evt.category:audit @ocsf.user.uid_alt:""'
+    processors:
+    - type: exclude-attribute
+      name: Remove `ocsf.user.uid_alt`
+      enabled: true
+      attributeToExclude: ocsf.user.uid_alt
+  - type: pipeline
+    name: Audit Trail > Drop an empty `usr.email`
+    enabled: true
+    filter:
+      query: '@evt.category:audit @usr.email:""'
+    processors:
+    - type: exclude-attribute
+      name: Remove `usr.email`
+      enabled: true
+      attributeToExclude: usr.email
+  - type: pipeline
+    name: Audit Trail > Drop an empty `usr.id`
+    enabled: true
+    filter:
+      query: '@evt.category:audit @usr.id:""'
+    processors:
+    - type: exclude-attribute
+      name: Remove `usr.id`
+      enabled: true
+      attributeToExclude: usr.id
+  - type: pipeline
+    name: Audit Trail > Remove the working attributes under `automox`
+    enabled: true
+    filter:
+      query: '@evt.category:audit'
+    processors:
+    - type: exclude-attribute
+      name: Remove the working attributes under `automox`
+      enabled: true
+      attributeToExclude: automox
+  - type: pipeline
+    name: Console events
+    enabled: true
+    filter:
+      query: '@evt.category:events'
+    processors:
+    - type: attribute-remapper
+      name: Map `name` to `evt.name`
+      enabled: true
+      sources:
+      - name
+      sourceType: attribute
+      target: evt.name
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+    - type: category-processor
+      name: automox.log_status
+      enabled: true
+      categories:
+      - filter:
+          query: '@evt.name:system.patch.failed'
+        name: warn
+      - filter:
+          query: '*'
+        name: info
+      target: automox.log_status
+    - type: status-remapper
+      name: Define `automox.log_status` as the official status of the log
+      enabled: true
+      sources:
+      - automox.log_status
+  - type: pipeline
+    name: OCSF pre transformations (Console events)
+    enabled: true
+    ocsf:
+      isOcsf: true
+    filter:
+      query: '@evt.category:events'
+    processors:
+    - type: string-builder-processor
+      name: Add product name
+      enabled: true
+      template: Automox
+      target: ocsf.metadata.product.name
+      replaceMissing: false
+    - type: string-builder-processor
+      name: Add product vendor
+      enabled: true
+      template: Automox
+      target: ocsf.metadata.product.vendor_name
+      replaceMissing: false
+    - type: string-builder-processor
+      name: Add log name
+      enabled: true
+      template: Events
+      target: ocsf.metadata.log_name
+      replaceMissing: false
+    - type: string-builder-processor
+      name: Add log provider
+      enabled: true
+      template: Automox Console API
+      target: ocsf.metadata.log_provider
+      replaceMissing: false
+    - type: attribute-remapper
+      name: Map `name` to `ocsf.metadata.event_code`
+      enabled: true
+      sources:
+      - name
+      sourceType: attribute
+      target: ocsf.metadata.event_code
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `id` to `ocsf.metadata.uid`
+      enabled: true
+      sources:
+      - id
+      sourceType: attribute
+      target: ocsf.metadata.uid
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+      targetFormat: string
+    - type: attribute-remapper
+      name: Map `create_time` to `ocsf.metadata.original_time`
+      enabled: true
+      sources:
+      - create_time
+      sourceType: attribute
+      target: ocsf.metadata.original_time
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `automox.event_time` to `ocsf.time`
+      enabled: true
+      sources:
+      - automox.event_time
+      sourceType: attribute
+      target: ocsf.time
+      targetType: attribute
+      preserveSource: true
+      overrideOnConflict: true
+  - type: pipeline
+    name: OCSF sub pipeline for class Account Change [3001] (Console events)
+    enabled: true
+    ocsf:
+      isOcsf: true
+    filter:
+      query: '@evt.category:events @ocsf.metadata.event_code:(user.create OR saml.user.create OR user.removed)'
+    processors:
+    - type: string-builder-processor
+      name: Add user full name
+      enabled: true
+      template: '%{data.firstname} %{data.lastname}'
+      target: automox.user_full_name
+      replaceMissing: false
+    - type: schema-processor
+      name: Apply OCSF schema for 3001
+      enabled: true
+      mappers:
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+        sources:
+        - ocsf.metadata.product.name
+        target: ocsf.metadata.product.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+        sources:
+        - ocsf.metadata.product.vendor_name
+        target: ocsf.metadata.product.vendor_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+        sources:
+        - ocsf.metadata.log_name
+        target: ocsf.metadata.log_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+        sources:
+        - ocsf.metadata.log_provider
+        target: ocsf.metadata.log_provider
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+        sources:
+        - ocsf.metadata.event_code
+        target: ocsf.metadata.event_code
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+        sources:
+        - ocsf.metadata.uid
+        target: ocsf.metadata.uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+        sources:
+        - ocsf.metadata.original_time
+        target: ocsf.metadata.original_time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.time` to `ocsf.time`
+        sources:
+        - ocsf.time
+        target: ocsf.time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `name` to `ocsf.message`
+        sources:
+        - name
+        target: ocsf.message
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `data.email` to `ocsf.user.email_addr`
+        sources:
+        - data.email
+        target: ocsf.user.email_addr
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `data.email` to `ocsf.user.name`
+        sources:
+        - data.email
+        target: ocsf.user.name
+        preserveSource: true
+        overrideOnConflict: false
+      - type: schema-remapper
+        name: Map `automox.user_full_name` to `ocsf.user.full_name`
+        sources:
+        - automox.user_full_name
+        target: ocsf.user.full_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `user_id` to `ocsf.user.uid_alt`
+        sources:
+        - user_id
+        target: ocsf.user.uid_alt
+        preserveSource: true
+        overrideOnConflict: true
+        targetFormat: string
+      - type: schema-remapper
+        name: Map `data.orgname` to `ocsf.user.org.name`
+        sources:
+        - data.orgname
+        target: ocsf.user.org.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-category-mapper
+        name: ocsf.activity_id
+        categories:
+        - filter:
+            query: '@ocsf.metadata.event_code:user.removed'
+          name: Delete
+          id: 6
+        - filter:
+            query: '*'
+          name: Create
+          id: 1
+        targets:
+          name: ocsf.activity_name
+          id: ocsf.activity_id
+      - type: schema-category-mapper
+        name: ocsf.status_id
+        categories:
+        - filter:
+            query: '*'
+          name: Success
+          id: 1
+        targets:
+          name: ocsf.status
+          id: ocsf.status_id
+      - type: schema-category-mapper
+        name: ocsf.severity_id
+        categories:
+        - filter:
+            query: '*'
+          name: Informational
+          id: 1
+        targets:
+          name: ocsf.severity
+          id: ocsf.severity_id
+      schema:
+        schemaType: ocsf
+        version: 1.5.0
+        className: Account Change
+        classUid: 3001
+        extensions: []
+        profiles: []
+  - type: pipeline
+    name: OCSF sub pipeline for class Entity Management [3004] (Console events)
+    enabled: true
+    ocsf:
+      isOcsf: true
+    filter:
+      query: '@evt.category:events @ocsf.metadata.event_code:(system.add OR system.delete)'
+    processors:
+    - type: schema-processor
+      name: Apply OCSF schema for 3004
+      enabled: true
+      mappers:
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+        sources:
+        - ocsf.metadata.product.name
+        target: ocsf.metadata.product.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+        sources:
+        - ocsf.metadata.product.vendor_name
+        target: ocsf.metadata.product.vendor_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+        sources:
+        - ocsf.metadata.log_name
+        target: ocsf.metadata.log_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+        sources:
+        - ocsf.metadata.log_provider
+        target: ocsf.metadata.log_provider
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+        sources:
+        - ocsf.metadata.event_code
+        target: ocsf.metadata.event_code
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+        sources:
+        - ocsf.metadata.uid
+        target: ocsf.metadata.uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+        sources:
+        - ocsf.metadata.original_time
+        target: ocsf.metadata.original_time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.time` to `ocsf.time`
+        sources:
+        - ocsf.time
+        target: ocsf.time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `server_id` to `ocsf.entity.device.uid`
+        sources:
+        - server_id
+        target: ocsf.entity.device.uid
+        preserveSource: true
+        overrideOnConflict: true
+        targetFormat: string
+      - type: schema-remapper
+        name: Map `server_name` to `ocsf.entity.device.name`
+        sources:
+        - server_name
+        target: ocsf.entity.device.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `data.ip` to `ocsf.entity.device.ip`
+        sources:
+        - data.ip
+        target: ocsf.entity.device.ip
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `data.os` to `ocsf.entity.device.os.name`
+        sources:
+        - data.os
+        target: ocsf.entity.device.os.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-category-mapper
+        name: ocsf.entity.device.type_id
+        categories:
+        - filter:
+            query: '*'
+          name: Unknown
+          id: 0
+        targets:
+          name: ocsf.entity.device.type
+          id: ocsf.entity.device.type_id
+      - type: schema-category-mapper
+        name: ocsf.entity.device.os.type_id
+        categories:
+        - filter:
+            query: '@data.os:(Mac OR "OS X")'
+          name: macOS
+          id: 300
+        - filter:
+            query: '@data.os:Windows'
+          name: Windows
+          id: 100
+        - filter:
+            query: '@data.os:*'
+          name: Linux
+          id: 200
+        targets:
+          name: ocsf.entity.device.os.type
+          id: ocsf.entity.device.os.type_id
+      - type: schema-remapper
+        name: Map `server_id` to `ocsf.entity.uid`
+        sources:
+        - server_id
+        target: ocsf.entity.uid
+        preserveSource: true
+        overrideOnConflict: true
+        targetFormat: string
+      - type: schema-remapper
+        name: Map `server_name` to `ocsf.entity.name`
+        sources:
+        - server_name
+        target: ocsf.entity.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `name` to `ocsf.message`
+        sources:
+        - name
+        target: ocsf.message
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-category-mapper
+        name: ocsf.entity.type_id
+        categories:
+        - filter:
+            query: '*'
+          name: Device
+          id: 1
+        targets:
+          name: ocsf.entity.type
+          id: ocsf.entity.type_id
+      - type: schema-category-mapper
+        name: ocsf.activity_id
+        categories:
+        - filter:
+            query: '@ocsf.metadata.event_code:system.add'
+          name: Create
+          id: 1
+        - filter:
+            query: '@ocsf.metadata.event_code:system.delete'
+          name: Delete
+          id: 4
+        targets:
+          name: ocsf.activity_name
+          id: ocsf.activity_id
+      - type: schema-category-mapper
+        name: ocsf.status_id
+        categories:
+        - filter:
+            query: '*'
+          name: Success
+          id: 1
+        targets:
+          name: ocsf.status
+          id: ocsf.status_id
+      - type: schema-category-mapper
+        name: ocsf.severity_id
+        categories:
+        - filter:
+            query: '*'
+          name: Informational
+          id: 1
+        targets:
+          name: ocsf.severity
+          id: ocsf.severity_id
+      schema:
+        schemaType: ocsf
+        version: 1.5.0
+        className: Entity Management
+        classUid: 3004
+        extensions: []
+        profiles: []
+  - type: pipeline
+    name: OCSF sub pipeline for class Device Config State Change [5019] (Console events)
+    enabled: true
+    ocsf:
+      isOcsf: true
+    filter:
+      query: '@evt.category:events @ocsf.metadata.event_code:system.policy.action'
+    processors:
+    - type: schema-processor
+      name: Apply OCSF schema for 5019
+      enabled: true
+      mappers:
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+        sources:
+        - ocsf.metadata.product.name
+        target: ocsf.metadata.product.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+        sources:
+        - ocsf.metadata.product.vendor_name
+        target: ocsf.metadata.product.vendor_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+        sources:
+        - ocsf.metadata.log_name
+        target: ocsf.metadata.log_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+        sources:
+        - ocsf.metadata.log_provider
+        target: ocsf.metadata.log_provider
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+        sources:
+        - ocsf.metadata.event_code
+        target: ocsf.metadata.event_code
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+        sources:
+        - ocsf.metadata.uid
+        target: ocsf.metadata.uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+        sources:
+        - ocsf.metadata.original_time
+        target: ocsf.metadata.original_time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.time` to `ocsf.time`
+        sources:
+        - ocsf.time
+        target: ocsf.time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `server_id` to `ocsf.device.uid`
+        sources:
+        - server_id
+        target: ocsf.device.uid
+        preserveSource: true
+        overrideOnConflict: true
+        targetFormat: string
+      - type: schema-remapper
+        name: Map `server_name` to `ocsf.device.name`
+        sources:
+        - server_name
+        target: ocsf.device.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `organization_id` to `ocsf.device.org.uid`
+        sources:
+        - organization_id
+        target: ocsf.device.org.uid
+        preserveSource: true
+        overrideOnConflict: true
+        targetFormat: string
+      - type: schema-remapper
+        name: Map `data.ip` to `ocsf.device.ip`
+        sources:
+        - data.ip
+        target: ocsf.device.ip
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `data.os` to `ocsf.device.os.name`
+        sources:
+        - data.os
+        target: ocsf.device.os.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-category-mapper
+        name: ocsf.device.type_id
+        categories:
+        - filter:
+            query: '*'
+          name: Unknown
+          id: 0
+        targets:
+          name: ocsf.device.type
+          id: ocsf.device.type_id
+      - type: schema-category-mapper
+        name: ocsf.device.os.type_id
+        categories:
+        - filter:
+            query: '@data.os:(Mac OR "OS X")'
+          name: macOS
+          id: 300
+        - filter:
+            query: '@data.os:Windows'
+          name: Windows
+          id: 100
+        - filter:
+            query: '@data.os:*'
+          name: Linux
+          id: 200
+        targets:
+          name: ocsf.device.os.type
+          id: ocsf.device.os.type_id
+      - type: schema-remapper
+        name: Map `policy_id` to `ocsf.unmapped.policy.uid`
+        sources:
+        - policy_id
+        target: ocsf.unmapped.policy.uid
+        preserveSource: true
+        overrideOnConflict: true
+        targetFormat: string
+      - type: schema-remapper
+        name: Map `policy_name` to `ocsf.unmapped.policy.name`
+        sources:
+        - policy_name
+        target: ocsf.unmapped.policy.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `policy_type_name` to `ocsf.unmapped.policy.type`
+        sources:
+        - policy_type_name
+        target: ocsf.unmapped.policy.type
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `data.status` to `ocsf.status_code`
+        sources:
+        - data.status
+        target: ocsf.status_code
+        preserveSource: true
+        overrideOnConflict: true
+        targetFormat: string
+      - type: schema-remapper
+        name: Map `name` to `ocsf.message`
+        sources:
+        - name
+        target: ocsf.message
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-category-mapper
+        name: ocsf.activity_id
+        categories:
+        - filter:
+            query: '*'
+          name: Log
+          id: 1
+        targets:
+          name: ocsf.activity_name
+          id: ocsf.activity_id
+      - type: schema-category-mapper
+        name: ocsf.status_id
+        categories:
+        - filter:
+            query: '@data.status:0'
+          name: Success
+          id: 1
+        - filter:
+            query: '@data.status:*'
+          name: Other
+          id: 99
+        - filter:
+            query: '*'
+          name: Unknown
+          id: 0
+        targets:
+          name: ocsf.status
+          id: ocsf.status_id
+        fallback:
+          values:
+            ocsf.status_id: '99'
+            ocsf.status: Other
+          sources:
+            ocsf.status:
+            - data.status
+      - type: schema-category-mapper
+        name: ocsf.severity_id
+        categories:
+        - filter:
+            query: '*'
+          name: Informational
+          id: 1
+        targets:
+          name: ocsf.severity
+          id: ocsf.severity_id
+      schema:
+        schemaType: ocsf
+        version: 1.5.0
+        className: Device Config State Change
+        classUid: 5019
+        extensions: []
+        profiles: []
+  - type: pipeline
+    name: Console events > Application Lifecycle [6002] > Parse the patches and the failure
+    enabled: true
+    filter:
+      query: '@evt.category:events @ocsf.metadata.event_code:(system.patch.applied OR system.patch.failed)'
+    processors:
+    - type: grok-parser
+      name: Take the first patch name
+      enabled: true
+      source: data.patches
+      samples:
+      - '"Firefox" "Google Chrome"'
+      grok:
+        supportRules: ''
+        matchRules: 'first_patch "%{regex("[^\"]+"):automox.patch.first}"%{data}
+
+          '
+    - type: grok-parser
+      name: Take the failure's first sentence
+      enabled: true
+      source: data.failure
+      samples:
+      - 'Failed to apply patches ("Docker"): time=2026-09-20T00:17:05Z level=INFO'
+      grok:
+        supportRules: ''
+        matchRules: 'summary %{data:automox.patch.summary}: time=%{data}
+
+          whole %{data:automox.patch.summary}
+
+          '
+  - type: pipeline
+    name: Console events > Application Lifecycle [6002] > Summarise an applied patch run
+    enabled: true
+    filter:
+      query: '@evt.category:events @ocsf.metadata.event_code:system.patch.applied'
+    processors:
+    - type: string-builder-processor
+      name: Add patch summary
+      enabled: true
+      template: Applied patches %{data.patches}
+      target: automox.patch.summary
+      replaceMissing: false
+  - type: pipeline
+    name: OCSF sub pipeline for class Application Lifecycle [6002] (Console events)
+    enabled: true
+    ocsf:
+      isOcsf: true
+    filter:
+      query: '@evt.category:events @ocsf.metadata.event_code:(system.patch.applied OR system.patch.failed)'
+    processors:
+    - type: schema-processor
+      name: Apply OCSF schema for 6002
+      enabled: true
+      mappers:
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+        sources:
+        - ocsf.metadata.product.name
+        target: ocsf.metadata.product.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+        sources:
+        - ocsf.metadata.product.vendor_name
+        target: ocsf.metadata.product.vendor_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+        sources:
+        - ocsf.metadata.log_name
+        target: ocsf.metadata.log_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+        sources:
+        - ocsf.metadata.log_provider
+        target: ocsf.metadata.log_provider
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+        sources:
+        - ocsf.metadata.event_code
+        target: ocsf.metadata.event_code
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+        sources:
+        - ocsf.metadata.uid
+        target: ocsf.metadata.uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+        sources:
+        - ocsf.metadata.original_time
+        target: ocsf.metadata.original_time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.time` to `ocsf.time`
+        sources:
+        - ocsf.time
+        target: ocsf.time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `server_id` to `ocsf.device.uid`
+        sources:
+        - server_id
+        target: ocsf.device.uid
+        preserveSource: true
+        overrideOnConflict: true
+        targetFormat: string
+      - type: schema-remapper
+        name: Map `server_name` to `ocsf.device.name`
+        sources:
+        - server_name
+        target: ocsf.device.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `organization_id` to `ocsf.device.org.uid`
+        sources:
+        - organization_id
+        target: ocsf.device.org.uid
+        preserveSource: true
+        overrideOnConflict: true
+        targetFormat: string
+      - type: schema-remapper
+        name: Map `data.ip` to `ocsf.device.ip`
+        sources:
+        - data.ip
+        target: ocsf.device.ip
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `data.os` to `ocsf.device.os.name`
+        sources:
+        - data.os
+        target: ocsf.device.os.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-category-mapper
+        name: ocsf.device.type_id
+        categories:
+        - filter:
+            query: '*'
+          name: Unknown
+          id: 0
+        targets:
+          name: ocsf.device.type
+          id: ocsf.device.type_id
+      - type: schema-category-mapper
+        name: ocsf.device.os.type_id
+        categories:
+        - filter:
+            query: '@data.os:(Mac OR "OS X")'
+          name: macOS
+          id: 300
+        - filter:
+            query: '@data.os:Windows'
+          name: Windows
+          id: 100
+        - filter:
+            query: '@data.os:*'
+          name: Linux
+          id: 200
+        targets:
+          name: ocsf.device.os.type
+          id: ocsf.device.os.type_id
+      - type: schema-remapper
+        name: Map `automox.patch.first` to `ocsf.app.name`
+        sources:
+        - automox.patch.first
+        target: ocsf.app.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `data.patches` to `ocsf.unmapped.patches`
+        sources:
+        - data.patches
+        target: ocsf.unmapped.patches
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.patch.summary` to `ocsf.message`
+        sources:
+        - automox.patch.summary
+        target: ocsf.message
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `automox.patch.summary` to `ocsf.status_detail`
+        sources:
+        - automox.patch.summary
+        target: ocsf.status_detail
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-category-mapper
+        name: ocsf.activity_id
+        categories:
+        - filter:
+            query: '*'
+          name: Update
+          id: 8
+        targets:
+          name: ocsf.activity_name
+          id: ocsf.activity_id
+      - type: schema-category-mapper
+        name: ocsf.status_id
+        categories:
+        - filter:
+            query: '@ocsf.metadata.event_code:system.patch.failed'
+          name: Failure
+          id: 2
+        - filter:
+            query: '*'
+          name: Success
+          id: 1
+        targets:
+          name: ocsf.status
+          id: ocsf.status_id
+      - type: schema-category-mapper
+        name: ocsf.severity_id
+        categories:
+        - filter:
+            query: '@ocsf.metadata.event_code:system.patch.failed'
+          name: Low
+          id: 2
+        - filter:
+            query: '*'
+          name: Informational
+          id: 1
+        targets:
+          name: ocsf.severity
+          id: ocsf.severity_id
+      schema:
+        schemaType: ocsf
+        version: 1.5.0
+        className: Application Lifecycle
+        classUid: 6002
+        extensions: []
+        profiles:
+        - host
+  - type: pipeline
+    name: OCSF sub pipeline for class Base Event [0] (Console events)
+    enabled: true
+    ocsf:
+      isOcsf: true
+    filter:
+      query: '@evt.category:events -@ocsf.category_uid:*'
+    processors:
+    - type: schema-processor
+      name: Apply OCSF schema for 0
+      enabled: true
+      mappers:
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
+        sources:
+        - ocsf.metadata.product.name
+        target: ocsf.metadata.product.name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
+        sources:
+        - ocsf.metadata.product.vendor_name
+        target: ocsf.metadata.product.vendor_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_name` to `ocsf.metadata.log_name`
+        sources:
+        - ocsf.metadata.log_name
+        target: ocsf.metadata.log_name
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.log_provider` to `ocsf.metadata.log_provider`
+        sources:
+        - ocsf.metadata.log_provider
+        target: ocsf.metadata.log_provider
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
+        sources:
+        - ocsf.metadata.event_code
+        target: ocsf.metadata.event_code
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
+        sources:
+        - ocsf.metadata.uid
+        target: ocsf.metadata.uid
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.metadata.original_time` to `ocsf.metadata.original_time`
+        sources:
+        - ocsf.metadata.original_time
+        target: ocsf.metadata.original_time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `ocsf.time` to `ocsf.time`
+        sources:
+        - ocsf.time
+        target: ocsf.time
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-remapper
+        name: Map `name` to `ocsf.message`
+        sources:
+        - name
+        target: ocsf.message
+        preserveSource: true
+        overrideOnConflict: true
+      - type: schema-category-mapper
+        name: ocsf.activity_id
+        categories:
+        - filter:
+            query: '@ocsf.metadata.event_code:*'
+          name: Other
+          id: 99
+        targets:
+          name: ocsf.activity_name
+          id: ocsf.activity_id
+        fallback:
+          values:
+            ocsf.activity_id: '99'
+            ocsf.activity_name: Other
+          sources:
+            ocsf.activity_name:
+            - ocsf.metadata.event_code
+      - type: schema-category-mapper
+        name: ocsf.status_id
+        categories:
+        - filter:
+            query: '*'
+          name: Unknown
+          id: 0
+        targets:
+          name: ocsf.status
+          id: ocsf.status_id
+      - type: schema-category-mapper
+        name: ocsf.severity_id
+        categories:
+        - filter:
+            query: '*'
+          name: Informational
+          id: 1
+        targets:
+          name: ocsf.severity
+          id: ocsf.severity_id
+      schema:
+        schemaType: ocsf
+        version: 1.5.0
+        className: Base Event
+        classUid: 0
+        extensions: []
+        profiles: []
+  - type: pipeline
+    name: Console events > Remove the working attributes under `automox`
+    enabled: true
+    filter:
+      query: '@evt.category:events'
+    processors:
+    - type: exclude-attribute
+      name: Remove the working attributes under `automox`
+      enabled: true
+      attributeToExclude: automox
