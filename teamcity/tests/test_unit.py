@@ -2,9 +2,11 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from collections import OrderedDict
+from urllib.parse import parse_qs, urlparse
 
 import pytest
 
+from datadog_checks.dev.http import MockResponse
 from datadog_checks.teamcity.common import filter_build_configs, filter_items, filter_projects, normalize_server_url
 
 from .common import (
@@ -18,6 +20,7 @@ from .common import (
     CONFIG_ONLY_EXCLUDE_ONE_BUILD_CONFIG,
     CONFIG_ONLY_EXCLUDE_ONE_PROJECT,
     CONFIG_ONLY_INCLUDE_ONE_BUILD_CONFIG,
+    LEGACY_REST_INSTANCE,
     TEAMCITY_SERVER_VALUES,
     USE_OPENMETRICS,
 )
@@ -348,3 +351,56 @@ def test_filter_build_configs(
     filtered = filter_build_configs(check, build_configs_to_filter, 'ProjectID', {'ProjectID': filter_config})
 
     assert filtered == expected_result
+
+
+def test_collects_build_config_without_default_branch_builds(dd_run_check, aggregator, mocker, teamcity_rest_check):
+    """
+    TeamCity's default build filter hides builds outside the default branch, as well as personal, canceled,
+    and failed-to-start builds. A build configuration whose builds all fall in that set, such as one that
+    only builds pull request branches, must still be collected.
+    """
+    build_config = LEGACY_REST_INSTANCE['build_configuration']
+    builds = []
+
+    def add_pull_request_build(build_id):
+        builds.insert(
+            0,
+            {
+                'id': build_id,
+                'buildTypeId': build_config,
+                'number': str(build_id),
+                'status': 'SUCCESS',
+                'state': 'finished',
+                'branchName': 'pull/{}'.format(build_id),
+                'webUrl': 'http://localhost:8111/viewLog.html?buildId={}'.format(build_id),
+            },
+        )
+
+    def teamcity_api(url, **kwargs):
+        parsed_url = urlparse(url)
+        if parsed_url.path.endswith('/app/rest/builds/'):
+            locator = parse_qs(parsed_url.query)['locator'][0]
+            # Without `defaultFilter:false`, TeamCity only returns default branch builds.
+            matching = builds if 'defaultFilter:false' in locator else []
+            if 'sinceBuild:id:' in locator:
+                since_build = int(locator.split('sinceBuild:id:')[1].split(',')[0])
+                matching = [build for build in matching if build['id'] > since_build]
+            if 'count:1' in locator:
+                matching = matching[:1]
+            return MockResponse(json_data={'count': len(matching), 'build': matching})
+        if parsed_url.path.endswith('/app/rest/buildTypes/id:{}'.format(build_config)):
+            return MockResponse(json_data={'id': build_config, 'projectId': 'SampleProject'})
+        return MockResponse(json_data={'count': 0})
+
+    mocker.patch('requests.Session.get', side_effect=teamcity_api)
+    instance = dict(
+        LEGACY_REST_INSTANCE, build_config_metrics=False, tests_health_check=False, build_problem_health_check=False
+    )
+    check = teamcity_rest_check(instance)
+
+    add_pull_request_build(100)
+    dd_run_check(check)
+    add_pull_request_build(101)
+    dd_run_check(check)
+
+    assert ['build_id:101' in event['tags'] for event in aggregator.events] == [True]

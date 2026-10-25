@@ -52,7 +52,7 @@
       "path": "/guestAuth/app/rest/builds/",
       "queryStringParameters": {
         "locator": [
-          "buildType:SampleProject_Build,project:SampleProject,count:1"
+          "buildType:SampleProject_Build,project:SampleProject,state:finished,defaultFilter:false,count:1"
         ]
       }
     },
@@ -83,7 +83,7 @@
       "path": "/guestAuth/app/rest/builds/",
       "queryStringParameters": {
         "locator": [
-          "buildType:SampleProject_Empty_Builds,project:SampleProject,count:1"
+          "buildType:SampleProject_Empty_Builds,project:SampleProject,state:finished,defaultFilter:false,count:1"
         ]
       }
     },
