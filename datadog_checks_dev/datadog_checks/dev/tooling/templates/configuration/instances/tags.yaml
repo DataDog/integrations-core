@@ -7,6 +7,7 @@ value:
   type: array
   items:
     type: string
+    formats: ["tag"]
 description: |
   A list of tags to attach to every metric and service check emitted by this instance.
 
