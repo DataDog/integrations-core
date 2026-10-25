@@ -8,8 +8,8 @@ This integration collects the following from an Automox organization:
 
 - **Audit trail**: administrative activity in the Automox console, such as sign-ins, policy and device changes, API key and role management, and remote control sessions.
 - **Console events**: devices added and removed, patches applied and failed, policy actions, and users created and removed.
-- **Policy executions**: the outcome of each policy run, with the number of devices that succeeded, failed, or are still pending.
-- **Metrics**: device inventory and status, outstanding patches by severity and age, known-exploited vulnerabilities, policy compliance, manual approvals, and devices that need attention.
+- **Policy execution metrics**: the outcome of each policy's latest run, with the number of devices that succeeded, failed, or are still pending.
+- **Device metrics**: device inventory and status, outstanding patches by severity and age, known-exploited vulnerabilities, policy compliance, and devices that need attention.
 
 With the out-of-the-box logs pipeline, the logs are parsed, enriched, and mapped to the Open Cybersecurity Schema Framework (OCSF) for easy searching and analysis. The integration includes a dashboard and recommended monitors for patch exposure and policy compliance.
 
@@ -18,7 +18,7 @@ With the out-of-the-box logs pipeline, the logs are parsed, enriched, and mapped
 ### Generate an API key in Automox
 
 1. Log in to the [Automox console][2].
-2. Go to **Settings** > **Keys**, and create an API key without an expiration. An organization API key is sufficient. A [global API key][3] also works.
+2. Go to **Settings** > **Keys**, and create an API key without an expiration. An organization API key with read-only access is sufficient. A [global API key][3] also works.
 3. Copy the API key.
 
 ### Find your organization ID
@@ -43,11 +43,13 @@ The integration needs the numeric ID of the Automox organization, not its UUID. 
 
 ### Logs
 
-The Automox integration collects the Automox audit trail, console events, and policy executions.
+The Automox integration collects the Automox audit trail and console events. Audit trail logs have the `service:audit` tag, and console events have the `service:events` tag.
 
 ### Metrics
 
-The Automox integration collects device, patch, policy compliance, and approval metrics.
+The Automox integration collects device, patch, policy compliance, policy execution, and Needs Attention report metrics. The `automox.device.*` metrics, from the device inventory and its outstanding packages, are collected twice a day. The other metrics are collected every few minutes.
+
+{{< get-metrics-from-git "automox" >}}
 
 ### Events
 

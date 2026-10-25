@@ -33,12 +33,35 @@
       "events": {
         "creates_events": false
       },
+      "metrics": {
+        "prefix": "automox.",
+        "check": [
+          "automox.org.device_count"
+        ],
+        "metadata_path": "metadata.csv"
+      },
       "service_checks": {
         "metadata_path": "assets/service_checks.json"
       }
     },
-    "dashboards": {},
-    "monitors": {},
+    "dashboards": {
+      "Automox Overview": "assets/dashboards/automox_overview.json"
+    },
+    "logs": {
+      "source": "automox"
+    },
+    "monitors": {
+      "Known-exploited vulnerabilities are unpatched": "assets/monitors/known_exploited_vulnerabilities.json",
+      "Critical-severity patches are overdue": "assets/monitors/critical_patches_overdue.json",
+      "Critical-severity patches are stuck on failing devices": "assets/monitors/critical_patches_on_failing_devices.json",
+      "High-severity patches are overdue": "assets/monitors/high_patches_overdue.json",
+      "Patch policy non-compliance is high": "assets/monitors/patch_policy_noncompliance.json",
+      "Patch installations are failing on many devices": "assets/monitors/patch_failures.json",
+      "Devices have been disconnected for 30 days": "assets/monitors/devices_disconnected.json",
+      "Automox data has stopped arriving": "assets/monitors/data_stopped.json",
+      "Automox device data has stopped arriving": "assets/monitors/device_data_stopped.json",
+      "Device inventory scans are failing": "assets/monitors/scan_failures.json"
+    },
     "saved_views": {}
   },
   "author": {
