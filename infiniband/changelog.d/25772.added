@@ -1,0 +1,1 @@
+Tag InfiniBand metrics with the HCA PCI address, NUMA node, node, system image and port GUIDs, and tag the link state metrics with the link width and speed.
