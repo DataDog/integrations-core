@@ -1,11 +1,11 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-import hashlib
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.base.utils.persistent_cache import config_set_persistent_cache_id
 
 from .config_models import ConfigMixin
 from .firewalls import FirewallSource, StaticFirewallSource
@@ -27,10 +27,7 @@ class PanFirewallCheck(AgentCheck, ConfigMixin):
         # The cache keys already name their device (serial, IP, Panorama host), so the namespace (and the Panorama
         # host) is enough to keep instances apart. Unlike the default config digest, editing credentials, tags or
         # tuning options keeps the threat watermarks, the Panorama firewall list and the device identities.
-        parts = [self.config.namespace or 'default']
-        if self.config.panorama_host:
-            parts.append(self.config.panorama_host)
-        return hashlib.md5('|'.join(parts).encode()).hexdigest()[:16]
+        return config_set_persistent_cache_id(self, instance_config_options=['namespace', 'panorama_host'])
 
     def check(self, _: Any) -> None:
         if self._source is None:

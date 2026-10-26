@@ -16,6 +16,7 @@ from .api import PanosClient
 from .auth import Credentials, KeyManager
 from .errors import PanosError
 from .firewalls import FirewallTarget, resolve_credentials
+from .log_utils import warn_once
 from .xml_utils import text
 
 if TYPE_CHECKING:
@@ -189,11 +190,7 @@ class PanoramaFirewallSource:
         )
 
     def _warn_once(self, key: str, msg: str, *args: object) -> None:
-        """Log the warning the first time `key` is seen, at debug level after that: a condition that lasts would
-        otherwise repeat it on every run."""
-        log = self._check.log.debug if key in self._warned else self._check.log.warning
-        self._warned.add(key)
-        log(msg, *args)
+        warn_once(self._check.log, self._warned, key, msg, *args)
 
     def _passes_filters(self, address: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
         filters = self._config.firewall_ips

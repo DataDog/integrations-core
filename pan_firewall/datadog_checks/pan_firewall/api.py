@@ -8,7 +8,7 @@ import threading
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any
 from urllib.parse import urlsplit
 from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import Element
@@ -23,8 +23,6 @@ if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
 
     from .auth import KeyManager
-
-T = TypeVar('T')
 
 KEY_HEADER = 'X-PAN-KEY'
 STREAM_CHUNK_SIZE = 64 * 1024
@@ -174,7 +172,7 @@ class PanosClient:
         with self._stats_lock:
             return dataclasses.replace(self._stats)
 
-    def _send(
+    def _send[T](
         self,
         params: dict[str, str],
         read: Callable[[ResponseWrapper], T],

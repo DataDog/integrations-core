@@ -13,6 +13,8 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal, NamedTuple
 from xml.etree.ElementTree import Element
 
+from datadog_checks.pan_firewall.log_utils import warn_once
+
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
     from datadog_checks.pan_firewall.api import PanosClient
@@ -125,13 +127,7 @@ class CollectContext:
         if not once:
             self.log.warning('%s: %s', self.ip, text)
             return
-        if key is None:
-            key = text
-        if key in self.state.warned:
-            self.log.debug('%s: %s', self.ip, text)
-            return
-        self.state.warned.add(key)
-        self.log.warning('%s: %s', self.ip, text)
+        warn_once(self.log, self.state.warned, text if key is None else key, '%s: %s', self.ip, text)
 
     def debug(self, msg: str, *args: object) -> None:
         self.log.debug('%s: %s', self.ip, msg % args if args else msg)

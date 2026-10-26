@@ -19,6 +19,7 @@ from .constants import IDENTITY
 from .errors import PanosError, PanosSkipped, PanosUnreachable
 from .identity import DeviceIdentity, configured_vsys, global_tags, parse_system_info, vsys_list
 from .interface_config import INTERFACE_CONFIG_CMD, parse_interface_config
+from .log_utils import warn_once
 from .metadata import build_device, build_interfaces
 from .ndm_models import DeviceMetadata, InterfaceMetadata, batch_payloads
 from .scheduler import BusyGate, FirewallSchedule, Result
@@ -321,9 +322,7 @@ class FirewallPoller:
     def _warn_once(self, key: str, msg: str, *args: object) -> None:
         """Log the warning the first time `key` is seen for this firewall, at debug level after that: a failure that
         lasts, such as a role without a permission, would otherwise repeat it every 30 minutes."""
-        log = self.log.debug if key in self.state.warned else self.log.warning
-        self.state.warned.add(key)
-        log('%s: ' + msg, self.ip, *args)
+        warn_once(self.log, self.state.warned, key, '%s: ' + msg, self.ip, *args)
 
     def _debug(self, msg: str, *args: object) -> None:
         """The `debug` callable of the `parse_*` functions the poller calls itself, outside a `CollectContext`."""
