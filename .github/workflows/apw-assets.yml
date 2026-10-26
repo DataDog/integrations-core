@@ -26,10 +26,9 @@ concurrency:
 
 jobs:
   package:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
-    outputs:
-      packaged: ${{ steps.export.outcome == 'success' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -41,37 +40,19 @@ jobs:
         with:
           cache-profile: local-ddev
       - name: Test shared packaging and release handling
-        if: github.event_name == 'pull_request'
         run: |
           ddev config override
           ddev --no-interactive test ddev -- tests/release/apw tests/cli/release/test_apw.py
-      - name: Check for a complete release
-        id: release
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: ddev --here release apw check --commit "$GITHUB_SHA" >> "$GITHUB_OUTPUT"
       - name: Export committed assets
-        id: export
-        if: steps.release.outputs.package != 'false'
         run: ddev --here release apw package --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA" --directory dist
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
-        if: steps.export.outcome == 'success'
-        with:
-          name: apw-assets
-          path: dist/*
-          if-no-files-found: error
-          retention-days: 7
 
   publish:
     # Only scheduled runs and manual dispatches from reviewed master can publish.
     if: >-
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') &&
-      github.ref == 'refs/heads/master' && needs.package.outputs.packaged == 'true'
-    needs: package
+      github.ref == 'refs/heads/master'
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 20
     permissions:
       contents: write
       id-token: write
@@ -85,23 +66,32 @@ jobs:
       - uses: ./.github/actions/setup-ddev
         with:
           cache-profile: local-ddev
-      - uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
-        with:
-          name: apw-assets
-          path: dist
+      - name: Check for a complete release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: ddev --here release apw check --commit "$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+      - name: Export committed assets
+        id: export
+        if: steps.release.outputs.package == 'true'
+        run: ddev --here release apw package --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA" --directory dist
       - name: Get source tag credentials
+        if: steps.export.outcome == 'success'
         id: octo-sts
         uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
         with:
           scope: DataDog/integrations-core
           policy: self.apw-assets.schedule
       - name: Ensure protected source tag exists
+        if: steps.export.outcome == 'success'
         env:
           GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
           GH_REPO: ${{ github.repository }}
         run: ddev --here release apw tag --commit "$GITHUB_SHA"
       # PRApprover requires github-actions[bot] as release author and asset uploader.
       - name: Verify and publish asset release
+        if: steps.export.outcome == 'success'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
