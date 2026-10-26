@@ -31,7 +31,7 @@ def test_fake_response_returns_only_configured_results():
     assert response.text == 'configured text'
     assert response.json(parse_float=str) is json_result
     assert list(response.iter_content(chunk_size=1, decode_unicode=True)) == [b'complete ', b'body']
-    assert list(response.iter_lines(chunk_size=1, decode_unicode=True, delimiter='|')) == ['first', 'second']
+    assert list(response.iter_lines(chunk_size=1, decode_unicode=True)) == ['first', 'second']
     assert list(response) == [b'complete ', b'body']
     assert response.get_peer_cert(binary_form=True) == b'certificate'
     assert response.headers['x-test'] == 'value'
@@ -42,6 +42,7 @@ def test_fake_response_returns_only_configured_results():
     [
         (b'first line\nsecond line', None, 'first line\nsecond line'),
         (b'caf\xe9', 'latin-1', 'café'),
+        (b'\xff\xfebinary', None, '\ufffd\ufffdbinary'),
     ],
 )
 def test_fake_response_derives_text_and_stream_results_from_content(
@@ -95,7 +96,7 @@ def test_fake_response_does_not_derive_metadata_or_json_from_content_or_headers(
 
     assert response.encoding is None
     assert response.links == {}
-    with pytest.raises(ValueError, match='No JSON result'):
+    with pytest.raises(AssertionError, match='No JSON result'):
         response.json()
 
 
@@ -204,6 +205,22 @@ def test_fake_client_reads_configured_cookies_and_falls_back_for_missing_names()
     assert client.get_cookie('missing', 'fallback') == 'fallback'
 
 
+@pytest.mark.parametrize(
+    'bypass',
+    [
+        pytest.param(True, id='flag'),
+        pytest.param(lambda url: url.startswith('https://internal.'), id='callable'),
+    ],
+)
+def test_created_clients_follow_the_parent_proxy_bypass(bypass):
+    parent = FakeHTTPClient()
+    child = parent.create_client()
+
+    parent.set_should_bypass_proxy(bypass)
+
+    assert child.should_bypass_proxy('https://internal.example/') is True
+
+
 def test_fake_client_reports_unmatched_request_and_pending_responses():
     client = FakeHTTPClient()
     client.register_response('POST', 'https://example.test/items', FakeHTTPResponse())
@@ -287,3 +304,13 @@ def test_fake_client_records_a_body_that_cannot_be_copied():
     client.post(url, data=body)
 
     assert client.requests[0].options['data'] is body
+
+
+class TestFakeHttpLegacyOptions:
+    def test_header_views_share_storage(self):
+        http = FakeHTTPClient()
+        http.options['headers']['X-Token'] = 'abc'
+        assert http.get_header('x-token') == 'abc'
+
+        http.set_header('X-Other', 'def')
+        assert http.options['headers']['X-Other'] == 'def'

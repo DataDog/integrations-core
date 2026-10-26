@@ -1,0 +1,1 @@
+Add opt-in collection of view definitions and column metadata during schema collection with `collect_schemas.collect_views`.

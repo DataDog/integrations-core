@@ -142,8 +142,12 @@ size-compressed.txt
 .env
 treemap*.png
 
-# Claude Code customizations
-.claude
+# Claude Code customizations (keep worktrees and local settings ignored,
+# but track shared, checked-in skills)
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/onboard-evalya/
 
 # Claude Code PR review artifacts
 .agint-review/

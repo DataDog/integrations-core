@@ -112,6 +112,18 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
         console_tag=True,
         metric_tag=True,
     ),
+    'operation_result': AttributeSpec(
+        'dispatcher.operation.result',
+        console_tag=True,
+        metric_tag=True,
+    ),
+    'operation_duration_seconds': AttributeSpec(
+        'dispatcher.operation.duration_seconds',
+    ),
+    # One entry per cause, each with its own fields, so causes of one operation never overwrite each other.
+    'operation_failures': AttributeSpec(
+        'dispatcher.operation.failures',
+    ),
     'outcome': AttributeSpec(
         'dispatcher.outcome',
         console_tag=True,

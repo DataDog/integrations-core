@@ -1,12 +1,13 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Base check error handling must behave the same whether or not a check sets AGNOSTIC_HTTP."""
+"""Base check error handling must behave the same whether or not a check sets AGNOSTIC_HTTP_CLIENT."""
 
 import re
 
 import pytest
 import requests
+from urllib3.exceptions import ReadTimeoutError
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheck, OpenMetricsBaseCheckV2
 from datadog_checks.base.checks.prometheus import PrometheusCheck
@@ -17,7 +18,7 @@ ENDPOINT = 'http://fake.endpoint:10055/metrics'
 
 @pytest.fixture(params=[False, True], ids=['default', 'agnostic'])
 def http_mode(request, monkeypatch, mocker):
-    monkeypatch.setattr(AgentCheck, 'AGNOSTIC_HTTP', request.param)
+    monkeypatch.setattr(AgentCheck, 'AGNOSTIC_HTTP_CLIENT', request.param)
     # Keeps SSL failures local instead of fetching intermediate certificates.
     mocker.patch.object(RequestsWrapper, 'fetch_intermediate_certs', return_value=[])
 
@@ -65,6 +66,17 @@ def test_openmetrics_v1_error_status_reports_critical(aggregator, mock_http_resp
 
 
 @pytest.mark.usefixtures('http_mode')
+def test_openmetrics_v1_connection_error_reports_critical(aggregator, mocker):
+    mocker.patch('requests.Session.get', side_effect=requests.exceptions.ConnectionError('refused'))
+    check, scraper_config = _openmetrics_v1_check()
+
+    with pytest.raises(requests.exceptions.ConnectionError):
+        check.poll(scraper_config)
+
+    aggregator.assert_service_check('test.prometheus.health', status=AgentCheck.CRITICAL, count=1)
+
+
+@pytest.mark.usefixtures('http_mode')
 def test_prometheus_ssl_error_skips_health_service_check(aggregator, mocker):
     mocker.patch('requests.Session.get', side_effect=requests.exceptions.SSLError('bad cert'))
     check = _prometheus_check()
@@ -81,6 +93,17 @@ def test_prometheus_error_status_reports_critical(aggregator, mock_http_response
     check = _prometheus_check()
 
     with pytest.raises(requests.exceptions.HTTPError):
+        check.poll(ENDPOINT)
+
+    aggregator.assert_service_check('test.prometheus.health', status=AgentCheck.CRITICAL, count=1)
+
+
+@pytest.mark.usefixtures('http_mode')
+def test_prometheus_connection_error_reports_critical(aggregator, mocker):
+    mocker.patch('requests.Session.get', side_effect=requests.exceptions.ConnectionError('refused'))
+    check = _prometheus_check()
+
+    with pytest.raises(requests.exceptions.ConnectionError):
         check.poll(ENDPOINT)
 
     aggregator.assert_service_check('test.prometheus.health', status=AgentCheck.CRITICAL, count=1)
@@ -116,3 +139,19 @@ def test_openmetrics_v2_read_timeout_fails_despite_ignore_connection_errors(dd_r
 
     with pytest.raises(Exception, match='read timed out'):
         dd_run_check(check)
+
+
+@pytest.mark.usefixtures('http_mode')
+def test_openmetrics_v2_ignores_mid_body_timeout_when_configured(dd_run_check, mocker, caplog):
+    # requests turns a read timeout while streaming the body into a connection error.
+    response = requests.Response()
+    response.status_code = 200
+    response.headers['Content-Type'] = 'text/plain'
+    response.raw = mocker.Mock()
+    response.raw.stream.side_effect = ReadTimeoutError(None, ENDPOINT, 'read timed out')
+    mocker.patch('requests.Session.get', return_value=response)
+    check = _openmetrics_v2_check(ignore_connection_errors=True)
+
+    dd_run_check(check)
+
+    assert f'OpenMetrics endpoint {ENDPOINT} is not accessible' in caplog.text

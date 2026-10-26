@@ -57,7 +57,7 @@ def test_read_timeout_before_response_reraised_when_connection_errors_are_ignore
         list(scraper.stream_connection_lines())
 
 
-def test_mid_stream_read_timeout_swallowed_when_connection_errors_are_ignored() -> None:
+def test_mid_stream_read_timeout_swallowed_when_connection_errors_are_ignored():
     connection = FakeHTTPResponse(
         headers={'Content-Type': 'text/plain'},
         lines=('first',),
@@ -72,7 +72,7 @@ def test_mid_stream_read_timeout_swallowed_when_connection_errors_are_ignored() 
     assert list(stream) == []
 
 
-def test_mid_stream_read_timeout_reraised_when_connection_errors_are_not_ignored() -> None:
+def test_mid_stream_read_timeout_reraised_when_connection_errors_are_not_ignored():
     connection = FakeHTTPResponse(
         headers={'Content-Type': 'text/plain'},
         lines=('first',),

@@ -94,6 +94,8 @@ ddev validate config -s <INTEGRATION_NAME>
 ddev validate models -s <INTEGRATION_NAME>
 ```
 
+The exception is `config_models/validators.py`, which is generated once and never overwritten: edit it by hand for rules a single spec field cannot express, such as cross-field checks or URL parsing.
+
 ## Service Checks
 
 **Applicable to:** newly created integrations. Existing integrations that already submit service checks are exempt.
@@ -104,11 +106,13 @@ The one exception is the OpenMetrics base check, which still emits a service che
 
 ## HTTP Requests
 
-**Applicable to:** new integrations, and any new or modified HTTP code in existing integrations. Existing code that still uses `requests` directly doesn't need to be migrated as part of an unrelated change.
+**Applicable to:** new integrations, and PRs dedicated to moving an existing integration onto this layer (`AGNOSTIC_HTTP_CLIENT = True`). Opting in switches the whole check, so don't do it inside an unrelated change. Opted-in checks must require a `datadog-checks-base` version that includes this layer.
 
 Make HTTP requests through the backend-neutral HTTP layer in `datadog_checks_base`, documented in `docs/developer/base/http.md`. Checks should not depend on the underlying HTTP library, so another backend can replace it without rewriting every integration and its tests.
 
-- Set `AGNOSTIC_HTTP = True` on the check class. Without it, clients return `requests` responses and raise `requests` exceptions, so the rules below do not hold and the `fake_http` fixture fails the test.
+To use the layer:
+
+- Set `AGNOSTIC_HTTP_CLIENT = True` on the check class. Without it, clients return `requests` responses and raise `requests` exceptions, so the rules below do not hold and the `fake_http` fixture fails the test.
 - Send requests through `self.http`. Construct additional clients with `AgentCheck.create_http_client()` rather than instantiating `RequestsWrapper` or a `requests.Session`.
 - Catch the exceptions in `datadog_checks.base.utils.http_exceptions` (for example `HTTPClientError`), never `requests.exceptions` types.
 - Use only the `HTTPClient` and `HTTPResponse` members documented in `http.md`. Anything else is an implementation detail of the current backend.

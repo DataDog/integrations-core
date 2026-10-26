@@ -179,7 +179,7 @@ class AgentCheck(object):
     # Opts the clients from create_http_client into the backend-neutral HTTP contract: responses expose only the
     # documented HTTPResponse members and errors are raised as datadog_checks.base.utils.http_exceptions types.
     # Unset, clients return and raise requests objects unchanged.
-    AGNOSTIC_HTTP = False
+    AGNOSTIC_HTTP_CLIENT = False
 
     # Used by `create_tls_context` for an instance of RequestsWrapper
     TLS_CONFIG_REMAPPER = None
@@ -517,7 +517,7 @@ class AgentCheck(object):
             self.init_config if init_config is None else init_config,
             self.HTTP_CONFIG_REMAPPER if remapper is None else remapper,
             self.log,
-            agnostic=self.AGNOSTIC_HTTP,
+            agnostic=self.AGNOSTIC_HTTP_CLIENT,
         )
 
     @property

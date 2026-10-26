@@ -575,7 +575,7 @@ class PrometheusScraperMixin(object):
 
         try:
             response = handler.get(endpoint, extra_headers=headers, stream=False)
-        # Checks with AGNOSTIC_HTTP raise the agnostic types. Checks without it raise requests exceptions.
+        # Checks with AGNOSTIC_HTTP_CLIENT raise the agnostic types. Checks without it raise requests exceptions.
         except (requests.exceptions.SSLError, HTTPClientSSLError):
             self.log.error("Invalid SSL settings for requesting %s endpoint", endpoint)
             raise

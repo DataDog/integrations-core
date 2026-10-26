@@ -1,0 +1,54 @@
+id: "nifi"
+tests:
+  - sample: "2026-05-01 12:00:00,123 INFO [main] o.a.nifi.NiFi Launched NiFi"
+    result:
+      custom:
+        timestamp: 1777636800123
+        level: "INFO"
+        logger:
+          name: "o.a.nifi.NiFi"
+          thread_name: "main"
+      message: "Launched NiFi"
+      status: "info"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1777636800123
+  - sample: "2026-05-01 12:03:11,884 WARN [Timer-Driven Process Thread-1] o.a.n.processors.standard.PutFile PutFile[id=8f1c9e2a-3b4d-4e5f-9a1b-2c3d4e5f6a7b] failed to process session"
+    result:
+      custom:
+        timestamp: 1777636991884
+        level: "WARN"
+        logger:
+          name: "o.a.n.processors.standard.PutFile"
+          thread_name: "Timer-Driven Process Thread-1"
+      message: "PutFile[id=8f1c9e2a-3b4d-4e5f-9a1b-2c3d4e5f6a7b] failed to process session"
+      status: "warn"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1777636991884
+  - sample: "2026-05-01 12:05:22,001 ERROR [Timer-Driven Process Thread-2] o.a.n.processors.standard.GetFile GetFile[id=2d3e4f5a-6b7c-4d8e-9f0a-1b2c3d4e5f6a] unable to read from source directory"
+    result:
+      custom:
+        timestamp: 1777637122001
+        level: "ERROR"
+        logger:
+          name: "o.a.n.processors.standard.GetFile"
+          thread_name: "Timer-Driven Process Thread-2"
+      message: "GetFile[id=2d3e4f5a-6b7c-4d8e-9f0a-1b2c3d4e5f6a] unable to read from source directory"
+      status: "error"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1777637122001
+  - sample: "2026-05-01 12:10:05,432 INFO [NiFi Web Server-19] o.a.n.audit.ProcessorAuditor admin updated the name of Processor GenerateFlowFile"
+    result:
+      custom:
+        timestamp: 1777637405432
+        level: "INFO"
+        logger:
+          name: "o.a.n.audit.ProcessorAuditor"
+          thread_name: "NiFi Web Server-19"
+      message: "admin updated the name of Processor GenerateFlowFile"
+      status: "info"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1777637405432
