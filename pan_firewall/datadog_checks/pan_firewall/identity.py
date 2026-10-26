@@ -79,6 +79,7 @@ def global_tags(
             ('os_version', (identity.sw_version if identity else None) or target.sw_version),
             ('multi_vsys', _bool_tag(identity.multi_vsys) if identity else None),
             ('advanced_routing', _bool_tag(identity.advanced_routing) if identity else None),
+            ('panorama_host', target.panorama_host),
         )
     )
     tags.extend(user_tags)

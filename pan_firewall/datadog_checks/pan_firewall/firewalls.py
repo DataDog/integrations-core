@@ -27,6 +27,8 @@ class FirewallTarget:
     family: str | None = None
     model: str | None = None
     sw_version: str | None = None
+    # The Panorama that discovered the firewall: the same for every firewall of an instance.
+    panorama_host: str | None = None
 
     @property
     def poller_key(self) -> tuple[object, ...]:

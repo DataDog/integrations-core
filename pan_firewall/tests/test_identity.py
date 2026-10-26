@@ -19,7 +19,9 @@ pytestmark = pytest.mark.unit
 
 CREDS = Credentials(username='dummy-user', password='dummy-password', api_key=None)
 # A Panorama-discovered fw-a, polled at the IP Panorama reports for it.
-PANORAMA_TARGET = FirewallTarget(ip='10.20.0.10', credentials=CREDS, serial=FW_A_SERIAL, hostname='fw-a')
+PANORAMA_TARGET = FirewallTarget(
+    ip='10.20.0.10', credentials=CREDS, serial=FW_A_SERIAL, hostname='fw-a', panorama_host='panorama.example.com'
+)
 FW_A = parse_system_info(parse_response(op_fixture(SYSTEM_INFO_CMD).read_bytes()))
 
 
@@ -55,6 +57,7 @@ def test_global_tags_take_serial_and_hostname_from_panorama_discovery():
             'device_hostname:fw-a',
             f'device_serial:{FW_A_SERIAL}',
             'device_vendor:paloaltonetworks',
+            'panorama_host:panorama.example.com',
             f'dd.internal.resource:ndm_device:{FW_A_SERIAL}',
             f'dd.internal.resource:ndm_device_user_tags:{FW_A_SERIAL}',
         ]

@@ -187,6 +187,7 @@ class PanoramaFirewallSource:
             family=firewall.family,
             model=firewall.model,
             sw_version=firewall.sw_version,
+            panorama_host=self._host,
         )
 
     def _warn_once(self, key: str, msg: str, *args: object) -> None:

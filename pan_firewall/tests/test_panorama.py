@@ -126,7 +126,11 @@ def test_firewalls_are_polled_at_the_reported_ip_which_is_their_device_ip(dd_run
     can_connect = metrics_by_ip(aggregator, 'can_connect')
     assert {ip: m.value for ip, m in can_connect.items()} == {FW_A_IP: 1, FW_B_IP: 1}
     fw_a_tags = can_connect[FW_A_IP].tags
-    assert {f'device_id:{FW_A_SERIAL}', 'device_hostname:fw-a', 'device_model:PA-VM'} <= set(fw_a_tags)
+    expected = {f'device_id:{FW_A_SERIAL}', 'device_hostname:fw-a', 'device_model:PA-VM', f'panorama_host:{PANORAMA}'}
+    assert expected <= set(fw_a_tags)
+    # Every firewall metric carries it, not only the health ones.
+    cpu = aggregator.metrics('pan_firewall.mgmt.cpu.used')
+    assert cpu and all(f'panorama_host:{PANORAMA}' in m.tags for m in cpu)
 
 
 def test_firewall_at_an_unreachable_reported_ip_is_reported_down(dd_run_check, aggregator, fake_panos):
