@@ -1,7 +1,7 @@
 {
   "manifest_version": "2.0.0",
   "app_uuid": "77694a48-d9d2-4d54-9e71-978a646e2360",
-  "app_id": "akamai-costs",
+  "app_id": "akamai-cost-management",
   "display_on_public_website": false,
   "oauth": {},
   "owner": "saas-integrations",
