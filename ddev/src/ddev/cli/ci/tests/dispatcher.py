@@ -248,7 +248,7 @@ def build_dispatcher(
         logger=client_logger,
         observer=github_monitor,
         # None unless the Dispatcher workflow opts in; its runs outlive the one-hour token.
-        token_provider=octo_sts_token_provider_from_env(logger=client_logger),
+        token_provider=octo_sts_token_provider_from_env(initial_token=token, logger=client_logger),
     )
 
     canonical_run_fields = run_fields(run, tags=tags)
