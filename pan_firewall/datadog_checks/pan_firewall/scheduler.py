@@ -8,7 +8,7 @@ from collections.abc import Callable, Collection, Iterable
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from .constants import COLLECTORS, COMMIT_SKIP_MAX_SECONDS, FAILURE_RETRY_SECONDS, IDENTITY, INTERVALS
+from .constants import COLLECTORS, COMMIT_SKIP_MAX_SECONDS, DUE_SLACK, FAILURE_RETRY_SECONDS, IDENTITY, INTERVALS
 
 if TYPE_CHECKING:
     from datadog_checks.base.log import CheckLoggingAdapter
@@ -46,9 +46,9 @@ class FirewallSchedule:
         ]
 
     def mark_run(self, names: Iterable[str], now: float) -> None:
-        """Call it for the collectors that succeeded: they are due again after their interval."""
+        """Call it for the collectors that succeeded: they are due again `DUE_SLACK` before their interval."""
         for name in names:
-            self._next_due[name] = now + INTERVALS[name]
+            self._next_due[name] = now + INTERVALS[name] - DUE_SLACK
 
     def mark_failed(self, names: Iterable[str], now: float) -> None:
         """Call it for the collectors that failed: they are due again after `FAILURE_RETRY_SECONDS` at most."""

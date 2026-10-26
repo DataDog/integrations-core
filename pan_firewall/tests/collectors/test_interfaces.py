@@ -117,7 +117,7 @@ def test_speeds_are_sent_with_the_identity_every_30_minutes(dd_run_check, aggreg
     start = schedule_clock.now
 
     sent = []
-    for seconds in (0, 1799, 1800):
+    for seconds in (0, 1794, 1795):
         schedule_clock.now = start + seconds
         before = len(aggregator.metrics('pan_firewall.interface.speed'))
         dd_run_check(check)

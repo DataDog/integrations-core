@@ -205,7 +205,7 @@ def test_metadata_is_sent_every_30_minutes(dd_run_check, aggregator, schedule_cl
     dd_run_check(check)
     assert len(events(aggregator)) == 1
 
-    schedule_clock.now += 1799
+    schedule_clock.now += 1794
     dd_run_check(check)
     assert len(events(aggregator)) == 1
 

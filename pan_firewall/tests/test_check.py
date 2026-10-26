@@ -226,11 +226,18 @@ def test_run_with_nothing_due_makes_no_call_and_sends_no_health_metric(dd_run_ch
     assert aggregator.metrics('pan_firewall.api.authentication.status') == []
 
 
+@pytest.mark.parametrize(
+    'first_start',
+    [
+        pytest.param(0, id='on-the-grid'),
+        pytest.param(0.5, id='first-run-started-late'),
+    ],
+)
 def test_collector_timers_count_from_the_start_of_the_run(
-    dd_run_check, aggregator, fake_panos, monkeypatch, schedule_clock
+    dd_run_check, aggregator, fake_panos, monkeypatch, schedule_clock, first_start
 ):
-    # The Agent starts runs on a fixed 60 s grid: timers counted from the end of a run that takes 2 s would make the
-    # run at 120 s too early for `bgp` (every 120 s), and delay it to 180 s.
+    # The Agent starts runs on a fixed 60 s grid, each a little late by a varying amount. `bgp` (every 120 s) must run
+    # again on the tick 120 s later, even though its first run took 2 s and started later than that tick does.
     def bgp(ctx):
         schedule_clock.now += 2
         return [stub_sample('bgp')]
@@ -240,14 +247,14 @@ def test_collector_timers_count_from_the_start_of_the_run(
     start = schedule_clock.now
     bgp_runs = []
 
-    for offset in (0, 60, 120):
+    for offset in (first_start, 60, 120):
         schedule_clock.now = start + offset
         aggregator.reset()
         dd_run_check(check)
         if (FW_A_IP, 'bgp') in stub_runs(aggregator):
             bgp_runs.append(offset)
 
-    assert bgp_runs == [0, 120]
+    assert bgp_runs == [first_start, 120]
 
 
 def test_firewalls_are_polled_concurrently_up_to_max_concurrency(dd_run_check, aggregator, monkeypatch):

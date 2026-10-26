@@ -33,6 +33,9 @@ COLLECTORS = tuple(INTERVALS)
 # A collector that failed runs again after its interval or this, whichever is sooner, so one failed call does not cost
 # a long interval's data (a day of licenses).
 FAILURE_RETRY_SECONDS = 300
+# A collector that ran is due again this much before its interval. The Agent starts runs on a fixed grid but a little
+# late by a varying amount, so a timer due exactly on a later tick would wait one more run about half the time.
+DUE_SLACK = 5
 
 # `device_vendor` tag value (the NDM metadata `vendor` is a different string).
 DEVICE_VENDOR_TAG = 'paloaltonetworks'

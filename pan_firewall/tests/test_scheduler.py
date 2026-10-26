@@ -49,9 +49,10 @@ def test_identity_metadata_is_forced_while_identity_is_missing(schedule, clock):
 @pytest.mark.parametrize(
     'name, result, elapsed, is_due',
     [
-        # `licenses` runs once a day, so a retry delay shorter than its interval shows.
-        pytest.param('licenses', Result.RAN, 86399, False, id='ran-before-its-interval'),
-        pytest.param('licenses', Result.RAN, 86400, True, id='ran-after-its-interval'),
+        # `licenses` runs once a day, so a retry delay shorter than its interval shows. A collector that ran is due
+        # `DUE_SLACK` (5 s) before its interval.
+        pytest.param('licenses', Result.RAN, 86394, False, id='ran-before-its-interval'),
+        pytest.param('licenses', Result.RAN, 86395, True, id='ran-after-its-interval'),
         pytest.param('licenses', Result.FAILED, 299, False, id='failed-before-the-retry-delay'),
         pytest.param('licenses', Result.FAILED, 300, True, id='failed-after-the-retry-delay'),
         pytest.param('licenses', Result.UNREACHABLE, 299, False, id='unreachable-before-the-retry-delay'),
