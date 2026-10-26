@@ -376,7 +376,7 @@ BEGIN
 
     -- Each histogram is read once; only whether a step is the NULL step is kept, never its value.
     SELECT s.object_id, s.stats_id, CASE WHEN hh.range_high_key IS NULL THEN 1 ELSE 0 END AS is_null,
-        CAST(hh.equal_rows AS FLOAT) AS equal_rows, hh.distinct_range_rows
+        CAST(hh.equal_rows AS FLOAT) AS equal_rows, CAST(hh.range_rows AS FLOAT) AS range_rows, hh.distinct_range_rows
     INTO #hist
     FROM #stats s
     CROSS APPLY sys.dm_db_stats_histogram(s.object_id, s.stats_id) hh;
@@ -393,9 +393,15 @@ BEGIN
     FROM #stats s
     CROSS APPLY (
         SELECT SUM(CASE WHEN hh.is_null = 1 THEN 0 ELSE 1 + hh.distinct_range_rows END) AS n_distinct,
-            SUM(CASE WHEN hh.is_null = 1 THEN hh.equal_rows ELSE 0 END) AS null_rows
+            SUM(CASE WHEN hh.is_null = 1 THEN hh.equal_rows END) AS null_step_rows,
+            SUM(CASE WHEN hh.is_null = 1 THEN 0 ELSE hh.equal_rows + hh.range_rows END) AS value_rows
         FROM #hist hh
         WHERE hh.object_id = s.object_id AND hh.stats_id = s.stats_id
+    ) hv
+    -- The NULL step counts the NULLs. Without one, they're the rows the other steps don't cover.
+    CROSS APPLY (
+        SELECT hv.n_distinct, CASE WHEN hv.null_step_rows > 0 THEN hv.null_step_rows
+            WHEN s.[rows] > hv.value_rows THEN s.[rows] - hv.value_rows ELSE 0 END AS null_rows
     ) h
     OUTER APPLY (
         SELECT STRING_AGG(f.freq, ',') WITHIN GROUP (ORDER BY f.equal_rows DESC) AS most_common_freqs
