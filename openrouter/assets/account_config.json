@@ -1,0 +1,17 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Management API key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "openrouter_management_key",
+          "label": "Management API key",
+          "help": "An OpenRouter management key, used to read usage and cost data from the analytics API. Regular OpenRouter API keys can't read analytics. See https://openrouter.ai/docs/guides/overview/auth/management-api-keys.",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ]
+}
