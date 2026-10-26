@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.containers import iter_unique
 
-from .config_models import InstanceConfig
+from .config_models import InstanceConfig, defaults
 
 CONFIG_MODELS_PACKAGE = 'datadog_checks.ibm_db2.config_models'
 
@@ -51,6 +51,10 @@ def build_config(check: IbmDb2Check) -> InstanceConfig:
     # default", so mark it as configured to keep the model from filling it in.
     args.setdefault('connection_timeout', None)
 
-    return check.load_configuration_model(
+    config = check.load_configuration_model(
         CONFIG_MODELS_PACKAGE, 'InstanceConfig', args, check._get_config_model_context(args)
     )
+    # The Agent ignores nonpositive intervals; background jobs need its effective cadence to stay alive.
+    if config.min_collection_interval is None or config.min_collection_interval <= 0:
+        config = config.model_copy(update={'min_collection_interval': defaults.instance_min_collection_interval()})
+    return config

@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json as stdlib_json
 from datetime import datetime
+from threading import Event
 
 import mock
 import pytest
@@ -225,7 +226,7 @@ def test_query_metrics_collection_controls(
 ):
     """Disabling metrics prevents collection; enabled jobs respect the configured cadence."""
     monkeypatch.setenv('DBM_THREADED_JOB_RUN_SYNC', 'true')
-    instance.update(dbm=True, **config)
+    instance.update(dbm=True, min_collection_interval=0, **config)
     collector = IbmDb2Check('ibm_db2', {}, [instance])._query_metrics
     with (
         mock.patch.object(collector, 'run_job') as collect,
@@ -241,11 +242,15 @@ def test_query_metrics_collection_controls(
         assert collect.call_count == 2 * int(enabled)
 
 
-@pytest.mark.parametrize('interval', [0, 15])
+@pytest.mark.parametrize('interval, effective_interval', [(0, 15), (-1, 15), (None, 15), (30, 30)])
 def test_custom_queries_collection_interval(
-    instance: dict, aggregator: AggregatorStub, monkeypatch: pytest.MonkeyPatch, interval: int
+    instance: dict,
+    aggregator: AggregatorStub,
+    monkeypatch: pytest.MonkeyPatch,
+    interval: int | None,
+    effective_interval: int,
 ):
-    """Custom queries retain their metric prefix and respect the interval, including no delay at zero."""
+    """Custom queries retain their metric prefix and follow the Agent's effective scheduling interval."""
     monkeypatch.setenv('DBM_THREADED_JOB_RUN_SYNC', 'true')
     instance.update(
         min_collection_interval=interval,
@@ -258,10 +263,32 @@ def test_custom_queries_collection_interval(
         mock.patch('datadog_checks.base.utils.db.utils.time.time', return_value=100) as clock,
     ):
         check.run_async_jobs(check.tags)
+        clock.return_value += effective_interval - 1
         check.run_async_jobs(check.tags)
-        clock.return_value += 15
+        clock.return_value += 1
         check.run_async_jobs(check.tags)
-    aggregator.assert_metric('app.value', value=1, count=3 if interval == 0 else 2)
+    aggregator.assert_metric('app.value', value=1, count=2)
+
+
+@pytest.mark.parametrize('job_name', ['custom-queries', 'query-metrics'])
+def test_background_jobs_collect_with_zero_interval(instance: dict, monkeypatch: pytest.MonkeyPatch, job_name: str):
+    """A zero configured interval must not stop a background job before its first collection."""
+    monkeypatch.delenv('DBM_THREADED_JOB_RUN_SYNC', raising=False)
+    instance.update(
+        min_collection_interval=0,
+        dbm=job_name == 'query-metrics',
+        custom_queries=[{'metric_prefix': 'app', 'query': 'SELECT 1', 'columns': [{'name': 'value', 'type': 'gauge'}]}],
+    )
+    check = IbmDb2Check('ibm_db2', {}, [instance])
+    collector = check._custom_metrics if job_name == 'custom-queries' else check._query_metrics
+    collected = Event()
+    with mock.patch.object(collector, 'run_job', side_effect=collected.set):
+        try:
+            collector.run_job_loop(check.tags)
+            assert collected.wait(timeout=2), f'{job_name} stopped before collecting'
+        finally:
+            collector.cancel()
+            collector.wait_for_completion()
 
 
 @pytest.mark.parametrize(

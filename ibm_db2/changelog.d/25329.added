@@ -1,1 +1,1 @@
-Add Database Monitoring for IBM Db2 with query metrics and obfuscated full query text.
+Add Database Monitoring for IBM Db2 with query metrics and obfuscated full query text, and run custom queries asynchronously on dedicated connections even when Database Monitoring is disabled.
