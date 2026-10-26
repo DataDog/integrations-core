@@ -6,6 +6,7 @@ from __future__ import annotations
 
 # 1st party.
 import argparse
+import json
 import logging
 import os
 import re
@@ -17,7 +18,18 @@ from tuf.api.exceptions import DownloadError
 
 from .download import DEFAULT_ROOT_LAYOUT_TYPE, REPOSITORY_URL_PREFIX, ROOT_LAYOUTS, TUFDownloader
 from .download_v2 import V2_REPOSITORY_URL, TUFPointerDownloader
-from .exceptions import CLIError, MissingVersion, NonCanonicalVersion, NonDatadogPackage, TargetNotFoundError
+from .exceptions import (
+    ChecksDownloaderException,
+    CLIError,
+    MissingVersion,
+    NonCanonicalVersion,
+    NonDatadogPackage,
+    TargetNotFoundError,
+)
+
+# When set, the downloader writes a JSON summary of the download to this path before exiting.
+# The Agent sets it to report which repository served the wheel in its install telemetry.
+RESULT_FILE_ENV_VAR = 'DD_DOWNLOADER_RESULT_FILE'
 
 V2_FALLBACK_ERRORS: tuple[type[BaseException], ...] = (
     MissingVersion,
@@ -45,6 +57,25 @@ def _v2_failure_category(exc: Exception) -> str:
     if isinstance(exc, (DownloadError, TimeoutError, RequestException)):
         return 'network error'
     return 'other'
+
+
+def _error_type(exc: Exception) -> str:
+    # Only class names from a known set are reported, never messages, which can contain paths or URLs.
+    if isinstance(exc, (ChecksDownloaderException, *V2_FALLBACK_ERRORS)):
+        return type(exc).__name__
+    return 'other'
+
+
+def _write_result(result: dict[str, str]) -> None:
+    path = os.environ.get(RESULT_FILE_ENV_VAR)
+    if not path:
+        return
+    try:
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(result, f)
+    except OSError as exc:
+        # Reporting is best effort and must never fail the download.
+        logging.getLogger(__name__).debug('could not write download result to %s: %s', path, exc)
 
 
 def __find_shipped_integrations():
@@ -165,7 +196,19 @@ def run_downloader(tuf_downloader, standard_distribution_name, version, ignore_p
 
 
 def download() -> None:
+    result: dict[str, str] = {}
+    try:
+        _download(result)
+    except Exception as exc:
+        result['error_type'] = _error_type(exc)
+        raise
+    finally:
+        _write_result(result)
+
+
+def _download(result: dict[str, str]) -> None:
     downloader, name, version, args = instantiate_v2_downloader()
+    result['repository'] = 'v2'
 
     if args.v2:
         warn_v2_ignored_args(args)
@@ -175,6 +218,8 @@ def download() -> None:
     try:
         run_v2_downloader(downloader, name, version)
     except V2_FALLBACK_ERRORS as exc:
+        result['repository'] = 'v1'
+        result['v2_failure'] = _v2_failure_category(exc)
         # Integrity failures (DigestMismatch / LengthMismatch / MalformedPointerError) are
         # intentionally not in V2_FALLBACK_ERRORS — they must propagate, not be masked by v1.
         logging.getLogger(__name__).info(

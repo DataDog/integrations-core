@@ -599,3 +599,54 @@ class TestCliDownloadFallback:
         with pytest.raises(type(integrity_exc)):
             cli.download()
         v1.assert_not_called()
+
+
+class TestDownloadResultFile:
+    """Covers the machine-readable result that the Agent requests through DD_DOWNLOADER_RESULT_FILE."""
+
+    @pytest.fixture
+    def result_file(self, monkeypatch, tmp_path):
+        path = tmp_path / 'result.json'
+        monkeypatch.setenv(cli.RESULT_FILE_ENV_VAR, str(path))
+        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres'])
+        monkeypatch.setattr(cli, 'instantiate_downloader', MagicMock(return_value=('d', 'n', 'v', False)))
+        return path
+
+    def test_reports_v2_when_v2_serves_the_wheel(self, monkeypatch, result_file):
+        monkeypatch.setattr(cli, 'run_v2_downloader', MagicMock())
+
+        cli.download()
+
+        assert json.loads(result_file.read_text()) == {'repository': 'v2'}
+
+    def test_reports_v1_and_v2_failure_category_on_fallback(self, monkeypatch, result_file):
+        monkeypatch.setattr(cli, 'run_v2_downloader', MagicMock(side_effect=DownloadError('unreachable')))
+        monkeypatch.setattr(cli, 'run_downloader', MagicMock())
+
+        cli.download()
+
+        assert json.loads(result_file.read_text()) == {'repository': 'v1', 'v2_failure': 'network error'}
+
+    @pytest.mark.parametrize(
+        'exc, expected_error_type',
+        [
+            pytest.param(DigestMismatch(PROJECT, 'a', 'b'), 'DigestMismatch', id='downloader-exception'),
+            pytest.param(ValueError('/home/user/secret path'), 'other', id='unknown-exception'),
+        ],
+    )
+    def test_reports_error_type_without_message_on_failure(self, monkeypatch, result_file, exc, expected_error_type):
+        monkeypatch.setattr(cli, 'run_v2_downloader', MagicMock(side_effect=exc))
+
+        with pytest.raises(type(exc)):
+            cli.download()
+
+        assert json.loads(result_file.read_text()) == {'repository': 'v2', 'error_type': expected_error_type}
+
+    def test_unwritable_result_file_does_not_fail_the_download(self, monkeypatch, tmp_path, capsys):
+        monkeypatch.setenv(cli.RESULT_FILE_ENV_VAR, str(tmp_path / 'missing-dir' / 'result.json'))
+        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres'])
+        monkeypatch.setattr(cli, 'run_v2_downloader', MagicMock(side_effect=lambda *_: print('/tmp/wheel.whl')))
+
+        cli.download()
+
+        assert capsys.readouterr().out == '/tmp/wheel.whl\n'
