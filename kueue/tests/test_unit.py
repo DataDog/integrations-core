@@ -378,6 +378,24 @@ def test_workload_event_index_persists_across_restart(dd_run_check, aggregator, 
     assert event_indexes(aggregator, 'workload-uid') == [3, 4]
 
 
+def test_workload_event_index_ignores_invalid_cache_entries(instance):
+    datadog_agent.reset()
+    check = KueueCheck('kueue', {}, [instance])
+    check.write_persistent_cache(
+        'workload_event_index',
+        json.dumps({'good-uid': 4, 'negative-uid': -1, 'text-uid': '3'}),
+    )
+    check.log.warning = Mock()
+
+    assert check.next_workload_event_index('good-uid') == 4
+    assert check.next_workload_event_index('negative-uid') == 0
+    check.log.warning.assert_called_once_with('Ignored %d invalid Kueue workload event index cache entries', 2)
+
+    check.log.warning.reset_mock()
+    check.next_workload_event_index('good-uid')
+    check.log.warning.assert_not_called()
+
+
 def test_workload_event_index_prunes_absent_workloads(dd_run_check, aggregator, instance, mock_http_response):
     datadog_agent.reset()
     mock_http_response(file_path=get_fixture_path('metrics.txt'))

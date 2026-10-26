@@ -220,9 +220,14 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             self.log.warning('Kueue workload event index cache is not a mapping')
             return
 
+        ignored = 0
         for uid, index in data.items():
-            if isinstance(uid, str) and isinstance(index, int) and not isinstance(index, bool) and index >= 0:
+            if isinstance(uid, str) and isinstance(index, int) and index >= 0:
                 self._workload_event_index[uid] = index
+            else:
+                ignored += 1
+        if ignored:
+            self.log.warning('Ignored %d invalid Kueue workload event index cache entries', ignored)
 
     def _persist_workload_event_index(self) -> None:
         if self._workload_event_index is None or not self._workload_event_index_dirty:
