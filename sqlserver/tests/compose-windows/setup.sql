@@ -332,7 +332,9 @@ FROM (SELECT TOP 10000 ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS n FROM sys.
 CREATE STATISTICS st_note ON dbo.orders (note);
 UPDATE STATISTICS dbo.orders WITH FULLSCAN;
 GO
-CREATE USER datadog FOR LOGIN datadog;
+-- On Windows the user already exists here, copied from model.
+IF USER_ID('datadog') IS NULL
+    CREATE USER datadog FOR LOGIN datadog;
 GO
 CREATE SCHEMA datadog AUTHORIZATION dbo;
 GO
