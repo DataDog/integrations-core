@@ -52,3 +52,42 @@ tests:
       status: "info"
       tags:
         - "source:LOGS_SOURCE"
+  - sample: "2026-10-26 16:13:34,983-04:00 INFO [main] org.apache.nifi.runtime.Application Starting NiFi 2.8.0 using Java 21.0.10+10-LTS with PID 75"
+    result:
+      custom:
+        timestamp: 1793045614983
+        level: "INFO"
+        logger:
+          name: "org.apache.nifi.runtime.Application"
+          thread_name: "main"
+      message: "Starting NiFi 2.8.0 using Java 21.0.10+10-LTS with PID 75"
+      status: "info"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1793045614983
+  - sample: "2026-10-26 16:13:19,507-0400 INFO [main] o.apache.nifi.runtime.PropertiesProvider Loading Application Properties [/opt/nifi/nifi-current/conf/nifi.properties]"
+    result:
+      custom:
+        timestamp: 1793045599507
+        level: "INFO"
+        logger:
+          name: "o.apache.nifi.runtime.PropertiesProvider"
+          thread_name: "main"
+      message: "Loading Application Properties [/opt/nifi/nifi-current/conf/nifi.properties]"
+      status: "info"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1793045599507
+  - sample: "2026-10-26 20:13:19,506Z INFO [main] org.apache.nifi.runtime.Application Starting NiFi 2.8.0 using Java 21.0.10+10-LTS with PID 80"
+    result:
+      custom:
+        timestamp: 1793045599506
+        level: "INFO"
+        logger:
+          name: "org.apache.nifi.runtime.Application"
+          thread_name: "main"
+      message: "Starting NiFi 2.8.0 using Java 21.0.10+10-LTS with PID 80"
+      status: "info"
+      tags:
+        - "source:LOGS_SOURCE"
+      timestamp: 1793045599506
