@@ -150,6 +150,11 @@ def test_query_metrics(
             assert text_events[0]['database_instance'] == instance_metadata['database_instance']
             key = (before['member'], hexlify(before['executable_id']).decode('ascii'), before['insert_timestamp'])
             assert all(key not in call.args[0] for call in fetch.call_args_list)
+        assert not any(
+            'MON_GET_PKG_CACHE_STMT' in row['query'].upper()
+            for payload in aggregator.get_event_platform_events('dbm-metrics')
+            for row in payload['ibm_db2_rows']
+        )
     finally:
         try:
             ibm_db.exec_immediate(connection.conn, f'DROP TABLE {table}')
