@@ -65,6 +65,19 @@ Some options can be set globally in `init_config` (with `instances` taking prece
 For complete documentation of every option, see the associated configuration templates for the
 [instances][config-spec-template-instances-http] and [init_config][config-spec-template-init-config-http] sections.
 
+## Disabling authentication
+
+Call `self.http.disable_auth()` to suppress configured authentication and automatic `.netrc` credentials on subsequent
+requests, including redirects:
+
+```python
+self.http.disable_auth()
+response = self.http.get(url)
+```
+
+This applies to existing and newly created sessions without disabling other environment settings, such as proxies.
+Explicit per-request options still override client configuration.
+
 ## Errors
 
 With `AGNOSTIC_HTTP_CLIENT` set, a failed request raises one of the backend-neutral types from the

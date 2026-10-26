@@ -44,12 +44,15 @@ class TestClose:
 
 
 class TestDisableAuth:
-    def test_disable_auth_overrides_config_basic_auth(self):
+    @pytest.mark.parametrize('existing_session', [False, True], ids=['fresh-session', 'existing-session'])
+    def test_disable_auth_overrides_config_basic_auth(self, existing_session):
         http = RequestsWrapper({'username': 'user', 'password': 'pass'}, {})
-        assert http.options['auth'] == ('user', 'pass')
+        if existing_session:
+            assert get_wire_headers(http)['Authorization'] == 'Basic dXNlcjpwYXNz'
+
         http.disable_auth()
-        assert http.options['auth'] is not None
-        assert http.options['auth'] != ('user', 'pass')
+
+        assert 'Authorization' not in get_wire_headers(http)
 
     def test_disable_auth_preserves_trust_env(self):
         http = RequestsWrapper({}, {})
