@@ -30,6 +30,7 @@ from ddev.monitoring.datadog_metrics import DatadogMetricsSink
 from ddev.utils.git import ChangedFile, ChangeType, GitCommit
 from ddev.utils.github_async import async_github_client
 from ddev.utils.github_async.models import PullRequest, PullRequestState
+from ddev.utils.platform import PlatformName
 from ddev.utils.rate_limiting import BudgetGovernor
 from tests.cli.ci.helpers import HEAD_SHA, PR_NUMBER, decode_job_list, listed_pull_request, mock_job_result, pulls_page
 from tests.cli.ci.tests.helpers import make_batch, make_job
@@ -1391,11 +1392,12 @@ def test_console_lines_show_operational_context_without_large_payloads(ddev: Cli
 
 
 PULL_REQUEST_RUN_MANIFEST = {
-    'schema_version': 3,
+    'schema_version': 4,
     'repository': 'DataDog/integrations-core',
     'checkout_sha': MERGE_SHA,
     'head_sha': HEAD_SHA,
     'head_branch': 'hs/a-branch',
+    'head_tag': None,
     'all_targets': False,
     'pr_number': PR_NUMBER,
     'base_branch': 'a-target-branch',
@@ -1576,7 +1578,7 @@ def test_an_all_target_run_round_trips_through_its_recorded_scope(
         pytest.param('{not json', 'is not a valid run', id='malformed-json'),
         pytest.param(b'\xff', 'is not a valid run', id='invalid-utf8'),
         pytest.param(
-            json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'schema_version': 4}),
+            json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'schema_version': 5}),
             'is not a valid run',
             id='newer-schema',
         ),
@@ -1585,7 +1587,7 @@ def test_an_all_target_run_round_trips_through_its_recorded_scope(
                 {
                     key: value
                     for key, value in {**PULL_REQUEST_RUN_MANIFEST, 'schema_version': 2}.items()
-                    if key not in ('targets', 'exclude_targets', 'context')
+                    if key not in ('targets', 'exclude_targets', 'context', 'head_tag')
                 }
             ),
             'is not a valid run',
@@ -1595,6 +1597,16 @@ def test_an_all_target_run_round_trips_through_its_recorded_scope(
             json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'repository': 'DataDog/integrations-extras'}),
             'describes repository',
             id='other-repository',
+        ),
+        pytest.param(
+            json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'head_tag': '7.85.0'}),
+            'is not a valid run',
+            id='both-branch-and-tag',
+        ),
+        pytest.param(
+            json.dumps({**PULL_REQUEST_RUN_MANIFEST, 'head_branch': None}),
+            'is not a valid run',
+            id='neither-branch-nor-tag',
         ),
     ],
 )
@@ -1757,33 +1769,97 @@ def test_duplicate_target_names_are_planned_once(ddev, planned, resolved_changes
 
 
 @pytest.mark.parametrize(
-    ('options', 'expected', 'shown'),
+    ('options', 'expected'),
     [
         pytest.param(
             ['--agent-image', 'registry/agent:7.85.0', '--agent-image-windows', 'registry/agent:7.85.0-servercore'],
             AgentImageOverride(linux='registry/agent:7.85.0', windows='registry/agent:7.85.0-servercore'),
-            ['registry/agent:7.85.0', 'registry/agent:7.85.0-servercore'],
             id='both',
         ),
         pytest.param(
             ['--agent-image', 'registry/agent:7.85.0'],
             AgentImageOverride(linux='registry/agent:7.85.0'),
-            ['registry/agent:7.85.0'],
             id='linux-only',
         ),
-        pytest.param([], None, [], id='none'),
+        pytest.param([], None, id='none'),
     ],
 )
-def test_agent_image_overrides_reach_the_plan_and_are_shown(
-    ddev, planned, resolved_changes, options: list[str], expected: AgentImageOverride | None, shown: list[str]
+def test_agent_image_overrides_reach_the_planner(
+    ddev, planned, resolved_changes, options: list[str], expected: AgentImageOverride | None
 ):
     result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', *options, '--dry-run')
 
     assert result.exit_code == 0, result.output
     assert planned.call_args.kwargs['agent_image_resolver'] == expected
-    for image in shown:
-        assert image in result.output
-    assert ('Agent image' in result.output) is bool(shown)
+
+
+def test_a_dry_run_shows_the_images_the_plan_actually_carries(ddev, mocker, resolved_changes):
+    """The images come from the planned jobs, so a dry run reports what will really be pulled."""
+    batches = [
+        make_batch(
+            make_job(target='ntp', platform=PlatformName.LINUX, e2e_tests=True, agent_image='registry/agent:7.85.0'),
+            make_job(
+                target='ntp',
+                platform=PlatformName.WINDOWS,
+                e2e_tests=True,
+                agent_image='registry/agent:7.85.0-servercore',
+            ),
+        )
+    ]
+    mocker.patch('ddev.cli.ci.dispatch_tests.build_plan', return_value=batches)
+
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    assert 'Agent image (linux E2E jobs)' in result.output
+    assert 'registry/agent:7.85.0' in result.output
+    assert 'Agent image (windows E2E jobs)' in result.output
+    assert 'registry/agent:7.85.0-servercore' in result.output
+
+
+def test_a_dry_run_shows_no_image_for_an_override_that_never_reached_the_jobs(ddev, planned, resolved_changes):
+    """An override the planner dropped must read as absent, or the dry run would confirm a lie."""
+    result = ddev('ci', 'dispatch-tests', '--commit', 'a-sha', '--agent-image', 'registry/agent:7.85.0', '--dry-run')
+
+    assert result.exit_code == 0, result.output
+    assert 'Agent image' not in result.output
+    assert 'registry/agent:7.85.0' not in result.output
+
+
+def test_a_tag_run_is_attributed_to_the_tag_and_never_to_a_branch(ddev, planned, resolved_changes, mocker, tmp_path):
+    """A release tag has no branch; recording the checkout's would file results under a fiction."""
+    current_branch = mocker.patch('ddev.utils.git.GitRepository.current_branch', return_value='7.85.0-rc.8')
+
+    result = ddev(
+        'ci',
+        'dispatch-tests',
+        '--commit',
+        'a-sha',
+        '--head-tag',
+        '7.85.0-rc.8',
+        '--resolve-only',
+        '--output-dir',
+        str(tmp_path),
+    )
+
+    assert result.exit_code == 0, result.output
+    manifest = json.loads((tmp_path / 'run.json').read_text())
+    assert manifest['head_tag'] == '7.85.0-rc.8'
+    assert manifest['head_branch'] is None
+    # The tag is taken as given: a checkout built for the occasion cannot identify it.
+    current_branch.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    'pr_option',
+    ['--pr', '--pr-head-repo', '--pr-head-branch', '--pr-head-sha', '--pr-base-branch'],
+)
+def test_a_tag_cannot_override_a_pull_requests_own_ref(ddev, planned, resolved_changes, pr_option: str):
+    result = ddev('ci', 'dispatch-tests', '--head-tag', '7.85.0', pr_option, 'a-value', '--dry-run')
+
+    assert result.exit_code == 2
+    assert '`--head-tag` cannot be combined with' in result.output
+    planned.assert_not_called()
 
 
 def test_a_called_run_round_trips_its_scope_and_context(ddev, planned, resolved_changes, mocker, tmp_path):

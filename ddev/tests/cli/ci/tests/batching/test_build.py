@@ -24,7 +24,7 @@ from ddev.cli.ci.tests.batching.build import (
     create_test_batches,
     supports_minimum_base_package,
 )
-from ddev.cli.ci.tests.batching.exceptions import BatchValidationError
+from ddev.cli.ci.tests.batching.exceptions import BatchValidationError, PlanningError
 from ddev.cli.ci.tests.batching.targets import ExplicitTargetsRule, all_target_rules
 from ddev.cli.ci.tests.dispatcher_config import BatchingConfig
 from ddev.utils.platform import PlatformName
@@ -355,6 +355,58 @@ def test_build_drops_excluded_targets_from_whatever_was_selected(rules, changed,
     units = build_test_units(repo, changed, environment_provider=provider, rules=rules, exclude_targets=("redis",))
 
     assert {unit.target for unit in units} == expected
+
+
+def test_build_rejects_an_exclusion_that_names_no_target():
+    """A typo would silently exclude nothing, so the run would test a target it was told to skip."""
+    repo = FakeRepo([FakeIntegration("ddev")])
+    provider = FakeEnvironmentProvider({"ddev": [env("py3.11")]})
+
+    with pytest.raises(PlanningError, match="Excluded targets are not testable targets: ddevv"):
+        build_test_units(repo, [], environment_provider=provider, exclude_targets=("ddevv",))
+
+
+@pytest.mark.parametrize(
+    ("ci", "environments", "message"),
+    [
+        pytest.param(
+            {"hyperv": {"exclude": True}},
+            {"hyperv": [env("py3.11")]},
+            "`overrides.ci.hyperv.exclude` removes it from CI",
+            id="ci-excluded",
+        ),
+        pytest.param(
+            {},
+            {"hyperv": []},
+            "hatch.toml with no testable environment",
+            id="no-testable-environment",
+        ),
+    ],
+)
+def test_build_refuses_to_silently_drop_a_requested_target(ci, environments, message):
+    """A no-op that reports success would look like the target was tested and found clean."""
+    repo = FakeRepo([FakeIntegration("hyperv")], ci=ci)
+    provider = FakeEnvironmentProvider(environments)
+
+    with pytest.raises(PlanningError, match=message):
+        build_test_units(
+            repo,
+            [],
+            environment_provider=provider,
+            rules=(ExplicitTargetsRule(("hyperv",)),),
+            requested_targets=("hyperv",),
+        )
+
+
+def test_build_still_skips_an_inferred_target_the_same_reasons_would_drop():
+    """Only a named target fails; one the change set merely implicated keeps being skipped."""
+    repo = FakeRepo([FakeIntegration("postgres"), FakeIntegration("hyperv")], ci={"hyperv": {"exclude": True}})
+    provider = FakeEnvironmentProvider({"postgres": [env("py3.11")], "hyperv": [env("py3.11")]})
+    changed = [modified("postgres/tests/test_a.py"), modified("hyperv/tests/test_b.py")]
+
+    units = build_test_units(repo, changed, environment_provider=provider, requested_targets=("postgres",))
+
+    assert {unit.target for unit in units} == {"postgres"}
 
 
 def test_build_plans_every_environment_of_an_explicit_target():

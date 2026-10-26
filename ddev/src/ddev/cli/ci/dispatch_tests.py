@@ -94,6 +94,13 @@ RUN_OUTCOME_METRICS = {
     'options. Defaults to local HEAD.',
 )
 @click.option(
+    '--head-tag',
+    default=None,
+    metavar='TAG',
+    help='Release tag the results belong to. Used with `--commit`, which stays the checkout source: '
+    'the tag is recorded as given, not resolved to a commit. Replaces branch attribution.',
+)
+@click.option(
     '--tags',
     default=None,
     metavar='"KEY:VALUE ..."',
@@ -174,6 +181,7 @@ def dispatch_tests(
     pr_head_branch: str | None,
     pr_base_branch: str | None,
     commit: str | None,
+    head_tag: str | None,
     tags: str | None,
     pytest_args: str | None,
     repository: str | None,
@@ -216,6 +224,7 @@ def dispatch_tests(
         pr_head_branch=pr_head_branch,
         pr_base_branch=pr_base_branch,
         commit=commit,
+        head_tag=head_tag,
         all_targets=all_targets,
         targets=targets,
         exclude_targets=exclude_targets,
@@ -309,6 +318,7 @@ def dispatch_tests(
                         all_targets=all_targets,
                         targets=targets,
                         exclude_targets=exclude_targets,
+                        head_tag=head_tag,
                         context=tag_fields(caller_tags).get('context') or 'master',
                         monitor=resolution,
                     )
@@ -375,8 +385,6 @@ def dispatch_tests(
             batches,
             tags=caller_tags,
             pytest_args=pytest_args or '',
-            agent_image=agent_image,
-            agent_image_windows=agent_image_windows,
         )
         if dry_run:
             monitor.logger.info('Dry run: nothing was dispatched')
@@ -566,6 +574,7 @@ def build_plan(
         config=config.batching,
         rules=rules,
         exclude_targets=exclude_targets,
+        requested_targets=targets,
         agent_image_resolver=agent_image_resolver or get_agent_image,
         minimum_base_package=minimum_base_package,
         monitor=monitor,
@@ -597,12 +606,13 @@ def display_plan(
     *,
     tags: Sequence[str] = (),
     pytest_args: str = '',
-    agent_image: str | None = None,
-    agent_image_windows: str | None = None,
 ) -> None:
     app.display_header('Dispatcher plan')
     app.display_pair('Repository', run.repository)
-    app.display_pair('Head branch', run.head_branch)
+    if run.head_tag is not None:
+        app.display_pair('Head tag', run.head_tag)
+    else:
+        app.display_pair('Head branch', str(run.head_branch))
     app.display_pair('Head SHA', run.head_sha)
     app.display_pair('Checkout SHA', run.checkout_sha)
     if run.pr_number is not None:
@@ -619,10 +629,13 @@ def display_plan(
         app.display_pair('Targets', ', '.join(run.targets))
     if run.exclude_targets:
         app.display_pair('Excluded targets', ', '.join(run.exclude_targets))
-    if agent_image:
-        app.display_pair('Agent image (Linux E2E jobs)', agent_image)
-    if agent_image_windows:
-        app.display_pair('Agent image (Windows E2E jobs)', agent_image_windows)
+    # Read back from the plan, not from the options: a dry run is where an override that never
+    # reached the jobs has to show up as absent rather than as the value that was asked for.
+    planned_images = sorted(
+        {(str(job.platform), job.agent_image) for batch in batches for job in batch.job_list if job.agent_image}
+    )
+    for platform, image in planned_images:
+        app.display_pair(f'Agent image ({platform} E2E jobs)', image)
     app.display_pair('Workflow', f'{config.workflow} @ {config.workflow_ref}')
 
     total = sum(batch.jobs_count for batch in batches)

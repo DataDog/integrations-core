@@ -70,6 +70,10 @@ ATTRIBUTE_SPECS: Mapping[str, AttributeSpec] = {
         'git.branch',
         metric_tag=True,
     ),
+    'head_tag': AttributeSpec(
+        'git.tag',
+        metric_tag=True,
+    ),
     'checkout_sha': AttributeSpec(
         'dispatcher.checkout_sha',
         test_tag=True,
@@ -371,6 +375,7 @@ PROTECTED_RUN_FIELDS = frozenset(
         'repo',
         'repository_url',
         'head_branch',
+        'head_tag',
         'head_sha',
         'checkout_sha',
         'context',
@@ -509,6 +514,7 @@ def run_fields(run: ResolvedRun, *, tags: Sequence[str] = ()) -> dict[str, Any]:
             **repository_fields(run.owner, run.repo),
             'head_sha': run.head_sha,
             'head_branch': run.head_branch,
+            'head_tag': run.head_tag,
             'checkout_sha': run.checkout_sha,
             'pr_number': run.pr_number,
             'base_branch': run.base_branch,

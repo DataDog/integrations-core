@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from ddev.cli.ci.tests.batching.exceptions import PlanningError
 from ddev.cli.ci.tests.batching.jobs import expand_batch_jobs
 from ddev.cli.ci.tests.batching.strategy import BatchStrategy, default_strategy
 from ddev.cli.ci.tests.batching.targets import (
@@ -46,6 +47,7 @@ def build_test_units(
     rules: Sequence[TargetRule] | None = None,
     infrastructure_targets: Sequence[str] = (),
     exclude_targets: Sequence[str] = (),
+    requested_targets: Sequence[str] = (),
     monitor: ComponentMonitor,
 ) -> list[TestUnit]:
     """Turn changed files into the complete, deterministic list of test units.
@@ -53,11 +55,20 @@ def build_test_units(
     Without explicit `rules`, the default set is used, with the repository-wide and infrastructure
     rules enabled only for the core repository. `infrastructure_targets` feeds the latter and is
     ignored when `rules` is given. `exclude_targets` is removed from whatever the rules select.
+
+    `requested_targets` are the targets the caller named itself. Dropping one silently would test
+    less than the run asked for, so a reason this stage cannot plan one raises `PlanningError`
+    instead of the skip an inferred target gets.
     """
     if rules is None:
         rules = default_target_rules(is_core=repo.name == "core", infrastructure_targets=infrastructure_targets)
 
     facts = RegistryRepositoryFacts(repo.integrations)
+    if unknown := [name for name in exclude_targets if not facts.is_testable_target(name)]:
+        # An exclusion that matches nothing reads as "this target was deliberately left out" while
+        # the target is in fact still planned, so a typo must fail rather than quietly do nothing.
+        raise PlanningError(f"Excluded targets are not testable targets: {', '.join(sorted(set(unknown)))}.")
+
     target_names = find_affected_targets(changed_files, facts, rules=rules)
 
     definitions: list[TargetDefinition] = []
@@ -67,6 +78,8 @@ def build_test_units(
 
         ci_override = repo.config.get(f"/overrides/ci/{name}", {}) or {}
         if ci_override.get("exclude", False):
+            if name in requested_targets:
+                raise PlanningError(f"{name} was requested but `overrides.ci.{name}.exclude` removes it from CI.")
             continue
 
         integration = repo.integrations.get(name)
@@ -75,6 +88,8 @@ def build_test_units(
         if not environments:
             # A `hatch.toml` makes a target testable, so one that enables no test or E2E
             # environment contradicts itself. Deliberate opt-out is `overrides.ci.<target>.exclude`.
+            if name in requested_targets:
+                raise PlanningError(f"{name} was requested but has a hatch.toml with no testable environment.")
             monitor.logger.warning("%s has a hatch.toml but no testable environment", name)
             continue
 
@@ -112,6 +127,7 @@ def build_test_batches(
     strategy: BatchStrategy = default_strategy,
     rules: Sequence[TargetRule] | None = None,
     exclude_targets: Sequence[str] = (),
+    requested_targets: Sequence[str] = (),
     agent_image_resolver: AgentImageResolver = get_agent_image,
     minimum_base_package: bool = False,
     monitor: ComponentMonitor,
@@ -128,6 +144,7 @@ def build_test_batches(
         rules=rules,
         infrastructure_targets=config.test_infrastructure_targets,
         exclude_targets=exclude_targets,
+        requested_targets=requested_targets,
         monitor=monitor,
     )
     jobs = expand_batch_jobs(

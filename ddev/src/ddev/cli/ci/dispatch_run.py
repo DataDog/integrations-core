@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import BaseModel, ConfigDict, ValidationError, model_validator
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -129,11 +129,15 @@ class ResolvedRun(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra='forbid')
 
-    schema_version: Literal[3] = 3
+    schema_version: Literal[4] = 4
     repository: str
     checkout_sha: str
     head_sha: str
-    head_branch: str
+    # Exactly one of these identifies the ref the results belong to. A run started from a release
+    # tag has no branch to attribute to, and inventing one would file its results under a branch
+    # that does not exist, so it carries the tag instead.
+    head_branch: str | None = None
+    head_tag: str | None = None
     all_targets: bool
     pr_number: int | None = None
     base_branch: str | None = None
@@ -144,6 +148,12 @@ class ResolvedRun(BaseModel):
     exclude_targets: tuple[str, ...] = ()
     # What the run was started for, such as `pr`, `master` or `nightly`. It tells apart runs on one commit.
     context: str = 'master'
+
+    @model_validator(mode='after')
+    def check_head_ref(self) -> ResolvedRun:
+        if (self.head_branch is None) == (self.head_tag is None):
+            raise ValueError('exactly one of head_branch and head_tag must be set')
+        return self
 
     @property
     def owner(self) -> str:
@@ -204,12 +214,18 @@ def resolve_run(
     all_targets: bool,
     targets: tuple[str, ...] = (),
     exclude_targets: tuple[str, ...] = (),
+    head_tag: str | None = None,
     context: str = 'master',
     monitor: ComponentMonitor | None = None,
 ) -> ResolvedRun | None:
     """Resolve what to test, reporting why a run has nothing left to test before returning None.
 
     A pull request run's context is always `pr`, whatever *context* says.
+
+    `head_tag` names the release tag the results belong to. It is taken as given rather than looked
+    up: the caller knows which tag it dispatched, and the checkout it hands over may be detached or
+    on a branch built for the occasion, neither of which identifies the tag. Supplying it replaces
+    branch attribution entirely.
     """
     if pr_resolver is not None:
         return resolve_pull_request_run(
@@ -222,15 +238,18 @@ def resolve_run(
             monitor=monitor,
         )
 
-    head_branch = app.repo.git.current_branch()
+    head_branch = None if head_tag is not None else app.repo.git.current_branch()
     if monitor is not None:
-        monitor.logger.info('Resolving tested revision', checkout_sha=commit, head_branch=head_branch)
+        monitor.logger.info(
+            'Resolving tested revision', checkout_sha=commit, head_branch=head_branch, head_tag=head_tag
+        )
     tested_commit = commit or app.repo.git.latest_commit().sha
     run = ResolvedRun(
         repository=repository,
         checkout_sha=tested_commit,
         head_sha=tested_commit,
         head_branch=head_branch,
+        head_tag=head_tag,
         all_targets=all_targets,
         targets=targets,
         exclude_targets=exclude_targets,
@@ -242,6 +261,7 @@ def resolve_run(
             checkout_sha=run.checkout_sha,
             head_sha=run.head_sha,
             head_branch=run.head_branch,
+            head_tag=run.head_tag,
         )
     return run
 
