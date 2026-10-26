@@ -1,0 +1,15 @@
+name: Datadog Agent
+files:
+- name: datadog_agent.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.value.example: http://localhost:5000/telemetry
+        openmetrics_endpoint.description: |
+          The Datadog Agent's OpenMetrics telemetry endpoint. It requires `telemetry.enabled: true` in
+          `datadog.yaml` and is served on `expvar_port`, which defaults to 5000.

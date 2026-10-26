@@ -1,0 +1,100 @@
+# HELP aggregator__dogstatsd_contexts Count the number of dogstatsd contexts in the aggregator
+# TYPE aggregator__dogstatsd_contexts gauge
+aggregator__dogstatsd_contexts{shard="0"} 60
+# HELP aggregator__flush Number of metrics/service checks/events flushed
+# TYPE aggregator__flush counter
+aggregator__flush{data_type="events",state="ok"} 1
+aggregator__flush{data_type="series",state="ok"} 1.21377e+06
+aggregator__flush{data_type="service_checks",state="ok"} 2903
+# HELP aggregator__flush_count Number of items handled by the last flush, by flush type
+# TYPE aggregator__flush_count gauge
+aggregator__flush_count{flush_type="events"} 0
+aggregator__flush_count{flush_type="series"} 412
+aggregator__flush_count{flush_type="service_checks"} 14
+aggregator__flush_count{flush_type="sketches"} 3
+# HELP aggregator__flush_time Duration in nanoseconds of the last flush, by flush type
+# TYPE aggregator__flush_time gauge
+aggregator__flush_time{flush_type="checks_metric_sample"} 1.203e+06
+aggregator__flush_time{flush_type="event"} 21000
+aggregator__flush_time{flush_type="main"} 3.48e+06
+aggregator__flush_time{flush_type="metric_sketch"} 412000
+aggregator__flush_time{flush_type="service_check"} 98000
+# HELP aggregator__number_of_flush Number of flushes done by the aggregator
+# TYPE aggregator__number_of_flush counter
+aggregator__number_of_flush 2903
+# HELP aggregator__processed Amount of metrics/services_checks/events processed by the aggregator
+# TYPE aggregator__processed counter
+aggregator__processed{data_type="dogstatsd_metrics",shard="0"} 192261
+aggregator__processed{data_type="events",shard=""} 1
+aggregator__processed{data_type="histogram_bucket",shard=""} 0
+aggregator__processed{data_type="metrics",shard=""} 1.41896e+06
+aggregator__processed{data_type="service_checks",shard=""} 48
+# HELP dogstatsd__processed Count of service checks/events/metrics processed by dogstatsd
+# TYPE dogstatsd__processed counter
+dogstatsd__processed{message_type="metrics",origin="",state="error"} 0
+dogstatsd__processed{message_type="metrics",origin="",state="ok"} 183708
+# HELP dogstatsd__udp_packets Dogstatsd UDP packets count
+# TYPE dogstatsd__udp_packets counter
+dogstatsd__udp_packets{state="ok"} 90271
+# HELP dogstatsd__uds_origin_detection_error Dogstatsd UDS origin detection error count
+# TYPE dogstatsd__uds_origin_detection_error counter
+dogstatsd__uds_origin_detection_error{listener_id="uds-unixgram",transport="unixgram"} 2
+# HELP dogstatsd__uds_packets Dogstatsd UDS packets count
+# TYPE dogstatsd__uds_packets counter
+dogstatsd__uds_packets{listener_id="uds-unixgram",state="error",transport="unixgram"} 1
+dogstatsd__uds_packets{listener_id="uds-unixgram",state="ok",transport="unixgram"} 5012
+# HELP logs__bytes_sent Total number of bytes sent before encoding if any
+# TYPE logs__bytes_sent counter
+logs__bytes_sent{emitter="agent",source="logs"} 884213
+# HELP logs__decoded Total number of decoded logs
+# TYPE logs__decoded counter
+logs__decoded 4210
+# HELP logs__encoded_bytes_sent Total number of sent bytes after encoding if any
+# TYPE logs__encoded_bytes_sent counter
+logs__encoded_bytes_sent{compression_kind="zstd",emitter="agent",source="epforwarder"} 2420
+# HELP logs__network_errors Total number of network errors
+# TYPE logs__network_errors counter
+logs__network_errors 3
+# HELP logs__processed Total number of processed logs
+# TYPE logs__processed counter
+logs__processed 4207
+# HELP logs__sent Total number of sent logs
+# TYPE logs__sent counter
+logs__sent 4201
+# HELP logs_client_http_destination__idle_ms Time spent idle while not sending payloads in ms
+# TYPE logs_client_http_destination__idle_ms counter
+logs_client_http_destination__idle_ms{sender="logs_0_reliable_0"} 1.73e+06
+# HELP logs_client_http_destination__in_use_ms Time spent sending payloads in ms
+# TYPE logs_client_http_destination__in_use_ms counter
+logs_client_http_destination__in_use_ms{sender="logs_0_reliable_0"} 21734
+# HELP scheduler__checks_entered How many checks are currently tracked by the scheduler
+# TYPE scheduler__checks_entered gauge
+scheduler__checks_entered{check_name="cpu"} 1
+scheduler__checks_entered{check_name="disk"} 1
+scheduler__checks_entered{check_name="memory"} 1
+# HELP scheduler__queue_size How many checks are scheduled in each job queue
+# TYPE scheduler__queue_size gauge
+scheduler__queue_size{interval="15",shadow="false"} 12
+scheduler__queue_size{interval="15",shadow="true"} 0
+# HELP scheduler__queues_count How many queues were opened
+# TYPE scheduler__queues_count counter
+scheduler__queues_count 3
+# HELP transactions__dropped Transaction drop count
+# TYPE transactions__dropped counter
+transactions__dropped{domain="https://7-84-5-app.agent.datadoghq.com.",endpoint="series_v3"} 2
+# HELP transactions__errors Count of transactions errored grouped by type of error
+# TYPE transactions__errors counter
+transactions__errors{domain="https://7-84-5-app.agent.datadoghq.com.",endpoint="series_v3",error_type="cant_send"} 13
+transactions__errors{domain="unknown",endpoint="unknown",error_type="dns_lookup_failure"} 11
+# HELP transactions__http_errors Count of transactions http errors per http code
+# TYPE transactions__http_errors counter
+transactions__http_errors{code="503",domain="https://7-84-5-app.agent.datadoghq.com.",endpoint="series_v3"} 4
+# HELP transactions__retry_queue_size Retry queue size
+# TYPE transactions__retry_queue_size gauge
+transactions__retry_queue_size{domain="https://7-84-5-app.agent.datadoghq.com."} 0
+# HELP transactions__success Successful transaction count
+# TYPE transactions__success counter
+transactions__success{domain="https://7-84-5-app.agent.datadoghq.com.",endpoint="series_v3",proto_version="HTTP/1.1"} 2855
+# HELP transactions__success_bytes Successful transaction sizes in bytes
+# TYPE transactions__success_bytes counter
+transactions__success_bytes{domain="https://7-84-5-app.agent.datadoghq.com.",endpoint="series_v3"} 1.4005923e+07
