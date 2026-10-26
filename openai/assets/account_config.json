@@ -25,7 +25,10 @@
   ],
   "dataflow_config": [
     {
-      "dataflow_id": "openai-usage-metrics",
+      "dataflow_id": "openai-usage-metrics"
+    },
+    {
+      "dataflow_id": "openai-llm-completions",
       "toggle": {
         "default": false,
         "label": "LLM Observability",
