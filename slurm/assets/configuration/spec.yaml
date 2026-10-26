@@ -77,7 +77,7 @@ files:
         example: False
     - name: collect_job_events
       description: |
-        Whether or not to send job lifecycle events (submitted, pending, started, finished, preempted, requeued
+        Whether to send job lifecycle events (submitted, pending, started, finished, preempted, requeued
         and suspended), based on polling sacct for jobs active since the previous check run. Requires GPU
         monitoring to be enabled in the Agent (`gpu.enabled: true`); otherwise this option is ignored.
         Pending reasons come from squeue and require `collect_squeue_stats`.

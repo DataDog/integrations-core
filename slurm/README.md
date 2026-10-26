@@ -148,15 +148,15 @@ integration polls `sacct` for jobs active since the previous check run and sends
 transitions. The transition is in the `slurm_job_transition` tag:
 
 - Submitted (`slurm_job_transition:submitted`): a job appears after the check has initialized its state. A job array
-  or heterogeneous job is reported once, not once per task or component.
-- Pending (`slurm_job_transition:pending`): the pending reason of a job changes, for example from `Priority` to
+  or heterogeneous job is reported one time, not once per task or component.
+- Pending (`slurm_job_transition:pending`): the pending reason of a job changes, such as from `Priority` to
   `QOSMaxGRESPerUser`. Reasons that are part of normal scheduling (`Priority`, `Resources`, `Dependency`, `BeginTime`)
-  are sent as `info`, any other reason as `warning`.
+  are sent as `info`, and any other reason as `warning`.
 - Started (`slurm_job_transition:started`): the job starts running, or starts again after a requeue. The event includes
   the queued wait time.
 - Finished (`slurm_job_transition:finished`): the job reaches a terminal state (`COMPLETED`, `FAILED`, `CANCELLED`,
-  `TIMEOUT`, `OUT_OF_MEMORY`, `NODE_FAIL`, `BOOT_FAIL` or `DEADLINE`).
-- Preempted, requeued and suspended (`slurm_job_transition:preempted`, `requeued` and `suspended`): the job enters the
+  `TIMEOUT`, `OUT_OF_MEMORY`, `NODE_FAIL`, `BOOT_FAIL`, or `DEADLINE`).
+- Preempted, requeued, and suspended (`slurm_job_transition:preempted`, `requeued`, and `suspended`): the job enters the
   matching state.
 
 Jobs that start and finish between two check runs still produce all of their events. Events are tagged with the job
@@ -169,9 +169,9 @@ dependency or a begin time, and jobs cancelled in those states are queried by ID
 pending by `squeue` for the first time, or when a known job is no longer reported by `squeue`. The window covers at
 most the last hour: after a longer interruption, only jobs that were already known are reported for that gap.
 
-The first collection run seeds the job state and does not emit events for already existing jobs, and transitions that
-happened before that run are never reported. Job events require
-Slurm accounting (`slurmdbd`). The `sacct` command does not report pending reasons, so they are taken from `squeue` and
+The first collection run seeds the job state and does not emit events for existing jobs. Transitions that
+happened before that run are never reported. Job events require Slurm accounting (`slurmdbd`). The `sacct` command
+does not report pending reasons, so they are taken from `squeue` and
 are only available when `collect_squeue_stats` is enabled.
 
 ## Troubleshooting
