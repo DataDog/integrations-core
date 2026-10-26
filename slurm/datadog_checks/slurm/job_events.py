@@ -176,6 +176,10 @@ class SacctJob:
     def gpus(self) -> int:
         return gpu_count(self.alloc_tres) or gpu_count(self.req_tres)
 
+    @property
+    def allocated(self) -> bool:
+        return bool(self.alloc_tres) or self.node_list not in ('', 'None assigned')
+
 
 def parent_job_id(job_id: str) -> str | None:
     # Array tasks are listed as '<array>_<task>', and their pending remainder as '<array>_[<tasks>]'.
@@ -192,17 +196,20 @@ def job_transitions(previous: SacctJob | None, current: SacctJob) -> list[str]:
 
     A job that is submitted and finishes between two polls is only seen once, so all of its
     transitions are derived from that single record. A requeued job keeps its ID and gets a new
-    start time when it runs again, which is reported as a new start.
+    start time when it runs again, which is reported as a new start, and the state it ends that
+    run in is reported even if it is the same as the previous run's.
     """
     transitions = []
     if previous is None:
         transitions.append('submitted')
 
-    if current.start is not None and (previous is None or previous.start != current.start):
+    # Some Slurm versions set the start time of a job cancelled while pending to its end time.
+    new_run = current.start is not None and current.allocated and (previous is None or previous.start != current.start)
+    if new_run:
         transitions.append('started')
 
     state_transition = STATE_TRANSITIONS.get(current.state)
-    if state_transition and (previous is None or previous.state != current.state):
+    if state_transition and (previous is None or previous.state != current.state or new_run):
         transitions.append(state_transition)
 
     return transitions

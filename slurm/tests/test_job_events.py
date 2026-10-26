@@ -268,11 +268,17 @@ def test_job_events_requeue(events_instance, aggregator):
         sacct_output(sacct_line('1', 'RUNNING', start='2026-10-21T12:01:00')),
         sacct_output(sacct_line('1', 'REQUEUED', start='2026-10-21T12:01:00', end='2026-10-21T12:05:00')),
         sacct_output(sacct_line('1', 'RUNNING', start='2026-10-21T12:08:00')),
+        # Requeued again, then run and requeued a third time before the next poll.
+        sacct_output(sacct_line('1', 'REQUEUED', start='2026-10-21T12:08:00', end='2026-10-21T12:10:00')),
+        sacct_output(sacct_line('1', 'REQUEUED', start='2026-10-21T12:12:00', end='2026-10-21T12:14:00')),
     )
 
-    assert [(e['event_type'], e['alert_type']) for e in aggregator.events] == [
-        ('slurm.job.requeued', 'warning'),
-        ('slurm.job.started', 'info'),
+    assert [(e['event_type'], e['timestamp']) for e in aggregator.events] == [
+        ('slurm.job.requeued', int(parse_sacct_time('2026-10-21T12:05:00'))),
+        ('slurm.job.started', int(parse_sacct_time('2026-10-21T12:08:00'))),
+        ('slurm.job.requeued', int(parse_sacct_time('2026-10-21T12:10:00'))),
+        ('slurm.job.started', int(parse_sacct_time('2026-10-21T12:12:00'))),
+        ('slurm.job.requeued', int(parse_sacct_time('2026-10-21T12:14:00'))),
     ]
 
 
@@ -329,13 +335,29 @@ def test_job_events_skip_transitions_before_first_poll(events_instance, aggregat
     assert [e['msg_title'] for e in aggregator.events] == ['Slurm job 1 (train) finished: COMPLETED']
 
 
+@pytest.mark.parametrize(
+    'start',
+    [
+        pytest.param('None', id='no start time'),
+        pytest.param('2026-10-21T12:05:00', id='start time set to the cancellation time'),
+    ],
+)
 @pytest.mark.usefixtures('gpu_monitoring_enabled')
-def test_job_events_cancelled_while_pending(events_instance, aggregator):
+def test_job_events_cancelled_while_pending(events_instance, aggregator, start):
     check = SlurmCheck('slurm', {}, [events_instance])
     run_polls(
         check,
         sacct_output(sacct_line('1', 'PENDING')),
-        sacct_output(sacct_line('1', 'CANCELLED by 1001', start='None', end='2026-10-21T12:05:00')),
+        sacct_output(
+            sacct_line(
+                '1',
+                'CANCELLED by 1001',
+                start=start,
+                end='2026-10-21T12:05:00',
+                NodeList='None assigned',
+                AllocTRES='',
+            )
+        ),
     )
 
     [event] = aggregator.events
