@@ -363,17 +363,15 @@ def test_workload_event_index_persists_across_restart(dd_run_check, aggregator, 
     assert event_indexes(aggregator, 'workload-uid') == [0, 1, 2]
     assert check._workload_event_index['workload-uid'] == 3
 
-    # Simulate an Agent process restart: drop in-memory state, keep the persistent cache.
-    check._workload_state = None
-    check._workload_event_index = None
-    check._workload_event_index_dirty = False
-    check.kube_client = FakeKubernetesAPIClient(load_workloads('admitted'), load_workloads('evicted'))
+    # A restart is a new check. The persistent cache is what carries the index.
+    restarted = KueueCheck('kueue', {}, [instance])
+    restarted.kube_client = FakeKubernetesAPIClient(load_workloads('admitted'), load_workloads('evicted'))
     aggregator.reset()
 
-    dd_run_check(check)
+    dd_run_check(restarted)
     assert not aggregator.events
 
-    dd_run_check(check)
+    dd_run_check(restarted)
 
     assert event_indexes(aggregator, 'workload-uid') == [3, 4]
 
