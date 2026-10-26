@@ -416,6 +416,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /okta_workflows/manifest.json                                        @DataDog/saas-integrations @DataDog/documentation
 /okta_workflows/assets/logs/                                         @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/openrouter/                                                         @DataDog/saas-integrations
+/openrouter/*.md                                                     @DataDog/saas-integrations @DataDog/documentation
+/openrouter/manifest.json                                            @DataDog/saas-integrations @DataDog/documentation
+
 /palo_alto_cortex_xdr/                                               @DataDog/saas-integrations
 /palo_alto_cortex_xdr/*.md                                           @DataDog/saas-integrations @DataDog/documentation
 /palo_alto_cortex_xdr/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
@@ -837,6 +841,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /anomali_threatstream/                                               @DataDog/cloud-siem
 /anomali_threatstream/*.md                                           @DataDog/cloud-siem @DataDog/documentation
 /anomali_threatstream/manifest.json                                  @DataDog/cloud-siem @DataDog/documentation
+
+/automox/                                                            @DataDog/cloud-siem
+/automox/*.md                                                        @DataDog/cloud-siem @DataDog/documentation
+/automox/manifest.json                                               @DataDog/cloud-siem @DataDog/documentation
+/automox/assets/logs/                                                @DataDog/cloud-siem @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 
 /palo_alto_networks_cortex_xsoar/                                     @DataDog/saas-integrations

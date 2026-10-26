@@ -26,6 +26,7 @@ from ddev.monitoring.adapter import ComponentLogAdapter
 from ddev.monitoring.context import MonitorContext
 from ddev.monitoring.runtime import MonitoringRuntime
 from ddev.utils.github_actions import get_workflow_run_url, write_step_summary
+from ddev.utils.octo_sts import octo_sts_token_provider_from_env
 from ddev.utils.rate_limiting import RelaxedRateLimits
 
 if TYPE_CHECKING:
@@ -246,6 +247,8 @@ def build_dispatcher(
         rate_limiter=rate_limiters.get_limiter(integrations),
         logger=client_logger,
         observer=github_monitor,
+        # None unless the Dispatcher workflow opts in; its runs outlive the one-hour token.
+        token_provider=octo_sts_token_provider_from_env(initial_token=token, logger=client_logger),
     )
 
     canonical_run_fields = run_fields(run, tags=tags)
