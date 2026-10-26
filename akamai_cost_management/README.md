@@ -28,7 +28,6 @@ The Akamai Cost Management integration does not include any service checks.
 
 ## Support
 
-Need help? Contact [Datadog support][2].
+Need help? Contact [Datadog support][1].
 
-[1]: https://github.com/DataDog/integrations-core/blob/master/akamai_cost_management/metadata.csv
-[2]: https://docs.datadoghq.com/help/
+[1]: https://docs.datadoghq.com/help/
