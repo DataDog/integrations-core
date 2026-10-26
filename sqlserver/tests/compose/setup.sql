@@ -297,6 +297,10 @@ GO
 -- the table. Data is deterministic so tests can assert exact statistics.
 CREATE DATABASE datadog_test_column_stats;
 GO
+-- The procedure runs as the database owner. On Windows the setup connects with Windows authentication, and that
+-- container login can't be impersonated (error 15517), so make sa the owner everywhere.
+ALTER AUTHORIZATION ON DATABASE::datadog_test_column_stats TO sa;
+GO
 USE datadog_test_column_stats;
 GO
 CREATE TABLE dbo.orders (
