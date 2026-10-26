@@ -9,10 +9,10 @@ from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from xml.etree.ElementTree import Element
 
-from .collectors.base import tag_tuple
 from .constants import DEVICE_VENDOR_TAG, NDM_DEVICE_RESOURCE_TAG, NDM_DEVICE_USER_TAGS_RESOURCE_TAG, PARSE_ERROR_CODE
 from .errors import PanosApiError
 from .firewalls import FirewallTarget
+from .tags import tag_tuple
 from .xml_utils import text
 
 

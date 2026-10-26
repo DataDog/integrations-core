@@ -96,7 +96,7 @@ class InstanceConfig(BaseModel):
     empty_default_hostname: Optional[bool] = None
     enable_legacy_tags_normalization: Optional[bool] = None
     extra_headers: Optional[MappingProxyType[str, Any]] = None
-    firewall_credentials: Optional[tuple[FirewallCredential, ...]] = None
+    firewall_credentials: tuple[FirewallCredential, ...] = Field(..., min_length=1)
     firewall_ip_overrides: Optional[MappingProxyType[str, str]] = None
     firewall_ips: Optional[FirewallIps] = None
     firewalls: Optional[tuple[str, ...]] = None

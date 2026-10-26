@@ -55,16 +55,16 @@ instances:
     #   - 10.0.0.1
     #   - 10.0.0.2
 
-    ## @param firewall_credentials - list of mappings - optional
+    ## @param firewall_credentials - list of mappings - required
     ## Credentials used to log in to the firewalls. The Agent uses the first entry whose `cidr` contains the
     ## firewall IP. An entry without `cidr` matches every firewall. Each entry must set either `username` and
     ## `password`, or `api_key`, but not both. The same credentials apply to the firewalls found through Panorama.
     #
-    # firewall_credentials:
-    #   - cidr: 10.0.0.0/24
-    #     username: <USERNAME>
-    #     password: <PASSWORD>
-    #   - api_key: <API_KEY>
+    firewall_credentials:
+      - cidr: 10.0.0.0/24
+        username: <USERNAME>
+        password: <PASSWORD>
+      - api_key: <API_KEY>
 
     ## @param namespace - string - optional - default: default
     ## Namespace to use for Network Device Monitoring (NDM) device metadata.
@@ -267,8 +267,8 @@ instances:
     ## @param security_rule_filter - list of strings - optional
     ## List of regular expressions. Only security rules whose name matches one of them are reported.
     ## If not set, all security rules are reported. Without a filter, one `security_rule.hits` series is sent
-    ## per security rule, summed over all virtual systems and including the two default rules, which can be
-    ## thousands on a large rulebase.
+    ## per security rule and virtual system, including the two default rules, which can be thousands on a
+    ## large rulebase.
     #
     # security_rule_filter:
     #   - ^allow-.*

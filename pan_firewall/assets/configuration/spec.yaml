@@ -86,6 +86,7 @@ files:
         - 10.0.0.1
         - 10.0.0.2
     - name: firewall_credentials
+      required: true
       fleet_configurable: true
       description: |
         Credentials used to log in to the firewalls. The Agent uses the first entry whose `cidr` contains the
@@ -93,6 +94,7 @@ files:
         `password`, or `api_key`, but not both. The same credentials apply to the firewalls found through Panorama.
       value:
         type: array
+        minItems: 1
         items:
           type: object
           properties:
@@ -198,8 +200,8 @@ files:
       description: |
         List of regular expressions. Only security rules whose name matches one of them are reported.
         If not set, all security rules are reported. Without a filter, one `security_rule.hits` series is sent
-        per security rule, summed over all virtual systems and including the two default rules, which can be
-        thousands on a large rulebase.
+        per security rule and virtual system, including the two default rules, which can be thousands on a
+        large rulebase.
       value:
         type: array
         items:

@@ -13,9 +13,10 @@ import re
 from typing import Literal
 from xml.etree.ElementTree import Element
 
+from datadog_checks.pan_firewall.tags import tag_tuple
 from datadog_checks.pan_firewall.xml_utils import num, text
 
-from .base import CollectContext, Sample, tag_tuple
+from .base import CollectContext, Sample
 
 BGP_PEER_CMD = '<show><routing><protocol><bgp><peer/></bgp></protocol></routing></show>'
 OSPF_NEIGHBOR_CMD = '<show><routing><protocol><ospf><neighbor/></ospf></protocol></routing></show>'

@@ -9,7 +9,7 @@ from typing import Any
 def check_instance(model: Any) -> Any:
     """Validate the combinations of options that the spec cannot express."""
     firewalls = list(model.firewalls or ())
-    credentials = list(model.firewall_credentials or ())
+    credentials = list(model.firewall_credentials)
 
     _check_mode(model, firewalls)
     _check_panorama_auth(model)

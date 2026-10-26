@@ -138,7 +138,3 @@ class CollectContext:
 
 
 Collector = Callable[[CollectContext], list[Sample]]
-
-
-def tag_tuple(*pairs: tuple[str, str | None]) -> tuple[str, ...]:
-    return tuple(f'{name}:{value}' for name, value in pairs if value)

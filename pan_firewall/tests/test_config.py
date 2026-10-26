@@ -42,12 +42,6 @@ def test_static_config_with_cidr_credentials_and_ipv6_polls_each_firewall_with_i
     assert [(c.host, c.params['user']) for c in fake_panos.calls if c.type == 'keygen'] == [('192.0.2.10', 'u')]
 
 
-def test_panorama_config_needs_no_firewall_credentials(dd_run_check, fake_panos):
-    run(dd_run_check, {'panorama_host': 'pan.example.com', 'panorama_api_key': 'k'})
-
-    assert [(c.type, c.key_sent) for c in fake_panos.calls_to('pan.example.com')] == [('op', True)]
-
-
 @pytest.mark.parametrize(
     'changes, message',
     [

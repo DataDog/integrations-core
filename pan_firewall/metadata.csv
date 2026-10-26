@@ -12,7 +12,7 @@ pan_firewall.bgp.peer.status_duration,gauge,,second,,Time in the current state.,
 pan_firewall.bgp.peer.updates.in,count,,message,,Update messages received.,0,palo_alto_networks_firewall,bgp peer updates in,,"peer,vr,peer_ip,remote_as,peer_group"
 pan_firewall.bgp.peer.updates.out,count,,message,,Update messages sent.,0,palo_alto_networks_firewall,bgp peer updates out,,"peer,vr,peer_ip,remote_as,peer_group"
 pan_firewall.can_connect,gauge,,,,"Whether the firewall API responded during the last check run (1 = responded, 0 = did not respond).",1,palo_alto_networks_firewall,can connect,,
-pan_firewall.counter.global,count,,,,"Increase of the PAN-OS global counter, tagged by counter name, category and aspect.",0,palo_alto_networks_firewall,counter global,,"counter,category,aspect"
+pan_firewall.counter.global,count,,,,"Increase of the PAN-OS global counter, tagged by counter name, category, and aspect.",0,palo_alto_networks_firewall,counter global,,"counter,category,aspect"
 pan_firewall.dataplane.cpu.utilization,gauge,,percent,,Data-plane CPU utilization per core.,-1,palo_alto_networks_firewall,dataplane cpu utilization,,"dp,core"
 pan_firewall.disk.used_pct,gauge,,percent,,"Percentage of file system space used, reported every 30 minutes. Not sent for the `none`, `tmpfs`, or `cgroup_root` file systems.",-1,palo_alto_networks_firewall,disk used pct,,"mount,filesystem"
 pan_firewall.dropped_packets,count,,packet,,"Dropped packets by aspect. Known aspects report 0 when they have no drops. Other aspects, such as `mgmt`, are reported when present.",-1,palo_alto_networks_firewall,dropped packets,,aspect
