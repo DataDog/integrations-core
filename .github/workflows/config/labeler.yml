@@ -1117,6 +1117,10 @@ integration/openmetrics:
 - changed-files:
   - any-glob-to-any-file:
     - openmetrics/**/*
+integration/openrouter:
+- changed-files:
+  - any-glob-to-any-file:
+    - openrouter/**/*
 integration/openshift:
 - changed-files:
   - any-glob-to-any-file:
