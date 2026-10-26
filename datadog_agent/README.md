@@ -18,9 +18,9 @@ Some of the metrics collected by default were added to the Agent's telemetry in 
 
 ### Configuration
 
-1. Enable the Agent's telemetry endpoint by setting `telemetry.enabled: true` in your [`datadog.yaml`][4] file. The endpoint is served at `/telemetry` on the port set by `expvar_port`, which defaults to `5000`.
+The Agent always serves its telemetry at `/telemetry` on the port set by `expvar_port` in [`datadog.yaml`][4], which defaults to `5000`. Setting `telemetry.enabled: true` is not required for this check; it only enables additional telemetry.
 
-2. Edit the `datadog_agent.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. See the [sample datadog_agent.d/conf.yaml][5] for all available configuration options. For example:
+1. Edit the `datadog_agent.d/conf.yaml` file in the `conf.d/` folder at the root of your [Agent's configuration directory][4]. See the [sample datadog_agent.d/conf.yaml][5] for all available configuration options. For example:
 
    ```yaml
    init_config:
@@ -31,7 +31,7 @@ Some of the metrics collected by default were added to the Agent's telemetry in 
 
    To collect telemetry beyond the default set, list the metrics to add with the `extra_metrics` option. You can view all available metrics by querying the `/telemetry` endpoint directly.
 
-3. [Restart the Agent][6].
+2. [Restart the Agent][6].
 
 ### Validation
 
