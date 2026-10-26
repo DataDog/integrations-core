@@ -346,10 +346,18 @@ def test_non_result_query_is_reported_as_error(aggregator, instance_basic):
 
 
 def test_streaming_result_is_capped_in_emitted_event(instance_basic):
-    mock_conn, _ = _make_mock_conn(rows=[(row,) for row in range(MAX_RESULT_ROWS + 1)], description=[('row',)])
+    # The query's rows go past the cap, as with a LIMIT of its own above it.
+    rows = [(row,) for row in range(MAX_RESULT_ROWS + 1)]
+    mock_conn, query_cursor = _make_mock_conn(rows=rows, description=[('row',)])
+    query_cursor.fetchone.return_value = rows[MAX_RESULT_ROWS]
 
     with patch.object(MySql, 'event_platform_event') as mock_epe:
-        _, conn, _ = _setup_and_run(instance_basic, mock_conn=mock_conn)
+        check, conn, _ = _setup_and_run(instance_basic, mock_conn=mock_conn)
+
+    # The rest of the result is left unread: the connection is closed, never the cursor.
+    query_cursor.close.assert_not_called()
+    conn.close.assert_called_once()
+    assert check.data_observability._db is None
 
     payload = json.loads(_get_do_event_calls(mock_epe)[0].args[0])
     assert payload['row_count'] == MAX_RESULT_ROWS

@@ -111,7 +111,7 @@ class MySql(MySQLInstanceMixin, DatabaseCheck):
     DEFAULT_MAX_CUSTOM_QUERIES = 20
     HA_SUPPORTED = True
 
-    def __new__(cls, name, init_config, instances):
+    def __new__(cls, name: str, init_config: dict[str, Any], instances: list[dict[str, Any]]) -> DatabaseCheck:
         # The Agent schedules a separate run-once check for each one-off Data Observability task,
         # holding only connection settings and a do_task block. It runs as its own check class, so
         # none of the instance setup below applies to it.
