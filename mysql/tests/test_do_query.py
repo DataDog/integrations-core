@@ -59,12 +59,35 @@ def test_stream_reads_in_batches():
 
 def test_stream_stops_at_max_rows():
     conn = FakeConnection({'SELECT id FROM t': (['id'], _rows(3_000))})
+    session = _session(conn)
 
-    _, batches = _session(conn).stream('shop', 'SELECT id FROM t', 30_000, max_rows=2_000)
+    _, batches = session.stream('shop', 'SELECT id FROM t', 30_000, max_rows=2_000)
 
     assert [row for batch in batches for row in batch] == _rows(2_000)
     assert conn.fetch_sizes == [1_000, 1_000]
     assert ('SET SESSION sql_select_limit = %s', (2_000,)) in _settings(conn)
+    # The server stopped at sql_select_limit, so the connection can run the next query.
+    assert session.usable
+
+
+@pytest.mark.parametrize(
+    'query',
+    [
+        pytest.param('SELECT id FROM t LIMIT 3000', id='own-limit'),
+        pytest.param('CALL list_ids()', id='stored-procedure'),
+    ],
+)
+def test_stream_leaves_rows_past_max_rows_unread(query):
+    # sql_select_limit doesn't stop these, and reading the rest would hold the connection for as long
+    # as the server takes to send it.
+    conn = FakeConnection({query: (['id'], _rows(3_000))})
+    session = _session(conn)
+
+    _, batches = session.stream('shop', query, 30_000, max_rows=2_000)
+
+    assert [row for batch in batches for row in batch] == _rows(2_000)
+    assert not conn.drained
+    assert not session.usable
 
 
 def test_stream_never_fetches_everything_at_once():

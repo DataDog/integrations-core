@@ -200,6 +200,10 @@ class MySQLDataObservability(ManagedAuthConnectionMixin, DBMAsyncJob):
             self._raise_if_cancelled()
             session = self._session_for(conn)
             columns, rows = session.run(dbname, query_spec.query, query_spec.query_timeout, MAX_RESULT_ROWS)
+            if not session.usable:
+                # The query had rows past the cap, or its cursor failed to close; the next query
+                # reconnects.
+                self._close_db_conn()
             rows = [list(row) for row in rows]
             duration = time.time() - start
             return {

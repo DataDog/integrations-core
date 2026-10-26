@@ -44,13 +44,18 @@ if TYPE_CHECKING:
 MAX_TASK_STATEMENT_ROWS = 1_000_000
 
 # Upper bound on one serialized event. Rows are sent in chunks of at most this size, which keeps
-# every event well under the intake's per-event limit.
+# every event well under the intake's per-event limit. A statement with a single row too large for a
+# chunk fails.
 MAX_EVENT_BYTES = 4 * 1024 * 1024
 
 # How long the server waits while the check is not reading a result. The check reads continuously,
 # so this is only a margin for pauses such as garbage collection or a throttled Agent container.
 # It does not limit how long a statement runs: timeout_seconds does.
 NET_WRITE_TIMEOUT_SECONDS = 300
+
+# Added to the task's longest statement timeout to get the client read timeout of its connection, so
+# the server's statement timeout always fires first and is reported as such.
+READ_TIMEOUT_MARGIN_SECONDS = 30
 
 # Client errors that mean the connection is gone: can't connect, server gone away, lost
 # connection during a query.
@@ -65,6 +70,27 @@ UNKNOWN_THREAD_ERROR_CODE = 1094
 KILL_TIMEOUT_SECONDS = 10
 
 
+class RowTooLargeError(Exception):
+    """A row is larger than a chunk event can hold, so the statement's result can't be sent."""
+
+    error_kind = 'row_too_large'
+
+    def __init__(self, row_index: int, row_bytes: int) -> None:
+        super().__init__(
+            f'Row {row_index} is {row_bytes} bytes encoded, more than the {MAX_EVENT_BYTES} bytes an event can '
+            'hold; select fewer or smaller columns'
+        )
+
+
+class ChunkEmitError(Exception):
+    """A chunk event could not be sent, so the result the backend receives would be incomplete."""
+
+    error_kind = 'emit_error'
+
+    def __init__(self, chunk_index: int) -> None:
+        super().__init__(f'Could not send chunk {chunk_index} of the result; the Agent log has the cause')
+
+
 class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
     """
     Runs the statements of one `do_task` once and reports a result for each of them. It sends no
@@ -77,7 +103,7 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
     DBMS = 'mysql'
     HA_SUPPORTED = True
 
-    def __init__(self, name, init_config, instances):
+    def __init__(self, name: str, init_config: dict[str, Any], instances: list[dict[str, Any]]) -> None:
         super().__init__(name, init_config, instances)
         self._init_instance(init_config)
         self._task = DoTask.model_validate(self.instance['do_task'])
@@ -144,7 +170,7 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
         )
         self._count('dd.mysql.do_task.kills', ['outcome:failed', f'exc_class:{type(error).__name__}'])
 
-    def check(self, _):
+    def check(self, _: Any) -> None:
         task = self._task
         if time.time() >= task.expires_at:
             # The Agent drops stale tasks too; this catches a task that sat in the queue.
@@ -190,7 +216,10 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
             self._close()
 
     def _connect(self) -> None:
-        conn = connect_with_session_variables(mysql_version=self._server_version, **self._get_connection_args())
+        conn = connect_with_session_variables(
+            mysql_version=self._server_version,
+            **{**self._get_connection_args(), 'read_timeout': self._read_timeout()},
+        )
         try:
             with closing(conn.cursor(CommenterCursor)) as cursor:
                 if self._server_version is None:
@@ -209,6 +238,14 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
             _close_quietly(conn, self.log)
             raise
         self._session = DOQuerySession(conn, self._server_version, self._server_version.flavor == 'MariaDB')
+
+    def _read_timeout(self) -> int:
+        """
+        The client read timeout of the task connection. The instance's read_timeout is meant for the
+        mysql check's own queries: a shorter one would fail a statement that is within its own
+        timeout, as a lost connection, and leave it running on the server.
+        """
+        return max(statement.timeout_seconds for statement in self._task.statements) + READ_TIMEOUT_MARGIN_SECONDS
 
     def _close(self) -> None:
         session = self._session
@@ -252,17 +289,20 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
                 statement.timeout_seconds * 1000,
                 min(statement.max_rows, MAX_TASK_STATEMENT_ROWS),
             )
-            for batch in batches:
-                if self.is_cancelled:
-                    # Nobody waits for the result. Closing the iterator marks the session unusable
-                    # without draining the rest of the result; closing the connection makes the
-                    # server abort the statement on its next write.
-                    batches.close()
-                    self._close()
-                    return False
-                for row in batch:
-                    sender.add([_to_text(value) for value in row])
-            sender.flush()
+            try:
+                for batch in batches:
+                    if self.is_cancelled:
+                        # Nobody waits for the result. Closing the connection makes the server abort
+                        # the statement on its next write.
+                        self._close()
+                        return False
+                    for row in batch:
+                        sender.add([_to_text(value) for value in row])
+                sender.flush()
+            finally:
+                # Leaving the read early, cancelled or on a row or chunk that can't be sent, leaves
+                # the rest of the result unread and the session unusable.
+                batches.close()
         except Exception as error:
             if self.is_cancelled:
                 # Most likely the kill from cancel() interrupted the statement. Nobody waits for
@@ -273,14 +313,14 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
             result = _error_result(error, duration)
             if not session.conn.open:
                 result['error_kind'] = 'connection_error'
-            # Keep the connection only after a plain server error. Anything else can leave it
-            # mid-result, and a statement that returned no result set may have changed the session,
-            # its read-only setting included, so the next statement starts on a fresh one.
+            # Keep the connection only after a plain server error or a result that couldn't be sent,
+            # which leave it in a known state (or the session unusable, checked below). A statement
+            # that returned no result set may have changed the session, its read-only setting
+            # included, so the next statement starts on a fresh one.
             if (
-                not isinstance(error, pymysql.err.DatabaseError)
+                not isinstance(error, (pymysql.err.DatabaseError, RowTooLargeError, ChunkEmitError))
                 or isinstance(error, NoResultSetError)
                 or result['error_kind'] == 'connection_error'
-                or not session.usable
             ):
                 self._close()
             self.log.warning(
@@ -299,6 +339,10 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
                 'error_kind': None,
                 'error_code': None,
             }
+        if not session.usable:
+            # The connection may be mid-result, after any outcome: a read stopped early, rows past
+            # max_rows, or a cursor that failed to close after a complete read.
+            self._close()
         self._statement_finished()
         self._emit_final(statement, sender, columns, result)
         return True
@@ -355,18 +399,23 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
             }
         )
 
-    def _emit(self, event: dict[str, Any]) -> None:
+    def _emit(self, event: dict[str, Any] | bytes, statement_id: str | None = None) -> bool:
+        """Send one event, or its serialized payload. Returns False, logged and counted, if it fails."""
+        if isinstance(event, dict):
+            statement_id = event.get('statement_id')
         try:
-            self.event_platform_event(json.encode(event), EVENT_TRACK_TYPE)
+            payload = event if isinstance(event, bytes) else json.encode_bytes(event)
+            self.event_platform_event(payload, EVENT_TRACK_TYPE)
         except Exception as error:
             self.log.exception(
                 "Failed to emit Data Observability task %s result for statement %s",
                 self._task.task_id,
-                event.get('statement_id'),
+                statement_id,
             )
             self._count('dd.mysql.do_task.emit_failures', [f'exc_class:{type(error).__name__}'])
-            return
+            return False
         self._count('dd.mysql.do_task.events')
+        return True
 
     def _record_statement(self, result: dict[str, Any], executed: bool) -> None:
         status_tag = f"status:{result['status']}"
@@ -421,32 +470,35 @@ class _ChunkSender:
         # the rows of one chunk may use.
         envelope = {**self.routing, 'kind': 'chunk', 'chunk_index': MAX_TASK_STATEMENT_ROWS, 'rows': []}
         self._budget = MAX_EVENT_BYTES - len(json.encode_bytes(envelope))
-        self._rows: list[list[str | None]] = []
+        # Rows are encoded once, as they are added; flush() splices them into the chunk event.
+        self._rows: list[bytes] = []
         self._size = 0
         self.sent_chunks = 0
         self.sent_rows = 0
 
     def add(self, row: list[str | None]) -> None:
-        # One more byte for the separating comma. A row larger than the budget gets a chunk of its
-        # own.
-        row_size = len(json.encode_bytes(row)) + 1
-        if self._rows and self._size + row_size > self._budget:
+        """Add one row, sending the pending rows first if it doesn't fit in their chunk."""
+        encoded = json.encode_bytes(row)
+        # One more byte for the separating comma.
+        row_size = len(encoded) + 1
+        if row_size > self._budget:
+            raise RowTooLargeError(self.sent_rows + len(self._rows), len(encoded))
+        if self._size + row_size > self._budget:
             self.flush()
-        self._rows.append(row)
+        self._rows.append(encoded)
         self._size += row_size
 
     def flush(self) -> None:
+        """Send the pending rows as a chunk event. Raises ChunkEmitError if it can't be sent."""
         if not self._rows:
             return
-        self._check._emit(
-            {
-                **self.routing,
-                'timestamp': int(time.time() * 1000),
-                'kind': 'chunk',
-                'chunk_index': self.sent_chunks,
-                'rows': self._rows,
-            }
+        envelope = json.encode_bytes(
+            {**self.routing, 'timestamp': int(time.time() * 1000), 'kind': 'chunk', 'chunk_index': self.sent_chunks}
         )
+        # The envelope is a JSON object: its closing brace makes way for the rows array.
+        payload = b''.join((envelope[:-1], b',"rows":[', b','.join(self._rows), b']}'))
+        if not self._check._emit(payload, self.routing['statement_id']):
+            raise ChunkEmitError(self.sent_chunks)
         self.sent_chunks += 1
         self.sent_rows += len(self._rows)
         self._rows, self._size = [], 0
@@ -463,7 +515,9 @@ def _error_result(error: Exception, duration: float, connecting: bool = False) -
     # Same classification as the Data Observability job, so both report one set of error kinds.
     # pymysql reports a closed socket as InterfaceError(0, ''); 0 is not a database error code.
     code = error.args[0] if error.args and isinstance(error.args[0], int) and error.args[0] else None
-    if connecting or isinstance(error, pymysql.err.InterfaceError) or code in CONNECTION_ERROR_CODES:
+    if isinstance(error, (RowTooLargeError, ChunkEmitError)):
+        kind = error.error_kind
+    elif connecting or isinstance(error, pymysql.err.InterfaceError) or code in CONNECTION_ERROR_CODES:
         kind = 'connection_error'
     elif code in STATEMENT_TIMEOUT_ERROR_CODES:
         kind = 'statement_timeout'

@@ -71,9 +71,9 @@ class DOQuerySession:
         rows, at most `max_rows` rows in all. Errors before the result set raise here; errors
         while reading raise from the iterator.
 
-        The iterator must be exhausted or closed. Closing it early leaves the connection
-        mid-result: the session becomes unusable and the caller must close the connection rather
-        than the cursor, because closing an unbuffered cursor reads every remaining row.
+        The iterator must be exhausted or closed. Closing it early, or a query that has rows past
+        `max_rows`, leaves the connection mid-result: the session becomes unusable and the caller
+        must close the connection, which never reads the rest of the result.
         """
         self._set_timeout(timeout_ms)
         self._set_row_limit(max_rows)
@@ -104,17 +104,37 @@ class DOQuerySession:
                     read += len(batch)
                     yield batch
                 if len(batch) < size:
+                    # A short batch ends the result.
                     break
+            else:
+                # The cap is reached. sql_select_limit stops the server there, unless the query has a
+                # larger LIMIT of its own or runs a stored procedure, which sql_select_limit doesn't
+                # apply to. Reading one more row tells them apart.
+                if cursor.fetchone() is not None:
+                    self._abandon(cursor)
+                    return
         except GeneratorExit:
-            # Stopped early by the caller. Closing the cursor would read every remaining row.
-            self.usable = False
+            # Stopped early by the caller.
+            self._abandon(cursor)
             raise
         except Exception:
             # A read error ended the result (server error packet or lost connection).
             self._close_cursor(cursor)
             raise
-        # The server has sent everything up to sql_select_limit; this reads the EOF only.
+        # The result is over; this reads the EOF only.
         self._close_cursor(cursor)
+
+    def _abandon(self, cursor: Any) -> None:
+        """
+        Leave the rest of the result unread. pymysql reads and discards every remaining row in
+        SSCursor.close(), which is also the cursor's finalizer, and in the result's finalizer, so both
+        are detached here. The connection stays mid-result until the caller closes it.
+        """
+        self.usable = False
+        result = getattr(cursor, '_result', None)
+        if result is not None:
+            result.unbuffered_active = False
+        cursor.connection = None
 
     def _close_cursor(self, cursor: Any) -> None:
         try:

@@ -28,9 +28,11 @@ class FakeConnection:
         self.cursor_classes = []
         # Called with no arguments at every fetchmany(), so tests can act or record state mid-read.
         self.on_fetch = None
-        # Set when a cursor is closed with rows left unread, which pymysql would read and discard.
+        # Set when a cursor is closed, or garbage-collected, with rows left unread, which pymysql would
+        # read and discard.
         self.drained = False
-        # Like the server, results stop at the session's sql_select_limit.
+        # Like the server, results stop at the session's sql_select_limit, unless the query has a
+        # LIMIT of its own or calls a stored procedure.
         self.select_limit = None
         # The server's ID for the connection, as pymysql reads it from the handshake.
         self.connection_id = 7
@@ -48,9 +50,21 @@ class FakeConnection:
         self.open = False
 
 
+class FakeResult:
+    def __init__(self):
+        self.unbuffered_active = False
+
+
 class FakeCursor:
+    """
+    Like pymysql's SSCursor, close() reads every unread row while the cursor is attached to its
+    connection and result, and the cursor closes itself when garbage-collected.
+    """
+
     def __init__(self, conn):
         self.conn = conn
+        self.connection = conn
+        self._result = FakeResult()
         self.description = None
         self.rows = []
         self.fetched = 0
@@ -76,11 +90,14 @@ class FakeCursor:
             raise result
         if result is not None:
             columns, self.rows = result
-            if self.conn.select_limit is not None:
+            if self.conn.select_limit is not None and ' LIMIT ' not in sql and not sql.startswith('CALL'):
                 self.rows = self.rows[: self.conn.select_limit]
             self.description = [(column,) for column in columns]
+            self._result.unbuffered_active = True
 
     def fetchone(self):
+        if self.fetched >= len(self.rows):
+            return None
         row = self.rows[self.fetched]
         self.fetched += 1
         return row
@@ -99,5 +116,8 @@ class FakeCursor:
         return batch
 
     def close(self):
-        if self.fetched < len(self.rows):
+        if self.connection is not None and self._result.unbuffered_active and self.fetched < len(self.rows):
             self.conn.drained = True
+        self.connection = None
+
+    __del__ = close

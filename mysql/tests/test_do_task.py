@@ -22,6 +22,7 @@ from datadog_checks.mysql.do_task import (
     MAX_EVENT_BYTES,
     MAX_TASK_STATEMENT_ROWS,
     NET_WRITE_TIMEOUT_SECONDS,
+    READ_TIMEOUT_MARGIN_SECONDS,
     MySqlTaskCheck,
     _ChunkSender,
     _to_text,
@@ -235,17 +236,31 @@ def test_metrics_report_runs_statements_and_events(aggregator, dd_run_check, ins
     aggregator.assert_metric('dd.mysql.do_task.emit_failures', count=0)
 
 
-def test_failed_emit_is_counted_and_the_task_continues(aggregator, dd_run_check, instance_basic):
+def test_failed_chunk_emit_fails_the_statement(aggregator, dd_run_check, instance_basic):
     check = _create_check(instance_basic, [_statement('s0', 'SELECT 1'), _statement('s1', 'SELECT 2')])
     conn = FakeConnection({'SELECT 1': (['1'], [(1,)]), 'SELECT 2': (['2'], [(2,)])})
+    sent = []
 
-    # The first chunk fails; the final event and the second statement's events still go out.
-    with patch.object(check, 'event_platform_event', side_effect=[ValueError('boom'), None, None, None]):
+    def first_chunk_fails(payload, track_type):
+        if not sent:
+            sent.append(None)
+            raise ValueError('boom')
+        sent.append(json.loads(payload))
+
+    # The backend would otherwise count a chunk it never receives as part of a successful result.
+    with patch.object(check, 'event_platform_event', side_effect=first_chunk_fails):
         _run(dd_run_check, check, conn)
 
+    final = _final(sent[1:])
+    assert (final['status'], final['error_kind'], final['chunk_count'], final['row_count']) == (
+        'error',
+        'emit_error',
+        0,
+        0,
+    )
+    assert _final(sent[1:], 's1')['status'] == 'success'
     _assert_count(aggregator, check, 'dd.mysql.do_task.emit_failures', 'exc_class:ValueError')
-    _assert_count(aggregator, check, 'dd.mysql.do_task.events', count=3)
-    _assert_count(aggregator, check, 'dd.mysql.do_task.statements', 'status:success', count=2)
+    _assert_count(aggregator, check, 'dd.mysql.do_task.statements', 'status:error', 'error_kind:emit_error')
     _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:completed')
 
 
@@ -375,6 +390,23 @@ def test_rows_past_the_limit_are_not_returned(aggregator, dd_run_check, instance
     assert connect.call_count == 1
 
 
+def test_rows_past_the_limit_from_the_statement_own_limit_reconnect(aggregator, dd_run_check, instance_basic):
+    # The statement's LIMIT overrides sql_select_limit, so rows past max_rows are left unread on a
+    # connection that can't run the next statement.
+    query = 'SELECT id FROM big LIMIT 100'
+    check = _create_check(instance_basic, [_statement('s0', query, max_rows=5), _statement('s1')])
+    conn = FakeConnection({query: (['id'], [(i,) for i in range(100)])})
+
+    connect = _run(dd_run_check, check, conn, FakeConnection({'SELECT 1': (['1'], [(1,)])}))
+
+    events = _events(aggregator)
+    assert _sent_rows(events, 's0') == [[str(i)] for i in range(5)]
+    assert _final(events, 's0')['status'] == _final(events, 's1')['status'] == 'success'
+    assert not conn.drained
+    assert not conn.open
+    assert connect.call_count == 2
+
+
 def test_max_rows_above_the_hard_cap_is_capped(aggregator, dd_run_check, instance_basic):
     check = _create_check(instance_basic, [_statement(max_rows=MAX_TASK_STATEMENT_ROWS * 2)])
     conn = FakeConnection({'SELECT 1': (['1'], [(1,)])})
@@ -481,10 +513,11 @@ def test_cancelled_check_skips_the_remaining_statements(aggregator, dd_run_check
     conn = FakeConnection({'SELECT 1': (['1'], [(1,)]), 'SELECT 2': (['2'], [(2,)])})
     emit = check._emit
 
-    def cancel_after_the_first_result(event):
-        emit(event)
-        if event.get('kind') == 'final':
+    def cancel_after_the_first_result(event, statement_id=None):
+        sent = emit(event, statement_id)
+        if isinstance(event, dict) and event.get('kind') == 'final':
             check._cancelled = True
+        return sent
 
     with patch.object(check, '_emit', side_effect=cancel_after_the_first_result):
         _run(dd_run_check, check, conn)
@@ -529,15 +562,21 @@ def test_chunks_fill_the_byte_budget(aggregator, dd_run_check, instance_basic):
     assert len({event['result_id'] for event in events}) == 1
 
 
-def test_row_larger_than_the_budget_gets_its_own_chunk(aggregator, dd_run_check, instance_basic):
-    rows = [('small',), ('x' * MAX_EVENT_BYTES,), ('small',)]
-    check = _create_check(instance_basic, [_statement(query='SELECT payload FROM blobs')])
+def test_row_larger_than_the_budget_fails_the_statement(aggregator, dd_run_check, instance_basic):
+    # Sent as is, the event would be larger than the Agent and the intake accept and be dropped.
+    rows = [('small',), ('x' * _chunk_budget(instance_basic),), ('small',)]
+    check = _create_check(instance_basic, [_statement('s0', 'SELECT payload FROM blobs'), _statement('s1')])
+    conn = FakeConnection({'SELECT payload FROM blobs': (['payload'], rows), 'SELECT 1': (['1'], [(1,)])})
 
-    _run(dd_run_check, check, FakeConnection({'SELECT payload FROM blobs': (['payload'], rows)}))
+    _run(dd_run_check, check, conn, FakeConnection({'SELECT 1': (['1'], [(1,)])}))
 
     events = _events(aggregator)
-    assert [chunk['rows'] for chunk in _chunks(events)] == [[['small']], [['x' * MAX_EVENT_BYTES]], [['small']]]
-    assert _final(events)['chunk_count'] == 3
+    assert not _chunks(events)
+    final = _final(events)
+    assert (final['status'], final['error_kind'], final['chunk_count']) == ('error', 'row_too_large', 0)
+    assert 'Row 1 is' in final['error']
+    assert _final(events, 's1')['status'] == 'success'
+    assert not conn.drained
 
 
 def test_chunks_are_sent_while_reading(aggregator, dd_run_check, instance_basic):
@@ -778,6 +817,18 @@ def test_session_sets_net_write_timeout(aggregator, dd_run_check, instance_basic
     _run(dd_run_check, check, conn)
 
     assert ('SET SESSION net_write_timeout = %s', (300,)) in conn.executed
+
+
+def test_connection_read_timeout_follows_the_statement_timeouts(aggregator, dd_run_check, instance_basic):
+    # The instance's read_timeout, meant for the mysql check's own queries, would fail a statement
+    # still within its own timeout as a lost connection.
+    statements = [{**_statement('s0'), 'timeout_seconds': 60}, {**_statement('s1'), 'timeout_seconds': 600}]
+    check = _create_check(instance_basic, statements)
+    check._config.read_timeout = 5
+
+    connect = _run(dd_run_check, check, FakeConnection({'SELECT 1': (['1'], [(1,)])}))
+
+    assert connect.call_args.kwargs['read_timeout'] == 600 + READ_TIMEOUT_MARGIN_SECONDS
 
 
 @pytest.mark.parametrize(
