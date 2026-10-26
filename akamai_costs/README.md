@@ -16,7 +16,7 @@ Placeholder Text
 
 ### Metrics
 
-See [metadata.csv][1] for a list of metrics provided by this integration.
+The Akamai Cost Management integration does not include any metrics.
 
 ### Events
 
