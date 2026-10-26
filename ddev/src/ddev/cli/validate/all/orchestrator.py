@@ -348,7 +348,7 @@ class ValidationOrchestrator(EventBusOrchestrator):
                 self._app.console.print(Rule(title=name, style="red"))
                 output = "\n".join(filter(None, [result.stdout, result.stderr]))
                 if output:
-                    self._app.console.print(output.rstrip())
+                    self._app.console.print(output.rstrip(), markup=False)
                 config = VALIDATIONS.get(name, ValidationConfig())
                 if config.fix_flag:
                     fix_cmd = f"ddev validate {name} {config.fix_flag}"
