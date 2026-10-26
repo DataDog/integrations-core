@@ -340,7 +340,7 @@ def competing_operation(monkeypatch: pytest.MonkeyPatch) -> Event:
 def test_concurrent_fake_requests_keep_response_ownership(
     monkeypatch: pytest.MonkeyPatch, competing_operation: Event, clients: str, same_url: bool, raises: bool
 ):
-    # Removing an earlier registration must not shift another worker's matched index (AI-7378).
+    # Removing an earlier registration must not shift another worker's matched index.
     root = FakeHTTPClient()
     first_client = root.create_client() if clients == 'siblings' else root
     second_client = root

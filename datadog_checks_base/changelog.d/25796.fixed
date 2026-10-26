@@ -1,1 +1,0 @@
-Make shared fake HTTP response matching and request recording atomic across created clients.
