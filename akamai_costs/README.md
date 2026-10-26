@@ -20,7 +20,7 @@ See [metadata.csv][1] for a list of metrics provided by this integration.
 
 ### Events
 
-Akamai Cost Management does not include any events.
+The Akamai Cost Management integration does not include any events.
 
 ### Service Checks
 
