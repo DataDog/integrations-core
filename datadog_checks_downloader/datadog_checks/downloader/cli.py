@@ -27,9 +27,10 @@ from .exceptions import (
     TargetNotFoundError,
 )
 
-# When set, the downloader writes a JSON summary of the download to this path before exiting.
-# The Agent sets it to report which repository served the wheel in its install telemetry.
-RESULT_FILE_ENV_VAR = 'DD_DOWNLOADER_RESULT_FILE'
+RESULT_FILE_HELP = (
+    'Write a JSON summary of the download to this path before exiting, '
+    'such as the repository that served the wheel. Used by the Agent for its install telemetry.'
+)
 
 V2_FALLBACK_ERRORS: tuple[type[BaseException], ...] = (
     MissingVersion,
@@ -66,8 +67,7 @@ def _error_type(exc: Exception) -> str:
     return 'other'
 
 
-def _write_result(result: dict[str, str]) -> None:
-    path = os.environ.get(RESULT_FILE_ENV_VAR)
+def _write_result(path: str | None, result: dict[str, str]) -> None:
     if not path:
         return
     try:
@@ -144,6 +144,9 @@ def instantiate_downloader():
 
     parser.add_argument('--ignore-python-version', action='store_true', help='Ignore Python version requirements.')
 
+    # Accepted so that the v1 fallback can parse the same command line; download() writes the file.
+    parser.add_argument('--result-file', type=str, default=None, help=RESULT_FILE_HELP)
+
     parser.add_argument(
         '-v', '--verbose', action='count', default=0, help='Show verbose information about TUF and in-toto.'
     )
@@ -196,6 +199,8 @@ def run_downloader(tuf_downloader, standard_distribution_name, version, ignore_p
 
 
 def download() -> None:
+    # Read up front so that the result is written even when validating the other arguments fails.
+    result_file = _v2_parser().parse_args().result_file
     result: dict[str, str] = {}
     try:
         _download(result)
@@ -203,7 +208,7 @@ def download() -> None:
         result['error_type'] = _error_type(exc)
         raise
     finally:
-        _write_result(result)
+        _write_result(result_file, result)
 
 
 def _download(result: dict[str, str]) -> None:
@@ -253,6 +258,7 @@ def _v2_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument('-v', '--verbose', action='count', default=0)
     parser.add_argument('--v2', action='store_true', default=False)
+    parser.add_argument('--result-file', type=str, default=None, help=RESULT_FILE_HELP)
 
     # v1 compat flags accepted as no-ops so callers upgrading from v1 get a warning, not an error.
     parser.add_argument('--type', type=str, default=None, dest='ignored_type')

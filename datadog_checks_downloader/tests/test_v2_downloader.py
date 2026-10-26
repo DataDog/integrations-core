@@ -602,13 +602,12 @@ class TestCliDownloadFallback:
 
 
 class TestDownloadResultFile:
-    """Covers the machine-readable result that the Agent requests through DD_DOWNLOADER_RESULT_FILE."""
+    """Covers the machine-readable result that the Agent requests with --result-file."""
 
     @pytest.fixture
     def result_file(self, monkeypatch, tmp_path):
         path = tmp_path / 'result.json'
-        monkeypatch.setenv(cli.RESULT_FILE_ENV_VAR, str(path))
-        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres'])
+        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres', '--result-file', str(path)])
         monkeypatch.setattr(cli, 'instantiate_downloader', MagicMock(return_value=('d', 'n', 'v', False)))
         return path
 
@@ -643,10 +642,21 @@ class TestDownloadResultFile:
         assert json.loads(result_file.read_text()) == {'repository': 'v2', 'error_type': expected_error_type}
 
     def test_unwritable_result_file_does_not_fail_the_download(self, monkeypatch, tmp_path, capsys):
-        monkeypatch.setenv(cli.RESULT_FILE_ENV_VAR, str(tmp_path / 'missing-dir' / 'result.json'))
-        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres'])
+        monkeypatch.setattr(
+            'sys.argv',
+            ['downloader', 'datadog-postgres', '--result-file', str(tmp_path / 'missing-dir' / 'result.json')],
+        )
         monkeypatch.setattr(cli, 'run_v2_downloader', MagicMock(side_effect=lambda *_: print('/tmp/wheel.whl')))
 
         cli.download()
 
         assert capsys.readouterr().out == '/tmp/wheel.whl\n'
+
+    def test_v1_fallback_accepts_the_result_file_flag(self, monkeypatch, tmp_path):
+        # The v1 fallback parses the same command line, so it must not reject the flag.
+        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres', '--result-file', str(tmp_path / 'r.json')])
+        monkeypatch.setattr(cli, 'TUFDownloader', MagicMock())
+
+        _, name, _, _ = cli.instantiate_downloader()
+
+        assert name == 'datadog-postgres'
