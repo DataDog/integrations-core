@@ -18,6 +18,9 @@ IBM_DB_INSTALLER_URL = "https://agent-integrations-ci-fixtures.s3.us-east-1.amaz
 matrix.topology.e2e-env = { value = false, if = ["hadr"] }
 matrix.topology.env-vars = [
   { key = "DB2_HADR", value = "true", if = ["hadr"] },
+  # Takeover changes server roles; automatic replays cannot reuse the same fixtures.
+  { key = "DD_CIVISIBILITY_FLAKY_RETRY_ENABLED", value = "false", if = ["hadr"] },
+  { key = "DD_CIVISIBILITY_EARLY_FLAKE_DETECTION_ENABLED", value = "false", if = ["hadr"] },
 ]
 matrix.version.env-vars = [
   { key = "DB2_VERSION", value = "{matrix:version}" },
