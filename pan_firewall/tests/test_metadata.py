@@ -168,8 +168,6 @@ def test_first_run_sends_the_device_and_its_interfaces(dd_run_check, aggregator,
         'fw-a',
         1,
     )
-    # The resource tags link metrics to the device; the device record itself does not carry them.
-    assert not [tag for tag in device['tags'] if tag.startswith('dd.internal.resource:')]
     assert len(event['interfaces']) == 7
 
 

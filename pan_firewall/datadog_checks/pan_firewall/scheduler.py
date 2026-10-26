@@ -28,9 +28,6 @@ class Result(Enum):
 class FirewallSchedule:
     """Fixed-interval timers for the collectors of one firewall, on a monotonic clock. Collectors stay due until
     `mark_run()` or `mark_failed()`, so a skipped cycle (a commit in progress) leaves them due.
-
-    Every method takes the `now` read once at the start of the run. The Agent starts runs on a fixed grid, so a timer
-    counted from the end of a run would make the run one interval later a little early, and delay it by one more run.
     """
 
     def __init__(self, clock: Callable[[], float] = time.monotonic):
