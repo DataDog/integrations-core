@@ -17,7 +17,15 @@ from .collectors.interfaces import parse_interface_all, parse_interface_speeds
 from .collectors.jobs import busy_jobs
 from .constants import IDENTITY
 from .errors import PanosError, PanosSkipped, PanosUnreachable
-from .identity import DeviceIdentity, configured_vsys, global_tags, parse_system_info, vsys_list
+from .identity import (
+    DeviceIdentity,
+    configured_vsys,
+    device_resource_tags,
+    device_serial,
+    global_tags,
+    parse_system_info,
+    vsys_list,
+)
 from .interface_config import INTERFACE_CONFIG_CMD, parse_interface_config
 from .log_utils import warn_once
 from .metadata import build_device, build_interfaces
@@ -60,7 +68,6 @@ class FirewallPoller:
         self.state = FirewallState(vsys=configured_vsys(self.config.vsys) or ['vsys1'])
         self.identity = self._load_identity()
         self._can_connect: int | None = None
-        self._auth_status: int | None = None
         # The `can_connect` the last metadata was sent with: a different one sends the metadata again at once.
         self._metadata_status: int | None = None
 
@@ -77,14 +84,15 @@ class FirewallPoller:
             self.log.debug('%s: %d calls in %.2fs', self.ip, self.client.stats.calls, time.monotonic() - start)
 
     def _run(self) -> None:
-        due = self.schedule.due(self._enabled(), identity_missing=self.identity is None)
+        now = self.schedule.now()
+        due = self.schedule.due(self._enabled(), now, identity_missing=self.identity is None)
         results = self._collect(due)
         self._warn_if_unreachable(results)
-        self.schedule.record(results)
+        self.schedule.record(results, now)
         if results.get(IDENTITY) is Result.RAN and self.state.interface_map is None:
             # The identity was read but not the interfaces: try again soon rather than in 30 minutes, as the interface
             # tags and the NDM interfaces depend on it.
-            self.schedule.mark_failed([IDENTITY])
+            self.schedule.mark_failed([IDENTITY], now)
         if self.client.stats.key_regenerated:
             # A rejected key that had worked may mean another unit answers here: read the identity again next run.
             self.schedule.make_due(IDENTITY)
@@ -107,19 +115,17 @@ class FirewallPoller:
         )
 
     def _send_health(self) -> None:
+        """Send what this run's calls measured, and nothing in a run that made no call: `can_connect` when there was
+        a call, and the authentication status only when the firewall answered, as only an answer tells whether the
+        credentials work."""
         stats = self.client.stats
-        if stats.calls:
-            self._can_connect = 1 if stats.answered else 0
-            # Only a run where the firewall answered says whether the credentials work; until one does, nothing is sent.
-            if stats.auth_rejected:
-                self._auth_status = 1
-            elif stats.answered:
-                self._auth_status = 0
-        tags = self._tags()
-        if self._can_connect is not None:
-            self.check.gauge('can_connect', self._can_connect, tags=tags)
-        if self._auth_status is not None:
-            self.check.gauge('api.authentication.status', self._auth_status, tags=tags)
+        if not stats.calls:
+            return
+        self._can_connect = 1 if stats.answered else 0
+        tags = self._metric_tags()
+        self.check.gauge('can_connect', self._can_connect, tags=tags)
+        if stats.auth_rejected or stats.answered:
+            self.check.gauge('api.authentication.status', 1 if stats.auth_rejected else 0, tags=tags)
 
     def _send_metadata(self, identity_read: bool) -> None:
         """Send the device and its interfaces after each identity read that succeeds (30 min), and when `can_connect`
@@ -244,12 +250,16 @@ class FirewallPoller:
         return COLLECTORS[name](ctx)
 
     def _submit(self, samples: Iterable[Sample]) -> None:
-        tags = self._tags()
+        tags = self._metric_tags()
         for sample in samples:
             getattr(self.check, sample.kind)(sample.name, sample.value, tags=[*tags, *sample.tags])
 
     def _tags(self) -> list[str]:
         return global_tags(self.identity, self.target, self.config.namespace or 'default', self.config.tags or ())
+
+    def _metric_tags(self) -> list[str]:
+        """`_tags()` plus the NDM resource tags, which link the metrics to the device record and stay out of it."""
+        return [*self._tags(), *device_resource_tags(device_serial(self.identity, self.target))]
 
     def _enabled(self) -> set[str]:
         return {

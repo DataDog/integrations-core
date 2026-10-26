@@ -205,17 +205,19 @@ def test_firewall_replaced_at_the_same_ip_is_reported_under_its_new_serial(dd_ru
         pytest.param(devices_xml((FW_A_SERIAL, 'fw-a', FW_A_IP, 'yes')), id='removed'),
     ],
 )
-def test_firewall_that_disconnects_or_is_removed_is_no_longer_polled(dd_run_check, aggregator, fake_panos, devices):
+def test_firewall_that_disconnects_or_is_removed_is_no_longer_polled(
+    dd_run_check, aggregator, fake_panos, schedule_clock, devices
+):
     check = new_panorama_check()
     dd_run_check(check)
     aggregator.reset()
     fake_panos.answer_op(PANORAMA, DISCOVERY_CMD, devices)
+    # Far enough for collectors to be due again, so a firewall still polled makes calls and reports `can_connect`.
+    schedule_clock.now += 120
 
     dd_run_check(check)
 
-    # A polled firewall reports `can_connect` on every run, even when nothing is due.
     assert set(metrics_by_ip(aggregator, 'can_connect')) == {FW_A_IP}
-    # `can_connect` cannot tell a released poller from an idle one; this checks the removed firewall's is released.
     assert list(check._pollers) == [FW_A_IP]
 
 

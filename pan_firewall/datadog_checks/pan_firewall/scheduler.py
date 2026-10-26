@@ -27,7 +27,11 @@ class Result(Enum):
 
 class FirewallSchedule:
     """Fixed-interval timers for the collectors of one firewall, on a monotonic clock. Collectors stay due until
-    `mark_run()` or `mark_failed()`, so a skipped cycle (a commit in progress) leaves them due."""
+    `mark_run()` or `mark_failed()`, so a skipped cycle (a commit in progress) leaves them due.
+
+    Every method takes the `now` read once at the start of the run. The Agent starts runs on a fixed grid, so a timer
+    counted from the end of a run would make the run one interval later a little early, and delay it by one more run.
+    """
 
     def __init__(self, clock: Callable[[], float] = time.monotonic):
         self._clock = clock
@@ -36,35 +40,35 @@ class FirewallSchedule:
     def now(self) -> float:
         return self._clock()
 
-    def due(self, enabled: Collection[str], identity_missing: bool = False) -> list[str]:
+    def due(self, enabled: Collection[str], now: float, identity_missing: bool = False) -> list[str]:
         """The enabled collectors that are due, in `COLLECTORS` order; the identity always while it is missing."""
-        now = self._clock()
         return [
             name
             for name in COLLECTORS
             if (name in enabled and self._next_due.get(name, now) <= now) or (name == IDENTITY and identity_missing)
         ]
 
-    def mark_run(self, names: Iterable[str]) -> None:
+    def mark_run(self, names: Iterable[str], now: float) -> None:
         """Call it for the collectors that succeeded: they are due again after their interval."""
-        now = self._clock()
         for name in names:
             self._next_due[name] = now + INTERVALS[name]
 
-    def mark_failed(self, names: Iterable[str]) -> None:
+    def mark_failed(self, names: Iterable[str], now: float) -> None:
         """Call it for the collectors that failed: they are due again after `FAILURE_RETRY_SECONDS` at most."""
-        now = self._clock()
         for name in names:
             self._next_due[name] = now + min(INTERVALS[name], FAILURE_RETRY_SECONDS)
 
-    def record(self, results: dict[str, Result]) -> None:
+    def record(self, results: dict[str, Result], now: float) -> None:
         """Set the timers from a run's results: RAN waits its interval, FAILED and UNREACHABLE retry within
         `FAILURE_RETRY_SECONDS`, and anything else (SKIPPED, no result) stays due. The jobs check has no timer."""
-        self.mark_run(name for name, result in results.items() if result is Result.RAN)
+        self.mark_run((name for name, result in results.items() if result is Result.RAN), now)
         self.mark_failed(
-            name
-            for name, result in results.items()
-            if result in (Result.FAILED, Result.UNREACHABLE) and name in INTERVALS
+            (
+                name
+                for name, result in results.items()
+                if result in (Result.FAILED, Result.UNREACHABLE) and name in INTERVALS
+            ),
+            now,
         )
 
     def make_due(self, name: str) -> None:

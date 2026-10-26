@@ -62,9 +62,9 @@ def _on_off(value: str | None) -> bool | None:
 def global_tags(
     identity: DeviceIdentity | None, target: FirewallTarget, namespace: str, user_tags: Iterable[str]
 ) -> list[str]:
-    """Tags on every metric of a firewall. `identity` is None before a static firewall first answers; until then
-    Panorama discovery fills in what it knows."""
-    serial = (identity.serial if identity else None) or target.serial
+    """Tags on every metric and on the NDM device record of a firewall. `identity` is None before a static firewall
+    first answers; until then Panorama discovery fills in what it knows."""
+    serial = device_serial(identity, target)
     hostname = (identity.hostname if identity else None) or target.hostname
     tags = list(
         tag_tuple(
@@ -83,9 +83,19 @@ def global_tags(
         )
     )
     tags.extend(user_tags)
-    if serial:
-        tags.extend([f'{NDM_DEVICE_RESOURCE_TAG}:{serial}', f'{NDM_DEVICE_USER_TAGS_RESOURCE_TAG}:{serial}'])
     return tags
+
+
+def device_serial(identity: DeviceIdentity | None, target: FirewallTarget) -> str | None:
+    """The serial from the firewall itself, or from Panorama discovery until the firewall first answers."""
+    return (identity.serial if identity else None) or target.serial
+
+
+def device_resource_tags(serial: str | None) -> list[str]:
+    """The tags that link a metric to its NDM device. Metrics only: the device record does not carry them."""
+    if not serial:
+        return []
+    return [f'{NDM_DEVICE_RESOURCE_TAG}:{serial}', f'{NDM_DEVICE_USER_TAGS_RESOURCE_TAG}:{serial}']
 
 
 def _bool_tag(value: bool | None) -> str | None:

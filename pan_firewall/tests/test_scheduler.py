@@ -25,31 +25,25 @@ def schedule(clock):
     return FirewallSchedule(clock)
 
 
-def run_due(schedule, enabled=COLLECTORS, **kwargs):
-    names = schedule.due(enabled, **kwargs)
-    schedule.mark_run(names)
-    return names
-
-
-def test_everything_is_due_on_the_first_call(schedule):
-    assert schedule.due(COLLECTORS) == list(COLLECTORS)
+def test_everything_is_due_on_the_first_call(schedule, clock):
+    assert schedule.due(COLLECTORS, clock.now) == list(COLLECTORS)
 
 
 def test_disabled_collector_is_never_due(schedule, clock):
     enabled = [name for name in COLLECTORS if name != 'ospf']
 
-    assert 'ospf' not in schedule.due(enabled)
+    assert 'ospf' not in schedule.due(enabled, clock.now)
     clock.now += 86400 * 2
-    assert 'ospf' not in schedule.due(enabled)
+    assert 'ospf' not in schedule.due(enabled, clock.now)
 
 
-def test_identity_metadata_is_forced_while_identity_is_missing(schedule):
+def test_identity_metadata_is_forced_while_identity_is_missing(schedule, clock):
     # Forced even where it is not among the enabled collectors.
     enabled = ['bgp']
-    run_due(schedule)
+    schedule.mark_run(schedule.due(COLLECTORS, clock.now), clock.now)
 
-    assert schedule.due(enabled) == []
-    assert schedule.due(enabled, identity_missing=True) == ['identity_metadata']
+    assert schedule.due(enabled, clock.now) == []
+    assert schedule.due(enabled, clock.now, identity_missing=True) == ['identity_metadata']
 
 
 @pytest.mark.parametrize(
@@ -68,16 +62,16 @@ def test_identity_metadata_is_forced_while_identity_is_missing(schedule):
     ],
 )
 def test_record_sets_the_timer_from_the_result(schedule, clock, name, result, elapsed, is_due):
-    schedule.record({name: result})
+    schedule.record({name: result}, clock.now)
 
     clock.now += elapsed
-    assert (name in schedule.due(COLLECTORS)) is is_due
+    assert (name in schedule.due(COLLECTORS, clock.now)) is is_due
 
 
-def test_record_gives_the_jobs_check_no_timer(schedule):
-    schedule.record({'jobs': Result.UNREACHABLE})
+def test_record_gives_the_jobs_check_no_timer(schedule, clock):
+    schedule.record({'jobs': Result.UNREACHABLE}, clock.now)
 
-    assert schedule.due(COLLECTORS) == list(COLLECTORS)
+    assert schedule.due(COLLECTORS, clock.now) == list(COLLECTORS)
 
 
 COMMIT = [BusyJob('Commit', '7')]

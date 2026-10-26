@@ -40,7 +40,8 @@ FW_A_TUNNEL = (
 )
 
 BASE_TAGS = [f'device_ip:{FW_A_IP}', 'device_namespace:default', 'device_vendor:paloaltonetworks', 'team:test']
-FW_A_TAGS = sorted(
+# fw-a's tags on its NDM device record, and on its metrics with the NDM resource tags added.
+FW_A_DEVICE_TAGS = sorted(
     [
         *BASE_TAGS,
         f'device_id:{FW_A_SERIAL}',
@@ -51,6 +52,11 @@ FW_A_TAGS = sorted(
         'os_version:11.1.13-h12',
         'multi_vsys:false',
         'advanced_routing:false',
+    ]
+)
+FW_A_TAGS = sorted(
+    [
+        *FW_A_DEVICE_TAGS,
         f'dd.internal.resource:ndm_device:{FW_A_SERIAL}',
         f'dd.internal.resource:ndm_device_user_tags:{FW_A_SERIAL}',
     ]

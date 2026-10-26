@@ -186,7 +186,7 @@ def auth_statuses(aggregator):
     return [m.value for m in aggregator.metrics('pan_firewall.api.authentication.status')]
 
 
-def test_run_without_an_auth_verdict_keeps_the_last_auth_status(dd_run_check, aggregator, fake_panos):
+def test_run_without_an_auth_verdict_sends_no_auth_status(dd_run_check, aggregator, fake_panos):
     fake_panos.fail(FW_A_IP, 'http_403', on='keygen')
     check = new_check()
     dd_run_check(check)
@@ -197,7 +197,7 @@ def test_run_without_an_auth_verdict_keeps_the_last_auth_status(dd_run_check, ag
 
     dd_run_check(check)
 
-    assert auth_statuses(aggregator) == [1, 1, 0]
+    assert auth_statuses(aggregator) == [1, 0]
     assert [m.value for m in aggregator.metrics('pan_firewall.can_connect')] == [1, 0, 1]
 
 
@@ -213,7 +213,7 @@ def test_static_key_accepted_again_clears_the_auth_status(dd_run_check, aggregat
     assert [c for c in fake_panos.calls if c.type == 'keygen'] == []
 
 
-def test_nothing_due_repeats_last_status_without_calls(dd_run_check, aggregator, fake_panos):
+def test_run_with_nothing_due_makes_no_call_and_sends_no_health_metric(dd_run_check, aggregator, fake_panos):
     check = new_check()
     dd_run_check(check)
     calls = len(fake_panos.calls)
@@ -222,10 +222,32 @@ def test_nothing_due_repeats_last_status_without_calls(dd_run_check, aggregator,
     dd_run_check(check)
 
     assert len(fake_panos.calls) == calls
-    aggregator.assert_metric('pan_firewall.can_connect', value=1, tags=FW_A_TAGS, metric_type=aggregator.GAUGE, count=1)
-    aggregator.assert_metric(
-        'pan_firewall.api.authentication.status', value=0, tags=FW_A_TAGS, metric_type=aggregator.GAUGE, count=1
-    )
+    assert aggregator.metrics('pan_firewall.can_connect') == []
+    assert aggregator.metrics('pan_firewall.api.authentication.status') == []
+
+
+def test_collector_timers_count_from_the_start_of_the_run(
+    dd_run_check, aggregator, fake_panos, monkeypatch, schedule_clock
+):
+    # The Agent starts runs on a fixed 60 s grid: timers counted from the end of a run that takes 2 s would make the
+    # run at 120 s too early for `bgp` (every 120 s), and delay it to 180 s.
+    def bgp(ctx):
+        schedule_clock.now += 2
+        return [stub_sample('bgp')]
+
+    register_stubs(monkeypatch, bgp=bgp)
+    check = new_check()
+    start = schedule_clock.now
+    bgp_runs = []
+
+    for offset in (0, 60, 120):
+        schedule_clock.now = start + offset
+        aggregator.reset()
+        dd_run_check(check)
+        if (FW_A_IP, 'bgp') in stub_runs(aggregator):
+            bgp_runs.append(offset)
+
+    assert bgp_runs == [0, 120]
 
 
 def test_firewalls_are_polled_concurrently_up_to_max_concurrency(dd_run_check, aggregator, monkeypatch):

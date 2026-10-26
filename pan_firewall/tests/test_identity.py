@@ -10,7 +10,7 @@ from datadog_checks.pan_firewall.firewalls import FirewallTarget
 from datadog_checks.pan_firewall.identity import global_tags, parse_system_info, vsys_list
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from .common import FIXTURES, FW_A_IP, FW_A_SERIAL, FW_A_TAGS, FW_B_SERIAL, SYSTEM_INFO_CMD
+from .common import FIXTURES, FW_A_DEVICE_TAGS, FW_A_IP, FW_A_SERIAL, FW_B_SERIAL, SYSTEM_INFO_CMD
 from .fake_panos import FIREWALL_SETS
 from .fixture_map import op_fixture
 from .helpers import make_instance, new_check
@@ -43,7 +43,7 @@ def test_parse_system_info_fw_a():
 def test_global_tags_with_identity():
     tags = global_tags(FW_A, FirewallTarget(ip=FW_A_IP, credentials=CREDS), 'default', ['team:test'])
 
-    assert sorted(tags) == FW_A_TAGS
+    assert sorted(tags) == FW_A_DEVICE_TAGS
 
 
 def test_global_tags_take_serial_and_hostname_from_panorama_discovery():
@@ -58,8 +58,6 @@ def test_global_tags_take_serial_and_hostname_from_panorama_discovery():
             f'device_serial:{FW_A_SERIAL}',
             'device_vendor:paloaltonetworks',
             'panorama_host:panorama.example.com',
-            f'dd.internal.resource:ndm_device:{FW_A_SERIAL}',
-            f'dd.internal.resource:ndm_device_user_tags:{FW_A_SERIAL}',
         ]
     )
 
