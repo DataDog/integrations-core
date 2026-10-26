@@ -97,13 +97,25 @@ def hadr_hosts(tmp_path_factory: pytest.TempPathFactory) -> Iterator[list[str]]:
             info = json.loads(subprocess.check_output(['docker', 'inspect', container], text=True))[0]
             hosts.append(next(iter(info['NetworkSettings']['Networks'].values()))['IPAddress'])
 
+        for service, alternate in zip(('primary', 'standby'), reversed(hosts)):
+            _db2(
+                service,
+                f'db2 update alternate server for database datadog using hostname {alternate} port 50000 '
+                '&& db2 terminate',
+            )
+
         config = ElementTree.Element('configuration')
         databases = ElementTree.SubElement(config, 'databases')
-        for host in hosts:
+        for host, alternate in zip(hosts, reversed(hosts)):
             database = ElementTree.SubElement(databases, 'database', name='datadog', host=host, port='50000')
+            # Connection-level balancing can change targets even when ACR is disabled.
+            ElementTree.SubElement(database, 'parameter', name='connectionLevelLoadBalancing', value='false')
             acr = ElementTree.SubElement(database, 'acr')
             for name in ('enableAcr', 'enableAlternateServerListFirstConnect'):
                 ElementTree.SubElement(acr, 'parameter', name=name, value='false')
+            alternates = ElementTree.SubElement(acr, 'alternateserverlist')
+            for name, target in (('configured', host), ('alternate', alternate)):
+                ElementTree.SubElement(alternates, 'server', name=name, hostname=target, port='50000')
         ElementTree.indent(config)
         driver_path = tmp_path_factory.mktemp('db2-driver')
         ElementTree.ElementTree(config).write(driver_path / 'db2dsdriver.cfg', encoding='utf-8')
