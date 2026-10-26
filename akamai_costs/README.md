@@ -24,7 +24,7 @@ Akamai Cost Management does not include any events.
 
 ### Service Checks
 
-Akamai Cost Management does not include any service checks.
+The Akamai Cost Management integration does not include any service checks.
 
 ## Support
 
