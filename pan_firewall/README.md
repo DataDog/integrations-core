@@ -50,6 +50,8 @@ No additional installation is needed on your server.
 
    With Panorama discovery, the Agent polls every connected firewall directly. The `max_concurrency` option (default `5`) sets how many firewalls are polled in parallel. In environments with many firewalls, raise `max_concurrency` so that a collection run completes within its interval.
 
+   Security rule hit counts are collected by default, with one `security_rule.hits` series per security rule and virtual system, which can be thousands on a large rulebase. Set `security_rule_filter` to a list of regular expressions to report only the matching rules, or set `collect_rule_hits` to `false` to stop collecting them.
+
 3. [Restart the Agent][5].
 
 ### Validation
@@ -89,6 +91,8 @@ The Palo Alto Networks Firewall integration collects the logs that PAN-OS forwar
         port: 10518
         source: pan.firewall
         service: <SERVICE>
+        tags:
+          - ndm_syslog:true
     ```
 3. In PAN-OS, go to **Device > Server Profiles > Syslog** and add a server profile with the IP address of the Agent host, transport **TCP**, port **10518**, and format **BSD**.
 4. In the **Custom Log Format** tab of the server profile, configure the format for each log type you want to collect. The formats below map the fields listed in the [PAN-OS syslog field descriptions][9].
