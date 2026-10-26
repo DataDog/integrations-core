@@ -280,7 +280,6 @@ def test_workload_events_transitions(dd_run_check, aggregator, instance, mock_ht
     dd_run_check(check)
 
     expected_tags = [
-        'test:tag',
         'kube_namespace:team-a',
         'kueue_workload:training-job',
         'kueue_workload_uid:workload-uid',
@@ -307,6 +306,21 @@ def test_workload_events_transitions(dd_run_check, aggregator, instance, mock_ht
         source_type_name='kueue',
         tags=[*expected_tags, 'kueue_transition:running'],
     )
+
+
+def test_workload_events_omit_instance_tags(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    check = KueueCheck('kueue', {}, [instance])
+    check.kube_client = FakeKubernetesAPIClient(load_workloads('pending'), load_workloads('admitted'))
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    aggregator.assert_metric_has_tag('kueue.go.goroutines', 'test:tag')
+    assert aggregator.events
+    for event in aggregator.events:
+        assert 'test:tag' not in event['tags']
+        assert any(tag.startswith('kueue_workload:') for tag in event['tags'])
 
 
 def test_workload_events_no_duplicates(dd_run_check, aggregator, instance, mock_http_response):
@@ -381,7 +395,6 @@ def test_workload_events_evicted_and_finished(dd_run_check, aggregator, instance
     dd_run_check(check)
 
     expected_evicted_tags = [
-        'test:tag',
         'kube_namespace:team-a',
         'kueue_workload:training-job',
         'kueue_workload_uid:workload-uid',
