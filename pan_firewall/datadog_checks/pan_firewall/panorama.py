@@ -144,7 +144,9 @@ class PanoramaFirewallSource:
             if target is None:
                 continue
             if target.ip in targets:
-                self._warn_once(
+                warn_once(
+                    self._check.log,
+                    self._warned,
                     f'duplicate_ip:{firewall.serial}',
                     'firewalls %s and %s are both polled at %s; only the first is polled',
                     targets[target.ip].serial,
@@ -159,7 +161,9 @@ class PanoramaFirewallSource:
         polled = self._ip_overrides.get(firewall.ip_address or '', firewall.ip_address)
         address = _parse_ip(polled)
         if address is None:
-            self._warn_once(
+            warn_once(
+                self._check.log,
+                self._warned,
                 f'no_ip:{firewall.serial}',
                 'firewall %s has no usable IP address (Panorama reports `%s`), skipping it',
                 firewall.serial,
@@ -172,7 +176,9 @@ class PanoramaFirewallSource:
             return None
         credentials = resolve_credentials(ip, self._config.firewall_credentials or ())
         if credentials is None:
-            self._warn_once(
+            warn_once(
+                self._check.log,
+                self._warned,
                 f'no_credentials:{firewall.serial}',
                 'no entry in `firewall_credentials` matches the firewall %s at %s, skipping it',
                 firewall.serial,
@@ -189,9 +195,6 @@ class PanoramaFirewallSource:
             sw_version=firewall.sw_version,
             panorama_host=self._host,
         )
-
-    def _warn_once(self, key: str, msg: str, *args: object) -> None:
-        warn_once(self._check.log, self._warned, key, msg, *args)
 
     def _passes_filters(self, address: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
         filters = self._config.firewall_ips
