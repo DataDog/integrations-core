@@ -273,11 +273,6 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Finding Information Product Name
-    path: ocsf.finding_info.product.name
-    source: log
-  - groups:
-      - OCSF
     name: Finding Info Title
     path: ocsf.finding_info.title
     source: log
