@@ -47,7 +47,7 @@ The Automox integration collects the Automox audit trail and console events. Aud
 
 ### Metrics
 
-The Automox integration collects device, patch, policy compliance, policy execution, and Needs Attention report metrics. The `automox.device.*` metrics, from the device inventory and its outstanding packages, are collected twice a day. The other metrics are collected every few minutes.
+The Automox integration collects device, patch, policy compliance, policy execution, and Needs Attention report metrics. The `automox.device.*` metrics come from the device inventory and its outstanding packages and are collected twice a day. The other metrics are collected every few minutes.
 
 {{< get-metrics-from-git "automox" >}}
 
