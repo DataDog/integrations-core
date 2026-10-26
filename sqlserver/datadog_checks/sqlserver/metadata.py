@@ -10,7 +10,6 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.sqlserver.column_statistics import SqlserverColumnStatisticsCollector
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import (
     DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
@@ -89,12 +88,6 @@ class SqlserverMetadata(DBMAsyncJob):
         )
         self._last_schemas_collection_time = 0
         self._schema_collectors = self._build_schema_collectors(check)
-        self._column_statistics_collector = None
-        if is_affirmative(self._config.column_statistics_config.get('enabled', False)):
-            self._column_statistics_collector = SqlserverColumnStatisticsCollector(
-                check, self._config.column_statistics_config
-            )
-        self._last_column_statistics_collection_time = 0
 
     def _build_schema_collectors(self, check) -> list[SQLServerObjectCollector]:
         if not self._schema_config.get('enabled', False):
@@ -105,9 +98,8 @@ class SqlserverMetadata(DBMAsyncJob):
         return collectors
 
     def shutdown(self) -> None:
-        # The collectors hold the check, so release them during teardown.
+        # The schema collectors hold the check, so release them during teardown.
         self._schema_collectors = []
-        self._column_statistics_collector = None
         self._check = None
 
     def _close_db_conn(self):
@@ -180,21 +172,6 @@ class SqlserverMetadata(DBMAsyncJob):
                 }
                 self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
         self.collect_schemas()
-        self.collect_column_statistics()
-
-    def collect_column_statistics(self):
-        collector = self._column_statistics_collector
-        if collector is None:
-            return
-        if time.time() - self._last_column_statistics_collection_time < collector.collection_interval:
-            return
-        self._last_column_statistics_collection_time = time.time()
-        # Like schema collection, a failure here must not stop the job loop; the collector logs it and reports it in
-        # its status:error telemetry.
-        try:
-            collector.collect(self._cancel_event)
-        except Exception as e:
-            self.log.debug("Skipped remaining column statistics collection after error: %s", e)
 
     def collect_schemas(self):
         if not self._schema_collectors:

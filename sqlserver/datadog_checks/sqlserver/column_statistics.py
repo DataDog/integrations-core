@@ -4,13 +4,14 @@
 from __future__ import annotations
 
 import time
-from threading import Event
 from typing import TYPE_CHECKING
 
+from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.health import HealthStatus
-from datadog_checks.base.utils.db.utils import default_json_event_encoding
+from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.health import SqlServerHealthEvent
 from datadog_checks.sqlserver.utils import construct_use_statement, execute_query, raise_if_cancelled
 
@@ -20,24 +21,26 @@ if TYPE_CHECKING:
 DEFAULT_COLLECTION_INTERVAL = 3600
 DEFAULT_MAX_TABLES = 500
 PAYLOAD_MAX_COLUMNS = 5_000
+# The check's command_timeout (10s by default) is too short for the procedure on a large database. This matches the
+# Postgres collector's statement timeout.
+MAX_QUERY_DURATION_SECONDS = 60
 KEY_PREFIX = "dbm-column-statistics-"
 
 # The agent's login can't read statistics itself, since SQL Server treats them as table data. Customers install this
 # procedure in each database; it runs as its owner and returns only counts and frequencies, never column values.
-COLUMN_STATISTICS_QUERY = "EXEC datadog.column_statistics @max_tables = {max_tables}"
+COLUMN_STATISTICS_QUERY = "EXEC datadog.column_statistics @max_tables = ?"
 
-# Setup problems the customer can fix, each matched on the text of the SQL Server error (2812, 229) that every driver
-# passes through in its exception message. That text is in the server's language, so on a non-English server these
-# are logged as other errors instead.
+# Setup problems the customer can fix. pyodbc ends its messages with the native error number, as in "(2812)", which
+# holds in any server language; adodbapi only passes the message text through, which is in the server's language.
 SETUP_ERRORS = (
     (
         SqlServerHealthEvent.COLUMN_STATISTICS_PROCEDURE_NOT_FOUND,
-        "Could not find stored procedure",
+        ("(2812)", "Could not find stored procedure"),
         "create it as described in the documentation",
     ),
     (
         SqlServerHealthEvent.COLUMN_STATISTICS_INSUFFICIENT_PRIVILEGE,
-        "EXECUTE permission was denied",
+        ("(229)", "EXECUTE permission was denied"),
         "grant EXECUTE on it to the Agent's user",
     ),
 )
@@ -47,29 +50,48 @@ def agent_check_getter(self):
     return self._check
 
 
-class SqlserverColumnStatisticsCollector:
+class SqlserverColumnStatisticsCollector(DBMAsyncJob):
     """Collects column statistics, in the shape the Postgres integration sends from pg_stats."""
 
-    def __init__(self, check: SQLServer, config: dict):
-        self._check = check
-        self._log = check.log
-        self.collection_interval = config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
-        self._max_tables = int(config.get('max_tables', DEFAULT_MAX_TABLES))
+    def __init__(self, check: SQLServer, config: SQLServerConfig):
+        column_statistics_config = config.column_statistics_config
+        self.collection_interval = column_statistics_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
+        self._max_tables = int(column_statistics_config.get('max_tables', DEFAULT_MAX_TABLES))
         # The databases currently failing each way, so each warning and health event fires once and recovery is
         # reported when the last one is fixed.
         self._failing_dbs: dict[SqlServerHealthEvent, set[str]] = {event: set() for event, _, _ in SETUP_ERRORS}
+        super().__init__(
+            check,
+            run_sync=is_affirmative(column_statistics_config.get('run_sync', False)),
+            enabled=is_affirmative(column_statistics_config.get('enabled', False)),
+            expected_db_exceptions=(),
+            min_collection_interval=config.min_collection_interval,
+            dbms=check.dbms,
+            rate_limit=1 / float(self.collection_interval),
+            job_name="column-statistics",
+        )
+
+    def shutdown(self) -> None:
+        self._check = None
+
+    def run_job(self):
+        self.collect()
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def collect(self, cancel_event: Event):
+    def collect(self):
         started = time.time()
         tables = columns = 0
         status = "success"
         try:
-            for db_name in self._check.get_databases():
-                raise_if_cancelled(cancel_event)
-                db_tables, db_columns = self._collect_database(db_name)
-                tables += db_tables
-                columns += db_columns
+            with self._check.connection.open_managed_default_connection(KEY_PREFIX):
+                # The driver applies the timeout to cursors created after it's set.
+                self._check.connection.set_command_timeout(KEY_PREFIX, MAX_QUERY_DURATION_SECONDS)
+                with self._check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
+                    for db_name in self._check.get_databases():
+                        raise_if_cancelled(self._cancel_event)
+                        db_tables, db_columns = self._collect_database(cursor, db_name)
+                        tables += db_tables
+                        columns += db_columns
         except Exception:
             status = "error"
             raise
@@ -90,12 +112,10 @@ class SqlserverColumnStatisticsCollector:
                 "dd.sqlserver.column_statistics.columns_count", columns, tags=tags, hostname=hostname, raw=True
             )
 
-    def _collect_database(self, db_name: str) -> tuple[int, int]:
+    def _collect_database(self, cursor, db_name: str) -> tuple[int, int]:
         try:
-            with self._check.connection.open_managed_default_connection(KEY_PREFIX):
-                with self._check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
-                    cursor.execute(construct_use_statement(db_name))
-                    rows = execute_query(COLUMN_STATISTICS_QUERY.format(max_tables=self._max_tables), cursor)
+            cursor.execute(construct_use_statement(db_name))
+            rows = execute_query(COLUMN_STATISTICS_QUERY, cursor, parameters=(self._max_tables,))
         except Exception as e:
             self._handle_error(db_name, e)
             return 0, 0
@@ -116,8 +136,8 @@ class SqlserverColumnStatisticsCollector:
 
     def _handle_error(self, db_name: str, error: Exception):
         message = str(error)
-        for event, marker, fix in SETUP_ERRORS:
-            if marker not in message:
+        for event, markers, fix in SETUP_ERRORS:
+            if not any(marker in message for marker in markers):
                 continue
             if db_name not in self._failing_dbs[event]:
                 self._failing_dbs[event].add(db_name)
@@ -135,7 +155,7 @@ class SqlserverColumnStatisticsCollector:
     def _handle_recovery(self, db_name: str):
         for event, failing in self._failing_dbs.items():
             if db_name in failing:
-                failing.discard(db_name)
+                failing.remove(db_name)
                 if not failing:
                     self._check.health.submit_health_event(name=event, status=HealthStatus.OK)
 
@@ -171,7 +191,7 @@ def group_by_table(db_name: str, rows: list[dict]) -> list[dict]:
                 "db": db_name,
                 "schema": key[0],
                 "table": key[1],
-                "stats_age": row["stats_age"],
+                "stats_age": 0,
                 "columns": [],
                 "version": 1,
             }

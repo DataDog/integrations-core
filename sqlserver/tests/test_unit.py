@@ -2098,6 +2098,7 @@ DBM_JOB_NAMES = [
     'query-activity',
     'agent-jobs-history',
     'deadlocks',
+    'column-statistics',
 ]
 
 

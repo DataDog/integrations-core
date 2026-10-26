@@ -18,8 +18,8 @@ def dbm_instance(instance_docker):
     instance_docker['query_metrics'] = {'enabled': False}
     instance_docker['query_activity'] = {'enabled': False}
     instance_docker['procedure_metrics'] = {'enabled': False}
-    instance_docker['collect_settings'] = {'enabled': True, 'run_sync': True, 'collection_interval': 0.1}
-    instance_docker['collect_column_statistics'] = {'enabled': True}
+    instance_docker['collect_settings'] = {'enabled': False}
+    instance_docker['collect_column_statistics'] = {'enabled': True, 'run_sync': True}
     return copy(instance_docker)
 
 
@@ -59,6 +59,8 @@ def test_collects_column_statistics(aggregator, dd_run_check, dbm_instance):
     assert columns['status']['n_distinct'] == 2
     assert columns['status']['null_frac'] == pytest.approx(0.1)
     assert columns['status']['most_common_freqs'] == [pytest.approx(0.7)]
+    # 'pending' and 'shipped' are 7 bytes each. As in pg_stats, the NULLs don't pull the average down.
+    assert columns['status']['avg_width'] == 7
     # nvarchar values of 20 to 40 characters average 60 bytes.
     assert columns['note']['avg_width'] == 60
 

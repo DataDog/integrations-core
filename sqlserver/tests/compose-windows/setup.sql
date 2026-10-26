@@ -341,29 +341,34 @@ WITH EXECUTE AS OWNER
 AS
 BEGIN
     SET NOCOUNT ON;
-    -- One statistics object per column: unfiltered, on the column as its leading key, the most fully sampled.
-    SELECT object_id, stats_id, stats_name, column_name, [rows], last_updated, CAST(NULL AS FLOAT) AS avg_width
+    -- One statistics object per column: unfiltered, on the column as its leading key, the most fully sampled. Every
+    -- value of a fixed-width type takes its storage size, so only variable-width columns need DBCC below.
+    SELECT object_id, stats_id, stats_name, column_name, [rows], last_updated, fixed_width,
+        CAST(NULL AS FLOAT) AS avg_width
     INTO #stats
     FROM (
-        SELECT st.object_id, st.stats_id, st.name AS stats_name, COL_NAME(sc.object_id, sc.column_id) AS column_name,
-            sp.[rows], sp.last_updated,
+        SELECT st.object_id, st.stats_id, st.name AS stats_name, c.name AS column_name, sp.[rows], sp.last_updated,
+            CASE WHEN TYPE_NAME(c.system_type_id) IN ('varchar', 'nvarchar', 'varbinary', 'sql_variant')
+                OR c.system_type_id = 240 THEN NULL ELSE CAST(c.max_length AS FLOAT) END AS fixed_width,
             ROW_NUMBER() OVER (PARTITION BY st.object_id, sc.column_id ORDER BY sp.rows_sampled DESC, sp.last_updated DESC) AS rn
         FROM (SELECT TOP (@max_tables) object_id FROM sys.tables WHERE is_ms_shipped = 0 ORDER BY SCHEMA_NAME(schema_id), name) t
         JOIN sys.stats st ON st.object_id = t.object_id AND st.has_filter = 0
         JOIN sys.stats_columns sc ON sc.object_id = st.object_id AND sc.stats_id = st.stats_id AND sc.stats_column_id = 1
+        JOIN sys.columns c ON c.object_id = sc.object_id AND c.column_id = sc.column_id
         CROSS APPLY sys.dm_db_stats_properties(st.object_id, st.stats_id) sp
         WHERE sp.[rows] > 0
     ) s
     WHERE rn = 1;
     CREATE CLUSTERED INDEX ix_stats ON #stats (object_id, stats_id);
 
-    -- The average width is only in the density vector, which only DBCC SHOW_STATISTICS returns.
+    -- A variable-width column's average is only in the density vector, which only DBCC SHOW_STATISTICS returns.
     CREATE TABLE #density (all_density FLOAT, average_length FLOAT, columns NVARCHAR(4000));
     DECLARE @object_id INT, @stats_id INT, @table NVARCHAR(300), @stats_name SYSNAME, @column_name SYSNAME;
     DECLARE stats_cursor CURSOR LOCAL FAST_FORWARD FOR
         SELECT object_id, stats_id, QUOTENAME(OBJECT_SCHEMA_NAME(object_id)) + N'.' + QUOTENAME(OBJECT_NAME(object_id)),
             stats_name, column_name
-        FROM #stats;
+        FROM #stats
+        WHERE fixed_width IS NULL;
     OPEN stats_cursor;
     FETCH NEXT FROM stats_cursor INTO @object_id, @stats_id, @table, @stats_name, @column_name;
     WHILE @@FETCH_STATUS = 0
@@ -379,23 +384,35 @@ BEGIN
     CLOSE stats_cursor;
     DEALLOCATE stats_cursor;
 
+    -- Each histogram is read once; only whether a step is the NULL step is kept, never its value.
+    SELECT s.object_id, s.stats_id, CASE WHEN hh.range_high_key IS NULL THEN 1 ELSE 0 END AS is_null,
+        CAST(hh.equal_rows AS FLOAT) AS equal_rows, hh.distinct_range_rows
+    INTO #hist
+    FROM #stats s
+    CROSS APPLY sys.dm_db_stats_histogram(s.object_id, s.stats_id) hh;
+
     -- Only counts and frequencies are returned, never the histogram's values. A common value is one with more rows
-    -- than the column's average per value, as Postgres keeps in most_common_freqs.
+    -- than the column's average per value, as Postgres keeps in most_common_freqs. The width is averaged over non-NULL
+    -- values, as in pg_stats; DBCC's average counts NULLs as zero bytes.
     SELECT OBJECT_SCHEMA_NAME(s.object_id) AS schema_name, OBJECT_NAME(s.object_id) AS table_name, s.column_name,
         DATEDIFF(SECOND, s.last_updated, SYSDATETIME()) AS stats_age,
-        h.n_distinct, h.null_rows / s.[rows] AS null_frac, s.avg_width, m.most_common_freqs
+        h.n_distinct, h.null_rows / s.[rows] AS null_frac,
+        CASE WHEN s.fixed_width IS NOT NULL THEN s.fixed_width
+            WHEN h.null_rows < s.[rows] THEN s.avg_width * s.[rows] / (s.[rows] - h.null_rows) END AS avg_width,
+        m.most_common_freqs
     FROM #stats s
     CROSS APPLY (
-        SELECT SUM(CASE WHEN hh.range_high_key IS NULL THEN 0 ELSE 1 + hh.distinct_range_rows END) AS n_distinct,
-            SUM(CASE WHEN hh.range_high_key IS NULL THEN CAST(hh.equal_rows AS FLOAT) ELSE 0 END) AS null_rows
-        FROM sys.dm_db_stats_histogram(s.object_id, s.stats_id) hh
+        SELECT SUM(CASE WHEN hh.is_null = 1 THEN 0 ELSE 1 + hh.distinct_range_rows END) AS n_distinct,
+            SUM(CASE WHEN hh.is_null = 1 THEN hh.equal_rows ELSE 0 END) AS null_rows
+        FROM #hist hh
+        WHERE hh.object_id = s.object_id AND hh.stats_id = s.stats_id
     ) h
     OUTER APPLY (
         SELECT STRING_AGG(f.freq, ',') WITHIN GROUP (ORDER BY f.equal_rows DESC) AS most_common_freqs
         FROM (
-            SELECT hh.equal_rows, CONVERT(VARCHAR(32), CAST(hh.equal_rows AS FLOAT) / s.[rows], 3) AS freq
-            FROM sys.dm_db_stats_histogram(s.object_id, s.stats_id) hh
-            WHERE hh.range_high_key IS NOT NULL AND h.n_distinct > 0
+            SELECT hh.equal_rows, CONVERT(VARCHAR(32), hh.equal_rows / s.[rows], 3) AS freq
+            FROM #hist hh
+            WHERE hh.object_id = s.object_id AND hh.stats_id = s.stats_id AND hh.is_null = 0 AND h.n_distinct > 0
                 AND hh.equal_rows > (s.[rows] - h.null_rows) / h.n_distinct
         ) f
     ) m
