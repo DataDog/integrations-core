@@ -46,7 +46,7 @@ SETUP_ERRORS = (
 )
 
 
-def agent_check_getter(self):
+def agent_check_getter(self: SqlserverColumnStatisticsCollector) -> SQLServer:
     return self._check
 
 
@@ -74,11 +74,11 @@ class SqlserverColumnStatisticsCollector(DBMAsyncJob):
     def shutdown(self) -> None:
         self._check = None
 
-    def run_job(self):
+    def run_job(self) -> None:
         self.collect()
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def collect(self):
+    def collect(self) -> None:
         started = time.time()
         tables = columns = 0
         status = "success"
@@ -134,7 +134,7 @@ class SqlserverColumnStatisticsCollector(DBMAsyncJob):
             self._submit(batch)
         return len(tables), len(rows)
 
-    def _handle_error(self, db_name: str, error: Exception):
+    def _handle_error(self, db_name: str, error: Exception) -> None:
         message = str(error)
         for event, markers, fix in SETUP_ERRORS:
             if not any(marker in message for marker in markers):
@@ -152,14 +152,14 @@ class SqlserverColumnStatisticsCollector(DBMAsyncJob):
             return
         self._log.exception("Error collecting column statistics for database '%s'", db_name)
 
-    def _handle_recovery(self, db_name: str):
+    def _handle_recovery(self, db_name: str) -> None:
         for event, failing in self._failing_dbs.items():
             if db_name in failing:
                 failing.remove(db_name)
                 if not failing:
                     self._check.health.submit_health_event(name=event, status=HealthStatus.OK)
 
-    def _submit(self, tables: list[dict]):
+    def _submit(self, tables: list[dict]) -> None:
         event = {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
