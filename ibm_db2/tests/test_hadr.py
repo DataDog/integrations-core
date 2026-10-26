@@ -183,6 +183,8 @@ def test_fixed_server_takeover(instance: dict, aggregator: AggregatorStub, hadr_
                 try:
                     count = collect(job)
                     break
+                except AssertionError:
+                    raise
                 except Exception:
                     if attempt == 29:
                         raise
