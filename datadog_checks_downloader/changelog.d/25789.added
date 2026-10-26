@@ -1,0 +1,1 @@
+Write a JSON summary of the download, including the repository that served the wheel, to the path in `DD_DOWNLOADER_RESULT_FILE` when it is set.
