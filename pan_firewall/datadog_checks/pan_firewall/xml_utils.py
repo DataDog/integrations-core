@@ -50,3 +50,7 @@ def num(elem: Element | None, path: str, default: float | None = None) -> float 
     except ValueError:
         return default
     return result if math.isfinite(result) else default
+
+
+def tag_tuple(*pairs: tuple[str, str | None]) -> tuple[str, ...]:
+    return tuple(f'{name}:{value}' for name, value in pairs if value)

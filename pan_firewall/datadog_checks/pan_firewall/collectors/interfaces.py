@@ -16,8 +16,7 @@ from xml.etree.ElementTree import Element
 
 from datadog_checks.pan_firewall.constants import NDM_INTERFACE_RESOURCE_TAG
 from datadog_checks.pan_firewall.identity import normalize_vsys
-from datadog_checks.pan_firewall.tags import tag_tuple
-from datadog_checks.pan_firewall.xml_utils import num, text
+from datadog_checks.pan_firewall.xml_utils import num, tag_tuple, text
 
 from .base import CollectContext, FirewallState, Sample
 

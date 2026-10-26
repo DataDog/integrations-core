@@ -12,8 +12,7 @@ from xml.etree.ElementTree import Element
 from .constants import DEVICE_VENDOR_TAG, NDM_DEVICE_RESOURCE_TAG, NDM_DEVICE_USER_TAGS_RESOURCE_TAG, PARSE_ERROR_CODE
 from .errors import PanosApiError
 from .firewalls import FirewallTarget
-from .tags import tag_tuple
-from .xml_utils import text
+from .xml_utils import tag_tuple, text
 
 
 @dataclass

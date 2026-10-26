@@ -22,8 +22,7 @@ from datadog_checks.pan_firewall import constants
 from datadog_checks.pan_firewall.constants import ACTIVE_STATUSES, PARSE_ERROR_CODE
 from datadog_checks.pan_firewall.errors import PanosApiError
 from datadog_checks.pan_firewall.identity import normalize_vsys
-from datadog_checks.pan_firewall.tags import tag_tuple
-from datadog_checks.pan_firewall.xml_utils import text
+from datadog_checks.pan_firewall.xml_utils import tag_tuple, text
 
 from .base import CollectContext, Sample, ThreatJob, ThreatState, Watermark
 

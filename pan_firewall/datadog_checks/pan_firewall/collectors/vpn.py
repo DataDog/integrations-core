@@ -13,8 +13,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from xml.etree.ElementTree import Element
 
-from datadog_checks.pan_firewall.tags import tag_tuple
-from datadog_checks.pan_firewall.xml_utils import text
+from datadog_checks.pan_firewall.xml_utils import tag_tuple, text
 
 from .base import CollectContext, Sample
 
