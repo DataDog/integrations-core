@@ -1,6 +1,6 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
 automox.device.connected,gauge,,,,"Whether the device's Automox agent is connected: 1 for true, 0 for false. Collected twice a day.",1,automox,Device Connected,,
-automox.device.count,gauge,,device,,"The number of devices in the latest device inventory collection, or 0 for an organization with no devices. If this metric stops reporting, the device metrics are not current. Collected twice a day.,0,automox,Devices Collected,,
+automox.device.count,gauge,,device,,"The number of devices in the latest device inventory collection, or 0 for an organization with no devices. If this metric stops reporting, the device metrics are not current. Collected twice a day.",0,automox,Devices Collected,,
 automox.device.info,gauge,,,,"One series per device with a value of 1, tagged with the device's name, operating system, agent version, and server group. Collected twice a day.",0,automox,Device Info,,
 automox.device.is_compatible,gauge,,,,"Whether the device is compatible with Automox: 1 for true, 0 for false. Collected twice a day.",1,automox,Device Compatible,,
 automox.device.last_scan_failed,gauge,,,,"Whether the device's last inventory scan failed: 1 for true, 0 for false. Collected twice a day.",-1,automox,Last Scan Failed,,
