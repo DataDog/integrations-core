@@ -328,8 +328,8 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         metadata = workload.get('metadata', {})
         spec = workload.get('spec', {})
         status = workload.get('status', {})
-        # Instance tags are the controller pod's tags. Leave them on metrics and off events,
-        # so a workload event is not attributed to the pod that runs the check.
+        # Instance tags are user-configured tags plus any tags Autodiscovery copies from
+        # the controller pod. Leave them on metrics and off events.
         tags: list[str] = []
 
         tags.extend(
