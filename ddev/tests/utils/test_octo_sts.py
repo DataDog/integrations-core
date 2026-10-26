@@ -15,8 +15,10 @@ from ddev.utils.octo_sts import (
     ACTIONS_ID_TOKEN_REQUEST_TOKEN_ENV,
     ACTIONS_ID_TOKEN_REQUEST_URL_ENV,
     MINT_ATTEMPTS,
+    MINTED_AT_ENV,
     POLICY_ENV,
     SCOPE_ENV,
+    TOKEN_REFRESH_AGE_SECONDS,
     OctoStsTokenProvider,
     octo_sts_token_provider_from_env,
 )
@@ -43,6 +45,9 @@ def make_provider(
     exchange: Callable[[httpx.Request], Awaitable[httpx.Response]],
     *,
     clock: FakeClock | None = None,
+    initial_token: str = "",
+    initial_token_minted_at: float | None = None,
+    wall_clock: FakeClock | None = None,
     logger: logging.Logger | None = None,
 ) -> OctoStsTokenProvider:
     return OctoStsTokenProvider(
@@ -50,8 +55,11 @@ def make_provider(
         policy="self.test-dispatch",
         oidc_url="https://actions.example/oidc?api-version=1",
         oidc_token="oidc-bearer",
+        initial_token=initial_token,
+        initial_token_minted_at=initial_token_minted_at,
         logger=logger,
         clock=clock or FakeClock(),
+        wall_clock=wall_clock or FakeClock(start=1_700_000_000.0),
         transport=httpx.MockTransport(exchange),
     )
 
@@ -73,6 +81,55 @@ async def test_first_use_mints_over_the_exchange_contract():
     assert exchange.headers["x-datadog-target-release"] == "dd-octo-sts.dd-octo-sts"
 
 
+async def test_seeded_token_is_used_until_its_refresh_deadline():
+    """AI-7375: startup must reuse a fresh token without extending its mint-relative window."""
+    clock = FakeClock()
+    wall_clock = FakeClock(start=1_700_000_000.0)
+    calls: list[httpx.Request] = []
+    provider = make_provider(
+        Exchange(calls, [httpx.Response(200, json={"token": "minted-one"})]),
+        clock=clock,
+        initial_token="workflow-token",
+        initial_token_minted_at=wall_clock() - 20 * 60,
+        wall_clock=wall_clock,
+    )
+
+    assert await provider() == "workflow-token"
+    clock.advance(TOKEN_REFRESH_AGE_SECONDS - 20 * 60 - 1)
+    assert await provider() == "workflow-token"
+    assert calls == []
+
+    clock.advance(1)
+    assert await asyncio.gather(*(provider() for _ in range(5))) == ["minted-one"] * 5
+    assert len(calls) == 2
+
+
+@pytest.mark.parametrize("minted_at", [None, "invalid", "nan", "inf", "0"])
+async def test_seed_with_unusable_mint_time_is_refreshed(monkeypatch: pytest.MonkeyPatch, minted_at: str | None):
+    calls: list[httpx.Request] = []
+    exchange = Exchange(calls, [httpx.Response(200, json={"token": "minted-one"})])
+    async_client = httpx.AsyncClient
+
+    def make_http_client(**kwargs: Any) -> httpx.AsyncClient:
+        kwargs["transport"] = httpx.MockTransport(exchange)
+        return async_client(**kwargs)
+
+    monkeypatch.setattr(httpx, "AsyncClient", make_http_client)
+    monkeypatch.setenv(SCOPE_ENV, "DataDog/integrations-core")
+    monkeypatch.setenv(POLICY_ENV, "self.test-dispatch")
+    monkeypatch.setenv(ACTIONS_ID_TOKEN_REQUEST_URL_ENV, "https://actions.example/oidc")
+    monkeypatch.setenv(ACTIONS_ID_TOKEN_REQUEST_TOKEN_ENV, "oidc-bearer")
+    if minted_at is None:
+        monkeypatch.delenv(MINTED_AT_ENV, raising=False)
+    else:
+        monkeypatch.setenv(MINTED_AT_ENV, minted_at)
+
+    provider = octo_sts_token_provider_from_env(initial_token="workflow-token")
+    assert provider is not None
+    assert await provider() == "minted-one"
+    assert len(calls) == 2
+
+
 async def test_cached_token_is_refreshed_for_concurrent_callers():
     """A long run must share one refresh, including callers arriving while the exchange is in flight."""
     clock = FakeClock()
@@ -83,11 +140,11 @@ async def test_cached_token_is_refreshed_for_concurrent_callers():
     provider = make_provider(exchange, clock=clock)
 
     assert await provider() == "minted-one"
-    clock.advance(49 * 60)
+    clock.advance(TOKEN_REFRESH_AGE_SECONDS - 1)
     assert await provider() == "minted-one"
     assert len(calls) == 2
 
-    clock.advance(12 * 60)
+    clock.advance(1)
     tokens = await asyncio.gather(*(provider() for _ in range(5)))
 
     assert tokens == ["minted-two"] * 5
@@ -171,21 +228,49 @@ async def test_failed_refresh_surfaces_a_sanitized_error(
 
 
 async def test_transient_failure_is_retried(monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture):
-    advance_clock_on_sleep(FakeClock(), monkeypatch)
+    clock = FakeClock()
+    started_at = clock()
+    advance_clock_on_sleep(clock, monkeypatch)
     calls: list[httpx.Request] = []
     provider = make_provider(
-        Exchange(calls, [httpx.Response(503, text="private-token"), httpx.Response(200, json={"token": "minted-one"})]),
+        Exchange(
+            calls,
+            [httpx.Response(503, text="private-token")] * 4 + [httpx.Response(200, json={"token": "minted-one"})],
+        ),
+        clock=clock,
         logger=logging.getLogger("octo-sts-test"),
     )
 
     with caplog.at_level(logging.INFO, logger="octo-sts-test"):
         assert await provider() == "minted-one"
 
-    assert len(calls) == 3
+    assert clock() - started_at == 130
+    assert len(calls) == 6
     assert [record.getMessage() for record in caplog.records if record.name == "octo-sts-test"] == [
         "Refreshing octo-sts GitHub token",
-        "octo-sts request failed; retrying after attempt 1/3: the octo-sts token exchange failed: HTTP 503",
+        *(
+            f"octo-sts request failed; retrying after attempt {attempt}/5: the octo-sts token exchange failed: HTTP 503"
+            for attempt in range(1, 5)
+        ),
     ]
+
+
+async def test_hung_attempts_are_bounded(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr("ddev.utils.octo_sts.MINT_TIMEOUT_SECONDS", 0.01)
+    monkeypatch.setattr("ddev.utils.octo_sts.MINT_RETRY_BASE_SECONDS", 0)
+    calls: list[httpx.Request] = []
+
+    async def hung_exchange(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        await asyncio.sleep(10)
+        return httpx.Response(200, json={"value": "oidc-value"})
+
+    provider = make_provider(hung_exchange)
+
+    with pytest.raises(RuntimeError, match="the Actions OIDC token request failed: TimeoutError"):
+        await asyncio.wait_for(provider(), timeout=2)
+
+    assert len(calls) == MINT_ATTEMPTS
 
 
 @pytest.mark.parametrize(
