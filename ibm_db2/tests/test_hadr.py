@@ -12,6 +12,7 @@ import json
 import os
 import re
 import subprocess
+import sys
 from collections.abc import Iterator
 from contextlib import ExitStack
 from pathlib import Path
@@ -33,6 +34,7 @@ from datadog_checks.ibm_db2.query_metrics import QueryMetricsCollector
 HADR_COMPOSE_FILE = str(Path(__file__).parent / 'docker' / 'docker-compose-hadr.yaml')
 pytestmark = [
     pytest.mark.integration,
+    pytest.mark.skipif(sys.platform != 'linux', reason='HADR tests use direct container IPs on Linux'),
     pytest.mark.skipif(os.getenv('DB2_HADR') != 'true', reason='Runs in the dedicated HADR matrix environments'),
 ]
 

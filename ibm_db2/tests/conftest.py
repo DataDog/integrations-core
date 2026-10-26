@@ -12,7 +12,7 @@ from datadog_checks.dev import WaitFor, docker_run, run_command
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.ibm_db2.connection import get_connection_data
 
-from .common import COMPOSE_FILE, CONFIG, E2E_METADATA
+from .common import COMPOSE_FILE, CONFIG, DB2_VERSION, E2E_METADATA
 
 
 def pytest_ignore_collect(collection_path: Path) -> bool | None:
@@ -80,9 +80,10 @@ class DbManager(object):
 def dd_environment():
     db = DbManager(CONFIG)
 
-    # All images use IBM's entrypoint to create the instance; this fixture creates the database.
+    # TASKANA ships the instance and logs readiness after db2start; official images create it.
+    ready_message = 'Database db2diag log following' if DB2_VERSION == '11.1' else r'\(\*\) Setup has completed\.'
     conditions = [
-        CheckDockerLogs(COMPOSE_FILE, r'\(\*\) Setup has completed\.', attempts=60, wait=10),
+        CheckDockerLogs(COMPOSE_FILE, ready_message, attempts=60, wait=10),
         db.initialize,
         WaitFor(db.connect),
     ]

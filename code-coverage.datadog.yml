@@ -341,6 +341,9 @@ services:
 - id: ibm_ace
   paths:
   - ibm_ace/datadog_checks/ibm_ace/
+- id: ibm_db2
+  paths:
+  - ibm_db2/datadog_checks/ibm_db2/
 - id: ibm_i
   paths:
   - ibm_i/datadog_checks/ibm_i/
