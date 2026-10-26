@@ -13,5 +13,16 @@
         }
       }
     }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "openrouter-agent-console",
+      "toggle": {
+        "default": true,
+        "label": "Collect Usage Data in AI Console",
+        "editable": true
+      },
+      "additional_config_fields": []
+    }
   ]
 }
