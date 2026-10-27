@@ -102,9 +102,7 @@ def test_critical_service_check(instance, check, aggregator):
     ],
 )
 def test_request_failure_reports_critical(instance, check, aggregator, exception):
-    # Any failure to retrieve the response has to report can_connect. Narrower except clauses let
-    # some of these escape, and the run then submits no service check at all, so a monitor sees a
-    # gap instead of a CRITICAL exactly when the servlet is unhealthy.
+    # An escaping exception submits no service check at all, so a monitor sees a gap, not a CRITICAL.
     tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
 
     with mock.patch('datadog_checks.base.utils.http.requests.Session.get', side_effect=exception):
@@ -117,10 +115,7 @@ def test_request_failure_reports_critical(instance, check, aggregator, exception
 
 
 def test_malformed_xml_reports_critical(instance, check, aggregator, caplog):
-    # lxml raises XMLSyntaxError, which is a sibling of ElementTree's ParseError rather than a
-    # subclass, so a narrower clause leaves malformed responses unhandled and silent. The request
-    # itself has to succeed here, so that a run which fetches a 2xx body it cannot parse reports
-    # CRITICAL alone rather than contradicting itself with an OK from the successful fetch.
+    # Goes through the real make_request so a 2xx body that fails to parse reports CRITICAL alone.
     response = mock.MagicMock(content=b'<Nodes><Node')
     response.raise_for_status.return_value = None
 
@@ -133,6 +128,20 @@ def test_malformed_xml_reports_critical(instance, check, aggregator, caplog):
     aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.OK, count=0)
     aggregator.assert_metric('ibm_was.can_connect', value=0, tags=tags, count=1)
     assert 'Unable to parse the XML response' in caplog.text
+
+
+def test_parsed_but_empty_document_reports_ok_without_metrics(instance, check, aggregator):
+    # Pins the contract in assets/service_checks.json: OK means fetched and parsed, nothing more.
+    response = mock.MagicMock(content=b'<Nodes/>')
+    response.raise_for_status.return_value = None
+
+    with mock.patch('datadog_checks.base.utils.http.requests.Session.get', return_value=response):
+        check = check(instance)
+        check.check(instance)
+
+    tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
+    aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.OK, tags=tags, count=1)
+    assert aggregator.metric_names == ['ibm_was.can_connect']
 
 
 def test_right_server_tag(instance, check, aggregator):

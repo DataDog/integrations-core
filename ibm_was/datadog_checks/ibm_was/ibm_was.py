@@ -48,8 +48,7 @@ class IbmWasCheck(AgentCheck):
             self.log.error("Unable to parse the XML response: %s", e)
             return
 
-        # Only report OK once the response has proved usable. Reporting it as soon as the request
-        # succeeds makes a malformed response emit OK and CRITICAL in the same run.
+        # Reporting OK before this point would pair it with CRITICAL on a malformed response.
         self.submit_service_checks(AgentCheck.OK)
 
         node_list = self.get_node_from_root(server_data_xml, "Node")
@@ -124,11 +123,8 @@ class IbmWasCheck(AgentCheck):
             resp = self.http.get(self.url)
             resp.raise_for_status()
         except requests.RequestException as e:
-            # Covers read timeouts too: ReadTimeout descends from Timeout, not ConnectionError, so
-            # narrower clauses let it escape and the run reports no service check at all.
-            self.warning(
-                "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable", self.url, e
-            )
+            # Broad by design: ReadTimeout descends from Timeout, not ConnectionError.
+            self.warning("Request to %s failed: %s", self.url, e)
             self.submit_service_checks(AgentCheck.CRITICAL)
             raise e
         return resp.content
