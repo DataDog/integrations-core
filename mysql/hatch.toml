@@ -15,45 +15,11 @@ mypy-deps = [
   "types-pymysql==1.1.0.1",
 ]
 
+# TEMP (do not merge): only 9.7.2, repeated, to reproduce the startup flake
 [[envs.default.matrix]]
 python = ["3.13"]
-version = [
-  "5.7",  # EOL October 21, 2023
-  "8.0.18", # Oldest 8.0: pre-8.0.22 replication syntax and early-8.0 single-query schema collection
-  "8.0.36",  # EOL April, 2026
-  "8.4.0",
-  "9.7.2",  # latest 9.x innovation release
-]
-
-[[envs.default.matrix]]
-python = ["3.13"]
-version = ["8.0"]
-replication = ["group"]
-
-[[envs.default.matrix]]
-python = ["3.13"]
-version = ["8.0"]
-replication = ["hybrid"]
-
-[[envs.default.matrix]]
-python = ["3.13"]
-flavor = ["mariadb"]
-version = [
-  "10.5",  # EOL 24 June 2025 (LTS version)
-  "10.6",  # EOL 06 July 2026 (LTS version)
-  "10.11", # EOL 16 Feb 2028 (LTS version)
-  "11.4",  # EOL 29 May 2029 (LTS version)
-  "12.0",  # newest major on the bitnamilegacy image
-  "13",    # RC-only; official mariadb image, pinned to 13.0-rc (see overrides)
-]
-
-[[envs.default.matrix]]
-python = ["3.13"]
-flavor = ["percona"]
-version = [
-  "8.0.42",
-  "8.4",
-]
+version = ["9.7.2"]
+rep = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
 
 [envs.default.overrides]
 matrix.version.env-vars = [
@@ -76,6 +42,8 @@ name."8.0-hybrid".env-vars = [
 
 
 [envs.default.env-vars]
+# TEMP (do not merge): expose pre-teardown diagnostics in downloadable raw job logs
+PYTEST_ADDOPTS = "-s"
 COMPOSE_FILE = "{matrix:flavor:mysql}.yaml"
 MYSQL_FLAVOR = "{matrix:flavor:mysql}"
 MYSQL_REPLICATION = "{matrix:replication:classic}"
