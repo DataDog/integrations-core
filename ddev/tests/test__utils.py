@@ -39,4 +39,4 @@ def test_cloned_repo(repository: ClonedRepo, local_repo: Path):
 
     assert current_repo_commit_list == cloned_repo_commit_list
 
-# AI-7380 concurrency check, commit B. Throwaway PR, do not merge.
+# AI-7380 concurrency check, commit C. Throwaway PR, do not merge.
