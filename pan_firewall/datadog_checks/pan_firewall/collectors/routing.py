@@ -30,6 +30,10 @@ ARE_BGP_PEER_CMD = (
     '<show><advanced-routing><bgp><peer><detail><logical-router>{router}</logical-router></detail></peer></bgp>'
     '</advanced-routing></show>'
 )
+ARE_OSPF_NEIGHBOR_CMD = (
+    '<show><advanced-routing><ospf><neighbor><logical-router>{router}</logical-router></neighbor></ospf>'
+    '</advanced-routing></show>'
+)
 
 # A peer that came up less than this long ago has restarted.
 RESTART_WINDOW_SECONDS = 1800
@@ -199,6 +203,28 @@ def parse_are_bgp_peers(data: dict, router: str) -> list[Sample]:
     return samples
 
 
+def parse_are_ospf_neighbors(data: dict, router: str) -> list[Sample]:
+    """`data['neighbors']` maps a router id to its neighbor entries. States such as `Full/DR` count as full."""
+    neighbors = data.get('neighbors')
+    samples: list[Sample] = []
+    for router_id, entries in neighbors.items() if isinstance(neighbors, dict) else ():
+        for entry in entries if isinstance(entries, list) else ():
+            if not isinstance(entry, dict) or entry.get('nbrState') is None:
+                continue
+            tags = tag_tuple(
+                ('neighbor', json_str(entry, 'ifaceAddress')),
+                ('router_id', router_id),
+                ('area', json_str(entry, 'areaId')),
+                ('vr', router),
+            )
+            full = str(entry['nbrState']).lower().startswith('full')
+            samples.append(Sample('ospf.neighbor.status', 1 if full else 0, tags, 'gauge'))
+            changes = json_num(entry, 'stateChangeCounter')
+            if changes is not None:
+                samples.append(Sample('ospf.neighbor.state_changes', changes, tags, 'monotonic_count'))
+    return samples
+
+
 def parse_ospf_neighbors(root: Element) -> list[Sample]:
     samples: list[Sample] = []
     for entry in root.iterfind('result/entry'):
@@ -215,18 +241,6 @@ def parse_ospf_neighbors(root: Element) -> list[Sample]:
     return samples
 
 
-def legacy_routing_engine(ctx: CollectContext) -> bool:
-    """False, with one warning per firewall, when the firewall runs the Advanced Routing Engine."""
-    if not ctx.identity.advanced_routing:
-        return True
-    ctx.warning(
-        'the firewall runs the Advanced Routing Engine: OSPF metrics need the legacy '
-        'routing engine and are not reported',
-        key='advanced_routing',
-    )
-    return False
-
-
 def collect_bgp(ctx: CollectContext) -> list[Sample]:
     if ctx.identity.advanced_routing is not True:
         return parse_bgp_peers(ctx.client.op(BGP_PEER_CMD))
@@ -238,6 +252,10 @@ def collect_bgp(ctx: CollectContext) -> list[Sample]:
 
 
 def collect_ospf(ctx: CollectContext) -> list[Sample]:
-    if not legacy_routing_engine(ctx):
-        return []
-    return parse_ospf_neighbors(ctx.client.op(OSPF_NEIGHBOR_CMD))
+    if ctx.identity.advanced_routing is not True:
+        return parse_ospf_neighbors(ctx.client.op(OSPF_NEIGHBOR_CMD))
+    samples: list[Sample] = []
+    for router in logical_routers(ctx):
+        data = are_json(ctx.client.op(ARE_OSPF_NEIGHBOR_CMD.format(router=escape(router))))
+        samples.extend(parse_are_ospf_neighbors(data, router))
+    return samples

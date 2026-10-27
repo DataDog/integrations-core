@@ -8,6 +8,7 @@ import pytest
 from datadog_checks.pan_firewall.collectors.routing import (
     ARE_BGP_PEER_CMD,
     ARE_LOGICAL_ROUTER_CMD,
+    ARE_OSPF_NEIGHBOR_CMD,
     BGP_PEER_CMD,
     OSPF_NEIGHBOR_CMD,
     are_json,
@@ -15,6 +16,7 @@ from datadog_checks.pan_firewall.collectors.routing import (
     collect_bgp,
     collect_ospf,
     parse_are_bgp_peers,
+    parse_are_ospf_neighbors,
     parse_bgp_peers,
     parse_ospf_neighbors,
     peer_ip,
@@ -134,20 +136,13 @@ def test_peer_ip_strips_the_port_and_keeps_ipv6_intact(address, expected):
     assert peer_ip(address) == expected
 
 
-@pytest.mark.parametrize(
-    'advanced_routing, called',
-    [
-        pytest.param(True, False, id='advanced-routing-engine'),
-        pytest.param(False, True, id='legacy-routing-engine'),
-        pytest.param(None, True, id='unknown-routing-engine'),
-    ],
-)
-def test_only_the_legacy_or_unknown_routing_engine_is_asked_for_ospf(advanced_routing, called):
+@pytest.mark.parametrize('advanced_routing', [False, None])
+def test_the_legacy_or_unknown_routing_engine_is_asked_the_legacy_ospf_command(advanced_routing):
     ctx = make_ctx(load_op(OSPF_NEIGHBOR_CMD), identity=mock.Mock(advanced_routing=advanced_routing))
 
     collect_ospf(ctx)
 
-    assert ctx.client.op.called is called
+    ctx.client.op.assert_called_once_with(OSPF_NEIGHBOR_CMD)
 
 
 @pytest.mark.parametrize('advanced_routing', [False, None])
@@ -266,6 +261,25 @@ def test_advanced_routing_engine_sends_the_are_calls():
     ctx.log.warning.assert_not_called()
 
 
+def test_advanced_routing_engine_sends_the_are_ospf_calls():
+    ctx = make_ctx(
+        {
+            ARE_LOGICAL_ROUTER_CMD: load_fw_b(ARE_LOGICAL_ROUTER_CMD),
+            ARE_OSPF_NEIGHBOR_CMD.format(router='default'): load_fw_b(ARE_OSPF_NEIGHBOR_CMD.format(router='default')),
+        },
+        identity=mock.Mock(advanced_routing=True),
+    )
+
+    samples = collect_ospf(ctx)
+
+    assert [c.args[0] for c in ctx.client.op.call_args_list] == [
+        ARE_LOGICAL_ROUTER_CMD,
+        ARE_OSPF_NEIGHBOR_CMD.format(router='default'),
+    ]
+    assert {s.name for s in samples} == {'ospf.neighbor.status', 'ospf.neighbor.state_changes'}
+    ctx.log.warning.assert_not_called()
+
+
 def test_are_json_of_the_logical_router_capture_names_the_routers():
     assert list(are_json(load_fw_b(ARE_LOGICAL_ROUTER_CMD))) == ['default']
 
@@ -309,3 +323,39 @@ def test_ospf_neighbor_without_a_status_is_not_reported():
     entry.remove(entry.find('status'))
 
     assert parse_ospf_neighbors(root) == []
+
+
+FW_B_OSPF = ('neighbor:169.254.10.1', 'router_id:10.255.0.1', 'area:0.0.0.0', 'vr:default')
+
+
+def test_are_ospf_of_the_capture():
+    data = are_json(load_fw_b(ARE_OSPF_NEIGHBOR_CMD.format(router='default')))
+
+    assert series(parse_are_ospf_neighbors(data, 'default')) == {
+        ('ospf.neighbor.status', FW_B_OSPF): (1, 'gauge'),
+        ('ospf.neighbor.state_changes', FW_B_OSPF): (4, 'monotonic_count'),
+    }
+
+
+@pytest.mark.parametrize(
+    'state, expected',
+    [('Full', 1), ('Full/DR', 1), ('Full/DROther', 1), ('2-Way', 0), ('Init', 0)],
+)
+def test_are_ospf_neighbor_is_up_only_in_a_full_state(state, expected):
+    data = are_json(load_fw_b(ARE_OSPF_NEIGHBOR_CMD.format(router='default')))
+    data['neighbors']['10.255.0.1'][0]['nbrState'] = state
+
+    values = series(parse_are_ospf_neighbors(data, 'default'))
+
+    assert values['ospf.neighbor.status', FW_B_OSPF] == (expected, 'gauge')
+
+
+def test_are_ospf_neighbor_without_a_state_is_not_reported():
+    data = are_json(load_fw_b(ARE_OSPF_NEIGHBOR_CMD.format(router='default')))
+    del data['neighbors']['10.255.0.1'][0]['nbrState']
+
+    assert parse_are_ospf_neighbors(data, 'default') == []
+
+
+def test_are_ospf_without_neighbors_is_empty():
+    assert parse_are_ospf_neighbors({}, 'default') == []

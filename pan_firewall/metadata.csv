@@ -69,6 +69,7 @@ pan_firewall.mgmt.swap.free,gauge,,byte,,Free swap.,1,palo_alto_networks_firewal
 pan_firewall.mgmt.swap.total,gauge,,byte,,Total swap.,0,palo_alto_networks_firewall,mgmt swap total,,
 pan_firewall.mgmt.swap.used,gauge,,byte,,Used swap.,-1,palo_alto_networks_firewall,mgmt swap used,,
 pan_firewall.mgmt.swap.used_pct,gauge,,percent,,Percentage of management-plane swap in use.,-1,palo_alto_networks_firewall,mgmt swap used pct,,
+pan_firewall.ospf.neighbor.state_changes,count,,,,OSPF neighbor state changes.,-1,palo_alto_networks_firewall,ospf neighbor state changes,,"neighbor,router_id,area,vr"
 pan_firewall.ospf.neighbor.status,gauge,,,,"Whether the OSPF neighbor is in the `full` state (1 = full, 0 = not full).",1,palo_alto_networks_firewall,ospf neighbor status,,"neighbor,router_id,area,vr"
 pan_firewall.panorama.can_connect,gauge,,,,"Whether the Panorama discovery call succeeded (1 = succeeded, 0 = failed).",1,palo_alto_networks_firewall,panorama can connect,,"device_namespace,panorama_host"
 pan_firewall.power.alarm.high,gauge,,,,"Whether the power sensor is in alarm above the maximum (1 = in alarm, 0 = not in alarm).",-1,palo_alto_networks_firewall,power alarm high,,"sensor,slot"
