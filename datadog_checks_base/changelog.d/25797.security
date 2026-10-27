@@ -1,0 +1,1 @@
+Update botocore to 1.43.119, dropping the Sectigo root that anchors the compromised eMudhra intermediates.

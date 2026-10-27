@@ -377,6 +377,9 @@ services:
 - id: kafka_consumer
   paths:
   - kafka_consumer/datadog_checks/kafka_consumer/
+- id: kai_scheduler
+  paths:
+  - kai_scheduler/datadog_checks/kai_scheduler/
 - id: karpenter
   paths:
   - karpenter/datadog_checks/karpenter/
@@ -536,6 +539,9 @@ services:
 - id: openstack_controller
   paths:
   - openstack_controller/datadog_checks/openstack_controller/
+- id: pan_firewall
+  paths:
+  - pan_firewall/datadog_checks/pan_firewall/
 - id: pdh_check
   paths:
   - pdh_check/datadog_checks/pdh_check/

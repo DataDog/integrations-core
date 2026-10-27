@@ -1,0 +1,1 @@
+Tag schema collector telemetry with the collector kind so that metrics from multiple collectors on one check stay separate.
