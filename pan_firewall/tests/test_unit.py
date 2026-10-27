@@ -10,7 +10,7 @@ import pytest
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.pan_firewall import PanFirewallCheck, constants
 from datadog_checks.pan_firewall.collectors.counters import GLOBAL_COUNTER_CMD
-from datadog_checks.pan_firewall.collectors.ha import HA_CMD
+from datadog_checks.pan_firewall.collectors.ha import HA_CMD, HA_INTERFACE_CMD
 from datadog_checks.pan_firewall.collectors.interfaces import COUNTER_INTERFACE_CMD
 from datadog_checks.pan_firewall.collectors.jobs import JOBS_PENDING_CMD
 from datadog_checks.pan_firewall.collectors.routing import OSPF_NEIGHBOR_CMD
@@ -215,7 +215,9 @@ def test_every_collector_submits_with_the_global_tags(dd_run_check, aggregator, 
 HARDWARE_ANSWERS = {
     ENVIRONMENTALS_CMD: SYNTHETIC / 'environmentals_hw.xml',
     INTERFACE_ALL_CMD: SYNTHETIC / 'interface_all_speeds.xml',
-    HA_CMD: SYNTHETIC / 'ha_all_enabled.xml',
+    HA_CMD: FIXTURES / 'fw-c' / 'ha_all.xml',
+    HA_INTERFACE_CMD.format(link='ha1'): FIXTURES / 'fw-c' / 'ha_interface_ha1.xml',
+    HA_INTERFACE_CMD.format(link='ha2'): FIXTURES / 'fw-c' / 'ha_interface_ha2.xml',
 }
 
 

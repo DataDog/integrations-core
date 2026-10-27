@@ -7,7 +7,7 @@ from xml.etree import ElementTree as ET
 import pytest
 
 from datadog_checks.pan_firewall.auth import Credentials
-from datadog_checks.pan_firewall.collectors.ha import HA_CMD
+from datadog_checks.pan_firewall.collectors.ha import HA_CMD, HA_INTERFACE_CMD
 from datadog_checks.pan_firewall.firewalls import FirewallTarget
 from datadog_checks.pan_firewall.identity import global_tags, parse_system_info
 from datadog_checks.pan_firewall.interface_config import parse_interface_config
@@ -171,8 +171,16 @@ def test_first_run_sends_the_device_and_its_interfaces(dd_run_check, aggregator,
     assert len(event['interfaces']) == 7
 
 
+HA_PAIR_ANSWERS = {
+    HA_CMD: 'ha_all.xml',
+    HA_INTERFACE_CMD.format(link='ha1'): 'ha_interface_ha1.xml',
+    HA_INTERFACE_CMD.format(link='ha2'): 'ha_interface_ha2.xml',
+}
+
+
 def test_device_event_carries_the_ha_state_of_an_ha_firewall(dd_run_check, aggregator, fake_panos):
-    fake_panos.answer_op(FW_A_IP, HA_CMD, (200, (SYNTHETIC / 'ha_all_enabled.xml').read_bytes()))
+    for cmd, name in HA_PAIR_ANSWERS.items():
+        fake_panos.answer_op(FW_A_IP, cmd, (200, (FIXTURES / 'fw-c' / name).read_bytes()))
 
     dd_run_check(new_check())
 

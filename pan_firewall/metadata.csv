@@ -16,6 +16,12 @@ pan_firewall.counter.global,count,,,,"Increase of the PAN-OS global counter, tag
 pan_firewall.dataplane.cpu.utilization,gauge,,percent,,Data-plane CPU utilization per core.,-1,palo_alto_networks_firewall,dataplane cpu utilization,,"dp,core"
 pan_firewall.disk.used_pct,gauge,,percent,,"Percentage of file system space used, reported every 30 minutes. Not sent for the `none`, `tmpfs`, or `cgroup_root` file systems.",-1,palo_alto_networks_firewall,disk used pct,,"mount,filesystem"
 pan_firewall.dropped_packets,count,,packet,,"Dropped packets by aspect. Known aspects report 0 when they have no drops. Other aspects, such as `mgmt`, are reported when present.",-1,palo_alto_networks_firewall,dropped packets,,aspect
+pan_firewall.ha.interface.rx.bytes,count,,byte,,HA link bytes received.,0,palo_alto_networks_firewall,ha interface rx bytes,,ha_link
+pan_firewall.ha.interface.rx.drops,count,,packet,,HA link receive drops.,-1,palo_alto_networks_firewall,ha interface rx drops,,ha_link
+pan_firewall.ha.interface.rx.errors,count,,packet,,HA link receive errors.,-1,palo_alto_networks_firewall,ha interface rx errors,,ha_link
+pan_firewall.ha.interface.rx.packets,count,,packet,,HA link packets received.,0,palo_alto_networks_firewall,ha interface rx packets,,ha_link
+pan_firewall.ha.interface.tx.bytes,count,,byte,,HA link bytes sent.,0,palo_alto_networks_firewall,ha interface tx bytes,,ha_link
+pan_firewall.ha.interface.tx.packets,count,,packet,,HA link packets sent.,0,palo_alto_networks_firewall,ha interface tx packets,,ha_link
 pan_firewall.interface.attack.ip_spoof,count,,packet,,IP-spoofed packets.,-1,palo_alto_networks_firewall,interface attack ip spoof,,"interface,interface_type,zone,vsys,vr"
 pan_firewall.interface.attack.land,count,,packet,,LAND attack packets.,-1,palo_alto_networks_firewall,interface attack land,,"interface,interface_type,zone,vsys,vr"
 pan_firewall.interface.attack.mac_spoof,count,,packet,,MAC-spoofed packets.,-1,palo_alto_networks_firewall,interface attack mac spoof,,"interface,interface_type,zone,vsys,vr"
