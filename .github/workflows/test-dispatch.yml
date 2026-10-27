@@ -76,38 +76,40 @@ jobs:
     permissions:
       contents: read
       id-token: write # the octo-sts exchange; every write happens with the scoped token
+    # `inputs` is empty unless the workflow is called, and `github.event_name` is then the caller's
+    # event, so `toJSON(inputs) != '{}'` identifies a called run wherever the `CALLED` variable is not
+    # available. An empty `context` therefore still counts as called, and the validation step rejects it.
     # A caller cannot set `continue-on-error` on a job that calls a reusable workflow, so shadow-mode
-    # callers ask for it here. `inputs.context` is only set when called, which keeps push runs blocking.
-    continue-on-error: ${{ inputs.context != '' && !inputs.blocking }}
+    # callers ask for it here.
+    continue-on-error: ${{ toJSON(inputs) != '{}' && !inputs.blocking }}
 
     # One source branch maps to one PR. Include the repository for forks and omit the SHA so a new
     # revision cancels the previous Dispatcher. Master pushes and called runs keep independent runs.
     # Keep concurrency at job level: workflow_run also fires for canceled triggers, whose skipped
     # jobs must not cancel newer triggers.
-    # In a called run `github.event_name` is the caller's event, so `inputs.context` is checked first.
     concurrency:
       group: test-dispatch-${{
-        inputs.context != '' && format('{0}-{1}', inputs.context, github.run_id) ||
+        toJSON(inputs) != '{}' && format('{0}-{1}', inputs.context, github.run_id) ||
         github.event_name == 'workflow_run' && format('pr-{0}/{1}', github.event.workflow_run.head_repository.full_name, github.event.workflow_run.head_branch) ||
         format('master-{0}', github.run_id) }}
       cancel-in-progress: true
 
     env:
-      CALLED: ${{ inputs.context != '' }}
+      CALLED: ${{ toJSON(inputs) != '{}' }}
       # The PR status keeps one stable name because it becomes a required check at takeover. Other runs
       # are named by context, so runs on one commit do not overwrite each other's status.
       STATUS_CONTEXT: ${{
-        inputs.context == '' && github.event_name == 'workflow_run' && 'Dispatcher / tests (beta, non-blocking)' ||
+        toJSON(inputs) == '{}' && github.event_name == 'workflow_run' && 'Dispatcher / tests (beta, non-blocking)' ||
         format('Dispatcher ({0}) / tests (beta, non-blocking)', inputs.context || 'master') }}
       HEAD_SHA: ${{
-        inputs.context != '' && inputs.commit ||
+        toJSON(inputs) != '{}' && inputs.commit ||
         github.event_name == 'workflow_run' && github.event.workflow_run.head_sha ||
         github.sha }}
 
     if: >-
       github.repository == 'DataDog/integrations-core'
       && (
-        inputs.context != ''
+        toJSON(inputs) != '{}'
         || (github.event_name == 'push' && github.ref == 'refs/heads/master')
         || (
           github.event_name == 'workflow_run'
@@ -127,6 +129,31 @@ jobs:
       - name: Attribute the pushed checkout to master
         if: github.event_name == 'push' && env.CALLED != 'true'
         run: git checkout -B master
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Set up ddev
+        uses: ./.github/actions/setup-ddev
+        with:
+          install-mode: local
+          cache-profile: local-ddev-base
+
+      - name: Configure the trusted checkout
+        run: |
+          set -euo pipefail
+          ddev config set upgrade_check false
+          ddev config override
+
+      # Reject a malformed context before anything is checked out, credentialed, posted or dispatched.
+      # It is forwarded as a single `context:VALUE` tag, and it names the run's statuses and concurrency.
+      - name: Validate the called run's inputs
+        if: env.CALLED == 'true'
+        env:
+          RUN_CONTEXT: ${{ inputs.context }}
+        run: ddev ci tests validate-inputs --context "$RUN_CONTEXT"
 
       # Data for trusted ddev to parse; its code is executed only by test-batch. Depth 2 holds the
       # first parent, which a change-based run diffs against.
@@ -169,23 +196,6 @@ jobs:
             -f "description=Planning and dispatching batches" \
             -f "target_url=${RUN_URL}" \
             --jq '"posted \(.context) as \(.state), pointing at \(.target_url)"'
-
-      - name: Set up Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: "3.13"
-
-      - name: Set up ddev
-        uses: ./.github/actions/setup-ddev
-        with:
-          install-mode: local
-          cache-profile: local-ddev-base
-
-      - name: Configure the trusted checkout
-        run: |
-          set -euo pipefail
-          ddev config set upgrade_check false
-          ddev config override
 
       - name: Resolve the run
         env:
