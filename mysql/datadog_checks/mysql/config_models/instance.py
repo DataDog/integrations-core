@@ -170,7 +170,6 @@ class DoTask(BaseModel):
         frozen=True,
     )
     config_id: str
-    expires_at: int = Field(..., description='Unix time in seconds after which the task must not run.')
     statements: tuple[Statement, ...]
     task_id: str
 

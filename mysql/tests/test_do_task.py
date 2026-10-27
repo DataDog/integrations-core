@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import json
-import time
 import uuid
 from copy import deepcopy
 from unittest.mock import patch
@@ -19,7 +18,6 @@ from datadog_checks.mysql.do_query import FETCH_BATCH_ROWS
 from datadog_checks.mysql.do_task import (
     MAX_EVENT_BYTES,
     MAX_TASK_STATEMENT_ROWS,
-    NET_WRITE_TIMEOUT_SECONDS,
     READ_TIMEOUT_MARGIN_SECONDS,
     MySqlTaskCheck,
     _ChunkSender,
@@ -39,7 +37,7 @@ def _statement(statement_id='s0', query='SELECT 1', max_rows=MAX_TASK_STATEMENT_
     return {'id': statement_id, 'dbname': dbname, 'query': query, 'timeout_seconds': 300, 'max_rows': max_rows}
 
 
-def _create_check(instance_basic, statements, expires_at=None):
+def _create_check(instance_basic, statements):
     instance = deepcopy(instance_basic)
     instance.update(
         {
@@ -47,7 +45,6 @@ def _create_check(instance_basic, statements, expires_at=None):
             'do_task': {
                 'config_id': CONFIG_ID,
                 'task_id': TASK_ID,
-                'expires_at': expires_at if expires_at is not None else int(time.time()) + 600,
                 'statements': statements,
             },
         }
@@ -122,11 +119,10 @@ def test_task_runs_statements_and_reports_only_events(aggregator, dd_run_check, 
     connect = _run(dd_run_check, check, conn)
 
     assert connect.call_count == 1
-    assert conn.executed[:7] == [
+    assert conn.executed[:6] == [
         'SELECT @@version, @@version_comment',
         'SET SESSION TRANSACTION READ ONLY',
         "SET time_zone = '+00:00'",
-        ('SET SESSION net_write_timeout = %s', (NET_WRITE_TIMEOUT_SECONDS,)),
         ('SET SESSION max_execution_time = %s', (300_000,)),
         ('SET SESSION sql_select_limit = %s', (MAX_TASK_STATEMENT_ROWS,)),
         'USE `shop`',
@@ -180,7 +176,7 @@ def test_task_runs_statements_and_reports_only_events(aggregator, dd_run_check, 
     assert not check._async_job_registry
 
 
-def test_metrics_report_runs_statements_and_events(aggregator, dd_run_check, instance_basic):
+def test_metrics_count_statements_by_outcome(aggregator, dd_run_check, instance_basic):
     check = _create_check(
         instance_basic,
         [_statement('s0', 'SELECT id FROM customers'), _statement('s1', 'SELECT nope')],
@@ -194,41 +190,9 @@ def test_metrics_report_runs_statements_and_events(aggregator, dd_run_check, ins
 
     _run(dd_run_check, check, conn)
 
-    _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:completed')
     _assert_count(aggregator, check, 'dd.mysql.do_task.statements', 'status:success')
-    _assert_count(
-        aggregator,
-        check,
-        'dd.mysql.do_task.statements',
-        'status:error',
-        'error_kind:sql_error',
-    )
-    # A chunk and a final event for the success, a final event for the error.
-    _assert_count(aggregator, check, 'dd.mysql.do_task.events', count=3)
-    for status in ('success', 'error'):
-        aggregator.assert_metric(
-            'dd.mysql.do_task.statement_execution_time',
-            tags=_metric_tags(check, f'status:{status}'),
-            count=1,
-            hostname='mysql.test',
-            metric_type=aggregator.HISTOGRAM,
-        )
-    aggregator.assert_metric(
-        'dd.mysql.do_task.statement_rows',
-        value=2,
-        tags=_metric_tags(check),
-        count=1,
-        hostname='mysql.test',
-        metric_type=aggregator.HISTOGRAM,
-    )
-    aggregator.assert_metric(
-        'dd.mysql.do_task.statement_chunks',
-        value=1,
-        tags=_metric_tags(check),
-        count=1,
-        hostname='mysql.test',
-        metric_type=aggregator.HISTOGRAM,
-    )
+    _assert_count(aggregator, check, 'dd.mysql.do_task.statements', 'status:error', 'error_kind:sql_error')
+    # Tags stay bounded: never a task or statement ID.
     for tag in _metric_tags(check):
         assert TASK_ID not in tag
     aggregator.assert_metric('dd.mysql.do_task.emit_failures', count=0)
@@ -259,7 +223,6 @@ def test_failed_chunk_emit_fails_the_statement(aggregator, dd_run_check, instanc
     assert _final(sent[1:], 's1')['status'] == 'success'
     _assert_count(aggregator, check, 'dd.mysql.do_task.emit_failures', 'exc_class:ValueError')
     _assert_count(aggregator, check, 'dd.mysql.do_task.statements', 'status:error', 'error_kind:emit_error')
-    _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:completed')
 
 
 def test_every_query_carries_the_agent_comment(aggregator, dd_run_check, instance_basic):
@@ -427,7 +390,6 @@ def test_connect_failure_reports_every_statement(aggregator, dd_run_check, insta
         assert (event['chunk_count'], event['row_count']) == (0, 0)
         assert event['error'].startswith('Statement not executed: could not connect to the database')
 
-    _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:connection_error')
     _assert_count(
         aggregator,
         check,
@@ -436,8 +398,6 @@ def test_connect_failure_reports_every_statement(aggregator, dd_run_check, insta
         'error_kind:connection_error',
         count=2,
     )
-    # The statements never ran, so they have no execution time.
-    aggregator.assert_metric('dd.mysql.do_task.statement_execution_time', count=0)
 
 
 @pytest.mark.parametrize(
@@ -488,23 +448,6 @@ def test_statement_without_result_set_drops_the_session(aggregator, dd_run_check
     assert _final(events, 's1')['status'] == 'success'
 
 
-def test_expired_task_reports_a_task_error_without_connecting(aggregator, dd_run_check, instance_basic):
-    check = _create_check(instance_basic, [_statement()], expires_at=int(time.time()) - 1)
-
-    connect = _run(dd_run_check, check)
-
-    (event,) = _events(aggregator)
-    assert 'statement_id' not in event
-    assert 'result_id' not in event
-    assert 'kind' not in event
-    assert (event['task_id'], event['status'], event['error_kind']) == (TASK_ID, 'error', 'expired')
-    assert (event['chunk_index'], event['chunk_count']) == (0, 1)
-    connect.assert_not_called()
-    _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:expired')
-    _assert_count(aggregator, check, 'dd.mysql.do_task.events')
-    aggregator.assert_metric('dd.mysql.do_task.statements', count=0)
-
-
 def test_cancelled_check_skips_the_remaining_statements(aggregator, dd_run_check, instance_basic):
     check = _create_check(instance_basic, [_statement('s0', 'SELECT 1'), _statement('s1', 'SELECT 2')])
 
@@ -525,8 +468,6 @@ def test_cancelled_check_skips_the_remaining_statements(aggregator, dd_run_check
         ('final', 's0'),
     ]
     assert 'SELECT 2' not in conn.executed
-    _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:cancelled')
-    aggregator.assert_metric('dd.mysql.do_task.runs', tags=_metric_tags(check, 'outcome:completed'), count=0)
 
 
 def _chunk_budget(instance_basic):
@@ -663,138 +604,25 @@ def test_cancel_while_reading_closes_the_connection(aggregator, dd_run_check, in
     assert not conn.open
     assert not conn.drained
     assert 'SELECT 1' not in conn.executed
-    _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:cancelled')
     aggregator.assert_metric('dd.mysql.do_task.statements', count=0)
 
 
-class _InlineThread:
-    """Runs a thread's target inside start(), so a test sees the kill finish before it asserts."""
-
-    started = []
-
-    def __init__(self, target, args=(), name=None, daemon=None):
-        self._target, self._args = target, args
-        _InlineThread.started.append(name)
-
-    def start(self):
-        self._target(*self._args)
-
-
-@pytest.fixture
-def inline_threads():
-    _InlineThread.started = []
-    with patch('datadog_checks.mysql.do_task.threading.Thread', _InlineThread):
-        yield _InlineThread.started
-
-
-INTERRUPTED = pymysql.err.OperationalError(1317, 'Query execution was interrupted')
-
-
-def test_cancel_kills_the_running_statement(aggregator, dd_run_check, instance_basic, inline_threads):
+def test_cancel_while_executing_sends_nothing(aggregator, dd_run_check, instance_basic):
+    # The Agent unschedules the check while the server is still executing; the statement then fails
+    # at its timeout, and nobody waits for that result or the next statement's.
     check = _create_check(instance_basic, [_statement('s0', 'SELECT SLOW'), _statement('s1')])
-    kill_conn = FakeConnection()
 
     def cancelled_while_executing(conn):
-        # The Agent unschedules the check while the server is still executing the statement.
         check.cancel()
-        return INTERRUPTED
+        return pymysql.err.OperationalError(3024, 'maximum statement execution time exceeded')
 
     conn = FakeConnection({'SELECT SLOW': cancelled_while_executing, 'SELECT 1': (['1'], [(1,)])})
-    conn.connection_id = 1234
 
-    with patch('datadog_checks.mysql.do_task.pymysql.connect', return_value=kill_conn) as connect:
-        _run(dd_run_check, check, conn)
+    _run(dd_run_check, check, conn)
 
-    assert inline_threads == [f'do-task-kill-{TASK_ID}']
-    assert connect.call_args.kwargs['connect_timeout'] == connect.call_args.kwargs['read_timeout'] == 10
-    assert kill_conn.executed == [('KILL QUERY %s', (1234,))]
-    assert not kill_conn.open
-    # Nobody waits for the result of a cancelled task.
     assert not _events(aggregator)
     assert not conn.open
     assert 'SELECT 1' not in conn.executed
-    _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:cancelled')
-    _assert_count(aggregator, check, 'dd.mysql.do_task.kills', 'outcome:killed')
-
-
-def test_cancel_kills_the_statement_while_reading(aggregator, dd_run_check, instance_basic, inline_threads):
-    check = _create_check(instance_basic, [_statement('s0', 'SELECT id FROM big')])
-    conn = FakeConnection({'SELECT id FROM big': (['id'], [(i,) for i in range(5_000)])})
-    kill_conn = FakeConnection()
-    conn.on_fetch = lambda: check.cancel() if len(conn.fetch_sizes) == 2 else None
-
-    with patch('datadog_checks.mysql.do_task.pymysql.connect', return_value=kill_conn):
-        _run(dd_run_check, check, conn)
-
-    assert kill_conn.executed == [('KILL QUERY %s', (7,))]
-    assert not [event for event in _events(aggregator) if event.get('kind') == 'final']
-    _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:cancelled')
-
-
-def test_cancel_between_statements_kills_nothing(aggregator, dd_run_check, instance_basic, inline_threads):
-    check = _create_check(instance_basic, [_statement('s0', 'SELECT 1'), _statement('s1', 'SELECT 2')])
-    conn = FakeConnection({'SELECT 1': (['1'], [(1,)]), 'SELECT 2': (['2'], [(2,)])})
-    emit = check._emit
-
-    def cancel_after_the_first_result(event):
-        emit(event)
-        if event.get('kind') == 'final':
-            check.cancel()
-
-    with (
-        patch.object(check, '_emit', side_effect=cancel_after_the_first_result),
-        patch('datadog_checks.mysql.do_task.pymysql.connect') as connect,
-    ):
-        _run(dd_run_check, check, conn)
-
-    assert not inline_threads
-    connect.assert_not_called()
-    assert 'SELECT 2' not in conn.executed
-    _assert_count(aggregator, check, 'dd.mysql.do_task.runs', 'outcome:cancelled')
-
-
-def test_cancel_of_an_idle_check_kills_nothing(instance_basic, inline_threads):
-    check = _create_check(instance_basic, [_statement()])
-
-    with patch('datadog_checks.mysql.do_task.pymysql.connect') as connect:
-        check.cancel()
-
-    assert not inline_threads
-    connect.assert_not_called()
-
-
-@pytest.mark.parametrize(
-    'error, outcome',
-    [
-        pytest.param(
-            pymysql.err.OperationalError(1094, 'Unknown thread id: 7'), ['outcome:not_running'], id='finished'
-        ),
-        pytest.param(
-            pymysql.err.OperationalError(1226, "User 'dog' has exceeded the 'max_user_connections' resource"),
-            ['outcome:failed', 'exc_class:OperationalError'],
-            id='no connection left',
-        ),
-        pytest.param(OSError('network unreachable'), ['outcome:failed', 'exc_class:OSError'], id='connect failed'),
-    ],
-)
-def test_kill_failures_are_counted(aggregator, instance_basic, error, outcome):
-    check = _create_check(instance_basic, [_statement()])
-
-    with patch('datadog_checks.mysql.do_task.pymysql.connect', side_effect=error):
-        check._kill_statement(7)
-
-    _assert_count(aggregator, check, 'dd.mysql.do_task.kills', *outcome)
-
-
-def test_kill_query_error_is_counted_and_closes_the_connection(aggregator, instance_basic):
-    check = _create_check(instance_basic, [_statement()])
-    kill_conn = FakeConnection({'KILL QUERY %s': pymysql.err.OperationalError(1094, 'Unknown thread id: 7')})
-
-    with patch('datadog_checks.mysql.do_task.pymysql.connect', return_value=kill_conn):
-        check._kill_statement(7)
-
-    assert not kill_conn.open
-    _assert_count(aggregator, check, 'dd.mysql.do_task.kills', 'outcome:not_running')
 
 
 def test_final_event_carries_the_statement(aggregator, dd_run_check, instance_basic):
@@ -806,15 +634,6 @@ def test_final_event_carries_the_statement(aggregator, dd_run_check, instance_ba
     statement_fields = ('db_name', 'query', 'timeout_ms')
     assert not any(field in chunk for field in statement_fields)
     assert [final[field] for field in statement_fields] == ['shop', 'SELECT id FROM t', 300_000]
-
-
-def test_session_sets_net_write_timeout(aggregator, dd_run_check, instance_basic):
-    check = _create_check(instance_basic, [_statement()])
-    conn = FakeConnection({'SELECT 1': (['1'], [(1,)])})
-
-    _run(dd_run_check, check, conn)
-
-    assert ('SET SESSION net_write_timeout = %s', (300,)) in conn.executed
 
 
 def test_connection_read_timeout_follows_the_statement_timeouts(aggregator, dd_run_check, instance_basic):
