@@ -207,6 +207,13 @@ def test_log_stream_regenerates_a_rejected_key():
             2,
             id='renewal-keygen-rejected',
         ),
+        # A role refusal is not an auth code, but the keygen still got no key.
+        pytest.param(
+            [(403, (FIXTURES / 'fw-a-probe' / 'config_refused.xml').read_bytes()), (200, KEYGEN_OK)],
+            [(200, SYSTEM_INFO)],
+            1,
+            id='keygen-refused-by-role',
+        ),
     ],
 )
 def test_rejected_keygen_is_not_retried_until_reset(keygen, api, keygens_before_reset):

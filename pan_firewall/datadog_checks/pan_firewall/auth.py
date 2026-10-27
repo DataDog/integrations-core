@@ -78,7 +78,11 @@ class KeyManager:
         resp = post_api(self._http, self._url, data)
         try:
             root = read_response(resp)
-        except PanosAuthError as e:
+        except PanosApiError as e:
+            if not e.panos_response:
+                raise
+            # Any PAN-OS error, not only an auth code: a role refusal is a plain PanosApiError, and a keygen that got
+            # no key would get none on a retry either.
             self._keygen_rejected = True
             raise PanosAuthError(e.code, f'{self._host} rejected the credentials: {e.msg}') from None
         key = text(root, './result/key')
