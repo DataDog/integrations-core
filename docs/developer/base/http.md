@@ -59,6 +59,18 @@ OpenMetrics and Prometheus scrapers build, returns responses that expose only th
 errors listed under [Errors](#errors). The `fake_http` test fixture requires it. Without it, clients return `requests`
 responses and raise `requests` exceptions unchanged.
 
+### Testing TLS configuration
+
+The `fake_http` fixture gives each check-owned client the real client's TLS defaults, instance settings, and
+`HTTP_CONFIG_REMAPPER` aliases. Explicit `create_http_client(instance, init_config=..., remapper=...)` arguments follow
+the same precedence as in production. TLS settings are isolated between clients, including mutable lists.
+
+Standalone `FakeHTTPClient(tls_config=...)` instances merge explicit overrides into the canonical TLS defaults.
+Calling `fake_http.create_client()` creates a fresh client with defaults, not a copy of the parent's TLS settings.
+The fixture configures that child from its owning check; changing the parent fixture's `tls_config` does not configure
+check-owned clients. Other HTTP settings are not parsed by the fixture, and registered responses still determine
+request outcomes without network I/O.
+
 ## Options
 
 Some options can be set globally in `init_config` (with `instances` taking precedence).

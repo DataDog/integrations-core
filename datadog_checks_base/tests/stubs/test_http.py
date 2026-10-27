@@ -1,12 +1,15 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections import ChainMap
 from datetime import timedelta
 
 import pytest
 
 from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
+from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError, HTTPClientTimeoutError
+from datadog_checks.base.utils.tls import create_ssl_context
 
 
 def test_fake_response_returns_only_configured_results():
@@ -154,6 +157,42 @@ def test_fake_response_raises_configured_stream_error_after_results(iter_method,
         next(stream)
 
     assert exc_info.value is error
+
+
+@pytest.mark.parametrize(
+    'tls_config',
+    [
+        None,
+        {},
+        {'tls_verify': False},
+        {'tls_verify': None},
+        {'tls_validate_hostname': False, 'tls_ca_cert': None},
+        {'tls_ciphers': ['AES128-SHA']},
+    ],
+)
+def test_fake_client_tls_policy_matches_real_client(tls_config: dict | None):
+    client = FakeHTTPClient(tls_config=tls_config)
+    real_client = RequestsWrapper(tls_config or {}, {})
+
+    assert client.tls_config == real_client.tls_config
+    assert client.options['verify'] == real_client.options['verify']
+    assert client.options['cert'] == real_client.options['cert']
+    context = create_ssl_context(client.tls_config)
+    real_context = create_ssl_context(real_client.tls_config)
+    assert context.verify_mode == real_context.verify_mode
+    assert context.check_hostname == real_context.check_hostname
+    assert context.get_ciphers() == real_context.get_ciphers()
+
+
+def test_created_client_retains_default_discovery_cipher_policy():
+    parent = FakeHTTPClient(tls_config={'tls_ciphers': 'ECDHE+AESGCM'})
+    child = parent.create_client()
+    context = create_ssl_context(ChainMap({'tls_verify': False}, child.tls_config))
+
+    assert 'AES128-SHA' in {cipher['name'] for cipher in context.get_ciphers()}
+    child.tls_config['tls_verify'] = False
+    assert parent.tls_config['tls_verify'] is True
+    assert FakeHTTPClient().tls_config['tls_verify'] is True
 
 
 def test_fake_client_matches_responses_and_records_requests():

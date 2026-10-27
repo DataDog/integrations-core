@@ -10,11 +10,14 @@ from enum import Enum, auto
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Unpack
 
+from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.utils.headers import get_default_headers
 from datadog_checks.base.utils.headers import get_header as get_header_value
 from datadog_checks.base.utils.headers import set_header as set_header_value
+from datadog_checks.base.utils.http import get_tls_options
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.base.utils.http_protocol import HTTPHeaders, HTTPRequestOptions, HTTPResponse
+from datadog_checks.base.utils.tls import TlsConfig
 
 __all__ = ['FakeHTTPClient', 'FakeHTTPResponse', 'RecordedRequest']
 
@@ -195,20 +198,17 @@ class FakeHTTPClient:
     ) -> None:
         self.options: dict[str, Any] = {
             'auth': None,
-            'cert': None,
             # A real client always seeds these, and checks negotiate against the seeded values.
             'headers': get_default_headers(),
             'proxies': None,
             'timeout': (10.0, 10.0),
-            'verify': True,
             'allow_redirects': True,
         }
+        self.configure_tls(tls_config or {})
         if options is not None:
             self.options.update(options)
         self.options['headers'] = dict(self.options.get('headers') or {})
-        self.tls_config = dict(tls_config or {})
         self.trust_env = True
-        self.ignore_tls_warning = False
         self.persist_connections = False
         self.closed = False
         self._cookies = dict(cookies or {})
@@ -216,6 +216,12 @@ class FakeHTTPClient:
         self._proxy_bypass: dict[str, bool | Callable[[str], bool]] = {'value': should_bypass_proxy}
         self.requests: list[RecordedRequest] = []
         self._responses: list[RegisteredResponse] = []
+
+    def configure_tls(self, config: Mapping[str, Any]) -> None:
+        """Apply resolved TLS settings without sharing mutable configuration with another client."""
+        self.tls_config = {**TlsConfig().__dict__, **_snapshot_value(config)}
+        self.options.update(get_tls_options(self.tls_config))
+        self.ignore_tls_warning = is_affirmative(self.tls_config['tls_ignore_warning'])
 
     def create_client(self) -> FakeHTTPClient:
         """Create an isolated client that shares registered responses, recorded requests and proxy bypass."""
