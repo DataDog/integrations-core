@@ -159,30 +159,48 @@ FW_B_DEAD = ('peer:dead-peer', 'vr:default', 'peer_ip:10.60.1.250', 'remote_as:6
 FW_B_SPARSE = ('peer:sparse-peer', 'vr:default', 'peer_ip:10.60.1.249', 'remote_as:65098', 'peer_group:lab')
 
 
+ARE_COUNTERS = {'updates.in', 'updates.out', 'connections.established', 'connections.dropped'}
+
+
+def are_peer_samples(tags, peer, ipv4):
+    """The expected samples of one ARE peer: `peer` maps a metric to its value, `ipv4` the IPv4 unicast family's."""
+    expected = {
+        (f'bgp.peer.{name}', tags): (value, 'monotonic_count' if name in ARE_COUNTERS else 'gauge')
+        for name, value in peer.items()
+    }
+    family_tags = (*tags, 'afi_safi:ipv4_unicast')
+    expected.update({(f'bgp.peer.{name}', family_tags): (value, 'gauge') for name, value in ipv4.items()})
+    return expected
+
+
 def test_are_bgp_of_the_capture():
     root = load_fw_b(ARE_BGP_PEER_CMD.format(router='default'))
-    values = series(parse_are_bgp_peers(are_json(root), 'default'))
+    samples = parse_are_bgp_peers(are_json(root), 'default')
 
-    up = (*FW_B_PEER, 'afi_safi:ipv4_unicast')
-    dead = (*FW_B_DEAD, 'afi_safi:ipv4_unicast')
-    assert values['bgp.peer.status', FW_B_PEER] == (1, 'gauge')
-    assert values['bgp.peer.status_duration', FW_B_PEER] == (63339.0, 'gauge')
-    assert values['bgp.peer.restart', FW_B_PEER] == (0, 'gauge')
-    assert values['bgp.peer.updates.in', FW_B_PEER] == (2, 'monotonic_count')
-    assert values['bgp.peer.updates.out', FW_B_PEER] == (4, 'monotonic_count')
-    assert values['bgp.peer.connections.established', FW_B_PEER] == (1, 'monotonic_count')
-    assert values['bgp.peer.connections.dropped', FW_B_PEER] == (0, 'monotonic_count')
-    assert values['bgp.peer.prefix_limit', up] == (10, 'gauge')
-    assert values['bgp.peer.prefixes.incoming.total', up] == (1, 'gauge')
-    assert values['bgp.peer.prefixes.outgoing.advertised', up] == (4, 'gauge')
-    assert values['bgp.peer.prefix_limit.utilization', up] == (10.0, 'gauge')
-    assert values['bgp.peer.status', FW_B_DEAD] == (0, 'gauge')
-    assert values['bgp.peer.restart', FW_B_DEAD] == (0, 'gauge')
-    assert values['bgp.peer.prefixes.incoming.total', dead] == (0, 'gauge')
-    # The dead peer has no sent counter.
-    assert ('bgp.peer.prefixes.outgoing.advertised', dead) not in values
-    names = {name for name, _ in values}
-    assert not names & {'bgp.peer.prefixes.incoming.rejected', 'bgp.peer.prefixes.outgoing.total'}
+    # ARE reports no rejected incoming or total outgoing prefixes, and the dead peer has no sent counter.
+    expected = {}
+    for tags, status, duration, updates, established, prefixes, advertised in (
+        (FW_B_PEER, 1, 63339.0, (2, 4), 1, 1, 4),
+        (FW_B_DEAD, 0, 63363.0, (0, 0), 0, 0, None),
+    ):
+        peer = {
+            'status': status,
+            'status_duration': duration,
+            'restart': 0,
+            'updates.in': updates[0],
+            'updates.out': updates[1],
+            'connections.established': established,
+            'connections.dropped': 0,
+        }
+        ipv4 = {
+            'prefix_limit': 10,
+            'prefixes.incoming.total': prefixes,
+            'prefix_limit.utilization': prefixes / 10 * 100,
+        }
+        if advertised is not None:
+            ipv4['prefixes.outgoing.advertised'] = advertised
+        expected.update(are_peer_samples(tags, peer, ipv4))
+    assert series(samples) == expected
 
 
 @pytest.mark.parametrize(
