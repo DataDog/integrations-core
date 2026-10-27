@@ -223,16 +223,12 @@ files:
               required:
                 - config_id
                 - task_id
-                - expires_at
                 - statements
               properties:
                 - name: config_id
                   type: string
                 - name: task_id
                   type: string
-                - name: expires_at
-                  description: Unix time in seconds after which the task must not run.
-                  type: integer
                 - name: statements
                   type: array
                   items:

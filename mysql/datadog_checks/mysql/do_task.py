@@ -15,7 +15,6 @@ event per execution. The backend joins them back to the task by `task_id`, `stat
 
 from __future__ import annotations
 
-import threading
 import time
 import uuid
 from contextlib import closing
@@ -46,11 +45,6 @@ MAX_TASK_STATEMENT_ROWS = 1_000_000
 # chunk fails.
 MAX_EVENT_BYTES = 4 * 1024 * 1024
 
-# How long the server waits while the check is not reading a result. The check reads continuously,
-# so this is only a margin for pauses such as garbage collection or a throttled Agent container.
-# It does not limit how long a statement runs: timeout_seconds does.
-NET_WRITE_TIMEOUT_SECONDS = 300
-
 # Added to the task's longest statement timeout to get the client read timeout of its connection, so
 # the server's statement timeout always fires first and is reported as such.
 READ_TIMEOUT_MARGIN_SECONDS = 30
@@ -61,11 +55,6 @@ CONNECTION_ERROR_CODES = frozenset((2002, 2003, 2006, 2013))
 # MySQL max_execution_time or MariaDB max_statement_time exceeded.
 STATEMENT_TIMEOUT_ERROR_CODES = frozenset((3024, 1969))
 LOCK_WAIT_TIMEOUT_ERROR_CODE = 1205
-# KILL QUERY on a connection that is no longer running a statement.
-UNKNOWN_THREAD_ERROR_CODE = 1094
-
-# Connect and read timeout of the short-lived connection that kills a cancelled statement.
-KILL_TIMEOUT_SECONDS = 10
 
 
 class RowTooLargeError(Exception):
@@ -108,75 +97,9 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
         self._session: DOQuerySession | None = None
         self._server_version = None
         self._metric_tags: list[str] | None = None
-        # Server connection ID of the statement in flight, read by cancel() from another thread.
-        self._statement_lock = threading.Lock()
-        self._running_connection_id: int | None = None
-
-    def cancel(self) -> None:
-        """
-        Stop the task when the Agent unschedules its check, which happens when the task's config
-        leaves Remote Configuration. Besides the base class's signal, a statement still running on
-        the server is killed, so it stops using the database now rather than at its timeout. The
-        Agent waits only briefly for cancel(), so the kill runs on a thread of its own. Killing is
-        best effort: it fails, for example, when the user has no connection left.
-        """
-        super().cancel()
-        with self._statement_lock:
-            connection_id = self._running_connection_id
-        if connection_id is None:
-            return
-        threading.Thread(
-            target=self._kill_statement,
-            args=(connection_id,),
-            name=f'do-task-kill-{self._task.task_id}',
-            daemon=True,
-        ).start()
-
-    def _kill_statement(self, connection_id: int) -> None:
-        args = {
-            **self._get_connection_args(),
-            'connect_timeout': KILL_TIMEOUT_SECONDS,
-            'read_timeout': KILL_TIMEOUT_SECONDS,
-        }
-        try:
-            conn = pymysql.connect(**args)
-            try:
-                with closing(conn.cursor(CommenterCursor)) as cursor:
-                    # A user may kill its own connections without any privilege.
-                    cursor.execute("KILL QUERY %s", (int(connection_id),))
-            finally:
-                _close_quietly(conn, self.log)
-        except pymysql.err.OperationalError as error:
-            if error.args and error.args[0] == UNKNOWN_THREAD_ERROR_CODE:
-                # The statement finished, and its connection closed, before the kill arrived.
-                self._count('dd.mysql.do_task.kills', ['outcome:not_running'])
-                return
-            self._kill_failed(error)
-            return
-        except Exception as error:
-            self._kill_failed(error)
-            return
-        self.log.debug("Killed the running statement of cancelled Data Observability task %s", self._task.task_id)
-        self._count('dd.mysql.do_task.kills', ['outcome:killed'])
-
-    def _kill_failed(self, error: Exception) -> None:
-        self.log.warning(
-            "Could not kill the running statement of cancelled Data Observability task %s, it runs until "
-            "its timeout: %s",
-            self._task.task_id,
-            error,
-        )
-        self._count('dd.mysql.do_task.kills', ['outcome:failed', f'exc_class:{type(error).__name__}'])
 
     def check(self, _: Any) -> None:
         task = self._task
-        if time.time() >= task.expires_at:
-            # The Agent drops stale tasks too; this catches a task that sat in the queue.
-            self.log.warning("Not running Data Observability task %s: it expired at %d", task.task_id, task.expires_at)
-            self._emit_task_error('expired', f'Task expired at {task.expires_at} before it ran')
-            self._count('dd.mysql.do_task.runs', ['outcome:expired'])
-            return
-
         statements = task.statements
         try:
             for index, statement in enumerate(statements):
@@ -187,7 +110,6 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
                         task.task_id,
                         len(statements) - index,
                     )
-                    self._count('dd.mysql.do_task.runs', ['outcome:cancelled'])
                     return
                 if self._session is None:
                     try:
@@ -198,8 +120,7 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
                         result = _error_result(error, 0.0, connecting=True)
                         for pending in statements[index:]:
                             sender = _ChunkSender(self, pending, str(uuid.uuid4()))
-                            self._emit_final(pending, sender, [], result, executed=False)
-                        self._count('dd.mysql.do_task.runs', ['outcome:connection_error'])
+                            self._emit_final(pending, sender, [], result)
                         return
                 if not self._run_statement(statement):
                     self.log.debug(
@@ -207,9 +128,7 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
                         task.task_id,
                         statement.id,
                     )
-                    self._count('dd.mysql.do_task.runs', ['outcome:cancelled'])
                     return
-            self._count('dd.mysql.do_task.runs', ['outcome:completed'])
         finally:
             self._close()
 
@@ -229,9 +148,6 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
                 cursor.execute("SET SESSION TRANSACTION READ ONLY")
                 # Temporal values come back in UTC whatever the server's time zone is.
                 cursor.execute("SET time_zone = '+00:00'")
-                # The server waits this long for the check to read more rows before dropping the
-                # connection, so a short pause while streaming a large result never fails it.
-                cursor.execute("SET SESSION net_write_timeout = %s", (NET_WRITE_TIMEOUT_SECONDS,))
         except Exception:
             _close_quietly(conn, self.log)
             raise
@@ -254,27 +170,9 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
     def _run_statement(self, statement: Statement) -> bool:
         """
         Run one statement, streaming its rows as chunk events, then send its final event. Returns
-        False if the check was cancelled before or during the statement, in which case no final
-        event is sent.
+        False if the check was cancelled during the statement, in which case no final event is sent.
         """
         session = self._session
-        with self._statement_lock:
-            # Checked under the lock cancel() reads the connection ID with, so a cancel either sees
-            # this statement running and kills it, or the statement never starts.
-            if self.is_cancelled:
-                return False
-            self._running_connection_id = session.conn.thread_id()
-        try:
-            return self._stream_statement(session, statement)
-        finally:
-            self._statement_finished()
-
-    def _statement_finished(self) -> None:
-        """Mark the server done with the statement in flight, so a later cancel kills nothing."""
-        with self._statement_lock:
-            self._running_connection_id = None
-
-    def _stream_statement(self, session: DOQuerySession, statement: Statement) -> bool:
         # A new result_id for every execution, so the backend never mixes the chunks of two runs of
         # a statement, for example before and after an Agent restart.
         sender = _ChunkSender(self, statement, str(uuid.uuid4()))
@@ -303,8 +201,7 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
                 batches.close()
         except Exception as error:
             if self.is_cancelled:
-                # Most likely the kill from cancel() interrupted the statement. Nobody waits for
-                # the result, and the session may be mid-result.
+                # Nobody waits for the result, and the session may be mid-result.
                 self._close()
                 return False
             duration = time.time() - start
@@ -341,7 +238,6 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
             # The connection may be mid-result, after any outcome: a read stopped early, rows past
             # max_rows, or a cursor that failed to close after a complete read.
             self._close()
-        self._statement_finished()
         self._emit_final(statement, sender, columns, result)
         return True
 
@@ -361,7 +257,6 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
         sender: _ChunkSender,
         columns: list[str],
         result: dict[str, Any],
-        executed: bool = True,
     ) -> None:
         # Rows read but not yet sent when a read fails are discarded: the final event counts only
         # the chunks already sent.
@@ -377,25 +272,8 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
             'columns': columns if result['status'] == 'success' else [],
             **result,
         }
-        self._record_statement(final, executed)
+        self._count_statement(result)
         self._emit(final)
-
-    def _emit_task_error(self, error_kind: str, message: str) -> None:
-        self._emit(
-            {
-                **self._base_event(),
-                'chunk_index': 0,
-                'chunk_count': 1,
-                'status': 'error',
-                'columns': [],
-                'rows': [],
-                'row_count': 0,
-                'duration_s': 0.0,
-                'error': message,
-                'error_kind': error_kind,
-                'error_code': None,
-            }
-        )
 
     def _emit(self, event: dict[str, Any] | bytes, statement_id: str | None = None) -> bool:
         """Send one event, or its serialized payload. Returns False, logged and counted, if it fails."""
@@ -412,22 +290,13 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
             )
             self._count('dd.mysql.do_task.emit_failures', [f'exc_class:{type(error).__name__}'])
             return False
-        self._count('dd.mysql.do_task.events')
         return True
 
-    def _record_statement(self, result: dict[str, Any], executed: bool) -> None:
-        status_tag = f"status:{result['status']}"
-        tags = [status_tag]
+    def _count_statement(self, result: dict[str, Any]) -> None:
+        tags = [f"status:{result['status']}"]
         if result['status'] == 'error':
             tags.append(f"error_kind:{result['error_kind']}")
         self._count('dd.mysql.do_task.statements', tags)
-        if not executed:
-            # The statement never ran, so it has no execution time.
-            return
-        self._histogram('dd.mysql.do_task.statement_execution_time', result['duration_s'], [status_tag])
-        if result['status'] == 'success':
-            self._histogram('dd.mysql.do_task.statement_rows', result['row_count'])
-            self._histogram('dd.mysql.do_task.statement_chunks', result['chunk_count'])
 
     def _base_metric_tags(self) -> list[str]:
         if self._metric_tags is None:
@@ -436,19 +305,13 @@ class MySqlTaskCheck(MySQLInstanceMixin, DatabaseCheck):
             ]
         return self._metric_tags
 
-    def _count(self, name: str, tags: list[str] | None = None) -> None:
-        self._submit(self.count, name, 1, tags)
-
-    def _histogram(self, name: str, value: float, tags: list[str] | None = None) -> None:
-        self._submit(self.histogram, name, value, tags)
-
-    def _submit(self, submit: Any, name: str, value: float, tags: list[str] | None) -> None:
+    def _count(self, name: str, tags: list[str]) -> None:
         # Internal metrics must never cost the task a statement or a result.
         try:
-            submit(
+            self.count(
                 name,
-                value,
-                tags=self._base_metric_tags() + (tags or []),
+                1,
+                tags=self._base_metric_tags() + tags,
                 hostname=self.reported_hostname,
                 raw=True,
             )
