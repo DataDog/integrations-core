@@ -16,7 +16,9 @@ ddev env agent <integration> <env> check <integration> --json
 ```
 
 `<env>` is one of the names from `ddev env show <integration>`. The JSON contains an aggregator
-dump; each `aggregator.metrics[]` entry carries the name (`.metric`) and its value (the last point,
+dump: a JSON array of collector results, possibly preceded by log lines (the E2E plugin
+extracts it with a regex, see `datadog_checks_dev/datadog_checks/dev/plugin/pytest.py`). Each
+element's `aggregator.metrics[]` entry carries the name (`.metric`) and its value (the last point,
 `.points[-1][1]`, or a `.value` field — confirm the exact shape at runtime, it has changed across
 Agent versions). Extract `(name, value)` per metric, not just the name.
 
@@ -34,10 +36,10 @@ coverage.
 monotonic counters — the OpenMetrics v2 base check needs a previous sample to submit a `.count`
 metric, so one scrape drops every counter on the endpoint. For any OpenMetrics-based check, always
 run `ddev env agent <integration> <env> check <integration> -t 2 --json` (`-t`/`--check-times`).
-This is not a workload problem and no amount of traffic fixes it; it cost ~15 percentage points of
-apparent coverage in the rabbitmq run (39/56 with one scrape, 54/56 with two) before it was
-diagnosed. When a whole class of metrics (everything ending `.count`) is missing while the matching
-gauges are present, suspect this before touching the workload.
+This is not a workload problem and no amount of traffic fixes it; it cost 15 metrics (~27
+percentage points) of apparent coverage in the rabbitmq run (39/56 with one scrape, 54/56 with two)
+before it was diagnosed. When a whole class of metrics (everything ending `.count`) is missing
+while the matching gauges are present, suspect this before touching the workload.
 
 **Verify the flag at runtime.** If `--json` is not honored by the pinned Agent, fall back to:
 
@@ -91,6 +93,8 @@ check instances** — one per role/endpoint. The emitted set is the union across
 this early: if two target metric groups require mutually exclusive deployment types, a single-endpoint
 fixture can never reach 100% no matter the workload.
 
+## The loop
+
 1. Stand up the fixture (A or B).
 2. Run the oracle, extract `(name, value)` per emitted metric.
 3. `covered = target metrics seen non-zero in any scrape`; `uncovered = achievable_target - covered`.
@@ -119,7 +123,8 @@ metric, are maintained with the check, and are representative. Serve them so the
   `rabbitmq/tests/fixtures/metrics.txt`, `detailed.txt`). Expose one as an extra scrape target: a
   static file server (`nginx:alpine` or `python -m http.server` serving it at `/metrics`), added to
   the compose and pointed at by a second check instance; or an injecting proxy that appends the
-  recorded lines to the live reply, as `references/redis-exemplar.md` does with `inject.conf`.
+  lines to the live reply, as the redisdb `info-proxy` does with `redisdb/tests/proxy/inject.conf`
+  (hand-written there, since redisdb has no `tests/fixtures/`).
 - **HTTP-API checks** (management API, mongo commands) — replay the recorded responses (e.g.
   `mongo/tests/fixtures/$collStats-foo`) from a small mock HTTP server the check is pointed at.
 

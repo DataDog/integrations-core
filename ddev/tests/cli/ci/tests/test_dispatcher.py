@@ -76,6 +76,7 @@ from ddev.utils.github_async.retry import RetryPolicy
 from ddev.utils.octo_sts import (
     ACTIONS_ID_TOKEN_REQUEST_TOKEN_ENV,
     ACTIONS_ID_TOKEN_REQUEST_URL_ENV,
+    MINTED_AT_ENV,
     POLICY_ENV,
     SCOPE_ENV,
     OctoStsTokenProvider,
@@ -322,6 +323,7 @@ def test_build_dispatcher_wires_the_opted_in_token_provider(
         monkeypatch.setenv(POLICY_ENV, "self.test-dispatch")
         monkeypatch.setenv(ACTIONS_ID_TOKEN_REQUEST_URL_ENV, "https://actions.example/oidc")
         monkeypatch.setenv(ACTIONS_ID_TOKEN_REQUEST_TOKEN_ENV, "oidc-bearer")
+        monkeypatch.setenv(MINTED_AT_ENV, str(time.time()))
 
     build_dispatcher(
         batches=[make_batch(make_job())],
@@ -335,6 +337,7 @@ def test_build_dispatcher_wires_the_opted_in_token_provider(
 
     if opted_in:
         assert isinstance(captured["token_provider"], OctoStsTokenProvider)
+        assert asyncio.run(captured["token_provider"]()) == "static-token"
     else:
         assert captured["token_provider"] is None
 
