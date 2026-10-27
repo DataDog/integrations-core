@@ -110,9 +110,9 @@ transitions:
 - `kueue.workload.finished`: the `Finished` condition becomes `True`.
 
 Events are tagged with the Workload namespace, name, UID, LocalQueue, transition, priority, and ClusterQueue when
-available. Instance tags are not copied onto events, so tags Autodiscovery takes from the controller pod stay on the
-metrics. Eviction events also include the eviction reason, and preemption events include the Kueue preemption reason
-when available. Pending events include the reason reported by Kueue.
+available. Instance tags, including the tags you set in `tags` and the tags Autodiscovery adds from the controller pod,
+apply to metrics only, not to events. Eviction events also include the eviction reason, and preemption events include
+the Kueue preemption reason when available. Pending events include the reason reported by Kueue.
 
 The first collection run seeds the Workload state and does not emit events for already existing transitions.
 
