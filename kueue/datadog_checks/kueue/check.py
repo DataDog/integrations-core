@@ -5,7 +5,7 @@ import re
 from datetime import datetime, timezone
 from typing import NamedTuple
 
-from datadog_checks.base import OpenMetricsBaseCheckV2
+from datadog_checks.base import OpenMetricsBaseCheckV2, is_affirmative
 from datadog_checks.base.checks.openmetrics.v2.scraper import OpenMetricsScraper
 from datadog_checks.base.checks.openmetrics.v2.transform import get_native_dynamic_transformer
 from datadog_checks.base.utils.tagging import tagger
@@ -56,6 +56,8 @@ WORKLOAD_TRANSITION_EVENT_TYPES = {
     'finished': 'kueue.workload.finished',
 }
 
+FOLLOWER_REPLICA_ROLE = 'follower'
+
 DEFAULT_RENAME_LABELS = {
     'cluster_queue': 'kueue_cluster_queue',
     'flavor': 'kueue_resource_flavor',
@@ -81,10 +83,17 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         super().check(instance)
 
         if self.collect_workload_events:
-            self.collect_workload_events_from_api()
+            self.collect_workload_events_from_api(submit_events=self.is_event_source())
 
     def create_scraper(self, config):
         return KueueOpenMetricsScraper(self, self.get_config_with_defaults(config))
+
+    def is_event_source(self) -> bool:
+        """Return whether the last scrape came from a replica that should submit Workload events."""
+        if self.scrapers[self.config.openmetrics_endpoint].is_follower:
+            self.log.debug('Not submitting Kueue Workload events: the scraped replica is a follower')
+            return False
+        return True
 
     def configure_scrapers(self):
         super().configure_scrapers()
@@ -167,7 +176,13 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         self.kube_config_dict = self.config.kube_config_dict
         self.workload_events_namespaces = set(self.config.workload_events_namespaces or [])
 
-    def collect_workload_events_from_api(self):
+    def collect_workload_events_from_api(self, submit_events: bool) -> None:
+        """Poll Workloads, update the tracked state and submit events for new transitions.
+
+        Followers call this with `submit_events=False` to keep the state current without submitting events. If they
+        skipped polling, a follower promoted to leader would diff against stale state and resubmit every transition
+        the previous leader already reported.
+        """
         try:
             if self.kube_client is None:
                 self.kube_client = KubernetesAPIClient(log=self.log, kube_config_dict=self.kube_config_dict)
@@ -180,7 +195,7 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         current_state = {}
         for workload in workloads:
             try:
-                self.process_workload_events(workload, current_state)
+                self.process_workload_events(workload, current_state, submit_events)
             except Exception as e:
                 metadata = workload.get('metadata', {})
                 self.log.warning(
@@ -192,7 +207,7 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
         self._workload_state = current_state
 
-    def process_workload_events(self, workload: dict, current_state: dict) -> None:
+    def process_workload_events(self, workload: dict, current_state: dict, submit_events: bool) -> None:
         metadata = workload.get('metadata', {})
         namespace = metadata.get('namespace')
 
@@ -204,7 +219,7 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         workload_state = self.get_workload_state(workload)
         current_state[uid] = workload_state
 
-        if self._workload_state is None:
+        if self._workload_state is None or not submit_events:
             return
 
         previous_state = self._workload_state.get(uid)
@@ -434,8 +449,26 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
 
 
 class KueueOpenMetricsScraper(OpenMetricsScraper):
+    def __init__(self, check, config):
+        super().__init__(check, config)
+        self.collect_follower_metrics = is_affirmative(config.get('collect_follower_metrics', False))
+        self.replica_roles = set()
+
+    def scrape(self):
+        self.replica_roles = set()
+        super().scrape()
+
+    @property
+    def is_follower(self) -> bool:
+        """Return whether the last scrape only saw follower series; a new leader keeps exporting stale ones."""
+        return self.replica_roles == {FOLLOWER_REPLICA_ROLE}
+
     def generate_sample_data(self, metric):
         for sample, tags, hostname in super().generate_sample_data(metric):
+            if replica_role := sample.labels.get('replica_role'):
+                self.replica_roles.add(replica_role)
+                if replica_role == FOLLOWER_REPLICA_ROLE and not self.collect_follower_metrics:
+                    continue
             tags.extend(self.get_queue_tagger_tags(metric, sample.labels))
             yield sample, tags, hostname
 
