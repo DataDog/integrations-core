@@ -243,6 +243,7 @@ tests:
       event_message: "ApiKey login successfully"
       event_status: "info"
       event_sub_type: "ApiKey"
+      event_type: "Connectivity"
       evt:
         name: "Connectivity"
       internalId: "c8d2456ef8b48123"
@@ -253,47 +254,50 @@ tests:
         client:
           geoip: {}
           ip: "10.10.10.10"
+      ocsf:
+        action: "Allowed"
+        action_id: 1
+        activity_id: 1
+        activity_name: "Logon"
+        actor:
+          user:
+            name: "demo-key"
+        auth_protocol: "APIKEY"
+        auth_protocol_id: 99
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        message: "ApiKey login successfully"
+        metadata:
+          event_code: "Connectivity"
+          product:
+            name: "Cato Networks SASE Platform"
+            vendor_name: "Cato Networks"
+          profiles:
+           - "security_control"
+          uid: "c8d2456ef8b48123"
+          version: "1.5.0"
+        service:
+          name: "eventsFeed"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "10.10.10.10"
+          location:
+            country: "IN"
+        status: "Success"
+        status_id: 1
+        time: 1763478148991
+        user:
+          name: "demo-key"
       service: "events"
       src_country: "India"
       src_country_code: "IN"
+      src_ip: "10.10.10.10"
       src_is_site_or_vpn: "API"
       time: 1763478148991
       time_str: "2025-11-18T15:02:28Z"
-      src_ip: 10.10.10.10
-      event_type: Connectivity
-      ocsf:
-        metadata:
-          product:
-            name: Cato Networks SASE Platform
-            vendor_name: Cato Networks
-          event_code: Connectivity
-          uid: c8d2456ef8b48123
-          version: 1.5.0
-        time: 1763478148991
-        severity: Informational
-        activity_name: Logon
-        category_uid: 3
-        category_name: Identity & Access Management
-        src_endpoint:
-          location:
-            country: IN
-          ip: 10.10.10.10
-        message: ApiKey login successfully
-        actor:
-          user:
-            name: demo-key
-        status_id: 1
-        auth_protocol: APIKEY
-        service:
-          name: eventsFeed
-        auth_protocol_id: 99
-        class_uid: 3002
-        activity_id: 1
-        severity_id: 1
-        class_name: Authentication
-        user:
-          name: demo-key
-        status: Success
     message: |-
       {
         "internal_id" : "c8d2456ef8b48123",
@@ -321,7 +325,7 @@ tests:
     service: "events"
     status: "info"
     tags:
-      - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
     timestamp: 1763478148991
  -
   sample: |-
@@ -746,34 +750,34 @@ tests:
       event_message: "License job applied 1 and revoked 0 licenses"
       event_status: "info"
       event_sub_type: "Sdp license"
+      event_type: "System"
       evt:
         name: "System"
       internalId: "a7cc4c4bb7fe123a"
       internal_id: "a7cc4c4bb7feda4e"
+      ocsf:
+        activity_id: 99
+        activity_name: "Succeeded"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
+        message: "License job applied 1 and revoked 0 licenses"
+        metadata:
+          event_code: "System"
+          product:
+            name: "Cato Networks SASE Platform"
+            vendor_name: "Cato Networks"
+          tenant_uid: "20000232"
+          uid: "a7cc4c4bb7feda4e"
+          version: "1.5.0"
+        severity: "Informational"
+        severity_id: 1
+        status: "Success"
+        status_id: 1
+        time: 1763531560065
       service: "events"
       time: 1763531560065
       time_str: "2025-11-19T05:52:40Z"
-      event_type: System
-      ocsf:
-        severity: Informational
-        activity_name: Sdp license
-        metadata:
-          uid: a7cc4c4bb7feda4e
-          tenant_uid: '20000232'
-          product:
-            name: Cato Networks SASE Platform
-            vendor_name: Cato Networks
-          event_code: System
-          version: 1.5.0
-        category_uid: 0
-        status_id: 1
-        class_uid: 0
-        activity_id: 99
-        severity_id: 1
-        message: License job applied 1 and revoked 0 licenses
-        class_name: Base Event
-        status: Success
-        time: 1763531560065
     message: |-
       {
         "internalId" : "a7cc4c4bb7fe123a",
@@ -792,7 +796,7 @@ tests:
     service: "events"
     status: "info"
     tags:
-      - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
     timestamp: 1763531560065
  -
   sample: |-
@@ -828,80 +832,84 @@ tests:
     }
   result:
     custom:
-      event_status: "info"
-      service: "events"
-      ocsf:
-        metadata:
-          product:
-            name: Cato Networks SASE Platform
-            vendor_name: Cato Networks
-          uid: a1b2c3d4e5f60001
-          event_code: Connectivity
-          version: 1.5.0
-        severity: Informational
-        activity_name: Logon
-        category_uid: 3
-        category_name: Identity & Access Management
-        src_endpoint:
-          location:
-            country: IN
-          hostname: DESKTOP-ABC0123
-          ip: 10.10.10.10
-        actor:
-          user:
-            email_addr: test@example.com
-            name: John Doe
-        status_id: 1
-        service:
-          name: Cato VPN
-        class_uid: 3002
-        activity_id: 1
-        time: 1763478630001
-        severity_id: 1
-        class_name: Authentication
-        user:
-          uid: '1000001'
-          email_addr: test@example.com
-          name: John Doe
-        status: Success
+      ISP_name: "Example ISP Ltd."
+      account_id: 20000232
+      account_name: "test-account"
+      action: "Succeeded"
+      client_version: "6.4.6.8830"
+      device_name: "DESKTOP-ABC0123"
       event_count: 1
-      user_name: John Doe
-      ISP_name: Example ISP Ltd.
-      time_str: '2025-11-18T15:10:30Z'
+      event_id: "a1b2c3d4e5f60001"
+      event_status: "info"
+      event_sub_type: "Connected"
+      event_type: "Connectivity"
+      evt:
+        name: "Connectivity"
+      internalId: "a1b2c3d4e5f60001"
+      internal_id: "a1b2c3d4e5f60001"
+      link_type: "Cato"
       network:
         client:
           geoip: {}
-          ip: 10.10.10.10
-      src_ip: 10.10.10.10
-      internalId: a1b2c3d4e5f60001
-      device_name: DESKTOP-ABC0123
-      event_type: Connectivity
-      usr:
-        name: John Doe
-        id: 1000001
-        email: test@example.com
-      src_country_code: IN
-      account_name: test-account
-      vpn_user_email: test@example.com
-      action: Succeeded
+          ip: "10.10.10.10"
+      ocsf:
+        action: "Allowed"
+        action_id: 1
+        activity_id: 1
+        activity_name: "Logon"
+        actor:
+          user:
+            email_addr: "test@example.com"
+            name: "John Doe"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        metadata:
+          event_code: "Connectivity"
+          product:
+            name: "Cato Networks SASE Platform"
+            vendor_name: "Cato Networks"
+          profiles:
+           - "security_control"
+          uid: "a1b2c3d4e5f60001"
+          version: "1.5.0"
+        service:
+          name: "Cato VPN"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          hostname: "DESKTOP-ABC0123"
+          ip: "10.10.10.10"
+          location:
+            country: "IN"
+        status: "Success"
+        status_id: 1
+        time: 1763478630001
+        user:
+          email_addr: "test@example.com"
+          name: "John Doe"
+          uid: "1000001"
+      os_type: "OS_WINDOWS"
+      os_version: "11"
+      pop_name: "Mumbai"
+      service: "events"
+      src_country: "India"
+      src_country_code: "IN"
+      src_ip: "10.10.10.10"
+      src_is_site_or_vpn: "SDP User"
       src_site_id: 1000001
-      client_version: 6.4.6.8830
-      pop_name: Mumbai
-      tunnel_protocol: DTLS
-      evt:
-        name: Connectivity
-      internal_id: a1b2c3d4e5f60001
-      event_sub_type: Connected
-      os_version: '11'
-      link_type: Cato
-      src_is_site_or_vpn: SDP User
-      account_id: 20000232
-      event_id: a1b2c3d4e5f60001
-      user_id: 1000001
-      src_country: India
-      src_site_name: John Doe
-      os_type: OS_WINDOWS
+      src_site_name: "John Doe"
       time: 1763478630001
+      time_str: "2025-11-18T15:10:30Z"
+      tunnel_protocol: "DTLS"
+      user_id: 1000001
+      user_name: "John Doe"
+      usr:
+        email: "test@example.com"
+        id: 1000001
+        name: "John Doe"
+      vpn_user_email: "test@example.com"
     message: |-
       {
         "event_count" : 1,
@@ -936,7 +944,7 @@ tests:
     service: "events"
     status: "info"
     tags:
-      - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
     timestamp: 1763478630001
  -
   sample: |-
@@ -980,6 +988,7 @@ tests:
       event_id: "b2c3d4e5f6a70002"
       event_status: "info"
       event_sub_type: "Disconnected"
+      event_type: "Connectivity"
       evt:
         name: "Connectivity"
       internalId: "b2c3d4e5f6a70002"
@@ -989,61 +998,64 @@ tests:
         client:
           geoip: {}
           ip: "10.10.10.10"
+      ocsf:
+        action: "Unknown"
+        action_id: 0
+        activity_id: 2
+        activity_name: "Logoff"
+        actor:
+          user:
+            email_addr: "test@example.com"
+            name: "John Doe"
+        category_name: "Identity & Access Management"
+        category_uid: 3
+        class_name: "Authentication"
+        class_uid: 3002
+        metadata:
+          event_code: "Connectivity"
+          product:
+            name: "Cato Networks SASE Platform"
+            vendor_name: "Cato Networks"
+          profiles:
+           - "security_control"
+          uid: "b2c3d4e5f6a70002"
+          version: "1.5.0"
+        service:
+          name: "Cato VPN"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          hostname: "Johns-MacBook-Pro"
+          ip: "10.10.10.10"
+          location:
+            country: "FI"
+        status: "Success"
+        status_id: 1
+        time: 1763547339002
+        user:
+          email_addr: "test@example.com"
+          name: "John Doe"
+          uid: "1000002"
       os_type: "OS_MAC"
       os_version: "15.7.3"
       pop_name: "Helsinki"
       service: "events"
       src_country: "Finland"
       src_country_code: "FI"
+      src_ip: "10.10.10.10"
       src_is_site_or_vpn: "SDP User"
       src_site_id: 1000002
       src_site_name: "John Doe"
       time: 1763547339002
       time_str: "2025-11-19T10:15:39Z"
       tunnel_protocol: "DTLS"
+      user_id: 1000002
+      user_name: "John Doe"
       usr:
         email: "test@example.com"
         id: 1000002
         name: "John Doe"
-      user_name: John Doe
-      src_ip: 10.10.10.10
-      event_type: Connectivity
-      ocsf:
-        severity: Informational
-        activity_name: Logoff
-        metadata:
-          uid: b2c3d4e5f6a70002
-          product:
-            name: Cato Networks SASE Platform
-            vendor_name: Cato Networks
-          event_code: Connectivity
-          version: 1.5.0
-        category_uid: 3
-        category_name: Identity & Access Management
-        src_endpoint:
-          location:
-            country: FI
-          hostname: Johns-MacBook-Pro
-          ip: 10.10.10.10
-        actor:
-          user:
-            email_addr: test@example.com
-            name: John Doe
-        status_id: 1
-        class_uid: 3002
-        activity_id: 2
-        severity_id: 1
-        class_name: Authentication
-        status: Success
-        time: 1763547339002
-        user:
-          uid: '1000002'
-          email_addr: test@example.com
-          name: John Doe
-        service:
-          name: Cato VPN
-      vpn_user_email: test@example.com
-      user_id: 1000002
+      vpn_user_email: "test@example.com"
     message: |-
       {
         "event_count" : 1,
@@ -1077,7 +1089,7 @@ tests:
     service: "events"
     status: "info"
     tags:
-      - "source:LOGS_SOURCE"
+     - "source:LOGS_SOURCE"
     timestamp: 1763547339002
  -
   sample: |-
@@ -2113,71 +2125,56 @@ tests:
       "object_module" : "Override domain categories",
       "time" : 1793024464000
     }
-  service: audit-logs
+  service: "audit-logs"
   result:
     custom:
-      object_type: OVERRIDE_DOMAIN_CATEGORIES
-      event_count: 1
-      user_name: John Doe
-      event_sub_type: Audit
+      account_id: 1001
+      account_name: "ExampleCorp-A"
+      action: "Modified"
+      audit_id: "9000001"
       changes:
-        innerChanges: false
         fields:
           overrideCategories:
-            before: General
-            after: AppCategory
-      time_str: '2026-10-26T14:21:04Z'
+            after: "AppCategory"
+            before: "General"
+        innerChanges: false
+      event_count: 1
+      event_id: "b3216fdaeeb97572"
+      event_sub_type: "Audit"
+      event_type: "System"
+      internalId: "b3216fdaeeb97572"
       is_admin: true
-      internalId: b3216fdaeeb97572
       is_sanctioned_app: false
-      audit_id: '9000001'
-      account_id: 1001
-      event_id: b3216fdaeeb97572
-      event_type: System
-      service: audit-logs
-      account_name: ExampleCorp-A
-      object_name: overrideDomainsCategories
-      vpn_user_email: john.doe@example.com
-      action: Modified
-      object_module: Override domain categories
-      time: 1793024464000
-      usr:
-        name: John Doe
-        email: john.doe@example.com
+      object_module: "Override domain categories"
+      object_name: "overrideDomainsCategories"
+      object_type: "OVERRIDE_DOMAIN_CATEGORIES"
       ocsf:
-        activity_id: 1
-        activity_name: Log
-        state_id: 0
-        state: Unknown
-        status_id: 1
-        status: Success
-        severity_id: 1
-        severity: Informational
-        status_detail: Modified
-        actor:
-          user:
-            name: John Doe
-            email_addr: john.doe@example.com
-            type_id: 2
-            type: Admin
-        device:
-          name: overrideDomainsCategories
-          desc: Override domain categories
-          type_id: 99
-          type: OVERRIDE_DOMAIN_CATEGORIES
+        activity_id: 99
+        activity_name: "Modified"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
         metadata:
+          event_code: "System"
           product:
-            name: Cato Networks SASE Platform
-            vendor_name: Cato Networks
-          event_code: System
-          version: 1.5.0
-          uid: b3216fdaeeb97572
-          tenant_uid: '1001'
+            name: "Cato Networks SASE Platform"
+            vendor_name: "Cato Networks"
+          tenant_uid: "1001"
+          uid: "b3216fdaeeb97572"
+          version: "1.5.0"
+        severity: "Modified"
+        severity_id: 99
+        status: "Modified"
+        status_id: 99
         time: 1793024464000
-        category_uid: 5
-        category_name: Discovery
-        class_uid: 5019
-        class_name: Device Config State Change
+      service: "audit-logs"
+      time: 1793024464000
+      time_str: "2026-10-26T14:21:04Z"
+      user_name: "John Doe"
+      usr:
+        email: "john.doe@example.com"
+        name: "John Doe"
+      vpn_user_email: "john.doe@example.com"
     message: |-
       {
         "object_type" : "OVERRIDE_DOMAIN_CATEGORIES",
@@ -2209,9 +2206,9 @@ tests:
         "object_module" : "Override domain categories",
         "time" : 1793024464000
       }
-    service: audit-logs
+    service: "audit-logs"
     tags:
-    - source:LOGS_SOURCE
+     - "source:LOGS_SOURCE"
     timestamp: 1793024464000
  -
   sample: |-
@@ -2238,73 +2235,58 @@ tests:
     }
   result:
     custom:
-      object_type: Rule
-      event_count: 1
-      event_sub_type: Audit
+      account_id: 1002
+      account_name: "ExampleCorp-B"
+      action: "Modified"
+      audit_id: "9000002"
       changes:
         fields:
-          dnsSettings - useSecondaryServer:
-            before: 'false'
-            after: 'true'
           dnsSettings - secondaryServer:
-            after: 10.0.1.3
+            after: "10.0.1.3"
+          dnsSettings - useSecondaryServer:
+            after: "true"
+            before: "false"
         innerChanges: false
-      time_str: '2026-10-26T14:42:36Z'
-      is_admin: true
-      internalId: 9fae923d5a4fd12a
-      is_sanctioned_app: false
-      audit_id: '9000002'
-      account_id: 1002
-      event_id: 9fae923d5a4fd12a
-      object_name: Temp  Alex Johnson cato only DNS
-      account_name: ExampleCorp-B
-      action: Modified
-      time: 1793025756382
-      object_module: DNS Settings Policy
-      event_type: System
-      user_name: Jane Smith
-      vpn_user_email: jane.smith@example.com
-      service: events
+      event_count: 1
+      event_id: "9fae923d5a4fd12a"
+      event_status: "info"
+      event_sub_type: "Audit"
+      event_type: "System"
       evt:
-        name: System
-      usr:
-        name: Jane Smith
-        email: jane.smith@example.com
-      event_status: info
+        name: "System"
+      internalId: "9fae923d5a4fd12a"
+      is_admin: true
+      is_sanctioned_app: false
+      object_module: "DNS Settings Policy"
+      object_name: "Temp  Alex Johnson cato only DNS"
+      object_type: "Rule"
       ocsf:
-        activity_id: 1
-        activity_name: Log
-        state_id: 0
-        state: Unknown
-        status_id: 1
-        status: Success
-        severity_id: 1
-        severity: Informational
-        status_detail: Modified
-        actor:
-          user:
-            name: Jane Smith
-            email_addr: jane.smith@example.com
-            type_id: 2
-            type: Admin
-        device:
-          name: Temp  Alex Johnson cato only DNS
-          desc: DNS Settings Policy
-          type_id: 99
-          type: Rule
+        activity_id: 99
+        activity_name: "Modified"
+        category_uid: 0
+        class_name: "Base Event"
+        class_uid: 0
         metadata:
+          event_code: "System"
           product:
-            name: Cato Networks SASE Platform
-            vendor_name: Cato Networks
-          event_code: System
-          version: 1.5.0
-          uid: 9fae923d5a4fd12a
-          tenant_uid: '1002'
+            name: "Cato Networks SASE Platform"
+            vendor_name: "Cato Networks"
+          tenant_uid: "1002"
+          uid: "9fae923d5a4fd12a"
+          version: "1.5.0"
+        severity: "Modified"
+        severity_id: 99
+        status: "Modified"
+        status_id: 99
         time: 1793025756382
-        category_uid: 5
-        category_name: Discovery
-        class_uid: 5019
-        class_name: Device Config State Change
+      service: "events"
+      time: 1793025756382
+      time_str: "2026-10-26T14:42:36Z"
+      user_name: "Jane Smith"
+      usr:
+        email: "jane.smith@example.com"
+        name: "Jane Smith"
+      vpn_user_email: "jane.smith@example.com"
     message: |-
       {
         "object_type" : "Rule",
@@ -2327,10 +2309,10 @@ tests:
         "time" : 1793025756382,
         "object_module" : "DNS Settings Policy"
       }
-    service: events
-    status: info
+    service: "events"
+    status: "info"
     tags:
-    - source:LOGS_SOURCE
+     - "source:LOGS_SOURCE"
     timestamp: 1793025756382
  -
   sample: |-
@@ -2607,70 +2589,74 @@ tests:
     }
   result:
     custom:
-      src_city: Tampere
-      login_type: Admin Login
-      event_count: 1
-      event_sub_type: Cato Management Application
-      time_str: '2026-10-26T14:30:40Z'
-      authentication_type: SSO
-      internalId: 0eb53f16947ccf25
-      is_sanctioned_app: false
       account_id: 1002
-      event_id: 0eb53f16947ccf25
-      src_country: Finland
-      src_country_code: FI
-      account_name: ExampleCorp-B
-      action: Succeeded
-      time: 1793025040519
-      event_type: Connectivity
-      src_ip: 198.51.100.4
-      user_name: Jane Smith
-      vpn_user_email: jane.smith@example.com
-      service: events
+      account_name: "ExampleCorp-B"
+      action: "Succeeded"
+      authentication_type: "SSO"
+      event_count: 1
+      event_id: "0eb53f16947ccf25"
+      event_status: "info"
+      event_sub_type: "Cato Management Application"
+      event_type: "Connectivity"
       evt:
-        name: Connectivity
+        name: "Connectivity"
+      internalId: "0eb53f16947ccf25"
+      is_sanctioned_app: false
+      login_type: "Admin Login"
       network:
         client:
-          ip: 198.51.100.4
           geoip: {}
-      usr:
-        name: Jane Smith
-        email: jane.smith@example.com
-      event_status: info
+          ip: "198.51.100.4"
       ocsf:
+        action: "Allowed"
+        action_id: 1
         activity_id: 1
-        activity_name: Logon
-        status_id: 1
-        status: Success
-        severity_id: 1
-        severity: Informational
-        auth_protocol_id: 99
-        auth_protocol: SSO
-        src_endpoint:
-          ip: 198.51.100.4
-          location:
-            country: FI
+        activity_name: "Logon"
         actor:
           user:
-            name: Jane Smith
-            email_addr: jane.smith@example.com
-        user:
-          name: Jane Smith
-          email_addr: jane.smith@example.com
-        service:
-          name: Cato Management Application
-        metadata:
-          product:
-            name: Cato Networks SASE Platform
-            vendor_name: Cato Networks
-          event_code: Connectivity
-          version: 1.5.0
-          uid: 0eb53f16947ccf25
-        time: 1793025040519
+            email_addr: "jane.smith@example.com"
+            name: "Jane Smith"
+        auth_protocol: "SSO"
+        auth_protocol_id: 99
+        category_name: "Identity & Access Management"
         category_uid: 3
-        category_name: Identity & Access Management
+        class_name: "Authentication"
         class_uid: 3002
-        class_name: Authentication
+        metadata:
+          event_code: "Connectivity"
+          product:
+            name: "Cato Networks SASE Platform"
+            vendor_name: "Cato Networks"
+          profiles:
+           - "security_control"
+          uid: "0eb53f16947ccf25"
+          version: "1.5.0"
+        service:
+          name: "Cato Management Application"
+        severity: "Informational"
+        severity_id: 1
+        src_endpoint:
+          ip: "198.51.100.4"
+          location:
+            country: "FI"
+        status: "Success"
+        status_id: 1
+        time: 1793025040519
+        user:
+          email_addr: "jane.smith@example.com"
+          name: "Jane Smith"
+      service: "events"
+      src_city: "Tampere"
+      src_country: "Finland"
+      src_country_code: "FI"
+      src_ip: "198.51.100.4"
+      time: 1793025040519
+      time_str: "2026-10-26T14:30:40Z"
+      user_name: "Jane Smith"
+      usr:
+        email: "jane.smith@example.com"
+        name: "Jane Smith"
+      vpn_user_email: "jane.smith@example.com"
     message: |-
       {
         "src_city" : "Tampere",
@@ -2693,10 +2679,10 @@ tests:
         "action" : "Succeeded",
         "time" : 1793025040519
       }
-    service: events
-    status: info
+    service: "events"
+    status: "info"
     tags:
-    - source:LOGS_SOURCE
+     - "source:LOGS_SOURCE"
     timestamp: 1793025040519
  -
   sample: |-
