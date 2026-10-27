@@ -147,11 +147,11 @@ Job events require Slurm accounting (`slurmdbd`) and GPU monitoring enabled in t
 
 The Slurm integration polls `sacct` for jobs active since the previous check run and sends Datadog events for job life cycle transitions. The transition is in the `slurm_job_transition` tag:
 
-- Submitted (`slurm_job_transition:submitted`): a job appears after the check has initialized its state. A job array or heterogeneous job is reported one time, not once per task or component.
-- Pending (`slurm_job_transition:pending`): the pending reason of a job changes, such as from `Priority` to `QOSMaxGRESPerUser`. Reasons that are part of normal scheduling (`Priority`, `Resources`, `Dependency`, `BeginTime`) are sent as `info`, and any other reason as `warning`.
-- Started (`slurm_job_transition:started`): the job starts running, or starts again after a requeue. The event includes the queued wait time.
-- Finished (`slurm_job_transition:finished`): the job reaches a terminal state (`COMPLETED`, `FAILED`, `CANCELLED`, `TIMEOUT`, `OUT_OF_MEMORY`, `NODE_FAIL`, `BOOT_FAIL`, or `DEADLINE`).
-- Preempted, requeued, and suspended (`slurm_job_transition:preempted`, `requeued`, and `suspended`): the job enters the matching state.
+- Submitted (`slurm_job_transition:submitted`): A job appears after the check has initialized its state. A job array or heterogeneous job is reported one time, not once per task or component.
+- Pending (`slurm_job_transition:pending`): The pending reason of a job changes, such as from `Priority` to `QOSMaxGRESPerUser`. Reasons that are part of normal scheduling (`Priority`, `Resources`, `Dependency`, `BeginTime`) are sent as `info`, and any other reason as `warning`.
+- Started (`slurm_job_transition:started`): The job starts running, or starts again after a requeue. The event includes the queued wait time.
+- Finished (`slurm_job_transition:finished`): The job reaches a terminal state (`COMPLETED`, `FAILED`, `CANCELLED`, `TIMEOUT`, `OUT_OF_MEMORY`, `NODE_FAIL`, `BOOT_FAIL`, or `DEADLINE`).
+- Preempted, requeued, and suspended (`slurm_job_transition:preempted`, `requeued`, and `suspended`): The job enters the matching state.
 
 Jobs that start and finish between two check runs still produce all of their events. Events are tagged with the job
 ID, name, user, account, partition, QOS, cluster, state, transition, and GPU count when GPUs are requested. Started and
