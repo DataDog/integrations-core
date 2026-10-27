@@ -1,6 +1,6 @@
 # bypass-global-missing-date-remapper-checks
 # NiFi's default log time has no timezone, so that time is kept as text in
-# nifi.local_time instead of being remapped as the official log date (IR-62514).
+# nifi.local_time instead of being remapped as the official log date.
 # Only a time with an offset (a logback pattern ending in XXX or Z) is remapped.
 id: nifi
 metric_id: nifi
