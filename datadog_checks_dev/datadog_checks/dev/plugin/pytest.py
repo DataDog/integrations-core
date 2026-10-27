@@ -388,24 +388,13 @@ def mock_http_response(mocker, mock_response):
 
 
 def _create_fake_http_client_factory(fake_http: Any) -> Callable[..., Any]:
-    resolve_http_config = importlib.import_module('datadog_checks.base.utils.http').resolve_http_config
-
-    def create_client(
-        check: Any, instance: dict | None = None, *, init_config: dict | None = None, remapper: dict | None = None
-    ) -> Any:
+    def create_client(check: Any, *_args: Any, **_kwargs: Any) -> Any:
         # The fake models the backend-neutral contract, which a check only gets in production by opting in.
         if not getattr(check, 'AGNOSTIC_HTTP_CLIENT', False):
             raise AssertionError(
                 f'{type(check).__name__} must set AGNOSTIC_HTTP_CLIENT = True to use the fake_http fixture.'
             )
-        config = resolve_http_config(
-            check.instance if instance is None else instance,
-            check.init_config if init_config is None else init_config,
-            check.HTTP_CONFIG_REMAPPER if remapper is None else remapper,
-        )
-        client = fake_http.create_client()
-        client.configure_tls({key: value for key, value in config.items() if key.startswith('tls_')})
-        return client
+        return fake_http.create_client()
 
     return create_client
 

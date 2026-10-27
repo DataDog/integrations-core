@@ -1,1 +1,1 @@
-Give HTTP fakes canonical TLS defaults and reuse the real client's TLS configuration parsing.
+Give HTTP fakes canonical TLS defaults while preserving explicit overrides and client isolation.

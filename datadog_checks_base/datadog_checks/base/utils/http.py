@@ -451,60 +451,6 @@ def _suppress_netrc_auth(session: requests.Session) -> None:
     session.rebuild_auth = MethodType(_rebuild_auth_without_netrc, session)
 
 
-def resolve_http_config(
-    instance: Mapping[str, Any], init_config: Mapping[str, Any], remapper: dict[str, Any] | None = None
-) -> dict[str, Any]:
-    """Resolve HTTP defaults and legacy aliases without constructing a backend client."""
-    default_fields = dict(STANDARD_FIELDS)
-
-    # Update the default behavior for global settings
-    for field in ('log_requests', 'skip_proxy', 'timeout', 'tls_ignore_warning'):
-        default_fields[field] = init_config.get(field, default_fields[field])
-
-    config = {field: instance.get(field, value) for field, value in default_fields.items()}
-
-    # Standard instance fields take precedence over legacy aliases and their defaults.
-    if remapper is None:
-        remapper = {}
-    remapper.update(DEFAULT_REMAPPED_FIELDS)
-
-    for remapped_field, data in remapper.items():
-        field = data.get('name')
-        if field not in STANDARD_FIELDS or field in instance:
-            continue
-
-        default = default_fields[field]
-        if data.get('invert'):
-            default = not default
-
-        value = instance.get(remapped_field, data.get('default', default))
-        if data.get('invert'):
-            value = not is_affirmative(value)
-
-        config[field] = value
-
-    return config
-
-
-def get_tls_options(config: Mapping[str, Any]) -> dict[str, Any]:
-    """Map resolved TLS settings to the legacy verify and certificate options."""
-    # TLS verification uses the context wrapper; these options retain requests compatibility.
-    verify: str | bool = True
-    if isinstance(config['tls_ca_cert'], str):
-        verify = config['tls_ca_cert']
-    elif not is_affirmative(config['tls_verify']):
-        verify = False
-
-    cert: str | tuple[str, str] | None = None
-    if isinstance(config['tls_cert'], str):
-        if isinstance(config['tls_private_key'], str):
-            cert = (config['tls_cert'], config['tls_private_key'])
-        else:
-            cert = config['tls_cert']
-
-    return {'verify': verify, 'cert': cert}
-
-
 class RequestsWrapper(object):
     __slots__ = (
         '_agnostic',
@@ -530,7 +476,57 @@ class RequestsWrapper(object):
     def __init__(self, instance, init_config, remapper=None, logger=None, session=None, *, agnostic=False):
         self._agnostic = agnostic
         self.logger = logger or LOGGER
-        config = resolve_http_config(instance, init_config, remapper)
+        default_fields = dict(STANDARD_FIELDS)
+
+        # Update the default behavior for global settings
+        default_fields['log_requests'] = init_config.get('log_requests', default_fields['log_requests'])
+        default_fields['skip_proxy'] = init_config.get('skip_proxy', default_fields['skip_proxy'])
+        default_fields['timeout'] = init_config.get('timeout', default_fields['timeout'])
+        default_fields['tls_ignore_warning'] = init_config.get(
+            'tls_ignore_warning', default_fields['tls_ignore_warning']
+        )
+
+        # Populate with the default values
+        config = {field: instance.get(field, value) for field, value in default_fields.items()}
+
+        # Support non-standard (usually legacy) configurations, for example:
+        # {
+        #     'disable_ssl_validation': {
+        #         'name': 'tls_verify',
+        #         'default': False,
+        #         'invert': True,
+        #     },
+        #     ...
+        # }
+        if remapper is None:
+            remapper = {}
+
+        remapper.update(DEFAULT_REMAPPED_FIELDS)
+
+        for remapped_field, data in remapper.items():
+            field = data.get('name')
+
+            # Ignore fields we don't recognize
+            if field not in STANDARD_FIELDS:
+                continue
+
+            # Ignore remapped fields if the standard one is already used
+            if field in instance:
+                continue
+
+            # Invert default booleans if need be
+            default = default_fields[field]
+            if data.get('invert'):
+                default = not default
+
+            # Get value, with a possible default
+            value = instance.get(remapped_field, data.get('default', default))
+
+            # Invert booleans if need be
+            if data.get('invert'):
+                value = not is_affirmative(value)
+
+            config[field] = value
 
         # https://requests.readthedocs.io/en/latest/user/advanced/#timeouts
         connect_timeout = read_timeout = float(config['timeout'])
@@ -577,6 +573,22 @@ class RequestsWrapper(object):
 
         allow_redirects = is_affirmative(config['allow_redirects'])
 
+        # For TLS verification, we now rely on the TLS context wrapper
+        # but still need to set verify for requests compatibility
+        verify = True
+        if isinstance(config['tls_ca_cert'], str):
+            verify = config['tls_ca_cert']
+        elif not is_affirmative(config['tls_verify']):
+            verify = False
+
+        # https://requests.readthedocs.io/en/latest/user/advanced/#client-side-certificates
+        cert = None
+        if isinstance(config['tls_cert'], str):
+            if isinstance(config['tls_private_key'], str):
+                cert = (config['tls_cert'], config['tls_private_key'])
+            else:
+                cert = config['tls_cert']
+
         # https://requests.readthedocs.io/en/latest/user/advanced/#proxies
         no_proxy_uris = None
         if is_affirmative(config['skip_proxy']):
@@ -608,10 +620,11 @@ class RequestsWrapper(object):
         # Default options
         self.options = {
             'auth': auth,
+            'cert': cert,
             'headers': headers,
             'proxies': proxies,
             'timeout': (connect_timeout, read_timeout),
-            **get_tls_options(config),
+            'verify': verify,
             'allow_redirects': allow_redirects,
         }
 

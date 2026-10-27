@@ -13,7 +13,6 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.openmetrics.base_check import OpenMetricsBaseCheck
 from datadog_checks.base.checks.prometheus.prometheus_base import PrometheusCheck
 from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
-from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.dev import http as http_testing
 
 
@@ -44,72 +43,6 @@ def test_fake_http_does_not_construct_backend_clients(fake_http, mocker):
     assert isinstance(check.create_http_client(), FakeHTTPClient)
 
     backend_client.assert_not_called()
-
-
-@pytest.mark.parametrize(
-    ('instance', 'init_config', 'remapper'),
-    [
-        pytest.param({}, {}, None, id='defaults'),
-        pytest.param({'tls_verify': False}, {}, None, id='disable-verification'),
-        pytest.param({'tls_verify': 'false'}, {}, None, id='string-boolean'),
-        pytest.param({'tls_ciphers': 'ECDHE+AESGCM'}, {}, None, id='custom-ciphers'),
-        pytest.param({'tls_ca_cert': '/test/ca.pem'}, {}, None, id='ca-bundle'),
-        pytest.param({'tls_cert': '/test/cert.pem', 'tls_private_key': '/test/key.pem'}, {}, None, id='client-cert'),
-        pytest.param({}, {'tls_ignore_warning': True}, None, id='init-default'),
-        pytest.param({'tls_ignore_warning': False}, {'tls_ignore_warning': True}, None, id='instance-precedence'),
-        pytest.param(
-            {'disable_ssl_validation': True},
-            {},
-            {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True}},
-            id='legacy-alias',
-        ),
-        pytest.param({}, {}, {'verify': {'name': 'tls_verify', 'default': False}}, id='remapped-default'),
-        pytest.param(
-            {'tls_verify': True, 'disable_ssl_validation': True},
-            {},
-            {'disable_ssl_validation': {'name': 'tls_verify', 'invert': True}},
-            id='standard-field-precedence',
-        ),
-    ],
-)
-def test_fake_http_resolves_check_tls_config(fake_http, instance: dict, init_config: dict, remapper: dict | None):
-    check = FixtureCheck('test', init_config, [instance])
-    check.HTTP_CONFIG_REMAPPER = remapper
-    real_client = RequestsWrapper(check.instance, check.init_config, remapper)
-
-    for client in (check.http, check.create_http_client()):
-        assert client.tls_config == real_client.tls_config
-        assert client.options['verify'] == real_client.options['verify']
-        assert client.options['cert'] == real_client.options['cert']
-        assert client.ignore_tls_warning == real_client.ignore_tls_warning
-
-
-def test_fake_http_respects_explicit_factory_config(fake_http):
-    check = FixtureCheck('test', {'tls_ignore_warning': True}, [{'tls_ciphers': 'ECDHE+AESGCM'}])
-    check.HTTP_CONFIG_REMAPPER = {'verify': {'name': 'tls_verify', 'default': False}}
-
-    client = check.create_http_client({'tls_validate_hostname': False}, init_config={}, remapper={})
-    real_client = RequestsWrapper({'tls_validate_hostname': False}, {}, {})
-
-    assert client.tls_config == real_client.tls_config
-    assert check.http.tls_config['tls_verify'] is False
-    assert check.http.tls_config['tls_ciphers'] == 'ECDHE+AESGCM'
-    assert check.http.ignore_tls_warning is True
-
-
-def test_fake_http_tls_config_is_isolated_per_check_and_client(fake_http):
-    first = FixtureCheck('test', {}, [{'tls_verify': False, 'tls_protocols_allowed': ['TLSv1.2']}])
-    second = FixtureCheck('test', {}, [{}])
-    sibling = first.create_http_client()
-
-    first.http.tls_config['tls_protocols_allowed'].append('TLSv1.3')
-    first.http.tls_config['tls_verify'] = True
-
-    assert sibling.tls_config['tls_verify'] is False
-    assert sibling.tls_config['tls_protocols_allowed'] == ['TLSv1.2']
-    assert first.instance['tls_protocols_allowed'] == ['TLSv1.2']
-    assert second.http.tls_config['tls_verify'] is True
-    assert fake_http.tls_config['tls_verify'] is True
 
 
 def test_fake_http_creates_isolated_clients(fake_http):

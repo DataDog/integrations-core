@@ -175,13 +175,22 @@ def test_fake_client_tls_policy_matches_real_client(tls_config: dict | None):
     real_client = RequestsWrapper(tls_config or {}, {})
 
     assert client.tls_config == real_client.tls_config
-    assert client.options['verify'] == real_client.options['verify']
-    assert client.options['cert'] == real_client.options['cert']
     context = create_ssl_context(client.tls_config)
     real_context = create_ssl_context(real_client.tls_config)
     assert context.verify_mode == real_context.verify_mode
     assert context.check_hostname == real_context.check_hostname
     assert context.get_ciphers() == real_context.get_ciphers()
+
+
+def test_fake_client_tls_overrides_are_isolated():
+    overrides = {'tls_ciphers': ['AES128-SHA']}
+    first = FakeHTTPClient(tls_config=overrides)
+    second = FakeHTTPClient(tls_config=overrides)
+
+    first.tls_config['tls_ciphers'].append('AES256-SHA')
+
+    assert second.tls_config['tls_ciphers'] == ['AES128-SHA']
+    assert overrides['tls_ciphers'] == ['AES128-SHA']
 
 
 def test_created_client_retains_default_discovery_cipher_policy():
