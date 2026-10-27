@@ -235,6 +235,9 @@ exclude = [
     'foundationdb', # 7+ has a breaking changes
     'kubernetes',   # Excluded on size: 36 bundles the aio client and aiohttp, +24M on disk.
                     # Unpin once https://github.com/kubernetes-client/python/issues/2677 is resolved.
+    # botocore requires python-dateutil<3.0.0, so 3.x cannot be installed alongside it.
+    # Unpin once https://github.com/boto/botocore/issues/3844 is resolved.
+    'python-dateutil',
 
 ]
 

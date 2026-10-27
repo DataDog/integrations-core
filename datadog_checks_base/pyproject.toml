@@ -44,7 +44,7 @@ deps = [
     "prometheus-client==0.26.0",
     "protobuf==7.36.2",
     "pydantic==2.14.1",
-    "python-dateutil==3.0.0",
+    "python-dateutil==2.9.0.post0",
     "pywin32==312; sys_platform == 'win32'",
     "pyyaml==6.0.3",
     "requests-toolbelt==1.0.0",
