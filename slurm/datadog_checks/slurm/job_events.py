@@ -204,7 +204,9 @@ def job_transitions(previous: SacctJob | None, current: SacctJob) -> list[str]:
         transitions.append('submitted')
 
     # Some Slurm versions set the start time of a job cancelled while pending to its end time.
-    new_run = current.start is not None and current.allocated and (previous is None or previous.start != current.start)
+    new_run = (
+        current.start is not None and current.allocated and (previous is None or previous.start != current.start)
+    )
     if new_run:
         transitions.append('started')
 

@@ -143,9 +143,11 @@ See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 
-When `collect_job_events` is enabled and GPU monitoring is enabled in the Agent (`gpu.enabled: true`), the Slurm
-integration polls `sacct` for jobs active since the previous check run and sends Datadog events for job life cycle
-transitions. The transition is in the `slurm_job_transition` tag:
+Job events require Slurm accounting (`slurmdbd`) and GPU monitoring enabled in the Agent (`gpu.enabled: true`). To
+collect job events, set `collect_job_events: true` in `slurm.d/conf.yaml`. Event collection is disabled by default.
+
+The Slurm integration polls `sacct` for jobs active since the previous check run and sends Datadog events for job life
+cycle transitions. The transition is in the `slurm_job_transition` tag:
 
 - Submitted (`slurm_job_transition:submitted`): a job appears after the check has initialized its state. A job array
   or heterogeneous job is reported one time, not once per task or component.
@@ -170,9 +172,8 @@ pending by `squeue` for the first time, or when a known job is no longer reporte
 most the last hour: after a longer interruption, only jobs that were already known are reported for that gap.
 
 The first collection run seeds the job state and does not emit events for existing jobs. Transitions that
-happened before that run are never reported. Job events require Slurm accounting (`slurmdbd`). The `sacct` command
-does not report pending reasons, so they are taken from `squeue` and
-are only available when `collect_squeue_stats` is enabled.
+happened before that run are never reported. The `sacct` command does not report pending reasons, so they are taken
+from `squeue` and are only available when `collect_squeue_stats` is enabled.
 
 ## Troubleshooting
 
