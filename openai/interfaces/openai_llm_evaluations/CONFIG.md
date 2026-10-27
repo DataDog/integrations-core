@@ -2,7 +2,7 @@
 
 1. Log in to your [OpenAI account][1].
 2. Go to **API keys** and create a project or user key.
-3. Give the key **write** permission for model capabilities so it can call the chat completions endpoint.
+3. Give the key **Write** permission for model capabilities so it can call the chat completions endpoint.
 4. Copy the generated API key.
 
 Standard API keys cannot read organization usage or costs. For usage metrics and Cloud Cost Management, add an admin-scoped key on the **Usage and Cost** interface.
