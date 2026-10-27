@@ -153,19 +153,11 @@ The Slurm integration polls `sacct` for jobs active since the previous check run
 - Finished (`slurm_job_transition:finished`): The job reaches a terminal state (`COMPLETED`, `FAILED`, `CANCELLED`, `TIMEOUT`, `OUT_OF_MEMORY`, `NODE_FAIL`, `BOOT_FAIL`, or `DEADLINE`).
 - Preempted, requeued, and suspended (`slurm_job_transition:preempted`, `requeued`, and `suspended`): The job enters the matching state.
 
-Jobs that start and finish between two check runs still produce all of their events. Events are tagged with the job
-ID, name, user, account, partition, QOS, cluster, state, transition, and GPU count when GPUs are requested. Started and
-finished events include the node list, finished events include the exit code, and submitted and pending events include
-the pending reason (`slurm_job_reason`).
+Jobs that start and finish between two check runs still produce all of their events. Events are tagged with the job ID, name, user, account, partition, QOS, cluster, state, transition, and GPU count when GPUs are requested. Started and finished events include the node list, finished events include the exit code, and submitted and pending events include the pending reason (`slurm_job_reason`).
 
-The `sacct` time window only returns jobs that were eligible to run during it. Held jobs, jobs waiting on a
-dependency or a begin time, and jobs cancelled in those states are queried by ID instead, when they are reported as
-pending by `squeue` for the first time, or when a known job is no longer reported by `squeue`. The window covers at
-most the last hour: after a longer interruption, only jobs that were already known are reported for that gap.
+The `sacct` time window only returns jobs that were eligible to run during it. Held jobs, jobs waiting on a dependency or a begin time, and jobs cancelled in those states are queried by ID instead, when they are reported as pending by `squeue` for the first time, or when a known job is no longer reported by `squeue`. The window covers at most the last hour: after a longer interruption, only jobs that were already known are reported for that gap.
 
-The first collection run seeds the job state and does not emit events for existing jobs. Transitions that
-happened before that run are never reported. The `sacct` command does not report pending reasons, so they are taken
-from `squeue` and are only available when `collect_squeue_stats` is enabled.
+The first collection run seeds the job state and does not emit events for existing jobs. Transitions that happened before that run are never reported. The `sacct` command does not report pending reasons, so they are taken from `squeue` and are only available when `collect_squeue_stats` is enabled.
 
 ## Troubleshooting
 
