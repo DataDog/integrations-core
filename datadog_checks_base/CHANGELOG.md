@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 38.8.0 / 2026-10-27
+
+***Security***:
+
+* Update botocore to 1.43.119, dropping the Sectigo root that anchors the compromised eMudhra intermediates. ([#25797](https://github.com/DataDog/integrations-core/pull/25797))
+
 ## 38.7.0 / 2026-10-21
 
 ***Security***:
