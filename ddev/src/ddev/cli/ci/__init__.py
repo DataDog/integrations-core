@@ -6,6 +6,7 @@ from datadog_checks.dev.tooling.commands.ci.setup import setup
 
 from ddev.cli.ci.codeowners import codeowners
 from ddev.cli.ci.dispatch_tests import dispatch_tests
+from ddev.cli.ci.tests import tests as tests_group  # The alias keeps `ddev.cli.ci.tests` bound to the package.
 
 
 @click.group(short_help='Collection of CI utilities')
@@ -19,3 +20,4 @@ def ci():
 ci.add_command(setup)
 ci.add_command(codeowners)
 ci.add_command(dispatch_tests)
+ci.add_command(tests_group)
