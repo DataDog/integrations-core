@@ -77,12 +77,19 @@ def read_response(resp: ResponseWrapper) -> Element:
     return root
 
 
+# PAN-OS answers a call the role may not make with HTTP 403 and "... not authorized for user role.".
+ROLE_REFUSAL = 'not authorized for user role'
+
+
 def _classify(status_code: int, error: PanosApiError) -> PanosApiError:
     """HTTP 403 or an auth `code` is an auth failure, but only in a PAN-OS response: a proxy's error page says nothing
     about the key, so it must not trigger a renewal."""
     if not error.panos_response:
         if status_code >= 400:
             return PanosApiError(str(status_code), f'HTTP {status_code}: {error.msg}', panos_response=False)
+        return error
+    if ROLE_REFUSAL in (error.msg or '').lower():
+        # The key works but the role lacks the permission (Log, Report, config): a new key would be refused too.
         return error
     if status_code == 403 or error.code in AUTH_ERROR_CODES:
         # PAN's docs say code 16 means the role lacks permission, so a new key may not help. It is treated as an

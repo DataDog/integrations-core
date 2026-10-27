@@ -255,6 +255,8 @@ def test_calls_rejected_with_the_same_key_renew_it_once():
         # A proxy's 403 page says nothing about the PAN-OS key or credentials.
         pytest.param((403, b'<html><body>403 Forbidden</body></html>'), '403', id='non-panos-http-403'),
         pytest.param((200, (FIXTURES / 'fw-a-probe' / 'report_top-rules.xml').read_bytes()), '400', id='api-error'),
+        # The role lacks the permission: the key works, so a new one would be refused too.
+        pytest.param((403, (FIXTURES / 'fw-a-probe' / 'config_refused.xml').read_bytes()), '403', id='role-refusal'),
     ],
 )
 def test_error_that_is_not_an_auth_rejection_neither_renews_the_key_nor_invalidates_credentials(call, answer, code):
