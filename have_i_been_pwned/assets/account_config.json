@@ -1,0 +1,19 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "API Key",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "have-i-been-pwned-logs" }
+  ]
+}

@@ -96,6 +96,19 @@ class PhysIf(BaseModel):
         return None
 
 
+class CnwPhysIfAttributes(BaseModel):
+    admin_st: Optional[str] = Field(default=None, alias="adminSt")
+    id: Optional[str] = None
+    name: Optional[str] = None
+    descr: Optional[str] = None
+    router_mac: Optional[str] = Field(default=None, alias="routerMac")
+    oper_st: Optional[str] = Field(default=None, alias="operSt")
+
+
+class CnwPhysIf(BaseModel):
+    attributes: CnwPhysIfAttributes
+
+
 class LldpAdjAttributes(BaseModel):
     chassis_id_t: Optional[str] = Field(default=None, alias="chassisIdT")
     chassis_id_v: Optional[str] = Field(default=None, alias="chassisIdV")
@@ -152,17 +165,23 @@ class LldpAdjAttributes(BaseModel):
 
     @computed_field
     @property
-    def remote_port_id(self) -> str:
-        # example: topology/pod-1/paths-201/path-ep-[eth1/1]
-        # use regex to extract port alias from square brackets - ex: eth1/1
-        return helpers.get_eth_id_from_dn(self.port_desc)
+    def remote_port_id(self) -> str | None:
+        # example: eth2-1
+        # fall through to the raw portDesc
+        if not self.port_desc:
+            return None
+        extracted = helpers.get_eth_id_from_dn(self.port_desc)
+        return extracted if extracted else self.port_desc
 
     @computed_field
     @property
-    def remote_port_index(self) -> int:
+    def remote_port_index(self) -> int | None:
         if self.remote_port_id is None:
             return None
-        return helpers.get_index_from_eth_id(self.remote_port_id)
+        try:
+            return helpers.get_index_from_eth_id(self.remote_port_id)
+        except (ValueError, IndexError):
+            return None
 
 
 class LldpAdjEp(BaseModel):
@@ -253,7 +272,10 @@ class InterfaceMetadata(BaseModel):
     def parse_index(cls, index: str | int | None) -> int | None:
         if type(index) == str:
             split = re.split('eth|/', index)
-            return int(split[-1])
+            try:
+                return int(split[-1])
+            except (ValueError, IndexError):
+                return None
         if type(index) == int:
             return index
         return None

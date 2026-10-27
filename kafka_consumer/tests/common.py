@@ -20,6 +20,8 @@ PARTITIONS = [0, 1]
 BROKER_METRICS = ['kafka.broker_offset']
 CONSUMER_METRICS = ['kafka.consumer_offset', 'kafka.consumer_lag']
 
+CONNECT_URL = 'http://localhost:8083'
+
 POSSIBLE_CONSUMER_GROUP_STATES = {
     'EMPTY',
     'STABLE',

@@ -29,7 +29,7 @@ services:
     volumes:
       - ./ping.py:/home/ray/ping.py
       - ./serve_tasks:/home/ray/serve
-      - ${RAY_LOG_FOLDER}:/tmp/logs
+      - ${RAY_LOG_FOLDER:-/tmp}:/tmp/logs
   ray-worker-1:
     container_name: ray-worker-1
     hostname: ray-worker-1

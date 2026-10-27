@@ -152,17 +152,19 @@ instances:
 
     ## @param custom_queries - list of mappings - optional
     ## Run custom queries for Elasticsearch. Each custom query endpoint can collect multiple metrics and tags.
-    ## Note: Each custom query requires an `endpoint`, `data_path`, and `columns` parameter. Each `columns` parameter
+    ## Note: Each custom query requires an `endpoint` and `columns` parameter. Each `columns` parameter
     ## should have at least one value containing `name` and `value_path`.
     ##
     ## Each query can have the following parameters:
     ##
     ## 1. endpoint - The Elasticsearch API endpoint to query.
     ##
-    ## 2. data_path - The JSON path up to, but not including, the metric. For example, if querying for size of parent
-    ##                circuit breaker, the full path is 'breakers.parent.estimated_size_in_bytes', which means the
-    ##                `data_path` is 'breakers.parent'. `data_path` cannot contain any wildcards, so accessing data
-    ##                indexed by ID (such as node or index) is not possible.
+    ## 2. data_path (optional) - The JSON path up to, but not including, the metric. For example, if querying for size
+    ##                of parent circuit breaker, the full path is 'breakers.parent.estimated_size_in_bytes', which
+    ##                means the `data_path` is 'breakers.parent'. `data_path` cannot contain any wildcards, so
+    ##                accessing data indexed by ID (such as node or index) is not possible. If `data_path` is omitted
+    ##                or empty, `value_path` is resolved against the root of the response, which is useful for flat
+    ##                responses such as `/<index>/_count`.
     ##
     ## 3. columns - The list representing the data to be collected from the JSON query. There are two required pieces
     ##              of data:

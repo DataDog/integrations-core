@@ -106,6 +106,13 @@ class TestIsTestable:
 
         assert integration.is_testable is False
 
+    def test_hatch_toml_without_tests(self, local_repo):
+        repo = Repository(local_repo.name, str(local_repo))
+        integration = repo.integrations.get('checkpoint_harmony_endpoint')
+
+        assert integration.has_hatch_config is True
+        assert integration.is_testable is False
+
 
 class TestIsShippable:
     def test_check(self, local_repo):

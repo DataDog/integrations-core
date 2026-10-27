@@ -3,9 +3,25 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import pytest
 
+from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
 from datadog_checks.nginx import Nginx
 
 from . import common
+
+
+def _assert_nginx_metrics(aggregator):
+    metrics = (
+        'nginx.net.conn_dropped_per_s',
+        'nginx.net.conn_opened_per_s',
+        'nginx.net.request_per_s',
+        'nginx.net.writing',
+        'nginx.net.reading',
+        'nginx.net.waiting',
+        'nginx.net.connections',
+    )
+    for m in metrics:
+        aggregator.assert_metric(m, at_least=1)
+    aggregator.assert_service_check('nginx.can_connect', status=Nginx.OK)
 
 
 @pytest.mark.e2e
@@ -19,6 +35,19 @@ def test_e2e(dd_agent_check, instance):
         aggregator.assert_metric(m, count=2, tags=common.TAGS_WITH_HOST_AND_PORT)
 
     aggregator.assert_service_check('nginx.can_connect', status=Nginx.OK, tags=common.TAGS_WITH_HOST_AND_PORT)
+
+
+@pytest.mark.e2e
+@pytest.mark.skipif(common.USING_VTS, reason="Non-VTS test")
+def test_e2e_discovery(dd_agent_check_discovery):
+    aggregator = dd_agent_check_discovery(check_rate=True)
+    _assert_nginx_metrics(aggregator)
+
+
+@pytest.mark.e2e
+@pytest.mark.skipif(common.USING_VTS, reason="Non-VTS test")
+def test_e2e_discovery_all_candidates(dd_agent_check):
+    assert_all_discovery_candidates_stable(dd_agent_check, Nginx)
 
 
 @pytest.mark.e2e

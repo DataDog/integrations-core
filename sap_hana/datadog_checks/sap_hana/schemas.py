@@ -40,13 +40,19 @@ from __future__ import annotations
 
 import contextlib
 from contextlib import closing
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from datadog_checks.base.utils.db.schemas import DatabaseInfo, SchemaCollector, SchemaCollectorConfig
+from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
 if TYPE_CHECKING:
     from .config_models.instance import CollectSchemas
     from .sap_hana import SapHanaCheck
+
+try:
+    from hdbcli.dbapi import Error as HanaError
+except ImportError:
+    HanaError = Exception  # type: ignore[misc,assignment]
 
 # Flush a schema payload once this many columns have accumulated. The base SchemaCollector
 # chunks payloads by table count (`payload_chunk_size`, default 10,000 tables), but a HANA
@@ -153,7 +159,10 @@ ORDER BY ao.SCHEMA_NAME, ao.TABLE_NAME, ac.POSITION
 class HanaSchemaCollectorConfig(SchemaCollectorConfig):
     def __init__(self, config: CollectSchemas):
         super().__init__()
-        self.collection_interval = int(config.collection_interval or 600)
+        # Guard against a non-positive interval (a sub-1 value truncates to 0), which would
+        # otherwise ship as collection_interval: 0 in every schema payload.
+        collection_interval = int(config.collection_interval or 600)
+        self.collection_interval = collection_interval if collection_interval > 0 else 600
         self.max_tables = int(config.max_tables or 2000)
         self.max_views = int(config.max_views or 2000)
         self.max_columns = int(config.max_columns or 500)
@@ -233,6 +242,16 @@ class HanaSchemaCollector(SchemaCollector):
         super().__init__(check, HanaSchemaCollectorConfig(config))
         self._query_builder = HanaSchemaQueryBuilder(self._config, self._log)
         self._pending_row = None
+        # The owning HanaSchemaCollectionJob injects its dedicated connection via
+        # set_connection() before each cycle; connection_lost is the collector's signal
+        # back to the job that the connection died mid-cycle and must be rebuilt.
+        self._conn: Any = None
+        self.connection_lost = False
+
+    def set_connection(self, conn: Any) -> None:
+        """Inject the job's dedicated connection for the upcoming collection cycle."""
+        self._conn = conn
+        self.connection_lost = False
 
     def _reset(self) -> None:
         super()._reset()
@@ -254,7 +273,7 @@ class HanaSchemaCollector(SchemaCollector):
 
     def _get_databases(self) -> list[DatabaseInfo]:
         try:
-            with closing(self._check._conn.cursor()) as cursor:
+            with closing(self._conn.cursor()) as cursor:
                 cursor.execute(CURRENT_DATABASE_QUERY)
                 row = cursor.fetchone()
                 if not row:
@@ -271,21 +290,31 @@ class HanaSchemaCollector(SchemaCollector):
                     pass
                 return [{'name': db_name, 'description': description}]
         except Exception as e:
+            # A dead HANA connection surfaces here rather than propagating, so flag it for
+            # the owning job to reconnect on the next cycle.
+            if isinstance(e, HanaError):
+                self.connection_lost = True
             self._log.warning("Could not determine current HANA database; skipping schema collection: %s", e)
             return []
 
     @contextlib.contextmanager
     def _get_cursor(self, _database_name):
-        conn = self._check._conn
-        self._query_builder.ensure_stats_permission(conn)
-        query, params = self._query_builder.build()
-        with closing(conn.cursor()) as cursor:
-            cursor.execute(query, params)
-            self._pending_row = cursor.fetchone()
-            try:
-                yield cursor
-            finally:
-                self._pending_row = None
+        conn = self._conn
+        try:
+            self._query_builder.ensure_stats_permission(conn)
+            query, params = self._query_builder.build()
+            with closing(conn.cursor()) as cursor:
+                cursor.execute(query, params)
+                self._pending_row = cursor.fetchone()
+                try:
+                    yield cursor
+                finally:
+                    self._pending_row = None
+        except HanaError:
+            # collect_schemas() swallows this per-database error, so flag the dead
+            # connection to the owning job; it reconnects next cycle.
+            self.connection_lost = True
+            raise
 
     def _get_next(self, cursor):
         """Assemble one table/view from consecutive cursor rows sharing the same (schema, table) key."""
@@ -343,3 +372,68 @@ class HanaSchemaCollector(SchemaCollector):
                 }
             ],
         }
+
+
+class HanaSchemaCollectionJob(DBMAsyncJob):
+    """Background job that runs HanaSchemaCollector on its own dedicated connection."""
+
+    def __init__(self, check: SapHanaCheck, config: CollectSchemas) -> None:
+        self._check = check
+        self._schema_collector = HanaSchemaCollector(check, config)
+        self._job_conn: Any = None
+        # Cast to float (not int) so a sub-1 interval doesn't truncate to 0 and make the
+        # rate_limit below divide by zero, which would crash the whole check on construction.
+        # A non-positive value is meaningless as an interval, so clamp it back to the default.
+        collection_interval = float(config.collection_interval or 600)
+        if collection_interval <= 0:
+            collection_interval = 600
+        super().__init__(
+            check,
+            config_host=check._server,
+            rate_limit=1.0 / collection_interval,
+            run_sync=config.run_sync or False,
+            enabled=config.enabled or False,
+            dbms="saphana",
+            min_collection_interval=check.instance.get('min_collection_interval', 15),
+            expected_db_exceptions=(HanaError,),
+            shutdown_callback=self._shutdown,
+            job_name="schema-collection",
+        )
+
+    def _shutdown(self) -> None:
+        if self._job_conn is not None:
+            try:
+                self._job_conn.close()
+            except Exception:
+                pass
+            self._job_conn = None
+
+    def _get_conn(self) -> Any:
+        if self._job_conn is not None:
+            return self._job_conn
+        from hdbcli.dbapi import connect as hana_connect  # noqa: PLC0415
+
+        props = self._check._get_connection_properties()
+        self._job_conn = hana_connect(**props)
+        return self._job_conn
+
+    def run_job(self) -> None:
+        try:
+            conn = self._get_conn()
+            # Resolve the HANA version on this dedicated connection so base_event never
+            # reads it off the main check's connection from this thread.
+            self._check._resolve_dbms_version(conn)
+            self._schema_collector.set_connection(conn)
+            self._schema_collector.collect_schemas()
+        except HanaError:
+            self._reset_conn()
+            raise
+        # collect_schemas() swallows per-database HANA errors internally, so a transient
+        # disconnect never reaches the except above. The collector flags connection_lost
+        # in that case; close ours too so the next cycle reconnects instead of reusing a
+        # dead handle forever.
+        if self._schema_collector.connection_lost:
+            self._reset_conn()
+
+    def _reset_conn(self) -> None:
+        self._shutdown()

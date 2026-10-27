@@ -27,6 +27,7 @@ class Fluentd(AgentCheck):
         'buffer_stage_byte_size',
         'buffer_queue_byte_size',
         'buffer_available_buffer_space_ratios',
+        'tracked_file_count',
     ]
     _AVAILABLE_TAGS = frozenset(['plugin_id', 'type'])
     VERSION_PATTERN = r'.* (?P<version>[0-9\.]+)'

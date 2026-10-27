@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import logging
 from unittest.mock import MagicMock, patch
 
 from datadog_checks.base import AgentCheck
@@ -96,6 +97,22 @@ def test_lparstat_command_failure(aggregator, instance):
         check.check(instance)
     aggregator.assert_service_check('lparstats.can_collect', status=AgentCheck.CRITICAL)
     assert len(aggregator.metrics('system.lpar.memory.physb')) == 0
+
+
+def test_dash_values_skipped_silently(aggregator, dd_run_check, instance, caplog):
+    """lparstat prints '-' for stats that do not apply to the LPAR; they are skipped without logging."""
+    check = LPARStats('lparstats', {}, [instance])
+    with patch('datadog_checks.lparstats.lparstats.subprocess.run', side_effect=_mock_subprocess_run):
+        with caplog.at_level(logging.INFO):
+            dd_run_check(check)
+
+    assert 'unable to convert' not in caplog.text
+    assert len(aggregator.metrics('system.lpar.memory.iomu')) == 0
+    assert len(aggregator.metrics('system.lpar.memory.iomf')) == 0
+    assert len(aggregator.metrics('system.lpar.memory.iohwm')) == 0
+    # sibling fields are still collected
+    aggregator.assert_metric('system.lpar.memory.physb', value=1.20, tags=[])
+    aggregator.assert_metric('system.lpar.memory.entc', value=15.2, tags=[])
 
 
 def test_hypervisor_and_entitlements(aggregator, dd_run_check):

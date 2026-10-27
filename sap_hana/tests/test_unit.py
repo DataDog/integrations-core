@@ -8,7 +8,7 @@ import pytest
 
 from datadog_checks.sap_hana import SapHanaCheck
 
-from .common import TIMEOUT
+from .common import PORT, SERVER, TIMEOUT
 
 pytestmark = pytest.mark.unit
 
@@ -189,6 +189,37 @@ def test_custom_query_configuration(instance):
     cursor.fetchmany = rows_generator()
 
     gauge.assert_not_called()
+
+
+def test_reported_hostname_is_server(instance):
+    check = SapHanaCheck('sap_hana', {}, [instance])
+    assert check.reported_hostname == instance['server']
+
+
+@pytest.mark.parametrize(
+    'database_identifier, tags, expected',
+    [
+        pytest.param(None, [], f'{SERVER}:{PORT}', id='unset-defaults-to-host-and-port'),
+        pytest.param({}, [], f'{SERVER}:{PORT}', id='empty-defaults-to-host-and-port'),
+        pytest.param({'template': None}, [], f'{SERVER}:{PORT}', id='null-template-defaults-to-host-and-port'),
+        pytest.param({'template': '$host'}, [], SERVER, id='host'),
+        pytest.param({'template': '$host:$port'}, [], f'{SERVER}:{PORT}', id='host-and-port'),
+        pytest.param({'template': 'saphana_myorg_$env'}, ['env:team-a'], 'saphana_myorg_team-a', id='tag'),
+        pytest.param({'template': 'saphana_myorg_$env'}, [], 'saphana_myorg_$env', id='missing-tag-left-literal'),
+        pytest.param({'template': '$env'}, ['env:prod', 'env:staging'], 'prod,staging', id='multi-value-tag'),
+    ],
+)
+def test_database_identifier(instance, database_identifier, tags, expected):
+    instance['tags'] = tags
+    if database_identifier is not None:
+        instance['database_identifier'] = database_identifier
+    check = SapHanaCheck('sap_hana', {}, [instance])
+    assert check.database_identifier == expected
+
+
+def test_database_identifier_is_cached(instance):
+    check = SapHanaCheck('sap_hana', {}, [instance])
+    assert check.database_identifier is check.database_identifier
 
 
 class TestConnectionProperties:

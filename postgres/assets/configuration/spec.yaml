@@ -33,6 +33,8 @@ files:
       fleet_configurable: true
       value:
         type: integer
+        minimum: 1
+        maximum: 65535
         display_default: 5432
     - name: username
       display_priority: 22
@@ -49,7 +51,7 @@ files:
       value:
         type: string
     - name: dbname
-      display_priority: 19
+      display_priority: 0
       description: |
         The name of the PostgreSQL database to monitor.
         Note: If omitted, the default system Postgres database is queried.
@@ -58,7 +60,7 @@ files:
         type: string
         display_default: postgres
     - name: dbm
-      display_priority: 18
+      display_priority: 0
       fleet_configurable: true
       description: |
         Set to `true` to enable Database Monitoring.
@@ -67,14 +69,17 @@ files:
         example: false
         display_default: false
     - name: relations
-      display_priority: 17
+      display_priority: 0
       fleet_configurable: true
       description: |
         The list of relations/tables must be specified here to track per-relation (table, index, view, etc.) metrics.
-        If enabled, `dbname` should be specified to collect database-specific relations metrics.
+        Use `dbname` to collect relation metrics for a single database — by default, `dbname` is `postgres` —
+        or enable `database_autodiscovery` to collect relation metrics across all databases on the instance.
         You can either specify a single relation by its exact name in 'relation_name' or use a regex to track metrics
         from all matching relations (useful in cases where relation names are dynamically generated, e.g. TimescaleDB).
-        Each relation generates many metrics (10 + 10 per index).
+        Each relation generates many metrics (dozens per relation, plus several more for each index).
+        Be mindful of the metric volume this can produce: on large instances, broad `relation_regex`
+        patterns that match many relations can emit metrics in the thousands.
 
         By default all schemas are included. To track relations from specific schemas only,
         you can specify the `schemas` attribute and provide a list of schemas to use for filtering.
@@ -127,7 +132,7 @@ files:
               - r
               - p
     - name: collect_activity_metrics
-      display_priority: 15
+      display_priority: 0
       fleet_configurable: true
       description: |
         Collect metrics regarding transactions from pg_stat_activity. Please make sure the user
@@ -136,7 +141,7 @@ files:
         type: boolean
         example: false
     - name: collect_function_metrics
-      display_priority: 14
+      display_priority: 0
       fleet_configurable: true
       description: |
         If set to true, collects metrics regarding PL/pgSQL functions from pg_stat_user_functions.
@@ -144,14 +149,14 @@ files:
         type: boolean
         example: false
     - name: collect_database_size_metrics
-      display_priority: 13
+      display_priority: 0
       fleet_configurable: true
       description: Collect database size metrics.
       value:
         type: boolean
         example: true
     - name: collect_bloat_metrics
-      display_priority: 12
+      display_priority: 0
       fleet_configurable: true
       description: Collect metrics about table bloat. Only available when `relation` metrics are enabled.
       enabled: true
@@ -159,29 +164,31 @@ files:
         type: boolean
         example: false
     - name: tag_replication_role
-      display_priority: 10
+      display_priority: 0
       fleet_configurable: true
       hidden: true
-      description: Tag metrics and checks with `replication_role:<master|standby>`.
+      description: |
+        Tag metrics and checks with `replication_role:<master|standby>`. Aurora instances are also tagged with
+        `aurora_role:<writer|reader>`.
       value:
         type: boolean
         example: true
     - name: collect_count_metrics
-      display_priority: 9
+      display_priority: 0
       fleet_configurable: true
       description: Collect count of user tables from pg_class.
       value:
         type: boolean
         example: true
     - name: max_relations
-      display_priority: 8
+      display_priority: 0
       fleet_configurable: true
       description: Determines the maximum number of relations to fetch.
       value:
         type: integer
         example: 300
     - name: ssl
-      display_priority: 7
+      display_priority: 0
       description: |
         This option determines whether or not and with what priority a secure SSL TCP/IP connection
         is negotiated with the server.
@@ -204,14 +211,14 @@ files:
         example: 'allow'
         default: 'allow'
     - name: collect_default_database
-      display_priority: 4
+      display_priority: 0
       fleet_configurable: true
       description: Include statistics from the default database 'postgres' in the check metrics.
       value:
         type: boolean
         example: true
     - name: query_timeout
-      display_priority: 3
+      display_priority: 0
       fleet_configurable: true
       description: |
         Adds a statement_timeout https://www.postgresql.org/docs/current/runtime-config-client.html#GUC-STATEMENT-TIMEOUT
@@ -222,7 +229,7 @@ files:
         type: integer
         example: 5000
     - name: reported_hostname
-      display_priority: 2
+      display_priority: 0
       description: |
         Set the reported hostname for this instance. This value overrides the hostname detected by the Agent
         and can be useful to set a custom hostname when connecting to a remote database through a proxy.
@@ -231,12 +238,14 @@ files:
         type: string
         default: null
     - name: ignore_databases
-      display_priority: 1
+      display_priority: 0
       fleet_configurable: true
       description: |
         A list of databases to ignore. No metrics or statement samples will be collected for these databases.
         Each value can be a plain string or a Postgres pattern. If you want to ignore the postgres database,
         set collect_default_database to false in addition to adding it to this array.
+        This setting does not apply to schema collection, column statistics, or autodiscovery; instead use
+        the specific include/exclude settings nested under those configurations.
         For more information on how patterns work, see https://www.postgresql.org/docs/12/functions-matching.html
       value:
         type: array
@@ -473,6 +482,7 @@ files:
         Only used when `collect_wal_metrics` is explicitly set to `true` on Postgres 9.6 and below.
       value:
         type: string
+        require_trusted_provider: true
         example: /usr/local/pgsql/data
         display_default: /usr/local/pgsql/data
       fleet_configurable: false
@@ -567,11 +577,11 @@ files:
               - "alloydbmetadata"
         - name: refresh
           description: Frequency in seconds of scans for new databases. Defaults to 10 minutes.
+          fleet_configurable: true
           value:
             type: integer
             example: 600
             display_default: 600
-          fleet_configurable: false
     - name: application_name
       display_priority: 0
       fleet_configurable: true
@@ -768,7 +778,6 @@ files:
           value:
             type: number
             default: 10000
-          fleet_configurable: false
         - name: full_statement_text_cache_max_size
           hidden: true
           description: |
@@ -776,7 +785,6 @@ files:
           value:
             type: number
             default: 10000
-          fleet_configurable: false
         - name: full_statement_text_samples_per_hour_per_query
           hidden: true
           description: |
@@ -784,7 +792,6 @@ files:
           value:
             type: number
             default: 1
-          fleet_configurable: false
         - name: incremental_query_metrics
           hidden: true
           description: |
@@ -795,7 +802,6 @@ files:
             type: boolean
             display_default: true
             example: true
-          fleet_configurable: false
         - name: run_sync
           hidden: true
           description: |
@@ -847,7 +853,6 @@ files:
           value:
             type: integer
             example: 60
-          fleet_configurable: false
         - name: samples_per_hour_per_query
           description: |
             Set the rate limit for how many explain plan events will be ingested per hour per normalized explain
@@ -855,7 +860,6 @@ files:
           value:
             type: integer
             example: 15
-          fleet_configurable: false
         - name: explained_queries_cache_maxsize
           description: |
             Set the max size of the cache used for the explained_queries_per_hour_per_query rate limit. This should
@@ -864,7 +868,6 @@ files:
           value:
             type: integer
             example: 5000
-          fleet_configurable: false
         - name: seen_samples_cache_maxsize
           description: |
             Set the max size of the cache used for the samples_per_hour_per_query rate limit. This should be increased
@@ -872,7 +875,6 @@ files:
           value:
             type: integer
             example: 10000
-          fleet_configurable: false
         - name: explain_parameterized_queries
           fleet_configurable: true
           description: |
@@ -888,7 +890,6 @@ files:
           value:
             type: integer
             default: 5000
-          fleet_configurable: false
         - name: explain_errors_cache_ttl
           hidden: true
           description: |
@@ -896,7 +897,6 @@ files:
           value:
             type: integer
             default: 86400
-          fleet_configurable: false
         - name: run_sync
           hidden: true
           description: |
@@ -1103,6 +1103,65 @@ files:
             example:
               - "customer.*"
 
+    - name: collect_roles
+      display_priority: 0
+      fleet_configurable: true
+      description: |
+        Enable collection of database roles.
+      options:
+        - name: enabled
+          fleet_configurable: true
+          description: |
+            Enable collection of database roles. Requires `dbm: true`.
+          value:
+            type: boolean
+            example: false
+        - name: collection_interval
+          fleet_configurable: true
+          description: |
+            The database role collection interval (in seconds).
+          value:
+            type: number
+            example: 600
+        - name: max_query_duration
+          fleet_configurable: true
+          description: |
+            Maximum duration of the query to collect role information in seconds.
+          value:
+            type: number
+            example: 60
+        - name: include_databases
+          fleet_configurable: true
+          description: |
+            A list of regex patterns to include databases.
+            Any database whose name matches any one of these patterns will be included.
+            If empty, all databases matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example: []
+        - name: exclude_databases
+          fleet_configurable: true
+          description: |
+            A list of regex patterns to exclude databases.
+            Any database whose name matches any one of these patterns will be excluded.
+            If empty, all databases matching other filters are included.
+          value:
+            type: array
+            items:
+              type: string
+            example:
+              - "privatedb.*"
+            default:
+              - "template0"
+              - "template1"
+              - "rdsadmin"
+              - "azure_maintenance"
+              - "cloudsqladmin"
+              - "alloydbadmin"
+              - "alloydbmetadata"
+
     - name: collect_column_statistics
       description: |
         Enable collection of column statistics from pg_stats.
@@ -1205,6 +1264,7 @@ files:
           fleet_configurable: false
     - name: aws
       display_priority: 0
+      fleet_configurable: true
       description: |
         This block defines the configuration for AWS RDS and Aurora instances.
 
@@ -1226,7 +1286,7 @@ files:
           value:
             type: string
             example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
-          fleet_configurable: false
+          fleet_configurable: true
         - name: region
           description: |
             Equal to the region of the instance the agent is connecting to.
@@ -1234,7 +1294,7 @@ files:
           value:
             type: string
             example: us-east-1
-          fleet_configurable: false
+          fleet_configurable: true
         - name: managed_authentication
           description: |
             Configure section used for AWS IAM Authentication with RDS.
@@ -1266,6 +1326,7 @@ files:
 
     - name: gcp
       display_priority: 0
+      fleet_configurable: true
       description: |
         This block defines the configuration for Google Cloud SQL instances.
 
@@ -1284,7 +1345,7 @@ files:
           value:
             type: string
             example: foo-project
-          fleet_configurable: false
+          fleet_configurable: true
         - name: instance_id
           description: |
             Equal to the GCP resource's instance ID.
@@ -1294,10 +1355,11 @@ files:
           value:
             type: string
             example: foo-database
-          fleet_configurable: false
+          fleet_configurable: true
 
     - name: azure
       display_priority: 0
+      fleet_configurable: true
       description: |
         This block defines the configuration for Azure Database for PostgreSQL.
 
@@ -1320,7 +1382,7 @@ files:
           value:
             type: string
             example: flexible_server
-          fleet_configurable: false
+          fleet_configurable: true
         - name: fully_qualified_domain_name
           description: |
             Equal to the full qualified domain name of the Azure PostgreSQL database.
@@ -1329,7 +1391,7 @@ files:
           value:
             type: string
             example: my-postgres-database.database.windows.net
-          fleet_configurable: false
+          fleet_configurable: true
         - name: managed_authentication
           description: |
             Configuration section used for Azure AD Authentication.
@@ -1532,7 +1594,6 @@ files:
         Enabling this option will allow the collection and ingestion of raw query statements and 
         explain plans into Datadog, which can then become viewable in query samples or explain plans. 
         This option is disabled by default.
-        Note: Collection of raw query statements is currently in preview.
         This option only applies when dbm is enabled.
       options:
         - name: enabled
@@ -1589,6 +1650,31 @@ files:
       value:
         example: false
         type: boolean
+    - name: automatic_diagnostics
+      fleet_configurable: false
+      hidden: true
+      description: |
+        Configure automatic diagnostics. When enabled, the integration runs its setup diagnostics and
+        reports the results to the Datadog platform.
+      options:
+        - name: enabled
+          description: Set to `true` to enable automatic diagnostics.
+          value:
+            type: boolean
+            example: false
+            display_default: false
+          hidden: true
+          fleet_configurable: false
+        - name: interval
+          description: |
+            Set the interval (in seconds) at which automatic diagnostics run. The diagnostics run at
+            most once per interval.
+          value:
+            type: number
+            example: 600
+            display_default: 600
+          hidden: true
+          fleet_configurable: false
     - template: instances/db
       overrides:
         custom_queries.value.example:
@@ -1601,16 +1687,16 @@ files:
             tags:
               - test:postgresql
             metric_prefix: postgresql
-        custom_queries.display_priority: 16
+        custom_queries.display_priority: 0
     - template: instances/default
       overrides:
         disable_generic_tags.hidden: False
         disable_generic_tags.enabled: True
         disable_generic_tags.description: The integration will stop sending server tag as is reduntant with host tag
-        tags.display_priority: 20
-        min_collection_interval.display_priority: 11
-        disable_generic_tags.display_priority: 6
-        empty_default_hostname.display_priority: 5
+        tags.display_priority: 0
+        min_collection_interval.display_priority: 0
+        disable_generic_tags.display_priority: 0
+        empty_default_hostname.display_priority: 0
   - template: logs
     example:
     - type: file

@@ -113,6 +113,16 @@ def instance_collect_schemas():
     )
 
 
+def instance_collect_roles():
+    return instance.CollectRoles(
+        enabled=False,
+        collection_interval=600,
+        max_query_duration=60,
+        include_databases=[],
+        exclude_databases=list(DEFAULT_EXCLUDED_DATABASES),
+    )
+
+
 def instance_obfuscator_options():
     return instance.ObfuscatorOptions(
         obfuscation_mode="obfuscate_and_normalize",
@@ -154,4 +164,11 @@ def instance_data_observability():
         run_sync=False,
         config_id=None,
         queries=(),
+    )
+
+
+def instance_automatic_diagnostics():
+    return instance.AutomaticDiagnostics(
+        enabled=False,
+        interval=600,
     )

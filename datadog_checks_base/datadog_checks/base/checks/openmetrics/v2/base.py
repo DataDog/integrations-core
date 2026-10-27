@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from collections import ChainMap
+from collections.abc import Mapping
 from contextlib import contextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -12,14 +13,13 @@ import yaml
 from requests.exceptions import RequestException
 
 from datadog_checks.base.checks import AgentCheck
+from datadog_checks.base.checks.openmetrics.metric_limit_issue import MetricLimitIssueReporter
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.tracing import traced_class
 
 from .scraper import OpenMetricsScraper
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from .metrics_mapping import MetricsMapping, _RawMetricsConfig
 
 
@@ -63,6 +63,9 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         When overriding, make sure to call this (the parent's) __init__ first!
         """
         super(OpenMetricsBaseCheckV2, self).__init__(name, init_config, instances)
+        self.metric_limit_issue_reporter: MetricLimitIssueReporter = MetricLimitIssueReporter(
+            filter_option_text='metrics / exclude_metrics'
+        )
 
         # All desired scraper configurations, which subclasses can override as needed
         self.scraper_configs = [self.instance]
@@ -95,6 +98,18 @@ class OpenMetricsBaseCheckV2(AgentCheck):
                 except (ConnectionError, RequestException) as e:
                     self.log.error("There was an error scraping endpoint %s: %s", endpoint, str(e))
                     raise type(e)("There was an error scraping endpoint {}: {}".format(endpoint, e)) from None
+
+    def _on_metric_limit_state(self, reached_limit: bool, observed_count: int, limit: int) -> None:
+        # Use the actual configured scraper endpoint keys rather than the raw instance field, so
+        # integrations that synthesize ``scraper_configs`` from options such as ``agent_endpoint``
+        # (e.g. Cilium) still report drops against the endpoint that was scraped.
+        self.metric_limit_issue_reporter.handle(
+            self,
+            self.scrapers.keys(),
+            reached_limit,
+            observed_count,
+            limit,
+        )
 
     def configure_scrapers(self):
         """
@@ -131,10 +146,22 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         Subclasses that override this method must call ``super().get_config_with_defaults(config)``;
         otherwise the YAML mappings declared via ``METRICS_MAP`` (or discovered by convention) are
         silently skipped.
+
+        The instance config wins option by option, except ``rename_labels``: the instance's renames
+        are merged into the check's declared ones entry by entry, with the instance winning on a key
+        collision. A ``ChainMap`` resolves keys shallowly, so without the merge an instance that sets
+        ``rename_labels`` at all would shadow the class default wholesale and silently drop renames
+        the check depends on. The trade-off is that ``rename_labels: {}`` cannot opt out of them.
         """
         defaults = dict(self.get_default_config())
         if file_metrics := self._load_file_based_metrics(config):
             defaults['metrics'] = list(defaults.get('metrics', [])) + file_metrics
+
+        default_renames = defaults.get('rename_labels')
+        instance_renames = config.get('rename_labels')
+        if isinstance(default_renames, Mapping) and isinstance(instance_renames, Mapping):
+            config = {**config, 'rename_labels': {**default_renames, **instance_renames}}
+
         return ChainMap(config, defaults)
 
     def get_default_config(self) -> dict:
@@ -143,6 +170,9 @@ class OpenMetricsBaseCheckV2(AgentCheck):
         The returned dict can be mutated by the framework before being wrapped
         in a ``ChainMap``. Avoid returning a shared or instance-level object to avoid
         state leakage between check executions.
+
+        A ``rename_labels`` default is merged with the instance's renames; every other default is
+        replaced outright. See ``get_config_with_defaults``.
         """
         return {}
 

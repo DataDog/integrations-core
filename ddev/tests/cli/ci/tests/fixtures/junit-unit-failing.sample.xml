@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="0.180" timestamp="2026-06-23T20:17:05.140709+00:00" hostname="runnervm08nci"><testcase classname="nagios.tests.test_nagios.TestEventLogTailer" name="test_line_parser" time="0.025"><failure message="assert 'OK' == 'CRITICAL'">nagios/tests/test_nagios.py:42: AssertionError</failure></testcase><testcase classname="nagios.tests.test_nagios.TestPerfDataTailer" name="test_host_perfdata" time="0.002" /></testsuite></testsuites>

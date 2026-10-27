@@ -1,0 +1,1 @@
+Read the kubelet pod list from the decoded response body so gzip-encoded responses parse, temporarily using additional memory equal to the decoded body size.

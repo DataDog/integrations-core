@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import pytest
 
+from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.temporal import TemporalCheck
 
@@ -28,3 +29,14 @@ def test_e2e_service_checks(dd_agent_check, instance):
         status=TemporalCheck.OK,
         tags=TAGS,
     )
+
+
+def test_e2e_discovery(dd_agent_check_discovery):
+    aggregator = dd_agent_check_discovery(check_rate=True)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_service_check("temporal.server.openmetrics.health", status=TemporalCheck.OK)
+
+
+def test_e2e_discovery_all_candidates(dd_agent_check):
+    assert_all_discovery_candidates_stable(dd_agent_check, TemporalCheck)

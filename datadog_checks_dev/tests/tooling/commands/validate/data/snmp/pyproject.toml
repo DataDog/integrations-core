@@ -1,0 +1,6 @@
+[project]
+name = "datadog-snmp"
+authors = [{ name = "Agent Integrations", email = "agent-integrations@datadoghq.com" }]
+
+[tool.hatch.version]
+path = "datadog_checks/snmp/__about__.py"

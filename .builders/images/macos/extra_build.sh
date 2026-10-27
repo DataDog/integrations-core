@@ -15,13 +15,32 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
       VERSION="${kafka_version}" \
       SHA256="14972092e4115f6e99f798a7cb420cbf6daa0c73502b3c52ae42fb5b418eea8f" \
       RELATIVE_PATH="librdkafka-{{version}}" \
+      PATCHES="librdkafka-fix-coord-request-uaf.patch librdkafka-fix-offsetfetch-null-cgrp.patch" \
       bash install-from-source.sh --prefix="${DD_PREFIX_PATH}" --enable-sasl --enable-curl --enable-zstd
 
     # lmdb doesnt't get the actual full path in its install name which means delocate won't find it
     # Luckily we can patch it here so that it does.
     install_name_tool -change liblmdb.so "${DD_PREFIX_PATH}/lib/liblmdb.so" "${DD_PREFIX_PATH}/lib/librdkafka.1.dylib"
     install_name_tool -change /usr/local/lib/libzstd.1.dylib "${DD_PREFIX_PATH}/lib/libzstd.1.dylib" "${DD_PREFIX_PATH}/lib/librdkafka.1.dylib"
+
+    # confluent-kafka's C extension reads offset commit metadata with strdup() although it is not
+    # NUL-terminated. Build the extension from a patched copy of the sdist instead of the PyPI one.
+    confluent_kafka_src="/tmp/confluent_kafka-${kafka_version}"
+    curl -L "https://files.pythonhosted.org/packages/source/c/confluent-kafka/confluent_kafka-${kafka_version}.tar.gz" \
+        -o "${confluent_kafka_src}.tar.gz"
+    echo "619d10d1d77c9821ba913b3e42a33ade7f889f3573c7f3c17b57c3056e3310f5  ${confluent_kafka_src}.tar.gz" | sha256sum --check
+    rm -rf "${confluent_kafka_src}"
+    tar -C /tmp -xzf "${confluent_kafka_src}.tar.gz"
+    patch -d "${confluent_kafka_src}" -p1 -i "${DD_MOUNT_DIR}/patches/confluent-kafka-fix-metadata-overread.patch"
+    # -i.bak keeps this working with both BSD and GNU sed
+    sed -i.bak "s|^confluent-kafka==.*|confluent-kafka @ file://${confluent_kafka_src}|" "${DD_MOUNT_DIR}/requirements.in"
+    rm "${DD_MOUNT_DIR}/requirements.in.bak"
     always_build+=("confluent-kafka")
+
+    # ddtrace publishes macosx_14_0 wheels because upstream builds its extensions against the
+    # macOS 14 SDK. Built here they honor MACOSX_DEPLOYMENT_TARGET and come out at 12.0.
+    # (The libddwaf dylib ddtrace downloads prebuilt is stripped in repair_wheels.py instead.)
+    always_build+=("ddtrace")
 fi
 
 # Make sure IBM MQ libraries are found under /opt/mqm even when we're using the builder cache
@@ -34,10 +53,26 @@ sudo cp -Rf "${DD_PREFIX_PATH}/mqm" /opt
 echo "WITH_XML2_CONFIG=${DD_PREFIX_PATH}/bin/xml2-config" >> $DD_ENV_FILE
 echo "WITH_XSLT_CONFIG=${DD_PREFIX_PATH}/bin/xslt-config" >> $DD_ENV_FILE
 
+# Point the openssl crate, used by cryptography, at the OpenSSL we build instead of the system one.
+# This runs on every build, unlike the builder setup, which is skipped when the cache is warm.
+echo "OPENSSL_LIB_DIR=${DD_PREFIX_PATH}/lib" >> $DD_ENV_FILE
+echo "OPENSSL_INCLUDE_DIR=${DD_PREFIX_PATH}/include" >> $DD_ENV_FILE
+
+# The rustup shims resolve the toolchain through these, so they are needed on cache hits too
+echo "RUSTUP_HOME=${DD_PREFIX_PATH}/rustup" >> $DD_ENV_FILE
+echo "CARGO_HOME=${DD_PREFIX_PATH}/cargo" >> $DD_ENV_FILE
+
+# Send `cargo install` binaries straight to ${DD_PREFIX_PATH}/bin, which build.py already puts on
+# PATH. ddtrace's build cargo-installs libdatadog's dedup_headers and then calls it by bare name;
+# without this it lands in ${CARGO_HOME}/bin, which is not on PATH. The builder_setup symlinks
+# don't cover it because they are made before ddtrace runs.
+echo "CARGO_INSTALL_ROOT=${DD_PREFIX_PATH}" >> $DD_ENV_FILE
+
 # Empty arrays are flagged as unset when using the `-u` flag. This is the safest way to work around that
 # (see https://stackoverflow.com/a/61551944)
-pip_no_binary=${always_build[@]+"${always_build[@]}"}
+# package names passed to PIP_NO_BINARY need to be separated by commas
+pip_no_binary=$(IFS=, ; printf '%s' "${always_build[*]-}")
 if [[ "$pip_no_binary" ]]; then
     # If there are any packages that must always be built, inform pip
-    echo "PIP_NO_BINARY=\"${pip_no_binary}\"" >> $DD_ENV_FILE
+    echo "PIP_NO_BINARY=${pip_no_binary}" >> $DD_ENV_FILE
 fi

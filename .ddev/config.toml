@@ -1,3 +1,8 @@
+# Other files merged into this configuration, relative to `.ddev/`. Each top-level table lives in
+# exactly one file.
+#   dispatcher.toml: `ddev ci dispatch-tests` settings.
+imports = ["dispatcher.toml"]
+
 # Validations to run with `ddev validate all`.
 # Each entry must match a known validation name.
 # Remove an entry to skip that validation for this repo.
@@ -22,8 +27,13 @@ validations = [
     "readmes",
     "saved-views",
     "version",
-    "qa-label"
+    "qa-label",
+    "pr-description"
 ]
+
+# GitHub organization that owns this repository, used for GitHub API operations. Defaults to `DataDog`.
+[github]
+owner = "DataDog"
 
 [overrides.display-name]
 datadog_checks_base = "Datadog Checks Base"
@@ -48,6 +58,9 @@ hpe_aruba_edgeconnect = "HPE Aruba EdgeConnect"
 control_m = "Control-M"
 nifi = "Apache NiFi"
 dell_powerflex = "Dell Powerflex"
+dynamo = "Dynamo"
+intersystems_iris = "InterSystems IRIS"
+kai_scheduler = "KAI Scheduler"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
@@ -56,9 +69,11 @@ kueue = "kueue."
 prefect = "prefect.server."
 n8n = "n8n."
 control_m = "control_m."
-nifi = "nifi."
 dell_powerflex = "dell_powerflex."
 hpe_aruba_edgeconnect = "hpe_aruba_edgeconnect."
+dynamo = "dynamo."
+intersystems_iris = "intersystems_iris."
+kai_scheduler = "kai."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -93,9 +108,6 @@ runners = { windows = ["windows-2022"] }
 
 [overrides.ci.tcp_check]
 platforms = ["linux", "windows"]
-
-[overrides.ci.tokumx]
-exclude = true
 
 [overrides.dependencies.licenses]
 # https://github.com/aerospike/aerospike-client-python/blob/master/LICENSE
@@ -210,17 +222,21 @@ nginx_ingress_controller = "nginx-ingress-controller"
 
 [overrides.dep.updates]
 exclude = [
-    'pyasn1',          # https://github.com/pyasn1/pyasn1/issues/52
     'pysnmp',          # Breaking snmp tests
     'aerospike',       # v8+ breaks agent build.
     'confluent-kafka',
+    # Newer drivers query system.settings.readonly, which ClickHouse 18 lacks.
+    # Remove once https://datadoghq.atlassian.net/browse/DBMON-6930 is resolved.
+    'clickhouse-connect',
     # https://github.com/DataDog/integrations-core/pull/16080
     'lxml',
     'psutil',
     'pyvmomi',      # 9+ has breaking changes
     'pymongo',      # Upgrade from 4.8.0 to 4.10.1 causes "AttributeError: module 'pymongo' has no attribute 'mongo_client'"
+    'pymysql',      # Pinned to below 1.2.0 as requested by DBM while they work on supporting 1.2+
     'foundationdb', # 7+ has a breaking changes
-    'ddtrace', # 4.5.1 does not support MacOS 11, which is used by the Agent
+    'kubernetes',   # Excluded on size: 36 bundles the aio client and aiohttp, +24M on disk.
+                    # Unpin once https://github.com/kubernetes-client/python/issues/2677 is resolved.
 
 ]
 
@@ -263,7 +279,7 @@ __pycache__ = false
   "datadog-prefect",
 ]
 
-# Explicitely add the platforms supported by an integration for those where the manifest has been
+# Explicitly add the platforms supported by an integration for those where the manifest has been
 # removed.
 # This is a temporary fix while we implement a metadata.json file that we can add to each integration
 # that replaces the manifest.
@@ -276,7 +292,9 @@ kueue = ["linux", "windows", "mac_os"]
 prefect = ["linux", "windows", "mac_os"]
 n8n = ["linux", "windows", "mac_os"]
 control_m = ["linux", "windows", "mac_os"]
-nifi = ["linux", "windows", "mac_os"]
 dell_powerflex = ["linux", "windows", "mac_os"]
 hpe_aruba_edgeconnect = ["linux", "windows", "mac_os"]
+dynamo = ["linux", "windows", "mac_os"]
+intersystems_iris = ["linux", "windows", "mac_os"]
+kai_scheduler = ["linux", "windows", "mac_os"]
 

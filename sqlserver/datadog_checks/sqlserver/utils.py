@@ -5,14 +5,35 @@ import os
 import re
 import shutil
 import sys
-from typing import Dict
+from typing import Dict, Optional, Sequence
+from xml.etree import ElementTree
 
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE, ENGINE_EDITION_SQL_DATABASE
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
+ODBC_INI = 'odbc.ini'
 ODBC_INST_INI = 'odbcinst.ini'
+
+DBM_COMMENT_MARKERS = (
+    'ddps=',
+    'dddbs=',
+    'ddh=',
+    'dddb=',
+    'ddprs=',
+    'dde=',
+    'ddpv=',
+    'traceparent=',
+    'ddsh=',
+)
+
+
+def serialize_database_names(database_names: list[str]) -> str:
+    root = ElementTree.Element('databases')
+    for database_name in database_names:
+        ElementTree.SubElement(root, 'database').text = database_name
+    return ElementTree.tostring(root, encoding='unicode')
 
 
 # Database is used to store both the name and physical_database_name
@@ -34,8 +55,23 @@ class Database:
         return "name:{}, physical_db_name:{}".format(self.name, self.physical_db_name)
 
 
+def raise_if_cancelled(cancel_event):
+    """Abort before issuing a query once the Agent has unscheduled the check owning the job.
+
+    Teardown waits for the job loop to stop, so a tick that keeps querying after a cancel holds up
+    the Agent. ``DBMAsyncJob._job_loop`` reports an exception raised after a cancel as a
+    cancellation rather than a crash, so raising here is how a job bails out of a tick.
+    """
+    if cancel_event.is_set():
+        raise Exception("Job loop cancelled. Aborting query.")
+
+
 def get_unixodbc_sysconfig(python_executable):
     return os.path.join(os.path.dirname(os.path.dirname(python_executable)), "etc")
+
+
+def get_agent_default_driver_config(python_executable):
+    return os.path.join(os.path.dirname(os.path.dirname(python_executable)), "share", "odbc")
 
 
 def is_non_empty_file(path):
@@ -51,41 +87,41 @@ def is_non_empty_file(path):
 
 
 def set_default_driver_conf():
-    if Platform.is_containerized():
-        # Use default `./driver_config/odbcinst.ini` when Agent is running in docker.
-        # `freetds` is shipped with the Docker Agent.
-        os.environ.setdefault('ODBCSYSINI', DRIVER_CONFIG_DIR)
-    elif Platform.is_linux():
-        """
-        The agent running on Linux has msodbcsql18 and FreeTDS installed.
-        The default driver is msodbcsql18.
-        To best leverage the default driver, we set the ODBCSYSINI environment variable to the directory
-        containing the pre-configured odbcinst.ini file.
-        However, if the user has already configured the ODBCSYSINI environment variable,
-        OR if the user has already created or copied the odbcinst.ini file in the unixODBC sysconfig location,
-        we do not override the ODBCSYSINI environment variable.
-        """
-        if 'ODBCSYSINI' in os.environ:
-            # If ODBCSYSINI is already set in env, don't override it
-            return
+    """Point unixODBC at the ODBC driver registration for the running Agent.
 
-        # linux_unixodbc_sysconfig is set to the agent embedded /etc directory
-        # this is a hacky way to get the path to the etc directory
-        # by getting the path to the python executable and get the directory above /bin/python
-        linux_unixodbc_sysconfig = get_unixodbc_sysconfig(sys.executable)
-        odbc_ini = os.path.join(linux_unixodbc_sysconfig, 'odbc.ini')
-        if is_non_empty_file(odbc_ini):
-            os.environ.setdefault('ODBCSYSINI', linux_unixodbc_sysconfig)
-            odbc_inst_ini_sysconfig = os.path.join(linux_unixodbc_sysconfig, ODBC_INST_INI)
-            if not is_non_empty_file(odbc_inst_ini_sysconfig):
-                shutil.copy(os.path.join(DRIVER_CONFIG_DIR, ODBC_INST_INI), odbc_inst_ini_sysconfig)
-                # If there are already drivers or dataSources installed, don't override the ODBCSYSINI
-                # This means user has copied odbcinst.ini and odbc.ini to the unixODBC sysconfig location
-                return
+    Tries, in order: the user-editable embedded/etc, the Agent's read-only default
+    in embedded/share/odbc, then the file bundled with this integration for older
+    Agents. A pre-set ODBCSYSINI always wins.
+    """
+    if 'ODBCSYSINI' in os.environ:
+        return
+    if not (Platform.is_linux() or Platform.is_containerized()):
+        return
 
-        # Use default `./driver_config/odbcinst.ini` to let the integration use agent embedded odbc driver.
-        os.environ.setdefault('ODBCSYSINI', DRIVER_CONFIG_DIR)
+    sysconfig = get_unixodbc_sysconfig(sys.executable)
+    defaults = [
+        path
+        for path in (get_agent_default_driver_config(sys.executable), DRIVER_CONFIG_DIR)
+        if is_non_empty_file(os.path.join(path, ODBC_INST_INI))
+    ]
 
+    selected = None
+    if is_non_empty_file(os.path.join(sysconfig, ODBC_INST_INI)):
+        selected = sysconfig
+    elif is_non_empty_file(os.path.join(sysconfig, ODBC_INI)) and defaults:
+        # DSNs in odbc.ini only resolve against drivers registered in the same directory.
+        try:
+            shutil.copy(os.path.join(defaults[0], ODBC_INST_INI), os.path.join(sysconfig, ODBC_INST_INI))
+            selected = sysconfig
+        except OSError:
+            pass
+    if selected is None and defaults:
+        selected = defaults[0]
+    if selected is None:
+        return
+
+    os.environ['ODBCSYSINI'] = selected
+    if not Platform.is_containerized():
         # required when using pyodbc with FreeTDS on Ubuntu 18.04
         # see https://stackoverflow.com/a/22988748/1258743
         # TODO: remove once we deprecate the embedded FreeTDS driver
@@ -116,6 +152,16 @@ def is_statement_proc(text):
         if 0 <= idx_create < idx_proc and idx_proc >= 0:
             return True, _get_procedure_name(t, idx_proc)
     return False, None
+
+
+def has_dbm_comment_marker(text: Optional[str]) -> bool:
+    return bool(text) and any(marker in text for marker in DBM_COMMENT_MARKERS)
+
+
+def needs_comment_recovery(full_text: Optional[str], statement_comments: Optional[Sequence[str]]) -> bool:
+    return has_dbm_comment_marker(full_text) and not any(
+        has_dbm_comment_marker(comment) for comment in statement_comments or ()
+    )
 
 
 def _get_procedure_name(t, idx):

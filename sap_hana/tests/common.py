@@ -14,6 +14,12 @@ TIMEOUT = 20
 CONFIG = {'server': SERVER, 'port': PORT, 'username': 'datadog', 'password': 'Datadog9000', 'timeout': TIMEOUT}
 ADMIN_CONFIG = {'server': SERVER, 'port': PORT, 'username': 'system', 'password': 'Admin1337'}
 
+# Name the test harness reports to HANA, recorded in AUDIT_LOG.APPLICATION_NAME for the statements
+# it audits. Set explicitly because hdbcli otherwise defaults APPLICATION to the client's process
+# name, which is not stable across CI runs: the hatch environment's interpreter has been invoked as
+# both `python3` and `python` depending on the uv version, silently changing the audited value.
+AUDIT_APPLICATION_NAME = 'datadog-test-harness'
+
 E2E_METADATA = {'start_commands': ['pip install hdbcli==2.21.28']}
 
 CAN_CONNECT_SERVICE_CHECK = 'sap_hana.{}'.format(SapHanaCheck.SERVICE_CHECK_CONNECT)

@@ -69,7 +69,7 @@ class ClickhouseTableMetrics(DBMAsyncJob):
             rate_limit=1 / collection_interval,
             run_sync=config.run_sync,
             enabled=config.enabled,
-            dbms='clickhouse',
+            dbms=check.dbms,
             min_collection_interval=check._config.min_collection_interval,
             expected_db_exceptions=(Exception,),
             job_name='clickhouse-table-metrics',
@@ -82,9 +82,9 @@ class ClickhouseTableMetrics(DBMAsyncJob):
         self._view_refreshes_permission_logged = False
         self._view_refreshes_skip = False
 
-    def cancel(self):
-        super(ClickhouseTableMetrics, self).cancel()
+    def shutdown(self) -> None:
         self._close_db_client()
+        self._check = None
 
     def _close_db_client(self):
         if self._db_client:
@@ -95,6 +95,8 @@ class ClickhouseTableMetrics(DBMAsyncJob):
             self._db_client = None
 
     def _execute_query(self, query: str) -> list:
+        if self._cancel_event.is_set():
+            raise Exception("Job loop cancelled. Aborting query.")
         if self._db_client is None:
             self._db_client = self._check.create_dbm_client()
             self._db_client.set_client_setting('max_execution_time', self._collection_interval)
@@ -108,6 +110,10 @@ class ClickhouseTableMetrics(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def run_job(self):
         self._emit_table_size_gauges()
+        # _emit_table_size_gauges() swallows the cancellation raised by _execute_query, and the
+        # view refresh collection queries the check's client directly, so it needs its own check.
+        if self._cancel_event.is_set():
+            return
         self._collect_view_refresh_metrics()
 
     def _emit_table_size_gauges(self) -> None:
@@ -140,7 +146,7 @@ class ClickhouseTableMetrics(DBMAsyncJob):
         # per-view series carries exactly one `db:` tag — the view's own database.
         base_tags = [t for t in self._check.tags if not t.startswith('db:')]
         for database, view_name, host, status, _exception, last_time, next_time, written_rows, written_bytes in rows:
-            view_tags = base_tags + [f'db:{database}', f'view:{view_name}', f'host:{host}']
+            view_tags = base_tags + [f'db:{database}', f'view:{view_name}', f'host:{host}', f'clickhouse_node:{host}']
             refresh_status = _VIEW_REFRESH_STATUS_MAP.get(status, AgentCheck.UNKNOWN)
             self._check.gauge('view.refresh.status', refresh_status, tags=view_tags)
             self._check.gauge('view.refresh.last_time', int(last_time or 0), tags=view_tags)

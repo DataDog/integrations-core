@@ -3,8 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from concurrent.futures import as_completed
 
-from confluent_kafka import Consumer, ConsumerGroupTopicPartitions, KafkaException, TopicPartition
-from confluent_kafka.admin import AdminClient
+from confluent_kafka import ConsumerGroupTopicPartitions, IsolationLevel, KafkaError, KafkaException, TopicPartition
+from confluent_kafka.admin import AdminClient, OffsetSpec
 
 # AWS MSK IAM authentication support
 try:
@@ -21,7 +21,6 @@ class KafkaClient:
         self.config = config
         self.log = log
         self._kafka_client = None
-        self._consumer = None
         self._cluster_metadata = None
 
     @property
@@ -40,23 +39,6 @@ class KafkaClient:
             self._kafka_client = AdminClient(config, logger=self.log)
 
         return self._kafka_client
-
-    def open_consumer(self, consumer_group):
-        config = {
-            "bootstrap.servers": self.config._kafka_connect_str,
-            "group.id": consumer_group,
-            "enable.auto.commit": False,  # To avoid offset commit to broker during close
-            "queued.max.messages.kbytes": self.config._consumer_queued_max_messages_kbytes,
-            "log_level": self.config._librdkafka_log_level,
-        }
-        config.update(self.__get_authentication_config())
-
-        self._consumer = Consumer(config, logger=self.log)
-        self.log.debug("Consumer instance %s created for group %s", self._consumer, consumer_group)
-
-    def close_consumer(self):
-        self.log.debug("Closing consumer instance %s", self._consumer)
-        self._consumer.close()
 
     def __get_authentication_config(self):
         config = {
@@ -137,35 +119,50 @@ class KafkaClient:
 
         return config
 
-    def consumer_get_cluster_id_and_list_topics(self, consumer_group):
-        cluster_metadata = self._consumer.list_topics(timeout=self.config._request_timeout)
-        try:
-            # TODO: remove this try-except, the attribute is always present.
-            cluster_id = cluster_metadata.cluster_id
-        except AttributeError:
-            self.log.error("Failed to get cluster metadata for consumer group %s", consumer_group)
-            return "", []
-        return (cluster_id, [(name, list(metadata.partitions)) for name, metadata in cluster_metadata.topics.items()])
+    def get_cluster_id(self):
+        return getattr(self._list_topics(), 'cluster_id', '')
 
-    def consumer_offsets_for_times(self, partitions, offset=-1):
-        topicpartitions_for_querying = [
-            # -1: latest; 0: earliest (timestamp 0)
-            TopicPartition(topic=topic, partition=partition, offset=offset)
-            for topic, partition in partitions
-        ]
+    def get_partition_offsets(self, partitions, offset=-1):
+        """Return (topic, partition, offset) tuples, skipping partitions that can't be queried.
+
+        A request-level failure (the batched list_offsets call itself raising, as opposed to an
+        individual partition's future) is not swallowed here: it propagates so the caller aborts
+        highwater collection instead of silently treating every partition as missing.
+        """
+        offset_spec = OffsetSpec.earliest() if offset == 0 else OffsetSpec.latest()
+        request = {TopicPartition(topic=topic, partition=partition): offset_spec for topic, partition in partitions}
+        if not request:
+            return []
+
+        futures = self.kafka_client.list_offsets(
+            request,
+            isolation_level=IsolationLevel.READ_UNCOMMITTED,
+            request_timeout=self.config._request_timeout,
+        )
+
         results = []
-        for tp in self._consumer.offsets_for_times(
-            partitions=topicpartitions_for_querying, timeout=self.config._request_timeout
-        ):
-            if tp.error:
-                self.log.debug(
-                    "Failed to get offset for topic %s partition %s: %s",
-                    tp.topic,
-                    tp.partition,
-                    tp.error,
-                )
+        negative = []
+        for tp, future in futures.items():
+            try:
+                partition_offset = future.result().offset
+            except Exception as e:
+                self.log.debug("Skipping offsets for %s/%s: %s", tp.topic, tp.partition, e)
                 continue
-            results.append((tp.topic, tp.partition, tp.offset))
+            if partition_offset < 0:
+                negative.append((tp.topic, tp.partition, partition_offset))
+                continue
+            results.append((tp.topic, tp.partition, partition_offset))
+        if negative:
+            # A Kafka offset is never negative, so the client library mangled these: it narrows
+            # ListOffsets results through a C long, which is 32 bits wide on Windows x64.
+            # https://github.com/confluentinc/confluent-kafka-python/issues/1696
+            self.log.warning(
+                "Discarding %d/%d negative offset(s): broker_offset and consumer_lag will be "
+                "missing for those partitions (up to 5 shown): %s",
+                len(negative),
+                len(request),
+                negative[:5],
+            )
         return results
 
     def _list_topics(self):
@@ -244,17 +241,23 @@ class KafkaClient:
             topic_partitions = (
                 topic_partitions if topic_partitions is None else [TopicPartition(t, p) for t, p in topic_partitions]
             )
-            futures.append(
-                self.kafka_client.list_consumer_group_offsets(
-                    [ConsumerGroupTopicPartitions(group_id=consumer_group, topic_partitions=topic_partitions)]
-                )[consumer_group]
-            )
+            try:
+                futures.append(
+                    self.kafka_client.list_consumer_group_offsets(
+                        [ConsumerGroupTopicPartitions(group_id=consumer_group, topic_partitions=topic_partitions)]
+                    )[consumer_group]
+                )
+            except Exception as e:
+                self.log.warning("Failed to request consumer offsets for consumer group %s: %s", consumer_group, e)
         offsets = []
+        coordinator_error = False
         for completed in as_completed(futures):
             try:
                 response_offset_info = completed.result()
             except KafkaException as e:
                 self.log.debug("Failed to read consumer offsets for future %s: %s", completed, e)
+                if e.args[0].code() in (KafkaError.NOT_COORDINATOR, KafkaError.COORDINATOR_NOT_AVAILABLE):
+                    coordinator_error = True
                 continue
             tpo = []
             for tp in response_offset_info.topic_partitions:
@@ -268,6 +271,11 @@ class KafkaClient:
                     continue
                 tpo.append((tp.topic, tp.partition, tp.offset))
             offsets.append((response_offset_info.group_id, tpo))
+        if coordinator_error:
+            # The AdminClient caches each group's coordinator and keeps using it after a coordinator error,
+            # so a group that moved to another broker would fail on every run. A new client looks it up again.
+            self.log.debug("Closing the AdminClient so the next request looks up group coordinators again")
+            self.close_admin_client()
         return offsets
 
     def describe_consumer_group(self, consumer_group):

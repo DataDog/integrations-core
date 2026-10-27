@@ -197,8 +197,10 @@ instances:
 
     ## @param read_messages - mapping - optional
     ## Configuration for reading messages from Kafka topics.
-    ## Messages are streamed in real-time and sent to Datadog as they arrive.
-    ## The check has a 20-second timeout for the entire operation.
+    ## Only messages already present in the log when the check starts are read; the
+    ## per-partition high watermark is captured up front and consumption stops once every
+    ## partition is drained, so messages produced after the check began are never returned.
+    ## A 5-second timeout bounds the entire operation as a safety net.
     ## Supports JSON, BSON, Protobuf, and Avro with optional Schema Registry integration.
     ## Filtering is applied after deserialization using jq-style expressions.
     #
@@ -257,7 +259,8 @@ instances:
     ## @param update_consumer_group_offsets - mapping - optional
     ## Configuration for updating consumer group offsets.
     ## WARNING: Can cause duplicate processing or data loss.
-    ## Consumer group should be stopped (no active members).
+    ## The consumer group must have no active members before this action runs.
+    ## The check enforces this and will fail with a clear error if members are found.
     #
     # update_consumer_group_offsets:
     #   cluster: prod-kafka-1
@@ -268,7 +271,9 @@ instances:
     #     offset: 1000
     #   - topic: orders
     #     partition: 1
-    #     offset: 1500
+    #     offset: -2
+    #   - topic: payments
+    #     timestamp: 1735689600000
 
     ## @param produce_message - mapping - optional
     ## Configuration for producing a message to a Kafka topic.
