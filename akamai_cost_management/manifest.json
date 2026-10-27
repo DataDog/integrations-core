@@ -1,0 +1,41 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "77694a48-d9d2-4d54-9e71-978a646e2360",
+  "app_id": "akamai-cost-management",
+  "display_on_public_website": false,
+  "oauth": {},
+  "owner": "saas-integrations",
+  "author": {
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "support_email": "help@datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "tile": {
+    "title": "Akamai Cost Management",
+    "description": "Placeholder description \u2014 update before launch.",
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "uninstallation": "README.md#Uninstallation",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "media": [],
+    "classifier_tags": [
+      "Category::Content Delivery Network",
+      "Category::Cost Management",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "source_type_name": "Akamai Cost Management",
+      "source_type_id": 92752002,
+      "auto_install": false,
+      "configuration": {},
+      "process_signatures": [],
+      "events": {
+        "creates_events": false
+      }
+    }
+  }
+}

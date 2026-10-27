@@ -1,20 +1,34 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import os
 from copy import deepcopy
+from pathlib import Path
 
 import ibm_db
 import pytest
 
 from datadog_checks.dev import WaitFor, docker_run, run_command
-from datadog_checks.ibm_db2 import IbmDb2Check
+from datadog_checks.dev.conditions import CheckDockerLogs
+from datadog_checks.ibm_db2.connection import get_connection_data
 
-from .common import COMPOSE_FILE, CONFIG, E2E_METADATA
+from .common import COMPOSE_FILE, CONFIG, DB2_VERSION, E2E_METADATA
+
+
+def pytest_ignore_collect(collection_path: Path) -> bool | None:
+    # Takeover changes roles; HADR environments collect only that test, even with CI's own -k filter.
+    if (
+        os.getenv('DB2_HADR') == 'true'
+        and collection_path.name.startswith('test_')
+        and collection_path.name != 'test_hadr.py'
+    ):
+        return True
+    return None
 
 
 class DbManager(object):
     def __init__(self, config):
-        self.target, self.username, self.password = IbmDb2Check.get_connection_data(
+        self.target, self.username, self.password = get_connection_data(
             config['db'],
             config['username'],
             config['password'],
@@ -66,7 +80,14 @@ class DbManager(object):
 def dd_environment():
     db = DbManager(CONFIG)
 
-    with docker_run(COMPOSE_FILE, conditions=[db.initialize, WaitFor(db.connect)], attempts=2):
+    # TASKANA ships the instance and logs readiness after db2start; official images create it.
+    ready_message = 'Database db2diag log following' if DB2_VERSION == '11.1' else r'\(\*\) Setup has completed\.'
+    conditions = [
+        CheckDockerLogs(COMPOSE_FILE, ready_message, attempts=60, wait=10),
+        db.initialize,
+        WaitFor(db.connect),
+    ]
+    with docker_run(COMPOSE_FILE, conditions=conditions, attempts=2, capture=True):
         yield CONFIG, E2E_METADATA
 
 
