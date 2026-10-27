@@ -36,9 +36,6 @@
         "prefix": "kai.",
         "check": "kai.queue.info",
         "metadata_path": "metadata.csv"
-      },
-      "service_checks": {
-        "metadata_path": "assets/service_checks.json"
       }
     }
   },
