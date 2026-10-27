@@ -1,15 +1,15 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import ssl
 from collections import ChainMap
 from datetime import timedelta
 
 import pytest
 
 from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
-from datadog_checks.base.utils.http import RequestsWrapper
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError, HTTPClientTimeoutError
-from datadog_checks.base.utils.tls import create_ssl_context
+from datadog_checks.base.utils.tls import TlsConfig, create_ssl_context
 
 
 def test_fake_response_returns_only_configured_results():
@@ -160,26 +160,32 @@ def test_fake_response_raises_configured_stream_error_after_results(iter_method,
 
 
 @pytest.mark.parametrize(
-    'tls_config',
+    ('tls_config', 'verify_mode', 'check_hostname'),
     [
-        None,
-        {},
-        {'tls_verify': False},
-        {'tls_verify': None},
-        {'tls_validate_hostname': False, 'tls_ca_cert': None},
-        {'tls_ciphers': ['AES128-SHA']},
+        (None, ssl.CERT_REQUIRED, True),
+        ({}, ssl.CERT_REQUIRED, True),
+        ({'tls_verify': False}, ssl.CERT_NONE, False),
+        ({'tls_verify': None}, ssl.CERT_NONE, False),
+        ({'tls_validate_hostname': False, 'tls_ca_cert': None}, ssl.CERT_REQUIRED, False),
     ],
 )
-def test_fake_client_tls_policy_matches_real_client(tls_config: dict | None):
+def test_fake_client_tls_defaults_and_overrides(
+    tls_config: dict | None, verify_mode: ssl.VerifyMode, check_hostname: bool
+):
     client = FakeHTTPClient(tls_config=tls_config)
-    real_client = RequestsWrapper(tls_config or {}, {})
 
-    assert client.tls_config == real_client.tls_config
+    assert client.tls_config == {**TlsConfig().__dict__, **(tls_config or {})}
     context = create_ssl_context(client.tls_config)
-    real_context = create_ssl_context(real_client.tls_config)
-    assert context.verify_mode == real_context.verify_mode
-    assert context.check_hostname == real_context.check_hostname
-    assert context.get_ciphers() == real_context.get_ciphers()
+    assert context.verify_mode == verify_mode
+    assert context.check_hostname is check_hostname
+
+
+def test_fake_client_tls_cipher_override():
+    client = FakeHTTPClient(tls_config={'tls_ciphers': ['AES128-SHA']})
+    context = create_ssl_context(client.tls_config)
+
+    # TLS 1.3 cipher suites are configured separately by OpenSSL.
+    assert {cipher['name'] for cipher in context.get_ciphers() if cipher['protocol'] != 'TLSv1.3'} == {'AES128-SHA'}
 
 
 def test_fake_client_tls_overrides_are_isolated():
