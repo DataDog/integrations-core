@@ -31,15 +31,14 @@ jobs:
       OCTO_STS_SCOPE: DataDog/integrations-core
       OCTO_STS_POLICY: self.test-dispatch
 
-    # One source branch maps to one PR. Include the repository for forks and omit the SHA so a new
-    # revision cancels the previous Dispatcher. Master pushes keep independent runs.
-    # Keep concurrency at job level: workflow_run also fires for canceled triggers, whose skipped
-    # jobs must not cancel newer triggers.
+    # Share the trigger's PR group, including the repository for forks. Only triggers cancel running
+    # members; stale dispatches must wait for newer triggers. Master pushes keep independent runs.
+    # Keep concurrency at job level so skipped jobs from canceled triggers do not join the group.
     concurrency:
       group: test-dispatch-${{
         github.event_name == 'workflow_run' && format('pr-{0}/{1}', github.event.workflow_run.head_repository.full_name, github.event.workflow_run.head_branch) ||
         format('master-{0}', github.run_id) }}
-      cancel-in-progress: true
+      cancel-in-progress: false
 
     if: >-
       github.repository == 'DataDog/integrations-core'
@@ -70,6 +69,10 @@ jobs:
         with:
           scope: ${{ env.OCTO_STS_SCOPE }}
           policy: ${{ env.OCTO_STS_POLICY }}
+
+      - name: Record the scoped token mint time
+        id: octo-sts-mint
+        run: echo "minted_at=$(date +%s)" >> "$GITHUB_OUTPUT"
 
       - name: Mark the run pending
         env:
@@ -216,6 +219,7 @@ jobs:
           # Opts ddev into re-minting; the run outlives the one-hour token above.
           DD_DISPATCHER_OCTO_STS_SCOPE: ${{ env.OCTO_STS_SCOPE }}
           DD_DISPATCHER_OCTO_STS_POLICY: ${{ env.OCTO_STS_POLICY }}
+          DD_DISPATCHER_OCTO_STS_MINTED_AT: ${{ steps.octo-sts-mint.outputs.minted_at }}
           RESOLVED: ${{ steps.resolved.outputs.available }}
           PR_NUMBER: ${{ steps.resolved.outputs.pr_number }}
         run: |
