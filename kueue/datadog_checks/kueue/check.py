@@ -343,7 +343,9 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         metadata = workload.get('metadata', {})
         spec = workload.get('spec', {})
         status = workload.get('status', {})
-        tags = list(self.instance.get('tags') or [])
+        # Instance tags are user-configured tags plus any tags Autodiscovery copies from
+        # the controller pod. Leave them on metrics and off events.
+        tags: list[str] = []
 
         tags.extend(
             self.filter_empty_tags(
