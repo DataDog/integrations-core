@@ -9,7 +9,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Troubleshooting",
     "changelog": "CHANGELOG.md",
-    "description": "Monitor KAI Scheduler queue quotas, fair share, scheduling latency, and preemption",
+    "description": "Monitor KAI Scheduler quotas, fair share, scheduling latency, and preemption",
     "title": "KAI Scheduler",
     "media": [],
     "classifier_tags": [
