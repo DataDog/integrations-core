@@ -125,6 +125,8 @@ def test_instance_timeout(mocked_query, mocked_time, aggregator):
         count=1,
         message="DNS resolution of www.example.org timed out",
     )
+    aggregator.assert_metric('dns.can_connect', tags=tags, count=1, value=0)
+    aggregator.assert_metric('dns.cant_connect', tags=tags, count=1, value=1)
 
     # Assert coverage for this check on this instance
     aggregator.assert_all_metrics_covered()
@@ -154,4 +156,6 @@ def test_invalid_config(aggregator, instance, message):
     integration = DNSCheck('dns_check', {}, [instance])
     integration.check(instance)
     aggregator.assert_service_check(DNSCheck.SERVICE_CHECK_NAME, status=DNSCheck.CRITICAL, count=1, message=message)
+    aggregator.assert_metric('dns.can_connect', count=1, value=0)
+    aggregator.assert_metric('dns.cant_connect', count=1, value=1)
     aggregator.assert_all_metrics_covered()
