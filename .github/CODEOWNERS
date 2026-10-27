@@ -181,6 +181,9 @@ datadog_checks_base/tests/**/test_sql_commenter.py  @DataDog/database-monitoring
 /clickhouse/                                        @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /clickhouse/*.md                                    @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /clickhouse/manifest.json                           @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/ibm_db2/                                           @DataDog/database-monitoring-agent @DataDog/agent-integrations
+/ibm_db2/*.md                                       @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/ibm_db2/manifest.json                              @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 
 # Data Observability
 /do_query_actions/                                  @DataDog/data-observability @DataDog/agent-integrations
@@ -251,6 +254,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /adyen/*.md                                                          @DataDog/saas-integrations @DataDog/documentation
 /adyen/manifest.json                                                 @DataDog/saas-integrations @DataDog/documentation
 /adyen/assets/logs/                                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/akamai_cost_management/                                             @DataDog/saas-integrations
+/akamai_cost_management/*.md                                         @DataDog/saas-integrations @DataDog/documentation
+/akamai_cost_management/manifest.json                                @DataDog/saas-integrations @DataDog/documentation
 
 /anthropic_compliance_logs/                                          @DataDog/saas-integrations
 /anthropic_compliance_logs/*.md                                      @DataDog/saas-integrations @DataDog/documentation
@@ -415,6 +422,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /okta_workflows/*.md                                                 @DataDog/saas-integrations @DataDog/documentation
 /okta_workflows/manifest.json                                        @DataDog/saas-integrations @DataDog/documentation
 /okta_workflows/assets/logs/                                         @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+
+/openrouter/                                                         @DataDog/saas-integrations
+/openrouter/*.md                                                     @DataDog/saas-integrations @DataDog/documentation
+/openrouter/manifest.json                                            @DataDog/saas-integrations @DataDog/documentation
 
 /palo_alto_cortex_xdr/                                               @DataDog/saas-integrations
 /palo_alto_cortex_xdr/*.md                                           @DataDog/saas-integrations @DataDog/documentation
@@ -650,6 +661,8 @@ plaid/assets/logs/                                                  @DataDog/saa
 /infiniband/*.md                                                     @DataDog/accelerator-telemetry @DataDog/documentation
 /infiniband/manifest.json                                            @DataDog/accelerator-telemetry @DataDog/agent-integrations @DataDog/documentation
 
+/kai_scheduler/                                                      @DataDog/accelerator-telemetry
+/kai_scheduler/*.md                                                  @DataDog/accelerator-telemetry @DataDog/documentation
 /kueue/                                                                @DataDog/gpu-monitoring-agent
 /kueue/*.md                                                            @DataDog/gpu-monitoring-agent @DataDog/documentation
 /kueue/manifest.json                                                   @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
@@ -837,6 +850,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /anomali_threatstream/                                               @DataDog/cloud-siem
 /anomali_threatstream/*.md                                           @DataDog/cloud-siem @DataDog/documentation
 /anomali_threatstream/manifest.json                                  @DataDog/cloud-siem @DataDog/documentation
+
+/automox/                                                            @DataDog/cloud-siem
+/automox/*.md                                                        @DataDog/cloud-siem @DataDog/documentation
+/automox/manifest.json                                               @DataDog/cloud-siem @DataDog/documentation
+/automox/assets/logs/                                                @DataDog/cloud-siem @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 
 /palo_alto_networks_cortex_xsoar/                                     @DataDog/saas-integrations
