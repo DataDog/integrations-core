@@ -266,3 +266,29 @@ def test_setup_errors_report_health_until_fixed(dbm_instance, message, event):
         assert submit.call_args_list == [mock.call(name=event, status=HealthStatus.WARNING)]
         collector._handle_recovery('other')
         assert submit.call_args_list[-1] == mock.call(name=event, status=HealthStatus.OK)
+
+
+@pytest.mark.unit
+def test_outdated_procedure_reports_health_event(dbm_instance):
+    # The shape the procedure returned before the Agent derived the statistics itself.
+    cursor = mock.MagicMock()
+    cursor.description = [
+        (name,)
+        for name in (
+            'schema_name',
+            'table_name',
+            'column_name',
+            'stats_age',
+            'n_distinct',
+            'null_frac',
+            'avg_width',
+            'most_common_freqs',
+        )
+    ]
+    cursor.fetchall.return_value = [('dbo', 'orders', 'id', 10, 100.0, 0.0, 4.0, None)]
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    with mock.patch.object(check.health, 'submit_health_event') as submit:
+        assert check.column_statistics._collect_database(cursor, 'app') == (0, 0, 0)
+    submit.assert_called_once_with(
+        name=SqlServerHealthEvent.COLUMN_STATISTICS_PROCEDURE_OUTDATED, status=HealthStatus.WARNING
+    )

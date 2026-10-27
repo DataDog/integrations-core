@@ -2,7 +2,8 @@
 -- documentation in each database. The test setups load this file, so keep the documentation's copy in sync with it.
 --
 -- It returns only the counts in each column's statistics histogram, never the histogram's values. The Agent derives
--- the statistics from them, so changes to that logic don't need the procedure to be reinstalled.
+-- the statistics from them, so changes to that logic don't need the procedure to be reinstalled. If the columns it
+-- returns ever change, the Agent warns that the installed procedure is outdated.
 CREATE OR ALTER PROCEDURE datadog.column_statistics @max_tables INT = 500
 WITH EXECUTE AS OWNER
 AS
@@ -52,16 +53,21 @@ BEGIN
     CLOSE stats_cursor;
     DEALLOCATE stats_cursor;
 
-    -- One row per histogram step, keeping only whether the step is the NULL step, never its value. A column whose
-    -- histogram is empty, as when every value is NULL, gets a single row with no step.
+    -- One row per column. Its histogram steps are packed in order as is_null:equal_rows:range_rows:distinct_range_rows,
+    -- keeping only whether a step is the NULL step, never its value. A column whose histogram is empty, as when every
+    -- value is NULL, has no steps.
     SELECT OBJECT_SCHEMA_NAME(s.object_id) AS schema_name, OBJECT_NAME(s.object_id) AS table_name, s.column_name,
         s.is_nullable, s.[rows], s.rows_sampled, DATEDIFF(SECOND, s.last_updated, SYSDATETIME()) AS stats_age,
-        s.fixed_width, s.avg_width,
-        CASE WHEN h.step_number IS NULL THEN NULL WHEN h.range_high_key IS NULL THEN 1 ELSE 0 END AS is_null,
-        CAST(h.equal_rows AS FLOAT) AS equal_rows, CAST(h.range_rows AS FLOAT) AS range_rows,
-        CAST(h.distinct_range_rows AS FLOAT) AS distinct_range_rows
+        s.fixed_width, s.avg_width, h.steps
     FROM #stats s
-    OUTER APPLY sys.dm_db_stats_histogram(s.object_id, s.stats_id) h
-    ORDER BY schema_name, table_name, s.column_name, h.step_number;
+    OUTER APPLY (
+        -- STRING_AGG stops at 8000 bytes unless its input is VARCHAR(MAX); 201 steps can exceed that.
+        SELECT STRING_AGG(CAST(CONCAT(CASE WHEN hh.range_high_key IS NULL THEN 1 ELSE 0 END, ':',
+                CAST(hh.equal_rows AS DECIMAL(19, 2)), ':', CAST(hh.range_rows AS DECIMAL(19, 2)), ':',
+                CAST(hh.distinct_range_rows AS DECIMAL(19, 2))) AS VARCHAR(MAX)), ',')
+                WITHIN GROUP (ORDER BY hh.step_number) AS steps
+        FROM sys.dm_db_stats_histogram(s.object_id, s.stats_id) hh
+    ) h
+    ORDER BY schema_name, table_name, s.column_name;
 END;
 GO

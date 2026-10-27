@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import math
 import time
-from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
 from datadog_checks.base import is_affirmative
@@ -15,7 +14,12 @@ from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.health import SqlServerHealthEvent
-from datadog_checks.sqlserver.utils import construct_use_statement, raise_if_cancelled, serialize_database_names
+from datadog_checks.sqlserver.utils import (
+    construct_use_statement,
+    execute_query,
+    raise_if_cancelled,
+    serialize_database_names,
+)
 
 if TYPE_CHECKING:
     from datadog_checks.sqlserver import SQLServer
@@ -27,7 +31,6 @@ PAYLOAD_MAX_COLUMNS = 5_000
 # Postgres collector's statement timeout.
 MAX_QUERY_DURATION_SECONDS = 60
 KEY_PREFIX = "dbm-column-statistics-"
-FETCH_SIZE = 10_000
 # Postgres's default_statistics_target, the most values ANALYZE keeps in most_common_freqs.
 MAX_COMMON_VALUES = 100
 # Fewer distinct values than this share of the rows are sent as a count, more as a negative share, as ANALYZE does.
@@ -37,6 +40,22 @@ N_DISTINCT_SCALING_THRESHOLD = 0.1
 # procedure (tests/sql/column_statistics.sql) in each database; it runs as its owner and returns only the counts in
 # each column's histogram, never column values.
 COLUMN_STATISTICS_QUERY = "EXEC datadog.column_statistics @max_tables = ?"
+# The columns the procedure returns. A procedure installed from an older version of the documentation returns others.
+PROCEDURE_COLUMNS = frozenset(
+    (
+        "schema_name",
+        "table_name",
+        "column_name",
+        "is_nullable",
+        "rows",
+        "rows_sampled",
+        "stats_age",
+        "fixed_width",
+        "avg_width",
+        "steps",
+    )
+)
+PROCEDURE_OUTDATED_MESSAGE = "datadog.column_statistics is outdated"
 
 # The system databases can't usefully hold the procedure (tempdb even loses it on restart), and an offline or
 # inaccessible database can't run it.
@@ -65,7 +84,16 @@ SETUP_ERRORS = (
         ("(229)", "EXECUTE permission was denied"),
         "grant EXECUTE on it to the Agent's user",
     ),
+    (
+        SqlServerHealthEvent.COLUMN_STATISTICS_PROCEDURE_OUTDATED,
+        (PROCEDURE_OUTDATED_MESSAGE,),
+        "re-create it as described in the documentation",
+    ),
 )
+
+
+class OutdatedProcedureError(Exception):
+    pass
 
 
 def agent_check_getter(self: SqlserverColumnStatisticsCollector) -> SQLServer:
@@ -158,8 +186,10 @@ class SqlserverColumnStatisticsCollector(DBMAsyncJob):
     def _collect_database(self, cursor, db_name: str) -> tuple[int, int, int]:
         try:
             cursor.execute(construct_use_statement(db_name))
-            cursor.execute(COLUMN_STATISTICS_QUERY, (self._max_tables,))
-            columns = list(read_columns(cursor))
+            rows = execute_query(COLUMN_STATISTICS_QUERY, cursor, parameters=(self._max_tables,))
+            if rows and not PROCEDURE_COLUMNS <= rows[0].keys():
+                raise OutdatedProcedureError(PROCEDURE_OUTDATED_MESSAGE)
+            columns = [derive_column_statistics(row, parse_steps(row["steps"])) for row in rows]
         except Exception as e:
             self._handle_error(db_name, e)
             return 0, 0, 0
@@ -225,26 +255,20 @@ class SqlserverColumnStatisticsCollector(DBMAsyncJob):
         self._check.database_monitoring_column_statistics(json.dumps(event, default=default_json_event_encoding))
 
 
-def read_columns(cursor) -> Iterator[dict]:
-    """
-    Read the procedure's histogram steps, ordered by column, and yield each column's statistics as soon as its last
-    step is read, so a database's histograms are never all in memory at once.
-    """
-    names = [str(column[0]).lower() for column in cursor.description]
-    column: dict | None = None
-    steps: list[dict] = []
-    while rows := cursor.fetchmany(FETCH_SIZE):
-        for values in rows:
-            row = dict(zip(names, values))
-            key = (row["schema_name"], row["table_name"], row["column_name"])
-            if column is None or key != (column["schema_name"], column["table_name"], column["column_name"]):
-                if column is not None:
-                    yield derive_column_statistics(column, steps)
-                column, steps = row, []
-            if row["is_null"] is not None:
-                steps.append(row)
-    if column is not None:
-        yield derive_column_statistics(column, steps)
+def parse_steps(steps: str | None) -> list[dict]:
+    """Unpack the histogram steps the procedure packs as is_null:equal_rows:range_rows:distinct_range_rows."""
+    parsed = []
+    for packed in steps.split(",") if steps else []:
+        is_null, equal_rows, range_rows, distinct_range_rows = packed.split(":")
+        parsed.append(
+            {
+                "is_null": is_null == "1",
+                "equal_rows": float(equal_rows),
+                "range_rows": float(range_rows),
+                "distinct_range_rows": float(distinct_range_rows),
+            }
+        )
+    return parsed
 
 
 def derive_column_statistics(column: dict, steps: list[dict]) -> dict:
