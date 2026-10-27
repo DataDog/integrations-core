@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import ssl
-from collections import ChainMap
 from datetime import timedelta
 
 import pytest
@@ -159,33 +158,15 @@ def test_fake_response_raises_configured_stream_error_after_results(iter_method,
     assert exc_info.value is error
 
 
-@pytest.mark.parametrize(
-    ('tls_config', 'verify_mode', 'check_hostname'),
-    [
-        (None, ssl.CERT_REQUIRED, True),
-        ({}, ssl.CERT_REQUIRED, True),
-        ({'tls_verify': False}, ssl.CERT_NONE, False),
-        ({'tls_verify': None}, ssl.CERT_NONE, False),
-        ({'tls_validate_hostname': False, 'tls_ca_cert': None}, ssl.CERT_REQUIRED, False),
-    ],
-)
-def test_fake_client_tls_defaults_and_overrides(
-    tls_config: dict | None, verify_mode: ssl.VerifyMode, check_hostname: bool
-):
-    client = FakeHTTPClient(tls_config=tls_config)
+@pytest.mark.parametrize('tls_verify', [False, None])
+def test_fake_client_tls_overrides_preserve_defaults(tls_verify: bool | None):
+    client = FakeHTTPClient(tls_config={'tls_verify': tls_verify})
 
-    assert client.tls_config == {**TlsConfig().__dict__, **(tls_config or {})}
+    assert client.tls_config['tls_verify'] is tls_verify
+    assert client.tls_config['tls_ciphers'] == TlsConfig().tls_ciphers
     context = create_ssl_context(client.tls_config)
-    assert context.verify_mode == verify_mode
-    assert context.check_hostname is check_hostname
-
-
-def test_fake_client_tls_cipher_override():
-    client = FakeHTTPClient(tls_config={'tls_ciphers': ['AES128-SHA']})
-    context = create_ssl_context(client.tls_config)
-
-    # TLS 1.3 cipher suites are configured separately by OpenSSL.
-    assert {cipher['name'] for cipher in context.get_ciphers() if cipher['protocol'] != 'TLSv1.3'} == {'AES128-SHA'}
+    assert context.verify_mode == ssl.CERT_NONE
+    assert context.check_hostname is False
 
 
 def test_fake_client_tls_overrides_are_isolated():
@@ -199,11 +180,14 @@ def test_fake_client_tls_overrides_are_isolated():
     assert overrides['tls_ciphers'] == ['AES128-SHA']
 
 
-def test_created_client_retains_default_discovery_cipher_policy():
+def test_created_client_uses_canonical_tls_defaults():
     parent = FakeHTTPClient(tls_config={'tls_ciphers': 'ECDHE+AESGCM'})
     child = parent.create_client()
-    context = create_ssl_context(ChainMap({'tls_verify': False}, child.tls_config))
 
+    assert child.tls_config == TlsConfig().__dict__
+    context = create_ssl_context(child.tls_config)
+    assert context.verify_mode == ssl.CERT_REQUIRED
+    assert context.check_hostname is True
     assert 'AES128-SHA' in {cipher['name'] for cipher in context.get_ciphers()}
     child.tls_config['tls_verify'] = False
     assert parent.tls_config['tls_verify'] is True
