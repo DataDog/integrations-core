@@ -357,50 +357,52 @@ def test_collects_build_config_without_default_branch_builds(dd_run_check, aggre
     """
     TeamCity's default build filter hides builds outside the default branch, as well as personal, canceled,
     and failed-to-start builds. A build configuration whose builds all fall in that set, such as one that
-    only builds pull request branches, must still be collected.
+    only builds pull request branches, must still be collected. A build still running when collection
+    starts must be reported once it finishes.
     """
     build_config = LEGACY_REST_INSTANCE['build_configuration']
-    builds = []
-
-    def add_pull_request_build(build_id):
-        builds.insert(
-            0,
-            {
-                'id': build_id,
-                'buildTypeId': build_config,
-                'number': str(build_id),
-                'status': 'SUCCESS',
-                'state': 'finished',
-                'branchName': 'pull/{}'.format(build_id),
-                'webUrl': 'http://localhost:8111/viewLog.html?buildId={}'.format(build_id),
-            },
-        )
+    builds = [
+        {
+            'id': build_id,
+            'buildTypeId': build_config,
+            'number': str(build_id),
+            'status': 'SUCCESS',
+            'state': state,
+            'branchName': 'pull/{}'.format(build_id),
+            'webUrl': 'http://localhost:8111/viewLog.html?buildId={}'.format(build_id),
+        }
+        for build_id, state in ((101, 'running'), (100, 'finished'))
+    ]
 
     def teamcity_api(url, **kwargs):
         parsed_url = urlparse(url)
         if parsed_url.path.endswith('/app/rest/builds/'):
             locator = parse_qs(parsed_url.query)['locator'][0]
-            # Without `defaultFilter:false`, TeamCity only returns default branch builds.
+            # TeamCity's default filter would hide every build here because none is on the default branch.
             matching = builds if 'defaultFilter:false' in locator else []
+            if 'state:finished' in locator:
+                matching = [build for build in matching if build['state'] == 'finished']
             if 'sinceBuild:id:' in locator:
                 since_build = int(locator.split('sinceBuild:id:')[1].split(',')[0])
                 matching = [build for build in matching if build['id'] > since_build]
             if 'count:1' in locator:
                 matching = matching[:1]
             return MockResponse(json_data={'count': len(matching), 'build': matching})
+        if parsed_url.path.endswith('/statistics'):
+            build_id = int(parsed_url.path.split('buildId:')[1].split('/')[0])
+            build_duration = {'name': 'BuildDuration', 'value': build_id * 1000}
+            return MockResponse(json_data={'count': 1, 'property': [build_duration]})
         if parsed_url.path.endswith('/app/rest/buildTypes/id:{}'.format(build_config)):
             return MockResponse(json_data={'id': build_config, 'projectId': 'SampleProject'})
         return MockResponse(json_data={'count': 0})
 
     mocker.patch('requests.Session.get', side_effect=teamcity_api)
-    instance = dict(
-        LEGACY_REST_INSTANCE, build_config_metrics=False, tests_health_check=False, build_problem_health_check=False
-    )
+    instance = dict(LEGACY_REST_INSTANCE, tests_health_check=False, build_problem_health_check=False)
     check = teamcity_rest_check(instance)
 
-    add_pull_request_build(100)
     dd_run_check(check)
-    add_pull_request_build(101)
+    builds[0]['state'] = 'finished'
     dd_run_check(check)
 
-    assert ['build_id:101' in event['tags'] for event in aggregator.events] == [True]
+    aggregator.assert_metric('teamcity.build_duration', value=101000, count=1)
+    aggregator.assert_metric_has_tag('teamcity.build_duration', 'build_config:{}'.format(build_config))
