@@ -1,3 +1,5 @@
+# bypass-global-date-remapper-parse-failure-checks
+# Lines without a UTC offset keep the incoming official timestamp.
 id: "nifi"
 tests:
   - sample: "2026-05-01 12:00:00,123 INFO [main] o.a.nifi.NiFi Launched NiFi"
