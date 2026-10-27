@@ -64,10 +64,10 @@ No additional installation is needed on your server.
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
-The integration submits a gauge only when its PAN-OS call runs, so each gauge series has one point per interval of its group. Size monitor evaluation windows to match:
+The integration submits a gauge only when its PAN-OS call runs, so each gauge gets one point per call. Size monitor evaluation windows to match each call's interval:
 
 - Every 2 minutes: BGP peer metrics and data-plane CPU utilization.
-- Every 3 minutes: management-plane CPU, memory, and swap, IPsec tunnel and OSPF neighbor metrics.
+- Every 3 minutes: management-plane CPU, memory, and swap; IPsec tunnel metrics; and OSPF neighbor metrics.
 - Every 5 minutes: power and temperature sensors.
 - Every 30 minutes: disk usage, interface speed, and top-N report metrics.
 - Every 24 hours: license days left and expiration.
