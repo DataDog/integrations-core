@@ -1,0 +1,1 @@
+Make the `ddev validate labeler` fix-it message actionable for integrations without an Agent check, and keep bracketed text in `ddev validate all` failure output.

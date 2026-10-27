@@ -114,6 +114,22 @@ def test_non_root_warning_logged_once(aggregator, dd_run_check, instance, caplog
     aggregator.assert_service_check('lparstats.can_collect', status=AgentCheck.OK)
 
 
+def test_dash_values_skipped_silently(aggregator, dd_run_check, instance, caplog):
+    """lparstat prints '-' for stats that do not apply to the LPAR; they are skipped without logging."""
+    check = LPARStats('lparstats', {}, [instance])
+    with patch('datadog_checks.lparstats.lparstats.subprocess.run', side_effect=_mock_subprocess_run):
+        with caplog.at_level(logging.INFO):
+            dd_run_check(check)
+
+    assert 'unable to convert' not in caplog.text
+    assert len(aggregator.metrics('system.lpar.memory.iomu')) == 0
+    assert len(aggregator.metrics('system.lpar.memory.iomf')) == 0
+    assert len(aggregator.metrics('system.lpar.memory.iohwm')) == 0
+    # sibling fields are still collected
+    aggregator.assert_metric('system.lpar.memory.physb', value=1.20, tags=[])
+    aggregator.assert_metric('system.lpar.memory.entc', value=15.2, tags=[])
+
+
 def test_hypervisor_and_entitlements(aggregator, dd_run_check):
     """Hypervisor and memory-entitlement collectors emit metrics with call/iompn tags."""
     inst = {

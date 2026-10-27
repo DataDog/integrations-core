@@ -33,6 +33,18 @@ def _run_cmd(cmd: list[str], sudo: bool = False, timeout: float | None = None) -
         return '', str(e), -1
 
 
+def _to_float(value: str) -> float | None:
+    """Convert a lparstat output value to float.
+
+    Returns None when lparstat prints '-', which it uses for statistics that do not
+    apply to the LPAR (e.g. I/O memory pool fields on LPARs without I/O memory pools).
+    Raises ValueError for other non-numeric values.
+    """
+    if value == '-':
+        return None
+    return float(value)
+
+
 def _lparstat_rows(
     cmd: list[str], start_idx: int, sudo: bool = False, timeout: float | None = None
 ) -> tuple[list[str], str, int]:
@@ -106,7 +118,9 @@ class LPARStats(AgentCheck):
             if idx >= len(values):
                 break
             try:
-                m = float(values[idx])
+                m = _to_float(values[idx])
+                if m is None:
+                    continue
                 if '%' in field:
                     field = field.replace('%', '')
                 self.gauge(f'system.lpar.memory.{field}', m)
@@ -132,8 +146,10 @@ class LPARStats(AgentCheck):
                 if idx >= len(self.HYPERVISOR_METRICS):
                     break
                 try:
+                    metric_value = _to_float(entry)
+                    if metric_value is None:
+                        continue
                     metric_name = self.HYPERVISOR_METRICS[idx]
-                    metric_value = float(entry)
                     self.gauge(metric_name, metric_value, tags=[call_tag])
                 except ValueError:
                     self.log.info(
@@ -164,7 +180,9 @@ class LPARStats(AgentCheck):
                 try:
                     field = field.replace('%', '')
                     metric_name = f"system.lpar.memory.entitlement.{field}"
-                    metric_value = float(values[idx + 1])
+                    metric_value = _to_float(values[idx + 1])
+                    if metric_value is None:
+                        continue
                     self.gauge(metric_name, metric_value, tags=[tag])
                 except ValueError:
                     self.log.info("unable to convert %s to float for %s - skipping", field, tag)
@@ -197,7 +215,10 @@ class LPARStats(AgentCheck):
             if idx >= norm_start:
                 metric = f"{metric}.norm"
             try:
-                metrics[metric] = float(stats[idx])
+                value = _to_float(stats[idx])
+                if value is None:
+                    continue
+                metrics[metric] = value
             except ValueError:
                 # freq field (e.g. "3.5GHz[100%]") is expected to fail
                 self.log.debug("unable to convert %s (%s) to float - skipping", field, stats[idx])

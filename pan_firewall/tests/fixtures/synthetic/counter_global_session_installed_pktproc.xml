@@ -1,0 +1,19 @@
+<!-- Derived from fw-a/counter_global.xml: only its `session_installed` entry, whose `aspect` is `pktproc` instead of `resource`: a listed counter takes its category and aspect from the response, not from the table. The other counters are absent, so they are sent as 0. -->
+<response status="success"><result>
+  <dp>dp0</dp>
+  <global>
+    <t>117669</t>
+    <counters>
+      <entry>
+        <name>session_installed</name>
+        <value>2269</value>
+        <rate>0</rate>
+        <severity>info</severity>
+        <category>session</category>
+        <aspect>pktproc</aspect>
+        <desc>Sessions installed</desc>
+        <id>206</id>
+      </entry>
+    </counters>
+  </global>
+</result></response>
