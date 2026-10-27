@@ -716,9 +716,13 @@ class RequestsWrapper(object):
         set_header_value(self.options['headers'], name, value)
 
     def disable_auth(self) -> None:
-        """Suppress configured and .netrc auth without disabling other environment settings."""
+        """Suppress configured `auth` and .netrc credentials, preserving other environment settings.
+
+        Does not suppress `auth_token` handling or an `Authorization` entry in `headers`.
+        """
         self.options['auth'] = suppress_default_auth
         if self._session is not None:
+            self._session.auth = suppress_default_auth
             _suppress_netrc_auth(self._session)
 
     def get(self, url, **options):

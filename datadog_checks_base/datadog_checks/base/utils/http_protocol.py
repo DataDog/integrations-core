@@ -188,9 +188,11 @@ class HTTPClient(Protocol):
         """Replace every case-insensitive match with one header under the first matching spelling."""
         ...
 
-    # TODO: This currently has no callers; VoltDB and NiFi will use it in their backend-neutral HTTP migrations.
     def disable_auth(self) -> None:
-        """Clear configured and .netrc auth without disabling other environment settings."""
+        """Suppress configured `auth` and .netrc credentials, preserving other environment settings.
+
+        Does not suppress `auth_token` handling or an `Authorization` entry in `headers`.
+        """
         ...
 
     def close(self) -> None: ...

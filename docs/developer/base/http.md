@@ -67,16 +67,17 @@ For complete documentation of every option, see the associated configuration tem
 
 ## Disabling authentication
 
-Call `self.http.disable_auth()` to suppress configured authentication and automatic `.netrc` credentials on subsequent
-requests, including redirects:
+Call `self.http.disable_auth()` to suppress the client's configured `auth` (such as Basic credentials) and automatic `.netrc`
+credentials on subsequent requests, including redirects:
 
 ```python
 self.http.disable_auth()
 response = self.http.get(url)
 ```
 
-This applies to existing and newly created sessions without disabling other environment settings, such as proxies.
-Explicit per-request options still override client configuration.
+This applies to existing and newly created sessions, including requests with `auth=None`, without disabling other
+environment settings, such as proxies. It does not suppress `auth_token` handling or an `Authorization` entry in `headers`.
+Explicit per-request authentication still overrides client configuration.
 
 ## Errors
 

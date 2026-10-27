@@ -53,6 +53,7 @@ class TestDisableAuth:
         http.disable_auth()
 
         assert 'Authorization' not in get_wire_headers(http)
+        assert 'Authorization' not in get_wire_headers(http, auth=None)
 
     def test_disable_auth_preserves_trust_env(self):
         http = RequestsWrapper({}, {})
