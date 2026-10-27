@@ -1,0 +1,17 @@
+[
+    {
+        "agent_version": "7.86.0",
+        "integration": "KAI Scheduler",
+        "check": "kai.openmetrics.health",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [
+            "endpoint",
+            "kai_component"
+        ],
+        "name": "KAI Scheduler OpenMetrics endpoint health",
+        "description": "Returns `CRITICAL` if the Agent is unable to connect to a KAI Scheduler OpenMetrics endpoint, otherwise returns `OK`."
+    }
+]
