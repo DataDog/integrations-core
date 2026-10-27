@@ -10,7 +10,7 @@
       <speed>ukn</speed>
       <duplex>ukn</duplex>
       <state>up</state>
-      <mac>02:ff:e0:32:96:ad</mac>
+      <mac>02:00:00:00:00:0c</mac>
       <type>0</type>
       <mode>ha</mode>
       <untag>False</untag>

@@ -10,14 +10,14 @@
       <duplex>full</duplex>
       <state>up</state>
       <fec>unknown</fec>
-      <hwaddr>02:ff:f4:8a:70:37</hwaddr>
-      <ip>10.60.0.12</ip>
+      <hwaddr>02:00:00:00:00:0d</hwaddr>
+      <ip>10.20.0.12</ip>
       <ip-type>dhcp-client</ip-type>
       <netmask>255.255.255.0</netmask>
-      <gw>10.60.0.1</gw>
+      <gw>10.20.0.1</gw>
       <ipv6>unknown</ipv6>
       <ip6-type>static</ip6-type>
-      <ipv6ll>fe80::ff:f4ff:fe8a:7037/64</ipv6ll>
+      <ipv6ll>fe80::d/64</ipv6ll>
       <ipv6gw/>
       <name>Management Interface</name>
     </info>
