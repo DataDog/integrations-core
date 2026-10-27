@@ -188,6 +188,13 @@ class HTTPClient(Protocol):
         """Replace every case-insensitive match with one header under the first matching spelling."""
         ...
 
+    def disable_auth(self) -> None:
+        """Suppress configured `auth` and .netrc credentials, preserving other environment settings.
+
+        Does not suppress `auth_token` handling or an `Authorization` entry in `headers`.
+        """
+        ...
+
     def close(self) -> None: ...
 
     def get_cookie(self, name: str, default: str | None = None) -> str | None:
