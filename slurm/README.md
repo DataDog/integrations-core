@@ -144,7 +144,7 @@ See [metadata.csv][6] for a list of metrics provided by this integration.
 ### Events
 
 When `collect_job_events` is enabled and GPU monitoring is enabled in the Agent (`gpu.enabled: true`), the Slurm
-integration polls `sacct` for jobs active since the previous check run and sends Datadog events for job lifecycle
+integration polls `sacct` for jobs active since the previous check run and sends Datadog events for job life cycle
 transitions. The transition is in the `slurm_job_transition` tag:
 
 - Submitted (`slurm_job_transition:submitted`): a job appears after the check has initialized its state. A job array
