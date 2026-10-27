@@ -15,12 +15,10 @@ event per execution. The backend joins them back to the task by `task_id`, `stat
 
 from __future__ import annotations
 
-import datetime
 import threading
 import time
 import uuid
 from contextlib import closing
-from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
 import pymysql
@@ -539,32 +537,11 @@ def _error_result(error: Exception, duration: float, connecting: bool = False) -
 
 def _to_text(value: Any) -> str | None:
     """
-    Render a column value as text, the only type the backend accepts besides null. Statements
-    should cast in SQL; this covers the values pymysql returns when they don't.
+    Render a column value as text, the only type the backend accepts besides null. Statements cast
+    their columns to text in SQL; this keeps a value they don't cast readable.
     """
     if value is None or isinstance(value, str):
         return value
     if isinstance(value, (bytes, bytearray)):
         return bytes(value).decode('utf-8', errors='replace')
-    if isinstance(value, datetime.datetime):
-        # MySQL's own DATETIME text format.
-        return value.isoformat(sep=' ')
-    if isinstance(value, datetime.timedelta):
-        return _format_time(value)
-    if isinstance(value, Decimal):
-        # Plain notation keeps every digit the server sent, never an exponent.
-        return format(value, 'f')
     return str(value)
-
-
-def _format_time(value: datetime.timedelta) -> str:
-    """Render a TIME value, which pymysql returns as a timedelta, the way MySQL prints it."""
-    total_microseconds = (value.days * 86_400 + value.seconds) * 1_000_000 + value.microseconds
-    sign = '-' if total_microseconds < 0 else ''
-    seconds, microseconds = divmod(abs(total_microseconds), 1_000_000)
-    minutes, seconds = divmod(seconds, 60)
-    hours, minutes = divmod(minutes, 60)
-    text = f'{sign}{hours:02d}:{minutes:02d}:{seconds:02d}'
-    if microseconds:
-        text += f'.{microseconds:06d}'
-    return text

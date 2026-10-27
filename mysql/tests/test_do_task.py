@@ -3,12 +3,10 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import datetime
 import json
 import time
 import uuid
 from copy import deepcopy
-from decimal import Decimal
 from unittest.mock import patch
 
 import pymysql
@@ -838,12 +836,6 @@ def test_connection_read_timeout_follows_the_statement_timeouts(aggregator, dd_r
         pytest.param(42, '42', id='int'),
         pytest.param(b'abc', 'abc', id='bytes'),
         pytest.param(b'\xff', '�', id='invalid-utf8'),
-        pytest.param(Decimal('12.50'), '12.50', id='decimal'),
-        pytest.param(Decimal('1E+2'), '100', id='decimal-exponent'),
-        pytest.param(datetime.datetime(2026, 1, 1, 0, 49, 0, 5), '2026-01-01 00:49:00.000005', id='datetime'),
-        pytest.param(datetime.date(2026, 1, 1), '2026-01-01', id='date'),
-        pytest.param(datetime.timedelta(days=1, seconds=5, microseconds=10), '24:00:05.000010', id='time'),
-        pytest.param(-datetime.timedelta(hours=1, minutes=2), '-01:02:00', id='negative-time'),
     ],
 )
 def test_values_are_rendered_as_text(value, expected):
