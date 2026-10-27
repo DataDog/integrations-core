@@ -1188,7 +1188,7 @@ files:
           value:
             type: number
             example: 10
-          fleet_configurable: true
+          fleet_configurable: false
     - name: schemas_collection
       deprecation:
         Agent version: 7.70.0
@@ -1204,14 +1204,14 @@ files:
           value:
             type: boolean
             example: false
-          fleet_configurable: true
+          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the database schema collection interval (in seconds). Defaults to 600 seconds.
           value:
             type: number
             example: 600
-          fleet_configurable: true
+          fleet_configurable: false
         - name: max_execution_time
           description: |
             Set the maximum time for schema collection (in seconds). Defaults to 10 seconds.
@@ -1219,7 +1219,7 @@ files:
           value:
             type: number
             example: 10
-          fleet_configurable: true
+          fleet_configurable: false
     - name: propagate_agent_tags
       description: |
         Set to `true` to propagate the tags from `datadog.yaml` and the agent host tags to the check.
@@ -1321,7 +1321,7 @@ files:
             type: integer
             example: 3
             display_default: 3
-          fleet_configurable: true
+          fleet_configurable: false
         - name: query_completions
           description: |
             Configure the collection of completed queries from the `datadog_query_completions` XE session.
@@ -1349,7 +1349,7 @@ files:
               type: integer
               example: 1000
               display_default: 1000
-          fleet_configurable: true
+          fleet_configurable: false
         - name: query_errors
           description: |
             Configure the collection of query errors from the `datadog_query_errors` XE session.
@@ -1377,7 +1377,7 @@ files:
               type: integer
               example: 1000
               display_default: 1000
-          fleet_configurable: true
+          fleet_configurable: false
     - name: collect_deadlocks
       description: |
         Configure the collection of deadlock data.
@@ -1417,7 +1417,7 @@ files:
           value:
             type: boolean
             example: false
-          fleet_configurable: true
+          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the interval for collecting deadlock data, in seconds. Defaults to 600 seconds.
@@ -1431,7 +1431,7 @@ files:
           value:
             type: number
             example: 100
-          fleet_configurable: true
+          fleet_configurable: false
     - name: data_observability
       display_priority: 0
       fleet_configurable: true
