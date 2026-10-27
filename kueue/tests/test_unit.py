@@ -20,6 +20,11 @@ from .common import EXPECTED_METRIC_TAGS, UNIT_METRICS, get_fixture_path
 pytestmark = pytest.mark.unit
 
 
+@pytest.fixture(autouse=True)
+def reset_persistent_cache():
+    datadog_agent.reset()
+
+
 def test_mapped_metrics_are_in_metadata():
     mapped_metrics = set()
     mapped_metrics.update(metadata_metric_name(metric_name) for metric_name in METRIC_MAP.values())
@@ -326,7 +331,6 @@ def test_workload_events_no_duplicates(dd_run_check, aggregator, instance, mock_
 
 
 def test_workload_event_index_is_monotonic_per_workload(dd_run_check, aggregator, instance, mock_http_response):
-    datadog_agent.reset()
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
     check = KueueCheck('kueue', {}, [instance])
     check.kube_client = FakeKubernetesAPIClient(
@@ -352,7 +356,6 @@ def test_workload_event_index_is_monotonic_per_workload(dd_run_check, aggregator
 
 
 def test_workload_event_index_persists_across_restart(dd_run_check, aggregator, instance, mock_http_response):
-    datadog_agent.reset()
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
     check = KueueCheck('kueue', {}, [instance])
     check.kube_client = FakeKubernetesAPIClient(load_workloads('pending'), load_workloads('admitted'))
@@ -377,7 +380,6 @@ def test_workload_event_index_persists_across_restart(dd_run_check, aggregator, 
 
 
 def test_workload_event_index_ignores_invalid_cache_entries(instance):
-    datadog_agent.reset()
     check = KueueCheck('kueue', {}, [instance])
     check.write_persistent_cache(
         'workload_event_index',
@@ -395,7 +397,6 @@ def test_workload_event_index_ignores_invalid_cache_entries(instance):
 
 
 def test_workload_event_index_prunes_absent_workloads(dd_run_check, aggregator, instance, mock_http_response):
-    datadog_agent.reset()
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
     check = KueueCheck('kueue', {}, [instance])
     check.kube_client = FakeKubernetesAPIClient(
