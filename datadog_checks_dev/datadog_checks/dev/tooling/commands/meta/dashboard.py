@@ -4,6 +4,7 @@
 import json
 import os
 import re
+from typing import Any
 
 import click
 import requests
@@ -15,7 +16,29 @@ from datadog_checks.dev.tooling.utils import get_valid_integrations, write_manif
 
 BOARD_ID_PATTERN = r'{site}/[^/]+/([^/]+)'
 DASHBOARD_API = 'https://api.{site}/api/v1/dashboard/{board_id}'
-REQUIRED_FIELDS = ["layout_type", "title", "description", "template_variables", "widgets"]
+SUPPORTED_FIELDS = (
+    'title',
+    'layout_type',
+    'widgets',
+    'description',
+    'is_read_only',
+    'restricted_roles',
+    'template_variables',
+    'notify_list',
+    'template_variable_presets',
+    'tags',
+    'experience_type',
+    'pause_auto_refresh',
+    'default_timeframe',
+    'tabs',
+    'reflow_type',
+)
+
+
+def _prepare_dashboard_payload(payload: dict[str, Any], author: str) -> dict[str, Any]:
+    dashboard_payload = {field: payload[field] for field in SUPPORTED_FIELDS if field in payload}
+    dashboard_payload['author_name'] = author
+    return dashboard_payload
 
 
 @click.group(context_settings=CONTEXT_SETTINGS, short_help='Dashboard utilities')
@@ -75,8 +98,7 @@ def export(ctx, url, integration, author):
         abort(str(e).replace(api_key, '*' * len(api_key)).replace(app_key, '*' * len(app_key)))
 
     payload = response.json()
-    new_payload = {field: payload[field] for field in REQUIRED_FIELDS}
-    new_payload['author_name'] = author
+    new_payload = _prepare_dashboard_payload(payload, author)
 
     output = json.dumps(new_payload, indent=4, sort_keys=True)
 
