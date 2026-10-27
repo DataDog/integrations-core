@@ -31,7 +31,7 @@ KAI Scheduler exposes its metrics from two deployments in the `kai-scheduler` na
 
 A single instance scrapes any combination of these endpoints. Each metric is tagged with `kai_component` (`scheduler` or `queue_controller`) so that the generic metrics of each component can be told apart.
 
-KAI Scheduler is a cluster-level service. Configure this integration as a Cluster Agent [cluster check][10] so only one Agent instance scrapes the endpoints. For file or ConfigMap based configuration, set `cluster_check: true` in the instance:
+KAI Scheduler is a cluster-level service. Configure this integration as a Cluster Agent [cluster check][10] so only one Agent instance scrapes the endpoints. For file- or ConfigMap-based configuration, set `cluster_check: true` in the instance:
 
 ```yaml
 clusterAgent:
@@ -66,7 +66,7 @@ The check expects KAI's default metrics namespace, `kai`. Do not change it with 
 
 See [metadata.csv][7] for a list of metrics provided by this integration.
 
-Queue metrics from the scheduler and the queue-controller share the `kai_queue` tag, which holds the Queue's `metadata.name`, so that quota, allocation, fair share, and usage can be compared per queue. Queues with a `spec.displayName` are also tagged with `kai_queue_display_name`. Tags without a value, such as labels that KAI leaves empty, are not submitted. Memory metrics are reported in bytes, CPU metrics in cores, and GPU metrics in devices.
+Queue metrics from the scheduler and the queue-controller share the `kai_queue` tag, which holds the queue's `metadata.name`, so that quota, allocation, fair share, and usage can be compared per queue. Queues with a `spec.displayName` are also tagged with `kai_queue_display_name`. Tags without a value, such as labels that KAI leaves empty, are not submitted. Memory metrics are reported in bytes, CPU metrics in cores, and GPU metrics in devices.
 
 KAI counts evicted pods per pod group and never deletes those series. To keep the number of contexts bounded, `kai.evicted_pods.count` reports the pods evicted since the previous check run, summed by `kube_namespace`, `kai_nodepool`, and `action`. Evictions that happened before the first successful check run are not reported. The check keeps the previous value of up to 10,000 pod group series. Beyond that, it reports the increase of the summed counters instead, which undercounts evictions in a group whose pod group series KAI removed during that check run. To see which workloads were evicted and by which preemptor, collect the Kubernetes `Evict` events that KAI records on each evicted PodGroup.
 
