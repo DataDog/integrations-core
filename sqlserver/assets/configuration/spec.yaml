@@ -927,7 +927,7 @@ files:
             type: string
             example: obfuscate_and_normalize
             display_default: obfuscate_and_normalize
-          fleet_configurable: true
+          fleet_configurable: false
         - name: replace_digits
           description: |
             Set to `true` to replace digits in identifiers and table names with question marks in your SQL statements.
@@ -1155,7 +1155,7 @@ files:
           value:
             type: boolean
             example: false
-          fleet_configurable: true
+          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the database schema collection interval (in seconds). Defaults to 600 seconds.
