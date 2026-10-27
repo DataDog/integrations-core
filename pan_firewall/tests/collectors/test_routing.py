@@ -6,19 +6,32 @@ from unittest import mock
 import pytest
 
 from datadog_checks.pan_firewall.collectors.routing import (
+    ARE_BGP_PEER_CMD,
+    ARE_LOGICAL_ROUTER_CMD,
     BGP_PEER_CMD,
     OSPF_NEIGHBOR_CMD,
+    are_json,
+    camel_afi_safi_tag,
     collect_bgp,
     collect_ospf,
+    parse_are_bgp_peers,
     parse_bgp_peers,
     parse_ospf_neighbors,
     peer_ip,
 )
+from datadog_checks.pan_firewall.errors import PanosError
+from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from ..common import FW_A_PEER, SYNTHETIC
+from ..fixture_map import find_op_fixture
 from ..helpers import load_op, load_xml, make_ctx, series
 
 pytestmark = pytest.mark.unit
+
+
+def load_fw_b(cmd):
+    """The parsed answer of fw-b (the Advanced Routing Engine firewall) to `cmd`."""
+    return load_xml(find_op_fixture(cmd, 'fw-b'))
 
 
 def peer_samples(tags, *, status, duration, restart, updates, limit, prefixes=None):
@@ -121,7 +134,6 @@ def test_peer_ip_strips_the_port_and_keeps_ipv6_intact(address, expected):
     assert peer_ip(address) == expected
 
 
-@pytest.mark.parametrize('collect, cmd', [(collect_bgp, BGP_PEER_CMD), (collect_ospf, OSPF_NEIGHBOR_CMD)])
 @pytest.mark.parametrize(
     'advanced_routing, called',
     [
@@ -130,12 +142,153 @@ def test_peer_ip_strips_the_port_and_keeps_ipv6_intact(address, expected):
         pytest.param(None, True, id='unknown-routing-engine'),
     ],
 )
-def test_only_the_legacy_or_unknown_routing_engine_is_asked(collect, cmd, advanced_routing, called):
-    ctx = make_ctx(load_op(cmd), identity=mock.Mock(advanced_routing=advanced_routing))
+def test_only_the_legacy_or_unknown_routing_engine_is_asked_for_ospf(advanced_routing, called):
+    ctx = make_ctx(load_op(OSPF_NEIGHBOR_CMD), identity=mock.Mock(advanced_routing=advanced_routing))
 
-    collect(ctx)
+    collect_ospf(ctx)
 
     assert ctx.client.op.called is called
+
+
+@pytest.mark.parametrize('advanced_routing', [False, None])
+def test_the_legacy_or_unknown_routing_engine_is_asked_the_legacy_bgp_command(advanced_routing):
+    ctx = make_ctx(load_op(BGP_PEER_CMD), identity=mock.Mock(advanced_routing=advanced_routing))
+
+    collect_bgp(ctx)
+
+    ctx.client.op.assert_called_once_with(BGP_PEER_CMD)
+
+
+FW_B_PEER = ('peer:fw-peer', 'vr:default', 'peer_ip:169.254.10.1', 'remote_as:65001', 'peer_group:lab')
+FW_B_DEAD = ('peer:dead-peer', 'vr:default', 'peer_ip:10.60.1.250', 'remote_as:65099', 'peer_group:lab')
+FW_B_SPARSE = ('peer:sparse-peer', 'vr:default', 'peer_ip:10.60.1.249', 'remote_as:65098', 'peer_group:lab')
+
+
+def test_are_bgp_of_the_capture():
+    root = load_fw_b(ARE_BGP_PEER_CMD.format(router='default'))
+    values = series(parse_are_bgp_peers(are_json(root), 'default'))
+
+    up = (*FW_B_PEER, 'afi_safi:ipv4_unicast')
+    dead = (*FW_B_DEAD, 'afi_safi:ipv4_unicast')
+    assert values['bgp.peer.status', FW_B_PEER] == (1, 'gauge')
+    assert values['bgp.peer.status_duration', FW_B_PEER] == (63339.0, 'gauge')
+    assert values['bgp.peer.restart', FW_B_PEER] == (0, 'gauge')
+    assert values['bgp.peer.updates.in', FW_B_PEER] == (2, 'monotonic_count')
+    assert values['bgp.peer.updates.out', FW_B_PEER] == (4, 'monotonic_count')
+    assert values['bgp.peer.connections.established', FW_B_PEER] == (1, 'monotonic_count')
+    assert values['bgp.peer.connections.dropped', FW_B_PEER] == (0, 'monotonic_count')
+    assert values['bgp.peer.prefix_limit', up] == (10, 'gauge')
+    assert values['bgp.peer.prefixes.incoming.total', up] == (1, 'gauge')
+    assert values['bgp.peer.prefixes.outgoing.advertised', up] == (4, 'gauge')
+    assert values['bgp.peer.prefix_limit.utilization', up] == (10.0, 'gauge')
+    assert values['bgp.peer.status', FW_B_DEAD] == (0, 'gauge')
+    assert values['bgp.peer.restart', FW_B_DEAD] == (0, 'gauge')
+    assert values['bgp.peer.prefixes.incoming.total', dead] == (0, 'gauge')
+    # The dead peer has no sent counter.
+    assert ('bgp.peer.prefixes.outgoing.advertised', dead) not in values
+    names = {name for name, _ in values}
+    assert not names & {'bgp.peer.prefixes.incoming.rejected', 'bgp.peer.prefixes.outgoing.total'}
+
+
+@pytest.mark.parametrize(
+    'duration, restart',
+    [pytest.param(1799.0, 1, id='up-for-less-than-30-minutes'), pytest.param(1800.0, 0, id='up-for-30-minutes')],
+)
+def test_are_bgp_restart_is_an_established_peer_up_for_less_than_30_minutes(duration, restart):
+    data = are_json(load_fw_b(ARE_BGP_PEER_CMD.format(router='default')))
+    data['fw-peer']['status-time'] = duration
+
+    values = series(parse_are_bgp_peers(data, 'default'))
+
+    assert values['bgp.peer.restart', FW_B_PEER] == (restart, 'gauge')
+
+
+def test_are_bgp_peer_without_details_still_reports_its_status():
+    samples = parse_are_bgp_peers(are_json(load_xml(SYNTHETIC / 'are_bgp_peer_sparse.xml')), 'default')
+
+    assert series(samples) == {
+        ('bgp.peer.status', FW_B_SPARSE): (0, 'gauge'),
+        ('bgp.peer.status_duration', FW_B_SPARSE): (12.0, 'gauge'),
+        ('bgp.peer.restart', FW_B_SPARSE): (0, 'gauge'),
+    }
+
+
+@pytest.mark.parametrize('limit', [0, None])
+def test_are_bgp_utilization_is_not_sent_without_a_prefix_limit(limit):
+    data = are_json(load_fw_b(ARE_BGP_PEER_CMD.format(router='default')))
+    family = data['fw-peer']['detail']['addressFamilyInfo']['ipv4Unicast']
+    if limit is None:
+        del family['prefixAllowedMax']
+    else:
+        family['prefixAllowedMax'] = limit
+
+    names = {s.name for s in parse_are_bgp_peers(data, 'default') if s.tags[: len(FW_B_PEER)] == FW_B_PEER}
+
+    assert 'bgp.peer.prefix_limit.utilization' not in names
+    assert 'bgp.peer.prefixes.incoming.total' in names
+
+
+def test_are_bgp_same_peer_name_in_two_logical_routers():
+    peers = load_fw_b(ARE_BGP_PEER_CMD.format(router='default'))
+    router_list = parse_response(
+        b'<response status="success"><result><json>{"default": {}, "lr2": {}}</json></result></response>'
+    )
+    ctx = make_ctx(
+        {
+            ARE_LOGICAL_ROUTER_CMD: router_list,
+            ARE_BGP_PEER_CMD.format(router='default'): peers,
+            ARE_BGP_PEER_CMD.format(router='lr2'): peers,
+        },
+        identity=mock.Mock(advanced_routing=True),
+    )
+
+    values = series(collect_bgp(ctx))
+
+    assert values['bgp.peer.status', FW_B_PEER] == (1, 'gauge')
+    assert values['bgp.peer.status', tuple(t.replace('vr:default', 'vr:lr2') for t in FW_B_PEER)] == (1, 'gauge')
+
+
+def test_advanced_routing_engine_sends_the_are_calls():
+    ctx = make_ctx(
+        {
+            ARE_LOGICAL_ROUTER_CMD: load_fw_b(ARE_LOGICAL_ROUTER_CMD),
+            ARE_BGP_PEER_CMD.format(router='default'): load_fw_b(ARE_BGP_PEER_CMD.format(router='default')),
+        },
+        identity=mock.Mock(advanced_routing=True),
+    )
+
+    collect_bgp(ctx)
+
+    assert [c.args[0] for c in ctx.client.op.call_args_list] == [
+        ARE_LOGICAL_ROUTER_CMD,
+        ARE_BGP_PEER_CMD.format(router='default'),
+    ]
+    ctx.log.warning.assert_not_called()
+
+
+def test_are_json_of_the_logical_router_capture_names_the_routers():
+    assert list(are_json(load_fw_b(ARE_LOGICAL_ROUTER_CMD))) == ['default']
+
+
+def test_are_json_invalid_raises():
+    root = parse_response(b'<response status="success"><result><json>{not json</json></result></response>')
+
+    with pytest.raises(PanosError):
+        are_json(root)
+
+
+@pytest.mark.parametrize(
+    'body',
+    [b'<result/>', b'<result><json></json></result>', b'<result><json>  </json></result>'],
+    ids=['no-json', 'empty-json', 'blank-json'],
+)
+def test_are_json_missing_is_empty(body):
+    assert are_json(parse_response(b'<response status="success">' + body + b'</response>')) == {}
+
+
+@pytest.mark.parametrize('name, expected', [('ipv4Unicast', 'ipv4_unicast'), ('ipv6Unicast', 'ipv6_unicast')])
+def test_camel_afi_safi_tag(name, expected):
+    assert camel_afi_safi_tag(name) == expected
 
 
 FW_A_OSPF = ('neighbor:169.254.10.2', 'router_id:10.255.0.2', 'area:0.0.0.0', 'vr:default')

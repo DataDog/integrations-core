@@ -59,6 +59,10 @@ PARTIAL_OP_FIXTURES = {
         'fw-a': 'synthetic/jobs_pending_idle.xml',
         'fw-b': 'synthetic/jobs_pending_idle.xml',
     },
+    # fw-b runs the Advanced Routing Engine.
+    '<show><advanced-routing><logical-router/></advanced-routing></show>': {'fw-b': 'fw-b/are_logical_router.xml'},
+    '<show><advanced-routing><bgp><peer><detail><logical-router>default</logical-router></detail></peer></bgp>'
+    '</advanced-routing></show>': {'fw-b': 'fw-b/are_bgp_peer_detail.xml'},
 }
 
 

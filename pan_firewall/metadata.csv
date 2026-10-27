@@ -1,6 +1,8 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
 pan_firewall.api.authentication.status,gauge,,,,"Whether the API rejected the credentials (1 = invalid credentials, 0 = OK).",-1,palo_alto_networks_firewall,api authentication status,,
-pan_firewall.bgp.peer.prefix_limit,gauge,,,,Configured maximum prefixes.,0,palo_alto_networks_firewall,bgp peer prefix limit,,"peer,vr,peer_ip,remote_as,peer_group"
+pan_firewall.bgp.peer.connections.dropped,count,,connection,,BGP connections dropped.,-1,palo_alto_networks_firewall,bgp peer connections dropped,,"peer,vr,peer_ip,remote_as,peer_group"
+pan_firewall.bgp.peer.connections.established,count,,connection,,BGP connections established.,0,palo_alto_networks_firewall,bgp peer connections established,,"peer,vr,peer_ip,remote_as,peer_group"
+pan_firewall.bgp.peer.prefix_limit,gauge,,,,Configured maximum prefixes.,0,palo_alto_networks_firewall,bgp peer prefix limit,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
 pan_firewall.bgp.peer.prefix_limit.utilization,gauge,,percent,,Received prefixes as a percentage of the configured limit.,-1,palo_alto_networks_firewall,bgp peer prefix limit utilization,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
 pan_firewall.bgp.peer.prefixes.incoming.rejected,gauge,,,,Prefixes rejected.,-1,palo_alto_networks_firewall,bgp peer prefixes incoming rejected,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
 pan_firewall.bgp.peer.prefixes.incoming.total,gauge,,,,Prefixes received.,0,palo_alto_networks_firewall,bgp peer prefixes incoming total,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
