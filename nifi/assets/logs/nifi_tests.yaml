@@ -13,6 +13,7 @@ tests:
       status: "info"
       tags:
         - "source:LOGS_SOURCE"
+      timestamp: 1
   - sample: "2026-05-01 12:03:11,884 WARN [Timer-Driven Process Thread-1] o.a.n.processors.standard.PutFile PutFile[id=8f1c9e2a-3b4d-4e5f-9a1b-2c3d4e5f6a7b] failed to process session"
     result:
       custom:
@@ -26,6 +27,7 @@ tests:
       status: "warn"
       tags:
         - "source:LOGS_SOURCE"
+      timestamp: 1
   - sample: "2026-05-01 12:05:22,001 ERROR [Timer-Driven Process Thread-2] o.a.n.processors.standard.GetFile GetFile[id=2d3e4f5a-6b7c-4d8e-9f0a-1b2c3d4e5f6a] unable to read from source directory"
     result:
       custom:
@@ -39,6 +41,7 @@ tests:
       status: "error"
       tags:
         - "source:LOGS_SOURCE"
+      timestamp: 1
   - sample: "2026-05-01 12:10:05,432 INFO [NiFi Web Server-19] o.a.n.audit.ProcessorAuditor admin updated the name of Processor GenerateFlowFile"
     result:
       custom:
@@ -52,6 +55,7 @@ tests:
       status: "info"
       tags:
         - "source:LOGS_SOURCE"
+      timestamp: 1
   - sample: "2026-10-26 16:13:34,983-04:00 INFO [main] org.apache.nifi.runtime.Application Starting NiFi 2.8.0 using Java 21.0.10+10-LTS with PID 75"
     result:
       custom:
