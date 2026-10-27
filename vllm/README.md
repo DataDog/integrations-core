@@ -19,7 +19,7 @@ No additional installation is needed on your server.
 
 1. Edit the `vllm.d/conf.yaml` file, in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your vllm performance data. See the [sample vllm.d/conf.yaml][3] for all available configuration options.
 
-   When vLLM runs as an NVIDIA Dynamo backend worker, set `openmetrics_endpoint` to the worker's system status server (`DYN_SYSTEM_PORT`), which exposes vLLM's metrics.
+   If vLLM runs as an NVIDIA Dynamo backend worker, set `openmetrics_endpoint` to the metrics URL of the worker's system status server, such as `http://<HOST>:<DYN_SYSTEM_PORT>/metrics`. The port is set by the `DYN_SYSTEM_PORT` environment variable.
 
 2. [Restart the Agent][4].
 
@@ -37,7 +37,7 @@ The following metrics are collected only when [GPU Monitoring][8] is enabled:
 
 - `vllm.estimated_flops_per_gpu`
 - `vllm.external_prefix_cache`
-- `vllm.nixl` (KV cache transfers between prefill and decode instances, when vLLM uses the NIXL connector)
+- `vllm.nixl` (KV cache transfers between prefill and decode instances, available with the NVIDIA Inference Xfer Library connector)
 - `vllm.prefix_cache`
 - `vllm.prompt_tokens.cached`
 - `vllm.request.decode_time`
