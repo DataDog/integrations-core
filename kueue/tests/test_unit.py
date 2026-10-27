@@ -139,6 +139,37 @@ def test_resource_name_map(dd_run_check, aggregator, instance, mock_http_respons
     aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.fpga', 'replica_role:leader')
 
 
+def test_follower_samples_are_dropped(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics_follower.txt'))
+
+    check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': False}])
+    dd_run_check(check)
+
+    aggregator.assert_metric('kueue.build_info')
+    aggregator.assert_metric('kueue.go.goroutines')
+    aggregator.assert_metric('kueue.controller.runtime.active_workers')
+    aggregator.assert_metric('kueue.pending_workloads', count=0)
+    aggregator.assert_metric('kueue.cluster_queue.resource_usage.cpu', count=0)
+    replica_role_metrics = {
+        metric.name
+        for name in aggregator.metric_names
+        for metric in aggregator.metrics(name)
+        if any(tag.startswith('replica_role:') for tag in metric.tags)
+    }
+    assert not replica_role_metrics
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics(), check_submission_type=True)
+
+
+def test_collect_follower_metrics(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics_follower.txt'))
+
+    check = KueueCheck('kueue', {}, [{**instance, 'collect_workload_events': False, 'collect_follower_metrics': True}])
+    dd_run_check(check)
+
+    aggregator.assert_metric_has_tag('kueue.pending_workloads', 'replica_role:follower')
+    aggregator.assert_metric_has_tag('kueue.cluster_queue.resource_usage.cpu', 'replica_role:follower')
+
+
 def test_empty_instance(dd_run_check):
     with pytest.raises(
         Exception,
@@ -455,6 +486,81 @@ def test_workload_events_evicted_uses_previous_admission(dd_run_check, aggregato
         'Workload team-a/training-job evicted.',
         ['kueue_cluster_queue:default', 'cluster_queue_tag:value'],
     )
+
+
+def replica_metrics(replica_role: str | None) -> str:
+    labels = 'cluster_queue="default",status="active"'
+    if replica_role:
+        labels += f',replica_role="{replica_role}"'
+    return f'# TYPE kueue_pending_workloads gauge\nkueue_pending_workloads{{{labels}}} 0\n'
+
+
+def test_workload_events_not_submitted_by_follower(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics_follower.txt'))
+    check = KueueCheck('kueue', {}, [instance])
+    check.kube_client = FakeKubernetesAPIClient(load_workloads('pending'), load_workloads('admitted'))
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    assert not aggregator.events
+    assert check.kube_client.list_workloads_namespaces == [None, None]
+
+
+@pytest.mark.parametrize('replica_role', ['leader', 'standalone', None])
+def test_workload_events_submitted_by_event_source(
+    replica_role, dd_run_check, aggregator, instance, mock_http_response
+):
+    mock_http_response(content=replica_metrics(replica_role))
+    check = KueueCheck('kueue', {}, [instance])
+    check.kube_client = FakeKubernetesAPIClient(load_workloads('pending'), load_workloads('admitted'))
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    aggregator.assert_event('Workload team-a/training-job admitted.', count=1, exact_match=False)
+
+
+def test_promoted_leader_with_stale_follower_series(dd_run_check, aggregator, instance, mock_http_response):
+    """A replica promoted to leader keeps exporting the series it recorded as a follower."""
+    mock_http_response(file_path=get_fixture_path('metrics_promoted_leader.txt'))
+    check = KueueCheck('kueue', {}, [instance])
+    check.kube_client = FakeKubernetesAPIClient(load_workloads('pending'), load_workloads('admitted'))
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    aggregator.assert_metric_has_tag('kueue.finished_workloads.count', 'replica_role:leader')
+    assert 'replica_role:follower' not in get_metric_tags(aggregator, 'kueue.finished_workloads.count')
+    aggregator.assert_event('Workload team-a/training-job admitted.', count=1, exact_match=False)
+
+
+def test_workload_events_state_kept_across_follower_to_leader_switch(
+    dd_run_check, aggregator, instance, mock_http_response
+):
+    check = KueueCheck('kueue', {}, [instance])
+    check.kube_client = FakeKubernetesAPIClient(
+        # Follower run: seeds the state.
+        load_workloads('pending'),
+        # Follower run: the admission transitions must update the state without being submitted.
+        load_workloads('admitted'),
+        # First leader run: only the eviction is new. Skipping polling or re-seeding on promotion would either
+        # resubmit the admission transitions or submit nothing.
+        load_workloads('evicted'),
+    )
+
+    mock_http_response(content=replica_metrics('follower'))
+    dd_run_check(check)
+    dd_run_check(check)
+
+    assert not aggregator.events
+
+    mock_http_response(content=replica_metrics('leader'))
+    dd_run_check(check)
+
+    aggregator.assert_event('Workload team-a/training-job evicted.', count=1, exact_match=False)
+    aggregator.assert_event('Workload team-a/training-job admitted.', count=0, exact_match=False)
+    aggregator.assert_event('Workload team-a/training-job created.', count=0, exact_match=False)
 
 
 def test_workload_events_namespace_filter(dd_run_check, aggregator, instance, mock_http_response):
