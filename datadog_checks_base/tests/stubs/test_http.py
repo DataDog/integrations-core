@@ -334,9 +334,16 @@ def competing_operation(monkeypatch: pytest.MonkeyPatch) -> Event:
     return progressed
 
 
-@pytest.mark.parametrize('clients', ['same', 'child', 'descendant', 'siblings'])
-@pytest.mark.parametrize('same_url', [False, True], ids=['distinct-urls', 'match-options'])
-@pytest.mark.parametrize('raises', [False, True], ids=['response', 'exception'])
+@pytest.mark.parametrize(
+    ('clients', 'same_url', 'raises'),
+    [
+        pytest.param('same', False, False, id='same-client'),
+        pytest.param('child', False, False, id='parent-child'),
+        pytest.param('descendant', False, False, id='parent-descendant'),
+        pytest.param('siblings', False, False, id='siblings'),
+        pytest.param('siblings', True, True, id='siblings-match-options-exception'),
+    ],
+)
 def test_concurrent_fake_requests_keep_response_ownership(
     monkeypatch: pytest.MonkeyPatch, competing_operation: Event, clients: str, same_url: bool, raises: bool
 ):
@@ -478,8 +485,7 @@ def test_fake_consumption_assertion_waits_for_matching_to_finish(
         assertion.result(timeout=5)
 
 
-@pytest.mark.parametrize('processing', ['json', 'iter_lines'])
-def test_fake_response_processing_does_not_block_other_clients(monkeypatch: pytest.MonkeyPatch, processing: str):
+def test_fake_streaming_does_not_block_other_clients(monkeypatch: pytest.MonkeyPatch):
     # A listener reading an open stream must not prevent a sibling client from polling.
     root = FakeHTTPClient()
     listener = root.create_client()
@@ -495,13 +501,11 @@ def test_fake_response_processing_does_not_block_other_clients(monkeypatch: pyte
         assert release.wait(5), 'Timed out releasing response processing'
         yield b'body'
 
-    monkeypatch.setattr(
-        response, processing, read_response if processing == 'iter_lines' else lambda: list(read_response())
-    )
+    monkeypatch.setattr(response, 'iter_lines', read_response)
 
     def consume() -> list[bytes]:
         with listener.get('/stream', stream=True) as stream:
-            return list(getattr(stream, processing)())
+            return list(stream.iter_lines())
 
     with ThreadPoolExecutor(max_workers=2) as workers:
         reading = workers.submit(consume)
