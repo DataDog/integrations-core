@@ -48,6 +48,12 @@ def test_e2e_profile_opengear_console_manager(dd_agent_check):
     # --- TEST METRICS ---
     assert_common_metrics(aggregator, common_tags)
 
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, value=31, tags=common_tags + ['cpu:10'])
+    aggregator.assert_metric('snmp.cpu.usage', metric_type=aggregator.GAUGE, value=15, tags=common_tags + ['cpu:21'])
+    aggregator.assert_metric('snmp.memory.free', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.memory.total', metric_type=aggregator.GAUGE, tags=common_tags)
+    aggregator.assert_metric('snmp.memory.usage', metric_type=aggregator.GAUGE, tags=common_tags)
+
     tag_rows = [
         [
             'og_serial_port_cts:off',
