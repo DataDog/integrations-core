@@ -20,6 +20,14 @@
       }
     }
   ],
+  "supported_connection_methods": [
+    {
+      "name": "Tenable.io",
+      "fixed": {
+        "fixed_base_url": "https://cloud.tenable.com"
+      }
+    }
+  ],
   "additional_config_fields": [],
   "dataflow_config": [
     {
@@ -48,5 +56,15 @@
         "should_map_legacy_fields": true
       }
     }
-  ]
+  ],
+  "health_probe": {
+    "http_method": "GET",
+    "path": "/audit-log/v1/events?limit=1",
+    "http_headers": [
+      {
+        "name": "Accept",
+        "value": "application/json"
+      }
+    ]
+  }
 }

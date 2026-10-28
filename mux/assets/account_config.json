@@ -20,7 +20,27 @@
       }
     }
   ],
+  "supported_connection_methods": [
+    {
+      "name": "Mux",
+      "fixed": {
+        "fixed_base_url": "https://api.mux.com"
+      }
+    }
+  ],
   "dataflow_config": [
-    { "dataflow_id": "mux-metrics" }
-  ]
+    {
+      "dataflow_id": "mux-metrics"
+    }
+  ],
+  "health_probe": {
+    "http_method": "GET",
+    "path": "/data/v1/metrics",
+    "http_headers": [
+      {
+        "name": "Accept",
+        "value": "application/json"
+      }
+    ]
+  }
 }

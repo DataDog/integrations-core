@@ -13,7 +13,27 @@
       }
     }
   ],
+  "supported_connection_methods": [
+    {
+      "name": "Forcepoint Security Service Edge",
+      "fixed": {
+        "fixed_base_url": "https://api.bitglass.com"
+      }
+    }
+  ],
   "dataflow_config": [
-    { "dataflow_id": "forcepoint-security-service-edge-logs" }
-  ]
+    {
+      "dataflow_id": "forcepoint-security-service-edge-logs"
+    }
+  ],
+  "health_probe": {
+    "http_method": "GET",
+    "path": "/api/bitglassapi/logs/v1",
+    "http_headers": [
+      {
+        "name": "Accept",
+        "value": "application/json"
+      }
+    ]
+  }
 }

@@ -13,6 +13,14 @@
       }
     }
   ],
+  "supported_connection_methods": [
+    {
+      "name": "Asana",
+      "fixed": {
+        "fixed_base_url": "https://app.asana.com"
+      }
+    }
+  ],
   "additional_config_fields": [
     {
       "key": "workspace_id",
@@ -23,6 +31,18 @@
     }
   ],
   "dataflow_config": [
-    { "dataflow_id": "asana-logs" }
-  ]
+    {
+      "dataflow_id": "asana-logs"
+    }
+  ],
+  "health_probe": {
+    "http_method": "GET",
+    "path": "/api/1.0/workspaces?limit=1",
+    "http_headers": [
+      {
+        "name": "Accept",
+        "value": "application/json"
+      }
+    ]
+  }
 }
