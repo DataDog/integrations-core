@@ -3,13 +3,14 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
-import math
+import itertools
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterator
 
 from datadog_checks.base.utils.db.health import HealthStatus
 from datadog_checks.base.utils.db.utils import default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
+from datadog_checks.base.utils.time import ensure_aware_datetime
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.diagnose import SYSTEM_DATABASES
@@ -27,19 +28,19 @@ if TYPE_CHECKING:
 
 DEFAULT_COLLECTION_INTERVAL = 3600
 DEFAULT_MAX_TABLES = 500
-PAYLOAD_MAX_COLUMNS = 5_000
+# Each table is stored as its own event, which must stay under the intake's 1 MB per message, and each payload under
+# its 5 MB per request.
+TABLE_MAX_BYTES = 900_000
+PAYLOAD_MAX_BYTES = 4_000_000
 # The check's command_timeout (10s by default) is too short for the procedure on a large database. This matches the
 # Postgres collector's statement timeout.
 MAX_QUERY_DURATION_SECONDS = 60
 KEY_PREFIX = "dbm-column-statistics-"
-# Postgres's default_statistics_target, the most values ANALYZE keeps in most_common_freqs.
-MAX_COMMON_VALUES = 100
-# Fewer distinct values than this share of the rows are sent as a count, more as a negative share, as ANALYZE does.
-N_DISTINCT_SCALING_THRESHOLD = 0.1
 
 # The agent's login can't read statistics itself, since SQL Server treats them as table data. Customers install this
-# procedure (tests/sql/column_statistics.sql) in each database; it runs as its owner and returns only the counts in
-# each column's histogram, never column values.
+# procedure (tests/sql/column_statistics.sql) in each database; it runs as its owner and returns each column's
+# statistics as SQL Server reports them, with only the counts in its histogram, never column values. They're sent with
+# SQL Server's names, and the backend derives what it needs from them.
 COLUMN_STATISTICS_QUERY = "EXEC datadog.column_statistics @max_tables = ?"
 # The columns the procedure returns. A procedure installed from an older version of the documentation returns others.
 PROCEDURE_COLUMNS = frozenset(
@@ -47,16 +48,25 @@ PROCEDURE_COLUMNS = frozenset(
         "schema_name",
         "table_name",
         "column_name",
+        "stats_name",
+        "auto_created",
+        "user_created",
+        "type_name",
+        "max_length",
         "is_nullable",
         "is_unique",
+        "last_updated",
         "rows",
         "rows_sampled",
-        "stats_age",
-        "fixed_width",
-        "avg_width",
         "steps",
+        "modification_counter",
+        "average_length",
+        "histogram",
     )
 )
+# The sys.dm_db_stats_histogram columns sent for each step, as parallel arrays. Whether a step's range_high_key is NULL
+# stands in for the value itself, which is never sent.
+HISTOGRAM_FIELDS = ("range_high_key_is_null", "equal_rows", "range_rows", "distinct_range_rows", "average_range_rows")
 PROCEDURE_OUTDATED_MESSAGE = "datadog.column_statistics is outdated"
 
 # get_databases() includes every database autodiscovery finds, whatever its state. An offline or inaccessible one,
@@ -103,8 +113,8 @@ def agent_check_getter(self: SqlserverColumnStatisticsCollector) -> SQLServer:
 
 class SqlserverColumnStatisticsCollector:
     """
-    Collects column statistics, in the shape the Postgres integration sends from pg_stats. It runs in the metadata job,
-    as the Postgres collector does.
+    Collects each column's statistics as SQL Server reports them. It runs in the metadata job, as the Postgres collector
+    does.
     """
 
     def __init__(self, check: SQLServer, config: SQLServerConfig, cancel_event: Event):
@@ -176,38 +186,35 @@ class SqlserverColumnStatisticsCollector:
         return databases
 
     def _collect_database(self, cursor, db_name: str) -> tuple[int, int, int]:
+        tables = columns = payloads = 0
+        # Rows come ordered by table, and each table's histograms can take megabytes, so tables are sent as they
+        # complete rather than all held at once.
+        batch: list[dict] = []
+        batch_bytes = 0
         try:
             cursor.execute(construct_use_statement(db_name))
             cursor.execute(COLUMN_STATISTICS_QUERY, (self._max_tables,))
             names = [str(column[0]).lower() for column in cursor.description]
             if not PROCEDURE_COLUMNS <= set(names):
                 raise OutdatedProcedureError(PROCEDURE_OUTDATED_MESSAGE)
-            # Each row's packed steps can take kilobytes, so each is derived as it arrives rather than all held at once.
-            columns = []
-            row = cursor.fetchone()
-            while row:
-                stats = dict(zip(names, row))
-                columns.append(derive_column_statistics(stats, parse_steps(stats["steps"])))
-                row = cursor.fetchone()
+            for table in read_tables(cursor, names, db_name):
+                table_bytes = fit_table(table)
+                if batch and batch_bytes + table_bytes > PAYLOAD_MAX_BYTES:
+                    self._submit(batch)
+                    payloads += 1
+                    batch, batch_bytes = [], 0
+                batch.append(table)
+                batch_bytes += table_bytes
+                tables += 1
+                columns += len(table["columns"])
         except Exception as e:
             self._handle_error(db_name, e)
-            return 0, 0, 0
+            return tables, columns, payloads
         self._handle_recovery(db_name)
-
-        tables = group_by_table(db_name, columns)
-        batch: list[dict] = []
-        batch_columns = payloads = 0
-        for table in tables:
-            batch.append(table)
-            batch_columns += len(table["columns"])
-            if batch_columns >= PAYLOAD_MAX_COLUMNS:
-                self._submit(batch)
-                payloads += 1
-                batch, batch_columns = [], 0
         if batch:
             self._submit(batch)
             payloads += 1
-        return len(tables), len(columns), payloads
+        return tables, columns, payloads
 
     def _handle_error(self, db_name: str, error: Exception) -> None:
         message = str(error)
@@ -254,163 +261,69 @@ class SqlserverColumnStatisticsCollector:
         self._check.database_monitoring_column_statistics(json.dumps(event, default=default_json_event_encoding))
 
 
-def parse_steps(steps: str | None) -> list[dict]:
-    """Unpack the histogram steps the procedure packs as is_null:equal_rows:range_rows:distinct_range_rows."""
-    parsed = []
-    for packed in steps.split(",") if steps else []:
-        is_null, equal_rows, range_rows, distinct_range_rows = packed.split(":")
-        parsed.append(
-            {
-                "is_null": is_null == "1",
-                "equal_rows": float(equal_rows),
-                "range_rows": float(range_rows),
-                "distinct_range_rows": float(distinct_range_rows),
-            }
-        )
-    return parsed
+def read_tables(cursor, names: list[str], db_name: str) -> Iterator[dict]:
+    """Read the procedure's rows, one per column ordered by table, into the column_statistics payload's tables."""
+    rows = (dict(zip(names, row)) for row in iter(cursor.fetchone, None))
+    for (schema, table), columns in itertools.groupby(
+        rows, key=lambda stats: (stats["schema_name"], stats["table_name"])
+    ):
+        yield {
+            "version": 1,
+            "db": db_name,
+            "schema": schema,
+            "table": table,
+            "columns": [column_statistics(stats) for stats in columns],
+        }
 
 
-def derive_column_statistics(column: dict, steps: list[dict]) -> dict:
-    """
-    Derive a column's statistics, in the shape of pg_stats, from its histogram steps. SQL Server keeps an exact count
-    only for the value ending each of its up to 200 steps; the values inside a step only have an average count.
-    """
-    rows = float(column["rows"])
-    value_steps = [step for step in steps if not step["is_null"]]
-    n_distinct = float(sum(1 + float(step["distinct_range_rows"]) for step in value_steps))
-    null_steps = [step for step in steps if step["is_null"]]
-    if not column["is_nullable"]:
-        # Sampled histograms don't add up to the rows exactly, which would otherwise look like a few NULLs.
-        null_rows = 0.0
-    elif null_steps:
-        null_rows = sum(float(step["equal_rows"]) for step in null_steps)
-    else:
-        # Some histograms have no NULL step, so the NULLs are the rows the other steps don't cover. A histogram with
-        # no steps at all, as when every value is NULL, covers none of them.
-        value_rows = sum(float(step["equal_rows"]) + float(step["range_rows"]) for step in value_steps)
-        null_rows = max(rows - value_rows, 0.0)
-    null_rows = min(null_rows, rows)
-
-    if column["fixed_width"] is not None:
-        avg_width = float(column["fixed_width"])
-    elif column["avg_width"] is not None and null_rows < rows:
-        # DBCC's average counts NULLs as zero bytes; pg_stats averages over the non-NULL values.
-        avg_width = float(column["avg_width"]) * rows / (rows - null_rows)
-    else:
-        avg_width = 0.0
-
-    if column["is_unique"]:
-        # A sampled histogram undercounts a unique column's values. As ANALYZE does when no value repeats, every
-        # non-NULL row is a distinct value, and none is common.
-        stored_n_distinct = -(1.0 - null_rows / rows)
-    elif n_distinct > N_DISTINCT_SCALING_THRESHOLD * rows:
-        # A negative n_distinct is a share of the rows, so it scales with the table.
-        stored_n_distinct = -min(n_distinct / rows, 1.0)
-    else:
-        stored_n_distinct = n_distinct
-
+def column_statistics(stats: dict) -> dict:
+    """A column's entry in the payload, from its row in the procedure's results."""
     return {
-        "schema_name": column["schema_name"],
-        "table_name": column["table_name"],
-        "column_name": column["column_name"],
-        "stats_age": column["stats_age"],
-        "avg_width": round(avg_width),
-        "n_distinct": stored_n_distinct,
-        "null_frac": null_rows / rows,
-        "most_common_freqs": []
-        if column["is_unique"]
-        else most_common_freqs(value_steps, n_distinct, null_rows / rows, rows, float(column["rows_sampled"] or rows)),
+        "column_name": stats["column_name"],
+        "stats_name": stats["stats_name"],
+        "auto_created": bool(stats["auto_created"]),
+        "user_created": bool(stats["user_created"]),
+        "type_name": stats["type_name"],
+        "max_length": int(stats["max_length"]),
+        "is_nullable": bool(stats["is_nullable"]),
+        "is_unique": bool(stats["is_unique"]),
+        # The procedure converts it to UTC, but the driver returns it without a time zone.
+        "last_updated": ensure_aware_datetime(stats["last_updated"]).isoformat(),
+        "rows": int(stats["rows"]),
+        "rows_sampled": int(stats["rows_sampled"]),
+        "steps": int(stats["steps"]),
+        "modification_counter": int(stats["modification_counter"]),
+        "average_length": None if stats["average_length"] is None else float(stats["average_length"]),
+        "histogram": parse_histogram(stats["histogram"]),
     }
 
 
-def most_common_freqs(
-    value_steps: list[dict], n_distinct: float, null_frac: float, rows: float, rows_sampled: float
-) -> list[float]:
+def parse_histogram(packed: str | None) -> dict[str, list]:
     """
-    Choose the common values as ANALYZE does for pg_stats, among the values ending a histogram step, and return each
-    one's share of all rows, NULLs included, most common first.
-
-    ANALYZE keeps every value it saw more than once when they're all the values there are, or when it read every row.
-    Otherwise it keeps only those significantly more common than the values left out would be.
+    Unpack the histogram steps the procedure packs as
+    range_high_key_is_null:equal_rows:range_rows:distinct_range_rows:average_range_rows into parallel arrays.
     """
-    # Histogram counts are scaled up to the whole table; ANALYZE reasons in counts within its sample.
-    sample_ratio = rows_sampled / rows
-    repeated = sorted(
-        (float(step["equal_rows"]) for step in value_steps if float(step["equal_rows"]) * sample_ratio > 1),
-        reverse=True,
-    )
-    all_values = len(repeated) == len(value_steps) and all(
-        float(step["distinct_range_rows"]) == 0 for step in value_steps
-    )
-    if all_values and len(repeated) <= MAX_COMMON_VALUES:
-        kept = repeated
-    else:
-        kept = repeated[:MAX_COMMON_VALUES]
-        if rows_sampled < rows:
-            sample_counts = [equal_rows * sample_ratio for equal_rows in kept]
-            kept = kept[: significant_common_values(sample_counts, n_distinct, null_frac, rows_sampled, rows)]
-    return [equal_rows / rows for equal_rows in kept]
+    histogram: dict[str, list] = {field: [] for field in HISTOGRAM_FIELDS}
+    for step in packed.split(",") if packed else []:
+        is_null, *counts = step.split(":")
+        histogram["range_high_key_is_null"].append(is_null == "1")
+        for field, count in zip(HISTOGRAM_FIELDS[1:], counts):
+            histogram[field].append(float(count))
+    return histogram
 
 
-def significant_common_values(
-    counts: list[float], n_distinct: float, null_frac: float, sample_rows: float, total_rows: float
-) -> int:
+def fit_table(table: dict) -> int:
     """
-    Return how many of the most common values to keep, from their counts in the sample, most common first. A port
-    of Postgres's analyze_mcv_list: the least common value is dropped until it's more common than it would be
-    estimated to be without the list, by more than twice its sampling error.
+    Return the size of a table's JSON, first setting its largest histograms to None in place if it's over
+    TABLE_MAX_BYTES. A column without its histogram still has its other statistics.
     """
-    num = len(counts)
-    sum_count = sum(counts[: num - 1])
-    while num > 0:
-        # The selectivity the least common value would be given if it were left out of the list.
-        selectivity = min(max(1.0 - sum_count / sample_rows - null_frac, 0.0), 1.0)
-        other_distinct = n_distinct - (num - 1)
-        if other_distinct > 1:
-            selectivity /= other_distinct
-        # The value's count in the sample follows a hypergeometric distribution.
-        population_count = total_rows * counts[num - 1] / sample_rows
-        variance = (
-            sample_rows
-            * population_count
-            * (total_rows - population_count)
-            * (total_rows - sample_rows)
-            / (total_rows * total_rows * (total_rows - 1))
-        )
-        if counts[num - 1] > selectivity * sample_rows + 2 * math.sqrt(max(variance, 0.0)) + 0.5:
+    size = len(json.dumps(table, default=default_json_event_encoding))
+    if size <= TABLE_MAX_BYTES:
+        return size
+    by_steps = sorted(table["columns"], key=lambda column: len(column["histogram"]["equal_rows"]), reverse=True)
+    for column in by_steps:
+        if size <= TABLE_MAX_BYTES:
             break
-        num -= 1
-        if num > 0:
-            sum_count -= counts[num - 1]
-    return num
-
-
-def group_by_table(db_name: str, columns: list[dict]) -> list[dict]:
-    """
-    Group per-column statistics into the per-table entries of the column_statistics payload. A table's stats_age is
-    that of its oldest column statistics.
-    """
-    tables: dict[tuple[str, str], dict] = {}
-    for column in columns:
-        key = (column["schema_name"], column["table_name"])
-        table = tables.get(key)
-        if table is None:
-            table = tables[key] = {
-                "db": db_name,
-                "schema": key[0],
-                "table": key[1],
-                "stats_age": 0,
-                "columns": [],
-                "version": 1,
-            }
-        table["stats_age"] = max(table["stats_age"], column["stats_age"])
-        table["columns"].append(
-            {
-                "name": column["column_name"],
-                "avg_width": column["avg_width"],
-                "n_distinct": column["n_distinct"],
-                "null_frac": column["null_frac"],
-                "most_common_freqs": column["most_common_freqs"],
-            }
-        )
-    return list(tables.values())
+        size -= len(json.dumps(column["histogram"])) - len("null")
+        column["histogram"] = None
+    return size

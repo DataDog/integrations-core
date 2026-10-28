@@ -2,13 +2,20 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from copy import copy
+from datetime import datetime, timedelta, timezone
 
 import mock
 import pytest
 
 from datadog_checks.base.utils.db.health import HealthStatus
+from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver import SQLServer
-from datadog_checks.sqlserver.column_statistics import derive_column_statistics, group_by_table
+from datadog_checks.sqlserver.column_statistics import (
+    TABLE_MAX_BYTES,
+    column_statistics,
+    fit_table,
+    read_tables,
+)
 from datadog_checks.sqlserver.health import SqlServerHealthEvent
 
 from .common import CHECK_NAME
@@ -52,30 +59,42 @@ def test_collects_column_statistics(aggregator, dd_run_check, dbm_instance):
 
     tables = event['column_statistics']
     assert [(t['db'], t['schema'], t['table']) for t in tables] == [('datadog_test_column_stats', 'dbo', 'orders')]
-    columns = {c['name']: c for c in tables[0]['columns']}
+    columns = {c['column_name']: c for c in tables[0]['columns']}
     assert set(columns) == {'id', 'customer_id', 'status', 'note', 'unused_num'}
 
-    # One customer has 30% of the rows and the other 349 have 0.2% each. The statistics were read in full, so as in
-    # Postgres, every repeated value the histogram has an exact count for is kept, up to 100.
-    assert columns['customer_id']['n_distinct'] == 350
-    customer_freqs = columns['customer_id']['most_common_freqs']
-    assert customer_freqs[0] == pytest.approx(0.302)
-    assert 1 < len(customer_freqs) <= 100
-    assert customer_freqs[1:] == [pytest.approx(0.002)] * (len(customer_freqs) - 1)
-    # Every value is distinct, which Postgres sends as -1, a share of the rows.
-    assert columns['id']['n_distinct'] == -1
-    assert columns['id']['most_common_freqs'] == []
-    assert columns['status']['n_distinct'] == 2
-    assert columns['status']['null_frac'] == pytest.approx(0.1)
-    assert columns['status']['most_common_freqs'] == [pytest.approx(0.7), pytest.approx(0.2)]
-    # Its histogram has no steps at all.
-    assert columns['unused_num']['null_frac'] == 1
-    assert columns['unused_num']['n_distinct'] == 0
-    assert columns['unused_num']['most_common_freqs'] == []
-    # 'pending' and 'shipped' are 7 bytes each. As in pg_stats, the NULLs don't pull the average down.
-    assert columns['status']['avg_width'] == 7
-    # nvarchar values of 20 to 40 characters average 60 bytes.
-    assert columns['note']['avg_width'] == 60
+    # The statistics are sent as SQL Server reports them, read in full after UPDATE STATISTICS WITH FULLSCAN.
+    for column in columns.values():
+        assert column['rows'] == column['rows_sampled'] == 10_000
+        assert column['modification_counter'] == 0
+        updated = datetime.fromisoformat(column['last_updated'])
+        assert abs(datetime.now(timezone.utc) - updated) < timedelta(days=1), "last_updated is in UTC"
+    # An all-NULL column's properties count one step, though sys.dm_db_stats_histogram returns none.
+    for name in ('id', 'customer_id', 'status', 'note'):
+        assert columns[name]['steps'] == len(columns[name]['histogram']['equal_rows'])
+    identity = columns['id']
+    assert identity['stats_name'].startswith('PK__')
+    assert (identity['type_name'], identity['max_length'], identity['is_nullable']) == ('int', 4, False)
+    assert identity['is_unique']
+    # Every value of a fixed-width type takes max_length, so only variable-width columns have an average length.
+    assert identity['average_length'] is None
+    note = columns['note']
+    assert (note['stats_name'], note['user_created'], note['auto_created']) == ('st_note', True, False)
+    assert (note['type_name'], note['max_length']) == ('nvarchar', 200)
+    # nvarchar values of 20 to 40 characters average 60 bytes, which DBCC reports as a 4-byte float.
+    assert note['average_length'] == pytest.approx(60, abs=0.01)
+
+    # One customer has 3020 of the 10000 rows, the other 349 have 20 each.
+    assert max(columns['customer_id']['histogram']['equal_rows']) == 3020
+    assert not columns['customer_id']['is_unique']
+    # 1000 NULLs, 2000 'pending' and 7000 'shipped'. Windows SQL Server 2019 builds the histogram without a NULL step.
+    status = columns['status']['histogram']
+    steps = list(zip(status['range_high_key_is_null'], status['equal_rows']))
+    assert sorted(rows for is_null, rows in steps if not is_null) == [2000, 7000]
+    assert [rows for is_null, rows in steps if is_null] in ([1000], [])
+    # 'pending' and 'shipped' are 7 bytes each; DBCC averages over every row, NULLs as 0 bytes.
+    assert columns['status']['average_length'] == pytest.approx(6.3, abs=0.01)
+    # Every value is NULL, so no step has a value.
+    assert not any(not is_null for is_null in columns['unused_num']['histogram']['range_high_key_is_null'])
     aggregator.assert_metric('dd.sqlserver.column_statistics.payloads_count', value=1)
     # Settings are off, so the metadata job ran only for column statistics.
     assert not [e for e in aggregator.get_event_platform_events("dbm-metadata") if e['kind'] == 'sqlserver_configs']
@@ -114,137 +133,74 @@ def test_missing_procedure_reports_health_event(aggregator, dd_run_check, dbm_in
     assert [(e['name'], e['status']) for e in health] == [('column_statistics_procedure_not_found', 'warning')]
 
 
-@pytest.mark.unit
-def test_group_by_table():
-    def row(table, column, stats_age):
-        return {
-            'schema_name': 'dbo',
-            'table_name': table,
-            'column_name': column,
-            'stats_age': stats_age,
-            'n_distinct': 3.0,
-            'null_frac': 0.0,
-            'avg_width': 4.0,
-            'most_common_freqs': [],
-        }
-
-    tables = group_by_table('db', [row('a', 'x', 10), row('a', 'y', 50), row('b', 'z', 5)])
-
-    assert [(t['table'], [c['name'] for c in t['columns']]) for t in tables] == [('a', ['x', 'y']), ('b', ['z'])]
-    assert tables[0]['stats_age'] == 50, "a table is as stale as its oldest column statistics"
-
-
-def step(equal_rows, range_rows=0.0, distinct_range_rows=0.0, is_null=0):
-    return {
-        'is_null': is_null,
-        'equal_rows': equal_rows,
-        'range_rows': range_rows,
-        'distinct_range_rows': distinct_range_rows,
-    }
-
-
-def column(rows, steps, is_nullable=True, rows_sampled=None, fixed_width=4.0, avg_width=None, is_unique=False):
-    stats = {
+def procedure_row(**overrides):
+    row = {
         'schema_name': 'dbo',
-        'table_name': 't',
-        'column_name': 'c',
-        'is_nullable': is_nullable,
-        'is_unique': is_unique,
-        'rows': rows,
-        'rows_sampled': rows_sampled or rows,
-        'stats_age': 0,
-        'fixed_width': fixed_width,
-        'avg_width': avg_width,
+        'table_name': 'orders',
+        'column_name': 'status',
+        'stats_name': 'ix_status',
+        'auto_created': 0,
+        'user_created': 0,
+        'type_name': 'varchar',
+        'max_length': 20,
+        'is_nullable': 1,
+        'is_unique': 0,
+        'last_updated': datetime(2026, 10, 28, 14, 30),
+        'rows': 10_000,
+        'rows_sampled': 6_700,
+        'steps': 3,
+        'modification_counter': 12,
+        'average_length': 6.3,
+        'histogram': '1:1000.00:0.00:0.00:1.0000,0:2000.00:0.00:0.00:1.0000,0:7000.00:0.00:0.00:1.0000',
     }
-    return derive_column_statistics(stats, steps)
+    row.update(overrides)
+    return row
+
+
+def iter_cursor(rows):
+    cursor = mock.MagicMock()
+    cursor.description = [(name,) for name in rows[0]]
+    cursor.fetchone.side_effect = [tuple(row.values()) for row in rows] + [None]
+    return cursor
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize(
-    'steps,is_nullable,rows_sampled,null_frac',
-    [
-        pytest.param([step(400), step(600, is_null=1)], True, None, 0.6, id='NULL step'),
-        pytest.param([step(400, range_rows=300, distinct_range_rows=3)], True, None, 0.3, id='no NULL step'),
-        pytest.param([], True, None, 1.0, id='every value NULL'),
-        # Steps scaled up from a sample cover slightly fewer rows than the table has.
-        pytest.param([step(399.99, range_rows=599.99, distinct_range_rows=9)], False, 20, 0.0, id='NOT NULL'),
-    ],
-)
-def test_derive_null_frac(steps, is_nullable, rows_sampled, null_frac):
-    assert column(1000, steps, is_nullable, rows_sampled)['null_frac'] == null_frac
+def test_fit_table_drops_largest_histograms_first():
+    def column(name, steps):
+        packed = ','.join('0:123456789.00:123456789.00:123456789.00:1.2345' for _ in range(steps))
+        return column_statistics(procedure_row(column_name=name, histogram=packed))
+
+    # Each 200-step histogram is about 11 KB, so about 80 of them fit in a table event.
+    table = {'columns': [column('small', 2)] + [column('wide_{}'.format(i), 200) for i in range(100)]}
+    size = fit_table(table)
+
+    assert size <= TABLE_MAX_BYTES
+    assert size == len(json.dumps(table))
+    dropped = [c['column_name'] for c in table['columns'] if c['histogram'] is None]
+    assert 0 < len(dropped) < 100
+    assert 'small' not in dropped
+    assert all(c['rows'] == 10_000 for c in table['columns']), "a column keeps its other statistics"
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize(
-    'steps,n_distinct',
-    [
-        pytest.param([step(500, range_rows=450, distinct_range_rows=49)], 50, id='count'),
-        pytest.param([step(1, range_rows=998, distinct_range_rows=998), step(1)], -1, id='unique'),
-        pytest.param([step(1, range_rows=499, distinct_range_rows=499), step(500, is_null=1)], -0.5, id='share'),
-        pytest.param([], 0, id='every value NULL'),
-    ],
-)
-def test_derive_n_distinct(steps, n_distinct):
-    # Like ANALYZE, more distinct values than 10% of the rows are sent as a negative share of the rows.
-    assert column(1000, steps)['n_distinct'] == n_distinct
+def test_payloads_split_by_size(dbm_instance):
+    # Three tables of two columns each, read as the procedure returns them: ordered by table.
+    rows = [procedure_row(table_name=table, column_name=column) for table in 'abc' for column in ('x', 'y')]
+    cursor = iter_cursor(rows)
+    collector = SQLServer(CHECK_NAME, {}, [dbm_instance]).sql_metadata._column_statistics_collector
+    # The tables are the same size apart from their names, so a budget of two and a half tables fits two.
+    table_bytes = fit_table(next(read_tables(iter_cursor(rows[:2]), list(rows[0]), 'app')))
 
+    with (
+        mock.patch('datadog_checks.sqlserver.column_statistics.PAYLOAD_MAX_BYTES', table_bytes * 2.5),
+        mock.patch.object(collector, '_submit') as submit,
+    ):
+        assert collector._collect_database(cursor, 'app') == (3, 6, 2)
 
-@pytest.mark.unit
-@pytest.mark.parametrize(
-    'steps,is_nullable,n_distinct',
-    [
-        # A 67% sample estimates only 930 of 1000 distinct values, and its scaled-up counts look repeated.
-        pytest.param([step(1.5, range_rows=997, distinct_range_rows=928), step(1.5)], False, -1, id='sampled'),
-        pytest.param(
-            [step(1, range_rows=898, distinct_range_rows=898), step(1), step(100, is_null=1)], True, -0.9, id='NULLs'
-        ),
-    ],
-)
-def test_derive_unique(steps, is_nullable, n_distinct):
-    # As in Postgres, every non-NULL value of a unique column is distinct, and none is common.
-    stats = column(1000, steps, is_nullable, rows_sampled=670, is_unique=True)
-    assert stats['n_distinct'] == pytest.approx(n_distinct)
-    assert stats['most_common_freqs'] == []
-
-
-@pytest.mark.unit
-def test_derive_avg_width_excludes_nulls():
-    # DBCC averages 3 bytes over all rows; the half that isn't NULL averages 6, as pg_stats reports.
-    stats = column(1000, [step(500), step(500, is_null=1)], fixed_width=None, avg_width=3.0)
-    assert stats['avg_width'] == 6
-
-
-@pytest.mark.unit
-@pytest.mark.parametrize(
-    'steps,rows_sampled,freqs',
-    [
-        pytest.param([step(700), step(200), step(100)], None, [0.7, 0.2, 0.1], id='all values'),
-        pytest.param([step(1), step(998, range_rows=1, distinct_range_rows=1)], None, [0.998], id='only repeated'),
-        pytest.param(
-            [step(300, range_rows=200, distinct_range_rows=99)] + [step(5)] * 100,
-            None,
-            [0.3] + [0.005] * 99,
-            id='read in full',
-        ),
-        # The sample has 10 or 11 rows of each of 100 values: their differences are noise.
-        pytest.param(
-            [step(10_000 + 1_000 * (i % 2), range_rows=9_000, distinct_range_rows=1) for i in range(50)],
-            0.01,
-            [],
-            id='sampled uniform',
-        ),
-        pytest.param(
-            [step(300_000)] + [step(7_000, range_rows=7_000, distinct_range_rows=1) for _ in range(50)],
-            0.01,
-            [0.3],
-            id='sampled skewed',
-        ),
-    ],
-)
-def test_derive_most_common_freqs(steps, rows_sampled, freqs):
-    rows = sum(s['equal_rows'] + s['range_rows'] for s in steps)
-    sampled = rows * rows_sampled if rows_sampled else None
-    assert column(rows, steps, rows_sampled=sampled)['most_common_freqs'] == [pytest.approx(f) for f in freqs]
+    batches = [
+        [(t['table'], [c['column_name'] for c in t['columns']]) for t in call.args[0]] for call in submit.call_args_list
+    ]
+    assert batches == [[('a', ['x', 'y']), ('b', ['x', 'y'])], [('c', ['x', 'y'])]]
 
 
 PROCEDURE_NOT_FOUND = SqlServerHealthEvent.COLUMN_STATISTICS_PROCEDURE_NOT_FOUND

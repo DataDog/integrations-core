@@ -864,9 +864,9 @@ instances:
 
     ## Configure collection of column statistics, which the query benchmarker uses to generate data shaped like
     ## yours. Requires the `datadog.column_statistics` procedure in each database, as described in the setup
-    ## documentation. Only counts and frequencies are collected, never column values. If `database_autodiscovery`
-    ## is not enabled, data is collected only for the database configured with `database` parameter. System
-    ## databases and databases that are offline or inaccessible are skipped.
+    ## documentation. Only statistics properties and histogram counts are collected, never column values. If
+    ## `database_autodiscovery` is not enabled, data is collected only for the database configured with `database`
+    ## parameter. System databases and databases that are offline or inaccessible are skipped.
     ## Requires SQL Server 2017 or later.
     #
     # collect_column_statistics:
