@@ -10,13 +10,23 @@ AS
 BEGIN
     SET NOCOUNT ON;
     -- One statistics object per column: unfiltered, on the column as its leading key, the most fully sampled. Every
-    -- value of a fixed-width type takes its storage size, so only variable-width columns need DBCC below.
-    SELECT object_id, stats_id, stats_name, column_name, is_nullable, [rows], rows_sampled, last_updated, fixed_width,
-        CAST(NULL AS FLOAT) AS avg_width
+    -- value of a fixed-width type takes its storage size, so only variable-width columns need DBCC below. A column is
+    -- unique when an unfiltered unique index or primary key has it as its only key, which a sampled histogram can't
+    -- tell.
+    SELECT object_id, stats_id, stats_name, column_name, is_nullable, is_unique, [rows], rows_sampled, last_updated,
+        fixed_width, CAST(NULL AS FLOAT) AS avg_width
     INTO #stats
     FROM (
         SELECT st.object_id, st.stats_id, st.name AS stats_name, c.name AS column_name, c.is_nullable, sp.[rows],
             sp.rows_sampled, sp.last_updated,
+            CAST(CASE WHEN EXISTS (
+                SELECT 1
+                FROM sys.indexes i
+                JOIN sys.index_columns ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id
+                    AND ic.key_ordinal = 1
+                WHERE i.object_id = c.object_id AND ic.column_id = c.column_id AND i.is_unique = 1
+                    AND i.has_filter = 0 AND INDEXKEY_PROPERTY(i.object_id, i.index_id, 2, 'ColumnId') IS NULL
+            ) THEN 1 ELSE 0 END AS BIT) AS is_unique,
             CASE WHEN TYPE_NAME(c.system_type_id) IN ('varchar', 'nvarchar', 'varbinary', 'sql_variant')
                 OR c.system_type_id = 240 THEN NULL ELSE CAST(c.max_length AS FLOAT) END AS fixed_width,
             ROW_NUMBER() OVER (PARTITION BY st.object_id, sc.column_id ORDER BY sp.rows_sampled DESC, sp.last_updated DESC) AS rn
@@ -57,7 +67,7 @@ BEGIN
     -- keeping only whether a step is the NULL step, never its value. A column whose histogram is empty, as when every
     -- value is NULL, has no steps.
     SELECT OBJECT_SCHEMA_NAME(s.object_id) AS schema_name, OBJECT_NAME(s.object_id) AS table_name, s.column_name,
-        s.is_nullable, s.[rows], s.rows_sampled, DATEDIFF(SECOND, s.last_updated, SYSDATETIME()) AS stats_age,
+        s.is_nullable, s.is_unique, s.[rows], s.rows_sampled, DATEDIFF(SECOND, s.last_updated, SYSDATETIME()) AS stats_age,
         s.fixed_width, s.avg_width, h.steps
     FROM #stats s
     OUTER APPLY (

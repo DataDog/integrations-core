@@ -13,10 +13,10 @@ from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_e
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
+from datadog_checks.sqlserver.diagnose import SYSTEM_DATABASES
 from datadog_checks.sqlserver.health import SqlServerHealthEvent
 from datadog_checks.sqlserver.utils import (
     construct_use_statement,
-    execute_query,
     raise_if_cancelled,
     serialize_database_names,
 )
@@ -47,6 +47,7 @@ PROCEDURE_COLUMNS = frozenset(
         "table_name",
         "column_name",
         "is_nullable",
+        "is_unique",
         "rows",
         "rows_sampled",
         "stats_age",
@@ -57,8 +58,8 @@ PROCEDURE_COLUMNS = frozenset(
 )
 PROCEDURE_OUTDATED_MESSAGE = "datadog.column_statistics is outdated"
 
-# The system databases can't usefully hold the procedure (tempdb even loses it on restart), and an offline or
-# inaccessible database can't run it.
+# get_databases() includes every database autodiscovery finds, whatever its state. An offline or inaccessible one,
+# such as a non-readable availability group secondary, can't run the procedure.
 DATABASES_QUERY = """
 DECLARE @databases xml = ?;
 SELECT name
@@ -67,7 +68,6 @@ WHERE name IN (
         SELECT database_node.value('.', 'nvarchar(128)')
         FROM @databases.nodes('/databases/database') AS d(database_node)
     )
-    AND name NOT IN ('master', 'tempdb', 'model', 'msdb')
     AND state = 0 AND HAS_DBACCESS(name) = 1;
 """
 
@@ -168,7 +168,8 @@ class SqlserverColumnStatisticsCollector(DBMAsyncJob):
             )
 
     def _databases(self, cursor) -> list[str]:
-        db_names = self._check.get_databases()
+        # The system databases can't usefully hold the procedure: tempdb even loses it on restart.
+        db_names = [db_name for db_name in self._check.get_databases() if db_name.lower() not in SYSTEM_DATABASES]
         cursor.execute(DATABASES_QUERY, (serialize_database_names(db_names),))
         usable = {row[0] for row in cursor.fetchall()}
         databases = [db_name for db_name in db_names if db_name in usable]
@@ -186,10 +187,17 @@ class SqlserverColumnStatisticsCollector(DBMAsyncJob):
     def _collect_database(self, cursor, db_name: str) -> tuple[int, int, int]:
         try:
             cursor.execute(construct_use_statement(db_name))
-            rows = execute_query(COLUMN_STATISTICS_QUERY, cursor, parameters=(self._max_tables,))
-            if rows and not PROCEDURE_COLUMNS <= rows[0].keys():
+            cursor.execute(COLUMN_STATISTICS_QUERY, (self._max_tables,))
+            names = [str(column[0]).lower() for column in cursor.description]
+            if not PROCEDURE_COLUMNS <= set(names):
                 raise OutdatedProcedureError(PROCEDURE_OUTDATED_MESSAGE)
-            columns = [derive_column_statistics(row, parse_steps(row["steps"])) for row in rows]
+            # Each row's packed steps can take kilobytes, so each is derived as it arrives rather than all held at once.
+            columns = []
+            row = cursor.fetchone()
+            while row:
+                stats = dict(zip(names, row))
+                columns.append(derive_column_statistics(stats, parse_steps(stats["steps"])))
+                row = cursor.fetchone()
         except Exception as e:
             self._handle_error(db_name, e)
             return 0, 0, 0
@@ -300,7 +308,11 @@ def derive_column_statistics(column: dict, steps: list[dict]) -> dict:
     else:
         avg_width = 0.0
 
-    if n_distinct > N_DISTINCT_SCALING_THRESHOLD * rows:
+    if column["is_unique"]:
+        # A sampled histogram undercounts a unique column's values. As ANALYZE does when no value repeats, every
+        # non-NULL row is a distinct value, and none is common.
+        stored_n_distinct = -(1.0 - null_rows / rows)
+    elif n_distinct > N_DISTINCT_SCALING_THRESHOLD * rows:
         # A negative n_distinct is a share of the rows, so it scales with the table.
         stored_n_distinct = -min(n_distinct / rows, 1.0)
     else:
@@ -314,9 +326,9 @@ def derive_column_statistics(column: dict, steps: list[dict]) -> dict:
         "avg_width": round(avg_width),
         "n_distinct": stored_n_distinct,
         "null_frac": null_rows / rows,
-        "most_common_freqs": most_common_freqs(
-            value_steps, n_distinct, null_rows / rows, rows, float(column["rows_sampled"] or rows)
-        ),
+        "most_common_freqs": []
+        if column["is_unique"]
+        else most_common_freqs(value_steps, n_distinct, null_rows / rows, rows, float(column["rows_sampled"] or rows)),
     }
 
 

@@ -134,12 +134,13 @@ def step(equal_rows, range_rows=0.0, distinct_range_rows=0.0, is_null=0):
     }
 
 
-def column(rows, steps, is_nullable=True, rows_sampled=None, fixed_width=4.0, avg_width=None):
+def column(rows, steps, is_nullable=True, rows_sampled=None, fixed_width=4.0, avg_width=None, is_unique=False):
     stats = {
         'schema_name': 'dbo',
         'table_name': 't',
         'column_name': 'c',
         'is_nullable': is_nullable,
+        'is_unique': is_unique,
         'rows': rows,
         'rows_sampled': rows_sampled or rows,
         'stats_age': 0,
@@ -177,6 +178,24 @@ def test_derive_null_frac(steps, is_nullable, rows_sampled, null_frac):
 def test_derive_n_distinct(steps, n_distinct):
     # Like ANALYZE, more distinct values than 10% of the rows are sent as a negative share of the rows.
     assert column(1000, steps)['n_distinct'] == n_distinct
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'steps,is_nullable,n_distinct',
+    [
+        # A 67% sample estimates only 930 of 1000 distinct values, and its scaled-up counts look repeated.
+        pytest.param([step(1.5, range_rows=997, distinct_range_rows=928), step(1.5)], False, -1, id='sampled'),
+        pytest.param(
+            [step(1, range_rows=898, distinct_range_rows=898), step(1), step(100, is_null=1)], True, -0.9, id='NULLs'
+        ),
+    ],
+)
+def test_derive_unique(steps, is_nullable, n_distinct):
+    # As in Postgres, every non-NULL value of a unique column is distinct, and none is common.
+    stats = column(1000, steps, is_nullable, rows_sampled=670, is_unique=True)
+    assert stats['n_distinct'] == pytest.approx(n_distinct)
+    assert stats['most_common_freqs'] == []
 
 
 @pytest.mark.unit
@@ -270,7 +289,8 @@ def test_setup_errors_report_health_until_fixed(dbm_instance, message, event):
 
 @pytest.mark.unit
 def test_outdated_procedure_reports_health_event(dbm_instance):
-    # The shape the procedure returned before the Agent derived the statistics itself.
+    # The shape the procedure returned before the Agent derived the statistics itself. It's outdated even in a
+    # database where it returns no rows.
     cursor = mock.MagicMock()
     cursor.description = [
         (name,)
@@ -285,7 +305,7 @@ def test_outdated_procedure_reports_health_event(dbm_instance):
             'most_common_freqs',
         )
     ]
-    cursor.fetchall.return_value = [('dbo', 'orders', 'id', 10, 100.0, 0.0, 4.0, None)]
+    cursor.fetchone.return_value = None
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     with mock.patch.object(check.health, 'submit_health_event') as submit:
         assert check.column_statistics._collect_database(cursor, 'app') == (0, 0, 0)
