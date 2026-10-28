@@ -5,16 +5,10 @@ from __future__ import annotations
 
 import re
 import time
+from typing import TYPE_CHECKING
 
 import psycopg
 from psycopg.rows import dict_row
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
-from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
@@ -130,8 +124,8 @@ class PostgresColumnStatisticsCollector:
         return {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
-            "ddagentversion": datadog_agent.get_version(),
-            "dbms": "postgres",
+            "ddagentversion": self._check.agent_version,
+            "dbms": self._check.dbms,
             "dbms_version": payload_pg_version(self._check.version),
             "cloud_metadata": self._check.cloud_metadata,
             "dbm_type": "column_statistics",

@@ -1,7 +1,7 @@
 import click
-from datadog_checks.dev.tooling.codeowners import CodeOwners
 
 from ddev.cli.application import Application
+from ddev.utils.codeowners import CodeOwners
 
 
 @click.command()

@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 5.7.1 / 2026-10-01
+
+***Fixed***:
+
+* Accept both lowercase and capitalized values for the ``filters.type`` config option. ([#25167](https://github.com/DataDog/integrations-core/pull/25167))
+
+## 5.7.0 / 2026-08-05 / Agent 7.83.0
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+
+## 5.6.1 / 2026-07-08 / Agent 7.82.0
+
+***Fixed***:
+
+* Reformat auto-generated `config_models` files following the migration of the model formatter from black to ruff. No behavior or type-contract change. ([#23588](https://github.com/DataDog/integrations-core/pull/23588))
+
 ## 5.6.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:

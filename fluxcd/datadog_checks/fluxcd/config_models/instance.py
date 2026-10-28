@@ -123,6 +123,7 @@ class InstanceConfig(BaseModel):
     kerberos_hostname: Optional[str] = None
     kerberos_keytab: Optional[str] = None
     kerberos_principal: Optional[str] = None
+    kube_state_metrics_endpoint: Optional[str] = None
     log_requests: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, Metrics]]], ...]] = None

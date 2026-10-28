@@ -6,6 +6,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 from contextlib import contextmanager
 from itertools import chain
 from pathlib import Path
@@ -44,6 +45,36 @@ def check_process(*args, **kwargs) -> subprocess.CompletedProcess:
         sys.exit(process.returncode)
 
     return process
+
+
+def pull_image_with_retry(image_name: str, *, attempts: int = 5, backoff_seconds: int = 15) -> None:
+    """Pull the builder image, retrying transient ghcr.io throttling.
+
+    When a dependency or builder change forces a full resolution, every build
+    target pulls its image at once and ghcr.io burst-throttles the pull with an
+    HTTP 429 (``toomanyrequests``). A single un-retried pull otherwise fails the
+    whole target. The registry's retry-after is sub-second, so a short backoff
+    clears it. Non-throttle failures (bad digest, auth) still fail fast.
+    """
+    command = ['docker', 'pull', image_name]
+    for attempt in range(1, attempts + 1):
+        print(f'Running: {join_command_args(command)}', file=sys.stderr)
+        process = subprocess.run(command, capture_output=True, text=True)
+        sys.stderr.write(process.stdout)
+        if process.returncode == 0:
+            return
+
+        if 'toomanyrequests' in process.stderr.lower() and attempt < attempts:
+            print(
+                f'Registry throttled the pull (attempt {attempt}/{attempts}); '
+                f'retrying in {backoff_seconds}s',
+                file=sys.stderr,
+            )
+            time.sleep(backoff_seconds)
+            continue
+
+        sys.stderr.write(process.stderr)
+        sys.exit(process.returncode)
 
 
 @contextmanager
@@ -187,7 +218,7 @@ def build_image():
     windows_image = image.startswith('windows-')
     if args.digest:
         image_name = f'ghcr.io/datadog/agent-int-builder@{args.digest}'
-        check_process(['docker', 'pull', image_name])
+        pull_image_with_retry(image_name)
     else:
         image_name = f'ghcr.io/datadog/agent-int-builder:{image}'
         with temporary_directory() as temp_dir:

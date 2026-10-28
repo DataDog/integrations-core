@@ -201,6 +201,18 @@ CONFIG_DONT_CHECK_EXP = {
     ]
 }
 
+CONFIG_ENABLE_HTTP_OUTCOME_TAG = {
+    "instances": [
+        {
+            "name": "enable_http_outcome_tag",
+            "url": "https://valid.mock/",
+            "check_certificate_expiration": False,
+            "timeout": 1,
+            "enable_http_outcome_tag": True,
+        }
+    ]
+}
+
 CONFIG_HTTP_NO_REDIRECTS = {
     "instances": [
         {

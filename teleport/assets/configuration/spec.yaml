@@ -2,6 +2,14 @@ name: Teleport
 fleet_configurable: true
 files:
   - name: teleport.yaml
+    discovery:
+      strategies:
+      - strategy: from_ports
+        port_hints:
+        - 3000
+        candidates:
+        - teleport_url: "http://{service.host}"
+          diag_port: "{port.number}"
     options:
       - template: init_config
         options:
@@ -25,3 +33,12 @@ files:
             overrides:
               openmetrics_endpoint.hidden: true
               openmetrics_endpoint.required: false
+  - name: auto_conf.yaml
+    options:
+    - template: ad_identifiers
+      overrides:
+        value.example:
+        - teleport-distroless
+        - teleport-ent-distroless
+        - teleport-ent-fips-distroless
+    - template: auto_conf/discovery

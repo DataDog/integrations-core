@@ -254,9 +254,7 @@ INIT_CONFIG_ALT_TABLES = {
 }
 
 OPERATION_TIME_METRICS = [
-    'simple_metrics',
-    'fraction_metrics',
-    'incr_fraction_metrics',
+    'perf_counter_metrics',
 ]
 
 OPERATION_TIME_METRIC_NAME = 'dd.sqlserver.operation.time'

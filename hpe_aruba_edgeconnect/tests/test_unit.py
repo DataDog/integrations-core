@@ -111,6 +111,36 @@ def test_appliances_filter(dd_run_check, aggregator, mocker, instance, ips, filt
 
 
 @pytest.mark.parametrize(
+    'bad_ip',
+    [
+        pytest.param('appliance.example.com', id='hostname'),
+        pytest.param('appliance.example.com:8443', id='host_port'),
+        pytest.param('localhost:9999', id='localhost_port'),
+        pytest.param('', id='empty'),
+    ],
+)
+def test_appliances_with_non_ip_address_are_skipped(dd_run_check, aggregator, mocker, instance, bad_ip):
+    inst = instance('localhost:8443', max_backfill_minutes=10)
+    check = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [inst])
+
+    payload = [
+        {**APPLIANCE_PAYLOAD[0], 'ip': '10.0.0.1'},
+        {**APPLIANCE_PAYLOAD[0], 'ip': bad_ip, 'hostName': 'invalid-appliance'},
+    ]
+    _setup_mocks(mocker, check, payload, appliance_client=_mock_appliance_client(TGZ_DATA))
+
+    dd_run_check(check)
+
+    monitored_ips = [
+        tag.split(':', 1)[1]
+        for metric in aggregator.metrics(f'{NS}.device.reachability')
+        for tag in metric.tags
+        if tag.startswith('device_ip:')
+    ]
+    assert monitored_ips == ['10.0.0.1']
+
+
+@pytest.mark.parametrize(
     'value, expected',
     [
         pytest.param('1000Mb/s (auto)', 1_000_000_000, id='1000mbps_auto'),
@@ -295,6 +325,58 @@ def test_login_orchestrator_csrf_token():
     client.login('admin', 'pass')
 
     assert http.session.headers.get('X-XSRF-TOKEN') == 'orchtoken'
+
+
+@pytest.mark.parametrize(
+    'login_type, expected_payload',
+    [
+        pytest.param(
+            None,
+            {'user': 'admin', 'password': 'pass'},
+            id='unset-omits-field',
+        ),
+        pytest.param(
+            0,
+            {'user': 'admin', 'password': 'pass', 'loginType': 0},
+            id='local',
+        ),
+        pytest.param(
+            2,
+            {'user': 'admin', 'password': 'pass', 'loginType': 2},
+            id='tacacs',
+        ),
+    ],
+)
+def test_login_orchestrator_sends_configured_login_type(login_type, expected_payload):
+    http = MagicMock()
+    http.session.cookies = {'orchCsrfToken': 'orchtoken'}
+    http.session.headers = {}
+    http.post.return_value = MagicMock(raise_for_status=MagicMock())
+
+    client = OrchestratorClient(http, '10.0.0.1', login_type)
+    client.login('admin', 'pass')
+
+    assert http.post.call_args.kwargs['json'] == expected_payload
+
+
+def test_orchestrator_login_type_reused_on_reauthentication():
+    """A 401 mid-collection re-logs in, which must keep using the configured backend."""
+    http = MagicMock()
+    http.session.cookies = {'orchCsrfToken': 'orchtoken'}
+    http.session.headers = {}
+    http.post.return_value = MagicMock(raise_for_status=MagicMock())
+    http.get.side_effect = [
+        MagicMock(status_code=401),
+        MagicMock(status_code=200, raise_for_status=MagicMock(), json=MagicMock(return_value=[])),
+    ]
+
+    client = OrchestratorClient(http, '10.0.0.1', 2)
+    client.login('admin', 'pass')
+    client.get_appliances()
+
+    assert http.post.call_count == 2
+    for call in http.post.call_args_list:
+        assert call.kwargs['json']['loginType'] == 2
 
 
 @pytest.mark.parametrize(

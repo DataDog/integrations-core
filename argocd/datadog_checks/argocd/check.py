@@ -51,9 +51,21 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                 self._resource_collector.collect()
             except Exception:
                 self.log.exception("genresources: collection cycle failed")
-        super().check(instance)
+        if self.config.collect_openmetrics:
+            super().check(instance)
+
+    def cancel(self):
+        if self._resource_collector is not None:
+            self._resource_collector.stop()
+        super().cancel()
 
     def parse_config(self):
+        self.scraper_configs = []
+        if not self.instance.get("collect_openmetrics", True):
+            if not self.instance.get("collect_genresources", False):
+                raise ConfigurationError("Enable at least one of `collect_openmetrics` or `collect_genresources`.")
+            return
+
         endpoint_configs = [
             ("app_controller_endpoint", APP_CONTROLLER_NAMESPACE, APPLICATION_CONTROLLER_METRICS),
             ("appset_controller_endpoint", APPSET_CONTROLLER_NAMESPACE, APPSET_CONTROLLER_METRICS),
@@ -62,8 +74,6 @@ class ArgocdCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             ("notifications_controller_endpoint", NOTIFICATIONS_CONTROLLER_NAMESPACE, NOTIFICATIONS_CONTROLLER_METRICS),
             ("commit_server_endpoint", COMMIT_SERVER_NAMESPACE, COMMIT_SERVER_METRICS),
         ]
-
-        self.scraper_configs = []
         for endpoint_key, namespace, metrics in endpoint_configs:
             if endpoint := self.instance.get(endpoint_key):
                 config = self.generate_config(endpoint, namespace, metrics)

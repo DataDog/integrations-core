@@ -388,6 +388,7 @@ tests:
         activity_name: Response
         answers:
           - rdata: 185.64.148.0
+          - rdata: 8.8.8.8
         category_name: Network Activity
         category_uid: 4
         class_name: DNS Activity
@@ -416,6 +417,7 @@ tests:
         src_endpoint:
           ip: 185.64.148.0
           port: 58013
+          uid: 185.64.148.0
         status: Success
         status_detail: NOERROR
         status_id: 1
@@ -564,6 +566,7 @@ tests:
         src_endpoint:
           ip: 10.10.10.10
           port: 123
+          uid: 10.10.10.10
         status: Unknown
         status_id: 0
         time: 1709786320085
@@ -1089,6 +1092,7 @@ tests:
         src_endpoint:
           ip: 185.64.148.0
           port: 58013
+          uid: 185.64.148.0
         status: Success
         status_detail: NOERROR
         status_id: 1

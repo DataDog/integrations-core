@@ -4,8 +4,13 @@
 
 from itertools import tee
 
+import prometheus_client.parser as _prom_parser
 from prometheus_client.metrics_core import Metric
-from prometheus_client.parser import _parse_sample, _replace_help_escaping
+from prometheus_client.parser import _replace_help_escaping
+
+from datadog_checks.base.checks.openmetrics import parser_optimizations as _parser_opt
+
+_parser_opt.init_from_agent_config()
 
 
 def text_fd_to_metric_families(fd):
@@ -87,7 +92,7 @@ def _parse_payload(fd):
             # Ignore blank lines
             pass
         else:
-            sample = _parse_sample(line)
+            sample = _prom_parser._parse_sample(line)
             if sample.name not in allowed_names:
                 if name != '':
                     yield build_metric(name, documentation, typ, samples)

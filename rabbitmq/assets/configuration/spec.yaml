@@ -45,7 +45,6 @@ files:
             value:
               type: boolean
               example: true
-            fleet_configurable: false
           - name: unaggregated_endpoint
             description: |
               Specify an endpoint without aggregation to collect more detailed metrics.
@@ -65,7 +64,6 @@ files:
             value:
               type: string
               example: "detailed"
-            fleet_configurable: false
       - template: instances/openmetrics
         overrides:
           openmetrics_endpoint.required: false

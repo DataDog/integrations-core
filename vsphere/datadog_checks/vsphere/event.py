@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import re
 from datetime import datetime
-from hashlib import md5
+from hashlib import sha256
 
 from pyVmomi import vim
 
@@ -149,9 +149,9 @@ class VSphereEvent(object):
 
         def get_agg_key(alarm_event):
             return 'h:{0}|dc:{1}|a:{2}'.format(
-                md5(alarm_event.entity.name.encode('utf-8')).hexdigest()[:10],
-                md5(alarm_event.datacenter.name.encode('utf-8')).hexdigest()[:10],
-                md5(alarm_event.alarm.name.encode('utf-8')).hexdigest()[:10],
+                sha256(alarm_event.entity.name.encode('utf-8')).hexdigest()[:10],
+                sha256(alarm_event.datacenter.name.encode('utf-8')).hexdigest()[:10],
+                sha256(alarm_event.alarm.name.encode('utf-8')).hexdigest()[:10],
             )
 
         host_name = self.hostname

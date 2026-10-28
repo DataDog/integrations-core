@@ -8,12 +8,19 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Dict, Iterable
 
 from ddev.integration.core import Integration
-from ddev.repo.constants import CONFIG_DIRECTORY, FULL_NAMES
+from ddev.repo.constants import CONFIG_DIRECTORY, DEFAULT_GITHUB_OWNER, FULL_NAMES
 from ddev.utils.fs import Path
-from ddev.utils.git import GitRepository
+from ddev.utils.git import Comparison, GitRepository
 
 if TYPE_CHECKING:
     from ddev.repo.config import RepositoryConfig
+
+
+# Two questions, merged: what this branch changed against master, and what the working tree changed
+# against the last commit. They differ only when the working tree reverts something the branch
+# committed, in which case the first reports nothing and the second still reports the file. Asking
+# both keeps such a file selected. Narrow this to a single comparison with `IntegrationRegistry.comparing`.
+DEFAULT_COMPARISONS = (Comparison(), Comparison(base='HEAD'))
 
 
 GIT_REMOTE_PATTERNS = (
@@ -84,12 +91,16 @@ class Repository:
         self.__integrations = IntegrationRegistry(self)
 
     def __derive_full_name(self) -> str:
+        # A known alias names the canonical repository regardless of how it was cloned. The remote
+        # only identifies checkouts ddev has no alias for, such as `--here` or custom `[repos]` keys.
+        if self.__name in FULL_NAMES:
+            return FULL_NAMES[self.__name]
         remote_url = _read_origin_url_from_git_config(self.__path)
         if remote_url:
             parsed = parse_remote_url(remote_url)
             if parsed is not None:
                 return parsed
-        return FULL_NAMES.get(self.__name, self.__name)
+        return self.__name
 
     @property
     def name(self) -> str:
@@ -118,6 +129,12 @@ class Repository:
         return RepositoryConfig(self.path / CONFIG_DIRECTORY / 'config.toml')
 
     @cached_property
+    def github_owner(self) -> str:
+        # The origin remote is not consulted: it may be a personal fork while GitHub operations
+        # still target the upstream repository.
+        return self.config.get('/github/owner', DEFAULT_GITHUB_OWNER)
+
+    @cached_property
     def agent_requirements(self) -> Path:
         return self.path / 'agent_requirements.in'
 
@@ -135,9 +152,39 @@ class Repository:
 
 
 class IntegrationRegistry:
-    def __init__(self, repo: Repository):
+    def __init__(
+        self,
+        repo: Repository,
+        *,
+        comparisons: tuple[Comparison, ...] = DEFAULT_COMPARISONS,
+        cache: Dict[str, Integration] | None = None,
+    ):
+        """
+        `comparisons` are the points a `changed` selection is resolved against, unioned so a path
+        counts as changed if any of them reports it. `cache` is shared between a registry and the
+        views `comparing` derives from it, since an `Integration` does not depend on which
+        comparison selected it.
+        """
         self.__repo = repo
-        self.__cache: Dict[str, Integration] = {}
+        self.__comparisons = comparisons
+        self.__cache: Dict[str, Integration] = {} if cache is None else cache
+
+    def comparing(self, *, base: str, head: str | None = None) -> IntegrationRegistry:
+        """Return a registry that resolves a `changed` selection between exactly two points.
+
+        Without a `head` the comparison runs against the working tree.
+        """
+        return IntegrationRegistry(self.__repo, comparisons=(Comparison(base=base, head=head),), cache=self.__cache)
+
+    @cached_property
+    def changed_paths(self) -> set[str]:
+        """Every path affected by a change, across all of this registry's comparisons."""
+        return {
+            path
+            for comparison in self.__comparisons
+            for changed_file in self.repo.git.changed_files(comparison.base, comparison.head)
+            for path in changed_file.affected_paths
+        }
 
     @property
     def repo(self) -> Repository:
@@ -198,6 +245,14 @@ class IntegrationRegistry:
             if integration.is_testable:
                 yield integration
 
+    def iter_hatch_configured(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
+        """
+        Iterate over all targets that have a Hatch configuration.
+        """
+        for integration in self.__iter_filtered(selection):
+            if integration.has_hatch_config:
+                yield integration
+
     def iter_shippable(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
         """
         Iterate over all integrations that can be shipped by the Agent.
@@ -233,10 +288,8 @@ class IntegrationRegistry:
         Iterate over all integrations that have changes that could affect built distributions.
         """
         for integration in self.__iter_filtered(selection):
-            for relative_path in self.repo.git.changed_files():
-                if integration.requires_changelog_entry(self.repo.path / relative_path):
-                    yield integration
-                    break
+            if any(integration.requires_changelog_entry(self.repo.path / path) for path in self.changed_paths):
+                yield integration
 
     def __iter_filtered(self, selection: Iterable[str] = ()) -> Iterable[Integration]:
         selected = self.__finalize_selection(selection)
@@ -276,4 +329,4 @@ class IntegrationRegistry:
         return set() if 'all' in selection else set(selection)
 
     def __get_changed_root_entries(self) -> set[str]:
-        return {relative_path.split('/', 1)[0] for relative_path in self.repo.git.changed_files()}
+        return {path.split('/', 1)[0] for path in self.changed_paths}

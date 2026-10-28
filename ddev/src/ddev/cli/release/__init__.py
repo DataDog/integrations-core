@@ -14,6 +14,7 @@ from ddev.cli.release.list_versions import list_versions
 from ddev.cli.release.port_commit import port_commit
 from ddev.cli.release.show import show
 from ddev.cli.release.stats import stats
+from ddev.cli.release.test_agent import test_agent
 
 
 @click.group(short_help='Manage the release of integrations')
@@ -33,4 +34,5 @@ release.add_command(port_commit)
 release.add_command(show)
 release.add_command(stats)
 release.add_command(tag)
+release.add_command(test_agent)
 release.add_command(upload)

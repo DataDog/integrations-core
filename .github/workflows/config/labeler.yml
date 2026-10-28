@@ -77,6 +77,10 @@ integration/airflow:
 - changed-files:
   - any-glob-to-any-file:
     - airflow/**/*
+integration/akamai_cost_management:
+- changed-files:
+  - any-glob-to-any-file:
+    - akamai_cost_management/**/*
 integration/amazon_app_mesh:
 - changed-files:
   - any-glob-to-any-file:
@@ -97,6 +101,10 @@ integration/ambari:
 - changed-files:
   - any-glob-to-any-file:
     - ambari/**/*
+integration/anomali_threatstream:
+- changed-files:
+  - any-glob-to-any-file:
+    - anomali_threatstream/**/*
 integration/anthropic:
 - changed-files:
   - any-glob-to-any-file:
@@ -153,6 +161,10 @@ integration/authorize_net:
 - changed-files:
   - any-glob-to-any-file:
     - authorize_net/**/*
+integration/automox:
+- changed-files:
+  - any-glob-to-any-file:
+    - automox/**/*
 integration/avast:
 - changed-files:
   - any-glob-to-any-file:
@@ -293,6 +305,10 @@ integration/cisco_asa:
 - changed-files:
   - any-glob-to-any-file:
     - cisco_asa/**/*
+integration/cisco_catalyst_center:
+- changed-files:
+  - any-glob-to-any-file:
+    - cisco_catalyst_center/**/*
 integration/cisco_duo:
 - changed-files:
   - any-glob-to-any-file:
@@ -409,10 +425,6 @@ integration/crowdstrike_fdr:
 - changed-files:
   - any-glob-to-any-file:
     - crowdstrike_fdr/**/*
-integration/cyberark_endpoint_privilege_manager:
-- changed-files:
-  - any-glob-to-any-file:
-    - cyberark_endpoint_privilege_manager/**/*
 integration/databricks:
 - changed-files:
   - any-glob-to-any-file:
@@ -489,6 +501,10 @@ integration/duckdb:
 - changed-files:
   - any-glob-to-any-file:
     - duckdb/**/*
+integration/dynamo:
+- changed-files:
+  - any-glob-to-any-file:
+    - dynamo/**/*
 integration/ecs_fargate:
 - changed-files:
   - any-glob-to-any-file:
@@ -721,6 +737,10 @@ integration/ide_shepherd:
 - changed-files:
   - any-glob-to-any-file:
     - ide_shepherd/**/*
+integration/idira_endpoint_privilege_manager:
+- changed-files:
+  - any-glob-to-any-file:
+    - idira_endpoint_privilege_manager/**/*
 integration/ignite:
 - changed-files:
   - any-glob-to-any-file:
@@ -745,6 +765,10 @@ integration/intercom:
 - changed-files:
   - any-glob-to-any-file:
     - intercom/**/*
+integration/intersystems_iris:
+- changed-files:
+  - any-glob-to-any-file:
+    - intersystems_iris/**/*
 integration/istio:
 - changed-files:
   - any-glob-to-any-file:
@@ -789,6 +813,10 @@ integration/kafka_consumer:
 - changed-files:
   - any-glob-to-any-file:
     - kafka_consumer/**/*
+integration/kai_scheduler:
+- changed-files:
+  - any-glob-to-any-file:
+    - kai_scheduler/**/*
 integration/kandji:
 - changed-files:
   - any-glob-to-any-file:
@@ -1097,6 +1125,10 @@ integration/openmetrics:
 - changed-files:
   - any-glob-to-any-file:
     - openmetrics/**/*
+integration/openrouter:
+- changed-files:
+  - any-glob-to-any-file:
+    - openrouter/**/*
 integration/openshift:
 - changed-files:
   - any-glob-to-any-file:
@@ -1289,6 +1321,10 @@ integration/scylla:
 - changed-files:
   - any-glob-to-any-file:
     - scylla/**/*
+integration/sglang:
+- changed-files:
+  - any-glob-to-any-file:
+    - sglang/**/*
 integration/shopify:
 - changed-files:
   - any-glob-to-any-file:
@@ -1509,6 +1545,10 @@ integration/terraform:
 - changed-files:
   - any-glob-to-any-file:
     - terraform/**/*
+integration/thermal:
+- changed-files:
+  - any-glob-to-any-file:
+    - thermal/**/*
 integration/tibco_ems:
 - changed-files:
   - any-glob-to-any-file:

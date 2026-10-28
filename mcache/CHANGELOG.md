@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 6.6.0 / 2026-10-01
+
+***Added***:
+
+* Package the Memcache integration on Windows. ([#23738](https://github.com/DataDog/integrations-core/pull/23738))
+
+## 6.5.0 / 2026-08-05 / Agent 7.83.0
+
+***Security***:
+
+* Expand the set of configuration fields protected behind integration security settings. ([#24646](https://github.com/DataDog/integrations-core/pull/24646))
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+
 ## 6.4.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:

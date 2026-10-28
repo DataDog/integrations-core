@@ -8,8 +8,8 @@
         "id": 170517673,
         "name": "[InfiniBand] Port Physical State Alert",
         "type": "query alert",
-        "query": "min(last_5m):avg:infiniband.port_phys_state{port_phys_state:disabled OR port_phys_state:link_error_recovery} by {port,device,host,port_state} >= 1",
-        "message": "{{#is_alert}}\nPort:{{port.name}} of device:{{device.name}} on host:{{host.name}} is reporting a {{port_state.name}} physical state.\n{{/is_alert}}",
+        "query": "min(last_5m):avg:infiniband.port_phys_state{port_phys_state:disabled OR port_phys_state:linkerrorrecovery} by {port,device,host,port_phys_state} >= 1",
+        "message": "{{#is_alert}}\nPort:{{port.name}} of device:{{device.name}} on host:{{host.name}} is reporting a {{port_phys_state.name}} physical state.\n{{/is_alert}}",
         "tags": [
             "integration:infiniband"
         ],

@@ -99,7 +99,9 @@ class InstanceConfig(BaseModel):
     cache_shared_labels: Optional[bool] = None
     cluster_check: Optional[bool] = None
     collect_counters_with_distributions: Optional[bool] = None
+    collect_follower_metrics: Optional[bool] = None
     collect_histogram_buckets: Optional[bool] = None
+    collect_workload_events: Optional[bool] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
@@ -124,6 +126,7 @@ class InstanceConfig(BaseModel):
     kerberos_hostname: Optional[str] = None
     kerberos_keytab: Optional[str] = None
     kerberos_principal: Optional[str] = None
+    kube_config_dict: Optional[MappingProxyType[str, Any]] = None
     log_requests: Optional[bool] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, Metrics]]], ...]] = None
@@ -160,6 +163,7 @@ class InstanceConfig(BaseModel):
     use_legacy_auth_encoding: Optional[bool] = None
     use_process_start_time: Optional[bool] = None
     username: Optional[str] = None
+    workload_events_namespaces: Optional[tuple[str, ...]] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):

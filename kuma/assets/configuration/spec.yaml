@@ -2,6 +2,12 @@ name: Kuma
 fleet_configurable: true
 files:
 - name: kuma.yaml
+  discovery:
+    strategies:
+    - template: discovery/openmetrics_from_named_ports
+      overrides:
+        port_names:
+        - diagnostics
   options:
   - template: init_config
     options:
@@ -18,3 +24,10 @@ files:
     - type: docker
       source: kuma
       service: <SERVICE>
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - kuma-cp
+  - template: auto_conf/discovery

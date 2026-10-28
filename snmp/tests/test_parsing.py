@@ -13,7 +13,7 @@ from datadog_checks.snmp.parsing import parse_metrics
 
 from . import common
 
-pytestmark = common.snmp_integration_only
+pytestmark = common.python_suite_only
 
 logger = logging.getLogger(__name__)
 

@@ -146,6 +146,22 @@ EXPECTED_DEFAULTS = {
         'include_tables': [],
         'exclude_tables': [],
     },
+    # === DBM: Role collection ===
+    'collect_roles': {
+        'enabled': False,
+        'collection_interval': 600,
+        'max_query_duration': 60,
+        'include_databases': [],
+        'exclude_databases': [
+            'template0',
+            'template1',
+            'rdsadmin',
+            'azure_maintenance',
+            'cloudsqladmin',
+            'alloydbadmin',
+            'alloydbmetadata',
+        ],
+    },
     # === DBM: Obfuscator options ===
     'obfuscator_options': {
         'obfuscation_mode': 'obfuscate_and_normalize',
@@ -235,6 +251,11 @@ EXPECTED_DEFAULTS = {
     # === Agent standard fields ===
     'min_collection_interval': 15.0,  # Standard Agent field
     'empty_default_hostname': False,  # Deprecated field
+    # === Health ===
+    'automatic_diagnostics': {
+        'enabled': False,
+        'interval': 600,
+    },
 }
 
 

@@ -96,6 +96,8 @@ For more information, see the [API documentation](api.md#datadog_checks.base.che
 
 Service checks are a type of monitor used to track the uptime status of the service. For more information, see the [Service checks](https://docs.datadoghq.com/developers/service_checks/) guide.
 
+New integrations generally should not submit their own service checks. Prefer metrics and metric-based monitors instead.
+
 For more information, see the [API documentation](api.md#datadog_checks.base.checks.base.AgentCheck.service_check).
 
 ### Events

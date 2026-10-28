@@ -1,0 +1,53 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "oauth",
+      "oauth2_authorization_code": {
+        "authorization_server": {
+          "authorization_endpoint": "https://app.hubspot.com/oauth/authorize"
+        },
+        "authorization_request": {
+          "scopes": [
+            "account-info.security.read",
+            "business-intelligence",
+            "content",
+            "crm.objects.companies.read",
+            "crm.schemas.companies.read"
+          ]
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "tags",
+      "label": "Tags",
+      "editable": true,
+      "tags": {}
+    },
+    {
+      "key": "metrics_enabled",
+      "label": "Metrics",
+      "editable": true,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "logs_enabled",
+      "label": "Logs",
+      "editable": true,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "companies_reference_table_enabled",
+      "label": "Companies Reference Table",
+      "editable": true,
+      "checkbox": {
+        "default": true
+      }
+    }
+  ]
+}

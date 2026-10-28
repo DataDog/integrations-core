@@ -96,8 +96,10 @@ files:
           require_trusted_provider: true
       - name: exact_match
         description: |
-          If you want to match your `search_string` on a substring within the list of process names, 
-          set this to true. This is equivalent to running `ps -e` on Linux or `Get-Process` on Windows.
+          Set this to true to match `search_string` against the exact process name, as reported by
+          the operating system's process list (for example, the names shown by `ps -e` on Linux).
+          On Windows, these process names include the file extension, so `search_string` must include
+          it as well (for example, `agent.exe` rather than `agent`).
 
           If you want to match your `search_string` on a substring within the list of process names
           and the command line, set this to false. This is equivalent to running `ps -ef` on Linux or
@@ -129,13 +131,36 @@ files:
             * critical: (optional) List of two values: If the number of processes found is below the first value or
                         above the second one, the process check returns CRITICAL. To make an semi-unbounded interval,
                          use `.inf` for the upper bound.
+
+          Each bound must be a number, or `.inf` for the upper bound, and the lower bound cannot exceed the upper
+          bound. Values after the first two are ignored, but they must be finite numbers, not `.inf`. A configuration
+          that breaks these rules fails to load. In a local YAML file either `.inf` or the quoted string `'.inf'`
+          works. When the configuration is sent as JSON (for example through Remote Config or Fleet Automation), use
+          the string `'.inf'`, since JSON cannot represent infinity.
         value:
           type: object
+          properties:
+          - name: warning
+            type: array
+            items:
+              anyOf:
+              - type: number
+              - type: string
+                enum: ['.inf']
+            minItems: 2
+          - name: critical
+            type: array
+            items:
+              anyOf:
+              - type: number
+              - type: string
+                enum: ['.inf']
+            minItems: 2
           compact_example: true
           example:
-            warning: [<BELOW_VALUE> , <TOP_VALUE>]
-            critical: [<BELOW_VALUE> , <TOP_VALUE>]
-        fleet_configurable: false
+            warning: [5, 10]
+            critical: [2, '.inf']
+        fleet_configurable: true
       - name: collect_children
         description: |
           If true, the check also collects metrics from all child processes of a matched process.

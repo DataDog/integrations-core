@@ -2,6 +2,19 @@ name: Nginx
 fleet_configurable: true
 files:
 - name: nginx.yaml
+  discovery:
+    strategies:
+      - strategy: local:from_nginx_ports
+        provides:
+          - endpoint
+        inputs:
+          port_hints: array[int]
+        port_hints:
+          - 80
+          - 443
+          - 8443
+        candidates:
+          - nginx_status_url: "{endpoint.scheme}://{service.host}:{endpoint.port.number}/nginx_status"
   options:
   - template: init_config
     options:
@@ -100,3 +113,11 @@ files:
     - type: file
       path: /var/log/nginx/error.log
       source: nginx
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - nginx
+  - template: auto_conf/discovery

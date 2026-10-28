@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from datadog_checks.dev import docker_run
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata
 from datadog_checks.pulsar import PulsarCheck
 
 from . import common
@@ -21,7 +21,7 @@ def dd_environment(instance):
         mount_logs=True,
         sleep=10,
     ):
-        yield instance
+        yield instance, get_e2e_discovery_metadata()
 
 
 @pytest.fixture(scope='session')

@@ -12,7 +12,7 @@ Supported versions:
 
 | Distribution | Versions          |
 |--------------|-------------------|
-| MySQL        | 5.6, 5.7, 8.0, 8.4 |
+| MySQL        | 5.6, 5.7, 8.0, 8.4, 9.7 |
 | MariaDB      | 10.5, 10.6, 10.11, 11.4 |
 | Percona      | 8.0, 8.4          |
 
@@ -66,6 +66,14 @@ For MySQL 8.0 or greater, grant `replication client` and set `max_user_connectio
 mysql> GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'%';
 Query OK, 0 rows affected (0.00 sec)
 mysql> ALTER USER 'datadog'@'%' WITH MAX_USER_CONNECTIONS 5;
+Query OK, 0 rows affected (0.00 sec)
+```
+
+Data Observability uses a dedicated connection. If you enable it with Database Monitoring,
+allow one additional connection:
+
+```shell
+mysql> ALTER USER 'datadog'@'%' WITH MAX_USER_CONNECTIONS 6;
 Query OK, 0 rows affected (0.00 sec)
 ```
 
@@ -137,6 +145,7 @@ To configure this check for an Agent running on a host:
         extra_innodb_metrics: true
         schema_size_metrics: false
         disable_innodb_metrics: false
+        binlog_size_metrics: true
   ```
 
 **Note**: Wrap your password in single quotes in case a special character is present.
@@ -275,7 +284,9 @@ To configure this check for an Agent running on Kubernetes:
 
 ##### Metric collection
 
-Set [Autodiscovery Integrations Templates][15] as pod annotations on your application container. Alternatively, you can configure templates with a [file, configmap, or key-value store][16].
+Choose one of the following Kubernetes Autodiscovery configurations. You can also configure templates with a [file, configmap, or key-value store][16].
+
+###### Kubernetes annotations
 
 **Annotations v1** (for Datadog Agent < v7.36)
 
@@ -328,6 +339,31 @@ spec:
   containers:
     - name: mysql
 ```
+###### DatadogInstrumentation CRD
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet # Or another target kind, if applicable.
+    name: <MYSQL_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: mysql
+        containerName: mysql
+        initConfig: {}
+        instances:
+          - server: "%%host%%"
+            username: "datadog"
+            password: "<UNIQUEPASSWORD>"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][34].
 
 See [Autodiscovery template variables][12] for details on using `<UNIQUEPASSWORD>` as an environment variable instead of a label.
 
@@ -600,3 +636,4 @@ Additional helpful documentation, links, and articles:
 [31]: https://www.datadoghq.com/blog/monitoring-mysql-performance-metrics
 [32]: https://docs.datadoghq.com/database_monitoring/setup_mysql/
 [33]: https://docs.datadoghq.com/database_monitoring/#mysql
+[34]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

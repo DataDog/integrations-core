@@ -25,6 +25,25 @@ CHECK_NAME = 'mysql'
 # adding flavor to differentiate mariadb from mysql
 MYSQL_FLAVOR = os.getenv('MYSQL_FLAVOR', '')
 
+
+def mysql_root_password():
+    """Root password for the current image. The official mysql (MySQL 9) and mariadb (12.1+/13 RC)
+    images and percona set one, as do the group/hybrid replication composes; the bitnami images used
+    for older versions (and the ``latest`` tag) allow an empty root password."""
+    if MYSQL_FLAVOR == 'percona' or MYSQL_REPLICATION in ('group', 'hybrid'):
+        return 'mypass'
+    if MYSQL_FLAVOR == 'mysql' and os.getenv('MYSQL_VERSION', '').startswith('9'):
+        return 'mypass'
+    if MYSQL_FLAVOR == 'mariadb' and MYSQL_VERSION_PARSED > parse_version('12.0'):
+        return 'mypass'
+    return None
+
+
+# When set, pins an explicit image tag (e.g. a prerelease like "13.0-rc") instead of
+# deriving it from MYSQL_VERSION. Mirrors postgres' POSTGRES_IMAGE_TAG; used for a major
+# only published under a non-GA tag on the official image (e.g. MariaDB 13's RC).
+MYSQL_IMAGE_TAG = os.getenv('MYSQL_IMAGE_TAG', None)
+
 HOST = get_docker_hostname()
 PORT = 13306
 SLAVE_PORT = 13307
