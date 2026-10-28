@@ -187,6 +187,7 @@ def rpc_completed_expected_values():
         'client_app_name': 'SQLAgent - Job Manager',
         'username': 'NT AUTHORITY\\NETWORK SERVICE',
         'object_name': 'sp_executesql',
+        'context_info': '013c9a1faa3f4412716ae2258a000000005c74e664fdcdb363',
     }
 
 
@@ -207,6 +208,7 @@ def error_expected_values():
         'message': "'REPEAT' is not a recognized built-in function name.",
         'activity_id': 'F961B15C-752A-487E-AC4F-F2A9BAB11DB7-1',
         'activity_id_xfer': 'AFCCDE6F-EACD-47F3-9B62-CC02D517191B-0',
+        'context_info': '015aaf8e1bc78021026ae22574000000004d8e7c9259c4eea8',
     }
 
 
@@ -895,6 +897,29 @@ class TestPayloadGeneration:
         assert metadata['tables'] == ['Customers']
         assert metadata['commands'] == ['SELECT']
         assert metadata['comments'] == []
+        assert query_details['context_info'] == ''
+
+    @pytest.mark.parametrize(
+        "handler_fixture,xml_fixture,expected_context_info",
+        [
+            (
+                'query_completion_handler',
+                'sample_rpc_completed_event_xml',
+                '013c9a1faa3f4412716ae2258a000000005c74e664fdcdb363',
+            ),
+            ('error_events_handler', 'sample_error_event_xml', '015aaf8e1bc78021026ae22574000000004d8e7c9259c4eea8'),
+        ],
+    )
+    def test_create_event_payload_includes_context_info(
+        self, request, handler_fixture, xml_fixture, expected_context_info
+    ):
+        """context_info carries trace context from tracers in DBM full mode and must reach the payload"""
+        handler = request.getfixturevalue(handler_fixture)
+        events = handler._process_events(wrap_xml_in_events_tag(request.getfixturevalue(xml_fixture)))
+        assert len(events) == 1
+
+        payload = handler._create_event_payload(events[0])
+        assert payload['query_details']['context_info'] == expected_context_info
 
     def test_create_rqt_event(self, query_completion_handler):
         """Test creation of Raw Query Text event"""
