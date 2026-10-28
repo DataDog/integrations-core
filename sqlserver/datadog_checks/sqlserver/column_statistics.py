@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import itertools
 import time
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING, Any, Iterator
 
 from datadog_checks.base.utils.db.health import HealthStatus
 from datadog_checks.base.utils.db.utils import default_json_event_encoding
@@ -167,7 +167,7 @@ class SqlserverColumnStatisticsCollector:
                 "dd.sqlserver.column_statistics.payloads_count", payloads, tags=tags, hostname=hostname, raw=True
             )
 
-    def _databases(self, cursor) -> list[str]:
+    def _databases(self, cursor: Any) -> list[str]:
         # The system databases can't usefully hold the procedure: tempdb even loses it on restart.
         db_names = [db_name for db_name in self._check.get_databases() if db_name.lower() not in SYSTEM_DATABASES]
         cursor.execute(DATABASES_QUERY, (serialize_database_names(db_names),))
@@ -184,7 +184,7 @@ class SqlserverColumnStatisticsCollector:
             )
         return databases
 
-    def _collect_database(self, cursor, db_name: str) -> tuple[int, int, int]:
+    def _collect_database(self, cursor: Any, db_name: str) -> tuple[int, int, int]:
         tables = columns = payloads = 0
         # Rows come ordered by table, and each table's histograms can take megabytes, so tables are sent as they
         # complete rather than all held at once.
@@ -220,6 +220,8 @@ class SqlserverColumnStatisticsCollector:
         for event, markers, fix in SETUP_ERRORS:
             if not any(marker in message for marker in markers):
                 continue
+            # A database fails one way at a time: a database now failing differently has fixed its earlier problem.
+            self._handle_recovery(db_name, still_failing=event)
             failing = self._failing_dbs[event]
             if db_name not in failing:
                 if not failing:
@@ -235,9 +237,9 @@ class SqlserverColumnStatisticsCollector:
             return
         self._log.exception("Error collecting column statistics for database '%s'", db_name)
 
-    def _handle_recovery(self, db_name: str) -> None:
+    def _handle_recovery(self, db_name: str, still_failing: SqlServerHealthEvent | None = None) -> None:
         for event, failing in self._failing_dbs.items():
-            if db_name in failing:
+            if event != still_failing and db_name in failing:
                 failing.remove(db_name)
                 if not failing:
                     self._check.health.submit_health_event(name=event, status=HealthStatus.OK)
@@ -260,7 +262,7 @@ class SqlserverColumnStatisticsCollector:
         self._check.database_monitoring_column_statistics(json.dumps(event, default=default_json_event_encoding))
 
 
-def read_tables(cursor, names: list[str], db_name: str) -> Iterator[dict]:
+def read_tables(cursor: Any, names: list[str], db_name: str) -> Iterator[dict]:
     """Read the procedure's rows, one per column ordered by table, into the column_statistics payload's tables."""
     rows = (dict(zip(names, row)) for row in iter(cursor.fetchone, None))
     for (schema, table), columns in itertools.groupby(

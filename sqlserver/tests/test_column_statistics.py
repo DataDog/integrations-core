@@ -67,8 +67,9 @@ def test_collects_column_statistics(aggregator, dd_run_check, dbm_instance):
     for column in columns.values():
         assert column['rows'] == column['rows_sampled'] == 10_000
         assert column['modification_counter'] == 0
-        # The procedure formats it, so every driver sends the same ISO 8601 text.
-        assert re.fullmatch(r'\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{7}Z', column['last_updated'])
+        # The procedure formats it, so every driver sends the same ISO 8601 text. SQL Server leaves out the fraction
+        # of a second when it's zero.
+        assert re.fullmatch(r'\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d{7})?Z', column['last_updated'])
         updated = datetime.fromisoformat(column['last_updated'])
         assert abs(datetime.now(timezone.utc) - updated) < timedelta(days=1), "last_updated is in UTC"
     # The properties count the NULL step, which sys.dm_db_stats_histogram leaves out for an all-NULL column, and on
@@ -257,6 +258,20 @@ def test_setup_errors_report_health_until_fixed(dbm_instance, message, event):
 
 
 @pytest.mark.unit
+def test_setup_error_change_recovers_the_earlier_one(dbm_instance):
+    collector = SQLServer(CHECK_NAME, {}, [dbm_instance]).sql_metadata._column_statistics_collector
+    with mock.patch.object(collector._check.health, 'submit_health_event') as submit:
+        collector._handle_error('app', Exception("Could not find stored procedure 'datadog.column_statistics'. (2812)"))
+        # The procedure was created, but without the GRANT.
+        collector._handle_error('app', Exception("The EXECUTE permission was denied on the object (229)"))
+    assert submit.call_args_list == [
+        mock.call(name=PROCEDURE_NOT_FOUND, status=HealthStatus.WARNING),
+        mock.call(name=PROCEDURE_NOT_FOUND, status=HealthStatus.OK),
+        mock.call(name=INSUFFICIENT_PRIVILEGE, status=HealthStatus.WARNING),
+    ]
+
+
+@pytest.mark.unit
 def test_outdated_procedure_reports_health_event(dbm_instance):
     # The shape the procedure returned before the Agent derived the statistics itself. It's outdated even in a
     # database where it returns no rows.
@@ -285,23 +300,48 @@ def test_outdated_procedure_reports_health_event(dbm_instance):
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    'period,elapsed,due',
+    'settings_interval,column_statistics_interval,elapsed,due',
     [
-        # The work before column statistics ran faster this tick, so the tick came slightly under an hour later.
-        pytest.param(3600, 3599.5, True, id='interval equal to the period'),
-        pytest.param(600, 3000, False, id='before the interval'),
-        pytest.param(600, 3599.5, True, id='tick nearest the interval'),
+        # Timer jitter brought the tick slightly under an hour later.
+        pytest.param(3600, 3600, 3599.5, True, id='interval equal to the period'),
+        pytest.param(600, 3600, 3000, False, id='before the interval'),
+        pytest.param(600, 3600, 3600, True, id='tick at the interval'),
+        pytest.param(600, 900, 600, False, id='never more often than configured'),
+        pytest.param(600, 900, 1200, True, id='first tick past the interval'),
     ],
 )
-def test_metadata_job_runs_column_statistics_each_interval(dbm_instance, period, elapsed, due):
-    dbm_instance['collect_settings'] = {'enabled': True, 'collection_interval': period}
+def test_metadata_job_runs_column_statistics_each_interval(
+    dbm_instance, settings_interval, column_statistics_interval, elapsed, due
+):
+    dbm_instance['collect_settings'] = {'enabled': True, 'collection_interval': settings_interval}
+    dbm_instance['collect_column_statistics'] = {'enabled': True, 'collection_interval': column_statistics_interval}
     metadata = SQLServer(CHECK_NAME, {}, [dbm_instance]).sql_metadata
     with mock.patch.object(metadata._column_statistics_collector, 'collect') as collect:
-        with mock.patch('datadog_checks.sqlserver.metadata.time.time', return_value=1_000_000):
-            metadata.collect_column_statistics()
-        with mock.patch('datadog_checks.sqlserver.metadata.time.time', return_value=1_000_000 + elapsed):
-            metadata.collect_column_statistics()
+        metadata.collect_column_statistics(1_000_000)
+        metadata.collect_column_statistics(1_000_000 + elapsed)
     assert collect.call_count == (2 if due else 1)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'settings,schemas,period',
+    [
+        pytest.param({'enabled': True}, {'enabled': False}, 600, id='settings'),
+        # Column statistics alone: the job only needs to run hourly.
+        pytest.param({'enabled': False}, {'enabled': False}, 3600, id='column statistics alone'),
+        # Schemas keep their 10 minutes though settings are off.
+        pytest.param({'enabled': False}, {'enabled': True}, 600, id='schemas'),
+        # An interval of 0 runs on every run of the job rather than setting its rate.
+        pytest.param({'enabled': True}, {'enabled': True, 'collection_interval': 0}, 600, id='schemas every run'),
+    ],
+)
+def test_metadata_job_runs_as_often_as_its_most_frequent_collection(dbm_instance, settings, schemas, period):
+    dbm_instance['collect_settings'] = settings
+    dbm_instance['collect_schemas'] = schemas
+    metadata = SQLServer(CHECK_NAME, {}, [dbm_instance]).sql_metadata
+    assert metadata._rate_limiter.period_s == period
+    # A run is only reported missed after the job's period, not a shorter collection's interval.
+    assert metadata._expected_collection_interval == period
 
 
 @pytest.mark.unit

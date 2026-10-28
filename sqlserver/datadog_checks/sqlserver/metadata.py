@@ -10,6 +10,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.sqlserver.column_statistics import DEFAULT_COLLECTION_INTERVAL as COLUMN_STATISTICS_INTERVAL
 from datadog_checks.sqlserver.column_statistics import SqlserverColumnStatisticsCollector
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import (
@@ -68,6 +69,24 @@ class SqlserverMetadata(DBMAsyncJob):
         self.collection_interval = self._config.settings_config.get(
             'collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL
         )
+        self._schema_config = self._config.schema_config
+        self._schema_collection_interval = self._schema_config.get(
+            'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
+        )
+        # Each collection runs on its own interval, so the job runs as often as the most frequent enabled one. An
+        # interval of 0 means every run of the job, so it doesn't set the job's rate.
+        intervals = [
+            interval
+            for enabled, interval in (
+                (self._settings_enabled, self.collection_interval),
+                (self._schema_config.get('enabled', False), self._schema_collection_interval),
+                (
+                    column_statistics_enabled,
+                    self._config.column_statistics_config.get('collection_interval', COLUMN_STATISTICS_INTERVAL),
+                ),
+            )
+            if enabled and interval > 0
+        ]
 
         super(SqlserverMetadata, self).__init__(
             check,
@@ -76,7 +95,7 @@ class SqlserverMetadata(DBMAsyncJob):
             expected_db_exceptions=(),
             min_collection_interval=self._config.min_collection_interval,
             dbms=check.dbms,
-            rate_limit=1 / float(self.collection_interval),
+            rate_limit=1 / float(min(intervals, default=self.collection_interval)),
             job_name="database-metadata",
             shutdown_callback=self._close_db_conn,
         )
@@ -87,18 +106,10 @@ class SqlserverMetadata(DBMAsyncJob):
         self._settings_query = None
         self._time_since_last_settings_query = 0
         self._max_query_metrics = self._config.statement_metrics_config.get("max_queries", 250)
-        self._schema_config = self._config.schema_config
-        self._schema_collection_interval = self._schema_config.get(
-            'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
-        )
         self._schema_collectors = self._build_schema_collectors(check)
         self._column_statistics_collector = (
             SqlserverColumnStatisticsCollector(check, config, self._cancel_event) if column_statistics_enabled else None
         )
-        if self._column_statistics_collector and not self._settings_enabled:
-            # Column statistics keep their own interval, so with settings off the job only needs to run as often as
-            # they do.
-            self._set_rate_limit(1 / float(self._column_statistics_collector.collection_interval))
         self._last_collection_times: dict[str, float] = {}
 
     def _build_schema_collectors(self, check) -> list[SQLServerObjectCollector]:
@@ -163,10 +174,13 @@ class SqlserverMetadata(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_sqlserver_metadata(self):
         raise_if_cancelled(self._cancel_event)
-        if self._settings_enabled:
+        # Each collection measures its interval from the start of the tick it last ran in, which the rate limiter spaces
+        # at least a period apart, rather than from whenever the collections before it finished.
+        tick = time.time()
+        if self._settings_enabled and self._is_due('settings', self.collection_interval, tick):
             self._report_settings()
-        self.collect_schemas()
-        self.collect_column_statistics()
+        self.collect_schemas(tick)
+        self.collect_column_statistics(tick)
 
     def _report_settings(self):
         with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
@@ -190,21 +204,21 @@ class SqlserverMetadata(DBMAsyncJob):
                 }
                 self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
 
-    def _is_due(self, collection: str, interval: float) -> bool:
+    def _is_due(self, collection: str, interval: float, tick: float | None = None) -> bool:
         """
-        Return whether a collection's interval has passed since it last ran, and if so, record that it runs now.
-        Ticks come a period apart give or take how long the work before the collection took, so a tick within half a
-        period of the interval counts: otherwise an interval equal to the period would skip every other tick.
+        Return whether a collection's interval has passed since the tick it last ran in, and if so, record that it runs
+        in this one. Ticks start a period apart, give or take timer jitter, so a tick within a tenth of a period of the
+        interval counts: otherwise an interval equal to the period would sometimes skip a tick.
         """
-        now = time.time()
+        tick = time.time() if tick is None else tick
         last = self._last_collection_times.get(collection)
-        if last is not None and now - last < interval - self._rate_limiter.period_s / 2:
+        if last is not None and tick - last < interval - self._rate_limiter.period_s / 10:
             return False
-        self._last_collection_times[collection] = now
+        self._last_collection_times[collection] = tick
         return True
 
-    def collect_schemas(self):
-        if not self._schema_collectors or not self._is_due('schemas', self._schema_collection_interval):
+    def collect_schemas(self, tick: float | None = None):
+        if not self._schema_collectors or not self._is_due('schemas', self._schema_collection_interval, tick):
             return
         for collector in self._schema_collectors:
             raise_if_cancelled(self._cancel_event)
@@ -215,9 +229,9 @@ class SqlserverMetadata(DBMAsyncJob):
             except Exception as e:
                 self.log.debug("Skipped remaining %s collection after error: %s", collector.kind, e)
 
-    def collect_column_statistics(self):
+    def collect_column_statistics(self, tick: float | None = None):
         collector = self._column_statistics_collector
-        if not collector or not self._is_due('column_statistics', collector.collection_interval):
+        if not collector or not self._is_due('column_statistics', collector.collection_interval, tick):
             return
         # As with schemas, a failure here must not stop the job loop, but a cancel still has to end the tick.
         try:
