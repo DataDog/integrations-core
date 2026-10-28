@@ -99,6 +99,21 @@ def test_lparstat_command_failure(aggregator, instance):
     assert len(aggregator.metrics('system.lpar.memory.physb')) == 0
 
 
+def test_non_root_warning_logged_once(aggregator, dd_run_check, instance, caplog):
+    """The 'not running as root' notice is logged once per check instance, not every collection interval."""
+    check = LPARStats('lparstats', {}, [instance])
+    with (
+        patch('datadog_checks.lparstats.lparstats.subprocess.run', side_effect=_mock_subprocess_run),
+        patch('datadog_checks.lparstats.lparstats.os.getuid', return_value=12345),
+        caplog.at_level(logging.INFO),
+    ):
+        dd_run_check(check)
+        dd_run_check(check)
+
+    assert caplog.text.count('Not running as root or sudo') == 1
+    aggregator.assert_service_check('lparstats.can_collect', status=AgentCheck.OK)
+
+
 def test_dash_values_skipped_silently(aggregator, dd_run_check, instance, caplog):
     """lparstat prints '-' for stats that do not apply to the LPAR; they are skipped without logging."""
     check = LPARStats('lparstats', {}, [instance])
