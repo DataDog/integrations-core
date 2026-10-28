@@ -10,9 +10,9 @@ import logging
 import os
 import re
 import sys
-import urllib.error
 
 # 2nd party.
+from requests.exceptions import RequestException
 from tuf.api.exceptions import DownloadError
 
 from .download import DEFAULT_ROOT_LAYOUT_TYPE, REPOSITORY_URL_PREFIX, ROOT_LAYOUTS, TUFDownloader
@@ -24,7 +24,7 @@ V2_FALLBACK_ERRORS: tuple[type[BaseException], ...] = (
     TargetNotFoundError,
     DownloadError,
     TimeoutError,
-    urllib.error.URLError,
+    RequestException,
 )
 
 # Private module functions.
@@ -42,7 +42,7 @@ def __is_canonical(version):
 def _v2_failure_category(exc: Exception) -> str:
     if isinstance(exc, TargetNotFoundError):
         return 'target version not found'
-    if isinstance(exc, (DownloadError, TimeoutError, urllib.error.URLError)):
+    if isinstance(exc, (DownloadError, TimeoutError, RequestException)):
         return 'network error'
     return 'other'
 

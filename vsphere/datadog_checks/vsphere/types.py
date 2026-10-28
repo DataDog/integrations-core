@@ -65,6 +65,7 @@ InfrastructureDataItem = TypedDict(
         'summary.config.memorySizeMB': int,
         'summary.config.numEthernetCards': int,
         'summary.config.numVirtualDisks': int,
+        'summary.hardware.numCpuCores': int,
         'summary.quickStats.uptimeSeconds': int,
         'guest.guestFullName': str,
         'guest.disk': List[VmomiObject],

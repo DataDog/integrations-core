@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import copy
+from unittest import mock
 
 import pytest
 
@@ -9,6 +10,12 @@ from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 
 from .common import COMPOSE_FILE, MOCKED_INSTANCE, MOCKED_INSTANCE_RAY, MOCKED_VERSION_ENDPOINT
+
+
+@pytest.fixture(autouse=True)
+def gpu_monitoring_enabled(datadog_agent):
+    with mock.patch.dict(datadog_agent._config, {'gpu.enabled': True}):
+        yield
 
 
 @pytest.fixture(scope='session')

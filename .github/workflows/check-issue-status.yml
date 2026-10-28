@@ -1,0 +1,151 @@
+---
+name: Check if datadog commented an issue
+
+on:
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to check'
+        required: true
+        type: number
+
+permissions: {}
+
+jobs:
+  check_comment:
+    runs-on: ubuntu-latest
+    # Process every issue comment, and comments on pull requests only when they carry
+    # the waiting on author label: the author replying to their PR removes the label
+    # (like on issues), without running the job on the whole PR comment traffic.
+    if: >-
+      github.event.issue.pull_request == null ||
+      contains(github.event.issue.labels.*.name, 'waiting on author')
+    permissions:
+      id-token: write # Required for OIDC token federation with dd-octo-sts
+    steps:
+      - name: Get GitHub token via dd-octo-sts
+        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+        id: octo-sts
+        with:
+          scope: DataDog/integrations-core
+          policy: self.check-issue-status.label-issue
+
+      - name: Classify the comment author
+        id: classify-comment
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ steps.octo-sts.outputs.token }}
+          script: |
+            const issueNumber = context.eventName === 'issue_comment'
+              ? context.issue.number
+              : parseInt(context.payload.inputs.issue_number);
+
+            // Determine the current comment's author and the issue/PR author
+            // depending on event type
+            let commenter = null;
+            let issueAuthor = null;
+            if (context.eventName === 'issue_comment') {
+              commenter = context.payload.comment.user;
+              issueAuthor = context.payload.issue.user.login;
+            } else if (context.payload.inputs && context.payload.inputs.issue_number) {
+              // For workflow_dispatch, fetch the latest comment's author on the issue
+
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber
+              });
+              if (comments.length === 0) {
+                // no comments, cannot determine user
+                return;
+              }
+              commenter = comments[comments.length - 1].user;
+              const issue = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber
+              });
+              issueAuthor = issue.data.user.login;
+            } else {
+              return;
+            }
+
+            // Bot comments (for example the stale workflow's own warning, posted through
+            // the octo-sts GitHub App) are not author responses: remove no label.
+            if (commenter.type === 'Bot') {
+              return;
+            }
+
+            // The waiting on author label is removed when the author replies, whoever
+            // they are: comments from other people (including datadog members) do not
+            // count as the author responding.
+            if (commenter.login === issueAuthor) {
+              core.setOutput('is-author', 'true');
+            }
+
+            try {
+              const membership = await github.rest.orgs.checkMembershipForUser({
+                org: 'datadog',
+                username: commenter.login
+              });
+              if (membership.status === 204) {
+                core.setOutput('is-member', 'true');
+              }
+            } catch (error) {
+              // 404 is the documented non-member response, the error message is not: https://docs.github.com/en/rest/orgs/members#check-organization-membership-for-a-user
+              if (error.status !== 404) {
+                throw error;
+              }
+            }
+
+      - name: Remove the pending label when a datadog member comments
+        if: steps.classify-comment.outputs.is-member == 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ steps.octo-sts.outputs.token }}
+          script: |
+            const issueNumber = context.eventName === 'issue_comment'
+              ? context.issue.number
+              : parseInt(context.payload.inputs.issue_number);
+            const labels = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber
+            });
+            for (const label of labels.data) {
+              if (label.name === 'pending') {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  name: label.name
+                });
+              }
+            }
+
+      - name: Remove the waiting on author label when the author comments
+        if: steps.classify-comment.outputs.is-author == 'true'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ steps.octo-sts.outputs.token }}
+          script: |
+            const issueNumber = context.eventName === 'issue_comment'
+              ? context.issue.number
+              : parseInt(context.payload.inputs.issue_number);
+            const labels = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber
+            });
+            for (const label of labels.data) {
+              if (label.name === 'waiting on author') {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  name: label.name
+                });
+              }
+            }

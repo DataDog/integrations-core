@@ -8,7 +8,7 @@ import time
 import pytest
 import requests
 
-from datadog_checks.dev import LazyFunction, TempDir, docker_run, run_command
+from datadog_checks.dev import LazyFunction, TempDir, docker_run, get_e2e_discovery_metadata, run_command
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.fs import create_file
@@ -97,7 +97,15 @@ def dd_environment(e2e_instance, dd_save_state):
         ):
             dd_save_state('client_token_path', token_file)
 
-            yield e2e_instance(), {'docker_volumes': ['{}:/home/vault-sink'.format(sink_dir)]}
+            yield (
+                e2e_instance(),
+                {
+                    'docker_volumes': [
+                        '{}:/home/vault-sink'.format(sink_dir),
+                        *get_e2e_discovery_metadata()['docker_volumes'],
+                    ]
+                },
+            )
 
 
 class ApplyPermissions(LazyFunction):

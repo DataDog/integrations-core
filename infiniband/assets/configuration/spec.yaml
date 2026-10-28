@@ -33,47 +33,59 @@ files:
                 type: string
           - name: additional_counters
             description: |
-              A list of additional counters to collect. The counter names are the files in which the counter 
+              A list of additional counters to collect. The counter names are the files in which the counter
               values are stored. These are located inside /sys/class/infiniband/devices/<device>/ports/<port>/counters.
+              These names come from the kernel's standard performance counter table and are the same across
+              drivers, so they are stable.
             value:
               example:
-                - "additional_counter"
-                - "rx_mpwqe_frag"
+                - "symbol_error"
+                - "port_xmit_wait"
               type: array
               items:
                 type: string
             fleet_configurable: false
           - name: additional_hw_counters
             description: |
-              A list of additional hardware counters to collect. The counter names are the files in which the 
-              counter values are stored. These are located inside 
+              A list of additional hardware counters to collect. The counter names are the files in which the
+              counter values are stored. These are located inside
               /sys/class/infiniband/devices/<device>/ports/<port>/hw_counters.
+
+              Unlike the standard counters, the contents of hw_counters are driver-specific and can also
+              change with the device's mode, so there is no name that is valid everywhere. List the
+              directory on the host to see what it actually exposes, and use the names from there:
+
+                ls /sys/class/infiniband/<device>/ports/<port>/hw_counters/
+
+              Counter names that do not match a file are ignored. Run the check with debug logging to see
+              which configured names were not found.
             fleet_configurable: true
             value:
               example:
                 - "additional_hw_counter"
-                - "rx_mpwqe_frag"
               type: array
               items:
                 type: string
           - name: exclude_counters
             description: |
-              A list of counters to exclude from the check.
+              A list of counters to exclude from the check. These are the standard counters found in
+              /sys/class/infiniband/devices/<device>/ports/<port>/counters.
             value:
               example:
-                - "duplicate_request"
-                - "lifespan"
+                - "VL15_dropped"
+                - "link_downed"
               type: array
               items:
                 type: string
             fleet_configurable: false
           - name: exclude_hw_counters
             description: |
-              A list of hardware counters to exclude from the check.
+              A list of hardware counters to exclude from the check. These are the driver-specific
+              counters found in /sys/class/infiniband/devices/<device>/ports/<port>/hw_counters.
             value:
               example:
-                - "VL15_dropped"
-                - "link_downed"
+                - "duplicate_request"
+                - "out_of_sequence"
               type: array
               items:
                 type: string

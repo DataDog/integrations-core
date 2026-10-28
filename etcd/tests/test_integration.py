@@ -6,6 +6,7 @@ from copy import deepcopy
 import mock
 import pytest
 
+from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.etcd import Etcd
 
 from .common import ETCD_VERSION, REMAPED_DEBUGGING_METRICS, URL
@@ -30,6 +31,8 @@ def test_check(aggregator, instance, openmetrics_metrics, dd_run_check):
 
     for metric in REMAPED_DEBUGGING_METRICS:
         aggregator.assert_metric('etcd.{}'.format(metric), at_least=1)
+
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
 
     aggregator.assert_all_metrics_covered()
 

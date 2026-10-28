@@ -29,7 +29,10 @@ Metrics are collected from the Kuma control plane and the Envoy data planes.
 
 **Autodiscovery (Kubernetes)**
 
-To configure the Agent to collect metrics from the Kuma control plane using autodiscovery, apply the following pod annotations to your `kuma-control-plane` deployment. This example assumes you installed Kuma using Helm. For more information about autodiscovery, see [Autodiscovery Integration Templates][4].
+To configure the Agent to collect metrics from the Kuma control plane, choose one of the following Autodiscovery options. This example assumes you installed Kuma using Helm.
+
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
 
 ```yaml
 # values.yaml
@@ -48,6 +51,36 @@ controlPlane:
         }
       }
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+Target the Kuma control plane Deployment:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: kuma-control-plane
+  config:
+    checks:
+      - integration: kuma
+        containerName: control-plane
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:5680/metrics"
+            service: "kuma-control-plane"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][19].
+
+<!-- xxz tab xxx -->
+<!-- xxz tabs xxx -->
 
 **Note:** The autodiscovery annotation for Kuma has the format `ad.datadoghq.com/<CONTAINER_NAME>.checks:`. 
 If your control plane has a different name, change the line accordingly. For more information, see the [Datadog documentation][18].
@@ -87,7 +120,10 @@ Metrics from the data planes are collected using the [Envoy integration][10].
             path: "/metrics"
     ```
 
-2.  Next, configure the Datadog Agent to collect these metrics by applying the following annotations to your application pods. For guidance on applying annotations, see [Autodiscovery Integration Templates][4].
+2.  Next, configure the Datadog Agent to collect these metrics with one of the following Autodiscovery options.
+
+    <!-- xxx tabs xxx -->
+    <!-- xxx tab "Kubernetes annotations" xxx -->
 
     ```yaml
     ad.datadoghq.com/kuma-sidecar.checks: |
@@ -102,6 +138,36 @@ Metrics from the data planes are collected using the [Envoy integration][10].
         }
       }
     ```
+    <!-- xxz tab xxx -->
+    <!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+    Create one resource for each application workload that Kuma injects with the Envoy sidecar:
+
+    ```yaml
+    apiVersion: datadoghq.com/v1alpha1
+    kind: DatadogInstrumentation
+    metadata:
+      name: <CR_NAME>
+      namespace: <WORKLOAD_NAMESPACE>
+    spec:
+      targetRef:
+        apiVersion: apps/v1
+        kind: Deployment # Or another target kind, if applicable.
+        name: <APPLICATION_WORKLOAD_NAME>
+      config:
+        checks:
+          - integration: envoy
+            containerName: kuma-sidecar
+            initConfig: {}
+            instances:
+              - openmetrics_endpoint: "http://%%host%%:5670/metrics"
+                collect_server_info: false
+    ```
+
+    For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][19].
+
+    <!-- xxz tab xxx -->
+    <!-- xxz tabs xxx -->
 
     **Note:** The autodiscovery annotation for Kuma has the format `ad.datadoghq.com/<CONTAINER_NAME>.checks:`. 
     If your sidecar has a different name, change the line accordingly. For more information, see the [Datadog documentation][18].
@@ -235,3 +301,4 @@ Need help? Contact [Datadog support][9].
 [16]: https://kuma.io/docs/latest/policies/meshtrafficpermission/
 [17]: https://docs.datadoghq.com/containers/guide/auto_conf/?tab=datadogoperator#disable-auto-configuration
 [18]: https://docs.datadoghq.com/containers/kubernetes/integrations/?tab=annotations
+[19]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 8.11.1 / 2026-10-01
+
+***Fixed***:
+
+* Reduce MQI round-trips per queue by reusing a single `PCFExecute` connection across queue stats, status, and reset metric collection instead of opening three separate ones. Also fix the `ibm_mq.queue` service check incorrectly reporting `CRITICAL` instead of `OK` when opening that shared connection hit a benign "no messages available" condition. ([#24635](https://github.com/DataDog/integrations-core/pull/24635))
+
+## 8.11.0 / 2026-08-05 / Agent 7.83.0
+
+***Security***:
+
+* Expand the set of configuration fields protected behind integration security settings. ([#24646](https://github.com/DataDog/integrations-core/pull/24646))
+
+***Fixed***:
+
+* Fix a ZeroDivisionError in the queue depth percent calculation when a queue's max depth is configured as 0. ([#24663](https://github.com/DataDog/integrations-core/pull/24663))
+
 ## 8.10.0 / 2026-06-10 / Agent 7.81.0
 
 ***Added***:

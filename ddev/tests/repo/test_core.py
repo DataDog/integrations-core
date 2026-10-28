@@ -75,6 +75,19 @@ def test_repository_identity_falls_back_when_remote_unparseable(mocker, tmp_path
     assert repo.full_name == expected_full_name
 
 
+@pytest.mark.parametrize(
+    'name, expected_full_name',
+    [
+        pytest.param('core', 'integrations-core', id='core'),
+        pytest.param('internal', 'integrations-internal', id='internal'),
+    ],
+)
+def test_repository_identity_known_alias_wins_over_remote(mocker, tmp_path, name, expected_full_name):
+    mocker.patch('ddev.repo.core._read_origin_url_from_git_config', return_value='git@github.com:me/renamed.git')
+
+    assert Repository(name, str(tmp_path)).full_name == expected_full_name
+
+
 def test_repository_identity_unknown_name_falls_back_to_name(mocker, tmp_path):
     mocker.patch('ddev.repo.core._read_origin_url_from_git_config', return_value=None)
     repo = Repository('custom-repo', str(tmp_path))
@@ -107,6 +120,26 @@ def test_repository_identity_follows_worktree_gitdir_pointer(tmp_path):
     repo = Repository('feature', str(worktree_path))
 
     assert repo.full_name == 'integrations-core'
+
+
+@pytest.mark.parametrize(
+    'config, expected_owner',
+    [
+        pytest.param('[github]\nowner = "ddoghq"\n', 'ddoghq', id='configured'),
+        pytest.param('[overrides.display-name]\nfoo = "Foo"\n', 'DataDog', id='no-github-table'),
+        pytest.param(None, 'DataDog', id='no-config-file'),
+    ],
+)
+def test_github_owner_comes_from_repository_config(tmp_path, config, expected_owner):
+    # A fork as origin must not change the owner GitHub operations target.
+    git_dir = tmp_path / '.git'
+    git_dir.mkdir()
+    (git_dir / 'config').write_text('[remote "origin"]\n\turl = git@github.com:some-fork/integrations-internal.git\n')
+    if config is not None:
+        (tmp_path / '.ddev').mkdir()
+        (tmp_path / '.ddev' / 'config.toml').write_text(config)
+
+    assert Repository('internal', str(tmp_path)).github_owner == expected_owner
 
 
 class TestGetIntegration:
@@ -184,9 +217,17 @@ class TestIntegrationsIteration:
         pytest.param(
             "iter_testable",
             lambda repo, path: (path / 'hatch.toml').is_file()
+            and (path / 'tests').is_dir()
             # Is not a worktree
             and not (path / ".git").is_file(),
             id="testable",
+        ),
+        pytest.param(
+            "iter_hatch_configured",
+            lambda repo, path: (path / 'hatch.toml').is_file()
+            # Is not a worktree
+            and not (path / ".git").is_file(),
+            id="hatch configured",
         ),
         pytest.param(
             "iter_shippable",
@@ -276,6 +317,71 @@ class TestIntegrationsIteration:
 
         assert [integration.name for integration in integrations] == integration_names
         assert list(iter_method(selection)) == integrations
+
+
+def test_iter_changed_includes_a_rename_source(repository):
+    # Moving a file between integrations changes both: the source lost it and the destination
+    # gained it, so both must be selected.
+    repo = Repository(repository.path.name, str(repository.path))
+
+    # The file has to already exist on the comparison base, otherwise the diff reports a plain
+    # addition rather than a rename.
+    repo.git.capture('mv', 'tekton/README.md', 'nginx/moved_from_tekton.md')
+    repo.git.capture('commit', '-m', 'move a file to another integration')
+
+    integrations = list(repo.integrations.iter(['changed']))
+
+    assert sorted(integration.name for integration in integrations) == ['nginx', 'tekton']
+
+
+def test_iter_changed_keeps_a_committed_change_reverted_in_the_working_tree(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+
+    readme = repo.path / 'tekton' / 'README.md'
+    original_content = readme.read_text()
+    readme.write_text(f'{original_content}\ncommitted change\n')
+    repo.git.capture('add', 'tekton/README.md')
+    repo.git.capture('commit', '-m', 'change a file')
+
+    # Nothing differs from the merge base any more, but the branch still changes the file
+    readme.write_text(original_content)
+
+    integrations = list(repo.integrations.iter(['changed']))
+
+    assert [integration.name for integration in integrations] == ['tekton']
+
+
+def test_iter_changed_against_head_ignores_committed_changes(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+
+    (repo.path / 'tekton' / 'foo.txt').touch()
+    repo.git.capture('add', 'tekton/foo.txt')
+    repo.git.capture('commit', '-m', 'add a file')
+
+    assert list(repo.integrations.comparing(base='HEAD').iter(['changed'])) == []
+    assert [integration.name for integration in repo.integrations.iter(['changed'])] == ['tekton']
+
+
+def test_iter_changed_code_selects_both_sides_of_a_rename(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+
+    repo.git.capture('mv', 'tekton/datadog_checks/tekton/__about__.py', 'nginx/datadog_checks/nginx/moved.py')
+    repo.git.capture('commit', '-m', 'move a shipped file to another integration')
+
+    integrations = list(repo.integrations.iter_changed_code())
+
+    assert sorted(integration.name for integration in integrations) == ['nginx', 'tekton']
+
+
+def test_iter_changed_code_ignores_files_that_need_no_entry(repository):
+    repo = Repository(repository.path.name, str(repository.path))
+
+    # The file is already tracked, so it has to be written to for git to report it at all
+    target = repo.path / 'tekton' / 'tests' / 'test_unit.py'
+    target.write_text(f'{target.read_text()}\n# change\n')
+
+    assert 'tekton/tests/test_unit.py' in repo.integrations.changed_paths
+    assert list(repo.integrations.iter_changed_code()) == []
 
 
 class TestIterationChanged:

@@ -1,6 +1,10 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import gc
+import threading
+import time
+import weakref
 from concurrent.futures.thread import ThreadPoolExecutor
 from unittest import mock
 
@@ -9,6 +13,10 @@ import pytest
 from datadog_checks.base.checks.db import DatabaseCheck
 from datadog_checks.base.stubs.datadog_agent import datadog_agent
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
+
+# Upper bound for waits on another thread; the tests only ever wait for a signal that is
+# already on its way.
+WAIT_TIMEOUT = 5
 
 
 class FakeDatabaseCheck(DatabaseCheck):
@@ -46,6 +54,27 @@ class RegistryTestJob(DBMAsyncJob):
         pass
 
 
+class LifecycleCheck(FakeDatabaseCheck):
+    """DatabaseCheck that records lifecycle calls and can hold check() open."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.check_calls = 0
+        self.shutdown_calls = 0
+        self.in_check = threading.Event()
+        # Cleared by tests that need a cancel to land while check() is still executing.
+        self.release_check = threading.Event()
+        self.release_check.set()
+
+    def check(self, _):
+        self.check_calls += 1
+        self.in_check.set()
+        assert self.release_check.wait(timeout=WAIT_TIMEOUT)
+
+    def shutdown(self):
+        self.shutdown_calls += 1
+
+
 @pytest.fixture
 def registry_check():
     check = FakeDatabaseCheck("test", {}, [{}])
@@ -69,6 +98,15 @@ def test_agent_hostname_resolves_once_and_caches():
         assert check.agent_hostname == "my-agent-host"
         assert check.agent_hostname == "my-agent-host"
         assert get_hostname.call_count == 1
+
+
+def test_agent_version_resolves_once_and_caches():
+    check = FakeDatabaseCheck("test", {}, [{}])
+    # The version comes from an FFI call, so it should only be resolved once and cached.
+    with mock.patch.object(datadog_agent, "get_version", return_value="7.70.0") as get_version:
+        assert check.agent_version == "7.70.0"
+        assert check.agent_version == "7.70.0"
+        assert get_version.call_count == 1
 
 
 @pytest.mark.parametrize(
@@ -189,3 +227,128 @@ def test_shutdown_async_jobs_tears_down_and_calls_shutdown(registry_check, start
     # The future is cleared and shutdown runs once, whether or not a loop was started.
     assert job._job_loop_future is None
     assert job.shutdown_calls == 1
+
+
+def test_run_without_cancel_leaves_check_usable():
+    check = LifecycleCheck("test", {}, [{}])
+
+    assert check.run() == ''
+
+    # An uncancelled run reports no error, is not treated as cancelled, and tears nothing down.
+    assert check.check_calls == 1
+    assert not check.is_cancelled
+    assert check.shutdown_calls == 0
+
+    check.cancel()
+    assert check.shutdown_calls == 1
+
+
+def test_cancel_when_idle_finalizes_immediately():
+    check = LifecycleCheck("test", {}, [{}])
+    job = check.register_async_job(RegistryTestJob(check))
+    check.run_async_jobs([])
+
+    check.cancel()
+
+    # With no run in flight there is nothing to wait for, so the whole teardown runs inline.
+    assert check.is_cancelled
+    assert job._cancel_event.is_set()
+    assert job._job_loop_future is None
+    assert job.shutdown_calls == 1
+    assert check.shutdown_calls == 1
+
+
+def test_cancel_during_run_defers_finalize_until_run_completes():
+    """Teardown must wait for check() to return.
+
+    Releasing resources under a running check() means the check resumes against a closed
+    connection, which crashes the Agent inside the database client library rather than raising.
+    """
+    check = LifecycleCheck("test", {}, [{}])
+    check.release_check.clear()
+    run_result = []
+    run_thread = threading.Thread(target=lambda: run_result.append(check.run()))
+    run_thread.start()
+    assert check.in_check.wait(timeout=WAIT_TIMEOUT)
+
+    check.cancel()
+
+    # The cancel is recorded, but check() is still executing so nothing may be released yet.
+    assert check.is_cancelled
+    assert check.shutdown_calls == 0
+
+    check.release_check.set()
+    run_thread.join(timeout=WAIT_TIMEOUT)
+
+    assert not run_thread.is_alive()
+    assert run_result == ['']
+    assert check.shutdown_calls == 1
+
+
+def test_run_after_cancel_skips_the_check():
+    check = LifecycleCheck("test", {}, [{}])
+    check.cancel()
+
+    assert check.run() == ''
+    assert check.check_calls == 0
+
+
+@pytest.mark.parametrize("in_flight", [False, True], ids=["idle", "during_run"])
+def test_cancel_is_idempotent(in_flight):
+    check = LifecycleCheck("test", {}, [{}])
+    job = check.register_async_job(RegistryTestJob(check))
+    if in_flight:
+        check.release_check.clear()
+        run_thread = threading.Thread(target=check.run)
+        run_thread.start()
+        assert check.in_check.wait(timeout=WAIT_TIMEOUT)
+
+    check.cancel()
+    check.cancel()
+
+    if in_flight:
+        check.release_check.set()
+        run_thread.join(timeout=WAIT_TIMEOUT)
+        assert not run_thread.is_alive()
+    # Teardown runs once however many times the cancel is signaled, and whichever path runs it.
+    assert check.shutdown_calls == 1
+    assert job.shutdown_calls == 1
+
+
+def test_run_async_jobs_does_not_restart_jobs_after_cancel():
+    check = LifecycleCheck("test", {}, [{}])
+    job = check.register_async_job(RegistryTestJob(check))
+    check.cancel()
+
+    check.run_async_jobs([])
+
+    assert job._job_loop_future is None
+
+
+def test_check_is_reclaimed_after_cancel():
+    """Verify cancel() breaks every reference cycle, so refcounting alone reclaims the check.
+
+    If this fails, find which attribute on the reported referrer points back at the check and
+    clear it in _finalize(), or in the relevant shutdown() method.
+    """
+    check = LifecycleCheck("test", {}, [{}])
+    check.register_async_job(RegistryTestJob(check))
+    check.run_async_jobs([])
+    ref = weakref.ref(check)
+
+    check.cancel()
+
+    gc.collect()
+    gc.disable()
+    try:
+        del check
+        deadline = time.monotonic() + 1
+        while ref() is not None and time.monotonic() < deadline:
+            time.sleep(0.01)
+        leaked = ref()
+        if leaked is not None:
+            referrers = [type(referrer).__name__ for referrer in gc.get_referrers(leaked)]
+            del leaked
+            pytest.fail(f"check still alive after cancel() and del -- pinned by: {referrers}")
+    finally:
+        gc.enable()

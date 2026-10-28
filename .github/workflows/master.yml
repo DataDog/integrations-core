@@ -26,13 +26,7 @@ on:
     - cron: "0 2 * * *"
 
 jobs:
-  cache:
-    uses: ./.github/workflows/cache-shared-deps.yml
-
   test:
-    needs:
-      - cache
-
     uses: ./.github/workflows/test-all.yml
     with:
       repo: core
@@ -53,22 +47,6 @@ jobs:
       # needed for dd-sts in test-target.yml
       id-token: write
 
-  publish-test-results:
-    needs:
-      - test
-
-    if: success() || failure()
-    concurrency:
-      group: test-results
-
-    permissions:
-      checks: write
-      pull-requests: write
-      contents: write
-
-    uses: ./.github/workflows/test-results-master.yml
-    secrets: inherit
-
   upload-coverage:
     needs:
       - test
@@ -82,7 +60,7 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Get Datadog credentials
         id: dd-sts

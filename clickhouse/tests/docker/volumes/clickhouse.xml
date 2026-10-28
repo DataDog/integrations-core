@@ -29,5 +29,19 @@
     </zookeeper>
     <macros>
         <replica>clickhouse</replica>
+        <cluster>dd_test_cluster</cluster>
     </macros>
+    <remote_servers>
+        <!-- A self-hosted style cluster named something other than 'default', so integration
+             tests can verify single_endpoint_mode fans out over the resolved cluster instead
+             of an assumed 'default' (see clickhouse/AGENTS.md and PR #24920). -->
+        <dd_test_cluster>
+            <shard>
+                <replica>
+                    <host>clickhouse</host>
+                    <port>9000</port>
+                </replica>
+            </shard>
+        </dd_test_cluster>
+    </remote_servers>
 </clickhouse>

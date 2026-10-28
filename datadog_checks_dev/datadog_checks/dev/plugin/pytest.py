@@ -219,7 +219,10 @@ def dd_agent_check(request, aggregator, datadog_agent):
 
         if not matches:
             message_parts = []
-            debug_result = run_command(['docker', 'logs', 'dd_{}_{}'.format(check, env)], capture=True)
+            debug_result = run_command(
+                [python_path, '-m', 'ddev', 'env', 'logs', check, env],
+                capture=True,
+            )
             if not debug_result.code:
                 message_parts.append(debug_result.stdout + debug_result.stderr)
 

@@ -290,6 +290,11 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
                 self._global_status_table = "performance_schema.global_status"
             self._version_processed = True
 
+    def shutdown(self) -> None:
+        self._close_db_conn()
+        self._check = None
+        self._connection_args_provider = None
+
     def _close_db_conn(self):
         if self._db:
             try:
@@ -330,6 +335,7 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
         """
         Run and log the query. If provided, obfuscated params are logged in place of the regular params.
         """
+        self._raise_if_cancelled()
         try:
             logged_query = obfuscated_query if obfuscated_query else query
             self._log.debug("Running query [%s] %s", logged_query, obfuscated_params if obfuscated_params else params)
@@ -394,7 +400,7 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
             # do not log raw sql_text to avoid leaking sensitive data into logs unless log_unobfuscated_queries is set
             # digest_text is safe as parameters are obfuscated by the database
             if self._config.log_unobfuscated_queries:
-                self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", row['sql_text'], e)
+                self._log.warning("Failed to obfuscate query=[%s] | err=[%s]", repr(row['sql_text']), e)
             else:
                 self._log.debug("Failed to obfuscate query=[%s] | err=[%s]", row['digest_text'], e)
             self._check.count(
@@ -444,7 +450,7 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
                 obfuscated_plan = datadog_agent.obfuscate_sql_exec_plan(plan)
             except Exception as e:
                 if self._config.log_unobfuscated_plans:
-                    self._log.warning("Failed to obfuscate plan=[%s] | err=[%s]", plan, e)
+                    self._log.warning("Failed to obfuscate plan=[%s] | err=[%s]", repr(plan), e)
                 raise e
             plan_signature = compute_exec_plan_signature(normalized_plan)
 
@@ -459,7 +465,7 @@ class MySQLStatementSamples(ManagedAuthConnectionMixin, DBMAsyncJob):
                 "timestamp": event_timestamp,
                 "dbm_type": "plan",
                 "host": self._check.reported_hostname,
-                "ddagentversion": datadog_agent.get_version(),
+                "ddagentversion": self._check.agent_version,
                 "ddsource": "mysql",
                 "ddtags": self._tags_str,
                 "duration": row['timer_wait_ns'],

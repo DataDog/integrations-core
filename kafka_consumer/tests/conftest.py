@@ -24,7 +24,7 @@ from .runners import Consumer, Producer
 def seed_mock_kafka_client():
     """Minimal Kafka client mock sufficient for the connector-focused tests."""
     client = mock.create_autospec(KafkaClient)
-    client.consumer_get_cluster_id_and_list_topics.return_value = ('cluster-1', [])
+    client.get_cluster_id.return_value = 'cluster-1'
     client.list_consumer_groups.return_value = []
     client.list_consumer_group_offsets.return_value = []
     client._cluster_metadata = None
@@ -83,7 +83,7 @@ def run_connect_check(check, kafka_instance, dd_run_check, datadog_agent):
         runs=1,
     ):
         kafka_instance['kafka_connect_url'] = 'http://localhost:8083'
-        kafka_instance['enable_cluster_monitoring'] = True
+        kafka_instance['enable_kafka_console'] = True
         if instance_extra:
             kafka_instance.update(instance_extra)
 

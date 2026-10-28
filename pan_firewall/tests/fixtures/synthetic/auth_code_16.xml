@@ -1,0 +1,2 @@
+<!-- Source: PAN-OS XML API error codes doc (code 16, "Unauthorized": the API role lacks access to the command). Never seen in the lab: the shape is auth_invalid_credential.xml with the code changed and the doc's code name as the message. -->
+<response status="error" code="16"><result><msg>Unauthorized</msg></result></response>

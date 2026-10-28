@@ -26,7 +26,7 @@ def _generated_candidates(service: Service) -> Iterator[dict[str, Any]]:
     for port in candidate_ports(service, [4730]):
         ctx = {'port': port}
         instance_data = {
-            'server': '{service.host}'.format(service=service, **ctx),
+            'server': '{service.host!s}'.format(service=service, **ctx),
             'port': '{port.number}'.format(service=service, **ctx),
         }
         instance = InstanceConfig.model_validate(

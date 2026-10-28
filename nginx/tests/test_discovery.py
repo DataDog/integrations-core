@@ -36,3 +36,9 @@ def test_discovery_prefers_http_80_before_https_443():
     assert urls[0] == 'http://127.0.0.1:80/nginx_status'
     assert 'https://127.0.0.1:443/nginx_status' in urls
     assert 'http://127.0.0.1:443/nginx_status' not in urls
+
+
+def test_discovery_brackets_ipv6_host_in_url() -> None:
+    service = Service(id='nginx', host='fd00::1', ports=(Port(number=80),))
+
+    assert generated_urls(service) == ['http://[fd00::1]:80/nginx_status']

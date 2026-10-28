@@ -173,6 +173,8 @@ def _get_expected_tags(
     )
     if role:
         base_tags.append(f'replication_role:{role}')
+        if check.is_aurora:
+            base_tags.append(f'aurora_role:{"reader" if role == "standby" else "writer"}')
     if with_db:
         base_tags.append(f'db:{pg_instance["dbname"]}')
     if with_host:

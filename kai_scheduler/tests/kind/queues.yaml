@@ -1,0 +1,61 @@
+apiVersion: scheduling.run.ai/v2
+kind: Queue
+metadata:
+  name: e2e-parent
+spec:
+  resources:
+    cpu:
+      quota: -1
+      limit: -1
+      overQuotaWeight: 1
+    gpu:
+      quota: -1
+      limit: -1
+      overQuotaWeight: 1
+    memory:
+      quota: -1
+      limit: -1
+      overQuotaWeight: 1
+---
+# The CPU limit makes the preemption tests deterministic: two 800m pods cannot both fit, regardless of the node size.
+# CPU quantities are in millicores and memory quantities in megabytes.
+apiVersion: scheduling.run.ai/v2
+kind: Queue
+metadata:
+  name: team-a
+spec:
+  displayName: Team A
+  parentQueue: e2e-parent
+  resources:
+    cpu:
+      quota: 1000
+      limit: 1000
+      overQuotaWeight: 1
+    gpu:
+      quota: 0
+      limit: -1
+      overQuotaWeight: 1
+    memory:
+      quota: 1024
+      limit: -1
+      overQuotaWeight: 1
+---
+apiVersion: scheduling.run.ai/v2
+kind: Queue
+metadata:
+  name: team-b
+spec:
+  parentQueue: e2e-parent
+  resources:
+    cpu:
+      quota: 500
+      limit: -1
+      overQuotaWeight: 1
+    gpu:
+      quota: 0
+      limit: -1
+      overQuotaWeight: 1
+    memory:
+      quota: 512
+      limit: -1
+      overQuotaWeight: 1

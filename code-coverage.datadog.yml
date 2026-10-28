@@ -23,7 +23,6 @@ gates:
     - '!silverstripe_cms'
     - '!snmp'
     - '!varnish'
-# New custom gates for services whose thresholds had to be lowered when migrating to Datadog Code Coverage.
 - type: total_coverage_percentage
   config:
     threshold: 74
@@ -79,7 +78,6 @@ gates:
     threshold: 52
     services:
     - datadog_checks_dev
-# Existing custom gates.
 - type: total_coverage_percentage
   config:
     threshold: 45
@@ -166,15 +164,15 @@ services:
 - id: cert_manager
   paths:
   - cert_manager/datadog_checks/cert_manager/
-- id: checkpoint_harmony_endpoint
-  paths:
-  - checkpoint_harmony_endpoint/datadog_checks/checkpoint_harmony_endpoint/
 - id: cilium
   paths:
   - cilium/datadog_checks/cilium/
 - id: cisco_aci
   paths:
   - cisco_aci/datadog_checks/cisco_aci/
+- id: cisco_catalyst_center
+  paths:
+  - cisco_catalyst_center/datadog_checks/cisco_catalyst_center/
 - id: citrix_hypervisor
   paths:
   - citrix_hypervisor/datadog_checks/citrix_hypervisor/
@@ -250,6 +248,9 @@ services:
 - id: duckdb
   paths:
   - duckdb/datadog_checks/duckdb/
+- id: dynamo
+  paths:
+  - dynamo/datadog_checks/dynamo/
 - id: ecs_fargate
   paths:
   - ecs_fargate/datadog_checks/ecs_fargate/
@@ -364,6 +365,9 @@ services:
 - id: infiniband
   paths:
   - infiniband/datadog_checks/infiniband/
+- id: intersystems_iris
+  paths:
+  - intersystems_iris/datadog_checks/intersystems_iris/
 - id: istio
   paths:
   - istio/datadog_checks/istio/
@@ -373,6 +377,9 @@ services:
 - id: kafka_consumer
   paths:
   - kafka_consumer/datadog_checks/kafka_consumer/
+- id: kai_scheduler
+  paths:
+  - kai_scheduler/datadog_checks/kai_scheduler/
 - id: karpenter
   paths:
   - karpenter/datadog_checks/karpenter/
@@ -532,6 +539,9 @@ services:
 - id: openstack_controller
   paths:
   - openstack_controller/datadog_checks/openstack_controller/
+- id: pan_firewall
+  paths:
+  - pan_firewall/datadog_checks/pan_firewall/
 - id: pdh_check
   paths:
   - pdh_check/datadog_checks/pdh_check/
@@ -595,6 +605,9 @@ services:
 - id: scylla
   paths:
   - scylla/datadog_checks/scylla/
+- id: sglang
+  paths:
+  - sglang/datadog_checks/sglang/
 - id: silk
   paths:
   - silk/datadog_checks/silk/

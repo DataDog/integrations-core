@@ -2,6 +2,70 @@
 
 <!-- towncrier release notes start -->
 
+## 9.2.2 / 2026-10-21
+
+***Fixed***:
+
+* Look up a consumer group's coordinator again after a `NOT_COORDINATOR` or `COORDINATOR_NOT_AVAILABLE` error. With `close_admin_client: false`, the group's offsets resume on the next check run after its coordinator moves to another broker. ([#25485](https://github.com/DataDog/integrations-core/pull/25485))
+
+## 9.2.1 / 2026-10-13
+
+***Fixed***:
+
+* Avoid fetching offsets for consumer groups that do not match the configured group pattern. consumer_groups_regex patterns now match the complete group ID; patterns spanning the group/topic comma no longer select a group. ([#25232](https://github.com/DataDog/integrations-core/pull/25232))
+
+## 9.2.0 / 2026-10-01
+
+***Added***:
+
+* Add the ``enable_kafka_console`` option as a replacement for ``enable_cluster_monitoring`` while preserving the old option as an alias. ([#25215](https://github.com/DataDog/integrations-core/pull/25215))
+* Update dependencies ([#25284](https://github.com/DataDog/integrations-core/pull/25284))
+
+## 9.1.1 / 2026-09-03 / Agent 7.84.0
+
+***Fixed***:
+
+* Skip partitions with no committed offset instead of reporting a negative offset and inflated `kafka.consumer_lag`. ([#24938](https://github.com/DataDog/integrations-core/pull/24938))
+
+## 9.1.0 / 2026-09-02
+
+***Added***:
+
+* Update dependencies ([#24817](https://github.com/DataDog/integrations-core/pull/24817))
+
+***Fixed***:
+
+* Discard broker and log-start offsets that come back negative, instead of reporting a negative ``kafka.broker_offset`` and firing a spurious negative consumer lag event for every partition on every run. ([#24814](https://github.com/DataDog/integrations-core/pull/24814))
+* Fix retention.ms and retention.bytes being dropped from topic config events when a topic has 30+ configs (e.g. tiered-storage topics). The configs were truncated because they sorted late alphabetically and the max_configs cap cut them, even though the corresponding metrics were still emitted. ([#25012](https://github.com/DataDog/integrations-core/pull/25012))
+
+## 9.0.0 / 2026-08-05 / Agent 7.83.0
+
+***Changed***:
+
+* Redact Kafka Connect connector configuration with a known-safe allowlist instead of a sensitive-key denylist. Configuration keys not on the allowlist are now hidden in Kafka Connect configuration events. ([#24309](https://github.com/DataDog/integrations-core/pull/24309))
+
+***Security***:
+
+* Expand the set of configuration fields protected behind integration security settings. ([#24646](https://github.com/DataDog/integrations-core/pull/24646))
+
+***Added***:
+
+* Add connector failure trace and tracked topics to Kafka Connect configuration events. ([#24309](https://github.com/DataDog/integrations-core/pull/24309))
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+* Emit a `consumer_membership` data-streams-message per consumer group with the Kafka cluster id, group id and current member ids. ([#24601](https://github.com/DataDog/integrations-core/pull/24601))
+
+***Fixed***:
+
+* Reduce cluster-check-runner memory churn by persisting the DSM broker timestamps cache in a compact binary format (marshal) instead of serializing it as JSON on every run. ([#24471](https://github.com/DataDog/integrations-core/pull/24471))
+* Cap the total DSM broker timestamps history per cluster with a memory budget that scales the per-partition depth by partition count, bounding cluster-check-runner memory on large clusters. ([#24508](https://github.com/DataDog/integrations-core/pull/24508))
+
+## 8.1.2 / 2026-07-23 / Agent 7.82.0
+
+***Fixed***:
+
+* Call malloc_trim after each run to return librdkafka's per-arena free memory to the OS and curb agent memory growth. ([#24553](https://github.com/DataDog/integrations-core/pull/24553))
+* Keep the DSM broker_timestamps cache in memory and persist it at most every 5 minutes to reduce per-run allocation churn and memory growth. ([#24554](https://github.com/DataDog/integrations-core/pull/24554))
+
 ## 8.1.1 / 2026-07-17
 
 ***Fixed***:

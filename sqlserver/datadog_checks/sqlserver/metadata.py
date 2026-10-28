@@ -13,15 +13,12 @@ from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import (
     DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
+    STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_VERSION,
 )
-from datadog_checks.sqlserver.schemas import SQLServerSchemaCollector
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
-from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
+from datadog_checks.sqlserver.schemas import SQLServerObjectCollector, SQLServerSchemaCollector
+from datadog_checks.sqlserver.utils import raise_if_cancelled
+from datadog_checks.sqlserver.views import SQLServerViewCollector
 
 # default settings collection interval in seconds
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
@@ -85,12 +82,25 @@ class SqlserverMetadata(DBMAsyncJob):
         self._settings_query = None
         self._time_since_last_settings_query = 0
         self._max_query_metrics = self._config.statement_metrics_config.get("max_queries", 250)
-        self._schema_collector = SQLServerSchemaCollector(check)
         self._schema_config = self._config.schema_config
         self._schema_collection_interval = self._schema_config.get(
             'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
         self._last_schemas_collection_time = 0
+        self._schema_collectors = self._build_schema_collectors(check)
+
+    def _build_schema_collectors(self, check) -> list[SQLServerObjectCollector]:
+        if not self._schema_config.get('enabled', False):
+            return []
+        collectors: list[SQLServerObjectCollector] = [SQLServerSchemaCollector(check)]
+        if self._schema_config.get('collect_views', False):
+            collectors.append(SQLServerViewCollector(check))
+        return collectors
+
+    def shutdown(self) -> None:
+        # The schema collectors hold the check, so release them during teardown.
+        self._schema_collectors = []
+        self._check = None
 
     def _close_db_conn(self):
         pass
@@ -139,13 +149,15 @@ class SqlserverMetadata(DBMAsyncJob):
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_sqlserver_metadata(self):
+        raise_if_cancelled(self._cancel_event)
+
         with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
                 settings_rows = self._load_settings_rows(cursor)
                 event = {
                     "host": self._check.reported_hostname,
                     "database_instance": self._check.database_identifier,
-                    "agent_version": datadog_agent.get_version(),
+                    "agent_version": self._check.agent_version,
                     "dbms": self._check.dbms,
                     "kind": "sqlserver_configs",
                     "collection_interval": self.collection_interval,
@@ -153,7 +165,7 @@ class SqlserverMetadata(DBMAsyncJob):
                         self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
                         self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
                     ),
-                    "tags": self._check.tag_manager.get_tags(),
+                    "tags": self._check.tag_manager.get_tags(include_internal=False, include_db=False),
                     "timestamp": time.time() * 1000,
                     "cloud_metadata": self._check.cloud_metadata,
                     "metadata": settings_rows,
@@ -162,9 +174,16 @@ class SqlserverMetadata(DBMAsyncJob):
         self.collect_schemas()
 
     def collect_schemas(self):
-        if not self._schema_config.get('enabled', False):
+        if not self._schema_collectors:
             return
         if time.time() - self._last_schemas_collection_time < self._schema_collection_interval:
             return
         self._last_schemas_collection_time = time.time()
-        self._schema_collector.collect_schemas()
+        for collector in self._schema_collectors:
+            raise_if_cancelled(self._cancel_event)
+            # Each collector is a separate run, so one failing must not skip the others or stop the job loop.
+            # The collector already logs the error and reports it through its status:error telemetry.
+            try:
+                collector.collect_schemas()
+            except Exception as e:
+                self.log.debug("Skipped remaining %s collection after error: %s", collector.kind, e)

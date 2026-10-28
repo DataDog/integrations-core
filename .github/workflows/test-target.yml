@@ -134,7 +134,7 @@ jobs:
       shell: bash
       run: echo "UV_LINK_MODE=copy" >> "$GITHUB_ENV"
 
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
     # When called as a reusable workflow from other repos, `uses: ./` resolves
     # from the caller's repo where the actions don't exist. We checkout the
@@ -152,7 +152,7 @@ jobs:
 
     - name: Checkout integrations-core actions
       if: inputs.repo != 'core'
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         repository: "DataDog/integrations-core"
         ref: master
@@ -263,7 +263,7 @@ jobs:
       shell: bash
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
@@ -281,23 +281,35 @@ jobs:
         install-mode: pypi
 
     - name: Configure ddev
+      env:
+        REPO: ${{ inputs.repo }}
       run: |-
         ddev config set upgrade_check false
-        ddev config set repos.${{ inputs.repo }} .
-        ddev config set repo ${{ inputs.repo }}
+        ddev config set "repos.${REPO}" .
+        ddev config set repo "$REPO"
 
     - name: Lint
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
+      env:
+        TARGET: ${{ inputs.target }}
       run: |-
-        ddev test --lint ${{ inputs.target }} || {
+        ddev test --lint "$TARGET" || {
           echo "::error::Lint failed!"
-          echo "::error::Please update to the latest version of ddev to ensure you are using the latest linting rules and then run 'ddev test --fmt ${{ inputs.target }}' to fix formatting issues."
+          echo "::error::Please update to the latest version of ddev to ensure you are using the latest linting rules and then run 'ddev test --fmt $TARGET' to fix formatting issues."
           exit 1
         }
 
     - name: Prepare for testing
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
-      run: ddev ci setup ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
+      env:
+        TARGET: ${{ inputs.target }}
+        TARGET_ENV: ${{ inputs.target-env }}
+      run: |-
+        if [[ -n "$TARGET_ENV" ]]; then
+          ddev ci setup "${TARGET}:${TARGET_ENV}"
+        else
+          ddev ci setup "$TARGET"
+        fi
 
     - name: Ensure Docker is running
       run: bash .github/workflows/scripts/ensure-docker.sh
@@ -320,7 +332,14 @@ jobs:
       env:
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && env.INPUT_IS_FORK != 'true' && '1' || '0' }}"
         DD_TEST_SESSION_NAME: "benchmarks"
-      run: ddev test --bench --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
+        TARGET: ${{ inputs.target }}
+        TARGET_ENV: ${{ inputs.target-env }}
+      run: |-
+        if [[ -n "$TARGET_ENV" ]]; then
+          ddev test --bench --junit "${TARGET}:${TARGET_ENV}"
+        else
+          ddev test --bench --junit "$TARGET"
+        fi
 
     - name: Run tests and verify support for the latest version
       if: inputs.latest
@@ -328,7 +347,14 @@ jobs:
       env:
         DDEV_TEST_ENABLE_TRACING: "${{ inputs.repo == 'core' && (inputs.target != 'sqlserver' || inputs.platform != 'windows') && env.INPUT_IS_FORK != 'true' && '1' || '0' }}"
         DD_TEST_SESSION_NAME: "latest-tests"
-      run: ddev test --latest --junit ${{ inputs.target-env && format('{0}:{1}', inputs.target, inputs.target-env) || inputs.target }}
+        TARGET: ${{ inputs.target }}
+        TARGET_ENV: ${{ inputs.target-env }}
+      run: |-
+        if [[ -n "$TARGET_ENV" ]]; then
+          ddev test --latest --junit "${TARGET}:${TARGET_ENV}"
+        else
+          ddev test --latest --junit "$TARGET"
+        fi
 
     - name: Run E2E tests for the latest version
       if: inputs.latest
@@ -342,10 +368,12 @@ jobs:
 
     - name: Finalize test results
       if: always()
+      env:
+        TARGET: ${{ inputs.target }}
       run: |-
         mkdir -p "${{ env.TEST_RESULTS_DIR }}"
-        if [[ -d ${{ inputs.target }}/junit ]]; then
-          mv ${{ inputs.target }}/junit/*.xml "${{ env.TEST_RESULTS_DIR }}"
+        if [[ -d "$TARGET/junit" ]]; then
+          mv "$TARGET"/junit/*.xml "${{ env.TEST_RESULTS_DIR }}"
         fi
 
     - name: Upload test results

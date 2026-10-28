@@ -10,12 +10,14 @@ from itertools import chain
 from math import isinf, isnan
 from typing import List  # noqa: F401
 
+from binary import KIBIBYTE
 from prometheus_client import Metric
 from prometheus_client.openmetrics.parser import text_fd_to_metric_families as parse_openmetrics
 from prometheus_client.parser import text_fd_to_metric_families as parse_prometheus
 from requests.exceptions import ConnectionError
 
 from datadog_checks.base.agent import datadog_agent
+from datadog_checks.base.checks.openmetrics import parser_optimizations
 from datadog_checks.base.checks.openmetrics.v2.first_scrape_handler import first_scrape_handler
 from datadog_checks.base.checks.openmetrics.v2.labels import LabelAggregator, get_label_normalizer
 from datadog_checks.base.checks.openmetrics.v2.transform import MetricTransformer
@@ -23,7 +25,7 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.functions import no_op, return_true
-from datadog_checks.base.utils.http import RequestsWrapper
+from datadog_checks.base.utils.http import OPENMETRICS_MAX_LINE_SIZE, RequestsWrapper, limit_line_size
 
 
 class OpenMetricsScraper:
@@ -218,6 +220,7 @@ class OpenMetricsScraper:
             self.raw_line_filter = re.compile('|'.join(raw_line_filters))
 
         self.http = RequestsWrapper(config, self.check.init_config, self.check.HTTP_CONFIG_REMAPPER, self.check.log)
+        self.http.max_line_size = OPENMETRICS_MAX_LINE_SIZE * KIBIBYTE
 
         self._content_type = ''
         self._use_latest_spec = is_affirmative(config.get('use_latest_spec', False))
@@ -231,6 +234,8 @@ class OpenMetricsScraper:
             self.http.options['headers']['Accept'] = accept_header
 
         self.use_process_start_time = is_affirmative(config.get('use_process_start_time'))
+
+        parser_optimizations.init_from_agent_config()
 
         # Used for monotonic counts
         self.flush_first_value = None
@@ -455,7 +460,11 @@ class OpenMetricsScraper:
                 if response.encoding is None:
                     response.encoding = 'utf-8'
 
-                self.submit_telemetry_endpoint_response_size(response)
+                try:
+                    self.submit_telemetry_endpoint_response_size(response)
+                except Exception:
+                    response.close()
+                    raise
 
                 return response
 
@@ -465,7 +474,10 @@ class OpenMetricsScraper:
         """
 
         kwargs['stream'] = True
-        return self.http.get(self.endpoint, **kwargs)
+        response = self.http.get(self.endpoint, **kwargs)
+        # Also limit reads that do not go through `iter_lines`, such as `response.content` for telemetry
+        limit_line_size(response, self.http.max_line_size)
+        return response
 
     def set_dynamic_tags(self, *tags):
         """

@@ -12,12 +12,13 @@ from .common import (
     ADAPTIVE_CONCURRENCY_STAT_PREFIX_TAG,
     ENVOY_VERSION,
     EXT_AUTHZ_METRICS,
+    GLOBAL_RATE_LIMIT_METRICS,
     INSTANCES,
     RBAC_METRICS,
 )
 
 CHECK_NAME = 'envoy'
-UNIQUE_METRICS = EXT_AUTHZ_METRICS + RBAC_METRICS
+UNIQUE_METRICS = EXT_AUTHZ_METRICS + GLOBAL_RATE_LIMIT_METRICS + RBAC_METRICS
 
 pytestmark = [
     pytest.mark.integration,
@@ -34,7 +35,7 @@ def test_success(aggregator, check, dd_run_check):
     metrics_collected = 0
     for metric in METRICS:
         collected_metrics = aggregator.metrics(METRIC_PREFIX + metric)
-        # The ext_auth and rbac metrics are excluded because the stats_prefix is not always present.
+        # The ext_auth, rate limit and rbac metrics are excluded because the stats_prefix is not always present.
         # They're tested in a different test.
         if collected_metrics and collected_metrics[0].name not in UNIQUE_METRICS:
             expected_tags = [t for t in METRICS[metric]['tags'] if t]

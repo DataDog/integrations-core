@@ -184,6 +184,12 @@ files:
             - information
             - success audit
             - failure audit
+            - Success
+            - Error
+            - Warning
+            - Information
+            - Success Audit
+            - Failure Audit
         - name: id
           type: array
           items:

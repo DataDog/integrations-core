@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import os
-import re
 import sys
 from contextlib import AbstractContextManager, contextmanager, nullcontext
 from functools import cache, cached_property, partial
@@ -12,6 +11,7 @@ from typing import TYPE_CHECKING, Callable, Type
 
 import stamina
 
+from ddev.e2e.agent.image import normalize_agent_image_name
 from ddev.e2e.agent.interface import AgentInterface
 from ddev.utils.structures import EnvVars
 
@@ -20,15 +20,11 @@ if TYPE_CHECKING:
 
     from ddev.utils.fs import Path
 
-AGENT_IMAGE_REGEX = r'^([^/]+)/([^:]+):(.*)$'
-AGENT_VERSION_REGEX = (
-    # Main version: 7, 7.69, 7.69.0 ...
-    r"^(?P<version>\d+(?:\.[\dx]+)*|latest|main|master|nightly)"
-    # rcs: rc.1, rc ...
-    r"(?P<rc>-rc(?:\.\d+)?)?"
-    # Anny suffixes: -jmx, -linux, -full...
-    r"(?P<suffixes>(?:-[a-zA-Z0-9]+)*)$"
-)
+# The Agent image pins its apt mirror to a single cloud region. When the host runs in a different
+# cloud, package downloads crawl (~40 kB/s versus ~8 MB/s in CI), which is slow enough for
+# `start_commands` to exhaust the job timeout. Point apt at the generic archive instead.
+APT_MIRRORLIST_FILE = '/etc/apt/mirrorlist.main'
+APT_MIRROR = 'http://archive.ubuntu.com/ubuntu'
 
 
 @contextmanager
@@ -45,43 +41,9 @@ def disable_integration_before_install(config_file):
     new.rename(config_file.parent / old)
 
 
-def _normalize_agent_image_name(agent_build: str | None, python_major: int, use_jmx: bool) -> str:
-    if not agent_build:
-        return 'registry.datadoghq.com/agent-dev:master-py3'
-
-    if match := re.match(AGENT_IMAGE_REGEX, agent_build):
-        org, image, tag = match.groups()
-
-        if org != 'datadog' and org != 'registry.datadoghq.com':
-            # Some non datadog image has been selected
-            return agent_build
-
-        version_match = re.match(AGENT_VERSION_REGEX, tag)
-
-        if version_match is None:
-            # Not sure how to extract information for a version of this shape
-            return agent_build
-
-        version = version_match.group('version')
-        rc = version_match.group('rc')
-        rc = rc if rc else ''
-        suffixes = version_match.group('suffixes')
-
-        # Add -py suffix if missing, only in agent-dev the agent does not have py3 suffix after agent 6
-        if image == 'agent-dev':
-            if not (rc != '' or any(suffix in suffixes for suffix in ['py', 'fips']) or version[0].isdigit()):
-                suffixes = f'-py{python_major}{suffixes}'
-
-        # Add jmx suffix if missing
-        if use_jmx and '-jmx' not in suffixes:
-            suffixes += '-jmx'
-
-        return f'{org}/{image}:{version}{rc}{suffixes}'
-
-    return agent_build
-
-
 class DockerAgent(AgentInterface):
+    build_config_key = 'docker'
+
     @cached_property
     def _isatty(self) -> bool:
         isatty: Callable[[], bool] | None = getattr(sys.stdout, 'isatty', None)
@@ -173,8 +135,24 @@ class DockerAgent(AgentInterface):
             self._show_logs()
             raise RuntimeError(error_message)
 
-    def _show_logs(self) -> None:
-        self._run_command(['docker', 'logs', self._container_name])
+    def _reset_apt_mirror(self) -> None:
+        """
+        Replace the Agent image's region-pinned apt mirror with the generic Ubuntu archive.
+
+        Best effort: images that ship no mirrorlist are left untouched and failures are ignored,
+        since this only affects how fast packages download.
+        """
+        self._captured_process(
+            self._format_command(
+                ['sh', '-c', f'test -f {APT_MIRRORLIST_FILE} && echo {APT_MIRROR} > {APT_MIRRORLIST_FILE}']
+            )
+        )
+
+    def _show_logs(self, *, check: bool = False) -> None:
+        self._run_command(['docker', 'logs', self._container_name], check=check)
+
+    def show_logs(self) -> None:
+        self._show_logs(check=True)
 
     def get_id(self) -> str:
         return self._container_name
@@ -182,7 +160,7 @@ class DockerAgent(AgentInterface):
     def start(self, *, agent_build: str | None, local_packages: dict[Path, str], env_vars: dict[str, str]) -> None:
         from ddev.e2e.agent.constants import AgentEnvVars
 
-        agent_build = _normalize_agent_image_name(
+        agent_build = normalize_agent_image_name(
             agent_build, self.python_version[0], self.metadata.get('use_jmx', False)
         )
 
@@ -196,8 +174,15 @@ class DockerAgent(AgentInterface):
         # Set Agent hostname for CI
         env_vars[AgentEnvVars.HOSTNAME] = _get_hostname()
 
-        # Run API on a random free port
-        env_vars[AgentEnvVars.CMD_PORT] = str(_find_free_port())
+        docker_network = self.metadata.get('docker_network')
+        if docker_network and docker_network.startswith('container:'):
+            raise ValueError('Docker network modes that share another container network namespace are not supported')
+        if self._is_windows_container and docker_network:
+            raise ValueError('Custom Docker networks are not supported for Windows Agent containers')
+
+        uses_host_network = not docker_network or docker_network == 'host'
+        if uses_host_network:
+            env_vars[AgentEnvVars.CMD_PORT] = str(_find_free_port())
 
         # Disable trace Agent by default (can be overridden by user-provided env_vars)
         env_vars.setdefault(AgentEnvVars.APM_ENABLED, 'false')
@@ -205,6 +190,9 @@ class DockerAgent(AgentInterface):
         # Set up telemetry
         env_vars.setdefault(AgentEnvVars.TELEMETRY_ENABLED, '1')
         env_vars.setdefault(AgentEnvVars.EXPVAR_PORT, '5000')
+
+        # Disable Agent telemetry by default so E2E Agents do not pollute COAT stats
+        env_vars.setdefault(AgentEnvVars.AGENT_TELEMETRY_ENABLED, 'false')
 
         if (proxy_data := self.metadata.get('proxy')) is not None:
             if (http_proxy := proxy_data.get('http')) is not None:
@@ -268,7 +256,7 @@ class DockerAgent(AgentInterface):
         # Windows containers accessing the host network must use `docker.for.win.localhost` or `host.docker.internal`:
         # https://docs.docker.com/docker-for-windows/networking/#use-cases-and-workarounds
         if not self._is_windows_container:
-            command.extend(['--network', 'host'])
+            command.extend(['--network', docker_network or 'host'])
 
         for volume in volumes:
             command.extend(['-v', volume])
@@ -305,6 +293,9 @@ class DockerAgent(AgentInterface):
             raise RuntimeError(
                 f'Unable to start Agent container `{self._container_name}`: {process.stdout.decode("utf-8")}'
             )
+
+        if not self._is_windows_container and (start_commands or post_install_commands):
+            self._reset_apt_mirror()
 
         if start_commands:
             for start_command in start_commands:

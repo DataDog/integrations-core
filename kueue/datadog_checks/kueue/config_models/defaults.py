@@ -40,6 +40,10 @@ def instance_collect_counters_with_distributions():
     return False
 
 
+def instance_collect_follower_metrics():
+    return False
+
+
 def instance_collect_histogram_buckets():
     return True
 
@@ -65,7 +69,7 @@ def instance_enable_legacy_tags_normalization():
 
 
 def instance_histogram_buckets_as_distributions():
-    return False
+    return True
 
 
 def instance_ignore_connection_errors():

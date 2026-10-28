@@ -7,16 +7,6 @@ from operator import attrgetter
 
 import pymysql
 
-from datadog_checks.mysql.cursor import CommenterDictCursor
-from datadog_checks.mysql.databases_data import DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL, DatabasesData
-
-from .util import ManagedAuthConnectionMixin, connect_with_session_variables
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.utils import (
     DBMAsyncJob,
@@ -24,6 +14,10 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.mysql.cursor import CommenterDictCursor
+from datadog_checks.mysql.schemas import DEFAULT_SCHEMAS_COLLECTION_INTERVAL, MySqlSchemaCollector
+
+from .util import ManagedAuthConnectionMixin, connect_with_session_variables
 
 # default pg_settings collection interval in seconds
 DEFAULT_SETTINGS_COLLECTION_INTERVAL = 600
@@ -50,7 +44,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
     def __init__(self, check, config, connection_args_provider, uses_managed_auth=False):
         self._databases_data_enabled = is_affirmative(config.schemas_config.get("enabled", False))
         self._databases_data_collection_interval = config.schemas_config.get(
-            "collection_interval", DEFAULT_DATABASES_DATA_COLLECTION_INTERVAL
+            "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
         self._settings_enabled = is_affirmative(config.settings_config.get('enabled', True))
 
@@ -85,7 +79,10 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
         self._uses_managed_auth = uses_managed_auth
         self._db_created_at = 0
         self._db = None
-        self._databases_data = DatabasesData(self, check, config)
+        # Schema collector, built lazily once the server version is known (see run_job). It selects
+        # single_query on MySQL 8.0+ and chunked everywhere else; both emit the shared
+        # SchemaCollector snapshot markers.
+        self._schema_collector = None
         self._last_settings_collection_time = 0
         self._last_databases_collection_time = 0
 
@@ -102,13 +99,19 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
 
         if not self._db:
             conn_args = self._connection_args_provider()
-            self._db = connect_with_session_variables(**conn_args)
+            self._db = connect_with_session_variables(mysql_version=self._check.version, **conn_args)
             if self._uses_managed_auth:
                 self._db_created_at = time.time()
         else:
             # ping() will by default automatically reconnect if the connection is lost
             self._db.ping()
         return self._db
+
+    def shutdown(self) -> None:
+        self._close_db_conn()
+        self._check = None
+        self._connection_args_provider = None
+        self._schema_collector = None
 
     def _close_db_conn(self):
         if self._db:
@@ -123,6 +126,7 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
         """
         Run and log the query. If provided, obfuscated params are logged in place of the regular params.
         """
+        self._raise_if_cancelled()
         try:
             self._log.debug("Running query [{}] params={}".format(query, params))
             cursor.execute(query, params)
@@ -151,15 +155,20 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
         if self._databases_data_enabled and elapsed_time_databases >= self._databases_data_collection_interval:
             self._last_databases_collection_time = time.time()
             try:
-                self._databases_data.collect_databases_data(self._tags)
+                self._collect_schemas()
             except Exception as e:
                 self._log.error(
                     """An error occurred while collecting schema data.
                                 These may be unavailable until the error is resolved. The error - {}""".format(e)
                 )
 
-    def shut_down(self):
-        self._databases_data.shut_down()
+    def _get_schema_collector(self) -> MySqlSchemaCollector:
+        if self._schema_collector is None:
+            self._schema_collector = MySqlSchemaCollector(self._check, self)
+        return self._schema_collector
+
+    def _collect_schemas(self):
+        self._get_schema_collector().collect_schemas()
 
     @tracked_method(agent_check_getter=attrgetter('_check'))
     def report_mysql_metadata(self):
@@ -180,12 +189,12 @@ class MySQLMetadata(ManagedAuthConnectionMixin, DBMAsyncJob):
         event = {
             "host": self._check.reported_hostname,
             "database_instance": self._check.database_identifier,
-            "agent_version": datadog_agent.get_version(),
+            "agent_version": self._check.agent_version,
             "dbms": self._check.dbms,
             "kind": "mysql_variables",
             "collection_interval": self.collection_interval,
             'dbms_version': self._check.version.version + '+' + self._check.version.build,
-            "tags": self._tags,
+            "tags": self._check.tag_manager.get_tags(include_internal=False, include_db=False),
             "timestamp": time.time() * 1000,
             "cloud_metadata": self._config.cloud_metadata,
             "metadata": settings,

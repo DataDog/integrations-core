@@ -20,6 +20,7 @@ import psycopg
 
 from .util import (
     DIAGNOSTIC_METADATA,
+    INSUFFICIENT_PRIVILEGE,
     DatabaseConfigurationError,
     build_description,
     build_remediation,
@@ -454,7 +455,7 @@ class PostgresDiagnose:
             with conn.cursor() as cursor:
                 cursor.execute(
                     "SELECT count(*) FROM {} WHERE query = %s".format(_safe_identifier(view)),
-                    ('<insufficient privilege>',),
+                    (INSUFFICIENT_PRIVILEGE,),
                 )
                 masked = cursor.fetchone()[0]
         except psycopg.Error as e:
@@ -470,10 +471,9 @@ class PostgresDiagnose:
         if masked:
             self._check.diagnosis.warning(
                 name=code.value,
-                diagnosis=(
-                    "{} rows in {} are masked as '<insufficient privilege>'; activity samples will miss "
-                    "other users' queries."
-                ).format(masked, view),
+                diagnosis=("{} rows in {} are masked as '{}'; activity samples will miss other users' queries.").format(
+                    masked, view, INSUFFICIENT_PRIVILEGE
+                ),
                 category=self._category,
                 description=DIAGNOSTIC_METADATA[code]["description"],
                 remediation=build_remediation(code),

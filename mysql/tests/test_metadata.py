@@ -2,7 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
-import re
+from unittest import mock
 
 import pytest
 from packaging.version import parse as parse_version
@@ -62,6 +62,18 @@ def normalize_values(actual_payload):
                             )
 
 
+@pytest.mark.unit
+def test_schema_collection_aborts_query_when_cancelled(dbm_instance):
+    check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
+    check.mysql_metadata.cancel()
+    collector = check.mysql_metadata._get_schema_collector()
+    cursor = mock.MagicMock()
+
+    with pytest.raises(Exception, match='cancelled'):
+        collector._execute(cursor, "SELECT 1")
+    cursor.execute.assert_not_called()
+
+
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 def test_collect_mysql_settings(aggregator, dbm_instance, dd_run_check):
@@ -75,39 +87,46 @@ def test_collect_mysql_settings(aggregator, dbm_instance, dd_run_check):
     assert event['database_instance'] == "stubbed.hostname"
     assert event['dbms'] == "mysql"
     assert len(event["metadata"]) > 0
+    instance_event = next(e for e in dbm_metadata if e['kind'] == 'database_instance')
+    assert sorted(event['tags']) == sorted(instance_event['tags'])
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'schemas_collection, collect_settings, expected_enabled, expected_interval',
+    [
+        ({"enabled": True, "collection_interval": 101}, {"enabled": False}, True, 101),
+        ({"enabled": False}, {"enabled": True, "collection_interval": 102}, True, 102),
+        (
+            {"enabled": True, "collection_interval": 101},
+            {"enabled": True, "collection_interval": 102},
+            True,
+            101,
+        ),
+        ({"enabled": False}, {"enabled": False}, False, None),
+    ],
+    ids=['schemas-only', 'settings-only', 'both', 'neither'],
+)
+def test_metadata_collection_interval_and_enabled(
+    dbm_instance, schemas_collection, collect_settings, expected_enabled, expected_interval
+):
+    dbm_instance['schemas_collection'] = schemas_collection
+    dbm_instance['collect_settings'] = collect_settings
+
+    metadata = MySql(common.CHECK_NAME, {}, instances=[dbm_instance]).mysql_metadata
+
+    assert metadata.enabled is expected_enabled
+    if expected_interval is not None:
+        assert metadata.collection_interval == expected_interval
 
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_metadata_collection_interval_and_enabled(dbm_instance):
-    dbm_instance['schemas_collection'] = {"enabled": True, "collection_interval": 101}
-    dbm_instance['collect_settings'] = {"enabled": False, "collection_interval": 100}
-
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    assert mysql_check._mysql_metadata.enabled
-    assert mysql_check._mysql_metadata.collection_interval == 101
-    dbm_instance['schemas_collection'] = {"enabled": False, "collection_interval": 101}
-    dbm_instance['collect_settings'] = {"enabled": True, "collection_interval": 102}
-
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    assert mysql_check._mysql_metadata.enabled
-    assert mysql_check._mysql_metadata.collection_interval == 102
-
-    dbm_instance['schemas_collection'] = {"enabled": True, "collection_interval": 101}
-    dbm_instance['collect_settings'] = {"enabled": True, "collection_interval": 102}
-
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    assert mysql_check._mysql_metadata.enabled
-    assert mysql_check._mysql_metadata.collection_interval == 101
-    dbm_instance['schemas_collection'] = {"enabled": False}
-    dbm_instance['collect_settings'] = {"enabled": False}
-    mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    assert not mysql_check._mysql_metadata.enabled
-
-
-@pytest.mark.integration
-@pytest.mark.usefixtures('dd_environment')
-def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
+# `use_single_query=True` (the default) uses single-query on MySQL 8.0+ and chunked on 5.7 and MariaDB.
+# `False` always uses chunked, which works on every supported version. Both must produce identical
+# schema payloads.
+@pytest.mark.parametrize('use_single_query', [True, False])
+def test_collect_schemas(aggregator, dd_run_check, dbm_instance, use_single_query):
     databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second']
 
     is_maria_db = MYSQL_FLAVOR.lower() == 'mariadb'
@@ -649,7 +668,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         'datadog_test_schemas_second': exp_datadog_test_schemas_second,
     }
 
-    dbm_instance['schemas_collection'] = {"enabled": True}
+    dbm_instance['collect_schemas'] = {"enabled": True, "use_single_query": use_single_query}
     mysql_check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
     dd_run_check(mysql_check)
 
@@ -661,8 +680,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         'database_hostname:stubbed.hostname',
         'database_instance:stubbed.hostname',
         'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
-        'dd.internal.resource:database_instance:stubbed.hostname',
-        'port:13306',
         'tag1:value1',
         'tag2:value2',
     )
@@ -679,17 +696,18 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         assert schema_event.get("collection_interval") is not None
         assert schema_event.get("dbms_version") is not None
         assert schema_event.get("flavor") in ("MariaDB", "MySQL", "Percona")
-        assert sorted(schema_event["tags"]) == sorted(expected_tags)
-        database_metadata = schema_event['metadata']
-        assert len(database_metadata) == 1
-        db_name = database_metadata[0]['name']
-        if db_name not in databases_to_find:
-            continue
-
-        if db_name in actual_payloads:
-            actual_payloads[db_name]['schemas'] = actual_payloads[db_name]['schemas'] + database_metadata[0]['schemas']
-        else:
-            actual_payloads[db_name] = database_metadata[0]
+        assert sorted(t for t in schema_event["tags"] if not t.startswith('dd.internal')) == sorted(expected_tags)
+        # The collector chunks a database's tables across multiple metadata entries (one table per
+        # entry). Reassemble per-database here so the assertions are agnostic to how many payloads
+        # the tables were split across.
+        for db_entry in schema_event['metadata']:
+            db_name = db_entry['name']
+            if db_name not in databases_to_find:
+                continue
+            if db_name in actual_payloads:
+                actual_payloads[db_name]['tables'].extend(db_entry.get('tables', []))
+            else:
+                actual_payloads[db_name] = {**db_entry, 'tables': list(db_entry.get('tables', []))}
 
     assert len(actual_payloads) == len(expected_data_for_db)
 
@@ -698,25 +716,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
         normalize_values(expected_data_for_db[db_name])
         assert db_name in databases_to_find
         assert expected_data_for_db[db_name] == actual_payload
-
-
-@pytest.mark.integration
-def test_schemas_collection_truncated(aggregator, dd_run_check, dbm_instance):
-    dbm_instance['dbm'] = True
-    dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
-    expected_pattern = r"^Truncated after fetching \d+ columns, elapsed time is \d+(\.\d+)?s, database is .*"
-    check = MySql(common.CHECK_NAME, {}, instances=[dbm_instance])
-    dd_run_check(check)
-
-    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
-    found = False
-    for schema_event in (e for e in dbm_metadata if e['kind'] == 'mysql_databases'):
-        if "collection_errors" in schema_event:
-            if schema_event["collection_errors"][0]["error_type"] == "truncated" and re.fullmatch(
-                expected_pattern, schema_event["collection_errors"][0]["message"]
-            ):
-                found = True
-    assert found
 
 
 @pytest.mark.unit

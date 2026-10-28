@@ -6,6 +6,8 @@ import os
 import mock
 import pytest
 
+from datadog_checks.base.stubs import datadog_agent
+
 from .common import (
     MOCK_DEVICE,
     MOCK_DEVICE_METADATA,
@@ -16,6 +18,15 @@ from .common import (
     MOCK_RDMA_COUNTER_DATA,
     MOCK_STATUS_DATA,
 )
+
+
+@pytest.fixture(autouse=True)
+def gpu_monitoring_enabled():
+    # The check only runs when the Agent's GPU monitoring SKU is enabled; default it on for
+    # tests that aren't specifically exercising that gating behavior. Patching the one key on
+    # the stub's config dict leaves every other option answering normally.
+    with mock.patch.dict(datadog_agent._config, {'gpu.enabled': True}):
+        yield
 
 
 @pytest.fixture

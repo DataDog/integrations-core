@@ -24,7 +24,8 @@ Remove-Item "librdkafka-${kafka_version}.tar.gz"
 $triplet = "x64-windows"
 $vcpkg_dir = "C:\vcpkg"
 $librdkafka_dir = "C:\librdkafka\librdkafka-${kafka_version}"
-$desired_commit = "667550429b1a7b35422380ae19078376d72b00e4"
+# Pinned to the vcpkg commit that first added the openssl 3.6.4 port entry
+$desired_commit = "7e43e0768a5af180a9cf75d87d692dce1b9da34f"
 
 # Clone and configure vcpkg
 if (-Not (Test-Path -Path "$vcpkg_dir\.git")) {
@@ -36,6 +37,11 @@ git checkout $desired_commit
 
 Write-Host "Bootstrapping vcpkg..."
 .\bootstrap-vcpkg.bat
+
+# Apply the same patches as the Linux and macOS builders, which pass them to install-from-source.sh
+foreach ($patch in 'librdkafka-fix-coord-request-uaf.patch', 'librdkafka-fix-offsetfetch-null-cgrp.patch') {
+    git -C $librdkafka_dir apply --verbose "C:\mnt\patches\$patch"
+}
 
 # Get deps
 Set-Location "$librdkafka_dir"
@@ -65,4 +71,18 @@ Copy-Item "${srcdir}\librdkafka.lib","${srcdir}\librdkafkacpp.lib" -Destination 
 
 New-Item -Path $includedir\librdkafka -ItemType Directory
 Copy-Item -Path ".\src\*" -Filter *.h -Destination $includedir\librdkafka
+
+# confluent-kafka's C extension reads offset commit metadata with strdup() although it is not
+# NUL-terminated. Build the extension from a patched copy of the sdist instead of the PyPI one.
+$confluent_kafka_src = "C:\confluent_kafka-${kafka_version}"
+Get-RemoteFile `
+  -Uri "https://files.pythonhosted.org/packages/source/c/confluent-kafka/confluent_kafka-${kafka_version}.tar.gz" `
+  -Path "C:\confluent_kafka-${kafka_version}.tar.gz" `
+  -Hash '619d10d1d77c9821ba913b3e42a33ade7f889f3573c7f3c17b57c3056e3310f5'
+7z x "C:\confluent_kafka-${kafka_version}.tar.gz" -o"C:\"
+7z x "C:\confluent_kafka-${kafka_version}.tar" -o"C:\"
+Remove-Item "C:\confluent_kafka-${kafka_version}.tar.gz","C:\confluent_kafka-${kafka_version}.tar"
+git -C $confluent_kafka_src apply --verbose "C:\mnt\patches\confluent-kafka-fix-metadata-overread.patch"
+(Get-Content 'C:\mnt\requirements.in') -replace '^confluent-kafka==.*', "confluent-kafka @ file:///C:/confluent_kafka-${kafka_version}" |
+  Set-Content 'C:\mnt\requirements.in'
 

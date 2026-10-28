@@ -253,3 +253,4 @@ mysql.replication.seconds_behind_master,gauge,,second,,The lag in seconds betwee
 mysql.replication.seconds_behind_source,gauge,,second,,The lag in seconds between the source and the replica.,-1,mysql,replication lag,
 mysql.replication.slave_running,gauge,,,,Deprecated. Use service check mysql.replication.replica_running instead. A boolean showing if this server is a replication slave / master that is running.,0,mysql,slave running,
 mysql.replication.slaves_connected,gauge,,,,Deprecated. Use `mysql.replication.replicas_connected` instead. Number of slaves connected to a replication master.,0,mysql,slaves connected,
+mysql.uptime,gauge,,second,,The number of seconds that the server has been up.,0,mysql,uptime,

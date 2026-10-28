@@ -49,13 +49,9 @@ files:
         - <HOST>:<PORT>
         anyOf:
           - type: string
-            formats:
-              - url
           - type: array
             items:
               type: string
-              formats:
-                - url
     - name: username
       description: |
         The username to use for authentication.
@@ -79,6 +75,9 @@ files:
       value:
         type: string
         example: mongodb
+        enum:
+        - mongodb
+        - mongodb+srv
     - name: database
       description: |
         The database to collect metrics from.
@@ -264,6 +263,11 @@ files:
           value:
             type: string
             example: queryPlanner
+            enum:
+            - queryPlanner
+            - executionStats
+            - allPlansExecution
+            - disabled
     - name: slow_operations
       description: Configure collection of MongoDB slow operations.
       fleet_configurable: true
@@ -301,6 +305,11 @@ files:
           value:
             type: string
             example: queryPlanner
+            enum:
+            - queryPlanner
+            - executionStats
+            - allPlansExecution
+            - disabled
     - name: collect_schemas
       description: Configure collection of MongoDB schemas (inferred) by sampling documents.
       fleet_configurable: true
@@ -418,11 +427,11 @@ files:
         - name: enabled
           description: |
             Enable collection of query metrics. Requires `dbm: true` and MongoDB 7.0+ (Atlas) or 8.0+ (self-hosted).
-            Unlike other DBM features, query_metrics must be explicitly enabled.
+            Query metrics are enabled by default when Database Monitoring is enabled.
           value:
             type: boolean
-            example: false
-            display_default: false
+            example: true
+            display_default: true
         - name: collection_interval
           description: |
             Set the query metrics collection interval in seconds.
@@ -465,7 +474,7 @@ files:
       value:
         type: boolean
         example: false
-      fleet_configurable: false
+      fleet_configurable: true
     - name: tls_certificate_key_file
       description: A file containing the client certificate and private key. Implies tls=True.
       value:

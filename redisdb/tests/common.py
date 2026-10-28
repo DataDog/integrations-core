@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 
+import redis
+
 from datadog_checks.base import is_affirmative
 from datadog_checks.dev import get_docker_hostname
 
@@ -21,3 +23,8 @@ if CLOUD_ENV:
     DOCKER_COMPOSE_PATH = os.path.join(HERE, 'compose', '1m-2s-cloud.compose')
 else:
     DOCKER_COMPOSE_PATH = os.path.join(HERE, 'compose', '1m-2s.compose')
+
+
+def redis_client(**kwargs):
+    """Build a client with the same protocol the check selects, so tests also run against Redis < 6.0."""
+    return redis.Redis(protocol=2, **kwargs)

@@ -40,7 +40,7 @@ def test_labeler_integration_not_in_config_file(fake_repo, ddev):
     result = ddev('validate', 'labeler')
 
     assert result.exit_code == 1, result.output
-    assert "Check `dummy2` does not have an integration PR label" in result.output
+    assert "Folder `dummy2` does not have an integration PR label" in result.output
 
 
 def test_labeler_invalid_configuration(fake_repo, ddev):

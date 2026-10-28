@@ -460,10 +460,14 @@ class ClusterMetadataCollector:
             if cached_offsets.keys() == requested:
                 return cached_offsets
 
-            result = self._fetch_earliest_offsets_from_broker(topic_partitions)
+            missing = {}
+            for topic, partition in requested - cached_offsets.keys():
+                missing.setdefault(topic, []).append(partition)
+            result = self._fetch_earliest_offsets_from_broker(missing)
             if result:
-                self._save_earliest_offsets_cache(result, expire_at=cached['expire_at'])
-            return result
+                cached_offsets.update(result)
+                self._save_earliest_offsets_cache(cached_offsets, expire_at=cached['expire_at'])
+            return cached_offsets
 
         result = self._fetch_earliest_offsets_from_broker(topic_partitions)
         if result:
@@ -488,6 +492,7 @@ class ClusterMetadataCollector:
 
         result = {}
         errors = 0
+        negative = []
         try:
             futures = self.client.kafka_client.list_offsets(
                 requests,
@@ -496,8 +501,7 @@ class ClusterMetadataCollector:
             )
             for tp, future in futures.items():
                 try:
-                    info = future.result()
-                    result[(tp.topic, tp.partition)] = info.offset
+                    offset = future.result().offset
                 except Exception as e:
                     errors += 1
                     if errors <= 3:
@@ -507,6 +511,11 @@ class ClusterMetadataCollector:
                             tp.partition,
                             e,
                         )
+                    continue
+                if offset < 0:
+                    negative.append((tp.topic, tp.partition, offset))
+                    continue
+                result[(tp.topic, tp.partition)] = offset
         except Exception as e:
             self.log.warning(
                 "Failed to issue list_offsets request; partition.beginning_offset, "
@@ -520,6 +529,18 @@ class ClusterMetadataCollector:
                 "earliest-dependent metrics will be skipped for those partitions",
                 errors,
                 len(requests),
+            )
+        if negative:
+            # A Kafka offset is never negative, so the client library mangled these: it narrows
+            # ListOffsets results through a C long, which is 32 bits wide on Windows x64.
+            # https://github.com/confluentinc/confluent-kafka-python/issues/1696
+            self.log.warning(
+                "Discarding %d/%d negative earliest offset(s): partition.beginning_offset and "
+                "partition.size will be missing for those partitions, and topic.size for their "
+                "entire topic (up to 5 shown): %s",
+                len(negative),
+                len(requests),
+                negative[:5],
             )
         return result
 
@@ -1359,11 +1380,31 @@ class ClusterMetadataCollector:
             'log.cleaner.enable',
         }
 
+        # Topic-level configs that should always be kept (not truncated).
+        # Without this, retention.ms and retention.bytes get dropped when a topic
+        # has 30+ configs (e.g. tiered-storage topics) because they sort late
+        # alphabetically and the max_configs cap cuts them.
+        important_topic_configs = {
+            # Retention (topic-level)
+            'retention.ms',
+            'retention.bytes',
+            'local.retention.ms',
+            'local.retention.bytes',
+            # Cleanup
+            'cleanup.policy',
+            # Message size
+            'max.message.bytes',
+            # Tiered storage
+            'remote.storage.enable',
+        }
+
+        all_important_configs = important_broker_configs | important_topic_configs
+
         important_found = {}
         remaining = {}
 
         for key, value in config_data.items():
-            if key in important_broker_configs:
+            if key in all_important_configs:
                 important_found[key] = value
             else:
                 remaining[key] = value

@@ -9,7 +9,7 @@ from ddev.cli.size.status import status
 from ddev.cli.size.timeline import timeline
 
 
-@click.group()
+@click.group(short_help='Analyze integration and dependency sizes')
 def size():
     """
     Analyze the download size of integrations and dependencies in various modes.

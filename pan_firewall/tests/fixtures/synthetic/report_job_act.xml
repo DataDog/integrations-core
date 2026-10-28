@@ -1,0 +1,11 @@
+<!-- Hand-written from the job envelope of fw-a/report_custom_app.xml (the PAN-OS XML API job status response), with
+     status ACT and no <report> element yet: the shape of a report job that is still running. -->
+<response status="success"><result>
+  <job>
+    <reportjob/>
+    <tenq>04:49:18</tenq>
+    <status>ACT</status>
+    <percent>40.000000</percent>
+    <id>4</id>
+  </job>
+</result></response>

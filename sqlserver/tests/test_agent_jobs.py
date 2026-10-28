@@ -4,13 +4,20 @@
 import datetime
 import logging
 import time
+import uuid
+from collections.abc import Iterator
 from copy import copy
+from typing import Any
 from unittest.mock import Mock
 
 import pytest
 
 from datadog_checks.sqlserver import SQLServer
-from datadog_checks.sqlserver.agent_history import AGENT_HISTORY_QUERY, SqlserverAgentHistory
+from datadog_checks.sqlserver.agent_history import (
+    AGENT_HISTORY_MAX_INSTANCE_QUERY,
+    AGENT_HISTORY_QUERY,
+    SqlserverAgentHistory,
+)
 
 from .common import (
     CHECK_NAME,
@@ -164,6 +171,43 @@ VALUES (
 );
 """
 
+HISTORY_INSERTION_BY_NAME_QUERY = """\
+INSERT INTO msdb.dbo.sysjobhistory (
+    job_id,
+    step_id,
+    step_name,
+    sql_message_id,
+    sql_severity,
+    message,
+    run_status,
+    run_date,
+    run_time,
+    run_duration,
+    operator_id_emailed,
+    operator_id_netsent,
+    operator_id_paged,
+    retries_attempted,
+    server
+)
+VALUES (
+    (SELECT job_id FROM msdb.dbo.sysjobs WHERE name = ?),
+    ?,
+    ?,
+    0,
+    0,
+    'Job executed successfully.',
+    1,
+    ?,
+    ?,
+    0,
+    0,
+    0,
+    0,
+    0,
+    @@SERVERNAME
+);
+"""
+
 ACTIVITY_INSERTION_QUERY = """\
 INSERT INTO msdb.dbo.sysjobactivity (
     session_id,
@@ -200,6 +244,54 @@ WHERE job_id IN (SELECT job_id FROM msdb.dbo.sysjobs WHERE name IN ('Job 1', 'Jo
 """
 
 KEY_PREFIX = "dbm-test-"
+AGENT_HISTORY_TEST_PREFIX = "datadog_agent_history_test_"
+
+
+@pytest.fixture
+def agent_history_test_jobs(sa_conn: Any) -> Iterator[list[str]]:
+    job_names: list[str] = []
+    yield job_names
+    with sa_conn as conn:
+        with conn.cursor() as cursor:
+            for job_name in job_names:
+                cursor.execute(
+                    "DELETE FROM msdb.dbo.sysjobhistory WHERE job_id = "
+                    "(SELECT job_id FROM msdb.dbo.sysjobs WHERE name = ?);",
+                    job_name,
+                )
+                cursor.execute(
+                    "EXEC msdb.dbo.sp_delete_job @job_name = ?, @delete_unused_schedule = 0;",
+                    job_name,
+                )
+
+
+def create_agent_history_test_job(cursor: Any, job_names: list[str], suffix: str) -> str:
+    job_name = f"{AGENT_HISTORY_TEST_PREFIX}{uuid.uuid4().hex[:8]}_{suffix}"
+    cursor.execute("EXEC msdb.dbo.sp_add_job @job_name = ?, @enabled = 0;", job_name)
+    job_names.append(job_name)
+    return job_name
+
+
+def insert_agent_history(cursor: Any, job_name: str, step_id: int, timestamp: float) -> None:
+    run_date, run_time = history_date_time_from_time(timestamp)
+    step_name = '(Job outcome)' if step_id == 0 else f'Step {step_id}'
+    cursor.execute(HISTORY_INSERTION_BY_NAME_QUERY, job_name, step_id, step_name, run_date, run_time)
+
+
+def get_max_agent_history_id(cursor: Any) -> int:
+    cursor.execute(AGENT_HISTORY_MAX_INSTANCE_QUERY)
+    return int(cursor.fetchone()[0])
+
+
+def create_agent_history_collector(
+    last_history_id: int | None, history_row_limit: int = 10000
+) -> SqlserverAgentHistory:
+    agent_history = object.__new__(SqlserverAgentHistory)
+    agent_history.log = Mock()
+    agent_history.history_row_limit = history_row_limit
+    agent_history._last_history_id = last_history_id
+    agent_history._initial_history_id = None
+    return agent_history
 
 
 @pytest.fixture
@@ -247,20 +339,26 @@ def test_connection_with_agent_history(instance_docker):
 
     with check.connection.open_managed_default_connection(KEY_PREFIX):
         with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
-            cursor.execute(AGENT_HISTORY_QUERY, (10000, 10000))
+            upper_bound = get_max_agent_history_id(cursor)
+            cursor.execute(AGENT_HISTORY_QUERY, (10000, upper_bound, upper_bound, 10000))
 
 
 class AgentHistoryCursor:
-    description = [('run_epoch_time',), ('run_duration_seconds',)]
+    description = [('completion_instance_id',)]
 
-    def __init__(self) -> None:
+    def __init__(self, upper_bound: int = 20000, completion_ids: list[int] | None = None) -> None:
+        self.upper_bound = upper_bound
+        self.completion_ids = completion_ids or []
         self.executions: list[tuple[str, tuple[int, ...]]] = []
 
-    def execute(self, query: str, params: tuple[int, ...]) -> None:
+    def execute(self, query: str, params: tuple[int, ...] = ()) -> None:
         self.executions.append((query, params))
 
-    def fetchall(self) -> list[tuple[int, int]]:
-        return []
+    def fetchone(self) -> tuple[int]:
+        return (self.upper_bound,)
+
+    def fetchall(self) -> list[tuple[int]]:
+        return [(completion_id,) for completion_id in self.completion_ids]
 
 
 class AgentHistoryCheck:
@@ -273,23 +371,62 @@ class AgentHistoryCheck:
         self.histogram = Mock()
 
 
-def test_agent_history_query_parameterizes_last_collection_time() -> None:
+def test_agent_history_empty_page_advances_to_snapshot_upper_bound():
     check = AgentHistoryCheck()
     agent_history = object.__new__(SqlserverAgentHistory)
     agent_history._check = check
     agent_history.log = check.log
     agent_history.history_row_limit = 10000
-    agent_history._last_collection_time = 10000
+    agent_history._last_history_id = 10000
+    agent_history._initial_history_id = None
     cursor = AgentHistoryCursor()
 
-    agent_history._get_new_agent_job_history(cursor)
+    rows, next_history_id = agent_history._get_new_agent_job_history(cursor)
 
-    query, params = cursor.executions[0]
-    assert "SELECT TOP (?)" in query
-    assert "completion_epoch_time > ?;" in query
-    assert "SELECT TOP 10000" not in query
-    assert "completion_epoch_time > 10000;" not in query
-    assert params == (10000, 10000)
+    assert rows == []
+    assert next_history_id == 20000
+
+
+def test_agent_history_watermark_commits_after_submission():
+    agent_history = object.__new__(SqlserverAgentHistory)
+    agent_history._check = Mock()
+    agent_history.log = Mock()
+    agent_history._last_history_id = 10000
+    agent_history._initial_history_id = None
+    agent_history._create_agent_jobs_history_event = Mock(return_value={})
+    agent_history._check.database_monitoring_query_activity.side_effect = RuntimeError("submit failed")
+
+    with pytest.raises(RuntimeError, match="submit failed"):
+        agent_history._submit_agent_jobs_history([], 20000)
+
+    assert agent_history._last_history_id == 10000
+    agent_history._check.database_monitoring_query_activity.side_effect = None
+    agent_history._submit_agent_jobs_history([], 20000)
+    assert agent_history._last_history_id == 20000
+
+
+def test_agent_history_initial_watermark_survives_submission_failure():
+    agent_history = create_agent_history_collector(last_history_id=None)
+    agent_history._check = AgentHistoryCheck()
+    agent_history._check.database_monitoring_query_activity = Mock()
+    agent_history._create_agent_jobs_history_event = Mock(return_value={})
+
+    rows, initial_history_id = agent_history._get_new_agent_job_history(AgentHistoryCursor(upper_bound=10000))
+    agent_history._check.database_monitoring_query_activity.side_effect = RuntimeError("submit failed")
+    with pytest.raises(RuntimeError, match="submit failed"):
+        agent_history._submit_agent_jobs_history(rows, initial_history_id)
+
+    assert agent_history._initial_history_id == 10000
+    retry_cursor = AgentHistoryCursor(upper_bound=20000, completion_ids=[15000])
+    rows, next_history_id = agent_history._get_new_agent_job_history(retry_cursor)
+
+    assert retry_cursor.executions[1][1] == (10000, 10000, 20000, 10000)
+    assert rows == [{'completion_instance_id': 15000}]
+    assert next_history_id == 15000
+    agent_history._check.database_monitoring_query_activity.side_effect = None
+    agent_history._submit_agent_jobs_history(rows, next_history_id)
+    assert agent_history._last_history_id == 15000
+    assert agent_history._initial_history_id is None
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -321,6 +458,7 @@ def test_history_output(instance_docker, sa_conn):
     with sa_conn as conn:
         with conn.cursor() as cursor:
             cursor.execute(JOB_CREATION_QUERY)
+            starting_history_id = get_max_agent_history_id(cursor)
             cursor.execute("SELECT * FROM msdb.dbo.sysjobs")
             results = cursor.fetchall()
             assert len(results) >= 2, "should have 2 created jobs and potentially built in job"
@@ -344,15 +482,145 @@ def test_history_output(instance_docker, sa_conn):
     check.initialize_connection()
     with check.connection.open_managed_default_connection(KEY_PREFIX):
         with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
-            cursor.execute(AGENT_HISTORY_QUERY, (10000, now - 1))
+            upper_bound = get_max_agent_history_id(cursor)
+            cursor.execute(AGENT_HISTORY_QUERY, (10000, starting_history_id, upper_bound, 10000))
             results = cursor.fetchall()
             assert len(results) == 7, "should have 7 steps associated with completed jobs"
             assert len(results[0]) == 10, "should have 10 columns per step"
-            cursor.execute(AGENT_HISTORY_QUERY, (10000, now + 1))
+            first_completion_id = min(row[5] for row in results)
+            cursor.execute(AGENT_HISTORY_QUERY, (10000, first_completion_id, upper_bound, 10000))
             results = cursor.fetchall()
-            assert len(results) == 4, (
-                "should only have 4 steps associated with completed jobs when filtering with last collection time"
-            )
+            assert len(results) == 4, "should only return executions after the completion watermark"
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_agent_history_interleaved_jobs_and_incomplete_execution(sa_conn, agent_history_test_jobs):
+    timestamp = time.time()
+    with sa_conn as conn:
+        with conn.cursor() as cursor:
+            first_job = create_agent_history_test_job(cursor, agent_history_test_jobs, 'interleaved_first')
+            second_job = create_agent_history_test_job(cursor, agent_history_test_jobs, 'interleaved_second')
+            incomplete_job = create_agent_history_test_job(cursor, agent_history_test_jobs, 'incomplete')
+            starting_history_id = get_max_agent_history_id(cursor)
+
+            for job_name, step_id in [
+                (first_job, 1),
+                (second_job, 1),
+                (first_job, 2),
+                (incomplete_job, 1),
+                (second_job, 2),
+                (first_job, 0),
+                (second_job, 0),
+                (incomplete_job, 2),
+            ]:
+                insert_agent_history(cursor, job_name, step_id, timestamp)
+
+            agent_history = create_agent_history_collector(starting_history_id)
+            rows, next_history_id = agent_history._get_new_agent_job_history(cursor)
+
+    rows_by_job = {
+        job_name: [row['step_id'] for row in rows if row['job_name'] == job_name]
+        for job_name in (first_job, second_job, incomplete_job)
+    }
+    assert rows_by_job == {
+        first_job: [1, 2, 0],
+        second_job: [1, 2, 0],
+        incomplete_job: [],
+    }
+    assert next_history_id == max(row['completion_instance_id'] for row in rows)
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_agent_history_watermark_polling_same_second_and_pre_watermark_steps(sa_conn, agent_history_test_jobs):
+    timestamp = time.time()
+    with sa_conn as conn:
+        with conn.cursor() as cursor:
+            first_job = create_agent_history_test_job(cursor, agent_history_test_jobs, 'same_second_first')
+            second_job = create_agent_history_test_job(cursor, agent_history_test_jobs, 'same_second_second')
+            insert_agent_history(cursor, first_job, 1, timestamp)
+            insert_agent_history(cursor, second_job, 1, timestamp)
+            starting_history_id = get_max_agent_history_id(cursor)
+
+            insert_agent_history(cursor, first_job, 0, timestamp)
+            insert_agent_history(cursor, second_job, 0, timestamp)
+            agent_history = create_agent_history_collector(starting_history_id)
+            first_rows, first_watermark = agent_history._get_new_agent_job_history(cursor)
+
+            agent_history._last_history_id = first_watermark
+            duplicate_rows, unchanged_watermark = agent_history._get_new_agent_job_history(cursor)
+
+            insert_agent_history(cursor, first_job, 1, timestamp)
+            no_completion_rows, incomplete_watermark = agent_history._get_new_agent_job_history(cursor)
+            agent_history._last_history_id = incomplete_watermark
+            insert_agent_history(cursor, first_job, 0, timestamp)
+            new_rows, new_watermark = agent_history._get_new_agent_job_history(cursor)
+
+    assert len(first_rows) == 4
+    assert {row['job_name'] for row in first_rows} == {first_job, second_job}
+    assert len({row['completion_instance_id'] for row in first_rows}) == 2
+    assert sum(row['step_instance_id'] <= starting_history_id for row in first_rows) == 2
+    assert duplicate_rows == []
+    assert unchanged_watermark == first_watermark
+    assert no_completion_rows == []
+    assert incomplete_watermark > unchanged_watermark
+    assert [row['step_id'] for row in new_rows] == [1, 0]
+    assert new_rows[0]['step_instance_id'] <= incomplete_watermark
+    assert new_watermark > first_watermark
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_agent_history_pagination_keeps_completions_whole(sa_conn, agent_history_test_jobs):
+    timestamp = time.time()
+    with sa_conn as conn:
+        with conn.cursor() as cursor:
+            first_job = create_agent_history_test_job(cursor, agent_history_test_jobs, 'page_first')
+            second_job = create_agent_history_test_job(cursor, agent_history_test_jobs, 'page_second')
+            third_job = create_agent_history_test_job(cursor, agent_history_test_jobs, 'page_third')
+            starting_history_id = get_max_agent_history_id(cursor)
+
+            for step_id in (1, 2, 0):
+                insert_agent_history(cursor, first_job, step_id, timestamp)
+            for job_name in (second_job, third_job):
+                for step_id in (1, 0):
+                    insert_agent_history(cursor, job_name, step_id, timestamp)
+
+            agent_history = create_agent_history_collector(starting_history_id, history_row_limit=2)
+            pages = []
+            for _ in range(3):
+                rows, next_history_id = agent_history._get_new_agent_job_history(cursor)
+                pages.append(rows)
+                agent_history._last_history_id = next_history_id
+            final_rows, final_watermark = agent_history._get_new_agent_job_history(cursor)
+
+    assert [[row['job_name'] for row in page] for page in pages] == [
+        [first_job, first_job, first_job],
+        [second_job, second_job],
+        [third_job, third_job],
+    ]
+    assert [[row['step_id'] for row in page] for page in pages] == [[1, 2, 0], [1, 0], [1, 0]]
+    assert final_rows == []
+    assert final_watermark == agent_history._last_history_id
+
+
+@pytest.mark.usefixtures('dd_environment')
+def test_agent_history_regression_resets_to_a_safe_baseline(sa_conn, agent_history_test_jobs):
+    timestamp = time.time()
+    with sa_conn as conn:
+        with conn.cursor() as cursor:
+            job_name = create_agent_history_test_job(cursor, agent_history_test_jobs, 'regression')
+            current_history_id = get_max_agent_history_id(cursor)
+            agent_history = create_agent_history_collector(current_history_id + 10000)
+
+            rows, reset_watermark = agent_history._get_new_agent_job_history(cursor)
+            agent_history._last_history_id = reset_watermark
+            insert_agent_history(cursor, job_name, 1, timestamp)
+            insert_agent_history(cursor, job_name, 0, timestamp)
+            new_rows, new_watermark = agent_history._get_new_agent_job_history(cursor)
+
+    assert rows == []
+    assert reset_watermark == current_history_id
+    assert [row['step_id'] for row in new_rows] == [1, 0]
+    assert new_watermark > reset_watermark
 
 
 @pytest.mark.usefixtures('dd_environment')
@@ -363,6 +631,7 @@ def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, s
         with conn.cursor() as cursor:
             cursor.execute(IDEMPOTENT_JOB_CREATION_QUERY)
             cursor.execute(CLEANUP_TEST_DATA_QUERY)
+            starting_history_id = get_max_agent_history_id(cursor)
             run_date_now, run_time_now = history_date_time_from_time(test_now)
             run_date_later, run_time_later = history_date_time_from_time(test_later)
             for job_number, step_id in [(1, 1), (1, 2), (2, 1), (1, 0)]:
@@ -386,7 +655,7 @@ def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, s
             results = cursor.fetchall()
             assert len(results) >= 1, "should have 1 entry in activity and potentially built in job activity"
     check = SQLServer(CHECK_NAME, {}, [agent_jobs_instance])
-    check.agent_history._last_collection_time = test_now - 1
+    check.agent_history._last_history_id = starting_history_id
     time.sleep(1)
     dd_run_check(check)
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")
@@ -414,7 +683,7 @@ def test_agent_jobs_integration(aggregator, dd_run_check, agent_jobs_instance, s
     assert history_row['message']
     for mname in EXPECTED_AGENT_JOBS_METRICS_COMMON:
         aggregator.assert_metric(mname, count=1)
-    assert check.agent_history._last_collection_time > test_now, "should update last collection time appropriately"
+    assert check.agent_history._last_history_id > starting_history_id, "should update the history watermark"
     time.sleep(2)
     dd_run_check(check)
     dbm_activity = aggregator.get_event_platform_events("dbm-activity")

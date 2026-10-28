@@ -209,6 +209,58 @@ def test_candidate_ports_prefers_hints_and_deduplicates():
     ]
 
 
+def test_candidate_ports_can_disable_fallback():
+    service = Service(
+        id='svc',
+        host='127.0.0.1',
+        ports=(
+            Port(number=8080, name='http'),
+            Port(number=9090, name='metrics'),
+            Port(number=8081, name='admin'),
+        ),
+    )
+
+    assert list(candidate_ports(service, [9090, 9090, 1234], fallback=False)) == [Port(number=9090, name='metrics')]
+    assert list(candidate_ports(service, [1234], fallback=False)) == []
+
+
+@pytest.mark.parametrize(
+    'host, expected',
+    [
+        pytest.param('fd00::1', '[fd00::1]', id='ipv6_literal'),
+        pytest.param('[fd00::1]', '[fd00::1]', id='already_bracketed'),
+        pytest.param('127.0.0.1', '127.0.0.1', id='ipv4'),
+        pytest.param('example.com', 'example.com', id='hostname'),
+        pytest.param('host:port', 'host:port', id='colon_bearing_non_ipv6'),
+    ],
+)
+def test_service_host_interpolation(host: str, expected: str) -> None:
+    service = Service(id='svc', host=host, ports=())
+
+    assert '{service.host}'.format(service=service) == expected
+    assert f'{service.host}' == expected
+
+
+def test_service_host_stays_unbracketed_outside_interpolation() -> None:
+    service = Service(id='svc', host='fd00::1', ports=())
+
+    assert service.host == 'fd00::1'
+    assert str(service.host) == 'fd00::1'
+    assert f'{service.host!s}' == 'fd00::1'
+    assert ':' in service.host
+
+
+def test_ipv6_service_renders_a_valid_authority_and_serializes_unbracketed() -> None:
+    service = Service.model_validate_json('{"id": "svc", "host": "fd00::1", "ports": [{"number": 9901}]}')
+
+    assert (
+        'http://{service.host}:{port.number}/metrics'.format(service=service, port=service.ports[0])
+        == 'http://[fd00::1]:9901/metrics'
+    )
+    assert service.model_dump()['host'] == 'fd00::1'
+    assert service.model_dump_json() == '{"id":"svc","host":"fd00::1","ports":[{"number":9901,"name":""}]}'
+
+
 @pytest.mark.parametrize(
     "ports, names, expected",
     [

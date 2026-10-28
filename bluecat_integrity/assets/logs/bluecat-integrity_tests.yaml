@@ -98,6 +98,7 @@ tests:
         src_endpoint:
           ip: "10.10.10.10"
           port: 57895
+          uid: "10.10.10.10"
         time: 1772082904884
       payloadType: "dnstap"
       requestData:
@@ -283,6 +284,7 @@ tests:
         src_endpoint:
           ip: "10.10.10.10"
           port: 39927
+          uid: "10.10.10.10"
         time: 1771522140526
       payloadType: "dnstap"
       responseAddress: "10.1.1.1"
@@ -493,6 +495,11 @@ tests:
       ocsf:
         activity_id: 2
         activity_name: "Response"
+        answers:
+          - class: "IN"
+            rdata: "bdds1.google.local.postmaster.no.email.please.783096803360060025920003600"
+            ttl: 3600
+            type: "SOA"
         category_name: "Network Activity"
         category_uid: 4
         class_name: "DNS Activity"
@@ -525,6 +532,7 @@ tests:
         src_endpoint:
           ip: "10.10.10.10"
           port: 18456
+          uid: "10.10.10.10"
         time: 1772001594423
       payloadType: "dnstap"
       queryZone: "google.local."
@@ -823,6 +831,7 @@ tests:
         src_endpoint:
           ip: "10.10.10.10"
           port: 39927
+          uid: "10.10.10.10"
         time: 1771522140526
       payloadType: "dnstap"
       requestData:

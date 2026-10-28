@@ -1,0 +1,10 @@
+[env.collectors.datadog-checks]
+check-types = true
+
+[[envs.default.matrix]]
+python = ["3.13"]
+
+[envs.default.env-vars]
+# Community Edition licenses expire ~13 months after the build's release date,
+# so refresh this periodically.
+IRIS_VERSION = "2026.1"
