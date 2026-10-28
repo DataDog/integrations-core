@@ -12,38 +12,47 @@ The OOM Kill check is included in the [Datadog Agent][1] package. It relies on a
 
 The eBPF program used by the System Probe is compiled at runtime and requires you to have access to the proper kernel headers.
 
-On Debian-like distributions, install the kernel headers like this:
-```sh
-apt install -y linux-headers-$(uname -r)
-```
+On Host and Docker installations install the kernel headers like so:
 
-On RHEL-like distributions, install the kernel headers like this:
-```sh
-yum install -y kernel-headers-$(uname -r)
-yum install -y kernel-devel-$(uname -r)
-```
+- Debian-like distributions:
+  ```sh
+  apt install -y linux-headers-$(uname -r)
+  ```
+- RHEL-like distributions:
+  ```sh
+  yum install -y kernel-headers-$(uname -r)
+  yum install -y kernel-devel-$(uname -r)
+  ```
 
 **Note**: Kernel version 4.9 or later is required for the OOM Kill check to work.
 In addition, Windows and CentOS/RHEL versions earlier than 8 are not supported.
 
 ### Configuration
+<!-- xxx tabs xxx -->
+<!-- xxx tab "Host" xxx -->
 
+#### Host
 1. In the `system-probe.yaml` file at the root of your Agent's configuration directory, add the following configuration:
 
     ```yaml
     system_probe_config:
-        enable_oom_kill: true
+      enable_oom_kill: true
     ```
 
-2. Ensure that the `oom_kill.d/conf.yaml` file is present in the `conf.d/` folder at the root of your Agent's configuration directory to start collecting your OOM Kill metrics. See the [example oom_kill.d/conf.yaml][2] for all available configuration options.
+2. The Agent has a pre-packaged [`oom_kill.d/conf.yaml.default`][2] file that will be used when the check is enabled in the `system-probe.yaml`. This is in the `conf.d/` folder at the root of your Agent's configuration directory. You can create a custom `oom_kill.d/conf.yaml` file to change the configuration options.
 
 3. [Restart the Agent][3].
+<!-- xxz tab xxx -->
+<!-- xxx tab "Docker" xxx -->
 
-### Configuration with Docker
+#### Docker
 
-In addition to mounting `system-probe.yaml` and `oom_kill.d/conf.yaml` as described above, do the following configuration:
+1. Startup the Agent container with the environment variable to enable the check in the System Probe process. This will use the pre-packaged [`oom_kill.d/conf.yaml.default`][2] once enabled:
+    ```
+    -e DD_SYSTEM_PROBE_CONFIG_ENABLE_OOM_KILL=true
+    ```
 
-1. Mount the following volumes to the Agent container:
+2. Mount the following volumes to the Agent container:
 
     ```
     -v /sys/kernel/debug:/sys/kernel/debug
@@ -61,20 +70,21 @@ In addition to mounting `system-probe.yaml` and `oom_kill.d/conf.yaml` as descri
 
 **Note**: `--privileged` mode is not supported in Docker swarm.
 
+<!-- xxz tab xxx -->
+<!-- xxx tab "Kubernetes" xxx -->
 
-### Configuration with Helm
+#### Kubernetes
 
-With the [Datadog Helm chart][4], set the `datadog.systemProbe.enableOOMKill` parameter to `true` in the `values.yaml` file. The `system-probe` is deployed automatically.
+##### Datadog Operator
 
-### Configuration with the Operator (v1.0.0+)
-
-Set the `features.oomKill.enabled` parameter in the DatadogAgent manifest:
+Set the `features.oomKill.enabled` parameter in the `DatadogAgent` manifest:
 ```yaml
 apiVersion: datadoghq.com/v2alpha1
 kind: DatadogAgent
 metadata:
   name: datadog
 spec:
+  #(...)
   features:
     oomKill:
       enabled: true
@@ -87,6 +97,7 @@ kind: DatadogAgent
 metadata:
   name: datadog
 spec:
+  #(...)
   features:
     oomKill:
       enabled: true
@@ -97,9 +108,25 @@ spec:
         name: src
 ```
 
+##### Helm
+With the [Datadog Helm chart][4], set the following configuration in your `values.yaml` file:
+
+```yaml
+datadog:
+  #(...)
+  systemProbe:
+    enableOOMKill: true
+```
+
+With these settings the `system-probe` container is deployed automatically with the right configuration and permissions.
+
+<!-- xxz tab xxx -->
+
+<!-- xxz tabs xxx -->
+
 ### Validation
 
-[Run the Agent's status subcommand][5] and look for `oom_kill` under the Checks section.
+[Run the Agent's status subcommand][5] and look for `oom_kill` under the `Collector` section.
 
 ## Data Collected
 
@@ -120,7 +147,7 @@ The OOM Kill check submits an event for each OOM Kill that includes the killed p
 Need help? Contact [Datadog support][7].
 
 [1]: /account/settings/agent/latest
-[2]: https://github.com/DataDog/datadog-agent/blob/master/cmd/agent/dist/conf.d/oom_kill.d/conf.yaml.example
+[2]: https://github.com/DataDog/datadog-agent/blob/main/cmd/agent/dist/conf.d/oom_kill.d/conf.yaml.default
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://github.com/DataDog/helm-charts
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
