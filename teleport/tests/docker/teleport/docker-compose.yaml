@@ -1,8 +1,11 @@
 services:
   teleport-service:
-    build: .
+    build:
+      context: .
+      args:
+        TELEPORT_VERSION: ${TELEPORT_VERSION:-17.2.9}
     # Autodiscovery matches the image short name against the ad_identifiers in auto_conf.yaml.
-    image: teleport-distroless:17.2.9
+    image: teleport-distroless:${TELEPORT_VERSION:-17.2.9}
     pull_policy: build
     ports:
       - 3000:3000
