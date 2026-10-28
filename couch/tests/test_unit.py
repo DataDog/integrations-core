@@ -1,12 +1,13 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 from copy import deepcopy
 from unittest.mock import MagicMock
 
-import mock
 import pytest
 
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError, HTTPClientReadTimeoutError
 from datadog_checks.couch import CouchDb
 from datadog_checks.couch.couch import CouchDB2
 
@@ -14,7 +15,7 @@ from . import common
 
 
 @pytest.mark.parametrize(
-    'test_case, extra_config, expected_http_kwargs',
+    'test_case, extra_config, expected_options',
     [
         (
             "legacy auth config",
@@ -25,29 +26,67 @@ from . import common
         ("timeout", {'timeout': 17}, {'timeout': (17, 17)}),
     ],
 )
-def test_config(test_case, extra_config, expected_http_kwargs):
+def test_config(test_case, extra_config, expected_options):
     instance = deepcopy(common.BASIC_CONFIG)
     instance.update(extra_config)
     check = CouchDb(common.CHECK_NAME, {}, instances=[instance])
 
-    r = mock.MagicMock()
-    with mock.patch('datadog_checks.base.utils.http.requests.Session', return_value=r):
-        r.get.return_value = mock.MagicMock(status_code=200, content='{}')
+    # Without the fake_http fixture, this is the client the check sends every request with
+    for name, value in expected_options.items():
+        assert check.http.options[name] == value
 
-        check.check(instance)
 
-        http_wargs = {
-            'auth': mock.ANY,
-            'cert': mock.ANY,
-            'headers': mock.ANY,
-            'proxies': mock.ANY,
-            'timeout': mock.ANY,
-            'verify': mock.ANY,
-            'allow_redirects': mock.ANY,
-        }
-        http_wargs.update(expected_http_kwargs)
+def test_unreadable_database_is_excluded(aggregator, dd_run_check, fake_http, fake_http_response):
+    server = common.URL
+    fake_http_response(server, json_data={'version': '1.6.1'})
+    fake_http_response(f'{server}/_stats/', json_data={'couchdb': {'open_databases': {'current': 2}}})
+    fake_http_response(f'{server}/_all_dbs/', json_data=['kennel', 'secret'])
+    fake_http_response(f'{server}/kennel', json_data={'doc_count': 3, 'disk_size': 1024})
+    fake_http_response(f'{server}/secret', status_code=403)
+    check = CouchDb(common.CHECK_NAME, {}, instances=[{'server': server}])
 
-        r.get.assert_called_with('http://{}:5984/_all_dbs/'.format(common.HOST), **http_wargs)
+    dd_run_check(check)
+
+    db_tags = [f'instance:{server}', 'db:kennel', 'device:kennel']
+    aggregator.assert_metric('couchdb.by_db.doc_count', value=3, tags=db_tags)
+    aggregator.assert_metric('couchdb.by_db.disk_size', value=1024, tags=db_tags)
+    aggregator.assert_metric('couchdb.couchdb.open_databases', value=2, tags=[f'instance:{server}'])
+    aggregator.assert_all_metrics_covered()
+    assert check.checker.db_exclude[server] == ['secret']
+    fake_http.assert_all_responses_consumed()
+
+
+@pytest.mark.parametrize(
+    'outcome, expected_message',
+    [
+        pytest.param(
+            HTTPClientReadTimeoutError('read timed out'), 'Request timeout: {url}, read timed out', id='timeout'
+        ),
+        pytest.param({'status_code': 500}, '500 Server Error', id='error-status'),
+        pytest.param(HTTPClientConnectionError('connection refused'), 'connection refused', id='connection-error'),
+    ],
+)
+def test_server_failure_reports_critical(
+    aggregator, dd_run_check, fake_http, fake_http_response, outcome, expected_message
+):
+    server = common.URL
+    if isinstance(outcome, Exception):
+        fake_http.register_response('GET', server, outcome)
+    else:
+        fake_http_response(server, **outcome)
+    check = CouchDb(common.CHECK_NAME, {}, instances=[{'server': server}])
+
+    with pytest.raises(Exception, match='Unable to talk to the server'):
+        dd_run_check(check)
+
+    aggregator.assert_service_check(
+        CouchDb.SERVICE_CHECK_NAME,
+        CouchDb.CRITICAL,
+        tags=[f'instance:{server}'],
+        message=re.escape(expected_message.format(url=server)),
+        count=1,
+    )
+    fake_http.assert_all_responses_consumed()
 
 
 def test_new_version_system_metrics(load_test_data):

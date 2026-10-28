@@ -6,13 +6,13 @@ import os
 from copy import deepcopy
 
 import pytest
-import requests
 
 from datadog_checks.couch import CouchDb
 from datadog_checks.dev import docker_run
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints, WaitFor
 
 from . import common
+from .api import request
 
 
 @pytest.fixture
@@ -120,11 +120,18 @@ def enable_cluster():
 
     resp_data = None
     for data in requests_data:
-        resp = requests.post("{}/_cluster_setup".format(common.URL), json=data, auth=auth, headers=headers)
-        resp_data = resp.json()
+        _, resp_data = request(
+            'POST',
+            "{}/_cluster_setup".format(common.URL),
+            json_body=data,
+            auth=auth,
+            headers=headers,
+            raise_for_status=False,
+        )
 
-    resp = requests.get("{}/_membership".format(common.URL), auth=auth, headers=headers)
-    membership = resp.json()
+    _, membership = request(
+        'GET', "{}/_membership".format(common.URL), auth=auth, headers=headers, raise_for_status=False
+    )
 
     expected_nb_nodes = 3
     actual_nb_nodes = len(membership['cluster_nodes'])
@@ -145,9 +152,9 @@ def generate_data(couch_version):
     headers = {'Accept': 'text/json'}
 
     # Generate a test database
-    requests.put("{}/kennel".format(common.URL), auth=auth, headers=headers)
+    request('PUT', "{}/kennel".format(common.URL), auth=auth, headers=headers, raise_for_status=False)
     for i in range(5):
-        requests.put("{}/db{}".format(common.URL, i), auth=auth, headers=headers)
+        request('PUT', "{}/db{}".format(common.URL, i), auth=auth, headers=headers, raise_for_status=False)
 
     # Populate the database
     data = {
@@ -157,7 +164,14 @@ def generate_data(couch_version):
             "by_data": {"map": "function(doc) { emit(doc.data, doc); }"},
         },
     }
-    requests.put("{}/kennel/_design/dummy".format(common.URL), json=data, auth=auth, headers=headers)
+    request(
+        'PUT',
+        "{}/kennel/_design/dummy".format(common.URL),
+        json_body=data,
+        auth=auth,
+        headers=headers,
+        raise_for_status=False,
+    )
 
 
 def check_node_stats():
@@ -166,8 +180,7 @@ def check_node_stats():
     # Check all nodes have stats
     for node in common.ALL_NODES:
         url = "{}/_node/{}/_stats".format(common.URL, node['name'])
-        res = requests.get(url, auth=auth, headers=headers)
-        data = res.json()
+        _, data = request('GET', url, auth=auth, headers=headers, raise_for_status=False)
         assert "global_changes" in data, "Invalid stats. Get stats url: {}".format(url)
 
 
@@ -188,13 +201,12 @@ def send_replication():
         body = replication_body.copy()
         body['_id'] = 'my_replication_id_{}'.format(i)
         body['target'] = body['target'] + str(i)
-        r = requests.post(
+        request(
+            'POST',
             replicator_url,
             auth=(common.NODE1['user'], common.NODE1['password']),
-            headers={'Content-Type': 'application/json'},
-            json=body,
+            json_body=body,
         )
-        r.raise_for_status()
 
 
 def get_replication():
@@ -203,8 +215,6 @@ def get_replication():
     """
     task_url = "{}/_active_tasks".format(common.NODE1['server'])
 
-    r = requests.get(task_url, auth=(common.NODE1['user'], common.NODE1['password']))
-    r.raise_for_status()
-    active_tasks = r.json()
+    _, active_tasks = request('GET', task_url, auth=(common.NODE1['user'], common.NODE1['password']))
     count = len(active_tasks)
     assert count > 0, "Expect active tasks but none found.\nactive_tasks response: {}".format(active_tasks)
