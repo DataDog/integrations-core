@@ -703,7 +703,7 @@ pipeline:
           preserveSource: true
           overrideOnConflict: false
     - type: pipeline
-      name: OCSF pre transformations for Cato Client tunnel addresses
+      name: OCSF sub pipeline for Cato Client tunnel addresses
       enabled: true
       ocsf:
         isOcsf: true
@@ -1129,27 +1129,27 @@ pipeline:
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: '@risk_level:Unknown OR (-@risk_level:* AND -@threat_verdict:(virus_found OR suspicious))'
+                    query: "@risk_level:Unknown OR (-@risk_level:* AND -@threat_verdict:(virus_found OR suspicious))"
                   name: Unknown
                   id: 0
                 - filter:
-                    query: '@risk_level:Low'
+                    query: "@risk_level:Low"
                   name: Low
                   id: 2
                 - filter:
-                    query: '@risk_level:Medium OR @threat_verdict:suspicious'
+                    query: "@risk_level:Medium OR @threat_verdict:suspicious"
                   name: Medium
                   id: 3
                 - filter:
-                    query: '@risk_level:High OR @threat_verdict:virus_found'
+                    query: "@risk_level:High OR @threat_verdict:virus_found"
                   name: High
                   id: 4
                 - filter:
-                    query: '@risk_level:Critical'
+                    query: "@risk_level:Critical"
                   name: Critical
                   id: 5
                 - filter:
-                    query: '*'
+                    query: "*"
                   name: Other
                   id: 99
               targets:
@@ -1596,7 +1596,7 @@ pipeline:
               name: ocsf.status_id
               categories:
                 - filter:
-                    query: '@action:(Succeeded OR Allow OR Monitor OR Notify) OR -@action:*'
+                    query: "@action:(Succeeded OR Allow OR Monitor OR Notify) OR -@action:*"
                   name: Success
                   id: 1
                 - filter:
@@ -1604,7 +1604,7 @@ pipeline:
                   name: Failure
                   id: 2
                 - filter:
-                    query: '*'
+                    query: "*"
                   name: Other
                   id: 99
               targets:
@@ -1621,11 +1621,11 @@ pipeline:
               name: ocsf.action_id
               categories:
                 - filter:
-                    query: '-@action:*'
+                    query: "-@action:*"
                   name: Unknown
                   id: 0
                 - filter:
-                    query: '@action:(Succeeded OR Allow)'
+                    query: "@action:(Succeeded OR Allow)"
                   name: Allowed
                   id: 1
                 - filter:
@@ -1633,11 +1633,11 @@ pipeline:
                   name: Denied
                   id: 2
                 - filter:
-                    query: '@action:(Monitor OR Notify)'
+                    query: "@action:(Monitor OR Notify)"
                   name: Observed
                   id: 3
                 - filter:
-                    query: '*'
+                    query: "*"
                   name: Other
                   id: 99
               targets:
@@ -1654,7 +1654,7 @@ pipeline:
               name: ocsf.severity_id
               categories:
                 - filter:
-                    query: '@action:(Succeeded OR Allow OR Monitor OR Notify) OR -@action:*'
+                    query: "@action:(Succeeded OR Allow OR Monitor OR Notify) OR -@action:*"
                   name: Informational
                   id: 1
                 - filter:
@@ -1662,7 +1662,7 @@ pipeline:
                   name: Medium
                   id: 3
                 - filter:
-                    query: '*'
+                    query: "*"
                   name: Other
                   id: 99
               targets:
