@@ -10,6 +10,7 @@ from datadog_checks.base.utils.db.utils import (
 )
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
+from datadog_checks.sqlserver.column_statistics import SqlserverColumnStatisticsCollector
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.const import (
     DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
@@ -55,11 +56,15 @@ class SqlserverMetadata(DBMAsyncJob):
     """
     Collects database metadata. Supports:
         1. collection of sqlserver instance settings
+        2. schema collection
+        3. column statistics collection
     """
 
     def __init__(self, check, config: SQLServerConfig):
         self.log = check.log
         self._config = config
+        self._settings_enabled = is_affirmative(self._config.settings_config.get('enabled', True))
+        column_statistics_enabled = is_affirmative(self._config.column_statistics_config.get('enabled', False))
         self.collection_interval = self._config.settings_config.get(
             'collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL
         )
@@ -67,7 +72,7 @@ class SqlserverMetadata(DBMAsyncJob):
         super(SqlserverMetadata, self).__init__(
             check,
             run_sync=is_affirmative(self._config.settings_config.get('run_sync', False)),
-            enabled=is_affirmative(self._config.settings_config.get('enabled', True)),
+            enabled=self._settings_enabled or column_statistics_enabled,
             expected_db_exceptions=(),
             min_collection_interval=self._config.min_collection_interval,
             dbms=check.dbms,
@@ -86,8 +91,15 @@ class SqlserverMetadata(DBMAsyncJob):
         self._schema_collection_interval = self._schema_config.get(
             'collection_interval', DEFAULT_SCHEMAS_COLLECTION_INTERVAL
         )
-        self._last_schemas_collection_time = 0
         self._schema_collectors = self._build_schema_collectors(check)
+        self._column_statistics_collector = (
+            SqlserverColumnStatisticsCollector(check, config, self._cancel_event) if column_statistics_enabled else None
+        )
+        if self._column_statistics_collector and not self._settings_enabled:
+            # Column statistics keep their own interval, so with settings off the job only needs to run as often as
+            # they do.
+            self._set_rate_limit(1 / float(self._column_statistics_collector.collection_interval))
+        self._last_collection_times: dict[str, float] = {}
 
     def _build_schema_collectors(self, check) -> list[SQLServerObjectCollector]:
         if not self._schema_config.get('enabled', False):
@@ -98,8 +110,9 @@ class SqlserverMetadata(DBMAsyncJob):
         return collectors
 
     def shutdown(self) -> None:
-        # The schema collectors hold the check, so release them during teardown.
+        # The schema and column statistics collectors hold the check, so release them during teardown.
         self._schema_collectors = []
+        self._column_statistics_collector = None
         self._check = None
 
     def _close_db_conn(self):
@@ -150,7 +163,12 @@ class SqlserverMetadata(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def report_sqlserver_metadata(self):
         raise_if_cancelled(self._cancel_event)
+        if self._settings_enabled:
+            self._report_settings()
+        self.collect_schemas()
+        self.collect_column_statistics()
 
+    def _report_settings(self):
         with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
                 settings_rows = self._load_settings_rows(cursor)
@@ -171,14 +189,23 @@ class SqlserverMetadata(DBMAsyncJob):
                     "metadata": settings_rows,
                 }
                 self._check.database_monitoring_metadata(json.dumps(event, default=default_json_event_encoding))
-        self.collect_schemas()
+
+    def _is_due(self, collection: str, interval: float) -> bool:
+        """
+        Return whether a collection's interval has passed since it last ran, and if so, record that it runs now.
+        Ticks come a period apart give or take how long the work before the collection took, so a tick within half a
+        period of the interval counts: otherwise an interval equal to the period would skip every other tick.
+        """
+        now = time.time()
+        last = self._last_collection_times.get(collection)
+        if last is not None and now - last < interval - self._rate_limiter.period_s / 2:
+            return False
+        self._last_collection_times[collection] = now
+        return True
 
     def collect_schemas(self):
-        if not self._schema_collectors:
+        if not self._schema_collectors or not self._is_due('schemas', self._schema_collection_interval):
             return
-        if time.time() - self._last_schemas_collection_time < self._schema_collection_interval:
-            return
-        self._last_schemas_collection_time = time.time()
         for collector in self._schema_collectors:
             raise_if_cancelled(self._cancel_event)
             # Each collector is a separate run, so one failing must not skip the others or stop the job loop.
@@ -187,3 +214,15 @@ class SqlserverMetadata(DBMAsyncJob):
                 collector.collect_schemas()
             except Exception as e:
                 self.log.debug("Skipped remaining %s collection after error: %s", collector.kind, e)
+
+    def collect_column_statistics(self):
+        collector = self._column_statistics_collector
+        if not collector or not self._is_due('column_statistics', collector.collection_interval):
+            return
+        # As with schemas, a failure here must not stop the job loop, but a cancel still has to end the tick.
+        try:
+            collector.collect()
+        except Exception:
+            if self._cancel_event.is_set():
+                raise
+            self.log.exception("Error collecting column statistics")

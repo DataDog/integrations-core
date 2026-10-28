@@ -7,9 +7,8 @@ import math
 import time
 from typing import TYPE_CHECKING
 
-from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.health import HealthStatus
-from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
+from datadog_checks.base.utils.db.utils import default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
@@ -22,6 +21,8 @@ from datadog_checks.sqlserver.utils import (
 )
 
 if TYPE_CHECKING:
+    from threading import Event
+
     from datadog_checks.sqlserver import SQLServer
 
 DEFAULT_COLLECTION_INTERVAL = 3600
@@ -100,33 +101,23 @@ def agent_check_getter(self: SqlserverColumnStatisticsCollector) -> SQLServer:
     return self._check
 
 
-class SqlserverColumnStatisticsCollector(DBMAsyncJob):
-    """Collects column statistics, in the shape the Postgres integration sends from pg_stats."""
+class SqlserverColumnStatisticsCollector:
+    """
+    Collects column statistics, in the shape the Postgres integration sends from pg_stats. It runs in the metadata job,
+    as the Postgres collector does.
+    """
 
-    def __init__(self, check: SQLServer, config: SQLServerConfig):
+    def __init__(self, check: SQLServer, config: SQLServerConfig, cancel_event: Event):
         column_statistics_config = config.column_statistics_config
+        self._check = check
+        self._log = check.log
+        self._cancel_event = cancel_event
         self.collection_interval = column_statistics_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
         self._max_tables = int(column_statistics_config.get('max_tables', DEFAULT_MAX_TABLES))
         # The databases currently failing each way, so each database's warning is logged once, and the health event
         # goes to warning with the first failing database and back to OK when the last one is fixed.
         self._failing_dbs: dict[SqlServerHealthEvent, set[str]] = {event: set() for event, _, _ in SETUP_ERRORS}
         self._warned_no_databases = False
-        super().__init__(
-            check,
-            run_sync=is_affirmative(column_statistics_config.get('run_sync', False)),
-            enabled=is_affirmative(column_statistics_config.get('enabled', False)),
-            expected_db_exceptions=(),
-            min_collection_interval=config.min_collection_interval,
-            dbms=check.dbms,
-            rate_limit=1 / float(self.collection_interval),
-            job_name="column-statistics",
-        )
-
-    def shutdown(self) -> None:
-        self._check = None
-
-    def run_job(self) -> None:
-        self.collect()
 
     @tracked_method(agent_check_getter=agent_check_getter)
     def collect(self) -> None:

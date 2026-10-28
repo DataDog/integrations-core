@@ -28,7 +28,6 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.activity import SqlserverActivity
 from datadog_checks.sqlserver.agent_history import SqlserverAgentHistory
-from datadog_checks.sqlserver.column_statistics import SqlserverColumnStatisticsCollector
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.data_observability import SqlServerDataObservability
 from datadog_checks.sqlserver.database_metrics import (
@@ -185,7 +184,6 @@ class SQLServer(DatabaseCheck):
         self.activity = None
         self.agent_history = None
         self.deadlocks = None
-        self.column_statistics = None
         self.data_observability = None
         self._register_async_jobs()
 
@@ -222,7 +220,6 @@ class SQLServer(DatabaseCheck):
             self.activity = self.register_async_job(SqlserverActivity(self, self._config))
             self.agent_history = self.register_async_job(SqlserverAgentHistory(self, self._config))
             self.deadlocks = self.register_async_job(Deadlocks(self, self._config))
-            self.column_statistics = self.register_async_job(SqlserverColumnStatisticsCollector(self, self._config))
         if self._config.data_observability.enabled:
             self.data_observability = self.register_async_job(SqlServerDataObservability(self, self._config))
 

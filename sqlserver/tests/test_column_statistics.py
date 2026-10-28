@@ -21,8 +21,9 @@ def dbm_instance(instance_docker):
     instance_docker['query_metrics'] = {'enabled': False}
     instance_docker['query_activity'] = {'enabled': False}
     instance_docker['procedure_metrics'] = {'enabled': False}
-    instance_docker['collect_settings'] = {'enabled': False}
-    instance_docker['collect_column_statistics'] = {'enabled': True, 'run_sync': True}
+    # Column statistics run in the metadata job, which takes run_sync from the settings options.
+    instance_docker['collect_settings'] = {'enabled': False, 'run_sync': True}
+    instance_docker['collect_column_statistics'] = {'enabled': True}
     return copy(instance_docker)
 
 
@@ -76,6 +77,8 @@ def test_collects_column_statistics(aggregator, dd_run_check, dbm_instance):
     # nvarchar values of 20 to 40 characters average 60 bytes.
     assert columns['note']['avg_width'] == 60
     aggregator.assert_metric('dd.sqlserver.column_statistics.payloads_count', value=1)
+    # Settings are off, so the metadata job ran only for column statistics.
+    assert not [e for e in aggregator.get_event_platform_events("dbm-metadata") if e['kind'] == 'sqlserver_configs']
 
 
 @pytest.mark.integration
@@ -83,11 +86,17 @@ def test_collects_column_statistics(aggregator, dd_run_check, dbm_instance):
 def test_skips_databases_that_cant_hold_the_procedure(aggregator, dd_run_check, dbm_instance):
     # The system databases never get the procedure, and unavailable_db is offline, so they'd warn forever.
     dbm_instance['database_autodiscovery'] = True
-    check = run_check(dd_run_check, dbm_instance)
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    # Shutting the check down releases the collector, so keep hold of it.
+    collector = check.sql_metadata._column_statistics_collector
+    try:
+        dd_run_check(check)
+    finally:
+        check.cancel()
 
     events = aggregator.get_event_platform_events("dbm-column-statistics")
     assert {t['db'] for e in events for t in e['column_statistics']} == {'datadog_test_column_stats'}
-    missing = check.column_statistics._failing_dbs[SqlServerHealthEvent.COLUMN_STATISTICS_PROCEDURE_NOT_FOUND]
+    missing = collector._failing_dbs[SqlServerHealthEvent.COLUMN_STATISTICS_PROCEDURE_NOT_FOUND]
     assert missing, "user databases without the procedure are still reported"
     assert not missing & {'master', 'msdb', 'tempdb', 'model', 'unavailable_db'}
 
@@ -275,7 +284,7 @@ INSUFFICIENT_PRIVILEGE = SqlServerHealthEvent.COLUMN_STATISTICS_INSUFFICIENT_PRI
 )
 def test_setup_errors_report_health_until_fixed(dbm_instance, message, event):
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
-    collector = check.column_statistics
+    collector = check.sql_metadata._column_statistics_collector
     with mock.patch.object(check.health, 'submit_health_event') as submit:
         # Two databases fail; the warning is sent once, and recovery only once both are fixed.
         collector._handle_error('app', Exception(message))
@@ -308,7 +317,35 @@ def test_outdated_procedure_reports_health_event(dbm_instance):
     cursor.fetchone.return_value = None
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     with mock.patch.object(check.health, 'submit_health_event') as submit:
-        assert check.column_statistics._collect_database(cursor, 'app') == (0, 0, 0)
+        assert check.sql_metadata._column_statistics_collector._collect_database(cursor, 'app') == (0, 0, 0)
     submit.assert_called_once_with(
         name=SqlServerHealthEvent.COLUMN_STATISTICS_PROCEDURE_OUTDATED, status=HealthStatus.WARNING
     )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'period,elapsed,due',
+    [
+        # The work before column statistics ran faster this tick, so the tick came slightly under an hour later.
+        pytest.param(3600, 3599.5, True, id='interval equal to the period'),
+        pytest.param(600, 3000, False, id='before the interval'),
+        pytest.param(600, 3599.5, True, id='tick nearest the interval'),
+    ],
+)
+def test_metadata_job_runs_column_statistics_each_interval(dbm_instance, period, elapsed, due):
+    dbm_instance['collect_settings'] = {'enabled': True, 'collection_interval': period}
+    metadata = SQLServer(CHECK_NAME, {}, [dbm_instance]).sql_metadata
+    with mock.patch.object(metadata._column_statistics_collector, 'collect') as collect:
+        with mock.patch('datadog_checks.sqlserver.metadata.time.time', return_value=1_000_000):
+            metadata.collect_column_statistics()
+        with mock.patch('datadog_checks.sqlserver.metadata.time.time', return_value=1_000_000 + elapsed):
+            metadata.collect_column_statistics()
+    assert collect.call_count == (2 if due else 1)
+
+
+@pytest.mark.unit
+def test_column_statistics_failure_does_not_stop_metadata_job(dbm_instance):
+    metadata = SQLServer(CHECK_NAME, {}, [dbm_instance]).sql_metadata
+    with mock.patch.object(metadata._column_statistics_collector, 'collect', side_effect=Exception('connection lost')):
+        metadata.collect_column_statistics()
