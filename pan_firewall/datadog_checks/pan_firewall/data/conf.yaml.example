@@ -1,3 +1,307 @@
+## All options defined here are available to all instances.
+#
+init_config:
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Additionally, this sets the default `service` for every log source.
+    #
+    # service: <SERVICE>
+
+## Every instance is scheduled independently of the others.
+#
+instances:
+
+  -
+    ## @param panorama_host - string - optional
+    ## Hostname or IP address of a Panorama management server. When set, the Agent discovers the connected
+    ## firewalls through Panorama and polls each one directly. Set either `panorama_host` or `firewalls`, not both.
+    ## Panorama requires `panorama_username` and `panorama_password`, or `panorama_api_key`.
+    #
+    # panorama_host: panorama.example.com
+
+    ## @param panorama_username - string - optional
+    ## Username of a Panorama admin account with XML API Operational Requests access.
+    #
+    # panorama_username: <PANORAMA_USERNAME>
+
+    ## @param panorama_password - string - optional
+    ## Password for `panorama_username`.
+    #
+    # panorama_password: <PANORAMA_PASSWORD>
+
+    ## @param panorama_api_key - string - optional
+    ## API key for Panorama. Use it instead of `panorama_username` and `panorama_password`.
+    #
+    # panorama_api_key: <PANORAMA_API_KEY>
+
+    ## @param firewall_ips - mapping - optional
+    ## Filters for the firewalls discovered through Panorama. Entries are IP addresses or CIDR blocks.
+    ## If no filters are configured, all connected firewalls are polled.
+    ## Use `include` to poll only matching firewalls and `exclude` to skip them. `exclude` takes precedence.
+    #
+    # firewall_ips:
+    #   include:
+    #   - 10.0.0.0/24
+    #   exclude:
+    #   - 10.0.0.99
+
+    ## @param firewalls - list of strings - optional
+    ## List of firewall IP addresses to poll. Set either `firewalls` or `panorama_host`, not both.
+    ## Every firewall must match an entry in `firewall_credentials`.
+    #
+    # firewalls:
+    #   - 10.0.0.1
+    #   - 10.0.0.2
+
+    ## @param firewall_credentials - list of mappings - required
+    ## Credentials used to log in to the firewalls. The Agent uses the first entry whose `cidr` contains the
+    ## firewall IP. An entry without `cidr` matches every firewall. Each entry must set either `username` and
+    ## `password`, or `api_key`, but not both. The same credentials apply to the firewalls found through Panorama.
+    #
+    firewall_credentials:
+      - cidr: 10.0.0.0/24
+        username: <USERNAME>
+        password: <PASSWORD>
+      - api_key: <API_KEY>
+
+    ## @param namespace - string - optional - default: default
+    ## Namespace to use for Network Device Monitoring (NDM) device metadata.
+    #
+    # namespace: default
+
+    ## @param proxy - mapping - optional
+    ## This overrides the `proxy` setting in `init_config`.
+    ##
+    ## Set HTTP or HTTPS proxies for this instance. Use the `no_proxy` list
+    ## to specify hosts that must bypass proxies.
+    ##
+    ## The SOCKS protocol is also supported, for example:
+    ##
+    ##   socks5://user:pass@host:port
+    ##
+    ## Using the scheme `socks5` causes the DNS resolution to happen on the
+    ## client, rather than on the proxy server. This is in line with `curl`,
+    ## which uses the scheme to decide whether to do the DNS resolution on
+    ## the client or proxy. If you want to resolve the domains on the proxy
+    ## server, use `socks5h` as the scheme.
+    #
+    # proxy:
+    #   http: http://<PROXY_SERVER_FOR_HTTP>:<PORT>
+    #   https: https://<PROXY_SERVER_FOR_HTTPS>:<PORT>
+    #   no_proxy:
+    #   - <HOSTNAME_1>
+    #   - <HOSTNAME_2>
+
+    ## @param skip_proxy - boolean - optional - default: false
+    ## This overrides the `skip_proxy` setting in `init_config`.
+    ##
+    ## If set to `true`, this makes the check bypass any proxy
+    ## settings enabled and attempt to reach services directly.
+    #
+    # skip_proxy: false
+
+    ## @param tls_verify - boolean - optional - default: true
+    ## Instructs the check to validate the TLS certificate of the firewall management interface.
+    ## PAN-OS management interfaces ship with a self-signed certificate. Either install a certificate signed
+    ## by a CA you trust and set `tls_ca_cert`, or set this to `false` to accept the self-signed certificate.
+    #
+    # tls_verify: true
+
+    ## @param tls_use_host_header - boolean - optional - default: false
+    ## If a `Host` header is set, this enables its use for SNI (matching against the TLS certificate CN or SAN).
+    #
+    # tls_use_host_header: false
+
+    ## @param tls_ignore_warning - boolean - optional - default: false
+    ## If `tls_verify` is disabled, security warnings are logged by the check.
+    ## Disable those by setting `tls_ignore_warning` to true.
+    #
+    # tls_ignore_warning: false
+
+    ## @param tls_cert - string - optional
+    ## The path to a single file in PEM format containing a certificate as well as any
+    ## number of CA certificates needed to establish the certificate's authenticity for
+    ## use when connecting to services. It may also contain an unencrypted private key to use.
+    #
+    # tls_cert: <CERT_PATH>
+
+    ## @param tls_private_key - string - optional
+    ## The unencrypted private key to use for `tls_cert` when connecting to services. This is
+    ## required if `tls_cert` is set and it does not already contain a private key.
+    #
+    # tls_private_key: <PRIVATE_KEY_PATH>
+
+    ## @param tls_ca_cert - string - optional
+    ## The path to a file of concatenated CA certificates in PEM format, or to a directory of
+    ## PEM certificates processed with `openssl rehash`. Use it when the firewall management certificate
+    ## is signed by a private CA, or to trust a self-signed certificate directly.
+    #
+    # tls_ca_cert: <CA_CERT_PATH>
+
+    ## @param tls_protocols_allowed - list of strings - optional
+    ## The expected versions of TLS/SSL when fetching intermediate certificates.
+    ## Only `SSLv3`, `TLSv1.2`, `TLSv1.3` are allowed by default. The possible values are:
+    ##   SSLv3
+    ##   TLSv1
+    ##   TLSv1.1
+    ##   TLSv1.2
+    ##   TLSv1.3
+    #
+    # tls_protocols_allowed:
+    #   - SSLv3
+    #   - TLSv1.2
+    #   - TLSv1.3
+
+    ## @param tls_ciphers - list of strings - optional
+    ## The list of ciphers suites to use when connecting to an endpoint. If not specified, 
+    ## `ALL` ciphers are used. For list of ciphers see: 
+    ## https://www.openssl.org/docs/man1.0.2/man1/ciphers.html
+    #
+    # tls_ciphers:
+    #   - TLS_AES_256_GCM_SHA384
+    #   - TLS_CHACHA20_POLY1305_SHA256
+    #   - TLS_AES_128_GCM_SHA256
+
+    ## @param timeout - number - optional - default: 30
+    ## Timeout in seconds for each request to a firewall or Panorama.
+    #
+    # timeout: 30
+
+    ## @param connect_timeout - number - optional
+    ## The connect timeout for accessing services. Defaults to `timeout`.
+    #
+    # connect_timeout: <CONNECT_TIMEOUT>
+
+    ## @param read_timeout - number - optional
+    ## The read timeout for accessing services. Defaults to `timeout`.
+    #
+    # read_timeout: <READ_TIMEOUT>
+
+    ## @param request_size - number - optional - default: 16
+    ## The number of kibibytes (KiB) to read from streaming HTTP responses at a time.
+    #
+    # request_size: 16
+
+    ## @param log_requests - boolean - optional - default: false
+    ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
+    #
+    # log_requests: false
+
+    ## @param persist_connections - boolean - optional - default: false
+    ## Whether or not to persist cookies and use connection pooling for improved performance.
+    #
+    # persist_connections: false
+
+    ## @param allow_redirects - boolean - optional - default: true
+    ## Whether or not to allow URL redirection.
+    #
+    # allow_redirects: true
+
+    ## @param max_concurrency - integer - optional - default: 5
+    ## Maximum number of firewalls to poll concurrently.
+    #
+    # max_concurrency: 5
+
+    ## @param tags - list of strings - optional
+    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ##
+    ## Learn more about tagging at https://docs.datadoghq.com/tagging
+    #
+    # tags:
+    #   - <KEY_1>:<VALUE_1>
+    #   - <KEY_2>:<VALUE_2>
+
+    ## @param service - string - optional
+    ## Attach the tag `service:<SERVICE>` to every metric, event, and service check emitted by this integration.
+    ##
+    ## Overrides any `service` defined in the `init_config` section.
+    #
+    # service: <SERVICE>
+
+    ## @param min_collection_interval - number - optional - default: 60
+    ## Changes the collection interval of the check. For more information, see
+    ## https://docs.datadoghq.com/developers/write_agent_check/#collection-interval.
+    ## We recommend 60 seconds. Each PAN-OS call has its own interval, from 2 minutes to 24 hours,
+    ## so a more frequent run does not collect additional data. Values above 120 seconds delay the calls
+    ## that run every 2 or 3 minutes.
+    #
+    min_collection_interval: 60
+
+    ## @param empty_default_hostname - boolean - optional - default: false
+    ## This forces the check to send metrics with no hostname.
+    ##
+    ## This is useful for cluster-level checks.
+    #
+    # empty_default_hostname: false
+
+    ## @param metric_patterns - mapping - optional
+    ## A mapping of metrics to include or exclude, with each entry being a regular expression.
+    ##
+    ## Metrics defined in `exclude` will take precedence in case of overlap.
+    #
+    # metric_patterns:
+    #   include:
+    #   - <INCLUDE_REGEX>
+    #   exclude:
+    #   - <EXCLUDE_REGEX>
+
+    ## @param vsys - list of strings - optional
+    ## List of virtual systems to collect from. A virtual system without interfaces is not detected
+    ## automatically, so list it here.
+    #
+    # vsys:
+    #   - vsys1
+
+    ## @param collect_threats - boolean - optional - default: true
+    ## Set to `true` to count threat log entries by severity and type.
+    #
+    # collect_threats: true
+
+    ## @param collect_rule_hits - boolean - optional - default: true
+    ## Set to `false` to stop collecting security rule hit counts.
+    #
+    # collect_rule_hits: true
+
+    ## @param security_rule_filter - list of strings - optional
+    ## List of regular expressions. Only security rules whose name matches one of them are reported.
+    ## If not set, all security rules are reported. Without a filter, one `security_rule.hits` series is sent
+    ## per security rule and virtual system, including the two default rules, which can be thousands on a
+    ## large rulebase.
+    #
+    # security_rule_filter:
+    #   - ^allow-.*
+
+    ## @param collect_global_counters - boolean - optional - default: false
+    ## Set to `true` to collect the PAN-OS global counters.
+    #
+    # collect_global_counters: false
+
+    ## @param collect_ospf - boolean - optional - default: false
+    ## Set to `true` to collect OSPF neighbor status.
+    #
+    # collect_ospf: false
+
+    ## @param collect_reports - boolean - optional - default: false
+    ## Set to `true` to collect the 10 top-N traffic reports (custom dynamic reports over the last 24 hours).
+    ## The reports run one at a time, and the Agent polls each one up to 10 times, 0.5 seconds apart, until it
+    ## finishes. In the worst case, where every report finishes only on its last poll, this adds about 45 seconds
+    ## of waiting, plus the time of the requests themselves, to one run every 30 minutes per firewall. A report
+    ## that is still running after its polls is picked up again by the next run.
+    #
+    # collect_reports: false
+
+    ## @param report_top_n - integer - optional - default: 10
+    ## Number of entries to keep from each report.
+    #
+    # report_top_n: 10
+
+    ## @param send_ndm_metadata - boolean - optional - default: true
+    ## Set to `true` to send Network Device Monitoring metadata for the firewalls.
+    #
+    # send_ndm_metadata: true
+
 ## Log Section
 ##
 ## type - required - Type of log input source (tcp / udp / file / windows_event).
