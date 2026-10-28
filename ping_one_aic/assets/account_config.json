@@ -1,0 +1,44 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API key ID and secret",
+      "basic": {
+        "user_setting": {
+          "key": "api_key_id",
+          "label": "API Key ID",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "api_key_secret",
+          "label": "API Key Secret",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "supported_connection_methods": [
+    {
+      "name": "PingOne Advanced Identity Cloud tenant",
+      "multitenant": {
+        "tenant_setting": {
+          "key": "tenant_domain",
+          "label": "Tenant Domain",
+          "help": "Must be publicly accessible via HTTPS (e.g., openam-tap-example.forgeblocks.com).",
+          "editable": true,
+          "required": true,
+          "text": {
+            "pattern": "^[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?(\\.[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?)+$"
+          }
+        },
+        "base_url_format": "https://%s"
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "ping-one-aic-logs" }
+  ]
+}
