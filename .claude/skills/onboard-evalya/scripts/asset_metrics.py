@@ -34,6 +34,7 @@ Prints JSON to stdout:
 Exit code is 0 even when assets or metadata are missing; the JSON reports what was found so the
 caller can decide. A malformed asset JSON is reported on stderr and skipped.
 """
+
 from __future__ import annotations
 
 import csv
@@ -48,37 +49,41 @@ from pathlib import Path
 # (`"query": "postgresql.rows_inserted{$scope}"`) with the aggregator in a sibling field.
 # Dotless names (e.g. otel's `otelcol_receiver_refused_spans`) are matched only after an
 # aggregator prefix, so tag-grouping keywords (`by {host}`) are not mistaken for metrics.
+# AGG lists the documented space aggregators: avg/sum/min/max, plus count and percentiles
+# (`p95:`, `p99.99:`) for distributions.
 # The trailing `{` avoids catching template vars (`$scope`), formula operands (`a / b`), and
 # monitor window functions (`avg(last_5m)`).
-_AGG = r"(?:avg|sum|min|max|count|last|pct|percentile|median|stddev|normalize|weight):"
-_METRIC_QUERY = re.compile(
-    rf"(?:(?:{_AGG})?([a-z_][a-z0-9_.]*\.[a-z0-9_.]+)|{_AGG}([a-z_][a-z0-9_]*))\s*\{{",
+# The leading lookbehind pins the match to a token start; without it `top5:x{` and `checksum:x{`
+# yield `x` via their `p5:`/`sum:` suffixes, and `9redis.mem{` yields `redis.mem`. Name chars and
+# `.` would continue a token, `$` opens a template var. `:` stays allowed for monitors
+# (`avg(last_5m):avg:m{`), `-` for formula subtraction (`a{*}-avg:b{*}`).
+AGG = r"(?:avg|sum|min|max|count|p\d+(?:\.\d+)?):"
+METRIC_QUERY = re.compile(
+    rf"(?<![a-z0-9_.$])(?:(?:{AGG})?([a-z_][a-z0-9_.]*\.[a-z0-9_.]+)|{AGG}([a-z_][a-z0-9_]*))\s*\{{",
     re.IGNORECASE,
 )
 
 # Query strings live under these keys in dashboard widgets and monitor definitions.
-_QUERY_KEYS = ("q", "query")
+QUERY_KEYS = ("q", "query")
 
 # We only care about metric queries. A dashboard widget query object carries a `data_source`
-# (`metrics`, `logs`, `rum`, `data_streams`, …); keep only `metrics`. A monitor's `definition`
-# carries a `type` instead; keep only metric-based alert types. Without this, log/APM/DSM queries
-# stored under the same `query` key leak metric-shaped tokens into the coverage target.
-_METRIC_MONITOR_TYPES = {"query alert", "metric alert"}
+# (`metrics`, `logs`, `rum`, `data_streams`, ...); its whole subtree is skipped unless it is
+# `metrics`, which also covers nested log searches (`{"data_source": "logs", "search": {"query": ...}}`).
+# A monitor's `definition` carries a `type` instead; keep only metric-based alert types. Without
+# this, log/APM/DSM queries stored under the same `query` key leak metric-shaped tokens into the
+# coverage target.
+METRIC_MONITOR_TYPES = {"query alert", "metric alert"}
 
 
 def _is_metric_query(container: dict, key: str) -> bool:
-    """Whether the `q`/`query` string on this dict is a metrics query.
+    """Whether the `query` string on this dict is a metrics query, judged by its sibling `type`.
 
-    Decided by the sibling `data_source` (dashboard formula/timeseries queries) or `type` (monitor
-    definitions). Legacy `q` and any query with neither sibling are assumed to be metrics — those
-    shapes only ever carried metric queries.
+    Only monitor definitions (and non-metric widgets) carry a `type` next to `query`. Legacy `q`
+    and any query without a `type` are assumed to be metrics; `data_source` is handled by the walker.
     """
-    data_source = container.get("data_source")
-    if data_source is not None:
-        return data_source == "metrics"
     monitor_type = container.get("type")
     if monitor_type is not None and key == "query":
-        return monitor_type in _METRIC_MONITOR_TYPES
+        return monitor_type in METRIC_MONITOR_TYPES
     return True
 
 
@@ -86,8 +91,11 @@ def _walk_query_strings(node: object) -> list[str]:
     """Recursively collect metric query strings; skip non-metric (logs/APM/DSM) queries."""
     found: list[str] = []
     if isinstance(node, dict):
+        # A non-metric query object owns its whole subtree, including nested `search.query`.
+        if node.get("data_source", "metrics") != "metrics":
+            return found
         for key, value in node.items():
-            if key in _QUERY_KEYS and isinstance(value, str):
+            if key in QUERY_KEYS and isinstance(value, str):
                 if _is_metric_query(node, key):
                     found.append(value)
             else:
@@ -101,7 +109,7 @@ def _walk_query_strings(node: object) -> list[str]:
 def extract_metrics(asset: dict) -> set[str]:
     metrics: set[str] = set()
     for query in _walk_query_strings(asset):
-        for match in _METRIC_QUERY.finditer(query):
+        for match in METRIC_QUERY.finditer(query):
             metrics.add(match.group(1) or match.group(2))
     return metrics
 
