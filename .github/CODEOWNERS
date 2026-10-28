@@ -116,6 +116,9 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /cisco_sdwan/                                                      @DataDog/ndm-integrations @DataDog/agent-integrations
 /cisco_sdwan/*.md                                                  @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
 /cisco_sdwan/manifest.json                                         @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
+/pan_firewall/                                                     @DataDog/ndm-integrations @DataDog/agent-integrations
+/pan_firewall/*.md                                                 @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
+/pan_firewall/manifest.json                                        @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
 /snmp/                                                             @DataDog/network-device-monitoring-core @DataDog/agent-integrations
 /snmp/*.md                                                         @DataDog/network-device-monitoring-core @DataDog/agent-integrations @DataDog/documentation
 /snmp/manifest.json                                                @DataDog/network-device-monitoring-core @DataDog/agent-integrations @DataDog/documentation
@@ -254,10 +257,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /adyen/*.md                                                          @DataDog/saas-integrations @DataDog/documentation
 /adyen/manifest.json                                                 @DataDog/saas-integrations @DataDog/documentation
 /adyen/assets/logs/                                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
-/akamai_cost_management/                                             @DataDog/saas-integrations
-/akamai_cost_management/*.md                                         @DataDog/saas-integrations @DataDog/documentation
-/akamai_cost_management/manifest.json                                @DataDog/saas-integrations @DataDog/documentation
 
 /anthropic_compliance_logs/                                          @DataDog/saas-integrations
 /anthropic_compliance_logs/*.md                                      @DataDog/saas-integrations @DataDog/documentation
@@ -661,6 +660,8 @@ plaid/assets/logs/                                                  @DataDog/saa
 /infiniband/*.md                                                     @DataDog/accelerator-telemetry @DataDog/documentation
 /infiniband/manifest.json                                            @DataDog/accelerator-telemetry @DataDog/agent-integrations @DataDog/documentation
 
+/kai_scheduler/                                                      @DataDog/accelerator-telemetry
+/kai_scheduler/*.md                                                  @DataDog/accelerator-telemetry @DataDog/documentation
 /kueue/                                                                @DataDog/gpu-monitoring-agent
 /kueue/*.md                                                            @DataDog/gpu-monitoring-agent @DataDog/documentation
 /kueue/manifest.json                                                   @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
