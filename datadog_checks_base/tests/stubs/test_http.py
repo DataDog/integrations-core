@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import ssl
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
@@ -12,6 +13,7 @@ import pytest
 from datadog_checks.base.stubs import http as http_stub
 from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError, HTTPClientTimeoutError
+from datadog_checks.base.utils.tls import TlsConfig, create_ssl_context
 
 
 def test_fake_response_returns_only_configured_results():
@@ -159,6 +161,59 @@ def test_fake_response_raises_configured_stream_error_after_results(iter_method,
         next(stream)
 
     assert exc_info.value is error
+
+
+@pytest.mark.parametrize('tls_verify', [False, None])
+def test_fake_client_tls_overrides_preserve_defaults(tls_verify: bool | None):
+    client = FakeHTTPClient(tls_config={'tls_verify': tls_verify})
+
+    assert client.tls_config['tls_verify'] is tls_verify
+    assert client.tls_config['tls_ciphers'] == TlsConfig().tls_ciphers
+
+
+@pytest.mark.parametrize('tls_verify', [False, None])
+def test_fake_client_tls_overrides_disable_ssl_verification(tls_verify: bool | None):
+    client = FakeHTTPClient(tls_config={'tls_verify': tls_verify})
+
+    context = create_ssl_context(client.tls_config)
+    assert context.verify_mode == ssl.CERT_NONE
+    assert context.check_hostname is False
+
+
+def test_fake_client_tls_overrides_are_isolated():
+    overrides = {'tls_ciphers': ['AES128-SHA']}
+    first = FakeHTTPClient(tls_config=overrides)
+    second = FakeHTTPClient(tls_config=overrides)
+
+    first.tls_config['tls_ciphers'].append('AES256-SHA')
+
+    assert second.tls_config['tls_ciphers'] == ['AES128-SHA']
+    assert overrides['tls_ciphers'] == ['AES128-SHA']
+
+
+def test_created_client_uses_canonical_tls_defaults():
+    parent = FakeHTTPClient(tls_config={'tls_ciphers': 'ECDHE+AESGCM'})
+    child = parent.create_client()
+
+    assert child.tls_config == TlsConfig().__dict__
+
+
+def test_created_client_ssl_context_enables_verification():
+    parent = FakeHTTPClient(tls_config={'tls_verify': False})
+    child = parent.create_client()
+
+    context = create_ssl_context(child.tls_config)
+    assert context.verify_mode == ssl.CERT_REQUIRED
+    assert context.check_hostname is True
+
+
+def test_created_client_tls_settings_are_isolated_from_parent():
+    parent = FakeHTTPClient()
+    child = parent.create_client()
+
+    child.tls_config['tls_verify'] = False
+
+    assert parent.tls_config['tls_verify'] is True
 
 
 def test_fake_client_matches_responses_and_records_requests():
