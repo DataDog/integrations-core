@@ -1,0 +1,44 @@
+<response status="success"><result><interface>
+  <ethernet>
+    <entry name="ethernet1/1">
+      <layer3>
+        <ip>
+          <entry name="10.60.1.10/24"/>
+        </ip>
+      </layer3>
+    </entry>
+    <entry name="ethernet1/2">
+      <layer3>
+        <ip>
+          <entry name="10.60.2.10/24"/>
+        </ip>
+        <interface-management-profile>allow-ping</interface-management-profile>
+      </layer3>
+    </entry>
+  </ethernet>
+  <loopback>
+    <units>
+      <entry name="loopback.1">
+        <ip>
+          <entry name="10.255.0.1/32"/>
+        </ip>
+      </entry>
+    </units>
+  </loopback>
+  <tunnel>
+    <units>
+      <entry name="tunnel.1">
+        <ip>
+          <entry name="169.254.10.1/30"/>
+        </ip>
+        <interface-management-profile>allow-ping</interface-management-profile>
+      </entry>
+      <entry name="tunnel.2">
+        <ip>
+          <entry name="169.254.20.1/30"/>
+        </ip>
+      </entry>
+    </units>
+  </tunnel>
+</interface>
+</result></response>
