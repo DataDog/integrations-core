@@ -12,7 +12,7 @@ The OOM Kill check is included in the [Datadog Agent][1] package. It relies on a
 
 The eBPF program used by the System Probe is compiled at runtime and requires you to have access to the proper kernel headers.
 
-On Host and Docker installations install the kernel headers like so:
+On Host and Docker installations, install the kernel headers:
 
 - Debian-like distributions:
   ```sh
@@ -39,7 +39,7 @@ In addition, Windows and CentOS/RHEL versions earlier than 8 are not supported.
       enable_oom_kill: true
     ```
 
-2. The Agent has a pre-packaged [`oom_kill.d/conf.yaml.default`][2] file that will be used when the check is enabled in the `system-probe.yaml`. This is in the `conf.d/` folder at the root of your Agent's configuration directory. You can create a custom `oom_kill.d/conf.yaml` file to change the configuration options.
+2. The Agent has a pre-packaged [`oom_kill.d/conf.yaml.default`][2] file that is used when the check is enabled in the `system-probe.yaml`. This is in the `conf.d/` folder at the root of your Agent's configuration directory. You can create a custom `oom_kill.d/conf.yaml` file to change the configuration options.
 
 3. [Restart the Agent][3].
 <!-- xxz tab xxx -->
@@ -47,7 +47,7 @@ In addition, Windows and CentOS/RHEL versions earlier than 8 are not supported.
 
 #### Docker
 
-1. Startup the Agent container with the environment variable to enable the check in the System Probe process. This will use the pre-packaged [`oom_kill.d/conf.yaml.default`][2] once enabled:
+1. Start the Agent container with the environment variable to enable the check in the System Probe process. This uses the pre-packaged [`oom_kill.d/conf.yaml.default`][2] once enabled:
     ```
     -e DD_SYSTEM_PROBE_CONFIG_ENABLE_OOM_KILL=true
     ```
@@ -60,13 +60,13 @@ In addition, Windows and CentOS/RHEL versions earlier than 8 are not supported.
     -v /usr/src:/usr/src
     ```
 
-2. Add the following permission to enable BPF operations:
+3. Add the following permission to enable BPF operations:
 
     ```
     --privileged
     ```
 
-    From kernel version 5.8, the `--privileged` parameter can be replaces by `--cap-add CAP_BPF`.
+    From kernel version 5.8, the `--privileged` parameter can be replaced by `--cap-add CAP_BPF`.
 
 **Note**: `--privileged` mode is not supported in Docker swarm.
 
@@ -118,7 +118,7 @@ datadog:
     enableOOMKill: true
 ```
 
-With these settings the `system-probe` container is deployed automatically with the right configuration and permissions.
+With these settings, the `system-probe` container is automatically deployed with the required configuration and permissions.
 
 <!-- xxz tab xxx -->
 
