@@ -4,10 +4,11 @@
 import ctypes
 import ctypes.util
 import platform
+from collections.abc import Callable
 
 
-def load_malloc_trim():
-    """Return glibc's ``malloc_trim`` on Linux, or ``None`` where it is unavailable (macOS, musl)."""
+def load_malloc_trim() -> Callable[[int], int] | None:
+    """Return glibc's `malloc_trim` on Linux, or `None` where it is unavailable (macOS, musl)."""
     if platform.system() != 'Linux':
         return None
     try:
@@ -23,7 +24,7 @@ def load_malloc_trim():
 MALLOC_TRIM = load_malloc_trim()
 
 
-def malloc_trim():
+def malloc_trim() -> None:
     """Return glibc per-arena free memory to the OS after a run; no-op where unavailable."""
     if MALLOC_TRIM is not None:
         MALLOC_TRIM(0)

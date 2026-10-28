@@ -17,7 +17,7 @@ def test_malloc_trim_is_safe_to_call():
 
 
 @pytest.mark.skipif(
-    platform.system() != 'Linux' or not platform.libc_ver()[0],
+    platform.system() != 'Linux' or platform.libc_ver()[0] != 'glibc',
     reason='malloc_trim is only expected to bind on glibc',
 )
 def test_malloc_trim_is_bound_on_glibc():
