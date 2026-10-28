@@ -13,27 +13,7 @@
       }
     }
   ],
-  "supported_connection_methods": [
-    {
-      "name": "Have I Been Pwned",
-      "fixed": {
-        "fixed_base_url": "https://haveibeenpwned.com"
-      }
-    }
-  ],
   "dataflow_config": [
-    {
-      "dataflow_id": "have-i-been-pwned-logs"
-    }
-  ],
-  "health_probe": {
-    "http_method": "GET",
-    "path": "/api/v3/subscribeddomains",
-    "http_headers": [
-      {
-        "name": "Accept",
-        "value": "application/json"
-      }
-    ]
-  }
+    { "dataflow_id": "have-i-been-pwned-logs" }
+  ]
 }

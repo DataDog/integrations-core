@@ -33,6 +33,10 @@
       {
         "name": "Accept",
         "value": "application/json"
+      },
+      {
+        "name": "anthropic-version",
+        "value": "2023-06-01"
       }
     ]
   }

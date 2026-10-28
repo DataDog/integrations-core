@@ -20,14 +20,6 @@
       }
     }
   ],
-  "supported_connection_methods": [
-    {
-      "name": "StreamNative",
-      "fixed": {
-        "fixed_base_url": "https://metrics.streamnative.cloud"
-      }
-    }
-  ],
   "additional_config_fields": [
     {
       "key": "organization_id",
@@ -45,18 +37,6 @@
     }
   ],
   "dataflow_config": [
-    {
-      "dataflow_id": "streamnative-metrics"
-    }
-  ],
-  "health_probe": {
-    "http_method": "GET",
-    "path": "/v1/cloud/metrics/health/export",
-    "http_headers": [
-      {
-        "name": "Accept",
-        "value": "application/json"
-      }
-    ]
-  }
+    { "dataflow_id": "streamnative-metrics" }
+  ]
 }
