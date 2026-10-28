@@ -245,9 +245,10 @@ def test_every_metadata_metric_is_emitted(dd_run_check, aggregator, fake_panos, 
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), check_symmetric_inclusion=True, check_submission_type=True
     )
-    # fw-b has its own threat watermark, so the aggregate above is satisfied by fw-a alone; each firewall must report.
+    # The aggregate above is satisfied by fw-a alone; each firewall must report. fw-b has its own threat watermark, and
+    # runs the Advanced Routing Engine, which takes the accepted prefixes from another field than fw-a's legacy one.
     for ip in FIREWALLS.values():
-        for name in ('can_connect', 'threat.count'):
+        for name in ('can_connect', 'threat.count', 'bgp.peer.prefixes.incoming.accepted'):
             assert any(f'device_ip:{ip}' in m.tags for m in aggregator.metrics(f'pan_firewall.{name}')), (name, ip)
 
 

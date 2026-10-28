@@ -5,7 +5,7 @@
 
 The legacy routing engine answers `show routing protocol bgp peer` and `... ospf neighbor`. The Advanced Routing Engine
 (ARE) answers `show advanced-routing ...` with JSON inside `result/json`, one call per logical router, and the logical
-router name fills the `vr` tag. OSPF neighbors on the ARE are not collected yet.
+router name fills the `vr` tag.
 """
 
 from __future__ import annotations
@@ -13,11 +13,12 @@ from __future__ import annotations
 import json
 import math
 import re
+from collections.abc import Callable
 from typing import Any, Literal
 from xml.etree.ElementTree import Element
 from xml.sax.saxutils import escape
 
-from datadog_checks.pan_firewall.errors import PanosError
+from datadog_checks.pan_firewall.errors import PanosAuthError, PanosError, PanosUnreachable
 from datadog_checks.pan_firewall.xml_utils import num, tag_tuple, text
 
 from .base import CollectContext, Sample
@@ -46,6 +47,7 @@ BGP_NUMBERS: tuple[tuple[str, str, Literal['gauge', 'monotonic_count']], ...] = 
 )
 BGP_PREFIXES = (
     ('incoming.total', 'incoming-total'),
+    ('incoming.accepted', 'incoming-accepted'),
     ('incoming.rejected', 'incoming-rejected'),
     ('outgoing.total', 'outgoing-total'),
     ('outgoing.advertised', 'outgoing-advertised'),
@@ -105,10 +107,10 @@ def parse_bgp_peers(root: Element) -> list[Sample]:
                 value = num(family, path)
                 if value is not None:
                     samples.append(Sample(f'bgp.peer.prefixes.{name}', value, family_tags, 'gauge'))
-            received = num(family, 'incoming-total')
-            if received is not None and limit:
+            accepted = num(family, 'incoming-accepted')
+            if accepted is not None and limit:
                 samples.append(
-                    Sample('bgp.peer.prefix_limit.utilization', received / limit * 100, family_tags, 'gauge')
+                    Sample('bgp.peer.prefix_limit.utilization', accepted / limit * 100, family_tags, 'gauge')
                 )
     return samples
 
@@ -191,7 +193,7 @@ def parse_are_bgp_peers(data: dict, router: str) -> list[Sample]:
             accepted = json_num(family, 'acceptedPrefixCounter')
             for metric, value in (
                 ('prefix_limit', limit),
-                ('prefixes.incoming.total', accepted),
+                ('prefixes.incoming.accepted', accepted),
                 ('prefixes.outgoing.advertised', json_num(family, 'sentPrefixCounter')),
             ):
                 if value is not None:
@@ -241,21 +243,39 @@ def parse_ospf_neighbors(root: Element) -> list[Sample]:
     return samples
 
 
+def collect_are(ctx: CollectContext, cmd: str, parse: Callable[[dict, str], list[Sample]], name: str) -> list[Sample]:
+    """Ask each logical router `cmd`, formatted with its name, and parse the answer with `parse(data, router)`.
+
+    A router whose call fails is skipped with a warning, so that one broken router (such as PAN-OS bug PAN-220293,
+    which fails the BGP peer call of any router with IPv6 peers) does not drop the others; when every router fails,
+    the collector fails. Authentication and connection errors fail the collector at once.
+    """
+    samples: list[Sample] = []
+    error: PanosError | None = None
+    answered = 0
+    for router in logical_routers(ctx):
+        try:
+            data = are_json(ctx.client.op(cmd.format(router=escape(router))))
+        except (PanosAuthError, PanosUnreachable):
+            raise
+        except PanosError as e:
+            ctx.warning('cannot read the %s of the logical router %s: %s', name, router, e, key=f'are:{name}:{router}')
+            error = e
+            continue
+        answered += 1
+        samples.extend(parse(data, router))
+    if error is not None and not answered:
+        raise error
+    return samples
+
+
 def collect_bgp(ctx: CollectContext) -> list[Sample]:
     if ctx.identity.advanced_routing is not True:
         return parse_bgp_peers(ctx.client.op(BGP_PEER_CMD))
-    samples: list[Sample] = []
-    for router in logical_routers(ctx):
-        data = are_json(ctx.client.op(ARE_BGP_PEER_CMD.format(router=escape(router))))
-        samples.extend(parse_are_bgp_peers(data, router))
-    return samples
+    return collect_are(ctx, ARE_BGP_PEER_CMD, parse_are_bgp_peers, 'BGP peers')
 
 
 def collect_ospf(ctx: CollectContext) -> list[Sample]:
     if ctx.identity.advanced_routing is not True:
         return parse_ospf_neighbors(ctx.client.op(OSPF_NEIGHBOR_CMD))
-    samples: list[Sample] = []
-    for router in logical_routers(ctx):
-        data = are_json(ctx.client.op(ARE_OSPF_NEIGHBOR_CMD.format(router=escape(router))))
-        samples.extend(parse_are_ospf_neighbors(data, router))
-    return samples
+    return collect_are(ctx, ARE_OSPF_NEIGHBOR_CMD, parse_are_ospf_neighbors, 'OSPF neighbors')

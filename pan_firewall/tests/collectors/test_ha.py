@@ -5,6 +5,7 @@ import pytest
 
 from datadog_checks.pan_firewall.collectors.base import FirewallState
 from datadog_checks.pan_firewall.collectors.ha import HA_CMD, HA_INTERFACE_CMD, collect_ha, parse_ha_interface
+from datadog_checks.pan_firewall.errors import PanosApiError
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from ..common import FIXTURES
@@ -116,3 +117,37 @@ def test_unknown_link_shape_warns_once_and_keeps_the_other_link():
         assert len(samples) == 6
         assert {s.tags for s in samples} == {HA2}
     ctx.log.warning.assert_called_once()
+
+
+def failing_links(*links):
+    """The answers of the fw-c HA pair, with the call of each of `links` failing."""
+    answers = pair_answers()
+
+    def op(cmd):
+        if cmd in {HA_INTERFACE_CMD.format(link=link) for link in links}:
+            raise PanosApiError('17', 'invalid command')
+        return answers[cmd]
+
+    return op
+
+
+def test_failing_link_call_warns_and_keeps_the_other_link():
+    ctx = make_ctx()
+    ctx.client.op.side_effect = failing_links('ha2')
+
+    samples = collect_ha(ctx)
+
+    assert len(samples) == 6
+    assert {s.tags for s in samples} == {HA1}
+    ctx.log.warning.assert_called_once()
+    assert 'link ha2' in ctx.log.warning.call_args.args[-1]
+
+
+def test_collector_fails_when_every_link_call_fails():
+    ctx = make_ctx()
+    ctx.client.op.side_effect = failing_links('ha1', 'ha2')
+
+    with pytest.raises(PanosApiError):
+        collect_ha(ctx)
+    # The state is set before the link calls, for the device metadata.
+    assert ctx.state.ha_state == 'active'
