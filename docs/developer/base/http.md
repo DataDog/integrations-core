@@ -62,7 +62,8 @@ responses and raise `requests` exceptions unchanged.
 ### Testing TLS configuration
 
 Each `FakeHTTPClient` starts with the real client's canonical TLS defaults. Pass `tls_config=...` to override specific
-fields; overrides, including `False` and `None`, take precedence. Mutable TLS settings are copied between clients.
+fields; overrides, including `False` and `None`, take precedence. Each client gets its own copy of the overrides, so changing
+one client's TLS settings doesn't affect other clients or the caller's mapping.
 
 Calling `fake_http.create_client()` creates a fresh client with defaults, not a copy of the parent's TLS settings.
 The fixture does not parse integration configuration or legacy aliases. Tests needing non-default TLS settings must

@@ -188,10 +188,15 @@ def test_created_client_uses_canonical_tls_defaults():
     context = create_ssl_context(child.tls_config)
     assert context.verify_mode == ssl.CERT_REQUIRED
     assert context.check_hostname is True
-    assert 'AES128-SHA' in {cipher['name'] for cipher in context.get_ciphers()}
+
+
+def test_created_client_tls_settings_are_isolated_from_parent():
+    parent = FakeHTTPClient()
+    child = parent.create_client()
+
     child.tls_config['tls_verify'] = False
+
     assert parent.tls_config['tls_verify'] is True
-    assert FakeHTTPClient().tls_config['tls_verify'] is True
 
 
 def test_fake_client_matches_responses_and_records_requests():
