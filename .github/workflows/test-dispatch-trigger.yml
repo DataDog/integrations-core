@@ -13,8 +13,8 @@ on:
 
 permissions: {}
 
-# Shares the PR concurrency group with the receiver's dispatch job so a queued trigger cancels
-# the superseded Dispatcher immediately, before this job obtains a runner.
+# Only triggers cancel running members of the shared PR group, including the superseded
+# Dispatcher, before obtaining a runner. Dispatch jobs wait instead of canceling newer triggers.
 concurrency:
   group: test-dispatch-${{
     format('pr-{0}/{1}', github.event.pull_request.head.repo.full_name, github.event.pull_request.head.ref) }}

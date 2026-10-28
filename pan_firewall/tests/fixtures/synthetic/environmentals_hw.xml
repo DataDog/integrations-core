@@ -1,0 +1,36 @@
+<!-- Hand-written; UNVERIFIED until a PA-3420 is captured. Field names come from two sources.
+     NDM engineering page (`show system environmentals`): `Volts` on power entries, `DegreesC`, `min`, `max` and `alarm`
+     on thermal entries, and `min-volt`/`max-volt` on power entries.
+     Perl hardware-output parser (real PA hardware output): power entries carry plain `min`/`max` like thermal entries,
+     plus their own `alarm`.
+     The slot elements are named `SlotN`; `description` names the sensor. Entries, in order:
+       power 1: min/max thresholds, no alarm
+       power 2: only min-volt/max-volt thresholds (fallback)
+       power 3: alarm True, Volts above max
+       power 4: alarm False while Volts is above max (PAN's alarm field wins)
+       power 5: alarm True without thresholds (direction unknown)
+       power 6: alarm True, Volts below min
+       thermal 1: alarm False
+       thermal 2: alarm True
+       thermal 3: alarm yes -->
+<response status="success"><result>
+  <power>
+    <Slot1>
+      <entry><slot>1</slot><description>Power Supply 1</description><alarm>False</alarm><Volts>12.1</Volts><min>10.8</min><max>13.2</max></entry>
+      <entry><slot>1</slot><description>Power Supply 2</description><alarm>False</alarm><Volts>11.9</Volts><min-volt>10.6</min-volt><max-volt>13.4</max-volt></entry>
+      <entry><slot>1</slot><description>Power Supply 3</description><alarm>True</alarm><Volts>13.9</Volts><min>10.8</min><max>13.2</max></entry>
+      <entry><slot>1</slot><description>Power Supply 4</description><alarm>False</alarm><Volts>13.9</Volts><min>10.8</min><max>13.2</max></entry>
+      <entry><slot>1</slot><description>Power Supply 5</description><alarm>True</alarm><Volts>12.0</Volts></entry>
+    </Slot1>
+    <Slot2>
+      <entry><slot>2</slot><description>Power Supply 6</description><alarm>True</alarm><Volts>10.2</Volts><min>10.8</min><max>13.2</max></entry>
+    </Slot2>
+  </power>
+  <thermal>
+    <Slot1>
+      <entry><slot>1</slot><description>Temperature at Inlet</description><alarm>False</alarm><DegreesC>31.0</DegreesC><min>0.0</min><max>80.0</max></entry>
+      <entry><slot>1</slot><description>Temperature at CPU</description><alarm>True</alarm><DegreesC>85.5</DegreesC><min>0.0</min><max>80.0</max></entry>
+      <entry><slot>1</slot><description>Temperature at Exhaust</description><alarm>yes</alarm><DegreesC>82.0</DegreesC><min>0.0</min><max>80.0</max></entry>
+    </Slot1>
+  </thermal>
+</result></response>

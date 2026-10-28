@@ -60,6 +60,7 @@ nifi = "Apache NiFi"
 dell_powerflex = "Dell Powerflex"
 dynamo = "Dynamo"
 intersystems_iris = "InterSystems IRIS"
+kai_scheduler = "KAI Scheduler"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
@@ -72,6 +73,7 @@ dell_powerflex = "dell_powerflex."
 hpe_aruba_edgeconnect = "hpe_aruba_edgeconnect."
 dynamo = "dynamo."
 intersystems_iris = "intersystems_iris."
+kai_scheduler = "kai."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -235,6 +237,9 @@ exclude = [
     'foundationdb', # 7+ has a breaking changes
     'kubernetes',   # Excluded on size: 36 bundles the aio client and aiohttp, +24M on disk.
                     # Unpin once https://github.com/kubernetes-client/python/issues/2677 is resolved.
+    # botocore requires python-dateutil<3.0.0, so 3.x cannot be installed alongside it.
+    # Unpin once https://github.com/boto/botocore/issues/3844 is resolved.
+    'python-dateutil',
 
 ]
 
@@ -294,4 +299,5 @@ dell_powerflex = ["linux", "windows", "mac_os"]
 hpe_aruba_edgeconnect = ["linux", "windows", "mac_os"]
 dynamo = ["linux", "windows", "mac_os"]
 intersystems_iris = ["linux", "windows", "mac_os"]
+kai_scheduler = ["linux", "windows", "mac_os"]
 
