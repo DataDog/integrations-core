@@ -8,7 +8,7 @@ from unittest.mock import Mock
 import pytest
 from kubernetes.client.exceptions import ApiException
 
-from datadog_checks.base.stubs import tagger
+from datadog_checks.base.stubs import datadog_agent, tagger
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kueue import KueueCheck
 from datadog_checks.kueue.check import OTHER_RESOURCE_NAME, RESOURCE_NAME_MAP
@@ -18,6 +18,11 @@ from datadog_checks.kueue.metrics import LOCAL_QUEUE_METRIC_MAP, METRIC_MAP, RES
 from .common import EXPECTED_METRIC_TAGS, UNIT_METRICS, get_fixture_path
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.fixture(autouse=True)
+def reset_persistent_cache():
+    datadog_agent.reset()
 
 
 def test_mapped_metrics_are_in_metadata():
@@ -325,17 +330,17 @@ def test_workload_events_transitions(dd_run_check, aggregator, instance, mock_ht
     aggregator.assert_event(
         'Workload team-a/training-job quota reserved. Quota reserved in ClusterQueue default',
         source_type_name='kueue',
-        tags=[*expected_tags, 'kueue_transition:quota_reserved'],
+        tags=[*expected_tags, 'kueue_transition:quota_reserved', 'kueue_workload_event_index:0'],
     )
     aggregator.assert_event(
         'Workload team-a/training-job admitted. The workload is admitted Queued wait time was 8s.',
         source_type_name='kueue',
-        tags=[*expected_tags, 'kueue_transition:admitted'],
+        tags=[*expected_tags, 'kueue_transition:admitted', 'kueue_workload_event_index:1'],
     )
     aggregator.assert_event(
         'Workload team-a/training-job running. All pods are ready',
         source_type_name='kueue',
-        tags=[*expected_tags, 'kueue_transition:running'],
+        tags=[*expected_tags, 'kueue_transition:running', 'kueue_workload_event_index:2'],
     )
 
 
@@ -368,6 +373,92 @@ def test_workload_events_no_duplicates(dd_run_check, aggregator, instance, mock_
     dd_run_check(check)
 
     aggregator.assert_event('Workload team-a/training-job admitted.', count=1, exact_match=False)
+
+
+def test_workload_event_index_is_monotonic_per_workload(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    check = KueueCheck('kueue', {}, [instance])
+    check.kube_client = FakeKubernetesAPIClient(
+        load_workloads('pending'),
+        load_workloads('admitted'),
+        load_workloads('evicted'),
+        with_uid(load_workloads('admitted'), 'other-workload-uid'),
+    )
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    assert event_indexes(aggregator, 'workload-uid') == [0, 1, 2]
+
+    dd_run_check(check)
+
+    assert event_indexes(aggregator, 'workload-uid') == [0, 1, 2, 3, 4]
+
+    dd_run_check(check)
+
+    assert event_indexes(aggregator, 'other-workload-uid') == [0, 1, 2, 3]
+    assert event_indexes(aggregator, 'workload-uid') == [0, 1, 2, 3, 4]
+
+
+def test_workload_event_index_persists_across_restart(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    check = KueueCheck('kueue', {}, [instance])
+    check.kube_client = FakeKubernetesAPIClient(load_workloads('pending'), load_workloads('admitted'))
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    assert event_indexes(aggregator, 'workload-uid') == [0, 1, 2]
+    assert check._workload_event_index['workload-uid'] == 3
+
+    # A restart is a new check. The persistent cache is what carries the index.
+    restarted = KueueCheck('kueue', {}, [instance])
+    restarted.kube_client = FakeKubernetesAPIClient(load_workloads('admitted'), load_workloads('evicted'))
+    aggregator.reset()
+
+    dd_run_check(restarted)
+    assert not aggregator.events
+
+    dd_run_check(restarted)
+
+    assert event_indexes(aggregator, 'workload-uid') == [3, 4]
+
+
+def test_workload_event_index_ignores_invalid_cache_entries(instance):
+    check = KueueCheck('kueue', {}, [instance])
+    check.write_persistent_cache(
+        'workload_event_index',
+        json.dumps({'good-uid': 4, 'negative-uid': -1, 'text-uid': '3'}),
+    )
+    check.log.warning = Mock()
+
+    assert check.next_workload_event_index('good-uid') == 4
+    assert check.next_workload_event_index('negative-uid') == 0
+    check.log.warning.assert_called_once_with('Ignored %d invalid Kueue workload event index cache entries', 2)
+
+    check.log.warning.reset_mock()
+    check.next_workload_event_index('good-uid')
+    check.log.warning.assert_not_called()
+
+
+def test_workload_event_index_prunes_absent_workloads(dd_run_check, aggregator, instance, mock_http_response):
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    check = KueueCheck('kueue', {}, [instance])
+    check.kube_client = FakeKubernetesAPIClient(
+        load_workloads('pending'),
+        load_workloads('admitted'),
+        [],
+    )
+
+    dd_run_check(check)
+    dd_run_check(check)
+
+    assert 'workload-uid' in check._workload_event_index
+
+    dd_run_check(check)
+
+    assert check._workload_event_index == {}
+    assert check.read_persistent_cache('workload_event_index') == '{}'
 
 
 @pytest.mark.parametrize('reason', ['Pending', 'Inadmissible'])
@@ -437,6 +528,7 @@ def test_workload_events_evicted_and_finished(dd_run_check, aggregator, instance
         'kueue_eviction_reason:Preempted',
         'kueue_preemption_reason:InClusterQueue',
         'kueue_preempted_by:preempting-workload-uid',
+        'kueue_workload_event_index:0',
     ]
     aggregator.assert_event(
         'Workload team-a/training-job evicted. Preempted to accommodate a workload '
@@ -617,6 +709,18 @@ def assert_event_has_tags(aggregator, msg_text, tags, **kwargs):
             return
 
     raise AssertionError(f'No event matching {msg_text!r} with tags {tags!r}')
+
+
+def event_indexes(aggregator, workload_uid):
+    indexes = []
+    for event in aggregator.events:
+        tags = event.get('tags') or []
+        if f'kueue_workload_uid:{workload_uid}' not in tags:
+            continue
+        index_tags = [tag for tag in tags if tag.startswith('kueue_workload_event_index:')]
+        assert len(index_tags) == 1, event
+        indexes.append(int(index_tags[0].split(':', 1)[1]))
+    return indexes
 
 
 def get_metric_tags(aggregator, metric_name):

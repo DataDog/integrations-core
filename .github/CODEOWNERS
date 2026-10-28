@@ -116,6 +116,9 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /cisco_sdwan/                                                      @DataDog/ndm-integrations @DataDog/agent-integrations
 /cisco_sdwan/*.md                                                  @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
 /cisco_sdwan/manifest.json                                         @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
+/pan_firewall/                                                     @DataDog/ndm-integrations @DataDog/agent-integrations
+/pan_firewall/*.md                                                 @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
+/pan_firewall/manifest.json                                        @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
 /snmp/                                                             @DataDog/network-device-monitoring-core @DataDog/agent-integrations
 /snmp/*.md                                                         @DataDog/network-device-monitoring-core @DataDog/agent-integrations @DataDog/documentation
 /snmp/manifest.json                                                @DataDog/network-device-monitoring-core @DataDog/agent-integrations @DataDog/documentation
