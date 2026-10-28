@@ -401,6 +401,7 @@ def test_collects_build_config_without_default_branch_builds(dd_run_check, aggre
     check = teamcity_rest_check(instance)
 
     dd_run_check(check)
+    aggregator.assert_metric('teamcity.build_duration', count=0)
     builds[0]['state'] = 'finished'
     dd_run_check(check)
 
