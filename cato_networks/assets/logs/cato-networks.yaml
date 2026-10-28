@@ -320,7 +320,7 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Finding Information Product Name
+    name: Finding Info Product Name
     path: ocsf.finding_info.product.name
     source: log
   - groups:
