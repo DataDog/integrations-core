@@ -4010,3 +4010,190 @@ tests:
    tags:
      - source:LOGS_SOURCE
    timestamp: 1793108836000
+ -
+  sample: |-
+    {
+      "event_id" : "24e31ed7-6722-4223-8334-fbcc2b243458",
+      "additional_details" : {
+        "shared_link_id" : "99agm1uqi4eb3bn4hptgv0bfjbizkrsr",
+        "shield_shared_link_enforcement" : {
+          "controlMode" : "monitoring",
+          "restrictedAccessLevels" : "Open, Company"
+        },
+        "accessLevel" : "company",
+        "service_name" : "Box for Slack",
+        "service_id" : "854298"
+      },
+      "created_at" : "2026-10-20T11:45:14-07:00",
+      "source" : {
+        "parent" : {
+          "name" : "Draft Slides",
+          "id" : "925547624842",
+          "type" : "folder"
+        },
+        "item_id" : "892534674360",
+        "item_type" : "folder",
+        "item_name" : "Working Drafts",
+        "owned_by" : {
+          "name" : "Ops Mailbox",
+          "id" : "28036701759",
+          "type" : "user",
+          "login" : "ops@example.com"
+        },
+        "classification" : {
+          "name" : "Restricted - Internal"
+        }
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "Blake Granger",
+        "id" : "20937946426",
+        "login" : "blake.granger@example.com"
+      },
+      "event_type" : "SHIELD_SHARED_LINK_STATUS_RESTRICTED_ON_UPDATE",
+      "ip_address" : "Unknown IP"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: SHIELD_SHARED_LINK_STATUS_RESTRICTED_ON_UPDATE
+     created_at: '2026-10-20T11:45:14-07:00'
+     source:
+       parent:
+         name: Draft Slides
+         id: '925547624842'
+         type: folder
+       item_id: '892534674360'
+       item_type: folder
+       item_name: Working Drafts
+       owned_by:
+         name: Ops Mailbox
+         id: '28036701759'
+         type: user
+         login: ops@example.com
+       classification:
+         name: Restricted - Internal
+     ip_address: Unknown IP
+     box_event_category: shield
+     type: event
+     created_by:
+       name: Blake Granger
+       id: '20937946426'
+       type: user
+       login: blake.granger@example.com
+     network:
+       client:
+         geoip:
+           invalidAddress: Unknown IP
+         ip: Unknown IP
+     event_id: 24e31ed7-6722-4223-8334-fbcc2b243458
+     event_type: SHIELD_SHARED_LINK_STATUS_RESTRICTED_ON_UPDATE
+     additional_details:
+       shared_link_id: 99agm1uqi4eb3bn4hptgv0bfjbizkrsr
+       shield_shared_link_enforcement:
+         controlMode: monitoring
+         restrictedAccessLevels: Open, Company
+       accessLevel: company
+       service_name: Box for Slack
+       service_id: '854298'
+     ocsf:
+       severity: Informational
+       activity_name: Share
+       metadata:
+         uid: 24e31ed7-6722-4223-8334-fbcc2b243458
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: SHIELD_SHARED_LINK_STATUS_RESTRICTED_ON_UPDATE
+         version: 1.5.0
+       category_uid: 6
+       category_name: Application Activity
+       src_endpoint:
+         name: Unknown IP
+       status_detail: monitoring
+       actor:
+         app_uid: '854298'
+         app_name: Box for Slack
+         user:
+           uid: '20937946426'
+           email_addr: blake.granger@example.com
+           type_id: 1
+           name: Blake Granger
+           type: User
+       file_result:
+         uid: '892534674360'
+         type_id: 2
+         name: Working Drafts
+         type: Folder
+       status_id: 1
+       file:
+         owner:
+           uid: '28036701759'
+           email_addr: ops@example.com
+           name: Ops Mailbox
+         uid: '892534674360'
+         parent_folder: Draft Slides
+         confidentiality_id: 6
+         type_id: 2
+         confidentiality: Restricted
+         name: Working Drafts
+         type: Folder
+       class_uid: 6006
+       activity_id: 12
+       time: 1792521914000
+       severity_id: 1
+       class_name: File Hosting Activity
+       status: Success
+     usr:
+       name: Blake Granger
+       id: '20937946426'
+       email: blake.granger@example.com
+   message: |-
+     {
+       "event_id" : "24e31ed7-6722-4223-8334-fbcc2b243458",
+       "additional_details" : {
+         "shared_link_id" : "99agm1uqi4eb3bn4hptgv0bfjbizkrsr",
+         "shield_shared_link_enforcement" : {
+           "controlMode" : "monitoring",
+           "restrictedAccessLevels" : "Open, Company"
+         },
+         "accessLevel" : "company",
+         "service_name" : "Box for Slack",
+         "service_id" : "854298"
+       },
+       "created_at" : "2026-10-20T11:45:14-07:00",
+       "source" : {
+         "parent" : {
+           "name" : "Draft Slides",
+           "id" : "925547624842",
+           "type" : "folder"
+         },
+         "item_id" : "892534674360",
+         "item_type" : "folder",
+         "item_name" : "Working Drafts",
+         "owned_by" : {
+           "name" : "Ops Mailbox",
+           "id" : "28036701759",
+           "type" : "user",
+           "login" : "ops@example.com"
+         },
+         "classification" : {
+           "name" : "Restricted - Internal"
+         }
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "Blake Granger",
+         "id" : "20937946426",
+         "login" : "blake.granger@example.com"
+       },
+       "event_type" : "SHIELD_SHARED_LINK_STATUS_RESTRICTED_ON_UPDATE",
+       "ip_address" : "Unknown IP"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1792521914000
