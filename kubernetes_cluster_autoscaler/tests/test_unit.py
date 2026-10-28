@@ -3,12 +3,17 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import pytest
-
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.kubernetes_cluster_autoscaler import KubernetesClusterAutoscalerCheck
 
 from .common import METRICS_MOCK, get_fixture_path
+
+pytestmark = pytest.mark.unit
+
+
+def test_default_metric_limit_is_zero():
+    assert KubernetesClusterAutoscalerCheck.DEFAULT_METRIC_LIMIT == 0
 
 
 def test_check_kubernetes_cluster_autoscaler(dd_run_check, aggregator, instance, mock_http_response):
