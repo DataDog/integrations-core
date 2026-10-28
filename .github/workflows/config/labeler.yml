@@ -77,10 +77,6 @@ integration/airflow:
 - changed-files:
   - any-glob-to-any-file:
     - airflow/**/*
-integration/akamai_cost_management:
-- changed-files:
-  - any-glob-to-any-file:
-    - akamai_cost_management/**/*
 integration/amazon_app_mesh:
 - changed-files:
   - any-glob-to-any-file:
