@@ -64,6 +64,7 @@ nav:
   - Dev Package:
     - What's in the box?: ddev/about.md
     - Test framework: ddev/test.md
+    - Pytest transport proof: ddev/pytest-transport.md
     - Plugins: ddev/plugins.md
     - Configuration: ddev/configuration.md
     - Multi-repo/Worktrees: ddev/multirepo.md

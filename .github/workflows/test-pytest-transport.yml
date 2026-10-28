@@ -1,0 +1,77 @@
+name: Prove literal pytest transport
+
+on:
+  pull_request:
+    paths:
+      - 'ddev/tests/plugin/external/hatch/*transport*.py'
+      - '.github/workflows/test-pytest-transport.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    name: ${{ matrix.os }} / Hatch ${{ matrix.hatch }} / ${{ matrix.lane }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        hatch: ['1.13.0', '1.18.2']
+        lane: [core]
+        python: ['3.13']
+        pytest: ['9.0.3']
+        kind: ['response-file,json-adapter']
+        utf8: ['0']
+        expect: ['']
+        include:
+          - {os: ubuntu-latest, hatch: '1.18.2', lane: upstream-current, python: '3.13', pytest: '9.1.1', kind: 'response-file,json-adapter', utf8: '0', expect: ''}
+          - {os: macos-latest, hatch: '1.18.2', lane: upstream-current, python: '3.13', pytest: '9.1.1', kind: 'response-file,json-adapter', utf8: '0', expect: ''}
+          - {os: windows-latest, hatch: '1.18.2', lane: upstream-current, python: '3.13', pytest: '9.1.1', kind: 'response-file,json-adapter', utf8: '0', expect: ''}
+          - {os: windows-latest, hatch: '1.18.2', lane: old-decoding-failure, python: '3.11', pytest: '8.2.0', kind: response-file, utf8: '0', expect: decode-error}
+          - {os: windows-latest, hatch: '1.18.2', lane: old-utf8-prerequisite, python: '3.11', pytest: '8.2.0', kind: response-file, utf8: '1', expect: ''}
+          - {os: windows-latest, hatch: '1.18.2', lane: old-json-no-utf8-change, python: '3.11', pytest: '8.2.0', kind: json-adapter, utf8: '0', expect: ''}
+          - {os: windows-latest, hatch: '1.18.2', lane: old-filesystem-decoding, python: '3.12', pytest: '8.2.0', kind: 'response-file,json-adapter', utf8: '0', expect: ''}
+          - {os: ubuntu-latest, hatch: '1.18.2', lane: pre-response-file-failure, python: '3.11', pytest: '7.4.4', kind: response-file, utf8: '0', expect: unsupported}
+          - {os: ubuntu-latest, hatch: '1.18.2', lane: pre-response-file-json, python: '3.11', pytest: '7.4.4', kind: json-adapter, utf8: '0', expect: ''}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        id: target-python
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+      - name: Run only the real-process transport proof
+        env:
+          DDEV_TRANSPORT_PROBE: '1'
+          TRANSPORT_PYTHON: ${{ matrix.python }}
+          TRANSPORT_PYTHON_EXECUTABLE: ${{ steps.target-python.outputs.python-path }}
+          TRANSPORT_PYTEST: ${{ matrix.pytest }}
+          TRANSPORT_KIND: ${{ matrix.kind }}
+          TRANSPORT_UTF8: ${{ matrix.utf8 }}
+          TRANSPORT_EXPECT: ${{ matrix.expect }}
+          PROBE_HATCH: ${{ matrix.hatch }}
+        run: |
+          virtualenv_version=21.15.1
+          if [[ "$PROBE_HATCH" == '1.13.0' ]]; then
+            virtualenv_version=20.36.1
+          fi
+          tooling=(--no-project --python 3.13 --with "hatch==$PROBE_HATCH" --with "virtualenv==$virtualenv_version"
+            --with-editable ./ddev --with-editable './datadog_checks_dev[cli]')
+          uv run "${tooling[@]}" ddev config override
+          uv run "${tooling[@]}" \
+            python -c 'import os, sys; os.environ["TRANSPORT_HATCH_PYTHON"] = sys.executable; from ddev.cli import main; main()' \
+            --no-interactive test ddev -- tests/plugin/external/hatch/test_pytest_transport.py \
+            -k literal_pytest_transport -s 2>&1 | tee transport-probe.log
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        if: always()
+        with:
+          name: transport-${{ matrix.os }}-${{ matrix.hatch }}-${{ matrix.lane }}
+          path: transport-probe.log
