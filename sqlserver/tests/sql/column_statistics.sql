@@ -26,8 +26,10 @@ BEGIN
                 WHERE i.object_id = c.object_id AND ic.column_id = c.column_id AND i.is_unique = 1
                     AND i.has_filter = 0 AND INDEXKEY_PROPERTY(i.object_id, i.index_id, 2, 'ColumnId') IS NULL
             ) THEN 1 ELSE 0 END AS BIT) AS is_unique,
-            -- In UTC, since the server's time zone is unknown to the reader.
-            DATEADD(SECOND, DATEDIFF(SECOND, SYSDATETIME(), SYSUTCDATETIME()), sp.last_updated) AS last_updated,
+            -- As ISO 8601 text in UTC, since the server's time zone is unknown to the reader, and older drivers such as
+            -- SQLOLEDB return datetime2 values as text in their own format.
+            CONVERT(VARCHAR(27), DATEADD(SECOND, DATEDIFF(SECOND, SYSDATETIME(), SYSUTCDATETIME()), sp.last_updated), 126)
+                + 'Z' AS last_updated,
             sp.[rows], sp.rows_sampled, sp.steps, sp.modification_counter,
             ROW_NUMBER() OVER (PARTITION BY st.object_id, sc.column_id ORDER BY sp.rows_sampled DESC, sp.last_updated DESC) AS rn
         FROM (SELECT TOP (@max_tables) object_id FROM sys.tables WHERE is_ms_shipped = 0 ORDER BY SCHEMA_NAME(schema_id), name) t

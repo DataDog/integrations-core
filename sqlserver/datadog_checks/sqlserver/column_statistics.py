@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, Iterator
 from datadog_checks.base.utils.db.health import HealthStatus
 from datadog_checks.base.utils.db.utils import default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
-from datadog_checks.base.utils.time import ensure_aware_datetime
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
 from datadog_checks.sqlserver.diagnose import SYSTEM_DATABASES
@@ -287,8 +286,8 @@ def column_statistics(stats: dict) -> dict:
         "max_length": int(stats["max_length"]),
         "is_nullable": bool(stats["is_nullable"]),
         "is_unique": bool(stats["is_unique"]),
-        # The procedure converts it to UTC, but the driver returns it without a time zone.
-        "last_updated": ensure_aware_datetime(stats["last_updated"]).isoformat(),
+        # ISO 8601 in UTC, as the procedure formats it.
+        "last_updated": stats["last_updated"],
         "rows": int(stats["rows"]),
         "rows_sampled": int(stats["rows_sampled"]),
         "steps": int(stats["steps"]),

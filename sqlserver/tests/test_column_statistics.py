@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import re
 from copy import copy
 from datetime import datetime, timedelta, timezone
 
@@ -66,10 +67,13 @@ def test_collects_column_statistics(aggregator, dd_run_check, dbm_instance):
     for column in columns.values():
         assert column['rows'] == column['rows_sampled'] == 10_000
         assert column['modification_counter'] == 0
+        # The procedure formats it, so every driver sends the same ISO 8601 text.
+        assert re.fullmatch(r'\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{7}Z', column['last_updated'])
         updated = datetime.fromisoformat(column['last_updated'])
         assert abs(datetime.now(timezone.utc) - updated) < timedelta(days=1), "last_updated is in UTC"
-    # An all-NULL column's properties count one step, though sys.dm_db_stats_histogram returns none.
-    for name in ('id', 'customer_id', 'status', 'note'):
+    # The properties count the NULL step, which sys.dm_db_stats_histogram leaves out for an all-NULL column, and on
+    # Windows SQL Server 2019 for any column, so only columns without NULLs match.
+    for name in ('id', 'customer_id', 'note'):
         assert columns[name]['steps'] == len(columns[name]['histogram']['equal_rows'])
     identity = columns['id']
     assert identity['stats_name'].startswith('PK__')
@@ -145,7 +149,7 @@ def procedure_row(**overrides):
         'max_length': 20,
         'is_nullable': 1,
         'is_unique': 0,
-        'last_updated': datetime(2026, 10, 28, 14, 30),
+        'last_updated': '2026-10-28T14:30:00.0000000Z',
         'rows': 10_000,
         'rows_sampled': 6_700,
         'steps': 3,
