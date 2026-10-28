@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 11.0.0 / 2026-10-21
+
+***Changed***:
+
+* Upgrade PyMongo to 4.18.2. The minimum supported MongoDB server version is 4.4. ([#25517](https://github.com/DataDog/integrations-core/pull/25517))
+
+***Added***:
+
+* Support MongoDB 9 query statistics and collect change stream, memory, replication traffic, and write-conflict metrics. ([#25517](https://github.com/DataDog/integrations-core/pull/25517))
+
 ## 10.14.0 / 2026-10-01
 
 ***Added***:

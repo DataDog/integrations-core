@@ -1,0 +1,11 @@
+<!-- Synthetic `type=log&action=get` response of a job still running. The envelope is fw-a/threat_log_5m.xml's with `status` changed from FIN to ACT, no entries and `progress="40"`; no real ACT log job was captured, so the progress value and the empty `<logs>` are unverified. -->
+<response status="success"><result>
+  <job>
+    <status>ACT</status>
+    <id>93</id>
+  </job>
+  <log>
+    <logs count="0" progress="40">
+    </logs>
+  </log>
+</result></response>
