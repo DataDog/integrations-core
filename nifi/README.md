@@ -51,7 +51,15 @@ No additional installation is needed on your server.
 
    Change the `path` and `service` parameter values based on your environment. See the [sample nifi.d/conf.yaml][4] for all available configuration options.
 
-3. [Restart the Agent][5].
+3. Optional: Configure NiFi to include a UTC offset in its log timestamps. By default, NiFi writes local time without a timezone, so the integration keeps that time in the `nifi.local_time` attribute and dates each log by when Datadog received it. To date logs by the time NiFi wrote them, edit `conf/logback.xml` in your NiFi installation and set the pattern of the `APP_FILE` appender to:
+
+   ```xml
+   <pattern>%date{"yyyy-MM-dd HH:mm:ss,SSSXXX"} %level [%thread] %logger{40} %msg%n</pattern>
+   ```
+
+   Keep the quotes around the date format. Without them, logback reads the text after the comma as a timezone ID and NiFi starts without any logging. Restart NiFi to apply the change.
+
+4. [Restart the Agent][5].
 
 ### Validation
 
