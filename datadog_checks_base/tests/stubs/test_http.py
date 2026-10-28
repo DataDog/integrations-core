@@ -164,6 +164,12 @@ def test_fake_client_tls_overrides_preserve_defaults(tls_verify: bool | None):
 
     assert client.tls_config['tls_verify'] is tls_verify
     assert client.tls_config['tls_ciphers'] == TlsConfig().tls_ciphers
+
+
+@pytest.mark.parametrize('tls_verify', [False, None])
+def test_fake_client_tls_overrides_disable_ssl_verification(tls_verify: bool | None):
+    client = FakeHTTPClient(tls_config={'tls_verify': tls_verify})
+
     context = create_ssl_context(client.tls_config)
     assert context.verify_mode == ssl.CERT_NONE
     assert context.check_hostname is False
@@ -185,6 +191,12 @@ def test_created_client_uses_canonical_tls_defaults():
     child = parent.create_client()
 
     assert child.tls_config == TlsConfig().__dict__
+
+
+def test_created_client_ssl_context_enables_verification():
+    parent = FakeHTTPClient(tls_config={'tls_verify': False})
+    child = parent.create_client()
+
     context = create_ssl_context(child.tls_config)
     assert context.verify_mode == ssl.CERT_REQUIRED
     assert context.check_hostname is True
