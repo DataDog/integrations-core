@@ -32,9 +32,10 @@ from datadog_checks.base.utils import http as http_module
 from datadog_checks.base.utils._certificate_distrust import (
     DISTRUSTED_SPKI_SHA256,
     CertificateDistrustError,
-    _configured_keys,
+    _configured_names,
     caused_by_certificate_distrust,
     find_distrusted_key,
+    find_distrusted_name,
 )
 from datadog_checks.base.utils.http import RequestsWrapper, load_x509_certificates
 from datadog_checks.base.utils.tls import TlsConfig, TlsContextWrapper
@@ -1157,6 +1158,27 @@ def test_find_distrusted_key_given_unparseable_certificate_first_returns_later_m
     assert find_distrusted_key([mangle(der), der]) == DV_G3B
 
 
+@pytest.mark.parametrize(
+    'fixture',
+    [
+        pytest.param('em-dv-tls-ca-g3b', id='issued-by-emsign'),
+        # The cross-sign by AAA Certificate Services, which the Windows ROOT store trusts, keeps the same name.
+        pytest.param('em-dv-tls-ca-g3b-aaa', id='cross-signed-by-aaa'),
+    ],
+)
+def test_find_distrusted_name_given_logged_ca_certificate_returns_common_name(fixture: str):
+    assert (
+        find_distrusted_name([load_distrust_fixture(fixture)], frozenset({'em dv tls ca - g3b'}))
+        == 'EM DV TLS CA - G3B'
+    )
+
+
+def test_find_distrusted_name_given_unparseable_certificate_first_returns_later_match():
+    der = load_distrust_fixture('em-dv-tls-ca-g3b')
+
+    assert find_distrusted_name([der[:-1], der], frozenset({'em dv tls ca - g3b'})) == 'EM DV TLS CA - G3B'
+
+
 @pytest.mark.parametrize('link', ['__cause__', '__context__'])
 def test_caused_by_certificate_distrust_given_distrust_error_behind_link_returns_true(link: str):
     wrapper = SSLError('request failed')
@@ -1219,20 +1241,20 @@ def distrust(monkeypatch: pytest.MonkeyPatch) -> Callable[[x509.Certificate], No
     return distrust_key_of
 
 
-DISTRUST_SETTING = 'tls_distrusted_spki_sha256'
+DISTRUST_SETTING = 'tls_distrusted_ca_names'
 
 
 @pytest.fixture
 def distrust_setting(monkeypatch: pytest.MonkeyPatch) -> Iterator[Callable[[object], None]]:
-    """Set the Agent setting that lists more CA keys to distrust, as `datadog_agent.get_config` returns it."""
+    """Set the Agent setting that lists more CA names to distrust, as `datadog_agent.get_config` returns it."""
 
     def set_value(value: object) -> None:
         monkeypatch.setitem(datadog_agent._config, DISTRUST_SETTING, value)
-        _configured_keys.cache_clear()
+        _configured_names.cache_clear()
 
     yield set_value
     # The setting is read once per process, so forget the value this test set.
-    _configured_keys.cache_clear()
+    _configured_names.cache_clear()
 
 
 class QuietHTTPServer(ThreadingHTTPServer):
@@ -1466,32 +1488,43 @@ def test_tls_context_given_resumed_session_raises_certificate_distrust_error(dis
                 context.wrap_socket(sock, server_hostname='localhost', session=session)
 
 
-@pytest.mark.parametrize('case', [pytest.param(str.lower, id='lowercase'), pytest.param(str.upper, id='uppercase')])
-def test_tls_context_given_configured_distrusted_ca_key_raises_certificate_distrust_error(
-    distrust_pki, distrust_setting, tmp_path, case: Callable[[str], str]
+@pytest.mark.parametrize(
+    'name',
+    [
+        pytest.param('Test Intermediate', id='exact'),
+        pytest.param('test INTERMEDIATE', id='different-case'),
+        pytest.param('  Test   Intermediate ', id='extra-whitespace'),
+    ],
+)
+def test_tls_context_given_configured_distrusted_ca_name_raises_certificate_distrust_error(
+    distrust_pki, distrust_setting, tmp_path, name: str
 ):
-    distrust_setting([case(spki_sha256(distrust_pki.intermediate))])
+    distrust_setting([name])
     context = TlsContextWrapper({'tls_ca_cert': distrust_pki.root_path}).tls_context
 
     with https_server(distrust_pki, tmp_path) as port:
-        with pytest.raises(CertificateDistrustError, match=DISTRUST_SETTING) as excinfo:
+        with pytest.raises(
+            CertificateDistrustError, match=r'distrusted CA: Test Intermediate .*tls_distrusted_ca_names'
+        ) as excinfo:
             connect_with_socket(context, port)
 
     assert excinfo.value.verify_code == 50
 
 
-def test_tls_context_given_certifi_fallback_and_configured_distrusted_ca_key_raises_certificate_distrust_error(
+def test_tls_context_given_certifi_fallback_and_configured_distrusted_ca_name_raises_certificate_distrust_error(
     distrust_pki, distrust_setting, tmp_path, monkeypatch
 ):
     # An empty OS trust store makes the context fall back to certifi.
     monkeypatch.setattr(ssl.SSLContext, 'load_default_certs', lambda self, purpose=ssl.Purpose.SERVER_AUTH: None)
     # certifi's bundle is a file the test cannot add its root to, so point certifi at the test root instead.
     monkeypatch.setattr(certifi, 'where', lambda: distrust_pki.root_path)
-    distrust_setting([spki_sha256(distrust_pki.intermediate)])
+    distrust_setting(['Test Intermediate'])
     context = TlsContextWrapper({}).tls_context
 
     with https_server(distrust_pki, tmp_path) as port:
-        with pytest.raises(CertificateDistrustError, match=DISTRUST_SETTING):
+        with pytest.raises(
+            CertificateDistrustError, match=r'distrusted CA: Test Intermediate .*tls_distrusted_ca_names'
+        ):
             connect_with_socket(context, port)
 
 
@@ -1514,11 +1547,21 @@ def test_tls_context_given_distrust_setting_unset_returns_connection(
         connect_with_socket(context, port)
 
 
-def test_tls_context_given_configured_keys_and_builtin_distrusted_ca_key_raises_naming_builtin_ca(
+def test_tls_context_given_partial_ca_name_returns_connection(distrust_pki, distrust_setting, tmp_path):
+    # A name matches a whole common name, so a word that many CAs share can't block them all.
+    distrust_setting(['Test'])
+    context = TlsContextWrapper({'tls_ca_cert': distrust_pki.root_path}).tls_context
+
+    with https_server(distrust_pki, tmp_path) as port:
+        # Completes the handshake without raising.
+        connect_with_socket(context, port)
+
+
+def test_tls_context_given_configured_names_and_builtin_distrusted_ca_key_raises_naming_builtin_ca(
     distrust_pki, distrust, distrust_setting, tmp_path
 ):
     distrust(distrust_pki.intermediate)
-    distrust_setting(['0' * 64])
+    distrust_setting(['Unrelated CA'])
     context = TlsContextWrapper({'tls_ca_cert': distrust_pki.root_path}).tls_context
 
     with https_server(distrust_pki, tmp_path) as port:
@@ -1529,10 +1572,9 @@ def test_tls_context_given_configured_keys_and_builtin_distrusted_ca_key_raises_
 @pytest.mark.parametrize(
     'value, bad_part',
     [
-        pytest.param(['not-a-hash'], "'not-a-hash'", id='not-hex'),
-        pytest.param(['a' * 63], 'a' * 63, id='63-characters'),
-        pytest.param([':'.join(['ab'] * 32)], ':'.join(['ab'] * 32), id='colon-separated-fingerprint'),
-        pytest.param('a' * 64, "'" + 'a' * 64 + "'", id='not-a-list'),
+        pytest.param(['Test Root', ''], "''", id='empty-name'),
+        pytest.param(['   '], "'   '", id='blank-name'),
+        pytest.param('Test Intermediate', "'Test Intermediate'", id='not-a-list'),
     ],
 )
 def test_tls_context_given_invalid_distrust_setting_raises_certificate_distrust_error_naming_value(
@@ -1550,7 +1592,7 @@ def test_tls_context_given_invalid_distrust_setting_raises_certificate_distrust_
 
 
 def test_tls_context_given_invalid_distrust_setting_logs_error_once(distrust_pki, distrust_setting, tmp_path, caplog):
-    distrust_setting(['not-a-hash'])
+    distrust_setting([''])
     context = TlsContextWrapper({'tls_ca_cert': distrust_pki.root_path}).tls_context
 
     with caplog.at_level(logging.ERROR), https_server(distrust_pki, tmp_path) as port:
@@ -1564,7 +1606,7 @@ def test_tls_context_given_invalid_distrust_setting_logs_error_once(distrust_pki
 def test_requests_wrapper_given_verification_disabled_and_invalid_distrust_setting_returns_response(
     distrust_pki, distrust_setting, tmp_path
 ):
-    distrust_setting(['not-a-hash'])
+    distrust_setting([''])
     http = RequestsWrapper({'tls_verify': False, 'skip_proxy': True}, {})
 
     with https_server(distrust_pki, tmp_path) as port:
@@ -1575,26 +1617,30 @@ def test_requests_wrapper_given_verification_disabled_and_invalid_distrust_setti
     'connect',
     [pytest.param(connect_with_socket, id='wrap-socket'), pytest.param(connect_with_asyncio, id='wrap-bio')],
 )
-def test_tls_context_outside_base_given_configured_distrusted_ca_key_raises_certificate_distrust_error(
+def test_tls_context_outside_base_given_configured_distrusted_ca_name_raises_certificate_distrust_error(
     distrust_pki, distrust_setting, tmp_path, connect: Callable[[ssl.SSLContext, int], None]
 ):
-    distrust_setting([spki_sha256(distrust_pki.intermediate)])
+    distrust_setting(['Test Intermediate'])
     # A context an integration or a library builds itself, without datadog_checks_base.
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
     context.load_verify_locations(distrust_pki.root_path)
 
     with https_server(distrust_pki, tmp_path) as port:
-        with pytest.raises(CertificateDistrustError, match=DISTRUST_SETTING):
+        with pytest.raises(
+            CertificateDistrustError, match=r'distrusted CA: Test Intermediate .*tls_distrusted_ca_names'
+        ):
             connect(context, port)
 
 
-def test_requests_session_given_configured_distrusted_ca_key_raises_ssl_error(distrust_pki, distrust_setting, tmp_path):
-    distrust_setting([spki_sha256(distrust_pki.intermediate)])
+def test_requests_session_given_configured_distrusted_ca_name_raises_ssl_error(
+    distrust_pki, distrust_setting, tmp_path
+):
+    distrust_setting(['Test Intermediate'])
 
     # A plain requests session, as integrations that don't use the HTTP wrapper create; urllib3 builds the context.
     with requests.Session() as session, https_server(distrust_pki, tmp_path) as port:
         session.trust_env = False
-        with pytest.raises(SSLError, match=DISTRUST_SETTING):
+        with pytest.raises(SSLError, match=r'distrusted CA: Test Intermediate .*tls_distrusted_ca_names'):
             session.get('https://localhost:{}'.format(port), verify=distrust_pki.root_path)
 
 
@@ -1618,21 +1664,23 @@ def pyopenssl_connection(
         yield connection
 
 
-def test_pyopenssl_connection_given_configured_distrusted_ca_key_raises_certificate_distrust_error(
+def test_pyopenssl_connection_given_configured_distrusted_ca_name_raises_certificate_distrust_error(
     distrust_pki, distrust_setting, tmp_path
 ):
-    distrust_setting([spki_sha256(distrust_pki.intermediate)])
+    distrust_setting(['Test Intermediate'])
     context = pyopenssl_client_context(distrust_pki.root_path)
 
     with https_server(distrust_pki, tmp_path) as port, pyopenssl_connection(context, port) as connection:
-        with pytest.raises(CertificateDistrustError, match=DISTRUST_SETTING):
+        with pytest.raises(
+            CertificateDistrustError, match=r'distrusted CA: Test Intermediate .*tls_distrusted_ca_names'
+        ):
             connection.do_handshake()
 
 
-def test_pyopenssl_connection_given_verification_disabled_and_distrusted_ca_key_returns_connection(
+def test_pyopenssl_connection_given_verification_disabled_and_distrusted_ca_name_returns_connection(
     distrust_pki, distrust_setting, tmp_path
 ):
-    distrust_setting([spki_sha256(distrust_pki.intermediate)])
+    distrust_setting(['Test Intermediate'])
     # pymongo turns verification off this way for `tls_allow_invalid_certificates`.
     context = pyopenssl_client_context(distrust_pki.root_path)
     context.set_verify(SSL.VERIFY_NONE)
@@ -1642,8 +1690,8 @@ def test_pyopenssl_connection_given_verification_disabled_and_distrusted_ca_key_
         connection.do_handshake()
 
 
-def test_pyopenssl_connection_given_distrusted_ca_key_rejects_later_writes(distrust_pki, distrust_setting, tmp_path):
-    distrust_setting([spki_sha256(distrust_pki.intermediate)])
+def test_pyopenssl_connection_given_distrusted_ca_name_rejects_later_writes(distrust_pki, distrust_setting, tmp_path):
+    distrust_setting(['Test Intermediate'])
     context = pyopenssl_client_context(distrust_pki.root_path)
 
     with https_server(distrust_pki, tmp_path) as port, pyopenssl_connection(context, port) as connection:
