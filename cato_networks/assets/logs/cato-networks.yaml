@@ -225,8 +225,38 @@ facets:
     source: log
   - groups:
       - OCSF
+    name: Device Geo Location City
+    path: ocsf.device.location.city
+    source: log
+  - groups:
+      - OCSF
+    name: Device Geo Location Country
+    path: ocsf.device.location.country
+    source: log
+  - groups:
+      - OCSF
+    name: Device MAC Address
+    path: ocsf.device.mac
+    source: log
+  - groups:
+      - OCSF
     name: Device Name
     path: ocsf.device.name
+    source: log
+  - groups:
+      - OCSF
+    name: Device OS Name
+    path: ocsf.device.os.name
+    source: log
+  - groups:
+      - OCSF
+    name: Device OS Version
+    path: ocsf.device.os.version
+    source: log
+  - groups:
+      - OCSF
+    name: Device Unique ID
+    path: ocsf.device.uid
     source: log
   - groups:
       - OCSF
@@ -256,6 +286,23 @@ facets:
     path: ocsf.dst_endpoint.port
     source: log
     type: integer
+  - facetType: range
+    groups:
+      - OCSF
+    name: Duration Milliseconds
+    path: ocsf.duration
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Entity Name
+    path: ocsf.entity.name
+    source: log
+  - groups:
+      - OCSF
+    name: Entity Unique ID
+    path: ocsf.entity.uid
+    source: log
   - groups:
       - OCSF
     name: Finding Info Analytic Name
@@ -273,13 +320,33 @@ facets:
     source: log
   - groups:
       - OCSF
+    name: Finding Information Product Name
+    path: ocsf.finding_info.product.name
+    source: log
+  - groups:
+      - OCSF
     name: Finding Info Title
     path: ocsf.finding_info.title
     source: log
   - groups:
       - OCSF
+    name: Finding Information Types
+    path: ocsf.finding_info.types
+    source: log
+  - groups:
+      - OCSF
     name: Finding Info Unique ID
     path: ocsf.finding_info.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Firewall Rule Name
+    path: ocsf.firewall_rule.name
+    source: log
+  - groups:
+      - OCSF
+    name: Firewall Rule Unique ID
+    path: ocsf.firewall_rule.uid
     source: log
   - groups:
       - IDE-Shepherd
@@ -305,6 +372,11 @@ facets:
       - OCSF
     name: Vendor Name
     path: ocsf.metadata.product.vendor_name
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Tenant UID
+    path: ocsf.metadata.tenant_uid
     source: log
   - groups:
       - OCSF
@@ -365,8 +437,18 @@ facets:
     source: log
   - groups:
       - OCSF
+    name: Source Endpoint Intermediate IP Addresses
+    path: ocsf.src_endpoint.intermediate_ips
+    source: log
+  - groups:
+      - OCSF
     name: Source IP Address
     path: ocsf.src_endpoint.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Source Endpoint Geo Location Country
+    path: ocsf.src_endpoint.location.country
     source: log
   - groups:
       - OCSF
@@ -978,7 +1060,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: '@ocsf.metadata.event_code:Security AND (@event_sub_type:(IPS OR "Suspicious Activity" OR "DNS Protection" OR "Dynamic Prevention" OR "Endpoint Protection") OR (@event_sub_type:("Anti Malware" OR "NG Anti Malware") AND @threat_verdict:(virus_found OR suspicious)))'
+        query: '@ocsf.metadata.event_code:Security AND (@event_sub_type:(IPS OR "Suspicious Activity" OR "DNS Protection" OR "Dynamic Prevention" OR "Endpoint Protection") OR (@event_sub_type:("Anti Malware" OR "NG Anti Malware") AND @threat_verdict:(virus_found OR suspicious))) AND -@ocsf.class_uid:*'
       processors:
         - type: category-processor
           name: ocsf.is_alert
@@ -2285,6 +2367,10 @@ pipeline:
                   name: Outbound
                   id: 2
                 - filter:
+                    query: "@traffic_direction:WANBOUND"
+                  name: Lateral
+                  id: 3
+                - filter:
                     query: "@traffic_direction:*"
                   name: Other
                   id: 99
@@ -2663,6 +2749,10 @@ pipeline:
                   name: Outbound
                   id: 2
                 - filter:
+                    query: "@traffic_direction:WANBOUND"
+                  name: Lateral
+                  id: 3
+                - filter:
                     query: "@traffic_direction:*"
                   name: Other
                   id: 99
@@ -2922,6 +3012,10 @@ pipeline:
                     query: "@traffic_direction:OUTBOUND"
                   name: Outbound
                   id: 2
+                - filter:
+                    query: "@traffic_direction:WANBOUND"
+                  name: Lateral
+                  id: 3
                 - filter:
                     query: "@traffic_direction:*"
                   name: Other
@@ -3187,6 +3281,10 @@ pipeline:
                   name: Outbound
                   id: 2
                 - filter:
+                    query: "@traffic_direction:WANBOUND"
+                  name: Lateral
+                  id: 3
+                - filter:
                     query: "@traffic_direction:*"
                   name: Other
                   id: 99
@@ -3450,6 +3548,10 @@ pipeline:
                     query: "@traffic_direction:OUTBOUND"
                   name: Outbound
                   id: 2
+                - filter:
+                    query: "@traffic_direction:WANBOUND"
+                  name: Lateral
+                  id: 3
                 - filter:
                     query: "@traffic_direction:*"
                   name: Other
