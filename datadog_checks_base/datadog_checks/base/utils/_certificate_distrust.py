@@ -11,14 +11,15 @@ Besides the built-in keys, the Agent setting `tls_distrusted_spki_sha256` can li
 distrust, but cannot remove one. An invalid value fails every verified connection, naming the bad entry, rather
 than trusting a key it may have been meant to distrust.
 
-The check runs when `do_handshake()` completes, which covers the default `do_handshake_on_connect=True` and
-explicit handshakes. Known limits:
+`install`, which runs when datadog_checks_base is imported, applies the check to the connections of every
+`ssl.SSLContext` in the process, whoever creates it, and to pyOpenSSL connections. The check runs when
+`do_handshake()` completes, which covers the default `do_handshake_on_connect=True` and explicit handshakes.
+Known limits:
 - A caller that disables `do_handshake_on_connect` and lets the first read or write complete the handshake
   implicitly bypasses it.
 - With mutual TLS, the client certificate has already been sent when the check rejects the server.
-- It applies to contexts built by `create_ssl_context` and to the TLS connection the HTTP wrapper opens to an
-  HTTPS proxy. Requests that the HTTP wrapper sends through requests' default adapter, such as uppercase
-  `HTTPS://` URLs or http-to-https redirects without persistent connections, are not checked.
+- TLS that doesn't go through Python's `ssl` module or pyOpenSSL is not checked: native client libraries such as
+  librdkafka (kafka_consumer) and libpq (postgres) bring their own.
 """
 
 import functools
@@ -26,9 +27,16 @@ import hashlib
 import logging
 import re
 import ssl
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
+from types import ModuleType
+from typing import TYPE_CHECKING, Any
+
+import wrapt
 
 from datadog_checks.base.agent import datadog_agent
+
+if TYPE_CHECKING:
+    from OpenSSL import SSL
 
 LOGGER = logging.getLogger(__name__)
 
@@ -89,10 +97,25 @@ class CertificateDistrustSSLObject(ssl.SSLObject):
 
 
 def attach_distrust_check(context: ssl.SSLContext) -> ssl.SSLContext:
-    """Make the connections created from `context` reject verified chains that contain a distrusted CA key."""
+    """Make the connections created from `context` reject verified chains that contain a distrusted CA key.
+
+    `install` does this for every context through `ssl.SSLContext`; setting it on a context as well keeps the check
+    if a library later replaces the classes on `ssl.SSLContext`.
+    """
     context.sslsocket_class = CertificateDistrustSSLSocket
     context.sslobject_class = CertificateDistrustSSLObject
     return context
+
+
+def install() -> None:
+    """Check the verified chain of every TLS client connection in this process for distrusted CA keys.
+
+    This covers the connections of every `ssl.SSLContext`, whoever creates it, and of pyOpenSSL, which pymongo uses,
+    once something imports it.
+    """
+    ssl.SSLContext.sslsocket_class = CertificateDistrustSSLSocket
+    ssl.SSLContext.sslobject_class = CertificateDistrustSSLObject
+    wrapt.register_post_import_hook(_check_pyopenssl_handshakes, 'OpenSSL.SSL')
 
 
 def find_distrusted_key(chain: Iterable[bytes], configured: frozenset[str] = frozenset()) -> tuple[str, str] | None:
@@ -185,12 +208,47 @@ def _check_verified_chain(connection: ssl.SSLSocket | ssl.SSLObject) -> None:
     # Without verification, `get_verified_chain` returns the unverified chain the server sent.
     if connection.server_side or connection.context.verify_mode == ssl.CERT_NONE:
         return
+    _check_chain(connection.get_verified_chain(), connection.session_reused)
+
+
+def _check_pyopenssl_handshakes(module: ModuleType) -> None:
+    wrapt.wrap_function_wrapper(module, 'Connection.do_handshake', _do_checked_pyopenssl_handshake)
+
+
+def _do_checked_pyopenssl_handshake(
+    wrapped: Callable[..., None], instance: 'SSL.Connection', args: tuple[Any, ...], kwargs: dict[str, Any]
+) -> None:
+    from OpenSSL import SSL
+
+    wrapped(*args, **kwargs)
+    try:
+        _check_pyopenssl_chain(instance)
+    except CertificateDistrustError:
+        # The handshake has already completed, so mark the connection shut down: a caller that swallows the error must
+        # not be able to send data to the distrusted peer.
+        instance.set_shutdown(SSL.SENT_SHUTDOWN | SSL.RECEIVED_SHUTDOWN)
+        raise
+
+
+def _check_pyopenssl_chain(connection: 'SSL.Connection') -> None:
+    from cryptography.hazmat.primitives.serialization import Encoding
+    from OpenSSL import SSL
+
+    # Without verification, OpenSSL never verified the chain.
+    if connection.get_context().get_verify_mode() == SSL.VERIFY_NONE:
+        return
+    chain = [cert.public_bytes(Encoding.DER) for cert in connection.get_verified_chain(as_cryptography=True) or []]
+    # pyOpenSSL can't tell whether the session was resumed, but a client only completes a verified handshake without
+    # a verified chain when it resumes one.
+    _check_chain(chain, session_reused=not chain)
+
+
+def _check_chain(chain: list[bytes], session_reused: bool) -> None:
     configured, invalid_setting = _configured_keys()
     if invalid_setting is not None:
         # Refuse the connection rather than trust a CA key the setting may have been meant to distrust.
         raise _certificate_distrust_error(invalid_setting)
-    chain = connection.get_verified_chain()
-    if not chain and connection.session_reused:
+    if not chain and session_reused:
         # A resumed session skips chain verification, so refuse it instead of trusting a chain that can't be seen.
         raise _certificate_distrust_error(
             'the certificate chain of a resumed TLS session could not be checked for distrusted CA keys'

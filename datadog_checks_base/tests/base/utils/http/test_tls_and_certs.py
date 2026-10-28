@@ -19,10 +19,12 @@ from threading import Thread
 import certifi
 import mock
 import pytest
+import requests
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import AuthorityInformationAccessOID, ExtendedKeyUsageOID, NameOID
+from OpenSSL import SSL
 from requests.exceptions import ProxyError, SSLError
 
 from datadog_checks.base.agent import datadog_agent
@@ -1567,3 +1569,100 @@ def test_requests_wrapper_given_verification_disabled_and_invalid_distrust_setti
 
     with https_server(distrust_pki, tmp_path) as port:
         assert http.get('https://localhost:{}'.format(port)).status_code == 200
+
+
+@pytest.mark.parametrize(
+    'connect',
+    [pytest.param(connect_with_socket, id='wrap-socket'), pytest.param(connect_with_asyncio, id='wrap-bio')],
+)
+def test_tls_context_outside_base_given_configured_distrusted_ca_key_raises_certificate_distrust_error(
+    distrust_pki, distrust_setting, tmp_path, connect: Callable[[ssl.SSLContext, int], None]
+):
+    distrust_setting([spki_sha256(distrust_pki.intermediate)])
+    # A context an integration or a library builds itself, without datadog_checks_base.
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    context.load_verify_locations(distrust_pki.root_path)
+
+    with https_server(distrust_pki, tmp_path) as port:
+        with pytest.raises(CertificateDistrustError, match=DISTRUST_SETTING):
+            connect(context, port)
+
+
+def test_requests_session_given_configured_distrusted_ca_key_raises_ssl_error(distrust_pki, distrust_setting, tmp_path):
+    distrust_setting([spki_sha256(distrust_pki.intermediate)])
+
+    # A plain requests session, as integrations that don't use the HTTP wrapper create; urllib3 builds the context.
+    with requests.Session() as session, https_server(distrust_pki, tmp_path) as port:
+        session.trust_env = False
+        with pytest.raises(SSLError, match=DISTRUST_SETTING):
+            session.get('https://localhost:{}'.format(port), verify=distrust_pki.root_path)
+
+
+def pyopenssl_client_context(root_path: str) -> SSL.Context:
+    context = SSL.Context(SSL.TLS_CLIENT_METHOD)
+    context.set_verify(SSL.VERIFY_PEER)
+    context.load_verify_locations(root_path)
+    return context
+
+
+@contextmanager
+def pyopenssl_connection(
+    context: SSL.Context, port: int, session: SSL.Session | None = None
+) -> Iterator[SSL.Connection]:
+    """Yield a pyOpenSSL client connection to `port`, before its handshake, as pymongo opens one."""
+    with socket.create_connection(('localhost', port)) as sock:
+        connection = SSL.Connection(context, sock)
+        if session is not None:
+            connection.set_session(session)
+        connection.set_connect_state()
+        yield connection
+
+
+def test_pyopenssl_connection_given_configured_distrusted_ca_key_raises_certificate_distrust_error(
+    distrust_pki, distrust_setting, tmp_path
+):
+    distrust_setting([spki_sha256(distrust_pki.intermediate)])
+    context = pyopenssl_client_context(distrust_pki.root_path)
+
+    with https_server(distrust_pki, tmp_path) as port, pyopenssl_connection(context, port) as connection:
+        with pytest.raises(CertificateDistrustError, match=DISTRUST_SETTING):
+            connection.do_handshake()
+
+
+def test_pyopenssl_connection_given_verification_disabled_and_distrusted_ca_key_returns_connection(
+    distrust_pki, distrust_setting, tmp_path
+):
+    distrust_setting([spki_sha256(distrust_pki.intermediate)])
+    # pymongo turns verification off this way for `tls_allow_invalid_certificates`.
+    context = pyopenssl_client_context(distrust_pki.root_path)
+    context.set_verify(SSL.VERIFY_NONE)
+
+    with https_server(distrust_pki, tmp_path) as port, pyopenssl_connection(context, port) as connection:
+        # Completes the handshake without raising.
+        connection.do_handshake()
+
+
+def test_pyopenssl_connection_given_distrusted_ca_key_rejects_later_writes(distrust_pki, distrust_setting, tmp_path):
+    distrust_setting([spki_sha256(distrust_pki.intermediate)])
+    context = pyopenssl_client_context(distrust_pki.root_path)
+
+    with https_server(distrust_pki, tmp_path) as port, pyopenssl_connection(context, port) as connection:
+        with pytest.raises(CertificateDistrustError):
+            connection.do_handshake()
+        with pytest.raises(SSL.Error):
+            connection.sendall(b'GET / HTTP/1.0\r\n\r\n')
+
+
+def test_pyopenssl_connection_given_resumed_session_raises_certificate_distrust_error(distrust_pki, tmp_path):
+    context = pyopenssl_client_context(distrust_pki.root_path)
+
+    # TLS 1.2 hands the client its session ticket during the handshake.
+    with https_server(distrust_pki, tmp_path, maximum_version=ssl.TLSVersion.TLSv1_2) as port:
+        with pyopenssl_connection(context, port) as connection:
+            connection.do_handshake()
+            session = connection.get_session()
+            # OpenSSL stops resuming the session of a connection freed without a TLS shutdown.
+            connection.shutdown()
+        with pyopenssl_connection(context, port, session) as connection:
+            with pytest.raises(CertificateDistrustError, match='could not be checked'):
+                connection.do_handshake()
