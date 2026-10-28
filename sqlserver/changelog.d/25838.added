@@ -1,0 +1,1 @@
+Collect `context_info` from XE query completion and query error events to correlate them with APM traces.

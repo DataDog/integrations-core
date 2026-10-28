@@ -1235,6 +1235,10 @@ files:
         Configure the collection of events from XE (Extended Events) sessions. Requires `dbm: true`.
 
         Set `collect_raw_query_statement.enabled` to `true` to collect the raw query statements for each event.
+
+        To correlate XE events with APM traces from tracers using DBM `full` propagation mode, add the
+        `sqlserver.context_info` action to the events in the `datadog_query_completions` and
+        `datadog_query_errors` sessions.
       options:
         - name: debug_sample_events
           description: |
@@ -1311,6 +1315,10 @@ files:
         Configure the collection of events from XE (Extended Events) sessions. Requires `dbm: true`.
 
         Set `collect_raw_query_statement.enabled` to `true` to collect the raw query statements for each event.
+
+        To correlate XE events with APM traces from tracers using DBM `full` propagation mode, add the
+        `sqlserver.context_info` action to the events in the `datadog_query_completions` and
+        `datadog_query_errors` sessions.
       options:
         - name: debug_sample_events
           description: |

@@ -121,6 +121,12 @@
 			(@P1 uniqueidentifier,@P2 int,@P3 int,@P4 int,@P5 int,@P6 int,@P7 int,@P8 int,@P9 int,@P10 int,@P11 int,@P12 int,@P13 int,@P14 int,@P15 nvarchar(4000))EXECUTE [msdb].[dbo].[sp_agent_log_job_history] @job_id = @P1, @is_system = @P2, @step_id = @P3, @sql_message_id = @P4, @sql_severity = @P5, @run_status = @P6, @run_date = @P7, @run_time = @P8, @run_duration = @P9, @operator_id_emailed = @P10, @operator_id_netsent = @P11, @operator_id_paged = @P12, @retries_attempted = @P13, @session_id  = @P14, @message = @P15
 		</value>
 	</action>
+	<action name="context_info" package="sqlserver">
+		<type name="binary_data" package="package0" />
+		<value>
+			013c9a1faa3f4412716ae2258a000000005c74e664fdcdb363
+		</value>
+	</action>
 	<action name="attach_activity_id" package="package0">
 		<type name="activity_id" package="package0" />
 		<value>
