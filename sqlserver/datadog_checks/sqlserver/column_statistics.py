@@ -289,7 +289,7 @@ def column_statistics(stats: dict) -> dict:
         "max_length": int(stats["max_length"]),
         "is_nullable": bool(stats["is_nullable"]),
         "is_unique": bool(stats["is_unique"]),
-        # ISO 8601 in UTC, as the procedure formats it.
+        # ISO 8601 with the server's offset, as the procedure formats it.
         "last_updated": stats["last_updated"],
         "rows": int(stats["rows"]),
         "rows_sampled": int(stats["rows_sampled"]),

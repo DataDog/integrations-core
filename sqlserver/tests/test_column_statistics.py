@@ -67,11 +67,11 @@ def test_collects_column_statistics(aggregator, dd_run_check, dbm_instance):
     for column in columns.values():
         assert column['rows'] == column['rows_sampled'] == 10_000
         assert column['modification_counter'] == 0
-        # The procedure formats it, so every driver sends the same ISO 8601 text. SQL Server leaves out the fraction
-        # of a second when it's zero.
-        assert re.fullmatch(r'\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d{7})?Z', column['last_updated'])
+        # The procedure formats it as the activity collector formats query_start, so every driver sends the same
+        # ISO 8601 text. SQL Server leaves out the milliseconds when they're zero.
+        assert re.fullmatch(r'\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d{3})?[+-]\d\d:\d\d', column['last_updated'])
         updated = datetime.fromisoformat(column['last_updated'])
-        assert abs(datetime.now(timezone.utc) - updated) < timedelta(days=1), "last_updated is in UTC"
+        assert abs(datetime.now(timezone.utc) - updated) < timedelta(days=1), "last_updated has the server's offset"
     # The properties count the NULL step, which sys.dm_db_stats_histogram leaves out for an all-NULL column, and on
     # Windows SQL Server 2019 for any column, so only columns without NULLs match.
     for name in ('id', 'customer_id', 'note', 'node'):
@@ -155,7 +155,7 @@ def procedure_row(**overrides):
         'max_length': 20,
         'is_nullable': 1,
         'is_unique': 0,
-        'last_updated': '2026-10-28T14:30:00.0000000Z',
+        'last_updated': '2026-10-28T14:30:00.530+00:00',
         'rows': 10_000,
         'rows_sampled': 6_700,
         'steps': 3,

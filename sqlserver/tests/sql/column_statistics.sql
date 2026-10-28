@@ -28,12 +28,10 @@ BEGIN
                 WHERE i.object_id = c.object_id AND ic.column_id = c.column_id AND i.is_unique = 1
                     AND i.has_filter = 0 AND INDEXKEY_PROPERTY(i.object_id, i.index_id, 2, 'ColumnId') IS NULL
             ) THEN 1 ELSE 0 END AS BIT) AS is_unique,
-            -- As ISO 8601 text in UTC, since the server's time zone is unknown to the reader, and older drivers such as
-            -- SQLOLEDB return datetime2 values as text in their own format. It's converted with the server's current
-            -- offset, so statistics updated before a daylight saving change are an hour off. Style 126 leaves out the
-            -- fraction of a second when it's zero.
-            CONVERT(VARCHAR(27), DATEADD(MINUTE, DATEPART(TZOFFSET, SYSDATETIMEOFFSET()) * -1, sp.last_updated), 126)
-                + 'Z' AS last_updated,
+            -- As ISO 8601 text with the server's offset, formatted as the activity collector formats query_start.
+            -- Older drivers such as SQLOLEDB return datetime2 values as text in their own format otherwise.
+            CONVERT(NVARCHAR(40), TODATETIMEOFFSET(CAST(sp.last_updated AS DATETIME),
+                DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126) AS last_updated,
             sp.[rows], sp.rows_sampled, sp.steps, sp.modification_counter,
             ROW_NUMBER() OVER (PARTITION BY st.object_id, sc.column_id ORDER BY sp.rows_sampled DESC, sp.last_updated DESC) AS rn
         FROM (SELECT TOP (@max_tables) object_id FROM sys.tables WHERE is_ms_shipped = 0 ORDER BY SCHEMA_NAME(schema_id), name) t
