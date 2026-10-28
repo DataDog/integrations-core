@@ -1359,8 +1359,8 @@ tests:
         app_name: DNS
         status_id: 2
         connection_info:
-          direction_id: 99
-          direction: WANBOUND
+          direction_id: 3
+          direction: Lateral
           protocol_name: UDP
         class_uid: 4003
         activity_id: 6
@@ -1535,8 +1535,8 @@ tests:
         app_name: HTTP(S)
         status_id: 1
         connection_info:
-          direction_id: 99
-          direction: WANBOUND
+          direction_id: 3
+          direction: Lateral
           protocol_name: TCP
         class_uid: 4001
         activity_id: 6
@@ -1705,8 +1705,8 @@ tests:
         app_name: SSH-V2
         status_id: 1
         connection_info:
-          direction_id: 99
-          direction: WANBOUND
+          direction_id: 3
+          direction: Lateral
           protocol_name: TCP
         class_uid: 4007
         activity_id: 6
@@ -1870,8 +1870,8 @@ tests:
         app_name: RDP
         status_id: 1
         connection_info:
-          direction_id: 99
-          direction: WANBOUND
+          direction_id: 3
+          direction: Lateral
           protocol_name: UDP
         class_uid: 4005
         activity_id: 6
@@ -2033,8 +2033,8 @@ tests:
         app_name: Netbios General (Parent of all Netbios apps)
         status_id: 1
         connection_info:
-          direction_id: 99
-          direction: WANBOUND
+          direction_id: 3
+          direction: Lateral
           protocol_name: UDP
         class_uid: 4006
         activity_id: 0
