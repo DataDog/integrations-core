@@ -104,8 +104,8 @@ tests:
           link: "https://app.box.com/master/shield/alerts/2398"
           malware_info:
             categories:
-             - "Adware"
-             - "SpyWare"
+              - "Adware"
+              - "SpyWare"
             description: "This is a really bad file"
             detail_link: "https://some.link/xyz"
             family: "MalwareBot4000"
@@ -130,13 +130,17 @@ tests:
             malware_name: "BadMalware"
             status: "Malicious"
             tags:
-             - "FILE_MALICIOUS_EXECUTION"
-             - "FILE_OTHER_TAG"
+              - "FILE_MALICIOUS_EXECUTION"
+              - "FILE_OTHER_TAG"
           priority: "medium"
           risk_score: 100
           rule_category: "Malicious Content"
           rule_id: 123
           rule_name: "Viruses and stuff"
+          user:
+            name: Some Name
+            id: 2320
+            email: some@email.com
       box_event_category: "shield"
       created_at: "2025-04-25T14:52:32+05:30"
       event_id: "97f1b31f-f143-4777-81f8-1b557b39ca33"
@@ -152,6 +156,48 @@ tests:
         email: "some@email.com"
         id: 2320
         name: "Some Name"
+      event_type: SHIELD_ALERT
+      ocsf:
+        severity: Medium
+        activity_name: Create
+        metadata:
+          uid: 97f1b31f-f143-4777-81f8-1b557b39ca33
+          product:
+            name: Box
+            vendor_name: Box
+          event_code: SHIELD_ALERT
+          version: 1.5.0
+        category_uid: 2
+        category_name: Findings
+        risk_score: 100
+        is_alert: true
+        finding_info:
+          uid: '2398'
+          src_url: https://app.box.com/master/shield/alerts/2398
+          title: Viruses and stuff
+          desc: This is a really bad file
+          created_time: 1745572952000
+          types:
+            - Malicious Content
+          analytic:
+            uid: '123'
+            type_id: 1
+            name: Viruses and stuff
+            type: Rule
+        class_uid: 2004
+        activity_id: 1
+        time: 1745572952000
+        severity_id: 3
+        class_name: Detection Finding
+        device:
+          owner:
+            uid: '2320'
+            email_addr: some@email.com
+            name: Some Name
+          type_id: 0
+          ip: 10.1.2.3
+          type: Unknown
+      ip_address: 10.1.2.3
     message: |-
       {
         "event_id" : "97f1b31f-f143-4777-81f8-1b557b39ca33",
@@ -230,7 +276,7 @@ tests:
     service: "enterprise-events"
     status: "warn"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1745572952000
  -
   sample: |-
@@ -241,7 +287,7 @@ tests:
         "file_path" : "/",
         "ekm_id" : "97f1b31f-f143-4777-81f8-1b557b39ca33",
         "size" : 857117299,
-        "file_hash" : "a4354646vdsdsf443",
+        "file_hash" : "a4354646d0bdf443c3c4e1b1f2a7d9e8c6b5a4f3",
         "service_name" : "Multiput Uploads",
         "service_id" : "231318",
         "version_id" : "2044534047872",
@@ -281,7 +327,7 @@ tests:
     custom:
       additional_details:
         ekm_id: "97f1b31f-f143-4777-81f8-1b557b39ca33"
-        file_hash: "a4354646vdsdsf443"
+        file_hash: "a4354646d0bdf443c3c4e1b1f2a7d9e8c6b5a4f3"
         file_path: "/"
         hash_type: "sha1"
         service_id: "231318"
@@ -292,6 +338,9 @@ tests:
       created_at: "2025-05-06T21:46:37+05:30"
       created_by:
         type: "user"
+        name: Aaron Levie
+        id: '13475339373'
+        login: notifications@example.com
       event_id: "97f1b31f-f143-4777-81f8-1b557b39ca33"
       evt:
         name: "UPLOAD"
@@ -320,6 +369,56 @@ tests:
         email: "notifications@example.com"
         id: "13475339373"
         name: "Aaron Levie"
+      ip_address: 10.1.2.3
+      event_type: UPLOAD
+      ocsf:
+        severity: Informational
+        activity_name: Upload
+        metadata:
+          uid: 97f1b31f-f143-4777-81f8-1b557b39ca33
+          product:
+            name: Box
+            vendor_name: Box
+          event_code: UPLOAD
+          version: 1.5.0
+        category_uid: 6
+        category_name: Application Activity
+        src_endpoint:
+          ip: 10.1.2.3
+        actor:
+          user:
+            uid: '13475339373'
+            email_addr: notifications@example.com
+            name: Aaron Levie
+          app_uid: '231318'
+          app_name: Multiput Uploads
+        file:
+          owner:
+            uid: '11446498'
+            email_addr: notifications@example.com
+            name: Aaron Levie
+          uid: '8903212345'
+          parent_folder: All Files
+          confidentiality_id: 4
+          size: 857117299
+          type_id: 1
+          confidentiality: Top Secret
+          name: example.docx
+          type: Regular File
+          version: '2044534047872'
+          ext: docx
+          path: /example.docx
+          hashes:
+            - value: a4354646d0bdf443c3c4e1b1f2a7d9e8c6b5a4f3
+              algorithm_id: 2
+              algorithm: SHA-1
+        class_uid: 6006
+        activity_id: 1
+        time: 1746548197000
+        severity_id: 1
+        class_name: File Hosting Activity
+        status_id: 1
+        status: Success
     message: |-
       {
         "event_id" : "97f1b31f-f143-4777-81f8-1b557b39ca33",
@@ -328,7 +427,7 @@ tests:
           "file_path" : "/",
           "ekm_id" : "97f1b31f-f143-4777-81f8-1b557b39ca33",
           "size" : 857117299,
-          "file_hash" : "a4354646vdsdsf443",
+          "file_hash" : "a4354646d0bdf443c3c4e1b1f2a7d9e8c6b5a4f3",
           "service_name" : "Multiput Uploads",
           "service_id" : "231318",
           "version_id" : "2044534047872",
@@ -365,7 +464,7 @@ tests:
       }
     service: "enterprise-events"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1746548197000
  -
   sample: |-
@@ -394,6 +493,9 @@ tests:
       created_at: "2025-04-22T01:25:51-07:00"
       created_by:
         type: "user"
+        name: Aaron Levie
+        id: '41799950245'
+        login: notifications@example.com
       event_id: "97f1b31f-f143-4777-81f8-1b557b39ca33"
       evt:
         name: "ADD_LOGIN_ACTIVITY_DEVICE"
@@ -411,6 +513,37 @@ tests:
         email: "notifications@example.com"
         id: "41799950245"
         name: "Aaron Levie"
+      event_type: ADD_LOGIN_ACTIVITY_DEVICE
+      ocsf:
+        severity: Informational
+        activity_name: ADD_LOGIN_ACTIVITY_DEVICE
+        metadata:
+          uid: 97f1b31f-f143-4777-81f8-1b557b39ca33
+          product:
+            name: Box
+            vendor_name: Box
+          event_code: ADD_LOGIN_ACTIVITY_DEVICE
+          version: 1.5.0
+        category_uid: 3
+        category_name: Identity & Access Management
+        src_endpoint:
+          ip: 10.2.3.4
+        status_id: 1
+        class_uid: 3002
+        activity_id: 99
+        time: 1745310351000
+        severity_id: 1
+        class_name: Authentication
+        user:
+          uid: '41799950245'
+          email_addr: notifications@example.com
+          name: Aaron Levie
+        status: Success
+        service:
+          name: Box
+        auth_protocol: Unknown
+        auth_protocol_id: 0
+      ip_address: 10.2.3.4
     message: |-
       {
         "event_id" : "97f1b31f-f143-4777-81f8-1b557b39ca33",
@@ -432,7 +565,7 @@ tests:
         }
       }
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1745310351000
  -
   sample: |-
@@ -472,6 +605,9 @@ tests:
       created_at: "2025-04-24T05:41:03-07:00"
       created_by:
         type: "user"
+        name: Aaron Levie
+        id: '41799950245'
+        login: notifications@example.com
       event_id: "97f1b31f-f143-4777-81f8-1b557b39ca33"
       evt:
         name: "UPLOAD"
@@ -497,6 +633,44 @@ tests:
         email: "notifications@example.com"
         id: "41799950245"
         name: "Aaron Levie"
+      event_type: UPLOAD
+      ocsf:
+        severity: Informational
+        activity_name: Upload
+        metadata:
+          uid: 97f1b31f-f143-4777-81f8-1b557b39ca33
+          product:
+            name: Box
+            vendor_name: Box
+          event_code: UPLOAD
+          version: 1.5.0
+        category_uid: 6
+        category_name: Application Activity
+        src_endpoint:
+          ip: 10.2.3.4
+        actor:
+          user:
+            uid: '41799950245'
+            email_addr: notifications@example.com
+            name: Aaron Levie
+        file:
+          owner:
+            uid: '41799950245'
+            email_addr: notifications@example.com
+            name: Aaron Levie
+          uid: '318298854550'
+          parent_folder: Box Reports
+          type_id: 2
+          name: Test
+          type: Folder
+        class_uid: 6006
+        activity_id: 1
+        time: 1745498463000
+        severity_id: 1
+        class_name: File Hosting Activity
+        status_id: 1
+        status: Success
+      ip_address: 10.2.3.4
     message: |-
       {
         "event_id" : "97f1b31f-f143-4777-81f8-1b557b39ca33",
@@ -529,5 +703,2699 @@ tests:
       }
     service: "enterprise-events"
     tags:
-     - "source:LOGS_SOURCE"
+      - "source:LOGS_SOURCE"
     timestamp: 1745498463000
+ -
+  sample: |-
+    {
+      "event_id" : "807a5044-2b21-4bb2-9f2f-aafbca7a2382",
+      "additional_details" : {
+        "shield_alert" : {
+          "rule_id" : "813763292",
+          "severity" : "HIGH",
+          "rule_name" : "Suspicious location",
+          "risk_score" : 80,
+          "rule_response_action" : {
+            "restrict_user" : false
+          },
+          "rule_category" : "Suspicious Locations",
+          "alert_id" : "2784",
+          "link" : "https://example.app.box.com/master/shield/alerts/2784",
+          "created_at" : "2026-10-27T04:56:17-07:00",
+          "alert_summary" : {
+            "alert_activities" : [
+              {
+                "occurred_at" : "2026-10-27T04:56:16-07:00",
+                "event_type" : "Login",
+                "ip_info" : {
+                  "country_code" : "KR",
+                  "city_name" : "Springfield",
+                  "ip" : "203.0.113.29",
+                  "latitude" : "37.0000",
+                  "region_name" : "Example Province",
+                  "registrant" : "Example Broadband",
+                  "longitude" : "127.0000"
+                }
+              }
+            ]
+          },
+          "user" : {
+            "name" : "Sam Ellison INT",
+            "id" : 95288625182,
+            "email" : "sam.ellison.int@example.com"
+          }
+        }
+      },
+      "created_at" : "2026-10-27T04:56:17-07:00",
+      "type" : "event",
+      "created_by" : {
+        "type" : "user"
+      },
+      "event_type" : "SHIELD_ALERT",
+      "ip_address" : "Unknown IP"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: SHIELD_ALERT
+     created_at: '2026-10-27T04:56:17-07:00'
+     ip_address: Unknown IP
+     box_event_category: shield
+     type: event
+     created_by:
+       type: user
+     network:
+       client:
+         geoip:
+           invalidAddress: Unknown IP
+         ip: Unknown IP
+     event_id: 807a5044-2b21-4bb2-9f2f-aafbca7a2382
+     event_type: SHIELD_ALERT
+     additional_details:
+       shield_alert:
+         rule_id: '813763292'
+         severity: HIGH
+         rule_name: Suspicious location
+         risk_score: 80
+         rule_response_action:
+           restrict_user: false
+         rule_category: Suspicious Locations
+         alert_id: '2784'
+         link: https://example.app.box.com/master/shield/alerts/2784
+         created_at: '2026-10-27T04:56:17-07:00'
+         alert_summary:
+           alert_activities:
+             - occurred_at: '2026-10-27T04:56:16-07:00'
+               event_type: Login
+               ip_info:
+                 country_code: KR
+                 city_name: Springfield
+                 ip: 203.0.113.29
+                 latitude: '37.0000'
+                 region_name: Example Province
+                 registrant: Example Broadband
+                 longitude: '127.0000'
+         user:
+           name: Sam Ellison INT
+           id: 95288625182
+           email: sam.ellison.int@example.com
+     ocsf:
+       severity: High
+       activity_name: Create
+       metadata:
+         uid: 807a5044-2b21-4bb2-9f2f-aafbca7a2382
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: SHIELD_ALERT
+         version: 1.5.0
+       category_uid: 2
+       category_name: Findings
+       risk_score: 80
+       is_alert: true
+       finding_info:
+         created_time: 1793102177000
+         uid: '2784'
+         src_url: https://example.app.box.com/master/shield/alerts/2784
+         types:
+           - Suspicious Locations
+         title: Suspicious location
+         analytic:
+           uid: '813763292'
+           type_id: 1
+           name: Suspicious location
+           type: Rule
+         desc: Suspicious Locations
+       class_uid: 2004
+       activity_id: 1
+       time: 1793102177000
+       severity_id: 4
+       class_name: Detection Finding
+       device:
+         owner:
+           uid: '95288625182'
+           email_addr: sam.ellison.int@example.com
+           name: Sam Ellison INT
+         type_id: 0
+         type: Unknown
+         name: Unknown IP
+     usr:
+       name: Sam Ellison INT
+       id: 95288625182
+       email: sam.ellison.int@example.com
+     status: critical
+   message: |-
+     {
+       "event_id" : "807a5044-2b21-4bb2-9f2f-aafbca7a2382",
+       "additional_details" : {
+         "shield_alert" : {
+           "rule_id" : "813763292",
+           "severity" : "HIGH",
+           "rule_name" : "Suspicious location",
+           "risk_score" : 80,
+           "rule_response_action" : {
+             "restrict_user" : false
+           },
+           "rule_category" : "Suspicious Locations",
+           "alert_id" : "2784",
+           "link" : "https://example.app.box.com/master/shield/alerts/2784",
+           "created_at" : "2026-10-27T04:56:17-07:00",
+           "alert_summary" : {
+             "alert_activities" : [
+               {
+                 "occurred_at" : "2026-10-27T04:56:16-07:00",
+                 "event_type" : "Login",
+                 "ip_info" : {
+                   "country_code" : "KR",
+                   "city_name" : "Springfield",
+                   "ip" : "203.0.113.29",
+                   "latitude" : "37.0000",
+                   "region_name" : "Example Province",
+                   "registrant" : "Example Broadband",
+                   "longitude" : "127.0000"
+                 }
+               }
+             ]
+           },
+           "user" : {
+             "name" : "Sam Ellison INT",
+             "id" : 95288625182,
+             "email" : "sam.ellison.int@example.com"
+           }
+         }
+       },
+       "created_at" : "2026-10-27T04:56:17-07:00",
+       "type" : "event",
+       "created_by" : {
+         "type" : "user"
+       },
+       "event_type" : "SHIELD_ALERT",
+       "ip_address" : "Unknown IP"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1793102177000
+   status: critical
+ -
+  sample: |-
+    {
+      "action_by" : {
+        "name" : "Box Admin",
+        "id" : "645073117",
+        "type" : "user",
+        "login" : "box.admin@example.com"
+      },
+      "event_id" : "4a8c2634-ea27-4c79-85c4-bfe04685f261",
+      "created_at" : "2026-10-26T13:10:16-07:00",
+      "source" : {
+        "name" : "Clay Wescott",
+        "id" : "47779751804",
+        "type" : "user",
+        "login" : "clay.wescott@example.com"
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "Clay Wescott",
+        "id" : "47779751804",
+        "login" : "clay.wescott@example.com"
+      },
+      "event_type" : "ADMIN_LOGIN",
+      "ip_address" : "203.0.113.2"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: ADMIN_LOGIN
+     created_at: '2026-10-26T13:10:16-07:00'
+     source:
+       name: Clay Wescott
+       id: '47779751804'
+       type: user
+       login: clay.wescott@example.com
+     ip_address: 203.0.113.2
+     box_event_category: user
+     type: event
+     created_by:
+       name: Clay Wescott
+       id: '47779751804'
+       type: user
+       login: clay.wescott@example.com
+     network:
+       client:
+         geoip: {}
+         ip: 203.0.113.2
+     action_by:
+       name: Box Admin
+       id: '645073117'
+       type: user
+       login: box.admin@example.com
+     event_id: 4a8c2634-ea27-4c79-85c4-bfe04685f261
+     event_type: ADMIN_LOGIN
+     ocsf:
+       severity: Informational
+       activity_name: Logon
+       metadata:
+         uid: 4a8c2634-ea27-4c79-85c4-bfe04685f261
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: ADMIN_LOGIN
+         version: 1.5.0
+       category_uid: 3
+       category_name: Identity & Access Management
+       src_endpoint:
+         ip: 203.0.113.2
+       actor:
+         user:
+           uid: '645073117'
+           email_addr: box.admin@example.com
+           name: Box Admin
+       status_id: 1
+       auth_protocol: Unknown
+       service:
+         name: Box
+       auth_protocol_id: 0
+       class_uid: 3002
+       activity_id: 1
+       time: 1793045416000
+       severity_id: 1
+       class_name: Authentication
+       user:
+         uid: '47779751804'
+         email_addr: clay.wescott@example.com
+         name: Clay Wescott
+       status: Success
+     usr:
+       name: Clay Wescott
+       id: '47779751804'
+       email: clay.wescott@example.com
+   message: |-
+     {
+       "action_by" : {
+         "name" : "Box Admin",
+         "id" : "645073117",
+         "type" : "user",
+         "login" : "box.admin@example.com"
+       },
+       "event_id" : "4a8c2634-ea27-4c79-85c4-bfe04685f261",
+       "created_at" : "2026-10-26T13:10:16-07:00",
+       "source" : {
+         "name" : "Clay Wescott",
+         "id" : "47779751804",
+         "type" : "user",
+         "login" : "clay.wescott@example.com"
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "Clay Wescott",
+         "id" : "47779751804",
+         "login" : "clay.wescott@example.com"
+       },
+       "event_type" : "ADMIN_LOGIN",
+       "ip_address" : "203.0.113.2"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1793045416000
+ -
+  sample: |-
+    {
+      "event_id" : "a65afda3-ae96-40a8-8cd7-53537d9b98e2",
+      "created_at" : "2026-10-21T13:35:52-07:00",
+      "source" : {
+        "name" : "Shay Sterling",
+        "id" : "10333776464",
+        "type" : "user",
+        "login" : "shay.sterling@example.com"
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "Unknown User",
+        "id" : "2",
+        "login" : ""
+      },
+      "event_type" : "FAILED_LOGIN",
+      "ip_address" : "203.0.113.20"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: FAILED_LOGIN
+     event_id: a65afda3-ae96-40a8-8cd7-53537d9b98e2
+     event_type: FAILED_LOGIN
+     ocsf:
+       severity: Informational
+       activity_name: Logon
+       metadata:
+         uid: a65afda3-ae96-40a8-8cd7-53537d9b98e2
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: FAILED_LOGIN
+         version: 1.5.0
+       category_uid: 3
+       category_name: Identity & Access Management
+       src_endpoint:
+         ip: 203.0.113.20
+       status_id: 2
+       auth_protocol: Unknown
+       service:
+         name: Box
+       auth_protocol_id: 0
+       class_uid: 3002
+       activity_id: 1
+       time: 1792614952000
+       severity_id: 1
+       class_name: Authentication
+       user:
+         uid: '10333776464'
+         email_addr: shay.sterling@example.com
+         name: Shay Sterling
+       status: Failure
+     usr:
+       name: Unknown User
+       id: '2'
+       email: Unknown User
+     created_at: '2026-10-21T13:35:52-07:00'
+     source:
+       name: Shay Sterling
+       id: '10333776464'
+       type: user
+       login: shay.sterling@example.com
+     ip_address: 203.0.113.20
+     box_event_category: user
+     type: event
+     created_by:
+       name: Unknown User
+       id: '2'
+       type: user
+       login: ''
+     network:
+       client:
+         geoip: {}
+         ip: 203.0.113.20
+   message: |-
+     {
+       "event_id" : "a65afda3-ae96-40a8-8cd7-53537d9b98e2",
+       "created_at" : "2026-10-21T13:35:52-07:00",
+       "source" : {
+         "name" : "Shay Sterling",
+         "id" : "10333776464",
+         "type" : "user",
+         "login" : "shay.sterling@example.com"
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "Unknown User",
+         "id" : "2",
+         "login" : ""
+       },
+       "event_type" : "FAILED_LOGIN",
+       "ip_address" : "203.0.113.20"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1792614952000
+ -
+  sample: |-
+    {
+      "event_id" : "242da609-8f6b-4823-a86b-3b370b620d75",
+      "created_at" : "2026-10-14T12:41:48-07:00",
+      "source" : {
+        "name" : "Tess Sutton",
+        "id" : "52893063611",
+        "type" : "user",
+        "login" : "tess.sutton@example.com"
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "Tess Sutton",
+        "id" : "52893063611",
+        "login" : "tess.sutton@example.com"
+      },
+      "event_type" : "MULTI_FACTOR_AUTH_INVALID_CODE",
+      "ip_address" : "Unknown IP"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: MULTI_FACTOR_AUTH_INVALID_CODE
+     event_id: 242da609-8f6b-4823-a86b-3b370b620d75
+     event_type: MULTI_FACTOR_AUTH_INVALID_CODE
+     ocsf:
+       severity: Informational
+       activity_name: Logon
+       metadata:
+         uid: 242da609-8f6b-4823-a86b-3b370b620d75
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: MULTI_FACTOR_AUTH_INVALID_CODE
+         version: 1.5.0
+       category_uid: 3
+       category_name: Identity & Access Management
+       src_endpoint:
+         name: Unknown IP
+       status_id: 2
+       auth_protocol: Unknown
+       service:
+         name: Box
+       auth_protocol_id: 0
+       class_uid: 3002
+       activity_id: 1
+       time: 1792006908000
+       severity_id: 1
+       is_mfa: true
+       class_name: Authentication
+       user:
+         uid: '52893063611'
+         email_addr: tess.sutton@example.com
+         name: Tess Sutton
+       status: Failure
+     usr:
+       name: Tess Sutton
+       id: '52893063611'
+       email: tess.sutton@example.com
+     created_at: '2026-10-14T12:41:48-07:00'
+     source:
+       name: Tess Sutton
+       id: '52893063611'
+       type: user
+       login: tess.sutton@example.com
+     ip_address: Unknown IP
+     box_event_category: user
+     type: event
+     created_by:
+       name: Tess Sutton
+       id: '52893063611'
+       type: user
+       login: tess.sutton@example.com
+     network:
+       client:
+         geoip:
+           invalidAddress: Unknown IP
+         ip: Unknown IP
+   message: |-
+     {
+       "event_id" : "242da609-8f6b-4823-a86b-3b370b620d75",
+       "created_at" : "2026-10-14T12:41:48-07:00",
+       "source" : {
+         "name" : "Tess Sutton",
+         "id" : "52893063611",
+         "type" : "user",
+         "login" : "tess.sutton@example.com"
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "Tess Sutton",
+         "id" : "52893063611",
+         "login" : "tess.sutton@example.com"
+       },
+       "event_type" : "MULTI_FACTOR_AUTH_INVALID_CODE",
+       "ip_address" : "Unknown IP"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1792006908000
+ -
+  sample: |-
+    {
+      "event_id" : "8aa29791-29a4-4a31-828f-8aa2366729d1",
+      "additional_details" : {
+        "device_trust_check_failed" : {
+          "agent_present" : "Device Trust could not communicate with the Box client on the device",
+          "device_trust_name" : "N/A",
+          "device_trust_id" : "N/A",
+          "testMode" : "true",
+          "client_environment" : "Unknown"
+        }
+      },
+      "created_at" : "2026-10-28T08:17:52-07:00",
+      "source" : {
+        "name" : "Cameron Kensington",
+        "id" : "49664861022",
+        "type" : "user",
+        "login" : "cameron.kensington@example.com"
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "Cameron Kensington",
+        "id" : "49664861022",
+        "login" : "cameron.kensington@example.com"
+      },
+      "event_type" : "DEVICE_TRUST_CHECK_FAILED",
+      "ip_address" : "203.0.113.1"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: DEVICE_TRUST_CHECK_FAILED
+     created_at: '2026-10-28T08:17:52-07:00'
+     source:
+       name: Cameron Kensington
+       id: '49664861022'
+       type: user
+       login: cameron.kensington@example.com
+     ip_address: 203.0.113.1
+     box_event_category: user
+     type: event
+     created_by:
+       name: Cameron Kensington
+       id: '49664861022'
+       type: user
+       login: cameron.kensington@example.com
+     network:
+       client:
+         geoip: {}
+         ip: 203.0.113.1
+     event_id: 8aa29791-29a4-4a31-828f-8aa2366729d1
+     event_type: DEVICE_TRUST_CHECK_FAILED
+     additional_details:
+       device_trust_check_failed:
+         agent_present: Device Trust could not communicate with the Box client on the device
+         device_trust_name: N/A
+         device_trust_id: N/A
+         testMode: 'true'
+         client_environment: Unknown
+     ocsf:
+       severity: Informational
+       activity_name: Logon
+       metadata:
+         uid: 8aa29791-29a4-4a31-828f-8aa2366729d1
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: DEVICE_TRUST_CHECK_FAILED
+         version: 1.5.0
+       category_uid: 3
+       category_name: Identity & Access Management
+       src_endpoint:
+         ip: 203.0.113.1
+       status_detail: Device Trust could not communicate with the Box client on the device
+       status_id: 2
+       auth_protocol: Unknown
+       service:
+         name: Box
+       auth_protocol_id: 0
+       class_uid: 3002
+       activity_id: 1
+       time: 1793200672000
+       severity_id: 1
+       class_name: Authentication
+       user:
+         uid: '49664861022'
+         email_addr: cameron.kensington@example.com
+         name: Cameron Kensington
+       status: Failure
+     usr:
+       name: Cameron Kensington
+       id: '49664861022'
+       email: cameron.kensington@example.com
+   message: |-
+     {
+       "event_id" : "8aa29791-29a4-4a31-828f-8aa2366729d1",
+       "additional_details" : {
+         "device_trust_check_failed" : {
+           "agent_present" : "Device Trust could not communicate with the Box client on the device",
+           "device_trust_name" : "N/A",
+           "device_trust_id" : "N/A",
+           "testMode" : "true",
+           "client_environment" : "Unknown"
+         }
+       },
+       "created_at" : "2026-10-28T08:17:52-07:00",
+       "source" : {
+         "name" : "Cameron Kensington",
+         "id" : "49664861022",
+         "type" : "user",
+         "login" : "cameron.kensington@example.com"
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "Cameron Kensington",
+         "id" : "49664861022",
+         "login" : "cameron.kensington@example.com"
+       },
+       "event_type" : "DEVICE_TRUST_CHECK_FAILED",
+       "ip_address" : "203.0.113.1"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1793200672000
+ -
+  sample: |-
+    {
+      "event_id" : "4ddd3c86-aaee-4c52-91d7-28590ad9c235",
+      "additional_details" : {
+        "service_name" : "Prod Files",
+        "service_id" : "9772615"
+      },
+      "created_at" : "2026-10-28T08:21:58-07:00",
+      "source" : {
+        "name" : "Deal Default User 1001",
+        "id" : "22237906747",
+        "type" : "user",
+        "login" : "AppUser_9772615_9F6T7fXwjw@boxdevedition.com"
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "Deal Default User 1001",
+        "id" : "22237906747",
+        "login" : "AppUser_9772615_9F6T7fXwjw@boxdevedition.com"
+      },
+      "event_type" : "USER_AUTHENTICATE_OAUTH2_ACCESS_TOKEN_CREATE",
+      "ip_address" : "203.0.113.7"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: USER_AUTHENTICATE_OAUTH2_ACCESS_TOKEN_CREATE
+     created_at: '2026-10-28T08:21:58-07:00'
+     source:
+       name: Deal Default User 1001
+       id: '22237906747'
+       type: user
+       login: AppUser_9772615_9F6T7fXwjw@boxdevedition.com
+     ip_address: 203.0.113.7
+     box_event_category: user
+     type: event
+     created_by:
+       name: Deal Default User 1001
+       id: '22237906747'
+       type: user
+       login: AppUser_9772615_9F6T7fXwjw@boxdevedition.com
+     network:
+       client:
+         geoip: {}
+         ip: 203.0.113.7
+     event_id: 4ddd3c86-aaee-4c52-91d7-28590ad9c235
+     event_type: USER_AUTHENTICATE_OAUTH2_ACCESS_TOKEN_CREATE
+     additional_details:
+       service_name: Prod Files
+       service_id: '9772615'
+     ocsf:
+       severity: Informational
+       activity_name: Logon
+       metadata:
+         uid: 4ddd3c86-aaee-4c52-91d7-28590ad9c235
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: USER_AUTHENTICATE_OAUTH2_ACCESS_TOKEN_CREATE
+         version: 1.5.0
+       category_uid: 3
+       category_name: Identity & Access Management
+       src_endpoint:
+         ip: 203.0.113.7
+       status_id: 1
+       auth_protocol: OAUTH 2.0
+       service:
+         name: Prod Files
+       auth_protocol_id: 6
+       class_uid: 3002
+       activity_id: 1
+       time: 1793200918000
+       severity_id: 1
+       class_name: Authentication
+       user:
+         uid: '22237906747'
+         email_addr: AppUser_9772615_9F6T7fXwjw@boxdevedition.com
+         name: Deal Default User 1001
+       status: Success
+     usr:
+       name: Deal Default User 1001
+       id: '22237906747'
+       email: AppUser_9772615_9F6T7fXwjw@boxdevedition.com
+   message: |-
+     {
+       "event_id" : "4ddd3c86-aaee-4c52-91d7-28590ad9c235",
+       "additional_details" : {
+         "service_name" : "Prod Files",
+         "service_id" : "9772615"
+       },
+       "created_at" : "2026-10-28T08:21:58-07:00",
+       "source" : {
+         "name" : "Deal Default User 1001",
+         "id" : "22237906747",
+         "type" : "user",
+         "login" : "AppUser_9772615_9F6T7fXwjw@boxdevedition.com"
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "Deal Default User 1001",
+         "id" : "22237906747",
+         "login" : "AppUser_9772615_9F6T7fXwjw@boxdevedition.com"
+       },
+       "event_type" : "USER_AUTHENTICATE_OAUTH2_ACCESS_TOKEN_CREATE",
+       "ip_address" : "203.0.113.7"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1793200918000
+ -
+  sample: |-
+    {
+      "event_id" : "bc8d13dc-9dfc-4000-82b3-a48f234284c1",
+      "additional_details" : {
+        "service_name" : "Box DLP",
+        "service_id" : "7040278"
+      },
+      "created_at" : "2026-10-28T23:00:11+08:00",
+      "source" : {
+        "name" : "test",
+        "id" : "62339882905",
+        "type" : "user",
+        "login" : "AutomationUser_7040278_YL5ErU4OCT@boxdevedition.com"
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "test",
+        "id" : "62339882905",
+        "login" : "AutomationUser_7040278_YL5ErU4OCT@boxdevedition.com"
+      },
+      "event_type" : "OAUTH2_ACCESS_TOKEN_REVOKE",
+      "ip_address" : "203.0.113.27"
+    }
+  service: "box_logs"
+  result:
+   service: box_logs
+   custom:
+     evt:
+       name: OAUTH2_ACCESS_TOKEN_REVOKE
+     created_at: '2026-10-28T23:00:11+08:00'
+     source:
+       name: test
+       id: '62339882905'
+       type: user
+       login: AutomationUser_7040278_YL5ErU4OCT@boxdevedition.com
+     ip_address: 203.0.113.27
+     box_event_category: user
+     type: event
+     created_by:
+       name: test
+       id: '62339882905'
+       type: user
+       login: AutomationUser_7040278_YL5ErU4OCT@boxdevedition.com
+     network:
+       client:
+         geoip: {}
+         ip: 203.0.113.27
+     event_id: bc8d13dc-9dfc-4000-82b3-a48f234284c1
+     event_type: OAUTH2_ACCESS_TOKEN_REVOKE
+     additional_details:
+       service_name: Box DLP
+       service_id: '7040278'
+     ocsf:
+       severity: Informational
+       activity_name: Logoff
+       metadata:
+         uid: bc8d13dc-9dfc-4000-82b3-a48f234284c1
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: OAUTH2_ACCESS_TOKEN_REVOKE
+         version: 1.5.0
+       category_uid: 3
+       category_name: Identity & Access Management
+       src_endpoint:
+         ip: 203.0.113.27
+       status_id: 1
+       auth_protocol: OAUTH 2.0
+       service:
+         name: Box DLP
+       auth_protocol_id: 6
+       class_uid: 3002
+       activity_id: 2
+       time: 1793199611000
+       severity_id: 1
+       class_name: Authentication
+       user:
+         uid: '62339882905'
+         email_addr: AutomationUser_7040278_YL5ErU4OCT@boxdevedition.com
+         name: test
+       status: Success
+     usr:
+       name: test
+       id: '62339882905'
+       email: AutomationUser_7040278_YL5ErU4OCT@boxdevedition.com
+   message: |-
+     {
+       "event_id" : "bc8d13dc-9dfc-4000-82b3-a48f234284c1",
+       "additional_details" : {
+         "service_name" : "Box DLP",
+         "service_id" : "7040278"
+       },
+       "created_at" : "2026-10-28T23:00:11+08:00",
+       "source" : {
+         "name" : "test",
+         "id" : "62339882905",
+         "type" : "user",
+         "login" : "AutomationUser_7040278_YL5ErU4OCT@boxdevedition.com"
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "test",
+         "id" : "62339882905",
+         "login" : "AutomationUser_7040278_YL5ErU4OCT@boxdevedition.com"
+       },
+       "event_type" : "OAUTH2_ACCESS_TOKEN_REVOKE",
+       "ip_address" : "203.0.113.27"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1793199611000
+ -
+  sample: |-
+    {
+      "event_id" : "0b56649a-b8ad-4aee-8220-f057654bc1c4",
+      "additional_details" : {
+        "service_name" : "DocumentSharingService",
+        "service_id" : "5200928"
+      },
+      "created_at" : "2026-10-28T09:16:41-06:00",
+      "source" : {
+        "name" : "example:company:5f096ef4-719a-427d-8b88-66b7a08a791a",
+        "id" : "74673041506",
+        "type" : "user",
+        "login" : "AppUser_5200928_VGBGX6iZId@boxdevedition.com"
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "DocumentSharingService",
+        "id" : "24247901930",
+        "login" : "AutomationUser_5200928_gvajwBRz66@boxdevedition.com"
+      },
+      "event_type" : "NEW_USER",
+      "ip_address" : "203.0.113.8"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: NEW_USER
+     created_at: '2026-10-28T09:16:41-06:00'
+     source:
+       name: example:company:5f096ef4-719a-427d-8b88-66b7a08a791a
+       id: '74673041506'
+       type: user
+       login: AppUser_5200928_VGBGX6iZId@boxdevedition.com
+     ip_address: 203.0.113.8
+     box_event_category: user
+     type: event
+     created_by:
+       name: DocumentSharingService
+       id: '24247901930'
+       type: user
+       login: AutomationUser_5200928_gvajwBRz66@boxdevedition.com
+     network:
+       client:
+         geoip: {}
+         ip: 203.0.113.8
+     event_id: 0b56649a-b8ad-4aee-8220-f057654bc1c4
+     event_type: NEW_USER
+     additional_details:
+       service_name: DocumentSharingService
+       service_id: '5200928'
+     ocsf:
+       severity: Informational
+       activity_name: Create
+       metadata:
+         uid: 0b56649a-b8ad-4aee-8220-f057654bc1c4
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: NEW_USER
+         version: 1.5.0
+       category_uid: 3
+       category_name: Identity & Access Management
+       src_endpoint:
+         ip: 203.0.113.8
+       actor:
+         app_uid: '5200928'
+         app_name: DocumentSharingService
+         user:
+           uid: '24247901930'
+           email_addr: AutomationUser_5200928_gvajwBRz66@boxdevedition.com
+           name: DocumentSharingService
+       class_uid: 3001
+       activity_id: 1
+       time: 1793200601000
+       severity_id: 1
+       class_name: Account Change
+       user:
+         uid: '74673041506'
+         email_addr: AppUser_5200928_VGBGX6iZId@boxdevedition.com
+         name: example:company:5f096ef4-719a-427d-8b88-66b7a08a791a
+     usr:
+       name: DocumentSharingService
+       id: '24247901930'
+       email: AutomationUser_5200928_gvajwBRz66@boxdevedition.com
+   message: |-
+     {
+       "event_id" : "0b56649a-b8ad-4aee-8220-f057654bc1c4",
+       "additional_details" : {
+         "service_name" : "DocumentSharingService",
+         "service_id" : "5200928"
+       },
+       "created_at" : "2026-10-28T09:16:41-06:00",
+       "source" : {
+         "name" : "example:company:5f096ef4-719a-427d-8b88-66b7a08a791a",
+         "id" : "74673041506",
+         "type" : "user",
+         "login" : "AppUser_5200928_VGBGX6iZId@boxdevedition.com"
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "DocumentSharingService",
+         "id" : "24247901930",
+         "login" : "AutomationUser_5200928_gvajwBRz66@boxdevedition.com"
+       },
+       "event_type" : "NEW_USER",
+       "ip_address" : "203.0.113.8"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1793200601000
+ -
+  sample: |-
+    {
+      "event_id" : "ba6ef244-26cf-45ac-9070-0ff61c807182",
+      "created_at" : "2026-10-20T09:02:47-07:00",
+      "source" : {
+        "name" : "Vic Ames",
+        "id" : "57853738500",
+        "type" : "user",
+        "login" : "vic.ames@example.com"
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "Admin Drew Emery",
+        "id" : "91292319247",
+        "login" : "admin.drew.emery@example.com"
+      },
+      "event_type" : "DELETE_USER",
+      "ip_address" : "203.0.113.15"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: DELETE_USER
+     event_id: ba6ef244-26cf-45ac-9070-0ff61c807182
+     event_type: DELETE_USER
+     ocsf:
+       severity: Informational
+       activity_name: Delete
+       metadata:
+         uid: ba6ef244-26cf-45ac-9070-0ff61c807182
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: DELETE_USER
+         version: 1.5.0
+       category_uid: 3
+       category_name: Identity & Access Management
+       src_endpoint:
+         ip: 203.0.113.15
+       actor:
+         user:
+           uid: '91292319247'
+           email_addr: admin.drew.emery@example.com
+           name: Admin Drew Emery
+       class_uid: 3001
+       activity_id: 6
+       time: 1792512167000
+       severity_id: 1
+       class_name: Account Change
+       user:
+         uid: '57853738500'
+         email_addr: vic.ames@example.com
+         name: Vic Ames
+     usr:
+       name: Admin Drew Emery
+       id: '91292319247'
+       email: admin.drew.emery@example.com
+     created_at: '2026-10-20T09:02:47-07:00'
+     source:
+       name: Vic Ames
+       id: '57853738500'
+       type: user
+       login: vic.ames@example.com
+     ip_address: 203.0.113.15
+     box_event_category: user
+     type: event
+     created_by:
+       name: Admin Drew Emery
+       id: '91292319247'
+       type: user
+       login: admin.drew.emery@example.com
+     network:
+       client:
+         geoip: {}
+         ip: 203.0.113.15
+   message: |-
+     {
+       "event_id" : "ba6ef244-26cf-45ac-9070-0ff61c807182",
+       "created_at" : "2026-10-20T09:02:47-07:00",
+       "source" : {
+         "name" : "Vic Ames",
+         "id" : "57853738500",
+         "type" : "user",
+         "login" : "vic.ames@example.com"
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "Admin Drew Emery",
+         "id" : "91292319247",
+         "login" : "admin.drew.emery@example.com"
+       },
+       "event_type" : "DELETE_USER",
+       "ip_address" : "203.0.113.15"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1792512167000
+ -
+  sample: |-
+    {
+      "event_id" : "20449390-22db-49a0-a544-f579ef2201b1",
+      "created_at" : "2026-10-27T13:46:52-06:00",
+      "source" : {
+        "group_id" : "61394534059",
+        "group_name" : "Integrations"
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "Jules Dunn",
+        "id" : "82057955561",
+        "login" : "jules.dunn@example.com"
+      },
+      "event_type" : "GROUP_CREATION",
+      "ip_address" : "203.0.113.22"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: GROUP_CREATION
+     event_id: 20449390-22db-49a0-a544-f579ef2201b1
+     event_type: GROUP_CREATION
+     ocsf:
+       severity: Informational
+       activity_name: Create
+       metadata:
+         uid: 20449390-22db-49a0-a544-f579ef2201b1
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: GROUP_CREATION
+         version: 1.5.0
+       category_uid: 3
+       category_name: Identity & Access Management
+       src_endpoint:
+         ip: 203.0.113.22
+       actor:
+         user:
+           uid: '82057955561'
+           email_addr: jules.dunn@example.com
+           name: Jules Dunn
+       class_uid: 3006
+       activity_id: 6
+       time: 1793130412000
+       severity_id: 1
+       class_name: Group Management
+       group:
+         uid: '61394534059'
+         name: Integrations
+     usr:
+       name: Jules Dunn
+       id: '82057955561'
+       email: jules.dunn@example.com
+     created_at: '2026-10-27T13:46:52-06:00'
+     source:
+       group_id: '61394534059'
+       group_name: Integrations
+     ip_address: 203.0.113.22
+     box_event_category: other
+     type: event
+     created_by:
+       name: Jules Dunn
+       id: '82057955561'
+       type: user
+       login: jules.dunn@example.com
+     network:
+       client:
+         geoip: {}
+         ip: 203.0.113.22
+   message: |-
+     {
+       "event_id" : "20449390-22db-49a0-a544-f579ef2201b1",
+       "created_at" : "2026-10-27T13:46:52-06:00",
+       "source" : {
+         "group_id" : "61394534059",
+         "group_name" : "Integrations"
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "Jules Dunn",
+         "id" : "82057955561",
+         "login" : "jules.dunn@example.com"
+       },
+       "event_type" : "GROUP_CREATION",
+       "ip_address" : "203.0.113.22"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1793130412000
+ -
+  sample: |-
+    {
+      "accessible_by" : {
+        "name" : "example:company:5f096ef4-719a-427d-8b88-66b7a08a791a",
+        "id" : "74673041506",
+        "type" : "user",
+        "login" : "AppUser_5200928_VGBGX6iZId@boxdevedition.com"
+      },
+      "event_id" : "f511f9eb-71ad-4b8a-b382-9bdeecfa3cf4",
+      "additional_details" : {
+        "role" : "Editor",
+        "service_name" : "DocumentSharingService",
+        "collab_id" : "54350108489",
+        "service_id" : "5200928",
+        "is_performed_by_admin" : false,
+        "type" : "box://event/additional_details/collaboration"
+      },
+      "created_at" : "2026-10-28T09:16:42-06:00",
+      "source" : {
+        "parent" : {
+          "name" : "Companies",
+          "id" : "164682715282",
+          "type" : "folder"
+        },
+        "user_id" : "74673041506",
+        "user_name" : "example:company:5f096ef4-719a-427d-8b88-66b7a08a791a",
+        "owned_by" : {
+          "name" : "DocumentSharingService",
+          "id" : "24247901930",
+          "type" : "user",
+          "login" : "AutomationUser_5200928_gvajwBRz66@boxdevedition.com"
+        },
+        "folder_name" : "5f096ef4-719a-427d-8b88-66b7a08a791a",
+        "folder_id" : "471299949777"
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "DocumentSharingService",
+        "id" : "24247901930",
+        "login" : "AutomationUser_5200928_gvajwBRz66@boxdevedition.com"
+      },
+      "event_type" : "COLLABORATION_INVITE",
+      "ip_address" : "203.0.113.8"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: COLLABORATION_INVITE
+     created_at: '2026-10-28T09:16:42-06:00'
+     source:
+       parent:
+         name: Companies
+         id: '164682715282'
+         type: folder
+       user_id: '74673041506'
+       user_name: example:company:5f096ef4-719a-427d-8b88-66b7a08a791a
+       owned_by:
+         name: DocumentSharingService
+         id: '24247901930'
+         type: user
+         login: AutomationUser_5200928_gvajwBRz66@boxdevedition.com
+       folder_name: 5f096ef4-719a-427d-8b88-66b7a08a791a
+       folder_id: '471299949777'
+     ip_address: 203.0.113.8
+     box_event_category: other
+     type: event
+     created_by:
+       name: DocumentSharingService
+       id: '24247901930'
+       type: user
+       login: AutomationUser_5200928_gvajwBRz66@boxdevedition.com
+     network:
+       client:
+         geoip: {}
+         ip: 203.0.113.8
+     accessible_by:
+       name: example:company:5f096ef4-719a-427d-8b88-66b7a08a791a
+       id: '74673041506'
+       type: user
+       login: AppUser_5200928_VGBGX6iZId@boxdevedition.com
+     event_id: f511f9eb-71ad-4b8a-b382-9bdeecfa3cf4
+     event_type: COLLABORATION_INVITE
+     additional_details:
+       role: Editor
+       service_name: DocumentSharingService
+       collab_id: '54350108489'
+       service_id: '5200928'
+       is_performed_by_admin: false
+       type: box://event/additional_details/collaboration
+     ocsf:
+       severity: Informational
+       privileges:
+         - Editor
+       activity_name: Assign Privileges
+       metadata:
+         uid: f511f9eb-71ad-4b8a-b382-9bdeecfa3cf4
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: COLLABORATION_INVITE
+         version: 1.5.0
+       category_uid: 3
+       category_name: Identity & Access Management
+       resource:
+         owner:
+           uid: '24247901930'
+           email_addr: AutomationUser_5200928_gvajwBRz66@boxdevedition.com
+           name: DocumentSharingService
+         uid: '471299949777'
+         name: 5f096ef4-719a-427d-8b88-66b7a08a791a
+         type: folder
+       src_endpoint:
+         ip: 203.0.113.8
+       actor:
+         app_uid: '5200928'
+         app_name: DocumentSharingService
+         user:
+           uid: '24247901930'
+           email_addr: AutomationUser_5200928_gvajwBRz66@boxdevedition.com
+           name: DocumentSharingService
+       class_uid: 3005
+       activity_id: 1
+       time: 1793200602000
+       severity_id: 1
+       user:
+         uid: '74673041506'
+         email_addr: AppUser_5200928_VGBGX6iZId@boxdevedition.com
+         name: example:company:5f096ef4-719a-427d-8b88-66b7a08a791a
+       class_name: User Access Management
+     usr:
+       name: DocumentSharingService
+       id: '24247901930'
+       email: AutomationUser_5200928_gvajwBRz66@boxdevedition.com
+   message: |-
+     {
+       "accessible_by" : {
+         "name" : "example:company:5f096ef4-719a-427d-8b88-66b7a08a791a",
+         "id" : "74673041506",
+         "type" : "user",
+         "login" : "AppUser_5200928_VGBGX6iZId@boxdevedition.com"
+       },
+       "event_id" : "f511f9eb-71ad-4b8a-b382-9bdeecfa3cf4",
+       "additional_details" : {
+         "role" : "Editor",
+         "service_name" : "DocumentSharingService",
+         "collab_id" : "54350108489",
+         "service_id" : "5200928",
+         "is_performed_by_admin" : false,
+         "type" : "box://event/additional_details/collaboration"
+       },
+       "created_at" : "2026-10-28T09:16:42-06:00",
+       "source" : {
+         "parent" : {
+           "name" : "Companies",
+           "id" : "164682715282",
+           "type" : "folder"
+         },
+         "user_id" : "74673041506",
+         "user_name" : "example:company:5f096ef4-719a-427d-8b88-66b7a08a791a",
+         "owned_by" : {
+           "name" : "DocumentSharingService",
+           "id" : "24247901930",
+           "type" : "user",
+           "login" : "AutomationUser_5200928_gvajwBRz66@boxdevedition.com"
+         },
+         "folder_name" : "5f096ef4-719a-427d-8b88-66b7a08a791a",
+         "folder_id" : "471299949777"
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "DocumentSharingService",
+         "id" : "24247901930",
+         "login" : "AutomationUser_5200928_gvajwBRz66@boxdevedition.com"
+       },
+       "event_type" : "COLLABORATION_INVITE",
+       "ip_address" : "203.0.113.8"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1793200602000
+ -
+  sample: |-
+    {
+      "event_id" : "e2cb7a4e-8d69-4919-8f37-1ac7bd140105",
+      "additional_details" : {
+        "collab_id" : "49620481603",
+        "is_performed_by_admin" : false,
+        "type" : "box://event/additional_details/collaboration"
+      },
+      "created_at" : "2026-10-28T08:11:27-07:00",
+      "source" : {
+        "parent" : {
+          "name" : "prod_deals-api PROPOSAL_1003",
+          "id" : "304311259998",
+          "type" : "folder"
+        },
+        "user_id" : "37662156662",
+        "user_name" : "Proposal Default User 1003",
+        "owned_by" : {
+          "name" : "Prod Files",
+          "id" : "53065531421",
+          "type" : "user",
+          "login" : "AutomationUser_9772615_nTnqzS7Hl5@boxdevedition.com"
+        },
+        "folder_name" : "PROPOSAL_1003",
+        "folder_id" : "783177126298"
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "id" : "1"
+      },
+      "event_type" : "COLLABORATION_REMOVE",
+      "ip_address" : "Unknown IP"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: COLLABORATION_REMOVE
+     created_at: '2026-10-28T08:11:27-07:00'
+     source:
+       parent:
+         name: prod_deals-api PROPOSAL_1003
+         id: '304311259998'
+         type: folder
+       user_id: '37662156662'
+       user_name: Proposal Default User 1003
+       owned_by:
+         name: Prod Files
+         id: '53065531421'
+         type: user
+         login: AutomationUser_9772615_nTnqzS7Hl5@boxdevedition.com
+       folder_name: PROPOSAL_1003
+       folder_id: '783177126298'
+     ip_address: Unknown IP
+     box_event_category: other
+     type: event
+     created_by:
+       id: '1'
+       type: user
+     network:
+       client:
+         geoip:
+           invalidAddress: Unknown IP
+         ip: Unknown IP
+     event_id: e2cb7a4e-8d69-4919-8f37-1ac7bd140105
+     event_type: COLLABORATION_REMOVE
+     additional_details:
+       collab_id: '49620481603'
+       is_performed_by_admin: false
+       type: box://event/additional_details/collaboration
+     ocsf:
+       severity: Informational
+       privileges:
+         - Unknown
+       activity_name: Revoke Privileges
+       metadata:
+         uid: e2cb7a4e-8d69-4919-8f37-1ac7bd140105
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: COLLABORATION_REMOVE
+         version: 1.5.0
+       category_uid: 3
+       category_name: Identity & Access Management
+       resource:
+         owner:
+           uid: '53065531421'
+           email_addr: AutomationUser_9772615_nTnqzS7Hl5@boxdevedition.com
+           name: Prod Files
+         uid: '783177126298'
+         name: PROPOSAL_1003
+         type: folder
+       src_endpoint:
+         name: Unknown IP
+       actor:
+         user:
+           uid: '1'
+       class_uid: 3005
+       activity_id: 2
+       time: 1793200287000
+       severity_id: 1
+       user:
+         uid: '37662156662'
+         name: Proposal Default User 1003
+       class_name: User Access Management
+     usr:
+       id: '1'
+   message: |-
+     {
+       "event_id" : "e2cb7a4e-8d69-4919-8f37-1ac7bd140105",
+       "additional_details" : {
+         "collab_id" : "49620481603",
+         "is_performed_by_admin" : false,
+         "type" : "box://event/additional_details/collaboration"
+       },
+       "created_at" : "2026-10-28T08:11:27-07:00",
+       "source" : {
+         "parent" : {
+           "name" : "prod_deals-api PROPOSAL_1003",
+           "id" : "304311259998",
+           "type" : "folder"
+         },
+         "user_id" : "37662156662",
+         "user_name" : "Proposal Default User 1003",
+         "owned_by" : {
+           "name" : "Prod Files",
+           "id" : "53065531421",
+           "type" : "user",
+           "login" : "AutomationUser_9772615_nTnqzS7Hl5@boxdevedition.com"
+         },
+         "folder_name" : "PROPOSAL_1003",
+         "folder_id" : "783177126298"
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "id" : "1"
+       },
+       "event_type" : "COLLABORATION_REMOVE",
+       "ip_address" : "Unknown IP"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1793200287000
+ -
+  sample: |-
+    {
+      "event_id" : "51287344-d955-4e92-92fe-776abce434e1",
+      "additional_details" : {
+        "self_service_sso" : {
+          "expires_at" : "2031-10-15T20:21:07.000Z",
+          "issuer_common_name" : "ExampleSAMLUser",
+          "valid_from" : "2026-10-15T20:21:07.000Z",
+          "serial_number" : "448463772374875025196539891472323834787431008258",
+          "subject_common_name" : "ExampleSAMLUser"
+        }
+      },
+      "created_at" : "2026-10-15T13:21:31-07:00",
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "Jules Redding",
+        "id" : "44277553659",
+        "login" : "jules.redding@example.com"
+      },
+      "event_type" : "SELF_SERVICE_SSO_CONNECTION_CERT_ADD",
+      "ip_address" : "203.0.113.28"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: SELF_SERVICE_SSO_CONNECTION_CERT_ADD
+     event_id: 51287344-d955-4e92-92fe-776abce434e1
+     event_type: SELF_SERVICE_SSO_CONNECTION_CERT_ADD
+     additional_details:
+       self_service_sso:
+         expires_at: '2031-10-15T20:21:07.000Z'
+         issuer_common_name: ExampleSAMLUser
+         valid_from: '2026-10-15T20:21:07.000Z'
+         serial_number: '448463772374875025196539891472323834787431008258'
+         subject_common_name: ExampleSAMLUser
+     ocsf:
+       severity: Informational
+       activity_name: Create
+       metadata:
+         uid: 51287344-d955-4e92-92fe-776abce434e1
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: SELF_SERVICE_SSO_CONNECTION_CERT_ADD
+         version: 1.5.0
+       category_uid: 3
+       category_name: Identity & Access Management
+       src_endpoint:
+         ip: 203.0.113.28
+       actor:
+         user:
+           uid: '44277553659'
+           email_addr: jules.redding@example.com
+           name: Jules Redding
+       class_uid: 3004
+       activity_id: 1
+       time: 1792095691000
+       severity_id: 1
+       class_name: Entity Management
+       entity:
+         uid: '448463772374875025196539891472323834787431008258'
+         name: ExampleSAMLUser
+         type: SAML signing certificate
+     usr:
+       name: Jules Redding
+       id: '44277553659'
+       email: jules.redding@example.com
+     created_at: '2026-10-15T13:21:31-07:00'
+     ip_address: 203.0.113.28
+     box_event_category: other
+     type: event
+     created_by:
+       name: Jules Redding
+       id: '44277553659'
+       type: user
+       login: jules.redding@example.com
+     network:
+       client:
+         geoip: {}
+         ip: 203.0.113.28
+   message: |-
+     {
+       "event_id" : "51287344-d955-4e92-92fe-776abce434e1",
+       "additional_details" : {
+         "self_service_sso" : {
+           "expires_at" : "2031-10-15T20:21:07.000Z",
+           "issuer_common_name" : "ExampleSAMLUser",
+           "valid_from" : "2026-10-15T20:21:07.000Z",
+           "serial_number" : "448463772374875025196539891472323834787431008258",
+           "subject_common_name" : "ExampleSAMLUser"
+         }
+       },
+       "created_at" : "2026-10-15T13:21:31-07:00",
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "Jules Redding",
+         "id" : "44277553659",
+         "login" : "jules.redding@example.com"
+       },
+       "event_type" : "SELF_SERVICE_SSO_CONNECTION_CERT_ADD",
+       "ip_address" : "203.0.113.28"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1792095691000
+ -
+  sample: |-
+    {
+      "event_id" : "413e8886-2375-4c53-b839-0d786c0a5570",
+      "additional_details" : {
+        "box_ai_request" : {
+          "request_id" : "00279632b59255b740cbc627cfc1e9e4e"
+        },
+        "service_name" : "Example Integration",
+        "service_id" : "7238917"
+      },
+      "created_at" : "2026-10-28T11:06:05-04:00",
+      "source" : {
+        "itemOwner" : {
+          "name" : "Taylor Eastman",
+          "id" : 42316083613,
+          "type" : "user",
+          "login" : "taylor.eastman@example.com"
+        },
+        "parent" : {
+          "name" : "outlook-20261028-example-county-senior-services-nonauto-submi-cb859d0d69f3a194",
+          "id" : 695013667969,
+          "type" : "folder"
+        },
+        "item_id" : 8153761963384,
+        "item_type" : "file",
+        "item_name" : "Example County Senior Services - NONAUTO Package Acord Apps (original pages 1-34)_ACORD_141.pdf"
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "Example Integration",
+        "id" : "32436807780",
+        "login" : "AutomationUser_7238917_EZbOhODvOS@boxdevedition.com"
+      },
+      "event_type" : "BOX_AI_USER_REQUEST",
+      "ip_address" : "203.0.113.3"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: BOX_AI_USER_REQUEST
+     created_at: '2026-10-28T11:06:05-04:00'
+     source:
+       itemOwner:
+         name: Taylor Eastman
+         id: 42316083613
+         type: user
+         login: taylor.eastman@example.com
+       parent:
+         name: outlook-20261028-example-county-senior-services-nonauto-submi-cb859d0d69f3a194
+         id: 695013667969
+         type: folder
+       item_id: 8153761963384
+       item_type: file
+       item_name: Example County Senior Services - NONAUTO Package Acord Apps (original pages 1-34)_ACORD_141.pdf
+     ip_address: 203.0.113.3
+     box_event_category: file
+     type: event
+     created_by:
+       name: Example Integration
+       id: '32436807780'
+       type: user
+       login: AutomationUser_7238917_EZbOhODvOS@boxdevedition.com
+     network:
+       client:
+         geoip: {}
+         ip: 203.0.113.3
+     event_id: 413e8886-2375-4c53-b839-0d786c0a5570
+     event_type: BOX_AI_USER_REQUEST
+     additional_details:
+       box_ai_request:
+         request_id: 00279632b59255b740cbc627cfc1e9e4e
+       service_name: Example Integration
+       service_id: '7238917'
+     ocsf:
+       severity: Informational
+       activity_name: BOX_AI_USER_REQUEST
+       metadata:
+         uid: 413e8886-2375-4c53-b839-0d786c0a5570
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: BOX_AI_USER_REQUEST
+         version: 1.5.0
+       category_uid: 6
+       category_name: Application Activity
+       src_endpoint:
+         ip: 203.0.113.3
+       actor:
+         app_uid: '7238917'
+         app_name: Example Integration
+         user:
+           uid: '32436807780'
+           email_addr: AutomationUser_7238917_EZbOhODvOS@boxdevedition.com
+           name: Example Integration
+       status_id: 1
+       file:
+         ext: pdf
+         owner:
+           uid: '42316083613'
+           email_addr: taylor.eastman@example.com
+           name: Taylor Eastman
+         uid: '8153761963384'
+         parent_folder: outlook-20261028-example-county-senior-services-nonauto-submi-cb859d0d69f3a194
+         type_id: 1
+         name: Example County Senior Services - NONAUTO Package Acord Apps (original pages 1-34)_ACORD_141.pdf
+         type: Regular File
+       class_uid: 6006
+       activity_id: 99
+       time: 1793199965000
+       severity_id: 1
+       class_name: File Hosting Activity
+       status: Success
+     usr:
+       name: Example Integration
+       id: '32436807780'
+       email: AutomationUser_7238917_EZbOhODvOS@boxdevedition.com
+     file_type: pdf
+   message: |-
+     {
+       "event_id" : "413e8886-2375-4c53-b839-0d786c0a5570",
+       "additional_details" : {
+         "box_ai_request" : {
+           "request_id" : "00279632b59255b740cbc627cfc1e9e4e"
+         },
+         "service_name" : "Example Integration",
+         "service_id" : "7238917"
+       },
+       "created_at" : "2026-10-28T11:06:05-04:00",
+       "source" : {
+         "itemOwner" : {
+           "name" : "Taylor Eastman",
+           "id" : 42316083613,
+           "type" : "user",
+           "login" : "taylor.eastman@example.com"
+         },
+         "parent" : {
+           "name" : "outlook-20261028-example-county-senior-services-nonauto-submi-cb859d0d69f3a194",
+           "id" : 695013667969,
+           "type" : "folder"
+         },
+         "item_id" : 8153761963384,
+         "item_type" : "file",
+         "item_name" : "Example County Senior Services - NONAUTO Package Acord Apps (original pages 1-34)_ACORD_141.pdf"
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "Example Integration",
+         "id" : "32436807780",
+         "login" : "AutomationUser_7238917_EZbOhODvOS@boxdevedition.com"
+       },
+       "event_type" : "BOX_AI_USER_REQUEST",
+       "ip_address" : "203.0.113.3"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1793199965000
+ -
+  sample: |-
+    {
+      "event_id" : "b5056401-ea8c-4552-84af-0983d0a25554",
+      "additional_details" : {
+        "shared_link_id" : "naku8ox0f26edxhdmho7lepn49z1g9je",
+        "security_information" : {
+          "accessFromSharedObject" : {
+            "createdAt" : "2026-10-08T10:30:09-07:00",
+            "sharedName" : "naku8ox0f26edxhdmho7lepn49z1g9je",
+            "accessLevel" : "collaborators",
+            "sharedId" : 40224394457,
+            "passwordSet" : false
+          }
+        },
+        "file_path" : "/DATA/CUSTOMERS/Example Government Agency (EGA)/30 PROGRAM/Project Alpha/10 Presentations/In-Process Review",
+        "shield_shared_link_enforcement" : {
+          "controlMode" : "monitoring",
+          "userAccessLevel" : "Collaborators",
+          "restrictedAccessLevels" : "Open, Company"
+        },
+        "accessLevel" : "collaborators",
+        "size" : 31987373,
+        "file_hash" : "5c7210627c1a296ea4e70781f74c73b051e3dcf1",
+        "version_id" : "5233626579042",
+        "hash_type" : "sha1"
+      },
+      "created_at" : "2026-10-28T04:06:22-07:00",
+      "source" : {
+        "parent" : {
+          "name" : "In-Process Review",
+          "id" : "539019018435",
+          "type" : "folder"
+        },
+        "item_id" : "4488919637480",
+        "item_type" : "file",
+        "item_name" : "Project Alpha In-Process Review.pptx",
+        "owned_by" : {
+          "name" : "Ops Mailbox",
+          "id" : "28036701759",
+          "type" : "user",
+          "login" : "ops@example.com"
+        },
+        "classification" : {
+          "name" : "Restricted - Internal / Export Control"
+        }
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "Pat Cole",
+        "id" : "57834558950",
+        "login" : "pat.cole@example.com"
+      },
+      "event_type" : "SHIELD_SHARED_LINK_ACCESS_BLOCKED",
+      "ip_address" : "203.0.113.1"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: SHIELD_SHARED_LINK_ACCESS_BLOCKED
+     created_at: '2026-10-28T04:06:22-07:00'
+     source:
+       parent:
+         name: In-Process Review
+         id: '539019018435'
+         type: folder
+       item_id: '4488919637480'
+       item_type: file
+       item_name: Project Alpha In-Process Review.pptx
+       owned_by:
+         name: Ops Mailbox
+         id: '28036701759'
+         type: user
+         login: ops@example.com
+       classification:
+         name: Restricted - Internal / Export Control
+     ip_address: 203.0.113.1
+     box_event_category: shield
+     type: event
+     created_by:
+       name: Pat Cole
+       id: '57834558950'
+       type: user
+       login: pat.cole@example.com
+     network:
+       client:
+         geoip: {}
+         ip: 203.0.113.1
+     event_id: b5056401-ea8c-4552-84af-0983d0a25554
+     event_type: SHIELD_SHARED_LINK_ACCESS_BLOCKED
+     additional_details:
+       shared_link_id: naku8ox0f26edxhdmho7lepn49z1g9je
+       security_information:
+         accessFromSharedObject:
+           createdAt: '2026-10-08T10:30:09-07:00'
+           sharedName: naku8ox0f26edxhdmho7lepn49z1g9je
+           accessLevel: collaborators
+           sharedId: 40224394457
+           passwordSet: false
+       file_path: /DATA/CUSTOMERS/Example Government Agency (EGA)/30 PROGRAM/Project Alpha/10 Presentations/In-Process Review
+       shield_shared_link_enforcement:
+         controlMode: monitoring
+         userAccessLevel: Collaborators
+         restrictedAccessLevels: Open, Company
+       accessLevel: collaborators
+       size: 31987373
+       file_hash: 5c7210627c1a296ea4e70781f74c73b051e3dcf1
+       version_id: '5233626579042'
+       hash_type: sha1
+     ocsf:
+       severity: Informational
+       activity_name: Access Check
+       metadata:
+         uid: b5056401-ea8c-4552-84af-0983d0a25554
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: SHIELD_SHARED_LINK_ACCESS_BLOCKED
+         version: 1.5.0
+       category_uid: 6
+       category_name: Application Activity
+       src_endpoint:
+         ip: 203.0.113.1
+       status_detail: monitoring
+       actor:
+         user:
+           uid: '57834558950'
+           email_addr: pat.cole@example.com
+           name: Pat Cole
+       file:
+         owner:
+           uid: '28036701759'
+           email_addr: ops@example.com
+           name: Ops Mailbox
+         path: /DATA/CUSTOMERS/Example Government Agency (EGA)/30 PROGRAM/Project Alpha/10 Presentations/In-Process Review/Project Alpha In-Process Review.pptx
+         uid: '4488919637480'
+         parent_folder: In-Process Review
+         confidentiality_id: 6
+         size: 31987373
+         type_id: 1
+         confidentiality: Restricted
+         hashes:
+           - value: 5c7210627c1a296ea4e70781f74c73b051e3dcf1
+             algorithm_id: 2
+             algorithm: SHA-1
+         name: Project Alpha In-Process Review.pptx
+         type: Regular File
+         version: '5233626579042'
+       status_id: 1
+       class_uid: 6006
+       activity_id: 17
+       time: 1793185582000
+       severity_id: 1
+       class_name: File Hosting Activity
+       status: Success
+     usr:
+       name: Pat Cole
+       id: '57834558950'
+       email: pat.cole@example.com
+   message: |-
+     {
+       "event_id" : "b5056401-ea8c-4552-84af-0983d0a25554",
+       "additional_details" : {
+         "shared_link_id" : "naku8ox0f26edxhdmho7lepn49z1g9je",
+         "security_information" : {
+           "accessFromSharedObject" : {
+             "createdAt" : "2026-10-08T10:30:09-07:00",
+             "sharedName" : "naku8ox0f26edxhdmho7lepn49z1g9je",
+             "accessLevel" : "collaborators",
+             "sharedId" : 40224394457,
+             "passwordSet" : false
+           }
+         },
+         "file_path" : "/DATA/CUSTOMERS/Example Government Agency (EGA)/30 PROGRAM/Project Alpha/10 Presentations/In-Process Review",
+         "shield_shared_link_enforcement" : {
+           "controlMode" : "monitoring",
+           "userAccessLevel" : "Collaborators",
+           "restrictedAccessLevels" : "Open, Company"
+         },
+         "accessLevel" : "collaborators",
+         "size" : 31987373,
+         "file_hash" : "5c7210627c1a296ea4e70781f74c73b051e3dcf1",
+         "version_id" : "5233626579042",
+         "hash_type" : "sha1"
+       },
+       "created_at" : "2026-10-28T04:06:22-07:00",
+       "source" : {
+         "parent" : {
+           "name" : "In-Process Review",
+           "id" : "539019018435",
+           "type" : "folder"
+         },
+         "item_id" : "4488919637480",
+         "item_type" : "file",
+         "item_name" : "Project Alpha In-Process Review.pptx",
+         "owned_by" : {
+           "name" : "Ops Mailbox",
+           "id" : "28036701759",
+           "type" : "user",
+           "login" : "ops@example.com"
+         },
+         "classification" : {
+           "name" : "Restricted - Internal / Export Control"
+         }
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "Pat Cole",
+         "id" : "57834558950",
+         "login" : "pat.cole@example.com"
+       },
+       "event_type" : "SHIELD_SHARED_LINK_ACCESS_BLOCKED",
+       "ip_address" : "203.0.113.1"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1793185582000
+ -
+  sample: |-
+    {
+      "event_id" : "8ee516d6-8982-4c38-b6e0-0cbc0d8cd693",
+      "additional_details" : {
+        "shared_link_id" : "ah1gv0ki61590fctrpyyoxkfhhzpl3xg",
+        "sharedLinkSettings" : {
+          "newCanPreview" : true,
+          "newVisibilityStatus" : "Open",
+          "newCanDownload" : true,
+          "autoExpirationSetByAccessPolicy" : false,
+          "oldVisibilityStatus" : "Open",
+          "newIsExpirationDateSet" : true,
+          "newCanEdit" : false,
+          "oldIsPasswordProtected" : false,
+          "newExpirationDate" : 1798366434,
+          "oldCanDownload" : true,
+          "oldCanEdit" : false,
+          "oldIsExpirationDateSet" : false,
+          "newIsPasswordProtected" : false,
+          "oldCanPreview" : true
+        }
+      },
+      "created_at" : "2026-10-28T03:13:54-07:00",
+      "source" : {
+        "parent" : {
+          "name" : "All Files",
+          "id" : "0",
+          "type" : "folder"
+        },
+        "item_id" : "511554385196",
+        "item_type" : "folder",
+        "item_name" : "Recording",
+        "owned_by" : {
+          "name" : "Ely Marsh",
+          "id" : "99893874983",
+          "type" : "user",
+          "login" : "ely.marsh@example.com"
+        }
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "Ely Marsh",
+        "id" : "99893874983",
+        "login" : "ely.marsh@example.com"
+      },
+      "event_type" : "SHARE_EXPIRATION",
+      "ip_address" : "2001:db8:b::1b"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: SHARE_EXPIRATION
+     created_at: '2026-10-28T03:13:54-07:00'
+     source:
+       parent:
+         name: All Files
+         id: '0'
+         type: folder
+       item_id: '511554385196'
+       item_type: folder
+       item_name: Recording
+       owned_by:
+         name: Ely Marsh
+         id: '99893874983'
+         type: user
+         login: ely.marsh@example.com
+     ip_address: 2001:db8:b::1b
+     box_event_category: folder
+     type: event
+     created_by:
+       name: Ely Marsh
+       id: '99893874983'
+       type: user
+       login: ely.marsh@example.com
+     network:
+       client:
+         geoip: {}
+         ip: 2001:db8:b::1b
+     event_id: 8ee516d6-8982-4c38-b6e0-0cbc0d8cd693
+     event_type: SHARE_EXPIRATION
+     additional_details:
+       shared_link_id: ah1gv0ki61590fctrpyyoxkfhhzpl3xg
+       sharedLinkSettings:
+         newCanPreview: true
+         newVisibilityStatus: Open
+         newCanDownload: true
+         autoExpirationSetByAccessPolicy: false
+         oldVisibilityStatus: Open
+         newIsExpirationDateSet: true
+         newCanEdit: false
+         oldIsPasswordProtected: false
+         newExpirationDate: 1798366434
+         oldCanDownload: true
+         oldCanEdit: false
+         oldIsExpirationDateSet: false
+         newIsPasswordProtected: false
+         oldCanPreview: true
+     ocsf:
+       severity: Informational
+       activity_name: Unshare
+       metadata:
+         uid: 8ee516d6-8982-4c38-b6e0-0cbc0d8cd693
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: SHARE_EXPIRATION
+         version: 1.5.0
+       category_uid: 6
+       category_name: Application Activity
+       src_endpoint:
+         ip: 2001:db8:b::1b
+       actor:
+         user:
+           uid: '99893874983'
+           email_addr: ely.marsh@example.com
+           name: Ely Marsh
+       status_id: 1
+       file:
+         owner:
+           uid: '99893874983'
+           email_addr: ely.marsh@example.com
+           name: Ely Marsh
+         uid: '511554385196'
+         parent_folder: All Files
+         type_id: 2
+         name: Recording
+         type: Folder
+       class_uid: 6006
+       activity_id: 13
+       time: 1793182434000
+       severity_id: 1
+       class_name: File Hosting Activity
+       status: Success
+     usr:
+       name: Ely Marsh
+       id: '99893874983'
+       email: ely.marsh@example.com
+   message: |-
+     {
+       "event_id" : "8ee516d6-8982-4c38-b6e0-0cbc0d8cd693",
+       "additional_details" : {
+         "shared_link_id" : "ah1gv0ki61590fctrpyyoxkfhhzpl3xg",
+         "sharedLinkSettings" : {
+           "newCanPreview" : true,
+           "newVisibilityStatus" : "Open",
+           "newCanDownload" : true,
+           "autoExpirationSetByAccessPolicy" : false,
+           "oldVisibilityStatus" : "Open",
+           "newIsExpirationDateSet" : true,
+           "newCanEdit" : false,
+           "oldIsPasswordProtected" : false,
+           "newExpirationDate" : 1798366434,
+           "oldCanDownload" : true,
+           "oldCanEdit" : false,
+           "oldIsExpirationDateSet" : false,
+           "newIsPasswordProtected" : false,
+           "oldCanPreview" : true
+         }
+       },
+       "created_at" : "2026-10-28T03:13:54-07:00",
+       "source" : {
+         "parent" : {
+           "name" : "All Files",
+           "id" : "0",
+           "type" : "folder"
+         },
+         "item_id" : "511554385196",
+         "item_type" : "folder",
+         "item_name" : "Recording",
+         "owned_by" : {
+           "name" : "Ely Marsh",
+           "id" : "99893874983",
+           "type" : "user",
+           "login" : "ely.marsh@example.com"
+         }
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "Ely Marsh",
+         "id" : "99893874983",
+         "login" : "ely.marsh@example.com"
+       },
+       "event_type" : "SHARE_EXPIRATION",
+       "ip_address" : "2001:db8:b::1b"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1793182434000
+ -
+  sample: |-
+    {
+      "event_id" : "e28ba405-c0cb-45c0-b6a9-014e33ddfc79",
+      "created_at" : "2026-10-21T11:55:10-07:00",
+      "source" : {
+        "parent" : {
+          "name" : "ACME",
+          "id" : "243828150862",
+          "type" : "folder"
+        },
+        "item_id" : "130608951654",
+        "item_type" : "folder",
+        "item_name" : "project_solutions_demo",
+        "owned_by" : {
+          "name" : "Ops Mailbox",
+          "id" : "28036701759",
+          "type" : "user",
+          "login" : "ops@example.com"
+        }
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "Admin Frankie Joyner",
+        "id" : "92802579995",
+        "login" : "admin.frankie.joyner@example.com"
+      },
+      "event_type" : "UNDELETE",
+      "ip_address" : "Unknown IP"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: UNDELETE
+     event_id: e28ba405-c0cb-45c0-b6a9-014e33ddfc79
+     event_type: UNDELETE
+     ocsf:
+       severity: Informational
+       activity_name: Restore
+       metadata:
+         uid: e28ba405-c0cb-45c0-b6a9-014e33ddfc79
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: UNDELETE
+         version: 1.5.0
+       category_uid: 6
+       category_name: Application Activity
+       src_endpoint:
+         name: Unknown IP
+       actor:
+         user:
+           uid: '92802579995'
+           email_addr: admin.frankie.joyner@example.com
+           name: Admin Frankie Joyner
+       status_id: 1
+       file:
+         owner:
+           uid: '28036701759'
+           email_addr: ops@example.com
+           name: Ops Mailbox
+         uid: '130608951654'
+         parent_folder: ACME
+         type_id: 2
+         name: project_solutions_demo
+         type: Folder
+       class_uid: 6006
+       activity_id: 8
+       time: 1792608910000
+       severity_id: 1
+       class_name: File Hosting Activity
+       status: Success
+     usr:
+       name: Admin Frankie Joyner
+       id: '92802579995'
+       email: admin.frankie.joyner@example.com
+     created_at: '2026-10-21T11:55:10-07:00'
+     source:
+       parent:
+         name: ACME
+         id: '243828150862'
+         type: folder
+       item_id: '130608951654'
+       item_type: folder
+       item_name: project_solutions_demo
+       owned_by:
+         name: Ops Mailbox
+         id: '28036701759'
+         type: user
+         login: ops@example.com
+     ip_address: Unknown IP
+     box_event_category: folder
+     type: event
+     created_by:
+       name: Admin Frankie Joyner
+       id: '92802579995'
+       type: user
+       login: admin.frankie.joyner@example.com
+     network:
+       client:
+         geoip:
+           invalidAddress: Unknown IP
+         ip: Unknown IP
+   message: |-
+     {
+       "event_id" : "e28ba405-c0cb-45c0-b6a9-014e33ddfc79",
+       "created_at" : "2026-10-21T11:55:10-07:00",
+       "source" : {
+         "parent" : {
+           "name" : "ACME",
+           "id" : "243828150862",
+           "type" : "folder"
+         },
+         "item_id" : "130608951654",
+         "item_type" : "folder",
+         "item_name" : "project_solutions_demo",
+         "owned_by" : {
+           "name" : "Ops Mailbox",
+           "id" : "28036701759",
+           "type" : "user",
+           "login" : "ops@example.com"
+         }
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "Admin Frankie Joyner",
+         "id" : "92802579995",
+         "login" : "admin.frankie.joyner@example.com"
+       },
+       "event_type" : "UNDELETE",
+       "ip_address" : "Unknown IP"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1792608910000
+ -
+  sample: |-
+    {
+      "event_id" : "495e637e-a720-4195-acf9-c085a8615134",
+      "additional_details" : {
+        "original_item_id" : "980629833065",
+        "original_item_name" : "POC",
+        "original_item_type" : "folder"
+      },
+      "created_at" : "2026-10-28T07:42:42-07:00",
+      "source" : {
+        "parent" : {
+          "name" : "2026-Jira-Tickets",
+          "id" : "140195996991",
+          "type" : "folder"
+        },
+        "item_id" : "379960928891",
+        "item_type" : "folder",
+        "item_name" : "POC",
+        "owned_by" : {
+          "name" : "Regional Repo",
+          "id" : "84815391205",
+          "type" : "user",
+          "login" : "eu.repo@example.com"
+        }
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "Devon Redding",
+        "id" : "14870891292",
+        "login" : "devon.redding@example.com"
+      },
+      "event_type" : "COPY",
+      "ip_address" : "203.0.113.14"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: COPY
+     created_at: '2026-10-28T07:42:42-07:00'
+     source:
+       parent:
+         name: 2026-Jira-Tickets
+         id: '140195996991'
+         type: folder
+       item_id: '379960928891'
+       item_type: folder
+       item_name: POC
+       owned_by:
+         name: Regional Repo
+         id: '84815391205'
+         type: user
+         login: eu.repo@example.com
+     ip_address: 203.0.113.14
+     box_event_category: folder
+     type: event
+     created_by:
+       name: Devon Redding
+       id: '14870891292'
+       type: user
+       login: devon.redding@example.com
+     network:
+       client:
+         geoip: {}
+         ip: 203.0.113.14
+     event_id: 495e637e-a720-4195-acf9-c085a8615134
+     event_type: COPY
+     additional_details:
+       original_item_id: '980629833065'
+       original_item_name: POC
+       original_item_type: folder
+     ocsf:
+       severity: Informational
+       activity_name: Copy
+       metadata:
+         uid: 495e637e-a720-4195-acf9-c085a8615134
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: COPY
+         version: 1.5.0
+       category_uid: 6
+       category_name: Application Activity
+       src_endpoint:
+         ip: 203.0.113.14
+       actor:
+         user:
+           uid: '14870891292'
+           email_addr: devon.redding@example.com
+           name: Devon Redding
+       status_id: 1
+       file:
+         owner:
+           uid: '84815391205'
+           email_addr: eu.repo@example.com
+           name: Regional Repo
+         uid: '379960928891'
+         parent_folder: 2026-Jira-Tickets
+         type_id: 2
+         name: POC
+         type: Folder
+       class_uid: 6006
+       activity_id: 6
+       time: 1793198562000
+       severity_id: 1
+       class_name: File Hosting Activity
+       status: Success
+     usr:
+       name: Devon Redding
+       id: '14870891292'
+       email: devon.redding@example.com
+   message: |-
+     {
+       "event_id" : "495e637e-a720-4195-acf9-c085a8615134",
+       "additional_details" : {
+         "original_item_id" : "980629833065",
+         "original_item_name" : "POC",
+         "original_item_type" : "folder"
+       },
+       "created_at" : "2026-10-28T07:42:42-07:00",
+       "source" : {
+         "parent" : {
+           "name" : "2026-Jira-Tickets",
+           "id" : "140195996991",
+           "type" : "folder"
+         },
+         "item_id" : "379960928891",
+         "item_type" : "folder",
+         "item_name" : "POC",
+         "owned_by" : {
+           "name" : "Regional Repo",
+           "id" : "84815391205",
+           "type" : "user",
+           "login" : "eu.repo@example.com"
+         }
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "Devon Redding",
+         "id" : "14870891292",
+         "login" : "devon.redding@example.com"
+       },
+       "event_type" : "COPY",
+       "ip_address" : "203.0.113.14"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1793198562000
+ -
+  sample: |-
+    {
+      "event_id" : "90d8a81f-dde4-4537-ac1a-41a1af5341ab",
+      "additional_details" : {
+        "sign_request" : {
+          "sign_request_id" : "ba0df5f3-aef2-435e-9f5d-16d58ddffb72",
+          "sender_message" : {
+            "subject" : "",
+            "message" : ""
+          },
+          "ready_sign_link" : {
+            "id" : ""
+          },
+          "requestor_ip_address" : "2001:db8:c::1c",
+          "files" : [
+            {
+              "parent" : {
+                "id" : "397530312525",
+                "type" : "folder"
+              },
+              "name" : "Doe-Region-Request Nov26.pdf",
+              "id" : "2274798555149",
+              "type" : "file"
+            }
+          ],
+          "redirection" : {
+            "declined_redirect_url" : "",
+            "redirect_url" : ""
+          },
+          "requestor" : {
+            "name" : "Val Knox",
+            "id" : "26329841518",
+            "type" : "user",
+            "login" : "val.knox@example.com"
+          },
+          "sign_request_short_id" : "C5HCBWO7",
+          "status" : "sent"
+        }
+      },
+      "created_at" : "2026-10-27T08:17:59-07:00",
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "Val Knox",
+        "id" : "26329841518",
+        "login" : "val.knox@example.com"
+      },
+      "event_type" : "SIGN_DOCUMENT_CREATED",
+      "ip_address" : "2001:db8:c::1c"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: SIGN_DOCUMENT_CREATED
+     event_id: 90d8a81f-dde4-4537-ac1a-41a1af5341ab
+     event_type: SIGN_DOCUMENT_CREATED
+     additional_details:
+       sign_request:
+         sign_request_id: ba0df5f3-aef2-435e-9f5d-16d58ddffb72
+         sender_message:
+           subject: ''
+           message: ''
+         ready_sign_link:
+           id: ''
+         requestor_ip_address: 2001:db8:c::1c
+         files:
+           - parent:
+               id: '397530312525'
+               type: folder
+             name: Doe-Region-Request Nov26.pdf
+             id: '2274798555149'
+             type: file
+         redirection:
+           declined_redirect_url: ''
+           redirect_url: ''
+         requestor:
+           name: Val Knox
+           id: '26329841518'
+           type: user
+           login: val.knox@example.com
+         sign_request_short_id: C5HCBWO7
+         status: sent
+     ocsf:
+       severity: Informational
+       activity_name: SIGN_DOCUMENT_CREATED
+       metadata:
+         uid: 90d8a81f-dde4-4537-ac1a-41a1af5341ab
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: SIGN_DOCUMENT_CREATED
+         version: 1.5.0
+       category_uid: 0
+       class_uid: 0
+       activity_id: 99
+       time: 1793114279000
+       severity_id: 1
+       class_name: Base Event
+     usr:
+       name: Val Knox
+       id: '26329841518'
+       email: val.knox@example.com
+     created_at: '2026-10-27T08:17:59-07:00'
+     ip_address: 2001:db8:c::1c
+     box_event_category: other
+     type: event
+     created_by:
+       name: Val Knox
+       id: '26329841518'
+       type: user
+       login: val.knox@example.com
+     network:
+       client:
+         geoip: {}
+         ip: 2001:db8:c::1c
+   message: |-
+     {
+       "event_id" : "90d8a81f-dde4-4537-ac1a-41a1af5341ab",
+       "additional_details" : {
+         "sign_request" : {
+           "sign_request_id" : "ba0df5f3-aef2-435e-9f5d-16d58ddffb72",
+           "sender_message" : {
+             "subject" : "",
+             "message" : ""
+           },
+           "ready_sign_link" : {
+             "id" : ""
+           },
+           "requestor_ip_address" : "2001:db8:c::1c",
+           "files" : [
+             {
+               "parent" : {
+                 "id" : "397530312525",
+                 "type" : "folder"
+               },
+               "name" : "Doe-Region-Request Nov26.pdf",
+               "id" : "2274798555149",
+               "type" : "file"
+             }
+           ],
+           "redirection" : {
+             "declined_redirect_url" : "",
+             "redirect_url" : ""
+           },
+           "requestor" : {
+             "name" : "Val Knox",
+             "id" : "26329841518",
+             "type" : "user",
+             "login" : "val.knox@example.com"
+           },
+           "sign_request_short_id" : "C5HCBWO7",
+           "status" : "sent"
+         }
+       },
+       "created_at" : "2026-10-27T08:17:59-07:00",
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "Val Knox",
+         "id" : "26329841518",
+         "login" : "val.knox@example.com"
+       },
+       "event_type" : "SIGN_DOCUMENT_CREATED",
+       "ip_address" : "2001:db8:c::1c"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1793114279000
+ -
+  sample: |-
+    {
+      "status" : "info",
+      "event_type" : "HEARTBEAT",
+      "message" : "Heartbeat: No new events for box_logs (box). Integration is active."
+    }
+  service: "box_logs"
+  result:
+   service: box_logs
+   custom:
+     evt:
+       name: HEARTBEAT
+     event_type: HEARTBEAT
+     box_event_category: other
+     status: info
+   message: 'Heartbeat: No new events for box_logs (box). Integration is active.'
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1
