@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
+import base64
 import datetime
 import hashlib
 import logging
@@ -1317,6 +1318,30 @@ def test_requests_wrapper_given_distrusted_ca_key_in_chain_skips_aia_chasing(dis
 
     with https_server(distrust_pki, tmp_path) as port:
         with pytest.raises(SSLError):
+            http.get('https://localhost:{}'.format(port))
+
+    assert distrust_pki.issuer.headers == []
+
+
+def write_rejected_trust_anchor(path: Path, cert: x509.Certificate) -> None:
+    """Write `cert` as an OpenSSL trusted certificate that is explicitly rejected for server authentication."""
+    # The DER auxiliary trust settings `SEQUENCE { reject [0] { serverAuth } }` that OpenSSL appends to the
+    # certificate in a TRUSTED CERTIFICATE block.
+    reject_server_auth = bytes.fromhex('300ca00a06082b06010505070301')
+    body = base64.b64encode(cert.public_bytes(serialization.Encoding.DER) + reject_server_auth).decode()
+    lines = '\n'.join(body[i : i + 64] for i in range(0, len(body), 64))
+    path.write_text(f'-----BEGIN TRUSTED CERTIFICATE-----\n{lines}\n-----END TRUSTED CERTIFICATE-----\n')
+
+
+def test_requests_wrapper_given_certificate_rejected_error_skips_aia_chasing(distrust_pki, tmp_path):
+    # OpenSSL fails a chain whose trust anchor is explicitly rejected with verify code 28, the code the Agent's
+    # embedded Python uses when it rejects a built-in distrusted key during the handshake.
+    ca_path = tmp_path / 'rejected-root.pem'
+    write_rejected_trust_anchor(ca_path, distrust_pki.root)
+    http = RequestsWrapper({'tls_ca_cert': str(ca_path), 'skip_proxy': True}, {})
+
+    with https_server(distrust_pki, tmp_path) as port:
+        with pytest.raises(SSLError, match='certificate rejected'):
             http.get('https://localhost:{}'.format(port))
 
     assert distrust_pki.issuer.headers == []

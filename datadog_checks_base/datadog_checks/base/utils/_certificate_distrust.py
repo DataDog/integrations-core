@@ -38,6 +38,9 @@ DISTRUSTED_SPKI_SHA256 = {
 
 # OpenSSL's `X509_V_ERR_APPLICATION_VERIFICATION`: the application rejected a chain that OpenSSL accepted.
 X509_V_ERR_APPLICATION_VERIFICATION = 50
+# OpenSSL's `X509_V_ERR_CERT_REJECTED`: the Agent's embedded Python rejects the keys above with this code during the
+# handshake, before the check in this module runs, and OpenSSL uses it for certificates a trust store rejects.
+X509_V_ERR_CERT_REJECTED = 28
 
 DER_EXPLICIT_VERSION = 0xA0
 
@@ -92,10 +95,11 @@ def find_distrusted_key(chain: Iterable[bytes]) -> tuple[str, str] | None:
 
 
 def caused_by_certificate_distrust(error: BaseException) -> bool:
-    """Return whether a `CertificateDistrustError` is in the chain of exceptions behind `error`.
+    """Return whether a rejected certificate is in the chain of exceptions behind `error`.
 
-    Both `__cause__` and `__context__` are followed because requests and urllib3 link wrapped TLS errors with
-    either, so an exception raised while handling a distrust failure counts as caused by it.
+    That is a `CertificateDistrustError`, or a verification error with `X509_V_ERR_CERT_REJECTED`. Both
+    `__cause__` and `__context__` are followed because requests and urllib3 link wrapped TLS errors with either,
+    so an exception raised while handling a distrust failure counts as caused by it.
     """
     pending: list[BaseException] = [error]
     seen: set[int] = set()
@@ -104,7 +108,9 @@ def caused_by_certificate_distrust(error: BaseException) -> bool:
         if id(current) in seen:
             continue
         seen.add(id(current))
-        if isinstance(current, CertificateDistrustError):
+        if isinstance(current, CertificateDistrustError) or (
+            isinstance(current, ssl.SSLCertVerificationError) and current.verify_code == X509_V_ERR_CERT_REJECTED
+        ):
             return True
         pending.extend(link for link in (current.__cause__, current.__context__) if link is not None)
     return False
