@@ -34,7 +34,7 @@
       },
       "metrics": {
         "prefix": "kai.",
-        "check": "kai.queue.info",
+        "check": "kai.go.info",
         "metadata_path": "metadata.csv"
       }
     }
