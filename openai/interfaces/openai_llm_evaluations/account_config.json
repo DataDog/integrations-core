@@ -1,0 +1,33 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "API Key",
+          "help": "A standard OpenAI project or user API key. Admin keys (sk-admin-...) cannot call model endpoints and do not work here. Create one in the OpenAI Platform under API keys, with Model capabilities set to Write (or All permissions) so it can call /v1/chat/completions.",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "openai-llm-completions",
+      "toggle": {
+        "default": true,
+        "label": "Use this API key to evaluate your LLM applications",
+        "help": "Makes this key available to run evaluations in LLM Observability.",
+        "editable": true
+      },
+      "additional_config_fields": [],
+      "legacy_flat_mapping": {
+        "enable_field": "llm_observability_enabled",
+        "should_map_legacy_fields": true
+      }
+    }
+  ]
+}
