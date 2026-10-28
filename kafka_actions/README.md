@@ -17,7 +17,7 @@ This integration is exclusively triggered through [Remote Configuration][4] and 
 | Action | Description |
 |--------|-------------|
 | `read_messages` | Read and filter messages with jq-style expressions, supporting JSON, string, BSON, Avro, and Protobuf formats |
-| `produce_message` | Produce messages to topics with base64-encoded payloads and headers |
+| `produce_message` | Produce messages to topics, either base64-encoded (default) or serialized against a Schema Registry (Avro, Protobuf, or JSON) |
 | `create_topic` | Create topics with custom partitions, replication factor, and configurations |
 | `update_topic_config` | Update topic configurations and partition counts |
 | `delete_topic` | Delete topics |
@@ -63,6 +63,9 @@ This integration does not include service checks.
 
 ### Message deserialization failures
 Ensure the correct format is specified (`json`, `string`, `bson`, `avro`, `protobuf`) and provide schemas for Avro/Protobuf.
+
+### Message serialization failures
+By default, `produce_message`'s `key` and `value` are base64-encoded raw bytes. Setting `value_uses_schema_registry` or `key_uses_schema_registry` to `true` (along with a configured `schema_registry_url`) switches that side to JSON text, serialized against the latest schema registered for the topic's `<topic>-value`/`<topic>-key` subject. To use a different subject, set `value_schema_subject` or `key_schema_subject`. The wire format (Avro, Protobuf, or JSON) is determined by the Schema Registry's reported type for that schema and cannot be directly configured.
 
 Need help? Contact [Datadog support][2] or reach out to the **Data Streams Monitoring team** at Datadog for questions about this integration.
 
