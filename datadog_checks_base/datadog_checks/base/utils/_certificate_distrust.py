@@ -7,6 +7,10 @@ Keys are matched by the SHA-256 of the DER `SubjectPublicKeyInfo`, so reissued a
 that reuse a distrusted key are rejected as well. The check runs after OpenSSL verifies the chain, so it
 applies whichever trust store made the chain verify.
 
+Besides the built-in keys, the Agent setting `tls_distrusted_spki_sha256` can list more keys to
+distrust, but cannot remove one. An invalid value fails every verified connection, naming the bad entry, rather
+than trusting a key it may have been meant to distrust.
+
 The check runs when `do_handshake()` completes, which covers the default `do_handshake_on_connect=True` and
 explicit handshakes. Known limits:
 - A caller that disables `do_handshake_on_connect` and lets the first read or write complete the handshake
@@ -17,9 +21,16 @@ explicit handshakes. Known limits:
   `HTTPS://` URLs or http-to-https redirects without persistent connections, are not checked.
 """
 
+import functools
 import hashlib
+import logging
+import re
 import ssl
 from collections.abc import Iterable
+
+from datadog_checks.base.agent import datadog_agent
+
+LOGGER = logging.getLogger(__name__)
 
 # The eMudhra emSign G3 intermediate CA keys that were compromised. Go's `crypto/x509`
 # (https://go.dev/issue/82345), rustls-webpki 0.103.16
@@ -35,6 +46,12 @@ DISTRUSTED_SPKI_SHA256 = {
     'ec4ffa1ad0ac88081314b7aaffef6a91f97cd57291bb5ba686c5415f5eb4f6b6': 'EM OV CS CA - G3B (eMudhra)',
     '92c063d67e8f14db71d288e11266ffdaf69cbf115f7bab14f3bc2f68d25e0e30': 'EM OV CS CA - G3C (eMudhra)',
 }
+
+# The Agent setting, in `datadog.yaml` or the `DD_TLS_DISTRUSTED_SPKI_SHA256` environment variable, that
+# lists more CA keys to distrust. It adds to the keys above and cannot remove them.
+DISTRUSTED_SPKI_SHA256_SETTING = 'tls_distrusted_spki_sha256'
+SPKI_SHA256_COMMAND = 'openssl x509 -in ca.pem -noout -pubkey | openssl pkey -pubin -outform DER | openssl dgst -sha256'
+HEX_SHA256 = re.compile('[0-9a-f]{64}')
 
 # OpenSSL's `X509_V_ERR_APPLICATION_VERIFICATION`: the application rejected a chain that OpenSSL accepted.
 X509_V_ERR_APPLICATION_VERIFICATION = 50
@@ -78,8 +95,11 @@ def attach_distrust_check(context: ssl.SSLContext) -> ssl.SSLContext:
     return context
 
 
-def find_distrusted_key(chain: Iterable[bytes]) -> tuple[str, str] | None:
-    """Return the CA name and SPKI SHA-256 of the first distrusted key in a chain of DER certificates."""
+def find_distrusted_key(chain: Iterable[bytes], configured: frozenset[str] = frozenset()) -> tuple[str, str] | None:
+    """Return the CA name and SPKI SHA-256 of the first distrusted key in a chain of DER certificates.
+
+    `configured` holds the keys the Agent setting adds to the built-in ones.
+    """
     for cert_der in chain:
         try:
             spki = _subject_public_key_info(cert_der)
@@ -89,7 +109,7 @@ def find_distrusted_key(chain: Iterable[bytes]) -> tuple[str, str] | None:
             # read therefore cannot hide one, while failing would reject unusual but valid chains.
             continue
         spki_sha256 = hashlib.sha256(spki).hexdigest()
-        if (ca_name := _distrusted_ca_name(spki_sha256)) is not None:
+        if (ca_name := _distrusted_ca_name(spki_sha256, configured)) is not None:
             return ca_name, spki_sha256
     return None
 
@@ -116,22 +136,66 @@ def caused_by_certificate_distrust(error: BaseException) -> bool:
     return False
 
 
-def _distrusted_ca_name(spki_sha256: str) -> str | None:
+@functools.cache
+def _configured_keys() -> tuple[frozenset[str], str | None]:
+    """Return the CA keys the Agent setting distrusts, or why the setting is invalid.
+
+    The setting is read once per process; the Agent applies a change to it when it restarts.
+    """
+    try:
+        return _parse_configured_keys(datadog_agent.get_config(DISTRUSTED_SPKI_SHA256_SETTING)), None
+    except ValueError as e:
+        LOGGER.error('%s Verified TLS connections fail until the setting is fixed.', e)
+        return frozenset(), str(e)
+
+
+def _parse_configured_keys(value: object) -> frozenset[str]:
+    # An Agent that doesn't register the setting returns None, and the test stub returns ''.
+    if value is None or value == '':
+        return frozenset()
+    if not isinstance(value, list):
+        raise ValueError(
+            f'The Agent setting `{DISTRUSTED_SPKI_SHA256_SETTING}` must be a list of hex SPKI SHA-256 values, '
+            f'not {value!r}.'
+        )
+    keys = set()
+    for index, entry in enumerate(value):
+        key = entry.lower() if isinstance(entry, str) else ''
+        if not HEX_SHA256.fullmatch(key):
+            raise ValueError(
+                f'Entry {index} of the Agent setting `{DISTRUSTED_SPKI_SHA256_SETTING}` is {entry!r}, which is not '
+                "the hex SHA-256 of a CA's DER SubjectPublicKeyInfo; a certificate fingerprint does not match. "
+                f'Compute it with: {SPKI_SHA256_COMMAND}'
+            )
+        keys.add(key)
+    return frozenset(keys)
+
+
+def _distrusted_ca_name(spki_sha256: str, configured: frozenset[str]) -> str | None:
     """Return the name of the CA whose public key has this SHA-256, if that key is distrusted."""
-    return DISTRUSTED_SPKI_SHA256.get(spki_sha256)
+    # Built-in keys come first, so the setting can add keys but never remove or rename one.
+    if (name := DISTRUSTED_SPKI_SHA256.get(spki_sha256)) is not None:
+        return name
+    if spki_sha256 in configured:
+        return f'a key from the Agent setting `{DISTRUSTED_SPKI_SHA256_SETTING}`'
+    return None
 
 
 def _check_verified_chain(connection: ssl.SSLSocket | ssl.SSLObject) -> None:
     # Without verification, `get_verified_chain` returns the unverified chain the server sent.
     if connection.server_side or connection.context.verify_mode == ssl.CERT_NONE:
         return
+    configured, invalid_setting = _configured_keys()
+    if invalid_setting is not None:
+        # Refuse the connection rather than trust a CA key the setting may have been meant to distrust.
+        raise _certificate_distrust_error(invalid_setting)
     chain = connection.get_verified_chain()
     if not chain and connection.session_reused:
         # A resumed session skips chain verification, so refuse it instead of trusting a chain that can't be seen.
         raise _certificate_distrust_error(
             'the certificate chain of a resumed TLS session could not be checked for distrusted CA keys'
         )
-    match = find_distrusted_key(chain)
+    match = find_distrusted_key(chain, configured)
     if match is not None:
         ca_name, spki_sha256 = match
         raise _certificate_distrust_error(

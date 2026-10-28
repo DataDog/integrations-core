@@ -1,0 +1,1 @@
+Add the `tls_distrusted_spki_sha256` Agent setting, which makes every Python integration reject TLS connections whose verified certificate chain contains a listed CA key.
