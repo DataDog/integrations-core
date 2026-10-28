@@ -1,0 +1,1 @@
+Give HTTP fakes canonical TLS defaults while preserving explicit overrides and client isolation.

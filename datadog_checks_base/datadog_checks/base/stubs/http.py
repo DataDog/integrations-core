@@ -15,6 +15,7 @@ from datadog_checks.base.utils.headers import get_header as get_header_value
 from datadog_checks.base.utils.headers import set_header as set_header_value
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.base.utils.http_protocol import HTTPHeaders, HTTPRequestOptions, HTTPResponse
+from datadog_checks.base.utils.tls import TlsConfig
 
 __all__ = ['FakeHTTPClient', 'FakeHTTPResponse', 'RecordedRequest']
 
@@ -206,7 +207,7 @@ class FakeHTTPClient:
         if options is not None:
             self.options.update(options)
         self.options['headers'] = dict(self.options.get('headers') or {})
-        self.tls_config = dict(tls_config or {})
+        self.tls_config = {**TlsConfig().__dict__, **_snapshot_value(tls_config or {})}
         self.trust_env = True
         self.ignore_tls_warning = False
         self.persist_connections = False
