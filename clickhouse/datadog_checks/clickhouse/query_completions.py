@@ -334,6 +334,56 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
             # Checkpoint will still advance to avoid duplicates on retry.
             raise
 
+    def _apply_lag_cap(self, max_event_time: int) -> int:
+        """
+        Apply lag cap to prevent unbounded checkpoint lag.
+        
+        If the checkpoint is more than N intervals behind the current time,
+        jump it to `now - collection_interval` and emit a counter for skipped time.
+        
+        Args:
+            max_event_time: Maximum event_time_microseconds from query results
+            
+        Returns:
+            Adjusted max_event_time after applying lag cap
+        """
+        # Get current time from DB
+        current_time = self._get_current_time_from_db()
+        
+        # Calculate lag in microseconds
+        lag_us = current_time - max_event_time
+        
+        # Define lag cap as N intervals (default: 2 intervals)
+        # This means we won't skip more than 2 collection intervals worth of data
+        lag_cap_intervals = 2
+        lag_cap_us = lag_cap_intervals * int(self._collection_interval * 1_000_000)
+        
+        if lag_us > lag_cap_us:
+            # Lag exceeds cap - jump checkpoint to current_time - collection_interval
+            new_checkpoint = current_time - int(self._collection_interval * 1_000_000)
+            skipped_time_us = max_event_time - new_checkpoint
+            
+            self._log.warning(
+                "Checkpoint lag cap triggered: lag=%ds, cap=%ds, jumping checkpoint from %d to %d (skipped %ds)",
+                lag_us // 1_000_000,
+                lag_cap_us // 1_000_000,
+                max_event_time,
+                new_checkpoint,
+                skipped_time_us // 1_000_000,
+            )
+            
+            # Emit counter for skipped time
+            self._check.count(
+                "dd.clickhouse.query_completions.lag_cap_triggered",
+                1,
+                tags=self.tags + [f"skipped_time_us:{skipped_time_us}"],
+                raw=True,
+            )
+            
+            return new_checkpoint
+        
+        return max_event_time
+
     def _create_batched_payload(self, rows):
         """
         Create a batched payload following SQL Server query_completion pattern.
