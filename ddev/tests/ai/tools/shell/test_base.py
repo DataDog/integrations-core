@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import asyncio
+from pathlib import Path
 from typing import Annotated
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -147,6 +148,18 @@ async def test_run_command_not_found():
     assert "nonexistent" in result.error
 
 
+@pytest.mark.parametrize("filename_available", [False, True])
+async def test_run_command_reports_missing_working_directory(tmp_path: Path, filename_available: bool):
+    cwd = str(tmp_path / "missing")
+
+    error = FileNotFoundError(2, "No such file or directory", cwd if filename_available else None)
+    with patch("asyncio.create_subprocess_exec", new=AsyncMock(side_effect=error)):
+        result = await run_command(["cmd"], cwd=cwd)
+
+    assert result.success is False
+    assert result.error == f"Working directory not found: {cwd!r}"
+
+
 async def test_run_command_timeout():
     proc = make_proc()
     with patch_proc(proc):
@@ -155,6 +168,25 @@ async def test_run_command_timeout():
     assert result.success is False
     assert "5s" in result.error
     proc.kill.assert_called_once()
+
+
+async def test_run_command_cancellation_kills_child():
+    started: asyncio.Future[asyncio.subprocess.Process] = asyncio.get_running_loop().create_future()
+    real_exec = asyncio.create_subprocess_exec
+
+    async def capture_exec(*args, **kwargs):
+        proc = await real_exec(*args, **kwargs)
+        started.set_result(proc)
+        return proc
+
+    with patch("asyncio.create_subprocess_exec", new=capture_exec):
+        task = asyncio.create_task(run_command(["sleep", "30"], timeout=300))
+        proc = await asyncio.wait_for(started, timeout=5)
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+
+    assert proc.returncode is not None
 
 
 async def test_run_command_unexpected_exception():

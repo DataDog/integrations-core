@@ -4,6 +4,7 @@
 import asyncio
 from abc import abstractmethod
 from collections.abc import Callable
+from pathlib import Path
 from typing import ClassVar
 
 from ddev.ai.tools.core.base import BaseTool, BaseToolInput
@@ -29,18 +30,33 @@ async def run_command(
     cmd: list[str],
     timeout: int = 10,
     stdout_filter: Callable[[str], str] | None = None,
+    *,
+    cwd: str | None = None,
 ) -> ToolResult:
     try:
         proc = await asyncio.create_subprocess_exec(
-            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, cwd=cwd
         )
-        stdout_bytes, stderr_bytes = await asyncio.wait_for(proc.communicate(), timeout=timeout)
-    except FileNotFoundError:
+    except FileNotFoundError as e:
+        if cwd is not None and (e.filename == cwd or not Path(cwd).is_dir()):
+            return ToolResult(success=False, error=f"Working directory not found: {cwd!r}")
         return ToolResult(success=False, error=f"Command not found: {cmd[0]!r}")
+    except Exception as e:
+        return ToolResult(success=False, error=f"{type(e).__name__}: {e}")
+
+    try:
+        stdout_bytes, stderr_bytes = await asyncio.wait_for(proc.communicate(), timeout=timeout)
     except asyncio.TimeoutError:
         proc.kill()
         await proc.communicate()
         return ToolResult(success=False, error=f"Command timed out after {timeout}s: {cmd}")
+    except asyncio.CancelledError:
+        # Don't leave the child running after the caller is cancelled.
+        if proc.returncode is None:
+            proc.kill()
+            # Shield so a repeated cancellation can't interrupt reaping the child.
+            await asyncio.shield(proc.wait())
+        raise
     except Exception as e:
         return ToolResult(success=False, error=f"{type(e).__name__}: {e}")
 
