@@ -390,6 +390,8 @@ tests:
             uid: '13475339373'
             email_addr: notifications@example.com
             name: Aaron Levie
+            type_id: 1
+            type: User
           app_uid: '231318'
           app_name: Multiput Uploads
         file:
@@ -419,6 +421,11 @@ tests:
         class_name: File Hosting Activity
         status_id: 1
         status: Success
+        file_result:
+          uid: '8903212345'
+          type_id: 1
+          name: example.docx
+          type: Regular File
     message: |-
       {
         "event_id" : "97f1b31f-f143-4777-81f8-1b557b39ca33",
@@ -543,6 +550,11 @@ tests:
           name: Box
         auth_protocol: Unknown
         auth_protocol_id: 0
+        actor:
+          user:
+            uid: '41799950245'
+            email_addr: notifications@example.com
+            name: Aaron Levie
       ip_address: 10.2.3.4
     message: |-
       {
@@ -653,6 +665,8 @@ tests:
             uid: '41799950245'
             email_addr: notifications@example.com
             name: Aaron Levie
+            type_id: 1
+            type: User
         file:
           owner:
             uid: '41799950245'
@@ -670,6 +684,11 @@ tests:
         class_name: File Hosting Activity
         status_id: 1
         status: Success
+        file_result:
+          uid: '318298854550'
+          type_id: 2
+          name: Test
+          type: Folder
       ip_address: 10.2.3.4
     message: |-
       {
@@ -1081,6 +1100,11 @@ tests:
          email_addr: shay.sterling@example.com
          name: Shay Sterling
        status: Failure
+       actor:
+         user:
+           uid: '10333776464'
+           email_addr: shay.sterling@example.com
+           name: Shay Sterling
      usr:
        name: Unknown User
        id: '2'
@@ -1185,6 +1209,11 @@ tests:
          email_addr: tess.sutton@example.com
          name: Tess Sutton
        status: Failure
+       actor:
+         user:
+           uid: '52893063611'
+           email_addr: tess.sutton@example.com
+           name: Tess Sutton
      usr:
        name: Tess Sutton
        id: '52893063611'
@@ -1324,6 +1353,11 @@ tests:
          email_addr: cameron.kensington@example.com
          name: Cameron Kensington
        status: Failure
+       actor:
+         user:
+           uid: '49664861022'
+           email_addr: cameron.kensington@example.com
+           name: Cameron Kensington
      usr:
        name: Cameron Kensington
        id: '49664861022'
@@ -1443,6 +1477,11 @@ tests:
          email_addr: AppUser_9772615_9F6T7fXwjw@boxdevedition.com
          name: Deal Default User 1001
        status: Success
+       actor:
+         user:
+           uid: '22237906747'
+           email_addr: AppUser_9772615_9F6T7fXwjw@boxdevedition.com
+           name: Deal Default User 1001
      usr:
        name: Deal Default User 1001
        id: '22237906747'
@@ -1557,6 +1596,11 @@ tests:
          email_addr: AutomationUser_7040278_YL5ErU4OCT@boxdevedition.com
          name: test
        status: Success
+       actor:
+         user:
+           uid: '62339882905'
+           email_addr: AutomationUser_7040278_YL5ErU4OCT@boxdevedition.com
+           name: test
      usr:
        name: test
        id: '62339882905'
@@ -1663,6 +1707,8 @@ tests:
            uid: '24247901930'
            email_addr: AutomationUser_5200928_gvajwBRz66@boxdevedition.com
            name: DocumentSharingService
+           type_id: 1
+           type: User
        class_uid: 3001
        activity_id: 1
        time: 1793200601000
@@ -1751,6 +1797,8 @@ tests:
            uid: '91292319247'
            email_addr: admin.drew.emery@example.com
            name: Admin Drew Emery
+           type_id: 1
+           type: User
        class_uid: 3001
        activity_id: 6
        time: 1792512167000
@@ -1851,6 +1899,8 @@ tests:
            uid: '82057955561'
            email_addr: jules.dunn@example.com
            name: Jules Dunn
+           type_id: 1
+           type: User
        class_uid: 3006
        activity_id: 6
        time: 1793130412000
@@ -1995,9 +2045,7 @@ tests:
        type: box://event/additional_details/collaboration
      ocsf:
        severity: Informational
-       privileges:
-         - Editor
-       activity_name: Assign Privileges
+       activity_name: Share
        metadata:
          uid: f511f9eb-71ad-4b8a-b382-9bdeecfa3cf4
          product:
@@ -2005,16 +2053,8 @@ tests:
            vendor_name: Box
          event_code: COLLABORATION_INVITE
          version: 1.5.0
-       category_uid: 3
-       category_name: Identity & Access Management
-       resource:
-         owner:
-           uid: '24247901930'
-           email_addr: AutomationUser_5200928_gvajwBRz66@boxdevedition.com
-           name: DocumentSharingService
-         uid: '471299949777'
-         name: 5f096ef4-719a-427d-8b88-66b7a08a791a
-         type: folder
+       category_uid: 6
+       category_name: Application Activity
        src_endpoint:
          ip: 203.0.113.8
        actor:
@@ -2024,15 +2064,36 @@ tests:
            uid: '24247901930'
            email_addr: AutomationUser_5200928_gvajwBRz66@boxdevedition.com
            name: DocumentSharingService
-       class_uid: 3005
-       activity_id: 1
+           type_id: 1
+           type: User
+       class_uid: 6006
+       activity_id: 12
        time: 1793200602000
        severity_id: 1
-       user:
-         uid: '74673041506'
-         email_addr: AppUser_5200928_VGBGX6iZId@boxdevedition.com
-         name: example:company:5f096ef4-719a-427d-8b88-66b7a08a791a
-       class_name: User Access Management
+       class_name: File Hosting Activity
+       access_list:
+         - Editor
+       file_result:
+         uid: '471299949777'
+         type_id: 2
+         name: 5f096ef4-719a-427d-8b88-66b7a08a791a
+         accessor:
+           uid: '74673041506'
+           email_addr: AppUser_5200928_VGBGX6iZId@boxdevedition.com
+           name: example:company:5f096ef4-719a-427d-8b88-66b7a08a791a
+         type: Folder
+       status_id: 1
+       file:
+         owner:
+           uid: '24247901930'
+           email_addr: AutomationUser_5200928_gvajwBRz66@boxdevedition.com
+           name: DocumentSharingService
+         uid: '471299949777'
+         parent_folder: Companies
+         type_id: 2
+         name: 5f096ef4-719a-427d-8b88-66b7a08a791a
+         type: Folder
+       status: Success
      usr:
        name: DocumentSharingService
        id: '24247901930'
@@ -2160,9 +2221,7 @@ tests:
        type: box://event/additional_details/collaboration
      ocsf:
        severity: Informational
-       privileges:
-         - Unknown
-       activity_name: Revoke Privileges
+       activity_name: Unshare
        metadata:
          uid: e2cb7a4e-8d69-4919-8f37-1ac7bd140105
          product:
@@ -2170,29 +2229,37 @@ tests:
            vendor_name: Box
          event_code: COLLABORATION_REMOVE
          version: 1.5.0
-       category_uid: 3
-       category_name: Identity & Access Management
-       resource:
-         owner:
-           uid: '53065531421'
-           email_addr: AutomationUser_9772615_nTnqzS7Hl5@boxdevedition.com
-           name: Prod Files
-         uid: '783177126298'
-         name: PROPOSAL_1003
-         type: folder
+       category_uid: 6
+       category_name: Application Activity
        src_endpoint:
          name: Unknown IP
        actor:
          user:
            uid: '1'
-       class_uid: 3005
-       activity_id: 2
+           type_id: 3
+           type: System
+       class_uid: 6006
+       activity_id: 13
        time: 1793200287000
        severity_id: 1
-       user:
-         uid: '37662156662'
-         name: Proposal Default User 1003
-       class_name: User Access Management
+       class_name: File Hosting Activity
+       file_result:
+         uid: '783177126298'
+         type_id: 2
+         name: PROPOSAL_1003
+         type: Folder
+       status_id: 1
+       file:
+         owner:
+           uid: '53065531421'
+           email_addr: AutomationUser_9772615_nTnqzS7Hl5@boxdevedition.com
+           name: Prod Files
+         uid: '783177126298'
+         parent_folder: prod_deals-api PROPOSAL_1003
+         type_id: 2
+         name: PROPOSAL_1003
+         type: Folder
+       status: Success
      usr:
        id: '1'
    message: |-
@@ -2290,6 +2357,8 @@ tests:
            uid: '44277553659'
            email_addr: jules.redding@example.com
            name: Jules Redding
+           type_id: 1
+           type: User
        class_uid: 3004
        activity_id: 1
        time: 1792095691000
@@ -2440,6 +2509,8 @@ tests:
            uid: '32436807780'
            email_addr: AutomationUser_7238917_EZbOhODvOS@boxdevedition.com
            name: Example Integration
+           type_id: 1
+           type: User
        status_id: 1
        file:
          ext: pdf
@@ -2458,6 +2529,11 @@ tests:
        severity_id: 1
        class_name: File Hosting Activity
        status: Success
+       file_result:
+         uid: '8153761963384'
+         type_id: 1
+         name: Example County Senior Services - NONAUTO Package Acord Apps (original pages 1-34)_ACORD_141.pdf
+         type: Regular File
      usr:
        name: Example Integration
        id: '32436807780'
@@ -2635,6 +2711,8 @@ tests:
            uid: '57834558950'
            email_addr: pat.cole@example.com
            name: Pat Cole
+           type_id: 1
+           type: User
        file:
          owner:
            uid: '28036701759'
@@ -2661,6 +2739,11 @@ tests:
        severity_id: 1
        class_name: File Hosting Activity
        status: Success
+       file_result:
+         uid: '4488919637480'
+         type_id: 1
+         name: Project Alpha In-Process Review.pptx
+         type: Regular File
      usr:
        name: Pat Cole
        id: '57834558950'
@@ -2844,6 +2927,8 @@ tests:
            uid: '99893874983'
            email_addr: ely.marsh@example.com
            name: Ely Marsh
+           type_id: 1
+           type: User
        status_id: 1
        file:
          owner:
@@ -2861,6 +2946,12 @@ tests:
        severity_id: 1
        class_name: File Hosting Activity
        status: Success
+       expiration_time: 1798366434000
+       file_result:
+         uid: '511554385196'
+         type_id: 2
+         name: Recording
+         type: Folder
      usr:
        name: Ely Marsh
        id: '99893874983'
@@ -2975,6 +3066,8 @@ tests:
            uid: '92802579995'
            email_addr: admin.frankie.joyner@example.com
            name: Admin Frankie Joyner
+           type_id: 1
+           type: User
        status_id: 1
        file:
          owner:
@@ -2992,6 +3085,11 @@ tests:
        severity_id: 1
        class_name: File Hosting Activity
        status: Success
+       file_result:
+         uid: '130608951654'
+         type_id: 2
+         name: project_solutions_demo
+         type: Folder
      usr:
        name: Admin Frankie Joyner
        id: '92802579995'
@@ -3149,13 +3247,15 @@ tests:
            uid: '14870891292'
            email_addr: devon.redding@example.com
            name: Devon Redding
+           type_id: 1
+           type: User
        status_id: 1
        file:
          owner:
            uid: '84815391205'
            email_addr: eu.repo@example.com
            name: Regional Repo
-         uid: '379960928891'
+         uid: '980629833065'
          parent_folder: 2026-Jira-Tickets
          type_id: 2
          name: POC
@@ -3166,6 +3266,11 @@ tests:
        severity_id: 1
        class_name: File Hosting Activity
        status: Success
+       file_result:
+         uid: '379960928891'
+         type_id: 2
+         name: POC
+         type: Folder
      usr:
        name: Devon Redding
        id: '14870891292'
@@ -3399,3 +3504,509 @@ tests:
    tags:
      - source:LOGS_SOURCE
    timestamp: 1
+ -
+  sample: |-
+    {
+      "event_id" : "44d88a55-1897-40b9-bfb5-ddfd81ee6281",
+      "created_at" : "2026-10-23T10:01:45-06:00",
+      "source" : {
+        "name" : "Jules Dunn",
+        "id" : "82057955561",
+        "type" : "user",
+        "login" : "jules.dunn@example.com"
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "Kendall Dale",
+        "id" : "10577938094",
+        "login" : "kendall.dale@example.com"
+      },
+      "event_type" : "REMOVE_LOGIN_ACTIVITY_DEVICE",
+      "ip_address" : "Unknown IP"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: REMOVE_LOGIN_ACTIVITY_DEVICE
+     event_id: 44d88a55-1897-40b9-bfb5-ddfd81ee6281
+     event_type: REMOVE_LOGIN_ACTIVITY_DEVICE
+     ocsf:
+       severity: Informational
+       activity_name: REMOVE_LOGIN_ACTIVITY_DEVICE
+       metadata:
+         uid: 44d88a55-1897-40b9-bfb5-ddfd81ee6281
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: REMOVE_LOGIN_ACTIVITY_DEVICE
+         version: 1.5.0
+       category_uid: 3
+       category_name: Identity & Access Management
+       src_endpoint:
+         name: Unknown IP
+       actor:
+         user:
+           uid: '10577938094'
+           email_addr: kendall.dale@example.com
+           name: Kendall Dale
+       status_id: 1
+       auth_protocol: Unknown
+       service:
+         name: Box
+       auth_protocol_id: 0
+       class_uid: 3002
+       activity_id: 99
+       time: 1792771305000
+       severity_id: 1
+       class_name: Authentication
+       user:
+         uid: '82057955561'
+         email_addr: jules.dunn@example.com
+         name: Jules Dunn
+       status: Success
+     usr:
+       name: Kendall Dale
+       id: '10577938094'
+       email: kendall.dale@example.com
+     created_at: '2026-10-23T10:01:45-06:00'
+     source:
+       name: Jules Dunn
+       id: '82057955561'
+       type: user
+       login: jules.dunn@example.com
+     ip_address: Unknown IP
+     box_event_category: user
+     type: event
+     created_by:
+       name: Kendall Dale
+       id: '10577938094'
+       type: user
+       login: kendall.dale@example.com
+     network:
+       client:
+         geoip:
+           invalidAddress: Unknown IP
+         ip: Unknown IP
+   message: |-
+     {
+       "event_id" : "44d88a55-1897-40b9-bfb5-ddfd81ee6281",
+       "created_at" : "2026-10-23T10:01:45-06:00",
+       "source" : {
+         "name" : "Jules Dunn",
+         "id" : "82057955561",
+         "type" : "user",
+         "login" : "jules.dunn@example.com"
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "Kendall Dale",
+         "id" : "10577938094",
+         "login" : "kendall.dale@example.com"
+       },
+       "event_type" : "REMOVE_LOGIN_ACTIVITY_DEVICE",
+       "ip_address" : "Unknown IP"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1792771305000
+ -
+  sample: |-
+    {
+      "accessible_by" : {
+        "name" : "Deal Default User 1001",
+        "id" : "22237906747",
+        "type" : "user",
+        "login" : "AppUser_9772615_9F6T7fXwjw@boxdevedition.com"
+      },
+      "event_id" : "d3fe6f87-2533-4956-9eb3-31f48b07f31b",
+      "additional_details" : {
+        "role" : "Viewer",
+        "service_name" : "Prod Files",
+        "collab_id" : "72305466484",
+        "service_id" : "9772615",
+        "is_performed_by_admin" : false,
+        "type" : "box://event/additional_details/collaboration"
+      },
+      "created_at" : "2026-10-28T08:21:57-07:00",
+      "source" : {
+        "parent" : {
+          "name" : "prod_deals-api DEAL_1001",
+          "id" : "378037693106",
+          "type" : "folder"
+        },
+        "user_id" : "22237906747",
+        "user_name" : "Deal Default User 1001",
+        "owned_by" : {
+          "name" : "Prod Files",
+          "id" : "53065531421",
+          "type" : "user",
+          "login" : "AutomationUser_9772615_nTnqzS7Hl5@boxdevedition.com"
+        },
+        "folder_name" : "DEAL_1001",
+        "folder_id" : "564701049430"
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "Prod Files",
+        "id" : "53065531421",
+        "login" : "AutomationUser_9772615_nTnqzS7Hl5@boxdevedition.com"
+      },
+      "event_type" : "COLLABORATION_ROLE_CHANGE",
+      "ip_address" : "203.0.113.7"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: COLLABORATION_ROLE_CHANGE
+     created_at: '2026-10-28T08:21:57-07:00'
+     source:
+       parent:
+         name: prod_deals-api DEAL_1001
+         id: '378037693106'
+         type: folder
+       user_id: '22237906747'
+       user_name: Deal Default User 1001
+       owned_by:
+         name: Prod Files
+         id: '53065531421'
+         type: user
+         login: AutomationUser_9772615_nTnqzS7Hl5@boxdevedition.com
+       folder_name: DEAL_1001
+       folder_id: '564701049430'
+     ip_address: 203.0.113.7
+     box_event_category: other
+     type: event
+     created_by:
+       name: Prod Files
+       id: '53065531421'
+       type: user
+       login: AutomationUser_9772615_nTnqzS7Hl5@boxdevedition.com
+     network:
+       client:
+         geoip: {}
+         ip: 203.0.113.7
+     accessible_by:
+       name: Deal Default User 1001
+       id: '22237906747'
+       type: user
+       login: AppUser_9772615_9F6T7fXwjw@boxdevedition.com
+     event_id: d3fe6f87-2533-4956-9eb3-31f48b07f31b
+     event_type: COLLABORATION_ROLE_CHANGE
+     additional_details:
+       role: Viewer
+       service_name: Prod Files
+       collab_id: '72305466484'
+       service_id: '9772615'
+       is_performed_by_admin: false
+       type: box://event/additional_details/collaboration
+     ocsf:
+       severity: Informational
+       activity_name: Share
+       metadata:
+         uid: d3fe6f87-2533-4956-9eb3-31f48b07f31b
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: COLLABORATION_ROLE_CHANGE
+         version: 1.5.0
+       category_uid: 6
+       category_name: Application Activity
+       src_endpoint:
+         ip: 203.0.113.7
+       access_list:
+         - Viewer
+       actor:
+         app_uid: '9772615'
+         app_name: Prod Files
+         user:
+           uid: '53065531421'
+           email_addr: AutomationUser_9772615_nTnqzS7Hl5@boxdevedition.com
+           type_id: 1
+           name: Prod Files
+           type: User
+       file_result:
+         uid: '564701049430'
+         type_id: 2
+         name: DEAL_1001
+         accessor:
+           uid: '22237906747'
+           email_addr: AppUser_9772615_9F6T7fXwjw@boxdevedition.com
+           name: Deal Default User 1001
+         type: Folder
+       status_id: 1
+       file:
+         owner:
+           uid: '53065531421'
+           email_addr: AutomationUser_9772615_nTnqzS7Hl5@boxdevedition.com
+           name: Prod Files
+         uid: '564701049430'
+         parent_folder: prod_deals-api DEAL_1001
+         type_id: 2
+         name: DEAL_1001
+         type: Folder
+       class_uid: 6006
+       activity_id: 12
+       time: 1793200917000
+       severity_id: 1
+       class_name: File Hosting Activity
+       status: Success
+     usr:
+       name: Prod Files
+       id: '53065531421'
+       email: AutomationUser_9772615_nTnqzS7Hl5@boxdevedition.com
+   message: |-
+     {
+       "accessible_by" : {
+         "name" : "Deal Default User 1001",
+         "id" : "22237906747",
+         "type" : "user",
+         "login" : "AppUser_9772615_9F6T7fXwjw@boxdevedition.com"
+       },
+       "event_id" : "d3fe6f87-2533-4956-9eb3-31f48b07f31b",
+       "additional_details" : {
+         "role" : "Viewer",
+         "service_name" : "Prod Files",
+         "collab_id" : "72305466484",
+         "service_id" : "9772615",
+         "is_performed_by_admin" : false,
+         "type" : "box://event/additional_details/collaboration"
+       },
+       "created_at" : "2026-10-28T08:21:57-07:00",
+       "source" : {
+         "parent" : {
+           "name" : "prod_deals-api DEAL_1001",
+           "id" : "378037693106",
+           "type" : "folder"
+         },
+         "user_id" : "22237906747",
+         "user_name" : "Deal Default User 1001",
+         "owned_by" : {
+           "name" : "Prod Files",
+           "id" : "53065531421",
+           "type" : "user",
+           "login" : "AutomationUser_9772615_nTnqzS7Hl5@boxdevedition.com"
+         },
+         "folder_name" : "DEAL_1001",
+         "folder_id" : "564701049430"
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "Prod Files",
+         "id" : "53065531421",
+         "login" : "AutomationUser_9772615_nTnqzS7Hl5@boxdevedition.com"
+       },
+       "event_type" : "COLLABORATION_ROLE_CHANGE",
+       "ip_address" : "203.0.113.7"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1793200917000
+ -
+  sample: |-
+    {
+      "event_id" : "e697e45a-f5f9-4746-852a-1df9d7eaf2e9",
+      "additional_details" : {
+        "shared_link_id" : "htqzc1ajh2uv4dioplhqwaxjb78keytj",
+        "sharedLinkSettings" : {
+          "newCanPreview" : true,
+          "newVisibilityStatus" : "Open",
+          "newCanDownload" : true,
+          "oldVisibilityStatus" : "Open",
+          "newIsExpirationDateSet" : true,
+          "newCanEdit" : false,
+          "oldIsPasswordProtected" : false,
+          "oldExpirationDate" : 1793195226,
+          "newExpirationDate" : 1796021940,
+          "oldCanDownload" : true,
+          "oldCanEdit" : false,
+          "oldIsExpirationDateSet" : true,
+          "newIsPasswordProtected" : false,
+          "oldCanPreview" : true
+        }
+      },
+      "created_at" : "2026-10-27T06:47:16-07:00",
+      "source" : {
+        "parent" : {
+          "name" : "CAS00001",
+          "id" : "738837840962",
+          "type" : "folder"
+        },
+        "item_id" : "525295877746",
+        "item_type" : "folder",
+        "item_name" : "For Customer",
+        "owned_by" : {
+          "name" : "Box-for-Netsuite",
+          "id" : "7334312055",
+          "type" : "user",
+          "login" : "AutomationUser_890660_CduIcwnQTG@boxdevedition.com"
+        }
+      },
+      "type" : "event",
+      "created_by" : {
+        "type" : "user",
+        "name" : "Pat Calloway",
+        "id" : "54374352938",
+        "login" : "pat.calloway@example.com"
+      },
+      "event_type" : "UPDATE_SHARE_EXPIRATION",
+      "ip_address" : "203.0.113.31"
+    }
+  service: "enterprise-events"
+  result:
+   service: enterprise-events
+   custom:
+     evt:
+       name: UPDATE_SHARE_EXPIRATION
+     created_at: '2026-10-27T06:47:16-07:00'
+     source:
+       parent:
+         name: CAS00001
+         id: '738837840962'
+         type: folder
+       item_id: '525295877746'
+       item_type: folder
+       item_name: For Customer
+       owned_by:
+         name: Box-for-Netsuite
+         id: '7334312055'
+         type: user
+         login: AutomationUser_890660_CduIcwnQTG@boxdevedition.com
+     ip_address: 203.0.113.31
+     box_event_category: folder
+     type: event
+     created_by:
+       name: Pat Calloway
+       id: '54374352938'
+       type: user
+       login: pat.calloway@example.com
+     network:
+       client:
+         geoip: {}
+         ip: 203.0.113.31
+     event_id: e697e45a-f5f9-4746-852a-1df9d7eaf2e9
+     event_type: UPDATE_SHARE_EXPIRATION
+     additional_details:
+       shared_link_id: htqzc1ajh2uv4dioplhqwaxjb78keytj
+       sharedLinkSettings:
+         newCanPreview: true
+         newVisibilityStatus: Open
+         newCanDownload: true
+         oldVisibilityStatus: Open
+         newIsExpirationDateSet: true
+         newCanEdit: false
+         oldIsPasswordProtected: false
+         oldExpirationDate: 1793195226
+         newExpirationDate: 1796021940
+         oldCanDownload: true
+         oldCanEdit: false
+         oldIsExpirationDateSet: true
+         newIsPasswordProtected: false
+         oldCanPreview: true
+     ocsf:
+       severity: Informational
+       activity_name: Share
+       metadata:
+         uid: e697e45a-f5f9-4746-852a-1df9d7eaf2e9
+         product:
+           name: Box
+           vendor_name: Box
+         event_code: UPDATE_SHARE_EXPIRATION
+         version: 1.5.0
+       category_uid: 6
+       category_name: Application Activity
+       src_endpoint:
+         ip: 203.0.113.31
+       expiration_time: 1796021940000
+       actor:
+         user:
+           uid: '54374352938'
+           email_addr: pat.calloway@example.com
+           type_id: 1
+           name: Pat Calloway
+           type: User
+       file_result:
+         uid: '525295877746'
+         type_id: 2
+         name: For Customer
+         type: Folder
+       status_id: 1
+       file:
+         owner:
+           uid: '7334312055'
+           email_addr: AutomationUser_890660_CduIcwnQTG@boxdevedition.com
+           name: Box-for-Netsuite
+         uid: '525295877746'
+         parent_folder: CAS00001
+         type_id: 2
+         name: For Customer
+         type: Folder
+       class_uid: 6006
+       activity_id: 12
+       time: 1793108836000
+       severity_id: 1
+       class_name: File Hosting Activity
+       status: Success
+     usr:
+       name: Pat Calloway
+       id: '54374352938'
+       email: pat.calloway@example.com
+   message: |-
+     {
+       "event_id" : "e697e45a-f5f9-4746-852a-1df9d7eaf2e9",
+       "additional_details" : {
+         "shared_link_id" : "htqzc1ajh2uv4dioplhqwaxjb78keytj",
+         "sharedLinkSettings" : {
+           "newCanPreview" : true,
+           "newVisibilityStatus" : "Open",
+           "newCanDownload" : true,
+           "oldVisibilityStatus" : "Open",
+           "newIsExpirationDateSet" : true,
+           "newCanEdit" : false,
+           "oldIsPasswordProtected" : false,
+           "oldExpirationDate" : 1793195226,
+           "newExpirationDate" : 1796021940,
+           "oldCanDownload" : true,
+           "oldCanEdit" : false,
+           "oldIsExpirationDateSet" : true,
+           "newIsPasswordProtected" : false,
+           "oldCanPreview" : true
+         }
+       },
+       "created_at" : "2026-10-27T06:47:16-07:00",
+       "source" : {
+         "parent" : {
+           "name" : "CAS00001",
+           "id" : "738837840962",
+           "type" : "folder"
+         },
+         "item_id" : "525295877746",
+         "item_type" : "folder",
+         "item_name" : "For Customer",
+         "owned_by" : {
+           "name" : "Box-for-Netsuite",
+           "id" : "7334312055",
+           "type" : "user",
+           "login" : "AutomationUser_890660_CduIcwnQTG@boxdevedition.com"
+         }
+       },
+       "type" : "event",
+       "created_by" : {
+         "type" : "user",
+         "name" : "Pat Calloway",
+         "id" : "54374352938",
+         "login" : "pat.calloway@example.com"
+       },
+       "event_type" : "UPDATE_SHARE_EXPIRATION",
+       "ip_address" : "203.0.113.31"
+     }
+   tags:
+     - source:LOGS_SOURCE
+   timestamp: 1793108836000

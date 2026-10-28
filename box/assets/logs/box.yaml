@@ -65,6 +65,11 @@ facets:
     source: log
   - groups:
       - OCSF
+    name: Access List
+    path: ocsf.access_list
+    source: log
+  - groups:
+      - OCSF
     name: Actor Application Name
     path: ocsf.actor.app_name
     source: log
@@ -130,6 +135,11 @@ facets:
     source: log
   - groups:
       - OCSF
+    name: Expiration Time
+    path: ocsf.expiration_time
+    source: log
+  - groups:
+      - OCSF
     name: File Extension
     path: ocsf.file.ext
     source: log
@@ -177,6 +187,31 @@ facets:
       - OCSF
     name: File Version
     path: ocsf.file.version
+    source: log
+  - groups:
+      - OCSF
+    name: File Result Accessor Email Address
+    path: ocsf.file_result.accessor.email_addr
+    source: log
+  - groups:
+      - OCSF
+    name: File Result Accessor Name
+    path: ocsf.file_result.accessor.name
+    source: log
+  - groups:
+      - OCSF
+    name: File Result Accessor Unique ID
+    path: ocsf.file_result.accessor.uid
+    source: log
+  - groups:
+      - OCSF
+    name: File Result Name
+    path: ocsf.file_result.name
+    source: log
+  - groups:
+      - OCSF
+    name: File Result Unique ID
+    path: ocsf.file_result.uid
     source: log
   - groups:
       - OCSF
@@ -257,41 +292,6 @@ facets:
       - OCSF
     name: Metadata Event UID
     path: ocsf.metadata.uid
-    source: log
-  - groups:
-      - OCSF
-    name: Privileges
-    path: ocsf.privileges
-    source: log
-  - groups:
-      - OCSF
-    name: Resource Name
-    path: ocsf.resource.name
-    source: log
-  - groups:
-      - OCSF
-    name: Resource Owner Email Address
-    path: ocsf.resource.owner.email_addr
-    source: log
-  - groups:
-      - OCSF
-    name: Resource Owner Name
-    path: ocsf.resource.owner.name
-    source: log
-  - groups:
-      - OCSF
-    name: Resource Owner Unique ID
-    path: ocsf.resource.owner.uid
-    source: log
-  - groups:
-      - OCSF
-    name: Resource Type
-    path: ocsf.resource.type
-    source: log
-  - groups:
-      - OCSF
-    name: Resource Unique ID
-    path: ocsf.resource.uid
     source: log
   - groups:
       - OCSF
@@ -1008,6 +1008,31 @@ pipeline:
               target: ocsf.actor.user.email_addr
               preserveSource: true
               overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.actor.user.type_id
+              categories:
+                - filter:
+                    query: "@created_by.type:user -@created_by.id:1"
+                  name: User
+                  id: 1
+                - filter:
+                    query: "@created_by.id:1"
+                  name: System
+                  id: 3
+                - filter:
+                    query: "@created_by.type:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.actor.user.type
+                id: ocsf.actor.user.type_id
+              fallback:
+                values:
+                  ocsf.actor.user.type: Other
+                  ocsf.actor.user.type_id: "99"
+                sources:
+                  ocsf.actor.user.type:
+                    - created_by.type
             - type: schema-remapper
               name: Map `additional_details.service_name` to `ocsf.actor.app_name`
               sources:
@@ -1089,6 +1114,38 @@ pipeline:
             supportRules: ""
             matchRules: |
               to_bool %{boolean("true","false"):ocsf.is_mfa}
+        - type: grok-parser
+          name: Parse `created_by.name` to `ocsf.actor.user.name`
+          enabled: true
+          source: created_by.name
+          samples:
+            - "Kendall Dale"
+            - "Unknown User"
+          grok:
+            supportRules: ""
+            matchRules: |
+              known_user %{regex("(?!Unknown User$)[^\\n]+"):ocsf.actor.user.name}
+        - type: grok-parser
+          name: Parse `created_by.id` to `ocsf.actor.user.uid`
+          enabled: true
+          source: created_by.id
+          samples:
+            - "10577938094"
+            - "2"
+          grok:
+            supportRules: ""
+            matchRules: |
+              known_user %{regex("(?!2$)[0-9]+"):ocsf.actor.user.uid}
+        - type: grok-parser
+          name: Parse `created_by.login` to `ocsf.actor.user.email_addr`
+          enabled: true
+          source: created_by.login
+          samples:
+            - "kendall.dale@example.com"
+          grok:
+            supportRules: ""
+            matchRules: |
+              known_user %{notSpace:ocsf.actor.user.email_addr}
         - type: schema-processor
           name: Apply OCSF schema for 3002
           enabled: true
@@ -1240,24 +1297,30 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `action_by.name` to `ocsf.actor.user.name`
+              name: Map `action_by.name`, `ocsf.actor.user.name`, `source.name` to `ocsf.actor.user.name`
               sources:
                 - action_by.name
+                - ocsf.actor.user.name
+                - source.name
               target: ocsf.actor.user.name
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `action_by.id` to `ocsf.actor.user.uid`
+              name: Map `action_by.id`, `ocsf.actor.user.uid`, `source.id` to `ocsf.actor.user.uid`
               sources:
                 - action_by.id
+                - ocsf.actor.user.uid
+                - source.id
               target: ocsf.actor.user.uid
               preserveSource: true
               overrideOnConflict: true
               targetFormat: string
             - type: schema-remapper
-              name: Map `action_by.login` to `ocsf.actor.user.email_addr`
+              name: Map `action_by.login`, `ocsf.actor.user.email_addr`, `source.login` to `ocsf.actor.user.email_addr`
               sources:
                 - action_by.login
+                - ocsf.actor.user.email_addr
+                - source.login
               target: ocsf.actor.user.email_addr
               preserveSource: true
               overrideOnConflict: true
@@ -1437,6 +1500,31 @@ pipeline:
               target: ocsf.actor.user.email_addr
               preserveSource: true
               overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.actor.user.type_id
+              categories:
+                - filter:
+                    query: "@created_by.type:user -@created_by.id:1"
+                  name: User
+                  id: 1
+                - filter:
+                    query: "@created_by.id:1"
+                  name: System
+                  id: 3
+                - filter:
+                    query: "@created_by.type:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.actor.user.type
+                id: ocsf.actor.user.type_id
+              fallback:
+                values:
+                  ocsf.actor.user.type: Other
+                  ocsf.actor.user.type_id: "99"
+                sources:
+                  ocsf.actor.user.type:
+                    - created_by.type
             - type: schema-remapper
               name: Map `additional_details.service_name` to `ocsf.actor.app_name`
               sources:
@@ -1471,269 +1559,6 @@ pipeline:
             version: 1.5.0
             className: Entity Management
             classUid: 3004
-            extensions: []
-            profiles: []
-    - type: pipeline
-      name: OCSF sub pipeline for class User Access Management [3005]
-      enabled: true
-      ocsf:
-        isOcsf: true
-      filter:
-        query: "@ocsf.metadata.event_code:(COLLABORATION_INVITE OR COLLABORATION_ROLE_CHANGE OR COLLABORATION_ACCEPT OR COLLABORATION_REMOVE OR COLLABORATION_EXPIRATION OR UPDATE_COLLABORATION_EXPIRATION)"
-      processors:
-        - type: grok-parser
-          name: Parse `ip_address` to `ocsf.src_endpoint.ip`, `ocsf.src_endpoint.name`
-          enabled: true
-          source: ip_address
-          samples:
-            - "203.0.113.2"
-            - "2001:db8::1"
-            - "Unknown IP"
-          grok:
-            supportRules: ""
-            matchRules: |
-              valid_ip %{ip:ocsf.src_endpoint.ip}
-              no_ip %{data:ocsf.src_endpoint.name}
-        - type: string-builder-processor
-          name: Add user name
-          enabled: true
-          template: "Unknown"
-          target: ocsf.user.name
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Add default privileges
-          enabled: true
-          template: "[Unknown]"
-          target: ocsf.privileges
-          replaceMissing: false
-        - type: string-builder-processor
-          name: Add privileges
-          enabled: true
-          template: "[%{additional_details.role}]"
-          target: ocsf.privileges
-          replaceMissing: false
-        - type: grok-parser
-          name: Parse `ocsf.privileges` to array
-          enabled: true
-          source: ocsf.privileges
-          samples:
-            - "[Editor]"
-          grok:
-            supportRules: ""
-            matchRules: |
-              to_array %{data:ocsf.privileges:array("[]",",")}
-        - type: string-builder-processor
-          name: Add resource type
-          enabled: true
-          template: "folder"
-          target: ocsf.resource.type
-          replaceMissing: false
-        - type: schema-processor
-          name: Apply OCSF schema for 3005
-          enabled: true
-          mappers:
-            - type: schema-remapper
-              name: Map `ocsf.metadata.product.name` to `ocsf.metadata.product.name`
-              sources:
-                - ocsf.metadata.product.name
-              target: ocsf.metadata.product.name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.product.vendor_name` to `ocsf.metadata.product.vendor_name`
-              sources:
-                - ocsf.metadata.product.vendor_name
-              target: ocsf.metadata.product.vendor_name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.event_code` to `ocsf.metadata.event_code`
-              sources:
-                - ocsf.metadata.event_code
-              target: ocsf.metadata.event_code
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.metadata.uid` to `ocsf.metadata.uid`
-              sources:
-                - ocsf.metadata.uid
-              target: ocsf.metadata.uid
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.time` to `ocsf.time`
-              sources:
-                - ocsf.time
-              target: ocsf.time
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-category-mapper
-              name: ocsf.activity_id
-              categories:
-                - filter:
-                    query: "@ocsf.metadata.event_code:(COLLABORATION_INVITE OR COLLABORATION_ROLE_CHANGE)"
-                  name: Assign Privileges
-                  id: 1
-                - filter:
-                    query: "@ocsf.metadata.event_code:(COLLABORATION_REMOVE OR COLLABORATION_EXPIRATION)"
-                  name: Revoke Privileges
-                  id: 2
-                - filter:
-                    query: "*"
-                  name: Other
-                  id: 99
-              targets:
-                name: ocsf.activity_name
-                id: ocsf.activity_id
-              fallback:
-                values:
-                  ocsf.activity_name: Other
-                  ocsf.activity_id: "99"
-                sources:
-                  ocsf.activity_name:
-                    - event_type
-            - type: schema-category-mapper
-              name: ocsf.severity_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Informational
-                  id: 1
-              targets:
-                name: ocsf.severity
-                id: ocsf.severity_id
-            - type: schema-remapper
-              name: Map `ocsf.privileges` to `ocsf.privileges`
-              sources:
-                - ocsf.privileges
-              target: ocsf.privileges
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `accessible_by.name`, `source.user_name`, `ocsf.user.name` to `ocsf.user.name`
-              sources:
-                - accessible_by.name
-                - source.user_name
-                - ocsf.user.name
-              target: ocsf.user.name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `accessible_by.id`, `source.user_id` to `ocsf.user.uid`
-              sources:
-                - accessible_by.id
-                - source.user_id
-              target: ocsf.user.uid
-              preserveSource: true
-              overrideOnConflict: true
-              targetFormat: string
-            - type: schema-remapper
-              name: Map `accessible_by.login` to `ocsf.user.email_addr`
-              sources:
-                - accessible_by.login
-              target: ocsf.user.email_addr
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `source.folder_id` to `ocsf.resource.uid`
-              sources:
-                - source.folder_id
-              target: ocsf.resource.uid
-              preserveSource: true
-              overrideOnConflict: true
-              targetFormat: string
-            - type: schema-remapper
-              name: Map `source.folder_name` to `ocsf.resource.name`
-              sources:
-                - source.folder_name
-              target: ocsf.resource.name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.resource.type` to `ocsf.resource.type`
-              sources:
-                - ocsf.resource.type
-              target: ocsf.resource.type
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `source.owned_by.name` to `ocsf.resource.owner.name`
-              sources:
-                - source.owned_by.name
-              target: ocsf.resource.owner.name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `source.owned_by.id` to `ocsf.resource.owner.uid`
-              sources:
-                - source.owned_by.id
-              target: ocsf.resource.owner.uid
-              preserveSource: true
-              overrideOnConflict: true
-              targetFormat: string
-            - type: schema-remapper
-              name: Map `source.owned_by.login` to `ocsf.resource.owner.email_addr`
-              sources:
-                - source.owned_by.login
-              target: ocsf.resource.owner.email_addr
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `created_by.name` to `ocsf.actor.user.name`
-              sources:
-                - created_by.name
-              target: ocsf.actor.user.name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `created_by.id` to `ocsf.actor.user.uid`
-              sources:
-                - created_by.id
-              target: ocsf.actor.user.uid
-              preserveSource: true
-              overrideOnConflict: true
-              targetFormat: string
-            - type: schema-remapper
-              name: Map `created_by.login` to `ocsf.actor.user.email_addr`
-              sources:
-                - created_by.login
-              target: ocsf.actor.user.email_addr
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `additional_details.service_name` to `ocsf.actor.app_name`
-              sources:
-                - additional_details.service_name
-              target: ocsf.actor.app_name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `additional_details.service_id` to `ocsf.actor.app_uid`
-              sources:
-                - additional_details.service_id
-              target: ocsf.actor.app_uid
-              preserveSource: true
-              overrideOnConflict: true
-              targetFormat: string
-            - type: schema-remapper
-              name: Map `ocsf.src_endpoint.ip` to `ocsf.src_endpoint.ip`
-              sources:
-                - ocsf.src_endpoint.ip
-              target: ocsf.src_endpoint.ip
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.src_endpoint.name` to `ocsf.src_endpoint.name`
-              sources:
-                - ocsf.src_endpoint.name
-              target: ocsf.src_endpoint.name
-              preserveSource: true
-              overrideOnConflict: true
-          schema:
-            schemaType: ocsf
-            version: 1.5.0
-            className: User Access Management
-            classUid: 3005
             extensions: []
             profiles: []
     - type: pipeline
@@ -1900,6 +1725,31 @@ pipeline:
               target: ocsf.actor.user.email_addr
               preserveSource: true
               overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.actor.user.type_id
+              categories:
+                - filter:
+                    query: "@created_by.type:user -@created_by.id:1"
+                  name: User
+                  id: 1
+                - filter:
+                    query: "@created_by.id:1"
+                  name: System
+                  id: 3
+                - filter:
+                    query: "@created_by.type:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.actor.user.type
+                id: ocsf.actor.user.type_id
+              fallback:
+                values:
+                  ocsf.actor.user.type: Other
+                  ocsf.actor.user.type_id: "99"
+                sources:
+                  ocsf.actor.user.type:
+                    - created_by.type
             - type: schema-remapper
               name: Map `additional_details.service_name` to `ocsf.actor.app_name`
               sources:
@@ -1942,7 +1792,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@source.item_type:(file OR folder)"
+        query: "@source.item_type:(file OR folder) OR @ocsf.metadata.event_code:(COLLABORATION_INVITE OR COLLABORATION_ROLE_CHANGE OR COLLABORATION_ACCEPT OR COLLABORATION_REMOVE OR COLLABORATION_EXPIRATION OR UPDATE_COLLABORATION_EXPIRATION)"
       processors:
         - type: grok-parser
           name: Parse `ip_address` to `ocsf.src_endpoint.ip`, `ocsf.src_endpoint.name`
@@ -1957,6 +1807,28 @@ pipeline:
             matchRules: |
               valid_ip %{ip:ocsf.src_endpoint.ip}
               no_ip %{data:ocsf.src_endpoint.name}
+        - type: string-builder-processor
+          name: Add access list
+          enabled: true
+          template: "[%{additional_details.role}]"
+          target: ocsf.access_list
+          replaceMissing: false
+        - type: grok-parser
+          name: Parse `ocsf.access_list` to array
+          enabled: true
+          source: ocsf.access_list
+          samples:
+            - "[Editor]"
+          grok:
+            supportRules: ""
+            matchRules: |
+              to_array %{data:ocsf.access_list:array("[]",",")}
+        - type: string-builder-processor
+          name: Add expiration time
+          enabled: true
+          template: "%{additional_details.sharedLinkSettings.newExpirationDate}000"
+          target: ocsf.expiration_time
+          replaceMissing: false
         - type: string-builder-processor
           name: Add file path
           enabled: true
@@ -2105,11 +1977,11 @@ pipeline:
                   name: Unlock
                   id: 11
                 - filter:
-                    query: "@ocsf.metadata.event_code:(SHARE OR ITEM_SHARED_UPDATE OR UPDATE_SHARE_EXPIRATION OR FILE_REQUEST_CREATE)"
+                    query: "@ocsf.metadata.event_code:(SHARE OR ITEM_SHARED_UPDATE OR UPDATE_SHARE_EXPIRATION OR FILE_REQUEST_CREATE OR COLLABORATION_INVITE OR COLLABORATION_ROLE_CHANGE)"
                   name: Share
                   id: 12
                 - filter:
-                    query: "@ocsf.metadata.event_code:(UNSHARE OR SHARE_EXPIRATION)"
+                    query: "@ocsf.metadata.event_code:(UNSHARE OR SHARE_EXPIRATION OR COLLABORATION_REMOVE OR COLLABORATION_EXPIRATION)"
                   name: Unshare
                   id: 13
                 - filter:
@@ -2195,6 +2067,31 @@ pipeline:
               target: ocsf.actor.user.email_addr
               preserveSource: true
               overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.actor.user.type_id
+              categories:
+                - filter:
+                    query: "@created_by.type:user -@created_by.id:1"
+                  name: User
+                  id: 1
+                - filter:
+                    query: "@created_by.id:1"
+                  name: System
+                  id: 3
+                - filter:
+                    query: "@created_by.type:*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.actor.user.type
+                id: ocsf.actor.user.type_id
+              fallback:
+                values:
+                  ocsf.actor.user.type: Other
+                  ocsf.actor.user.type_id: "99"
+                sources:
+                  ocsf.actor.user.type:
+                    - created_by.type
             - type: schema-remapper
               name: Map `additional_details.service_name` to `ocsf.actor.app_name`
               sources:
@@ -2225,16 +2122,35 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `source.item_name` to `ocsf.file.name`
+              name: Map `ocsf.access_list` to `ocsf.access_list`
               sources:
+                - ocsf.access_list
+              target: ocsf.access_list
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.expiration_time` to `ocsf.expiration_time`
+              sources:
+                - ocsf.expiration_time
+              target: ocsf.expiration_time
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: integer
+            - type: schema-remapper
+              name: Map `additional_details.original_item_name`, `source.item_name`, `source.folder_name` to `ocsf.file.name`
+              sources:
+                - additional_details.original_item_name
                 - source.item_name
+                - source.folder_name
               target: ocsf.file.name
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `source.item_id` to `ocsf.file.uid`
+              name: Map `additional_details.original_item_id`, `source.item_id`, `source.folder_id` to `ocsf.file.uid`
               sources:
+                - additional_details.original_item_id
                 - source.item_id
+                - source.folder_id
               target: ocsf.file.uid
               preserveSource: true
               overrideOnConflict: true
@@ -2247,7 +2163,7 @@ pipeline:
                   name: Regular File
                   id: 1
                 - filter:
-                    query: "@source.item_type:folder"
+                    query: "@source.item_type:folder OR @source.folder_id:*"
                   name: Folder
                   id: 2
                 - filter:
@@ -2264,6 +2180,70 @@ pipeline:
                 sources:
                   ocsf.file.type:
                     - source.item_type
+            - type: schema-remapper
+              name: Map `source.item_name`, `source.folder_name` to `ocsf.file_result.name`
+              sources:
+                - source.item_name
+                - source.folder_name
+              target: ocsf.file_result.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `source.item_id`, `source.folder_id` to `ocsf.file_result.uid`
+              sources:
+                - source.item_id
+                - source.folder_id
+              target: ocsf.file_result.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-category-mapper
+              name: ocsf.file_result.type_id
+              categories:
+                - filter:
+                    query: "@source.item_type:file"
+                  name: Regular File
+                  id: 1
+                - filter:
+                    query: "@source.item_type:folder OR @source.folder_id:*"
+                  name: Folder
+                  id: 2
+                - filter:
+                    query: "*"
+                  name: Other
+                  id: 99
+              targets:
+                name: ocsf.file_result.type
+                id: ocsf.file_result.type_id
+              fallback:
+                values:
+                  ocsf.file_result.type: Other
+                  ocsf.file_result.type_id: "99"
+                sources:
+                  ocsf.file_result.type:
+                    - source.item_type
+            - type: schema-remapper
+              name: Map `accessible_by.name` to `ocsf.file_result.accessor.name`
+              sources:
+                - accessible_by.name
+              target: ocsf.file_result.accessor.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `accessible_by.id` to `ocsf.file_result.accessor.uid`
+              sources:
+                - accessible_by.id
+              target: ocsf.file_result.accessor.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `accessible_by.login` to `ocsf.file_result.accessor.email_addr`
+              sources:
+                - accessible_by.login
+              target: ocsf.file_result.accessor.email_addr
+              preserveSource: true
+              overrideOnConflict: true
             - type: schema-remapper
               name: Map `file_type` to `ocsf.file.ext`
               sources:
