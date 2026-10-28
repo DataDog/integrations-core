@@ -11,7 +11,28 @@
     "changelog": "CHANGELOG.md",
     "description": "Monitor Automox device patch compliance, policy runs, and console audit activity.",
     "title": "Automox",
-    "media": [],
+    "media": [
+      {
+        "caption": "Automox Overview",
+        "image_url": "images/automox_overview_part1.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Automox Overview (Part 2)",
+        "image_url": "images/automox_overview_part2.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Automox Overview (Part 3)",
+        "image_url": "images/automox_overview_part3.png",
+        "media_type": "image"
+      },
+      {
+        "caption": "Automox Overview (Part 4)",
+        "image_url": "images/automox_overview_part4.png",
+        "media_type": "image"
+      }
+    ],
     "classifier_tags": [
       "Category::Automation",
       "Category::Log Collection",
