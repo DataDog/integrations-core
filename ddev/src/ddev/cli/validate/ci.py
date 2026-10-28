@@ -12,6 +12,40 @@ if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 DEFAULT_COVERAGE_THRESHOLD = 75
+TEST_WORKFLOW_PREFIX = 'DataDog/integrations-core/.github/workflows/test-target.yml@'
+PINNING_INPUTS = ('ddev-version',)
+
+
+def _get_test_workflow_settings(workflow: dict[str, Any], job_id: str) -> tuple[str, dict[str, Any]]:
+    existing_jobs = {
+        key: job
+        for key, job in workflow.get('jobs', {}).items()
+        if job.get('uses', '').startswith(TEST_WORKFLOW_PREFIX)
+    }
+    existing_job = existing_jobs.get(job_id, {})
+    references = {job['uses'] for job in existing_jobs.values()}
+    workflow_ref = existing_job.get('uses')
+    if workflow_ref is None:
+        if len(references) > 1:
+            raise click.ClickException(f'Choose a shared test workflow revision for new job `{job_id}`')
+        workflow_ref = next(iter(references), f'{TEST_WORKFLOW_PREFIX}master')
+
+    inputs = workflow.get('on', {}).get('workflow_call', {}).get('inputs', {})
+    settings = {}
+    for field in PINNING_INPUTS:
+        if field in existing_job.get('with', {}):
+            settings[field] = existing_job['with'][field]
+        elif field in inputs:
+            settings[field] = f'${{{{ inputs.{field} }}}}'
+        elif job_id not in existing_jobs:
+            values = {job.get('with', {}).get(field) for job in existing_jobs.values()}
+            if len(values) > 1:
+                raise click.ClickException(f'Choose `{field}` for new job `{job_id}`')
+            value = next(iter(values), None)
+            if value is not None:
+                settings[field] = value
+
+    return workflow_ref, settings
 
 
 def code_coverage_enabled(check_name: str, app: Application) -> bool:
@@ -44,51 +78,16 @@ def ci(app: Application, sync: bool):
     is_marketplace = app.repo.name == 'marketplace'
     is_extras = app.repo.name == 'extras'
 
-    # For non-core repos, extract the workflow reference from existing workflow files
-    # This allows using either @master or @<commit-sha>
-    workflow_ref = 'master'  # default
-    windows_workflow_ref = 'master'  # default
-    if not is_core:
-        jobs_workflow_path_temp = app.repo.path / '.github' / 'workflows' / 'test-all.yml'
-        windows_jobs_workflow_path_temp = app.repo.path / '.github' / 'workflows' / 'test-all-windows.yml'
-
-        # Extract reference from Linux workflow file
-        if jobs_workflow_path_temp.is_file():
-            existing_workflow = jobs_workflow_path_temp.read_text()
-            # Look for pattern like: DataDog/integrations-core/.github/workflows/test-target.yml@<ref>
-            # <ref> can be a branch name (alphanumeric + dots/dashes/underscores) or commit SHA (hex only)
-            match = re.search(
-                r'DataDog/integrations-core/\.github/workflows/test-target\.yml@([a-zA-Z0-9_.-]+)', existing_workflow
-            )
-            if match:
-                workflow_ref = match.group(1)
-
-        # Extract reference from Windows workflow file
-        if windows_jobs_workflow_path_temp.is_file():
-            existing_windows_workflow = windows_jobs_workflow_path_temp.read_text()
-            match = re.search(
-                r'DataDog/integrations-core/\.github/workflows/test-target\.yml@([a-zA-Z0-9_.-]+)',
-                existing_windows_workflow,
-            )
-            if match:
-                windows_workflow_ref = match.group(1)
-
-    test_workflow = (
-        './.github/workflows/test-target.yml'
-        if app.repo.name == 'core'
-        else f'DataDog/integrations-core/.github/workflows/test-target.yml@{workflow_ref}'
-    )
-    windows_test_workflow = (
-        './.github/workflows/test-target.yml'
-        if app.repo.name == 'core'
-        else f'DataDog/integrations-core/.github/workflows/test-target.yml@{windows_workflow_ref}'
-    )
     jobs_workflow_path = app.repo.path / '.github' / 'workflows' / 'test-all.yml'
     windows_jobs_workflow_path = app.repo.path / '.github' / 'workflows' / 'test-all-windows.yml'
     original_jobs_workflow = jobs_workflow_path.read_text() if jobs_workflow_path.is_file() else ''
     original_windows_jobs_workflow = (
         windows_jobs_workflow_path.read_text() if windows_jobs_workflow_path.is_file() else ''
     )
+    existing_workflows = {
+        False: yaml.load(original_jobs_workflow, Loader=yaml.BaseLoader) or {},
+        True: yaml.load(original_windows_jobs_workflow, Loader=yaml.BaseLoader) or {},
+    }
     ddev_jobs_id = ('jd316aba', 'j6712d43')
 
     job_matrix = construct_job_matrix(app.repo.path, get_all_targets(app.repo.path))
@@ -167,8 +166,12 @@ def ci(app: Application, sync: bool):
         job_id = hashlib.sha256(config['job-name'].encode('utf-8')).hexdigest()[:7]
         job_id = f'j{job_id}'
 
-        # Use the appropriate workflow reference based on platform
-        workflow_to_use = windows_test_workflow if 'windows' in data['platform'] else test_workflow
+        workflow_to_use = './.github/workflows/test-target.yml'
+        if not is_core:
+            workflow_to_use, pinning_settings = _get_test_workflow_settings(
+                existing_workflows['windows' in data['platform']], job_id
+            )
+            config.update(pinning_settings)
         job_config = {'uses': workflow_to_use, 'with': config, 'secrets': 'inherit'}
         if 'target-env' in config:
             job_config['strategy'] = {
@@ -195,6 +198,7 @@ def ci(app: Application, sync: bool):
         'agent-image-windows',
         'agent-image-windows-py2',
         'skip-ddev-tests',
+        *PINNING_INPUTS,
     ):
         jobs_component = jobs_component.replace(f'${{{{ inputs.{field} }}}}', f'"${{{{ inputs.{field} }}}}"')
         windows_jobs_component = windows_jobs_component.replace(

@@ -191,6 +191,13 @@ runs:
         DDEV_VERSION: ${{ inputs.ddev-version }}
       run: uv pip install --system "ddev${DDEV_VERSION}"
 
+    - name: Show tooling versions
+      shell: bash
+      run: |-
+        python --version
+        ddev --version
+        hatch --version
+
     - name: Save local ddev cache
       if: ${{ inputs.install-mode == 'local' && inputs.cache-profile == 'local-ddev-base' && steps.restore-local-ddev-base-cache.outputs.cache-hit != 'true' }}
       uses: actions/cache/save@2c8a9bd7457de244a408f35966fab2fb45fda9c8 # v6.0.0
