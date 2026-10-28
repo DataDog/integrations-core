@@ -208,8 +208,9 @@ class SqlserverColumnStatisticsCollector:
                 columns += len(table["columns"])
         except Exception as e:
             self._handle_error(db_name, e)
-            return tables, columns, payloads
-        self._handle_recovery(db_name)
+        else:
+            self._handle_recovery(db_name)
+        # Tables are only yielded once all their rows are read, so those read before an error are complete.
         if batch:
             self._submit(batch)
             payloads += 1

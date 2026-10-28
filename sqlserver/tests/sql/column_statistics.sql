@@ -17,7 +17,9 @@ BEGIN
     INTO #stats
     FROM (
         SELECT st.object_id, st.stats_id, st.name AS stats_name, st.auto_created, st.user_created, c.name AS column_name,
-            TYPE_NAME(c.system_type_id) AS type_name, c.max_length, c.is_nullable,
+            -- An alias type's base type, but a CLR type's own name: CLR types share system_type_id 240, which has none.
+            TYPE_NAME(CASE WHEN c.system_type_id = 240 THEN c.user_type_id ELSE c.system_type_id END) AS type_name,
+            c.max_length, c.is_nullable,
             CAST(CASE WHEN EXISTS (
                 SELECT 1
                 FROM sys.indexes i
@@ -57,12 +59,17 @@ BEGIN
     FETCH NEXT FROM stats_cursor INTO @object_id, @stats_id, @table, @stats_name, @column_name;
     WHILE @@FETCH_STATUS = 0
     BEGIN
-        TRUNCATE TABLE #density;
-        INSERT INTO #density
-        EXEC sp_executesql N'DBCC SHOW_STATISTICS (@table, @stats_name) WITH DENSITY_VECTOR, NO_INFOMSGS',
-            N'@table NVARCHAR(300), @stats_name SYSNAME', @table, @stats_name;
-        UPDATE #stats SET average_length = (SELECT TOP 1 average_length FROM #density WHERE columns = @column_name)
-        WHERE object_id = @object_id AND stats_id = @stats_id;
+        -- Statistics can be dropped since they were listed, as auto-created ones are. DBCC's error for them would fail
+        -- the whole procedure, and TRY...CATCH doesn't catch it inside INSERT...EXEC.
+        IF EXISTS (SELECT 1 FROM sys.stats WHERE object_id = @object_id AND stats_id = @stats_id)
+        BEGIN
+            TRUNCATE TABLE #density;
+            INSERT INTO #density
+            EXEC sp_executesql N'DBCC SHOW_STATISTICS (@table, @stats_name) WITH DENSITY_VECTOR, NO_INFOMSGS',
+                N'@table NVARCHAR(300), @stats_name SYSNAME', @table, @stats_name;
+            UPDATE #stats SET average_length = (SELECT TOP 1 average_length FROM #density WHERE columns = @column_name)
+            WHERE object_id = @object_id AND stats_id = @stats_id;
+        END;
         FETCH NEXT FROM stats_cursor INTO @object_id, @stats_id, @table, @stats_name, @column_name;
     END;
     CLOSE stats_cursor;

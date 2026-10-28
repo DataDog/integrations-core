@@ -61,7 +61,7 @@ def test_collects_column_statistics(aggregator, dd_run_check, dbm_instance):
     tables = event['column_statistics']
     assert [(t['db'], t['schema'], t['table']) for t in tables] == [('datadog_test_column_stats', 'dbo', 'orders')]
     columns = {c['column_name']: c for c in tables[0]['columns']}
-    assert set(columns) == {'id', 'customer_id', 'status', 'note', 'unused_num'}
+    assert set(columns) == {'id', 'customer_id', 'status', 'note', 'unused_num', 'node'}
 
     # The statistics are sent as SQL Server reports them, read in full after UPDATE STATISTICS WITH FULLSCAN.
     for column in columns.values():
@@ -74,7 +74,7 @@ def test_collects_column_statistics(aggregator, dd_run_check, dbm_instance):
         assert abs(datetime.now(timezone.utc) - updated) < timedelta(days=1), "last_updated is in UTC"
     # The properties count the NULL step, which sys.dm_db_stats_histogram leaves out for an all-NULL column, and on
     # Windows SQL Server 2019 for any column, so only columns without NULLs match.
-    for name in ('id', 'customer_id', 'note'):
+    for name in ('id', 'customer_id', 'note', 'node'):
         assert columns[name]['steps'] == len(columns[name]['histogram']['equal_rows'])
     identity = columns['id']
     assert identity['stats_name'].startswith('PK__')
@@ -87,6 +87,11 @@ def test_collects_column_statistics(aggregator, dd_run_check, dbm_instance):
     assert (note['type_name'], note['max_length']) == ('nvarchar', 200)
     # nvarchar values of 20 to 40 characters average 60 bytes, which DBCC reports as a 4-byte float.
     assert note['average_length'] == pytest.approx(60, abs=0.01)
+
+    # A CLR type is named, and variable-width, so it has an average length.
+    node = columns['node']
+    assert (node['type_name'], node['stats_name']) == ('hierarchyid', 'st_node')
+    assert node['average_length'] is not None
 
     # One customer has 3020 of the 10000 rows, the other 349 have 20 each.
     assert max(columns['customer_id']['histogram']['equal_rows']) == 3020
@@ -206,6 +211,18 @@ def test_payloads_split_by_size(dbm_instance):
         [(t['table'], [c['column_name'] for c in t['columns']]) for t in call.args[0]] for call in submit.call_args_list
     ]
     assert batches == [[('a', ['x', 'y']), ('b', ['x', 'y'])], [('c', ['x', 'y'])]]
+
+
+@pytest.mark.unit
+def test_tables_read_before_an_error_are_sent(dbm_instance):
+    rows = [procedure_row(table_name=table, column_name=column) for table in 'abc' for column in ('x', 'y')]
+    cursor = iter_cursor(rows)
+    # The connection drops after the first of table c's rows, so c is incomplete and isn't sent.
+    cursor.fetchone.side_effect = [tuple(row.values()) for row in rows[:5]] + [Exception('Communication link failure')]
+    collector = SQLServer(CHECK_NAME, {}, [dbm_instance]).sql_metadata._column_statistics_collector
+    with mock.patch.object(collector, '_submit') as submit:
+        assert collector._collect_database(cursor, 'app') == (2, 4, 1)
+    assert [t['table'] for t in submit.call_args.args[0]] == ['a', 'b']
 
 
 PROCEDURE_NOT_FOUND = SqlServerHealthEvent.COLUMN_STATISTICS_PROCEDURE_NOT_FOUND

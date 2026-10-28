@@ -309,18 +309,22 @@ CREATE TABLE dbo.orders (
     status VARCHAR(20) NULL,
     note NVARCHAR(100) NULL,
     -- Never filled: every value is NULL, so its histogram has no steps.
-    unused_num INT NULL
+    unused_num INT NULL,
+    -- A CLR type, whose name comes from user_type_id rather than system_type_id.
+    node HIERARCHYID NULL
 );
 CREATE INDEX ix_customer ON dbo.orders (customer_id);
 CREATE INDEX ix_status ON dbo.orders (status);
 CREATE INDEX ix_unused_num ON dbo.orders (unused_num);
-INSERT INTO dbo.orders (id, customer_id, status, note)
+INSERT INTO dbo.orders (id, customer_id, status, note, node)
 SELECT n,
     CASE WHEN n % 10 < 3 THEN 7 ELSE n % 500 END,
     CASE WHEN n % 10 = 0 THEN NULL WHEN n % 10 IN (1, 2) THEN 'pending' ELSE 'shipped' END,
-    REPLICATE(N'x', 20 + n % 21)
+    REPLICATE(N'x', 20 + n % 21),
+    HIERARCHYID::Parse(CONCAT('/', n % 50, '/'))
 FROM (SELECT TOP 10000 ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS n FROM sys.all_objects a CROSS JOIN sys.all_objects b) numbers;
 CREATE STATISTICS st_note ON dbo.orders (note);
+CREATE STATISTICS st_node ON dbo.orders (node);
 UPDATE STATISTICS dbo.orders WITH FULLSCAN;
 GO
 -- On Windows the user already exists here, copied from model.
