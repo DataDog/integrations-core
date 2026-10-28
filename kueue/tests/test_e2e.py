@@ -98,16 +98,28 @@ def test_e2e_workload_events(dd_agent_check, aggregator, kubectl_env, kueue_repl
 
     retry_apply('event-pending-workload.yaml', env=kubectl_env)
     pending_workload = wait_for_job_workload_condition('event-pending-workload', 'QuotaReserved=False', env=kubectl_env)
-    assert_workload_event(checks.values(), aggregator, 'pending', pending_workload)
+    pending_index = assert_workload_event(checks.values(), aggregator, 'pending', pending_workload)
+    assert [
+        workload_event_index(aggregator, 'created', pending_workload),
+        pending_index,
+    ] == [0, 1]
 
     retry_apply('event-workload.yaml', env=kubectl_env)
     admitted_workload = wait_for_job_workload_condition('event-workload', 'Admitted=True', env=kubectl_env)
-    for transition in ('created', 'quota_reserved', 'admitted'):
+    admitted_indexes = [
         assert_workload_event(checks.values(), aggregator, transition, admitted_workload)
+        for transition in ('created', 'quota_reserved', 'admitted')
+    ]
+    assert admitted_indexes == [0, 1, 2]
 
     retry_apply('event-finish-workload.yaml', env=kubectl_env)
     finished_workload = wait_for_job_workload_condition('event-finish-workload', 'Finished=True', env=kubectl_env)
-    assert_workload_event(checks.values(), aggregator, 'finished', finished_workload)
+    finished_index = assert_workload_event(checks.values(), aggregator, 'finished', finished_workload)
+    earlier_indexes = [
+        workload_event_index(aggregator, transition, finished_workload)
+        for transition in ('created', 'quota_reserved', 'admitted')
+    ]
+    assert earlier_indexes + [finished_index] == sorted(set(earlier_indexes + [finished_index]))
 
 
 @pytest.mark.e2e
@@ -207,8 +219,11 @@ def workload_event_text(workload_name: str, transition: str) -> str:
     return f'Workload default/{workload_name} {transition.replace("_", " ")}.'
 
 
-def assert_workload_event(checks: Iterable[KueueCheck], aggregator, transition: str, workload_name: str) -> None:
-    """Poll the checks until exactly one event for a workload transition shows up across all replicas."""
+def assert_workload_event(checks: Iterable[KueueCheck], aggregator, transition: str, workload_name: str) -> int:
+    """Poll the checks until exactly one event for a workload transition shows up across all replicas.
+
+    Returns that event's per-workload index.
+    """
     checks = list(checks)
     alert_type = 'warning' if transition == 'pending' else 'info'
     for attempt in range(EVENT_POLL_ATTEMPTS):
@@ -222,11 +237,24 @@ def assert_workload_event(checks: Iterable[KueueCheck], aggregator, transition: 
                 source_type_name='kueue',
                 alert_type=alert_type,
             )
-            return
+            return workload_event_index(aggregator, transition, workload_name)
         except AssertionError:
             if attempt == EVENT_POLL_ATTEMPTS - 1:
                 raise
             time.sleep(1)
+
+
+def workload_event_index(aggregator, transition, workload_name) -> int:
+    needle = workload_event_text(workload_name, transition)
+    indexes = []
+    for event in aggregator.events:
+        if needle not in event['msg_text']:
+            continue
+        index_tags = [tag for tag in event['tags'] if tag.startswith('kueue_workload_event_index:')]
+        assert len(index_tags) == 1, event
+        indexes.append(int(index_tags[0].rsplit(':', 1)[1]))
+    assert len(indexes) == 1, f'expected one {transition} event for {workload_name}, found {indexes}'
+    return indexes[0]
 
 
 @retry(stop=stop_after_attempt(30), wait=wait_fixed(2), reraise=True)

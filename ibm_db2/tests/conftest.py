@@ -87,7 +87,7 @@ def dd_environment():
         db.initialize,
         WaitFor(db.connect),
     ]
-    with docker_run(COMPOSE_FILE, conditions=conditions, attempts=2, capture=True):
+    with docker_run(COMPOSE_FILE, conditions=conditions, attempts=2):
         yield CONFIG, E2E_METADATA
 
 
