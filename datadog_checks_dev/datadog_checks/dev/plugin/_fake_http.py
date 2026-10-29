@@ -60,9 +60,8 @@ class FakeHTTP:
         self.requests: list[RecordedRequest] = []
         self.sent: list[SentRequest] = []
         self._registrations: list[_Registration] = []
-        # Concurrent requests must not both claim, or skip, the same pending registration. The concurrency test
-        # reproduces the earlier pop-by-index race; this lock's own race was only verified by stress runs, because
-        # nothing can pause a thread between choosing a registration and marking it served.
+        # Checks may send requests from several threads. Choosing the first unserved registration and marking it
+        # served must be atomic, or two concurrent requests could receive the same response while another goes unused.
         self._lock = threading.Lock()
         self._calls = threading.local()
 
