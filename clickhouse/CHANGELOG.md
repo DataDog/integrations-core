@@ -2,6 +2,14 @@
 
 <!-- towncrier release notes start -->
 
+## 7.3.2 / 2026-10-29
+
+***Fixed***:
+
+* Send the `database_instance` metadata event before metric queries run, so a failing query no longer suppresses it. ([#25530](https://github.com/DataDog/integrations-core/pull/25530))
+* Declare the accepted values of `compression` in the configuration spec. ([#25603](https://github.com/DataDog/integrations-core/pull/25603))
+* Exclude internal resource tags from the `database_instance` metadata payload. ([#25692](https://github.com/DataDog/integrations-core/pull/25692))
+
 ## 7.3.1 / 2026-10-01 / Agent 7.85.0
 
 ***Fixed***:

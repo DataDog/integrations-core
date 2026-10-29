@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 13.5.0 / 2026-10-29
+
+***Added***:
+
+* Add a generic BFD session fragment (``bfdSessTable``/``bfdSessPerfTable``) to the Arista, Juniper, F5 BIG-IP, NEC Univerge, and generic Cisco profiles. ([#25033](https://github.com/DataDog/integrations-core/pull/25033))
+
 ## 13.4.0 / 2026-10-01 / Agent 7.85.0
 
 ***Added***:

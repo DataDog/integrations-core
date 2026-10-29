@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 8.11.0 / 2026-10-29
+
+***Added***:
+
+* Add `disable_config_get` and stop retrying rejected `CONFIG GET` commands for the lifetime of the check instance. ([#25654](https://github.com/DataDog/integrations-core/pull/25654))
+
 ## 8.10.0 / 2026-09-02 / Agent 7.84.0
 
 ***Added***:

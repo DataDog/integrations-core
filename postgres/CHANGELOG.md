@@ -2,6 +2,19 @@
 
 <!-- towncrier release notes start -->
 
+## 23.15.0 / 2026-10-29
+
+***Added***:
+
+* Add collection of database roles, role memberships and settings, and object privileges, enabled with `collect_roles.enabled`. ([#25279](https://github.com/DataDog/integrations-core/pull/25279))
+* Update dependencies ([#25599](https://github.com/DataDog/integrations-core/pull/25599))
+
+***Fixed***:
+
+* Constrain the `port` option to the valid range 1-65535. ([#25475](https://github.com/DataDog/integrations-core/pull/25475))
+* Fix per-database dynamic queries continuing to query dropped databases and skipping new ones when `database_autodiscovery` is enabled. ([#25624](https://github.com/DataDog/integrations-core/pull/25624))
+* Reconnect when the main database connection is left with a command in progress, which caused every subsequent query to fail with `another command is already in progress`. ([#25644](https://github.com/DataDog/integrations-core/pull/25644))
+
 ## 23.14.0 / 2026-10-27 / Agent 7.85.0
 
 ***Security***:

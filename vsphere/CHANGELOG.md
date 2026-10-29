@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 10.0.2 / 2026-10-29
+
+***Fixed***:
+
+* Bump pyvmomi to 9.0.0.0 so vSAN health metrics can be collected from vCenter 9.0.x. pyvmomi 8.0.3.0.1 declared the result type of `VsanPerfQueryClusterHealth` as the abstract `vmodl.DynamicData[]` rather than `vim.cluster.VsanClusterHealthGroup[]`, so it could only determine the concrete type from an `xsi:type` attribute that vCenter 9.0.x no longer sends. Collection failed with `AttributeError: groupId` while deserializing the response. ([#25676](https://github.com/DataDog/integrations-core/pull/25676))
+
 ## 10.0.1 / 2026-10-08 / Agent 7.85.0
 
 ***Fixed***:
