@@ -1,1 +1,0 @@
-Send the current auth token on requests that pass `extra_headers`. Those requests previously had no token on the first run and a stale one after a token refresh.
