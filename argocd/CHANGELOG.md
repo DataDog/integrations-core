@@ -2,6 +2,16 @@
 
 <!-- towncrier release notes start -->
 
+## 4.9.0 / 2026-10-01
+
+***Added***:
+
+* Add container-based config discovery support. ([#24624](https://github.com/DataDog/integrations-core/pull/24624))
+
+***Fixed***:
+
+* Default Argo CD Application streaming opt-in for entity collection ([#25464](https://github.com/DataDog/integrations-core/pull/25464))
+
 ## 4.8.0 / 2026-07-08 / Agent 7.82.0
 
 ***Added***:

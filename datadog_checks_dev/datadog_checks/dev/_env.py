@@ -40,13 +40,23 @@ EVENT_PLATFORM_EVENT_TYPES = [
 ]
 
 
-def e2e_active():
+def _launched_in_e2e_mode() -> bool:
     return (
         E2E_SET_UP in os.environ
         or E2E_TEAR_DOWN in os.environ
         or E2E_PARENT_PYTHON in os.environ
         or any(ev.startswith(E2E_ENV_VAR_PREFIX) for ev in os.environ)
     )
+
+
+# `save_state` writes the same variables during an ordinary test run, so the mode must come from the
+# environment the process was launched with. Otherwise a pytest retry that sets up session fixtures again
+# would see the saved state and start an E2E environment.
+_E2E_ACTIVE = _launched_in_e2e_mode()
+
+
+def e2e_active() -> bool:
+    return _E2E_ACTIVE
 
 
 def e2e_testing():

@@ -38,7 +38,9 @@ from __future__ import annotations
 
 from .factories import (
     DEFAULT_COMPLETED_AT,
+    DEFAULT_CREATED_AT,
     DEFAULT_DURATION_SECONDS,
+    DEFAULT_QUEUE_DURATION_SECONDS,
     DEFAULT_STARTED_AT,
     make_artifact,
     make_artifacts_list,
@@ -70,7 +72,9 @@ __all__ = [
     'DEFAULT_COMMENT_ID',
     'DEFAULT_DISPATCH_HTML_URL',
     'DEFAULT_COMPLETED_AT',
+    'DEFAULT_CREATED_AT',
     'DEFAULT_DURATION_SECONDS',
+    'DEFAULT_QUEUE_DURATION_SECONDS',
     'DEFAULT_STARTED_AT',
     'FakeAsyncGitHubClient',
     'RecordedRequest',

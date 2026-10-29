@@ -64,6 +64,9 @@ UNSET = Unset.TOKEN
 DEFAULT_STARTED_AT = '2026-01-01T10:00:00Z'
 DEFAULT_COMPLETED_AT = '2026-01-01T10:01:30Z'
 DEFAULT_DURATION_SECONDS = 90.0
+# A few seconds before `DEFAULT_STARTED_AT`, so a default job also waited for a runner.
+DEFAULT_CREATED_AT = '2026-01-01T09:59:55Z'
+DEFAULT_QUEUE_DURATION_SECONDS = 5.0
 
 
 def make_response[T](data: T, headers: dict[str, str] | None = None) -> GitHubResponse[T]:
@@ -394,13 +397,23 @@ def make_workflow_job(
     name: str = 'test-job',
     status: WorkflowJobStatus = WorkflowJobStatus.COMPLETED,
     conclusion: WorkflowJobConclusion | None | Unset = UNSET,
+    runner_name: str | None | Unset = UNSET,
     html_url: str | None | Unset = UNSET,
+    created_at: str = DEFAULT_CREATED_AT,
     started_at: str = DEFAULT_STARTED_AT,
     completed_at: str | None | Unset = UNSET,
     steps: Sequence[JobStep] = (),
 ) -> WorkflowJob:
     if conclusion is UNSET:
         conclusion = WorkflowJobConclusion.SUCCESS if status is WorkflowJobStatus.COMPLETED else None
+    if runner_name is UNSET:
+        # Jobs cancelled while queued must pass `runner_name=None` explicitly.
+        runner_name = (
+            'github-actions-runner'
+            if status in (WorkflowJobStatus.IN_PROGRESS, WorkflowJobStatus.COMPLETED)
+            and conclusion is not WorkflowJobConclusion.SKIPPED
+            else None
+        )
     if html_url is UNSET:
         html_url = f'https://github.com/DataDog/integrations-core/actions/runs/{run_id}/job/{id}'
     if completed_at is UNSET:
@@ -411,7 +424,9 @@ def make_workflow_job(
         name=name,
         status=status,
         conclusion=conclusion,
+        runner_name=runner_name,
         html_url=html_url,
+        created_at=created_at,
         started_at=started_at,
         completed_at=completed_at,
         steps=list(steps),

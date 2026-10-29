@@ -1,0 +1,7 @@
+<!-- Derived from fw-a/system_resources.xml: the Mem and Swap lines rewritten in KiB (each MiB value x 1024, rounded); the other `top` header lines unchanged and the process table removed. PAN-OS 11.1 prints MiB, but top picks the unit per release. -->
+<response status="success"><result><![CDATA[top - 04:49:12 up  2:00,  1 user,  load average: 2.60, 1.45, 1.18
+Tasks: 228 total,   2 running, 225 sleeping,   0 stopped,   1 zombie
+%Cpu(s):  8.2 us,  4.9 sy,  0.0 ni, 85.2 id,  0.0 wa,  1.6 hi,  0.0 si,  0.0 st
+KiB Mem :  16112333 total,    381030 free,   4920013 used,  10811290 buff/cache
+KiB Swap:   4096000 total,   4094669 free,      1229 used.   5215949 avail Mem 
+]]></result></response>

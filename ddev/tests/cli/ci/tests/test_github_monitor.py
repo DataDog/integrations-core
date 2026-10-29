@@ -58,7 +58,7 @@ def monitored(
         rate_limit_resource='forged',
         rate_limiter='forged',
     )
-    monitor = GitHubMonitor(monitoring.component('github-async', integration='ntp'), now=lambda: NOW)
+    monitor = GitHubMonitor(monitoring.component('github-async', target='ntp'), now=lambda: NOW)
     client = AsyncGitHubClient('token', rate_limiter=rate_limiter, transport=transport, observer=monitor)
     return client, monitor, sink, handler
 
@@ -87,6 +87,7 @@ async def test_every_attempt_is_counted_under_the_family_tags_only(monkeypatch: 
         (1, {**failed, 'dispatcher.reason': 'server_error'}),
         (0, {**succeeded, 'dispatcher.reason': 'none'}),
     ]
+    assert samples(sink, 'requests.failed') == []
     assert samples(sink, 'requests.throttled') == [(0, failed), (0, succeeded)]
     assert samples(sink, 'requests.retried') == [(0, PIPELINE), (1, PIPELINE)]
     assert [tags for _, tags in samples(sink, 'requests.duration')] == [failed, succeeded]
@@ -100,7 +101,7 @@ async def test_every_attempt_is_counted_under_the_family_tags_only(monkeypatch: 
     [failure] = [event for event in handler.events if event['level'] == 'error']
     assert failure['event'] == 'GitHub request attempt failed'
     assert (failure['endpoint'], failure['attempt'], failure['status_code']) == (RUN_PATH, 1, 503)
-    assert (failure['reason'], failure['terminal'], failure['integration']) == ('server_error', False, 'ntp')
+    assert (failure['reason'], failure['terminal'], failure['target']) == ('server_error', False, 'ntp')
     [completed] = [event for event in handler.events if event['event'] == 'GitHub request completed']
     assert (completed['level'], completed['attempt'], completed['status_code']) == ('debug', 2, 200)
 
@@ -181,38 +182,63 @@ def abandoning_limiter() -> InstrumentedAsyncLimiter:
 
 
 @pytest.mark.parametrize(
-    ('transport', 'rate_limiter', 'error', 'sent'),
+    ('transport', 'rate_limiter', 'error', 'sent', 'status_code', 'reason'),
     [
         pytest.param(
-            httpx.MockTransport(lambda request: httpx.Response(404)), None, httpx.HTTPStatusError, 1, id="not-found"
+            httpx.MockTransport(lambda request: httpx.Response(404)),
+            None,
+            httpx.HTTPStatusError,
+            1,
+            404,
+            'client_error',
+            id='not-found',
+        ),
+        pytest.param(
+            httpx.MockTransport(lambda request: httpx.Response(503)),
+            None,
+            httpx.HTTPStatusError,
+            3,
+            503,
+            'server_error',
+            id='retries-exhausted',
         ),
         pytest.param(
             httpx.MockTransport(lambda request: httpx.Response(200)),
             abandoning_limiter(),
             RateLimitWaitAbandoned,
             0,
-            id="abandoned-before-send",
+            None,
+            None,
+            id='abandoned-before-send',
         ),
     ],
 )
-async def test_a_request_that_fails_for_good_is_logged_once_as_terminal(
+async def test_a_request_failure_is_counted_and_logged_once(
     transport: httpx.MockTransport,
     rate_limiter: InstrumentedAsyncLimiter | None,
     error: type[Exception],
     sent: int,
+    status_code: int | None,
+    reason: str | None,
+    monkeypatch: pytest.MonkeyPatch,
 ):
+    advance_clock_on_sleep(FakeClock(), monkeypatch)
     client, _, sink, handler = monitored(transport, rate_limiter)
 
     with pytest.raises(error):
         await client.get_workflow_run('o', 'r', 42)
 
-    # One sample per send, and none for the terminal failure or for a wait that never sent.
     assert len(sink.records_named('requests.count')) == len(sink.records_named('requests.throttled')) == sent
+    assert sum(value for value, _ in samples(sink, 'requests.fault')) == sent
+    expected_tags = {**PIPELINE}
+    if status_code is not None:
+        expected_tags['http.status_code'] = str(status_code)
+    assert samples(sink, 'requests.failed') == [(1, expected_tags)]
     [terminal] = [event for event in handler.events if event.get('terminal')]
     assert (terminal['level'], terminal['endpoint'], terminal['attempts']) == ('error', RUN_PATH, sent)
     assert terminal['error'].startswith(error.__name__)
     # Nothing was sent to fail, so an abandoned wait adds no HTTP reason and the log keeps the context's.
-    expected = ('client_error', 404) if sent else ('forged', '999')
+    expected = (reason, status_code) if sent else ('forged', '999')
     assert (terminal['reason'], terminal['status_code']) == expected
 
 
@@ -243,6 +269,7 @@ async def test_a_send_without_a_response_has_elapsed_time_but_no_status(
 
     assert samples(sink, 'requests.count') == [(1, PIPELINE)]
     assert samples(sink, 'requests.fault') == [(fault, {**PIPELINE, 'dispatcher.reason': reason})]
+    assert samples(sink, 'requests.failed') == ([(1, PIPELINE)] if fault else [])
     assert samples(sink, 'requests.throttled') == [(0, PIPELINE)]
     assert samples(sink, 'requests.retried') == [(0, PIPELINE)]
     assert [tags for _, tags in samples(sink, 'requests.duration')] == [PIPELINE]

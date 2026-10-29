@@ -16,12 +16,13 @@ import click
 from ddev.cli.ci.dispatch_options import validate_options
 from ddev.cli.ci.dispatch_run import (
     RUN_MANIFEST_NAME,
+    RunResolutionError,
     changes_for_run,
     load_run_manifest,
     resolve_run,
     write_run_manifest,
 )
-from ddev.cli.ci.tests.execution_metrics import ExecutionOutcome
+from ddev.cli.ci.tests.execution_metrics import ExecutionOutcome, MetricsHelper, Operation
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -39,6 +40,16 @@ if TYPE_CHECKING:
 
 DEFAULT_OUTPUT_DIRECTORY = ".dispatcher"
 EXPORT_DRAIN_TIMEOUT = 10.0
+# `--resolve-only` and `--dry-run` invocations are not runs, so they count toward none of these.
+RUN_OUTCOME_METRICS = {
+    ExecutionOutcome.PASSED: 'runs.passed',
+    ExecutionOutcome.TESTS_FAILED: 'runs.tests_failed',
+    ExecutionOutcome.FAILED: 'runs.failed',
+    ExecutionOutcome.TIMED_OUT: 'runs.timed_out',
+    ExecutionOutcome.CANCELLED: 'runs.cancelled',
+    ExecutionOutcome.NO_OP: 'runs.no_op',
+    ExecutionOutcome.PLANNING_FAILED: 'runs.planning_failed',
+}
 
 
 @click.command(short_help='Run the Dispatcher to test a commit as parallel batches')
@@ -248,21 +259,27 @@ def dispatch_tests(
         base_path = app.repo.path / output_dir
 
         run: ResolvedRun | None
+        resolution = monitoring.component('resolution')
         if run_manifest is not None:
             # The manifest is the whole run: its identity is read, not recalculated, and a
             # manifest the caller explicitly supplied is not rewritten either.
             run = load_run_manifest(app, Path(run_manifest), repository=tested_repository)
             all_targets = run.all_targets
         else:
-            run = resolve_run(
-                app,
-                repository=tested_repository,
-                pr_resolver=pr_resolver,
-                commit=commit,
-                token=token,
-                all_targets=all_targets,
-                monitor=monitoring.component('resolution'),
-            )
+            # Abort outside the operation: it settles on the error, and the abort's `SystemExit` settles nothing.
+            try:
+                with MetricsHelper(resolution).operation(Operation.RESOLVE_RUN):
+                    run = resolve_run(
+                        app,
+                        repository=tested_repository,
+                        pr_resolver=pr_resolver,
+                        commit=commit,
+                        token=token,
+                        all_targets=all_targets,
+                        monitor=resolution,
+                    )
+            except RunResolutionError as error:
+                app.abort(str(error))
             if run is None:
                 outcome = ExecutionOutcome.NO_OP
                 return
@@ -277,23 +294,29 @@ def dispatch_tests(
                 app.display_success(f'Resolved run written to {base_path / RUN_MANIFEST_NAME}.')
                 return
 
-        changed_files = changes_for_run(app, run=run, monitor=monitoring.component('resolution'))
+        try:
+            with MetricsHelper(resolution).operation(Operation.RESOLVE_CHANGES):
+                changed_files = changes_for_run(app, run=run, monitor=resolution)
+        except RunResolutionError as error:
+            app.abort(str(error))
 
         # Read after resolution: `--resolve-only` stops before the run needs planning configuration.
         config = DispatcherConfig.from_repo_config(app.repo.config)
         overrides = {'workflow': workflow, 'workflow_ref': workflow_ref}
         config = config.model_copy(update={name: value for name, value in overrides.items() if value})
 
+        planner = monitoring.component('planner')
         try:
-            batches = build_plan(
-                app,
-                config=config,
-                changed_files=changed_files,
-                all_targets=all_targets,
-                minimum_base_package=minimum_base_package,
-                environment_provider=HatchEnvironmentProvider(default_python_version=config.default_python_version),
-                monitor=monitoring.component('planner'),
-            )
+            with MetricsHelper(planner).operation(Operation.BUILD_PLAN):
+                batches = build_plan(
+                    app,
+                    config=config,
+                    changed_files=changed_files,
+                    all_targets=all_targets,
+                    minimum_base_package=minimum_base_package,
+                    environment_provider=HatchEnvironmentProvider(default_python_version=config.default_python_version),
+                    monitor=planner,
+                )
         except PlanningError as error:
             outcome = ExecutionOutcome.PLANNING_FAILED
             summary_error = str(error)
@@ -333,11 +356,15 @@ def dispatch_tests(
             app.abort(f'Dispatcher execution failed: {error}')
 
         dispatcher_outcome = dispatcher.outcome
-        if dispatcher_outcome is None or not dispatcher_outcome.successful:
+        if dispatcher_outcome is not None:
+            outcome = dispatcher_outcome.execution_outcome
+        else:
             outcome = ExecutionOutcome.CANCELLED if dispatcher.cancelled else ExecutionOutcome.FAILED
-            app.abort('Dispatcher tests failed.')
-
-        outcome = ExecutionOutcome.PASSED
+        if outcome is not ExecutionOutcome.PASSED:
+            if outcome is ExecutionOutcome.CANCELLED:
+                app.abort('Dispatcher tests were cancelled.')
+            else:
+                app.abort('Dispatcher tests failed.')
     except (KeyboardInterrupt, asyncio.CancelledError):
         if outcome is None:
             outcome = ExecutionOutcome.CANCELLED
@@ -420,24 +447,19 @@ def run_summary(
     if progress is not None:
         batch_count = len(progress.batches)
         job_count = sum(len(batch.jobs_progress) for batch in progress.batches)
-    cancelled = outcome is ExecutionOutcome.CANCELLED or (
-        dispatcher_outcome is not None and dispatcher_outcome.cancelled
-    )
+    cancelled = outcome is ExecutionOutcome.CANCELLED
     final_report_published = dispatcher_outcome.final_report_published if dispatcher_outcome is not None else False
-    timed_out = dispatcher_outcome is not None and dispatcher_outcome.timed_out
     elapsed = time.monotonic() - started
-    if outcome not in (ExecutionOutcome.RESOLVED, ExecutionOutcome.DRY_RUN):
+    if outcome in RUN_OUTCOME_METRICS:
         metrics = monitor.metrics
         metrics.count('runs.count', 1)
-        metrics.count('runs.failed', int(outcome in (ExecutionOutcome.FAILED, ExecutionOutcome.PLANNING_FAILED)))
-        metrics.count('runs.planning_failed', int(outcome is ExecutionOutcome.PLANNING_FAILED))
-        metrics.count('runs.cancelled', int(cancelled))
-        metrics.count('runs.timed_out', int(timed_out))
-        metrics.count('runs.no_op', int(outcome is ExecutionOutcome.NO_OP))
-        metrics.distribution('run.duration', elapsed)
+        # Every counter on every run: a monitor on one outcome sees zeros instead of gaps.
+        for candidate, metric in RUN_OUTCOME_METRICS.items():
+            metrics.count(metric, int(outcome is candidate))
+        metrics.distribution('run.duration', elapsed, outcome=outcome)
     log = (
         monitor.logger.error
-        if outcome in (ExecutionOutcome.FAILED, ExecutionOutcome.PLANNING_FAILED)
+        if outcome in (ExecutionOutcome.FAILED, ExecutionOutcome.TIMED_OUT, ExecutionOutcome.PLANNING_FAILED)
         else monitor.logger.warning
         if cancelled
         else monitor.logger.info
@@ -469,7 +491,6 @@ def build_plan(
     `--all` plans every eligible target, so it needs no comparison and `changed_files` is None.
     """
     from ddev.cli.ci.tests.batching.build import build_test_batches
-    from ddev.cli.ci.tests.batching.exceptions import PlanningError
     from ddev.cli.ci.tests.batching.targets import all_target_rules
     from ddev.cli.ci.tests.dispatcher_attributes import batch_fields
 
@@ -481,19 +502,15 @@ def build_plan(
         minimum_base_package=minimum_base_package,
     )
 
-    try:
-        batches = build_test_batches(
-            app.repo,
-            changed_files or [],
-            environment_provider=environment_provider,
-            config=config.batching,
-            rules=rules,
-            minimum_base_package=minimum_base_package,
-            monitor=monitor,
-        )
-    except PlanningError as error:
-        monitor.logger.error('Planning failed', error=str(error))
-        raise
+    batches = build_test_batches(
+        app.repo,
+        changed_files or [],
+        environment_provider=environment_provider,
+        config=config.batching,
+        rules=rules,
+        minimum_base_package=minimum_base_package,
+        monitor=monitor,
+    )
 
     monitor.logger.info(
         'Planning completed',

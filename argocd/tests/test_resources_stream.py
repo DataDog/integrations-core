@@ -153,8 +153,15 @@ def test_forget_application_during_a_concurrent_full_scrape_is_not_resurrected()
     submit.assert_not_called()  # the stale, pre-delete snapshot must not resurrect it
 
 
-def test_collect_with_streaming_off_runs_poll_path_and_starts_no_listener():
-    check = build_check(genresources_stream_applications_enabled=False)
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        pytest.param({"genresources_stream_applications_enabled": False}, id="explicitly_disabled"),
+        pytest.param({}, id="unset_defaults_to_off"),
+    ],
+)
+def test_collect_with_streaming_off_runs_poll_path_and_starts_no_listener(overrides):
+    check = build_check(**overrides)
     collector = check._resource_collector
 
     with patch("datadog_checks.argocd.resources.ArgocdApplicationStreamListener") as listener_cls:

@@ -2,7 +2,24 @@
 
 <!-- towncrier release notes start -->
 
-## 10.13.0 / 2026-09-02
+## 11.0.0 / 2026-10-21
+
+***Changed***:
+
+* Upgrade PyMongo to 4.18.2. The minimum supported MongoDB server version is 4.4. ([#25517](https://github.com/DataDog/integrations-core/pull/25517))
+
+***Added***:
+
+* Support MongoDB 9 query statistics and collect change stream, memory, replication traffic, and write-conflict metrics. ([#25517](https://github.com/DataDog/integrations-core/pull/25517))
+
+## 10.14.0 / 2026-10-01
+
+***Added***:
+
+* Enable query metrics by default when Database Monitoring is enabled. ([#25197](https://github.com/DataDog/integrations-core/pull/25197))
+* Update dependencies ([#25284](https://github.com/DataDog/integrations-core/pull/25284))
+
+## 10.13.0 / 2026-09-02 / Agent 7.84.0
 
 ***Added***:
 
