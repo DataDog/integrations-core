@@ -230,11 +230,6 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Finding Information Created Time
-    path: ocsf.finding_info.created_time
-    source: log
-  - groups:
-      - OCSF
     name: Finding Information Description
     path: ocsf.finding_info.desc
     source: log
@@ -278,6 +273,7 @@ facets:
     name: Multi Factor Authentication
     path: ocsf.is_mfa
     source: log
+    type: boolean
   - groups:
       - OCSF
     name: Event Code
@@ -328,11 +324,13 @@ facets:
     name: Status Detail
     path: ocsf.status_detail
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
     name: Event Time
     path: ocsf.time
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Target Email Address
