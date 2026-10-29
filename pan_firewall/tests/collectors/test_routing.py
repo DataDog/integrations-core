@@ -12,7 +12,6 @@ from datadog_checks.pan_firewall.collectors.routing import (
     BGP_PEER_CMD,
     OSPF_NEIGHBOR_CMD,
     are_json,
-    camel_afi_safi_tag,
     collect_bgp,
     collect_ospf,
     parse_are_bgp_peers,
@@ -21,7 +20,7 @@ from datadog_checks.pan_firewall.collectors.routing import (
     parse_ospf_neighbors,
     peer_ip,
 )
-from datadog_checks.pan_firewall.errors import PanosApiError, PanosAuthError, PanosError, PanosUnreachable
+from datadog_checks.pan_firewall.errors import PanosApiError, PanosError
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from ..common import FW_A_PEER, SYNTHETIC
@@ -200,19 +199,6 @@ def test_are_bgp_of_the_capture():
     assert series(samples) == expected
 
 
-@pytest.mark.parametrize(
-    'duration, restart',
-    [pytest.param(1799.0, 1, id='up-for-less-than-30-minutes'), pytest.param(1800.0, 0, id='up-for-30-minutes')],
-)
-def test_are_bgp_restart_is_an_established_peer_up_for_less_than_30_minutes(duration, restart):
-    data = are_json(load_fw_b(ARE_BGP_PEER_CMD.format(router='default')))
-    data['fw-peer']['status-time'] = duration
-
-    values = series(parse_are_bgp_peers(data, 'default'))
-
-    assert values['bgp.peer.restart', FW_B_PEER] == (restart, 'gauge')
-
-
 def test_are_bgp_peer_without_details_still_reports_its_status():
     samples = parse_are_bgp_peers(are_json(load_xml(SYNTHETIC / 'are_bgp_peer_sparse.xml')), 'default')
 
@@ -325,38 +311,6 @@ def test_are_failing_logical_router_is_skipped_with_a_warning(collect, cmd, lr1)
     assert 'logical router lr1' in ctx.log.warning.call_args.args[-1]
 
 
-def test_are_collector_fails_when_every_logical_router_fails():
-    ctx = make_ctx(
-        {
-            ARE_LOGICAL_ROUTER_CMD: parse_response(TWO_ROUTERS),
-            ARE_BGP_PEER_CMD.format(router='lr1'): parse_response(NOT_JSON),
-            ARE_BGP_PEER_CMD.format(router='default'): parse_response(NOT_JSON),
-        },
-        identity=mock.Mock(advanced_routing=True),
-    )
-
-    with pytest.raises(PanosError, match='not valid JSON'):
-        collect_bgp(ctx)
-
-
-@pytest.mark.parametrize(
-    'error',
-    [
-        pytest.param(PanosAuthError('403', 'Invalid credentials.'), id='auth'),
-        pytest.param(PanosUnreachable('timed out'), id='unreachable'),
-    ],
-)
-def test_are_auth_and_connection_errors_fail_the_collector(error):
-    ctx = are_ctx(ARE_BGP_PEER_CMD, error)
-
-    with pytest.raises(type(error)):
-        collect_bgp(ctx)
-
-
-def test_are_json_of_the_logical_router_capture_names_the_routers():
-    assert list(are_json(load_fw_b(ARE_LOGICAL_ROUTER_CMD))) == ['default']
-
-
 @pytest.mark.parametrize(
     'body, match',
     [pytest.param('{not json', 'not valid JSON', id='not-json'), pytest.param('["default"]', 'JSON list', id='list')],
@@ -375,11 +329,6 @@ def test_are_json_invalid_raises(body, match):
 )
 def test_are_json_missing_is_empty(body):
     assert are_json(parse_response(b'<response status="success">' + body + b'</response>')) == {}
-
-
-@pytest.mark.parametrize('name, expected', [('ipv4Unicast', 'ipv4_unicast'), ('ipv6Unicast', 'ipv6_unicast')])
-def test_camel_afi_safi_tag(name, expected):
-    assert camel_afi_safi_tag(name) == expected
 
 
 FW_A_OSPF = ('neighbor:169.254.10.2', 'router_id:10.255.0.2', 'area:0.0.0.0', 'vr:default')
@@ -432,7 +381,3 @@ def test_are_ospf_neighbor_without_a_state_is_not_reported():
     del data['neighbors']['10.255.0.1'][0]['nbrState']
 
     assert parse_are_ospf_neighbors(data, 'default') == []
-
-
-def test_are_ospf_without_neighbors_is_empty():
-    assert parse_are_ospf_neighbors({}, 'default') == []

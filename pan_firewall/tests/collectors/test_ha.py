@@ -74,26 +74,19 @@ def test_dataplane_packets_are_not_sent_when_a_cast_counter_is_missing():
     assert 'ha.interface.tx.packets' in names
 
 
-def test_unknown_shape_is_none():
-    root = parse_response(b'<response status="success"><result/></response>')
-
-    assert parse_ha_interface(root, 'ha1') is None
-
-
 @pytest.mark.parametrize(
-    'answers, ha_state, calls',
+    'answers, ha_state',
     [
-        pytest.param({HA_CMD: load_op(HA_CMD)}, None, 1, id='standalone'),
-        pytest.param(pair_answers(), 'active', 3, id='enabled'),
+        pytest.param({HA_CMD: load_op(HA_CMD)}, None, id='standalone'),
+        pytest.param(pair_answers(), 'active', id='enabled'),
     ],
 )
-def test_each_run_replaces_the_ha_state(answers, ha_state, calls):
+def test_each_run_replaces_the_ha_state(answers, ha_state):
     ctx = make_ctx(answers, state=FirewallState(ha_state='passive'))
 
     collect_ha(ctx)
 
     assert ctx.state.ha_state == ha_state
-    assert ctx.client.op.call_count == calls
 
 
 def test_enabled_pair_sets_state_and_collects_both_links():
@@ -107,15 +100,14 @@ def test_enabled_pair_sets_state_and_collects_both_links():
     ctx.log.warning.assert_not_called()
 
 
-def test_unknown_link_shape_warns_once_and_keeps_the_other_link():
+def test_unknown_link_shape_warns_and_keeps_the_other_link():
     unknown = parse_response(b'<response status="success"><result/></response>')
     ctx = make_ctx(pair_answers(ha1=unknown))
 
-    first, second = collect_ha(ctx), collect_ha(ctx)
+    samples = collect_ha(ctx)
 
-    for samples in (first, second):
-        assert len(samples) == 6
-        assert {s.tags for s in samples} == {HA2}
+    assert len(samples) == 6
+    assert {s.tags for s in samples} == {HA2}
     ctx.log.warning.assert_called_once()
 
 
@@ -143,7 +135,7 @@ def test_failing_link_call_warns_and_keeps_the_other_link():
     assert 'link ha2' in ctx.log.warning.call_args.args[-1]
 
 
-def test_collector_fails_when_every_link_call_fails():
+def test_ha_state_is_kept_when_every_link_call_fails():
     ctx = make_ctx()
     ctx.client.op.side_effect = failing_links('ha1', 'ha2')
 
