@@ -4,6 +4,7 @@
 import importlib
 import sys
 import threading
+from datetime import timedelta
 from typing import Any
 
 import pytest
@@ -14,6 +15,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.openmetrics.base_check import OpenMetricsBaseCheck
 from datadog_checks.base.checks.prometheus.prometheus_base import PrometheusCheck
 from datadog_checks.base.stubs.http import FakeHTTPResponse, RecordedRequest
+from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
 from datadog_checks.dev import http as http_testing
 
 
@@ -34,6 +36,28 @@ def test_fake_http_requires_the_check_to_opt_in(fake_http):
 
     with pytest.raises(AssertionError, match='AGNOSTIC_HTTP_CLIENT = True'):
         check.create_http_client()
+
+
+@pytest.mark.parametrize(
+    ('disable_auth', 'expected_auth'),
+    [
+        pytest.param(False, 'Basic dTpw', id='instance-auth'),
+        pytest.param(True, None, id='auth-disabled'),
+    ],
+)
+def test_fake_http_sends_the_check_instance_config(fake_http, fake_http_response, disable_auth, expected_auth):
+    url = 'https://example.test/items'
+    fake_http_response(url)
+    check = FixtureCheck('test', {}, [{'username': 'u', 'password': 'p', 'headers': {'X-Team': 'agint'}}])
+    if disable_auth:
+        check.http.disable_auth()
+
+    check.http.get(url)
+
+    [sent] = fake_http.sent
+    assert (sent.method, sent.url) == ('GET', url)
+    assert sent.headers['x-team'] == 'agint'
+    assert sent.headers.get('Authorization') == expected_auth
 
 
 def test_fake_http_creates_isolated_clients(fake_http):
@@ -254,6 +278,103 @@ def test_fake_http_serves_matching_registrations_in_order_then_repeats_the_last(
 
     assert [check.http.get(url).content for _ in range(2)] == [b'second', b'second']
     fake_http.assert_all_responses_consumed()
+
+
+def test_fake_http_rejects_requests_that_bypass_the_check_client(fake_http, fake_http_response):
+    url = 'https://example.test/items'
+    fake_http_response(url)
+
+    with pytest.raises(AssertionError, match='bypassed the check HTTP client'):
+        requests.get(url)
+
+
+def test_fake_http_rejects_a_followed_redirect(fake_http, fake_http_response):
+    fake_http_response('https://example.test/old', status_code=302, headers={'Location': 'https://example.test/new'})
+    fake_http_response('https://example.test/new', b'moved')
+    check = FixtureCheck('test', {}, [{}])
+
+    with pytest.raises(AssertionError, match='GET https://example.test/old sent GET https://example.test/new'):
+        check.http.get('https://example.test/old')
+
+
+def test_fake_http_rejects_a_token_request_sent_during_a_check_call(fake_http, fake_http_response, mocker):
+    url = 'https://example.test/metrics'
+    fake_http_response(url, b'metric 1')
+    check = FixtureCheck('test', {}, [{}])
+    # Stands in for an auth token reader, such as dcos_auth, that fetches its token with requests mid-call.
+    check.http.auth_token_handler = mocker.Mock(poll=lambda **_: requests.post('https://login.test/token'))
+
+    with pytest.raises(AssertionError, match=f'GET {url} sent POST https://login.test/token'):
+        check.http.get(url)
+
+
+def test_fake_http_serves_a_retry_of_the_same_call(fake_http, fake_http_response, mocker):
+    # The client retries the same call after renewing an auth token that the first response rejected.
+    url = 'https://example.test/metrics'
+    fake_http_response(url, status_code=401)
+    fake_http_response(url, b'metric 1')
+    check = FixtureCheck('test', {}, [{}])
+    check.http.auth_token_handler = mocker.Mock()
+
+    assert check.http.get(url).content == b'metric 1'
+    fake_http.assert_requests([RecordedRequest('GET', url)])
+    assert [sent.url for sent in fake_http.sent] == [url, url]
+    fake_http.assert_all_responses_consumed()
+
+
+@pytest.mark.parametrize(
+    ('url', 'sent_url'),
+    [
+        pytest.param('https://Example.TEST/a b', 'https://example.test/a%20b', id='normalized'),
+        pytest.param('unix:///var/run/test.sock/info', 'unix://%2Fvar%2Frun%2Ftest.sock/info', id='unix-socket'),
+    ],
+)
+def test_fake_http_serves_a_call_whose_url_the_client_rewrites(fake_http, fake_http_response, url, sent_url):
+    fake_http_response(url, b'ok')
+    check = FixtureCheck('test', {}, [{}])
+
+    assert check.http.get(url).content == b'ok'
+    assert [sent.url for sent in fake_http.sent] == [sent_url]
+
+
+@pytest.mark.parametrize(
+    ('response', 'error', 'match'),
+    [
+        pytest.param(FakeHTTPResponse(elapsed=timedelta(seconds=1)), ValueError, 'elapsed', id='elapsed'),
+        pytest.param(
+            FakeHTTPResponse(stream_error=HTTPClientConnectionError('cut')),
+            ValueError,
+            'stream_error',
+            id='stream_error',
+        ),
+        pytest.param(
+            FakeHTTPResponse(history=[FakeHTTPResponse(status_code=302)]), ValueError, 'history', id='history'
+        ),
+        pytest.param(FakeHTTPResponse(peer_cert=b'cert'), ValueError, 'peer_cert', id='peer_cert'),
+        pytest.param(FakeHTTPResponse(json_error=ValueError('bad')), ValueError, 'json_error', id='json_error'),
+        pytest.param(FakeHTTPResponse(url='https://other.test/'), ValueError, 'url', id='url'),
+        pytest.param(
+            FakeHTTPResponse(content=b'raw', json_result={'a': 1}), ValueError, 'json_result', id='json_result-and-body'
+        ),
+        pytest.param(
+            FakeHTTPResponse(content_chunks=[b'a', b'b']), ValueError, 'content_chunks', id='several-content_chunks'
+        ),
+        pytest.param(FakeHTTPResponse(lines=['a', '']), ValueError, 'lines', id='trailing-empty-line'),
+        pytest.param(FakeHTTPResponse(lines=['a\n', 'b']), ValueError, 'lines', id='line-with-newline'),
+        pytest.param(requests.Response(), TypeError, 'FakeHTTPResponse', id='requests-response'),
+    ],
+)
+def test_fake_http_rejects_responses_it_cannot_send(fake_http, response, error, match):
+    with pytest.raises(error, match=match):
+        fake_http.register_response('GET', 'https://example.test/items', response)
+
+
+def test_fake_http_serves_lines(fake_http):
+    url = 'https://example.test/stream'
+    fake_http.register_response('GET', url, FakeHTTPResponse(lines=[b'first', b'', b'third']))
+    check = FixtureCheck('test', {}, [{}])
+
+    assert list(check.http.get(url, stream=True).iter_lines()) == [b'first', b'', b'third']
 
 
 def test_legacy_mock_response_is_a_requests_response_without_loading_base_fakes(monkeypatch):

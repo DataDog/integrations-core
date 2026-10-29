@@ -67,7 +67,18 @@ one client's TLS settings doesn't affect other clients or the caller's mapping.
 
 The `fake_http` fixture does not use `FakeHTTPClient` clients. Checks run their real client, configured from their
 instance and `init_config`, and the fixture answers on the wire. Registrations matching the same request are served in
-order, and the last one then repeats.
+order, and the last one then repeats. `fake_http.requests` holds each call as the check made it, and `fake_http.sent`
+holds each request as it reached the wire, with the headers and authentication the client applied.
+
+The fixture fails the test instead of serving a response it cannot represent:
+
+- A request sent outside a check client, or a wire request that differs from the call that sent it, such as a followed
+  redirect or an auth token fetch. Pass `allow_redirects=False` to receive a registered redirect.
+- A `FakeHTTPResponse` that sets `elapsed`, `stream_error`, `history`, `peer_cert`, `json_error` or `url`, more than one
+  entry in `content_chunks`, `lines` that do not split back unchanged, or a `json_result` that the body does not encode.
+
+A custom `status_error` is not detected and is replaced by the client's own error for the status code. To test these
+behaviors, use a `FakeHTTPClient` directly.
 
 ## Options
 

@@ -15,7 +15,9 @@ import threading
 from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from dataclasses import dataclass
+from datetime import timedelta
 from typing import Any
+from urllib.parse import urlsplit
 
 import requests
 import requests_mock
@@ -29,8 +31,17 @@ from datadog_checks.base.stubs.http import (
     RegisteredResponse,
     _snapshot_options,
 )
-from datadog_checks.base.utils.http import RequestsWrapper, create_http_client
-from datadog_checks.base.utils.http_protocol import HTTPClient
+from datadog_checks.base.utils.http import RequestsWrapper, create_http_client, is_uds_url, quote_uds_url
+from datadog_checks.base.utils.http_protocol import HTTPClient, HTTPHeaders
+
+
+@dataclass(frozen=True, slots=True)
+class SentRequest:
+    """A request as it reached the wire, after the client applied its configuration."""
+
+    method: str
+    url: str
+    headers: Mapping[str, str]
 
 
 @dataclass
@@ -47,8 +58,11 @@ class FakeHTTP:
 
     def __init__(self) -> None:
         self.requests: list[RecordedRequest] = []
+        self.sent: list[SentRequest] = []
         self._registrations: list[_Registration] = []
-        # Concurrent requests must not both claim, or skip, the same pending registration.
+        # Concurrent requests must not both claim, or skip, the same pending registration. The concurrency test
+        # reproduces the earlier pop-by-index race; this lock's own race was only verified by stress runs, because
+        # nothing can pause a thread between choosing a registration and marking it served.
         self._lock = threading.Lock()
         self._calls = threading.local()
 
@@ -68,6 +82,7 @@ class FakeHTTP:
 
         Registrations matching the same request are served in order, and the last one then repeats.
         """
+        _check_servable(response)
         registered = RegisteredResponse(
             method=method.upper(), url=url, outcome=response, match_options=_snapshot_options(match_options or {})
         )
@@ -98,13 +113,23 @@ class FakeHTTP:
         finally:
             stack.pop()
 
-    def _serve(self, wire_request: Any) -> requests.Response | None:
+    def _serve(self, wire_request: Any) -> requests.Response:
+        """Answer one wire request on behalf of the client call that sent it."""
         stack = self._calls.__dict__.get('stack')
         if not stack:
-            # Not sent through a check client; requests-mock raises NoMockAddress.
-            return None
+            raise AssertionError(
+                f'{wire_request.method} {wire_request.url} bypassed the check HTTP client. The fake_http fixture '
+                'serves requests sent through clients from create_http_client() or fake_http.create_client().'
+            )
         call = stack[-1]
         with self._lock:
+            self.sent.append(SentRequest(wire_request.method, wire_request.url, HTTPHeaders(wire_request.headers)))
+            if not _sends_call(wire_request, call):
+                raise AssertionError(
+                    f'{call.method} {call.url} sent {wire_request.method} {wire_request.url}, for example by '
+                    'following a redirect or fetching an auth token. The fake_http fixture serves only the call '
+                    'itself; pass allow_redirects=False to receive a registered redirect.'
+                )
             matching = [r for r in self._registrations if FakeHTTPClient._matches(r.registered, call)]
             chosen = next((r for r in matching if not r.served), matching[-1] if matching else None)
             if chosen is None:
@@ -123,18 +148,74 @@ def _encode(value: bytes | str, encoding: str | None) -> bytes:
     return value if isinstance(value, bytes) else value.encode(encoding or 'utf-8')
 
 
-def _body(response: FakeHTTPResponse) -> bytes:
+def _sends_call(wire_request: Any, call: RecordedRequest) -> bool:
+    """Whether the wire request is the call itself, possibly retried, rather than a redirect or a nested request."""
+    url = quote_uds_url(call.url) if is_uds_url(call.url) else call.url
+    # The client normalizes the URL, for example its host case and path quoting, before sending it.
+    prepared = requests.PreparedRequest()
+    prepared.prepare_url(url, None)
+    expected, sent = urlsplit(prepared.url), urlsplit(wire_request.url)
+    # Query strings are not compared, because the `params` option extends them.
+    return wire_request.method == call.method and expected[:3] == sent[:3]
+
+
+def _check_servable(response: object) -> None:
+    if isinstance(response, Exception):
+        return
+    if not isinstance(response, FakeHTTPResponse):
+        raise TypeError(f'The fake_http fixture serves FakeHTTPResponse objects or exceptions, not {response!r}.')
+    lines = None if response._lines is None else _encoded_lines(response)
+    unsendable = {
+        # These only exist on a response object, so the real client can't receive them from the wire.
+        'elapsed': response.elapsed != timedelta(),
+        'stream_error': response._stream_error is not None,
+        'history': bool(response.history),
+        'peer_cert': response._peer_cert is not None,
+        'json_error': response._json_error is not None,
+        'url': bool(response.url),
+        # The wire carries one body, so the client parses JSON from it rather than returning json_result.
+        'json_result': _json_contradicts_body(response),
+        # The body is streamed in chunks the client picks, not the configured ones.
+        'content_chunks': len(response._content_chunks) > 1,
+        # Lines are sent joined by newlines, so they must split back into the same lines.
+        'lines': lines is not None and b'\n'.join(lines).splitlines() != lines,
+    }
+    fields = [name for name, is_set in unsendable.items() if is_set]
+    if fields:
+        raise ValueError(f'The fake_http fixture cannot send these FakeHTTPResponse fields on the wire: {fields}.')
+
+
+def _json_contradicts_body(response: FakeHTTPResponse) -> bool:
+    body = _non_json_body(response)
+    if response._json_result is JSON_RESULT_UNSET or body is None:
+        return False
+    try:
+        return json.loads(body) != response._json_result
+    except ValueError:
+        return True
+
+
+def _encoded_lines(response: FakeHTTPResponse) -> list[bytes]:
+    return [_encode(line, response.encoding) for line in response._lines or ()]
+
+
+def _non_json_body(response: FakeHTTPResponse) -> bytes | None:
     if response.content:
         return response.content
     if response._lines is not None:
-        return b'\n'.join(_encode(line, response.encoding) for line in response._lines)
+        return b'\n'.join(_encoded_lines(response))
     if response._content_chunks:
         return b''.join(_encode(chunk, response.encoding) for chunk in response._content_chunks)
     if response.text:
         return _encode(response.text, response.encoding)
-    if response._json_result is not JSON_RESULT_UNSET:
+    return None
+
+
+def _body(response: FakeHTTPResponse) -> bytes:
+    body = _non_json_body(response)
+    if body is None and response._json_result is not JSON_RESULT_UNSET:
         return _encode(json.dumps(response._json_result), response.encoding)
-    return b''
+    return body or b''
 
 
 def _to_requests_response(wire_request: Any, response: FakeHTTPResponse) -> requests.Response:
