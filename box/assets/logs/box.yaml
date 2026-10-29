@@ -659,6 +659,13 @@ pipeline:
           preserveSource: true
           processors:
             - type: attribute-remapper
+              name: Map `$sourceElem.event_type` to `$targetElem.api.operation`
+              sources:
+                - $sourceElem.event_type
+              target: $targetElem.api.operation
+              preserveSource: true
+              overrideOnConflict: false
+            - type: attribute-remapper
               name: Map `$sourceElem.ip_info.ip` to `$targetElem.src_endpoint.ip`
               sources:
                 - $sourceElem.ip_info.ip

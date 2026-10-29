@@ -875,7 +875,9 @@ tests:
            uid: '7319046628105'
            type: file
        evidences:
-         - src_endpoint:
+         - api:
+             operation: Content Access
+           src_endpoint:
              ip: 203.0.113.29
              isp: Example Broadband
              location:
