@@ -1,0 +1,1 @@
+Send the Network Device Monitoring device vendor as `paloaltonetworks`, matching the `device_vendor` tag and the SNMP profile.

@@ -8,6 +8,8 @@ from collections.abc import Iterable, Iterator
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .constants import DEVICE_VENDOR_TAG
+
 INTEGRATION = 'pan_firewall'
 PAYLOAD_METADATA_BATCH_SIZE = 100
 
@@ -31,8 +33,8 @@ class DeviceMetadata(BaseModel):
     model: str | None = None
     serial_number: str
     version: str | None = None
-    # Differs from the `device_vendor` tag (`paloaltonetworks`).
-    vendor: str = 'Palo Alto Networks'
+    # Same value as the `device_vendor` tag and the SNMP profile, so that NDM derives no second vendor tag.
+    vendor: str = DEVICE_VENDOR_TAG
     os_name: str = 'PAN-OS'
     device_type: str = 'firewall'
     namespace: str

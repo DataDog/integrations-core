@@ -69,7 +69,7 @@ def test_device_metadata_of_the_static_fw_a():
         'model': 'PA-VM',
         'serial_number': '007900000000001',
         'version': '11.1.13-h12',
-        'vendor': 'Palo Alto Networks',
+        'vendor': 'paloaltonetworks',
         'os_name': 'PAN-OS',
         'device_type': 'firewall',
         'namespace': 'default',
