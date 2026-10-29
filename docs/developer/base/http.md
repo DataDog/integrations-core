@@ -59,16 +59,13 @@ OpenMetrics and Prometheus scrapers build, returns responses that expose only th
 errors listed under [Errors](#errors). The `fake_http` test fixture requires it. Without it, clients return `requests`
 responses and raise `requests` exceptions unchanged.
 
-### Testing TLS configuration
+### Testing with `fake_http`
 
-Each `FakeHTTPClient` starts with the real client's canonical TLS defaults. Pass `tls_config=...` to override specific
-fields; overrides, including `False` and `None`, take precedence. Each client gets its own copy of the overrides, so changing
-one client's TLS settings doesn't affect other clients or the caller's mapping.
-
-The `fake_http` fixture does not use `FakeHTTPClient` clients. Checks run their real client, configured from their
-instance and `init_config`, and the fixture answers on the wire. Registrations matching the same request are served in
-order, and the last one then repeats. `fake_http.requests` holds each call as the check made it, and `fake_http.sent`
-holds each request as it reached the wire, with the headers and authentication the client applied.
+Use the `fake_http` and `fake_http_response` fixtures to test a check. The check runs its real client, configured from
+its instance and `init_config`, and the fixture answers on the wire with the registered `FakeHTTPResponse`.
+Registrations matching the same request are served in order, and the last one then repeats. `fake_http.requests` holds
+each call as the check made it, and `fake_http.sent` holds each request as it reached the wire, with the headers and
+authentication the client applied.
 
 The fixture fails the test instead of serving a response it cannot represent:
 
@@ -77,8 +74,24 @@ The fixture fails the test instead of serving a response it cannot represent:
 - A `FakeHTTPResponse` that sets `elapsed`, `stream_error`, `history`, `peer_cert`, `json_error` or `url`, more than one
   entry in `content_chunks`, `lines` that do not split back unchanged, or a `json_result` that the body does not encode.
 
-A custom `status_error` is not detected and is replaced by the client's own error for the status code. To test these
-behaviors, use a `FakeHTTPClient` directly.
+A custom `status_error` is not detected and is replaced by the client's own error for the status code.
+
+### Testing with `FakeHTTPClient`
+
+A `FakeHTTPClient` is an in-memory `HTTPClient` that never runs the real client. Use it only where the `fake_http`
+fixture cannot serve the test:
+
+- Code that receives a client: pass the fake directly.
+- A suite-local emulator that computes responses per request: subclass the fake and return it from a patched version
+  of `AgentCheck.create_http_client`.
+- Responses the fixture rejects, such as `elapsed` or `history`, and cookies seeded on the client with `cookies=...`.
+
+Unlike the fixture, a `FakeHTTPClient` ignores the instance configuration, serves each registration once, and is not
+safe for concurrent requests.
+
+Each `FakeHTTPClient` starts with the real client's canonical TLS defaults. Pass `tls_config=...` to override specific
+fields; overrides, including `False` and `None`, take precedence. Each client gets its own copy of the overrides, so changing
+one client's TLS settings doesn't affect other clients or the caller's mapping.
 
 ## Options
 
