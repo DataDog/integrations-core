@@ -10,7 +10,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from textual.containers import Horizontal
-from textual.widgets import Button, Input
+from textual.widgets import Button, Input, Static
 
 from ddev.ai.agent.registry import AgentProviderRegistry
 from ddev.ai.config.models import (
@@ -45,6 +45,29 @@ def _make_flow(name: str = "Test Flow", n_phases: int = 2) -> ResolvedFlow:
         for i in range(n_phases)
     }
     flow = [FlowEntry(phase=f"phase_{i}") for i in range(n_phases)]
+    return ResolvedFlow(
+        name=name,
+        description=f"Description for {name}",
+        inputs=FlowConfig(name="test", flow=[]).inputs,
+        agents=agents,
+        phases=phases,
+        flow=flow,
+        variables={},
+    )
+
+
+def _make_chain_flow(name: str = "Chain Flow", n_phases: int = 3) -> ResolvedFlow:
+    """Create a ResolvedFlow whose phases form a linear dependency chain."""
+    agents = {"agent_a": AgentConfig.model_construct(provider="anthropic", tools=[])}
+    phases = {
+        f"phase_{i}": PhaseConfig(
+            name=f"phase_{i}",
+            agent="agent_a",
+            tasks=[TaskConfig(name=f"task_{i}", prompt="do something")],
+        )
+        for i in range(n_phases)
+    }
+    flow = [FlowEntry(phase=f"phase_{i}", dependencies=[f"phase_{i - 1}"] if i > 0 else []) for i in range(n_phases)]
     return ResolvedFlow(
         name=name,
         description=f"Description for {name}",
@@ -516,12 +539,14 @@ async def test_resume_button_shown_with_incomplete_run(tmp_path: Path) -> None:
         assert resume_btn.display
 
 
-async def test_resume_button_appears_when_screen_resumes(tmp_path: Path) -> None:
-    """A run that fails while the screen is on the stack reveals Resume on return."""
+async def test_resume_affordances_appear_when_screen_resumes(tmp_path: Path) -> None:
+    """A run that fails while the screen is on the stack reveals Resume and checkpointed phases on return."""
     from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
     from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen
+    from ddev.cli.meta.ai.tui.status import RunStatus
+    from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseNode
 
-    flow = _make_flow(n_phases=2)
+    flow = _make_chain_flow(n_phases=2)
     app = _app()
     async with app.run_test(size=(120, 50)) as pilot:
         await pilot.pause()
@@ -529,6 +554,7 @@ async def test_resume_button_appears_when_screen_resumes(tmp_path: Path) -> None
         await pilot.pause()
         flow_screen = pilot.app.screen
         assert not flow_screen.query_one("#resume", Button).display
+        assert not flow_screen.query_one("#pipeline-legend", Static).display
 
         await pilot.app.push_screen(PhaseConfigScreen(flow, flow.flow[0].phase))
         await pilot.pause()
@@ -538,14 +564,20 @@ async def test_resume_button_appears_when_screen_resumes(tmp_path: Path) -> None
 
         assert pilot.app.screen is flow_screen
         assert flow_screen.query_one("#resume", Button).display
+        assert flow_screen.query_one("#pipeline-legend", Static).display
+        nodes = {node.phase_id: node.status for node in flow_screen.query(PhaseNode)}
+        assert nodes["phase_0"] is RunStatus.CHECKPOINTED
+        assert nodes["phase_1"] is RunStatus.PENDING
 
 
-async def test_resume_button_hidden_again_when_run_completes(tmp_path: Path) -> None:
-    """A run that finishes while the screen is on the stack hides Resume on return."""
+async def test_resume_affordances_hidden_again_when_run_completes(tmp_path: Path) -> None:
+    """A run that finishes while the screen is on the stack hides Resume and marks every phase checkpointed."""
     from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
     from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen
+    from ddev.cli.meta.ai.tui.status import RunStatus
+    from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseNode
 
-    flow = _make_flow(n_phases=2)
+    flow = _make_chain_flow(n_phases=2)
     _write_incomplete_run(tmp_path, flow)
     app = _app()
     async with app.run_test(size=(120, 50)) as pilot:
@@ -562,6 +594,116 @@ async def test_resume_button_hidden_again_when_run_completes(tmp_path: Path) -> 
         await pilot.pause()
 
         assert not flow_screen.query_one("#resume", Button).display
+        nodes = {node.phase_id: node.status for node in flow_screen.query(PhaseNode)}
+        assert nodes["phase_0"] is RunStatus.CHECKPOINTED
+        assert nodes["phase_1"] is RunStatus.CHECKPOINTED
+
+
+# ---------------------------------------------------------------------------
+# Pipeline preview: checkpointed phases
+# ---------------------------------------------------------------------------
+
+
+async def test_flow_screen_pipeline_marks_checkpointed_phases(tmp_path: Path) -> None:
+    """Phases already succeeded in a resumable run render as CHECKPOINTED; the rest stay PENDING."""
+    from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+    from ddev.cli.meta.ai.tui.status import RunStatus
+    from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseNode
+
+    flow = _make_chain_flow(n_phases=3)
+    _write_run(tmp_path, flow, "".join(_success_checkpoint_yaml(p) for p in ("phase_0", "phase_1")))
+    app = _app()
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
+        await pilot.pause()
+        nodes = {node.phase_id: node.status for node in pilot.app.screen.query(PhaseNode)}
+        assert nodes["phase_0"] is RunStatus.CHECKPOINTED
+        assert nodes["phase_1"] is RunStatus.CHECKPOINTED
+        assert nodes["phase_2"] is RunStatus.PENDING
+
+
+async def test_flow_screen_pipeline_all_pending_when_never_run() -> None:
+    """A never-run flow shows every phase pending and hides the legend."""
+    from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+    from ddev.cli.meta.ai.tui.status import RunStatus
+    from ddev.cli.meta.ai.tui.widgets.pipeline_graph import PhaseNode
+
+    flow = _make_chain_flow(n_phases=2)
+    app = _app()
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow))
+        await pilot.pause()
+        nodes = pilot.app.screen.query(PhaseNode)
+        assert all(node.status is RunStatus.PENDING for node in nodes)
+        assert not pilot.app.screen.query_one("#pipeline-legend", Static).display
+
+
+async def test_flow_screen_pipeline_legend_shown_with_checkpointed_phases(tmp_path: Path) -> None:
+    """The legend appears only once at least one phase is checkpointed."""
+    from ddev.cli.meta.ai.tui.screens.flow import FlowScreen
+
+    flow = _make_chain_flow(n_phases=2)
+    _write_incomplete_run(tmp_path, flow)
+    app = _app()
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
+        await pilot.pause()
+        assert pilot.app.screen.query_one("#pipeline-legend", Static).display
+
+
+async def test_flow_screen_legend_reports_an_unreadable_checkpoint(tmp_path: Path) -> None:
+    """A corrupt checkpoint states the remedy on the flow screen instead of leaving it silent."""
+    from ddev.cli.meta.ai.tui.runs import flow_slug
+    from ddev.cli.meta.ai.tui.screens.flow import CHECKPOINT_UNREADABLE_LEGEND, FlowScreen
+
+    flow = _make_chain_flow(n_phases=2)
+    run_dir = tmp_path / flow_slug(flow)
+    run_dir.mkdir()
+    (run_dir / "checkpoints.yaml").write_text("{ not: valid: yaml")
+    app = _app()
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
+        await pilot.pause()
+
+        legend = pilot.app.screen.query_one("#pipeline-legend", Static)
+        assert legend.display
+        assert str(legend.render()) == CHECKPOINT_UNREADABLE_LEGEND
+        assert legend.has_class("legend-error")
+        assert not pilot.app.screen.query_one("#resume", Button).display
+
+
+async def test_flow_screen_legend_returns_to_checkpoint_text_when_file_is_repaired(tmp_path: Path) -> None:
+    """The legend follows the state in both directions rather than latching on the error."""
+    from ddev.cli.meta.ai.tui.runs import flow_slug
+    from ddev.cli.meta.ai.tui.screens.flow import PIPELINE_LEGEND, FlowScreen
+    from ddev.cli.meta.ai.tui.screens.phase_config import PhaseConfigScreen
+
+    flow = _make_chain_flow(n_phases=2)
+    run_dir = tmp_path / flow_slug(flow)
+    run_dir.mkdir()
+    (run_dir / "checkpoints.yaml").write_text("{ not: valid: yaml")
+    app = _app()
+    async with app.run_test(size=(120, 50)) as pilot:
+        await pilot.pause()
+        await pilot.app.push_screen(FlowScreen(flow, runs_dir=tmp_path))
+        await pilot.pause()
+        flow_screen = pilot.app.screen
+        assert flow_screen.query_one("#pipeline-legend", Static).has_class("legend-error")
+
+        await pilot.app.push_screen(PhaseConfigScreen(flow, flow.flow[0].phase))
+        await pilot.pause()
+        _write_incomplete_run(tmp_path, flow)
+        pilot.app.pop_screen()
+        await pilot.pause()
+
+        legend = flow_screen.query_one("#pipeline-legend", Static)
+        assert legend.display
+        assert str(legend.render()) == PIPELINE_LEGEND
+        assert not legend.has_class("legend-error")
 
 
 async def test_phase_config_agent_panel_renders_tools_and_prompt() -> None:
