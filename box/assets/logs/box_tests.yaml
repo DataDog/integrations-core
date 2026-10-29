@@ -416,10 +416,25 @@ tests:
         status_id: 1
         status: Success
         file_result:
-          uid: '8903212345'
+          owner:
+            uid: '11446498'
+            email_addr: notifications@example.com
+            name: Aaron Levie
+          parent_folder: All Files
+          confidentiality_id: 4
+          size: 857117299
           type_id: 1
-          name: example.docx
+          confidentiality: Top Secret
           type: Regular File
+          version: '2044534047872'
+          ext: docx
+          path: /example.docx
+          hashes:
+            - value: a4354646d0bdf443c3c4e1b1f2a7d9e8c6b5a4f3
+              algorithm_id: 2
+              algorithm: SHA-1
+          name: example.docx
+          uid: '8903212345'
     message: |-
       {
         "event_id" : "97f1b31f-f143-4777-81f8-1b557b39ca33",
@@ -681,10 +696,15 @@ tests:
         status_id: 1
         status: Success
         file_result:
-          uid: '318298854550'
+          owner:
+            uid: '41799950245'
+            email_addr: notifications@example.com
+            name: Aaron Levie
+          parent_folder: Box Reports
           type_id: 2
-          name: Test
           type: Folder
+          name: Test
+          uid: '318298854550'
       ip_address: 10.2.3.4
     message: |-
       {
@@ -2074,14 +2094,19 @@ tests:
           type_id: 2
           uid: "471299949777"
         file_result:
+          owner:
+            email_addr: "AutomationUser_5200928_gvajwBRz66@boxdevedition.com"
+            name: "DocumentSharingService"
+            uid: "24247901930"
+          parent_folder: "Companies"
+          type: "Folder"
+          type_id: 2
+          name: "5f096ef4-719a-427d-8b88-66b7a08a791a"
+          uid: "471299949777"
           accessor:
             email_addr: "AppUser_5200928_VGBGX6iZId@boxdevedition.com"
             name: "example:company:5f096ef4-719a-427d-8b88-66b7a08a791a"
             uid: "74673041506"
-          name: "5f096ef4-719a-427d-8b88-66b7a08a791a"
-          type: "Folder"
-          type_id: 2
-          uid: "471299949777"
         metadata:
           event_code: "COLLABORATION_INVITE"
           product:
@@ -2246,9 +2271,14 @@ tests:
           type_id: 2
           uid: "783177126298"
         file_result:
-          name: "PROPOSAL_1003"
+          owner:
+            email_addr: "AutomationUser_9772615_nTnqzS7Hl5@boxdevedition.com"
+            name: "Prod Files"
+            uid: "53065531421"
+          parent_folder: "prod_deals-api PROPOSAL_1003"
           type: "Folder"
           type_id: 2
+          name: "PROPOSAL_1003"
           uid: "783177126298"
         metadata:
           event_code: "COLLABORATION_REMOVE"
@@ -2524,9 +2554,15 @@ tests:
           type_id: 1
           uid: "8153761963384"
         file_result:
-          name: "Example County Senior Services - NONAUTO Package Acord Apps (original pages 1-34)_ACORD_141.pdf"
+          ext: "pdf"
+          owner:
+            email_addr: "taylor.eastman@example.com"
+            name: "Taylor Eastman"
+            uid: "42316083613"
+          parent_folder: "outlook-20261028-example-county-senior-services-nonauto-submi-cb859d0d69f3a194"
           type: "Regular File"
           type_id: 1
+          name: "Example County Senior Services - NONAUTO Package Acord Apps (original pages 1-34)_ACORD_141.pdf"
           uid: "8153761963384"
         metadata:
           event_code: "BOX_AI_USER_REQUEST"
@@ -2737,9 +2773,24 @@ tests:
           uid: "4488919637480"
           version: "5233626579042"
         file_result:
-          name: "Project Alpha In-Process Review.pptx"
+          confidentiality: "Restricted"
+          confidentiality_id: 6
+          hashes:
+           -
+            algorithm: "SHA-1"
+            algorithm_id: 2
+            value: "5c7210627c1a296ea4e70781f74c73b051e3dcf1"
+          owner:
+            email_addr: "ops@example.com"
+            name: "Ops Mailbox"
+            uid: "28036701759"
+          parent_folder: "In-Process Review"
+          path: "/DATA/CUSTOMERS/Example Government Agency (EGA)/30 PROGRAM/Project Alpha/10 Presentations/In-Process Review/Project Alpha In-Process Review.pptx"
+          size: 31987373
           type: "Regular File"
           type_id: 1
+          version: "5233626579042"
+          name: "Project Alpha In-Process Review.pptx"
           uid: "4488919637480"
         metadata:
           event_code: "SHIELD_SHARED_LINK_ACCESS_BLOCKED"
@@ -2950,9 +3001,14 @@ tests:
           type_id: 2
           uid: "511554385196"
         file_result:
-          name: "Recording"
+          owner:
+            email_addr: "ely.marsh@example.com"
+            name: "Ely Marsh"
+            uid: "99893874983"
+          parent_folder: "All Files"
           type: "Folder"
           type_id: 2
+          name: "Recording"
           uid: "511554385196"
         metadata:
           event_code: "SHARE_EXPIRATION"
@@ -3117,9 +3173,14 @@ tests:
           type_id: 2
           uid: "130608951654"
         file_result:
-          name: "project_solutions_demo"
+          owner:
+            email_addr: "ops@example.com"
+            name: "Ops Mailbox"
+            uid: "28036701759"
+          parent_folder: "ACME"
           type: "Folder"
           type_id: 2
+          name: "project_solutions_demo"
           uid: "130608951654"
         metadata:
           event_code: "UNDELETE"
@@ -3273,9 +3334,14 @@ tests:
           type_id: 2
           uid: "980629833065"
         file_result:
-          name: "POC"
+          owner:
+            email_addr: "eu.repo@example.com"
+            name: "Regional Repo"
+            uid: "84815391205"
+          parent_folder: "2026-Jira-Tickets"
           type: "Folder"
           type_id: 2
+          name: "POC"
           uid: "379960928891"
         metadata:
           event_code: "COPY"
@@ -3733,14 +3799,19 @@ tests:
           type_id: 2
           uid: "564701049430"
         file_result:
+          owner:
+            email_addr: "AutomationUser_9772615_nTnqzS7Hl5@boxdevedition.com"
+            name: "Prod Files"
+            uid: "53065531421"
+          parent_folder: "prod_deals-api DEAL_1001"
+          type: "Folder"
+          type_id: 2
+          name: "DEAL_1001"
+          uid: "564701049430"
           accessor:
             email_addr: "AppUser_9772615_9F6T7fXwjw@boxdevedition.com"
             name: "Deal Default User 1001"
             uid: "22237906747"
-          name: "DEAL_1001"
-          type: "Folder"
-          type_id: 2
-          uid: "564701049430"
         metadata:
           event_code: "COLLABORATION_ROLE_CHANGE"
           product:
@@ -3937,9 +4008,14 @@ tests:
           type_id: 2
           uid: "525295877746"
         file_result:
-          name: "For Customer"
+          owner:
+            email_addr: "AutomationUser_890660_CduIcwnQTG@boxdevedition.com"
+            name: "Box-for-Netsuite"
+            uid: "7334312055"
+          parent_folder: "CAS00001"
           type: "Folder"
           type_id: 2
+          name: "For Customer"
           uid: "525295877746"
         metadata:
           event_code: "UPDATE_SHARE_EXPIRATION"
@@ -4133,9 +4209,16 @@ tests:
           type_id: 2
           uid: "892534674360"
         file_result:
-          name: "Working Drafts"
+          confidentiality: "Restricted"
+          confidentiality_id: 6
+          owner:
+            email_addr: "ops@example.com"
+            name: "Ops Mailbox"
+            uid: "28036701759"
+          parent_folder: "Draft Slides"
           type: "Folder"
           type_id: 2
+          name: "Working Drafts"
           uid: "892534674360"
         metadata:
           event_code: "SHIELD_SHARED_LINK_STATUS_RESTRICTED_ON_UPDATE"

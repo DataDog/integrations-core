@@ -2214,70 +2214,6 @@ pipeline:
                   ocsf.file.type:
                     - source.item_type
             - type: schema-remapper
-              name: Map `source.item_name`, `source.folder_name` to `ocsf.file_result.name`
-              sources:
-                - source.item_name
-                - source.folder_name
-              target: ocsf.file_result.name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `source.item_id`, `source.folder_id` to `ocsf.file_result.uid`
-              sources:
-                - source.item_id
-                - source.folder_id
-              target: ocsf.file_result.uid
-              preserveSource: true
-              overrideOnConflict: true
-              targetFormat: string
-            - type: schema-category-mapper
-              name: ocsf.file_result.type_id
-              categories:
-                - filter:
-                    query: "@source.item_type:file"
-                  name: Regular File
-                  id: 1
-                - filter:
-                    query: "@source.item_type:folder OR @source.folder_id:*"
-                  name: Folder
-                  id: 2
-                - filter:
-                    query: "*"
-                  name: Other
-                  id: 99
-              targets:
-                name: ocsf.file_result.type
-                id: ocsf.file_result.type_id
-              fallback:
-                values:
-                  ocsf.file_result.type: Other
-                  ocsf.file_result.type_id: "99"
-                sources:
-                  ocsf.file_result.type:
-                    - source.item_type
-            - type: schema-remapper
-              name: Map `accessible_by.name` to `ocsf.file_result.accessor.name`
-              sources:
-                - accessible_by.name
-              target: ocsf.file_result.accessor.name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `accessible_by.id` to `ocsf.file_result.accessor.uid`
-              sources:
-                - accessible_by.id
-              target: ocsf.file_result.accessor.uid
-              preserveSource: true
-              overrideOnConflict: true
-              targetFormat: string
-            - type: schema-remapper
-              name: Map `accessible_by.login` to `ocsf.file_result.accessor.email_addr`
-              sources:
-                - accessible_by.login
-              target: ocsf.file_result.accessor.email_addr
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
               name: Map `file_type` to `ocsf.file.ext`
               sources:
                 - file_type
@@ -2380,6 +2316,52 @@ pipeline:
               sources:
                 - additional_details.version_id
               target: ocsf.file.version
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.file` to `ocsf.file_result`
+              sources:
+                - ocsf.file
+              target: ocsf.file_result
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `source.item_name`, `source.folder_name` to `ocsf.file_result.name`
+              sources:
+                - source.item_name
+                - source.folder_name
+              target: ocsf.file_result.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `source.item_id`, `source.folder_id` to `ocsf.file_result.uid`
+              sources:
+                - source.item_id
+                - source.folder_id
+              target: ocsf.file_result.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `accessible_by.name` to `ocsf.file_result.accessor.name`
+              sources:
+                - accessible_by.name
+              target: ocsf.file_result.accessor.name
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `accessible_by.id` to `ocsf.file_result.accessor.uid`
+              sources:
+                - accessible_by.id
+              target: ocsf.file_result.accessor.uid
+              preserveSource: true
+              overrideOnConflict: true
+              targetFormat: string
+            - type: schema-remapper
+              name: Map `accessible_by.login` to `ocsf.file_result.accessor.email_addr`
+              sources:
+                - accessible_by.login
+              target: ocsf.file_result.accessor.email_addr
               preserveSource: true
               overrideOnConflict: true
             - type: schema-category-mapper
