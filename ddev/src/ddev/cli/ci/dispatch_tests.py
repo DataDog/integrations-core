@@ -6,7 +6,9 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
+import os
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -15,6 +17,7 @@ import click
 
 from ddev.cli.ci.dispatch_options import validate_options
 from ddev.cli.ci.dispatch_run import (
+    NO_MATCHING_PR_REASON,
     RUN_MANIFEST_NAME,
     RunResolutionError,
     changes_for_run,
@@ -241,6 +244,7 @@ def dispatch_tests(
     started = time.monotonic()
     monitor = monitoring.component('dispatcher')
     outcome: ExecutionOutcome | None = None
+    no_op_reason: str | None = None
     dispatcher: Dispatcher | None = None
     summary_error: str | None = None
     batch_count = job_count = 0
@@ -282,6 +286,7 @@ def dispatch_tests(
                 app.abort(str(error))
             if run is None:
                 outcome = ExecutionOutcome.NO_OP
+                no_op_reason = NO_MATCHING_PR_REASON
                 return
 
         # Bind before setup can fail, so terminal records retain the resolved identity.
@@ -323,7 +328,8 @@ def dispatch_tests(
             app.abort(f'Could not build a test plan: {error}')
 
         if not batches:
-            monitor.logger.info('Nothing to test', reason='the plan covers no target')
+            no_op_reason = 'the plan covers no target'
+            monitor.logger.info('Nothing to test', reason=no_op_reason)
             outcome = ExecutionOutcome.NO_OP
             return
 
@@ -370,6 +376,7 @@ def dispatch_tests(
             outcome = ExecutionOutcome.CANCELLED
         raise
     finally:
+        _write_actions_outcome(outcome or ExecutionOutcome.FAILED, no_op_reason=no_op_reason)
         try:
             run_summary(
                 monitor,
@@ -385,6 +392,15 @@ def dispatch_tests(
             if datadog_handler is not None:
                 # Close the runtime first so no event arrives while delivery drains.
                 datadog_handler.close(EXPORT_DRAIN_TIMEOUT)
+
+
+def _write_actions_outcome(outcome: ExecutionOutcome, *, no_op_reason: str | None) -> None:
+    # Reporting must not prevent cleanup if Actions' output file is unavailable.
+    if output_path := os.environ.get('GITHUB_OUTPUT'):
+        with contextlib.suppress(OSError):
+            with open(output_path, 'a', encoding='utf-8') as output:
+                output.write(f'outcome={outcome}\n')
+                output.write(f'no-op-reason={no_op_reason or ""}\n')
 
 
 def build_datadog_metrics_sink(app: Application) -> DatadogMetricsSink | None:

@@ -1,1 +1,0 @@
-Treat '-' in lparstat output as a statistic that does not apply to the LPAR and skip the field silently, instead of logging an INFO line every collection interval while skipping the metric.

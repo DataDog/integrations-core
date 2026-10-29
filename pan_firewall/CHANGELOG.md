@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.4.0 / 2026-10-29
+
+***Added***:
+
+* Add metrics and Network Device Monitoring metadata collection from the PAN-OS XML API. ([#25662](https://github.com/DataDog/integrations-core/pull/25662))
+
 ## 3.3.0 / 2026-03-18 / Agent 7.78.0
 
 ***Added***:

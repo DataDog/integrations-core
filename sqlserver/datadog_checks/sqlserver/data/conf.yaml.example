@@ -862,6 +862,30 @@ instances:
         #
         # max_execution_time: 10
 
+    ## Configure collection of column statistics, which the query benchmarker uses to generate data shaped like
+    ## yours. Requires the `datadog.column_statistics` procedure in each database, as described in the setup
+    ## documentation. Only statistics properties and histogram counts are collected, never column values. If
+    ## `database_autodiscovery` is not enabled, data is collected only for the database configured with `database`
+    ## parameter. System databases and databases that are offline or inaccessible are skipped.
+    ## Requires SQL Server 2017 or later.
+    #
+    # collect_column_statistics:
+
+        ## @param enabled - boolean - optional - default: false
+        ## Enable collection of column statistics. Requires `dbm: true`. Defaults to false.
+        #
+        # enabled: false
+
+        ## @param collection_interval - number - optional - default: 3600
+        ## Set the column statistics collection interval (in seconds). Defaults to 3600 seconds.
+        #
+        # collection_interval: 3600
+
+        ## @param max_tables - integer - optional - default: 500
+        ## Set the maximum number of tables to collect column statistics for in each database. Defaults to 500.
+        #
+        # max_tables: 500
+
     ## DEPRECATED: Use `collect_schemas` instead.
     ## Configure collection of schemas. If `database_autodiscovery` is not enabled, data is collected
     ## only for the database configured with `database` parameter.

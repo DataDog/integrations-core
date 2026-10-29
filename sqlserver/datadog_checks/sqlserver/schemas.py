@@ -226,7 +226,7 @@ class SQLServerSchemaCollector(SQLServerObjectCollector):
         # SQL Server 2017 and later, at compatibility level 130 or higher, can get all the data in one query
         query += f"""
             SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.owner_name,
-                schema_tables.table_name
+                schema_tables.table_name, schema_tables.table_id
                 , json_query(({COLUMN_QUERY} FOR JSON PATH), '$') as columns
                 , json_query(({INDEX_QUERY} FOR JSON PATH), '$') as indexes
                 , json_query(({FOREIGN_KEY_QUERY} FOR JSON PATH), '$') as foreign_keys
