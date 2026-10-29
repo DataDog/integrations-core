@@ -514,7 +514,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@event_id:*"
+        query: "@event_type:*"
       processors:
         - type: string-builder-processor
           name: Add product name
@@ -2477,7 +2477,7 @@ pipeline:
       ocsf:
         isOcsf: true
       filter:
-        query: "@ocsf.metadata.event_code:* -@ocsf.category_uid:*"
+        query: "@event_type:* -@ocsf.category_uid:*"
       processors:
         - type: schema-processor
           name: Apply OCSF schema for 0
