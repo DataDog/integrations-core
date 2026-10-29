@@ -67,9 +67,7 @@ one client's TLS settings doesn't affect other clients or the caller's mapping.
 
 The `fake_http` fixture does not use `FakeHTTPClient` clients. Checks run their real client, configured from their
 instance and `init_config`, and the fixture answers on the wire. Registrations matching the same request are served in
-order, and the last one then repeats. Besides the recorded calls in `fake_http.requests`, `fake_http.sent` lists each
-request as sent, with the headers the client applied. `fake_http.create_client()` creates a client with default
-configuration.
+order, and the last one then repeats.
 
 ## Options
 

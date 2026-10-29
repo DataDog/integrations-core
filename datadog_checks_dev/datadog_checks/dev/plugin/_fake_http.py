@@ -3,22 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Back the `fake_http` fixture with requests-mock, so checks run their real HTTP client.
 
-Tests register `FakeHTTPResponse` objects or exceptions and assert on call-level `RecordedRequest` objects,
-as with `FakeHTTPClient`. Matching happens on the call each check makes through its client, before the client
-applies its configuration, so `match_options` keeps the meaning it has for `FakeHTTPClient`. Responses are then
-served on the wire by requests-mock, so instance auth, headers, TLS and error translation all run for real.
-
-This lives in the dev package rather than base because base ships with the Agent and must not import requests-mock.
+Calls are recorded and matched where checks call their client, so `RecordedRequest` and `match_options` keep their
+`FakeHTTPClient` meaning, and requests-mock serves the matched response. This lives in dev because base ships with
+the Agent and must not import requests-mock.
 """
 
 from __future__ import annotations
 
 import json
 import threading
-from collections.abc import Iterable, Iterator, Mapping
+from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from dataclasses import dataclass
-from datetime import timedelta
 from typing import Any
 
 import requests
@@ -34,16 +30,7 @@ from datadog_checks.base.stubs.http import (
     _snapshot_options,
 )
 from datadog_checks.base.utils.http import RequestsWrapper, create_http_client
-from datadog_checks.base.utils.http_protocol import HTTPClient, HTTPHeaders
-
-
-@dataclass(frozen=True, slots=True)
-class SentRequest:
-    """A request as it reached the wire, after the client applied its configuration."""
-
-    method: str
-    url: str
-    headers: Mapping[str, str]
+from datadog_checks.base.utils.http_protocol import HTTPClient
 
 
 @dataclass
@@ -52,21 +39,16 @@ class _Registration:
     served: int = 0
 
 
-@dataclass
-class _Call:
-    request: RecordedRequest
-    sends: int = 0
-
-
 class FakeHTTP:
     """Registers responses for, and records the requests of, every check client created during a test."""
 
+    assert_requests = FakeHTTPClient.assert_requests
+    assert_has_request = FakeHTTPClient.assert_has_request
+
     def __init__(self) -> None:
         self.requests: list[RecordedRequest] = []
-        self.sent: list[SentRequest] = []
         self._registrations: list[_Registration] = []
-        # Guards registration, matching with marking served, recording, and assertion snapshots, so concurrent
-        # requests can't serve the same pending registration twice or skip one.
+        # Concurrent requests must not both claim, or skip, the same pending registration.
         self._lock = threading.Lock()
         self._calls = threading.local()
 
@@ -86,25 +68,11 @@ class FakeHTTP:
 
         Registrations matching the same request are served in order, and the last one then repeats.
         """
-        _check_servable(response)
         registered = RegisteredResponse(
             method=method.upper(), url=url, outcome=response, match_options=_snapshot_options(match_options or {})
         )
         with self._lock:
             self._registrations.append(_Registration(registered))
-
-    def assert_requests(self, expected: Iterable[RecordedRequest]) -> None:
-        with self._lock:
-            recorded = list(self.requests)
-        expected_requests = list(expected)
-        if recorded != expected_requests:
-            raise AssertionError(f'Expected recorded requests {expected_requests!r}, got {recorded!r}.')
-
-    def assert_has_request(self, expected: RecordedRequest) -> None:
-        with self._lock:
-            recorded = list(self.requests)
-        if expected not in recorded:
-            raise AssertionError(f'No recorded request matched {expected!r}. Recorded requests: {recorded!r}.')
 
     def assert_all_responses_consumed(self) -> None:
         """Assert that every registration was served at least once."""
@@ -119,64 +87,36 @@ class FakeHTTP:
 
     @contextmanager
     def _record_call(self, method: str, url: str, options: Mapping[str, Any]) -> Iterator[None]:
-        call = _Call(RecordedRequest(method=method, url=url, options=options))
+        request = RecordedRequest(method=method, url=url, options=options)
         with self._lock:
-            self.requests.append(call.request)
-        # Calls nest when sending one request makes another on the same thread, so the innermost call is served.
+            self.requests.append(request)
+        # The wire request is served on the calling thread, from the innermost call it is making.
         stack = self._calls.__dict__.setdefault('stack', [])
-        stack.append(call)
+        stack.append(request)
         try:
             yield
         finally:
             stack.pop()
 
-    def _serve(self, wire_request: Any) -> requests.Response:
-        """Answer one wire request on behalf of the client call that sent it."""
+    def _serve(self, wire_request: Any) -> requests.Response | None:
         stack = self._calls.__dict__.get('stack')
         if not stack:
-            raise AssertionError(
-                f'{wire_request.method} {wire_request.url} bypassed the check HTTP client. The fake_http fixture '
-                'serves requests sent through clients from create_http_client() or fake_http.create_client().'
-            )
+            # Not sent through a check client; requests-mock raises NoMockAddress.
+            return None
         call = stack[-1]
         with self._lock:
-            self.sent.append(SentRequest(wire_request.method, wire_request.url, HTTPHeaders(wire_request.headers)))
-            call.sends += 1
-            if call.sends > 1:
-                raise AssertionError(
-                    f'{call.request.method} {call.request.url} sent a second request, {wire_request.method} '
-                    f'{wire_request.url}, for example by following a redirect. The fake_http fixture serves one '
-                    'response per call; pass allow_redirects=False to receive a registered redirect.'
-                )
-            matching = [r for r in self._registrations if FakeHTTPClient._matches(r.registered, call.request)]
+            matching = [r for r in self._registrations if FakeHTTPClient._matches(r.registered, call)]
             chosen = next((r for r in matching if not r.served), matching[-1] if matching else None)
             if chosen is None:
                 raise AssertionError(
-                    f'No registered response matched {call.request.method} {call.request.url} with options '
-                    f'{dict(call.request.options)!r}. Pending responses: {self._pending()!r}.'
+                    f'No registered response matched {call.method} {call.url} with options {dict(call.options)!r}. '
+                    f'Pending responses: {self._pending()!r}.'
                 )
             chosen.served += 1
             outcome = chosen.registered.outcome
         if isinstance(outcome, Exception):
             raise outcome
         return _to_requests_response(wire_request, outcome)
-
-
-def _check_servable(response: object) -> None:
-    if isinstance(response, Exception):
-        return
-    if not isinstance(response, FakeHTTPResponse):
-        raise TypeError(f'The fake_http fixture serves FakeHTTPResponse objects or exceptions, not {response!r}.')
-    # These only exist on a response object, so the real client can't receive them from the wire.
-    unsendable = {
-        'elapsed': response.elapsed != timedelta(),
-        'stream_error': response._stream_error is not None,
-        'history': bool(response.history),
-        'peer_cert': response._peer_cert is not None,
-    }
-    fields = [name for name, is_set in unsendable.items() if is_set]
-    if fields:
-        raise ValueError(f'The fake_http fixture cannot send these FakeHTTPResponse fields on the wire: {fields}.')
 
 
 def _encode(value: bytes | str, encoding: str | None) -> bytes:

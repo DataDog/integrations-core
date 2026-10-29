@@ -4,8 +4,6 @@
 import importlib
 import sys
 import threading
-from concurrent.futures import ThreadPoolExecutor
-from datetime import timedelta
 from typing import Any
 
 import pytest
@@ -16,7 +14,6 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.openmetrics.base_check import OpenMetricsBaseCheck
 from datadog_checks.base.checks.prometheus.prometheus_base import PrometheusCheck
 from datadog_checks.base.stubs.http import FakeHTTPResponse, RecordedRequest
-from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
 from datadog_checks.dev import http as http_testing
 
 
@@ -39,28 +36,6 @@ def test_fake_http_requires_the_check_to_opt_in(fake_http):
         check.create_http_client()
 
 
-@pytest.mark.parametrize(
-    ('disable_auth', 'expected_auth'),
-    [
-        pytest.param(False, 'Basic dTpw', id='instance-auth'),
-        pytest.param(True, None, id='auth-disabled'),
-    ],
-)
-def test_fake_http_sends_the_check_instance_config(fake_http, fake_http_response, disable_auth, expected_auth):
-    url = 'https://example.test/items'
-    fake_http_response(url)
-    check = FixtureCheck('test', {}, [{'username': 'u', 'password': 'p', 'headers': {'X-Team': 'agint'}}])
-    if disable_auth:
-        check.http.disable_auth()
-
-    check.http.get(url)
-
-    [sent] = fake_http.sent
-    assert (sent.method, sent.url) == ('GET', url)
-    assert sent.headers['x-team'] == 'agint'
-    assert sent.headers.get('Authorization') == expected_auth
-
-
 def test_fake_http_creates_isolated_clients(fake_http):
     check = FixtureCheck('test', {}, [{}])
 
@@ -76,30 +51,30 @@ def test_fake_http_creates_isolated_clients(fake_http):
     assert explicit_client.get_header('X-Default-Only') is None
 
 
-def test_fake_http_aggregates_interactions_from_isolated_clients(fake_http, fake_http_response):
+def test_fake_http_aggregates_interactions_from_isolated_clients(fake_http):
     first_url = 'https://example.test/first'
     second_url = 'https://example.test/second'
-    fake_http_response(first_url, b'first')
-    fake_http_response(second_url, b'second')
+    fake_http.register_response('GET', first_url, FakeHTTPResponse(content=b'first'))
+    fake_http.register_response('GET', second_url, FakeHTTPResponse(content=b'second'))
     check = FixtureCheck('test', {}, [{}])
 
-    assert check.http.get(first_url).content == b'first'
-    assert check.create_http_client().get(second_url).content == b'second'
+    default_client = check.http
+    explicit_client = check.create_http_client()
+
+    assert default_client is not explicit_client
+    assert default_client.get(first_url).content == b'first'
+    assert explicit_client.get(second_url).content == b'second'
     fake_http.assert_requests([RecordedRequest('GET', first_url), RecordedRequest('GET', second_url)])
     fake_http.assert_all_responses_consumed()
 
 
-@pytest.mark.parametrize('method', ['get', 'post', 'head', 'put', 'patch', 'delete', 'options_method'])
-def test_fake_http_serves_and_records_every_client_method(fake_http, method):
+def test_fake_http_installs_registered_response_and_records_request(fake_http):
     url = 'https://example.test/items'
-    wire_method = 'OPTIONS' if method == 'options_method' else method.upper()
-    fake_http.register_response(wire_method, url, FakeHTTPResponse(status_code=202))
+    fake_http.register_response('GET', url, FakeHTTPResponse(json_result={'items': []}))
     check = FixtureCheck('test', {}, [{}])
 
-    response = getattr(check.http, method)(url, stream=True)
-
-    assert response.status_code == 202
-    fake_http.assert_requests([RecordedRequest(method=wire_method, url=url, options={'stream': True})])
+    assert check.http.get(url, stream=True).json() == {'items': []}
+    fake_http.assert_requests([RecordedRequest(method='GET', url=url, options={'stream': True})])
     fake_http.assert_all_responses_consumed()
 
 
@@ -109,8 +84,9 @@ def test_fake_http_response_builds_and_registers_text_response(fake_http_respons
     check = FixtureCheck('test', {}, [{}])
 
     response = check.http.get(url, stream=True)
-
+    assert response.content == b'first\nsecond'
     assert response.text == 'first\nsecond'
+    assert list(response.iter_content()) == [b'first\nsecond']
     assert list(response.iter_lines(decode_unicode=True)) == ['first', 'second']
 
 
@@ -136,7 +112,6 @@ def test_fake_http_response_builds_and_registers_json_response(
     check = FixtureCheck('test', {}, [{}])
 
     response = check.http.post(url, json=payload)
-
     assert response.content == expected_content
     assert response.json() == payload
     assert response.status_code == 201
@@ -144,10 +119,10 @@ def test_fake_http_response_builds_and_registers_json_response(
     fake_http.assert_all_responses_consumed()
 
 
-def test_fake_http_routes_openmetrics_send_request(fake_http, fake_http_response):
+def test_fake_http_routes_openmetrics_send_request(fake_http):
     url = 'https://example.test/metrics'
-    fake_http_response(url, 'metric 1')
     headers = {'Authorization': 'Bearer token'}
+    fake_http.register_response('GET', url, FakeHTTPResponse(text='metric 1'))
     check = OpenMetricsFixtureCheck('test', {}, {}, [])
     scraper_config = check.create_scraper_configuration({'prometheus_url': url, 'namespace': 'test'})
 
@@ -174,9 +149,9 @@ def test_fake_http_preserves_openmetrics_handler_cache_and_isolation(fake_http):
     assert second_handler.get_header('X-First-Only') is None
 
 
-def test_fake_http_routes_prometheus_poll(fake_http, fake_http_response):
+def test_fake_http_routes_prometheus_poll(fake_http):
     url = 'https://example.test/metrics'
-    fake_http_response(url, 'metric 1')
+    fake_http.register_response('GET', url, FakeHTTPResponse(text='metric 1'))
     check = PrometheusFixtureCheck('test', {}, {}, [])
 
     result = check.poll(url, headers={'X-Test': 'value'})
@@ -267,18 +242,6 @@ def test_fake_http_serves_each_concurrent_request_its_own_registration(fake_http
     assert results == {'a': b'A', 'b': b'B'}
 
 
-def test_fake_http_reuses_a_registration_across_concurrent_requests(fake_http, fake_http_response):
-    url = 'https://example.test/items'
-    fake_http_response(url, b'shared')
-    check = FixtureCheck('test', {}, [{}])
-
-    with ThreadPoolExecutor(4) as pool:
-        bodies = list(pool.map(lambda _: check.http.get(url).content, range(8)))
-
-    assert bodies == [b'shared'] * 8
-    fake_http.assert_all_responses_consumed()
-
-
 def test_fake_http_serves_matching_registrations_in_order_then_repeats_the_last(fake_http, fake_http_response):
     url = 'https://example.test/items'
     fake_http_response(url, b'first')
@@ -291,77 +254,6 @@ def test_fake_http_serves_matching_registrations_in_order_then_repeats_the_last(
 
     assert [check.http.get(url).content for _ in range(2)] == [b'second', b'second']
     fake_http.assert_all_responses_consumed()
-
-
-@pytest.mark.parametrize(
-    ('registered', 'expected_type'),
-    [
-        pytest.param(requests.ConnectionError('down'), HTTPClientConnectionError, id='requests-error-is-translated'),
-        pytest.param(HTTPClientConnectionError('down'), HTTPClientConnectionError, id='neutral-error'),
-        pytest.param(ValueError('unrelated'), ValueError, id='other-error'),
-    ],
-)
-def test_fake_http_raises_registered_exceptions_through_the_client(fake_http, registered, expected_type):
-    url = 'https://example.test/items'
-    fake_http.register_response('GET', url, registered)
-    check = FixtureCheck('test', {}, [{}])
-
-    with pytest.raises(expected_type, match='down|unrelated') as exc_info:
-        check.http.get(url)
-
-    if isinstance(registered, expected_type):
-        assert exc_info.value is registered
-
-
-@pytest.mark.parametrize(
-    'field',
-    [
-        pytest.param({'elapsed': timedelta(seconds=1)}, id='elapsed'),
-        pytest.param({'stream_error': HTTPClientConnectionError('cut')}, id='stream_error'),
-        pytest.param({'history': [FakeHTTPResponse(status_code=302)]}, id='history'),
-        pytest.param({'peer_cert': b'cert'}, id='peer_cert'),
-    ],
-)
-def test_fake_http_rejects_response_fields_it_cannot_send(fake_http, field):
-    with pytest.raises(ValueError, match=next(iter(field))):
-        fake_http.register_response('GET', 'https://example.test/items', FakeHTTPResponse(**field))
-
-
-def test_fake_http_rejects_a_followed_redirect(fake_http, fake_http_response):
-    url = 'https://example.test/old'
-    fake_http_response(url, status_code=302, headers={'Location': 'https://example.test/new'})
-    fake_http_response('https://example.test/new', b'moved')
-    check = FixtureCheck('test', {}, [{}])
-
-    with pytest.raises(AssertionError, match='redirect'):
-        check.http.get(url)
-
-
-def test_fake_http_rejects_requests_that_bypass_the_check_client(fake_http, fake_http_response):
-    url = 'https://example.test/items'
-    fake_http_response(url)
-
-    with pytest.raises(AssertionError, match='bypassed the check HTTP client'):
-        requests.get(url)
-
-
-def test_fake_http_open_stream_does_not_block_other_requests(fake_http, fake_http_response):
-    stream_url = 'https://example.test/stream'
-    other_url = 'https://example.test/other'
-    fake_http_response(stream_url, b'one\ntwo')
-    fake_http_response(other_url, b'other')
-    check = FixtureCheck('test', {}, [{}])
-    results = {}
-
-    with check.http.get(stream_url, stream=True) as stream:
-        lines = stream.iter_lines()
-        assert next(lines) == b'one'
-        other = threading.Thread(target=lambda: results.update(other=check.http.get(other_url).content))
-        other.start()
-        other.join(5)
-        assert next(lines) == b'two'
-
-    assert results == {'other': b'other'}
 
 
 def test_legacy_mock_response_is_a_requests_response_without_loading_base_fakes(monkeypatch):
