@@ -135,6 +135,11 @@ facets:
     source: log
   - groups:
       - OCSF
+    name: Evidences
+    path: ocsf.evidences
+    source: log
+  - groups:
+      - OCSF
     name: Expiration Time
     path: ocsf.expiration_time
     source: log
@@ -292,6 +297,11 @@ facets:
       - OCSF
     name: Metadata Event UID
     path: ocsf.metadata.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Resources Array
+    path: ocsf.resources
     source: log
   - groups:
       - OCSF
@@ -613,6 +623,92 @@ pipeline:
             supportRules: ""
             matchRules: |
               to_array %{data:ocsf.finding_info.types:array("[]",",")}
+        - type: array-map-processor
+          name: Map `additional_details.shield_alert.alert_summary.alert_activities` to `ocsf.resources`
+          enabled: true
+          source: additional_details.shield_alert.alert_summary.alert_activities
+          target: ocsf.resources
+          preserveSource: true
+          processors:
+            - type: attribute-remapper
+              name: Map `$sourceElem.item_name` to `$targetElem.name`
+              sources:
+                - $sourceElem.item_name
+              target: $targetElem.name
+              preserveSource: true
+              overrideOnConflict: false
+            - type: attribute-remapper
+              name: Map `$sourceElem.item_id` to `$targetElem.uid`
+              sources:
+                - $sourceElem.item_id
+              target: $targetElem.uid
+              preserveSource: true
+              overrideOnConflict: false
+            - type: attribute-remapper
+              name: Map `$sourceElem.item_type` to `$targetElem.type`
+              sources:
+                - $sourceElem.item_type
+              target: $targetElem.type
+              preserveSource: true
+              overrideOnConflict: false
+        - type: array-map-processor
+          name: Map `additional_details.shield_alert.alert_summary.alert_activities` to `ocsf.evidences`
+          enabled: true
+          source: additional_details.shield_alert.alert_summary.alert_activities
+          target: ocsf.evidences
+          preserveSource: true
+          processors:
+            - type: attribute-remapper
+              name: Map `$sourceElem.ip_info.ip` to `$targetElem.src_endpoint.ip`
+              sources:
+                - $sourceElem.ip_info.ip
+              target: $targetElem.src_endpoint.ip
+              preserveSource: true
+              overrideOnConflict: false
+            - type: attribute-remapper
+              name: Map `$sourceElem.ip_info.registrant` to `$targetElem.src_endpoint.isp`
+              sources:
+                - $sourceElem.ip_info.registrant
+              target: $targetElem.src_endpoint.isp
+              preserveSource: true
+              overrideOnConflict: false
+            - type: attribute-remapper
+              name: Map `$sourceElem.ip_info.city_name` to `$targetElem.src_endpoint.location.city`
+              sources:
+                - $sourceElem.ip_info.city_name
+              target: $targetElem.src_endpoint.location.city
+              preserveSource: true
+              overrideOnConflict: false
+            - type: attribute-remapper
+              name: Map `$sourceElem.ip_info.region_name` to `$targetElem.src_endpoint.location.region`
+              sources:
+                - $sourceElem.ip_info.region_name
+              target: $targetElem.src_endpoint.location.region
+              preserveSource: true
+              overrideOnConflict: false
+            - type: attribute-remapper
+              name: Map `$sourceElem.ip_info.country_code` to `$targetElem.src_endpoint.location.country`
+              sources:
+                - $sourceElem.ip_info.country_code
+              target: $targetElem.src_endpoint.location.country
+              preserveSource: true
+              overrideOnConflict: false
+            - type: attribute-remapper
+              name: Map `$sourceElem.ip_info.latitude` to `$targetElem.src_endpoint.location.lat`
+              sources:
+                - $sourceElem.ip_info.latitude
+              target: $targetElem.src_endpoint.location.lat
+              targetFormat: double
+              preserveSource: true
+              overrideOnConflict: false
+            - type: attribute-remapper
+              name: Map `$sourceElem.ip_info.longitude` to `$targetElem.src_endpoint.location.long`
+              sources:
+                - $sourceElem.ip_info.longitude
+              target: $targetElem.src_endpoint.location.long
+              targetFormat: double
+              preserveSource: true
+              overrideOnConflict: false
         - type: attribute-remapper
           name: Map `additional_details.shield_alert.created_at` to `ocsf.finding_info.created_time`
           enabled: true
@@ -731,6 +827,20 @@ pipeline:
               sources:
                 - ocsf.finding_info.created_time
               target: ocsf.finding_info.created_time
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.resources` to `ocsf.resources`
+              sources:
+                - ocsf.resources
+              target: ocsf.resources
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `ocsf.evidences` to `ocsf.evidences`
+              sources:
+                - ocsf.evidences
+              target: ocsf.evidences
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper

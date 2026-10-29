@@ -744,8 +744,13 @@ tests:
           "alert_summary" : {
             "alert_activities" : [
               {
-                "occurred_at" : "2026-10-27T04:56:16-07:00",
-                "event_type" : "Login",
+                "occurred_at" : "2026-10-08T01:26:34-07:00",
+                "event_type" : "Content Access",
+                "item_id" : "7319046628105",
+                "item_type" : "file",
+                "service_name" : "Box Elements (used in Box Web App)",
+                "item_name" : "XYZ_TestSamples_Guide_8.13.26.pdf",
+                "item_path" : "XYZ Builds/XYZ Test Data",
                 "ip_info" : {
                   "country_code" : "KR",
                   "city_name" : "Springfield",
@@ -806,8 +811,8 @@ tests:
          created_at: '2026-10-27T04:56:17-07:00'
          alert_summary:
            alert_activities:
-             - occurred_at: '2026-10-27T04:56:16-07:00'
-               event_type: Login
+             - occurred_at: '2026-10-08T01:26:34-07:00'
+               event_type: Content Access
                ip_info:
                  country_code: KR
                  city_name: Springfield
@@ -816,6 +821,11 @@ tests:
                  region_name: Example Province
                  registrant: Example Broadband
                  longitude: '127.0000'
+               item_id: '7319046628105'
+               item_type: file
+               service_name: Box Elements (used in Box Web App)
+               item_name: XYZ_TestSamples_Guide_8.13.26.pdf
+               item_path: XYZ Builds/XYZ Test Data
          user:
            name: Sam Ellison INT
            id: 95288625182
@@ -860,6 +870,20 @@ tests:
          type_id: 0
          type: Unknown
          name: Unknown IP
+       resources:
+         - name: XYZ_TestSamples_Guide_8.13.26.pdf
+           uid: '7319046628105'
+           type: file
+       evidences:
+         - src_endpoint:
+             ip: 203.0.113.29
+             isp: Example Broadband
+             location:
+               city: Springfield
+               region: Example Province
+               country: KR
+               lat: 37.0
+               long: 127.0
      usr:
        name: Sam Ellison INT
        id: 95288625182
@@ -884,8 +908,13 @@ tests:
            "alert_summary" : {
              "alert_activities" : [
                {
-                 "occurred_at" : "2026-10-27T04:56:16-07:00",
-                 "event_type" : "Login",
+                 "occurred_at" : "2026-10-08T01:26:34-07:00",
+                 "event_type" : "Content Access",
+                 "item_id" : "7319046628105",
+                 "item_type" : "file",
+                 "service_name" : "Box Elements (used in Box Web App)",
+                 "item_name" : "XYZ_TestSamples_Guide_8.13.26.pdf",
+                 "item_path" : "XYZ Builds/XYZ Test Data",
                  "ip_info" : {
                    "country_code" : "KR",
                    "city_name" : "Springfield",
