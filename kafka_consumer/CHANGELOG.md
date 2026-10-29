@@ -14,7 +14,7 @@
 * Stop creating a librdkafka Consumer on every check run just to read the cluster ID; read it from the AdminClient metadata instead. ([#25667](https://github.com/DataDog/integrations-core/pull/25667))
 * Fetch only uncached partitions when the earliest-offsets cache is fresh, so one unfetchable partition no longer bypasses the cache for all partitions. ([#25668](https://github.com/DataDog/integrations-core/pull/25668))
 
-## 9.3.0 / 2026-10-27
+## 9.3.0 / 2026-10-27 / Agent 7.85.0
 
 ***Security***:
 

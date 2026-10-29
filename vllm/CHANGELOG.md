@@ -8,7 +8,7 @@
 
 * Collect the vLLM NIXL KV cache transfer metrics. ([#25742](https://github.com/DataDog/integrations-core/pull/25742))
 
-## 3.5.0 / 2026-10-01
+## 3.5.0 / 2026-10-01 / Agent 7.85.0
 
 ***Added***:
 

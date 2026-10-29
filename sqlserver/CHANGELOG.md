@@ -18,7 +18,7 @@
 * Exclude internal resource tags from the `database_instance` and settings metadata payloads. ([#25692](https://github.com/DataDog/integrations-core/pull/25692))
 * Collect schemas at `collect_schemas.collection_interval` when it is shorter than the settings collection interval, instead of at most once per settings interval. ([#25769](https://github.com/DataDog/integrations-core/pull/25769))
 
-## 23.6.0 / 2026-10-01
+## 23.6.0 / 2026-10-01 / Agent 7.85.0
 
 ***Security***:
 

@@ -12,7 +12,7 @@
 
 * Accept the `.inf` string for an unbounded `thresholds` upper bound so it survives JSON transport from Remote Config, and treat an explicit `null` threshold range as the default instead of crashing the check run. ([#25422](https://github.com/DataDog/integrations-core/pull/25422))
 
-## 5.5.3 / 2026-10-01
+## 5.5.3 / 2026-10-01 / Agent 7.85.0
 
 ***Fixed***:
 

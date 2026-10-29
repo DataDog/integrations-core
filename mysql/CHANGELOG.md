@@ -12,7 +12,7 @@
 
 * Exclude internal resource tags from the `database_instance` and settings metadata payloads, and send the same tags on both. ([#25692](https://github.com/DataDog/integrations-core/pull/25692))
 
-## 15.23.0 / 2026-10-27
+## 15.23.0 / 2026-10-27 / Agent 7.85.0
 
 ***Security***:
 

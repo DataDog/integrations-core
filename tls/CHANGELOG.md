@@ -12,7 +12,7 @@
 
 * Reload rotated TLS client certificates without restarting the Agent when their contents change. Missing, unreadable, malformed, or mismatched client credentials report CRITICAL validation without certificate-age metrics until a complete valid pair is available, including during non-atomic rotation. Retry TLS context creation if a configured CA bundle is temporarily missing during a rebuild. ([#25363](https://github.com/DataDog/integrations-core/pull/25363))
 
-## 5.9.0 / 2026-10-01
+## 5.9.0 / 2026-10-01 / Agent 7.85.0
 
 ***Security***:
 

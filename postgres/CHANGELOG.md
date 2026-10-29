@@ -15,7 +15,7 @@
 * Fix per-database dynamic queries continuing to query dropped databases and skipping new ones when `database_autodiscovery` is enabled. ([#25624](https://github.com/DataDog/integrations-core/pull/25624))
 * Reconnect when the main database connection is left with a command in progress, which caused every subsequent query to fail with `another command is already in progress`. ([#25644](https://github.com/DataDog/integrations-core/pull/25644))
 
-## 23.14.0 / 2026-10-27
+## 23.14.0 / 2026-10-27 / Agent 7.85.0
 
 ***Security***:
 

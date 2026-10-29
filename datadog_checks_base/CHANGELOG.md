@@ -19,7 +19,7 @@
 * Send the current auth token on requests that pass `extra_headers`. Those requests previously had no token on the first run and a stale one after a token refresh. ([#25728](https://github.com/DataDog/integrations-core/pull/25728))
 * Read the kubelet pod list from the decoded response body so gzip-encoded responses parse, temporarily using additional memory equal to the decoded body size. ([#25729](https://github.com/DataDog/integrations-core/pull/25729))
 
-## 38.8.0 / 2026-10-27
+## 38.8.0 / 2026-10-27 / Agent 7.85.0
 
 ***Security***:
 
@@ -47,7 +47,7 @@
 
 * Make `assert_histogram_bucket` compare bucket bounds when they are given. ([#25378](https://github.com/DataDog/integrations-core/pull/25378))
 
-## 38.4.0 / 2026-10-01
+## 38.4.0 / 2026-10-01 / Agent 7.84.2
 
 ***Security***:
 
