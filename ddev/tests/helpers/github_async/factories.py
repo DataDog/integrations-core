@@ -30,6 +30,7 @@ from ddev.utils.github_async.models import (
     GitHubUser,
     GitObject,
     GitReference,
+    GitTag,
     IssueComment,
     JobStep,
     JobStepStatus,
@@ -153,6 +154,21 @@ def make_git_reference(
     if url is UNSET:
         url = f'https://api.github.com/repos/DataDog/integrations-core/git/ref/{ref}'
     return GitReference(ref=ref, node_id=node_id, url=url, object=object if object is not None else make_git_object())
+
+
+def make_git_tag(
+    *,
+    tag: str = '7.85.0',
+    sha: str = 't' * 40,
+    node_id: str = 'TAG_kwDO',
+    url: str | Unset = UNSET,
+    object: GitObject | None = None,
+) -> GitTag:
+    if url is UNSET:
+        url = f'https://api.github.com/repos/DataDog/integrations-core/git/tags/{sha}'
+    return GitTag(
+        tag=tag, sha=sha, node_id=node_id, url=url, object=object if object is not None else make_git_object()
+    )
 
 
 def make_file_content(

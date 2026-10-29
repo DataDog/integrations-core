@@ -97,8 +97,8 @@ RUN_OUTCOME_METRICS = {
     '--head-tag',
     default=None,
     metavar='TAG',
-    help='Release tag the results belong to. Used with `--commit`, which stays the checkout source: '
-    'the tag is recorded as given, not resolved to a commit. Replaces branch attribution.',
+    help='Release tag to test. Supplies the commit, read from the tag, so it cannot be combined with '
+    '`--commit`. Results are attributed to the tag rather than to a branch.',
 )
 @click.option(
     '--tags',

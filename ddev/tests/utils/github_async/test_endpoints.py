@@ -21,6 +21,7 @@ from ddev.utils.github_async.models import (
     FileContent,
     GitHubUser,
     GitReference,
+    GitTag,
     IssueComment,
     JobStep,
     JobStepStatus,
@@ -54,6 +55,7 @@ from tests.utils.github_async.payloads import (
     file_content_payload,
     full_pull_request_payload,
     git_ref_payload,
+    git_tag_payload,
     issue_comment_payload,
     pr_review_comment_payload,
     pull_request_file_payload,
@@ -779,6 +781,20 @@ async def test_get_ref_success() -> None:
     result = await client.get_ref("owner", "repo", "heads/7.56.x")
     assert isinstance(result.data, GitReference)
     assert result.data.object.sha == "d" * 40
+
+
+async def test_get_tag_success() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == f"/repos/owner/repo/git/tags/{'t' * 40}"
+        return json_response(git_tag_payload(tag="7.85.0-rc.8", object_sha="c" * 40))
+
+    client = make_client(httpx.MockTransport(handler))
+    result = await client.get_tag("owner", "repo", "t" * 40)
+    assert isinstance(result.data, GitTag)
+    # The commit the annotated tag wraps, not the tag object's own SHA.
+    assert result.data.object.sha == "c" * 40
+    assert result.data.object.type == "commit"
 
 
 async def test_create_ref_success() -> None:

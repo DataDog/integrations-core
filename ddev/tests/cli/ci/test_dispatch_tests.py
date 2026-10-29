@@ -37,6 +37,9 @@ from tests.cli.ci.tests.helpers import make_batch, make_job
 from tests.helpers.clock import FakeClock, advance_clock_on_sleep
 from tests.helpers.datadog import FakeLogSubmitter, FakeMetricsSubmitter
 from tests.helpers.github_async import (
+    make_git_object,
+    make_git_reference,
+    make_git_tag,
     make_pull_request,
     make_pull_request_ref,
     make_pull_request_repo,
@@ -1826,39 +1829,81 @@ def test_a_dry_run_shows_no_image_for_an_override_that_never_reached_the_jobs(dd
     assert 'registry/agent:7.85.0' not in result.output
 
 
-def test_a_tag_run_is_attributed_to_the_tag_and_never_to_a_branch(ddev, planned, resolved_changes, mocker, tmp_path):
-    """A release tag has no branch; recording the checkout's would file results under a fiction."""
-    current_branch = mocker.patch('ddev.utils.git.GitRepository.current_branch', return_value='7.85.0-rc.8')
-
-    result = ddev(
-        'ci',
-        'dispatch-tests',
-        '--commit',
-        'a-sha',
-        '--head-tag',
-        '7.85.0-rc.8',
-        '--resolve-only',
-        '--output-dir',
-        str(tmp_path),
+@pytest.mark.parametrize(
+    'object_type',
+    [
+        pytest.param('tag', id='annotated-tag'),
+        pytest.param('commit', id='lightweight-tag'),
+    ],
+)
+def test_a_tag_run_tests_the_commit_the_tag_points_at(
+    ddev, planned, resolved_changes, fake_async_github, mocker, tmp_path, object_type: str
+):
+    """The commit comes from the tag, so no second input can name a different revision."""
+    current_branch = mocker.patch('ddev.utils.git.GitRepository.current_branch', return_value='a-branch')
+    fake_async_github.mock_response(
+        'get_ref',
+        make_git_reference(ref='refs/tags/7.85.0-rc.8', object=make_git_object(type=object_type, sha='t' * 40)),
     )
+    fake_async_github.mock_response('get_tag', make_git_tag(object=make_git_object(type='commit', sha='c' * 40)))
+
+    result = ddev('ci', 'dispatch-tests', '--head-tag', '7.85.0-rc.8', '--resolve-only', '--output-dir', str(tmp_path))
 
     assert result.exit_code == 0, result.output
     manifest = json.loads((tmp_path / 'run.json').read_text())
+    # An annotated tag wraps its commit, so resolution follows one more step to reach it.
+    assert manifest['checkout_sha'] == ('c' * 40 if object_type == 'tag' else 't' * 40)
+    assert manifest['head_sha'] == manifest['checkout_sha']
     assert manifest['head_tag'] == '7.85.0-rc.8'
     assert manifest['head_branch'] is None
-    # The tag is taken as given: a checkout built for the occasion cannot identify it.
+    # A release tag has no branch, so none is read off the checkout to stand in for it.
     current_branch.assert_not_called()
 
 
+def test_a_tag_that_does_not_exist_stops_the_run(ddev, planned, resolved_changes, fake_async_github, tmp_path):
+    """Planning against a typo'd tag would test whatever the checkout happened to be."""
+    request = httpx.Request('GET', 'https://api.github.com/repos/DataDog/integrations-core/git/ref/tags/7.85.0')
+    fake_async_github.mock_response(
+        'get_ref',
+        httpx.HTTPStatusError('404', request=request, response=httpx.Response(404, request=request)),
+    )
+
+    result = ddev('ci', 'dispatch-tests', '--head-tag', '7.85.0', '--resolve-only', '--output-dir', str(tmp_path))
+
+    assert result.exit_code == 1
+    assert 'Tag 7.85.0 does not exist' in result.output
+    planned.assert_not_called()
+
+
+def test_a_tag_that_does_not_lead_to_a_commit_stops_the_run(
+    ddev, planned, resolved_changes, fake_async_github, tmp_path
+):
+    fake_async_github.mock_response('get_ref', make_git_reference(object=make_git_object(type='tree')))
+
+    result = ddev('ci', 'dispatch-tests', '--head-tag', '7.85.0', '--resolve-only', '--output-dir', str(tmp_path))
+
+    assert result.exit_code == 1
+    assert 'points at a tree, which is not a commit to test' in result.output
+    planned.assert_not_called()
+
+
 @pytest.mark.parametrize(
-    'pr_option',
-    ['--pr', '--pr-head-repo', '--pr-head-branch', '--pr-head-sha', '--pr-base-branch'],
+    'conflicting',
+    [
+        pytest.param(['--commit', 'a-sha'], id='commit'),
+        pytest.param(['--pr', '42'], id='pr'),
+        pytest.param(['--pr-head-repo', 'DataDog/integrations-core'], id='pr-head-repo'),
+        pytest.param(['--pr-head-branch', 'a-branch'], id='pr-head-branch'),
+        pytest.param(['--pr-head-sha', 'a-sha'], id='pr-head-sha'),
+        pytest.param(['--pr-base-branch', 'master'], id='pr-base-branch'),
+    ],
 )
-def test_a_tag_cannot_override_a_pull_requests_own_ref(ddev, planned, resolved_changes, pr_option: str):
-    result = ddev('ci', 'dispatch-tests', '--head-tag', '7.85.0', pr_option, 'a-value', '--dry-run')
+def test_a_tag_is_the_whole_selection(ddev, planned, resolved_changes, conflicting: list[str]):
+    """Two inputs for one revision could disagree, so the second is refused rather than checked."""
+    result = ddev('ci', 'dispatch-tests', '--head-tag', '7.85.0', *conflicting, '--dry-run')
 
     assert result.exit_code == 2
-    assert '`--head-tag` cannot be combined with' in result.output
+    assert '`--head-tag` supplies the commit to test' in result.output
     planned.assert_not_called()
 
 

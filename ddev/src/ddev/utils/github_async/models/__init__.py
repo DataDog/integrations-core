@@ -36,6 +36,7 @@ if TYPE_CHECKING:
     from .git import FileContent as FileContent
     from .git import GitObject as GitObject
     from .git import GitReference as GitReference
+    from .git import GitTag as GitTag
     from .label import Label as Label
     from .pull_request import PullRequest as PullRequest
     from .pull_request import PullRequestFile as PullRequestFile
@@ -71,6 +72,7 @@ MODULE_BY_NAME: dict[str, str] = {
     'GitHubUser': 'user',
     'GitObject': 'git',
     'GitReference': 'git',
+    'GitTag': 'git',
     'IssueComment': 'comment',
     'JobStep': 'workflow',
     'JobStepStatus': 'workflow',

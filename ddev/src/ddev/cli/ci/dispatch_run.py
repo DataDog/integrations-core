@@ -222,10 +222,9 @@ def resolve_run(
 
     A pull request run's context is always `pr`, whatever *context* says.
 
-    `head_tag` names the release tag the results belong to. It is taken as given rather than looked
-    up: the caller knows which tag it dispatched, and the checkout it hands over may be detached or
-    on a branch built for the occasion, neither of which identifies the tag. Supplying it replaces
-    branch attribution entirely.
+    `head_tag` names the release tag to test, and is the whole selection: the commit is read from
+    the tag rather than supplied alongside it, so the two cannot disagree about what is being
+    tested. Supplying it replaces branch attribution entirely.
     """
     if pr_resolver is not None:
         return resolve_pull_request_run(
@@ -238,11 +237,21 @@ def resolve_run(
             monitor=monitor,
         )
 
-    head_branch = None if head_tag is not None else app.repo.git.current_branch()
-    if monitor is not None:
-        monitor.logger.info(
-            'Resolving tested revision', checkout_sha=commit, head_branch=head_branch, head_tag=head_tag
+    if head_tag is not None:
+        return resolve_tag_run(
+            repository=repository,
+            tag=head_tag,
+            token=token,
+            all_targets=all_targets,
+            targets=targets,
+            exclude_targets=exclude_targets,
+            context=context,
+            monitor=monitor,
         )
+
+    head_branch = app.repo.git.current_branch()
+    if monitor is not None:
+        monitor.logger.info('Resolving tested revision', checkout_sha=commit, head_branch=head_branch)
     tested_commit = commit or app.repo.git.latest_commit().sha
     run = ResolvedRun(
         repository=repository,
@@ -261,6 +270,83 @@ def resolve_run(
             checkout_sha=run.checkout_sha,
             head_sha=run.head_sha,
             head_branch=run.head_branch,
+        )
+    return run
+
+
+def resolve_tag_run(
+    *,
+    repository: str,
+    tag: str,
+    token: str,
+    all_targets: bool,
+    targets: tuple[str, ...] = (),
+    exclude_targets: tuple[str, ...] = (),
+    context: str = 'master',
+    monitor: ComponentMonitor | None = None,
+) -> ResolvedRun:
+    """Read the commit a release tag points at, and test that.
+
+    Release tags are annotated, so the reference points at a tag object rather than at a commit and
+    has to be followed one step further. A lightweight tag points straight at its commit and needs
+    no second call, so both are handled rather than only the shape we publish today.
+
+    Nothing here verifies the checkout: `validate_checkout` already refuses a tree that is not the
+    run's `checkout_sha`, which also covers a tag that moved after the workflow checked it out.
+    """
+    import asyncio
+
+    import httpx
+
+    from ddev.utils.github_async import async_github_client
+    from ddev.utils.github_errors import GitHubAuthenticationError
+
+    owner, _, repo = repository.partition('/')
+    if monitor is not None:
+        monitor.logger.info('Resolving tested revision', head_tag=tag, all_targets=all_targets)
+
+    async def resolve() -> str:
+        async with async_github_client(token=token) as client:
+            reference = (await client.get_ref(owner, repo, f'tags/{tag}')).data
+            if reference.object.type == 'commit':
+                return reference.object.sha
+            if reference.object.type != 'tag':
+                raise RunResolutionError(
+                    f'Tag {tag} points at a {reference.object.type}, which is not a commit to test.'
+                )
+            # An annotated tag wraps its commit; one tag object wrapping another is not something
+            # git produces for a release, so a second indirection is treated as unusable.
+            tag_object = (await client.get_tag(owner, repo, reference.object.sha)).data
+            if tag_object.object.type != 'commit':
+                raise RunResolutionError(f'Tag {tag} wraps a {tag_object.object.type}, which is not a commit to test.')
+            return tag_object.object.sha
+
+    try:
+        tested_commit = asyncio.run(resolve())
+    except GitHubAuthenticationError as error:
+        raise RunResolutionError(str(error)) from error
+    except httpx.HTTPStatusError as error:
+        if error.response.status_code == httpx.codes.NOT_FOUND:
+            raise RunResolutionError(f'Tag {tag} does not exist in {repository}.') from error
+        raise RunResolutionError(f'Could not read tag {tag}: {error}') from error
+    except (httpx.HTTPError, ValidationError) as error:
+        raise RunResolutionError(f'Could not read tag {tag}: {error}') from error
+
+    run = ResolvedRun(
+        repository=repository,
+        checkout_sha=tested_commit,
+        head_sha=tested_commit,
+        head_tag=tag,
+        all_targets=all_targets,
+        targets=targets,
+        exclude_targets=exclude_targets,
+        context=context,
+    )
+    if monitor is not None:
+        monitor.logger.info(
+            'Tested revision resolved',
+            checkout_sha=run.checkout_sha,
+            head_sha=run.head_sha,
             head_tag=run.head_tag,
         )
     return run

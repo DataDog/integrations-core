@@ -52,6 +52,7 @@ def validate_options(
     _validate_target_selection(all_targets=all_targets, targets=targets, exclude_targets=exclude_targets)
     _validate_head_tag(
         head_tag=head_tag,
+        commit=commit,
         pull_request=pull_request,
         pr_head_sha=pr_head_sha,
         pr_head_repo=pr_head_repo,
@@ -75,7 +76,9 @@ def validate_options(
 
     token = _authentication_token(
         app,
-        is_pr_run=resolver is not None,
+        # A tag run reads the commit from the API, so resolution needs a token even when nothing
+        # is dispatched afterwards.
+        resolution_reads_api=resolver is not None or head_tag is not None,
         dry_run=dry_run,
         resolve_only=resolve_only,
     )
@@ -131,13 +134,18 @@ def _validate_manifest_options(
 def _validate_head_tag(
     *,
     head_tag: str | None,
+    commit: str | None,
     pull_request: str | None,
     pr_head_sha: str | None,
     pr_head_repo: str | None,
     pr_head_branch: str | None,
     pr_base_branch: str | None,
 ) -> None:
-    """A pull request already knows which ref its results belong to, so a tag cannot override it."""
+    """A tag is the whole selection: it names what to test, and the commit is read from it.
+
+    `--commit` is refused alongside it rather than verified against it, so there is no second input
+    that could name a different revision than the tag does.
+    """
     if head_tag is None:
         return
     if not head_tag or head_tag != head_tag.strip():
@@ -146,6 +154,7 @@ def _validate_head_tag(
     conflicting = [
         option
         for option, present in {
+            '--commit': commit is not None,
             '--pr': pull_request is not None,
             '--pr-head-repo': pr_head_repo is not None,
             '--pr-head-branch': pr_head_branch is not None,
@@ -155,7 +164,9 @@ def _validate_head_tag(
         if present
     ]
     if conflicting:
-        raise click.UsageError(f'`--head-tag` cannot be combined with `{"`, `".join(conflicting)}`.')
+        raise click.UsageError(
+            f'`--head-tag` supplies the commit to test, so it cannot be combined with `{"`, `".join(conflicting)}`.'
+        )
 
 
 def _validate_target_selection(
@@ -235,8 +246,8 @@ def _pull_request_resolver(
     )
 
 
-def _authentication_token(app: Application, *, is_pr_run: bool, dry_run: bool, resolve_only: bool) -> str:
+def _authentication_token(app: Application, *, resolution_reads_api: bool, dry_run: bool, resolve_only: bool) -> str:
     token = app.config.github.token
-    if (is_pr_run or (not dry_run and not resolve_only)) and not token:
+    if (resolution_reads_api or (not dry_run and not resolve_only)) and not token:
         app.abort('A GitHub token is required. Set `github.token` in your ddev config.')
     return token
