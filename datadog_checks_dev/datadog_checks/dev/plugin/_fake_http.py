@@ -50,7 +50,7 @@ class _Registration:
     served: int = 0
 
 
-class FakeHTTP:
+class FakeHTTPFixture:
     """Registers responses for, and records the requests of, every check client created during a test."""
 
     def __init__(self) -> None:
@@ -245,9 +245,9 @@ def _to_requests_response(wire_request: Any, response: FakeHTTPResponse) -> requ
 
 
 @contextmanager
-def install(mocker: Any) -> Iterator[FakeHTTP]:
-    """Serve every request sent through check HTTP clients from a new `FakeHTTP` until the context exits."""
-    fake_http = FakeHTTP()
+def install(mocker: Any) -> Iterator[FakeHTTPFixture]:
+    """Serve every request sent through check HTTP clients from a new `FakeHTTPFixture` until the context exits."""
+    fake_http = FakeHTTPFixture()
     create_check_client = AgentCheck.create_http_client
     send_request = RequestsWrapper._request
 
