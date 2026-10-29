@@ -11,6 +11,7 @@ import pytest
 
 from ddev.cli.release.branch.build_agent import ensure_build_agent_yaml_updated
 from ddev.cli.release.branch.create import compute_next_milestone, update_release_json
+from ddev.cli.validate.pr_description import _check_pr_description, _checklist
 from ddev.utils.fs import Path
 from ddev.utils.github_errors import GitHubAuthenticationError
 
@@ -289,6 +290,33 @@ def test_create_branch_creates_milestone_and_pr(ddev, mocker):
     assert 'Updating release.json with new milestone `7.80.0`' in result.output
     assert 'Pull request created' in result.output
     assert 'All done' in result.output
+
+
+def test_create_branch_milestone_pr_body_has_template_checklist(ddev, mocker):
+    # The pr-description validation fails on bodies missing the template checklist (PR #25844).
+    mocker.patch('ddev.utils.git.GitRepository.run')
+    mocker.patch('ddev.utils.github.GitHubManager.create_label')
+    mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
+    create_pr = mocker.patch(
+        'ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1'
+    )
+    mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
+    mocker.patch('ddev.cli.release.branch.create.update_release_json')
+    mocker.patch('click.confirm', return_value=True)
+
+    result = ddev('release', 'branch', 'create', '7.79.x')
+
+    assert result.exit_code == 0, result.output
+    body = create_pr.call_args.kwargs['body']
+    assert 'Updates `current_milestone` in `release.json` to `7.80.0`' in body
+    assert '`7.79.x`' in body
+    template = (Path(__file__).parents[5] / '.github' / 'PULL_REQUEST_TEMPLATE.md').read_text()
+    required_items = list(_checklist(template))
+    assert required_items
+    # Every item is present but left unticked: only the human author may tick them.
+    assert _check_pr_description(body, required_items) == [
+        f'Unchecked checklist item: {item}' for item in required_items
+    ]
 
 
 def test_create_branch_milestone_already_exists(ddev, mocker):

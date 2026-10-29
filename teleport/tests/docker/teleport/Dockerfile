@@ -3,7 +3,7 @@
 # pulls from GitHub runners fail with "toomanyrequests: Data limit exceeded".
 FROM debian:bookworm-slim
 
-ARG TELEPORT_VERSION=17.2.9
+ARG TELEPORT_VERSION
 ARG TARGETARCH
 
 RUN apt-get update \
