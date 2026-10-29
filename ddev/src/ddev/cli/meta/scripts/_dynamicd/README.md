@@ -13,7 +13,7 @@ DynamicD uses Claude to analyze an integration's metrics, service checks, and da
 export ANTHROPIC_API_KEY="your-anthropic-key"
 
 # Option 2: ddev config
-ddev config set dynamicd.llm_api_key "your-anthropic-key"
+ddev config set ai.anthropic_api_key "your-anthropic-key"
 ```
 
 ### Required: Datadog API Key (for sending data)

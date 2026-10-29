@@ -7,8 +7,11 @@ These tests verify that dashboard parsing correctly extracts metrics, tags,
 and tag values from real integration dashboards.
 """
 
+import json
 from unittest.mock import MagicMock
 
+import anthropic
+import httpx2
 import pytest
 
 from ddev.repo.core import Repository
@@ -176,6 +179,93 @@ class TestGetApiKeys:
         _get_api_keys(app)
 
         app.abort.assert_called_once()
+
+
+def _text_stream_response(text: str) -> httpx2.Response:
+    events = [
+        {
+            'type': 'message_start',
+            'message': {
+                'id': 'msg_test',
+                'type': 'message',
+                'role': 'assistant',
+                'model': 'claude-test',
+                'content': [],
+                'stop_reason': None,
+                'stop_sequence': None,
+                'usage': {'input_tokens': 1, 'output_tokens': 0},
+            },
+        },
+        {'type': 'content_block_start', 'index': 0, 'content_block': {'type': 'text', 'text': ''}},
+        {'type': 'content_block_delta', 'index': 0, 'delta': {'type': 'text_delta', 'text': text}},
+        {'type': 'content_block_stop', 'index': 0},
+        {
+            'type': 'message_delta',
+            'delta': {'stop_reason': 'end_turn', 'stop_sequence': None},
+            'usage': {'output_tokens': 1},
+        },
+        {'type': 'message_stop'},
+    ]
+    body = ''.join(f"event: {event['type']}\ndata: {json.dumps(event)}\n\n" for event in events)
+    return httpx2.Response(200, headers={'content-type': 'text/event-stream'}, content=body.encode())
+
+
+class TestGenerator:
+    """Runs the generator through the installed SDK with the HTTP layer mocked.
+
+    Mocking the client object instead would hide arguments the SDK rejects, such as the
+    `temperature` argument that SDK 1.0.0 removed.
+    """
+
+    @pytest.fixture
+    def requests(self, monkeypatch) -> list[dict]:
+        sent: list[dict] = []
+
+        def handler(request: httpx2.Request) -> httpx2.Response:
+            sent.append(json.loads(request.content))
+            return _text_stream_response('```python\nprint("simulating")\n```')
+
+        real_client = anthropic.Anthropic
+
+        def client_factory(api_key: str) -> anthropic.Anthropic:
+            http_client = anthropic.DefaultHttpxClient(transport=httpx2.MockTransport(handler))
+            return real_client(api_key=api_key, http_client=http_client, max_retries=0)
+
+        monkeypatch.setattr(anthropic, 'Anthropic', client_factory)
+        return sent
+
+    def test_generate_simulator_script(self, requests):
+        from ddev.cli.meta.scripts._dynamicd.constants import DEFAULT_MODEL
+        from ddev.cli.meta.scripts._dynamicd.generator import generate_simulator_script
+
+        context = MagicMock(display_name='Redis')
+        context.name = 'redisdb'
+        context.to_prompt_context.return_value = 'redis context'
+
+        script = generate_simulator_script(
+            context=context,
+            scenario='healthy',
+            dd_site='datadoghq.com',
+            metrics_per_batch=10,
+            duration=60,
+            api_key='test-key',
+        )
+
+        assert script == '#!/usr/bin/env python3\nprint("simulating")'
+        assert [request['model'] for request in requests] == [DEFAULT_MODEL, DEFAULT_MODEL]
+
+    def test_fix_script_error(self, requests):
+        from ddev.cli.meta.scripts._dynamicd.generator import fix_script_error
+
+        script = fix_script_error(
+            original_script='print(',
+            error_message='SyntaxError',
+            attempt=1,
+            api_key='test-key',
+        )
+
+        assert script == '#!/usr/bin/env python3\nprint("simulating")'
+        assert len(requests) == 1
 
 
 class TestReadMetrics:
