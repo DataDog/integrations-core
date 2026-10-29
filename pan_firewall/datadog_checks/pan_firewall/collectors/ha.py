@@ -8,10 +8,9 @@ from __future__ import annotations
 
 from xml.etree.ElementTree import Element
 
-from datadog_checks.pan_firewall.errors import PanosAuthError, PanosError, PanosUnreachable
 from datadog_checks.pan_firewall.xml_utils import num, tag_tuple, text
 
-from .base import CollectContext, Sample
+from .base import CollectContext, Sample, read_each
 
 HA_CMD = '<show><high-availability><all/></high-availability></show>'
 HA_INTERFACE_CMD = '<show><high-availability><interface>{link}</interface></high-availability></show>'
@@ -53,27 +52,19 @@ def collect_ha(ctx: CollectContext) -> list[Sample]:
         return []
     ctx.state.ha_state = text(root, 'result/group/local-info/state')
     samples: list[Sample] = []
-    error: PanosError | None = None
-    answered = 0
-    for link in HA_LINKS:
-        if not text(root, f'result/group/local-info/{link}-port'):
-            continue
-        try:
-            link_root = ctx.client.op(HA_INTERFACE_CMD.format(link=link))
-        except (PanosAuthError, PanosUnreachable):
-            raise
-        except PanosError as e:
-            ctx.warning('cannot read the high availability link %s: %s', link, e, key=f'ha_interface_error:{link}')
-            error = e
-            continue
-        answered += 1
+    answers = read_each(
+        (link for link in HA_LINKS if text(root, f'result/group/local-info/{link}-port')),
+        lambda link: ctx.client.op(HA_INTERFACE_CMD.format(link=link)),
+        lambda link, e: ctx.warning(
+            'cannot read the high availability link %s: %s', link, e, key=f'ha_interface_error:{link}'
+        ),
+    )
+    for link, link_root in answers:
         link_samples = parse_ha_interface(link_root, link)
         if link_samples is None:
             ctx.warning(f'unrecognized answer for the high availability link {link}', key=f'ha_interface:{link}')
             continue
         samples.extend(link_samples)
-    if error is not None and not answered:
-        raise error
     return samples
 
 

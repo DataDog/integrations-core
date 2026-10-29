@@ -18,10 +18,10 @@ from typing import Any, Literal
 from xml.etree.ElementTree import Element
 from xml.sax.saxutils import escape
 
-from datadog_checks.pan_firewall.errors import PanosAuthError, PanosError, PanosUnreachable
+from datadog_checks.pan_firewall.errors import PanosError
 from datadog_checks.pan_firewall.xml_utils import num, tag_tuple, text
 
-from .base import CollectContext, Sample
+from .base import CollectContext, Sample, read_each
 
 BGP_PEER_CMD = '<show><routing><protocol><bgp><peer/></bgp></protocol></routing></show>'
 OSPF_NEIGHBOR_CMD = '<show><routing><protocol><ospf><neighbor/></ospf></protocol></routing></show>'
@@ -250,23 +250,14 @@ def collect_are(ctx: CollectContext, cmd: str, parse: Callable[[dict, str], list
     which fails the BGP peer call of any router with IPv6 peers) does not drop the others; when every router fails,
     the collector fails. Authentication and connection errors fail the collector at once.
     """
-    samples: list[Sample] = []
-    error: PanosError | None = None
-    answered = 0
-    for router in logical_routers(ctx):
-        try:
-            data = are_json(ctx.client.op(cmd.format(router=escape(router))))
-        except (PanosAuthError, PanosUnreachable):
-            raise
-        except PanosError as e:
-            ctx.warning('cannot read the %s of the logical router %s: %s', name, router, e, key=f'are:{name}:{router}')
-            error = e
-            continue
-        answered += 1
-        samples.extend(parse(data, router))
-    if error is not None and not answered:
-        raise error
-    return samples
+    answers = read_each(
+        logical_routers(ctx),
+        lambda router: are_json(ctx.client.op(cmd.format(router=escape(router)))),
+        lambda router, e: ctx.warning(
+            'cannot read the %s of the logical router %s: %s', name, router, e, key=f'are:{name}:{router}'
+        ),
+    )
+    return [sample for router, data in answers for sample in parse(data, router)]
 
 
 def collect_bgp(ctx: CollectContext) -> list[Sample]:
