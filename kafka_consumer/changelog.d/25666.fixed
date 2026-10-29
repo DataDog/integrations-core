@@ -1,1 +1,0 @@
-Skip configured consumer group topics that do not exist in the cluster instead of failing consumer offset collection for every group, and pick up topics and partitions created after the first check run.
