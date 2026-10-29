@@ -673,6 +673,10 @@ integration/hivemq:
 - changed-files:
   - any-glob-to-any-file:
     - hivemq/**/*
+integration/hmc:
+- changed-files:
+  - any-glob-to-any-file:
+    - hmc/**/*
 integration/hpe_aruba_edgeconnect:
 - changed-files:
   - any-glob-to-any-file:
