@@ -1,0 +1,1 @@
+Expire downloaded intermediate CA trust after `intermediate_cert_refresh_interval` (60 minutes by default). With `fetch_intermediate_certs` enabled, validation reports CRITICAL when the endpoint requires an expired cached intermediate and its AIA endpoint cannot serve a valid replacement, until trust can be renewed.

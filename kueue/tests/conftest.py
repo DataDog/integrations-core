@@ -10,6 +10,7 @@ from glob import glob
 
 import pytest
 import yaml
+from tenacity import retry, stop_before_delay, wait_fixed
 
 from datadog_checks.base.stubs import tagger
 from datadog_checks.dev.kind import kind_run
@@ -19,16 +20,20 @@ from datadog_checks.dev.utils import get_active_env
 
 from .common import CHECK_NAME, INSTANCE_STATE_KEY, MOCKED_INSTANCE
 from .kube import (
+    KUEUE_NAMESPACE,
+    KUEUE_REPLICAS,
     WAIT_TIMEOUT,
     kubectl,
     kubectl_output,
     manifest_path,
     retry_apply,
+    scale_kueue_controller,
+    trigger_preemption,
+    wait_for_controller,
     wait_for_job_workload_condition,
 )
 
 KUEUE_VERSION_ENV = 'KUEUE_VERSION'
-KUEUE_NAMESPACE = 'kueue-system'  # hardcoded in the Kueue manifests
 MANAGER_CONTAINER = 'manager'
 KIND_SUBNETS_ENV = 'KUEUE_KIND_SUBNETS'
 SUBNET_CANDIDATES = [f'10.{octet}.0.0/16' for octet in range(255, -1, -1)]
@@ -131,29 +136,6 @@ def reset_tagger():
     tagger.reset()
     yield
     tagger.reset()
-
-
-def wait_for_controller():
-    kubectl(
-        [
-            'rollout',
-            'status',
-            'deployment/kueue-controller-manager',
-            '-n',
-            KUEUE_NAMESPACE,
-            f'--timeout={WAIT_TIMEOUT}',
-        ]
-    )
-    kubectl(
-        [
-            'wait',
-            'deployment/kueue-controller-manager',
-            '--for=condition=Available',
-            '-n',
-            KUEUE_NAMESPACE,
-            f'--timeout={WAIT_TIMEOUT}',
-        ]
-    )
 
 
 def manager_container_index() -> int:
@@ -266,8 +248,12 @@ def wait_for_queues_active():
         )
 
 
-def setup_kueue():
-    preload_workload_images()
+@retry(stop=stop_before_delay(240), wait=wait_fixed(10), reraise=True)
+def apply_kueue_manifests():
+    """Download Kueue's release YAML from GitHub and apply it to the test cluster.
+
+    Retry the whole kubectl command because fetching the YAML can fail transiently.
+    """
     kubectl(
         [
             'apply',
@@ -277,12 +263,18 @@ def setup_kueue():
         ]
     )
 
+
+def setup_kueue():
+    preload_workload_images()
+    apply_kueue_manifests()
     disable_visibility_server()
 
     # Ensure the controller is ready
     wait_for_controller()
 
     kubectl(['apply', '-f', manifest_path('kueue-config.yaml')])
+    # Run Kueue in HA so the e2e tests cover leader election, follower samples and failover.
+    scale_kueue_controller(KUEUE_REPLICAS)
     # Restart the controller to pick up the new config
     kubectl(['rollout', 'restart', 'deployment/kueue-controller-manager', '-n', KUEUE_NAMESPACE])
     wait_for_controller()
@@ -293,7 +285,7 @@ def setup_kueue():
     kubectl(
         [
             'wait',
-            '--for=jsonpath={.subsets[*].addresses[*].ip}',
+            '--for=jsonpath={.subsets[0].addresses[0].ip}',
             'endpoints/kueue-webhook-service',
             '-n',
             KUEUE_NAMESPACE,
@@ -308,19 +300,6 @@ def setup_kueue():
     wait_for_job_workload_condition('gpu-workload', 'Admitted=True')
     wait_for_job_workload_condition('finished-workload', 'Finished=True')
     trigger_preemption()
-
-
-def trigger_preemption():
-    """Admit a low-priority workload, then a higher-priority one that preempts it, for preemption/eviction metrics.
-
-    This runs at env-start so the counters are already non-zero when the metrics test scrapes. It does
-    not give the check an observable Evicted *transition*: Kueue clears that condition as soon as it
-    requeues the preempted workload, well inside a collection interval.
-    """
-    retry_apply('preempt-low-workload.yaml')
-    wait_for_job_workload_condition('preempt-low-workload', 'Admitted=True')
-    retry_apply('preempt-high-workload.yaml')
-    wait_for_job_workload_condition('preempt-high-workload', 'Admitted=True')
 
 
 def get_service_account_token():
@@ -338,6 +317,7 @@ def dd_environment(dd_save_state):
         with open(kubeconfig) as f:
             kubeconfig_content = yaml.safe_load(f)
 
+        # The e2e tests forward each Kueue pod themselves; this Service forward only backs `ddev env check`.
         kueue_host, kueue_port = stack.enter_context(
             port_forward(kubeconfig, 'kueue-system', 8443, 'service', 'kueue-controller-manager-metrics-service')
         )

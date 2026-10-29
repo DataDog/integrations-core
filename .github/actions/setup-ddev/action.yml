@@ -52,6 +52,17 @@ runs:
           exit 1
         fi
 
+    # uv's default of 3 retries per HTTP request gives up after at most 14s of backoff, which transient
+    # PyPI 503s have outlasted. The backoff is not configurable (2s doubling up to 30s, with jitter), so
+    # 10 retries wait at most about 3.5 minutes per request. Exporting it through GITHUB_ENV also covers
+    # the uv installs hatch runs later in the job. A value set by the caller takes precedence.
+    - name: Configure uv HTTP retries
+      shell: bash
+      run: |-
+        if [[ -z "${UV_HTTP_RETRIES:-}" ]]; then
+          echo "UV_HTTP_RETRIES=10" >> "$GITHUB_ENV"
+        fi
+
     - name: Compute cache date
       id: cache-date
       shell: bash

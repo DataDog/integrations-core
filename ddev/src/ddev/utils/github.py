@@ -1,6 +1,12 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+"""Synchronous GitHub client.
+
+Adding new features to this client is deprecated. New GitHub API calls go in `ddev.utils.github_async`;
+only bug fixes to existing methods belong here.
+"""
+
 from __future__ import annotations
 
 import json
@@ -32,11 +38,11 @@ if TYPE_CHECKING:
 
 
 def resolve_owner_repo(app: Application, repository: str | None = None) -> tuple[str, str]:
-    """Split `owner/name`, defaulting to the active repository and the `DataDog` organization."""
+    """Split `owner/name`, defaulting to the active repository and its configured GitHub owner."""
     full_name = repository or app.repo.full_name
     owner, separator, name = full_name.partition('/')
     if not separator:
-        return 'DataDog', full_name
+        return app.repo.github_owner, full_name
     return owner, name
 
 
@@ -133,7 +139,7 @@ class GitHubManager:
         self.__repo = repo
         self.__auth = (user, token)
         self.__status = status
-        self.__repo_id = f'DataDog/{self.__repo.full_name}'
+        self.__repo_id = f'{self.__repo.github_owner}/{self.__repo.full_name}'
 
     @property
     def repo_id(self) -> str:

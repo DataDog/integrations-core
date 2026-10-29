@@ -157,6 +157,10 @@ integration/authorize_net:
 - changed-files:
   - any-glob-to-any-file:
     - authorize_net/**/*
+integration/automox:
+- changed-files:
+  - any-glob-to-any-file:
+    - automox/**/*
 integration/avast:
 - changed-files:
   - any-glob-to-any-file:
@@ -297,6 +301,10 @@ integration/cisco_asa:
 - changed-files:
   - any-glob-to-any-file:
     - cisco_asa/**/*
+integration/cisco_catalyst_center:
+- changed-files:
+  - any-glob-to-any-file:
+    - cisco_catalyst_center/**/*
 integration/cisco_duo:
 - changed-files:
   - any-glob-to-any-file:
@@ -801,6 +809,10 @@ integration/kafka_consumer:
 - changed-files:
   - any-glob-to-any-file:
     - kafka_consumer/**/*
+integration/kai_scheduler:
+- changed-files:
+  - any-glob-to-any-file:
+    - kai_scheduler/**/*
 integration/kandji:
 - changed-files:
   - any-glob-to-any-file:
@@ -1109,6 +1121,10 @@ integration/openmetrics:
 - changed-files:
   - any-glob-to-any-file:
     - openmetrics/**/*
+integration/openrouter:
+- changed-files:
+  - any-glob-to-any-file:
+    - openrouter/**/*
 integration/openshift:
 - changed-files:
   - any-glob-to-any-file:
@@ -1525,6 +1541,10 @@ integration/terraform:
 - changed-files:
   - any-glob-to-any-file:
     - terraform/**/*
+integration/thermal:
+- changed-files:
+  - any-glob-to-any-file:
+    - thermal/**/*
 integration/tibco_ems:
 - changed-files:
   - any-glob-to-any-file:

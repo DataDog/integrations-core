@@ -1,0 +1,1 @@
+Reduce API calls per check run: list tasks once per space instead of twice per project, list projects once per space instead of once per project group, fetch deployments in bulk by id, and raise the default `paginated_limit` from 30 to 300.

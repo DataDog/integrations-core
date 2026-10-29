@@ -24,12 +24,23 @@ class PullRequestRef(BaseModel):
     repo: Repo | None = None
 
 
+class EventUser(BaseModel):
+    model_config = ConfigDict(extra='ignore')
+
+    login: str | None = None
+    type: str | None = None
+
+
 class EventPullRequest(BaseModel):
     model_config = ConfigDict(extra='ignore', strict=True)
 
     number: int | None = None
     head: PullRequestRef | None = None
     base: PullRequestRef | None = None
+    body: str | None = None
+    title: str | None = None
+    user: EventUser | None = None
+    created_at: str | None = None
 
 
 class PullRequestEvent(BaseModel):

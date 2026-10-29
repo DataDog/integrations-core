@@ -9,9 +9,10 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -36,8 +37,8 @@ class Thresholds(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    critical: Optional[tuple[float, ...]] = Field(None, min_length=2)
-    warning: Optional[tuple[float, ...]] = Field(None, min_length=2)
+    critical: Optional[tuple[Union[float, Literal['.inf']], ...]] = Field(None, min_length=2)
+    warning: Optional[tuple[Union[float, Literal['.inf']], ...]] = Field(None, min_length=2)
 
 
 class InstanceConfig(BaseModel):

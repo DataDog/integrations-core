@@ -9,11 +9,11 @@ import re
 import socket
 import warnings
 from collections import ChainMap
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from hashlib import sha256
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from urllib.parse import quote, urljoin, urlparse, urlunparse
 
 import lazy_loader
@@ -60,6 +60,10 @@ DEFAULT_EXPIRATION = 300
 # 16 KiB seems optimal, and is also the standard chunk size of the Bittorrent protocol:
 # https://www.bittorrent.org/beps/bep_0003.html
 DEFAULT_CHUNK_SIZE = 16
+
+# `iter_lines` buffers a line until its end, so OpenMetrics checks limit lines (in KiB) to avoid buffering an unbounded
+# response
+OPENMETRICS_MAX_LINE_SIZE = 16384
 
 STANDARD_FIELDS = {
     'allow_redirects': True,
@@ -231,12 +235,68 @@ class _SSLContextAdapter(requests.adapters.HTTPAdapter):
         return host_params, {"ssl_context": self.ssl_context}
 
 
+class ResponseLineTooLongError(ValueError):
+    pass
+
+
+def limit_line_size(response: requests.Response, max_line_size: int | None) -> None:
+    """Make reading `response` raise `ResponseLineTooLongError` once a line is longer than `max_line_size` bytes."""
+    if max_line_size is None:
+        return
+
+    raw = getattr(response, 'raw', None)
+    # Don't overwrite test mocks or responses that are already limited
+    if hasattr(raw, 'stream') and not isinstance(raw, LineCappedRawResponse):
+        response.raw = LineCappedRawResponse(raw, max_line_size)
+
+
+class LineCappedRawResponse(ObjectProxy):
+    """
+    Wraps a urllib3 response so that its decoded stream, which `requests` reads the body from, raises
+    `ResponseLineTooLongError` once a line is longer than `max_line_size` bytes. Everything else is forwarded.
+    """
+
+    def __init__(self, raw: Any, max_line_size: int):
+        super().__init__(raw)
+        self._self_max_line_size = max_line_size
+
+    def stream(self, amt: int | None = 2**16, *args: Any, **kwargs: Any) -> Iterator[bytes]:
+        """
+        Yield the decoded body in chunks that each contain a line break, except possibly the last one. Raise
+        `ResponseLineTooLongError` once a line is longer than `max_line_size` bytes.
+        """
+        # `amt` is the number of bytes read per chunk, 64 KiB by default (mirrors the urllib3 name)
+        if amt is None or amt > self._self_max_line_size:
+            amt = self._self_max_line_size
+
+        line_size = 0
+        # A byte buffer rather than a list of chunks, because endpoints can send many tiny chunks
+        buffer = bytearray()
+        for chunk in self.__wrapped__.stream(amt, *args, **kwargs):
+            newline = chunk.find(b'\n')
+            first_line_size = line_size + (len(chunk) if newline < 0 else newline)
+            if first_line_size > self._self_max_line_size:
+                raise ResponseLineTooLongError(f'Response contains a line longer than {self._self_max_line_size} bytes')
+            line_size = first_line_size if newline < 0 else len(chunk) - chunk.rfind(b'\n') - 1
+            if newline < 0:
+                buffer += chunk
+            elif buffer:
+                buffer += chunk
+                yield bytes(buffer)
+                buffer.clear()
+            else:
+                yield chunk
+        if buffer:
+            yield bytes(buffer)
+
+
 class ResponseWrapper(ObjectProxy):
-    def __init__(self, response, default_chunk_size):
+    def __init__(self, response, default_chunk_size, max_line_size: int | None = None):
         super(ResponseWrapper, self).__init__(response)
 
         # See https://github.com/psf/requests/pull/5942
         self.__default_chunk_size = default_chunk_size
+        self.__max_line_size = max_line_size
 
     def iter_content(self, chunk_size=None, decode_unicode=False):
         if chunk_size is None:
@@ -247,6 +307,10 @@ class ResponseWrapper(ObjectProxy):
     def iter_lines(self, chunk_size=None, decode_unicode=False, delimiter=None):
         if chunk_size is None:
             chunk_size = self.__default_chunk_size
+
+        # Not implemented yet for custom delimiters, which no check uses
+        if delimiter is None and self.__max_line_size is not None:
+            limit_line_size(self.__wrapped__, self.__max_line_size)
 
         return self.__wrapped__.iter_lines(chunk_size=chunk_size, decode_unicode=decode_unicode, delimiter=delimiter)
 
@@ -404,6 +468,7 @@ class RequestsWrapper(object):
         'request_hooks',
         'auth_token_handler',
         'request_size',
+        'max_line_size',
         'tls_protocols_allowed',
         'aia_chasing_max_depth',
         'tls_config',
@@ -570,6 +635,8 @@ class RequestsWrapper(object):
         self.ignore_tls_warning = is_affirmative(config['tls_ignore_warning'])
 
         self.request_size = int(float(config['request_size']) * KIBIBYTE)
+        # Set in bytes by checks that limit the size of lines read with `iter_lines`
+        self.max_line_size: int | None = None
 
         self.aia_chasing_max_depth = DEFAULT_AIA_CHASING_MAX_DEPTH
 
@@ -645,15 +712,13 @@ class RequestsWrapper(object):
             self.logger.debug('An unverified HTTPS request is being made to %s', url)
 
         extra_headers = options.pop('extra_headers', None)
-        if extra_headers is not None:
-            new_options['headers'] = new_options['headers'].copy()
-            new_options['headers'].update(extra_headers)
 
         if is_uds_url(url):
             persist = True  # UDS support is only enabled on the shared session.
             url = quote_uds_url(url)
 
         self.handle_auth_token(method=method, url=url, default_options=self.options)
+        request_options = self._with_extra_headers(new_options, extra_headers)
 
         with ExitStack() as stack:
             for hook in self.request_hooks:
@@ -666,16 +731,26 @@ class RequestsWrapper(object):
 
             if self.auth_token_handler:
                 try:
-                    response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
+                    response = self.make_request_aia_chasing(request_method, method, url, request_options, persist)
                     response.raise_for_status()
                 except Exception as e:
                     self.logger.debug('Renewing auth token, as an error occurred: %s', e)
                     self.handle_auth_token(method=method, url=url, default_options=self.options, error=str(e))
-                    response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
+                    request_options = self._with_extra_headers(new_options, extra_headers)
+                    response = self.make_request_aia_chasing(request_method, method, url, request_options, persist)
             else:
-                response = self.make_request_aia_chasing(request_method, method, url, new_options, persist)
+                response = self.make_request_aia_chasing(request_method, method, url, request_options, persist)
 
-            return ResponseWrapper(response, self.request_size)
+            return ResponseWrapper(response, self.request_size, self.max_line_size)
+
+    @staticmethod
+    def _with_extra_headers(options: ChainMap[str, Any], extra_headers: Mapping[str, str] | None) -> ChainMap[str, Any]:
+        # Merge at send time, because the auth token writer updates the default headers in place.
+        if extra_headers is None:
+            return options
+        headers = options['headers'].copy()
+        headers.update(extra_headers)
+        return options.new_child({'headers': headers})
 
     def make_request_aia_chasing(self, request_method, method, url, new_options, persist):
         try:
