@@ -11,6 +11,7 @@ import re
 import shutil
 import subprocess
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -180,6 +181,41 @@ class Release:
             return True
         self.verify_published(release)
         return False
+
+    def cleanup(self, retention_days: int = 7, *, dry_run: bool = False, now: datetime | None = None) -> str:
+        """Remove expired APW releases, keeping the newest complete snapshot and this commit's release."""
+        if retention_days < 1:
+            raise ValueError("retention must be at least one day")
+        cutoff = (now or datetime.now(timezone.utc)) - timedelta(days=retention_days)
+        pages = json.loads(gh("api", "--paginate", "--slurp", f"{self.endpoint}?per_page=100"))
+        releases = []
+        for page in pages:
+            for release in page:
+                match = re.fullmatch(r"apw-assets-([0-9a-f]{40})", release["tag_name"])
+                if not match or release["draft"] or release.get("author", {}).get("login") != "github-actions[bot]":
+                    continue
+                try:
+                    assets = Release(self.repository, match[1]).assets(release)
+                except ValueError:
+                    continue
+                if set(assets) != set(FILES):
+                    continue
+                published = datetime.fromisoformat(release["published_at"])
+                releases.append((published, release["id"], release))
+        if not releases:
+            return "No complete APW releases to clean up."
+        newest_id = max(releases, key=lambda item: (item[0], item[1]))[1]
+        count = total_bytes = 0
+        for published, release_id, release in sorted(releases, key=lambda item: (item[0], item[1])):
+            if published >= cutoff or release_id == newest_id or release["tag_name"] == self.tag:
+                continue
+            size = sum(asset["size"] for asset in release["assets"])
+            if not dry_run:
+                gh("api", "--method", "DELETE", f"{self.endpoint}/{release_id}")
+            print(f"{'Would delete' if dry_run else 'Deleted'} {release['tag_name']} ({size} bytes); Git tag retained.")
+            count += 1
+            total_bytes += size
+        return f"{'Would delete' if dry_run else 'Deleted'} {count} APW releases ({total_bytes} bytes)."
 
     def publish(self, directory: Path) -> str:
         hashes = {name: digest(directory / name) for name in FILES}

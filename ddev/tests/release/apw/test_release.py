@@ -6,6 +6,7 @@ import hashlib
 import json
 import subprocess
 from collections.abc import Callable
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
@@ -16,6 +17,109 @@ from ddev.release.apw import FILES, Release, api_get
 
 COMMIT = 'a' * 40
 REPOSITORY = 'DataDog/integrations-core'
+
+
+class TestCleanup:
+    @pytest.fixture(autouse=True)
+    def setup(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        self.now = datetime(2026, 10, 29, 12, tzinfo=timezone.utc)
+        self.pages: list[list[dict[str, Any]]] = []
+        self.deleted: list[int] = []
+        self.release = Release(REPOSITORY, COMMIT)
+        monkeypatch.setattr('ddev.release.apw.gh', self.gh)
+
+    def snapshot(self, release_id: int, age_days: int) -> dict[str, Any]:
+        commit = f'{release_id:040x}'
+        return {
+            'id': release_id,
+            'tag_name': f'apw-assets-{commit}',
+            'target_commitish': commit,
+            'prerelease': True,
+            'draft': False,
+            'author': {'login': 'github-actions[bot]'},
+            'published_at': (self.now - timedelta(days=age_days)).isoformat(),
+            'assets': [{'name': name, 'size': 100, 'state': 'uploaded'} for name in FILES],
+        }
+
+    def gh(self, *args: str) -> bytes:
+        if args == ('api', '--paginate', '--slurp', f'repos/{REPOSITORY}/releases?per_page=100'):
+            return json.dumps(self.pages).encode()
+        assert args[:3] == ('api', '--method', 'DELETE')
+        assert args[3].startswith(f'repos/{REPOSITORY}/releases/')
+        self.deleted.append(int(args[3].rsplit('/', 1)[1]))
+        return b''
+
+    @pytest.mark.parametrize('dry_run', [False, True])
+    def test_retention_across_pages_preserves_current_and_boundary(
+        self, dry_run: bool, capsys: pytest.CaptureFixture[str]
+    ):
+        current = self.snapshot(1, 20)
+        current.update(tag_name=self.release.tag, target_commitish=COMMIT)
+        self.pages = [
+            [current, self.snapshot(2, 8), self.snapshot(3, 7)],
+            [self.snapshot(4, 1), self.snapshot(5, 10)],
+        ]
+        result = self.release.cleanup(dry_run=dry_run, now=self.now)
+        assert self.deleted == ([] if dry_run else [5, 2])
+        assert result == f'{"Would delete" if dry_run else "Deleted"} 2 APW releases (600 bytes).'
+        output = capsys.readouterr().out
+        assert f'apw-assets-{2:040x}' in output
+        assert f'apw-assets-{5:040x}' in output
+        assert self.release.tag not in output
+
+    def test_quiet_repository_keeps_newest_complete_release(self):
+        draft = self.snapshot(3, 0)
+        draft['draft'] = True
+        incomplete = self.snapshot(4, 0)
+        incomplete['assets'].pop()
+        self.pages = [[draft, self.snapshot(1, 20)], [incomplete, self.snapshot(2, 10)]]
+        self.release.cleanup(now=self.now)
+        assert self.deleted == [1]
+
+    @pytest.mark.parametrize(
+        'changes',
+        [
+            {'tag_name': 'v1.0.0'},
+            {'tag_name': 'apw-assets-not-a-sha'},
+            {'prerelease': False},
+            {'draft': True},
+            {'author': {'login': 'another-bot'}},
+            {'target_commitish': 'master'},
+            {'assets': [{'name': 'unrelated.tar.gz', 'size': 100, 'state': 'uploaded'}]},
+        ],
+    )
+    def test_unrelated_or_unfinished_releases_are_not_deleted(self, changes: dict[str, Any]):
+        candidate = self.snapshot(1, 20) | changes
+        self.pages = [[candidate, self.snapshot(2, 1)]]
+        self.release.cleanup(now=self.now)
+        assert self.deleted == []
+
+    def test_custom_retention(self):
+        self.pages = [[self.snapshot(1, 10), self.snapshot(2, 1)]]
+        self.release.cleanup(14, now=self.now)
+        assert self.deleted == []
+
+    def test_empty_repository(self):
+        self.pages = [[]]
+        assert self.release.cleanup(now=self.now) == 'No complete APW releases to clean up.'
+        assert self.deleted == []
+
+    def test_bad_timestamp_aborts_before_any_deletion(self):
+        invalid = self.snapshot(2, 1)
+        invalid['published_at'] = 'invalid'
+        self.pages = [[self.snapshot(1, 20)], [invalid]]
+        with pytest.raises(ValueError):
+            self.release.cleanup(now=self.now)
+        assert self.deleted == []
+
+    def test_listing_error_aborts_cleanup(self, monkeypatch: pytest.MonkeyPatch):
+        def fail(*args: str) -> bytes:
+            raise subprocess.CalledProcessError(1, args)
+
+        monkeypatch.setattr('ddev.release.apw.gh', fail)
+        with pytest.raises(subprocess.CalledProcessError):
+            self.release.cleanup(now=self.now)
+        assert self.deleted == []
 
 
 class TestRelease:
