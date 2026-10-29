@@ -883,6 +883,57 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     assert min_collections <= len(metrics) <= max_collections
 
 
+# VALIDATION ONLY: the body of test_activity_collection_rate_limit, repeated, with timings recorded in the JUnit XML
+@pytest.mark.integration
+@pytest.mark.parametrize('iteration', range(150))
+def test_activity_collection_rate_limit_repeat(aggregator, dd_run_check, dbm_instance, record_property, iteration):
+    collection_interval = 0.1
+    dbm_instance['query_activity']['collection_interval'] = collection_interval
+    dbm_instance['query_activity']['run_sync'] = False
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    starts = []
+    original_run_job = check.activity.run_job
+
+    def run_job():
+        starts.append(time.time())
+        return original_run_job()
+
+    check.activity.run_job = run_job
+    t_begin = time.time()
+    dd_run_check(check)
+    t_check_done = time.time()
+    sleep_time = 1
+    time.sleep(sleep_time)
+    max_collections = int(sleep_time / collection_interval) + 1
+    min_collections = sleep_time
+    t_cancel = time.time()
+    check.cancel()
+    metrics = aggregator.metrics("dd.sqlserver.activity.collect_activity.payload_size")
+    t_read = time.time()
+    count = len(metrics)
+    started_before_read = len([s for s in starts if s <= t_read])
+    first_start = starts[0] if starts else t_check_done
+    record_property(
+        'rate_limit_timings',
+        json.dumps(
+            {
+                'count': count,
+                'started_before_read': started_before_read,
+                'check_s': round(t_check_done - t_begin, 4),
+                'first_start_to_check_done_s': round(t_check_done - first_start, 4),
+                'first_start_to_cancel_s': round(t_cancel - first_start, 4),
+                'first_start_to_read_s': round(t_read - first_start, 4),
+                'started_before_cancel': len([s for s in starts if s <= t_cancel]),
+                'gaps_s': [round(b - a, 4) for a, b in zip(starts, starts[1:]) if b <= t_read],
+            }
+        ),
+    )
+    wait_for_completion = getattr(check.activity, 'wait_for_completion', None)
+    if wait_for_completion is not None:
+        wait_for_completion()
+    assert min_collections <= count <= max_collections
+
+
 def _load_test_activity_json(filename):
     with open(os.path.join(ACTIVITY_JSON_PLANS_DIR, filename), 'r') as f:
         return json.load(f)
