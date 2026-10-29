@@ -2,7 +2,7 @@
 
 <!-- towncrier release notes start -->
 
-## 38.8.0 / 2026-10-27
+## 38.8.0 / 2026-10-27 / Agent 7.85.0
 
 ***Security***:
 
@@ -30,7 +30,7 @@
 
 * Make `assert_histogram_bucket` compare bucket bounds when they are given. ([#25378](https://github.com/DataDog/integrations-core/pull/25378))
 
-## 38.4.0 / 2026-10-01
+## 38.4.0 / 2026-10-01 / Agent 7.84.2
 
 ***Security***:
 

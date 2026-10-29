@@ -2,7 +2,7 @@
 
 <!-- towncrier release notes start -->
 
-## 15.23.0 / 2026-10-27
+## 15.23.0 / 2026-10-27 / Agent 7.85.0
 
 ***Security***:
 
