@@ -93,7 +93,6 @@ def test_tables(dbm_instance, integration_check):
 def test_schema_table_id_matches_sqlserver_object_id(
     dbm_instance: dict, integration_check: Callable[..., SQLServer], major_version: int
 ):
-    # SDBM-3064: both schema queries must preserve the real table ID, not emit the string "None".
     check = integration_check(dbm_instance)
     check.static_info_cache[STATIC_INFO_MAJOR_VERSION] = major_version
     collector = create_schema_collector(check)
