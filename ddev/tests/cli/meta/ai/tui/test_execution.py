@@ -1014,7 +1014,7 @@ async def test_phase_log_shows_thinking_block_until_agent_response():
     from ddev.ai.agent.scope import AgentRole, AgentScope
     from ddev.cli.meta.ai.tui.messages import AgentBeforeSend, AgentResponseReceived
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
-    from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogScreen, ThinkingBlock
+    from ddev.cli.meta.ai.tui.screens.phase_log import ActivityBlock, PhaseLogScreen
 
     class _IdleOrchestrator:
         async def run_async(self) -> None:
@@ -1036,15 +1036,15 @@ async def test_phase_log_shows_thinking_block_until_agent_response():
         screen.on_agent_before_send(AgentBeforeSend(scope, "do the work", 1))
         await pilot.pause()
 
-        thinking_blocks = phase_log.query(ThinkingBlock)
+        thinking_blocks = phase_log.query(ActivityBlock)
         assert len(thinking_blocks) == 1
-        assert "phase_1:phase:1" in screen._active_thinking["phase_1"]
+        assert "phase_1:phase:1" in screen._active_activities["phase_1"]
 
         screen.on_agent_response_received(AgentResponseReceived(scope, _make_agent_response("done"), 1))
         await pilot.pause()
 
-        assert len(phase_log.query(ThinkingBlock)) == 0
-        assert "phase_1:phase:1" not in screen._active_thinking["phase_1"]
+        assert len(phase_log.query(ActivityBlock)) == 0
+        assert "phase_1:phase:1" not in screen._active_activities["phase_1"]
 
 
 async def test_sentinel_send_shows_thinking_without_prompt_block():
@@ -1053,7 +1053,7 @@ async def test_sentinel_send_shows_thinking_without_prompt_block():
     from ddev.ai.react.process import TOOL_RESULTS_SENTINEL
     from ddev.cli.meta.ai.tui.messages import AgentBeforeSend, AgentResponseReceived
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
-    from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogScreen, ThinkingBlock
+    from ddev.cli.meta.ai.tui.screens.phase_log import ActivityBlock, PhaseLogScreen
 
     class _IdleOrchestrator:
         async def run_async(self) -> None:
@@ -1076,20 +1076,20 @@ async def test_sentinel_send_shows_thinking_without_prompt_block():
         await pilot.pause()
 
         assert screen._phase_logs["phase_1"] == []
-        assert len(phase_log.query(ThinkingBlock)) == 1
+        assert len(phase_log.query(ActivityBlock)) == 1
 
         screen.on_agent_response_received(AgentResponseReceived(scope, _make_agent_response("done"), 2))
         await pilot.pause()
 
-        assert len(phase_log.query(ThinkingBlock)) == 0
+        assert len(phase_log.query(ActivityBlock)) == 0
 
 
-async def test_phase_log_replays_entries_before_active_thinking_block():
+async def test_phase_log_replays_entries_before_active_activities_block():
     """Opening a log mid-turn appends transient state after historical entries."""
     from ddev.ai.agent.scope import AgentRole, AgentScope
     from ddev.cli.meta.ai.tui.messages import AgentBeforeSend
     from ddev.cli.meta.ai.tui.screens.execution import ExecutionScreen
-    from ddev.cli.meta.ai.tui.screens.phase_log import PhaseLogBlock, PhaseLogScreen, ThinkingBlock
+    from ddev.cli.meta.ai.tui.screens.phase_log import ActivityBlock, PhaseLogBlock, PhaseLogScreen
 
     class _IdleOrchestrator:
         async def run_async(self) -> None:
@@ -1113,7 +1113,110 @@ async def test_phase_log_replays_entries_before_active_thinking_block():
 
         output_children = list(phase_log.query_one("#phase-log-output").children)
         assert isinstance(output_children[-2], PhaseLogBlock)
-        assert isinstance(output_children[-1], ThinkingBlock)
+        assert isinstance(output_children[-1], ActivityBlock)
+
+
+@pytest.mark.parametrize(
+    "seconds, expected",
+    [(0.4, "0s"), (59.9, "59s"), (185, "3m5s"), (3725, "1h2m")],
+)
+def test_format_elapsed(seconds, expected):
+    from ddev.cli.meta.ai.tui.screens.phase_log import format_elapsed
+
+    assert format_elapsed(seconds) == expected
+
+
+def _make_tool_response(tool_names: list[str]) -> Any:
+    from ddev.ai.agent.types import AgentResponse, StopReason, ToolCall, WebActivity
+
+    return AgentResponse(
+        stop_reason=StopReason.TOOL_USE,
+        text="",
+        tool_calls=[ToolCall(id=f"tc{i}", name=name, input={}) for i, name in enumerate(tool_names)],
+        usage=_make_token_usage(),
+        web_activity=WebActivity(),
+    )
+
+
+@pytest.mark.parametrize(
+    "tool_names, expected_text",
+    [
+        pytest.param(["ddev_test"], "running tool (ddev_test)", id="single"),
+        pytest.param(["read_file", "grep", "read_file"], "running tools batch (read_file, grep)", id="batch"),
+    ],
+)
+async def test_tool_batch_shows_activity_block_until_results(tool_names, expected_text):
+    """A running tool batch shows an activity block until its results arrive."""
+    from ddev.ai.agent.scope import AgentRole, AgentScope
+    from ddev.ai.tools.core.types import ToolResult
+    from ddev.cli.meta.ai.tui.messages import AgentResponseReceived, AgentToolCalled
+    from ddev.cli.meta.ai.tui.screens import execution
+    from ddev.cli.meta.ai.tui.screens.phase_log import ActivityBlock, PhaseLogScreen
+
+    class _IdleOrchestrator:
+        async def run_async(self) -> None:
+            pass
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = execution.ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: _IdleOrchestrator())
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        phase_log = PhaseLogScreen(flow, "phase_1", screen._phase_logs["phase_1"], source=screen)
+        await app.push_screen(phase_log)
+        await pilot.pause()
+
+        scope = AgentScope(owner_id="phase_1", role=AgentRole.PHASE, phase_id="phase_1")
+        response = _make_tool_response(tool_names)
+        screen.on_agent_response_received(AgentResponseReceived(scope, response, 1))
+        await pilot.pause()
+
+        blocks = list(phase_log.query(ActivityBlock))
+        assert len(blocks) == 1
+        assert f" {expected_text} · " in str(blocks[0].content)
+
+        tool_call = response.tool_calls[0]
+        screen.on_agent_tool_called(AgentToolCalled(scope, tool_call, ToolResult(success=True, data="ok"), 1))
+        await pilot.pause()
+
+        assert len(phase_log.query(ActivityBlock)) == 0
+
+
+async def test_tool_result_arriving_before_banner_mounts_leaves_no_banner():
+    """A tool result handled before its banner finishes mounting still removes the banner."""
+    from ddev.ai.agent.scope import AgentRole, AgentScope
+    from ddev.ai.tools.core.types import ToolResult
+    from ddev.cli.meta.ai.tui.messages import AgentResponseReceived, AgentToolCalled
+    from ddev.cli.meta.ai.tui.screens import execution
+    from ddev.cli.meta.ai.tui.screens.phase_log import ActivityBlock, PhaseLogScreen
+
+    class _IdleOrchestrator:
+        async def run_async(self) -> None:
+            pass
+
+    flow = _make_flow()
+    app = _app(flow)
+    async with app.run_test() as pilot:
+        await pilot.pause()
+        screen = execution.ExecutionScreen(flow, orchestrator_builder=lambda _callbacks: _IdleOrchestrator())
+        await app.push_screen(screen)
+        await pilot.pause()
+
+        phase_log = PhaseLogScreen(flow, "phase_1", screen._phase_logs["phase_1"], source=screen)
+        await app.push_screen(phase_log)
+        await pilot.pause()
+
+        scope = AgentScope(owner_id="phase_1", role=AgentRole.PHASE, phase_id="phase_1")
+        response = _make_tool_response(["read_file"])
+        screen.on_agent_response_received(AgentResponseReceived(scope, response, 1))
+        tool_call = response.tool_calls[0]
+        screen.on_agent_tool_called(AgentToolCalled(scope, tool_call, ToolResult(success=True, data="ok"), 1))
+        await pilot.pause()
+
+        assert len(phase_log.query(ActivityBlock)) == 0
 
 
 # ---------------------------------------------------------------------------
