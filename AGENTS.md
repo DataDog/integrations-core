@@ -116,7 +116,7 @@ To use the layer:
 - Send requests through `self.http`. Construct additional clients with `AgentCheck.create_http_client()` rather than instantiating `RequestsWrapper` or a `requests.Session`.
 - Catch the exceptions in `datadog_checks.base.utils.http_exceptions` (for example `HTTPClientError`), never `requests.exceptions` types.
 - Use only the `HTTPClient` and `HTTPResponse` members documented in `http.md`. Anything else is an implementation detail of the current backend.
-- In tests, use the `fake_http` and `fake_http_response` fixtures, which run the check's real client and serve `FakeHTTPResponse` objects from `datadog_checks.base.stubs.http`, instead of patching `requests` or using the legacy `MockResponse`. Use `FakeHTTPClient` only where `http.md` says the fixture cannot serve the test.
+- In tests, use the `fake_http` and `fake_http_response` fixtures, which run the check's real client and serve `FakeHTTPResponse` objects from `datadog_checks.base.stubs.http`, instead of patching `requests` or using the legacy `MockResponse`. Use `FakeHTTPClient` only for the cases listed under "Testing with `FakeHTTPClient`" in `docs/developer/base/http.md`: code that receives a client, per-request emulators, and responses the fixture rejects.
 
 ## Development Workflow
 
