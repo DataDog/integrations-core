@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 2.4.1 / 2026-10-29
+
+***Fixed***:
+
+* Reduce API calls per check run: list tasks once per space instead of twice per project, list projects once per space instead of once per project group, fetch deployments in bulk by id, and raise the default `paginated_limit` from 30 to 300. ([#25342](https://github.com/DataDog/integrations-core/pull/25342))
+
 ## 2.4.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:

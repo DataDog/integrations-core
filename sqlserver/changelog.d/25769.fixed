@@ -1,1 +1,0 @@
-Collect schemas at `collect_schemas.collection_interval` when it is shorter than the settings collection interval, instead of at most once per settings interval.
