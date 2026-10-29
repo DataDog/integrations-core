@@ -96,3 +96,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: ddev --here release apw publish --commit "$GITHUB_SHA" --directory dist
+      # Run on unchanged-source checks too; retain the newest complete release and Git tags.
+      - name: Clean up expired APW releases
+        # Cleanup failure must not invalidate the successful producer run used by PRApprover.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: ddev --here release apw cleanup --commit "$GITHUB_SHA" --retention-days 7

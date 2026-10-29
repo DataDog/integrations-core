@@ -113,3 +113,27 @@ def test_tag_is_separate_from_publication(ddev: CliRunner, mocker: MockerFixture
     result = ddev('release', 'apw', 'tag', '--repository', 'DataDog/integrations-core', '--commit', 'a' * 40)
     assert result.exit_code == 0, result.output
     assert 'Created source tag at the expected commit.' in step_summary.read_text()
+
+
+@pytest.mark.parametrize('dry_run', [False, True])
+def test_cleanup_options_and_summary(ddev: CliRunner, mocker: MockerFixture, step_summary: Path, dry_run: bool):
+    cleanup = mocker.patch.object(Release, 'cleanup', autospec=True, return_value='Cleanup completed.')
+    args = ['--dry-run'] if dry_run else []
+    result = ddev(
+        'release',
+        'apw',
+        'cleanup',
+        '--repository',
+        'DataDog/marketplace',
+        '--commit',
+        'c' * 40,
+        '--retention-days',
+        '7',
+        *args,
+    )
+    assert result.exit_code == 0, result.output
+    release = cleanup.call_args.args[0]
+    assert release.repository == 'DataDog/marketplace'
+    assert release.commit == 'c' * 40
+    cleanup.assert_called_once_with(release, 7, dry_run=dry_run)
+    assert 'Cleanup completed.' in step_summary.read_text()
