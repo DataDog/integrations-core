@@ -1,0 +1,94 @@
+name: "[DO NOT MERGE] Validate Cacti startup time"
+
+on:
+  pull_request:
+    branches:
+    - master
+
+permissions:
+  contents: read
+
+jobs:
+  startup:
+    name: "${{ matrix.variant }} shard ${{ matrix.shard }}"
+    runs-on: ubuntu-22.04
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [master, fixed]
+        shard: [1, 2, 3, 4]
+    env:
+      ITERATIONS: 5
+      READY_TIMEOUT: 900
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+    - name: Prepare compose file
+      run: |
+        mkdir -p out
+        cp cacti/tests/compose/docker-compose.yaml out/docker-compose.yaml
+        if [ "${{ matrix.variant }}" = master ]; then
+          sed -i '/PHP_SNMP=0/d' out/docker-compose.yaml
+        fi
+        grep -n PHP_SNMP out/docker-compose.yaml || echo "no PHP_SNMP override"
+        docker compose -f out/docker-compose.yaml pull -q
+
+    - name: Start and stop Cacti
+      run: |
+        cat > out/parse.py <<'EOF'
+        import json, re, sys
+        from datetime import datetime, timedelta
+
+        def ts(line):
+            m = re.match(r'(\S+T\d\d:\d\d:\d\d)(?:\.(\d+))?Z', line)
+            return datetime.fromisoformat(m[1]) + timedelta(microseconds=int((m[2] or '0')[:6].ljust(6, '0')))
+
+        lines = open(sys.argv[1]).read().splitlines()
+        php = [l for l in lines if '[PHP-SNMP]' in l]
+        nxt = [l for l in lines if '[New Install]' in l or 'Starting httpd service.' in l]
+        downloads = [l.split(' ', 1)[1] for l in lines if re.search(r' [0-9.]+ [kMG]?B/s \| ', l)]
+        repo_lines = [l.split(' ', 1)[1] for l in lines if re.search(r'Rocky Linux|metadata|Removed|Nothing to do|already installed', l)]
+        yum_seconds = None
+        if php and nxt:
+            yum_seconds = round((ts(nxt[0]) - ts(php[0])).total_seconds(), 1)
+        print(json.dumps({
+            'php_snmp_line': php[0].split(' ', 1)[1] if php else None,
+            'yum_seconds': yum_seconds,
+            'repo_downloads': downloads,
+            'repo_lines': repo_lines,
+        }))
+        EOF
+        for i in $(seq 1 "$ITERATIONS"); do
+          start=$(date +%s)
+          docker compose -f out/docker-compose.yaml up -d --quiet-pull
+          ready=false
+          while [ $(( $(date +%s) - start )) -lt "$READY_TIMEOUT" ]; do
+            if docker logs cacti 2>&1 | grep 'Starting httpd service.' > /dev/null; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+          elapsed=$(( $(date +%s) - start ))
+          docker logs -t cacti > "out/cacti-$i.log" 2>&1
+          parsed=$(python3 out/parse.py "out/cacti-$i.log")
+          jq -cn --arg variant "${{ matrix.variant }}" --argjson shard ${{ matrix.shard }} --argjson iteration "$i" \
+            --argjson elapsed "$elapsed" --argjson ready "$ready" --argjson parsed "$parsed" \
+            '{variant: $variant, shard: $shard, iteration: $iteration, elapsed: $elapsed, ready: $ready} + $parsed' \
+            | tee -a out/results.jsonl
+          docker compose -f out/docker-compose.yaml down -v
+        done
+
+    - name: Summary
+      if: always()
+      run: |
+        echo '```' >> "$GITHUB_STEP_SUMMARY"
+        jq -c '{variant, iteration, elapsed, ready, yum_seconds, downloads: (.repo_downloads | length)}' out/results.jsonl >> "$GITHUB_STEP_SUMMARY"
+        echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+    - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      if: always()
+      with:
+        name: cacti-${{ matrix.variant }}-${{ matrix.shard }}
+        path: out/
