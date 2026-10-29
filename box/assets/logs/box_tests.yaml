@@ -189,14 +189,6 @@ tests:
         time: 1745572952000
         severity_id: 3
         class_name: Detection Finding
-        device:
-          owner:
-            uid: '2320'
-            email_addr: some@email.com
-            name: Some Name
-          type_id: 0
-          ip: 10.1.2.3
-          type: Unknown
       ip_address: 10.1.2.3
     message: |-
       {
@@ -381,6 +373,8 @@ tests:
             vendor_name: Box
           event_code: UPLOAD
           version: 1.5.0
+          profiles:
+            - security_control
         category_uid: 6
         category_name: Application Activity
         src_endpoint:
@@ -656,6 +650,8 @@ tests:
             vendor_name: Box
           event_code: UPLOAD
           version: 1.5.0
+          profiles:
+            - security_control
         category_uid: 6
         category_name: Application Activity
         src_endpoint:
@@ -834,14 +830,6 @@ tests:
         category_uid: 2
         class_name: "Detection Finding"
         class_uid: 2004
-        device:
-          name: "Unknown IP"
-          owner:
-            email_addr: "sam.ellison.int@example.com"
-            name: "Sam Ellison INT"
-            uid: "95288625182"
-          type: "Unknown"
-          type_id: 0
         evidences:
          -
           api:
@@ -2101,6 +2089,8 @@ tests:
             vendor_name: "Box"
           uid: "f511f9eb-71ad-4b8a-b382-9bdeecfa3cf4"
           version: "1.5.0"
+          profiles:
+            - "security_control"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
@@ -2267,6 +2257,8 @@ tests:
             vendor_name: "Box"
           uid: "e2cb7a4e-8d69-4919-8f37-1ac7bd140105"
           version: "1.5.0"
+          profiles:
+            - "security_control"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
@@ -2543,6 +2535,8 @@ tests:
             vendor_name: "Box"
           uid: "413e8886-2375-4c53-b839-0d786c0a5570"
           version: "1.5.0"
+          profiles:
+            - "security_control"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
@@ -2717,6 +2711,10 @@ tests:
         category_name: "Application Activity"
         category_uid: 6
         class_name: "File Hosting Activity"
+        action: "Allowed"
+        action_id: 1
+        disposition: "Detected"
+        disposition_id: 15
         class_uid: 6006
         file:
           confidentiality: "Restricted"
@@ -2750,6 +2748,8 @@ tests:
             vendor_name: "Box"
           uid: "b5056401-ea8c-4552-84af-0983d0a25554"
           version: "1.5.0"
+          profiles:
+            - "security_control"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
@@ -2961,6 +2961,8 @@ tests:
             vendor_name: "Box"
           uid: "8ee516d6-8982-4c38-b6e0-0cbc0d8cd693"
           version: "1.5.0"
+          profiles:
+            - "security_control"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
@@ -3126,6 +3128,8 @@ tests:
             vendor_name: "Box"
           uid: "e28ba405-c0cb-45c0-b6a9-014e33ddfc79"
           version: "1.5.0"
+          profiles:
+            - "security_control"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
@@ -3280,6 +3284,8 @@ tests:
             vendor_name: "Box"
           uid: "495e637e-a720-4195-acf9-c085a8615134"
           version: "1.5.0"
+          profiles:
+            - "security_control"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
@@ -3742,6 +3748,8 @@ tests:
             vendor_name: "Box"
           uid: "d3fe6f87-2533-4956-9eb3-31f48b07f31b"
           version: "1.5.0"
+          profiles:
+            - "security_control"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
@@ -3940,6 +3948,8 @@ tests:
             vendor_name: "Box"
           uid: "e697e45a-f5f9-4746-852a-1df9d7eaf2e9"
           version: "1.5.0"
+          profiles:
+            - "security_control"
         severity: "Informational"
         severity_id: 1
         src_endpoint:
@@ -4105,6 +4115,10 @@ tests:
         category_name: "Application Activity"
         category_uid: 6
         class_name: "File Hosting Activity"
+        action: "Allowed"
+        action_id: 1
+        disposition: "Detected"
+        disposition_id: 15
         class_uid: 6006
         file:
           confidentiality: "Restricted"
@@ -4130,6 +4144,8 @@ tests:
             vendor_name: "Box"
           uid: "24e31ed7-6722-4223-8334-fbcc2b243458"
           version: "1.5.0"
+          profiles:
+            - "security_control"
         severity: "Informational"
         severity_id: 1
         src_endpoint:

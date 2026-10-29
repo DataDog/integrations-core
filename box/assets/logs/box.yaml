@@ -95,31 +95,6 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Device IP
-    path: ocsf.device.ip
-    source: log
-  - groups:
-      - OCSF
-    name: Device Name
-    path: ocsf.device.name
-    source: log
-  - groups:
-      - OCSF
-    name: Device Owner Email Address
-    path: ocsf.device.owner.email_addr
-    source: log
-  - groups:
-      - OCSF
-    name: Device Owner Name
-    path: ocsf.device.owner.name
-    source: log
-  - groups:
-      - OCSF
-    name: Device Owner Unique ID
-    path: ocsf.device.owner.uid
-    source: log
-  - groups:
-      - OCSF
     name: Entity Name
     path: ocsf.entity.name
     source: log
@@ -346,6 +321,7 @@ facets:
     name: Target Unique ID
     path: ocsf.user.uid
     source: log
+
 pipeline:
   type: pipeline
   name: Box
@@ -593,18 +569,6 @@ pipeline:
             supportRules: ""
             matchRules: |
               to_bool %{boolean("true","false"):ocsf.is_alert}
-        - type: grok-parser
-          name: Parse `ip_address` to `ocsf.device.ip`, `ocsf.device.name`
-          enabled: true
-          source: ip_address
-          samples:
-            - "10.1.2.3"
-            - "Unknown IP"
-          grok:
-            supportRules: ""
-            matchRules: |
-              valid_ip %{ip:ocsf.device.ip}
-              no_ip %{data:ocsf.device.name}
         - type: string-builder-processor
           name: Add finding types
           enabled: true
@@ -923,52 +887,6 @@ pipeline:
                   ocsf.severity:
                     - additional_details.shield_alert.severity
                     - additional_details.shield_alert.priority
-            - type: schema-remapper
-              name: Map `ocsf.device.ip` to `ocsf.device.ip`
-              sources:
-                - ocsf.device.ip
-              target: ocsf.device.ip
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `ocsf.device.name` to `ocsf.device.name`
-              sources:
-                - ocsf.device.name
-              target: ocsf.device.name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-category-mapper
-              name: ocsf.device.type_id
-              categories:
-                - filter:
-                    query: "*"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.device.type
-                id: ocsf.device.type_id
-            - type: schema-remapper
-              name: Map `additional_details.shield_alert.user.name` to `ocsf.device.owner.name`
-              sources:
-                - additional_details.shield_alert.user.name
-              target: ocsf.device.owner.name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
-              name: Map `additional_details.shield_alert.user.id` to `ocsf.device.owner.uid`
-              sources:
-                - additional_details.shield_alert.user.id
-              target: ocsf.device.owner.uid
-              preserveSource: true
-              overrideOnConflict: true
-              targetFormat: string
-            - type: schema-remapper
-              name: Map `additional_details.shield_alert.user.email` to `ocsf.device.owner.email_addr`
-              sources:
-                - additional_details.shield_alert.user.email
-              target: ocsf.device.owner.email_addr
-              preserveSource: true
-              overrideOnConflict: true
           schema:
             schemaType: ocsf
             version: 1.5.0
@@ -2464,13 +2382,46 @@ pipeline:
               target: ocsf.file.version
               preserveSource: true
               overrideOnConflict: true
+            - type: schema-category-mapper
+              name: ocsf.action_id
+              categories:
+                - filter:
+                    query: "@ocsf.metadata.event_code:(SHIELD_SHARED_LINK_STATUS_RESTRICTED_ON_CREATE OR SHIELD_SHARED_LINK_STATUS_RESTRICTED_ON_UPDATE) OR (@ocsf.metadata.event_code:(SHIELD_SHARED_LINK_ACCESS_BLOCKED OR SHIELD_DOWNLOAD_BLOCKED OR SHIELD_PREVIEW_BLOCKED OR SHIELD_INFORMATION_BARRIER_ITEM_MOVE_BLOCKED OR SHIELD_INFORMATION_BARRIER_ITEM_COPY_BLOCKED OR SHIELD_INFORMATION_BARRIER_SHARED_ITEM_ACCESS_BLOCKED OR SHIELD_EXTERNAL_COLLAB_INVITE_BLOCKED OR SHIELD_EXTERNAL_COLLAB_INVITE_BLOCKED_MISSING_JUSTIFICATION OR SHIELD_EXTERNAL_COLLAB_ACCESS_BLOCKED OR SHIELD_EXTERNAL_COLLAB_ACCESS_BLOCKED_MISSING_JUSTIFICATION OR SHIELD_INFORMATION_BARRIER_COLLAB_BLOCKED) @additional_details.shield_shared_link_enforcement.controlMode:monitoring)"
+                  name: Allowed
+                  id: 1
+                - filter:
+                    query: "@ocsf.metadata.event_code:(SHIELD_SHARED_LINK_ACCESS_BLOCKED OR SHIELD_DOWNLOAD_BLOCKED OR SHIELD_PREVIEW_BLOCKED OR SHIELD_INFORMATION_BARRIER_ITEM_MOVE_BLOCKED OR SHIELD_INFORMATION_BARRIER_ITEM_COPY_BLOCKED OR SHIELD_INFORMATION_BARRIER_SHARED_ITEM_ACCESS_BLOCKED OR SHIELD_EXTERNAL_COLLAB_INVITE_BLOCKED OR SHIELD_EXTERNAL_COLLAB_INVITE_BLOCKED_MISSING_JUSTIFICATION OR SHIELD_EXTERNAL_COLLAB_ACCESS_BLOCKED OR SHIELD_EXTERNAL_COLLAB_ACCESS_BLOCKED_MISSING_JUSTIFICATION OR SHIELD_INFORMATION_BARRIER_COLLAB_BLOCKED) @additional_details.shield_shared_link_enforcement.controlMode:enforced"
+                  name: Denied
+                  id: 2
+              targets:
+                name: ocsf.action
+                id: ocsf.action_id
+            - type: schema-category-mapper
+              name: ocsf.disposition_id
+              categories:
+                - filter:
+                    query: "@ocsf.metadata.event_code:(SHIELD_SHARED_LINK_ACCESS_BLOCKED OR SHIELD_DOWNLOAD_BLOCKED OR SHIELD_PREVIEW_BLOCKED OR SHIELD_INFORMATION_BARRIER_ITEM_MOVE_BLOCKED OR SHIELD_INFORMATION_BARRIER_ITEM_COPY_BLOCKED OR SHIELD_INFORMATION_BARRIER_SHARED_ITEM_ACCESS_BLOCKED OR SHIELD_EXTERNAL_COLLAB_INVITE_BLOCKED OR SHIELD_EXTERNAL_COLLAB_INVITE_BLOCKED_MISSING_JUSTIFICATION OR SHIELD_EXTERNAL_COLLAB_ACCESS_BLOCKED OR SHIELD_EXTERNAL_COLLAB_ACCESS_BLOCKED_MISSING_JUSTIFICATION OR SHIELD_INFORMATION_BARRIER_COLLAB_BLOCKED) @additional_details.shield_shared_link_enforcement.controlMode:enforced"
+                  name: Blocked
+                  id: 2
+                - filter:
+                    query: "@ocsf.metadata.event_code:(SHIELD_SHARED_LINK_STATUS_RESTRICTED_ON_CREATE OR SHIELD_SHARED_LINK_STATUS_RESTRICTED_ON_UPDATE) @additional_details.shield_shared_link_enforcement.controlMode:enforced"
+                  name: Corrected
+                  id: 11
+                - filter:
+                    query: "@ocsf.metadata.event_code:(SHIELD_SHARED_LINK_ACCESS_BLOCKED OR SHIELD_DOWNLOAD_BLOCKED OR SHIELD_PREVIEW_BLOCKED OR SHIELD_INFORMATION_BARRIER_ITEM_MOVE_BLOCKED OR SHIELD_INFORMATION_BARRIER_ITEM_COPY_BLOCKED OR SHIELD_INFORMATION_BARRIER_SHARED_ITEM_ACCESS_BLOCKED OR SHIELD_EXTERNAL_COLLAB_INVITE_BLOCKED OR SHIELD_EXTERNAL_COLLAB_INVITE_BLOCKED_MISSING_JUSTIFICATION OR SHIELD_EXTERNAL_COLLAB_ACCESS_BLOCKED OR SHIELD_EXTERNAL_COLLAB_ACCESS_BLOCKED_MISSING_JUSTIFICATION OR SHIELD_INFORMATION_BARRIER_COLLAB_BLOCKED OR SHIELD_SHARED_LINK_STATUS_RESTRICTED_ON_CREATE OR SHIELD_SHARED_LINK_STATUS_RESTRICTED_ON_UPDATE) @additional_details.shield_shared_link_enforcement.controlMode:monitoring"
+                  name: Detected
+                  id: 15
+              targets:
+                name: ocsf.disposition
+                id: ocsf.disposition_id
           schema:
             schemaType: ocsf
             version: 1.5.0
             className: File Hosting Activity
             classUid: 6006
             extensions: []
-            profiles: []
+            profiles:
+              - security_control
     - type: pipeline
       name: OCSF sub pipeline for class Base Event [0]
       enabled: true
