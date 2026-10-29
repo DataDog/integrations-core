@@ -1,0 +1,1 @@
+Add the ``sqlserver.uptime`` metric, reporting the time elapsed since the database engine last started.
