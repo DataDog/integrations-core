@@ -33,7 +33,7 @@ def patch_upload_credentials(monkeypatch):
     # Key-aware: a blanket string return would leak into the check's proxy config lookup
     # during ``integration_check`` and break check initialization.
     def get_config(key):
-        if key in ('api_key', 'app_key'):
+        if key == 'api_key':
             return 'TEST_KEY'
         return None
 

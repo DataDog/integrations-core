@@ -834,10 +834,10 @@ class ClickhouseRemoteQueryHandler:
                         'target_not_found', 'No loaded ClickHouse integration instance matched target selector.'
                     )
                 creds = rq_upload.resolve_upload_credentials(parsed.result_delivery, started_at, parsed.trace_context)
-                if not creds.api_key or not creds.app_key:
+                if not creds.api_key:
                     raise rq_contract.RemoteQueryFailure(
                         'credentials_unavailable',
-                        'Remote query upload requires api_key and app_key to be configured on the Agent.',
+                        'Remote query upload requires api_key to be configured on the Agent.',
                     )
                 if getattr(self._check, '_pool_manager', None) is None:
                     raise rq_contract.RemoteQueryFailure(

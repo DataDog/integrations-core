@@ -425,8 +425,6 @@ def patch_upload_credentials(monkeypatch):
     def get_config(key):
         if key == 'api_key':
             return 'TEST_API_KEY'
-        if key == 'app_key':
-            return 'TEST_APP_KEY'
         return None
 
     monkeypatch.setattr(rq_upload.datadog_agent, 'get_config', get_config)

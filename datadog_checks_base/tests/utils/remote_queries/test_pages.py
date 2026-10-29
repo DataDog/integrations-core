@@ -540,7 +540,7 @@ def test_finalize_abort_and_test_drive_routing(monkeypatch, creds):
         return SimpleNamespace(status_code=200, content=b'{"upload_id":"upload-1"}')
 
     monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
-    creds = rq_upload.UploadCredentials(creds.base_url, creds.upload_id, creds.api_key, creds.app_key, 'test-intake')
+    creds = rq_upload.UploadCredentials(creds.base_url, creds.upload_id, creds.api_key, 'test-intake')
     client = rq_upload.RequestsUploadClient()
     assert client.finalize_run(creds, 3)['upload_id'] == creds.upload_id
     client.abort(creds)

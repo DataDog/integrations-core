@@ -140,7 +140,7 @@ def test_stream_accepts_large_payload_proof_queries(monkeypatch):
     assert pool.requested_dbnames == ['datadog_test'] * 6
 
 
-def test_stream_credentials_unavailable_without_agent_keys(monkeypatch):
+def test_stream_credentials_unavailable_without_agent_api_key(monkeypatch):
     def get_config(key):
         return None
 
@@ -152,6 +152,49 @@ def test_stream_credentials_unavailable_without_agent_keys(monkeypatch):
     assert_failed_event(events, 'credentials_unavailable')
     assert events[0].event_type == 'error'
     assert pool.requested_dbnames == []
+
+
+class HeaderRecordingUploadClient(FakeUploadClient):
+    """Records the headers the production request builder derives from each call's credentials."""
+
+    def __init__(self):
+        super().__init__()
+        self.headers = []
+
+    def _record(self, creds):
+        self.headers.append(rq_upload.RequestsUploadClient()._headers(creds))
+
+    def register_descriptor(self, creds, body):
+        self._record(creds)
+        return super().register_descriptor(creds, body)
+
+    def put_source_page(self, creds, page, body):
+        self._record(creds)
+        return super().put_source_page(creds, page, body)
+
+    def finalize_run(self, creds, expected_page_count):
+        self._record(creds)
+        return super().finalize_run(creds, expected_page_count)
+
+
+def test_stream_uploads_with_api_key_only(monkeypatch):
+    """The Agent holds no application key: the upload proceeds on the API key alone and no
+    upload request carries a dd-application-key header."""
+    reads = []
+
+    def get_config(key):
+        reads.append(key)
+        return 'TEST_API_KEY' if key == 'api_key' else None
+
+    monkeypatch.setattr(rq_upload.datadog_agent, 'get_config', get_config)
+    client = HeaderRecordingUploadClient()
+    events = collect_events(valid_request(), make_check(pool=FakePool(rows=[(1,)])), client=client)
+
+    assert_success(events)
+    assert 'app_key' not in reads
+    assert client.headers
+    assert all(headers['dd-api-key'] == 'TEST_API_KEY' for headers in client.headers)
+    assert all('dd-application-key' not in headers for headers in client.headers)
 
 
 def test_stream_missing_pool_returns_credentials_unavailable(monkeypatch):

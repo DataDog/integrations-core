@@ -108,6 +108,24 @@ def test_finalize_totals_are_required_and_authoritative():
     assert failure.value.code == 'invalid_receipt'
 
 
+def test_upload_credentials_are_api_key_only(monkeypatch, delivery):
+    """Agents upload with the API key alone: the application key is never read, even when
+    configured, and no request carries a dd-application-key header."""
+    reads = []
+
+    def get_config(key):
+        reads.append(key)
+        return {'api_key': 'test-api-key', 'app_key': 'SHOULD_NOT_BE_READ'}.get(key)
+
+    monkeypatch.setattr(rq_upload.datadog_agent, 'get_config', get_config)
+    resolved = rq_upload.resolve_upload_credentials(delivery, 0.0)
+    assert resolved.api_key == 'test-api-key'
+    assert 'app_key' not in reads
+    assert not hasattr(resolved, 'app_key')
+    headers = rq_upload.RequestsUploadClient()._headers(resolved, 'application/json')
+    assert headers == {'dd-api-key': 'test-api-key', 'Content-Type': 'application/json'}
+
+
 def test_http_descriptor_registration_replays_the_identical_body(monkeypatch, creds):
     import requests
 
@@ -128,7 +146,6 @@ def test_http_descriptor_registration_replays_the_identical_body(monkeypatch, cr
     assert (method, url, sent) == ('POST', 'https://intake.example/uploads/upload-1/descriptor', body)
     assert headers == {
         'dd-api-key': 'test-api-key',
-        'dd-application-key': 'test-app-key',
         'Content-Type': 'application/json',
     }
 
@@ -159,7 +176,6 @@ def test_http_source_page_retry_replays_exact_body_and_headers(monkeypatch, cred
     assert (method, url, sent) == ('PUT', 'https://intake.example/uploads/upload-1/pages/2', payload)
     assert headers == {
         'dd-api-key': 'test-api-key',
-        'dd-application-key': 'test-app-key',
         'Content-Type': 'application/vnd.datadog.remote-query.rows+csv;version=1',
         'Content-Length': str(len(payload)),
         'X-DD-Source-Page-Bytes': str(len(payload)),
@@ -300,9 +316,7 @@ def test_http_page_attempt_bound_kills_slow_attempts(monkeypatch, creds):
     # The wall is 100 s away, but the per-attempt bound is 55 s: the first attempt's body read
     # happens past it and is killed mid-body; the second, rewound attempt succeeds.
     monkeypatch.setattr(rq_upload.time, 'monotonic', lambda: clock['now'])
-    wall_creds = rq_upload.UploadCredentials(
-        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, None, wall_deadline=100.0
-    )
+    wall_creds = rq_upload.UploadCredentials(creds.base_url, creds.upload_id, creds.api_key, None, wall_deadline=100.0)
     with io.BytesIO(payload) as body:
         assert rq_upload.RequestsUploadClient().put_source_page(wall_creds, page, body) == acceptance_receipt(0, 0, 1)
     assert len(attempts) == 2
@@ -330,9 +344,7 @@ def test_http_page_attempt_bound_never_exceeds_the_run_wall(monkeypatch, creds):
     # retried past the wall, and the run surfaces the retryable wall timeout.
     clock = iter([0.0, 0.0, 51.0, 51.5] + [51.5] * 10)
     monkeypatch.setattr(rq_upload.time, 'monotonic', lambda: next(clock))
-    wall_creds = rq_upload.UploadCredentials(
-        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, None, wall_deadline=50.0
-    )
+    wall_creds = rq_upload.UploadCredentials(creds.base_url, creds.upload_id, creds.api_key, None, wall_deadline=50.0)
     with pytest.raises(rq_contract.RemoteQueryFailure) as failure, io.BytesIO(payload) as body:
         rq_upload.RequestsUploadClient().put_source_page(wall_creds, page, body)
     assert failure.value.code == 'timeout'
@@ -357,9 +369,7 @@ def test_http_retry_sequence_never_extends_the_run_wall(monkeypatch, creds):
     # attempt and surfaces the retryable wall timeout instead of uploading past the wall.
     clock = iter([0.0, 0.0, 51.5] + [51.5] * 10)
     monkeypatch.setattr(rq_upload.time, 'monotonic', lambda: next(clock))
-    wall_creds = rq_upload.UploadCredentials(
-        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, None, wall_deadline=50.0
-    )
+    wall_creds = rq_upload.UploadCredentials(creds.base_url, creds.upload_id, creds.api_key, None, wall_deadline=50.0)
     with pytest.raises(rq_contract.RemoteQueryFailure) as failure, io.BytesIO(payload) as body:
         rq_upload.RequestsUploadClient().put_source_page(wall_creds, page, body)
     assert failure.value.code == 'timeout'
@@ -403,7 +413,6 @@ def test_http_finalize_polls_pending_until_the_authoritative_receipt(monkeypatch
         creds.base_url,
         creds.upload_id,
         creds.api_key,
-        creds.app_key,
         None,
         wall_deadline=rq_upload.time.monotonic() + 60,
     )
@@ -446,7 +455,6 @@ def test_http_finalize_pending_receipt_is_strictly_verified(monkeypatch, creds, 
         creds.base_url,
         creds.upload_id,
         creds.api_key,
-        creds.app_key,
         None,
         wall_deadline=rq_upload.time.monotonic() + 60,
     )
@@ -475,9 +483,7 @@ def test_http_finalize_pending_backoff_is_bounded_under_the_run_wall(monkeypatch
     monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
     monkeypatch.setattr(rq_upload.time, 'sleep', sleep)
     monkeypatch.setattr(rq_upload.time, 'monotonic', lambda: clock['now'])
-    scoped = rq_upload.UploadCredentials(
-        creds.base_url, creds.upload_id, creds.api_key, creds.app_key, None, wall_deadline=25.0
-    )
+    scoped = rq_upload.UploadCredentials(creds.base_url, creds.upload_id, creds.api_key, None, wall_deadline=25.0)
     with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
         rq_upload.RequestsUploadClient().finalize_run(scoped, 1)
     assert failure.value.code == 'timeout'
@@ -503,7 +509,6 @@ def test_http_finalize_pending_then_terminal_rejection_fails_closed(monkeypatch,
         creds.base_url,
         creds.upload_id,
         creds.api_key,
-        creds.app_key,
         None,
         wall_deadline=rq_upload.time.monotonic() + 60,
     )
@@ -537,7 +542,7 @@ def test_trace_headers_reach_page_finalize_abort_and_retries_without_other_chang
     def drive(trace_context):
         calls.clear()
         scoped = rq_upload.UploadCredentials(
-            creds.base_url, creds.upload_id, creds.api_key, creds.app_key, 'test-intake', trace_context=trace_context
+            creds.base_url, creds.upload_id, creds.api_key, 'test-intake', trace_context=trace_context
         )
         with io.BytesIO(b'x') as body:
             client.put_source_page(scoped, page, body)
@@ -624,7 +629,6 @@ def test_active_spans_replace_the_manual_trace_headers_only_on_spanned_requests(
         creds.base_url,
         creds.upload_id,
         creds.api_key,
-        creds.app_key,
         None,
         trace_context=rq_contract.RemoteQueryTraceContext.model_validate(
             {'traceId': TRACE_ID, 'parentId': PARENT_ID, 'samplingPriority': 2}
@@ -662,7 +666,7 @@ def test_active_spans_replace_the_manual_trace_headers_only_on_spanned_requests(
     assert page_headers[rq_contract.REMOTE_QUERY_TRACE_PARENT_ID_HEADER] == str(attempt.span_id)
     assert page_headers[rq_contract.REMOTE_QUERY_TRACE_SAMPLING_PRIORITY_HEADER] == '1'
     assert page_headers['dd-api-key'] == 'test-api-key'
-    assert page_headers['dd-application-key'] == 'test-app-key'
+    assert 'dd-application-key' not in page_headers
     assert page_headers['Content-Type'] == rq_upload.REMOTE_QUERY_SOURCE_PAGE_CONTENT_TYPE
 
     # Finalize and abort inject their whole-call spans the same way.
@@ -683,7 +687,6 @@ def test_injection_failure_falls_back_to_the_manual_trace_headers(monkeypatch, d
         creds.base_url,
         creds.upload_id,
         creds.api_key,
-        creds.app_key,
         None,
         trace_context=rq_contract.RemoteQueryTraceContext.model_validate(
             {'traceId': TRACE_ID, 'parentId': PARENT_ID, 'samplingPriority': 2}
@@ -879,9 +882,7 @@ PAGE_PAYLOAD = b'x' * (8 * 1024 * 1024)
 
 
 def put_page_to(intake, client, wall_deadline=None):
-    creds = rq_upload.UploadCredentials(
-        intake.base_url, 'upload-1', 'test-api-key', 'test-app-key', None, wall_deadline
-    )
+    creds = rq_upload.UploadCredentials(intake.base_url, 'upload-1', 'test-api-key', None, wall_deadline)
     with io.BytesIO(PAGE_PAYLOAD) as body:
         return client.put_source_page(creds, source_page(PAGE_PAYLOAD, record_offset=0), body)
 

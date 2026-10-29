@@ -549,10 +549,10 @@ class PostgresRemoteQueryHandler:
                         'target_unavailable', 'Matched Postgres check does not expose a configured database name.'
                     )
                 creds = rq_upload.resolve_upload_credentials(parsed.result_delivery, started_at, parsed.trace_context)
-                if not creds.api_key or not creds.app_key:
+                if not creds.api_key:
                     raise rq_contract.RemoteQueryFailure(
                         'credentials_unavailable',
-                        'Remote query upload requires api_key and app_key to be configured on the Agent.',
+                        'Remote query upload requires api_key to be configured on the Agent.',
                     )
                 pool = getattr(self._check, 'db_pool', None)
                 if pool is None:

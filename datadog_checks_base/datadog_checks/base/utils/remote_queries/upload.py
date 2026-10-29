@@ -108,7 +108,6 @@ class UploadCredentials:
     base_url: str
     upload_id: str
     api_key: str
-    app_key: str
     test_drive: str | None
     # The run-wide monotonic hard wall for this session's upload requests; None means the
     # request is not wall-scoped (best-effort abort, or a test double driving the client).
@@ -250,7 +249,6 @@ class RequestsUploadClient:
     def _headers(self, creds: UploadCredentials, content_type: str | None = None) -> dict[str, str]:
         headers = {
             'dd-api-key': creds.api_key,
-            'dd-application-key': creds.app_key,
         }
         if content_type is not None:
             headers['Content-Type'] = content_type
@@ -693,7 +691,6 @@ def resolve_upload_credentials(
         base_url=delivery.base_url,
         upload_id=delivery.upload_id,
         api_key=get_agent_config('api_key'),
-        app_key=get_agent_config('app_key'),
         test_drive=test_drive,
         wall_deadline=started_at + delivery.limits.timeout_ms / 1000,
         trace_context=trace_context,

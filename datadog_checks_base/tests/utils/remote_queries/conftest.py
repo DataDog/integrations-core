@@ -33,4 +33,4 @@ def delivery():
 
 @pytest.fixture
 def creds(delivery):
-    return rq_upload.UploadCredentials(delivery.base_url, delivery.upload_id, 'test-api-key', 'test-app-key', None)
+    return rq_upload.UploadCredentials(delivery.base_url, delivery.upload_id, 'test-api-key', None)
