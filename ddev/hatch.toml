@@ -3,10 +3,6 @@ check-types = true
 mypy-files = [
   "src/ddev",
 ]
-# Keep in sync with the anthropic pin in pyproject.toml so mypy checks the SDK calls.
-mypy-deps = [
-  "anthropic==2.1.0",
-]
 
 [envs.default]
 python = "3.13"
