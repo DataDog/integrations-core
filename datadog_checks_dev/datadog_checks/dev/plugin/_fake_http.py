@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import json
 import threading
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterable, Iterator, Mapping
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import timedelta
@@ -25,11 +25,11 @@ import requests_mock
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.stubs.http import (
     JSON_RESULT_UNSET,
-    FakeHTTPClient,
     FakeHTTPResponse,
     RecordedRequest,
     RegisteredResponse,
-    _snapshot_options,
+    assert_has_recorded_request,
+    assert_recorded_requests,
 )
 from datadog_checks.base.utils.http import RequestsWrapper, create_http_client, is_uds_url, quote_uds_url
 from datadog_checks.base.utils.http_protocol import HTTPClient, HTTPHeaders
@@ -52,9 +52,6 @@ class _Registration:
 
 class FakeHTTP:
     """Registers responses for, and records the requests of, every check client created during a test."""
-
-    assert_requests = FakeHTTPClient.assert_requests
-    assert_has_request = FakeHTTPClient.assert_has_request
 
     def __init__(self) -> None:
         self.requests: list[RecordedRequest] = []
@@ -82,11 +79,21 @@ class FakeHTTP:
         Registrations matching the same request are served in order, and the last one then repeats.
         """
         _check_servable(response)
-        registered = RegisteredResponse(
-            method=method.upper(), url=url, outcome=response, match_options=_snapshot_options(match_options or {})
-        )
+        registered = RegisteredResponse(method, url, response, match_options or {})
         with self._lock:
             self._registrations.append(_Registration(registered))
+
+    def assert_requests(self, expected: Iterable[RecordedRequest]) -> None:
+        """Assert that the checks made exactly the expected calls, in order."""
+        with self._lock:
+            recorded = list(self.requests)
+        assert_recorded_requests(recorded, expected)
+
+    def assert_has_request(self, expected: RecordedRequest) -> None:
+        """Assert that the checks made the expected call."""
+        with self._lock:
+            recorded = list(self.requests)
+        assert_has_recorded_request(recorded, expected)
 
     def assert_all_responses_consumed(self) -> None:
         """Assert that every registration was served at least once."""
@@ -129,7 +136,7 @@ class FakeHTTP:
                     'following a redirect or fetching an auth token. The fake_http fixture serves only the call '
                     'itself; pass allow_redirects=False to receive a registered redirect.'
                 )
-            matching = [r for r in self._registrations if FakeHTTPClient._matches(r.registered, call)]
+            matching = [r for r in self._registrations if r.registered.matches(call)]
             chosen = next((r for r in matching if not r.served), matching[-1] if matching else None)
             if chosen is None:
                 raise AssertionError(
