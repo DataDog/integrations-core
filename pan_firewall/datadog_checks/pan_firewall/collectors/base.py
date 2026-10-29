@@ -140,12 +140,6 @@ Collector = Callable[[CollectContext], list[Sample]]
 def read_each[T, R](
     items: Iterable[T], read: Callable[[T], R], on_error: Callable[[T, PanosError], None]
 ) -> Iterator[tuple[T, R]]:
-    """Yield `(item, read(item))` for each item whose read succeeds, for a collector that makes one call per item.
-
-    A read that fails with a PanosError is reported to `on_error` and skipped, so that one broken item does not drop
-    the others. Authentication and connection errors propagate at once. When the items are exhausted and none was
-    read, the last error is raised, so the collector still fails when nothing answered: consume the whole iterator.
-    """
     error: PanosError | None = None
     answered = False
     for item in items:
