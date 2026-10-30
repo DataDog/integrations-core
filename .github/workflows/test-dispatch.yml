@@ -12,6 +12,55 @@ on:
     types:
       - completed
 
+  # Callers reference this file at `@master`, so a caller on a release branch or tag runs master's
+  # Dispatcher against its own commit. Caller and callee must not share a concurrency group string, or
+  # the run cancels itself.
+  workflow_call:
+    inputs:
+      commit:
+        description: "Full SHA of the commit to test"
+        required: true
+        type: string
+      all:
+        description: "Test every eligible target. Cannot be combined with `targets`"
+        required: false
+        default: false
+        type: boolean
+      targets:
+        description: "Comma-separated targets to test, with all their environments"
+        required: false
+        default: ""
+        type: string
+      exclude-targets:
+        description: "Comma-separated targets to remove from the selection"
+        required: false
+        default: ""
+        type: string
+      pytest-args:
+        description: "Arguments every job appends to pytest"
+        required: false
+        default: '-m "not flaky"'
+        type: string
+      context:
+        description: "What the run is for, such as `nightly` or `test-agent`. Keeps runs on one commit apart"
+        required: true
+        type: string
+      agent-image:
+        description: "Agent image for every Linux E2E job"
+        required: false
+        default: ""
+        type: string
+      agent-image-windows:
+        description: "Agent image for every Windows E2E job"
+        required: false
+        default: ""
+        type: string
+      blocking:
+        description: "Whether a failing run fails the caller. `false` in shadow mode"
+        required: false
+        default: true
+        type: boolean
+
 permissions: {}
 
 defaults:
@@ -27,21 +76,39 @@ jobs:
     permissions:
       contents: read
       id-token: write # the octo-sts exchange; every write happens with the scoped token
+    # A caller cannot set `continue-on-error` on a job that calls a reusable workflow, so shadow-mode
+    # callers ask for it here. `inputs.context` is only set when called, which keeps push runs blocking.
+    continue-on-error: ${{ inputs.context != '' && !inputs.blocking }}
 
     # One source branch maps to one PR. Include the repository for forks and omit the SHA so a new
-    # revision cancels the previous Dispatcher. Master pushes keep independent runs.
+    # revision cancels the previous Dispatcher. Master pushes and called runs keep independent runs.
     # Keep concurrency at job level: workflow_run also fires for canceled triggers, whose skipped
     # jobs must not cancel newer triggers.
+    # In a called run `github.event_name` is the caller's event, so `inputs.context` is checked first.
     concurrency:
       group: test-dispatch-${{
+        inputs.context != '' && format('{0}-{1}', inputs.context, github.run_id) ||
         github.event_name == 'workflow_run' && format('pr-{0}/{1}', github.event.workflow_run.head_repository.full_name, github.event.workflow_run.head_branch) ||
         format('master-{0}', github.run_id) }}
       cancel-in-progress: true
 
+    env:
+      CALLED: ${{ inputs.context != '' }}
+      # The PR status keeps one stable name because it becomes a required check at takeover. Other runs
+      # are named by context, so runs on one commit do not overwrite each other's status.
+      STATUS_CONTEXT: ${{
+        inputs.context == '' && github.event_name == 'workflow_run' && 'Dispatcher / tests (beta, non-blocking)' ||
+        format('Dispatcher ({0}) / tests (beta, non-blocking)', inputs.context || 'master') }}
+      HEAD_SHA: ${{
+        inputs.context != '' && inputs.commit ||
+        github.event_name == 'workflow_run' && github.event.workflow_run.head_sha ||
+        github.sha }}
+
     if: >-
       github.repository == 'DataDog/integrations-core'
       && (
-        (github.event_name == 'push' && github.ref == 'refs/heads/master')
+        inputs.context != ''
+        || (github.event_name == 'push' && github.ref == 'refs/heads/master')
         || (
           github.event_name == 'workflow_run'
           && github.event.workflow_run.conclusion == 'success'
@@ -51,15 +118,33 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # workflow_run executes current trusted code. A push tests that exact master revision.
-          ref: ${{ github.event_name == 'workflow_run' && 'refs/heads/master' || github.sha }}
-          fetch-depth: ${{ github.event_name == 'workflow_run' && 1 || 2 }}
+          # workflow_run and called runs execute current trusted code. A push tests that exact master revision.
+          ref: ${{ (env.CALLED == 'true' || github.event_name == 'workflow_run') && 'refs/heads/master' || github.sha }}
+          fetch-depth: ${{ (env.CALLED == 'true' || github.event_name == 'workflow_run') && 1 || 2 }}
           persist-credentials: false
 
       # Commit resolution records the local branch, but checking out a SHA leaves it detached.
       - name: Attribute the pushed checkout to master
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && env.CALLED != 'true'
         run: git checkout -B master
+
+      # Data for trusted ddev to parse; its code is executed only by test-batch. Depth 2 holds the
+      # first parent, which a change-based run diffs against.
+      - name: Check out the tested commit
+        if: env.CALLED == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.commit }}
+          path: dispatcher-planning-repo
+          fetch-depth: 2
+          persist-credentials: false
+
+      # Commit resolution records the local branch, so results are attributed to the caller's ref.
+      - name: Attribute the tested commit to the caller's ref
+        if: env.CALLED == 'true'
+        env:
+          CALLER_REF: ${{ github.ref_name }}
+        run: git -C dispatcher-planning-repo checkout -q -B "$CALLER_REF"
 
       - name: Get a scoped token
         id: octo-sts
@@ -71,8 +156,6 @@ jobs:
       - name: Mark the run pending
         env:
           GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
-          HEAD_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
-          STATUS_CONTEXT: Dispatcher / tests (beta, non-blocking)
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
@@ -112,6 +195,11 @@ jobs:
           HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
           PUSH_SHA: ${{ github.sha }}
+          COMMIT: ${{ inputs.commit }}
+          ALL_TARGETS: ${{ inputs.all }}
+          TARGETS: ${{ inputs.targets }}
+          EXCLUDE_TARGETS: ${{ inputs.exclude-targets }}
+          RUN_CONTEXT: ${{ inputs.context }}
         run: |
           set -euo pipefail
           args=(
@@ -120,7 +208,21 @@ jobs:
             --repo DataDog/integrations-core
             --output-dir "$GITHUB_WORKSPACE/dispatcher-output"
           )
-          if [[ "$EVENT_NAME" == workflow_run ]]; then
+          if [[ "$CALLED" == true ]]; then
+            # Resolve from the tested tree, whose branch is the caller's ref.
+            cd "$GITHUB_WORKSPACE/dispatcher-planning-repo"
+            ddev config override
+            args+=(--commit "$COMMIT" --tags "context:${RUN_CONTEXT}")
+            if [[ "$ALL_TARGETS" == true ]]; then
+              args+=(--all)
+            fi
+            if [[ -n "$TARGETS" ]]; then
+              args+=(--targets "$TARGETS")
+            fi
+            if [[ -n "$EXCLUDE_TARGETS" ]]; then
+              args+=(--exclude-targets "$EXCLUDE_TARGETS")
+            fi
+          elif [[ "$EVENT_NAME" == workflow_run ]]; then
             args+=(
               --pr-head-repo "$HEAD_REPO"
               --pr-head-branch "$HEAD_BRANCH"
@@ -148,6 +250,7 @@ jobs:
           pr_number=$(jq -r '.pr_number // empty' "$manifest")
           base_branch=$(jq -r '.base_branch // empty' "$manifest")
           base_sha=$(jq -r '.base_sha // empty' "$manifest")
+          context=$(jq -er '.context' "$manifest")
 
           echo "Resolved run:"
           jq . "$manifest"
@@ -169,7 +272,7 @@ jobs:
               echo "- Run type: Pull request"
               echo "- Pull request: <${GITHUB_SERVER_URL}/${repository}/pull/${pr_number}>"
             else
-              echo "- Run type: Master push"
+              echo "- Run type: Commit (\`${context}\`)"
             fi
             echo "- Head branch: \`${head_branch}\`"
             echo "- Head SHA: [\`${head_sha}\`](${GITHUB_SERVER_URL}/${repository}/commit/${head_sha})"
@@ -212,6 +315,9 @@ jobs:
           DD_GITHUB_TOKEN: ${{ steps.octo-sts.outputs.token }}
           RESOLVED: ${{ steps.resolved.outputs.available }}
           PR_NUMBER: ${{ steps.resolved.outputs.pr_number }}
+          PYTEST_ARGS: ${{ inputs.pytest-args }}
+          AGENT_IMAGE: ${{ inputs.agent-image }}
+          AGENT_IMAGE_WINDOWS: ${{ inputs.agent-image-windows }}
         run: |
           set -euo pipefail
           if [[ "$RESOLVED" != true ]]; then
@@ -220,12 +326,15 @@ jobs:
           fi
 
           planning_repo=$GITHUB_WORKSPACE
-          if [[ -n "$PR_NUMBER" ]]; then
+          if [[ -n "$PR_NUMBER" || "$CALLED" == true ]]; then
             planning_repo=$GITHUB_WORKSPACE/dispatcher-planning-repo
           fi
           cd "$planning_repo"
           ddev config override
 
+          if [[ "$CALLED" != true ]]; then
+            PYTEST_ARGS='-m "not flaky"'
+          fi
           args=(
             ci dispatch-tests
             --run-manifest "$GITHUB_WORKSPACE/dispatcher-output/run.json"
@@ -233,9 +342,17 @@ jobs:
             --workflow test-batch.yml
             --workflow-ref master
             --output-dir "$GITHUB_WORKSPACE/dispatcher-output"
-            --pytest-args '-m "not flaky"'
             --minimum-base-package
           )
+          if [[ -n "$PYTEST_ARGS" ]]; then
+            args+=(--pytest-args "$PYTEST_ARGS")
+          fi
+          if [[ -n "$AGENT_IMAGE" ]]; then
+            args+=(--agent-image "$AGENT_IMAGE")
+          fi
+          if [[ -n "$AGENT_IMAGE_WINDOWS" ]]; then
+            args+=(--agent-image-windows "$AGENT_IMAGE_WINDOWS")
+          fi
           # Deliver cancellation signals directly to ddev's cleanup handler.
           exec ddev "${args[@]}"
 
@@ -245,8 +362,6 @@ jobs:
         timeout-minutes: 1
         env:
           GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
-          HEAD_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
-          STATUS_CONTEXT: Dispatcher / tests (beta, non-blocking)
           DISPATCH_OUTCOME: ${{ steps.dispatch.outcome }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
@@ -282,8 +397,8 @@ jobs:
           if [[ ! -d "$coverage_dir" ]] || [[ -z "$(find "$coverage_dir" -type f -name '*.xml' -print -quit)" ]]; then
             exit 0
           fi
-          if [[ -n "$PR_NUMBER" ]]; then
-            # The uploader reads repository metadata, so use the same merge tree that produced the reports.
+          if [[ -n "$PR_NUMBER" || "$CALLED" == true ]]; then
+            # The uploader reads repository metadata, so use the same tree that produced the reports.
             git fetch --no-tags --depth=2 origin "$CHECKOUT_SHA"
             git checkout --detach "$CHECKOUT_SHA"
           fi

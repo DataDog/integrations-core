@@ -1,12 +1,14 @@
-# Allows test-dispatch on master to run test batches and report their results.
+# Allows test-dispatch on master to run test batches and report their results. Callers on master,
+# a release branch or a release tag run master's test-dispatch through `workflow_call`, where the
+# event, ref and ref type are the caller's.
 issuer: https://token.actions.githubusercontent.com
 
-subject: repo:DataDog/integrations-core:ref:refs/heads/master
+subject_pattern: repo:DataDog/integrations-core:ref:refs/(heads/(master|7\.\d+\.x)|tags/7\.\d+\.\d+)
 
 claim_pattern:
-  event_name: ^(push|workflow_run)$
-  ref: ^refs/heads/master$
-  ref_type: ^branch$
+  event_name: ^(push|workflow_run|schedule|workflow_dispatch)$
+  ref: ^refs/(heads/(master|7\.\d+\.x)|tags/7\.\d+\.\d+)$
+  ref_type: ^(branch|tag)$
   job_workflow_ref: ^DataDog/integrations-core/\.github/workflows/test-dispatch\.yml@refs/heads/master$
   repository: ^DataDog/integrations-core$
 
