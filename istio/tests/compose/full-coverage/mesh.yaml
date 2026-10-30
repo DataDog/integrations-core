@@ -1,0 +1,107 @@
+# Sidecar-injected workload for the istio-full evalya fixture. `client` calls
+# `web` over an HTTP port and a TCP port (`tcp-` prefix), so its sidecar reports
+# both the istio_request*/istio_response* and the istio_tcp_* families as the
+# source reporter. That sidecar is the one the check scrapes.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mesh
+  labels:
+    istio-injection: enabled
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: mesh
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+        version: v1
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: mesh
+spec:
+  selector:
+    app: web
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+    - name: tcp-web
+      port: 8080
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client
+  namespace: mesh
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client
+  template:
+    metadata:
+      labels:
+        app: client
+      annotations:
+        # A 20s workload certificate makes pilot-agent rotate it every ~10s, so
+        # the CSR counters (istio_agent_num_outgoing_requests,
+        # istio_agent_outgoing_latency, citadel_server_*) keep moving.
+        proxy.istio.io/config: |
+          proxyMetadata:
+            SECRET_TTL: 20s
+    spec:
+      containers:
+        - name: client
+          image: curlimages/curl:8.11.1
+          command: ["sleep", "infinity"]
+---
+# The client sidecar's merged stats (Envoy istio_* plus pilot-agent
+# istio_agent_*), reachable from the compose network on the k3s node.
+apiVersion: v1
+kind: Service
+metadata:
+  name: client-stats
+  namespace: mesh
+spec:
+  type: NodePort
+  selector:
+    app: client
+  ports:
+    - name: stats
+      port: 15020
+      targetPort: 15020
+      nodePort: 31020
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: istiod-metrics
+  namespace: istio-system
+spec:
+  type: NodePort
+  selector:
+    app: istiod
+  ports:
+    - name: http-monitoring
+      port: 15014
+      targetPort: 15014
+      nodePort: 31014

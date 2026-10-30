@@ -1,0 +1,47 @@
+# Istio config for the istio-full fixture. Routes and subsets for `web` give
+# istiod virtual services and destination rules to count and push.
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: web
+  namespace: mesh
+spec:
+  host: web.mesh.svc.cluster.local
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: web
+  namespace: mesh
+spec:
+  hosts:
+    - web.mesh.svc.cluster.local
+  http:
+    - route:
+        - destination:
+            host: web.mesh.svc.cluster.local
+            subset: v1
+---
+# A Wasm extension on the client sidecar, so pilot-agent fetches and caches a
+# module (istio_agent_wasm_cache_entries). Server-side only and fail-open, so the
+# client's outbound calls to web are untouched.
+apiVersion: extensions.istio.io/v1alpha1
+kind: WasmPlugin
+metadata:
+  name: cache-probe
+  namespace: mesh
+spec:
+  selector:
+    matchLabels:
+      app: client
+  url: oci://ghcr.io/istio-ecosystem/wasm-extensions/basic_auth:1.12.0
+  phase: AUTHN
+  failStrategy: FAIL_OPEN
+  match:
+    - mode: SERVER
+  pluginConfig:
+    basic_auth_rules: []
