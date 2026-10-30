@@ -1,7 +1,7 @@
 # Agent Metrics Integration
 
 <div class="alert alert-warning">
-This integration is deprecated. Use the <a href="https://docs.datadoghq.com/integrations/datadog_agent/">Datadog Agent</a> integration instead, which collects the Agent's internal telemetry from its OpenMetrics endpoint with typed metrics, more granular tags, and a larger set of available metrics.
+This integration is deprecated. Use the <a href="https://docs.datadoghq.com/integrations/datadog_agent/">Datadog Agent</a> integration instead. The Datadog Agent integration collects the Agent's internal telemetry from its OpenMetrics endpoint with typed metrics, more granular tags, and a larger set of available metrics.
 </div>
 
 ## Overview
