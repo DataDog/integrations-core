@@ -1045,6 +1045,10 @@ pipeline:
               name: ocsf.actor.user.type_id
               categories:
                 - filter:
+                    query: "-@created_by.type:* -@created_by.id:1"
+                  name: Unknown
+                  id: 0
+                - filter:
                     query: "@created_by.type:user -@created_by.id:1"
                   name: User
                   id: 1
@@ -1537,6 +1541,10 @@ pipeline:
               name: ocsf.actor.user.type_id
               categories:
                 - filter:
+                    query: "-@created_by.type:* -@created_by.id:1"
+                  name: Unknown
+                  id: 0
+                - filter:
                     query: "@created_by.type:user -@created_by.id:1"
                   name: User
                   id: 1
@@ -1761,6 +1769,10 @@ pipeline:
             - type: schema-category-mapper
               name: ocsf.actor.user.type_id
               categories:
+                - filter:
+                    query: "-@created_by.type:* -@created_by.id:1"
+                  name: Unknown
+                  id: 0
                 - filter:
                     query: "@created_by.type:user -@created_by.id:1"
                   name: User
@@ -2103,6 +2115,10 @@ pipeline:
             - type: schema-category-mapper
               name: ocsf.actor.user.type_id
               categories:
+                - filter:
+                    query: "-@created_by.type:* -@created_by.id:1"
+                  name: Unknown
+                  id: 0
                 - filter:
                     query: "@created_by.type:user -@created_by.id:1"
                   name: User
