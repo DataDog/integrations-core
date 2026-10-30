@@ -134,6 +134,9 @@ files:
         CIDR block, the associated username and password are used instead of the main credentials.
         If multiple CIDR blocks match, the Agent uses the first match. Each entry must specify all three
         fields: `cidr`, `username`, and `password`.
+        When `orchestrator_api_key` is set, this option is the only source of appliance credentials.
+        Appliances that no entry covers are skipped with a warning, and only `device.reachability` is
+        reported for them.
       value:
         type: array
         items:

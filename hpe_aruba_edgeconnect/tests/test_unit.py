@@ -54,6 +54,7 @@ def test_config_rejects_invalid_appliance_ip_patterns(instance, appliance_ips):
 
 
 APPLIANCE_OVERRIDE = [{'cidr': '0.0.0.0/0', 'username': 'admin', 'password': ''}]
+PASSWORD_AUTH = {'orchestrator_username': 'admin', 'orchestrator_password': 'default_pass'}
 
 
 @pytest.mark.parametrize(
@@ -242,7 +243,7 @@ def test_parse_speed(dd_run_check, aggregator, mocker, check, value, expected):
             [{'cidr': '192.168.1.0/24', 'username': 'cidr_user', 'password': 'cidr_pass'}],
             'cidr_user',
             'cidr_pass',
-            {'orchestrator_username': 'admin', 'orchestrator_password': 'default_pass'},
+            PASSWORD_AUTH,
             id='cidr_match',
         ),
         pytest.param(
@@ -250,7 +251,7 @@ def test_parse_speed(dd_run_check, aggregator, mocker, check, value, expected):
             [{'cidr': '192.168.1.0/24', 'username': 'cidr_user', 'password': 'cidr_pass'}],
             'admin',
             'default_pass',
-            {'orchestrator_username': 'admin', 'orchestrator_password': 'default_pass'},
+            PASSWORD_AUTH,
             id='fallback_to_shared',
         ),
         pytest.param(
@@ -258,7 +259,7 @@ def test_parse_speed(dd_run_check, aggregator, mocker, check, value, expected):
             None,
             'admin',
             'default_pass',
-            {'orchestrator_username': 'admin', 'orchestrator_password': 'default_pass'},
+            PASSWORD_AUTH,
             id='no_overrides',
         ),
         pytest.param(
@@ -269,7 +270,7 @@ def test_parse_speed(dd_run_check, aggregator, mocker, check, value, expected):
             ],
             'good',
             'good',
-            {'orchestrator_username': 'admin', 'orchestrator_password': 'default_pass'},
+            PASSWORD_AUTH,
             id='invalid_cidr_skipped',
         ),
         pytest.param(
@@ -277,7 +278,7 @@ def test_parse_speed(dd_run_check, aggregator, mocker, check, value, expected):
             [{'cidr': '192.168.1.0/24', 'username': 'cidr_user', 'password': ''}],
             'cidr_user',
             '',
-            {'orchestrator_username': 'admin', 'orchestrator_password': 'default_pass'},
+            PASSWORD_AUTH,
             id='empty_password_is_valid',
         ),
         pytest.param(
@@ -288,7 +289,7 @@ def test_parse_speed(dd_run_check, aggregator, mocker, check, value, expected):
             ],
             'first_user',
             'first_pass',
-            {'orchestrator_username': 'admin', 'orchestrator_password': 'default_pass'},
+            PASSWORD_AUTH,
             id='first_match_wins',
         ),
         pytest.param(
