@@ -24,7 +24,11 @@ pytestmark = pytest.mark.unit
 EMPTY_RESULT = b'<response status="success"><result/></response>'
 NO_RESULT = b'<response status="success"/>'
 TEXT_RESULT = b'<response status="success"><result>not what was expected</result></response>'
-HA_ENABLED = b'<response status="success"><result><enabled>yes</enabled></result></response>'
+# Answers every call, so the HA1 link call gets a shape without counters.
+HA_ENABLED = (
+    b'<response status="success"><result><enabled>yes</enabled>'
+    b'<group><local-info><ha1-port>management</ha1-port></local-info></group></result></response>'
+)
 # A power supply in alarm without thresholds: the direction is unknown, so it is warned about, and the other sensors
 # are still sent.
 HARDWARE = (SYNTHETIC / 'environmentals_hw.xml').read_bytes()
