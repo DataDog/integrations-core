@@ -190,7 +190,7 @@ kind: Pod
 metadata:
   name: ray
   annotations:
-    ad.datadoghq.com/apache.logs: '[{"source":"ray","service":"ray"}]'
+    ad.datadoghq.com/ray.logs: '[{"source":"ray","service":"ray"}]'
 spec:
   containers:
     - name: ray
