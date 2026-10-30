@@ -1,0 +1,142 @@
+# Full metric-coverage environment for the scylla check (evalya `scylla-full`).
+#
+# A real single-node Scylla with password authentication, a one-shot `seed` that
+# creates the workload schema and credentials, and a continuous `activity-gen`
+# that keeps the coordinator, cache, and CQL transport counters moving. The
+# `scylla-proxy` entrypoint is a plain TCP pass-through (nothing is injected);
+# it exists only so that a single dependency on it pulls up the whole
+# environment, because the scraped node itself cannot depend on its own seed.
+#
+# Host-overridable inputs (each with a working default):
+#   SCYLLA_VERSION  Scylla image tag, shared by every service.
+#   DB_USERNAME     CQL role used by seed/activity-gen and published to consumers.
+#   DB_PASSWORD     Password for DB_USERNAME.
+#   ACTIVITY_GEN    Set to 0 for a quiescent fixture (no generated traffic).
+services:
+  scylla:
+    image: "scylladb/scylla:${SCYLLA_VERSION:-5.2.6}"
+    networks:
+      - network1
+    # Small single-shard footprint so it runs on a shared CI host. The REST API
+    # listens on all interfaces so activity-gen can flush and drop caches.
+    command: >
+      --smp 1
+      --memory 750M
+      --overprovisioned 1
+      --developer-mode 1
+      --api-address 0.0.0.0
+      --authenticator PasswordAuthenticator
+      --authorizer CassandraAuthorizer
+    healthcheck:
+      # NORMAL operation mode on the metrics endpoint and CQL accepting
+      # connections. Credentials are verified by `seed`, which may still be
+      # rotating them when this first passes.
+      test:
+        - CMD-SHELL
+        - >-
+          curl -sf "http://$$(hostname -i):9180/metrics" | grep -q '^scylla_node_operation_mode{shard="0"} 3'
+          && bash -c "</dev/tcp/$$(hostname -i)/9042"
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  # Ensures the DB_USERNAME/DB_PASSWORD role exists (bootstrapping from the
+  # built-in cassandra/cassandra superuser when they differ), then creates the
+  # workload keyspace and primes it so the cache and coordinator counters are
+  # non-zero before the first scrape.
+  seed:
+    image: "scylladb/scylla:${SCYLLA_VERSION:-5.2.6}"
+    depends_on:
+      scylla:
+        condition: service_healthy
+    networks:
+      - network1
+    restart: "no"
+    environment:
+      DB_HOST: scylla
+      DB_USERNAME: "${DB_USERNAME:-cassandra}"
+      DB_PASSWORD: "${DB_PASSWORD:-cassandra}"
+    entrypoint:
+      - bash
+      - -c
+      - |
+        set -eu
+        login() { cqlsh "$$DB_HOST" -u "$$1" -p "$$2" -e 'SELECT now() FROM system.local' >/dev/null 2>&1; }
+        # The default superuser is created asynchronously after startup.
+        tries=0
+        until login "$$DB_USERNAME" "$$DB_PASSWORD" || login cassandra cassandra; do
+          tries=$$((tries+1)); [ $$tries -ge 60 ] && { echo "seed: CQL login never succeeded"; exit 1; }
+          sleep 2
+        done
+        if ! login "$$DB_USERNAME" "$$DB_PASSWORD"; then
+          echo "seed: provisioning role $$DB_USERNAME"
+          if [ "$$DB_USERNAME" = cassandra ]; then
+            cqlsh "$$DB_HOST" -u cassandra -p cassandra -e "ALTER ROLE cassandra WITH PASSWORD = '$$DB_PASSWORD'"
+          else
+            cqlsh "$$DB_HOST" -u cassandra -p cassandra -e "CREATE ROLE IF NOT EXISTS \"$$DB_USERNAME\" WITH PASSWORD = '$$DB_PASSWORD' AND LOGIN = true AND SUPERUSER = true"
+          fi
+        fi
+        Q="cqlsh $$DB_HOST -u $$DB_USERNAME -p $$DB_PASSWORD"
+        $$Q -e "CREATE KEYSPACE IF NOT EXISTS activity WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}"
+        $$Q -e "CREATE TABLE IF NOT EXISTS activity.kv (k int, c int, v text, PRIMARY KEY (k, c))"
+        i=1; while [ $$i -le 200 ]; do echo "INSERT INTO activity.kv (k, c, v) VALUES ($$((i % 50)), $$i, 'seed');"; i=$$((i+1)); done > /tmp/seed.cql
+        echo "SELECT * FROM activity.kv WHERE k = 1;" >> /tmp/seed.cql
+        $$Q -f /tmp/seed.cql >/dev/null
+        echo "seed-done"
+
+  # Continuous workload so rate/counter metrics keep moving across scrapes
+  # (coordinator reads/writes and their latency histograms, cache row hits and
+  # misses, read/write timeouts, CQL requests served). See ../activity-gen.sh.
+  activity-gen:
+    # Same image as the node (no extra pull); used for its cqlsh and curl.
+    image: "scylladb/scylla:${SCYLLA_VERSION:-5.2.6}"
+    depends_on:
+      scylla:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+    networks:
+      - network1
+    restart: unless-stopped
+    environment:
+      DB_HOST: scylla
+      DB_PORT: "9042"
+      SCYLLA_API_PORT: "10000"
+      DB_USERNAME: "${DB_USERNAME:-cassandra}"
+      DB_PASSWORD: "${DB_PASSWORD:-cassandra}"
+      # Set ACTIVITY_GEN=0 (host env) for a quiescent scylla-full: the container
+      # stays up but generates no traffic. Defaults to on.
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+    volumes:
+      - ../activity-gen.sh:/opt/activity-gen.sh:ro
+    entrypoint: ["sh", "/opt/activity-gen.sh"]
+
+  scylla-proxy:
+    image: "nginx:1.27-alpine"
+    # Fixture entrypoint (published as scylla-full). Gated on the whole
+    # environment so one dependency on it brings up the node, the seeded schema,
+    # and the workload. Forwards 9180 (metrics) and 9042 (CQL) unchanged.
+    depends_on:
+      scylla:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+      activity-gen:
+        condition: service_started
+    volumes:
+      - ./configs/full-coverage-proxy.conf:/etc/nginx/nginx.conf:ro
+    # No host-port publish: consumers reach the proxy over the managed network
+    # through the DB_HOST label, which avoids clashing with a local Scylla.
+    networks:
+      - network1
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:9180/metrics | grep -q '^scylla_node_operation_mode'"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+networks:
+  network1:
+    name: scylla-full-coverage_default
