@@ -1102,7 +1102,7 @@ def test_sanitize_activity_row_recovers_appended_comment_from_tail_text(
     check = SQLServer(CHECK_NAME, {}, [dict(dbm_instance, obfuscator_options=obfuscator_options)])
     row = check.activity._obfuscate_and_sanitize_row(row)
 
-    assert row['dd_comments'] == ([case_comment, dbm_comment] if expect_comments else [])
+    assert row['dd_comments'] == ([dbm_comment] if expect_comments else [])
     assert 'tail_text' not in row
     assert 'statement_text' not in row
 

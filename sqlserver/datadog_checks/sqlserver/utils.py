@@ -164,11 +164,16 @@ def needs_comment_recovery(full_text: Optional[str], statement_comments: Optiona
     )
 
 
-def extract_trailing_comments(text: Optional[str]) -> list[str]:
-    """Return the block comments at the end of `text`, in order.
+_SQLCOMMENTER_COMMENT = re.compile(r"/\*\s*[\w.-]+='[^']*'(?:\s*,\s*[\w.-]+='[^']*')*\s*\*/")
 
-    Only trailing whitespace, semicolons and `/* ... */` blocks are scanned, from the end backward,
-    so this is safe on text cut at an arbitrary position, such as inside a string literal.
+
+def extract_trailing_dbm_comments(text: Optional[str]) -> list[str]:
+    """Return the DBM propagation comments at the end of `text`, in order.
+
+    Scans backward over trailing whitespace, semicolons and `/* ... */` blocks, so it is safe on text cut
+    at an arbitrary position, such as inside a string literal. A backward scan cannot tell whether a
+    delimiter belongs to a string literal or a line comment, so only blocks in the `key='value'` format
+    the tracers emit, with a DBM marker, are accepted, and the scan stops at the first block that is not.
     """
     comments = []
     end = len(text) if text else 0
@@ -180,7 +185,10 @@ def extract_trailing_comments(text: Optional[str]) -> list[str]:
         start = text.rfind('/*', 0, end - 2)
         if start < 0:
             break
-        comments.append(text[start:end])
+        comment = text[start:end]
+        if not _SQLCOMMENTER_COMMENT.fullmatch(comment) or not has_dbm_comment_marker(comment):
+            break
+        comments.append(comment)
         end = start
     return comments[::-1]
 
