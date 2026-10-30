@@ -4,7 +4,7 @@
 
 import pytest
 
-CHECK_NAME = 'hmc'
+CHECK_NAME = 'ibm_hmc'
 
 
 @pytest.fixture

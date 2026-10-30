@@ -329,9 +329,6 @@ services:
 - id: hdfs_namenode
   paths:
   - hdfs_namenode/datadog_checks/hdfs_namenode/
-- id: hmc
-  paths:
-  - hmc/datadog_checks/hmc/
 - id: hpe_aruba_edgeconnect
   paths:
   - hpe_aruba_edgeconnect/datadog_checks/hpe_aruba_edgeconnect/
@@ -347,6 +344,9 @@ services:
 - id: ibm_db2
   paths:
   - ibm_db2/datadog_checks/ibm_db2/
+- id: ibm_hmc
+  paths:
+  - ibm_hmc/datadog_checks/ibm_hmc/
 - id: ibm_i
   paths:
   - ibm_i/datadog_checks/ibm_i/

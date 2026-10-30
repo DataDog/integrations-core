@@ -7,14 +7,14 @@ requires = ["hatchling>=0.11.2"]
 build-backend = "hatchling.build"
 
 [project]
-name = "datadog-hmc"
-description = "The HMC check"
+name = "datadog-ibm-hmc"
+description = "The IBM HMC check"
 readme = "README.md"
 keywords = [
     "datadog",
     "datadog agent",
     "datadog check",
-    "hmc",
+    "ibm_hmc",
     "ibm",
     "powervm",
 ]
@@ -39,11 +39,11 @@ deps = ["paramiko==5.0.0"]
 Source = "https://github.com/DataDog/integrations-core"
 
 [tool.hatch.version]
-path = "datadog_checks/hmc/__about__.py"
+path = "datadog_checks/ibm_hmc/__about__.py"
 
 [tool.hatch.build.targets.sdist]
 include = ["/datadog_checks", "/tests"]
 
 [tool.hatch.build.targets.wheel]
-include = ["/datadog_checks/hmc"]
+include = ["/datadog_checks/ibm_hmc"]
 dev-mode-dirs = ["."]

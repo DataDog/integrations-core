@@ -1,38 +1,40 @@
-# HMC
+# IBM HMC
 
 ## Overview
 
-The HMC check collects performance metrics from POWER systems managed by an
+The IBM HMC check collects performance metrics from POWER systems managed by an
 IBM Hardware Management Console (HMC).
 
 The check connects to the HMC appliance over SSH and runs `lslparutil` on it,
 so it can run on any host that can reach the HMC: an AIX LPAR, a Linux box, or
 anywhere else the Datadog Agent runs.
 
+**This check is only shipped with the Agent for AIX.**
+
 Metrics collected:
 
-- **LPAR statistics** (`hmc.lpar.*`): per-partition processor and memory usage,
+- **LPAR statistics** (`ibm_hmc.lpar.*`): per-partition processor and memory usage,
   such as entitled cycles, capped/uncapped cycles, and current memory.
-- **Shared processor pool statistics** (`hmc.pool.*`, `hmc.procpool.*`): pool
+- **Shared processor pool statistics** (`ibm_hmc.pool.*`, `ibm_hmc.procpool.*`): pool
   cycles and available/configurable processor units.
-- **Memory pool statistics** (`hmc.mempool.*`): shared memory pool allocation
+- **Memory pool statistics** (`ibm_hmc.mempool.*`): shared memory pool allocation
   and firmware memory.
-- **Managed system statistics** (`hmc.sys.*`): available and configurable system
+- **Managed system statistics** (`ibm_hmc.sys.*`): available and configurable system
   memory.
-- **HMC appliance statistics** (`hmc.system.memory.*`): memory and swap usage
+- **HMC appliance statistics** (`ibm_hmc.system.memory.*`): memory and swap usage
   of the HMC appliance itself, from `/proc/meminfo` and `monhmc`.
 
 ## Setup
 
 ### Installation
 
-The HMC check is included in the [Datadog Agent][1] package. No additional
+The IBM HMC check is included in the [Datadog Agent][1] package for AIX. No additional
 installation is needed on the HMC.
 
 ### Configuration
 
-1. Edit the `hmc.d/conf.yaml` file in your Agent's `conf.d/` directory.
-   See the [sample hmc.d/conf.yaml][2] for all available configuration options.
+1. Edit the `ibm_hmc.d/conf.yaml` file in your Agent's `conf.d/` directory.
+   See the [sample ibm_hmc.d/conf.yaml][2] for all available configuration options.
 
 2. Configure SSH access to the HMC. The recommended setup is an account with
    a read-only role (for example `hscroot`) and either a password or a private
@@ -70,7 +72,7 @@ collection are submitted. Keep the Agent host and the HMC reasonably in sync
 
 ### Validation
 
-Run the [Agent's status subcommand][4] and look for `hmc` under the Checks
+Run the [Agent's status subcommand][4] and look for `ibm_hmc` under the Checks
 section.
 
 ## Data Collected
@@ -78,25 +80,25 @@ section.
 ### Metrics
 
 See [metadata.csv][5] for a list of metrics provided by this check.
-The `hmc.system.memory.*` metrics come from the HMC's `/proc/meminfo`, so the
+The `ibm_hmc.system.memory.*` metrics come from the HMC's `/proc/meminfo`, so the
 exact set depends on the HMC firmware version.
 
 ### Service Checks
 
-`hmc.can_connect`
+`ibm_hmc.can_connect`
 : Returns `CRITICAL` if the Agent cannot connect to the HMC over SSH. Returns `OK` otherwise.
 
 ### Events
 
-The HMC check does not include any events.
+The IBM HMC check does not include any events.
 
 ## Support
 
 Need help? Contact [Datadog support][6].
 
 [1]: https://app.datadoghq.com/account/settings/agent/latest
-[2]: https://github.com/DataDog/integrations-core/blob/master/hmc/datadog_checks/hmc/data/conf.yaml.example
+[2]: https://github.com/DataDog/integrations-core/blob/master/ibm_hmc/datadog_checks/ibm_hmc/data/conf.yaml.example
 [3]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [4]: https://docs.datadoghq.com/agent/guide/agent-commands/#agent-status-and-information
-[5]: https://github.com/DataDog/integrations-core/blob/master/hmc/metadata.csv
+[5]: https://github.com/DataDog/integrations-core/blob/master/ibm_hmc/metadata.csv
 [6]: https://docs.datadoghq.com/help/

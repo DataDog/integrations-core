@@ -89,8 +89,8 @@ class ManagedServer:
         self.last_sample_time = dict.fromkeys(SAMPLE_FIELDS)
 
 
-class HMC(AgentCheck, ConfigMixin):
-    __NAMESPACE__ = 'hmc'
+class IbmHmcCheck(AgentCheck, ConfigMixin):
+    __NAMESPACE__ = 'ibm_hmc'
 
     SERVICE_CHECK_NAME = 'can_connect'
 

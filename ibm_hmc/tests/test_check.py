@@ -10,7 +10,7 @@ import paramiko
 import pytest
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.hmc import HMC
+from datadog_checks.ibm_hmc import IbmHmcCheck
 
 LSHMC_OUTPUT = """\
 vpd=*FC ????????
@@ -135,7 +135,7 @@ class FakeSSHClient:
         # malformed on purpose: a truncated row and an unparsable timestamp.
         lines = ['truncated', '13/45/2018 99:99:99,' + values]
         for i in range(self.num_samples):
-            when = time.strftime(HMC.SAMPLE_TIME_FORMAT, time.localtime(time.time() - (i + 1) * SAMPLE_RATE))
+            when = time.strftime(IbmHmcCheck.SAMPLE_TIME_FORMAT, time.localtime(time.time() - (i + 1) * SAMPLE_RATE))
             lines.append(f'{when},{values}')
         return '\n'.join(lines) + '\n'
 
@@ -146,32 +146,34 @@ def run_check(dd_run_check, check, fake_client):
 
 
 def test_check_runs(aggregator, dd_run_check, instance):
-    check = HMC('hmc', {}, [instance])
+    check = IbmHmcCheck('ibm_hmc', {}, [instance])
     fake = FakeSSHClient()
     run_check(dd_run_check, check, fake)
 
     # Service check
-    aggregator.assert_service_check('hmc.can_connect', status=AgentCheck.OK, tags=['hmc-instance:hmc.example.com-22'])
+    aggregator.assert_service_check(
+        'ibm_hmc.can_connect', status=AgentCheck.OK, tags=['hmc-instance:hmc.example.com-22']
+    )
 
     # Managed system metrics: one set per server, tagged with the LPAR sample's tag fields
     lpar_tags = ['server:ServerA', 'lpar_name:lparA', 'curr_sharing_mode:cap', 'mem_mode:ded']
     lpar_tags_b = [tag.replace('ServerA', 'ServerB') for tag in lpar_tags]
-    aggregator.assert_metric('hmc.lpar.curr_proc_units', value=0.5, tags=lpar_tags)
-    aggregator.assert_metric('hmc.lpar.curr_proc_units', value=0.5, tags=lpar_tags_b)
-    aggregator.assert_metric('hmc.lpar.idle_cycles', value=0, tags=lpar_tags)
-    aggregator.assert_metric('hmc.pool.total_pool_cycles', value=2538167299223, tags=['server:ServerA'])
-    assert len(aggregator.metrics('hmc.pool.total_pool_cycles')) == 2
-    aggregator.assert_metric('hmc.procpool.utilized_pool_cycles', value=467439053292, tags=['server:ServerA'])
-    aggregator.assert_metric('hmc.mempool.sys_firmware_pool_mem', value=282, tags=['server:ServerA'])
-    aggregator.assert_metric('hmc.sys.curr_avail_sys_mem', value=37376, tags=['server:ServerA'])
+    aggregator.assert_metric('ibm_hmc.lpar.curr_proc_units', value=0.5, tags=lpar_tags)
+    aggregator.assert_metric('ibm_hmc.lpar.curr_proc_units', value=0.5, tags=lpar_tags_b)
+    aggregator.assert_metric('ibm_hmc.lpar.idle_cycles', value=0, tags=lpar_tags)
+    aggregator.assert_metric('ibm_hmc.pool.total_pool_cycles', value=2538167299223, tags=['server:ServerA'])
+    assert len(aggregator.metrics('ibm_hmc.pool.total_pool_cycles')) == 2
+    aggregator.assert_metric('ibm_hmc.procpool.utilized_pool_cycles', value=467439053292, tags=['server:ServerA'])
+    aggregator.assert_metric('ibm_hmc.mempool.sys_firmware_pool_mem', value=282, tags=['server:ServerA'])
+    aggregator.assert_metric('ibm_hmc.sys.curr_avail_sys_mem', value=37376, tags=['server:ServerA'])
 
     # HMC appliance metrics
     appliance_tags = ['hmc-instance:hmc.example.com-22']
-    aggregator.assert_metric('hmc.system.memory.memtotal', value=4128368, tags=appliance_tags)
-    aggregator.assert_metric('hmc.system.memory.active_anon', value=65536, tags=appliance_tags)
-    aggregator.assert_metric('hmc.system.memory.swaptotal', value=2040244, tags=appliance_tags)
-    aggregator.assert_metric('hmc.system.memory.swap.total', value=2040244, tags=appliance_tags)
-    aggregator.assert_metric('hmc.system.memory.swap.used', value=266000, tags=appliance_tags)
+    aggregator.assert_metric('ibm_hmc.system.memory.memtotal', value=4128368, tags=appliance_tags)
+    aggregator.assert_metric('ibm_hmc.system.memory.active_anon', value=65536, tags=appliance_tags)
+    aggregator.assert_metric('ibm_hmc.system.memory.swaptotal', value=2040244, tags=appliance_tags)
+    aggregator.assert_metric('ibm_hmc.system.memory.swap.total', value=2040244, tags=appliance_tags)
+    aggregator.assert_metric('ibm_hmc.system.memory.swap.used', value=266000, tags=appliance_tags)
 
     # The lslparutil command resumes from the collection window, not the last sample
     sample_cmd = next(cmd for cmd in fake.commands if cmd.startswith('lslparutil -r lpar '))
@@ -181,41 +183,41 @@ def test_check_runs(aggregator, dd_run_check, instance):
 
 def test_sampling_throttled_by_sample_rate(aggregator, dd_run_check, instance):
     """A second collection within the HMC sample rate does not re-query subsystems."""
-    check = HMC('hmc', {}, [instance])
+    check = IbmHmcCheck('ibm_hmc', {}, [instance])
     fake = FakeSSHClient(num_samples=1)
     run_check(dd_run_check, check, fake)
     run_check(dd_run_check, check, fake)
 
     # LPAR metrics were submitted once, appliance memory metrics on every run
-    aggregator.assert_metric('hmc.lpar.curr_proc_units', count=2)  # one per server, first run only
-    assert len(aggregator.metrics('hmc.system.memory.memtotal')) == 2  # both runs
+    aggregator.assert_metric('ibm_hmc.lpar.curr_proc_units', count=2)  # one per server, first run only
+    assert len(aggregator.metrics('ibm_hmc.system.memory.memtotal')) == 2  # both runs
 
 
 def test_version_fallback_disables_newer_fields(aggregator, dd_run_check, instance):
     """Without a parsable *RM line the check assumes HMC 700 and drops newer LPAR fields."""
-    check = HMC('hmc', {}, [instance])
+    check = IbmHmcCheck('ibm_hmc', {}, [instance])
     fake = FakeSSHClient(
         lshmc_output='*DS Hardware Management Console\n',
         subsystem_values=SUBSYSTEM_VALUES_V700,
     )
     run_check(dd_run_check, check, fake)
 
-    aggregator.assert_metric('hmc.lpar.shared_cycles_while_active', value=0)
-    assert len(aggregator.metrics('hmc.lpar.curr_mem')) == 0
-    assert len(aggregator.metrics('hmc.lpar.idle_cycles')) == 0
+    aggregator.assert_metric('ibm_hmc.lpar.shared_cycles_while_active', value=0)
+    assert len(aggregator.metrics('ibm_hmc.lpar.curr_mem')) == 0
+    assert len(aggregator.metrics('ibm_hmc.lpar.idle_cycles')) == 0
 
 
 def test_server_without_sample_rate_is_skipped(aggregator, dd_run_check, instance):
     """A server whose sample rate cannot be read is skipped for this run."""
-    check = HMC('hmc', {}, [instance])
+    check = IbmHmcCheck('ibm_hmc', {}, [instance])
     fake = FakeSSHClient(sample_rates={'ServerA': SAMPLE_RATE, 'ServerB': 'not a number'})
     run_check(dd_run_check, check, fake)
 
     lpar_tags = ['server:ServerA', 'lpar_name:lparA', 'curr_sharing_mode:cap', 'mem_mode:ded']
-    aggregator.assert_metric('hmc.lpar.curr_proc_units', tags=lpar_tags)
+    aggregator.assert_metric('ibm_hmc.lpar.curr_proc_units', tags=lpar_tags)
     # Only ServerA reports; nothing at all for ServerB
-    assert len(aggregator.metrics('hmc.pool.total_pool_cycles')) == 1
-    assert len(aggregator.metrics('hmc.system.memory.memtotal')) == 1
+    assert len(aggregator.metrics('ibm_hmc.pool.total_pool_cycles')) == 1
+    assert len(aggregator.metrics('ibm_hmc.system.memory.memtotal')) == 1
 
 
 def test_connection_failure(aggregator, dd_run_check, instance):
@@ -225,9 +227,9 @@ def test_connection_failure(aggregator, dd_run_check, instance):
         def connect(self, host, port=22, username=None, password=None, **kwargs):
             raise paramiko.AuthenticationException('Authentication failed.')
 
-    check = HMC('hmc', {}, [instance])
+    check = IbmHmcCheck('ibm_hmc', {}, [instance])
     with pytest.raises(Exception, match='Authentication failed'):
         run_check(dd_run_check, check, UnreachableClient())
 
-    aggregator.assert_service_check('hmc.can_connect', status=AgentCheck.CRITICAL)
-    assert len(aggregator.metrics('hmc.system.memory.memtotal')) == 0
+    aggregator.assert_service_check('ibm_hmc.can_connect', status=AgentCheck.CRITICAL)
+    assert len(aggregator.metrics('ibm_hmc.system.memory.memtotal')) == 0

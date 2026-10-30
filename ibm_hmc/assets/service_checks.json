@@ -1,11 +1,11 @@
 [
     {
         "agent_version": "7.0.0",
-        "integration": "hmc",
-        "check": "hmc.can_connect",
+        "integration": "ibm_hmc",
+        "check": "ibm_hmc.can_connect",
         "statuses": ["ok", "critical"],
         "groups": [],
-        "name": "HMC Can Connect",
+        "name": "IBM HMC Can Connect",
         "description": "Returns `CRITICAL` if the check cannot connect to the HMC over SSH. Returns `OK` otherwise."
     }
 ]
