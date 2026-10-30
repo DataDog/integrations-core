@@ -2976,8 +2976,8 @@ tests:
           geoip: {}
           ip: "2001:db8:b::1b"
       ocsf:
-        activity_id: 13
-        activity_name: "Unshare"
+        activity_id: 3
+        activity_name: "Update"
         actor:
           user:
             email_addr: "ely.marsh@example.com"
