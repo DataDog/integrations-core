@@ -569,10 +569,6 @@ integration/forcepoint_secure_web_gateway:
 - changed-files:
   - any-glob-to-any-file:
     - forcepoint_secure_web_gateway/**/*
-integration/forcepoint_security_service_edge:
-- changed-files:
-  - any-glob-to-any-file:
-    - forcepoint_security_service_edge/**/*
 integration/forescout:
 - changed-files:
   - any-glob-to-any-file:
@@ -589,10 +585,6 @@ integration/gearmand:
 - changed-files:
   - any-glob-to-any-file:
     - gearmand/**/*
-integration/genesys:
-- changed-files:
-  - any-glob-to-any-file:
-    - genesys/**/*
 integration/gitlab:
 - changed-files:
   - any-glob-to-any-file:
@@ -617,18 +609,10 @@ integration/go_expvar:
 - changed-files:
   - any-glob-to-any-file:
     - go_expvar/**/*
-integration/godaddy:
-- changed-files:
-  - any-glob-to-any-file:
-    - godaddy/**/*
 integration/gpu:
 - changed-files:
   - any-glob-to-any-file:
     - gpu/**/*
-integration/greenhouse:
-- changed-files:
-  - any-glob-to-any-file:
-    - greenhouse/**/*
 integration/guarddog:
 - changed-files:
   - any-glob-to-any-file:
@@ -645,10 +629,6 @@ integration/harbor:
 - changed-files:
   - any-glob-to-any-file:
     - harbor/**/*
-integration/have_i_been_pwned:
-- changed-files:
-  - any-glob-to-any-file:
-    - have_i_been_pwned/**/*
 integration/hazelcast:
 - changed-files:
   - any-glob-to-any-file:
@@ -1161,10 +1141,6 @@ integration/palo_alto_cortex_xdr:
 - changed-files:
   - any-glob-to-any-file:
     - palo_alto_cortex_xdr/**/*
-integration/palo_alto_networks_cortex_xsoar:
-- changed-files:
-  - any-glob-to-any-file:
-    - palo_alto_networks_cortex_xsoar/**/*
 integration/palo_alto_panorama:
 - changed-files:
   - any-glob-to-any-file:
