@@ -62,10 +62,38 @@ class RecordedRequest:
 
 @dataclass(frozen=True, slots=True)
 class RegisteredResponse:
+    """A response or exception registered for the requests it matches."""
+
     method: str
     url: str
     outcome: HTTPResponse | Exception
-    match_options: Mapping[str, Any]
+    match_options: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, 'method', self.method.upper())
+        object.__setattr__(self, 'match_options', _snapshot_options(self.match_options))
+
+    def matches(self, request: RecordedRequest) -> bool:
+        """Whether the request has this method and URL, and each match option is set to the registered value."""
+        return (
+            self.method == request.method
+            and self.url == request.url
+            and all(request.options.get(name, OPTION_UNSET) == value for name, value in self.match_options.items())
+        )
+
+
+def assert_recorded_requests(recorded: Iterable[RecordedRequest], expected: Iterable[RecordedRequest]) -> None:
+    """Assert that the recorded requests are exactly the expected ones, in order."""
+    recorded_requests, expected_requests = list(recorded), list(expected)
+    if recorded_requests != expected_requests:
+        raise AssertionError(f'Expected recorded requests {expected_requests!r}, got {recorded_requests!r}.')
+
+
+def assert_has_recorded_request(recorded: Iterable[RecordedRequest], expected: RecordedRequest) -> None:
+    """Assert that the expected request is among the recorded ones."""
+    recorded_requests = list(recorded)
+    if expected not in recorded_requests:
+        raise AssertionError(f'No recorded request matched {expected!r}. Recorded requests: {recorded_requests!r}.')
 
 
 class FakeHTTPResponse:
@@ -235,14 +263,7 @@ class FakeHTTPClient:
         match_options: Mapping[str, Any] | None = None,
     ) -> None:
         """Queue a response or exception for the first matching request."""
-        self._responses.append(
-            RegisteredResponse(
-                method=method.upper(),
-                url=url,
-                outcome=response,
-                match_options=_snapshot_options(match_options or {}),
-            )
-        )
+        self._responses.append(RegisteredResponse(method, url, response, match_options or {}))
 
     def get(self, url: str, **options: Unpack[HTTPRequestOptions]) -> HTTPResponse:
         return self._request('GET', url, options)
@@ -289,13 +310,10 @@ class FakeHTTPClient:
         return bypass(url) if callable(bypass) else bypass
 
     def assert_requests(self, expected: Iterable[RecordedRequest]) -> None:
-        expected_requests = list(expected)
-        if self.requests != expected_requests:
-            raise AssertionError(f'Expected recorded requests {expected_requests!r}, got {self.requests!r}.')
+        assert_recorded_requests(self.requests, expected)
 
     def assert_has_request(self, expected: RecordedRequest) -> None:
-        if expected not in self.requests:
-            raise AssertionError(f'No recorded request matched {expected!r}. Recorded requests: {self.requests!r}.')
+        assert_has_recorded_request(self.requests, expected)
 
     def assert_all_responses_consumed(self) -> None:
         count = len(self._responses)
@@ -308,7 +326,7 @@ class FakeHTTPClient:
         self.requests.append(request)
 
         for index, registered in enumerate(self._responses):
-            if self._matches(registered, request):
+            if registered.matches(request):
                 outcome = self._responses.pop(index).outcome
                 if isinstance(outcome, Exception):
                     raise outcome
@@ -317,16 +335,6 @@ class FakeHTTPClient:
         raise AssertionError(
             f'No registered response matched {request.method} {request.url} with options {dict(request.options)!r}. '
             f'Pending responses: {self._responses!r}.'
-        )
-
-    @staticmethod
-    def _matches(registered: RegisteredResponse, request: RecordedRequest) -> bool:
-        return (
-            registered.method == request.method
-            and registered.url == request.url
-            and all(
-                request.options.get(name, OPTION_UNSET) == value for name, value in registered.match_options.items()
-            )
         )
 
 
