@@ -300,6 +300,14 @@ def install(mocker: Any) -> Iterator[FakeHTTPFixture]:
         return create_check_client(check, *args, **kwargs)
 
     def record_request(client: RequestsWrapper, method: str, url: str, options: dict[str, Any]) -> Any:
+        # Clients built outside AgentCheck.create_http_client, such as RequestsWrapper(...) or a client cached before
+        # the fixture was installed, skip the check above, so check the client that sends each call.
+        if not client._agnostic:
+            raise AssertionError(
+                f'{method.upper()} {url} was sent by a client that did not opt in to the backend-neutral contract. '
+                'The fake_http fixture serves only opted-in clients: set AGNOSTIC_HTTP_CLIENT = True on the check, '
+                'or pass agnostic=True to create_http_client().'
+            )
         with fake_http._record_call(method, url, options) as violations:
             try:
                 return send_request(client, method, url, options)

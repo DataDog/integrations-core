@@ -16,6 +16,7 @@ from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.openmetrics.base_check import OpenMetricsBaseCheck
 from datadog_checks.base.checks.prometheus.prometheus_base import PrometheusCheck
 from datadog_checks.base.stubs.http import FakeHTTPResponse, RecordedRequest
+from datadog_checks.base.utils.http import RequestsWrapper, create_http_client
 from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
 from datadog_checks.dev import http as http_testing
 
@@ -40,6 +41,32 @@ def test_fake_http_requires_the_check_to_opt_in(fake_http):
 
     with pytest.raises(AssertionError, match='AGNOSTIC_HTTP_CLIENT = True'):
         check.create_http_client()
+
+
+@pytest.mark.parametrize(
+    'create_client',
+    [
+        pytest.param(lambda: RequestsWrapper({}, {}), id='requests-wrapper'),
+        pytest.param(lambda: create_http_client({}, {}), id='create-http-client-function'),
+    ],
+)
+def test_fake_http_rejects_requests_from_clients_that_did_not_opt_in(fake_http, fake_http_response, create_client):
+    # Clients built outside AgentCheck.create_http_client skip its opt-in check.
+    url = 'https://example.test/items'
+    fake_http_response(url)
+    client = create_client()
+
+    with pytest.raises(AssertionError, match=re.escape(f'GET {url} was sent by a client that did not opt in')):
+        client.get(url)
+
+    assert fake_http.requests == []
+
+
+def test_fake_http_serves_an_opted_in_client_built_outside_a_check(fake_http, fake_http_response):
+    url = 'https://example.test/items'
+    fake_http_response(url, b'items')
+
+    assert create_http_client({}, {}, agnostic=True).get(url).content == b'items'
 
 
 @pytest.mark.parametrize(

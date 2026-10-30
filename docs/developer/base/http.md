@@ -69,6 +69,8 @@ authentication the client applied.
 
 The fixture fails the test instead of serving a response it cannot represent:
 
+- A request sent by a client that did not opt in, such as one built with `RequestsWrapper(...)` or with the
+  module-level `create_http_client()` without `agnostic=True`.
 - A request sent outside a check client, a followed redirect, or a wire request that differs from the call that sent
   it, such as an auth token fetch. Pass `allow_redirects=False` to receive a registered redirect. The call fails even
   if the client catches the error and retries, as it does when renewing an auth token.
