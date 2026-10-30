@@ -58,12 +58,26 @@ COMMON_METRICS = [
 ]
 
 
+# CEL-based policy metrics. Both the admission and reports controllers expose the full set; they differ
+# only in the execution_cause label value (admission_request vs background_scan).
+CEL_POLICY_METRICS = [
+    metric
+    for policy_type in ('validating', 'mutating', 'image.validating', 'generating')
+    for metric in (
+        f'kyverno.{policy_type}.policy.execution.duration.seconds.bucket',
+        f'kyverno.{policy_type}.policy.execution.duration.seconds.count',
+        f'kyverno.{policy_type}.policy.execution.duration.seconds.sum',
+        f'kyverno.{policy_type}.policy.results.count',
+    )
+]
+
 REPORTS_METRICS = [
     'kyverno.controller.requeue.count',
     'kyverno.policy.execution.duration.seconds.bucket',
     'kyverno.policy.execution.duration.seconds.count',
     'kyverno.policy.execution.duration.seconds.sum',
     'kyverno.policy.results.count',
+    *CEL_POLICY_METRICS,
 ]
 
 BACKGROUND_METRICS = [
@@ -78,6 +92,10 @@ ADMISSION_METRICS = [
     'kyverno.http.requests.duration.seconds.sum',
     'kyverno.policy.changes.count',
     'kyverno.policy.rule.info',
+    *CEL_POLICY_METRICS,
 ]
 
-CLEANUP_METRICS = []
+CLEANUP_METRICS = [
+    'kyverno.deleting.controller.deletedobjects.count',
+    'kyverno.deleting.controller.errors.count',
+]
