@@ -1,0 +1,1 @@
+Add a `--result-file` option that writes a JSON summary of the download, including the repository that served the wheel.
