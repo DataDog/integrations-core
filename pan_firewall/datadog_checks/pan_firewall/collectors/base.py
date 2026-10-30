@@ -73,8 +73,6 @@ class CollectContext:
     # whether they are sent does not depend on which of the parallel collectors finishes first.
     tunnel_tags: dict[str, tuple[str, ...]] | None = None
     clock: Callable[[], float] = time.monotonic
-    read_cache: Callable[[str], str] = lambda key: ''
-    write_cache: Callable[[str, str], None] = lambda key, value: None
 
     def warning(self, msg: str, *args: object, key: str | None = None, once: bool = True) -> None:
         """Log the warning the first time `key` (by default, the formatted message) is seen for this firewall, at debug
