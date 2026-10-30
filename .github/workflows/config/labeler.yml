@@ -393,6 +393,10 @@ integration/databricks:
 - changed-files:
   - any-glob-to-any-file:
     - databricks/**/*
+integration/datadog_agent:
+- changed-files:
+  - any-glob-to-any-file:
+    - datadog_agent/**/*
 integration/datadog_checks_tests_helper:
 - changed-files:
   - any-glob-to-any-file:
