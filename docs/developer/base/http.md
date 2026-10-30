@@ -59,6 +59,30 @@ OpenMetrics and Prometheus scrapers build, returns responses that expose only th
 errors listed under [Errors](#errors). The `fake_http` test fixture requires it. Without it, clients return `requests`
 responses and raise `requests` exceptions unchanged.
 
+### Migrating an existing check
+
+Move a check onto this mode in one pull request dedicated to it, covering production code, tests and test-environment
+helpers together. The check is migrated when all of the following hold:
+
+- `AGNOSTIC_HTTP_CLIENT = True` is set on every check class the integration instantiates, including legacy
+  implementations and the classes a `__new__` factory returns. Don't set it on a shared base class instead.
+- Extra clients are built with `create_http_client()`, never with `RequestsWrapper` or a `requests.Session`.
+- Production code catches the types listed under [Errors](#errors). Keep separately handled cases separate: a timeout
+  handled apart from a connection error maps to `HTTPClientTimeoutError` and `HTTPClientConnectionError`, and `except
+  HTTPError` maps to `HTTPClientStatusError`. Catch `json.JSONDecodeError` from the standard library, not from
+  `simplejson` or `requests`, for bodies that are not valid JSON.
+- Nothing under `datadog_checks/` or `tests/` imports `requests`, `urllib3`, `requests_mock`, `responses` or a
+  `requests_*` package, or uses `RequestsWrapper`, `ResponseWrapper`, `MockResponse`, `mock_http_response`,
+  `requests.*` patch targets, `.session`, `._session` or `.raw`.
+- Unit tests register responses per URL with the `fake_http_response` fixture, or register exceptions with
+  `fake_http.register_response()`, and call `fake_http.assert_all_responses_consumed()`. Register one response per
+  request, so a test that runs the check twice registers each response twice.
+- Tests for configuration, such as authentication or timeouts, create the check without the `fake_http` fixture and
+  assert on `check.http.options`, because the fake does not parse configuration.
+- Environment helpers, such as `conftest.py` conditions and data loaders, use the standard library (`urllib.request`).
+- `requests` and `requests-mock` are removed from `hatch.toml` and `pyproject.toml`, and `datadog-checks-base` is
+  pinned to a release that includes this mode.
+
 ### Testing TLS configuration
 
 Each `FakeHTTPClient` starts with the real client's canonical TLS defaults. Pass `tls_config=...` to override specific

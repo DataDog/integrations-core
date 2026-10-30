@@ -16,6 +16,13 @@ from .common import (
     get_fixture_path,
 )
 
+ENDPOINT = OM_MOCKED_INSTANCE['openmetrics_endpoint']
+
+
+def read_fixture(name):
+    with open(get_fixture_path(name), 'rb') as f:
+        return f.read()
+
 
 @pytest.mark.parametrize(
     'fixture_name, expected_metrics',
@@ -26,8 +33,8 @@ from .common import (
         ('reports', REPORTS_METRICS),
     ],
 )
-def test_kyverno_mock_metrics(dd_run_check, aggregator, mock_http_response, fixture_name, expected_metrics):
-    mock_http_response(file_path=get_fixture_path(f'{fixture_name}_controller.txt'))
+def test_kyverno_mock_metrics(dd_run_check, aggregator, fake_http, fake_http_response, fixture_name, expected_metrics):
+    fake_http_response(ENDPOINT, read_fixture(f'{fixture_name}_controller.txt'))
     check = KyvernoCheck('kyverno', {}, [OM_MOCKED_INSTANCE])
     dd_run_check(check)
 
@@ -36,19 +43,21 @@ def test_kyverno_mock_metrics(dd_run_check, aggregator, mock_http_response, fixt
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
     aggregator.assert_service_check('kyverno.openmetrics.health', ServiceCheck.OK)
+    fake_http.assert_all_responses_consumed()
 
 
-def test_kyverno_mock_invalid_endpoint(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(status_code=503)
+def test_kyverno_mock_invalid_endpoint(dd_run_check, aggregator, fake_http, fake_http_response):
+    fake_http_response(ENDPOINT, status_code=503)
     check = KyvernoCheck('kyverno', {}, [OM_MOCKED_INSTANCE])
     with pytest.raises(Exception):
         dd_run_check(check)
 
     aggregator.assert_service_check('kyverno.openmetrics.health', ServiceCheck.CRITICAL)
+    fake_http.assert_all_responses_consumed()
 
 
-def test_kyverno_label_remap(dd_run_check, aggregator, mock_http_response):
-    mock_http_response(file_path=get_fixture_path('remap_labels.txt'))
+def test_kyverno_label_remap(dd_run_check, aggregator, fake_http, fake_http_response):
+    fake_http_response(ENDPOINT, read_fixture('remap_labels.txt'))
     check = KyvernoCheck('kyverno', {}, [OM_MOCKED_INSTANCE])
     relabeled_tags = ['kyverno_namespace:foo', 'kyverno_name:baz', 'go_version:go1.21.10']
     dd_run_check(check)
@@ -56,3 +65,4 @@ def test_kyverno_label_remap(dd_run_check, aggregator, mock_http_response):
     aggregator.assert_metric('kyverno.go.info')
     for tag in relabeled_tags:
         aggregator.assert_metric_has_tag('kyverno.go.info', tag)
+    fake_http.assert_all_responses_consumed()

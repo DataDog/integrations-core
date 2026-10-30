@@ -11,12 +11,12 @@ from collections import defaultdict
 from copy import deepcopy
 
 import pytest
-import requests
 
 from datadog_checks.couch import CouchDb
 from datadog_checks.dev.utils import get_metadata_metrics
 
 from . import common
+from .api import request
 
 pytestmark = pytest.mark.skipif(common.COUCH_MAJOR_VERSION == 1, reason='Test for version Couch v2+')
 
@@ -360,36 +360,31 @@ def test_view_compaction_metrics(aggregator, gauges):
         def generate_views(self):
             url = '{}/kennel/_design/dummy/_view/all'.format(self._server)
             try:
-                r = requests.get(url, auth=self._auth, timeout=1)
-                r.raise_for_status()
-            except requests.exceptions.Timeout:
+                request('GET', url, auth=self._auth, timeout=1)
+            except TimeoutError:
                 pass
             url = '{}/kennel/_design/dummy/_view/by_data'.format(self._server)
             try:
-                r = requests.get(url, auth=self._auth, timeout=1)
-                r.raise_for_status()
-            except requests.exceptions.Timeout:
+                request('GET', url, auth=self._auth, timeout=1)
+            except TimeoutError:
                 pass
 
         def update_doc(self, doc):
             body = {'data': str(random.randint(0, 1000000000)), '_rev': doc['rev']}
 
             url = '{}/kennel/{}'.format(self._server, doc['id'])
-            r = requests.put(url, auth=self._auth, headers={'Content-Type': 'application/json'}, json=body)
-            r.raise_for_status()
-            return r.json()
+            _, doc = request('PUT', url, auth=self._auth, json_body=body)
+            return doc
 
         def post_doc(self, doc_id):
             body = {"_id": doc_id, "data": str(time.time())}
             url = '{}/kennel'.format(self._server)
-            r = requests.post(url, auth=self._auth, headers={'Content-Type': 'application/json'}, json=body)
-            r.raise_for_status()
-            return r.json()
+            _, doc = request('POST', url, auth=self._auth, json_body=body)
+            return doc
 
         def compact_views(self):
             url = '{}/kennel/_compact/dummy'.format(self._server)
-            r = requests.post(url, auth=self._auth, headers={'Content-Type': 'application/json'})
-            r.raise_for_status()
+            request('POST', url, auth=self._auth, headers={'Content-Type': 'application/json'})
 
         def stop(self):
             self._status = self.STOP
