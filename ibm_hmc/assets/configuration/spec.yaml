@@ -1,0 +1,60 @@
+name: IBM HMC
+files:
+- name: ibm_hmc.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/default
+  - template: instances
+    options:
+    - name: host
+      description: Hostname or IP address of the HMC appliance to connect to.
+      required: true
+      value:
+        type: string
+        example: hmc.example.com
+    - name: port
+      description: SSH port of the HMC appliance.
+      required: false
+      value:
+        type: integer
+        example: 22
+    - name: username
+      description: SSH username to the HMC appliance, usually `hscroot`.
+      required: true
+      value:
+        type: string
+        example: hscroot
+    - name: password
+      description: |
+        SSH password for the HMC appliance.
+        If an encrypted SSH private key is specified in `private_key_file`,
+        the given password is used to decrypt the key.
+      required: false
+      secret: true
+      value:
+        type: string
+    - name: private_key_file
+      description: |
+        File path to an SSH private key. If the key is encrypted, `password` is used to decrypt it.
+        See: http://docs.paramiko.org/en/stable/api/keys.html#paramiko.pkey.PKey.from_private_key_file
+      required: false
+      value:
+        type: string
+        require_trusted_provider: true
+    - name: private_key_type
+      description: Type of the private key, either `rsa` or `ecdsa`.
+      required: false
+      value:
+        type: string
+        example: rsa
+    - name: force_sha1
+      description: |
+        Some older HMC appliances only support SHA1 encryption and do not advertise it
+        to SSH clients, which assume SHA2 and fail to connect. Enable this to force the
+        SSH client to use SHA1. Upgrading the HMC firmware is recommended instead.
+      required: false
+      value:
+        type: boolean
+        example: false
+    - template: instances/default

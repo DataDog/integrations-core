@@ -1,0 +1,1 @@
+Add the ibm_hmc check, ported from the Unix Agent's hmc check: it collects performance metrics for POWER systems managed by an IBM Hardware Management Console. Unix Agent users migrating should note the check and metric names were renamed (`hmc.LPAR.*` to `ibm_hmc.lpar.*`), and the `hmc.can_connect` service check was replaced by an `ibm_hmc.can_connect` gauge.
