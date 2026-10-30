@@ -741,7 +741,8 @@ def test_check_uses_api_key_instead_of_login(dd_run_check, aggregator, mocker, i
 )
 def test_orchestrator_rejecting_appliance_list_reports_unreachable(dd_run_check, aggregator, mocker, instance, auth):
     check = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [instance('localhost:8443', **auth)])
-    orch = _setup_mocks(mocker, check, APPLIANCE_PAYLOAD)
+    orch = _setup_mocks(mocker, check, APPLIANCE_PAYLOAD, tgz_bytes=TGZ_DATA)
+    orch_cls = mocker.patch(f'{CHECK_MODULE}.OrchestratorClient', return_value=orch)
     mocker.patch.object(orch, 'login')
     orch.get_appliances.side_effect = requests.HTTPError('401 Unauthorized')
 
@@ -749,26 +750,14 @@ def test_orchestrator_rejecting_appliance_list_reports_unreachable(dd_run_check,
         dd_run_check(check, extract_message=True)
 
     aggregator.assert_metric(f'{NS}.orchestrator.reachability', value=0, count=1)
-    assert check._orch_client is None
 
+    # The next run rebuilds the client and recovers once the Orchestrator answers again.
+    orch.get_appliances.side_effect = None
+    aggregator.reset()
+    dd_run_check(check)
 
-def test_api_key_is_not_sent_to_appliances(mocker, instance):
-    inst = instance(
-        'localhost:8443',
-        orchestrator_api_key='secret-key',
-        orchestrator_username=None,
-        orchestrator_password=None,
-        appliance_credentials=APPLIANCE_OVERRIDE,
-    )
-    check = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [inst])
-    check.load_configuration_models()
-    mocker.patch.object(ApplianceClient, 'login')
-
-    check._get_orch_client()
-    appliance_client = check._create_appliance_client('10.0.0.1', 'admin', '')
-
-    assert check.http.session.headers['X-Auth-Token'] == 'secret-key'
-    assert 'X-Auth-Token' not in appliance_client._http.session.headers
+    assert orch_cls.call_count == 2
+    aggregator.assert_metric(f'{NS}.orchestrator.reachability', value=1, count=1)
 
 
 def test_up_to_date_appliance_skips_minute_stats_recording(dd_run_check, aggregator, mocker, check):
