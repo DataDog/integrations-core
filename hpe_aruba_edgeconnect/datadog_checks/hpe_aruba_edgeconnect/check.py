@@ -59,20 +59,29 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
     def _get_orch_client(self) -> OrchestratorClient:
         if self._orch_client is not None:
             return self._orch_client
-        client = OrchestratorClient(self.http, self.config.orchestrator_ip, self.config.orchestrator_login_type)
-        client.login(self.config.orchestrator_username, self.config.orchestrator_password)
+        client = OrchestratorClient(
+            self.http,
+            self.config.orchestrator_ip,
+            self.config.orchestrator_login_type,
+            self.config.orchestrator_api_key,
+        )
+        username = self.config.orchestrator_username
+        password = self.config.orchestrator_password
+        if username is not None and password is not None:
+            client.login(username, password)
         self._orch_client = client
         return client
 
     def check(self, _: Any) -> None:
         try:
             orch_client = self._get_orch_client()
+            raw_appliances = orch_client.get_appliances()
         except Exception:
             self.gauge('orchestrator.reachability', 0, tags=self.tags)
             self._orch_client = None
             raise
         self.gauge('orchestrator.reachability', 1, tags=self.tags)
-        appliances = self._collect_appliances_from_orch(orch_client)
+        appliances = self._collect_appliances_from_orch(orch_client, raw_appliances)
         self._remove_stale_appliance_clients({ap.ip for ap in appliances})
         with ThreadPoolExecutor(max_workers=self.config.max_concurrency) as pool:
             futs = {
@@ -128,8 +137,9 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             appliances.append(Appliance(raw))
         return appliances
 
-    def _collect_appliances_from_orch(self, client: OrchestratorClient) -> Appliances:
-        raw_appliances = client.get_appliances()
+    def _collect_appliances_from_orch(
+        self, client: OrchestratorClient, raw_appliances: list[dict[str, Any]]
+    ) -> Appliances:
         if not raw_appliances:
             self.log.warning("No appliances returned from orchestrator %s", self.config.orchestrator_ip)
             return Appliances([], self.log)
@@ -272,6 +282,13 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         traffic_class_map: dict[str, str],
     ) -> None:
         app_ip = appliance.ip
+        if appliance.username is None or appliance.password is None:
+            self.log.warning(
+                "No credentials for appliance %s: add an `appliance_credentials_overrides` entry covering it "
+                "to collect its metrics.",
+                app_ip,
+            )
+            return
         self.log.debug("Starting collection for appliance %s", app_ip)
         client = self._create_appliance_client(app_ip, appliance.username, appliance.password)
 
