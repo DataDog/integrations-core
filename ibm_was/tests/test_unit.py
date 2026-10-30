@@ -93,6 +93,57 @@ def test_critical_service_check(instance, check, aggregator):
     aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
 
 
+@pytest.mark.parametrize(
+    'exception',
+    [
+        pytest.param(requests.ReadTimeout, id='read timeout'),
+        pytest.param(requests.ConnectTimeout, id='connect timeout'),
+        pytest.param(requests.TooManyRedirects, id='too many redirects'),
+    ],
+)
+def test_request_failure_reports_critical(instance, check, aggregator, exception):
+    # An escaping exception submits no service check at all, so a monitor sees a gap, not a CRITICAL.
+    tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
+
+    with mock.patch('datadog_checks.base.utils.http.requests.Session.get', side_effect=exception):
+        check = check(instance)
+        with pytest.raises(exception):
+            check.check(instance)
+
+    aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
+    aggregator.assert_metric('ibm_was.can_connect', value=0, tags=tags, count=1)
+
+
+def test_malformed_xml_reports_critical(instance, check, aggregator, caplog):
+    # Goes through the real make_request so a 2xx body that fails to parse reports CRITICAL alone.
+    response = mock.MagicMock(content=b'<Nodes><Node')
+    response.raise_for_status.return_value = None
+
+    with mock.patch('datadog_checks.base.utils.http.requests.Session.get', return_value=response):
+        check = check(instance)
+        check.check(instance)
+
+    tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
+    aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
+    aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.OK, count=0)
+    aggregator.assert_metric('ibm_was.can_connect', value=0, tags=tags, count=1)
+    assert 'Unable to parse the XML response' in caplog.text
+
+
+def test_parsed_but_empty_document_reports_ok_without_metrics(instance, check, aggregator):
+    # Pins the contract in assets/service_checks.json: OK means fetched and parsed, nothing more.
+    response = mock.MagicMock(content=b'<Nodes/>')
+    response.raise_for_status.return_value = None
+
+    with mock.patch('datadog_checks.base.utils.http.requests.Session.get', return_value=response):
+        check = check(instance)
+        check.check(instance)
+
+    tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
+    aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.OK, tags=tags, count=1)
+    assert aggregator.metric_names == ['ibm_was.can_connect']
+
+
 def test_right_server_tag(instance, check, aggregator):
     del instance['custom_queries']
     with mock.patch(
