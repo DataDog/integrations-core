@@ -1,2 +1,4 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+dns.can_connect,gauge,,,,"1 when the DNS check succeeds according to its configured expectations, 0 otherwise. An expected NXDOMAIN response counts as success.",0,dns,dns can connect,
+dns.cant_connect,gauge,,,,"1 when the DNS check fails, 0 otherwise. Failures include timeouts, unexpected DNS responses, and answers that do not match resolves_as.",0,dns,dns cant connect,
 dns.response_time,gauge,,second,,"The response time for DNS query for a given record, tagged by hostname, e.g. 'hostname:example.com'.",-1,dns,dns resp time,
