@@ -2,8 +2,10 @@
 
 -----
 
-Whenever you need to make HTTP requests, the base class provides a convenience member that has the same interface as the
-popular [requests][requests-github] library and ensures consistent behavior across all integrations.
+Whenever you need to make HTTP requests, the base class provides a convenience member that ensures consistent behavior
+across all integrations. Its request methods and response objects follow the shape of the popular
+[requests][requests-github] library, but the member is defined by its own interface rather than by that library.
+Anything this page does not document is an implementation detail and may change.
 
 The wrapper automatically parses and uses configuration from the `instance`, `init_config`, and Agent config. Also, this
 is only done once during initialization and cached to reduce the overhead of every call.
@@ -14,7 +16,8 @@ For example, to make a GET request you would use:
 response = self.http.get(url)
 ```
 
-and the wrapper will pass the right things to `requests`. All methods accept optional keyword arguments like `stream`, etc.
+and the wrapper will pass the right things to the underlying HTTP library. All methods accept optional keyword arguments
+like `stream`, etc.
 
 Any method-level option will override configuration. So for example if `tls_verify` was set to false and you do
 `self.http.get(url, verify=True)`, then SSL certificates will be verified on that particular request. You can
@@ -42,11 +45,84 @@ url = 'unix:///var/run/docker.sock'
 response = self.http.get(url)
 ```
 
+## Backend-neutral mode
+
+Set the `AGNOSTIC_HTTP_CLIENT` class attribute to opt a check into the interface this page describes:
+
+```python
+class MyCheck(AgentCheck):
+    AGNOSTIC_HTTP_CLIENT = True
+```
+
+With it set, every client the check creates through `self.http` or `create_http_client()`, including the clients its
+OpenMetrics and Prometheus scrapers build, returns responses that expose only the documented members and raises the
+errors listed under [Errors](#errors). The `fake_http` test fixture requires it. Without it, clients return `requests`
+responses and raise `requests` exceptions unchanged.
+
+### Testing TLS configuration
+
+Each `FakeHTTPClient` starts with the real client's canonical TLS defaults. Pass `tls_config=...` to override specific
+fields; overrides, including `False` and `None`, take precedence. Each client gets its own copy of the overrides, so changing
+one client's TLS settings doesn't affect other clients or the caller's mapping.
+
+Calling `fake_http.create_client()` creates a fresh client with defaults, not a copy of the parent's TLS settings.
+The fixture does not parse integration configuration or legacy aliases. Tests needing non-default TLS settings must
+configure each check-owned fake explicitly; changing the parent fixture's `tls_config` does not configure those clients.
+
 ## Options
 
 Some options can be set globally in `init_config` (with `instances` taking precedence).
 For complete documentation of every option, see the associated configuration templates for the
 [instances][config-spec-template-instances-http] and [init_config][config-spec-template-init-config-http] sections.
+
+## Disabling authentication
+
+Call `self.http.disable_auth()` to suppress the client's configured `auth` (such as Basic credentials) and automatic `.netrc`
+credentials on subsequent requests, including redirects:
+
+```python
+self.http.disable_auth()
+response = self.http.get(url)
+```
+
+This applies to existing and newly created sessions, including requests with `auth=None`, without disabling other
+environment settings, such as proxies. It does not suppress `auth_token` handling or an `Authorization` entry in `headers`.
+Explicit per-request authentication still overrides client configuration.
+
+## Errors
+
+With `AGNOSTIC_HTTP_CLIENT` set, a failed request raises one of the backend-neutral types from the
+module `datadog_checks.base.utils.http_exceptions`, never an exception class belonging to the underlying HTTP
+library. Catch these instead:
+
+| Exception | Raised when |
+| --- | --- |
+| `HTTPClientError` | Root of the tree. Catch this to handle any HTTP failure. |
+| `HTTPClientRequestError` | The request never produced a usable response. |
+| `HTTPClientConnectionError` | The connection could not be established or was lost. |
+| `HTTPClientSSLError` | The TLS handshake or certificate verification failed. |
+| `HTTPClientInvalidURLError` | The URL was rejected before a connection was attempted. |
+| `HTTPClientTimeoutError` | The request exceeded its configured timeout. |
+| `HTTPClientConnectTimeoutError` | The timeout elapsed while establishing the connection. |
+| `HTTPClientReadTimeoutError` | The timeout elapsed while waiting for response data. |
+| `HTTPClientStatusError` | An error status was raised through `raise_for_status()`. |
+
+For example, a check that skips optional data when its endpoint is unavailable looks like this:
+
+```python
+from datadog_checks.base.utils.http_exceptions import HTTPClientError
+
+try:
+    response = self.http.get(url)
+    response.raise_for_status()
+except HTTPClientError as e:
+    self.log.debug('Could not retrieve version metadata: %s', e)
+    return
+```
+
+Decoding the body is the only failure outside this tree. Calling `response.json()` on a body that is not valid JSON raises the
+standard library's `json.JSONDecodeError`, a subclass of `ValueError` that is not part of the tree above, so handle it
+separately from the types listed here.
 
 ## Future
 
