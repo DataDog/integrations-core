@@ -78,18 +78,22 @@ instances:
 
 <div class="alert alert-info">These custom Flink metrics are considered standard metrics in Datadog.</div>
 
-You can also match multiple metrics at once with a regular expression, for
-example, to collect everything under a given Flink scope:
+You can also match multiple metrics at once with a regular expression. Keep the
+pattern specific to your own metrics, for example by registering them under a
+dedicated metric group (`getMetricGroup().addGroup("myapp")`) so they share a
+prefix:
 
 ```yaml
 instances:
   - openmetrics_endpoint: http://<FLINK_HOST>:9249/metrics
     extra_metrics:
-      - ^flink_taskmanager_job_task_operator_.+
+      - ^flink_taskmanager_job_task_operator_myapp_.+
 ```
 
+<div class="alert alert-warning">Do not use a pattern that also matches metrics the check already collects, such as <code>^flink_taskmanager_job_task_operator_.+</code>. The pattern takes precedence over the check's own handling of counters, so curated metrics like <code>flink.operator.numRecordsIn</code> stop being reported and are submitted as gauges under their raw name instead.</div>
+
 Metrics collected this way are submitted under Flink's raw Prometheus metric
-name (for example `flink.flink_taskmanager_job_task_operator_messageLatency`)
+name (for example `flink.flink_taskmanager_job_task_operator_myapp_eventsProcessed`)
 rather than a curated Datadog name. A regular expression can match more than
 one metric, so it cannot be mapped to a single custom name.
 
