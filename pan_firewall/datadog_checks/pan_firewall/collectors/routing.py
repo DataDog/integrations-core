@@ -1,24 +1,40 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Routing protocol sessions: BGP peers and OSPF neighbors of the legacy routing engine.
+"""Routing protocol sessions: BGP peers and OSPF neighbors.
 
-The Advanced Routing Engine (ARE) answers `show routing protocol bgp peer` and `... ospf neighbor` differently, and
-has no parser yet.
+The legacy routing engine answers `show routing protocol bgp peer` and `... ospf neighbor`. The Advanced Routing Engine
+(ARE) answers `show advanced-routing ...` with JSON inside `result/json`, one call per logical router, and the logical
+router name fills the `vr` tag.
 """
 
 from __future__ import annotations
 
+import json
+import math
 import re
-from typing import Literal
+from collections.abc import Callable
+from typing import Any, Literal
 from xml.etree.ElementTree import Element
+from xml.sax.saxutils import escape
 
+from datadog_checks.pan_firewall.errors import PanosApiError, PanosAuthError, PanosError
 from datadog_checks.pan_firewall.xml_utils import num, tag_tuple, text
 
-from .base import CollectContext, Sample
+from .base import CollectContext, Sample, read_each
 
 BGP_PEER_CMD = '<show><routing><protocol><bgp><peer/></bgp></protocol></routing></show>'
 OSPF_NEIGHBOR_CMD = '<show><routing><protocol><ospf><neighbor/></ospf></protocol></routing></show>'
+
+ARE_LOGICAL_ROUTER_CMD = '<show><advanced-routing><logical-router/></advanced-routing></show>'
+ARE_BGP_PEER_CMD = (
+    '<show><advanced-routing><bgp><peer><detail><logical-router>{router}</logical-router></detail></peer></bgp>'
+    '</advanced-routing></show>'
+)
+ARE_OSPF_NEIGHBOR_CMD = (
+    '<show><advanced-routing><ospf><neighbor><logical-router>{router}</logical-router></neighbor></ospf>'
+    '</advanced-routing></show>'
+)
 
 # A peer that came up less than this long ago has restarted.
 RESTART_WINDOW_SECONDS = 1800
@@ -31,6 +47,7 @@ BGP_NUMBERS: tuple[tuple[str, str, Literal['gauge', 'monotonic_count']], ...] = 
 )
 BGP_PREFIXES = (
     ('incoming.total', 'incoming-total'),
+    ('incoming.accepted', 'incoming-accepted'),
     ('incoming.rejected', 'incoming-rejected'),
     ('outgoing.total', 'outgoing-total'),
     ('outgoing.advertised', 'outgoing-advertised'),
@@ -54,6 +71,15 @@ def afi_safi_tag(name: str) -> str:
     return re.sub(r'(?i)^bgpafi', '', name).replace('-', '_').lower()
 
 
+def camel_afi_safi_tag(name: str) -> str:
+    """`ipv4Unicast` -> `ipv4_unicast`."""
+    return re.sub(r'(?<=[a-z0-9])(?=[A-Z])', '_', name).lower()
+
+
+def bgp_restart(established: bool, duration: float) -> int:
+    return 1 if established and duration < RESTART_WINDOW_SECONDS else 0
+
+
 def parse_bgp_peers(root: Element) -> list[Sample]:
     samples: list[Sample] = []
     for entry in root.iterfind('result/entry'):
@@ -68,8 +94,7 @@ def parse_bgp_peers(root: Element) -> list[Sample]:
         duration = num(entry, 'status-duration')
         samples.append(Sample('bgp.peer.status', 1 if established else 0, tags, 'gauge'))
         if duration is not None:
-            restart = established and duration < RESTART_WINDOW_SECONDS
-            samples.append(Sample('bgp.peer.restart', 1 if restart else 0, tags, 'gauge'))
+            samples.append(Sample('bgp.peer.restart', bgp_restart(established, duration), tags, 'gauge'))
         for name, path, kind in BGP_NUMBERS:
             value = num(entry, path)
             if value is not None:
@@ -82,11 +107,123 @@ def parse_bgp_peers(root: Element) -> list[Sample]:
                 value = num(family, path)
                 if value is not None:
                     samples.append(Sample(f'bgp.peer.prefixes.{name}', value, family_tags, 'gauge'))
-            received = num(family, 'incoming-total')
-            if received is not None and limit:
+            accepted = num(family, 'incoming-accepted')
+            if accepted is not None and limit:
                 samples.append(
-                    Sample('bgp.peer.prefix_limit.utilization', received / limit * 100, family_tags, 'gauge')
+                    Sample('bgp.peer.prefix_limit.utilization', accepted / limit * 100, family_tags, 'gauge')
                 )
+    return samples
+
+
+def are_json(root: Element) -> dict:
+    """The JSON object in `result/json` of an ARE answer; `{}` when missing or empty.
+
+    Raises PanosError when the text is not a JSON object, so that a broken answer is reported as a failed call.
+    """
+    body = text(root, 'result/json')
+    if body is None:
+        return {}
+    try:
+        data = json.loads(body)
+    except ValueError as e:
+        raise PanosError(f'the Advanced Routing Engine answer is not valid JSON: {e}') from e
+    if not isinstance(data, dict):
+        raise PanosError(f'the Advanced Routing Engine answer is a JSON {type(data).__name__}, expected an object')
+    return data
+
+
+def json_num(data: Any, key: str) -> float | None:
+    """The number at `key` of a JSON object; None when missing, not a number or not finite."""
+    value = data.get(key) if isinstance(data, dict) else None
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+        return None
+    return value
+
+
+def json_str(data: dict, key: str) -> str | None:
+    value = data.get(key)
+    return None if value is None else str(value)
+
+
+def logical_routers(ctx: CollectContext) -> list[str]:
+    """The names of the logical routers; warns once per firewall when the answer lists none."""
+    routers = list(are_json(ctx.client.op(ARE_LOGICAL_ROUTER_CMD)))
+    if not routers:
+        ctx.warning('the Advanced Routing Engine lists no logical router', key='are_logical_router')
+    return routers
+
+
+def parse_are_bgp_peers(data: dict, router: str) -> list[Sample]:
+    samples: list[Sample] = []
+    for name, peer in data.items():
+        if not isinstance(peer, dict):
+            continue
+        tags = tag_tuple(
+            ('peer', name),
+            ('vr', router),
+            ('peer_ip', json_str(peer, 'peer-ip')),
+            ('remote_as', json_str(peer, 'remote-as')),
+            ('peer_group', json_str(peer, 'peer-group-name')),
+        )
+        established = peer.get('state') == 'Established'
+        samples.append(Sample('bgp.peer.status', 1 if established else 0, tags, 'gauge'))
+        duration = json_num(peer, 'status-time')
+        if duration is not None:
+            samples.append(Sample('bgp.peer.status_duration', duration, tags, 'gauge'))
+            samples.append(Sample('bgp.peer.restart', bgp_restart(established, duration), tags, 'gauge'))
+
+        detail = peer.get('detail')
+        if not isinstance(detail, dict):
+            continue
+        counters = detail.get('messageStats')
+        for metric, source, key in (
+            ('updates.in', counters, 'updatesRecv'),
+            ('updates.out', counters, 'updatesSent'),
+            ('connections.established', detail, 'connectionsEstablished'),
+            ('connections.dropped', detail, 'connectionsDropped'),
+        ):
+            value = json_num(source, key)
+            if value is not None:
+                samples.append(Sample(f'bgp.peer.{metric}', value, tags, 'monotonic_count'))
+
+        families = detail.get('addressFamilyInfo')
+        for family_name, family in families.items() if isinstance(families, dict) else ():
+            family_tags = (*tags, f'afi_safi:{camel_afi_safi_tag(family_name)}')
+            limit = json_num(family, 'prefixAllowedMax')
+            accepted = json_num(family, 'acceptedPrefixCounter')
+            for metric, value in (
+                ('prefix_limit', limit),
+                ('prefixes.incoming.accepted', accepted),
+                ('prefixes.outgoing.advertised', json_num(family, 'sentPrefixCounter')),
+            ):
+                if value is not None:
+                    samples.append(Sample(f'bgp.peer.{metric}', value, family_tags, 'gauge'))
+            if accepted is not None and limit:
+                samples.append(
+                    Sample('bgp.peer.prefix_limit.utilization', accepted / limit * 100, family_tags, 'gauge')
+                )
+    return samples
+
+
+def parse_are_ospf_neighbors(data: dict, router: str) -> list[Sample]:
+    """`data['neighbors']` maps a router id to its neighbor entries. States such as `Full/DR` count as full."""
+    neighbors = data.get('neighbors')
+    samples: list[Sample] = []
+    for router_id, entries in neighbors.items() if isinstance(neighbors, dict) else ():
+        for entry in entries if isinstance(entries, list) else ():
+            if not isinstance(entry, dict) or entry.get('nbrState') is None:
+                continue
+            tags = tag_tuple(
+                ('neighbor', json_str(entry, 'ifaceAddress')),
+                ('router_id', router_id),
+                ('area', json_str(entry, 'areaId')),
+                ('vr', router),
+            )
+            full = str(entry['nbrState']).lower().startswith('full')
+            samples.append(Sample('ospf.neighbor.status', 1 if full else 0, tags, 'gauge'))
+            changes = json_num(entry, 'stateChangeCounter')
+            if changes is not None:
+                samples.append(Sample('ospf.neighbor.state_changes', changes, tags, 'monotonic_count'))
     return samples
 
 
@@ -106,25 +243,38 @@ def parse_ospf_neighbors(root: Element) -> list[Sample]:
     return samples
 
 
-def legacy_routing_engine(ctx: CollectContext) -> bool:
-    """False, with one warning per firewall, when the firewall runs the Advanced Routing Engine."""
-    if not ctx.identity.advanced_routing:
-        return True
-    ctx.warning(
-        'the firewall runs the Advanced Routing Engine: BGP and OSPF metrics need the legacy '
-        'routing engine and are not reported',
-        key='advanced_routing',
+def collect_are(ctx: CollectContext, cmd: str, parse: Callable[[dict, str], list[Sample]], name: str) -> list[Sample]:
+    """Ask each logical router `cmd`, formatted with its name, and parse the answer with `parse(data, router)`.
+
+    A router whose call fails is skipped with a warning, so that one broken router (such as PAN-OS bug PAN-220293,
+    which fails the BGP peer call of any router with IPv6 peers) does not drop the others. When every router answers
+    with an API error, nothing is sent and the collector does not fail: a router without the protocol may answer this
+    way (the engine is FRRouting, which ends a BGP query of a VRF without BGP with a warning status), and failing
+    would log and retry it on every run on firewalls that do not run the protocol. Authentication and connection
+    errors, and an answer that is not JSON on every router, fail the collector.
+    """
+    answers = read_each(
+        logical_routers(ctx),
+        lambda router: are_json(ctx.client.op(cmd.format(router=escape(router)))),
+        lambda router, e: ctx.warning(
+            'cannot read the %s of the logical router %s: %s', name, router, e, key=f'are:{name}:{router}'
+        ),
     )
-    return False
+    try:
+        return [sample for router, data in answers for sample in parse(data, router)]
+    except PanosAuthError:
+        raise
+    except PanosApiError:
+        return []
 
 
 def collect_bgp(ctx: CollectContext) -> list[Sample]:
-    if not legacy_routing_engine(ctx):
-        return []
-    return parse_bgp_peers(ctx.client.op(BGP_PEER_CMD))
+    if ctx.identity.advanced_routing is not True:
+        return parse_bgp_peers(ctx.client.op(BGP_PEER_CMD))
+    return collect_are(ctx, ARE_BGP_PEER_CMD, parse_are_bgp_peers, 'BGP peers')
 
 
 def collect_ospf(ctx: CollectContext) -> list[Sample]:
-    if not legacy_routing_engine(ctx):
-        return []
-    return parse_ospf_neighbors(ctx.client.op(OSPF_NEIGHBOR_CMD))
+    if ctx.identity.advanced_routing is not True:
+        return parse_ospf_neighbors(ctx.client.op(OSPF_NEIGHBOR_CMD))
+    return collect_are(ctx, ARE_OSPF_NEIGHBOR_CMD, parse_are_ospf_neighbors, 'OSPF neighbors')
