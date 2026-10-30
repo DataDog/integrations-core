@@ -424,11 +424,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /postmark/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /postmark/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/proofpoint_on_demand/                                              @DataDog/saas-integrations
-/proofpoint_on_demand/*.md                                          @DataDog/saas-integrations @DataDog/documentation
-/proofpoint_on_demand/manifest.json                                 @DataDog/saas-integrations @DataDog/documentation
-/proofpoint_on_demand/assets/logs/                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
 /resend/                                                            @DataDog/saas-integrations
 /resend/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
 /resend/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
@@ -484,20 +479,20 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /ping_federate/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /ping_federate/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/temporal_cloud/                                                    @DataDog/saas-integrations
-/temporal_cloud/*.md                                                @DataDog/saas-integrations @DataDog/documentation
-/temporal_cloud/manifest.json                                       @DataDog/saas-integrations @DataDog/documentation
-/temporal_cloud/metadata.csv                                        @DataDog/saas-integrations @DataDog/documentation
+/cisco_secure_email_threat_defense/                                 @DataDog/saas-integrations
+/cisco_secure_email_threat_defense/*.md                             @DataDog/saas-integrations @DataDog/documentation
+/cisco_secure_email_threat_defense/manifest.json                    @DataDog/saas-integrations @DataDog/documentation
+/cisco_secure_email_threat_defense/assets/logs/                     @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /trend_micro_email_security/                                        @DataDog/saas-integrations
 /trend_micro_email_security/*.md                                    @DataDog/saas-integrations @DataDog/documentation
 /trend_micro_email_security/manifest.json                           @DataDog/saas-integrations @DataDog/documentation
 /trend_micro_email_security/assets/logs/                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/trellix_endpoint_security/                                         @DataDog/saas-integrations
-/trellix_endpoint_security/*.md                                     @DataDog/saas-integrations @DataDog/documentation
-/trellix_endpoint_security/manifest.json                            @DataDog/saas-integrations @DataDog/documentation
-/trellix_endpoint_security/assets/logs/                             @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
+/docusign/                                                          @DataDog/saas-integrations
+/docusign/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
+/docusign/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
+/docusign/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /trend_micro_vision_one_endpoint_security/                          @DataDog/saas-integrations
 /trend_micro_vision_one_endpoint_security/*.md                      @DataDog/saas-integrations @DataDog/documentation
@@ -573,11 +568,6 @@ plaid/assets/logs/                                                  @DataDog/saa
 /jamf_pro/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
 /jamf_pro/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /jamf_pro/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
-
-/proofpoint_tap/                                                    @DataDog/saas-integrations
-/proofpoint_tap/*.md                                                @DataDog/saas-integrations @DataDog/documentation
-/proofpoint_tap/manifest.json                                       @DataDog/saas-integrations @DataDog/documentation
-/proofpoint_tap/assets/logs/                                        @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /carbon_black_cloud/                                                               @DataDog/saas-integrations
 /carbon_black_cloud/*.md                                                           @DataDog/saas-integrations @DataDog/documentation
@@ -662,11 +652,6 @@ plaid/assets/logs/                                                  @DataDog/saa
 /klaviyo/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
 /klaviyo/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
 /klaviyo/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
-/zerofox_cloud_platform/                                             @DataDog/saas-integrations
-/zerofox_cloud_platform/*.md                                         @DataDog/saas-integrations @DataDog/documentation
-/zerofox_cloud_platform/manifest.json                                @DataDog/saas-integrations @DataDog/documentation
-/zerofox_cloud_platform/assets/logs/                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
 /beyondtrust_password_safe/                                          @DataDog/saas-integrations @DataDog/agent-integrations
 /beyondtrust_password_safe/*.md                                      @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation
