@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 BRANCH_NAME_PATTERN = r"^\d+\.\d+\.x$"
 BRANCH_NAME_REGEX = re.compile(BRANCH_NAME_PATTERN)
 GITHUB_LABEL_COLOR = '5319e7'
+MILESTONE_PR_LABELS = ['qa/skip-qa']
 
 
 @click.command
@@ -131,7 +132,7 @@ def bump_milestone(app: Application, branch_name: str) -> None:
 
     app.display_waiting("Creating a pull request...")
     try:
-        pr_url = app.github.create_pull_request(
+        pr_number, pr_url = app.github.create_pull_request(
             title=f'Update current_milestone to {next_milestone}',
             head=bump_branch,
             base='master',
@@ -147,6 +148,14 @@ def bump_milestone(app: Application, branch_name: str) -> None:
         app.display_warning(
             f'Failed to create the pull request ({e}). Please create one manually from `{bump_branch}` to `master`.'
         )
+        return
+
+    # The pull request already exists at this point, so a labeling failure must not read as a creation failure.
+    labels = ', '.join(f'`{label}`' for label in MILESTONE_PR_LABELS)
+    try:
+        app.github.add_labels(pr_number, MILESTONE_PR_LABELS)
+    except HTTPError as e:
+        app.display_warning(f'Failed to add {labels} to {pr_url} ({e}). Please add the labels manually.')
 
 
 def milestone_pr_body(app: Application, milestone: str, branch_name: str) -> str:
