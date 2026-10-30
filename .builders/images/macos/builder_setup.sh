@@ -24,11 +24,11 @@ RUSTUP_VERSION="1.29.2"
 case "$(uname -m)" in
     x86_64)
         RUST_TARGET="x86_64-apple-darwin"
-        RUSTUP_SHA256="f6d1a9fac1a0d0802d87c254f02369a79973bc8c55aa0016d34af4fcdbd67822"
+        RUSTUP_SHA256="b9610730ddeef52765723847866fd1e3540b2bf7d5ab0c324aa143a5edf25ba0"
         ;;
     arm64)
         RUST_TARGET="aarch64-apple-darwin"
-        RUSTUP_SHA256="ed299a8fe762dc28161a99a03cf62836977524ad557ad70e13882d2f375d3983"
+        RUSTUP_SHA256="f7c7e11eb2e07f006e532a8aaac77b32f4527d305ac386c0c633ca6133d35ca9"
         ;;
     *)
         echo "Unsupported architecture for the Rust toolchain: $(uname -m)" >&2
