@@ -62,6 +62,7 @@ class SQLServerConfig:
         self.activity_config: dict = instance.get('query_activity', {}) or {}
         # Backward compatibility: check new names first, then fall back to old names
         self.schema_config: dict = instance.get('collect_schemas', instance.get('schemas_collection', {})) or {}
+        self.column_statistics_config: dict = instance.get('collect_column_statistics', {}) or {}
         self.deadlocks_config: dict = instance.get('collect_deadlocks', instance.get('deadlocks_collection', {})) or {}
         self.xe_collection_config: dict = instance.get('collect_xe', instance.get('xe_collection', {})) or {}
         self.cloud_metadata: dict = {}

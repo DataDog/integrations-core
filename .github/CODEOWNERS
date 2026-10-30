@@ -258,10 +258,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /adyen/manifest.json                                                 @DataDog/saas-integrations @DataDog/documentation
 /adyen/assets/logs/                                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/akamai_cost_management/                                             @DataDog/saas-integrations
-/akamai_cost_management/*.md                                         @DataDog/saas-integrations @DataDog/documentation
-/akamai_cost_management/manifest.json                                @DataDog/saas-integrations @DataDog/documentation
-
 /anthropic_compliance_logs/                                          @DataDog/saas-integrations
 /anthropic_compliance_logs/*.md                                      @DataDog/saas-integrations @DataDog/documentation
 /anthropic_compliance_logs/manifest.json                             @DataDog/saas-integrations @DataDog/documentation
@@ -509,12 +505,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /cisco_secure_email_threat_defense/*.md                             @DataDog/saas-integrations @DataDog/documentation
 /cisco_secure_email_threat_defense/manifest.json                    @DataDog/saas-integrations @DataDog/documentation
 /cisco_secure_email_threat_defense/assets/logs/                     @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
-/ringcentral/                                                        @DataDog/saas-integrations
-/ringcentral/*.md                                                    @DataDog/saas-integrations @DataDog/documentation
-/ringcentral/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
-/ringcentral/metadata.csv                                            @DataDog/saas-integrations @DataDog/documentation
-/ringcentral/assets/logs/                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /temporal_cloud/                                                    @DataDog/saas-integrations
 /temporal_cloud/*.md                                                @DataDog/saas-integrations @DataDog/documentation

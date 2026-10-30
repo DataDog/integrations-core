@@ -111,6 +111,7 @@ jobs:
           ddev config override
 
       - name: Resolve the run
+        id: resolve
         env:
           DD_GITHUB_TOKEN: ${{ steps.octo-sts.outputs.token }}
           EVENT_NAME: ${{ github.event_name }}
@@ -221,11 +222,18 @@ jobs:
           DD_DISPATCHER_OCTO_STS_POLICY: ${{ env.OCTO_STS_POLICY }}
           DD_DISPATCHER_OCTO_STS_MINTED_AT: ${{ steps.octo-sts-mint.outputs.minted_at }}
           RESOLVED: ${{ steps.resolved.outputs.available }}
+          RESOLUTION_OUTCOME: ${{ steps.resolve.outputs.outcome }}
+          RESOLUTION_NO_OP_REASON: ${{ steps.resolve.outputs.no-op-reason }}
           PR_NUMBER: ${{ steps.resolved.outputs.pr_number }}
         run: |
           set -euo pipefail
           if [[ "$RESOLVED" != true ]]; then
             echo "No run remains to test."
+            # Resolution can no-op before there is a manifest for ddev to dispatch.
+            {
+              echo "outcome=$RESOLUTION_OUTCOME"
+              echo "no-op-reason=$RESOLUTION_NO_OP_REASON"
+            } >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -266,7 +274,8 @@ jobs:
           GH_TOKEN: ${{ steps.octo-sts-settle.outputs.token }}
           HEAD_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
           STATUS_CONTEXT: Dispatcher / tests (beta, non-blocking)
-          DISPATCH_OUTCOME: ${{ steps.dispatch.outcome }}
+          DISPATCH_OUTCOME: ${{ steps.dispatch.outputs.outcome }}
+          NO_OP_REASON: ${{ steps.dispatch.outputs.no-op-reason }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
@@ -274,12 +283,37 @@ jobs:
             echo "::error::Refusing to settle the status: no scoped token or full SHA."
             exit 1
           fi
-          state=failure
-          description="Test dispatch did not complete"
-          if [[ "$DISPATCH_OUTCOME" == success ]]; then
-            state=success
-            description="Test dispatch completed"
-          fi
+          state=error
+          description="Dispatcher run did not complete"
+          case "$DISPATCH_OUTCOME" in
+            passed)
+              state=success
+              description="Tests passed"
+              ;;
+            tests-failed)
+              state=failure
+              description="Tests failed"
+              ;;
+            no-op)
+              state=success
+              description="Nothing to test"
+              if [[ "$NO_OP_REASON" == 'no open pull request matches the requested revision' ]]; then
+                description="Not tested: superseded by a newer commit"
+              fi
+              ;;
+            cancelled)
+              state=failure
+              description="Cancelled"
+              ;;
+            timed-out)
+              state=error
+              description="Timed out"
+              ;;
+            planning-failed)
+              state=error
+              description="Planning failed"
+              ;;
+          esac
 
           gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
             -f "context=${STATUS_CONTEXT}" \
