@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 38.9.1 / 2026-10-30
+
+***Fixed***:
+
+* Wait a full collection interval after the first run of a DBM async job instead of running a second collection immediately. ([#25855](https://github.com/DataDog/integrations-core/pull/25855))
+
 ## 38.9.0 / 2026-10-29
 
 ***Added***:
