@@ -50,7 +50,8 @@ pushd $TMP_DIR
   tar -zxvf ./*.tar.gz
   pushd MQServer
     for i in 2 4 8 16 32; do sudo ./mqlicense.sh -text_only -accept && break || sleep $i; done
-    sudo rpm -ivh --force-debian *.rpm
+    # MQ Explorer is a GUI the tests don't use, and its JVM can crash and hang the installation
+    sudo rpm -ivh --force-debian $(ls *.rpm | grep -v '^MQSeriesExplorer-')
     sudo /opt/mqm/bin/setmqinst -p /opt/mqm -i
   popd
 

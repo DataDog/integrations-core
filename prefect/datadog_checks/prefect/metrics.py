@@ -20,6 +20,12 @@ WORK_QUEUE_METRICS = {
     "work_queue.concurrency.in_use": "gauge",
 }
 
+CONCURRENCY_LIMIT_METRICS = {
+    "concurrency_limit.limit": "gauge",
+    "concurrency_limit.active_slots": "gauge",
+    "concurrency_limit.is_active": "gauge",
+}
+
 DEPLOYMENT_METRICS = {
     "deployment.is_ready": "gauge",
 }
@@ -58,6 +64,7 @@ METRICS_SPEC = {
     **STATUS_METRICS,
     **WORK_POOL_METRICS,
     **WORK_QUEUE_METRICS,
+    **CONCURRENCY_LIMIT_METRICS,
     **DEPLOYMENT_METRICS,
     **FLOW_RUN_METRICS,
     **TASK_RUN_METRICS,

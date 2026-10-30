@@ -203,6 +203,19 @@ def test_validate_config(instance):
         check.validate_config()
 
 
+def test_empty_compression_disables_compression(instance):
+    instance['compression'] = ''
+    check = ClickhouseCheck('clickhouse', {}, [instance])
+    check.check_id = 'test-empty-compression'
+    check.validate_config()
+
+    with mock.patch('clickhouse_connect.get_client') as m:
+        m.return_value = mock_clickhouse_client()
+        check.connect()
+        _, kwargs = m.call_args
+        assert kwargs['compress'] is False
+
+
 def test_deprecated_user_option():
     """Test that the deprecated 'user' option is migrated to 'username' with a warning."""
     instance = {

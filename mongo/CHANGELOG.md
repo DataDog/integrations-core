@@ -2,6 +2,27 @@
 
 <!-- towncrier release notes start -->
 
+## 11.1.0 / 2026-10-29
+
+***Added***:
+
+* Update dependencies ([#25599](https://github.com/DataDog/integrations-core/pull/25599))
+
+***Fixed***:
+
+* Fix `mongodb.system.cpu.percent` not being submitted for self-hosted MongoDB, and the repeated warnings logged on Windows when the mongod process cannot be resolved. ([#25200](https://github.com/DataDog/integrations-core/pull/25200))
+* Declare the accepted values of `connection_scheme` and `explain_verbosity` in the configuration spec. ([#25603](https://github.com/DataDog/integrations-core/pull/25603))
+
+## 11.0.0 / 2026-10-21 / Agent 7.85.0
+
+***Changed***:
+
+* Upgrade PyMongo to 4.18.2. The minimum supported MongoDB server version is 4.4. ([#25517](https://github.com/DataDog/integrations-core/pull/25517))
+
+***Added***:
+
+* Support MongoDB 9 query statistics and collect change stream, memory, replication traffic, and write-conflict metrics. ([#25517](https://github.com/DataDog/integrations-core/pull/25517))
+
 ## 10.14.0 / 2026-10-01
 
 ***Added***:

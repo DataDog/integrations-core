@@ -60,6 +60,7 @@ nifi = "Apache NiFi"
 dell_powerflex = "Dell Powerflex"
 dynamo = "Dynamo"
 intersystems_iris = "InterSystems IRIS"
+kai_scheduler = "KAI Scheduler"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
@@ -68,11 +69,11 @@ kueue = "kueue."
 prefect = "prefect.server."
 n8n = "n8n."
 control_m = "control_m."
-nifi = "nifi."
 dell_powerflex = "dell_powerflex."
 hpe_aruba_edgeconnect = "hpe_aruba_edgeconnect."
 dynamo = "dynamo."
 intersystems_iris = "intersystems_iris."
+kai_scheduler = "kai."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -236,6 +237,14 @@ exclude = [
     'foundationdb', # 7+ has a breaking changes
     'kubernetes',   # Excluded on size: 36 bundles the aio client and aiohttp, +24M on disk.
                     # Unpin once https://github.com/kubernetes-client/python/issues/2677 is resolved.
+    # botocore requires python-dateutil<3.0.0, so 3.x cannot be installed alongside it.
+    # Unpin once https://github.com/boto/botocore/issues/3844 is resolved.
+    'python-dateutil',
+    # ddtrace adds MiBs to every Agent artifact per release, and the Agent's integrations-core pin PR
+    # fails the static quality gates per-PR size threshold (600 KiB) when a bump lands in a batch.
+    # 4.13.2 -> 4.16.0 added 2.2 to 2.9 MiB in #25804, which had to be reverted in #25822.
+    # Bump it in its own PR, coordinated with a size exception in datadog-agent.
+    'ddtrace',
 
 ]
 
@@ -291,9 +300,9 @@ kueue = ["linux", "windows", "mac_os"]
 prefect = ["linux", "windows", "mac_os"]
 n8n = ["linux", "windows", "mac_os"]
 control_m = ["linux", "windows", "mac_os"]
-nifi = ["linux", "windows", "mac_os"]
 dell_powerflex = ["linux", "windows", "mac_os"]
 hpe_aruba_edgeconnect = ["linux", "windows", "mac_os"]
 dynamo = ["linux", "windows", "mac_os"]
 intersystems_iris = ["linux", "windows", "mac_os"]
+kai_scheduler = ["linux", "windows", "mac_os"]
 
