@@ -50,6 +50,22 @@ def test_cannot_override_hostname_if_no_host_provided(instance):
         IBMMQConfig(instance, {})
 
 
+def test_collect_connection_metrics_defaults_to_false(instance):
+    """AGENT-16599 issue 6: the runtime default must match the documented default (spec.yaml,
+    conf.yaml.example) and the generated config model, which are all False. conn_status carries a
+    high-cardinality `connection` tag, so it is opt-in."""
+    instance.pop('collect_connection_metrics', None)
+    config = IBMMQConfig(instance, {})
+    assert config.collect_connection_metrics is False
+
+
+@pytest.mark.parametrize('value, expected', [(True, True), ('true', True), (False, False), ('false', False)])
+def test_collect_connection_metrics_respects_explicit_value(instance, value, expected):
+    instance['collect_connection_metrics'] = value
+    config = IBMMQConfig(instance, {})
+    assert config.collect_connection_metrics is expected
+
+
 @pytest.mark.parametrize(
     'param, values, should_error',
     [
