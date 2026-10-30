@@ -47,10 +47,10 @@ installation is needed on the HMC.
        password: <PASSWORD>
    ```
 
-   If the Agent host's known hosts file does not contain the HMC's host key
-   yet, add it with `ssh-keyscan <HMC HOSTNAME> >> /etc/ssh/ssh_known_hosts`,
-   run as the same user as the Agent. The check rejects connections to hosts
-   with unknown keys.
+   If the Agent user's known hosts file does not contain the HMC's host key
+   yet, add it with `ssh-keyscan <HMC HOSTNAME> >> ~/.ssh/known_hosts`, run as
+   the Agent user (`dd-agent` by default). The check reads that user's known
+   hosts and rejects connections to hosts with unknown keys.
 
 3. [Restart the Agent][3].
 
@@ -65,10 +65,11 @@ than needed.
 
 #### Clock synchronization
 
-`lslparutil` samples are selected with `--startyear/--startmonth/...` options
-expressed in HMC-local time, and only samples newer than the previous
-collection are submitted. Keep the Agent host and the HMC reasonably in sync
-(NTP) so samples are neither missed nor repeatedly fetched.
+The `lslparutil` start options are expressed in HMC-local time, so the check
+queries the HMC's clock for its first collection window and keeps track of
+the HMC-side time of the last collected sample afterwards. The Agent's time
+zone and clock skew therefore do not affect collection; only keep the HMC
+itself reasonably in sync (NTP) so samples are produced with sane timestamps.
 
 ### Validation
 
@@ -85,8 +86,11 @@ exact set depends on the HMC firmware version.
 
 ### Service Checks
 
-`ibm_hmc.can_connect`
-: Returns `CRITICAL` if the Agent cannot connect to the HMC over SSH. Returns `OK` otherwise.
+The IBM HMC check does not include any service checks.
+
+Connectivity is reported with the `ibm_hmc.can_connect` metric instead: `1`
+when the Agent can connect to the HMC over SSH, `0` otherwise. Monitor it with
+for example `max(last_5m):avg:ibm_hmc.can_connect{*} by {hmc-instance} < 1`.
 
 ### Events
 

@@ -1,4 +1,5 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric
+ibm_hmc.can_connect,gauge,,,,"1 if the check can connect to the HMC over SSH, 0 otherwise.",0,ibm_hmc,ibm_hmc can connect,
 ibm_hmc.lpar.capped_cycles,gauge,,,,Number of cycles consumed while the LPAR was capped.,0,ibm_hmc,ibm_hmc lpar capped cycles,
 ibm_hmc.lpar.curr_io_entitled_mem,gauge,,,,Current I/O entitled memory of the LPAR.,0,ibm_hmc,ibm_hmc lpar io entitled memory,
 ibm_hmc.lpar.curr_mem,gauge,,,,Current memory of the LPAR.,0,ibm_hmc,ibm_hmc lpar memory,
@@ -21,7 +22,6 @@ ibm_hmc.pool.configurable_pool_proc_units,gauge,,,,Configurable processor units 
 ibm_hmc.pool.curr_avail_pool_proc_units,gauge,,,,Currently available processor units of the shared processor pool.,0,ibm_hmc,ibm_hmc pool available units,
 ibm_hmc.pool.total_pool_cycles,gauge,,,,Total cycles of the shared processor pool.,0,ibm_hmc,ibm_hmc pool total cycles,
 ibm_hmc.pool.utilized_pool_cycles,gauge,,,,Utilized cycles of the shared processor pool.,0,ibm_hmc,ibm_hmc pool utilized cycles,
-ibm_hmc.procpool.shared_proc_pool_id,gauge,,,,ID of the shared processor pool.,0,ibm_hmc,ibm_hmc procpool id,
 ibm_hmc.procpool.total_pool_cycles,gauge,,,,Total cycles of the dedicated processor pool.,0,ibm_hmc,ibm_hmc procpool total cycles,
 ibm_hmc.procpool.utilized_pool_cycles,gauge,,,,Utilized cycles of the dedicated processor pool.,0,ibm_hmc,ibm_hmc procpool utilized cycles,
 ibm_hmc.sys.configurable_sys_mem,gauge,,,,Configurable system memory.,0,ibm_hmc,ibm_hmc sys configurable memory,

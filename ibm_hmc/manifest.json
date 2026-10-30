@@ -39,9 +39,6 @@
         "prefix": "ibm_hmc.",
         "check": "ibm_hmc.lpar.curr_proc_units",
         "metadata_path": "metadata.csv"
-      },
-      "service_checks": {
-        "metadata_path": "assets/service_checks.json"
       }
     }
   }

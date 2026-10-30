@@ -17,8 +17,8 @@ from datadog_checks.base import AgentCheck
 from .config_models import ConfigMixin
 
 # Sample fields per `lslparutil` resource. Each entry is (field, is_gauge): fields
-# with is_gauge=False are not metrics, their value is attached as a tag to every
-# metric of the sample instead.
+# with is_gauge=False are not metrics, their value identifies the sample's series
+# and is attached as a tag to every metric of that sample instead.
 SAMPLE_FIELDS: dict[str, tuple[tuple[str, bool], ...]] = {
     'LPAR': (
         ('lpar_name', False),
@@ -37,7 +37,7 @@ SAMPLE_FIELDS: dict[str, tuple[tuple[str, bool], ...]] = {
         ('curr_avail_pool_proc_units', True),
     ),
     'PROCPOOL': (
-        ('shared_proc_pool_id', True),
+        ('shared_proc_pool_id', False),
         ('total_pool_cycles', True),
         ('utilized_pool_cycles', True),
     ),
@@ -86,13 +86,17 @@ class ManagedServer:
         self.last_collection = dict.fromkeys(SAMPLE_FIELDS)
         # HMC-side time of the newest sample already collected per subsystem,
         # used to only submit samples that were not seen before.
-        self.last_sample_time = dict.fromkeys(SAMPLE_FIELDS)
+        self.last_sample_time: dict[str, time.struct_time | None] = dict.fromkeys(SAMPLE_FIELDS)
 
 
 class IbmHmcCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'ibm_hmc'
 
-    SERVICE_CHECK_NAME = 'can_connect'
+    # 1 when the check can connect to the HMC over SSH, 0 otherwise. Connectivity
+    # is reported as a metric rather than a service check, per repository policy
+    # for new integrations; monitor it with e.g.
+    # `max(last_5m):avg:ibm_hmc.can_connect{*} by {hmc-instance} < 1`.
+    CONNECTIVITY_METRIC = 'can_connect'
 
     # lslparutil needs a fixed numeric locale, otherwise the HMC may print
     # decimal separators that cannot be parsed as floats.
@@ -105,6 +109,7 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
     GET_VERSION_CMD = 'lshmc -v'
     GET_SERVERS_CMD = 'lssyscfg -r sys -F name,type_model,serial_num'
     GET_SAMPLE_RATE_CMD = 'lslparutil -r config -m {name} -F sample_rate'
+    GET_TIME_CMD = "date '+%m/%d/%Y %H:%M:%S'"
     SAMPLES_CMD_TEMPLATE = (
         'lslparutil -r {resource} --startyear {year} --startmonth {month} --startday {day} '
         '--starthour {hour} --startminute {minute} -m {name} -F time,{fields} '
@@ -140,9 +145,9 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
         try:
             try:
                 client.connect(host, port=port, username=self.config.username, **self._connect_kwargs())
-                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=tags)
-            except Exception as e:
-                self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=tags, message=str(e))
+                self.gauge(self.CONNECTIVITY_METRIC, 1, tags=tags)
+            except Exception:
+                self.gauge(self.CONNECTIVITY_METRIC, 0, tags=tags)
                 raise
 
             self.collect_metrics(client, key, tags)
@@ -157,15 +162,21 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
 
         now = time.time()
         if now - self._last_refresh.get(key, 0) > self.SERVER_REFRESH_PERIOD:
-            self.refresh_managed_servers(client, key)
-            self._last_refresh[key] = now
+            try:
+                self.refresh_managed_servers(client, key)
+            except Exception:
+                # Keep the current inventory and retry on the next run: a failed
+                # discovery must not suppress managed-system metrics for an hour.
+                self.log.exception('Unable to refresh the managed servers of %s:%s', *key)
+            else:
+                self._last_refresh[key] = now
 
         for server in list(self._managed_servers.get(key, {}).values()):
             if server.sample_rate is None:
                 server.sample_rate = self.get_sample_rate(client, server)
                 if server.sample_rate is None:
                     continue
-            server_tags = [f'server:{server.name}']
+            server_tags = [*tags, f'server:{server.name}']
             for subsys in SAMPLE_FIELDS:
                 try:
                     self.collect_subsystem(client, subsys, server, version, tags=server_tags)
@@ -197,7 +208,7 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
         HMC 10 releases have a two-digit major version (e.g. `V10R3.1060.0`), so the
         components must not be collapsed into a single truncated integer.
         """
-        output = self._exec_command(client, self.GET_VERSION_CMD, environment=self.LSLPARUTIL_ENV)
+        output, _, _ = self._exec_command(client, self.GET_VERSION_CMD, environment=self.LSLPARUTIL_ENV)
         for line in output.splitlines():
             parts = line.split()
             if len(parts) >= 2 and parts[0] == '*RM':
@@ -211,7 +222,12 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
 
     def get_managed_servers(self, client):
         """Return the POWER systems managed by the HMC."""
-        output = self._exec_command(client, self.GET_SERVERS_CMD, environment=self.LSLPARUTIL_ENV)
+        output, _, status = self._exec_command(client, self.GET_SERVERS_CMD, environment=self.LSLPARUTIL_ENV)
+        if status != 0:
+            # An empty successful listing is valid (nothing managed), a failed
+            # command must be propagated so the caller keeps its inventory.
+            raise RuntimeError(f'`lssyscfg -r sys` failed with exit status {status}')
+
         servers = []
         for line in output.splitlines():
             fields = line.split(',')
@@ -224,15 +240,36 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
     def get_sample_rate(self, client, server):
         """Return the lslparutil sample rate in seconds, or None if it cannot be read."""
         cmd = self.GET_SAMPLE_RATE_CMD.format(name=server.name)
-        output = self._exec_command(client, cmd, environment=self.LSLPARUTIL_ENV)
+        output, _, status = self._exec_command(client, cmd, environment=self.LSLPARUTIL_ENV)
+        if status != 0:
+            self.log.error('Unable to collect sample rate for %s: exit status %d', server.name, status)
+            return None
         try:
             return int(output.strip())
         except ValueError:
             self.log.error('Unable to collect sample rate for %s: %r', server.name, output.strip())
             return None
 
+    def get_hmc_time(self, client):
+        """Return the HMC's current local time as a struct_time.
+
+        The `lslparutil` start options are expressed in HMC-local time, so the
+        first collection window must come from the HMC's clock: the Agent's
+        local time may be in a different time zone, which would place the
+        window past every sample and prevent collection from ever starting.
+        """
+        output, _, status = self._exec_command(client, self.GET_TIME_CMD, environment=self.C_ENV)
+        if status == 0:
+            try:
+                return time.strptime(output.strip(), self.SAMPLE_TIME_FORMAT)
+            except ValueError:
+                self.log.warning('Unable to parse HMC time %r, falling back to the Agent clock', output.strip())
+        else:
+            self.log.warning('Unable to collect the HMC time, falling back to the Agent clock')
+        return time.localtime()
+
     def collect_subsystem(self, client, subsys, server, version, tags):
-        """Collect and submit the newest unseen `lslparutil` sample of a subsystem."""
+        """Collect and submit the newest unseen `lslparutil` sample of every series."""
         last_collection = server.last_collection[subsys]
         if last_collection is not None and time.time() - last_collection < server.sample_rate:
             self.log.debug(
@@ -243,14 +280,10 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
             return
 
         fields = self._fields_for(subsys, version)
-        # Resume from the HMC-side time of the newest sample already collected.
-        # On the first collection there is no such timestamp, so the local clock
-        # is used and the HMC is assumed to be roughly in sync (see the README).
+        # Resume from the HMC-side time of the newest sample already collected,
+        # or from the HMC's own clock on the first collection of the subsystem.
         last_seen = server.last_sample_time[subsys]
-        if last_seen is None:
-            start_tm = time.localtime()
-        else:
-            start_tm = time.localtime(last_seen)
+        start_tm = last_seen if last_seen is not None else self.get_hmc_time(client)
 
         cmd = self.SAMPLES_CMD_TEMPLATE.format(
             resource=subsys.lower(),
@@ -262,7 +295,10 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
             name=server.name,
             fields=','.join(field for field, _ in fields),
         )
-        output = self._exec_command(client, cmd, environment=self.LSLPARUTIL_ENV)
+        output, _, status = self._exec_command(client, cmd, environment=self.LSLPARUTIL_ENV)
+        if status != 0:
+            self.log.warning('Unable to collect %s samples for %s: exit status %d', subsys, server.name, status)
+            return
 
         samples = []
         for line in output.splitlines():
@@ -271,7 +307,7 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
                 self.log.debug('Skipping malformed %s sample for %s: %r', subsys, server.name, line)
                 continue
             try:
-                sample_time = time.mktime(time.strptime(sample[0], self.SAMPLE_TIME_FORMAT))
+                sample_time = time.strptime(sample[0], self.SAMPLE_TIME_FORMAT)
             except ValueError:
                 self.log.debug('Skipping %s sample with unparsable time %r for %s', subsys, sample[0], server.name)
                 continue
@@ -282,29 +318,41 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
             self.log.debug('No new %s samples were collected for %s', subsys, server.name)
             return
 
-        # `lslparutil` prints newest samples first, but do not rely on it.
-        newest_time, newest = max(samples, key=lambda sample: sample[0])
+        # `lslparutil` returns one row per series and timestamp (e.g. one row per
+        # LPAR, or per shared processor pool): keep the newest sample of every
+        # series, not just the single newest row overall.
+        by_series = {}
+        for sample_time, sample in samples:
+            series = tuple(sample[i + 1] for i, (_, is_gauge) in enumerate(fields) if not is_gauge)
+            current = by_series.get(series)
+            if current is None or sample_time > current[0]:
+                by_series[series] = (sample_time, sample)
 
         server.last_collection[subsys] = time.time()
-        server.last_sample_time[subsys] = newest_time
+        server.last_sample_time[subsys] = max(sample_time for sample_time, _ in samples)
 
-        # Fields that are not metrics are attached as tags to the sample metrics.
-        sample_tags = list(tags)
-        for i, (field, is_gauge) in enumerate(fields):
-            if not is_gauge:
-                sample_tags.append(f'{field}:{newest[i + 1]}')
+        for _, sample in by_series.values():
+            # Fields that are not metrics are attached as tags to the sample metrics.
+            sample_tags = list(tags)
+            for i, (field, is_gauge) in enumerate(fields):
+                if not is_gauge:
+                    sample_tags.append(f'{field}:{sample[i + 1]}')
 
-        for i, (field, is_gauge) in enumerate(fields):
-            if not is_gauge:
-                continue
-            try:
-                self.gauge(f'{subsys.lower()}.{field}', float(newest[i + 1]), tags=sample_tags)
-            except ValueError:
-                self.log.exception('Unable to submit metric %s for %s', field, server.name)
+            for i, (field, is_gauge) in enumerate(fields):
+                if not is_gauge:
+                    continue
+                try:
+                    self.gauge(f'{subsys.lower()}.{field}', float(sample[i + 1]), tags=sample_tags)
+                except ValueError:
+                    self.log.exception('Unable to submit metric %s for %s', field, server.name)
 
     def collect_meminfo(self, client, tags):
         """Collect the HMC appliance's own memory statistics from /proc/meminfo."""
-        output = self._exec_command(client, self.MEMINFO_CMD, environment=self.C_ENV)
+        output, _, status = self._exec_command(client, self.MEMINFO_CMD, environment=self.C_ENV)
+        if status != 0:
+            self.log.warning('Unable to collect /proc/meminfo from the HMC: exit status %d', status)
+            return
+
         for line in output.splitlines():
             # MemTotal:      4128368 kB
             parts = line.split()
@@ -321,7 +369,11 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
 
     def collect_swap(self, client, tags):
         """Collect the HMC appliance's swap statistics via `monhmc -r swap`."""
-        output = self._exec_command(client, self.SWAP_CMD, environment=self.C_ENV)
+        output, _, status = self._exec_command(client, self.SWAP_CMD, environment=self.C_ENV)
+        if status != 0:
+            self.log.warning('Unable to collect swap statistics from the HMC: exit status %d', status)
+            return
+
         # Swap: 2040244k total, 266000k used, 1774244k free, 2282460k cached
         stats = ' '.join(output.split()[1:])
         for stat in stats.split(','):
@@ -378,6 +430,7 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
         return None
 
     def _exec_command(self, client, command, environment=None):
+        """Run a command on the HMC, returning (stdout, stderr, exit status)."""
         _, stdout, stderr = client.exec_command(command, environment=environment)
         output = stdout.read()
         err = stderr.read()
@@ -387,4 +440,4 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
             err = err.decode('utf-8', errors='replace')
         if not output and err:
             self.log.debug('Command %r produced no output, stderr: %s', command, err.strip())
-        return output
+        return output, err, stdout.channel.recv_exit_status()
