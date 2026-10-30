@@ -7,7 +7,7 @@
 set -ex
 
 TMP_DIR=/tmp/mq
-MQ_URL=https://ddintegrations.blob.core.windows.net/ibm-mq/mqadv_dev90_linux_x86-64.tar.gz
+MQ_URL=https://agent-integrations-ci-fixtures.s3.us-east-1.amazonaws.com/fixtures/ibm-mq/mqadv_dev90_linux_x86-64.tar.gz
 MQ_PACKAGES="MQSeriesRuntime-*.rpm MQSeriesServer-*.rpm MQSeriesMsg*.rpm MQSeriesJava*.rpm MQSeriesJRE*.rpm MQSeriesGSKit*.rpm"
 
 if [ -e /opt/mqm/inc/cmqc.h ]; then
@@ -50,7 +50,8 @@ pushd $TMP_DIR
   tar -zxvf ./*.tar.gz
   pushd MQServer
     for i in 2 4 8 16 32; do sudo ./mqlicense.sh -text_only -accept && break || sleep $i; done
-    sudo rpm -ivh --force-debian *.rpm
+    # MQ Explorer is a GUI the tests don't use, and its JVM can crash and hang the installation
+    sudo rpm -ivh --force-debian $(ls *.rpm | grep -v '^MQSeriesExplorer-')
     sudo /opt/mqm/bin/setmqinst -p /opt/mqm -i
   popd
 

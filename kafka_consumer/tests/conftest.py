@@ -10,8 +10,8 @@ import pytest
 from confluent_kafka.admin import AdminClient
 from confluent_kafka.cimpl import NewTopic
 
-from datadog_checks.dev import TempDir, WaitFor, docker_run
-from datadog_checks.dev._env import e2e_testing
+from datadog_checks.dev import EnvVars, TempDir, WaitFor, docker_run
+from datadog_checks.dev._env import e2e_testing, get_state, save_state
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.client import KafkaClient
@@ -20,11 +20,18 @@ from . import common
 from .common import get_cluster_id
 from .runners import Consumer, Producer
 
+KERBEROS_SECRET_DIR_STATE = 'kafka_consumer_kerberos_secret_dir'
+KRB5_CONFIG = (
+    f"{common.HERE}/docker/kerberos/kdc/krb5_agent.conf"
+    if running_on_ci()
+    else f"{common.HERE}/docker/kerberos/kdc/krb5_local.conf"
+)
+
 
 def seed_mock_kafka_client():
     """Minimal Kafka client mock sufficient for the connector-focused tests."""
     client = mock.create_autospec(KafkaClient)
-    client.consumer_get_cluster_id_and_list_topics.return_value = ('cluster-1', [])
+    client.get_cluster_id.return_value = 'cluster-1'
     client.list_consumer_groups.return_value = []
     client.list_consumer_group_offsets.return_value = []
     client._cluster_metadata = None
@@ -83,7 +90,7 @@ def run_connect_check(check, kafka_instance, dd_run_check, datadog_agent):
         runs=1,
     ):
         kafka_instance['kafka_connect_url'] = 'http://localhost:8083'
-        kafka_instance['enable_cluster_monitoring'] = True
+        kafka_instance['enable_kafka_console'] = True
         if instance_extra:
             kafka_instance.update(instance_extra)
 
@@ -137,6 +144,7 @@ def dd_environment():
 
         if common.AUTHENTICATION == "kerberos":
             common.INSTANCE["sasl_kerberos_keytab"] = common.INSTANCE["sasl_kerberos_keytab"].format(secret_dir)
+            save_state(KERBEROS_SECRET_DIR_STATE, secret_dir)
             conditions.append(WaitFor(wait_for_cp_kafka_topics, attempts=10, wait=10))
             common.E2E_METADATA["docker_volumes"].append(f"{secret_dir}:/var/lib/secret")
 
@@ -154,14 +162,7 @@ def dd_environment():
         with docker_run(
             common.DOCKER_IMAGE_PATH,
             conditions=conditions,
-            env_vars={
-                "KRB5_CONFIG": (
-                    f"{common.HERE}/docker/kerberos/kdc/krb5_agent.conf"
-                    if running_on_ci()
-                    else f"{common.HERE}/docker/kerberos/kdc/krb5_local.conf"
-                ),
-                "SECRET_DIR": secret_dir,
-            },
+            env_vars={"KRB5_CONFIG": KRB5_CONFIG, "SECRET_DIR": secret_dir},
             build=True,
         ):
             yield (
@@ -171,6 +172,24 @@ def dd_environment():
                 },
                 common.E2E_METADATA,
             )
+
+
+@pytest.fixture(scope='session', autouse=True)
+def e2e_kerberos_client():
+    """Give host-side Kerberos clients the credentials `dd_environment` set up when the environment started.
+
+    `dd_environment` runs in the `ddev env start` process. In the `ddev env test` process the plugin turns it into a
+    no-op, so its changes to `common.INSTANCE` and `KRB5_CONFIG` are missing there and `get_cluster_id` would
+    authenticate with an unformatted keytab path and the runner's default Kerberos realm.
+    """
+    if common.AUTHENTICATION != "kerberos" or not e2e_testing():
+        yield
+        return
+
+    secret_dir = get_state(KERBEROS_SECRET_DIR_STATE)
+    common.INSTANCE["sasl_kerberos_keytab"] = common.INSTANCE["sasl_kerberos_keytab"].format(secret_dir)
+    with EnvVars({"KRB5_CONFIG": KRB5_CONFIG}):
+        yield
 
 
 def is_cluster_id_available():

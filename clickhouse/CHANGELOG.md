@@ -2,7 +2,21 @@
 
 <!-- towncrier release notes start -->
 
-## 7.3.0 / 2026-09-02
+## 7.3.2 / 2026-10-29
+
+***Fixed***:
+
+* Send the `database_instance` metadata event before metric queries run, so a failing query no longer suppresses it. ([#25530](https://github.com/DataDog/integrations-core/pull/25530))
+* Declare the accepted values of `compression` in the configuration spec. ([#25603](https://github.com/DataDog/integrations-core/pull/25603))
+* Exclude internal resource tags from the `database_instance` metadata payload. ([#25692](https://github.com/DataDog/integrations-core/pull/25692))
+
+## 7.3.1 / 2026-10-01 / Agent 7.85.0
+
+***Fixed***:
+
+* Log query sample obfuscation failures with repr so an embedded null cannot crash the job. ([#25344](https://github.com/DataDog/integrations-core/pull/25344))
+
+## 7.3.0 / 2026-09-02 / Agent 7.84.0
 
 ***Added***:
 
@@ -19,7 +33,13 @@
 * Manage the DBM async jobs through the ``DatabaseCheck`` registry. ([#24934](https://github.com/DataDog/integrations-core/pull/24934))
 * Cache the Agent version instead of resolving it for every payload. ([#25024](https://github.com/DataDog/integrations-core/pull/25024))
 
-## 7.2.0 / 2026-08-05
+## 7.2.1 / 2026-09-10 / Agent 7.83.2
+
+***Fixed***:
+
+* Fix a crash on Altinity FIPS builds whose version string includes a non-numeric suffix (e.g. ``25.3.8.30001.altinityfips``). ([#24807](https://github.com/DataDog/integrations-core/pull/24807))
+
+## 7.2.0 / 2026-08-05 / Agent 7.83.0
 
 ***Added***:
 

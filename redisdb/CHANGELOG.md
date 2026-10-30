@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 8.10.0 / 2026-09-02
+## 8.11.0 / 2026-10-29
+
+***Added***:
+
+* Add `disable_config_get` and stop retrying rejected `CONFIG GET` commands for the lifetime of the check instance. ([#25654](https://github.com/DataDog/integrations-core/pull/25654))
+
+## 8.10.0 / 2026-09-02 / Agent 7.84.0
 
 ***Added***:
 
@@ -158,6 +164,12 @@
 ***Added***:
 
 * Update dependencies ([#17319](https://github.com/DataDog/integrations-core/pull/17319))
+
+## 5.3.2 / 2026-10-23 / Agent 7.53.1
+
+***Added***:
+
+* Add support of Redis 8 ([#20227](https://github.com/DataDog/integrations-core/pull/20227))
 
 ## 5.3.1 / 2024-03-05 / Agent 7.53.0
 

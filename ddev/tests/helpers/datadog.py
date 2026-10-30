@@ -1,7 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Test support for code that submits Datadog logs."""
+"""Test support for code that submits Datadog logs and metrics."""
 
 from __future__ import annotations
 
@@ -10,33 +10,29 @@ from collections import deque
 from collections.abc import Mapping
 from pprint import pformat
 
+from datadog_api_client.v1.model.distribution_points_payload import DistributionPointsPayload
 from datadog_api_client.v2.model.http_log import HTTPLog
+from datadog_api_client.v2.model.metric_payload import MetricPayload
 
 type SubmittedLog = dict[str, object]
+type SubmittedSeries = dict[str, object]
 
 
-class FakeLogSubmitter:
-    """Record submitted logs with optional failures and blocking."""
+class SubmissionRecorder:
+    """Failure and blocking controls shared by fake submitters."""
 
     def __init__(self) -> None:
-        self.requests: list[list[SubmittedLog]] = []
         self._failures: deque[Exception] = deque()
         self._submission_gate = threading.Event()
         self._submission_gate.set()
         self._submission_started = threading.Semaphore(0)
 
-    @property
-    def logs(self) -> list[SubmittedLog]:
-        return [log for request in self.requests for log in request]
-
-    def submit_log(self, body: HTTPLog) -> object:
+    def begin_submission(self) -> None:
         self._submission_started.release()
         if not self._submission_gate.wait(timeout=5):
             raise RuntimeError('test intake remained blocked')
         if self._failures:
             raise self._failures.popleft()
-        self.requests.append([item.to_dict() for item in body.value])
-        return {}
 
     def fail_next(self, error: Exception, *, count: int = 1) -> None:
         if count < 0:
@@ -52,6 +48,23 @@ class FakeLogSubmitter:
     def wait_for_submission(self, timeout: float = 5) -> bool:
         return self._submission_started.acquire(timeout=timeout)
 
+
+class FakeLogSubmitter(SubmissionRecorder):
+    """Record submitted logs with optional failures and blocking."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.requests: list[list[SubmittedLog]] = []
+
+    @property
+    def logs(self) -> list[SubmittedLog]:
+        return [log for request in self.requests for log in request]
+
+    def submit_log(self, body: HTTPLog) -> object:
+        self.begin_submission()
+        self.requests.append([item.to_dict() for item in body.value])
+        return {}
+
     def assert_logs(self, *expected: Mapping[str, object]) -> None:
         actual = self.logs
         expected_logs = [dict(log) for log in expected]
@@ -66,3 +79,30 @@ class FakeLogSubmitter:
 
     def assert_no_logs(self) -> None:
         self.assert_logs()
+
+
+class FakeMetricsSubmitter(SubmissionRecorder):
+    """Record submitted metrics with optional failures and blocking."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.metric_requests: list[list[SubmittedSeries]] = []
+        self.distribution_requests: list[list[SubmittedSeries]] = []
+
+    @property
+    def series(self) -> list[SubmittedSeries]:
+        return [series for request in self.metric_requests for series in request]
+
+    @property
+    def distributions(self) -> list[SubmittedSeries]:
+        return [series for request in self.distribution_requests for series in request]
+
+    def submit_metrics(self, body: MetricPayload) -> object:
+        self.begin_submission()
+        self.metric_requests.append([series.to_dict() for series in body.series])
+        return {}
+
+    def submit_distribution_points(self, body: DistributionPointsPayload) -> object:
+        self.begin_submission()
+        self.distribution_requests.append([series.to_dict() for series in body.series])
+        return {}

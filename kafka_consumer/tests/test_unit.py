@@ -6,11 +6,16 @@ import json
 import logging
 import marshal
 from collections import defaultdict
+from concurrent.futures import Future
 from contextlib import nullcontext as does_not_raise
 
 import mock
 import pytest
+from confluent_kafka import ConsumerGroupTopicPartitions, KafkaError, KafkaException, TopicPartition
+from confluent_kafka.admin import AdminClient, ClusterMetadata, PartitionMetadata, TopicMetadata
+from confluent_kafka.cimpl import _AdminClientImpl
 
+from datadog_checks.base import ConfigurationError
 from datadog_checks.kafka_consumer import KafkaCheck
 from datadog_checks.kafka_consumer.client import KafkaClient
 
@@ -40,20 +45,7 @@ def seed_mock_client(cluster_id="cluster_id"):
     client.get_partitions_for_topic.return_value = ['partition1']
     client.list_consumer_group_offsets.return_value = [("consumer_group1", [("topic1", "partition1", 2)])]
     client.describe_consumer_group.return_value = 'STABLE'
-    client.consumer_get_cluster_id_and_list_topics.return_value = (
-        cluster_id,
-        # topics
-        [
-            # Used in unit tets
-            ('topic1', ["partition1"]),
-            ('topic2', ["partition2"]),
-            # Copied from integration tests
-            ('dc', [0, 1]),
-            ('unconsumed_topic', [0, 1]),
-            ('marvel', [0, 1]),
-            ('__consumer_offsets', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
-        ],
-    )
+    client.get_cluster_id.return_value = cluster_id
     client.get_partition_offsets = fake_get_partition_offsets
     return client
 
@@ -77,6 +69,13 @@ def seed_mock_client(cluster_id="cluster_id"):
 def test_tls_config_legacy(legacy_config, kafka_client_config, value, check):
     kafka_consumer_check = check({legacy_config: value})
     assert getattr(kafka_consumer_check.config, kafka_client_config) == value
+
+
+def test_kafka_console_options_are_mutually_exclusive(check, kafka_instance):
+    kafka_instance.update({'enable_kafka_console': False, 'enable_cluster_monitoring': False})
+
+    with pytest.raises(ConfigurationError, match='cannot both be set'):
+        check(kafka_instance)
 
 
 @pytest.mark.parametrize(
@@ -133,20 +132,7 @@ def test_tls_verify_is_string(tls_verify, expected, check, kafka_instance):
 
 mock_client = mock.MagicMock()
 mock_client.get_highwater_offsets.return_value = ({}, "")
-mock_client.consumer_get_cluster_id_and_list_topics.return_value = (
-    "cluster_id",
-    # topics
-    [
-        # Used in unit tets
-        ('topic1', ["partition1"]),
-        ('topic2', ["partition2"]),
-        # Copied from integration tests
-        ('dc', [0, 1]),
-        ('unconsumed_topic', [0, 1]),
-        ('marvel', [0, 1]),
-        ('__consumer_offsets', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]),
-    ],
-)
+mock_client.get_cluster_id.return_value = "cluster_id"
 
 
 @pytest.mark.parametrize(
@@ -403,6 +389,124 @@ def test_when_partition_not_in_partitions_then_emit_warning_log(
     assert expected_warning in caplog.text
 
 
+FAKE_COMMITTED_OFFSET = 5
+
+
+class _FakeBroker(_AdminClientImpl):
+    """Answers AdminClient's broker round-trips from an in-memory topic -> partitions map.
+
+    It sits after AdminClient in the MRO, so AdminClient's own request validation and
+    future handling run unchanged and only the network call is replaced.
+    """
+
+    def list_topics(self, topic=None, timeout=-1):
+        metadata = ClusterMetadata()
+        metadata.cluster_id = 'cluster_id'
+        for name, partitions in self.cluster_topics.items():
+            topic_metadata = TopicMetadata()
+            topic_metadata.topic = name
+            for partition in partitions:
+                partition_metadata = PartitionMetadata()
+                partition_metadata.id = partition
+                topic_metadata.partitions[partition] = partition_metadata
+            metadata.topics[name] = topic_metadata
+        return metadata
+
+    def list_consumer_group_offsets(self, request, future, **kwargs):
+        future.set_result(
+            [
+                ConsumerGroupTopicPartitions(
+                    req.group_id,
+                    [TopicPartition(tp.topic, tp.partition, FAKE_COMMITTED_OFFSET) for tp in req.topic_partitions],
+                )
+                for req in request
+            ]
+        )
+
+
+class _FakeAdminClient(AdminClient, _FakeBroker):
+    def __init__(self, cluster_topics, config, **kwargs):
+        self.cluster_topics = cluster_topics
+        super().__init__(config, **kwargs)
+
+
+@pytest.fixture
+def fake_cluster(monkeypatch):
+    """Topic -> partitions map served by every AdminClient the check creates. Mutate it to change the cluster."""
+    cluster_topics = {}
+    monkeypatch.setattr(
+        'datadog_checks.kafka_consumer.client.AdminClient',
+        lambda config, **kwargs: _FakeAdminClient(cluster_topics, config, **kwargs),
+    )
+    return cluster_topics
+
+
+def check_against_fake_cluster(check, monkeypatch, consumer_groups):
+    """A check that uses the real KafkaClient admin code path; only partition offset lookups are stubbed."""
+    instance = {'kafka_connect_str': 'localhost:1', 'tags': ['optional:tag1'], 'consumer_groups': consumer_groups}
+    kafka_consumer_check = check(instance)
+    client = kafka_consumer_check.client
+    monkeypatch.setattr(client, 'get_partition_offsets', fake_get_partition_offsets)
+    return kafka_consumer_check
+
+
+def consumer_tags(consumer_group, topic, partition):
+    return [
+        'optional:tag1',
+        'kafka_cluster_id:cluster_id',
+        f'consumer_group:{consumer_group}',
+        f'topic:{topic}',
+        f'partition:{partition}',
+    ]
+
+
+def test_configured_topic_missing_from_cluster_does_not_block_other_groups(
+    check, fake_cluster, monkeypatch, dd_run_check, aggregator
+):
+    fake_cluster['topic1'] = [0]
+    kafka_consumer_check = check_against_fake_cluster(
+        check,
+        monkeypatch,
+        {'healthy_group': {'topic1': []}, 'other_group': {'missing_topic': []}},
+    )
+
+    dd_run_check(kafka_consumer_check)
+
+    aggregator.assert_metric(
+        'kafka.consumer_offset',
+        value=FAKE_COMMITTED_OFFSET,
+        count=1,
+        tags=consumer_tags('healthy_group', 'topic1', 0),
+    )
+    aggregator.assert_metric(
+        'kafka.consumer_lag',
+        value=80 - FAKE_COMMITTED_OFFSET,
+        count=1,
+        tags=consumer_tags('healthy_group', 'topic1', 0),
+    )
+
+
+def test_configured_topic_created_after_first_run_is_collected(
+    check, fake_cluster, monkeypatch, dd_run_check, aggregator
+):
+    kafka_consumer_check = check_against_fake_cluster(check, monkeypatch, {'consumer_group1': {'new_topic': []}})
+
+    dd_run_check(kafka_consumer_check)
+    aggregator.assert_metric('kafka.consumer_offset', count=0)
+
+    fake_cluster['new_topic'] = [0, 1]
+    aggregator.reset()
+    dd_run_check(kafka_consumer_check)
+
+    for partition in (0, 1):
+        aggregator.assert_metric(
+            'kafka.consumer_offset',
+            value=FAKE_COMMITTED_OFFSET,
+            count=1,
+            tags=consumer_tags('consumer_group1', 'new_topic', partition),
+        )
+
+
 def test_when_highwater_metric_count_hit_context_limit_then_no_more_highwater_metrics(
     check, kafka_instance, dd_run_check, aggregator, caplog
 ):
@@ -505,19 +609,66 @@ def test_load_broker_timestamps_empty(
     assert check.read_persistent_cache.mock_calls == [mock.call("broker_timestamps_")]
 
 
-def test_client_init(kafka_instance, check, dd_run_check):
-    """
-    We only open a connection to datadog-agent consumer once.
+class FakeAdminClient:
+    """Stands in for librdkafka's AdminClient so the real KafkaClient can run without a broker."""
 
-    Doing so more often degrades performance, as described in this issue:
-    https://github.com/DataDog/integrations-core/issues/19564
-    """
-    mock_client = seed_mock_client()
-    check = check(kafka_instance)
-    check.client = mock_client
-    dd_run_check(check)
+    def __init__(self, metadata):
+        self.metadata = metadata
+        self.list_topics_calls = 0
 
-    assert check.client.open_consumer.mock_calls == [mock.call("datadog-agent")]
+    @staticmethod
+    def _done(value):
+        future = Future()
+        future.set_result(value)
+        return future
+
+    def list_topics(self, topic=None, timeout=None):
+        self.list_topics_calls += 1
+        return self.metadata
+
+    def list_consumer_group_offsets(self, requests):
+        return {
+            r.group_id: self._done(
+                mock.Mock(
+                    group_id=r.group_id,
+                    topic_partitions=[TopicPartition(tp.topic, tp.partition, 5) for tp in r.topic_partitions],
+                )
+            )
+            for r in requests
+        }
+
+    def list_offsets(self, request, **_kwargs):
+        return {tp: self._done(mock.Mock(offset=80)) for tp in request}
+
+    def poll(self, timeout):
+        return 0
+
+
+def test_highwater_collection_reads_cluster_id_without_a_consumer(kafka_instance, check, dd_run_check, aggregator):
+    """
+    The cluster id is part of the metadata the AdminClient already fetches at the start of each run,
+    so collecting highwater offsets must not build a librdkafka Consumer just to fetch it again.
+    """
+    metadata = mock.Mock(cluster_id='admin-metadata-cluster', topics={'marvel': mock.Mock(partitions={0: None})})
+    admin = FakeAdminClient(metadata)
+    consumer_cls = mock.MagicMock()
+    consumer_cls.return_value.list_topics.return_value = metadata
+
+    with (
+        mock.patch('datadog_checks.kafka_consumer.client.AdminClient', return_value=admin),
+        mock.patch('datadog_checks.kafka_consumer.client.Consumer', consumer_cls, create=True),
+    ):
+        kafka_check = check(kafka_instance)
+        dd_run_check(kafka_check)
+        dd_run_check(kafka_check)
+
+    assert consumer_cls.call_count == 0, f"a librdkafka Consumer was created {consumer_cls.call_count} time(s)"
+    assert admin.list_topics_calls == 2, "expected exactly one cluster metadata request per run"
+    aggregator.assert_metric(
+        'kafka.broker_offset',
+        value=80,
+        tags=['topic:marvel', 'partition:0', 'kafka_cluster_id:admin-metadata-cluster', 'optional:tag1'],
+    )
 
 
 def test_check_clears_cache_on_partial_reset(kafka_instance, check, dd_run_check):
@@ -757,7 +908,7 @@ def test_report_lag_in_time_uses_low_watermark(kafka_instance, check, aggregator
 
 
 def test_report_lag_in_time_caps_left_extrapolation_without_low_watermark(kafka_instance, check, aggregator):
-    # With cluster monitoring off there is no low watermark, so the consumer offset is used as-is.
+    # With Kafka Console off there is no low watermark, so the consumer offset is used as-is.
     # When it predates every cached sample, the lag is still bounded by the left-extrapolation cap
     # (cache window + LAG_EXTRAPOLATION_LIMIT_SECONDS) rather than growing without limit.
     kafka_instance['data_streams_enabled'] = True
@@ -1005,10 +1156,7 @@ def test_consumer_group_state_fetched_once_per_group(check, kafka_instance, dd_r
     offsets = [2, 3]
     topic = 'topic1'
     consumer_group = 'consumer_group1'
-    mock_client.consumer_get_cluster_id_and_list_topics.return_value = (
-        'cluster_id',
-        [(topic, partitions)],
-    )
+    mock_client.get_cluster_id.return_value = 'cluster_id'
     mock_client.get_partitions_for_topic.return_value = partitions
     consumer_group_offsets = [(topic, p, o) for p, o in zip(partitions, offsets)]
     mock_client.list_consumer_group_offsets.return_value = [
@@ -1069,9 +1217,10 @@ def _setup_failing_check(check, kafka_instance, dd_run_check):
     return kafka_consumer_check
 
 
-def test_connection_error_emits_dsm_event(check, kafka_instance, dd_run_check):
-    """A connection_error event is emitted when request_metadata_update fails and cluster monitoring is on."""
-    kafka_instance['enable_cluster_monitoring'] = True
+@pytest.mark.parametrize('kafka_console_option', ['enable_kafka_console', 'enable_cluster_monitoring'])
+def test_connection_error_emits_dsm_event(kafka_console_option, check, kafka_instance, dd_run_check):
+    """A connection_error event is emitted when request_metadata_update fails and Kafka Console is enabled."""
+    kafka_instance[kafka_console_option] = True
     kafka_consumer_check = _setup_failing_check(check, kafka_instance, dd_run_check)
 
     events = _connection_error_events(kafka_consumer_check)
@@ -1083,7 +1232,7 @@ def test_connection_error_emits_dsm_event(check, kafka_instance, dd_run_check):
 
 def test_connection_error_includes_cluster_id_override(check, kafka_instance, dd_run_check):
     """connection_error event uses kafka_cluster_id_override when configured."""
-    kafka_instance['enable_cluster_monitoring'] = True
+    kafka_instance['enable_kafka_console'] = True
     kafka_instance['kafka_cluster_id_override'] = 'my-cluster'
     kafka_consumer_check = _setup_failing_check(check, kafka_instance, dd_run_check)
 
@@ -1092,15 +1241,15 @@ def test_connection_error_includes_cluster_id_override(check, kafka_instance, dd
     assert events[0]['kafka_cluster_id'] == 'my-cluster'
 
 
-def test_connection_error_not_emitted_without_cluster_monitoring(check, kafka_instance, dd_run_check):
-    """No connection_error event is emitted when cluster monitoring is disabled."""
+def test_connection_error_not_emitted_without_kafka_console(check, kafka_instance, dd_run_check):
+    """No connection_error event is emitted when Kafka Console is disabled."""
     kafka_consumer_check = _setup_failing_check(check, kafka_instance, dd_run_check)
     assert not _connection_error_events(kafka_consumer_check)
 
 
 def test_connection_error_sink_failure_does_not_mask_broker_error(check, kafka_instance, dd_run_check):
     """Sink failure during connection_error emission does not mask the original AdminClient error."""
-    kafka_instance['enable_cluster_monitoring'] = True
+    kafka_instance['enable_kafka_console'] = True
     kafka_consumer_check = check(kafka_instance)
     kafka_consumer_check.client = seed_mock_client()
     kafka_consumer_check.client.request_metadata_update.side_effect = Exception('broker down')
@@ -1238,3 +1387,149 @@ def test_get_partition_offsets_drops_negative_offsets():
     results = client.get_partition_offsets([("healthy_topic", 0), ("wrapped_topic", 0)])
 
     assert results == [("healthy_topic", 0, 100)]
+
+
+def test_consumer_groups_regex_filters_groups_before_fetching_offsets(check, kafka_instance):
+    kafka_instance['consumer_groups'] = {}
+    kafka_instance['consumer_groups_regex'] = {'prod-.+': {}}
+    kafka_instance['monitor_unlisted_consumer_groups'] = False
+
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_groups.return_value = [
+        'prod-orders',
+        'prod-payments',
+        'dev-orders',
+        'staging-orders',
+    ]
+    mock_client.list_consumer_group_offsets.return_value = []
+
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    kafka_consumer_check.get_consumer_offsets()
+
+    mock_client.list_consumer_group_offsets.assert_called_once_with(
+        [
+            ('prod-orders', None),
+            ('prod-payments', None),
+        ]
+    )
+
+
+def test_consumer_groups_regex_prefilter_excludes_prefix_sharing_groups(check, kafka_instance):
+    kafka_instance['consumer_groups'] = {}
+    kafka_instance['consumer_groups_regex'] = {'orders': {}}
+    kafka_instance['monitor_unlisted_consumer_groups'] = False
+
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_groups.return_value = ['orders', 'orders-v2', 'orders-archive']
+    mock_client.list_consumer_group_offsets.return_value = []
+
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+    kafka_consumer_check.get_consumer_offsets()
+
+    mock_client.list_consumer_group_offsets.assert_called_once_with([('orders', None)])
+
+
+def test_consumer_groups_regex_prefilter_excludes_comma_crossing_patterns(check, kafka_instance):
+    kafka_instance['consumer_groups'] = {}
+    kafka_instance['consumer_groups_regex'] = {'a,.': {}}
+    kafka_instance['monitor_unlisted_consumer_groups'] = False
+
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_groups.return_value = ['a']
+    mock_client.list_consumer_group_offsets.return_value = []
+
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+    kafka_consumer_check.get_consumer_offsets()
+
+    # Group patterns cannot extend across the group/topic delimiter.
+    mock_client.list_consumer_group_offsets.assert_called_once_with([])
+
+
+def test_consumer_groups_regex_prefilter_combines_explicit_and_regex_groups(check, kafka_instance):
+    kafka_instance['consumer_groups'] = {'critical-orders': {}}
+    kafka_instance['consumer_groups_regex'] = {'prod-.+': {}}
+    kafka_instance['monitor_unlisted_consumer_groups'] = False
+
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_groups.return_value = [
+        'critical-orders',
+        'prod-orders',
+        'prod-payments',
+        'dev-orders',
+    ]
+    mock_client.list_consumer_group_offsets.return_value = []
+
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    kafka_consumer_check.get_consumer_offsets()
+
+    mock_client.list_consumer_group_offsets.assert_called_once_with(
+        [
+            ('critical-orders', None),
+            ('prod-orders', None),
+            ('prod-payments', None),
+        ]
+    )
+
+
+def test_consumer_groups_regex_prefilter_disabled_when_monitoring_unlisted_groups(check, kafka_instance):
+    kafka_instance['consumer_groups'] = {}
+    kafka_instance['consumer_groups_regex'] = {'prod-.+': {}}
+    kafka_instance['monitor_unlisted_consumer_groups'] = True
+
+    mock_client = seed_mock_client()
+    mock_client.list_consumer_groups.return_value = [
+        'prod-orders',
+        'dev-orders',
+        'staging-orders',
+    ]
+    mock_client.list_consumer_group_offsets.return_value = []
+
+    kafka_consumer_check = check(kafka_instance)
+    kafka_consumer_check.client = mock_client
+
+    kafka_consumer_check.get_consumer_offsets()
+
+    mock_client.list_consumer_group_offsets.assert_called_once_with(
+        [
+            ('prod-orders', None),
+            ('dev-orders', None),
+            ('staging-orders', None),
+        ]
+    )
+
+
+@pytest.mark.parametrize(
+    'error_code',
+    [
+        pytest.param(KafkaError.NOT_COORDINATOR, id='not coordinator'),
+        pytest.param(KafkaError.COORDINATOR_NOT_AVAILABLE, id='coordinator not available'),
+    ],
+)
+def test_list_consumer_group_offsets_given_coordinator_error_returns_offsets_on_next_call(error_code):
+    """After a group coordinator error, the next call looks the coordinator up again and returns the offsets."""
+    stale_offsets = Future()
+    stale_offsets.set_exception(KafkaException(KafkaError(error_code)))
+    fresh_offsets = Future()
+    fresh_offsets.set_result(ConsumerGroupTopicPartitions('consumer_group1', [TopicPartition('topic1', 0, 5)]))
+    # AdminClient is the network boundary. A broker can't be made to hand a group to another coordinator on
+    # demand, and librdkafka keeps sending to the coordinator it cached, so only a new AdminClient finds the new one.
+    stale_admin_client = mock.MagicMock()
+    stale_admin_client.list_consumer_group_offsets.return_value = {'consumer_group1': stale_offsets}
+    fresh_admin_client = mock.MagicMock()
+    fresh_admin_client.list_consumer_group_offsets.return_value = {'consumer_group1': fresh_offsets}
+    client = KafkaClient(mock.MagicMock(), logging.getLogger(__name__))
+    groups = [('consumer_group1', [('topic1', 0)])]
+
+    with mock.patch(
+        'datadog_checks.kafka_consumer.client.AdminClient', side_effect=[stale_admin_client, fresh_admin_client]
+    ):
+        client.list_consumer_group_offsets(groups)
+        offsets = client.list_consumer_group_offsets(groups)
+
+    assert offsets == [('consumer_group1', [('topic1', 0, 5)])]

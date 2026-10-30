@@ -6,12 +6,12 @@
 from __future__ import annotations
 
 import asyncio
-import dataclasses
 import logging
 import os
 import signal
 import sys
 import time
+from collections import Counter
 from collections.abc import AsyncIterator
 from io import StringIO
 from pathlib import Path
@@ -20,21 +20,28 @@ from typing import Any
 import httpx
 import pytest
 
+from ddev.cli.ci.dispatch_run import ResolvedRun
+from ddev.cli.ci.dispatch_tests import run_summary
 from ddev.cli.ci.tests import dispatcher as dispatcher_module
 from ddev.cli.ci.tests import rate_limiting
 from ddev.cli.ci.tests.dispatcher import (
     CANCELLED_RATE_LIMITS,
-    PROTECTED_RUN_FIELDS,
     Dispatcher,
-    DispatcherContext,
+    DispatcherOutcome,
     build_dispatcher,
+    message_scope,
+)
+from ddev.cli.ci.tests.dispatcher_attributes import (
+    PROTECTED_RUN_FIELDS,
+    console_hidden_fields,
+    log_tag_mapping,
     message_fields,
     run_fields,
 )
 from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
+from ddev.cli.ci.tests.execution_metrics import ExecutionOutcome
 from ddev.cli.ci.tests.messages import (
     BatchFinished,
-    BatchJob,
     BatchProgressUpdate,
     TestBatch,
     UpdatePRComment,
@@ -43,6 +50,7 @@ from ddev.cli.ci.tests.pr_comment import (
     ALERT_RUNNING_NOTE,
     CANCELLED_HEADING,
     FAILED_HEADING,
+    SHUTDOWN_ALERTS,
     TIMED_OUT_HEADING,
 )
 from ddev.cli.ci.tests.progress import DispatcherProgress, ExecutionState
@@ -51,43 +59,69 @@ from ddev.cli.ci.tests.task_run_reporter import RunReporterOptions, TaskRunRepor
 from ddev.cli.ci.tests.task_test_gatherer import TaskTestGatherer
 from ddev.cli.ci.tests.task_test_runner import TaskTestRunner, TestRunnerOptions
 from ddev.event_bus.exceptions import FatalProcessingError
+from ddev.event_bus.orchestrator import BaseMessage
 from ddev.event_bus.shutdown import ShutdownKind, ShutdownRequest
 from ddev.monitoring import MonitoringRuntime, console_formatter
+from ddev.monitoring.context import MonitorContext
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import (
     ArtifactsList,
     IssueComment,
     WorkflowDispatchResult,
-    WorkflowJob,
-    WorkflowJobsList,
     WorkflowJobStatus,
     WorkflowRun,
 )
+from ddev.utils.github_async.observer import RequestObserver
+from ddev.utils.github_async.retry import RetryPolicy
+from ddev.utils.octo_sts import (
+    ACTIONS_ID_TOKEN_REQUEST_TOKEN_ENV,
+    ACTIONS_ID_TOKEN_REQUEST_URL_ENV,
+    MINTED_AT_ENV,
+    POLICY_ENV,
+    SCOPE_ENV,
+    OctoStsTokenProvider,
+)
 from ddev.utils.rate_limiting import BucketEvent, InstrumentedAsyncLimiter, RateLimitEvent
+from tests.cli.ci.helpers import mock_job_result
 from tests.cli.ci.tests.helpers import (
+    attempt,
+    batch_progress,
     invalid_response_error,
+    job_progress,
     jobs_reported,
     make_batch,
     make_job,
+    recording_runtime,
+    timed_out_job,
 )
-from tests.helpers.github_async import FakeAsyncGitHubClient
-from tests.helpers.monitoring import RecordingSink
+from tests.helpers.github_async import (
+    DEFAULT_COMMENT_ID,
+    DEFAULT_DISPATCH_HTML_URL,
+    FakeAsyncGitHubClient,
+    make_artifacts_list,
+    make_workflow_dispatch_result,
+    make_workflow_job,
+    make_workflow_jobs_list,
+    make_workflow_run,
+)
+from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink, projector_for
 
 # Every test here runs a Dispatcher to completion, and `on_finalize` writes the run summary. Without
 # this the reports land in the real job summary whenever the suite runs inside a workflow.
 pytestmark = pytest.mark.usefixtures("step_summary")
 
-CONTEXT = DispatcherContext(
-    owner="DataDog",
-    repo="integrations-core",
-    checkout_sha="refs/pull/42/merge",
-    base_sha="head-sha",
-    branch="a-branch",
-    workflow="test-batch.yml",
-    workflow_ref="master",
-    target_branch="master",
+CONTEXT = ResolvedRun(
+    repository="DataDog/integrations-core",
+    checkout_sha="merge-sha-mmm",
+    head_sha="head-sha",
+    head_branch="a-branch",
+    all_targets=False,
     pr_number=42,
+    base_branch="master",
+    base_sha="base-sha",
 )
+
+TIMED_OUT = ShutdownRequest.timed_out(RuntimeError('the run reached its time limit'))
 
 
 def build_bus(
@@ -97,28 +131,38 @@ def build_bus(
     *,
     pr_number: int | None = 42,
     max_timeout: float = 30,
+    monitoring: MonitoringRuntime | None = None,
 ) -> Dispatcher:
     """A Dispatcher over the three real tasks, so the subscriptions under test are production's."""
+    if monitoring is None:
+        monitoring = MonitoringRuntime()
     runner = TaskTestRunner(
         "test-runner",
         client,  # type: ignore[arg-type]
         TestRunnerOptions(
             owner=CONTEXT.owner,
             repo=CONTEXT.repo,
-            workflow_id=CONTEXT.workflow,
-            ref=CONTEXT.workflow_ref,
-            base_sha=CONTEXT.base_sha,
-            checkout_sha=CONTEXT.checkout_sha,
+            workflow_id="test-batch.yml",
+            ref="master",
+            run_fields=run_fields(CONTEXT),
+            concurrency_key=CONTEXT.concurrency_key,
             artifacts_base_path=tmp_path / "artifacts",
             poll_interval_seconds=0.0,
         ),
         artifact_client=client,  # type: ignore[arg-type]
+        monitor=monitoring.component('test-runner'),
     )
-    gatherer = TaskTestGatherer("test-gatherer", tmp_path / "results", batches)
+    gatherer = TaskTestGatherer(
+        "test-gatherer",
+        tmp_path / "results",
+        batches,
+        monitor=monitoring.component('test-gatherer'),
+    )
     reporter = TaskRunReporter(
         "run-reporter",
         client,  # type: ignore[arg-type]
         RunReporterOptions(owner=CONTEXT.owner, repo=CONTEXT.repo, pr_number=pr_number),
+        monitor=monitoring.component('run-reporter'),
     )
     return Dispatcher(
         batches=batches,
@@ -128,6 +172,8 @@ def build_bus(
         reporter=reporter,
         max_timeout=max_timeout,
         grace_period=0.2,
+        monitor=monitoring.component('dispatcher'),
+        message_scope=message_scope(monitoring.context, batches),
     )
 
 
@@ -138,26 +184,10 @@ def client(request) -> FakeAsyncGitHubClient:
     fake = FakeAsyncGitHubClient()
     fake.mock_response(
         "get_workflow_run",
-        WorkflowRun(
-            id=123,
-            name="test-batch",
-            status="completed",
-            conclusion=conclusion,
-            html_url="https://github.com/DataDog/integrations-core/actions/runs/123",
-        ),
+        make_workflow_run(name="test-batch", conclusion=conclusion),
     )
-    fake.mock_response("list_workflow_run_artifacts", ArtifactsList(total_count=0, artifacts=[]))
+    fake.mock_response("list_workflow_run_artifacts", make_artifacts_list())
     return fake
-
-
-def mock_job_result(fake: FakeAsyncGitHubClient, job: BatchJob, conclusion: str) -> None:
-    fake.mock_response(
-        "list_workflow_jobs",
-        WorkflowJobsList(
-            total_count=1,
-            jobs=[WorkflowJob(id=1, run_id=123, name=job.name, status="completed", conclusion=conclusion)],
-        ),
-    )
 
 
 def test_a_batch_travels_from_dispatch_to_the_pull_request_comment(client, tmp_path):
@@ -177,7 +207,9 @@ def test_a_batch_travels_from_dispatch_to_the_pull_request_comment(client, tmp_p
     assert dispatches[0].kwargs["workflow_id"] == "test-batch.yml"
     assert dispatches[0].kwargs["ref"] == "master"
     assert dispatches[0].kwargs["inputs"]["batch_id"] == "batch-01"
-    assert dispatches[0].kwargs["inputs"]["checkout_sha"] == "refs/pull/42/merge"
+    assert dispatches[0].kwargs["inputs"]["checkout_sha"] == "merge-sha-mmm"
+    # Keyed on the PR rather than the immutable merge SHA, so a new revision cancels the old batches.
+    assert dispatches[0].kwargs["inputs"]["concurrency_key"] == "pr-42"
 
     # The initial plan and the final collected result both reach the same comment.
     created = client.calls_to("create_issue_comment")
@@ -190,7 +222,7 @@ def test_a_batch_travels_from_dispatch_to_the_pull_request_comment(client, tmp_p
 
     outcome = dispatcher.outcome
     assert outcome is not None
-    assert outcome.successful
+    assert outcome.execution_outcome is ExecutionOutcome.PASSED
     assert outcome.progress.done
     assert outcome.progress.passed == 1
 
@@ -200,43 +232,60 @@ def test_dispatcher_assembly_routes_artifact_requests_to_the_artifact_tier(
 ):
     events: list[RateLimitEvent] = []
     requests: dict[str, str] = {}
+    requests_sent: Counter[str] = Counter()
     job = make_job()
     run_url = "https://github.com/DataDog/integrations-core/actions/runs/123"
 
     def handle(request: httpx.Request) -> httpx.Response:
         bucket = next(event for event in reversed(events) if isinstance(event, BucketEvent))
         requests[request.url.path] = bucket.name
+        requests_sent[request.url.path] += 1
         if request.url.path.endswith("/dispatches"):
-            return httpx.Response(200, json={"workflow_run_id": 123, "run_url": str(request.url), "html_url": run_url})
+            return httpx.Response(
+                200,
+                json=make_workflow_dispatch_result(
+                    workflow_run_id=123, run_url=str(request.url), html_url=run_url
+                ).model_dump(mode="json"),
+            )
         if request.url.path.endswith("/artifacts"):
-            return httpx.Response(200, json={"total_count": 0, "artifacts": []})
+            return httpx.Response(200, json=make_artifacts_list().model_dump(mode="json"))
         if request.url.path.endswith("/jobs"):
             return httpx.Response(
                 200,
-                json={
-                    "total_count": 1,
-                    "jobs": [
-                        {"id": 1, "run_id": 123, "name": job.name, "status": "completed", "conclusion": "success"}
-                    ],
-                },
+                json=make_workflow_jobs_list([make_workflow_job(name=job.name)]).model_dump(mode="json"),
             )
         assert request.url.path == "/repos/DataDog/integrations-core/actions/runs/123"
-        return httpx.Response(
-            200, json={"id": 123, "status": "completed", "conclusion": "success", "html_url": run_url}
-        )
+        return httpx.Response(200, json=make_workflow_run(html_url=run_url).model_dump(mode="json"))
 
-    def make_client(token: str, *, rate_limiter: InstrumentedAsyncLimiter) -> AsyncGitHubClient:
-        return AsyncGitHubClient(token, rate_limiter=rate_limiter, transport=httpx.MockTransport(handle))
+    def make_client(
+        token: str,
+        *,
+        rate_limiter: InstrumentedAsyncLimiter,
+        logger: logging.Logger | None = None,
+        observer: RequestObserver | None = None,
+        **kwargs: Any,
+    ) -> AsyncGitHubClient:
+        return AsyncGitHubClient(
+            token,
+            rate_limiter=rate_limiter,
+            logger=logger,
+            observer=observer,
+            transport=httpx.MockTransport(handle),
+            **kwargs,
+        )
 
     monkeypatch.setattr("ddev.utils.github_async.AsyncGitHubClient", make_client)
     monkeypatch.setattr(rate_limiting, "event_logger", lambda _: events.append)
+    sink = RecordingSink()
+    monitoring = MonitoringRuntime(metrics_sink=sink)
     dispatcher = build_dispatcher(
         batches=[make_batch(job)],
-        context=dataclasses.replace(CONTEXT, pr_number=None),
+        run=CONTEXT.model_copy(update={"pr_number": None}),
         config=DispatcherConfig(grace_period_seconds=0.1, global_timeout_seconds=5),
         token="test-token",
         artifacts_path=tmp_path / "artifacts",
         output_path=tmp_path / "results",
+        monitoring=monitoring,
     )
 
     dispatcher.run()
@@ -246,6 +295,51 @@ def test_dispatcher_assembly_routes_artifact_requests_to_the_artifact_tier(
     assert requests[f"{prefix}/artifacts"] == "artifacts"
     assert requests[f"{prefix}/jobs"] == "default"
     assert requests[prefix] == "default"
+    # Both tiers report through the Dispatcher: one attempt per request the transport answered.
+    assert len(sink.records_named("requests.count")) == sum(requests_sent.values())
+
+
+@pytest.mark.parametrize("opted_in", [True, False], ids=["opted_in", "not_opted_in"])
+def test_build_dispatcher_wires_the_opted_in_token_provider(
+    client: FakeAsyncGitHubClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, opted_in: bool
+):
+    """The workflow's opt-in must reach the client, or a long run rides a one-hour token."""
+    captured: dict[str, Any] = {}
+
+    def make_client(token: str, *, rate_limiter: Any = None, **kwargs: Any) -> FakeAsyncGitHubClient:
+        captured.update(kwargs)
+        return client
+
+    monkeypatch.setattr("ddev.utils.github_async.AsyncGitHubClient", make_client)
+    for name in (
+        SCOPE_ENV,
+        POLICY_ENV,
+        ACTIONS_ID_TOKEN_REQUEST_URL_ENV,
+        ACTIONS_ID_TOKEN_REQUEST_TOKEN_ENV,
+    ):
+        monkeypatch.delenv(name, raising=False)
+    if opted_in:
+        monkeypatch.setenv(SCOPE_ENV, "DataDog/integrations-core")
+        monkeypatch.setenv(POLICY_ENV, "self.test-dispatch")
+        monkeypatch.setenv(ACTIONS_ID_TOKEN_REQUEST_URL_ENV, "https://actions.example/oidc")
+        monkeypatch.setenv(ACTIONS_ID_TOKEN_REQUEST_TOKEN_ENV, "oidc-bearer")
+        monkeypatch.setenv(MINTED_AT_ENV, str(time.time()))
+
+    build_dispatcher(
+        batches=[make_batch(make_job())],
+        run=CONTEXT,
+        config=DispatcherConfig(grace_period_seconds=0.1, global_timeout_seconds=5),
+        token="static-token",
+        artifacts_path=tmp_path / "artifacts",
+        output_path=tmp_path / "results",
+        monitoring=MonitoringRuntime(),
+    )
+
+    if opted_in:
+        assert isinstance(captured["token_provider"], OctoStsTokenProvider)
+        assert asyncio.run(captured["token_provider"]()) == "static-token"
+    else:
+        assert captured["token_provider"] is None
 
 
 def test_progress_reaches_the_comment_before_artifact_collection_finishes(
@@ -263,7 +357,8 @@ def test_progress_reaches_the_comment_before_artifact_collection_finishes(
         owner: str, repo: str, comment_id: int, body: str, **kwargs: Any
     ) -> GitHubResponse[IssueComment]:
         result = await update_comment(owner, repo, comment_id, body, **kwargs)
-        if "📥 collecting artifacts" in body:
+        # The chip the batch strip draws while a batch's results are still being collected.
+        if "📥" in body:
             collecting_reported.set()
         return result
 
@@ -286,7 +381,7 @@ def test_progress_reaches_the_comment_before_artifact_collection_finishes(
 
 
 @pytest.mark.parametrize("client", ["failure"], indirect=True)
-def test_a_failed_batch_makes_the_run_unsuccessful(client, tmp_path):
+def test_a_failed_batch_is_a_test_failure(client, tmp_path):
     job = make_job()
     mock_job_result(client, job, "failure")
     dispatcher = build_bus(client, tmp_path, [make_batch(job)])
@@ -295,23 +390,93 @@ def test_a_failed_batch_makes_the_run_unsuccessful(client, tmp_path):
 
     outcome = dispatcher.outcome
     assert outcome is not None
-    assert not outcome.successful
+    assert outcome.execution_outcome is ExecutionOutcome.TESTS_FAILED
     assert outcome.progress.failed == 1
 
 
-def test_missing_final_job_metadata_keeps_the_run_unsuccessful(client: FakeAsyncGitHubClient, tmp_path: Path):
+@pytest.mark.parametrize(
+    ("batches", "expected"),
+    [
+        pytest.param(
+            [batch_progress("batch-01", job_progress(attempt(Status.FAILURE)), status=Status.SUCCESS)],
+            ExecutionOutcome.TESTS_FAILED,
+            id="failed-job-in-a-passing-batch",
+        ),
+        pytest.param(
+            [
+                batch_progress("batch-01", job_progress(attempt()), status=Status.FAILURE),
+                batch_progress(
+                    "batch-02", job_progress(attempt(Status.CANCELLED), target="kafka"), status=Status.CANCELLED
+                ),
+            ],
+            ExecutionOutcome.TESTS_FAILED,
+            id="failed-batch-outranks-a-cancelled-one",
+        ),
+        pytest.param(
+            [batch_progress("batch-01", job_progress(attempt(Status.FAILURE)), status=Status.CANCELLED)],
+            ExecutionOutcome.CANCELLED,
+            id="failed-job-inside-a-cancelled-batch",
+        ),
+        pytest.param(
+            [batch_progress("batch-01", job_progress(attempt(Status.CANCELLED)), status=Status.CANCELLED)],
+            ExecutionOutcome.CANCELLED,
+            id="cancelled-batch-alone",
+        ),
+    ],
+)
+def test_a_failed_batch_outranks_a_cancelled_one(batches: list, expected: ExecutionOutcome):
+    """A real failure keeps the run `tests-failed`; a cancelled batch's failed jobs are discarded."""
+    outcome = DispatcherOutcome(
+        progress=DispatcherProgress(batches=tuple(batches), done=True), final_report_published=True
+    )
+
+    assert outcome.execution_outcome is expected
+
+
+@pytest.mark.parametrize("client", ["cancelled"], indirect=True)
+def test_a_batch_timed_out_by_its_job_fails_the_run(client, tmp_path):
+    """A run cancelled because a job hit its timeout is a failure, not a cancellation."""
+    job = make_job()
+    client.mock_response("list_workflow_jobs", make_workflow_jobs_list([timed_out_job(job.name)]))
+    dispatcher = build_bus(client, tmp_path, [make_batch(job)])
+
+    dispatcher.run()
+
+    outcome = dispatcher.outcome
+    assert outcome is not None
+    assert outcome.execution_outcome is ExecutionOutcome.TESTS_FAILED
+    assert outcome.progress.failed == 1
+    assert outcome.progress.cancelled == 0
+    assert CANCELLED_HEADING not in client.last_call("update_issue_comment").kwargs["body"]
+
+
+def test_a_test_failure_that_could_not_be_reported_fails_the_run(client, tmp_path):
+    job = make_job()
+    mock_job_result(client, job, "failure")
+    for method in ("update_issue_comment", "create_issue_comment", "list_issue_comments"):
+        client.mock_response(method, RuntimeError("the comment API is down"))
+    dispatcher = build_bus(client, tmp_path, [make_batch(job)])
+
+    dispatcher.run()
+
+    outcome = dispatcher.outcome
+    assert outcome is not None
+    assert outcome.progress.failed == 1
+    assert not outcome.final_report_published
+    assert outcome.execution_outcome is ExecutionOutcome.FAILED
+
+
+def test_missing_final_job_metadata_is_resolved_from_the_run_conclusion(client: FakeAsyncGitHubClient, tmp_path: Path):
+    """A successful run clears a job whose final listing failed, since GitHub fails a run with a failed job."""
     job = make_job()
     client.mock_response(
         "get_workflow_run",
-        WorkflowRun(id=123, status="in_progress", html_url="https://github.com/o/r/actions/runs/123"),
+        make_workflow_run(status="in_progress", html_url="https://github.com/o/r/actions/runs/123"),
         once=True,
     )
     client.mock_response(
         "list_workflow_jobs",
-        WorkflowJobsList(
-            total_count=1,
-            jobs=[WorkflowJob(id=1, run_id=123, name=job.name, status=WorkflowJobStatus.IN_PROGRESS)],
-        ),
+        make_workflow_jobs_list([make_workflow_job(name=job.name, status=WorkflowJobStatus.IN_PROGRESS)]),
         once=True,
     )
     client.mock_response("list_workflow_jobs", RuntimeError("Final job metadata unavailable"))
@@ -319,8 +484,9 @@ def test_missing_final_job_metadata_keeps_the_run_unsuccessful(client: FakeAsync
 
     dispatcher.run()
 
-    assert not dispatcher.outcome.progress.done
-    assert not dispatcher.outcome.successful
+    assert dispatcher.outcome.progress.done
+    assert dispatcher.outcome.progress.passed == 1
+    assert dispatcher.outcome.execution_outcome is ExecutionOutcome.PASSED
 
 
 def test_the_report_is_written_to_the_run_summary(client, tmp_path, step_summary):
@@ -371,13 +537,7 @@ def a_run_that_never_finishes(client: FakeAsyncGitHubClient) -> None:
     """Keep every dispatched run `in_progress`, so a batch is still polling when the signal lands."""
     client.mock_response(
         "get_workflow_run",
-        WorkflowRun(
-            id=123,
-            name="test-batch",
-            status="in_progress",
-            conclusion=None,
-            html_url="https://github.com/DataDog/integrations-core/actions/runs/123",
-        ),
+        make_workflow_run(name="test-batch", status="in_progress"),
     )
 
 
@@ -405,7 +565,7 @@ def test_a_cancelled_run_reports_itself_and_stops_the_work_it_started(client, tm
 
     outcome = dispatcher.outcome
     assert outcome is not None
-    assert not outcome.successful
+    assert outcome.execution_outcome is ExecutionOutcome.CANCELLED
     assert outcome.shutdown is not None
     assert outcome.shutdown.kind is ShutdownKind.CANCELLED
 
@@ -421,7 +581,7 @@ def test_a_timed_out_run_reports_itself_and_cancels_what_it_started(
 
     outcome = dispatcher.outcome
     assert outcome is not None
-    assert not outcome.successful
+    assert outcome.execution_outcome is ExecutionOutcome.TIMED_OUT
     assert not dispatcher.cancelled
     assert outcome.shutdown is not None
     assert outcome.shutdown.kind is ShutdownKind.TIMED_OUT
@@ -430,8 +590,10 @@ def test_a_timed_out_run_reports_itself_and_cancels_what_it_started(
     assert [call.kwargs["run_id"] for call in client.calls_to("cancel_workflow_run")] == [123]
     terminal_body = client.last_call("update_issue_comment").kwargs["body"]
     assert TIMED_OUT_HEADING in terminal_body
-    assert "max_timeout" in terminal_body
-    assert "Dispatcher tests · in progress" not in terminal_body
+    # A deadline explains itself, so the terminal alert is one sentence and carries no reason.
+    assert SHUTDOWN_ALERTS[ShutdownKind.TIMED_OUT] in terminal_body
+    assert "max_timeout" not in terminal_body
+    assert "Dispatcher tests: in progress" not in terminal_body
     assert ALERT_RUNNING_NOTE not in terminal_body
     assert TIMED_OUT_HEADING.removeprefix("## ") in step_summary.read_text(encoding="utf-8")
 
@@ -442,8 +604,10 @@ def stop_from_inside_the_run(
     """Request a shutdown once a remote run is tracked."""
     got_workflow_run = client.get_workflow_run
 
-    async def stop_once_a_run_is_in_flight(owner: str, repo: str, run_id: int) -> GitHubResponse[WorkflowRun]:
-        response = await got_workflow_run(owner, repo, run_id)
+    async def stop_once_a_run_is_in_flight(
+        owner: str, repo: str, run_id: int, *, retry: RetryPolicy | None = None
+    ) -> GitHubResponse[WorkflowRun]:
+        response = await got_workflow_run(owner, repo, run_id, retry=retry)
         dispatcher.request_shutdown(request)
         return response
 
@@ -453,7 +617,7 @@ def stop_from_inside_the_run(
 
 
 def dispatched_run(run_id: int) -> WorkflowDispatchResult:
-    return WorkflowDispatchResult(
+    return make_workflow_dispatch_result(
         workflow_run_id=run_id,
         run_url=f"https://api.github.com/repos/o/r/actions/runs/{run_id}",
         html_url=f"https://github.com/o/r/actions/runs/{run_id}",
@@ -461,11 +625,10 @@ def dispatched_run(run_id: int) -> WorkflowDispatchResult:
 
 
 def running_run(run_id: int) -> WorkflowRun:
-    return WorkflowRun(
+    return make_workflow_run(
         id=run_id,
         name="test-batch",
         status="in_progress",
-        conclusion=None,
         html_url=f"https://github.com/o/r/actions/runs/{run_id}",
     )
 
@@ -482,7 +645,7 @@ def test_a_fatal_response_failure_cancels_every_dispatched_run(
     client.mock_response("create_workflow_dispatch", dispatched_run(456), once=True)
     client.mock_response("get_workflow_run", running_run(123), run_id=123)
     client.mock_response("get_workflow_run", running_run(456), run_id=456)
-    client.mock_response("list_workflow_jobs", WorkflowJobsList(total_count=0, jobs=[]), run_id=123)
+    client.mock_response("list_workflow_jobs", make_workflow_jobs_list(), run_id=123)
     client.mock_response("list_workflow_jobs", invalid_response_error(), run_id=456)
     if shutdown_mode_fails:
         client.mock_response("enter_shutdown_mode", RuntimeError("shutdown mode is broken"))
@@ -504,7 +667,7 @@ def test_a_fatal_response_failure_cancels_every_dispatched_run(
         assert CANCELLED_HEADING not in call.kwargs["body"]
     terminal_body = client.last_call("update_issue_comment").kwargs["body"]
     assert FAILED_HEADING in terminal_body
-    assert "Dispatcher tests · in progress" not in terminal_body
+    assert "Dispatcher tests: in progress" not in terminal_body
     assert ALERT_RUNNING_NOTE not in terminal_body
     assert "listing workflow jobs (batch batch-02, run 456)" in terminal_body
     summary = step_summary.read_text(encoding="utf-8")
@@ -513,7 +676,7 @@ def test_a_fatal_response_failure_cancels_every_dispatched_run(
     outcome = dispatcher.outcome
     assert outcome is not None
     assert not outcome.progress.done
-    assert not outcome.successful
+    assert outcome.execution_outcome is ExecutionOutcome.FAILED
 
 
 def test_a_programmatic_stop_goes_through_the_same_path_as_a_signal(
@@ -547,7 +710,174 @@ def test_a_comment_write_failure_does_not_prevent_remote_cancellation(
     assert CANCELLED_HEADING.removeprefix("## ") in step_summary.read_text(encoding="utf-8")
     outcome = dispatcher.outcome
     assert outcome is not None
-    assert not outcome.successful
+    assert outcome.execution_outcome is ExecutionOutcome.CANCELLED
+
+
+def test_a_cancelled_run_reports_its_unfinished_work_as_cancelled(client: FakeAsyncGitHubClient, tmp_path: Path):
+    """A cancelled run reports its unfinished work as cancelled, never incomplete or failed."""
+    monitoring, sink = recording_runtime()
+    dispatcher = build_bus(client, tmp_path, [make_batch(make_job())], monitoring=monitoring)
+    a_run_that_never_finishes(client)
+
+    stop_from_inside_the_run(dispatcher, client, request=ShutdownRequest.cancelled())
+
+    run_summary(
+        monitoring.component('dispatcher'),
+        started=time.monotonic(),
+        outcome=dispatcher.outcome.execution_outcome,
+        dispatcher=dispatcher,
+    )
+
+    assert [record.value for record in sink.records_named('runs.count')] == [1]
+    assert [record.value for record in sink.records_named('runs.cancelled')] == [1]
+    assert [record.value for record in sink.records_named('runs.failed')] == [0]
+    assert [record.value for record in sink.records_named('batches.cancelled')] == [1]
+    assert [record.value for record in sink.records_named('batches.failed')] == [0]
+    assert [record.value for record in sink.records_named('jobs.cancelled')] == [1]
+    assert [record.value for record in sink.records_named('jobs.failed')] == [0]
+    assert sink.records_named('jobs.incomplete') == []
+
+
+@pytest.mark.parametrize("cancelled", [False, True], ids=["gathered", "cancelled-shutdown"])
+def test_a_jobs_dimensions_stay_identical_from_launch_to_terminal_accounting(
+    client: FakeAsyncGitHubClient, tmp_path: Path, cancelled: bool
+):
+    """The launch, gathering and shutdown accounting of one job share their metric dimensions.
+
+    The launch and the gatherer's outcome counters are emitted inside a message scope, while the
+    shutdown accounting runs outside one, so a scope field marked as a metric tag would split the
+    job's series between the run and its terminal accounting.
+    """
+    monitoring, sink = recording_runtime()
+    job = make_job()
+    dispatcher = build_bus(client, tmp_path, [make_batch(job)], monitoring=monitoring)
+    if cancelled:
+        a_run_that_never_finishes(client)
+        stop_from_inside_the_run(dispatcher, client, request=ShutdownRequest.cancelled())
+    else:
+        # The listing never answers, so the job's outcome is resolved from the run's conclusion at gathering.
+        client.mock_response('list_workflow_jobs', RuntimeError('Final job metadata unavailable'))
+        dispatcher.run()
+
+    terminal = 'jobs.cancelled' if cancelled else 'jobs.passed'
+    # A cancelled shutdown counts the outstanding work as cancelled; a completed one flags nothing.
+    names = ('jobs.count', terminal) if cancelled else ('jobs.count', terminal, 'jobs.incomplete')
+    records = {name: next(record for record in sink.records_named(name)) for name in names}
+    # The runner counts the launch, the gatherer the outcome and the shutdown accounting.
+    components = {record.tags['dispatcher.component'] for record in records.values()}
+    assert components == {'test-runner', 'test-gatherer'}
+    shared = {
+        tuple(sorted((key, value) for key, value in record.tags.items() if key != 'dispatcher.component'))
+        for record in records.values()
+    }
+    assert len(shared) == 1
+
+
+def test_a_timed_out_run_is_counted_only_as_timed_out_with_its_jobs_incomplete(
+    client: FakeAsyncGitHubClient, tmp_path: Path
+):
+    monitoring, sink = recording_runtime()
+    dispatcher = build_bus(client, tmp_path, [make_batch(make_job())], max_timeout=0.5, monitoring=monitoring)
+    a_run_that_never_finishes(client)
+
+    dispatcher.run()
+
+    run_summary(
+        monitoring.component('dispatcher'),
+        started=time.monotonic(),
+        outcome=dispatcher.outcome.execution_outcome,
+        dispatcher=dispatcher,
+    )
+
+    assert [record.value for record in sink.records_named('runs.count')] == [1]
+    assert [record.value for record in sink.records_named('runs.timed_out')] == [1]
+    assert [record.value for record in sink.records_named('runs.failed')] == [0]
+    assert [record.value for record in sink.records_named('runs.cancelled')] == [0]
+    assert [record.value for record in sink.records_named('jobs.incomplete')] == [1]
+    assert sink.records_named('jobs.failed') == []
+
+
+@pytest.mark.parametrize('stopped', [False, True], ids=['completed', 'timed-out'])
+def test_accounting_errors_allow_final_reporting_and_remote_cleanup(
+    client: FakeAsyncGitHubClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, stopped: bool
+):
+    handler = RecordingJsonHandler()
+    monitoring = MonitoringRuntime(console_handler=handler)
+    job = make_job()
+    dispatcher = build_bus(client, tmp_path, [make_batch(job)], monitoring=monitoring)
+
+    # The incomplete flag is the shutdown accounting's own emission, so failing it leaves the run
+    # itself untouched.
+    metrics = dispatcher._gatherer.monitor.metrics
+    real_count = metrics.count
+
+    def fail_incomplete(name: str, value: float, **tags: Any) -> None:
+        if name == 'jobs.incomplete':
+            raise ValueError('Cannot count incomplete jobs')
+        real_count(name, value, **tags)
+
+    monkeypatch.setattr(metrics, 'count', fail_incomplete)
+    if stopped:
+        a_run_that_never_finishes(client)
+        stop_from_inside_the_run(dispatcher, client, request=TIMED_OUT)
+    else:
+        mock_job_result(client, job, 'success')
+        dispatcher.run()
+
+    outcome = dispatcher.outcome
+    assert outcome is not None
+    assert outcome.execution_outcome is (ExecutionOutcome.TIMED_OUT if stopped else ExecutionOutcome.PASSED)
+    if stopped:
+        assert TIMED_OUT_HEADING in client.last_call('update_issue_comment').kwargs['body']
+    else:
+        assert outcome.final_report_published
+    assert [call.kwargs['run_id'] for call in client.calls_to('cancel_workflow_run')] == ([123] if stopped else [])
+    [error] = [event for event in handler.events if event['event'] == 'Failed to report unfinished work']
+    assert error['level'] == 'error'
+    assert error['component'] == 'test-gatherer'
+    assert 'Cannot count incomplete jobs' in error['exception']
+
+
+def test_a_cleanup_failure_keeps_the_collected_accounting(
+    client: FakeAsyncGitHubClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    monitoring, sink = recording_runtime()
+    dispatcher = build_bus(client, tmp_path, [make_batch(make_job())], monitoring=monitoring)
+    a_run_that_never_finishes(client)
+
+    async def fail_cleanup(request: ShutdownRequest) -> None:
+        raise asyncio.CancelledError
+
+    monkeypatch.setattr(dispatcher, '_shutdown_cleanup', fail_cleanup)
+
+    with pytest.raises(asyncio.CancelledError):
+        stop_from_inside_the_run(dispatcher, client, request=TIMED_OUT)
+
+    assert dispatcher.outcome is None
+    assert [record.value for record in sink.records_named('jobs.count')] == [1]
+    assert [record.value for record in sink.records_named('jobs.incomplete')] == [1]
+
+
+def test_shutdown_before_progress_counts_only_launched_jobs(client: FakeAsyncGitHubClient, tmp_path: Path):
+    monitoring, sink = recording_runtime()
+    a_run_that_never_finishes(client)
+    batches = [
+        make_batch(make_job('j1')),
+        make_batch(make_job('j2', target='kafka'), batch_id='batch-02'),
+    ]
+    dispatcher = build_bus(client, tmp_path, batches, monitoring=monitoring)
+
+    stop_from_inside_the_run(dispatcher, client, request=TIMED_OUT)
+
+    assert dispatcher.outcome is not None
+    assert {batch.state for batch in dispatcher.outcome.progress.batches} == {ExecutionState.PLANNED}
+    assert [record.value for record in sink.records_named('batches.count')] == [1]
+    launched = [record.tags['dispatcher.batch.job.target'] for record in sink.records_named('jobs.count')]
+    assert launched == ['ntp']
+    incomplete = [
+        (record.value, record.tags['dispatcher.batch.job.target']) for record in sink.records_named('jobs.incomplete')
+    ]
+    assert incomplete == [(1, 'ntp')]
 
 
 @requires_signals
@@ -576,60 +906,125 @@ class ObservingGatherer(TaskTestGatherer):
 
 
 @pytest.mark.parametrize(
-    ('context', 'fields'),
+    ('run', 'tags', 'fields'),
     [
-        (
+        pytest.param(
             CONTEXT,
+            (),
             {
-                'commit': 'head-sha',
-                'branch': 'a-branch',
-                'context': 'pr',
-                'pr_number': 42,
-                'target-branch': 'master',
+                'team': 'agent-integrations',
                 'repo': 'DataDog/integrations-core',
+                'repository_url': 'https://github.com/datadog/integrations-core',
+                'head_sha': 'head-sha',
+                'head_branch': 'a-branch',
+                'checkout_sha': 'merge-sha-mmm',
+                'is_fork': False,
+                'pr_number': 42,
+                'context': 'pr',
+                'base_branch': 'master',
+                'base_sha': 'base-sha',
             },
+            id='pull-request',
         ),
-        (
-            dataclasses.replace(
-                CONTEXT, pr_number=None, target_branch=None, checkout_sha='a-master-sha', base_sha='a-master-sha'
+        pytest.param(
+            CONTEXT.model_copy(
+                update={
+                    'pr_number': None,
+                    'checkout_sha': 'a-master-sha',
+                    'head_sha': 'a-master-sha',
+                    'head_branch': 'master',
+                    'base_branch': None,
+                    'base_sha': None,
+                }
+            ),
+            (),
+            {
+                'team': 'agent-integrations',
+                'repo': 'DataDog/integrations-core',
+                'repository_url': 'https://github.com/datadog/integrations-core',
+                'head_sha': 'a-master-sha',
+                'head_branch': 'master',
+                'checkout_sha': 'a-master-sha',
+                'pr_number': None,
+                'base_branch': None,
+                'base_sha': None,
+                'is_fork': False,
+                'context': 'master',
+            },
+            id='default-branch',
+        ),
+        pytest.param(
+            CONTEXT,
+            (
+                'repo:sneaky/repo',
+                'head_sha:sneaky',
+                'head_branch:sneaky',
+                'checkout_sha:sneaky',
+                'base_sha:sneaky',
+                'base_branch:sneaky',
+                'pr_number:999',
+                'context:sneaky',
+                'team:platform',
             ),
             {
-                'commit': 'a-master-sha',
-                'branch': 'a-branch',
-                'context': 'master',
-                'pr_number': None,
-                'target-branch': None,
+                'team': 'agent-integrations',
                 'repo': 'DataDog/integrations-core',
-            },
-        ),
-        (
-            dataclasses.replace(CONTEXT, tags=('commit:sneaky', 'team:platform')),
-            {
-                'commit': 'head-sha',
-                'branch': 'a-branch',
-                'context': 'pr',
+                'repository_url': 'https://github.com/datadog/integrations-core',
+                'head_sha': 'head-sha',
+                'head_branch': 'a-branch',
+                'checkout_sha': 'merge-sha-mmm',
+                'is_fork': False,
                 'pr_number': 42,
-                'target-branch': 'master',
-                'repo': 'DataDog/integrations-core',
-                'team': 'platform',
+                'context': 'pr',
+                'base_branch': 'master',
+                'base_sha': 'base-sha',
             },
+            id='caller-tags',
         ),
-        (
-            dataclasses.replace(CONTEXT, pr_number=None, tags=('context:release',)),
+        pytest.param(
+            CONTEXT.model_copy(update={'pr_number': None}),
+            ('context:release',),
             {
-                'commit': 'head-sha',
-                'branch': 'a-branch',
+                'team': 'agent-integrations',
                 'context': 'release',
-                'pr_number': None,
-                'target-branch': 'master',
                 'repo': 'DataDog/integrations-core',
+                'repository_url': 'https://github.com/datadog/integrations-core',
+                'head_sha': 'head-sha',
+                'head_branch': 'a-branch',
+                'checkout_sha': 'merge-sha-mmm',
+                'pr_number': None,
+                'is_fork': False,
+                'base_branch': 'master',
+                'base_sha': 'base-sha',
             },
+            id='caller-context',
         ),
     ],
-    ids=['pull-request', 'default-branch', 'caller-tags', 'caller-context'],
 )
-def test_run_fields(context, fields):
-    assert run_fields(context) == fields
+def test_run_fields(run, tags, fields):
+    assert run_fields(run, tags=tags) == fields
+
+
+def test_non_pr_runtime_events_carry_the_resolved_custom_context():
+    handler = RecordingJsonHandler()
+    monitoring = MonitoringRuntime(protected_fields=PROTECTED_RUN_FIELDS)
+    monitoring.add_log_handler(handler)
+    monitoring.set_run_fields(pr_number='999', base_branch='caller-base', base_sha='caller-sha')
+    run = CONTEXT.model_copy(update={'pr_number': None, 'base_branch': None, 'base_sha': None})
+
+    monitoring.set_run_fields(**run_fields(run, tags=('context:test-agent',)))
+    monitoring.component('dispatcher').logger.info('Resolved run')
+
+    [event] = handler.events
+    assert event['context'] == 'test-agent'
+    assert event['pr_number'] is None
+    assert event['base_branch'] is None
+    assert event['base_sha'] is None
+    rendered = log_tag_mapping(event)
+    assert rendered['dispatcher.context'] == 'test-agent'
+    assert 'dispatcher.pr.number' not in rendered
+    assert 'dispatcher.base_branch' not in rendered
+    assert 'dispatcher.base_sha' not in rendered
 
 
 def test_message_fields_carry_batch_identity_only_where_a_message_has_one():
@@ -655,6 +1050,7 @@ def test_message_fields_carry_batch_identity_only_where_a_message_has_one():
     assert message_fields(batch) == {"batch_id": "batch-01"}
     assert message_fields(progress) == {"batch_id": "batch-01", "run_id": 123}
     assert message_fields(finished) == {"batch_id": "batch-01", "run_id": 123}
+    # Aggregate reports must not inherit the batch that happened to trigger them.
     assert message_fields(report) == {}
 
 
@@ -666,13 +1062,17 @@ def test_the_shared_runtime_is_wired_through_build_dispatcher(client, tmp_path, 
     sink = RecordingSink()
     stream = StringIO()
     console_handler = logging.StreamHandler(stream)
-    console_handler.setFormatter(console_formatter(hidden_fields=PROTECTED_RUN_FIELDS))
-    monitoring = MonitoringRuntime(console_handler=console_handler, metrics_sink=sink)
+    console_handler.setFormatter(console_formatter(hidden_fields=console_hidden_fields() | PROTECTED_RUN_FIELDS))
+    monitoring = MonitoringRuntime(
+        console_handler=console_handler,
+        metrics_sink=sink,
+        metrics_tag_projector=projector_for("batch_id", "tag", "component"),
+    )
     monitoring.set_run_fields(**run_fields(CONTEXT))
 
     dispatcher = build_dispatcher(
         batches=[make_batch(job)],
-        context=CONTEXT,
+        run=CONTEXT,
         config=DispatcherConfig(grace_period_seconds=0.1, global_timeout_seconds=5),
         token="test-token",
         artifacts_path=tmp_path / "artifacts",
@@ -683,10 +1083,133 @@ def test_the_shared_runtime_is_wired_through_build_dispatcher(client, tmp_path, 
     dispatcher.run()
 
     assert sink.records
-    for record in sink.records:
-        assert record.fields["batch_id"] == record.tags["tag"]
-        assert record.fields["component"] == "test-gatherer"
+    observed = sink.records_named("observed")
+    assert observed
+    for record in observed:
+        assert record.tags["batch_id"] == record.tags["tag"]
+        assert record.tags["component"] == "test-gatherer"
     queued = [line for line in stream.getvalue().splitlines() if "Queued planned batches" in line]
     assert len(queued) == 1
     assert "component=dispatcher" in queued[0]
-    assert "batch_count=1" in queued[0]
+    assert "plan_batch_count=1" in queued[0]
+
+
+def test_a_monitored_run_carries_message_and_workflow_identity_per_event(client, tmp_path, monkeypatch):
+    monkeypatch.setattr("ddev.utils.github_async.AsyncGitHubClient", lambda token, rate_limiter=None, **kwargs: client)
+    job = make_job()
+    mock_job_result(client, job, "success")
+    handler = RecordingJsonHandler()
+    monitoring = MonitoringRuntime(console_handler=handler)
+    monitoring.set_run_fields(**run_fields(CONTEXT))
+
+    dispatcher = build_dispatcher(
+        batches=[make_batch(job)],
+        run=CONTEXT,
+        config=DispatcherConfig(grace_period_seconds=0.1, global_timeout_seconds=5),
+        token="test-token",
+        artifacts_path=tmp_path / "artifacts",
+        output_path=tmp_path / "results",
+        monitoring=monitoring,
+    )
+
+    dispatcher.run()
+    monitoring.close()
+
+    received = [event for event in handler.events if event["event"] == "Message received"]
+    assert {event["message_type"] for event in received} >= {
+        "TestBatch",
+        "BatchProgressUpdate",
+        "UpdatePRComment",
+    }
+    assert all(event["message_id"] for event in received)
+    progress = next(event for event in received if event["message_type"] == "BatchProgressUpdate")
+    assert progress["batch_id"] == "batch-01"
+    assert progress["run_id"] == 123
+
+    by_event = {event["event"]: event for event in handler.events}
+    dispatched = by_event["Batch batch-01 dispatched as workflow run 123"]
+    assert dispatched["batch_id"] == "batch-01"
+    assert dispatched["run_id"] == 123
+    assert dispatched["workflow_url"] == DEFAULT_DISPATCH_HTML_URL
+    assert dispatched["batch_integrations"] == ["ntp"]
+
+    completed = by_event["Workflow run 123 completed: success"]
+    assert completed["batch_id"] == "batch-01"
+    assert completed["run_id"] == 123
+    assert completed["workflow_status"] == "completed"
+    assert completed["workflow_conclusion"] == "success"
+
+    # The gatherer runs in a worker thread: its logs still carry the batch the message described.
+    gathered = by_event["Gathering results for batch batch-01 (jobs=1)"]
+    assert gathered["batch_id"] == "batch-01"
+    assert gathered["run_id"] == 123
+    assert gathered["batch_job_count"] == 1
+    assert gathered["batch_integrations"] == ["ntp"]
+
+    comment = [event for event in handler.events if event["event"].startswith("PR comment written for revision")][-1]
+    assert comment["message_type"] == "UpdatePRComment"
+    assert comment["message_id"]
+    assert comment["revision"] > 0
+    assert comment["done"] is True
+    assert comment["comment_id"] == DEFAULT_COMMENT_ID
+    assert comment["published"] is True
+    assert "batch_id" not in comment
+    assert "batch_integrations" not in comment
+
+
+@pytest.mark.parametrize(
+    ("message", "expected_integrations"),
+    [
+        pytest.param(make_batch(make_job(target="redis"), batch_id="batch-02"), ["redis"], id="batch"),
+        pytest.param(
+            BatchProgressUpdate(
+                id="progress",
+                batch_id="batch-02",
+                run_id=123,
+                workflow_url=DEFAULT_DISPATCH_HTML_URL,
+                state=ExecutionState.RUNNING,
+                sequence=1,
+            ),
+            ["redis"],
+            id="progress",
+        ),
+        pytest.param(
+            BatchProgressUpdate(
+                id="unplanned-progress",
+                batch_id="unplanned-batch",
+                run_id=456,
+                workflow_url=DEFAULT_DISPATCH_HTML_URL,
+                state=ExecutionState.RUNNING,
+                sequence=1,
+            ),
+            None,
+            id="unplanned-batch",
+        ),
+        pytest.param(
+            BatchFinished(
+                id="finished",
+                batch_id="batch-02",
+                run_id=123,
+                workflow_url=DEFAULT_DISPATCH_HTML_URL,
+                status=Status.SUCCESS,
+                artifacts_path="artifacts",
+            ),
+            ["redis"],
+            id="finished",
+        ),
+        pytest.param(
+            UpdatePRComment(id="report", revision=1, progress=DispatcherProgress(batches=(), done=True)),
+            None,
+            id="report",
+        ),
+    ],
+)
+def test_message_scope_resolves_integrations_from_the_planned_batch(
+    message: BaseMessage, expected_integrations: list[str] | None
+):
+    context = MonitorContext()
+    batches = [make_batch(), make_batch(make_job(target="redis"), batch_id="batch-02")]
+    scope = message_scope(context, batches)
+
+    with scope(message):
+        assert context.fields.get("batch_integrations") == expected_integrations

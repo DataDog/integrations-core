@@ -25,6 +25,7 @@ def _timer(timeout, callback):
 
 
 def run_with_isolation(check, aggregator, datadog_agent):
+    """Run the check in a separate process and return its error report, or an empty string if it succeeded."""
     message_indicator = os.urandom(8).hex()
     instance = dict(check.instance)
     init_config = dict(check.init_config)
@@ -64,6 +65,7 @@ def run_with_isolation(check, aggregator, datadog_agent):
         env=env_vars,
     )
     timed_out = False
+    error_report = ''
 
     def _kill_on_timeout():
         nonlocal timed_out
@@ -108,6 +110,7 @@ def run_with_isolation(check, aggregator, datadog_agent):
                             break
                 elif message_type == 'error':
                     check.log.error(message[0]['traceback'])
+                    error_report = json.encode(message)
                     break
                 else:
                     check.log.error(
@@ -118,3 +121,5 @@ def run_with_isolation(check, aggregator, datadog_agent):
     if timed_out:
         check.log.error('Check timed out after %s seconds', timeout)
         check.warning('Check timed out and possibly reported incomplete data.')
+
+    return error_report

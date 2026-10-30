@@ -1,6 +1,11 @@
 provides:
-  - id: tenable-io-logs
-    always_on: true
-    granular: false
+  - id: tenable-io-activity-logs
+    always_on: false
+    granular: true
+    data_type: logs
+    direction: inbound
+  - id: tenable-io-vulnerability-logs
+    always_on: false
+    granular: true
     data_type: logs
     direction: inbound

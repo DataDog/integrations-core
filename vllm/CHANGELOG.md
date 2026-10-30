@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 3.6.0 / 2026-10-29
+
+***Added***:
+
+* Collect the vLLM NIXL KV cache transfer metrics. ([#25742](https://github.com/DataDog/integrations-core/pull/25742))
+
+## 3.5.0 / 2026-10-01 / Agent 7.85.0
+
+***Added***:
+
+* Add additional vLLM inference metrics for GPU Monitoring. ([#25213](https://github.com/DataDog/integrations-core/pull/25213))
+
+***Fixed***:
+
+* Keep metric collection healthy when version metadata is unavailable. ([#25282](https://github.com/DataDog/integrations-core/pull/25282))
+
 ## 3.4.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:

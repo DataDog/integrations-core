@@ -21,6 +21,9 @@ dynamo_component_response_bytes_total{dynamo_component="backend",dynamo_endpoint
 # HELP dynamo_component_inflight_requests component.inflight_requests
 # TYPE dynamo_component_inflight_requests gauge
 dynamo_component_inflight_requests{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo"} 3.14
+# HELP dynamo_component_model_load_time_seconds Model load time in seconds.
+# TYPE dynamo_component_model_load_time_seconds gauge
+dynamo_component_model_load_time_seconds{dynamo_component="backend",model="Qwen/Qwen3-0.6B"} 32.31215763092041
 # HELP dynamo_component_request_duration_seconds component.request_duration.seconds
 # TYPE dynamo_component_request_duration_seconds histogram
 dynamo_component_request_duration_seconds_bucket{dynamo_component="backend",dynamo_endpoint="generate",dynamo_namespace="dynamo",le="0.025"} 3
@@ -267,3 +270,72 @@ dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dyn
 dynamo_component_router_overlap_blocks_lost_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill",le="+Inf"} 51
 dynamo_component_router_overlap_blocks_lost_count{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill"} 51
 dynamo_component_router_overlap_blocks_lost_sum{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",worker_type="prefill"} 42.0
+# HELP dynamo_component_router_kv_transfer_estimated_latency_seconds Upper-bound estimation of KV cache transfer latency in disaggregated serving (prefill_complete to first_token)
+# TYPE dynamo_component_router_kv_transfer_estimated_latency_seconds histogram
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0"} 3
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.0019"} 6
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.0037"} 9
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.0072"} 12
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.014"} 15
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.027"} 18
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.052"} 21
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.1"} 24
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.19"} 27
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.37"} 30
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.72"} 33
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="1.4"} 36
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="2.7"} 39
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="5.2"} 42
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="10"} 45
+dynamo_component_router_kv_transfer_estimated_latency_seconds_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="+Inf"} 48
+dynamo_component_router_kv_transfer_estimated_latency_seconds_count{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345"} 48
+dynamo_component_router_kv_transfer_estimated_latency_seconds_sum{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345"} 1.25
+# HELP dynamo_component_router_shared_cache_hit_rate Fraction of request blocks found in the shared KV cache (0.0-1.0)
+# TYPE dynamo_component_router_shared_cache_hit_rate histogram
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0"} 3
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.05"} 6
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.1"} 9
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.15"} 12
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.2"} 15
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.25"} 18
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.3"} 21
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.35"} 24
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.4"} 27
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.45"} 30
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.5"} 33
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.55"} 36
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.6"} 39
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.65"} 42
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.7"} 45
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.75"} 48
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.8"} 51
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.85"} 54
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.9"} 57
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="0.95"} 60
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="1"} 63
+dynamo_component_router_shared_cache_hit_rate_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="+Inf"} 66
+dynamo_component_router_shared_cache_hit_rate_count{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345"} 66
+dynamo_component_router_shared_cache_hit_rate_sum{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345"} 12.5
+# HELP dynamo_component_router_shared_cache_beyond_blocks Shared cache blocks beyond device overlap for the selected worker
+# TYPE dynamo_component_router_shared_cache_beyond_blocks histogram
+dynamo_component_router_shared_cache_beyond_blocks_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="1"} 3
+dynamo_component_router_shared_cache_beyond_blocks_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="2"} 6
+dynamo_component_router_shared_cache_beyond_blocks_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="4"} 9
+dynamo_component_router_shared_cache_beyond_blocks_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="8"} 12
+dynamo_component_router_shared_cache_beyond_blocks_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="16"} 15
+dynamo_component_router_shared_cache_beyond_blocks_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="32"} 18
+dynamo_component_router_shared_cache_beyond_blocks_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="64"} 21
+dynamo_component_router_shared_cache_beyond_blocks_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="128"} 24
+dynamo_component_router_shared_cache_beyond_blocks_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="256"} 27
+dynamo_component_router_shared_cache_beyond_blocks_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="512"} 30
+dynamo_component_router_shared_cache_beyond_blocks_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="1024"} 33
+dynamo_component_router_shared_cache_beyond_blocks_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="2048"} 36
+dynamo_component_router_shared_cache_beyond_blocks_bucket{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345",le="+Inf"} 39
+dynamo_component_router_shared_cache_beyond_blocks_count{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345"} 39
+dynamo_component_router_shared_cache_beyond_blocks_sum{dynamo_component="router",dynamo_endpoint="generate",dynamo_namespace="dynamo",router_id="12345"} 420.0
+# HELP dynamo_component_kv_publisher_zmq_events_total ZMQ KV events seen by the relay
+# TYPE dynamo_component_kv_publisher_zmq_events_total counter
+dynamo_component_kv_publisher_zmq_events_total{stage="decode",event_type="stored"} 42
+# HELP dynamo_component_kv_publisher_zmq_filtered_events_total ZMQ KV events filtered before conversion
+# TYPE dynamo_component_kv_publisher_zmq_filtered_events_total counter
+dynamo_component_kv_publisher_zmq_filtered_events_total{event_type="stored",reason="not_decode"} 7

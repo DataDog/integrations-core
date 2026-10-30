@@ -32,15 +32,7 @@ them from git, and `../changes.py` decides which two commits a CI run compares.
 
 The `BatchJob` type itself lives in `../messages.py`, alongside the other Dispatcher messages.
 
-## Relationship to `ci_matrix.py`
-
-The implementation this package shadows is `ddev/src/ddev/utils/scripts/ci_matrix.py`, and that is
-still the one CI uses. The two will run side by side until the Dispatcher takes over, so a
-behavioural change here that CI does not make is a divergence, not an improvement.
-
-Some values are duplicated between them on purpose: `ci_matrix.py` must run standalone with no
-dependencies, so it cannot import from this package. `PLATFORMS` and the path patterns are the
-copies that matter. Change one and change the other.
+## Environment discovery
 
 Environment discovery uses an injected `EnvironmentProvider` defined in `units.py`.
 The `HatchEnvironmentProvider` in `hatch_environments.py` reads `hatch.toml` without invoking Hatch
@@ -85,8 +77,7 @@ would point the dependency the wrong way.
 
 **Comments explain intent, not mechanics.** State the contract and the reasoning a caller cannot
 infer from the signature, and use inline field comments for per-field notes. Do not restate what the
-code says, do not narrate what other modules do, and do not use Sphinx roles (`:class:`, `:func:`)
-or double backticks.
+code says or narrate what other modules do.
 
 ## Keeping this file current
 

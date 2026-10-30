@@ -6,14 +6,19 @@ name: Test Dispatch Trigger
 
 on:
   pull_request:
-    branches:
-      - master
     types:
       - opened
       - synchronize
       - reopened
 
 permissions: {}
+
+# Only triggers cancel running members of the shared PR group, including the superseded
+# Dispatcher, before obtaining a runner. Dispatch jobs wait instead of canceling newer triggers.
+concurrency:
+  group: test-dispatch-${{
+    format('pr-{0}/{1}', github.event.pull_request.head.repo.full_name, github.event.pull_request.head.ref) }}
+  cancel-in-progress: true
 
 jobs:
   trigger:

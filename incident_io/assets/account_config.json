@@ -12,5 +12,23 @@
         }
       }
     }
-  ]
+  ],
+  "supported_connection_methods": [
+    {
+      "name": "incident.io",
+      "fixed": {
+        "fixed_base_url": "https://api.incident.io"
+      }
+    }
+  ],
+  "health_probe": {
+    "http_method": "GET",
+    "path": "/v1/identity",
+    "http_headers": [
+      {
+        "name": "Accept",
+        "value": "application/json"
+      }
+    ]
+  }
 }

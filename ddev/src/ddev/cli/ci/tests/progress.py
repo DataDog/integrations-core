@@ -6,13 +6,13 @@
 ``DispatcherProgress`` -> ``BatchProgress`` -> ``JobProgress`` -> ``JobAttemptProgress``: batches,
 their planned jobs, and each job's executions in attempt order.
 
-``conclusion`` is the one GitHub value kept, as its enum, because it distinguishes outcomes
-(cancelled, timed out, action required) that ``Status`` collapses.
+`conclusion` is the one GitHub value kept, as its enum, because it distinguishes outcomes
+(timed out, action required) that `Status` collapses.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from enum import Enum, StrEnum, auto
 from typing import TYPE_CHECKING
 
@@ -30,7 +30,6 @@ if TYPE_CHECKING:
 class ProgressError(StrEnum):
     """Why a batch or execution is unavailable, as a closed set to branch on rather than prose."""
 
-    TIMED_OUT = auto()
     NO_JOB_RESULTS = auto()
     NO_ARTIFACTS = auto()
 
@@ -66,6 +65,8 @@ class JobAttemptProgress:
     reports: tuple[JUnitReport, ...] | None
     error: ProgressError | None = None
     state: ExecutionState = ExecutionState.FINISHED
+    # The timeout metric reads this, since GitHub reports a timeout stop as `cancelled`.
+    timed_out: bool = False
 
     @property
     def failed_tests(self) -> list[JUnitTestCase]:
@@ -100,6 +101,14 @@ class JobProgress:
         return self.latest is not None and self.latest.state is ExecutionState.FINISHED
 
     @property
+    def collected_result(self) -> JobAttemptProgress | None:
+        """An empty report tuple is collected; `None` means the attempt was only observed."""
+        latest = self.latest
+        if latest is None or latest.state is not ExecutionState.FINISHED or latest.reports is None:
+            return None
+        return latest
+
+    @property
     def retry_count(self) -> int:
         """Executions minus one. Not ``run_attempt - 1``: histories can be sparse."""
         return max(0, len(self.attempts) - 1)
@@ -124,6 +133,19 @@ class BatchProgress:
     retrying_jobs: tuple[BatchJob, ...]
     jobs_progress: tuple[JobProgress, ...]
     error: ProgressError | None = None
+
+    def reconciled(self) -> BatchProgress:
+        """Return a snapshot whose batch state agrees with observed jobs.
+
+        Workflow and job statuses arrive separately, so jobs may prove execution started while the
+        workflow still appears queued. Only ``QUEUED`` is promoted; later states remain authoritative.
+        """
+        if self.state is ExecutionState.QUEUED and any(
+            job.latest is not None and job.latest.state in (ExecutionState.RUNNING, ExecutionState.FINISHED)
+            for job in self.jobs_progress
+        ):
+            return replace(self, state=ExecutionState.RUNNING)
+        return self
 
 
 @dataclass(frozen=True)
@@ -151,6 +173,28 @@ class DispatcherProgress:
         return self._count(Status.SKIPPED)
 
     @property
+    def cancelled(self) -> int:
+        """Jobs the workflow cancelled; counted apart from pass and fail."""
+        return self._count(Status.CANCELLED)
+
+    @property
+    def inconclusive(self) -> int:
+        """Jobs whose outcome could not be confirmed; counted apart from pass and fail."""
+        return self._count(Status.INCONCLUSIVE)
+
+    @property
+    def has_failure(self) -> bool:
+        """Whether a batch failed, or a job failed in a batch that was not cancelled.
+
+        A cancelled batch is discarded: jobs that failed in it stay counted, but do not fail the run.
+        """
+        return any(
+            batch.status is Status.FAILURE
+            or (batch.status is not Status.CANCELLED and any(_failed(job) for job in batch.jobs_progress))
+            for batch in self.batches
+        )
+
+    @property
     def complete(self) -> int:
         """Planned jobs whose latest execution has finished."""
         return sum(job.complete for job in self._jobs_progress)
@@ -168,3 +212,12 @@ class DispatcherProgress:
         return sum(
             1 for job in self._jobs_progress if job.complete and job.latest is not None and job.latest.status == status
         )
+
+    def reconciled(self) -> DispatcherProgress:
+        """Reconcile every batch before exposing the aggregate snapshot."""
+        batches = tuple(batch.reconciled() for batch in self.batches)
+        return self if batches == self.batches else replace(self, batches=batches)
+
+
+def _failed(job: JobProgress) -> bool:
+    return job.complete and job.latest is not None and job.latest.status is Status.FAILURE

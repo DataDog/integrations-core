@@ -19,17 +19,17 @@
     {
       "key": "sqs_queue_url",
       "label": "SQS Queue URL",
-      "help": "The SQS Queue URL generated for your CrowdStrike FDR feed.",
+      "help": "The SQS Queue URL generated for your CrowdStrike FDR feed, in the form https://sqs.<region>.amazonaws.com/<account-id>/<queue-name>. Datadog reads the AWS region from this URL.",
       "required": true,
       "editable": true,
       "text": {
-        "pattern": "^https://sqs\\.[a-z0-9-]+\\.(?:amazonaws\\.com(?:\\.cn)?|api\\.aws)/\\d{12}/.+$"
+        "pattern": "^https://(?:sqs\\.[a-z]{2}(?:-[a-z]+)+-\\d{1,2}\\.amazonaws\\.com|queue\\.amazonaws\\.com)/\\d{12}/.+$"
       }
     },
     {
       "key": "s3_bucket",
       "label": "S3 Bucket",
-      "help": "The S3 bucket CrowdStrike delivers your FDR files to, shown with the feed credentials in the Falcon console.",
+      "help": "The bucket name or access point alias from your FDR feed's S3 path, without s3:// or the trailing path. For example, cs-<name>-cannon-<id>-s3alias.",
       "required": true,
       "editable": true,
       "text": {

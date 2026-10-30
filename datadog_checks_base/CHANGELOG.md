@@ -2,13 +2,89 @@
 
 <!-- towncrier release notes start -->
 
+## 38.9.0 / 2026-10-29
+
+***Added***:
+
+* Update dependencies ([#25599](https://github.com/DataDog/integrations-core/pull/25599))
+
+***Fixed***:
+
+* Keep the lower bound of a histogram first bucket finite when its upper bound is negative, so the bucket is no longer dropped from distributions. ([#25465](https://github.com/DataDog/integrations-core/pull/25465))
+* Keep the `lower_bound` tag of a negative first histogram bucket as `-inf` outside distributions, collapsing it only for the distribution sketch. ([#25521](https://github.com/DataDog/integrations-core/pull/25521))
+* Report errors raised by checks running with `process_isolation` instead of showing them as OK. ([#25550](https://github.com/DataDog/integrations-core/pull/25550))
+* Rename the internal `omit_histogram_bound_tags` setting in the OpenMetrics V2 transformer to `collect_histograms_as_distributions`. ([#25647](https://github.com/DataDog/integrations-core/pull/25647))
+* Exclude the `db` tag and internal resource tags from schema payload tags, since the payload describes the whole database instance. ([#25691](https://github.com/DataDog/integrations-core/pull/25691))
+* Tag schema collector telemetry with the collector kind so that metrics from multiple collectors on one check stay separate. ([#25722](https://github.com/DataDog/integrations-core/pull/25722))
+* Send the current auth token on requests that pass `extra_headers`. Those requests previously had no token on the first run and a stale one after a token refresh. ([#25728](https://github.com/DataDog/integrations-core/pull/25728))
+* Read the kubelet pod list from the decoded response body so gzip-encoded responses parse, temporarily using additional memory equal to the decoded body size. ([#25729](https://github.com/DataDog/integrations-core/pull/25729))
+
+## 38.8.0 / 2026-10-27 / Agent 7.85.0
+
+***Security***:
+
+* Update botocore to 1.43.119, dropping the Sectigo root that anchors the compromised eMudhra intermediates. ([#25797](https://github.com/DataDog/integrations-core/pull/25797))
+
+## 38.7.0 / 2026-10-21
+
+***Security***:
+
+* Limit lines read by OpenMetrics checks to 16 MiB. ([#25625](https://github.com/DataDog/integrations-core/pull/25625))
+
+## 38.6.0 / 2026-10-20
+
+***Security***:
+
+* Pin `certifi` to 2026.10.19 to remove the eMudhra root certificate whose intermediates were compromised. ([#25701](https://github.com/DataDog/integrations-core/pull/25701))
+
+## 38.5.0 / 2026-10-13
+
+***Added***:
+
+* Add the `collect_histograms_as_distributions` OpenMetrics V2 option, which submits histogram buckets as distributions without the `upper_bound` and `lower_bound` tags on Agents that support it. ([#25378](https://github.com/DataDog/integrations-core/pull/25378))
+
+***Fixed***:
+
+* Make `assert_histogram_bucket` compare bucket bounds when they are given. ([#25378](https://github.com/DataDog/integrations-core/pull/25378))
+
+## 38.4.0 / 2026-10-01 / Agent 7.84.2
+
+***Security***:
+
+* Fetch AIA intermediate certificates with a fresh credential-free HTTP session over http(s) endpoints only, trying TLS first then plain HTTP, and capping the response size. ([#24154](https://github.com/DataDog/integrations-core/pull/24154))
+
+***Added***:
+
+* Update dependencies ([#25284](https://github.com/DataDog/integrations-core/pull/25284))
+
+***Fixed***:
+
+* Add `get_agent_embedded_path` helper to resolve paths under the agent's embedded directory regardless of install location. ([#23644](https://github.com/DataDog/integrations-core/pull/23644))
+* Fix concurrent memory profiling crashes in DBM background jobs. ([#25090](https://github.com/DataDog/integrations-core/pull/25090))
+* Fix a bug where OpenMetrics histogram buckets with a zero upper bound (e.g. `le="0.0"`) were silently dropped when `histogram_buckets_as_distributions` is enabled. ([#25283](https://github.com/DataDog/integrations-core/pull/25283))
+* Remove embedded null characters by default before obfuscating SQL. ([#25343](https://github.com/DataDog/integrations-core/pull/25343))
+* Log query obfuscation failures with repr so an embedded null cannot crash the caller. ([#25344](https://github.com/DataDog/integrations-core/pull/25344))
+
+## 38.3.3 / 2026-10-09 / Agent 7.84.3
+
+***Added***:
+
+* Add the `collect_histograms_as_distributions` OpenMetrics V2 option, which submits histogram buckets as distributions without the `upper_bound` and `lower_bound` tags on Agents that support it. ([#25378](https://github.com/DataDog/integrations-core/pull/25378))
+
+***Fixed***:
+
+* Fix a bug where OpenMetrics histogram buckets with a zero upper bound (e.g. `le="0.0"`) were silently dropped when `histogram_buckets_as_distributions` is enabled. ([#25283](https://github.com/DataDog/integrations-core/pull/25283))
+* Make `assert_histogram_bucket` compare bucket bounds when they are given. ([#25378](https://github.com/DataDog/integrations-core/pull/25378))
+* Bump pyjwt to 2.14.0. ([#25510](https://github.com/DataDog/integrations-core/pull/25510))
+* Bump urllib3 to 2.8.0. ([#25514](https://github.com/DataDog/integrations-core/pull/25514))
+
 ## 38.3.2 / 2026-09-10
 
 ***Fixed***:
 
 * Allow schema collectors to report object-specific count telemetry. ([#24947](https://github.com/DataDog/integrations-core/pull/24947))
 
-## 38.3.1 / 2026-09-03
+## 38.3.1 / 2026-09-03 / Agent 7.84.0
 
 ***Fixed***:
 
@@ -45,7 +121,13 @@
 * Fix AIA chasing crashing when the CA Issuers response is DER-encoded. ([#24683](https://github.com/DataDog/integrations-core/pull/24683))
 * Stop the check logging adapter from holding a reference to the check, so a cancelled check is reclaimed without waiting for a garbage collection pass. ([#24914](https://github.com/DataDog/integrations-core/pull/24914))
 
-## 38.0.2 / 2026-08-26
+## 38.0.3 / 2026-09-10 / Agent 7.83.2
+
+***Fixed***:
+
+* Bump ddtrace to 4.13.2 to fix a ``SIGSEGV`` crash (CrashLoopBackOff) that occurs when integration profiling is enabled and the interpreter is embedded. ([#25048](https://github.com/DataDog/integrations-core/pull/25048))
+
+## 38.0.2 / 2026-08-26 / Agent 7.83.0
 
 ***Fixed***:
 

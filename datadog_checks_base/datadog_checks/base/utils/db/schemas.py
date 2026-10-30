@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, TypedDict
 
 from datadog_checks.base.utils.serialization import json
 
-from .utils import now_ms
+from .utils import TagManager, now_ms
 
 if TYPE_CHECKING:
     from datadog_checks.base.checks.db import DatabaseCheck
@@ -108,24 +108,25 @@ class SchemaCollector(ABC):
             self._log.error("Error collecting schema: %s", e)
             raise e
         finally:
+            telemetry_tags = self._check.tags + ["status:" + status, "kind:" + self.kind]
             self._check.histogram(
                 f"dd.{self._check.dbms}.schema.time",
                 now_ms() - run_started_at,
-                tags=self._check.tags + ["status:" + status],
+                tags=telemetry_tags,
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
             self._check.gauge(
                 self.object_count_metric_name,
                 self._total_rows_count,
-                tags=self._check.tags + ["status:" + status],
+                tags=telemetry_tags,
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
             self._check.gauge(
                 f"dd.{self._check.dbms}.schema.payloads_count",
                 total_payloads_count,
-                tags=self._check.tags + ["status:" + status],
+                tags=telemetry_tags,
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
@@ -146,10 +147,16 @@ class SchemaCollector(ABC):
             "collection_interval": self._config.collection_interval,
             "dbms": self._check.dbms,
             "dbms_version": str(self._check.dbms_version),
-            "tags": self._check.tags,
+            "tags": self._event_tags(),
             "cloud_metadata": self._check.cloud_metadata,
             "collection_started_at": self._collection_started_at,
         }
+
+    def _event_tags(self) -> list[str]:
+        tag_manager = getattr(self._check, "tag_manager", None)
+        if not isinstance(tag_manager, TagManager):
+            return self._check.tags
+        return tag_manager.get_tags(include_internal=False, include_db=False)
 
     def maybe_flush(self, is_last_payload):
         if is_last_payload or len(self._queued_rows) >= self._config.payload_chunk_size:
