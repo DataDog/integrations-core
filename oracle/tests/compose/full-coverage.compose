@@ -1,0 +1,108 @@
+# Full metric-coverage environment for the Oracle Database check (the Agent's
+# `oracle` core check, configured with `dbm: true`).
+#
+# A single-instance Oracle Database Free (CDB `FREE` with the `FREEPDB1` PDB)
+# produces every V$SYSMETRIC/V$CON_SYSMETRIC, V$SGAINFO, V$PROCESS and tablespace
+# figure the OOTB dashboards plot. `seed` creates the Datadog monitoring user and
+# the workload schema; `activity-gen` keeps the per-second sysmetrics moving.
+# `oracle-full` is the entrypoint: a plain TCP forwarder to the database, gated on
+# the whole environment so one dependency pulls everything up.
+#
+# Every service that runs the Oracle image reads the same ORACLE_VERSION, and the
+# credentials are host-overridable with working defaults:
+#   ORACLE_PASSWORD  SYS/SYSTEM password (default datad0g)
+#   DB_USERNAME      Datadog monitoring user (default c##datadog)
+#   DB_PASSWORD      its password (default datadog)
+services:
+  oracle:
+    image: "gvenzl/oracle-free:${ORACLE_VERSION:-23.26.3}-slim-faststart"
+    networks:
+      - network1
+    environment:
+      ORACLE_PASSWORD: "${ORACLE_PASSWORD:-datad0g}"
+    # Startup scripts run before healthcheck.sh reports ready; 01-direct-io.sh
+    # enables O_DIRECT so single-block read latency is measured against storage.
+    volumes:
+      - ../startdb:/container-entrypoint-startdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  # One-shot: creates the Datadog user with the grants the check needs (including
+  # the `dd_session` view DBM query samples read), and the `ddapp` workload schema
+  # in FREEPDB1. Idempotent, so a restart of the environment re-runs it safely.
+  seed:
+    image: "gvenzl/oracle-free:${ORACLE_VERSION:-23.26.3}-slim-faststart"
+    depends_on:
+      oracle:
+        condition: service_healthy
+    networks:
+      - network1
+    restart: "no"
+    environment:
+      DB_HOST: oracle
+      ORACLE_PASSWORD: "${ORACLE_PASSWORD:-datad0g}"
+      DB_USERNAME: "${DB_USERNAME:-c##datadog}"
+      DB_PASSWORD: "${DB_PASSWORD:-datadog}"
+    volumes:
+      - ../seed.sh:/opt/seed.sh:ro
+    entrypoint: ["bash", "/opt/seed.sh"]
+
+  # Continuous workload so the per-second sysmetrics (commits, rollbacks, parses,
+  # sorts, scans, direct and LOB I/O, index splits, enqueue timeouts and
+  # deadlocks, checkpoints, temp usage) stay non-zero across scrapes. Writes
+  # straight to the database. See ../activity-gen.sh.
+  activity-gen:
+    # Same image as the database (no extra pull); used only for its sqlplus client.
+    image: "gvenzl/oracle-free:${ORACLE_VERSION:-23.26.3}-slim-faststart"
+    depends_on:
+      oracle:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+    networks:
+      - network1
+    restart: unless-stopped
+    environment:
+      DB_HOST: oracle
+      ORACLE_PASSWORD: "${ORACLE_PASSWORD:-datad0g}"
+      # Set ACTIVITY_GEN=0 (host env) for a quiescent oracle-full: the container
+      # stays up but generates no traffic. Defaults to on.
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+      ACTIVITY_DURATION: "${ACTIVITY_DURATION:-0}"
+    volumes:
+      - ../activity-gen.sh:/opt/activity-gen.sh:ro
+    entrypoint: ["sh", "/opt/activity-gen.sh"]
+
+  # Fixture entrypoint (published as oracle-full). Compose only starts the
+  # dependencies of the requested service, so the entrypoint must sit downstream
+  # of seed and activity-gen; the database itself cannot. This forwards TCP 1521
+  # to the database unchanged (no protocol awareness, nothing injected); the
+  # dedicated-server listener does not redirect, so clients stay on this hop.
+  oracle-full:
+    image: alpine/socat:1.8.1.3
+    depends_on:
+      oracle:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+      activity-gen:
+        condition: service_started
+    networks:
+      - network1
+    command: ["tcp-listen:1521,fork,reuseaddr", "tcp-connect:oracle:1521"]
+    # No host-port publish, to avoid clashing with a local Oracle; consumers reach
+    # it over the managed network via the DB_HOST label. Add `--publish
+    # 1521:1521` or a compose override to inspect by hand.
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z -w 3 127.0.0.1 1521"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+networks:
+  network1: {}
