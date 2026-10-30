@@ -521,10 +521,6 @@ integration/fly_io:
 - changed-files:
   - any-glob-to-any-file:
     - fly_io/**/*
-integration/forcepoint_secure_web_gateway:
-- changed-files:
-  - any-glob-to-any-file:
-    - forcepoint_secure_web_gateway/**/*
 integration/forescout:
 - changed-files:
   - any-glob-to-any-file:
