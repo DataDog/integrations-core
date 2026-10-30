@@ -1,0 +1,149 @@
+# Full metric-coverage environment for the couch check.
+#
+# The two OOTB dashboards read different metric names, produced by different
+# code paths in the check, which picks one per instance from the server version:
+#   - CouchDB-overview (couchdb.couchdb.*, by_db.file_size) -> CouchDB2, 2.x/3.x;
+#   - CouchDBv1-overview (couchdb.httpd*, by_db.disk_size) -> CouchDB1, 1.x.
+# No single server emits both, so the environment runs one of each, a one-shot
+# seed, a continuous workload, and a TCP gateway that exposes both on one host
+# (5984 -> 3.x, 5985 -> 1.x). Point one check instance at each port.
+services:
+  couchdb:
+    image: "couchdb:${COUCH_VERSION:-3.4}"
+    networks:
+      - network1
+    environment:
+      COUCHDB_USER: "${DB_USERNAME:-dduser}"
+      COUCHDB_PASSWORD: "${DB_PASSWORD:-pawprint}"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS -u \"$$COUCHDB_USER:$$COUCHDB_PASSWORD\" http://127.0.0.1:5984/_up"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  # CouchDB 1.x is only published for amd64; it runs under emulation elsewhere.
+  # Left in admin party (no admins) like the pytest v1 environment, so the
+  # check reaches it without credentials.
+  couchdb-v1:
+    image: "couchdb:${COUCH_V1_VERSION:-1.6.1}"
+    platform: linux/amd64
+    # The image's entrypoint drops privileges with an old gosu build that
+    # crashes under qemu; do the same chown + drop with `su` instead. Any
+    # command other than `couchdb` is exec'd as-is by the image's entrypoint.
+    command:
+      - sh
+      - -c
+      - >-
+        chown -R couchdb:couchdb /usr/local/var/lib/couchdb /usr/local/var/log/couchdb
+        /usr/local/var/run/couchdb /usr/local/etc/couchdb
+        && exec su -s /bin/sh couchdb -c 'exec couchdb'
+    networks:
+      - network1
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:5984/"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
+
+  # Creates the system databases on 3.x, a `kennel` database with documents and
+  # a design document on both servers, and a non-admin `_users` account
+  # (ddreader) that the workload authenticates as, so the per-database gauges
+  # and the auth cache have something to report before the first scrape.
+  seed:
+    image: "couchdb:${COUCH_VERSION:-3.4}"
+    depends_on:
+      couchdb:
+        condition: service_healthy
+      couchdb-v1:
+        condition: service_healthy
+    networks:
+      - network1
+    restart: "no"
+    environment:
+      DB_USERNAME: "${DB_USERNAME:-dduser}"
+      DB_PASSWORD: "${DB_PASSWORD:-pawprint}"
+    entrypoint:
+      - sh
+      - -c
+      - |
+        set -eu
+        J='Content-Type: application/json'
+        # validate_doc_update rejects docs flagged `forbidden`, giving the
+        # workload a 403 path that behaves the same on 1.x and 3.x.
+        DDOC='{"language":"javascript","views":{"all":{"map":"function(doc) { emit(doc._id); }"},"by_data":{"map":"function(doc) { emit(doc.data, doc); }"}},"validate_doc_update":"function(newDoc) { if (newDoc.forbidden) { throw({forbidden: \"forbidden document\"}); } }"}'
+        DOCS='{"docs":['
+        i=1; while [ $$i -le 50 ]; do DOCS="$${DOCS}{\"_id\":\"seed-$$i\",\"data\":$$i},"; i=$$((i+1)); done
+        DOCS="$${DOCS%,}]}"
+        USER_DOC='{"name":"ddreader","password":"ddreader","roles":[],"type":"user"}'
+        for base in "http://$$DB_USERNAME:$$DB_PASSWORD@couchdb:5984" "http://couchdb-v1:5984"; do
+          echo "seeding $${base#*@}"
+          for db in _users _replicator kennel activity; do
+            curl -sS -o /dev/null -X PUT "$$base/$$db"
+          done
+          curl -sS -o /dev/null -X PUT -H "$$J" "$$base/kennel/_design/dummy" -d "$$DDOC"
+          curl -sS -o /dev/null -X POST -H "$$J" "$$base/kennel/_bulk_docs" -d "$$DOCS"
+          curl -sS -o /dev/null -X PUT -H "$$J" "$$base/_users/org.couchdb.user:ddreader" -d "$$USER_DOC"
+          curl -fsS "$$base/kennel" >/dev/null
+        done
+        echo "seed-done"
+
+  # Continuous workload so the request, method, status-code, read/write and
+  # auth-cache counters keep moving on both servers. See ../activity-gen.sh.
+  activity-gen:
+    # Same image as the 3.x server (no extra pull); used only for curl.
+    image: "couchdb:${COUCH_VERSION:-3.4}"
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    networks:
+      - network1
+    restart: unless-stopped
+    environment:
+      DB_HOST: couchdb
+      DB_PORT: "5984"
+      DB_V1_HOST: couchdb-v1
+      DB_V1_PORT: "5984"
+      DB_USERNAME: "${DB_USERNAME:-dduser}"
+      DB_PASSWORD: "${DB_PASSWORD:-pawprint}"
+      # Set ACTIVITY_GEN=0 (host env) for a quiescent couch-full: the container
+      # stays up but generates no traffic. Defaults to on.
+      ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
+      ACTIVITY_DURATION: "${ACTIVITY_DURATION:-0}"
+    volumes:
+      - ../activity-gen.sh:/opt/activity-gen.sh:ro
+    entrypoint: ["sh", "/opt/activity-gen.sh"]
+
+  # Fixture entrypoint (published as couch-full). Gated on the whole environment
+  # so a single dependency on it pulls up both servers, the seed and the workload.
+  gateway:
+    image: "nginx:${NGINX_VERSION:-1.27-alpine}"
+    depends_on:
+      couchdb:
+        condition: service_healthy
+      couchdb-v1:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+      activity-gen:
+        condition: service_started
+    volumes:
+      - ../gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    environment:
+      DB_USERNAME: "${DB_USERNAME:-dduser}"
+      DB_PASSWORD: "${DB_PASSWORD:-pawprint}"
+    # No host-port publish, to avoid clashing with a local CouchDB; consumers
+    # reach the gateway over the managed network via the DB_HOST label.
+    networks:
+      - network1
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null \"http://$$DB_USERNAME:$$DB_PASSWORD@127.0.0.1:5984/_node/_local/_stats\" && wget -q -O /dev/null http://127.0.0.1:5985/_stats"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+networks:
+  network1:
+    name: couch-full-coverage_default
