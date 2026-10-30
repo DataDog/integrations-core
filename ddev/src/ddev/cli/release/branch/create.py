@@ -135,8 +135,7 @@ def bump_milestone(app: Application, branch_name: str) -> None:
             title=f'Update current_milestone to {next_milestone}',
             head=bump_branch,
             base='master',
-            body=f'Updates `current_milestone` in `release.json` to `{next_milestone}` '
-            f'after cutting the `{branch_name}` release branch.',
+            body=milestone_pr_body(app, next_milestone, branch_name),
         )
         app.display_success(f'Pull request created: {pr_url}')
     except GitHubAuthenticationError:
@@ -148,6 +147,17 @@ def bump_milestone(app: Application, branch_name: str) -> None:
         app.display_warning(
             f'Failed to create the pull request ({e}). Please create one manually from `{bump_branch}` to `master`.'
         )
+
+
+def milestone_pr_body(app: Application, milestone: str, branch_name: str) -> str:
+    """Fill the PR template, keeping its checklist unticked for the human author."""
+    template = (app.repo.path / '.github' / 'PULL_REQUEST_TEMPLATE.md').read_text()
+    checklist = template[template.index('## Checklist before requesting review') :]
+    return (
+        f'## What does this PR do?\n\nUpdates `current_milestone` in `release.json` to `{milestone}`.\n\n'
+        f'## Motivation\n\nThe `{branch_name}` release branch has been cut, so master now targets the '
+        f'`{milestone}` milestone.\n\n{checklist}'
+    )
 
 
 def compute_next_milestone(branch_name: str) -> str:

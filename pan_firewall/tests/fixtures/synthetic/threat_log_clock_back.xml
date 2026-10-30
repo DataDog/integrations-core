@@ -1,0 +1,281 @@
+<!-- Synthetic forward `type=log` job after a firewall clock change (PAN-OS threat log): seqno 1001-1030, written after a watermark of 1000 (log 1000 received 2026/10/02 04:49:06) but with receive_time one hour EARLIER (03:49:07-03:49:36). Entries are fw-a/threat_log_5m.xml's first entry, trimmed to the fields the threats collector reads plus receive_time and time_generated, which show the clock going back. The envelope is fw-a/threat_log_5m.xml's. -->
+<response status="success"><result>
+  <job>
+    <status>FIN</status>
+    <id>90</id>
+  </job>
+  <log>
+    <logs count="30" progress="100">
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:07</receive_time>
+        <seqno>1001</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:07</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:08</receive_time>
+        <seqno>1002</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:08</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:09</receive_time>
+        <seqno>1003</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:09</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:10</receive_time>
+        <seqno>1004</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:10</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:11</receive_time>
+        <seqno>1005</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:11</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:12</receive_time>
+        <seqno>1006</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:12</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:13</receive_time>
+        <seqno>1007</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:13</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:14</receive_time>
+        <seqno>1008</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:14</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:15</receive_time>
+        <seqno>1009</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:15</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:16</receive_time>
+        <seqno>1010</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:16</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:17</receive_time>
+        <seqno>1011</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:17</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:18</receive_time>
+        <seqno>1012</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:18</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:19</receive_time>
+        <seqno>1013</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:19</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:20</receive_time>
+        <seqno>1014</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:20</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:21</receive_time>
+        <seqno>1015</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:21</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:22</receive_time>
+        <seqno>1016</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:22</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:23</receive_time>
+        <seqno>1017</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:23</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:24</receive_time>
+        <seqno>1018</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:24</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:25</receive_time>
+        <seqno>1019</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:25</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:26</receive_time>
+        <seqno>1020</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:26</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:27</receive_time>
+        <seqno>1021</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:27</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:28</receive_time>
+        <seqno>1022</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:28</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:29</receive_time>
+        <seqno>1023</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:29</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:30</receive_time>
+        <seqno>1024</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:30</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:31</receive_time>
+        <seqno>1025</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:31</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:32</receive_time>
+        <seqno>1026</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:32</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:33</receive_time>
+        <seqno>1027</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:33</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:34</receive_time>
+        <seqno>1028</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:34</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:35</receive_time>
+        <seqno>1029</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:35</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+      <entry logid="7691853494432563439">
+        <receive_time>2026/10/02 03:49:36</receive_time>
+        <seqno>1030</seqno>
+        <subtype>spyware</subtype>
+        <time_generated>2026/10/02 03:49:36</time_generated>
+        <vsys>vsys1</vsys>
+        <severity>medium</severity>
+        <action>drop</action>
+      </entry>
+    </logs>
+  </log>
+</result></response>

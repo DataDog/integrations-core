@@ -3,3 +3,13 @@ provides:
     always_on: true
     data_type: logs
     direction: inbound
+  - id: valence-security-alert-logs
+    always_on: false
+    granular: true
+    data_type: logs
+    direction: inbound
+  - id: valence-security-audit-logs
+    always_on: false
+    granular: true
+    data_type: logs
+    direction: inbound
