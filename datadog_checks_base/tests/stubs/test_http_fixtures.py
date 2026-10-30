@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import importlib
+import re
 import sys
 import threading
 from datetime import timedelta
@@ -288,13 +289,23 @@ def test_fake_http_rejects_requests_that_bypass_the_check_client(fake_http, fake
         requests.get(url)
 
 
-def test_fake_http_rejects_a_followed_redirect(fake_http, fake_http_response):
-    fake_http_response('https://example.test/old', status_code=302, headers={'Location': 'https://example.test/new'})
-    fake_http_response('https://example.test/new', b'moved')
+@pytest.mark.parametrize(
+    ('url', 'location'),
+    [
+        pytest.param('https://example.test/old', 'https://example.test/new', id='path'),
+        pytest.param('https://example.test/items?page=1', 'https://example.test/items?page=2', id='query'),
+        pytest.param('https://example.test/items?page=1', 'https://example.test/items', id='dropped-query'),
+    ],
+)
+def test_fake_http_rejects_a_followed_redirect(fake_http, fake_http_response, url, location):
+    fake_http_response(url, status_code=302, headers={'Location': location})
+    # A later registration for the original call must not be served to the redirect target.
+    fake_http_response(url, b'original')
+    fake_http_response(location, b'moved')
     check = FixtureCheck('test', {}, [{}])
 
-    with pytest.raises(AssertionError, match='GET https://example.test/old sent GET https://example.test/new'):
-        check.http.get('https://example.test/old')
+    with pytest.raises(AssertionError, match=re.escape(f'GET {url} sent GET {location}')):
+        check.http.get(url)
 
 
 def test_fake_http_rejects_a_token_request_sent_during_a_check_call(fake_http, fake_http_response, mocker):
@@ -337,6 +348,15 @@ def test_fake_http_serves_a_call_whose_url_the_client_rewrites(fake_http, fake_h
     assert [sent.url for sent in fake_http.sent] == [sent_url]
 
 
+def test_fake_http_serves_a_call_whose_params_extend_its_url(fake_http, fake_http_response):
+    url = 'https://example.test/items?sort=asc'
+    fake_http_response(url, b'ok')
+    check = FixtureCheck('test', {}, [{}])
+
+    assert check.http.get(url, params={'page': 2}).content == b'ok'
+    assert [sent.url for sent in fake_http.sent] == ['https://example.test/items?sort=asc&page=2']
+
+
 @pytest.mark.parametrize(
     ('response', 'error', 'match'),
     [
@@ -361,12 +381,40 @@ def test_fake_http_serves_a_call_whose_url_the_client_rewrites(fake_http, fake_h
         ),
         pytest.param(FakeHTTPResponse(lines=['a', '']), ValueError, 'lines', id='trailing-empty-line'),
         pytest.param(FakeHTTPResponse(lines=['a\n', 'b']), ValueError, 'lines', id='line-with-newline'),
+        pytest.param(FakeHTTPResponse(content=b'a', text='b'), ValueError, 'text', id='text-and-content'),
+        pytest.param(FakeHTTPResponse(lines=[b'a'], text='b'), ValueError, 'text', id='text-and-lines'),
+        pytest.param(FakeHTTPResponse(content=b'a', lines=[b'b']), ValueError, 'lines', id='lines-and-content'),
+        pytest.param(
+            FakeHTTPResponse(content=b'a', content_chunks=[b'b']),
+            ValueError,
+            'content_chunks',
+            id='content_chunks-and-content',
+        ),
+        pytest.param(
+            FakeHTTPResponse(lines=[b'a'], content_chunks=[b'b']),
+            ValueError,
+            'content_chunks',
+            id='content_chunks-and-lines',
+        ),
         pytest.param(requests.Response(), TypeError, 'FakeHTTPResponse', id='requests-response'),
     ],
 )
 def test_fake_http_rejects_responses_it_cannot_send(fake_http, response, error, match):
     with pytest.raises(error, match=match):
         fake_http.register_response('GET', 'https://example.test/items', response)
+
+
+@pytest.mark.parametrize(
+    'response',
+    [
+        pytest.param(FakeHTTPResponse(content=b'a\nb\n', lines=[b'a', b'b']), id='trailing-newline'),
+        pytest.param(FakeHTTPResponse(content=b'a\r\nb', lines=['a', 'b']), id='crlf'),
+        pytest.param(FakeHTTPResponse(content=b'caf\xe9', text='caf\xe9', encoding='latin-1'), id='encoded-text'),
+        pytest.param(FakeHTTPResponse(content=b'\x08\x01', content_chunks=(), lines=()), id='binary-and-empty-views'),
+    ],
+)
+def test_fake_http_accepts_body_views_that_agree(fake_http, response):
+    fake_http.register_response('GET', 'https://example.test/items', response)
 
 
 def test_fake_http_serves_lines(fake_http):

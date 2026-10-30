@@ -159,10 +159,9 @@ def _sends_call(wire_request: Any, call: RecordedRequest) -> bool:
     url = quote_uds_url(call.url) if is_uds_url(call.url) else call.url
     # The client normalizes the URL, for example its host case and path quoting, before sending it.
     prepared = requests.PreparedRequest()
-    prepared.prepare_url(url, None)
+    prepared.prepare_url(url, call.options.get('params'))
     expected, sent = urlsplit(prepared.url), urlsplit(wire_request.url)
-    # Query strings are not compared, because the `params` option extends them.
-    return wire_request.method == call.method and expected[:3] == sent[:3]
+    return wire_request.method == call.method and expected[:4] == sent[:4]
 
 
 def _check_servable(response: object) -> None:
@@ -171,6 +170,7 @@ def _check_servable(response: object) -> None:
     if not isinstance(response, FakeHTTPResponse):
         raise TypeError(f'The fake_http fixture serves FakeHTTPResponse objects or exceptions, not {response!r}.')
     lines = None if response._lines is None else _encoded_lines(response)
+    body = _non_json_body(response)
     unsendable = {
         # These only exist on a response object, so the real client can't receive them from the wire.
         'elapsed': response.elapsed != timedelta(),
@@ -182,9 +182,19 @@ def _check_servable(response: object) -> None:
         # The wire carries one body, so the client parses JSON from it rather than returning json_result.
         'json_result': _json_contradicts_body(response),
         # The body is streamed in chunks the client picks, not the configured ones.
-        'content_chunks': len(response._content_chunks) > 1,
+        # The wire carries one body, so every other view must agree with it. Empty views are skipped because
+        # FakeHTTPResponse derives `text` and `content_chunks` as empty when they are not given.
+        'content_chunks': len(response._content_chunks) > 1
+        or (body is not None and any(_encode(chunk, response.encoding) != body for chunk in response._content_chunks)),
+        # Text is compared decoded, because a binary body does not survive a decode and encode round trip.
+        'text': body is not None
+        and bool(response.text)
+        and response.text != body.decode(response.encoding or 'utf-8', errors='replace'),
         # Lines are sent joined by newlines, so they must split back into the same lines.
-        'lines': lines is not None and b'\n'.join(lines).splitlines() != lines,
+        'lines': lines is not None
+        and (
+            b'\n'.join(lines).splitlines() != lines or (bool(lines) and body is not None and body.splitlines() != lines)
+        ),
     }
     fields = [name for name, is_set in unsendable.items() if is_set]
     if fields:
