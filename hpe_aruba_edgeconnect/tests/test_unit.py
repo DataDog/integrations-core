@@ -5,6 +5,7 @@ import json
 from unittest.mock import MagicMock
 
 import pytest
+import requests
 
 from datadog_checks.dev.utils import get_metadata_metrics
 from datadog_checks.hpe_aruba_edgeconnect import HpeArubaEdgeconnectCheck
@@ -50,6 +51,68 @@ def test_config_rejects_invalid_appliance_ip_patterns(instance, appliance_ips):
 
     with pytest.raises(Exception, match='Invalid appliance_ips pattern'):
         c.load_configuration_models()
+
+
+APPLIANCE_OVERRIDE = [{'cidr': '0.0.0.0/0', 'username': 'admin', 'password': ''}]
+PASSWORD_AUTH = {'orchestrator_username': 'admin', 'orchestrator_password': 'default_pass'}
+
+
+@pytest.mark.parametrize(
+    'auth, match',
+    [
+        pytest.param(
+            {'orchestrator_username': None, 'orchestrator_password': None},
+            'Set either `orchestrator_api_key`',
+            id='no-auth',
+        ),
+        pytest.param(
+            {'orchestrator_api_key': '', 'orchestrator_username': None, 'orchestrator_password': None},
+            'Set either `orchestrator_api_key`',
+            id='empty-key-is-unset',
+        ),
+        pytest.param(
+            {'orchestrator_username': 'admin', 'orchestrator_password': None},
+            'must be set together',
+            id='username-without-password',
+        ),
+        pytest.param(
+            {'orchestrator_api_key': 'k', 'appliance_credentials': APPLIANCE_OVERRIDE},
+            'not both',
+            id='key-with-username-password',
+        ),
+        pytest.param(
+            {'orchestrator_api_key': 'k', 'orchestrator_username': None, 'orchestrator_password': None},
+            '`appliance_credentials_overrides` must provide',
+            id='key-without-appliance-credentials',
+        ),
+    ],
+)
+def test_config_rejects_incomplete_auth(instance, auth, match):
+    c = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [instance('localhost:8443', **auth)])
+
+    with pytest.raises(Exception, match=match):
+        c.load_configuration_models()
+
+
+@pytest.mark.parametrize(
+    'auth',
+    [
+        pytest.param({}, id='username-password'),
+        pytest.param(
+            {
+                'orchestrator_api_key': 'k',
+                'orchestrator_username': None,
+                'orchestrator_password': None,
+                'appliance_credentials': APPLIANCE_OVERRIDE,
+            },
+            id='key-with-overrides',
+        ),
+    ],
+)
+def test_config_accepts_complete_auth(instance, auth):
+    c = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [instance('localhost:8443', **auth)])
+
+    c.load_configuration_models()
 
 
 # ---------------------------------------------------------------------------
@@ -173,13 +236,14 @@ def test_parse_speed(dd_run_check, aggregator, mocker, check, value, expected):
 
 
 @pytest.mark.parametrize(
-    'ip, appliance_credentials, expected_username, expected_password',
+    'ip, appliance_credentials, expected_username, expected_password, auth',
     [
         pytest.param(
             '192.168.1.5',
             [{'cidr': '192.168.1.0/24', 'username': 'cidr_user', 'password': 'cidr_pass'}],
             'cidr_user',
             'cidr_pass',
+            PASSWORD_AUTH,
             id='cidr_match',
         ),
         pytest.param(
@@ -187,6 +251,7 @@ def test_parse_speed(dd_run_check, aggregator, mocker, check, value, expected):
             [{'cidr': '192.168.1.0/24', 'username': 'cidr_user', 'password': 'cidr_pass'}],
             'admin',
             'default_pass',
+            PASSWORD_AUTH,
             id='fallback_to_shared',
         ),
         pytest.param(
@@ -194,6 +259,7 @@ def test_parse_speed(dd_run_check, aggregator, mocker, check, value, expected):
             None,
             'admin',
             'default_pass',
+            PASSWORD_AUTH,
             id='no_overrides',
         ),
         pytest.param(
@@ -204,6 +270,7 @@ def test_parse_speed(dd_run_check, aggregator, mocker, check, value, expected):
             ],
             'good',
             'good',
+            PASSWORD_AUTH,
             id='invalid_cidr_skipped',
         ),
         pytest.param(
@@ -211,6 +278,7 @@ def test_parse_speed(dd_run_check, aggregator, mocker, check, value, expected):
             [{'cidr': '192.168.1.0/24', 'username': 'cidr_user', 'password': ''}],
             'cidr_user',
             '',
+            PASSWORD_AUTH,
             id='empty_password_is_valid',
         ),
         pytest.param(
@@ -221,19 +289,23 @@ def test_parse_speed(dd_run_check, aggregator, mocker, check, value, expected):
             ],
             'first_user',
             'first_pass',
+            PASSWORD_AUTH,
             id='first_match_wins',
+        ),
+        pytest.param(
+            '10.0.0.1',
+            [{'cidr': '10.0.0.0/24', 'username': 'cidr_user', 'password': 'cidr_pass'}],
+            'cidr_user',
+            'cidr_pass',
+            {'orchestrator_api_key': 'k', 'orchestrator_username': None, 'orchestrator_password': None},
+            id='key_only_override_match',
         ),
     ],
 )
 def test_resolve_credentials(
-    dd_run_check, mocker, instance, ip, appliance_credentials, expected_username, expected_password
+    dd_run_check, mocker, instance, ip, appliance_credentials, expected_username, expected_password, auth
 ):
-    inst = instance(
-        'localhost:8443',
-        orchestrator_username='admin',
-        orchestrator_password='default_pass',
-        appliance_credentials=appliance_credentials,
-    )
+    inst = instance('localhost:8443', appliance_credentials=appliance_credentials, **auth)
     check = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [inst])
 
     payload = [{**APPLIANCE_PAYLOAD[0], 'ip': ip}]
@@ -245,6 +317,27 @@ def test_resolve_credentials(
     dd_run_check(check)
 
     create_client.assert_called_once_with(ip, expected_username, expected_password)
+
+
+def test_appliance_without_credentials_is_skipped(dd_run_check, aggregator, mocker, instance):
+    inst = instance(
+        'localhost:8443',
+        orchestrator_api_key='k',
+        orchestrator_username=None,
+        orchestrator_password=None,
+        appliance_credentials=[{'cidr': '10.0.0.1/32', 'username': 'admin', 'password': ''}],
+    )
+    check = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [inst])
+    payload = [APPLIANCE_PAYLOAD[0], {**APPLIANCE_PAYLOAD[0], 'ip': '10.0.0.9', 'hostName': 'Uncovered'}]
+    _setup_mocks(mocker, check, payload)
+    create_client = mocker.patch.object(
+        check, '_create_appliance_client', return_value=_mock_appliance_client(TGZ_DATA)
+    )
+
+    dd_run_check(check)
+
+    create_client.assert_called_once_with('10.0.0.1', 'admin', '')
+    aggregator.assert_metric(f'{NS}.device.reachability', count=2)
 
 
 @pytest.mark.parametrize(
@@ -415,6 +508,34 @@ def test_request_retries_once_on_401(client_factory, login_url):
     assert http.post.call_args_list[1].args[0] == login_url
 
 
+def test_orchestrator_api_key_authenticates_without_login():
+    http = MagicMock()
+    http.session.headers = {}
+    http.get.return_value = MagicMock(status_code=200, raise_for_status=MagicMock(), json=MagicMock(return_value=[]))
+
+    client = OrchestratorClient(http, '10.0.0.1', api_key='secret-key')
+    client.get_appliances()
+
+    assert http.session.headers['X-Auth-Token'] == 'secret-key'
+    http.post.assert_not_called()
+
+
+def test_orchestrator_api_key_rejection_is_not_retried():
+    """A rejected key (expired, revoked, IP not allow-listed) cannot be fixed by re-sending it."""
+    http = MagicMock()
+    http.session.headers = {}
+    http.get.return_value = MagicMock(
+        status_code=401, raise_for_status=MagicMock(side_effect=requests.HTTPError('401 Unauthorized'))
+    )
+
+    client = OrchestratorClient(http, '10.0.0.1', api_key='expired-key')
+    with pytest.raises(requests.HTTPError, match='401'):
+        client.get_appliances()
+
+    assert http.get.call_count == 1
+    http.post.assert_not_called()
+
+
 # ---------------------------------------------------------------------------
 # Parsers
 # ---------------------------------------------------------------------------
@@ -583,6 +704,61 @@ def test_orchestrator_login_failure_emits_no_metrics(dd_run_check, aggregator, m
     assert aggregator.get_event_platform_events('network-devices-metadata') == []
     orch.get_appliances.assert_not_called()
     assert check._orch_client is None
+
+
+def test_check_uses_api_key_instead_of_login(dd_run_check, aggregator, mocker, instance):
+    inst = instance(
+        'localhost:8443',
+        orchestrator_api_key='secret-key',
+        orchestrator_username=None,
+        orchestrator_password=None,
+        appliance_credentials=APPLIANCE_OVERRIDE,
+        appliance_ips=['10.0.0.1'],
+    )
+    check = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [inst])
+    orch = _setup_mocks(mocker, check, APPLIANCE_PAYLOAD, tgz_bytes=TGZ_DATA)
+    login = mocker.patch.object(orch, 'login')
+
+    dd_run_check(check)
+
+    login.assert_not_called()
+    aggregator.assert_metric(f'{NS}.orchestrator.reachability', value=1, count=1)
+
+
+@pytest.mark.parametrize(
+    'auth',
+    [
+        pytest.param({}, id='username-password'),
+        pytest.param(
+            {
+                'orchestrator_api_key': 'expired-key',
+                'orchestrator_username': None,
+                'orchestrator_password': None,
+                'appliance_credentials': APPLIANCE_OVERRIDE,
+            },
+            id='api-key',
+        ),
+    ],
+)
+def test_orchestrator_rejecting_appliance_list_reports_unreachable(dd_run_check, aggregator, mocker, instance, auth):
+    check = HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [instance('localhost:8443', **auth)])
+    orch = _setup_mocks(mocker, check, APPLIANCE_PAYLOAD, tgz_bytes=TGZ_DATA)
+    orch_cls = mocker.patch(f'{CHECK_MODULE}.OrchestratorClient', return_value=orch)
+    mocker.patch.object(orch, 'login')
+    orch.get_appliances.side_effect = requests.HTTPError('401 Unauthorized')
+
+    with pytest.raises(Exception, match='401'):
+        dd_run_check(check, extract_message=True)
+
+    aggregator.assert_metric(f'{NS}.orchestrator.reachability', value=0, count=1)
+
+    # The next run rebuilds the client and recovers once the Orchestrator answers again.
+    orch.get_appliances.side_effect = None
+    aggregator.reset()
+    dd_run_check(check)
+
+    assert orch_cls.call_count == 2
+    aggregator.assert_metric(f'{NS}.orchestrator.reachability', value=1, count=1)
 
 
 def test_up_to_date_appliance_skips_minute_stats_recording(dd_run_check, aggregator, mocker, check):
