@@ -9,7 +9,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Sophos Central Cloud alert and event logs.",
+    "description": "Gain insights into Sophos alerts, events, audit logs, detections, and cases.",
     "title": "Sophos Central Cloud",
     "media": [
       {
