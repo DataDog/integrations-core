@@ -18,9 +18,9 @@ install-from-source() {
 # RUST_VERSION bumps on its own; the hashes are rustup-init's, so they only change with RUSTUP_VERSION:
 # https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/${RUST_TARGET}/rustup-init.sha256
 # renovate: datasource=github-releases depName=rust-lang/rust
-RUST_VERSION="1.91.0"
+RUST_VERSION="1.99.1"
 # renovate: datasource=github-tags depName=rust-lang/rustup
-RUSTUP_VERSION="1.26.0"
+RUSTUP_VERSION="1.29.2"
 case "$(uname -m)" in
     x86_64)
         RUST_TARGET="x86_64-apple-darwin"
