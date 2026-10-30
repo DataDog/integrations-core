@@ -1,0 +1,1 @@
+Fix DBM<>APM correlation comments appended to long batches being dropped from Query Samples, and stop sending the raw query text tail in activity payloads.
