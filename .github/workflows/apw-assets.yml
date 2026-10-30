@@ -1,0 +1,106 @@
+name: APW asset release
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/apw-assets.yml
+      - .github/chainguard/self.apw-assets.schedule.sts.yaml
+      - ddev/src/ddev/cli/release/__init__.py
+      - ddev/src/ddev/cli/release/apw.py
+      - ddev/src/ddev/release/apw.py
+      - ddev/tests/cli/release/test_apw.py
+      - ddev/tests/release/apw/**
+      - ddev/pyproject.toml
+      - .github/actions/setup-ddev/**
+  workflow_dispatch:
+  schedule:
+    # Every 15 minutes, offset from the busiest start-of-hour period.
+    - cron: '7,22,37,52 * * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apw-assets-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - uses: ./.github/actions/setup-ddev
+        with:
+          cache-profile: local-ddev
+      - name: Test shared packaging and release handling
+        run: |
+          ddev config override
+          ddev --no-interactive test ddev -- tests/release/apw tests/cli/release/test_apw.py
+      - name: Export committed assets
+        run: ddev --here release apw package --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA" --directory dist
+
+  publish:
+    # Only scheduled runs and manual dispatches from reviewed master can publish.
+    if: >-
+      (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') &&
+      github.ref == 'refs/heads/master'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - uses: ./.github/actions/setup-ddev
+        with:
+          cache-profile: local-ddev
+      - name: Check for a complete release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: ddev --here release apw check --commit "$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+      - name: Export committed assets
+        id: export
+        if: steps.release.outputs.package == 'true'
+        run: ddev --here release apw package --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA" --directory dist
+      - name: Get source tag credentials
+        if: steps.export.outcome == 'success'
+        id: octo-sts
+        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+        with:
+          scope: DataDog/integrations-core
+          policy: self.apw-assets.schedule
+      - name: Ensure protected source tag exists
+        if: steps.export.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+        run: ddev --here release apw tag --commit "$GITHUB_SHA"
+      # PRApprover requires github-actions[bot] as release author and asset uploader.
+      - name: Verify and publish asset release
+        if: steps.export.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: ddev --here release apw publish --commit "$GITHUB_SHA" --directory dist
+      # Run on unchanged-source checks too; retain the newest complete release and Git tags.
+      - name: Clean up expired APW releases
+        # Cleanup failure must not invalidate the successful producer run used by PRApprover.
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: ddev --here release apw cleanup --commit "$GITHUB_SHA" --retention-days 7
