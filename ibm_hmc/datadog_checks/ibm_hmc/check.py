@@ -57,9 +57,9 @@ SAMPLE_FIELDS: dict[str, tuple[tuple[str, bool], ...]] = {
 
 # LPAR fields that only exist from the given HMC version onward (7.0, 7.3.4, 7.7.2).
 LPAR_EXTRA_FIELDS = (
-    (700, (('shared_cycles_while_active', True),)),
+    ((7, 0, 0), (('shared_cycles_while_active', True),)),
     (
-        734,
+        (7, 3, 4),
         (
             ('mem_mode', False),
             ('curr_mem', True),
@@ -69,7 +69,7 @@ LPAR_EXTRA_FIELDS = (
             ('mem_overage_cooperation', True),
         ),
     ),
-    (772, (('idle_cycles', True),)),
+    ((7, 7, 2), (('idle_cycles', True),)),
 )
 
 
@@ -115,14 +115,14 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
 
     # Fallback HMC version when `lshmc -v` output cannot be parsed, matching the
     # oldest HMC level whose fields the check knows about.
-    DEFAULT_HMC_VERSION = 700
+    DEFAULT_HMC_VERSION = (7, 0, 0)
     # Managed systems are re-discovered at most once per hour.
     SERVER_REFRESH_PERIOD = 3600.0
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
         # State is keyed per (host, port) so multiple instances never share it.
-        self._hmc_versions: dict[tuple[str, int], int] = {}
+        self._hmc_versions: dict[tuple[str, int], tuple[int, int, int]] = {}
         self._managed_servers: dict[tuple[str, int], dict[str, ManagedServer]] = {}
         self._last_refresh: dict[tuple[str, int], float] = {}
 
@@ -186,25 +186,27 @@ class IbmHmcCheck(AgentCheck, ConfigMixin):
                 del managed[name]
 
     def get_hmc_version(self, client):
-        """Return the HMC version as an integer, e.g. 8.8.4 becomes 884.
+        """Return the HMC version as a (major, minor, patch) tuple, e.g. `V8R8.4.0.0` is (8, 8, 4).
 
         `lshmc -v` prints machine-readable lines such as::
 
             *DS Hardware Management Console
             *RM V8R8.4.0.0
 
-        where the *RM line holds the version.
+        where the *RM line holds the version, formatted as `V<major>R<minor>.<patch>...`.
+        HMC 10 releases have a two-digit major version (e.g. `V10R3.1060.0`), so the
+        components must not be collapsed into a single truncated integer.
         """
         output = self._exec_command(client, self.GET_VERSION_CMD, environment=self.LSLPARUTIL_ENV)
         for line in output.splitlines():
             parts = line.split()
             if len(parts) >= 2 and parts[0] == '*RM':
-                version = parts[1].replace('.', '').replace('V', '').replace('R', '')
-                if len(version) >= 3:
-                    return int(version[:3])
+                match = re.match(r'^V(\d+)R(\d+)(?:\.(\d+))?', parts[1])
+                if match:
+                    return (int(match.group(1)), int(match.group(2)), int(match.group(3) or 0))
                 break
 
-        self.log.debug('Unable to parse HMC version from `lshmc -v` output, assuming %d', self.DEFAULT_HMC_VERSION)
+        self.log.debug('Unable to parse HMC version from `lshmc -v` output, assuming %s', self.DEFAULT_HMC_VERSION)
         return self.DEFAULT_HMC_VERSION
 
     def get_managed_servers(self, client):

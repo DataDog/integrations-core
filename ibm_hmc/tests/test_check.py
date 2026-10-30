@@ -194,7 +194,7 @@ def test_sampling_throttled_by_sample_rate(aggregator, dd_run_check, instance):
 
 
 def test_version_fallback_disables_newer_fields(aggregator, dd_run_check, instance):
-    """Without a parsable *RM line the check assumes HMC 700 and drops newer LPAR fields."""
+    """Without a parsable *RM line the check assumes HMC 7.0 and drops newer LPAR fields."""
     check = IbmHmcCheck('ibm_hmc', {}, [instance])
     fake = FakeSSHClient(
         lshmc_output='*DS Hardware Management Console\n',
@@ -205,6 +205,22 @@ def test_version_fallback_disables_newer_fields(aggregator, dd_run_check, instan
     aggregator.assert_metric('ibm_hmc.lpar.shared_cycles_while_active', value=0)
     assert len(aggregator.metrics('ibm_hmc.lpar.curr_mem')) == 0
     assert len(aggregator.metrics('ibm_hmc.lpar.idle_cycles')) == 0
+
+
+def test_hmc10_two_digit_major_version(aggregator, dd_run_check, instance):
+    """HMC 10 releases have a two-digit major version and must collect all version-gated fields.
+
+    Collapsing the version into a truncated integer turned `V10R3.1060.0` into 103,
+    below every 7.x threshold, silently disabling all gated LPAR metrics on HMC 10.
+    """
+    check = IbmHmcCheck('ibm_hmc', {}, [instance])
+    fake = FakeSSHClient(lshmc_output='*DS Hardware Management Console\n*RM V10R3.1060.0\n')
+    run_check(dd_run_check, check, fake)
+
+    lpar_tags = ['server:ServerA', 'lpar_name:lparA', 'curr_sharing_mode:cap', 'mem_mode:ded']
+    aggregator.assert_metric('ibm_hmc.lpar.shared_cycles_while_active', tags=lpar_tags)
+    aggregator.assert_metric('ibm_hmc.lpar.curr_mem', value=2048, tags=lpar_tags)
+    aggregator.assert_metric('ibm_hmc.lpar.idle_cycles', value=0, tags=lpar_tags)
 
 
 def test_server_without_sample_rate_is_skipped(aggregator, dd_run_check, instance):
