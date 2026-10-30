@@ -20,10 +20,15 @@ if TYPE_CHECKING:
     from ddev.utils.github_async.models import PullRequest, PullRequestRef, PullRequestSimple
 
 RUN_MANIFEST_NAME = 'run.json'
+NO_MATCHING_PR_REASON = 'no open pull request matches the requested revision'
 
 # `merge_commit_sha` reads null only while GitHub recomputes the synthetic merge.
 MERGE_COMMIT_REFRESH_ATTEMPTS = 3
 MERGE_COMMIT_REFRESH_SECONDS = 2.0
+
+
+class RunResolutionError(Exception):
+    """A run could not be resolved; the message is what the invocation aborts with."""
 
 
 @dataclass(frozen=True)
@@ -236,9 +241,7 @@ def changes_for_run(
     try:
         changed_files = changes_in_commit(app.repo.git, run.checkout_sha)
     except ChangeResolutionError as error:
-        if monitor is not None:
-            monitor.logger.error('Revision resolution failed', error=str(error))
-        app.abort(str(error))
+        raise RunResolutionError(str(error)) from error
 
     if monitor is not None:
         monitor.logger.info('Test changes resolved', changed_file_count=len(changed_files))
@@ -249,7 +252,7 @@ def validate_checkout(app: Application, *, run: ResolvedRun) -> None:
     """Require the resolved checkout and, for a PR, a merge built from its resolved head."""
     checked_out = app.repo.git.latest_commit().sha
     if checked_out != run.checkout_sha:
-        app.abort(f'The checkout is {checked_out}, not the run\'s commit {run.checkout_sha}.')
+        raise RunResolutionError(f'The checkout is {checked_out}, not the run\'s commit {run.checkout_sha}.')
 
     if run.pr_number is None:
         return
@@ -257,13 +260,13 @@ def validate_checkout(app: Application, *, run: ResolvedRun) -> None:
     try:
         head_parent = app.repo.git.capture('rev-parse', f'{run.checkout_sha}^2').strip()
     except OSError as error:
-        app.abort(
+        raise RunResolutionError(
             f'{run.checkout_sha} is not a merge commit this repository holds: {error}\n'
             'The checkout needs the merge and its parents, which `fetch-depth: 2` provides.'
-        )
+        ) from error
 
     if head_parent != run.head_sha:
-        app.abort(f'The merge {run.checkout_sha} carries PR head {head_parent}, not {run.head_sha}.')
+        raise RunResolutionError(f'The merge {run.checkout_sha} carries PR head {head_parent}, not {run.head_sha}.')
 
 
 def head_is_fork(head: PullRequestRef, *, owner: str, repo: str) -> bool:
@@ -322,7 +325,7 @@ def resolve_pull_request_run(
             pull = await resolver.resolve(client)
             if pull is None:
                 if monitor is not None:
-                    monitor.logger.info('Nothing to test', reason='no open pull request matches the requested revision')
+                    monitor.logger.info('Nothing to test', reason=NO_MATCHING_PR_REASON)
                 app.display_info('No open pull request matches the requested revision, so there is nothing to test.')
                 return None
             assert pull.head is not None and pull.base is not None, 'Resolved PRs have branch references.'
@@ -355,8 +358,8 @@ def resolve_pull_request_run(
     try:
         return asyncio.run(resolve())
     except GitHubAuthenticationError as error:
-        app.abort(str(error))
+        raise RunResolutionError(str(error)) from error
     except ChangeResolutionError as error:
-        app.abort(str(error))
+        raise RunResolutionError(str(error)) from error
     except (httpx.HTTPError, ValidationError) as error:
-        app.abort(f'Could not read the pull request to test: {error}')
+        raise RunResolutionError(f'Could not read the pull request to test: {error}') from error

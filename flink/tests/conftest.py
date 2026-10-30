@@ -4,15 +4,23 @@
 import copy
 import os
 from unittest import mock
+from urllib.request import urlopen
 
 import pytest
 
-from datadog_checks.dev import docker_run, get_docker_hostname, get_e2e_discovery_metadata, get_here
-from datadog_checks.dev.conditions import CheckEndpoints
+from datadog_checks.dev import docker_run, get_docker_hostname, get_e2e_discovery_metadata, get_here, run_command
+from datadog_checks.dev.conditions import CheckEndpoints, WaitFor
 from datadog_checks.flink import FlinkCheck
 
 JOBMANAGER_PORT = 9249
 TASKMANAGER_PORT = 9250
+
+
+def _task_metrics_present():
+    # Task/operator metric groups only exist once a job is actually scheduled
+    # onto the TaskManager, which lags job submission by a few seconds.
+    with urlopen(f"http://{get_docker_hostname()}:{TASKMANAGER_PORT}/metrics", timeout=5) as response:
+        return b'flink_taskmanager_job_task_numRecordsIn' in response.read()
 
 
 @pytest.fixture(scope='session')
@@ -23,8 +31,20 @@ def dd_environment():
         conditions=(
             CheckEndpoints(f"http://{get_docker_hostname()}:{JOBMANAGER_PORT}/metrics"),
             CheckEndpoints(f"http://{get_docker_hostname()}:{TASKMANAGER_PORT}/metrics"),
+            lambda: run_command(
+                [
+                    'docker',
+                    'exec',
+                    'flink-jobmanager',
+                    'flink',
+                    'run',
+                    '-d',
+                    '/opt/flink/examples/streaming/StateMachineExample.jar',
+                ],
+                check=True,
+            ),
+            WaitFor(_task_metrics_present, attempts=30, wait=2),
         ),
-        sleep=15,
     ):
         yield (
             {

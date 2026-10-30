@@ -2,6 +2,27 @@
 
 <!-- towncrier release notes start -->
 
+## 20.1.0 / 2026-10-15
+
+***Added***:
+
+* Read the GitHub owner from `[github] owner` in `.ddev/config.toml` so GitHub operations support repositories outside the DataDog organization. ([#25293](https://github.com/DataDog/integrations-core/pull/25293))
+* Run every eligible target when a pull request changes `.ddev/dispatcher.toml`. ([#25429](https://github.com/DataDog/integrations-core/pull/25429))
+* Improve Dispatcher outcome metrics: report runs whose tests failed separately from runs the Dispatcher could not complete, count exactly one outcome per run, and count passed batches when their results are gathered. ([#25441](https://github.com/DataDog/integrations-core/pull/25441))
+* Log Dispatcher operation failures from the component that owns them, and log every finished job with its target, status and duration. ([#25491](https://github.com/DataDog/integrations-core/pull/25491))
+* Add a `pr-description` validation for pull request checklist and length requirements. ([#25496](https://github.com/DataDog/integrations-core/pull/25496))
+* Record the duration of every Dispatcher operation and log each settled operation with its result. ([#25535](https://github.com/DataDog/integrations-core/pull/25535))
+* Add a Dispatcher metric counting GitHub requests that return a failure to the caller. ([#25636](https://github.com/DataDog/integrations-core/pull/25636))
+
+***Fixed***:
+
+* Identify event bus messages by type and id in error text instead of embedding the full message. ([#25448](https://github.com/DataDog/integrations-core/pull/25448))
+* Resolve a job whose final state the GitHub jobs API could not confirm from the run's conclusion and the job's artifacts, instead of failing the batch. ([#25449](https://github.com/DataDog/integrations-core/pull/25449))
+* Shorten comments, docstrings and test names in the Dispatcher logging code. ([#25504](https://github.com/DataDog/integrations-core/pull/25504))
+* Count cancelled Dispatcher batches and jobs as cancelled, report jobs stopped by the 120-minute test timeout as timed out and failed, and emit the same dense outcome counters for batches and jobs. ([#25505](https://github.com/DataDog/integrations-core/pull/25505))
+* Fix `ddev env start` not enabling the logs Agent on Linux and macOS when the E2E environment mounts logs. ([#25588](https://github.com/DataDog/integrations-core/pull/25588))
+* Retry transient 404 responses when the Dispatcher first fetches a newly dispatched workflow run. ([#25628](https://github.com/DataDog/integrations-core/pull/25628))
+
 ## 20.0.0 / 2026-09-29
 
 ***Changed***:

@@ -3,7 +3,7 @@
   "app_uuid": "34c50cbf-c717-48ba-9eab-32c0b8049f1c",
   "app_id": "crowdstrike-fdr",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",

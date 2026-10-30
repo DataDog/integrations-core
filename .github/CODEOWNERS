@@ -116,6 +116,9 @@ manifest.json         @DataDog/documentation @DataDog/agent-integrations
 /cisco_sdwan/                                                      @DataDog/ndm-integrations @DataDog/agent-integrations
 /cisco_sdwan/*.md                                                  @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
 /cisco_sdwan/manifest.json                                         @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
+/pan_firewall/                                                     @DataDog/ndm-integrations @DataDog/agent-integrations
+/pan_firewall/*.md                                                 @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
+/pan_firewall/manifest.json                                        @DataDog/ndm-integrations @DataDog/agent-integrations @DataDog/documentation
 /snmp/                                                             @DataDog/network-device-monitoring-core @DataDog/agent-integrations
 /snmp/*.md                                                         @DataDog/network-device-monitoring-core @DataDog/agent-integrations @DataDog/documentation
 /snmp/manifest.json                                                @DataDog/network-device-monitoring-core @DataDog/agent-integrations @DataDog/documentation
@@ -181,6 +184,9 @@ datadog_checks_base/tests/**/test_sql_commenter.py  @DataDog/database-monitoring
 /clickhouse/                                        @DataDog/database-monitoring-agent @DataDog/agent-integrations
 /clickhouse/*.md                                    @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 /clickhouse/manifest.json                           @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/ibm_db2/                                           @DataDog/database-monitoring-agent @DataDog/agent-integrations
+/ibm_db2/*.md                                       @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
+/ibm_db2/manifest.json                              @DataDog/database-monitoring @DataDog/agent-integrations @DataDog/documentation
 
 # Data Observability
 /do_query_actions/                                  @DataDog/data-observability @DataDog/agent-integrations
@@ -225,6 +231,9 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /pdh_check/                                                          @DataDog/windows-products @DataDog/agent-integrations
 /pdh_check/*.md                                                      @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
 /pdh_check/manifest.json                                             @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/powershell/                                                         @DataDog/windows-products @DataDog/agent-integrations
+/powershell/*.md                                                     @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
+/powershell/manifest.json                                            @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
 /thermal/                                                            @DataDog/windows-products @DataDog/agent-integrations
 /thermal/*.md                                                        @DataDog/windows-products @DataDog/agent-integrations @DataDog/documentation
 /win32_event_log/                                                    @DataDog/windows-products @DataDog/agent-integrations
@@ -416,6 +425,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /okta_workflows/manifest.json                                        @DataDog/saas-integrations @DataDog/documentation
 /okta_workflows/assets/logs/                                         @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
+/openrouter/                                                         @DataDog/saas-integrations
+/openrouter/*.md                                                     @DataDog/saas-integrations @DataDog/documentation
+/openrouter/manifest.json                                            @DataDog/saas-integrations @DataDog/documentation
+
 /palo_alto_cortex_xdr/                                               @DataDog/saas-integrations
 /palo_alto_cortex_xdr/*.md                                           @DataDog/saas-integrations @DataDog/documentation
 /palo_alto_cortex_xdr/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
@@ -495,12 +508,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /cisco_secure_email_threat_defense/*.md                             @DataDog/saas-integrations @DataDog/documentation
 /cisco_secure_email_threat_defense/manifest.json                    @DataDog/saas-integrations @DataDog/documentation
 /cisco_secure_email_threat_defense/assets/logs/                     @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
-/ringcentral/                                                        @DataDog/saas-integrations
-/ringcentral/*.md                                                    @DataDog/saas-integrations @DataDog/documentation
-/ringcentral/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
-/ringcentral/metadata.csv                                            @DataDog/saas-integrations @DataDog/documentation
-/ringcentral/assets/logs/                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /temporal_cloud/                                                    @DataDog/saas-integrations
 /temporal_cloud/*.md                                                @DataDog/saas-integrations @DataDog/documentation
@@ -650,6 +657,8 @@ plaid/assets/logs/                                                  @DataDog/saa
 /infiniband/*.md                                                     @DataDog/accelerator-telemetry @DataDog/documentation
 /infiniband/manifest.json                                            @DataDog/accelerator-telemetry @DataDog/agent-integrations @DataDog/documentation
 
+/kai_scheduler/                                                      @DataDog/accelerator-telemetry
+/kai_scheduler/*.md                                                  @DataDog/accelerator-telemetry @DataDog/documentation
 /kueue/                                                                @DataDog/gpu-monitoring-agent
 /kueue/*.md                                                            @DataDog/gpu-monitoring-agent @DataDog/documentation
 /kueue/manifest.json                                                   @DataDog/gpu-monitoring-agent @DataDog/agent-integrations @DataDog/documentation
@@ -837,6 +846,11 @@ plaid/assets/logs/                                                  @DataDog/saa
 /anomali_threatstream/                                               @DataDog/cloud-siem
 /anomali_threatstream/*.md                                           @DataDog/cloud-siem @DataDog/documentation
 /anomali_threatstream/manifest.json                                  @DataDog/cloud-siem @DataDog/documentation
+
+/automox/                                                            @DataDog/cloud-siem
+/automox/*.md                                                        @DataDog/cloud-siem @DataDog/documentation
+/automox/manifest.json                                               @DataDog/cloud-siem @DataDog/documentation
+/automox/assets/logs/                                                @DataDog/cloud-siem @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 
 /palo_alto_networks_cortex_xsoar/                                     @DataDog/saas-integrations
