@@ -1,0 +1,48 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "6a63393d-1f8d-4c7f-a2a0-64cfd4b5c86f",
+  "app_id": "ibm_hmc",
+  "owner": "agent-integrations",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Collect performance metrics for POWER systems managed by an IBM Hardware Management Console (HMC).",
+    "title": "IBM HMC",
+    "media": [],
+    "classifier_tags": [
+      "Category::OS & System",
+      "Supported OS::AIX",
+      "Offering::Integration"
+    ]
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  },
+  "assets": {
+    "integration": {
+      "source_type_name": "IBM HMC",
+      "source_type_id": 96680300,
+      "auto_install": true,
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "ibm_hmc.",
+        "check": "ibm_hmc.lpar.curr_proc_units",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  }
+}

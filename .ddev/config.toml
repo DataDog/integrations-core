@@ -61,7 +61,6 @@ dell_powerflex = "Dell Powerflex"
 dynamo = "Dynamo"
 intersystems_iris = "InterSystems IRIS"
 kai_scheduler = "KAI Scheduler"
-ibm_hmc = "IBM HMC"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
@@ -75,7 +74,6 @@ hpe_aruba_edgeconnect = "hpe_aruba_edgeconnect."
 dynamo = "dynamo."
 intersystems_iris = "intersystems_iris."
 kai_scheduler = "kai."
-ibm_hmc = "ibm_hmc."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -307,5 +305,4 @@ hpe_aruba_edgeconnect = ["linux", "windows", "mac_os"]
 dynamo = ["linux", "windows", "mac_os"]
 intersystems_iris = ["linux", "windows", "mac_os"]
 kai_scheduler = ["linux", "windows", "mac_os"]
-ibm_hmc = ["aix"]
 
