@@ -276,7 +276,7 @@ def _to_requests_response(wire_request: Any, response: FakeHTTPResponse) -> requ
         status_code=response.status_code,
         content=_body(response),
         headers=headers,
-        reason=response.reason or None,
+        reason=response.reason,
         cookies=dict(response.cookies) or None,
     )
     if response.encoding is not None:
