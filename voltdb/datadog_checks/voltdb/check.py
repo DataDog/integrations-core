@@ -1,15 +1,20 @@
 # (C) Datadog, Inc. 2020-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from typing import Any, List, Optional, cast  # noqa: F401
+from concurrent.futures import Future  # noqa: F401
+from typing import Any, Dict, List, Optional, Tuple, cast  # noqa: F401
+
+from voltclient import VoltConnectionError
 
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.utils.db import QueryManager
 
 from .client import Client
-from .config import MODE_HTTP, Config
+from .config import MODE_HTTP, MODE_NATIVE, Config
 from .http_client import HttpClient
 from .types import Instance
+
+_VERSION_CALL = ('@SystemInformation', ('OVERVIEW',))
 
 
 class VoltDBCheck(AgentCheck):
@@ -53,11 +58,56 @@ class VoltDBCheck(AgentCheck):
             tags=self._config.tags,
         )
         self.check_initializations.append(self._query_manager.compile_queries)
+        self._inflight = {}  # type: Dict[Tuple[str, tuple], Future]
+        self._send_error = None  # type: Optional[Exception]
+
+    def _submit_calls(self):
+        # type: () -> Tuple[Dict[Tuple[str, tuple], Future], Optional[Exception]]
+        """Send every procedure call of this run up front so their round-trips
+        overlap; QueryManager then consumes the responses in its usual order.
+
+        Returns the in-flight calls, and the connection error that stopped sending, if any."""
+        if self._config.mode != MODE_NATIVE:
+            return {}, None
+
+        calls = [_VERSION_CALL]
+        for query in self._query_manager.queries:
+            # Skip queries not compiled yet (check() called without run()) and interval-gated
+            # ones, which run synchronously when QueryManager decides they are due.
+            if query.query is not None and query.collection_interval is None:
+                procedure, params = _parse_query(query.query)
+                calls.append((procedure, tuple(params)))
+
+        inflight = {}  # type: Dict[Tuple[str, tuple], Future]
+        for procedure, params in calls:
+            if (procedure, params) in inflight:
+                continue
+            try:
+                inflight[(procedure, params)] = self._client.call_procedure_async(procedure, list(params))
+            except VoltConnectionError as exc:
+                # The cluster is unreachable: every call of this run reports this error rather
+                # than making its own connection attempt.
+                return inflight, exc
+            except Exception as exc:
+                # Anything else (e.g. a parameter that can't be serialized) concerns this call
+                # alone; it is retried synchronously, where the error gets reported.
+                self.log.debug('Could not send VoltDB call %s ahead of time: %s', procedure, exc)
+        return inflight, None
+
+    def _call(self, procedure, params):
+        # type: (str, list) -> Any
+        if self._send_error is not None:
+            raise self._send_error
+        future = self._inflight.pop((procedure, tuple(params)), None)
+        if future is None:
+            return self._client.call_procedure(procedure, params)
+        return self._client.result(future, procedure, params)
 
     def _fetch_version(self):
         # type: () -> Optional[str]
         # See: https://docs.voltdb.com/UsingVoltDB/sysprocsysteminfo.php#sysprocsysinforetvalovervw
-        response = self._client.call_procedure('@SystemInformation', ['OVERVIEW'])
+        procedure, params = _VERSION_CALL
+        response = self._call(procedure, list(params))
         self._client.raise_for_status(response)
 
         table = response.tables[0]
@@ -123,7 +173,7 @@ class VoltDBCheck(AgentCheck):
         # Ad-hoc format: 'A:[B, C]' -> procedure A called with parameters [B, C].
         procedure, params = _parse_query(query)
 
-        response = self._client.call_procedure(procedure, params)
+        response = self._call(procedure, params)
         self._client.raise_for_status(response)
 
         table = response.tables[0]
@@ -154,8 +204,12 @@ class VoltDBCheck(AgentCheck):
 
     def check(self, _):
         # type: (Any) -> None
-        self._check_can_connect_and_submit_version()
-        self._query_manager.execute()
+        self._inflight, self._send_error = self._submit_calls()
+        try:
+            self._check_can_connect_and_submit_version()
+            self._query_manager.execute()
+        finally:
+            self._inflight, self._send_error = {}, None
 
 
 def _parse_query(query):
