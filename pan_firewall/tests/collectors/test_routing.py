@@ -20,7 +20,7 @@ from datadog_checks.pan_firewall.collectors.routing import (
     parse_ospf_neighbors,
     peer_ip,
 )
-from datadog_checks.pan_firewall.errors import PanosApiError, PanosError
+from datadog_checks.pan_firewall.errors import PanosApiError, PanosAuthError, PanosError
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
 from ..common import FW_A_PEER, SYNTHETIC
@@ -309,6 +309,60 @@ def test_are_failing_logical_router_is_skipped_with_a_warning(collect, cmd, lr1)
     assert {t for s in samples for t in s.tags if t.startswith('vr:')} == {'vr:default'}
     ctx.log.warning.assert_called_once()
     assert 'logical router lr1' in ctx.log.warning.call_args.args[-1]
+
+
+def are_answers(cmd, answer):
+    """A context for an ARE firewall with the logical routers `lr1` and `default`, both answering `answer` to `cmd`:
+    raising it when it is an exception."""
+
+    def op(command):
+        if command == ARE_LOGICAL_ROUTER_CMD:
+            return parse_response(TWO_ROUTERS)
+        assert command in {cmd.format(router='lr1'), cmd.format(router='default')}
+        if isinstance(answer, Exception):
+            raise answer
+        return answer
+
+    ctx = make_ctx(identity=mock.Mock(advanced_routing=True))
+    ctx.client.op.side_effect = op
+    return ctx
+
+
+# What FRRouting, the routing engine behind these answers, prints for a VRF without the protocol.
+EMPTY_JSON = b'<response status="success"><result><json>{}</json></result></response>'
+
+
+@pytest.mark.parametrize('collect, cmd', ARE_COLLECTORS)
+def test_are_logical_routers_without_the_protocol_send_nothing_and_do_not_warn(collect, cmd):
+    ctx = are_answers(cmd, parse_response(EMPTY_JSON))
+
+    assert collect(ctx) == []
+    ctx.log.warning.assert_not_called()
+
+
+@pytest.mark.parametrize('collect, cmd', ARE_COLLECTORS)
+def test_are_api_error_from_every_logical_router_warns_for_each_and_sends_nothing(collect, cmd):
+    # PAN-OS may answer this way for a router without the protocol; failing would log it and retry on every run.
+    ctx = are_answers(cmd, PanosApiError('17', 'invalid command'))
+
+    assert collect(ctx) == []
+    warnings = [c.args[-1] for c in ctx.log.warning.call_args_list]
+    assert len(warnings) == 2
+    assert any('logical router lr1' in w for w in warnings)
+    assert any('logical router default' in w for w in warnings)
+
+
+@pytest.mark.parametrize(
+    'answer, error',
+    [
+        # PanosAuthError subclasses PanosApiError, which the collector tolerates on every router.
+        pytest.param(PanosAuthError('403', 'Invalid credentials.'), PanosAuthError, id='auth'),
+        pytest.param(parse_response(NOT_JSON), PanosError, id='not-json'),
+    ],
+)
+def test_are_auth_error_or_broken_answer_on_every_logical_router_fails_the_collector(answer, error):
+    with pytest.raises(error):
+        collect_bgp(are_answers(ARE_BGP_PEER_CMD, answer))
 
 
 @pytest.mark.parametrize(

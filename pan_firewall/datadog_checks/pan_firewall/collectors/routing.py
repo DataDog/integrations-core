@@ -18,7 +18,7 @@ from typing import Any, Literal
 from xml.etree.ElementTree import Element
 from xml.sax.saxutils import escape
 
-from datadog_checks.pan_firewall.errors import PanosError
+from datadog_checks.pan_firewall.errors import PanosApiError, PanosAuthError, PanosError
 from datadog_checks.pan_firewall.xml_utils import num, tag_tuple, text
 
 from .base import CollectContext, Sample, read_each
@@ -247,8 +247,11 @@ def collect_are(ctx: CollectContext, cmd: str, parse: Callable[[dict, str], list
     """Ask each logical router `cmd`, formatted with its name, and parse the answer with `parse(data, router)`.
 
     A router whose call fails is skipped with a warning, so that one broken router (such as PAN-OS bug PAN-220293,
-    which fails the BGP peer call of any router with IPv6 peers) does not drop the others; when every router fails,
-    the collector fails. Authentication and connection errors fail the collector at once.
+    which fails the BGP peer call of any router with IPv6 peers) does not drop the others. When every router answers
+    with an API error, nothing is sent and the collector does not fail: a router without the protocol may answer this
+    way (the engine is FRRouting, which ends a BGP query of a VRF without BGP with a warning status), and failing
+    would log and retry it on every run on firewalls that do not run the protocol. Authentication and connection
+    errors, and an answer that is not JSON on every router, fail the collector.
     """
     answers = read_each(
         logical_routers(ctx),
@@ -257,7 +260,12 @@ def collect_are(ctx: CollectContext, cmd: str, parse: Callable[[dict, str], list
             'cannot read the %s of the logical router %s: %s', name, router, e, key=f'are:{name}:{router}'
         ),
     )
-    return [sample for router, data in answers for sample in parse(data, router)]
+    try:
+        return [sample for router, data in answers for sample in parse(data, router)]
+    except PanosAuthError:
+        raise
+    except PanosApiError:
+        return []
 
 
 def collect_bgp(ctx: CollectContext) -> list[Sample]:
