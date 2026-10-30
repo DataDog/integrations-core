@@ -5,9 +5,7 @@
 
 from __future__ import annotations
 
-import json
 import time
-from collections import Counter
 from collections.abc import Callable, Iterable, Iterator
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal, NamedTuple
@@ -29,48 +27,6 @@ class Sample(NamedTuple):
     value: float
     tags: tuple[str, ...]  # collector-specific tags only
     kind: Literal['gauge', 'monotonic_count', 'count']
-
-
-@dataclass(frozen=True)
-class Watermark:
-    """Where the threat collector resumes: the last `seqno` counted. `last_reset_check` is on the monotonic clock, so
-    a value ahead of it (after a restart) counts as due."""
-
-    seqno: int
-    last_reset_check: float
-
-    def to_json(self) -> str:
-        return json.dumps({'seqno': self.seqno, 'last_reset_check': self.last_reset_check})
-
-    @classmethod
-    def from_json(cls, raw: str) -> Watermark:
-        """Raises ValueError, TypeError or KeyError for anything else than `to_json()` wrote."""
-        data = json.loads(raw)
-        return cls(seqno=int(data['seqno']), last_reset_check=float(data['last_reset_check']))
-
-
-@dataclass
-class ThreatJob:
-    """A threat log job and what its pass has gathered: `baseline` (first run: newest log), `forward` (logs above
-    `base_seqno`, page after page; `base_seqno` moves to the newest log read as each page ends) or `reset` (newest
-    log, to detect a `seqno` reset)."""
-
-    purpose: Literal['baseline', 'forward', 'reset']
-    base_seqno: int = 0
-    page_size: int = 1
-    job_id: str | None = None
-    page_entries: int = 0
-    pages_read: int = 0  # full pages already read by this pass, across runs
-    newest_seqno: int | None = None
-    counted: int = 0
-    counts: Counter[tuple[str, str, str, str]] = field(default_factory=Counter)
-
-
-@dataclass
-class ThreatState:
-    watermark: Watermark | None = None
-    loaded: bool = False  # the watermark has been read from the persistent cache
-    pending: ThreatJob | None = None  # a job still running when the last run ended, polled first next run
 
 
 @dataclass
@@ -98,7 +54,6 @@ class FirewallState:
     # Written by `vpn`, read by `interfaces`, which owns the tunnel counters: None until `vpn` first answers.
     tunnel_tags: dict[str, tuple[str, ...]] | None = None
     tunnel_states: dict[str, str] = field(default_factory=dict)
-    threats: ThreatState = field(default_factory=ThreatState)
     # Keys of the warnings already logged for this firewall (see `CollectContext.warning`).
     warned: set[str] = field(default_factory=set)
     reports: ReportState = field(default_factory=ReportState)

@@ -30,11 +30,9 @@ def _xml(body: bytes, status: int = 200) -> Response:
     return Response(body, status=status, mimetype='text/xml')
 
 
-def create_app(
-    username: str, password: str, op_fixture: OpAnswer, log_fixtures: JobFixtures, report_fixtures: JobFixtures
-) -> Flask:
-    """Build the app. `op_fixture` returns the body answering an op command, the job callbacks the files answering a
-    job; each returns None when there is no capture."""
+def create_app(username: str, password: str, op_fixture: OpAnswer, report_fixtures: JobFixtures) -> Flask:
+    """Build the app. `op_fixture` returns the body answering an op command, `report_fixtures` the file answering a
+    report job; each returns None when there is no capture."""
     app = Flask(__name__)
     # A job answers `ACT` to its first `get` and its fixture from the second on, so the check's polling is exercised.
     reads: dict[tuple[str, str], int] = {}
@@ -55,7 +53,7 @@ def create_app(
         kind = data.get('type', '')
         if kind == 'op':
             return _xml(op_fixture(data.get('cmd', '')) or NO_CAPTURE)
-        if kind in ('log', 'report'):
+        if kind == 'report':
             return _job(kind, data)
         return _xml(NO_CAPTURE)
 
@@ -70,7 +68,7 @@ def create_app(
             return _xml(ACTIVE_JOB % job_id.encode() if read == 1 else response.read_bytes())
         if kind == 'report' and data.get('async') != 'yes':  # PAN-OS refuses a report submit that is not asynchronous
             return _xml(NO_CAPTURE)
-        response = (log_fixtures if kind == 'log' else report_fixtures)(data)
+        response = report_fixtures(data)
         if response is None:
             return _xml(NO_CAPTURE)
         with lock:

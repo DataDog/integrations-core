@@ -123,7 +123,7 @@ def configured_vsys(configured: Sequence[str] | None) -> list[str]:
 
 def normalize_vsys(value: str | None) -> str | None:
     """`1` -> `vsys1`, `VSYS1` -> `vsys1`; None for a missing or blank value. PAN-OS gives the bare number in
-    `show interface all` and the name in threat logs."""
+    `show interface all`."""
     value = (value or '').strip()
     if not value:
         return None

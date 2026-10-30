@@ -6,7 +6,7 @@
 import os
 
 from tests.docker.panos_server import create_app, serve
-from tests.fixture_map import find_op_fixture, log_job_fixture, report_job_fixture
+from tests.fixture_map import find_op_fixture, report_job_fixture
 
 FIREWALL_SET = os.environ['FIREWALL_SET']
 
@@ -20,7 +20,6 @@ app = create_app(
     os.environ['PANOS_USERNAME'],
     os.environ['PANOS_PASSWORD'],
     op_fixture=op_fixture,
-    log_fixtures=lambda data: log_job_fixture(data, FIREWALL_SET),
     report_fixtures=lambda data: report_job_fixture(data, FIREWALL_SET),
 )
 
