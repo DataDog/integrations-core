@@ -179,26 +179,31 @@ def _check_servable(response: object) -> None:
         'peer_cert': response._peer_cert is not None,
         'json_error': response._json_error is not None,
         'url': bool(response.url),
-        # The wire carries one body, so the client parses JSON from it rather than returning json_result.
-        'json_result': _json_contradicts_body(response),
         # The body is streamed in chunks the client picks, not the configured ones.
-        # The wire carries one body, so every other view must agree with it. Empty views are skipped because
-        # FakeHTTPResponse derives `text` and `content_chunks` as empty when they are not given.
-        'content_chunks': len(response._content_chunks) > 1
-        or (body is not None and any(_encode(chunk, response.encoding) != body for chunk in response._content_chunks)),
+        'content_chunks': len(response._content_chunks) > 1,
+        # Lines are sent joined by newlines, so they must split back into the same lines.
+        'lines': lines is not None and b'\n'.join(lines).splitlines() != lines,
+    }
+    # The wire carries one body, so the client derives every other view from it. Empty views are skipped because
+    # FakeHTTPResponse derives `text` and `content_chunks` as empty when they are not given.
+    conflicting = {
+        # The client parses JSON from the body rather than returning json_result.
+        'json_result': _json_contradicts_body(response),
+        'content_chunks': body is not None
+        and any(_encode(chunk, response.encoding) != body for chunk in response._content_chunks),
         # Text is compared decoded, because a binary body does not survive a decode and encode round trip.
         'text': body is not None
         and bool(response.text)
         and response.text != body.decode(response.encoding or 'utf-8', errors='replace'),
-        # Lines are sent joined by newlines, so they must split back into the same lines.
-        'lines': lines is not None
-        and (
-            b'\n'.join(lines).splitlines() != lines or (bool(lines) and body is not None and body.splitlines() != lines)
-        ),
+        'lines': bool(lines) and body is not None and body.splitlines() != lines,
     }
-    fields = [name for name, is_set in unsendable.items() if is_set]
-    if fields:
+    if fields := [name for name, is_set in unsendable.items() if is_set]:
         raise ValueError(f'The fake_http fixture cannot send these FakeHTTPResponse fields on the wire: {fields}.')
+    if fields := [name for name, is_set in conflicting.items() if is_set]:
+        raise ValueError(
+            f'These FakeHTTPResponse fields disagree with the body the fake_http fixture sends: {fields}. The client '
+            'derives every view from one body, so set a single body field or make the others match it.'
+        )
 
 
 def _json_contradicts_body(response: FakeHTTPResponse) -> bool:

@@ -72,9 +72,9 @@ The fixture fails the test instead of serving a response it cannot represent:
 - A request sent outside a check client, or a wire request that differs from the call that sent it, such as a followed
   redirect or an auth token fetch. Pass `allow_redirects=False` to receive a registered redirect.
 - A `FakeHTTPResponse` that sets `elapsed`, `stream_error`, `history`, `peer_cert`, `json_error` or `url`, more than one
-  entry in `content_chunks`, `lines` that do not split back unchanged, or a `json_result` that the body does not encode.
-- A `FakeHTTPResponse` whose `text`, `lines` or `content_chunks` disagree with the body it sends, which is its
-  `content` if set. The wire carries one body, so the client derives every view from it.
+  entry in `content_chunks`, or `lines` that do not split back unchanged.
+- A `FakeHTTPResponse` whose `text`, `lines`, `content_chunks` or `json_result` disagree with the body it sends, which
+  is its `content` if set. The wire carries one body, so the client derives every view from it.
 
 A custom `status_error` is not detected and is replaced by the client's own error for the status code.
 

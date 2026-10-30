@@ -19,6 +19,9 @@ from datadog_checks.base.stubs.http import FakeHTTPResponse, RecordedRequest
 from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
 from datadog_checks.dev import http as http_testing
 
+UNSENDABLE = r"cannot send these FakeHTTPResponse fields on the wire: \['{}'\]"
+CONFLICT = r"disagree with the body the fake_http fixture sends: \['{}'\]"
+
 
 class FixtureCheck(AgentCheck):
     AGNOSTIC_HTTP_CLIENT = True
@@ -374,26 +377,42 @@ def test_fake_http_serves_a_call_whose_params_extend_its_url(fake_http, fake_htt
         pytest.param(FakeHTTPResponse(json_error=ValueError('bad')), ValueError, 'json_error', id='json_error'),
         pytest.param(FakeHTTPResponse(url='https://other.test/'), ValueError, 'url', id='url'),
         pytest.param(
-            FakeHTTPResponse(content=b'raw', json_result={'a': 1}), ValueError, 'json_result', id='json_result-and-body'
+            FakeHTTPResponse(content=b'raw', json_result={'a': 1}),
+            ValueError,
+            CONFLICT.format('json_result'),
+            id='json_result-and-body',
         ),
         pytest.param(
-            FakeHTTPResponse(content_chunks=[b'a', b'b']), ValueError, 'content_chunks', id='several-content_chunks'
+            FakeHTTPResponse(content_chunks=[b'a', b'b']),
+            ValueError,
+            UNSENDABLE.format('content_chunks'),
+            id='several-content_chunks',
         ),
-        pytest.param(FakeHTTPResponse(lines=['a', '']), ValueError, 'lines', id='trailing-empty-line'),
-        pytest.param(FakeHTTPResponse(lines=['a\n', 'b']), ValueError, 'lines', id='line-with-newline'),
-        pytest.param(FakeHTTPResponse(content=b'a', text='b'), ValueError, 'text', id='text-and-content'),
-        pytest.param(FakeHTTPResponse(lines=[b'a'], text='b'), ValueError, 'text', id='text-and-lines'),
-        pytest.param(FakeHTTPResponse(content=b'a', lines=[b'b']), ValueError, 'lines', id='lines-and-content'),
+        pytest.param(
+            FakeHTTPResponse(lines=['a', '']), ValueError, UNSENDABLE.format('lines'), id='trailing-empty-line'
+        ),
+        pytest.param(
+            FakeHTTPResponse(lines=['a\n', 'b']), ValueError, UNSENDABLE.format('lines'), id='line-with-newline'
+        ),
+        pytest.param(
+            FakeHTTPResponse(content=b'a', text='b'), ValueError, CONFLICT.format('text'), id='text-and-content'
+        ),
+        pytest.param(
+            FakeHTTPResponse(lines=[b'a'], text='b'), ValueError, CONFLICT.format('text'), id='text-and-lines'
+        ),
+        pytest.param(
+            FakeHTTPResponse(content=b'a', lines=[b'b']), ValueError, CONFLICT.format('lines'), id='lines-and-content'
+        ),
         pytest.param(
             FakeHTTPResponse(content=b'a', content_chunks=[b'b']),
             ValueError,
-            'content_chunks',
+            CONFLICT.format('content_chunks'),
             id='content_chunks-and-content',
         ),
         pytest.param(
             FakeHTTPResponse(lines=[b'a'], content_chunks=[b'b']),
             ValueError,
-            'content_chunks',
+            CONFLICT.format('content_chunks'),
             id='content_chunks-and-lines',
         ),
         pytest.param(requests.Response(), TypeError, 'FakeHTTPResponse', id='requests-response'),
