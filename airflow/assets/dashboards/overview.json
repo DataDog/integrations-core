@@ -582,7 +582,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:airflow.dagbag_size{*} by {host}"
+                                            "query": "avg:airflow.dagbag_size{$host} by {host}"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -768,7 +768,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:airflow.dag_processing.processes{*} by {host}.as_count()"
+                                            "query": "avg:airflow.dag_processing.processes{$host} by {host}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -824,12 +824,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:airflow.ti_failures{*} by {host}.as_count()"
+                                            "query": "avg:airflow.ti_failures{$host} by {host}.as_count()"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "avg:airflow.ti_successes{*} by {host}.as_count()"
+                                            "query": "avg:airflow.ti_successes{$host} by {host}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -960,7 +960,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "avg:airflow.job.start{*} by {job_name,host}.as_count()"
+                                            "query": "avg:airflow.job.start{$host} by {job_name,host}.as_count()"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -1042,7 +1042,7 @@
     "template_variables": [
         {
             "name": "host",
-            "prefix": "@host",
+            "prefix": "host",
             "available_values": [],
             "default": "*"
         },
