@@ -1073,6 +1073,31 @@ def test_sanitize_activity_row_recovers_leading_comment_for_non_proc_statement(d
 
 
 @pytest.mark.unit
+def test_sanitize_activity_row_recovers_appended_comment_from_tail_text(dbm_instance, datadog_agent):
+    case_comment = "/* orders-lookup */"
+    dbm_comment = "/*ddps='orders-service',dde='prod',ddpv='1.0.0'*/"
+    statement_text = "SELECT id, '" + 'x' * 600 + "' AS pad FROM dbo.orders"
+    batch = f"(@P0 nvarchar(4000)){statement_text} {case_comment} {dbm_comment}"
+    row = {
+        'statement_text': statement_text,
+        'text': batch[:500],
+        # RIGHT(text, 200) can start inside a string literal
+        'tail_text': batch[-200:],
+        'procedure_name': None,
+        'query_hash': b'\xa4\xffV\x1c\xd4\x14\xbeC',
+        'query_plan_hash': b'\xfe\xba\xbf\xc6_\x9bo\x83',
+    }
+    assert row['tail_text'].startswith('x')
+
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    row = check.activity._obfuscate_and_sanitize_row(row)
+
+    assert row['dd_comments'] == [case_comment, dbm_comment]
+    assert 'tail_text' not in row
+    assert 'statement_text' not in row
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     'text,statement_text,expected_comments',
     [

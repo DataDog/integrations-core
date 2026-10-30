@@ -164,6 +164,27 @@ def needs_comment_recovery(full_text: Optional[str], statement_comments: Optiona
     )
 
 
+def extract_trailing_comments(text: Optional[str]) -> list[str]:
+    """Return the block comments at the end of ``text``, in order.
+
+    Only trailing whitespace, semicolons and ``/* ... */`` blocks are scanned, from the end backward,
+    so this is safe on text cut at an arbitrary position, such as inside a string literal.
+    """
+    comments = []
+    end = len(text) if text else 0
+    while True:
+        while end > 0 and (text[end - 1].isspace() or text[end - 1] == ';'):
+            end -= 1
+        if end < 4 or text[end - 2 : end] != '*/':
+            break
+        start = text.rfind('/*', 0, end - 2)
+        if start < 0:
+            break
+        comments.append(text[start:end])
+        end = start
+    return comments[::-1]
+
+
 def _get_procedure_name(t, idx):
     if idx >= 0 and idx + 1 < len(t):
         return t[idx + 1].lower()
