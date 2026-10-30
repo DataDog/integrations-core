@@ -69,8 +69,8 @@ authentication the client applied.
 
 The fixture fails the test instead of serving a response it cannot represent:
 
-- A request sent outside a check client, or a wire request that differs from the call that sent it, such as a followed
-  redirect or an auth token fetch. Pass `allow_redirects=False` to receive a registered redirect. The call fails even
+- A request sent outside a check client, a followed redirect, or a wire request that differs from the call that sent
+  it, such as an auth token fetch. Pass `allow_redirects=False` to receive a registered redirect. The call fails even
   if the client catches the error and retries, as it does when renewing an auth token.
 - A `FakeHTTPResponse` that sets `elapsed`, `stream_error`, `history`, `peer_cert`, `json_error` or `url`, more than one
   entry in `content_chunks`, or `lines` that do not split back unchanged.

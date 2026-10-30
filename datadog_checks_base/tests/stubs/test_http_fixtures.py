@@ -298,6 +298,7 @@ def test_fake_http_rejects_requests_that_bypass_the_check_client(fake_http, fake
         pytest.param('https://example.test/old', 'https://example.test/new', id='path'),
         pytest.param('https://example.test/items?page=1', 'https://example.test/items?page=2', id='query'),
         pytest.param('https://example.test/items?page=1', 'https://example.test/items', id='dropped-query'),
+        pytest.param('https://example.test/items', 'https://example.test/items', id='same-url'),
     ],
 )
 def test_fake_http_rejects_a_followed_redirect(fake_http, fake_http_response, url, location):
@@ -307,8 +308,18 @@ def test_fake_http_rejects_a_followed_redirect(fake_http, fake_http_response, ur
     fake_http_response(location, b'moved')
     check = FixtureCheck('test', {}, [{}])
 
-    with pytest.raises(AssertionError, match=re.escape(f'GET {url} sent GET {location}')):
+    with pytest.raises(AssertionError, match=re.escape(f'GET {url} followed a redirect to GET {location}')):
         check.http.get(url)
+
+
+def test_fake_http_serves_a_redirect_the_client_does_not_follow(fake_http, fake_http_response):
+    url = 'https://example.test/items'
+    fake_http_response(url, status_code=302, headers={'Location': url})
+    fake_http_response(url, b'items')
+    check = FixtureCheck('test', {}, [{}])
+
+    assert check.http.get(url, allow_redirects=False).status_code == 302
+    assert check.http.get(url).content == b'items'
 
 
 def test_fake_http_rejects_a_followed_redirect_the_client_retries_past(fake_http, fake_http_response, mocker):
@@ -319,7 +330,9 @@ def test_fake_http_rejects_a_followed_redirect_the_client_retries_past(fake_http
     # The client catches the rejected redirect, renews its auth token, and retries the call successfully.
     check.http.auth_token_handler = mocker.Mock()
 
-    with pytest.raises(AssertionError, match=re.escape(f'GET {url} sent GET https://example.test/new')):
+    with pytest.raises(
+        AssertionError, match=re.escape(f'GET {url} followed a redirect to GET https://example.test/new')
+    ):
         check.http.get(url)
 
 

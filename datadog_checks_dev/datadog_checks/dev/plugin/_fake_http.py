@@ -56,6 +56,9 @@ class _ActiveCall:
 
     request: RecordedRequest
     violations: list[AssertionError] = field(default_factory=list)
+    # The client resends a call only after an exception or an error status, never after a redirect, so a wire request
+    # that follows a served redirect is that redirect being followed, even when its location is the call's own URL.
+    redirected: bool = False
 
     def violation(self, message: str) -> AssertionError:
         error = AssertionError(message)
@@ -145,11 +148,16 @@ class FakeHTTPFixture:
         call = active.request
         with self._lock:
             self.sent.append(SentRequest(wire_request.method, wire_request.url, HTTPHeaders(wire_request.headers)))
+            if active.redirected:
+                raise active.violation(
+                    f'{call.method} {call.url} followed a redirect to {wire_request.method} {wire_request.url}. The '
+                    'fake_http fixture serves only the call itself; pass allow_redirects=False to receive a '
+                    'registered redirect.'
+                )
             if not _sends_call(wire_request, call):
                 raise active.violation(
                     f'{call.method} {call.url} sent {wire_request.method} {wire_request.url}, for example by '
-                    'following a redirect or fetching an auth token. The fake_http fixture serves only the call '
-                    'itself; pass allow_redirects=False to receive a registered redirect.'
+                    'fetching an auth token. The fake_http fixture serves only the call itself.'
                 )
             matching = [r for r in self._registrations if r.registered.matches(call)]
             chosen = next((r for r in matching if not r.served), matching[-1] if matching else None)
@@ -162,7 +170,9 @@ class FakeHTTPFixture:
             outcome = chosen.registered.outcome
         if isinstance(outcome, Exception):
             raise outcome
-        return _to_requests_response(wire_request, outcome)
+        wire_response = _to_requests_response(wire_request, outcome)
+        active.redirected = wire_response.is_redirect
+        return wire_response
 
 
 def _encode(value: bytes | str, encoding: str | None) -> bytes:
@@ -170,7 +180,7 @@ def _encode(value: bytes | str, encoding: str | None) -> bytes:
 
 
 def _sends_call(wire_request: Any, call: RecordedRequest) -> bool:
-    """Whether the wire request is the call itself, possibly retried, rather than a redirect or a nested request."""
+    """Whether the wire request is the call itself, possibly retried, rather than a nested request."""
     url = quote_uds_url(call.url) if is_uds_url(call.url) else call.url
     # The client normalizes the URL, for example its host case and path quoting, before sending it.
     prepared = requests.PreparedRequest()
