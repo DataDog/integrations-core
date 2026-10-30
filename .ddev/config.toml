@@ -242,6 +242,11 @@ exclude = [
     # botocore requires python-dateutil<3.0.0, so 3.x cannot be installed alongside it.
     # Unpin once https://github.com/boto/botocore/issues/3844 is resolved.
     'python-dateutil',
+    # ddtrace adds MiBs to every Agent artifact per release, and the Agent's integrations-core pin PR
+    # fails the static quality gates per-PR size threshold (600 KiB) when a bump lands in a batch.
+    # 4.13.2 -> 4.16.0 added 2.2 to 2.9 MiB in #25804, which had to be reverted in #25822.
+    # Bump it in its own PR, coordinated with a size exception in datadog-agent.
+    'ddtrace',
 
 ]
 

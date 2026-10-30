@@ -875,7 +875,10 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     dd_run_check(check)
     sleep_time = 1
     time.sleep(sleep_time)
-    max_collections = int(sleep_time / collection_interval) + 1
+    # `datadog-checks-base` before 38.9.1 runs the first two collections back to back, and the minimum-base-package
+    # jobs still test with it. Use `+ 1` once the minimum base version is 38.9.1 or later. See
+    # https://github.com/DataDog/integrations-core/pull/25829 and https://github.com/DataDog/integrations-core/pull/25855
+    max_collections = int(sleep_time / collection_interval) + 2
     min_collections = sleep_time  # at minimum, one collection per second
     check.cancel()
     metrics = aggregator.metrics("dd.sqlserver.activity.collect_activity.payload_size")

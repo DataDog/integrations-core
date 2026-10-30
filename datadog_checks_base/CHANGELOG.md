@@ -2,7 +2,30 @@
 
 <!-- towncrier release notes start -->
 
-## 38.8.0 / 2026-10-27
+## 38.9.1 / 2026-10-30
+
+***Fixed***:
+
+* Wait a full collection interval after the first run of a DBM async job instead of running a second collection immediately. ([#25855](https://github.com/DataDog/integrations-core/pull/25855))
+
+## 38.9.0 / 2026-10-29
+
+***Added***:
+
+* Update dependencies ([#25599](https://github.com/DataDog/integrations-core/pull/25599))
+
+***Fixed***:
+
+* Keep the lower bound of a histogram first bucket finite when its upper bound is negative, so the bucket is no longer dropped from distributions. ([#25465](https://github.com/DataDog/integrations-core/pull/25465))
+* Keep the `lower_bound` tag of a negative first histogram bucket as `-inf` outside distributions, collapsing it only for the distribution sketch. ([#25521](https://github.com/DataDog/integrations-core/pull/25521))
+* Report errors raised by checks running with `process_isolation` instead of showing them as OK. ([#25550](https://github.com/DataDog/integrations-core/pull/25550))
+* Rename the internal `omit_histogram_bound_tags` setting in the OpenMetrics V2 transformer to `collect_histograms_as_distributions`. ([#25647](https://github.com/DataDog/integrations-core/pull/25647))
+* Exclude the `db` tag and internal resource tags from schema payload tags, since the payload describes the whole database instance. ([#25691](https://github.com/DataDog/integrations-core/pull/25691))
+* Tag schema collector telemetry with the collector kind so that metrics from multiple collectors on one check stay separate. ([#25722](https://github.com/DataDog/integrations-core/pull/25722))
+* Send the current auth token on requests that pass `extra_headers`. Those requests previously had no token on the first run and a stale one after a token refresh. ([#25728](https://github.com/DataDog/integrations-core/pull/25728))
+* Read the kubelet pod list from the decoded response body so gzip-encoded responses parse, temporarily using additional memory equal to the decoded body size. ([#25729](https://github.com/DataDog/integrations-core/pull/25729))
+
+## 38.8.0 / 2026-10-27 / Agent 7.85.0
 
 ***Security***:
 
@@ -30,7 +53,7 @@
 
 * Make `assert_histogram_bucket` compare bucket bounds when they are given. ([#25378](https://github.com/DataDog/integrations-core/pull/25378))
 
-## 38.4.0 / 2026-10-01
+## 38.4.0 / 2026-10-01 / Agent 7.84.2
 
 ***Security***:
 

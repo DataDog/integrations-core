@@ -1217,6 +1217,10 @@ integration/podman:
 - changed-files:
   - any-glob-to-any-file:
     - podman/**/*
+integration/powershell:
+- changed-files:
+  - any-glob-to-any-file:
+    - powershell/**/*
 integration/postfix:
 - changed-files:
   - any-glob-to-any-file:
@@ -1305,10 +1309,6 @@ integration/riakcs:
 - changed-files:
   - any-glob-to-any-file:
     - riakcs/**/*
-integration/ringcentral:
-- changed-files:
-  - any-glob-to-any-file:
-    - ringcentral/**/*
 integration/sanity:
 - changed-files:
   - any-glob-to-any-file:
