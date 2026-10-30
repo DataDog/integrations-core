@@ -293,14 +293,6 @@ integration/cisco_secure_client:
 - changed-files:
   - any-glob-to-any-file:
     - cisco_secure_client/**/*
-integration/cisco_secure_email_threat_defense:
-- changed-files:
-  - any-glob-to-any-file:
-    - cisco_secure_email_threat_defense/**/*
-integration/cisco_secure_endpoint:
-- changed-files:
-  - any-glob-to-any-file:
-    - cisco_secure_endpoint/**/*
 integration/cisco_secure_firewall:
 - changed-files:
   - any-glob-to-any-file:
@@ -445,10 +437,6 @@ integration/dns_check:
 - changed-files:
   - any-glob-to-any-file:
     - dns_check/**/*
-integration/dnsfilter:
-- changed-files:
-  - any-glob-to-any-file:
-    - dnsfilter/**/*
 integration/do_query_actions:
 - changed-files:
   - any-glob-to-any-file:
@@ -457,10 +445,6 @@ integration/docker_daemon:
 - changed-files:
   - any-glob-to-any-file:
     - docker_daemon/**/*
-integration/docusign:
-- changed-files:
-  - any-glob-to-any-file:
-    - docusign/**/*
 integration/dotnetclr:
 - changed-files:
   - any-glob-to-any-file:
@@ -517,10 +501,6 @@ integration/external_dns:
 - changed-files:
   - any-glob-to-any-file:
     - external_dns/**/*
-integration/extrahop:
-- changed-files:
-  - any-glob-to-any-file:
-    - extrahop/**/*
 integration/falco:
 - changed-files:
   - any-glob-to-any-file:
@@ -541,10 +521,6 @@ integration/fly_io:
 - changed-files:
   - any-glob-to-any-file:
     - fly_io/**/*
-integration/forcepoint_secure_web_gateway:
-- changed-files:
-  - any-glob-to-any-file:
-    - forcepoint_secure_web_gateway/**/*
 integration/forcepoint_security_service_edge:
 - changed-files:
   - any-glob-to-any-file:
