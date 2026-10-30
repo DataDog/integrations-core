@@ -1,1 +1,1 @@
-Add the IBM HMC integration to collect performance metrics from POWER systems managed by an IBM Hardware Management Console.
+Add the ibm_hmc check, ported from the Unix Agent's hmc check: it collects performance metrics for POWER systems managed by an IBM Hardware Management Console. Unix Agent users migrating should note the check, metric and service check names were renamed (`hmc.LPAR.*` to `ibm_hmc.lpar.*`, `hmc.can_connect` to `ibm_hmc.can_connect`).
