@@ -38,20 +38,33 @@ COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 def dd_environment(instance, dd_save_state):
     if USE_EDGECONNECT_LAB:
         orch_ip = os.environ['EDGECONNECT_ORCH_IP']
-        orch_username = os.environ['EDGECONNECT_ORCH_USERNAME']
-        orch_password = os.environ['EDGECONNECT_ORCH_PASSWORD']
-        appliance_username = os.environ.get('EDGECONNECT_APPLIANCE_USERNAME', orch_username)
-        appliance_password = os.environ.get('EDGECONNECT_APPLIANCE_PASSWORD', orch_password)
+        if E2E_AUTH == 'api-key':
+            # Appliances only take username/password, so there are no Orchestrator credentials to fall back on.
+            auth = {
+                'orchestrator_api_key': os.environ['EDGECONNECT_ORCH_API_KEY'],
+                'orchestrator_username': None,
+                'orchestrator_password': None,
+            }
+            appliance_username = os.environ['EDGECONNECT_APPLIANCE_USERNAME']
+            appliance_password = os.environ['EDGECONNECT_APPLIANCE_PASSWORD']
+        else:
+            auth = {
+                'orchestrator_username': os.environ['EDGECONNECT_ORCH_USERNAME'],
+                'orchestrator_password': os.environ['EDGECONNECT_ORCH_PASSWORD'],
+            }
+            appliance_username = os.environ.get('EDGECONNECT_APPLIANCE_USERNAME', auth['orchestrator_username'])
+            appliance_password = os.environ.get('EDGECONNECT_APPLIANCE_PASSWORD', auth['orchestrator_password'])
+        # Narrow the CIDR to leave some appliances uncovered and exercise the skip path.
+        appliance_cidr = os.environ.get('EDGECONNECT_APPLIANCE_CIDR', '0.0.0.0/0')
         appliance_credentials = [
-            {'cidr': '0.0.0.0/0', 'username': appliance_username, 'password': appliance_password},
+            {'cidr': appliance_cidr, 'username': appliance_username, 'password': appliance_password},
         ]
         inst = instance(
             orch_ip,
-            orchestrator_username=orch_username,
-            orchestrator_password=orch_password,
             appliance_credentials_overrides=appliance_credentials,
             send_ndm_metadata=True,
             collect_events=True,
+            **auth,
         )
         dd_save_state('e2e_instance', inst)
         yield {

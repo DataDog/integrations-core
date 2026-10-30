@@ -16,3 +16,10 @@ python = "3.13"
 
 [envs.lab.env-vars]
 USE_EDGECONNECT_LAB = "True"
+
+[envs.lab-api-key]
+python = "3.13"
+
+[envs.lab-api-key.env-vars]
+USE_EDGECONNECT_LAB = "True"
+EDGECONNECT_E2E_AUTH = "api-key"
