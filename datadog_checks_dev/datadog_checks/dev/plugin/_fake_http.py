@@ -14,7 +14,7 @@ import json
 import threading
 from collections.abc import Iterable, Iterator, Mapping
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import timedelta
 from typing import Any
 from urllib.parse import urlsplit
@@ -48,6 +48,19 @@ class SentRequest:
 class _Registration:
     registered: RegisteredResponse
     served: int = 0
+
+
+@dataclass
+class _ActiveCall:
+    """A client call in progress, and the fixture violations raised while serving it."""
+
+    request: RecordedRequest
+    violations: list[AssertionError] = field(default_factory=list)
+
+    def violation(self, message: str) -> AssertionError:
+        error = AssertionError(message)
+        self.violations.append(error)
+        return error
 
 
 class FakeHTTPFixture:
@@ -107,15 +120,16 @@ class FakeHTTPFixture:
         return [registration.registered for registration in self._registrations if not registration.served]
 
     @contextmanager
-    def _record_call(self, method: str, url: str, options: Mapping[str, Any]) -> Iterator[None]:
-        request = RecordedRequest(method=method, url=url, options=options)
+    def _record_call(self, method: str, url: str, options: Mapping[str, Any]) -> Iterator[list[AssertionError]]:
+        """Record a client call, yielding the fixture violations its wire requests raise."""
+        call = _ActiveCall(RecordedRequest(method=method, url=url, options=options))
         with self._lock:
-            self.requests.append(request)
+            self.requests.append(call.request)
         # The wire request is served on the calling thread, from the innermost call it is making.
         stack = self._calls.__dict__.setdefault('stack', [])
-        stack.append(request)
+        stack.append(call)
         try:
-            yield
+            yield call.violations
         finally:
             stack.pop()
 
@@ -127,11 +141,12 @@ class FakeHTTPFixture:
                 f'{wire_request.method} {wire_request.url} bypassed the check HTTP client. The fake_http fixture '
                 'serves requests sent through clients from create_http_client() or fake_http.create_client().'
             )
-        call = stack[-1]
+        active = stack[-1]
+        call = active.request
         with self._lock:
             self.sent.append(SentRequest(wire_request.method, wire_request.url, HTTPHeaders(wire_request.headers)))
             if not _sends_call(wire_request, call):
-                raise AssertionError(
+                raise active.violation(
                     f'{call.method} {call.url} sent {wire_request.method} {wire_request.url}, for example by '
                     'following a redirect or fetching an auth token. The fake_http fixture serves only the call '
                     'itself; pass allow_redirects=False to receive a registered redirect.'
@@ -139,7 +154,7 @@ class FakeHTTPFixture:
             matching = [r for r in self._registrations if r.registered.matches(call)]
             chosen = next((r for r in matching if not r.served), matching[-1] if matching else None)
             if chosen is None:
-                raise AssertionError(
+                raise active.violation(
                     f'No registered response matched {call.method} {call.url} with options {dict(call.options)!r}. '
                     f'Pending responses: {self._pending()!r}.'
                 )
@@ -275,8 +290,14 @@ def install(mocker: Any) -> Iterator[FakeHTTPFixture]:
         return create_check_client(check, *args, **kwargs)
 
     def record_request(client: RequestsWrapper, method: str, url: str, options: dict[str, Any]) -> Any:
-        with fake_http._record_call(method, url, options):
-            return send_request(client, method, url, options)
+        with fake_http._record_call(method, url, options) as violations:
+            try:
+                return send_request(client, method, url, options)
+            finally:
+                # The client may catch a violation, for example to renew its auth token and retry, so the call
+                # fails with the first one even if it then succeeds.
+                if violations:
+                    raise violations[0]
 
     mocker.patch.object(AgentCheck, 'create_http_client', autospec=True, side_effect=create_opted_in_client)
     mocker.patch.object(RequestsWrapper, '_request', record_request)

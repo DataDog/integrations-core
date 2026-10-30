@@ -311,6 +311,18 @@ def test_fake_http_rejects_a_followed_redirect(fake_http, fake_http_response, ur
         check.http.get(url)
 
 
+def test_fake_http_rejects_a_followed_redirect_the_client_retries_past(fake_http, fake_http_response, mocker):
+    url = 'https://example.test/old'
+    fake_http_response(url, status_code=302, headers={'Location': 'https://example.test/new'})
+    fake_http_response(url, b'original')
+    check = FixtureCheck('test', {}, [{}])
+    # The client catches the rejected redirect, renews its auth token, and retries the call successfully.
+    check.http.auth_token_handler = mocker.Mock()
+
+    with pytest.raises(AssertionError, match=re.escape(f'GET {url} sent GET https://example.test/new')):
+        check.http.get(url)
+
+
 def test_fake_http_rejects_a_token_request_sent_during_a_check_call(fake_http, fake_http_response, mocker):
     url = 'https://example.test/metrics'
     fake_http_response(url, b'metric 1')
