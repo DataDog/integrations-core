@@ -7,6 +7,7 @@ from collections.abc import Callable, Iterable, Iterator, Mapping
 from dataclasses import dataclass, field
 from datetime import timedelta
 from enum import Enum, auto
+from threading import Lock
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Unpack
 
@@ -217,12 +218,14 @@ class FakeHTTPClient:
         self._proxy_bypass: dict[str, bool | Callable[[str], bool]] = {'value': should_bypass_proxy}
         self.requests: list[RecordedRequest] = []
         self._responses: list[RegisteredResponse] = []
+        self._response_lock = Lock()
 
     def create_client(self) -> FakeHTTPClient:
         """Create an isolated client that shares registered responses, recorded requests and proxy bypass."""
         client = FakeHTTPClient()
         client.requests = self.requests
         client._responses = self._responses
+        client._response_lock = self._response_lock
         client._proxy_bypass = self._proxy_bypass
         return client
 
@@ -235,14 +238,14 @@ class FakeHTTPClient:
         match_options: Mapping[str, Any] | None = None,
     ) -> None:
         """Queue a response or exception for the first matching request."""
-        self._responses.append(
-            RegisteredResponse(
-                method=method.upper(),
-                url=url,
-                outcome=response,
-                match_options=_snapshot_options(match_options or {}),
-            )
+        registered = RegisteredResponse(
+            method=method.upper(),
+            url=url,
+            outcome=response,
+            match_options=_snapshot_options(match_options or {}),
         )
+        with self._response_lock:
+            self._responses.append(registered)
 
     def get(self, url: str, **options: Unpack[HTTPRequestOptions]) -> HTTPResponse:
         return self._request('GET', url, options)
@@ -290,34 +293,40 @@ class FakeHTTPClient:
 
     def assert_requests(self, expected: Iterable[RecordedRequest]) -> None:
         expected_requests = list(expected)
-        if self.requests != expected_requests:
-            raise AssertionError(f'Expected recorded requests {expected_requests!r}, got {self.requests!r}.')
+        with self._response_lock:
+            if self.requests != expected_requests:
+                raise AssertionError(f'Expected recorded requests {expected_requests!r}, got {self.requests!r}.')
 
     def assert_has_request(self, expected: RecordedRequest) -> None:
-        if expected not in self.requests:
-            raise AssertionError(f'No recorded request matched {expected!r}. Recorded requests: {self.requests!r}.')
+        with self._response_lock:
+            if expected not in self.requests:
+                raise AssertionError(f'No recorded request matched {expected!r}. Recorded requests: {self.requests!r}.')
 
     def assert_all_responses_consumed(self) -> None:
-        count = len(self._responses)
-        if count:
-            noun = 'response was' if count == 1 else 'responses were'
-            raise AssertionError(f'{count} registered {noun} not consumed: {self._responses!r}.')
+        with self._response_lock:
+            count = len(self._responses)
+            if count:
+                noun = 'response was' if count == 1 else 'responses were'
+                raise AssertionError(f'{count} registered {noun} not consumed: {self._responses!r}.')
 
     def _request(self, method: str, url: str, options: Mapping[str, Any]) -> HTTPResponse:
         request = RecordedRequest(method=method, url=url, options=options)
-        self.requests.append(request)
+        # Matching and removal must be atomic across all clients sharing the queue.
+        with self._response_lock:
+            self.requests.append(request)
 
-        for index, registered in enumerate(self._responses):
-            if self._matches(registered, request):
-                outcome = self._responses.pop(index).outcome
-                if isinstance(outcome, Exception):
-                    raise outcome
-                return outcome
+            for index, registered in enumerate(self._responses):
+                if self._matches(registered, request):
+                    outcome = self._responses.pop(index).outcome
+                    if isinstance(outcome, Exception):
+                        raise outcome
+                    return outcome
 
-        raise AssertionError(
-            f'No registered response matched {request.method} {request.url} with options {dict(request.options)!r}. '
-            f'Pending responses: {self._responses!r}.'
-        )
+            raise AssertionError(
+                f'No registered response matched {request.method} {request.url} '
+                f'with options {dict(request.options)!r}. '
+                f'Pending responses: {self._responses!r}.'
+            )
 
     @staticmethod
     def _matches(registered: RegisteredResponse, request: RecordedRequest) -> bool:
