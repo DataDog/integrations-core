@@ -1,0 +1,66 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Client ID and secret key",
+      "basic": {
+        "user_setting": {
+          "key": "client_id",
+          "label": "Client ID",
+          "help": "Client ID of the BlueCat Edge API access key.",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "secret_key",
+          "label": "Secret key",
+          "help": "Secret key of the BlueCat Edge API access key.",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "supported_connection_methods": [
+    {
+      "name": "BlueCat Edge API",
+      "multitenant": {
+        "tenant_setting": {
+          "key": "domain",
+          "label": "BlueCat Edge domain",
+          "help": "Your BlueCat Edge domain, for example example.bluec.at.",
+          "editable": true,
+          "required": true,
+          "text": {
+            "pattern": "^(?:[a-z0-9-]+\\.)*bluec\\.at$"
+          }
+        },
+        "base_url_format": "https://api-%s"
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "collect_no_error_dns_logs",
+      "label": "Collect NOERROR DNS query logs",
+      "help": "Also collect DNS queries with a NOERROR or NODATA response code.",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "site_ids",
+      "label": "Site IDs",
+      "help": "Comma-separated list of site IDs to collect DNS query logs from. Leave empty to collect from all sites.",
+      "editable": true,
+      "required": false,
+      "text": {}
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "bluecat-edge-dns-query-logs" }
+  ]
+}

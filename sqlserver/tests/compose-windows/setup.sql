@@ -103,6 +103,10 @@ CREATE INDEX ix_include ON datadog_test_schemas.test_schema.index_coverage (c) I
 CREATE INDEX ix_prefix ON datadog_test_schemas.test_schema.index_coverage (c, a) INCLUDE (e);
 GO
 
+-- ix_filtered covers only rows where e is not null.
+CREATE INDEX ix_filtered ON datadog_test_schemas.test_schema.index_coverage (a) WHERE e IS NOT NULL;
+GO
+
 -- Clustered (b, a) is not table column order, and ix_desc keeps the DESC suffix.
 CREATE TABLE datadog_test_schemas.test_schema.key_order (
     a INT,
@@ -196,6 +200,10 @@ CREATE TABLE datadog_test_collation.test_schema.index_coverage (
 );
 CREATE INDEX ix_include ON datadog_test_collation.test_schema.index_coverage (c) INCLUDE (a, e);
 CREATE INDEX ix_prefix ON datadog_test_collation.test_schema.index_coverage (c, a) INCLUDE (e);
+GO
+
+-- ix_filtered covers only rows where e is not null.
+CREATE INDEX ix_filtered ON datadog_test_collation.test_schema.index_coverage (a) WHERE e IS NOT NULL;
 GO
 
 -- Clustered (b, a) is not table column order, and ix_desc keeps the DESC suffix.
@@ -299,6 +307,53 @@ END;
 GO
 GRANT EXECUTE on nullCharTest to bob;
 GRANT EXECUTE on nullCharTest to fred;
+GO
+
+-- Column statistics: a database where the datadog user can run the column statistics procedure but can't read
+-- the table. Data is deterministic so tests can assert exact statistics.
+CREATE DATABASE datadog_test_column_stats;
+GO
+-- The procedure runs as the database owner. On Windows the setup connects with Windows authentication, and that
+-- container login can't be impersonated (error 15517), so make sa the owner everywhere.
+ALTER AUTHORIZATION ON DATABASE::datadog_test_column_stats TO sa;
+GO
+USE datadog_test_column_stats;
+GO
+CREATE TABLE dbo.orders (
+    id INT NOT NULL PRIMARY KEY,
+    customer_id INT NOT NULL,
+    status VARCHAR(20) NULL,
+    note NVARCHAR(100) NULL,
+    -- Never filled: every value is NULL, so its histogram has no steps.
+    unused_num INT NULL,
+    -- A CLR type, whose name comes from user_type_id rather than system_type_id.
+    node HIERARCHYID NULL
+);
+CREATE INDEX ix_customer ON dbo.orders (customer_id);
+CREATE INDEX ix_status ON dbo.orders (status);
+CREATE INDEX ix_unused_num ON dbo.orders (unused_num);
+INSERT INTO dbo.orders (id, customer_id, status, note, node)
+SELECT n,
+    CASE WHEN n % 10 < 3 THEN 7 ELSE n % 500 END,
+    CASE WHEN n % 10 = 0 THEN NULL WHEN n % 10 IN (1, 2) THEN 'pending' ELSE 'shipped' END,
+    REPLICATE(N'x', 20 + n % 21),
+    HIERARCHYID::Parse(CONCAT('/', n % 50, '/'))
+FROM (SELECT TOP 10000 ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS n FROM sys.all_objects a CROSS JOIN sys.all_objects b) numbers;
+CREATE STATISTICS st_note ON dbo.orders (note);
+CREATE STATISTICS st_node ON dbo.orders (node);
+UPDATE STATISTICS dbo.orders WITH FULLSCAN;
+GO
+-- On Windows the user already exists here, copied from model.
+IF USER_ID('datadog') IS NULL
+    CREATE USER datadog FOR LOGIN datadog;
+GO
+CREATE SCHEMA datadog AUTHORIZATION dbo;
+GO
+-- Copied into the image from tests/sql, the procedure as customers install it.
+:r column_statistics.sql
+GRANT EXECUTE ON datadog.column_statistics TO datadog;
+GO
+USE master;
 GO
 
 -- create an offline database to have an unavailable database to test with

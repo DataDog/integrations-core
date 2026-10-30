@@ -749,12 +749,14 @@ files:
       fleet_configurable: true
       options:
         - name: enabled
+          fleet_configurable: true
           description: |
             Enable collection of active sessions. Requires `dbm: true`.
           value:
             type: boolean
             example: true
         - name: collection_interval
+          fleet_configurable: true
           description: |
             Set the activity collection interval in seconds. Each collection involves querying several
             different DMV tables such as `dm_exec_requests`, `dm_exec_sessions`, and `dm_exec_sql_text`.
@@ -785,6 +787,7 @@ files:
         with SQL Server integration telemetry.
 
         These values are only applied when `dbm: true` option is set.
+      fleet_configurable: true
       options:
         - name: instance_endpoint
           description: |
@@ -796,7 +799,7 @@ files:
           value:
             type: string
             example: mydb.cfxgae8cilcf.us-east-1.rds.amazonaws.com
-          fleet_configurable: false
+          fleet_configurable: true
 
     - name: gcp
       description: |
@@ -807,6 +810,7 @@ files:
         with SQL Server integration telemetry.
 
         These values are only applied when `dbm: true` option is set.
+      fleet_configurable: true
       options:
         - name: project_id
           description: |
@@ -817,7 +821,7 @@ files:
           value:
             type: string
             example: foo-project
-          fleet_configurable: false
+          fleet_configurable: true
         - name: instance_id
           description: |
             Equal to the GCP resource's instance ID.
@@ -827,7 +831,7 @@ files:
           value:
             type: string
             example: foo-database
-          fleet_configurable: false
+          fleet_configurable: true
 
     - name: azure
       description: |
@@ -839,6 +843,7 @@ files:
         with SQL Server integration telemetry.
 
         These values are only applied when `dbm: true` option is set.
+      fleet_configurable: true
       options:
         - name: deployment_type
           description: |
@@ -854,7 +859,11 @@ files:
           value:
             type: string
             example: sql_database
-          fleet_configurable: false
+            enum:
+            - sql_database
+            - managed_instance
+            - virtual_machine
+          fleet_configurable: true
         - name: fully_qualified_domain_name
           description: |
             Equal to the name of the SQL Database, Managed Instance (SQL MI) or virtual machine.
@@ -863,7 +872,7 @@ files:
           value:
             type: string
             example: my-sqlserver-database.database.windows.net
-          fleet_configurable: false
+          fleet_configurable: true
         - name: aggregate_sql_databases
           description: |
             Aggregate individual Azure SQL Databases under a single logical SQL server database instance.
@@ -1047,7 +1056,6 @@ files:
         Enabling this option will allow the collection and ingestion of raw query statements 
         into Datadog, which can then become viewable in query samples.
         This option is disabled by default.
-        Note: Collection of raw query statements is currently in preview.
         This option only applies when dbm is enabled.
       options:
         - name: enabled
@@ -1140,6 +1148,14 @@ files:
             type: boolean
             example: false
           fleet_configurable: true
+        - name: collect_views
+          description: |
+            Enable collection of SQL Server views when schema collection is enabled. View definitions are sent
+            as written, without obfuscation. Defaults to false.
+          value:
+            type: boolean
+            example: false
+          fleet_configurable: false
         - name: collection_interval
           description: |
             Set the database schema collection interval (in seconds). Defaults to 600 seconds.
@@ -1154,6 +1170,14 @@ files:
             type: integer
             example: 300
           fleet_configurable: true
+        - name: max_views
+          description: |
+            Set the maximum number of views to collect from each database when `collect_views` is enabled.
+            Defaults to 1000.
+          value:
+            type: integer
+            example: 1000
+          fleet_configurable: false
         - name: max_execution_time
           deprecation:
             Agent version: 7.74.0
@@ -1164,6 +1188,36 @@ files:
           value:
             type: number
             example: 10
+          fleet_configurable: false
+    - name: collect_column_statistics
+      description: |
+        Configure collection of column statistics, which the query benchmarker uses to generate data shaped like
+        yours. Requires the `datadog.column_statistics` procedure in each database, as described in the setup
+        documentation. Only statistics properties and histogram counts are collected, never column values. If
+        `database_autodiscovery` is not enabled, data is collected only for the database configured with `database`
+        parameter. System databases and databases that are offline or inaccessible are skipped.
+        Requires SQL Server 2017 or later.
+      options:
+        - name: enabled
+          description: |
+            Enable collection of column statistics. Requires `dbm: true`. Defaults to false.
+          value:
+            type: boolean
+            example: false
+          fleet_configurable: false
+        - name: collection_interval
+          description: |
+            Set the column statistics collection interval (in seconds). Defaults to 3600 seconds.
+          value:
+            type: number
+            example: 3600
+          fleet_configurable: false
+        - name: max_tables
+          description: |
+            Set the maximum number of tables to collect column statistics for in each database. Defaults to 500.
+          value:
+            type: integer
+            example: 500
           fleet_configurable: false
     - name: schemas_collection
       deprecation:

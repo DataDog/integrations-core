@@ -157,6 +157,10 @@ integration/authorize_net:
 - changed-files:
   - any-glob-to-any-file:
     - authorize_net/**/*
+integration/automox:
+- changed-files:
+  - any-glob-to-any-file:
+    - automox/**/*
 integration/avast:
 - changed-files:
   - any-glob-to-any-file:
@@ -805,6 +809,10 @@ integration/kafka_consumer:
 - changed-files:
   - any-glob-to-any-file:
     - kafka_consumer/**/*
+integration/kai_scheduler:
+- changed-files:
+  - any-glob-to-any-file:
+    - kai_scheduler/**/*
 integration/kandji:
 - changed-files:
   - any-glob-to-any-file:
@@ -1113,6 +1121,10 @@ integration/openmetrics:
 - changed-files:
   - any-glob-to-any-file:
     - openmetrics/**/*
+integration/openrouter:
+- changed-files:
+  - any-glob-to-any-file:
+    - openrouter/**/*
 integration/openshift:
 - changed-files:
   - any-glob-to-any-file:
@@ -1289,10 +1301,6 @@ integration/riakcs:
 - changed-files:
   - any-glob-to-any-file:
     - riakcs/**/*
-integration/ringcentral:
-- changed-files:
-  - any-glob-to-any-file:
-    - ringcentral/**/*
 integration/sanity:
 - changed-files:
   - any-glob-to-any-file:

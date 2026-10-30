@@ -19,8 +19,9 @@ from ddev.cli.ci.tests.batching.targets import (
     find_affected_targets,
 )
 from tests.cli.ci.tests.helpers import FakeIntegration, FakeRegistry, copied, modified, renamed
+from tests.helpers.monitoring import RecordingJsonHandler, make_monitor
 
-CORE_RULES = default_target_rules(is_core=True, infrastructure_targets=("disk",))
+CORE_RULES = default_target_rules(is_core=True, infrastructure_targets=("disk",), monitor=make_monitor("planner"))
 
 
 @dataclass(frozen=True)
@@ -92,6 +93,37 @@ def test_direct_rule_copy_affects_only_destination():
     changed = [copied("postgres/tests/test_a.py", "mysql/tests/test_a.py")]
 
     assert list(DirectTargetRule()(changed, facts("postgres", "mysql"))) == ["mysql"]
+
+
+@pytest.mark.parametrize(
+    "path, expected, warning_path",
+    [
+        pytest.param(".ddev/ci/scripts/mysql/linux/setup.sh", ["mysql"], None, id="linux"),
+        pytest.param(".ddev/ci/scripts/sqlserver/windows/setup.bat", ["sqlserver"], None, id="windows"),
+        pytest.param(".ddev/ci/scripts/tokumx/linux/setup.sh", [], ".ddev/ci/scripts/tokumx", id="not-testable"),
+        pytest.param(".ddev/ci/scripts/setup.sh", [], None, id="no-target-folder"),
+    ],
+)
+def test_ci_setup_script_change_selects_its_target(path: str, expected: list[str], warning_path: str | None):
+    handler = RecordingJsonHandler()
+    rules = default_target_rules(
+        is_core=True, infrastructure_targets=("disk",), monitor=make_monitor("planner", handler=handler)
+    )
+
+    assert find_affected_targets([modified(path)], facts("mysql", "sqlserver", "disk"), rules=rules) == expected
+    if warning_path is not None:
+        [event] = handler.events
+        assert event["level"] == "warning"
+        assert warning_path in event["event"]
+
+
+def test_ci_setup_script_rename_selects_both_targets():
+    changed = [renamed(".ddev/ci/scripts/mysql/linux/setup.sh", ".ddev/ci/scripts/sqlserver/linux/setup.sh")]
+
+    assert sorted(find_affected_targets(changed, facts("mysql", "sqlserver"), rules=CORE_RULES)) == [
+        "mysql",
+        "sqlserver",
+    ]
 
 
 def test_repository_wide_rule_triggers_full_eligible_set_in_core():
@@ -310,7 +342,9 @@ def test_default_target_rules_only_expand_the_repository_for_core():
         "postgres",
     ]
     assert find_affected_targets(
-        changed, known, rules=default_target_rules(is_core=False, infrastructure_targets=("disk",))
+        changed,
+        known,
+        rules=default_target_rules(is_core=False, infrastructure_targets=("disk",), monitor=make_monitor("planner")),
     ) == ["datadog_checks_base"]
 
 

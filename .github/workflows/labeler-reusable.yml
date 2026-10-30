@@ -25,6 +25,17 @@ jobs:
           configuration-path: .github/workflows/config/labeler.yml
           repo-token: "${{ steps.token-generator.outputs.token }}"
           sync-labels: true
+      # Same-repository pull requests are authored by Datadog employees and are
+      # eligible for automatic staling (see stale.yml). Pull requests from forks
+      # never get this label and are only staled when explicitly marked as
+      # waiting on their author.
+      - name: Add the internal label
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        run: gh pr edit "$NUMBER" --add-label internal
+        env:
+          GITHUB_TOKEN: "${{ steps.token-generator.outputs.token }}"
+          GH_REPO: ${{ github.repository }}
+          NUMBER: ${{ github.event.number }}
       - name: Add team labels
         run: |
           jq -r '.event.pull_request.requested_teams[].name' <<< "$GITHUB_CONTEXT" | while read -r team; do

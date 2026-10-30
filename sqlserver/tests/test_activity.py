@@ -875,7 +875,8 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     dd_run_check(check)
     sleep_time = 1
     time.sleep(sleep_time)
-    max_collections = int(sleep_time / collection_interval) + 1
+    # The rate limiter starts with no previous run, so the first two collections run back to back
+    max_collections = int(sleep_time / collection_interval) + 2
     min_collections = sleep_time  # at minimum, one collection per second
     check.cancel()
     metrics = aggregator.metrics("dd.sqlserver.activity.collect_activity.payload_size")
