@@ -20,6 +20,14 @@
       }
     }
   ],
+  "supported_connection_methods": [
+    {
+      "name": "Vonage",
+      "fixed": {
+        "fixed_base_url": "https://api.nexmo.com"
+      }
+    }
+  ],
   "additional_config_fields": [
     {
       "key": "include_message",
@@ -31,6 +39,18 @@
     }
   ],
   "dataflow_config": [
-    { "dataflow_id": "vonage-logs" }
-  ]
+    {
+      "dataflow_id": "vonage-logs"
+    }
+  ],
+  "health_probe": {
+    "http_method": "GET",
+    "path": "/beta/audit/events?limit=1",
+    "http_headers": [
+      {
+        "name": "Accept",
+        "value": "application/json"
+      }
+    ]
+  }
 }

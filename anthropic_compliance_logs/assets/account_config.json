@@ -13,9 +13,31 @@
       }
     }
   ],
+  "supported_connection_methods": [
+    {
+      "name": "Anthropic API",
+      "fixed": {
+        "fixed_base_url": "https://api.anthropic.com"
+      }
+    }
+  ],
   "dataflow_config": [
     {
       "dataflow_id": "anthropic-compliance-logs"
     }
-  ]
+  ],
+  "health_probe": {
+    "http_method": "GET",
+    "path": "/v1/compliance/activities?limit=1",
+    "http_headers": [
+      {
+        "name": "Accept",
+        "value": "application/json"
+      },
+      {
+        "name": "anthropic-version",
+        "value": "2023-06-01"
+      }
+    ]
+  }
 }
