@@ -307,7 +307,5 @@ hpe_aruba_edgeconnect = ["linux", "windows", "mac_os"]
 dynamo = ["linux", "windows", "mac_os"]
 intersystems_iris = ["linux", "windows", "mac_os"]
 kai_scheduler = ["linux", "windows", "mac_os"]
-# The ibm_hmc check is AIX only: like lparstats, it is not shipped in the Linux/Windows/macOS
-# Agent builds (the AIX build is not driven by this list).
 ibm_hmc = ["aix"]
 
