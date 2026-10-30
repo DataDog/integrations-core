@@ -222,6 +222,15 @@ instances:
     #
     # collect_counters_with_distributions: false
 
+    ## @param collect_histograms_as_distributions - boolean - optional - default: false
+    ## Whether or not to send histogram buckets as Datadog distribution metrics without the `upper_bound`
+    ## and `lower_bound` tags. This implicitly enables the `histogram_buckets_as_distributions` option.
+    ##
+    ## This option requires an Agent version that supports submitting histogram buckets without bound
+    ## tags. On older Agent versions, the check fails with a configuration error.
+    #
+    # collect_histograms_as_distributions: false
+
     ## @param use_process_start_time - boolean - optional - default: false
     ## Whether to enable a heuristic for reporting counter values on the first scrape. When true,
     ## the first time an endpoint is scraped, check `process_start_time_seconds` to decide whether zero
