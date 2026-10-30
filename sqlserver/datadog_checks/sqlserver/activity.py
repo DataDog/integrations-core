@@ -179,6 +179,10 @@ class SqlserverActivity(DBMAsyncJob):
     def __init__(self, check, config: SQLServerConfig):
         self.log = check.log
         self._config = config
+        obfuscator_options = json.loads(self._config.obfuscator_options)
+        self._collect_comments = bool(
+            obfuscator_options.get('return_json_metadata') and obfuscator_options.get('collect_comments')
+        )
         collection_interval = float(
             self._config.activity_config.get('collection_interval', DEFAULT_COLLECTION_INTERVAL)
         )
@@ -402,7 +406,7 @@ class SqlserverActivity(DBMAsyncJob):
                         self.log.warning("Failed to obfuscate query text=[%s] | err=[%s]", repr(row['text']), e)
                     else:
                         self.log.debug("Failed to obfuscate query text | err=[%s]", e)
-            if row.get('tail_text'):
+            if self._collect_comments and row.get('tail_text'):
                 # tail_text is cut at a fixed length and can start inside a string literal, which hides
                 # the trailing comments from the obfuscator, so read them directly from the end instead.
                 comments = self._merge_comments(comments, {'comments': extract_trailing_comments(row['tail_text'])})

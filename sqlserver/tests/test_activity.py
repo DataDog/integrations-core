@@ -1073,7 +1073,17 @@ def test_sanitize_activity_row_recovers_leading_comment_for_non_proc_statement(d
 
 
 @pytest.mark.unit
-def test_sanitize_activity_row_recovers_appended_comment_from_tail_text(dbm_instance, datadog_agent):
+@pytest.mark.parametrize(
+    'obfuscator_options,expect_comments',
+    [
+        pytest.param({}, True, id='defaults'),
+        pytest.param({'collect_comments': False}, False, id='collect_comments_disabled'),
+        pytest.param({'collect_metadata': False}, False, id='collect_metadata_disabled'),
+    ],
+)
+def test_sanitize_activity_row_recovers_appended_comment_from_tail_text(
+    dbm_instance, datadog_agent, obfuscator_options, expect_comments
+):
     case_comment = "/* orders-lookup */"
     dbm_comment = "/*ddps='orders-service',dde='prod',ddpv='1.0.0'*/"
     statement_text = "SELECT id, '" + 'x' * 600 + "' AS pad FROM dbo.orders"
@@ -1089,10 +1099,10 @@ def test_sanitize_activity_row_recovers_appended_comment_from_tail_text(dbm_inst
     }
     assert row['tail_text'].startswith('x')
 
-    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    check = SQLServer(CHECK_NAME, {}, [dict(dbm_instance, obfuscator_options=obfuscator_options)])
     row = check.activity._obfuscate_and_sanitize_row(row)
 
-    assert row['dd_comments'] == [case_comment, dbm_comment]
+    assert row['dd_comments'] == ([case_comment, dbm_comment] if expect_comments else [])
     assert 'tail_text' not in row
     assert 'statement_text' not in row
 
