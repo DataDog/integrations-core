@@ -61,7 +61,7 @@ files:
               require_trusted_provider: true
 
           - name: private_key_type
-            description: Private key type to choose between `rsa` or `ecdsa`.
+            description: Private key type to choose between `rsa`, `ecdsa`, or `ed25519`.
             fleet_configurable: true
             value:
               example: rsa
