@@ -165,9 +165,9 @@ def needs_comment_recovery(full_text: Optional[str], statement_comments: Optiona
 
 
 def extract_trailing_comments(text: Optional[str]) -> list[str]:
-    """Return the block comments at the end of ``text``, in order.
+    """Return the block comments at the end of `text`, in order.
 
-    Only trailing whitespace, semicolons and ``/* ... */`` blocks are scanned, from the end backward,
+    Only trailing whitespace, semicolons and `/* ... */` blocks are scanned, from the end backward,
     so this is safe on text cut at an arbitrary position, such as inside a string literal.
     """
     comments = []
