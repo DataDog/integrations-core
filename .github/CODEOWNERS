@@ -847,8 +847,8 @@ plaid/assets/logs/                                                  @DataDog/saa
 /automox/                                                            @DataDog/cloud-siem
 /automox/*.md                                                        @DataDog/cloud-siem @DataDog/documentation
 /automox/manifest.json                                               @DataDog/cloud-siem @DataDog/documentation
+/automox/metadata.csv                                                @DataDog/cloud-siem @DataDog/documentation
 /automox/assets/logs/                                                @DataDog/cloud-siem @DataDog/documentation @DataDog/logs-integrations-reviewers
-
 
 /palo_alto_networks_cortex_xsoar/                                     @DataDog/saas-integrations
 /palo_alto_networks_cortex_xsoar/*.md                                 @DataDog/saas-integrations @DataDog/documentation
