@@ -39,7 +39,6 @@ def test_e2e_profile_checkpoint(dd_agent_check):
         'device_id:default:' + ip_address,
         'agent_host:' + common.get_agent_hostname(),
         'device_vendor:checkpoint',
-        'ha_state:active',
     ] + []
 
     # --- TEST EXTENDED METRICS ---

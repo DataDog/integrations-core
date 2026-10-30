@@ -1,1 +1,1 @@
-Add ``haStatCode`` and ``haClusterXLFailover`` metrics and an ``ha_state`` tag to the Check Point profile.
+Add ``haStatCode`` and ``haClusterXLFailover`` metrics to the Check Point profile.

@@ -2193,7 +2193,6 @@ def test_checkpoint(aggregator):
         'device_vendor:checkpoint',
         'snmp_host:checkpoint.device.name',
         'device_hostname:checkpoint.device.name',
-        'ha_state:active',
     ]
 
     common.assert_common_metrics(aggregator, common_tags)
@@ -2272,7 +2271,6 @@ def test_checkpoint_firewall(aggregator):
         'device_vendor:checkpoint',
         'snmp_host:checkpoint.device.name',
         'device_hostname:checkpoint.device.name',
-        'ha_state:active',
     ]
 
     common.assert_common_metrics(aggregator, common_tags)
