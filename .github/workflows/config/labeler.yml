@@ -1249,14 +1249,6 @@ integration/prometheus:
 - changed-files:
   - any-glob-to-any-file:
     - prometheus/**/*
-integration/proofpoint_on_demand:
-- changed-files:
-  - any-glob-to-any-file:
-    - proofpoint_on_demand/**/*
-integration/proofpoint_tap:
-- changed-files:
-  - any-glob-to-any-file:
-    - proofpoint_tap/**/*
 integration/proxmox:
 - changed-files:
   - any-glob-to-any-file:
@@ -1521,10 +1513,6 @@ integration/temporal:
 - changed-files:
   - any-glob-to-any-file:
     - temporal/**/*
-integration/temporal_cloud:
-- changed-files:
-  - any-glob-to-any-file:
-    - temporal_cloud/**/*
 integration/tenable:
 - changed-files:
   - any-glob-to-any-file:
@@ -1573,10 +1561,6 @@ integration/traffic_server:
 - changed-files:
   - any-glob-to-any-file:
     - traffic_server/**/*
-integration/trellix_endpoint_security:
-- changed-files:
-  - any-glob-to-any-file:
-    - trellix_endpoint_security/**/*
 integration/trend_micro_email_security:
 - changed-files:
   - any-glob-to-any-file:
@@ -1709,10 +1693,6 @@ integration/zero_networks:
 - changed-files:
   - any-glob-to-any-file:
     - zero_networks/**/*
-integration/zerofox_cloud_platform:
-- changed-files:
-  - any-glob-to-any-file:
-    - zerofox_cloud_platform/**/*
 integration/zk:
 - changed-files:
   - any-glob-to-any-file:
