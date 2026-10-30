@@ -160,7 +160,7 @@ async def test_object_input_prefills_and_submits_object_level_default(make_launc
                 "retries": "3",
                 "enabled": "true",
             },
-            "prd": "Required product behavior.\n",
+            "prd": app.expected_prd,
         }
 
 
@@ -184,7 +184,7 @@ async def test_object_null_parent_default_uses_child_default(make_launch_modal_a
 
         assert app.dismiss_result == {
             "endpoint": {"enabled": "true"},
-            "prd": "Required product behavior.\n",
+            "prd": app.expected_prd,
         }
 
 
@@ -216,7 +216,7 @@ async def test_object_path_default_stays_raw_until_launch(make_launch_modal_app,
 
         assert app.dismiss_result == {
             "endpoint": {"source": "launch-time content"},
-            "prd": "Required product behavior.\n",
+            "prd": app.expected_prd,
         }
 
 
@@ -337,7 +337,7 @@ async def test_valid_submission_dismisses_with_payload(make_launch_modal_app, la
         await pilot.pause()
         assert app.dismiss_result is not None
         assert app.dismiss_result != "NOT_SET"
-        assert app.dismiss_result == {"s": "world", "b": "false", "prd": "Required product behavior.\n"}
+        assert app.dismiss_result == {"s": "world", "b": "false", "prd": app.expected_prd}
 
 
 async def test_valid_number_submission_dismisses(make_launch_modal_app, large_terminal) -> None:
@@ -351,7 +351,7 @@ async def test_valid_number_submission_dismisses(make_launch_modal_app, large_te
         await pilot.pause()
         assert app.dismiss_result is not None
         assert app.dismiss_result != "NOT_SET"
-        assert app.dismiss_result == {"n": "99", "prd": "Required product behavior.\n"}
+        assert app.dismiss_result == {"n": "99", "prd": app.expected_prd}
 
 
 async def test_object_submission_dismisses_with_canonical_nested_payload(make_launch_modal_app, large_terminal) -> None:
@@ -371,7 +371,7 @@ async def test_object_submission_dismisses_with_canonical_nested_payload(make_la
                 "retries": "2",
                 "enabled": "false",
             },
-            "prd": "Required product behavior.\n",
+            "prd": app.expected_prd,
         }
 
 
@@ -407,7 +407,7 @@ async def test_multi_scalar_entries_can_be_added_removed_and_submitted_in_order(
         await pilot.press("enter")
         await pilot.pause()
 
-        assert app.dismiss_result == {"tags": ["second"], "prd": "Required product behavior.\n"}
+        assert app.dismiss_result == {"tags": ["second"], "prd": app.expected_prd}
 
 
 async def test_singular_collection_label_adds_and_submits_value(make_launch_modal_app) -> None:
@@ -430,7 +430,7 @@ async def test_singular_collection_label_adds_and_submits_value(make_launch_moda
         await pilot.press("enter")
         await pilot.pause()
 
-        assert app.dismiss_result == {"series": ["requests"], "prd": "Required product behavior.\n"}
+        assert app.dismiss_result == {"series": ["requests"], "prd": app.expected_prd}
 
 
 async def test_required_multi_object_starts_with_a_usable_entry(make_launch_modal_app) -> None:
@@ -458,7 +458,7 @@ async def test_required_multi_object_starts_with_a_usable_entry(make_launch_moda
 
         assert app.dismiss_result == {
             "endpoints": [{"name": "primary", "url": "https://primary.test"}],
-            "prd": "Required product behavior.\n",
+            "prd": app.expected_prd,
         }
 
 
@@ -508,7 +508,7 @@ async def test_multi_object_entries_can_be_added_removed_and_submitted_in_order(
 
         assert app.dismiss_result == {
             "endpoints": [{"name": "second", "url": "https://second.test"}],
-            "prd": "Required product behavior.\n",
+            "prd": app.expected_prd,
         }
 
 
@@ -528,7 +528,7 @@ async def test_multi_defaults_launch_as_ordered_runtime_values(make_launch_modal
         await pilot.click("#btn-launch")
         await pilot.pause()
 
-        assert app.dismiss_result == {"ports": ["9090", "8080"], "prd": "Required product behavior.\n"}
+        assert app.dismiss_result == {"ports": ["9090", "8080"], "prd": app.expected_prd}
 
 
 async def test_multi_defaults_are_restored_after_all_entries_are_removed(make_launch_modal_app, large_terminal) -> None:
@@ -552,7 +552,7 @@ async def test_multi_defaults_are_restored_after_all_entries_are_removed(make_la
         await pilot.press("enter")
         await pilot.pause()
 
-        assert app.dismiss_result == {"ports": ["9090", "8080"], "prd": "Required product behavior.\n"}
+        assert app.dismiss_result == {"ports": ["9090", "8080"], "prd": app.expected_prd}
 
 
 async def test_required_multi_input_blocks_launch_while_initial_entry_is_empty(
@@ -597,7 +597,7 @@ async def test_optional_object_with_every_child_empty_is_omitted(make_launch_mod
         await pilot.click("#btn-launch")
         await pilot.pause()
 
-        assert app.dismiss_result == {"prd": "Required product behavior.\n"}
+        assert app.dismiss_result == {"prd": app.expected_prd}
 
 
 async def test_optional_object_with_any_child_value_validates_required_children(
@@ -647,7 +647,7 @@ async def test_optional_object_with_boolean_field_is_present(make_launch_modal_a
 
         assert app.dismiss_result == {
             "endpoint": {"enabled": "false"},
-            "prd": "Required product behavior.\n",
+            "prd": app.expected_prd,
         }
 
 
@@ -675,7 +675,7 @@ async def test_optional_empty_field_is_omitted(make_launch_modal_app, large_term
         await pilot.click("#btn-launch")
         await pilot.pause()
 
-        assert app.dismiss_result == {"prd": "Required product behavior.\n"}
+        assert app.dismiss_result == {"prd": app.expected_prd}
 
 
 # ---------------------------------------------------------------------------
