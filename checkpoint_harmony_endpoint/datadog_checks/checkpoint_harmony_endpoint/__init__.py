@@ -2,6 +2,5 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from .__about__ import __version__
-from .check import CheckpointHarmonyEndpointCheck
 
-__all__ = ['__version__', 'CheckpointHarmonyEndpointCheck']
+__all__ = ['__version__']
