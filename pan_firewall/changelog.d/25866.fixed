@@ -1,0 +1,1 @@
+Remove the threat log count metric and the collect_threats option; threat logs are covered by the log integration.
