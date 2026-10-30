@@ -6,6 +6,18 @@
 
 set -ex
 
+# Try the runner image's package index first to avoid an unnecessary mirror refresh.
+apt_install() {
+  if sudo timeout 120 apt-get install "$@"; then
+    return
+  fi
+  if ! sudo timeout 60 apt-get update; then
+    sleep 10
+    sudo timeout 60 apt-get update || return 1
+  fi
+  sudo timeout 120 apt-get install "$@" || return 1
+}
+
 TMP_DIR=/tmp/mq
 MQ_URL=https://agent-integrations-ci-fixtures.s3.us-east-1.amazonaws.com/fixtures/ibm-mq/mqadv_dev90_linux_x86-64.tar.gz
 MQ_PACKAGES="MQSeriesRuntime-*.rpm MQSeriesServer-*.rpm MQSeriesMsg*.rpm MQSeriesJava*.rpm MQSeriesJRE*.rpm MQSeriesGSKit*.rpm"
@@ -16,8 +28,7 @@ if [ -e /opt/mqm/inc/cmqc.h ]; then
   exit 0
 fi
 
-sudo apt-get update
-sudo apt-get install -y --no-install-recommends \
+apt_install -y --no-install-recommends \
   bash \
   bc \
   coreutils \
