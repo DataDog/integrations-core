@@ -1,1 +1,1 @@
-Fix DBM<>APM correlation comments appended to long batches being dropped from Query Samples, and stop sending the raw query text tail in activity payloads.
+Fix Query Samples missing the calling APM service for queries longer than `stored_procedure_characters_limit` (500 characters by default) when the tracer appends its SQL comment to the end of the query. The unobfuscated end of these long queries is also no longer sent with Query Samples.
