@@ -503,7 +503,6 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             # The batch is dispatched at the default branch, so its own context describes master.
             # These two say which commit the results belong to, for CI Visibility and the check run.
             "head_sha": str(run["head_sha"]),
-            "head_branch": str(run["head_branch"]),
             "context": str(run["context"]),
             # The batch withholds every credential when this is true, so it is sent on every dispatch
             # rather than only when set: an absent input would default the workflow to trusting it.
@@ -511,6 +510,12 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
             "integrations": json.dumps(message.integrations),
             "job_list": encode_job_list([self._job_input(message, job) for job in message.job_list]),
         }
+        # Exactly one of these is set on the run, so the batch is told which ref its results belong
+        # to without having to guess from the other.
+        if run["head_branch"] is not None:
+            inputs["head_branch"] = str(run["head_branch"])
+        if run["head_tag"] is not None:
+            inputs["head_tag"] = str(run["head_tag"])
         # GitHub rejects inputs the workflow does not declare, so unset means absent, not empty.
         if self._options.pytest_args:
             inputs["pytest_args"] = self._options.pytest_args

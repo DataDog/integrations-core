@@ -26,7 +26,10 @@ def validate_options(
     pr_head_branch: str | None,
     pr_base_branch: str | None,
     commit: str | None,
+    head_tag: str | None,
     all_targets: bool,
+    targets: tuple[str, ...],
+    exclude_targets: tuple[str, ...],
     dry_run: bool,
     resolve_only: bool,
     run_manifest: str | None,
@@ -41,7 +44,20 @@ def validate_options(
         pr_head_branch=pr_head_branch,
         pr_base_branch=pr_base_branch,
         commit=commit,
+        head_tag=head_tag,
         all_targets=all_targets,
+        targets=targets,
+        exclude_targets=exclude_targets,
+    )
+    _validate_target_selection(all_targets=all_targets, targets=targets, exclude_targets=exclude_targets)
+    _validate_head_tag(
+        head_tag=head_tag,
+        commit=commit,
+        pull_request=pull_request,
+        pr_head_sha=pr_head_sha,
+        pr_head_repo=pr_head_repo,
+        pr_head_branch=pr_head_branch,
+        pr_base_branch=pr_base_branch,
     )
 
     resolver = None
@@ -55,11 +71,14 @@ def validate_options(
             pr_head_branch=pr_head_branch,
             pr_base_branch=pr_base_branch,
             commit=commit,
+            targets=targets,
         )
 
     token = _authentication_token(
         app,
-        is_pr_run=resolver is not None,
+        # A tag run reads the commit from the API, so resolution needs a token even when nothing
+        # is dispatched afterwards.
+        resolution_reads_api=resolver is not None or head_tag is not None,
         dry_run=dry_run,
         resolve_only=resolve_only,
     )
@@ -82,7 +101,10 @@ def _validate_manifest_options(
     pr_head_branch: str | None,
     pr_base_branch: str | None,
     commit: str | None,
+    head_tag: str | None,
     all_targets: bool,
+    targets: tuple[str, ...],
+    exclude_targets: tuple[str, ...],
 ) -> None:
     if run_manifest is None:
         return
@@ -96,7 +118,10 @@ def _validate_manifest_options(
             '--pr-head-sha': pr_head_sha is not None,
             '--pr-base-branch': pr_base_branch is not None,
             '--commit': commit is not None,
+            '--head-tag': head_tag is not None,
             '--all': all_targets,
+            '--targets': bool(targets),
+            '--exclude-targets': bool(exclude_targets),
         }.items()
         if present
     ]
@@ -104,6 +129,64 @@ def _validate_manifest_options(
         raise click.UsageError(
             f'`--run-manifest` supplies the resolved run, so it cannot be combined with `{"`, `".join(conflicting)}`.'
         )
+
+
+def _validate_head_tag(
+    *,
+    head_tag: str | None,
+    commit: str | None,
+    pull_request: str | None,
+    pr_head_sha: str | None,
+    pr_head_repo: str | None,
+    pr_head_branch: str | None,
+    pr_base_branch: str | None,
+) -> None:
+    """A tag is the whole selection: it names what to test, and the commit is read from it.
+
+    `--commit` is refused alongside it rather than verified against it, so there is no second input
+    that could name a different revision than the tag does.
+    """
+    if head_tag is None:
+        return
+    if not head_tag or head_tag != head_tag.strip():
+        raise click.UsageError(f'`--head-tag` expected a tag name, got {head_tag!r}.')
+
+    conflicting = [
+        option
+        for option, present in {
+            '--commit': commit is not None,
+            '--pr': pull_request is not None,
+            '--pr-head-repo': pr_head_repo is not None,
+            '--pr-head-branch': pr_head_branch is not None,
+            '--pr-head-sha': pr_head_sha is not None,
+            '--pr-base-branch': pr_base_branch is not None,
+        }.items()
+        if present
+    ]
+    if conflicting:
+        raise click.UsageError(
+            f'`--head-tag` supplies the commit to test, so it cannot be combined with `{"`, `".join(conflicting)}`.'
+        )
+
+
+def _validate_target_selection(
+    *, all_targets: bool, targets: tuple[str, ...], exclude_targets: tuple[str, ...]
+) -> None:
+    # Neither option silently wins, because the caller may not have meant to pass both.
+    if all_targets and targets:
+        raise click.UsageError('`--all` and `--targets` cannot be combined.')
+    if overlap := [target for target in targets if target in exclude_targets]:
+        raise click.UsageError(f'Targets cannot be both requested and excluded: {", ".join(overlap)}.')
+
+
+def parse_target_list(ctx: click.Context, param: click.Parameter, value: str | None) -> tuple[str, ...]:
+    """Split a comma-separated list of target names, rejecting empty or padded names."""
+    if value is None:
+        return ()
+    names = value.split(',')
+    if any(not name or name != name.strip() for name in names):
+        raise click.BadParameter(f'expected a comma-separated list of target names, got {value!r}.')
+    return tuple(dict.fromkeys(names))
 
 
 def _pull_request_resolver(
@@ -116,6 +199,7 @@ def _pull_request_resolver(
     pr_head_branch: str | None,
     pr_base_branch: str | None,
     commit: str | None,
+    targets: tuple[str, ...],
 ) -> PullRequestResolver | None:
     from ddev.utils.github import parse_pull_request_reference
 
@@ -129,6 +213,8 @@ def _pull_request_resolver(
     is_pr_run = any(value is not None for value in pr_options.values())
     if commit is not None and is_pr_run:
         raise click.UsageError('`--commit` cannot be combined with PR options.')
+    if targets and is_pr_run:
+        raise click.UsageError('`--targets` cannot be combined with PR options.')
     if not is_pr_run:
         return None
 
@@ -160,8 +246,8 @@ def _pull_request_resolver(
     )
 
 
-def _authentication_token(app: Application, *, is_pr_run: bool, dry_run: bool, resolve_only: bool) -> str:
+def _authentication_token(app: Application, *, resolution_reads_api: bool, dry_run: bool, resolve_only: bool) -> str:
     token = app.config.github.token
-    if (is_pr_run or (not dry_run and not resolve_only)) and not token:
+    if (resolution_reads_api or (not dry_run and not resolve_only)) and not token:
         app.abort('A GitHub token is required. Set `github.token` in your ddev config.')
     return token

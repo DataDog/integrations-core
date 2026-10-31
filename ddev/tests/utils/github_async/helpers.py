@@ -26,6 +26,7 @@ from tests.utils.github_async.payloads import (
     file_content_payload,
     full_pull_request_payload,
     git_ref_payload,
+    git_tag_payload,
     issue_comment_payload,
     pr_review_comment_payload,
     pull_request_file_payload,
@@ -242,6 +243,12 @@ ENDPOINT_CALLS = [
         "get_ref",
         lambda c: c.get_ref("o", "r", "heads/main"),
         lambda: json_response(git_ref_payload()),
+        default_retry="safe",
+    ),
+    EndpointCase(
+        "get_tag",
+        lambda c: c.get_tag("o", "r", "t" * 40),
+        lambda: json_response(git_tag_payload()),
         default_retry="safe",
     ),
     EndpointCase(

@@ -25,6 +25,7 @@ from ddev.utils.github_async.models import (
     FileCommit,
     FileContent,
     GitReference,
+    GitTag,
     IssueComment,
     Label,
     PullRequest,
@@ -43,6 +44,7 @@ from .factories import (
     make_file_commit,
     make_file_content,
     make_git_reference,
+    make_git_tag,
     make_issue_comment,
     make_pull_request,
     make_pull_request_review_comment,
@@ -145,6 +147,7 @@ def _default_response_factories() -> dict[str, Callable[[], Any]]:
         'download_artifact': lambda: None,
         # Git data / contents defaults. Tests that care about specific values register their own.
         'get_ref': lambda: make_response(make_git_reference()),
+        'get_tag': lambda: make_response(make_git_tag()),
         'create_ref': lambda: make_response(make_git_reference(ref='refs/heads/feature')),
         'get_content': lambda: make_response(make_file_content()),
         'create_or_update_file_contents': lambda: make_response(make_file_commit()),
@@ -672,6 +675,17 @@ class FakeAsyncGitHubClient:
         retry: RetryPolicy | None = None,
     ) -> GitHubResponse[GitReference]:
         return self._call('get_ref', owner=owner, repo=repo, ref=ref, timeout=timeout)
+
+    async def get_tag(
+        self,
+        owner: str,
+        repo: str,
+        tag_sha: str,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> GitHubResponse[GitTag]:
+        return self._call('get_tag', owner=owner, repo=repo, tag_sha=tag_sha, timeout=timeout)
 
     async def create_ref(
         self,

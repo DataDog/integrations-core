@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import BaseModel, ConfigDict, ValidationError, model_validator
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -130,16 +130,31 @@ class ResolvedRun(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra='forbid')
 
-    schema_version: Literal[2] = 2
+    schema_version: Literal[4] = 4
     repository: str
     checkout_sha: str
     head_sha: str
-    head_branch: str
+    # Exactly one of these identifies the ref the results belong to. A run started from a release
+    # tag has no branch to attribute to, and inventing one would file its results under a branch
+    # that does not exist, so it carries the tag instead.
+    head_branch: str | None = None
+    head_tag: str | None = None
     all_targets: bool
     pr_number: int | None = None
     base_branch: str | None = None
     base_sha: str | None = None
     is_fork: bool = False
+    # Explicit targets replace the selection; exclusions filter whichever selection applies.
+    targets: tuple[str, ...] = ()
+    exclude_targets: tuple[str, ...] = ()
+    # What the run was started for, such as `pr`, `master` or `nightly`. It tells apart runs on one commit.
+    context: str = 'master'
+
+    @model_validator(mode='after')
+    def check_head_ref(self) -> ResolvedRun:
+        if (self.head_branch is None) == (self.head_tag is None):
+            raise ValueError('exactly one of head_branch and head_tag must be set')
+        return self
 
     @property
     def owner(self) -> str:
@@ -151,8 +166,12 @@ class ResolvedRun(BaseModel):
 
     @property
     def concurrency_key(self) -> str:
-        """New PR revisions must cancel old batches, so they key on the PR, not the merge SHA."""
-        return f'pr-{self.pr_number}' if self.pr_number is not None else self.head_sha
+        """New PR revisions must cancel old batches, so they key on the PR, not the merge SHA.
+
+        Other runs key on their context too, so a nightly run and a master push on one commit do not
+        cancel each other.
+        """
+        return f'pr-{self.pr_number}' if self.pr_number is not None else f'{self.context}-{self.head_sha}'
 
 
 def write_run_manifest(base_path: Path, *, run: ResolvedRun) -> None:
@@ -194,9 +213,20 @@ def resolve_run(
     commit: str | None,
     token: str,
     all_targets: bool,
+    targets: tuple[str, ...] = (),
+    exclude_targets: tuple[str, ...] = (),
+    head_tag: str | None = None,
+    context: str = 'master',
     monitor: ComponentMonitor | None = None,
 ) -> ResolvedRun | None:
-    """Resolve what to test, reporting why a run has nothing left to test before returning None."""
+    """Resolve what to test, reporting why a run has nothing left to test before returning None.
+
+    A pull request run's context is always `pr`, whatever *context* says.
+
+    `head_tag` names the release tag to test, and is the whole selection: the commit is read from
+    the tag rather than supplied alongside it, so the two cannot disagree about what is being
+    tested. Supplying it replaces branch attribution entirely.
+    """
     if pr_resolver is not None:
         return resolve_pull_request_run(
             app,
@@ -204,6 +234,19 @@ def resolve_run(
             resolver=pr_resolver,
             token=token,
             all_targets=all_targets,
+            exclude_targets=exclude_targets,
+            monitor=monitor,
+        )
+
+    if head_tag is not None:
+        return resolve_tag_run(
+            repository=repository,
+            tag=head_tag,
+            token=token,
+            all_targets=all_targets,
+            targets=targets,
+            exclude_targets=exclude_targets,
+            context=context,
             monitor=monitor,
         )
 
@@ -216,7 +259,11 @@ def resolve_run(
         checkout_sha=tested_commit,
         head_sha=tested_commit,
         head_branch=head_branch,
+        head_tag=head_tag,
         all_targets=all_targets,
+        targets=targets,
+        exclude_targets=exclude_targets,
+        context=context,
     )
     if monitor is not None:
         monitor.logger.info(
@@ -228,12 +275,90 @@ def resolve_run(
     return run
 
 
+def resolve_tag_run(
+    *,
+    repository: str,
+    tag: str,
+    token: str,
+    all_targets: bool,
+    targets: tuple[str, ...] = (),
+    exclude_targets: tuple[str, ...] = (),
+    context: str = 'master',
+    monitor: ComponentMonitor | None = None,
+) -> ResolvedRun:
+    """Read the commit a release tag points at, and test that.
+
+    Release tags are annotated, so the reference points at a tag object rather than at a commit and
+    has to be followed one step further. A lightweight tag points straight at its commit and needs
+    no second call, so both are handled rather than only the shape we publish today.
+
+    Nothing here verifies the checkout: `validate_checkout` already refuses a tree that is not the
+    run's `checkout_sha`, which also covers a tag that moved after the workflow checked it out.
+    """
+    import asyncio
+
+    import httpx
+
+    from ddev.utils.github_async import async_github_client
+    from ddev.utils.github_errors import GitHubAuthenticationError
+
+    owner, _, repo = repository.partition('/')
+    if monitor is not None:
+        monitor.logger.info('Resolving tested revision', head_tag=tag, all_targets=all_targets)
+
+    async def resolve() -> str:
+        async with async_github_client(token=token) as client:
+            reference = (await client.get_ref(owner, repo, f'tags/{tag}')).data
+            if reference.object.type == 'commit':
+                return reference.object.sha
+            if reference.object.type != 'tag':
+                raise RunResolutionError(
+                    f'Tag {tag} points at a {reference.object.type}, which is not a commit to test.'
+                )
+            # An annotated tag wraps its commit; one tag object wrapping another is not something
+            # git produces for a release, so a second indirection is treated as unusable.
+            tag_object = (await client.get_tag(owner, repo, reference.object.sha)).data
+            if tag_object.object.type != 'commit':
+                raise RunResolutionError(f'Tag {tag} wraps a {tag_object.object.type}, which is not a commit to test.')
+            return tag_object.object.sha
+
+    try:
+        tested_commit = asyncio.run(resolve())
+    except GitHubAuthenticationError as error:
+        raise RunResolutionError(str(error)) from error
+    except httpx.HTTPStatusError as error:
+        if error.response.status_code == httpx.codes.NOT_FOUND:
+            raise RunResolutionError(f'Tag {tag} does not exist in {repository}.') from error
+        raise RunResolutionError(f'Could not read tag {tag}: {error}') from error
+    except (httpx.HTTPError, ValidationError) as error:
+        raise RunResolutionError(f'Could not read tag {tag}: {error}') from error
+
+    run = ResolvedRun(
+        repository=repository,
+        checkout_sha=tested_commit,
+        head_sha=tested_commit,
+        head_tag=tag,
+        all_targets=all_targets,
+        targets=targets,
+        exclude_targets=exclude_targets,
+        context=context,
+    )
+    if monitor is not None:
+        monitor.logger.info(
+            'Tested revision resolved',
+            checkout_sha=run.checkout_sha,
+            head_sha=run.head_sha,
+            head_tag=run.head_tag,
+        )
+    return run
+
+
 def changes_for_run(
     app: Application, *, run: ResolvedRun, monitor: ComponentMonitor | None = None
 ) -> list[ChangedFile] | None:
-    """The files the run is responsible for; `None` when the run covers every target."""
+    """The files the run is responsible for; `None` when the run names its targets instead."""
     validate_checkout(app, run=run)
-    if run.all_targets:
+    if run.all_targets or run.targets:
         return None
 
     from ddev.cli.ci.tests.changes import ChangeResolutionError, changes_in_commit
@@ -287,6 +412,7 @@ def resolve_pull_request_run(
     resolver: PullRequestResolver,
     token: str,
     all_targets: bool,
+    exclude_targets: tuple[str, ...] = (),
     monitor: ComponentMonitor | None = None,
 ) -> ResolvedRun | None:
     """Read the pull request from the API, in one client session."""
@@ -341,6 +467,8 @@ def resolve_pull_request_run(
                 base_branch=pull.base.ref,
                 base_sha=pull.base.sha,
                 is_fork=head_is_fork(pull.head, owner=resolver.owner, repo=resolver.repo),
+                exclude_targets=exclude_targets,
+                context='pr',
             )
             if monitor is not None:
                 monitor.logger.info(

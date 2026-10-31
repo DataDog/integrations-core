@@ -47,6 +47,7 @@ from .models import (
     FileCommit,
     FileContent,
     GitReference,
+    GitTag,
     IssueComment,
     Label,
     PullRequest,
@@ -1421,6 +1422,38 @@ class AsyncGitHubClient:
         """
         response = await self._request("GET", f"/repos/{owner}/{repo}/git/ref/{ref}", timeout=timeout, retry=retry)
         return self._parse_response(response, GitReference)
+
+    async def get_tag(
+        self,
+        owner: str,
+        repo: str,
+        tag_sha: str,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> GitHubResponse[GitTag]:
+        """
+        Calls the GitHub API to get an annotated tag object.
+
+        A tag reference points at this object rather than at a commit when the tag is annotated, so
+        resolving such a tag to its commit means reading `object.sha` from here.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/git/tags#get-a-tag
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            tag_sha: SHA of the tag object itself, not of the commit it points at.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+            retry: Defaults to the replayable policy, which does not retry a 404.
+
+        Returns:
+            GitHubResponse[GitTag]: The validated tag object (its `object` is what the tag wraps)
+            and headers.
+        """
+        response = await self._request("GET", f"/repos/{owner}/{repo}/git/tags/{tag_sha}", timeout=timeout, retry=retry)
+        return self._parse_response(response, GitTag)
 
     async def create_ref(
         self,

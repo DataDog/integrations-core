@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 
 import click
 
-from ddev.cli.ci.dispatch_options import validate_options
+from ddev.cli.ci.dispatch_options import parse_target_list, validate_options
 from ddev.cli.ci.dispatch_run import (
     NO_MATCHING_PR_REASON,
     RUN_MANIFEST_NAME,
@@ -32,6 +32,7 @@ if TYPE_CHECKING:
 
     from ddev.cli.application import Application
     from ddev.cli.ci.dispatch_run import ResolvedRun
+    from ddev.cli.ci.tests.batching.jobs import AgentImageResolver
     from ddev.cli.ci.tests.batching.units import EnvironmentProvider
     from ddev.cli.ci.tests.dispatcher import Dispatcher
     from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
@@ -96,6 +97,13 @@ RUN_OUTCOME_METRICS = {
     'options. Defaults to local HEAD.',
 )
 @click.option(
+    '--head-tag',
+    default=None,
+    metavar='TAG',
+    help='Release tag to test. Supplies the commit, read from the tag, so it cannot be combined with '
+    '`--commit`. Results are attributed to the tag rather than to a branch.',
+)
+@click.option(
     '--tags',
     default=None,
     metavar='"KEY:VALUE ..."',
@@ -109,6 +117,30 @@ RUN_OUTCOME_METRICS = {
 )
 @click.option('--repo', 'repository', default=None, metavar='OWNER/NAME', help='Repository to dispatch against.')
 @click.option('--all', 'all_targets', is_flag=True, help='Test every eligible target instead of the affected ones.')
+@click.option(
+    '--targets',
+    callback=parse_target_list,
+    metavar='NAME,...',
+    help='Test only these targets, with all their environments, whatever changed. Cannot be combined with `--all`.',
+)
+@click.option(
+    '--exclude-targets',
+    callback=parse_target_list,
+    metavar='NAME,...',
+    help='Remove these targets from whatever the run selects.',
+)
+@click.option(
+    '--agent-image',
+    default=None,
+    metavar='IMAGE',
+    help='Run every Linux E2E job against this Agent image instead of the one mapped to its Python version.',
+)
+@click.option(
+    '--agent-image-windows',
+    default=None,
+    metavar='IMAGE',
+    help='Run every Windows E2E job against this Agent image instead of the one mapped to its Python version.',
+)
 @click.option(
     '--minimum-base-package',
     is_flag=True,
@@ -152,10 +184,15 @@ def dispatch_tests(
     pr_head_branch: str | None,
     pr_base_branch: str | None,
     commit: str | None,
+    head_tag: str | None,
     tags: str | None,
     pytest_args: str | None,
     repository: str | None,
     all_targets: bool,
+    targets: tuple[str, ...],
+    exclude_targets: tuple[str, ...],
+    agent_image: str | None,
+    agent_image_windows: str | None,
     minimum_base_package: bool,
     workflow: str | None,
     workflow_ref: str | None,
@@ -190,7 +227,10 @@ def dispatch_tests(
         pr_head_branch=pr_head_branch,
         pr_base_branch=pr_base_branch,
         commit=commit,
+        head_tag=head_tag,
         all_targets=all_targets,
+        targets=targets,
+        exclude_targets=exclude_targets,
         dry_run=dry_run,
         resolve_only=resolve_only,
         run_manifest=run_manifest,
@@ -199,6 +239,7 @@ def dispatch_tests(
     from ddev.cli.application import AppLoggingHandler
     from ddev.cli.ci.tests.batching.exceptions import PlanningError
     from ddev.cli.ci.tests.batching.hatch_environments import HatchEnvironmentProvider
+    from ddev.cli.ci.tests.batching.jobs import AgentImageOverride
     from ddev.cli.ci.tests.dispatcher import build_dispatcher
     from ddev.cli.ci.tests.dispatcher_attributes import (
         BASE_FIELDS,
@@ -268,7 +309,6 @@ def dispatch_tests(
             # The manifest is the whole run: its identity is read, not recalculated, and a
             # manifest the caller explicitly supplied is not rewritten either.
             run = load_run_manifest(app, Path(run_manifest), repository=tested_repository)
-            all_targets = run.all_targets
         else:
             # Abort outside the operation: it settles on the error, and the abort's `SystemExit` settles nothing.
             try:
@@ -280,6 +320,10 @@ def dispatch_tests(
                         commit=commit,
                         token=token,
                         all_targets=all_targets,
+                        targets=targets,
+                        exclude_targets=exclude_targets,
+                        head_tag=head_tag,
+                        context=tag_fields(caller_tags).get('context') or 'master',
                         monitor=resolution,
                     )
             except RunResolutionError as error:
@@ -310,6 +354,10 @@ def dispatch_tests(
         overrides = {'workflow': workflow, 'workflow_ref': workflow_ref}
         config = config.model_copy(update={name: value for name, value in overrides.items() if value})
 
+        agent_image_resolver = None
+        if agent_image or agent_image_windows:
+            agent_image_resolver = AgentImageOverride(linux=agent_image, windows=agent_image_windows)
+
         planner = monitoring.component('planner')
         try:
             with MetricsHelper(planner).operation(Operation.BUILD_PLAN):
@@ -317,7 +365,10 @@ def dispatch_tests(
                     app,
                     config=config,
                     changed_files=changed_files,
-                    all_targets=all_targets,
+                    all_targets=run.all_targets,
+                    targets=run.targets,
+                    exclude_targets=run.exclude_targets,
+                    agent_image_resolver=agent_image_resolver,
                     minimum_base_package=minimum_base_package,
                     environment_provider=HatchEnvironmentProvider(default_python_version=config.default_python_version),
                     monitor=planner,
@@ -333,7 +384,14 @@ def dispatch_tests(
             outcome = ExecutionOutcome.NO_OP
             return
 
-        display_plan(app, run, config, batches, tags=caller_tags, pytest_args=pytest_args or '')
+        display_plan(
+            app,
+            run,
+            config,
+            batches,
+            tags=caller_tags,
+            pytest_args=pytest_args or '',
+        )
         if dry_run:
             monitor.logger.info('Dry run: nothing was dispatched')
             outcome = ExecutionOutcome.DRY_RUN
@@ -498,22 +556,29 @@ def build_plan(
     config: DispatcherConfig,
     changed_files: list[ChangedFile] | None,
     all_targets: bool,
+    targets: tuple[str, ...] = (),
+    exclude_targets: tuple[str, ...] = (),
+    agent_image_resolver: AgentImageResolver | None = None,
     minimum_base_package: bool,
     environment_provider: EnvironmentProvider,
     monitor: ComponentMonitor,
 ) -> list[TestBatch]:
     """Build the batches this run must execute, raising `PlanningError` on a bad plan.
 
-    `--all` plans every eligible target, so it needs no comparison and `changed_files` is None.
+    `--all` and `--targets` name what to plan, so they need no comparison and `changed_files` is
+    None. `exclude_targets` is removed from whichever selection applies.
     """
     from ddev.cli.ci.tests.batching.build import build_test_batches
-    from ddev.cli.ci.tests.batching.targets import all_target_rules
+    from ddev.cli.ci.tests.batching.targets import ExplicitTargetsRule, all_target_rules
     from ddev.cli.ci.tests.dispatcher_attributes import batch_fields
+    from ddev.e2e.agent_images import get_agent_image
 
-    rules = all_target_rules() if all_targets else None
+    rules = (ExplicitTargetsRule(targets),) if targets else all_target_rules() if all_targets else None
     monitor.logger.info(
         'Planning started',
         all_targets=all_targets,
+        targets=list(targets) or None,
+        exclude_targets=list(exclude_targets) or None,
         changed_file_count=len(changed_files) if changed_files is not None else None,
         minimum_base_package=minimum_base_package,
     )
@@ -524,6 +589,9 @@ def build_plan(
         environment_provider=environment_provider,
         config=config.batching,
         rules=rules,
+        exclude_targets=exclude_targets,
+        requested_targets=targets,
+        agent_image_resolver=agent_image_resolver or get_agent_image,
         minimum_base_package=minimum_base_package,
         monitor=monitor,
     )
@@ -557,7 +625,10 @@ def display_plan(
 ) -> None:
     app.display_header('Dispatcher plan')
     app.display_pair('Repository', run.repository)
-    app.display_pair('Head branch', run.head_branch)
+    if run.head_tag is not None:
+        app.display_pair('Head tag', run.head_tag)
+    else:
+        app.display_pair('Head branch', str(run.head_branch))
     app.display_pair('Head SHA', run.head_sha)
     app.display_pair('Checkout SHA', run.checkout_sha)
     if run.pr_number is not None:
@@ -570,6 +641,17 @@ def display_plan(
         app.display_pair('Tags', ' '.join(tags))
     if pytest_args:
         app.display_pair('Pytest args', pytest_args)
+    if run.targets:
+        app.display_pair('Targets', ', '.join(run.targets))
+    if run.exclude_targets:
+        app.display_pair('Excluded targets', ', '.join(run.exclude_targets))
+    # Read back from the plan, not from the options: a dry run is where an override that never
+    # reached the jobs has to show up as absent rather than as the value that was asked for.
+    planned_images = sorted(
+        {(str(job.platform), job.agent_image) for batch in batches for job in batch.job_list if job.agent_image}
+    )
+    for platform, image in planned_images:
+        app.display_pair(f'Agent image ({platform} E2E jobs)', image)
     app.display_pair('Workflow', f'{config.workflow} @ {config.workflow_ref}')
 
     total = sum(batch.jobs_count for batch in batches)
