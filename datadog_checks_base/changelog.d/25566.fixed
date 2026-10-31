@@ -1,0 +1,1 @@
+Log query errors raised while `QueryExecutor` reads rows and continue with the next query instead of failing the check run.
