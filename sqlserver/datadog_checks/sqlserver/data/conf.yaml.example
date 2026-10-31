@@ -273,7 +273,7 @@ instances:
         ## Configure collection of additional Task and Scheduler metrics.
         ##
         ## Set `task_scheduler_metrics.enabled` to true to enable collection of additional Task and Scheduler metrics.
-        ## Defaults to false.
+        ## Defaults to true.
         #
         # task_scheduler_metrics: {}
 
