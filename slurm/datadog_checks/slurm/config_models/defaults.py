@@ -16,6 +16,10 @@ def instance_collect_gpu_stats():
     return False
 
 
+def instance_collect_job_events():
+    return False
+
+
 def instance_collect_sacct_stats():
     return True
 
