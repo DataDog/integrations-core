@@ -82,6 +82,15 @@ jobs:
         )}}
 ```
 
+The map overrides the generated environment variables, in map order, after the defaults.
+Empty or whitespace-only input applies no overrides.
+Names must match `[A-Za-z_][A-Za-z0-9_]*`. Values use jq's string conversion: strings are preserved;
+booleans, numbers and `null` become their JSON text; arrays and objects become compact JSON. Empty strings are supported.
+
+All setup inputs and decoded override values are single-line. CR and LF are rejected, including trailing line breaks;
+overrides also reject NUL. No multiline fields are supported. JSON formatting may span lines, but decoded string
+values may not. Invalid inputs leave the existing environment file unchanged, and errors do not include values.
+
 !!! note
     Secrets for [integrations-core](https://github.com/DataDog/integrations-core) itself are defined as the default value in the [base workflow](#test-target).
 

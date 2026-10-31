@@ -13,9 +13,23 @@ set -euo pipefail
 # DOCKER_USERNAME, DOCKER_ACCESS_TOKEN, ORACLE_DOCKER_USERNAME, ORACLE_DOCKER_PASSWORD
 # DD_GITHUB_USER, DD_GITHUB_TOKEN
 
-# =============================================================================
-# Define all variables as bash variables first for readability
-# =============================================================================
+validate_single_line() {
+  if [[ "$1" == *$'\r'* || "$1" == *$'\n'* ]]; then
+    echo "Environment values must not contain CR or LF." >&2
+    exit 1
+  fi
+}
+
+# Validate before command substitution can strip trailing newlines (notably JOB_NAME).
+for name in \
+  INPUT_PYTHON_VERSION INPUT_TEST_PY2 INPUT_TEST_PY3 INPUT_PLATFORM \
+  INPUT_AGENT_IMAGE INPUT_AGENT_IMAGE_PY2 INPUT_AGENT_IMAGE_WINDOWS INPUT_AGENT_IMAGE_WINDOWS_PY2 \
+  INPUT_TARGET INPUT_TARGET_ENV INPUT_REPO INPUT_CONTEXT INPUT_MINIMUM_BASE_PACKAGE INPUT_JOB_NAME \
+  INPUT_PYTEST_ARGS INPUT_IS_FORK INPUT_ADDITIONAL_TAGS INPUT_REPLACE_TAGS \
+  DD_API_KEY_SECRET DOCKER_USERNAME DOCKER_ACCESS_TOKEN ORACLE_DOCKER_USERNAME ORACLE_DOCKER_PASSWORD \
+  DD_GITHUB_USER DD_GITHUB_TOKEN; do
+  validate_single_line "${!name-}"
+done
 
 DEFAULT_PYTHON_VERSION="3.13"
 
@@ -87,49 +101,80 @@ else
   INPUT_TARGET_STR="${INPUT_TARGET}"
 fi
 
-# =============================================================================
-# Export all variables to GITHUB_ENV
-# =============================================================================
-{
-  echo "FORCE_COLOR=${FORCE_COLOR}"
-  echo "TEST_RESULTS_BASE_DIR=${TEST_RESULTS_BASE_DIR}"
-  echo "PYTHON_VERSION=${PYTHON_VERSION}"
-  echo "PYTHONUNBUFFERED=${PYTHONUNBUFFERED}"
-  echo "SKIP_ENV_NAME=${SKIP_ENV_NAME}"
-  echo "DDEV_E2E_AGENT=${DDEV_E2E_AGENT}"
-  echo "DDEV_E2E_AGENT_PY2=${DDEV_E2E_AGENT_PY2}"
-  echo "DD_ENV=${DD_ENV}"
-  echo "DD_SERVICE=${DD_SERVICE}"
-  echo "DD_TRACE_ANALYTICS_ENABLED=${DD_TRACE_ANALYTICS_ENABLED}"
-  echo "DD_CIVISIBILITY_ENABLED=${DD_CIVISIBILITY_ENABLED}"
-  echo "DD_CIVISIBILITY_AGENTLESS_ENABLED=${DD_CIVISIBILITY_AGENTLESS_ENABLED}"
-  echo "DD_CIVISIBILITY_AUTO_INSTRUMENTATION_PROVIDER=${DD_CIVISIBILITY_AUTO_INSTRUMENTATION_PROVIDER}"
-  echo "DD_PROFILING_ENABLED=${DD_PROFILING_ENABLED}"
-  echo "DD_SITE=${DD_SITE}"
-  echo "DD_API_KEY=${DD_API_KEY}"
-  echo "MINIMUM_BASE_PACKAGE_PREFIX=${MINIMUM_BASE_PACKAGE_PREFIX}"
-  echo "TEST_RESULTS_DIR=${TEST_RESULTS_DIR}"
-  echo "DD_TAGS=${DD_TAGS}"
-  echo "DOCKER_USERNAME=${DOCKER_USERNAME}"
-  echo "DOCKER_ACCESS_TOKEN=${DOCKER_ACCESS_TOKEN}"
-  echo "ORACLE_DOCKER_USERNAME=${ORACLE_DOCKER_USERNAME}"
-  echo "ORACLE_DOCKER_PASSWORD=${ORACLE_DOCKER_PASSWORD}"
-  echo "DD_GITHUB_USER=${DD_GITHUB_USER}"
-  echo "DD_GITHUB_TOKEN=${DD_GITHUB_TOKEN}"
+records=(
+  "FORCE_COLOR=${FORCE_COLOR}"
+  "TEST_RESULTS_BASE_DIR=${TEST_RESULTS_BASE_DIR}"
+  "PYTHON_VERSION=${PYTHON_VERSION}"
+  "PYTHONUNBUFFERED=${PYTHONUNBUFFERED}"
+  "SKIP_ENV_NAME=${SKIP_ENV_NAME}"
+  "DDEV_E2E_AGENT=${DDEV_E2E_AGENT}"
+  "DDEV_E2E_AGENT_PY2=${DDEV_E2E_AGENT_PY2}"
+  "DD_ENV=${DD_ENV}"
+  "DD_SERVICE=${DD_SERVICE}"
+  "DD_TRACE_ANALYTICS_ENABLED=${DD_TRACE_ANALYTICS_ENABLED}"
+  "DD_CIVISIBILITY_ENABLED=${DD_CIVISIBILITY_ENABLED}"
+  "DD_CIVISIBILITY_AGENTLESS_ENABLED=${DD_CIVISIBILITY_AGENTLESS_ENABLED}"
+  "DD_CIVISIBILITY_AUTO_INSTRUMENTATION_PROVIDER=${DD_CIVISIBILITY_AUTO_INSTRUMENTATION_PROVIDER}"
+  "DD_PROFILING_ENABLED=${DD_PROFILING_ENABLED}"
+  "DD_SITE=${DD_SITE}"
+  "DD_API_KEY=${DD_API_KEY}"
+  "MINIMUM_BASE_PACKAGE_PREFIX=${MINIMUM_BASE_PACKAGE_PREFIX}"
+  "TEST_RESULTS_DIR=${TEST_RESULTS_DIR}"
+  "DD_TAGS=${DD_TAGS}"
+  "DOCKER_USERNAME=${DOCKER_USERNAME}"
+  "DOCKER_ACCESS_TOKEN=${DOCKER_ACCESS_TOKEN}"
+  "ORACLE_DOCKER_USERNAME=${ORACLE_DOCKER_USERNAME}"
+  "ORACLE_DOCKER_PASSWORD=${ORACLE_DOCKER_PASSWORD}"
+  "DD_GITHUB_USER=${DD_GITHUB_USER}"
+  "DD_GITHUB_TOKEN=${DD_GITHUB_TOKEN}"
   # Variables used by test scripts (run-unit-integration-tests.sh, run-e2e-tests.sh)
   # Define once here to avoid overloading the action object map
-  echo "INPUT_REPO=${INPUT_REPO}"
-  echo "INPUT_TARGET=${INPUT_TARGET}"
-  echo "INPUT_TARGET_ENV=${INPUT_TARGET_ENV:-}"
-  echo "INPUT_TARGET_STR=${INPUT_TARGET_STR}"
-  echo "INPUT_PLATFORM=${INPUT_PLATFORM}"
-  echo "INPUT_MINIMUM_BASE_PACKAGE=${INPUT_MINIMUM_BASE_PACKAGE:-false}"
-  echo "INPUT_PYTEST_ARGS=${INPUT_PYTEST_ARGS:-}"
-  echo "INPUT_IS_FORK=${INPUT_IS_FORK:-false}"
-  echo "INPUT_CONTEXT=${INPUT_CONTEXT:-standard}"
-} >> "$GITHUB_ENV"
+  "INPUT_REPO=${INPUT_REPO}"
+  "INPUT_TARGET=${INPUT_TARGET}"
+  "INPUT_TARGET_ENV=${INPUT_TARGET_ENV:-}"
+  "INPUT_TARGET_STR=${INPUT_TARGET_STR}"
+  "INPUT_PLATFORM=${INPUT_PLATFORM}"
+  "INPUT_MINIMUM_BASE_PACKAGE=${INPUT_MINIMUM_BASE_PACKAGE:-false}"
+  "INPUT_PYTEST_ARGS=${INPUT_PYTEST_ARGS:-}"
+  "INPUT_IS_FORK=${INPUT_IS_FORK:-false}"
+  "INPUT_CONTEXT=${INPUT_CONTEXT:-standard}"
+)
 
-# Override with custom vars if provided
+for record in "${records[@]}"; do
+  if [[ ! "${record%%=*}" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+    echo "Invalid environment variable name." >&2
+    exit 1
+  fi
+  validate_single_line "$record"
+done
+
+# Stage everything privately, preserving native jq line endings on Windows.
+staged_env=$(mktemp "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/test-env.XXXXXX")
+trap 'rm -f "$staged_env"' EXIT
+printf '%s\n' "${records[@]}" > "$staged_env"
+
+# Validate decoded values before rendering, preserving jq's string conversions.
 if [[ -n "${SETUP_ENV_VARS:-}" ]]; then
-  echo "$SETUP_ENV_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"' >> "$GITHUB_ENV"
+  if ! printf '%s' "$SETUP_ENV_VARS" | jq -sr '
+    if length == 0 then
+      empty
+    elif length != 1 or (.[0] | type) != "object" then
+      error("Expected one environment variable map")
+    else
+      .[0] | to_entries | map(.value |= tostring) |
+      if all(.[];
+        (.key | test("\\A[A-Za-z_][A-Za-z0-9_]*\\z")) and
+        (.value | test("[\r\n\u0000]") | not)
+      ) then
+        .[] | "\(.key)=\(.value)"
+      else
+        error("Invalid environment record")
+      end
+    end
+  ' >> "$staged_env" 2>/dev/null; then
+    echo "Invalid SETUP_ENV_VARS: expected a JSON map with valid names and single-line values." >&2
+    exit 1
+  fi
 fi
+
+cat "$staged_env" >> "$GITHUB_ENV"
