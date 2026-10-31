@@ -1,0 +1,1 @@
+Fix parsing RFC3339 timestamps with fractional seconds.
