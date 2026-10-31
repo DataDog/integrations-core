@@ -8,11 +8,10 @@ from xml.etree import ElementTree as ET
 import pytest
 
 from datadog_checks.dev.utils import get_metadata_metrics
-from datadog_checks.pan_firewall import PanFirewallCheck, constants
+from datadog_checks.pan_firewall import PanFirewallCheck
 from datadog_checks.pan_firewall.collectors.counters import GLOBAL_COUNTER_CMD
 from datadog_checks.pan_firewall.collectors.ha import HA_CMD, HA_INTERFACE_CMD
 from datadog_checks.pan_firewall.collectors.interfaces import COUNTER_INTERFACE_CMD
-from datadog_checks.pan_firewall.collectors.jobs import JOBS_PENDING_CMD
 from datadog_checks.pan_firewall.collectors.routing import OSPF_NEIGHBOR_CMD
 from datadog_checks.pan_firewall.collectors.system import ENVIRONMENTALS_CMD
 from datadog_checks.pan_firewall.errors import PanosApiError
@@ -30,13 +29,12 @@ from .common import (
     SYNTHETIC,
 )
 from .fake_panos import FIREWALL_SETS, PANORAMA_HOSTS
-from .fixture_map import THREAT_LOG_FIRST_SEQNO
-from .helpers import THREAT_LOG_ACT, log_page, make_instance, new_check
+from .helpers import make_instance, new_check
 
 pytestmark = pytest.mark.unit
 
 # Patterns that mean a credential value was captured. The bare word "password" is not one of them: real fixtures
-# legitimately contain `<password-set>no</password-set>` and threat names such as "/etc/passwd Access Attempt".
+# legitimately contain `<password-set>no</password-set>`.
 SECRET_PATTERNS = [
     re.compile(p, re.IGNORECASE)
     for p in (r'<key>', r'LUFRPT', r'<password>', r'password=', r'key=', r'X-PAN-KEY', r'Cookie:', r'<authcode>[^<]')
@@ -121,38 +119,12 @@ def new_static_check():
     return PanFirewallCheck('pan_firewall', {}, [instance])
 
 
-def test_a_threat_job_still_running_is_polled_again_on_the_next_run_not_in_5_minutes(
-    dd_run_check,
-    fake_panos,
-    monkeypatch,
-    schedule_clock,
-):
-    monkeypatch.setattr(constants, 'THREAT_JOB_POLLS', 1)
-    monkeypatch.setattr(constants, 'THREAT_JOB_POLL_DELAY', 0)
-    ip = FIREWALLS['fw-a']
-    fake_panos.answer_log(ip, 'backward', None, THREAT_LOG_ACT, log_page([1]))
-    check = new_static_check()
-    dd_run_check(check)
-
-    def run_after_a_minute():
-        schedule_clock.now += 60
-        before = len(fake_panos.calls)
-        dd_run_check(check)
-        return [(c.type, c.cmd) for c in fake_panos.calls[before:] if c.host == ip]
-
-    # Nothing else is due a minute later: the jobs check, then the poll of the job.
-    assert run_after_a_minute() == [('op', JOBS_PENDING_CMD), ('log', None)]
-    # The job finished: the collector is on its 5-minute interval again.
-    assert ('log', None) not in run_after_a_minute()
-
-
 # Each optional collector: its default, and whether a request is one of its own.
 OPTIONAL_COLLECTOR_CALLS = {
     'collect_global_counters': (False, lambda call: call.cmd == GLOBAL_COUNTER_CMD),
     'collect_ospf': (False, lambda call: call.cmd == OSPF_NEIGHBOR_CMD),
     'collect_reports': (False, lambda call: call.type == 'report'),
     'collect_rule_hits': (True, lambda call: 'rule-hit-count' in (call.cmd or '')),
-    'collect_threats': (True, lambda call: call.type == 'log'),
 }
 
 
@@ -222,8 +194,7 @@ HARDWARE_ANSWERS = {
 
 
 def test_every_metadata_metric_is_emitted(dd_run_check, aggregator, fake_panos, schedule_clock):
-    for name, ip in FIREWALLS.items():
-        fake_panos.answer_log(ip, 'backward', None, log_page([THREAT_LOG_FIRST_SEQNO[name] - 1]))
+    for ip in FIREWALLS.values():
         for cmd, path in HARDWARE_ANSWERS.items():
             fake_panos.answer_op(ip, cmd, (200, path.read_bytes()))
     # A Panorama instance, as only it sends `panorama.can_connect`; it discovers and polls both fake firewalls.
@@ -245,10 +216,10 @@ def test_every_metadata_metric_is_emitted(dd_run_check, aggregator, fake_panos, 
     aggregator.assert_metrics_using_metadata(
         get_metadata_metrics(), check_symmetric_inclusion=True, check_submission_type=True
     )
-    # The aggregate above is satisfied by fw-a alone; each firewall must report. fw-b has its own threat watermark, and
-    # runs the Advanced Routing Engine, which takes the accepted prefixes from another field than fw-a's legacy one.
+    # The aggregate above is satisfied by fw-a alone; each firewall must report. fw-b runs the Advanced Routing Engine,
+    # which takes the accepted prefixes from another field than fw-a's legacy one.
     for ip in FIREWALLS.values():
-        for name in ('can_connect', 'threat.count', 'bgp.peer.prefixes.incoming.accepted'):
+        for name in ('can_connect', 'bgp.peer.prefixes.incoming.accepted'):
             assert any(f'device_ip:{ip}' in m.tags for m in aggregator.metrics(f'pan_firewall.{name}')), (name, ip)
 
 
@@ -269,7 +240,7 @@ def test_every_metadata_metric_is_emitted(dd_run_check, aggregator, fake_panos, 
     ],
 )
 def test_persistent_cache_id_survives_config_edits_but_not_a_different_target(other, same_id):
-    # A changed ID drops the threat watermarks and the Panorama firewall list, so only the target may change it.
+    # A changed ID drops the Panorama firewall list, so only the target may change it.
     def cache_id(instance):
         check = new_check(instance)
         check.load_configuration_models()

@@ -86,4 +86,3 @@ pan_firewall.temperature.alarm,gauge,,,,"Whether the temperature sensor is in al
 pan_firewall.temperature.current,gauge,,degree celsius,,Current temperature.,0,palo_alto_networks_firewall,temperature current,,"sensor,slot"
 pan_firewall.temperature.max,gauge,,degree celsius,,Maximum threshold.,0,palo_alto_networks_firewall,temperature max,,"sensor,slot"
 pan_firewall.temperature.min,gauge,,degree celsius,,Minimum threshold.,0,palo_alto_networks_firewall,temperature min,,"sensor,slot"
-pan_firewall.threat.count,count,,,,Threat logs received.,0,palo_alto_networks_firewall,threat count,,"severity,action,subtype,vsys"

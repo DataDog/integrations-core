@@ -28,7 +28,6 @@ from .fixture_map import (
     KEYGEN_OK,
     NO_CAPTURE,
     find_op_fixture,
-    log_job_fixture,
     panorama_op_answer,
     report_field,
     report_job_fixture,
@@ -86,12 +85,9 @@ class FakePanos:
         self.calls: list[Call] = []
         self._failures: dict[tuple[str, str], Answer] = {}
         self._op_answers: dict[tuple[str, str], Answer] = {}
-        # `type=log` jobs: the bodies a `get` of the job answers in turn (the last one repeats), by (host, job id).
-        self._log_overrides: dict[tuple[str, str, str | None], list[LogBody]] = {}
-        self._log_jobs: dict[tuple[str, str], list[LogBody]] = {}
-        self._log_reads: dict[tuple[str, str], int] = {}
         self._job_ids = itertools.count(9000)
-        # `type=report` jobs, like the log ones: overrides by (host, aggregate-by field), bodies by (host, job id).
+        # `type=report` jobs: overrides by (host, aggregate-by field), the bodies a `get` of a job answers in turn (the
+        # last one repeating) by (host, job id).
         self._report_overrides: dict[tuple[str, str], list[LogBody]] = {}
         self._report_jobs: dict[tuple[str, str], list[LogBody]] = {}
         self._report_reads: dict[tuple[str, str], int] = {}
@@ -105,14 +101,6 @@ class FakePanos:
         """Answer every later `type=op&cmd=<cmd>` request to `host` with `answer`; `fail()` still takes precedence."""
         self._op_answers[host, cmd] = answer
 
-    def answer_log(self, host: str, direction: str, query: str | None, *bodies: LogBody) -> None:
-        """Answer `type=log` submits of (`dir`, `query`) to `host` with a new job whose `get`s answer `bodies`.
-
-        The bodies are served one per `get` (`get_job` or `read_log_job`), the last one repeating, so a job can
-        be `ACT` for a while and then finish. A body is bytes, a fixture path, or an `Answer` (a failure).
-        """
-        self._log_overrides[host, direction, query] = list(bodies)
-
     def answer_report(self, host: str, field: str, *bodies: LogBody) -> None:
         """Answer report submits aggregated by `field` to `host` with a new job whose `get`s answer `bodies` in turn."""
         self._report_overrides[host, field] = list(bodies)
@@ -120,7 +108,6 @@ class FakePanos:
     def recover(self, host: str) -> None:
         self._failures = {k: v for k, v in self._failures.items() if k[0] != host}
         self._op_answers = {k: v for k, v in self._op_answers.items() if k[0] != host}
-        self._log_overrides = {k: v for k, v in self._log_overrides.items() if k[0] != host}
         self._report_overrides = {k: v for k, v in self._report_overrides.items() if k[0] != host}
 
     def calls_to(self, host: str) -> list[Call]:
@@ -147,7 +134,6 @@ class FakePanos:
         answer = (
             self._failures.get((host, kind))
             or (data.get('type') == 'op' and self._op_answers.get((host, data.get('cmd', ''))))
-            or (data.get('type') == 'log' and self._answer_log(host, data))
             or (data.get('type') == 'report' and self._answer_report(host, data))
             or self._answer(host, data)
         )
@@ -165,22 +151,6 @@ class FakePanos:
             return ConnectionRefusedError(f'no fake firewall at {host}')
         path = find_op_fixture(data['cmd'], FIREWALL_SETS[host]) if data.get('type') == 'op' else None
         return (200, path.read_bytes()) if path else (200, NO_CAPTURE)
-
-    def _answer_log(self, host: str, data: dict[str, str]) -> Answer | None:
-        """Answer a `type=log` submit or `action=get`; None for anything else, which `_answer` then handles."""
-        if host not in FIREWALL_SETS:
-            return None
-        if data.get('action') == 'get':
-            return self._read_log_job(host, data.get('job-id', ''))
-        direction, query = data.get('dir', ''), data.get('query')
-        return self._open_job(
-            'log',
-            self._log_jobs,
-            self._log_reads,
-            host,
-            self._log_overrides.get((host, direction, query)),
-            log_job_fixture(data, FIREWALL_SETS[host]),
-        )
 
     def _answer_report(self, host: str, data: dict[str, str]) -> Answer | None:
         """Answer a `type=report` submit or `action=get`; None for an unknown host, which `_answer` then handles."""
@@ -211,7 +181,7 @@ class FakePanos:
 
     def _open_job(
         self,
-        kind: Literal['log', 'report'],
+        kind: Literal['report'],
         jobs: dict[tuple[str, str], list[LogBody]],
         reads: dict[tuple[str, str], int],
         host: str,
@@ -231,9 +201,6 @@ class FakePanos:
         jobs[host, job_id] = bodies
         reads[host, job_id] = 0
         return 200, submit
-
-    def _read_log_job(self, host: str, job_id: str) -> Answer:
-        return self._read_job(self._log_jobs, self._log_reads, host, job_id)
 
     @staticmethod
     def _read_job(

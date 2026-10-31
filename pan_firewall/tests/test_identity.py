@@ -100,19 +100,15 @@ def test_vsys_list(identity, rows_file, configured, expected):
 def test_static_firewall_replaced_at_the_same_ip_is_tagged_and_tracked_as_the_new_unit(
     dd_run_check, aggregator, fake_panos, monkeypatch, schedule_clock
 ):
-    check = new_check(make_instance(collect_threats=True))
+    check = new_check(make_instance())
     dd_run_check(check)
     # The unit is swapped for another one that answers at the same IP; the identity is due again after 30 minutes.
     monkeypatch.setitem(FIREWALL_SETS, FW_A_IP, 'fw-b')
     schedule_clock.now += 1800
     aggregator.reset()
-    calls_before = len(fake_panos.calls)
 
     dd_run_check(check)
 
     (can_connect,) = aggregator.metrics('pan_firewall.can_connect')
     assert {f'device_id:{FW_B_SERIAL}', f'device_serial:{FW_B_SERIAL}', 'device_hostname:fw-b'} <= set(can_connect.tags)
     assert f'device_id:{FW_A_SERIAL}' not in can_connect.tags
-    # The new unit has no threat watermark of its own: it starts with a first run (`backward`), not from the old one's.
-    threat_jobs = [c.params['dir'] for c in fake_panos.calls[calls_before:] if c.type == 'log' and c.action is None]
-    assert threat_jobs == ['backward']

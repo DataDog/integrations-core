@@ -9,7 +9,6 @@ without the check installed, so none of those may import this one.
 
 import copy
 from unittest import mock
-from xml.etree import ElementTree as ET
 
 from datadog_checks.pan_firewall import PanFirewallCheck
 from datadog_checks.pan_firewall.collectors import COLLECTORS
@@ -17,7 +16,7 @@ from datadog_checks.pan_firewall.collectors.base import CollectContext, Firewall
 from datadog_checks.pan_firewall.collectors.interfaces import parse_interface_all
 from datadog_checks.pan_firewall.xml_utils import parse_response
 
-from .common import CREDENTIALS, FW_A_IP, STUBS, SYNTHETIC
+from .common import CREDENTIALS, FW_A_IP, STUBS
 from .fixture_map import op_fixture
 
 
@@ -108,27 +107,6 @@ def metrics_by_ip(aggregator, name):
 
 def can_connect_by_ip(aggregator):
     return {ip: metric.value for ip, metric in metrics_by_ip(aggregator, 'can_connect').items()}
-
-
-# Threat log job answers: a job still running, and a finished one built from a real entry.
-THREAT_LOG_ACT = (SYNTHETIC / 'threat_log_act.xml').read_bytes()
-THREAT_LOG_CLOCK_BACK = SYNTHETIC / 'threat_log_clock_back.xml'
-POLL_ENTRY = ET.parse(THREAT_LOG_CLOCK_BACK).getroot().find('result/log/logs/entry')
-
-
-def log_page(seqnos, **fields):
-    """A finished log job of one entry per seqno, copied from a real entry of `synthetic/threat_log_clock_back.xml`."""
-    entries = []
-    for seqno in seqnos:
-        entry = copy.deepcopy(POLL_ENTRY)
-        entry.find('seqno').text = str(seqno)
-        for name, value in fields.items():
-            entry.find(name).text = value
-        entries.append(ET.tostring(entry, encoding='unicode'))
-    return (
-        '<response status="success"><result><job><status>FIN</status><id>1</id></job>'
-        f'<log><logs count="{len(entries)}" progress="100">{"".join(entries)}</logs></log></result></response>'
-    ).encode()
 
 
 def logged(log_method):
