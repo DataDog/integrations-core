@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import re
+import zlib
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.kafka_consumer.constants import CONTEXT_UPPER_BOUND, DEFAULT_KAFKA_TIMEOUT
@@ -36,6 +37,15 @@ class KafkaConfig:
             if self._consumer_groups_regex
             else ""
         )
+        self._consumer_groups_shard_count = int(instance.get('consumer_groups_shard_count', 1))
+        shard_index = instance.get('consumer_groups_shard_index')
+        if shard_index is None and self._consumer_groups_shard_count > 1:
+            # Defaulting to shard 0 would silently collect only a fraction of the groups.
+            raise ConfigurationError(
+                "`consumer_groups_shard_index` is required when `consumer_groups_shard_count` is greater than 1"
+            )
+        self._consumer_groups_shard_index = int(shard_index or 0)
+        self._validate_consumer_groups_shard()
         # Optimization to avoid OOM kill:
         # https://github.com/confluentinc/confluent-kafka-python/issues/759
         self._consumer_queued_max_messages_kbytes = instance.get('consumer_queued_max_messages_kbytes', 1024)
@@ -100,6 +110,10 @@ class KafkaConfig:
         self._kafka_console_enabled = is_affirmative(
             instance.get('enable_kafka_console', instance.get('enable_cluster_monitoring', False))
         )
+        if self._kafka_console_enabled and self._consumer_groups_shard_count > 1:
+            # Kafka Console collects cluster-wide metadata, including every consumer group, so
+            # each shard would emit it again and count group membership changes once per shard.
+            raise ConfigurationError("`consumer_groups_shard_count` cannot be used with Kafka Console")
 
         if self._kafka_console_enabled:
             self._monitor_unlisted_consumer_groups = True
@@ -291,6 +305,25 @@ class KafkaConfig:
                 patterns.append(template.format(consumer_group, ".+", ".+"))
 
         return patterns
+
+    def _validate_consumer_groups_shard(self) -> None:
+        if self._consumer_groups_shard_count < 1:
+            raise ConfigurationError("`consumer_groups_shard_count` must be at least 1")
+        if not 0 <= self._consumer_groups_shard_index < self._consumer_groups_shard_count:
+            raise ConfigurationError(
+                "`consumer_groups_shard_index` must be between 0 and `consumer_groups_shard_count` - 1"
+            )
+
+    def in_consumer_groups_shard(self, consumer_group: str) -> bool:
+        """Return whether the consumer group is assigned to this instance's shard.
+
+        The assignment must be identical for every shard of a deployment, so it uses a stable
+        hash of the group ID rather than `hash()`, which is randomized per process.
+        """
+        if self._consumer_groups_shard_count == 1:
+            return True
+        shard = zlib.crc32(consumer_group.encode('utf-8')) % self._consumer_groups_shard_count
+        return shard == self._consumer_groups_shard_index
 
     def _validate_consumer_groups(self):
         """Validate any explicitly specified consumer groups.
