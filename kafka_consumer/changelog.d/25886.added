@@ -1,0 +1,1 @@
+Add `consumer_groups_shard_count` and `consumer_groups_shard_index` to split one cluster's consumer groups across several instances, each fetching offsets only for its own groups.

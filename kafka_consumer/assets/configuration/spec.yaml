@@ -122,6 +122,40 @@ files:
         value:
           type: boolean
           example: false
+      - name: consumer_groups_shard_count
+        description: |
+          Split the consumer groups selected by `monitor_unlisted_consumer_groups`, `consumer_groups`, or
+          `consumer_groups_regex` into this many shards, and only collect the shard set by
+          `consumer_groups_shard_index`. To spread a cluster with many consumer groups across several check
+          runs, or several cluster check runners, configure one instance per shard with identical settings
+          and a different `consumer_groups_shard_index`.
+
+          Groups are assigned to shards by a stable hash of the group ID before their offsets are fetched,
+          so each instance only requests offsets for its own groups. Changing the shard count reassigns
+          most groups, so change it on all instances at once.
+
+          All instances of a sharded set must use identical settings apart from `consumer_groups_shard_index`,
+          including `tags`. A partition consumed by groups in several shards reports `kafka.broker_offset`
+          from each of them: with identical tags these are the same series, while a per-shard tag turns them
+          into separate series that add up in queries.
+
+          Sharding only spreads the load when the shards run on different cluster check runners, so size
+          each runner for the shards that may be scheduled onto it together.
+
+          Sharding cannot be combined with `enable_kafka_console`, which collects cluster-wide metadata.
+        fleet_configurable: true
+        value:
+          type: integer
+          example: 1
+          display_default: 1
+      - name: consumer_groups_shard_index
+        description: |
+          The shard of consumer groups this instance collects, from 0 to `consumer_groups_shard_count` - 1.
+          Required when `consumer_groups_shard_count` is greater than 1. See `consumer_groups_shard_count`.
+        fleet_configurable: true
+        value:
+          type: integer
+          example: 0
       - name: consumer_queued_max_messages_kbytes
         description: |
           The consumer very aggressively caches messages in the background (tuned for very high throughput).
