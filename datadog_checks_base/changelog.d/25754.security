@@ -1,0 +1,1 @@
+Reject TLS connections whose verified certificate chain contains one of the compromised eMudhra emSign G3 CA keys.

@@ -1,0 +1,1 @@
+Add the `tls_distrusted_ca_names` Agent setting, which makes every Python integration reject TLS connections whose verified certificate chain contains a CA with a listed common name.

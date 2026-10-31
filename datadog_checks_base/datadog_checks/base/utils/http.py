@@ -7,6 +7,7 @@ import logging
 import os
 import re
 import socket
+import ssl
 import warnings
 from collections import ChainMap
 from collections.abc import Iterator, Mapping
@@ -22,6 +23,7 @@ from binary import KIBIBYTE
 from requests import auth as requests_auth
 from requests.exceptions import SSLError
 from urllib3.exceptions import InsecureRequestWarning
+from urllib3.util import create_urllib3_context
 from wrapt import ObjectProxy
 
 from datadog_checks.base.agent import datadog_agent
@@ -29,6 +31,7 @@ from datadog_checks.base.config import is_affirmative
 from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils import _http_utils
 
+from ._certificate_distrust import attach_distrust_check, caused_by_certificate_distrust
 from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
 from .time import get_timestamp
@@ -205,6 +208,14 @@ def get_tls_config_from_options(new_options):
     return tls_config
 
 
+def _create_proxy_ssl_context(verify_mode: ssl.VerifyMode) -> ssl.SSLContext:
+    # This is the context urllib3 would build for an HTTPS proxy itself (its defaults and the OS trust store), so
+    # passing it changes nothing about which proxies are trusted except that distrusted CA keys are rejected.
+    context = create_urllib3_context(cert_reqs=verify_mode)
+    context.load_default_certs()
+    return attach_distrust_check(context)
+
+
 class _SSLContextAdapter(requests.adapters.HTTPAdapter):
     """
     This adapter lets us hook into requests.Session and make it use the SSLContext that we manage.
@@ -217,6 +228,13 @@ class _SSLContextAdapter(requests.adapters.HTTPAdapter):
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
         pool_kwargs['ssl_context'] = self.ssl_context
         return super().init_poolmanager(connections, maxsize, block=block, **pool_kwargs)
+
+    def proxy_manager_for(self, proxy, **proxy_kwargs):
+        # urllib3 opens the TLS connection to an HTTPS proxy with a context of its own, which would skip the
+        # distrust check and could send proxy credentials to a distrusted peer.
+        if proxy not in self.proxy_manager and proxy.lower().startswith('https://'):
+            proxy_kwargs['proxy_ssl_context'] = _create_proxy_ssl_context(self.ssl_context.verify_mode)
+        return super().proxy_manager_for(proxy, **proxy_kwargs)
 
     def cert_verify(self, conn, url, verify, cert):
         """
@@ -756,7 +774,8 @@ class RequestsWrapper(object):
         try:
             response = request_method(url, **new_options)
         except SSLError as e:
-            if self.aia_chasing_max_depth <= 0:
+            # Fetching intermediate certificates cannot make a distrusted CA key trustworthy.
+            if self.aia_chasing_max_depth <= 0 or caused_by_certificate_distrust(e):
                 raise e
             self.logger.debug(
                 'AIA chasing: request to `%s` failed with an SSLError (%s); attempting to recover missing '
@@ -785,13 +804,15 @@ class RequestsWrapper(object):
             request_method = getattr(session, method)
             try:
                 response = request_method(url, **new_options)
-            except SSLError:
-                self.logger.error(
-                    'AIA chasing: request to `%s` still failed after mounting %d recovered intermediate '
-                    'certificate(s); the certificate chain is still incomplete',
-                    url,
-                    len(certs),
-                )
+            except SSLError as retry_error:
+                # A distrusted CA key in the recovered chain is reported by the raised error itself.
+                if not caused_by_certificate_distrust(retry_error):
+                    self.logger.error(
+                        'AIA chasing: request to `%s` still failed after mounting %d recovered intermediate '
+                        'certificate(s); the certificate chain is still incomplete',
+                        url,
+                        len(certs),
+                    )
                 raise
         return response
 
