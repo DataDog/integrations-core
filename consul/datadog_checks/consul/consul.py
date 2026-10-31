@@ -6,7 +6,10 @@ from __future__ import division
 import copy
 from collections import defaultdict, namedtuple
 from datetime import datetime, timedelta, timezone
+from hashlib import sha256
+from heapq import nsmallest
 from itertools import islice
+from json import dumps as json_dumps
 from multiprocessing.pool import ThreadPool
 from time import time as timestamp
 from urllib.parse import urljoin
@@ -102,6 +105,15 @@ class ConsulCheck(OpenMetricsBaseCheck):
         self.perform_network_latency_checks = is_affirmative(
             self.instance.get('network_latency_checks', self.init_config.get('network_latency_checks'))
         )
+        self.network_latency_sample_size = self.instance.get(
+            'network_latency_sample_size', self.init_config.get('network_latency_sample_size')
+        )
+        if self.network_latency_sample_size is not None and (
+            isinstance(self.network_latency_sample_size, bool)
+            or not isinstance(self.network_latency_sample_size, int)
+            or self.network_latency_sample_size < 1
+        ):
+            raise ConfigurationError('network_latency_sample_size must be a positive integer')
         self.use_node_name_as_hostname = is_affirmative(self.instance.get('use_node_name_as_hostname', True))
         self.disable_legacy_service_tag = is_affirmative(self.instance.get('disable_legacy_service_tag', False))
         default_services_include = self.init_config.get(
@@ -663,7 +675,23 @@ class ConsulCheck(OpenMetricsBaseCheck):
         if num_nodes == 1:
             self.log.debug("Only 1 node in cluster, skipping network latency metrics.")
         else:
-            known_distances = {}
+            sampled_nodes = None
+            sample_size = self.network_latency_sample_size
+            if sample_size is not None and num_nodes > sample_size + 1:
+
+                def coordinate_priority(item: tuple[int, dict]) -> tuple[bytes, bytes]:
+                    node = item[1]
+                    # Hash the same UTF-8 bytes regardless of the Agent's JSON backend.
+                    identity = json_dumps(
+                        [agent_dc, node.get('Partition') or 'default', node.get('Segment') or '', node['Node']],
+                        ensure_ascii=False,
+                        separators=(',', ':'),
+                    ).encode('utf-8')
+                    return sha256(identity).digest(), identity
+
+                # Keep a spare peer so nodes in the cohort can exclude themselves.
+                sampled_nodes = nsmallest(sample_size + 1, enumerate(nodes), key=coordinate_priority)
+
             for i, node in enumerate(nodes):
                 tags = main_tags + ['consul_node_name:{}'.format(node['Node'])]
 
@@ -674,14 +702,12 @@ class ConsulCheck(OpenMetricsBaseCheck):
                 else:
                     node_name = ''
 
-                # Initialize with pre-computed distances
-                latencies = [known_distances[(x, x + 1)] for x in range(i)]
-
-                # Calculate the distance between the current node and nodes that have not yet been seen
-                for n in range(i + 1, num_nodes):
-                    latency = distance(node, nodes[n])
-                    latencies.append(latency)
-                    known_distances[(i, n)] = latency
+                # Store distances for one node at a time to keep memory use linear.
+                if sampled_nodes is None:
+                    latencies = [distance(node, other) for j, other in enumerate(nodes) if j != i]
+                else:
+                    peers = islice((other for j, other in sampled_nodes if j != i), sample_size)
+                    latencies = [distance(node, other) for other in peers]
 
                 latencies.sort()
                 n = len(latencies)

@@ -39,11 +39,35 @@ files:
         Whether to enable network latency metric collection. When enabled, Consul
         network coordinates are retrieved and latency is calculated for
         each node and between data centers.
+        Comparing every node with every other node can use significant CPU. For data centers
+        with roughly 1000 or more entries returned by /v1/coordinate/nodes, consider setting
+        network_latency_sample_size to compare each node with fewer peers.
+        Consul documents network coordinates as comparable only within the same network segment
+        or WAN area. This check does not separate coordinates by segment or area before calculating latency.
         See https://www.consul.io/docs/internals/coordinates.html
       fleet_configurable: true
       value:
         type: boolean
         example: false
+    - name: network_latency_sample_size
+      description: |
+        Maximum number of other nodes in the same data center used to calculate each node's
+        latency metrics. Leave unset to compare with every peer. Requires network_latency_checks.
+        Set a positive integer to compare every node with a common group of peers. The check
+        selects peers using data center, partition, segment, and node names, so the selection
+        stays the same across Agent restarts and Consul leader changes. Adding or removing
+        nodes changes only the affected part of the sample.
+        Every node still reports metrics. A node in the group is replaced by another peer
+        when calculating its own metrics, so it never compares with itself. When fewer peers
+        are available than the sample size, all available peers are used.
+        With sampling enabled, percentiles and min/max describe only the selected peers,
+        not every peer in the data center. Calculations between data centers are unchanged.
+      fleet_configurable: true
+      value:
+        type: integer
+        example: 256
+        display_default: null
+        minimum: 1
     - name: use_node_name_as_hostname
       description: |
         Whether to use the Consul node name as the hostname. If set to true, 
