@@ -1,0 +1,1 @@
+Add `ray_serve_num_ongoing_requests_at_replicas` metric to monitor the current number of requests to this deployment that’s been assigned and sent to execute on a replica.

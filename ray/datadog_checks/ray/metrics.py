@@ -117,6 +117,7 @@ METRIC_MAP = {
     'ray_serve_num_multiplexed_models': 'serve.num_multiplexed_models',
     'ray_serve_num_ongoing_grpc_requests': 'server.num_ongoing_grpc_requests',
     'ray_serve_num_ongoing_http_requests': 'server.num_ongoing_http_requests',
+    'ray_serve_num_ongoing_requests_at_replicas': 'serve.ongoing_requests_at_replicas',
     'ray_serve_num_router_requests': 'serve.num_router_requests',
     'ray_serve_num_scheduling_tasks': 'server.num_scheduling_tasks',
     'ray_serve_num_scheduling_tasks_in_backoff': 'server.num_scheduling_tasks_in_backoff',
