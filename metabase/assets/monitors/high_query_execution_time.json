@@ -12,7 +12,7 @@
 		"message": "{{#is_alert}}\n\nHigh query running time observed. Total {{value}}% of queries are taking longer than 10 seconds.\n\n{{/is_alert}}\n\n@example@example.com",
 		"tags": [
 			"integration:metabase",
-			"service:query-logs"
+			"vendor.endpoint:query-logs"
 		],
 		"options": {
 			"thresholds": {
@@ -34,7 +34,7 @@
 					},
 					"group_by": [],
 					"search": {
-						"query": "source:metabase service:query-logs @running_time_seconds:>10"
+						"query": "source:metabase (service:query-logs OR @vendor.endpoint:query-logs) @running_time_seconds:>10"
 					},
 					"storage": "hot"
 				},
@@ -49,7 +49,7 @@
 					},
 					"group_by": [],
 					"search": {
-						"query": "source:metabase service:query-logs"
+						"query": "source:metabase (service:query-logs OR @vendor.endpoint:query-logs)"
 					},
 					"storage": "hot"
 				}

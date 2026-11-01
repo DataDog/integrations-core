@@ -41,7 +41,7 @@
               "hide_zero_counts": true,
               "show_status": true,
               "last_triggered_format": "relative",
-              "query": "tag:(integration:metabase) service:query-logs",
+              "query": "tag:(integration:metabase) (service:query-logs OR tag:(vendor.endpoint:query-logs))",
               "sort": "status,asc",
               "count": 50,
               "start": 0,
@@ -117,7 +117,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:metabase service:query-logs $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                        "query": "source:metabase (service:query-logs OR  @vendor.endpoint:query-logs) $Query_Source $Card_Name $Dashboard_Name $User_Name"
                       },
                       "storage": "hot"
                     }
@@ -194,7 +194,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:metabase service:query-logs $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                        "query": "source:metabase (service:query-logs OR  @vendor.endpoint:query-logs) $Query_Source $Card_Name $Dashboard_Name $User_Name"
                       },
                       "storage": "hot"
                     }
@@ -240,7 +240,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:metabase service:query-logs $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                        "query": "source:metabase (service:query-logs OR  @vendor.endpoint:query-logs) $Query_Source $Card_Name $Dashboard_Name $User_Name"
                       },
                       "storage": "hot"
                     }
@@ -311,7 +311,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:metabase service:query-logs @query_source:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                        "query": "source:metabase (service:query-logs OR  @vendor.endpoint:query-logs) @query_source:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
                       },
                       "storage": "hot"
                     }
@@ -384,7 +384,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:metabase service:query-logs $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                        "query": "source:metabase (service:query-logs OR  @vendor.endpoint:query-logs) $Query_Source $Card_Name $Dashboard_Name $User_Name"
                       },
                       "storage": "hot"
                     }
@@ -451,7 +451,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:metabase service:query-logs $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                        "query": "source:metabase (service:query-logs OR  @vendor.endpoint:query-logs) $Query_Source $Card_Name $Dashboard_Name $User_Name"
                       },
                       "storage": "hot"
                     }
@@ -510,7 +510,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:metabase service:query-logs @cache_hit:true $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                        "query": "source:metabase (service:query-logs OR  @vendor.endpoint:query-logs) @cache_hit:true $Query_Source $Card_Name $Dashboard_Name $User_Name"
                       },
                       "storage": "hot"
                     },
@@ -525,7 +525,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:metabase service:query-logs @cache_hit:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                        "query": "source:metabase (service:query-logs OR  @vendor.endpoint:query-logs) @cache_hit:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
                       },
                       "storage": "hot"
                     }
@@ -593,7 +593,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:metabase service:query-logs @cache_hit:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                        "query": "source:metabase (service:query-logs OR  @vendor.endpoint:query-logs) @cache_hit:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
                       },
                       "storage": "hot"
                     }
@@ -641,7 +641,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "source:metabase service:query-logs $Query_Source $Card_Name $Dashboard_Name $User_Name ",
+                    "query_string": "source:metabase (service:query-logs OR  @vendor.endpoint:query-logs) $Query_Source $Card_Name $Dashboard_Name $User_Name ",
                     "indexes": [],
                     "storage": "hot"
                   },
@@ -748,7 +748,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:metabase service:query-logs @query_source:dashboard $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                        "query": "source:metabase (service:query-logs OR  @vendor.endpoint:query-logs) @query_source:dashboard $Query_Source $Card_Name $Dashboard_Name $User_Name"
                       },
                       "storage": "hot"
                     }
@@ -823,7 +823,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:metabase service:query-logs @query_source:dashboard $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                        "query": "source:metabase (service:query-logs OR  @vendor.endpoint:query-logs) @query_source:dashboard $Query_Source $Card_Name $Dashboard_Name $User_Name"
                       },
                       "storage": "hot"
                     }
@@ -916,7 +916,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:metabase service:query-logs @query_source:question $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                        "query": "source:metabase (service:query-logs OR  @vendor.endpoint:query-logs) @query_source:question $Query_Source $Card_Name $Dashboard_Name $User_Name"
                       },
                       "storage": "hot"
                     }
@@ -991,7 +991,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:metabase service:query-logs @query_source:question $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                        "query": "source:metabase (service:query-logs OR  @vendor.endpoint:query-logs) @query_source:question $Query_Source $Card_Name $Dashboard_Name $User_Name"
                       },
                       "storage": "hot"
                     }
@@ -1074,7 +1074,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:metabase service:query-logs @error:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                        "query": "source:metabase (service:query-logs OR  @vendor.endpoint:query-logs) @error:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
                       },
                       "storage": "hot"
                     }
@@ -1134,7 +1134,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:metabase service:query-logs @error:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                        "query": "source:metabase (service:query-logs OR  @vendor.endpoint:query-logs) @error:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
                       },
                       "storage": "hot"
                     }
@@ -1195,7 +1195,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:metabase service:query-logs @error:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                        "query": "source:metabase (service:query-logs OR  @vendor.endpoint:query-logs) @error:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
                       },
                       "storage": "hot"
                     }
@@ -1262,7 +1262,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:metabase service:query-logs @error:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
+                        "query": "source:metabase (service:query-logs OR  @vendor.endpoint:query-logs) @error:* $Query_Source $Card_Name $Dashboard_Name $User_Name"
                       },
                       "storage": "hot"
                     }
@@ -1311,7 +1311,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "source:metabase service:query-logs @error:* $Query_Source $Card_Name $Dashboard_Name $User_Name ",
+                    "query_string": "source:metabase (service:query-logs OR  @vendor.endpoint:query-logs) @error:* $Query_Source $Card_Name $Dashboard_Name $User_Name ",
                     "indexes": [],
                     "storage": "hot"
                   },
