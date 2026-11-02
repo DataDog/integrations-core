@@ -1,7 +1,7 @@
 {
   "manifest_version": "2.0.0",
   "app_uuid": "45f03e8d-0358-4ee5-8c9d-36a1bddbd06f",
-  "app_id": "datadog-agent",
+  "app_id": "datadog-agent-openmetrics",
   "owner": "agent-integrations",
   "display_on_public_website": true,
   "tile": {
