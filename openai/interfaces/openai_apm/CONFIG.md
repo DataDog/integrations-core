@@ -143,7 +143,7 @@ See the [APM PHP library documentation][3] for more advanced usage and all the a
 
 Examine the `phpinfo` output of your service. Under the `ddtrace` section, `Diagnostic checks` should be `passed`.
 
-[1]: https://docs.datadoghq.com/tracing/trace_collection/automatic_instrumentation/dd_libraries/php/#install-the-extension
+[1]: https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/php/#install-the-extension
 [2]: https://docs.datadoghq.com/getting_started/site/#access-the-datadog-site
 [3]: https://docs.datadoghq.com/tracing/trace_collection/library_config/php/
 
