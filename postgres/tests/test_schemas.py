@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import contextlib
 from unittest import mock
 
 import pytest
@@ -12,6 +13,14 @@ from datadog_checks.postgres.version_utils import VersionUtils
 from .common import POSTGRES_VERSION
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
+
+
+@contextlib.contextmanager
+def open_tables_query(collector: PostgresSchemaCollector, database_name: str):
+    """Opens the database and starts the tables query, yielding its rows."""
+    tables = collector._object_collectors[0]
+    with collector._open_database(database_name) as conn, tables._open_rows(conn, database_name) as rows:
+        yield rows
 
 
 @pytest.fixture
@@ -111,7 +120,7 @@ def test_get_cursor(dbm_instance, integration_check):
     check.version = POSTGRES_VERSION
     collector = PostgresSchemaCollector(check)
 
-    with collector._get_cursor('datadog_test') as cursor:
+    with open_tables_query(collector, 'datadog_test') as cursor:
         assert cursor is not None
         schemas = []
         for row in cursor:
@@ -126,7 +135,7 @@ def test_schemas_filters(dbm_instance, integration_check):
     check.version = POSTGRES_VERSION
     collector = PostgresSchemaCollector(check)
 
-    with collector._get_cursor('datadog_test') as cursor:
+    with open_tables_query(collector, 'datadog_test') as cursor:
         assert cursor is not None
         schemas = []
         for row in cursor:
@@ -141,7 +150,7 @@ def test_schemas_include_filter(dbm_instance, integration_check):
     check.version = POSTGRES_VERSION
     collector = PostgresSchemaCollector(check)
 
-    with collector._get_cursor('datadog_test') as cursor:
+    with open_tables_query(collector, 'datadog_test') as cursor:
         assert cursor is not None
         schemas = []
         for row in cursor:
@@ -157,7 +166,7 @@ def test_schemas_include_and_exclude_filter(dbm_instance, integration_check):
     check.version = POSTGRES_VERSION
     collector = PostgresSchemaCollector(check)
 
-    with collector._get_cursor('datadog_test') as cursor:
+    with open_tables_query(collector, 'datadog_test') as cursor:
         assert cursor is not None
         schemas = []
         for row in cursor:
@@ -171,7 +180,7 @@ def test_tables(dbm_instance, integration_check):
     check.version = POSTGRES_VERSION
     collector = PostgresSchemaCollector(check)
 
-    with collector._get_cursor('datadog_test') as cursor:
+    with open_tables_query(collector, 'datadog_test') as cursor:
         assert cursor is not None
         tables = []
         for row in cursor:
@@ -211,7 +220,7 @@ def test_tables_include_filter(dbm_instance, integration_check):
     check.version = POSTGRES_VERSION
     collector = PostgresSchemaCollector(check)
 
-    with collector._get_cursor('datadog_test') as cursor:
+    with open_tables_query(collector, 'datadog_test') as cursor:
         assert cursor is not None
         tables = [row['table_name'] for row in cursor if row['table_name']]
 
@@ -225,7 +234,7 @@ def test_tables_include_and_exclude_filter(dbm_instance, integration_check):
     check.version = POSTGRES_VERSION
     collector = PostgresSchemaCollector(check)
 
-    with collector._get_cursor('datadog_test') as cursor:
+    with open_tables_query(collector, 'datadog_test') as cursor:
         assert cursor is not None
         tables = [row['table_name'] for row in cursor if row['table_name']]
 
@@ -245,7 +254,7 @@ def test_tables_include_and_exclude_filter(dbm_instance, integration_check):
 #     check.version = POSTGRES_VERSION
 #     collector = PostgresSchemaCollector(check)
 
-#     with collector._get_cursor('datadog_test') as cursor:
+#     with open_tables_query(collector, 'datadog_test') as cursor:
 #         assert cursor is not None
 #         # Assert that at least one row has columns
 #         assert any(row['columns'] for row in cursor)
@@ -264,7 +273,7 @@ def test_tables_include_and_exclude_filter(dbm_instance, integration_check):
 #     check.version = POSTGRES_VERSION
 #     collector = PostgresSchemaCollector(check)
 
-#     with collector._get_cursor('datadog_test') as cursor:
+#     with open_tables_query(collector, 'datadog_test') as cursor:
 #         assert cursor is not None
 #         # Assert that at least one row has indexes
 #         assert any(row['indexes'] for row in cursor)

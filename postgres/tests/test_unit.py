@@ -20,6 +20,128 @@ from datadog_checks.postgres.statements_v2 import PostgresStatementMetricsV2
 pytestmark = pytest.mark.unit
 
 
+def test_schema_collectors_use_independent_queries_and_limits(pg_instance, integration_check):
+    pg_instance['collect_schemas'] = {'collect_views': True, 'max_tables': 25, 'max_views': 1000}
+    check = integration_check(pg_instance)
+    check.version = VersionInfo(18, 0, 0)
+    tables, views = PostgresSchemaCollector(check)._object_collectors
+
+    table_query, _ = tables.get_rows_query()
+    view_query, _ = views.get_rows_query()
+
+    assert "LIMIT 25" in table_query
+    assert "c.relkind IN ( 'r', 'p', 'f' )" in table_query
+    assert "pg_get_viewdef" not in table_query
+    assert "LIMIT 1000" in view_query
+    assert "c.relkind IN ('v', 'm')" in view_query
+    # The limit applies before the per-view definition and column lookups.
+    assert view_query.index("LIMIT 1000") < view_query.index("pg_get_viewdef")
+    assert view_query.index("LIMIT 1000") < view_query.index("INNER JOIN pg_attribute")
+    assert "a.attrelid = selected_views.view_id" in view_query
+
+
+def test_view_collector_maps_view_metadata(pg_instance, integration_check):
+    pg_instance['collect_schemas'] = {'collect_views': True}
+    check = integration_check(pg_instance)
+    views = PostgresSchemaCollector(check)._object_collectors[1]
+    database = {
+        'description': 'application database',
+        'encoding': 'UTF8',
+        'id': '1',
+        'name': 'app',
+        'owner': 'postgres',
+    }
+    row = {
+        'schema_id': 2200,
+        'schema_name': 'public',
+        'schema_owner': 'postgres',
+        'view_id': 16420,
+        'view_name': 'active_users',
+        'view_owner': 'app',
+        'definition': 'SELECT id, email FROM users;',
+        'relkind': 'v',
+        'columns': [
+            {'data_type': 'integer', 'default': None, 'name': 'id', 'nullable': True},
+            {'data_type': 'text', 'default': None, 'name': 'email', 'nullable': True},
+        ],
+    }
+
+    mapped = views._map_row(database, row)
+
+    assert mapped == {
+        **database,
+        'schemas': [
+            {
+                'id': '2200',
+                'name': 'public',
+                'owner': 'postgres',
+                'tables': [],
+                'views': [
+                    {
+                        'columns': row['columns'],
+                        'definition': 'SELECT id, email FROM users;',
+                        'id': '16420',
+                        'name': 'active_users',
+                        'owner': 'app',
+                        'relkind': 'v',
+                    }
+                ],
+            }
+        ],
+    }
+
+
+def test_schema_collector_reports_separate_object_counts(pg_instance, integration_check):
+    pg_instance['collect_schemas'] = {'collect_views': True}
+    check = integration_check(pg_instance)
+    check.gauge = mock.Mock()
+    collector = PostgresSchemaCollector(check)
+    collector._get_databases = mock.Mock(return_value=[])
+
+    collector.collect_schemas()
+
+    submitted_metrics = [call.args[0] for call in check.gauge.call_args_list]
+    assert submitted_metrics.count('dd.postgres.schema.tables_count') == 1
+    assert submitted_metrics.count('dd.postgres.schema.views_count') == 1
+
+
+@pytest.mark.parametrize(
+    ('collect_views', 'expected_kinds'),
+    [(None, ['pg_databases']), (True, ['pg_databases', 'pg_views']), (False, ['pg_databases'])],
+)
+def test_schema_collector_collects_views_only_when_enabled(
+    pg_instance, integration_check, collect_views, expected_kinds
+):
+    if collect_views is not None:
+        pg_instance['collect_schemas'] = {'collect_views': collect_views}
+    check = integration_check(pg_instance)
+
+    assert PostgresSchemaCollector(check).kinds == expected_kinds
+
+
+def test_schema_collector_runs_tables_and_views_on_one_connection_per_database(pg_instance, integration_check):
+    pg_instance['collect_schemas'] = {'collect_views': True}
+    check = integration_check(pg_instance)
+    check.version = VersionInfo(18, 0, 0)
+    collector = PostgresSchemaCollector(check)
+    collector._get_databases = mock.Mock(return_value=[{'name': 'db1'}, {'name': 'db2'}])
+    cursor = mock.MagicMock()
+    cursor.fetchone.return_value = None
+    conn = mock.MagicMock()
+    conn.cursor.return_value.__enter__.return_value = cursor
+    check.db_pool = mock.Mock()
+    check.db_pool.get_connection.return_value.__enter__ = mock.Mock(return_value=conn)
+    check.db_pool.get_connection.return_value.__exit__ = mock.Mock(return_value=False)
+
+    collector.collect_schemas()
+
+    assert check.db_pool.get_connection.call_args_list == [mock.call('db1'), mock.call('db2')]
+    # Each kind sets its timeout inside its own transaction on the shared connection.
+    assert conn.transaction.call_count == 4
+    timeouts = [c for c in cursor.execute.call_args_list if c.args[0].startswith('SET LOCAL statement_timeout')]
+    assert len(timeouts) == 4
+
+
 def test_get_instance_metrics_lt_92(integration_check, pg_instance):
     """
     check output when 9.2+

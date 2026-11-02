@@ -131,3 +131,9 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-'EOSQL'
     SELECT * FROM pg_create_physical_replication_slot('replication_slot');
     SELECT * FROM pg_create_logical_replication_slot('logical_slot', 'test_decoding');
 EOSQL
+
+# Created last: schema snapshot fixtures embed object OIDs, so objects added here must not shift earlier ones.
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" datadog_test <<-'EOSQL'
+    CREATE VIEW public2.active_persons AS SELECT personid, lastname, city FROM persons;
+    CREATE MATERIALIZED VIEW public2.materialized_persons AS SELECT personid, firstname, city FROM persons;
+EOSQL

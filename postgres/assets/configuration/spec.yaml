@@ -992,6 +992,14 @@ files:
           value:
             type: boolean
             example: true
+        - name: collect_views
+          fleet_configurable: false
+          description: |
+            Enable collection of PostgreSQL views and materialized views when schema collection is enabled.
+            View definitions are sent as written, without obfuscation. Defaults to false.
+          value:
+            type: boolean
+            example: false
         - name: max_tables
           fleet_configurable: true
           description: |
@@ -1000,6 +1008,15 @@ files:
             type: number
             example: 300
             display_default: 300
+        - name: max_views
+          fleet_configurable: false
+          description: |
+            Set the maximum number of views and materialized views to collect from each database when
+            `collect_views` is enabled. Set to 0 to collect every view. Defaults to 1000.
+          value:
+            type: number
+            example: 1000
+            display_default: 1000
         - name: max_query_duration
           fleet_configurable: true
           description: |
