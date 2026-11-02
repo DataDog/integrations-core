@@ -37,6 +37,92 @@ The Agent always serves its telemetry at `/telemetry` on the port set by `expvar
 
 [Run the Agent's status subcommand][7] and look for `datadog_agent` under the Checks section.
 
+### Migrating from Agent Metrics
+
+The Datadog Agent integration collects similar data to the [Agent Metrics][2] integration, but most metric names, types, and tags differ. Dashboards and monitors that query Agent Metrics metrics must be updated.
+
+1. Configure the Datadog Agent integration as described in [Configuration](#configuration).
+2. Optionally, keep `go_expvar.d/agent_stats.yaml` in place while you update your dashboards and monitors, so that you can compare the old and new metrics. While both checks run, the metrics that keep the same name are submitted twice: `datadog.agent.aggregator.dogstatsd_contexts`, `datadog.agent.forwarder.transactions.retry_queue_size`, and `datadog.agent.scheduler.checks_entered`.
+3. Update your dashboards and monitors using the mapping below.
+4. Remove `go_expvar.d/agent_stats.yaml` and [restart the Agent][6].
+
+#### Behavior changes
+
+- **Counters are submitted as counts.** Agent Metrics submitted counters as per-second rates. The Datadog Agent integration submits them as counts with a `.count` suffix. For example, to get the equivalent of `datadog.agent.forwarder.transactions.success`, query `datadog.agent.forwarder.transactions.success.count` with the `.as_rate()` function.
+- **Related metrics are combined and distinguished by tags.** For example, the separate DogStatsD packet and parse error metrics are replaced by `datadog.agent.dogstatsd.processed.count`, tagged by `message_type` and `state`.
+- **Some metrics are now under the `datadog.agent.` namespace.** Agent Metrics submitted `scheduler.queues.size`, `scheduler.queues.interval`, `batch_strategy.idle_time`, and `batch_strategy.in_use_time` without a namespace.
+- **Go runtime metrics are not collected by default.** Agent Metrics also collected Go memory statistics, such as `datadog.agent.memstats.heap_alloc`. The telemetry endpoint exposes them as `go_memstats_*` and `go_gc_*` metrics, which you can collect with the `extra_metrics` option. For example:
+
+  ```yaml
+  instances:
+    - openmetrics_endpoint: http://localhost:5000/telemetry
+      extra_metrics:
+        - go_memstats_heap_alloc_bytes: go.memstats.heap_alloc
+        - go_memstats_heap_inuse_bytes: go.memstats.heap_inuse
+  ```
+
+#### Metric mapping
+
+Unless noted otherwise, all metric names in the table are prefixed with `datadog.agent.`.
+
+| Agent Metrics metric | Datadog Agent metric |
+| --- | --- |
+| `forwarder.transactions.success` | `forwarder.transactions.success.count` |
+| `forwarder.transactions.errors` | `forwarder.transactions.errors.count` |
+| `forwarder.transactions.errors_by_type.dns_errors` | `forwarder.transactions.errors.count` with `error_type:dns_lookup_failure` |
+| `forwarder.transactions.errors_by_type.tls_errors` | `forwarder.transactions.errors.count` with `error_type:tls_handshake_failure` |
+| `forwarder.transactions.errors_by_type.connection_errors` | `forwarder.transactions.errors.count` with `error_type:connection_failure` |
+| `forwarder.transactions.errors_by_type.wrote_request_errors` | `forwarder.transactions.errors.count` with `error_type:writing_failure` |
+| `forwarder.transactions.errors_by_type.sent_request_errors` | `forwarder.transactions.errors.count` with `error_type:invalid_request` |
+| `forwarder.transactions.http_errors` | `forwarder.transactions.http_errors.count`, tagged by `code` |
+| `forwarder.transactions.retry_queue_size` | `forwarder.transactions.retry_queue_size`, tagged by `domain` |
+| `forwarder.transactions.dropped_on_input` | No longer reported by the Agent. See `forwarder.transactions.dropped.count`. |
+| `dogstatsd.metric_packets` | `dogstatsd.processed.count` with `message_type:metrics` and `state:ok` |
+| `dogstatsd.metric_parse_errors` | `dogstatsd.processed.count` with `message_type:metrics` and `state:error` |
+| `dogstatsd.event_packets` | `dogstatsd.processed.count` with `message_type:events` and `state:ok` |
+| `dogstatsd.event_parse_errors` | `dogstatsd.processed.count` with `message_type:events` and `state:error` |
+| `dogstatsd.service_check_packets` | `dogstatsd.processed.count` with `message_type:service_checks` and `state:ok` |
+| `dogstatsd.service_check_parse_errors` | `dogstatsd.processed.count` with `message_type:service_checks` and `state:error` |
+| `dogstatsd_udp.packets` | `dogstatsd_udp.packets.count` with `state:ok` |
+| `dogstatsd_udp.packet_reading_errors` | `dogstatsd_udp.packets.count` with `state:error` |
+| `dogstatsd_uds.packets` | `dogstatsd_uds.packets.count` with `state:ok` |
+| `dogstatsd_uds.packet_reading_errors` | `dogstatsd_uds.packets.count` with `state:error` |
+| `dogstatsd_uds.origin_detection_errors` | `dogstatsd_uds.origin_detection_errors.count` |
+| `aggregator.dogstatsd_contexts` | `aggregator.dogstatsd_contexts`, tagged by `shard` |
+| `aggregator.series_flushed` | `aggregator.flush.count` with `data_type:series` |
+| `aggregator.service_check_flushed` | `aggregator.flush.count` with `data_type:service_checks` |
+| `aggregator.events_flushed` | `aggregator.flush.count` with `data_type:events` |
+| `aggregator.checks_metric_sample` | `aggregator.processed.count` with `data_type:metrics` |
+| `aggregator.dogstatsd_metric_sample` | `aggregator.processed.count` with `data_type:dogstatsd_metrics` |
+| `aggregator.service_check` | `aggregator.processed.count` with `data_type:service_checks` |
+| `aggregator.event` | `aggregator.processed.count` with `data_type:events` |
+| `aggregator.number_of_flush` | `aggregator.number_of_flush.count` |
+| `aggregator.flush.main_flush_time.last_flush` | `aggregator.flush_time` with `flush_type:main` |
+| `aggregator.flush.checks_metric_sample_flush_time.last_flush` | `aggregator.flush_time` with `flush_type:checks_metric_sample` |
+| `aggregator.flush.service_check_flush_time.last_flush` | `aggregator.flush_time` with `flush_type:service_check` |
+| `aggregator.flush.event_flush_time.last_flush` | `aggregator.flush_time` with `flush_type:event` |
+| `aggregator.flush.metric_sketch_flush_time.last_flush` | `aggregator.flush_time` with `flush_type:metric_sketch` |
+| `aggregator.flush_count.series.last_flush` | `aggregator.flush_count` with `flush_type:series` |
+| `aggregator.flush_count.service_checks.last_flush` | `aggregator.flush_count` with `flush_type:service_checks` |
+| `aggregator.flush_count.events.last_flush` | `aggregator.flush_count` with `flush_type:events` |
+| `aggregator.flush_count.sketches.last_flush` | `aggregator.flush_count` with `flush_type:sketches` |
+| `aggregator.hostname_update` | No longer reported by the Agent. |
+| `scheduler.checks_entered` | `scheduler.checks_entered`, tagged by `check_name` |
+| `scheduler.queues_count` | `scheduler.queues_count.count` |
+| `scheduler.queues.size` (no namespace) | `scheduler.queues.size`, tagged by `interval` |
+| `scheduler.queues.interval` (no namespace) | No equivalent. Use the `interval` tag of `scheduler.queues.size`. |
+| `splitter.*` | No longer reported by the Agent. |
+| `logs_agent.logs_decoded` | `logs_agent.logs_decoded.count` |
+| `logs_agent.logs_processed` | `logs_agent.logs_processed.count` |
+| `logs_agent.logs_sent` | `logs_agent.logs_sent.count` |
+| `logs_agent.bytes_sent` | `logs_agent.bytes_sent.count` |
+| `logs_agent.encoded_bytes_sent` | `logs_agent.encoded_bytes_sent.count` |
+| `logs_agent.destination_errors` | `logs_agent.destination_errors.count` |
+| `logs_agent.is_running` | Not collected. |
+| `batch_strategy.idle_time` (no namespace) | `batch_strategy.idle_time.count`, tagged by `sender` (for example, `sender:logs_0_reliable_0` instead of `sender:0`) |
+| `batch_strategy.in_use_time` (no namespace) | `batch_strategy.in_use_time.count`, tagged by `sender` |
+| `memstats.*` | Not collected by default. See the `extra_metrics` example above. |
+
 ## Data Collected
 
 ### Metrics
