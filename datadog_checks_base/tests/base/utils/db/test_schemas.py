@@ -6,7 +6,13 @@ from contextlib import contextmanager
 import pytest
 
 from datadog_checks.base.checks.db import DatabaseCheck
-from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
+from datadog_checks.base.utils.db.schemas import (
+    DatabaseSchemaCollector,
+    SchemaCollector,
+    SchemaCollectorConfig,
+    SchemaObjectCollector,
+    ViewObjectCollector,
+)
 
 try:
     import datadog_agent  # type: ignore
@@ -311,3 +317,206 @@ def test_schema_collector_skips_malformed_database_entry(aggregator):
     collected_names = [row['name'] for event in events for row in event['metadata']]
     assert 'db_good' in collected_names
     assert 'db_also_good' in collected_names
+
+
+class FakeSession:
+    """Stands in for a per-database connection and records the queries run on it."""
+
+    def __init__(self, database_name):
+        self.database_name = database_name
+        self.queries = []
+
+
+class FakeTablesCollector(SchemaObjectCollector):
+    def __init__(self, check, config, rows_by_database, fail_on=()):
+        super().__init__(check, config)
+        self._rows_by_database = rows_by_database
+        self._fail_on = set(fail_on)
+
+    @property
+    def kind(self):
+        return "test_databases"
+
+    @contextmanager
+    def _open_rows(self, session, database_name):
+        session.queries.append(self.kind)
+        yield self._iter_rows(database_name)
+
+    def _iter_rows(self, database_name):
+        for row in self._rows_by_database.get(database_name, []):
+            if (database_name, row) in self._fail_on:
+                raise RuntimeError(f"{self.kind} query failed")
+            yield row
+
+    def _map_row(self, database, cursor_row):
+        return {**database, "tables": [{"name": cursor_row}]}
+
+
+class FakeViewsCollector(ViewObjectCollector, FakeTablesCollector):
+    @property
+    def kind(self):
+        return "test_views"
+
+    def _map_row(self, database, cursor_row):
+        view = {"name": cursor_row, "definition": "SELECT 1", "columns": []}
+        return {**database, "schemas": [self._schema_with_view({"name": "public"}, view)]}
+
+
+class FakeDatabaseCollector(DatabaseSchemaCollector):
+    def __init__(self, check, object_collectors, databases, unopenable=()):
+        super().__init__(check, object_collectors)
+        self._databases = databases
+        self._unopenable = set(unopenable)
+        self.get_databases_calls = 0
+        self.sessions = []
+
+    def _get_databases(self):
+        self.get_databases_calls += 1
+        return [{"name": name} for name in self._databases]
+
+    @contextmanager
+    def _open_database(self, database_name):
+        if database_name in self._unopenable:
+            raise RuntimeError(f"cannot open {database_name}")
+        session = FakeSession(database_name)
+        self.sessions.append(session)
+        yield session
+
+
+def events_by_kind(aggregator):
+    events = {}
+    for event in aggregator.get_event_platform_events("dbm-metadata"):
+        events.setdefault(event["kind"], []).append(event)
+    return events
+
+
+def snapshot_names(events):
+    """
+    Names of the databases whose snapshot was completed by a terminal payload, in collection order.
+
+    A terminal payload is empty when the rows were already flushed in chunks, so the name comes from the latest
+    payload that had rows.
+    """
+    completed = []
+    current = None
+    for event in events:
+        if event["metadata"]:
+            current = event["metadata"][0]["name"]
+        if "collection_payloads_count" in event:
+            completed.append(current)
+    return completed
+
+
+@pytest.mark.unit
+def test_database_collector_opens_each_database_once_for_all_kinds(aggregator):
+    check = TestDatabaseCheck()
+    rows = {"db1": ["a"], "db2": ["b"]}
+    tables = FakeTablesCollector(check, SchemaCollectorConfig(), rows)
+    views = FakeViewsCollector(check, SchemaCollectorConfig(), rows)
+    collector = FakeDatabaseCollector(check, [tables, views], ["db1", "db2"])
+
+    assert collector.collect_schemas() is True
+
+    assert collector.get_databases_calls == 1
+    assert [(s.database_name, s.queries) for s in collector.sessions] == [
+        ("db1", ["test_databases", "test_views"]),
+        ("db2", ["test_databases", "test_views"]),
+    ]
+    events = events_by_kind(aggregator)
+    assert snapshot_names(events["test_databases"]) == ["db1", "db2"]
+    assert snapshot_names(events["test_views"]) == ["db1", "db2"]
+    view_schema = events["test_views"][0]["metadata"][0]["schemas"][0]
+    assert view_schema["tables"] == []
+    assert view_schema["views"][0]["name"] == "a"
+
+
+@pytest.mark.unit
+def test_database_collector_kind_failure_skips_only_that_kind(aggregator):
+    """A kind failing partway through a database leaves its snapshot incomplete without affecting other kinds."""
+    check = TestDatabaseCheck()
+    config = SchemaCollectorConfig()
+    config.payload_chunk_size = 1
+    rows = {"db1": ["first", "second"], "db2": ["third"]}
+    tables = FakeTablesCollector(check, config, rows, fail_on=[("db1", "second")])
+    views = FakeViewsCollector(check, config, rows)
+    collector = FakeDatabaseCollector(check, [tables, views], ["db1", "db2"])
+
+    assert collector.collect_schemas() is True
+
+    events = events_by_kind(aggregator)
+    db1_tables = [e for e in events["test_databases"] if e["metadata"] and e["metadata"][0]["name"] == "db1"]
+    assert [e["metadata"][0]["tables"][0]["name"] for e in db1_tables] == ["first"]
+    assert "collection_payloads_count" not in db1_tables[0]
+    assert snapshot_names(events["test_databases"]) == ["db2"]
+    # Views run on db1 after tables failed there, and the terminal payload follows the two chunk payloads.
+    assert [e.get("collection_payloads_count") for e in events["test_views"]] == [None, None, 3, None, 2]
+    aggregator.assert_metric(
+        f"dd.{check.dbms}.schema.tables_count", value=1, tags=check.tags + ["status:success", "kind:test_databases"]
+    )
+
+
+@pytest.mark.unit
+def test_database_collector_unopenable_database_skips_all_kinds(aggregator):
+    check = TestDatabaseCheck()
+    rows = {"db1": ["a"], "db2": ["b"], "db3": ["c"]}
+    tables = FakeTablesCollector(check, SchemaCollectorConfig(), rows)
+    views = FakeViewsCollector(check, SchemaCollectorConfig(), rows)
+    collector = FakeDatabaseCollector(check, [tables, views], ["db1", "db2", "db3"], unopenable=["db2"])
+
+    assert collector.collect_schemas() is True
+
+    events = events_by_kind(aggregator)
+    assert snapshot_names(events["test_databases"]) == ["db1", "db3"]
+    assert snapshot_names(events["test_views"]) == ["db1", "db3"]
+
+
+@pytest.mark.unit
+def test_database_collector_reports_telemetry_per_kind(aggregator):
+    check = TestDatabaseCheck()
+    rows = {"db1": ["a", "b"]}
+    tables = FakeTablesCollector(check, SchemaCollectorConfig(), {"db1": ["a"]})
+    views = FakeViewsCollector(check, SchemaCollectorConfig(), rows)
+    FakeDatabaseCollector(check, [tables, views], ["db1"]).collect_schemas()
+
+    table_tags = check.tags + ["status:success", "kind:test_databases"]
+    view_tags = check.tags + ["status:success", "kind:test_views"]
+    aggregator.assert_metric(f"dd.{check.dbms}.schema.tables_count", value=1, tags=table_tags, count=1)
+    aggregator.assert_metric(f"dd.{check.dbms}.schema.views_count", value=2, tags=view_tags, count=1)
+    for tags in (table_tags, view_tags):
+        aggregator.assert_metric(f"dd.{check.dbms}.schema.time", tags=tags, count=1)
+        aggregator.assert_metric(f"dd.{check.dbms}.schema.payloads_count", value=1, tags=tags, count=1)
+
+
+@pytest.mark.unit
+def test_database_collector_database_listing_failure_reports_error_for_every_kind(aggregator):
+    check = TestDatabaseCheck()
+    tables = FakeTablesCollector(check, SchemaCollectorConfig(), {})
+    views = FakeViewsCollector(check, SchemaCollectorConfig(), {})
+    collector = FakeDatabaseCollector(check, [tables, views], [])
+
+    def fail():
+        raise RuntimeError("cannot list databases")
+
+    collector._get_databases = fail
+    with pytest.raises(RuntimeError, match="cannot list databases"):
+        collector.collect_schemas()
+
+    for kind in ("test_databases", "test_views"):
+        aggregator.assert_metric(f"dd.{check.dbms}.schema.time", tags=check.tags + ["status:error", f"kind:{kind}"])
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "configured_chunk_size, expected_chunk_size",
+    [
+        pytest.param(10_000, 500, id="caps large table chunk size"),
+        pytest.param(100, 100, id="keeps smaller configured size"),
+    ],
+)
+def test_view_collector_payload_chunk_size(configured_chunk_size, expected_chunk_size):
+    """View rows carry full definitions, so view payloads must not use the much larger table chunk size."""
+    config = SchemaCollectorConfig()
+    config.payload_chunk_size = configured_chunk_size
+    views = FakeViewsCollector(TestDatabaseCheck(), config, {})
+
+    assert views.payload_chunk_size == expected_chunk_size
