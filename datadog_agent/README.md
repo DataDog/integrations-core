@@ -39,19 +39,19 @@ The Agent always serves its telemetry at `/telemetry` on the port set by `expvar
 
 ### Migrating from Agent Metrics
 
-The Datadog Agent integration collects similar data to the [Agent Metrics][2] integration, but most metric names, types, and tags differ. Dashboards and monitors that query Agent Metrics metrics must be updated.
+The Datadog Agent integration collects similar data to the [Agent Metrics][2] integration, but most metric names, types, and tags differ. You must update dashboards and monitors that query Agent Metrics metrics.
 
 1. Configure the Datadog Agent integration as described in [Configuration](#configuration).
-2. Optionally, keep `go_expvar.d/agent_stats.yaml` in place while you update your dashboards and monitors, so that you can compare the old and new metrics. While both checks run, the metrics that keep the same name are submitted twice: `datadog.agent.aggregator.dogstatsd_contexts`, `datadog.agent.forwarder.transactions.retry_queue_size`, and `datadog.agent.scheduler.checks_entered`.
+2. Optionally, keep `go_expvar.d/agent_stats.yaml` in place while you update your dashboards and monitors, so that you can compare the old and new metrics. Three metrics keep the same name in both integrations, and both checks submit them while both checks run: `datadog.agent.aggregator.dogstatsd_contexts`, `datadog.agent.forwarder.transactions.retry_queue_size`, and `datadog.agent.scheduler.checks_entered`.
 3. Update your dashboards and monitors using the mapping below.
 4. Remove `go_expvar.d/agent_stats.yaml` and [restart the Agent][6].
 
 #### Behavior changes
 
 - **Counters are submitted as counts.** Agent Metrics submitted counters as per-second rates. The Datadog Agent integration submits them as counts with a `.count` suffix. For example, to get the equivalent of `datadog.agent.forwarder.transactions.success`, query `datadog.agent.forwarder.transactions.success.count` with the `.as_rate()` function.
-- **Related metrics are combined and distinguished by tags.** For example, the separate DogStatsD packet and parse error metrics are replaced by `datadog.agent.dogstatsd.processed.count`, tagged by `message_type` and `state`.
+- **Related metrics are combined and distinguished by tags.** For example, `datadog.agent.dogstatsd.processed.count`, tagged by `message_type` and `state`, replaces the separate DogStatsD packet and parse error metrics.
 - **Some metrics are now under the `datadog.agent.` namespace.** Agent Metrics submitted `scheduler.queues.size`, `scheduler.queues.interval`, `batch_strategy.idle_time`, and `batch_strategy.in_use_time` without a namespace.
-- **Go runtime metrics are not collected by default.** Agent Metrics also collected Go memory statistics, such as `datadog.agent.memstats.heap_alloc`. The telemetry endpoint exposes them as `go_memstats_*` and `go_gc_*` metrics, which you can collect with the `extra_metrics` option. For example:
+- **Go runtime metrics are not collected by default.** Agent Metrics also collected Go memory statistics, such as `datadog.agent.memstats.heap_alloc`. The telemetry endpoint exposes them as `go_memstats_*` and `go_gc_*` metrics. To collect them, use the `extra_metrics` option. For example:
 
   ```yaml
   instances:
