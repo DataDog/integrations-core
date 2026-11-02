@@ -93,7 +93,7 @@ ddtrace-run --debug
 <!-- xxz tab xxx -->
 <!-- xxx tab "Node.js" xxx -->
 
-#### If you do not have the Datadog Agent
+#### If the Datadog Agent is not yet installed
 
 1. Install the `dd-trace` package:
 
