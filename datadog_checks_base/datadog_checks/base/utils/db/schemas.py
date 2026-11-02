@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import contextlib
 from abc import ABC, abstractmethod
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from typing import TYPE_CHECKING, Any, ContextManager, TypedDict
 
 from datadog_checks.base.utils.serialization import json
@@ -400,6 +400,10 @@ class ViewObjectCollector(SchemaObjectCollector):
         return min(self._config.payload_chunk_size, VIEW_PAYLOAD_CHUNK_SIZE)
 
     @staticmethod
-    def _schema_with_view(schema: dict[str, Any], view: ViewObject) -> dict[str, Any]:
-        """Returns a schema object holding one view and no tables."""
+    def _schema_with_view(schema: Mapping[str, Any], view: Mapping[str, Any]) -> dict[str, Any]:
+        """
+        Returns a schema object holding one view and no tables.
+
+        `view` is typically a `ViewObject` extended with DBMS-specific fields.
+        """
         return {**schema, "tables": [], "views": [view]}
