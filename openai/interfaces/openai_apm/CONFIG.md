@@ -65,7 +65,7 @@ Pass the `--debug` flag to `ddtrace-run` to enable debug logging:
 ddtrace-run --debug
 ```
 
-This displays any errors sending data, for example:
+Debug logging displays any errors sending data. For example:
 
 ```
 ERROR:ddtrace.internal.writer.writer:failed to send, dropping 1 traces to intake at http://localhost:8126/v0.5/traces after 3 retries ([Errno 61] Connection refused)
