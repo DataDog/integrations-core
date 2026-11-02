@@ -170,7 +170,9 @@ ddtrace-run --debug
 
 The following OpenAI methods are traced automatically, capturing latency, input and output messages, and token usage without manual instrumentation:
 
-- `client.completions.create()`, `client.chat.completions.create()`, `client.embeddings.create()` (where `client` is an instance of `OpenAI`)
+- `client.completions.create()`
+- `client.chat.completions.create()`
+- `client.embeddings.create()` (where `client` is an instance of `OpenAI`)
 
 #### Troubleshooting
 
