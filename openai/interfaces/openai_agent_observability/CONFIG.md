@@ -54,7 +54,7 @@ Get end-to-end visibility into your LLM application's calls to OpenAI with [LLM 
 
 **Note**: If the Agent is running on a custom host or port, set `DD_AGENT_HOST` and `DD_TRACE_AGENT_PORT` accordingly.
 
-#### If you are running in a serverless environment (AWS Lambda)
+#### Run in a serverless environment (AWS Lambda)
 
 1. Install the **Datadog-Python** and **Datadog-Extension** Lambda layers as part of your AWS Lambda setup.
 2. Enable LLM Observability by setting the following environment variables:
