@@ -478,7 +478,7 @@
                                     "response_format": "event_list",
                                     "query": {
                                         "data_source": "logs_stream",
-                                        "query_string": "source:airflow ",
+                                        "query_string": "source:airflow $host",
                                         "indexes": [],
                                         "storage": "online_archives"
                                     },
