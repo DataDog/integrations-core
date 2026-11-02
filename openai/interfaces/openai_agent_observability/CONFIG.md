@@ -21,7 +21,7 @@ Get end-to-end visibility into your LLM application's calls to OpenAI with [LLM 
    DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_AGENTLESS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> ddtrace-run python <YOUR_APP>.py
    ```
 
-#### If you already have the Datadog Agent installed
+#### If the Datadog Agent is already installed
 
 1. Make sure the Agent is running and that APM and StatsD are enabled. For example, with Docker:
 
