@@ -22,6 +22,13 @@ APPLIANCE_USERNAME = os.environ.get("APPLIANCE_USERNAME", "admin")
 APPLIANCE_PASSWORD = os.environ.get("APPLIANCE_PASSWORD", "")
 
 
+@app.before_request
+def reject_orchestrator_api_key():
+    # The Orchestrator API key must never reach an appliance; fail the request so E2E catches a leak.
+    if "X-Auth-Token" in request.headers:
+        return jsonify({"status": "unexpected X-Auth-Token"}), 400
+
+
 @app.route("/rest/json/login", methods=["POST"])
 def login():
     data = request.get_json(silent=True) or {}

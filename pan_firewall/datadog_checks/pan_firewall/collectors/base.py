@@ -8,11 +8,12 @@ from __future__ import annotations
 import json
 import time
 from collections import Counter
-from collections.abc import Callable
+from collections.abc import Callable, Iterable, Iterator
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Literal, NamedTuple
 from xml.etree.ElementTree import Element
 
+from datadog_checks.pan_firewall.errors import PanosAuthError, PanosError, PanosUnreachable
 from datadog_checks.pan_firewall.log_utils import warn_once
 
 if TYPE_CHECKING:
@@ -134,3 +135,23 @@ class CollectContext:
 
 
 Collector = Callable[[CollectContext], list[Sample]]
+
+
+def read_each[T, R](
+    items: Iterable[T], read: Callable[[T], R], on_error: Callable[[T, PanosError], None]
+) -> Iterator[tuple[T, R]]:
+    error: PanosError | None = None
+    answered = False
+    for item in items:
+        try:
+            result = read(item)
+        except (PanosAuthError, PanosUnreachable):
+            raise
+        except PanosError as e:
+            on_error(item, e)
+            error = e
+            continue
+        answered = True
+        yield item, result
+    if error is not None and not answered:
+        raise error

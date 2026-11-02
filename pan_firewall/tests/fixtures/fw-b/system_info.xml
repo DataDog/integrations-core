@@ -1,26 +1,26 @@
-<response status="success"><result><system><hostname>fw-b</hostname><ip-address>10.20.0.11</ip-address><public-ip-address>unknown</public-ip-address><netmask>255.255.255.0</netmask><default-gateway>10.20.0.1</default-gateway><is-dhcp>yes</is-dhcp><is-dhcp6>no</is-dhcp6><ipv6-address>unknown</ipv6-address><ipv6-link-local-address>fe80::ff:fe00:b/64</ipv6-link-local-address><mac-address>02:00:00:00:00:0b</mac-address><time>Fri Oct  2 04:49:28 2026
+<response status="success"><result><system><hostname>fw-b</hostname><ip-address>10.20.0.11</ip-address><public-ip-address>unknown</public-ip-address><netmask>255.255.255.0</netmask><default-gateway>10.20.0.1</default-gateway><is-dhcp>yes</is-dhcp><is-dhcp6>no</is-dhcp6><ipv6-address>unknown</ipv6-address><ipv6-link-local-address>fe80::ff:fe00:b/64</ipv6-link-local-address><mac-address>02:00:00:00:00:0b</mac-address><time>Tue Oct 27 11:00:07 2026
 </time>
-<uptime>0 days, 2:00:49</uptime>
+<uptime>0 days, 17:38:43</uptime>
 <devicename>fw-b</devicename>
 <family>vm</family><model>PA-VM</model><serial>007900000000002</serial><vm-mac-base></vm-mac-base><vm-mac-count>256</vm-mac-count><vm-uuid>00000000-0000-4000-8000-000000000002</vm-uuid><vm-cpuid>AWS:0000000000000000</vm-cpuid><vm-license>VM-SERIES-4</vm-license><vm-cap-tier>T2-16GB</vm-cap-tier><vm-cores>4</vm-cores><vm-mem>16112364</vm-mem><relicense>0</relicense><vm-mode>Amazon AWS</vm-mode>
 <cloud-mode>cloud</cloud-mode>
 <sw-version>11.1.13-h12</sw-version>
 <global-protect-client-package-version>0.0.0</global-protect-client-package-version>
-<device-dictionary-version>245-762</device-dictionary-version>
-<device-dictionary-release-date>2026/09/28 17:09:54 UTC</device-dictionary-release-date>
-<app-version>9154-10270</app-version>
-<app-release-date>2026/10/01 18:50:36 UTC</app-release-date>
-<av-version>5697-6225</av-version>
-<av-release-date>2026/10/01 11:00:03 UTC</av-release-date>
-<threat-version>9154-10270</threat-version>
-<threat-release-date>2026/10/01 18:50:36 UTC</threat-release-date>
+<device-dictionary-version>249-772</device-dictionary-version>
+<device-dictionary-release-date>2026/10/24 02:35:51 UTC</device-dictionary-release-date>
+<app-version>9166-10323</app-version>
+<app-release-date>2026/10/26 23:01:46 UTC</app-release-date>
+<av-version>5726-6254</av-version>
+<av-release-date>2026/10/27 08:30:15 UTC</av-release-date>
+<threat-version>9166-10323</threat-version>
+<threat-release-date>2026/10/26 23:01:46 UTC</threat-release-date>
 <wf-private-version>0</wf-private-version>
 <wf-private-release-date>unknown</wf-private-release-date>
 <url-db>paloaltonetworks</url-db>
-<wildfire-version>1122983-1127609</wildfire-version>
-<wildfire-release-date>2026/10/02 04:43:00 UTC</wildfire-release-date>
+<wildfire-version>1130239-1134881</wildfire-version>
+<wildfire-release-date>2026/10/27 10:42:57 UTC</wildfire-release-date>
 <wildfire-rt>Disabled</wildfire-rt>
-<url-filtering-version>20261002.20073</url-filtering-version>
+<url-filtering-version>20261027.20165</url-filtering-version>
 <global-protect-datafile-version>0</global-protect-datafile-version>
 <global-protect-datafile-release-date>unknown</global-protect-datafile-release-date><global-protect-clientless-vpn-version>0</global-protect-clientless-vpn-version>
 <logdb-version>11.1.2</logdb-version>
@@ -28,6 +28,6 @@
 <vpn-disable-mode>off</vpn-disable-mode>
 <multi-vsys>off</multi-vsys>
 <operational-mode>normal</operational-mode>
-<advanced-routing>off</advanced-routing>
+<advanced-routing>on</advanced-routing>
 <duplicate-ip>Disabled</duplicate-ip>
 <device-certificate-status>None</device-certificate-status></system></result></response>
