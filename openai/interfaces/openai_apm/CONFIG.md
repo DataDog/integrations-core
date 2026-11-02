@@ -2,7 +2,7 @@
 
 Collect request duration, token usage, and error metrics from your OpenAI calls with a Datadog APM tracing library.
 
-**Note**: This setup method does not collect `audio_speeches`, `audio_transcriptions`, `code_interpreter_sessions`, `completions`, `embeddings`, `images`, `moderations`, and `vector_stores` usage metrics. To collect these metrics, also configure the **Usage and Cost** interface.
+**Note**: This setup method does not collect `audio_speeches`, `audio_transcriptions`, `code_interpreter_sessions`, `completions`, `embeddings`, `images`, `moderations`, or `vector_stores` usage metrics. To collect these metrics, also configure the **Usage and Cost** interface.
 
 #### Step 1: Enable APM and StatsD in the Datadog Agent
 
