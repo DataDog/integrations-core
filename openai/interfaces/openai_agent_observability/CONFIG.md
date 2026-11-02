@@ -7,7 +7,7 @@ Get end-to-end visibility into your LLM application's calls to OpenAI with [LLM 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Python" xxx -->
 
-#### If you do not have the Datadog Agent
+#### If the Datadog Agent is not yet installed
 
 1. Install the `ddtrace` package:
 
