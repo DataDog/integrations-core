@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.5.0 / 2026-11-02
+
+***Added***:
+
+* Collect HA link counters, BGP and OSPF metrics on firewalls running the Advanced Routing Engine, and the `bgp.peer.prefixes.incoming.accepted` metric. ([#25806](https://github.com/DataDog/integrations-core/pull/25806))
+
 ## 3.4.0 / 2026-10-29
 
 ***Added***:
