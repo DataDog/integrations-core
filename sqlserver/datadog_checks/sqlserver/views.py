@@ -6,6 +6,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypedDict
 
+from datadog_checks.base.utils.db.schemas import (
+    DEFAULT_MAX_VIEWS,
+    SchemaCollectorConfig,
+    ViewColumn,
+    ViewObjectCollector,
+)
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.sqlserver.queries import SCHEMA_QUERY, VIEW_COLUMN_QUERY, VIEWS_QUERY
 from datadog_checks.sqlserver.schemas import DatabaseInfo, SQLServerObjectCollector
@@ -13,17 +19,8 @@ from datadog_checks.sqlserver.schemas import DatabaseInfo, SQLServerObjectCollec
 if TYPE_CHECKING:
     from datadog_checks.sqlserver import SQLServer
 
-# Each view row carries its full nvarchar(max) definition, so view payloads use far smaller chunks than tables.
-VIEW_PAYLOAD_CHUNK_SIZE = 500
 
-
-class ViewColumnObjectBase(TypedDict):
-    data_type: str
-    name: str
-    nullable: bool
-
-
-class ViewColumnObject(ViewColumnObjectBase, total=False):
+class ViewColumnObject(ViewColumn, total=False):
     ordinal_position: str
 
 
@@ -48,19 +45,14 @@ class ViewDatabaseObject(DatabaseInfo):
     schemas: list[ViewSchemaObject]
 
 
-class SQLServerViewCollector(SQLServerObjectCollector):
-    def __init__(self, check: SQLServer):
-        super().__init__(check)
-        self._max_views = check._config.schema_config.get('max_views', 1000)
-        self._config.payload_chunk_size = VIEW_PAYLOAD_CHUNK_SIZE
+class SQLServerViewCollector(ViewObjectCollector, SQLServerObjectCollector):
+    def __init__(self, check: SQLServer, config: SchemaCollectorConfig):
+        super().__init__(check, config)
+        self._max_views = check._config.schema_config.get('max_views', DEFAULT_MAX_VIEWS)
 
     @property
     def kind(self) -> str:
         return "sqlserver_views"
-
-    @property
-    def object_count_metric_name(self) -> str:
-        return f"dd.{self._check.dbms}.schema.views_count"
 
     def _get_query(self) -> str:
         limit = int(self._max_views or 1_000_000)
@@ -112,24 +104,17 @@ class SQLServerViewCollector(SQLServerObjectCollector):
         else:
             columns = json.loads(cursor_row.get("columns") or "[]")
 
-        return {
-            **database,
-            "schemas": [
-                {
-                    "name": cursor_row.get("schema_name"),
-                    "id": str(cursor_row.get("schema_id")),
-                    "owner_name": cursor_row.get("owner_name"),
-                    "tables": [],
-                    "views": [
-                        {
-                            "id": str(cursor_row.get("view_id")),
-                            "name": cursor_row.get("view_name"),
-                            "create_date": cursor_row.get("create_date"),
-                            "modify_date": cursor_row.get("modify_date"),
-                            "definition": cursor_row.get("definition"),
-                            "columns": [column for column in columns if column.get("name") is not None],
-                        }
-                    ],
-                }
-            ],
+        view: ViewObject = {
+            "id": str(cursor_row.get("view_id")),
+            "name": cursor_row.get("view_name"),
+            "create_date": cursor_row.get("create_date"),
+            "modify_date": cursor_row.get("modify_date"),
+            "definition": cursor_row.get("definition"),
+            "columns": [column for column in columns if column.get("name") is not None],
         }
+        schema = {
+            "name": cursor_row.get("schema_name"),
+            "id": str(cursor_row.get("schema_id")),
+            "owner_name": cursor_row.get("owner_name"),
+        }
+        return {**database, "schemas": [self._schema_with_view(schema, view)]}
