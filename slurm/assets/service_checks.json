@@ -1,1 +1,14 @@
-[]
+[
+    {
+        "agent_version": "7.70.0",
+        "integration": "Slurm",
+        "check": "slurm.rest.can_connect",
+        "statuses": [
+            "ok",
+            "critical"
+        ],
+        "groups": [],
+        "name": "Slurm REST API can connect",
+        "description": "Returns `CRITICAL` if the Agent cannot reach the Slurm REST API (slurmrestd) when `slurm_rest_api_url` is configured, otherwise returns `OK`."
+    }
+]
