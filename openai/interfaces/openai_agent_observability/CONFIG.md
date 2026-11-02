@@ -2,7 +2,7 @@
 
 Get end-to-end visibility into your LLM application's calls to OpenAI with [LLM Observability][1]. Choose the setup that matches your application's language and environment.
 
-[1]: https://docs.datadoghq.com/llm_observability/setup/sdk/
+[1]: https://docs.datadoghq.com/llm_observability/instrument/sdk/
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Python" xxx -->
