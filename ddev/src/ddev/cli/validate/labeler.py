@@ -142,11 +142,11 @@ def labeler(app: Application, sync: bool):
             if integration_label in label_to_directory:
                 existing_dir = label_to_directory[integration_label]
                 message = (
-                    f'Check `{check_name}` does not have an integration PR label; '
+                    f'Folder `{check_name}` does not have an integration PR label; '
                     f'label `{integration_label}` is already used for directory `{existing_dir}`'
                 )
             else:
-                message = f'Check `{check_name}` does not have an integration PR label'
+                message = f'Folder `{check_name}` does not have an integration PR label'
             tracker.error((str(pr_labels_config_path),), message=message)
             continue
 
@@ -172,12 +172,14 @@ def labeler(app: Application, sync: bool):
 
     if tracker.errors:  # no cov
         message = (
-            'To fix this, you can take one of the following actions based on whether the failure is related to '
-            'an Agent check or not:\n'
+            'To fix this, run `ddev validate labeler --sync`. Every integration folder needs a PR label, '
+            'including integrations without an Agent check, such as logs-only or tile-only integrations.\n'
             '\n'
-            '* If it is an Agent check, run `ddev validate labeler --sync`.\n'
-            '* If it is not an Agent check, you can mark it as such by adding '
-            'it to the `[overrides.is-integration]` table in your `.ddev/config.toml` file.'
+            'If a reported folder is not an integration, for example shared code or tooling such as '
+            '`datadog_checks_base` or `ddev`, mark it in `.ddev/config.toml` instead:\n'
+            '\n'
+            '[overrides.is-integration]\n'
+            '<folder> = false'
         )
         app.display_info(escape(message))
         app.abort()

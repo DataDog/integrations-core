@@ -73,6 +73,14 @@ from ddev.utils.github_async.models import (
 )
 from ddev.utils.github_async.observer import RequestObserver
 from ddev.utils.github_async.retry import RetryPolicy
+from ddev.utils.octo_sts import (
+    ACTIONS_ID_TOKEN_REQUEST_TOKEN_ENV,
+    ACTIONS_ID_TOKEN_REQUEST_URL_ENV,
+    MINTED_AT_ENV,
+    POLICY_ENV,
+    SCOPE_ENV,
+    OctoStsTokenProvider,
+)
 from ddev.utils.rate_limiting import BucketEvent, InstrumentedAsyncLimiter, RateLimitEvent
 from tests.cli.ci.helpers import mock_job_result
 from tests.cli.ci.tests.helpers import (
@@ -255,9 +263,15 @@ def test_dispatcher_assembly_routes_artifact_requests_to_the_artifact_tier(
         rate_limiter: InstrumentedAsyncLimiter,
         logger: logging.Logger | None = None,
         observer: RequestObserver | None = None,
+        **kwargs: Any,
     ) -> AsyncGitHubClient:
         return AsyncGitHubClient(
-            token, rate_limiter=rate_limiter, logger=logger, observer=observer, transport=httpx.MockTransport(handle)
+            token,
+            rate_limiter=rate_limiter,
+            logger=logger,
+            observer=observer,
+            transport=httpx.MockTransport(handle),
+            **kwargs,
         )
 
     monkeypatch.setattr("ddev.utils.github_async.AsyncGitHubClient", make_client)
@@ -283,6 +297,49 @@ def test_dispatcher_assembly_routes_artifact_requests_to_the_artifact_tier(
     assert requests[prefix] == "default"
     # Both tiers report through the Dispatcher: one attempt per request the transport answered.
     assert len(sink.records_named("requests.count")) == sum(requests_sent.values())
+
+
+@pytest.mark.parametrize("opted_in", [True, False], ids=["opted_in", "not_opted_in"])
+def test_build_dispatcher_wires_the_opted_in_token_provider(
+    client: FakeAsyncGitHubClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, opted_in: bool
+):
+    """The workflow's opt-in must reach the client, or a long run rides a one-hour token."""
+    captured: dict[str, Any] = {}
+
+    def make_client(token: str, *, rate_limiter: Any = None, **kwargs: Any) -> FakeAsyncGitHubClient:
+        captured.update(kwargs)
+        return client
+
+    monkeypatch.setattr("ddev.utils.github_async.AsyncGitHubClient", make_client)
+    for name in (
+        SCOPE_ENV,
+        POLICY_ENV,
+        ACTIONS_ID_TOKEN_REQUEST_URL_ENV,
+        ACTIONS_ID_TOKEN_REQUEST_TOKEN_ENV,
+    ):
+        monkeypatch.delenv(name, raising=False)
+    if opted_in:
+        monkeypatch.setenv(SCOPE_ENV, "DataDog/integrations-core")
+        monkeypatch.setenv(POLICY_ENV, "self.test-dispatch")
+        monkeypatch.setenv(ACTIONS_ID_TOKEN_REQUEST_URL_ENV, "https://actions.example/oidc")
+        monkeypatch.setenv(ACTIONS_ID_TOKEN_REQUEST_TOKEN_ENV, "oidc-bearer")
+        monkeypatch.setenv(MINTED_AT_ENV, str(time.time()))
+
+    build_dispatcher(
+        batches=[make_batch(make_job())],
+        run=CONTEXT,
+        config=DispatcherConfig(grace_period_seconds=0.1, global_timeout_seconds=5),
+        token="static-token",
+        artifacts_path=tmp_path / "artifacts",
+        output_path=tmp_path / "results",
+        monitoring=MonitoringRuntime(),
+    )
+
+    if opted_in:
+        assert isinstance(captured["token_provider"], OctoStsTokenProvider)
+        assert asyncio.run(captured["token_provider"]()) == "static-token"
+    else:
+        assert captured["token_provider"] is None
 
 
 def test_progress_reaches_the_comment_before_artifact_collection_finishes(

@@ -2,7 +2,6 @@
 
 | | |
 | --- | --- |
-| CI/CD | [![CI - Test][1]][2] |
 | Docs | [![Docs - Release][19]][20] |
 | Meta | [![Hatch project][26]][27] [![Linting - Ruff][24]][25] [![Typing - Mypy][28]][29] [![License - BSD-3-Clause][30]][31] |
 
@@ -27,8 +26,6 @@ For more information on integrations, please reference our [documentation][11] a
 [knowledge base][12]. You can also visit our [help page][13] to connect with us.
 
 
-[1]: https://raw.githubusercontent.com/DataDog/integrations-core/badges/test-results.svg
-[2]: https://github.com/DataDog/integrations-core/actions/workflows/master.yml
 [3]: https://datadoghq.dev/integrations-core/
 [5]: https://github.com/DataDog/integrations-extras
 [6]: https://docs.datadoghq.com/developers/integrations/

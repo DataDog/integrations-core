@@ -1,0 +1,1 @@
+Reuse the workflow's initial GitHub token and widen the retry backoff for Dispatcher credential refresh through octo-sts.

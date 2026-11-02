@@ -7,8 +7,15 @@ import http.client
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.request
+
+
+# The app key minted by dd-sts is not usable immediately, so the first calls
+# can return HTTP 403 until it propagates. Retry 403 with these backoff delays
+# (in seconds) before treating it as a misconfiguration.
+FORBIDDEN_RETRY_DELAYS = (2, 4, 8, 16)
 
 
 def escape_slack_text(value: str) -> str:
@@ -68,18 +75,24 @@ def post(api_url: str, api_key: str, app_key: str, text: str) -> bool:
             "DD-APPLICATION-KEY": app_key,
         },
     )
-    try:
-        urllib.request.urlopen(request, timeout=15).close()
-    except urllib.error.HTTPError as e:
-        if e.code == 429 or e.code >= 500:
-            print(f"::warning::Release notification failed (transient): HTTP {e.code}")
+    forbidden_delays = iter(FORBIDDEN_RETRY_DELAYS)
+    while True:
+        try:
+            urllib.request.urlopen(request, timeout=15).close()
             return True
-        report_config_error(f"HTTP {e.code}")
-        return False
-    except (OSError, http.client.HTTPException, ValueError) as e:
-        print(f"::warning::Release notification request failed (transient): {e}")
-        return True
-    return True
+        except urllib.error.HTTPError as e:
+            if e.code == 403 and (delay := next(forbidden_delays, None)) is not None:
+                print(f"HTTP 403, retrying in {delay}s while the app key propagates")
+                time.sleep(delay)
+                continue
+            if e.code == 429 or e.code >= 500:
+                print(f"::warning::Release notification failed (transient): HTTP {e.code}")
+                return True
+            report_config_error(f"HTTP {e.code}")
+            return False
+        except (OSError, http.client.HTTPException, ValueError) as e:
+            print(f"::warning::Release notification request failed (transient): {e}")
+            return True
 
 
 def main() -> None:

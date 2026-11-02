@@ -9,7 +9,7 @@ HERE = get_here()
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
 HOST = get_docker_hostname()
-PORT = '50000'
+PORT = os.getenv('DB2_PORT', '50000')
 DB = 'datadog'
 USERNAME = 'db2inst1'
 PASSWORD = 'db2inst1-pwd'

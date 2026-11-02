@@ -441,7 +441,6 @@ def _make_collecting_collector(databases):
     collector._check.tags = []
     collector._check.cloud_metadata = {}
     collector._check.agent_version = "7.70.0"
-    collector._metadata._tags = None
     db_cursor = collector._metadata.get_db_connection.return_value.cursor.return_value.__enter__.return_value
     db_cursor.fetchall.return_value = databases
     collector._get_cursor = mock.Mock(return_value=mock.MagicMock())

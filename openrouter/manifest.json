@@ -1,0 +1,40 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "1d642465-44cf-4730-ba2c-3239d0a4fee3",
+  "app_id": "openrouter",
+  "owner": "saas-integrations",
+  "display_on_public_website": false,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "description": "Track OpenRouter LLM usage and costs by model, provider, API key, and user.",
+    "title": "OpenRouter",
+    "media": [],
+    "classifier_tags": [
+      "Category::AI/ML",
+      "Category::Cost Management",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": false,
+      "source_type_id": 92761286,
+      "source_type_name": "OpenRouter",
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      }
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}
