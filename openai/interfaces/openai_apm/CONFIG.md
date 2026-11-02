@@ -101,7 +101,7 @@ See the [APM Node.js OpenAI documentation][2] for more advanced usage, and the [
 
 #### Validation
 
-Validate that the APM Node.js library can communicate with your Agent by examining the debugging output from the application process. Within the section titled "Encoding payload," you should see an entry with a `name` field and a correlating value of `openai.request`. For example (truncated):
+Validate that the APM Node.js library can communicate with your Agent by examining the debugging output from the application process. Within the section titled "Encoding payload," you should see an entry with a `name` field that contains the value `openai.request`. For example (truncated):
 
 ```json
 {
