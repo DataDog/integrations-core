@@ -130,8 +130,7 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 <!-- xxz tab xxx -->
 <!-- xxx tab "PHP" xxx -->
 
-1. [Install the Datadog APM PHP library][1].
-2. The library is automatically injected into your OpenAI PHP application.
+[Install the Datadog APM PHP library][1]. The library is automatically injected into your OpenAI PHP application.
 
 **Notes**:
 
