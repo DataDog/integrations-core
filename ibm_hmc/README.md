@@ -5,18 +5,16 @@
 The IBM HMC check collects performance metrics from POWER systems managed by an
 IBM Hardware Management Console (HMC).
 
-The check connects to the HMC appliance over SSH and runs `lslparutil` on it,
-so it can run on any host that can reach the HMC: an AIX LPAR, a Linux box, or
-anywhere else the Datadog Agent runs.
-
-**This check is only shipped with the Agent for AIX.**
+The check connects to the HMC appliance over SSH and runs `lslparutil` on it.
+The check can run on any host that can reach the HMC, such as an AIX LPAR or a
+Linux host, but it is only shipped with the Agent for AIX.
 
 Metrics collected:
 
 - **LPAR statistics** (`ibm_hmc.lpar.*`): per-partition processor and memory usage,
-  such as entitled cycles, capped/uncapped cycles, and current memory.
+  such as entitled cycles, capped and uncapped cycles, and current memory.
 - **Shared processor pool statistics** (`ibm_hmc.pool.*`, `ibm_hmc.procpool.*`): pool
-  cycles and available/configurable processor units.
+  cycles and available and configurable processor units.
 - **Memory pool statistics** (`ibm_hmc.mempool.*`): shared memory pool allocation
   and firmware memory.
 - **Managed system statistics** (`ibm_hmc.sys.*`): available and configurable system
@@ -36,32 +34,36 @@ installation is needed on the HMC.
 1. Edit the `ibm_hmc.d/conf.yaml` file in your Agent's `conf.d/` directory.
    See the [sample ibm_hmc.d/conf.yaml][2] for all available configuration options.
 
-2. Configure SSH access to the HMC. The recommended setup is an account with
-   a read-only role (for example `hscroot`) and either a password or a private
-   key:
+2. Configure SSH access to the HMC. Use an account with a read-only role, such
+   as one with the HMC Viewer role, and either a password or a private key:
 
    ```yaml
    instances:
      - host: hmc.example.com
-       username: hscroot
+       username: <READ_ONLY_USER>
        password: <PASSWORD>
    ```
 
-   If the Agent user's known hosts file does not contain the HMC's host key
-   yet, add it with `ssh-keyscan <HMC HOSTNAME> >> ~/.ssh/known_hosts`, run as
-   the Agent user (`dd-agent` by default). The check reads that user's known
-   hosts and rejects connections to hosts with unknown keys.
+   `hscroot` is the HMC super-administrator account; do not use it for monitoring.
+
+   The check rejects connections to hosts with unknown keys. If the HMC's host
+   key is not in the Agent user's known hosts file, add it. Run the following
+   command as the same user as the Agent (`dd-agent` by default):
+
+   ```shell
+   ssh-keyscan <HMC_HOSTNAME> >> ~/.ssh/known_hosts
+   ```
 
 3. [Restart the Agent][3].
 
 #### Collection interval
 
-The HMC only produces new `lslparutil` samples at its own configured sample
-rate (often 60 seconds or more). The check reads that rate per managed system
-and skips subsystems whose sample rate has not elapsed, so the default
-collection interval works but collects each sample as soon as it is available.
-Set `min_collection_interval` to the sample rate to avoid polling more often
-than needed.
+The HMC produces new `lslparutil` samples only at its configured sample rate,
+which is often 60 seconds or more. The check reads the sample rate for each
+managed system and skips subsystems whose sample rate has not elapsed. The
+default collection interval works and collects each sample as soon as it is
+available. To avoid polling more often than needed, set
+`min_collection_interval` to the sample rate.
 
 #### Clock synchronization
 
@@ -76,7 +78,7 @@ itself reasonably in sync (NTP) so samples are produced with sane timestamps.
 Run the [Agent's status subcommand][4] and look for `ibm_hmc` under the Checks
 section.
 
-## Data Collected
+## Data collected
 
 ### Metrics
 
@@ -84,7 +86,7 @@ See [metadata.csv][5] for a list of metrics provided by this check.
 The `ibm_hmc.system.memory.*` metrics come from the HMC's `/proc/meminfo`, so the
 exact set depends on the HMC firmware version.
 
-### Service Checks
+### Service checks
 
 The IBM HMC check does not include any service checks.
 

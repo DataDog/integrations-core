@@ -24,9 +24,10 @@ instances:
     # port: 22
 
     ## @param username - string - required
-    ## SSH username to the HMC appliance, usually `hscroot`.
+    ## SSH username to the HMC appliance. Use a read-only account, such as one with the
+    ## HMC Viewer role; `hscroot` is the HMC super-administrator account.
     #
-    username: hscroot
+    username: hmc-readonly
 
     ## @param password - string - optional
     ## SSH password for the HMC appliance.
@@ -49,7 +50,7 @@ instances:
     ## @param force_sha1 - boolean - optional - default: false
     ## Some older HMC appliances only support SHA1 encryption and do not advertise it
     ## to SSH clients, which assume SHA2 and fail to connect. Enable this to force the
-    ## SSH client to use SHA1. Upgrading the HMC firmware is recommended instead.
+    ## SSH client to use SHA1. Datadog recommends upgrading the HMC firmware instead.
     #
     # force_sha1: false
 
