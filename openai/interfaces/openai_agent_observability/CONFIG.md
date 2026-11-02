@@ -1,4 +1,4 @@
-### Agent Observability Configuration
+## Agent Observability Configuration
 
 Get end-to-end visibility into your LLM application's calls to OpenAI with [LLM Observability][1]. Choose the setup that matches your application's language and environment.
 
@@ -7,7 +7,7 @@ Get end-to-end visibility into your LLM application's calls to OpenAI with [LLM 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Python" xxx -->
 
-#### If the Datadog Agent is not yet installed
+### If the Datadog Agent is not yet installed
 
 1. Install the `ddtrace` package:
 
@@ -21,7 +21,7 @@ Get end-to-end visibility into your LLM application's calls to OpenAI with [LLM 
    DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_AGENTLESS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> ddtrace-run python <YOUR_APP>.py
    ```
 
-#### If the Datadog Agent is already installed
+### If the Datadog Agent is already installed
 
 1. Make sure the Agent is running and that APM and StatsD are enabled. For example, with Docker:
 
@@ -54,7 +54,7 @@ Get end-to-end visibility into your LLM application's calls to OpenAI with [LLM 
 
 **Note**: If the Agent is running on a custom host or port, set `DD_AGENT_HOST` and `DD_TRACE_AGENT_PORT` accordingly.
 
-#### Run in a serverless environment (AWS Lambda)
+### Run in a serverless environment (AWS Lambda)
 
 1. Install the **Datadog-Python** and **Datadog-Extension** Lambda layers as part of your AWS Lambda setup.
 2. Enable LLM Observability by setting the following environment variables:
@@ -65,14 +65,14 @@ Get end-to-end visibility into your LLM application's calls to OpenAI with [LLM 
 
 **Note**: In serverless environments, Datadog automatically flushes spans when the Lambda function finishes running.
 
-#### Automatic OpenAI tracing
+### Automatic OpenAI tracing
 
 LLM Observability automatically traces the following OpenAI methods, capturing latency, input and output messages, and token usage without manual instrumentation:
 
 - `OpenAI().completions.create()`, `OpenAI().chat.completions.create()`
 - For async calls: `AsyncOpenAI().completions.create()`, `AsyncOpenAI().chat.completions.create()`
 
-#### Validation
+### Validation
 
 Check your application logs for successful span creation, or confirm the status of the `ddtrace` integration:
 
@@ -82,7 +82,7 @@ ddtrace-run --info
 
 Look for `Agent error: None` in the output.
 
-#### Troubleshooting
+### Troubleshooting
 
 Pass the `--debug` flag to `ddtrace-run` to enable debug logging and display detailed information about tracing errors:
 
@@ -93,7 +93,7 @@ ddtrace-run --debug
 <!-- xxz tab xxx -->
 <!-- xxx tab "Node.js" xxx -->
 
-#### If the Datadog Agent is not yet installed
+### If the Datadog Agent is not yet installed
 
 1. Install the `dd-trace` package:
 
@@ -107,7 +107,7 @@ ddtrace-run --debug
    DD_SITE=<YOUR_DATADOG_SITE> DD_API_KEY=<YOUR_API_KEY> DD_LLMOBS_ENABLED=1 DD_LLMOBS_AGENTLESS_ENABLED=1 DD_LLMOBS_ML_APP=<YOUR_ML_APP_NAME> node -r 'dd-trace/init' <YOUR_APP>.js
    ```
 
-#### If the Datadog Agent is already installed
+### If the Datadog Agent is already installed
 
 1. Make sure the Agent is running and that APM and StatsD are enabled. For example, with Docker:
 
@@ -140,7 +140,7 @@ ddtrace-run --debug
 
 **Note**: If the Agent is running on a custom host or port, set `DD_AGENT_HOST` and `DD_TRACE_AGENT_PORT` accordingly.
 
-#### If you are running in a serverless environment (AWS Lambda)
+### If you are running in a serverless environment (AWS Lambda)
 
 1. Enable LLM Observability by setting the following environment variables:
 
@@ -166,7 +166,7 @@ ddtrace-run --debug
    }
    ```
 
-#### Automatic OpenAI tracing
+### Automatic OpenAI tracing
 
 The following OpenAI methods are traced automatically, capturing latency, input and output messages, and token usage without manual instrumentation:
 
@@ -174,7 +174,7 @@ The following OpenAI methods are traced automatically, capturing latency, input 
 - `client.chat.completions.create()`
 - `client.embeddings.create()` (where `client` is an instance of `OpenAI`)
 
-#### Troubleshooting
+### Troubleshooting
 
 Set `DD_TRACE_DEBUG=1` to enable debug logging and display detailed information about tracing errors.
 

@@ -1,10 +1,10 @@
-### APM Configuration
+## APM Configuration
 
 Collect request duration, token usage, and error metrics from your OpenAI calls with a Datadog APM tracing library.
 
 **Note**: This setup method does not collect `audio_speeches`, `audio_transcriptions`, `code_interpreter_sessions`, `completions`, `embeddings`, `images`, `moderations`, or `vector_stores` usage metrics. To collect these metrics, also configure the **Usage and Cost** interface.
 
-#### Step 1: Enable APM and StatsD in the Datadog Agent
+### Step 1: Enable APM and StatsD in the Datadog Agent
 
 For example, with Docker:
 
@@ -23,7 +23,7 @@ docker run -d \
   registry.datadoghq.com/agent:latest
 ```
 
-#### Step 2: Install the tracing library and instrument your application
+### Step 2: Install the tracing library and instrument your application
 
 <!-- xxx tabs xxx -->
 <!-- xxx tab "Python" xxx -->
@@ -47,7 +47,7 @@ docker run -d \
 
 See the [APM Python library documentation][2] for more advanced usage, and the [OpenAI integration documentation][3] for all the available configuration options.
 
-#### Validation
+### Validation
 
 Validate that the APM Python library can communicate with your Agent:
 
@@ -57,7 +57,7 @@ ddtrace-run --info
 
 Look for `Agent error: None` in the output.
 
-#### Troubleshooting
+### Troubleshooting
 
 Pass the `--debug` flag to `ddtrace-run` to enable debug logging:
 
@@ -99,7 +99,7 @@ ERROR:ddtrace.internal.writer.writer:failed to send, dropping 1 traces to intake
 
 See the [APM Node.js OpenAI documentation][2] for more advanced usage, and the [APM Node.js library documentation][3] for all the available configuration options.
 
-#### Validation
+### Validation
 
 Validate that the APM Node.js library can communicate with your Agent by examining the debugging output from the application process. Within the section titled "Encoding payload," you should see an entry with a `name` field that contains the value `openai.request`. For example (truncated):
 
@@ -139,7 +139,7 @@ Validate that the APM Node.js library can communicate with your Agent by examini
 
 See the [APM PHP library documentation][3] for more advanced usage and all the available configuration options.
 
-#### Validation
+### Validation
 
 Examine the `phpinfo` output of your service. Under the `ddtrace` section, `Diagnostic checks` should be `passed`.
 
