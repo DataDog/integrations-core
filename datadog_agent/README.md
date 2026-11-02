@@ -39,11 +39,11 @@ The Agent always serves its telemetry at `/telemetry` on the port set by `expvar
 
 ### Migrating from Agent Metrics
 
-The Datadog Agent integration collects similar data to the [Agent Metrics][2] integration, but most metric names, types, and tags differ. You must update dashboards and monitors that query Agent Metrics metrics.
+The Datadog Agent integration collects similar data to the [Agent Metrics][2] integration, but most metric names, types, and tags differ. You must update any dashboards and monitors that query metrics from the Agent Metrics integration.
 
 1. Configure the Datadog Agent integration as described in [Configuration](#configuration).
-2. Optionally, keep `go_expvar.d/agent_stats.yaml` in place while you update your dashboards and monitors, so that you can compare the old and new metrics. Three metrics keep the same name in both integrations, and both checks submit them while both checks run: `datadog.agent.aggregator.dogstatsd_contexts`, `datadog.agent.forwarder.transactions.retry_queue_size`, and `datadog.agent.scheduler.checks_entered`.
-3. Update your dashboards and monitors using the mapping below.
+2. Optionally, keep `go_expvar.d/agent_stats.yaml` in place while you update your dashboards and monitors, so that you can compare the old and new metrics. Three metrics have the same name in both integrations: `datadog.agent.aggregator.dogstatsd_contexts`, `datadog.agent.forwarder.transactions.retry_queue_size`, and `datadog.agent.scheduler.checks_entered`. While both checks run, each check submits these metrics.
+3. Update your dashboards and monitors using the [metric mapping](#metric-mapping).
 4. Remove `go_expvar.d/agent_stats.yaml` and [restart the Agent][6].
 
 #### Behavior changes
@@ -121,7 +121,7 @@ Unless noted otherwise, all metric names in the table are prefixed with `datadog
 | `logs_agent.is_running` | Not collected. |
 | `batch_strategy.idle_time` (no namespace) | `batch_strategy.idle_time.count`, tagged by `sender` (for example, `sender:logs_0_reliable_0` instead of `sender:0`) |
 | `batch_strategy.in_use_time` (no namespace) | `batch_strategy.in_use_time.count`, tagged by `sender` |
-| `memstats.*` | Not collected by default. See the `extra_metrics` example above. |
+| `memstats.*` | Not collected by default. See the `extra_metrics` example in [Behavior changes](#behavior-changes). |
 
 ## Data Collected
 
