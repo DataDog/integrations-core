@@ -1,0 +1,1 @@
+Collect HA link counters, BGP and OSPF metrics on firewalls running the Advanced Routing Engine, and the `bgp.peer.prefixes.incoming.accepted` metric.
