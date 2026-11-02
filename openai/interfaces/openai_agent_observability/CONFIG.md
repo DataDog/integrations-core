@@ -67,7 +67,7 @@ Get end-to-end visibility into your LLM application's calls to OpenAI with [LLM 
 
 #### Automatic OpenAI tracing
 
-The following OpenAI methods are traced automatically, capturing latency, input and output messages, and token usage without manual instrumentation:
+LLM Observability automatically traces the following OpenAI methods, capturing latency, input and output messages, and token usage without manual instrumentation:
 
 - `OpenAI().completions.create()`, `OpenAI().chat.completions.create()`
 - For async calls: `AsyncOpenAI().completions.create()`, `AsyncOpenAI().chat.completions.create()`
