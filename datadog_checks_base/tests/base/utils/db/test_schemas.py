@@ -520,3 +520,32 @@ def test_view_collector_payload_chunk_size(configured_chunk_size, expected_chunk
     views = FakeViewsCollector(TestDatabaseCheck(), config, {})
 
     assert views.payload_chunk_size == expected_chunk_size
+
+
+@pytest.mark.unit
+def test_database_collector_stops_when_cancelled_during_collection(aggregator):
+    """An error raised because the job was cancelled ends the run instead of moving on to the next kind or database."""
+    check = TestDatabaseCheck()
+    rows = {"db1": ["a"], "db2": ["b"]}
+    tables = FakeTablesCollector(check, SchemaCollectorConfig(), rows, fail_on=[("db1", "a")])
+    views = FakeViewsCollector(check, SchemaCollectorConfig(), rows)
+    collector = FakeDatabaseCollector(check, [tables, views], ["db1", "db2"])
+    cancelled = False
+
+    def raise_if_cancelled():
+        if cancelled:
+            raise RuntimeError("cancelled")
+
+    def cancel_then_fail(database_name):
+        nonlocal cancelled
+        cancelled = True
+        raise RuntimeError("connection closed")
+
+    collector._raise_if_cancelled = raise_if_cancelled
+    tables._iter_rows = cancel_then_fail
+
+    with pytest.raises(RuntimeError, match="cancelled"):
+        collector.collect_schemas()
+
+    assert [(s.database_name, s.queries) for s in collector.sessions] == [("db1", ["test_databases"])]
+    aggregator.assert_metric(f"dd.{check.dbms}.schema.time", tags=check.tags + ["status:error", "kind:test_views"])

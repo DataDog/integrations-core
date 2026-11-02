@@ -235,6 +235,14 @@ class DatabaseSchemaCollector(ABC):
         """
         raise NotImplementedError("Subclasses must implement _get_databases")
 
+    def _raise_if_cancelled(self) -> None:
+        """
+        Raises if the owning job was cancelled. The default never raises.
+
+        It runs before each database and before any per-database error is skipped, so an error caused by a cancel
+        (such as a closed connection) ends the run instead of moving on to the next database.
+        """
+
     def _open_database(self, database_name: str) -> ContextManager[Any]:
         """
         Opens one database for collection and yields a session that every object collector receives.
@@ -260,6 +268,7 @@ class DatabaseSchemaCollector(ABC):
                 if not database_name:
                     self._log.warning("database has no name: %s", database)
                     continue
+                self._raise_if_cancelled()
                 self._collect_database(database)
         except Exception as e:
             status = "error"
@@ -279,6 +288,7 @@ class DatabaseSchemaCollector(ABC):
                     try:
                         object_collector._collect_database(session, database)
                     except Exception as e:
+                        self._raise_if_cancelled()
                         self._log.warning(
                             "Skipping %s collection for database %s due to error: %s",
                             object_collector.kind,
@@ -287,6 +297,7 @@ class DatabaseSchemaCollector(ABC):
                             exc_info=True,
                         )
         except Exception as e:
+            self._raise_if_cancelled()
             self._log.warning("Skipping database %s due to error: %s", database_name, e, exc_info=True)
 
 
