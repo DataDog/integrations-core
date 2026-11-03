@@ -104,7 +104,7 @@ services:
   # seed so a single dependency on it pulls up and keeps alive the cluster, the
   # control plane, and the workload.
   gateway:
-    image: nginx:1.27-alpine
+    image: nginx:1.27.5-alpine
     depends_on:
       k3s:
         condition: service_healthy

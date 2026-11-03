@@ -41,7 +41,7 @@ spec:
     spec:
       containers:
         - name: notready
-          image: nginx:1.27-alpine
+          image: nginx:1.27.5-alpine
 ---
 apiVersion: v1
 kind: Service
