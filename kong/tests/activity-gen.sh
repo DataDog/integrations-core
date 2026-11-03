@@ -7,6 +7,8 @@ set -eu
 
 HOSTS="${KONG_HOSTS:-${DB_HOST:-kong}}"
 PORT="${KONG_PROXY_PORT:-8000}"
+STREAM_HOSTS="${KONG_STREAM_HOSTS:-}"
+STREAM_PORT="${KONG_STREAM_PORT:-9000}"
 KEY="${KONG_CONSUMER_KEY}"
 DURATION="${ACTIVITY_DURATION:-0}"   # 0 = run forever
 
@@ -27,6 +29,16 @@ for host in $HOSTS; do
   curl -sS -o /dev/null --rate 4/m -H "apikey: ${KEY}" "http://${host}:${PORT}/?keepalive=[1-1000000]" &
 done
 
+# connections_reading counts clients still sending request headers, so hold one
+# per node with a request line and no blank line. Kong drops it at its 60s
+# client_header_timeout, so reconnect after 55s.
+for host in $HOSTS; do
+  log "opening slow-header session to ${host}"
+  while :; do
+    { printf 'GET / HTTP/1.1\r\nHost: %s\r\n' "$host"; sleep 55; } | nc "$host" "$PORT" >/dev/null 2>&1 || true
+  done &
+done
+
 end=0
 [ "$DURATION" -gt 0 ] && end=$(( $(date +%s) + DURATION ))
 i=0
@@ -43,6 +55,11 @@ while :; do
     # 401 (no credential) and 404 (upstream miss) widen the code dimension.
     curl -sS -o /dev/null "${base}/" || true
     curl -sS -o /dev/null -H "apikey: ${KEY}" "${base}/missing-${i}" || true
+  done
+
+  # Proxied TCP sessions: session.duration.ms and the stream connection series.
+  for host in $STREAM_HOSTS; do
+    curl -sS -o /dev/null "http://${host}:${STREAM_PORT}/" || true
   done
 
   [ $(( i % 100 )) -eq 0 ] && log "iteration ${i}"
