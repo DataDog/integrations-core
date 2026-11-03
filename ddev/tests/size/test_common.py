@@ -2,7 +2,9 @@ import io
 import json
 import os
 import re
+import threading
 import zipfile
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from unittest.mock import MagicMock, PropertyMock, mock_open, patch
 
 import pytest
@@ -761,21 +763,94 @@ def test_request_wheel_uses_head_when_requested():
     )
 
 
+@pytest.fixture
+def wheel_server():
+    """A local server that answers with the queued statuses, then 200, recording every request.
+
+    A queued entry is a status code, or a `(status, headers)` pair to send extra headers.
+    """
+    statuses: list[int | tuple[int, dict[str, str]]] = []
+    requested: list[str] = []
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            requested.append(self.path)
+            entry = statuses.pop(0) if statuses else 200
+            status, headers = entry if isinstance(entry, tuple) else (entry, {})
+            self.send_response(status)
+            for name, value in headers.items():
+                self.send_header(name, value)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+
+        def log_message(self, *args):
+            pass
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, kwargs={"poll_interval": 0.05}, daemon=True)
+    thread.start()
+    https_adapter = WHEEL_REQUEST_SESSION.get_adapter("https://example.com")
+    with (
+        patch.dict(WHEEL_REQUEST_SESSION.adapters, {"http://": https_adapter}),
+        patch("urllib3.util.retry.time.sleep"),
+    ):
+        yield f"http://127.0.0.1:{server.server_address[1]}/dep1-1.1.1-.whl", statuses, requested
+    server.shutdown()
+    thread.join()
+
+
+@pytest.mark.parametrize("status_code", [502, 503, 504])
+def test_request_wheel_retries_gateway_errors(wheel_server, status_code):
+    url, statuses, requested = wheel_server
+    statuses.extend([status_code, status_code])
+
+    with request_wheel(MagicMock(), url, "dev") as response:
+        assert response.status_code == 200
+
+    assert len(requested) == 3
+
+
+def test_request_wheel_ignores_retry_after_on_gateway_errors(wheel_server):
+    url, statuses, requested = wheel_server
+    statuses.append((503, {"Retry-After": "3600"}))
+
+    with patch("urllib3.util.retry.time.sleep") as sleep:
+        with request_wheel(MagicMock(), url, "dev") as response:
+            assert response.status_code == 200
+
+    assert len(requested) == 2
+    assert all(call.args[0] < 3600 for call in sleep.call_args_list)
+
+
 @pytest.mark.parametrize(
-    "status_code, retried",
+    "status",
     [
-        pytest.param(502, True, id="bad gateway"),
-        pytest.param(503, True, id="service unavailable"),
-        pytest.param(504, True, id="gateway timeout"),
-        pytest.param(403, False, id="forbidden falls back to the next tier"),
-        pytest.param(404, False, id="not found falls back to the next tier"),
-        pytest.param(500, False, id="other errors abort"),
+        pytest.param(403, id="forbidden"),
+        pytest.param(404, id="not found"),
+        pytest.param(500, id="server error"),
+        pytest.param((413, {"Retry-After": "3600"}), id="payload too large with retry-after"),
+        pytest.param((429, {"Retry-After": "3600"}), id="too many requests with retry-after"),
     ],
 )
-def test_wheel_request_session_retries_only_gateway_errors(status_code, retried):
-    retry = WHEEL_REQUEST_SESSION.get_adapter("https://example.com").max_retries
+def test_request_wheel_does_not_resend_other_errors(wheel_server, status):
+    url, statuses, requested = wheel_server
+    statuses.append(status)
+    status_code = status[0] if isinstance(status, tuple) else status
 
-    assert retry.is_retry("GET", status_code) is retried
+    with pytest.raises(requests.HTTPError, match=str(status_code)):
+        request_wheel(MagicMock(), url, "dev")
+
+    assert len(requested) == 1
+
+
+def test_request_wheel_gives_up_on_a_persistent_gateway_error(wheel_server):
+    url, statuses, requested = wheel_server
+    statuses.extend([504] * (WHEEL_REQUEST_MAX_RETRIES + 1))
+
+    with pytest.raises(requests.HTTPError, match="504"):
+        request_wheel(MagicMock(), url, "dev")
+
+    assert len(requested) == WHEEL_REQUEST_MAX_RETRIES + 1
 
 
 def make_streamed_wheel_response(content):

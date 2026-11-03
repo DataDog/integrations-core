@@ -340,6 +340,7 @@ WHEEL_REQUEST_SESSION.mount(
             backoff_factor=WHEEL_REQUEST_RETRY_BACKOFF_SECONDS,
             status_forcelist=WHEEL_REQUEST_RETRY_STATUSES,
             raise_on_status=False,
+            respect_retry_after_header=False,
         )
     ),
 )
