@@ -578,6 +578,33 @@ def test_run_identity_and_context_reach_workflow_and_job_tags(
     assert not any(tag.startswith(("git.", "dispatcher.head_sha", "dispatcher.head_branch")) for tag in job_tags)
 
 
+@pytest.mark.parametrize(
+    ("head_branch", "head_tag"),
+    [
+        pytest.param("master", None, id="branch-run"),
+        pytest.param(None, "7.85.0-rc.8", id="tag-run"),
+    ],
+)
+def test_a_batch_is_sent_only_the_ref_the_run_actually_has(
+    tmp_path: Path, head_branch: str | None, head_tag: str | None
+):
+    """GitHub rejects undeclared inputs, and an empty one would attribute results to no ref."""
+    run = ResolvedRun(
+        repository="DataDog/integrations-core",
+        head_sha="a-sha",
+        checkout_sha="a-sha",
+        head_branch=head_branch,
+        head_tag=head_tag,
+        all_targets=False,
+    )
+    runner = make_runner(FakeAsyncGitHubClient(), tmp_path, run=run)
+
+    inputs = runner._build_inputs(make_batch("batch-context"))
+
+    assert inputs.get("head_branch") == head_branch
+    assert inputs.get("head_tag") == head_tag
+
+
 def test_job_tags_keep_caller_values_inside_one_transport_field(tmp_path: Path):
     run = ResolvedRun(
         repository="DataDog/integrations-core",

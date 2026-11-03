@@ -12,6 +12,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
   redis:
     image: redis:7
     volumes:
@@ -32,6 +33,7 @@ services:
     environment:
       PREFECT_API_DATABASE_CONNECTION_URL: postgresql+asyncpg://prefect:prefect@postgres:5432/prefect
       PREFECT_SERVER_API_HOST: 0.0.0.0
+      PREFECT_UI_API_URL: http://localhost:${PREFECT_PORT}/api
       PREFECT_MESSAGING_BROKER: prefect_redis.messaging
       PREFECT_MESSAGING_CACHE: prefect_redis.messaging
       PREFECT_REDIS_MESSAGING_HOST: redis
@@ -85,11 +87,11 @@ services:
       start_period: 10s
     restart: on-failure
 
-  prefect-flow:
+  prefect-setup:
     image: prefecthq/prefect:${PREFECT_VERSION}-python${PYTHON}
     depends_on:
       prefect-worker:
-        condition: service_healthy 
+        condition: service_healthy
     environment:
       PREFECT_API_URL: http://prefect-server:4200/api
     working_dir: /app
@@ -98,7 +100,10 @@ services:
       - ./prefect.yaml:/app/prefect.yaml
     command: >
       bash -c "
+      prefect work-pool set-concurrency-limit local-pool 10 &&
       prefect work-queue set-concurrency-limit default 10 &&
+      prefect global-concurrency-limit create e2e-limit --limit 5 &&
+      prefect concurrency-limit create e2e-tag 3 &&
       prefect --no-prompt deploy --name 'sample-deploy-2' &&
       prefect deployment run 'failing-flow/sample-deploy-2' &&
       prefect --no-prompt deploy --name 'sample-deploy' &&
@@ -106,7 +111,7 @@ services:
       "
 
     restart: "no"
-      
+
 volumes:
   postgres_data:
   redis_data:

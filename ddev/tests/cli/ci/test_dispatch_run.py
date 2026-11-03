@@ -3,15 +3,24 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import asyncio
+from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING
 
 import pytest
 
-from ddev.cli.ci.dispatch_run import PullRequestResolver, ResolvedRun, changes_for_run, head_is_fork
+from ddev.cli.ci.dispatch_run import (
+    PullRequestResolver,
+    ResolvedRun,
+    changes_for_run,
+    head_is_fork,
+    resolution_github_client,
+)
 from ddev.cli.ci.tests.changes import ChangeResolutionError
 from ddev.utils.git import GitCommit
 from tests.cli.ci.helpers import HEAD_SHA, listed_pull_request, pulls_page
 from tests.helpers.github_async import make_pull_request_ref, make_pull_request_repo
+from tests.helpers.monitoring import make_monitor
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
@@ -131,3 +140,51 @@ def test_exclusions_alone_still_compare_the_commit(mocker: MockerFixture):
 
     assert changes_for_run(app, run=commit_run(exclude_targets=('ddev',))) == []
     compare.assert_called_once()
+
+
+def test_the_resolution_client_is_instrumented_from_its_monitor(mocker: MockerFixture):
+    """An uninstrumented session spends the same GitHub quota the governor thinks it manages."""
+    opened: list[dict] = []
+
+    @asynccontextmanager
+    async def record(**kwargs):
+        opened.append(kwargs)
+        yield mocker.MagicMock()
+
+    mocker.patch('ddev.utils.github_async.async_github_client', record)
+
+    factory = resolution_github_client('a-token', monitor=make_monitor('resolution'))
+
+    async def open_once():
+        async with factory():
+            pass
+
+    asyncio.run(open_once())
+
+    [kwargs] = opened
+    assert kwargs['token'] == 'a-token'
+    assert all(kwargs[name] is not None for name in ('logger', 'observer', 'rate_limiter'))
+
+
+def test_every_resolution_session_shares_one_rate_limiter(mocker: MockerFixture):
+    """A limiter per session would let the resolvers overspend the quota it exists to bound."""
+    opened: list[dict] = []
+
+    @asynccontextmanager
+    async def record(**kwargs):
+        opened.append(kwargs)
+        yield mocker.MagicMock()
+
+    mocker.patch('ddev.utils.github_async.async_github_client', record)
+    factory = resolution_github_client('a-token', monitor=make_monitor('resolution'))
+
+    async def open_twice():
+        async with factory():
+            pass
+        async with factory():
+            pass
+
+    asyncio.run(open_twice())
+
+    first, second = opened
+    assert first['rate_limiter'] is second['rate_limiter']

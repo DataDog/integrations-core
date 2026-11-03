@@ -167,21 +167,14 @@ On pull requests we [create](https://github.com/DataDog/integrations-core/blob/m
 
 ![Example comment](../../assets/images/pr-test-results-comment.png){ loading=lazy }
 
-On merges to the `master` branch we [generate](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/test-results-master.yml) a [badge](https://github.com/DataDog/integrations-core/blob/badges/test-results.svg) with stats about all tests:
-
-[![CI testing badge](https://raw.githubusercontent.com/DataDog/integrations-core/badges/test-results.svg){ loading=lazy }](https://github.com/DataDog/integrations-core/actions/workflows/master.yml)
-
 ## Caching
 
-A [workflow](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/cache-shared-deps.yml) runs on merges to the `master` branch that, if the files defining the dependencies have not changed, [saves](https://github.com/actions/cache/blob/main/save/README.md) the dependencies shared by all targets for the current [Python version](#python-version) for each [platform](#platforms).
-
-During [testing](#test-target) the cache is restored, with a fallback to an older compatible version of the cache.
+The [setup-ddev](https://github.com/DataDog/integrations-core/blob/master/.github/actions/setup-ddev/action.yml) action restores the `uv` and `pip` caches before installing `ddev`, with a fallback to an older compatible version of the cache, and [saves](https://github.com/actions/cache/blob/main/save/README.md) them when there was no exact match.
 
 ## Python version
 
 Tests by default use the Python version the Agent currently ships. This value must be changed in the following locations:
 
-- `PYTHON_VERSION` environment variable in [/.github/workflows/cache-shared-deps.yml](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/cache-shared-deps.yml)
 - `PYTHON_VERSION` environment variable in [/.github/workflows/run-validations.yml](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/run-validations.yml)
 - `PYTHON_VERSION` environment variable fallback in [/.github/workflows/test-target.yml](https://github.com/DataDog/integrations-core/blob/master/.github/workflows/test-target.yml)
 

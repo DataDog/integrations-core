@@ -6,7 +6,9 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
+import os
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -15,10 +17,12 @@ import click
 
 from ddev.cli.ci.dispatch_options import parse_target_list, validate_options
 from ddev.cli.ci.dispatch_run import (
+    NO_MATCHING_PR_REASON,
     RUN_MANIFEST_NAME,
     RunResolutionError,
     changes_for_run,
     load_run_manifest,
+    resolution_github_client,
     resolve_run,
     write_run_manifest,
 )
@@ -92,6 +96,13 @@ RUN_OUTCOME_METRICS = {
     metavar='SHA',
     help='Checked-out commit to test, compared with its first parent. Cannot be combined with PR '
     'options. Defaults to local HEAD.',
+)
+@click.option(
+    '--head-tag',
+    default=None,
+    metavar='TAG',
+    help='Release tag to test. Supplies the commit, read from the tag, so it cannot be combined with '
+    '`--commit`. Results are attributed to the tag rather than to a branch.',
 )
 @click.option(
     '--tags',
@@ -174,6 +185,7 @@ def dispatch_tests(
     pr_head_branch: str | None,
     pr_base_branch: str | None,
     commit: str | None,
+    head_tag: str | None,
     tags: str | None,
     pytest_args: str | None,
     repository: str | None,
@@ -216,6 +228,7 @@ def dispatch_tests(
         pr_head_branch=pr_head_branch,
         pr_base_branch=pr_base_branch,
         commit=commit,
+        head_tag=head_tag,
         all_targets=all_targets,
         targets=targets,
         exclude_targets=exclude_targets,
@@ -273,6 +286,7 @@ def dispatch_tests(
     started = time.monotonic()
     monitor = monitoring.component('dispatcher')
     outcome: ExecutionOutcome | None = None
+    no_op_reason: str | None = None
     dispatcher: Dispatcher | None = None
     summary_error: str | None = None
     batch_count = job_count = 0
@@ -305,10 +319,11 @@ def dispatch_tests(
                         repository=tested_repository,
                         pr_resolver=pr_resolver,
                         commit=commit,
-                        token=token,
+                        github_client=resolution_github_client(token, monitor=resolution),
                         all_targets=all_targets,
                         targets=targets,
                         exclude_targets=exclude_targets,
+                        head_tag=head_tag,
                         context=tag_fields(caller_tags).get('context') or 'master',
                         monitor=resolution,
                     )
@@ -316,6 +331,7 @@ def dispatch_tests(
                 app.abort(str(error))
             if run is None:
                 outcome = ExecutionOutcome.NO_OP
+                no_op_reason = NO_MATCHING_PR_REASON
                 return
 
         # Bind before setup can fail, so terminal records retain the resolved identity.
@@ -364,7 +380,8 @@ def dispatch_tests(
             app.abort(f'Could not build a test plan: {error}')
 
         if not batches:
-            monitor.logger.info('Nothing to test', reason='the plan covers no target')
+            no_op_reason = 'the plan covers no target'
+            monitor.logger.info('Nothing to test', reason=no_op_reason)
             outcome = ExecutionOutcome.NO_OP
             return
 
@@ -375,8 +392,6 @@ def dispatch_tests(
             batches,
             tags=caller_tags,
             pytest_args=pytest_args or '',
-            agent_image=agent_image,
-            agent_image_windows=agent_image_windows,
         )
         if dry_run:
             monitor.logger.info('Dry run: nothing was dispatched')
@@ -420,6 +435,7 @@ def dispatch_tests(
             outcome = ExecutionOutcome.CANCELLED
         raise
     finally:
+        _write_actions_outcome(outcome or ExecutionOutcome.FAILED, no_op_reason=no_op_reason)
         try:
             run_summary(
                 monitor,
@@ -435,6 +451,15 @@ def dispatch_tests(
             if datadog_handler is not None:
                 # Close the runtime first so no event arrives while delivery drains.
                 datadog_handler.close(EXPORT_DRAIN_TIMEOUT)
+
+
+def _write_actions_outcome(outcome: ExecutionOutcome, *, no_op_reason: str | None) -> None:
+    # Reporting must not prevent cleanup if Actions' output file is unavailable.
+    if output_path := os.environ.get('GITHUB_OUTPUT'):
+        with contextlib.suppress(OSError):
+            with open(output_path, 'a', encoding='utf-8') as output:
+                output.write(f'outcome={outcome}\n')
+                output.write(f'no-op-reason={no_op_reason or ""}\n')
 
 
 def build_datadog_metrics_sink(app: Application) -> DatadogMetricsSink | None:
@@ -566,6 +591,7 @@ def build_plan(
         config=config.batching,
         rules=rules,
         exclude_targets=exclude_targets,
+        requested_targets=targets,
         agent_image_resolver=agent_image_resolver or get_agent_image,
         minimum_base_package=minimum_base_package,
         monitor=monitor,
@@ -597,12 +623,13 @@ def display_plan(
     *,
     tags: Sequence[str] = (),
     pytest_args: str = '',
-    agent_image: str | None = None,
-    agent_image_windows: str | None = None,
 ) -> None:
     app.display_header('Dispatcher plan')
     app.display_pair('Repository', run.repository)
-    app.display_pair('Head branch', run.head_branch)
+    if run.head_tag is not None:
+        app.display_pair('Head tag', run.head_tag)
+    else:
+        app.display_pair('Head branch', str(run.head_branch))
     app.display_pair('Head SHA', run.head_sha)
     app.display_pair('Checkout SHA', run.checkout_sha)
     if run.pr_number is not None:
@@ -619,10 +646,13 @@ def display_plan(
         app.display_pair('Targets', ', '.join(run.targets))
     if run.exclude_targets:
         app.display_pair('Excluded targets', ', '.join(run.exclude_targets))
-    if agent_image:
-        app.display_pair('Agent image (Linux E2E jobs)', agent_image)
-    if agent_image_windows:
-        app.display_pair('Agent image (Windows E2E jobs)', agent_image_windows)
+    # Read back from the plan, not from the options: a dry run is where an override that never
+    # reached the jobs has to show up as absent rather than as the value that was asked for.
+    planned_images = sorted(
+        {(str(job.platform), job.agent_image) for batch in batches for job in batch.job_list if job.agent_image}
+    )
+    for platform, image in planned_images:
+        app.display_pair(f'Agent image ({platform} E2E jobs)', image)
     app.display_pair('Workflow', f'{config.workflow} @ {config.workflow_ref}')
 
     total = sum(batch.jobs_count for batch in batches)

@@ -9,7 +9,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Palo Alto Networks Firewall log events",
+    "description": "Monitor Palo Alto Networks firewall metrics, network device metadata, and logs",
     "title": "Palo Alto Networks Firewall",
     "media": [],
     "classifier_tags": [
@@ -21,7 +21,10 @@
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Offering::Integration"
+      "Offering::Integration",
+      "Category::Metrics",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
     ],
     "resources": [
       {
@@ -53,7 +56,12 @@
         "metadata_path": "assets/service_checks.json"
       },
       "source_type_id": 10155,
-      "auto_install": true
+      "auto_install": true,
+      "metrics": {
+        "prefix": "pan_firewall.",
+        "check": "pan_firewall.can_connect",
+        "metadata_path": "metadata.csv"
+      }
     },
     "dashboards": {
       "Palo Alto Networks Firewall Overview": "assets/dashboards/palo_alto_networks_firewall_overview.json"

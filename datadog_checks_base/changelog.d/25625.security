@@ -1,1 +1,0 @@
-Limit lines read by OpenMetrics checks to 16 MiB.

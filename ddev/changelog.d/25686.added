@@ -1,1 +1,2 @@
 Add `--targets`, `--exclude-targets`, `--agent-image` and `--agent-image-windows` to `ddev ci dispatch-tests`.
+Add `--head-tag` to `ddev ci dispatch-tests`, so a run started from a release tag is attributed to the tag rather than to a branch.

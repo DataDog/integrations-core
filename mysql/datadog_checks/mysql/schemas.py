@@ -305,10 +305,6 @@ class MySqlSchemaCollector(SchemaCollector):
         event["dbms_version"] = self._check.version.version
         event["flavor"] = self._check.version.flavor
         event["agent_version"] = self._check.agent_version
-        # Tag with the async job's DBM tags (service check tags unioned with the check tags, e.g.
-        # including `port:`) rather than the bare check tags.
-        if getattr(self._metadata, "_tags", None):
-            event["tags"] = self._metadata._tags
         return event
 
     def _resolve_strategy(self) -> str:

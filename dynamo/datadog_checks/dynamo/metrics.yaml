@@ -119,6 +119,9 @@ dynamo_component_router_output_sequence_tokens: component.router.output_sequence
 dynamo_component_router_kv_hit_rate: component.router.kv_hit_rate
 dynamo_component_router_non_max_overlap_selections: component.router.non_max_overlap_selections
 dynamo_component_router_overlap_blocks_lost: component.router.overlap_blocks_lost
+dynamo_component_router_kv_transfer_estimated_latency_seconds: component.router.kv_transfer_estimated_latency.seconds
+dynamo_component_router_shared_cache_hit_rate: component.router.shared_cache_hit_rate
+dynamo_component_router_shared_cache_beyond_blocks: component.router.shared_cache_beyond_blocks
 # The TensorRT-LLM engine publishes its own hit-rate gauge under this name instead of Dynamo's
 # portable dynamo_component_kv_cache_hit_rate, which requires the KV event consolidator to be
 # configured (kv_connector_config) and is otherwise never emitted for this backend.

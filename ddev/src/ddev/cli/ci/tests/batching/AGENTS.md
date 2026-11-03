@@ -66,6 +66,11 @@ of guessing at what it probably meant: a Python version that is not `major.minor
 repeated platform name in a CI override, or a target reaching expansion with no environments all
 raise `PlanningError`. The alternative is a plan that looks fine and tests the wrong thing.
 
+**What the caller named is never dropped quietly.** A target the change set merely implicated may be
+skipped with a warning, but one the caller asked for by name must be planned or raise
+`PlanningError` — a CI exclusion and an empty environment set both qualify. The same goes for an
+exclusion matching no target. Silently planning nothing reports success for tests that never ran.
+
 Generated or advertised data is different. `manifest.json` lists platforms ddev has no runner for,
 such as AIX, so the supported OS list is filtered rather than parsed. Failing on it would turn
 someone else's metadata into an outage for every target in the run.

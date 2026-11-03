@@ -11,11 +11,7 @@ from .utils import get_check
 
 pytestmark = pytest.mark.unit
 
-# hypothesis>=6.170.1 falsely flags `lists(from_regex(...), unique=True)` as having a large minimal example.
-settings.register_profile(
-    "pytest-func-fixtures-ok",
-    suppress_health_check=[HealthCheck.function_scoped_fixture, HealthCheck.large_base_example],
-)
+settings.register_profile("pytest-func-fixtures-ok", suppress_health_check=[HealthCheck.function_scoped_fixture])
 settings.load_profile("pytest-func-fixtures-ok")
 
 metric_names = st.from_regex(r'[a-z][0-9a-z]*(?:_[0-9a-z]+)*', fullmatch=True)

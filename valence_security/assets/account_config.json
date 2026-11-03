@@ -1,0 +1,73 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "API key",
+          "help": "Valence Security API key, generated under Administration > Settings > Valence API.",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "supported_connection_methods": [
+    {
+      "name": "Valence Security API",
+      "regional": {
+        "region_setting": {
+          "key": "region",
+          "label": "Region",
+          "help": "Your Valence Security region: US for app.valencesecurity.com, EU for appeu.valencesecurity.com.",
+          "editable": true,
+          "required": true,
+          "dropdown": {
+            "options": [
+              { "value": "us", "label": "US" },
+              { "value": "eu", "label": "EU" }
+            ]
+          }
+        },
+        "region_base_urls": {
+          "us": "https://app.valencesecurity.com",
+          "eu": "https://appeu.valencesecurity.com"
+        }
+      }
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "valence-security-alert-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Alerts",
+        "help": "Collects Valence Security alerts.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "collect_alerts",
+        "should_map_legacy_fields": true
+      }
+    },
+    {
+      "dataflow_id": "valence-security-audit-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Audit Logs",
+        "help": "Collects Valence Security audit logs.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "collect_audit_logs",
+        "should_map_legacy_fields": true
+      }
+    }
+  ],
+  "health_probe": {
+    "http_method": "GET",
+    "path": "/api/v2/alerts/alertTypes"
+  }
+}
