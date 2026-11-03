@@ -46,11 +46,38 @@ jobs:
       - name: Export committed assets
         run: ddev --here release apw package --repository "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA" --directory dist
 
-  publish:
-    # Only scheduled runs and manual dispatches from reviewed master can publish.
+  release-tooling:
+    # Resolve the production pin without write or OIDC credentials.
     if: >-
       (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') &&
       github.ref == 'refs/heads/master'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    outputs:
+      ddev-version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Resolve pinned ddev release
+        id: version
+        env:
+          # Bootstrap: merge #25665 and release ddev, then set this exact version
+          # in a reviewed change to enable publication. Never fall back to local/latest.
+          # This pins ddev itself, not its transitive dependencies.
+          APW_DDEV_VERSION: ""
+        run: |
+          if [[ -z "$APW_DDEV_VERSION" ]]; then
+            echo "::notice::APW publication is disabled until an APW-enabled ddev release is pinned."
+            echo "Set APW_DDEV_VERSION to a released ddev version containing #25665 to enable publication." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [[ ! "$APW_DDEV_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::APW_DDEV_VERSION must be an exact stable version, without a range or wildcard."
+            exit 1
+          fi
+          echo "version=$APW_DDEV_VERSION" >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: release-tooling
+    if: needs.release-tooling.outputs.ddev-version != ''
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
@@ -65,7 +92,8 @@ jobs:
           python-version: '3.13'
       - uses: ./.github/actions/setup-ddev
         with:
-          cache-profile: local-ddev
+          install-mode: pypi
+          ddev-version: "==${{ needs.release-tooling.outputs.ddev-version }}"
       - name: Check for a complete release
         id: release
         env:
