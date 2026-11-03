@@ -2,6 +2,24 @@
 
 <!-- towncrier release notes start -->
 
+## 9.4.0 / 2026-10-29
+
+***Added***:
+
+* Update dependencies ([#25599](https://github.com/DataDog/integrations-core/pull/25599))
+
+***Fixed***:
+
+* Skip configured consumer group topics that do not exist in the cluster instead of failing consumer offset collection for every group, and pick up topics and partitions created after the first check run. ([#25666](https://github.com/DataDog/integrations-core/pull/25666))
+* Stop creating a librdkafka Consumer on every check run just to read the cluster ID; read it from the AdminClient metadata instead. ([#25667](https://github.com/DataDog/integrations-core/pull/25667))
+* Fetch only uncached partitions when the earliest-offsets cache is fresh, so one unfetchable partition no longer bypasses the cache for all partitions. ([#25668](https://github.com/DataDog/integrations-core/pull/25668))
+
+## 9.3.0 / 2026-10-27 / Agent 7.85.0
+
+***Security***:
+
+* Update boto3 to 1.43.119, which drops the Sectigo root that anchors the compromised eMudhra intermediates. ([#25797](https://github.com/DataDog/integrations-core/pull/25797))
+
 ## 9.2.2 / 2026-10-21
 
 ***Fixed***:

@@ -14,6 +14,7 @@ from ddev.cli.ci.tests.batching.exceptions import PlanningError
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Sequence
 
+    from ddev.monitoring import ComponentMonitor
     from ddev.repo.core import IntegrationRegistry
     from ddev.utils.git import ChangedFile
 
@@ -168,6 +169,29 @@ class DirectTargetRule:
 
 
 @dataclass(frozen=True)
+class CISetupScriptRule:
+    """Select the target whose CI setup scripts changed."""
+
+    monitor: ComponentMonitor
+
+    def __call__(self, changed_files: Sequence[ChangedFile], facts: RepositoryFacts) -> Iterator[str]:
+        prefix = ".ddev/ci/scripts/"
+        for changed_file in changed_files:
+            for path in _relevant_affected_paths(changed_file):
+                if not path.startswith(prefix):
+                    continue
+                target, separator, remaining = path[len(prefix) :].partition("/")
+                if not separator or not remaining:
+                    continue
+                if facts.is_testable_target(target):
+                    yield target
+                else:
+                    self.monitor.logger.warning(
+                        "CI setup script folder is not a testable target: %s", f"{prefix}{target}"
+                    )
+
+
+@dataclass(frozen=True)
 class RepositoryWideRule:
     """Trigger the full eligible target set when a repository-wide path changes.
 
@@ -240,10 +264,13 @@ def all_target_rules() -> tuple[TargetRule, ...]:
     return (AllTargetsRule(),)
 
 
-def default_target_rules(*, is_core: bool, infrastructure_targets: Sequence[str]) -> tuple[TargetRule, ...]:
+def default_target_rules(
+    *, is_core: bool, infrastructure_targets: Sequence[str], monitor: ComponentMonitor
+) -> tuple[TargetRule, ...]:
     """Build the default ordered rule set for a repository."""
     return (
         DirectTargetRule(),
+        CISetupScriptRule(monitor=monitor),
         RepositoryWideRule(is_core=is_core),
         InfrastructureRule(is_core=is_core, targets=tuple(infrastructure_targets)),
     )

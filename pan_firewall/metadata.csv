@@ -1,11 +1,14 @@
 metric_name,metric_type,interval,unit_name,per_unit_name,description,orientation,integration,short_name,curated_metric,sample_tags
 pan_firewall.api.authentication.status,gauge,,,,"Whether the API rejected the credentials (1 = invalid credentials, 0 = OK).",-1,palo_alto_networks_firewall,api authentication status,,
-pan_firewall.bgp.peer.prefix_limit,gauge,,,,Configured maximum prefixes.,0,palo_alto_networks_firewall,bgp peer prefix limit,,"peer,vr,peer_ip,remote_as,peer_group"
-pan_firewall.bgp.peer.prefix_limit.utilization,gauge,,percent,,Received prefixes as a percentage of the configured limit.,-1,palo_alto_networks_firewall,bgp peer prefix limit utilization,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
-pan_firewall.bgp.peer.prefixes.incoming.rejected,gauge,,,,Prefixes rejected.,-1,palo_alto_networks_firewall,bgp peer prefixes incoming rejected,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
-pan_firewall.bgp.peer.prefixes.incoming.total,gauge,,,,Prefixes received.,0,palo_alto_networks_firewall,bgp peer prefixes incoming total,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
+pan_firewall.bgp.peer.connections.dropped,count,,connection,,BGP connections dropped. Sent only by the Advanced Routing Engine.,-1,palo_alto_networks_firewall,bgp peer connections dropped,,"peer,vr,peer_ip,remote_as,peer_group"
+pan_firewall.bgp.peer.connections.established,count,,connection,,BGP connections established. Sent only by the Advanced Routing Engine.,0,palo_alto_networks_firewall,bgp peer connections established,,"peer,vr,peer_ip,remote_as,peer_group"
+pan_firewall.bgp.peer.prefix_limit,gauge,,,,Configured maximum prefixes. The Advanced Routing Engine reports a limit per address family (`afi_safi`); the legacy routing engine reports one limit per peer.,0,palo_alto_networks_firewall,bgp peer prefix limit,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
+pan_firewall.bgp.peer.prefix_limit.utilization,gauge,,percent,,Accepted prefixes as a percentage of the configured limit.,-1,palo_alto_networks_firewall,bgp peer prefix limit utilization,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
+pan_firewall.bgp.peer.prefixes.incoming.accepted,gauge,,,,Prefixes accepted from the peer.,0,palo_alto_networks_firewall,bgp peer prefixes incoming accepted,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
+pan_firewall.bgp.peer.prefixes.incoming.rejected,gauge,,,,Prefixes rejected. Not sent by the Advanced Routing Engine.,-1,palo_alto_networks_firewall,bgp peer prefixes incoming rejected,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
+pan_firewall.bgp.peer.prefixes.incoming.total,gauge,,,,Prefixes received. Not sent by the Advanced Routing Engine.,0,palo_alto_networks_firewall,bgp peer prefixes incoming total,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
 pan_firewall.bgp.peer.prefixes.outgoing.advertised,gauge,,,,Prefixes advertised.,0,palo_alto_networks_firewall,bgp peer prefixes outgoing advertised,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
-pan_firewall.bgp.peer.prefixes.outgoing.total,gauge,,,,Prefixes to send.,0,palo_alto_networks_firewall,bgp peer prefixes outgoing total,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
+pan_firewall.bgp.peer.prefixes.outgoing.total,gauge,,,,Prefixes to send. Not sent by the Advanced Routing Engine.,0,palo_alto_networks_firewall,bgp peer prefixes outgoing total,,"peer,vr,peer_ip,remote_as,peer_group,afi_safi"
 pan_firewall.bgp.peer.restart,gauge,,,,"Whether the BGP peer came up in the last 30 minutes (1 = came up, 0 = did not come up).",-1,palo_alto_networks_firewall,bgp peer restart,,"peer,vr,peer_ip,remote_as,peer_group"
 pan_firewall.bgp.peer.status,gauge,,,,"Whether the BGP peer is established (1 = established, 0 = not established).",1,palo_alto_networks_firewall,bgp peer status,,"peer,vr,peer_ip,remote_as,peer_group"
 pan_firewall.bgp.peer.status_duration,gauge,,second,,Time in the current state.,0,palo_alto_networks_firewall,bgp peer status duration,,"peer,vr,peer_ip,remote_as,peer_group"
@@ -16,6 +19,12 @@ pan_firewall.counter.global,count,,,,"Increase of the PAN-OS global counter, tag
 pan_firewall.dataplane.cpu.utilization,gauge,,percent,,Data-plane CPU utilization per core.,-1,palo_alto_networks_firewall,dataplane cpu utilization,,"dp,core"
 pan_firewall.disk.used_pct,gauge,,percent,,"Percentage of file system space used, reported every 30 minutes. Not sent for the `none`, `tmpfs`, or `cgroup_root` file systems.",-1,palo_alto_networks_firewall,disk used pct,,"mount,filesystem"
 pan_firewall.dropped_packets,count,,packet,,"Dropped packets by aspect. Known aspects report 0 when they have no drops. Other aspects, such as `mgmt`, are reported when present.",-1,palo_alto_networks_firewall,dropped packets,,aspect
+pan_firewall.ha.interface.rx.bytes,count,,byte,,HA link bytes received.,0,palo_alto_networks_firewall,ha interface rx bytes,,ha_link
+pan_firewall.ha.interface.rx.drops,count,,packet,,HA link receive drops.,-1,palo_alto_networks_firewall,ha interface rx drops,,ha_link
+pan_firewall.ha.interface.rx.errors,count,,packet,,HA link receive errors.,-1,palo_alto_networks_firewall,ha interface rx errors,,ha_link
+pan_firewall.ha.interface.rx.packets,count,,packet,,HA link packets received.,0,palo_alto_networks_firewall,ha interface rx packets,,ha_link
+pan_firewall.ha.interface.tx.bytes,count,,byte,,HA link bytes sent.,0,palo_alto_networks_firewall,ha interface tx bytes,,ha_link
+pan_firewall.ha.interface.tx.packets,count,,packet,,HA link packets sent.,0,palo_alto_networks_firewall,ha interface tx packets,,ha_link
 pan_firewall.interface.attack.ip_spoof,count,,packet,,IP-spoofed packets.,-1,palo_alto_networks_firewall,interface attack ip spoof,,"interface,interface_type,zone,vsys,vr"
 pan_firewall.interface.attack.land,count,,packet,,LAND attack packets.,-1,palo_alto_networks_firewall,interface attack land,,"interface,interface_type,zone,vsys,vr"
 pan_firewall.interface.attack.mac_spoof,count,,packet,,MAC-spoofed packets.,-1,palo_alto_networks_firewall,interface attack mac spoof,,"interface,interface_type,zone,vsys,vr"
@@ -61,6 +70,7 @@ pan_firewall.mgmt.swap.free,gauge,,byte,,Free swap.,1,palo_alto_networks_firewal
 pan_firewall.mgmt.swap.total,gauge,,byte,,Total swap.,0,palo_alto_networks_firewall,mgmt swap total,,
 pan_firewall.mgmt.swap.used,gauge,,byte,,Used swap.,-1,palo_alto_networks_firewall,mgmt swap used,,
 pan_firewall.mgmt.swap.used_pct,gauge,,percent,,Percentage of management-plane swap in use.,-1,palo_alto_networks_firewall,mgmt swap used pct,,
+pan_firewall.ospf.neighbor.state_changes,count,,,,OSPF neighbor state changes. Sent only by the Advanced Routing Engine.,-1,palo_alto_networks_firewall,ospf neighbor state changes,,"neighbor,router_id,area,vr"
 pan_firewall.ospf.neighbor.status,gauge,,,,"Whether the OSPF neighbor is in the `full` state (1 = full, 0 = not full).",1,palo_alto_networks_firewall,ospf neighbor status,,"neighbor,router_id,area,vr"
 pan_firewall.panorama.can_connect,gauge,,,,"Whether the Panorama discovery call succeeded (1 = succeeded, 0 = failed).",1,palo_alto_networks_firewall,panorama can connect,,"device_namespace,panorama_host"
 pan_firewall.power.alarm.high,gauge,,,,"Whether the power sensor is in alarm above the maximum (1 = in alarm, 0 = not in alarm).",-1,palo_alto_networks_firewall,power alarm high,,"sensor,slot"

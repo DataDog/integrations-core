@@ -23,6 +23,7 @@ from ddev.cli.ci.tests.changes import ChangeResolutionError
 from ddev.cli.ci.tests.dispatcher_attributes import metric_tag_mapping
 from ddev.cli.ci.tests.dispatcher_config import DispatcherConfig
 from ddev.cli.ci.tests.dispatcher_logging import dispatcher_datadog_formatter
+from ddev.cli.ci.tests.execution_metrics import ExecutionOutcome
 from ddev.monitoring import MonitoringRuntime
 from ddev.monitoring.datadog import DatadogLogHandler
 from ddev.monitoring.datadog_metrics import DatadogMetricsSink
@@ -1013,6 +1014,92 @@ def test_an_executed_run_reports_its_execution_metrics(
         'gather_batch_results',
         'publish_report',
     }
+
+
+@pytest.mark.parametrize(
+    'outcome',
+    [
+        ExecutionOutcome.PASSED,
+        ExecutionOutcome.TESTS_FAILED,
+        ExecutionOutcome.FAILED,
+        ExecutionOutcome.TIMED_OUT,
+        ExecutionOutcome.CANCELLED,
+    ],
+)
+def test_dispatcher_execution_outcome_reaches_actions_output(
+    ddev: CliRunner,
+    github: FakeAsyncGitHubClient,
+    planned: MagicMock,
+    mocker: MockerFixture,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    outcome: ExecutionOutcome,
+):
+    output = tmp_path / 'actions-output'
+    monkeypatch.setenv('GITHUB_OUTPUT', str(output))
+    dispatcher = mocker.Mock(
+        outcome=mocker.Mock(execution_outcome=outcome, progress=None, final_report_published=False)
+    )
+    mocker.patch('ddev.cli.ci.tests.dispatcher.build_dispatcher', return_value=dispatcher)
+
+    result = ddev('ci', 'dispatch-tests', '--pr', str(PR_NUMBER), '--output-dir', str(tmp_path))
+
+    assert result.exit_code == int(outcome is not ExecutionOutcome.PASSED), result.output
+    assert output.read_text(encoding='utf-8') == f'outcome={outcome}\nno-op-reason=\n'
+
+
+@pytest.mark.parametrize(
+    ('scenario', 'options', 'outcome', 'reason'),
+    [
+        ('superseded', (), 'no-op', 'no open pull request matches the requested revision'),
+        ('superseded', ('--resolve-only',), 'no-op', 'no open pull request matches the requested revision'),
+        ('empty-plan', (), 'no-op', 'the plan covers no target'),
+        ('planning-error', (), 'planning-failed', ''),
+        ('resolution-error', (), 'failed', ''),
+        ('interrupted', (), 'cancelled', ''),
+        ('resolved', ('--resolve-only',), 'resolved', ''),
+        ('dry-run', ('--dry-run',), 'dry-run', ''),
+    ],
+)
+def test_predispatch_outcome_reaches_actions_output(
+    ddev: CliRunner,
+    github: FakeAsyncGitHubClient,
+    planned: MagicMock,
+    mocker: MockerFixture,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    scenario: str,
+    options: tuple[str, ...],
+    outcome: str,
+    reason: str,
+):
+    output = tmp_path / 'actions-output'
+    monkeypatch.setenv('GITHUB_OUTPUT', str(output))
+    if scenario == 'superseded':
+        github.mock_response('get_pull_request', pull_request(head_sha='a-newer-sha'))
+    elif scenario == 'empty-plan':
+        planned.return_value = []
+    elif scenario == 'planning-error':
+        planned.side_effect = PlanningError('invalid plan')
+    elif scenario == 'resolution-error':
+        github.mock_response('get_pull_request', httpx.ConnectError('resolution failed'))
+    elif scenario == 'interrupted':
+        mocker.patch('ddev.cli.ci.dispatch_tests.changes_for_run', side_effect=KeyboardInterrupt)
+
+    result = ddev(
+        'ci',
+        'dispatch-tests',
+        '--pr',
+        str(PR_NUMBER),
+        '--pr-head-sha',
+        HEAD_SHA,
+        '--output-dir',
+        str(tmp_path),
+        *options,
+    )
+
+    assert result.exit_code == int(scenario in {'planning-error', 'resolution-error', 'interrupted'}), result.output
+    assert output.read_text(encoding='utf-8') == f'outcome={outcome}\nno-op-reason={reason}\n'
 
 
 def test_a_run_with_failed_tests_is_counted_as_a_test_failure(

@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.5.0 / 2026-10-29
+
+***Added***:
+
+* Add Database Monitoring for IBM Db2 with query metrics and obfuscated full query text. Custom queries now run asynchronously on dedicated connections and submit metrics in the background, even when Database Monitoring is disabled. ([#25329](https://github.com/DataDog/integrations-core/pull/25329))
+
 ## 4.4.0 / 2026-08-05 / Agent 7.83.0
 
 ***Security***:
