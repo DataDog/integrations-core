@@ -65,7 +65,6 @@ in the host environment before starting the fixture to override it.
 | `DB_USERNAME` | `dduser` | Admin user on the 3.x server, published as `provides.DB_USERNAME`. |
 | `DB_PASSWORD` | `pawprint` | Admin password on the 3.x server, published as `provides.DB_PASSWORD`. |
 | `ACTIVITY_GEN` | `1` | Set to `0` for a quiescent fixture. The workload container stays up but sends no traffic. |
-| `ACTIVITY_DURATION` | `0` | Stop the workload after this many seconds. `0` runs it forever. |
 | `NGINX_VERSION` | `1.27.5-alpine` | Image tag of the gateway. |
 
 ```shell

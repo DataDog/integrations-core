@@ -12,7 +12,6 @@ ADMIN="${DB_USERNAME}:${DB_PASSWORD}"
 # Non-admin _users account created by the seed; authenticating as it goes
 # through the auth cache (server admins bypass it).
 READER="ddreader:ddreader"
-DURATION="${ACTIVITY_DURATION:-0}"   # 0 = run forever
 J='Content-Type: application/json'
 
 log() { echo "activity-gen: $*"; }
@@ -74,8 +73,6 @@ drive() {
   fi
 }
 
-end=0
-[ "$DURATION" -gt 0 ] && end=$(( $(date +%s) + DURATION ))
 i=0
 
 log "driving $V3 and $V1"
@@ -89,9 +86,5 @@ while :; do
         "3.x requests=$(curl -s -u "$ADMIN" "$V3/_node/_local/_stats/couchdb/httpd/requests" | sed -n 's/.*"value":\([0-9]*\).*/\1/p')" \
         "1.x requests=$(curl -s "$V1/_stats/httpd/requests" | sed -n 's/.*"current":\([0-9.]*\).*/\1/p')"
   fi
-
-  [ "$end" -gt 0 ] && [ "$(date +%s)" -ge "$end" ] && break
   sleep 1
 done
-
-log "PASS: activity workload complete after $i iterations"

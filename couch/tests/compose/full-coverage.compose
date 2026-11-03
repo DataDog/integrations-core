@@ -110,7 +110,6 @@ services:
       # Set ACTIVITY_GEN=0 (host env) for a quiescent couch-full: the container
       # stays up but generates no traffic. Defaults to on.
       ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
-      ACTIVITY_DURATION: "${ACTIVITY_DURATION:-0}"
     volumes:
       - ../activity-gen.sh:/opt/activity-gen.sh:ro
     entrypoint: ["sh", "/opt/activity-gen.sh"]
