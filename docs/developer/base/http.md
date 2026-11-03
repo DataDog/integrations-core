@@ -98,6 +98,51 @@ Each `FakeHTTPClient` starts with the real client's canonical TLS defaults. Pass
 fields; overrides, including `False` and `None`, take precedence. Each client gets its own copy of the overrides, so changing
 one client's TLS settings doesn't affect other clients or the caller's mapping.
 
+### Migrating an existing check
+
+Move a check onto this mode in one pull request dedicated to it, covering production code, tests and test-environment
+helpers together. The check is migrated when all of the following hold.
+
+Production code:
+
+- Every check class the integration instantiates sets `AGNOSTIC_HTTP_CLIENT = True`, including legacy implementations
+  and the classes a `__new__` factory returns. Don't set it on a shared base class instead.
+- Extra clients come from `self.create_http_client(...)`, never from `RequestsWrapper(...)` or a `requests.Session`.
+- Errors are caught as the types listed under [Errors](#errors), keeping separately handled cases separate. A timeout
+  handled apart from a connection error maps to `HTTPClientTimeoutError` and `HTTPClientConnectionError`, and an error
+  status caught as `HTTPError` maps to `HTTPClientStatusError`. A body that is not valid JSON raises the standard
+  library's `json.JSONDecodeError`, a `ValueError`, rather than the `simplejson` or `requests` one.
+
+Tests:
+
+- Unit tests register responses per URL with the `fake_http_response` fixture, or register exceptions with the
+  fixture's `fake_http.register_response()`, and call `fake_http.assert_all_responses_consumed()`. The last matching
+  registration repeats, so a test that runs the check twice registers a response once unless the second run needs a
+  different one.
+- Assert the outcome as well, such as service checks or metrics. A check that catches `Exception` around its request
+  also catches the error the fixture raises for an unmatched request.
+- Configuration tests run through the fixture and assert `fake_http.sent`, which holds each request with the headers and
+  authentication the client applied: instance headers, Basic credentials, and no `Authorization` header after a call
+  to `disable_auth()`. Settings that never reach the wire, such as `timeout`, may be asserted on `check.http.options`.
+- A helper that receives a client gets one from `fake_http.create_client()`, not the fixture object itself.
+- JSON errors are tested by registering a body that is not JSON, such as `content=b'not json'`, not with `json_error`.
+- Redirects are tested by registering the 3xx response and calling with `allow_redirects=False`. A followed redirect
+  fails the test.
+- Tests use `FakeHTTPClient` only for the cases listed under
+  [Testing with `FakeHTTPClient`](#testing-with-fakehttpclient).
+
+Everything else:
+
+- Nothing under `datadog_checks/`, `tests/` (including `conftest.py` and Docker helpers) or the package's scripts
+  imports `requests`, `urllib3`, `requests_mock`, `responses` or a `requests_*` package. None of them uses the
+  classes `RequestsWrapper`, `ResponseWrapper` or `MockResponse`, the `mock_http_response` fixture, `requests.*` patch
+  targets, or the client's `.session`, `._session` or `.raw` members.
+- Environment helpers, such as readiness conditions and data loaders, use the standard library. The CouchDB helper
+  in `couch/tests/api.py` is a template: it sends Basic credentials preemptively, because the `urllib` auth handler
+  waits for a 401 challenge, and turns the `URLError` wrapping a connect timeout back into `TimeoutError`.
+- The package's `hatch.toml` and `pyproject.toml` no longer list `requests` or `requests-mock`, and the package
+  requires a `datadog-checks-base` release that includes this mode.
+
 ## Options
 
 Some options can be set globally in `init_config` (with `instances` taking precedence).
