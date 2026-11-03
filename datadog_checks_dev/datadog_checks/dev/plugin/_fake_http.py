@@ -45,13 +45,13 @@ class SentRequest:
 
 
 @dataclass
-class _Registration:
+class Registration:
     registered: RegisteredResponse
     served: int = 0
 
 
 @dataclass
-class _ActiveCall:
+class ActiveCall:
     """A client call in progress, and the fixture violations raised while serving it."""
 
     request: RecordedRequest
@@ -72,7 +72,7 @@ class FakeHTTPFixture:
     def __init__(self) -> None:
         self.requests: list[RecordedRequest] = []
         self.sent: list[SentRequest] = []
-        self._registrations: list[_Registration] = []
+        self._registrations: list[Registration] = []
         # Checks may send requests from several threads. Choosing the first unserved registration and marking it
         # served must be atomic, or two concurrent requests could receive the same response while another goes unused.
         self._lock = threading.Lock()
@@ -97,7 +97,7 @@ class FakeHTTPFixture:
         _check_servable(response)
         registered = RegisteredResponse(method, url, response, match_options or {})
         with self._lock:
-            self._registrations.append(_Registration(registered))
+            self._registrations.append(Registration(registered))
 
     def assert_requests(self, expected: Iterable[RecordedRequest]) -> None:
         """Assert that the checks made exactly the expected calls, in order."""
@@ -125,7 +125,7 @@ class FakeHTTPFixture:
     @contextmanager
     def _record_call(self, method: str, url: str, options: Mapping[str, Any]) -> Iterator[list[AssertionError]]:
         """Record a client call, yielding the fixture violations its wire requests raise."""
-        call = _ActiveCall(RecordedRequest(method=method, url=url, options=options))
+        call = ActiveCall(RecordedRequest(method=method, url=url, options=options))
         with self._lock:
             self.requests.append(call.request)
         # The wire request is served on the calling thread, from the innermost call it is making.
