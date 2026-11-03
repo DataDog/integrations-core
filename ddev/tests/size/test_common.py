@@ -11,6 +11,7 @@ import pytest
 import requests
 
 from ddev.cli.size.utils.common_funcs import (
+    WHEEL_BODY_MAX_RESTARTS,
     WHEEL_REQUEST_MAX_RETRIES,
     WHEEL_REQUEST_SESSION,
     WHEEL_REQUEST_TIMEOUT_SECONDS,
@@ -881,7 +882,7 @@ def test_download_wheel_restarts_a_download_dropped_mid_body(error):
 def test_download_wheel_gives_up_after_the_retry_limit():
     responses = [
         make_streamed_wheel_response(requests.exceptions.ChunkedEncodingError("Connection broken"))
-        for _ in range(WHEEL_REQUEST_MAX_RETRIES + 1)
+        for _ in range(WHEEL_BODY_MAX_RESTARTS + 1)
     ]
 
     with (
@@ -891,4 +892,4 @@ def test_download_wheel_gives_up_after_the_retry_limit():
         with pytest.raises(requests.exceptions.ChunkedEncodingError):
             download_wheel(MagicMock(), PLACEHOLDER_URL, "dev")
 
-    assert mock_get.call_count == WHEEL_REQUEST_MAX_RETRIES + 1
+    assert mock_get.call_count == WHEEL_BODY_MAX_RESTARTS + 1

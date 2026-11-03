@@ -327,6 +327,8 @@ def wheel_url_candidates(url: str, wheels_storage: WheelsStorageTier) -> list[st
 
 WHEEL_REQUEST_MAX_RETRIES = 3
 WHEEL_REQUEST_RETRY_BACKOFF_SECONDS = 1.0
+WHEEL_BODY_MAX_RESTARTS = 3
+WHEEL_BODY_RESTART_BACKOFF_SECONDS = 1.0
 WHEEL_REQUEST_TIMEOUT_SECONDS = 30
 
 WHEEL_REQUEST_RETRY_STATUSES = (502, 503, 504)
@@ -384,14 +386,14 @@ def request_wheel(
 
 def download_wheel(app: Application, url: str, wheels_storage: WheelsStorageTier) -> bytes:
     """Downloads a wheel's content, restarting the download if the connection drops mid-body."""
-    for attempt in range(WHEEL_REQUEST_MAX_RETRIES + 1):
+    for attempt in range(WHEEL_BODY_MAX_RESTARTS + 1):
         with request_wheel(app, url, wheels_storage) as response:
             try:
                 return response.content
             except (requests.exceptions.ChunkedEncodingError, requests.exceptions.ConnectionError) as e:
-                if attempt == WHEEL_REQUEST_MAX_RETRIES:
+                if attempt == WHEEL_BODY_MAX_RESTARTS:
                     raise
-                delay = WHEEL_REQUEST_RETRY_BACKOFF_SECONDS * 2**attempt
+                delay = WHEEL_BODY_RESTART_BACKOFF_SECONDS * 2**attempt
                 app.display_debug(f"Wheel download from {url} was interrupted ({e}), retrying in {delay}s")
         time.sleep(delay)
 
