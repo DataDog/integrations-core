@@ -403,11 +403,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /resend/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
 /resend/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/sanity/                                                            @DataDog/saas-integrations
-/sanity/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
-/sanity/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
-/sanity/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
 
 /sonatype_nexus/                                                     @DataDog/agent-integrations
 /sonatype_nexus/*.md                                                 @DataDog/agent-integrations @DataDog/documentation
@@ -462,11 +457,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /trend_micro_vision_one_endpoint_security/*.md                      @DataDog/saas-integrations @DataDog/documentation
 /trend_micro_vision_one_endpoint_security/manifest.json             @DataDog/saas-integrations @DataDog/documentation
 /trend_micro_vision_one_endpoint_security/assets/logs/              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
-/shopify/                                                           @DataDog/saas-integrations
-/shopify/*.md                                                       @DataDog/saas-integrations @DataDog/documentation
-/shopify/manifest.json                                              @DataDog/saas-integrations @DataDog/documentation
-/shopify/assets/logs/                                               @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /hubspot_content_hub/                                               @DataDog/saas-integrations
 /hubspot_content_hub/*.md                                           @DataDog/saas-integrations @DataDog/documentation
