@@ -9,7 +9,6 @@ set -eu
 DB_PORT="${DB_PORT:-1521}"
 APP="ddapp/${ORACLE_PASSWORD}@//${DB_HOST}:${DB_PORT}/FREEPDB1"
 SYS="sys/${ORACLE_PASSWORD}@//${DB_HOST}:${DB_PORT}/FREE as sysdba"
-DURATION="${ACTIVITY_DURATION:-0}"   # 0 = run forever
 
 log() { echo "activity-gen: $*"; }
 
@@ -53,10 +52,7 @@ deadlock() {
 
 log "starting lock/temp holder session"
 hold &
-holder=$!
 
-end=0
-[ "$DURATION" -gt 0 ] && end=$(( $(date +%s) + DURATION ))
 i=0
 
 while :; do
@@ -165,10 +161,5 @@ SQL
   wait "$dl" || true
 
   if [ $(( i % 10 )) -eq 0 ]; then log "iteration $i"; fi
-
-  [ "$end" -gt 0 ] && [ "$(date +%s)" -ge "$end" ] && break
   sleep 1
 done
-
-kill "$holder" 2> /dev/null || true
-log "PASS: activity workload complete after $i iterations"

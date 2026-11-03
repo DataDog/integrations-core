@@ -45,7 +45,6 @@ Each input has a working default and can be overridden from the host environment
 | `DB_USERNAME` | `c##datadog` | Datadog monitoring user (a common user in the CDB). |
 | `DB_PASSWORD` | `datadog` | Password of `DB_USERNAME`. |
 | `ACTIVITY_GEN` | `1` | Set to `0` for a quiescent fixture: the workload container stays up but generates no traffic. |
-| `ACTIVITY_DURATION` | `0` | Stop the workload after this many seconds (`0` runs forever). |
 
 The task publishes `DB_HOST`, `DB_PORT` (`1521`), `DB_SERVICE_NAME` (`FREE`),
 `DB_USERNAME`, and `DB_PASSWORD`. These labels carry the defaults: if you override
