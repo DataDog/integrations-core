@@ -20,13 +20,15 @@ tasks:
       evalya.io/provides.KONG_CONSUMER_KEY: devops-best-friend
     env:
       - name: KONG_VERSION
-        value: "3.9"
+        value: "3.9.4"
       - name: KONG_LEGACY_VERSION
-        value: "2.7"
+        value: "2.7.2"
       - name: KONG_CONSUMER_KEY
         value: devops-best-friend
       - name: ACTIVITY_GEN
         value: "1"
+      - name: ACTIVITY_DURATION
+        value: "0"
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8001/metrics >/dev/null && wget -qO- http://127.0.0.1:8101/metrics >/dev/null && wget -qO- http://127.0.0.1:8200/metrics >/dev/null"]
       interval: 10s
