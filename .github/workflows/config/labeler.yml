@@ -389,10 +389,6 @@ integration/crowdstrike_fdr:
 - changed-files:
   - any-glob-to-any-file:
     - crowdstrike_fdr/**/*
-integration/databricks:
-- changed-files:
-  - any-glob-to-any-file:
-    - databricks/**/*
 integration/datadog_checks_tests_helper:
 - changed-files:
   - any-glob-to-any-file:
@@ -613,10 +609,6 @@ integration/http_check:
 - changed-files:
   - any-glob-to-any-file:
     - http_check/**/*
-integration/hubspot_content_hub:
-- changed-files:
-  - any-glob-to-any-file:
-    - hubspot_content_hub/**/*
 integration/hudi:
 - changed-files:
   - any-glob-to-any-file:
