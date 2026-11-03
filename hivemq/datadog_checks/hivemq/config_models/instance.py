@@ -9,9 +9,11 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from types import MappingProxyType
+from typing import Any, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -19,7 +21,77 @@ from datadog_checks.base.utils.models import validation
 from . import defaults, validators
 
 
-SECURE_FIELD_NAMES = frozenset(['java_bin_path', 'key_store_path', 'tools_jar_path', 'trust_store_path'])
+SECURE_FIELD_NAMES = frozenset(
+    [
+        'auth_token',
+        'java_bin_path',
+        'kerberos_cache',
+        'kerberos_keytab',
+        'key_store_path',
+        'tls_ca_cert',
+        'tls_cert',
+        'tls_private_key',
+        'tools_jar_path',
+        'trust_store_path',
+    ]
+)
+
+
+class AuthToken(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    reader: Optional[MappingProxyType[str, Any]] = None
+    writer: Optional[MappingProxyType[str, Any]] = None
+
+
+class ExtraMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        extra='allow',
+        frozen=True,
+    )
+    name: Optional[str] = None
+    type: Optional[str] = None
+
+
+class MetricPatterns(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    exclude: Optional[tuple[str, ...]] = None
+    include: Optional[tuple[str, ...]] = None
+
+
+class Metrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        extra='allow',
+        frozen=True,
+    )
+    name: Optional[str] = None
+    type: Optional[str] = None
+
+
+class Proxy(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    http: Optional[str] = None
+    https: Optional[str] = None
+    no_proxy: Optional[tuple[str, ...]] = None
+
+
+class ShareLabels(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    labels: Optional[tuple[str, ...]] = None
+    match: Optional[tuple[str, ...]] = None
 
 
 class InstanceConfig(BaseModel):
@@ -28,29 +100,94 @@ class InstanceConfig(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    allow_redirects: Optional[bool] = None
+    auth_token: Optional[AuthToken] = None
+    auth_type: Optional[str] = None
+    aws_host: Optional[str] = None
+    aws_region: Optional[str] = None
+    aws_service: Optional[str] = None
+    cache_metric_wildcards: Optional[bool] = None
+    cache_shared_labels: Optional[bool] = None
+    collect_counters_with_distributions: Optional[bool] = None
     collect_default_jvm_metrics: Optional[bool] = None
+    collect_histogram_buckets: Optional[bool] = None
+    connect_timeout: Optional[float] = None
+    disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
-    host: str
+    enable_health_service_check: Optional[bool] = None
+    enable_legacy_tags_normalization: Optional[bool] = None
+    exclude_labels: Optional[tuple[str, ...]] = None
+    exclude_metrics: Optional[tuple[str, ...]] = None
+    exclude_metrics_by_labels: Optional[MappingProxyType[str, Union[bool, tuple[str, ...]]]] = None
+    extra_headers: Optional[MappingProxyType[str, Any]] = None
+    extra_metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, ExtraMetrics]]], ...]] = None
+    headers: Optional[MappingProxyType[str, Any]] = None
+    histogram_buckets_as_distributions: Optional[bool] = None
+    host: Optional[str] = None
+    hostname_format: Optional[str] = None
+    hostname_label: Optional[str] = None
+    ignore_connection_errors: Optional[bool] = None
+    ignore_tags: Optional[tuple[str, ...]] = None
+    include_labels: Optional[tuple[str, ...]] = None
     is_jmx: Optional[bool] = None
     java_bin_path: Optional[str] = None
     java_options: Optional[str] = None
     jmx_url: Optional[str] = None
+    kerberos_auth: Optional[Literal['required', 'optional', 'disabled']] = None
+    kerberos_cache: Optional[str] = None
+    kerberos_delegate: Optional[bool] = None
+    kerberos_force_initiate: Optional[bool] = None
+    kerberos_hostname: Optional[str] = None
+    kerberos_keytab: Optional[str] = None
+    kerberos_principal: Optional[str] = None
     key_store_password: Optional[str] = None
     key_store_path: Optional[str] = None
+    log_requests: Optional[bool] = None
+    metric_patterns: Optional[MetricPatterns] = None
+    metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, Metrics]]], ...]] = None
     min_collection_interval: Optional[float] = None
     name: Optional[str] = None
+    namespace: Optional[str] = Field(None, pattern='\\w*')
+    non_cumulative_histogram_buckets: Optional[bool] = None
+    ntlm_domain: Optional[str] = None
+    openmetrics_endpoint: Optional[str] = None
     password: Optional[str] = None
-    port: int
+    persist_connections: Optional[bool] = None
+    port: Optional[int] = None
     process_name_regex: Optional[str] = None
+    proxy: Optional[Proxy] = None
+    raw_line_filters: Optional[tuple[str, ...]] = None
+    raw_metric_prefix: Optional[str] = None
+    read_timeout: Optional[float] = None
+    rename_labels: Optional[MappingProxyType[str, Any]] = None
+    request_size: Optional[float] = None
     rmi_client_timeout: Optional[float] = None
     rmi_connection_timeout: Optional[float] = None
     rmi_registry_ssl: Optional[bool] = None
     service: Optional[str] = None
+    share_labels: Optional[MappingProxyType[str, Union[bool, ShareLabels]]] = None
+    skip_proxy: Optional[bool] = None
+    tag_by_endpoint: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
+    telemetry: Optional[bool] = None
+    timeout: Optional[float] = None
+    tls_ca_cert: Optional[str] = None
+    tls_cert: Optional[str] = None
+    tls_ciphers: Optional[tuple[str, ...]] = None
+    tls_ignore_warning: Optional[bool] = None
+    tls_private_key: Optional[str] = None
+    tls_protocols_allowed: Optional[tuple[str, ...]] = None
+    tls_use_host_header: Optional[bool] = None
+    tls_verify: Optional[bool] = None
     tools_jar_path: Optional[str] = None
     trust_store_password: Optional[str] = None
     trust_store_path: Optional[str] = None
+    use_latest_spec: Optional[bool] = None
+    use_legacy_auth_encoding: Optional[bool] = None
+    use_openmetrics: Optional[bool] = None
+    use_process_start_time: Optional[bool] = None
     user: Optional[str] = None
+    username: Optional[str] = None
 
     @model_validator(mode='before')
     def _initial_validation(cls, values):

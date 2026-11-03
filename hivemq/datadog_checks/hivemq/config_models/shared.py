@@ -28,7 +28,7 @@ class SharedConfig(BaseModel):
     )
     collect_default_metrics: Optional[bool] = None
     conf: Optional[tuple[MappingProxyType[str, Any], ...]] = None
-    is_jmx: bool
+    is_jmx: Optional[bool] = None
     new_gc_metrics: Optional[bool] = None
     service: Optional[str] = None
     service_check_prefix: Optional[str] = None
