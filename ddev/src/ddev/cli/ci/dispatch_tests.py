@@ -19,6 +19,7 @@ from ddev.cli.ci.dispatch_run import (
     RunResolutionError,
     changes_for_run,
     load_run_manifest,
+    resolution_github_client,
     resolve_run,
     write_run_manifest,
 )
@@ -314,7 +315,7 @@ def dispatch_tests(
                         repository=tested_repository,
                         pr_resolver=pr_resolver,
                         commit=commit,
-                        token=token,
+                        github_client=resolution_github_client(token, monitor=resolution),
                         all_targets=all_targets,
                         targets=targets,
                         exclude_targets=exclude_targets,

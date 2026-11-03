@@ -5,12 +5,15 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 
 from pydantic import BaseModel, ConfigDict, ValidationError, model_validator
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterator
+    from contextlib import AbstractAsyncContextManager
     from pathlib import Path
 
     from ddev.cli.application import Application
@@ -18,6 +21,9 @@ if TYPE_CHECKING:
     from ddev.utils.git import ChangedFile
     from ddev.utils.github_async import AsyncGitHubClient
     from ddev.utils.github_async.models import PullRequest, PullRequestRef, PullRequestSimple
+
+    # Opens one instrumented client session. See `resolution_github_client`.
+    ResolutionClientFactory = Callable[[], AbstractAsyncContextManager[AsyncGitHubClient]]
 
 RUN_MANIFEST_NAME = 'run.json'
 
@@ -28,6 +34,74 @@ MERGE_COMMIT_REFRESH_SECONDS = 2.0
 
 class RunResolutionError(Exception):
     """A run could not be resolved; the message is what the invocation aborts with."""
+
+
+def resolution_github_client(token: str, *, monitor: ComponentMonitor | None = None) -> ResolutionClientFactory:
+    """Build the GitHub client factory every resolver uses.
+
+    Every GitHub client the Dispatcher opens is instrumented, so a resolver must take its client
+    from here rather than calling `async_github_client` itself: one built in passing has no request
+    metrics, no rate-limit logging, and a limiter of its own, which quietly spends the same GitHub
+    quota the governor thinks it is managing.
+
+    A factory rather than a client, because each resolution runs in its own `asyncio.run` and an
+    `httpx.AsyncClient` cannot cross event loops. The instrumentation it closes over is built once,
+    so every session shares one rate limiter.
+    """
+    client_logger = None
+    observer = None
+    rate_limiter = None
+    if monitor is not None:
+        from ddev.cli.ci.tests.github_monitor import GitHubMonitor
+        from ddev.monitoring.adapter import ComponentLogAdapter
+        from ddev.utils.github_async.defaults import default_github_rate_limiter, log_rate_limit_events
+        from ddev.utils.rate_limiting import RateLimitEvent
+
+        client_logger = ComponentLogAdapter(monitor)
+        github_monitor = observer = GitHubMonitor(monitor)
+        log_event = log_rate_limit_events(client_logger)
+
+        def on_rate_limit_event(event: RateLimitEvent) -> None:
+            log_event(event)
+            github_monitor.rate_limit_event(event)
+
+        rate_limiter = default_github_rate_limiter(on_event=on_rate_limit_event)
+
+    def open_client() -> AbstractAsyncContextManager[AsyncGitHubClient]:
+        from ddev.utils.github_async import async_github_client
+
+        return async_github_client(token=token, logger=client_logger, observer=observer, rate_limiter=rate_limiter)
+
+    return open_client
+
+
+@contextmanager
+def resolution_failures(*, description: str, not_found: str | None = None) -> Iterator[None]:
+    """Map everything a resolver's API session can fail with onto `RunResolutionError`.
+
+    `description` prefixes the generic failures; `not_found` replaces it for a 404, for a resolver
+    that can say something more useful than "could not read" when the thing simply is not there.
+    A `RunResolutionError` raised inside the session already says what went wrong, so it passes
+    through rather than being wrapped in a second message.
+    """
+    import httpx
+
+    from ddev.cli.ci.tests.changes import ChangeResolutionError
+    from ddev.utils.github_errors import GitHubAuthenticationError
+
+    try:
+        yield
+    except RunResolutionError:
+        raise
+    except (GitHubAuthenticationError, ChangeResolutionError) as error:
+        raise RunResolutionError(str(error)) from error
+    # Checked before `HTTPError`, which it subclasses.
+    except httpx.HTTPStatusError as error:
+        if not_found is not None and error.response.status_code == httpx.codes.NOT_FOUND:
+            raise RunResolutionError(not_found) from error
+        raise RunResolutionError(f'{description}: {error}') from error
+    except (httpx.HTTPError, ValidationError) as error:
+        raise RunResolutionError(f'{description}: {error}') from error
 
 
 @dataclass(frozen=True)
@@ -210,7 +284,7 @@ def resolve_run(
     repository: str,
     pr_resolver: PullRequestResolver | None,
     commit: str | None,
-    token: str,
+    github_client: ResolutionClientFactory,
     all_targets: bool,
     targets: tuple[str, ...] = (),
     exclude_targets: tuple[str, ...] = (),
@@ -231,7 +305,7 @@ def resolve_run(
             app,
             repository=repository,
             resolver=pr_resolver,
-            token=token,
+            github_client=github_client,
             all_targets=all_targets,
             exclude_targets=exclude_targets,
             monitor=monitor,
@@ -241,7 +315,7 @@ def resolve_run(
         return resolve_tag_run(
             repository=repository,
             tag=head_tag,
-            token=token,
+            github_client=github_client,
             all_targets=all_targets,
             targets=targets,
             exclude_targets=exclude_targets,
@@ -278,7 +352,7 @@ def resolve_tag_run(
     *,
     repository: str,
     tag: str,
-    token: str,
+    github_client: ResolutionClientFactory,
     all_targets: bool,
     targets: tuple[str, ...] = (),
     exclude_targets: tuple[str, ...] = (),
@@ -296,17 +370,12 @@ def resolve_tag_run(
     """
     import asyncio
 
-    import httpx
-
-    from ddev.utils.github_async import async_github_client
-    from ddev.utils.github_errors import GitHubAuthenticationError
-
     owner, _, repo = repository.partition('/')
     if monitor is not None:
         monitor.logger.info('Resolving tested revision', head_tag=tag, all_targets=all_targets)
 
     async def resolve() -> str:
-        async with async_github_client(token=token) as client:
+        async with github_client() as client:
             reference = (await client.get_ref(owner, repo, f'tags/{tag}')).data
             if reference.object.type == 'commit':
                 return reference.object.sha
@@ -321,16 +390,10 @@ def resolve_tag_run(
                 raise RunResolutionError(f'Tag {tag} wraps a {tag_object.object.type}, which is not a commit to test.')
             return tag_object.object.sha
 
-    try:
+    with resolution_failures(
+        description=f'Could not read tag {tag}', not_found=f'Tag {tag} does not exist in {repository}.'
+    ):
         tested_commit = asyncio.run(resolve())
-    except GitHubAuthenticationError as error:
-        raise RunResolutionError(str(error)) from error
-    except httpx.HTTPStatusError as error:
-        if error.response.status_code == httpx.codes.NOT_FOUND:
-            raise RunResolutionError(f'Tag {tag} does not exist in {repository}.') from error
-        raise RunResolutionError(f'Could not read tag {tag}: {error}') from error
-    except (httpx.HTTPError, ValidationError) as error:
-        raise RunResolutionError(f'Could not read tag {tag}: {error}') from error
 
     run = ResolvedRun(
         repository=repository,
@@ -409,7 +472,7 @@ def resolve_pull_request_run(
     *,
     repository: str,
     resolver: PullRequestResolver,
-    token: str,
+    github_client: ResolutionClientFactory,
     all_targets: bool,
     exclude_targets: tuple[str, ...] = (),
     monitor: ComponentMonitor | None = None,
@@ -417,36 +480,11 @@ def resolve_pull_request_run(
     """Read the pull request from the API, in one client session."""
     import asyncio
 
-    import httpx
-
-    from ddev.cli.ci.tests.changes import ChangeResolutionError
-    from ddev.utils.github_async import async_github_client
-    from ddev.utils.github_errors import GitHubAuthenticationError
-
-    client_logger = None
-    observer = None
-    rate_limiter = None
     if monitor is not None:
-        from ddev.cli.ci.tests.github_monitor import GitHubMonitor
-        from ddev.monitoring.adapter import ComponentLogAdapter
-        from ddev.utils.github_async.defaults import default_github_rate_limiter, log_rate_limit_events
-        from ddev.utils.rate_limiting import RateLimitEvent
-
-        client_logger = ComponentLogAdapter(monitor)
-        github_monitor = observer = GitHubMonitor(monitor)
-        log_event = log_rate_limit_events(client_logger)
-
-        def on_rate_limit_event(event: RateLimitEvent) -> None:
-            log_event(event)
-            github_monitor.rate_limit_event(event)
-
-        rate_limiter = default_github_rate_limiter(on_event=on_rate_limit_event)
         monitor.logger.info('Resolving pull request', pr_number=resolver.number, all_targets=all_targets)
 
     async def resolve() -> ResolvedRun | None:
-        async with async_github_client(
-            token=token, logger=client_logger, observer=observer, rate_limiter=rate_limiter
-        ) as client:
+        async with github_client() as client:
             pull = await resolver.resolve(client)
             if pull is None:
                 if monitor is not None:
@@ -482,11 +520,5 @@ def resolve_pull_request_run(
                 )
             return run
 
-    try:
+    with resolution_failures(description='Could not read the pull request to test'):
         return asyncio.run(resolve())
-    except GitHubAuthenticationError as error:
-        raise RunResolutionError(str(error)) from error
-    except ChangeResolutionError as error:
-        raise RunResolutionError(str(error)) from error
-    except (httpx.HTTPError, ValidationError) as error:
-        raise RunResolutionError(f'Could not read the pull request to test: {error}') from error
