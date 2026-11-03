@@ -9,7 +9,6 @@ ADMIN="http://${ENVOY_HOST}:${ENVOY_PORT:-8001}"
 FRONT="http://${ENVOY_HOST}:80"
 LIMITED="http://${ENVOY_HOST}:82"
 DYN="${ENVOY_DYNAMIC_DIR:-/var/run/envoy-dynamic}"
-DURATION="${ACTIVITY_DURATION:-0}"   # 0 = run forever
 
 log() { echo "activity-gen: $*"; }
 get() { curl -s -o /dev/null --max-time 5 "$@" || true; }
@@ -40,8 +39,6 @@ hold "${FRONT}/slow?s=30" &
 hold --http2-prior-knowledge "${FRONT}/slow?s=30" &
 hold "${LIMITED}/slow?s=30" &
 
-end=0
-[ "$DURATION" -gt 0 ] && end=$(( $(date +%s) + DURATION ))
 i=0
 
 while :; do
@@ -111,10 +108,5 @@ while :; do
   fi
 
   [ $(( i % 30 )) -eq 0 ] && log "iteration ${i}"
-
-  if [ "$end" -gt 0 ] && [ "$(date +%s)" -ge "$end" ]; then
-    log "PASS: completed ${i} iterations in ${DURATION}s"
-    exec sleep infinity
-  fi
   sleep 1
 done

@@ -66,7 +66,6 @@ All defined in `compose/full-coverage.compose`:
 |---|---|---|
 | `ENVOY_VERSION` | `1.31.0` | Image tag (`envoyproxy/envoy:v<version>`) for the front proxy and the seed. |
 | `ACTIVITY_GEN` | `1` | Set to `0` for a quiescent fixture: `activity-gen` stays up but sends no traffic. |
-| `ACTIVITY_DURATION` | `0` | Stop the workload after this many seconds (`0` runs forever). |
 
 All three accept a host-environment override. The `service1`/`service2` sidecars are built from
 `docker/api_v3/Dockerfile-service`, which pins its own Envoy version; `ENVOY_VERSION` does not change them, and the
