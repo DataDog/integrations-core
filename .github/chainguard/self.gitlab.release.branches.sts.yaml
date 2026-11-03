@@ -25,7 +25,11 @@
 #   script:
 #     - GITHUB_TOKEN=$(dd-octo-sts token --scope DataDog/integrations-core --policy self.gitlab.release.branches)
 
-issuer: https://gitlab.ddbuild.io
+# Accepts the same job identity from GitLab and from DDCI Run. DDCI Run job
+# tokens are minted by ddci-token and signed by Ticino's larch issuer; they carry
+# GitLab's sub format and top-level GitLab claims, so the subject and claim
+# patterns below apply unchanged to both issuers.
+issuer_pattern: "https://gitlab\\.ddbuild\\.io|https://ticino\\.identity\\.local-cluster\\.local-dc\\.fabric\\.dog:8443/v1/issuer/larch"
 
 subject_pattern: project_path:DataDog/integrations-core:ref_type:branch:ref:(master|\d+\.\d+\.x)
 
