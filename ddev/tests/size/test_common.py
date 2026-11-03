@@ -3,7 +3,7 @@ import json
 import os
 import re
 import zipfile
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import MagicMock, PropertyMock, mock_open, patch
 
 import pytest
 import requests
@@ -16,6 +16,7 @@ from ddev.cli.size.utils.common_funcs import (
     check_python_version,
     compress,
     convert_to_human_readable_size,
+    download_wheel,
     export_format,
     extract_version_from_about_py,
     format_modules,
@@ -760,11 +761,54 @@ def test_request_wheel_uses_head_when_requested():
     )
 
 
-def test_wheel_request_session_retries_connection_failures_only():
-    # The wheels storage host resets connections under load; a dropped connection must be
-    # retried, but an HTTP error status must not (that's request_wheel's own tier-fallback job).
-    adapter = WHEEL_REQUEST_SESSION.get_adapter("https://example.com")
-    retry = adapter.max_retries
+@pytest.mark.parametrize(
+    "status_code, retried",
+    [
+        pytest.param(502, True, id="bad gateway"),
+        pytest.param(503, True, id="service unavailable"),
+        pytest.param(504, True, id="gateway timeout"),
+        pytest.param(403, False, id="forbidden falls back to the next tier"),
+        pytest.param(404, False, id="not found falls back to the next tier"),
+        pytest.param(500, False, id="other errors abort"),
+    ],
+)
+def test_wheel_request_session_retries_only_gateway_errors(status_code, retried):
+    # Gateway errors from the wheels storage host are transient and worth retrying; 403/404 belong to
+    # request_wheel's tier fallback, and retrying them would only delay it.
+    retry = WHEEL_REQUEST_SESSION.get_adapter("https://example.com").max_retries
 
-    assert retry.total == WHEEL_REQUEST_MAX_RETRIES
-    assert not retry.status_forcelist
+    assert retry.is_retry("GET", status_code) is retried
+
+
+def make_streamed_wheel_response(content):
+    response = make_wheel_response(200)
+    response.__enter__.return_value = response
+    type(response).content = PropertyMock(side_effect=[content])
+    return response
+
+
+def test_download_wheel_restarts_a_download_dropped_mid_body():
+    dropped = make_streamed_wheel_response(requests.exceptions.ChunkedEncodingError("Connection broken"))
+    complete = make_streamed_wheel_response(b"wheel")
+
+    with (
+        patch.object(WHEEL_REQUEST_SESSION, "get", side_effect=[dropped, complete]),
+        patch("ddev.cli.size.utils.common_funcs.time.sleep"),
+    ):
+        assert download_wheel(MagicMock(), PLACEHOLDER_URL, "dev") == b"wheel"
+
+
+def test_download_wheel_gives_up_after_the_retry_limit():
+    responses = [
+        make_streamed_wheel_response(requests.exceptions.ChunkedEncodingError("Connection broken"))
+        for _ in range(WHEEL_REQUEST_MAX_RETRIES + 1)
+    ]
+
+    with (
+        patch.object(WHEEL_REQUEST_SESSION, "get", side_effect=responses) as mock_get,
+        patch("ddev.cli.size.utils.common_funcs.time.sleep"),
+    ):
+        with pytest.raises(requests.exceptions.ChunkedEncodingError):
+            download_wheel(MagicMock(), PLACEHOLDER_URL, "dev")
+
+    assert mock_get.call_count == WHEEL_REQUEST_MAX_RETRIES + 1

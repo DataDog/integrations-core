@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import time
 import zipfile
 import zlib
 from datetime import date
@@ -329,14 +330,25 @@ WHEEL_REQUEST_MAX_RETRIES = 3
 WHEEL_REQUEST_RETRY_BACKOFF_SECONDS = 1.0
 WHEEL_REQUEST_TIMEOUT_SECONDS = 30
 
-# The wheels storage host resets the connection under load often enough to fail a disk-usage
-# measurement run several times a week, so connection failures get a few retries with backoff.
-# HTTP error statuses are not retried here: they're handled by request_wheel's tier fallback and
-# immediate-abort logic.
+# Gateway errors the wheels storage host returns under load. They're transient, unlike 403/404
+# (handled by request_wheel's tier fallback) and other error statuses (which abort immediately).
+WHEEL_REQUEST_RETRY_STATUSES = (502, 503, 504)
+
+# The wheels storage host resets the connection and returns gateway errors under load often enough
+# to fail a disk-usage measurement run several times a week, so both get a few retries with backoff.
+# raise_on_status=False hands the last gateway error back to request_wheel, so it fails with the
+# same error and tier listing as any other HTTP error once retries run out.
 WHEEL_REQUEST_SESSION = requests.Session()
 WHEEL_REQUEST_SESSION.mount(
     "https://",
-    HTTPAdapter(max_retries=Retry(total=WHEEL_REQUEST_MAX_RETRIES, backoff_factor=WHEEL_REQUEST_RETRY_BACKOFF_SECONDS)),
+    HTTPAdapter(
+        max_retries=Retry(
+            total=WHEEL_REQUEST_MAX_RETRIES,
+            backoff_factor=WHEEL_REQUEST_RETRY_BACKOFF_SECONDS,
+            status_forcelist=WHEEL_REQUEST_RETRY_STATUSES,
+            raise_on_status=False,
+        )
+    ),
 )
 
 
@@ -374,6 +386,27 @@ def request_wheel(
         return response
 
     raise RuntimeError(f"No wheels storage tier served {url}")
+
+
+def download_wheel(app: Application, url: str, wheels_storage: WheelsStorageTier) -> bytes:
+    """
+    Downloads a wheel's content, restarting the download if the connection drops mid-body.
+
+    The session's retries only cover the request up to the response headers; the body is streamed
+    afterwards, so a connection reset while reading it surfaces here and needs its own retry.
+    """
+    for attempt in range(WHEEL_REQUEST_MAX_RETRIES + 1):
+        try:
+            with request_wheel(app, url, wheels_storage) as response:
+                return response.content
+        except (requests.exceptions.ChunkedEncodingError, requests.exceptions.ConnectionError) as e:
+            if attempt == WHEEL_REQUEST_MAX_RETRIES:
+                raise
+            delay = WHEEL_REQUEST_RETRY_BACKOFF_SECONDS * 2**attempt
+            app.display_debug(f"Wheel download from {url} was interrupted ({e}), retrying in {delay}s")
+            time.sleep(delay)
+
+    raise RuntimeError(f"Wheel download from {url} was not attempted")
 
 
 def get_dependencies(
@@ -450,8 +483,7 @@ def get_dependencies_sizes(
     """
     file_data: list[FileDataEntry] = []
     for dep, url, version in zip(deps, download_urls, versions, strict=False):
-        with request_wheel(app, url, wheels_storage) as response:
-            wheel_data = response.content
+        wheel_data = download_wheel(app, url, wheels_storage)
 
         with tempfile.TemporaryDirectory() as tmpdir:
             wheel_path = Path(tmpdir) / "package"

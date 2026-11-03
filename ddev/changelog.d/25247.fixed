@@ -1,1 +1,1 @@
-Retry wheel download requests in `ddev size` when the connection is dropped mid-request, fixing recurring failures in the disk-usage measurement CI job.
+Retry wheel downloads in `ddev size` on dropped connections and gateway errors, fixing recurring failures in the disk-usage measurement CI job.
