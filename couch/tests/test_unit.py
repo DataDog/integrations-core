@@ -103,6 +103,54 @@ def test_server_failure_reports_critical(
     fake_http.assert_all_responses_consumed()
 
 
+def test_couchdb2_collects_every_node_and_shard(aggregator, dd_run_check, fake_http, fake_http_response):
+    server = common.URL
+    nodes = ['couchdb@node1', 'couchdb@node2']
+    indexer_task = {
+        'type': 'indexer',
+        'database': 'shards/00000000-1fffffff/kennel.1600000000',
+        'design_document': '_design/dummy',
+        'changes_done': 1,
+        'progress': 50,
+        'total_changes': 2,
+    }
+    fake_http_response(server, json_data={'version': '3.1.0'})
+    # Both the node discovery and the database sharding read the membership
+    fake_http_response(f'{server}/_membership', json_data={'cluster_nodes': nodes})
+    fake_http_response(f'{server}/_active_tasks', json_data=[{**indexer_task, 'node': nodes[0]}])
+    for index, node in enumerate(nodes):
+        node_stats = {'couchdb': {'open_databases': {'value': index + 1, 'type': 'counter'}}}
+        fake_http_response(f'{server}/_node/{node}/_stats', json_data=node_stats)
+        fake_http_response(f'{server}/_node/{node}/_system', json_data={'run_queue': index})
+    fake_http_response(f'{server}/_all_dbs', json_data=['kennel', 'users'])
+    for db, doc_count in (('kennel', 3), ('users', 5)):
+        db_info = {'sizes': {'file': 10, 'external': 5, 'active': 7}, 'doc_del_count': 0, 'doc_count': doc_count}
+        fake_http_response(f'{server}/{db}', json_data=db_info)
+    design_docs_query = '_all_docs?startkey="_design/"&endkey="_design0"'
+    fake_http_response(f'{server}/kennel/{design_docs_query}', json_data={'rows': [{'id': '_design/dummy'}]})
+    fake_http_response(f'{server}/users/{design_docs_query}', json_data={'rows': []})
+    view_index = {'language': 'javascript', 'sizes': {'file': 4}, 'updates_pending': {'total': 1}, 'waiting_clients': 0}
+    fake_http_response(f'{server}/kennel/_design/dummy/_info', json_data={'name': 'dummy', 'view_index': view_index})
+    check = CouchDb(common.CHECK_NAME, {}, instances=[{'server': server}])
+
+    dd_run_check(check)
+
+    for index, node in enumerate(nodes):
+        node_tags = [f'instance:{node}']
+        aggregator.assert_metric('couchdb.couchdb.open_databases', value=index + 1, tags=node_tags)
+        aggregator.assert_metric('couchdb.erlang.run_queue', value=index, tags=node_tags)
+        aggregator.assert_metric('couchdb.active_tasks.indexer.count', value=1 - index, tags=node_tags)
+        aggregator.assert_service_check(CouchDb.SERVICE_CHECK_NAME, CouchDb.OK, tags=node_tags, count=1)
+    task_tags = [f'instance:{nodes[0]}', 'database:kennel', 'design_document:dummy']
+    aggregator.assert_metric('couchdb.active_tasks.indexer.progress', value=50, tags=task_tags)
+    # Each node scans its own shard of the databases
+    aggregator.assert_metric('couchdb.by_db.doc_count', value=3, tags=['db:kennel'], count=1)
+    aggregator.assert_metric('couchdb.by_db.doc_count', value=5, tags=['db:users'], count=1)
+    ddoc_tags = ['db:kennel', 'design_document:dummy', 'language:javascript']
+    aggregator.assert_metric('couchdb.by_ddoc.file_size', value=4, tags=ddoc_tags, count=1)
+    fake_http.assert_all_responses_consumed()
+
+
 def test_new_version_system_metrics(load_test_data):
     # Testing the _build_system_metrics method I'm feeding it a json that has a the updated
     # keys that was added in version 3.4 that was causing the check to break. The idea here
