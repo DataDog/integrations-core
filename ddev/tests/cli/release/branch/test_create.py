@@ -309,8 +309,9 @@ def test_create_branch_milestone_pr_body_has_template_checklist(ddev, mocker):
     mocker.patch('ddev.utils.github.GitHubManager.create_label')
     mocker.patch('ddev.utils.github.GitHubManager.create_milestone')
     create_pr = mocker.patch(
-        'ddev.utils.github.GitHubManager.create_pull_request', return_value='https://github.com/test/pr/1'
+        'ddev.utils.github.GitHubManager.create_pull_request', return_value=(1, 'https://github.com/test/pr/1')
     )
+    mocker.patch('ddev.utils.github.GitHubManager.add_labels')
     mocker.patch('ddev.cli.release.branch.create.ensure_build_agent_yaml_updated', return_value=False)
     mocker.patch('ddev.cli.release.branch.create.update_release_json')
     mocker.patch('click.confirm', return_value=True)
