@@ -60,13 +60,13 @@ in the host environment before starting the fixture to override it.
 
 | Variable | Default | Effect |
 |---|---|---|
-| `COUCH_VERSION` | `3.4` | Image tag of the 2.x/3.x server. The seed and activity-gen use the same image. |
+| `COUCH_VERSION` | `3.4.3` | Image tag of the 2.x/3.x server. The seed and activity-gen use the same image. |
 | `COUCH_V1_VERSION` | `1.6.1` | Image tag of the 1.x server. |
 | `DB_USERNAME` | `dduser` | Admin user on the 3.x server, published as `provides.DB_USERNAME`. |
 | `DB_PASSWORD` | `pawprint` | Admin password on the 3.x server, published as `provides.DB_PASSWORD`. |
 | `ACTIVITY_GEN` | `1` | Set to `0` for a quiescent fixture. The workload container stays up but sends no traffic. |
 | `ACTIVITY_DURATION` | `0` | Stop the workload after this many seconds. `0` runs it forever. |
-| `NGINX_VERSION` | `1.27-alpine` | Image tag of the gateway. |
+| `NGINX_VERSION` | `1.27.5-alpine` | Image tag of the gateway. |
 
 ```shell
 evalya run --path couch/tests/evalya.yaml --task couch-full

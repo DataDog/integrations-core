@@ -9,7 +9,7 @@
 # (5984 -> 3.x, 5985 -> 1.x). Point one check instance at each port.
 services:
   couchdb:
-    image: "couchdb:${COUCH_VERSION:-3.4}"
+    image: "couchdb:${COUCH_VERSION:-3.4.3}"
     networks:
       - network1
     environment:
@@ -52,7 +52,7 @@ services:
   # (ddreader) that the workload authenticates as, so the per-database gauges
   # and the auth cache have something to report before the first scrape.
   seed:
-    image: "couchdb:${COUCH_VERSION:-3.4}"
+    image: "couchdb:${COUCH_VERSION:-3.4.3}"
     depends_on:
       couchdb:
         condition: service_healthy
@@ -93,7 +93,7 @@ services:
   # auth-cache counters keep moving on both servers. See ../activity-gen.sh.
   activity-gen:
     # Same image as the 3.x server (no extra pull); used only for curl.
-    image: "couchdb:${COUCH_VERSION:-3.4}"
+    image: "couchdb:${COUCH_VERSION:-3.4.3}"
     depends_on:
       seed:
         condition: service_completed_successfully
@@ -118,7 +118,7 @@ services:
   # Fixture entrypoint (published as couch-full). Gated on the whole environment
   # so a single dependency on it pulls up both servers, the seed and the workload.
   gateway:
-    image: "nginx:${NGINX_VERSION:-1.27-alpine}"
+    image: "nginx:${NGINX_VERSION:-1.27.5-alpine}"
     depends_on:
       couchdb:
         condition: service_healthy
