@@ -3,11 +3,12 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
 import subprocess
+from urllib.request import urlopen
 
 import pytest
-import requests
 
 from datadog_checks.dev import WaitFor, docker_run
+from datadog_checks.dev.fs import read_file_binary
 from datadog_checks.dev.utils import ON_WINDOWS
 
 from .common import ATHOST, CONFIG_FILE, HERE, URL
@@ -19,11 +20,12 @@ COREDNS_VERSION = [int(i) for i in os.environ['COREDNS_VERSION'].split(".")]
 
 
 def init_coredns():
-    res = requests.get(URL)
+    # urlopen raises for error statuses, so WaitFor retries until the endpoint is healthy
+    with urlopen(URL, timeout=10):
+        pass
     if not ON_WINDOWS:
         # create some metrics by using dig
         subprocess.check_call(DIG_ARGS)
-    res.raise_for_status()
 
 
 @pytest.fixture(scope="session")
@@ -56,10 +58,12 @@ def omv2_instance():
 
 
 @pytest.fixture
-def mock_get(mock_http_response):
+def mock_get(fake_http, fake_http_response):
     if COREDNS_VERSION[:2] == [1, 8]:
         metric_file = 'metrics_18.txt'
     elif COREDNS_VERSION[:2] == [1, 2]:
         metric_file = 'metrics_12.txt'
-    metric_file_path = os.path.join(os.path.dirname(__file__), 'fixtures', metric_file)
-    yield mock_http_response(file_path=metric_file_path)
+    # The fixture repeats the response, so it serves every run of the check
+    fake_http_response(URL, read_file_binary(os.path.join(HERE, 'fixtures', metric_file)))
+    yield
+    fake_http.assert_all_responses_consumed()

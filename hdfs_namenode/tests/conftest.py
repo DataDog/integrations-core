@@ -4,10 +4,9 @@
 import os
 
 import pytest
-from mock import patch
 
 from datadog_checks.dev import docker_run
-from datadog_checks.dev.http import MockResponse
+from datadog_checks.dev.fs import read_file_binary
 from datadog_checks.hdfs_namenode import HDFSNameNode
 
 from .common import (
@@ -17,8 +16,6 @@ from .common import (
     NAME_SYSTEM_METADATA_URL,
     NAME_SYSTEM_STATE_URL,
     NAME_SYSTEM_URL,
-    TEST_PASSWORD,
-    TEST_USERNAME,
 )
 
 
@@ -43,32 +40,12 @@ def check():
 
 
 @pytest.fixture
-def mocked_request():
-    with patch("requests.Session.get", new=requests_get_mock):
-        yield
-
-
-@pytest.fixture
-def mocked_auth_request():
-    with patch("requests.Session.get", new=requests_auth_mock):
-        yield
-
-
-def requests_get_mock(session, url, *args, **kwargs):
-    if url == NAME_SYSTEM_STATE_URL:
-        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'hdfs_namesystem_state.json'))
-    elif url == NAME_SYSTEM_URL:
-        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'hdfs_namesystem.json'))
-    elif url == NAME_SYSTEM_METADATA_URL:
-        return MockResponse(file_path=os.path.join(FIXTURE_DIR, 'hdfs_namesystem_info.json'))
-
-
-def requests_auth_mock(*args, **kwargs):
-    # Make sure we're passing in authentication
-    assert 'auth' in kwargs, "Error, missing authentication"
-
-    # Make sure we've got the correct username and password
-    assert kwargs['auth'] == (TEST_USERNAME, TEST_PASSWORD), "Incorrect username or password"
-
-    # Return mocked request.get(...)
-    return requests_get_mock(*args, **kwargs)
+def mocked_request(fake_http, fake_http_response):
+    for url, fixture in (
+        (NAME_SYSTEM_STATE_URL, 'hdfs_namesystem_state.json'),
+        (NAME_SYSTEM_URL, 'hdfs_namesystem.json'),
+        (NAME_SYSTEM_METADATA_URL, 'hdfs_namesystem_info.json'),
+    ):
+        fake_http_response(url, read_file_binary(os.path.join(FIXTURE_DIR, fixture)))
+    yield
+    fake_http.assert_all_responses_consumed()
