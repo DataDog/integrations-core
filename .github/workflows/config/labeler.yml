@@ -1497,10 +1497,6 @@ integration/trend_micro_vision_one_eps:
 - changed-files:
   - any-glob-to-any-file:
     - trend_micro_vision_one_endpoint_security/**/*
-integration/trend_micro_vision_one_xdr:
-- changed-files:
-  - any-glob-to-any-file:
-    - trend_micro_vision_one_xdr/**/*
 integration/twemproxy:
 - changed-files:
   - any-glob-to-any-file:
@@ -1509,10 +1505,6 @@ integration/twistlock:
 - changed-files:
   - any-glob-to-any-file:
     - twistlock/**/*
-integration/valence_security:
-- changed-files:
-  - any-glob-to-any-file:
-    - valence_security/**/*
 integration/varnish:
 - changed-files:
   - any-glob-to-any-file:

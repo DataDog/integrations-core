@@ -443,11 +443,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /ping_one/manifest.json                                              @DataDog/saas-integrations @DataDog/documentation
 /ping_one/assets/logs/                                               @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/trend_micro_vision_one_xdr/                                         @DataDog/saas-integrations
-/trend_micro_vision_one_xdr/*.md                                     @DataDog/saas-integrations @DataDog/documentation
-/trend_micro_vision_one_xdr/manifest.json                            @DataDog/saas-integrations @DataDog/documentation
-/trend_micro_vision_one_xdr/assets/logs/                             @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
 /ping_federate/                                                      @DataDog/saas-integrations
 /ping_federate/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
 /ping_federate/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
@@ -676,11 +671,6 @@ plaid/assets/logs/                                                  @DataDog/saa
 /vectra/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
 /vectra/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
 /vectra/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
-/valence_security/                                                   @DataDog/saas-integrations
-/valence_security/*.md                                               @DataDog/saas-integrations @DataDog/documentation
-/valence_security/manifest.json                                      @DataDog/saas-integrations @DataDog/documentation
-/valence_security/assets/logs/                                       @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /cato_networks/                                                      @DataDog/saas-integrations
 /cato_networks/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
