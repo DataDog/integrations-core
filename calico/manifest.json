@@ -20,6 +20,7 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Category::Security",
+      "Category::SIEM",
       "Category::Kubernetes",
       "Submitted Data Type::Metrics",
       "Submitted Data Type::Logs",
