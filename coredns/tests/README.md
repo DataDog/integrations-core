@@ -47,7 +47,6 @@ the host environment.
 |---|---|---|
 | `COREDNS_VERSION` | `1.8.5` | `coredns/coredns` image tag whose binary is repackaged into the `coredns` service. |
 | `ACTIVITY_GEN` | `1` | Set to `0` for a quiescent fixture: `activity-gen` stays up but sends no queries. |
-| `ACTIVITY_DURATION` | `0` | Seconds before `activity-gen` stops querying; `0` runs forever. |
 
 CoreDNS has no authentication, so the fixture has no credential inputs. The task publishes
 `DNS_HOST`, `DNS_PORT` (`53`) and `METRICS_PORT` (`9153`); the check's endpoint is

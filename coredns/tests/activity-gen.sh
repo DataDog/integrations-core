@@ -8,7 +8,6 @@ set -eu
 # `docker compose` exposes it by service name (`coredns`), while evalya aliases
 # the entrypoint service only by its task id (`coredns-full`).
 DNS_HOSTS="${DNS_HOSTS:-coredns coredns-full}"
-DURATION="${ACTIVITY_DURATION:-0}"   # 0 = run forever
 
 log() { echo "activity-gen: $*"; }
 
@@ -38,8 +37,6 @@ while [ -z "$DNS_HOST" ]; do
 done
 log "querying ${DNS_HOST}:53"
 
-end=0
-[ "$DURATION" -gt 0 ] && end=$(( $(date +%s) + DURATION ))
 i=0
 
 while :; do
@@ -62,9 +59,5 @@ while :; do
   if [ $(( i % 10 )) -eq 0 ]; then
     log "iteration $i"
   fi
-
-  [ "$end" -gt 0 ] && [ "$(date +%s)" -ge "$end" ] && break
   sleep 1
 done
-
-log "PASS: activity workload complete after $i iterations"
