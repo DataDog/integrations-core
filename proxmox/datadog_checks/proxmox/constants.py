@@ -47,6 +47,10 @@ RESOURCE_METRIC_NAME = {
 
 RESOURCE_COUNT_METRICS = ['uptime']
 
+# Maximum number of tasks requested per node and check run. The Proxmox API defaults to 50, which a node
+# catching up after failed collections can exceed.
+TASK_COLLECTION_LIMIT = 1000
+
 EVENT_TYPE_TO_TITLE = {
     'vzstart': 'Container Started',
     'vzshutdown': 'Container Shutdown',

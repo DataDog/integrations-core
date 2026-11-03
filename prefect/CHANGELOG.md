@@ -2,13 +2,30 @@
 
 <!-- towncrier release notes start -->
 
-## 1.2.0 / 2026-09-02
+## 2.1.0 / 2026-10-29
+
+***Added***:
+
+* Improve Prefect monitoring:
+  - Add concurrency limit metrics for global and task run concurrency limits.
+  - Add a `concurrency_limit_type` tag (`global` or `tag`) to concurrency limit metrics, and a `concurrency_limit.is_active` metric for global limits.
+  - Add a `flow_name` tag to deployment, flow run and task run metrics.
+  - Add `prefect_tag` tags: one per deployment tag on deployment and flow run metrics, and one per task run tag on task run metrics.
+  - Add a `flow_names` option to filter by flow. ([#25529](https://github.com/DataDog/integrations-core/pull/25529))
+
+## 2.0.0 / 2026-10-01 / Agent 7.85.0
+
+***Changed***:
+
+* Add support for standard HTTP configuration options (TLS, authentication, proxy, timeouts, headers) and remove the `custom_headers` option in favor of the standard `headers`/`extra_headers` options. ([#25259](https://github.com/DataDog/integrations-core/pull/25259))
+
+## 1.2.0 / 2026-09-02 / Agent 7.84.0
 
 ***Added***:
 
 * Add ``metrics_prefix`` to the ``discovery`` block of ``auto_conf.yaml``. ([#24861](https://github.com/DataDog/integrations-core/pull/24861))
 
-## 1.1.0 / 2026-08-05
+## 1.1.0 / 2026-08-05 / Agent 7.83.0
 
 ***Added***:
 

@@ -10,7 +10,7 @@ from tests.common import SNMP_CONTAINER_NAME
 from . import common, metrics
 from .test_e2e_core_metadata import assert_device_metadata
 
-pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
+pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.core_suite_only]
 
 
 def test_e2e_v1_with_apc_ups_profile(dd_agent_check):

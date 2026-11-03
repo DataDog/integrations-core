@@ -15,8 +15,10 @@ from datadog_checks.dev.kind import KindLoad, kind_run
 from .common import MOCKED_INSTANCE, PORT
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+CHECK_ROOT = os.path.dirname(HERE)
 KIND_DIR = os.path.join(HERE, 'kind')
 NODE_AGENT_IP_STATE = 'velero_node_agent_ip'
+KUBECONFIG_STATE = 'velero_kubeconfig'
 
 
 @contextmanager
@@ -113,10 +115,12 @@ def dd_environment():
             },
         ) as kubeconfig:
             instances = get_instances(get_state(NODE_AGENT_IP_STATE))
+            save_state(KUBECONFIG_STATE, kubeconfig)
             metadata = {
                 'agent_type': 'kubernetes',
                 'kubernetes': {
                     'kubeconfig': kubeconfig,
+                    'auto_conf': os.path.join(CHECK_ROOT, 'datadog_checks', 'velero', 'data', 'auto_conf.yaml'),
                 },
             }
 
@@ -126,3 +130,8 @@ def dd_environment():
 @pytest.fixture
 def instance():
     return MOCKED_INSTANCE
+
+
+@pytest.fixture(scope='session')
+def velero_kubeconfig():
+    return get_state(KUBECONFIG_STATE)

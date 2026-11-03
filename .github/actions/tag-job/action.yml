@@ -60,15 +60,14 @@ runs:
       run: |
         npm install -g @datadog/datadog-ci
 
-        # Convert comma-separated tags to --tags flag format
-        # e.g., "tag1:value1,tag2:value2" becomes "--tags tag1:value1 --tags tag2:value2"
-        TAGS_ARGS=""
+        # Keep each tag as one argument when its value contains spaces.
+        TAGS_ARGS=()
         IFS=',' read -ra TAG_ARRAY <<< "$TAGS"
         for tag in "${TAG_ARRAY[@]}"; do
-          TAGS_ARGS="$TAGS_ARGS --tags $tag"
+          TAGS_ARGS+=(--tags "$tag")
         done
 
-        datadog-ci tag --level job $TAGS_ARGS
+        datadog-ci tag --level job "${TAGS_ARGS[@]}"
 
         echo "Tags added to the job:"
         for tag in "${TAG_ARRAY[@]}"; do

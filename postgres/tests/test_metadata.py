@@ -11,7 +11,7 @@ import pytest
 from datadog_checks.base.utils.db.utils import DBMAsyncJob
 
 from .common import POSTGRES_LOCALE, POSTGRES_VERSION
-from .utils import normalize_object, run_one_check
+from .utils import _get_superconn, normalize_object, run_one_check
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -76,6 +76,26 @@ def test_collect_metadata(integration_check, dbm_instance, aggregator):
     assert statement_timeout_setting is not None
     # statement_timeout should be server level setting not session level
     assert statement_timeout_setting['setting'] == '10000'
+
+
+def test_collect_settings_ignores_shadowing_extension_overloads(integration_check, dbm_instance, aggregator):
+    # Regression test for HackerOne report 3977706: an overload planted on the monitoring role's search_path
+    # must not be picked over the extension's own function by the settings loader queries.
+    with _get_superconn(dbm_instance) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "CREATE FUNCTION public.armor(text) RETURNS text "
+                "AS $$ BEGIN RAISE EXCEPTION 'shadowing overload executed'; END $$ LANGUAGE plpgsql"
+            )
+    try:
+        check = integration_check(dbm_instance)
+        check.check(dbm_instance)
+    finally:
+        with _get_superconn(dbm_instance) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("DROP FUNCTION public.armor(text)")
+    dbm_metadata = aggregator.get_event_platform_events("dbm-metadata")
+    assert any(e['kind'] == 'pg_settings' for e in dbm_metadata)
 
 
 def test_collect_schema_snapshot(integration_check, dbm_instance, aggregator):

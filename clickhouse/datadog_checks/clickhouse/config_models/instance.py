@@ -13,6 +13,7 @@ from types import MappingProxyType
 from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -177,7 +178,7 @@ class InstanceConfig(BaseModel):
     collect_async_inserts: Optional[CollectAsyncInserts] = None
     collect_pending_async_inserts: Optional[CollectPendingAsyncInserts] = None
     collect_schemas: Optional[CollectSchemas] = None
-    compression: Optional[str] = None
+    compression: Optional[Literal['lz4', 'zstd', 'br', 'gzip']] = None
     connect_timeout: Optional[int] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     database_identifier: Optional[DatabaseIdentifier] = None

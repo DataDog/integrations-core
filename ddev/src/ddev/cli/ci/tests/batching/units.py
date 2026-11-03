@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-import logging
 import re
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, ClassVar, NamedTuple, Protocol
@@ -17,6 +16,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from ddev.integration.core import Integration
+    from ddev.monitoring import ComponentMonitor
 
 
 class PlatformSpec(NamedTuple):
@@ -26,9 +26,6 @@ class PlatformSpec(NamedTuple):
     image: str
 
 
-# Kept in sync by hand with `ci_matrix.PLATFORMS`, which CI still uses and which cannot import from
-# here because it has to run standalone. A runner image changed in one place and not the other makes
-# the two plans disagree.
 PLATFORMS: dict[PlatformName, PlatformSpec] = {
     PlatformName.LINUX: PlatformSpec("Linux", "ubuntu-22.04"),
     PlatformName.WINDOWS: PlatformSpec("Windows", "windows-2022"),
@@ -57,9 +54,6 @@ DISPLAY_ORDER_OVERRIDE: dict[str, int] = {
 # Job names end up in file paths, so characters Windows reserves must be replaced.
 # https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#naming-conventions
 JOB_NAME_RESERVED_PATTERN = re.compile(r'[<>:"/\\|?*]')
-
-
-logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -171,7 +165,7 @@ def _display_order_key(target: str) -> tuple[int, str]:
     return DISPLAY_ORDER_OVERRIDE.get(target, len(DISPLAY_ORDER_OVERRIDE)), target
 
 
-def expand_test_units(targets: Sequence[TargetDefinition]) -> list[TestUnit]:
+def expand_test_units(targets: Sequence[TargetDefinition], *, monitor: ComponentMonitor) -> list[TestUnit]:
     """Expand targets into deterministically ordered test units, one per resolved environment.
 
     A platform whose environments are all constrained elsewhere gets no units, which is the
@@ -197,7 +191,7 @@ def expand_test_units(targets: Sequence[TargetDefinition]) -> list[TestUnit]:
 
             platform_environments = environments_by_platform.get(platform_id, [])
             if not platform_environments:
-                logger.warning("%s runs on %s but no environment tests it", target.name, platform_id)
+                monitor.logger.warning("%s runs on %s but no environment tests it", target.name, platform_id)
                 continue
 
             for environment in platform_environments:

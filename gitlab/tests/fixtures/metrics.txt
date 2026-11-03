@@ -10609,3 +10609,213 @@ geo_project_wiki_repositories_verification_total{name="aws_eu_north_1",url="aws_
 # HELP geo_project_wiki_repositories_verified Multiprocess metric
 # TYPE geo_project_wiki_repositories_verified gauge
 geo_project_wiki_repositories_verified{name="aws_eu_north_1",url="aws_eu_north_1"} 2
+# HELP geo_ci_secure_files_checksum_failed Multiprocess metric
+# TYPE geo_ci_secure_files_checksum_failed gauge
+geo_ci_secure_files_checksum_failed 0
+# HELP geo_ci_secure_files_checksum_total Multiprocess metric
+# TYPE geo_ci_secure_files_checksum_total gauge
+geo_ci_secure_files_checksum_total 1
+# HELP geo_ci_secure_files_checksummed Multiprocess metric
+# TYPE geo_ci_secure_files_checksummed gauge
+geo_ci_secure_files_checksummed 2
+# HELP geo_ci_secure_files_failed Multiprocess metric
+# TYPE geo_ci_secure_files_failed gauge
+geo_ci_secure_files_failed 3
+# HELP geo_ci_secure_files_synced Multiprocess metric
+# TYPE geo_ci_secure_files_synced gauge
+geo_ci_secure_files_synced 4
+# HELP geo_container_repositories_checksum_total Multiprocess metric
+# TYPE geo_container_repositories_checksum_total gauge
+geo_container_repositories_checksum_total 5
+# HELP geo_container_repositories_checksummed Multiprocess metric
+# TYPE geo_container_repositories_checksummed gauge
+geo_container_repositories_checksummed 6
+# HELP geo_dependency_proxy_blobs_checksum_failed Multiprocess metric
+# TYPE geo_dependency_proxy_blobs_checksum_failed gauge
+geo_dependency_proxy_blobs_checksum_failed 0
+# HELP geo_dependency_proxy_blobs_checksum_total Multiprocess metric
+# TYPE geo_dependency_proxy_blobs_checksum_total gauge
+geo_dependency_proxy_blobs_checksum_total 1
+# HELP geo_dependency_proxy_blobs_checksummed Multiprocess metric
+# TYPE geo_dependency_proxy_blobs_checksummed gauge
+geo_dependency_proxy_blobs_checksummed 2
+# HELP geo_dependency_proxy_blobs_failed Multiprocess metric
+# TYPE geo_dependency_proxy_blobs_failed gauge
+geo_dependency_proxy_blobs_failed 3
+# HELP geo_dependency_proxy_blobs_synced Multiprocess metric
+# TYPE geo_dependency_proxy_blobs_synced gauge
+geo_dependency_proxy_blobs_synced 4
+# HELP geo_dependency_proxy_manifests_checksum_failed Multiprocess metric
+# TYPE geo_dependency_proxy_manifests_checksum_failed gauge
+geo_dependency_proxy_manifests_checksum_failed 5
+# HELP geo_dependency_proxy_manifests_checksum_total Multiprocess metric
+# TYPE geo_dependency_proxy_manifests_checksum_total gauge
+geo_dependency_proxy_manifests_checksum_total 6
+# HELP geo_dependency_proxy_manifests_checksummed Multiprocess metric
+# TYPE geo_dependency_proxy_manifests_checksummed gauge
+geo_dependency_proxy_manifests_checksummed 0
+# HELP geo_dependency_proxy_manifests_failed Multiprocess metric
+# TYPE geo_dependency_proxy_manifests_failed gauge
+geo_dependency_proxy_manifests_failed 1
+# HELP geo_dependency_proxy_manifests_synced Multiprocess metric
+# TYPE geo_dependency_proxy_manifests_synced gauge
+geo_dependency_proxy_manifests_synced 2
+# HELP geo_design_management_repositories_checksum_failed Multiprocess metric
+# TYPE geo_design_management_repositories_checksum_failed gauge
+geo_design_management_repositories_checksum_failed 3
+# HELP geo_design_management_repositories_checksum_total Multiprocess metric
+# TYPE geo_design_management_repositories_checksum_total gauge
+geo_design_management_repositories_checksum_total 4
+# HELP geo_design_management_repositories_checksummed Multiprocess metric
+# TYPE geo_design_management_repositories_checksummed gauge
+geo_design_management_repositories_checksummed 5
+# HELP geo_design_management_repositories_failed Multiprocess metric
+# TYPE geo_design_management_repositories_failed gauge
+geo_design_management_repositories_failed 6
+# HELP geo_design_management_repositories_synced Multiprocess metric
+# TYPE geo_design_management_repositories_synced gauge
+geo_design_management_repositories_synced 0
+# HELP geo_job_artifacts Multiprocess metric
+# TYPE geo_job_artifacts gauge
+geo_job_artifacts 1
+# HELP geo_job_artifacts_checksum_failed Multiprocess metric
+# TYPE geo_job_artifacts_checksum_failed gauge
+geo_job_artifacts_checksum_failed 2
+# HELP geo_job_artifacts_checksum_total Multiprocess metric
+# TYPE geo_job_artifacts_checksum_total gauge
+geo_job_artifacts_checksum_total 3
+# HELP geo_job_artifacts_checksummed Multiprocess metric
+# TYPE geo_job_artifacts_checksummed gauge
+geo_job_artifacts_checksummed 4
+# HELP geo_job_artifacts_failed Multiprocess metric
+# TYPE geo_job_artifacts_failed gauge
+geo_job_artifacts_failed 5
+# HELP geo_job_artifacts_registry Multiprocess metric
+# TYPE geo_job_artifacts_registry gauge
+geo_job_artifacts_registry 6
+# HELP geo_job_artifacts_synced Multiprocess metric
+# TYPE geo_job_artifacts_synced gauge
+geo_job_artifacts_synced 0
+# HELP geo_job_artifacts_verified Multiprocess metric
+# TYPE geo_job_artifacts_verified gauge
+geo_job_artifacts_verified 1
+# HELP geo_packages_helm_metadata_caches_checksum_failed Multiprocess metric
+# TYPE geo_packages_helm_metadata_caches_checksum_failed gauge
+geo_packages_helm_metadata_caches_checksum_failed 2
+# HELP geo_packages_helm_metadata_caches_checksum_total Multiprocess metric
+# TYPE geo_packages_helm_metadata_caches_checksum_total gauge
+geo_packages_helm_metadata_caches_checksum_total 3
+# HELP geo_packages_helm_metadata_caches_checksummed Multiprocess metric
+# TYPE geo_packages_helm_metadata_caches_checksummed gauge
+geo_packages_helm_metadata_caches_checksummed 4
+# HELP geo_packages_helm_metadata_caches_failed Multiprocess metric
+# TYPE geo_packages_helm_metadata_caches_failed gauge
+geo_packages_helm_metadata_caches_failed 5
+# HELP geo_packages_helm_metadata_caches_synced Multiprocess metric
+# TYPE geo_packages_helm_metadata_caches_synced gauge
+geo_packages_helm_metadata_caches_synced 6
+# HELP geo_packages_nuget_symbols_checksum_failed Multiprocess metric
+# TYPE geo_packages_nuget_symbols_checksum_failed gauge
+geo_packages_nuget_symbols_checksum_failed 0
+# HELP geo_packages_nuget_symbols_checksum_total Multiprocess metric
+# TYPE geo_packages_nuget_symbols_checksum_total gauge
+geo_packages_nuget_symbols_checksum_total 1
+# HELP geo_packages_nuget_symbols_checksummed Multiprocess metric
+# TYPE geo_packages_nuget_symbols_checksummed gauge
+geo_packages_nuget_symbols_checksummed 2
+# HELP geo_packages_nuget_symbols_failed Multiprocess metric
+# TYPE geo_packages_nuget_symbols_failed gauge
+geo_packages_nuget_symbols_failed 3
+# HELP geo_packages_nuget_symbols_synced Multiprocess metric
+# TYPE geo_packages_nuget_symbols_synced gauge
+geo_packages_nuget_symbols_synced 4
+# HELP geo_pages_deployments_checksum_failed Multiprocess metric
+# TYPE geo_pages_deployments_checksum_failed gauge
+geo_pages_deployments_checksum_failed 5
+# HELP geo_pages_deployments_checksum_total Multiprocess metric
+# TYPE geo_pages_deployments_checksum_total gauge
+geo_pages_deployments_checksum_total 6
+# HELP geo_pages_deployments_checksummed Multiprocess metric
+# TYPE geo_pages_deployments_checksummed gauge
+geo_pages_deployments_checksummed 0
+# HELP geo_pages_deployments_failed Multiprocess metric
+# TYPE geo_pages_deployments_failed gauge
+geo_pages_deployments_failed 1
+# HELP geo_pages_deployments_synced Multiprocess metric
+# TYPE geo_pages_deployments_synced gauge
+geo_pages_deployments_synced 2
+# HELP geo_pipeline_artifacts_checksum_failed Multiprocess metric
+# TYPE geo_pipeline_artifacts_checksum_failed gauge
+geo_pipeline_artifacts_checksum_failed 3
+# HELP geo_pipeline_artifacts_checksum_total Multiprocess metric
+# TYPE geo_pipeline_artifacts_checksum_total gauge
+geo_pipeline_artifacts_checksum_total 4
+# HELP geo_pipeline_artifacts_checksummed Multiprocess metric
+# TYPE geo_pipeline_artifacts_checksummed gauge
+geo_pipeline_artifacts_checksummed 5
+# HELP geo_pipeline_artifacts_failed Multiprocess metric
+# TYPE geo_pipeline_artifacts_failed gauge
+geo_pipeline_artifacts_failed 6
+# HELP geo_pipeline_artifacts_synced Multiprocess metric
+# TYPE geo_pipeline_artifacts_synced gauge
+geo_pipeline_artifacts_synced 0
+# HELP geo_snippet_repositories_checksum_failed Multiprocess metric
+# TYPE geo_snippet_repositories_checksum_failed gauge
+geo_snippet_repositories_checksum_failed 1
+# HELP geo_snippet_repositories_checksum_total Multiprocess metric
+# TYPE geo_snippet_repositories_checksum_total gauge
+geo_snippet_repositories_checksum_total 2
+# HELP geo_snippet_repositories_checksummed Multiprocess metric
+# TYPE geo_snippet_repositories_checksummed gauge
+geo_snippet_repositories_checksummed 3
+# HELP geo_snippet_repositories_failed Multiprocess metric
+# TYPE geo_snippet_repositories_failed gauge
+geo_snippet_repositories_failed 4
+# HELP geo_snippet_repositories_synced Multiprocess metric
+# TYPE geo_snippet_repositories_synced gauge
+geo_snippet_repositories_synced 5
+# HELP geo_terraform_state_versions_checksum_failed Multiprocess metric
+# TYPE geo_terraform_state_versions_checksum_failed gauge
+geo_terraform_state_versions_checksum_failed 6
+# HELP geo_terraform_state_versions_checksum_total Multiprocess metric
+# TYPE geo_terraform_state_versions_checksum_total gauge
+geo_terraform_state_versions_checksum_total 0
+# HELP geo_terraform_state_versions_checksummed Multiprocess metric
+# TYPE geo_terraform_state_versions_checksummed gauge
+geo_terraform_state_versions_checksummed 1
+# HELP geo_terraform_state_versions_failed Multiprocess metric
+# TYPE geo_terraform_state_versions_failed gauge
+geo_terraform_state_versions_failed 2
+# HELP geo_terraform_state_versions_synced Multiprocess metric
+# TYPE geo_terraform_state_versions_synced gauge
+geo_terraform_state_versions_synced 3
+# HELP geo_uploads Multiprocess metric
+# TYPE geo_uploads gauge
+geo_uploads 4
+# HELP geo_uploads_checksum_failed Multiprocess metric
+# TYPE geo_uploads_checksum_failed gauge
+geo_uploads_checksum_failed 5
+# HELP geo_uploads_checksum_total Multiprocess metric
+# TYPE geo_uploads_checksum_total gauge
+geo_uploads_checksum_total 6
+# HELP geo_uploads_checksummed Multiprocess metric
+# TYPE geo_uploads_checksummed gauge
+geo_uploads_checksummed 0
+# HELP geo_uploads_failed Multiprocess metric
+# TYPE geo_uploads_failed gauge
+geo_uploads_failed 1
+# HELP geo_uploads_registry Multiprocess metric
+# TYPE geo_uploads_registry gauge
+geo_uploads_registry 2
+# HELP geo_uploads_synced Multiprocess metric
+# TYPE geo_uploads_synced gauge
+geo_uploads_synced 3
+# HELP geo_uploads_verification_total Multiprocess metric
+# TYPE geo_uploads_verification_total gauge
+geo_uploads_verification_total 4
+# HELP geo_uploads_verified Multiprocess metric
+# TYPE geo_uploads_verified gauge
+geo_uploads_verified 5
+# HELP sidekiq_enqueued_jobs_total Sidekiq jobs enqueued
+# TYPE sidekiq_enqueued_jobs_total counter
+sidekiq_enqueued_jobs_total{boundary="cpu",destination_shard_redis="main",external_dependencies="no",feature_category="source_code_management",queue="default",scheduling="immediate",urgency="high",worker="PostReceive"} 21

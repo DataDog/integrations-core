@@ -1,7 +1,45 @@
 # (C) Datadog, Inc. 2025-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+from pathlib import Path
+from typing import Any
+
 INSTANCE = {'proxmox_server': 'http://localhost:8006/api2/json', 'tags': ['testing']}
+
+BASE_TAGS = [f'proxmox_server:{INSTANCE["proxmox_server"]}'] + INSTANCE['tags']
+
+CLUSTER_RESOURCES_FIXTURE = (
+    Path(__file__).parent / 'fixtures' / 'GET' / 'api2' / 'json' / 'cluster' / 'resources' / 'response.json'
+)
+
+
+def _cluster_resources_fixture() -> dict[str, Any]:
+    """Return a fresh copy of the shipped `/cluster/resources` payload."""
+    with CLUSTER_RESOURCES_FIXTURE.open() as f:
+        return json.load(f)
+
+
+def cluster_resources_with_offline_node() -> dict[str, Any]:
+    """Return the shipped `/cluster/resources` payload with the node flipped to `offline`."""
+    payload = _cluster_resources_fixture()
+    for resource in payload['data']:
+        if resource.get('type') == 'node':
+            resource['status'] = 'offline'
+    return payload
+
+
+def cluster_resources_with_vm_maxcpu(maxcpu: int | None) -> dict[str, Any]:
+    """Return the shipped payload with VM `qemu/100`'s `maxcpu` set, or removed if None."""
+    payload = _cluster_resources_fixture()
+    for resource in payload['data']:
+        if resource.get('id') == 'qemu/100':
+            if maxcpu is None:
+                resource.pop('maxcpu', None)
+            else:
+                resource['maxcpu'] = maxcpu
+    return payload
+
 
 BASE_METRICS = [
     'proxmox.node.count',
@@ -48,6 +86,12 @@ PERF_METRICS = [
 
 HA_METIRCS = ['proxmox.ha.quorate', 'proxmox.ha.quorum']
 
+# Emitted only for VMs and nodes, with `proxmox_type` on the point.
+CPU_COUNT_METRICS = [
+    'proxmox.vm.cpu.max',
+    'proxmox.node.cpu.max',
+]
+
 NODE_RESOURCE_METRICS = set(RESOURCE_METRICS) - {
     'proxmox.diskread',
     'proxmox.diskwrite',
@@ -79,7 +123,7 @@ CONTAINER_PERF_METRICS = set(PERF_METRICS) - {
 
 STORAGE_PERF_METRICS = {'proxmox.disk.total', 'proxmox.disk.used'}
 
-ALL_METRICS = BASE_METRICS + RESOURCE_METRICS + PERF_METRICS + HA_METIRCS
+ALL_METRICS = BASE_METRICS + RESOURCE_METRICS + PERF_METRICS + HA_METIRCS + CPU_COUNT_METRICS
 
 ALL_EVENTS = [
     {

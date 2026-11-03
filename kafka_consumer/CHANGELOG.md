@@ -2,7 +2,44 @@
 
 <!-- towncrier release notes start -->
 
-## 9.1.1 / 2026-09-03
+## 9.4.0 / 2026-10-29
+
+***Added***:
+
+* Update dependencies ([#25599](https://github.com/DataDog/integrations-core/pull/25599))
+
+***Fixed***:
+
+* Skip configured consumer group topics that do not exist in the cluster instead of failing consumer offset collection for every group, and pick up topics and partitions created after the first check run. ([#25666](https://github.com/DataDog/integrations-core/pull/25666))
+* Stop creating a librdkafka Consumer on every check run just to read the cluster ID; read it from the AdminClient metadata instead. ([#25667](https://github.com/DataDog/integrations-core/pull/25667))
+* Fetch only uncached partitions when the earliest-offsets cache is fresh, so one unfetchable partition no longer bypasses the cache for all partitions. ([#25668](https://github.com/DataDog/integrations-core/pull/25668))
+
+## 9.3.0 / 2026-10-27 / Agent 7.85.0
+
+***Security***:
+
+* Update boto3 to 1.43.119, which drops the Sectigo root that anchors the compromised eMudhra intermediates. ([#25797](https://github.com/DataDog/integrations-core/pull/25797))
+
+## 9.2.2 / 2026-10-21
+
+***Fixed***:
+
+* Look up a consumer group's coordinator again after a `NOT_COORDINATOR` or `COORDINATOR_NOT_AVAILABLE` error. With `close_admin_client: false`, the group's offsets resume on the next check run after its coordinator moves to another broker. ([#25485](https://github.com/DataDog/integrations-core/pull/25485))
+
+## 9.2.1 / 2026-10-13
+
+***Fixed***:
+
+* Avoid fetching offsets for consumer groups that do not match the configured group pattern. consumer_groups_regex patterns now match the complete group ID; patterns spanning the group/topic comma no longer select a group. ([#25232](https://github.com/DataDog/integrations-core/pull/25232))
+
+## 9.2.0 / 2026-10-01
+
+***Added***:
+
+* Add the ``enable_kafka_console`` option as a replacement for ``enable_cluster_monitoring`` while preserving the old option as an alias. ([#25215](https://github.com/DataDog/integrations-core/pull/25215))
+* Update dependencies ([#25284](https://github.com/DataDog/integrations-core/pull/25284))
+
+## 9.1.1 / 2026-09-03 / Agent 7.84.0
 
 ***Fixed***:
 
@@ -19,7 +56,7 @@
 * Discard broker and log-start offsets that come back negative, instead of reporting a negative ``kafka.broker_offset`` and firing a spurious negative consumer lag event for every partition on every run. ([#24814](https://github.com/DataDog/integrations-core/pull/24814))
 * Fix retention.ms and retention.bytes being dropped from topic config events when a topic has 30+ configs (e.g. tiered-storage topics). The configs were truncated because they sorted late alphabetically and the max_configs cap cut them, even though the corresponding metrics were still emitted. ([#25012](https://github.com/DataDog/integrations-core/pull/25012))
 
-## 9.0.0 / 2026-08-05
+## 9.0.0 / 2026-08-05 / Agent 7.83.0
 
 ***Changed***:
 

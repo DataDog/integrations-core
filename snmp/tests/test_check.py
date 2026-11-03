@@ -19,7 +19,7 @@ from datadog_checks.snmp import SnmpCheck
 
 from . import common
 
-pytestmark = [pytest.mark.usefixtures("dd_environment"), common.snmp_integration_only]
+pytestmark = [pytest.mark.usefixtures("dd_environment"), common.python_suite_only]
 
 
 def test_command_generator():
@@ -671,6 +671,8 @@ def test_network_failure(aggregator):
 
     # Change port so connection will fail
     instance['port'] = 162
+    instance['timeout'] = 1
+    instance['retries'] = 0
     check = common.create_check(instance)
 
     check.check(instance)
@@ -961,6 +963,7 @@ def test_discovery_devices_monitored_count(read_mock, aggregator):
         'port': common.PORT,
         'community_string': 'public',
         'retries': 0,
+        'timeout': 1,
         'discovery_interval': 0,
     }
     init_config = {
@@ -1226,6 +1229,8 @@ def test_timeout(aggregator, caplog):
     aggregator.assert_metric('snmp.ifOutDiscards.rate', count=4)
     aggregator.assert_metric('snmp.ifInErrors.rate', count=4)
     aggregator.assert_metric('snmp.ifOutErrors.rate', count=4)
+    aggregator.assert_metric('snmp.ifOperStatus', count=4)
+    aggregator.assert_metric('snmp.ifSpeed', count=4)
     aggregator.assert_metric('snmp.sysUpTimeInstance', count=1)
 
     common.assert_common_metrics(aggregator)

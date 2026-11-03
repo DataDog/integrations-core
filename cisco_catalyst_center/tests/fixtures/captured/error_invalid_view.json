@@ -1,0 +1,10 @@
+{
+  "response": [
+    {
+      "detail": null,
+      "errorCode": 14000,
+      "message": "Invalid view provided"
+    }
+  ],
+  "version": null
+}

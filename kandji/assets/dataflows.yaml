@@ -4,3 +4,13 @@ provides:
     granular: false
     data_type: logs
     direction: inbound
+  - id: kandji-audit-logs
+    always_on: false
+    granular: true
+    data_type: logs
+    direction: inbound
+  - id: kandji-detection-logs
+    always_on: false
+    granular: true
+    data_type: logs
+    direction: inbound

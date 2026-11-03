@@ -85,7 +85,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.node.count{$scope,$label,$node,$service,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster} by {kube_cluster_name}.weighted()",
+                                            "query": "sum:kubernetes_state.node.count{$scope,$label,$service,$deployment,$statefulset,$replicaset,$daemonset,$namespace,$cluster} by {kube_cluster_name}.weighted()",
                                             "aggregator": "avg",
                                             "semantic_mode": "combined"
                                         }
@@ -127,7 +127,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.node.count{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}",
+                                            "query": "sum:kubernetes_state.node.count{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -1316,7 +1316,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.deployment.count{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}",
+                                            "query": "sum:kubernetes_state.deployment.count{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -1366,7 +1366,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.deployment.replicas_available{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.deployment.replicas_available{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         }
                                     ],
                                     "formulas": [
@@ -1390,7 +1390,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.deployment.replicas_unavailable{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         }
                                     ],
                                     "formulas": [
@@ -1414,7 +1414,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.deployment.replicas_desired{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.deployment.replicas_desired{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         }
                                     ],
                                     "formulas": [
@@ -1473,7 +1473,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.deployment.replicas_updated{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.deployment.replicas_updated{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         }
                                     ],
                                     "formulas": [
@@ -1497,12 +1497,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.deployment.replicas_desired{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.deployment.replicas_desired{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:kubernetes_state.deployment.replicas_updated{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.deployment.replicas_updated{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         }
                                     ],
                                     "formulas": [
@@ -1526,7 +1526,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.deployment.replicas_desired{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.deployment.replicas_desired{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         }
                                     ],
                                     "formulas": [
@@ -1574,7 +1574,7 @@
                                     "query": {
                                         "data_source": "infrastructure",
                                         "resource_type": "deployment",
-                                        "query_string": "$scope $cluster $namespace $deployment $statefulset $replicaset $daemonset $service $node $label"
+                                        "query_string": "$scope $cluster $namespace $deployment $statefulset $replicaset $daemonset $service $label"
                                     },
                                     "columns": []
                                 }
@@ -1620,7 +1620,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.daemonset.count{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}",
+                                            "query": "sum:kubernetes_state.daemonset.count{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -1670,7 +1670,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.daemonset.ready{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.daemonset.ready{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         }
                                     ],
                                     "formulas": [
@@ -1694,12 +1694,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.daemonset.scheduled{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.daemonset.scheduled{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:kubernetes_state.daemonset.ready{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.daemonset.ready{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         }
                                     ],
                                     "formulas": [
@@ -1723,7 +1723,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.daemonset.desired{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.daemonset.desired{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         }
                                     ],
                                     "formulas": [
@@ -1782,7 +1782,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.daemonset.updated{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.daemonset.updated{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         }
                                     ],
                                     "formulas": [
@@ -1806,12 +1806,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.daemonset.scheduled{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.daemonset.scheduled{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:kubernetes_state.daemonset.updated{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.daemonset.updated{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         }
                                     ],
                                     "formulas": [
@@ -1835,7 +1835,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.daemonset.desired{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.daemonset.desired{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         }
                                     ],
                                     "formulas": [
@@ -1883,7 +1883,7 @@
                                     "query": {
                                         "data_source": "infrastructure",
                                         "resource_type": "daemonSet",
-                                        "query_string": "$scope $cluster $namespace $deployment $statefulset $replicaset $daemonset $service $node $label"
+                                        "query_string": "$scope $cluster $namespace $deployment $statefulset $replicaset $daemonset $service $label"
                                     },
                                     "columns": []
                                 }
@@ -1929,7 +1929,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.statefulset.count{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}",
+                                            "query": "sum:kubernetes_state.statefulset.count{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -1979,7 +1979,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.statefulset.replicas_ready{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.statefulset.replicas_ready{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         }
                                     ],
                                     "formulas": [
@@ -2003,12 +2003,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.statefulset.replicas{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.statefulset.replicas{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:kubernetes_state.statefulset.replicas_ready{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.statefulset.replicas_ready{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         }
                                     ],
                                     "formulas": [
@@ -2032,7 +2032,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.statefulset.replicas_desired{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.statefulset.replicas_desired{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         }
                                     ],
                                     "formulas": [
@@ -2091,7 +2091,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.statefulset.replicas_updated{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.statefulset.replicas_updated{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         }
                                     ],
                                     "formulas": [
@@ -2115,12 +2115,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.statefulset.replicas{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.statefulset.replicas{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:kubernetes_state.statefulset.replicas_updated{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.statefulset.replicas_updated{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         }
                                     ],
                                     "formulas": [
@@ -2144,7 +2144,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.statefulset.replicas_desired{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(null).rollup(avg, 20)"
+                                            "query": "sum:kubernetes_state.statefulset.replicas_desired{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(null).rollup(avg, 20)"
                                         }
                                     ],
                                     "formulas": [
@@ -2192,7 +2192,7 @@
                                     "query": {
                                         "data_source": "infrastructure",
                                         "resource_type": "statefulSet",
-                                        "query_string": "$scope $cluster $namespace $deployment $statefulset $replicaset $daemonset $service $node $label"
+                                        "query_string": "$scope $cluster $namespace $deployment $statefulset $replicaset $daemonset $service $label"
                                     },
                                     "columns": []
                                 }
@@ -2238,7 +2238,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.cronjob.count{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}",
+                                            "query": "sum:kubernetes_state.cronjob.count{$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}",
                                             "aggregator": "avg"
                                         }
                                     ],
@@ -2280,7 +2280,7 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.job.duration{kube_cronjob:*,$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}"
+                                            "query": "sum:kubernetes_state.job.duration{kube_cronjob:*,$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}"
                                         }
                                     ],
                                     "formulas": [
@@ -2340,12 +2340,12 @@
                                         {
                                             "data_source": "metrics",
                                             "name": "query1",
-                                            "query": "sum:kubernetes_state.job.succeeded{kube_cronjob:*,$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(zero)"
+                                            "query": "sum:kubernetes_state.job.succeeded{kube_cronjob:*,$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(zero)"
                                         },
                                         {
                                             "data_source": "metrics",
                                             "name": "query2",
-                                            "query": "sum:kubernetes_state.job.failed{kube_cronjob:*,$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$node,$label}.fill(zero)"
+                                            "query": "sum:kubernetes_state.job.failed{kube_cronjob:*,$scope,$cluster,$namespace,$deployment,$statefulset,$replicaset,$daemonset,$service,$label}.fill(zero)"
                                         }
                                     ],
                                     "response_format": "timeseries",
@@ -2378,7 +2378,7 @@
                                     "query": {
                                         "data_source": "infrastructure",
                                         "resource_type": "cronJob",
-                                        "query_string": "$scope $cluster $namespace $deployment $statefulset $replicaset $daemonset $service $node $label"
+                                        "query_string": "$scope $cluster $namespace $deployment $statefulset $replicaset $daemonset $service $label"
                                     },
                                     "columns": []
                                 }
@@ -2452,7 +2452,7 @@
         },
         {
             "name": "node",
-            "prefix": "node",
+            "prefix": "kube_node",
             "available_values": [],
             "default": "*"
         },

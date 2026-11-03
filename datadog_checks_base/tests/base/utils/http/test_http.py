@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import gzip
+import io
 import logging
 import os
 import ssl
@@ -12,9 +14,17 @@ import mock
 import pytest
 import requests
 import requests_unixsocket
+import urllib3
 
 from datadog_checks.base import AgentCheck
-from datadog_checks.base.utils.http import RequestsWrapper, is_uds_url, quote_uds_url
+from datadog_checks.base.utils.http import (
+    RequestsWrapper,
+    ResponseLineTooLongError,
+    ResponseWrapper,
+    is_uds_url,
+    limit_line_size,
+    quote_uds_url,
+)
 from datadog_checks.dev.utils import ON_WINDOWS
 
 
@@ -340,3 +350,58 @@ class TestLogger:
         expected_message = 'Sending GET request to https://www.google.com'
         for _, _, message in caplog.record_tuples:
             assert message != expected_message
+
+
+def _gzip_response(body):
+    response = requests.Response()
+    response.raw = urllib3.HTTPResponse(
+        io.BytesIO(gzip.compress(body)), headers={'Content-Encoding': 'gzip'}, preload_content=False
+    )
+    return response
+
+
+# Chunks of 4 bytes and a limit of 10 bytes
+@pytest.mark.parametrize(
+    'body, lines',
+    [
+        pytest.param(b'1234567\n' * 100, 100, id='long body with short lines'),
+        pytest.param(b'x' * 10 + b'\ny', 2, id='line at the limit'),
+        pytest.param(b'x' * 10, 1, id='last line at the limit'),
+    ],
+)
+def test_iter_lines_allows_lines_up_to_limit(body, lines):
+    assert len(list(ResponseWrapper(_gzip_response(body), 4, 10).iter_lines())) == lines
+
+
+@pytest.mark.parametrize(
+    'body',
+    [
+        pytest.param(b'x' * 11, id='no line break'),
+        pytest.param(b'x' * 11 + b'\ny', id='line break in the chunk after the limit'),
+        pytest.param(b'y\n' + b'x' * 11 + b'\ny', id='line that starts in a chunk'),
+    ],
+)
+def test_iter_lines_limits_line_size(body):
+    with pytest.raises(ResponseLineTooLongError, match='line longer than 10 bytes'):
+        list(ResponseWrapper(_gzip_response(body), 4, 10).iter_lines())
+
+
+# Chunks of 32 bytes, longer than the limit of 10 bytes
+@pytest.mark.parametrize(
+    'body',
+    [
+        pytest.param(b'a\n' + b'x' * 11 + b'\nb', id='line inside a chunk'),
+        pytest.param(b'a\n' + b'x' * 11, id='last line inside a chunk'),
+    ],
+)
+def test_iter_lines_limits_lines_inside_chunks(body):
+    with pytest.raises(ResponseLineTooLongError, match='line longer than 10 bytes'):
+        list(ResponseWrapper(_gzip_response(body), 32, 10).iter_lines())
+
+
+def test_stream_groups_chunks_up_to_a_line_break():
+    response = _gzip_response(b'y\n' + b'x' * 9 + b'\ny')
+    limit_line_size(response, 10)
+
+    # The chunks are b'y\nxx', b'xxxx', b'xxx\n' and b'y'
+    assert list(response.raw.stream(4)) == [b'y\nxx', b'xxxxxxx\n', b'y']

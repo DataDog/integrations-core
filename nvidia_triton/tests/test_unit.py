@@ -70,3 +70,25 @@ def test_check_nvidia_triton_metadata(datadog_agent, instance, mock_http_respons
         'version.scheme': 'semver',
     }
     datadog_agent.assert_metadata('test:123', version_metadata)
+
+
+@pytest.mark.parametrize(
+    'endpoint, expected',
+    [
+        ('http://localhost:8002/metrics', 'http://localhost:8000'),
+        ('http://10.0.0.5:8002/metrics', 'http://10.0.0.5:8000'),
+        ('http://[::1]:8002/metrics', 'http://[::1]:8000'),
+        ('http://[2406:da14:8ba:1a22:904b::2]:8002/metrics', 'http://[2406:da14:8ba:1a22:904b::2]:8000'),
+        ('http://[fe80::1%25eth0]:8002/metrics', 'http://[fe80::1%25eth0]:8000'),
+    ],
+)
+def test_server_info_api_url(instance, endpoint, expected):
+    """
+    The server info API URL is derived from the openmetrics endpoint by dropping the path and swapping in the
+    server port. Regression test for https://github.com/DataDog/integrations-core/issues/22624, where IPv6 hosts
+    lost their brackets and produced an unusable URL that made every check run fail with `InvalidURL`.
+    """
+    instance['openmetrics_endpoint'] = endpoint
+    check = NvidiaTritonCheck('nvidia_triton', {}, [instance])
+
+    assert check.server_info_api == expected

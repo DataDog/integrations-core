@@ -16,16 +16,23 @@ import pytest
 from aiolimiter import AsyncLimiter
 
 from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
-from ddev.utils.github_async.models import Artifact, ArtifactsList, IssueComment, PullRequest
+from ddev.utils.github_async.models import PullRequest
 from ddev.utils.rate_limiting import InstrumentedAsyncLimiter, RelaxedRateLimits
 from tests.cli.ci.tests.helpers import comment_page
-from tests.helpers.github_async import FakeAsyncGitHubClient
+from tests.helpers.github_async import (
+    FakeAsyncGitHubClient,
+    make_artifact,
+    make_artifacts_list,
+    make_issue_comment,
+    make_pull_request,
+    make_response,
+)
 from tests.utils.github_async.helpers import first_page
 
 
 def a_pull_request(number: int) -> PullRequest:
     """A payload for the fake to hand back. These tests are about the fake's dispatch, not the model."""
-    return PullRequest(number=number, html_url=f'https://x/{number}', changed_files=1)
+    return make_pull_request(number=number, html_url=f'https://x/{number}')
 
 
 @pytest.fixture
@@ -54,7 +61,7 @@ async def test_sticky_mock_with_inner_data_is_auto_wrapped(fake: FakeAsyncGitHub
 
 
 async def test_sticky_mock_with_full_response_passes_through(fake: FakeAsyncGitHubClient) -> None:
-    full = GitHubResponse.model_validate({'data': a_pull_request(99), 'headers': {'x-rate-limit': '5'}})
+    full = make_response(a_pull_request(99), {'x-rate-limit': '5'})
     fake.mock_response('create_pull_request', full)
 
     response = await fake.create_pull_request('o', 'r', 'T', 'h', 'b')
@@ -169,6 +176,7 @@ async def test_assert_called_once_with_passes_on_single_exact_match(fake: FakeAs
         body='',
         draft=False,
         timeout=None,
+        retry=None,
     )
 
 
@@ -236,6 +244,7 @@ async def test_assert_called_with_passes_on_exact_match(fake: FakeAsyncGitHubCli
         body='',
         draft=False,
         timeout=None,
+        retry=None,
     )
 
 
@@ -265,7 +274,7 @@ async def test_list_issue_comments_yields_the_pages_it_was_given(fake: FakeAsync
     """A page is itself a list of comments, so pages are registered explicitly rather than inferred."""
     fake.mock_response(
         'list_issue_comments',
-        [comment_page(IssueComment(id=1, body='a')), comment_page(IssueComment(id=2, body='b'))],
+        [comment_page(make_issue_comment(body='a')), comment_page(make_issue_comment(id=2, body='b'))],
     )
 
     pages = [page async for page in fake.list_issue_comments('o', 'r', 1)]
@@ -275,7 +284,9 @@ async def test_list_issue_comments_yields_the_pages_it_was_given(fake: FakeAsync
 
 
 async def test_list_issue_comments_yields_one_page_for_one_response(fake: FakeAsyncGitHubClient):
-    fake.mock_response('list_issue_comments', comment_page(IssueComment(id=1, body='a'), IssueComment(id=2, body='b')))
+    fake.mock_response(
+        'list_issue_comments', comment_page(make_issue_comment(body='a'), make_issue_comment(id=2, body='b'))
+    )
 
     pages = [page async for page in fake.list_issue_comments('o', 'r', 1)]
 
@@ -370,6 +381,14 @@ MIRROR_CALLS = [
         'download_artifact',
         lambda f, tmp: f.download_artifact('https://x/zip', tmp / 'out'),
         {'archive_download_url': 'https://x/zip'},
+    ),
+    ('get_ref', lambda f, _: f.get_ref('o', 'r', 'heads/main'), {'ref': 'heads/main'}),
+    ('create_ref', lambda f, _: f.create_ref('o', 'r', 'refs/heads/x', 'abc123'), {'sha': 'abc123'}),
+    ('get_content', lambda f, _: f.get_content('o', 'r', 'release.json'), {'path': 'release.json'}),
+    (
+        'create_or_update_file_contents',
+        lambda f, _: f.create_or_update_file_contents('o', 'r', 'release.json', message='m', content='e30K'),
+        {'content': 'e30K'},
     ),
 ]
 
@@ -487,7 +506,7 @@ async def test_a_mirror_records_the_arguments_it_was_called_with(
 
 
 async def test_list_workflow_run_artifacts_yields_a_single_page(fake: FakeAsyncGitHubClient) -> None:
-    page = ArtifactsList(total_count=1, artifacts=[Artifact(id=1, name='a', expired=False)])
+    page = make_artifacts_list([make_artifact(id=1, name='a')])
     fake.mock_response('list_workflow_run_artifacts', page)
 
     pages = [p async for p in fake.list_workflow_run_artifacts('o', 'r', 123)]
@@ -499,8 +518,8 @@ async def test_list_workflow_run_artifacts_yields_a_single_page(fake: FakeAsyncG
 
 
 async def test_list_workflow_run_artifacts_yields_multiple_pages(fake: FakeAsyncGitHubClient) -> None:
-    page1 = ArtifactsList(total_count=2, artifacts=[Artifact(id=1, name='a', expired=False)])
-    page2 = ArtifactsList(total_count=2, artifacts=[Artifact(id=2, name='b', expired=False)])
+    page1 = make_artifacts_list([make_artifact(id=1, name='a')], total_count=2)
+    page2 = make_artifacts_list([make_artifact(id=2, name='b')], total_count=2)
     fake.mock_response('list_workflow_run_artifacts', [page1, page2])
 
     ids = [p.data.artifacts[0].id async for p in fake.list_workflow_run_artifacts('o', 'r', 123)]

@@ -1,0 +1,41 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API login ID and transaction key",
+      "basic": {
+        "user_setting": {
+          "key": "api_login_id",
+          "label": "API login ID",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "transaction_key",
+          "label": "Transaction key",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "environment_type",
+      "label": "Environment type",
+      "editable": true,
+      "required": true,
+      "dropdown": {
+        "options": [
+          { "value": "Production", "label": "Production" },
+          { "value": "Sandbox", "label": "Sandbox" }
+        ]
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "authorize-net-logs" },
+    { "dataflow_id": "authorize-net-metrics" }
+  ]
+}

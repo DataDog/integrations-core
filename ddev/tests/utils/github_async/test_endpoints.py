@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from contextlib import AbstractContextManager
 from contextlib import nullcontext as does_not_raise
 from typing import TYPE_CHECKING, Any
 
@@ -10,13 +11,16 @@ import httpx
 import pytest
 from pydantic import ValidationError
 
-from ddev.utils.github_async import GitHubResponse
+from ddev.utils.github_async import AsyncGitHubClient, GitHubResponse
 from ddev.utils.github_async.models import (
     ArtifactsList,
     CheckRun,
     CheckRunConclusion,
     CheckRunStatus,
+    FileCommit,
+    FileContent,
     GitHubUser,
+    GitReference,
     IssueComment,
     JobStep,
     JobStepStatus,
@@ -35,11 +39,21 @@ from ddev.utils.github_async.models import (
     WorkflowRun,
 )
 from ddev.utils.github_errors import GitHubAuthenticationError, GitHubBodyTooLongError
-from tests.utils.github_async.helpers import ENDPOINT_CALLS, first_page, json_response, make_client
+from tests.utils.github_async.helpers import (
+    ENDPOINT_CALLS,
+    TOKEN,
+    RecordingObserver,
+    first_page,
+    json_response,
+    make_client,
+)
 from tests.utils.github_async.payloads import (
     artifact,
     check_run_payload,
+    file_commit_payload,
+    file_content_payload,
     full_pull_request_payload,
+    git_ref_payload,
     issue_comment_payload,
     pr_review_comment_payload,
     pull_request_file_payload,
@@ -755,6 +769,83 @@ async def test_update_check_run_unexpected_status_raises() -> None:
         await client.update_check_run("o", "r", 77, status="in_progress")
 
 
+async def test_get_ref_success() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == "/repos/owner/repo/git/ref/heads/7.56.x"
+        return json_response(git_ref_payload(ref="refs/heads/7.56.x", sha="d" * 40))
+
+    client = make_client(httpx.MockTransport(handler))
+    result = await client.get_ref("owner", "repo", "heads/7.56.x")
+    assert isinstance(result.data, GitReference)
+    assert result.data.object.sha == "d" * 40
+
+
+async def test_create_ref_success() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "POST"
+        assert request.url.path == "/repos/owner/repo/git/refs"
+        assert json.loads(request.content) == {"ref": "refs/heads/feature", "sha": "a" * 40}
+        return json_response(git_ref_payload(ref="refs/heads/feature", sha="a" * 40), status_code=201)
+
+    client = make_client(httpx.MockTransport(handler))
+    result = await client.create_ref("owner", "repo", "refs/heads/feature", "a" * 40)
+    assert isinstance(result.data, GitReference)
+    assert result.data.ref == "refs/heads/feature"
+
+
+async def test_get_content_success_forwards_ref() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == "/repos/owner/repo/contents/release.json"
+        assert request.url.params["ref"] == "7.56.x"
+        return json_response(file_content_payload(content="e30K", sha="b" * 40))
+
+    client = make_client(httpx.MockTransport(handler))
+    result = await client.get_content("owner", "repo", "release.json", ref="7.56.x")
+    assert isinstance(result.data, FileContent)
+    assert result.data.content == "e30K"
+    assert result.data.sha == "b" * 40
+
+
+async def test_get_content_omits_ref_when_not_given() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert "ref" not in request.url.params
+        return json_response(file_content_payload())
+
+    client = make_client(httpx.MockTransport(handler))
+    await client.get_content("owner", "repo", "release.json")
+
+
+async def test_create_or_update_file_contents_success() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "PUT"
+        assert request.url.path == "/repos/owner/repo/contents/release.json"
+        assert json.loads(request.content) == {
+            "message": "bump",
+            "content": "e30K",
+            "sha": "b" * 40,
+            "branch": "feature",
+        }
+        return json_response(file_commit_payload(commit_sha="c" * 40), status_code=201)
+
+    client = make_client(httpx.MockTransport(handler))
+    result = await client.create_or_update_file_contents(
+        "owner", "repo", "release.json", message="bump", content="e30K", sha="b" * 40, branch="feature"
+    )
+    assert isinstance(result.data, FileCommit)
+    assert result.data.commit.sha == "c" * 40
+
+
+async def test_create_or_update_file_contents_omits_optional_fields() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert json.loads(request.content) == {"message": "add", "content": "e30K"}
+        return json_response(file_commit_payload(), status_code=201)
+
+    client = make_client(httpx.MockTransport(handler))
+    await client.create_or_update_file_contents("owner", "repo", "new.json", message="add", content="e30K")
+
+
 @pytest.mark.parametrize("case", ENDPOINT_CALLS, ids=[case.id for case in ENDPOINT_CALLS])
 async def test_endpoint_http_error_raises(case: EndpointCase) -> None:
     client = make_client(httpx.MockTransport(lambda r: httpx.Response(422)))
@@ -794,13 +885,20 @@ async def test_endpoint_forwards_response_headers(case: EndpointCase) -> None:
         pytest.param(404, pytest.raises(httpx.HTTPStatusError), id="not_found"),
     ],
 )
-async def test_cancelling_a_run_that_already_finished_is_not_a_failure(status_code: int, expectation) -> None:
+async def test_cancelling_a_run_that_already_finished_is_not_a_failure(
+    status_code: int, expectation: AbstractContextManager[object]
+):
     """GitHub answers 409 once a run is terminal, which is the state the caller asked for.
 
     Treating it as a failure would have the caller report a cleanup step as broken for doing nothing,
     and a run finishing between the decision to cancel it and the call is ordinary.
     """
-    client = make_client(httpx.MockTransport(lambda request: httpx.Response(status_code)))
+    observer = RecordingObserver()
+    client = AsyncGitHubClient(
+        token=TOKEN, transport=httpx.MockTransport(lambda request: httpx.Response(status_code)), observer=observer
+    )
 
     with expectation:
         await client.cancel_workflow_run("DataDog", "integrations-core", 123)
+
+    assert len(observer.failures) == int(status_code == 404)

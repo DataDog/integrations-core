@@ -12,12 +12,10 @@ import pytest
 from ddev.cli.ci.tests.messages import (
     ARTIFACT_NAME_DISALLOWED,
     BatchJobResult,
-    WorkflowStatus,
 )
-from ddev.cli.ci.tests.status import Status
-from ddev.utils.github_async.models import WorkflowJob
 from ddev.utils.platform import PlatformName
 from tests.cli.ci.tests.helpers import make_job
+from tests.helpers.github_async import make_workflow_job
 
 
 def test_artifact_name_built_from_target_env_platform():
@@ -67,7 +65,7 @@ def test_correlate_matches_jobs_and_artifacts(tmp_path: Path):
     base = job.artifact_name()
     artifact_dir = tmp_path / base
     artifact_dir.mkdir()
-    workflow_job = WorkflowJob(id=1, run_id=123, name="j1", status="completed", conclusion="success")
+    workflow_job = make_workflow_job(name="j1")
 
     [result] = BatchJobResult.correlate([job], [workflow_job], {base: artifact_dir})
 
@@ -99,23 +97,3 @@ def test_correlate_ignores_artifact_dir_missing_on_disk(tmp_path: Path):
     [result] = BatchJobResult.correlate([job], [], {base: tmp_path / base})
 
     assert result.artifact_name_path is None
-
-
-def _workflow(batch_id: str, run_id: int, success: int, failed: int, skipped: int, results: list) -> WorkflowStatus:
-    return WorkflowStatus(
-        batch_id=batch_id,
-        url=f"https://example/runs/{run_id}",
-        id=run_id,
-        success_count=success,
-        failed_count=failed,
-        skipped_count=skipped,
-        results=results,
-    )
-
-
-def test_workflow_status_label():
-    assert _workflow("b1", 1, 2, 0, 0, []).status == Status.SUCCESS
-    assert _workflow("b2", 2, 1, 1, 0, []).status == Status.FAILURE
-    assert _workflow("b3", 3, 0, 0, 2, []).status == Status.SKIPPED
-    # A batch with passes and skips (no failures) reads as success.
-    assert _workflow("b4", 4, 3, 0, 1, []).status == Status.SUCCESS
