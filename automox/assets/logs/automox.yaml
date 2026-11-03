@@ -197,8 +197,288 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Policy Name
+    name: Unmapped Data Policy Name
     path: ocsf.unmapped.policy.name
+    source: log
+  - groups:
+      - OCSF
+    name: Name
+    path: ocsf.actor.user.name
+    source: log
+  - groups:
+      - OCSF
+    name: Actor User Alternate ID
+    path: ocsf.actor.user.uid_alt
+    source: log
+  - facetType: range
+    groups:
+      - OCSF
+    name: Count
+    path: ocsf.count
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Device IP
+    path: ocsf.device.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Device OS Name
+    path: ocsf.device.os.name
+    source: log
+  - groups:
+      - OCSF
+    name: Entity Device IP Address
+    path: ocsf.entity.device.ip
+    source: log
+  - groups:
+      - OCSF
+    name: Entity Device Name
+    path: ocsf.entity.device.name
+    source: log
+  - groups:
+      - OCSF
+    name: Entity Device OS Name
+    path: ocsf.entity.device.os.name
+    source: log
+  - groups:
+      - OCSF
+    name: Entity Device Unique ID
+    path: ocsf.entity.device.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Entity User Email Address
+    path: ocsf.entity.user.email_addr
+    source: log
+  - groups:
+      - OCSF
+    name: Entity User Full Name
+    path: ocsf.entity.user.full_name
+    source: log
+  - groups:
+      - OCSF
+    name: Entity User Name
+    path: ocsf.entity.user.name
+    source: log
+  - groups:
+      - OCSF
+    name: Entity User Alternate ID
+    path: ocsf.entity.user.uid_alt
+    source: log
+  - groups:
+      - OCSF
+    name: Message
+    path: ocsf.message
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Log Name
+    path: ocsf.metadata.log_name
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Log Provider
+    path: ocsf.metadata.log_provider
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Original Time
+    path: ocsf.metadata.original_time
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Product Version
+    path: ocsf.metadata.product.version
+    source: log
+  - groups:
+      - OCSF
+    name: Metadata Event UID
+    path: ocsf.metadata.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Raw Data
+    path: ocsf.raw_data
+    source: log
+  - groups:
+      - OCSF
+    name: Resources Array
+    path: ocsf.resources
+    source: log
+  - groups:
+      - OCSF
+    name: Service Name
+    path: ocsf.service.name
+    source: log
+  - groups:
+      - OCSF
+    name: Status Code
+    path: ocsf.status_code
+    source: log
+  - groups:
+      - OCSF
+    name: Status Detail
+    path: ocsf.status_detail
+    source: log
+  - facetType: range
+    groups:
+      - OCSF
+    name: Event Time
+    path: ocsf.time
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Timezone Offset
+    path: ocsf.timezone_offset
+    source: log
+    type: integer
+  - groups:
+      - OCSF
+    name: Unmapped Data Account Type
+    path: ocsf.unmapped.account_type
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data Action
+    path: ocsf.unmapped.action
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data Batch
+    path: ocsf.unmapped.batch
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data Bulk
+    path: ocsf.unmapped.bulk
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data Command Type Name
+    path: ocsf.unmapped.command_type_name
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data Connection Type
+    path: ocsf.unmapped.connection_type
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data Device Count
+    path: ocsf.unmapped.device_count
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data Event
+    path: ocsf.unmapped.event
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data Manual Approval
+    path: ocsf.unmapped.manual_approval
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data New Access Type
+    path: ocsf.unmapped.new_access_type
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data New Consent Required
+    path: ocsf.unmapped.new_consent_required
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data Patches
+    path: ocsf.unmapped.patches
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data Policy Type
+    path: ocsf.unmapped.policy.type
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data Policy Unique ID
+    path: ocsf.unmapped.policy.uid
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data Previous Access Type
+    path: ocsf.unmapped.previous_access_type
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data Previous Consent Required
+    path: ocsf.unmapped.previous_consent_required
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data Scope
+    path: ocsf.unmapped.scope
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data Scope Uid
+    path: ocsf.unmapped.scope_uid
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data Session Id
+    path: ocsf.unmapped.session_id
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data Splashtop Url Generated
+    path: ocsf.unmapped.splashtop_url_generated
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data Termination Reason
+    path: ocsf.unmapped.termination_reason
+    source: log
+  - groups:
+      - OCSF
+    name: Unmapped Data Tfa Type
+    path: ocsf.unmapped.tfa_type
+    source: log
+  - groups:
+      - OCSF
+    name: User Account Unique ID
+    path: ocsf.user.account.uid
+    source: log
+  - groups:
+      - OCSF
+    name: User Full Name
+    path: ocsf.user.full_name
+    source: log
+  - groups:
+      - OCSF
+    name: Target Name
+    path: ocsf.user.name
+    source: log
+  - groups:
+      - OCSF
+    name: User Organization Name
+    path: ocsf.user.org.name
+    source: log
+  - groups:
+      - OCSF
+    name: User Organization Unique ID
+    path: ocsf.user.org.uid
+    source: log
+  - groups:
+      - OCSF
+    name: User Alternate ID
+    path: ocsf.user.uid_alt
+    source: log
+  - groups:
+      - OCSF
+    name: Web Resources
+    path: ocsf.web_resources
     source: log
 pipeline:
   type: pipeline
@@ -1231,48 +1511,6 @@ pipeline:
                 sources:
                   ocsf.severity:
                     - severity
-            - name: ocsf.auth_protocol_id
-              type: schema-category-mapper
-              categories:
-                - filter:
-                    query: "@auth_protocol_id:99"
-                  name: Other
-                  id: 99
-                - filter:
-                    query: "*"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.auth_protocol
-                id: ocsf.auth_protocol_id
-              fallback:
-                values:
-                  ocsf.auth_protocol_id: "99"
-                  ocsf.auth_protocol: Other
-                sources:
-                  ocsf.auth_protocol:
-                    - auth_protocol
-            - name: ocsf.logon_type_id
-              type: schema-category-mapper
-              categories:
-                - filter:
-                    query: "@logon_type_id:99"
-                  name: Other
-                  id: 99
-                - filter:
-                    query: "*"
-                  name: Unknown
-                  id: 0
-              targets:
-                name: ocsf.logon_type
-                id: ocsf.logon_type_id
-              fallback:
-                values:
-                  ocsf.logon_type_id: "99"
-                  ocsf.logon_type: Other
-                sources:
-                  ocsf.logon_type:
-                    - logon_type
     - name: Audit Trail > Entity Management [3004] > When `automox.raw.notes` is set
       type: pipeline
       enabled: true
@@ -3659,12 +3897,27 @@ pipeline:
                   name: Windows
                   id: 100
                 - filter:
-                    query: "@data.os:*"
+                    query: '@data.os:(AlmaLinux OR Amazon OR CentOS OR Debian OR Fedora OR Oracle OR "Red Hat" OR RHEL OR Rocky OR SLES OR SUSE OR Ubuntu)'
                   name: Linux
                   id: 200
+                - filter:
+                    query: "@data.os:*"
+                  name: Other
+                  id: 99
+                - filter:
+                    query: "-@data.os:*"
+                  name: Unknown
+                  id: 0
               targets:
                 name: ocsf.entity.device.os.type
                 id: ocsf.entity.device.os.type_id
+              fallback:
+                values:
+                  ocsf.entity.device.os.type_id: "99"
+                  ocsf.entity.device.os.type: Other
+                sources:
+                  ocsf.entity.device.os.type:
+                    - data.os
             - name: Map `server_id` to `ocsf.entity.uid`
               type: schema-remapper
               sources:
@@ -3865,12 +4118,27 @@ pipeline:
                   name: Windows
                   id: 100
                 - filter:
-                    query: "@data.os:*"
+                    query: '@data.os:(AlmaLinux OR Amazon OR CentOS OR Debian OR Fedora OR Oracle OR "Red Hat" OR RHEL OR Rocky OR SLES OR SUSE OR Ubuntu)'
                   name: Linux
                   id: 200
+                - filter:
+                    query: "@data.os:*"
+                  name: Other
+                  id: 99
+                - filter:
+                    query: "-@data.os:*"
+                  name: Unknown
+                  id: 0
               targets:
                 name: ocsf.device.os.type
                 id: ocsf.device.os.type_id
+              fallback:
+                values:
+                  ocsf.device.os.type_id: "99"
+                  ocsf.device.os.type: Other
+                sources:
+                  ocsf.device.os.type:
+                    - data.os
             - name: Map `policy_id` to `ocsf.unmapped.policy.uid`
               type: schema-remapper
               sources:
@@ -4123,12 +4391,27 @@ pipeline:
                   name: Windows
                   id: 100
                 - filter:
-                    query: "@data.os:*"
+                    query: '@data.os:(AlmaLinux OR Amazon OR CentOS OR Debian OR Fedora OR Oracle OR "Red Hat" OR RHEL OR Rocky OR SLES OR SUSE OR Ubuntu)'
                   name: Linux
                   id: 200
+                - filter:
+                    query: "@data.os:*"
+                  name: Other
+                  id: 99
+                - filter:
+                    query: "-@data.os:*"
+                  name: Unknown
+                  id: 0
               targets:
                 name: ocsf.device.os.type
                 id: ocsf.device.os.type_id
+              fallback:
+                values:
+                  ocsf.device.os.type_id: "99"
+                  ocsf.device.os.type: Other
+                sources:
+                  ocsf.device.os.type:
+                    - data.os
             - name: Map `automox.patch.first` to `ocsf.app.name`
               type: schema-remapper
               sources:

@@ -327,10 +327,6 @@ tests:
         status: Failure
         severity_id: 2
         severity: Low
-        auth_protocol_id: 99
-        auth_protocol: Other
-        logon_type_id: 99
-        logon_type: Other
         class_uid: 3002
         class_name: Authentication
         category_uid: 3
@@ -507,10 +503,6 @@ tests:
         status: Success
         severity_id: 1
         severity: Informational
-        auth_protocol_id: 99
-        auth_protocol: Other
-        logon_type_id: 99
-        logon_type: Other
         class_uid: 3002
         class_name: Authentication
         category_uid: 3
@@ -678,10 +670,6 @@ tests:
         status: Success
         severity_id: 1
         severity: Informational
-        auth_protocol_id: 99
-        auth_protocol: Other
-        logon_type_id: 99
-        logon_type: Other
         class_uid: 3002
         class_name: Authentication
         category_uid: 3
@@ -8417,6 +8405,9 @@ tests:
           name: EXAMPLE-MAC
           org:
             uid: '171910'
+          os:
+            type_id: 0
+            type: Unknown
           type_id: 0
           type: Unknown
         unmapped:
