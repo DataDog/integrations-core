@@ -1413,10 +1413,6 @@ integration/systemd:
 - changed-files:
   - any-glob-to-any-file:
     - systemd/**/*
-integration/tanium:
-- changed-files:
-  - any-glob-to-any-file:
-    - tanium/**/*
 integration/tcp_check:
 - changed-files:
   - any-glob-to-any-file:
@@ -1445,10 +1441,6 @@ integration/tenable:
 - changed-files:
   - any-glob-to-any-file:
     - tenable/**/*
-integration/tenable_io:
-- changed-files:
-  - any-glob-to-any-file:
-    - tenable_io/**/*
 integration/teradata:
 - changed-files:
   - any-glob-to-any-file:
