@@ -1,1 +1,0 @@
-Exclude internal resource tags from the `database_instance` and settings metadata payloads, and send the same tags on both.

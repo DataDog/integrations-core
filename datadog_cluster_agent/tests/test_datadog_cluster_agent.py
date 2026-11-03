@@ -74,6 +74,7 @@ METRICS = [
     'kubernetes_apiserver.kube_events',
     'language_detection_dca_handler.processed_requests',
     'language_detection_patcher.patches',
+    'metadata_streaming.history_resyncs',
     'secret_backend.elapsed',
     'tagger.stored_entities',
     'tagger.updated_entities',
@@ -96,6 +97,12 @@ def test_check(aggregator, instance, mock_metrics_endpoint):
     for metric in METRICS:
         aggregator.assert_metric(NAMESPACE + '.' + metric)
         aggregator.assert_metric_has_tag_prefix(NAMESPACE + '.' + metric, 'is_leader:')
+
+    aggregator.assert_metric(
+        NAMESPACE + '.metadata_streaming.history_resyncs',
+        value=3,
+        metric_type=aggregator.MONOTONIC_COUNT,
+    )
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

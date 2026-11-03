@@ -19,6 +19,7 @@
       "Category::Containers",
       "Category::Network",
       "Category::Security",
+      "Category::SIEM",
       "Category::Log Collection",
       "Offering::Integration"
     ]
