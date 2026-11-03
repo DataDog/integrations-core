@@ -23,6 +23,7 @@ from .utils.common_funcs import (
     WrongDependencyFormat,
     compress,
     convert_to_human_readable_size,
+    download_wheel,
     extract_version_from_about_py,
     get_valid_platforms,
     get_valid_versions,
@@ -594,8 +595,7 @@ def get_dependency_size(
             raise ValueError(f"Missing size for commit {commit}")
         size = int(size_str)
     else:
-        with request_wheel(app, download_url, wheels_storage) as response:
-            wheel_data = response.content
+        wheel_data = download_wheel(app, download_url, wheels_storage)
 
         with tempfile.TemporaryDirectory() as tmpdir:
             wheel_path = Path(tmpdir) / "package.whl"

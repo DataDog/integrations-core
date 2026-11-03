@@ -785,8 +785,15 @@ def make_streamed_wheel_response(content):
     return response
 
 
-def test_download_wheel_restarts_a_download_dropped_mid_body():
-    dropped = make_streamed_wheel_response(requests.exceptions.ChunkedEncodingError("Connection broken"))
+@pytest.mark.parametrize(
+    "error",
+    [
+        pytest.param(requests.exceptions.ChunkedEncodingError("Connection broken"), id="connection reset"),
+        pytest.param(requests.exceptions.ConnectionError("Read timed out"), id="read timeout"),
+    ],
+)
+def test_download_wheel_restarts_a_download_dropped_mid_body(error):
+    dropped = make_streamed_wheel_response(error)
     complete = make_streamed_wheel_response(b"wheel")
 
     with (

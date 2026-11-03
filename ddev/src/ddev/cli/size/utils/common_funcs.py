@@ -20,8 +20,7 @@ from typing import TYPE_CHECKING, Literal, Optional, Type, TypedDict, get_args
 import requests
 import squarify
 from datadog import api, initialize
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter, Retry
 
 from ddev.cli.application import Application
 from ddev.cli.size.utils.common_params import WheelsStorageTier
@@ -385,15 +384,15 @@ def request_wheel(
 def download_wheel(app: Application, url: str, wheels_storage: WheelsStorageTier) -> bytes:
     """Downloads a wheel's content, restarting the download if the connection drops mid-body."""
     for attempt in range(WHEEL_REQUEST_MAX_RETRIES + 1):
-        try:
-            with request_wheel(app, url, wheels_storage) as response:
+        with request_wheel(app, url, wheels_storage) as response:
+            try:
                 return response.content
-        except (requests.exceptions.ChunkedEncodingError, requests.exceptions.ConnectionError) as e:
-            if attempt == WHEEL_REQUEST_MAX_RETRIES:
-                raise
-            delay = WHEEL_REQUEST_RETRY_BACKOFF_SECONDS * 2**attempt
-            app.display_debug(f"Wheel download from {url} was interrupted ({e}), retrying in {delay}s")
-            time.sleep(delay)
+            except (requests.exceptions.ChunkedEncodingError, requests.exceptions.ConnectionError) as e:
+                if attempt == WHEEL_REQUEST_MAX_RETRIES:
+                    raise
+                delay = WHEEL_REQUEST_RETRY_BACKOFF_SECONDS * 2**attempt
+                app.display_debug(f"Wheel download from {url} was interrupted ({e}), retrying in {delay}s")
+        time.sleep(delay)
 
     raise RuntimeError(f"Wheel download from {url} was not attempted")
 
