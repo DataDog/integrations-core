@@ -194,6 +194,172 @@ def test_minimum_base_package(ddev, repository, helpers, repo_name, config_file)
     assert result.exit_code == 0, result.output
 
 
+@pytest.mark.parametrize(
+    ('repo_name', 'filename', 'content', 'expected_error'),
+    [
+        pytest.param(
+            'core',
+            'test-all.yml',
+            'jobs: [}\n',
+            "line 1, column 8: expected the node content, but found '}'. "
+            'Fix the YAML syntax or resolve merge conflicts',
+            id='core-syntax',
+        ),
+        pytest.param(
+            'extras',
+            'test-all-windows.yml',
+            '<<<<<<< HEAD\njobs: {}\n=======\njobs: {}\n>>>>>>> branch\n',
+            'line 2, column 5: mapping values are not allowed here. Fix the YAML syntax or resolve merge conflicts',
+            id='extras-windows-conflict',
+        ),
+        pytest.param('extras', 'test-all.yml', '[]\n', "'workflow' must be a mapping", id='workflow-list'),
+        pytest.param(
+            'core',
+            'test-all-windows.yml',
+            'jobs:\n',
+            "'jobs' must be a mapping. Use 'jobs: {}' if the section is intentionally empty.",
+            id='core-windows-empty-jobs',
+        ),
+        pytest.param(
+            'extras',
+            'test-all.yml',
+            'jobs:\n',
+            "'jobs' must be a mapping. Use 'jobs: {}' if the section is intentionally empty.",
+            id='extras-empty-jobs',
+        ),
+        pytest.param('extras', 'test-all.yml', 'jobs: []\n', "'jobs' must be a mapping", id='jobs-list'),
+        pytest.param(
+            'extras',
+            'test-all.yml',
+            'jobs:\n  broken:\n',
+            "'jobs.broken' must be a mapping",
+            id='empty-job',
+        ),
+        pytest.param(
+            'extras',
+            'test-all.yml',
+            'jobs:\n  broken:\n    uses: []\n',
+            "'jobs.broken.uses' must be a string",
+            id='uses-list',
+        ),
+        pytest.param(
+            'extras',
+            'test-all.yml',
+            'jobs:\n  broken:\n    with: []\n',
+            "'jobs.broken.with' must be a mapping",
+            id='with-list',
+        ),
+        pytest.param(
+            'extras',
+            'test-all.yml',
+            f'jobs:\n  broken:\n    uses: {TEST_WORKFLOW_PREFIX}master\n    with:\n      ddev-version: []\n',
+            "'jobs.broken.with.ddev-version' must be a string",
+            id='pin-list',
+        ),
+        pytest.param(
+            'extras',
+            'test-all.yml',
+            'on:\n  workflow_call: []\n',
+            "'on.workflow_call' must be a mapping",
+            id='workflow-call-list',
+        ),
+        pytest.param(
+            'extras',
+            'test-all.yml',
+            'on:\n  workflow_call:\n    inputs: []\n',
+            "'on.workflow_call.inputs' must be a mapping",
+            id='inputs-list',
+        ),
+    ],
+)
+def test_ci_generator_rejects_invalid_workflows(
+    ddev,
+    repository,
+    config_file,
+    repo_name: str,
+    filename: str,
+    content: str,
+    expected_error: str,
+):
+    config_file.model.repos[repo_name] = str(repository.path)
+    config_file.model.repo = repo_name
+    config_file.save()
+    paths = [repository.path / '.github/workflows' / name for name in ('test-all.yml', 'test-all-windows.yml')]
+    for path in paths:
+        path.write_text('name: Test CI\njobs: {}\n')
+    (repository.path / '.github/workflows' / filename).write_text(content)
+    original = {path: path.read_bytes() for path in paths}
+
+    result = ddev('validate', 'ci', '--sync')
+
+    assert result.exit_code == 1, result.output
+    output = ' '.join(result.output.split())
+    assert f'Error: {filename}:' in output
+    assert expected_error in output
+    assert {path: path.read_bytes() for path in paths} == original
+
+
+@pytest.mark.parametrize(
+    ('repo_name', 'event_names', 'call_event'),
+    [('core', '[push, pull_request]', 'workflow_call:'), ('extras', 'workflow_call', 'workflow_call: null')],
+)
+def test_ci_generator_preserves_trigger_headers(
+    ddev,
+    repository,
+    config_file,
+    repo_name: str,
+    event_names: str,
+    call_event: str,
+):
+    config_file.model.repos[repo_name] = str(repository.path)
+    config_file.model.repo = repo_name
+    config_file.save()
+    headers = {
+        repository.path / '.github/workflows/test-all.yml': f'name: Test CI\non:\n  {call_event}\n',
+        repository.path / '.github/workflows/test-all-windows.yml': f'name: Test CI\non: {event_names}\n',
+    }
+    for path, header in headers.items():
+        path.write_text(f'{header}\njobs: {{}}\n')
+
+    result = ddev('validate', 'ci', '--sync')
+
+    assert result.exit_code == 0, result.output
+    for path, header in headers.items():
+        assert path.read_text().startswith(header)
+    result = ddev('validate', 'ci')
+    assert result.exit_code == 0, result.output
+
+
+@pytest.mark.parametrize(
+    ('repo_name', 'content'),
+    [
+        pytest.param('extras', None, id='missing-file'),
+        pytest.param('core', '', id='empty-file'),
+        pytest.param('extras', 'name: Test CI\n', id='missing-jobs'),
+        pytest.param('core', 'name: Test CI\njobs: {}\n', id='core-empty-mapping'),
+        pytest.param('extras', 'name: Test CI\njobs: {}\n', id='extras-empty-mapping'),
+    ],
+)
+def test_ci_generator_initializes_workflows(ddev, repository, config_file, repo_name: str, content: str | None):
+    config_file.model.repos[repo_name] = str(repository.path)
+    config_file.model.repo = repo_name
+    config_file.save()
+    paths = [repository.path / '.github/workflows' / name for name in ('test-all.yml', 'test-all-windows.yml')]
+    for path in paths:
+        if content is None:
+            path.unlink()
+        else:
+            path.write_text(content)
+
+    result = ddev('validate', 'ci', '--sync')
+
+    assert result.exit_code == 0, result.output
+    for path in paths:
+        assert yaml.safe_load(path.read_text())['jobs']
+    result = ddev('validate', 'ci')
+    assert result.exit_code == 0, result.output
+
+
 @pytest.mark.parametrize('repo_name', ['extras', 'marketplace', 'internal'])
 @pytest.mark.parametrize('pin_source', ['job', 'input'])
 def test_ci_generator_preserves_tooling_pins(ddev, repository, config_file, repo_name: str, pin_source: str):

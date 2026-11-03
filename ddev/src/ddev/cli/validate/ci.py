@@ -16,7 +16,62 @@ TEST_WORKFLOW_PREFIX = 'DataDog/integrations-core/.github/workflows/test-target.
 PINNING_INPUTS = ('ddev-version',)
 
 
+def _parse_test_workflow(content: str, filename: str) -> dict[str, Any]:
+    import yaml
+
+    try:
+        workflow = yaml.load(content, Loader=yaml.BaseLoader)
+    except yaml.YAMLError as error:
+        location = filename
+        explanation = str(error)
+        if isinstance(error, yaml.MarkedYAMLError):
+            if error.problem_mark is not None:
+                location += f': line {error.problem_mark.line + 1}, column {error.problem_mark.column + 1}'
+            explanation = error.problem or error.context or explanation
+        raise click.ClickException(
+            f'{location}: {explanation}. Fix the YAML syntax or resolve merge conflicts '
+            'before running `ddev validate ci --sync`.'
+        ) from error
+
+    if workflow is None:
+        return {}
+
+    def require_mapping(value: Any, field: str) -> dict[str, Any]:
+        if not isinstance(value, dict):
+            message = f"{filename}: '{field}' must be a mapping."
+            if field == 'jobs':
+                message += " Use 'jobs: {}' if the section is intentionally empty."
+            raise click.ClickException(message)
+        return value
+
+    workflow = require_mapping(workflow, 'workflow')
+    jobs = require_mapping(workflow.get('jobs', {}), 'jobs')
+    for job_id, job in jobs.items():
+        job = require_mapping(job, f'jobs.{job_id}')
+        uses = job.get('uses', '')
+        if not isinstance(uses, str):
+            raise click.ClickException(f"{filename}: 'jobs.{job_id}.uses' must be a string.")
+        settings = require_mapping(job.get('with', {}), f'jobs.{job_id}.with')
+        if uses.startswith(TEST_WORKFLOW_PREFIX):
+            for field in PINNING_INPUTS:
+                if field in settings and not isinstance(settings[field], str):
+                    raise click.ClickException(f"{filename}: 'jobs.{job_id}.with.{field}' must be a string.")
+
+    events = workflow.get('on', {})
+    if isinstance(events, dict):
+        workflow_call = events.get('workflow_call', '')
+        if workflow_call not in ('', 'null', 'Null', 'NULL', '~'):
+            workflow_call = require_mapping(workflow_call, 'on.workflow_call')
+            require_mapping(workflow_call.get('inputs', {}), 'on.workflow_call.inputs')
+
+    return workflow
+
+
 def _get_test_workflow_settings(workflow: dict[str, Any], job_id: str) -> tuple[str, dict[str, Any]]:
+    """Prefer job `with` values, then declared workflow inputs.
+
+    Only new jobs inherit unanimous values from existing shared-workflow jobs.
+    """
     existing_jobs = {
         key: job
         for key, job in workflow.get('jobs', {}).items()
@@ -30,7 +85,9 @@ def _get_test_workflow_settings(workflow: dict[str, Any], job_id: str) -> tuple[
             raise click.ClickException(f'Choose a shared test workflow revision for new job `{job_id}`')
         workflow_ref = next(iter(references), f'{TEST_WORKFLOW_PREFIX}master')
 
-    inputs = workflow.get('on', {}).get('workflow_call', {}).get('inputs', {})
+    events = workflow.get('on', {})
+    workflow_call = events.get('workflow_call', {}) if isinstance(events, dict) else {}
+    inputs = workflow_call.get('inputs', {}) if isinstance(workflow_call, dict) else {}
     settings = {}
     for field in PINNING_INPUTS:
         if field in existing_job.get('with', {}):
@@ -85,8 +142,8 @@ def ci(app: Application, sync: bool):
         windows_jobs_workflow_path.read_text() if windows_jobs_workflow_path.is_file() else ''
     )
     existing_workflows = {
-        False: yaml.load(original_jobs_workflow, Loader=yaml.BaseLoader) or {},
-        True: yaml.load(original_windows_jobs_workflow, Loader=yaml.BaseLoader) or {},
+        False: _parse_test_workflow(original_jobs_workflow, jobs_workflow_path.name),
+        True: _parse_test_workflow(original_windows_jobs_workflow, windows_jobs_workflow_path.name),
     }
     ddev_jobs_id = ('jd316aba', 'j6712d43')
 
