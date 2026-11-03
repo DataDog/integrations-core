@@ -14,7 +14,7 @@ The check covers three metric families that no single Kong node emits, so the en
 
 | Service | Role |
 |---|---|
-| `upstream` | `nginx:alpine` backend that both Kong nodes proxy to. |
+| `upstream` | `nginx` backend that both Kong nodes proxy to. |
 | `kong` | Kong 3.x. Emits the 3.0 Prometheus names (`bandwidth.bytes`, `http.requests`, `kong.latency.ms`, `nginx.connections.total`), plus stream session series through a TCP route on `:9000`. |
 | `kong-legacy` | Kong 2.x. Emits the pre-3.0 names that Kong 3.0 renamed (`bandwidth`, `http.status`, `http.consumer.status`, `latency`, `nginx.http.current_connections`). |
 | `seed` | One-shot. Sends one request per labelled series (authenticated 200, unauthenticated 401, authenticated 404) and one TCP session, so every series exists before the first scrape. |
@@ -43,8 +43,8 @@ Every input has a working default and accepts a host-env override.
 
 | Variable | Default | Effect |
 |---|---|---|
-| `KONG_VERSION` | `3.9` | Image tag of the Kong 3.x node. |
-| `KONG_LEGACY_VERSION` | `2.7` | Image tag of the Kong 2.x node. It must stay below 3.0 to emit the pre-3.0 names. `2.7` is the newest 2.x tag published for arm64. |
+| `KONG_VERSION` | `3.9.4` | Image tag of the Kong 3.x node. |
+| `KONG_LEGACY_VERSION` | `2.7.2` | Image tag of the Kong 2.x node. It must stay below 3.0 to emit the pre-3.0 names. 2.7 is the newest 2.x line published for arm64. |
 | `KONG_CONSUMER_KEY` | `devops-best-friend` | `key-auth` credential, read by both nodes, `seed`, and `activity-gen`. |
 | `ACTIVITY_GEN` | `1` | `0` keeps `activity-gen` running but idle, which leaves the counters at `0`. |
 | `ACTIVITY_DURATION` | `0` | Seconds of traffic before `activity-gen` exits with a `PASS:` line. `0` runs forever. |
