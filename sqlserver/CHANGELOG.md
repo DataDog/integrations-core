@@ -2,7 +2,23 @@
 
 <!-- towncrier release notes start -->
 
-## 23.6.0 / 2026-10-01
+## 23.7.0 / 2026-10-29
+
+***Added***:
+
+* Add opt-in collection of view definitions and column metadata during schema collection with `collect_schemas.collect_views`. ([#24928](https://github.com/DataDog/integrations-core/pull/24928))
+* Report SQL Server index key columns and included columns separately. ([#25484](https://github.com/DataDog/integrations-core/pull/25484))
+* Report the `WHERE` condition of SQL Server filtered indexes as `filter_definition`. ([#25563](https://github.com/DataDog/integrations-core/pull/25563))
+* Add opt-in collection of column statistics through a customer-installed `datadog.column_statistics` procedure, for the query benchmarker. ([#25769](https://github.com/DataDog/integrations-core/pull/25769))
+
+***Fixed***:
+
+* Prefer the ODBC driver registration owned by the Agent install over the bundled odbcinst.ini, which hardcodes the Agent install path. The bundled file is still used on Agents that do not ship one. ([#25413](https://github.com/DataDog/integrations-core/pull/25413))
+* Declare the accepted values of `azure.deployment_type` in the configuration spec. ([#25603](https://github.com/DataDog/integrations-core/pull/25603))
+* Exclude internal resource tags from the `database_instance` and settings metadata payloads. ([#25692](https://github.com/DataDog/integrations-core/pull/25692))
+* Collect schemas at `collect_schemas.collection_interval` when it is shorter than the settings collection interval, instead of at most once per settings interval. ([#25769](https://github.com/DataDog/integrations-core/pull/25769))
+
+## 23.6.0 / 2026-10-01 / Agent 7.85.0
 
 ***Security***:
 

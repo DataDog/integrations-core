@@ -1,0 +1,3 @@
+<response status="success"><result>
+  <json>{"neighbors": {"10.255.0.1": [{"ifaceAddress": "169.254.10.1", "areaId": "0.0.0.0", "ifaceName": "tunnel.1", "nbrPriority": 1, "nbrState": "Full", "stateChangeCounter": 4, "lastPrgrsvChangeMsec": 63592918, "routerDesignatedId": "0.0.0.0", "routerDesignatedBackupId": "0.0.0.0", "optionsCounter": 66, "optionsList": "*|O|-|-|-|-|E|-", "routerDeadIntervalTimerDueMsec": 37572, "databaseSummaryListCounter": 0, "linkStateRequestListCounter": 0, "linkStateRetransmissionListCounter": 0, "threadInactivityTimer": "on", "threadLinkStateRequestRetransmission": "on", "threadLinkStateUpdateRetransmission": "on", "grHelperStatus": "None"}]}}</json>
+</result></response>
