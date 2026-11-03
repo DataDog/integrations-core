@@ -7,7 +7,12 @@ from collections.abc import Callable
 
 
 def load_malloc_trim() -> Callable[[int], int] | None:
-    """Return glibc's `malloc_trim` on Linux, or `None` where it is unavailable (macOS, musl)."""
+    """Return the process's `malloc_trim` on Linux, or `None` where it is unavailable (macOS, musl).
+
+    The symbol is resolved from the process-wide namespace, so under an `LD_PRELOAD` allocator that
+    interposes `malloc_trim` this binds the interposer's. That is intended: the allocator actually
+    serving the process is the one holding the memory to release.
+    """
     if platform.system() != 'Linux':
         return None
     try:
@@ -26,6 +31,6 @@ MALLOC_TRIM = load_malloc_trim()
 
 
 def malloc_trim() -> None:
-    """Return glibc per-arena free memory to the OS after a run; no-op where unavailable."""
+    """Return the allocator's per-arena free memory to the OS after a run; no-op where unavailable."""
     if MALLOC_TRIM is not None:
         MALLOC_TRIM(0)

@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import ctypes
 import platform
 
 import mock
@@ -9,6 +10,20 @@ import pytest
 from datadog_checks.base.utils.native_memory import load_malloc_trim, malloc_trim
 
 pytestmark = pytest.mark.unit
+
+
+def glibc_is_loaded():
+    """Probe the loaded libc for a glibc-only symbol.
+
+    `platform.libc_ver()` greps the executable for a banner and reports `('', '')` whenever that
+    fails, which would skip the binding test on a glibc host with a stripped or frozen build.
+    """
+    if platform.system() != 'Linux':
+        return False
+    try:
+        return hasattr(ctypes.CDLL(None, use_errno=True), 'gnu_get_libc_version')
+    except OSError:
+        return False
 
 
 class LibcWithoutMallocTrim:
@@ -24,10 +39,7 @@ def test_malloc_trim_is_safe_to_call():
     malloc_trim()
 
 
-@pytest.mark.skipif(
-    platform.system() != 'Linux' or platform.libc_ver()[0] != 'glibc',
-    reason='malloc_trim is only expected to bind on glibc',
-)
+@pytest.mark.skipif(not glibc_is_loaded(), reason='malloc_trim is only expected to bind on glibc')
 def test_malloc_trim_is_bound_on_glibc():
     # Guards the ctypes binding itself: a wrong symbol name or signature would surface here
     # rather than silently degrading to a no-op on the platforms that need the trim.
