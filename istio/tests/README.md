@@ -43,7 +43,6 @@ Every input has a working default, and each one can be overridden from the host 
 | `ISTIO_VERSION` | `1.29.2` | Tag of the `istio/istioctl` image, and therefore the installed Istio release. |
 | `K3S_VERSION` | `v1.31.6-k3s1` | Tag of the `rancher/k3s` image used by the cluster, seed, and activity-gen. |
 | `ACTIVITY_GEN` | `1` | Set to `0` to keep activity-gen alive but idle. |
-| `ACTIVITY_DURATION` | `0` | Seconds before activity-gen stops; `0` runs forever. |
 
 Istio's metrics endpoints are unauthenticated, so the fixture has no credentials.
 

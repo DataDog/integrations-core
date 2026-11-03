@@ -7,7 +7,6 @@
 set -u
 
 M=/opt/istio-full/manifests
-DURATION="${ACTIVITY_DURATION:-0}"   # 0 = run forever
 
 log() { echo "activity-gen: $*"; }
 
@@ -23,8 +22,6 @@ export KUBECONFIG=/tmp/kubeconfig
 
 PAUSE_IMAGE=rancher/mirrored-pause:3.6   # k3s's sandbox image, already on the node
 
-end=0
-[ "$DURATION" -gt 0 ] && end=$(( $(date +%s) + DURATION ))
 i=0
 
 while :; do
@@ -91,9 +88,5 @@ while :; do
   if [ $(( i % 10 )) -eq 0 ]; then
     log "iteration $i: $(kubectl -n mesh get pods --no-headers 2>/dev/null | wc -l) pods in mesh"
   fi
-
-  [ "$end" -gt 0 ] && [ "$(date +%s)" -ge "$end" ] && break
   sleep 1
 done
-
-log "PASS: activity workload complete after $i iterations"
