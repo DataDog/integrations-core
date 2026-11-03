@@ -1,13 +1,13 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Schema Registry client for fetching schemas by ID."""
+"""Schema Registry client for fetching schemas by ID or by subject's latest version."""
 
 import time
 
 
 class SchemaRegistryClient:
-    """Fetches schemas from Confluent Schema Registry via HTTP."""
+    """Fetches schemas from Confluent Schema Registry via HTTP, by ID or by subject's latest version."""
 
     def __init__(self, http, base_url: str, log, config: dict):
         self._http = http
@@ -135,6 +135,22 @@ class SchemaRegistryClient:
         result = (schema_str, schema_type, dep_schemas)
         self._schema_cache[schema_id] = result
         return result
+
+    def get_latest_schema_id(self, subject: str) -> int:
+        """Look up the latest registered schema ID for a subject (Confluent TopicNameStrategy lookup).
+
+        Unlike get_schema, this is never cached: "latest" can change between calls as new
+        versions are registered, and produce_message relies on that to pick up new schemas
+        without a config change.
+        """
+        self._refresh_oauth_token()
+
+        url = f"{self._base_url}/subjects/{subject}/versions/latest"
+        self._log.debug("Fetching latest schema ID for subject %s from %s", subject, url)
+
+        response = self._http.get(url)
+        response.raise_for_status()
+        return response.json()['id']
 
     def _resolve_protobuf_references(self, references: list[dict]) -> list[tuple[str, str]]:
         """Recursively resolve protobuf schema references.
