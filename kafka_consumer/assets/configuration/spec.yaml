@@ -49,6 +49,15 @@ files:
           - type: array
             items:
               type: string
+      - name: allow_kafka_actions
+        description: |
+          Set to `false` to prevent the Agent from running one-time Kafka actions against the cluster configured by
+          this instance. This does not disable Kafka consumer monitoring or other Remote Configuration features.
+        fleet_configurable: false
+        value:
+          type: boolean
+          example: true
+          display_default: true
       - name: kafka_client_api_version
         description: |
           Specify the highest client protocol version supported by all brokers in the cluster.

@@ -12,6 +12,10 @@ def shared_kafka_timeout():
     return 5
 
 
+def instance_allow_kafka_actions():
+    return True
+
+
 def instance_close_admin_client():
     return True
 
