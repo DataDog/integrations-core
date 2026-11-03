@@ -112,6 +112,11 @@ Production code:
   handled apart from a connection error maps to `HTTPClientTimeoutError` and `HTTPClientConnectionError`, and an error
   status caught as `HTTPError` maps to `HTTPClientStatusError`. A body that is not valid JSON raises the standard
   library's `json.JSONDecodeError`, a `ValueError`, rather than the `simplejson` or `requests` one.
+- Unlike in `requests`, timeouts are not connection errors here: `HTTPClientConnectTimeoutError` does not subclass
+  the class `HTTPClientConnectionError`. A port of a bare `except requests.ConnectionError` that names only
+  the class `HTTPClientConnectionError` stops catching connect timeouts, and the read timeouts that `requests` reports
+  as connection errors while streaming a body. Catch `(HTTPClientConnectionError, HTTPClientTimeoutError)` to keep
+  handling them; this also catches a read timeout before the response arrives, which `requests.ConnectionError` did not.
 
 Tests:
 
