@@ -937,10 +937,6 @@ integration/metabase:
 - changed-files:
   - any-glob-to-any-file:
     - metabase/**/*
-integration/microsoft_copilot:
-- changed-files:
-  - any-glob-to-any-file:
-    - microsoft_copilot/**/*
 integration/microsoft_dns:
 - changed-files:
   - any-glob-to-any-file:
@@ -953,10 +949,6 @@ integration/milvus:
 - changed-files:
   - any-glob-to-any-file:
     - milvus/**/*
-integration/mimecast:
-- changed-files:
-  - any-glob-to-any-file:
-    - mimecast/**/*
 integration/mongo:
 - changed-files:
   - any-glob-to-any-file:
