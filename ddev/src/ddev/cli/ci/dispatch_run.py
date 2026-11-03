@@ -36,41 +36,40 @@ class RunResolutionError(Exception):
     """A run could not be resolved; the message is what the invocation aborts with."""
 
 
-def resolution_github_client(token: str, *, monitor: ComponentMonitor | None = None) -> ResolutionClientFactory:
+def resolution_github_client(token: str, *, monitor: ComponentMonitor) -> ResolutionClientFactory:
     """Build the GitHub client factory every resolver uses.
 
     Every GitHub client the Dispatcher opens is instrumented, so a resolver must take its client
     from here rather than calling `async_github_client` itself: one built in passing has no request
     metrics, no rate-limit logging, and a limiter of its own, which quietly spends the same GitHub
-    quota the governor thinks it is managing.
+    quota the governor thinks it is managing. `monitor` is required for the same reason — an
+    optional one leaves a way to build exactly the client this function exists to prevent.
 
     A factory rather than a client, because each resolution runs in its own `asyncio.run` and an
     `httpx.AsyncClient` cannot cross event loops. The instrumentation it closes over is built once,
     so every session shares one rate limiter.
     """
-    client_logger = None
-    observer = None
-    rate_limiter = None
-    if monitor is not None:
-        from ddev.cli.ci.tests.github_monitor import GitHubMonitor
-        from ddev.monitoring.adapter import ComponentLogAdapter
-        from ddev.utils.github_async.defaults import default_github_rate_limiter, log_rate_limit_events
-        from ddev.utils.rate_limiting import RateLimitEvent
+    from ddev.cli.ci.tests.github_monitor import GitHubMonitor
+    from ddev.monitoring.adapter import ComponentLogAdapter
+    from ddev.utils.github_async.defaults import default_github_rate_limiter, log_rate_limit_events
+    from ddev.utils.rate_limiting import RateLimitEvent
 
-        client_logger = ComponentLogAdapter(monitor)
-        github_monitor = observer = GitHubMonitor(monitor)
-        log_event = log_rate_limit_events(client_logger)
+    client_logger = ComponentLogAdapter(monitor)
+    github_monitor = GitHubMonitor(monitor)
+    log_event = log_rate_limit_events(client_logger)
 
-        def on_rate_limit_event(event: RateLimitEvent) -> None:
-            log_event(event)
-            github_monitor.rate_limit_event(event)
+    def on_rate_limit_event(event: RateLimitEvent) -> None:
+        log_event(event)
+        github_monitor.rate_limit_event(event)
 
-        rate_limiter = default_github_rate_limiter(on_event=on_rate_limit_event)
+    rate_limiter = default_github_rate_limiter(on_event=on_rate_limit_event)
 
     def open_client() -> AbstractAsyncContextManager[AsyncGitHubClient]:
         from ddev.utils.github_async import async_github_client
 
-        return async_github_client(token=token, logger=client_logger, observer=observer, rate_limiter=rate_limiter)
+        return async_github_client(
+            token=token, logger=client_logger, observer=github_monitor, rate_limiter=rate_limiter
+        )
 
     return open_client
 

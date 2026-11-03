@@ -142,16 +142,7 @@ def test_exclusions_alone_still_compare_the_commit(mocker: MockerFixture):
     compare.assert_called_once()
 
 
-@pytest.mark.parametrize(
-    ('monitored', 'instrumented'),
-    [
-        pytest.param(True, True, id='with-a-monitor'),
-        pytest.param(False, False, id='without-a-monitor'),
-    ],
-)
-def test_the_resolution_client_is_instrumented_from_its_monitor(
-    mocker: MockerFixture, monitored: bool, instrumented: bool
-):
+def test_the_resolution_client_is_instrumented_from_its_monitor(mocker: MockerFixture):
     """An uninstrumented session spends the same GitHub quota the governor thinks it manages."""
     opened: list[dict] = []
 
@@ -162,7 +153,7 @@ def test_the_resolution_client_is_instrumented_from_its_monitor(
 
     mocker.patch('ddev.utils.github_async.async_github_client', record)
 
-    factory = resolution_github_client('a-token', monitor=make_monitor('resolution') if monitored else None)
+    factory = resolution_github_client('a-token', monitor=make_monitor('resolution'))
 
     async def open_once():
         async with factory():
@@ -172,7 +163,7 @@ def test_the_resolution_client_is_instrumented_from_its_monitor(
 
     [kwargs] = opened
     assert kwargs['token'] == 'a-token'
-    assert all((kwargs[name] is not None) is instrumented for name in ('logger', 'observer', 'rate_limiter'))
+    assert all(kwargs[name] is not None for name in ('logger', 'observer', 'rate_limiter'))
 
 
 def test_every_resolution_session_shares_one_rate_limiter(mocker: MockerFixture):
