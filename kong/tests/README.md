@@ -47,7 +47,6 @@ Every input has a working default and accepts a host-env override.
 | `KONG_LEGACY_VERSION` | `2.7.2` | Image tag of the Kong 2.x node. It must stay below 3.0 to emit the pre-3.0 names. 2.7 is the newest 2.x line published for arm64. |
 | `KONG_CONSUMER_KEY` | `devops-best-friend` | `key-auth` credential, read by both nodes, `seed`, and `activity-gen`. |
 | `ACTIVITY_GEN` | `1` | `0` keeps `activity-gen` running but idle, which leaves the counters at `0`. |
-| `ACTIVITY_DURATION` | `0` | Seconds of traffic before `activity-gen` exits with a `PASS:` line. `0` runs forever. |
 
 The two nodes intentionally read different version variables: Kong 3.0 renamed the Prometheus metrics, so the
 pre-3.0 and 3.0 names can only be produced by two different Kong versions.

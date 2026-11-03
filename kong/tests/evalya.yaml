@@ -27,8 +27,6 @@ tasks:
         value: devops-best-friend
       - name: ACTIVITY_GEN
         value: "1"
-      - name: ACTIVITY_DURATION
-        value: "0"
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8001/metrics >/dev/null && wget -qO- http://127.0.0.1:8101/metrics >/dev/null && wget -qO- http://127.0.0.1:8200/metrics >/dev/null"]
       interval: 10s

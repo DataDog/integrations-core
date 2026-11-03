@@ -10,7 +10,6 @@ PORT="${KONG_PROXY_PORT:-8000}"
 STREAM_HOSTS="${KONG_STREAM_HOSTS:-}"
 STREAM_PORT="${KONG_STREAM_PORT:-9000}"
 KEY="${KONG_CONSUMER_KEY}"
-DURATION="${ACTIVITY_DURATION:-0}"   # 0 = run forever
 
 log() { echo "activity-gen: $*"; }
 
@@ -39,8 +38,6 @@ for host in $HOSTS; do
   done &
 done
 
-end=0
-[ "$DURATION" -gt 0 ] && end=$(( $(date +%s) + DURATION ))
 i=0
 
 while :; do
@@ -63,11 +60,6 @@ while :; do
   done
 
   [ $(( i % 100 )) -eq 0 ] && log "iteration ${i}"
-
-  if [ "$end" -gt 0 ] && [ "$(date +%s)" -ge "$end" ]; then
-    log "PASS: ran ${i} iterations in ${DURATION}s"
-    exit 0
-  fi
 
   sleep 1
 done

@@ -144,9 +144,7 @@ services:
         condition: service_completed_successfully
     networks:
       - kong-net
-    # on-failure, not unless-stopped: a finite ACTIVITY_DURATION run exits 0
-    # and must stay exited.
-    restart: on-failure
+    restart: unless-stopped
     environment:
       KONG_HOSTS: "kong kong-legacy"
       KONG_PROXY_PORT: "8000"
@@ -154,7 +152,6 @@ services:
       KONG_STREAM_PORT: "9000"
       KONG_CONSUMER_KEY: "${KONG_CONSUMER_KEY:-devops-best-friend}"
       ACTIVITY_GEN: "${ACTIVITY_GEN:-1}"
-      ACTIVITY_DURATION: "${ACTIVITY_DURATION:-0}"
     volumes:
       - ../activity-gen.sh:/activity-gen.sh:ro
     entrypoint: ["sh", "/activity-gen.sh"]
