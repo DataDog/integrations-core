@@ -181,13 +181,6 @@ files:
           type: string
         example:
         - vsys1
-    - name: collect_threats
-      fleet_configurable: true
-      description: Set to `true` to count threat log entries by severity and type.
-      value:
-        type: boolean
-        default: true
-        example: true
     - name: collect_rule_hits
       fleet_configurable: true
       description: Set to `false` to stop collecting security rule hit counts.
