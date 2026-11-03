@@ -1,0 +1,1 @@
+Select testable targets when their CI setup scripts change and warn about script folders without a testable target.

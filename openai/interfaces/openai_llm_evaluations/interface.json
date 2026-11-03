@@ -1,0 +1,9 @@
+{
+  "interface_type": "api",
+  "source_type_id": 92170538,
+  "source_type_name": "OpenAI LLM Evaluations",
+  "interface_title": "LLM Evaluations",
+  "is_primary": false,
+  "auto_install": false,
+  "creates_events": false
+}

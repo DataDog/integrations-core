@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from ddev.utils.github_async.models import PullRequest, PullRequestRef, PullRequestSimple
 
 RUN_MANIFEST_NAME = 'run.json'
+NO_MATCHING_PR_REASON = 'no open pull request matches the requested revision'
 
 # `merge_commit_sha` reads null only while GitHub recomputes the synthetic merge.
 MERGE_COMMIT_REFRESH_ATTEMPTS = 3
@@ -324,7 +325,7 @@ def resolve_pull_request_run(
             pull = await resolver.resolve(client)
             if pull is None:
                 if monitor is not None:
-                    monitor.logger.info('Nothing to test', reason='no open pull request matches the requested revision')
+                    monitor.logger.info('Nothing to test', reason=NO_MATCHING_PR_REASON)
                 app.display_info('No open pull request matches the requested revision, so there is nothing to test.')
                 return None
             assert pull.head is not None and pull.base is not None, 'Resolved PRs have branch references.'

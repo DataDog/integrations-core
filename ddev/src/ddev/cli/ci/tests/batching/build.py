@@ -52,7 +52,9 @@ def build_test_units(
     ignored when `rules` is given.
     """
     if rules is None:
-        rules = default_target_rules(is_core=repo.name == "core", infrastructure_targets=infrastructure_targets)
+        rules = default_target_rules(
+            is_core=repo.name == "core", infrastructure_targets=infrastructure_targets, monitor=monitor
+        )
 
     facts = RegistryRepositoryFacts(repo.integrations)
     target_names = find_affected_targets(changed_files, facts, rules=rules)

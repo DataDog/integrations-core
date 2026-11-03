@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import re
 from datetime import datetime, timezone
 from typing import NamedTuple
@@ -28,6 +29,7 @@ OTHER_RESOURCE_NAME = 'other'
 KUEUE_QUEUE_ENTITY_PREFIX = 'kubernetes_kueue_queue://'
 KUEUE_RESOURCE_FLAVOR_ENTITY_PREFIX = 'kueue_resource_flavor://'
 KUEUE_WORKLOAD_ENTITY_PREFIX = 'kueue_workload://'
+WORKLOAD_EVENT_INDEX_CACHE_KEY = 'workload_event_index'
 
 
 class WorkloadTransition(NamedTuple):
@@ -75,6 +77,8 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         self.instance['rename_labels'] = {**DEFAULT_RENAME_LABELS, **self.instance.get('rename_labels', {})}
         self.kube_client = None
         self._workload_state = None
+        self._workload_event_index: dict[str, int] | None = None
+        self._workload_event_index_dirty = False
 
     def get_default_config(self):
         return {'metrics': [METRIC_MAP]}
@@ -192,6 +196,8 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             self.log.warning('Cannot collect Kueue Workload events from the Kubernetes API: %s', e)
             return
 
+        self._ensure_workload_event_index()
+
         current_state = {}
         for workload in workloads:
             try:
@@ -206,6 +212,63 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                 )
 
         self._workload_state = current_state
+        self._prune_workload_event_index(set(current_state))
+        self._persist_workload_event_index()
+
+    def _ensure_workload_event_index(self) -> None:
+        if self._workload_event_index is not None:
+            return
+
+        self._workload_event_index = {}
+        self._workload_event_index_dirty = False
+        raw = self.read_persistent_cache(WORKLOAD_EVENT_INDEX_CACHE_KEY)
+        if not raw:
+            return
+
+        try:
+            data = json.loads(raw)
+        except (TypeError, ValueError) as e:
+            self.log.warning('Cannot parse Kueue workload event index cache: %s', e)
+            return
+
+        if not isinstance(data, dict):
+            self.log.warning('Kueue workload event index cache is not a mapping')
+            return
+
+        ignored = 0
+        for uid, index in data.items():
+            if isinstance(uid, str) and isinstance(index, int) and index >= 0:
+                self._workload_event_index[uid] = index
+            else:
+                ignored += 1
+        if ignored:
+            self.log.warning('Ignored %d invalid Kueue workload event index cache entries', ignored)
+
+    def _persist_workload_event_index(self) -> None:
+        if self._workload_event_index is None or not self._workload_event_index_dirty:
+            return
+
+        self.write_persistent_cache(WORKLOAD_EVENT_INDEX_CACHE_KEY, json.dumps(self._workload_event_index))
+        self._workload_event_index_dirty = False
+
+    def _prune_workload_event_index(self, active_uids: set[str]) -> None:
+        if self._workload_event_index is None:
+            return
+
+        stale_uids = [uid for uid in self._workload_event_index if uid not in active_uids]
+        if not stale_uids:
+            return
+
+        for uid in stale_uids:
+            del self._workload_event_index[uid]
+        self._workload_event_index_dirty = True
+
+    def next_workload_event_index(self, workload_key: str) -> int:
+        self._ensure_workload_event_index()
+        index = self._workload_event_index.get(workload_key, 0)
+        self._workload_event_index[workload_key] = index + 1
+        self._workload_event_index_dirty = True
+        return index
 
     def process_workload_events(self, workload: dict, current_state: dict, submit_events: bool) -> None:
         metadata = workload.get('metadata', {})
@@ -291,6 +354,10 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         details = WORKLOAD_TRANSITIONS.get(transition)
         transition_label = details.label if details else transition
         alert_type = details.alert_type if details else 'info'
+        workload_key = metadata.get('uid') or f'{namespace}/{name}'
+        event_index = self.next_workload_event_index(workload_key)
+        tags = self.workload_event_tags(transition, workload, condition, previous_state)
+        tags.append(f'kueue_workload_event_index:{event_index}')
 
         self.event(
             {
@@ -298,9 +365,9 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                 'event_type': WORKLOAD_TRANSITION_EVENT_TYPES[transition],
                 'msg_title': f'Kueue workload {namespace}/{name} {transition_label}',
                 'msg_text': self.workload_event_text(transition, workload, condition),
-                'aggregation_key': metadata.get('uid', f'{namespace}/{name}'),
+                'aggregation_key': workload_key,
                 'alert_type': alert_type,
-                'tags': self.workload_event_tags(transition, workload, condition, previous_state),
+                'tags': tags,
             }
         )
 
