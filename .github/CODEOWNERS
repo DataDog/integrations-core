@@ -277,14 +277,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /checkpoint_harmony_email_and_collaboration/manifest.json            @DataDog/saas-integrations @DataDog/documentation
 /checkpoint_harmony_email_and_collaboration/assets/logs/             @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/cisco_umbrella_dns/                                                 @DataDog/saas-integrations
-/cisco_umbrella_dns/*.md                                             @DataDog/saas-integrations @DataDog/documentation
-/cisco_umbrella_dns/manifest.json                                    @DataDog/saas-integrations @DataDog/documentation
-
-/cisco_duo/                                                          @DataDog/saas-integrations
-/cisco_duo/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
-/cisco_duo/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
-
 /contentful/                                                         @DataDog/saas-integrations
 /contentful/*.md                                                     @DataDog/saas-integrations @DataDog/documentation
 /contentful/manifest.json                                            @DataDog/saas-integrations @DataDog/documentation
