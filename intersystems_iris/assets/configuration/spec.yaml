@@ -57,7 +57,7 @@ files:
     example:
     - type: file
       path: /usr/irissys/mgr/messages.log
-      source: intersystems_iris
+      source: intersystems-iris
       service: <SERVICE>
       log_processing_rules:
         - type: multi_line
@@ -65,5 +65,5 @@ files:
           pattern: \d{2}/\d{2}/\d{2}-\d{2}:\d{2}:\d{2}
     - type: file
       path: /var/log/iris/structured.log
-      source: intersystems_iris
+      source: intersystems-iris
       service: <SERVICE>

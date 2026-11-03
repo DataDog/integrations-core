@@ -1,0 +1,1 @@
+Revert the Python version to 3.13.15 and make `upgrade-python-version` skip 3.13.16, which breaks concurrent imports in the Agent.

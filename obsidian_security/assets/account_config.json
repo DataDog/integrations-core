@@ -1,0 +1,72 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API token",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_token",
+          "label": "API Token",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "region",
+      "label": "Region",
+      "editable": true,
+      "required": true,
+      "dropdown": {
+        "options": [
+          { "value": "us", "label": "America" },
+          { "value": "eu", "label": "Europe" },
+          { "value": "au", "label": "Australia" }
+        ]
+      }
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "obsidian-security-alerts-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Alerts",
+        "help": "Collects Obsidian Security alerts.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "collect_alerts",
+        "should_map_legacy_fields": true
+      }
+    },
+    {
+      "dataflow_id": "obsidian-security-events-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Events",
+        "help": "Collects Obsidian Security events.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "collect_events",
+        "should_map_legacy_fields": true
+      }
+    },
+    {
+      "dataflow_id": "obsidian-security-audit-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Audit Logs",
+        "help": "Collects Obsidian Security audit logs.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "collect_audit_logs",
+        "should_map_legacy_fields": true
+      }
+    }
+  ]
+}

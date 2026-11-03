@@ -13,6 +13,7 @@ from types import MappingProxyType
 from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -44,8 +45,18 @@ class Azure(BaseModel):
         frozen=True,
     )
     aggregate_sql_databases: Optional[bool] = None
-    deployment_type: Optional[str] = None
+    deployment_type: Optional[Literal['sql_database', 'managed_instance', 'virtual_machine']] = None
     fully_qualified_domain_name: Optional[str] = None
+
+
+class CollectColumnStatistics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_tables: Optional[int] = None
 
 
 class CollectDeadlocks(BaseModel):
@@ -71,10 +82,12 @@ class CollectSchemas(BaseModel):
         arbitrary_types_allowed=True,
         frozen=True,
     )
+    collect_views: Optional[bool] = None
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
     max_execution_time: Optional[float] = None
     max_tables: Optional[int] = None
+    max_views: Optional[int] = None
 
 
 class CollectSettings(BaseModel):
@@ -491,6 +504,7 @@ class InstanceConfig(BaseModel):
     autodiscovery_include: Optional[tuple[str, ...]] = None
     aws: Optional[Aws] = None
     azure: Optional[Azure] = None
+    collect_column_statistics: Optional[CollectColumnStatistics] = None
     collect_deadlocks: Optional[CollectDeadlocks] = None
     collect_raw_query_statement: Optional[CollectRawQueryStatement] = None
     collect_schemas: Optional[CollectSchemas] = None

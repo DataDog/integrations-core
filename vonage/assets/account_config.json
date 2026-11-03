@@ -1,0 +1,36 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Account ID and client secret",
+      "basic": {
+        "user_setting": {
+          "key": "account_id",
+          "label": "Account ID",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "client_secret",
+          "label": "Client secret",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "include_message",
+      "label": "Include body of the messages in logs",
+      "editable": true,
+      "checkbox": {
+        "default": false
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "vonage-logs" }
+  ]
+}

@@ -11,6 +11,7 @@ covers what would otherwise be four separate per-device fan-outs.
 
 from __future__ import annotations
 
+import re
 from collections import Counter
 from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass
@@ -35,6 +36,7 @@ from .constants import (
     FABRIC_SITE_HEALTH_ENDPOINT,
     INTENT_INTERFACE_METADATA_FIELDS,
     INTENT_INTERFACES_ENDPOINT,
+    INTENT_NETWORK_DEVICES_ENDPOINT,
     INTERFACES_ENDPOINT,
     ISSUE_DEFAULT_ALERT_TYPE,
     ISSUE_DETAIL_FIELDS,
@@ -55,6 +57,7 @@ from .constants import (
     STACK_MEMBER_READY_STATES,
     STACK_PORT_OK_VALUES,
     STACKABLE_DEVICE_FAMILIES,
+    UNREACHABLE_VALUES,
     UP_VALUES,
     VIRTUAL_NETWORK_HEALTH_ENDPOINT,
 )
@@ -63,12 +66,15 @@ from .errors import CatalystApiError
 from .metrics import (
     APPLICATION_METRICS,
     CLIENT_AGGREGATES,
+    CLIENT_DURATION_FIELDS,
     CLIENT_GROUP_BY_DEFAULT,
+    CLIENT_RADIO_FIELDS,
     DEVICE_INTERFACE_LIST_METRICS,
     DEVICE_METRICS,
     DEVICE_METRICS_DETAILS,
     EVENT_BREAKDOWNS,
     FABRIC_SITE_METRICS,
+    FABRIC_SITE_PERCENTAGE_FIELDS,
     INTERFACE_POE_WATT_METRICS,
     INTERFACE_STATISTICS_METRICS,
     NETWORK_CATEGORY_METRICS,
@@ -108,7 +114,12 @@ def device_identity_tags(namespace: str, management_ip: Any, device_uuid: Any) -
 
 
 def device_tags(record: dict[str, Any], namespace: str = DEFAULT_NAMESPACE) -> list[str]:
-    """Tags shared by every metric derived from one device record."""
+    """Tags that describe a device, shared by every metric derived from its record.
+
+    Reachability is left out: it changes from one cycle to the next, and Assurance leaves it null
+    while it re-scores, so as a tag it would split one device's series. Only the device's own
+    metrics carry it, as they always have.
+    """
     return compact(
         [
             *device_identity_tags(namespace, record.get('managementIpAddress'), record.get('id')),
@@ -121,9 +132,69 @@ def device_tags(record: dict[str, Any], namespace: str = DEFAULT_NAMESPACE) -> l
             tag('software_version', record.get('softwareVersion')),
             tag('site_id', record.get('siteId')),
             tag('site_hierarchy', record.get('siteHierarchy')),
-            tag('reachability', record.get('reachabilityHealthStatus')),
         ]
     )
+
+
+def list_device_inventory(client: CatalystCenterClient) -> dict[str, dict[str, Any]]:
+    """Read the device inventory, keyed by device id.
+
+    The inventory is the fallback for reachability. The data API leaves `reachabilityHealthStatus`
+    null while Assurance re-scores devices, and drops devices while it re-indexes, but the
+    inventory keeps listing every managed device with a reachability throughout.
+    """
+    return {record['id']: record for record in client.get_list(INTENT_NETWORK_DEVICES_ENDPOINT) if record.get('id')}
+
+
+def device_reachability(record: dict[str, Any], inventory: dict[str, dict[str, Any]]) -> str | None:
+    """A device's reachability: the data API's when it reports one, otherwise the inventory's.
+
+    The data API stays primary so that nothing changes while it answers. One rule with three
+    callers -- the reachability gauge, the stack fan-out and the NDM status -- so they cannot
+    drift apart.
+    """
+    # The empty string is one of Catalyst Center's encodings of absent data, so from either source
+    # it is treated as null.
+    reported = record.get('reachabilityHealthStatus') or None
+    device_id = record.get('id')
+    if reported is not None or device_id is None:
+        return reported
+    return (inventory.get(device_id) or {}).get('reachabilityStatus') or None
+
+
+def is_unreachable(reachability: str | None) -> bool:
+    """Whether a reachability is an explicit unreachable status.
+
+    Only that status withholds a device's metrics, since it is the one in which Catalyst Center
+    serves last-known readings. Anything else, unknown included, is collected as before.
+    """
+    return reachability in UNREACHABLE_VALUES
+
+
+def collect_inventory_reachability(
+    check: AgentCheck,
+    entries: Iterable[dict[str, Any]],
+    base_tags: list[str] | None = None,
+    namespace: str = DEFAULT_NAMESPACE,
+) -> None:
+    """Emit reachability for inventory devices that the data API did not return.
+
+    Only the identity tags and the name come from the inventory record, because those are the
+    ones known to match what the data API reports for the same device.
+    """
+    base_tags = base_tags or []
+    for entry in entries:
+        # An empty status is absent data, as in `device_reachability`, not a device that is down.
+        reachability = entry.get('reachabilityStatus') or None
+        if reachability is None:
+            continue
+        tags = base_tags + compact(
+            [
+                *device_identity_tags(namespace, entry.get('managementIpAddress'), entry.get('id')),
+                tag('device_name', entry.get('hostname')),
+            ]
+        )
+        check.gauge('device.reachable', int(reachability in REACHABLE_VALUES), tags=tags)
 
 
 def _collect_radios(check: AgentCheck, record: dict[str, Any], base_tags: list[str]) -> None:
@@ -160,6 +231,7 @@ def collect_devices(
     collect_wireless: bool,
     base_tags: list[str] | None = None,
     namespace: str = DEFAULT_NAMESPACE,
+    inventory: dict[str, dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     """Collect every managed device, returning the records so callers need not refetch them.
 
@@ -173,18 +245,27 @@ def collect_devices(
             radio mapping is derived from Cisco's schema and has not been validated against a
             live controller.
         base_tags: Tags applied to every metric, carrying the instance's configured `tags`.
+        inventory: The device inventory, keyed by device id, which supplies the reachability
+            of any device the data API reports without one.
     """
     records = client.get_list(NETWORK_DEVICES_ENDPOINT)
     base_tags = base_tags or []
+    inventory = inventory or {}
 
     for record in records:
-        tags = base_tags + device_tags(record, namespace)
+        reachability_tag = compact([tag('reachability', record.get('reachabilityHealthStatus'))])
+        tags = base_tags + device_tags(record, namespace) + reachability_tag
 
         # Reachability as a metric, not only as NDM inventory: a monitor cannot alert on
         # inventory, and "is this device up" is the first question an operator asks.
-        reachability = record.get('reachabilityHealthStatus')
+        reachability = device_reachability(record, inventory)
         if reachability is not None:
             check.gauge('device.reachable', int(reachability in REACHABLE_VALUES), tags=tags)
+
+        if is_unreachable(reachability):
+            # Catalyst Center keeps serving an unreachable device's last readings -- a powered-off
+            # switch's uptime keeps counting -- so they would graph a device that is still up.
+            continue
 
         for field, metric_name in DEVICE_METRICS.items():
             emit_gauge(check, metric_name, record.get(field), tags)
@@ -294,6 +375,8 @@ def collect_interfaces(
     views: tuple[str, ...],
     base_tags: list[str] | None = None,
     namespace: str = DEFAULT_NAMESPACE,
+    devices: list[dict[str, Any]] | None = None,
+    inventory: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, dict[str, Any]]:
     """Collect port health, returning the merged records keyed by interface id.
 
@@ -309,12 +392,29 @@ def collect_interfaces(
         client: An authenticated client.
         views: Which interface views to request and join on the interface id.
         base_tags: Tags applied to every metric.
+        devices: The device records from `collect_devices`, which give the per-device throughput
+            rollups the same tags as every other device metric.
+        inventory: The device inventory, keyed by device id, which supplies the reachability of
+            any device the data API reports without one.
+
+    A device with an explicit unreachable status emits no interface metrics. Catalyst Center cannot
+    poll it, so whatever it serves for the device's interfaces is a last-known value, the same
+    staleness that withholds the device's own metrics. Its records are still returned, so NDM keeps
+    its interfaces alongside the device it reports as unreachable.
     """
     base_tags = base_tags or []
     merged = _merge_views(client, views)
     _enrich_metadata(client, merged)
 
-    for record in merged.values():
+    devices_by_id = {device['id']: device for device in devices or [] if device.get('id')}
+    unreachable = {
+        device_id
+        for device_id, device in devices_by_id.items()
+        if is_unreachable(device_reachability(device, inventory or {}))
+    }
+    current = [record for record in merged.values() if record.get('networkDeviceId') not in unreachable]
+
+    for record in current:
         tags = base_tags + interface_tags(record, namespace)
 
         oper_status = record.get('operStatus')
@@ -338,7 +438,7 @@ def collect_interfaces(
         for field, metric_name in INTERFACE_POE_WATT_METRICS.items():
             emit_watts(check, metric_name, record.get(field), tags)
 
-    _emit_device_rollups(check, merged.values(), base_tags, namespace)
+    _emit_device_rollups(check, current, base_tags, namespace, devices_by_id)
 
     return merged
 
@@ -360,7 +460,11 @@ class _DeviceThroughput:
 
 
 def _emit_device_rollups(
-    check: AgentCheck, records: Iterable[dict[str, Any]], base_tags: list[str], namespace: str
+    check: AgentCheck,
+    records: Iterable[dict[str, Any]],
+    base_tags: list[str],
+    namespace: str,
+    devices_by_id: dict[str, dict[str, Any]],
 ) -> None:
     """Roll per-interface rates up to per-device and per-uplink totals.
 
@@ -401,7 +505,14 @@ def _emit_device_rollups(
     for device_ip, bucket in totals.items():
         if not bucket.seen:
             continue
-        tags = base_tags + compact(device_identity_tags(namespace, device_ip, bucket.device_uuid))
+        # An interface record identifies its device by IP and UUID only. Where the data API
+        # returned the device, its record supplies the name and site, so throughput can be
+        # filtered and labelled like every other device metric.
+        device = devices_by_id.get(bucket.device_uuid or '')
+        if device is not None:
+            tags = base_tags + device_tags(device, namespace)
+        else:
+            tags = base_tags + compact(device_identity_tags(namespace, device_ip, bucket.device_uuid))
         check.gauge('device.throughput.rx', bucket.rx, tags=tags)
         check.gauge('device.throughput.tx', bucket.tx, tags=tags)
 
@@ -507,12 +618,21 @@ def collect_network_health(check: AgentCheck, client: CatalystCenterClient, base
     tags = base_tags or []
     body = client.get_envelope(NETWORK_HEALTH_ENDPOINT)
 
+    # A score over no scored device is not a measurement. The newest five-minute bucket scores
+    # 0 until its devices are scored, and 0 reads as a network that is entirely down.
+    unscored = to_number(body.get('healthContributingDevices')) == 0
     for field, metric_name in NETWORK_HEALTH_METRICS.items():
+        if field == 'latestHealthScore' and unscored:
+            continue
         emit_gauge(check, metric_name, body.get(field), tags)
 
     for category in body.get(NETWORK_HEALTH_DISTRIBUTION_KEY) or []:
         category_tags = tags + compact([tag('category', category.get('category'))])
+        no_health = to_number(category.get('noHealthCount'))
+        category_unscored = no_health is not None and no_health == to_number(category.get('totalCount'))
         for field, metric_name in NETWORK_CATEGORY_METRICS.items():
+            if field == 'healthScore' and category_unscored:
+                continue
             emit_gauge(check, metric_name, category.get(field), category_tags)
 
 
@@ -525,6 +645,7 @@ def collect_stacks(
     devices: list[dict[str, Any]],
     base_tags: list[str] | None = None,
     namespace: str = DEFAULT_NAMESPACE,
+    inventory: dict[str, dict[str, Any]] | None = None,
 ) -> None:
     """Collect stack membership.
 
@@ -534,16 +655,22 @@ def collect_stacks(
     `member.state` and `port.status` are fault signals, and re-emitting a stale `1` reports a
     healthy stack that is not.
 
-    A device that fails is logged and skipped: one unreachable switch must not cost the cycle.
+    An unreachable switch is not asked: Catalyst Center can only answer for it from its last-known
+    copy, which would report members that have lost power as ready. A switch whose request fails is
+    logged and skipped, so that one failure does not cost the cycle; if every request fails,
+    nothing was collected, and that raises.
     """
     base_tags = base_tags or []
+    inventory = inventory or {}
+    attempted = failed = 0
+    last_error: CatalystApiError | None = None
 
     for device in devices:
         if device.get('deviceFamily') not in STACKABLE_DEVICE_FAMILIES:
             continue
 
         device_id = device.get('id')
-        if device_id is None:
+        if device_id is None or is_unreachable(device_reachability(device, inventory)):
             continue
 
         tags = base_tags + compact(
@@ -553,10 +680,13 @@ def collect_stacks(
             ]
         )
 
+        attempted += 1
         try:
             stack = client.get_object(STACK_ENDPOINT_TEMPLATE.format(device_id=device_id))
-        except CatalystApiError:
+        except CatalystApiError as exc:
             check.log.warning('Could not read stack detail for device %s', device_id, exc_info=True)
+            failed += 1
+            last_error = exc
             continue
 
         # Both of these are null rather than empty on a device with no stack, so `or []` is
@@ -582,6 +712,13 @@ def collect_stacks(
             sync_ok = port.get('isSynchOk')
             if sync_ok is not None:
                 check.gauge('device.stack.port.status', int(str(sync_ok) in STACK_PORT_OK_VALUES), tags=port_tags)
+
+    if attempted and failed == attempted:
+        # The status page shows only the message, so the last cause goes in it: its
+        # x-correlation-id is the only reference Cisco TAC acts on.
+        raise CatalystApiError(
+            f'Could not read stack detail for any of the {attempted} switches; last error: {last_error}'
+        ) from last_error
 
 
 # -- aggregate client health ------------------------------------------------------------
@@ -611,15 +748,34 @@ def collect_client_health(check: AgentCheck, client: CatalystCenterClient, base_
 # -- client experience ----------------------------------------------------------------
 
 
-def _emit_aggregates(check: AgentCheck, aggregates: list[dict[str, Any]] | None, tags: list[str]) -> None:
+def _emit_aggregates(
+    check: AgentCheck, aggregates: list[dict[str, Any]] | None, tags: list[str], wired: bool = False
+) -> None:
     """Emit one metric per requested (field, function) pair.
 
     A requested aggregate can come back with `value: null` when the underlying field has no
-    data, which `emit_gauge()` drops.
+    data, which `emit_gauge()` drops. Two more shapes mean the same absence and are dropped too: a
+    radio aggregate for a group of wired clients, and an onboarding duration of 0.
     """
     by_key = {(a.get('name'), a.get('function')): a.get('value') for a in aggregates or []}
     for field, function, metric_name in CLIENT_AGGREGATES:
-        emit_gauge(check, metric_name, by_key.get((field, function)), tags)
+        value = by_key.get((field, function))
+        if wired and field in CLIENT_RADIO_FIELDS:
+            continue
+        if field in CLIENT_DURATION_FIELDS and to_number(value) == 0:
+            continue
+        emit_gauge(check, metric_name, value, tags)
+
+
+def _is_wired_group(attributes: list[dict[str, Any]]) -> bool:
+    """Whether a client group holds wired clients: grouped by band, yet with no band and no SSID.
+
+    The appliance reports its wired clients as the group whose `band` is null and whose `ssid` is
+    empty. A client on a named SSID is wireless whatever band it reports, and a grouping that leaves
+    out `band` says nothing either way, so neither is treated as wired.
+    """
+    values = {attribute.get('name'): attribute.get('value') for attribute in attributes}
+    return 'band' in values and values['band'] in (None, '') and values.get('ssid') in (None, '')
 
 
 def collect_client_experience(
@@ -648,10 +804,9 @@ def collect_client_experience(
     _emit_aggregates(check, summary.get('aggregateAttributes'), base_tags)
 
     for group in summary.get('groups') or []:
-        group_tags = base_tags + compact(
-            [tag(attr.get('name'), attr.get('value')) for attr in group.get('attributes') or []]
-        )
-        _emit_aggregates(check, group.get('aggregateAttributes'), group_tags)
+        attributes = group.get('attributes') or []
+        group_tags = base_tags + compact([tag(attr.get('name'), attr.get('value')) for attr in attributes])
+        _emit_aggregates(check, group.get('aggregateAttributes'), group_tags, wired=_is_wired_group(attributes))
 
 
 # -- topology -------------------------------------------------------------------------
@@ -736,7 +891,11 @@ def collect_sda_fabric(
 
     for site in client.get_list(FABRIC_SITE_HEALTH_ENDPOINT):
         site_tags = tags + compact([tag('fabric_site_id', site.get('id')), tag('fabric_site_name', site.get('name'))])
+        # A share of no devices is not a measurement; see FABRIC_SITE_PERCENTAGE_FIELDS.
+        empty = to_number(site.get('totalDeviceCount')) == 0
         for field, metric_name in FABRIC_SITE_METRICS.items():
+            if empty and field in FABRIC_SITE_PERCENTAGE_FIELDS:
+                continue
             emit_gauge(check, metric_name, site.get(field), site_tags)
 
     for vn in client.get_list(VIRTUAL_NETWORK_HEALTH_ENDPOINT):
@@ -876,6 +1035,25 @@ def collect_assurance_issues(
 
 # -- assurance events -----------------------------------------------------------------
 
+# A Cisco syslog message names its severity in the mnemonic, `%FACILITY-SEVERITY-MNEMONIC`, on the
+# same 0-7 scale as the event's `severity` field.
+SYSLOG_MNEMONIC = re.compile(r'%[A-Z0-9_]+-([0-7])-[A-Z0-9_]+')
+
+
+def _with_syslog_severity(record: dict[str, Any]) -> dict[str, Any]:
+    """Fill an absent `severity` from the syslog mnemonic in `details`.
+
+    Catalyst Center 2.3.7.11 sends no `severity` on any assurance event, but a syslog message still
+    carries one: `%LINK-3-UPDOWN` is severity 3, Error. A trap has no mnemonic and stays without.
+    The record is copied rather than modified, so what the appliance sent stays intact.
+    """
+    if isinstance(record.get('severity'), int):
+        return record
+    match = SYSLOG_MNEMONIC.search(str(record.get('details') or ''))
+    if match is None:
+        return record
+    return {**record, 'severity': int(match.group(1))}
+
 
 def _event_alert_type(record: dict[str, Any]) -> str:
     """Map a Catalyst Center syslog severity onto a Datadog alert type.
@@ -978,6 +1156,7 @@ def collect_events(
             continue
 
         any_group_succeeded = True
+        records = [_with_syslog_severity(record) for record in records]
 
         # Untagged, and submitted once per group. Counts sharing a name and tag set are summed,
         # so the four submissions add up to the whole window. The group is an artefact of the
@@ -1021,9 +1200,12 @@ def collect_application_health(
     `siteIds` while the accepted parameter is singular. So this is a genuine per-site fan-out
     whose cost scales with the hierarchy, which is why it is gated off by default.
 
-    A site that fails is logged and skipped rather than aborting the sweep.
+    A site that fails is logged and skipped rather than aborting the sweep. If every site fails,
+    nothing was collected, and that raises.
     """
     tags = base_tags or []
+    attempted = failed = 0
+    last_error: CatalystApiError | None = None
 
     for site in sites:
         site_id = site.get('id')
@@ -1031,6 +1213,7 @@ def collect_application_health(
             continue
 
         site_tags = tags + compact([tag('site_id', site_id), tag('site_hierarchy', site.get('siteHierarchy'))])
+        attempted += 1
         try:
             # There is no top-N endpoint. Sorting descending by usage and reading one page is how
             # to get the busiest applications, and keeps the series bounded however many a site
@@ -1039,8 +1222,10 @@ def collect_application_health(
                 NETWORK_APPLICATIONS_ENDPOINT,
                 params={'siteId': site_id, 'sortBy': 'usage', 'order': 'desc'},
             )
-        except CatalystApiError:
+        except CatalystApiError as exc:
             check.log.warning('Could not read application health for site %s', site_id, exc_info=True)
+            failed += 1
+            last_error = exc
             continue
 
         for application in applications:
@@ -1053,6 +1238,12 @@ def collect_application_health(
             )
             for field, metric_name in APPLICATION_METRICS.items():
                 emit_gauge(check, metric_name, application.get(field), app_tags)
+
+    if attempted and failed == attempted:
+        # As in collect_stacks: the last cause, with its x-correlation-id, goes in the message.
+        raise CatalystApiError(
+            f'Could not read application health for any of the {attempted} sites; last error: {last_error}'
+        ) from last_error
 
 
 # -- security -------------------------------------------------------------------------

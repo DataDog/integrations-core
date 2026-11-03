@@ -32,12 +32,27 @@ METRIC_MAP = {
     'vllm:request_success': 'request.success',
     'vllm:avg_prompt_throughput_toks_per_s': 'avg.prompt.throughput.toks_per_s',
     'vllm:avg_generation_throughput_toks_per_s': 'avg.generation_throughput.toks_per_s',
+    # Current vLLM names for KV cache usage and per-token latency; older versions expose
+    # gpu_cache_usage_perc and time_per_output_token_seconds instead.
+    'vllm:kv_cache_usage_perc': 'kv_cache_usage_perc',
+    'vllm:inter_token_latency_seconds': 'inter_token_latency.seconds',
+    'vllm:request_time_per_output_token_seconds': 'request.time_per_output_token.seconds',
 }
 
 GPU_METRIC_MAP = {
     'vllm:estimated_flops_per_gpu': 'estimated_flops_per_gpu',
     'vllm:external_prefix_cache_hits': 'external_prefix_cache.hits',
     'vllm:external_prefix_cache_queries': 'external_prefix_cache.queries',
+    'vllm:nixl_bytes_transferred': 'nixl.bytes_transferred',
+    'vllm:nixl_num_descriptors': 'nixl.num_descriptors',
+    'vllm:nixl_num_failed_notifications': 'nixl.num_failed_notifications',
+    'vllm:nixl_num_failed_transfers': 'nixl.num_failed_transfers',
+    'vllm:nixl_num_kv_expired_reqs': 'nixl.num_kv_expired_reqs',
+    'vllm:nixl_num_notifications_after_expiry': 'nixl.num_notifications_after_expiry',
+    'vllm:nixl_post_time_seconds': 'nixl.post_time.seconds',
+    'vllm:nixl_xfer_time_seconds': 'nixl.xfer_time.seconds',
+    'vllm:prefix_cache_hits': 'prefix_cache.hits',
+    'vllm:prefix_cache_queries': 'prefix_cache.queries',
     'vllm:prompt_tokens_cached': 'prompt_tokens.cached',
     'vllm:request_decode_time_seconds': 'request.decode_time.seconds',
     'vllm:request_prefill_kv_computed_tokens': 'request.prefill_kv_computed_tokens',
@@ -69,6 +84,9 @@ RAY_METRIC_MAP = {
     'ray_vllm:request_success': 'request.success',
     'ray_vllm:avg_prompt_throughput_toks_per_s': 'avg.prompt.throughput.toks_per_s',
     'ray_vllm:avg_generation_throughput_toks_per_s': 'avg.generation_throughput.toks_per_s',
+    'ray_vllm:kv_cache_usage_perc': 'kv_cache_usage_perc',
+    'ray_vllm:inter_token_latency_seconds': 'inter_token_latency.seconds',
+    'ray_vllm:request_time_per_output_token_seconds': 'request.time_per_output_token.seconds',
 }
 
 RAY_GPU_METRIC_MAP = {name.replace('vllm:', 'ray_vllm:', 1): metric for name, metric in GPU_METRIC_MAP.items()}

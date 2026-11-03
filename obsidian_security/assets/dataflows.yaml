@@ -4,3 +4,18 @@ provides:
     granular: true
     data_type: logs
     direction: inbound
+  - id: obsidian-security-alerts-logs
+    always_on: false
+    granular: true
+    data_type: logs
+    direction: inbound
+  - id: obsidian-security-events-logs
+    always_on: false
+    granular: true
+    data_type: logs
+    direction: inbound
+  - id: obsidian-security-audit-logs
+    always_on: false
+    granular: true
+    data_type: logs
+    direction: inbound

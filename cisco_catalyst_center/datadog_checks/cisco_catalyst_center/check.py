@@ -20,6 +20,7 @@ from .collectors import (
     collect_devices,
     collect_events,
     collect_interfaces,
+    collect_inventory_reachability,
     collect_l3_topology,
     collect_network_health,
     collect_sda_fabric,
@@ -28,6 +29,8 @@ from .collectors import (
     collect_site_topology,
     collect_stacks,
     collect_topology,
+    device_reachability,
+    list_device_inventory,
     list_sites,
 )
 from .config_models import ConfigMixin
@@ -56,6 +59,10 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         self._events_polled_through: int | None = None
         # Each open issue's last reported occurrence, by issueId. None until the first cycle.
         self._reported_issues: dict[str, int | None] | None = None
+        # This cycle's collector outcomes, reset as each cycle starts. They decide whether the
+        # cycle merely degraded or failed outright.
+        self._collectors_succeeded = 0
+        self._failed_collectors: list[str] = []
 
     @property
     def client(self) -> CatalystCenterClient:
@@ -115,21 +122,30 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
 
         A single unreachable domain must not cost the whole cycle: losing site health should not
         also lose device health. `collection.success` reflects whether *anything* failed, so a
-        partial collection is still visible rather than silently degraded.
+        partial collection is still visible rather than silently degraded. Each failure is also a
+        warning, which is what moves the Agent status off OK; a log line alone does not.
         """
         try:
             collector()
         except CatalystApiError as exc:
             # Carries Cisco's x-correlation-id, which is the only reference TAC will act on.
-            self.log.error('Catalyst Center %s collection failed: %s', name, exc)
+            self.warning('Catalyst Center %s collection failed: %s', name, exc)
+            self._failed_collectors.append(name)
             return False
         except Exception:
             self.log.exception('Unexpected failure collecting Catalyst Center %s', name)
+            self.warning('Unexpected failure collecting Catalyst Center %s; see the Agent log', name)
+            self._failed_collectors.append(name)
             return False
+        self._collectors_succeeded += 1
         return True
 
     def _send_ndm_metadata(
-        self, devices: list[dict[str, Any]], interfaces: dict[str, dict[str, Any]], namespace: str
+        self,
+        devices: list[dict[str, Any]],
+        interfaces: dict[str, dict[str, Any]],
+        namespace: str,
+        inventory: dict[str, dict[str, Any]],
     ) -> None:
         """Emit device and interface metadata for Network Device Monitoring.
 
@@ -139,7 +155,10 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         """
         collect_timestamp = int(time.time())
 
-        device_metadata: list[DeviceMetadata] = [create_device_metadata(record, namespace) for record in devices]
+        device_metadata: list[DeviceMetadata] = [
+            create_device_metadata(record, namespace, reachability=device_reachability(record, inventory))
+            for record in devices
+        ]
         interface_metadata: list[InterfaceMetadata] = [
             create_interface_metadata(record, namespace) for record in interfaces.values()
         ]
@@ -163,6 +182,14 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
         # to omit the scheme, so the client's https:// prefix would otherwise leak into the tag.
         base_tags.append(f'catalyst_center_host:{self.config.catalyst_center_host}')
         namespace = self.config.namespace or 'default'
+        self._collectors_succeeded = 0
+        self._failed_collectors = []
+
+        inventory: dict[str, dict[str, Any]] = {}
+
+        def _inventory() -> None:
+            nonlocal inventory
+            inventory = list_device_inventory(self.client)
 
         devices: list[dict[str, Any]] = []
 
@@ -174,16 +201,35 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
                 collect_wireless=bool(self.config.collect_wireless),
                 base_tags=base_tags,
                 namespace=namespace,
+                inventory=inventory,
             )
-            self.gauge('device.count', len(devices), tags=base_tags)
 
-        # Devices first: it is the only call that produces the inventory the stack collector
-        # needs, and if it fails there is nothing to fan out over anyway.
-        healthy = self._run('devices', _devices)
+        # The inventory first, since the device collector falls back on it for any device the data
+        # API reports without a reachability. Devices next: it is the only call that produces the
+        # list the stack collector fans out over.
+        inventory_read = self._run('device inventory', _inventory)
+        devices_read = self._run('devices', _devices)
+        # The inventory only fills gaps the data API leaves, so losing it costs at most the
+        # fallback: `_run` has already made it a warning, and it does not count as a failed
+        # collection. It still counts as a success for the total-failure rule below, because the
+        # appliance answered and its reachability is still reported.
+        healthy = devices_read
+
+        # The data API drops devices while it re-indexes -- all of them, if its call failed -- but
+        # the inventory still lists them, so their reachability can still be reported.
+        returned = {record.get('id') for record in devices}
+        unlisted = [entry for device_id, entry in inventory.items() if device_id not in returned]
+        collect_inventory_reachability(self, unlisted, base_tags=base_tags, namespace=namespace)
+        if inventory_read or devices_read:
+            # Counted across both sources, because device.count is the number of managed devices.
+            self.gauge('device.count', len(devices) + len(unlisted), tags=base_tags)
 
         if devices and self.config.collect_stacks:
             healthy &= self._run(
-                'stacks', lambda: collect_stacks(self, self.client, devices, base_tags=base_tags, namespace=namespace)
+                'stacks',
+                lambda: collect_stacks(
+                    self, self.client, devices, base_tags=base_tags, namespace=namespace, inventory=inventory
+                ),
             )
 
         interfaces: dict[str, dict[str, Any]] = {}
@@ -198,6 +244,8 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
                     views=self._interface_views(),
                     base_tags=base_tags,
                     namespace=namespace,
+                    devices=devices,
+                    inventory=inventory,
                 )
 
             healthy &= self._run('interfaces', _interfaces)
@@ -289,17 +337,29 @@ class CiscoCatalystCenterCheck(AgentCheck, ConfigMixin):
             # reports success.
             self.log.debug('Collecting application health for %s sites', len(sites))
 
-            # One request per site on top of that, so the cost scales with the hierarchy.
-            healthy &= self._run(
-                'application health',
-                lambda: collect_application_health(self, self.client, sites, base_tags=base_tags),
-            )
+            # One request per site on top of that, so the cost scales with the hierarchy. With no
+            # sites there is nothing to ask, and running it anyway would count a sweep that made no
+            # request as a collector that succeeded, which hides a cycle in which every call failed.
+            if sites:
+                healthy &= self._run(
+                    'application health',
+                    lambda: collect_application_health(self, self.client, sites, base_tags=base_tags),
+                )
 
         if self.config.collect_security:
             healthy &= self._run('security', lambda: collect_security(self, self.client, base_tags=base_tags))
 
+        if self._failed_collectors and not self._collectors_succeeded:
+            # Nothing was collected: an unreachable appliance or a rejected login fails every call.
+            # That is an error rather than a degraded cycle, and raising is what shows it as one in
+            # the Agent status. collection.success goes out first, so a monitor can still alert on it.
+            self.gauge('collection.success', 0, tags=base_tags)
+            raise CatalystApiError(f'Every Catalyst Center collector failed: {", ".join(self._failed_collectors)}')
+
         if self.config.send_ndm_metadata:
-            healthy &= self._run('NDM metadata', lambda: self._send_ndm_metadata(devices, interfaces, namespace))
+            healthy &= self._run(
+                'NDM metadata', lambda: self._send_ndm_metadata(devices, interfaces, namespace, inventory)
+            )
 
         # A metric rather than a service check: new integrations here do not ship service checks.
         # Emitted on failure too -- a monitor on missing data cannot tell an unreachable appliance

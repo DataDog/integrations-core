@@ -87,6 +87,8 @@ def test_collect_mysql_settings(aggregator, dbm_instance, dd_run_check):
     assert event['database_instance'] == "stubbed.hostname"
     assert event['dbms'] == "mysql"
     assert len(event["metadata"]) > 0
+    instance_event = next(e for e in dbm_metadata if e['kind'] == 'database_instance')
+    assert sorted(event['tags']) == sorted(instance_event['tags'])
 
 
 @pytest.mark.unit
@@ -678,8 +680,6 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance, use_single_quer
         'database_hostname:stubbed.hostname',
         'database_instance:stubbed.hostname',
         'dbms_flavor:{}'.format(common.MYSQL_FLAVOR.lower()),
-        'dd.internal.resource:database_instance:stubbed.hostname',
-        'port:13306',
         'tag1:value1',
         'tag2:value2',
     )
@@ -696,7 +696,7 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance, use_single_quer
         assert schema_event.get("collection_interval") is not None
         assert schema_event.get("dbms_version") is not None
         assert schema_event.get("flavor") in ("MariaDB", "MySQL", "Percona")
-        assert sorted(schema_event["tags"]) == sorted(expected_tags)
+        assert sorted(t for t in schema_event["tags"] if not t.startswith('dd.internal')) == sorted(expected_tags)
         # The collector chunks a database's tables across multiple metadata entries (one table per
         # entry). Reassemble per-database here so the assertions are agnostic to how many payloads
         # the tables were split across.

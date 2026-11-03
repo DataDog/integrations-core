@@ -241,9 +241,9 @@ files:
         example: {}
     - name: paginated_limit
       description: |
-          Sets the number of items API calls should return at a time. Default is 30.
+          Sets the number of items API calls should return at a time. Default is 300.
       value:
-        example: 30
+        example: 300
         type: integer
       required: false
       fleet_configurable: false

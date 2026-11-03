@@ -89,6 +89,7 @@ def governed_client(
     on_event: Any = None,
     max_rate_limit_retries: int = 2,
     observer: RecordingObserver | None = None,
+    token_provider: Callable[[], Awaitable[str]] | None = None,
 ) -> AsyncGitHubClient:
     """Client whose governor runs on *clock*, so retry waits are deterministic under a fake sleep."""
     governor = BudgetGovernor(now=clock, on_event=on_event)
@@ -104,6 +105,7 @@ def governed_client(
         transport=transport,
         max_rate_limit_retries=max_rate_limit_retries,
         observer=observer,
+        token_provider=token_provider,
     )
 
 

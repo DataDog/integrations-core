@@ -14,6 +14,7 @@ The integration collects metrics across multiple layers of the Prefect orchestra
 -   **Work pool layer**: Pool readiness, paused or not-ready state, and aggregated worker availability to detect capacity or configuration issues.
 -   **Worker layer**: Online or offline status and heartbeat age to identify lost or unhealthy workers.
 -   **Work queue layer**: Backlog size, backlog age, last polled age, concurrency utilization, and queue state (ready, paused or not-ready) to detect congestion, starvation, and stalled consumers.
+-   **Concurrency limit layer**: Configured limit and occupied slots for global and task run (tag-based) concurrency limits to detect saturation.
 -   **Deployment and flow layer**: Flow run counts by state (running, completed, failed, crashed, etc.), throughput, late starts, execution duration, queue wait time, and retry gaps to track reliability and latency percentiles.
 -   **Task layer**: Task run counts by state, throughput, execution duration, and dependency wait time to enable drilldowns from slow flows to individual task bottlenecks.
 -   **Events**: Prefect events for state transitions and lifecycle changes.

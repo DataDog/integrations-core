@@ -1,0 +1,82 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Client ID and Secret Key",
+      "basic": {
+        "user_setting": {
+          "key": "client_id",
+          "label": "Client ID",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "secret_key",
+          "label": "Secret Key",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "supported_connection_methods": [
+    {
+      "name": "Vectra Platform API",
+      "multitenant": {
+        "tenant_setting": {
+          "key": "sub_domain",
+          "label": "Sub Domain",
+          "help": "The Sub Domain from your Vectra Platform URL. For example, if your platform URL is example.portal.vectra.ai, enter example.",
+          "editable": true,
+          "required": true,
+          "text": {
+            "pattern": "^[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*$"
+          }
+        },
+        "base_url_format": "https://%s.portal.vectra.ai"
+      }
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "vectra-detection-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Detections",
+        "help": "Collects Vectra detections and detection events.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "collect_detections",
+        "should_map_legacy_fields": true
+      }
+    },
+    {
+      "dataflow_id": "vectra-entity-scoring-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Entity Scoring Events",
+        "help": "Collects Vectra account and host entity scoring events.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "collect_entity_scoring_events",
+        "should_map_legacy_fields": true
+      }
+    },
+    {
+      "dataflow_id": "vectra-audit-logs",
+      "toggle": {
+        "default": true,
+        "label": "Collect Audit Events",
+        "help": "Collects Vectra audit events.",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "collect_audit_events",
+        "should_map_legacy_fields": true
+      }
+    }
+  ]
+}

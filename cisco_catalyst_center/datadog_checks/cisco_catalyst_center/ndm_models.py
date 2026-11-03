@@ -116,15 +116,21 @@ def _int_or_none(value: Any) -> int | None:
         return None
 
 
-def create_device_metadata(record: dict[str, Any], namespace: str) -> DeviceMetadata:
+def create_device_metadata(record: dict[str, Any], namespace: str, reachability: str | None = None) -> DeviceMetadata:
     """Build the NDM device payload from one `data/networkDevices` record.
 
     The data API names these fields differently from the legacy inventory endpoint: `name` rather
     than `hostname`, `osType` rather than `softwareType`, and `reachabilityHealthStatus` rather
     than `reachabilityStatus`.
+
+    `reachability` replaces the record's own `reachabilityHealthStatus` when given. The data API
+    leaves that field null while Assurance re-scores devices, and a null alone would report a
+    healthy device to NDM as unreachable, so the caller resolves it against the inventory.
     """
     management_ip = record.get('managementIpAddress') or ''
     hierarchy = record.get('siteHierarchy')
+    if reachability is None:
+        reachability = record.get('reachabilityHealthStatus')
 
     # The record identity is Catalyst Center's own instanceUuid. It is present on every
     # record, whereas managementIpAddress is not -- an access point reporting
@@ -156,7 +162,7 @@ def create_device_metadata(record: dict[str, Any], namespace: str) -> DeviceMeta
         id_tags=id_tags,
         tags=tags,
         ip_address=management_ip,
-        status=STATUS_REACHABLE if record.get('reachabilityHealthStatus') in REACHABLE_VALUES else STATUS_UNREACHABLE,
+        status=STATUS_REACHABLE if reachability in REACHABLE_VALUES else STATUS_UNREACHABLE,
         name=record.get('name') or '',
         serial_number=record.get('serialNumber') or '',
         location=hierarchy or '',

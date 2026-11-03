@@ -1,1 +1,0 @@
-Allow `.ddev/config.toml` to import other TOML files through a top-level `imports` key.

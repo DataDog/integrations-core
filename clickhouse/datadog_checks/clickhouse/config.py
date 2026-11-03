@@ -189,6 +189,8 @@ def _apply_validated_defaults(args: dict, instance: dict, validation_result: Val
         validation_result.add_error(
             f'Invalid compression type "{args["compression"]}". Valid values are: lz4, zstd, br, gzip'
         )
+        # Revert to the default (no compression) so the value matches the config model's enum.
+        args['compression'] = None
 
     # Validate collection intervals are positive
     if _safefloat(args.get('query_metrics', {}).get('collection_interval')) <= 0:

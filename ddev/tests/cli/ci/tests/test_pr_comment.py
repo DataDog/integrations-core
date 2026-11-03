@@ -27,6 +27,7 @@ from ddev.cli.ci.tests.pr_comment import (
     COMMENT_MARKER,
     COMMON_TESTS_LEAD,
     FAILED_HEADING,
+    INCONCLUSIVE_TEXT,
     PROGRESS_BAR_ASSETS,
     PROGRESS_BAR_WIDTH,
     SHUTDOWN_ALERTS,
@@ -456,6 +457,13 @@ SECTION_MARKERS = (
             ),
         ),
         (
+            "cancelled",
+            DispatcherProgress(
+                batches=(batch_progress("batch-01", job_progress(attempt(Status.CANCELLED)), status=Status.CANCELLED),),
+                done=True,
+            ),
+        ),
+        (
             "incomplete",
             DispatcherProgress(
                 batches=(batch_progress("batch-01", _kuma_target()),),
@@ -872,6 +880,16 @@ def test_a_collection_error_is_reported_once_against_its_own_target():
             "❌ <code>base</code>: 1 failed target",
             id="failed-and-lost-its-reports",
         ),
+        pytest.param(
+            (attempt(Status.INCONCLUSIVE), attempt(Status.INCONCLUSIVE)),
+            "⚠️ <code>base</code>: 2 inconclusive targets",
+            id="inconclusive",
+        ),
+        pytest.param(
+            (attempt(Status.FAILURE), attempt(Status.INCONCLUSIVE), attempt(error=ProgressError.NO_ARTIFACTS)),
+            "❌ <code>base</code>: 1 failed target, 1 inconclusive target, 1 result unavailable",
+            id="failed-inconclusive-and-unavailable",
+        ),
     ],
 )
 def test_a_group_counts_its_outcomes_in_the_unit_each_one_is_in(attempts, expected: str):
@@ -976,7 +994,6 @@ def test_a_batch_only_failure_is_linked_and_says_what_happened():
 @pytest.mark.parametrize(
     ("error", "expected"),
     [
-        pytest.param(ProgressError.TIMED_OUT, "timed out", id="timed-out"),
         pytest.param(ProgressError.NO_JOB_RESULTS, "test results could not be collected", id="no-job-results"),
         pytest.param(ProgressError.NO_ARTIFACTS, "artifacts could not be downloaded", id="no-artifacts"),
     ],
@@ -1020,13 +1037,13 @@ def test_a_batch_problem_its_own_targets_already_explain_is_not_said_twice():
 
 
 def test_a_batch_problem_its_targets_do_not_explain_is_still_reported():
-    """Suppression is per problem, not per batch: a timeout is not the artifacts that went missing."""
+    """Suppression is per problem, not per batch: missing results are not the artifacts that went missing."""
     progress = DispatcherProgress(
         batches=(
             batch_progress(
                 "batch-01",
                 job_progress(attempt(error=ProgressError.NO_ARTIFACTS), target="mysql"),
-                error=ProgressError.TIMED_OUT,
+                error=ProgressError.NO_JOB_RESULTS,
             ),
         ),
         done=True,
@@ -1034,7 +1051,7 @@ def test_a_batch_problem_its_targets_do_not_explain_is_still_reported():
 
     body = render_comment(progress)
 
-    assert f"⚠️ [`batch-01`]({BATCH_RUN_URL}): timed out" in body
+    assert f"⚠️ [`batch-01`]({BATCH_RUN_URL}): test results could not be collected" in body
     assert "artifacts could not be downloaded" in body
     assert "Dispatcher could not collect test results for 1 target." in body
     assert "Dispatcher could not collect results for 1 batch." in body
@@ -1235,6 +1252,30 @@ def test_a_real_failure_outranks_a_missing_result():
     assert "## ❌ Dispatcher tests: failed" in render_comment(progress)
 
 
+def test_a_real_failure_outranks_a_cancelled_batch():
+    """A run with a failed and a cancelled batch is a failed run, matching the run outcome."""
+    progress = DispatcherProgress(
+        batches=(
+            batch_progress(
+                "batch-01",
+                job_progress(attempt(Status.FAILURE), target="nginx"),
+                status=Status.FAILURE,
+            ),
+            batch_progress(
+                "batch-02", job_progress(attempt(Status.CANCELLED), target="kafka"), status=Status.CANCELLED
+            ),
+        ),
+        done=True,
+    )
+
+    body = render_comment(progress)
+
+    assert "## ❌ Dispatcher tests: failed" in body
+    assert CANCELLED_HEADING not in body
+    # The cancelled batch still carries its own chip, so the reader can see which one to rerun.
+    assert "🚫 [batch-02]" in _batch_strip_of(body)
+
+
 def test_a_missing_result_is_not_counted_as_a_failed_integration():
     """The group renders as a warning, so counting it as a failure would contradict the body."""
     progress = DispatcherProgress(
@@ -1310,14 +1351,112 @@ def test_a_zero_is_left_out_of_the_totals_rather_than_printed():
     assert "0 failed" not in body
 
 
-def test_skipped_is_shown_only_when_non_zero():
-    progress = DispatcherProgress(
+def test_skipped_and_cancelled_are_shown_only_when_non_zero():
+    """Like every other zero count, a missing outcome is left out rather than printed as a zero."""
+    skipped = DispatcherProgress(
         batches=(batch_progress("batch-01", job_progress(attempt(Status.SKIPPED), target="ntp")),),
         done=True,
     )
+    cancelled = DispatcherProgress(
+        batches=(batch_progress("batch-01", job_progress(attempt(Status.CANCELLED), target="ntp")),),
+        done=True,
+    )
 
-    assert "⏭️ 1 skipped" in render_comment(progress)
-    assert "skipped" not in render_comment(uniform_progress(done=True))
+    assert "⏭️ 1 skipped" in render_comment(skipped)
+    assert "🚫 1 cancelled" in render_comment(cancelled)
+    clean = render_comment(uniform_progress(done=True))
+    assert "skipped" not in clean
+    assert "cancelled" not in clean
+
+
+def test_a_cancelled_batch_reads_as_cancelled_neither_passed_nor_failed():
+    """A cancelled batch is its own outcome: the heading says cancelled, and no cancelled job is
+    counted or listed as a failure."""
+    progress = DispatcherProgress(
+        batches=(
+            batch_progress(
+                "batch-01",
+                job_progress(attempt(), target="ntp"),
+                job_progress(attempt(Status.CANCELLED), target="kafka"),
+                status=Status.CANCELLED,
+            ),
+        ),
+        done=True,
+    )
+
+    body = render_comment(progress)
+
+    # The same heading a shutdown-cancelled run uses: either way the run ended by cancellation.
+    assert CANCELLED_HEADING in body
+    assert _batch_strip_of(body).startswith(f"Batches · 🚫 [batch-01]({BATCH_RUN_URL}) 2/2")
+    assert "✅ 1 passed" in body
+    assert "🚫 1 cancelled" in body
+    assert "❌" not in body
+    assert "nothing failed" not in body
+    assert _group_summaries_of(body) == []
+    assert _target_rows_of(body) == []
+    # A cancelled job drew no verified result, so it takes the pending colour like an inconclusive one.
+    assert set(_progress_bar_of(body)) == {"passed", "pending"}
+
+    # A failed job inside the cancelled batch stays counted, so "nothing failed" cannot be said
+    # beside the "1 failed" the totals just printed.
+    with_a_failed_job = DispatcherProgress(
+        batches=(
+            batch_progress("batch-01", job_progress(attempt(Status.FAILURE), target="kafka"), status=Status.CANCELLED),
+        ),
+        done=True,
+    )
+
+    cancelled_body = render_comment(with_a_failed_job)
+
+    assert CANCELLED_HEADING in cancelled_body
+    assert "❌ 1 failed" in cancelled_body
+    assert "nothing failed" not in cancelled_body
+
+
+def test_an_inconclusive_job_is_listed_and_warns_its_batch():
+    """A failed batch whose only unconfirmed job is inconclusive points at that job, not elsewhere."""
+    progress = DispatcherProgress(
+        batches=(
+            batch_progress(
+                "batch-01",
+                job_progress(attempt(), target="ntp"),
+                job_progress(attempt(Status.INCONCLUSIVE), target="kafka"),
+                status=Status.FAILURE,
+            ),
+        ),
+        done=True,
+    )
+
+    body = render_comment(progress)
+
+    assert "## ❌ Dispatcher tests: failed" in body
+    assert _batch_strip_of(body).startswith(f"Batches · ⚠️ [batch-01]({BATCH_RUN_URL}) 2/2")
+    assert _group_summaries_of(body) == ["⚠️ <code>kafka</code>: 1 inconclusive target"]
+    [row] = _target_rows_of(body)
+    assert row.endswith(f"· batch-01 · {INCONCLUSIVE_TEXT}")
+    # The inconclusive job may be what failed, so the batch is not blamed on a step outside the jobs.
+    assert BATCH_FAILURE_TEXT not in body
+    assert "✅ 1 passed" in body
+    assert "❔ 1 inconclusive" in body
+    assert "nothing failed" not in body
+    assert set(_progress_bar_of(body)) == {"passed", "pending"}
+
+
+def test_a_confirmed_failure_keeps_a_batch_with_inconclusive_jobs_failed():
+    progress = DispatcherProgress(
+        batches=(
+            batch_progress(
+                "batch-01",
+                job_progress(attempt(Status.FAILURE), target="ntp"),
+                job_progress(attempt(Status.INCONCLUSIVE), target="kafka"),
+                status=Status.FAILURE,
+            ),
+        ),
+        done=True,
+    )
+
+    assert _batch_strip_of(render_comment(progress)).startswith(f"Batches · ❌ [batch-01]({BATCH_RUN_URL}) 2/2")
 
 
 def test_only_the_latest_attempt_counts_toward_totals():

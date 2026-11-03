@@ -31,10 +31,12 @@ class NvidiaTritonCheck(OpenMetricsBaseCheckV2):
         # Get the base url from the openmetrics endpoint and construct the server info API endpoint.
         if self.collect_server_info:
             parts = urlparse(self.openmetrics_endpoint)
-            # Delete the /metrics from the url
-            self.base_url = parts._replace(path="")
-            # Replace the openmetrics port by the server port
-            self.server_info_api = self.base_url._replace(netloc=parts.hostname + ':' + self.server_port).geturl()
+            host = parts.hostname
+            # urlparse strips the brackets from IPv6 literals; restore them before appending the port
+            if ':' in host:
+                host = f'[{host}]'
+            # Delete the /metrics from the url and replace the openmetrics port by the server port
+            self.server_info_api = parts._replace(path="", netloc=f'{host}:{self.server_port}').geturl()
         else:
             self.log.debug("Collecting server info through API is disabled.")
             return

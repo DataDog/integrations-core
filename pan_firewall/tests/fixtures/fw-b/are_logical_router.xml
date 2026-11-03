@@ -1,0 +1,3 @@
+<response status="success"><result>
+  <json>{"default": {"id": "1", "name_space": "ns1"}}</json>
+</result></response>

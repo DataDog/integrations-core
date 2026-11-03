@@ -1,0 +1,126 @@
+# Dispatcher configuration, imported from `config.toml`.
+#
+# The Dispatcher (`ddev ci dispatch-tests`) works out which test jobs a change needs, groups them
+# into batches, dispatches each batch as a run of a GitHub workflow and follows the runs until
+# they finish.
+#
+# These are the values integrations-core runs with. They start out equal to the model defaults
+# in `ddev/src/ddev/cli/ci/tests/dispatcher_config.py`, which only apply to repositories without
+# this file.
+
+[dispatcher]
+
+## Run lifetime
+
+# Wall-clock limit for a whole run, in seconds. Work still in progress when it expires is
+# cancelled. Three hours.
+global_timeout_seconds = 10800.0
+
+# How long the run waits for new work once nothing is running before it finishes, in seconds.
+grace_period_seconds = 30.0
+
+## Test environments
+
+# Python version for jobs whose Hatch environment does not declare one.
+default_python_version = "3.13"
+
+## Workflow
+
+# Workflow each batch is dispatched to, by file name or numeric ID. `--workflow` overrides it.
+workflow = "test-batch.yml"
+
+# Branch the workflow definition is loaded from. It must be a reviewed branch, never a pull
+# request ref, because the workflow decides where jobs run and what they can access.
+# `--workflow-ref` overrides it.
+workflow_ref = "master"
+
+# Seconds between status polls of each running batch. Every batch polls for as long as it runs,
+# so this drives most of the run's GitHub API usage.
+poll_interval_seconds = 30.0
+
+
+# Batching: how the test jobs a change needs are grouped into batches. Each batch becomes one
+# workflow run.
+[dispatcher.batching]
+
+# Jobs per batch. At most 240: GitHub's 256-job matrix limit minus 16 jobs of headroom.
+max_jobs_per_batch = 240
+
+# Let an integration with more jobs than one batch holds span several batches. When disabled,
+# planning fails for such an integration.
+allow_integration_splitting = false
+
+# Targets tested when a change touches CI plumbing that every test job runs, such as the
+# `setup-ddev` action. Pick targets that are fast and cover every platform. `disk` runs unit,
+# E2E and minimum-base-package jobs on Linux and Windows in a few minutes.
+test_infrastructure_targets = ["disk"]
+
+
+# GitHub rate limits: client-side pacing of GitHub API calls. The GitHub App's hourly request
+# budget is shared by every concurrent run, so each run keeps to its own share.
+#
+# Each tier is a bucket allowing `max_rate` requests every `time_period` seconds. Buckets start
+# full, so a run can burst up to `max_rate` requests before settling to the sustained rate.
+[dispatcher.github_rate_limits]
+
+## Tiers
+
+# Requests for batches without a slow integration, mostly status polling.
+default.max_rate = 360.0
+default.time_period = 3600.0
+
+# Requests for batches that contain any integration listed in `slow_integrations`.
+slow.max_rate = 120.0
+slow.time_period = 3600.0
+
+# Artifact downloads once batches finish.
+artifacts.max_rate = 1000.0
+artifacts.time_period = 3600.0
+
+# Integrations whose batches use the `slow` tier instead of `default`.
+slow_integrations = []
+
+## Budget
+
+# Ceiling on the combined hourly rate of the three tiers. The configuration fails to load when
+# the tiers exceed it. Sized so ten concurrent runs fit in a 15,000 requests per hour budget.
+total_hourly_max_rate = 1500.0
+
+# When GitHub reports this fraction of the budget or less remaining, requests are spread evenly
+# over the time left until the budget resets.
+reserve_fraction = 0.15
+
+# Extra seconds added to waits for a pause GitHub imposes, to absorb clock skew.
+budget_buffer_seconds = 1.0
+
+
+# GitHub retries: how hard a failed GitHub request is retried. Only the limits are configurable.
+# Which failures are retried is fixed by whether a request is safe to repeat.
+#
+# Backoff starts at `wait_initial_seconds` and doubles up to `wait_max_seconds`, plus up to
+# `wait_jitter_seconds` of random jitter. `timeout_seconds` bounds all tries including backoff.
+# TOML has no null, so it cannot be disabled from here.
+
+# Requests that are safe to repeat: reads, and writes where repeating changes nothing, such as
+# cancelling a run. Retried on connection errors and on 500, 502, 503 and 504 responses.
+[dispatcher.github_retries.safe]
+
+# Total tries, including the first one.
+attempts = 3
+
+timeout_seconds = 60.0
+wait_initial_seconds = 0.5
+wait_max_seconds = 10.0
+wait_jitter_seconds = 1.0
+
+# Other writes, such as dispatching a workflow. Retried only when the request provably never
+# reached GitHub, so a retry cannot start a duplicate run or repeat another side effect.
+[dispatcher.github_retries.mutating]
+
+# Total tries, including the first one.
+attempts = 2
+
+timeout_seconds = 60.0
+wait_initial_seconds = 0.5
+wait_max_seconds = 10.0
+wait_jitter_seconds = 1.0

@@ -16,6 +16,8 @@ find out why. Security still emits metrics only.
 
 from __future__ import annotations
 
+from contextlib import nullcontext as does_not_raise
+
 import pytest
 
 from datadog_checks.cisco_catalyst_center.collectors import (
@@ -26,9 +28,10 @@ from datadog_checks.cisco_catalyst_center.collectors import (
     collect_security,
     collect_topology,
 )
+from datadog_checks.cisco_catalyst_center.errors import CatalystApiError
 
 from .common import client_from_script as _client
-from .common import load_captured, metric_values, with_value
+from .common import load_captured, load_captured_reservable, metric_values, with_value
 
 # -- topology ---------------------------------------------------------------------
 
@@ -95,6 +98,43 @@ def test_collect_sda_fabric_emits_device_role_counts_from_the_bulk_record(aggreg
 
     assert metric_values(aggregator, 'cisco_catalyst_center.fabric.device.count', 'fabric_role:edge') == [2]
     assert metric_values(aggregator, 'cisco_catalyst_center.fabric.device.count', 'fabric_role:border') == [1]
+
+
+#: The fabric site metrics that are shares of the site's devices.
+FABRIC_SITE_PERCENTAGES = [
+    'cisco_catalyst_center.fabric.site.health',
+    'cisco_catalyst_center.fabric.site.connectivity.health',
+    'cisco_catalyst_center.fabric.site.control_plane.health',
+    'cisco_catalyst_center.fabric.site.infra.health',
+]
+
+
+@pytest.mark.parametrize('metric', FABRIC_SITE_PERCENTAGES)
+def test_collect_sda_fabric_given_a_site_with_no_devices_skips_its_percentages(aggregator, instance, check, metric):
+    # The reservable sandbox's fabric site had no devices yet still reported 0.0% healthy, which
+    # reads as a fabric that is entirely down. A share of zero devices is not a measurement.
+    script = [
+        load_captured_reservable('data_fabric_site_health_summaries'),
+        load_captured('data_virtual_network_health_summaries'),
+    ]
+
+    collect_sda_fabric(check, _client(instance, script), devices=[])
+
+    aggregator.assert_metric(metric, count=0)
+
+
+@pytest.mark.parametrize('metric', FABRIC_SITE_PERCENTAGES)
+def test_collect_sda_fabric_given_a_site_with_devices_emits_its_percentages(aggregator, instance, check, metric):
+    # The same recorded site with devices, so the skip above cannot widen unnoticed. Catalyst Center
+    # 2.3.7.11 names the infrastructure share `infraGoodHealthPercentage`, the 3.3.1 schema's
+    # spelling of the 1.0.1 schema's `infraHealthyPercentage`.
+    sites = load_captured_reservable('data_fabric_site_health_summaries')
+    sites = with_value(sites, 'response.0.totalDeviceCount', 2)
+    script = [sites, load_captured('data_virtual_network_health_summaries')]
+
+    collect_sda_fabric(check, _client(instance, script), devices=[])
+
+    assert metric_values(aggregator, metric) == [0.0]
 
 
 # -- assurance issues -------------------------------------------------------------
@@ -238,6 +278,33 @@ def test_collect_application_health_given_no_sites_makes_no_calls(instance, chec
     collect_application_health(check, client, sites=[])
 
     assert client.http.requests == []
+
+
+FAILURE = {'status_code': 500, 'json': {}}
+
+
+@pytest.mark.parametrize(
+    ('script', 'expectation'),
+    [
+        pytest.param([FAILURE, load_captured('data_network_applications')], does_not_raise(), id='one-site-failing'),
+        # The aggregate message, not one site's error escaping, carrying the last site's cause: the
+        # status page shows only the message, and its x-correlation-id is what TAC asks for.
+        pytest.param(
+            [FAILURE, FAILURE],
+            pytest.raises(CatalystApiError, match='any of the 2 sites.*x-correlation-id=test-correlation-id'),
+            id='every-site-failing',
+        ),
+    ],
+)
+def test_collect_application_health_given_failing_sites_raises_only_when_every_one_fails(
+    instance, check, script, expectation
+):
+    # One failing site is skipped so it cannot cost the sweep. When every site fails, nothing was
+    # collected, and returning normally would report the cycle as a success.
+    sites = [*SITES, {'id': 'site-b', 'siteHierarchy': 'Global/B'}]
+
+    with expectation:
+        collect_application_health(check, _client(instance, script), sites=sites)
 
 
 # -- security ---------------------------------------------------------------------

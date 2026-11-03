@@ -13,6 +13,7 @@ from types import MappingProxyType
 from typing import Any, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -108,7 +109,7 @@ class OperationSamples(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
-    explain_verbosity: Optional[str] = None
+    explain_verbosity: Optional[Literal['queryPlanner', 'executionStats', 'allPlansExecution', 'disabled']] = None
 
 
 class QueryMetrics(BaseModel):
@@ -142,7 +143,7 @@ class SlowOperations(BaseModel):
     )
     collection_interval: Optional[float] = None
     enabled: Optional[bool] = None
-    explain_verbosity: Optional[str] = None
+    explain_verbosity: Optional[Literal['queryPlanner', 'executionStats', 'allPlansExecution', 'disabled']] = None
     max_operations: Optional[float] = None
 
 
@@ -159,7 +160,7 @@ class InstanceConfig(BaseModel):
     collect_schemas: Optional[CollectSchemas] = None
     collections: Optional[tuple[str, ...]] = None
     collections_indexes_stats: Optional[bool] = None
-    connection_scheme: Optional[str] = None
+    connection_scheme: Optional[Literal['mongodb', 'mongodb+srv']] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     database: Optional[str] = None
     database_autodiscovery: Optional[DatabaseAutodiscovery] = None

@@ -243,6 +243,17 @@ class QueryMetricsRow(TypedDict, total=False):
     # P2 metrics
     read_time_micros_sum: int
     working_time_millis_sum: int
+    peak_tracked_mem_bytes_sum: int
+    cluster_peak_tracked_mem_bytes_sum: int
+    planning_time_micros_sum: int
+    from_plan_cache_count: int
+    from_multi_planner_count: int
+    docs_matched_sum: int
+    docs_upserted_sum: int
+    docs_modified_sum: int
+    docs_deleted_sum: int
+    docs_inserted_sum: int
+    update_ops_sum: int
     # Timestamps
     first_seen_timestamp: str | None
     latest_seen_timestamp: str | None

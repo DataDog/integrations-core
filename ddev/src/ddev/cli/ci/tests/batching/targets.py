@@ -14,6 +14,7 @@ from ddev.cli.ci.tests.batching.exceptions import PlanningError
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Sequence
 
+    from ddev.monitoring import ComponentMonitor
     from ddev.repo.core import IntegrationRegistry
     from ddev.utils.git import ChangedFile
 
@@ -48,10 +49,10 @@ TESTABLE_PATH_PATTERN = re.compile(
 
 # Repository-wide paths that, when changed, trigger the full eligible target set.
 #
-# A path belongs here only if a pull request's own test jobs run it from the pull request checkout
-# and a change to it can break some targets but not others. The Dispatcher itself, including this
-# module, runs from master, so a pull request cannot exercise its own changes to it; its unit tests
-# still run through the direct rule on the `ddev` target.
+# A path belongs here only if a pull request's own run uses it from the pull request checkout and a
+# change to it can break some targets but not others, or only shows at full scale. The Dispatcher
+# itself, including this module, runs from master, so a pull request cannot exercise its own changes
+# to it; its unit tests still run through the direct rule on the `ddev` target.
 #
 # TODO(manifest): once ddev no longer depends on `manifest.json`, each integration should declare
 # its own triggers as structured configuration instead of this shared regex.
@@ -72,6 +73,9 @@ REPOSITORY_WIDE_PATTERNS = re.compile(
   | ddev/src/ddev/plugin/external/hatch/.+
   | ddev/src/ddev/integration/core\.py
   | ddev/src/ddev/repo/core\.py
+    # Dispatcher settings, which the planner reads from the pull request's tree. Batching, rate
+    # limits and retries only show their effect on a full run.
+  | \.ddev/dispatcher\.toml
     """,
     re.VERBOSE,
 )
@@ -165,6 +169,29 @@ class DirectTargetRule:
 
 
 @dataclass(frozen=True)
+class CISetupScriptRule:
+    """Select the target whose CI setup scripts changed."""
+
+    monitor: ComponentMonitor
+
+    def __call__(self, changed_files: Sequence[ChangedFile], facts: RepositoryFacts) -> Iterator[str]:
+        prefix = ".ddev/ci/scripts/"
+        for changed_file in changed_files:
+            for path in _relevant_affected_paths(changed_file):
+                if not path.startswith(prefix):
+                    continue
+                target, separator, remaining = path[len(prefix) :].partition("/")
+                if not separator or not remaining:
+                    continue
+                if facts.is_testable_target(target):
+                    yield target
+                else:
+                    self.monitor.logger.warning(
+                        "CI setup script folder is not a testable target: %s", f"{prefix}{target}"
+                    )
+
+
+@dataclass(frozen=True)
 class RepositoryWideRule:
     """Trigger the full eligible target set when a repository-wide path changes.
 
@@ -237,10 +264,13 @@ def all_target_rules() -> tuple[TargetRule, ...]:
     return (AllTargetsRule(),)
 
 
-def default_target_rules(*, is_core: bool, infrastructure_targets: Sequence[str]) -> tuple[TargetRule, ...]:
+def default_target_rules(
+    *, is_core: bool, infrastructure_targets: Sequence[str], monitor: ComponentMonitor
+) -> tuple[TargetRule, ...]:
     """Build the default ordered rule set for a repository."""
     return (
         DirectTargetRule(),
+        CISetupScriptRule(monitor=monitor),
         RepositoryWideRule(is_core=is_core),
         InfrastructureRule(is_core=is_core, targets=tuple(infrastructure_targets)),
     )

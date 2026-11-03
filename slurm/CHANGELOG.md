@@ -2,7 +2,13 @@
 
 <!-- towncrier release notes start -->
 
-## 2.5.2 / 2026-09-25
+## 2.5.3 / 2026-10-26
+
+***Fixed***:
+
+* Fix version metadata collection failing when `collect_sinfo_stats` is disabled. ([#25685](https://github.com/DataDog/integrations-core/pull/25685))
+
+## 2.5.2 / 2026-09-25 / Agent 7.85.0
 
 ***Fixed***:
 
