@@ -123,6 +123,7 @@ class InstanceConfig(BaseModel):
     leader_election: Optional[bool] = None
     leader_election_kind: Optional[str] = None
     log_requests: Optional[bool] = None
+    max_line_size: Optional[float] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics: Optional[tuple[Union[str, MappingProxyType[str, str]], ...]] = None
     min_collection_interval: Optional[float] = None

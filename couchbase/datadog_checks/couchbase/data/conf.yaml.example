@@ -374,6 +374,14 @@ instances:
     #
     # request_size: 16
 
+    ## @param max_line_size - number - optional
+    ## The maximum size in kibibytes (KiB) of a line when a streaming HTTP response is read line by line.
+    ## A longer line fails the check run instead of being buffered in memory.
+    ## There is no limit by default, except for OpenMetrics endpoints, which default to 16384 (16 MiB).
+    ## The value must be at least `request_size`.
+    #
+    # max_line_size: 16384
+
     ## @param log_requests - boolean - optional - default: false
     ## Whether or not to debug log the HTTP(S) requests made, including the method and URL.
     #

@@ -3563,6 +3563,7 @@ def test_template_array():
         'connect_timeout',
         'read_timeout',
         'request_size',
+        'max_line_size',
         'log_requests',
         'persist_connections',
         'allow_redirects',
