@@ -2,7 +2,6 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import ctypes
-import ctypes.util
 import platform
 from collections.abc import Callable
 
@@ -12,7 +11,9 @@ def load_malloc_trim() -> Callable[[int], int] | None:
     if platform.system() != 'Linux':
         return None
     try:
-        libc = ctypes.CDLL(ctypes.util.find_library('c') or 'libc.so.6', use_errno=True)
+        # CDLL(None) reuses the libc already linked into the process. ctypes.util.find_library
+        # would instead shell out to ldconfig, or to gcc where ldconfig is absent, on every import.
+        libc = ctypes.CDLL(None, use_errno=True)
         trim = libc.malloc_trim
     except (OSError, AttributeError):
         return None
