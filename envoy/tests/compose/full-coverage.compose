@@ -67,7 +67,7 @@ services:
       - SERVICE_NAME=2
 
   backend:
-    image: python:3.12-alpine
+    image: python:3.12.16-alpine
     command: ["python3", "-I", "/opt/backend.py"]
     volumes:
       - ./full-coverage/backend.py:/opt/backend.py:ro
