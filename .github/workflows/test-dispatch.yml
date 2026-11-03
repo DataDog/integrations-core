@@ -17,9 +17,15 @@ on:
   # the run cancels itself.
   workflow_call:
     inputs:
-      commit:
-        description: "Full SHA of the commit to test"
-        required: true
+      checkout_sha:
+        description: "Full SHA of the commit to test. Omitted for a tag run, which derives it from `head-tag`"
+        required: false
+        default: ""
+        type: string
+      head-tag:
+        description: "Release tag to test. Supplies the commit, so it replaces `checkout_sha` rather than joining it"
+        required: false
+        default: ""
         type: string
       all:
         description: "Test every eligible target. Cannot be combined with `targets`"
@@ -101,10 +107,13 @@ jobs:
       STATUS_CONTEXT: ${{
         inputs.context == '' && github.event_name == 'workflow_run' && 'Dispatcher / tests (beta, non-blocking)' ||
         format('Dispatcher ({0}) / tests (beta, non-blocking)', inputs.context || 'master') }}
+      # Empty for a tag run, whose commit is not known until the tag is checked out. The step that
+      # checks it out fills this in, and the status steps read it from there.
       HEAD_SHA: ${{
-        inputs.context != '' && inputs.commit ||
+        inputs.context != '' && inputs.checkout_sha ||
         github.event_name == 'workflow_run' && github.event.workflow_run.head_sha ||
         github.sha }}
+      TAG: ${{ inputs.head-tag }}
 
     if: >-
       github.repository == 'DataDog/integrations-core'
@@ -136,17 +145,41 @@ jobs:
         if: env.CALLED == 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.commit }}
+          # A tag run names the tag; `ddev` derives the same commit from the API, and
+          # `validate_checkout` fails the run if the two disagree because the tag moved.
+          ref: ${{ inputs.head-tag || inputs.checkout_sha }}
           path: dispatcher-planning-repo
           fetch-depth: 2
           persist-credentials: false
 
-      # Commit resolution records the local branch, so results are attributed to the caller's ref.
-      - name: Attribute the tested commit to the caller's ref
-        if: env.CALLED == 'true'
+      # A tag is not a branch, so nothing is fabricated for it: `ddev` is told the tag and records
+      # it as the run's ref. Only a branch caller gets a local branch, because commit resolution
+      # reads one and checking out a SHA leaves the tree detached.
+      - name: Attribute the tested commit to the caller's branch
+        if: env.CALLED == 'true' && inputs.head-tag == ''
         env:
           CALLER_REF: ${{ github.ref_name }}
         run: git -C dispatcher-planning-repo checkout -q -B "$CALLER_REF"
+
+      # The tag's commit is only known once it is checked out. `ddev` resolves it independently from
+      # the API; this is for the status the run posts before resolution has happened.
+      - name: Resolve the tested tag's commit
+        if: env.CALLED == 'true' && inputs.head-tag != ''
+        run: echo "HEAD_SHA=$(git -C dispatcher-planning-repo rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      # Batches load `.github/actions/run-test-job` from the tested revision, so a revision predating
+      # it plans cleanly and then fails every batch. Refusing here costs one `test -f` instead.
+      - name: Check the tested revision can run batches
+        if: env.CALLED == 'true'
+        env:
+          TESTED_REF: ${{ inputs.head-tag || inputs.checkout_sha }}
+        run: |
+          set -euo pipefail
+          if [[ ! -f dispatcher-planning-repo/.github/actions/run-test-job/action.yml ]]; then
+            echo "::error::${TESTED_REF} predates .github/actions/run-test-job, which every batch runs."
+            echo "::error::The Dispatcher supports 7.85.x and later; older revisions keep using test-agent.yml."
+            exit 1
+          fi
 
       - name: Get a scoped token
         id: octo-sts
@@ -202,7 +235,7 @@ jobs:
           HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
           PUSH_SHA: ${{ github.sha }}
-          COMMIT: ${{ inputs.commit }}
+          COMMIT: ${{ inputs.checkout_sha }}
           ALL_TARGETS: ${{ inputs.all }}
           TARGETS: ${{ inputs.targets }}
           EXCLUDE_TARGETS: ${{ inputs.exclude-targets }}
@@ -219,7 +252,13 @@ jobs:
             # Resolve from the tested tree, whose branch is the caller's ref.
             cd "$GITHUB_WORKSPACE/dispatcher-planning-repo"
             ddev config override
-            args+=(--commit "$COMMIT" --tags "context:${RUN_CONTEXT}")
+            args+=(--tags "context:${RUN_CONTEXT}")
+            # A tag supplies its own commit, so the two are never passed together.
+            if [[ -n "$TAG" ]]; then
+              args+=(--head-tag "$TAG")
+            else
+              args+=(--commit "$COMMIT")
+            fi
             if [[ "$ALL_TARGETS" == true ]]; then
               args+=(--all)
             fi
@@ -253,7 +292,9 @@ jobs:
           repository=$(jq -er '.repository' "$manifest")
           checkout_sha=$(jq -er '.checkout_sha' "$manifest")
           head_sha=$(jq -er '.head_sha' "$manifest")
-          head_branch=$(jq -er '.head_branch' "$manifest")
+          # Exactly one of these is set, so neither can be read with `-e`.
+          head_branch=$(jq -r '.head_branch // empty' "$manifest")
+          head_tag=$(jq -r '.head_tag // empty' "$manifest")
           pr_number=$(jq -r '.pr_number // empty' "$manifest")
           base_branch=$(jq -r '.base_branch // empty' "$manifest")
           base_sha=$(jq -r '.base_sha // empty' "$manifest")
@@ -267,6 +308,7 @@ jobs:
             echo "checkout_sha=$checkout_sha"
             echo "head_sha=$head_sha"
             echo "head_branch=$head_branch"
+            echo "head_tag=$head_tag"
             echo "pr_number=$pr_number"
             echo "base_branch=$base_branch"
             echo "base_sha=$base_sha"
@@ -281,7 +323,11 @@ jobs:
             else
               echo "- Run type: Commit (\`${context}\`)"
             fi
-            echo "- Head branch: \`${head_branch}\`"
+            if [[ -n "$head_tag" ]]; then
+              echo "- Head tag: \`${head_tag}\`"
+            else
+              echo "- Head branch: \`${head_branch}\`"
+            fi
             echo "- Head SHA: [\`${head_sha}\`](${GITHUB_SERVER_URL}/${repository}/commit/${head_sha})"
             echo "- Checkout SHA: [\`${checkout_sha}\`](${GITHUB_SERVER_URL}/${repository}/commit/${checkout_sha})"
             if [[ -n "$base_branch" ]]; then

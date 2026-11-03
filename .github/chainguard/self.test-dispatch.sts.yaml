@@ -3,11 +3,14 @@
 # event, ref and ref type are the caller's.
 issuer: https://token.actions.githubusercontent.com
 
-subject_pattern: repo:DataDog/integrations-core:ref:refs/(heads/(master|7\.\d+\.x)|tags/7\.\d+\.\d+)
+# Release candidates are tagged `7.85.0-rc.8` and `ddev release test-agent` accepts them, so the
+# tag arms carry the optional suffix. The major stays pinned to 7: `ddev` would accept `8.0.0`, so
+# an Agent 8 line needs this widened before it can be tested through the Dispatcher.
+subject_pattern: repo:DataDog/integrations-core:ref:refs/(heads/(master|7\.\d+\.x)|tags/7\.\d+\.\d+(-rc\.\d+)?)
 
 claim_pattern:
   event_name: ^(push|workflow_run|schedule|workflow_dispatch)$
-  ref: ^refs/(heads/(master|7\.\d+\.x)|tags/7\.\d+\.\d+)$
+  ref: ^refs/(heads/(master|7\.\d+\.x)|tags/7\.\d+\.\d+(-rc\.\d+)?)$
   ref_type: ^(branch|tag)$
   job_workflow_ref: ^DataDog/integrations-core/\.github/workflows/test-dispatch\.yml@refs/heads/master$
   repository: ^DataDog/integrations-core$

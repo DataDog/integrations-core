@@ -51,8 +51,14 @@ on:
         required: true
         type: string
       head_branch:
-        description: "Branch the results belong to"
-        required: true
+        description: "Branch the results belong to. Empty for a tag run, which sends `head_tag` instead"
+        required: false
+        default: ""
+        type: string
+      head_tag:
+        description: "Release tag the results belong to, in place of `head_branch`"
+        required: false
+        default: ""
         type: string
       job_list:
         description: "The batch's jobs, as gzip+base64 of the plan's JSON"
@@ -242,6 +248,7 @@ jobs:
         env:
           HEAD_SHA: ${{ inputs.head_sha }}
           BRANCH: ${{ inputs.head_branch }}
+          TAG: ${{ inputs.head_tag }}
         run: |
           set -euo pipefail
 
@@ -253,7 +260,14 @@ jobs:
 
           {
             echo "DD_GIT_COMMIT_SHA=${HEAD_SHA}"
-            echo "DD_GIT_BRANCH=${BRANCH}"
+            # A tag run has no branch. Naming one would file its results under a ref that does
+            # not exist, and omitting both would let the tracer fall back to this workflow's own
+            # ambient branch, which is master.
+            if [[ -n "$TAG" ]]; then
+              echo "DD_GIT_TAG=${TAG}"
+            else
+              echo "DD_GIT_BRANCH=${BRANCH}"
+            fi
             echo "DD_GIT_REPOSITORY_URL=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
             echo "DD_GIT_COMMIT_AUTHOR_EMAIL=${author_email}"
           } >> "$GITHUB_ENV"
@@ -367,6 +381,7 @@ jobs:
         env:
           HEAD_SHA: ${{ inputs.head_sha }}
           BRANCH: ${{ inputs.head_branch }}
+          TAG: ${{ inputs.head_tag }}
         run: |
           set -euo pipefail
 
@@ -377,7 +392,14 @@ jobs:
 
           {
             echo "DD_GIT_COMMIT_SHA=${HEAD_SHA}"
-            echo "DD_GIT_BRANCH=${BRANCH}"
+            # A tag run has no branch. Naming one would file its results under a ref that does
+            # not exist, and omitting both would let the tracer fall back to this workflow's own
+            # ambient branch, which is master.
+            if [[ -n "$TAG" ]]; then
+              echo "DD_GIT_TAG=${TAG}"
+            else
+              echo "DD_GIT_BRANCH=${BRANCH}"
+            fi
             echo "DD_GIT_REPOSITORY_URL=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
             echo "DD_GIT_COMMIT_AUTHOR_EMAIL=${author_email}"
           } >> "$GITHUB_ENV"
