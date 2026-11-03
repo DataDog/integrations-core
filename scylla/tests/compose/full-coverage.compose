@@ -113,7 +113,7 @@ services:
     entrypoint: ["sh", "/opt/activity-gen.sh"]
 
   scylla-proxy:
-    image: "nginx:1.27-alpine"
+    image: "nginx:1.27.5-alpine"
     # Fixture entrypoint (published as scylla-full). Gated on the whole
     # environment so one dependency on it brings up the node, the seeded schema,
     # and the workload. Forwards 9180 (metrics) and 9042 (CQL) unchanged.
