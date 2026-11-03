@@ -1377,10 +1377,6 @@ integration/supabase:
 - changed-files:
   - any-glob-to-any-file:
     - supabase/**/*
-integration/supabase_cloud:
-- changed-files:
-  - any-glob-to-any-file:
-    - supabase_cloud/**/*
 integration/supervisord:
 - changed-files:
   - any-glob-to-any-file:
@@ -1397,10 +1393,6 @@ integration/symantec_endpoint_protection:
 - changed-files:
   - any-glob-to-any-file:
     - symantec_endpoint_protection/**/*
-integration/symantec_vip:
-- changed-files:
-  - any-glob-to-any-file:
-    - symantec_vip/**/*
 integration/system_core:
 - changed-files:
   - any-glob-to-any-file:
