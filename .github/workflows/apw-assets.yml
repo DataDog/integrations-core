@@ -20,6 +20,12 @@ on:
 permissions:
   contents: read
 
+env:
+  # Production publishes with this released ddev; PR tests use the checked-out source.
+  # TODO: set to the first ddev release that includes #25665 before this is marked ready.
+  # renovate: datasource=pypi depName=ddev
+  APW_DDEV_VERSION: "X.Y.Z"
+
 concurrency:
   group: apw-assets-${{ github.ref }}
   cancel-in-progress: false
@@ -65,7 +71,8 @@ jobs:
           python-version: '3.13'
       - uses: ./.github/actions/setup-ddev
         with:
-          cache-profile: local-ddev
+          install-mode: pypi
+          ddev-version: "==${{ env.APW_DDEV_VERSION }}"
       - name: Check for a complete release
         id: release
         env:
