@@ -5,11 +5,13 @@ import importlib
 import re
 import sys
 import threading
+from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
 from typing import Any
 
 import pytest
 import requests
+from pytest_mock import MockerFixture
 
 import datadog_checks.dev
 from datadog_checks.base import AgentCheck
@@ -17,8 +19,13 @@ from datadog_checks.base.checks.openmetrics.base_check import OpenMetricsBaseChe
 from datadog_checks.base.checks.prometheus.prometheus_base import PrometheusCheck
 from datadog_checks.base.stubs.http import FakeHTTPResponse, RecordedRequest
 from datadog_checks.base.utils.http import RequestsWrapper, create_http_client
-from datadog_checks.base.utils.http_exceptions import HTTPClientConnectionError
+from datadog_checks.base.utils.http_exceptions import (
+    HTTPClientConnectionError,
+    HTTPClientError,
+    HTTPClientReadTimeoutError,
+)
 from datadog_checks.dev import http as http_testing
+from datadog_checks.dev.plugin._fake_http import install
 
 UNSENDABLE = r"cannot send these FakeHTTPResponse fields on the wire: \['{}'\]"
 CONFLICT = r"disagree with the body the fake_http fixture sends: \['{}'\]"
@@ -36,11 +43,13 @@ class PrometheusFixtureCheck(PrometheusCheck):
     AGNOSTIC_HTTP_CLIENT = True
 
 
-def test_fake_http_requires_the_check_to_opt_in(fake_http):
-    check = AgentCheck('test', {}, [{}])
-
-    with pytest.raises(AssertionError, match='AGNOSTIC_HTTP_CLIENT = True'):
-        check.create_http_client()
+def test_fake_http_requires_the_check_to_opt_in(mocker: MockerFixture):
+    message = 'AGNOSTIC_HTTP_CLIENT = True'
+    with pytest.raises(AssertionError, match=f'fake_http recorded a request violation: .*{message}'):
+        with install(mocker):
+            check = AgentCheck('test', {}, [{}])
+            with pytest.raises(AssertionError, match=message):
+                check.create_http_client()
 
 
 @pytest.mark.parametrize(
@@ -50,16 +59,17 @@ def test_fake_http_requires_the_check_to_opt_in(fake_http):
         pytest.param(lambda: create_http_client({}, {}), id='create-http-client-function'),
     ],
 )
-def test_fake_http_rejects_requests_from_clients_that_did_not_opt_in(fake_http, fake_http_response, create_client):
+def test_fake_http_rejects_requests_from_clients_that_did_not_opt_in(mocker: MockerFixture, create_client):
     # Clients built outside AgentCheck.create_http_client skip its opt-in check.
     url = 'https://example.test/items'
-    fake_http_response(url)
-    client = create_client()
-
-    with pytest.raises(AssertionError, match=re.escape(f'GET {url} was sent by a client that did not opt in')):
-        client.get(url)
-
-    assert fake_http.requests == []
+    message = re.escape(f'GET {url} was sent by a client that did not opt in')
+    with pytest.raises(AssertionError, match=f'fake_http recorded a request violation: {message}'):
+        with install(mocker) as fake_http:
+            fake_http.register_response('GET', url, FakeHTTPResponse())
+            client = create_client()
+            with pytest.raises(AssertionError, match=message):
+                client.get(url)
+            assert fake_http.requests == []
 
 
 def test_fake_http_serves_an_opted_in_client_built_outside_a_check(fake_http, fake_http_response):
@@ -311,12 +321,60 @@ def test_fake_http_serves_matching_registrations_in_order_then_repeats_the_last(
     fake_http.assert_all_responses_consumed()
 
 
-def test_fake_http_rejects_requests_that_bypass_the_check_client(fake_http, fake_http_response):
+@pytest.mark.parametrize('in_thread', [False, True], ids=['main-thread', 'worker-thread'])
+def test_fake_http_rejects_swallowed_unmatched_requests(mocker: MockerFixture, in_thread: bool):
     url = 'https://example.test/items'
-    fake_http_response(url)
+    unexpected_url = 'https://example.test/unregistered'
+    message = re.escape(f'No registered response matched GET {unexpected_url}')
 
-    with pytest.raises(AssertionError, match='bypassed the check HTTP client'):
-        requests.get(url)
+    with pytest.raises(AssertionError, match=f'fake_http recorded a request violation: {message}'):
+        with install(mocker) as fake_http:
+            fake_http.register_response('GET', url, FakeHTTPResponse(content=b'items'))
+            client = fake_http.create_client()
+            assert client.get(url).content == b'items'
+
+            def send_unmatched() -> None:
+                try:
+                    client.get(unexpected_url)
+                except Exception as error:
+                    assert isinstance(error, AssertionError)
+                    assert unexpected_url in str(error)
+                else:
+                    pytest.fail('Expected an unmatched-request error')
+
+            if in_thread:
+                with ThreadPoolExecutor(max_workers=1) as executor:
+                    executor.submit(send_unmatched).result(timeout=5)
+            else:
+                send_unmatched()
+            fake_http.assert_all_responses_consumed()
+
+
+@pytest.mark.parametrize(
+    'outcome',
+    [
+        pytest.param(HTTPClientConnectionError('refused'), id='connection-error'),
+        pytest.param(HTTPClientReadTimeoutError('timed out'), id='timeout'),
+        pytest.param(FakeHTTPResponse(status_code=503), id='error-status'),
+    ],
+)
+def test_fake_http_allows_registered_http_failures(mocker: MockerFixture, outcome: HTTPClientError | FakeHTTPResponse):
+    url = 'https://example.test/items'
+    with install(mocker) as fake_http:
+        fake_http.register_response('GET', url, outcome)
+        with pytest.raises(HTTPClientError):
+            fake_http.create_client().get(url).raise_for_status()
+        fake_http.assert_all_responses_consumed()
+
+
+def test_fake_http_rejects_requests_that_bypass_the_check_client(mocker: MockerFixture):
+    url = 'https://example.test/items'
+    message = 'bypassed the check HTTP client'
+    with pytest.raises(AssertionError, match=f'fake_http recorded a request violation: .*{message}'):
+        with install(mocker) as fake_http:
+            fake_http.register_response('GET', url, FakeHTTPResponse())
+            with pytest.raises(AssertionError, match=message):
+                requests.get(url)
 
 
 @pytest.mark.parametrize(
@@ -328,15 +386,17 @@ def test_fake_http_rejects_requests_that_bypass_the_check_client(fake_http, fake
         pytest.param('https://example.test/items', 'https://example.test/items', id='same-url'),
     ],
 )
-def test_fake_http_rejects_a_followed_redirect(fake_http, fake_http_response, url, location):
-    fake_http_response(url, status_code=302, headers={'Location': location})
-    # A later registration for the original call must not be served to the redirect target.
-    fake_http_response(url, b'original')
-    fake_http_response(location, b'moved')
-    check = FixtureCheck('test', {}, [{}])
-
-    with pytest.raises(AssertionError, match=re.escape(f'GET {url} followed a redirect to GET {location}')):
-        check.http.get(url)
+def test_fake_http_rejects_a_followed_redirect(mocker: MockerFixture, url, location):
+    message = re.escape(f'GET {url} followed a redirect to GET {location}')
+    with pytest.raises(AssertionError, match=f'fake_http recorded a request violation: {message}'):
+        with install(mocker) as fake_http:
+            fake_http.register_response('GET', url, FakeHTTPResponse(status_code=302, headers={'Location': location}))
+            # A later registration for the original call must not be served to the redirect target.
+            fake_http.register_response('GET', url, FakeHTTPResponse(content=b'original'))
+            fake_http.register_response('GET', location, FakeHTTPResponse(content=b'moved'))
+            check = FixtureCheck('test', {}, [{}])
+            with pytest.raises(AssertionError, match=message):
+                check.http.get(url)
 
 
 def test_fake_http_serves_a_redirect_the_client_does_not_follow(fake_http, fake_http_response):
@@ -349,29 +409,32 @@ def test_fake_http_serves_a_redirect_the_client_does_not_follow(fake_http, fake_
     assert check.http.get(url).content == b'items'
 
 
-def test_fake_http_rejects_a_followed_redirect_the_client_retries_past(fake_http, fake_http_response, mocker):
+def test_fake_http_rejects_a_followed_redirect_the_client_retries_past(mocker: MockerFixture):
     url = 'https://example.test/old'
-    fake_http_response(url, status_code=302, headers={'Location': 'https://example.test/new'})
-    fake_http_response(url, b'original')
-    check = FixtureCheck('test', {}, [{}])
-    # The client catches the rejected redirect, renews its auth token, and retries the call successfully.
-    check.http.auth_token_handler = mocker.Mock()
+    location = 'https://example.test/new'
+    message = re.escape(f'GET {url} followed a redirect to GET {location}')
+    with pytest.raises(AssertionError, match=f'fake_http recorded a request violation: {message}'):
+        with install(mocker) as fake_http:
+            fake_http.register_response('GET', url, FakeHTTPResponse(status_code=302, headers={'Location': location}))
+            fake_http.register_response('GET', url, FakeHTTPResponse(content=b'original'))
+            check = FixtureCheck('test', {}, [{}])
+            # The client catches the rejected redirect, renews its auth token, and retries the call successfully.
+            check.http.auth_token_handler = mocker.Mock()
+            with pytest.raises(AssertionError, match=message):
+                check.http.get(url)
 
-    with pytest.raises(
-        AssertionError, match=re.escape(f'GET {url} followed a redirect to GET https://example.test/new')
-    ):
-        check.http.get(url)
 
-
-def test_fake_http_rejects_a_token_request_sent_during_a_check_call(fake_http, fake_http_response, mocker):
+def test_fake_http_rejects_a_token_request_sent_during_a_check_call(mocker: MockerFixture):
     url = 'https://example.test/metrics'
-    fake_http_response(url, b'metric 1')
-    check = FixtureCheck('test', {}, [{}])
-    # Stands in for an auth token reader, such as dcos_auth, that fetches its token with requests mid-call.
-    check.http.auth_token_handler = mocker.Mock(poll=lambda **_: requests.post('https://login.test/token'))
-
-    with pytest.raises(AssertionError, match=f'GET {url} sent POST https://login.test/token'):
-        check.http.get(url)
+    message = re.escape(f'GET {url} sent POST https://login.test/token')
+    with pytest.raises(AssertionError, match=f'fake_http recorded a request violation: {message}'):
+        with install(mocker) as fake_http:
+            fake_http.register_response('GET', url, FakeHTTPResponse(content=b'metric 1'))
+            check = FixtureCheck('test', {}, [{}])
+            # Stands in for an auth token reader, such as dcos_auth, that fetches its token with requests mid-call.
+            check.http.auth_token_handler = mocker.Mock(poll=lambda **_: requests.post('https://login.test/token'))
+            with pytest.raises(AssertionError, match=message):
+                check.http.get(url)
 
 
 def test_fake_http_serves_a_retry_of_the_same_call(fake_http, fake_http_response, mocker):

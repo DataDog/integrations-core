@@ -69,8 +69,8 @@ authentication the client applied.
 
 The fixture fails the test instead of serving a response it cannot represent:
 
-- A request sent by a client that did not opt in, such as one built with `RequestsWrapper(...)` or with the
-  module-level `create_http_client()` without `agnostic=True`.
+- A request with no matching registration, or one sent by a client that did not opt in, such as one built with
+  `RequestsWrapper(...)` or with the module-level `create_http_client()` without `agnostic=True`.
 - A request sent outside a check client, a followed redirect, or a wire request that differs from the call that sent
   it, such as an auth token fetch. Pass `allow_redirects=False` to receive a registered redirect. The call fails even
   if the client catches the error and retries, as it does when renewing an auth token.
@@ -78,6 +78,10 @@ The fixture fails the test instead of serving a response it cannot represent:
   entry in `content_chunks`, or `lines` that do not split back unchanged.
 - A `FakeHTTPResponse` whose `text`, `lines`, `content_chunks` or `json_result` disagree with the body it sends, which
   is its `content` if set. The wire carries one body, so the client derives every view from it.
+
+Request-guard errors also fail fixture cleanup, even if the check catches the original error and continues. Deliberately
+registered exceptions and error responses are valid test outcomes, not guard errors. Call
+`fake_http.assert_all_responses_consumed()` to check separately that every registration was used.
 
 A custom `status_error` is not detected and is replaced by the client's own error for the status code.
 

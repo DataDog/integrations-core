@@ -73,6 +73,7 @@ class FakeHTTPFixture:
         self.requests: list[RecordedRequest] = []
         self.sent: list[SentRequest] = []
         self._registrations: list[Registration] = []
+        self._violations: list[AssertionError] = []
         # Checks may send requests from several threads. Choosing the first unserved registration and marking it
         # served must be atomic, or two concurrent requests could receive the same response while another goes unused.
         self._lock = threading.Lock()
@@ -119,6 +120,19 @@ class FakeHTTPFixture:
             noun = 'response was' if len(pending) == 1 else 'responses were'
             raise AssertionError(f'{len(pending)} registered {noun} not consumed: {pending!r}.')
 
+    def _violation(self, message: str) -> AssertionError:
+        error = AssertionError(message)
+        with self._lock:
+            self._violations.append(error)
+        return error
+
+    def _assert_no_violations(self) -> None:
+        """Fail cleanup even when a check swallowed a request-guard error."""
+        with self._lock:
+            violation = self._violations[0] if self._violations else None
+        if violation is not None:
+            raise AssertionError(f'fake_http recorded a request violation: {violation}') from violation
+
     def _pending(self) -> list[RegisteredResponse]:
         return [registration.registered for registration in self._registrations if not registration.served]
 
@@ -135,12 +149,14 @@ class FakeHTTPFixture:
             yield call.violations
         finally:
             stack.pop()
+            with self._lock:
+                self._violations.extend(call.violations)
 
     def _serve(self, wire_request: Any) -> requests.Response:
         """Answer one wire request on behalf of the client call that sent it."""
         stack = self._calls.__dict__.get('stack')
         if not stack:
-            raise AssertionError(
+            raise self._violation(
                 f'{wire_request.method} {wire_request.url} bypassed the check HTTP client. The fake_http fixture '
                 'serves requests sent through clients from create_http_client() or fake_http.create_client().'
             )
@@ -294,7 +310,7 @@ def install(mocker: Any) -> Iterator[FakeHTTPFixture]:
     def create_opted_in_client(check: AgentCheck, *args: Any, **kwargs: Any) -> HTTPClient:
         # The fixture models the backend-neutral contract, which a check only gets in production by opting in.
         if not getattr(check, 'AGNOSTIC_HTTP_CLIENT', False):
-            raise AssertionError(
+            raise fake_http._violation(
                 f'{type(check).__name__} must set AGNOSTIC_HTTP_CLIENT = True to use the fake_http fixture.'
             )
         return create_check_client(check, *args, **kwargs)
@@ -303,7 +319,7 @@ def install(mocker: Any) -> Iterator[FakeHTTPFixture]:
         # Clients built outside AgentCheck.create_http_client, such as RequestsWrapper(...) or a client cached before
         # the fixture was installed, skip the check above, so check the client that sends each call.
         if not client._agnostic:
-            raise AssertionError(
+            raise fake_http._violation(
                 f'{method.upper()} {url} was sent by a client that did not opt in to the backend-neutral contract. '
                 'The fake_http fixture serves only opted-in clients: set AGNOSTIC_HTTP_CLIENT = True on the check, '
                 'or pass agnostic=True to create_http_client().'
@@ -321,4 +337,7 @@ def install(mocker: Any) -> Iterator[FakeHTTPFixture]:
     mocker.patch.object(RequestsWrapper, '_request', record_request)
     with requests_mock.Mocker() as wire:
         wire.add_matcher(fake_http._serve)
-        yield fake_http
+        try:
+            yield fake_http
+        finally:
+            fake_http._assert_no_violations()
