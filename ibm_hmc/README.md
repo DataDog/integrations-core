@@ -67,11 +67,7 @@ available. To avoid polling more often than needed, set
 
 #### Clock synchronization
 
-The `lslparutil` start options are expressed in HMC-local time, so the check
-queries the HMC's clock for its first collection window and keeps track of
-the HMC-side time of the last collected sample afterwards. The Agent's time
-zone and clock skew therefore do not affect collection; only keep the HMC
-itself reasonably in sync (NTP) so samples are produced with sane timestamps.
+The check selects `lslparutil` samples with `--startyear/--startmonth/...` options expressed in HMC-local time, and submits only samples newer than the previous collection. Synchronize the clocks of the Agent host and the HMC; for example, with Network Time Protocol (NTP), so the check doesn't miss samples or fetch them more than once.
 
 ### Validation
 

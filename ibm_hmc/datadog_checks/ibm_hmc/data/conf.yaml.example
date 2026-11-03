@@ -55,7 +55,7 @@ instances:
     # force_sha1: false
 
     ## @param tags - list of strings - optional
-    ## A list of tags to attach to every metric and service check emitted by this instance.
+    ## A list of tags to attach to every metric and service check this instance emits.
     ##
     ## Learn more about tagging at https://docs.datadoghq.com/tagging
     #
