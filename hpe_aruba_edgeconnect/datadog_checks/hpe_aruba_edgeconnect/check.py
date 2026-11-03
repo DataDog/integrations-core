@@ -6,6 +6,7 @@ from __future__ import annotations
 import ipaddress
 import json
 import threading
+import time
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
@@ -39,6 +40,7 @@ from .utils import parse_speed
 
 class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'hpe_aruba_edgeconnect'
+    HA_SUPPORTED = True
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -495,7 +497,12 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             return
         cache_key = f'last_alarm_ts:{client.app_ip}'
         raw = self.read_persistent_cache(cache_key)
-        last_ts = int(raw) if raw else 0
+        if raw:
+            last_ts = int(raw)
+        else:
+            # An empty cache means a first run, or an HA failover to an Agent that has not run this check.
+            # Start one interval back so outstanding alarms already reported elsewhere are not resent.
+            last_ts = int((time.time() - self.config.min_collection_interval) * 1000)
         newest_ts = last_ts
         for alarm in outstanding:
             raised_ms = alarm.get('time')

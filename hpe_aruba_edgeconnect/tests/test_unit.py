@@ -616,13 +616,21 @@ def test_collection_step_failure_does_not_block_others(dd_run_check, aggregator,
     aggregator.assert_metric(f'{NS}.device.hardware.ok', count=1)
 
 
+ALARM_RAISED_S = ALARM_PAYLOAD['outstanding'][0]['time'] // 1000
+
+
 def _events_check(instance):
     inst = instance('localhost:8443', appliance_ips=['10.0.0.1'], max_backfill_minutes=10, collect_events=True)
     return HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [inst])
 
 
+def _freeze_check_time(mocker, now):
+    mocker.patch('datadog_checks.hpe_aruba_edgeconnect.check.time').time.return_value = now
+
+
 def test_alarm_events_submitted(dd_run_check, aggregator, mocker, instance):
     check = _events_check(instance)
+    _freeze_check_time(mocker, ALARM_RAISED_S + 30)
     client = _mock_appliance_client(TGZ_BYTES[0], alarms=ALARM_PAYLOAD)
     _setup_mocks(mocker, check, APPLIANCE_PAYLOAD[:1], appliance_client=client)
 
@@ -662,6 +670,7 @@ def test_alarm_events_not_collected_when_disabled(dd_run_check, aggregator, mock
 
 def test_alarm_events_deduped_across_runs(dd_run_check, aggregator, mocker, instance):
     check = _events_check(instance)
+    _freeze_check_time(mocker, ALARM_RAISED_S + 30)
     client = _mock_appliance_client(TGZ_BYTES[0], alarms=ALARM_PAYLOAD)
     _setup_mocks(mocker, check, APPLIANCE_PAYLOAD[:1], appliance_client=client)
 
@@ -689,6 +698,26 @@ def test_alarm_events_emitted_when_newer_than_watermark(dd_run_check, aggregator
 
     assert len([e for e in aggregator.events if 'NTP' in e['msg_text']]) == 1
     check.write_persistent_cache.assert_any_call('last_alarm_ts:10.0.0.1', '1779178081000')
+
+
+@pytest.mark.parametrize(
+    'seconds_since_raised, expected_events',
+    [
+        pytest.param(30, 1, id='raised within the last interval'),
+        pytest.param(3600, 0, id='raised before the last interval'),
+    ],
+)
+def test_alarm_events_on_empty_cache(dd_run_check, aggregator, mocker, instance, seconds_since_raised, expected_events):
+    # An empty cache happens on a first run and after an HA failover. Alarms raised before the last
+    # interval may already have been reported by the previously active Agent, so they are not resent.
+    check = _events_check(instance)
+    client = _mock_appliance_client(TGZ_BYTES[0], alarms=ALARM_PAYLOAD)
+    _setup_mocks(mocker, check, APPLIANCE_PAYLOAD[:1], appliance_client=client)
+    _freeze_check_time(mocker, ALARM_RAISED_S + seconds_since_raised)
+
+    dd_run_check(check)
+
+    assert len([e for e in aggregator.events if 'NTP' in e['msg_text']]) == expected_events
 
 
 def test_orchestrator_login_failure_emits_no_metrics(dd_run_check, aggregator, mocker, check):
