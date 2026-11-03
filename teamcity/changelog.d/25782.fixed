@@ -1,1 +1,0 @@
-Collect build configurations whose builds are all hidden by the TeamCity default build filter, such as configurations that only build non-default branches.
