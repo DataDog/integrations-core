@@ -419,11 +419,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /sonicwall_firewall/manifest.json                                     @DataDog/saas-integrations @DataDog/documentation
 /sonicwall_firewall/assets/logs/                                      @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/sophos_central_cloud/                                               @DataDog/saas-integrations
-/sophos_central_cloud/*.md                                           @DataDog/saas-integrations @DataDog/documentation
-/sophos_central_cloud/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
-/sophos_central_cloud/assets/logs/                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
 /squid/                                                              @DataDog/agent-integrations
 /squid/*.md                                                          @DataDog/agent-integrations @DataDog/documentation
 /squid/manifest.json                                                 @DataDog/agent-integrations @DataDog/documentation
@@ -487,11 +482,6 @@ plaid/                                                              @DataDog/saa
 plaid/*.md                                                          @DataDog/saas-integrations @DataDog/documentation
 plaid/manifest.json                                                 @DataDog/saas-integrations @DataDog/documentation
 plaid/assets/logs/                                                  @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
-/streamnative/                                                      @DataDog/saas-integrations
-/streamnative/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
-/streamnative/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
-/streamnative/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /servicenow_performance/                                            @DataDog/saas-integrations
 /servicenow_performance/*.md                                        @DataDog/saas-integrations @DataDog/documentation
