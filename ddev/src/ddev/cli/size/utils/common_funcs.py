@@ -330,14 +330,8 @@ WHEEL_REQUEST_MAX_RETRIES = 3
 WHEEL_REQUEST_RETRY_BACKOFF_SECONDS = 1.0
 WHEEL_REQUEST_TIMEOUT_SECONDS = 30
 
-# Gateway errors the wheels storage host returns under load. They're transient, unlike 403/404
-# (handled by request_wheel's tier fallback) and other error statuses (which abort immediately).
 WHEEL_REQUEST_RETRY_STATUSES = (502, 503, 504)
 
-# The wheels storage host resets the connection and returns gateway errors under load often enough
-# to fail a disk-usage measurement run several times a week, so both get a few retries with backoff.
-# raise_on_status=False hands the last gateway error back to request_wheel, so it fails with the
-# same error and tier listing as any other HTTP error once retries run out.
 WHEEL_REQUEST_SESSION = requests.Session()
 WHEEL_REQUEST_SESSION.mount(
     "https://",
@@ -389,12 +383,7 @@ def request_wheel(
 
 
 def download_wheel(app: Application, url: str, wheels_storage: WheelsStorageTier) -> bytes:
-    """
-    Downloads a wheel's content, restarting the download if the connection drops mid-body.
-
-    The session's retries only cover the request up to the response headers; the body is streamed
-    afterwards, so a connection reset while reading it surfaces here and needs its own retry.
-    """
+    """Downloads a wheel's content, restarting the download if the connection drops mid-body."""
     for attempt in range(WHEEL_REQUEST_MAX_RETRIES + 1):
         try:
             with request_wheel(app, url, wheels_storage) as response:

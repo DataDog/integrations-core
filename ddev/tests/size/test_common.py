@@ -773,8 +773,6 @@ def test_request_wheel_uses_head_when_requested():
     ],
 )
 def test_wheel_request_session_retries_only_gateway_errors(status_code, retried):
-    # Gateway errors from the wheels storage host are transient and worth retrying; 403/404 belong to
-    # request_wheel's tier fallback, and retrying them would only delay it.
     retry = WHEEL_REQUEST_SESSION.get_adapter("https://example.com").max_retries
 
     assert retry.is_retry("GET", status_code) is retried
