@@ -342,7 +342,7 @@
                                     "query": {
                                         "data_source": "infrastructure",
                                         "resource_type": "pod",
-                                        "query_string": "$scope $cluster $namespace $deployment $statefulset $daemonset $job $cronjob ((field#metadata.creationTimestamp:>=1hr AND NOT kube_condition_ready:true) OR pod_phase:failed)"
+                                        "query_string": "$scope $cluster $namespace $deployment $statefulset $daemonset $job $cronjob ((field#metadata.creationTimestamp:>=1hr AND NOT kube_condition_ready:true AND NOT pod_phase:succeeded) OR pod_phase:failed)"
                                     },
                                     "columns": [
                                         {
@@ -627,12 +627,27 @@
                                             "data_source": "metrics",
                                             "name": "usage",
                                             "query": "sum:kubernetes.memory.usage{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob}"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "working_set",
+                                            "query": "sum:kubernetes.memory.working_set{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob}"
                                         }
                                     ],
                                     "formulas": [
                                         {
                                             "formula": "usage",
                                             "alias": "Usage",
+                                            "number_format": {
+                                                "unit": {
+                                                    "type": "canonical_unit",
+                                                    "unit_name": "byte_in_binary_bytes_family"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "formula": "working_set",
+                                            "alias": "Working Set",
                                             "number_format": {
                                                 "unit": {
                                                     "type": "canonical_unit",
@@ -1073,6 +1088,217 @@
                 "y": 13,
                 "width": 12,
                 "height": 9
+            }
+        },
+        {
+            "id": 2768845919270966,
+            "definition": {
+                "title": "Containers",
+                "title_align": "center",
+                "background_color": "pink",
+                "show_title": true,
+                "type": "group",
+                "layout_type": "ordered",
+                "widgets": [
+                    {
+                        "id": 5129512503162770,
+                        "definition": {
+                            "title": "Container states and readiness",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "show_legend": true,
+                            "legend_layout": "auto",
+                            "legend_columns": [
+                                "avg",
+                                "min",
+                                "max",
+                                "value",
+                                "sum"
+                            ],
+                            "type": "timeseries",
+                            "requests": [
+                                {
+                                    "response_format": "timeseries",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "running",
+                                            "query": "sum:kubernetes_state.container.running{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob}",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "waiting",
+                                            "query": "sum:kubernetes_state.container.status_report.count.waiting{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob}.fill(zero)",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "terminated",
+                                            "query": "sum:kubernetes_state.container.terminated{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob}",
+                                            "semantic_mode": "combined"
+                                        },
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "ready",
+                                            "query": "sum:kubernetes_state.container.ready{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob}",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "running",
+                                            "alias": "Running"
+                                        },
+                                        {
+                                            "formula": "waiting",
+                                            "alias": "Waiting"
+                                        },
+                                        {
+                                            "formula": "terminated",
+                                            "alias": "Terminated"
+                                        },
+                                        {
+                                            "formula": "ready",
+                                            "alias": "Ready"
+                                        }
+                                    ],
+                                    "style": {
+                                        "palette": "purple",
+                                        "line_type": "solid",
+                                        "line_width": "normal"
+                                    },
+                                    "display_type": "line"
+                                }
+                            ],
+                            "yaxis": {
+                                "include_zero": true
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 0,
+                            "width": 12,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 935123463493438,
+                        "definition": {
+                            "title": "Pods with OOMKilled containers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "live_span": "10m"
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "oom_state",
+                                            "query": "sum:kubernetes.containers.state.terminated{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob,reason:oomkilled} by {kube_cluster_name,kube_namespace,pod_name}",
+                                            "aggregator": "max",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "oom_state",
+                                            "alias": "Containers"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "custom_links": [],
+                            "style": {
+                                "display": {
+                                    "type": "flat"
+                                },
+                                "palette": "red"
+                            }
+                        },
+                        "layout": {
+                            "x": 0,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    },
+                    {
+                        "id": 656508063035940,
+                        "definition": {
+                            "title": "Pods with CrashLoopBackOff containers",
+                            "title_size": "16",
+                            "title_align": "left",
+                            "time": {
+                                "live_span": "10m"
+                            },
+                            "type": "toplist",
+                            "requests": [
+                                {
+                                    "response_format": "scalar",
+                                    "queries": [
+                                        {
+                                            "data_source": "metrics",
+                                            "name": "crashloop",
+                                            "query": "sum:kubernetes_state.container.status_report.count.waiting{$scope,$cluster,$namespace,$deployment,$statefulset,$daemonset,$job,$cronjob,reason:crashloopbackoff} by {kube_cluster_name,kube_namespace,pod_name}",
+                                            "aggregator": "max",
+                                            "semantic_mode": "combined"
+                                        }
+                                    ],
+                                    "formulas": [
+                                        {
+                                            "formula": "crashloop",
+                                            "alias": "Waiting containers"
+                                        }
+                                    ],
+                                    "sort": {
+                                        "count": 100,
+                                        "order_by": [
+                                            {
+                                                "type": "formula",
+                                                "index": 0,
+                                                "order": "desc"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            "custom_links": [],
+                            "style": {
+                                "display": {
+                                    "type": "flat"
+                                },
+                                "palette": "orange"
+                            }
+                        },
+                        "layout": {
+                            "x": 6,
+                            "y": 3,
+                            "width": 6,
+                            "height": 3
+                        }
+                    }
+                ]
+            },
+            "layout": {
+                "x": 0,
+                "y": 22,
+                "width": 12,
+                "height": 7
             }
         }
     ],
