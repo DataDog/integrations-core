@@ -236,6 +236,30 @@ def check_run_payload(
     }
 
 
+def git_tag_payload(
+    tag: str = "7.85.0",
+    sha: str = "t" * 40,
+    object_sha: str = "c" * 40,
+    object_type: str = "commit",
+    node_id: str = "TAG_kwDOABCD",
+    **extra: Any,
+) -> dict[str, Any]:
+    return {
+        "tag": tag,
+        "sha": sha,
+        "node_id": node_id,
+        "url": f"https://api.github.com/repos/owner/repo/git/tags/{sha}",
+        "message": f"Release {tag}",
+        "tagger": {"name": "a-tagger", "email": "a-tagger@example.com", "date": "2026-01-01T00:00:00Z"},
+        "object": {
+            "type": object_type,
+            "sha": object_sha,
+            "url": f"https://api.github.com/repos/owner/repo/git/commits/{object_sha}",
+        },
+        **extra,
+    }
+
+
 def git_ref_payload(
     ref: str = "refs/heads/main",
     sha: str = "a" * 40,

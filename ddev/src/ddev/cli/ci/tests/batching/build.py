@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from ddev.cli.ci.tests.batching.exceptions import PlanningError
 from ddev.cli.ci.tests.batching.jobs import expand_batch_jobs
 from ddev.cli.ci.tests.batching.strategy import BatchStrategy, default_strategy
 from ddev.cli.ci.tests.batching.targets import (
@@ -22,10 +23,12 @@ from ddev.cli.ci.tests.batching.units import (
 )
 from ddev.cli.ci.tests.batching.validation import validate_batches
 from ddev.cli.ci.tests.messages import TestBatch
+from ddev.e2e.agent_images import get_agent_image
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from ddev.cli.ci.tests.batching.jobs import AgentImageResolver
     from ddev.cli.ci.tests.batching.targets import TargetRule
     from ddev.cli.ci.tests.batching.units import EnvironmentProvider
     from ddev.cli.ci.tests.dispatcher_config import BatchingConfig
@@ -43,13 +46,19 @@ def build_test_units(
     environment_provider: EnvironmentProvider,
     rules: Sequence[TargetRule] | None = None,
     infrastructure_targets: Sequence[str] = (),
+    exclude_targets: Sequence[str] = (),
+    requested_targets: Sequence[str] = (),
     monitor: ComponentMonitor,
 ) -> list[TestUnit]:
     """Turn changed files into the complete, deterministic list of test units.
 
     Without explicit `rules`, the default set is used, with the repository-wide and infrastructure
     rules enabled only for the core repository. `infrastructure_targets` feeds the latter and is
-    ignored when `rules` is given.
+    ignored when `rules` is given. `exclude_targets` is removed from whatever the rules select.
+
+    `requested_targets` are the targets the caller named itself. Dropping one silently would test
+    less than the run asked for, so a reason this stage cannot plan one raises `PlanningError`
+    instead of the skip an inferred target gets.
     """
     if rules is None:
         rules = default_target_rules(
@@ -57,12 +66,22 @@ def build_test_units(
         )
 
     facts = RegistryRepositoryFacts(repo.integrations)
+    if unknown := [name for name in exclude_targets if not facts.is_testable_target(name)]:
+        # An exclusion that matches nothing reads as "this target was deliberately left out" while
+        # the target is in fact still planned, so a typo must fail rather than quietly do nothing.
+        raise PlanningError(f"Excluded targets are not testable targets: {', '.join(sorted(set(unknown)))}.")
+
     target_names = find_affected_targets(changed_files, facts, rules=rules)
 
     definitions: list[TargetDefinition] = []
     for name in target_names:
+        if name in exclude_targets:
+            continue
+
         ci_override = repo.config.get(f"/overrides/ci/{name}", {}) or {}
         if ci_override.get("exclude", False):
+            if name in requested_targets:
+                raise PlanningError(f"{name} was requested but `overrides.ci.{name}.exclude` removes it from CI.")
             continue
 
         integration = repo.integrations.get(name)
@@ -71,6 +90,8 @@ def build_test_units(
         if not environments:
             # A `hatch.toml` makes a target testable, so one that enables no test or E2E
             # environment contradicts itself. Deliberate opt-out is `overrides.ci.<target>.exclude`.
+            if name in requested_targets:
+                raise PlanningError(f"{name} was requested but has a hatch.toml with no testable environment.")
             monitor.logger.warning("%s has a hatch.toml but no testable environment", name)
             continue
 
@@ -107,6 +128,9 @@ def build_test_batches(
     config: BatchingConfig,
     strategy: BatchStrategy = default_strategy,
     rules: Sequence[TargetRule] | None = None,
+    exclude_targets: Sequence[str] = (),
+    requested_targets: Sequence[str] = (),
+    agent_image_resolver: AgentImageResolver = get_agent_image,
     minimum_base_package: bool = False,
     monitor: ComponentMonitor,
 ) -> list[TestBatch]:
@@ -121,9 +145,13 @@ def build_test_batches(
         environment_provider=environment_provider,
         rules=rules,
         infrastructure_targets=config.test_infrastructure_targets,
+        exclude_targets=exclude_targets,
+        requested_targets=requested_targets,
         monitor=monitor,
     )
-    jobs = expand_batch_jobs(units, minimum_base_package=minimum_base_package)
+    jobs = expand_batch_jobs(
+        units, agent_image_resolver=agent_image_resolver, minimum_base_package=minimum_base_package
+    )
     job_groups = strategy(jobs, config=config)
     validate_batches(job_groups, jobs, config=config)
     return create_test_batches(job_groups)
