@@ -10,7 +10,6 @@ import re
 import shutil
 import subprocess
 import tempfile
-import time
 import zipfile
 import zlib
 from datetime import date
@@ -386,16 +385,22 @@ def request_wheel(
 
 def download_wheel(app: Application, url: str, wheels_storage: WheelsStorageTier) -> bytes:
     """Downloads a wheel's content, restarting the download if the connection drops mid-body."""
-    for attempt in range(WHEEL_BODY_MAX_RESTARTS + 1):
-        with request_wheel(app, url, wheels_storage) as response:
-            try:
+    import stamina
+
+    body_errors = (requests.exceptions.ChunkedEncodingError, requests.exceptions.ConnectionError)
+    try:
+        for attempt in stamina.retry_context(
+            on=body_errors,
+            attempts=WHEEL_BODY_MAX_RESTARTS + 1,
+            timeout=None,
+            wait_initial=WHEEL_BODY_RESTART_BACKOFF_SECONDS,
+        ):
+            # request_wheel is entered before the attempt, so its errors are not restarted here.
+            with request_wheel(app, url, wheels_storage) as response, attempt:
                 return response.content
-            except (requests.exceptions.ChunkedEncodingError, requests.exceptions.ConnectionError) as e:
-                if attempt == WHEEL_BODY_MAX_RESTARTS:
-                    raise
-                delay = WHEEL_BODY_RESTART_BACKOFF_SECONDS * 2**attempt
-                app.display_debug(f"Wheel download from {url} was interrupted ({e}), retrying in {delay}s")
-        time.sleep(delay)
+    except body_errors as e:
+        e.add_note(f"Wheel download from {url} failed")
+        raise
 
     raise RuntimeError(f"Wheel download from {url} was not attempted")
 

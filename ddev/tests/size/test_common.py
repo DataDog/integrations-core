@@ -9,6 +9,7 @@ from unittest.mock import MagicMock, PropertyMock, mock_open, patch
 
 import pytest
 import requests
+import stamina
 
 from ddev.cli.size.utils.common_funcs import (
     WHEEL_BODY_MAX_RESTARTS,
@@ -874,12 +875,12 @@ def test_download_wheel_restarts_a_download_dropped_mid_body(error):
 
     with (
         patch.object(WHEEL_REQUEST_SESSION, "get", side_effect=[dropped, complete]),
-        patch("ddev.cli.size.utils.common_funcs.time.sleep"),
+        stamina.set_testing(True, attempts=100, cap=True),
     ):
         assert download_wheel(MagicMock(), PLACEHOLDER_URL, "dev") == b"wheel"
 
 
-def test_download_wheel_gives_up_after_the_retry_limit():
+def test_download_wheel_gives_up_after_the_retry_limit_and_names_the_wheel():
     responses = [
         make_streamed_wheel_response(requests.exceptions.ChunkedEncodingError("Connection broken"))
         for _ in range(WHEEL_BODY_MAX_RESTARTS + 1)
@@ -887,9 +888,22 @@ def test_download_wheel_gives_up_after_the_retry_limit():
 
     with (
         patch.object(WHEEL_REQUEST_SESSION, "get", side_effect=responses) as mock_get,
-        patch("ddev.cli.size.utils.common_funcs.time.sleep"),
+        stamina.set_testing(True, attempts=100, cap=True),
     ):
-        with pytest.raises(requests.exceptions.ChunkedEncodingError):
+        with pytest.raises(requests.exceptions.ChunkedEncodingError) as excinfo:
             download_wheel(MagicMock(), PLACEHOLDER_URL, "dev")
 
     assert mock_get.call_count == WHEEL_BODY_MAX_RESTARTS + 1
+    assert any("dep1-1.1.1-.whl" in note for note in excinfo.value.__notes__)
+
+
+def test_download_wheel_does_not_restart_a_failed_request():
+    # The session has already retried a connection failure before request_wheel raises it.
+    with (
+        patch.object(WHEEL_REQUEST_SESSION, "get", side_effect=requests.exceptions.ConnectionError) as mock_get,
+        stamina.set_testing(True, attempts=100, cap=True),
+        pytest.raises(requests.exceptions.ConnectionError),
+    ):
+        download_wheel(MagicMock(), PLACEHOLDER_URL, "dev")
+
+    assert mock_get.call_count == 1
