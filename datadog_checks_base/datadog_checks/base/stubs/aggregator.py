@@ -7,6 +7,7 @@ import json
 import os
 import re
 from collections import OrderedDict, defaultdict
+from typing import Any
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.base.utils.common import ensure_unicode, to_native_string
@@ -142,9 +143,44 @@ class AggregatorStub(object):
         tags,
         flush_first_value=False,
     ):
+        self._record_histogram_bucket(
+            name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value, False
+        )
+
+    def submit_histogram_bucket_multi(
+        self,
+        check: Any,
+        check_id: str,
+        name: str,
+        value: int,
+        lower_bound: float,
+        upper_bound: float,
+        monotonic: bool,
+        hostname: str,
+        tags: list[str],
+        flush_first_value: bool = False,
+    ) -> None:
+        self._record_histogram_bucket(
+            name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value, True
+        )
+
+    def _record_histogram_bucket(
+        self,
+        name: str,
+        value: int,
+        lower_bound: float,
+        upper_bound: float,
+        monotonic: bool,
+        hostname: str,
+        tags: list[str],
+        flush_first_value: bool,
+        multiple_buckets: bool,
+    ) -> None:
         check_tag_names(name, tags)
         self._histogram_buckets[name].append(
-            HistogramBucketStub(name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value)
+            HistogramBucketStub(
+                name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value, multiple_buckets
+            )
         )
 
     def metrics(self, name):
@@ -207,6 +243,7 @@ class AggregatorStub(object):
                 ensure_unicode(stub.hostname),
                 normalize_tags(stub.tags),
                 stub.flush_first_value,
+                stub.multiple_buckets,
             )
             for stub in self._histogram_buckets.get(to_native_string(name), [])
         ]
@@ -279,12 +316,19 @@ class AggregatorStub(object):
         count=None,
         at_least=1,
         flush_first_value=None,
+        multiple_buckets=None,
     ):
         expected_tags = normalize_tags(tags, sort=True)
 
         candidates = []
         for bucket in self.histogram_bucket(name):
             if value is not None and value != bucket.value:
+                continue
+
+            if lower_bound is not None and lower_bound != bucket.lower_bound:
+                continue
+
+            if upper_bound is not None and upper_bound != bucket.upper_bound:
                 continue
 
             if expected_tags and expected_tags != sorted(bucket.tags):
@@ -299,10 +343,13 @@ class AggregatorStub(object):
             if flush_first_value is not None and flush_first_value != bucket.flush_first_value:
                 continue
 
+            if multiple_buckets is not None and multiple_buckets != bucket.multiple_buckets:
+                continue
+
             candidates.append(bucket)
 
         expected_bucket = HistogramBucketStub(
-            name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value
+            name, value, lower_bound, upper_bound, monotonic, hostname, tags, flush_first_value, multiple_buckets
         )
 
         if count is not None:

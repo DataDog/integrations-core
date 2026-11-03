@@ -173,6 +173,7 @@ tests:
         severity_id: 1
         src_endpoint:
           ip: "185.64.148.0"
+          uid: "617808138"
         status: "Failure"
         status_id: 2
         time: 1702288020000
@@ -428,6 +429,7 @@ tests:
         severity_id: 1
         src_endpoint:
           ip: "185.64.148.0"
+          uid: "618368586"
         status: "Success"
         status_id: 1
         time: 1702990616000
@@ -668,6 +670,7 @@ tests:
         severity_id: 1
         src_endpoint:
           ip: "185.64.148.0"
+          uid: "618368586"
         time: 1702990616000
       policycategories:
        -

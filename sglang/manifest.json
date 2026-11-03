@@ -1,0 +1,53 @@
+{
+  "manifest_version": "2.0.0",
+  "app_uuid": "6e220506-0ceb-4c8b-96c2-31d2d03cb59f",
+  "app_id": "sglang",
+  "owner": "gpu-monitoring-agent",
+  "display_on_public_website": true,
+  "tile": {
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "support": "README.md#Troubleshooting",
+    "changelog": "CHANGELOG.md",
+    "description": "Monitor SGLang request performance, token throughput, and KV cache efficiency",
+    "title": "SGLang",
+    "media": [],
+    "classifier_tags": [
+      "Supported OS::Linux",
+      "Category::AI/ML",
+      "Submitted Data Type::Metrics",
+      "Offering::Integration"
+    ]
+  },
+  "assets": {
+    "integration": {
+      "auto_install": true,
+      "source_type_id": 90091000,
+      "source_type_name": "SGLang",
+      "configuration": {
+        "spec": "assets/configuration/spec.yaml"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "metrics": {
+        "prefix": "sglang.",
+        "check": "sglang.num_requests.running",
+        "metadata_path": "metadata.csv"
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "process_signatures": [
+        "sglang.launch_server",
+        "sglang serve"
+      ]
+    }
+  },
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com"
+  }
+}

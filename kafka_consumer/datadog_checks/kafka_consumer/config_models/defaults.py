@@ -40,6 +40,10 @@ def instance_enable_cluster_monitoring():
     return False
 
 
+def instance_enable_kafka_console():
+    return False
+
+
 def instance_enable_legacy_tags_normalization():
     return True
 

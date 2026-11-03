@@ -1,0 +1,45 @@
+{
+  "healthContributingDevices": 4,
+  "healthDistirubution": [
+    {
+      "badCount": 0.0,
+      "badPercentage": 0.0,
+      "category": "Access",
+      "fairCount": 0.0,
+      "fairPercentage": 0.0,
+      "goodCount": 4.0,
+      "goodPercentage": 100.0,
+      "healthScore": 100,
+      "noHealthCount": 0.0,
+      "noHealthPercentage": 0.0,
+      "thirdPartyDeviceCount": 0.0,
+      "totalCount": 4
+    }
+  ],
+  "latestHealthScore": 100,
+  "latestMeasuredByEntity": null,
+  "measuredBy": "global",
+  "monitoredDevices": 4,
+  "monitoredFairHealthDevices": 0,
+  "monitoredHealthyDevices": 4,
+  "monitoredPoorHealthDevices": 0,
+  "monitoredUnHealthyDevices": 0,
+  "noHealthDevices": 0,
+  "notApplicableDevices": 0,
+  "response": [
+    {
+      "badCount": 0,
+      "entity": null,
+      "fairCount": 0,
+      "goodCount": 4,
+      "healthScore": 100,
+      "maintenanceModeCount": 0,
+      "noHealthCount": 0,
+      "time": "2026-08-05T15:10:00.000+0000",
+      "timeinMillis": 1785942600000,
+      "totalCount": 4
+    }
+  ],
+  "totalDevices": 4,
+  "version": "1.0"
+}

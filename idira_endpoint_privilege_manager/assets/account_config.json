@@ -1,0 +1,50 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Username and password",
+      "basic": {
+        "user_setting": {
+          "key": "username",
+          "label": "Username",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "password",
+          "label": "Password",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "region",
+      "label": "EPM Account region",
+      "editable": true,
+      "required": true,
+      "dropdown": {
+        "options": [
+          { "value": "usa", "label": "USA" },
+          { "value": "germany", "label": "Germany" },
+          { "value": "switzerland", "label": "Switzerland" },
+          { "value": "uk", "label": "UK" },
+          { "value": "australia", "label": "Australia" },
+          { "value": "canada", "label": "Canada" },
+          { "value": "india", "label": "India" },
+          { "value": "japan", "label": "Japan" },
+          { "value": "singapore", "label": "Singapore" },
+          { "value": "italy", "label": "Italy" },
+          { "value": "uae", "label": "UAE" },
+          { "value": "federal", "label": "Federal" }
+        ]
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "idira-endpoint-privilege-manager-logs" }
+  ]
+}

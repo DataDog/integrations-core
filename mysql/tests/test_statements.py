@@ -1198,6 +1198,48 @@ def test_normalize_queries(dbm_instance):
 
 
 @pytest.mark.unit
+def test_normalize_queries_null_byte_log_does_not_raise(dbm_instance):
+    """Logging a null-bearing query must not escape the obfuscation handler.
+
+    The agent log binding raises ValueError on an embedded null. Logging the raw
+    text turns that one row into a statement-metrics job crash.
+
+    Obfuscation is forced to fail even though the helper strips embedded nulls
+    before calling the agent. The handler still logs the original row, so a raw
+    null in that warning must raise here the way the agent log binding would.
+    """
+    check = MySql(common.CHECK_NAME, {}, [dbm_instance])
+
+    def obfuscate_sql(query, options=None):
+        raise ValueError('embedded null character')
+
+    def warning(msg, *args, **kwargs):
+        for arg in args:
+            if isinstance(arg, str) and '\x00' in arg:
+                raise ValueError('embedded null character')
+
+    with (
+        mock.patch('datadog_checks.base.utils.db.utils.datadog_agent.obfuscate_sql', side_effect=obfuscate_sql),
+        mock.patch.object(check.statement_metrics.log, 'warning', side_effect=warning) as mocked_warning,
+    ):
+        rows = check.statement_metrics._normalize_queries(
+            [
+                {
+                    'schema': 'network',
+                    'digest': None,
+                    'digest_text': "SELECT * from table where name = 'abc\x00def'",
+                    'count': 41,
+                    'time': 66721400,
+                    'lock_time': 18298000,
+                }
+            ]
+        )
+
+    assert rows == []
+    mocked_warning.assert_called_once()
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "timer_end,now,uptime,expected_timestamp",
     [

@@ -1,0 +1,52 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Client ID and secret",
+      "basic": {
+        "user_setting": {
+          "key": "client_id",
+          "label": "Client ID",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "client_secret",
+          "label": "Client secret",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "domain",
+      "label": "Domain",
+      "editable": true,
+      "required": true,
+      "dropdown": {
+        "options": [
+          { "value": "ca", "label": "ca" },
+          { "value": "com", "label": "com" },
+          { "value": "com.au", "label": "com.au" },
+          { "value": "eu", "label": "eu" },
+          { "value": "asia", "label": "asia" }
+        ]
+      }
+    },
+    {
+      "key": "env_id",
+      "label": "Environment ID",
+      "editable": true,
+      "required": true,
+      "text": {
+        "pattern": "[\\w\\-]*"
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "ping-one-logs" }
+  ]
+}

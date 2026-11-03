@@ -1,0 +1,29 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "VIP certificate",
+      "bearer_token": {
+        "password_setting": {
+          "key": "vip_cert_pem_file_content",
+          "label": "VIP certificate .pem file content",
+          "help": "Copy the content of VIP certificate (.pem) file that will be used to connect to streaming endpoint",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "jurisdiction_hash",
+      "label": "Jurisdiction hash",
+      "editable": true,
+      "required": true,
+      "integer": {}
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "symantec-vip-logs" }
+  ]
+}

@@ -339,12 +339,6 @@ instances:
     #   exclude:
     #   - <EXCLUDE_REGEX>
 
-    ## @param data_streams_enabled - boolean - optional - default: false
-    ## Collects consumer lag metric in seconds. It may result in additional billing charges.
-    ## Note: This is automatically enabled when enable_cluster_monitoring is set to true.
-    #
-    # data_streams_enabled: false
-
     ## @param kafka_cluster_id_override - string - optional
     ## Override the auto-detected kafka_cluster_id. When set, this value is used as
     ## the kafka_cluster_id tag on all metrics and events. The original auto-detected
@@ -352,18 +346,16 @@ instances:
     #
     # kafka_cluster_id_override: <KAFKA_CLUSTER_ID_OVERRIDE>
 
-    ## @param enable_cluster_monitoring - boolean - optional - default: false
-    ## (PREVIEW) Enable cluster monitoring to collect cluster-wide metrics for Data Streams
-    ## Monitoring. Collects broker, topic, partition, consumer group,
-    ## and schema registry metadata. Events are cached and tagged with kafka_cluster_id.
-    ## May increase resource consumption on large clusters.
+    ## @param enable_kafka_console - boolean - optional - default: false
+    ## Enable the Kafka Console product in Datadog and collect cluster-wide
+    ## metrics. Collects broker, topic, partition, consumer group,
+    ## connector, and schema registry metadata. May increase resource
+    ## consumption on large clusters.
     ##
-    ## When enabled, this automatically:
-    ##   - Collects highwater mark offsets for all topic partitions (same as monitor_all_broker_highwatermarks)
-    ##   - Collects consumer lag for all consumer groups (same as monitor_unlisted_consumer_groups)
-    ##   - Enables Data Streams monitoring (same as data_streams_enabled)
+    ## Additional billing charges may apply. See
+    ## https://www.datadoghq.com/pricing/?product=data-streams-monitoring
     #
-    # enable_cluster_monitoring: false
+    # enable_kafka_console: false
 
     ## @param kafka_configs_refresh_interval - integer - optional - default: 180
     ## How often (in seconds) to re-fetch broker configurations, topic configurations,
@@ -375,7 +367,7 @@ instances:
     # kafka_configs_refresh_interval: 180
 
     ## @param schema_registry_url - string - optional - default: http://localhost:8081
-    ## Schema Registry URL. When set with enable_cluster_monitoring, collects schema information.
+    ## Schema Registry URL. When set with enable_kafka_console, collects schema information.
     #
     # schema_registry_url: http://localhost:8081
 
@@ -457,7 +449,7 @@ instances:
         # tls_ca_cert: /path/to/oauth_ca_cert.pem
 
     ## @param kafka_connect_url - string or list of strings - optional - default: http://localhost:8083
-    ## Kafka Connect REST API URL or list of URLs. When set with enable_cluster_monitoring,
+    ## Kafka Connect REST API URL or list of URLs. When set with enable_kafka_console,
     ## collects connector metrics and configuration events from the Kafka Connect REST API.
     ## Accepts a single URL string or a list of URLs to monitor multiple Connect clusters.
     ## For Confluent Cloud, set this to

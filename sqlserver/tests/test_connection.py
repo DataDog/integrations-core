@@ -28,6 +28,7 @@ from .common import CHECK_NAME, SQLSERVER_YEAR
 KEY_PREFIX = "dbm-test-"
 SPECIAL_CHARACTERS_PASSWORD_LOGIN = 'datadog_special_characters_password'
 SPECIAL_CHARACTERS_PASSWORD = 'Pa;ss}"word123!'
+DATABASE_NAME_INJECTION = 'h1;Address=attacker,1433;Encrypt=no;APP=forged'
 
 
 @pytest.mark.unit
@@ -333,6 +334,119 @@ def test_freetds_password_with_closing_brace_semicolon_raises_limitation(
     assert 'FreeTDS' in error_message
     assert 'Microsoft ODBC Driver for SQL Server' in error_message
     assert password not in error_message
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'connector,driver,database,expected_database_parameter',
+    [
+        pytest.param(
+            'odbc',
+            None,
+            DATABASE_NAME_INJECTION,
+            'Database={h1;Address=attacker,1433;Encrypt=no;APP=forged};',
+            id='odbc',
+        ),
+        pytest.param(
+            'odbc',
+            'FreeTDS',
+            DATABASE_NAME_INJECTION,
+            'Database={h1;Address=attacker,1433;Encrypt=no;APP=forged};',
+            id='odbc-freetds',
+        ),
+        pytest.param(
+            'adodbapi',
+            None,
+            DATABASE_NAME_INJECTION,
+            'Initial Catalog="h1;Address=attacker,1433;Encrypt=no;APP=forged";',
+            id='adodbapi',
+        ),
+    ],
+)
+def test_connection_string_encodes_database_name_special_characters(
+    instance_minimal_defaults: dict[str, object],
+    connector: str,
+    driver: str | None,
+    database: str,
+    expected_database_parameter: str,
+) -> None:
+    instance_minimal_defaults.update({'connector': connector})
+    if driver:
+        instance_minimal_defaults['driver'] = driver
+    connection = Connection({}, instance_minimal_defaults, None)
+
+    if connector == 'odbc':
+        conn_str = connection._conn_string_odbc('database', db_name=database)
+    else:
+        conn_str = connection._conn_string_adodbapi('database', db_name=database)
+
+    assert expected_database_parameter in conn_str
+
+
+@pytest.mark.unit
+def test_odbc_database_name_cannot_inject_connection_attributes(
+    instance_minimal_defaults: dict[str, object],
+) -> None:
+    instance_minimal_defaults.update({'connector': 'odbc', 'driver': 'ODBC Driver 18 for SQL Server'})
+    connection = Connection({}, instance_minimal_defaults, None)
+
+    conn_str = connection._conn_string_odbc('database', db_name=DATABASE_NAME_INJECTION)
+
+    params = parse_connection_string_properties(conn_str)
+    assert params['Database'] == DATABASE_NAME_INJECTION
+    assert {key.lower() for key in params} == {'connectretrycount', 'driver', 'server', 'database', 'uid', 'pwd'}
+
+
+@pytest.mark.unit
+def test_adodbapi_database_name_with_quote_is_doubled(instance_minimal_defaults: dict[str, object]) -> None:
+    instance_minimal_defaults.update({'connector': 'adodbapi'})
+    connection = Connection({}, instance_minimal_defaults, None)
+
+    conn_str = connection._conn_string_adodbapi('database', db_name='db"name;Encrypt=no')
+
+    assert 'Initial Catalog="db""name;Encrypt=no";' in conn_str
+
+
+@pytest.mark.unit
+def test_freetds_database_name_with_closing_brace_semicolon_raises_limitation(
+    instance_minimal_defaults: dict[str, object],
+) -> None:
+    database = 'db};name'
+    instance_minimal_defaults.update({'connector': 'odbc', 'driver': 'FreeTDS'})
+    connection = Connection({}, instance_minimal_defaults, None)
+
+    with pytest.raises(ConfigurationError) as exc_info:
+        connection._conn_string_odbc('database', db_name=database)
+
+    error_message = str(exc_info.value)
+    assert "'};'" in error_message
+    assert 'FreeTDS' in error_message
+    assert 'Microsoft ODBC Driver for SQL Server' in error_message
+    assert database not in error_message
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'connector,expected_database_parameter',
+    [
+        pytest.param('odbc', 'Database={master};', id='odbc'),
+        pytest.param('adodbapi', 'Initial Catalog="master";', id='adodbapi'),
+    ],
+)
+def test_connection_string_ordinary_database_name_is_single_value(
+    instance_minimal_defaults: dict[str, object],
+    connector: str,
+    expected_database_parameter: str,
+) -> None:
+    instance_minimal_defaults.update({'connector': connector})
+    connection = Connection({}, instance_minimal_defaults, None)
+
+    if connector == 'odbc':
+        conn_str = connection._conn_string_odbc('database')
+    else:
+        conn_str = connection._conn_string_adodbapi('database')
+
+    assert expected_database_parameter in conn_str
 
 
 @pytest.fixture

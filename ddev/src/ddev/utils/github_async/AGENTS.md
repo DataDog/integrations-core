@@ -165,3 +165,14 @@ Each method must map to a single GitHub endpoint so that behavior, error
 handling, and rate-limit accounting stay predictable and one-to-one with the API.
 If a caller needs a composite result, compose the single-endpoint methods at the
 call site rather than hiding multiple requests behind one method.
+
+## Testing code that uses the client
+
+Code that uses the client is tested with `FakeAsyncGitHubClient` and the `make_<model>` factories in
+`tests/helpers/github_async/factories.py`, which default every field so a test passes only what it
+asserts on. The raw payloads in `tests/utils/github_async/payloads.py` are only for the client's own
+wire-level tests.
+
+When an endpoint adds a model, add its `make_<model>` factory in the same change, and when a model
+gains a field, add that field to its factory with a default. Otherwise tests of code using the client
+fall back to building the model by hand, which is what the factories exist to prevent.

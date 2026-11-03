@@ -1,0 +1,46 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API key",
+      "basic": {
+        "user_setting": {
+          "key": "x_xdr_auth_id",
+          "label": "Authentication ID",
+          "help": "ID of the Cortex XDR API key, shown in the ID column of the API Keys page.",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "api_key",
+          "label": "API key",
+          "help": "Cortex XDR API key.",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "supported_connection_methods": [
+    {
+      "name": "Cortex XDR API",
+      "multitenant": {
+        "tenant_setting": {
+          "key": "fqdn",
+          "label": "FQDN",
+          "help": "Fully qualified domain name of your Cortex XDR tenant, for example example.xdr.us.paloaltonetworks.com.",
+          "editable": true,
+          "required": true,
+          "text": {
+            "pattern": "^[\\w.-]+\\.xdr\\.[a-zA-z]+\\.paloaltonetworks\\.com$"
+          }
+        },
+        "base_url_format": "https://api-%s"
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "palo-alto-cortex-xdr-logs" }
+  ]
+}

@@ -184,7 +184,8 @@ def test_dbm_async_job_unknown_error(aggregator, exception_expected, enable_heal
     if enable_health:
         check.health = Health(check)
     exception = DBExceptionForTests() if exception_expected else UnexpectedExceptionForTests()
-    job = JobForTesting(check, exception=exception)
+    # A long interval makes the loop time out below if a failed run waits for the next period before exiting
+    job = JobForTesting(check, rate_limit=1 / 60, exception=exception)
     try:
         job.run_job_loop(["hello:there"])
         job._job_loop_future.result(timeout=10)
@@ -306,6 +307,12 @@ def test_obfuscate_sql_with_metadata(obfuscator_return_value, expected_value):
             "SELECT * FROM randomtable where name = '123\x00'",
             False,
         ),
+        # Default strips, so a null cannot reach the agent binding and raise ValueError.
+        (
+            "SELECT * FROM randomtable where name = '123\x00'",
+            "SELECT * FROM randomtable where name = '123'",
+            None,
+        ),
     ],
 )
 def test_obfuscate_sql_with_metadata_replace_null_character(input_query, expected_query, replace_null_character):
@@ -315,7 +322,10 @@ def test_obfuscate_sql_with_metadata_replace_null_character(input_query, expecte
     # Check that it can handle null characters
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = _mock_obfuscate_sql
-        statement = obfuscate_sql_with_metadata(input_query, None, replace_null_character=replace_null_character)
+        if replace_null_character is None:
+            statement = obfuscate_sql_with_metadata(input_query, None)
+        else:
+            statement = obfuscate_sql_with_metadata(input_query, None, replace_null_character=replace_null_character)
         assert statement['query'] == expected_query
 
 
@@ -330,6 +340,7 @@ class JobForTesting(DBMAsyncJob):
         job_execution_time=0,
         max_sleep_chunk_s=5,
         exception=None,
+        run_rate_limit=None,
     ):
         super(JobForTesting, self).__init__(
             check,
@@ -346,12 +357,19 @@ class JobForTesting(DBMAsyncJob):
         )
         self._job_execution_time = job_execution_time
         self.count_executed = 0
+        self.run_start_times = []
+        self.run_ticks = []
         self._exception = exception
+        self._run_rate_limit = run_rate_limit
 
     def test_shutdown(self):
         self._check.count("dbm.async_job_test.shutdown", 1)
 
     def run_job(self):
+        self.run_start_times.append(time.time())
+        self.run_ticks.append(self._rate_limiter.last_event)
+        if self._run_rate_limit is not None:
+            self._set_rate_limit(self._run_rate_limit)
         self._check.count("dbm.async_job_test.run_job", 1)
         self.count_executed += 1
         if self._exception:
@@ -457,6 +475,40 @@ def test_dbm_async_job_rate_limit(aggregator):
 
     metrics = aggregator.metrics("dbm.async_job_test.run_job")
     assert max_collections / 2.0 <= len(metrics) <= max_collections
+
+
+@pytest.mark.parametrize(
+    "initial_rate_limit",
+    [
+        pytest.param(1 / 0.2, id='constant-rate'),
+        # Like MySQL statement samples, which set the rate of the collection strategy picked during the run
+        pytest.param(1, id='rate-set-during-run'),
+    ],
+)
+def test_dbm_async_job_waits_a_full_period_after_the_first_run(initial_rate_limit):
+    # Without this wait, every job collects twice back to back at startup, sending duplicate queries and payloads
+    period = 0.2
+    job = JobForTesting(AgentCheck(), rate_limit=initial_rate_limit, run_rate_limit=1 / period)
+    job.run_job_loop([])
+    deadline = time.time() + 5
+    while len(job.run_start_times) < 2 and time.time() < deadline:
+        time.sleep(0.01)
+    job.cancel()
+
+    first, second = job.run_start_times[:2]
+    assert second - first >= period * 0.9
+
+
+def test_dbm_async_job_exposes_the_tick_of_the_first_run():
+    # Jobs such as Postgres metadata schedule their sub-collections from the tick of the run in progress
+    job = JobForTesting(AgentCheck(), rate_limit=1 / 60, max_sleep_chunk_s=0.1)
+    job.run_job_loop([])
+    deadline = time.time() + 5
+    while not job.run_ticks and time.time() < deadline:
+        time.sleep(0.01)
+    job.cancel()
+
+    assert job.run_start_times[0] - 1 <= job.run_ticks[0] <= job.run_start_times[0]
 
 
 def test_dbm_async_job_inactive_stop(aggregator):

@@ -9,7 +9,7 @@ HERE = get_here()
 COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
 
 HOST = get_docker_hostname()
-PORT = '50000'
+PORT = os.getenv('DB2_PORT', '50000')
 DB = 'datadog'
 USERNAME = 'db2inst1'
 PASSWORD = 'db2inst1-pwd'
@@ -26,7 +26,7 @@ CONFIG = {
 
 E2E_METADATA = {
     'env_vars': {
-        'IBM_DB_INSTALLER_URL': 'https://ddintegrations.blob.core.windows.net/ibm-db2/',
+        'IBM_DB_INSTALLER_URL': 'https://agent-integrations-ci-fixtures.s3.us-east-1.amazonaws.com/fixtures/ibm-db2/',
     },
     'docker_volumes': ['{}/requirements.txt:/dev/requirements.txt'.format(os.path.join(HERE, 'docker'))],
     'start_commands': [

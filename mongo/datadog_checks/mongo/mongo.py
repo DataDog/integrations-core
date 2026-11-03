@@ -98,6 +98,8 @@ class MongoDb(AgentCheck):
         self.collectors = []
         self.last_states_by_server = {}
         self.metrics_last_collection_timestamp = {}
+        # Held here rather than on ProcessStatsCollector, which is rebuilt every run.
+        self._mongo_process = None
 
         self.deployment_type = None
         self._mongo_version = None

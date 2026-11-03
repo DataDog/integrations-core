@@ -9,6 +9,8 @@ services:
     environment:
       ORCH_USERNAME: "${ORCH_USERNAME}"
       ORCH_PASSWORD: "${ORCH_PASSWORD}"
+      ORCH_LOGIN_TYPE: "${ORCH_LOGIN_TYPE}"
+      ORCH_API_KEY: "${ORCH_API_KEY}"
     restart: "no"
 
   appliance:

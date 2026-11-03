@@ -18,6 +18,11 @@ WP1_WORKER_TAGS = ["work_pool_id:wp-1", "work_pool_name:default-pool", "worker_i
 WP2_WORKER_TAGS = ["work_pool_id:wp-2", "work_pool_name:paused-pool", "worker_id:w-6", "worker_name:worker-6"]
 WP3_WORKER_TAGS = ["work_pool_id:wp-3", "work_pool_name:not-ready-pool", "worker_id:w-8", "worker_name:worker-8"]
 
+CL1_TAGS = ["concurrency_limit_id:cl-1", "concurrency_limit_name:db-connections", "concurrency_limit_type:global"]
+CL2_TAGS = ["concurrency_limit_id:cl-2", "concurrency_limit_name:inactive-limit", "concurrency_limit_type:global"]
+CL3_TAGS = ["concurrency_limit_id:cl-3", "concurrency_limit_name:etl", "concurrency_limit_type:tag"]
+NI_CL_TAGS = ["concurrency_limit_id:cl-3", "concurrency_limit_name:tag:etl", "concurrency_limit_type:global"]
+
 WQ1_TAGS = [
     "work_queue_id:wq-1",
     "work_queue_name:default-queue",
@@ -44,7 +49,7 @@ WQ1_STATUS_TAGS = WQ1_TAGS + ["work_queue_status:READY"]
 WQ2_STATUS_TAGS = WQ2_TAGS + ["work_queue_status:PAUSED"]
 WQ4_STATUS_TAGS = WQ4_TAGS + ["work_queue_status:NOT_READY"]
 
-TAGS_F1 = [
+TAGS_F1_WITHOUT_DEPLOYMENT_TAGS = [
     "work_pool_id:wp-1",
     "work_pool_name:default-pool",
     "work_queue_id:wq-1",
@@ -52,7 +57,9 @@ TAGS_F1 = [
     "deployment_id:d-1",
     "deployment_name:deployment-1",
     "flow_id:f-1",
+    "flow_name:flow-1",
 ]
+TAGS_F1 = TAGS_F1_WITHOUT_DEPLOYMENT_TAGS + ["prefect_tag:tag-1"]
 
 TAGS_F2 = [
     "work_pool_id:wp-1",
@@ -62,6 +69,7 @@ TAGS_F2 = [
     "deployment_id:d-2",
     "deployment_name:deployment-2",
     "flow_id:f-2",
+    "flow_name:flow-2",
 ]
 
 TAGS_F3 = [
@@ -72,14 +80,16 @@ TAGS_F3 = [
     "deployment_id:d-3",
     "deployment_name:deployment-3",
     "flow_id:f-3",
+    "flow_name:flow-3",
 ]
 
-TAGS_TR1 = TAGS_F1 + ["task_key:task-1"]
-TAGS_TR2 = TAGS_F1 + ["task_key:task-2"]
-TAGS_TR3 = TAGS_F1 + ["task_key:task-3"]
-TAGS_TR7 = TAGS_F1 + ["task_key:task-7"]
-TAGS_TR8 = TAGS_F1 + ["task_key:task-8"]
-TAGS_TR9 = TAGS_F1 + ["task_key:task-9"]
+# Task runs carry their own tags (task-1 is tagged `etl`), not the deployment's
+TAGS_TR1 = TAGS_F1_WITHOUT_DEPLOYMENT_TAGS + ["task_key:task-1", "prefect_tag:etl"]
+TAGS_TR2 = TAGS_F1_WITHOUT_DEPLOYMENT_TAGS + ["task_key:task-2"]
+TAGS_TR3 = TAGS_F1_WITHOUT_DEPLOYMENT_TAGS + ["task_key:task-3"]
+TAGS_TR7 = TAGS_F1_WITHOUT_DEPLOYMENT_TAGS + ["task_key:task-7"]
+TAGS_TR8 = TAGS_F1_WITHOUT_DEPLOYMENT_TAGS + ["task_key:task-8"]
+TAGS_TR9 = TAGS_F1_WITHOUT_DEPLOYMENT_TAGS + ["task_key:task-9"]
 
 NI_WP_TAGS = ["work_pool_id:wp-4", "work_pool_name:not_included_pool", "work_pool_type:process"]
 NI_WORKER_TAGS = ["work_pool_id:wp-4", "work_pool_name:not_included_pool", "worker_id:w-9", "worker_name:worker-9"]
@@ -94,6 +104,7 @@ NI_DEPLOY_TAGS = [
     "deployment_id:d-5",
     "deployment_name:deployment-5",
     "flow_id:f-5",
+    "flow_name:flow-5",
     "work_pool_name:not_included_pool",
     "work_pool_id:wp-4",
     "work_queue_name:not-included-queue",
@@ -108,6 +119,7 @@ NI_FLOW_TAGS = [
     "deployment_id:d-5",
     "deployment_name:deployment-5",
     "flow_id:f-5",
+    "flow_name:flow-5",
 ]
 NI_TASK_TAGS = NI_FLOW_TAGS + ["task_key:task-ni"]
 
@@ -122,6 +134,7 @@ NIQ_DEPLOY_TAGS = [
     "deployment_id:d-6",
     "deployment_name:deployment-6",
     "flow_id:f-6",
+    "flow_name:flow-6",
     "work_pool_name:default-pool",
     "work_pool_id:wp-1",
     "work_queue_name:not_included_queue",
@@ -136,6 +149,7 @@ NIQ_FLOW_TAGS = [
     "deployment_id:d-6",
     "deployment_name:deployment-6",
     "flow_id:f-6",
+    "flow_name:flow-6",
 ]
 NIQ_TASK_TAGS = NIQ_FLOW_TAGS + ["task_key:task-niq"]
 
@@ -143,6 +157,7 @@ NID_DEPLOY_TAGS = [
     "deployment_id:d-7",
     "deployment_name:not_included_deployment",
     "flow_id:f-7",
+    "flow_name:flow-7",
     "work_pool_name:default-pool",
     "work_pool_id:wp-1",
     "work_queue_name:default-queue",
@@ -157,8 +172,32 @@ NID_FLOW_TAGS = [
     "deployment_id:d-7",
     "deployment_name:not_included_deployment",
     "flow_id:f-7",
+    "flow_name:flow-7",
 ]
 NID_TASK_TAGS = NID_FLOW_TAGS + ["task_key:task-nid"]
+
+NIF_DEPLOY_TAGS = [
+    "deployment_id:d-8",
+    "deployment_name:deployment-8",
+    "flow_id:f-8",
+    "flow_name:not_included_flow",
+    "work_pool_name:default-pool",
+    "work_pool_id:wp-1",
+    "work_queue_name:default-queue",
+    "work_queue_id:wq-1",
+    "is_paused:False",
+]
+NIF_FLOW_TAGS = [
+    "work_pool_id:wp-1",
+    "work_pool_name:default-pool",
+    "work_queue_id:wq-1",
+    "work_queue_name:default-queue",
+    "deployment_id:d-8",
+    "deployment_name:deployment-8",
+    "flow_id:f-8",
+    "flow_name:not_included_flow",
+]
+NIF_TASK_TAGS = NIF_FLOW_TAGS + ["task_key:task-nif"]
 
 
 class MetricCase(NamedTuple):
@@ -181,6 +220,8 @@ class ExcludedEventCase(NamedTuple):
 
 
 NOT_INCLUDED_METRICS = [
+    # --- task run limits are not double-reported from the v2 endpoint ---
+    ExcludedMetricCase(name="prefect.server.concurrency_limit.limit", tags=NI_CL_TAGS, mid="ni-cl-tag-limit"),
     # --- excluded by work_pool_names ---
     ExcludedMetricCase(name="prefect.server.work_pool.is_ready", tags=NI_WP_TAGS, mid="ni-wp-is_ready"),
     ExcludedMetricCase(
@@ -210,6 +251,14 @@ NOT_INCLUDED_METRICS = [
     ),
     ExcludedMetricCase(
         name="prefect.server.task_runs.completed.count", tags=NID_TASK_TAGS, mid="nid-task_runs-completed"
+    ),
+    # --- excluded by flow_names ---
+    ExcludedMetricCase(name="prefect.server.deployment.is_ready", tags=NIF_DEPLOY_TAGS, mid="nif-deploy-is_ready"),
+    ExcludedMetricCase(
+        name="prefect.server.flow_runs.completed.count", tags=NIF_FLOW_TAGS, mid="nif-flow_runs-completed"
+    ),
+    ExcludedMetricCase(
+        name="prefect.server.task_runs.completed.count", tags=NIF_TASK_TAGS, mid="nif-task_runs-completed"
     ),
 ]
 
@@ -347,6 +396,51 @@ ALL_METRIC_CASES = [
         mid="wq1-concurrency_in_use",
         expected_count=1,
     ),
+    # --- concurrency limit metrics ---
+    MetricCase(
+        name="prefect.server.concurrency_limit.limit", value=5, tags=CL1_TAGS, mid="cl1-limit", expected_count=1
+    ),
+    MetricCase(
+        name="prefect.server.concurrency_limit.active_slots",
+        value=2,
+        tags=CL1_TAGS,
+        mid="cl1-active_slots",
+        expected_count=1,
+    ),
+    MetricCase(
+        name="prefect.server.concurrency_limit.is_active",
+        value=1,
+        tags=CL1_TAGS,
+        mid="cl1-is_active",
+        expected_count=1,
+    ),
+    MetricCase(
+        name="prefect.server.concurrency_limit.limit", value=3, tags=CL2_TAGS, mid="cl2-limit", expected_count=1
+    ),
+    MetricCase(
+        name="prefect.server.concurrency_limit.active_slots",
+        value=0,
+        tags=CL2_TAGS,
+        mid="cl2-active_slots",
+        expected_count=1,
+    ),
+    MetricCase(
+        name="prefect.server.concurrency_limit.is_active",
+        value=0,
+        tags=CL2_TAGS,
+        mid="cl2-is_active",
+        expected_count=1,
+    ),
+    MetricCase(
+        name="prefect.server.concurrency_limit.limit", value=4, tags=CL3_TAGS, mid="cl3-limit", expected_count=1
+    ),
+    MetricCase(
+        name="prefect.server.concurrency_limit.active_slots",
+        value=1,
+        tags=CL3_TAGS,
+        mid="cl3-active_slots",
+        expected_count=1,
+    ),
     # --- work queue backlog metrics ---
     MetricCase(
         name="prefect.server.work_queue.backlog.age",
@@ -398,6 +492,8 @@ ALL_METRIC_CASES = [
             "deployment_id:d-1",
             "deployment_name:deployment-1",
             "flow_id:f-1",
+            "flow_name:flow-1",
+            "prefect_tag:tag-1",
             "work_pool_name:default-pool",
             "work_pool_id:wp-1",
             "work_queue_name:default-queue",
@@ -414,6 +510,7 @@ ALL_METRIC_CASES = [
             "deployment_id:d-2",
             "deployment_name:deployment-2",
             "flow_id:f-2",
+            "flow_name:flow-2",
             "work_pool_name:paused-pool",
             "work_pool_id:wp-2",
             "work_queue_name:queue-paused-pool",
@@ -585,6 +682,7 @@ NOT_INCLUDED_EVENTS = [
     ExcludedEventCase(msg_title="[PREFECT] [flow-run] fr-ni-completed -> Completed", mid="ni-evt-excluded-pool"),
     ExcludedEventCase(msg_title="[PREFECT] [flow-run] fr-niq-completed -> Completed", mid="niq-evt-excluded-queue"),
     ExcludedEventCase(msg_title="[PREFECT] [flow-run] fr-nid-completed -> Completed", mid="nid-evt-excluded-deploy"),
+    ExcludedEventCase(msg_title="[PREFECT] [flow-run] fr-nif-completed -> Completed", mid="nif-evt-excluded-flow"),
     ExcludedEventCase(
         msg_title="[PREFECT] [worker.process] ProcessWorker worker-1 -> executed-flow-run",
         mid="ni-evt-excluded-event-name",
@@ -712,6 +810,38 @@ def test_assert_metrics(ready_check: PrefectCheck, aggregator: AggregatorStub):
             ) from e
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_flow_name_after_flows_filter_failure(
+    check: PrefectCheck, dd_run_check: Callable, aggregator: AggregatorStub, mock_prefect_client, mocker
+):
+    """
+    When flows can't be resolved, runs are included without `flow_name`, and flow runs cached in that
+    state pick up `flow_name` once flows resolve again.
+    """
+    mocker.patch(
+        "datadog_checks.prefect.check._utcnow", return_value=datetime(2026, 1, 20, 15, 2, 0, tzinfo=timezone.utc)
+    )
+    mocker.patch.object(check, '_get_last_check_time')
+    post_responses = mock_prefect_client.paginate_filter.side_effect
+    mock_prefect_client.paginate_filter.side_effect = lambda endpoint, payload=None: (
+        [] if endpoint == "/flows/filter" else post_responses(endpoint, payload)
+    )
+
+    reset_check_time(check)
+    dd_run_check(check)
+
+    base = check.base_tags
+    nif_tags = [t for t in NIF_FLOW_TAGS if not t.startswith("flow_name:")]
+    aggregator.assert_metric("prefect.server.flow_runs.completed.count", value=1, tags=base + nif_tags, count=1)
+
+    mock_prefect_client.paginate_filter.side_effect = post_responses
+    aggregator.reset()
+    reset_check_time(check)
+    dd_run_check(check)
+
+    # fr-late is still running, so its tags stay cached between runs
+    aggregator.assert_metric("prefect.server.task_runs.paused", value=1, tags=base + TAGS_TR8, count=1)
 
 
 ALL_EVENT_CASES = [

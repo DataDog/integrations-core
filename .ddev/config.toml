@@ -1,3 +1,8 @@
+# Other files merged into this configuration, relative to `.ddev/`. Each top-level table lives in
+# exactly one file.
+#   dispatcher.toml: `ddev ci dispatch-tests` settings.
+imports = ["dispatcher.toml"]
+
 # Validations to run with `ddev validate all`.
 # Each entry must match a known validation name.
 # Remove an entry to skip that validation for this repo.
@@ -22,8 +27,13 @@ validations = [
     "readmes",
     "saved-views",
     "version",
-    "qa-label"
+    "qa-label",
+    "pr-description"
 ]
+
+# GitHub organization that owns this repository, used for GitHub API operations. Defaults to `DataDog`.
+[github]
+owner = "DataDog"
 
 [overrides.display-name]
 datadog_checks_base = "Datadog Checks Base"
@@ -49,6 +59,8 @@ control_m = "Control-M"
 nifi = "Apache NiFi"
 dell_powerflex = "Dell Powerflex"
 dynamo = "Dynamo"
+intersystems_iris = "InterSystems IRIS"
+kai_scheduler = "KAI Scheduler"
 
 [overrides.metrics-prefix]
 krakend = "krakend.api."
@@ -57,10 +69,11 @@ kueue = "kueue."
 prefect = "prefect.server."
 n8n = "n8n."
 control_m = "control_m."
-nifi = "nifi."
 dell_powerflex = "dell_powerflex."
 hpe_aruba_edgeconnect = "hpe_aruba_edgeconnect."
 dynamo = "dynamo."
+intersystems_iris = "intersystems_iris."
+kai_scheduler = "kai."
 
 [overrides.ci.ddev]
 platforms = ["linux", "windows"]
@@ -212,6 +225,9 @@ exclude = [
     'pysnmp',          # Breaking snmp tests
     'aerospike',       # v8+ breaks agent build.
     'confluent-kafka',
+    # Newer drivers query system.settings.readonly, which ClickHouse 18 lacks.
+    # Remove once https://datadoghq.atlassian.net/browse/DBMON-6930 is resolved.
+    'clickhouse-connect',
     # https://github.com/DataDog/integrations-core/pull/16080
     'lxml',
     'psutil',
@@ -221,6 +237,14 @@ exclude = [
     'foundationdb', # 7+ has a breaking changes
     'kubernetes',   # Excluded on size: 36 bundles the aio client and aiohttp, +24M on disk.
                     # Unpin once https://github.com/kubernetes-client/python/issues/2677 is resolved.
+    # botocore requires python-dateutil<3.0.0, so 3.x cannot be installed alongside it.
+    # Unpin once https://github.com/boto/botocore/issues/3844 is resolved.
+    'python-dateutil',
+    # ddtrace adds MiBs to every Agent artifact per release, and the Agent's integrations-core pin PR
+    # fails the static quality gates per-PR size threshold (600 KiB) when a bump lands in a batch.
+    # 4.13.2 -> 4.16.0 added 2.2 to 2.9 MiB in #25804, which had to be reverted in #25822.
+    # Bump it in its own PR, coordinated with a size exception in datadog-agent.
+    'ddtrace',
 
 ]
 
@@ -263,7 +287,7 @@ __pycache__ = false
   "datadog-prefect",
 ]
 
-# Explicitely add the platforms supported by an integration for those where the manifest has been
+# Explicitly add the platforms supported by an integration for those where the manifest has been
 # removed.
 # This is a temporary fix while we implement a metadata.json file that we can add to each integration
 # that replaces the manifest.
@@ -276,8 +300,9 @@ kueue = ["linux", "windows", "mac_os"]
 prefect = ["linux", "windows", "mac_os"]
 n8n = ["linux", "windows", "mac_os"]
 control_m = ["linux", "windows", "mac_os"]
-nifi = ["linux", "windows", "mac_os"]
 dell_powerflex = ["linux", "windows", "mac_os"]
 hpe_aruba_edgeconnect = ["linux", "windows", "mac_os"]
 dynamo = ["linux", "windows", "mac_os"]
+intersystems_iris = ["linux", "windows", "mac_os"]
+kai_scheduler = ["linux", "windows", "mac_os"]
 

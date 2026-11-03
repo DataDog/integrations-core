@@ -3,10 +3,11 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import logging
 import os
+import re
 
 import psutil
 import pytest
-from mock import patch
+from mock import Mock, patch
 
 from datadog_checks.process import ProcessCheck
 
@@ -44,6 +45,9 @@ class MockProcess(object):
     def children(self, recursive=False):
         return []
 
+    def ppid(self):
+        return None
+
     # https://stackoverflow.com/questions/5093382/object-becomes-none-when-using-a-context-manager
     def oneshot(self):
         class MockOneShot(object):
@@ -54,6 +58,19 @@ class MockProcess(object):
                 pass
 
         return MockOneShot()
+
+
+class PpidMockProcess(MockProcess):
+    def __init__(self, pid, ppid_value=None, deny_access=False):
+        super(PpidMockProcess, self).__init__()
+        self.pid = pid
+        self._ppid_value = ppid_value
+        self._deny_access = deny_access
+
+    def ppid(self):
+        if self._deny_access:
+            raise psutil.AccessDenied(self.pid)
+        return self._ppid_value
 
 
 class NamedMockProcess(object):
@@ -204,12 +221,50 @@ def test_check(mock_process, reset_process_list_cache, aggregator, dd_run_check)
             )
 
 
+@patch('psutil.pids', return_value=[])
 @patch('psutil.Process', return_value=MockProcess())
-def test_check_collect_children(mock_process, reset_process_list_cache, aggregator, dd_run_check):
+def test_check_collect_children(mock_process, mock_pids, reset_process_list_cache, aggregator, dd_run_check):
     instance = {'name': 'foo', 'pid': 1, 'collect_children': True}
     process = ProcessCheck(common.CHECK_NAME, {}, [instance])
     dd_run_check(process)
     aggregator.assert_metric('system.processes.number', value=1, tags=generate_expected_tags(instance))
+
+
+def test_check_collect_children_uses_fast_ppid_map(reset_process_list_cache, aggregator, dd_run_check, monkeypatch):
+    # Simulates a fast platform (eg. Windows, Linux); the per-pid fallback must not run.
+    instance = {'name': 'foo', 'pid': 1, 'collect_children': True}
+    fake_process = MockProcess()
+    fake_process.pid = 1
+    fake_ppid_map = Mock(return_value={1: 999, 2: 1, 3: 2})
+    monkeypatch.setattr(psutil._psplatform, 'ppid_map', fake_ppid_map, raising=False)
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
+    with (
+        patch('psutil.pids') as mock_pids,
+        patch('psutil.Process', return_value=fake_process),
+    ):
+        dd_run_check(process)
+    fake_ppid_map.assert_called_once()
+    mock_pids.assert_not_called()
+    aggregator.assert_metric('system.processes.number', value=3, tags=generate_expected_tags(instance))
+
+
+def test_check_collect_children_skips_inaccessible_pid(reset_process_list_cache, aggregator, dd_run_check, monkeypatch):
+    # Simulates a slow platform (eg. AIX); an inaccessible pid must not drop the rest.
+    processes = {
+        0: PpidMockProcess(0, deny_access=True),
+        1: PpidMockProcess(1, ppid_value=999),
+        2: PpidMockProcess(2, ppid_value=1),
+        3: PpidMockProcess(3, ppid_value=2),
+    }
+    instance = {'name': 'foo', 'pid': 1, 'collect_children': True}
+    monkeypatch.delattr(psutil._psplatform, 'ppid_map', raising=False)
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
+    with (
+        patch('psutil.pids', return_value=list(processes)),
+        patch('psutil.Process', side_effect=lambda pid: processes[pid]),
+    ):
+        dd_run_check(process)
+    aggregator.assert_metric('system.processes.number', value=3, tags=generate_expected_tags(instance))
 
 
 @patch('psutil.Process', return_value=MockProcess())
@@ -418,10 +473,96 @@ def test_process_service_check(aggregator):
     process._process_service_check(
         'no_top_critical', 0, {'warning': [2, float('inf')], 'critical': [2, float('inf')]}, []
     )
+    # Remote Config sends `.inf` as the string sentinel ".inf" (JSON can't
+    # represent a raw float infinity); it must be coerced the same as the
+    # native float above, not compared directly against `nb_procs`.
+    process._process_service_check('string_inf_ok', 3, {'warning': [2, '.inf'], 'critical': [2, '.inf']}, [])
+    process._process_service_check('string_inf_many', 10_000, {'warning': [2, '.inf'], 'critical': [2, '.inf']}, [])
+    process._process_service_check('string_inf_low', 1, {'warning': [2, '.inf'], 'critical': [0, '.inf']}, [])
+    # An explicit `null` bound (e.g. from Remote Config JSON) falls back to the default `[1, inf]`.
+    process._process_service_check('null_warning', 1, {'warning': None, 'critical': [0, '.inf']}, [])
 
     aggregator.assert_service_check('process.up', count=1, tags=['process:warning'], status=process.WARNING)
     aggregator.assert_service_check('process.up', count=1, tags=['process:no_top_ok'], status=process.OK)
     aggregator.assert_service_check('process.up', count=1, tags=['process:no_top_critical'], status=process.CRITICAL)
+    aggregator.assert_service_check('process.up', count=1, tags=['process:string_inf_ok'], status=process.OK)
+    aggregator.assert_service_check('process.up', count=1, tags=['process:string_inf_many'], status=process.OK)
+    aggregator.assert_service_check('process.up', count=1, tags=['process:string_inf_low'], status=process.WARNING)
+    aggregator.assert_service_check('process.up', count=1, tags=['process:null_warning'], status=process.OK)
+
+
+@pytest.mark.parametrize(
+    'thresholds, expected_status',
+    [
+        # An explicit `null` range (e.g. from Remote Config JSON) falls back to the default `[1, inf]`.
+        pytest.param({'warning': None, 'critical': None}, ProcessCheck.OK, id='both_null'),
+        pytest.param({'warning': None, 'critical': [1, '.inf']}, ProcessCheck.OK, id='warning_null'),
+        pytest.param({'warning': [1, '.inf'], 'critical': [1, '.inf']}, ProcessCheck.OK, id='within_range'),
+        pytest.param({'warning': [2, '.inf'], 'critical': [1, '.inf']}, ProcessCheck.WARNING, id='below_lower_bound'),
+        # `-inf` is accepted as an unbounded lower bound.
+        pytest.param(
+            {'warning': [float('-inf'), '.inf'], 'critical': [1, '.inf']}, ProcessCheck.OK, id='unbounded_lower'
+        ),
+        # Equal bounds are a valid range: exactly that many processes.
+        pytest.param({'warning': [1, 1], 'critical': [1, '.inf']}, ProcessCheck.OK, id='equal_bounds'),
+    ],
+)
+@patch('psutil.process_iter', return_value=[NamedMockProcess("foo", pid=123, cmdline=["foo"])])
+def test_thresholds_end_to_end(mock_process_iter, aggregator, dd_run_check, thresholds, expected_status):
+    # Goes through config model validation as well as the comparison, unlike `test_process_service_check`.
+    instance = {'name': 'foo', 'search_string': ['foo'], 'thresholds': thresholds}
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
+    dd_run_check(process)
+    expected_tags = generate_expected_tags(instance)
+    aggregator.assert_service_check('process.up', count=1, tags=expected_tags + ['process:foo'], status=expected_status)
+
+
+NOT_A_NUMBER = "thresholds.warning {} must be a number or the string '.inf'"
+INF_LOWER = "thresholds.warning lower bound cannot be infinite"
+EXTRA_NOT_FINITE = "thresholds.warning bound at index 2 must be a finite number"
+
+
+@pytest.mark.parametrize(
+    'warning, expected_error',
+    [
+        pytest.param([1, 'inf'], NOT_A_NUMBER.format('upper bound'), id='inf'),
+        pytest.param([1, 'Infinity'], NOT_A_NUMBER.format('upper bound'), id='Infinity'),
+        pytest.param([1, '5'], NOT_A_NUMBER.format('upper bound'), id='numeric_str'),
+        pytest.param([1, 'NaN'], NOT_A_NUMBER.format('upper bound'), id='nan_str'),
+        pytest.param([1, float('nan')], NOT_A_NUMBER.format('upper bound'), id='nan_float'),
+        # What `JSON.stringify([1, Infinity])` produces.
+        pytest.param([1, None], NOT_A_NUMBER.format('upper bound'), id='null_bound'),
+        pytest.param([True, 5], NOT_A_NUMBER.format('lower bound'), id='bool'),
+        # The model accepts lists longer than two, so extra elements are checked too.
+        pytest.param([1, 2, 'inf'], EXTRA_NOT_FINITE, id='extra_inf_str'),
+        pytest.param([1, 2, float('nan')], EXTRA_NOT_FINITE, id='extra_nan_float'),
+        pytest.param([1, 2, float('inf')], EXTRA_NOT_FINITE, id='extra_inf_float'),
+        pytest.param([1, 2, float('-inf')], EXTRA_NOT_FINITE, id='extra_neg_inf_float'),
+        pytest.param([1, 2, '.inf'], EXTRA_NOT_FINITE, id='extra_inf_sentinel'),
+        pytest.param(['.inf', 5], INF_LOWER, id='inf_lower'),
+        # Unquoted YAML `.inf` arrives as a float.
+        pytest.param([float('inf'), 5], INF_LOWER, id='inf_float_lower'),
+        # Unquoted YAML `-.inf`: an upper bound every process count exceeds.
+        pytest.param(
+            [1, float('-inf')], "thresholds.warning upper bound cannot be negative infinity", id='neg_inf_upper'
+        ),
+        # Too large for a float: left to the model's error rather than an `OverflowError` here.
+        pytest.param([10**400, 10**401], 'thresholds -> warning', id='huge_int_lower'),
+        # An inverted range breaches for every process count.
+        pytest.param([10, 5], 'thresholds.warning lower bound cannot exceed the upper bound', id='inverted_range'),
+        # Non-list shapes are left to the generated model's own error.
+        pytest.param(5, 'thresholds -> warning', id='not_a_list'),
+        pytest.param('.inf', 'thresholds -> warning', id='bare_inf_str'),
+    ],
+)
+def test_thresholds_rejected_at_config_load(dd_run_check, warning, expected_error):
+    instance = {'name': 'foo', 'search_string': ['foo'], 'thresholds': {'warning': warning, 'critical': [1, '.inf']}}
+    process = ProcessCheck(common.CHECK_NAME, {}, [instance])
+
+    with pytest.raises(Exception, match=re.escape(expected_error)) as exc_info:
+        dd_run_check(process)
+
+    assert 'ConfigurationError' in str(exc_info.value)
 
 
 def test_reset_cache_on_process_changes_config(aggregator, dd_run_check):

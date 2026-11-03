@@ -1,0 +1,256 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Account number and provisioning hash",
+      "basic": {
+        "user_setting": {
+          "key": "account_number",
+          "label": "Account number",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "provisioning_hash",
+          "label": "Provisioning hash",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "timezone",
+      "label": "Time zone",
+      "editable": true,
+      "required": true,
+      "dropdown": {
+        "options": [
+          {
+            "value": "Etc/GMT+12",
+            "label": "International Date Line West"
+          },
+          {
+            "value": "US/Samoa",
+            "label": "Midway Island, Samoa"
+          },
+          {
+            "value": "US/Hawaii",
+            "label": "Hawaii"
+          },
+          {
+            "value": "US/Alaska",
+            "label": "Alaska"
+          },
+          {
+            "value": "US/Pacific",
+            "label": "Pacific Time (US & Canada)"
+          },
+          {
+            "value": "US/Arizona",
+            "label": "Arizona"
+          },
+          {
+            "value": "US/Mountain",
+            "label": "Mountain Time (US & Canada)"
+          },
+          {
+            "value": "Canada/Saskatchewan",
+            "label": "Central America, Saskatchewan"
+          },
+          {
+            "value": "America/Mexico_City",
+            "label": "Central Time (US & Canada), Guadalajara, Mexico City"
+          },
+          {
+            "value": "America/Lima",
+            "label": "Indiana, Bogota, Lima, Quito, Rio Branco"
+          },
+          {
+            "value": "US/Eastern",
+            "label": "Eastern Time (US & Canada)"
+          },
+          {
+            "value": "America/Caracas",
+            "label": "Caracas"
+          },
+          {
+            "value": "America/Santiago",
+            "label": "Atlantic Time (Canada), Manaus, Santiago"
+          },
+          {
+            "value": "America/La_Paz",
+            "label": "La Paz"
+          },
+          {
+            "value": "Canada/Newfoundland",
+            "label": "Newfoundland"
+          },
+          {
+            "value": "America/Montevideo",
+            "label": "Greenland, Brasilia, Montevideo"
+          },
+          {
+            "value": "America/Buenos_Aires",
+            "label": "Buenos Aires, Georgetown"
+          },
+          {
+            "value": "Etc/GMT+2",
+            "label": "Mid-Atlantic"
+          },
+          {
+            "value": "Atlantic/South_Georgia",
+            "label": "South Georgia"
+          },
+          {
+            "value": "Atlantic/Azores",
+            "label": "Azores"
+          },
+          {
+            "value": "Atlantic/Cape_Verde",
+            "label": "Cape Verde Is."
+          },
+          {
+            "value": "UTC",
+            "label": "Casablanca, Monrovia, Reykjavik"
+          },
+          {
+            "value": "Europe/London",
+            "label": "GMT: Dublin, Edinburgh, Lisbon, London"
+          },
+          {
+            "value": "Europe/Berlin",
+            "label": "Amsterdam, Berlin, Rome, Vienna, Prague, Brussels"
+          },
+          {
+            "value": "Africa/Malabo",
+            "label": "West Central Africa"
+          },
+          {
+            "value": "Asia/Jerusalem",
+            "label": "Amman, Athens, Istanbul, Beirut, Cairo, Jerusalem"
+          },
+          {
+            "value": "Africa/Harare",
+            "label": "Harare, Pretoria"
+          },
+          {
+            "value": "Asia/Baghdad",
+            "label": "Baghdad"
+          },
+          {
+            "value": "Europe/Moscow",
+            "label": "Kuwait, Riyadh, Nairobi, Moscow, St. Petersburg, Volgograd"
+          },
+          {
+            "value": "Asia/Tehran",
+            "label": "Tehran"
+          },
+          {
+            "value": "Asia/Muscat",
+            "label": "Abu Dhabi, Muscat, Tbilisi, Izhevsk"
+          },
+          {
+            "value": "Asia/Yerevan",
+            "label": "Baku, Yerevan"
+          },
+          {
+            "value": "Asia/Kabul",
+            "label": "Kabul"
+          },
+          {
+            "value": "Etc/GMT-5",
+            "label": "GMT+5"
+          },
+          {
+            "value": "Asia/Karachi",
+            "label": "Islamabad, Karachi, Tashkent, Ekaterinburg"
+          },
+          {
+            "value": "Asia/Kolkata",
+            "label": "Chennai, Kolkata, Mumbai, New Delhi, Sri Jayawardenepura"
+          },
+          {
+            "value": "Asia/Kathmandu",
+            "label": "Kathmandu"
+          },
+          {
+            "value": "Asia/Dhaka",
+            "label": "Astana, Dhaka, Novosibirsk"
+          },
+          {
+            "value": "Asia/Almaty",
+            "label": "Almaty"
+          },
+          {
+            "value": "Asia/Yangon",
+            "label": "Yangon (Rangoon)"
+          },
+          {
+            "value": "Etc/GMT-7",
+            "label": "GMT+7"
+          },
+          {
+            "value": "Asia/Jakarta",
+            "label": "Bangkok, Hanoi, Jakarta, Krasnoyarsk"
+          },
+          {
+            "value": "Hongkong",
+            "label": "Beijing, Hong Kong, Singapore, Taipei, Irkutsk"
+          },
+          {
+            "value": "Australia/Perth",
+            "label": "Ulaan Bataar, Perth"
+          },
+          {
+            "value": "Etc/GMT-9",
+            "label": "GMT+9"
+          },
+          {
+            "value": "Asia/Tokyo",
+            "label": "Seoul, Osaka, Sapporo, Tokyo, Yakutsk"
+          },
+          {
+            "value": "Australia/Darwin",
+            "label": "Darwin"
+          },
+          {
+            "value": "Australia/Adelaide",
+            "label": "Adelaide"
+          },
+          {
+            "value": "Australia/Brisbane",
+            "label": "Brisbane, Guam, Port Moresby, Vladivostok"
+          },
+          {
+            "value": "Australia/Sydney",
+            "label": "Canberra, Melbourne, Sydney, Hobart"
+          },
+          {
+            "value": "Asia/Magadan",
+            "label": "Magadan, Solomon Is., New Caledonia"
+          },
+          {
+            "value": "Pacific/Auckland",
+            "label": "Auckland, Wellington"
+          },
+          {
+            "value": "Pacific/Fiji",
+            "label": "Fiji, Kamchatka, Marshall Is."
+          },
+          {
+            "value": "Pacific/Tongatapu",
+            "label": "Nuku'alofa"
+          }
+        ]
+      }
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "lastpass-logs"
+    }
+  ]
+}

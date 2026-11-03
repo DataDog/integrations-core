@@ -27,16 +27,18 @@ jobs:
     permissions:
       contents: read
       id-token: write # the octo-sts exchange; every write happens with the scoped token
+    env:
+      OCTO_STS_SCOPE: DataDog/integrations-core
+      OCTO_STS_POLICY: self.test-dispatch
 
-    # One source branch maps to one PR. Include the repository for forks and omit the SHA so a new
-    # revision cancels the previous Dispatcher. Master pushes keep independent runs.
-    # Keep concurrency at job level: workflow_run also fires for canceled triggers, whose skipped
-    # jobs must not cancel newer triggers.
+    # Share the trigger's PR group, including the repository for forks. Only triggers cancel running
+    # members; stale dispatches must wait for newer triggers. Master pushes keep independent runs.
+    # Keep concurrency at job level so skipped jobs from canceled triggers do not join the group.
     concurrency:
       group: test-dispatch-${{
         github.event_name == 'workflow_run' && format('pr-{0}/{1}', github.event.workflow_run.head_repository.full_name, github.event.workflow_run.head_branch) ||
         format('master-{0}', github.run_id) }}
-      cancel-in-progress: true
+      cancel-in-progress: false
 
     if: >-
       github.repository == 'DataDog/integrations-core'
@@ -65,8 +67,12 @@ jobs:
         id: octo-sts
         uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
         with:
-          scope: DataDog/integrations-core
-          policy: self.test-dispatch
+          scope: ${{ env.OCTO_STS_SCOPE }}
+          policy: ${{ env.OCTO_STS_POLICY }}
+
+      - name: Record the scoped token mint time
+        id: octo-sts-mint
+        run: echo "minted_at=$(date +%s)" >> "$GITHUB_OUTPUT"
 
       - name: Mark the run pending
         env:
@@ -105,6 +111,7 @@ jobs:
           ddev config override
 
       - name: Resolve the run
+        id: resolve
         env:
           DD_GITHUB_TOKEN: ${{ steps.octo-sts.outputs.token }}
           EVENT_NAME: ${{ github.event_name }}
@@ -210,12 +217,23 @@ jobs:
         id: dispatch
         env:
           DD_GITHUB_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          # Opts ddev into re-minting; the run outlives the one-hour token above.
+          DD_DISPATCHER_OCTO_STS_SCOPE: ${{ env.OCTO_STS_SCOPE }}
+          DD_DISPATCHER_OCTO_STS_POLICY: ${{ env.OCTO_STS_POLICY }}
+          DD_DISPATCHER_OCTO_STS_MINTED_AT: ${{ steps.octo-sts-mint.outputs.minted_at }}
           RESOLVED: ${{ steps.resolved.outputs.available }}
+          RESOLUTION_OUTCOME: ${{ steps.resolve.outputs.outcome }}
+          RESOLUTION_NO_OP_REASON: ${{ steps.resolve.outputs.no-op-reason }}
           PR_NUMBER: ${{ steps.resolved.outputs.pr_number }}
         run: |
           set -euo pipefail
           if [[ "$RESOLVED" != true ]]; then
             echo "No run remains to test."
+            # Resolution can no-op before there is a manifest for ddev to dispatch.
+            {
+              echo "outcome=$RESOLUTION_OUTCOME"
+              echo "no-op-reason=$RESOLUTION_NO_OP_REASON"
+            } >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -239,15 +257,25 @@ jobs:
           # Deliver cancellation signals directly to ddev's cleanup handler.
           exec ddev "${args[@]}"
 
+      # The first token can be expired by settle time.
+      - name: Get a fresh scoped token for settling
+        id: octo-sts-settle
+        if: always()
+        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+        with:
+          scope: ${{ env.OCTO_STS_SCOPE }}
+          policy: ${{ env.OCTO_STS_POLICY }}
+
       # Settle pending statuses even after cancellation or setup failure.
       - name: Settle the run's aggregate result
         if: always()
         timeout-minutes: 1
         env:
-          GH_TOKEN: ${{ steps.octo-sts.outputs.token }}
+          GH_TOKEN: ${{ steps.octo-sts-settle.outputs.token }}
           HEAD_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
           STATUS_CONTEXT: Dispatcher / tests (beta, non-blocking)
-          DISPATCH_OUTCOME: ${{ steps.dispatch.outcome }}
+          DISPATCH_OUTCOME: ${{ steps.dispatch.outputs.outcome }}
+          NO_OP_REASON: ${{ steps.dispatch.outputs.no-op-reason }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
@@ -255,12 +283,37 @@ jobs:
             echo "::error::Refusing to settle the status: no scoped token or full SHA."
             exit 1
           fi
-          state=failure
-          description="Test dispatch did not complete"
-          if [[ "$DISPATCH_OUTCOME" == success ]]; then
-            state=success
-            description="Test dispatch completed"
-          fi
+          state=error
+          description="Dispatcher run did not complete"
+          case "$DISPATCH_OUTCOME" in
+            passed)
+              state=success
+              description="Tests passed"
+              ;;
+            tests-failed)
+              state=failure
+              description="Tests failed"
+              ;;
+            no-op)
+              state=success
+              description="Nothing to test"
+              if [[ "$NO_OP_REASON" == 'no open pull request matches the requested revision' ]]; then
+                description="Not tested: superseded by a newer commit"
+              fi
+              ;;
+            cancelled)
+              state=failure
+              description="Cancelled"
+              ;;
+            timed-out)
+              state=error
+              description="Timed out"
+              ;;
+            planning-failed)
+              state=error
+              description="Planning failed"
+              ;;
+          esac
 
           gh api --method POST "repos/${GITHUB_REPOSITORY}/statuses/${HEAD_SHA}" \
             -f "context=${STATUS_CONTEXT}" \

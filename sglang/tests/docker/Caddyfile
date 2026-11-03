@@ -1,0 +1,8 @@
+:30000 {
+  route /metrics {
+    rewrite * /sglang_metrics
+    file_server {
+      root /usr/share/caddy
+    }
+  }
+}

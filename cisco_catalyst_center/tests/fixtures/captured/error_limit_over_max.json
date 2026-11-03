@@ -1,0 +1,10 @@
+{
+  "response": [
+    {
+      "detail": null,
+      "errorCode": 2511,
+      "message": "Limit can't be more than 500"
+    }
+  ],
+  "version": "1.0"
+}

@@ -19,16 +19,16 @@ import pytest
 from ddev.cli.release.test_agent.dispatch import extract_dispatched_workflows
 from ddev.utils.github_async import GitHubResponse
 from ddev.utils.github_async.models import WorkflowDispatchResult
+from tests.helpers.github_async import make_response, make_workflow_dispatch_result
 
 
 def _ok(run_id: int, html_url: str) -> GitHubResponse[WorkflowDispatchResult]:
-    return GitHubResponse(
-        data=WorkflowDispatchResult(
+    return make_response(
+        make_workflow_dispatch_result(
             workflow_run_id=run_id,
             run_url=f'https://api.github.com/{html_url}',
             html_url=html_url,
-        ),
-        headers={},
+        )
     )
 
 
