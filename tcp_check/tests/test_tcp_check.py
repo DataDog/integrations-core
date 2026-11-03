@@ -55,6 +55,39 @@ def test_reattempt_resolution_on_error():
         assert resolve_ips.called
 
 
+def test_ipv6_address_is_refreshed_after_connection_failure(aggregator):
+    instance = deepcopy(common.INSTANCE)
+    instance['host'] = 'example.org'
+    check = TCPCheck(common.CHECK_NAME, {}, [instance])
+    resolved = [
+        [(socket.AF_INET6, socket.SOCK_STREAM, socket.IPPROTO_TCP, '', ('2001:db8::1', 80, 0, 0))],
+        [(socket.AF_INET6, socket.SOCK_STREAM, socket.IPPROTO_TCP, '', ('2001:db8::2', 80, 0, 0))],
+    ]
+
+    with (
+        mock.patch('socket.getaddrinfo', side_effect=resolved) as getaddrinfo,
+        mock.patch.object(check, 'connect', side_effect=[OSError('unreachable'), 0.1]) as connect,
+    ):
+        check.check(instance)
+        check.check(instance)
+
+    assert getaddrinfo.call_count == 2
+    assert connect.call_args_list == [
+        mock.call('2001:db8::1', socket.AF_INET6),
+        mock.call('2001:db8::2', socket.AF_INET6),
+    ]
+
+    base_tags = ['instance:UpService', 'target_host:example.org', 'port:80', 'foo:bar']
+    for status, value, address in [
+        (check.CRITICAL, 0, '2001:db8::1'),
+        (check.OK, 1, '2001:db8::2'),
+    ]:
+        tags = base_tags + ['address:{}'.format(address)]
+        aggregator.assert_service_check('tcp.can_connect', status=status, tags=tags)
+        aggregator.assert_metric('network.tcp.can_connect', value=value, tags=tags)
+    aggregator.assert_all_metrics_covered()
+
+
 def test_reattempt_resolution_on_duration():
     instance = deepcopy(common.INSTANCE)
     instance['ip_cache_duration'] = 0
