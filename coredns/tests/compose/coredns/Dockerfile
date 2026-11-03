@@ -4,6 +4,6 @@
 # health plugin's endpoint.
 ARG COREDNS_VERSION=1.8.5
 FROM coredns/coredns:${COREDNS_VERSION} AS coredns
-FROM alpine:3.20
+FROM alpine:3.20.10
 COPY --from=coredns /coredns /coredns
 ENTRYPOINT ["/coredns"]

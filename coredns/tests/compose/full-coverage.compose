@@ -37,7 +37,7 @@ services:
   # counts, cache hits/misses, forward request duration and rcode) stay
   # non-zero across scrapes, not just on the first query. See ../activity-gen.sh.
   activity-gen:
-    image: alpine:3.20
+    image: alpine:3.20.10
     restart: unless-stopped
     environment:
       # Service name under plain compose; evalya aliases the entrypoint by its
