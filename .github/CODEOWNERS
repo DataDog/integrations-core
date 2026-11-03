@@ -473,11 +473,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /hubspot_content_hub/manifest.json                                  @DataDog/saas-integrations @DataDog/documentation
 /hubspot_content_hub/assets/logs/                                   @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-vonage/                                                            @DataDog/saas-integrations
-vonage/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
-vonage/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
-vonage/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
 /tanium/                                                            @DataDog/saas-integrations
 /tanium/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
 /tanium/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
@@ -671,11 +666,6 @@ plaid/assets/logs/                                                  @DataDog/saa
 /guarddog/*.md                                                       @DataDog/agent-integrations @DataDog/documentation
 /guarddog/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
 /guarddog/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
-/vectra/                                                             @DataDog/saas-integrations
-/vectra/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
-/vectra/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
-/vectra/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /valence_security/                                                   @DataDog/saas-integrations
 /valence_security/*.md                                               @DataDog/saas-integrations @DataDog/documentation
