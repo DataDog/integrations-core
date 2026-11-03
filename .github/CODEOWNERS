@@ -479,20 +479,10 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /ping_federate/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /ping_federate/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/cisco_secure_email_threat_defense/                                 @DataDog/saas-integrations
-/cisco_secure_email_threat_defense/*.md                             @DataDog/saas-integrations @DataDog/documentation
-/cisco_secure_email_threat_defense/manifest.json                    @DataDog/saas-integrations @DataDog/documentation
-/cisco_secure_email_threat_defense/assets/logs/                     @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
 /trend_micro_email_security/                                        @DataDog/saas-integrations
 /trend_micro_email_security/*.md                                    @DataDog/saas-integrations @DataDog/documentation
 /trend_micro_email_security/manifest.json                           @DataDog/saas-integrations @DataDog/documentation
 /trend_micro_email_security/assets/logs/                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
-/docusign/                                                          @DataDog/saas-integrations
-/docusign/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
-/docusign/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
-/docusign/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /trend_micro_vision_one_endpoint_security/                          @DataDog/saas-integrations
 /trend_micro_vision_one_endpoint_security/*.md                      @DataDog/saas-integrations @DataDog/documentation
