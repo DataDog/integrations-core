@@ -1033,10 +1033,6 @@ integration/oke:
 - changed-files:
   - any-glob-to-any-file:
     - oke/**/*
-integration/okta_workflows:
-- changed-files:
-  - any-glob-to-any-file:
-    - okta_workflows/**/*
 integration/oom_kill:
 - changed-files:
   - any-glob-to-any-file:
@@ -1089,10 +1085,6 @@ integration/otel:
 - changed-files:
   - any-glob-to-any-file:
     - otel/**/*
-integration/palo_alto_cortex_xdr:
-- changed-files:
-  - any-glob-to-any-file:
-    - palo_alto_cortex_xdr/**/*
 integration/palo_alto_panorama:
 - changed-files:
   - any-glob-to-any-file:
