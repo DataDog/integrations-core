@@ -232,12 +232,6 @@ def test_calls_rejected_with_the_same_key_renew_it_once():
 
 
 @pytest.mark.parametrize(
-    'call',
-    [
-        pytest.param(lambda client: client.op(SYSTEM_INFO_CMD), id='op'),
-    ],
-)
-@pytest.mark.parametrize(
     'answer, code',
     [
         # A proxy's 403 page says nothing about the PAN-OS key or credentials.
@@ -247,12 +241,12 @@ def test_calls_rejected_with_the_same_key_renew_it_once():
         pytest.param((403, (FIXTURES / 'fw-a-probe' / 'config_refused.xml').read_bytes()), '403', id='role-refusal'),
     ],
 )
-def test_error_that_is_not_an_auth_rejection_neither_renews_the_key_nor_invalidates_credentials(call, answer, code):
+def test_error_that_is_not_an_auth_rejection_neither_renews_the_key_nor_invalidates_credentials(answer, code):
     http = FakeHttp(keygen=[(200, KEYGEN_OK)], api=[answer])
     client = make_client(http)
 
     with pytest.raises(PanosApiError) as exc_info:
-        call(client)
+        client.op(SYSTEM_INFO_CMD)
 
     assert type(exc_info.value) is PanosApiError
     assert exc_info.value.code == code

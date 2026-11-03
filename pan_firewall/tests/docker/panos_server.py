@@ -75,7 +75,7 @@ def create_app(username: str, password: str, op_fixture: OpAnswer, report_fixtur
             job_id = str(next(job_ids))
             finished[kind, job_id] = response
             reads[kind, job_id] = 0
-        return _xml(submit_answer(kind, job_id))
+        return _xml(submit_answer(job_id))
 
     return app
 

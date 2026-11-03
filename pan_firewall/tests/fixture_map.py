@@ -138,16 +138,16 @@ def report_job_fixture(params: Mapping[str, str], firewall: str) -> Path | None:
 
 # The captured submit answer every fake builds its own from. The client reads only the job id from it, so each fake
 # numbers its jobs itself. The capture announces its id twice.
-SUBMIT_TEMPLATES = {'report': 'fw-a/report_custom_app_submit.xml'}
-SUBMIT_TEMPLATE_IDS = {'report': '4'}
+SUBMIT_TEMPLATE = 'fw-a/report_custom_app_submit.xml'
+SUBMIT_TEMPLATE_ID = '4'
 
 
-def submit_answer(kind: str, job_id: str) -> bytes:
+def submit_answer(job_id: str) -> bytes:
     """The submit answer of a `report` job numbered `job_id`: the capture with its id replaced in the message
     text (`jobid <n>`) and in `<job><n></job>`, and nothing else changed."""
-    capture_id = SUBMIT_TEMPLATE_IDS[kind]
+    capture_id = SUBMIT_TEMPLATE_ID
     return (
-        (FIXTURES / SUBMIT_TEMPLATES[kind])
+        (FIXTURES / SUBMIT_TEMPLATE)
         .read_bytes()
         .replace(f'jobid {capture_id}<'.encode(), f'jobid {job_id}<'.encode())
         .replace(f'<job>{capture_id}</job>'.encode(), f'<job>{job_id}</job>'.encode())

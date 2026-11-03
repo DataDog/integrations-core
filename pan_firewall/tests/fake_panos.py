@@ -48,7 +48,7 @@ PANORAMA_FIREWALL_IPS = {'fw-a': '192.0.2.10', 'fw-b': '192.0.2.11'}
 
 
 Answer = tuple[int, bytes] | Exception
-LogBody = bytes | Path | Answer
+JobBody = bytes | Path | Answer
 
 # What the transport raises when a device cannot be reached. Every `requests` exception is an OSError, so the built-in
 # ones stand in for them; `test_api` runs the real `requests` types once.
@@ -88,8 +88,8 @@ class FakePanos:
         self._job_ids = itertools.count(9000)
         # `type=report` jobs: overrides by (host, aggregate-by field), the bodies a `get` of a job answers in turn (the
         # last one repeating) by (host, job id).
-        self._report_overrides: dict[tuple[str, str], list[LogBody]] = {}
-        self._report_jobs: dict[tuple[str, str], list[LogBody]] = {}
+        self._report_overrides: dict[tuple[str, str], list[JobBody]] = {}
+        self._report_jobs: dict[tuple[str, str], list[JobBody]] = {}
         self._report_reads: dict[tuple[str, str], int] = {}
 
     def fail(self, host: str, failure: str, on: Literal['all', 'keygen', 'api'] = 'all') -> None:
@@ -101,7 +101,7 @@ class FakePanos:
         """Answer every later `type=op&cmd=<cmd>` request to `host` with `answer`; `fail()` still takes precedence."""
         self._op_answers[host, cmd] = answer
 
-    def answer_report(self, host: str, field: str, *bodies: LogBody) -> None:
+    def answer_report(self, host: str, field: str, *bodies: JobBody) -> None:
         """Answer report submits aggregated by `field` to `host` with a new job whose `get`s answer `bodies` in turn."""
         self._report_overrides[host, field] = list(bodies)
 
@@ -161,7 +161,6 @@ class FakePanos:
         if data.get('async') != 'yes':  # PAN-OS refuses a report submit that is not asynchronous
             return 200, NO_CAPTURE
         return self._open_job(
-            'report',
             self._report_jobs,
             self._report_reads,
             host,
@@ -181,11 +180,10 @@ class FakePanos:
 
     def _open_job(
         self,
-        kind: Literal['report'],
-        jobs: dict[tuple[str, str], list[LogBody]],
+        jobs: dict[tuple[str, str], list[JobBody]],
         reads: dict[tuple[str, str], int],
         host: str,
-        override: list[LogBody] | None,
+        override: list[JobBody] | None,
         fixture: Path | None,
     ) -> Answer:
         """Register a job in `jobs` and return its submit answer: a new job answering the `override` bodies in turn, or
@@ -197,14 +195,14 @@ class FakePanos:
         else:
             return 200, NO_CAPTURE
         job_id = str(next(self._job_ids))
-        submit = submit_answer(kind, job_id)
+        submit = submit_answer(job_id)
         jobs[host, job_id] = bodies
         reads[host, job_id] = 0
         return 200, submit
 
     @staticmethod
     def _read_job(
-        jobs: dict[tuple[str, str], list[LogBody]], reads: dict[tuple[str, str], int], host: str, job_id: str
+        jobs: dict[tuple[str, str], list[JobBody]], reads: dict[tuple[str, str], int], host: str, job_id: str
     ) -> Answer:
         bodies = jobs.get((host, job_id))
         if bodies is None:
