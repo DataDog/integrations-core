@@ -10,8 +10,7 @@ import tarfile
 from pathlib import Path
 
 import pytest
-
-from ddev.release.apw import package
+from apw_assets import package
 
 
 class TestPackage:

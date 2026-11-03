@@ -4,12 +4,18 @@
 import json
 import subprocess
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
-from pytest_mock import MockerFixture
+from apw_assets import Release, main
 
-from ddev.release.apw import Release
-from tests.helpers.runner import CliRunner
+
+@pytest.fixture
+def step_summary(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    path = tmp_path / 'step-summary.md'
+    path.touch()
+    monkeypatch.setenv('GITHUB_STEP_SUMMARY', str(path))
+    return path
 
 
 @pytest.mark.parametrize(
@@ -22,10 +28,8 @@ from tests.helpers.runner import CliRunner
         'ddoghq/integrations-internal-core',
     ],
 )
-def test_package_arbitrary_asset_checkout(
-    ddev: CliRunner, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, repository: str
-):
-    # Pubplat has no integration metadata or named ddev repository configuration.
+def test_package_arbitrary_asset_checkout(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, repository: str):
+    # Asset repositories need no integration metadata or ddev repository configuration.
     source = tmp_path / 'checkout'
     source.mkdir()
     subprocess.run(['git', 'init', '--quiet', str(source)], check=True)
@@ -55,8 +59,7 @@ def test_package_arbitrary_asset_checkout(
     commit = subprocess.check_output(['git', '-C', str(source), 'rev-parse', 'HEAD'], text=True).strip()
     monkeypatch.chdir(source)
     monkeypatch.setenv('GH_REPO', 'wrong/implicit-repository')
-    result = ddev('--here', 'release', 'apw', 'package', '--repository', repository, '--commit', commit)
-    assert result.exit_code == 0, result.output
+    assert main(['package', '--repository', repository, '--commit', commit]) == 0
     metadata = json.loads((source / 'dist/release.json').read_text())
     assert metadata['repository'] == repository
     assert metadata['commit'] == commit
@@ -65,7 +68,7 @@ def test_package_arbitrary_asset_checkout(
 
 @pytest.mark.parametrize('needed', [False, True])
 def test_check_exports_workflow_output_and_summary(
-    ddev: CliRunner, mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch, step_summary: Path, needed: bool
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], step_summary: Path, needed: bool
 ):
     def check(release: Release) -> bool:
         assert release.repository == 'ddoghq/publishing-platform'
@@ -73,67 +76,64 @@ def test_check_exports_workflow_output_and_summary(
         return needed
 
     monkeypatch.setenv('GH_REPO', 'ddoghq/publishing-platform')
-    mocker.patch.object(Release, 'needs_package', autospec=True, side_effect=check)
-    result = ddev('release', 'apw', 'check', '--commit', 'a' * 40)
-    assert result.exit_code == 0, result.output
-    assert f'package={str(needed).lower()}' in result.output
+    with patch.object(Release, 'needs_package', autospec=True, side_effect=check):
+        assert main(['check', '--commit', 'a' * 40]) == 0
+    assert capsys.readouterr().out == f'package={str(needed).lower()}\n'
     assert ('Packaging needed.' if needed else 'Complete release exists; skipping') in step_summary.read_text()
 
 
-def test_publish_uses_selected_directory(ddev: CliRunner, mocker: MockerFixture, tmp_path: Path, step_summary: Path):
+def test_publish_uses_selected_directory(tmp_path: Path, step_summary: Path):
     def publish(release: Release, directory: Path) -> str:
         assert release.repository == 'ddoghq/integrations-internal-core'
         assert release.commit == 'b' * 40
         assert directory == tmp_path
         return 'Published verified APW snapshot.'
 
-    mocker.patch.object(Release, 'publish', autospec=True, side_effect=publish)
-    result = ddev(
-        'release',
-        'apw',
-        'publish',
-        '--repository',
-        'ddoghq/integrations-internal-core',
-        '--commit',
-        'b' * 40,
-        '--directory',
-        str(tmp_path),
-    )
-    assert result.exit_code == 0, result.output
+    with patch.object(Release, 'publish', autospec=True, side_effect=publish):
+        args = ['publish', '--repository', 'ddoghq/integrations-internal-core', '--commit', 'b' * 40]
+        assert main([*args, '--directory', str(tmp_path)]) == 0
     assert 'Published verified APW snapshot.' in step_summary.read_text()
 
 
-def test_tag_is_separate_from_publication(ddev: CliRunner, mocker: MockerFixture, step_summary: Path):
+def test_tag_is_separate_from_publication(step_summary: Path):
     def tag(release: Release) -> str:
         assert release.repository == 'DataDog/integrations-core'
         assert release.commit == 'a' * 40
         return 'Created source tag at the expected commit.'
 
-    mocker.patch.object(Release, 'ensure_tag', autospec=True, side_effect=tag)
-    result = ddev('release', 'apw', 'tag', '--repository', 'DataDog/integrations-core', '--commit', 'a' * 40)
-    assert result.exit_code == 0, result.output
+    with patch.object(Release, 'ensure_tag', autospec=True, side_effect=tag):
+        assert main(['tag', '--repository', 'DataDog/integrations-core', '--commit', 'a' * 40]) == 0
     assert 'Created source tag at the expected commit.' in step_summary.read_text()
 
 
 @pytest.mark.parametrize('dry_run', [False, True])
-def test_cleanup_options_and_summary(ddev: CliRunner, mocker: MockerFixture, step_summary: Path, dry_run: bool):
-    cleanup = mocker.patch.object(Release, 'cleanup', autospec=True, return_value='Cleanup completed.')
-    args = ['--dry-run'] if dry_run else []
-    result = ddev(
-        'release',
-        'apw',
-        'cleanup',
-        '--repository',
-        'DataDog/marketplace',
-        '--commit',
-        'c' * 40,
-        '--retention-days',
-        '7',
-        *args,
-    )
-    assert result.exit_code == 0, result.output
+def test_cleanup_options_and_summary(step_summary: Path, dry_run: bool):
+    with patch.object(Release, 'cleanup', autospec=True, return_value='Cleanup completed.') as cleanup:
+        args = ['cleanup', '--repository', 'DataDog/marketplace', '--commit', 'c' * 40, '--retention-days', '7']
+        assert main([*args, *(['--dry-run'] if dry_run else [])]) == 0
     release = cleanup.call_args.args[0]
     assert release.repository == 'DataDog/marketplace'
     assert release.commit == 'c' * 40
     cleanup.assert_called_once_with(release, 7, dry_run=dry_run)
     assert 'Cleanup completed.' in step_summary.read_text()
+
+
+@pytest.mark.parametrize(
+    'args',
+    [
+        ['check', '--repository', 'DataDog/marketplace', '--commit', 'a' * 40, '--exclude', 'vendor/**'],
+        ['publish', '--repository', 'DataDog/marketplace', '--commit', 'a' * 40, '--dry-run'],
+        ['tag', '--repository', 'DataDog/marketplace', '--commit', 'a' * 40, '--retention-days', '3'],
+        ['cleanup', '--repository', 'DataDog/marketplace', '--commit', 'a' * 40, '--retention-days', '0'],
+        ['release', '--repository', 'DataDog/marketplace', '--commit', 'a' * 40],
+    ],
+)
+def test_rejects_options_for_other_actions(args: list[str]):
+    with pytest.raises(SystemExit) as error:
+        main(args)
+    assert error.value.code == 2
+
+
+def test_invalid_identity_fails_without_traceback(capsys: pytest.CaptureFixture[str]):
+    assert main(['check', '--repository', 'DataDog/marketplace', '--commit', 'A' * 40]) == 1
+    assert capsys.readouterr().err == 'Error: commit must be a full, lowercase Git SHA\n'

@@ -12,8 +12,7 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
-
-from ddev.release.apw import FILES, Release, api_get
+from apw_assets import FILES, Release, api_get
 
 COMMIT = 'a' * 40
 REPOSITORY = 'DataDog/integrations-core'
@@ -26,7 +25,7 @@ class TestCleanup:
         self.pages: list[list[dict[str, Any]]] = []
         self.deleted: list[int] = []
         self.release = Release(REPOSITORY, COMMIT)
-        monkeypatch.setattr('ddev.release.apw.gh', self.gh)
+        monkeypatch.setattr('apw_assets.gh', self.gh)
 
     def snapshot(self, release_id: int, age_days: int) -> dict[str, Any]:
         commit = f'{release_id:040x}'
@@ -116,7 +115,7 @@ class TestCleanup:
         def fail(*args: str) -> bytes:
             raise subprocess.CalledProcessError(1, args)
 
-        monkeypatch.setattr('ddev.release.apw.gh', fail)
+        monkeypatch.setattr('apw_assets.gh', fail)
         with pytest.raises(subprocess.CalledProcessError):
             self.release.cleanup(now=self.now)
         assert self.deleted == []
@@ -149,8 +148,8 @@ class TestRelease:
         self.mutations = []
         self.downloads = []
         self.fail_upload = None
-        monkeypatch.setattr('ddev.release.apw.api_get', self.api)
-        monkeypatch.setattr('ddev.release.apw.gh', self.gh)
+        monkeypatch.setattr('apw_assets.api_get', self.api)
+        monkeypatch.setattr('apw_assets.gh', self.gh)
         monkeypatch.setenv('GITHUB_SERVER_URL', 'https://github.com')
         monkeypatch.setenv('GITHUB_RUN_ID', '123')
         monkeypatch.setenv('GH_REPO', 'wrong/implicit-repository')
@@ -362,7 +361,7 @@ class TestAPIError:
             stdout=f'HTTP/2.0 {status} Status\nHeader: value\n\n{{"id":42}}',
             stderr='error' if code else '',
         )
-        with patch('ddev.release.apw.subprocess.run', return_value=response):
+        with patch('apw_assets.subprocess.run', return_value=response):
             if status == 404:
                 assert api_get('endpoint', missing_ok=True) is None
             elif status == 200:
@@ -373,6 +372,6 @@ class TestAPIError:
 
     def test_connection_error_is_not_missing(self):
         response = subprocess.CompletedProcess(['gh', 'api'], 1, stdout='', stderr='connection failed')
-        with patch('ddev.release.apw.subprocess.run', return_value=response):
+        with patch('apw_assets.subprocess.run', return_value=response):
             with pytest.raises(subprocess.CalledProcessError):
                 api_get('endpoint', missing_ok=True)
