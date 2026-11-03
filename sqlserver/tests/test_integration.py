@@ -23,6 +23,7 @@ from datadog_checks.sqlserver.const import (
     STATIC_INFO_VERSION,
     STATIC_INFO_YEAR,
     TABLE_SIZE_METRICS,
+    TASK_SCHEDULER_METRICS,
 )
 
 from .common import (
@@ -611,7 +612,13 @@ def test_check_windows_defaults(aggregator, dd_run_check, init_config, instance_
 
     aggregator.assert_metric_has_tag('sqlserver.db.commit_table_entries', 'db:master')
 
-    for mname in EXPECTED_DEFAULT_METRICS + CUSTOM_METRICS:
+    expected_metrics = EXPECTED_DEFAULT_METRICS + CUSTOM_METRICS
+    if check._config.database_metrics_config['task_scheduler_metrics']['enabled']:
+        # Scheduler and task metrics are gated on task_scheduler_metrics.enabled, so only
+        # assert them when they are actually collected to keep this test hermetic.
+        expected_metrics += [m[0] for m in TASK_SCHEDULER_METRICS]
+
+    for mname in expected_metrics:
         # These require extra setup to test
         if mname not in DATABASE_INDEX_METRICS and mname not in [m[0] for m in TABLE_SIZE_METRICS]:
             aggregator.assert_metric(mname)

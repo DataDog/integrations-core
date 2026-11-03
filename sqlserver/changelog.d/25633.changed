@@ -1,0 +1,1 @@
+Enable Task and Scheduler metrics by default, so unconfigured instances now emit `sqlserver.scheduler.*` and `sqlserver.task.*` metrics.

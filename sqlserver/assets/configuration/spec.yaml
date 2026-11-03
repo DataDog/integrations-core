@@ -435,13 +435,13 @@ files:
             Configure collection of additional Task and Scheduler metrics.
 
             Set `task_scheduler_metrics.enabled` to true to enable collection of additional Task and Scheduler metrics.
-            Defaults to false.
+            Defaults to true.
           value:
             type: object
             properties:
             - name: enabled
               type: boolean
-              example: false
+              example: true
           fleet_configurable: false
         - name: tempdb_file_space_usage_metrics
           description: |
