@@ -66,7 +66,7 @@ In addition, Windows and CentOS/RHEL versions earlier than 8 are not supported.
     --privileged
     ```
 
-    From kernel version 5.8, the `--privileged` parameter can be replaced by `--cap-add CAP_BPF`.
+    From kernel version 5.8, the `--privileged` parameter can be replaced by `--cap-add CAP_BPF --cap-add CAP_PERFMON`.
 
 **Note**: `--privileged` mode is not supported in Docker swarm.
 
