@@ -75,7 +75,7 @@ traffic is continuous rather than bursty. Each iteration:
 
 Because of the deliberate timeouts, the dashboard's timeout widgets show
 activity and the node logs batch-size warnings; this is expected for this
-fixture. `ACTIVITY_DURATION` (seconds, `0` = forever) bounds the run.
+fixture.
 
 All 14 target metrics are produced live; none rely on recorded fixtures, and
 none are expected to stay at zero.

@@ -6,7 +6,6 @@
 set -eu
 
 API="http://${DB_HOST}:${SCYLLA_API_PORT:-10000}"
-DURATION="${ACTIVITY_DURATION:-0}"   # 0 = run forever
 
 log() { echo "activity-gen: $*" >&2; }
 
@@ -21,13 +20,11 @@ fi
 # timeout, while staying under the 1 MB batch size failure threshold.
 BIG=$(head -c 15000 /dev/zero | tr '\0' 'x')
 
-# Emits CQL forever (or until ACTIVITY_DURATION) on stdout. It is piped into a
-# single long-lived cqlsh session, so traffic is continuous rather than bursty
-# and the pipe throttles generation to the rate cqlsh can execute. Logs go to
-# stderr. Timeouts are deliberate; cqlsh reports them and keeps going.
+# Emits CQL forever on stdout. It is piped into a single long-lived cqlsh
+# session, so traffic is continuous rather than bursty and the pipe throttles
+# generation to the rate cqlsh can execute. Logs go to stderr. Timeouts are
+# deliberate; cqlsh reports them and keeps going.
 workload() {
-  end=0
-  [ "$DURATION" -gt 0 ] && end=$(( $(date +%s) + DURATION ))
   i=0
 
   while :; do
@@ -72,12 +69,8 @@ workload() {
           "read_timeouts=$(echo "$m" | sed -n 's/^scylla_storage_proxy_coordinator_read_timeouts{[^}]*} \([0-9]*\).*/\1/p' | head -1)" \
           "write_timeouts=$(echo "$m" | sed -n 's/^scylla_storage_proxy_coordinator_write_timeouts{[^}]*} \([0-9]*\).*/\1/p' | head -1)"
     fi
-
-    [ "$end" -gt 0 ] && [ "$(date +%s)" -ge "$end" ] && break
     sleep 1
   done
-
-  log "PASS: activity workload complete after $i iterations"
 }
 
 workload | cqlsh "$DB_HOST" "${DB_PORT:-9042}" -u "$DB_USERNAME" -p "$DB_PASSWORD" > /dev/null 2>&1 || true
