@@ -15,6 +15,7 @@ from datadog_checks.hpe_aruba_edgeconnect.ndm_models import PAYLOAD_METADATA_BAT
 
 from .common import (
     ALARM_PAYLOAD,
+    ALARM_RAISED_MS,
     APPLIANCE_PAYLOAD,
     BASE_DEVICE_TAGS,
     CHECK_MODULE,
@@ -616,7 +617,7 @@ def test_collection_step_failure_does_not_block_others(dd_run_check, aggregator,
     aggregator.assert_metric(f'{NS}.device.hardware.ok', count=1)
 
 
-ALARM_RAISED_S = ALARM_PAYLOAD['outstanding'][0]['time'] // 1000
+ALARM_RAISED_S = ALARM_RAISED_MS // 1000
 
 
 def _events_check(instance):

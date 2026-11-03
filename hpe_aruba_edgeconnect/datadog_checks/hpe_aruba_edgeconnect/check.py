@@ -502,7 +502,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         else:
             # An empty cache means a first run, or an HA failover to an Agent that has not run this check.
             # Start one interval back so outstanding alarms already reported elsewhere are not resent.
-            last_ts = int((time.time() - self.config.min_collection_interval) * 1000)
+            last_ts = int((time.time() - (self.config.min_collection_interval or 60)) * 1000)
         newest_ts = last_ts
         for alarm in outstanding:
             raised_ms = alarm.get('time')
