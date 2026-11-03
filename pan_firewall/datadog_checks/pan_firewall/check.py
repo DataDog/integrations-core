@@ -26,7 +26,7 @@ class PanFirewallCheck(AgentCheck, ConfigMixin):
     def persistent_cache_id(self) -> str:
         # The cache keys already name their device (serial, IP, Panorama host), so the namespace (and the Panorama
         # host) is enough to keep instances apart. Unlike the default config digest, editing credentials, tags or
-        # tuning options keeps the threat watermarks, the Panorama firewall list and the device identities.
+        # tuning options keeps the Panorama firewall list and the device identities.
         return config_set_persistent_cache_id(self, instance_config_options=['namespace', 'panorama_host'])
 
     def check(self, _: Any) -> None:

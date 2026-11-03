@@ -23,7 +23,6 @@ INTERVALS = {
     'global_counters': 180,
     'ospf': 180,
     'environment': 300,
-    'threats': 300,
     'disk': 1800,
     IDENTITY: 1800,
     'reports': 1800,
@@ -43,7 +42,7 @@ NDM_DEVICE_RESOURCE_TAG = 'dd.internal.resource:ndm_device'
 NDM_DEVICE_USER_TAGS_RESOURCE_TAG = 'dd.internal.resource:ndm_device_user_tags'
 NDM_INTERFACE_RESOURCE_TAG = 'dd.internal.resource:ndm_interface'
 
-# A job still running: a log or report job being polled, or a job that makes the firewall busy.
+# A job still running: a report job being polled, or a job that makes the firewall busy.
 ACTIVE_STATUSES = frozenset({'ACT', 'PEND'})
 
 # A firewall is busy, and is not collected, while `show jobs pending` lists an active job of one of these types.
@@ -51,15 +50,6 @@ ACTIVE_STATUSES = frozenset({'ACT', 'PEND'})
 # collection.
 BUSY_JOB_TYPES = frozenset({'Commit', 'AutoCom', 'Content', 'Antivirus', 'WildFire'})
 COMMIT_SKIP_MAX_SECONDS = 600
-
-# Threat logs: entries asked per `type=log` job (the PAN-OS maximum), how often a job is polled and how long to wait
-# between polls before it is left for the next run, and the minimum seconds between two `seqno` reset checks.
-THREAT_PAGE_SIZE = 5000
-# Pages one run reads at most, to bound its time. A run that hits the cap is followed by another on the next check run.
-THREAT_MAX_PAGES = 2
-THREAT_JOB_POLLS = 5
-THREAT_JOB_POLL_DELAY = 1.0
-THREAT_RESET_CHECK_SECONDS = 1800
 
 # Top-N reports: report name -> (PAN-OS field the custom report aggregates by, dimension tag of its metrics). There is
 # no HTTP-only report. A job is polled this many times, this many seconds apart, before it is left for
