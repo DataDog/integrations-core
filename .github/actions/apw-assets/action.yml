@@ -2,7 +2,7 @@ name: APW assets
 description: >-
   Package the current commit as an APW source snapshot, or publish it as an
   immutable apw-assets-<commit> GitHub prerelease. Runs apw_assets.py with the
-  runner's Python standard library and gh; installs no packages.
+  runner's Python standard library and gh.
 
 inputs:
   mode:
