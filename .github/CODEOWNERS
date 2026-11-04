@@ -361,11 +361,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /ping_federate/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /ping_federate/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-vonage/                                                            @DataDog/saas-integrations
-vonage/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
-vonage/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
-vonage/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
 /servicenow_performance/                                            @DataDog/saas-integrations
 /servicenow_performance/*.md                                        @DataDog/saas-integrations @DataDog/documentation
 /servicenow_performance/manifest.json                               @DataDog/saas-integrations @DataDog/documentation
@@ -494,11 +489,6 @@ vonage/assets/logs/                                                @DataDog/saas
 /guarddog/*.md                                                       @DataDog/agent-integrations @DataDog/documentation
 /guarddog/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
 /guarddog/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
-/vectra/                                                             @DataDog/saas-integrations
-/vectra/*.md                                                         @DataDog/saas-integrations @DataDog/documentation
-/vectra/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
-/vectra/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /beyondtrust_privileged_remote_access/                               @DataDog/agent-integrations
 /beyondtrust_privileged_remote_access/*.md                           @DataDog/agent-integrations @DataDog/documentation

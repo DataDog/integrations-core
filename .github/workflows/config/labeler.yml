@@ -1369,10 +1369,6 @@ integration/vault:
 - changed-files:
   - any-glob-to-any-file:
     - vault/**/*
-integration/vectra:
-- changed-files:
-  - any-glob-to-any-file:
-    - vectra/**/*
 integration/velero:
 - changed-files:
   - any-glob-to-any-file:
@@ -1393,10 +1389,6 @@ integration/voltdb:
 - changed-files:
   - any-glob-to-any-file:
     - voltdb/**/*
-integration/vonage:
-- changed-files:
-  - any-glob-to-any-file:
-    - vonage/**/*
 integration/vsphere:
 - changed-files:
   - any-glob-to-any-file:
