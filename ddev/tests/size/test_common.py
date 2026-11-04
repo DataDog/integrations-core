@@ -2,9 +2,8 @@ import io
 import json
 import os
 import re
-import threading
 import zipfile
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from collections.abc import Iterator
 from unittest.mock import MagicMock, PropertyMock, mock_open, patch
 
 import pytest
@@ -12,9 +11,7 @@ import requests
 import stamina
 
 from ddev.cli.size.utils.common_funcs import (
-    WHEEL_BODY_MAX_RESTARTS,
-    WHEEL_REQUEST_MAX_RETRIES,
-    WHEEL_REQUEST_SESSION,
+    WHEEL_REQUEST_ATTEMPTS,
     WHEEL_REQUEST_TIMEOUT_SECONDS,
     _matches_gitignore,
     check_python_version,
@@ -34,6 +31,7 @@ from ddev.cli.size.utils.common_funcs import (
     is_correct_dependency,
     is_valid_integration_file,
     request_wheel,
+    retry_wheel_request,
     save_csv,
     save_json,
     save_markdown,
@@ -188,7 +186,7 @@ def test_get_dependencies_sizes():
     mock_response.content = zip_content
     mock_response.__enter__.return_value = mock_response
     mock_response.__exit__.return_value = None
-    with patch.object(WHEEL_REQUEST_SESSION, "get", return_value=mock_response) as mock_get:
+    with patch("requests.get", return_value=mock_response) as mock_get:
         file_data = get_dependencies_sizes(
             MagicMock(),
             ["dependency1"],
@@ -722,7 +720,7 @@ def test_request_wheel_falls_back_to_the_other_tier(missing_status_code):
     missing = make_wheel_response(missing_status_code)
     found = make_wheel_response(200)
 
-    with patch.object(WHEEL_REQUEST_SESSION, "get", side_effect=[missing, found]) as mock_get:
+    with patch("requests.get", side_effect=[missing, found]) as mock_get:
         assert request_wheel(MagicMock(), PLACEHOLDER_URL, "dev") is found
 
     assert [call.args[0] for call in mock_get.call_args_list] == [
@@ -733,7 +731,7 @@ def test_request_wheel_falls_back_to_the_other_tier(missing_status_code):
 
 
 def test_request_wheel_raises_when_no_tier_has_the_wheel():
-    with patch.object(WHEEL_REQUEST_SESSION, "get", side_effect=[make_wheel_response(404), make_wheel_response(404)]):
+    with patch("requests.get", side_effect=[make_wheel_response(404), make_wheel_response(404)]):
         with pytest.raises(
             requests.HTTPError,
             match=re.escape(
@@ -745,9 +743,7 @@ def test_request_wheel_raises_when_no_tier_has_the_wheel():
 
 
 def test_request_wheel_does_not_retry_on_a_non_missing_error():
-    with patch.object(
-        WHEEL_REQUEST_SESSION, "get", side_effect=[make_wheel_response(500), make_wheel_response(200)]
-    ) as mock_get:
+    with patch("requests.get", side_effect=[make_wheel_response(500), make_wheel_response(200)]) as mock_get:
         with pytest.raises(requests.HTTPError):
             request_wheel(MagicMock(), PLACEHOLDER_URL, "dev")
 
@@ -757,7 +753,7 @@ def test_request_wheel_does_not_retry_on_a_non_missing_error():
 def test_request_wheel_uses_head_when_requested():
     found = make_wheel_response(200)
 
-    with patch.object(WHEEL_REQUEST_SESSION, "head", return_value=found) as mock_head:
+    with patch("requests.head", return_value=found) as mock_head:
         assert request_wheel(MagicMock(), PLACEHOLDER_URL, "stable", head=True) is found
 
     mock_head.assert_called_once_with(
@@ -766,93 +762,10 @@ def test_request_wheel_uses_head_when_requested():
 
 
 @pytest.fixture
-def wheel_server():
-    """A local server that answers with the queued statuses, then 200, recording every request.
-
-    A queued entry is a status code, or a `(status, headers)` pair to send extra headers.
-    """
-    statuses: list[int | tuple[int, dict[str, str]]] = []
-    requested: list[str] = []
-
-    class Handler(BaseHTTPRequestHandler):
-        def do_GET(self):
-            requested.append(self.path)
-            entry = statuses.pop(0) if statuses else 200
-            status, headers = entry if isinstance(entry, tuple) else (entry, {})
-            self.send_response(status)
-            for name, value in headers.items():
-                self.send_header(name, value)
-            self.send_header("Content-Length", "0")
-            self.end_headers()
-
-        def log_message(self, *args):
-            pass
-
-    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
-    thread = threading.Thread(target=server.serve_forever, kwargs={"poll_interval": 0.05}, daemon=True)
-    thread.start()
-    https_adapter = WHEEL_REQUEST_SESSION.get_adapter("https://example.com")
-    with (
-        patch.dict(WHEEL_REQUEST_SESSION.adapters, {"http://": https_adapter}),
-        patch("urllib3.util.retry.time.sleep"),
-    ):
-        yield f"http://127.0.0.1:{server.server_address[1]}/dep1-1.1.1-.whl", statuses, requested
-    server.shutdown()
-    thread.join()
-
-
-@pytest.mark.parametrize("status_code", [502, 503, 504])
-def test_request_wheel_retries_gateway_errors(wheel_server, status_code):
-    url, statuses, requested = wheel_server
-    statuses.extend([status_code, status_code])
-
-    with request_wheel(MagicMock(), url, "dev") as response:
-        assert response.status_code == 200
-
-    assert len(requested) == 3
-
-
-def test_request_wheel_ignores_retry_after_on_gateway_errors(wheel_server):
-    url, statuses, requested = wheel_server
-    statuses.append((503, {"Retry-After": "3600"}))
-
-    with patch("urllib3.util.retry.time.sleep") as sleep:
-        with request_wheel(MagicMock(), url, "dev") as response:
-            assert response.status_code == 200
-
-    assert len(requested) == 2
-    assert all(call.args[0] < 3600 for call in sleep.call_args_list)
-
-
-@pytest.mark.parametrize(
-    "status",
-    [
-        pytest.param(403, id="forbidden"),
-        pytest.param(404, id="not found"),
-        pytest.param(500, id="server error"),
-        pytest.param((413, {"Retry-After": "3600"}), id="payload too large with retry-after"),
-        pytest.param((429, {"Retry-After": "3600"}), id="too many requests with retry-after"),
-    ],
-)
-def test_request_wheel_does_not_resend_other_errors(wheel_server, status):
-    url, statuses, requested = wheel_server
-    statuses.append(status)
-    status_code = status[0] if isinstance(status, tuple) else status
-
-    with pytest.raises(requests.HTTPError, match=str(status_code)):
-        request_wheel(MagicMock(), url, "dev")
-
-    assert len(requested) == 1
-
-
-def test_request_wheel_gives_up_on_a_persistent_gateway_error(wheel_server):
-    url, statuses, requested = wheel_server
-    statuses.extend([504] * (WHEEL_REQUEST_MAX_RETRIES + 1))
-
-    with pytest.raises(requests.HTTPError, match="504"):
-        request_wheel(MagicMock(), url, "dev")
-
-    assert len(requested) == WHEEL_REQUEST_MAX_RETRIES + 1
+def instant_retries() -> Iterator[None]:
+    """Skips the backoff between wheel retries while keeping the configured number of attempts."""
+    with stamina.set_testing(True, attempts=100, cap=True):
+        yield
 
 
 def make_streamed_wheel_response(content):
@@ -863,47 +776,84 @@ def make_streamed_wheel_response(content):
 
 
 @pytest.mark.parametrize(
-    "error",
+    "make_failure",
     [
-        pytest.param(requests.exceptions.ChunkedEncodingError("Connection broken"), id="connection reset"),
-        pytest.param(requests.exceptions.ConnectionError("Read timed out"), id="read timeout"),
+        pytest.param(lambda: make_wheel_response(502), id="bad gateway"),
+        pytest.param(lambda: make_wheel_response(503), id="service unavailable"),
+        pytest.param(lambda: make_wheel_response(504), id="gateway timeout"),
+        pytest.param(lambda: requests.exceptions.ConnectionError("Connection reset"), id="connection reset"),
+        pytest.param(lambda: requests.exceptions.ReadTimeout("Read timed out"), id="read timeout"),
+        pytest.param(
+            lambda: make_streamed_wheel_response(requests.exceptions.ChunkedEncodingError("Connection broken")),
+            id="body cut short",
+        ),
+        pytest.param(
+            lambda: make_streamed_wheel_response(requests.exceptions.ConnectionError("Read timed out")),
+            id="body read timeout",
+        ),
     ],
 )
-def test_download_wheel_restarts_a_download_dropped_mid_body(error):
-    dropped = make_streamed_wheel_response(error)
-    complete = make_streamed_wheel_response(b"wheel")
-
-    with (
-        patch.object(WHEEL_REQUEST_SESSION, "get", side_effect=[dropped, complete]),
-        stamina.set_testing(True, attempts=100, cap=True),
-    ):
+def test_download_wheel_retries_transient_errors(instant_retries, make_failure):
+    with patch("requests.get", side_effect=[make_failure(), make_streamed_wheel_response(b"wheel")]) as mock_get:
         assert download_wheel(MagicMock(), PLACEHOLDER_URL, "dev") == b"wheel"
 
+    assert mock_get.call_count == 2
 
-def test_download_wheel_gives_up_after_the_retry_limit_and_names_the_wheel():
-    responses = [
-        make_streamed_wheel_response(requests.exceptions.ChunkedEncodingError("Connection broken"))
-        for _ in range(WHEEL_BODY_MAX_RESTARTS + 1)
-    ]
 
-    with (
-        patch.object(WHEEL_REQUEST_SESSION, "get", side_effect=responses) as mock_get,
-        stamina.set_testing(True, attempts=100, cap=True),
-    ):
-        with pytest.raises(requests.exceptions.ChunkedEncodingError) as excinfo:
+@pytest.mark.parametrize(
+    "status_code, expected_requests",
+    [
+        pytest.param(500, 1, id="server error"),
+        pytest.param(429, 1, id="too many requests"),
+        pytest.param(404, 2, id="not found on every tier"),
+    ],
+)
+def test_download_wheel_does_not_retry_other_errors(instant_retries, status_code, expected_requests):
+    responses = [make_wheel_response(status_code) for _ in range(WHEEL_REQUEST_ATTEMPTS)]
+
+    with patch("requests.get", side_effect=responses) as mock_get:
+        with pytest.raises(requests.HTTPError, match=str(status_code)):
             download_wheel(MagicMock(), PLACEHOLDER_URL, "dev")
 
-    assert mock_get.call_count == WHEEL_BODY_MAX_RESTARTS + 1
+    assert mock_get.call_count == expected_requests
+
+
+def make_failing_responses(kinds):
+    return [
+        make_wheel_response(504)
+        if kind == "gateway error"
+        else make_streamed_wheel_response(requests.exceptions.ChunkedEncodingError("Connection broken"))
+        for kind in kinds
+    ]
+
+
+@pytest.mark.parametrize(
+    "kinds",
+    [
+        pytest.param(["gateway error"] * (WHEEL_REQUEST_ATTEMPTS + 2), id="gateway errors"),
+        pytest.param(["body cut short"] * (WHEEL_REQUEST_ATTEMPTS + 2), id="bodies cut short"),
+        pytest.param(
+            ["gateway error"] * (WHEEL_REQUEST_ATTEMPTS - 1) + ["body cut short"] * 3,
+            id="gateway errors then a body cut short",
+        ),
+    ],
+)
+def test_download_wheel_shares_one_attempt_budget_and_names_the_wheel(instant_retries, kinds):
+    with patch("requests.get", side_effect=make_failing_responses(kinds)) as mock_get:
+        with pytest.raises(requests.RequestException) as excinfo:
+            download_wheel(MagicMock(), PLACEHOLDER_URL, "dev")
+
+    assert mock_get.call_count == WHEEL_REQUEST_ATTEMPTS
     assert any("dep1-1.1.1-.whl" in note for note in excinfo.value.__notes__)
 
 
-def test_download_wheel_does_not_restart_a_failed_request():
-    # The session has already retried a connection failure before request_wheel raises it.
-    with (
-        patch.object(WHEEL_REQUEST_SESSION, "get", side_effect=requests.exceptions.ConnectionError) as mock_get,
-        stamina.set_testing(True, attempts=100, cap=True),
-        pytest.raises(requests.exceptions.ConnectionError),
-    ):
-        download_wheel(MagicMock(), PLACEHOLDER_URL, "dev")
+def test_retry_wheel_request_retries_a_head_request(instant_retries):
+    found = make_wheel_response(200)
 
-    assert mock_get.call_count == 1
+    with patch("requests.head", side_effect=[make_wheel_response(504), found]) as mock_head:
+        response = retry_wheel_request(
+            lambda: request_wheel(MagicMock(), PLACEHOLDER_URL, "stable", head=True), PLACEHOLDER_URL
+        )
+
+    assert response is found
+    assert mock_head.call_count == 2

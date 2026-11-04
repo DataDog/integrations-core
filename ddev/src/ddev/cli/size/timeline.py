@@ -31,6 +31,7 @@ from .utils.common_funcs import (
     is_valid_integration_file,
     print_table,
     request_wheel,
+    retry_wheel_request,
     save_csv,
     save_json,
     save_markdown,
@@ -589,7 +590,9 @@ def get_dependency_size(
         A CommitEntry with size and metadata for the given dependency and commit.
     """
     if compressed:
-        response = request_wheel(app, download_url, wheels_storage, head=True)
+        response = retry_wheel_request(
+            lambda: request_wheel(app, download_url, wheels_storage, head=True), download_url
+        )
         size_str = response.headers.get("Content-Length")
         if size_str is None:
             raise ValueError(f"Missing size for commit {commit}")
