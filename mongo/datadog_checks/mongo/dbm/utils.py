@@ -246,7 +246,25 @@ def obfuscate_command(command: dict):
     obfuscated_command = command.copy()
     for key in COMMAND_KEYS_TO_REMOVE:
         obfuscated_command.pop(key, None)
+    if isinstance(command.get('q'), dict) and ('u' in command or 'limit' in command):
+        # Shards add this routing field to observed statements, but not to $queryStats shapes.
+        obfuscated_command.pop('includeQueryStatsMetricsForOpIndex', None)
+        obfuscated_command['q'] = _normalize_write_predicate(command['q'])
     return datadog_agent.obfuscate_mongodb_string(json_util.dumps(obfuscated_command))
+
+
+def _normalize_write_predicate(predicate: dict) -> dict:
+    # $queryStats makes shorthand equality explicit; use the same form across write collectors.
+    normalized = {}
+    for field, value in predicate.items():
+        if field in ('$and', '$or', '$nor') and isinstance(value, list):
+            value = [_normalize_write_predicate(item) if isinstance(item, dict) else item for item in value]
+        elif not field.startswith('$') and isinstance(value, dict) and set(value) == {'$eq'}:
+            # shortcut: only scalar equality is normalized; other predicate rewrites need server comparisons.
+            if not isinstance(value['$eq'], (dict, list, regex.Regex, re.Pattern)):
+                value = value['$eq']
+        normalized[field] = value
+    return normalized
 
 
 def obfuscate_explain_plan(plan):
@@ -310,6 +328,8 @@ QUERY_SHAPE_COPYABLE_FIELDS = [
     'collation',
     'arrayFilters',
     'key',  # for distinct command
+    'documents',  # for insert commands
+    'allowPartialResults',
 ]
 
 
@@ -366,6 +386,15 @@ def reconstruct_command_from_query_shape(query_shape: dict) -> dict:
     db_name = cmd_ns.get('db', '')
     coll_name = cmd_ns.get('coll', '')
     command_type = query_shape.get('command', 'unknown')
+
+    # $currentOp and slow-query records contain individual write statements, not wire-command batches.
+    if command_type in ('update', 'delete'):
+        fields = (
+            ('q', 'u', 'c', 'arrayFilters', 'multi', 'upsert', 'collation')
+            if command_type == 'update'
+            else ('q', 'limit', 'collation')
+        )
+        return {field: normalize_query_stats_value(query_shape[field]) for field in fields if field in query_shape}
 
     # Build the command with command type as key and collection as value
     command = {

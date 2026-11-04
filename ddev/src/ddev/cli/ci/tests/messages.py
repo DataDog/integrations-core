@@ -140,32 +140,6 @@ class BatchJobResult:
 
 
 @dataclass
-class WorkflowStatus:
-    """Status of a single GitHub Actions workflow run (one batch), with every job's result.
-
-    `batch_id` is the human batch identifier (e.g. `batch-01`) the comment renders; `id` is the
-    numeric workflow run id and `url` links to the run.
-    """
-
-    batch_id: str
-    url: str
-    id: int
-    success_count: int
-    failed_count: int
-    skipped_count: int
-    results: list[JobResult]
-
-    @property
-    def status(self) -> Status:
-        """Batch-level label: FAILURE if any job failed, else SUCCESS if any passed, else SKIPPED."""
-        if self.failed_count > 0:
-            return Status.FAILURE
-        if self.success_count > 0:
-            return Status.SUCCESS
-        return Status.SKIPPED
-
-
-@dataclass
 class TestBatch(BaseMessage):
     """Dispatched to trigger a matrix of test jobs.
 
@@ -212,7 +186,6 @@ class BatchFinished(BaseMessage):
     run_id: int  # GitHub Actions workflow run
     workflow_url: str
     artifacts_path: str
-    timed_out: bool = False
     batch_jobs: list[BatchJobResult] = field(default_factory=list)
 
 

@@ -3,10 +3,24 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Shared test helpers.
 
-Fixtures live in two directories and the split is deliberate:
+Fixtures live in three directories and the split is deliberate:
 
 `captured/`
     Verbatim responses recorded from the Cisco DevNet always-on sandbox. Real values.
+
+`captured_reservable/`
+    Verbatim responses recorded on 2026-10-05 from a Cisco DevNet reservable sandbox (Catalyst
+    Center 2.3.7.11) after seeding it with a site, two wired clients and an SD-Access fabric site.
+    File stems match `captured/`, so a test can load either. Each records a shape the always-on
+    sandbox never produced:
+    - `data_network_devices_switch_unreachable`: sw4 powered off, reporting `UNREACHABLE`, a
+      health score of -2, and an uptime and client count that are its last-known values.
+    - `data_clients_summary_analytics`: the wired clients as one group with an empty SSID, a
+      null band and every radio and onboarding value 0.
+    - `intent_network_health_zero_score`: the newest five-minute bucket before it completed, with
+      one device and no health for it, scoring the network 0.
+    - `data_fabric_site_health_summaries`: a fabric site with no devices reporting 0.0% healthy.
+    - `data_assurance_events`: syslog events and traps with no `severity` field at all.
 
 `wireless_synthetic/`
     Access point and radio payloads. The *keys* are generated from Cisco's published OpenAPI
@@ -31,12 +45,18 @@ from datadog_checks.cisco_catalyst_center.client import CatalystCenterClient
 
 FIXTURE_ROOT = Path(__file__).parent / 'fixtures'
 CAPTURED_DIR = FIXTURE_ROOT / 'captured'
+CAPTURED_RESERVABLE_DIR = FIXTURE_ROOT / 'captured_reservable'
 WIRELESS_SYNTHETIC_DIR = FIXTURE_ROOT / 'wireless_synthetic'
 
 
 def load_captured(name: str) -> Any:
     """Load a verbatim sandbox recording by file stem."""
     return json.loads((CAPTURED_DIR / f'{name}.json').read_text())
+
+
+def load_captured_reservable(name: str) -> Any:
+    """Load a verbatim reservable-sandbox recording by file stem."""
+    return json.loads((CAPTURED_RESERVABLE_DIR / f'{name}.json').read_text())
 
 
 def load_wireless_synthetic(name: str) -> Any:

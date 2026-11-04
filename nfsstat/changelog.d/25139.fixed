@@ -1,1 +1,0 @@
-Fix nfsiostat resolution and invocation on Fleet Automation-managed hosts, skip incomplete nfsiostat samples instead of failing the check, and support NFS sources without an export path.

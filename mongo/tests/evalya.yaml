@@ -1,0 +1,40 @@
+version: "1"
+
+# Full metric-coverage fixture for the mongo check and the OTel mongodbreceiver:
+# a one-shard sharded cluster (config server, shard primary, delayed secondary,
+# mongos) with a seed and a continuous workload. The dashboard and monitors mix
+# mongos-only and replica-set-only metrics, so a consumer runs one check
+# instance per role, all through the entrypoint's forwarded ports (see
+# ./README.md). The task targets the compose file's `mongo-full` entrypoint,
+# which gates on the whole environment.
+tasks:
+  - id: mongo-full
+    task: ./compose/full-coverage.compose@mongo-full
+    labels:
+      evalya.io/publish: "true"
+      evalya.io/provides.DB_HOST: "{{ .hostname }}"
+      evalya.io/provides.DB_PORT: "27017"
+      evalya.io/provides.MONGO_SHARD_PRIMARY_PORT: "27018"
+      evalya.io/provides.MONGO_SHARD_SECONDARY_PORT: "27019"
+      evalya.io/provides.DB_USERNAME: "${DB_USERNAME:-datadog}"
+      evalya.io/provides.DB_PASSWORD: "${DB_PASSWORD:-datadog}"
+    env:
+      - name: MONGO_VERSION
+        value: "8.0"
+      - name: ACTIVITY_GEN
+        value: "1"
+      - name: DB_USERNAME
+        value: datadog
+      - name: DB_PASSWORD
+        value: datadog
+    # Probes each forwarded port, then each upstream. A socat listener that
+    # dies does not stop the container while the others run, and a forked
+    # listener accepts even when its upstream is down, so both are checked.
+    # The depends_on chain already guarantees the nodes are healthy and the
+    # seed authenticated as DB_USERNAME.
+    healthcheck:
+      test: ["CMD-SHELL", "for a in 127.0.0.1:27017 127.0.0.1:27018 127.0.0.1:27019 mongos:27017 shard-a:27017 shard-b:27017; do socat -u OPEN:/dev/null TCP:$$a,connect-timeout=2 || exit 1; done"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s

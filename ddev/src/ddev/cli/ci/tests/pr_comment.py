@@ -98,7 +98,6 @@ REJECTION_HEADROOM = 4096
 # What a reader investigating a failure needs from a collection problem: which stage failed to hand
 # over what, in their vocabulary rather than the gatherer's.
 PROGRESS_ERROR_TEXT = {
-    ProgressError.TIMED_OUT: "timed out",
     ProgressError.NO_JOB_RESULTS: "test results could not be collected",
     ProgressError.NO_ARTIFACTS: "artifacts could not be downloaded",
 }
@@ -127,6 +126,7 @@ STATUS_CHIP = {
     Status.SUCCESS: "✅",
     Status.FAILURE: "❌",
     Status.SKIPPED: "⏭️",
+    Status.CANCELLED: "🚫",
 }
 
 
@@ -255,6 +255,8 @@ def summary_line(progress: DispatcherProgress, *, shutdown: ShutdownRequest | No
         f"Dispatcher tests {state}: {progress.complete}/{progress.total} jobs, "
         f"{progress.passed} passed, {progress.failed} failed, {progress.skipped} skipped"
     )
+    if progress.cancelled:
+        summary += f", {progress.cancelled} cancelled"
     if progress.inconclusive:
         summary += f", {progress.inconclusive} inconclusive"
     return summary
@@ -277,13 +279,17 @@ def _header(progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = 
 
 
 def _heading(progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = None) -> str:
-    """The run's outcome in one line. A failure outranks an uncollected result, which outranks a pass."""
+    """The run's outcome in one line. A failure outranks a cancelled batch, which outranks an
+    uncollected result, which outranks a pass."""
     if shutdown is not None:
         return SHUTDOWN_HEADINGS[shutdown.kind]
     if not progress.done:
         return "## 🔄 Dispatcher tests: in progress"
-    if _has_failure(progress):
+    if progress.has_failure:
         return "## ❌ Dispatcher tests: failed"
+    if any(batch.status is Status.CANCELLED for batch in progress.batches):
+        # The same heading a shutdown-cancelled run uses: either way the run ended by cancellation.
+        return CANCELLED_HEADING
     if any(_uncollected_counts(progress)) or progress.inconclusive:
         # An inconclusive job is as unknown as an uncollected one, so the run cannot claim a pass.
         return "## ⚠️ Dispatcher tests: results incomplete"
@@ -306,7 +312,7 @@ def _alert(progress: DispatcherProgress, *, shutdown: ShutdownRequest | None = N
         return f"> [!NOTE]\n> **{phase}** {_outstanding(progress)} {ALERT_RUNNING_NOTE}"
 
     uncollected = _uncollected_sentences(progress)
-    if _has_failure(progress):
+    if progress.has_failure:
         groups = sum(1 for group in _failure_groups(progress) if group.failed)
         if groups:
             lead = f"**{_plural(groups, 'integration')} failed.** {progress.failed} of {progress.total} jobs failed."
@@ -383,18 +389,21 @@ def _totals(progress: DispatcherProgress) -> str:
         counts.append(f"❌ {progress.failed} failed")
     if progress.skipped:
         counts.append(f"⏭️ {progress.skipped} skipped")
+    if progress.cancelled:
+        counts.append(f"🚫 {progress.cancelled} cancelled")
     if progress.inconclusive:
         counts.append(f"❔ {progress.inconclusive} inconclusive")
     pending = progress.total - progress.complete
     if pending:
         counts.append(f"⏳ {pending} pending")
-    # Only worth saying once the run is over, and only when it is the whole truth: alongside results
-    # that never arrived, or an outcome that could not be determined, "nothing failed" is what a
-    # reader would remember and it would be wrong.
+    # Only say it once the run is over and it is the whole truth: a failed job, missing results,
+    # an undetermined outcome or a cancelled batch would make "nothing failed" wrong.
     if (
         progress.done
-        and not _has_failure(progress)
+        and not progress.failed
+        and not progress.has_failure
         and not progress.inconclusive
+        and not progress.cancelled
         and not any(_uncollected_counts(progress))
     ):
         counts.append("nothing failed")
@@ -412,9 +421,10 @@ def _progress_bar(progress: DispatcherProgress) -> str:
     if not progress.done and not pending and not _collecting_results(progress):
         pending = 1
 
-    # An inconclusive job has no outcome of its own to draw, so it takes the pending colour:
-    # leaving it out would hand its share of the width to the passed segment.
-    counts = (progress.passed, progress.failed, progress.skipped, pending + progress.inconclusive)
+    # An inconclusive or cancelled job has no verified result of its own to draw, so it takes the
+    # pending colour: leaving it out would hand its share of the width to the passed segment.
+    unverified = pending + progress.inconclusive + progress.cancelled
+    counts = (progress.passed, progress.failed, progress.skipped, unverified)
     total = max(progress.total, sum(counts))
     if total <= 0:
         return ""
@@ -879,16 +889,6 @@ def _failure_is_unattributed(batch: BatchProgress) -> bool:
     """Whether no job confirmed a failure and at least one job's outcome is inconclusive."""
     jobs = batch.jobs_progress
     return any(_is_inconclusive(job) for job in jobs) and not any(_is_failed(job) for job in jobs)
-
-
-def _has_failure(progress: DispatcherProgress) -> bool:
-    """Whether the run has a failure to answer for.
-
-    A batch's own `FAILURE` counts, since a workflow can fail with nothing inside it failing. An
-    *error* does not: an uncollected result reads as incomplete, so the heading never claims a
-    failure with nothing to show for it.
-    """
-    return progress.failed > 0 or any(batch.status is Status.FAILURE for batch in progress.batches)
 
 
 def _target_label(job: JobProgress) -> str:

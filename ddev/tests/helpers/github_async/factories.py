@@ -30,6 +30,7 @@ from ddev.utils.github_async.models import (
     GitHubUser,
     GitObject,
     GitReference,
+    GitTag,
     IssueComment,
     JobStep,
     JobStepStatus,
@@ -153,6 +154,21 @@ def make_git_reference(
     if url is UNSET:
         url = f'https://api.github.com/repos/DataDog/integrations-core/git/ref/{ref}'
     return GitReference(ref=ref, node_id=node_id, url=url, object=object if object is not None else make_git_object())
+
+
+def make_git_tag(
+    *,
+    tag: str = '7.85.0',
+    sha: str = 't' * 40,
+    node_id: str = 'TAG_kwDO',
+    url: str | Unset = UNSET,
+    object: GitObject | None = None,
+) -> GitTag:
+    if url is UNSET:
+        url = f'https://api.github.com/repos/DataDog/integrations-core/git/tags/{sha}'
+    return GitTag(
+        tag=tag, sha=sha, node_id=node_id, url=url, object=object if object is not None else make_git_object()
+    )
 
 
 def make_file_content(
@@ -397,6 +413,7 @@ def make_workflow_job(
     name: str = 'test-job',
     status: WorkflowJobStatus = WorkflowJobStatus.COMPLETED,
     conclusion: WorkflowJobConclusion | None | Unset = UNSET,
+    runner_name: str | None | Unset = UNSET,
     html_url: str | None | Unset = UNSET,
     created_at: str = DEFAULT_CREATED_AT,
     started_at: str = DEFAULT_STARTED_AT,
@@ -405,6 +422,14 @@ def make_workflow_job(
 ) -> WorkflowJob:
     if conclusion is UNSET:
         conclusion = WorkflowJobConclusion.SUCCESS if status is WorkflowJobStatus.COMPLETED else None
+    if runner_name is UNSET:
+        # Jobs cancelled while queued must pass `runner_name=None` explicitly.
+        runner_name = (
+            'github-actions-runner'
+            if status in (WorkflowJobStatus.IN_PROGRESS, WorkflowJobStatus.COMPLETED)
+            and conclusion is not WorkflowJobConclusion.SKIPPED
+            else None
+        )
     if html_url is UNSET:
         html_url = f'https://github.com/DataDog/integrations-core/actions/runs/{run_id}/job/{id}'
     if completed_at is UNSET:
@@ -415,6 +440,7 @@ def make_workflow_job(
         name=name,
         status=status,
         conclusion=conclusion,
+        runner_name=runner_name,
         html_url=html_url,
         created_at=created_at,
         started_at=started_at,

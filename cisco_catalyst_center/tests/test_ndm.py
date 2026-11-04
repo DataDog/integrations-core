@@ -28,7 +28,7 @@ from datadog_checks.cisco_catalyst_center.ndm_models import (
     create_interface_metadata,
 )
 
-from .common import ScriptedHttp, ViewRoutedHttp, load_captured, load_wireless_synthetic
+from .common import ScriptedHttp, ViewRoutedHttp, load_captured, load_wireless_synthetic, with_value
 
 
 def _device_record():
@@ -206,14 +206,16 @@ def test_batch_payloads_splits_into_batches_of_at_most_one_hundred(device_count,
 def test_check_given_ndm_disabled_sends_no_metadata_event(dd_run_check, aggregator, instance):
     instance['send_ndm_metadata'] = False
     check = CiscoCatalystCenterCheck('cisco_catalyst_center', {}, [instance])
-    check.client.http = ScriptedHttp([load_captured('data_network_devices')])
+    # The inventory sweep is the first request. It is answered empty so the devices reach the device
+    # collector: with no devices there is nothing to send, and the test would pass with NDM on too.
+    check.client.http = ScriptedHttp([{'response': []}, load_captured('data_network_devices')])
 
     dd_run_check(check)
 
     assert aggregator.get_event_platform_events('network-devices-metadata', parse_json=False) == []
 
 
-def _ndm_enabled_check(instance):
+def _ndm_enabled_check(instance, devices=None):
     """A check with NDM metadata switched on, serving the captured devices and interfaces."""
     instance['send_ndm_metadata'] = True
     instance['collect_stacks'] = False
@@ -221,13 +223,17 @@ def _ndm_enabled_check(instance):
     check = CiscoCatalystCenterCheck('cisco_catalyst_center', {}, [instance])
     check.client.http = ViewRoutedHttp(
         {
-            None: load_captured('data_network_devices'),
+            None: devices or load_captured('data_network_devices'),
             'configuration': load_captured('data_interfaces_configuration'),
             'statistics': load_captured('data_interfaces_statistics'),
         },
-        # The interface collector always sweeps the intent API; without a route for it the
-        # viewless request would be served the device payload above.
-        by_path={'/dna/intent/api/v1/interface': {'response': []}},
+        # The interface collector always sweeps the intent API, and the device collector the
+        # inventory; without a route for each, the viewless request would be served the device
+        # payload above.
+        by_path={
+            '/dna/intent/api/v1/interface': {'response': []},
+            '/dna/intent/api/v1/network-device': load_captured('intent_network_device'),
+        },
     )
     return check
 
@@ -244,6 +250,18 @@ def test_check_given_ndm_enabled_sends_devices_in_the_metadata_event(dd_run_chec
 
     expected = {record['id'] for record in load_captured('data_network_devices')['response']}
     assert {d['id'] for d in _ndm_devices(aggregator)} == expected
+
+
+def test_check_given_no_data_api_reachability_reports_the_inventory_status_to_ndm(dd_run_check, aggregator, instance):
+    # The data API leaves reachabilityHealthStatus null while Assurance re-scores devices. Read
+    # alone, that null reached NDM as unreachable, marking healthy switches as down for as long as
+    # Assurance took -- at least 38 minutes on 2026-10-06.
+    devices = with_value(load_captured('data_network_devices'), 'response.0.reachabilityHealthStatus', None)
+
+    dd_run_check(_ndm_enabled_check(instance, devices=devices))
+
+    statuses = {device['id']: device['status'] for device in _ndm_devices(aggregator)}
+    assert statuses[devices['response'][0]['id']] == STATUS_REACHABLE
 
 
 def test_check_given_ndm_enabled_tags_each_device_metric_with_its_id_tags(dd_run_check, aggregator, instance):

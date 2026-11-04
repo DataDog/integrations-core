@@ -1,11 +1,16 @@
 # (C) Datadog, Inc. 2018-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import gzip
+import io
 import json
 import os
 from datetime import datetime, timezone
 
 import mock
+import pytest
+import requests
+import urllib3
 
 from datadog_checks.base.checks.kubelet_base.base import KubeletBase, urljoin
 from datadog_checks.dev import get_here
@@ -32,6 +37,28 @@ def test_retrieve_pod_list_success(monkeypatch, mock_http_response):
     retrieved = check.retrieve_pod_list()
     expected = json.loads(mock_from_file("kubelet_base/pod_list_raw.json"))
     assert json.dumps(retrieved, sort_keys=True) == json.dumps(expected, sort_keys=True)
+
+
+@pytest.mark.parametrize('expiration_duration', ['0', '900'], ids=['no_expiration_filter', 'expiration_filter'])
+def test_retrieve_pod_list_decodes_a_gzip_encoded_body(monkeypatch, expiration_duration):
+    pod_list = {'items': [{'metadata': {'name': 'pod'}}]}
+    response = requests.Response()
+    response.status_code = 200
+    response.headers['Content-Encoding'] = 'gzip'
+    response.raw = urllib3.HTTPResponse(
+        body=io.BytesIO(gzip.compress(json.dumps(pod_list).encode())),
+        headers={'Content-Encoding': 'gzip'},
+        preload_content=False,
+        decode_content=False,
+    )
+    check = KubeletBase('kubelet', {}, [{}])
+    check.pod_list_url = "dummyurl"
+    monkeypatch.setattr(check, 'perform_kubelet_query', lambda url, stream=False: response)
+
+    with mock.patch('datadog_checks.base.checks.kubelet_base.base.get_config', return_value=expiration_duration):
+        retrieved = check.retrieve_pod_list()
+
+    assert retrieved['items'] == pod_list['items']
 
 
 def test_retrieved_pod_list_failure(monkeypatch):

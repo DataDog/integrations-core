@@ -295,7 +295,7 @@ def instance_remote_cert_warning_seconds():
 def instance_remote_postgresql_valid():
     return {
         'server': 'localhost',
-        'port': 55432,
+        'port': 15432,
         'server_hostname': 'valid.mock',
         'start_tls': 'postgres',
         'tls_ca_cert': CA_CERT,

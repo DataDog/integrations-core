@@ -1,0 +1,7 @@
+<!-- Trimmed from capture fw-b/system_resources.xml (lab, 2026-10-09): the `top` header lines only, unchanged; the process table is removed. -->
+<response status="success"><result><![CDATA[top - 04:49:34 up  2:00,  0 users,  load average: 0.92, 1.06, 0.99
+Tasks: 225 total,   1 running, 223 sleeping,   0 stopped,   1 zombie
+%Cpu(s):  8.1 us,  4.8 sy,  0.0 ni, 85.5 id,  0.0 wa,  1.6 hi,  0.0 si,  0.0 st
+MiB Mem :  15734.7 total,    381.0 free,   4837.9 used,  10515.9 buff/cache
+MiB Swap:   4000.0 total,   3998.7 free,      1.2 used.   5155.8 avail Mem 
+]]></result></response>

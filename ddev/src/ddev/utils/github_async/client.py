@@ -10,7 +10,7 @@ import io
 import logging
 import re
 import zipfile
-from collections.abc import AsyncIterator, Callable
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager, suppress
 from copy import copy
 from dataclasses import dataclass, replace
@@ -47,6 +47,7 @@ from .models import (
     FileCommit,
     FileContent,
     GitReference,
+    GitTag,
     IssueComment,
     Label,
     PullRequest,
@@ -269,6 +270,10 @@ class AsyncGitHubClient:
         observer: Receives every request sent to the GitHub API and every request that finally
             fails. A retry of a failure it was already shown is then not logged again through
             `logger`. Views made with `with_rate_limit` report to the same observer.
+        token_provider: Optional async callable returning the token each request is sent with.
+            When set, the Authorization header is resolved through it per request, after the rate
+            limiter is acquired. The provider owns caching; None sends the constructor token on
+            every request. Views share the provider.
     """
 
     def __init__(
@@ -282,12 +287,14 @@ class AsyncGitHubClient:
         logger: logging.Logger | None = None,
         transport: httpx.AsyncBaseTransport | None = None,
         observer: RequestObserver | None = None,
+        token_provider: Callable[[], Awaitable[str]] | None = None,
     ) -> None:
         if not token:
             raise ValueError("GitHub token must not be empty.")
 
         self._logger = logger
         self._observer = observer
+        self._token_provider = token_provider
         # A None limiter means "use the default protection," not "no protection." The local bucket
         # is deliberately permissive because the governor is the protection; with a healthy budget
         # and no secondary limits the governor adds zero wait, so this default is invisible to
@@ -443,6 +450,13 @@ class AsyncGitHubClient:
         expect_redirect: bool = False,
         **kwargs: Any,
     ) -> httpx.Response:
+        if self._token_provider is not None:
+            # Resolved after the limiter wait so the token is not aged by a long governor pause.
+            async with asyncio.timeout(timeout if self._shutting_down else None):
+                token = await self._token_provider()
+            headers = dict(kwargs.get("headers") or {})
+            headers["Authorization"] = f"Bearer {token}"
+            kwargs = {**kwargs, "headers": headers}
         started = monotonic()
         try:
             response = await self._client.request(method, endpoint, timeout=timeout, **kwargs)
@@ -745,16 +759,21 @@ class AsyncGitHubClient:
             retry: Defaults to the replayable policy, since cancelling twice cancels once. The ladder is
                 shortened because the caller is usually a run being torn down with seconds to spare.
         """
+        endpoint = f"/repos/{owner}/{repo}/actions/runs/{run_id}/cancel"
+        attempts = RequestAttempts()
         try:
             await self._request(
                 "POST",
-                f"/repos/{owner}/{repo}/actions/runs/{run_id}/cancel",
+                endpoint,
                 timeout=timeout,
                 retry=retry if retry is not None else self._retry_policies.safe.replace(timeout=CANCEL_RETRY_TIMEOUT),
+                attempts=attempts,
             )
-        except httpx.HTTPStatusError as error:
-            if error.response.status_code != RUN_ALREADY_TERMINAL_STATUS:
-                raise
+        except Exception as error:
+            if isinstance(error, httpx.HTTPStatusError) and error.response.status_code == RUN_ALREADY_TERMINAL_STATUS:
+                return
+            self._report_failure(attempts, "POST", endpoint, error)
+            raise
 
     async def list_workflow_run_artifacts(
         self,
@@ -1404,6 +1423,38 @@ class AsyncGitHubClient:
         response = await self._request("GET", f"/repos/{owner}/{repo}/git/ref/{ref}", timeout=timeout, retry=retry)
         return self._parse_response(response, GitReference)
 
+    async def get_tag(
+        self,
+        owner: str,
+        repo: str,
+        tag_sha: str,
+        timeout: float | None = None,
+        *,
+        retry: RetryPolicy | None = None,
+    ) -> GitHubResponse[GitTag]:
+        """
+        Calls the GitHub API to get an annotated tag object.
+
+        A tag reference points at this object rather than at a commit when the tag is annotated, so
+        resolving such a tag to its commit means reading `object.sha` from here.
+
+        GitHub API Documentation:
+        https://docs.github.com/en/rest/git/tags#get-a-tag
+
+        Args:
+            owner: Repository owner (user or organisation).
+            repo: Repository name.
+            tag_sha: SHA of the tag object itself, not of the commit it points at.
+            timeout: Optional timeout for this specific request. Defaults to the client's default_timeout.
+            retry: Defaults to the replayable policy, which does not retry a 404.
+
+        Returns:
+            GitHubResponse[GitTag]: The validated tag object (its `object` is what the tag wraps)
+            and headers.
+        """
+        response = await self._request("GET", f"/repos/{owner}/{repo}/git/tags/{tag_sha}", timeout=timeout, retry=retry)
+        return self._parse_response(response, GitTag)
+
     async def create_ref(
         self,
         owner: str,
@@ -1652,6 +1703,7 @@ async def async_github_client(
     logger: logging.Logger | None = None,
     transport: httpx.AsyncBaseTransport | None = None,
     observer: RequestObserver | None = None,
+    token_provider: Callable[[], Awaitable[str]] | None = None,
 ) -> AsyncIterator[AsyncGitHubClient]:
     """
     Async context manager that creates an AsyncGitHubClient and ensures it is closed on exit.
@@ -1673,6 +1725,8 @@ async def async_github_client(
         logger: Where retries are reported; None keeps the client silent.
         transport: Optional custom HTTPX transport (useful for testing with MockTransport).
         observer: Receives every request sent to the GitHub API and every request that finally fails.
+        token_provider: Optional async callable returning the token each request is sent with; None
+            sends the constructor token on every request.
 
     Yields:
         AsyncGitHubClient: A ready-to-use async GitHub client.
@@ -1686,6 +1740,7 @@ async def async_github_client(
         logger=logger,
         transport=transport,
         observer=observer,
+        token_provider=token_provider,
     )
     try:
         yield client

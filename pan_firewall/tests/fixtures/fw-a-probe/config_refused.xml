@@ -1,0 +1,1 @@
+<response status = 'error' code = '403'><result><msg>API Error: Type [config] not authorized for user role.</msg></result></response>

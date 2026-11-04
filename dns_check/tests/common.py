@@ -56,5 +56,7 @@ E2E_METADATA = {'docker_platform': 'windows' if using_windows_containers() else 
 
 def _test_check(aggregator):
     aggregator.assert_metric('dns.response_time')
+    aggregator.assert_metric('dns.can_connect')
+    aggregator.assert_metric('dns.cant_connect')
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

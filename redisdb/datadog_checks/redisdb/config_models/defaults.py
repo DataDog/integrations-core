@@ -20,6 +20,10 @@ def instance_db():
     return 0
 
 
+def instance_disable_config_get():
+    return False
+
+
 def instance_disable_connection_cache():
     return False
 

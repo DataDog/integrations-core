@@ -1446,7 +1446,7 @@ class MySql(DatabaseCheck):
                 "collection_interval": self._config.database_instance_collection_interval,
                 'dbms_version': self.version.version + '+' + self.version.build,
                 'integration_version': __version__,
-                "tags": self.tag_manager.get_tags(),
+                "tags": self.tag_manager.get_tags(include_internal=False, include_db=False),
                 "timestamp": time.time() * 1000,
                 "cloud_metadata": self._config.cloud_metadata,
                 "metadata": {

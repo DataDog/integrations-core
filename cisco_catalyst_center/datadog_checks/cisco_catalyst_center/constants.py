@@ -30,6 +30,10 @@ SECURITY_ROGUE_ENDPOINT: Final = '/dna/intent/api/v1/security/rogue/additional/d
 SECURITY_THREATS_ENDPOINT: Final = '/dna/intent/api/v1/security/threats/details'
 
 INTENT_INTERFACES_ENDPOINT: Final = '/dna/intent/api/v1/interface'
+# The device inventory. Its reachability is the fallback for devices the data API reports
+# without one. Paged at the default 500, Cisco's documented maximum for this endpoint, which has
+# not been probed live.
+INTENT_NETWORK_DEVICES_ENDPOINT: Final = '/dna/intent/api/v1/network-device'
 STACK_ENDPOINT_TEMPLATE: Final = '/dna/intent/api/v1/network-device/{device_id}/stack'
 NETWORK_HEALTH_ENDPOINT: Final = '/dna/intent/api/v1/network-health'
 CLIENT_HEALTH_ENDPOINT: Final = '/dna/intent/api/v1/client-health'
@@ -78,6 +82,11 @@ STACK_PORT_OK_VALUES: Final[frozenset[str]] = frozenset({'Yes', 'yes', 'true', '
 # reachability: the legacy endpoint answers in title case (`Reachable`) while the data API answers
 # in upper case, so both are accepted.
 REACHABLE_VALUES: Final[frozenset[str]] = frozenset({'REACHABLE', 'Reachable', 'reachable'})
+
+# Values for a device Catalyst Center cannot reach, and so answers for only from its last-known
+# readings. Matched explicitly rather than as "not reachable": Cisco also documents states such as
+# `ONLY_PING_REACHABLE` and `UNKNOWN`, and neither means the readings are stale.
+UNREACHABLE_VALUES: Final[frozenset[str]] = frozenset({'UNREACHABLE', 'Unreachable', 'unreachable'})
 
 # L3 topology types the endpoint serves.
 L3_TOPOLOGY_TYPES: Final[tuple[str, ...]] = ('ospf', 'isis', 'static')

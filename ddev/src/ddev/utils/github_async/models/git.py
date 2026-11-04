@@ -40,6 +40,27 @@ class GitReference(BaseModel):
     object: GitObject
 
 
+class GitTag(BaseModel):
+    """An annotated tag object, which a tag reference points at instead of a commit.
+
+    `object` is the thing the tag wraps, and carries the same required `sha`/`type`/`url` shape as
+    a reference's. `tagger`, `message` and `verification` are omitted: a caller resolving a tag to
+    its commit has no use for them.
+
+    Field reference (`git-tag` requires `sha`, `url`, `node_id`, `tagger`, `object`, `tag`,
+    `message`):
+    https://docs.github.com/en/rest/git/tags#get-a-tag
+    """
+
+    model_config = ConfigDict(extra="ignore")
+
+    tag: str
+    sha: str
+    node_id: str
+    url: str
+    object: GitObject
+
+
 class ContentType(StrEnum):
     """The type of a repository content entry returned for a file path.
 

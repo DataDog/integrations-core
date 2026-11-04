@@ -70,6 +70,15 @@ def test_e2e_mongo_standalone(dd_agent_check, instance_user, database_autodiscov
     aggregator = dd_agent_check(instance_user, rate=True)
     for metric in MONGOD_METRICS:
         aggregator.assert_metric(metric)
+    if version.parse(MONGODB_VERSION) >= version.parse('9.0'):
+        for metric in (
+            'mongodb.metrics.changestreams.cursor.open.total',
+            'mongodb.metrics.changestreams.cursor.docsreturnedps',
+            'mongodb.metrics.operation.writeconflictretrywaiters',
+            'mongodb.metrics.query.configuredmaxmemoryusagebytesperoperation',
+            'mongodb.metrics.query.operationsfailedduetomemorylimitps',
+        ):
+            aggregator.assert_metric(metric)
     aggregator.assert_service_check('mongodb.can_connect', status=MongoDb.OK)
 
 

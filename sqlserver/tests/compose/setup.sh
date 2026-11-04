@@ -27,7 +27,7 @@ do
     fi
 done
 
-$SQLCMD_EXEC -C -N -S localhost -U sa -P $SA_PASSWORD -d master -i setup.sql -b
+$SQLCMD_EXEC -C -N -S localhost -U sa -P $SA_PASSWORD -d master -I -i setup.sql -b
 if [ $? -eq 0 ]
 then
     echo "INFO: setup.sql completed."

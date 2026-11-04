@@ -2,6 +2,48 @@
 
 <!-- towncrier release notes start -->
 
+## 20.2.0 / 2026-11-03
+
+***Added***:
+
+* Include wheel contents validation in the `package` validation description. ([#25576](https://github.com/DataDog/integrations-core/pull/25576))
+* Add `--targets`, `--exclude-targets`, `--agent-image` and `--agent-image-windows` to `ddev ci dispatch-tests`.
+  Add `--head-tag` to `ddev ci dispatch-tests`, so a run started from a release tag is attributed to the tag rather than to a branch. ([#25686](https://github.com/DataDog/integrations-core/pull/25686))
+* Add an optional PyPI ddev version pin to reusable test workflows, preserve it in CI generation, and load shared actions and scripts from the reusable workflow commit. ([#25824](https://github.com/DataDog/integrations-core/pull/25824))
+
+***Fixed***:
+
+* Replace the misleading example in the `validators.py` template used by `ddev create` with guidance on spec constraints and the `check_instance` hook. ([#25552](https://github.com/DataDog/integrations-core/pull/25552))
+* Revert the Python version to 3.13.15 and make `upgrade-python-version` skip 3.13.16, which breaks concurrent imports in the Agent. ([#25585](https://github.com/DataDog/integrations-core/pull/25585))
+* Bump the pinned embedded Python version from 3.13.15 to 3.13.17. ([#25738](https://github.com/DataDog/integrations-core/pull/25738))
+* Make the `ddev validate labeler` fix-it message actionable for integrations without an Agent check, and keep bracketed text in `ddev validate all` failure output. ([#25780](https://github.com/DataDog/integrations-core/pull/25780))
+* Refresh Dispatcher GitHub credentials during long runs and before settling the aggregate commit status. ([#25786](https://github.com/DataDog/integrations-core/pull/25786))
+* Reuse the workflow's initial GitHub token and widen the retry backoff for Dispatcher credential refresh through octo-sts. ([#25792](https://github.com/DataDog/integrations-core/pull/25792))
+* Report the actual Dispatcher outcome and no-op reason in the aggregate commit status. ([#25847](https://github.com/DataDog/integrations-core/pull/25847))
+* Fill the pull request template, including its checklist, in the body of the milestone bump PR opened by `ddev release branch create`. ([#25851](https://github.com/DataDog/integrations-core/pull/25851))
+* Select testable targets when their CI setup scripts change and warn about script folders without a testable target. ([#25859](https://github.com/DataDog/integrations-core/pull/25859))
+
+## 20.1.0 / 2026-10-15
+
+***Added***:
+
+* Read the GitHub owner from `[github] owner` in `.ddev/config.toml` so GitHub operations support repositories outside the DataDog organization. ([#25293](https://github.com/DataDog/integrations-core/pull/25293))
+* Run every eligible target when a pull request changes `.ddev/dispatcher.toml`. ([#25429](https://github.com/DataDog/integrations-core/pull/25429))
+* Improve Dispatcher outcome metrics: report runs whose tests failed separately from runs the Dispatcher could not complete, count exactly one outcome per run, and count passed batches when their results are gathered. ([#25441](https://github.com/DataDog/integrations-core/pull/25441))
+* Log Dispatcher operation failures from the component that owns them, and log every finished job with its target, status and duration. ([#25491](https://github.com/DataDog/integrations-core/pull/25491))
+* Add a `pr-description` validation for pull request checklist and length requirements. ([#25496](https://github.com/DataDog/integrations-core/pull/25496))
+* Record the duration of every Dispatcher operation and log each settled operation with its result. ([#25535](https://github.com/DataDog/integrations-core/pull/25535))
+* Add a Dispatcher metric counting GitHub requests that return a failure to the caller. ([#25636](https://github.com/DataDog/integrations-core/pull/25636))
+
+***Fixed***:
+
+* Identify event bus messages by type and id in error text instead of embedding the full message. ([#25448](https://github.com/DataDog/integrations-core/pull/25448))
+* Resolve a job whose final state the GitHub jobs API could not confirm from the run's conclusion and the job's artifacts, instead of failing the batch. ([#25449](https://github.com/DataDog/integrations-core/pull/25449))
+* Shorten comments, docstrings and test names in the Dispatcher logging code. ([#25504](https://github.com/DataDog/integrations-core/pull/25504))
+* Count cancelled Dispatcher batches and jobs as cancelled, report jobs stopped by the 120-minute test timeout as timed out and failed, and emit the same dense outcome counters for batches and jobs. ([#25505](https://github.com/DataDog/integrations-core/pull/25505))
+* Fix `ddev env start` not enabling the logs Agent on Linux and macOS when the E2E environment mounts logs. ([#25588](https://github.com/DataDog/integrations-core/pull/25588))
+* Retry transient 404 responses when the Dispatcher first fetches a newly dispatched workflow run. ([#25628](https://github.com/DataDog/integrations-core/pull/25628))
+
 ## 20.0.0 / 2026-09-29
 
 ***Changed***:
