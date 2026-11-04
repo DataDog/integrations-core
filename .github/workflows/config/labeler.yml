@@ -869,10 +869,6 @@ integration/mac_audit_logs:
 - changed-files:
   - any-glob-to-any-file:
     - mac_audit_logs/**/*
-integration/mailchimp:
-- changed-files:
-  - any-glob-to-any-file:
-    - mailchimp/**/*
 integration/mapr:
 - changed-files:
   - any-glob-to-any-file:
@@ -901,10 +897,6 @@ integration/mesos_slave:
 - changed-files:
   - any-glob-to-any-file:
     - mesos_slave/**/*
-integration/metabase:
-- changed-files:
-  - any-glob-to-any-file:
-    - metabase/**/*
 integration/microsoft_copilot:
 - changed-files:
   - any-glob-to-any-file:

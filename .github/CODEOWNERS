@@ -317,15 +317,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /lastpass/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /lastpass/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/mailchimp/                                                          @DataDog/saas-integrations
-/mailchimp/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
-/mailchimp/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
-
-/metabase/                                                          @DataDog/saas-integrations
-/metabase/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
-/metabase/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
-/metabase/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
 /microsoft_dns/                                                     @DataDog/agent-integrations
 /microsoft_dns/*.md                                                 @DataDog/agent-integrations @DataDog/documentation
 /microsoft_dns/manifest.json                                        @DataDog/agent-integrations @DataDog/documentation
