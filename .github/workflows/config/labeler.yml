@@ -313,10 +313,6 @@ integration/cockroachdb:
 - changed-files:
   - any-glob-to-any-file:
     - cockroachdb/**/*
-integration/cofense_triage:
-- changed-files:
-  - any-glob-to-any-file:
-    - cofense_triage/**/*
 integration/confluent_platform:
 - changed-files:
   - any-glob-to-any-file:
@@ -369,10 +365,6 @@ integration/crio:
 - changed-files:
   - any-glob-to-any-file:
     - crio/**/*
-integration/crowdstrike_fdr:
-- changed-files:
-  - any-glob-to-any-file:
-    - crowdstrike_fdr/**/*
 integration/databricks:
 - changed-files:
   - any-glob-to-any-file:
