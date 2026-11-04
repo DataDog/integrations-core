@@ -47,6 +47,10 @@ def test_malloc_trim_is_bound_on_glibc():
 
     assert trim is not None
     assert trim(0) in (0, 1)
+    # Pinned because the binding is public: a caller passing a non-zero pad would have it
+    # truncated to a C int without these, and `trim(0)` alone cannot tell the difference.
+    assert trim.argtypes == [ctypes.c_size_t]
+    assert trim.restype == ctypes.c_int
 
 
 @pytest.mark.parametrize(
@@ -65,3 +69,19 @@ def test_load_malloc_trim_degrades_to_none_on_linux_without_glibc(cdll):
         mock.patch('datadog_checks.base.utils.native_memory.ctypes.CDLL', **cdll),
     ):
         assert load_malloc_trim() is None
+
+
+@pytest.mark.parametrize(
+    ('loaded', 'expected_calls'),
+    [
+        pytest.param(None, [], id='no binding'),
+        pytest.param(mock.Mock(), [mock.call(0)], id='binding available'),
+    ],
+)
+def test_malloc_trim_calls_the_binding_only_when_one_was_loaded(loaded, expected_calls):
+    # Patching the module global keeps both branches covered everywhere. Otherwise which one runs
+    # depends on the runner: glibc never exercises the no-op, and non-glibc never exercises the call.
+    with mock.patch('datadog_checks.base.utils.native_memory.MALLOC_TRIM', loaded):
+        malloc_trim()
+
+    assert (loaded.call_args_list if loaded is not None else []) == expected_calls

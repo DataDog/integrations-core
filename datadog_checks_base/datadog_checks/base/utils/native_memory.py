@@ -7,7 +7,7 @@ from collections.abc import Callable
 
 
 def load_malloc_trim() -> Callable[[int], int] | None:
-    """Return the process's `malloc_trim` on Linux, or `None` where it is unavailable (macOS, musl).
+    """Return the process's `malloc_trim` on Linux, or `None` without glibc (macOS, musl, bionic).
 
     The symbol is resolved from the process-wide namespace, so under an `LD_PRELOAD` allocator that
     interposes `malloc_trim` this binds the interposer's. That is intended: the allocator actually
