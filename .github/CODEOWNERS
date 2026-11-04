@@ -672,11 +672,6 @@ plaid/assets/logs/                                                  @DataDog/saa
 /valence_security/manifest.json                                      @DataDog/saas-integrations @DataDog/documentation
 /valence_security/assets/logs/                                       @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/cato_networks/                                                      @DataDog/saas-integrations
-/cato_networks/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
-/cato_networks/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
-/cato_networks/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
 /idira_endpoint_privilege_manager/                                @DataDog/saas-integrations
 /idira_endpoint_privilege_manager/*.md                            @DataDog/saas-integrations @DataDog/documentation
 /idira_endpoint_privilege_manager/manifest.json                   @DataDog/saas-integrations @DataDog/documentation
@@ -696,11 +691,6 @@ plaid/assets/logs/                                                  @DataDog/saa
 /cisco_asa/*.md                                                       @DataDog/agent-integrations @DataDog/documentation
 /cisco_asa/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
 /cisco_asa/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
-/bluecat_edge/                                                        @DataDog/saas-integrations
-/bluecat_edge/*.md                                                    @DataDog/saas-integrations @DataDog/documentation
-/bluecat_edge/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
-/bluecat_edge/assets/logs/                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /cisco_secure_client/                                                @DataDog/agent-integrations
 /cisco_secure_client/*.md                                            @DataDog/agent-integrations @DataDog/documentation

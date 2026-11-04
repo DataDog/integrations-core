@@ -197,10 +197,6 @@ integration/bitdefender:
 - changed-files:
   - any-glob-to-any-file:
     - bitdefender/**/*
-integration/bluecat_edge:
-- changed-files:
-  - any-glob-to-any-file:
-    - bluecat_edge/**/*
 integration/bluecat_integrity:
 - changed-files:
   - any-glob-to-any-file:
@@ -237,10 +233,6 @@ integration/cassandra_nodetool:
 - changed-files:
   - any-glob-to-any-file:
     - cassandra_nodetool/**/*
-integration/cato_networks:
-- changed-files:
-  - any-glob-to-any-file:
-    - cato_networks/**/*
 integration/celery:
 - changed-files:
   - any-glob-to-any-file:
