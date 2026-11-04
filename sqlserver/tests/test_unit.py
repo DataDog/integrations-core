@@ -230,7 +230,9 @@ def test_schema_collector_runs_tables_and_views_on_one_connection_per_database()
         collect_views=True,
     )
     collector._get_databases = mock.Mock(
-        return_value=[{"name": "datadog_test", "id": "1", "collation": "c", "owner": "dbo", "compatibility_level": "120"}]
+        return_value=[
+            {"name": "datadog_test", "id": "1", "collation": "c", "owner": "dbo", "compatibility_level": "120"}
+        ]
     )
     collector._database_compatibility_levels = {"datadog_test": 120}
     main_cursor = mock.Mock()
@@ -439,7 +441,9 @@ def test_table_collector_uses_database_compatibility_level_for_schema_query(
 
 
 def test_table_collector_reuses_pre_2017_connection_for_table_detail_queries() -> None:
-    collector = create_schema_collector({STATIC_INFO_ENGINE_EDITION: ENGINE_EDITION_STANDARD, STATIC_INFO_MAJOR_VERSION: 13})
+    collector = create_schema_collector(
+        {STATIC_INFO_ENGINE_EDITION: ENGINE_EDITION_STANDARD, STATIC_INFO_MAJOR_VERSION: 13}
+    )
     tables = collector._object_collectors[0]
     main_cursor = mock.Mock()
     detail_cursor = mock.Mock()
@@ -487,7 +491,9 @@ def configure_pre_2017_detail_cursor(cursor: mock.Mock, partition_count: int = 1
 
 
 def test_table_collector_uses_new_pre_2017_connection_for_each_database() -> None:
-    collector = create_schema_collector({STATIC_INFO_ENGINE_EDITION: ENGINE_EDITION_STANDARD, STATIC_INFO_MAJOR_VERSION: 13})
+    collector = create_schema_collector(
+        {STATIC_INFO_ENGINE_EDITION: ENGINE_EDITION_STANDARD, STATIC_INFO_MAJOR_VERSION: 13}
+    )
     tables = collector._object_collectors[0]
     detail_cursor_1 = mock.Mock()
     configure_pre_2017_detail_cursor(detail_cursor_1, partition_count=1)
@@ -497,7 +503,12 @@ def test_table_collector_uses_new_pre_2017_connection_for_each_database() -> Non
     row = {"schema_name": "test_schema", "schema_id": 1, "owner_name": "dbo", "table_name": "table", "table_id": 101}
 
     for index, database_name in enumerate(["datadog_test_1", "datadog_test_2"], start=1):
-        database = {"name": database_name, "id": str(index), "collation": "SQL_Latin1_General_CP1_CI_AS", "owner": "dbo"}
+        database = {
+            "name": database_name,
+            "id": str(index),
+            "collation": "SQL_Latin1_General_CP1_CI_AS",
+            "owner": "dbo",
+        }
         with run_object_query(collector, tables, database_name):
             tables._map_row(database, row)
 
@@ -513,7 +524,9 @@ def test_table_collector_uses_new_pre_2017_connection_for_each_database() -> Non
 
 
 def test_table_collector_does_not_open_pre_2017_connection_for_modern_query() -> None:
-    collector = create_schema_collector({STATIC_INFO_ENGINE_EDITION: ENGINE_EDITION_STANDARD, STATIC_INFO_MAJOR_VERSION: 14})
+    collector = create_schema_collector(
+        {STATIC_INFO_ENGINE_EDITION: ENGINE_EDITION_STANDARD, STATIC_INFO_MAJOR_VERSION: 14}
+    )
     tables = collector._object_collectors[0]
     collector._database_compatibility_levels = {"datadog_test": 130}
     cursor = mock.Mock()
