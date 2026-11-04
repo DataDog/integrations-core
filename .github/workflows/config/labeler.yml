@@ -681,10 +681,6 @@ integration/ivanti_connect_secure:
 - changed-files:
   - any-glob-to-any-file:
     - ivanti_connect_secure/**/*
-integration/ivanti_nzta:
-- changed-files:
-  - any-glob-to-any-file:
-    - ivanti_nzta/**/*
 integration/jamf_pro:
 - changed-files:
   - any-glob-to-any-file:
@@ -721,10 +717,6 @@ integration/kai_scheduler:
 - changed-files:
   - any-glob-to-any-file:
     - kai_scheduler/**/*
-integration/kandji:
-- changed-files:
-  - any-glob-to-any-file:
-    - kandji/**/*
 integration/karpenter:
 - changed-files:
   - any-glob-to-any-file:
