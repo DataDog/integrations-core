@@ -1057,14 +1057,6 @@ integration/pivotal_pks:
 - changed-files:
   - any-glob-to-any-file:
     - pivotal_pks/**/*
-integration/plaid:
-- changed-files:
-  - any-glob-to-any-file:
-    - plaid/**/*
-integration/plivo:
-- changed-files:
-  - any-glob-to-any-file:
-    - plivo/**/*
 integration/podman:
 - changed-files:
   - any-glob-to-any-file:
