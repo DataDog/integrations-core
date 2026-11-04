@@ -406,7 +406,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
 
         return [row for statement_row in self._statement_rows.values() for row in statement_row.values()]
 
-    def _drop_deallocated_prepared_statements(self, rows):
+    def _drop_deallocated_prepared_statements(self, rows: list[Row]) -> None:
         """
         `prepared_statements_instances` is read in full on each run, so an instance missing from `rows` has normally
         been deallocated and will not report again. Writing to a signature refreshes the cache TTL, so without this the
