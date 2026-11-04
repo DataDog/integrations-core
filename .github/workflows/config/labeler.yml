@@ -633,10 +633,6 @@ integration/ide_shepherd:
 - changed-files:
   - any-glob-to-any-file:
     - ide_shepherd/**/*
-integration/idira_endpoint_privilege_manager:
-- changed-files:
-  - any-glob-to-any-file:
-    - idira_endpoint_privilege_manager/**/*
 integration/ignite:
 - changed-files:
   - any-glob-to-any-file:
@@ -649,10 +645,6 @@ integration/impala:
 - changed-files:
   - any-glob-to-any-file:
     - impala/**/*
-integration/incident_io:
-- changed-files:
-  - any-glob-to-any-file:
-    - incident_io/**/*
 integration/infiniband:
 - changed-files:
   - any-glob-to-any-file:
