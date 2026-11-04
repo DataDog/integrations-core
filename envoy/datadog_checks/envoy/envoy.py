@@ -26,7 +26,7 @@ class Envoy(AgentCheck):
     def __new__(cls, name, init_config, instances):
         instance = instances[0]
 
-        if 'openmetrics_endpoint' in instance:
+        if 'openmetrics_endpoint' in instance or 'ai_gateway_endpoint' in instance:
             return EnvoyCheckV2(name, init_config, instances)
         else:
             return super(Envoy, cls).__new__(cls)
