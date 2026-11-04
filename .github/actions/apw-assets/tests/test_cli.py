@@ -2,11 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import json
+import os
 import subprocess
+import sys
+import tarfile
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+import yaml
 from apw_assets import Release, main
 
 
@@ -35,6 +39,8 @@ def test_package_arbitrary_asset_checkout(tmp_path: Path, monkeypatch: pytest.Mo
     subprocess.run(['git', 'init', '--quiet', str(source)], check=True)
     (source / 'future-assets').mkdir()
     (source / 'future-assets/example.json').write_text('{}')
+    (source / '-vendor').mkdir()
+    (source / '-vendor/dependency.bin').write_bytes(b'excluded')
     subprocess.run(['git', '-C', str(source), 'add', '.'], check=True)
     subprocess.run(
         [
@@ -59,11 +65,28 @@ def test_package_arbitrary_asset_checkout(tmp_path: Path, monkeypatch: pytest.Mo
     commit = subprocess.check_output(['git', '-C', str(source), 'rev-parse', 'HEAD'], text=True).strip()
     monkeypatch.chdir(source)
     monkeypatch.setenv('GH_REPO', 'wrong/implicit-repository')
-    assert main(['package', '--repository', repository, '--commit', commit]) == 0
-    metadata = json.loads((source / 'dist/release.json').read_text())
+    # Execute the action's actual shell so option binding is covered at its boundary.
+    action_dir = Path(__file__).resolve().parents[1]
+    action = yaml.safe_load((action_dir / 'action.yml').read_text())
+    package_step = next(step for step in action['runs']['steps'] if step.get('id') == 'package')
+    subprocess.run(
+        ['bash', '--noprofile', '--norc', '-eo', 'pipefail', '-c', package_step['run']],
+        check=True,
+        env={
+            **os.environ,
+            'PATH': str(Path(sys.executable).parent) + os.pathsep + os.environ['PATH'],
+            'GITHUB_ACTION_PATH': str(action_dir),
+            'GITHUB_REPOSITORY': repository,
+            'GITHUB_SHA': commit,
+            'APW_DIRECTORY': '-dist',
+            'APW_EXCLUDE': '-vendor/**',
+        },
+    )
+    metadata = json.loads((source / '-dist/release.json').read_text())
     assert metadata['repository'] == repository
     assert metadata['commit'] == commit
-    assert (source / 'dist/apw-assets.tar.gz').is_file()
+    with tarfile.open(source / '-dist/apw-assets.tar.gz') as archive:
+        assert {member.name for member in archive if member.isfile()} == {'repo/future-assets/example.json'}
 
 
 @pytest.mark.parametrize('needed', [False, True])
@@ -132,6 +155,13 @@ def test_rejects_options_for_other_actions(args: list[str]):
     with pytest.raises(SystemExit) as error:
         main(args)
     assert error.value.code == 2
+
+
+def test_rejects_abbreviated_options(capsys: pytest.CaptureFixture[str]):
+    with patch.object(Release, 'needs_package', return_value=False), pytest.raises(SystemExit) as error:
+        main(['check', '--repository', 'DataDog/marketplace', '--commit', 'a' * 40, '--dir', 'dist'])
+    assert error.value.code == 2
+    assert 'unrecognized arguments: --dir dist' in capsys.readouterr().err
 
 
 def test_invalid_identity_fails_without_traceback(capsys: pytest.CaptureFixture[str]):

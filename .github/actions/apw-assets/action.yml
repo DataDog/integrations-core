@@ -76,11 +76,11 @@ runs:
         excludes=()
         while read -r pattern; do
           if [[ -n "$pattern" ]]; then
-            excludes+=(--exclude "$pattern")
+            excludes+=("--exclude=$pattern")
           fi
         done <<< "$APW_EXCLUDE"
         python3 "$GITHUB_ACTION_PATH/apw_assets.py" package --repository "$GITHUB_REPOSITORY" \
-          --commit "$GITHUB_SHA" --directory "$APW_DIRECTORY" "${excludes[@]}"
+          --commit "$GITHUB_SHA" --directory="$APW_DIRECTORY" "${excludes[@]}"
 
     - name: Get source tag credentials
       id: octo-sts
@@ -108,7 +108,7 @@ runs:
         GH_REPO: ${{ github.repository }}
       run: |
         python3 "$GITHUB_ACTION_PATH/apw_assets.py" publish --repository "$GITHUB_REPOSITORY" \
-          --commit "$GITHUB_SHA" --directory "$APW_DIRECTORY"
+          --commit "$GITHUB_SHA" --directory="$APW_DIRECTORY"
 
     # Runs on unchanged-source checks too; keeps the newest complete release and all Git tags.
     - name: Clean up expired APW releases

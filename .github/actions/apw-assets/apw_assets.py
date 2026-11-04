@@ -307,7 +307,9 @@ def _retention_days(value: str) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter, allow_abbrev=False
+    )
     parser.add_argument("action", choices=("package", "check", "tag", "publish", "cleanup"))
     parser.add_argument(
         "--repository",
