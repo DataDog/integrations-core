@@ -633,10 +633,6 @@ integration/ide_shepherd:
 - changed-files:
   - any-glob-to-any-file:
     - ide_shepherd/**/*
-integration/idira_endpoint_privilege_manager:
-- changed-files:
-  - any-glob-to-any-file:
-    - idira_endpoint_privilege_manager/**/*
 integration/ignite:
 - changed-files:
   - any-glob-to-any-file:
@@ -649,10 +645,6 @@ integration/impala:
 - changed-files:
   - any-glob-to-any-file:
     - impala/**/*
-integration/incident_io:
-- changed-files:
-  - any-glob-to-any-file:
-    - incident_io/**/*
 integration/infiniband:
 - changed-files:
   - any-glob-to-any-file:
@@ -961,10 +953,6 @@ integration/oke:
 - changed-files:
   - any-glob-to-any-file:
     - oke/**/*
-integration/okta_workflows:
-- changed-files:
-  - any-glob-to-any-file:
-    - okta_workflows/**/*
 integration/oom_kill:
 - changed-files:
   - any-glob-to-any-file:
@@ -1017,10 +1005,6 @@ integration/otel:
 - changed-files:
   - any-glob-to-any-file:
     - otel/**/*
-integration/palo_alto_cortex_xdr:
-- changed-files:
-  - any-glob-to-any-file:
-    - palo_alto_cortex_xdr/**/*
 integration/palo_alto_panorama:
 - changed-files:
   - any-glob-to-any-file:
@@ -1045,14 +1029,6 @@ integration/ping_federate:
 - changed-files:
   - any-glob-to-any-file:
     - ping_federate/**/*
-integration/ping_one:
-- changed-files:
-  - any-glob-to-any-file:
-    - ping_one/**/*
-integration/ping_one_aic:
-- changed-files:
-  - any-glob-to-any-file:
-    - ping_one_aic/**/*
 integration/pivotal_pks:
 - changed-files:
   - any-glob-to-any-file:
@@ -1145,10 +1121,6 @@ integration/riakcs:
 - changed-files:
   - any-glob-to-any-file:
     - riakcs/**/*
-integration/sanity:
-- changed-files:
-  - any-glob-to-any-file:
-    - sanity/**/*
 integration/sap_hana:
 - changed-files:
   - any-glob-to-any-file:
@@ -1161,10 +1133,6 @@ integration/sglang:
 - changed-files:
   - any-glob-to-any-file:
     - sglang/**/*
-integration/shopify:
-- changed-files:
-  - any-glob-to-any-file:
-    - shopify/**/*
 integration/sidekiq:
 - changed-files:
   - any-glob-to-any-file:
@@ -1257,10 +1225,6 @@ integration/sonicwall_firewall:
 - changed-files:
   - any-glob-to-any-file:
     - sonicwall_firewall/**/*
-integration/sophos_central_cloud:
-- changed-files:
-  - any-glob-to-any-file:
-    - sophos_central_cloud/**/*
 integration/spark:
 - changed-files:
   - any-glob-to-any-file:
@@ -1285,10 +1249,6 @@ integration/storage_management:
 - changed-files:
   - any-glob-to-any-file:
     - storage_management/**/*
-integration/streamnative:
-- changed-files:
-  - any-glob-to-any-file:
-    - streamnative/**/*
 integration/strimzi:
 - changed-files:
   - any-glob-to-any-file:
