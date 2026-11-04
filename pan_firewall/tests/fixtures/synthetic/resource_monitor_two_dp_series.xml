@@ -1,0 +1,23 @@
+<!-- Derived from fw-a/resource_monitor.xml: a second data processor (dp1) added, and the load averages of dp0 and dp1 made 3-minute series (`show running resource-monitor minute last 3`), newest value first. Only cpu-load-average is kept. -->
+<response status="success"><result>
+  <resource-monitor>
+    <data-processors>
+      <dp0>
+        <minute>
+          <cpu-load-average>
+            <entry><coreid>0</coreid><value>7,5,2</value></entry>
+            <entry><coreid>1</coreid><value>0,0,0</value></entry>
+          </cpu-load-average>
+        </minute>
+      </dp0>
+      <dp1>
+        <minute>
+          <cpu-load-average>
+            <entry><coreid>0</coreid><value>31,30,29</value></entry>
+            <entry><coreid>1</coreid><value>12,15,9</value></entry>
+          </cpu-load-average>
+        </minute>
+      </dp1>
+    </data-processors>
+  </resource-monitor>
+</result></response>

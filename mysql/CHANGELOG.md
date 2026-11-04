@@ -2,6 +2,22 @@
 
 <!-- towncrier release notes start -->
 
+## 15.24.0 / 2026-10-29
+
+***Added***:
+
+* Update dependencies ([#25599](https://github.com/DataDog/integrations-core/pull/25599))
+
+***Fixed***:
+
+* Exclude internal resource tags from the `database_instance` and settings metadata payloads, and send the same tags on both. ([#25692](https://github.com/DataDog/integrations-core/pull/25692))
+
+## 15.23.0 / 2026-10-27 / Agent 7.85.0
+
+***Security***:
+
+* Update boto3 to 1.43.119, which drops the Sectigo root that anchors the compromised eMudhra intermediates. ([#25797](https://github.com/DataDog/integrations-core/pull/25797))
+
 ## 15.22.0 / 2026-10-01
 
 ***Added***:
