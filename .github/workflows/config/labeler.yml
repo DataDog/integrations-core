@@ -365,10 +365,6 @@ integration/crio:
 - changed-files:
   - any-glob-to-any-file:
     - crio/**/*
-integration/databricks:
-- changed-files:
-  - any-glob-to-any-file:
-    - databricks/**/*
 integration/datadog_checks_tests_helper:
 - changed-files:
   - any-glob-to-any-file:
@@ -589,10 +585,6 @@ integration/http_check:
 - changed-files:
   - any-glob-to-any-file:
     - http_check/**/*
-integration/hubspot_content_hub:
-- changed-files:
-  - any-glob-to-any-file:
-    - hubspot_content_hub/**/*
 integration/hudi:
 - changed-files:
   - any-glob-to-any-file:
@@ -725,10 +717,6 @@ integration/keycloak:
 - changed-files:
   - any-glob-to-any-file:
     - keycloak/**/*
-integration/klaviyo:
-- changed-files:
-  - any-glob-to-any-file:
-    - klaviyo/**/*
 integration/kong:
 - changed-files:
   - any-glob-to-any-file:
@@ -825,10 +813,6 @@ integration/langchain:
 - changed-files:
   - any-glob-to-any-file:
     - langchain/**/*
-integration/lastpass:
-- changed-files:
-  - any-glob-to-any-file:
-    - lastpass/**/*
 integration/lighttpd:
 - changed-files:
   - any-glob-to-any-file:
@@ -889,10 +873,6 @@ integration/mesos_slave:
 - changed-files:
   - any-glob-to-any-file:
     - mesos_slave/**/*
-integration/microsoft_copilot:
-- changed-files:
-  - any-glob-to-any-file:
-    - microsoft_copilot/**/*
 integration/microsoft_dns:
 - changed-files:
   - any-glob-to-any-file:
@@ -905,18 +885,10 @@ integration/milvus:
 - changed-files:
   - any-glob-to-any-file:
     - milvus/**/*
-integration/mimecast:
-- changed-files:
-  - any-glob-to-any-file:
-    - mimecast/**/*
 integration/mongo:
 - changed-files:
   - any-glob-to-any-file:
     - mongo/**/*
-integration/mux:
-- changed-files:
-  - any-glob-to-any-file:
-    - mux/**/*
 integration/mysql:
 - changed-files:
   - any-glob-to-any-file:
@@ -973,10 +945,6 @@ integration/nvidia_triton:
 - changed-files:
   - any-glob-to-any-file:
     - nvidia_triton/**/*
-integration/obsidian_security:
-- changed-files:
-  - any-glob-to-any-file:
-    - obsidian_security/**/*
 integration/octopus_deploy:
 - changed-files:
   - any-glob-to-any-file:
@@ -1081,14 +1049,6 @@ integration/pivotal_pks:
 - changed-files:
   - any-glob-to-any-file:
     - pivotal_pks/**/*
-integration/plaid:
-- changed-files:
-  - any-glob-to-any-file:
-    - plaid/**/*
-integration/plivo:
-- changed-files:
-  - any-glob-to-any-file:
-    - plivo/**/*
 integration/podman:
 - changed-files:
   - any-glob-to-any-file:
@@ -1329,10 +1289,6 @@ integration/supabase:
 - changed-files:
   - any-glob-to-any-file:
     - supabase/**/*
-integration/supabase_cloud:
-- changed-files:
-  - any-glob-to-any-file:
-    - supabase_cloud/**/*
 integration/supervisord:
 - changed-files:
   - any-glob-to-any-file:
@@ -1349,10 +1305,6 @@ integration/symantec_endpoint_protection:
 - changed-files:
   - any-glob-to-any-file:
     - symantec_endpoint_protection/**/*
-integration/symantec_vip:
-- changed-files:
-  - any-glob-to-any-file:
-    - symantec_vip/**/*
 integration/system_core:
 - changed-files:
   - any-glob-to-any-file:
@@ -1449,10 +1401,6 @@ integration/trend_micro_vision_one_eps:
 - changed-files:
   - any-glob-to-any-file:
     - trend_micro_vision_one_endpoint_security/**/*
-integration/trend_micro_vision_one_xdr:
-- changed-files:
-  - any-glob-to-any-file:
-    - trend_micro_vision_one_xdr/**/*
 integration/twemproxy:
 - changed-files:
   - any-glob-to-any-file:
@@ -1461,10 +1409,6 @@ integration/twistlock:
 - changed-files:
   - any-glob-to-any-file:
     - twistlock/**/*
-integration/valence_security:
-- changed-files:
-  - any-glob-to-any-file:
-    - valence_security/**/*
 integration/varnish:
 - changed-files:
   - any-glob-to-any-file:
