@@ -381,11 +381,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /storage_management/*.md                                            @DataDog/new-workloads @DataDog/documentation
 /storage_management/manifest.json                                    @DataDog/new-workloads @DataDog/documentation
 
-/supabase_cloud/                                                     @DataDog/saas-integrations
-/supabase_cloud/*.md                                                 @DataDog/saas-integrations @DataDog/documentation
-/supabase_cloud/manifest.json                                        @DataDog/saas-integrations @DataDog/documentation
-/supabase_cloud/assets/logs/                                         @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
 /ping_one/                                                           @DataDog/saas-integrations
 /ping_one/*.md                                                       @DataDog/saas-integrations @DataDog/documentation
 /ping_one/manifest.json                                              @DataDog/saas-integrations @DataDog/documentation
@@ -440,11 +435,6 @@ vonage/assets/logs/                                                @DataDog/saas
 /silverstripe_cms/*.md                                              @DataDog/agent-integrations @DataDog/documentation
 /silverstripe_cms/manifest.json                                     @DataDog/agent-integrations @DataDog/documentation
 /silverstripe_cms/assets/logs/                                      @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
-/symantec_vip/                                                      @DataDog/saas-integrations
-/symantec_vip/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
-/symantec_vip/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
-/symantec_vip/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /tenable_io/                                                        @DataDog/saas-integrations
 /tenable_io/*.md                                                    @DataDog/saas-integrations @DataDog/documentation
