@@ -273,10 +273,6 @@ integration/cisco_catalyst_center:
 - changed-files:
   - any-glob-to-any-file:
     - cisco_catalyst_center/**/*
-integration/cisco_duo:
-- changed-files:
-  - any-glob-to-any-file:
-    - cisco_duo/**/*
 integration/cisco_sdwan:
 - changed-files:
   - any-glob-to-any-file:
@@ -293,10 +289,6 @@ integration/cisco_secure_web_appliance:
 - changed-files:
   - any-glob-to-any-file:
     - cisco_secure_web_appliance/**/*
-integration/cisco_umbrella_dns:
-- changed-files:
-  - any-glob-to-any-file:
-    - cisco_umbrella_dns/**/*
 integration/citrix_hypervisor:
 - changed-files:
   - any-glob-to-any-file:
