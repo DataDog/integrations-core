@@ -101,7 +101,7 @@ def test_critical_service_check(instance, check, aggregator):
         pytest.param(requests.TooManyRedirects, id='too many redirects'),
     ],
 )
-def test_request_failure_reports_critical(instance, check, aggregator, exception):
+def test_request_failure_reports_critical(instance, check, aggregator, caplog, exception):
     # An escaping exception submits no service check at all, so a monitor sees a gap, not a CRITICAL.
     tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
 
@@ -112,6 +112,25 @@ def test_request_failure_reports_critical(instance, check, aggregator, exception
 
     aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
     aggregator.assert_metric('ibm_was.can_connect', value=0, tags=tags, count=1)
+    # The URL rather than the phrasing, so this pins that operators are told which endpoint failed
+    # without freezing the wording.
+    assert instance['servlet_url'] in caplog.text
+
+
+def test_error_status_reports_critical(instance, check, aggregator):
+    # A non-2xx body never reaches the parser, so raise_for_status is the only thing turning it
+    # into CRITICAL. Without it this payload parses cleanly and the run reports OK instead.
+    response = mock.MagicMock(content=b'<html>502 Bad Gateway</html>')
+    response.raise_for_status.side_effect = requests.HTTPError('502 Server Error')
+
+    with mock.patch('datadog_checks.base.utils.http.requests.Session.get', return_value=response):
+        check = check(instance)
+        with pytest.raises(requests.HTTPError):
+            check.check(instance)
+
+    tags = ['url:{}'.format(instance['servlet_url']), 'key1:value1']
+    aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.CRITICAL, tags=tags, count=1)
+    aggregator.assert_service_check('ibm_was.can_connect', status=AgentCheck.OK, count=0)
 
 
 def test_malformed_xml_reports_critical(instance, check, aggregator, caplog):
