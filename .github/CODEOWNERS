@@ -366,11 +366,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /storage_management/*.md                                            @DataDog/new-workloads @DataDog/documentation
 /storage_management/manifest.json                                    @DataDog/new-workloads @DataDog/documentation
 
-/ping_one/                                                           @DataDog/saas-integrations
-/ping_one/*.md                                                       @DataDog/saas-integrations @DataDog/documentation
-/ping_one/manifest.json                                              @DataDog/saas-integrations @DataDog/documentation
-/ping_one/assets/logs/                                               @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
 /ping_federate/                                                      @DataDog/saas-integrations
 /ping_federate/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
 /ping_federate/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
