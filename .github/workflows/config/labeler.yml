@@ -1285,10 +1285,6 @@ integration/systemd:
 - changed-files:
   - any-glob-to-any-file:
     - systemd/**/*
-integration/tanium:
-- changed-files:
-  - any-glob-to-any-file:
-    - tanium/**/*
 integration/tcp_check:
 - changed-files:
   - any-glob-to-any-file:
@@ -1317,10 +1313,6 @@ integration/tenable:
 - changed-files:
   - any-glob-to-any-file:
     - tenable/**/*
-integration/tenable_io:
-- changed-files:
-  - any-glob-to-any-file:
-    - tenable_io/**/*
 integration/teradata:
 - changed-files:
   - any-glob-to-any-file:
@@ -1361,14 +1353,6 @@ integration/traffic_server:
 - changed-files:
   - any-glob-to-any-file:
     - traffic_server/**/*
-integration/trend_micro_email_security:
-- changed-files:
-  - any-glob-to-any-file:
-    - trend_micro_email_security/**/*
-integration/trend_micro_vision_one_eps:
-- changed-files:
-  - any-glob-to-any-file:
-    - trend_micro_vision_one_endpoint_security/**/*
 integration/twemproxy:
 - changed-files:
   - any-glob-to-any-file:

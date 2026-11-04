@@ -361,21 +361,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /ping_federate/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
 /ping_federate/assets/logs/                                          @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/trend_micro_email_security/                                        @DataDog/saas-integrations
-/trend_micro_email_security/*.md                                    @DataDog/saas-integrations @DataDog/documentation
-/trend_micro_email_security/manifest.json                           @DataDog/saas-integrations @DataDog/documentation
-/trend_micro_email_security/assets/logs/                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
-/trend_micro_vision_one_endpoint_security/                          @DataDog/saas-integrations
-/trend_micro_vision_one_endpoint_security/*.md                      @DataDog/saas-integrations @DataDog/documentation
-/trend_micro_vision_one_endpoint_security/manifest.json             @DataDog/saas-integrations @DataDog/documentation
-/trend_micro_vision_one_endpoint_security/assets/logs/              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
-/tanium/                                                            @DataDog/saas-integrations
-/tanium/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
-/tanium/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
-/tanium/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
 /servicenow_performance/                                            @DataDog/saas-integrations
 /servicenow_performance/*.md                                        @DataDog/saas-integrations @DataDog/documentation
 /servicenow_performance/manifest.json                               @DataDog/saas-integrations @DataDog/documentation
@@ -385,11 +370,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /silverstripe_cms/*.md                                              @DataDog/agent-integrations @DataDog/documentation
 /silverstripe_cms/manifest.json                                     @DataDog/agent-integrations @DataDog/documentation
 /silverstripe_cms/assets/logs/                                      @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
-/tenable_io/                                                        @DataDog/saas-integrations
-/tenable_io/*.md                                                    @DataDog/saas-integrations @DataDog/documentation
-/tenable_io/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
-/tenable_io/assets/logs/                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /bitdefender/                                                       @DataDog/saas-integrations
 /bitdefender/*.md                                                   @DataDog/saas-integrations @DataDog/documentation
