@@ -1,8 +1,13 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Immutable APW source snapshots shared by public and private asset repositories."""
+"""Package, check, tag, publish, or clean up immutable APW source snapshot releases.
 
+Standard library only, so the privileged publish job installs no packages. The
+GitHub CLI (gh) must be on PATH and authenticated through GH_TOKEN.
+"""
+
+import argparse
 import gzip
 import hashlib
 import json
@@ -292,3 +297,75 @@ class Release:
             raise ValueError("published release is not visible; retry verification")
         self.verify_published(published)
         return "Published verified APW snapshot."
+
+
+def _retention_days(value: str) -> int:
+    days = int(value)
+    if days < 1:
+        raise argparse.ArgumentTypeError("must be at least 1")
+    return days
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter, allow_abbrev=False
+    )
+    parser.add_argument("action", choices=("package", "check", "tag", "publish", "cleanup"))
+    parser.add_argument(
+        "--repository",
+        default=os.environ.get("GH_REPO") or os.environ.get("GITHUB_REPOSITORY"),
+        help="GitHub owner/repository. Defaults to GH_REPO, then GITHUB_REPOSITORY.",
+    )
+    parser.add_argument("--commit", required=True, help="Full lowercase source commit SHA.")
+    parser.add_argument("--source", type=Path, default=Path("."), help="Git checkout to package. Default: .")
+    parser.add_argument("--directory", type=Path, default=Path("dist"), help="Asset directory. Default: dist")
+    parser.add_argument(
+        "--exclude",
+        action="append",
+        default=[],
+        help="Package only: repo-relative Git glob to exclude. May be repeated.",
+    )
+    parser.add_argument(
+        "--retention-days",
+        type=_retention_days,
+        default=7,
+        help="Cleanup only: days to retain releases. Default: 7",
+    )
+    parser.add_argument("--dry-run", action="store_true", help="Cleanup only: report without deleting.")
+    args = parser.parse_args(argv)
+    if not args.repository:
+        parser.error("--repository is required")
+    if not args.source.is_dir():
+        parser.error("--source must be an existing directory")
+    if args.exclude and args.action != "package":
+        parser.error("--exclude only applies to package")
+    if (args.dry_run or args.retention_days != 7) and args.action != "cleanup":
+        parser.error("--dry-run and --retention-days only apply to cleanup")
+    try:
+        release = Release(args.repository, args.commit)
+        if args.action == "package":
+            metadata = package(args.source, args.repository, args.commit, args.directory, tuple(args.exclude))
+            print(json.dumps(metadata, indent=2))
+            return 0
+        if args.action == "check":
+            needed = release.needs_package()
+            print(f"package={str(needed).lower()}")
+            message = "Packaging needed." if needed else "Complete release exists; skipping packaging and publication."
+        elif args.action == "tag":
+            message = release.ensure_tag()
+        elif args.action == "cleanup":
+            message = release.cleanup(args.retention_days, dry_run=args.dry_run)
+        else:
+            message = release.publish(args.directory)
+    except ValueError as error:
+        print(f"Error: {error}", file=sys.stderr)
+        return 1
+    print(f"{release.tag}: {message}", file=sys.stderr)
+    if summary := os.environ.get("GITHUB_STEP_SUMMARY"):
+        with open(summary, "a") as output:
+            output.write(f"{message}\n\nCommit: `{release.commit}`\n")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
