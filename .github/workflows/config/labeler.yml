@@ -725,10 +725,6 @@ integration/keycloak:
 - changed-files:
   - any-glob-to-any-file:
     - keycloak/**/*
-integration/klaviyo:
-- changed-files:
-  - any-glob-to-any-file:
-    - klaviyo/**/*
 integration/kong:
 - changed-files:
   - any-glob-to-any-file:
@@ -825,10 +821,6 @@ integration/langchain:
 - changed-files:
   - any-glob-to-any-file:
     - langchain/**/*
-integration/lastpass:
-- changed-files:
-  - any-glob-to-any-file:
-    - lastpass/**/*
 integration/lighttpd:
 - changed-files:
   - any-glob-to-any-file:

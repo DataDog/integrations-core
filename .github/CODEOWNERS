@@ -312,11 +312,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /keeper/manifest.json                                                @DataDog/saas-integrations @DataDog/documentation
 /keeper/assets/logs/                                                 @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-backend
 
-/lastpass/                                                          @DataDog/saas-integrations
-/lastpass/*.md                                                      @DataDog/saas-integrations @DataDog/documentation
-/lastpass/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
-/lastpass/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
 /microsoft_dns/                                                     @DataDog/agent-integrations
 /microsoft_dns/*.md                                                 @DataDog/agent-integrations @DataDog/documentation
 /microsoft_dns/manifest.json                                        @DataDog/agent-integrations @DataDog/documentation
@@ -554,11 +549,6 @@ plaid/assets/logs/                                                  @DataDog/saa
 /barracuda_secure_edge/*.md                                           @DataDog/agent-integrations @DataDog/documentation
 /barracuda_secure_edge/manifest.json                                  @DataDog/agent-integrations @DataDog/documentation
 /barracuda_secure_edge/assets/logs/                                   @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend @DataDog/logs-core
-
-/klaviyo/                                                            @DataDog/saas-integrations
-/klaviyo/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
-/klaviyo/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
-/klaviyo/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /beyondtrust_password_safe/                                          @DataDog/saas-integrations @DataDog/agent-integrations
 /beyondtrust_password_safe/*.md                                      @DataDog/saas-integrations @DataDog/agent-integrations @DataDog/documentation
