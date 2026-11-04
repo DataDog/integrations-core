@@ -366,11 +366,6 @@ vonage/*.md                                                        @DataDog/saas
 vonage/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
 vonage/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/tanium/                                                            @DataDog/saas-integrations
-/tanium/*.md                                                        @DataDog/saas-integrations @DataDog/documentation
-/tanium/manifest.json                                               @DataDog/saas-integrations @DataDog/documentation
-/tanium/assets/logs/                                                @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
 /servicenow_performance/                                            @DataDog/saas-integrations
 /servicenow_performance/*.md                                        @DataDog/saas-integrations @DataDog/documentation
 /servicenow_performance/manifest.json                               @DataDog/saas-integrations @DataDog/documentation
@@ -380,11 +375,6 @@ vonage/assets/logs/                                                @DataDog/saas
 /silverstripe_cms/*.md                                              @DataDog/agent-integrations @DataDog/documentation
 /silverstripe_cms/manifest.json                                     @DataDog/agent-integrations @DataDog/documentation
 /silverstripe_cms/assets/logs/                                      @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
-
-/tenable_io/                                                        @DataDog/saas-integrations
-/tenable_io/*.md                                                    @DataDog/saas-integrations @DataDog/documentation
-/tenable_io/manifest.json                                           @DataDog/saas-integrations @DataDog/documentation
-/tenable_io/assets/logs/                                            @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /bitdefender/                                                       @DataDog/saas-integrations
 /bitdefender/*.md                                                   @DataDog/saas-integrations @DataDog/documentation
