@@ -1121,10 +1121,6 @@ integration/riakcs:
 - changed-files:
   - any-glob-to-any-file:
     - riakcs/**/*
-integration/sanity:
-- changed-files:
-  - any-glob-to-any-file:
-    - sanity/**/*
 integration/sap_hana:
 - changed-files:
   - any-glob-to-any-file:
@@ -1137,10 +1133,6 @@ integration/sglang:
 - changed-files:
   - any-glob-to-any-file:
     - sglang/**/*
-integration/shopify:
-- changed-files:
-  - any-glob-to-any-file:
-    - shopify/**/*
 integration/sidekiq:
 - changed-files:
   - any-glob-to-any-file:
