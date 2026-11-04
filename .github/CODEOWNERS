@@ -337,11 +337,6 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /mimecast/manifest.json                                             @DataDog/saas-integrations @DataDog/documentation
 /mimecast/assets/logs/                                              @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
-/mux/                                                               @DataDog/saas-integrations
-/mux/*.md                                                           @DataDog/saas-integrations @DataDog/documentation
-/mux/manifest.json                                                  @DataDog/saas-integrations @DataDog/documentation
-/mux/metadata.csv                                                   @DataDog/saas-integrations @DataDog/documentation
-
 /orca_security/                                                      @DataDog/saas-integrations
 /orca_security/*.md                                                  @DataDog/saas-integrations @DataDog/documentation
 /orca_security/manifest.json                                         @DataDog/saas-integrations @DataDog/documentation
@@ -609,11 +604,6 @@ plaid/assets/logs/                                                  @DataDog/saa
 /forescout/*.md                                                       @DataDog/agent-integrations @DataDog/documentation
 /forescout/manifest.json                                              @DataDog/agent-integrations @DataDog/documentation
 /forescout/assets/logs/                                               @DataDog/agent-integrations @DataDog/documentation @DataDog/logs-backend
-
-/obsidian_security/                                                  @DataDog/saas-integrations
-/obsidian_security/*.md                                              @DataDog/saas-integrations @DataDog/documentation
-/obsidian_security/manifest.json                                     @DataDog/saas-integrations @DataDog/documentation
-/obsidian_security/assets/logs/                                      @DataDog/saas-integrations @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 /guarddog/                                                           @DataDog/agent-integrations
 /guarddog/*.md                                                       @DataDog/agent-integrations @DataDog/documentation

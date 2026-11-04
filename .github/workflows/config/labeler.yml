@@ -921,10 +921,6 @@ integration/mongo:
 - changed-files:
   - any-glob-to-any-file:
     - mongo/**/*
-integration/mux:
-- changed-files:
-  - any-glob-to-any-file:
-    - mux/**/*
 integration/mysql:
 - changed-files:
   - any-glob-to-any-file:
@@ -981,10 +977,6 @@ integration/nvidia_triton:
 - changed-files:
   - any-glob-to-any-file:
     - nvidia_triton/**/*
-integration/obsidian_security:
-- changed-files:
-  - any-glob-to-any-file:
-    - obsidian_security/**/*
 integration/octopus_deploy:
 - changed-files:
   - any-glob-to-any-file:
