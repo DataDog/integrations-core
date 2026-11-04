@@ -107,8 +107,8 @@ jobs:
       STATUS_CONTEXT: ${{
         inputs.context == '' && github.event_name == 'workflow_run' && 'Dispatcher / tests (beta, non-blocking)' ||
         format('Dispatcher ({0}) / tests (beta, non-blocking)', inputs.context || 'master') }}
-      # Empty for a tag run, whose commit is not known until the tag is checked out. The step that
-      # checks it out fills this in, and the status steps read it from there.
+      # For a tag run this starts as the caller's `github.sha`; the step that checks the tag out
+      # replaces it with the tag's commit through `GITHUB_ENV`, which the status steps then read.
       HEAD_SHA: ${{
         inputs.context != '' && inputs.checkout_sha ||
         github.event_name == 'workflow_run' && github.event.workflow_run.head_sha ||
@@ -138,6 +138,16 @@ jobs:
       - name: Attribute the pushed checkout to master
         if: github.event_name == 'push' && env.CALLED != 'true'
         run: git checkout -B master
+
+      - name: Check the tested revision inputs
+        if: env.CALLED == 'true'
+        env:
+          CHECKOUT_SHA: ${{ inputs.checkout_sha }}
+        run: |
+          if [[ -n "$TAG" && -n "$CHECKOUT_SHA" ]] || [[ -z "$TAG" && -z "$CHECKOUT_SHA" ]]; then
+            echo "::error::Pass exactly one of checkout_sha and head-tag."
+            exit 1
+          fi
 
       # Data for trusted ddev to parse; its code is executed only by test-batch. Depth 2 holds the
       # first parent, which a change-based run diffs against.

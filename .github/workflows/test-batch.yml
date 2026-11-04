@@ -42,7 +42,7 @@ on:
         required: true
         type: string
       concurrency_key:
-        description: "What the batch cancels against: pr-<number> for a pull request, the commit SHA for a branch run"
+        description: "What the batch cancels against: pr-<number> for a pull request, <context>-<sha> for other runs"
         required: false
         default: ""
         type: string
