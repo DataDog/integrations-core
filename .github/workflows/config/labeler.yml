@@ -1225,10 +1225,6 @@ integration/sonicwall_firewall:
 - changed-files:
   - any-glob-to-any-file:
     - sonicwall_firewall/**/*
-integration/sophos_central_cloud:
-- changed-files:
-  - any-glob-to-any-file:
-    - sophos_central_cloud/**/*
 integration/spark:
 - changed-files:
   - any-glob-to-any-file:
@@ -1253,10 +1249,6 @@ integration/storage_management:
 - changed-files:
   - any-glob-to-any-file:
     - storage_management/**/*
-integration/streamnative:
-- changed-files:
-  - any-glob-to-any-file:
-    - streamnative/**/*
 integration/strimzi:
 - changed-files:
   - any-glob-to-any-file:
