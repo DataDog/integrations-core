@@ -1597,10 +1597,6 @@ integration/wmi_check:
 - changed-files:
   - any-glob-to-any-file:
     - wmi_check/**/*
-integration/workato:
-- changed-files:
-  - any-glob-to-any-file:
-    - workato/**/*
 integration/yarn:
 - changed-files:
   - any-glob-to-any-file:
@@ -1609,10 +1605,6 @@ integration/zeek:
 - changed-files:
   - any-glob-to-any-file:
     - zeek/**/*
-integration/zero_networks:
-- changed-files:
-  - any-glob-to-any-file:
-    - zero_networks/**/*
 integration/zk:
 - changed-files:
   - any-glob-to-any-file:
