@@ -93,10 +93,11 @@ A recording served as is never changes between scrapes, so every counter in it r
 delta of 0. The following 8 counters have data only in a recording, because Galley, the
 Istio 1.1 Pilot, and the Istio 1.5 pilot-agent's xDS client no longer exist in a current
 Istio. To report them non-zero, the gateway serves them from `/replay/`
-(`compose/full-coverage/replay.js`, run by nginx's njs module). On the Nth request for a
-file, it multiplies every counter, histogram bucket, and histogram or summary count and sum
-by N. Gauges and summary quantiles are served as recorded. Each file has one request count
-shared by every client, so values only grow.
+(`compose/full-coverage/replay.js`, run by nginx's njs module). N seconds after the first
+replay request, it multiplies every counter, histogram bucket, and histogram or summary
+count and sum by N + 1. Gauges and summary quantiles are served as recorded. The factor
+depends only on elapsed time, so each replayed counter grows by its recorded value per
+second no matter how many clients scrape, and values only grow.
 
 These 8 metrics are covered by synthetically incremented recordings, not by live scrapes.
 Their non-zero values show that the check parses and maps the recorded series. They say

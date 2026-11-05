@@ -1,8 +1,10 @@
-// Serves a tests/fixtures recording as if the component had kept running: on the
-// Nth request for a file, every counter, histogram, and summary count/sum value
-// is the recorded value times N. Gauges and summary quantiles are served as
-// recorded. A frozen recording otherwise gives the check a zero delta between
-// scrapes, so its counters always report 0.
+// Serves a tests/fixtures recording as if the component had kept running: N
+// seconds after the first replay request, every counter, histogram, and summary
+// count/sum value is the recorded value times N + 1. Gauges and summary
+// quantiles are served as recorded. A frozen recording otherwise gives the check
+// a zero delta between scrapes, so its counters always report 0. Scaling by
+// elapsed time rather than by request count keeps each counter's rate fixed
+// (its recorded value per second) however many clients scrape.
 const fs = require('fs');
 
 const ROOT = '/usr/share/nginx/fixtures';
@@ -59,7 +61,9 @@ function serve(r) {
         r.return(404);
         return;
     }
-    const n = ngx.shared.replay.incr(r.uri, 1, 0);
+    // add() only sets the key when it is absent, so the first request fixes the start.
+    ngx.shared.replay.add('start', Date.now());
+    const n = Math.floor((Date.now() - ngx.shared.replay.get('start')) / 1000) + 1;
     r.headersOut['Content-Type'] = 'text/plain; version=0.0.4';
     r.return(200, scale(text, n));
 }
