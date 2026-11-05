@@ -3697,6 +3697,35 @@ workqueue_work_duration_seconds_bucket{controller="kuma-service-controller",name
 workqueue_work_duration_seconds_bucket{controller="kuma-service-controller",name="kuma-service-controller",le="+Inf"} 26608
 workqueue_work_duration_seconds_sum{controller="kuma-service-controller",name="kuma-service-controller"} 5159.097595162031
 workqueue_work_duration_seconds_count{controller="kuma-service-controller",name="kuma-service-controller"} 26608
+# HELP kds_delta_delivery Summary of config delivery including a response (ACK/NACK) from the client
+# TYPE kds_delta_delivery summary
+kds_delta_delivery{zone="default",quantile="0.5"} NaN
+kds_delta_delivery{zone="default",quantile="0.9"} NaN
+kds_delta_delivery{zone="default",quantile="0.99"} NaN
+kds_delta_delivery_sum{zone="default"} 0
+kds_delta_delivery_count{zone="default"} 0
+# HELP kds_delta_generation_errors Counter of errors during KDS generation
+# TYPE kds_delta_generation_errors counter
+kds_delta_generation_errors{zone="default"} 0
+# HELP kds_delta_streams_active Number of active connections between a server and a client
+# TYPE kds_delta_streams_active gauge
+kds_delta_streams_active{zone="default"} 0
+# HELP kds_resources_sync Time it took to sync resources from the upstream over KDS
+# TYPE kds_resources_sync histogram
+kds_resources_sync_bucket{zone="default",le="0.005"} 0
+kds_resources_sync_bucket{zone="default",le="0.01"} 0
+kds_resources_sync_bucket{zone="default",le="0.025"} 0
+kds_resources_sync_bucket{zone="default",le="0.05"} 0
+kds_resources_sync_bucket{zone="default",le="0.1"} 0
+kds_resources_sync_bucket{zone="default",le="0.25"} 0
+kds_resources_sync_bucket{zone="default",le="0.5"} 0
+kds_resources_sync_bucket{zone="default",le="1"} 0
+kds_resources_sync_bucket{zone="default",le="2.5"} 0
+kds_resources_sync_bucket{zone="default",le="5"} 0
+kds_resources_sync_bucket{zone="default",le="10"} 0
+kds_resources_sync_bucket{zone="default",le="+Inf"} 0
+kds_resources_sync_sum{zone="default"} 0
+kds_resources_sync_count{zone="default"} 0
 # HELP xds_delivery Summary of config delivery including a response (ACK/NACK) from the client
 # TYPE xds_delivery summary
 xds_delivery{zone="default",quantile="0.5"} NaN
