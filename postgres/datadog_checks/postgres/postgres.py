@@ -40,6 +40,7 @@ from datadog_checks.postgres.relationsmanager import (
     DYNAMIC_RELATION_QUERIES,
     INDEX_BLOAT,
     RELATION_METRICS,
+    STATIO_METRICS,
     TABLE_BLOAT,
     RelationsManager,
 )
@@ -157,6 +158,9 @@ class PostgreSql(DatabaseCheck):
         self.set_resource_tags()
         self.pg_settings = {}
         self._warnings_by_code = {}
+        # Warn once per database rather than on every run. See _check_bloat_visibility.
+        self._bloat_insufficient_privilege_dbs: set[str] = set()
+        self._relation_rows_seen: set[str] = set()
         self.db_pool = LRUConnectionPoolManager(
             max_db=self._config.max_connections,
             base_conn_args=self.build_connection_args(),
@@ -774,6 +778,7 @@ class PostgreSql(DatabaseCheck):
         # to a tag name (e.g. 'schema').
         descriptors = scope['descriptors']
         results = self._run_query_scope(scope, is_custom_metrics, cols, descriptors, dbname=dbname)
+        self._check_bloat_visibility(scope, results, dbname)
         if not results:
             return None
 
@@ -831,6 +836,47 @@ class PostgreSql(DatabaseCheck):
             num_results += 1
 
         return num_results
+
+    def _check_bloat_visibility(self, scope: dict, results, dbname: str | None) -> None:
+        """
+        Warn when bloat metrics come back empty while other relation metrics do not.
+
+        Bloat reads `pg_stats`, which exposes only tables the user can read, so a missing
+        privilege yields an empty result set rather than an error. `pg_statio_user_tables` has
+        no such restriction, which separates that case from relations matching nothing.
+
+        Relation scopes run with `STATIO_METRICS` ahead of the bloat scopes (see
+        `_collect_stats`), so the comparison is always against the current run.
+        """
+        scope_name = scope.get('name')
+        if scope_name not in (STATIO_METRICS['name'], TABLE_BLOAT['name'], INDEX_BLOAT['name']):
+            return
+
+        db = dbname or self._config.dbname
+
+        if scope_name == STATIO_METRICS['name']:
+            if results:
+                self._relation_rows_seen.add(db)
+            return
+
+        if results:
+            if db in self._bloat_insufficient_privilege_dbs:
+                self._bloat_insufficient_privilege_dbs.discard(db)
+                self.log.info("Bloat metrics are now being collected in database '%s'", db)
+            return
+
+        # No bloat rows. Only a privilege problem if other relation metrics did come back.
+        if db not in self._relation_rows_seen or db in self._bloat_insufficient_privilege_dbs:
+            return
+
+        self._bloat_insufficient_privilege_dbs.add(db)
+        self.log.warning(
+            "No bloat metrics returned for database '%s' while other relation metrics were collected. "
+            "`collect_bloat_metrics` only collects tables that the datadog user can read and that have "
+            "been analyzed. Check that the datadog user has the SELECT privilege on the configured "
+            "relations.",
+            db,
+        )
 
     def _cache_table_activity(
         self,
@@ -935,6 +981,9 @@ class PostgreSql(DatabaseCheck):
         on top of that.
         If custom_metrics is not an empty list, gather custom metrics defined in postgres.yaml
         """
+        # Scoped to a single run, so _check_bloat_visibility compares within the current run.
+        self._relation_rows_seen = set()
+
         db_instance_metrics = self.metrics_cache.get_instance_metrics(self.version)
         bgw_instance_metrics = self.metrics_cache.get_bgw_metrics(self.version)
         archiver_instance_metrics = self.metrics_cache.get_archiver_metrics(self.version)
