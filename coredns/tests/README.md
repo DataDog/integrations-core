@@ -13,9 +13,14 @@ Two services:
   repackages the real `coredns/coredns` binary (unmodified) onto an Alpine base. The upstream
   image ships on `scratch` with no shell or HTTP client, so the compose healthcheck (which
   probes the `health` plugin's `:8080/health` endpoint) needs a base image that has `wget`. It
-  runs the existing pytest Corefile (`docker/coredns/Corefile-v1.8`): `forward`, `cache`,
-  `health`, `prometheus`.
-- **`activity-gen`** — continuous DNS query workload (`activity-gen.sh`). Every target metric
+  runs a fixture-only Corefile (`compose/coredns/Corefile`) with the same plugins as the pytest
+  one (`forward`, `cache`, `health`, `prometheus`), except that `forward` targets a local
+  upstream instead of `/etc/resolv.conf`. The upstream is a second server block in the same
+  CoreDNS process (`127.0.0.1:5300`), authoritative for `example.com.`: it answers the apex and
+  returns `NXDOMAIN` for every other name. It lives in-process because `forward` accepts only IP
+  addresses, not compose service names. Nothing in the fixture needs internet access at runtime.
+- **`activity-gen`** — continuous DNS query workload (`activity-gen.sh`), run from an Alpine
+  image with `dig` installed at build time (`compose/activity-gen/Dockerfile`). Every target metric
   here is emittable by a live, unmodified CoreDNS: process/go metrics and the request/response
   counters appear as soon as any query flows, and cache hits appear once the same name is
   looked up twice inside the cache TTL. No metric needs data an OSS CoreDNS can't produce, so
@@ -23,12 +28,12 @@ Two services:
 
 `activity-gen` sends three queries per iteration, about one iteration per second:
 
-- `example.com`, forwarded to the host resolver by the `forward` plugin and then cached for 30s.
+- `example.com`, forwarded to the local upstream by the `forward` plugin and then cached for 30s.
   The first lookup per window is a cache miss plus a forward request/response/rcode; repeats are
   cache hits.
 - `fwd-<n>.example.com`, a unique name inside the forward zone. It always misses the cache and
-  reaches `forward`, so `forward_response_rcode_count` and `forward_request_duration` move between
-  any two scrapes, not just once per cache window.
+  reaches `forward` (the upstream answers `NXDOMAIN`), so `forward_response_rcode_count` and
+  `forward_request_duration` move between any two scrapes, not just once per cache window.
 - `miss-<n>.invalid`, outside the forward zone and answered locally as `SERVFAIL`, which adds
   cache misses and response-code variety without touching `forward`.
 

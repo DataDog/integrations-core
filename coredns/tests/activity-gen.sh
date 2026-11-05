@@ -39,7 +39,7 @@ i=0
 while :; do
   i=$(( i + 1 ))
 
-  # example.com is forwarded to the host resolver (forward plugin) and cached
+  # example.com is forwarded to the local upstream (forward plugin) and cached
   # (cache 30): the first lookup per 30s window is a cache miss plus a
   # forward request/response/rcode; repeats within that window are cache hits.
   dig example.com "@${DNS_HOST}" -p 53 +short >/dev/null 2>&1 || true
@@ -47,6 +47,7 @@ while :; do
   # A unique name inside the forward zone always misses the cache, so every
   # iteration reaches forward. Without it forward fires once per 30s window and
   # a short scrape interval often sees no forward_response_rcode_count change.
+  # The upstream answers these NXDOMAIN.
   dig "fwd-$i.example.com" "@${DNS_HOST}" -p 53 +short >/dev/null 2>&1 || true
 
   # Names outside the example.com forward zone resolve locally (SERVFAIL):

@@ -7,8 +7,9 @@
 # metric here needs data an OSS CoreDNS can't produce, so there is no seed
 # step and no injection layer -- just the live service plus a workload.
 services:
-  # Reuses the existing pytest Corefile (forward + cache + health + prometheus)
-  # instead of authoring a new one. Built from ./coredns/Dockerfile, which
+  # Runs the fixture-only ./coredns/Corefile (forward + cache + health +
+  # prometheus, forwarding example.com. to an in-process local upstream so
+  # nothing reaches the internet). Built from ./coredns/Dockerfile, which
   # repackages the real coredns/coredns binary onto Alpine purely so the
   # healthcheck below has a shell and `wget` -- coredns/coredns itself ships on
   # scratch with neither.
@@ -19,7 +20,8 @@ services:
         COREDNS_VERSION: "${COREDNS_VERSION:-1.8.5}"
     command: ["-conf", "/data/Corefile"]
     volumes:
-      - ../docker/coredns/Corefile-v1.8:/data/Corefile:ro
+      - ./coredns/Corefile:/data/Corefile:ro
+      - ./coredns/example.com.zone:/data/example.com.zone:ro
     # Pulls activity-gen up whenever coredns is requested (see evalya.yaml).
     # activity-gen does not depend on coredns in turn (it self-polls for
     # readiness) to avoid a dependency cycle on the entrypoint service.

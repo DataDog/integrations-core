@@ -2,7 +2,7 @@ version: "1"
 
 tasks:
   # Full metric-coverage fixture: a plain CoreDNS instance (forward + cache +
-  # health + prometheus, reusing the pytest Corefile) plus a continuous query
+  # health + prometheus, forwarding to a local upstream) plus a continuous query
   # workload that keeps every rate/counter metric non-zero. No injection
   # layer is needed here: every dashboard/monitor metric is emittable by a
   # live OSS CoreDNS. See ./compose/full-coverage.compose and ./activity-gen.sh.
