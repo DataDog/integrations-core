@@ -13,6 +13,7 @@ import pytest
 
 from datadog_checks.base.stubs.http import FakeHTTPResponse, RecordedRequest
 from datadog_checks.base.utils.http_exceptions import HTTPClientError, HTTPClientStatusError
+from datadog_checks.base.utils.requests_adapter import RequestsResponseAdapter
 from datadog_checks.checks.prometheus import PrometheusCheck, UnknownFormatError
 from datadog_checks.utils.prometheus import metrics_pb2, parse_metric_family
 
@@ -1918,9 +1919,11 @@ def test_health_service_check_failing(fake_http):
     fake_http.assert_all_responses_consumed()
 
 
-def test_health_service_check_failing_on_status_error(fake_http):
-    response = FakeHTTPResponse(status_code=503)
-    fake_http.register_response('GET', FAKE_ENDPOINT, response, match_options=PROMETHEUS_REQUEST_OPTIONS)
+def test_health_service_check_failing_on_status_error(fake_http, mocker):
+    close = mocker.spy(RequestsResponseAdapter, 'close')
+    fake_http.register_response(
+        'GET', FAKE_ENDPOINT, FakeHTTPResponse(status_code=503), match_options=PROMETHEUS_REQUEST_OPTIONS
+    )
     check = PrometheusCheck('prometheus_check', {}, {}, {})
     check.NAMESPACE = 'ksm'
     check.health_service_check = True
@@ -1932,7 +1935,7 @@ def test_health_service_check_failing_on_status_error(fake_http):
     check.service_check.assert_called_with(
         "ksm.prometheus.health", PrometheusCheck.CRITICAL, tags=["endpoint:http://fake.endpoint:10055/metrics"]
     )
-    assert response.closed
+    close.assert_called_once()
     fake_http.assert_requests([PROMETHEUS_REQUEST])
     fake_http.assert_all_responses_consumed()
 

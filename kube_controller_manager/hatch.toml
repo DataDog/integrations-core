@@ -6,7 +6,6 @@ base-package-features = [
 
 [envs.default]
 dependencies = [
-  "requests-mock==1.4.0",
   "requests-oauthlib==1.3.1; python_version < '3.0'",
 ]
 

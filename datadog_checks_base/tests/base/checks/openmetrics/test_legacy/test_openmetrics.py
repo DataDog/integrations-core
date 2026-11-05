@@ -19,6 +19,7 @@ from prometheus_client.samples import Sample
 from datadog_checks.base.errors import CheckException
 from datadog_checks.base.stubs.http import FakeHTTPResponse, RecordedRequest
 from datadog_checks.base.utils.http_exceptions import HTTPClientError, HTTPClientStatusError
+from datadog_checks.base.utils.requests_adapter import RequestsResponseAdapter
 from datadog_checks.checks.openmetrics import OpenMetricsBaseCheck
 from datadog_checks.dev import get_here
 
@@ -2667,11 +2668,11 @@ def test_possible_urls_fall_back_for_root_http_client_errors():
 
 
 def test_health_service_check_failing_on_status_error(
-    aggregator, fake_http, mocked_prometheus_check, mocked_prometheus_scraper_config
+    aggregator, fake_http, mocked_prometheus_check, mocked_prometheus_scraper_config, mocker
 ):
     check = mocked_prometheus_check
-    response = FakeHTTPResponse(status_code=503)
-    fake_http.register_response('GET', FAKE_ENDPOINT, response, match_options={'stream': True})
+    close = mocker.spy(RequestsResponseAdapter, 'close')
+    fake_http.register_response('GET', FAKE_ENDPOINT, FakeHTTPResponse(status_code=503), match_options={'stream': True})
 
     mocked_prometheus_scraper_config['namespace'] = 'ksm'
     mocked_prometheus_scraper_config['custom_tags'] = ['foo:bar']
@@ -2684,7 +2685,7 @@ def test_health_service_check_failing_on_status_error(
         tags=['endpoint:http://fake.endpoint:10055/metrics', 'foo:bar'],
         count=1,
     )
-    assert response.closed
+    close.assert_called_once()
     fake_http.assert_requests([OPENMETRICS_REQUEST])
     fake_http.assert_all_responses_consumed()
 

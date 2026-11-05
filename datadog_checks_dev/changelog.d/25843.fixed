@@ -1,0 +1,1 @@
+Fail `fake_http` fixture cleanup when a check catches a request-guard error, so unexpected requests cannot silently pass tests.

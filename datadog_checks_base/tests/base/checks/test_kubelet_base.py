@@ -62,11 +62,11 @@ def test_perform_kubelet_query_forwards_credentials_and_verbosity(
     fake_http, fake_http_response, credentials, expected_options, verbose
 ):
     url = 'https://kubelet:10250/healthz'
-    response = fake_http_response(url, status_code=200)
+    fake_http_response(url, b'ok', status_code=200)
     check = KubeletBase('kubelet', {}, [{}])
     check.kubelet_credentials = KubeletCredentials(credentials)
 
-    assert check.perform_kubelet_query(url, verbose=verbose) is response
+    assert check.perform_kubelet_query(url, verbose=verbose).content == b'ok'
 
     fake_http.assert_requests(
         [
