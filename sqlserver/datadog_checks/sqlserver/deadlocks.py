@@ -176,7 +176,7 @@ class Deadlocks(DBMAsyncJob):
                 self._set_xe_session_name()
             except NoXESessionError as e:
                 self._log.error(str(e))
-                return
+                return []
             self._log.info(
                 f'Using XE session [{self._xe_session_name}], target [{self._xe_session_target}] to collect deadlocks'
             )
