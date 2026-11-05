@@ -56,7 +56,10 @@ instances:
 ### Inputs
 
 Each input has a working default, so the task runs unattended. Set any of them
-in the host environment before starting the fixture to override it.
+in the host environment before starting the fixture to override it: `evalya.yaml`
+declares each one as `${VAR:-default}`, and the published `provides.DB_USERNAME`
+and `provides.DB_PASSWORD` labels use the same form, so consumers receive the
+overridden credentials.
 
 | Variable | Default | Effect |
 |---|---|---|
