@@ -18,10 +18,13 @@ from .build_agent import BUILD_AGENT_YAML_PATH, ensure_build_agent_yaml_updated
 
 if TYPE_CHECKING:
     from ddev.cli.application import Application
+    from ddev.utils.github_async.models import PullRequest
 
 BRANCH_NAME_PATTERN = r"^\d+\.\d+\.x$"
 BRANCH_NAME_REGEX = re.compile(BRANCH_NAME_PATTERN)
 GITHUB_LABEL_COLOR = '5319e7'
+# The milestone bump only touches release.json, so it never needs QA.
+MILESTONE_PR_LABELS = ['qa/skip-qa']
 
 
 @click.command
@@ -131,13 +134,12 @@ def bump_milestone(app: Application, branch_name: str) -> None:
 
     app.display_waiting("Creating a pull request...")
     try:
-        pr_url = app.github.create_pull_request(
+        pr = create_milestone_pr(
+            app,
             title=f'Update current_milestone to {next_milestone}',
             head=bump_branch,
-            base='master',
             body=milestone_pr_body(app, next_milestone, branch_name),
         )
-        app.display_success(f'Pull request created: {pr_url}')
     except GitHubAuthenticationError:
         app.display_warning(
             f'Failed to create the pull request. Please create one manually from `{bump_branch}` to `master`.'
@@ -147,6 +149,42 @@ def bump_milestone(app: Application, branch_name: str) -> None:
         app.display_warning(
             f'Failed to create the pull request ({e}). Please create one manually from `{bump_branch}` to `master`.'
         )
+        return
+
+    app.display_success(f'Pull request created: {pr.html_url}')
+    # The pull request already exists at this point, so a labeling failure must not read as a creation failure.
+    labels = ', '.join(f'`{label}`' for label in MILESTONE_PR_LABELS)
+    try:
+        label_milestone_pr(app, pr.number)
+    except HTTPError as e:
+        app.display_warning(f'Failed to add {labels} to {pr.html_url} ({e}). Please add the labels manually.')
+
+
+def create_milestone_pr(app: Application, title: str, head: str, body: str) -> PullRequest:
+    import asyncio
+
+    from ddev.utils.github_async import async_github_client
+
+    async def create() -> PullRequest:
+        async with async_github_client(token=app.config.github.token) as client:
+            response = await client.create_pull_request(
+                app.repo.github_owner, app.repo.full_name, title=title, head=head, base='master', body=body
+            )
+            return response.data
+
+    return asyncio.run(create())
+
+
+def label_milestone_pr(app: Application, pr_number: int) -> None:
+    import asyncio
+
+    from ddev.utils.github_async import async_github_client
+
+    async def label() -> None:
+        async with async_github_client(token=app.config.github.token) as client:
+            await client.add_labels_to_issue(app.repo.github_owner, app.repo.full_name, pr_number, MILESTONE_PR_LABELS)
+
+    asyncio.run(label())
 
 
 def milestone_pr_body(app: Application, milestone: str, branch_name: str) -> str:
