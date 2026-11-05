@@ -122,7 +122,11 @@ class DOQuerySession:
             self._close_cursor(cursor)
             raise
         # The result is over; this reads the EOF only.
-        self._close_cursor(cursor)
+        try:
+            cursor.close()
+        except Exception:
+            self.usable = False
+            raise
 
     def _abandon(self, cursor: Any) -> None:
         """
