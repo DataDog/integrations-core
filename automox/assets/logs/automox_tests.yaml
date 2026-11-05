@@ -8405,9 +8405,6 @@ tests:
           name: EXAMPLE-MAC
           org:
             uid: '171910'
-          os:
-            type_id: 0
-            type: Unknown
           type_id: 0
           type: Unknown
         unmapped:

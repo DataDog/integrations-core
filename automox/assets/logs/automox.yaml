@@ -3904,10 +3904,6 @@ pipeline:
                     query: "@data.os:*"
                   name: Other
                   id: 99
-                - filter:
-                    query: "-@data.os:*"
-                  name: Unknown
-                  id: 0
               targets:
                 name: ocsf.entity.device.os.type
                 id: ocsf.entity.device.os.type_id
@@ -4125,10 +4121,6 @@ pipeline:
                     query: "@data.os:*"
                   name: Other
                   id: 99
-                - filter:
-                    query: "-@data.os:*"
-                  name: Unknown
-                  id: 0
               targets:
                 name: ocsf.device.os.type
                 id: ocsf.device.os.type_id
@@ -4398,10 +4390,6 @@ pipeline:
                     query: "@data.os:*"
                   name: Other
                   id: 99
-                - filter:
-                    query: "-@data.os:*"
-                  name: Unknown
-                  id: 0
               targets:
                 name: ocsf.device.os.type
                 id: ocsf.device.os.type_id
