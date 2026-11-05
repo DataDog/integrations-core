@@ -36,7 +36,9 @@ single-node k3s cluster inside the Compose environment (`compose/full-coverage.c
 
 ### Inputs
 
-Every input has a working default, and each one can be overridden from the host environment.
+Every input has a working default, and each one can be overridden from the host environment. The
+`env` entries in `evalya.yaml` are written as `${VAR:-default}`, which evalya expands from the host
+environment, and plain `docker compose` reads the same variables.
 
 | Variable | Default | Effect |
 |---|---|---|

@@ -20,11 +20,11 @@ tasks:
       evalya.io/provides.ISTIO_REPLAY_URL: "http://{{ .hostname }}:15014/replay"
     env:
       - name: ISTIO_VERSION
-        value: "1.29.2"
+        value: "${ISTIO_VERSION:-1.29.2}"
       - name: K3S_VERSION
-        value: v1.31.6-k3s1
+        value: "${K3S_VERSION:-v1.31.6-k3s1}"
       - name: ACTIVITY_GEN
-        value: "1"
+        value: "${ACTIVITY_GEN:-1}"
     healthcheck:
       test:
         - CMD-SHELL
