@@ -72,6 +72,9 @@ Both accept a host-environment override, under `evalya run` and plain `docker co
 `service1`/`service2` sidecars are built from `docker/api_v3/Dockerfile-service`, which pins its own Envoy version;
 `ENVOY_VERSION` does not change them, and the check does not scrape them.
 
+The front proxy runs with `--concurrency 2`, so per-worker stats, and with them the number of series, are the same
+on every host.
+
 ### Coverage
 
 All 66 envoy metrics in the dashboards and monitor are emitted non-zero, from the live fixture, with no

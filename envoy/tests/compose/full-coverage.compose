@@ -29,7 +29,9 @@ services:
         condition: service_started
       activity-gen:
         condition: service_started
-    command: ["envoy", "-c", "/etc/envoy-full/front-envoy.yaml", "--service-cluster", "front-proxy"]
+    # A fixed worker count keeps per-worker stats (and so series cardinality) the
+    # same on every host; Envoy defaults to one worker per CPU.
+    command: ["envoy", "-c", "/etc/envoy-full/front-envoy.yaml", "--service-cluster", "front-proxy", "--concurrency", "2"]
     volumes:
       - ./full-coverage:/etc/envoy-full:ro
       - envoy-dynamic:/var/run/envoy-dynamic
