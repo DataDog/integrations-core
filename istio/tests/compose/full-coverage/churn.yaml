@@ -3,9 +3,10 @@
 # (drills.yaml) per push context and only for what that push recomputed. The
 # bundle lands within one debounce window (seed.sh sets it to 1s), so a single
 # full push re-merges the destination rules, recomputes the mesh proxies'
-# service targets (the `notready` service change), re-reads the ghost endpoint,
-# and regenerates every proxy's listeners and clusters, recording all of them
-# together.
+# service targets (the `notready` service change), and regenerates every
+# proxy's listeners and clusters, recording all of them together. The ghost
+# endpoint behind endpoint_no_pod is not part of the bundle: activity-gen.sh
+# touches it after this push lands (see there).
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
@@ -49,24 +50,3 @@ spec:
     - name: http-churn
       port: 1__N__
       targetPort: 80
----
-apiVersion: discovery.k8s.io/v1
-kind: EndpointSlice
-metadata:
-  name: nopod-1
-  namespace: drill
-  labels:
-    kubernetes.io/service-name: nopod
-addressType: IPv4
-ports:
-  - name: http
-    port: 80__N__
-    protocol: TCP
-endpoints:
-  - addresses: ["10.42.0.250"]
-    conditions:
-      ready: true
-    targetRef:
-      kind: Pod
-      name: ghost
-      namespace: drill

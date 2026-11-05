@@ -85,8 +85,18 @@ while :; do
   # grpc_server_msg_*) that re-records the drill gauges. See churn.yaml.
   sed "s/__N__/$n/g" "$M/churn.yaml" | kubectl apply -f - > /dev/null || log "churn apply failed"
 
+  # istiod adds endpoint_no_pod to the push context that is current when it
+  # processes the ghost endpoint (drills.yaml), and every full push starts an
+  # empty context that istiod's 10s metrics refresh then records. Touching the
+  # ghost EndpointSlice right before the churn push would leave the new context
+  # without it, so touch it once that push has landed (1s debounce). An
+  # annotation change only triggers an incremental EDS push, so it does not
+  # start another context.
+  sleep 1.5
+  kubectl -n drill annotate endpointslice nopod-1 "istio-full/touch=$i" --overwrite > /dev/null \
+    || log "ghost endpoint touch failed"
+
   if [ $(( i % 10 )) -eq 0 ]; then
     log "iteration $i: $(kubectl -n mesh get pods --no-headers 2>/dev/null | wc -l) pods in mesh"
   fi
-  sleep 1
 done

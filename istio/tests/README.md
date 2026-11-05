@@ -21,8 +21,9 @@ single-node k3s cluster inside the Compose environment (`compose/full-coverage.c
   traffic from `client`, injects, skips, and rejects sidecar injections, submits valid
   and invalid Istio config, makes istiod reconcile its validating webhook (with a
   `ValidatingAdmissionPolicy` drill that denies the first attempts), and applies
-  `churn.yaml` so the drill gauges are recorded in istiod's latest push. The `client`
-  sidecar uses a 20s workload certificate, so CSR counters move as well.
+  `churn.yaml` so the drill gauges are recorded in istiod's latest push, then touches the
+  ghost endpoint behind `endpoint_no_pod`. The `client` sidecar uses a 20s workload
+  certificate, so CSR counters move as well.
 - **gateway**: the entrypoint (nginx on port 15014). It routes the live endpoints out of
   the cluster and serves this directory's recorded payloads, both as recorded and
   replayed:
@@ -112,8 +113,14 @@ nothing about a live deployment, and the replayed rates are artificial:
 
 ### Metrics that stay at 0 or are missing
 
-The istiod drill gauges (`pilot_*` conflicts and duplicates, `endpoint_no_pod`) report
-istiod's latest push, so they can briefly drop to 0 between activity-gen iterations.
+The drill objects stay applied for the fixture's lifetime, and the `pilot_*` conflict and
+duplicate gauges stay non-zero. `endpoint_no_pod` (`istio.galley.endpoint_no_pod`) can still
+read 0 for a few seconds: istiod adds it to the push context that is current when it
+processes the ghost endpoint, and its 10s metrics refresh records each new context once.
+activity-gen touches the ghost endpoint right after each config push, so a refresh that
+lands in that gap of about a second records 0 until the next push. In two 4-minute runs
+sampled every 2s, it read 0 in 3% and 6% of samples, against 23% when the endpoint
+change was part of the push itself.
 
 The following are 0 by nature:
 
