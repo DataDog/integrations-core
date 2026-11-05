@@ -46,7 +46,9 @@ instances:
 ### Inputs
 
 Every input has a working default, so the task runs unattended. Each one can
-be overridden from the host environment when starting the fixture.
+be overridden from the host environment when starting the fixture. An
+overridden `DB_USERNAME` or `DB_PASSWORD` is also what the task publishes as
+`provides.DB_USERNAME` and `provides.DB_PASSWORD`.
 
 | Variable | Default | Purpose |
 |---|---|---|
@@ -81,5 +83,9 @@ fixture. Other `cqlsh` errors, such as a failed login, appear in the
 `activity-gen` container log; the expected timeouts are logged only once every
 100 occurrences.
 
-All 14 target metrics are produced live; none rely on recorded fixtures, and
-none are expected to stay at zero.
+All 14 target metrics are produced live; none rely on recorded fixtures.
+
+Known host dependence: the two timeout counters rely on `USING TIMEOUT 1ms`
+being too short for the large reads and batch. On a fast enough host they can
+increase rarely (the write batch times out roughly once every ten iterations
+on a developer laptop) and may read zero within a single short check run.
