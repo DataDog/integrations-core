@@ -29,14 +29,14 @@ jobs:
           ref: master
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Get Datadog credentials
         id: dd-sts
         if: github.event.workflow_run.event == 'push'
-        uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+        uses: DataDog/dd-sts-action@639d841c72f15e4e77747bd726ef8105ce971da2 # v1.0.5
         with:
           policy: integrations-core-api-key
 
@@ -164,7 +164,7 @@ jobs:
       - name: Get token via dd-octo-sts
         id: octo-sts
         if: github.event.workflow_run.event == 'pull_request'
-        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+        uses: DataDog/dd-octo-sts-action@c85802a58e202b7e764b5441e4378c76043c8108 # v1.0.5
         with:
           scope: DataDog/integrations-core
           policy: self.measure-disk-usage.workflow-run
@@ -190,14 +190,14 @@ jobs:
           edit-mode: replace
 
       - name: Upload JSON uncompressed sizes artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: status_uncompressed.json
           path: status_uncompressed.json
           if-no-files-found: error
 
       - name: Upload JSON compressed sizes artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: status_compressed.json
           path: status_compressed.json

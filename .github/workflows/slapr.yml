@@ -16,7 +16,7 @@ jobs:
           - SLACK_CHANNEL_ID
           - SLACK_CHANNEL_ID_AGENT_INTEGRATIONS_REVIEWS
     steps:
-    - uses: DataDog/slapr@4b5efe2ce585e45898bb88c4fa303e226e8199e4 # 1.0.0
+    - uses: DataDog/slapr@1c074e1dfd433f91a679d5113f7f8b956b65d973 # v1.2.0
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         SLACK_CHANNEL_ID: "${{ vars[matrix.slack_channel_variable] }}"
