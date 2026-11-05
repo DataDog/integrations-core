@@ -15,6 +15,7 @@ READER="ddreader:ddreader"
 J='Content-Type: application/json'
 
 log() { echo "activity-gen: $*"; }
+warn() { echo "activity-gen: $*" >&2; }
 
 # Opt out of the workload for a quiescent couch-full: ACTIVITY_GEN=0 keeps the
 # container running (so dependents still start) but generates no traffic.
@@ -23,31 +24,47 @@ if [ "${ACTIVITY_GEN:-1}" = "0" ]; then
   exec sleep infinity
 fi
 
-# body <auth or empty> <curl args...>: print the response body, never fail.
+# Document ids and failed-login names are unique per container start, so a
+# restarted workload (restart: unless-stopped) creates fresh documents and
+# behaves like a first run instead of hitting 409s on ids it already used.
+RUN=$(date +%s)
+
+# body <auth or empty> <curl args...>: print the response body. HTTP error
+# statuses are part of the workload; transport failures are logged to stderr
+# (without the credentials) and the workload keeps going.
 body() {
-  if [ -n "$1" ]; then auth=$1; shift; curl -s -u "$auth" "$@" || true
-  else shift; curl -s "$@" || true; fi
+  auth=$1; shift
+  if [ -n "$auth" ]; then
+    curl -sS -u "$auth" "$@" || warn "curl exit $? for: $*"
+  else
+    curl -sS "$@" || warn "curl exit $? for: $*"
+  fi
 }
 
 # drive <base url> <admin auth, empty for admin party> <iteration>
 drive() {
   b=$1 a=$2 i=$3
+  d="doc-$RUN-$i"
   c() { body "$a" -o /dev/null "$@"; }
 
   # GET 200 + database_reads; 404 for a document that is not there yet.
   c "$b/"
   c "$b/kennel/seed-$(( i % 50 + 1 ))"
-  c "$b/activity/doc-$i"
+  c "$b/activity/$d"
   # PUT 201 + database_writes, then a 409 conflict re-PUT without the rev.
-  rev=$(body "$a" -X PUT -H "$J" "$b/activity/doc-$i" -d "{\"data\":$i}" \
+  rev=$(body "$a" -X PUT -H "$J" "$b/activity/$d" -d "{\"data\":$i}" \
         | sed -n 's/.*"rev":"\([^"]*\)".*/\1/p')
-  c "$b/activity/doc-$i"
-  c -X PUT -H "$J" "$b/activity/doc-$i" -d "{\"data\":$i}"
+  c "$b/activity/$d"
+  c -X PUT -H "$J" "$b/activity/$d" -d "{\"data\":$i}"
   # POST 201 and a _bulk_docs request (httpd.bulk_requests).
   c -X POST -H "$J" "$b/activity" -d "{\"data\":$i}"
   c -X POST -H "$J" "$b/activity/_bulk_docs" -d "{\"docs\":[{\"n\":1},{\"n\":2},{\"n\":3}]}"
   # DELETE 200.
-  [ -n "$rev" ] && c -X DELETE "$b/activity/doc-$i?rev=$rev"
+  if [ -n "$rev" ]; then
+    c -X DELETE "$b/activity/$d?rev=$rev"
+  else
+    warn "PUT $b/activity/$d returned no rev; DELETE skipped"
+  fi
   # Error paths: 400 bad JSON, 403 validate_doc_update, 405 bad method,
   # 412 database already exists.
   c -X POST -H "$J" "$b/activity" -d "notjson"
@@ -61,9 +78,8 @@ drive() {
   # requests as the _users account that hit the auth cache. 3.x locks a user
   # out (403) after a few failed logins from one client, so each failed login
   # uses a fresh name and never touches the admin account.
-  h=${b#http://}
-  curl -s -o /dev/null -u "ghost-$i:x" "http://$h/" || true
-  for _ in 1 2 3; do curl -s -o /dev/null -u "$READER" "http://$h/_session" || true; done
+  body "ghost-$RUN-$i:x" -o /dev/null "$b/"
+  for _ in 1 2 3; do body "$READER" -o /dev/null "$b/_session"; done
 
   # Keep the activity database bounded on a long run: recreating it also
   # exercises DELETE on a database.
