@@ -24,8 +24,8 @@ Remove-Item "librdkafka-${kafka_version}.tar.gz"
 $triplet = "x64-windows"
 $vcpkg_dir = "C:\vcpkg"
 $librdkafka_dir = "C:\librdkafka\librdkafka-${kafka_version}"
-# Pinned to the vcpkg commit that first added the openssl 3.6.4 port entry
-$desired_commit = "7e43e0768a5af180a9cf75d87d692dce1b9da34f"
+# Pinned to the vcpkg commit that first added the openssl 3.6.5 port entry
+$desired_commit = "e182cb4dd2df2ab02f66a1aabd5f35bbdc9522c7"
 
 # Clone and configure vcpkg
 if (-Not (Test-Path -Path "$vcpkg_dir\.git")) {
