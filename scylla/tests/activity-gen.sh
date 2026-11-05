@@ -1,7 +1,7 @@
 #!/bin/sh
 # Drives scylla-full so the scylla check reports its dashboard metrics with
 # non-zero values (an idle node reports zero for the coordinator, cache, and
-# transport counters). Consumes DB_HOST/DB_PORT/DB_USERNAME/DB_PASSWORD from the
+# transport counters). Consumes DB_HOST/CQL_PORT/DB_USERNAME/DB_PASSWORD from the
 # fixture.
 set -eu
 
@@ -73,4 +73,4 @@ workload() {
   done
 }
 
-workload | cqlsh "$DB_HOST" "${DB_PORT:-9042}" -u "$DB_USERNAME" -p "$DB_PASSWORD" > /dev/null 2>&1 || true
+workload | cqlsh "$DB_HOST" "${CQL_PORT:-9042}" -u "$DB_USERNAME" -p "$DB_PASSWORD" > /dev/null 2>&1 || true

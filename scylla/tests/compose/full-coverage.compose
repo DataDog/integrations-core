@@ -101,7 +101,7 @@ services:
     restart: unless-stopped
     environment:
       DB_HOST: scylla
-      DB_PORT: "9042"
+      CQL_PORT: "9042"
       SCYLLA_API_PORT: "10000"
       DB_USERNAME: "${DB_USERNAME:-cassandra}"
       DB_PASSWORD: "${DB_PASSWORD:-cassandra}"
