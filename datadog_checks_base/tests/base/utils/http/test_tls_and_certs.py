@@ -1220,6 +1220,9 @@ def distrust(monkeypatch: pytest.MonkeyPatch) -> Callable[[x509.Certificate], No
 
 
 DISTRUST_SETTING = 'tls_distrusted_spki_sha256'
+# The error for a match on a key from the setting. Tests match it rather than the setting's name, which the error for
+# an invalid setting contains too.
+CONFIGURED_KEY_MATCH = 'distrusted CA key: a key from the Agent setting `tls_distrusted_spki_sha256`'
 
 
 @pytest.fixture
@@ -1474,7 +1477,7 @@ def test_tls_context_given_configured_distrusted_ca_key_raises_certificate_distr
     context = TlsContextWrapper({'tls_ca_cert': distrust_pki.root_path}).tls_context
 
     with https_server(distrust_pki, tmp_path) as port:
-        with pytest.raises(CertificateDistrustError, match=DISTRUST_SETTING) as excinfo:
+        with pytest.raises(CertificateDistrustError, match=CONFIGURED_KEY_MATCH) as excinfo:
             connect_with_socket(context, port)
 
     assert excinfo.value.verify_code == 50
@@ -1491,7 +1494,7 @@ def test_tls_context_given_certifi_fallback_and_configured_distrusted_ca_key_rai
     context = TlsContextWrapper({}).tls_context
 
     with https_server(distrust_pki, tmp_path) as port:
-        with pytest.raises(CertificateDistrustError, match=DISTRUST_SETTING):
+        with pytest.raises(CertificateDistrustError, match=CONFIGURED_KEY_MATCH):
             connect_with_socket(context, port)
 
 
@@ -1584,7 +1587,7 @@ def test_tls_context_outside_base_given_configured_distrusted_ca_key_raises_cert
     context.load_verify_locations(distrust_pki.root_path)
 
     with https_server(distrust_pki, tmp_path) as port:
-        with pytest.raises(CertificateDistrustError, match=DISTRUST_SETTING):
+        with pytest.raises(CertificateDistrustError, match=CONFIGURED_KEY_MATCH):
             connect(context, port)
 
 
@@ -1594,7 +1597,7 @@ def test_requests_session_given_configured_distrusted_ca_key_raises_ssl_error(di
     # A plain requests session, as integrations that don't use the HTTP wrapper create; urllib3 builds the context.
     with requests.Session() as session, https_server(distrust_pki, tmp_path) as port:
         session.trust_env = False
-        with pytest.raises(SSLError, match=DISTRUST_SETTING):
+        with pytest.raises(SSLError, match=CONFIGURED_KEY_MATCH):
             session.get('https://localhost:{}'.format(port), verify=distrust_pki.root_path)
 
 
@@ -1625,7 +1628,7 @@ def test_pyopenssl_connection_given_configured_distrusted_ca_key_raises_certific
     context = pyopenssl_client_context(distrust_pki.root_path)
 
     with https_server(distrust_pki, tmp_path) as port, pyopenssl_connection(context, port) as connection:
-        with pytest.raises(CertificateDistrustError, match=DISTRUST_SETTING):
+        with pytest.raises(CertificateDistrustError, match=CONFIGURED_KEY_MATCH):
             connection.do_handshake()
 
 
