@@ -38,7 +38,8 @@ All defined in `compose/full-coverage.compose`:
 - **seed**: one-shot. Writes the file-based CDS, the overload pressure file, and a runtime directory nested past
   Envoy's walk limit to a volume shared with `envoy-full`.
 - **activity-gen**: continuous workload (`activity-gen.sh`). It waits for the proxy to be ready, then loops traffic
-  through every route.
+  through every route. A request that fails at the transport level, where a metric could lose its traffic, is
+  reported on stderr.
 
 ### How each non-obvious metric is driven
 
