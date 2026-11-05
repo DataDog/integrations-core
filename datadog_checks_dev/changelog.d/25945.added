@@ -1,0 +1,1 @@
+Let `fake_http` compute responses per request through responders and `set_responder()`, and let `fake_http_response` read the body from a `file_path`.

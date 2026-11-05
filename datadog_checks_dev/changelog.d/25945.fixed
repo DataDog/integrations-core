@@ -1,0 +1,1 @@
+Keep cookies that `fake_http` responses set, stop forcing a UTF-8 encoding in `fake_http_response`, and fail `mock_http_response` requests from checks that set `AGNOSTIC_HTTP_CLIENT = True`.
