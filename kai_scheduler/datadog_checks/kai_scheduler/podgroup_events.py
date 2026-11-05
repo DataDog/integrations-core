@@ -244,11 +244,16 @@ class PodGroupEventCollector:
         eviction = parse_timestamp(transition.timestamp)
         # The Kubernetes event recorder combines bursts of similar events, such as one per pod of a large PodGroup, into
         # events without KAI's annotations.
-        annotated = [event for event in events if EVICTOR_ACTION_ANNOTATION in event_annotations(event)]
+        annotated = [
+            event
+            for event in events
+            if EVICTOR_ACTION_ANNOTATION in event_annotations(event)
+            and evict_event_timestamp(event) == eviction
+        ]
         latest = max(annotated, key=evict_event_timestamp, default=None)
-        # The scheduler records the event and stamps the eviction at the same moment, so an older event belongs to an
-        # earlier eviction.
-        if latest is None or eviction is None or evict_event_timestamp(latest) < eviction:
+        # The scheduler records the event and stamps the eviction at the same moment. Matching the exact timestamp
+        # avoids attaching a later eviction's details when another eviction happens between the two API reads.
+        if latest is None:
             return []
 
         annotations = event_annotations(latest)

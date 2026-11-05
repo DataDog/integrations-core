@@ -69,6 +69,10 @@ EARLIER_EVICT_EVENT = {
         }
     },
 }
+LATER_EVICT_EVENT = {
+    **EARLIER_EVICT_EVENT,
+    'lastTimestamp': RESTARTED_AT,
+}
 # Events of other PodGroups in the same namespace are listed together.
 OTHER_PODGROUP_EVICT_EVENT = {
     **EVICT_EVENT,
@@ -261,6 +265,30 @@ def test_evicted_without_evict_event(aggregator, instance, evict_events):
         'PodGroup team-a/pg-train evicted.',
         count=1,
         tags=[*BASE_TAGS, 'kai_nodepool:gpu-pool', 'kai_transition:evicted', 'kai_workload_event_index:0'],
+    )
+
+
+def test_eviction_details_match_transition(aggregator, instance):
+    collector = make_collector(
+        instance,
+        [podgroup(last_start=STARTED_AT)],
+        [podgroup(last_start=STARTED_AT, last_eviction=EVICTED_AT)],
+        evict_events=[EVICT_EVENT, LATER_EVICT_EVENT],
+    )
+    collect(collector, 2)
+
+    aggregator.assert_event(
+        'PodGroup team-a/pg-train evicted. Pod team-a/train-0 was preempted by higher priority workload '
+        'team-b/pg-serve. Eviction action: preempt.',
+        count=1,
+        tags=[
+            *BASE_TAGS,
+            'kai_nodepool:gpu-pool',
+            'kai_transition:evicted',
+            'kai_eviction_action:preempt',
+            'kai_evicted_by:team-b/pg-serve',
+            'kai_workload_event_index:0',
+        ],
     )
 
 
