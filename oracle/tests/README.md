@@ -47,13 +47,17 @@ Each input has a working default and can be overridden from the host environment
 | `ACTIVITY_GEN` | `1` | Set to `0` for a quiescent fixture: the workload container stays up but generates no traffic. |
 
 The task publishes `DB_HOST`, `DB_PORT` (`1521`), `DB_SERVICE_NAME` (`FREE`),
-`DB_USERNAME`, and `DB_PASSWORD`. These labels carry the defaults: if you override
-the credentials, override the consumer's values as well.
+`DB_USERNAME`, and `DB_PASSWORD`. The credential labels follow the same host
+overrides as the inputs, so an override reaches the database, the workload, and
+consumers alike.
 
 ### Coverage
 
 The fixture emits 67 of the 73 dashboard metrics with non-zero values, all from the
-live instance. The other six are:
+live instance. This includes `oracle.cache_blocks_lost` (`Global Cache Blocks Lost` in
+`V$SYSMETRIC`): despite its RAC name, Oracle Database Free reports it non-zero on a
+single instance (about 100 per interval under this workload) while the `gc blocks lost`
+statistic in `V$SYSSTAT` stays at 0. The other six are:
 
 | Metric | Why it is not covered |
 |---|---|

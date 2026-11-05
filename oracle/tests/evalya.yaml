@@ -12,19 +12,19 @@ tasks:
       evalya.io/provides.DB_HOST: "{{ .hostname }}"
       evalya.io/provides.DB_PORT: "1521"
       evalya.io/provides.DB_SERVICE_NAME: FREE
-      evalya.io/provides.DB_USERNAME: c##datadog
-      evalya.io/provides.DB_PASSWORD: datadog
+      evalya.io/provides.DB_USERNAME: "${DB_USERNAME:-c##datadog}"
+      evalya.io/provides.DB_PASSWORD: "${DB_PASSWORD:-datadog}"
     env:
       - name: ORACLE_VERSION
-        value: "23.26.3"
+        value: "${ORACLE_VERSION:-23.26.3}"
       - name: ORACLE_PASSWORD
-        value: datad0g
+        value: "${ORACLE_PASSWORD:-datad0g}"
       - name: DB_USERNAME
-        value: c##datadog
+        value: "${DB_USERNAME:-c##datadog}"
       - name: DB_PASSWORD
-        value: datadog
+        value: "${DB_PASSWORD:-datadog}"
       - name: ACTIVITY_GEN
-        value: "1"
+        value: "${ACTIVITY_GEN:-1}"
     # The forwarder only starts once `seed` has verified that DB_USERNAME can log
     # in and read V$SYSMETRIC, so a listening port means the check can be served.
     healthcheck:
