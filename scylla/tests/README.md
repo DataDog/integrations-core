@@ -70,8 +70,10 @@ traffic is continuous rather than bursty. Each iteration:
   `USING TIMEOUT 1ms`, which deliberately trips
   `storage.proxy.coordinator_read_timeouts` and
   `storage.proxy.coordinator_write_timeouts`;
-- every fifth iteration, flushes the keyspace and drops the sstable caches
-  through the REST API, so the following reads produce `cache.row_misses`.
+- every fifth iteration, flushes the keyspace and calls the
+  `/system/drop_sstable_caches` REST endpoint, which invalidates every table's
+  row cache, so the following reads produce `cache.row_misses`. A failed REST
+  call is logged.
 
 Because of the deliberate timeouts, the dashboard's timeout widgets show
 activity and the node logs batch-size warnings; this is expected for this

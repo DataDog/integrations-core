@@ -55,11 +55,16 @@ workload() {
     done
     echo "APPLY BATCH;"
 
-    # cache.row_misses: flush the memtable to sstables, then drop the row cache
-    # so the next reads have to go to disk.
+    # cache.row_misses: flush the memtable to sstables, then drop the in-memory
+    # caches of sstable data (this invalidates every table's row cache), so the
+    # next reads miss the cache and go to disk. Without the drop, reads keep
+    # hitting the cache and row_misses stops moving. A failure is logged and the
+    # workload keeps going.
     if [ $(( i % 5 )) -eq 0 ]; then
-      curl -sf -X POST "$API/storage_service/keyspace_flush/activity" > /dev/null || true
-      curl -sf -X POST "$API/system/drop_sstable_caches" > /dev/null || true
+      curl -sSf -X POST "$API/storage_service/keyspace_flush/activity" > /dev/null \
+        || log "keyspace_flush failed; cache.row_misses may stall"
+      curl -sSf -X POST "$API/system/drop_sstable_caches" > /dev/null \
+        || log "drop_sstable_caches failed; cache.row_misses may stall"
     fi
 
     if [ $(( i % 10 )) -eq 0 ]; then
