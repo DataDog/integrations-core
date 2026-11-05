@@ -145,7 +145,9 @@ def test_fake_http_installs_registered_response_and_records_request(fake_http):
 
 def test_fake_http_response_builds_and_registers_text_response(fake_http_response: Any):
     url = 'https://example.test/metrics'
-    fake_http_response(url, 'first\nsecond', match_options={'stream': True})
+    fake_http_response(
+        url, 'first\nsecond', headers={'Content-Type': 'text/plain; charset=utf-8'}, match_options={'stream': True}
+    )
     check = FixtureCheck('test', {}, [{}])
 
     response = check.http.get(url, stream=True)
@@ -182,6 +184,24 @@ def test_fake_http_response_builds_and_registers_json_response(
     assert response.status_code == 201
     assert response.reason == 'Created'
     fake_http.assert_all_responses_consumed()
+
+
+@pytest.mark.parametrize(
+    ('headers', 'expected_encoding'),
+    [
+        pytest.param({}, None, id='no-content-type'),
+        pytest.param({'Content-Type': 'text/plain; charset=latin-1'}, 'latin-1', id='charset'),
+    ],
+)
+def test_fake_http_response_leaves_the_encoding_to_the_response_headers(
+    fake_http_response: Any, headers: dict[str, str], expected_encoding: str | None
+):
+    # Scrapers fall back to UTF-8 only when the server sends no charset, so the fixture must not invent one.
+    url = 'https://example.test/metrics'
+    fake_http_response(url, 'metric 1', headers=headers)
+    check = FixtureCheck('test', {}, [{}])
+
+    assert check.http.get(url).encoding == expected_encoding
 
 
 def test_fake_http_routes_openmetrics_send_request(fake_http):

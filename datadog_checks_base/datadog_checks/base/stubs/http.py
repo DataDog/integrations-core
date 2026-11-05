@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import json
 from collections.abc import Callable, Iterable, Iterator, Mapping
 from dataclasses import dataclass, field
 from datetime import timedelta
@@ -166,7 +167,7 @@ class FakeHTTPResponse:
         if self._json_error is not None:
             raise self._json_error
         if self._json_result is JSON_RESULT_UNSET:
-            raise AssertionError('No JSON result was configured for this fake response.')
+            return json.loads(self.text, **kwargs)
         return self._json_result
 
     def raise_for_status(self) -> None:

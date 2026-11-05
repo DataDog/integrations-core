@@ -65,7 +65,8 @@ Use the `fake_http` and `fake_http_response` fixtures to test a check. The check
 its instance and `init_config`, and the fixture answers on the wire with the registered `FakeHTTPResponse`.
 Registrations matching the same request are served in order, and the last one then repeats. `fake_http.requests` holds
 each call as the check made it, and `fake_http.sent` holds each request as it reached the wire, with the headers and
-authentication the client applied.
+authentication the client applied. Like a server, the fixture sends only the headers a test registers, so the client
+derives the response encoding from a `Content-Type` charset and leaves it unset when there is none.
 
 The fixture fails the test instead of serving a response it cannot represent:
 
@@ -94,6 +95,9 @@ fixture cannot serve the test:
 - A suite-local emulator that computes responses per request: subclass the fake and return it from a patched version
   of `AgentCheck.create_http_client`.
 - Responses the fixture rejects, such as `elapsed` or `history`, and cookies seeded on the client with `cookies=...`.
+
+A `FakeHTTPResponse` parses `json()` from its body, raising `json.JSONDecodeError` like the real client, unless
+`json_result` or `json_error` is set.
 
 Unlike the fixture, a `FakeHTTPClient` ignores the instance configuration, serves each registration once, and is not
 safe for concurrent requests.

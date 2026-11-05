@@ -404,7 +404,8 @@ def fake_http(mocker):
 def fake_http_response(fake_http: Any) -> Callable[..., Any]:
     """Build and register a response on the base-owned HTTP fake.
 
-    The `json_data` argument sets both the serialized body and parsed result unless `json_result` is overridden.
+    The `json_data` argument sets the body to its JSON serialization. Like a server, the fixture sends only the
+    headers given, so the client derives the encoding from a `Content-Type` charset rather than assuming one.
     """
     FakeHTTPResponse = importlib.import_module('datadog_checks.base.stubs.http').FakeHTTPResponse
 
@@ -415,15 +416,14 @@ def fake_http_response(fake_http: Any) -> Callable[..., Any]:
         method: str = 'GET',
         json_data: Any = FAKE_HTTP_JSON_UNSET,
         status_code: int = 200,
-        encoding: str = 'utf-8',
+        encoding: str | None = None,
         match_options: Mapping[str, Any] | None = None,
         **overrides: Any,
     ) -> Any:
         if json_data is not FAKE_HTTP_JSON_UNSET:
-            content = json.dumps(json_data).encode(encoding)
-            overrides.setdefault('json_result', json_data)
+            content = json.dumps(json_data)
 
-        body = content.encode(encoding) if isinstance(content, str) else content
+        body = content.encode(encoding or 'utf-8') if isinstance(content, str) else content
         response = FakeHTTPResponse(
             status_code=status_code,
             content=body,

@@ -1,6 +1,7 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
 import ssl
 from datetime import timedelta
 
@@ -87,9 +88,8 @@ def test_fake_response_preserves_explicit_text_and_stream_results():
     assert list(response.iter_lines()) == []
 
 
-def test_fake_response_does_not_derive_metadata_or_json_from_content_or_headers():
+def test_fake_response_does_not_derive_metadata_from_headers():
     response = FakeHTTPResponse(
-        content=b'{"items": []}\nsecond line',
         headers={
             'Content-Type': 'application/json; charset=utf-8',
             'Link': '<https://example.test/items?page=2>; rel=next',
@@ -98,8 +98,25 @@ def test_fake_response_does_not_derive_metadata_or_json_from_content_or_headers(
 
     assert response.encoding is None
     assert response.links == {}
-    with pytest.raises(AssertionError, match='No JSON result'):
-        response.json()
+
+
+@pytest.mark.parametrize(
+    ('options', 'expected'),
+    [
+        pytest.param({'content': b'{"items": []}'}, {'items': []}, id='content'),
+        pytest.param({'content': b'null'}, None, id='null'),
+        pytest.param({'text': '{"items": []}'}, {'items': []}, id='text'),
+    ],
+)
+def test_fake_response_parses_json_from_its_body(options: dict, expected: object):
+    assert FakeHTTPResponse(**options).json() == expected
+
+
+@pytest.mark.parametrize('content', [b'', b'not json'], ids=['empty', 'invalid'])
+def test_fake_response_raises_a_json_decode_error_for_a_body_that_is_not_json(content: bytes):
+    # A check's broad except clause must see the error the real client raises, not a test-only AssertionError.
+    with pytest.raises(json.JSONDecodeError):
+        FakeHTTPResponse(content=content).json()
 
 
 def test_fake_response_raises_configured_json_error():
