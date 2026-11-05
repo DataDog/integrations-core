@@ -18,9 +18,6 @@ if [ "${ACTIVITY_GEN:-1}" = "0" ]; then
   exec sleep infinity
 fi
 
-log "installing dig"
-apk add --no-cache bind-tools >/dev/null
-
 # coredns has no depends_on/healthcheck condition pointing back at this
 # service (that would create a dependency cycle on the entrypoint), so wait
 # out its own startup here instead.
