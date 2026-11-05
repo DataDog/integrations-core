@@ -106,3 +106,27 @@ def calculate_elapsed_time(datestamp, timestamp, qm_timezone, current_time=None)
     elapsed = round_value(current_time - timestamp_posix)
 
     return elapsed
+
+
+def mq_pattern_matcher(patterns):
+    """Build a predicate matching a name against a list of MQ generic names.
+
+    MQ generic names support a single trailing ``*`` (a prefix match); everything else is a
+    literal name. Used to de-duplicate the wildcard channel-status sweep against the user's
+    ``channels`` entries, which are MQ patterns, not literal names (AGENT-16599, issue 5).
+
+    The matcher is built once per call, not per response row.
+    """
+    prefixes = []
+    literals = set()
+    for pattern in patterns or []:
+        pattern = to_string(pattern).strip()
+        if pattern.endswith('*'):
+            prefixes.append(pattern[:-1])
+        else:
+            literals.add(pattern)
+
+    def matches(name):
+        return name in literals or any(name.startswith(prefix) for prefix in prefixes)
+
+    return matches
