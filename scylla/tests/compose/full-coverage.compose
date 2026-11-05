@@ -139,4 +139,3 @@ services:
 
 networks:
   network1:
-    name: scylla-full-coverage_default
