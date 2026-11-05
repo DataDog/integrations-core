@@ -895,6 +895,31 @@ def test_a_retry_after_hint_that_fits_the_run_wall_is_honored(monkeypatch, sessi
     assert intake.requests == 2
 
 
+def test_a_backoff_longer_than_a_smaller_hint_cannot_cross_the_run_wall(monkeypatch):
+    clock = RetryClock(monkeypatch)
+    # The hint alone fits the 3s left on the wall, but the 5s backoff it is raised to does not.
+    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
+        rq_upload.retry_pause_seconds(5.0, 1, clock.now + 3)
+    assert failure.value.code == 'timeout'
+    assert rq_upload.retry_pause_seconds(5.0, 1, clock.now + 6) == 5.0
+    assert rq_upload.retry_pause_seconds(0.2, 3, clock.now + 6) == 3.0
+
+
+@pytest.mark.parametrize('hint', [None, 'abc'])
+def test_a_plain_backoff_cannot_cross_the_run_wall_of_a_sessionless_page(monkeypatch, sessionless_creds, hint):
+    clock = RetryClock(monkeypatch)
+    intake = ThrottlingIntake(monkeypatch, (503, hint))
+    creds = rq_upload.UploadCredentials(
+        sessionless_creds.base_url, '', 'test-api-key', None, wall_deadline=clock.now + 0.25
+    )
+    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
+        post_one_sessionless_page(creds)
+    # The 0.1s pause fits; the 0.2s one would end at 0.3s, past the 0.25s wall.
+    assert failure.value.code == 'timeout'
+    assert clock.sleeps == [0.1]
+    assert intake.requests == 2
+
+
 def test_only_opted_in_requests_honor_retry_after(monkeypatch):
     clock = RetryClock(monkeypatch)
     intake = ThrottlingIntake(monkeypatch, (429, '30'))
@@ -902,6 +927,17 @@ def test_only_opted_in_requests_honor_retry_after(monkeypatch):
         rq_upload.upload_with_retry('POST', BASE_URL + '/uploads', {}, b'{}')
     assert intake.requests == rq_upload.REMOTE_QUERY_UPLOAD_MAX_RETRIES + 1
     assert clock.sleeps == [0.1, 0.2, 0.4, 0.8]
+
+
+def test_a_request_that_is_not_opted_in_keeps_its_plain_backoff_near_the_wall(monkeypatch):
+    clock = RetryClock(monkeypatch)
+    intake = ThrottlingIntake(monkeypatch, (503, None))
+    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
+        rq_upload.upload_with_retry('POST', BASE_URL + '/uploads', {}, b'{}', deadline=clock.now + 0.25)
+    # Unchanged default: the 0.2s pause is slept and the next attempt's own wall check times out.
+    assert failure.value.code == 'timeout'
+    assert clock.sleeps == [0.1, 0.2]
+    assert intake.requests == 2
 
 
 def test_the_multipart_body_rewinds_for_retries_without_buffering_the_source():

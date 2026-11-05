@@ -726,15 +726,14 @@ def parse_retry_after_seconds(value: str | None) -> int | None:
 def retry_pause_seconds(backoff: float, retry_after: int | None, deadline: float | None) -> float:
     """The pause before the next attempt: the backoff, lengthened by a valid hint.
 
-    When the hint reaches the run wall the next attempt could only be sent after the wall, so
-    the run times out now instead of sleeping through the rest of its budget: the deadline
-    always dominates a server hint.
+    When the final pause reaches the run wall the next attempt could only be sent after the
+    wall, so the run times out now instead of sleeping through the rest of its budget: the
+    deadline always dominates both the backoff and a server hint.
     """
-    if retry_after is None:
-        return backoff
-    if deadline is not None and time.monotonic() + retry_after >= deadline:
+    pause = backoff if retry_after is None else max(backoff, float(retry_after))
+    if deadline is not None and time.monotonic() + pause >= deadline:
         raise RemoteQueryFailure('timeout', 'Remote query exceeded timeoutMs.', retryable=True)
-    return max(backoff, float(retry_after))
+    return pause
 
 
 def upload_with_retry(
@@ -754,8 +753,8 @@ def upload_with_retry(
 
     With `honor_retry_after` (sessionless pages only), a valid integer-seconds `Retry-After`
     on a transient rejection lengthens that attempt's pause, capped at 60 seconds; a hint that
-    reaches `deadline` times the run out instead of sleeping past it. The retry count is
-    unchanged and a malformed hint is ignored.
+    reaches `deadline` times the run out instead of sleeping past it, as does any pause (hint
+    or plain backoff) that would. The retry count is unchanged and a malformed hint is ignored.
 
     `timeout` is the (connect, read) pair; `write_timeout` separately bounds how long one
     send of the request body may stall, capped by the page attempt's deadline when there is one.
@@ -848,7 +847,9 @@ def upload_with_retry(
                 page_attempt.finish(error=attempt_error, http_status=attempt_status)
         if attempt == REMOTE_QUERY_UPLOAD_MAX_RETRIES:
             break
-        time.sleep(retry_pause_seconds(backoff, retry_after, deadline))
+        # Only opted-in requests (sessionless pages) refuse a pause that crosses the run wall;
+        # the others keep their plain backoff and the next attempt's own deadline check.
+        time.sleep(retry_pause_seconds(backoff, retry_after, deadline) if honor_retry_after else backoff)
         backoff = min(backoff * 2, REMOTE_QUERY_UPLOAD_MAX_BACKOFF_SECONDS)
     raise RemoteQueryFailure(
         'upload_failed',
