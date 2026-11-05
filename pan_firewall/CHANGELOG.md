@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 4.0.0 / 2026-11-04
+
+***Removed***:
+
+* Remove the threat log count metric and the `collect_threats` option. Threat logs are still collected by the log integration. ([#25866](https://github.com/DataDog/integrations-core/pull/25866))
+
 ## 3.5.0 / 2026-11-02
 
 ***Added***:

@@ -3,16 +3,21 @@ import json
 import os
 import re
 import zipfile
-from unittest.mock import MagicMock, mock_open, patch
+from collections.abc import Iterator
+from unittest.mock import MagicMock, PropertyMock, mock_open, patch
 
 import pytest
 import requests
+import stamina
 
 from ddev.cli.size.utils.common_funcs import (
+    WHEEL_REQUEST_ATTEMPTS,
+    WHEEL_REQUEST_TIMEOUT_SECONDS,
     _matches_gitignore,
     check_python_version,
     compress,
     convert_to_human_readable_size,
+    download_wheel,
     export_format,
     extract_version_from_about_py,
     format_modules,
@@ -26,6 +31,7 @@ from ddev.cli.size.utils.common_funcs import (
     is_correct_dependency,
     is_valid_integration_file,
     request_wheel,
+    retry_wheel_request,
     save_csv,
     save_json,
     save_markdown,
@@ -191,7 +197,11 @@ def test_get_dependencies_sizes():
         )
 
     # The storage tier placeholder must be resolved against the tier passed in, not left as-is.
-    mock_get.assert_called_once_with("https://example.com/dev/dependency1/dependency1-1.1.1-.whl", stream=True)
+    mock_get.assert_called_once_with(
+        "https://example.com/dev/dependency1/dependency1-1.1.1-.whl",
+        timeout=WHEEL_REQUEST_TIMEOUT_SECONDS,
+        stream=True,
+    )
 
     assert file_data == [
         {
@@ -746,4 +756,104 @@ def test_request_wheel_uses_head_when_requested():
     with patch("requests.head", return_value=found) as mock_head:
         assert request_wheel(MagicMock(), PLACEHOLDER_URL, "stable", head=True) is found
 
-    mock_head.assert_called_once_with("https://example.com/stable/built/dep1/dep1-1.1.1-.whl")
+    mock_head.assert_called_once_with(
+        "https://example.com/stable/built/dep1/dep1-1.1.1-.whl", timeout=WHEEL_REQUEST_TIMEOUT_SECONDS
+    )
+
+
+@pytest.fixture
+def instant_retries() -> Iterator[None]:
+    """Skips the backoff between wheel retries while keeping the configured number of attempts."""
+    with stamina.set_testing(True, attempts=100, cap=True):
+        yield
+
+
+def make_streamed_wheel_response(content):
+    response = make_wheel_response(200)
+    response.__enter__.return_value = response
+    type(response).content = PropertyMock(side_effect=[content])
+    return response
+
+
+@pytest.mark.parametrize(
+    "make_failure",
+    [
+        pytest.param(lambda: make_wheel_response(502), id="bad gateway"),
+        pytest.param(lambda: make_wheel_response(503), id="service unavailable"),
+        pytest.param(lambda: make_wheel_response(504), id="gateway timeout"),
+        pytest.param(lambda: requests.exceptions.ConnectionError("Connection reset"), id="connection reset"),
+        pytest.param(lambda: requests.exceptions.ReadTimeout("Read timed out"), id="read timeout"),
+        pytest.param(
+            lambda: make_streamed_wheel_response(requests.exceptions.ChunkedEncodingError("Connection broken")),
+            id="body cut short",
+        ),
+        pytest.param(
+            lambda: make_streamed_wheel_response(requests.exceptions.ConnectionError("Read timed out")),
+            id="body read timeout",
+        ),
+    ],
+)
+def test_download_wheel_retries_transient_errors(instant_retries, make_failure):
+    with patch("requests.get", side_effect=[make_failure(), make_streamed_wheel_response(b"wheel")]) as mock_get:
+        assert download_wheel(MagicMock(), PLACEHOLDER_URL, "dev") == b"wheel"
+
+    assert mock_get.call_count == 2
+
+
+@pytest.mark.parametrize(
+    "status_code, expected_requests",
+    [
+        pytest.param(500, 1, id="server error"),
+        pytest.param(429, 1, id="too many requests"),
+        pytest.param(404, 2, id="not found on every tier"),
+    ],
+)
+def test_download_wheel_does_not_retry_other_errors(instant_retries, status_code, expected_requests):
+    responses = [make_wheel_response(status_code) for _ in range(WHEEL_REQUEST_ATTEMPTS)]
+
+    with patch("requests.get", side_effect=responses) as mock_get:
+        with pytest.raises(requests.HTTPError, match=str(status_code)):
+            download_wheel(MagicMock(), PLACEHOLDER_URL, "dev")
+
+    assert mock_get.call_count == expected_requests
+
+
+def make_failing_responses(kinds):
+    return [
+        make_wheel_response(504)
+        if kind == "gateway error"
+        else make_streamed_wheel_response(requests.exceptions.ChunkedEncodingError("Connection broken"))
+        for kind in kinds
+    ]
+
+
+@pytest.mark.parametrize(
+    "kinds",
+    [
+        pytest.param(["gateway error"] * (WHEEL_REQUEST_ATTEMPTS + 2), id="gateway errors"),
+        pytest.param(["body cut short"] * (WHEEL_REQUEST_ATTEMPTS + 2), id="bodies cut short"),
+        pytest.param(
+            ["gateway error"] * (WHEEL_REQUEST_ATTEMPTS - 1) + ["body cut short"] * 3,
+            id="gateway errors then a body cut short",
+        ),
+    ],
+)
+def test_download_wheel_shares_one_attempt_budget_and_names_the_wheel(instant_retries, kinds):
+    with patch("requests.get", side_effect=make_failing_responses(kinds)) as mock_get:
+        with pytest.raises(requests.RequestException) as excinfo:
+            download_wheel(MagicMock(), PLACEHOLDER_URL, "dev")
+
+    assert mock_get.call_count == WHEEL_REQUEST_ATTEMPTS
+    assert any("dep1-1.1.1-.whl" in note for note in excinfo.value.__notes__)
+
+
+def test_retry_wheel_request_retries_a_head_request(instant_retries):
+    found = make_wheel_response(200)
+
+    with patch("requests.head", side_effect=[make_wheel_response(504), found]) as mock_head:
+        response = retry_wheel_request(
+            lambda: request_wheel(MagicMock(), PLACEHOLDER_URL, "stable", head=True), PLACEHOLDER_URL
+        )
+
+    assert response is found
+    assert mock_head.call_count == 2
