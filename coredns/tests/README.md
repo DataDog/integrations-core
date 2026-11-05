@@ -26,7 +26,7 @@ Two services:
   looked up twice inside the cache TTL. No metric needs data an OSS CoreDNS can't produce, so
   there is no seed step and no metric-injection layer, unlike the redisdb exemplar.
 
-`activity-gen` sends three queries per iteration, about one iteration per second:
+`activity-gen` runs about one iteration per second, each sending:
 
 - `example.com`, forwarded to the local upstream by the `forward` plugin and then cached for 30s.
   The first lookup per window is a cache miss plus a forward request/response/rcode; repeats are
@@ -36,12 +36,16 @@ Two services:
   `forward_request_duration` move between any two scrapes, not just once per cache window.
 - `miss-<n>.invalid`, outside the forward zone and answered locally as `SERVFAIL`, which adds
   cache misses and response-code variety without touching `forward`.
+- a batch of 50 `example.com` lookups from one `dig` process, nearly all cache hits. Without it
+  CoreDNS can use under 10ms of CPU between two check runs, and `process.cpu_seconds_total`
+  (which moves in 10ms steps) intermittently reads zero.
 
 `coredns` depends on `activity-gen` in the compose file (not the reverse, to avoid a dependency
 cycle on the entrypoint service), so requesting the `coredns-full` task also starts the workload.
 `activity-gen` polls for CoreDNS to answer instead of using a compose health condition. It tries
 each name in `DNS_HOSTS` (`coredns coredns-full`): plain `docker compose` exposes the server by
-its service name, while evalya aliases the entrypoint only by its task id.
+its service name, while evalya aliases the entrypoint only by its task id. A failed query (a
+transport error, not an `NXDOMAIN`/`SERVFAIL` answer) is logged to stderr and the loop continues.
 
 ## Inputs
 
