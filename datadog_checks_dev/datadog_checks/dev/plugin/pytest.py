@@ -404,8 +404,9 @@ def fake_http(mocker):
 def fake_http_response(fake_http: Any) -> Callable[..., Any]:
     """Build and register a response on the base-owned HTTP fake.
 
-    The `json_data` argument sets the body to its JSON serialization. Like a server, the fixture sends only the
-    headers given, so the client derives the encoding from a `Content-Type` charset rather than assuming one.
+    The `json_data` argument sets the body to its JSON serialization, and `file_path` to the bytes of that file.
+    Like a server, the fixture sends only the headers given, so the client derives the encoding from a
+    `Content-Type` charset rather than assuming one.
     """
     FakeHTTPResponse = importlib.import_module('datadog_checks.base.stubs.http').FakeHTTPResponse
 
@@ -415,12 +416,18 @@ def fake_http_response(fake_http: Any) -> Callable[..., Any]:
         *,
         method: str = 'GET',
         json_data: Any = FAKE_HTTP_JSON_UNSET,
+        file_path: str | os.PathLike[str] | None = None,
         status_code: int = 200,
         encoding: str | None = None,
         match_options: Mapping[str, Any] | None = None,
         **overrides: Any,
     ) -> Any:
-        if json_data is not FAKE_HTTP_JSON_UNSET:
+        if file_path is not None:
+            if content or json_data is not FAKE_HTTP_JSON_UNSET:
+                raise TypeError('file_path cannot be combined with content or json_data.')
+            with open(file_path, 'rb') as f:
+                content = f.read()
+        elif json_data is not FAKE_HTTP_JSON_UNSET:
             content = json.dumps(json_data)
 
         body = content.encode(encoding or 'utf-8') if isinstance(content, str) else content

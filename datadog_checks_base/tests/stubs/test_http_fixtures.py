@@ -204,6 +204,27 @@ def test_fake_http_response_leaves_the_encoding_to_the_response_headers(
     assert check.http.get(url).encoding == expected_encoding
 
 
+def test_fake_http_response_reads_its_body_from_a_file(fake_http_response: Any, tmp_path):
+    url = 'https://example.test/metrics'
+    path = tmp_path / 'metrics.txt'
+    path.write_bytes(b'# TYPE metric gauge\nmetric 1\n')
+    fake_http_response(url, file_path=path)
+    check = FixtureCheck('test', {}, [{}])
+
+    assert check.http.get(url).content == b'# TYPE metric gauge\nmetric 1\n'
+
+
+@pytest.mark.parametrize(
+    'body', [pytest.param({'content': 'body'}, id='content'), pytest.param({'json_data': {}}, id='json_data')]
+)
+def test_fake_http_response_rejects_a_file_combined_with_another_body(fake_http_response: Any, tmp_path, body):
+    path = tmp_path / 'metrics.txt'
+    path.write_bytes(b'metric 1')
+
+    with pytest.raises(TypeError, match='file_path cannot be combined'):
+        fake_http_response('https://example.test/metrics', file_path=path, **body)
+
+
 def test_fake_http_routes_openmetrics_send_request(fake_http):
     url = 'https://example.test/metrics'
     headers = {'Authorization': 'Bearer token'}

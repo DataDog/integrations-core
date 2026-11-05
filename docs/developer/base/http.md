@@ -68,6 +68,14 @@ each call as the check made it, and `fake_http.sent` holds each request as it re
 authentication the client applied. Like a server, the fixture sends only the headers a test registers, so the client
 derives the response encoding from a `Content-Type` charset and leaves it unset when there is none.
 
+Pass `fake_http_response` the body as `content`, as `json_data` to serialize, or as `file_path` to read a fixture
+file:
+
+```python
+def test_check(dd_run_check, fake_http_response):
+    fake_http_response('http://localhost:8080/metrics', file_path=os.path.join(HERE, 'fixtures', 'metrics.txt'))
+```
+
 The fixture fails the test instead of serving a response it cannot represent:
 
 - A request with no matching registration, or one sent by a client that did not opt in, such as one built with
