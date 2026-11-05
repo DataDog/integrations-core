@@ -174,15 +174,16 @@ static_resources:
       endpoints:
       - lb_endpoints:
         - endpoint: {address: {socket_address: {address: backend, port_value: 8080}}}
-  # Non-routable address: connection attempts time out (cluster.upstream_cx_connect_timeout).
+  # The backend's port 8081 never completes a handshake, so connection attempts
+  # time out (cluster.upstream_cx_connect_timeout).
   - name: blackhole
     connect_timeout: 0.25s
-    type: STATIC
+    type: STRICT_DNS
     load_assignment:
       cluster_name: blackhole
       endpoints:
       - lb_endpoints:
-        - endpoint: {address: {socket_address: {address: 10.255.255.1, port_value: 80}}}
+        - endpoint: {address: {socket_address: {address: backend, port_value: 8081}}}
   - name: xds_cluster
     connect_timeout: 1s
     type: LOGICAL_DNS

@@ -7,8 +7,12 @@
 - `/status/<code>` answers with that status code (upstream and downstream 3xx/4xx/5xx).
 - `/ws` answers a WebSocket upgrade with `101 Switching Protocols` (downstream 1xx).
 - `/healthz` always fails, so the health-checked `panic` cluster stays in panic mode.
+
+Port 8081 is a blackhole: its accept queue is kept full, so the kernel drops new SYNs and
+connections time out (`cluster.upstream_cx_connect_timeout`) without leaving the host.
 """
 
+import socket
 import sys
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -59,5 +63,15 @@ class Server(ThreadingHTTPServer):
             super().handle_error(request, client_address)
 
 
+def open_blackhole(port: int) -> tuple[socket.socket, socket.socket]:
+    # With backlog 0, one connection that is never accepted fills the queue, and
+    # Linux then drops every new SYN: a deterministic connect timeout on any host,
+    # unlike a non-routable address that a VPN may route or answer with ICMP.
+    listener = socket.create_server(('0.0.0.0', port), backlog=0)
+    filler = socket.create_connection(('127.0.0.1', port))
+    return listener, filler
+
+
 if __name__ == '__main__':
+    blackhole = open_blackhole(8081)
     Server(('0.0.0.0', 8080), Handler).serve_forever()

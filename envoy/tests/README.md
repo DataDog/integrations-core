@@ -33,7 +33,8 @@ All defined in `compose/full-coverage.compose`:
 - **xds**, **service1**, **service2**: reused from `docker/api_v3`. The xds control plane serves LDS over ADS
   (`control_plane.connected_state`), and the sidecar services answer the 2xx traffic.
 - **backend**: `compose/full-coverage/backend.py`, a small HTTP server that returns the responses the shipped
-  services cannot: chosen status codes, slow responses, a WebSocket `101`, and a failing health check.
+  services cannot: chosen status codes, slow responses, a WebSocket `101`, a failing health check, and a port that
+  never completes a TCP handshake.
 - **seed**: one-shot. Writes the file-based CDS, the overload pressure file, and a runtime directory nested past
   Envoy's walk limit to a volume shared with `envoy-full`.
 - **activity-gen**: continuous workload (`activity-gen.sh`). It waits for the proxy to be ready, then loops traffic
@@ -46,7 +47,7 @@ All defined in `compose/full-coverage.compose`:
 | `cluster.upstream_rq_{3,4,5}xx`, `listener.http.downstream_rq_*` | `/status/<code>` on the backend |
 | `listener.http.downstream_rq_1xx` | WebSocket upgrade to `/ws` (`101 Switching Protocols`) |
 | `cluster.upstream_rq_timeout` | `/timeout`: 0.25s route timeout in front of a 1s response |
-| `cluster.upstream_cx_connect_timeout` | `blackhole` cluster pointing at a non-routable address |
+| `cluster.upstream_cx_connect_timeout` | `blackhole` cluster pointing at a backend port whose accept queue is kept full, so the kernel drops SYNs |
 | `cluster.lb_healthy_panic` | `panic` cluster whose only host always fails its health check |
 | `cluster.internal.upstream_rq_xx` | `use_remote_address` marks compose-network clients as internal |
 | `cluster.version` | `file_eds` cluster fed by a file-based EDS assignment |
