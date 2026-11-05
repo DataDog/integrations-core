@@ -35,15 +35,11 @@ serve the legacy `/status` endpoint.
 | `provides.KONG_FIXTURE_METRICS_PORT` | `8200` (recorded Kong 2.x `/metrics`). |
 | `provides.KONG_CONSUMER_KEY` | The `key-auth` credential of `consumer1`. |
 
-The Kong OSS Admin API is unauthenticated, so the consumer key is the only credential. Evalya `provides.*` labels
-cannot reference env values, so `provides.KONG_CONSUMER_KEY` repeats the literal key: change it together with the
-`KONG_CONSUMER_KEY` entry in `evalya.yaml`.
+The Kong OSS Admin API is unauthenticated, so the consumer key is the only credential.
 
 ### Configurable inputs
 
-Every input has a working default. Under `evalya run`, the values come from the `env` block of `evalya.yaml`,
-which sets each one explicitly, so host environment variables do not override them. With plain `docker compose`,
-each input accepts a host-env override.
+Every input has a working default and accepts a host-env override.
 
 | Variable | Default | Effect |
 |---|---|---|
