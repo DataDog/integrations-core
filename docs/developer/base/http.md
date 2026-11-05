@@ -73,9 +73,9 @@ self.http.set_header('X-Vault-Token', token)
 
 The `options` attribute holds every default, such as `headers`, `timeout` and `verify`. It stays public while checks
 migrate to this interface, but its keys and value shapes follow `requests`, for example a `(connect, read)` tuple for
-`timeout`, and may change when another backend is added. Once the persistent session exists, setting a key to `None`,
-or replacing `headers` or `proxies` with a mapping that omits keys, does not remove the values the session started
-with. Prefer `set_header()`, `disable_auth()` and per-request options to editing `options`.
+`timeout`. Once the persistent session exists, setting a key to `None`, or replacing `headers` or `proxies` with a
+mapping that omits keys, does not remove the values the session started with. Prefer `set_header()`, `disable_auth()`
+and per-request options to editing `options`.
 
 The `tls_config` attribute holds the resolved `tls_*` settings, for code that builds its own SSL context.
 
@@ -280,10 +280,10 @@ Catching a type also catches every type below it in the tree:
 
 Timeouts are not connection errors: `except HTTPClientConnectionError` does not catch a connect timeout.
 
-While `requests` is the backend, each error the client raises also subclasses the `requests` exception it replaces,
-and through it `OSError`, so existing handlers that catch `requests` exceptions keep matching. That compatibility belongs
-to the current backend and would hide an unfinished migration, so don't catch `requests` exceptions in an opted-in
-check.
+Each error the client raises also subclasses the `requests` exception it replaces, and through it `OSError`, so
+existing handlers that catch `requests` exceptions keep matching. Don't rely on that in an opted-in check: catch the
+types above instead. The `fake_http` fixture raises them without the `requests` base classes, so a `requests` handler
+never runs in tests.
 
 For example, a check that skips optional data when its endpoint is unavailable looks like this:
 
@@ -369,8 +369,8 @@ connect timeouts, and now catches them.
 ## Reference
 
 Opted-in checks may use the members documented below. To annotate clients and responses, import `HTTPClient` and
-`HTTPResponse` from `datadog_checks.base.utils.http_protocol`. Members whose values follow the current `requests`
-backend, such as `HTTPClient.options`, may change when another backend is added.
+`HTTPResponse` from `datadog_checks.base.utils.http_protocol`. Some members, such as `HTTPClient.options`, use
+`requests` value shapes.
 
 ::: datadog_checks.base.utils.http_protocol.HTTPClient
     options:

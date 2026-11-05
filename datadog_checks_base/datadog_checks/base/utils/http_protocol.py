@@ -3,9 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Backend-neutral HTTP interfaces that opted-in checks depend on.
 
-The members declared here are the contract documented in `docs/developer/base/http.md`. Members whose values follow
-the current `requests` backend, such as `HTTPClient.options`, may change when another backend is added, so coordinate
-member and semantic changes across implementations.
+The members declared here are the contract documented in `docs/developer/base/http.md`. Some members, such as
+`HTTPClient.options`, use `requests` value shapes. Coordinate member and semantic changes across implementations.
 """
 
 from __future__ import annotations
@@ -150,10 +149,10 @@ class HTTPClient(Protocol):
     options: dict[str, Any]
     """Default request options, which per-request options override.
 
-    Keys and value shapes follow the current `requests` backend, for example a `(connect, read)` tuple for `timeout`,
-    and may change when another backend is added. Once the persistent session exists, setting a key to `None` or
-    replacing `headers` or `proxies` with a mapping that omits keys does not remove the values the session was created
-    with. Use `set_header()` to change headers and `disable_auth()` to drop configured authentication.
+    Keys and value shapes follow `requests`, for example a `(connect, read)` tuple for `timeout`. Once the persistent
+    session exists, setting a key to `None` or replacing `headers` or `proxies` with a mapping that omits keys does not
+    remove the values the session was created with. Use `set_header()` to change headers and `disable_auth()` to drop
+    configured authentication.
     """
 
     tls_config: dict[str, Any]
