@@ -41,3 +41,8 @@ matrix.locale.env-vars = [
 
 [envs.latest.env-vars]
 POSTGRES_VERSION = "latest"
+
+[envs.bench]
+
+[envs.bench.env-vars]
+POSTGRES_VERSION = "latest"
