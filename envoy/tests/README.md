@@ -31,7 +31,9 @@ All defined in `compose/full-coverage.compose`:
 - **envoy-full**: the entrypoint, a front proxy configured by `compose/full-coverage/front-envoy.yaml`. It depends on
   every other service, so requesting it brings up the whole environment.
 - **xds**, **service1**, **service2**: reused from `docker/api_v3`. The xds control plane serves LDS over ADS
-  (`control_plane.connected_state`), and the sidecar services answer the 2xx traffic.
+  (`control_plane.connected_state`), and the sidecar services answer the 2xx traffic. The xds image is built from
+  `gcr.io/istio-testing/go-control-plane-ci:08-20-2019`, which is amd64-only (emulated on arm64 hosts), and its
+  build downloads Go modules, so the first build needs network access.
 - **backend**: `compose/full-coverage/backend.py`, a small HTTP server that returns the responses the shipped
   services cannot: chosen status codes, slow responses, a WebSocket `101`, a failing health check, and a port that
   never completes a TCP handshake.
