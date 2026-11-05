@@ -530,7 +530,7 @@ class SessionlessPageReceipt(BaseModel):
     page_index: StrictInt = Field(ge=0)
     record_offset: StrictInt = Field(ge=0)
     rows: StrictInt = Field(ge=0)
-    bytes: StrictInt = Field(ge=0)
+    bytes: StrictInt = Field(gt=0)
 
     @field_validator('object_id')
     @classmethod

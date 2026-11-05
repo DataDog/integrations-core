@@ -422,6 +422,7 @@ def test_empty_result_with_a_schema_sends_the_descriptor_and_an_empty_source_as_
         lambda page: page_receipt(page, rows=True),
         lambda page: page_receipt(page, rows=str(page.rows)),
         lambda page: page_receipt(page, bytes=-1),
+        lambda page: page_receipt(page, bytes=0),  # a stored canonical page is never empty
         lambda page: page_receipt(page, bytes=1025),  # beyond maxFileBytes
         lambda page: page_receipt(page, bytes=1.5),
         lambda page: [page_receipt(page)],
@@ -766,6 +767,141 @@ def test_terminal_too_large_rejection_maps_to_its_failure_code(monkeypatch, sess
     with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
         rq_upload.RequestsUploadClient().post_sessionless_page(sessionless_creds, page, b'{}', io.BytesIO(b'x'))
     assert failure.value.code == rq_upload.REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE
+
+
+class RetryClock:
+    """A mocked clock whose `sleep` advances `monotonic`, so retry pauses never wait for real."""
+
+    def __init__(self, monkeypatch):
+        self.now = 1000.0
+        self.sleeps = []
+        monkeypatch.setattr(rq_upload.time, 'monotonic', lambda: self.now)
+        monkeypatch.setattr(rq_upload.time, 'sleep', self.sleep)
+
+    def sleep(self, seconds):
+        self.sleeps.append(seconds)
+        self.now += seconds
+
+
+class ThrottlingIntake:
+    """Answers each page request with the next scripted status and Retry-After value."""
+
+    def __init__(self, monkeypatch, *responses):
+        import requests
+
+        self.responses = list(responses)
+        self.requests = 0
+        monkeypatch.setattr(requests.Session, 'request', as_session_request(self.request))
+
+    def request(self, method, url, headers, data, timeout):
+        self.requests += 1
+        status, retry_after = self.responses.pop(0) if len(self.responses) > 1 else self.responses[0]
+        response_headers = {} if retry_after is None else {'Retry-After': retry_after}
+        content = b'{}'
+        if status == 201:
+            content = json.dumps(
+                {
+                    'protocol': 'sessionless-v1',
+                    'object_id': str(uuid.uuid4()),
+                    'page_index': 0,
+                    'record_offset': 0,
+                    'rows': 1,
+                    'bytes': 3,
+                }
+            ).encode()
+        return SimpleNamespace(status_code=status, content=content, headers=response_headers)
+
+
+def post_one_sessionless_page(creds):
+    page = rq_contract.SourcePageUploadMetadata(0, 0, 1, 1)
+    return rq_upload.RequestsUploadClient().post_sessionless_page(creds, page, b'{}', io.BytesIO(b'x'))
+
+
+def test_a_burst_limited_page_waits_for_the_retry_after_hint(monkeypatch, sessionless_creds):
+    # The default 0.1-0.8s schedule would exhaust long before a 20s bucket refill.
+    clock = RetryClock(monkeypatch)
+    intake = ThrottlingIntake(monkeypatch, (429, '20'), (429, '20'), (201, None))
+    post_one_sessionless_page(sessionless_creds)
+    assert clock.sleeps == [20.0, 20.0]
+    assert intake.requests == 3
+
+
+def test_a_retry_after_hint_never_lowers_the_backoff_or_adds_retries(monkeypatch, sessionless_creds):
+    clock = RetryClock(monkeypatch)
+    intake = ThrottlingIntake(monkeypatch, (503, '1'))
+    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
+        post_one_sessionless_page(sessionless_creds)
+    assert failure.value.code == 'upload_failed'
+    assert intake.requests == rq_upload.REMOTE_QUERY_UPLOAD_MAX_RETRIES + 1
+    assert clock.sleeps == [1.0] * rq_upload.REMOTE_QUERY_UPLOAD_MAX_RETRIES
+
+
+@pytest.mark.parametrize(
+    'hint',
+    [
+        None,
+        '',
+        '0',
+        '-5',
+        '1.5',
+        '+5',
+        'abc',
+        '5, 5',
+        '1e3',
+        '99999999999999999999',
+        '\u0665',  # a non-ASCII digit
+        'Wed, 21 Oct 2037 07:28:00 GMT',
+    ],
+)
+def test_a_malformed_retry_after_hint_keeps_the_ordinary_backoff(monkeypatch, sessionless_creds, hint):
+    clock = RetryClock(monkeypatch)
+    ThrottlingIntake(monkeypatch, (429, hint))
+    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
+        post_one_sessionless_page(sessionless_creds)
+    assert failure.value.code == 'upload_failed'
+    assert clock.sleeps == [0.1, 0.2, 0.4, 0.8]
+
+
+def test_a_retry_after_hint_is_capped_at_sixty_seconds(monkeypatch, sessionless_creds):
+    clock = RetryClock(monkeypatch)
+    ThrottlingIntake(monkeypatch, (429, '999999'))
+    with pytest.raises(rq_contract.RemoteQueryFailure):
+        post_one_sessionless_page(sessionless_creds)
+    assert clock.sleeps == [60.0] * rq_upload.REMOTE_QUERY_UPLOAD_MAX_RETRIES
+
+
+def test_the_run_deadline_dominates_a_retry_after_hint(monkeypatch, sessionless_creds):
+    clock = RetryClock(monkeypatch)
+    intake = ThrottlingIntake(monkeypatch, (429, '40'), (201, None))
+    creds = rq_upload.UploadCredentials(
+        sessionless_creds.base_url, '', 'test-api-key', None, wall_deadline=clock.now + 15
+    )
+    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
+        post_one_sessionless_page(creds)
+    # A 40s hint cannot fit the 15s left on the wall: no sleep, and no second attempt.
+    assert failure.value.code == 'timeout'
+    assert clock.sleeps == []
+    assert intake.requests == 1
+
+
+def test_a_retry_after_hint_that_fits_the_run_wall_is_honored(monkeypatch, sessionless_creds):
+    clock = RetryClock(monkeypatch)
+    intake = ThrottlingIntake(monkeypatch, (429, '10'), (201, None))
+    creds = rq_upload.UploadCredentials(
+        sessionless_creds.base_url, '', 'test-api-key', None, wall_deadline=clock.now + 15
+    )
+    post_one_sessionless_page(creds)
+    assert clock.sleeps == [10.0]
+    assert intake.requests == 2
+
+
+def test_only_opted_in_requests_honor_retry_after(monkeypatch):
+    clock = RetryClock(monkeypatch)
+    intake = ThrottlingIntake(monkeypatch, (429, '30'))
+    with pytest.raises(rq_contract.RemoteQueryFailure):
+        rq_upload.upload_with_retry('POST', BASE_URL + '/uploads', {}, b'{}')
+    assert intake.requests == rq_upload.REMOTE_QUERY_UPLOAD_MAX_RETRIES + 1
+    assert clock.sleeps == [0.1, 0.2, 0.4, 0.8]
 
 
 def test_the_multipart_body_rewinds_for_retries_without_buffering_the_source():

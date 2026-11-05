@@ -91,6 +91,17 @@ REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS = 0.1
 REMOTE_QUERY_UPLOAD_MAX_BACKOFF_SECONDS = 5.0
 
 
+# The longest one server `Retry-After` hint may make an opted-in request wait. The hint is a
+# server claim: it only ever lengthens a single pause, never beyond this cap or the run wall,
+# and the retry count stays the same.
+REMOTE_QUERY_UPLOAD_MAX_RETRY_AFTER_SECONDS = 60
+
+
+# `Retry-After` is honored only as a short run of ASCII digits. Longer values are overflow
+# garbage and fall back to the ordinary backoff instead of being clamped into a long wait.
+REMOTE_QUERY_RETRY_AFTER_PATTERN = re.compile(r'[0-9]{1,6}')
+
+
 REMOTE_QUERY_UPLOAD_HTTP_CONNECT_TIMEOUT_SECONDS = 10
 
 
@@ -479,6 +490,7 @@ class RequestsUploadClient:
             tracing=self._tracing,
             attempt_spans=True,
             write_timeout=self._write_timeout,
+            honor_retry_after=True,
         )
         if status != REMOTE_QUERY_SESSIONLESS_PAGE_CREATED_STATUS_CODE:
             raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake page upload answered HTTP {}.'.format(status))
@@ -692,6 +704,39 @@ def parse_error_code(body: bytes) -> str | None:
     return code if isinstance(code, str) else None
 
 
+def parse_retry_after_seconds(value: str | None) -> int | None:
+    """Read a server `Retry-After` hint as positive whole seconds, or None if it is not one.
+
+    Only plain decimal digits are accepted: HTTP dates, signs, fractions, zero, lists (a
+    repeated header arrives comma-joined), and over-long numbers all return None so the
+    caller keeps its ordinary backoff. A valid hint is capped at
+    `REMOTE_QUERY_UPLOAD_MAX_RETRY_AFTER_SECONDS`.
+    """
+    if value is None:
+        return None
+    value = value.strip()
+    if REMOTE_QUERY_RETRY_AFTER_PATTERN.fullmatch(value) is None:
+        return None
+    seconds = int(value)
+    if seconds <= 0:
+        return None
+    return min(seconds, REMOTE_QUERY_UPLOAD_MAX_RETRY_AFTER_SECONDS)
+
+
+def retry_pause_seconds(backoff: float, retry_after: int | None, deadline: float | None) -> float:
+    """The pause before the next attempt: the backoff, lengthened by a valid hint.
+
+    When the hint reaches the run wall the next attempt could only be sent after the wall, so
+    the run times out now instead of sleeping through the rest of its budget: the deadline
+    always dominates a server hint.
+    """
+    if retry_after is None:
+        return backoff
+    if deadline is not None and time.monotonic() + retry_after >= deadline:
+        raise RemoteQueryFailure('timeout', 'Remote query exceeded timeoutMs.', retryable=True)
+    return max(backoff, float(retry_after))
+
+
 def upload_with_retry(
     method: str,
     url: str,
@@ -703,8 +748,14 @@ def upload_with_retry(
     tracing: RemoteQueryProducerTracing | None = None,
     attempt_spans: bool = False,
     write_timeout: float = REMOTE_QUERY_UPLOAD_HTTP_WRITE_TIMEOUT_SECONDS,
+    honor_retry_after: bool = False,
 ) -> tuple[int, bytes]:
     """Send one intake request with bounded retries; `deadline` is the run-wide wall.
+
+    With `honor_retry_after` (sessionless pages only), a valid integer-seconds `Retry-After`
+    on a transient rejection lengthens that attempt's pause, capped at 60 seconds; a hint that
+    reaches `deadline` times the run out instead of sleeping past it. The retry count is
+    unchanged and a malformed hint is ignored.
 
     `timeout` is the (connect, read) pair; `write_timeout` separately bounds how long one
     send of the request body may stall, capped by the page attempt's deadline when there is one.
@@ -751,6 +802,7 @@ def upload_with_retry(
         # text.
         attempt_error: str | None = 'transport'
         attempt_status: int | None = None
+        retry_after: int | None = None
         try:
             # One session per attempt: its adapter is bound to this attempt's deadline, and a
             # fresh connection is what lets the write timeout replace the connect timeout.
@@ -777,6 +829,8 @@ def upload_with_retry(
             attempt_error = 'rejected'
             if is_transient_upload_status(resp.status_code):
                 last_failure = 'HTTP status {}'.format(resp.status_code)
+                if honor_retry_after:
+                    retry_after = parse_retry_after_seconds(resp.headers.get('Retry-After'))
             else:
                 error_code = parse_error_code(resp.content)
                 mapped_code = mapped_error_codes.get(error_code) if error_code is not None else None
@@ -794,7 +848,7 @@ def upload_with_retry(
                 page_attempt.finish(error=attempt_error, http_status=attempt_status)
         if attempt == REMOTE_QUERY_UPLOAD_MAX_RETRIES:
             break
-        time.sleep(backoff)
+        time.sleep(retry_pause_seconds(backoff, retry_after, deadline))
         backoff = min(backoff * 2, REMOTE_QUERY_UPLOAD_MAX_BACKOFF_SECONDS)
     raise RemoteQueryFailure(
         'upload_failed',
