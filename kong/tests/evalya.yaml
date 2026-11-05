@@ -17,6 +17,7 @@ tasks:
       evalya.io/provides.KONG_LEGACY_PROXY_PORT: "8100"
       evalya.io/provides.KONG_LEGACY_ADMIN_PORT: "8101"
       evalya.io/provides.KONG_FIXTURE_METRICS_PORT: "8200"
+      # Labels cannot reference env values; keep in sync with KONG_CONSUMER_KEY below.
       evalya.io/provides.KONG_CONSUMER_KEY: devops-best-friend
     env:
       - name: KONG_VERSION
