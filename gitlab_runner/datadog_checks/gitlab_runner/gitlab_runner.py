@@ -72,9 +72,7 @@ class GitlabRunnerCheck(OpenMetricsBaseCheck):
         metrics = list(METRICS_LIST)
 
         # Add user-configured allowed_metrics
-        allowed_metrics = init_config.get('allowed_metrics')
-        if allowed_metrics is None:
-            raise CheckException("At least one metric must be whitelisted in `allowed_metrics`.")
+        allowed_metrics = init_config.get('allowed_metrics') or []
 
         # Users may want to only report the version
         # OpenMetricsCheck doesn't allow the metadata_metric_name to be one of the metrics
