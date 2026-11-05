@@ -224,6 +224,14 @@ def repair_windows(source_built_dir: str, source_external_dir: str, built_dir: s
             sys.exit(process.returncode)
 
 
+def _supports_macos(platform_tag: str, macos_version: tuple[int, int], arch: str) -> bool:
+    """Whether a wheel's platform tag, possibly a compressed tag set, installs on `macos_version` for `arch`."""
+    from packaging.tags import mac_platforms
+
+    supported = set(mac_platforms(macos_version, arch))
+    return any(tag in supported for tag in platform_tag.split('.'))
+
+
 def repair_darwin(source_built_dir: str, source_external_dir: str, built_dir: str, external_dir: str) -> None:
     from delocate import delocate_wheel
     from packaging.version import Version
@@ -266,6 +274,8 @@ def repair_darwin(source_built_dir: str, source_external_dir: str, built_dir: st
         return not any(excl.search(libname) for excl in exclusions)
 
     min_macos_version = Version(os.environ["MACOSX_DEPLOYMENT_TARGET"])
+    macos_target = (min_macos_version.major, min_macos_version.minor)
+    arch = os.uname().machine
 
     for wheel in iter_wheels(source_external_dir):
         print(f'--> {wheel.name}')
@@ -273,6 +283,13 @@ def repair_darwin(source_built_dir: str, source_external_dir: str, built_dir: st
         if wheel_name.name == 'ddtrace' and find_patterns_in_wheel(wheel, [MACOS_DDTRACE_LIBDDWAF_PATTERN]):
             shutil.move(wheel, Path(source_built_dir) / wheel.name)
             continue
+        # pip picks the most specific wheel for the runner's own macOS, which can be newer than the Agent's
+        # minimum. Built wheels get this check from delocate below; external wheels only get it here.
+        if wheel_name.platform_tag != 'any' and not _supports_macos(wheel_name.platform_tag, macos_target, arch):
+            raise RuntimeError(
+                f'External wheel {wheel.name} does not support macOS {min_macos_version} on {arch}; '
+                'build it from source by adding it to `always_build` in images/macos/extra_build.sh'
+            )
         print('Using existing wheel')
         shutil.move(wheel, external_dir)
 
