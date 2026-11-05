@@ -49,6 +49,12 @@ environment, and plain `docker compose` reads the same variables.
 
 Istio's metrics endpoints are unauthenticated, so the fixture has no credentials.
 
+The fixture needs outbound network access at runtime, not only when Compose pulls its
+images. Inside the cluster, k3s pulls its system images, istiod and the sidecar proxy
+(`istio/pilot`, `istio/proxyv2`), and the `nginx` and `curlimages/curl` workload images
+from Docker Hub, and the client sidecar fetches the WasmPlugin module from `ghcr.io`.
+There is no air-gapped mode: without network access, istiod and the mesh pods do not start.
+
 ### Provided values
 
 The task publishes `ISTIO_HOST`, `ISTIO_PORT`, `ISTIOD_ENDPOINT`, `ISTIO_MESH_ENDPOINT`,
