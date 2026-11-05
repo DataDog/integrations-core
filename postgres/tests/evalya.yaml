@@ -1,0 +1,21 @@
+version: "1"
+
+# Publish the existing authenticated postgres Compose fixture as
+# postgres/tests@postgres. Defaults to the alpine image/UTF8 locale, so
+# consumers only need to select a Postgres version if they want a different one.
+tasks:
+  - id: postgres
+    task: ./compose/docker-compose.yaml@postgres
+    labels:
+      evalya.io/publish: "true"
+      evalya.io/provides.DB_HOST: "{{ .hostname }}"
+      evalya.io/provides.DB_PORT: "5432"
+      evalya.io/provides.POSTGRES_USER: datadog
+      evalya.io/provides.POSTGRES_PASSWORD: datadog
+      evalya.io/provides.POSTGRES_DB: datadog_test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U datadog -d datadog_test && if [[ ! -e /tmp/container_ready.txt ]]; then exit 1; fi"]
+      interval: 1s
+      timeout: 5s
+      start_period: 60s
+      retries: 5

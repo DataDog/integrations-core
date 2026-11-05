@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: "postgres:${POSTGRES_IMAGE}"
+    image: "postgres:${POSTGRES_IMAGE:-alpine}"
     ports:
       - "5432:5432"
     healthcheck:
@@ -14,5 +14,5 @@ services:
       - ./etc/postgresql:/etc/postgresql/
     environment:
       POSTGRES_PASSWORD: datad0g
-      POSTGRES_INITDB_ARGS: "--data-checksums --locale=${POSTGRES_LOCALE}"
+      POSTGRES_INITDB_ARGS: "--data-checksums --locale=${POSTGRES_LOCALE:-UTF8}"
     command: postgres -c 'config_file=/etc/postgresql/postgresql.conf' -c 'hba_file=/etc/postgresql/pg_hba.conf'
