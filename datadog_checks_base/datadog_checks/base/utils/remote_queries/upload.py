@@ -10,19 +10,24 @@ from __future__ import annotations
 import json
 import logging
 import re
+import secrets
 import socket
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any, BinaryIO, Protocol
 
+from pydantic import ValidationError
+
 from datadog_checks.base.agent import datadog_agent
 
 from .contract import (
+    RemoteQueryDelivery,
     RemoteQueryFailure,
-    RemoteQueryResultDelivery,
+    RemoteQuerySessionlessResultDelivery,
     RemoteQueryTraceContext,
     RemoteQueryUploadDescriptor,
+    SessionlessPageReceipt,
     SourcePageUploadMetadata,
     canonical_json_bytes,
 )
@@ -42,6 +47,12 @@ REMOTE_QUERY_PAGE_ACCEPTED_STATUS_CODE = 202
 
 
 REMOTE_QUERY_PAGE_RECEIPT_STATUS = 'accepted'
+
+
+REMOTE_QUERY_SESSIONLESS_PAGE_PATH = '/ingest/v1/pages'
+
+
+REMOTE_QUERY_SESSIONLESS_PAGE_CREATED_STATUS_CODE = 201
 
 
 REMOTE_QUERY_PAGE_RECEIPT_KEYS = frozenset(('upload_id', 'batch_index', 'record_offset', 'source_rows', 'status'))
@@ -119,6 +130,12 @@ class UploadCredentials:
 
 
 class UploadClient(Protocol):
+    """The session transport; `post_sessionless_page` is the sessionless-v1 page request.
+
+    A sessionless run uses only `post_sessionless_page`: it never registers, finalizes,
+    aborts, or polls an upload session.
+    """
+
     def register_descriptor(self, creds: UploadCredentials, body: bytes) -> Mapping[str, Any]: ...
 
     def put_source_page(
@@ -128,6 +145,10 @@ class UploadClient(Protocol):
     def finalize_run(self, creds: UploadCredentials, expected_page_count: int) -> Mapping[str, Any]: ...
 
     def abort(self, creds: UploadCredentials) -> None: ...
+
+    def post_sessionless_page(
+        self, creds: UploadCredentials, page: SourcePageUploadMetadata, metadata: bytes, body: BinaryIO
+    ) -> Mapping[str, Any]: ...
 
 
 class UploadAttemptExpired(Exception):
@@ -153,6 +174,85 @@ class DeadlinedPageBody:
 
     def tell(self) -> int:
         return self._body.tell()
+
+
+class SessionlessPageBody:
+    """A seekable two-part multipart/form-data body streamed without buffering the page.
+
+    The framing is `head` (opening boundary, the metadata part with its JSON, and the
+    source part's headers), then exactly `source_length` bytes streamed from `source`, then
+    `tail` (the closing boundary). The metadata part therefore always precedes the source
+    part, and the total length is known exactly before the first byte is sent, so one
+    fixed Content-Length covers the complete request. Retries rewind with `seek(0)` and
+    resend byte-identical content; at most one chunk of the page is ever copied at a time.
+    """
+
+    def __init__(self, head: bytes, source: BinaryIO, source_length: int, tail: bytes):
+        self._head = head
+        self._source = source
+        self._source_length = source_length
+        self._tail = tail
+        self.length = len(head) + source_length + len(tail)
+        self._pos = 0
+        self._source_pos: int | None = None
+
+    def read(self, amount: int | None = -1) -> bytes:
+        remaining = self.length - self._pos
+        wanted = remaining if amount is None or amount < 0 else min(amount, remaining)
+        chunks = []
+        head_end = len(self._head)
+        source_end = head_end + self._source_length
+        while wanted > 0:
+            if self._pos < head_end:
+                chunk = self._head[self._pos : self._pos + wanted]
+            elif self._pos < source_end:
+                if self._source_pos != self._pos - head_end:
+                    self._source.seek(self._pos - head_end)
+                chunk = self._source.read(min(wanted, source_end - self._pos))
+                if not chunk:
+                    raise RemoteQueryFailure('upload_failed', 'The source page ended before its declared length.')
+                self._source_pos = self._pos - head_end + len(chunk)
+            else:
+                start = self._pos - source_end
+                chunk = self._tail[start : start + wanted]
+            chunks.append(chunk)
+            self._pos += len(chunk)
+            wanted -= len(chunk)
+        return b''.join(chunks)
+
+    def seek(self, offset: int, whence: int = 0) -> int:
+        if whence == 0:
+            position = offset
+        elif whence == 1:
+            position = self._pos + offset
+        elif whence == 2:
+            position = self.length + offset
+        else:
+            raise ValueError('invalid whence ({!r}, should be 0, 1 or 2).'.format(whence))
+        self._pos = max(0, min(position, self.length))
+        return self._pos
+
+    def tell(self) -> int:
+        return self._pos
+
+
+def sessionless_multipart_body(
+    boundary: str, metadata: bytes, source: BinaryIO, source_length: int
+) -> SessionlessPageBody:
+    """Frame the metadata JSON first and the source page second as multipart/form-data."""
+    head = (
+        '--{b}\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n'.format(
+            b=boundary
+        ).encode('ascii')
+        + metadata
+        + (
+            '\r\n--{b}\r\nContent-Disposition: form-data; name="source"\r\nContent-Type: {t}\r\n\r\n'.format(
+                b=boundary, t=REMOTE_QUERY_SOURCE_PAGE_CONTENT_TYPE
+            ).encode('ascii')
+        )
+    )
+    tail = '\r\n--{}--\r\n'.format(boundary).encode('ascii')
+    return SessionlessPageBody(head, source, source_length, tail)
 
 
 def stall_bounded_pool_classes(write_timeout: float, deadline: float | None) -> dict[str, type]:
@@ -349,6 +449,41 @@ class RequestsUploadClient:
             time.sleep(backoff)
             backoff = min(backoff * 2, REMOTE_QUERY_UPLOAD_MAX_BACKOFF_SECONDS)
 
+    def post_sessionless_page(
+        self, creds: UploadCredentials, page: SourcePageUploadMetadata, metadata: bytes, buffer: BinaryIO
+    ) -> Mapping[str, Any]:
+        """Upload one independent page as a metadata-first two-part multipart request.
+
+        The request is self-contained — the metadata part repeats the descriptor and the page
+        identity — so it needs no session. The metadata bytes are built once by the caller
+        and the source page is streamed from its buffer, so every bounded retry resends a
+        byte-identical body with one exact Content-Length and a fresh server-side object. Intake
+        answers HTTP 201 exactly; its defensive `final_page_too_large` rejection surfaces as its
+        own failure code so the writer can split the buffered records and retry the same index.
+        """
+        boundary = 'ddrq-{}'.format(secrets.token_hex(16))
+        headers = self._headers(creds, 'multipart/form-data; boundary={}'.format(boundary))
+        body = sessionless_multipart_body(boundary, metadata, buffer, page.source_bytes)
+        headers['Content-Length'] = str(body.length)
+        url = '{}{}'.format(creds.base_url.rstrip('/'), REMOTE_QUERY_SESSIONLESS_PAGE_PATH)
+        status, response_body = upload_with_retry(
+            'POST',
+            url,
+            headers,
+            body,
+            self._timeout,
+            mapped_error_codes={
+                REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE: REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE
+            },
+            deadline=creds.wall_deadline,
+            tracing=self._tracing,
+            attempt_spans=True,
+            write_timeout=self._write_timeout,
+        )
+        if status != REMOTE_QUERY_SESSIONLESS_PAGE_CREATED_STATUS_CODE:
+            raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake page upload answered HTTP {}.'.format(status))
+        return parse_json_object_response(response_body, 'page upload')
+
     def abort(self, creds: UploadCredentials) -> None:
         headers = self._headers(creds, 'application/json')
         url = '{}/uploads/{}/abort'.format(creds.base_url.rstrip('/'), creds.upload_id)
@@ -427,6 +562,38 @@ def verify_source_page_receipt(response: Mapping[str, Any], upload_id: str, page
         raise RemoteQueryFailure(
             'invalid_receipt', 'its-agent-intake page upload response did not report the page as accepted.'
         )
+
+
+def verify_sessionless_page_receipt(
+    response: Mapping[str, Any], page: SourcePageUploadMetadata, max_file_bytes: int
+) -> SessionlessPageReceipt:
+    """Fail closed unless intake's 201 receipt is the exact shape confirming this page.
+
+    The receipt's object id is the page's only handle in the completion proposal, so the
+    shape is strict (all six fields, no extras, strict types, a canonical UUID), the index,
+    offset, and row count must equal the page this producer sent, and the reported canonical
+    bytes must fit one file. The values are intake's claims, checked here only for
+    consistency; the trusted worker validates the stored objects.
+    """
+    if not isinstance(response, Mapping):
+        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake page upload response was not a JSON object.')
+    try:
+        parsed = SessionlessPageReceipt.model_validate(response)
+    except ValidationError as error:
+        # Field names and fixed rule types only: the invalid values are the server's text.
+        problems = sorted({'.'.join(str(part) for part in item['loc']) or 'receipt' for item in error.errors()})
+        raise RemoteQueryFailure(
+            'invalid_receipt',
+            'its-agent-intake page upload response was not a valid sessionless receipt: {}.'.format(
+                ', '.join(problems)
+            ),
+        ) from None
+    verify_page_receipt_field(response, 'page_index', page.batch_index)
+    verify_page_receipt_field(response, 'record_offset', page.record_offset)
+    verify_page_receipt_field(response, 'rows', page.rows)
+    if parsed.bytes > max_file_bytes:
+        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake page upload response reported an oversized page.')
+    return parsed
 
 
 def verify_finalize_pending_response(response: Mapping[str, Any], expected_page_count: int) -> None:
@@ -681,15 +848,20 @@ def validate_test_drive_name(value: str | None) -> str | None:
 
 
 def resolve_upload_credentials(
-    delivery: RemoteQueryResultDelivery,
+    delivery: RemoteQueryDelivery,
     started_at: float,
     trace_context: RemoteQueryTraceContext | None = None,
 ) -> UploadCredentials:
-    """Build the session credentials, carrying the run-wide wall for upload retries."""
+    """Build the upload credentials, carrying the run-wide wall for upload retries.
+
+    A sessionless delivery has no upload session, so its credentials carry an empty upload
+    id: that is what makes `safe_abort` a no-op for it.
+    """
+    upload_id = '' if isinstance(delivery, RemoteQuerySessionlessResultDelivery) else delivery.upload_id
     test_drive = validate_test_drive_name(get_agent_config(REMOTE_QUERY_UPLOAD_TEST_DRIVE_CONFIG_KEY))
     return UploadCredentials(
         base_url=delivery.base_url,
-        upload_id=delivery.upload_id,
+        upload_id=upload_id,
         api_key=get_agent_config('api_key'),
         test_drive=test_drive,
         wall_deadline=started_at + delivery.limits.timeout_ms / 1000,
@@ -698,6 +870,7 @@ def resolve_upload_credentials(
 
 
 def safe_abort(client: UploadClient, creds: UploadCredentials) -> None:
+    # Without an upload id (a sessionless run) there is no session to abort and no request is made.
     if not creds.base_url or not creds.upload_id:
         return
     try:

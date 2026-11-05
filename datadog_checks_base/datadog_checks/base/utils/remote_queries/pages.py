@@ -12,18 +12,23 @@ import io
 from array import array
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, BinaryIO, Protocol
 
 from .contract import (
     REMOTE_QUERY_PAGE_CONTRACT_VERSION,
+    REMOTE_QUERY_SESSIONLESS_MAX_DESCRIPTOR_BYTES,
+    REMOTE_QUERY_SESSIONLESS_PROTOCOL,
+    RemoteQueryDelivery,
     RemoteQueryFailure,
-    RemoteQueryResultDelivery,
     RemoteQueryRunStats,
+    RemoteQuerySessionlessResultDelivery,
     RemoteQueryUploadDescriptor,
+    SessionlessCompletionReceipt,
     SourcePageUploadMetadata,
     canonical_json_bytes,
     descriptor_request_bytes,
     descriptor_schema_bytes,
+    sessionless_page_metadata_bytes,
 )
 from .tracing import NULL_PRODUCER_TRACING, RemoteQueryProducerTracing
 from .upload import (
@@ -33,6 +38,7 @@ from .upload import (
     finalize_totals,
     verify_descriptor_response,
     verify_run_finalize_response,
+    verify_sessionless_page_receipt,
     verify_source_page_receipt,
 )
 
@@ -153,16 +159,133 @@ class _SourcePageBody:
         raise TypeError('the source-page body is a byte stream, not an iterable.')
 
 
-class PageUploader:
-    """Upload complete CSV records; retry oversized pages at a record boundary.
+class UploadProtocol(Protocol):
+    """The protocol-specific half of a page uploader, chosen from the delivery.
 
-    Callers own their buffers and supply record ends. Optional row bounds describe
-    final JSON sizes; otherwise only source sizes are known until intake finalizes.
+    `PageUploader` owns the shared page loop: limits, record-boundary splitting of an
+    oversized page, and run accounting. A protocol owns what crosses the wire: how the run
+    begins, how one page is sent and its receipt verified, and how the run is completed.
+    """
+
+    def begin(self) -> None: ...
+
+    def send_page(self, page: SourcePageUploadMetadata, body: BinaryIO, bound: int) -> int:
+        """Send one page and return the bytes the run accounts for it."""
+        ...
+
+    def complete(self, stats: RemoteQueryRunStats) -> dict[str, Any]: ...
+
+
+class SessionUploadProtocol:
+    """The default session-backed protocol: register once, PUT pages, finalize for the totals."""
+
+    def __init__(
+        self,
+        creds: UploadCredentials,
+        client: UploadClient,
+        descriptor: RemoteQueryUploadDescriptor,
+        tracing: RemoteQueryProducerTracing,
+    ):
+        self._creds, self._client, self._descriptor, self._tracing = creds, client, descriptor, tracing
+
+    def begin(self) -> None:
+        body = descriptor_request_bytes(self._descriptor)
+        verify_descriptor_response(
+            self._client.register_descriptor(self._creds, body), self._creds.upload_id, self._descriptor
+        )
+
+    def send_page(self, page: SourcePageUploadMetadata, body: BinaryIO, bound: int) -> int:
+        receipt = self._client.put_source_page(self._creds, page, body)
+        verify_source_page_receipt(receipt, self._creds.upload_id, page)
+        # Only the conservative bound is known until finalization reports the authoritative totals.
+        return bound
+
+    def complete(self, stats: RemoteQueryRunStats) -> dict[str, Any]:
+        # The finalize span is also the injection parent of the finalize requests.
+        with self._tracing.finalize_span():
+            response = self._client.finalize_run(self._creds, stats.pages_emitted)
+            verify_run_finalize_response(response, self._creds.upload_id)
+            pages, rows, size = finalize_totals(response)
+        stats.pages_emitted, stats.rows_emitted, stats.bytes_emitted = pages, rows, size
+        return {'uploadId': self._creds.upload_id, 'pageCount': pages, 'totalRows': rows, 'totalBytes': size}
+
+
+class SessionlessUploadProtocol:
+    """The opt-in `sessionless-v1` protocol: independent self-describing pages, no session calls.
+
+    Each logical page is one multipart request carrying the descriptor and its identity, and
+    its receipt supplies one object id. Only the accepted request's id is kept: a transport
+    retry sends a fresh request, so an earlier attempt whose response was lost can leave an
+    orphaned stored object that is never referenced. Completion makes no request: it reports
+    the ordered ids and the canonical totals accumulated from the verified receipts. No scan
+    stamp is read or reported; whether a page was scanned is intake's own stored record.
     """
 
     def __init__(
         self,
-        delivery: RemoteQueryResultDelivery,
+        delivery: RemoteQuerySessionlessResultDelivery,
+        creds: UploadCredentials,
+        client: UploadClient,
+        descriptor: RemoteQueryUploadDescriptor,
+    ):
+        self._delivery, self._creds, self._client, self._descriptor = delivery, creds, client, descriptor
+        self._descriptor_json = descriptor_request_bytes(descriptor)
+        self._object_ids: list[str] = []
+
+    def begin(self) -> None:
+        if len(self._descriptor_json) > REMOTE_QUERY_SESSIONLESS_MAX_DESCRIPTOR_BYTES:
+            raise RemoteQueryFailure('max_schema_bytes_exceeded', 'The encoded descriptor exceeds its size limit.')
+
+    def send_page(self, page: SourcePageUploadMetadata, body: BinaryIO, bound: int) -> int:
+        metadata = sessionless_page_metadata_bytes(self._delivery, page, self._descriptor_json)
+        response = self._client.post_sessionless_page(self._creds, page, metadata, body)
+        receipt = verify_sessionless_page_receipt(response, page, self._delivery.limits.max_file_bytes)
+        self._object_ids.append(receipt.object_id)
+        return receipt.bytes
+
+    def complete(self, stats: RemoteQueryRunStats) -> dict[str, Any]:
+        if self._descriptor.include_schema and not self._object_ids:
+            # The empty schema page is the only artifact that carries the schema: it is never optional.
+            raise RemoteQueryFailure('invalid_receipt', 'A schema-bearing result completed without a page.')
+        try:
+            proposal = SessionlessCompletionReceipt(
+                protocol=REMOTE_QUERY_SESSIONLESS_PROTOCOL,
+                objectIds=tuple(self._object_ids),
+                pageCount=stats.pages_emitted,
+                totalRows=stats.rows_emitted,
+                totalBytes=stats.bytes_emitted,
+            )
+        except ValueError:
+            raise RemoteQueryFailure(
+                'invalid_receipt', 'The sessionless completion proposal is inconsistent.'
+            ) from None
+        return proposal.wire()
+
+
+def create_upload_protocol(
+    delivery: RemoteQueryDelivery,
+    creds: UploadCredentials,
+    client: UploadClient,
+    descriptor: RemoteQueryUploadDescriptor,
+    tracing: RemoteQueryProducerTracing,
+) -> UploadProtocol:
+    """Choose the wire protocol from `resultDelivery.protocol`; an absent protocol is the session path."""
+    if isinstance(delivery, RemoteQuerySessionlessResultDelivery):
+        return SessionlessUploadProtocol(delivery, creds, client, descriptor)
+    return SessionUploadProtocol(creds, client, descriptor, tracing)
+
+
+class PageUploader:
+    """Upload complete CSV records; retry oversized pages at a record boundary.
+
+    Callers own their buffers and supply record ends. Optional row bounds describe
+    final JSON sizes; otherwise only source sizes are known until the protocol reports
+    its authoritative totals (session finalize) or verified per-page receipts (sessionless).
+    """
+
+    def __init__(
+        self,
+        delivery: RemoteQueryDelivery,
         creds: UploadCredentials,
         client: UploadClient,
         descriptor: RemoteQueryUploadDescriptor,
@@ -183,8 +306,8 @@ class PageUploader:
             raise RemoteQueryFailure(
                 'max_file_bytes_exceeded', 'The repeated schema plus the minimal page envelope exceeds maxFileBytes.'
             )
-        body = descriptor_request_bytes(descriptor)
-        verify_descriptor_response(client.register_descriptor(creds, body), creds.upload_id, descriptor)
+        self.protocol = create_upload_protocol(delivery, creds, client, descriptor, self.tracing)
+        self.protocol.begin()
 
     def page_bound(self, offset: int, row_bounds: Sequence[int]) -> int:
         prefix = page_prefix(
@@ -212,8 +335,9 @@ class PageUploader:
             page = SourcePageUploadMetadata(stats.pages_emitted, stats.rows_emitted, end, count)
             try:
                 self.guard()
-                receipt = self.client.put_source_page(self.creds, page, _SourcePageBody(buffer, end))
-                verify_source_page_receipt(receipt, self.creds.upload_id, page)
+                accepted_bytes = self.protocol.send_page(page, _SourcePageBody(buffer, end), bound)
+                if stats.bytes_emitted + accepted_bytes > limits.max_result_bytes:
+                    raise RemoteQueryFailure('max_result_bytes_exceeded', 'Result pages exceed maxResultBytes.')
             except RemoteQueryFailure as error:
                 if error.code != REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE or count <= 1:
                     raise
@@ -221,20 +345,14 @@ class PageUploader:
                 continue
             stats.pages_emitted += 1
             stats.rows_emitted += count
-            stats.bytes_emitted += bound
+            stats.bytes_emitted += accepted_bytes
             # The root span's time_to_first_page_ms counts the first receipt-verified,
             # counted page.
             self.tracing.note_page_acknowledged()
             return count, end
 
     def finalize(self) -> dict[str, Any]:
-        # The finalize span is also the injection parent of the finalize requests.
-        with self.tracing.finalize_span():
-            response = self.client.finalize_run(self.creds, self.stats.pages_emitted)
-            verify_run_finalize_response(response, self.creds.upload_id)
-            pages, rows, size = finalize_totals(response)
-        self.stats.pages_emitted, self.stats.rows_emitted, self.stats.bytes_emitted = pages, rows, size
-        return {'uploadId': self.creds.upload_id, 'pageCount': pages, 'totalRows': rows, 'totalBytes': size}
+        return self.protocol.complete(self.stats)
 
 
 class SourcePageWriter:
@@ -242,7 +360,7 @@ class SourcePageWriter:
 
     def __init__(
         self,
-        delivery: RemoteQueryResultDelivery,
+        delivery: RemoteQueryDelivery,
         creds: UploadCredentials,
         client: UploadClient,
         descriptor: RemoteQueryUploadDescriptor,
