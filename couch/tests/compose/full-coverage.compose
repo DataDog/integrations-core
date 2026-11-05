@@ -77,14 +77,26 @@ services:
         i=1; while [ $$i -le 50 ]; do DOCS="$${DOCS}{\"_id\":\"seed-$$i\",\"data\":$$i},"; i=$$((i+1)); done
         DOCS="$${DOCS%,}]}"
         USER_DOC='{"name":"ddreader","password":"ddreader","roles":[],"type":"user"}'
+        # create <url> <curl args...>: fail the seed on any error except
+        # "already exists" (409 conflict, 412 file_exists), so a missing
+        # design doc or user cannot silently drop coverage, yet a re-run
+        # against existing data still succeeds.
+        create() {
+          url=$$1; shift
+          code=$$(curl -sS -o /tmp/resp -w '%{http_code}' "$$@" "$$url") || code=000
+          case $$code in
+            2??|409|412) ;;
+            *) echo "seed: $${url#*@} -> HTTP $$code: $$(cat /tmp/resp 2>/dev/null)" >&2; exit 1 ;;
+          esac
+        }
         for base in "http://$$DB_USERNAME:$$DB_PASSWORD@couchdb:5984" "http://couchdb-v1:5984"; do
           echo "seeding $${base#*@}"
           for db in _users _replicator kennel activity; do
-            curl -sS -o /dev/null -X PUT "$$base/$$db"
+            create "$$base/$$db" -X PUT
           done
-          curl -sS -o /dev/null -X PUT -H "$$J" "$$base/kennel/_design/dummy" -d "$$DDOC"
-          curl -sS -o /dev/null -X POST -H "$$J" "$$base/kennel/_bulk_docs" -d "$$DOCS"
-          curl -sS -o /dev/null -X PUT -H "$$J" "$$base/_users/org.couchdb.user:ddreader" -d "$$USER_DOC"
+          create "$$base/kennel/_design/dummy" -X PUT -H "$$J" -d "$$DDOC"
+          create "$$base/kennel/_bulk_docs" -X POST -H "$$J" -d "$$DOCS"
+          create "$$base/_users/org.couchdb.user:ddreader" -X PUT -H "$$J" -d "$$USER_DOC"
           curl -fsS "$$base/kennel" >/dev/null
         done
         echo "seed-done"
