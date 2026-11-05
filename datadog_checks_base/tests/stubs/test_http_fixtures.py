@@ -382,6 +382,87 @@ def test_fake_http_serves_matching_registrations_in_order_then_repeats_the_last(
     fake_http.assert_all_responses_consumed()
 
 
+def test_fake_http_computes_each_response_from_the_request_with_a_responder(fake_http):
+    # Emulators answer pagination and POST bodies from what the check sent, not from a fixed queue.
+    url = 'https://example.test/items'
+    fake_http.register_response(
+        'GET', url, lambda request: FakeHTTPResponse(content=f'page {request.options["params"]["page"]}'.encode())
+    )
+    check = FixtureCheck('test', {}, [{}])
+
+    assert [check.http.get(url, params={'page': page}).content for page in (1, 2)] == [b'page 1', b'page 2']
+    fake_http.assert_all_responses_consumed()
+
+
+def test_fake_http_serves_calls_no_registration_matches_with_the_catch_all_responder(fake_http):
+    fake_http.register_response('GET', 'https://example.test/registered', FakeHTTPResponse(content=b'registered'))
+    fake_http.set_responder(lambda request: FakeHTTPResponse(content=f'{request.method} {request.url}'.encode()))
+    check = FixtureCheck('test', {}, [{}])
+
+    assert check.http.get('https://example.test/registered').content == b'registered'
+    assert check.http.post('https://example.test/other').content == b'POST https://example.test/other'
+
+
+def test_fake_http_raises_an_exception_a_responder_returns(fake_http):
+    fake_http.set_responder(lambda request: HTTPClientConnectionError('refused'))
+    check = FixtureCheck('test', {}, [{}])
+
+    with pytest.raises(HTTPClientConnectionError, match='refused'):
+        check.http.get('https://example.test/items')
+
+
+def raise_from_responder(request: RecordedRequest) -> FakeHTTPResponse:
+    raise KeyError('missing state')
+
+
+@pytest.mark.parametrize(
+    ('responder', 'message'),
+    [
+        pytest.param(raise_from_responder, 'raised KeyError', id='raises'),
+        pytest.param(
+            lambda request: FakeHTTPResponse(url='x'), "cannot send these FakeHTTPResponse fields", id='unsendable'
+        ),
+        pytest.param(lambda request: 'body', 'FakeHTTPResponse objects or exceptions', id='wrong-type'),
+    ],
+)
+def test_fake_http_rejects_a_responder_that_cannot_answer(mocker: MockerFixture, responder, message):
+    # A check's broad except clause must not turn a broken emulator into a passing test.
+    url = 'https://example.test/items'
+    with pytest.raises(AssertionError, match=f'fake_http recorded a request violation: .*{message}'):
+        with install(mocker) as fake_http:
+            fake_http.register_response('GET', url, responder)
+            with pytest.raises(AssertionError, match=message):
+                fake_http.create_client().get(url)
+
+
+def test_fake_http_runs_responders_one_at_a_time(fake_http):
+    # Checks may send requests from several threads, and a stateful emulator must not see them interleaved.
+    first_entered, overlapped = threading.Event(), threading.Event()
+    active = []
+
+    def responder(request: RecordedRequest) -> FakeHTTPResponse:
+        if active:
+            overlapped.set()
+        active.append(request.url)
+        if request.url.endswith('/first'):
+            first_entered.set()
+            overlapped.wait(0.3)
+        active.remove(request.url)
+        return FakeHTTPResponse()
+
+    fake_http.set_responder(responder)
+    client = fake_http.create_client()
+    first = threading.Thread(target=client.get, args=('https://example.test/first',))
+    first.start()
+    assert first_entered.wait(5)
+    second = threading.Thread(target=client.get, args=('https://example.test/second',))
+    second.start()
+    first.join(5)
+    second.join(5)
+
+    assert not overlapped.is_set()
+
+
 @pytest.mark.parametrize('in_thread', [False, True], ids=['main-thread', 'worker-thread'])
 def test_fake_http_rejects_swallowed_unmatched_requests(mocker: MockerFixture, in_thread: bool):
     url = 'https://example.test/items'

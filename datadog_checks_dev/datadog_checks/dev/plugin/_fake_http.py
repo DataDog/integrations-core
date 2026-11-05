@@ -14,7 +14,7 @@ import http.client
 import io
 import json
 import threading
-from collections.abc import Iterable, Iterator, Mapping
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import timedelta
@@ -36,6 +36,9 @@ from datadog_checks.base.stubs.http import (
 from datadog_checks.base.utils.http import RequestsWrapper, create_http_client, is_uds_url, quote_uds_url
 from datadog_checks.base.utils.http_protocol import HTTPClient, HTTPHeaders
 
+Responder = Callable[[RecordedRequest], FakeHTTPResponse | Exception]
+"""Computes the outcome of a call from the call itself."""
+
 
 @dataclass(frozen=True, slots=True)
 class SentRequest:
@@ -48,7 +51,7 @@ class SentRequest:
 
 @dataclass
 class Registration:
-    registered: RegisteredResponse
+    registered: RegisteredResponse[FakeHTTPResponse | Exception | Responder]
     served: int = 0
 
 
@@ -79,6 +82,10 @@ class FakeHTTPFixture:
         # Checks may send requests from several threads. Choosing the first unserved registration and marking it
         # served must be atomic, or two concurrent requests could receive the same response while another goes unused.
         self._lock = threading.Lock()
+        # Serializes responders so a stateful emulator needs no locking of its own. It is separate from _lock so a
+        # responder can still inspect the fixture, for example through assert_has_request.
+        self._responder_lock = threading.Lock()
+        self._responder: Responder | None = None
         self._calls = threading.local()
 
     def create_client(self) -> HTTPClient:
@@ -89,18 +96,25 @@ class FakeHTTPFixture:
         self,
         method: str,
         url: str,
-        response: FakeHTTPResponse | Exception,
+        response: FakeHTTPResponse | Exception | Responder,
         *,
         match_options: Mapping[str, Any] | None = None,
     ) -> None:
         """Serve a response or raise an exception for matching requests.
 
-        Registrations matching the same request are served in order, and the last one then repeats.
+        A responder is called with each matching request and returns the response or exception for it. Registrations
+        matching the same request are served in order, and the last one then repeats.
         """
-        _check_servable(response)
+        if not callable(response):
+            _check_servable(response)
         registered = RegisteredResponse(method, url, response, match_options or {})
         with self._lock:
             self._registrations.append(Registration(registered))
+
+    def set_responder(self, responder: Responder) -> None:
+        """Answer the requests that no registration matches by calling the responder with each of them."""
+        with self._lock:
+            self._responder = responder
 
     def assert_requests(self, expected: Iterable[RecordedRequest]) -> None:
         """Assert that the checks made exactly the expected calls, in order."""
@@ -135,7 +149,7 @@ class FakeHTTPFixture:
         if violation is not None:
             raise AssertionError(f'fake_http recorded a request violation: {violation}') from violation
 
-    def _pending(self) -> list[RegisteredResponse]:
+    def _pending(self) -> list[RegisteredResponse[FakeHTTPResponse | Exception | Responder]]:
         return [registration.registered for registration in self._registrations if not registration.served]
 
     @contextmanager
@@ -179,18 +193,38 @@ class FakeHTTPFixture:
                 )
             matching = [r for r in self._registrations if r.registered.matches(call)]
             chosen = next((r for r in matching if not r.served), matching[-1] if matching else None)
-            if chosen is None:
+            if chosen is not None:
+                chosen.served += 1
+                outcome = chosen.registered.outcome
+            elif self._responder is not None:
+                outcome = self._responder
+            else:
                 raise active.violation(
                     f'No registered response matched {call.method} {call.url} with options {dict(call.options)!r}. '
                     f'Pending responses: {self._pending()!r}.'
                 )
-            chosen.served += 1
-            outcome = chosen.registered.outcome
+        if callable(outcome):
+            outcome = self._respond(active, outcome)
         if isinstance(outcome, Exception):
             raise outcome
         wire_response = _to_requests_response(wire_request, outcome)
         active.redirected = wire_response.is_redirect
         return wire_response
+
+    def _respond(self, active: ActiveCall, responder: Responder) -> FakeHTTPResponse | Exception:
+        call = active.request
+        with self._responder_lock:
+            try:
+                outcome = responder(call)
+            except Exception as error:
+                raise active.violation(f'The responder for {call.method} {call.url} raised {error!r}.') from error
+        try:
+            _check_servable(outcome)
+        except (TypeError, ValueError) as error:
+            raise active.violation(
+                f'The responder for {call.method} {call.url} returned an invalid outcome. {error}'
+            ) from error
+        return outcome
 
 
 def _encode(value: bytes | str, encoding: str | None) -> bytes:

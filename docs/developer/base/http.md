@@ -79,6 +79,21 @@ def test_check(dd_run_check, fake_http_response):
     fake_http_response('http://localhost:8080/metrics', file_path=os.path.join(HERE, 'fixtures', 'metrics.txt'))
 ```
 
+To compute each response from the request, such as a page of results or the state of a job, register a responder: a
+callable that receives the `RecordedRequest` and returns the `FakeHTTPResponse` or exception for it. A responder
+registration repeats like any other last registration. `fake_http.set_responder()` answers every call that no
+registration matches. Responders run one at a time, even when the check sends requests from several threads, so a
+stateful emulator needs no locking of its own.
+
+```python
+def test_pagination(dd_run_check, fake_http):
+    def respond(request):
+        page = request.options['params']['page']
+        return FakeHTTPResponse(content=json.dumps({'items': ITEMS[page], 'last': page == 2}).encode())
+
+    fake_http.register_response('GET', 'https://localhost/api/items', respond)
+```
+
 The fixture fails the test instead of serving a response it cannot represent:
 
 - A request with no matching registration, or one sent by a client that did not opt in, such as one built with
@@ -90,6 +105,7 @@ The fixture fails the test instead of serving a response it cannot represent:
   entry in `content_chunks`, or `lines` that do not split back unchanged.
 - A `FakeHTTPResponse` whose `text`, `lines`, `content_chunks` or `json_result` disagree with the body it sends, which
   is its `content` if set. The wire carries one body, so the client derives every view from it.
+- A responder that raises, or returns anything the fixture could not serve if it were registered.
 
 Request-guard errors also fail fixture cleanup, even if the check catches the original error and continues. Deliberately
 registered exceptions and error responses are valid test outcomes, not guard errors. Call
@@ -106,8 +122,6 @@ A `FakeHTTPClient` is an in-memory `HTTPClient` that never runs the real client.
 fixture cannot serve the test:
 
 - Code that receives a client: pass the fake directly.
-- A suite-local emulator that computes responses per request: subclass the fake and return it from a patched version
-  of `AgentCheck.create_http_client`.
 - Responses the fixture rejects, such as `elapsed` or `history`, and cookies seeded on the client with `cookies=...`.
 
 A `FakeHTTPResponse` parses `json()` from its body, raising `json.JSONDecodeError` like the real client, unless

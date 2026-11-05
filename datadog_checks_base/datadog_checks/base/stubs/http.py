@@ -62,12 +62,12 @@ class RecordedRequest:
 
 
 @dataclass(frozen=True, slots=True)
-class RegisteredResponse:
-    """A response or exception registered for the requests it matches."""
+class RegisteredResponse[T]:
+    """An outcome, such as a response or exception, registered for the requests it matches."""
 
     method: str
     url: str
-    outcome: HTTPResponse | Exception
+    outcome: T
     match_options: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -245,7 +245,7 @@ class FakeHTTPClient:
         # Shared with created clients so a setting changed after a check starts still reaches it.
         self._proxy_bypass: dict[str, bool | Callable[[str], bool]] = {'value': should_bypass_proxy}
         self.requests: list[RecordedRequest] = []
-        self._responses: list[RegisteredResponse] = []
+        self._responses: list[RegisteredResponse[HTTPResponse | Exception]] = []
 
     def create_client(self) -> FakeHTTPClient:
         """Create an isolated client that shares registered responses, recorded requests and proxy bypass."""
