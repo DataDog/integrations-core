@@ -76,8 +76,10 @@ agent check coredns -t 2 --pause 5000 --json
 The 5s pause matters: back-to-back runs (the default) report a zero delta for every monotonic
 counter.
 
-Result: **18/18 achievable target metrics non-zero**, all live, 0 fixture-backed, 0
-zero-by-nature. The result held over three consecutive runs.
+Result: **18/19 target metrics non-zero (18/18 achievable)**, all live, 0 fixture-backed, 0
+zero-by-nature, over five consecutive runs. The run used a compose network with
+`internal: true`, so the fixture had no internet access. The remaining metric is not emittable
+(see below).
 
 - Legacy (`prometheus_url`): `cache_hits_count`, `cache_misses_count`, `cache_size.count`,
   `forward_request_duration.seconds.{count,sum}`, `forward_response_rcode_count`,
@@ -87,7 +89,9 @@ zero-by-nature. The result held over three consecutive runs.
   (`cache_hits_count.count`, `cache_misses_count.count`, `forward_response_rcode_count.count`,
   `response_code_count.count`). `process.cpu_seconds_total` is legacy-only.
 
-Excluded: `coredns.request_duration.seconds` (no suffix). The `coredns_request_duration_high`
-monitor queries it, but it is not in `metadata.csv` and the check never emits it in either mode.
-It is the histogram's base name, and only its `.count`/`.sum`/`.bucket` series exist. The monitor
-query, not the fixture, would have to change to cover it.
+Not covered: `coredns.request_duration.seconds` (no suffix). The recommended monitor
+`assets/monitors/coredns_request_duration_high.json` queries it, but the check never emits it in
+either mode and it is not in `metadata.csv`: it is the histogram's base name, and only its
+`.count`/`.sum`/`.bucket` series exist. That monitor therefore has no data and cannot alert,
+whatever the fixture does. Fixing it means changing the monitor query, which is out of scope for
+this fixture.
