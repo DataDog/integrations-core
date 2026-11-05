@@ -55,8 +55,8 @@ def test_openmetrics_v1_ssl_error_skips_health_service_check(aggregator, mocker)
 
 
 @pytest.mark.usefixtures('http_mode')
-def test_openmetrics_v1_error_status_reports_critical(aggregator, mock_http_response):
-    mock_http_response(status_code=503)
+def test_openmetrics_v1_error_status_reports_critical(aggregator, mocker, mock_response):
+    mocker.patch('requests.Session.get', return_value=mock_response(status_code=503))
     check, scraper_config = _openmetrics_v1_check()
 
     with pytest.raises(requests.exceptions.HTTPError):
@@ -88,8 +88,8 @@ def test_prometheus_ssl_error_skips_health_service_check(aggregator, mocker):
 
 
 @pytest.mark.usefixtures('http_mode')
-def test_prometheus_error_status_reports_critical(aggregator, mock_http_response):
-    mock_http_response(status_code=503)
+def test_prometheus_error_status_reports_critical(aggregator, mocker, mock_response):
+    mocker.patch('requests.Session.get', return_value=mock_response(status_code=503))
     check = _prometheus_check()
 
     with pytest.raises(requests.exceptions.HTTPError):
@@ -110,8 +110,8 @@ def test_prometheus_connection_error_reports_critical(aggregator, mocker):
 
 
 @pytest.mark.usefixtures('http_mode')
-def test_openmetrics_v2_error_names_the_endpoint(dd_run_check, mock_http_response):
-    mock_http_response(status_code=503)
+def test_openmetrics_v2_error_names_the_endpoint(dd_run_check, mocker, mock_response):
+    mocker.patch('requests.Session.get', return_value=mock_response(status_code=503))
     check = _openmetrics_v2_check()
 
     with pytest.raises(Exception, match=re.escape(f'There was an error scraping endpoint {ENDPOINT}: 503')):

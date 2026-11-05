@@ -665,6 +665,25 @@ def test_mock_http_response_preserves_requests_responses(mock_http_response):
     assert response.text == 'payload'
 
 
+LEGACY_HTTP_FIXTURES = {
+    'mock_http_response': lambda register, mock_response, url: register(content='payload'),
+    'mock_http_response_per_endpoint': lambda register, mock_response, url: register({url: [mock_response()]}),
+}
+
+
+@pytest.mark.parametrize('fixture_name', LEGACY_HTTP_FIXTURES)
+def test_legacy_http_fixtures_reject_requests_from_opted_in_clients(
+    request: pytest.FixtureRequest, mock_response: Any, fixture_name: str
+):
+    # The legacy fixtures patch requests, so an opted-in check would pass without its real client being exercised.
+    url = 'https://example.test/items'
+    LEGACY_HTTP_FIXTURES[fixture_name](request.getfixturevalue(fixture_name), mock_response, url)
+    check = FixtureCheck('test', {}, [{}])
+
+    with pytest.raises(AssertionError, match='use the fake_http fixture'):
+        check.http.get(url)
+
+
 def test_mock_http_response_per_endpoint_preserves_requests_responses(mock_http_response_per_endpoint, mock_response):
     url = 'https://example.test/items'
     response = mock_response()

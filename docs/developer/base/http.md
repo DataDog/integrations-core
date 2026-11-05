@@ -95,6 +95,9 @@ Request-guard errors also fail fixture cleanup, even if the check catches the or
 registered exceptions and error responses are valid test outcomes, not guard errors. Call
 `fake_http.assert_all_responses_consumed()` to check separately that every registration was used.
 
+The legacy `mock_http_response` and `mock_http_response_per_endpoint` fixtures patch `requests`, so they would answer
+an opted-in check without running its real client. They fail any request sent by an opted-in client instead.
+
 A custom `status_error` is not detected and is replaced by the client's own error for the status code.
 
 ### Testing with `FakeHTTPClient`
