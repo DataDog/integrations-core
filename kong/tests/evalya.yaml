@@ -17,17 +17,16 @@ tasks:
       evalya.io/provides.KONG_LEGACY_PROXY_PORT: "8100"
       evalya.io/provides.KONG_LEGACY_ADMIN_PORT: "8101"
       evalya.io/provides.KONG_FIXTURE_METRICS_PORT: "8200"
-      # Labels cannot reference env values; keep in sync with KONG_CONSUMER_KEY below.
-      evalya.io/provides.KONG_CONSUMER_KEY: devops-best-friend
+      evalya.io/provides.KONG_CONSUMER_KEY: "${KONG_CONSUMER_KEY:-devops-best-friend}"
     env:
       - name: KONG_VERSION
-        value: "3.9.4"
+        value: "${KONG_VERSION:-3.9.4}"
       - name: KONG_LEGACY_VERSION
-        value: "2.7.2"
+        value: "${KONG_LEGACY_VERSION:-2.7.2}"
       - name: KONG_CONSUMER_KEY
-        value: devops-best-friend
+        value: "${KONG_CONSUMER_KEY:-devops-best-friend}"
       - name: ACTIVITY_GEN
-        value: "1"
+        value: "${ACTIVITY_GEN:-1}"
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8001/metrics >/dev/null && wget -qO- http://127.0.0.1:8101/metrics >/dev/null && wget -qO- http://127.0.0.1:8200/metrics >/dev/null"]
       interval: 10s
