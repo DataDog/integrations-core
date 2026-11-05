@@ -105,10 +105,6 @@ integration/anthropic:
 - changed-files:
   - any-glob-to-any-file:
     - anthropic/**/*
-integration/anthropic_usage_and_costs:
-- changed-files:
-  - any-glob-to-any-file:
-    - anthropic_usage_and_costs/**/*
 integration/anyscale:
 - changed-files:
   - any-glob-to-any-file:
@@ -145,10 +141,6 @@ integration/aspdotnet:
 - changed-files:
   - any-glob-to-any-file:
     - aspdotnet/**/*
-integration/authorize_net:
-- changed-files:
-  - any-glob-to-any-file:
-    - authorize_net/**/*
 integration/automox:
 - changed-files:
   - any-glob-to-any-file:
