@@ -19,9 +19,20 @@ if [ "${ACTIVITY_GEN:-1}" = "0" ]; then
   exec sleep infinity
 fi
 
+# Forwards ORA-/SP2- lines from sqlplus output to stderr, so a broken step shows
+# up in the container log instead of silently dropping coverage. The workload
+# keeps running either way. ORA-00060 is filtered out because deadlock() provokes
+# it on purpose; the other deliberate errors (ORA-30006 lock-wait timeout,
+# ORA-00942 parse failures) are caught inside PL/SQL and never printed.
+report() {
+  awk -v who="$1" '/ORA-[0-9]+|SP2-[0-9]+/ && !/ORA-00060/ {
+    print "activity-gen: " who ": " $0 > "/dev/stderr"; fflush("/dev/stderr")
+  }'
+}
+
 # Runs the SQL on stdin in a fresh session (each call is also a logon).
-app() { sqlplus -L -s "$APP" > /dev/null 2>&1 || true; }
-sys() { sqlplus -L -s "$SYS" > /dev/null 2>&1 || true; }
+app() { sqlplus -L -s "$APP" 2>&1 | report app; }
+sys() { sqlplus -L -s "$SYS" 2>&1 | report sys; }
 
 # Long-lived holder session, restarted if it drops:
 #   - ~20 MB of session-private rows in a global temporary table -> temp_space_used;
@@ -35,7 +46,7 @@ hold() {
       echo "commit;"
       echo "update lock_rows set v = v + 1 where id = 1;"
       while :; do echo "select count(*) from temp_hold;"; sleep 20; done
-    } | sqlplus -L -s "$APP" > /dev/null 2>&1 || true
+    } | sqlplus -L -s "$APP" 2>&1 | report hold
     sleep 5
   done
 }
