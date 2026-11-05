@@ -9,13 +9,18 @@ from datadog_checks.base.utils.remote_queries import contract as rq_contract
 from datadog_checks.base.utils.remote_queries import upload as rq_upload
 
 
+@pytest.fixture(autouse=True)
+def agent_site(monkeypatch):
+    """The Agent site every fixture base URL is on; tests override `get_config` for other keys."""
+    monkeypatch.setattr(rq_upload.datadog_agent, 'get_config', lambda key: 'intake.example' if key == 'site' else None)
+
+
 @pytest.fixture
 def delivery():
     return rq_contract.RemoteQueryResultDelivery.model_validate(
         {
             'runId': 'run-1',
             'taskId': 'task-1',
-            'artifactVersion': 1,
             'uploadId': 'upload-1',
             'baseUrl': 'https://intake.example',
             'limits': {

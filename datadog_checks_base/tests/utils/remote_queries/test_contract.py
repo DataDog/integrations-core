@@ -120,7 +120,7 @@ def test_request_trace_context_parses_the_agent_carrier(delivery):
         'operation': 'produce_json_pages',
         'query': 'SELECT 1',
         'target': {'host': 'db', 'port': 5432, 'dbname': 'db'},
-        'resultDelivery': delivery.model_dump(by_alias=True),
+        'session_info': delivery.model_dump(by_alias=True),
     }
     # Absence is valid for mixed versions: an Agent that never sends the field — and an
     # explicit null — carries no context and the request parses exactly as before.
@@ -172,7 +172,7 @@ def test_request_trace_context_is_strict_without_echoing_values(delivery, mutati
         'operation': 'produce_json_pages',
         'query': 'SELECT 1',
         'target': {'host': 'db', 'port': 5432, 'dbname': 'db'},
-        'resultDelivery': delivery.model_dump(by_alias=True),
+        'session_info': delivery.model_dump(by_alias=True),
         'traceContext': {'traceId': TRACE_ID, 'parentId': PARENT_ID, 'samplingPriority': 2},
     }
     request['traceContext'].update(mutation)
@@ -203,7 +203,7 @@ def test_request_trace_context_is_a_closed_shape(delivery, carrier):
         'operation': 'produce_json_pages',
         'query': 'SELECT 1',
         'target': {'host': 'db', 'port': 5432, 'dbname': 'db'},
-        'resultDelivery': delivery.model_dump(by_alias=True),
+        'session_info': delivery.model_dump(by_alias=True),
         'traceContext': carrier,
     }
 
@@ -241,12 +241,13 @@ def test_target_requires_one_complete_selector(target):
         (('operation',), None),
         (('includeSchema',), 'true'),
         (('target', 'port'), '5432'),
-        (('resultDelivery',), None),
-        (('resultDelivery', 'token'), 'scoped-upload-token'),
-        (('resultDelivery', 'artifactVersion'), 2),
-        (('resultDelivery', 'limits', 'maxFileBytes'), 128 * 1024**2 + 1),
-        (('resultDelivery', 'limits', 'maxResultBytes'), rq_contract.REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES + 1),
-        (('resultDelivery', 'limits', 'password'), 'SECRET_DO_NOT_LOG'),
+        (('session_info',), None),
+        (('session_info', 'token'), 'scoped-upload-token'),
+        (('session_info', 'artifactVersion'), 1),
+        (('session_info', 'protocol'), 'sessionless-v1'),
+        (('session_info', 'limits', 'maxFileBytes'), 128 * 1024**2 + 1),
+        (('session_info', 'limits', 'maxResultBytes'), rq_contract.REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES + 1),
+        (('session_info', 'limits', 'password'), 'SECRET_DO_NOT_LOG'),
     ],
 )
 def test_request_validation_rejects_malformed_instructions_without_echoing_values(delivery, path, value):
@@ -254,7 +255,7 @@ def test_request_validation_rejects_malformed_instructions_without_echoing_value
         'operation': 'produce_json_pages',
         'query': 'SELECT 1',
         'target': {'host': 'db', 'port': 5432, 'dbname': 'db'},
-        'resultDelivery': delivery.model_dump(by_alias=True),
+        'session_info': delivery.model_dump(by_alias=True),
     }
     parent = request
     for key in path[:-1]:
@@ -298,7 +299,7 @@ def test_resolve_request_is_target_only():
     [
         ('query', 'SELECT 1'),
         ('includeSchema', True),
-        ('resultDelivery', {'runId': 'run-1'}),
+        ('session_info', {'runId': 'run-1'}),
         ('traceContext', {'traceId': TRACE_ID, 'parentId': PARENT_ID, 'samplingPriority': 2}),
         ('matchFingerprint', 'deadbeef'),
         ('apiKey', 'SECRET_DO_NOT_LOG'),

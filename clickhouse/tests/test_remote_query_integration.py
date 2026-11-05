@@ -52,10 +52,9 @@ def real_server_request(instance, query, include_schema=False):
         'operation': 'produce_json_pages',
         'target': {'host': instance['server'], 'port': int(instance['port']), 'dbname': 'default'},
         'query': query,
-        'resultDelivery': {
+        'session_info': {
             'runId': RUN_ID,
             'taskId': TASK_ID,
-            'artifactVersion': 1,
             'uploadId': UPLOAD_ID,
             'baseUrl': BASE_URL,
             'limits': limits,
@@ -73,6 +72,8 @@ def patch_real_check(monkeypatch, instance):
     def get_config(key):
         if key == 'api_key':
             return 'TEST_API_KEY'
+        if key == 'site':
+            return 'datad0g.com'
         return None
 
     monkeypatch.setattr(rq_upload.datadog_agent, 'get_config', get_config)
@@ -91,10 +92,9 @@ def test_remote_query_registers_descriptor_and_sends_source_pages_against_real_c
         'target': {'host': instance['server'], 'port': int(instance['port']), 'dbname': 'default'},
         'query': 'SELECT 1 AS value',
         'includeSchema': True,
-        'resultDelivery': {
+        'session_info': {
             'runId': RUN_ID,
             'taskId': TASK_ID,
-            'artifactVersion': 1,
             'uploadId': UPLOAD_ID,
             'baseUrl': BASE_URL,
             'limits': valid_limits(),

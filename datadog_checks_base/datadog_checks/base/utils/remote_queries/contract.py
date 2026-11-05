@@ -36,11 +36,6 @@ REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES = 100 * 1024 * 1024 * 1024
 REMOTE_QUERY_DEFAULT_TIMEOUT_MS = 30_000
 
 
-# The transport artifact version: the sole accepted `resultDelivery.artifactVersion` value
-# the backend injects with the upload instructions.
-REMOTE_QUERY_ARTIFACT_VERSION = 1
-
-
 # The consumer-visible final page contract version, an exact semver string mirrored from
 # intake's final page writer. The RFC-format page contract labels every page
 # `contract_version` with this string; the producer emits the same bytes only to bound the
@@ -51,12 +46,9 @@ REMOTE_QUERY_PAGE_CONTRACT_VERSION = '1.0.0'
 REMOTE_QUERY_DESCRIPTOR_FORMAT_VERSION = 'csv-json-cell-v1'
 
 
-# The opt-in sessionless protocol: independently routed pages, no upload session, and a bounded
+# The opt-in sessionless upload: independently routed pages, no upload session, and a bounded
 # completion proposal instead of a finalize receipt. The experiment ceilings below bound what
-# its delivery may ask for; they are a POC profile, never raised by the Agent or the integration.
-REMOTE_QUERY_SESSIONLESS_PROTOCOL = 'sessionless-v1'
-
-
+# its `session_info` may ask for; they are a POC profile, never raised by the Agent or the integration.
 REMOTE_QUERY_SESSIONLESS_MAX_FILE_BYTES = 16 * 1024 * 1024
 
 
@@ -301,13 +293,16 @@ class RemoteQueryUploadLimits(BaseModel):
 
 
 class RemoteQueryResultDelivery(BaseModel):
-    """Backend-injected upload instructions and artifact contract metadata."""
+    """The session-backed `session_info`: the backend-injected upload instructions.
+
+    Its `uploadId` is what selects this shape. The Agent transports `session_info` as an
+    opaque JSON object, so this model is the only strict validator of its current fields.
+    """
 
     model_config = ConfigDict(extra='forbid', frozen=True)
 
     run_id: StrictStr = Field(alias='runId', min_length=1)
     task_id: StrictStr = Field(alias='taskId', min_length=1)
-    artifact_version: Literal[REMOTE_QUERY_ARTIFACT_VERSION] = Field(alias='artifactVersion')
     upload_id: StrictStr = Field(alias='uploadId', min_length=1)
     base_url: StrictStr = Field(alias='baseUrl', min_length=1)
     limits: RemoteQueryUploadLimits
@@ -337,9 +332,10 @@ class RemoteQuerySessionlessLimits(RemoteQueryUploadLimits):
 
 
 class RemoteQuerySessionlessResultDelivery(BaseModel):
-    """Backend-injected instructions of the opt-in `sessionless-v1` protocol.
+    """The sessionless `session_info`: the backend-injected instructions of the opt-in sessionless upload.
 
     There is no upload session: no upload id, bucket, account routing, token, or scan stamp.
+    The absence of `uploadId` is what selects this shape.
     `runId` keeps its wire name but is the fresh per-delivery crawl id, never the ITS run id.
     `scanSensitiveData` is a required strict boolean: it is requested of intake, which
     decides and records whether it actually scanned.
@@ -347,10 +343,8 @@ class RemoteQuerySessionlessResultDelivery(BaseModel):
 
     model_config = ConfigDict(extra='forbid', frozen=True)
 
-    protocol: Literal['sessionless-v1']
     run_id: StrictStr = Field(alias='runId', min_length=1)
     task_id: StrictStr = Field(alias='taskId', min_length=1)
-    artifact_version: Literal[REMOTE_QUERY_ARTIFACT_VERSION] = Field(alias='artifactVersion')
     base_url: StrictStr = Field(alias='baseUrl', min_length=1)
     scan_sensitive_data: StrictBool = Field(alias='scanSensitiveData')
     limits: RemoteQuerySessionlessLimits
@@ -360,15 +354,16 @@ RemoteQueryDelivery = RemoteQueryResultDelivery | RemoteQuerySessionlessResultDe
 
 
 def delivery_variant(value: Any) -> str:
-    """Select the delivery model from the input: a `protocol` key means sessionless, never a fallback.
+    """Select the `session_info` model from the input: `uploadId` present means session-backed.
 
-    The session-backed delivery carries no protocol key, so any request that names one is
-    validated strictly as the sessionless shape and fails closed on an unknown version
-    instead of silently being read as a session delivery.
+    There is no mode or version field: a session-backed run is the one that names an upload
+    session. Each model is strict with no unknown keys, so a mixed shape (an `uploadId` with
+    `scanSensitiveData`, or a sessionless object missing it) fails validation instead of
+    being silently read as the other mode.
     """
     if isinstance(value, Mapping):
-        return 'sessionless' if 'protocol' in value else 'session'
-    return 'sessionless' if isinstance(value, RemoteQuerySessionlessResultDelivery) else 'session'
+        return 'session' if 'uploadId' in value else 'sessionless'
+    return 'session' if isinstance(value, RemoteQueryResultDelivery) else 'sessionless'
 
 
 RemoteQueryDeliveryInput = Annotated[
@@ -442,7 +437,7 @@ class RemoteQueryRequest(BaseModel):
     target: RemoteQueryTarget
     query: StrictStr = Field(min_length=1)
     include_schema: StrictBool = Field(default=False, alias='includeSchema')
-    result_delivery: RemoteQueryDeliveryInput = Field(alias='resultDelivery')
+    session_info: RemoteQueryDeliveryInput = Field(alias='session_info')
     trace_context: RemoteQueryTraceContext | None = Field(default=None, alias='traceContext')
 
 
@@ -450,7 +445,7 @@ class RemoteQueryResolveRequest(BaseModel):
     """A resolve_target request: one strict target-only operation, nothing else.
 
     The Agent's resolve dispatch carries only the operation and the target. Strict validation
-    rejects every execution field — query, includeSchema, resultDelivery, credentials, a match
+    rejects every execution field — query, includeSchema, session_info, credentials, a match
     fingerprint, or anything else — so a resolve sweep can never carry SQL or upload
     instructions.
     """
@@ -525,7 +520,6 @@ class SessionlessPageReceipt(BaseModel):
 
     model_config = ConfigDict(extra='forbid', frozen=True)
 
-    protocol: Literal['sessionless-v1']
     object_id: StrictStr
     page_index: StrictInt = Field(ge=0)
     record_offset: StrictInt = Field(ge=0)
@@ -551,7 +545,6 @@ class SessionlessCompletionReceipt(BaseModel):
 
     model_config = ConfigDict(extra='forbid', frozen=True)
 
-    protocol: Literal['sessionless-v1']
     object_ids: tuple[StrictStr, ...] = Field(alias='objectIds', max_length=REMOTE_QUERY_SESSIONLESS_MAX_PAGES)
     page_count: StrictInt = Field(alias='pageCount', ge=0)
     total_rows: StrictInt = Field(alias='totalRows', ge=0)

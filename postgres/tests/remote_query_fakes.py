@@ -374,7 +374,7 @@ def valid_request(query='SELECT 1 AS value', include_schema=False, **extra):
         'operation': 'produce_json_pages',
         'target': target,
         'query': query,
-        'resultDelivery': valid_result_delivery(),
+        'session_info': valid_result_delivery(),
     }
     if include_schema:
         request['includeSchema'] = True
@@ -386,7 +386,6 @@ def valid_result_delivery(**extra):
     result_delivery = {
         'runId': RUN_ID,
         'taskId': TASK_ID,
-        'artifactVersion': 1,
         'uploadId': UPLOAD_ID,
         'baseUrl': BASE_URL,
         'limits': valid_limits(),
@@ -417,7 +416,7 @@ def bounded_request(query='SELECT 1 AS value', **limit_overrides):
     limits.update(limit_overrides)
     limits['maxSchemaBytes'] = min(limits['maxSchemaBytes'], limits['maxFileBytes'])
     request = valid_request(query=query)
-    request['resultDelivery']['limits'] = limits
+    request['session_info']['limits'] = limits
     return request
 
 
@@ -425,6 +424,8 @@ def patch_upload_credentials(monkeypatch):
     def get_config(key):
         if key == 'api_key':
             return 'TEST_API_KEY'
+        if key == 'site':
+            return 'datad0g.com'
         return None
 
     monkeypatch.setattr(rq_upload.datadog_agent, 'get_config', get_config)

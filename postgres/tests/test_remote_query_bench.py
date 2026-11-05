@@ -109,6 +109,8 @@ def patch_upload_credentials(monkeypatch):
     def get_config(key):
         if key == 'api_key':
             return 'TEST_KEY'
+        if key == 'site':
+            return 'datad0g.com'
         return None
 
     monkeypatch.setattr(rq_upload.datadog_agent, 'get_config', get_config)
@@ -126,10 +128,9 @@ def bench_request(pg_instance, rows, max_file_bytes, timeout_ms):
         },
         'query': query,
         'includeSchema': False,
-        'resultDelivery': {
+        'session_info': {
             'runId': RUN_ID,
             'taskId': TASK_ID,
-            'artifactVersion': 1,
             'uploadId': UPLOAD_ID,
             'baseUrl': 'https://dd.datad0g.com/api/unstable/its-agent-intake',
             'limits': {

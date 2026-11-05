@@ -64,10 +64,9 @@ VALID_REQUEST = {
     'operation': 'produce_json_pages',
     'target': {'host': 'LOCALHOST.', 'port': 5432, 'dbname': 'datadog_test'},
     'query': 'SELECT 1 AS value',
-    'resultDelivery': {
+    'session_info': {
         'runId': '383d34aa-0766-472f-9e27-9190d9a52ab6',
         'taskId': '603f58a7-04cf-4ffe-860b-3885457f885c',
-        'artifactVersion': 1,
         'uploadId': 'upload-01k',
         'baseUrl': 'https://dd.datad0g.com/api/unstable/its-agent-intake',
         'limits': {

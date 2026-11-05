@@ -115,7 +115,7 @@ def test_upload_credentials_are_api_key_only(monkeypatch, delivery):
 
     def get_config(key):
         reads.append(key)
-        return {'api_key': 'test-api-key', 'app_key': 'SHOULD_NOT_BE_READ'}.get(key)
+        return {'api_key': 'test-api-key', 'app_key': 'SHOULD_NOT_BE_READ', 'site': 'intake.example'}.get(key)
 
     monkeypatch.setattr(rq_upload.datadog_agent, 'get_config', get_config)
     resolved = rq_upload.resolve_upload_credentials(delivery, 0.0)
@@ -124,6 +124,76 @@ def test_upload_credentials_are_api_key_only(monkeypatch, delivery):
     assert not hasattr(resolved, 'app_key')
     headers = rq_upload.RequestsUploadClient()._headers(resolved, 'application/json')
     assert headers == {'dd-api-key': 'test-api-key', 'Content-Type': 'application/json'}
+
+
+@pytest.mark.parametrize(
+    'base_url',
+    [
+        'https://intake.example',
+        'https://intake.example/',
+        'https://dd.intake.example/api/unstable/its-agent-intake',
+        'https://INTAKE.example:443/api/unstable/its-agent-intake/',
+    ],
+)
+def test_intake_base_url_on_the_agent_site_is_accepted(base_url):
+    rq_upload.validate_intake_base_url(base_url, 'intake.example')
+
+
+@pytest.mark.parametrize(
+    'base_url',
+    [
+        'http://intake.example/api',  # not https
+        'https://evil.example/api',
+        'https://intake.example.evil.example/api',  # site as a prefix label
+        'https://evilintake.example/api',  # site as a bare string suffix
+        'https://evil.example/intake.example',
+        'https://intake.example@evil.example/api',  # userinfo
+        'https://user:pass@intake.example/api',
+        'https://intake.example\\@evil.example/api',
+        'https://intake.example:8443/api',
+        'https://intake.example:/api',
+        'https://intake.example./api',
+        'https://intake.example/api?next=https://evil.example',
+        'https://intake.example/api#frag',
+        'https://intake.example/../api',
+        'https://intake.example/api/./x',
+        'https://intake.example/%2e%2e/api',
+        'https://intake.example//api',
+        'https://intake.example/a b',
+        'https://intake.example/api\n',
+        'https://[::1]/api',
+        'https://127.0.0.1/api',
+        'https://intake.example/' + 'a' * 2048,
+        'intake.example/api',
+        '',
+    ],
+)
+def test_hostile_intake_base_url_is_rejected_without_being_echoed(base_url):
+    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
+        rq_upload.validate_intake_base_url(base_url, 'intake.example')
+    assert failure.value.code == 'invalid_request'
+    assert 'evil' not in failure.value.message
+
+
+@pytest.mark.parametrize('site', [None, '', '   ', 'localhost', 'evil.example/path', 'a b.example'])
+def test_intake_base_url_fails_closed_without_a_usable_agent_site(site):
+    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
+        rq_upload.validate_intake_base_url('https://intake.example/api', site)
+    assert failure.value.code == 'invalid_request'
+
+
+def test_the_api_key_is_not_read_for_an_off_site_base_url(monkeypatch, delivery):
+    """The base URL is checked before the API key is even fetched from the Agent config."""
+    reads = []
+
+    def get_config(key):
+        reads.append(key)
+        return {'api_key': 'test-api-key', 'site': 'datadoghq.com'}.get(key)
+
+    monkeypatch.setattr(rq_upload.datadog_agent, 'get_config', get_config)
+    with pytest.raises(rq_contract.RemoteQueryFailure):
+        rq_upload.resolve_upload_credentials(delivery, 0.0)
+    assert 'api_key' not in reads
 
 
 def test_http_descriptor_registration_replays_the_identical_body(monkeypatch, creds):

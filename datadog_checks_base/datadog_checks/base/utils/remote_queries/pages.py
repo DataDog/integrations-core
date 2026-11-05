@@ -17,7 +17,6 @@ from typing import Any, BinaryIO, Protocol
 from .contract import (
     REMOTE_QUERY_PAGE_CONTRACT_VERSION,
     REMOTE_QUERY_SESSIONLESS_MAX_DESCRIPTOR_BYTES,
-    REMOTE_QUERY_SESSIONLESS_PROTOCOL,
     RemoteQueryDelivery,
     RemoteQueryFailure,
     RemoteQueryRunStats,
@@ -211,7 +210,7 @@ class SessionUploadProtocol:
 
 
 class SessionlessUploadProtocol:
-    """The opt-in `sessionless-v1` protocol: independent self-describing pages, no session calls.
+    """The opt-in sessionless protocol: independent self-describing pages, no session calls.
 
     Each logical page is one multipart request carrying the descriptor and its identity, and
     its receipt supplies one object id. Only the accepted request's id is kept: a transport
@@ -249,7 +248,6 @@ class SessionlessUploadProtocol:
             raise RemoteQueryFailure('invalid_receipt', 'A schema-bearing result completed without a page.')
         try:
             proposal = SessionlessCompletionReceipt(
-                protocol=REMOTE_QUERY_SESSIONLESS_PROTOCOL,
                 objectIds=tuple(self._object_ids),
                 pageCount=stats.pages_emitted,
                 totalRows=stats.rows_emitted,
@@ -269,7 +267,7 @@ def create_upload_protocol(
     descriptor: RemoteQueryUploadDescriptor,
     tracing: RemoteQueryProducerTracing,
 ) -> UploadProtocol:
-    """Choose the wire protocol from `resultDelivery.protocol`; an absent protocol is the session path."""
+    """Choose the wire protocol from the validated `session_info`: no `uploadId` means sessionless."""
     if isinstance(delivery, RemoteQuerySessionlessResultDelivery):
         return SessionlessUploadProtocol(delivery, creds, client, descriptor)
     return SessionUploadProtocol(creds, client, descriptor, tracing)

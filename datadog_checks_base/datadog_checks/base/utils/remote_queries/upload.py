@@ -82,6 +82,29 @@ REMOTE_QUERY_UPLOAD_TEST_DRIVE_NAME_MAX_LENGTH = 63
 REMOTE_QUERY_UPLOAD_TEST_DRIVE_NAME_PATTERN = re.compile(r'[a-z0-9](?:[a-z0-9-]*[a-z0-9])?')
 
 
+# The intake base URL receives the org API key, so it is validated here against the Agent's own
+# site, independently of whatever transport delivered `session_info`. The accepted shape is
+# exactly `https://<site host>[:443]` plus an optional path of plain segments: no userinfo,
+# query, fragment, backslash, percent-encoding, dot segment, whitespace, or control character.
+REMOTE_QUERY_INTAKE_HOST_LABEL = r'[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?'
+
+
+REMOTE_QUERY_INTAKE_PATH_SEGMENT = r'(?!\.{1,2}(?:/|\Z))[A-Za-z0-9._~-]+'
+
+
+REMOTE_QUERY_INTAKE_BASE_URL_PATTERN = re.compile(
+    r'\A(?i:https)://(?P<host>{label}(?:\.{label})+)(?::443)?(?P<path>(?:/{segment})*/?)\Z'.format(
+        label=REMOTE_QUERY_INTAKE_HOST_LABEL, segment=REMOTE_QUERY_INTAKE_PATH_SEGMENT
+    )
+)
+
+
+REMOTE_QUERY_INTAKE_SITE_PATTERN = re.compile(r'\A{label}(?:\.{label})+\Z'.format(label=REMOTE_QUERY_INTAKE_HOST_LABEL))
+
+
+REMOTE_QUERY_INTAKE_BASE_URL_MAX_LENGTH = 2048
+
+
 REMOTE_QUERY_UPLOAD_MAX_RETRIES = 4
 
 
@@ -141,7 +164,7 @@ class UploadCredentials:
 
 
 class UploadClient(Protocol):
-    """The session transport; `post_sessionless_page` is the sessionless-v1 page request.
+    """The session transport; `post_sessionless_page` is the sessionless page request.
 
     A sessionless run uses only `post_sessionless_page`: it never registers, finalizes,
     aborts, or polls an upload session.
@@ -582,7 +605,7 @@ def verify_sessionless_page_receipt(
     """Fail closed unless intake's 201 receipt is the exact shape confirming this page.
 
     The receipt's object id is the page's only handle in the completion proposal, so the
-    shape is strict (all six fields, no extras, strict types, a canonical UUID), the index,
+    shape is strict (all five fields, no extras, strict types, a canonical UUID), the index,
     offset, and row count must equal the page this producer sent, and the reported canonical
     bytes must fit one file. The values are intake's claims, checked here only for
     consistency; the trusted worker validates the stored objects.
@@ -902,6 +925,37 @@ def validate_test_drive_name(value: str | None) -> str | None:
     return name
 
 
+def validate_intake_base_url(base_url: str, site: str | None) -> None:
+    """Fail closed unless `base_url` may receive the org API key: an https URL on the Agent's site.
+
+    The host must be the configured Datadog site or a subdomain of it, with no port other than
+    443; the path may only be plain segments. A missing or malformed site fails closed too. The
+    error text never echoes the URL, which is hostile input until this check passes.
+    """
+    site = (site or '').strip().lower()
+    if not site:
+        raise RemoteQueryFailure(
+            'invalid_request', 'session_info.baseUrl cannot be checked: the Agent site is not configured.'
+        )
+    if REMOTE_QUERY_INTAKE_SITE_PATTERN.match(site) is None:
+        raise RemoteQueryFailure(
+            'invalid_request', 'session_info.baseUrl cannot be checked: the Agent site is not a valid host.'
+        )
+    match = (
+        REMOTE_QUERY_INTAKE_BASE_URL_PATTERN.match(base_url)
+        if len(base_url) <= REMOTE_QUERY_INTAKE_BASE_URL_MAX_LENGTH
+        else None
+    )
+    if match is None:
+        raise RemoteQueryFailure(
+            'invalid_request',
+            'session_info.baseUrl must be an https URL without userinfo, query, fragment, or unusual path or port.',
+        )
+    host = match.group('host').lower()
+    if host != site and not host.endswith('.' + site):
+        raise RemoteQueryFailure('invalid_request', "session_info.baseUrl must be on the Agent's site.")
+
+
 def resolve_upload_credentials(
     delivery: RemoteQueryDelivery,
     started_at: float,
@@ -909,9 +963,13 @@ def resolve_upload_credentials(
 ) -> UploadCredentials:
     """Build the upload credentials, carrying the run-wide wall for upload retries.
 
+    The delivery's base URL is validated against the Agent's site before the API key is read,
+    so the key can never be handed to a URL this module has not itself accepted.
+
     A sessionless delivery has no upload session, so its credentials carry an empty upload
     id: that is what makes `safe_abort` a no-op for it.
     """
+    validate_intake_base_url(delivery.base_url, get_agent_config('site'))
     upload_id = '' if isinstance(delivery, RemoteQuerySessionlessResultDelivery) else delivery.upload_id
     test_drive = validate_test_drive_name(get_agent_config(REMOTE_QUERY_UPLOAD_TEST_DRIVE_CONFIG_KEY))
     return UploadCredentials(

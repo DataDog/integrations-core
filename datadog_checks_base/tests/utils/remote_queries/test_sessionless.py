@@ -36,10 +36,8 @@ BASE_URL = 'https://intake.example/api/unstable/its-agent-intake'
 
 def delivery_input(**overrides):
     value = {
-        'protocol': 'sessionless-v1',
         'runId': 'crawl-1',
         'taskId': 'task-1',
-        'artifactVersion': 1,
         'baseUrl': BASE_URL,
         'scanSensitiveData': True,
         'limits': {
@@ -107,7 +105,6 @@ class SessionlessIntake:
 
 def page_receipt(page, bytes_=None, **overrides):
     receipt = {
-        'protocol': 'sessionless-v1',
         'object_id': str(uuid.uuid4()),
         'page_index': page.batch_index,
         'record_offset': page.record_offset,
@@ -140,33 +137,74 @@ def bounded(delivery, **limits):
 # ---------------------------------------------------------------------------
 
 
-def test_request_selects_the_delivery_model_from_the_protocol_key():
+def test_request_selects_the_session_info_model_from_the_presence_of_upload_id():
     base = {
         'operation': 'produce_json_pages',
         'target': {'database_instance': 'db'},
         'query': 'select 1',
     }
-    sessionless = rq_contract.RemoteQueryRequest.model_validate({**base, 'resultDelivery': delivery_input()})
-    assert isinstance(sessionless.result_delivery, rq_contract.RemoteQuerySessionlessResultDelivery)
-    assert sessionless.result_delivery.scan_sensitive_data is True
+    sessionless = rq_contract.RemoteQueryRequest.model_validate({**base, 'session_info': delivery_input()})
+    assert isinstance(sessionless.session_info, rq_contract.RemoteQuerySessionlessResultDelivery)
+    assert sessionless.session_info.scan_sensitive_data is True
 
     session_delivery = {
         'runId': 'run-1',
         'taskId': 'task-1',
-        'artifactVersion': 1,
         'uploadId': 'upload-1',
         'baseUrl': BASE_URL,
         'limits': delivery_input()['limits'],
     }
-    session = rq_contract.RemoteQueryRequest.model_validate({**base, 'resultDelivery': session_delivery})
-    assert isinstance(session.result_delivery, rq_contract.RemoteQueryResultDelivery)
+    session = rq_contract.RemoteQueryRequest.model_validate({**base, 'session_info': session_delivery})
+    assert isinstance(session.session_info, rq_contract.RemoteQueryResultDelivery)
 
 
 @pytest.mark.parametrize(
     'overrides',
     [
-        {'protocol': 'sessionless-v2'},  # mixed/unknown version: never read as a session delivery
-        {'protocol': None},
+        {'scanSensitiveData': True},  # a session-backed run requests no scan
+        {'protocol': 'sessionless-v1'},
+        {'artifactVersion': 1},
+        {'uploadId': ''},
+        {'uploadId': None},
+    ],
+)
+def test_session_backed_info_is_strict_and_a_mixed_shape_fails_closed(overrides):
+    session_info = {
+        'runId': 'run-1',
+        'taskId': 'task-1',
+        'uploadId': 'upload-1',
+        'baseUrl': BASE_URL,
+        'limits': delivery_input()['limits'],
+        **overrides,
+    }
+    with pytest.raises(ValidationError):
+        rq_contract.RemoteQueryRequest.model_validate(
+            {
+                'operation': 'produce_json_pages',
+                'target': {'database_instance': 'db'},
+                'query': 'select 1',
+                'session_info': session_info,
+            }
+        )
+
+
+@pytest.mark.parametrize('session_info', [None, 'sessionless', ['uploadId'], 1])
+def test_session_info_must_be_an_object(session_info):
+    with pytest.raises(ValidationError):
+        rq_contract.RemoteQueryRequest.model_validate(
+            {
+                'operation': 'produce_json_pages',
+                'target': {'database_instance': 'db'},
+                'query': 'select 1',
+                'session_info': session_info,
+            }
+        )
+
+
+@pytest.mark.parametrize(
+    'overrides',
+    [
+        {'protocol': 'sessionless-v1'},  # no protocol or version discriminator
         {'uploadId': 'upload-1'},  # no session identity
         {'bucket': 'landing'},  # no destination routing
         {'token': 'secret'},
@@ -174,7 +212,7 @@ def test_request_selects_the_delivery_model_from_the_protocol_key():
         {'scanSensitiveData': 'true'},  # strict boolean
         {'scanSensitiveData': 1},
         {'scanSensitiveData': None},
-        {'artifactVersion': 2},
+        {'artifactVersion': 1},
         {'runId': ''},
         {'taskId': ''},
         {'baseUrl': ''},
@@ -189,12 +227,12 @@ def test_sessionless_delivery_is_strict(overrides):
                 'operation': 'produce_json_pages',
                 'target': {'database_instance': 'db'},
                 'query': 'select 1',
-                'resultDelivery': delivery_input(**overrides),
+                'session_info': delivery_input(**overrides),
             }
         )
 
 
-@pytest.mark.parametrize('missing', ['protocol', 'runId', 'taskId', 'artifactVersion', 'baseUrl', 'scanSensitiveData'])
+@pytest.mark.parametrize('missing', ['runId', 'taskId', 'baseUrl', 'scanSensitiveData'])
 def test_sessionless_delivery_requires_every_field(missing):
     value = delivery_input()
     del value[missing]
@@ -246,13 +284,12 @@ def test_sessionless_run_reports_its_delivery_and_creates_no_session_credentials
                 'operation': 'produce_json_pages',
                 'target': {'database_instance': 'db'},
                 'query': 'select 1',
-                'resultDelivery': delivery_input(),
+                'session_info': delivery_input(),
             }
         )
     )
-    assert metadata['resultDelivery']['protocol'] == 'sessionless-v1'
-    assert metadata['resultDelivery']['scanSensitiveData'] is True
-    assert 'uploadId' not in metadata['resultDelivery']
+    assert metadata['session_info']['scanSensitiveData'] is True
+    assert 'uploadId' not in metadata['session_info']
 
     creds = rq_upload.resolve_upload_credentials(sessionless_delivery, 10.0)
     assert creds.upload_id == ''
@@ -332,8 +369,7 @@ def test_pages_flow_through_independent_requests_into_the_completion_proposal(sc
     ]
 
     # The proposal: ids in page order, canonical totals from the receipts, no scan claim.
-    assert list(proposal) == ['protocol', 'objectIds', 'pageCount', 'totalRows', 'totalBytes']
-    assert proposal['protocol'] == 'sessionless-v1'
+    assert list(proposal) == ['objectIds', 'pageCount', 'totalRows', 'totalBytes']
     assert proposal['objectIds'] == intake.object_ids
     assert proposal['pageCount'] == 3
     assert proposal['totalRows'] == 3
@@ -386,7 +422,7 @@ def test_empty_result_without_a_schema_posts_nothing_and_proposes_zero_reference
     intake = SessionlessIntake()
     proposal = make_writer(sessionless_delivery, sessionless_creds, intake).finish()
     assert intake.attempts == []
-    assert proposal == {'protocol': 'sessionless-v1', 'objectIds': [], 'pageCount': 0, 'totalRows': 0, 'totalBytes': 0}
+    assert proposal == {'objectIds': [], 'pageCount': 0, 'totalRows': 0, 'totalBytes': 0}
 
 
 def test_empty_result_with_a_schema_sends_the_descriptor_and_an_empty_source_as_one_reference(
@@ -410,8 +446,7 @@ def test_empty_result_with_a_schema_sends_the_descriptor_and_an_empty_source_as_
         lambda page: {k: v for k, v in page_receipt(page).items() if k != 'object_id'},
         lambda page: {k: v for k, v in page_receipt(page).items() if k != 'bytes'},
         lambda page: page_receipt(page, scan_policy='its-stable-v1'),  # no unknown fields
-        lambda page: page_receipt(page, protocol='sessionless-v2'),  # wrong protocol
-        lambda page: {k: v for k, v in page_receipt(page).items() if k != 'protocol'},
+        lambda page: page_receipt(page, protocol='sessionless-v1'),  # no protocol field
         lambda page: page_receipt(page, object_id='not-a-uuid'),
         lambda page: page_receipt(page, object_id=str(uuid.uuid4()).upper()),
         lambda page: page_receipt(page, object_id=str(uuid.uuid4()) + '/../x'),
@@ -490,7 +525,6 @@ def test_a_descriptor_beyond_its_cap_is_rejected_before_any_request(sessionless_
 
 def proposal_input(count=2, **overrides):
     value = {
-        'protocol': 'sessionless-v1',
         'objectIds': [str(uuid.uuid4()) for _ in range(count)],
         'pageCount': count,
         'totalRows': 5,
@@ -504,7 +538,6 @@ def test_the_completion_proposal_has_the_exact_wire_shape():
     ids = [str(uuid.uuid4()) for _ in range(2)]
     proposal = rq_contract.SessionlessCompletionReceipt.model_validate(proposal_input(objectIds=ids))
     assert proposal.wire() == {
-        'protocol': 'sessionless-v1',
         'objectIds': ids,
         'pageCount': 2,
         'totalRows': 5,
@@ -518,7 +551,7 @@ def test_the_completion_proposal_has_the_exact_wire_shape():
         {'objectIds': ['x' * 36, 'y' * 36]},
         {'objectIds': ['9f1b7c2e-0000-4000-8000-000000000000'] * 2},  # duplicate references
         {'pageCount': 3},  # one reference per logical page
-        {'protocol': 'sessionless-v2'},
+        {'protocol': 'sessionless-v1'},  # no protocol field
         {'totalRows': -1},
         {'totalBytes': True},
         {'totalRows': '5'},
@@ -616,7 +649,6 @@ class LoopbackIntake:
                 metadata = json.loads(parts[0][1])
                 receipt = json.dumps(
                     {
-                        'protocol': 'sessionless-v1',
                         'object_id': str(uuid.uuid4()),
                         'page_index': metadata['page_index'],
                         'record_offset': metadata['record_offset'],
@@ -700,8 +732,7 @@ def test_a_transient_failure_resends_the_same_page_and_keeps_only_the_accepted_o
         delivery = rq_contract.RemoteQuerySessionlessResultDelivery.model_validate(
             {**sessionless_delivery.model_dump(by_alias=True), 'baseUrl': intake.base_url}
         )
-        creds = rq_upload.resolve_upload_credentials(delivery, 0.0)
-        creds = rq_upload.UploadCredentials(creds.base_url, '', 'test-api-key', None, wall_deadline=None)
+        creds = rq_upload.UploadCredentials(delivery.base_url, '', 'test-api-key', None, wall_deadline=None)
         writer = make_writer(delivery, creds, rq_upload.RequestsUploadClient())
         writer.add_row([string_cell('a')])
         proposal = writer.finish()
@@ -723,7 +754,6 @@ def test_page_requests_use_one_post_and_no_session_routes(monkeypatch, sessionle
         body = data.read()
         metadata = json.loads(split_multipart(headers['Content-Type'], body)[0][1])
         receipt = {
-            'protocol': 'sessionless-v1',
             'object_id': str(uuid.uuid4()),
             'page_index': metadata['page_index'],
             'record_offset': metadata['record_offset'],
@@ -801,7 +831,6 @@ class ThrottlingIntake:
         if status == 201:
             content = json.dumps(
                 {
-                    'protocol': 'sessionless-v1',
                     'object_id': str(uuid.uuid4()),
                     'page_index': 0,
                     'record_offset': 0,
