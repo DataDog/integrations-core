@@ -225,6 +225,26 @@ def test_fake_http_response_rejects_a_file_combined_with_another_body(fake_http_
         fake_http_response('https://example.test/metrics', file_path=path, **body)
 
 
+@pytest.mark.parametrize(
+    'login_response',
+    [
+        pytest.param(FakeHTTPResponse(cookies={'sid': 'abc'}), id='cookies'),
+        pytest.param(FakeHTTPResponse(headers={'Set-Cookie': 'sid=abc; Path=/'}), id='set-cookie-header'),
+    ],
+)
+def test_fake_http_keeps_the_cookies_a_response_sets(fake_http, login_response):
+    # Login flows read the session cookie and rely on the client sending it with later requests.
+    fake_http.register_response('POST', 'https://example.test/api/login', login_response)
+    fake_http.register_response('GET', 'https://example.test/data', FakeHTTPResponse())
+    check = FixtureCheck('test', {}, [{'persist_connections': True}])
+
+    check.http.post('https://example.test/api/login')
+    check.http.get('https://example.test/data')
+
+    assert check.http.get_cookie('sid') == 'abc'
+    assert fake_http.sent[-1].headers.get('Cookie') == 'sid=abc'
+
+
 def test_fake_http_routes_openmetrics_send_request(fake_http):
     url = 'https://example.test/metrics'
     headers = {'Authorization': 'Bearer token'}

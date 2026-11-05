@@ -66,7 +66,10 @@ its instance and `init_config`, and the fixture answers on the wire with the reg
 Registrations matching the same request are served in order, and the last one then repeats. `fake_http.requests` holds
 each call as the check made it, and `fake_http.sent` holds each request as it reached the wire, with the headers and
 authentication the client applied. Like a server, the fixture sends only the headers a test registers, so the client
-derives the response encoding from a `Content-Type` charset and leaves it unset when there is none.
+derives the response encoding from a `Content-Type` charset and leaves it unset when there is none. Cookies a response
+sets, through its `cookies` or a `Set-Cookie` header, reach the client's session as they would from a server, so with
+`persist_connections` enabled `get_cookie()` returns them and later requests send them. Cookies in `cookies` are set
+with `Path=/`.
 
 Pass `fake_http_response` the body as `content`, as `json_data` to serialize, or as `file_path` to read a fixture
 file:

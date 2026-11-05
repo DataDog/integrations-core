@@ -10,6 +10,8 @@ the Agent and must not import requests-mock.
 
 from __future__ import annotations
 
+import http.client
+import io
 import json
 import threading
 from collections.abc import Iterable, Iterator, Mapping
@@ -297,7 +299,34 @@ def _to_requests_response(wire_request: Any, response: FakeHTTPResponse) -> requ
     )
     if response.encoding is not None:
         wire_response.encoding = response.encoding
+    # requests stores the cookies a response sets in the session jar from the original http.client response, which
+    # requests-mock leaves unset, so a session would otherwise never keep or resend them.
+    wire_response.raw._original_response = _original_response(wire_request, response, headers)
     return wire_response
+
+
+class HeadSocket:
+    """A socket whose only content is a response head, for `http.client.HTTPResponse` to parse."""
+
+    def __init__(self, head: bytes) -> None:
+        self._head = head
+
+    def makefile(self, mode: str) -> io.BytesIO:
+        return io.BytesIO(self._head)
+
+
+def _original_response(
+    wire_request: Any, response: FakeHTTPResponse, headers: Mapping[str, str]
+) -> http.client.HTTPResponse:
+    lines = [f'HTTP/1.1 {response.status_code} {response.reason}']
+    lines.extend(f'{name}: {value}' for name, value in headers.items())
+    # Path=/ so a cookie set by, for example, /api/login also reaches other paths, not only those under /api.
+    lines.extend(f'Set-Cookie: {name}={value}; Path=/' for name, value in response.cookies.items())
+    original = http.client.HTTPResponse(
+        HeadSocket('\r\n'.join([*lines, '', '']).encode('iso-8859-1')), method=wire_request.method
+    )
+    original.begin()
+    return original
 
 
 @contextmanager
