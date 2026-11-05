@@ -1,0 +1,159 @@
+<!-- Trimmed from capture fw-a/counter_global.xml (lab, 2026-10-09): only the 15 entries the check reads (the GLOBAL_COUNTERS it lists and the severity=drop ones), every field of each unchanged. -->
+<response status="success"><result>
+  <dp>dp0</dp>
+  <global>
+    <t>117669</t>
+    <counters>
+      <entry>
+        <name>pkt_recv</name>
+        <value>140542</value>
+        <rate>59</rate>
+        <severity>info</severity>
+        <category>packet</category>
+        <aspect>pktproc</aspect>
+        <desc>Packets received</desc>
+        <id>17</id>
+      </entry>
+      <entry>
+        <name>pkt_sent</name>
+        <value>140806</value>
+        <rate>59</rate>
+        <severity>info</severity>
+        <category>packet</category>
+        <aspect>pktproc</aspect>
+        <desc>Packets transmitted</desc>
+        <id>99</id>
+      </entry>
+      <entry>
+        <name>session_freed</name>
+        <value>2236</value>
+        <rate>0</rate>
+        <severity>info</severity>
+        <category>session</category>
+        <aspect>resource</aspect>
+        <desc>Sessions freed</desc>
+        <id>205</id>
+      </entry>
+      <entry>
+        <name>session_installed</name>
+        <value>2269</value>
+        <rate>0</rate>
+        <severity>info</severity>
+        <category>session</category>
+        <aspect>resource</aspect>
+        <desc>Sessions installed</desc>
+        <id>206</id>
+      </entry>
+      <entry>
+        <name>flow_fwd_l3_noarp</name>
+        <value>1546</value>
+        <rate>0</rate>
+        <severity>drop</severity>
+        <category>flow</category>
+        <aspect>forward</aspect>
+        <desc>Packets dropped: no ARP</desc>
+        <id>807</id>
+      </entry>
+      <entry>
+        <name>flow_action_close</name>
+        <value>118</value>
+        <rate>0</rate>
+        <severity>drop</severity>
+        <category>flow</category>
+        <aspect>pktproc</aspect>
+        <desc>TCP sessions closed via injecting RST</desc>
+        <id>1493</id>
+      </entry>
+      <entry>
+        <name>flow_arp_pkt_rcv</name>
+        <value>225</value>
+        <rate>0</rate>
+        <severity>info</severity>
+        <category>flow</category>
+        <aspect>arp</aspect>
+        <desc>ARP packets received</desc>
+        <id>1572</id>
+      </entry>
+      <entry>
+        <name>flow_arp_pkt_xmt</name>
+        <value>307</value>
+        <rate>0</rate>
+        <severity>info</severity>
+        <category>flow</category>
+        <aspect>arp</aspect>
+        <desc>ARP packets transmitted</desc>
+        <id>1573</id>
+      </entry>
+      <entry>
+        <name>flow_arp_resolve_xmt</name>
+        <value>307</value>
+        <rate>0</rate>
+        <severity>info</severity>
+        <category>flow</category>
+        <aspect>arp</aspect>
+        <desc>ARP resolution packets transmitted</desc>
+        <id>1578</id>
+      </entry>
+      <entry>
+        <name>flow_host_decap_err</name>
+        <value>45</value>
+        <rate>0</rate>
+        <severity>drop</severity>
+        <category>flow</category>
+        <aspect>mgmt</aspect>
+        <desc>Packets dropped: decapsulation error from control plane</desc>
+        <id>1615</id>
+      </entry>
+      <entry>
+        <name>flow_host_service_allow</name>
+        <value>2841</value>
+        <rate>0</rate>
+        <severity>info</severity>
+        <category>flow</category>
+        <aspect>mgmt</aspect>
+        <desc>Device management session allowed</desc>
+        <id>1620</id>
+      </entry>
+      <entry>
+        <name>appid_unknown_fini_empty</name>
+        <value>520</value>
+        <rate>0</rate>
+        <severity>info</severity>
+        <category>appid</category>
+        <aspect>pktproc</aspect>
+        <desc>The number of unknown applications because of no data</desc>
+        <id>3275</id>
+      </entry>
+      <entry>
+        <name>ssl_hsm_up_down_event_rcv</name>
+        <value>1</value>
+        <rate>0</rate>
+        <severity>info</severity>
+        <category>ssl</category>
+        <aspect>pktproc</aspect>
+        <desc>The number of HSM up/down events received</desc>
+        <id>5178</id>
+      </entry>
+      <entry>
+        <name>ctd_dns_wait_pkt_drop</name>
+        <value>8</value>
+        <rate>0</rate>
+        <severity>drop</severity>
+        <category>ctd</category>
+        <aspect>pktproc</aspect>
+        <desc>DNS packet drop when waiting</desc>
+        <id>5345</id>
+      </entry>
+      <entry>
+        <name>ctd_dns_wait_pkt_drop_response</name>
+        <value>8</value>
+        <rate>0</rate>
+        <severity>drop</severity>
+        <category>ctd</category>
+        <aspect>pktproc</aspect>
+        <desc>DNS response packet drop when waiting</desc>
+        <id>5346</id>
+      </entry>
+    </counters>
+  </global>
+</result></response>
