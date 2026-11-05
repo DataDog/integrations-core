@@ -16,9 +16,9 @@ tasks:
       evalya.io/provides.ENVOY_STATS_URL: "http://{{ .hostname }}:8001/stats"
     env:
       - name: ENVOY_VERSION
-        value: "1.31.0"
+        value: "${ENVOY_VERSION:-1.31.0}"
       - name: ACTIVITY_GEN
-        value: "1"
+        value: "${ACTIVITY_GEN:-1}"
     healthcheck:
       test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8001 && printf 'GET /ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q LIVE <&3"]
       interval: 5s
