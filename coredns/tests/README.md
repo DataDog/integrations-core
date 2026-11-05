@@ -41,7 +41,7 @@ its service name, while evalya aliases the entrypoint only by its task id.
 ## Inputs
 
 Each input has a working default, so the task runs unattended. All of them can be overridden from
-the host environment.
+the host environment: `evalya.yaml` declares each one as `${VAR:-default}`.
 
 | Variable | Default | Effect |
 |---|---|---|
