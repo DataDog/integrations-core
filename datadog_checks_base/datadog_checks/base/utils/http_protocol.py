@@ -1,9 +1,11 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-"""Provisional backend-neutral HTTP interfaces.
+"""Backend-neutral HTTP interfaces that opted-in checks depend on.
 
-Coordinate member and semantic changes across implementations until a second backend implements the protocols.
+The members declared here are the contract documented in `docs/developer/base/http.md`. Members whose values follow
+the current `requests` backend, such as `HTTPClient.options`, may change when another backend is added, so coordinate
+member and semantic changes across implementations.
 """
 
 from __future__ import annotations
@@ -130,27 +132,41 @@ class HTTPRequestOptions(TypedDict, total=False):
     cert: str | tuple[str, str] | None
     """Client certificate, optionally paired with its private key."""
     proxies: Mapping[str, str] | None
-    """Proxy URLs keyed by scheme; None uses configured client proxies."""
+    """Proxy URLs keyed by scheme, replacing the client's proxies for this request.
+
+    Omit to use the client's proxy settings. `None` also uses the configured proxies, but skips the `no_proxy` and
+    `skip_proxy` settings.
+    """
     extra_headers: Mapping[str, str]
     """Headers merged after configured and per-request headers."""
     stream: bool
-    """Whether response body consumption should be deferred."""
+    """Whether to defer reading the body. Close a streamed response, or use it as a context manager, to release its
+    connection."""
     persist: bool
     """Whether this request should use the persistent client."""
 
 
 class HTTPClient(Protocol):
     options: dict[str, Any]
-    """Mutable defaults read by the backend before every request."""
+    """Default request options, which per-request options override.
+
+    Keys and value shapes follow the current `requests` backend, for example a `(connect, read)` tuple for `timeout`,
+    and may change when another backend is added. Once the persistent session exists, setting a key to `None` or
+    replacing `headers` or `proxies` with a mapping that omits keys does not remove the values the session was created
+    with. Use `set_header()` to change headers and `disable_auth()` to drop configured authentication.
+    """
 
     tls_config: dict[str, Any]
-    """TLS settings for callers that build their own SSL context."""
+    """The resolved `tls_*` settings, for callers that build their own SSL context."""
 
     trust_env: bool
+    """Whether requests use environment proxy variables and `.netrc` credentials. Defaults to `True`."""
 
     ignore_tls_warning: bool
+    """Whether to skip the debug log written for each unverified HTTPS request."""
 
     persist_connections: bool
+    """Whether requests share one session, reusing its connections and cookies, unless a request sets `persist`."""
 
     def get(self, url: str, **options: Unpack[HTTPRequestOptions]) -> HTTPResponse:
         """Perform a GET request using `HTTPRequestOptions`."""
@@ -195,10 +211,20 @@ class HTTPClient(Protocol):
         """
         ...
 
-    def close(self) -> None: ...
+    def close(self) -> None:
+        """Close open connections and discard the persistent session and its cookies.
+
+        The client stays usable, and the next request starts a new session.
+        """
+        ...
 
     def get_cookie(self, name: str, default: str | None = None) -> str | None:
         """Return default for missing or ambiguous persisted cookies."""
         ...
 
-    def should_bypass_proxy(self, url: str) -> bool: ...
+    def should_bypass_proxy(self, url: str) -> bool:
+        """Whether `url` matches the `no_proxy` list of the client's proxy configuration.
+
+        Environment variables such as `NO_PROXY` are not considered.
+        """
+        ...
