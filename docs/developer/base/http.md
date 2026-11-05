@@ -92,8 +92,7 @@ Explicit per-request authentication still overrides client configuration.
 ## Errors
 
 With `AGNOSTIC_HTTP_CLIENT` set, a failed request raises one of the backend-neutral types from the
-module `datadog_checks.base.utils.http_exceptions`, never an exception class belonging to the underlying HTTP
-library. Catch these instead:
+module `datadog_checks.base.utils.http_exceptions`. Catch these instead of the underlying HTTP library's exceptions:
 
 | Exception | Raised when |
 | --- | --- |
@@ -106,6 +105,10 @@ library. Catch these instead:
 | `HTTPClientConnectTimeoutError` | The timeout elapsed while establishing the connection. |
 | `HTTPClientReadTimeoutError` | The timeout elapsed while waiting for response data. |
 | `HTTPClientStatusError` | An error status was raised through `raise_for_status()`. |
+
+While `requests` is the backend, each raised error also subclasses the `requests` exception it replaces, so existing
+handlers that catch `requests` exceptions keep matching. That compatibility belongs to the current backend, so don't
+catch `requests` exceptions in an opted-in check.
 
 For example, a check that skips optional data when its endpoint is unavailable looks like this:
 
@@ -123,6 +126,29 @@ except HTTPClientError as e:
 Decoding the body is the only failure outside this tree. Calling `response.json()` on a body that is not valid JSON raises the
 standard library's `json.JSONDecodeError`, a subclass of `ValueError` that is not part of the tree above, so handle it
 separately from the types listed here.
+
+## Reference
+
+Opted-in checks may use the members documented below. To annotate clients and responses, import `HTTPClient` and
+`HTTPResponse` from `datadog_checks.base.utils.http_protocol`. Members whose values follow the current `requests`
+backend, such as `HTTPClient.options`, may change when another backend is added.
+
+::: datadog_checks.base.utils.http_protocol.HTTPClient
+    options:
+      heading_level: 3
+
+::: datadog_checks.base.utils.http_protocol.HTTPRequestOptions
+    options:
+      heading_level: 3
+
+::: datadog_checks.base.utils.http_protocol.HTTPResponse
+    options:
+      heading_level: 3
+
+::: datadog_checks.base.utils.http_protocol.HTTPHeaders
+    options:
+      heading_level: 3
+      members: false
 
 ## Future
 

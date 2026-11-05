@@ -141,7 +141,13 @@ class HTTPRequestOptions(TypedDict, total=False):
 
 class HTTPClient(Protocol):
     options: dict[str, Any]
-    """Mutable defaults read by the backend before every request."""
+    """Default request options, which per-request options override.
+
+    Keys and value shapes follow the current `requests` backend, for example a `(connect, read)` tuple for `timeout`,
+    and may change when another backend is added. Once the persistent session exists, setting a key to `None` or
+    replacing `headers` or `proxies` with a mapping that omits keys does not remove the values the session was created
+    with. Use `set_header()` to change headers and `disable_auth()` to drop configured authentication.
+    """
 
     tls_config: dict[str, Any]
     """TLS settings for callers that build their own SSL context."""
