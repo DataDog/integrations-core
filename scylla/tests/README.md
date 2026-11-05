@@ -77,7 +77,9 @@ traffic is continuous rather than bursty. Each iteration:
 
 Because of the deliberate timeouts, the dashboard's timeout widgets show
 activity and the node logs batch-size warnings; this is expected for this
-fixture.
+fixture. Other `cqlsh` errors, such as a failed login, appear in the
+`activity-gen` container log; the expected timeouts are logged only once every
+100 occurrences.
 
 All 14 target metrics are produced live; none rely on recorded fixtures, and
 none are expected to stay at zero.

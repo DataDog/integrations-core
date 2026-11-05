@@ -78,4 +78,21 @@ workload() {
   done
 }
 
-workload | cqlsh "$DB_HOST" "${CQL_PORT:-9042}" -u "$DB_USERNAME" -p "$DB_PASSWORD" > /dev/null 2>&1 || true
+# Query results are discarded, but cqlsh errors go to the container log so an
+# auth or CQL failure is visible. The deliberate timeouts (ReadTimeout and
+# WriteTimeout, up to two per iteration) would flood the log, so only every
+# 100th is shown, with a running count.
+workload \
+  | cqlsh "$DB_HOST" "${CQL_PORT:-9042}" -u "$DB_USERNAME" -p "$DB_PASSWORD" 2>&1 > /dev/null \
+  | awk '
+      /(Read|Write)Timeout/ {
+        if (n++ % 100 == 0) { print "activity-gen: expected timeout #" n ": " $0; fflush() }
+        next
+      }
+      { print "activity-gen: cqlsh: " $0; fflush() }
+    ' >&2
+
+# cqlsh only exits on a fatal error (for example a failed login); exit non-zero
+# so the restart policy starts a fresh session.
+log "cqlsh session ended; exiting"
+exit 1
