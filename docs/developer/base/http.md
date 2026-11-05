@@ -65,7 +65,34 @@ Use the `fake_http` and `fake_http_response` fixtures to test a check. The check
 its instance and `init_config`, and the fixture answers on the wire with the registered `FakeHTTPResponse`.
 Registrations matching the same request are served in order, and the last one then repeats. `fake_http.requests` holds
 each call as the check made it, and `fake_http.sent` holds each request as it reached the wire, with the headers and
-authentication the client applied.
+authentication the client applied. Like a server, the fixture sends only the headers a test registers, so the client
+derives the response encoding from a `Content-Type` charset and leaves it unset when there is none. Cookies a response
+sets, through its `cookies` or a `Set-Cookie` header, reach the client's session as they would from a server, so with
+`persist_connections` enabled `get_cookie()` returns them and later requests send them. Cookies in `cookies` are set
+with `Path=/`.
+
+Pass `fake_http_response` the body as `content`, as `json_data` to serialize, or as `file_path` to read a fixture
+file:
+
+```python
+def test_check(dd_run_check, fake_http_response):
+    fake_http_response('http://localhost:8080/metrics', file_path=os.path.join(HERE, 'fixtures', 'metrics.txt'))
+```
+
+To compute each response from the request, such as a page of results or the state of a job, register a responder: a
+callable that receives the `RecordedRequest` and returns the `FakeHTTPResponse` or exception for it. A responder
+registration repeats like any other last registration. `fake_http.set_responder()` answers every call that no
+registration matches. Responders run one at a time, even when the check sends requests from several threads, so a
+stateful emulator needs no locking of its own.
+
+```python
+def test_pagination(dd_run_check, fake_http):
+    def respond(request):
+        page = request.options['params']['page']
+        return FakeHTTPResponse(content=json.dumps({'items': ITEMS[page], 'last': page == 2}).encode())
+
+    fake_http.register_response('GET', 'https://localhost/api/items', respond)
+```
 
 The fixture fails the test instead of serving a response it cannot represent:
 
@@ -78,10 +105,14 @@ The fixture fails the test instead of serving a response it cannot represent:
   entry in `content_chunks`, or `lines` that do not split back unchanged.
 - A `FakeHTTPResponse` whose `text`, `lines`, `content_chunks` or `json_result` disagree with the body it sends, which
   is its `content` if set. The wire carries one body, so the client derives every view from it.
+- A responder that raises, or returns anything the fixture could not serve if it were registered.
 
 Request-guard errors also fail fixture cleanup, even if the check catches the original error and continues. Deliberately
 registered exceptions and error responses are valid test outcomes, not guard errors. Call
 `fake_http.assert_all_responses_consumed()` to check separately that every registration was used.
+
+The legacy `mock_http_response` and `mock_http_response_per_endpoint` fixtures patch `requests`, so they would answer
+an opted-in check without running its real client. They fail any request sent by an opted-in client instead.
 
 A custom `status_error` is not detected and is replaced by the client's own error for the status code.
 
@@ -91,9 +122,10 @@ A `FakeHTTPClient` is an in-memory `HTTPClient` that never runs the real client.
 fixture cannot serve the test:
 
 - Code that receives a client: pass the fake directly.
-- A suite-local emulator that computes responses per request: subclass the fake and return it from a patched version
-  of `AgentCheck.create_http_client`.
 - Responses the fixture rejects, such as `elapsed` or `history`, and cookies seeded on the client with `cookies=...`.
+
+A `FakeHTTPResponse` parses `json()` from its body, raising `json.JSONDecodeError` like the real client, unless
+`json_result` or `json_error` is set.
 
 Unlike the fixture, a `FakeHTTPClient` ignores the instance configuration, serves each registration once, and is not
 safe for concurrent requests.

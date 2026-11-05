@@ -1,0 +1,1 @@
+Parse `FakeHTTPResponse.json()` from the body and raise `json.JSONDecodeError` like the real client when no `json_result` is set.

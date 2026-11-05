@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import json
 from collections.abc import Callable, Iterable, Iterator, Mapping
 from dataclasses import dataclass, field
 from datetime import timedelta
@@ -61,12 +62,12 @@ class RecordedRequest:
 
 
 @dataclass(frozen=True, slots=True)
-class RegisteredResponse:
-    """A response or exception registered for the requests it matches."""
+class RegisteredResponse[T]:
+    """An outcome, such as a response or exception, registered for the requests it matches."""
 
     method: str
     url: str
-    outcome: HTTPResponse | Exception
+    outcome: T
     match_options: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -166,7 +167,7 @@ class FakeHTTPResponse:
         if self._json_error is not None:
             raise self._json_error
         if self._json_result is JSON_RESULT_UNSET:
-            raise AssertionError('No JSON result was configured for this fake response.')
+            return json.loads(self.text, **kwargs)
         return self._json_result
 
     def raise_for_status(self) -> None:
@@ -244,7 +245,7 @@ class FakeHTTPClient:
         # Shared with created clients so a setting changed after a check starts still reaches it.
         self._proxy_bypass: dict[str, bool | Callable[[str], bool]] = {'value': should_bypass_proxy}
         self.requests: list[RecordedRequest] = []
-        self._responses: list[RegisteredResponse] = []
+        self._responses: list[RegisteredResponse[HTTPResponse | Exception]] = []
 
     def create_client(self) -> FakeHTTPClient:
         """Create an isolated client that shares registered responses, recorded requests and proxy bypass."""

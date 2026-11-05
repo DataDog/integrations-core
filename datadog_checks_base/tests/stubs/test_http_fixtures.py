@@ -145,7 +145,9 @@ def test_fake_http_installs_registered_response_and_records_request(fake_http):
 
 def test_fake_http_response_builds_and_registers_text_response(fake_http_response: Any):
     url = 'https://example.test/metrics'
-    fake_http_response(url, 'first\nsecond', match_options={'stream': True})
+    fake_http_response(
+        url, 'first\nsecond', headers={'Content-Type': 'text/plain; charset=utf-8'}, match_options={'stream': True}
+    )
     check = FixtureCheck('test', {}, [{}])
 
     response = check.http.get(url, stream=True)
@@ -182,6 +184,65 @@ def test_fake_http_response_builds_and_registers_json_response(
     assert response.status_code == 201
     assert response.reason == 'Created'
     fake_http.assert_all_responses_consumed()
+
+
+@pytest.mark.parametrize(
+    ('headers', 'expected_encoding'),
+    [
+        pytest.param({}, None, id='no-content-type'),
+        pytest.param({'Content-Type': 'text/plain; charset=latin-1'}, 'latin-1', id='charset'),
+    ],
+)
+def test_fake_http_response_leaves_the_encoding_to_the_response_headers(
+    fake_http_response: Any, headers: dict[str, str], expected_encoding: str | None
+):
+    # Scrapers fall back to UTF-8 only when the server sends no charset, so the fixture must not invent one.
+    url = 'https://example.test/metrics'
+    fake_http_response(url, 'metric 1', headers=headers)
+    check = FixtureCheck('test', {}, [{}])
+
+    assert check.http.get(url).encoding == expected_encoding
+
+
+def test_fake_http_response_reads_its_body_from_a_file(fake_http_response: Any, tmp_path):
+    url = 'https://example.test/metrics'
+    path = tmp_path / 'metrics.txt'
+    path.write_bytes(b'# TYPE metric gauge\nmetric 1\n')
+    fake_http_response(url, file_path=path)
+    check = FixtureCheck('test', {}, [{}])
+
+    assert check.http.get(url).content == b'# TYPE metric gauge\nmetric 1\n'
+
+
+@pytest.mark.parametrize(
+    'body', [pytest.param({'content': 'body'}, id='content'), pytest.param({'json_data': {}}, id='json_data')]
+)
+def test_fake_http_response_rejects_a_file_combined_with_another_body(fake_http_response: Any, tmp_path, body):
+    path = tmp_path / 'metrics.txt'
+    path.write_bytes(b'metric 1')
+
+    with pytest.raises(TypeError, match='file_path cannot be combined'):
+        fake_http_response('https://example.test/metrics', file_path=path, **body)
+
+
+@pytest.mark.parametrize(
+    'login_response',
+    [
+        pytest.param(FakeHTTPResponse(cookies={'sid': 'abc'}), id='cookies'),
+        pytest.param(FakeHTTPResponse(headers={'Set-Cookie': 'sid=abc; Path=/'}), id='set-cookie-header'),
+    ],
+)
+def test_fake_http_keeps_the_cookies_a_response_sets(fake_http, login_response):
+    # Login flows read the session cookie and rely on the client sending it with later requests.
+    fake_http.register_response('POST', 'https://example.test/api/login', login_response)
+    fake_http.register_response('GET', 'https://example.test/data', FakeHTTPResponse())
+    check = FixtureCheck('test', {}, [{'persist_connections': True}])
+
+    check.http.post('https://example.test/api/login')
+    check.http.get('https://example.test/data')
+
+    assert check.http.get_cookie('sid') == 'abc'
+    assert fake_http.sent[-1].headers.get('Cookie') == 'sid=abc'
 
 
 def test_fake_http_routes_openmetrics_send_request(fake_http):
@@ -319,6 +380,87 @@ def test_fake_http_serves_matching_registrations_in_order_then_repeats_the_last(
 
     assert [check.http.get(url).content for _ in range(2)] == [b'second', b'second']
     fake_http.assert_all_responses_consumed()
+
+
+def test_fake_http_computes_each_response_from_the_request_with_a_responder(fake_http):
+    # Emulators answer pagination and POST bodies from what the check sent, not from a fixed queue.
+    url = 'https://example.test/items'
+    fake_http.register_response(
+        'GET', url, lambda request: FakeHTTPResponse(content=f'page {request.options["params"]["page"]}'.encode())
+    )
+    check = FixtureCheck('test', {}, [{}])
+
+    assert [check.http.get(url, params={'page': page}).content for page in (1, 2)] == [b'page 1', b'page 2']
+    fake_http.assert_all_responses_consumed()
+
+
+def test_fake_http_serves_calls_no_registration_matches_with_the_catch_all_responder(fake_http):
+    fake_http.register_response('GET', 'https://example.test/registered', FakeHTTPResponse(content=b'registered'))
+    fake_http.set_responder(lambda request: FakeHTTPResponse(content=f'{request.method} {request.url}'.encode()))
+    check = FixtureCheck('test', {}, [{}])
+
+    assert check.http.get('https://example.test/registered').content == b'registered'
+    assert check.http.post('https://example.test/other').content == b'POST https://example.test/other'
+
+
+def test_fake_http_raises_an_exception_a_responder_returns(fake_http):
+    fake_http.set_responder(lambda request: HTTPClientConnectionError('refused'))
+    check = FixtureCheck('test', {}, [{}])
+
+    with pytest.raises(HTTPClientConnectionError, match='refused'):
+        check.http.get('https://example.test/items')
+
+
+def raise_from_responder(request: RecordedRequest) -> FakeHTTPResponse:
+    raise KeyError('missing state')
+
+
+@pytest.mark.parametrize(
+    ('responder', 'message'),
+    [
+        pytest.param(raise_from_responder, 'raised KeyError', id='raises'),
+        pytest.param(
+            lambda request: FakeHTTPResponse(url='x'), "cannot send these FakeHTTPResponse fields", id='unsendable'
+        ),
+        pytest.param(lambda request: 'body', 'FakeHTTPResponse objects or exceptions', id='wrong-type'),
+    ],
+)
+def test_fake_http_rejects_a_responder_that_cannot_answer(mocker: MockerFixture, responder, message):
+    # A check's broad except clause must not turn a broken emulator into a passing test.
+    url = 'https://example.test/items'
+    with pytest.raises(AssertionError, match=f'fake_http recorded a request violation: .*{message}'):
+        with install(mocker) as fake_http:
+            fake_http.register_response('GET', url, responder)
+            with pytest.raises(AssertionError, match=message):
+                fake_http.create_client().get(url)
+
+
+def test_fake_http_runs_responders_one_at_a_time(fake_http):
+    # Checks may send requests from several threads, and a stateful emulator must not see them interleaved.
+    first_entered, overlapped = threading.Event(), threading.Event()
+    active = []
+
+    def responder(request: RecordedRequest) -> FakeHTTPResponse:
+        if active:
+            overlapped.set()
+        active.append(request.url)
+        if request.url.endswith('/first'):
+            first_entered.set()
+            overlapped.wait(0.3)
+        active.remove(request.url)
+        return FakeHTTPResponse()
+
+    fake_http.set_responder(responder)
+    client = fake_http.create_client()
+    first = threading.Thread(target=client.get, args=('https://example.test/first',))
+    first.start()
+    assert first_entered.wait(5)
+    second = threading.Thread(target=client.get, args=('https://example.test/second',))
+    second.start()
+    first.join(5)
+    second.join(5)
+
+    assert not overlapped.is_set()
 
 
 @pytest.mark.parametrize('in_thread', [False, True], ids=['main-thread', 'worker-thread'])
@@ -602,6 +744,25 @@ def test_mock_http_response_preserves_requests_responses(mock_http_response):
 
     assert isinstance(response, requests.Response)
     assert response.text == 'payload'
+
+
+LEGACY_HTTP_FIXTURES = {
+    'mock_http_response': lambda register, mock_response, url: register(content='payload'),
+    'mock_http_response_per_endpoint': lambda register, mock_response, url: register({url: [mock_response()]}),
+}
+
+
+@pytest.mark.parametrize('fixture_name', LEGACY_HTTP_FIXTURES)
+def test_legacy_http_fixtures_reject_requests_from_opted_in_clients(
+    request: pytest.FixtureRequest, mock_response: Any, fixture_name: str
+):
+    # The legacy fixtures patch requests, so an opted-in check would pass without its real client being exercised.
+    url = 'https://example.test/items'
+    LEGACY_HTTP_FIXTURES[fixture_name](request.getfixturevalue(fixture_name), mock_response, url)
+    check = FixtureCheck('test', {}, [{}])
+
+    with pytest.raises(AssertionError, match='use the fake_http fixture'):
+        check.http.get(url)
 
 
 def test_mock_http_response_per_endpoint_preserves_requests_responses(mock_http_response_per_endpoint, mock_response):

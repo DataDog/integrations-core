@@ -380,8 +380,27 @@ def mock_response():
     yield MockResponse
 
 
+def _reject_opted_in_clients(mocker):
+    """Fail requests from opted-in clients, which the legacy fixtures would answer without their real client running."""
+    # Imported lazily because base, which it requires, may be missing where this plugin loads.
+    RequestsWrapper = importlib.import_module('datadog_checks.base.utils.http').RequestsWrapper
+    send_request = RequestsWrapper._request
+
+    def guarded_request(client, method, url, options):
+        # Older base releases predate the opt-in, so their clients never set it.
+        if getattr(client, '_agnostic', False):
+            raise AssertionError(
+                f'{method.upper()} {url} was sent by a client that sets AGNOSTIC_HTTP_CLIENT = True; '
+                'use the fake_http fixture instead of mock_http_response or mock_http_response_per_endpoint.'
+            )
+        return send_request(client, method, url, options)
+
+    mocker.patch.object(RequestsWrapper, '_request', guarded_request)
+
+
 @pytest.fixture
 def mock_http_response(mocker, mock_response):
+    _reject_opted_in_clients(mocker)
     yield lambda *args, **kwargs: mocker.patch(
         kwargs.pop('method', DEFAULT_MOCK_METHOD), return_value=mock_response(*args, **kwargs)
     )
@@ -404,7 +423,9 @@ def fake_http(mocker):
 def fake_http_response(fake_http: Any) -> Callable[..., Any]:
     """Build and register a response on the base-owned HTTP fake.
 
-    The `json_data` argument sets both the serialized body and parsed result unless `json_result` is overridden.
+    The `json_data` argument sets the body to its JSON serialization, and `file_path` to the bytes of that file.
+    Like a server, the fixture sends only the headers given, so the client derives the encoding from a
+    `Content-Type` charset rather than assuming one.
     """
     FakeHTTPResponse = importlib.import_module('datadog_checks.base.stubs.http').FakeHTTPResponse
 
@@ -414,16 +435,21 @@ def fake_http_response(fake_http: Any) -> Callable[..., Any]:
         *,
         method: str = 'GET',
         json_data: Any = FAKE_HTTP_JSON_UNSET,
+        file_path: str | os.PathLike[str] | None = None,
         status_code: int = 200,
-        encoding: str = 'utf-8',
+        encoding: str | None = None,
         match_options: Mapping[str, Any] | None = None,
         **overrides: Any,
     ) -> Any:
-        if json_data is not FAKE_HTTP_JSON_UNSET:
-            content = json.dumps(json_data).encode(encoding)
-            overrides.setdefault('json_result', json_data)
+        if file_path is not None:
+            if content or json_data is not FAKE_HTTP_JSON_UNSET:
+                raise TypeError('file_path cannot be combined with content or json_data.')
+            with open(file_path, 'rb') as f:
+                content = f.read()
+        elif json_data is not FAKE_HTTP_JSON_UNSET:
+            content = json.dumps(json_data)
 
-        body = content.encode(encoding) if isinstance(content, str) else content
+        body = content.encode(encoding or 'utf-8') if isinstance(content, str) else content
         response = FakeHTTPResponse(
             status_code=status_code,
             content=body,
@@ -438,6 +464,8 @@ def fake_http_response(fake_http: Any) -> Callable[..., Any]:
 
 @pytest.fixture
 def mock_http_response_per_endpoint(mocker, mock_response):
+    _reject_opted_in_clients(mocker)
+
     @overload
     def _mock(
         responses_by_endpoint: Dict[str, list[Any]],
