@@ -2,10 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import ssl
+from collections.abc import Iterator
+from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
+from threading import Event, Lock
+from typing import Any
 
 import pytest
 
+from datadog_checks.base.stubs import http as http_stub
 from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError, HTTPClientTimeoutError
 from datadog_checks.base.utils.tls import TlsConfig, create_ssl_context
@@ -359,6 +364,215 @@ def test_fake_client_records_a_body_that_cannot_be_copied():
     client.post(url, data=body)
 
     assert client.requests[0].options['data'] is body
+
+
+@pytest.fixture
+def competing_operation(monkeypatch: pytest.MonkeyPatch) -> Event:
+    progressed = Event()
+
+    class ObservedLock:
+        """Let the scheduler distinguish a blocked contender from a finished one."""
+
+        def __init__(self) -> None:
+            self.lock = Lock()
+
+        def __enter__(self) -> None:
+            if not self.lock.acquire(blocking=False):
+                progressed.set()
+                assert self.lock.acquire(timeout=5), 'Timed out acquiring the shared fake lock'
+
+        def __exit__(self, *exc_info: object) -> None:
+            self.lock.release()
+
+    # This also runs against the unlocked implementation to demonstrate the regression.
+    monkeypatch.setattr(http_stub, 'Lock', ObservedLock, raising=False)
+    return progressed
+
+
+@pytest.mark.parametrize(
+    ('clients', 'same_url', 'raises'),
+    [
+        pytest.param('same', False, False, id='same-client'),
+        pytest.param('child', False, False, id='parent-child'),
+        pytest.param('descendant', False, False, id='parent-descendant'),
+        pytest.param('siblings', False, False, id='siblings'),
+        pytest.param('siblings', True, True, id='siblings-match-options-exception'),
+    ],
+)
+def test_concurrent_fake_requests_keep_response_ownership(
+    monkeypatch: pytest.MonkeyPatch, competing_operation: Event, clients: str, same_url: bool, raises: bool
+):
+    # Removing an earlier registration must not shift another worker's matched index.
+    root = FakeHTTPClient()
+    first_client = root.create_client() if clients == 'siblings' else root
+    second_client = root
+    if clients != 'same':
+        second_client = root.create_client()
+    if clients == 'descendant':
+        second_client = second_client.create_client()
+    urls = ['/items'] * 3 if same_url else ['/a', '/b', '/c']
+    options = [{'params': {'id': i}} if same_url else {} for i in range(3)]
+    outcomes = [FakeHTTPResponse(), HTTPClientTimeoutError('b') if raises else FakeHTTPResponse(), FakeHTTPResponse()]
+    for url, outcome, match_options in zip(urls, outcomes, options):
+        root.register_response('GET', url, outcome, match_options=match_options)
+
+    matched = Event()
+    release = Event()
+    original_matches = FakeHTTPClient._matches
+
+    def pause_matched_response(registered: Any, request: RecordedRequest) -> bool:
+        matches = original_matches(registered, request)
+        if matches and registered.outcome is outcomes[1]:
+            matched.set()
+            assert release.wait(5), 'Timed out releasing the matched request'
+        return matches
+
+    monkeypatch.setattr(FakeHTTPClient, '_matches', staticmethod(pause_matched_response))
+
+    def consume_earlier_response() -> Any:
+        try:
+            return first_client.get(urls[0], **options[0])
+        finally:
+            competing_operation.set()
+
+    with ThreadPoolExecutor(max_workers=2) as workers:
+        second = workers.submit(second_client.get, urls[1], **options[1])
+        try:
+            assert matched.wait(5), 'Request never reached response matching'
+            first = workers.submit(consume_earlier_response)
+            assert competing_operation.wait(5), 'Competing request neither completed nor waited for the lock'
+        finally:
+            release.set()
+        assert first.result(timeout=5) is outcomes[0]
+        if raises:
+            with pytest.raises(HTTPClientTimeoutError) as exc_info:
+                second.result(timeout=5)
+            assert exc_info.value is outcomes[1]
+        else:
+            assert second.result(timeout=5) is outcomes[1]
+
+    # Requests for different resources need not have a predetermined global order.
+    assert len(root.requests) == 2
+    for url, request_options in zip(urls[:2], options[:2]):
+        root.assert_has_request(RecordedRequest('GET', url, request_options))
+    assert root.get(urls[2], **options[2]) is outcomes[2]
+    root.assert_all_responses_consumed()
+    with pytest.raises(AssertionError, match='No registered response matched'):
+        root.get(urls[1], **options[1])
+
+
+def test_concurrent_fake_requests_consume_a_registration_only_once(
+    monkeypatch: pytest.MonkeyPatch, competing_operation: Event
+):
+    # Two callers of the same URL must see one response and one unmatched-request error.
+    root = FakeHTTPClient()
+    child = root.create_client()
+    response = FakeHTTPResponse()
+    root.register_response('GET', '/one', response)
+    matched = Event()
+    release = Event()
+    original_matches = FakeHTTPClient._matches
+
+    def pause_first_match(registered: Any, request: RecordedRequest) -> bool:
+        matches = original_matches(registered, request)
+        if matches and not matched.is_set():
+            matched.set()
+            assert release.wait(5), 'Timed out releasing the first request'
+        return matches
+
+    monkeypatch.setattr(FakeHTTPClient, '_matches', staticmethod(pause_first_match))
+
+    def compete() -> Any:
+        try:
+            return child.get('/one')
+        finally:
+            competing_operation.set()
+
+    with ThreadPoolExecutor(max_workers=2) as workers:
+        first = workers.submit(root.get, '/one')
+        try:
+            assert matched.wait(5), 'Request never reached response matching'
+            second = workers.submit(compete)
+            assert competing_operation.wait(5), 'Competing request neither completed nor waited for the lock'
+        finally:
+            release.set()
+        assert first.result(timeout=5) is response
+        with pytest.raises(AssertionError, match='No registered response matched GET /one'):
+            second.result(timeout=5)
+    root.assert_requests([RecordedRequest('GET', '/one'), RecordedRequest('GET', '/one')])
+    root.assert_all_responses_consumed()
+
+
+def test_fake_consumption_assertion_waits_for_matching_to_finish(
+    monkeypatch: pytest.MonkeyPatch, competing_operation: Event
+):
+    # A consumption assertion must not read a partially completed queue operation.
+    root = FakeHTTPClient()
+    child = root.create_client()
+    root.register_response('GET', '/one', FakeHTTPResponse())
+    matched = Event()
+    release = Event()
+    original_matches = FakeHTTPClient._matches
+
+    def pause_match(registered: Any, request: RecordedRequest) -> bool:
+        matches = original_matches(registered, request)
+        matched.set()
+        assert release.wait(5), 'Timed out releasing the request'
+        return matches
+
+    monkeypatch.setattr(FakeHTTPClient, '_matches', staticmethod(pause_match))
+
+    def assert_consumed() -> None:
+        try:
+            child.assert_all_responses_consumed()
+        finally:
+            competing_operation.set()
+
+    with ThreadPoolExecutor(max_workers=2) as workers:
+        request = workers.submit(root.get, '/one')
+        try:
+            assert matched.wait(5), 'Request never reached response matching'
+            assertion = workers.submit(assert_consumed)
+            assert competing_operation.wait(5), 'Assertion neither completed nor waited for the lock'
+        finally:
+            release.set()
+        request.result(timeout=5)
+        assertion.result(timeout=5)
+
+
+def test_fake_streaming_does_not_block_other_clients(monkeypatch: pytest.MonkeyPatch):
+    # A listener reading an open stream must not prevent a sibling client from polling.
+    root = FakeHTTPClient()
+    listener = root.create_client()
+    entered = Event()
+    release = Event()
+    response = FakeHTTPResponse()
+    root.register_response('GET', '/stream', response)
+    poll_response = FakeHTTPResponse()
+    root.register_response('GET', '/poll', poll_response)
+
+    def read_response() -> Iterator[bytes]:
+        entered.set()
+        assert release.wait(5), 'Timed out releasing response processing'
+        yield b'body'
+
+    monkeypatch.setattr(response, 'iter_lines', read_response)
+
+    def consume() -> list[bytes]:
+        with listener.get('/stream', stream=True) as stream:
+            return list(stream.iter_lines())
+
+    with ThreadPoolExecutor(max_workers=2) as workers:
+        reading = workers.submit(consume)
+        try:
+            assert entered.wait(5), 'Response processing did not start'
+            polling = workers.submit(root.get, '/poll')
+            assert polling.result(timeout=5) is poll_response
+        finally:
+            release.set()
+        assert reading.result(timeout=5) == [b'body']
+    assert response.closed
+    root.assert_all_responses_consumed()
 
 
 class TestFakeHttpLegacyOptions:
