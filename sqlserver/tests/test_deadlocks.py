@@ -366,6 +366,54 @@ def test_deadlock_calls_obfuscator(deadlocks_collection_instance):
         assert expected_xml_string == result_string
 
 
+def test_deadlock_signature_uses_first_stack_frame(deadlocks_collection_instance):
+    root = ET.fromstring(
+        """
+        <deadlock>
+          <process-list>
+            <process spid="51">
+              <executionStack>
+                <frame>SELECT * FROM orders WHERE id = 1</frame>
+                <frame>SELECT * FROM customers WHERE id = 2</frame>
+              </executionStack>
+            </process>
+          </process-list>
+        </deadlock>
+        """
+    )
+    deadlocks_obj = _get_deadlock_obj(deadlocks_collection_instance)
+
+    with (
+        patch.object(deadlocks_obj, 'obfuscate_no_except_wrapper', side_effect=lambda sql: sql.strip()),
+        patch('datadog_checks.sqlserver.deadlocks.compute_sql_signature', side_effect=lambda sql: f'sig:{sql}'),
+    ):
+        signatures = deadlocks_obj._obfuscate_xml(root)
+
+    assert signatures == [{'spid': 51, 'signature': 'sig:SELECT * FROM orders WHERE id = 1'}]
+
+
+def test_deadlock_signatures_deduplicate_spids(deadlocks_collection_instance):
+    root = ET.fromstring(
+        """
+        <deadlock>
+          <process-list>
+            <process spid="51"><inputbuf>SELECT 1</inputbuf></process>
+            <process spid="51"><inputbuf>SELECT 2</inputbuf></process>
+          </process-list>
+        </deadlock>
+        """
+    )
+    deadlocks_obj = _get_deadlock_obj(deadlocks_collection_instance)
+
+    with (
+        patch.object(deadlocks_obj, 'obfuscate_no_except_wrapper', side_effect=lambda sql: sql.strip()),
+        patch('datadog_checks.sqlserver.deadlocks.compute_sql_signature', side_effect=lambda sql: f'sig:{sql}'),
+    ):
+        signatures = deadlocks_obj._obfuscate_xml(root)
+
+    assert signatures == [{'spid': 51, 'signature': 'sig:SELECT 1'}]
+
+
 @pytest.mark.unit
 def test_collect_deadlocks_config(dbm_instance):
     dbm_instance['collect_deadlocks'] = {"enabled": True, 'collection_interval': 0.2}
