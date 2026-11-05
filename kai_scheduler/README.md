@@ -4,7 +4,7 @@
 
 This check monitors [KAI Scheduler][1] through the Datadog Agent.
 
-KAI Scheduler is a Kubernetes scheduler for AI and GPU workloads. It schedules pods into hierarchical queues with quotas, fair share, priorities, and preemption. This integration collects metrics from the KAI scheduler and queue-controller to help you monitor queue quotas and allocation, fair share, scheduling latency, and preemption.
+KAI Scheduler is a Kubernetes scheduler for AI and GPU workloads. It schedules pods into hierarchical queues with quotas, fair share, priorities, and preemption. This integration collects metrics from the KAI scheduler and queue-controller to help you monitor queue quotas and allocation, fair share, scheduling latency, and preemption, and sends events for PodGroup life cycle transitions.
 
 ## Setup
 
@@ -44,7 +44,7 @@ clusterAgent:
         queue_controller_endpoint: http://queue-controller.kai-scheduler.svc:8080/metrics
 ```
 
-If you run several scheduling shards, add one `scheduler_endpoint` instance per shard service.
+If you run several scheduling shards, add one `scheduler_endpoint` instance per shard service. Each instance with `collect_podgroup_events` enabled polls all the PodGroups of the cluster, so set `collect_podgroup_events: false` on all but one of them to avoid duplicate [events](#events).
 
 #### Binder metrics (optional)
 
@@ -68,7 +68,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 
 Queue metrics from the scheduler and the queue-controller share the `kai_queue` tag, which holds the queue's `metadata.name`, so that quota, allocation, fair share, and usage can be compared per queue. Queues with a `spec.displayName` are also tagged with `kai_queue_display_name`. Tags without a value, such as labels that KAI leaves empty, are not submitted. Memory metrics are reported in bytes, CPU metrics in cores, and GPU metrics in devices.
 
-KAI counts evicted pods per pod group and never deletes those series. To keep the number of contexts bounded, `kai.evicted_pods.count` reports the pods evicted since the previous check run, summed by `kube_namespace`, `kai_nodepool`, and `action`. Evictions that happened before the first successful check run are not reported. The check keeps the previous value of up to 10,000 pod group series. Beyond that, it reports the increase of the summed counters instead, which undercounts evictions in a group whose pod group series KAI removed during that check run. To see which workloads were evicted and by which preemptor, collect the Kubernetes `Evict` events that KAI records on each evicted PodGroup.
+KAI counts evicted pods per pod group and never deletes those series. To keep the number of contexts bounded, `kai.evicted_pods.count` reports the pods evicted since the previous check run, summed by `kube_namespace`, `kai_nodepool`, and `action`. Evictions that happened before the first successful check run are not reported. The check keeps the previous value of up to 10,000 pod group series. Beyond that, it reports the increase of the summed counters instead, which undercounts evictions in a group whose pod group series KAI removed during that check run. To see which workloads were evicted and by which preemptor, use the `kai.podgroup.evicted` [events](#events).
 
 The `kai.scheduling_cycle.latency.milliseconds`, `kai.session.*.latency.milliseconds`, `kai.action.latency.milliseconds`, and `kai.plugin.latency.milliseconds` gauges hold the duration of the most recent scheduling cycle only. The scheduler runs a cycle every second by default, so each check run samples one cycle and short spikes between check runs are not visible. A scheduler that is consistently slow is still visible in every sample.
 
@@ -76,7 +76,24 @@ Histograms, such as `kai.task.scheduling_latency.milliseconds` and `kai.task.bin
 
 ### Events
 
-The KAI Scheduler integration does not include any events.
+By default, the KAI Scheduler integration polls the KAI PodGroup custom resources and sends Datadog events for life cycle transitions:
+
+- **Created** (`kai.podgroup.created`): A PodGroup appears after the check has initialized its state.
+- **Pending** (`kai.podgroup.pending`): The scheduler cannot schedule the PodGroup on a node pool and adds an `UnschedulableOnNodePool` scheduling condition for it.
+- **Admitted** (`kai.podgroup.admitted`): The scheduler allocates pods to a PodGroup that has none allocated, such as a new PodGroup, an evicted one, or a Job that starts its next pod, and updates its `kai.scheduler/last-start-timestamp` annotation.
+- **Evicted** (`kai.podgroup.evicted`): The scheduler evicts some or all of the PodGroup's pods to preempt, reclaim, or consolidate, or because they are background pods whose capacity it gives to other pods, and updates its `kai.scheduler/last-eviction-timestamp` annotation. KAI sets this annotation starting with version 0.17.0. Stale gang evictions do not update it, so they are only counted in `kai.evicted_pods.count`.
+
+KAI does not record quota reservation, pod readiness, or completion on the PodGroup, so there are no equivalents of the Kueue `quota_reserved`, `running`, and `finished` Workload events.
+
+Events are tagged with `kube_namespace`, `kai_workload` (the PodGroup name), `kai_workload_uid`, `kai_queue`, `kai_nodepool`, `kai_transition`, and `kai_workload_priority_class` when the PodGroup sets a priority class. The `kai_queue` tag matches the tag the Agent adds to the metrics of the PodGroup's pods, and so does `kai_workload` when the Agent collects tags with `orchestrator` cardinality. Pending events take the node pool from the scheduling condition, and other events from the `kai.scheduler/node-pool` PodGroup label, so other events are tagged `kai_nodepool:default` when KAI is configured with another `global.nodePoolLabelKey`. Instance tags, including the tags you set in `tags` and the tags Autodiscovery adds from the KAI pods, apply to metrics only, not to events.
+
+Pending events include the scheduling error and a `kai_pending_reason` tag for each reason KAI reports, such as `OverLimit`. Admitted events include the queued wait time when the check can determine it, counted from the PodGroup creation or from the latest eviction. After an eviction of only some of the pods, it can also include time the PodGroup spent running. Eviction events include the message and the eviction action, and are tagged with `kai_eviction_action` (such as `preempt` or `reclaim`) and `kai_evicted_by` (the preemptor PodGroup), when available from the `Evict` Kubernetes event that KAI records on the PodGroup.
+
+Each event also carries `kai_workload_event_index`, a per-PodGroup integer that increases for every event the check emits for that PodGroup. KAI stamps transitions with second-resolution timestamps, so several events can share one. Sort by `timestamp`, then by `kai_workload_event_index` as an integer, to order them. The index is kept in the Agent persistent cache so a process restart continues the sequence for PodGroups still present in the API. The cache is cleared when the check configuration changes, and a new pod starts the sequence at `0` because the run directory is not preserved across container recreation.
+
+The first collection run seeds the PodGroup state and does not emit events for already existing transitions.
+
+Collecting events requires `list` role-based access control (RBAC) permission on `podgroups.scheduling.run.ai`, and `list` on `events` for the eviction details. Every instance with `collect_podgroup_events` enabled polls all the PodGroups of the cluster, so when you configure several instances, such as one per scheduling shard, set `collect_podgroup_events: false` on all but one of them. Set it to `false` on every instance to disable events.
 
 ### Service Checks
 
