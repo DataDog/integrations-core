@@ -1,0 +1,1 @@
+Fix 404 errors when `server_url` has a trailing slash.
