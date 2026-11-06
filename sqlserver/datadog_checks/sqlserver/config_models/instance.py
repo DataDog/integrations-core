@@ -455,12 +455,23 @@ class QueryActivity(BaseModel):
     enabled: Optional[bool] = None
 
 
+class CollectRealPlans(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    enabled: Optional[bool] = Field(None, examples=[False])
+    max_plan_size_bytes: Optional[int] = Field(None, examples=[1000000])
+    samples_per_hour_per_query: Optional[int] = Field(None, examples=[4])
+
+
 class QueryMetrics(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         frozen=True,
     )
     collect_plans: Optional[bool] = None
+    collect_real_plans: Optional[CollectRealPlans] = None
     collection_interval: Optional[float] = None
     disable_secondary_tags: Optional[bool] = None
     dm_exec_query_stats_row_limit: Optional[int] = None

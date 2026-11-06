@@ -11,6 +11,9 @@ from xml.etree import ElementTree
 from datadog_checks.base.utils.platform import Platform
 from datadog_checks.sqlserver.const import ENGINE_EDITION_AZURE_MANAGED_INSTANCE, ENGINE_EDITION_SQL_DATABASE
 
+# SQL Server 2019
+LAST_QUERY_PLAN_STATS_MIN_MAJOR_VERSION = 15
+
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
 ODBC_INI = 'odbc.ini'
@@ -284,6 +287,29 @@ def is_azure_sql_database(engine_edition):
     :return: bool
     """
     return engine_edition == ENGINE_EDITION_SQL_DATABASE
+
+
+def supports_last_query_plan_stats(major_version: int | None, engine_edition: int | None) -> bool:
+    """Whether the server has `sys.dm_exec_query_plan_stats`: SQL Server 2019 and later, and Azure SQL."""
+    return is_azure_database(engine_edition) or (major_version or 0) >= LAST_QUERY_PLAN_STATS_MIN_MAJOR_VERSION
+
+
+def read_last_query_plan_stats(cursor, db_name: str) -> bool:
+    """Whether the `LAST_QUERY_PLAN_STATS` database scoped configuration is on in the database."""
+    # The value is a sql_variant, which pyodbc can't read.
+    cursor.execute(
+        "SELECT CAST(value AS int) FROM [{}].sys.database_scoped_configurations "
+        "WHERE name = 'LAST_QUERY_PLAN_STATS'".format(db_name.replace(']', ']]'))
+    )
+    row = cursor.fetchone()
+    return bool(row and row[0])
+
+
+def read_trace_flag_2451(cursor) -> bool:
+    """Whether trace flag 2451, which turns `LAST_QUERY_PLAN_STATS` on in every database, is on globally."""
+    cursor.execute("DBCC TRACESTATUS(2451, -1)")
+    # The columns are TraceFlag, Status, Global and Session.
+    return any(row[2] == 1 for row in cursor.fetchall() or ())
 
 
 def execute_query(query, cursor, convert_results_to_str=False, parameters=None) -> Dict[str, str]:

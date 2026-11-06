@@ -16,7 +16,13 @@ from typing import Any
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.sqlserver.connection_errors import SQLConnectionError
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION
-from datadog_checks.sqlserver.utils import is_azure_database, is_azure_sql_database
+from datadog_checks.sqlserver.utils import (
+    is_azure_database,
+    is_azure_sql_database,
+    read_last_query_plan_stats,
+    read_trace_flag_2451,
+    supports_last_query_plan_stats,
+)
 
 CATEGORY_SQLSERVER = "sqlserver"
 KEY_PREFIX = "sqlserver-diagnose-"
@@ -27,6 +33,7 @@ SYSTEM_DATABASES = ("master", "tempdb", "model", "msdb")
 
 SQLSERVER_SETUP_DOCS_URL = "https://docs.datadoghq.com/integrations/sql-server/?tab=host#setup"
 SQLSERVER_TROUBLESHOOTING_DOCS_URL = "https://docs.datadoghq.com/database_monitoring/setup_sql_server/troubleshooting/"
+SQLSERVER_DBM_SETUP_DOCS_URL = "https://docs.datadoghq.com/database_monitoring/setup_sql_server/"
 SQLSERVER_DBM_GRANTS_DOCS_URL = (
     "https://docs.datadoghq.com/database_monitoring/setup_sql_server/selfhosted/"
     "?tab=sqlserver2014#grant-the-agent-access"
@@ -47,6 +54,7 @@ class SQLServerConfigurationError(Enum):
     odbc_driver_not_installed = "odbc-driver-not-installed"
     per_database_access = "per-database-access"
     missing_per_database_view_state = "missing-per-database-view-state"
+    last_query_plan_stats_disabled = "last-query-plan-stats-disabled"
 
 
 DIAGNOSTIC_METADATA = {
@@ -124,6 +132,17 @@ DIAGNOSTIC_METADATA = {
         "remediation": ("Grant VIEW DATABASE STATE to the Datadog user on the listed databases."),
         "docs_url": SQLSERVER_DBM_GRANTS_DOCS_URL,
     },
+    SQLServerConfigurationError.last_query_plan_stats_disabled: {
+        "description": (
+            "Verifies that LAST_QUERY_PLAN_STATS is on in each user database when `query_metrics.collect_real_plans` "
+            "is enabled, so the Agent can collect their real execution plans."
+        ),
+        "remediation": (
+            "Use SQL Server 2019 or later, or Azure SQL, and run "
+            "`ALTER DATABASE SCOPED CONFIGURATION SET LAST_QUERY_PLAN_STATS = ON;` in the listed databases."
+        ),
+        "docs_url": SQLSERVER_DBM_SETUP_DOCS_URL,
+    },
 }
 
 
@@ -179,6 +198,8 @@ class SqlserverDiagnose:
                         self._diagnose_msdb_select(cursor)
                     if self._needs_per_database_access():
                         self._diagnose_per_database_access(cursor)
+                    if self._needs_last_query_plan_stats():
+                        self._diagnose_last_query_plan_stats(cursor)
         except (ConfigurationError, SQLConnectionError) as e:
             code = SQLServerConfigurationError.connection_failure
             self._fail(
@@ -475,6 +496,75 @@ class SqlserverDiagnose:
             category=CATEGORY_SQLSERVER,
         )
 
+    def _diagnose_last_query_plan_stats(self, cursor: Any) -> None:
+        code = SQLServerConfigurationError.last_query_plan_stats_disabled
+        engine_edition = self._current_engine_edition()
+        if self._major_version is None and engine_edition is None:
+            # The version diagnostic already reports why the version is unknown.
+            return
+        if not supports_last_query_plan_stats(self._major_version, engine_edition):
+            self._warn(
+                code,
+                diagnosis=(
+                    "`query_metrics.collect_real_plans` is enabled, but SQL Server major version {} has no "
+                    "LAST_QUERY_PLAN_STATS: real execution plans need SQL Server 2019 or later, or Azure SQL."
+                ).format(self._major_version),
+            )
+            return
+        try:
+            trace_flag_2451 = read_trace_flag_2451(cursor)
+        except Exception:
+            # Without the trace flag status, each database's setting still tells.
+            trace_flag_2451 = False
+        if trace_flag_2451:
+            self._check.diagnosis.success(
+                name=code.value,
+                diagnosis="Trace flag 2451 is on, so LAST_QUERY_PLAN_STATS is on in every database.",
+                category=CATEGORY_SQLSERVER,
+            )
+            return
+
+        try:
+            if is_azure_sql_database(engine_edition):
+                rows = [_fetchone(cursor, "SELECT DB_NAME()")]
+            else:
+                cursor.execute(
+                    "SELECT name FROM sys.databases "
+                    "WHERE state = 0 AND database_id > 4 AND name NOT IN ('master', 'tempdb', 'model', 'msdb')"
+                )
+                rows = cursor.fetchall() or []
+        except Exception as e:
+            self._warn(code, diagnosis="Unable to list the databases to check: {}".format(e), rawerror=str(e))
+            return
+
+        databases = [row[0] for row in rows if row and row[0]][:PER_DATABASE_PROBE_LIMIT]
+        warned = False
+        for name in databases:
+            try:
+                enabled = read_last_query_plan_stats(cursor, name)
+            except Exception as e:
+                self._warn(
+                    code,
+                    diagnosis="Unable to read LAST_QUERY_PLAN_STATS in database {!r}: {}".format(name, e),
+                    rawerror=str(e),
+                )
+                warned = True
+                continue
+            if not enabled:
+                self._warn(
+                    code,
+                    diagnosis=(
+                        "LAST_QUERY_PLAN_STATS is off in database {!r}, so its real execution plans aren't collected."
+                    ).format(name),
+                )
+                warned = True
+        if not warned:
+            self._check.diagnosis.success(
+                name=code.value,
+                diagnosis="LAST_QUERY_PLAN_STATS is on in all {} probed databases.".format(len(databases)),
+                category=CATEGORY_SQLSERVER,
+            )
+
     def _diagnose_msdb_select(self, cursor: Any) -> None:
         code = SQLServerConfigurationError.missing_msdb_select
         failures = []
@@ -558,6 +648,17 @@ class SqlserverDiagnose:
             or database_metrics["secondary_log_shipping_metrics"]["enabled"]
         )
 
+    def _needs_last_query_plan_stats(self) -> bool:
+        config = self._check._config
+        query_metrics = config.statement_metrics_config
+        real_plans = query_metrics.get('collect_real_plans', {}) or {}
+        return (
+            config.dbm_enabled
+            and is_affirmative(query_metrics.get('enabled', True))
+            and is_affirmative(query_metrics.get('collect_plans', True))
+            and is_affirmative(real_plans.get('enabled', False))
+        )
+
     def _msdb_probe_queries(self) -> list[tuple[str, str]]:
         config = self._check._config
         database_metrics = config.database_metrics_config
@@ -628,6 +729,16 @@ class SqlserverDiagnose:
             rawerror=rawerror,
         )
         self._failed.add(code.value)
+
+    def _warn(self, code: SQLServerConfigurationError, diagnosis: str, rawerror: str | None = None) -> None:
+        self._check.diagnosis.warning(
+            name=code.value,
+            diagnosis=diagnosis,
+            category=CATEGORY_SQLSERVER,
+            description=DIAGNOSTIC_METADATA[code]["description"],
+            remediation=build_remediation(code),
+            rawerror=rawerror,
+        )
 
     def _database_desc(self) -> str:
         connection = self._check.connection
