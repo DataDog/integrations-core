@@ -69,6 +69,10 @@ jobs:
     needs:
     - build
 
+    concurrency:
+      group: docs-publish
+      cancel-in-progress: false
+
     permissions:
       contents: write
       
