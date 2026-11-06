@@ -50,7 +50,10 @@ tests:
               name: "Île-de-France"
             timezone: "Europe/Paris"
           ip: "185.64.148.0"
-          port: 46973
+          nat:
+            ip: "185.64.148.0"
+            port: 46973
+          port: 42071
         destination:
           geoip:
             city:
@@ -70,6 +73,9 @@ tests:
               name: "Île-de-France"
             timezone: "Europe/Paris"
           ip: "185.64.148.0"
+          nat:
+            ip: "185.64.148.0"
+            port: 233
           port: 233
       offloaded: 0
       outboundif: "ethernet1/2"
@@ -152,7 +158,10 @@ tests:
               name: "Île-de-France"
             timezone: "Europe/Paris"
           ip: "185.64.148.0"
-          port: 16742
+          nat:
+            ip: "185.64.148.0"
+            port: 16742
+          port: 49896
         destination:
           geoip:
             city:
@@ -172,6 +181,9 @@ tests:
               name: "Île-de-France"
             timezone: "Europe/Paris"
           ip: "185.64.148.0"
+          nat:
+            ip: "185.64.148.0"
+            port: 443
           port: 443
       outboundif: "ethernet1/1"
       palo:
@@ -217,7 +229,7 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1706180577000
  -
-  sample: "<190>Jan 16 14:15:34 PA-VM serial=42808DUMMY733|type=DECRYPTION|subtype=|configver=10.2.5-h5|time_generated=Jan 25 2024 11:02:57 GMT|src=185.64.148.03|dst=185.64.148.0|natsrc=185.64.148.0|natdst=185.64.148.0|rule=DNS|suser=sruser1|duser=dstuser1|app=ssl|vsys=vsys3|from=LAN|to=WAN|inboundif=ethernet1/2|outboundif=ethernet1/1|logset=POC-Dash-DD-204-9099|time_received=2024/01/01 11:20:30|sessionid=1578|repeatcnt=1|sport=5347|dport=7007|natsport=5431|natdport=7001|flags=0x02000000|proto=tcp|act=deny|tunnel=bi-tunnel|suuid=9d526565-ba09-yyxx-9c2e-6f54430132ac|duuid=9d526565-ba09-aabb-9c2e-6f54430132dc|ruleuuid=9d526565-ba01-4e35-1234-6f54430032er|hsstagec2f=Client Hello|hsstagef2s=Server Finished|tlsver=1|tlskeyxchg=RSA|tlsenc=AES-128-CBC|tlsauth=SHA|policyname=CLI Command|eccurve=test_ec_curve|errindex=Cipher|rootstatus=trusted|chainstatus=Uninspected|proxytype=Forward|certserial=XYZ420|fingerprint=test-9d526565-ba01-4e35-9c2e-6f54430032er|notbefore=1704068400|notafter=1704069400|certver=v1|certsize=65536|cnlen=33000|issuerlen=532|rootcnlen=895|snilen=99|certflags=padding3|cn=YM204|issuercn=FRID|rootcn=Yiffi|sni=server1|err=failed validation|contid=fashfgdshkfgdskfsh21515|podnamespace=pod_namespace|podname=pod_name|sedl=src_edl|dedl=dst_edl|sdag=src_dag|ddag=dst_dag|scat=network|sprofile=roaming_comp|smodel=lenovo-win|sven=win|src_osfamily=windows|sosver=1803|shost=WIN45|smac=00:11:22:33:44:55|dcat=firewall|dprofile=router|dmodel=44OS|dven=cisfo|dosfam=windows|dosver=1809|dhost=DE423|dmac=BE:EF:57:33:13:C4|seqno=7288183790458945051|actflag=0x0|vsysname=vsys2|dvc=PA-VM|vsysid=5455545|appsubcat=encrypted-tunnel|appcat=business-systems|apptech=browser-based|apprisk=1|appchar=used-by-malware,able-to-transfer-file,has-known-vulnerability,tunnel-other-application,pervasive-use|appcont=docker|appsaas=1|appstate=1|cluster=CLN0"
+  sample: "<190>Jan 16 14:15:34 PA-VM serial=42808DUMMY733|type=DECRYPTION|subtype=|configver=10.2.5-h5|time_generated=Jan 25 2024 11:02:57 GMT|src=185.64.148.0|dst=185.64.148.0|natsrc=185.64.148.0|natdst=185.64.148.0|rule=DNS|suser=sruser1|duser=dstuser1|app=ssl|vsys=vsys3|from=LAN|to=WAN|inboundif=ethernet1/2|outboundif=ethernet1/1|logset=POC-Dash-DD-204-9099|time_received=2024/01/01 11:20:30|sessionid=1578|repeatcnt=1|sport=5347|dport=7007|natsport=5431|natdport=7001|flags=0x02000000|proto=tcp|act=deny|tunnel=bi-tunnel|suuid=9d526565-ba09-yyxx-9c2e-6f54430132ac|duuid=9d526565-ba09-aabb-9c2e-6f54430132dc|ruleuuid=9d526565-ba01-4e35-1234-6f54430032er|hsstagec2f=Client Hello|hsstagef2s=Server Finished|tlsver=1|tlskeyxchg=RSA|tlsenc=AES-128-CBC|tlsauth=SHA|policyname=CLI Command|eccurve=test_ec_curve|errindex=Cipher|rootstatus=trusted|chainstatus=Uninspected|proxytype=Forward|certserial=XYZ420|fingerprint=test-9d526565-ba01-4e35-9c2e-6f54430032er|notbefore=1704068400|notafter=1704069400|certver=v1|certsize=65536|cnlen=33000|issuerlen=532|rootcnlen=895|snilen=99|certflags=padding3|cn=YM204|issuercn=FRID|rootcn=Yiffi|sni=server1|err=failed validation|contid=fashfgdshkfgdskfsh21515|podnamespace=pod_namespace|podname=pod_name|sedl=src_edl|dedl=dst_edl|sdag=src_dag|ddag=dst_dag|scat=network|sprofile=roaming_comp|smodel=lenovo-win|sven=win|src_osfamily=windows|sosver=1803|shost=WIN45|smac=00:11:22:33:44:55|dcat=firewall|dprofile=router|dmodel=44OS|dven=cisfo|dosfam=windows|dosver=1809|dhost=DE423|dmac=BE:EF:57:33:13:C4|seqno=7288183790458945051|actflag=0x0|vsysname=vsys2|dvc=PA-VM|vsysid=5455545|appsubcat=encrypted-tunnel|appcat=business-systems|apptech=browser-based|apprisk=1|appchar=used-by-malware,able-to-transfer-file,has-known-vulnerability,tunnel-other-application,pervasive-use|appcont=docker|appsaas=1|appstate=1|cluster=CLN0"
   result:
     custom:
       actflag: "0x0"
@@ -282,7 +294,10 @@ tests:
               name: "Île-de-France"
             timezone: "Europe/Paris"
           ip: "185.64.148.0"
-          port: 5431
+          nat:
+            ip: "185.64.148.0"
+            port: 5431
+          port: 5347
         destination:
           geoip:
             city:
@@ -302,7 +317,10 @@ tests:
               name: "Île-de-France"
             timezone: "Europe/Paris"
           ip: "185.64.148.0"
-          port: 7001
+          nat:
+            ip: "185.64.148.0"
+            port: 7001
+          port: 7007
       notafter: 1704069400
       notbefore: 1704068400
       outboundif: "ethernet1/1"
@@ -347,7 +365,7 @@ tests:
       sni: "server1"
       snilen: 99
       sport: 5347
-      src: "185.64.148.03"
+      src: "185.64.148.0"
       srczone: "LAN"
       suser: "sruser1"
       suuid: "9d526565-ba09-yyxx-9c2e-6f54430132ac"
@@ -362,7 +380,7 @@ tests:
       type: "DECRYPTION"
       vsysid: 5455545
       vsysname: "vsys2"
-    message: "<190>Jan 16 14:15:34 PA-VM serial=42808DUMMY733|type=DECRYPTION|subtype=|configver=10.2.5-h5|time_generated=Jan 25 2024 11:02:57 GMT|src=185.64.148.03|dst=185.64.148.0|natsrc=185.64.148.0|natdst=185.64.148.0|rule=DNS|suser=sruser1|duser=dstuser1|app=ssl|vsys=vsys3|from=LAN|to=WAN|inboundif=ethernet1/2|outboundif=ethernet1/1|logset=POC-Dash-DD-204-9099|time_received=2024/01/01 11:20:30|sessionid=1578|repeatcnt=1|sport=5347|dport=7007|natsport=5431|natdport=7001|flags=0x02000000|proto=tcp|act=deny|tunnel=bi-tunnel|suuid=9d526565-ba09-yyxx-9c2e-6f54430132ac|duuid=9d526565-ba09-aabb-9c2e-6f54430132dc|ruleuuid=9d526565-ba01-4e35-1234-6f54430032er|hsstagec2f=Client Hello|hsstagef2s=Server Finished|tlsver=1|tlskeyxchg=RSA|tlsenc=AES-128-CBC|tlsauth=SHA|policyname=CLI Command|eccurve=test_ec_curve|errindex=Cipher|rootstatus=trusted|chainstatus=Uninspected|proxytype=Forward|certserial=XYZ420|fingerprint=test-9d526565-ba01-4e35-9c2e-6f54430032er|notbefore=1704068400|notafter=1704069400|certver=v1|certsize=65536|cnlen=33000|issuerlen=532|rootcnlen=895|snilen=99|certflags=padding3|cn=YM204|issuercn=FRID|rootcn=Yiffi|sni=server1|err=failed validation|contid=fashfgdshkfgdskfsh21515|podnamespace=pod_namespace|podname=pod_name|sedl=src_edl|dedl=dst_edl|sdag=src_dag|ddag=dst_dag|scat=network|sprofile=roaming_comp|smodel=lenovo-win|sven=win|src_osfamily=windows|sosver=1803|shost=WIN45|smac=00:11:22:33:44:55|dcat=firewall|dprofile=router|dmodel=44OS|dven=cisfo|dosfam=windows|dosver=1809|dhost=DE423|dmac=BE:EF:57:33:13:C4|seqno=7288183790458945051|actflag=0x0|vsysname=vsys2|dvc=PA-VM|vsysid=5455545|appsubcat=encrypted-tunnel|appcat=business-systems|apptech=browser-based|apprisk=1|appchar=used-by-malware,able-to-transfer-file,has-known-vulnerability,tunnel-other-application,pervasive-use|appcont=docker|appsaas=1|appstate=1|cluster=CLN0"
+    message: "<190>Jan 16 14:15:34 PA-VM serial=42808DUMMY733|type=DECRYPTION|subtype=|configver=10.2.5-h5|time_generated=Jan 25 2024 11:02:57 GMT|src=185.64.148.0|dst=185.64.148.0|natsrc=185.64.148.0|natdst=185.64.148.0|rule=DNS|suser=sruser1|duser=dstuser1|app=ssl|vsys=vsys3|from=LAN|to=WAN|inboundif=ethernet1/2|outboundif=ethernet1/1|logset=POC-Dash-DD-204-9099|time_received=2024/01/01 11:20:30|sessionid=1578|repeatcnt=1|sport=5347|dport=7007|natsport=5431|natdport=7001|flags=0x02000000|proto=tcp|act=deny|tunnel=bi-tunnel|suuid=9d526565-ba09-yyxx-9c2e-6f54430132ac|duuid=9d526565-ba09-aabb-9c2e-6f54430132dc|ruleuuid=9d526565-ba01-4e35-1234-6f54430032er|hsstagec2f=Client Hello|hsstagef2s=Server Finished|tlsver=1|tlskeyxchg=RSA|tlsenc=AES-128-CBC|tlsauth=SHA|policyname=CLI Command|eccurve=test_ec_curve|errindex=Cipher|rootstatus=trusted|chainstatus=Uninspected|proxytype=Forward|certserial=XYZ420|fingerprint=test-9d526565-ba01-4e35-9c2e-6f54430032er|notbefore=1704068400|notafter=1704069400|certver=v1|certsize=65536|cnlen=33000|issuerlen=532|rootcnlen=895|snilen=99|certflags=padding3|cn=YM204|issuercn=FRID|rootcn=Yiffi|sni=server1|err=failed validation|contid=fashfgdshkfgdskfsh21515|podnamespace=pod_namespace|podname=pod_name|sedl=src_edl|dedl=dst_edl|sdag=src_dag|ddag=dst_dag|scat=network|sprofile=roaming_comp|smodel=lenovo-win|sven=win|src_osfamily=windows|sosver=1803|shost=WIN45|smac=00:11:22:33:44:55|dcat=firewall|dprofile=router|dmodel=44OS|dven=cisfo|dosfam=windows|dosver=1809|dhost=DE423|dmac=BE:EF:57:33:13:C4|seqno=7288183790458945051|actflag=0x0|vsysname=vsys2|dvc=PA-VM|vsysid=5455545|appsubcat=encrypted-tunnel|appcat=business-systems|apptech=browser-based|apprisk=1|appchar=used-by-malware,able-to-transfer-file,has-known-vulnerability,tunnel-other-application,pervasive-use|appcont=docker|appsaas=1|appstate=1|cluster=CLN0"
     service: "DECRYPTION"
     tags:
      - "source:LOGS_SOURCE"
@@ -434,3 +452,119 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1706180577000
+ -
+  sample: "<14>Oct  5 16:15:08 panorama-01 serial=012345678901|type=TRAFFIC|subtype=end|time_generated=Oct 05 2026 16:15:07 GMT|src=10.0.0.14|dst=185.64.148.0|natsrc=203.0.113.5|natdst=185.64.148.0|rule=rule-04|app=ssl|vsys=vsys1|from=trust|to=untrust|sessionid=123459|repeatcnt=1|sport=51517|dport=443|natsport=40406|natdport=443|proto=tcp|act=allow|bytes=600|bytes_sent=200|bytes_received=400|pkt=6|seq=7300000000000000005|dvc=fw-01"
+  result:
+    custom:
+      app: "ssl"
+      bytes: 600
+      dport: 443
+      dst: "185.64.148.0"
+      dstzone: "untrust"
+      dvc: "fw-01"
+      network:
+        bytes_read: 200
+        bytes_written: 400
+        client:
+          geoip: {}
+          ip: "10.0.0.14"
+          nat:
+            ip: "203.0.113.5"
+            port: 40406
+          port: 51517
+        destination:
+          geoip:
+            city:
+              name: "Paris"
+            continent:
+              code: "EU"
+              name: "Europe"
+            country:
+              iso_code: "FR"
+              name: "France"
+            ipAddress: "185.64.148.0"
+            location:
+              latitude: 48.90654
+              longitude: 2.33339
+            subdivision:
+              iso_code: "FR-IDF"
+              name: "Île-de-France"
+            timezone: "Europe/Paris"
+          ip: "185.64.148.0"
+          nat:
+            ip: "185.64.148.0"
+            port: 443
+          port: 443
+      palo:
+        alto:
+          panorama:
+            action: "allow"
+            pkt: 6
+            vsys: "vsys1"
+      proto: "tcp"
+      repeatcnt: 1
+      rule: "rule-04"
+      seq: 7300000000000000005
+      serial: "012345678901"
+      sessionid: 123459
+      sport: 51517
+      src: "10.0.0.14"
+      srczone: "trust"
+      subtype: "end"
+      time_generated: "Oct 05 2026 16:15:07 GMT"
+      timestamp: 1791216907000
+      type: "TRAFFIC"
+    message: "<14>Oct  5 16:15:08 panorama-01 serial=012345678901|type=TRAFFIC|subtype=end|time_generated=Oct 05 2026 16:15:07 GMT|src=10.0.0.14|dst=185.64.148.0|natsrc=203.0.113.5|natdst=185.64.148.0|rule=rule-04|app=ssl|vsys=vsys1|from=trust|to=untrust|sessionid=123459|repeatcnt=1|sport=51517|dport=443|natsport=40406|natdport=443|proto=tcp|act=allow|bytes=600|bytes_sent=200|bytes_received=400|pkt=6|seq=7300000000000000005|dvc=fw-01"
+    service: "TRAFFIC"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1791216907000
+ -
+  sample: "<14>Oct  5 16:15:08 panorama-01 serial=012345678901|type=TRAFFIC|subtype=end|time_generated=Oct 05 2026 16:15:07 GMT|src=10.0.0.15|dst=10.0.1.20|natsrc=0.0.0.0|natdst=0.0.0.0|rule=rule-05|app=ldap|vsys=vsys1|from=trust|to=dmz|sessionid=123460|repeatcnt=1|sport=51518|dport=389|natsport=0|natdport=0|proto=tcp|act=allow|bytes=900|bytes_sent=300|bytes_received=600|pkt=8|seq=7300000000000000006|dvc=fw-01"
+  result:
+    custom:
+      app: "ldap"
+      bytes: 900
+      dport: 389
+      dst: "10.0.1.20"
+      dstzone: "dmz"
+      dvc: "fw-01"
+      natdport: 0
+      natdst: "0.0.0.0"
+      natsport: 0
+      natsrc: "0.0.0.0"
+      network:
+        bytes_read: 300
+        bytes_written: 600
+        client:
+          geoip: {}
+          ip: "10.0.0.15"
+          port: 51518
+        destination:
+          geoip: {}
+          ip: "10.0.1.20"
+          port: 389
+      palo:
+        alto:
+          panorama:
+            action: "allow"
+            pkt: 8
+            vsys: "vsys1"
+      proto: "tcp"
+      repeatcnt: 1
+      rule: "rule-05"
+      seq: 7300000000000000006
+      serial: "012345678901"
+      sessionid: 123460
+      sport: 51518
+      src: "10.0.0.15"
+      srczone: "trust"
+      subtype: "end"
+      time_generated: "Oct 05 2026 16:15:07 GMT"
+      timestamp: 1791216907000
+      type: "TRAFFIC"
+    message: "<14>Oct  5 16:15:08 panorama-01 serial=012345678901|type=TRAFFIC|subtype=end|time_generated=Oct 05 2026 16:15:07 GMT|src=10.0.0.15|dst=10.0.1.20|natsrc=0.0.0.0|natdst=0.0.0.0|rule=rule-05|app=ldap|vsys=vsys1|from=trust|to=dmz|sessionid=123460|repeatcnt=1|sport=51518|dport=389|natsport=0|natdport=0|proto=tcp|act=allow|bytes=900|bytes_sent=300|bytes_received=600|pkt=8|seq=7300000000000000006|dvc=fw-01"
+    service: "TRAFFIC"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1791216907000
