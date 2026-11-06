@@ -135,10 +135,11 @@ DIAGNOSTIC_METADATA = {
     SQLServerConfigurationError.last_query_plan_stats_disabled: {
         "description": (
             "Verifies that LAST_QUERY_PLAN_STATS is on in each user database when `query_metrics.collect_real_plans` "
-            "is enabled, so the Agent can collect their real execution plans."
+            "is enabled. With it off, real execution plans are only collected for the few queries SQL Server keeps "
+            "actual plans of on its own."
         ),
         "remediation": (
-            "Use SQL Server 2019 or later, or Azure SQL, and run "
+            "Use SQL Server 2019 or later, or Azure SQL, and for full coverage run "
             "`ALTER DATABASE SCOPED CONFIGURATION SET LAST_QUERY_PLAN_STATS = ON;` in the listed databases."
         ),
         "docs_url": SQLSERVER_DBM_SETUP_DOCS_URL,
@@ -554,7 +555,8 @@ class SqlserverDiagnose:
                 self._warn(
                     code,
                     diagnosis=(
-                        "LAST_QUERY_PLAN_STATS is off in database {!r}, so its real execution plans aren't collected."
+                        "LAST_QUERY_PLAN_STATS is off in database {!r}: real execution plans are only collected for "
+                        "the few queries SQL Server keeps actual plans of on its own."
                     ).format(name),
                 )
                 warned = True

@@ -68,6 +68,8 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
     "total_spills",
 ]
 
+# last_execution_time is in the server's time zone. last_execution_time_with_offset, for real plan events, adds the
+# server's current UTC offset. It's an ISO 8601 string because pyodbc can't read the datetimeoffset type.
 STATEMENT_METRICS_QUERY = """\
 with qstats as (
     select
@@ -117,6 +119,9 @@ select
             - statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
     encrypted as is_encrypted,
+    CONVERT(varchar(34),
+        TODATETIMEOFFSET(s.last_execution_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
+    ) as last_execution_time_with_offset,
     OBJECT_SCHEMA_NAME(s.sproc_object_id, s.dbid) as schema_name,
     OBJECT_NAME(s.sproc_object_id, s.dbid) as procedure_name,
     s.* from qstats_aggr_split s
@@ -134,6 +139,9 @@ with qstats_aggr as (
             CONVERT(VARCHAR(64), CONVERT(binary(64), qs.plan_handle), 1),
             CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_start_offset), 1),
             CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_end_offset), 1))) as plan_handle_and_offsets,
+        CONVERT(varchar(34),
+            TODATETIMEOFFSET(max(qs.last_execution_time), DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
+        ) as last_execution_time_with_offset,
         eps.object_id as sproc_object_id,
         {query_metrics_column_sums}
         from sys.dm_exec_query_stats qs
@@ -208,6 +216,9 @@ select
             - statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
     encrypted as is_encrypted,
+    CONVERT(varchar(34),
+        TODATETIMEOFFSET(s.last_execution_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
+    ) as last_execution_time_with_offset,
     OBJECT_SCHEMA_NAME(s.sproc_object_id, s.dbid) as schema_name,
     OBJECT_NAME(s.sproc_object_id, s.dbid) as procedure_name,
     s.* from qstats_aggr_split s
@@ -219,34 +230,10 @@ select cast(query_plan as nvarchar(max)) as query_plan, encrypted as is_encrypte
 from sys.dm_exec_query_plan(CONVERT(varbinary(max), ?, 1))
 """
 
-# The plan's QueryTimeStats are wrong: on SQL Server 2019 and 2022 each statement has the times of the one before, and
-# 2025 swaps CPU and elapsed time. So the real plan event takes the last execution's statistics of its statement from
-# sys.dm_exec_query_stats, whose times are in microseconds. last_execution_time is in the server's time zone, so it gets
-# the server's current UTC offset, as an ISO 8601 string because pyodbc can't read the datetimeoffset type.
 REAL_PLAN_LOOKUP_QUERY = """\
-select cast(ps.query_plan as nvarchar(max)) as query_plan,
-    CONVERT(varchar(34),
-        TODATETIMEOFFSET(qs.last_execution_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
-    ) as last_execution_time,
-    qs.last_elapsed_time, qs.last_worker_time, qs.last_dop, qs.last_grant_kb, qs.last_used_grant_kb, qs.last_spills,
-    qs.last_rows
-from sys.dm_exec_query_plan_stats(CONVERT(varbinary(max), ?, 1)) ps
-outer apply (
-    select top 1 last_execution_time, last_elapsed_time, last_worker_time, last_dop, last_grant_kb, last_used_grant_kb,
-        last_spills, last_rows
-    from sys.dm_exec_query_stats
-    where plan_handle = CONVERT(varbinary(max), ?, 1) and statement_start_offset = ? and statement_end_offset = ?
-) qs
+select cast(query_plan as nvarchar(max)) as query_plan
+from sys.dm_exec_query_plan_stats(CONVERT(varbinary(max), ?, 1))
 """
-REAL_PLAN_STATEMENT_STATS_COLUMNS = (
-    "last_elapsed_time",
-    "last_worker_time",
-    "last_dop",
-    "last_grant_kb",
-    "last_used_grant_kb",
-    "last_spills",
-    "last_rows",
-)
 
 
 def _row_key(row):
@@ -585,6 +572,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         # the text in metrics payloads
         if 'procedure_text' in row:
             del row['procedure_text']
+        # only real plan events use it
+        row.pop('last_execution_time_with_offset', None)
         return row
 
     def _to_metrics_payload(self, rows, max_queries):
@@ -852,11 +841,12 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             )
         return False
 
-    def _last_query_plan_stats_enabled(self, cursor, db_name: str | None) -> bool:
+    def _last_query_plan_stats_setting(self, cursor, db_name: str | None) -> str:
         """
-        Whether the database keeps the last actual plan of its queries. The settings are read at most every
-        `LAST_QUERY_PLAN_STATS_REFRESH_INTERVAL` seconds. When a database's setting can't be read, or the row has no
-        database, its real plans are looked for anyway, and only kept if they hold runtime data.
+        Whether the database keeps the last actual plan of its queries: `on`, `off`, or `unknown` when its setting can't
+        be read or the row has no database. The settings are read at most every `LAST_QUERY_PLAN_STATS_REFRESH_INTERVAL`
+        seconds. The setting doesn't decide collection: SQL Server 2022 and later keep actual plans of some queries with
+        it off, so real plans are kept whenever they hold runtime data, and the setting only drives the health event.
         """
         now = time.time()
         if now - self._last_query_plan_stats_read_at >= LAST_QUERY_PLAN_STATS_REFRESH_INTERVAL:
@@ -872,11 +862,14 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             # none of their plans gets collected.
             for failing_db in sorted(self._last_query_plan_stats_disabled_dbs):
                 self._read_last_query_plan_stats(cursor, failing_db)
-        if self._trace_flag_2451 or not db_name:
-            return True
+        if self._trace_flag_2451:
+            return "on"
+        if not db_name:
+            return "unknown"
         if db_name not in self._last_query_plan_stats_by_db:
             self._read_last_query_plan_stats(cursor, db_name)
-        return self._last_query_plan_stats_by_db[db_name] is not False
+        enabled = self._last_query_plan_stats_by_db[db_name]
+        return "unknown" if enabled is None else "on" if enabled else "off"
 
     def _read_last_query_plan_stats(self, cursor, db_name: str) -> None:
         enabled: bool | None = True
@@ -888,8 +881,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 self.log.debug("Failed to read LAST_QUERY_PLAN_STATS in database '%s': %s", db_name, e)
                 enabled = None
         self._last_query_plan_stats_by_db[db_name] = enabled
-        # The system databases run the Agent's own queries, so a warning there is noise. Their real plans are still
-        # collected when the setting is on.
+        # The system databases run the Agent's own queries, so a warning there is noise.
         if enabled is False and db_name.lower() not in SYSTEM_DATABASES:
             if db_name not in self._last_query_plan_stats_disabled_dbs:
                 if not self._last_query_plan_stats_disabled_dbs:
@@ -898,9 +890,9 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                     )
                 self._last_query_plan_stats_disabled_dbs.add(db_name)
                 self.log.warning(
-                    "LAST_QUERY_PLAN_STATS is off in database '%s', so its real execution plans aren't collected. "
-                    "Turn it on in that database with `ALTER DATABASE SCOPED CONFIGURATION SET LAST_QUERY_PLAN_STATS "
-                    "= ON;`: %s",
+                    "LAST_QUERY_PLAN_STATS is off in database '%s': real execution plans are only collected for the "
+                    "few queries SQL Server keeps actual plans of on its own. Turn it on in that database for full "
+                    "coverage with `ALTER DATABASE SCOPED CONFIGURATION SET LAST_QUERY_PLAN_STATS = ON;`: %s",
                     db_name,
                     SQLSERVER_DBM_SETUP_DOCS_URL,
                 )
@@ -912,23 +904,17 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                 )
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _load_real_plan(self, row: dict, cursor) -> dict | None:
-        """The real plan of the row's cached plan, with the last execution's statistics of the row's statement."""
-        params = (
-            "0x" + row['plan_handle'],
-            "0x" + row['plan_handle'],
-            row['statement_start_offset'],
-            row['statement_end_offset'],
-        )
-        self.log.debug("Running query [%s] %s", REAL_PLAN_LOOKUP_QUERY, params)
-        cursor.execute(REAL_PLAN_LOOKUP_QUERY, params)
-        columns = [column[0] for column in cursor.description]
+    def _load_real_plan(self, plan_handle: str, cursor) -> str | None:
+        self.log.debug("Running query [%s] %s", REAL_PLAN_LOOKUP_QUERY, (plan_handle,))
+        cursor.execute(REAL_PLAN_LOOKUP_QUERY, ("0x" + plan_handle,))
         result = cursor.fetchone()
-        return dict(zip(columns, result)) if result else None
+        return result[0] if result else None
 
-    def _count_real_plan(self, status: str) -> None:
+    def _count_real_plan(self, status: str, tags: list[str] | None = None) -> None:
         self._check.count(
-            "dd.sqlserver.statements.real_plans", 1, **self._check.debug_stats_kwargs(tags=["status:" + status])
+            "dd.sqlserver.statements.real_plans",
+            1,
+            **self._check.debug_stats_kwargs(tags=["status:" + status] + (tags or [])),
         )
 
     def _collect_real_plan_events(
@@ -942,19 +928,16 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             return
         if self.enforce_collection_interval_deadline and time.time() > deadline:
             return
-        if not self._last_query_plan_stats_enabled(cursor, row.get('database_name')):
-            self._count_real_plan("db_disabled")
-            return
+        last_query_plan_stats = self._last_query_plan_stats_setting(cursor, row.get('database_name'))
         raise_if_cancelled(self._cancel_event)
         try:
-            real_plan = self._load_real_plan(row, cursor) or {}
+            raw_plan = self._load_real_plan(row['plan_handle'], cursor)
         except Exception as e:
             # A connection closed during cancellation may surface as a database error.
             raise_if_cancelled(self._cancel_event)
             self.log.debug("Failed to load real plan. plan_handle=%s error=%s", row['plan_handle'], e)
             self._count_real_plan("error")
             return
-        raw_plan = real_plan.get('query_plan')
         if not raw_plan:
             self._count_real_plan("empty")
             return
@@ -986,11 +969,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             "collection_errors": None,
         }
         # The plan describes the last execution of the cached plan, not one of the executions the metrics count.
-        real_plan_event["sqlserver"]["last_execution_time"] = real_plan.get('last_execution_time')
-        # A procedure's plan covers all its statements, so one statement's statistics would misdescribe it.
-        if not row['is_proc']:
-            for column in REAL_PLAN_STATEMENT_STATS_COLUMNS:
-                real_plan_event["sqlserver"][column] = real_plan.get(column)
+        real_plan_event["sqlserver"]["last_execution_time"] = row.get('last_execution_time_with_offset')
         if self._collect_raw_query_statement:
             raw_plan_event = copy.deepcopy(real_plan_event)
             raw_plan_event["dbm_type"] = "rqp"  # raw query plan
@@ -999,5 +978,5 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             raw_plan_event["db"]["plan"]["raw_signature"] = raw_plan_signature
             real_plan_event["db"]["plan"]["raw_signature"] = raw_plan_signature
             yield raw_plan_event
-        self._count_real_plan("collected")
+        self._count_real_plan("collected", tags=["setting:" + last_query_plan_stats])
         yield real_plan_event
