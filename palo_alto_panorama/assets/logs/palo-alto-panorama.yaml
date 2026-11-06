@@ -583,13 +583,13 @@ pipeline:
       filter:
         query: '@type:("DECRYPTION" OR "TRAFFIC" OR "THREAT" OR "START" OR "END") @natdst:* -@natdst:"0.0.0.0"'
       processors:
-        # PAN-OS copies `dst`/`dport` into `natdst`/`natdport` when only source NAT is applied. Map the
+        # PAN-OS copies the original destination into `natdst`/`natdport` when only source NAT is applied. Map the
         # post-NAT destination only when it differs from the original one: join both into one string and
         # let the `translated` rule's backreferences reject the case where the halves are equal.
         - type: string-builder-processor
           name: Join original and post-NAT destination
           enabled: true
-          template: "%{dst} %{dport} %{natdst} %{natdport}"
+          template: "%{network.destination.ip} %{network.destination.port} %{natdst} %{natdport}"
           target: natdst_compare
           replaceMissing: false
         - type: grok-parser
