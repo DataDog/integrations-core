@@ -135,8 +135,7 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
             ttl=60 * 60 / self._config.full_statement_text_samples_per_hour_per_query,
         )  # type: TTLCache
 
-        # statement_rows: cache of all rows for each digest, keyed by (schema_name, query_signature)
-        # This is used to cache the metrics for queries that have the same query_signature but different digests
+        # Cache signature groups, with independently expiring digest/prepared-statement rows in each group.
         self._statement_rows = TTLCache(
             maxsize=self._config.statement_rows_cache_max_size,
             ttl=self._config.statement_rows_cache_ttl,
@@ -387,22 +386,29 @@ class MySQLStatementMetrics(ManagedAuthConnectionMixin, DBMAsyncJob):
 
         return normalized_rows
 
-    def _add_associated_rows(self, rows):
+    def _add_associated_rows(self, rows: list[PyMysqlRow]) -> list[PyMysqlRow]:
         """
-        If two or more statements with different digests have the same query_signature, they are considered the same
-        Because only one digest statement may be updated, we cache all the rows for each digest,
-        update with any new rows and then return all the rows for all the query_signatures.
-
-        We return all rows to guard against the case where a signature wasn't collected on the immediately previous run
-        but was present on runs before that.
+        Retain recently collected counters across runs where only some statements are returned.
+        Each identity expires independently, even when another has the same query signature.
+        Returning cached rows preserves their derivative baselines until eviction.
         """
         for row in rows:
             key = (row['schema_name'], row['query_signature'])
-            digest_rows = self._statement_rows.get(key, {})
+            digest_rows = self._statement_rows.get(key)
+            if digest_rows is None:
+                # Keep the configured capacity in signature groups; a per-row cap could discard active baselines.
+                digest_rows = TTLCache(
+                    maxsize=float('inf'), ttl=self._statement_rows.ttl, timer=self._statement_rows.timer
+                )
             digest_rows[_row_state_key(row)] = row
             self._statement_rows[key] = digest_rows
 
-        return [row for statement_row in self._statement_rows.values() for row in statement_row.values()]
+        associated_rows = []
+        for digest_rows in self._statement_rows.values():
+            # TTLCache iteration skips expired entries but does not release their references.
+            digest_rows.expire()
+            associated_rows.extend(digest_rows.values())
+        return associated_rows
 
     def _rows_to_fqt_events(self, rows, tags):
         for row in rows:

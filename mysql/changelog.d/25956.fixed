@@ -1,0 +1,1 @@
+Expire stale MySQL query metric identities independently within active query signature groups to prevent indefinite cache retention.
