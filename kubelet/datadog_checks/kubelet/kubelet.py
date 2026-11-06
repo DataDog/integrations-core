@@ -120,6 +120,8 @@ NEW_1_14_SUMMARIES = {}
 TRANSFORM_VALUE_HISTOGRAMS = {
     'kubelet_network_plugin_operations_duration_seconds': 'kubelet.network_plugin.latency',
     'kubelet_pod_start_duration_seconds': 'kubelet.pod.start.duration',
+    'kubelet_pod_start_sli_duration_seconds': 'kubelet.pod.start.sli.duration',
+    'kubelet_pod_start_total_duration_seconds': 'kubelet.pod.start.total.duration',
     'kubelet_pod_worker_duration_seconds': 'kubelet.pod.worker.duration',
     'kubelet_pod_worker_start_duration_seconds': 'kubelet.pod.worker.start.duration',
     'kubelet_runtime_operations_duration_seconds': 'kubelet.runtime.operations.duration',
