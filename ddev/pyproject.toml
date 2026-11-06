@@ -27,7 +27,7 @@ classifiers = [
 ]
 dependencies = [
     "aiolimiter==1.2.1",
-    "anthropic>=0.18.0",
+    "anthropic==2.1.0",
     "click~=8.1.6",
     "coverage",
     "datadog-api-client==2.20.0",

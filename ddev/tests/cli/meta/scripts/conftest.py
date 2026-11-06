@@ -1,6 +1,10 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import json
+
+import anthropic
+import httpx2
 import pytest
 
 from ddev.repo.core import Repository
@@ -233,3 +237,51 @@ def write_file(folder, file, content):
     folder.mkdir(exist_ok=True, parents=True)
     file_path = folder / file
     file_path.write_text(content)
+
+
+def _text_stream_response(text: str) -> httpx2.Response:
+    events = [
+        {
+            'type': 'message_start',
+            'message': {
+                'id': 'msg_test',
+                'type': 'message',
+                'role': 'assistant',
+                'model': 'claude-test',
+                'content': [],
+                'stop_reason': None,
+                'stop_sequence': None,
+                'usage': {'input_tokens': 1, 'output_tokens': 0},
+            },
+        },
+        {'type': 'content_block_start', 'index': 0, 'content_block': {'type': 'text', 'text': ''}},
+        {'type': 'content_block_delta', 'index': 0, 'delta': {'type': 'text_delta', 'text': text}},
+        {'type': 'content_block_stop', 'index': 0},
+        {
+            'type': 'message_delta',
+            'delta': {'stop_reason': 'end_turn', 'stop_sequence': None},
+            'usage': {'output_tokens': 1},
+        },
+        {'type': 'message_stop'},
+    ]
+    body = ''.join(f"event: {event['type']}\ndata: {json.dumps(event)}\n\n" for event in events)
+    return httpx2.Response(200, headers={'content-type': 'text/event-stream'}, content=body.encode())
+
+
+@pytest.fixture
+def anthropic_requests(monkeypatch) -> list[dict]:
+    """Route the installed SDK's HTTP calls to a mock transport and record each request body."""
+    sent: list[dict] = []
+
+    def handler(request: httpx2.Request) -> httpx2.Response:
+        sent.append(json.loads(request.content))
+        return _text_stream_response('```python\nprint("simulating")\n```')
+
+    real_client = anthropic.Anthropic
+
+    def client_factory(api_key: str) -> anthropic.Anthropic:
+        http_client = anthropic.DefaultHttpxClient(transport=httpx2.MockTransport(handler))
+        return real_client(api_key=api_key, http_client=http_client, max_retries=0)
+
+    monkeypatch.setattr(anthropic, 'Anthropic', client_factory)
+    return sent

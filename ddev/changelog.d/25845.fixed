@@ -1,0 +1,1 @@
+Pin `anthropic` to 2.1.0 and fix `ddev meta scripts dynamicd`, which failed on `anthropic` 1.0.0 and later and used a retired default model.
