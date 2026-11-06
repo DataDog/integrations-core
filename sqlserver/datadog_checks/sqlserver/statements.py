@@ -67,6 +67,8 @@ SQL_SERVER_QUERY_METRICS_COLUMNS = [
     "total_spills",
 ]
 
+# last_execution_time is in the server's time zone. last_execution_time_with_offset, for real plan events, adds the
+# server's current UTC offset. It's an ISO 8601 string because pyodbc can't read the datetimeoffset type.
 STATEMENT_METRICS_QUERY = """\
 with qstats as (
     select
@@ -116,6 +118,9 @@ select
             - statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
     encrypted as is_encrypted,
+    CONVERT(varchar(34),
+        TODATETIMEOFFSET(s.last_execution_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
+    ) as last_execution_time_with_offset,
     OBJECT_SCHEMA_NAME(s.sproc_object_id, s.dbid) as schema_name,
     OBJECT_NAME(s.sproc_object_id, s.dbid) as procedure_name,
     s.* from qstats_aggr_split s
@@ -133,7 +138,9 @@ with qstats_aggr as (
             CONVERT(VARCHAR(64), CONVERT(binary(64), qs.plan_handle), 1),
             CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_start_offset), 1),
             CONVERT(VARCHAR(10), CONVERT(varbinary(4), qs.statement_end_offset), 1))) as plan_handle_and_offsets,
-        max(qs.last_execution_time) as last_execution_time,
+        CONVERT(varchar(34),
+            TODATETIMEOFFSET(max(qs.last_execution_time), DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
+        ) as last_execution_time_with_offset,
         eps.object_id as sproc_object_id,
         {query_metrics_column_sums}
         from sys.dm_exec_query_stats qs
@@ -208,6 +215,9 @@ select
             - statement_start_offset) / 2) + 1) AS statement_text,
     SUBSTRING(qt.text, 1, {proc_char_limit}) as text,
     encrypted as is_encrypted,
+    CONVERT(varchar(34),
+        TODATETIMEOFFSET(s.last_execution_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
+    ) as last_execution_time_with_offset,
     OBJECT_SCHEMA_NAME(s.sproc_object_id, s.dbid) as schema_name,
     OBJECT_NAME(s.sproc_object_id, s.dbid) as procedure_name,
     s.* from qstats_aggr_split s
@@ -561,6 +571,8 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         # the text in metrics payloads
         if 'procedure_text' in row:
             del row['procedure_text']
+        # only real plan events use it
+        row.pop('last_execution_time_with_offset', None)
         return row
 
     def _to_metrics_payload(self, rows, max_queries):
@@ -953,7 +965,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             "collection_errors": None,
         }
         # The plan describes the last execution of the cached plan, not one of the executions the metrics count.
-        real_plan_event["sqlserver"]["last_execution_time"] = row.get('last_execution_time')
+        real_plan_event["sqlserver"]["last_execution_time"] = row.get('last_execution_time_with_offset')
         if self._collect_raw_query_statement:
             raw_plan_event = copy.deepcopy(real_plan_event)
             raw_plan_event["dbm_type"] = "rqp"  # raw query plan

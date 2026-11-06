@@ -435,6 +435,7 @@ def test_statement_metrics_and_plans(
         else:
             assert row['query_signature'], "missing query signature"
         assert 'statement_text' not in row, "statement_text field should not be forwarded"
+        assert 'last_execution_time_with_offset' not in row, "only real plan events use it"
         assert row['is_encrypted'] == is_encrypted
         if not is_encrypted:
             assert row['is_proc'] == is_proc
@@ -1605,7 +1606,7 @@ def test_collect_real_plans_event(aggregator, datadog_agent, dbm_instance, colle
         dbm_instance['collect_raw_query_statement'] = {'enabled': True}
     check = _real_plans_check(dbm_instance)
     row = _plan_row('real')
-    row['last_execution_time'] = '2026-11-06T06:44:10.123'
+    row['last_execution_time_with_offset'] = '2026-11-06T06:44:10.123+01:00'
     # an actual plan with both the compiled and the runtime value of its parameter
     real_plan = _load_test_xml_plan("test3_raw.xml")
 
@@ -1628,7 +1629,7 @@ def test_collect_real_plans_event(aggregator, datadog_agent, dbm_instance, colle
     assert "(42)" not in real_plan_definition and "(43)" not in real_plan_definition
     assert real_event['db']['plan']['source'] == 'last_query_plan_stats'
     assert real_event['db']['plan']['signature'] == row['query_plan_hash']
-    assert real_event['sqlserver']['last_execution_time'] == row['last_execution_time']
+    assert real_event['sqlserver']['last_execution_time'] == row['last_execution_time_with_offset']
     assert real_event['timestamp'] >= estimated_event['timestamp']
     # everything else describes the same query and cached plan as the estimated plan event
     for key in set(estimated_event) - {'db', 'sqlserver', 'timestamp'}:
@@ -1802,7 +1803,10 @@ def test_statement_real_plans(aggregator, dd_run_check, dbm_instance, bob_conn, 
     assert [s['dbm_type'] for s in real_plan_events] == (['rqp', 'plan'] if collect_raw_query_statement else ['plan'])
     for event in real_plan_events:
         assert event['db']['plan']['source'] == 'last_query_plan_stats'
-        assert event['sqlserver']['last_execution_time'], "missing the time of the execution the plan describes"
+        # the time of the execution the plan describes, with the server's UTC offset so it reads the same everywhere
+        assert re.fullmatch(
+            r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?[+-]\d{2}:\d{2}", event['sqlserver']['last_execution_time']
+        ), event['sqlserver']['last_execution_time']
         definition = event['db']['plan']['definition']
         assert ET.fromstring(definition).tag.endswith("ShowPlanXML"), "plan does not match expected structure"
         assert '<RunTimeInformation' in definition, "real plan without runtime data"
