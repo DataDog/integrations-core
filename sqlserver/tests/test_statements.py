@@ -435,7 +435,6 @@ def test_statement_metrics_and_plans(
         else:
             assert row['query_signature'], "missing query signature"
         assert 'statement_text' not in row, "statement_text field should not be forwarded"
-        assert 'last_execution_time_with_offset' not in row, "only real plan events use it"
         assert row['is_encrypted'] == is_encrypted
         if not is_encrypted:
             assert row['is_proc'] == is_proc
@@ -1560,11 +1559,17 @@ def test_plan_lookup_failure_during_cancellation_propagates(dbm_instance):
         list(check.statement_metrics._collect_plans([_plan_row('cancelled')], mock.Mock(), float('inf')))
 
 
-# A plan from sys.dm_exec_query_plan_stats with only the root statement, when no actual plan was captured.
-SIMPLIFIED_REAL_PLAN = (
-    '<ShowPlanXML xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan"><BatchSequence><Batch><Statements>'
-    '<StmtSimple StatementText="SELECT 1" StatementType="SELECT"/></Statements></Batch></BatchSequence></ShowPlanXML>'
-)
+# The last execution's statistics of a statement in sys.dm_exec_query_stats, which the real plan lookup also returns.
+REAL_PLAN_STATEMENT_STATS = {
+    'last_execution_time': '2026-11-06T06:44:10.123+01:00',
+    'last_elapsed_time': 17_801_000,
+    'last_worker_time': 35_659_000,
+    'last_dop': 4,
+    'last_grant_kb': 9_216,
+    'last_used_grant_kb': 4_096,
+    'last_spills': 0,
+    'last_rows': 20,
+}
 
 
 def _real_plans_check(dbm_instance, major_version=16, engine_edition=ENGINE_EDITION_STANDARD, **real_plans_config):
@@ -1576,8 +1581,11 @@ def _real_plans_check(dbm_instance, major_version=16, engine_edition=ENGINE_EDIT
 
 
 def _collect_with_real_plan(check, rows, real_plan, last_query_plan_stats=True):
-    estimated_plan = _load_test_xml_plan("last_query_plan_stats_prepared_estimated.xml")
-    real_plan_lookup = {'side_effect': real_plan} if isinstance(real_plan, Exception) else {'return_value': real_plan}
+    estimated_plan = _load_test_xml_plan("last_query_plan_stats_2025_heavy_estimated.xml")
+    if isinstance(real_plan, Exception):
+        real_plan_lookup = {'side_effect': real_plan}
+    else:
+        real_plan_lookup = {'return_value': {'query_plan': real_plan, **REAL_PLAN_STATEMENT_STATS}}
     with (
         mock.patch.object(check.statement_metrics, '_load_plan', return_value=(estimated_plan, False)),
         mock.patch.object(check.statement_metrics, '_load_real_plan', **real_plan_lookup) as load_real_plan,
@@ -1599,14 +1607,23 @@ def _real_plans_health_events(aggregator):
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("collect_raw_query_statement", [False, True])
-def test_collect_real_plans_event(aggregator, datadog_agent, dbm_instance, collect_raw_query_statement):
-    """The real plan event is the estimated plan event with the obfuscated real plan and when it last ran."""
+@pytest.mark.parametrize(
+    "collect_raw_query_statement,is_proc",
+    [
+        pytest.param(False, False, id="statement"),
+        pytest.param(True, False, id="statement_with_raw_plan"),
+        pytest.param(False, True, id="procedure"),
+    ],
+)
+def test_collect_real_plans_event(aggregator, datadog_agent, dbm_instance, collect_raw_query_statement, is_proc):
+    """
+    The real plan event is the estimated plan event with the obfuscated real plan, when it last ran and, for a
+    statement, the statistics of that execution.
+    """
     if collect_raw_query_statement:
         dbm_instance['collect_raw_query_statement'] = {'enabled': True}
     check = _real_plans_check(dbm_instance)
-    row = _plan_row('real')
-    row['last_execution_time_with_offset'] = '2026-11-06T06:44:10.123+01:00'
+    row = _plan_row('real', plan_handle='proc-plan-handle' if is_proc else None)
     # an actual plan with both the compiled and the runtime value of its parameter
     real_plan = _load_test_xml_plan("test3_raw.xml")
 
@@ -1629,7 +1646,14 @@ def test_collect_real_plans_event(aggregator, datadog_agent, dbm_instance, colle
     assert "(42)" not in real_plan_definition and "(43)" not in real_plan_definition
     assert real_event['db']['plan']['source'] == 'last_query_plan_stats'
     assert real_event['db']['plan']['signature'] == row['query_plan_hash']
-    assert real_event['sqlserver']['last_execution_time'] == row['last_execution_time_with_offset']
+    assert real_event['sqlserver']['last_execution_time'] == REAL_PLAN_STATEMENT_STATS['last_execution_time']
+    # a procedure's plan covers all its statements, so the statistics of one would misdescribe it
+    expected_statement_stats = {} if is_proc else REAL_PLAN_STATEMENT_STATS
+    real_plan_sqlserver = {k: v for k, v in real_event['sqlserver'].items() if k not in estimated_event['sqlserver']}
+    assert real_plan_sqlserver == {
+        'last_execution_time': REAL_PLAN_STATEMENT_STATS['last_execution_time'],
+        **expected_statement_stats,
+    }
     assert real_event['timestamp'] >= estimated_event['timestamp']
     # everything else describes the same query and cached plan as the estimated plan event
     for key in set(estimated_event) - {'db', 'sqlserver', 'timestamp'}:
@@ -1637,7 +1661,7 @@ def test_collect_real_plans_event(aggregator, datadog_agent, dbm_instance, colle
     assert {k: v for k, v in real_event['db'].items() if k != 'plan'} == {
         k: v for k, v in estimated_event['db'].items() if k != 'plan'
     }
-    assert {k: v for k, v in real_event['sqlserver'].items() if k != 'last_execution_time'} == (
+    assert {k: v for k, v in real_event['sqlserver'].items() if k in estimated_event['sqlserver']} == (
         estimated_event['sqlserver']
     )
 
@@ -1659,11 +1683,12 @@ def test_collect_real_plans_event(aggregator, datadog_agent, dbm_instance, colle
     "real_plan,max_plan_size_bytes,status",
     [
         pytest.param(None, None, 'empty', id="evicted"),
-        pytest.param(SIMPLIFIED_REAL_PLAN, None, 'no_runtime_data', id="simplified_plan"),
-        pytest.param("last_query_plan_stats_prepared_estimated.xml", None, 'no_runtime_data', id="estimated_plan"),
-        pytest.param("last_query_plan_stats_prepared_actual.xml", 1000, 'too_large', id="too_large"),
+        # SQL Server 2019 with LAST_QUERY_PLAN_STATS off returns a simplified plan with no runtime data
+        pytest.param("last_query_plan_stats_2019_heavy_setting_off.xml", None, 'no_runtime_data', id="simplified_plan"),
+        pytest.param("last_query_plan_stats_2025_heavy_estimated.xml", None, 'no_runtime_data', id="estimated_plan"),
+        pytest.param("last_query_plan_stats_2025_heavy_actual.xml", 1000, 'too_large', id="too_large"),
         pytest.param(RuntimeError('plan lookup timed out'), None, 'error', id="lookup_error"),
-        pytest.param("last_query_plan_stats_prepared_actual.xml", None, 'collected', id="collected"),
+        pytest.param("last_query_plan_stats_2025_heavy_actual.xml", None, 'collected', id="collected"),
     ],
 )
 def test_collect_real_plans_keeps_only_plans_with_runtime_data(
@@ -1692,7 +1717,7 @@ def test_collect_real_plans_skips_databases_without_last_query_plan_stats(aggreg
     row['database_name'] = 'app_db'
 
     events, load_real_plan = _collect_with_real_plan(
-        check, [row], _load_test_xml_plan("last_query_plan_stats_prepared_actual.xml"), last_query_plan_stats=False
+        check, [row], _load_test_xml_plan("last_query_plan_stats_2025_heavy_actual.xml"), last_query_plan_stats=False
     )
 
     assert [e['db']['plan'].get('type') for e in events] == [None]
@@ -1715,7 +1740,7 @@ def test_collect_real_plans_skips_databases_without_last_query_plan_stats(aggreg
 def test_collect_real_plans_server_version(aggregator, dbm_instance, major_version, engine_edition, supported):
     """Real plans need SQL Server 2019 or Azure SQL. Otherwise one health event tells, and estimated plans remain."""
     check = _real_plans_check(dbm_instance, major_version=major_version, engine_edition=engine_edition)
-    real_plan = _load_test_xml_plan("last_query_plan_stats_prepared_actual.xml")
+    real_plan = _load_test_xml_plan("last_query_plan_stats_2025_heavy_actual.xml")
 
     first_events, load_real_plan = _collect_with_real_plan(check, [_plan_row('first')], real_plan)
     second_events, _ = _collect_with_real_plan(check, [_plan_row('second')], real_plan)
@@ -1807,6 +1832,8 @@ def test_statement_real_plans(aggregator, dd_run_check, dbm_instance, bob_conn, 
         assert re.fullmatch(
             r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?[+-]\d{2}:\d{2}", event['sqlserver']['last_execution_time']
         ), event['sqlserver']['last_execution_time']
+        for column in ('last_elapsed_time', 'last_worker_time', 'last_dop', 'last_rows'):
+            assert isinstance(event['sqlserver'][column], int), "missing {} of the last execution".format(column)
         definition = event['db']['plan']['definition']
         assert ET.fromstring(definition).tag.endswith("ShowPlanXML"), "plan does not match expected structure"
         assert '<RunTimeInformation' in definition, "real plan without runtime data"
