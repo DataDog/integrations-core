@@ -110,7 +110,7 @@ def test_collect_schema_snapshot(integration_check, dbm_instance, aggregator):
 
     file_path = f'tests/fixtures/schema_snapshot_v{POSTGRES_VERSION}_{POSTGRES_LOCALE}.json'
     # If you need to update the snapshot, uncomment the following lines and run
-    # ddev test postgres -- -x -k test_collect_schema_snapshot
+    # ddev test postgres --pytest-args='-x -k test_collect_schema_snapshot'
     # then go grab a cup of coffee, tea, or your beverage of choice
     # with open(file_path, 'w') as f:
     #     json.dump(schema_events[0]['metadata'], f, indent=4)
