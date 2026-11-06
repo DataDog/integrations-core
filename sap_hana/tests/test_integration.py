@@ -10,7 +10,7 @@ from mock.mock import ANY, call
 from datadog_checks.sap_hana import SapHanaCheck
 
 from . import metrics
-from .common import CAN_CONNECT_SERVICE_CHECK, connection_flaked
+from .common import AUDIT_APPLICATION_NAME, CAN_CONNECT_SERVICE_CHECK, connection_flaked
 
 pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')]
 
@@ -122,7 +122,7 @@ def _assert_logs(check, datadog_agent):
         check.check_id,
         [
             {
-                'application_name': 'python3',
+                'application_name': AUDIT_APPLICATION_NAME,
                 'application_user_name': ANY,
                 'audit_policy_name': 'USER_MANAGEMENT',
                 'event_action': 'CREATE USER',
@@ -139,7 +139,7 @@ def _assert_logs(check, datadog_agent):
                 'user_name': 'SYSTEM',
             },
             {
-                'application_name': 'python3',
+                'application_name': AUDIT_APPLICATION_NAME,
                 'application_user_name': ANY,
                 'audit_policy_name': 'USER_MANAGEMENT',
                 'event_action': 'ALTER USER',
@@ -156,7 +156,7 @@ def _assert_logs(check, datadog_agent):
                 'user_name': 'SYSTEM',
             },
             {
-                'application_name': 'python3',
+                'application_name': AUDIT_APPLICATION_NAME,
                 'application_user_name': ANY,
                 'audit_policy_name': 'USER_MANAGEMENT',
                 'event_action': 'ALTER USER',

@@ -20,8 +20,6 @@ By surfacing traffic and throughput metrics at the device and interface level, t
 
 ## Setup
 
-**The Cisco SD-WAN NDM integration is Generally Available. To learn more about billing implications, visit our [pricing page][8].**
-
 Follow the instructions below to install and configure this check for an Agent running on a host. For containerized environments, see the [Autodiscovery Integration Templates][3] for guidance on applying these instructions.
 
 ### Installation
@@ -63,4 +61,3 @@ Need help? Contact [Datadog support][7].
 [5]: https://docs.datadoghq.com/agent/guide/agent-commands/#start-stop-and-restart-the-agent
 [6]: https://github.com/DataDog/integrations-core/blob/master/cisco_sdwan/metadata.csv
 [7]: https://docs.datadoghq.com/help/
-[8]: https://www.datadoghq.com/pricing/?product=network-monitoring&tab=network-device-monitoring#products

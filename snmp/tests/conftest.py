@@ -21,7 +21,7 @@ from .common import (
     HERE,
     PORT,
     SNMP_CONTAINER_NAME,
-    SNMP_LISTENER_ENV,
+    SNMP_TEST_SUITE,
     generate_container_instance_config,
 )
 
@@ -29,7 +29,7 @@ from .common import (
 pytest.register_assert_rewrite("tests.test_e2e_core_profiles.utils")
 
 FILES = [
-    "https://ddintegrations.blob.core.windows.net/snmp/cisco-3850.snmprec",
+    "https://agent-integrations-ci-fixtures.s3.us-east-1.amazonaws.com/fixtures/snmp/cisco-3850.snmprec",
 ]
 
 E2E_METADATA = {
@@ -43,7 +43,7 @@ E2E_METADATA = {
     ],
 }
 
-EXPECTED_AUTODISCOVERY_CHECKS = 6
+EXPECTED_AUTODISCOVERY_CHECKS = 4
 
 
 @pytest.fixture(scope='session')
@@ -60,7 +60,7 @@ def dd_environment():
                     output.write(response.content)
 
         with docker_run(os.path.join(COMPOSE_DIR, 'docker-compose.yaml'), env_vars=env, log_patterns="Listening at"):
-            if SNMP_LISTENER_ENV == 'true':
+            if SNMP_TEST_SUITE == 'listener':
                 instance_config = None
                 new_e2e_metadata['docker_volumes'].append(
                     '{}:/etc/datadog-agent/datadog.yaml'.format(create_datadog_conf_file(tmp_dir)),
@@ -100,6 +100,10 @@ def _autodiscovery_ready():
 def create_datadog_conf_file(tmp_dir):
     container_ip = get_container_ip(SNMP_CONTAINER_NAME)
     prefix = ".".join(container_ip.split('.')[:3])
+    # Docker DNAT makes the bridge gateway (.1) also respond to SNMP, so both .1 and .2 are
+    # reachable. Ignore the gateway in configs that assert .2, and vice versa, to make the
+    # test deterministic — pysnmp discovers .1 or .2 nondeterministically otherwise.
+    gateway_ip = '{}.1'.format(prefix)
     datadog_conf = {
         # Set check_runners to -1 to avoid checks being run in background when running `agent check` for e2e testing
         # Setting check_runners to a negative number to disable check runners is a workaround,
@@ -122,6 +126,7 @@ def create_datadog_conf_file(tmp_dir):
                             "tag1:val1",
                             "tag2:val2",
                         ],
+                        'ignored_ip_addresses': [gateway_ip],
                         'loader': 'core',
                     },
                     {
@@ -131,6 +136,7 @@ def create_datadog_conf_file(tmp_dir):
                         'version': 2,
                         'timeout': 1,
                         'retries': 2,
+                        'ignored_ip_addresses': [gateway_ip],
                         'loader': 'python',
                     },
                     {
@@ -146,7 +152,7 @@ def create_datadog_conf_file(tmp_dir):
                         'privacy_key': 'doggiePRIVkey',
                         'privacy_protocol': 'des',
                         'context_name': 'public',
-                        'ignored_ip_addresses': ['{}.2'.format(prefix)],
+                        'ignored_ip_addresses': [container_ip],
                         'loader': 'core',
                     },
                     {
@@ -162,7 +168,7 @@ def create_datadog_conf_file(tmp_dir):
                         'privacy_key': 'doggiePRIVkey',
                         'privacy_protocol': 'AES',
                         'context_name': 'public',
-                        'ignored_ip_addresses': ['{}.2'.format(prefix)],
+                        'ignored_ip_addresses': [container_ip],
                         'loader': 'core',
                     },
                 ],

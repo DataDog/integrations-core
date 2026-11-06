@@ -20,7 +20,7 @@ The Fly.io check is included in the [Datadog Agent][2] package. We recommend dep
 
     ```
     [build]
-        image = 'gcr.io/datadoghq/agent:7'
+        image = 'registry.datadoghq.com/agent:7'
     ```
 
 2. Set a [secret][17] for your Datadog API key called `DD_API_KEY`, and optionally your [site][14] as `DD_SITE`.

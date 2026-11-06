@@ -168,6 +168,14 @@ def assert_metric_coverage(env_version, aggregator, include_clients=False, inclu
     aggregator.assert_metric('pgbouncer.stats.bytes_received_per_second')
     aggregator.assert_metric('pgbouncer.stats.bytes_sent_per_second')
 
+    if env_version >= version.parse('1.24.0'):
+        aggregator.assert_metric('pgbouncer.stats.client_parse_count_per_second')
+        aggregator.assert_metric('pgbouncer.stats.server_parse_count_per_second')
+        aggregator.assert_metric('pgbouncer.stats.bind_count_per_second')
+        aggregator.assert_metric('pgbouncer.stats.avg_client_parse_count')
+        aggregator.assert_metric('pgbouncer.stats.avg_server_parse_count')
+        aggregator.assert_metric('pgbouncer.stats.avg_bind_count')
+
     aggregator.assert_metric('pgbouncer.databases.pool_size', at_least=0)
     aggregator.assert_metric('pgbouncer.databases.max_connections', at_least=0)
     aggregator.assert_metric('pgbouncer.databases.current_connections', at_least=0)
@@ -180,10 +188,14 @@ def assert_metric_coverage(env_version, aggregator, include_clients=False, inclu
         if env_version >= version.parse('1.8.0'):
             aggregator.assert_metric('pgbouncer.clients.wait')
             aggregator.assert_metric('pgbouncer.clients.wait_us')
+        if env_version >= version.parse('1.21.0'):
+            aggregator.assert_metric('pgbouncer.clients.prepared_statements')
 
     if include_servers:
         aggregator.assert_metric('pgbouncer.servers.connect_time')
         aggregator.assert_metric('pgbouncer.servers.request_time')
+        if env_version >= version.parse('1.21.0'):
+            aggregator.assert_metric('pgbouncer.servers.prepared_statements')
 
     # Service checks
     sc_tags = ['host:{}'.format(common.HOST), 'port:{}'.format(common.PORT), 'db:pgbouncer', 'optional:tag1']

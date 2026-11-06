@@ -2,6 +2,13 @@ name: Ray
 fleet_configurable: true
 files:
 - name: ray.yaml
+  discovery:
+    strategies:
+      - strategy: from_ports
+        port_hints:
+          - 8080
+        candidates:
+          - openmetrics_endpoint: "http://{service.host}:{port.number}"
   options:
   - template: init_config
     options:
@@ -29,3 +36,11 @@ files:
       path: /tmp/ray/session_latest/logs/gcs_server.err
       source: ray
       service: <SERVICE>
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - ray
+  - template: auto_conf/discovery

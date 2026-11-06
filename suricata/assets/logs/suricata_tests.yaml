@@ -389,17 +389,17 @@ tests:
       dns:
         authorities:
          -
+          rrname: "ubuntu.com"
+          rrtype: "SOA"
           soa:
+            expire: 604800
+            minimum: 3600
+            mname: "ns1.canonical.com"
+            refresh: 10800
+            retry: 3600
             rname: "hostmaster.canonical.com"
             serial: 2018058001
-            expire: 604800
-            refresh: 10800
-            mname: "ns1.canonical.com"
-            minimum: 3600
-            retry: 3600
-          rrname: "ubuntu.com"
           ttl: 412
-          rrtype: "SOA"
         flags:
           rcode: "NOERROR"
         id: 51436

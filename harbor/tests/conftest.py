@@ -50,12 +50,16 @@ def dd_environment(e2e_instance):
         CheckDockerLogs(compose_file, expected_log, wait=3, service='core'),
         WaitFor(create_simple_user, wait=5),
     ]
-    with docker_run(compose_file, conditions=conditions, attempts=5, waith_for_health=True):
-        yield e2e_instance
+    e2e_metadata = {}
+    if os.environ.get('HARBOR_USE_SSL'):
+        cert_dir = os.path.join(HERE, 'compose', 'common', 'cert')
+        e2e_metadata['docker_volumes'] = ['{}:/home/harbor/tests/compose/common/cert'.format(cert_dir)]
+    with docker_run(compose_file, conditions=conditions, attempts=5, wait_for_health=True):
+        yield e2e_instance, e2e_metadata
 
 
 def create_simple_user():
-    requests.post(
+    response = requests.post(
         URL + USERS_PATH,
         auth=("admin", "Harbor12345"),
         json={
@@ -66,6 +70,9 @@ def create_simple_user():
         },
         verify=False,
     )
+    # A conflict means an earlier attempt or a reused environment already created the user.
+    if response.status_code != 409:
+        response.raise_for_status()
 
 
 @pytest.fixture(scope='session')

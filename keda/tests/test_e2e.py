@@ -1,8 +1,18 @@
 # (C) Datadog, Inc. 2024-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import pytest
+
 from datadog_checks.base.constants import ServiceCheck
+from datadog_checks.dev.kubernetes import assert_all_discovery_candidates_stable_kubernetes
 from datadog_checks.dev.utils import assert_service_checks
+from datadog_checks.keda import KedaCheck
+
+KEDA_POD_SELECTORS = (
+    'app=keda-operator',
+    'app=keda-operator-metrics-apiserver',
+    'app=keda-admission-webhooks',
+)
 
 
 def test_e2e_openmetrics_v2(dd_agent_check):
@@ -10,3 +20,23 @@ def test_e2e_openmetrics_v2(dd_agent_check):
 
     aggregator.assert_service_check('keda.openmetrics.health', ServiceCheck.OK, count=1)
     assert_service_checks(aggregator)
+
+
+@pytest.mark.e2e
+def test_e2e_discovery(dd_agent_check_discovery):
+    aggregator = dd_agent_check_discovery(check_rate=True, discovery_min_instances=len(KEDA_POD_SELECTORS))
+
+    aggregator.assert_service_check('keda.openmetrics.health', ServiceCheck.OK, count=2 * len(KEDA_POD_SELECTORS))
+    assert_service_checks(aggregator)
+
+
+@pytest.mark.e2e
+@pytest.mark.parametrize('pod_selector', KEDA_POD_SELECTORS)
+def test_e2e_discovery_all_candidates(dd_agent_check, keda_kubeconfig, pod_selector):
+    assert_all_discovery_candidates_stable_kubernetes(
+        dd_agent_check,
+        KedaCheck,
+        keda_kubeconfig,
+        namespace='keda',
+        pod_selector=pod_selector,
+    )

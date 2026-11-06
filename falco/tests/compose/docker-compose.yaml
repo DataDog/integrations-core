@@ -5,8 +5,9 @@ services:
     image: falcosecurity/falco:latest
     privileged: true
     container_name: falco
-    network_mode: host
     pid: host
+    ports:
+      - "8765:8765"
     cap_drop:
       - ALL
     cap_add:

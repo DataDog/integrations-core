@@ -5,11 +5,23 @@
 
 import json
 import os
+from datetime import datetime
 
 import pytest
+from requests.exceptions import HTTPError
 
 from datadog_checks.dev import docker_run, get_docker_hostname, get_here
 from datadog_checks.dev.conditions import CheckEndpoints
+
+
+def _filter_after(records, field, filter_param):
+    """Filter & sort records whose `field` ISO-8601 timestamp is after the value in `<field> gt …`."""
+    threshold = datetime.fromisoformat(filter_param.split(f"{field} gt ")[-1].strip().replace("Z", "+00:00"))
+    return sorted(
+        (r for r in records if r.get(field) and datetime.fromisoformat(r[field].replace("Z", "+00:00")) > threshold),
+        key=lambda r: datetime.fromisoformat(r[field].replace("Z", "+00:00")),
+    )
+
 
 HERE = get_here()
 HOST = get_docker_hostname()
@@ -41,6 +53,15 @@ def load_fixture_page(filename, page):
         return pages[page]
     # Return empty response for pages beyond available data
     return {"data": [], "metadata": {"totalAvailableResults": 0}}
+
+
+def fixture_alert(alert_type, **overrides):
+    """Load the first fixture alert with the given alertType and apply overrides."""
+    for page in load_fixture('alerts.json'):
+        for alert in page.get('data', []):
+            if alert.get('alertType') == alert_type:
+                return {**alert, **overrides}
+    raise ValueError(f"No alert with alertType={alert_type} in fixture")
 
 
 # Test instance configurations
@@ -232,25 +253,8 @@ def mock_http_get(mocker):
 
             filter_param = params.get('$filter', '') if params else ''
             if 'creationTime gt' in filter_param:
-                from datetime import datetime
-
-                filter_time_str = filter_param.split('creationTime gt ')[-1].strip()
-                filter_time = datetime.fromisoformat(filter_time_str.replace('Z', '+00:00'))
-
-                filtered_data = []
-                for event in response_data.get('data', []):
-                    event_time_str = event.get('creationTime', '')
-                    if event_time_str:
-                        event_time = datetime.fromisoformat(event_time_str.replace('Z', '+00:00'))
-                        if event_time > filter_time:
-                            filtered_data.append(event)
-
-                filtered_data.sort(
-                    key=lambda t: datetime.fromisoformat(t.get('creationTime', '').replace('Z', '+00:00'))
-                )
-
                 response_data = dict(response_data)
-                response_data['data'] = filtered_data
+                response_data['data'] = _filter_after(response_data.get('data', []), 'creationTime', filter_param)
 
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
@@ -260,25 +264,8 @@ def mock_http_get(mocker):
 
             filter_param = params.get('$filter', '') if params else ''
             if 'creationTime gt' in filter_param:
-                from datetime import datetime
-
-                filter_time_str = filter_param.split('creationTime gt ')[-1].strip()
-                filter_time = datetime.fromisoformat(filter_time_str.replace('Z', '+00:00'))
-
-                filtered_data = []
-                for audit in response_data.get('data', []):
-                    audit_time_str = audit.get('creationTime', '')
-                    if audit_time_str:
-                        audit_time = datetime.fromisoformat(audit_time_str.replace('Z', '+00:00'))
-                        if audit_time > filter_time:
-                            filtered_data.append(audit)
-
-                filtered_data.sort(
-                    key=lambda t: datetime.fromisoformat(t.get('creationTime', '').replace('Z', '+00:00'))
-                )
-
                 response_data = dict(response_data)
-                response_data['data'] = filtered_data
+                response_data['data'] = _filter_after(response_data.get('data', []), 'creationTime', filter_param)
 
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
@@ -286,7 +273,7 @@ def mock_http_get(mocker):
         # Individual alert fetch by ID (e.g. /alerts/{uuid})
         import re
 
-        alert_id_match = re.search(r'api/monitoring/v4\.\d/serviceability/alerts/([0-9a-f-]{36})', url)
+        alert_id_match = re.search(r'api/monitoring/v4\.0/serviceability/alerts/([0-9a-f-]{36})', url)
         if alert_id_match:
             alert_ext_id = alert_id_match.group(1)
             all_alerts = load_fixture_page("alerts.json", 0).get('data', [])
@@ -295,33 +282,22 @@ def mock_http_get(mocker):
                 mock_resp.json = mocker.Mock(return_value={"data": alert_data})
             else:
                 mock_resp.status_code = 404
-                mock_resp.raise_for_status = mocker.Mock(side_effect=Exception("404 Not Found"))
+                mock_resp.raise_for_status = mocker.Mock(side_effect=HTTPError(response=mock_resp))
             return mock_resp
 
-        if 'api/monitoring/v4.0/serviceability/alerts' in url or 'api/monitoring/v4.2/serviceability/alerts' in url:
+        if 'api/monitoring/v4.0/serviceability/alerts' in url:
             response_data = load_fixture_page("alerts.json", page)
 
             filter_param = params.get('$filter', '') if params else ''
-            if 'creationTime gt' in filter_param:
-                from datetime import datetime
-
-                filter_time_str = filter_param.split('creationTime gt ')[-1].strip()
-                filter_time = datetime.fromisoformat(filter_time_str.replace('Z', '+00:00'))
-
-                filtered_data = []
-                for alert in response_data.get('data', []):
-                    alert_time_str = alert.get('creationTime', '')
-                    if alert_time_str:
-                        alert_time = datetime.fromisoformat(alert_time_str.replace('Z', '+00:00'))
-                        if alert_time > filter_time:
-                            filtered_data.append(alert)
-
-                filtered_data.sort(
-                    key=lambda t: datetime.fromisoformat(t.get('creationTime', '').replace('Z', '+00:00'))
-                )
-
+            if 'isResolved eq false' in filter_param:
                 response_data = dict(response_data)
-                response_data['data'] = filtered_data
+                response_data['data'] = [a for a in response_data.get('data', []) if not a.get('isResolved')]
+            elif 'lastUpdatedTime gt' in filter_param:
+                response_data = dict(response_data)
+                response_data['data'] = _filter_after(response_data.get('data', []), 'lastUpdatedTime', filter_param)
+            elif 'creationTime gt' in filter_param:
+                response_data = dict(response_data)
+                response_data['data'] = _filter_after(response_data.get('data', []), 'creationTime', filter_param)
 
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
@@ -330,32 +306,15 @@ def mock_http_get(mocker):
 
             filter_param = params.get('$filter', '') if params else ''
             if 'createdTime gt' in filter_param:
-                from datetime import datetime
-
-                filter_time_str = filter_param.split('createdTime gt ')[-1].strip()
-                filter_time = datetime.fromisoformat(filter_time_str.replace('Z', '+00:00'))
-
-                filtered_data = []
-                for task in response_data.get('data', []):
-                    task_time_str = task.get('createdTime', '')
-                    if task_time_str:
-                        task_time = datetime.fromisoformat(task_time_str.replace('Z', '+00:00'))
-                        if task_time > filter_time:
-                            filtered_data.append(task)
-
-                filtered_data.sort(
-                    key=lambda t: datetime.fromisoformat(t.get('createdTime', '').replace('Z', '+00:00'))
-                )
-
                 response_data = dict(response_data)
-                response_data['data'] = filtered_data
+                response_data['data'] = _filter_after(response_data.get('data', []), 'createdTime', filter_param)
 
             mock_resp.json = mocker.Mock(return_value=response_data)
             return mock_resp
 
         print(f"[MOCK ERROR] No matching endpoint for URL: {url}")
         mock_resp.status_code = 404
-        mock_resp.raise_for_status = mocker.Mock(side_effect=Exception("404 Not Found"))
+        mock_resp.raise_for_status = mocker.Mock(side_effect=HTTPError(response=mock_resp))
         return mock_resp
 
     return mocker.patch('requests.Session.get', side_effect=mock_response)

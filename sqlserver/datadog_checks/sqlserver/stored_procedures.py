@@ -13,13 +13,8 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
+from datadog_checks.sqlserver.utils import raise_if_cancelled
 
 DEFAULT_COLLECTION_INTERVAL = 60
 
@@ -85,7 +80,7 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
             enabled=is_affirmative(self._config.procedure_metrics_config.get('enabled', True)),
             expected_db_exceptions=(),
             min_collection_interval=self._config.min_collection_interval,
-            dbms="sqlserver",
+            dbms=check.dbms,
             rate_limit=1 / float(collection_interval),
             job_name="procedure-metrics",
             shutdown_callback=self._close_db_conn,
@@ -97,6 +92,9 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         self._conn_key_prefix = "dbm-procedures"
         self._procedure_metrics_query = None
         self._max_procedure_metrics = self._config.procedure_metrics_config.get("max_procedures", 250)
+
+    def shutdown(self) -> None:
+        self._check = None
 
     def _close_db_conn(self):
         pass
@@ -156,7 +154,7 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
             'sqlserver_rows': rows,
             'sqlserver_version': self._check.static_info_cache.get(STATIC_INFO_VERSION, ""),
             'sqlserver_engine_edition': self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION, ""),
-            'ddagentversion': datadog_agent.get_version(),
+            'ddagentversion': self._check.agent_version,
             'service': self._config.service,
             'tags': self._check.tag_manager.get_tags(),
         }
@@ -167,6 +165,8 @@ class SqlserverProcedureMetrics(DBMAsyncJob):
         Collects procedure metrics.
         :return:
         """
+        raise_if_cancelled(self._cancel_event)
+
         # re-use the check's conn module, but set extra_key=dbm- to ensure we get our own
         # raw connection. adodbapi and pyodbc modules are thread safe, but connections are not.
         with self._check.connection.open_managed_default_connection(self._conn_key_prefix):

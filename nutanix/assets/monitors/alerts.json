@@ -1,0 +1,35 @@
+{
+	"version": 2,
+	"created_at": "2026-05-14",
+	"last_updated_at": "2026-05-14",
+	"title": "Nutanix alert is open in Prism Central",
+	"description": "Tracks open Nutanix alerts from Prism Central. Fires when an alert is unresolved, auto-recovers on acknowledgement or resolution. Lifecycle events (created, acknowledged, reopened, resolved) are emitted to the Events Explorer under the same aggregation key.",
+	"definition": {
+		"id": 281752599,
+		"name": "{{#is_alert}}OPEN{{/is_alert}}{{#is_recovery}}RESOLVED{{/is_recovery}} [Nutanix {{ntnx_alert_severity.name}}] [{{ntnx_alert_impact.name}}] [{{ntnx_originating_cluster_name.name}}] - {{ntnx_alert_ext_id.name}}",
+		"type": "event-v2 alert",
+		"query": "events(\"source:nutanix ntnx_type:alert ntnx_alert_status:open\").rollup(\"cardinality\", \"@aggregation_key\").by(\"@aggregation_key,ntnx_alert_severity,ntnx_alert_impact,ntnx_originating_cluster_name\").last(\"5m\") > 0",
+		"message": "{{#is_alert}}A Nutanix alert has been raised or escalated.{{/is_alert}}\n  {{#is_recovery}}The underlying Nutanix alert has recovered.{{/is_recovery}}\n\n  **Alert:** `{{@aggregation_key.name}}`\n  **Severity:** `{{ntnx_alert_severity.name}}`\n  **Impact:** `{{ntnx_alert_impact.name}}`\n  **Originating cluster:** `{{ntnx_originating_cluster_name.name}}`\n\n  **Transition observed at:** {{last_triggered_at}}",
+		"tags": [],
+		"options": {
+			"thresholds": {
+				"critical": 0
+			},
+			"enable_logs_sample": false,
+			"notify_audit": false,
+			"on_missing_data": "default",
+			"include_tags": true,
+			"new_group_delay": 60,
+			"renotify_interval": 0,
+			"escalation_message": "",
+			"silenced": {}
+		},
+		"priority": null,
+		"restriction_policy": {
+			"bindings": []
+		}
+	},
+	"tags": [
+		"integration:nutanix"
+	]
+}

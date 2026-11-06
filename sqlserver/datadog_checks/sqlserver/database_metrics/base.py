@@ -9,7 +9,12 @@ from typing import Callable, List, Optional
 from datadog_checks.base.log import get_check_logger
 from datadog_checks.base.utils.db.core import QueryExecutor
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_RDS
+from datadog_checks.sqlserver.const import (
+    SQLSERVER_PARAMETER_LIMIT,
+    STATIC_INFO_ENGINE_EDITION,
+    STATIC_INFO_MAJOR_VERSION,
+    STATIC_INFO_RDS,
+)
 
 
 class SqlserverDatabaseMetricsBase:
@@ -25,7 +30,7 @@ class SqlserverDatabaseMetricsBase:
         self.config: SQLServerConfig = config
         self.server_static_info: dict = server_static_info
         self.new_query_executor: Callable[
-            [List[dict], Callable, Optional[List[str]], Optional[bool]], QueryExecutor
+            [List[dict], Callable, Optional[List[str]], Optional[bool], Optional[List[str]]], QueryExecutor
         ] = new_query_executor
         self.execute_query_handler: Callable[[str, Optional[str]], List[tuple]] = execute_query_handler
         self.track_operation_time: bool = track_operation_time
@@ -56,6 +61,20 @@ class SqlserverDatabaseMetricsBase:
     @property
     def databases(self) -> Optional[List[str]]:
         return self._databases
+
+    def _database_filters(self, column: str) -> list[tuple[str, tuple[str, ...]]]:
+        # None disables filtering; an empty list means autodiscovery selected no databases.
+        if self.databases is None:
+            return [("", ())]
+        if not self.databases:
+            return [("1 = 0", ())]
+
+        filters = []
+        for start in range(0, len(self.databases), SQLSERVER_PARAMETER_LIMIT):
+            params = tuple(self.databases[start : start + SQLSERVER_PARAMETER_LIMIT])
+            placeholders = ", ".join("?" for _ in params)
+            filters.append((f"{column} IN ({placeholders})", params))
+        return filters
 
     @property
     def query_executors(self) -> List[QueryExecutor]:

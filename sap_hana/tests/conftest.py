@@ -24,7 +24,7 @@ from datadog_checks.sap_hana.queries import (
     SystemDatabases,
 )
 
-from .common import ADMIN_CONFIG, COMPOSE_FILE, CONFIG, E2E_METADATA, TIMEOUT
+from .common import ADMIN_CONFIG, AUDIT_APPLICATION_NAME, COMPOSE_FILE, CONFIG, E2E_METADATA, TIMEOUT
 
 
 class DbManager(object):
@@ -34,6 +34,10 @@ class DbManager(object):
             'port': connection_config['port'],
             'user': connection_config['username'],
             'password': connection_config['password'],
+            # Keeps AUDIT_LOG.APPLICATION_NAME deterministic for the statements audited below.
+            # APPLICATION is a session variable rather than a connect property, so it has to go
+            # through `sessionvariables`; hdbcli silently ignores unrecognised bare kwargs.
+            'sessionvariables': {'APPLICATION': AUDIT_APPLICATION_NAME},
         }
         self.schema = schema
         self.conn = None

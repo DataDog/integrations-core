@@ -1,8 +1,8 @@
 services:
   redis-standalone:
-    image: "redis:${REDIS_VERSION}"
+    image: "redis:${REDIS_VERSION:-7.0}"
     volumes:
-      - ${REDIS_CONFIG}:/etc/redis.conf
+      - ${REDIS_CONFIG:-../config/auth.conf}:/etc/redis.conf
     ports:
       - "6379:6379"
     networks:

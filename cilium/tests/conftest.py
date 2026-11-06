@@ -8,22 +8,13 @@ import pytest
 
 from datadog_checks.base.utils.common import get_docker_hostname
 from datadog_checks.cilium import CiliumCheck
-from datadog_checks.dev import run_command
+from datadog_checks.dev import TempDir, run_command
+from datadog_checks.dev.conditions import WaitFor
+from datadog_checks.dev.fs import path_join
 from datadog_checks.dev.kind import kind_run
-from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.utils import get_active_env
 
-from .common import CILIUM_VERSION
-
-try:
-    from contextlib import ExitStack
-except ImportError:
-    from contextlib2 import ExitStack
-
-from datadog_checks.dev import TempDir
-from datadog_checks.dev.fs import path_join
-
-from .common import CILIUM_LEGACY
+from .common import CILIUM_LEGACY, CILIUM_VERSION
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOST = get_docker_hostname()
@@ -33,8 +24,9 @@ AGENT_URL = "http://{}:{}/metrics".format(HOST, AGENT_PORT)
 OPERATOR_URL = "http://{}:{}/metrics".format(HOST, OPERATOR_PORT)
 
 IMAGE_NAME = "quay.io/cilium/cilium:v{}".format(CILIUM_VERSION)
-PORTS = [AGENT_PORT, OPERATOR_PORT]
 CLUSTER_NAME = "cluster-{}-{}".format("cilium", get_active_env())
+# Cilium exposes both metrics endpoints as host ports on each kind node.
+KIND_NODE_HOST = "{}-control-plane".format(CLUSTER_NAME)
 
 
 def setup_cilium():
@@ -110,9 +102,11 @@ def setup_cilium():
     )
     if result.stderr:
         raise Exception(result.stderr)
-    pods = result.stdout.split(" ")
+    cilium_pods = result.stdout.split()
+    if not cilium_pods:
+        raise AssertionError("No Cilium pods found")
 
-    for pod in pods:
+    for pod in cilium_pods:
         result = run_command(
             [
                 "kubectl",
@@ -121,7 +115,7 @@ def setup_cilium():
                 "cilium",
                 "-c",
                 "cilium-agent",
-                pod.strip(),
+                pod,
                 "--",
                 "cilium",
                 "endpoint",
@@ -131,6 +125,52 @@ def setup_cilium():
         )
         if result.stderr:
             raise Exception(result.stderr)
+
+    WaitFor(
+        wait_for_cilium_metric_families,
+        attempts=60,
+        wait=2,
+        args=(
+            cilium_pods,
+            [
+                "cilium_forward_bytes_total",
+                "cilium_forward_count_total",
+                "cilium_endpoint_regeneration_time_stats_seconds",
+                "cilium_policy_regeneration_time_stats_seconds",
+            ],
+        ),
+    )()
+
+
+def wait_for_cilium_metric_families(pods, families):
+    missing = []
+    for pod in pods:
+        for family in families:
+            result = run_command(
+                [
+                    "kubectl",
+                    "exec",
+                    "-n",
+                    "cilium",
+                    "-c",
+                    "cilium-agent",
+                    pod,
+                    "--",
+                    "cilium",
+                    "metrics",
+                    "list",
+                    "--match-pattern",
+                    family,
+                ],
+                capture=True,
+            )
+            if result.code != 0:
+                raise Exception(result.stderr or result.stdout)
+            if family not in result.stdout:
+                missing.append("{} on {}".format(family, pod))
+
+    if missing:
+        raise AssertionError("Cilium metric families are not available yet: {}".format(", ".join(missing)))
 
 
 def get_instances(agent_host, agent_port, operator_host, operator_port, use_openmetrics):
@@ -160,18 +200,15 @@ def dd_environment():
                 "HELM_CACHE_HOME": path_join(helm_dir, "Caches"),
                 "HELM_CONFIG_HOME": path_join(helm_dir, "Preferences"),
             },
-        ) as kubeconfig:
-            with ExitStack() as stack:
-                ip_ports = [
-                    stack.enter_context(port_forward(kubeconfig, "cilium", port, "deployment", "cilium-operator"))
-                    for port in PORTS
-                ]
-
-                instances = get_instances(
-                    ip_ports[0][0], ip_ports[0][1], ip_ports[1][0], ip_ports[1][1], use_openmetrics
-                )
-
-            yield instances
+        ):
+            instances = get_instances(
+                KIND_NODE_HOST,
+                AGENT_PORT,
+                KIND_NODE_HOST,
+                OPERATOR_PORT,
+                use_openmetrics,
+            )
+            yield instances, {'docker_network': 'kind'}
 
 
 @pytest.fixture(scope="session")

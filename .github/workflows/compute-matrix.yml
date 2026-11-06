@@ -26,12 +26,12 @@ jobs:
       data: "${{ steps.compute.outputs.data }}"
 
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         ref: "${{ github.event.pull_request.head.sha }}"
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
@@ -45,11 +45,21 @@ jobs:
         echo "MERGE_BASE=$merge_base" >> "$GITHUB_ENV"
         git -c protocol.version=2 fetch --no-tags --no-recurse-submodules --filter=blob:none origin "$merge_base"
 
-    - name: Fetch computation script
+    - name: Checkout computation script
+      if: inputs.repo != 'core'
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        repository: DataDog/integrations-core
+        ref: ${{ job.workflow_sha }}
+        fetch-depth: 1
+        sparse-checkout: ddev/src/ddev/utils/scripts
+        path: core-temp
+
+    - name: Install computation script
       if: inputs.repo != 'core'
       run: |-
-        mkdir -p $(dirname ${{ env.MATRIX_SCRIPT }})
-        curl -sLo ${{ env.MATRIX_SCRIPT }} https://raw.githubusercontent.com/DataDog/integrations-core/master/${{ env.MATRIX_SCRIPT }}
+        mkdir -p "$(dirname "$MATRIX_SCRIPT")"
+        cp "core-temp/$MATRIX_SCRIPT" "$MATRIX_SCRIPT"
 
     - name: Compute
       id: compute

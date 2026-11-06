@@ -87,6 +87,8 @@ def test_initialize_features_enabled_and_disabled(mock_check, minimal_instance):
             'query_samples': {'enabled': True},
             'collect_settings': {'enabled': True},
             'collect_schemas': {'enabled': True},
+            'collect_roles': {'enabled': True},
+            'collect_column_statistics': {'enabled': True},
             'query_activity': {'enabled': True},
             'query_metrics': {'enabled': True},
             'data_observability': {'enabled': True},
@@ -101,6 +103,8 @@ def test_initialize_features_enabled_and_disabled(mock_check, minimal_instance):
         FeatureKey.QUERY_SAMPLES,
         FeatureKey.COLLECT_SETTINGS,
         FeatureKey.COLLECT_SCHEMAS,
+        FeatureKey.COLLECT_ROLES,
+        FeatureKey.COLLECT_COLUMN_STATISTICS,
         FeatureKey.QUERY_ACTIVITY,
         FeatureKey.QUERY_METRICS,
         FeatureKey.DATA_OBSERVABILITY,
@@ -118,6 +122,8 @@ def test_initialize_features_disabled_by_default(mock_check, minimal_instance):
     assert features[FeatureKey.QUERY_SAMPLES]['enabled'] is False
     assert features[FeatureKey.COLLECT_SETTINGS]['enabled'] is False
     assert features[FeatureKey.COLLECT_SCHEMAS]['enabled'] is False
+    assert features[FeatureKey.COLLECT_ROLES]['enabled'] is False
+    assert features[FeatureKey.COLLECT_COLUMN_STATISTICS]['enabled'] is False
     assert features[FeatureKey.QUERY_ACTIVITY]['enabled'] is False
     assert features[FeatureKey.QUERY_METRICS]['enabled'] is False
 
@@ -128,6 +134,7 @@ def test_initialize_features_warn_if_dbm_missing_for_dbm_features(mock_check, mi
     instance['query_samples'] = {'enabled': True}
     instance['collect_settings'] = {'enabled': True}
     instance['collect_schemas'] = {'enabled': True}
+    instance['collect_roles'] = {'enabled': True}
     instance['query_activity'] = {'enabled': True}
     instance['query_metrics'] = {'enabled': True}
     mock_check.instance = instance
@@ -140,6 +147,7 @@ def test_initialize_features_warn_if_dbm_missing_for_dbm_features(mock_check, mi
     assert FeatureKey.QUERY_SAMPLES in feature_keys
     assert FeatureKey.COLLECT_SETTINGS in feature_keys
     assert FeatureKey.COLLECT_SCHEMAS in feature_keys
+    assert FeatureKey.COLLECT_ROLES in feature_keys
     assert FeatureKey.QUERY_ACTIVITY in feature_keys
     assert FeatureKey.QUERY_METRICS in feature_keys
 
@@ -308,6 +316,27 @@ def test_apply_validated_defaults(mock_check, minimal_instance, section, section
     assert getattr(config, section).collection_interval == expected_collection_interval
 
 
+@pytest.mark.parametrize(
+    'field, value, expected',
+    [
+        ('collection_interval', 'not_a_number', dict_defaults.instance_collect_roles().collection_interval),
+        ('collection_interval', '0', dict_defaults.instance_collect_roles().collection_interval),
+        ('collection_interval', '1', 1),
+        ('max_query_duration', 'not_a_number', dict_defaults.instance_collect_roles().max_query_duration),
+        ('max_query_duration', '0', dict_defaults.instance_collect_roles().max_query_duration),
+        ('max_query_duration', '1', 1),
+    ],
+)
+def test_collect_roles_validated_defaults(mock_check, minimal_instance, field, value, expected):
+    instance = minimal_instance
+    instance['collect_roles'] = {field: value}
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert getattr(config.collect_roles, field) == expected
+
+
 def test_apply_validated_defaults_ssl(mock_check, minimal_instance):
     instance = minimal_instance
     instance['ssl'] = 'invalid_ssl'
@@ -358,6 +387,41 @@ def test_cloud_validations(mock_check, minimal_instance):
     config, result = build_config(check=mock_check)
     assert result.valid
     assert config.azure.managed_authentication.enabled
+
+
+def test_cloud_validations_azure_workload_identity(mock_check, minimal_instance):
+    """Test that workload_identity auth_type is valid without client_id."""
+    instance = minimal_instance.copy()
+    instance['azure'] = {'managed_authentication': {'enabled': True, 'auth_type': 'workload_identity'}}
+    instance['password'] = None
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    assert config.azure.managed_authentication.auth_type == 'workload_identity'
+
+
+@pytest.mark.parametrize(
+    'auth_type, has_client_id, expect_valid',
+    [
+        ('workload_identity', False, True),
+        ('managed_identity', True, True),
+        ('managed_identity', False, False),
+        ('bad_type', True, False),
+    ],
+    ids=['workload_no_client_id', 'managed_with_client_id', 'managed_missing_client_id', 'invalid_auth_type'],
+)
+def test_azure_auth_type_validation(mock_check, minimal_instance, auth_type, has_client_id, expect_valid):
+    instance = minimal_instance.copy()
+    auth_cfg = {'enabled': True, 'auth_type': auth_type}
+    if has_client_id:
+        auth_cfg['client_id'] = 'some-id'
+    instance['azure'] = {'managed_authentication': auth_cfg}
+    instance['password'] = None
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    _, result = build_config(check=mock_check)
+    assert result.valid == expect_valid
 
 
 @pytest.mark.parametrize(
@@ -536,6 +600,18 @@ def test_autodiscovery_case_sensitive_exclude_matching(mock_check):
     assert config.dbname == 'POSTGRES'
 
 
+def test_empty_collect_roles_block_uses_defaults(mock_check, minimal_instance):
+    """A bare `collect_roles:` key, as uncommenting the example config produces, parses to None."""
+    minimal_instance['collect_roles'] = None
+    mock_check.instance = minimal_instance
+    mock_check.init_config = {}
+
+    config, result = build_config(check=mock_check)
+
+    assert result.valid
+    assert config.collect_roles.model_dump() == dict_defaults.instance_collect_roles().model_dump()
+
+
 def test_autodiscovery_invalid_regex_pattern_warns(mock_check):
     # Invalid regex patterns should generate warnings
     instance = {
@@ -572,3 +648,102 @@ def test_autodiscovery_exclude_none_does_not_error(mock_check):
     config, result = build_config(check=mock_check)
     assert result.valid
     assert config.dbname == 'main'
+
+
+# ---------------------------------------------------------------------------
+# Data Observability — schedule field config tests
+# ---------------------------------------------------------------------------
+
+
+def test_do_query_schedule_field_defaults_to_none(mock_check, minimal_instance):
+    """A DO query without schedule field has schedule=None by default."""
+    minimal_instance['data_observability'] = {
+        'enabled': True,
+        'run_sync': True,
+        'queries': [
+            {
+                'monitor_id': 1,
+                'dbname': 'mydb',
+                'query': 'SELECT 1',
+                'interval_seconds': 60,
+                'query_timeout': 30_000,
+                'entity': {
+                    'platform': 'aws',
+                    'account': '123',
+                    'database': 'mydb',
+                    'schema': 'public',
+                    'table': 'foo',
+                },
+            }
+        ],
+    }
+    mock_check.instance = minimal_instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    query = config.data_observability.queries[0]
+    assert query.schedule is None
+    assert query.interval_seconds == 60
+
+
+def test_do_query_schedule_field_parsed(mock_check, minimal_instance):
+    """A DO query with schedule field is parsed correctly; interval_seconds may be absent."""
+    minimal_instance['data_observability'] = {
+        'enabled': True,
+        'run_sync': True,
+        'queries': [
+            {
+                'monitor_id': 2,
+                'dbname': 'mydb',
+                'query': 'SELECT 1',
+                'schedule': '20 * * * *',
+                'query_timeout': 30_000,
+                'entity': {
+                    'platform': 'aws',
+                    'account': '123',
+                    'database': 'mydb',
+                    'schema': 'public',
+                    'table': 'bar',
+                },
+            }
+        ],
+    }
+    mock_check.instance = minimal_instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    query = config.data_observability.queries[0]
+    assert query.schedule == '20 * * * *'
+    assert query.interval_seconds is None
+
+
+def test_do_query_both_schedule_and_interval_parsed(mock_check, minimal_instance):
+    """A DO query with both schedule and interval_seconds is accepted; both fields present."""
+    minimal_instance['data_observability'] = {
+        'enabled': True,
+        'run_sync': True,
+        'queries': [
+            {
+                'monitor_id': 3,
+                'dbname': 'mydb',
+                'query': 'SELECT 1',
+                'schedule': '0 * * * *',
+                'interval_seconds': 3600,
+                'query_timeout': 30_000,
+                'entity': {
+                    'platform': 'aws',
+                    'account': '123',
+                    'database': 'mydb',
+                    'schema': 'public',
+                    'table': 'baz',
+                },
+            }
+        ],
+    }
+    mock_check.instance = minimal_instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid
+    query = config.data_observability.queries[0]
+    assert query.schedule == '0 * * * *'
+    assert query.interval_seconds == 3600

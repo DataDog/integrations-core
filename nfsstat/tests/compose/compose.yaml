@@ -11,7 +11,7 @@ services:
       - ./nfs-share:/nfs-share
 
   nfs-client:
-    image: debian:11
+    image: debian:12
     # The container must be privileged to mount a volume
     # cap_add: sys_admin is not enough for the CI
     privileged: true

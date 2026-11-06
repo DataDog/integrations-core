@@ -9,6 +9,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -U datadog -d datadog_test && if [[ ! -e /tmp/container_ready.txt ]]; then exit 1; fi"]
       interval: 1s
       timeout: 5s
+      start_period: 60s
       retries: 5
     networks:
       - pg-net
@@ -28,6 +29,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -p 5433 -U datadog -d datadog_test && if [[ ! -e /tmp/container_ready.txt ]]; then exit 1; fi"]
       interval: 1s
       timeout: 5s
+      start_period: 60s
       retries: 5
     networks:
       - pg-net
@@ -47,6 +49,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -p 5434 -U datadog -d datadog_test && if [[ ! -e /tmp/container_ready.txt ]]; then exit 1; fi"]
       interval: 1s
       timeout: 5s
+      start_period: 60s
       retries: 5
     networks:
       - pg-net
@@ -66,6 +69,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -p 5435 -U datadog -d datadog_test && if [[ ! -e /tmp/container_ready.txt ]]; then exit 1; fi"]
       interval: 1s
       timeout: 5s
+      start_period: 60s
       retries: 5
     networks:
       - pg-net

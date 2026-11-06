@@ -22,6 +22,7 @@ files:
       value:
         type: integer
         example: 1025
+      fleet_configurable: false
     - name: username
       description: Username for the Datadog-Teradata check user.
       fleet_configurable: true
@@ -38,6 +39,7 @@ files:
         The Datadog-Teradata check user's account string to use when logging into the database.
       value:
         type: string
+      fleet_configurable: false
     - name: database
       fleet_configurable: true
       required: true
@@ -72,6 +74,7 @@ files:
             - <TABLE_2>
           exclude:
             - <TABLE_3>
+      fleet_configurable: false
     - name: collect_table_disk_metrics
       fleet_configurable: true
       description: |
@@ -87,11 +90,13 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: https_port
       description: The port number used for making TLS connections to the Teradata database.
       value:
         type: integer
         example: 443
+      fleet_configurable: false
     - name: ssl_mode
       description: |
         The SSL mode used for making TLS connections to the Teradata database.
@@ -109,11 +114,13 @@ files:
         - Disable
         - Prefer
         - Require
+      fleet_configurable: false
     - name: ssl_protocol
       description: Specifies the TLS protocol for HTTPS/TLS connections. Currently, only TLSv1.2 is supported.
       value:
         type: string
         example: TLSv1.2
+      fleet_configurable: false
     - name: auth_mechanism
       description: |
         The authentication mechanism for connecting to the Teradata data source. If no value is provided, the defined
@@ -136,6 +143,7 @@ files:
         - LDAP
         - KRB5
         - JWT
+      fleet_configurable: false
     - name: auth_data
       secret: true
       description: |
@@ -161,5 +169,6 @@ files:
         auth_data: username@@userpassword
       value:
         type: string
+      fleet_configurable: false
     - template: instances/db
     - template: instances/default

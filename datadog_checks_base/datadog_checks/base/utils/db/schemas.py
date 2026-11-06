@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, TypedDict
 
 from datadog_checks.base.utils.serialization import json
 
-from .utils import now_ms
+from .utils import TagManager, now_ms
 
 if TYPE_CHECKING:
     from datadog_checks.base.checks.db import DatabaseCheck
@@ -63,58 +63,79 @@ class SchemaCollector(ABC):
         This class relies on the owning check to handle scheduling this method.
         """
         status = "success"
+        run_started_at = now_ms()
+        total_payloads_count = 0
         try:
-            self._collection_started_at = now_ms()
             databases = self._get_databases()
             self._log.debug("Collecting schemas for %d databases", len(databases))
             for database in databases:
-                self._log.debug("Starting collection of schemas for database %s", database['name'])
-                database_name = database['name']
+                database_name = database.get('name')
                 if not database_name:
-                    self._log.warning("database has no name %v", database)
+                    self._log.warning("database has no name: %s", database)
                     continue
-                with self._get_cursor(database_name) as cursor:
-                    # Get the next row from the cursor
-                    next_row = self._get_next(cursor)
-                    while next_row:
-                        self._queued_rows.append(self._map_row(database, next_row))
-                        self._total_rows_count += 1
-                        # Because we're iterating over a cursor we need to try to get
-                        # the next row to see if we've reached the last row
+                self._log.debug("Starting collection of schemas for database %s", database_name)
+                self._collection_started_at = now_ms()
+                self._collection_payloads_count = 0
+                self._queued_rows = []
+                db_rows_count = 0
+                try:
+                    with self._get_cursor(database_name) as cursor:
+                        # Get the next row from the cursor
                         next_row = self._get_next(cursor)
-                        self.maybe_flush(is_last_payload=False)
-                is_last_payload = database == databases[-1]
-                self.maybe_flush(is_last_payload)
-                self._log.debug("Completed collection of schemas for database %s", database_name)
+                        while next_row:
+                            self._queued_rows.append(self._map_row(database, next_row))
+                            db_rows_count += 1
+                            # Because we're iterating over a cursor we need to try to get
+                            # the next row to see if we've reached the last row
+                            next_row = self._get_next(cursor)
+                            self.maybe_flush(is_last_payload=False)
+                    self.maybe_flush(is_last_payload=True)
+                    self._total_rows_count += db_rows_count
+                    total_payloads_count += self._collection_payloads_count
+                    self._log.debug(
+                        "Completed collection of schemas for database %s (%d rows, %d payloads)",
+                        database_name,
+                        db_rows_count,
+                        self._collection_payloads_count,
+                    )
+                except Exception as e:
+                    self._queued_rows = []
+                    total_payloads_count += self._collection_payloads_count
+                    self._log.warning("Skipping database %s due to error: %s", database_name, e, exc_info=True)
+                    continue
         except Exception as e:
             status = "error"
             self._log.error("Error collecting schema: %s", e)
             raise e
         finally:
+            telemetry_tags = self._check.tags + ["status:" + status, "kind:" + self.kind]
             self._check.histogram(
                 f"dd.{self._check.dbms}.schema.time",
-                now_ms() - self._collection_started_at,
-                tags=self._check.tags + ["status:" + status],
+                now_ms() - run_started_at,
+                tags=telemetry_tags,
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
             self._check.gauge(
-                f"dd.{self._check.dbms}.schema.tables_count",
+                self.object_count_metric_name,
                 self._total_rows_count,
-                tags=self._check.tags + ["status:" + status],
+                tags=telemetry_tags,
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
             self._check.gauge(
                 f"dd.{self._check.dbms}.schema.payloads_count",
-                self._collection_payloads_count,
-                tags=self._check.tags + ["status:" + status],
+                total_payloads_count,
+                tags=telemetry_tags,
                 hostname=self._check.reported_hostname,
                 raw=True,
             )
-
             self._reset()
         return True
+
+    @property
+    def object_count_metric_name(self) -> str:
+        return f"dd.{self._check.dbms}.schema.tables_count"
 
     @property
     def base_event(self):
@@ -126,10 +147,16 @@ class SchemaCollector(ABC):
             "collection_interval": self._config.collection_interval,
             "dbms": self._check.dbms,
             "dbms_version": str(self._check.dbms_version),
-            "tags": self._check.tags,
+            "tags": self._event_tags(),
             "cloud_metadata": self._check.cloud_metadata,
             "collection_started_at": self._collection_started_at,
         }
+
+    def _event_tags(self) -> list[str]:
+        tag_manager = getattr(self._check, "tag_manager", None)
+        if not isinstance(tag_manager, TagManager):
+            return self._check.tags
+        return tag_manager.get_tags(include_internal=False, include_db=False)
 
     def maybe_flush(self, is_last_payload):
         if is_last_payload or len(self._queued_rows) >= self._config.payload_chunk_size:

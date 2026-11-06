@@ -12,6 +12,7 @@ files:
             value:
               example: false
               type: boolean
+            fleet_configurable: false
           - name: collect_apps_states_list
             description: |
               Configure the application states of which to collect application metrics.
@@ -74,6 +75,7 @@ files:
                 "<TAG_KEY1>": "<YARN_KEY>"
                 "<TAG_KEY2>": "<YARN_KEY>"
               type: object
+            fleet_configurable: false
           - name: application_status_mapping
             description: |
               Custom application status mapping for service check `yarn.application.status`.
@@ -97,6 +99,7 @@ files:
                 FAILED: critical
                 KILLED: critical
               type: object
+            fleet_configurable: false
           - name: collect_app_metrics
             description: Set this parameter to false to remove yarn.app metrics from metric collection.
             fleet_configurable: true
@@ -146,6 +149,7 @@ files:
             value:
               example: true
               type: boolean
+            fleet_configurable: false
           - name: queue_blacklist
             description: |
               Do not emit metrics for certain yarn capacityScheduler queues and sub_queues.
@@ -159,6 +163,7 @@ files:
               type: array
               items:
                 type: string
+            fleet_configurable: false
           - name: split_yarn_application_tags
             description: |
               Set this parameter to true to split YARN application tags string formatted as
@@ -167,6 +172,7 @@ files:
             value:
               example: false
               type: boolean
+            fleet_configurable: false
           - name: disable_legacy_cluster_tag
             description: Enable to stop submitting the tag `cluster_name`, which has been renamed to `yarn_cluster`.
             fleet_configurable: true

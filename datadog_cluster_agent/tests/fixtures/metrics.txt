@@ -247,6 +247,13 @@ go_memstats_sys_bytes 7.5580416e+07
 # HELP go_threads Number of OS threads created.
 # TYPE go_threads gauge
 go_threads 11
+# HELP instrumentation_controller__reconciliations Number of DatadogInstrumentation section reconciliation attempts by outcome.
+# TYPE instrumentation_controller__reconciliations counter
+instrumentation_controller__reconciliations{section="checks",status="success"} 3
+instrumentation_controller__reconciliations{section="logs",status="error"} 1
+# HELP instrumentation_controller__resources Number of DatadogInstrumentation resources tracked by the controller.
+# TYPE instrumentation_controller__resources gauge
+instrumentation_controller__resources 3
 # HELP jsonstream__blocked_time Total time spent waiting for the compressor to be available
 # TYPE jsonstream__blocked_time counter
 jsonstream__blocked_time 6.1130524e+07
@@ -265,6 +272,9 @@ jsonstream__total_items 40
 # HELP leader_election_is_leader The label is_leader is true if the reporting pod is leader, equals false otherwise.
 # TYPE leader_election_is_leader gauge
 leader_election_is_leader{is_leader="true",join_leader="true"} 1
+# HELP metadata_streaming_history_resyncs Number of full metadata states successfully sent because an agent fell behind the retained version history
+# TYPE metadata_streaming_history_resyncs counter
+metadata_streaming_history_resyncs 3
 # HELP orchestrator__cache_hits Number of cache hits
 # TYPE orchestrator__cache_hits counter
 orchestrator__cache_hits{orchestrator="k8s",resource="cluster"} 6

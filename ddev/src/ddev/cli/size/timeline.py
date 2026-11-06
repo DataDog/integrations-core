@@ -7,12 +7,11 @@ from pathlib import Path
 from typing import Optional, overload
 
 import click
-import requests
 from rich.console import Console
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
 from ddev.cli.application import Application
-from ddev.cli.size.utils.common_params import common_params
+from ddev.cli.size.utils.common_params import WheelsStorageTier, common_params
 
 from .utils.common_funcs import (
     CommitEntry,
@@ -24,13 +23,15 @@ from .utils.common_funcs import (
     WrongDependencyFormat,
     compress,
     convert_to_human_readable_size,
+    download_wheel,
     extract_version_from_about_py,
     get_valid_platforms,
     get_valid_versions,
     is_correct_dependency,
     is_valid_integration_file,
     print_table,
-    resolve_wheel_url,
+    request_wheel,
+    retry_wheel_request,
     save_csv,
     save_json,
     save_markdown,
@@ -43,7 +44,7 @@ MINIMUM_LENGTH_COMMIT = 7
 console = Console(stderr=True)
 
 
-@click.command()
+@click.command(short_help='Show size evolution over time')
 @click.argument("type", type=click.Choice(["integration", "dependency"]))
 @click.argument("name")
 @click.option("--initial-commit", help="Initial commit to analyze. If not specified, will start from the first commit")
@@ -72,7 +73,7 @@ def timeline(
     compressed: bool,
     format: Optional[list[str]],
     show_gui: bool,
-    wheels_storage: str,
+    wheels_storage: WheelsStorageTier,
 ) -> None:
     """
     Show the size evolution of a module (integration or dependency) over time.
@@ -385,6 +386,7 @@ def process_commits(
         date, message, commit = format_commit_data(date_str, message, commit, params["first_commit"])
         if params["type"] == "dependency" and date > MINIMUM_DATE_DEPENDENCIES:
             result = get_dependencies(
+                params["app"],
                 repo,
                 params["module"],
                 params["platform"],
@@ -490,6 +492,7 @@ def get_files(
 
 
 def get_dependencies(
+    app: Application,
     repo_path: str,
     module: str,
     platform: str,
@@ -498,7 +501,7 @@ def get_dependencies(
     author: str,
     message: str,
     compressed: bool,
-    wheels_storage: str,
+    wheels_storage: WheelsStorageTier,
 ) -> Optional[CommitEntry]:
     """
     Returns the size and metadata of a dependency for a given commit and platform.
@@ -522,16 +525,18 @@ def get_dependencies(
     for filename in paths:
         file_path = os.path.join(resolved_path, filename)
         if os.path.isfile(file_path) and is_correct_dependency(platform, version, filename):
-            download_url, dep_version = get_dependency_data(file_path, module, wheels_storage)
+            download_url, dep_version = get_dependency_data(file_path, module)
             return (
-                get_dependency_size(download_url, dep_version, commit, date, author, message, compressed)
+                get_dependency_size(
+                    app, download_url, dep_version, commit, date, author, message, compressed, wheels_storage
+                )
                 if download_url and dep_version is not None
                 else None
             )
     return None
 
 
-def get_dependency_data(file_path: str, module: str, wheels_storage: str) -> tuple[Optional[str], Optional[str]]:
+def get_dependency_data(file_path: str, module: str) -> tuple[Optional[str], Optional[str]]:
     """
     Parses a dependency file and extracts the dependency name, download URL, and version.
 
@@ -552,7 +557,6 @@ def get_dependency_data(file_path: str, module: str, wheels_storage: str) -> tup
                 raise WrongDependencyFormat("The dependency format 'name @ link' is no longer supported.")
             name, url = match.groups()
             if name == module:
-                url = resolve_wheel_url(url, wheels_storage)
                 version_match = re.search(rf"{re.escape(name)}/[^/]+?-([0-9]+(?:\.[0-9]+)*)-", url)
                 version = version_match.group(1) if version_match else ""
                 return url, version
@@ -560,7 +564,15 @@ def get_dependency_data(file_path: str, module: str, wheels_storage: str) -> tup
 
 
 def get_dependency_size(
-    download_url: str, version: str, commit: str, date: date, author: str, message: str, compressed: bool
+    app: Application,
+    download_url: str,
+    version: str,
+    commit: str,
+    date: date,
+    author: str,
+    message: str,
+    compressed: bool,
+    wheels_storage: WheelsStorageTier,
 ) -> CommitEntry:
     """
     Calculates the size of a dependency wheel at a given commit.
@@ -578,16 +590,15 @@ def get_dependency_size(
         A CommitEntry with size and metadata for the given dependency and commit.
     """
     if compressed:
-        response = requests.head(download_url)
-        response.raise_for_status()
+        response = retry_wheel_request(
+            lambda: request_wheel(app, download_url, wheels_storage, head=True), download_url
+        )
         size_str = response.headers.get("Content-Length")
         if size_str is None:
             raise ValueError(f"Missing size for commit {commit}")
         size = int(size_str)
     else:
-        with requests.get(download_url, stream=True) as response:
-            response.raise_for_status()
-            wheel_data = response.content
+        wheel_data = download_wheel(app, download_url, wheels_storage)
 
         with tempfile.TemporaryDirectory() as tmpdir:
             wheel_path = Path(tmpdir) / "package.whl"

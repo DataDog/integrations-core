@@ -15,7 +15,7 @@ from datadog_checks.dev.tooling.commands.console import (
     echo_warning,
 )
 from datadog_checks.dev.tooling.constants import get_root
-from datadog_checks.dev.tooling.license_headers import validate_license_headers
+from datadog_checks.dev.tooling.license_headers import build_get_previous, validate_license_headers
 from datadog_checks.dev.tooling.testing import process_checks_option
 from datadog_checks.dev.tooling.utils import complete_valid_checks
 
@@ -25,7 +25,6 @@ IGNORES = {
     "mysql": ["datadog_checks/mysql/databases_data.py"],  # deleted in master but still in release branches
     "php_fpm": ["datadog_checks/php_fpm/vendor"],
     "snmp": ["tests/mibs"],
-    "tokumx": ["datadog_checks/tokumx/vendor"],
 }
 
 
@@ -33,7 +32,7 @@ IGNORES = {
 @click.argument('check', shell_complete=complete_valid_checks, required=False)
 @click.option('--fix', is_flag=True, help='Attempt to fix errors')
 @click.pass_context
-def license_headers(ctx, check, fix):
+def license_headers(ctx: click.Context, check: str | None, fix: bool) -> None:
     """Validate license headers in python code files.
 
     If `check` is specified, only the check will be validated, if check value is 'changed' will only apply to changed
@@ -52,11 +51,13 @@ def license_headers(ctx, check, fix):
     total_errors = 0
     total_fixes = 0
 
+    get_previous = build_get_previous()
+
     for check_name in checks:
         path_to_check = root / check_name
         ignores = [pathlib.Path(p) for p in IGNORES.get(check_name, [])]
         ignores.extend([pathlib.Path(p) for p in IGNORES.get("all")])
-        errors = validate_license_headers(path_to_check, ignore=ignores, repo_root=root)
+        errors = validate_license_headers(path_to_check, ignore=ignores, repo_root=root, get_previous=get_previous)
 
         for err in errors:
             echo_failure(f'{check_name}/{err.path}: {err.message}')

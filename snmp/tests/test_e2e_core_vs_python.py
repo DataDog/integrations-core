@@ -10,7 +10,7 @@ from datadog_checks.base.stubs.common import MetricStub, ServiceCheckStub
 
 from . import common
 
-pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.snmp_integration_only]
+pytestmark = [pytest.mark.e2e, common.py3_plus_only, common.python_suite_only]
 
 SUPPORTED_METRIC_TYPES = [
     {'MIB': 'ABC', 'symbol': {'OID': "1.3.6.1.2.1.7.1.0", 'name': "IAmACounter32"}},  # Counter32
@@ -357,7 +357,7 @@ def test_e2e_profile_checkpoint(dd_agent_check):
     assert_python_vs_core(
         dd_agent_check,
         config,
-        expected_total_count=311,
+        expected_total_count=314,
         metrics_to_skip=metrics_to_skip,
         tags_to_skip=['fan_speed_sensor_status'],
     )
@@ -369,7 +369,7 @@ def test_e2e_profile_checkpoint_firewall(dd_agent_check):
     assert_python_vs_core(
         dd_agent_check,
         config,
-        expected_total_count=311,
+        expected_total_count=314,
         metrics_to_skip=metrics_to_skip,
         tags_to_skip=['fan_speed_sensor_status'],
     )
@@ -693,7 +693,8 @@ def assert_python_vs_core(
     tags_to_skip += DEFAULT_TAGS_TO_SKIP
 
     # building expected metrics (python)
-    aggregator = dd_agent_check(python_config, rate=rate, pause=pause, times=times)
+    run_kwargs = common.two_runs_instead_of_rate({'rate': rate, 'pause': pause, 'times': times})
+    aggregator = dd_agent_check(python_config, **run_kwargs)
     python_metrics = defaultdict(list)
     for _, metrics in aggregator._metrics.items():
         for stub in metrics:
@@ -713,7 +714,7 @@ def assert_python_vs_core(
 
     # building core metrics (core)
     aggregator.reset()
-    aggregator = common.dd_agent_check_wrapper(dd_agent_check, core_config, rate=rate, pause=pause, times=times)
+    aggregator = common.dd_agent_check_wrapper(dd_agent_check, core_config, **run_kwargs)
     aggregator_metrics = aggregator._metrics
     aggregator._metrics = defaultdict(list)
     for metric_name in aggregator_metrics:

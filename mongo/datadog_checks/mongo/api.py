@@ -254,10 +254,7 @@ class MongoApi(object):
         - metrics: execution statistics (execCount, totalExecMicros, etc.)
         - asOf: timestamp of the statistics
         """
-        pipeline = [
-            {'$queryStats': {}},
-            {'$sort': {'metrics.execCount': -1}},
-        ]
+        pipeline = [{'$queryStats': {}}]
         return self['admin'].aggregate(pipeline, session=session, maxTimeMS=self._timeout)
 
     @property
@@ -272,4 +269,4 @@ class MongoApi(object):
             return self.__hostname
         except Exception as e:
             self._log.error('Unable to get hostname: %s', e)
-            return None
+            raise

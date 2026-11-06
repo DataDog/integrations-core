@@ -7,7 +7,7 @@ import pytest
 from packaging.version import parse as parse_version
 
 from datadog_checks.base import is_affirmative
-from datadog_checks.dev import docker_run, run_command
+from datadog_checks.dev import docker_run, get_e2e_discovery_metadata, run_command
 
 from .common import COCKROACHDB_VERSION, HERE, HOST, PORT
 
@@ -24,7 +24,7 @@ def dd_environment(instance):
         endpoints=instance['openmetrics_endpoint'],
         conditions=conditions,
     ):
-        yield instance
+        yield instance, get_e2e_discovery_metadata()
 
 
 @pytest.fixture(scope='session')

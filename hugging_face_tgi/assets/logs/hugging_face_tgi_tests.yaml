@@ -14,25 +14,25 @@ tests:
          -
           type: "GenerateParameters"
          -
-          watermark: false
-          seed: "None"
+          adapter_id: "None"
+          best_of: "None"
+          decoder_input_details: false
+          details: false
           do_sample: false
-          top_p: "None"
           frequency_penalty: "None"
           grammar: "None"
-          best_of: "None"
-          stop: "[]"
-          truncate: "None"
-          top_n_tokens: "None"
           max_new_tokens: "Some(20)"
-          top_k: "None"
-          decoder_input_details: false
-          temperature: "None"
-          typical_p: "None"
-          details: false
-          adapter_id: "None"
-          return_full_text: "None"
           repetition_penalty: "None"
+          return_full_text: "None"
+          seed: "None"
+          stop: "[]"
+          temperature: "None"
+          top_k: "None"
+          top_n_tokens: "None"
+          top_p: "None"
+          truncate: "None"
+          typical_p: "None"
+          watermark: false
         queue_time: "53.525µs"
         seed: "None"
         sub_component: "server"
@@ -59,25 +59,25 @@ tests:
          -
           type: "GenerateParameters"
          -
-          watermark: false
-          seed: "None"
+          adapter_id: "None"
+          best_of: "None"
+          decoder_input_details: false
+          details: true
           do_sample: true
-          top_p: "None"
           frequency_penalty: "None"
           grammar: "None"
-          best_of: "None"
-          stop: "[]"
-          truncate: "None"
-          top_n_tokens: "None"
           max_new_tokens: "Some(20)"
-          top_k: "None"
-          decoder_input_details: false
-          temperature: "None"
-          typical_p: "None"
-          details: true
-          adapter_id: "None"
-          return_full_text: "None"
           repetition_penalty: "None"
+          return_full_text: "None"
+          seed: "None"
+          stop: "[]"
+          temperature: "None"
+          top_k: "None"
+          top_n_tokens: "None"
+          top_p: "None"
+          truncate: "None"
+          typical_p: "None"
+          watermark: false
         sub_component: "infer"
       status: "ERROR"
     message: "`inputs` tokens + `max_new_tokens` must be <= 512. Given: 1864 `inputs` tokens and 20 `max_new_tokens`"
@@ -180,59 +180,59 @@ tests:
        -
         component: "text_generation_launcher"
        -
-        validation_workers: 2
-        cuda_graphs: "None"
-        usage_stats: "On"
-        sharded: "None"
-        trust_remote_code: false
-        max_total_tokens: "None"
-        hostname: "ip-172-31-21-18"
-        max_input_length: "None"
-        max_batch_size: "None"
-        shard_uds_path: "/tmp/text-generation-server"
-        waiting_served_ratio: 0.3
-        num_shard: "None"
-        graceful_termination_timeout: 90
-        json_output: false
-        dtype: "None"
-        kv_cache_dtype: "None"
-        payload_limit: 2000000
-        max_stop_sequences: 4
-        tokenizer_config_path: "None"
-        revision: "None"
-        weights_cache_override: "None"
-        lora_adapters: "None"
-        port: 80
-        max_input_tokens: "None"
-        cuda_memory_fraction: 1.0
-        otlp_service_name: "text-generation-inference.router"
-        max_top_n_tokens: 5
-        rope_factor: "None"
-        watermark_delta: "None"
-        ngrok: false
-        disable_grammar_support: false
-        max_waiting_tokens: 20
-        quantize: "None"
-        disable_custom_kernels: false
-        max_concurrent_requests: 128
-        max_client_batch_size: 4
-        rope_scaling: "None"
-        huggingface_hub_cache: "None"
-        speculate: "None"
-        max_best_of: 2
-        model_id: "teknium/OpenHermes-2.5-Mistral-7B"
-        env: false
-        master_addr: "localhost"
-        watermark_gamma: "None"
-        ngrok_authtoken: "None"
         api_key: "None"
-        prometheus_port: 9000
-        ngrok_edge: "None"
         cors_allow_origin: "[]"
-        master_port: 29500
-        otlp_endpoint: "None"
+        cuda_graphs: "None"
+        cuda_memory_fraction: 1.0
+        disable_custom_kernels: false
+        disable_grammar_support: false
+        dtype: "None"
         enable_prefill_logprobs: false
+        env: false
+        graceful_termination_timeout: 90
+        hostname: "ip-172-31-21-18"
+        huggingface_hub_cache: "None"
+        json_output: false
+        kv_cache_dtype: "None"
+        lora_adapters: "None"
+        master_addr: "localhost"
+        master_port: 29500
+        max_batch_size: "None"
         max_batch_total_tokens: "None"
+        max_best_of: 2
+        max_client_batch_size: 4
+        max_concurrent_requests: 128
+        max_input_length: "None"
+        max_input_tokens: "None"
+        max_stop_sequences: 4
+        max_top_n_tokens: 5
+        max_total_tokens: "None"
+        max_waiting_tokens: 20
+        model_id: "teknium/OpenHermes-2.5-Mistral-7B"
+        ngrok: false
+        ngrok_authtoken: "None"
+        ngrok_edge: "None"
+        num_shard: "None"
+        otlp_endpoint: "None"
+        otlp_service_name: "text-generation-inference.router"
+        payload_limit: 2000000
+        port: 80
+        prometheus_port: 9000
+        quantize: "None"
+        revision: "None"
+        rope_factor: "None"
+        rope_scaling: "None"
+        shard_uds_path: "/tmp/text-generation-server"
+        sharded: "None"
+        speculate: "None"
+        tokenizer_config_path: "None"
+        trust_remote_code: false
+        usage_stats: "On"
+        validation_workers: 2
+        waiting_served_ratio: 0.3
+        watermark_delta: "None"
+        watermark_gamma: "None"
+        weights_cache_override: "None"
       status: "INFO"
     message: |-
       2025-09-08T15:38:40.500145Z  INFO text_generation_launcher: Args {

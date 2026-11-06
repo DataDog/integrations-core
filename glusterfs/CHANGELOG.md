@@ -2,6 +2,12 @@
 
 <!-- towncrier release notes start -->
 
+## 3.5.0 / 2026-06-09 / Agent 7.81.0
+
+***Added***:
+
+* Add support for security validation in models for the `gstatus_path` configuration option. ([#23881](https://github.com/DataDog/integrations-core/pull/23881))
+
 ## 3.4.1 / 2026-03-18 / Agent 7.78.0
 
 ***Fixed***:

@@ -22,7 +22,7 @@ from . import defaults, validators
 
 
 SECURE_FIELD_NAMES = frozenset(
-    ['auth_token', 'kerberos_cache', 'kerberos_keytab', 'tls_ca_cert', 'tls_cert', 'tls_private_key']
+    ['auth_token', 'fluentd', 'kerberos_cache', 'kerberos_keytab', 'tls_ca_cert', 'tls_cert', 'tls_private_key']
 )
 
 

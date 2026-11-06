@@ -294,3 +294,20 @@ promhttp_metric_handler_requests_in_flight 1
 # HELP promhttp_metric_handler_requests_total Total number of scrapes by HTTP status code.
 # TYPE promhttp_metric_handler_requests_total counter
 promhttp_metric_handler_requests_total{code="200"} 1
+# HELP gitaly_catfile_cache_total Counter of catfile cache hit/miss
+# TYPE gitaly_catfile_cache_total counter
+gitaly_catfile_cache_total{type="dirty"} 105
+gitaly_catfile_cache_total{type="hit"} 150
+# HELP gitaly_connections_total Total number of connections to Gitaly
+# TYPE gitaly_connections_total counter
+gitaly_connections_total{type="unix"} 3
+# HELP gitaly_service_client_requests_total Counter of client requests received by client, call_site, auth version, response code and deadline_type
+# TYPE gitaly_service_client_requests_total counter
+gitaly_service_client_requests_total{auth_version="v2",call_site="unknown",client_name="gitlab-sidekiq",deadline_type="unknown",grpc_code="OK",grpc_method="CountCommits",grpc_service="gitaly.CommitService",method_operation="accessor",method_scope="repository"} 2
+gitaly_service_client_requests_total{auth_version="v2",call_site="unknown",client_name="gitlab-sidekiq",deadline_type="unknown",grpc_code="OK",grpc_method="RepositoryInfo",grpc_service="gitaly.RepositoryService",method_operation="accessor",method_scope="repository"} 1
+# HELP gitaly_total_repositories_count Gauge of number of repositories by storage path and repository prefix
+# TYPE gitaly_total_repositories_count gauge
+gitaly_total_repositories_count{path="/var/opt/gitlab/git-data/repositories",prefix="@hashed"} 2
+# HELP gitaly_concurrency_limiting_current_limit The current limit value of an adaptive concurrency limit
+# TYPE gitaly_concurrency_limiting_current_limit gauge
+gitaly_concurrency_limiting_current_limit{limit="perRPC/gitaly.SmartHTTPService/PostUploadPackWithSidechannel"} 32

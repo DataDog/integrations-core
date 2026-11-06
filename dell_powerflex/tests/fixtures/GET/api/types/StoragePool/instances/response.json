@@ -1,0 +1,14 @@
+[
+  {
+    "mediaType": "HDD",
+    "protectionDomainId": "68c139ee00000000",
+    "name": "storagepool2",
+    "id": "2515d0d600000001"
+  },
+  {
+    "mediaType": "SSD",
+    "protectionDomainId": "68c139ee00000000",
+    "name": "pool1",
+    "id": "25155ba600000000"
+  }
+]

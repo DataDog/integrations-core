@@ -73,6 +73,10 @@ def get_dynamic_tags(columns):
 def get_value_from_path(value, path):
     result = value
 
+    # An empty or missing path targets the root of the response
+    if not path:
+        return result
+
     # Traverse the nested dictionaries
     for key in re.split(REGEX, path):
         if result is not None:
@@ -597,7 +601,7 @@ class ESCheck(AgentCheck):
         """
 
         tags_to_submit = deepcopy(tags)
-        path = '{}.{}'.format(data_path, value_path)
+        path = '.'.join(part for part in (data_path, value_path) if part)
 
         # Collect the value of tags first, and then append to tags_to_submit
         for dynamic_tag_path, dynamic_tag_name in dynamic_tags:

@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
+from typing import Any
 
 from datadog_checks.base import ConfigurationError, is_affirmative
 
@@ -289,6 +290,11 @@ class KafkaActionsConfig:
         if not config.get('consumer_group'):
             raise ConfigurationError("delete_consumer_group action requires 'consumer_group' parameter")
 
+    def _validate_offset_entry_partition(self, offset_entry: dict[str, Any], index: int) -> None:
+        """Validate that offsets[index].partition, if present, is a non-negative integer."""
+        if not isinstance(offset_entry['partition'], int) or offset_entry['partition'] < 0:
+            raise ConfigurationError(f"offsets[{index}].partition must be a non-negative integer")
+
     def _validate_update_consumer_group_offsets(self):
         """Validate update_consumer_group_offsets action configuration."""
         config = self.update_consumer_group_offsets
@@ -310,17 +316,36 @@ class KafkaActionsConfig:
             if not offset_entry.get('topic'):
                 raise ConfigurationError(f"offsets[{i}] requires 'topic' parameter")
 
-            if 'partition' not in offset_entry:
-                raise ConfigurationError(f"offsets[{i}] requires 'partition' parameter")
+            has_offset = 'offset' in offset_entry
+            has_timestamp = 'timestamp' in offset_entry
 
-            if 'offset' not in offset_entry:
-                raise ConfigurationError(f"offsets[{i}] requires 'offset' parameter")
+            if not has_offset and not has_timestamp:
+                raise ConfigurationError(f"offsets[{i}] requires 'offset' or 'timestamp'")
 
-            if not isinstance(offset_entry.get('partition'), int):
-                raise ConfigurationError(f"offsets[{i}].partition must be an integer")
+            if has_offset and has_timestamp:
+                raise ConfigurationError(f"offsets[{i}] cannot specify both 'offset' and 'timestamp'")
 
-            if not isinstance(offset_entry.get('offset'), int):
-                raise ConfigurationError(f"offsets[{i}].offset must be an integer")
+            if has_offset:
+                if 'partition' not in offset_entry:
+                    raise ConfigurationError(f"offsets[{i}] requires 'partition' when 'offset' is specified")
+
+                self._validate_offset_entry_partition(offset_entry, i)
+
+                offset_val = offset_entry['offset']
+                if not isinstance(offset_val, int) or offset_val < -2:
+                    raise ConfigurationError(
+                        f"offsets[{i}].offset must be -2 (earliest), -1 (latest), or a non-negative integer"
+                    )
+
+            if has_timestamp:
+                ts = offset_entry['timestamp']
+                if not isinstance(ts, int) or ts <= 0:
+                    raise ConfigurationError(
+                        f"offsets[{i}].timestamp must be a positive integer (milliseconds since epoch)"
+                    )
+
+                if 'partition' in offset_entry:
+                    self._validate_offset_entry_partition(offset_entry, i)
 
     def _validate_produce_message(self):
         """Validate produce_message action configuration."""

@@ -98,6 +98,7 @@ def test_events_collection_one_event(aggregator, realtime_instance, dd_run_check
     )
     assert len(aggregator.events) == 1
     assert aggregator.events[0]['msg_title'] == "[Triggered] alarm1 on VM vm1 is now red"
+    assert aggregator.events[0]['event_object'] == 'h:7b11e3d1b4|dc:66a9ee1b16|a:73e47c07e2'
     assert check.latest_event_query == time1 + dt.timedelta(seconds=1)
 
 

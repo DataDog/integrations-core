@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+import logging
 import re
 from typing import TYPE_CHECKING
 
@@ -39,20 +40,26 @@ def promote(app: Application, pr_url: str):
 
     pr_number = int(match.group(1))
 
-    with app.status(f'Fetching PR #{pr_number} head...'):
-        head_sha, head_ref = app.github.get_pr_head(pr_number)
+    httpx_logger = logging.getLogger('httpx')
+    previous_level = httpx_logger.level
+    httpx_logger.setLevel(logging.WARNING)
+    try:
+        with app.status(f'Fetching PR #{pr_number} head...'):
+            head_sha, head_ref = app.github.get_pr_head(pr_number)
 
-    app.display_info(f'PR #{pr_number} — branch: {head_ref}, SHA: {head_sha}')
+        app.display_info(f'PR #{pr_number}: branch {head_ref}, SHA {head_sha}')
 
-    with app.status('Dispatching promote workflow...'):
-        app.github.dispatch_workflow(
-            workflow_id=PROMOTE_WORKFLOW,
-            ref=PROMOTE_WORKFLOW_REF,
-            inputs={'pr_number': str(pr_number), 'head_sha': head_sha},
-        )
+        with app.status('Dispatching promote workflow...'):
+            run_details = app.github.dispatch_workflow(
+                workflow_id=PROMOTE_WORKFLOW,
+                ref=PROMOTE_WORKFLOW_REF,
+                inputs={'pr_number': str(pr_number), 'head_sha': head_sha},
+                return_run_details=True,
+            )
 
-    runs_url = (
-        f'https://github.com/{app.github.repo_id}/actions/workflows/{PROMOTE_WORKFLOW}?query=event%3Aworkflow_dispatch'
-    )
-    app.display_success(f'Promote workflow dispatched for PR #{pr_number}.')
-    app.display_info(f'Recent runs: {runs_url}')
+        if not run_details:
+            app.abort('Workflow dispatched but no run details were returned.')
+        app.display_success(f'Promote workflow dispatched for PR #{pr_number}.')
+        app.display_info(f'Workflow run: {run_details["html_url"]}')
+    finally:
+        httpx_logger.setLevel(previous_level)

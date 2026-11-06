@@ -2,6 +2,36 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+from datadog_checks.argocd import ArgocdCheck
+from datadog_checks.argocd.resources import ArgocdResourceCollector
+
+GENRESOURCES_ENDPOINT = "https://argocd.example.com"
+
+
+def build_instance(**overrides) -> dict:
+    instance = {
+        "app_controller_endpoint": "http://app_controller:8082",
+        "collect_genresources": True,
+        "genresources_endpoint": GENRESOURCES_ENDPOINT,
+        "genresources_auth_token": "test-token",
+    }
+    instance.update(overrides)
+    return instance
+
+
+def build_check(**overrides) -> ArgocdCheck:
+    """Build an ArgocdCheck with config models loaded and the genresources collector attached.
+
+    Production builds the collector lazily on the first ``check()`` once
+    ``check_initializations`` has populated ``self.config``; tests reach into
+    ``check._resource_collector`` directly, so we mirror that bootstrap here.
+    """
+    check = ArgocdCheck("argocd", {}, [build_instance(**overrides)])
+    check.load_configuration_models()
+    check._resource_collector = ArgocdResourceCollector(check)
+    return check
+
+
 MOCKED_APP_CONTROLLER_INSTANCE = {'app_controller_endpoint': 'http://app_controller:8082'}
 
 MOCKED_APP_CONTROLLER_WITH_OTHER_PARAMS = {

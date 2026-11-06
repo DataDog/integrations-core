@@ -17,10 +17,10 @@ jobs:
     uses: ./.github/workflows/test-all-windows.yml
 
     permissions:
-       # needed for codecov in test-target.yml, allows the action to get a JWT signed by Github
-       id-token: write
        # needed for compute-matrix in test-target.yml
        contents: read
+       # needed for dd-sts in test-target.yml
+       id-token: write
 
     with:
       repo: core

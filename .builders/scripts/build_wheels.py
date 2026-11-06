@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import email.message
 import fnmatch
 import json
@@ -13,6 +14,7 @@ import time
 import tomllib
 from functools import cache
 from hashlib import sha256
+from itertools import accumulate
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import TypedDict
@@ -21,7 +23,7 @@ from zipfile import ZipFile
 import pathspec
 import urllib3
 from dotenv import dotenv_values
-from utils import iter_wheels
+from utils import iter_wheels, wheel_supports_macos
 
 
 def unpack_wheel(wheel_file: Path, dest_dir: Path | None = None):
@@ -46,6 +48,7 @@ def pack_wheel(wheel_dir: Path, dest_dir: Path | None = None):
         cmd += ['-d', str(dest_dir)]
     cmd.append(str(wheel_dir))
     subprocess.check_call(cmd)
+
 
 INDEX_BASE_URL = 'https://agent-int-packages.datadoghq.com'
 CUSTOM_EXTERNAL_INDEX = f'{INDEX_BASE_URL}/external'
@@ -172,6 +175,62 @@ def wheel_was_built(wheel: Path) -> bool:
     return file_hash != wheel_hashes[wheel.name]
 
 
+def use_macos_target_wheels(external_wheels_dir: Path, python_path: Path, env_vars: dict[str, str]) -> None:
+    """
+    Replace each external wheel that needs a newer macOS than `MACOSX_DEPLOYMENT_TARGET` with a wheel of the
+    same release that doesn't.
+
+    pip ranks wheels by the macOS version of the runner, so a newer runner can make it pick a wheel that the
+    oldest macOS the Agent supports can't load, even when the release also ships one that it can. A replacement
+    must declare the same dependencies, since resolution used the original's metadata. When the release has no
+    compatible wheel, the original stays for `repair_wheels.py` to reject.
+    """
+    target = tuple(int(part) for part in os.environ['MACOSX_DEPLOYMENT_TARGET'].split('.')[:2])
+    arch = os.uname().machine
+    platform = f'macosx_{target[0]}_{target[1]}_{arch}'
+    # pip refuses `--only-binary=:all:` while `--no-binary` is set, and the packages in it never reach this point
+    download_env = {key: value for key, value in env_vars.items() if key != 'PIP_NO_BINARY'}
+
+    for wheel in iter_wheels(external_wheels_dir):
+        if wheel_supports_macos(wheel.name, target, arch):
+            continue
+
+        metadata = extract_metadata(wheel)
+        with TemporaryDirectory() as d:
+            command_args = [
+                str(python_path),
+                '-m',
+                'pip',
+                'download',
+                f'{metadata["Name"]}=={metadata["Version"]}',
+                '--no-deps',
+                '--only-binary=:all:',
+                '--platform',
+                platform,
+                '--dest',
+                d,
+                '--extra-index-url',
+                CUSTOM_EXTERNAL_INDEX,
+            ]
+            print(f'Running: {join_command_args(command_args)}', file=sys.stderr)
+            if subprocess.run(command_args, env=download_env).returncode:
+                print(f'No wheel of the same release as {wheel.name} supports {platform}')
+                continue
+
+            replacement = next(iter_wheels(d))
+            replacement_metadata = extract_metadata(replacement)
+            for field in ('Requires-Dist', 'Requires-Python'):
+                if sorted(replacement_metadata.get_all(field, [])) != sorted(metadata.get_all(field, [])):
+                    raise RuntimeError(f'{replacement.name} and {wheel.name} declare a different `{field}`')
+
+            wheel.unlink()
+            shutil.move(replacement, external_wheels_dir)
+            print(
+                f'::warning::Using {replacement.name} instead of {wheel.name}, '
+                f'which needs a newer macOS than {platform}'
+            )
+
+
 def _remove_test_files_from_dir(unpacked_dir: Path) -> bool:
     """Remove excluded test files and directories from an unpacked wheel directory."""
     removed_any = False
@@ -208,9 +267,6 @@ def _load_excluded_spec() -> pathspec.PathSpec:
 def is_excluded_from_wheel(path: str | Path) -> bool:
     """
     Return True if `path` (file or directory) should be excluded per files_to_remove.toml.
-    Matches:
-      - type annotation files: **/*.pyi, **/py.typed
-      - test directories listed with a trailing '/'
     """
     spec = _load_excluded_spec()
     rel = Path(path).as_posix()
@@ -250,8 +306,30 @@ def _get_matching_rules(wheel_name: str) -> list[dict]:
     return matching
 
 
+def _strip_docstrings(source: str, filename: str) -> str:
+    """Empty Python docstrings without rewriting executable code or license comments."""
+    data = source.encode('utf-8')
+    offsets = list(accumulate((len(line) + 1 for line in data.split(b'\n')), initial=0))
+    spans = []
+    for node in ast.walk(ast.parse(source, filename=filename)):
+        if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
+            if ast.get_docstring(node, clean=False) is not None:
+                doc = node.body[0]
+                assert doc.end_lineno is not None and doc.end_col_offset is not None
+                spans.append(
+                    (
+                        offsets[doc.lineno - 1] + doc.col_offset,
+                        offsets[doc.end_lineno - 1] + doc.end_col_offset,
+                    )
+                )
+    for start, end in sorted(spans, reverse=True):
+        # An empty literal preserves docstring-only bodies and leading __future__ imports.
+        data = data[:start] + b'""' + data[end:]
+    return data.decode('utf-8')
+
+
 def _strip_lines_from_dir(unpacked_dir: Path, rules: list[dict]) -> bool:
-    """Strip matching lines and their indented blocks from files."""
+    """Strip matching lines, their indented blocks, and optionally Python docstrings."""
     modified = False
     for rule in rules:
         file_pattern = rule.get('file_pattern', '*.py')
@@ -287,8 +365,11 @@ def _strip_lines_from_dir(unpacked_dir: Path, rules: list[dict]) -> bool:
 
                 kept_lines.append(line)
 
-            if len(kept_lines) != len(lines):
-                py_file.write_text(''.join(kept_lines), encoding='utf-8')
+            updated_content = ''.join(kept_lines)
+            if rule.get('strip_docstrings', False):
+                updated_content = _strip_docstrings(updated_content, str(py_file))
+            if updated_content != original_content:
+                py_file.write_text(updated_content, encoding='utf-8')
                 modified = True
     return modified
 
@@ -336,6 +417,7 @@ def clean_wheel(wheel_path: Path) -> bool:
             shutil.move(str(new_files[0]), str(wheel_path))
 
     return True
+
 
 def add_dependency(dependencies: dict[str, str], sizes: dict[str, VersionedWheelSizes], wheel: Path) -> None:
     project_metadata = extract_metadata(wheel)
@@ -442,6 +524,9 @@ def main():
                 shutil.move(wheel, staged_built_wheels_dir)
             else:
                 shutil.move(wheel, staged_external_wheels_dir)
+
+        if sys.platform == 'darwin':
+            use_macos_target_wheels(staged_external_wheels_dir, python_path, env_vars)
 
         # Repair wheels
         check_process(

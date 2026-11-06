@@ -39,7 +39,7 @@ def clean_fips_environment():
 
 @pytest.fixture(scope='session')
 def dd_environment(instance_e2e, mock_local_tls_dns):
-    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, sleep=20):
+    with docker_run(os.path.join(HERE, 'compose', 'docker-compose.yml'), build=True, wait_for_health=False, sleep=20):
         e2e_metadata = {'docker_volumes': ['{}:{}'.format(CA_CERT, CA_CERT_MOUNT_PATH)]}
         yield instance_e2e, e2e_metadata
 
@@ -295,7 +295,7 @@ def instance_remote_cert_warning_seconds():
 def instance_remote_postgresql_valid():
     return {
         'server': 'localhost',
-        'port': 55432,
+        'port': 15432,
         'server_hostname': 'valid.mock',
         'start_tls': 'postgres',
         'tls_ca_cert': CA_CERT,

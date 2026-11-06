@@ -1,0 +1,182 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+import os
+import ssl
+from urllib.request import urlopen
+
+import pytest
+
+from datadog_checks.dev import WaitFor, docker_run, get_docker_hostname, get_here
+from datadog_checks.dev.utils import find_free_port
+from datadog_checks.hpe_aruba_edgeconnect import HpeArubaEdgeconnectCheck
+
+from .common import (
+    APPLIANCE_PAYLOAD,
+    EXCLUDED_APPLIANCE_IP,
+    TGZ_DATA,
+    _mock_appliance_client,
+    _setup_mocks,
+)
+
+USE_EDGECONNECT_LAB = os.environ.get('USE_EDGECONNECT_LAB')
+
+# The fake Orchestrator only accepts this backend, so the E2E login fails unless the check
+# actually sends `loginType`.
+ORCH_LOGIN_TYPE = 2
+E2E_AUTH = os.environ.get('EDGECONNECT_E2E_AUTH', 'password')
+# Test-only value, not a real credential.
+ORCH_API_KEY = 'e2e-api-key'
+
+
+HERE = get_here()
+HOST = get_docker_hostname()
+COMPOSE_FILE = os.path.join(HERE, 'docker', 'docker-compose.yaml')
+
+
+@pytest.fixture(scope='session')
+def dd_environment(instance, dd_save_state):
+    if USE_EDGECONNECT_LAB:
+        orch_ip = os.environ['EDGECONNECT_ORCH_IP']
+        if E2E_AUTH == 'api-key':
+            # Appliances only take username/password, so there are no Orchestrator credentials to fall back on.
+            auth = {
+                'orchestrator_api_key': os.environ['EDGECONNECT_ORCH_API_KEY'],
+                'orchestrator_username': None,
+                'orchestrator_password': None,
+            }
+            appliance_username = os.environ['EDGECONNECT_APPLIANCE_USERNAME']
+            appliance_password = os.environ['EDGECONNECT_APPLIANCE_PASSWORD']
+        else:
+            auth = {
+                'orchestrator_username': os.environ['EDGECONNECT_ORCH_USERNAME'],
+                'orchestrator_password': os.environ['EDGECONNECT_ORCH_PASSWORD'],
+            }
+            appliance_username = os.environ.get('EDGECONNECT_APPLIANCE_USERNAME', auth['orchestrator_username'])
+            appliance_password = os.environ.get('EDGECONNECT_APPLIANCE_PASSWORD', auth['orchestrator_password'])
+        # Narrow the CIDR to leave some appliances uncovered and exercise the skip path.
+        appliance_cidr = os.environ.get('EDGECONNECT_APPLIANCE_CIDR', '0.0.0.0/0')
+        appliance_credentials = [
+            {'cidr': appliance_cidr, 'username': appliance_username, 'password': appliance_password},
+        ]
+        inst = instance(
+            orch_ip,
+            appliance_credentials_overrides=appliance_credentials,
+            send_ndm_metadata=True,
+            collect_events=True,
+            **auth,
+        )
+        dd_save_state('e2e_instance', inst)
+        yield {
+            'instances': [inst],
+            'logs': [
+                {
+                    'type': 'tcp',
+                    'port': 10514,
+                    'service': 'edgeconnect',
+                    'source': 'aruba_edgeconnect',
+                }
+            ],
+        }
+    else:
+        orch_port = find_free_port(HOST)
+        appliance_port = find_free_port(HOST)
+        orch_ip = f'{HOST}:{orch_port}'
+
+        def _ready():
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            urlopen(f'https://{orch_ip}/health', timeout=2, context=ctx)
+            urlopen(f'https://{HOST}:{appliance_port}/health', timeout=2, context=ctx)
+
+        if E2E_AUTH == 'api-key':
+            # The fake Orchestrator rejects data requests without this key, and appliances only take
+            # username/password, so they get credentials from an override.
+            auth = {
+                'orchestrator_api_key': ORCH_API_KEY,
+                'orchestrator_username': None,
+                'orchestrator_password': None,
+                'appliance_credentials': [{'cidr': '0.0.0.0/0', 'username': 'admin', 'password': ''}],
+            }
+        else:
+            auth = {'orchestrator_login_type': ORCH_LOGIN_TYPE}
+
+        inst = instance(
+            orch_ip,
+            connect_timeout=2,
+            appliance_ips={'exclude': [f'{EXCLUDED_APPLIANCE_IP}/32']},
+            **auth,
+        )
+
+        with docker_run(
+            compose_file=COMPOSE_FILE,
+            build=True,
+            conditions=[WaitFor(_ready, attempts=60, wait=1)],
+            env_vars={
+                'HOST_PORT': str(orch_port),
+                'APPLIANCE_PORT': str(appliance_port),
+                'ORCH_USERNAME': 'admin',
+                'ORCH_PASSWORD': '',
+                'ORCH_LOGIN_TYPE': str(ORCH_LOGIN_TYPE),
+                'ORCH_API_KEY': ORCH_API_KEY if E2E_AUTH == 'api-key' else '',
+                'APPLIANCE_USERNAME': 'admin',
+                'APPLIANCE_PASSWORD': '',
+            },
+        ):
+            yield {'instances': [inst]}
+
+
+@pytest.fixture(scope='session')
+def instance():
+    def builder(
+        orchestrator_ip: str,
+        orchestrator_username: str | None = 'admin',
+        orchestrator_password: str | None = '',
+        appliance_ips=None,
+        appliance_credentials=None,
+        send_ndm_metadata: bool = False,
+        **kwargs,
+    ) -> dict:
+        inst = {
+            'orchestrator_ip': orchestrator_ip,
+            'tls_verify': False,
+            'send_ndm_metadata': send_ndm_metadata,
+            **kwargs,
+        }
+        if orchestrator_username is not None:
+            inst['orchestrator_username'] = orchestrator_username
+        if orchestrator_password is not None:
+            inst['orchestrator_password'] = orchestrator_password
+        if appliance_ips is not None:
+            inst['appliance_ips'] = appliance_ips if isinstance(appliance_ips, dict) else {'include': appliance_ips}
+        if appliance_credentials is not None:
+            inst['appliance_credentials_overrides'] = appliance_credentials
+        return inst
+
+    return builder
+
+
+@pytest.fixture
+def check(instance):
+    inst = instance('localhost:8443', appliance_ips=['10.0.0.1'], max_backfill_minutes=10)
+    return HpeArubaEdgeconnectCheck('hpe_aruba_edgeconnect', {}, [inst])
+
+
+@pytest.fixture
+def all_metrics_aggregator(dd_run_check, aggregator, mocker, check):
+    client = _mock_appliance_client(TGZ_DATA)
+    _setup_mocks(
+        mocker,
+        check,
+        APPLIANCE_PAYLOAD,
+        appliance_client=client,
+        cached_timestamp='99999940',
+        overlay_config=[
+            {'id': 0, 'name': 'business'},
+            {'name': 'BulkData', 'trafficClass': 2},
+            {'name': 'RealTime', 'trafficClass': 4},
+        ],
+    )
+    dd_run_check(check)
+    return aggregator

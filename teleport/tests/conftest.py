@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from datadog_checks.dev import docker_run, get_docker_hostname, get_here
+from datadog_checks.dev import docker_run, get_docker_hostname, get_e2e_discovery_metadata, get_here
 from datadog_checks.dev.conditions import CheckDockerLogs, CheckEndpoints
 
 from .common import INSTANCE, USE_TELEPORT_CADDY
@@ -34,7 +34,7 @@ def dd_environment():
                 CheckEndpoints(URL + ":3000/healthz", attempts=120),
             ],
         ):
-            yield {"teleport_url": URL, "diag_port": "3000"}
+            yield {"teleport_url": URL, "diag_port": "3000"}, get_e2e_discovery_metadata()
 
 
 @pytest.fixture

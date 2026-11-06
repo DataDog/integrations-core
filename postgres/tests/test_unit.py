@@ -2,6 +2,9 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
+import gc
+import weakref
+from itertools import groupby
 
 import mock
 import psycopg
@@ -9,8 +12,10 @@ import pytest
 from pytest import fail
 from semver import VersionInfo
 
-from datadog_checks.postgres import util
+from datadog_checks.postgres import PostgreSql, util
 from datadog_checks.postgres.schemas import PostgresSchemaCollector
+from datadog_checks.postgres.statements import PostgresStatementMetrics
+from datadog_checks.postgres.statements_v2 import PostgresStatementMetricsV2
 
 pytestmark = pytest.mark.unit
 
@@ -242,6 +247,40 @@ def test_trim_set_stmts(query, expected_trimmed_query):
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
+    'intervals, expected',
+    [
+        pytest.param((600, 600, 600, 3600), 600, id='all-multiples-of-min'),
+        pytest.param((600, 600, 600, 4500), 300, id='min-not-equal-to-gcd'),
+        pytest.param((600,), 600, id='single-interval'),
+        pytest.param((600, 0, 3600), 600, id='zero-does-not-constrain-gcd'),
+        pytest.param((600.0, 3600.0), 600, id='float-inputs-cast-to-int'),
+        pytest.param((900, 1500), 300, id='gcd-smaller-than-any-input'),
+    ],
+)
+def test_collection_interval_gcd(intervals, expected):
+    assert util.collection_interval_gcd(*intervals) == expected
+
+
+@pytest.mark.unit
+def test_metadata_job_ticks_at_gcd_of_all_sub_intervals(pg_instance):
+    """
+    Each metadata sub-collector gates itself on its own interval, which only yields the configured
+    cadence if the loop ticks at the GCD of every sub-interval. A tick coarser than that -- because
+    the GCD is computed over only some of the intervals, or not at all -- silently delays whichever
+    collector has the shortest interval.
+    """
+    pg_instance['dbm'] = True
+    pg_instance['collect_settings'] = {'enabled': True, 'collection_interval': 600}
+    pg_instance['collect_schemas'] = {'enabled': True, 'collection_interval': 700}
+    pg_instance['collect_column_statistics'] = {'enabled': True, 'collection_interval': 800}
+
+    check = PostgreSql('postgres', {}, [pg_instance])
+
+    assert check.metadata_samples.collection_interval == 100
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
     'exclude_hostname, expected_hostname',
     [
         (False, 'resolved.hostname'),
@@ -315,7 +354,7 @@ def test_run_explain_uses_parameterized_statement(pg_instance, integration_check
     conn_cm = mock.MagicMock()
     conn_cm.__enter__.return_value = mock_conn
 
-    with mock.patch.object(check.statement_samples.db_pool, 'get_connection', return_value=conn_cm):
+    with mock.patch.object(check.db_pool, 'get_connection', return_value=conn_cm):
         with mock.patch.object(check, 'histogram'):
             check.statement_samples._run_explain('testdb', statement, statement)
 
@@ -325,3 +364,271 @@ def test_run_explain_uses_parameterized_statement(pg_instance, integration_check
     assert '$stmt$' not in query, "Dollar-quote tag must not appear in the SQL template"
     assert statement not in query, "Statement must not be interpolated into the SQL template"
     assert params == (statement,), "Statement must be passed as a bound parameter"
+
+
+def test_new_connection_closes_conn_when_configure_raises(integration_check, pg_instance):
+    """If _configure_connection raises after connect() succeeds, the connection must be closed."""
+    check = integration_check(pg_instance)
+    conn = mock.MagicMock()
+    with mock.patch('datadog_checks.postgres.postgres.TokenAwareConnection.connect', return_value=conn):
+        with mock.patch.object(check.db_pool, '_configure_connection', side_effect=psycopg.Error('SET failed')):
+            with pytest.raises(psycopg.Error):
+                check._new_connection(check._config.dbname)
+    conn.close.assert_called_once()
+
+
+def test_close_db_closes_open_connection(integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    conn = mock.MagicMock()
+    conn.closed = False
+    check._db = conn
+
+    check._close_db()
+
+    conn.close.assert_called_once()
+    assert check._db is None
+
+
+def test_close_db_handles_already_closed_connection(integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    conn = mock.MagicMock()
+    conn.close.side_effect = Exception("already closed")
+    check._db = conn
+
+    check._close_db()
+
+    assert check._db is None
+
+
+def test_close_db_noop_when_no_connection(integration_check, pg_instance):
+    check = integration_check(pg_instance)
+    check._db = None
+
+    check._close_db()
+
+    assert check._db is None
+
+
+def test_cancel_releases_check_resources(integration_check, pg_instance):
+    """cancel() runs shutdown(), which releases everything the check holds for its lifetime."""
+    check = integration_check(pg_instance)
+    conn = mock.MagicMock()
+    check._db = conn
+
+    with mock.patch.object(check.db_pool, 'close_all', wraps=check.db_pool.close_all) as close_all:
+        check.cancel()
+
+    conn.close.assert_called_once()
+    close_all.assert_called_once()
+    assert check._db is None
+    assert check._query_manager is None
+    assert check.health is None
+
+
+def test_check_gc_after_cancel(pg_instance):
+    """Verify cancel() breaks all reference cycles so refcount alone reclaims the check.
+
+    If this test fails, the assertion message lists the types still holding a
+    reference to the check. To fix it:
+
+    1. Identify the referrer type in the failure message (e.g. ``QueryManager``).
+    2. Find which attribute on that object points back to the check (usually
+       ``self.check`` or ``self._check``).
+    3. Null that attribute in the check's ``shutdown()`` or in the relevant job's
+       ``shutdown()``.
+    4. If the referrer is a closure or ``functools.partial``, find the
+       registration site and null or clear the container that holds it.
+    """
+    pg_instance['dbm'] = True
+    pg_instance['query_samples'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
+    pg_instance['query_metrics'] = {'enabled': True, 'run_sync': True, 'collection_interval': 10}
+    pg_instance['query_activity'] = {'enabled': True, 'collection_interval': 1}
+    pg_instance['data_observability'] = {'enabled': True, 'run_sync': True, 'collection_interval': 1}
+    pg_instance['collect_column_statistics'] = {'enabled': True, 'collection_interval': 60}
+
+    check = PostgreSql('postgres', {}, [pg_instance])
+    ref = weakref.ref(check)
+
+    check.cancel()
+
+    gc.collect()
+    gc.disable()
+    try:
+        del check
+        obj = ref()
+        if obj is not None:
+            import inspect
+
+            referrers = [
+                f"bound method {r.__qualname__}" if inspect.ismethod(r) else type(r).__name__
+                for r in gc.get_referrers(obj)
+            ]
+            del obj
+            fail(f"Check still alive after cancel() + del -- pinned by: {referrers}")
+    finally:
+        gc.enable()
+
+
+@pytest.mark.parametrize(
+    'dbm, data_observability_enabled, expected_jobs',
+    [
+        (False, False, []),
+        (True, False, ['query-metrics', 'query-samples', 'database-metadata']),
+        (False, True, ['database-metadata', 'data-observability']),
+        (True, True, ['query-metrics', 'query-samples', 'database-metadata', 'data-observability']),
+    ],
+)
+def test_async_job_registry_matches_config(pg_instance, dbm, data_observability_enabled, expected_jobs):
+    """Only the jobs enabled by the instance config are built and registered."""
+    pg_instance['dbm'] = dbm
+    pg_instance['data_observability'] = {'enabled': data_observability_enabled}
+
+    check = PostgreSql('postgres', {}, [pg_instance])
+
+    registered = check._async_job_registry
+    assert list(registered) == expected_jobs
+    # Each attribute holds the registered job, or None when the config does not enable it.
+    assert check.statement_metrics is registered.get('query-metrics')
+    assert check.statement_samples is registered.get('query-samples')
+    assert check.metadata_samples is registered.get('database-metadata')
+    assert check.data_observability is registered.get('data-observability')
+
+
+def test_initialize_statement_metrics_replaces_registered_job(pg_instance):
+    """The incremental collector replaces the placeholder registered before the version was known."""
+    pg_instance['dbm'] = True
+    pg_instance['query_metrics'] = {'enabled': True, 'incremental_query_metrics': True}
+
+    check = PostgreSql('postgres', {}, [pg_instance])
+    assert isinstance(check._async_job_registry['query-metrics'], PostgresStatementMetrics)
+
+    check.version = VersionInfo(14, 0, 0)
+    check._initialize_statement_metrics()
+
+    assert isinstance(check.statement_metrics, PostgresStatementMetricsV2)
+    assert check._async_job_registry['query-metrics'] is check.statement_metrics
+    assert list(check._async_job_registry) == ['query-metrics', 'query-samples', 'database-metadata']
+
+
+def test_initialize_statement_metrics_noop_without_dbm(pg_instance):
+    """Without DBM there is no query metrics job to build."""
+    pg_instance['dbm'] = False
+
+    check = PostgreSql('postgres', {}, [pg_instance])
+    check.version = VersionInfo(14, 0, 0)
+    check._initialize_statement_metrics()
+
+    assert check.statement_metrics is None
+    assert check._async_job_registry == {}
+
+
+def test_collect_column_statistics_updates_timestamp_on_failure(pg_instance):
+    pg_instance['dbm'] = True
+    pg_instance['collect_column_statistics'] = {'enabled': True, 'collection_interval': 60}
+
+    check = PostgreSql('postgres', {}, [pg_instance])
+    metadata = check.metadata_samples
+    metadata._tags_no_db = []
+
+    with mock.patch.object(
+        metadata._column_statistics_collector,
+        'collect_column_statistics',
+        side_effect=RuntimeError('boom'),
+    ):
+        before = metadata._last_column_statistics_query_time
+        with pytest.raises(RuntimeError):
+            metadata._collect_column_statistics()
+        after = metadata._last_column_statistics_query_time
+
+    assert after > before
+
+
+def _autodiscovery_check(pg_instance, databases):
+    """Build a check whose per-database connections record each `(dbname, query)` in `check.executed`."""
+    pg_instance['reported_hostname'] = 'stubbed-host'
+    check = PostgreSql('postgres', {}, [pg_instance])
+    check.version = VersionInfo(14, 0, 0)
+    check.db = mock.MagicMock()
+    check.db.return_value.__enter__.return_value.cursor.return_value.__enter__.return_value.fetchall.return_value = []
+    check.autodiscovery = mock.MagicMock()
+    check.autodiscovery.get_items.return_value = databases
+
+    check.executed = []
+
+    def get_connection(dbname, persistent=False):
+        pool_connection = mock.MagicMock()
+        cursor = pool_connection.__enter__.return_value.cursor.return_value.__enter__.return_value
+        cursor.execute.side_effect = lambda query, *args: check.executed.append((dbname, query))
+        cursor.fetchall.return_value = []
+        return pool_connection
+
+    check.db_pool = mock.MagicMock()
+    check.db_pool.get_connection.side_effect = get_connection
+    return check
+
+
+def test_autodiscovery_visits_each_database_once(pg_instance):
+    """
+    All per-database queries for a database run in one contiguous block; interleaving databases lets
+    the LRU pool cap evict and re-create each database's pool within a single check run.
+    """
+    pg_instance['relations'] = [{'relation_regex': '.*'}]
+    pg_instance['collect_count_metrics'] = True
+    check = _autodiscovery_check(pg_instance, ['db1', 'db2'])
+
+    check._collect_stats([])
+
+    acquired = [dbname for dbname, _ in check.executed]
+    assert [dbname for dbname, _ in groupby(acquired)] == ['db1', 'db2'], "each database should be acquired once"
+
+
+def test_autodiscovery_follows_refreshed_databases(pg_instance):
+    """
+    A dropped database must stop being queried and a new one must start being queried.
+    Regression test for https://github.com/DataDog/integrations-core/issues/25598.
+    """
+    pg_instance['relations'] = [{'relation_regex': '.*'}]
+    check = _autodiscovery_check(pg_instance, ['db1', 'db2'])
+    check._collect_stats([])
+
+    check.executed.clear()
+    check.autodiscovery.get_items.return_value = ['db2', 'db3']
+    check._collect_stats([])
+
+    # `pg_relation_size(` only appears in the dynamic relation queries, not in the relation scopes.
+    assert {dbname for dbname, query in check.executed if 'pg_relation_size(' in query} == {'db2', 'db3'}
+
+
+def test_autodiscovery_collection_interval_applies_per_database(pg_instance):
+    """A `collection_interval` query must run for every database, not only the first one visited."""
+    pg_instance['dbm'] = True
+    check = _autodiscovery_check(pg_instance, ['db1', 'db2'])
+
+    check._collect_stats([])
+
+    idle_tx_databases = [dbname for dbname, query in check.executed if "'idle in transaction'" in query]
+    assert idle_tx_databases == ['db1', 'db2']
+
+
+def test_autodiscovery_group_failure_does_not_skip_later_groups(pg_instance):
+    """
+    A group that raises for a database must not abort that database's remaining groups, otherwise
+    one unreadable relation would silently drop the database's stat metrics too.
+    """
+    pg_instance['reported_hostname'] = 'stubbed-host'
+    check = PostgreSql('postgres', {}, [pg_instance])
+    check.autodiscovery = mock.MagicMock()
+    check.autodiscovery.get_items.return_value = ['db1']
+    collected = []
+
+    def failing_group(dbname):
+        raise psycopg.errors.InsufficientPrivilege('relation scope failed')
+
+    check._collect_metric_autodiscovery(
+        [
+            ('_collect_relations_autodiscovery', failing_group),
+            ('_collect_stat_autodiscovery', collected.append),
+        ]
+    )
+
+    assert collected == ['db1']

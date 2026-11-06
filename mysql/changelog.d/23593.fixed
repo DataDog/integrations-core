@@ -1,1 +1,0 @@
-Fix schema collection query failure when MySQL ANSI_QUOTES sql_mode is enabled

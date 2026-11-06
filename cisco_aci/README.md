@@ -21,8 +21,6 @@ By integrating ACI metrics with Datadog's infrastructure and application monitor
 
 ## Setup
 
-**The Cisco ACI integration is Generally Available. To learn more about billing implications, visit our [pricing page][19].**
-
 ### Installation
 
 The Cisco ACI check is packaged with the Agent, so simply [install the Agent][1] on a server within your network.
@@ -202,4 +200,3 @@ Contact [Datadog support][9].
 [16]: /logs
 [17]: https://docs.datadoghq.com/logs/log_collection/?tab=host#setup
 [18]: https://github.com/DataDog/integrations-core/blob/master/cisco_aci/tests/cisco_aci_query.py
-[19]: https://www.datadoghq.com/pricing/?product=network-monitoring&tab=network-device-monitoring#products

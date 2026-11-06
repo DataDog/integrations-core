@@ -10,7 +10,7 @@ from io import StringIO
 import pytest
 
 from datadog_checks.base.utils.common import get_docker_hostname
-from datadog_checks.dev import RetryError, docker_run
+from datadog_checks.dev import RetryError, docker_run, get_e2e_discovery_metadata
 from datadog_checks.dev.conditions import CheckDockerLogs
 from datadog_checks.zk import ZookeeperCheck
 from datadog_checks.zk.zk import ZKConnectionFailure
@@ -97,6 +97,8 @@ def get_conn_failure_config():
 @pytest.fixture
 def get_multiple_expected_modes_config():
     config = deepcopy(VALID_CONFIG)
+    if get_tls():
+        config = deepcopy(VALID_TLS_CONFIG_FOR_TEST)
     config.update({'expected_mode': ['standalone', 'leader']})
     return config
 
@@ -110,7 +112,7 @@ def get_version():
 
 
 def get_tls():
-    return os.environ.get("SSL") == 'True'
+    return os.environ.get("SSL", "").lower() == 'true'
 
 
 @pytest.fixture(scope="session")
@@ -151,16 +153,20 @@ def dd_environment(get_instance):
 
     if is_tls:
         condition = [
-            CheckDockerLogs(compose_file, patterns=['Starting server', 'Started AdminServer', 'bound to port'])
+            CheckDockerLogs(
+                compose_file, patterns=['Starting server', 'Started AdminServer', 'bound to port'], matches='all'
+            )
         ]
     else:
         condition = [condition_non_tls]
 
     with docker_run(compose_file, conditions=condition, sleep=5):
+        discovery_metadata = get_e2e_discovery_metadata()
         yield (
             get_instance,
             {
-                'docker_volumes': [
+                'docker_volumes': discovery_metadata['docker_volumes']
+                + [
                     '{}:/conf/private_key.pem'.format(private_key),
                     '{}:/conf/cert.pem'.format(cert),
                     '{}:/conf/ca_cert.pem'.format(ca_cert),

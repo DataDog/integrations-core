@@ -1,0 +1,10 @@
+{
+  "numOfMappedVolumes": 0,
+  "userDataWriteBwc": {"numSeconds": 0, "totalWeightInKb": 0, "numOccured": 0},
+  "userDataReadBwc": {"numSeconds": 0, "totalWeightInKb": 0, "numOccured": 0},
+  "volumeIds": [],
+  "userDataTrimBwc": {"numSeconds": 0, "totalWeightInKb": 0, "numOccured": 0},
+  "userDataSdcReadLatency": {"numSeconds": 0, "totalWeightInKb": 0, "numOccured": 0},
+  "userDataSdcTrimLatency": {"numSeconds": 0, "totalWeightInKb": 0, "numOccured": 0},
+  "userDataSdcWriteLatency": {"numSeconds": 0, "totalWeightInKb": 0, "numOccured": 0}
+}

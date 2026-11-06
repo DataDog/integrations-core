@@ -12,13 +12,16 @@ import click
 from httpx import HTTPError, HTTPStatusError
 from packaging.version import Version
 
+from ddev.utils.github_errors import GitHubAuthenticationError
+
+from .build_agent import BUILD_AGENT_YAML_PATH, ensure_build_agent_yaml_updated
+
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
 BRANCH_NAME_PATTERN = r"^\d+\.\d+\.x$"
 BRANCH_NAME_REGEX = re.compile(BRANCH_NAME_PATTERN)
 GITHUB_LABEL_COLOR = '5319e7'
-DATADOG_AGENT_REPO_URL = 'https://github.com/DataDog/datadog-agent.git'
 
 
 @click.command
@@ -104,6 +107,9 @@ def bump_milestone(app: Application, branch_name: str) -> None:
         app.display_waiting(f"Updating release.json with new milestone `{next_milestone}`...")
         app.repo.git.run('fetch', 'origin', 'master')
         app.repo.git.run('checkout', '-B', bump_branch, 'origin/master')
+        # Force-restore build_agent.yaml from origin/master so any prior in-process edit on the release
+        # branch cannot leak into the milestone-bump commit (root cause of the leak on PR #23977).
+        app.repo.git.run('checkout', 'origin/master', '--', BUILD_AGENT_YAML_PATH)
         update_release_json(app.repo.path / 'release.json', next_milestone)
         app.repo.git.run('add', 'release.json')
         app.repo.git.run('commit', '-m', f'Update current_milestone to {next_milestone}')
@@ -129,14 +135,29 @@ def bump_milestone(app: Application, branch_name: str) -> None:
             title=f'Update current_milestone to {next_milestone}',
             head=bump_branch,
             base='master',
-            body=f'Updates `current_milestone` in `release.json` to `{next_milestone}` '
-            f'after cutting the `{branch_name}` release branch.',
+            body=milestone_pr_body(app, next_milestone, branch_name),
         )
         app.display_success(f'Pull request created: {pr_url}')
+    except GitHubAuthenticationError:
+        app.display_warning(
+            f'Failed to create the pull request. Please create one manually from `{bump_branch}` to `master`.'
+        )
+        raise
     except HTTPError as e:
         app.display_warning(
             f'Failed to create the pull request ({e}). Please create one manually from `{bump_branch}` to `master`.'
         )
+
+
+def milestone_pr_body(app: Application, milestone: str, branch_name: str) -> str:
+    """Fill the PR template, keeping its checklist unticked for the human author."""
+    template = (app.repo.path / '.github' / 'PULL_REQUEST_TEMPLATE.md').read_text()
+    checklist = template[template.index('## Checklist before requesting review') :]
+    return (
+        f'## What does this PR do?\n\nUpdates `current_milestone` in `release.json` to `{milestone}`.\n\n'
+        f'## Motivation\n\nThe `{branch_name}` release branch has been cut, so master now targets the '
+        f'`{milestone}` milestone.\n\n{checklist}'
+    )
 
 
 def compute_next_milestone(branch_name: str) -> str:
@@ -175,61 +196,3 @@ def suggest_next_branch(app: Application) -> str:
             return suggestion
 
     return f'{major}.{minors[-1] + 1}.x'
-
-
-def ensure_build_agent_yaml_updated(app: Application, branch_name: str) -> bool:
-    """
-    Ensure build_agent.yaml points to the correct agent branch for release builds.
-
-    This function:
-    1. Checks if the file still points to 'main' (needs update)
-    2. Checks if the agent branch exists in datadog-agent repository
-    3. Updates the file if both conditions are met
-
-    Args:
-        branch_name: The release branch name (e.g., '7.45.x')
-
-    Returns:
-        True if the file was updated, False otherwise.
-    """
-    from ddev.utils.fs import Path
-
-    build_agent_yaml = Path('.gitlab/build_agent.yaml')
-
-    if not build_agent_yaml.exists():
-        app.display_warning(f'Warning: {build_agent_yaml} not found')
-        return False
-
-    # Read the current content
-    with open(build_agent_yaml, 'r') as f:
-        content = f.read()
-
-    # Check if file still points to main (needs update)
-    old_pattern = r'(\s+branch:\s+)main'
-    if not re.search(old_pattern, content):
-        # Already updated to a release branch, nothing to do
-        return False
-
-    # Check if the agent branch exists in datadog-agent repository using git ls-remote
-    app.display_waiting(f'Checking if branch `{branch_name}` exists in datadog-agent...')
-    ls_remote_output = app.repo.git.capture('ls-remote', '--heads', DATADOG_AGENT_REPO_URL, branch_name)
-    if not ls_remote_output.strip():
-        app.display_warning(
-            f"Agent branch `{branch_name}` does not exist yet in datadog-agent. "
-            f"Keeping build_agent.yaml pointing to 'main'. "
-            f"The `update-build-agent-yaml` workflow will create a PR to update the file "
-            f"once the agent branch is created."
-        )
-        return False
-
-    # Agent branch exists, update the file
-    def replacement(match):
-        return match.group(1) + branch_name
-
-    updated_content = re.sub(old_pattern, replacement, content)
-
-    with open(build_agent_yaml, 'w') as f:
-        f.write(updated_content)
-
-    app.display_success(f'Updated build_agent.yaml file to use Agent branch: {branch_name}')
-    return True

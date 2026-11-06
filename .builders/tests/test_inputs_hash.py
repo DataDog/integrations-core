@@ -1,4 +1,5 @@
 """Tests for inputs_hash.py: hashing, pinning, status, verify-resolution, and coverage."""
+
 import json
 from pathlib import Path
 from unittest import mock
@@ -26,13 +27,32 @@ def test_status_raises_for_unknown_target(fake_repo: Path, tmp_path: Path) -> No
         json.dumps([{'platform': 'nonexistent', 'arch': 'target', 'runner_os': 'ubuntu-22.04'}]),
         encoding='utf-8',
     )
-    with pytest.raises(FileNotFoundError, match='Unknown builder target'):
+    with pytest.raises(AssertionError, match='platform must be one of:'):
         inputs_hash.status(bogus)
+
+
+@pytest.mark.parametrize(
+    'field,value',
+    [
+        pytest.param('platform', 'linux$(touch pwned)', id="dangerous platform"),
+        pytest.param('arch', 'x86_64;echo pwned', id="dangerous arch"),
+    ],
+)
+def test_status_rejects_invalid_target_components(fake_repo: Path, tmp_path: Path, field: str, value: str) -> None:
+    """Platform and arch must use a safe character set."""
+    row = {'platform': 'linux', 'arch': 'x86_64', 'runner_os': 'ubuntu-22.04'}
+    row[field] = value
+    targets = tmp_path / 'targets.json'
+    targets.write_text(json.dumps([row]), encoding='utf-8')
+
+    with pytest.raises(AssertionError, match=f'{field} must be one of:'):
+        inputs_hash.status(targets)
 
 
 # ---------------------------------------------------------------------------
 # Bot-commit neutrality
 # ---------------------------------------------------------------------------
+
 
 def test_resolution_inputs_do_not_glob_into_deps_directory() -> None:
     """No RESOLUTION_INPUTS or SHARED_INPUTS pattern expands to anything under .deps/.
@@ -354,8 +374,8 @@ def test_status_emits_matrix_split_by_platform(fake_repo: Path) -> None:
         {'platform': 'linux',   'arch': 'x86_64',  'runner_os': 'ubuntu-22.04'},
         {'platform': 'linux',   'arch': 'aarch64', 'runner_os': 'ubuntu-22.04-arm'},
         {'platform': 'windows', 'arch': 'x86_64',  'runner_os': 'windows-2022'},
-        {'platform': 'macos',   'arch': 'x86_64',  'runner_os': 'macos-14-large'},
-        {'platform': 'macos',   'arch': 'aarch64', 'runner_os': 'macos-14'},
+        {'platform': 'macos',   'arch': 'x86_64',  'runner_os': 'macos-15-large'},
+        {'platform': 'macos',   'arch': 'aarch64', 'runner_os': 'macos-15'},
     ]), encoding='utf-8')
     out = inputs_hash.status(targets_file)
     container = json.loads(out['matrix_container'])

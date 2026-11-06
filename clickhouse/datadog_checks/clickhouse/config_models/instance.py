@@ -13,6 +13,7 @@ from types import MappingProxyType
 from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from typing_extensions import Literal
 
 from datadog_checks.base.utils.functions import identity
 from datadog_checks.base.utils.models import validation
@@ -21,6 +22,43 @@ from . import defaults, validators
 
 
 SECURE_FIELD_NAMES = frozenset(['tls_ca_cert'])
+
+
+class CollectAsyncInserts(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_samples_per_collection: Optional[int] = None
+
+
+class CollectPendingAsyncInserts(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    max_samples_per_collection: Optional[int] = None
+
+
+class CollectSchemas(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    exclude_databases: Optional[tuple[str, ...]] = None
+    exclude_tables: Optional[tuple[str, ...]] = None
+    include_databases: Optional[tuple[str, ...]] = None
+    include_tables: Optional[tuple[str, ...]] = None
+    max_columns: Optional[int] = None
+    max_query_duration: Optional[int] = None
+    max_tables: Optional[int] = None
+    run_sync: Optional[bool] = None
 
 
 class CustomQuery(BaseModel):
@@ -121,13 +159,26 @@ class QuerySamples(BaseModel):
     run_sync: Optional[bool] = None
 
 
+class SchemaMetrics(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = None
+    enabled: Optional[bool] = None
+    run_sync: Optional[bool] = None
+
+
 class InstanceConfig(BaseModel):
     model_config = ConfigDict(
         validate_default=True,
         arbitrary_types_allowed=True,
         frozen=True,
     )
-    compression: Optional[str] = None
+    collect_async_inserts: Optional[CollectAsyncInserts] = None
+    collect_pending_async_inserts: Optional[CollectPendingAsyncInserts] = None
+    collect_schemas: Optional[CollectSchemas] = None
+    compression: Optional[Literal['lz4', 'zstd', 'br', 'gzip']] = None
     connect_timeout: Optional[int] = None
     custom_queries: Optional[tuple[CustomQuery, ...]] = None
     database_identifier: Optional[DatabaseIdentifier] = None
@@ -147,13 +198,17 @@ class InstanceConfig(BaseModel):
     query_metrics: Optional[QueryMetrics] = None
     query_samples: Optional[QuerySamples] = None
     read_timeout: Optional[int] = None
+    reported_hostname: Optional[str] = None
+    schema_metrics: Optional[SchemaMetrics] = None
     server: str
     service: Optional[str] = None
     single_endpoint_mode: Optional[bool] = None
     tags: Optional[tuple[str, ...]] = None
     tls_ca_cert: Optional[str] = None
     tls_verify: Optional[bool] = None
+    use_advanced_queries: Optional[bool] = None
     use_global_custom_queries: Optional[str] = None
+    use_legacy_queries: Optional[bool] = None
     username: Optional[str] = None
     verify: Optional[bool] = None
 

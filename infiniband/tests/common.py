@@ -8,6 +8,15 @@ MOCK_IB_COUNTER_DATA = {
     'port_xmit_packets': '200',
 }
 
+# Counters whose submitted value equals the raw sysfs value. port_rcv_data and
+# port_xmit_data are deliberately excluded: sysfs stores those in 4-byte words while the
+# check submits bytes, so they are asserted on their own in
+# test_data_counters_are_scaled_to_bytes rather than against the raw values above.
+MOCK_IB_UNSCALED_COUNTER_DATA = {
+    'port_rcv_packets': '100',
+    'port_xmit_packets': '200',
+}
+
 MOCK_RDMA_COUNTER_DATA = {
     'rx_atomic_requests': '50',
     'tx_pkts': '150',
@@ -17,6 +26,20 @@ MOCK_RDMA_COUNTER_DATA = {
 MOCK_STATUS_DATA = {
     'state': '4: ACTIVE',
     'phys_state': '5: LinkUp',
+}
+
+MOCK_RATE_DATA = '100 Gb/sec (4X EDR)'
+MOCK_DEVICE_METADATA = {
+    'fw_ver': '16.35.4030',
+    'hca_type': 'MT4129',
+    'board_id': 'MT_0000000438',
+    'node_type': '1: CA',
+}
+MOCK_GID_ATTRS = {
+    '0': {
+        'netdev': 'ens5f0',
+        'type': 'RoCE v2',
+    },
 }
 
 MOCK_DEVICE = 'mlx5_0'

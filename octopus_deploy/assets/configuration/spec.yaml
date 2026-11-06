@@ -241,11 +241,12 @@ files:
         example: {}
     - name: paginated_limit
       description: |
-          Sets the number of items API calls should return at a time. Default is 30.
+          Sets the number of items API calls should return at a time. Default is 300.
       value:
-        example: 30
+        example: 300
         type: integer
       required: false
+      fleet_configurable: false
     - name: collect_events
       description: |
           Whether or not to collect audit events about machines, deployments, and failed logins.
@@ -254,6 +255,7 @@ files:
         example: true
         type: boolean
       required: false
+      fleet_configurable: false
     - name: unified_service_tagging
       description: |
           Tags metrics, logs, and events with the project name as the `service`, and octopus environment as `env`,
@@ -264,6 +266,7 @@ files:
         example: true
         type: boolean
       required: false
+      fleet_configurable: false
     - template: instances/default
     - template: instances/http
       overrides:

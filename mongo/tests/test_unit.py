@@ -16,7 +16,7 @@ from pymongo.errors import ConnectionFailure, OperationFailure
 from datadog_checks.base import ConfigurationError
 from datadog_checks.base.utils.db.sql import compute_exec_plan_signature
 from datadog_checks.mongo.api import CRITICAL_FAILURE, MongoApi
-from datadog_checks.mongo.collectors import MongoCollector
+from datadog_checks.mongo.collectors import MongoCollector, ProcessStatsCollector
 from datadog_checks.mongo.common import MongosDeployment, ReplicaSetDeployment, get_state_name
 from datadog_checks.mongo.dbm.utils import get_explain_plan, should_explain_operation
 from datadog_checks.mongo.mongo import HostingType, MongoDb, metrics
@@ -38,6 +38,58 @@ DEFAULT_METRICS_LEN = len(
 )
 
 
+MONGODB_8_0_16_WIREDTIGER_CACHE_METRICS = {
+    'application thread time evicting (usecs)': 'mongodb.wiredtiger.cache.application_thread_time_evicting_usecsps',
+    'page evict attempts by application threads': (
+        'mongodb.wiredtiger.cache.page_evict_attempts_by_application_threadsps'
+    ),
+    'page evict failures by application threads': (
+        'mongodb.wiredtiger.cache.page_evict_failures_by_application_threadsps'
+    ),
+    'modified page evict attempts by application threads': (
+        'mongodb.wiredtiger.cache.modified_page_evict_attempts_by_application_threadsps'
+    ),
+    'modified page evict failures by application threads': (
+        'mongodb.wiredtiger.cache.modified_page_evict_failures_by_application_threadsps'
+    ),
+    'evict page attempts by eviction server': 'mongodb.wiredtiger.cache.evict_page_attempts_by_eviction_serverps',
+    'evict page failures by eviction server': 'mongodb.wiredtiger.cache.evict_page_failures_by_eviction_serverps',
+    'evict page attempts by eviction worker threads': (
+        'mongodb.wiredtiger.cache.evict_page_attempts_by_eviction_worker_threadsps'
+    ),
+    'evict page failures by eviction worker threads': (
+        'mongodb.wiredtiger.cache.evict_page_failures_by_eviction_worker_threadsps'
+    ),
+}
+
+
+def test_wiredtiger_cache_keeps_legacy_application_thread_eviction_metric(aggregator):
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    collector = MongoCollector(check, [])
+    collector._submit_payload(
+        {'wiredTiger': {'cache': {'pages evicted by application threads': 1}}},
+        metrics_to_collect=metrics.WIREDTIGER_METRICS,
+    )
+
+    aggregator.assert_metric('mongodb.wiredtiger.cache.pages_evicted_by_application_threadsps', value=1, count=1)
+    for metric_name in MONGODB_8_0_16_WIREDTIGER_CACHE_METRICS.values():
+        aggregator.assert_metric(metric_name, count=0)
+
+
+def test_wiredtiger_cache_collects_mongodb_8_0_16_eviction_metrics(aggregator):
+    check = MongoDb('mongo', {}, [{'hosts': ['localhost']}])
+    collector = MongoCollector(check, [])
+    cache_payload = {metric: idx for idx, metric in enumerate(MONGODB_8_0_16_WIREDTIGER_CACHE_METRICS, start=1)}
+    collector._submit_payload(
+        {'wiredTiger': {'cache': cache_payload}},
+        metrics_to_collect=metrics.WIREDTIGER_METRICS,
+    )
+
+    aggregator.assert_metric('mongodb.wiredtiger.cache.pages_evicted_by_application_threadsps', count=0)
+    for idx, metric_name in enumerate(MONGODB_8_0_16_WIREDTIGER_CACHE_METRICS.values(), start=1):
+        aggregator.assert_metric(metric_name, value=idx, count=1)
+
+
 @mock.patch('pymongo.database.Database.command', side_effect=ConnectionFailure('Service not available'))
 def test_emits_critical_service_check_when_service_is_not_available(mock_command, dd_run_check, aggregator):
     # Given
@@ -56,8 +108,8 @@ def test_emits_critical_service_check_when_service_is_not_available(mock_command
         {'parsed': {}},  # getCmdLineOpts
     ],
 )
-@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
-@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+@mock.patch('pymongo.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.MongoClient.list_database_names', return_value=[])
 def test_emits_ok_service_check_when_service_is_available(
     mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator, datadog_agent
 ):
@@ -78,8 +130,8 @@ def test_emits_ok_service_check_when_service_is_available(
         {'parsed': {}},  # getCmdLineOpts
     ],
 )
-@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
-@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+@mock.patch('pymongo.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.MongoClient.list_database_names', return_value=[])
 def test_emits_ok_service_check_each_run_when_service_is_available(
     mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator, datadog_agent
 ):
@@ -101,8 +153,8 @@ def test_emits_ok_service_check_each_run_when_service_is_available(
         {'parsed': {}},  # getCmdLineOpts
     ],
 )
-@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
-@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+@mock.patch('pymongo.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.MongoClient.list_database_names', return_value=[])
 def test_version_metadata(
     mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator, datadog_agent
 ):
@@ -134,8 +186,8 @@ def test_version_metadata(
         {'msg': 'isdbgrid'},  # isMaster
     ],
 )
-@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
-@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+@mock.patch('pymongo.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.MongoClient.list_database_names', return_value=[])
 def test_emits_ok_service_check_when_alibaba_mongos_deployment(
     mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator
 ):
@@ -162,8 +214,8 @@ def test_emits_ok_service_check_when_alibaba_mongos_deployment(
         {'configsvr': True, 'set': 'replset', "myState": 1},  # replSetGetStatus
     ],
 )
-@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
-@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+@mock.patch('pymongo.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.MongoClient.list_database_names', return_value=[])
 def test_emits_ok_service_check_when_alibaba_replicaset_role_configsvr_deployment(
     mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator
 ):
@@ -195,8 +247,8 @@ def test_emits_ok_service_check_when_alibaba_replicaset_role_configsvr_deploymen
         {'configsvr': True, 'set': 'replset', "myState": 3},  # replSetGetStatus
     ],
 )
-@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
-@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+@mock.patch('pymongo.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.MongoClient.list_database_names', return_value=[])
 def test_when_replicaset_state_recovering_then_database_names_not_called(
     mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator
 ):
@@ -670,6 +722,19 @@ def test_parse_mongo_version_with_suffix(check, instance, dd_run_check, datadog_
     datadog_agent.assert_metadata('test:123', {'version.scheme': 'semver', 'version.major': '3', 'version.minor': '6'})
 
 
+def test_query_stats_does_not_use_server_side_sort_or_allow_disk_use() -> None:
+    api = MongoApi.__new__(MongoApi)
+    api._timeout = 123
+    admin_db = mock.MagicMock()
+    api._cli = {'admin': admin_db}
+
+    cursor = object()
+    admin_db.aggregate.return_value = cursor
+
+    assert api.query_stats(session='session') is cursor
+    admin_db.aggregate.assert_called_once_with([{'$queryStats': {}}], session='session', maxTimeMS=123)
+
+
 @mock.patch(
     'pymongo.database.Database.command',
     side_effect=[
@@ -681,8 +746,8 @@ def test_parse_mongo_version_with_suffix(check, instance, dd_run_check, datadog_
         {},  # isMaster
     ],
 )
-@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '5.0.0'})
-@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+@mock.patch('pymongo.MongoClient.server_info', return_value={'version': '5.0.0'})
+@mock.patch('pymongo.MongoClient.list_database_names', return_value=[])
 def test_emits_ok_service_check_for_documentdb_deployment(
     mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator
 ):
@@ -713,8 +778,8 @@ def test_emits_ok_service_check_for_documentdb_deployment(
         {'parsed': {}},  # getCmdLineOpts
     ],
 )
-@mock.patch('pymongo.mongo_client.MongoClient.server_info', return_value={'version': '7.0.0'})
-@mock.patch('pymongo.mongo_client.MongoClient.list_database_names', return_value=[])
+@mock.patch('pymongo.MongoClient.server_info', return_value={'version': '7.0.0'})
+@mock.patch('pymongo.MongoClient.list_database_names', return_value=[])
 def test_emits_ok_service_check_for_mongodb_atlas_deployment(
     mock_list_database_names, mock_server_info, mock_command, dd_run_check, aggregator
 ):
@@ -959,3 +1024,121 @@ def test_get_explain_plan_adds_cursor_for_aggregate(command, expected_cursor):
             assert captured_command["cursor"] == command["cursor"]
         else:
             assert "cursor" not in captured_command, f"cursor should not be added for {command}"
+
+
+class FakePsutilProcess:
+    """
+    Stand-in for `psutil.Process`: `cpu_percent()` returns 0.0 the first time it is called on a
+    given object, and a real measurement afterwards.
+    """
+
+    def __init__(self, pid, name, cpu_percent=12.5, running=True):
+        self.pid = pid
+        self._name = name
+        self._cpu_percent = cpu_percent
+        self._running = running
+        self._sampled = False
+
+    def name(self):
+        return self._name
+
+    def is_running(self):
+        return self._running
+
+    def as_dict(self, attrs=None, ad_value=None):
+        # process_iter() populates `info` through as_dict.
+        return {'pid': self.pid, 'name': self._name}
+
+    def cpu_percent(self):
+        if not self._sampled:
+            self._sampled = True
+            return 0.0
+        return self._cpu_percent
+
+
+def run_process_stats(mongo_check, api, times=1):
+    """Collect `times` times, rebuilding the collector each run as `_collect_metrics` does."""
+    for _ in range(times):
+        ProcessStatsCollector(mongo_check, []).collect(api)
+
+
+@pytest.mark.parametrize(
+    ('reported_process', 'psutil_name'),
+    [
+        pytest.param('mongod', 'mongod', id='posix-bare-name'),
+        pytest.param('mongos', 'mongos', id='posix-mongos'),
+        pytest.param(r'C:\GetSmart\CE_MongoDB\bin\mongod.exe', 'mongod.exe', id='windows-absolute-path'),
+        pytest.param(r'C:\Program Files\MongoDB\Server\8.0\bin\mongod.exe', 'mongod.exe', id='windows-path-with-space'),
+    ],
+)
+def test_process_stats_resolves_process_regardless_of_reported_path(
+    check, instance_integration, aggregator, reported_process, psutil_name
+):
+    """
+    The process is resolved whether serverStatus reports a bare name or a Windows absolute path.
+    """
+    mongo_check = check(instance_integration)
+    api = mock.MagicMock()
+    api.server_status.return_value = {'pid': 4321, 'process': reported_process}
+
+    with mock.patch('psutil.Process', side_effect=lambda pid: FakePsutilProcess(pid, psutil_name)):
+        run_process_stats(mongo_check, api, times=2)
+
+    aggregator.assert_metric('mongodb.system.cpu.percent', value=12.5, count=1)
+
+
+def test_process_stats_survives_collector_rebuild(check, instance_integration, aggregator):
+    """
+    The resolved process outlives the collector, which the check rebuilds on every run.
+    """
+    mongo_check = check(instance_integration)
+    api = mock.MagicMock()
+    api.server_status.return_value = {'pid': 4321, 'process': 'mongod'}
+    with mock.patch('psutil.Process', side_effect=lambda pid: FakePsutilProcess(pid, 'mongod')):
+        run_process_stats(mongo_check, api, times=1)
+        aggregator.assert_metric('mongodb.system.cpu.percent', count=0)  # first sample is 0%
+
+        run_process_stats(mongo_check, api, times=3)
+
+    aggregator.assert_metric('mongodb.system.cpu.percent', value=12.5, count=3)
+
+
+def test_process_stats_recovers_after_mongod_restart(check, instance_integration, aggregator):
+    """
+    CPU collection moves onto the new PID after mongod restarts.
+    """
+    mongo_check = check(instance_integration)
+    api = mock.MagicMock()
+    api.server_status.return_value = {'pid': 111, 'process': 'mongod'}
+    before_restart = []
+
+    def build_old(pid):
+        before_restart.append(FakePsutilProcess(pid, 'mongod'))
+        return before_restart[-1]
+
+    with mock.patch('psutil.Process', side_effect=build_old):
+        run_process_stats(mongo_check, api, times=2)
+    aggregator.assert_metric('mongodb.system.cpu.percent', value=12.5, count=1)
+
+    # mongod restarts: the process it was collecting is gone and serverStatus reports a new PID.
+    for process in before_restart:
+        process._running = False
+    api.server_status.return_value = {'pid': 222, 'process': 'mongod'}
+    with mock.patch('psutil.Process', side_effect=lambda pid: FakePsutilProcess(pid, 'mongod', cpu_percent=44.0)):
+        run_process_stats(mongo_check, api, times=2)
+
+    aggregator.assert_metric('mongodb.system.cpu.percent', value=44.0, count=1)
+
+
+def test_process_stats_reports_genuinely_idle_node_as_zero(check, instance_integration, aggregator):
+    """
+    Only the first sample after resolving a process is discarded, so an idle node reports 0%.
+    """
+    mongo_check = check(instance_integration)
+    api = mock.MagicMock()
+    api.server_status.return_value = {'pid': 4321, 'process': 'mongod'}
+    with mock.patch('psutil.Process', side_effect=lambda pid: FakePsutilProcess(pid, 'mongod', cpu_percent=0.0)):
+        run_process_stats(mongo_check, api, times=4)
+
+    # The first run is the discarded sample; the rest are real 0% measurements.
+    aggregator.assert_metric('mongodb.system.cpu.percent', value=0.0, count=3)

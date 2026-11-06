@@ -24,6 +24,7 @@ files:
         display_default: null
         example: http://%%host%%:5000/metrics
         type: string
+      fleet_configurable: false
     - template: instances/openmetrics
       overrides:
         openmetrics_endpoint.required: false

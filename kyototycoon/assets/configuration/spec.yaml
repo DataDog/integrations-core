@@ -51,3 +51,4 @@ files:
           value:
             type: string
             example: http://%%host%%:1978/rpc/report
+          fleet_configurable: false

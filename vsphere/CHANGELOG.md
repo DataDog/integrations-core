@@ -2,7 +2,39 @@
 
 <!-- towncrier release notes start -->
 
-## 9.4.1 / 2026-04-15
+## 10.0.2 / 2026-10-29
+
+***Fixed***:
+
+* Bump pyvmomi to 9.0.0.0 so vSAN health metrics can be collected from vCenter 9.0.x. pyvmomi 8.0.3.0.1 declared the result type of `VsanPerfQueryClusterHealth` as the abstract `vmodl.DynamicData[]` rather than `vim.cluster.VsanClusterHealthGroup[]`, so it could only determine the concrete type from an `xsi:type` attribute that vCenter 9.0.x no longer sends. Collection failed with `AttributeError: groupId` while deserializing the response. ([#25676](https://github.com/DataDog/integrations-core/pull/25676))
+
+## 10.0.1 / 2026-10-08 / Agent 7.85.0
+
+***Fixed***:
+
+* Do not stop vSAN collection for an entire vCenter when a single cluster fails, and log the real error instead of the retry failure that masked it. ([#25435](https://github.com/DataDog/integrations-core/pull/25435))
+
+## 10.0.0 / 2026-10-01
+
+***Changed***:
+
+* `vsphere.vm.summary.config.numCpu` is now collected on every check run instead of only when `collect_property_metrics` is enabled. It is submitted once per `min_collection_interval` rather than once per `refresh_infrastructure_cache_interval`. It can no longer be excluded with `metric_filters`. ([#25162](https://github.com/DataDog/integrations-core/pull/25162))
+
+***Added***:
+
+* Collect the CPU core count of each monitored ESXi host as `vsphere.host.summary.hardware.numCpuCores`. ([#25162](https://github.com/DataDog/integrations-core/pull/25162))
+
+## 9.5.0 / 2026-08-05 / Agent 7.83.0
+
+***Security***:
+
+* Expand the set of configuration fields protected behind integration security settings. ([#24646](https://github.com/DataDog/integrations-core/pull/24646))
+
+***Fixed***:
+
+* Use SHA-256 instead of MD5 for vSphere alarm events. ([#24765](https://github.com/DataDog/integrations-core/pull/24765))
+
+## 9.4.1 / 2026-04-15 / Agent 7.79.0
 
 ***Fixed***:
 

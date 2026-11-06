@@ -40,7 +40,6 @@ LICENSE_HEADER = "(C) Datadog, Inc."
 
 INTEGRATIONS_WITHOUT_MODELS = {
     'snmp',  # Deprecated
-    'tokumx',  # Python 2 only
 }
 
 
@@ -95,8 +94,6 @@ def models(ctx, check, sync, verbose):
     license_header_lines = get_license_header().splitlines(True) + ['\n', '\n']
     documentation_header_lines = get_config_models_documentation().splitlines(True) + ['\n']
 
-    code_formatter = ModelConsumer.create_code_formatter()
-
     if is_core_check:
         checks = checks.difference(INTEGRATIONS_WITHOUT_MODELS)
 
@@ -135,7 +132,7 @@ def models(ctx, check, sync, verbose):
             if not sync and not dir_exists(models_location) and not is_core_check:
                 continue
 
-        model_consumer = ModelConsumer(spec.data, code_formatter)
+        model_consumer = ModelConsumer(spec.data)
 
         # So formatters see config files
         with chdir(root):
@@ -168,7 +165,7 @@ def models(ctx, check, sync, verbose):
                 current_model_file_lines = read_file_lines(model_file_path)
 
                 if model_file in CUSTOM_FILES and (len(current_model_file_lines) + 1) > len(license_header_lines):
-                    # validators.py and deprecations.py are custom files, they should only be rendered the first time
+                    # Custom files should only be rendered the first time.
                     continue
 
             if not is_community_check:

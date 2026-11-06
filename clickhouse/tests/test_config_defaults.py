@@ -23,6 +23,7 @@ EXPECTED_DEFAULTS = {
     'password': '',
     'connect_timeout': 10,
     'read_timeout': 10,
+    'reported_hostname': None,
     'compression': None,
     'tls_verify': False,
     'tls_ca_cert': None,
@@ -69,6 +70,25 @@ EXPECTED_DEFAULTS = {
         'max_samples_per_collection': 1000,
         'run_sync': False,
     },
+    # === DBM: Schema metrics ===
+    'schema_metrics': {
+        'enabled': False,
+        'collection_interval': 60,
+        'run_sync': False,
+    },
+    # === DBM: Schema collector ===
+    'collect_schemas': {
+        'enabled': False,
+        'collection_interval': 600,
+        'max_tables': 300,
+        'max_columns': 1000,
+        'max_query_duration': 60,
+        'include_databases': (),
+        'exclude_databases': (),
+        'include_tables': (),
+        'exclude_tables': (),
+        'run_sync': False,
+    },
     # === DBM: Parts and merges ===
     'parts_and_merges': {
         'enabled': True,
@@ -83,6 +103,18 @@ EXPECTED_DEFAULTS = {
         'stalled_merge_elapsed_threshold_seconds': 3600,
         'stuck_replication_num_tries': 3,
     },
+    # === DBM: Async insert buffer snapshot ===
+    'collect_pending_async_inserts': {
+        'enabled': False,
+        'collection_interval': 10,
+        'max_samples_per_collection': 1000,
+    },
+    # === DBM: Async insert flushes ===
+    'collect_async_inserts': {
+        'enabled': False,
+        'collection_interval': 60,
+        'max_samples_per_collection': 1000,
+    },
     # === Tagging ===
     'tags': (),
     'disable_generic_tags': False,
@@ -91,6 +123,9 @@ EXPECTED_DEFAULTS = {
     'custom_queries': None,
     'only_custom_queries': False,
     'use_global_custom_queries': 'true',
+    # === Query set selection (legacy vs advanced) ===
+    'use_legacy_queries': True,
+    'use_advanced_queries': True,
     # === Agent standard fields ===
     'min_collection_interval': 15,
     'empty_default_hostname': False,

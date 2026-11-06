@@ -16,6 +16,7 @@ files:
         type: string
         example: https://example.com:8443/automation-api
       display_priority: 2
+      fleet_configurable: false
     - name: control_m_username
       required: false
       description: |
@@ -24,6 +25,7 @@ files:
       value:
         type: string
         example: workbench
+      fleet_configurable: false
     - name: control_m_password
       required: false
       secret: true
@@ -32,6 +34,7 @@ files:
         Must be set together with `control_m_username`.
       value:
         type: string
+      fleet_configurable: false
     - name: token_lifetime_seconds
       required: false
       description: |
@@ -39,6 +42,7 @@ files:
       value:
         type: integer
         example: 1800
+      fleet_configurable: false
     - name: token_refresh_buffer_seconds
       required: false
       description: |
@@ -46,6 +50,7 @@ files:
       value:
         type: integer
         example: 300
+      fleet_configurable: false
     - name: job_status_limit
       required: false
       description: |
@@ -56,6 +61,7 @@ files:
       value:
         type: integer
         example: 10000
+      fleet_configurable: false
     - name: job_name_filter
       required: false
       description: |
@@ -63,6 +69,7 @@ files:
       value:
         type: string
         example: "*"
+      fleet_configurable: false
     - name: finalized_ttl_seconds
       required: false
       description: |
@@ -73,6 +80,7 @@ files:
       value:
         type: integer
         example: 86400
+      fleet_configurable: false
     - name: active_ttl_seconds
       required: false
       description: |
@@ -81,6 +89,7 @@ files:
       value:
         type: integer
         example: 21600
+      fleet_configurable: false
     - name: emit_job_events
       required: false
       description: |
@@ -90,6 +99,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: emit_success_events
       required: false
       description: |
@@ -99,6 +109,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: control_m_timezone
       required: false
       description: |
@@ -109,6 +120,7 @@ files:
       value:
         type: string
         example: UTC
+      fleet_configurable: false
     - name: slow_run_threshold_ms
       required: false
       description: |
@@ -117,6 +129,7 @@ files:
         enabled. When not set, no slow-run events are emitted.
       value:
         type: integer
+      fleet_configurable: false
     - template: instances/http
       overrides:
         headers.display_priority: 1

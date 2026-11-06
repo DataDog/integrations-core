@@ -46,7 +46,7 @@ Starting from Agent 7.68.0, the LiteLLM check is included in the [Datadog Agent]
 
 ### Configuration
 
-This integration collects metrics through the Prometheus endpoint exposed by the LiteLLM Proxy. This feature is only available for enterprise users of LiteLLM. By default, the metrics are exposed on the `/metrics` endpoint. If connecting locally, the default port is 4000. For more information, see the [LiteLLM Prometheus documentation][10].
+This integration collects metrics through the Prometheus endpoint exposed by the LiteLLM Proxy. By default, the metrics are exposed on the `/metrics` endpoint. If connecting locally, the default port is 4000. For more information, see the [LiteLLM Prometheus documentation][10].
 
 Note: The listed metrics can only be collected if they are available. Some metrics are generated only when certain actions are performed. For example, the `litellm.auth.failed_requests.count` metric might only be exposed after an authentication failed request has occurred.
 
@@ -68,7 +68,9 @@ Note: The listed metrics can only be collected if they are available. Some metri
 
 #### Kubernetes-based
 
-For LiteLLM Proxy running on Kubernetes, configuration can be easily done via pod annotations. See the example below:
+For LiteLLM Proxy running on Kubernetes, choose one of the following Autodiscovery configurations:
+
+##### Kubernetes annotations
 
 ```yaml
 apiVersion: v1
@@ -94,6 +96,29 @@ spec:
     - name: <CONTAINER_NAME>
 # (...)
 ```
+##### DatadogInstrumentation CRD
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: <CR_NAME>
+  namespace: <WORKLOAD_NAMESPACE>
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment # Or another target kind, if applicable.
+    name: <LITELLM_WORKLOAD_NAME>
+  config:
+    checks:
+      - integration: litellm
+        containerName: litellm
+        initConfig: {}
+        instances:
+          - openmetrics_endpoint: "http://%%host%%:4000/metrics"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][14].
 
 For more information and alternative ways to configure the check in Kubernetes-based environments, see the [Kubernetes Integration Setup documentation][3].
 
@@ -140,3 +165,4 @@ Need help? Contact [Datadog support][9].
 [11]: https://docs.litellm.ai/docs/proxy/logging
 [12]: https://docs.datadoghq.com/llm_observability/quickstart/
 [13]: https://docs.datadoghq.com/llm_observability/instrumentation/auto_instrumentation?tab=python#litellm
+[14]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

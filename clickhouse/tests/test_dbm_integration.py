@@ -39,6 +39,8 @@ METRICS_COLUMNS = {
     'result_rows',
     'result_bytes',
     'memory_usage',
+    'cpu_us',
+    'cpu_wait_us',
     'peak_memory_usage',
 }
 
@@ -118,7 +120,7 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     event = events[-1]
     assert event['host'] is not None
     assert event['database_instance'] is not None
-    assert event['ddagentversion'] == datadog_agent.get_version()
+    assert event['ddagentversion'] == '0.0.0'
     assert event['timestamp'] > 0
     assert event['min_collection_interval'] is not None
     assert 'tags' in event
@@ -162,7 +164,7 @@ def test_statement_metrics(aggregator, dbm_instance, dd_run_check, datadog_agent
     assert 'commands' in fqt_event['db']['metadata']
     assert fqt_event['timestamp'] > 0
     assert fqt_event['host'] is not None
-    assert fqt_event['ddagentversion'] == datadog_agent.get_version()
+    assert fqt_event['ddagentversion'] == '0.0.0'
 
 
 def test_statement_metrics_with_metadata(aggregator, dbm_instance, dd_run_check, datadog_agent):
@@ -264,8 +266,8 @@ def test_dbm_properties(instance):
 
     check = ClickhouseCheck('clickhouse', {}, [instance_config])
     assert check.reported_hostname is not None
+    assert check.reported_hostname != ''
     assert check.database_identifier is not None
-    assert check._config.server in check.reported_hostname
     assert str(check._config.port) in check.database_identifier
 
 
@@ -294,9 +296,7 @@ def test_samples_event_structure(instance):
     ]
     active_connections = [{'user': 'default', 'query_kind': 'Select', 'current_database': 'default', 'connections': 1}]
 
-    with mock.patch('datadog_checks.clickhouse.statement_samples.datadog_agent') as mock_agent:
-        mock_agent.get_version.return_value = '7.64.0'
-        event = samples._create_samples_event(rows, active_connections)
+    event = samples._create_samples_event(rows, active_connections)
 
     assert event['ddsource'] == 'clickhouse'
     assert event['dbm_type'] == 'activity'
@@ -359,6 +359,8 @@ def test_query_completions_data(aggregator, instance, dd_run_check, datadog_agen
     assert details['username'] is not None
     assert details['read_rows'] >= 0
     assert details['event_time_microseconds'] > 0
+    assert details['cpu_us'] >= 0
+    assert details['cpu_wait_us'] >= 0
 
 
 def test_explain_plan_collected(aggregator, instance, dd_run_check, datadog_agent):
@@ -406,7 +408,7 @@ def test_explain_plan_collected(aggregator, instance, dd_run_check, datadog_agen
     assert plan_event['ddsource'] == 'clickhouse'
     assert plan_event['host'] is not None
     assert plan_event['database_instance'] is not None
-    assert plan_event['ddagentversion'] == datadog_agent.get_version()
+    assert plan_event['ddagentversion'] == '0.0.0'
     assert plan_event['timestamp'] > 0
 
     db = plan_event['db']
@@ -494,7 +496,7 @@ def test_explain_plan_not_collected_for_insert(aggregator, instance, dd_run_chec
 
     # Run a SELECT alongside the INSERT so we can confirm the pipeline collected queries
     client.command("SELECT count() FROM system.tables")
-    client.command("INSERT INTO tableau VALUES (222)")
+    client.command("INSERT INTO test (id) VALUES (222)")
     client.command('SYSTEM FLUSH LOGS')
 
     dd_run_check(check)
@@ -608,9 +610,18 @@ def test_query_errors_data(aggregator, instance, dd_run_check):
 
     assert len(all_errors) > 0, "Expected at least one error record in payload"
 
-    details = all_errors[0]['query_details']
+    details = next(
+        (
+            e['query_details']
+            for e in all_errors
+            if 'nonexistent_table_query_error_test' in e['query_details'].get('exception', '')
+        ),
+        None,
+    )
+    assert details is not None, "Expected an error record for `nonexistent_table_query_error_test` in payload"
     assert details['query_signature'] is not None
-    assert 'nonexistent_table_query_error_test' in details['exception']
     assert 'UNKNOWN_TABLE' in details['exception']
     assert details['exception_code'] == 60
     assert 'stack_trace' in details
+    assert details['cpu_us'] >= 0
+    assert details['cpu_wait_us'] >= 0

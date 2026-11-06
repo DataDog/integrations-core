@@ -8,6 +8,7 @@ import platform
 import pytest
 
 from datadog_checks.base import AgentCheck
+from datadog_checks.dev.docker import assert_all_discovery_candidates_stable
 from datadog_checks.kong import Kong
 
 from . import common
@@ -87,20 +88,41 @@ def test_connection_failure(aggregator, check, dd_run_check):
     aggregator.all_metrics_asserted()
 
 
-@pytest.mark.skipif(platform.python_version() < "3", reason='OpenMetrics V2 is only available with Python 3')
-@pytest.mark.e2e
-def test_e2e_openmetrics_v2(dd_agent_check, instance_openmetrics_v2):
-    kong_version = os.environ.get('KONG_VERSION').split('.')[0]
-    aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
-    tags = "endpoint:" + instance_openmetrics_v2.get('openmetrics_endpoint')
-    tags = instance_openmetrics_v2.get('tags').append(tags)
+def assert_openmetrics_v2(aggregator, tags=None):
     aggregator.assert_service_check('kong.openmetrics.health', AgentCheck.OK, count=2, tags=tags)
 
     # Only a subset(3) of metrics are exposed currently in our Kong test environment
+    kong_version = os.environ.get('KONG_VERSION').split('.')[0]
     if kong_version >= '3':
         metrics = EXPECTED_METRICS_V3
     else:
         metrics = EXPECTED_METRICS
 
     for metric in metrics:
-        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE, tags=tags)
+        aggregator.assert_metric(metric, metric_type=aggregator.GAUGE)
+        # Use a subset match instead of passing tags to `assert_metric` since
+        # the `shared_dict` metrics carry an extra `shared_dict:<name>` tag not
+        # in `tags`.
+        if tags:
+            aggregator.assert_metric_has_tags(metric, tags)
+
+
+@pytest.mark.skipif(platform.python_version() < "3", reason='OpenMetrics V2 is only available with Python 3')
+@pytest.mark.e2e
+def test_e2e_openmetrics_v2(dd_agent_check, instance_openmetrics_v2):
+    aggregator = dd_agent_check(instance_openmetrics_v2, rate=True)
+    tags = "endpoint:" + instance_openmetrics_v2.get('openmetrics_endpoint')
+    tags = instance_openmetrics_v2.get('tags') + [tags]
+    assert_openmetrics_v2(aggregator, tags)
+
+
+@pytest.mark.skipif(platform.python_version() < "3", reason='OpenMetrics V2 is only available with Python 3')
+@pytest.mark.e2e
+def test_e2e_discovery(dd_agent_check_discovery):
+    aggregator = dd_agent_check_discovery(rate=True)
+    assert_openmetrics_v2(aggregator)
+
+
+@pytest.mark.e2e
+def test_e2e_discovery_all_candidates(dd_agent_check):
+    assert_all_discovery_candidates_stable(dd_agent_check, Kong)

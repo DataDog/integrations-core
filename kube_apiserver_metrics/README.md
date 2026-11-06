@@ -23,7 +23,7 @@ However, if you are using a managed Kubernetes distribution like GKE, EKS, or AK
 In this case, you can setup the integration against the `kubernetes` Service in the `default` namespace.
 
 - The main use case to run the `kube_apiserver_metrics` check is as a [Cluster Level Check][4]. 
-- You can do this with [annotations on your service](#annotate-service), or by using a [local file](#local-file) through the Datadog Operator, Helm Chart or manually. 
+- You can do this with [annotations or a `DatadogInstrumentation` resource](#annotate-service), or by using a [local file](#local-file) through the Datadog Operator, Helm Chart or manually.
 - To collect metrics, set the following parameters and values in an [Autodiscovery][8] template. 
 
 | Parameter         | Value                                                                 |
@@ -36,10 +36,12 @@ You can review all available configuration options in the [kube_apiserver_metric
 
 #### Annotate service
 
-You can annotate the kubernetes service in your `default` namespace with the following:
+Choose one of the following Autodiscovery configurations for the `kubernetes` Service in the `default` namespace:
 
 <!-- xxx tabs xxx -->
-<!-- xxx tab "Annotations v2 (for Datadog Agent v7.36)" xxx -->
+<!-- xxx tab "Kubernetes annotations" xxx -->
+
+**Annotations v2** (for Datadog Agent v7.36+)
 
 ```yaml
 ad.datadoghq.com/endpoints.checks: |
@@ -54,9 +56,7 @@ ad.datadoghq.com/endpoints.checks: |
   }
 ```
 
-<!-- xxz tab xxx -->
-
-<!-- xxx tab "Annotations v1 (for Datadog Agent < v7.36)" xxx -->
+**Annotations v1** (for Datadog Agent < v7.36)
 
 ```yaml
 annotations:
@@ -65,6 +65,31 @@ annotations:
   ad.datadoghq.com/endpoints.instances:
     '[{ "prometheus_url": "https://%%host%%:%%port%%/metrics"}]'
 ```
+<!-- xxz tab xxx -->
+<!-- xxx tab "DatadogInstrumentation CRD" xxx -->
+
+This resource targets the Service and omits `containerName`:
+
+```yaml
+apiVersion: datadoghq.com/v1alpha1
+kind: DatadogInstrumentation
+metadata:
+  name: kubernetes-api-server-metrics
+  namespace: default
+spec:
+  targetRef:
+    apiVersion: v1
+    kind: Service
+    name: kubernetes
+  config:
+    checks:
+      - integration: kube_apiserver_metrics
+        initConfig: {}
+        instances:
+          - prometheus_url: "https://%%host%%:%%port%%/metrics"
+```
+
+For setup details, see [Configure Autodiscovery with the DatadogInstrumentation CRD][15].
 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
@@ -161,3 +186,4 @@ Need help? Contact [Datadog support][11].
 [12]: https://docs.datadoghq.com/containers/kubernetes/integrations/?tab=annotations
 [13]: https://docs.datadoghq.com/containers/cluster_agent/clusterchecks/?tab=helm#configuration-from-configuration-files
 [14]: https:docs.datadoghq.com//containers/cluster_agent/clusterchecks/?tab=datadogoperator#setting-up-check-configurations
+[15]: https://docs.datadoghq.com/containers/guide/configure-autodiscovery-with-the-datadoginstrumentation-crd/

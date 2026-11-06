@@ -922,3 +922,99 @@ go_memstats_gc_sys_bytes{supabase_project_ref="xdgggqomhgiilfjtepts",service_typ
 # HELP go_memstats_mallocs_total Total number of mallocs.
 # TYPE go_memstats_mallocs_total counter
 go_memstats_mallocs_total{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="gotrue"} 44733
+# HELP supavisor_connections_active The total count of active clients for a tenant.
+# TYPE supavisor_connections_active gauge
+supavisor_connections_active{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 12
+# HELP supavisor_proxy_connections_active The total count of active proxy clients for a tenant.
+# TYPE supavisor_proxy_connections_active gauge
+supavisor_proxy_connections_active{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 0
+# HELP supavisor_pool_connections_checked_out The count of checked-out (busy) pool connections per tenant.
+# TYPE supavisor_pool_connections_checked_out gauge
+supavisor_pool_connections_checked_out{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 3
+# HELP supavisor_pool_connections_idle The count of idle pool connections per tenant.
+# TYPE supavisor_pool_connections_idle gauge
+supavisor_pool_connections_idle{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 7
+# HELP supavisor_tenants_active The total count of active tenants.
+# TYPE supavisor_tenants_active gauge
+supavisor_tenants_active{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler"} 1
+# HELP supavisor_client_queries_count The total number of queries received by clients.
+# TYPE supavisor_client_queries_count counter
+supavisor_client_queries_count{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path="",proxy="false"} 1542
+# HELP supavisor_client_joins_ok The total number of successful joins.
+# TYPE supavisor_client_joins_ok counter
+supavisor_client_joins_ok{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 218
+# HELP supavisor_client_joins_fail The total number of failed joins.
+# TYPE supavisor_client_joins_fail counter
+supavisor_client_joins_fail{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 0
+# HELP supavisor_client_network_recv The total number of bytes received by clients.
+# TYPE supavisor_client_network_recv counter
+supavisor_client_network_recv{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 1.234567e+06
+# HELP supavisor_client_network_send The total number of bytes sent by clients.
+# TYPE supavisor_client_network_send counter
+supavisor_client_network_send{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 9.876543e+06
+# HELP supavisor_db_network_recv The total number of bytes received by db process
+# TYPE supavisor_db_network_recv counter
+supavisor_db_network_recv{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 8.654321e+06
+# HELP supavisor_db_network_send The total number of bytes sent by db process
+# TYPE supavisor_db_network_send counter
+supavisor_db_network_send{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 2.345678e+06
+# HELP supavisor_client_handler_started_count The total number of created client_handler.
+# TYPE supavisor_client_handler_started_count counter
+supavisor_client_handler_started_count{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 218
+# HELP supavisor_client_handler_stopped_count The total number of stopped client_handler.
+# TYPE supavisor_client_handler_stopped_count counter
+supavisor_client_handler_stopped_count{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 206
+# HELP supavisor_db_handler_started_count The total number of created db_handler.
+# TYPE supavisor_db_handler_started_count counter
+supavisor_db_handler_started_count{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 14
+# HELP supavisor_db_handler_stopped_count The total number of stopped db_handler.
+# TYPE supavisor_db_handler_stopped_count counter
+supavisor_db_handler_stopped_count{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 4
+# HELP supavisor_db_handler_db_connection_count The total number of database connections by db_handler.
+# TYPE supavisor_db_handler_db_connection_count counter
+supavisor_db_handler_db_connection_count{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 14
+# HELP supavisor_db_handler_prepared_statements_evicted_count The number of prepared statements evicted by db_handler.
+# TYPE supavisor_db_handler_prepared_statements_evicted_count counter
+supavisor_db_handler_prepared_statements_evicted_count{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 0
+# HELP supavisor_pool_checkout_duration_local Duration of the checkout local process in the tenant db pool.
+# TYPE supavisor_pool_checkout_duration_local histogram
+supavisor_pool_checkout_duration_local_bucket{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path="",le="1"} 1200
+supavisor_pool_checkout_duration_local_bucket{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path="",le="5"} 1500
+supavisor_pool_checkout_duration_local_bucket{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path="",le="+Inf"} 1542
+supavisor_pool_checkout_duration_local_sum{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 4321.5
+supavisor_pool_checkout_duration_local_count{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 1542
+# HELP supavisor_pool_checkout_duration_remote Duration of the checkout remote process in the tenant db pool.
+# TYPE supavisor_pool_checkout_duration_remote histogram
+supavisor_pool_checkout_duration_remote_bucket{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path="",le="1"} 0
+supavisor_pool_checkout_duration_remote_bucket{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path="",le="5"} 0
+supavisor_pool_checkout_duration_remote_bucket{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path="",le="+Inf"} 0
+supavisor_pool_checkout_duration_remote_sum{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 0
+supavisor_pool_checkout_duration_remote_count{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 0
+# HELP supavisor_client_query_duration Duration of processing the query.
+# TYPE supavisor_client_query_duration histogram
+supavisor_client_query_duration_bucket{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path="",proxy="false",le="1"} 400
+supavisor_client_query_duration_bucket{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path="",proxy="false",le="10"} 1200
+supavisor_client_query_duration_bucket{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path="",proxy="false",le="+Inf"} 1542
+supavisor_client_query_duration_sum{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path="",proxy="false"} 18234.7
+supavisor_client_query_duration_count{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path="",proxy="false"} 1542
+# HELP supavisor_client_connection_duration Duration from the TCP connection to sending greetings to clients.
+# TYPE supavisor_client_connection_duration histogram
+supavisor_client_connection_duration_bucket{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path="",le="5"} 200
+supavisor_client_connection_duration_bucket{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path="",le="100"} 218
+supavisor_client_connection_duration_bucket{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path="",le="+Inf"} 218
+supavisor_client_connection_duration_sum{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 1456.3
+supavisor_client_connection_duration_count{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 218
+# HELP supavisor_client_connection_lifetime_ms How long the client connection has been alive.
+# TYPE supavisor_client_connection_lifetime_ms histogram
+supavisor_client_connection_lifetime_ms_bucket{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path="",le="1000"} 10
+supavisor_client_connection_lifetime_ms_bucket{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path="",le="60000"} 12
+supavisor_client_connection_lifetime_ms_bucket{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path="",le="+Inf"} 12
+supavisor_client_connection_lifetime_ms_sum{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 87654
+supavisor_client_connection_lifetime_ms_count{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",user="postgres",mode="transaction",type="single",db_name="postgres",search_path=""} 12
+# HELP supavisor_client_handler_state_duration Duration spent in each client_handler state.
+# TYPE supavisor_client_handler_state_duration histogram
+supavisor_client_handler_state_duration_bucket{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",from_state="idle",to_state="busy",le="1"} 1500
+supavisor_client_handler_state_duration_bucket{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",from_state="idle",to_state="busy",le="5"} 1540
+supavisor_client_handler_state_duration_bucket{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",from_state="idle",to_state="busy",le="+Inf"} 1542
+supavisor_client_handler_state_duration_sum{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",from_state="idle",to_state="busy"} 2156.4
+supavisor_client_handler_state_duration_count{supabase_project_ref="xdgggqomhgiilfjtepts",service_type="pooler",tenant="xdgggqomhgiilfjtepts",from_state="idle",to_state="busy"} 1542

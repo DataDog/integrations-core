@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 from __future__ import annotations
 
+from collections import Counter
 from typing import TYPE_CHECKING, Any
 
 import click
@@ -10,33 +11,111 @@ import click
 if TYPE_CHECKING:
     from ddev.cli.application import Application
 
-
-def read_file(file, encoding='utf-8'):
-    # type: (str, str) -> str
-    with open(file, 'r', encoding=encoding) as f:
-        return f.read()
+DEFAULT_COVERAGE_THRESHOLD = 75
+TEST_WORKFLOW_PREFIX = 'DataDog/integrations-core/.github/workflows/test-target.yml@'
+PINNING_INPUTS = ('ddev-version',)
 
 
-def write_file(file, contents, encoding='utf-8'):
-    with open(file, 'w', encoding=encoding) as f:
-        f.write(contents)
+def _parse_test_workflow(content: str, filename: str) -> dict[str, Any]:
+    import yaml
+
+    try:
+        workflow = yaml.load(content, Loader=yaml.BaseLoader)
+    except yaml.YAMLError as error:
+        location = filename
+        explanation = str(error)
+        if isinstance(error, yaml.MarkedYAMLError):
+            if error.problem_mark is not None:
+                location += f': line {error.problem_mark.line + 1}, column {error.problem_mark.column + 1}'
+            explanation = error.problem or error.context or explanation
+        raise click.ClickException(
+            f'{location}: {explanation}. Fix the YAML syntax or resolve merge conflicts '
+            'before running `ddev validate ci --sync`.'
+        ) from error
+
+    if workflow is None:
+        return {}
+
+    def require_mapping(value: Any, field: str) -> dict[str, Any]:
+        if not isinstance(value, dict):
+            message = f"{filename}: '{field}' must be a mapping."
+            if field == 'jobs':
+                message += " Use 'jobs: {}' if the section is intentionally empty."
+            raise click.ClickException(message)
+        return value
+
+    workflow = require_mapping(workflow, 'workflow')
+    jobs = require_mapping(workflow.get('jobs', {}), 'jobs')
+    for job_id, job in jobs.items():
+        job = require_mapping(job, f'jobs.{job_id}')
+        uses = job.get('uses', '')
+        if not isinstance(uses, str):
+            raise click.ClickException(f"{filename}: 'jobs.{job_id}.uses' must be a string.")
+        settings = require_mapping(job.get('with', {}), f'jobs.{job_id}.with')
+        if uses.startswith(TEST_WORKFLOW_PREFIX):
+            for field in PINNING_INPUTS:
+                if field in settings and not isinstance(settings[field], str):
+                    raise click.ClickException(f"{filename}: 'jobs.{job_id}.with.{field}' must be a string.")
+
+    events = workflow.get('on', {})
+    if isinstance(events, dict):
+        workflow_call = events.get('workflow_call', '')
+        if workflow_call not in ('', 'null', 'Null', 'NULL', '~'):
+            workflow_call = require_mapping(workflow_call, 'on.workflow_call')
+            require_mapping(workflow_call.get('inputs', {}), 'on.workflow_call.inputs')
+
+    return workflow
 
 
-def code_coverage_enabled(check_name, app):
+def _get_test_workflow_settings(workflow: dict[str, Any], job_id: str) -> tuple[str, dict[str, Any]]:
+    """Prefer job `with` values, then declared workflow inputs.
+
+    Only new jobs inherit unanimous values from existing shared-workflow jobs.
+    """
+    existing_jobs = {
+        key: job
+        for key, job in workflow.get('jobs', {}).items()
+        if job.get('uses', '').startswith(TEST_WORKFLOW_PREFIX)
+    }
+    existing_job = existing_jobs.get(job_id, {})
+    references = {job['uses'] for job in existing_jobs.values()}
+    workflow_ref = existing_job.get('uses')
+    if workflow_ref is None:
+        if len(references) > 1:
+            raise click.ClickException(f'Choose a shared test workflow revision for new job `{job_id}`')
+        workflow_ref = next(iter(references), f'{TEST_WORKFLOW_PREFIX}master')
+
+    events = workflow.get('on', {})
+    workflow_call = events.get('workflow_call', {}) if isinstance(events, dict) else {}
+    inputs = workflow_call.get('inputs', {}) if isinstance(workflow_call, dict) else {}
+    settings = {}
+    for field in PINNING_INPUTS:
+        if field in existing_job.get('with', {}):
+            settings[field] = existing_job['with'][field]
+        elif field in inputs:
+            settings[field] = f'${{{{ inputs.{field} }}}}'
+        elif job_id not in existing_jobs:
+            values = {job.get('with', {}).get(field) for job in existing_jobs.values()}
+            if len(values) > 1:
+                raise click.ClickException(f'Choose `{field}` for new job `{job_id}`')
+            value = next(iter(values), None)
+            if value is not None:
+                settings[field] = value
+
+    return workflow_ref, settings
+
+
+def code_coverage_enabled(check_name: str, app: Application) -> bool:
     if check_name in ('datadog_checks_base', 'datadog_checks_dev', 'datadog_checks_downloader', 'ddev'):
         return True
 
     return app.repo.integrations.get(check_name).is_agent_check
 
 
-def get_coverage_sources(check_name, app):
+def get_coverage_sources(check_name: str, app: Application) -> list[str]:
     package_path = app.repo.integrations.get(check_name).package_directory
     package_dir = package_path.relative_to(app.repo.path)
-    return sorted([str(package_dir.as_posix()), f'{check_name}/tests'])
-
-
-def sort_projects(projects):
-    return sorted(projects.items(), key=lambda item: (item[0] != 'default', item[0]))
+    return [f'{package_dir.as_posix()}/']
 
 
 @click.command()
@@ -46,9 +125,7 @@ def ci(app: Application, sync: bool):
     """Validate CI infrastructure configuration."""
     import hashlib
     import json
-    import os
     import re
-    from collections import defaultdict
 
     import yaml
 
@@ -56,52 +133,18 @@ def ci(app: Application, sync: bool):
 
     is_core = app.repo.name == 'core'
     is_marketplace = app.repo.name == 'marketplace'
+    is_extras = app.repo.name == 'extras'
 
-    # For non-core repos, extract the workflow reference from existing workflow files
-    # This allows using either @master or @<commit-sha>
-    workflow_ref = 'master'  # default
-    windows_workflow_ref = 'master'  # default
-    if not is_core:
-        jobs_workflow_path_temp = app.repo.path / '.github' / 'workflows' / 'test-all.yml'
-        windows_jobs_workflow_path_temp = app.repo.path / '.github' / 'workflows' / 'test-all-windows.yml'
-
-        # Extract reference from Linux workflow file
-        if jobs_workflow_path_temp.is_file():
-            existing_workflow = jobs_workflow_path_temp.read_text()
-            # Look for pattern like: DataDog/integrations-core/.github/workflows/test-target.yml@<ref>
-            # <ref> can be a branch name (alphanumeric + dots/dashes/underscores) or commit SHA (hex only)
-            match = re.search(
-                r'DataDog/integrations-core/\.github/workflows/test-target\.yml@([a-zA-Z0-9_.-]+)', existing_workflow
-            )
-            if match:
-                workflow_ref = match.group(1)
-
-        # Extract reference from Windows workflow file
-        if windows_jobs_workflow_path_temp.is_file():
-            existing_windows_workflow = windows_jobs_workflow_path_temp.read_text()
-            match = re.search(
-                r'DataDog/integrations-core/\.github/workflows/test-target\.yml@([a-zA-Z0-9_.-]+)',
-                existing_windows_workflow,
-            )
-            if match:
-                windows_workflow_ref = match.group(1)
-
-    test_workflow = (
-        './.github/workflows/test-target.yml'
-        if app.repo.name == 'core'
-        else f'DataDog/integrations-core/.github/workflows/test-target.yml@{workflow_ref}'
-    )
-    windows_test_workflow = (
-        './.github/workflows/test-target.yml'
-        if app.repo.name == 'core'
-        else f'DataDog/integrations-core/.github/workflows/test-target.yml@{windows_workflow_ref}'
-    )
     jobs_workflow_path = app.repo.path / '.github' / 'workflows' / 'test-all.yml'
     windows_jobs_workflow_path = app.repo.path / '.github' / 'workflows' / 'test-all-windows.yml'
     original_jobs_workflow = jobs_workflow_path.read_text() if jobs_workflow_path.is_file() else ''
     original_windows_jobs_workflow = (
         windows_jobs_workflow_path.read_text() if windows_jobs_workflow_path.is_file() else ''
     )
+    existing_workflows = {
+        False: _parse_test_workflow(original_jobs_workflow, jobs_workflow_path.name),
+        True: _parse_test_workflow(original_windows_jobs_workflow, windows_jobs_workflow_path.name),
+    }
     ddev_jobs_id = ('jd316aba', 'j6712d43')
 
     job_matrix = construct_job_matrix(app.repo.path, get_all_targets(app.repo.path))
@@ -180,8 +223,12 @@ def ci(app: Application, sync: bool):
         job_id = hashlib.sha256(config['job-name'].encode('utf-8')).hexdigest()[:7]
         job_id = f'j{job_id}'
 
-        # Use the appropriate workflow reference based on platform
-        workflow_to_use = windows_test_workflow if 'windows' in data['platform'] else test_workflow
+        workflow_to_use = './.github/workflows/test-target.yml'
+        if not is_core:
+            workflow_to_use, pinning_settings = _get_test_workflow_settings(
+                existing_workflows['windows' in data['platform']], job_id
+            )
+            config.update(pinning_settings)
         job_config = {'uses': workflow_to_use, 'with': config, 'secrets': 'inherit'}
         if 'target-env' in config:
             job_config['strategy'] = {
@@ -208,6 +255,7 @@ def ci(app: Application, sync: bool):
         'agent-image-windows',
         'agent-image-windows-py2',
         'skip-ddev-tests',
+        *PINNING_INPUTS,
     ):
         jobs_component = jobs_component.replace(f'${{{{ inputs.{field} }}}}', f'"${{{{ inputs.{field} }}}}"')
         windows_jobs_component = windows_jobs_component.replace(
@@ -237,184 +285,168 @@ def ci(app: Application, sync: bool):
             app.abort('CI configuration is not in sync, try again with the `--sync` flag')
 
     validation_tracker = app.create_validation_tracker('CI configuration validation')
-    error_message = ''
-    warning_message = ''
 
     repo_choice = app.repo.name
     valid_repos = ['core', 'marketplace', 'extras', 'internal']
     if repo_choice not in valid_repos:
         app.abort(f'Unknown repository `{repo_choice}`')
 
-    # marketplace does not have a .codecov.yml file
-    if app.repo.name == 'marketplace':
+    if is_marketplace or is_extras:
+        validation_tracker.success()
+        validation_tracker.display()
         return
 
-    testable_checks = {integration.name for integration in app.repo.integrations.iter_testable('all')}
+    _validate_code_coverage(app, sync, validation_tracker, repo_choice)
 
-    cached_display_names: defaultdict[str, str] = defaultdict(str)
 
-    codecov_config_relative_path = '.codecov.yml'
+def _validate_code_coverage(
+    app: Application,
+    sync: bool,
+    validation_tracker: Any,
+    repo_choice: str,
+) -> None:
+    import yaml
 
-    path_split = str(codecov_config_relative_path).split('/')
-    codecov_config_path = os.path.join(app.repo.path, *path_split)
-    if not os.path.isfile(codecov_config_path):
-        error_message = 'Unable to find the Codecov config file'
-        validation_tracker.error((repo_choice,), message=error_message)
+    config_filename = 'code-coverage.datadog.yml'
+    config_path = app.repo.path / config_filename
+
+    if not config_path.is_file():
+        validation_tracker.error(
+            (repo_choice,), message=f'Unable to find the code coverage config file: {config_filename}'
+        )
         validation_tracker.display()
         app.abort()
 
-    codecov_config = yaml.safe_load(read_file(codecov_config_path))
-    projects = codecov_config.setdefault('coverage', {}).setdefault('status', {}).setdefault('project', {})
-    defined_checks = set()
+    config = yaml.safe_load(config_path.read_text())
+    if config is None:
+        config = {}
+
+    testable_checks = {integration.name for integration in app.repo.integrations.iter_testable('all')}
+    excluded_jobs = {
+        name for name, conf in app.repo.config.get('/overrides/ci', {}).items() if conf.get('exclude', False)
+    }
+
+    expected_checks = set()
+    for check in testable_checks:
+        if check not in excluded_jobs and code_coverage_enabled(check, app):
+            expected_checks.add(check)
+
+    existing_services = config.get('services') or []
+    existing_service_id_list = [s['id'] for s in existing_services if 'id' in s]
+    existing_service_ids = set(existing_service_id_list)
+
     success = True
     fixed = False
+    error_message = ''
 
-    for project, data in list(projects.items()):
-        if project == 'default':
-            continue
-
-        project_flags = data.get('flags', [])
-        if len(project_flags) != 1:
-            success = False
-            error_message += f'Project `{project}` must have exactly one flag\n'
-            continue
-
-        check_name = project_flags[0]
-
-        if check_name in defined_checks:
-            success = False
-            error_message += f'Check `{check_name}` is defined as a flag in more than one project\n'
-            continue
-
-        defined_checks.add(check_name)
-        # Project names cannot contain spaces, see:
-        # https://github.com/DataDog/integrations-core/pull/6760#issuecomment-634976885
-        if check_name in cached_display_names:
-            display_name = cached_display_names[check_name].replace(' ', '_')
-        else:
-            try:
-                integration = app.repo.integrations.get(check_name)
-            except OSError as e:
-                if str(e).startswith('Integration does not exist: '):
-                    continue
-
-                raise
-
-            display_name = integration.display_name
-            display_name = display_name.replace(' ', '_')
-            cached_display_names[check_name] = display_name
-
-        if project != display_name:
-            message = f'Project `{project}` should be called `{display_name}`\n'
-
-            if sync:
-                fixed = True
-                warning_message += message
-                if display_name not in projects:
-                    projects[display_name] = data
-                    del projects[project]
-                app.display_success(f'Renamed project to `{display_name}`\n')
-            else:
-                success = False
-                error_message += message
-
-    # This works because we ensure there is a 1 to 1 correspondence between projects and checks (flags)
-    excluded_jobs = {
-        name for name, config in app.repo.config.get('/overrides/ci', {}).items() if config.get('exclude', False)
-    }
-    missing_projects = testable_checks - set(defined_checks) - excluded_jobs
-
-    not_agent_checks = set()
-    for check in set(missing_projects):
-        if not code_coverage_enabled(check, app):
-            not_agent_checks.add(check)
-            missing_projects.discard(check)
-
-    if missing_projects:
-        num_missing_projects = len(missing_projects)
-        message = (
-            f"Codecov config has {num_missing_projects} missing project{'s' if num_missing_projects > 1 else ''}\n"
-        )
+    duplicate_services = sorted(
+        service_id for service_id, count in Counter(existing_service_id_list).items() if count > 1
+    )
+    if duplicate_services:
+        num_duplicate = len(duplicate_services)
+        service_label = 'service IDs' if num_duplicate > 1 else 'service ID'
+        duplicate_service_names = ', '.join(duplicate_services)
+        message = f'Code coverage config has {num_duplicate} duplicate {service_label}: {duplicate_service_names}\n'
 
         if sync:
             fixed = True
-            warning_message += message
+            deduplicated_services = []
+            seen_service_ids = set()
+            for service in existing_services:
+                service_id = service.get('id', '')
+                if service_id in seen_service_ids:
+                    app.display_success(f'Removed duplicate service `{service_id}`\n')
+                    continue
 
-            for missing_check in sorted(missing_projects):
-                display_name = app.repo.integrations.get(missing_check).display_name
-                display_name = display_name.replace(' ', '_')
-                projects[display_name] = {'target': 75, 'flags': [missing_check]}
-                app.display_success(f'Added project `{display_name}`\n')
+                seen_service_ids.add(service_id)
+                deduplicated_services.append(service)
+
+            existing_services = deduplicated_services
         else:
             success = False
             error_message += message
 
-    flags = codecov_config.setdefault('flags', {})
-    defined_checks = set()
-
-    for flag, data in list(flags.items()):
-        defined_checks.add(flag)
-
-        expected_coverage_paths = get_coverage_sources(flag, app)
-
-        configured_coverage_paths = data.get('paths', [])
-        if configured_coverage_paths != expected_coverage_paths:
-            message = f'Flag `{flag}` has incorrect coverage source paths\n'
-
-            if sync:
-                fixed = True
-                warning_message += message
-                data['paths'] = expected_coverage_paths
-                app.display_success(f'Configured coverage paths for flag `{flag}`\n')
-            else:
-                success = False
-                error_message += message
-
-        if not data.get('carryforward'):
-            message = f'Flag `{flag}` must have carryforward set to true\n'
-
-            if sync:
-                fixed = True
-                warning_message += message
-                data['carryforward'] = True
-                app.display_success(f'Enabled the carryforward feature for flag `{flag}`\n')
-            else:
-                success = False
-                error_message += message
-
-    missing_flags = testable_checks - set(defined_checks) - excluded_jobs
-    for check in set(missing_flags):
-        if check in not_agent_checks or not code_coverage_enabled(check, app):
-            missing_flags.discard(check)
-
-    if missing_flags:
-        num_missing_flags = len(missing_flags)
-        message = f"Codecov config has {num_missing_flags} missing flag{'s' if num_missing_flags > 1 else ''}\n"
+    stale_services = sorted(existing_service_ids - expected_checks)
+    if stale_services:
+        num_stale = len(stale_services)
+        service_label = 'services' if num_stale > 1 else 'service'
+        stale_service_names = ', '.join(stale_services)
+        message = f'Code coverage config has {num_stale} stale {service_label}: {stale_service_names}\n'
 
         if sync:
             fixed = True
-            warning_message += message
+            existing_services = [s for s in existing_services if s.get('id', '') not in stale_services]
+            for service_id in stale_services:
+                app.display_success(f'Removed stale service `{service_id}`\n')
+        else:
+            success = False
+            error_message += message
 
-            for missing_check in sorted(missing_flags):
-                flags[missing_check] = {'carryforward': True, 'paths': get_coverage_sources(missing_check, app)}
-                app.display_success(f'Added flag `{missing_check}`\n')
+    # Validate existing services have correct paths
+    for service in existing_services:
+        service_id = service.get('id', '')
+        if service_id not in expected_checks:
+            continue
+
+        expected_paths = get_coverage_sources(service_id, app)
+        configured_paths = service.get('paths', [])
+        if sorted(configured_paths) != sorted(expected_paths):
+            message = f'Service `{service_id}` has incorrect coverage source paths\n'
+            if sync:
+                fixed = True
+                service['paths'] = expected_paths
+                app.display_success(f'Configured coverage paths for service `{service_id}`\n')
+            else:
+                success = False
+                error_message += message
+
+    missing_services = sorted(expected_checks - existing_service_ids)
+    if missing_services:
+        num_missing = len(missing_services)
+        message = f"Code coverage config has {num_missing} missing service{'s' if num_missing > 1 else ''}\n"
+
+        if sync:
+            fixed = True
+            for check_name in missing_services:
+                existing_services.append(
+                    {
+                        'id': check_name,
+                        'paths': get_coverage_sources(check_name, app),
+                    }
+                )
+                app.display_success(f'Added service `{check_name}`\n')
+        else:
+            success = False
+            error_message += message
+
+    gates = config.get('gates') or []
+    if not gates:
+        message = 'Code coverage config has no coverage gates\n'
+        if sync:
+            fixed = True
+            gates.append(
+                {
+                    'type': 'total_coverage_percentage',
+                    'config': {'threshold': DEFAULT_COVERAGE_THRESHOLD},
+                }
+            )
+            config['gates'] = gates
+            app.display_success(f'Added default coverage gate with {DEFAULT_COVERAGE_THRESHOLD}% threshold\n')
         else:
             success = False
             error_message += message
 
     if not success:
-        message = 'Try running `ddev validate ci --sync`\n'
-        app.display_info(message)
-        validation_tracker.error((codecov_config_path,), message=error_message)
-
+        app.display_info('Try running `ddev validate ci --sync`\n')
+        validation_tracker.error((str(config_path),), message=error_message)
         validation_tracker.display()
         app.abort()
     elif fixed:
-        codecov_config['coverage']['status']['project'] = dict(sort_projects(projects))
-        codecov_config['flags'] = dict(sorted(flags.items()))
-        output = yaml.safe_dump(codecov_config, default_flow_style=False, sort_keys=False)
-        write_file(codecov_config_path, output)
-        app.display_success(f'Successfully fixed {codecov_config_relative_path}')
+        config['services'] = sorted(existing_services, key=lambda s: s.get('id', ''))
+
+        output = yaml.safe_dump(config, default_flow_style=False, sort_keys=False)
+        config_path.write_text(output)
+        app.display_success(f'Successfully fixed {config_filename}')
 
         validation_tracker.success()
         validation_tracker.display()

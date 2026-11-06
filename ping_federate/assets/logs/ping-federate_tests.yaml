@@ -152,9 +152,9 @@ tests:
           targetsessionid:
           - "spAdapter.SAML2"
           - " spConnection.PartnerSP"
+        duration: 2.0E8
         error:
           message: "Invalid Credentials"
-        duration: 2.0E8
         evt:
           name: "AUTHN_ATTEMPT"
           outcome: "failure"
@@ -186,8 +186,8 @@ tests:
               timezone: "Europe/Paris"
             ip: "185.64.148.0"
         oauth:
-          granttype: "authorization_code"
           attrackingid: "qwerty-1234-asdfgh-5678"
+          granttype: "authorization_code"
         ping_federate:
           transaction:
             connection:

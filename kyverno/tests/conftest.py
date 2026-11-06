@@ -2,16 +2,15 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 import os
-from contextlib import ExitStack
 
 import pytest
 
 from datadog_checks.dev import get_here
 from datadog_checks.dev.kind import kind_run
-from datadog_checks.dev.kube_port_forward import port_forward
 from datadog_checks.dev.subprocess import run_command
 
 HERE = get_here()
+CHECK_ROOT = os.path.dirname(HERE)
 
 
 def setup_kyverno():
@@ -33,25 +32,38 @@ def setup_kyverno():
 
 
 @pytest.fixture(scope='session')
-def dd_environment():
-    with kind_run(conditions=[setup_kyverno], sleep=30) as kubeconfig, ExitStack() as stack:
-        kyverno_host1, kyverno_port1 = stack.enter_context(
-            port_forward(kubeconfig, 'kyverno', 8000, 'deployment', 'kyverno-admission-controller'),
-        )
-        kyverno_host2, kyverno_port2 = stack.enter_context(
-            port_forward(kubeconfig, 'kyverno', 8000, 'deployment', 'kyverno-background-controller'),
-        )
-        kyverno_host3, kyverno_port3 = stack.enter_context(
-            port_forward(kubeconfig, 'kyverno', 8000, 'deployment', 'kyverno-cleanup-controller'),
-        )
-        kyverno_host4, kyverno_port4 = stack.enter_context(
-            port_forward(kubeconfig, 'kyverno', 8000, 'deployment', 'kyverno-reports-controller'),
-        )
+def dd_environment(dd_save_state):
+    with kind_run(conditions=[setup_kyverno], sleep=30) as kubeconfig:
+        dd_save_state('kyverno_kubeconfig', kubeconfig)
         instances = [
-            {'openmetrics_endpoint': f'http://{kyverno_host1}:{kyverno_port1}/metrics'},
-            {'openmetrics_endpoint': f'http://{kyverno_host2}:{kyverno_port2}/metrics'},
-            {'openmetrics_endpoint': f'http://{kyverno_host3}:{kyverno_port3}/metrics'},
-            {'openmetrics_endpoint': f'http://{kyverno_host4}:{kyverno_port4}/metrics'},
+            {'openmetrics_endpoint': 'http://kyverno-svc-metrics.kyverno.svc.cluster.local:8000/metrics'},
+            {
+                'openmetrics_endpoint': (
+                    'http://kyverno-background-controller-metrics.kyverno.svc.cluster.local:8000/metrics'
+                )
+            },
+            {
+                'openmetrics_endpoint': (
+                    'http://kyverno-cleanup-controller-metrics.kyverno.svc.cluster.local:8000/metrics'
+                )
+            },
+            {
+                'openmetrics_endpoint': (
+                    'http://kyverno-reports-controller-metrics.kyverno.svc.cluster.local:8000/metrics'
+                )
+            },
         ]
+        metadata = {
+            'agent_type': 'kubernetes',
+            'kubernetes': {
+                'kubeconfig': kubeconfig,
+                'auto_conf': os.path.join(CHECK_ROOT, 'datadog_checks', 'kyverno', 'data', 'auto_conf.yaml'),
+            },
+        }
 
-        yield {'instances': instances}
+        yield {'instances': instances}, metadata
+
+
+@pytest.fixture(scope='session')
+def kyverno_kubeconfig(dd_get_state):
+    return dd_get_state('kyverno_kubeconfig')

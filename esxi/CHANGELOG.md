@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 4.4.1 / 2026-10-29
+
+***Fixed***:
+
+* Bump pyvmomi to 9.0.0.0, in step with the vSphere integration. The ESXi integration does not use the vSAN API and is unaffected by the underlying issue; the dependency pin is shared. ([#25676](https://github.com/DataDog/integrations-core/pull/25676))
+
+## 4.4.0 / 2026-08-05 / Agent 7.83.0
+
+***Security***:
+
+* Expand the set of configuration fields protected behind integration security settings. ([#24646](https://github.com/DataDog/integrations-core/pull/24646))
+
 ## 4.3.0 / 2026-02-19 / Agent 7.77.0
 
 ***Added***:

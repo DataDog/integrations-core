@@ -12,6 +12,7 @@ files:
       value:
         example: false
         type: boolean
+      fleet_configurable: false
     - template: init_config/default
   - template: instances
     options:
@@ -48,13 +49,9 @@ files:
         - <HOST>:<PORT>
         anyOf:
           - type: string
-            formats:
-              - url
           - type: array
             items:
               type: string
-              formats:
-                - url
     - name: username
       description: |
         The username to use for authentication.
@@ -78,6 +75,9 @@ files:
       value:
         type: string
         example: mongodb
+        enum:
+        - mongodb
+        - mongodb+srv
     - name: database
       description: |
         The database to collect metrics from.
@@ -263,6 +263,11 @@ files:
           value:
             type: string
             example: queryPlanner
+            enum:
+            - queryPlanner
+            - executionStats
+            - allPlansExecution
+            - disabled
     - name: slow_operations
       description: Configure collection of MongoDB slow operations.
       fleet_configurable: true
@@ -300,6 +305,11 @@ files:
           value:
             type: string
             example: queryPlanner
+            enum:
+            - queryPlanner
+            - executionStats
+            - allPlansExecution
+            - disabled
     - name: collect_schemas
       description: Configure collection of MongoDB schemas (inferred) by sampling documents.
       fleet_configurable: true
@@ -417,11 +427,11 @@ files:
         - name: enabled
           description: |
             Enable collection of query metrics. Requires `dbm: true` and MongoDB 7.0+ (Atlas) or 8.0+ (self-hosted).
-            Unlike other DBM features, query_metrics must be explicitly enabled.
+            Query metrics are enabled by default when Database Monitoring is enabled.
           value:
             type: boolean
-            example: false
-            display_default: false
+            example: true
+            display_default: true
         - name: collection_interval
           description: |
             Set the query metrics collection interval in seconds.
@@ -450,6 +460,7 @@ files:
       value:
         type: boolean
         example: true
+      fleet_configurable: false
     - name: timeout
       description: |
         Controls connectTimeoutMS, serverSelectionTimeoutMS, socketTimeoutMS and timeoutMS
@@ -457,16 +468,19 @@ files:
       value:
         type: integer
         example: 30
+      fleet_configurable: false
     - name: tls
       description: If `True`, create the connection to the server using transport layer security.
       value:
         type: boolean
         example: false
+      fleet_configurable: true
     - name: tls_certificate_key_file
       description: A file containing the client certificate and private key. Implies tls=True.
       value:
         type: string
         require_trusted_provider: true
+      fleet_configurable: false
     - name: tls_ca_file
       description: |
         A file containing one or a bundle of “certification authority” certificates,
@@ -475,6 +489,7 @@ files:
       value:
         type: string
         require_trusted_provider: true
+      fleet_configurable: false
     - name: tls_allow_invalid_hostnames
       description: |
         If `True`, disables TLS hostname verification. tls_allow_invalid_hostnames=False implies tls=True.
@@ -483,6 +498,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: tls_allow_invalid_certificates
       description: |
         If `True`, continues the TLS handshake regardless of the outcome of the certificate verification process.
@@ -491,12 +507,14 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: dbstats_tag_dbname
       description: |
         Whether or not to include the 'dbname' as a tag for dbstat metrics
       value:
         type: boolean
         example: true
+      fleet_configurable: false
     - name: additional_metrics
       description: |
         By default, the check collects a sample of metrics from MongoDB.
@@ -514,6 +532,7 @@ files:
           type: string
         example:
           [metrics.commands, tcmalloc, top, collection, jumbo_chunks, sharded_data_distribution]
+      fleet_configurable: false
     - name: metrics_collection_interval
       description: |
         The interval in seconds at which to collect certain types of metrics.
@@ -574,6 +593,7 @@ files:
           type: string
         example:
           - <COLLECTION_NAME>
+      fleet_configurable: false
     - name: collections_indexes_stats
       description: |
         Collect indexes access metrics for every index in every collections in
@@ -581,6 +601,7 @@ files:
       value:
         type: boolean
         example: false
+      fleet_configurable: false
     - name: system_database_stats
       description: |
         Enable or disable the collection of database stats, collection stats, and index stats for system databases
@@ -702,6 +723,7 @@ files:
       value:
         example: false
         type: boolean
+      fleet_configurable: false
     - name: server
       fleet_configurable: true
       legacy: true

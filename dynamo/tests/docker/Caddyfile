@@ -1,0 +1,17 @@
+:8000 {
+  route /metrics {
+    rewrite * /frontend_metrics
+    file_server {
+      root /usr/share/caddy
+    }
+  }
+}
+
+:8081 {
+  route /metrics {
+    rewrite * /worker_metrics
+    file_server {
+      root /usr/share/caddy
+    }
+  }
+}

@@ -118,18 +118,18 @@ tests:
             conversation_parts:
               conversation_parts:
                -
-                updated_at: 1726135185
-                redacted: false
                 author:
-                  name: "Fin"
-                  id: "1234567"
-                  type: "bot"
                   email: "operator+abcdefgh@intercom.io"
+                  id: "1234567"
+                  name: "Fin"
+                  type: "bot"
                 created_at: 1726135185
-                part_type: "language_detection_details"
                 id: "123"
                 notified_at: 1726135185
+                part_type: "language_detection_details"
+                redacted: false
                 type: "conversation_part"
+                updated_at: 1726135185
               total_count: 1
               type: "conversation_part.list"
             created_at: 1726135184
@@ -449,45 +449,45 @@ tests:
           - "IP"
           results:
           -
-            indicator: "185.64.148.0"
             additional_data:
-              tunnels:
-              -
-                anonymous: false
-                type: "PROXY"
-                operator: "XYZ_PROXY"
               as:
                 number: 55256
                 organization: "XYZ Inc"
-              risks:
-              - "CALLBACK_PROXY"
-              infrastructure: "DATACENTER"
-              organization: "XYZ Inc."
               client:
+                concentration:
+                  city: "Gurgaon"
+                  country: "IN"
+                  density: 1
+                  geohash: "ttnccg"
+                  skew: 28
+                  state: "Haryana"
+                count: 4
+                countries: 1
+                proxies:
+                - "LUMINATI_PROXY"
                 types:
                 - "MOBILE"
                 - "DESKTOP"
-                count: 4
-                concentration:
-                  country: "IN"
-                  density: 1
-                  city: "Gurgaon"
-                  geohash: "ttnccg"
-                  state: "Haryana"
-                  skew: 28
-                proxies:
-                - "LUMINATI_PROXY"
-                countries: 1
+              infrastructure: "DATACENTER"
               location:
-                country: "IN"
                 city: "Delhi"
+                country: "IN"
                 state: "National Capital Territory of Delhi"
+              organization: "XYZ Inc."
+              risks:
+              - "CALLBACK_PROXY"
+              tunnels:
+              -
+                anonymous: false
+                operator: "XYZ_PROXY"
+                type: "PROXY"
+            category: "corp_vpn"
+            indicator: "185.64.148.0"
+            intention: "benign"
             source:
               name: "spur"
               url: "https://spur.us"
             type: "IP"
-            category: "corp_vpn"
-            intention: "benign"
         topic: "admin.activity_log_event.created"
         type: "notification_event"
         usr:
@@ -1205,60 +1205,60 @@ tests:
             ticket_parts:
               ticket_parts:
                -
-                updated_at: 1725600373
-                redacted: false
                 author:
-                  name: "Fin"
-                  id: "1234567"
-                  type: "bot"
                   email: "operator+abcdefgh@intercom.io"
+                  id: "1234567"
+                  name: "Fin"
+                  type: "bot"
                 created_at: 1725600373
-                part_type: "language_detection_details"
                 id: "324"
-                type: "ticket_part"
-               -
-                updated_at: 1725600378
+                part_type: "language_detection_details"
                 redacted: false
+                type: "ticket_part"
+                updated_at: 1725600373
+               -
                 author:
-                  name: "Fin"
-                  id: "1234567"
-                  type: "bot"
                   email: "operator+abcdefgh@intercom.io"
-                created_at: 1725600378
-                part_type: "comment"
-                id: "325"
-                type: "ticket_part"
-                body: "<p>Hi there! How can I assist you today?</p>"
-               -
-                updated_at: 1725600405
-                redacted: false
-                author:
-                  name: "ABC"
                   id: "1234567"
-                  type: "admin"
-                  email: "abc@xyz.com"
-                created_at: 1725600405
-                part_type: "assignment"
-                id: "326"
+                  name: "Fin"
+                  type: "bot"
+                body: "<p>Hi there! How can I assist you today?</p>"
+                created_at: 1725600378
+                id: "325"
+                part_type: "comment"
+                redacted: false
                 type: "ticket_part"
-                body: "<p class=\"no-margin\">Two</p>"
+                updated_at: 1725600378
+               -
                 assigned_to:
                   id: "1234567"
                   type: "admin"
-               -
-                ticket_state: "submitted"
-                previous_ticket_state: "submitted"
-                updated_at: 1726136230
-                redacted: false
                 author:
-                  name: "ABC"
-                  id: "1234567"
-                  type: "admin"
                   email: "abc@xyz.com"
-                created_at: 1726136230
-                part_type: "ticket_state_updated_by_admin"
-                id: "561"
+                  id: "1234567"
+                  name: "ABC"
+                  type: "admin"
+                body: "<p class=\"no-margin\">Two</p>"
+                created_at: 1725600405
+                id: "326"
+                part_type: "assignment"
+                redacted: false
                 type: "ticket_part"
+                updated_at: 1725600405
+               -
+                author:
+                  email: "abc@xyz.com"
+                  id: "1234567"
+                  name: "ABC"
+                  type: "admin"
+                created_at: 1726136230
+                id: "561"
+                part_type: "ticket_state_updated_by_admin"
+                previous_ticket_state: "submitted"
+                redacted: false
+                ticket_state: "submitted"
+                type: "ticket_part"
+                updated_at: 1726136230
               total_count: 4
               type: "ticket_part.list"
             ticket_state: "submitted"
@@ -1276,81 +1276,81 @@ tests:
               ticket_type_attributes:
                 data:
                  -
+                  archived: false
+                  created_at: 1724911006
+                  data_type: "string"
+                  default: true
+                  description: ""
+                  id: "1234567"
                   input_options:
                     multiline: false
-                  description: ""
-                  created_at: 1724911006
-                  type: "ticket_type_attribute"
-                  visible_on_create: true
-                  workspace_id: "abcdefgh"
-                  visible_to_contacts: true
-                  archived: false
-                  default: true
-                  ticket_type_id: 1
-                  updated_at: 1724911006
                   name: "_default_title_"
-                  data_type: "string"
-                  required_to_create_for_contacts: false
-                  id: "1234567"
-                  required_to_create: false
                   order: 0
+                  required_to_create: false
+                  required_to_create_for_contacts: false
+                  ticket_type_id: 1
+                  type: "ticket_type_attribute"
+                  updated_at: 1724911006
+                  visible_on_create: true
+                  visible_to_contacts: true
+                  workspace_id: "abcdefgh"
                  -
+                  archived: false
+                  created_at: 1724911006
+                  data_type: "string"
+                  default: true
+                  description: ""
+                  id: "1234567"
                   input_options:
                     multiline: true
-                  description: ""
-                  created_at: 1724911006
-                  type: "ticket_type_attribute"
-                  visible_on_create: true
-                  workspace_id: "abcdefgh"
-                  visible_to_contacts: true
-                  archived: false
-                  default: true
-                  ticket_type_id: 1
-                  updated_at: 1724911006
                   name: "_default_description_"
-                  data_type: "string"
-                  required_to_create_for_contacts: false
-                  id: "1234567"
-                  required_to_create: false
                   order: 1
+                  required_to_create: false
+                  required_to_create_for_contacts: false
+                  ticket_type_id: 1
+                  type: "ticket_type_attribute"
+                  updated_at: 1724911006
+                  visible_on_create: true
+                  visible_to_contacts: true
+                  workspace_id: "abcdefgh"
                  -
+                  archived: false
+                  created_at: 1724911006
+                  data_type: "string"
+                  default: false
+                  description: ""
+                  id: "1234567"
                   input_options:
                     multiline: false
-                  description: ""
-                  created_at: 1724911006
-                  type: "ticket_type_attribute"
-                  visible_on_create: true
-                  workspace_id: "abcdefgh"
-                  visible_to_contacts: true
-                  archived: false
-                  default: false
-                  ticket_type_id: 1
-                  updated_at: 1724911006
                   name: "Platforms"
-                  data_type: "string"
-                  required_to_create_for_contacts: false
-                  id: "1234567"
-                  required_to_create: false
                   order: 2
+                  required_to_create: false
+                  required_to_create_for_contacts: false
+                  ticket_type_id: 1
+                  type: "ticket_type_attribute"
+                  updated_at: 1724911006
+                  visible_on_create: true
+                  visible_to_contacts: true
+                  workspace_id: "abcdefgh"
                  -
+                  archived: false
+                  created_at: 1724911006
+                  data_type: "string"
+                  default: false
+                  description: ""
+                  id: "1234567"
                   input_options:
                     multiline: false
-                  description: ""
-                  created_at: 1724911006
-                  type: "ticket_type_attribute"
-                  visible_on_create: true
-                  workspace_id: "abcdefgh"
-                  visible_to_contacts: true
-                  archived: false
-                  default: false
-                  ticket_type_id: 1
-                  updated_at: 1724911006
                   name: "Root cause"
-                  data_type: "string"
-                  required_to_create_for_contacts: false
-                  id: "1234567"
-                  required_to_create: false
                   order: 3
+                  required_to_create: false
+                  required_to_create_for_contacts: false
+                  ticket_type_id: 1
+                  type: "ticket_type_attribute"
+                  updated_at: 1724911006
+                  visible_on_create: true
+                  visible_to_contacts: true
+                  workspace_id: "abcdefgh"
                 type: "list"
               type: "ticket_type"
               updated_at: 1724911006
@@ -1826,84 +1826,84 @@ tests:
               ticket_parts:
                 ticket_parts:
                  -
-                  updated_at: 1726488973
-                  redacted: false
                   author:
-                    name: "Fin"
-                    id: "774209"
-                    type: "bot"
                     email: "operator+fq6rl0h@intercom.io"
+                    id: "774209"
+                    name: "Fin"
+                    type: "bot"
                   created_at: 1726488973
-                  part_type: "language_detection_details"
                   id: "142"
-                  type: "ticket_part"
-                 -
-                  updated_at: 1726488976
+                  part_type: "language_detection_details"
                   redacted: false
-                  author:
-                    name: "Fin"
-                    id: "7742909"
-                    type: "bot"
-                    email: "operator+fq6rl0h@intercom.io"
-                  created_at: 1726488976
-                  part_type: "channel_and_reply_time_expectation"
-                  id: "143"
                   type: "ticket_part"
+                  updated_at: 1726488973
+                 -
+                  author:
+                    email: "operator+fq6rl0h@intercom.io"
+                    id: "7742909"
+                    name: "Fin"
+                    type: "bot"
                   body: "<p>Crest will be back tomorrow.</p>"
-                 -
-                  updated_at: 1726488977
+                  created_at: 1726488976
+                  id: "143"
+                  part_type: "channel_and_reply_time_expectation"
                   redacted: false
+                  type: "ticket_part"
+                  updated_at: 1726488976
+                 -
                   author:
-                    name: "Fin"
+                    email: "operator+fq6rl0h@intercom.io"
                     id: "774209"
-                    type: "bot"
-                    email: "operator+fq6rl0h@intercom.io"
-                  created_at: 1726488977
-                  part_type: "comment"
-                  id: "144"
-                  type: "ticket_part"
-                  body: "<p>Give the team a way to reach you:</p>"
-                 -
-                  updated_at: 1726488977
-                  redacted: false
-                  author:
                     name: "Fin"
-                    id: "7742909"
                     type: "bot"
-                    email: "operator+fq6rl0h@intercom.io"
+                  body: "<p>Give the team a way to reach you:</p>"
                   created_at: 1726488977
-                  part_type: "attribute_collector"
+                  id: "144"
+                  part_type: "comment"
+                  redacted: false
+                  type: "ticket_part"
+                  updated_at: 1726488977
+                 -
+                  author:
+                    email: "operator+fq6rl0h@intercom.io"
+                    id: "7742909"
+                    name: "Fin"
+                    type: "bot"
+                  created_at: 1726488977
                   id: "145"
-                  type: "ticket_part"
-                 -
-                  ticket_state: "submitted"
-                  previous_ticket_state: "submitted"
-                  updated_at: 1726488984
+                  part_type: "attribute_collector"
                   redacted: false
+                  type: "ticket_part"
+                  updated_at: 1726488977
+                 -
                   author:
-                    name: "ABC"
+                    email: "abc@xyz.com"
                     id: "772908"
-                    type: "admin"
-                    email: "abc@xyz.com"
-                  created_at: 1726488984
-                  part_type: "ticket_state_updated_by_admin"
-                  id: "146"
-                  type: "ticket_part"
-                 -
-                  updated_at: 1726488990
-                  redacted: false
-                  author:
                     name: "ABC"
-                    id: "774208"
                     type: "admin"
-                    email: "abc@xyz.com"
-                  created_at: 1726488990
-                  part_type: "assignment"
-                  id: "147"
+                  created_at: 1726488984
+                  id: "146"
+                  part_type: "ticket_state_updated_by_admin"
+                  previous_ticket_state: "submitted"
+                  redacted: false
+                  ticket_state: "submitted"
                   type: "ticket_part"
+                  updated_at: 1726488984
+                 -
                   assigned_to:
                     id: "774208"
                     type: "admin"
+                  author:
+                    email: "abc@xyz.com"
+                    id: "774208"
+                    name: "ABC"
+                    type: "admin"
+                  created_at: 1726488990
+                  id: "147"
+                  part_type: "assignment"
+                  redacted: false
+                  type: "ticket_part"
+                  updated_at: 1726488990
                 total_count: 6
                 type: "ticket_part.list"
               ticket_state: "submitted"
@@ -1921,43 +1921,43 @@ tests:
                 ticket_type_attributes:
                   data:
                    -
+                    archived: false
+                    created_at: 1726469971
+                    data_type: "string"
+                    default: true
+                    description: ""
+                    id: "5181691"
                     input_options:
                       multiline: false
-                    description: ""
-                    created_at: 1726469971
-                    type: "ticket_type_attribute"
-                    visible_on_create: true
-                    workspace_id: "fq6rl0h"
-                    visible_to_contacts: true
-                    archived: false
-                    default: true
-                    ticket_type_id: 5
-                    updated_at: 1726469971
                     name: "_default_title_"
-                    data_type: "string"
-                    required_to_create_for_contacts: false
-                    id: "5181691"
-                    required_to_create: false
                     order: 0
+                    required_to_create: false
+                    required_to_create_for_contacts: false
+                    ticket_type_id: 5
+                    type: "ticket_type_attribute"
+                    updated_at: 1726469971
+                    visible_on_create: true
+                    visible_to_contacts: true
+                    workspace_id: "fq6rl0h"
                    -
+                    archived: false
+                    created_at: 1726469971
+                    data_type: "string"
+                    default: true
+                    description: ""
+                    id: "5181692"
                     input_options:
                       multiline: true
-                    description: ""
-                    created_at: 1726469971
-                    type: "ticket_type_attribute"
-                    visible_on_create: true
-                    workspace_id: "fq6rl0h"
-                    visible_to_contacts: true
-                    archived: false
-                    default: true
-                    ticket_type_id: 5
-                    updated_at: 1726469971
                     name: "_default_description_"
-                    data_type: "string"
-                    required_to_create_for_contacts: false
-                    id: "5181692"
-                    required_to_create: false
                     order: 1
+                    required_to_create: false
+                    required_to_create_for_contacts: false
+                    ticket_type_id: 5
+                    type: "ticket_type_attribute"
+                    updated_at: 1726469971
+                    visible_on_create: true
+                    visible_to_contacts: true
+                    workspace_id: "fq6rl0h"
                   type: "list"
                 type: "ticket_type"
                 updated_at: 1726469971

@@ -50,7 +50,8 @@ def parse_mongo_uri(server, sanitize_username=False):
     password = parsed.get('password')
     db_name = parsed.get('database')
     nodelist = parsed.get('nodelist')
-    auth_source = parsed.get('options', {}).get('authsource') or db_name or "admin"
+    options = {key.lower(): value for key, value in parsed.get('options', {}).items()}
+    auth_source = options.get('authsource') or db_name or "admin"
 
     # Remove password (and optionally username) from sanitized server URI.
     # To ensure that the `replace` works well, we first need to url-decode the raw server string

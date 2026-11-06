@@ -84,6 +84,11 @@ facets:
     path: network.client.ip
     source: log
   - groups:
+      - Web Access
+    name: Client Port
+    path: network.client.port
+    source: log
+  - groups:
       - User
     name: User Email
     path: usr.email
@@ -162,6 +167,7 @@ facets:
     name: Activity ID
     path: ocsf.activity_id
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Activity Name
@@ -172,6 +178,7 @@ facets:
     name: Category ID
     path: ocsf.category_uid
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Category
@@ -182,6 +189,7 @@ facets:
     name: Class ID
     path: ocsf.class_uid
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Class
@@ -197,6 +205,13 @@ facets:
     name: Source IP Address
     path: ocsf.src_endpoint.ip
     source: log
+  - facetType: range
+    groups:
+      - OCSF
+    name: Src Endpoint Port
+    path: ocsf.src_endpoint.port
+    source: log
+    type: integer
   - groups:
       - OCSF
     name: Event Code
@@ -212,6 +227,7 @@ facets:
     name: Status ID
     path: ocsf.status_id
     source: log
+    type: integer
 pipeline:
   type: pipeline
   name: Azure Active Directory
@@ -277,6 +293,29 @@ pipeline:
       overrideOnConflict: false
       sourceType: attribute
       targetType: attribute
+    - type: grok-parser
+      name: Parse `network.client.ip` to `network.client.ip`, `network.client.port`
+      enabled: true
+      source: network.client.ip
+      grok:
+        supportRules: |
+        matchRules: |
+          ipv4_rule %{ipv4:network.client.ip}(:%{port:network.client.port})?
+          ipv6_rule \[?%{ipv6:network.client.ip}\]?(:%{port:network.client.port})?
+      samples:
+        - 15.113.255.209
+        - 15.113.255.209:21341
+    - type: attribute-remapper
+      name: Map `network.client.port` to `network.client.port`
+      enabled: true
+      sources:
+        - network.client.port
+      sourceType: attribute
+      target: network.client.port
+      targetType: attribute
+      targetFormat: integer
+      preserveSource: false
+      overrideOnConflict: false
     - type: arithmetic-processor
       name: Compute duration in nanoseconds from durationMs in miliseconds
       enabled: true
@@ -544,6 +583,18 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+        - type: grok-parser
+          name: Parse `ocsf.src_endpoint.ip` to `ocsf.src_endpoint.ip`, `ocsf.src_endpoint.port`
+          enabled: true
+          source: ocsf.src_endpoint.ip
+          grok:
+            supportRules: |
+            matchRules: |
+              ipv4_rule %{ipv4:ocsf.src_endpoint.ip}(:%{port:ocsf.src_endpoint.port})?
+              ipv6_rule \[?%{ipv6:ocsf.src_endpoint.ip}\]?(:%{port:ocsf.src_endpoint.port})?
+          samples:
+            - 15.113.255.209
+            - 15.113.255.209:21341
         - type: attribute-remapper
           name: Map `properties.resultReason` to `ocsf.status_code`
           enabled: true
@@ -1015,6 +1066,18 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+        - type: grok-parser
+          name: Parse `ocsf.src_endpoint.ip` to `ocsf.src_endpoint.ip`, `ocsf.src_endpoint.port`
+          enabled: true
+          source: ocsf.src_endpoint.ip
+          grok:
+            supportRules: |
+            matchRules: |
+              ipv4_rule %{ipv4:ocsf.src_endpoint.ip}(:%{port:ocsf.src_endpoint.port})?
+              ipv6_rule \[?%{ipv6:ocsf.src_endpoint.ip}\]?(:%{port:ocsf.src_endpoint.port})?
+          samples:
+            - 15.113.255.209
+            - 15.113.255.209:21341
         - type: attribute-remapper
           name: Map `properties.deviceDetail.operatingSystem` to `ocsf.src_endpoint.os.name`
           enabled: true
@@ -1873,6 +1936,18 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+        - type: grok-parser
+          name: Parse `ocsf.src_endpoint.ip` to `ocsf.src_endpoint.ip`, `ocsf.src_endpoint.port`
+          enabled: true
+          source: ocsf.src_endpoint.ip
+          grok:
+            supportRules: |
+            matchRules: |
+              ipv4_rule %{ipv4:ocsf.src_endpoint.ip}(:%{port:ocsf.src_endpoint.port})?
+              ipv6_rule \[?%{ipv6:ocsf.src_endpoint.ip}\]?(:%{port:ocsf.src_endpoint.port})?
+          samples:
+            - 15.113.255.209
+            - 15.113.255.209:21341
         - type: string-builder-processor
           name: Add dst_endpoint.hostname
           enabled: true
@@ -2190,6 +2265,16 @@ pipeline:
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ocsf.src_endpoint.port` to `network.client.port`
+          enabled: true
+          sources:
+            - ocsf.src_endpoint.port
+          sourceType: attribute
+          target: callerIpAddress
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
     - type: pipeline
       name: OCSF post transformations
       enabled: true
@@ -2288,6 +2373,17 @@ pipeline:
             - ocsf.user.type_id
           sourceType: attribute
           target: ocsf.user.type_id
+          targetType: attribute
+          targetFormat: integer
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `ocsf.src_endpoint.port` to `ocsf.src_endpoint.port`
+          enabled: true
+          sources:
+            - ocsf.src_endpoint.port
+          sourceType: attribute
+          target: ocsf.src_endpoint.port
           targetType: attribute
           targetFormat: integer
           preserveSource: false

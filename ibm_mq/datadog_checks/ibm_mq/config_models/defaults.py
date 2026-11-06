@@ -56,6 +56,10 @@ def instance_enable_legacy_tags_normalization():
     return True
 
 
+def instance_filter_queue_statistics_metrics():
+    return False
+
+
 def instance_host():
     return 'localhost'
 

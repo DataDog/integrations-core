@@ -66,5 +66,10 @@ def instance_trigger_start():
 
 
 @pytest.fixture
+def instance_group_per_user_services():
+    return deepcopy(common.INSTANCE_GROUP_PER_USER_SERVICES)
+
+
+@pytest.fixture
 def instance_name_regex_prefix():
     return deepcopy(common.INSTANCE_PREFIX_MATCH)

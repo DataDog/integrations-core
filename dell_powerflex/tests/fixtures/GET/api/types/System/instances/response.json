@@ -1,0 +1,164 @@
+[
+  {
+    "lastRealignNetPathTime": 0,
+    "realignNetPathInterval": 0,
+    "restrictedSdcMode": "None",
+    "swid": "",
+    "daysInstalled": 0,
+    "maxCapacityInGb": "Unlimited",
+    "enterpriseFeaturesEnabled": true,
+    "restrictedSdcModeEnabled": false,
+    "systemVersionName": "DellEMC PowerFlex Version: R4_5.4000.111",
+    "perfProfile": "HighPerformance",
+    "authenticationMethod": "Mno",
+    "installId": "aaabbbcccdddeeef",
+    "mdmCluster": {
+      "tieBreakers": [
+        {
+          "opensslVersion": "N/A",
+          "status": "Normal",
+          "role": "TieBreaker",
+          "managementIPs": [
+            "10.0.1.228"
+          ],
+          "ips": [
+            "10.0.1.228"
+          ],
+          "versionInfo": "R4_5.4000.0",
+          "name": "TB1",
+          "id": "06edf25b7acf5602",
+          "port": 9011
+        }
+      ],
+      "slaves": [
+        {
+          "virtualInterfaces": [],
+          "opensslVersion": "N/A",
+          "status": "Normal",
+          "role": "Manager",
+          "managementIPs": [
+            "10.0.1.250"
+          ],
+          "ips": [
+            "10.0.1.250"
+          ],
+          "versionInfo": "R4_5.4000.0",
+          "name": "MDM1",
+          "id": "0710bf1106383a00",
+          "port": 9011
+        }
+      ],
+      "goodReplicasNum": 2,
+      "clusterState": "ClusteredNormal",
+      "clusterMode": "ThreeNodes",
+      "goodNodesNum": 3,
+      "master": {
+        "virtualInterfaces": [],
+        "opensslVersion": "N/A",
+        "status": "Normal",
+        "role": "Manager",
+        "managementIPs": [
+          "10.0.1.223"
+        ],
+        "ips": [
+          "10.0.1.223"
+        ],
+        "versionInfo": "R4_5.4000.0",
+        "name": "MDM2",
+        "id": "5ec3c8b17ce02e01",
+        "port": 9011
+      },
+      "id": "2292122188054417935"
+    },
+    "isInitialLicense": true,
+    "capacityTimeLeftInDays": "90",
+    "sdcSdsConnectivityInfo": {
+      "clientServerConnectivityStatus": "AllConnected",
+      "disconnectedClientId": null,
+      "disconnectedClientName": null,
+      "disconnectedServerId": null,
+      "disconnectedServerName": null,
+      "disconnectedServerIp": null
+    },
+    "sdrSdsConnectivityInfo": {
+      "clientServerConnectivityStatus": "AllConnected",
+      "disconnectedClientId": null,
+      "disconnectedClientName": null,
+      "disconnectedServerId": null,
+      "disconnectedServerName": null,
+      "disconnectedServerIp": null
+    },
+    "sdcSdrConnectivityInfo": {
+      "clientServerConnectivityStatus": "AllConnected",
+      "disconnectedClientId": null,
+      "disconnectedClientName": null,
+      "disconnectedServerId": null,
+      "disconnectedServerName": null,
+      "disconnectedServerIp": null
+    },
+    "addressSpaceUsage": "Normal",
+    "upgradeState": "NoUpgrade",
+    "capacityAlertHighThresholdPercent": 80,
+    "capacityAlertCriticalThresholdPercent": 90,
+    "mdmSecurityPolicy": "Authentication",
+    "sdtSdsConnectivityInfo": {
+      "clientServerConnectivityStatus": "AllConnected",
+      "disconnectedClientId": null,
+      "disconnectedClientName": null,
+      "disconnectedServerId": null,
+      "disconnectedServerName": null,
+      "disconnectedServerIp": null
+    },
+    "systemNqn": "nqn.1988-11.com.dell:powerflex:00:aaabbbcccdddeee0",
+    "remoteReadOnlyLimitState": false,
+    "mdmManagementPort": 8611,
+    "mdmExternalPort": 7611,
+    "sdcMdmNetworkDisconnectionsCounterParameters": {
+      "shortWindow": {"windowSizeInSec": 60, "threshold": 300},
+      "mediumWindow": {"windowSizeInSec": 3600, "threshold": 500},
+      "longWindow": {"windowSizeInSec": 86400, "threshold": 700}
+    },
+    "sdcSdsNetworkDisconnectionsCounterParameters": {
+      "shortWindow": {"windowSizeInSec": 60, "threshold": 800},
+      "mediumWindow": {"windowSizeInSec": 3600, "threshold": 4000},
+      "longWindow": {"windowSizeInSec": 86400, "threshold": 20000}
+    },
+    "sdcMemoryAllocationFailuresCounterParameters": {
+      "shortWindow": {"windowSizeInSec": 60, "threshold": 300},
+      "mediumWindow": {"windowSizeInSec": 3600, "threshold": 500},
+      "longWindow": {"windowSizeInSec": 86400, "threshold": 700}
+    },
+    "sdcSocketAllocationFailuresCounterParameters": {
+      "shortWindow": {"windowSizeInSec": 60, "threshold": 300},
+      "mediumWindow": {"windowSizeInSec": 3600, "threshold": 500},
+      "longWindow": {"windowSizeInSec": 86400, "threshold": 700}
+    },
+    "sdcLongOperationsCounterParameters": {
+      "shortWindow": {"windowSizeInSec": 60, "threshold": 10000},
+      "mediumWindow": {"windowSizeInSec": 3600, "threshold": 100000},
+      "longWindow": {"windowSizeInSec": 86400, "threshold": 1000000}
+    },
+    "tlsVersion": "TLSv1.2",
+    "lastUpgradeTime": 0,
+    "cliPasswordAllowed": true,
+    "managementClientSecureCommunicationEnabled": true,
+    "showGuid": true,
+    "defragmentationEnabled": true,
+    "id": "1fcf40fc60c6520f",
+    "links": [
+      {"rel": "self", "href": "/api/instances/System::1fcf40fc60c6520f"},
+      {"rel": "/api/System/relationship/Statistics", "href": "/api/instances/System::1fcf40fc60c6520f/relationships/Statistics"},
+      {"rel": "/api/System/relationship/Sdr", "href": "/api/instances/System::1fcf40fc60c6520f/relationships/Sdr"},
+      {"rel": "/api/System/relationship/ProtectionDomain", "href": "/api/instances/System::1fcf40fc60c6520f/relationships/ProtectionDomain"},
+      {"rel": "/api/System/relationship/Sdt", "href": "/api/instances/System::1fcf40fc60c6520f/relationships/Sdt"},
+      {"rel": "/api/System/relationship/User", "href": "/api/instances/System::1fcf40fc60c6520f/relationships/User"},
+      {"rel": "/api/System/relationship/PeerMdm", "href": "/api/instances/System::1fcf40fc60c6520f/relationships/PeerMdm"},
+      {"rel": "/api/System/relationship/RemoteSystem", "href": "/api/instances/System::1fcf40fc60c6520f/relationships/RemoteSystem"},
+      {"rel": "/api/System/relationship/HostGroup", "href": "/api/instances/System::1fcf40fc60c6520f/relationships/HostGroup"},
+      {"rel": "/api/System/relationship/SnapshotCopyTask", "href": "/api/instances/System::1fcf40fc60c6520f/relationships/SnapshotCopyTask"},
+      {"rel": "/api/System/relationship/SystemNetwork", "href": "/api/instances/System::1fcf40fc60c6520f/relationships/SystemNetwork"},
+      {"rel": "/api/System/relationship/Sdc", "href": "/api/instances/System::1fcf40fc60c6520f/relationships/Sdc"},
+      {"rel": "/api/System/relationship/SnapshotPolicy", "href": "/api/instances/System::1fcf40fc60c6520f/relationships/SnapshotPolicy"}
+    ]
+  }
+]

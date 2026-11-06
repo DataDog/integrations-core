@@ -2,6 +2,42 @@
 
 <!-- towncrier release notes start -->
 
+## 9.4.1 / 2026-10-01 / Agent 7.85.0
+
+***Fixed***:
+
+* Retry transient 5xx/429 and network errors on TUF metadata and wheel fetches instead of failing immediately. ([#25308](https://github.com/DataDog/integrations-core/pull/25308))
+
+## 9.4.0 / 2026-09-02 / Agent 7.84.0
+
+***Added***:
+
+* Update dependencies ([#24817](https://github.com/DataDog/integrations-core/pull/24817))
+
+## 9.3.0 / 2026-08-05 / Agent 7.83.0
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+
+## 9.2.2 / 2026-06-22 / Agent 7.81.0
+
+***Fixed***:
+
+* Use ``https://agent-integration-wheels.datadoghq.com`` (CloudFront) as the default v2 repository URL, replacing the direct S3 URL. The ``--repository`` flag still accepts any HTTPS base URL. ([#24084](https://github.com/DataDog/integrations-core/pull/24084))
+
+## 9.2.1 / 2026-06-15
+
+***Fixed***:
+
+* Use the versioned ``wheelsmith/v1`` v2 target namespace and tighten pointer validation. ([#23937](https://github.com/DataDog/integrations-core/pull/23937))
+
+## 9.2.0 / 2026-06-09
+
+***Added***:
+
+* Add v2 TUF pointer downloader support. ([#23144](https://github.com/DataDog/integrations-core/pull/23144))
+
 ## 9.1.0 / 2026-03-18 / Agent 7.78.0
 
 ***Added***:

@@ -2,6 +2,18 @@
 
 <!-- towncrier release notes start -->
 
+## 6.7.0 / 2026-10-29
+
+***Added***:
+
+* Collect the `datadog.cluster_agent.metadata_streaming.history_resyncs` metric. ([#25819](https://github.com/DataDog/integrations-core/pull/25819))
+
+## 6.6.0 / 2026-09-02 / Agent 7.84.0
+
+***Added***:
+
+* Collect DatadogInstrumentation controller resource and reconciliation telemetry by default. ([#24966](https://github.com/DataDog/integrations-core/pull/24966))
+
 ## 6.5.0 / 2026-04-01 / Agent 7.78.0
 
 ***Added***:

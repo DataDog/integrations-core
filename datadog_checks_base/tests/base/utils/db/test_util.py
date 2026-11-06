@@ -32,10 +32,25 @@ from datadog_checks.base.utils.format import json
 @pytest.mark.parametrize(
     "db_host, agent_hostname, want",
     [
+        # Unset host or local hostname
         (None, "agent_hostname", "agent_hostname"),
         ("localhost", "agent_hostname", "agent_hostname"),
+        # Unix socket
+        ("/var/run/mysqld.sock", "agent_hostname", "agent_hostname"),
+        # Loopback IP literals (incl. zone-scoped IPv6)
         ("127.0.0.1", "agent_hostname", "agent_hostname"),
+        ("::1", "agent_hostname", "agent_hostname"),
+        ("::1%lo0", "agent_hostname", "agent_hostname"),
+        # Non-loopback IP literals keep the configured host
+        ("169.254.169.254", "agent_hostname", "169.254.169.254"),
+        ("fe80::1", "agent_hostname", "fe80::1"),
+        ("fe80::1%eth0", "agent_hostname", "fe80::1%eth0"),
         ("192.0.2.1", "agent_hostname", "192.0.2.1"),
+        ("2001:db8::1", "agent_hostname", "2001:db8::1"),
+        # Resolved DB host shares the agent host IP
+        ("192.0.2.1", "192.0.2.1", "192.0.2.1"),
+        ("192.0.2.1", "192.0.2.254", "192.0.2.1"),
+        # Hostname resolution failures fall back to the configured db_host
         ("socket.gaierror", "agent_hostname", "socket.gaierror"),
         (
             "greater-than-or-equal-to-64-characters-causes-unicode-error-----",
@@ -44,8 +59,7 @@ from datadog_checks.base.utils.format import json
         ),
         ("192.0.2.1", "socket.gaierror", "192.0.2.1"),
         ("192.0.2.1", "greater-than-or-equal-to-64-characters-causes-unicode-error-----", "192.0.2.1"),
-        ("192.0.2.1", "192.0.2.1", "192.0.2.1"),
-        ("192.0.2.1", "192.0.2.254", "192.0.2.1"),
+        # mDNS .local names are passed through unchanged
         ("postgres.svc.local", "some-pod", "postgres.svc.local"),
     ],
 )
@@ -170,7 +184,8 @@ def test_dbm_async_job_unknown_error(aggregator, exception_expected, enable_heal
     if enable_health:
         check.health = Health(check)
     exception = DBExceptionForTests() if exception_expected else UnexpectedExceptionForTests()
-    job = JobForTesting(check, exception=exception)
+    # A long interval makes the loop time out below if a failed run waits for the next period before exiting
+    job = JobForTesting(check, rate_limit=1 / 60, exception=exception)
     try:
         job.run_job_loop(["hello:there"])
         job._job_loop_future.result(timeout=10)
@@ -292,6 +307,12 @@ def test_obfuscate_sql_with_metadata(obfuscator_return_value, expected_value):
             "SELECT * FROM randomtable where name = '123\x00'",
             False,
         ),
+        # Default strips, so a null cannot reach the agent binding and raise ValueError.
+        (
+            "SELECT * FROM randomtable where name = '123\x00'",
+            "SELECT * FROM randomtable where name = '123'",
+            None,
+        ),
     ],
 )
 def test_obfuscate_sql_with_metadata_replace_null_character(input_query, expected_query, replace_null_character):
@@ -301,7 +322,10 @@ def test_obfuscate_sql_with_metadata_replace_null_character(input_query, expecte
     # Check that it can handle null characters
     with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
         mock_agent.side_effect = _mock_obfuscate_sql
-        statement = obfuscate_sql_with_metadata(input_query, None, replace_null_character=replace_null_character)
+        if replace_null_character is None:
+            statement = obfuscate_sql_with_metadata(input_query, None)
+        else:
+            statement = obfuscate_sql_with_metadata(input_query, None, replace_null_character=replace_null_character)
         assert statement['query'] == expected_query
 
 
@@ -316,6 +340,7 @@ class JobForTesting(DBMAsyncJob):
         job_execution_time=0,
         max_sleep_chunk_s=5,
         exception=None,
+        run_rate_limit=None,
     ):
         super(JobForTesting, self).__init__(
             check,
@@ -332,12 +357,19 @@ class JobForTesting(DBMAsyncJob):
         )
         self._job_execution_time = job_execution_time
         self.count_executed = 0
+        self.run_start_times = []
+        self.run_ticks = []
         self._exception = exception
+        self._run_rate_limit = run_rate_limit
 
     def test_shutdown(self):
         self._check.count("dbm.async_job_test.shutdown", 1)
 
     def run_job(self):
+        self.run_start_times.append(time.time())
+        self.run_ticks.append(self._rate_limiter.last_event)
+        if self._run_rate_limit is not None:
+            self._set_rate_limit(self._run_rate_limit)
         self._check.count("dbm.async_job_test.run_job", 1)
         self.count_executed += 1
         if self._exception:
@@ -445,6 +477,40 @@ def test_dbm_async_job_rate_limit(aggregator):
     assert max_collections / 2.0 <= len(metrics) <= max_collections
 
 
+@pytest.mark.parametrize(
+    "initial_rate_limit",
+    [
+        pytest.param(1 / 0.2, id='constant-rate'),
+        # Like MySQL statement samples, which set the rate of the collection strategy picked during the run
+        pytest.param(1, id='rate-set-during-run'),
+    ],
+)
+def test_dbm_async_job_waits_a_full_period_after_the_first_run(initial_rate_limit):
+    # Without this wait, every job collects twice back to back at startup, sending duplicate queries and payloads
+    period = 0.2
+    job = JobForTesting(AgentCheck(), rate_limit=initial_rate_limit, run_rate_limit=1 / period)
+    job.run_job_loop([])
+    deadline = time.time() + 5
+    while len(job.run_start_times) < 2 and time.time() < deadline:
+        time.sleep(0.01)
+    job.cancel()
+
+    first, second = job.run_start_times[:2]
+    assert second - first >= period * 0.9
+
+
+def test_dbm_async_job_exposes_the_tick_of_the_first_run():
+    # Jobs such as Postgres metadata schedule their sub-collections from the tick of the run in progress
+    job = JobForTesting(AgentCheck(), rate_limit=1 / 60, max_sleep_chunk_s=0.1)
+    job.run_job_loop([])
+    deadline = time.time() + 5
+    while not job.run_ticks and time.time() < deadline:
+        time.sleep(0.01)
+    job.cancel()
+
+    assert job.run_start_times[0] - 1 <= job.run_ticks[0] <= job.run_start_times[0]
+
+
 def test_dbm_async_job_inactive_stop(aggregator):
     job = JobForTesting(AgentCheck(), rate_limit=10, min_collection_interval=1)
     job.run_job_loop([])
@@ -488,46 +554,38 @@ class TestTagManager:
         """Test initialization of TagManager"""
         tag_manager = TagManager()
         assert tag_manager._tags == {}
-        assert tag_manager._cached_tag_list is None
+        assert tag_manager._cache_valid is False
         assert tag_manager._keyless == TagType.KEYLESS
 
     @pytest.mark.parametrize(
-        'key,value,expected_tags',
+        'operations,expected_tags',
         [
-            ('test_key', 'test_value', {'test_key': ['test_value']}),
-            (None, 'test_value', {TagType.KEYLESS: ['test_value']}),
+            pytest.param([('test_key', 'test_value', False)], {'test_key': ['test_value']}, id='single key-value'),
+            pytest.param([(None, 'test_value', False)], {TagType.KEYLESS: ['test_value']}, id='single keyless'),
+            pytest.param(
+                [('test_key', 'value1', False), ('test_key', 'value2', False)],
+                {'test_key': ['value1', 'value2']},
+                id='append to existing key',
+            ),
+            pytest.param(
+                [('test_key', 'value1', False), ('test_key', 'value2', True)],
+                {'test_key': ['value2']},
+                id='replace existing key',
+            ),
+            pytest.param(
+                [('test_key', 'test_value', False), ('test_key', 'test_value', False)],
+                {'test_key': ['test_value']},
+                id='duplicate value ignored',
+            ),
         ],
     )
-    def test_set_tag(self, key, value, expected_tags):
-        """Test setting tags with various combinations of key and value"""
+    def test_set_tag(self, operations, expected_tags):
+        """Test setting tags across single, keyless, append, replace, and duplicate scenarios"""
         tag_manager = TagManager()
-        tag_manager.set_tag(key, value)
+        for key, value, replace in operations:
+            tag_manager.set_tag(key, value, replace=replace)
         assert tag_manager._tags == expected_tags
-        assert tag_manager._cached_tag_list is None
-
-    def test_set_tag_existing_key_append(self):
-        """Test appending a value to an existing key"""
-        tag_manager = TagManager()
-        tag_manager.set_tag('test_key', 'value1')
-        tag_manager.set_tag('test_key', 'value2')
-        assert tag_manager._tags == {'test_key': ['value1', 'value2']}
-        assert tag_manager._cached_tag_list is None
-
-    def test_set_tag_existing_key_replace(self):
-        """Test replacing values for an existing key"""
-        tag_manager = TagManager()
-        tag_manager.set_tag('test_key', 'value1')
-        tag_manager.set_tag('test_key', 'value2', replace=True)
-        assert tag_manager._tags == {'test_key': ['value2']}
-        assert tag_manager._cached_tag_list is None
-
-    def test_set_tag_duplicate_value(self):
-        """Test setting a duplicate value for a key"""
-        tag_manager = TagManager()
-        tag_manager.set_tag('test_key', 'test_value')
-        tag_manager.set_tag('test_key', 'test_value')
-        assert tag_manager._tags == {'test_key': ['test_value']}
-        assert tag_manager._cached_tag_list is None
+        assert tag_manager._cache_valid is False
 
     @pytest.mark.parametrize(
         'key,values,delete_key,delete_value,expected_tags,description',
@@ -561,13 +619,13 @@ class TestTagManager:
 
         # Generate initial cache
         tag_manager.get_tags()
-        assert tag_manager._cached_tag_list is not None
+        assert tag_manager._cache_valid is True
 
         # Perform deletion
         assert tag_manager.delete_tag(delete_key, delete_value)
 
         # Verify cache is invalidated
-        assert tag_manager._cached_tag_list is None
+        assert tag_manager._cache_valid is False
 
         # Verify internal state
         assert tag_manager._tags == expected_tags
@@ -619,13 +677,13 @@ class TestTagManager:
 
         # Generate cache to ensure it exists
         _ = tag_manager.get_tags()
-        assert tag_manager._cached_tag_list is not None
+        assert tag_manager._cache_valid is True
 
         tag_manager.set_tags_from_list(tag_list, replace=replace)
 
         # Verify cache was invalidated when needed
         if replace:
-            assert tag_manager._cached_tag_list is None
+            assert tag_manager._cache_valid is False
 
         # Verify final state
         assert sorted(tag_manager.get_tags()) == sorted(expected_tags)
@@ -662,11 +720,11 @@ class TestTagManager:
 
         # First call should generate cache
         _ = tag_manager.get_tags()
-        assert tag_manager._cached_tag_list is not None
+        assert tag_manager._cache_valid is True
 
         # Modify regular tags
         tag_manager.set_tag('regular_key2', 'regular_value2')
-        assert tag_manager._cached_tag_list is None
+        assert tag_manager._cache_valid is False
 
         # Verify all tags are included
         second_result = tag_manager.get_tags()
@@ -690,6 +748,128 @@ class TestTagManager:
         assert new_tags == ['test_key:test_value']
         assert new_tags != tags  # The lists should be different objects
 
+    @pytest.mark.parametrize(
+        'include_internal,include_db,expected_tags',
+        [
+            pytest.param(
+                True,
+                True,
+                [
+                    'env:prod',
+                    'db:mydb',
+                    'dd.internal.resource:database_instance:host1',
+                    'dd.internal.resource:aws_rds_instance:endpoint',
+                ],
+                id='full view',
+            ),
+            pytest.param(
+                False,
+                True,
+                ['env:prod', 'db:mydb'],
+                id='exclude internal',
+            ),
+            pytest.param(
+                True,
+                False,
+                [
+                    'env:prod',
+                    'dd.internal.resource:database_instance:host1',
+                    'dd.internal.resource:aws_rds_instance:endpoint',
+                ],
+                id='exclude db',
+            ),
+            pytest.param(
+                False,
+                False,
+                ['env:prod'],
+                id='exclude internal and db',
+            ),
+        ],
+    )
+    def test_get_tags_view_filtering(self, include_internal, include_db, expected_tags):
+        """Test that include_internal/include_db filter the dd.internal.* and db buckets"""
+        tag_manager = TagManager()
+        tag_manager.set_tag('env', 'prod')
+        tag_manager.set_tag('db', 'mydb')
+        tag_manager.set_tag('dd.internal.resource', 'database_instance:host1')
+        tag_manager.set_tag('dd.internal.resource', 'aws_rds_instance:endpoint')
+
+        assert sorted(tag_manager.get_tags(include_internal=include_internal, include_db=include_db)) == sorted(
+            expected_tags
+        )
+
+    def test_get_tags_exclude_db_is_exact_key_match(self):
+        """A key like "dbms_flavor" must NOT be excluded by the db filter (exact-key match, not prefix)"""
+        tag_manager = TagManager()
+        tag_manager.set_tag('db', 'mydb')
+        tag_manager.set_tag('dbms_flavor', 'postgres')
+
+        tags = tag_manager.get_tags(include_db=False)
+        assert 'db:mydb' not in tags
+        assert 'dbms_flavor:postgres' in tags
+
+    def test_get_tags_filtering_reflects_mutations(self):
+        """Test that filtered views reflect subsequent mutations (cache invalidation)"""
+        tag_manager = TagManager()
+        tag_manager.set_tag('env', 'prod')
+        tag_manager.set_tag('dd.internal.resource', 'database_instance:host1')
+
+        assert tag_manager.get_tags(include_internal=False) == ['env:prod']
+
+        # Reading a filtered view must not affect the full view
+        assert sorted(tag_manager.get_tags()) == sorted(['env:prod', 'dd.internal.resource:database_instance:host1'])
+
+        tag_manager.set_tag('service', 'web')
+        assert sorted(tag_manager.get_tags(include_internal=False)) == sorted(['env:prod', 'service:web'])
+
+    def test_set_tag_replace_noop_preserves_cache(self):
+        """Re-setting a tag with replace=True and the same value must not invalidate the cache"""
+        tag_manager = TagManager()
+        tag_manager.set_tag('env', 'prod')
+        tag_manager.set_tag('db', 'mydb')
+
+        # Build the rendered cache
+        tag_manager.get_tags()
+        assert tag_manager._cache_valid is True
+
+        # Re-setting an existing tag to the same value via replace is a no-op: cache survives
+        tag_manager.set_tag('env', 'prod', replace=True)
+        assert tag_manager._cache_valid is True
+
+        # Setting a tag with a different value via replace still invalidates
+        tag_manager.set_tag('env', 'staging', replace=True)
+        assert tag_manager._cache_valid is False
+        assert 'env:staging' in tag_manager.get_tags()
+        assert 'env:prod' not in tag_manager.get_tags()
+
+    def test_set_tag_replace_noop_collapses_multivalue(self):
+        """replace with the same single value is a no-op, but replacing a multi-value key is not"""
+        tag_manager = TagManager()
+        tag_manager.set_tag('team', 'a')
+        tag_manager.set_tag('team', 'b')  # team now has two values
+        tag_manager.get_tags()
+        assert tag_manager._cache_valid is True
+
+        # Replacing the multi-value key with a single value must invalidate and collapse it
+        tag_manager.set_tag('team', 'a', replace=True)
+        assert tag_manager._cache_valid is False
+        assert tag_manager._tags['team'] == ['a']
+
+    def test_filtered_view_cache(self):
+        """Test that the rendered buckets are cached and invalidated on mutation"""
+        tag_manager = TagManager()
+        tag_manager.set_tag('env', 'prod')
+        tag_manager.set_tag('db', 'mydb')
+
+        assert tag_manager._cache_valid is False
+        assert tag_manager.get_tags(include_db=False) == ['env:prod']
+        assert tag_manager._cache_valid is True
+
+        # Mutating tags invalidates the cache
+        tag_manager.set_tag('service', 'web')
+        assert tag_manager._cache_valid is False
+        assert sorted(tag_manager.get_tags(include_db=False)) == sorted(['env:prod', 'service:web'])
+
     # Normalization tests
     def mock_tag_normalizer(self, tag):
         """Mock normalizer that replaces spaces and hyphens with underscores and lowercases"""
@@ -700,7 +880,7 @@ class TestTagManager:
         tag_manager = TagManager(normalizer=self.mock_tag_normalizer)
         assert tag_manager._normalizer == self.mock_tag_normalizer
         assert tag_manager._tags == {}
-        assert tag_manager._cached_tag_list is None
+        assert tag_manager._cache_valid is False
 
     def test_set_tag_with_normalization(self):
         """Test setting tags with normalization enabled"""
@@ -727,50 +907,36 @@ class TestTagManager:
         tag_manager.set_tag('another-key', 'another value')
         assert tag_manager._tags == {'test-key': ['value with spaces'], 'another-key': ['another value']}
 
-    def test_set_tags_from_list_with_normalization(self):
-        """Test setting tags from list with normalization enabled"""
+    @pytest.mark.parametrize(
+        'normalize,expected_tags',
+        [
+            pytest.param(True, ['env:prod_test', 'service:web_app', 'keyless_tag'], id='normalize'),
+            pytest.param(False, ['env:prod-test', 'service:web app', 'keyless-tag'], id='no normalize'),
+        ],
+    )
+    def test_set_tags_from_list_normalization(self, normalize, expected_tags):
+        """Test setting tags from a list with and without normalization"""
         tag_manager = TagManager(normalizer=self.mock_tag_normalizer)
 
-        tag_list = ['env:prod-test', 'service:web app', 'keyless-tag']
-        tag_manager.set_tags_from_list(tag_list, normalize=True)
+        tag_manager.set_tags_from_list(['env:prod-test', 'service:web app', 'keyless-tag'], normalize=normalize)
 
-        expected_tags = sorted(['env:prod_test', 'service:web_app', 'keyless_tag'])
-        assert sorted(tag_manager.get_tags()) == expected_tags
+        assert sorted(tag_manager.get_tags()) == sorted(expected_tags)
 
-    def test_set_tags_from_list_without_normalization(self):
-        """Test setting tags from list without normalization"""
+    @pytest.mark.parametrize(
+        'normalize,stored_value',
+        [
+            pytest.param(True, 'value_with_spaces', id='normalize'),
+            pytest.param(False, 'value with spaces', id='no normalize'),
+        ],
+    )
+    def test_delete_tag_normalization(self, normalize, stored_value):
+        """Test setting then deleting a tag with and without normalization"""
         tag_manager = TagManager(normalizer=self.mock_tag_normalizer)
 
-        tag_list = ['env:prod-test', 'service:web app', 'keyless-tag']
-        tag_manager.set_tags_from_list(tag_list, normalize=False)
+        tag_manager.set_tag('test-key', 'value with spaces', normalize=normalize)
+        assert tag_manager._tags == {'test-key': [stored_value]}
 
-        expected_tags = sorted(['env:prod-test', 'service:web app', 'keyless-tag'])
-        assert sorted(tag_manager.get_tags()) == expected_tags
-
-    def test_delete_tag_with_normalization(self):
-        """Test deleting tags with normalization enabled"""
-        tag_manager = TagManager(normalizer=self.mock_tag_normalizer)
-
-        # Set tag with normalization (only value normalized)
-        tag_manager.set_tag('test-key', 'value with spaces', normalize=True)
-        assert 'test-key' in tag_manager._tags
-        assert tag_manager._tags['test-key'] == ['value_with_spaces']
-
-        # Delete with normalization - should find the normalized value
-        result = tag_manager.delete_tag('test-key', 'value with spaces', normalize=True)
-        assert result is True
-        assert tag_manager._tags == {}
-
-    def test_delete_tag_without_normalization(self):
-        """Test deleting tags without normalization"""
-        tag_manager = TagManager(normalizer=self.mock_tag_normalizer)
-
-        # Set tag without normalization
-        tag_manager.set_tag('test-key', 'value with spaces', normalize=False)
-        assert tag_manager._tags == {'test-key': ['value with spaces']}
-
-        # Delete without normalization
-        result = tag_manager.delete_tag('test-key', 'value with spaces', normalize=False)
+        result = tag_manager.delete_tag('test-key', 'value with spaces', normalize=normalize)
         assert result is True
         assert tag_manager._tags == {}
 

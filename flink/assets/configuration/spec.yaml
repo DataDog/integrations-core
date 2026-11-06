@@ -2,10 +2,37 @@ name: flink
 fleet_configurable: true
 files:
 - name: flink.yaml
+  discovery:
+    strategies:
+    - template: discovery/openmetrics_from_ports
+      overrides:
+        port_hints:
+        - 9249
   options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.description: |
+          The URL exposing metrics in the OpenMetrics/Prometheus format,
+          served by Flink's flink-metrics-prometheus reporter. By default
+          the reporter listens on `<host>:9249/metrics`.
+
+          See https://nightlies.apache.org/flink/flink-docs-stable/docs/deployment/metric_reporters/#prometheus
+          for configuration of the reporter on the Flink side.
   - template: logs
     example:
     - type: file
       path: /var/log/flink.log
       source: flink
       service: <SERVICE>
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - flink
+  - template: auto_conf/discovery

@@ -48,6 +48,7 @@ class TestMain:
 
         monkeypatch.setenv("DRY_RUN", "true" if dry_run else "false")
         monkeypatch.setenv("PACKAGES", '["postgres", "mysql"]')
+        monkeypatch.setenv("NEW_TAGS", '["postgres-1.2.3", "mysql-2.0.0"]')
         monkeypatch.setenv("SOURCE_REPO", "integrations-core")
         monkeypatch.setenv("REF", "abc123")
         monkeypatch.setenv("RUNNER_TEMP", str(runner_temp))
@@ -67,6 +68,22 @@ class TestMain:
              patch("release_dispatch.write_summary") as mock_summary:
             release_dispatch.main()
         mock_summary.assert_called_once()
+
+    def test_passes_new_tags_to_summary(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+        self._base_env(monkeypatch, tmp_path, dry_run=True)
+        with patch("release_dispatch.build_summary", return_value="summary") as mock_build_summary, \
+             patch("release_dispatch.write_summary"):
+            release_dispatch.main()
+        mock_build_summary.assert_called_once_with(
+            ["postgres", "mysql"],
+            [],
+            "auto",
+            "integrations-core",
+            "abc123",
+            dry_run=True,
+            was_dispatched=False,
+            new_tags=["postgres-1.2.3", "mysql-2.0.0"],
+        )
 
     def test_non_dry_run_outputs_batches(self, monkeypatch, tmp_path):
         self._base_env(monkeypatch, tmp_path, dry_run=False)

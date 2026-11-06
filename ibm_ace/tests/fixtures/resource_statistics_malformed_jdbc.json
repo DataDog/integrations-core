@@ -1,0 +1,45 @@
+{
+  "ResourceStatistics": {
+    "brokerLabel": "integration_server",
+    "brokerUUID": "00000000-0000-0000-0000-000000000000",
+    "executionGroupName": "ACESERVER",
+    "executionGroupUUID": "00000000-0000-0000-0000-000000000000",
+    "ResourceType": [
+      {
+        "name": "JDBCConnectionPools",
+        "resourceIdentifier": [
+          {
+            "name": "summary",
+            "NameOfJDBCProvider": "jdbc_DataSourceA",
+            "MaxSizeOfPool": 100,
+            "ActualSizeOfPool": 1,
+            "CumulativeRequests": 891,
+            "CumulativeDelayedRequests": 0,
+            "CumulativeTimedOutRequests": 0,
+            "MaxDelayInMilliseconds": 0
+          },
+          {
+            "": "summary0",
+            "NameOfJDBCProvider": "jdbc_DataSourceB",
+            "MaxSizeOfPool": 100,
+            "ActualSizeOfPool": 1,
+            "CumulativeRequests": 891,
+            "CumulativeDelayedRequests": 0,
+            "CumulativeTimedOutRequests": 0,
+            "MaxDelayInMilliseconds": 0
+          },
+          {
+            "": "summary0",
+            "NameOfJDBCProvider": "jdbc_DataSourceA",
+            "MaxSizeOfPool": 100,
+            "ActualSizeOfPool": 1,
+            "CumulativeRequests": 29,
+            "CumulativeDelayedRequests": 0,
+            "CumulativeTimedOutRequests": 0,
+            "MaxDelayInMilliseconds": 0
+          }
+        ]
+      }
+    ]
+  }
+}

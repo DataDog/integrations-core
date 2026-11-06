@@ -18,7 +18,7 @@ The Process check is included in the [Datadog Agent][2] package, so you don't ne
 
 Unlike many checks, the Process check doesn't monitor anything useful by default. You must configure which processes you want to monitor.
 
-While there's no standard default check configuration, here's an example `process.d/conf.yaml` that monitors SSH/SSHD processes. See the [sample process.d/conf.yaml][3] for all available configuration options:
+While there's no standard default check configuration, here's an example `process.d/conf.yaml` that monitors SSH/SSHD processes. See the [sample process.d/conf.yaml][3] for all available configuration options. For regex-based process matching, see [Process matching](#process-matching).
 
 ```yaml
 init_config:
@@ -35,6 +35,34 @@ Retrieving some process metrics requires the Datadog collector to either run as 
 
 ```shell
 dd-agent ALL=NOPASSWD: /bin/ls /proc/*/fd/
+```
+
+#### Process matching
+
+By default, the Process check matches processes by exact name. Set `exact_match` to `false` to match using substrings instead.
+
+When `exact_match` is `false`, values in `search_string` are interpreted as Python regular expressions using `re.search()`. Regex metacharacters (`. + * ? ( ) [ ] { } ^ $ | \`) must be escaped with a backslash for literal matching.
+
+For example, to match the literal path `/usr/lib/jdk-11.0.10+9/bin/java`, escape the `.` and `+` characters:
+
+Unescaped (does not match literally):
+
+```yaml
+instances:
+  - exact_match: false
+    name: java_jdk11
+    search_string:
+      - /usr/lib/jdk-11.0.10+9/bin/java
+```
+
+Escaped (matches literally):
+
+```yaml
+instances:
+  - exact_match: false
+    name: java_jdk11
+    search_string:
+      - /usr/lib/jdk-11\.0\.10\+9/bin/java
 ```
 
 ### Validation

@@ -1,0 +1,124 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
+"""Fake HPE Aruba EdgeConnect orchestrator for E2E tests."""
+
+import os
+import socket
+import ssl
+
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
+CERT_FILE = "/app/certs/cert.pem"
+KEY_FILE = "/app/certs/key.pem"
+
+ORCH_USERNAME = os.environ.get("ORCH_USERNAME", "admin")
+ORCH_PASSWORD = os.environ.get("ORCH_PASSWORD", "")
+# When set, the account is only accepted for this authentication backend, mirroring an
+# Orchestrator whose users live on a remote RADIUS or TACACS+ server. Parsed here so a bad
+# value fails at container start rather than on the first login request.
+_raw_login_type = os.environ.get("ORCH_LOGIN_TYPE")
+ORCH_LOGIN_TYPE = int(_raw_login_type) if _raw_login_type else None
+# When set, data endpoints accept only this key in `X-Auth-Token`, as an Orchestrator does for
+# API-key clients. Login and health stay open so the password-mode environment is unaffected.
+ORCH_API_KEY = os.environ.get("ORCH_API_KEY") or None
+
+PEER_NEWYORK_IP = "10.0.0.2"
+PEER_SANFRAN_IP = "10.0.0.3"
+
+
+def _appliance_ip():
+    return socket.gethostbyname("dd-appliance")
+
+
+def _appliance(ip, ne_pk, host_name, site, startup_time=None):
+    return {
+        "id": ne_pk,
+        "uuid": "19dde6b0-e971-4cbe-8714-c42c29657a2a",
+        "networkRole": "0",
+        "site": site,
+        "sitePriority": 0,
+        "userName": "admin",
+        "password": None,
+        "groupId": "2.Network",
+        "IP": ip,
+        "webProtocolType": 3,
+        "serial": "SN001",
+        "hasUnsavedChanges": False,
+        "rebootRequired": False,
+        "model": "EC-V",
+        "hardwareRevision": "209005002001 Rev 102786",
+        "hostName": host_name,
+        "applianceId": 182356,
+        "platform": "VMware",
+        "mode": "router",
+        "bypass": False,
+        "softwareVersion": "9.3.1",
+        "startupTime": startup_time,
+        "webProtocol": "BOTH",
+        "systemBandwidth": 300000,
+        "state": 1,
+        "dynamicUuid": "2f938d31-8eb6-428d-9a16-208aec647d3d",
+        "portalObjectId": "69811624fb692e7082aff5ca",
+        "discoveredFrom": 2,
+        "reachabilityChannel": 2,
+        "preconfigStatus": None,
+        "suricataVersion": "6.0.10",
+        "signatureFamily": "5.x",
+        "ip": ip,
+        "nePk": ne_pk,
+    }
+
+
+@app.before_request
+def require_api_key():
+    if ORCH_API_KEY is None or request.path in ("/health", "/gms/rest/authentication/login"):
+        return None
+    if request.headers.get("X-Auth-Token") != ORCH_API_KEY:
+        return jsonify({"status": "unauthorized"}), 401
+    return None
+
+
+@app.route("/gms/rest/authentication/login", methods=["POST"])
+def login():
+    data = request.get_json(silent=True) or {}
+    if data.get("user") != ORCH_USERNAME or data.get("password") != ORCH_PASSWORD:
+        return jsonify({"status": "unauthorized"}), 401
+    if ORCH_LOGIN_TYPE is not None and data.get("loginType") != ORCH_LOGIN_TYPE:
+        return jsonify({"status": "wrong credentials"}), 401
+    return jsonify({"status": "ok"})
+
+
+@app.route("/gms/rest/appliance")
+def appliances():
+    return jsonify(
+        [
+            _appliance(_appliance_ip(), "1.NE", "SydneySP01", "SYD", startup_time=86400),
+            _appliance(PEER_NEWYORK_IP, "4.NE", "NewYorkSP01", "NYC"),
+            _appliance(PEER_SANFRAN_IP, "5.NE", "SanFranSP02", "SFO"),
+        ]
+    )
+
+
+@app.route("/gms/rest/gms/overlays/config")
+def overlay_config():
+    return jsonify(
+        [
+            {"id": 0, "name": "business"},
+            {"id": 2, "name": "BulkData", "trafficClass": "2"},
+            {"id": 4, "name": "RealTime", "trafficClass": "4"},
+        ]
+    )
+
+
+@app.route("/health")
+def health():
+    return jsonify({"status": "ok"})
+
+
+if __name__ == "__main__":
+    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    ctx.load_cert_chain(CERT_FILE, KEY_FILE)
+    app.run(host="0.0.0.0", port=8443, ssl_context=ctx)

@@ -97,6 +97,8 @@ def test_integration_mongos(instance_integration_cluster, aggregator, check, dd_
         ],
         ['sharding_cluster_role:mongos', 'clustername:my_cluster', 'hosting_type:self-hosted'],
     )
+    if dbm:
+        aggregator.assert_metric('dd.mongo.operation.time', tags=['operation:collect_query_metrics'])
 
     aggregator.assert_all_metrics_covered()
     aggregator.assert_metrics_using_metadata(
@@ -1206,6 +1208,9 @@ def test_integration_localhost_process_stats(instance_integration, aggregator, c
             with mock.patch('psutil.Process') as mock_process:
                 mock_process.return_value.name.return_value = 'mongos'
                 mock_process.return_value.cpu_percent.return_value = 20.0
+                # psutil's first cpu_percent() sample on a process is meaningless and is skipped,
+                # so process CPU is only reported from the run after the process is resolved.
+                dd_run_check(mongo_check)
                 dd_run_check(mongo_check)
 
     metrics_categories = [

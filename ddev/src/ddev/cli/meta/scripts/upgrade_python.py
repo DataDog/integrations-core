@@ -21,6 +21,12 @@ PYTHON_FTP_URL = "https://www.python.org/ftp/python/"
 PYTHON_SBOM_LINUX_URL_TEMPLATE = "https://www.python.org/ftp/python/{version}/Python-{version}.tgz.spdx.json"
 PYTHON_SBOM_WINDOWS_URL_TEMPLATE = "https://www.python.org/ftp/python/{version}/python-{version}-amd64.exe.spdx.json"
 
+# Patch versions the automated upgrade must never select, mapped to the reason.
+# Keep in sync with EXCLUDED_PYTHON_VERSIONS in datadog-agent's tasks/python_version.py.
+EXCLUDED_PYTHON_VERSIONS = {
+    "3.13.16": "the python/cpython#130094 backport makes concurrent imports raise _DeadlockError in the Agent",
+}
+
 # Python Build Standalone (PBS) - used for macOS
 # https://github.com/astral-sh/python-build-standalone
 PBS_LATEST_RELEASE_URL = "https://api.github.com/repos/astral-sh/python-build-standalone/releases/latest"
@@ -52,7 +58,7 @@ def upgrade_python_version(app: Application):
     and updates version references across:
     - ddev/src/ddev/repo/constants.py
     - .builders/images/*/Dockerfile (Linux and Windows)
-    - .github/workflows/resolve-build-deps.yaml (macOS)
+    - .builders/images/macos/pbs.env (macOS PBS / Python patch)
 
     \b
     `$ ddev meta scripts upgrade-python-version`
@@ -255,13 +261,14 @@ def upgrade_dockerfiles_python_version(
 
 def upgrade_macos_python_version(app: Application, new_version: str, tracker: ValidationTracker):
     """
-    Update macOS Python version in the workflow file.
+    Update macOS PBS pins used by resolve-build-deps.
 
-    The workflow uses Python Build Standalone (PBS) from Astral. Updates PYTHON_PATCH,
-    PBS_RELEASE, and the SHA256 hashes for both macOS architectures.
+    CI installs Python from Python Build Standalone (PBS) on macOS. Pins live in
+    ``.builders/images/macos/pbs.env`` so they participate in inputs_hash
+    (``images/macos/**/*``) and invalidate the ``~/builder_root`` cache when bumped.
     """
-    workflow_file = app.repo.path / '.github' / 'workflows' / 'resolve-build-deps.yaml'
-    content = read_file_safely(workflow_file, 'macOS workflow', tracker)
+    pbs_env_file = app.repo.path / '.builders' / 'images' / 'macos' / 'pbs.env'
+    content = read_file_safely(pbs_env_file, 'macOS pbs.env', tracker)
     if content is None:
         return
 
@@ -271,27 +278,28 @@ def upgrade_macos_python_version(app: Application, new_version: str, tracker: Va
     pbs_info = get_pbs_release_info(app, new_version)
     if pbs_info is None:
         tracker.error(
-            ('macOS workflow',),
+            ('macOS pbs.env',),
             message=f'Could not find PBS release with Python {new_version}. '
             'A new PBS release may not be available yet.',
         )
         return
 
-    # Define replacements: (label, pattern, new_value)
+    # Define replacements: (label, pattern, new_value) — KEY=value lines for shell `source`
+    # Lines may have trailing spaces from editors; \s*$ matches the old YAML patterns' tolerance.
     replacements = [
-        ('PYTHON_PATCH', r'^(\s*PYTHON_PATCH:\s*)\d+\s*$', rf'\g<1>{new_patch}'),
-        ('PBS_RELEASE', r'^(\s*PBS_RELEASE:\s*)\d+\s*$', rf"\g<1>{pbs_info['release']}"),
-        ('PBS_SHA256__aarch64', r'^(\s*PBS_SHA256__aarch64:\s*)[0-9a-f]+\s*$', rf"\g<1>{pbs_info['aarch64']}"),
-        ('PBS_SHA256__x86_64', r'^(\s*PBS_SHA256__x86_64:\s*)[0-9a-f]+\s*$', rf"\g<1>{pbs_info['x86_64']}"),
+        ('PYTHON_PATCH', r'^(PYTHON_PATCH=)\d+\s*$', rf'\g<1>{new_patch}'),
+        ('PBS_RELEASE', r'^(PBS_RELEASE=)\d+\s*$', rf"\g<1>{pbs_info['release']}"),
+        ('PBS_SHA256__aarch64', r'^(PBS_SHA256__aarch64=)[0-9a-f]+\s*$', rf"\g<1>{pbs_info['aarch64']}"),
+        ('PBS_SHA256__x86_64', r'^(PBS_SHA256__x86_64=)[0-9a-f]+\s*$', rf"\g<1>{pbs_info['x86_64']}"),
     ]
 
     for label, pattern, replacement in replacements:
         content, count = re.subn(pattern, replacement, content, count=1, flags=re.MULTILINE)
         if count == 0:
-            tracker.error(('macOS workflow',), message=f'Could not find {label} in workflow file')
+            tracker.error(('macOS pbs.env',), message=f'Could not find {label} in macOS pbs.env')
             return
 
-    write_file_safely(workflow_file, content, 'macOS workflow', tracker)
+    write_file_safely(pbs_env_file, content, 'macOS pbs.env', tracker)
 
 
 def upgrade_python_version_full_constant(app: Application, new_version: str, tracker: ValidationTracker):
@@ -344,6 +352,9 @@ def get_latest_python_version(app: Application, major_minor: str) -> str | None:
         match = re.search(pattern, line)
         if match:
             version_str = match.group(1)
+            if version_str in EXCLUDED_PYTHON_VERSIONS:
+                app.display_warning(f"Skipping Python {version_str}: {EXCLUDED_PYTHON_VERSIONS[version_str]}")
+                continue
             try:
                 versions.append(Version(version_str))
             except Exception:

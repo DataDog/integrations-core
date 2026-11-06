@@ -70,9 +70,9 @@ QUERY_INDEX_USAGE = {
         {'name': 'db', 'type': 'tag'},
         {'name': 'table', 'type': 'tag'},
         {'name': 'index', 'type': 'tag'},
-        {'name': 'mysql.index.reads', 'type': 'gauge'},
-        {'name': 'mysql.index.updates', 'type': 'gauge'},
-        {'name': 'mysql.index.deletes', 'type': 'gauge'},
+        {'name': 'mysql.index.reads', 'type': 'monotonic_count'},
+        {'name': 'mysql.index.updates', 'type': 'monotonic_count'},
+        {'name': 'mysql.index.deletes', 'type': 'monotonic_count'},
     ],
 }
 

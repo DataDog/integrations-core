@@ -26,6 +26,9 @@ from datadog_checks.sqlserver.connection_errors import (
 from .common import CHECK_NAME, SQLSERVER_YEAR
 
 KEY_PREFIX = "dbm-test-"
+SPECIAL_CHARACTERS_PASSWORD_LOGIN = 'datadog_special_characters_password'
+SPECIAL_CHARACTERS_PASSWORD = 'Pa;ss}"word123!'
+DATABASE_NAME_INJECTION = 'h1;Address=attacker,1433;Encrypt=no;APP=forged'
 
 
 @pytest.mark.unit
@@ -284,6 +287,207 @@ def test_config_with_and_without_port(instance_minimal_defaults, host, port, exp
     connection = Connection({}, instance_minimal_defaults, None)
     _, result_host, _, _, _, _ = connection._get_access_info('somekey', 'somedb')
     assert result_host == expected_host
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'connector,driver,password,expected_password_parameter',
+    [
+        pytest.param('odbc', None, SPECIAL_CHARACTERS_PASSWORD, 'PWD={Pa;ss}}"word123!};', id='odbc'),
+        pytest.param('odbc', 'FreeTDS', SPECIAL_CHARACTERS_PASSWORD, 'PWD={Pa;ss}"word123!};', id='odbc-freetds'),
+        pytest.param('adodbapi', None, SPECIAL_CHARACTERS_PASSWORD, 'Password="Pa;ss}""word123!";', id='adodbapi'),
+    ],
+)
+def test_connection_string_escapes_password_special_characters(
+    instance_minimal_defaults: dict[str, object],
+    connector: str,
+    driver: str | None,
+    password: str,
+    expected_password_parameter: str,
+) -> None:
+    instance_minimal_defaults.update({'connector': connector, 'password': password})
+    if driver:
+        instance_minimal_defaults['driver'] = driver
+    connection = Connection({}, instance_minimal_defaults, None)
+
+    if connector == 'odbc':
+        conn_str = connection._conn_string_odbc('database')
+    else:
+        conn_str = connection._conn_string_adodbapi('database')
+
+    assert expected_password_parameter in conn_str
+
+
+@pytest.mark.unit
+def test_freetds_password_with_closing_brace_semicolon_raises_limitation(
+    instance_minimal_defaults: dict[str, object],
+) -> None:
+    password = 'pass};word'
+    instance_minimal_defaults.update({'connector': 'odbc', 'driver': 'FreeTDS', 'password': password})
+    connection = Connection({}, instance_minimal_defaults, None)
+
+    with pytest.raises(ConfigurationError) as exc_info:
+        connection._conn_string_odbc('database')
+
+    error_message = str(exc_info.value)
+    assert "'};'" in error_message
+    assert 'FreeTDS' in error_message
+    assert 'Microsoft ODBC Driver for SQL Server' in error_message
+    assert password not in error_message
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'connector,driver,database,expected_database_parameter',
+    [
+        pytest.param(
+            'odbc',
+            None,
+            DATABASE_NAME_INJECTION,
+            'Database={h1;Address=attacker,1433;Encrypt=no;APP=forged};',
+            id='odbc',
+        ),
+        pytest.param(
+            'odbc',
+            'FreeTDS',
+            DATABASE_NAME_INJECTION,
+            'Database={h1;Address=attacker,1433;Encrypt=no;APP=forged};',
+            id='odbc-freetds',
+        ),
+        pytest.param(
+            'adodbapi',
+            None,
+            DATABASE_NAME_INJECTION,
+            'Initial Catalog="h1;Address=attacker,1433;Encrypt=no;APP=forged";',
+            id='adodbapi',
+        ),
+    ],
+)
+def test_connection_string_encodes_database_name_special_characters(
+    instance_minimal_defaults: dict[str, object],
+    connector: str,
+    driver: str | None,
+    database: str,
+    expected_database_parameter: str,
+) -> None:
+    instance_minimal_defaults.update({'connector': connector})
+    if driver:
+        instance_minimal_defaults['driver'] = driver
+    connection = Connection({}, instance_minimal_defaults, None)
+
+    if connector == 'odbc':
+        conn_str = connection._conn_string_odbc('database', db_name=database)
+    else:
+        conn_str = connection._conn_string_adodbapi('database', db_name=database)
+
+    assert expected_database_parameter in conn_str
+
+
+@pytest.mark.unit
+def test_odbc_database_name_cannot_inject_connection_attributes(
+    instance_minimal_defaults: dict[str, object],
+) -> None:
+    instance_minimal_defaults.update({'connector': 'odbc', 'driver': 'ODBC Driver 18 for SQL Server'})
+    connection = Connection({}, instance_minimal_defaults, None)
+
+    conn_str = connection._conn_string_odbc('database', db_name=DATABASE_NAME_INJECTION)
+
+    params = parse_connection_string_properties(conn_str)
+    assert params['Database'] == DATABASE_NAME_INJECTION
+    assert {key.lower() for key in params} == {'connectretrycount', 'driver', 'server', 'database', 'uid', 'pwd'}
+
+
+@pytest.mark.unit
+def test_adodbapi_database_name_with_quote_is_doubled(instance_minimal_defaults: dict[str, object]) -> None:
+    instance_minimal_defaults.update({'connector': 'adodbapi'})
+    connection = Connection({}, instance_minimal_defaults, None)
+
+    conn_str = connection._conn_string_adodbapi('database', db_name='db"name;Encrypt=no')
+
+    assert 'Initial Catalog="db""name;Encrypt=no";' in conn_str
+
+
+@pytest.mark.unit
+def test_freetds_database_name_with_closing_brace_semicolon_raises_limitation(
+    instance_minimal_defaults: dict[str, object],
+) -> None:
+    database = 'db};name'
+    instance_minimal_defaults.update({'connector': 'odbc', 'driver': 'FreeTDS'})
+    connection = Connection({}, instance_minimal_defaults, None)
+
+    with pytest.raises(ConfigurationError) as exc_info:
+        connection._conn_string_odbc('database', db_name=database)
+
+    error_message = str(exc_info.value)
+    assert "'};'" in error_message
+    assert 'FreeTDS' in error_message
+    assert 'Microsoft ODBC Driver for SQL Server' in error_message
+    assert database not in error_message
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'connector,expected_database_parameter',
+    [
+        pytest.param('odbc', 'Database={master};', id='odbc'),
+        pytest.param('adodbapi', 'Initial Catalog="master";', id='adodbapi'),
+    ],
+)
+def test_connection_string_ordinary_database_name_is_single_value(
+    instance_minimal_defaults: dict[str, object],
+    connector: str,
+    expected_database_parameter: str,
+) -> None:
+    instance_minimal_defaults.update({'connector': connector})
+    connection = Connection({}, instance_minimal_defaults, None)
+
+    if connector == 'odbc':
+        conn_str = connection._conn_string_odbc('database')
+    else:
+        conn_str = connection._conn_string_adodbapi('database')
+
+    assert expected_database_parameter in conn_str
+
+
+@pytest.fixture
+def special_characters_password_login(sa_conn: object) -> tuple[str, str]:
+    with sa_conn.cursor() as cursor:
+        cursor.execute(
+            """
+            IF NOT EXISTS (
+                SELECT 1 FROM sys.server_principals WHERE name = N'{login}'
+            )
+                CREATE LOGIN [{login}] WITH PASSWORD = '{password}', CHECK_POLICY = OFF
+            ELSE
+                ALTER LOGIN [{login}] WITH PASSWORD = '{password}', CHECK_POLICY = OFF
+            """.format(login=SPECIAL_CHARACTERS_PASSWORD_LOGIN, password=SPECIAL_CHARACTERS_PASSWORD)
+        )
+        cursor.execute(
+            """
+            IF NOT EXISTS (
+                SELECT 1 FROM sys.database_principals WHERE name = N'{login}'
+            )
+                CREATE USER [{login}] FOR LOGIN [{login}]
+            """.format(login=SPECIAL_CHARACTERS_PASSWORD_LOGIN)
+        )
+    return SPECIAL_CHARACTERS_PASSWORD_LOGIN, SPECIAL_CHARACTERS_PASSWORD
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_connection_with_special_characters_in_password(
+    instance_docker: dict[str, object], special_characters_password_login: tuple[str, str]
+) -> None:
+    login_name, password = special_characters_password_login
+    instance_docker['username'] = login_name
+    instance_docker['password'] = password
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    check.initialize_connection()
+
+    with check.connection.open_managed_default_connection(KEY_PREFIX):
+        with check.connection.get_managed_cursor(KEY_PREFIX) as cursor:
+            cursor.execute("select 1")
+            assert cursor.fetchall()
 
 
 @pytest.mark.flaky

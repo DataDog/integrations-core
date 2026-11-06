@@ -2,7 +2,45 @@
 
 <!-- towncrier release notes start -->
 
-## 5.6.2 / 2026-04-28
+## 6.0.0 / 2026-10-29
+
+***Changed***:
+
+* Expire downloaded intermediate CA trust after `intermediate_cert_refresh_interval` (60 minutes by default). With `fetch_intermediate_certs` enabled, validation reports CRITICAL when the endpoint requires an expired cached intermediate and its AIA endpoint cannot serve a valid replacement, until trust can be renewed. ([#25363](https://github.com/DataDog/integrations-core/pull/25363))
+
+***Fixed***:
+
+* Reload rotated TLS client certificates without restarting the Agent when their contents change. Missing, unreadable, malformed, or mismatched client credentials report CRITICAL validation without certificate-age metrics until a complete valid pair is available, including during non-atomic rotation. Retry TLS context creation if a configured CA bundle is temporarily missing during a rebuild. ([#25363](https://github.com/DataDog/integrations-core/pull/25363))
+
+## 5.9.0 / 2026-10-01 / Agent 7.85.0
+
+***Security***:
+
+* Fetch AIA intermediate certificates with a fresh credential-free HTTP session, trying TLS first and then plain HTTP fallback. ([#24154](https://github.com/DataDog/integrations-core/pull/24154))
+
+***Added***:
+
+* Update dependencies ([#25284](https://github.com/DataDog/integrations-core/pull/25284))
+
+## 5.8.0 / 2026-08-24 / Agent 7.83.0
+
+***Security***:
+
+* Bump cryptography to 50.0.0 to remediate CVE-2026-69247, GHSA-jwv3-5hgf-82ww, and GHSA-m2h6-j472-rp4c. ([#24948](https://github.com/DataDog/integrations-core/pull/24948))
+
+## 5.7.0 / 2026-08-05
+
+***Added***:
+
+* Update dependencies ([#24321](https://github.com/DataDog/integrations-core/pull/24321))
+
+## 5.6.3 / 2026-06-18 / Agent 7.81.0
+
+***Fixed***:
+
+* Bump cryptography to 48.0.1. ([#24073](https://github.com/DataDog/integrations-core/pull/24073))
+
+## 5.6.2 / 2026-04-28 / Agent 7.79.0
 
 ***Fixed***:
 

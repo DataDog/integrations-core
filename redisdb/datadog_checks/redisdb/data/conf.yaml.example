@@ -52,6 +52,16 @@ instances:
     #
     # collect_client_metrics: false
 
+    ## @param disable_config_get - boolean - optional - default: false
+    ## Skip all CONFIG GET commands. Enable this for managed backends such as Amazon ElastiCache
+    ## that forbid CONFIG commands to avoid rejected requests.
+    ## When enabled, redis.net.maxclients is not collected. Slowlog collection uses slowlog-max-len
+    ## if configured, otherwise 128.
+    ## By default, the first CONFIG GET response error disables all CONFIG GET commands for the
+    ## lifetime of the check instance and logs a warning.
+    #
+    # disable_config_get: false
+
     ## @param socket_timeout - integer - optional - default: 5
     ## Custom timeout for the check request.
     #
@@ -94,6 +104,12 @@ instances:
     #
     # ssl_check_hostname: true
 
+    ## @param client_name - string - optional
+    ## Set the connection name that appears in CLIENT LIST on the Redis server.
+    ## Useful for identifying agent connections. Requires the CLIENT SETNAME permission.
+    #
+    # client_name: <CLIENT_NAME>
+
     ## @param keys - list of strings - optional
     ## Enter the list of keys to collect the lengths from.
     ## The length is 1 for strings.
@@ -113,6 +129,7 @@ instances:
     ## @param slowlog-max-len - integer - optional - default: 128
     ## Set the maximum number of entries to fetch from the slow query log.
     ## By default, the check reads this value from the redis config, but is limited to 128.
+    ## If CONFIG GET is disabled or rejected, the check uses 128 unless a value is configured here.
     ##
     ## Set a custom value here if you need to get more than 128 slowlog entries every 15 seconds.
     ## Warning: Higher values may impact the performance of your Redis instance.

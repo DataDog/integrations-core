@@ -9,6 +9,7 @@ import re
 from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.base.utils.common import to_native_string
 from datadog_checks.base.utils.db.utils import get_agent_host_tags
+from datadog_checks.sqlserver.config_models.instance import DataObservability
 from datadog_checks.sqlserver.const import (
     DEFAULT_AUTODISCOVERY_INTERVAL,
     DEFAULT_LONG_METRICS_COLLECTION_INTERVAL,
@@ -61,6 +62,7 @@ class SQLServerConfig:
         self.activity_config: dict = instance.get('query_activity', {}) or {}
         # Backward compatibility: check new names first, then fall back to old names
         self.schema_config: dict = instance.get('collect_schemas', instance.get('schemas_collection', {})) or {}
+        self.column_statistics_config: dict = instance.get('collect_column_statistics', {}) or {}
         self.deadlocks_config: dict = instance.get('collect_deadlocks', instance.get('deadlocks_collection', {})) or {}
         self.xe_collection_config: dict = instance.get('collect_xe', instance.get('xe_collection', {})) or {}
         self.cloud_metadata: dict = {}
@@ -132,6 +134,11 @@ class SQLServerConfig:
         self.connection_host: str = instance['host']
         self.service = instance.get('service') or init_config.get('service') or ''
         self.db_fragmentation_object_names = instance.get('db_fragmentation_object_names', []) or []
+        self.index_usage_table_names = instance.get('index_usage_table_names', []) or []
+        self.table_size_table_names = instance.get('table_size_table_names', []) or []
+        self.data_observability: DataObservability = DataObservability.model_validate(
+            instance.get('data_observability') or {}
+        )
 
         self.tags: list[str] = self._build_tags(
             custom_tags=instance.get('tags', []),
@@ -279,6 +286,13 @@ class SQLServerConfig:
             for key, value in metric_config.items():
                 if value is not None:
                     config[key] = value
+
+        legacy_instance_metrics = instance.get('include_instance_metrics')
+        instance_metrics = database_metrics.get('instance_metrics', {}).get('enabled')
+        if (legacy_instance_metrics is not None and not is_affirmative(legacy_instance_metrics)) or (
+            instance_metrics is not None and not is_affirmative(instance_metrics)
+        ):
+            configurable_metrics['instance_metrics']['enabled'] = False
         return configurable_metrics
 
     def _validate_only_custom_queries(self, instance):

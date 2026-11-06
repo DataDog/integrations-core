@@ -54,6 +54,59 @@ class TestInputValidation:
         )
 
 
+class TestHatchOnlyTarget:
+    @pytest.mark.parametrize(
+        'flag, script',
+        [
+            pytest.param('--lint', 'all', id='lint'),
+            pytest.param('--lint-unsafe', 'style-unsafe', id='lint-unsafe'),
+            pytest.param('--fmt', 'fmt', id='fmt'),
+            pytest.param('--fmt-unsafe', 'fmt-unsafe', id='fmt-unsafe'),
+        ],
+    )
+    def test_lint_and_format(self, ddev, mocker, flag, script):
+        popen = mocker.patch('subprocess.Popen', return_value=MockPopen(returncode=0))
+
+        result = ddev('test', 'checkpoint_harmony_endpoint', flag)
+
+        assert result.exit_code == 0, result.output
+        assert_calls(
+            popen.call_args_list,
+            [
+                mocker.call(
+                    [sys.executable, '-m', 'hatch', 'env', 'run', '--env', 'lint', '--', script],
+                    shell=False,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    bufsize=1,
+                    encoding='utf-8',
+                )
+            ],
+            ignored_kwargs=['env'],
+        )
+
+    def test_list_environments(self, ddev, mocker):
+        run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))
+
+        result = ddev('test', 'checkpoint_harmony_endpoint', '--list')
+
+        assert result.exit_code == 0, result.output
+        assert not result.output
+        assert run.call_args_list == [
+            mocker.call([sys.executable, '-m', 'hatch', 'env', 'show'], shell=False),
+        ]
+
+    def test_not_testable_by_default(self, ddev, helpers):
+        result = ddev('test', 'checkpoint_harmony_endpoint')
+
+        assert result.exit_code == 1, result.output
+        assert result.output == helpers.dedent(
+            """
+            No testable targets found
+            """
+        )
+
+
 class TestListEnvironments:
     def test_single_target(self, ddev, mocker):
         run = mocker.patch('subprocess.run', return_value=mocker.MagicMock(returncode=0))

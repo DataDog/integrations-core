@@ -1,0 +1,22 @@
+{
+  "rplUsedJournalCap": 0,
+  "replicationState": "UnmarkedForReplication",
+  "numOfChildVolumes": 0,
+  "userDataWriteBwc": {"numSeconds": 0, "totalWeightInKb": 0, "numOccured": 0},
+  "rplTotalJournalCap": 0,
+  "initiatorSdcId": null,
+  "userDataSdcReadLatency": {"numSeconds": 0, "totalWeightInKb": 0, "numOccured": 0},
+  "userDataSdcTrimLatency": {"numSeconds": 0, "totalWeightInKb": 0, "numOccured": 0},
+  "mappedSdcIds": ["1b8659fd00000001"],
+  "registrationKey": null,
+  "registrationKeys": [],
+  "descendantVolumeIds": [],
+  "numOfMappedSdcs": 1,
+  "userDataReadBwc": {"numSeconds": 0, "totalWeightInKb": 0, "numOccured": 0},
+  "numOfDescendantVolumes": 0,
+  "reservationType": "NotReserved",
+  "replicationJournalVolume": false,
+  "userDataTrimBwc": {"numSeconds": 0, "totalWeightInKb": 0, "numOccured": 0},
+  "childVolumeIds": [],
+  "userDataSdcWriteLatency": {"numSeconds": 0, "totalWeightInKb": 0, "numOccured": 0}
+}

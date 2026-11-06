@@ -57,6 +57,29 @@ def instance_query_errors():
     )
 
 
+def instance_schema_metrics():
+    return instance.SchemaMetrics(
+        enabled=False,
+        collection_interval=60,
+        run_sync=False,
+    )
+
+
+def instance_collect_schemas():
+    return instance.CollectSchemas(
+        enabled=False,
+        collection_interval=600,
+        max_tables=300,
+        max_columns=1000,
+        max_query_duration=60,
+        include_databases=(),
+        exclude_databases=(),
+        include_tables=(),
+        exclude_tables=(),
+        run_sync=False,
+    )
+
+
 def instance_parts_and_merges():
     return instance.PartsAndMerges(
         enabled=True,
@@ -70,4 +93,20 @@ def instance_parts_and_merges():
         table_metrics_max_tables=200,
         stalled_merge_elapsed_threshold_seconds=3600,
         stuck_replication_num_tries=3,
+    )
+
+
+def instance_collect_pending_async_inserts():
+    return instance.CollectPendingAsyncInserts(
+        enabled=False,
+        collection_interval=10,
+        max_samples_per_collection=1000,
+    )
+
+
+def instance_collect_async_inserts():
+    return instance.CollectAsyncInserts(
+        enabled=False,
+        collection_interval=60,
+        max_samples_per_collection=1000,
     )

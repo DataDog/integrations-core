@@ -6,13 +6,27 @@ import os
 import mock
 import pytest
 
+from datadog_checks.base.stubs import datadog_agent
+
 from .common import (
     MOCK_DEVICE,
+    MOCK_DEVICE_METADATA,
+    MOCK_GID_ATTRS,
     MOCK_IB_COUNTER_DATA,
     MOCK_PORT,
+    MOCK_RATE_DATA,
     MOCK_RDMA_COUNTER_DATA,
     MOCK_STATUS_DATA,
 )
+
+
+@pytest.fixture(autouse=True)
+def gpu_monitoring_enabled():
+    # The check only runs when the Agent's GPU monitoring SKU is enabled; default it on for
+    # tests that aren't specifically exercising that gating behavior. Patching the one key on
+    # the stub's config dict leaves every other option answering normally.
+    with mock.patch.dict(datadog_agent._config, {'gpu.enabled': True}):
+        yield
 
 
 @pytest.fixture
@@ -24,7 +38,7 @@ def instance():
 
 def _is_valid_directory(path):
     # Mocks the directories name to return True so they exist
-    return any(x in path for x in ['infiniband', 'ports', 'counters', 'hw_counters'])
+    return any(x in path for x in ['infiniband', 'ports', 'counters', 'hw_counters', 'gid_attrs', 'ndevs', 'types'])
 
 
 def _get_directory_contents(path):
@@ -47,18 +61,31 @@ def _get_glob_matches(pattern):
         return [os.path.join(base_dir, f) for f in MOCK_IB_COUNTER_DATA.keys()]
     elif 'hw_counters/*' in pattern:
         return [os.path.join(base_dir, f) for f in MOCK_RDMA_COUNTER_DATA.keys()]
+    elif 'gid_attrs/ndevs/*' in pattern:
+        return [os.path.join(base_dir, gid_index) for gid_index in MOCK_GID_ATTRS]
     return []
 
 
 def _get_file_content(filename):
     # Set up mock file content. Mock dict keys to return dict values
     counter = os.path.basename(filename)
+    parent = os.path.basename(os.path.dirname(filename))
+    if filename.endswith('rate'):
+        return MOCK_RATE_DATA
+    elif parent == 'ndevs' and counter in MOCK_GID_ATTRS:
+        return MOCK_GID_ATTRS[counter]['netdev']
+    elif parent == 'types' and counter in MOCK_GID_ATTRS:
+        return MOCK_GID_ATTRS[counter]['type']
     if counter in MOCK_IB_COUNTER_DATA:
         return MOCK_IB_COUNTER_DATA[counter]
     elif counter in MOCK_RDMA_COUNTER_DATA:
         return MOCK_RDMA_COUNTER_DATA[counter]
     elif counter in MOCK_STATUS_DATA:
         return MOCK_STATUS_DATA[counter]
+    elif counter in MOCK_DEVICE_METADATA:
+        return MOCK_DEVICE_METADATA[counter]
+    elif counter == 'link_layer':
+        return 'InfiniBand'
     return '0'
 
 

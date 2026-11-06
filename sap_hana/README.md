@@ -81,6 +81,17 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
    GRANT SELECT ON SYS_DATABASES.M_VOLUME_IO_TOTAL_STATISTICS TO DD_MONITOR;
    ```
 
+   To collect schema metadata for Data Quality features in Data Observability (requires Agent 7.82.0+), grant select on the catalog and monitoring views that store schema, table, and column definitions. These are already covered by the `GRANT CATALOG READ` in step 2, so this is only needed if you skipped that grant:
+
+   ```shell
+   GRANT SELECT ON SYS.SCHEMAS TO DD_MONITOR;
+   GRANT SELECT ON SYS.M_TABLES TO DD_MONITOR;
+   GRANT SELECT ON SYS.TABLE_COLUMNS TO DD_MONITOR;
+   GRANT SELECT ON SYS.VIEWS TO DD_MONITOR;
+   GRANT SELECT ON SYS.VIEW_COLUMNS TO DD_MONITOR;
+   GRANT SELECT ON SYS.M_TABLE_STATISTICS TO DD_MONITOR;
+   ```
+
 4. Finally, run the following command to assign the monitoring role to the desired user:
 
    ```shell
@@ -120,6 +131,40 @@ To learn how to set the port number for HANA tenant, single-tenant, and system d
     See the [sample sap_hana.d/conf.yaml][4] for all available configuration options.
 
 3. [Restart the Agent][5].
+
+#### Schema collection
+
+**Requires Agent 7.82.0+.**
+
+The Agent can collect SAP HANA catalog metadata (schemas, tables, views, and columns) for Data Quality features in Data Observability. When the monitoring user has access to `SYS.M_TABLE_STATISTICS`, the Agent also collects row counts and last modification times for tables. Collection is disabled by default. To enable schema collection, ensure that the monitoring user can read the required views (see [Granting privileges](#granting-privileges)) and add the following block to your `sap_hana.d/conf.yaml` file:
+
+```yaml
+   collect_schemas:
+     enabled: true
+     collection_interval: 600
+     max_tables: 2000
+     max_views: 2000
+     max_columns: 500
+```
+
+See the [sample sap_hana.d/conf.yaml][4] for all available schema collection options, including `include_schemas` and `exclude_schemas`.
+
+#### Data Observability query actions
+
+The Datadog backend can deliver monitoring queries to the SAP HANA check through Remote Configuration. When enabled, the Agent executes these queries against HANA on a schedule and forwards the results as Data Observability events.
+
+To allow Remote Configuration to push query configs to the `sap_hana` check, add `sap_hana` to the allowlist in `datadog.yaml`:
+
+```yaml
+remote_configuration:
+  agent_integrations:
+    allow_list:
+      - sap_hana
+```
+
+Without this entry, the Agent silently drops any query delivered by the backend without surfacing an error. After updating `datadog.yaml`, [restart the Agent][5].
+
+Data Observability query actions require schema collection to be enabled. Verify that the `collect_schemas` block is present and `enabled: true` in your `sap_hana.d/conf.yaml` (see [Schema collection](#schema-collection)).
 
 ### Validation
 

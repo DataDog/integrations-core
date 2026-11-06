@@ -15,6 +15,20 @@ from datadog_checks.slurm.constants import (
 SLURM_VERSION = '21.08.6'
 DEFAULT_SINFO_PATH = ['/usr/bin/sinfo']
 
+# stderr captured verbatim from Slurm 25.05.9. `scontrol listpid` exits 1 in all three
+# cases below; only the first is a node that simply has nothing to report. The other two
+# also carry the "no job steps" line because every failure inside stepd_available()
+# returns an empty step list.
+SCONTROL_IDLE_STDERR = "No job steps exist on this node.\n"
+SCONTROL_MISSING_SPOOLDIR_STDERR = (
+    "scontrol: error: Domain socket directory /var/spool/definitely-not-here: No such file or directory\n"
+    "No job steps exist on this node.\n"
+)
+SCONTROL_UNREADABLE_SPOOLDIR_STDERR = (
+    "scontrol: error: Unable to open directory: Permission denied\nNo job steps exist on this node.\n"
+)
+SINFO_CONTROLLER_DOWN_STDERR = "slurm_load_partitions: Unable to contact slurm controller (connect failure)\n"
+
 # Testing for params addition in sinfo
 SINFO_1_F = SINFO_PARTITION_PARAMS
 SINFO_2_F = SINFO_NODE_PARAMS
@@ -658,7 +672,7 @@ SQUEUE_MAP = {
                 'slurm_job_node_list:c1',
                 'slurm_job_reason:c1',
                 'slurm_job_state:RUNNING',
-                'slurm_job_tres_per_node:300M',
+                'slurm_job_tres_per_node:gres/gpu:1',
                 'slurm_job_user:root',
                 'slurm_partition_name:foo',
             ],
@@ -675,7 +689,7 @@ SQUEUE_MAP = {
                 'slurm_job_node_list:c2',
                 'slurm_job_reason:c2',
                 'slurm_job_state:RUNNING',
-                'slurm_job_tres_per_node:400M',
+                'slurm_job_tres_per_node:gres/gpu:2',
                 'slurm_job_user:root',
                 'slurm_partition_name:foo',
             ],
@@ -692,7 +706,7 @@ SQUEUE_MAP = {
                 'slurm_job_node_list:null',
                 'slurm_job_reason:Resources',
                 'slurm_job_state:PENDING',
-                'slurm_job_tres_per_node:100M',
+                'slurm_job_tres_per_node:gres/gpu:1',
                 'slurm_job_user:root',
                 'slurm_partition_name:foo',
             ],
@@ -709,7 +723,7 @@ SQUEUE_MAP = {
                 'slurm_job_node_list:null',
                 'slurm_job_reason:Priority',
                 'slurm_job_state:PENDING',
-                'slurm_job_tres_per_node:200M',
+                'slurm_job_tres_per_node:gres/gpu:1',
                 'slurm_job_user:root',
                 'slurm_partition_name:foo',
             ],

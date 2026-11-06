@@ -1,0 +1,82 @@
+{
+  "id": "labLongChain",
+  "versionId": "10000000-0000-0000-0000-000000000005",
+  "name": "Lab Long Chain",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "lab/chain",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "11111111-0000-0000-0000-000000000005",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "lab-chain-aaaa-bbbb-cccc-000000000005"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [{"id": "1", "name": "step", "value": "one", "type": "string"}]
+        },
+        "options": {}
+      },
+      "id": "22222222-0000-0000-0000-000000000005",
+      "name": "Step 1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [{"id": "2", "name": "step", "value": "two", "type": "string"}]
+        },
+        "options": {}
+      },
+      "id": "33333333-0000-0000-0000-000000000005",
+      "name": "Step 2",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [{"id": "3", "name": "step", "value": "three", "type": "string"}]
+        },
+        "options": {}
+      },
+      "id": "44444444-0000-0000-0000-000000000005",
+      "name": "Step 3",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [{"id": "4", "name": "scenario", "value": "chain", "type": "string"}]
+        },
+        "options": {}
+      },
+      "id": "55555555-0000-0000-0000-000000000005",
+      "name": "Step 4",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {"main": [[{"node": "Step 1", "type": "main", "index": 0}]]},
+    "Step 1": {"main": [[{"node": "Step 2", "type": "main", "index": 0}]]},
+    "Step 2": {"main": [[{"node": "Step 3", "type": "main", "index": 0}]]},
+    "Step 3": {"main": [[{"node": "Step 4", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {"executionOrder": "v1"},
+  "pinData": {}
+}

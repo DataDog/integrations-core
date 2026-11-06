@@ -1,1 +1,0 @@
-Add `include_total` option to the Windows perf-counter spec template, allowing integrations to opt in to collecting the `_Total` aggregate instance.

@@ -5,6 +5,9 @@ import re
 
 import pytest
 
+from ddev.cli.release.agent.common import get_changes_per_agent
+from ddev.repo.core import Repository
+
 
 def test_changelog_without_arguments(fake_changelog, ddev):
     result = ddev('release', 'agent', 'changelog')
@@ -88,6 +91,55 @@ def test_new_integration_with_non_initial_version(repo_with_new_integration_patc
 """
     assert result.output.rstrip('\n') == expected_output.strip('\n')
     assert mock_fetch_tags.call_count == 1
+
+
+def test_changelog_skips_unreleased_integrations(repo_with_history, config_file, ddev, mocker, write_repo_config):
+    config_file.model.repos['core'] = str(repo_with_history.path)
+    config_file.save()
+    write_repo_config(
+        repo_with_history.path,
+        """
+[overrides.release.agent.unreleased-integrations.by-integration]
+bar = ["7.38.0"]
+""",
+    )
+    mock_fetch_tags = mocker.patch('ddev.utils.git.GitRepository.fetch_tags')
+
+    result = ddev('release', 'agent', 'changelog', '--since', '7.37.0', '--to', '7.38.0')
+    assert result.exit_code == 0
+
+    expected_output = """## Datadog Agent version [7.38.0](https://github.com/DataDog/datadog-agent/blob/master/CHANGELOG.rst#7380)
+
+### New Integrations
+* datadog_checks_base [2.1.3](https://github.com/DataDog/integrations-core/blob/master/datadog_checks_base/CHANGELOG.md)
+### Integration Updates
+* foo [1.5.0](https://github.com/DataDog/integrations-core/blob/master/foo/CHANGELOG.md)
+"""
+    assert result.output.rstrip('\n') == expected_output.strip('\n')
+    assert mock_fetch_tags.call_count == 1
+
+
+@pytest.mark.parametrize(
+    ('previous_version', 'current_version', 'breaking'),
+    [
+        pytest.param('9.4.1', '10.0.0', True, id='major-upgrade-across-digit-boundary'),
+        pytest.param('10.0.0', '9.4.1', True, id='major-downgrade-across-digit-boundary'),
+        pytest.param('10.0.0', '10.1.0', False, id='minor-upgrade'),
+        pytest.param('10.0.0', '10.0.1', False, id='patch-upgrade'),
+    ],
+)
+def test_major_version_change_detection(
+    repo_with_history: Repository, previous_version: str, current_version: str, breaking: bool
+):
+    # Regression for the missing NGINX 9 -> 10 breaking-change notice in #25291.
+    for tag, version in (('7.42.0', previous_version), ('7.43.0', current_version)):
+        repo_with_history.agent_release_requirements.write_text(f'datadog-foo=={version}\n')
+        repo_with_history.git.run('commit', '--no-verify', '-am', tag)
+        repo_with_history.git.run('tag', tag)
+
+    changes = get_changes_per_agent(repo_with_history, '7.42.0', '7.43.0')
+
+    assert changes == {'7.43.0': {'foo': (current_version, False, breaking)}}
 
 
 @pytest.fixture

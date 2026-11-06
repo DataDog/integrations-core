@@ -165,6 +165,12 @@ instances:
     #
     # collect_statistics_metrics: false
 
+    ## @param filter_queue_statistics_metrics - boolean - optional - default: false
+    ## When enabled, queue statistics metrics (`ibm_mq.stats.queue.*`) are only emitted for queues that the check
+    ## monitors via `queue_patterns` or `queue_regex`.
+    #
+    # filter_queue_statistics_metrics: true
+
     ## @param collect_reset_queue_metrics - boolean - optional - default: true
     ## Collect metrics from Reset Queue Statistics. Statistics collected are:
     ##   - reset queue statistics (MQCMD_RESET_Q_STATS)

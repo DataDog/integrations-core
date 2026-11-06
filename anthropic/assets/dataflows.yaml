@@ -1,4 +1,5 @@
 provides:
   - id: anthropic-llm-completions
     always_on: false
+    data_type: llm_completions
     granular: true

@@ -233,10 +233,8 @@ def test_collect_plan_for_statement_no_plans_possible(explain_plans):
     assert result is None
 
 
-@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
-def test_plan_event_structure(mock_agent, explain_plans):
+def test_plan_event_structure(explain_plans):
     """A successful plan event has the required fields and correct dbm_type."""
-    mock_agent.get_version.return_value = '7.64.0'
 
     explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN),)])
 
@@ -257,7 +255,7 @@ def test_plan_event_structure(mock_agent, explain_plans):
     assert event is not None
     assert event['dbm_type'] == 'plan'
     assert event['ddsource'] == 'clickhouse'
-    assert event['ddagentversion'] == '7.64.0'
+    assert event['ddagentversion'] == '0.0.0'
     assert event['host'] is not None
     assert event['database_instance'] is not None
     assert event['timestamp'] == 1746205423150500 / 1000
@@ -277,10 +275,8 @@ def test_plan_event_structure(mock_agent, explain_plans):
     assert ch['query_duration_ms'] == 100.0
 
 
-@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
-def test_collect_plans_rate_limiting(mock_agent, explain_plans):
+def test_collect_plans_rate_limiting(explain_plans):
     """The same query_signature is only explained once within the rate-limit TTL."""
-    mock_agent.get_version.return_value = '7.64.0'
 
     explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN),)])
 
@@ -319,10 +315,8 @@ def test_collect_plans_rate_limiting(mock_agent, explain_plans):
     assert explain_plans._execute_query_fn.call_count == 1
 
 
-@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
-def test_collect_plans_skips_cte_insert(mock_agent, explain_plans):
+def test_collect_plans_skips_cte_insert(explain_plans):
     """WITH ... INSERT queries pass _can_explain_statement but are skipped via query_kind."""
-    mock_agent.get_version.return_value = '7.64.0'
     explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN),)])
 
     rows = [
@@ -346,10 +340,8 @@ def test_collect_plans_skips_cte_insert(mock_agent, explain_plans):
     explain_plans._execute_query_fn.assert_not_called()
 
 
-@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
-def test_collect_plans_skips_missing_signature(mock_agent, explain_plans):
+def test_collect_plans_skips_missing_signature(explain_plans):
     """Rows without a query_signature are skipped."""
-    mock_agent.get_version.return_value = '7.64.0'
 
     rows = [
         {
@@ -364,10 +356,8 @@ def test_collect_plans_skips_missing_signature(mock_agent, explain_plans):
     assert len(plans) == 0
 
 
-@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
-def test_collect_plans_error_event(mock_agent, explain_plans):
+def test_collect_plans_error_event(explain_plans):
     """When EXPLAIN fails, the error is recorded in collection_errors."""
-    mock_agent.get_version.return_value = '7.64.0'
     explain_plans._execute_query_fn = mock.MagicMock(side_effect=Exception("DB error"))
 
     rows = [
@@ -398,10 +388,8 @@ def test_collect_plans_error_event(mock_agent, explain_plans):
     assert errors[0]['code'] == DBExplainError.database_error.value
 
 
-@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
-def test_collect_plans_unsupported_statements_skip_rate_limiter(mock_agent, explain_plans):
+def test_collect_plans_unsupported_statements_skip_rate_limiter(explain_plans):
     """Unsupported statements are skipped before acquiring a rate limit slot."""
-    mock_agent.get_version.return_value = '7.64.0'
     explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN),)])
 
     # Fill the cache with DDL queries up to maxsize so any further acquire would fail
@@ -444,10 +432,8 @@ def test_collect_plans_unsupported_statements_skip_rate_limiter(mock_agent, expl
     explain_plans._execute_query_fn.assert_not_called()
 
 
-@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
-def test_collect_plans_different_databases_explained_separately(mock_agent, explain_plans):
+def test_collect_plans_different_databases_explained_separately(explain_plans):
     """Same query_signature in different databases each get an EXPLAIN."""
-    mock_agent.get_version.return_value = '7.64.0'
     explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN),)])
 
     rows = [
@@ -495,10 +481,8 @@ def test_run_explain_uses_indexes_and_actions(explain_plans):
     assert "actions = 1" in call_args
 
 
-@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
-def test_plan_definition_preserves_indexes(mock_agent, explain_plans):
+def test_plan_definition_preserves_indexes(explain_plans):
     """Plan definition keeps Indexes fields intact."""
-    mock_agent.get_version.return_value = '7.64.0'
     explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN_WITH_INDEXES),)])
 
     row = {
@@ -523,10 +507,8 @@ def test_plan_definition_preserves_indexes(mock_agent, explain_plans):
     assert read_node['Indexes'][0]['Keys'] == ['order_date']
 
 
-@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
-def test_plan_definition_preserves_actions(mock_agent, explain_plans):
+def test_plan_definition_preserves_actions(explain_plans):
     """Plan definition keeps Actions fields intact."""
-    mock_agent.get_version.return_value = '7.64.0'
     explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN_WITH_ACTIONS),)])
 
     row = {
@@ -576,10 +558,8 @@ def test_normalize_clickhouse_plan_strips_stats():
     assert child['Description'] == 'default.inventory_items'
 
 
-@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
-def test_plan_definition_preserves_descriptions(mock_agent, explain_plans):
+def test_plan_definition_preserves_descriptions(explain_plans):
     """Plan definition keeps ClickHouse Description fields intact (not replaced with '?')."""
-    mock_agent.get_version.return_value = '7.64.0'
     explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN),)])
 
     row = {
@@ -776,10 +756,8 @@ def test_run_explain_safe_captures_empty_rows_as_database_error(explain_plans):
     assert error_code == DBExplainError.database_error
 
 
-@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
-def test_collect_plan_for_statement_serialization_failure(mock_agent, explain_plans):
+def test_collect_plan_for_statement_serialization_failure(explain_plans):
     """A serialization failure during plan obfuscation is recorded as invalid_result."""
-    mock_agent.get_version.return_value = '7.64.0'
 
     explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN),)])
 
@@ -810,10 +788,8 @@ def test_collect_plan_for_statement_serialization_failure(mock_agent, explain_pl
     assert event['db']['plan']['signature'] is None
 
 
-@mock.patch('datadog_checks.clickhouse.explain_plans.datadog_agent')
-def test_collect_plan_for_statement_no_collection_errors_on_success(mock_agent, explain_plans):
+def test_collect_plan_for_statement_no_collection_errors_on_success(explain_plans):
     """collection_errors is None (not an empty list) when the plan is collected successfully."""
-    mock_agent.get_version.return_value = '7.64.0'
     explain_plans._execute_query_fn = mock.MagicMock(return_value=[(json.dumps(SAMPLE_PLAN),)])
 
     row = {

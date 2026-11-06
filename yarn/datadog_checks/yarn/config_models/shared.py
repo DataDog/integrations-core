@@ -39,7 +39,17 @@ class SharedConfig(BaseModel):
     collect_apps_all_states: Optional[bool] = None
     collect_apps_states_list: Optional[
         tuple[
-            Literal['ALL', 'NEW', 'NEW_SAVING', 'SUBMITTED', 'ACCEPTED', 'RUNNING', 'FINISHED', 'FAILED', 'KILLED'], ...
+            Literal[
+                'ALL',
+                'NEW',
+                'NEW_SAVING',
+                'SUBMITTED',
+                'ACCEPTED',
+                'RUNNING',
+                'FINISHED',
+                'FAILED',
+                'KILLED',
+            ], ...
         ]
     ] = None
     proxy: Optional[Proxy] = None

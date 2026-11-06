@@ -28,7 +28,22 @@ class Filters(BaseModel):
     id: Optional[tuple[int, ...]] = None
     source: Optional[tuple[str, ...]] = None
     type: Optional[
-        tuple[Literal['success', 'error', 'warning', 'information', 'success audit', 'failure audit'], ...]
+        tuple[
+            Literal[
+                'success',
+                'error',
+                'warning',
+                'information',
+                'success audit',
+                'failure audit',
+                'Success',
+                'Error',
+                'Warning',
+                'Information',
+                'Success Audit',
+                'Failure Audit',
+            ], ...
+        ]
     ] = None
 
 

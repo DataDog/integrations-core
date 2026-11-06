@@ -1,12 +1,9 @@
 [env.collectors.datadog-checks]
 check-types = true
-mypy-args = [
-    "--explicit-package-bases",
-]
 
 [[envs.default.matrix]]
 python = ["3.13"]
-prefect_version = ["3.6.17"]
+prefect_version = ["3.6.17", "3.8.5"]
 
 [envs.default.overrides]
 matrix.python.env-vars = "PYTHON"

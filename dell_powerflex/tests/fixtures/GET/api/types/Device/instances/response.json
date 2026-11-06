@@ -1,0 +1,221 @@
+[
+  {
+    "fglNvdimmWriteCacheState": "Disabled",
+    "mediaType": "SSD",
+    "deviceType": "Unknown",
+    "serialNumber": "VBOX_HARDDISK_VBa1b2c3d4-00000001",
+    "vendorName": "ATA",
+    "modelName": "VBOX HARDDISK",
+    "firmwareVersion": "1.0",
+    "deviceState": "Normal",
+    "errorState": "None",
+    "rdmaBaseDeviceName": null,
+    "rdmaBaseDeviceMaxSize": 0,
+    "rdmaBaseDeviceDeletedSize": 0,
+    "capacityLimitInKb": 103756800,
+    "maxCapacityInKb": 103756800,
+    "logicalCapacityInKb": 0,
+    "persistentChecksumState": "Protected",
+    "autoDetectMediaType": "SSD",
+    "externalAccelerationType": "None",
+    "rfcacheProps": null,
+    "storagePoolId": "25155ba600000000",
+    "sdsId": "d1c062b900000002",
+    "name": "sds1-dev1",
+    "id": "f7fd7d0b00020000",
+    "deviceCurrentPathName": "/dev/sdb",
+    "deviceOriginalPathName": "/dev/sdb",
+    "temperatureState": "NeverFailed",
+    "aggregatedState": "NeverFailed",
+    "ssdEndOfLifeState": "NeverFailed",
+    "longSuccessfulIos": {
+      "shortWindow": {
+        "threshold": 10000,
+        "windowSizeInSec": 60,
+        "lastOscillationCount": 0,
+        "lastOscillationTime": 0,
+        "maxFailuresCount": 0
+      },
+      "mediumWindow": {
+        "threshold": 100000,
+        "windowSizeInSec": 3600,
+        "lastOscillationCount": 0,
+        "lastOscillationTime": 0,
+        "maxFailuresCount": 0
+      },
+      "longWindow": {
+        "threshold": 1000000,
+        "windowSizeInSec": 86400,
+        "lastOscillationCount": 0,
+        "lastOscillationTime": 0,
+        "maxFailuresCount": 0
+      }
+    },
+    "ataSecurityActive": false,
+    "fglNvdimmSizeMb": 0,
+    "links": [
+      {
+        "rel": "self",
+        "href": "/api/instances/Device::f7fd7d0b00020000"
+      },
+      {
+        "rel": "/api/Device/relationship/Statistics",
+        "href": "/api/instances/Device::f7fd7d0b00020000/relationships/Statistics"
+      },
+      {
+        "rel": "/api/parent/relationship/sdsId",
+        "href": "/api/instances/Sds::d1c062b900000002"
+      },
+      {
+        "rel": "/api/parent/relationship/storagePoolId",
+        "href": "/api/instances/StoragePool::25155ba600000000"
+      }
+    ]
+  },
+  {
+    "fglNvdimmWriteCacheState": "Disabled",
+    "mediaType": "SSD",
+    "deviceType": "Unknown",
+    "serialNumber": "VBOX_HARDDISK_VBa1b2c3d4-00000002",
+    "vendorName": "ATA",
+    "modelName": "VBOX HARDDISK",
+    "firmwareVersion": "1.0",
+    "deviceState": "Normal",
+    "errorState": "None",
+    "rdmaBaseDeviceName": null,
+    "rdmaBaseDeviceMaxSize": 0,
+    "rdmaBaseDeviceDeletedSize": 0,
+    "capacityLimitInKb": 103756800,
+    "maxCapacityInKb": 103756800,
+    "logicalCapacityInKb": 0,
+    "persistentChecksumState": "Protected",
+    "autoDetectMediaType": "SSD",
+    "externalAccelerationType": "None",
+    "rfcacheProps": null,
+    "storagePoolId": "25155ba600000000",
+    "sdsId": "d1c062b800000001",
+    "name": "sds2-dev1",
+    "id": "f7fd7d0a00010000",
+    "deviceCurrentPathName": "/dev/sdb",
+    "deviceOriginalPathName": "/dev/sdb",
+    "temperatureState": "NeverFailed",
+    "aggregatedState": "NeverFailed",
+    "ssdEndOfLifeState": "NeverFailed",
+    "longSuccessfulIos": {
+      "shortWindow": {
+        "threshold": 10000,
+        "windowSizeInSec": 60,
+        "lastOscillationCount": 0,
+        "lastOscillationTime": 0,
+        "maxFailuresCount": 0
+      },
+      "mediumWindow": {
+        "threshold": 100000,
+        "windowSizeInSec": 3600,
+        "lastOscillationCount": 0,
+        "lastOscillationTime": 0,
+        "maxFailuresCount": 0
+      },
+      "longWindow": {
+        "threshold": 1000000,
+        "windowSizeInSec": 86400,
+        "lastOscillationCount": 0,
+        "lastOscillationTime": 0,
+        "maxFailuresCount": 0
+      }
+    },
+    "ataSecurityActive": false,
+    "fglNvdimmSizeMb": 0,
+    "links": [
+      {
+        "rel": "self",
+        "href": "/api/instances/Device::f7fd7d0a00010000"
+      },
+      {
+        "rel": "/api/Device/relationship/Statistics",
+        "href": "/api/instances/Device::f7fd7d0a00010000/relationships/Statistics"
+      },
+      {
+        "rel": "/api/parent/relationship/sdsId",
+        "href": "/api/instances/Sds::d1c062b800000001"
+      },
+      {
+        "rel": "/api/parent/relationship/storagePoolId",
+        "href": "/api/instances/StoragePool::25155ba600000000"
+      }
+    ]
+  },
+  {
+    "fglNvdimmWriteCacheState": "Disabled",
+    "mediaType": "SSD",
+    "deviceType": "Unknown",
+    "serialNumber": "VBOX_HARDDISK_VBa1b2c3d4-00000003",
+    "vendorName": "ATA",
+    "modelName": "VBOX HARDDISK",
+    "firmwareVersion": "1.0",
+    "deviceState": "Normal",
+    "errorState": "None",
+    "rdmaBaseDeviceName": null,
+    "rdmaBaseDeviceMaxSize": 0,
+    "rdmaBaseDeviceDeletedSize": 0,
+    "capacityLimitInKb": 103756800,
+    "maxCapacityInKb": 103756800,
+    "logicalCapacityInKb": 0,
+    "persistentChecksumState": "Protected",
+    "autoDetectMediaType": "SSD",
+    "externalAccelerationType": "None",
+    "rfcacheProps": null,
+    "storagePoolId": "25155ba600000000",
+    "sdsId": "d1c062b700000000",
+    "name": "sds3-dev1",
+    "id": "f7f77d0900000000",
+    "deviceCurrentPathName": "/dev/sdb",
+    "deviceOriginalPathName": "/dev/sdb",
+    "temperatureState": "NeverFailed",
+    "aggregatedState": "NeverFailed",
+    "ssdEndOfLifeState": "NeverFailed",
+    "longSuccessfulIos": {
+      "shortWindow": {
+        "threshold": 10000,
+        "windowSizeInSec": 60,
+        "lastOscillationCount": 0,
+        "lastOscillationTime": 0,
+        "maxFailuresCount": 0
+      },
+      "mediumWindow": {
+        "threshold": 100000,
+        "windowSizeInSec": 3600,
+        "lastOscillationCount": 0,
+        "lastOscillationTime": 0,
+        "maxFailuresCount": 0
+      },
+      "longWindow": {
+        "threshold": 1000000,
+        "windowSizeInSec": 86400,
+        "lastOscillationCount": 0,
+        "lastOscillationTime": 0,
+        "maxFailuresCount": 0
+      }
+    },
+    "ataSecurityActive": false,
+    "fglNvdimmSizeMb": 0,
+    "links": [
+      {
+        "rel": "self",
+        "href": "/api/instances/Device::f7f77d0900000000"
+      },
+      {
+        "rel": "/api/Device/relationship/Statistics",
+        "href": "/api/instances/Device::f7f77d0900000000/relationships/Statistics"
+      },
+      {
+        "rel": "/api/parent/relationship/sdsId",
+        "href": "/api/instances/Sds::d1c062b700000000"
+      },
+      {
+        "rel": "/api/parent/relationship/storagePoolId",
+        "href": "/api/instances/StoragePool::25155ba600000000"
+      }
+    ]
+  }
+]

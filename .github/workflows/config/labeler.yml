@@ -3,9 +3,12 @@ base_package:
   - any-glob-to-any-file: datadog_checks_base/**/*
 changelog/no-changelog:
 - changed-files:
-  - any-glob-to-any-file:
+  - any-glob-to-all-files:
     - requirements-agent-release.txt
     - '**/__about__.py'
+    - '**/CHANGELOG.md'
+    - '**/changelog.d/*'
+    - .in-toto/**
 ddev:
 - changed-files:
   - any-glob-to-any-file: ddev/**/*
@@ -19,7 +22,7 @@ dev/testing:
 - changed-files:
   - any-glob-to-any-file:
     - .github/workflows/**
-    - .codecov.yml
+    - code-coverage.datadog.yml
 dev/tooling:
 - changed-files:
   - any-glob-to-any-file:
@@ -94,14 +97,14 @@ integration/ambari:
 - changed-files:
   - any-glob-to-any-file:
     - ambari/**/*
+integration/anomali_threatstream:
+- changed-files:
+  - any-glob-to-any-file:
+    - anomali_threatstream/**/*
 integration/anthropic:
 - changed-files:
   - any-glob-to-any-file:
     - anthropic/**/*
-integration/anthropic_usage_and_costs:
-- changed-files:
-  - any-glob-to-any-file:
-    - anthropic_usage_and_costs/**/*
 integration/anyscale:
 - changed-files:
   - any-glob-to-any-file:
@@ -134,22 +137,14 @@ integration/argocd:
 - changed-files:
   - any-glob-to-any-file:
     - argocd/**/*
-integration/asana:
-- changed-files:
-  - any-glob-to-any-file:
-    - asana/**/*
 integration/aspdotnet:
 - changed-files:
   - any-glob-to-any-file:
     - aspdotnet/**/*
-integration/authorize_net:
+integration/automox:
 - changed-files:
   - any-glob-to-any-file:
-    - authorize_net/**/*
-integration/avast:
-- changed-files:
-  - any-glob-to-any-file:
-    - avast/**/*
+    - automox/**/*
 integration/avi_vantage:
 - changed-files:
   - any-glob-to-any-file:
@@ -194,18 +189,6 @@ integration/bitdefender:
 - changed-files:
   - any-glob-to-any-file:
     - bitdefender/**/*
-integration/bitwarden:
-- changed-files:
-  - any-glob-to-any-file:
-    - bitwarden/**/*
-integration/blazemeter:
-- changed-files:
-  - any-glob-to-any-file:
-    - blazemeter/**/*
-integration/bluecat_edge:
-- changed-files:
-  - any-glob-to-any-file:
-    - bluecat_edge/**/*
 integration/bluecat_integrity:
 - changed-files:
   - any-glob-to-any-file:
@@ -214,10 +197,6 @@ integration/boundary:
 - changed-files:
   - any-glob-to-any-file:
     - boundary/**/*
-integration/box:
-- changed-files:
-  - any-glob-to-any-file:
-    - box/**/*
 integration/brevo:
 - changed-files:
   - any-glob-to-any-file:
@@ -246,10 +225,6 @@ integration/cassandra_nodetool:
 - changed-files:
   - any-glob-to-any-file:
     - cassandra_nodetool/**/*
-integration/cato_networks:
-- changed-files:
-  - any-glob-to-any-file:
-    - cato_networks/**/*
 integration/celery:
 - changed-files:
   - any-glob-to-any-file:
@@ -286,10 +261,10 @@ integration/cisco_asa:
 - changed-files:
   - any-glob-to-any-file:
     - cisco_asa/**/*
-integration/cisco_duo:
+integration/cisco_catalyst_center:
 - changed-files:
   - any-glob-to-any-file:
-    - cisco_duo/**/*
+    - cisco_catalyst_center/**/*
 integration/cisco_sdwan:
 - changed-files:
   - any-glob-to-any-file:
@@ -298,14 +273,6 @@ integration/cisco_secure_client:
 - changed-files:
   - any-glob-to-any-file:
     - cisco_secure_client/**/*
-integration/cisco_secure_email_threat_defense:
-- changed-files:
-  - any-glob-to-any-file:
-    - cisco_secure_email_threat_defense/**/*
-integration/cisco_secure_endpoint:
-- changed-files:
-  - any-glob-to-any-file:
-    - cisco_secure_endpoint/**/*
 integration/cisco_secure_firewall:
 - changed-files:
   - any-glob-to-any-file:
@@ -314,10 +281,6 @@ integration/cisco_secure_web_appliance:
 - changed-files:
   - any-glob-to-any-file:
     - cisco_secure_web_appliance/**/*
-integration/cisco_umbrella_dns:
-- changed-files:
-  - any-glob-to-any-file:
-    - cisco_umbrella_dns/**/*
 integration/citrix_hypervisor:
 - changed-files:
   - any-glob-to-any-file:
@@ -342,10 +305,6 @@ integration/cockroachdb:
 - changed-files:
   - any-glob-to-any-file:
     - cockroachdb/**/*
-integration/cofense_triage:
-- changed-files:
-  - any-glob-to-any-file:
-    - cofense_triage/**/*
 integration/confluent_platform:
 - changed-files:
   - any-glob-to-any-file:
@@ -398,18 +357,6 @@ integration/crio:
 - changed-files:
   - any-glob-to-any-file:
     - crio/**/*
-integration/crowdstrike_fdr:
-- changed-files:
-  - any-glob-to-any-file:
-    - crowdstrike_fdr/**/*
-integration/cyberark_endpoint_privilege_manager:
-- changed-files:
-  - any-glob-to-any-file:
-    - cyberark_endpoint_privilege_manager/**/*
-integration/databricks:
-- changed-files:
-  - any-glob-to-any-file:
-    - databricks/**/*
 integration/datadog_checks_tests_helper:
 - changed-files:
   - any-glob-to-any-file:
@@ -438,6 +385,10 @@ integration/delinea_secret_server:
 - changed-files:
   - any-glob-to-any-file:
     - delinea_secret_server/**/*
+integration/dell_powerflex:
+- changed-files:
+  - any-glob-to-any-file:
+    - dell_powerflex/**/*
 integration/directory:
 - changed-files:
   - any-glob-to-any-file:
@@ -450,10 +401,6 @@ integration/dns_check:
 - changed-files:
   - any-glob-to-any-file:
     - dns_check/**/*
-integration/dnsfilter:
-- changed-files:
-  - any-glob-to-any-file:
-    - dnsfilter/**/*
 integration/do_query_actions:
 - changed-files:
   - any-glob-to-any-file:
@@ -462,10 +409,6 @@ integration/docker_daemon:
 - changed-files:
   - any-glob-to-any-file:
     - docker_daemon/**/*
-integration/docusign:
-- changed-files:
-  - any-glob-to-any-file:
-    - docusign/**/*
 integration/dotnetclr:
 - changed-files:
   - any-glob-to-any-file:
@@ -478,6 +421,10 @@ integration/duckdb:
 - changed-files:
   - any-glob-to-any-file:
     - duckdb/**/*
+integration/dynamo:
+- changed-files:
+  - any-glob-to-any-file:
+    - dynamo/**/*
 integration/ecs_fargate:
 - changed-files:
   - any-glob-to-any-file:
@@ -518,10 +465,6 @@ integration/external_dns:
 - changed-files:
   - any-glob-to-any-file:
     - external_dns/**/*
-integration/extrahop:
-- changed-files:
-  - any-glob-to-any-file:
-    - extrahop/**/*
 integration/falco:
 - changed-files:
   - any-glob-to-any-file:
@@ -542,14 +485,6 @@ integration/fly_io:
 - changed-files:
   - any-glob-to-any-file:
     - fly_io/**/*
-integration/forcepoint_secure_web_gateway:
-- changed-files:
-  - any-glob-to-any-file:
-    - forcepoint_secure_web_gateway/**/*
-integration/forcepoint_security_service_edge:
-- changed-files:
-  - any-glob-to-any-file:
-    - forcepoint_security_service_edge/**/*
 integration/forescout:
 - changed-files:
   - any-glob-to-any-file:
@@ -566,10 +501,6 @@ integration/gearmand:
 - changed-files:
   - any-glob-to-any-file:
     - gearmand/**/*
-integration/genesys:
-- changed-files:
-  - any-glob-to-any-file:
-    - genesys/**/*
 integration/gitlab:
 - changed-files:
   - any-glob-to-any-file:
@@ -594,18 +525,10 @@ integration/go_expvar:
 - changed-files:
   - any-glob-to-any-file:
     - go_expvar/**/*
-integration/godaddy:
-- changed-files:
-  - any-glob-to-any-file:
-    - godaddy/**/*
 integration/gpu:
 - changed-files:
   - any-glob-to-any-file:
     - gpu/**/*
-integration/greenhouse:
-- changed-files:
-  - any-glob-to-any-file:
-    - greenhouse/**/*
 integration/guarddog:
 - changed-files:
   - any-glob-to-any-file:
@@ -622,10 +545,6 @@ integration/harbor:
 - changed-files:
   - any-glob-to-any-file:
     - harbor/**/*
-integration/have_i_been_pwned:
-- changed-files:
-  - any-glob-to-any-file:
-    - have_i_been_pwned/**/*
 integration/hazelcast:
 - changed-files:
   - any-glob-to-any-file:
@@ -650,14 +569,14 @@ integration/hivemq:
 - changed-files:
   - any-glob-to-any-file:
     - hivemq/**/*
+integration/hpe_aruba_edgeconnect:
+- changed-files:
+  - any-glob-to-any-file:
+    - hpe_aruba_edgeconnect/**/*
 integration/http_check:
 - changed-files:
   - any-glob-to-any-file:
     - http_check/**/*
-integration/hubspot_content_hub:
-- changed-files:
-  - any-glob-to-any-file:
-    - hubspot_content_hub/**/*
 integration/hudi:
 - changed-files:
   - any-glob-to-any-file:
@@ -718,10 +637,6 @@ integration/impala:
 - changed-files:
   - any-glob-to-any-file:
     - impala/**/*
-integration/incident_io:
-- changed-files:
-  - any-glob-to-any-file:
-    - incident_io/**/*
 integration/infiniband:
 - changed-files:
   - any-glob-to-any-file:
@@ -730,6 +645,10 @@ integration/intercom:
 - changed-files:
   - any-glob-to-any-file:
     - intercom/**/*
+integration/intersystems_iris:
+- changed-files:
+  - any-glob-to-any-file:
+    - intersystems_iris/**/*
 integration/istio:
 - changed-files:
   - any-glob-to-any-file:
@@ -738,10 +657,6 @@ integration/ivanti_connect_secure:
 - changed-files:
   - any-glob-to-any-file:
     - ivanti_connect_secure/**/*
-integration/ivanti_nzta:
-- changed-files:
-  - any-glob-to-any-file:
-    - ivanti_nzta/**/*
 integration/jamf_pro:
 - changed-files:
   - any-glob-to-any-file:
@@ -774,10 +689,10 @@ integration/kafka_consumer:
 - changed-files:
   - any-glob-to-any-file:
     - kafka_consumer/**/*
-integration/kandji:
+integration/kai_scheduler:
 - changed-files:
   - any-glob-to-any-file:
-    - kandji/**/*
+    - kai_scheduler/**/*
 integration/karpenter:
 - changed-files:
   - any-glob-to-any-file:
@@ -794,10 +709,6 @@ integration/keycloak:
 - changed-files:
   - any-glob-to-any-file:
     - keycloak/**/*
-integration/klaviyo:
-- changed-files:
-  - any-glob-to-any-file:
-    - klaviyo/**/*
 integration/kong:
 - changed-files:
   - any-glob-to-any-file:
@@ -874,6 +785,10 @@ integration/kubevirt_handler:
 - changed-files:
   - any-glob-to-any-file:
     - kubevirt_handler/**/*
+integration/kueue:
+- changed-files:
+  - any-glob-to-any-file:
+    - kueue/**/*
 integration/kuma:
 - changed-files:
   - any-glob-to-any-file:
@@ -890,14 +805,6 @@ integration/langchain:
 - changed-files:
   - any-glob-to-any-file:
     - langchain/**/*
-integration/lparstats:
-- changed-files:
-  - any-glob-to-any-file:
-    - lparstats/**/*
-integration/lastpass:
-- changed-files:
-  - any-glob-to-any-file:
-    - lastpass/**/*
 integration/lighttpd:
 - changed-files:
   - any-glob-to-any-file:
@@ -918,6 +825,10 @@ integration/litellm:
 - changed-files:
   - any-glob-to-any-file:
     - litellm/**/*
+integration/lparstats:
+- changed-files:
+  - any-glob-to-any-file:
+    - lparstats/**/*
 integration/lustre:
 - changed-files:
   - any-glob-to-any-file:
@@ -926,10 +837,6 @@ integration/mac_audit_logs:
 - changed-files:
   - any-glob-to-any-file:
     - mac_audit_logs/**/*
-integration/mailchimp:
-- changed-files:
-  - any-glob-to-any-file:
-    - mailchimp/**/*
 integration/mapr:
 - changed-files:
   - any-glob-to-any-file:
@@ -958,14 +865,6 @@ integration/mesos_slave:
 - changed-files:
   - any-glob-to-any-file:
     - mesos_slave/**/*
-integration/metabase:
-- changed-files:
-  - any-glob-to-any-file:
-    - metabase/**/*
-integration/microsoft_copilot:
-- changed-files:
-  - any-glob-to-any-file:
-    - microsoft_copilot/**/*
 integration/microsoft_dns:
 - changed-files:
   - any-glob-to-any-file:
@@ -978,18 +877,10 @@ integration/milvus:
 - changed-files:
   - any-glob-to-any-file:
     - milvus/**/*
-integration/mimecast:
-- changed-files:
-  - any-glob-to-any-file:
-    - mimecast/**/*
 integration/mongo:
 - changed-files:
   - any-glob-to-any-file:
     - mongo/**/*
-integration/mux:
-- changed-files:
-  - any-glob-to-any-file:
-    - mux/**/*
 integration/mysql:
 - changed-files:
   - any-glob-to-any-file:
@@ -1002,10 +893,6 @@ integration/nagios:
 - changed-files:
   - any-glob-to-any-file:
     - nagios/**/*
-integration/nifi:
-- changed-files:
-  - any-glob-to-any-file:
-    - nifi/**/*
 integration/network:
 - changed-files:
   - any-glob-to-any-file:
@@ -1026,6 +913,10 @@ integration/nginx_ingress_controller:
 - changed-files:
   - any-glob-to-any-file:
     - nginx_ingress_controller/**/*
+integration/nifi:
+- changed-files:
+  - any-glob-to-any-file:
+    - nifi/**/*
 integration/ntp:
 - changed-files:
   - any-glob-to-any-file:
@@ -1046,10 +937,6 @@ integration/nvidia_triton:
 - changed-files:
   - any-glob-to-any-file:
     - nvidia_triton/**/*
-integration/obsidian_security:
-- changed-files:
-  - any-glob-to-any-file:
-    - obsidian_security/**/*
 integration/octopus_deploy:
 - changed-files:
   - any-glob-to-any-file:
@@ -1058,10 +945,6 @@ integration/oke:
 - changed-files:
   - any-glob-to-any-file:
     - oke/**/*
-integration/okta_workflows:
-- changed-files:
-  - any-glob-to-any-file:
-    - okta_workflows/**/*
 integration/oom_kill:
 - changed-files:
   - any-glob-to-any-file:
@@ -1078,6 +961,10 @@ integration/openmetrics:
 - changed-files:
   - any-glob-to-any-file:
     - openmetrics/**/*
+integration/openrouter:
+- changed-files:
+  - any-glob-to-any-file:
+    - openrouter/**/*
 integration/openshift:
 - changed-files:
   - any-glob-to-any-file:
@@ -1110,10 +997,6 @@ integration/otel:
 - changed-files:
   - any-glob-to-any-file:
     - otel/**/*
-integration/palo_alto_cortex_xdr:
-- changed-files:
-  - any-glob-to-any-file:
-    - palo_alto_cortex_xdr/**/*
 integration/palo_alto_panorama:
 - changed-files:
   - any-glob-to-any-file:
@@ -1138,30 +1021,18 @@ integration/ping_federate:
 - changed-files:
   - any-glob-to-any-file:
     - ping_federate/**/*
-integration/ping_one:
-- changed-files:
-  - any-glob-to-any-file:
-    - ping_one/**/*
-integration/ping_one_aic:
-- changed-files:
-  - any-glob-to-any-file:
-    - ping_one_aic/**/*
 integration/pivotal_pks:
 - changed-files:
   - any-glob-to-any-file:
     - pivotal_pks/**/*
-integration/plaid:
-- changed-files:
-  - any-glob-to-any-file:
-    - plaid/**/*
-integration/plivo:
-- changed-files:
-  - any-glob-to-any-file:
-    - plivo/**/*
 integration/podman:
 - changed-files:
   - any-glob-to-any-file:
     - podman/**/*
+integration/powershell:
+- changed-files:
+  - any-glob-to-any-file:
+    - powershell/**/*
 integration/postfix:
 - changed-files:
   - any-glob-to-any-file:
@@ -1194,14 +1065,6 @@ integration/prometheus:
 - changed-files:
   - any-glob-to-any-file:
     - prometheus/**/*
-integration/proofpoint_on_demand:
-- changed-files:
-  - any-glob-to-any-file:
-    - proofpoint_on_demand/**/*
-integration/proofpoint_tap:
-- changed-files:
-  - any-glob-to-any-file:
-    - proofpoint_tap/**/*
 integration/proxmox:
 - changed-files:
   - any-glob-to-any-file:
@@ -1250,14 +1113,6 @@ integration/riakcs:
 - changed-files:
   - any-glob-to-any-file:
     - riakcs/**/*
-integration/ringcentral:
-- changed-files:
-  - any-glob-to-any-file:
-    - ringcentral/**/*
-integration/sanity:
-- changed-files:
-  - any-glob-to-any-file:
-    - sanity/**/*
 integration/sap_hana:
 - changed-files:
   - any-glob-to-any-file:
@@ -1266,10 +1121,10 @@ integration/scylla:
 - changed-files:
   - any-glob-to-any-file:
     - scylla/**/*
-integration/shopify:
+integration/sglang:
 - changed-files:
   - any-glob-to-any-file:
-    - shopify/**/*
+    - sglang/**/*
 integration/sidekiq:
 - changed-files:
   - any-glob-to-any-file:
@@ -1362,10 +1217,6 @@ integration/sonicwall_firewall:
 - changed-files:
   - any-glob-to-any-file:
     - sonicwall_firewall/**/*
-integration/sophos_central_cloud:
-- changed-files:
-  - any-glob-to-any-file:
-    - sophos_central_cloud/**/*
 integration/spark:
 - changed-files:
   - any-glob-to-any-file:
@@ -1390,10 +1241,6 @@ integration/storage_management:
 - changed-files:
   - any-glob-to-any-file:
     - storage_management/**/*
-integration/streamnative:
-- changed-files:
-  - any-glob-to-any-file:
-    - streamnative/**/*
 integration/strimzi:
 - changed-files:
   - any-glob-to-any-file:
@@ -1402,10 +1249,6 @@ integration/supabase:
 - changed-files:
   - any-glob-to-any-file:
     - supabase/**/*
-integration/supabase_cloud:
-- changed-files:
-  - any-glob-to-any-file:
-    - supabase_cloud/**/*
 integration/supervisord:
 - changed-files:
   - any-glob-to-any-file:
@@ -1422,10 +1265,6 @@ integration/symantec_endpoint_protection:
 - changed-files:
   - any-glob-to-any-file:
     - symantec_endpoint_protection/**/*
-integration/symantec_vip:
-- changed-files:
-  - any-glob-to-any-file:
-    - symantec_vip/**/*
 integration/system_core:
 - changed-files:
   - any-glob-to-any-file:
@@ -1438,10 +1277,6 @@ integration/systemd:
 - changed-files:
   - any-glob-to-any-file:
     - systemd/**/*
-integration/tanium:
-- changed-files:
-  - any-glob-to-any-file:
-    - tanium/**/*
 integration/tcp_check:
 - changed-files:
   - any-glob-to-any-file:
@@ -1466,18 +1301,10 @@ integration/temporal:
 - changed-files:
   - any-glob-to-any-file:
     - temporal/**/*
-integration/temporal_cloud:
-- changed-files:
-  - any-glob-to-any-file:
-    - temporal_cloud/**/*
 integration/tenable:
 - changed-files:
   - any-glob-to-any-file:
     - tenable/**/*
-integration/tenable_io:
-- changed-files:
-  - any-glob-to-any-file:
-    - tenable_io/**/*
 integration/teradata:
 - changed-files:
   - any-glob-to-any-file:
@@ -1486,6 +1313,10 @@ integration/terraform:
 - changed-files:
   - any-glob-to-any-file:
     - terraform/**/*
+integration/thermal:
+- changed-files:
+  - any-glob-to-any-file:
+    - thermal/**/*
 integration/tibco_ems:
 - changed-files:
   - any-glob-to-any-file:
@@ -1514,22 +1345,6 @@ integration/traffic_server:
 - changed-files:
   - any-glob-to-any-file:
     - traffic_server/**/*
-integration/trellix_endpoint_security:
-- changed-files:
-  - any-glob-to-any-file:
-    - trellix_endpoint_security/**/*
-integration/trend_micro_email_security:
-- changed-files:
-  - any-glob-to-any-file:
-    - trend_micro_email_security/**/*
-integration/trend_micro_vision_one_eps:
-- changed-files:
-  - any-glob-to-any-file:
-    - trend_micro_vision_one_endpoint_security/**/*
-integration/trend_micro_vision_one_xdr:
-- changed-files:
-  - any-glob-to-any-file:
-    - trend_micro_vision_one_xdr/**/*
 integration/twemproxy:
 - changed-files:
   - any-glob-to-any-file:
@@ -1538,10 +1353,6 @@ integration/twistlock:
 - changed-files:
   - any-glob-to-any-file:
     - twistlock/**/*
-integration/valence_security:
-- changed-files:
-  - any-glob-to-any-file:
-    - valence_security/**/*
 integration/varnish:
 - changed-files:
   - any-glob-to-any-file:
@@ -1550,10 +1361,6 @@ integration/vault:
 - changed-files:
   - any-glob-to-any-file:
     - vault/**/*
-integration/vectra:
-- changed-files:
-  - any-glob-to-any-file:
-    - vectra/**/*
 integration/velero:
 - changed-files:
   - any-glob-to-any-file:
@@ -1574,10 +1381,6 @@ integration/voltdb:
 - changed-files:
   - any-glob-to-any-file:
     - voltdb/**/*
-integration/vonage:
-- changed-files:
-  - any-glob-to-any-file:
-    - vonage/**/*
 integration/vsphere:
 - changed-files:
   - any-glob-to-any-file:
@@ -1634,10 +1437,6 @@ integration/wmi_check:
 - changed-files:
   - any-glob-to-any-file:
     - wmi_check/**/*
-integration/workato:
-- changed-files:
-  - any-glob-to-any-file:
-    - workato/**/*
 integration/yarn:
 - changed-files:
   - any-glob-to-any-file:
@@ -1646,14 +1445,6 @@ integration/zeek:
 - changed-files:
   - any-glob-to-any-file:
     - zeek/**/*
-integration/zero_networks:
-- changed-files:
-  - any-glob-to-any-file:
-    - zero_networks/**/*
-integration/zerofox_cloud_platform:
-- changed-files:
-  - any-glob-to-any-file:
-    - zerofox_cloud_platform/**/*
 integration/zk:
 - changed-files:
   - any-glob-to-any-file:

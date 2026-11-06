@@ -1,0 +1,35 @@
+<response status="success"><result>
+  <job>
+    <reportjob/>
+    <tenq>04:49:16</tenq>
+    <tdeq>04:49:16</tdeq>
+    <tlast>04:49:16</tlast>
+    <status>FIN</status>
+    <percent>100.000000</percent>
+    <recordcnt>1</recordcnt>
+    <ndev>1</ndev>
+    <nskip>0</nskip>
+    <nreq>1</nreq>
+    <nresp>1</nresp>
+    <nproc>1</nproc>
+    <eruntime>0</eruntime>
+    <id>2</id>
+  </job>
+  <report name="ndm" logtype="trsum" start="2026/10/01 04:49:16" start-epoch="1790830156" end="2026/10/02 04:49:15" end-epoch="1790916555" generated-at="2026/10/02 04:49:16" generated-at-epoch="1790916556" range="Thursday, October 01, 2026">
+    <entry>
+      <category-of-app>general-internet</category-of-app>
+      <sessions>848</sessions>
+      <bytes>8817020</bytes>
+    </entry>
+    <entry>
+      <category-of-app>networking</category-of-app>
+      <sessions>530</sessions>
+      <bytes>79483216</bytes>
+    </entry>
+    <entry>
+      <category-of-app>business-systems</category-of-app>
+      <sessions>104</sessions>
+      <bytes>47990880</bytes>
+    </entry>
+  </report>
+</result></response>

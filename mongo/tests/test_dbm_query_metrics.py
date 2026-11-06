@@ -22,7 +22,7 @@ def mock_mongo_version_8():
 def test_mongo_query_metrics_standalone(aggregator, instance_integration_cluster_autodiscovery, check, dd_run_check):
     """Test query metrics collection on standalone MongoDB 8.0+."""
     instance_integration_cluster_autodiscovery['dbm'] = True
-    instance_integration_cluster_autodiscovery['query_metrics'] = {'enabled': True, 'run_sync': True}
+    instance_integration_cluster_autodiscovery['query_metrics'] = {'run_sync': True}
     instance_integration_cluster_autodiscovery['operation_samples'] = {'enabled': False}
     instance_integration_cluster_autodiscovery['slow_operations'] = {'enabled': False}
     instance_integration_cluster_autodiscovery['schemas'] = {'enabled': False}
@@ -93,7 +93,7 @@ def test_mongo_query_metrics_arbiter(aggregator, instance_arbiter, check, dd_run
     """Test that query metrics are skipped on arbiter nodes."""
     instance_arbiter['dbm'] = True
     instance_arbiter['cluster_name'] = 'my_cluster'
-    instance_arbiter['query_metrics'] = {'enabled': True, 'run_sync': True}
+    instance_arbiter['query_metrics'] = {'run_sync': True}
     instance_arbiter['operation_samples'] = {'enabled': False}
     instance_arbiter['slow_operations'] = {'enabled': False}
     instance_arbiter['schemas'] = {'enabled': False}

@@ -177,14 +177,14 @@ class LustreCheck(AgentCheck):
         devices = []
         if self._use_yaml:
             try:
-                output = self._run_command('lctl', 'dl', '-y')
+                output = self._run_command('lctl', 'dl', '-y', sudo=True, warn_on_error=False)
                 device_data = yaml.safe_load(output)
                 devices = device_data.get('devices', [])
             except AttributeError:
                 self.log.debug('Device update failed with yaml flag, retrying without it.')
                 self._use_yaml = False
         if not self._use_yaml:
-            output = self._run_command('lctl', 'dl')
+            output = self._run_command('lctl', 'dl', sudo=True)
             for device_line in output.splitlines():
                 device_attr = device_line.split()
                 if not len(device_attr) == len(DEVICE_ATTR_NAMES):
@@ -238,14 +238,18 @@ class LustreCheck(AgentCheck):
 
     @AgentCheck.metadata_entrypoint
     def _update_metadata(self):
-        version = self._run_command("lctl", 'get_param', '-ny', 'version').strip()
+        version = self._run_command("lctl", 'get_param', '-n', 'version').strip()
         if version:
             self.log.debug("Setting version %s for Lustre", version)
             self.set_metadata("version", version)
 
-    def _run_command(self, bin: str, *args: str, sudo: bool = False) -> str:
+    def _run_command(self, bin: str, *args: str, sudo: bool = False, warn_on_error: bool = True) -> str:
         '''
         Run a command using the given binary.
+
+        Set warn_on_error=False for commands whose failure is expected and handled
+        by the caller (e.g. a capability probe with a fallback), to avoid logging a
+        WARNING on every check run.
         '''
         if bin not in self._bin_mapping:
             raise ValueError('Unknown binary: {}'.format(bin))
@@ -260,9 +264,8 @@ class LustreCheck(AgentCheck):
                 cmd, timeout=5, shell=False, capture_output=True, text=True
             )  # Explicitly disable shell invocation to prevent command injection
             if not output.returncode == 0 and output.stderr:
-                self.log.debug(
-                    'Command %s exited with returncode %s. Captured stderr: %s', cmd, output.returncode, output.stderr
-                )
+                log = self.log.warning if warn_on_error else self.log.debug
+                log('Command %s exited with returncode %s. Captured stderr: %s', cmd, output.returncode, output.stderr)
                 return ''
             if output.stdout is None:
                 self.log.debug(
@@ -293,7 +296,7 @@ class LustreCheck(AgentCheck):
             return
         param_names = self._get_jobstats_params_list(jobstats_param)
         jobid_config_tags = [
-            f'{param.regex}:{self._run_command("lctl", "get_param", "-ny", param.regex, sudo=True).strip()}'
+            f'{param.regex}:{self._run_command("lctl", "get_param", "-n", param.regex, sudo=True).strip()}'
             for param in JOBID_TAG_PARAMS
         ]
         for param_name in param_names:
@@ -339,7 +342,7 @@ class LustreCheck(AgentCheck):
         '''
         Get the jobstats metrics for a given jobstats param.
         '''
-        jobstats_output = self._run_command('lctl', 'get_param', '-ny', jobstats_param, sudo=True)
+        jobstats_output = self._run_command('lctl', 'get_param', '-n', jobstats_param, sudo=True)
         try:
             return yaml.safe_load(jobstats_output) or {}
         except Exception as e:
@@ -454,7 +457,7 @@ class LustreCheck(AgentCheck):
                     tags = self.tags + self._extract_tags_from_param(param.regex, param_name, param.wildcards)
                 except IgnoredFilesystemName:
                     continue
-                raw_stats = self._run_command('lctl', 'get_param', '-ny', param_name, sudo=True)
+                raw_stats = self._run_command('lctl', 'get_param', '-n', param_name, sudo=True)
                 if not param.regex.endswith('.stats'):
                     self._submit_param(param.prefix, param_name, tags)
                     continue
@@ -467,7 +470,7 @@ class LustreCheck(AgentCheck):
         Submit a single parameter.
         '''
         try:
-            output = int(self._run_command('lctl', 'get_param', '-ny', param_name, sudo=True))
+            output = int(self._run_command('lctl', 'get_param', '-n', param_name, sudo=True))
             suffix = param_name.split('.')[-1]
         except (ValueError, TypeError):
             self.log.debug('No output found for %s', param_name)

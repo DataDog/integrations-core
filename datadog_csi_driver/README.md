@@ -2,6 +2,8 @@
 
 ## Overview
 
+**Note:** Starting from Datadog Agent 7.80.0, this integration has been moved as a core check inside the Datadog Agent. Only assets are maintained in this repository.
+
 This check monitors [`datadog_csi_driver`][1] through the Datadog Agent. 
 
 The Datadog CSI Driver is a DaemonSet that runs a gRPC server implementing the CSI specifications on each node of your Kubernetes cluster.

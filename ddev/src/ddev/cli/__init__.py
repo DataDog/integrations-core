@@ -5,15 +5,15 @@ import os
 
 import click
 import pluggy
-from datadog_checks.dev.tooling.commands.create import create
 from datadog_checks.dev.tooling.commands.run import run
 
 from ddev._version import __version__
 from ddev.cli import upgrade_check
-from ddev.cli.application import Application
+from ddev.cli.application import Application, DdevGroup
 from ddev.cli.ci import ci
 from ddev.cli.clean import clean
 from ddev.cli.config import config
+from ddev.cli.create import create
 from ddev.cli.dep import dep
 from ddev.cli.docs import docs
 from ddev.cli.env import env
@@ -27,9 +27,14 @@ from ddev.config.constants import AppEnvVars, ConfigEnvVars
 from ddev.plugin import specs
 from ddev.utils.ci import running_in_ci
 from ddev.utils.fs import Path
+from ddev.utils.github_errors import GitHubAuthenticationError
 
 
-@click.group(context_settings={'help_option_names': ['-h', '--help']}, invoke_without_command=True)
+def display_registered_exception(app: Application, error: Exception) -> None:
+    app.display_error(str(error))
+
+
+@click.group(cls=DdevGroup, context_settings={'help_option_names': ['-h', '--help']}, invoke_without_command=True)
 @click.option('--core', '-c', is_flag=True, help='Work on `integrations-core`.')
 @click.option('--extras', '-e', is_flag=True, help='Work on `integrations-extras`.')
 @click.option('--marketplace', '-m', is_flag=True, help='Work on `marketplace`.')
@@ -93,6 +98,7 @@ def ddev(
         interactive = not running_in_ci()
 
     app = Application(ctx.exit, verbose - quiet, color, interactive)
+    app.register_exception_handler(GitHubAuthenticationError, display_registered_exception)
 
     if config_file:
         app.config_file.path = Path(config_file).resolve()

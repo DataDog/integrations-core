@@ -5,18 +5,132 @@ import copy
 import os
 import time
 
+import mock
 import pytest
 from confluent_kafka.admin import AdminClient
 from confluent_kafka.cimpl import NewTopic
 
-from datadog_checks.dev import TempDir, WaitFor, docker_run
-from datadog_checks.dev._env import e2e_testing
+from datadog_checks.dev import EnvVars, TempDir, WaitFor, docker_run
+from datadog_checks.dev._env import e2e_testing, get_state, save_state
 from datadog_checks.dev.ci import running_on_ci
 from datadog_checks.kafka_consumer import KafkaCheck
+from datadog_checks.kafka_consumer.client import KafkaClient
 
 from . import common
 from .common import get_cluster_id
 from .runners import Consumer, Producer
+
+KERBEROS_SECRET_DIR_STATE = 'kafka_consumer_kerberos_secret_dir'
+KRB5_CONFIG = (
+    f"{common.HERE}/docker/kerberos/kdc/krb5_agent.conf"
+    if running_on_ci()
+    else f"{common.HERE}/docker/kerberos/kdc/krb5_local.conf"
+)
+
+
+def seed_mock_kafka_client():
+    """Minimal Kafka client mock sufficient for the connector-focused tests."""
+    client = mock.create_autospec(KafkaClient)
+    client.get_cluster_id.return_value = 'cluster-1'
+    client.list_consumer_groups.return_value = []
+    client.list_consumer_group_offsets.return_value = []
+    client._cluster_metadata = None
+    return client
+
+
+SAMPLE_CONNECTORS_RESPONSE = {
+    'demo-source': {
+        'info': {
+            'type': 'source',
+            'config': {
+                'connector.class': 'org.apache.kafka.connect.mirror.MirrorSourceConnector',
+                'tasks.max': '2',
+                'topics': 'demo-orders',
+            },
+        },
+        'status': {
+            'connector': {'state': 'RUNNING'},
+            'tasks': [
+                {'id': 0, 'state': 'RUNNING', 'worker_id': 'connect:8083'},
+                {'id': 1, 'state': 'RUNNING', 'worker_id': 'connect:8083'},
+            ],
+        },
+    },
+    'demo-heartbeat': {
+        'info': {
+            'type': 'source',
+            'config': {'connector.class': 'org.apache.kafka.connect.mirror.MirrorHeartbeatConnector'},
+        },
+        'status': {
+            'connector': {'state': 'PAUSED'},
+            'tasks': [{'id': 0, 'state': 'PAUSED', 'worker_id': 'connect:8083'}],
+        },
+    },
+}
+
+
+@pytest.fixture
+def run_connect_check(check, kafka_instance, dd_run_check, datadog_agent):
+    """Run a full KafkaCheck cycle with Kafka Connect monitoring enabled.
+
+    Returns the check instance and the mocked Connect HTTP client so tests can assert on
+    emitted metrics/events (through the aggregator) and on the outbound Connect requests.
+    Depends on ``datadog_agent`` so the persistent cache is reset between tests.
+    """
+
+    def _run(
+        connectors_response=None,
+        connectors_per_run=None,
+        plugins_response=None,
+        topics_response=None,
+        instance_extra=None,
+        get_side_effect=None,
+        post_response=None,
+        post_side_effect=None,
+        runs=1,
+    ):
+        kafka_instance['kafka_connect_url'] = 'http://localhost:8083'
+        kafka_instance['enable_kafka_console'] = True
+        if instance_extra:
+            kafka_instance.update(instance_extra)
+
+        kafka_consumer_check = check(kafka_instance)
+        kafka_consumer_check.client = seed_mock_kafka_client()
+
+        responses = connectors_per_run if connectors_per_run is not None else [connectors_response]
+        state = {'run': 0}
+
+        def default_get(url, **kwargs):
+            response = mock.MagicMock()
+            if 'connector-plugins' in url:
+                response.json.return_value = [] if plugins_response is None else plugins_response
+            elif '/topics' in url:
+                name = url.rstrip('/').rsplit('/', 2)[-2]
+                topics = (topics_response or {}).get(name, [])
+                response.json.return_value = {name: {'topics': topics}}
+            else:
+                current = responses[min(state['run'], len(responses) - 1)]
+                response.json.return_value = {} if current is None else current
+            return response
+
+        http = mock.MagicMock()
+        http.get.side_effect = get_side_effect or default_get
+        if post_side_effect is not None:
+            http.post.side_effect = post_side_effect
+        elif post_response is not None:
+            post = mock.MagicMock()
+            post.json.return_value = post_response
+            http.post.return_value = post
+        kafka_consumer_check._connector_collector.http = http
+
+        with mock.patch.object(kafka_consumer_check.metadata_collector, 'collect_all_metadata'):
+            for i in range(runs):
+                state['run'] = i
+                dd_run_check(kafka_consumer_check)
+
+        return kafka_consumer_check, http
+
+    return _run
 
 
 @pytest.fixture(scope='session')
@@ -30,6 +144,7 @@ def dd_environment():
 
         if common.AUTHENTICATION == "kerberos":
             common.INSTANCE["sasl_kerberos_keytab"] = common.INSTANCE["sasl_kerberos_keytab"].format(secret_dir)
+            save_state(KERBEROS_SECRET_DIR_STATE, secret_dir)
             conditions.append(WaitFor(wait_for_cp_kafka_topics, attempts=10, wait=10))
             common.E2E_METADATA["docker_volumes"].append(f"{secret_dir}:/var/lib/secret")
 
@@ -47,14 +162,7 @@ def dd_environment():
         with docker_run(
             common.DOCKER_IMAGE_PATH,
             conditions=conditions,
-            env_vars={
-                "KRB5_CONFIG": (
-                    f"{common.HERE}/docker/kerberos/kdc/krb5_agent.conf"
-                    if running_on_ci()
-                    else f"{common.HERE}/docker/kerberos/kdc/krb5_local.conf"
-                ),
-                "SECRET_DIR": secret_dir,
-            },
+            env_vars={"KRB5_CONFIG": KRB5_CONFIG, "SECRET_DIR": secret_dir},
             build=True,
         ):
             yield (
@@ -64,6 +172,24 @@ def dd_environment():
                 },
                 common.E2E_METADATA,
             )
+
+
+@pytest.fixture(scope='session', autouse=True)
+def e2e_kerberos_client():
+    """Give host-side Kerberos clients the credentials `dd_environment` set up when the environment started.
+
+    `dd_environment` runs in the `ddev env start` process. In the `ddev env test` process the plugin turns it into a
+    no-op, so its changes to `common.INSTANCE` and `KRB5_CONFIG` are missing there and `get_cluster_id` would
+    authenticate with an unformatted keytab path and the runner's default Kerberos realm.
+    """
+    if common.AUTHENTICATION != "kerberos" or not e2e_testing():
+        yield
+        return
+
+    secret_dir = get_state(KERBEROS_SECRET_DIR_STATE)
+    common.INSTANCE["sasl_kerberos_keytab"] = common.INSTANCE["sasl_kerberos_keytab"].format(secret_dir)
+    with EnvVars({"KRB5_CONFIG": KRB5_CONFIG}):
+        yield
 
 
 def is_cluster_id_available():

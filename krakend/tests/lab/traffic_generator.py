@@ -260,7 +260,7 @@ def start(ctx, env: str):
         "-e",
         "DD_LOGS_ENABLED=true",
         # "-a",
-        # "datadog/agent:latest",
+        # "registry.datadoghq.com/agent:latest",
     ]
     process = subprocess.Popen(
         command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, start_new_session=True

@@ -130,6 +130,7 @@ class SqlserverDBFragmentationMetrics(SqlserverDatabaseMetricsBase):
                 executor=functools.partial(self.execute_query_handler, db=database),
                 extra_tags=['db:{}'.format(database)],
                 track_operation_time=self.track_operation_time,
+                operation_tags=['database:{}'.format(database)],
             )
             executor.compile_queries()
             executors.append(executor)

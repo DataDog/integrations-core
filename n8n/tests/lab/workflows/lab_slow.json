@@ -1,0 +1,54 @@
+{
+  "id": "labSlowSuccess",
+  "versionId": "10000000-0000-0000-0000-000000000002",
+  "name": "Lab Slow Success",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "lab/slow",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "11111111-0000-0000-0000-000000000002",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "lab-slow-aaaa-bbbb-cccc-000000000002"
+    },
+    {
+      "parameters": {
+        "amount": 500,
+        "unit": "ms"
+      },
+      "id": "22222222-0000-0000-0000-000000000002",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id": "1", "name": "scenario", "value": "slow", "type": "string"}
+          ]
+        },
+        "options": {}
+      },
+      "id": "33333333-0000-0000-0000-000000000002",
+      "name": "Set",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {"main": [[{"node": "Wait", "type": "main", "index": 0}]]},
+    "Wait": {"main": [[{"node": "Set", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {"executionOrder": "v1"},
+  "pinData": {}
+}

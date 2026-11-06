@@ -106,6 +106,13 @@ class TestIsTestable:
 
         assert integration.is_testable is False
 
+    def test_hatch_toml_without_tests(self, local_repo):
+        repo = Repository(local_repo.name, str(local_repo))
+        integration = repo.integrations.get('checkpoint_harmony_endpoint')
+
+        assert integration.has_hatch_config is True
+        assert integration.is_testable is False
+
 
 class TestIsShippable:
     def test_check(self, local_repo):
@@ -285,3 +292,28 @@ class TestMetrics:
     def test_has_no_metadata_file(self, fake_repo):
         integration = fake_repo.integrations.get('no_metadata_file')
         assert not list(integration.metrics)
+
+
+def test_example_config_path(local_repo):
+    repo = Repository(local_repo.name, str(local_repo))
+    integration = repo.integrations.get('postgres')
+
+    assert integration.example_config == integration.package_directory / 'data' / 'conf.yaml.example'
+
+
+@pytest.mark.parametrize(
+    'relative_path, expected',
+    [
+        pytest.param('datadog_checks/postgres/postgres.py', True, id='package_source_file'),
+        pytest.param('datadog_checks/postgres/data/conf.yaml.example', True, id='example_config'),
+        pytest.param('pyproject.toml', True, id='pyproject_toml'),
+        pytest.param('assets/configuration/spec.yaml', False, id='config_spec'),
+        pytest.param('README.md', False, id='readme'),
+        pytest.param('tests/test_postgres.py', False, id='test_file'),
+    ],
+)
+def test_requires_changelog_entry(local_repo, relative_path, expected):
+    repo = Repository(local_repo.name, str(local_repo))
+    integration = repo.integrations.get('postgres')
+
+    assert integration.requires_changelog_entry(integration.path / relative_path) is expected

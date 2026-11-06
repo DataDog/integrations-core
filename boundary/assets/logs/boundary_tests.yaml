@@ -343,61 +343,61 @@ tests:
           grants_info:
             grants:
              -
-              scope_id: "global"
-              role_id: "r_HEFEclAk6K"
               grant: "id=*;type=scope;actions=list,no-op"
-             -
-              scope_id: "global"
               role_id: "r_HEFEclAk6K"
+              scope_id: "global"
+             -
               grant: "id=*;type=auth-method;actions=authenticate,list"
-             -
-              scope_id: "global"
               role_id: "r_HEFEclAk6K"
+              scope_id: "global"
+             -
               grant: "id={{account.id}};actions=change-password,read"
-             -
-              scope_id: "global"
               role_id: "r_HEFEclAk6K"
-              grant: "id=*;type=auth-token;actions=delete:self,list,read:self"
+              scope_id: "global"
              -
-              scope_id: "o_7ysLSf6Ujf"
-              role_id: "r_Z9w5BjN6Ej"
+              grant: "id=*;type=auth-token;actions=delete:self,list,read:self"
+              role_id: "r_HEFEclAk6K"
+              scope_id: "global"
+             -
               grant: "id=*;type=scope;actions=list,no-op"
-             -
-              scope_id: "o_7ysLSf6Ujf"
               role_id: "r_Z9w5BjN6Ej"
+              scope_id: "o_7ysLSf6Ujf"
+             -
               grant: "id=*;type=auth-method;actions=authenticate,list"
-             -
-              scope_id: "o_7ysLSf6Ujf"
               role_id: "r_Z9w5BjN6Ej"
+              scope_id: "o_7ysLSf6Ujf"
+             -
               grant: "id={{account.id}};actions=change-password,read"
-             -
-              scope_id: "o_7ysLSf6Ujf"
               role_id: "r_Z9w5BjN6Ej"
+              scope_id: "o_7ysLSf6Ujf"
+             -
               grant: "id=*;type=auth-token;actions=delete:self,list,read:self"
+              role_id: "r_Z9w5BjN6Ej"
+              scope_id: "o_7ysLSf6Ujf"
              -
-              scope_id: "global"
-              role_id: "r_877JfAIKvi"
               grant: "id=*;type=auth-method;actions=authenticate,list"
-             -
-              scope_id: "global"
               role_id: "r_877JfAIKvi"
+              scope_id: "global"
+             -
               grant: "id={{account.id}};actions=change-password,read"
-             -
-              scope_id: "global"
               role_id: "r_877JfAIKvi"
-              grant: "type=scope;actions=list"
+              scope_id: "global"
              -
-              scope_id: "o_6Ry9uTXbwM"
-              role_id: "r_IHgOGXdfR3"
+              grant: "type=scope;actions=list"
+              role_id: "r_877JfAIKvi"
+              scope_id: "global"
+             -
               grant: "id=*;type=auth-method;actions=authenticate,list"
-             -
-              scope_id: "o_6Ry9uTXbwM"
               role_id: "r_IHgOGXdfR3"
+              scope_id: "o_6Ry9uTXbwM"
+             -
               grant: "id={{account.id}};actions=change-password,read"
-             -
-              scope_id: "o_6Ry9uTXbwM"
               role_id: "r_IHgOGXdfR3"
+              scope_id: "o_6Ry9uTXbwM"
+             -
               grant: "type=scope;actions=list"
+              role_id: "r_IHgOGXdfR3"
+              scope_id: "o_6Ry9uTXbwM"
         id: "e_VjusDp0D4I"
         request:
           details:
@@ -751,85 +751,85 @@ tests:
           grants_info:
             grants:
              -
-              scope_id: "global"
-              role_id: "r_HEFEclAk6K"
               grant: "id=*;type=scope;actions=list,no-op"
-             -
-              scope_id: "global"
               role_id: "r_HEFEclAk6K"
+              scope_id: "global"
+             -
               grant: "id=*;type=auth-method;actions=authenticate,list"
-             -
-              scope_id: "global"
               role_id: "r_HEFEclAk6K"
+              scope_id: "global"
+             -
               grant: "id={{account.id}};actions=change-password,read"
-             -
-              scope_id: "global"
               role_id: "r_HEFEclAk6K"
-              grant: "id=*;type=auth-token;actions=delete:self,list,read:self"
+              scope_id: "global"
              -
-              scope_id: "o_7ysLSf6Ujf"
-              role_id: "r_Z9w5BjN6Ej"
+              grant: "id=*;type=auth-token;actions=delete:self,list,read:self"
+              role_id: "r_HEFEclAk6K"
+              scope_id: "global"
+             -
               grant: "id=*;type=scope;actions=list,no-op"
-             -
-              scope_id: "o_7ysLSf6Ujf"
               role_id: "r_Z9w5BjN6Ej"
+              scope_id: "o_7ysLSf6Ujf"
+             -
               grant: "id=*;type=auth-method;actions=authenticate,list"
-             -
-              scope_id: "o_7ysLSf6Ujf"
               role_id: "r_Z9w5BjN6Ej"
+              scope_id: "o_7ysLSf6Ujf"
+             -
               grant: "id={{account.id}};actions=change-password,read"
-             -
-              scope_id: "o_7ysLSf6Ujf"
               role_id: "r_Z9w5BjN6Ej"
+              scope_id: "o_7ysLSf6Ujf"
+             -
               grant: "id=*;type=auth-token;actions=delete:self,list,read:self"
+              role_id: "r_Z9w5BjN6Ej"
+              scope_id: "o_7ysLSf6Ujf"
              -
-              scope_id: "p_wD6GyDAHjA"
-              role_id: "r_ZE1mQvEoDl"
               grant: "id=*;type=session;actions=cancel:self,list,read:self"
-             -
-              scope_id: "p_wD6GyDAHjA"
               role_id: "r_ZE1mQvEoDl"
-              grant: "type=target;actions=list"
+              scope_id: "p_wD6GyDAHjA"
              -
-              scope_id: "p_BwnxUNhdu0"
-              role_id: "r_4JUFIrVk7y"
+              grant: "type=target;actions=list"
+              role_id: "r_ZE1mQvEoDl"
+              scope_id: "p_wD6GyDAHjA"
+             -
               grant: "id=*;type=session;actions=cancel:self,list,read:self"
-             -
-              scope_id: "p_BwnxUNhdu0"
               role_id: "r_4JUFIrVk7y"
+              scope_id: "p_BwnxUNhdu0"
+             -
               grant: "type=target;actions=list"
+              role_id: "r_4JUFIrVk7y"
+              scope_id: "p_BwnxUNhdu0"
              -
-              scope_id: "global"
-              role_id: "r_877JfAIKvi"
               grant: "id=*;type=auth-method;actions=authenticate,list"
-             -
-              scope_id: "global"
               role_id: "r_877JfAIKvi"
+              scope_id: "global"
+             -
               grant: "id={{account.id}};actions=change-password,read"
-             -
-              scope_id: "global"
               role_id: "r_877JfAIKvi"
-              grant: "type=scope;actions=list"
+              scope_id: "global"
              -
-              scope_id: "o_6Ry9uTXbwM"
-              role_id: "r_IHgOGXdfR3"
+              grant: "type=scope;actions=list"
+              role_id: "r_877JfAIKvi"
+              scope_id: "global"
+             -
               grant: "id=*;type=auth-method;actions=authenticate,list"
-             -
-              scope_id: "o_6Ry9uTXbwM"
               role_id: "r_IHgOGXdfR3"
+              scope_id: "o_6Ry9uTXbwM"
+             -
               grant: "id={{account.id}};actions=change-password,read"
-             -
-              scope_id: "o_6Ry9uTXbwM"
               role_id: "r_IHgOGXdfR3"
-              grant: "type=scope;actions=list"
-             -
               scope_id: "o_6Ry9uTXbwM"
+             -
+              grant: "type=scope;actions=list"
+              role_id: "r_IHgOGXdfR3"
+              scope_id: "o_6Ry9uTXbwM"
+             -
+              grant: "id=*;type=*;actions=*"
               role_id: "r_RoSMph23yU"
-              grant: "id=*;type=*;actions=*"
+              scope_id: "o_6Ry9uTXbwM"
              -
-              scope_id: "p_BwnxUNhdu0"
-              role_id: "r_X4ZLRfvk8W"
               grant: "id=*;type=*;actions=*"
+              role_id: "r_X4ZLRfvk8W"
+              scope_id: "p_BwnxUNhdu0"
           user_info:
             auth_account_id: "acctpw_7Lxbhaonkh"
         id: "e_2tr24ynpkD"

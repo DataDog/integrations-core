@@ -121,6 +121,7 @@ files:
               type: array
               items:
                 type: string
+            fleet_configurable: false
           - name: blacklist_conntrack_metrics
             description: |
               Linux only.
@@ -137,6 +138,7 @@ files:
               type: array
               items:
                 type: string
+            fleet_configurable: false
           - name: collect_aws_ena_metrics
             description: |
               Turn on collection of the AWS Elastic Network Adapter (ENA) statistics for network interfaces.
@@ -168,6 +170,13 @@ files:
               - virtio_net
               - hv_netvsc
               - gve
+              - mlx5_core
+
+              On mlx5_core, RoCE/PFC counters are additionally collected when GPU
+              monitoring is enabled ('gpu.enabled' in datadog.yaml). These are tagged
+              'prio:<0-7>' for per-priority counters and cover PFC pause, ECN marking,
+              buffer and congestion discards, link-level pause, PCIe health, FEC and
+              cable health, and module health. Pause durations are in microseconds.
             fleet_configurable: true
             value:
               display_default: false

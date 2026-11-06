@@ -1,0 +1,12 @@
+{
+  "rplUsedJournalCap": 0,
+  "numOfChildVolumes": 1,
+  "userDataWriteBwc": {"numSeconds": 0, "totalWeightInKb": 0, "numOccured": 0},
+  "rplTotalJournalCap": 0,
+  "userDataSdcReadLatency": {"numSeconds": 0, "totalWeightInKb": 0, "numOccured": 0},
+  "userDataSdcTrimLatency": {"numSeconds": 0, "totalWeightInKb": 0, "numOccured": 0},
+  "numOfMappedSdcs": 1,
+  "userDataReadBwc": {"numSeconds": 0, "totalWeightInKb": 0, "numOccured": 0},
+  "userDataTrimBwc": {"numSeconds": 0, "totalWeightInKb": 0, "numOccured": 0},
+  "userDataSdcWriteLatency": {"numSeconds": 0, "totalWeightInKb": 0, "numOccured": 0}
+}

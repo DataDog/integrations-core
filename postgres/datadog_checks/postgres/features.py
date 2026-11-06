@@ -15,9 +15,11 @@ class FeatureKey(Enum):
     QUERY_SAMPLES = "query_samples"
     COLLECT_SETTINGS = "collect_settings"
     COLLECT_SCHEMAS = "collect_schemas"
+    COLLECT_ROLES = "collect_roles"
     QUERY_ACTIVITY = "query_activity"
     QUERY_METRICS = "query_metrics"
     DATA_OBSERVABILITY = "data_observability"
+    COLLECT_COLUMN_STATISTICS = "collect_column_statistics"
 
 
 FeatureNames = {
@@ -25,9 +27,11 @@ FeatureNames = {
     FeatureKey.QUERY_SAMPLES: 'Query Samples',
     FeatureKey.COLLECT_SETTINGS: 'Collect Settings',
     FeatureKey.COLLECT_SCHEMAS: 'Collect Schemas',
+    FeatureKey.COLLECT_ROLES: 'Collect Roles',
     FeatureKey.QUERY_ACTIVITY: 'Query Activity',
     FeatureKey.QUERY_METRICS: 'Query Metrics',
     FeatureKey.DATA_OBSERVABILITY: 'Data Observability',
+    FeatureKey.COLLECT_COLUMN_STATISTICS: 'Collect Column Statistics',
 }
 
 

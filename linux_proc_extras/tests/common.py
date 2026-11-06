@@ -22,6 +22,7 @@ EXPECTED_BASE_METRICS = [
     'system.linux.processes_created',
     'system.linux.interrupts',
     'system.entropy.available',
+    'system.crypto.fips_enabled',
     'system.processes.states',
     'system.processes.priorities',
 ]

@@ -6,6 +6,7 @@ import click
 from ddev.cli.env.agent import agent
 from ddev.cli.env.check import check
 from ddev.cli.env.config import config
+from ddev.cli.env.logs import logs
 from ddev.cli.env.reload import reload_command
 from ddev.cli.env.shell import shell
 from ddev.cli.env.show import show
@@ -24,6 +25,7 @@ def env():
 env.add_command(agent)
 env.add_command(check)
 env.add_command(config)
+env.add_command(logs)
 env.add_command(reload_command)
 env.add_command(shell)
 env.add_command(show)

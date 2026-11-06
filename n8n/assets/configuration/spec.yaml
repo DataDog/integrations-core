@@ -1,6 +1,12 @@
 name: n8n
 files:
 - name: n8n.yaml
+  discovery:
+    strategies:
+    - template: discovery/openmetrics_from_ports
+      overrides:
+        port_hints:
+        - 5678
   options:
   - template: init_config
     options:
@@ -12,7 +18,7 @@ files:
         openmetrics_endpoint.required: true
         openmetrics_endpoint.hidden: false
         openmetrics_endpoint.display_priority: 1
-        openmetrics_endpoint.value.example: http://localhost:5678
+        openmetrics_endpoint.value.example: http://localhost:5678/metrics
         openmetrics_endpoint.description: |
           Endpoint exposing the n8n's metrics in the OpenMetrics format. For more information, refer to:
           https://docs.n8n.io/hosting/logging-monitoring/monitoring/ 
@@ -34,3 +40,11 @@ files:
     - type: docker
       source: n8n
       service: <SERVICE>
+
+- name: auto_conf.yaml
+  options:
+  - template: ad_identifiers
+    overrides:
+      value.example:
+      - n8n
+  - template: auto_conf/discovery

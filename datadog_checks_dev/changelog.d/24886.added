@@ -1,0 +1,1 @@
+Add a `from_named_ports` discovery strategy and a Kubernetes discovery-stability E2E helper for container-based config discovery.

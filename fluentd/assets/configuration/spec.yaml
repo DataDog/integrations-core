@@ -12,6 +12,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: fluentd
     - template: init_config/http
     - template: init_config/default
@@ -31,6 +32,7 @@ files:
       fleet_configurable: true
       value:
         type: string
+        require_trusted_provider: true
         example: fluentd
     - name: plugin_ids
       description: Enter your Plugin IDs to monitor a specific scope of plugins.

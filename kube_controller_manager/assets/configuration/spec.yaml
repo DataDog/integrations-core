@@ -99,6 +99,7 @@ files:
           - https://localhost:10257/metrics
           - http://%%host%%:10252/metrics
           - http://localhost:10252/metrics
+      fleet_configurable: false
     - name: prometheus_url
       description: |
         The URL where your application metrics are exposed by Prometheus.
@@ -106,6 +107,7 @@ files:
       value:
         example: http://%%host%%:10252/metrics
         type: string
+      fleet_configurable: false
     - name: bearer_token_auth
       description: |
         Used if you are using RBACs and need the Agent to authenticate
@@ -117,6 +119,7 @@ files:
         anyOf:
         - type: boolean
         - type: string
+      fleet_configurable: false
     - name: ssl_verify
       description: Used to verify self signed certificates.
       enabled: true
@@ -124,3 +127,4 @@ files:
         type: boolean
         example: false
         display_default: true
+      fleet_configurable: false

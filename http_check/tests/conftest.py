@@ -14,7 +14,7 @@ from datadog_checks.dev.conditions import WaitFor
 from datadog_checks.dev.utils import ON_WINDOWS
 from datadog_checks.http_check import HTTPCheck
 
-from .common import CONFIG_E2E, HERE
+from .common import CONFIG_E2E, HERE, MOCKBIN_URL
 
 MOCKED_HOSTS = ['valid.mock', 'expired.mock', 'wronghost.mock', 'selfsigned.mock', 'tinyproxy.mock']
 
@@ -29,8 +29,15 @@ def dd_environment(mock_local_http_dns):
     with docker_run(
         os.path.join(HERE, 'compose', 'docker-compose.yml'),
         build=True,
+        wait_for_health=False,
         log_patterns=["start worker process"],
-        conditions=[WaitFor(call_endpoint, args=("https://127.0.0.1",))],
+        conditions=[
+            WaitFor(call_endpoint, args=("https://127.0.0.1",)),
+            # The published port accepts connections before httpbin is listening behind it, so tests
+            # using MOCKBIN_URL can get their connection closed mid-request unless we wait on a real
+            # response. Only nginx was waited on before.
+            WaitFor(call_endpoint, args=("{}/status/200".format(MOCKBIN_URL),)),
+        ],
     ):
         yield CONFIG_E2E, e2e_metadata
 
