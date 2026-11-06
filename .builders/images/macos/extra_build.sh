@@ -41,11 +41,6 @@ if [[ "${DD_BUILD_PYTHON_VERSION}" == "3" ]]; then
     # macOS 14 SDK. Built here they honor MACOSX_DEPLOYMENT_TARGET and come out at 12.0.
     # (The libddwaf dylib ddtrace downloads prebuilt is stripped in repair_wheels.py instead.)
     always_build+=("ddtrace")
-
-    # On a macos-15 runner pip prefers orjson's macosx_15_0_arm64 wheel over its universal one, and
-    # that wheel doesn't load on the older macOS versions the Agent supports. Built here it honors
-    # MACOSX_DEPLOYMENT_TARGET. repair_wheels.py rejects any other external wheel that needs a newer macOS.
-    always_build+=("orjson")
 fi
 
 # Make sure IBM MQ libraries are found under /opt/mqm even when we're using the builder cache

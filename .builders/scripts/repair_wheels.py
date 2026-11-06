@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import NamedTuple
 from zipfile import ZipFile
 
-from utils import iter_wheels
+from utils import iter_wheels, wheel_supports_macos
 
 
 MACOS_DDTRACE_LIBDDWAF_PATTERN = 'ddtrace/appsec/_ddwaf/libddwaf/*/lib/libddwaf.dylib'
@@ -224,14 +224,6 @@ def repair_windows(source_built_dir: str, source_external_dir: str, built_dir: s
             sys.exit(process.returncode)
 
 
-def _supports_macos(platform_tag: str, macos_version: tuple[int, int], arch: str) -> bool:
-    """Whether a wheel's platform tag, possibly a compressed tag set, installs on `macos_version` for `arch`."""
-    from packaging.tags import mac_platforms
-
-    supported = set(mac_platforms(macos_version, arch))
-    return any(tag in supported for tag in platform_tag.split('.'))
-
-
 def repair_darwin(source_built_dir: str, source_external_dir: str, built_dir: str, external_dir: str) -> None:
     from delocate import delocate_wheel
     from packaging.version import Version
@@ -283,12 +275,13 @@ def repair_darwin(source_built_dir: str, source_external_dir: str, built_dir: st
         if wheel_name.name == 'ddtrace' and find_patterns_in_wheel(wheel, [MACOS_DDTRACE_LIBDDWAF_PATTERN]):
             shutil.move(wheel, Path(source_built_dir) / wheel.name)
             continue
-        # pip picks the most specific wheel for the runner's own macOS, which can be newer than the Agent's
-        # minimum. Built wheels get this check from delocate below; external wheels only get it here.
-        if wheel_name.platform_tag != 'any' and not _supports_macos(wheel_name.platform_tag, macos_target, arch):
+        # build_wheels.py already swapped incompatible wheels for compatible ones of the same release where one
+        # exists. Built wheels get this check from delocate below; external wheels only get it here.
+        if not wheel_supports_macos(wheel.name, macos_target, arch):
             raise RuntimeError(
-                f'External wheel {wheel.name} does not support macOS {min_macos_version} on {arch}; '
-                'build it from source by adding it to `always_build` in images/macos/extra_build.sh'
+                f'External wheel {wheel.name} does not support macOS {min_macos_version} on {arch} and no wheel '
+                'of the same release that does could be downloaded; build it from source by adding it to '
+                '`always_build` in images/macos/extra_build.sh'
             )
         print('Using existing wheel')
         shutil.move(wheel, external_dir)
