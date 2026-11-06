@@ -568,3 +568,326 @@ tests:
     tags:
      - "source:LOGS_SOURCE"
     timestamp: 1791216907000
+ -
+  sample: "<14>Oct  5 16:15:08 panorama-01 1,2026/10/05 16:15:08,012345678901,TRAFFIC,end,2049,2026/10/05 16:15:07,10.0.0.10,185.64.148.0,203.0.113.5,185.64.148.0,rule-01,example\\user1,,ssl,vsys1,trust,untrust,ethernet1/2,ethernet1/1,log-profile-01,2026/10/05 16:15:07,123456,1,51515,443,40404,443,0x40001c,tcp,allow,5120,1024,4096,20,2026/10/05 16:14:52,15,computer-and-internet-info,,7300000000000000001,0x8000000000000000,10.0.0.0-10.255.255.255,FR,,10,10,tcp-fin,11,0,0,0,,fw-01,from-policy,,,0,,0,,N/A,0,0,0,0,00000000-0000-4000-8000-000000000001,0,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2026-10-05T16:15:07.123+00:00,,,encrypted-tunnel,networking,browser-based,4,\"used-by-malware,able-to-transfer-file\",,ssl,no,no,0,,"
+  result:
+    custom:
+      actflag: "0x8000000000000000"
+      actsrc: "from-policy"
+      app: "ssl"
+      appcat: "networking"
+      appflap: 0
+      appsaas: "no"
+      appstate: "no"
+      apptech: "browser-based"
+      associd: 0
+      bytes: 5120
+      cat: "computer-and-internet-info"
+      chunk: 0
+      chunkrcvd: 0
+      chunksent: 0
+      dg_hier_level_1: 11
+      dg_hier_level_2: 0
+      dg_hier_level_3: 0
+      dg_hier_level_4: 0
+      dloc: "FR"
+      dport: 443
+      dst: "185.64.148.0"
+      dstzone: "untrust"
+      dvc: "fw-01"
+      elapsed: 15
+      flags: "0x40001c"
+      future_use_1: 1
+      future_use_22: "2026/10/05 16:15:07"
+      future_use_6: 2049
+      high_res_timestamp: "2026-10-05T16:15:07.123+00:00"
+      http2conn: 0
+      inboundif: "ethernet1/2"
+      logset: "log-profile-01"
+      network:
+        bytes_read: 1024
+        bytes_written: 4096
+        client:
+          geoip: {}
+          ip: "10.0.0.10"
+          nat:
+            ip: "203.0.113.5"
+            port: 40404
+          port: 51515
+        destination:
+          geoip:
+            city:
+              name: "Paris"
+            continent:
+              code: "EU"
+              name: "Europe"
+            country:
+              iso_code: "FR"
+              name: "France"
+            ipAddress: "185.64.148.0"
+            location:
+              latitude: 48.90654
+              longitude: 2.33339
+            subdivision:
+              iso_code: "FR-IDF"
+              name: "Île-de-France"
+            timezone: "Europe/Paris"
+          ip: "185.64.148.0"
+          nat:
+            ip: "185.64.148.0"
+            port: 443
+          port: 443
+      offloaded: 0
+      outboundif: "ethernet1/1"
+      palo:
+        alto:
+          panorama:
+            action: "allow"
+            appchar: "used-by-malware,able-to-transfer-file"
+            apprisk: 4
+            pkt: 20
+            pktrcvd: 10
+            pktsent: 10
+            vsys: "vsys1"
+      parentid: 0
+      proto: "tcp"
+      receive_time: "2026/10/05 16:15:08"
+      repeatcnt: 1
+      rule: "rule-01"
+      ruleuuid: "00000000-0000-4000-8000-000000000001"
+      seq: 7300000000000000000
+      serial: "012345678901"
+      sessionendreason: "tcp-fin"
+      sessionid: 123456
+      sloc: "10.0.0.0-10.255.255.255"
+      sport: 51515
+      src: "10.0.0.10"
+      srczone: "trust"
+      start: "2026/10/05 16:14:52"
+      subcatapp: "encrypted-tunnel"
+      subtype: "end"
+      suser: "example\\user1"
+      time_generated: "2026/10/05 16:15:07"
+      timestamp: 1791216907000
+      tunnel: "N/A"
+      tunneledapp: "ssl"
+      tunnelid: 0
+      type: "TRAFFIC"
+    message: '<14>Oct  5 16:15:08 panorama-01 1,2026/10/05 16:15:08,012345678901,TRAFFIC,end,2049,2026/10/05 16:15:07,10.0.0.10,185.64.148.0,203.0.113.5,185.64.148.0,rule-01,example\user1,,ssl,vsys1,trust,untrust,ethernet1/2,ethernet1/1,log-profile-01,2026/10/05 16:15:07,123456,1,51515,443,40404,443,0x40001c,tcp,allow,5120,1024,4096,20,2026/10/05 16:14:52,15,computer-and-internet-info,,7300000000000000001,0x8000000000000000,10.0.0.0-10.255.255.255,FR,,10,10,tcp-fin,11,0,0,0,,fw-01,from-policy,,,0,,0,,N/A,0,0,0,0,00000000-0000-4000-8000-000000000001,0,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2026-10-05T16:15:07.123+00:00,,,encrypted-tunnel,networking,browser-based,4,"used-by-malware,able-to-transfer-file",,ssl,no,no,0,,'
+    service: "TRAFFIC"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1791216907000
+ -
+  sample: "<14>Oct  5 16:15:08 panorama-01 1,2026/10/05 16:15:08,012345678901,THREAT,url,2817,2026/10/05 16:15:07,10.0.0.11,185.64.148.0,203.0.113.5,185.64.148.0,rule-02,example\\user2,,web-browsing,vsys1,trust,untrust,ethernet1/2,ethernet1/1,log-profile-01,2026/10/05 16:15:07,123457,1,51516,80,40405,80,0x40f400,tcp,block-url,host-01.example.com/,(9999),malware,medium,client-to-server,7300000000000000002,0x8000000000000000,10.0.0.0-10.255.255.255,FR,,text/html,0,,,1,Mozilla/5.0,,,,,,,,11,0,0,0,,fw-01,,,,get,0,,0,,N/A,unknown,AppThreat-0-0,0x0,0,4294967295,,\"malware,high-risk\",00000000-0000-4000-8000-000000000002,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2026-10-05T16:15:07.456+00:00,,,,,,,,,,,,,,,"
+  result:
+    custom:
+      actflags: "0x8000000000000000"
+      app: "web-browsing"
+      assoc_id: 0
+      cat: "malware"
+      contenttype: "text/html"
+      contentver: "AppThreat-0-0"
+      dg_hier_level_1: 11
+      dg_hier_level_2: 0
+      dg_hier_level_3: 0
+      dg_hier_level_4: 0
+      dir: "client-to-server"
+      dloc: "FR"
+      dport: 80
+      dst: "185.64.148.0"
+      dstzone: "untrust"
+      dvc: "fw-01"
+      flags: "0x40f400"
+      future_use_1: 1
+      future_use_22: "2026/10/05 16:15:07"
+      future_use_6: 2817
+      future_use_72: "0x0"
+      high_res_timestamp: "2026-10-05T16:15:07.456+00:00"
+      http:
+        method: "get"
+      http2conn: 0
+      inboundif: "ethernet1/2"
+      logset: "log-profile-01"
+      misc: "host-01.example.com/"
+      network:
+        client:
+          geoip: {}
+          ip: "10.0.0.11"
+          nat:
+            ip: "203.0.113.5"
+            port: 40405
+          port: 51516
+        destination:
+          geoip:
+            city:
+              name: "Paris"
+            continent:
+              code: "EU"
+              name: "Europe"
+            country:
+              iso_code: "FR"
+              name: "France"
+            ipAddress: "185.64.148.0"
+            location:
+              latitude: 48.90654
+              longitude: 2.33339
+            subdivision:
+              iso_code: "FR-IDF"
+              name: "Île-de-France"
+            timezone: "Europe/Paris"
+          ip: "185.64.148.0"
+          nat:
+            ip: "185.64.148.0"
+            port: 80
+          port: 80
+      outboundif: "ethernet1/1"
+      palo:
+        alto:
+          panorama:
+            action: "block-url"
+            vsys: "vsys1"
+      parent_session_id: 0
+      pcapip: 0
+      ppid: 4294967295
+      proto: "tcp"
+      receive_time: "2026/10/05 16:15:08"
+      repeatcnt: 1
+      rule: "rule-02"
+      ruleuuid: "00000000-0000-4000-8000-000000000002"
+      seqno: 7300000000000000000
+      serial: "012345678901"
+      sessionid: 123457
+      severity: "medium"
+      sloc: "10.0.0.0-10.255.255.255"
+      sport: 51516
+      src: "10.0.0.11"
+      srczone: "trust"
+      status: "warning"
+      subtype: "url"
+      suser: "example\\user2"
+      thrcategory: "unknown"
+      threatid: "(9999)"
+      time_generated: "2026/10/05 16:15:07"
+      timestamp: 1791216907000
+      tunnel: "N/A"
+      tunnelid: 0
+      type: "THREAT"
+      urlcategory: "malware,high-risk"
+      urlidx: 1
+      useragent: "Mozilla/5.0"
+    message: '<14>Oct  5 16:15:08 panorama-01 1,2026/10/05 16:15:08,012345678901,THREAT,url,2817,2026/10/05 16:15:07,10.0.0.11,185.64.148.0,203.0.113.5,185.64.148.0,rule-02,example\user2,,web-browsing,vsys1,trust,untrust,ethernet1/2,ethernet1/1,log-profile-01,2026/10/05 16:15:07,123457,1,51516,80,40405,80,0x40f400,tcp,block-url,host-01.example.com/,(9999),malware,medium,client-to-server,7300000000000000002,0x8000000000000000,10.0.0.0-10.255.255.255,FR,,text/html,0,,,1,Mozilla/5.0,,,,,,,,11,0,0,0,,fw-01,,,,get,0,,0,,N/A,unknown,AppThreat-0-0,0x0,0,4294967295,,"malware,high-risk",00000000-0000-4000-8000-000000000002,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2026-10-05T16:15:07.456+00:00,,,,,,,,,,,,,,,'
+    service: "THREAT"
+    status: "warn"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1791216907000
+ -
+  sample: "<14>Oct  5 16:15:08 panorama-01 1,2026/10/05 16:15:08,012345678901,SYSTEM,auth,0,2026/10/05 16:15:07,,auth-success,,,,general,informational,authenticated for user 'user3'. From: 10.0.0.12.,7300000000000000003,0x8000000000000000,0,0,0,0,,panorama-01,0,0,2026-10-05T16:15:07.789+00:00"
+  result:
+    custom:
+      actionflags: "0x8000000000000000"
+      device_name: "panorama-01"
+      dg_hier_level_1: 0
+      dg_hier_level_2: 0
+      dg_hier_level_3: 0
+      dg_hier_level_4: 0
+      eventid: "auth-success"
+      future_use_1: 1
+      future_use_24: 0
+      future_use_25: 0
+      future_use_6: 0
+      high_res_timestamp: "2026-10-05T16:15:07.789+00:00"
+      module: "general"
+      opaque: "authenticated for user 'user3'. From: 10.0.0.12."
+      receive_time: "2026/10/05 16:15:08"
+      seqno: 7300000000000000000
+      serial: "012345678901"
+      severity: "informational"
+      status: "info"
+      subtype: "auth"
+      time_generated: "2026/10/05 16:15:07"
+      timestamp: 1791216907000
+      type: "SYSTEM"
+    message: "<14>Oct  5 16:15:08 panorama-01 1,2026/10/05 16:15:08,012345678901,SYSTEM,auth,0,2026/10/05 16:15:07,,auth-success,,,,general,informational,authenticated for user 'user3'. From: 10.0.0.12.,7300000000000000003,0x8000000000000000,0,0,0,0,,panorama-01,0,0,2026-10-05T16:15:07.789+00:00"
+    service: "SYSTEM"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1791216907000
+ -
+  sample: "<14>Oct  5 16:15:08 panorama-01 timestamp=2026/10/05 16:15:07, serial=012345678901, type=TRAFFIC, subtype=end, time_generated=2026/10/05 16:15:07, network.client.ip=10.0.0.13, network.destination.ip=185.64.148.0, natsrc=203.0.113.5, natdst=185.64.148.0, rule=rule-03, usr.id=, dstuser=, app=dns-base, vsys=vsys1, source_zone=trust, destination_zone=untrust, inbound_if=ethernet1/2, outbound_if=ethernet1/1, logset=log-profile-01, sessionid=123458, repeatcnt=1, network.client.port=53535, network.destination.port=53, natsport=40404 natdport=53, flags=0x19, proto=udp, evt.name=allow, bytes=280, network.bytes_read=78, network.bytes_written=202, start=2026/10/05 16:14:37, elapsed=0, category=any, seqno=7300000000000000004, actionflags=0x8000000000000000, network.client.geoip.country.name=10.0.0.0-10.255.255.255, dstloc=FR, pkts_sent=1, pkts_received=1, session_end_reason=aged-out, device_name=fw-01, action_source=from-policy"
+  result:
+    custom:
+      action_source: "from-policy"
+      actionflags: "0x8000000000000000"
+      app: "dns-base"
+      bytes: 280
+      category: "any"
+      destination_zone: "untrust"
+      device_name: "fw-01"
+      dstloc: "FR"
+      elapsed: 0
+      evt:
+        name: "allow"
+      flags: "0x19"
+      inbound_if: "ethernet1/2"
+      logset: "log-profile-01"
+      network:
+        bytes_read: 78
+        bytes_written: 202
+        client:
+          geoip: {}
+          ip: "10.0.0.13"
+          nat:
+            ip: "203.0.113.5"
+            port: 40404
+          port: 53535
+        destination:
+          geoip:
+            city:
+              name: "Paris"
+            continent:
+              code: "EU"
+              name: "Europe"
+            country:
+              iso_code: "FR"
+              name: "France"
+            ipAddress: "185.64.148.0"
+            location:
+              latitude: 48.90654
+              longitude: 2.33339
+            subdivision:
+              iso_code: "FR-IDF"
+              name: "Île-de-France"
+            timezone: "Europe/Paris"
+          ip: "185.64.148.0"
+          nat:
+            ip: "185.64.148.0"
+            port: 53
+          port: 53
+      outbound_if: "ethernet1/1"
+      palo:
+        alto:
+          panorama:
+            vsys: "vsys1"
+      pkts_received: 1
+      pkts_sent: 1
+      proto: "udp"
+      repeatcnt: 1
+      rule: "rule-03"
+      seqno: 7300000000000000004
+      serial: "012345678901"
+      session_end_reason: "aged-out"
+      sessionid: 123458
+      source_zone: "trust"
+      start: "2026/10/05 16:14:37"
+      subtype: "end"
+      time_generated: "2026/10/05 16:15:07"
+      timestamp: 1791216907000
+      type: "TRAFFIC"
+    message: "<14>Oct  5 16:15:08 panorama-01 timestamp=2026/10/05 16:15:07, serial=012345678901, type=TRAFFIC, subtype=end, time_generated=2026/10/05 16:15:07, network.client.ip=10.0.0.13, network.destination.ip=185.64.148.0, natsrc=203.0.113.5, natdst=185.64.148.0, rule=rule-03, usr.id=, dstuser=, app=dns-base, vsys=vsys1, source_zone=trust, destination_zone=untrust, inbound_if=ethernet1/2, outbound_if=ethernet1/1, logset=log-profile-01, sessionid=123458, repeatcnt=1, network.client.port=53535, network.destination.port=53, natsport=40404 natdport=53, flags=0x19, proto=udp, evt.name=allow, bytes=280, network.bytes_read=78, network.bytes_written=202, start=2026/10/05 16:14:37, elapsed=0, category=any, seqno=7300000000000000004, actionflags=0x8000000000000000, network.client.geoip.country.name=10.0.0.0-10.255.255.255, dstloc=FR, pkts_sent=1, pkts_received=1, session_end_reason=aged-out, device_name=fw-01, action_source=from-policy"
+    service: "TRAFFIC"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1791216907000
