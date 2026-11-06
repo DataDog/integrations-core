@@ -38,7 +38,7 @@ deps = [
     "cachetools==7.2.1",
     "certifi==2026.10.19",
     "cryptography==50.0.1",
-    "ddtrace==4.13.2",
+    "ddtrace==4.16.1",
     "jellyfish==1.2.1",
     "lazy-loader==0.6",
     "prometheus-client==0.26.0",
