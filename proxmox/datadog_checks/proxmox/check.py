@@ -396,8 +396,11 @@ class ProxmoxCheck(AgentCheck, ConfigMixin):
                 self.log.debug("Skipping resource %s as it is powered off.", resource_name)
                 continue
             elif resource_type_remapped == VM_RESOURCE and status == 1:
-                vm_id = resource.get('vmid')
-                hostname = self._get_vm_hostname(vm_id, resource_name, node)
+                if self.config.hostname_source == 'proxmox_name':
+                    hostname = resource_name
+                else:
+                    vm_id = resource.get('vmid')
+                    hostname = self._get_vm_hostname(vm_id, resource_name, node)
             elif resource_type_remapped == NODE_RESOURCE:
                 resource_tags.add('proxmox_type:host')
                 hostname = node
