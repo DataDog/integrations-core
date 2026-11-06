@@ -1,0 +1,1 @@
+Add `DatabaseSchemaCollector` and `SchemaObjectCollector` so one schema collection run can send several payload kinds, such as tables and views, while connecting to each database once.
