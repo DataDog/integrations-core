@@ -1,0 +1,25 @@
+name: AI-7386 vLLM Agent baseline
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/ai-7386-vllm-agent-baseline.yml
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  vllm:
+    uses: DataDog/integrations-core/.github/workflows/test-target.yml@9b392a0b2af074f16fb6309df9cabe6d866c2bf8
+    with:
+      job-name: vLLM
+      target: vllm
+      platform: linux
+      runner: '["ubuntu-22.04"]'
+      repo: core
+      context: pr
+      python-version: "3.13"
+      pytest-args: '-m "not flaky"'
+      agent-image: registry.datadoghq.com/agent-dev@sha256:f87854334fe9d2e930f2f6d631e35b02d27be760beb9f3fd63182ee4acaac9be
+    secrets: inherit
