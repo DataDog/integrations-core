@@ -1,0 +1,9 @@
+; Zone served by the fixture's local upstream (see Corefile). Only the apex
+; has an A record, so every other name, including the workload's
+; fwd-<n>.example.com, gets an authoritative NXDOMAIN.
+$ORIGIN example.com.
+$TTL 60
+@  IN SOA ns.example.com. hostmaster.example.com. 1 3600 600 86400 60
+@  IN NS  ns.example.com.
+@  IN A   192.0.2.1
+ns IN A   192.0.2.2

@@ -1,0 +1,22 @@
+# Fixture-only Corefile for coredns-full. Same plugin set as the pytest
+# Corefile (docker/coredns/Corefile-v1.8), except `forward` targets a local
+# upstream instead of /etc/resolv.conf, so forward/cache/rcode metrics never
+# depend on internet access or real upstream answers.
+.:53 {
+    errors
+    health
+    prometheus :9153
+    # forward only accepts IPs or resolv.conf-style files, not hostnames, so
+    # the upstream runs as a second server block in this same process on
+    # loopback rather than as a separate compose service.
+    forward example.com. 127.0.0.1:5300
+    cache 30
+}
+
+# Local authoritative upstream for example.com.: answers the apex and returns
+# NXDOMAIN for every other name in the zone (the workload's fwd-<n> names),
+# giving forward both NOERROR and NXDOMAIN rcodes.
+example.com.:5300 {
+    bind 127.0.0.1
+    file /data/example.com.zone
+}
