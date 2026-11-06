@@ -100,6 +100,41 @@ def test_sqlserver_collect_settings(aggregator, dd_run_check, dbm_instance):
     assert not any(tag.startswith('dd.internal') for tag in event['tags'])
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    'dbm, data_observability_enabled, settings_config',
+    [
+        pytest.param(False, True, {'run_sync': True}, id='data-observability-only'),
+        pytest.param(True, False, {'enabled': False, 'run_sync': True}, id='dbm-without-settings'),
+    ],
+)
+def test_collect_schemas_without_settings(
+    aggregator, dd_run_check, instance_docker, dbm, data_observability_enabled, settings_config
+):
+    """Schemas are collected even when settings collection is off, which it always is without DBM."""
+    instance_docker['dbm'] = dbm
+    instance_docker['data_observability'] = {'enabled': data_observability_enabled, 'queries': []}
+    instance_docker['query_metrics'] = {'enabled': False}
+    instance_docker['query_activity'] = {'enabled': False}
+    instance_docker['procedure_metrics'] = {'enabled': False}
+    instance_docker['database_autodiscovery'] = True
+    instance_docker['autodiscovery_include'] = ['datadog_test_schemas$']
+    instance_docker['collect_schemas'] = {'enabled': True}
+    # `run_sync` for the whole metadata job is read from `collect_settings`.
+    instance_docker['collect_settings'] = settings_config
+
+    check = SQLServer(CHECK_NAME, {}, [instance_docker])
+    dd_run_check(check)
+
+    events = aggregator.get_event_platform_events("dbm-metadata")
+    assert not [e for e in events if e['kind'] == 'sqlserver_configs']
+    collected_databases = {
+        database['name'] for e in events if e['kind'] == 'sqlserver_databases' for database in e['metadata']
+    }
+    assert collected_databases == {'datadog_test_schemas'}
+
+
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
     databases_to_find = ['datadog_test_schemas', 'datadog_test_schemas_second', 'datadog_test_collation']
     exp_datadog_test = {
