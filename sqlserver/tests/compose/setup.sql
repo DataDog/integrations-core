@@ -220,6 +220,11 @@ CREATE USER fred FOR LOGIN fred;
 CREATE CLUSTERED INDEX thingsindex ON [datadog_test-1].dbo.ϑings (name);
 GO
 
+-- Keep the last actual plan of each query, for real plan collection (SQL Server 2019 and later).
+IF CAST(SERVERPROPERTY('ProductMajorVersion') AS int) >= 15
+    EXEC('ALTER DATABASE SCOPED CONFIGURATION SET LAST_QUERY_PLAN_STATS = ON;');
+GO
+
 -- Create a simple table for deadlocks
 CREATE TABLE [datadog_test-1].dbo.deadlocks (a int PRIMARY KEY not null ,b int null); 
 

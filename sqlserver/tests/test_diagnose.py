@@ -730,3 +730,53 @@ def test_per_database_view_state_skipped_on_azure_sql_database(instance_minimal_
     diagnoses = _get_diagnoses(check)
 
     assert not _by_name(diagnoses, SQLServerConfigurationError.missing_per_database_view_state.value)
+
+
+@pytest.mark.parametrize(
+    "real_plans_enabled,major_version,trace_flag_2451,last_query_plan_stats,expected",
+    [
+        pytest.param(
+            True,
+            16,
+            0,
+            {'db_on': 1, 'db_off': 0},
+            [(Diagnosis.DIAGNOSIS_WARNING, "'db_off'")],
+            id="setting_off_in_one_database",
+        ),
+        pytest.param(True, 16, 0, {'db_on': 1}, [(Diagnosis.DIAGNOSIS_SUCCESS, "1 probed")], id="setting_on"),
+        pytest.param(
+            True, 16, 1, {'db_off': 0}, [(Diagnosis.DIAGNOSIS_SUCCESS, "Trace flag 2451")], id="trace_flag_on"
+        ),
+        pytest.param(
+            True, 14, 0, {'db_on': 1}, [(Diagnosis.DIAGNOSIS_WARNING, "major version 14")], id="unsupported_version"
+        ),
+        pytest.param(False, 16, 0, {'db_off': 0}, [], id="real_plans_disabled"),
+    ],
+)
+def test_last_query_plan_stats(
+    instance_minimal_defaults, real_plans_enabled, major_version, trace_flag_2451, last_query_plan_stats, expected
+):
+    def database_setting(db_name):
+        def predicate(sql, params):
+            return "database_scoped_configurations" in sql and "[{}]".format(db_name) in sql
+
+        return predicate
+
+    responses = [
+        ("DBCC TRACESTATUS(2451, -1)", [(2451, trace_flag_2451, trace_flag_2451, 0)]),
+        *[(database_setting(db_name), [(value,)]) for db_name, value in last_query_plan_stats.items()],
+        *_happy_responses(major_version=major_version, autodiscovered_databases=tuple(last_query_plan_stats)),
+    ]
+    check = _check(
+        instance_minimal_defaults,
+        responses,
+        dbm=True,
+        query_metrics={'collect_real_plans': {'enabled': real_plans_enabled}},
+    )
+
+    diagnoses = _by_name(_get_diagnoses(check), SQLServerConfigurationError.last_query_plan_stats_disabled.value)
+
+    assert len(diagnoses) == len(expected)
+    for diagnosis, (result, text) in zip(diagnoses, expected):
+        assert diagnosis['result'] == result
+        assert text in diagnosis['diagnosis']

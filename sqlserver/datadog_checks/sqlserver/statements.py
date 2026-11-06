@@ -6,12 +6,14 @@ import binascii
 import copy
 import math
 import time
+from typing import Any, Iterator
 
 from cachetools import TTLCache
 from lxml import etree as ET
 
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.common import ensure_unicode, to_native_string
+from datadog_checks.base.utils.db.health import HealthStatus
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.statement_metrics import StatementMetrics
 from datadog_checks.base.utils.db.utils import (
@@ -23,10 +25,28 @@ from datadog_checks.base.utils.db.utils import (
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 from datadog_checks.sqlserver.config import SQLServerConfig
-from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_VERSION
-from datadog_checks.sqlserver.utils import is_azure_sql_database, needs_comment_recovery, raise_if_cancelled
+from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION, STATIC_INFO_MAJOR_VERSION, STATIC_INFO_VERSION
+from datadog_checks.sqlserver.diagnose import SQLSERVER_DBM_SETUP_DOCS_URL, SYSTEM_DATABASES
+from datadog_checks.sqlserver.health import SqlServerHealthEvent
+from datadog_checks.sqlserver.utils import (
+    is_azure_sql_database,
+    needs_comment_recovery,
+    raise_if_cancelled,
+    read_last_query_plan_stats,
+    read_trace_flag_2451,
+    supports_last_query_plan_stats,
+)
 
 DEFAULT_COLLECTION_INTERVAL = 60
+
+DEFAULT_REAL_PLANS_SAMPLES_PER_HOUR_PER_QUERY = 4
+# A real plan adds runtime counters per operator and per thread to its estimated plan, so it can be twice as large at a
+# high degree of parallelism.
+DEFAULT_REAL_PLAN_MAX_SIZE_BYTES = 1_000_000
+# How long the LAST_QUERY_PLAN_STATS setting of each database and trace flag 2451 are trusted before being read again.
+LAST_QUERY_PLAN_STATS_REFRESH_INTERVAL = 600
+# An actual plan holds at least one of these. Without them, it's a simplified plan with no runtime data.
+REAL_PLAN_RUNTIME_ELEMENTS = ("<RunTimeInformation", "<QueryTimeStats")
 
 SQL_SERVER_QUERY_METRICS_COLUMNS = [
     "execution_count",
@@ -199,6 +219,22 @@ select cast(query_plan as nvarchar(max)) as query_plan, encrypted as is_encrypte
 from sys.dm_exec_query_plan(CONVERT(varbinary(max), ?, 1))
 """
 
+# last_execution_time is read for the plan handle and statement of the row, since the metrics row aggregates several
+# cache entries. It's in the server's time zone, so it gets the server's current UTC offset, as an ISO 8601 string
+# because pyodbc can't read the datetimeoffset type.
+REAL_PLAN_LOOKUP_QUERY = """\
+select cast(ps.query_plan as nvarchar(max)) as query_plan,
+    CONVERT(varchar(34),
+        TODATETIMEOFFSET(qs.last_execution_time, DATEPART(TZOFFSET, SYSDATETIMEOFFSET())), 126
+    ) as last_execution_time
+from sys.dm_exec_query_plan_stats(CONVERT(varbinary(max), ?, 1)) ps
+outer apply (
+    select top 1 last_execution_time
+    from sys.dm_exec_query_stats
+    where plan_handle = CONVERT(varbinary(max), ?, 1) and statement_start_offset = ? and statement_end_offset = ?
+) qs
+"""
+
 
 def _row_key(row):
     """
@@ -290,6 +326,23 @@ class SqlserverStatementMetrics(DBMAsyncJob):
         self._collect_execution_plans = is_affirmative(self._config.statement_metrics_config.get('collect_plans', True))
         self._collect_raw_query_statement = self._config.collect_raw_query_statement.get("enabled", False)
 
+        real_plans_config = self._real_plans_config()
+        self._collect_real_plans = is_affirmative(real_plans_config.get('enabled', False))
+        self._real_plan_max_size_bytes = int(
+            real_plans_config.get('max_plan_size_bytes', DEFAULT_REAL_PLAN_MAX_SIZE_BYTES)
+        )
+        self._real_plans_version_unsupported_warned = False
+        # LAST_QUERY_PLAN_STATS of each database whose real plans were looked for, None when it couldn't be read.
+        self._last_query_plan_stats_by_db: dict[str, bool | None] = {}
+        self._trace_flag_2451 = False
+        self._last_query_plan_stats_read_at = 0.0
+        # The databases with LAST_QUERY_PLAN_STATS off, so each database's warning is logged once, and the health
+        # event goes to warning with the first one and back to OK when the last one is fixed.
+        self._last_query_plan_stats_disabled_dbs: set[str] = set()
+
+    def _real_plans_config(self) -> dict:
+        return self._config.statement_metrics_config.get('collect_real_plans', {}) or {}
+
     def _init_caches(self):
         # full_statement_text_cache: limit the ingestion rate of full statement text events per query_signature
         self._full_statement_text_cache = TTLCache(
@@ -304,6 +357,22 @@ class SqlserverStatementMetrics(DBMAsyncJob):
             # total size: 10k * 100 = 1 Mb
             maxsize=int(self._check.instance.get('seen_samples_cache_maxsize', 10000)),
             ttl=60 * 60 / int(self._check.instance.get('samples_per_hour_per_query', 4)),
+        )
+
+        # seen_real_plans_ratelimiter: limit the ingestion rate of real plans per unique plan, separately from
+        # estimated plans.
+        real_plans_per_hour = int(
+            self._real_plans_config().get('samples_per_hour_per_query', DEFAULT_REAL_PLANS_SAMPLES_PER_HOUR_PER_QUERY)
+        )
+        if real_plans_per_hour < 1:
+            self.log.warning(
+                "`query_metrics.collect_real_plans.samples_per_hour_per_query` must be at least 1, using %s",
+                DEFAULT_REAL_PLANS_SAMPLES_PER_HOUR_PER_QUERY,
+            )
+            real_plans_per_hour = DEFAULT_REAL_PLANS_SAMPLES_PER_HOUR_PER_QUERY
+        self._seen_real_plans_ratelimiter = RateLimitingTTLCache(
+            maxsize=int(self._check.instance.get('seen_samples_cache_maxsize', 10000)),
+            ttl=60 * 60 / real_plans_per_hour,
         )
 
     def shutdown(self) -> None:
@@ -628,6 +697,7 @@ class SqlserverStatementMetrics(DBMAsyncJob):
     @tracked_method(agent_check_getter=agent_check_getter)
     def _collect_plans(self, rows, cursor, deadline):
         attempted_plan_keys = set()
+        collect_real_plans = self._collect_real_plans and self._real_plans_supported()
         for row in rows:
             if self.enforce_collection_interval_deadline and time.time() > deadline:
                 self.log.debug("ending plan collection early because check deadline has been exceeded")
@@ -752,3 +822,175 @@ class SqlserverStatementMetrics(DBMAsyncJob):
                         obfuscated_plan_event["db"]["plan"]["raw_signature"] = raw_plan_signature
                     yield raw_plan_event
                 yield obfuscated_plan_event
+                if collect_real_plans and raw_plan and not is_plan_encrypted:
+                    yield from self._collect_real_plan_events(row, plan_key, obfuscated_plan_event, cursor, deadline)
+
+    def _real_plans_supported(self) -> bool:
+        major_version = self._check.static_info_cache.get(STATIC_INFO_MAJOR_VERSION)
+        engine_edition = self._check.static_info_cache.get(STATIC_INFO_ENGINE_EDITION)
+        if supports_last_query_plan_stats(major_version, engine_edition):
+            return True
+        # Until the version is known, skip real plans without warning.
+        if major_version is not None and not self._real_plans_version_unsupported_warned:
+            self._real_plans_version_unsupported_warned = True
+            self.log.warning(
+                "Real execution plans need SQL Server 2019 or later, or Azure SQL, but this server's major version is "
+                "%s: only estimated plans are collected. Turn off `query_metrics.collect_real_plans` to remove this "
+                "warning: %s",
+                major_version,
+                SQLSERVER_DBM_SETUP_DOCS_URL,
+            )
+            self._check.health.submit_health_event(
+                name=SqlServerHealthEvent.REAL_PLANS_VERSION_UNSUPPORTED, status=HealthStatus.WARNING
+            )
+        return False
+
+    def _last_query_plan_stats_setting(self, cursor, db_name: str | None) -> str:
+        """
+        Whether the database keeps the last actual plan of its queries: `on`, `off`, or `unknown` when its setting can't
+        be read or the row has no database. The settings are read at most every `LAST_QUERY_PLAN_STATS_REFRESH_INTERVAL`
+        seconds. The setting doesn't decide collection: SQL Server 2022 and later keep actual plans of some queries with
+        it off, so real plans are kept whenever they hold runtime data, and the setting only drives the health event.
+        """
+        now = time.time()
+        if now - self._last_query_plan_stats_read_at >= LAST_QUERY_PLAN_STATS_REFRESH_INTERVAL:
+            self._last_query_plan_stats_read_at = now
+            try:
+                self._trace_flag_2451 = read_trace_flag_2451(cursor)
+            except Exception as e:
+                raise_if_cancelled(self._cancel_event)
+                self.log.debug("Failed to read the status of trace flag 2451: %s", e)
+                self._trace_flag_2451 = False
+            self._last_query_plan_stats_by_db = {}
+            # Read the failing databases again, so the health event goes back to OK once they're fixed, even when
+            # none of their plans gets collected.
+            for failing_db in sorted(self._last_query_plan_stats_disabled_dbs):
+                self._read_last_query_plan_stats(cursor, failing_db)
+        if self._trace_flag_2451:
+            return "on"
+        if not db_name:
+            return "unknown"
+        if db_name not in self._last_query_plan_stats_by_db:
+            self._read_last_query_plan_stats(cursor, db_name)
+        enabled = self._last_query_plan_stats_by_db[db_name]
+        return "unknown" if enabled is None else "on" if enabled else "off"
+
+    def _read_last_query_plan_stats(self, cursor, db_name: str) -> None:
+        enabled: bool | None = True
+        if not self._trace_flag_2451:
+            try:
+                enabled = read_last_query_plan_stats(cursor, db_name)
+            except Exception as e:
+                raise_if_cancelled(self._cancel_event)
+                self.log.debug("Failed to read LAST_QUERY_PLAN_STATS in database '%s': %s", db_name, e)
+                enabled = None
+        self._last_query_plan_stats_by_db[db_name] = enabled
+        # The system databases run the Agent's own queries, so a warning there is noise.
+        if enabled is False and db_name.lower() not in SYSTEM_DATABASES:
+            if db_name not in self._last_query_plan_stats_disabled_dbs:
+                self._last_query_plan_stats_disabled_dbs.add(db_name)
+                if len(self._last_query_plan_stats_disabled_dbs) == 1:
+                    self._check.health.submit_health_event(
+                        name=SqlServerHealthEvent.LAST_QUERY_PLAN_STATS_DISABLED,
+                        status=HealthStatus.WARNING,
+                        data={"databases": [db_name]},
+                    )
+                self.log.warning(
+                    "LAST_QUERY_PLAN_STATS is off in database '%s': real execution plans are only collected for the "
+                    "few queries SQL Server keeps actual plans of on its own. Turn it on in that database for full "
+                    "coverage with `ALTER DATABASE SCOPED CONFIGURATION SET LAST_QUERY_PLAN_STATS = ON;`: %s",
+                    db_name,
+                    SQLSERVER_DBM_SETUP_DOCS_URL,
+                )
+        # A setting that couldn't be read leaves the database as it was.
+        elif enabled and db_name in self._last_query_plan_stats_disabled_dbs:
+            self._last_query_plan_stats_disabled_dbs.remove(db_name)
+            if not self._last_query_plan_stats_disabled_dbs:
+                self._check.health.submit_health_event(
+                    name=SqlServerHealthEvent.LAST_QUERY_PLAN_STATS_DISABLED, status=HealthStatus.OK
+                )
+
+    @tracked_method(agent_check_getter=agent_check_getter)
+    def _load_real_plan(self, row: dict, cursor) -> tuple[str | None, str | None]:
+        """The real plan of the row's cached plan, and when the row's statement last ran."""
+        params = (
+            "0x" + row['plan_handle'],
+            "0x" + row['plan_handle'],
+            row['statement_start_offset'],
+            row['statement_end_offset'],
+        )
+        self.log.debug("Running query [%s] %s", REAL_PLAN_LOOKUP_QUERY, params)
+        cursor.execute(REAL_PLAN_LOOKUP_QUERY, params)
+        result = cursor.fetchone()
+        return (result[0], result[1]) if result else (None, None)
+
+    def _count_real_plan(self, status: str, tags: list[str] | None = None) -> None:
+        self._check.count(
+            "dd.sqlserver.statements.real_plans",
+            1,
+            **self._check.debug_stats_kwargs(tags=["status:" + status] + (tags or [])),
+        )
+
+    def _collect_real_plan_events(
+        self, row: dict, plan_key: Any, plan_event: dict, cursor, deadline: float
+    ) -> Iterator[dict]:
+        """
+        Yields the real plan event of a row, the last actual plan of its cached plan, built from its estimated plan
+        event, and its raw copy when raw collection is on.
+        """
+        if plan_key in self._seen_real_plans_ratelimiter:
+            return
+        if self.enforce_collection_interval_deadline and time.time() > deadline:
+            return
+        last_query_plan_stats = self._last_query_plan_stats_setting(cursor, row.get('database_name'))
+        raise_if_cancelled(self._cancel_event)
+        try:
+            raw_plan, last_execution_time = self._load_real_plan(row, cursor)
+        except Exception as e:
+            # A connection closed during cancellation may surface as a database error.
+            raise_if_cancelled(self._cancel_event)
+            self.log.debug("Failed to load real plan. plan_handle=%s error=%s", row['plan_handle'], e)
+            self._count_real_plan("error")
+            return
+        if not raw_plan:
+            self._count_real_plan("empty")
+            return
+        if not any(element in raw_plan for element in REAL_PLAN_RUNTIME_ELEMENTS):
+            self._count_real_plan("no_runtime_data")
+            return
+        if len(raw_plan.encode('utf-8')) > self._real_plan_max_size_bytes:
+            self._count_real_plan("too_large")
+            return
+        try:
+            obfuscated_plan = obfuscate_xml_plan(raw_plan, self._config.obfuscator_options)
+        except Exception as e:
+            if self._config.log_unobfuscated_plans:
+                self.log.warning("Failed to obfuscate real plan=[%s] | err=[%s]", repr(raw_plan), e)
+            else:
+                self.log.debug("Failed to obfuscate real plan | plan_handle=[%s] err=[%s]", row['plan_handle'], e)
+            self._count_real_plan("error")
+            return
+        if not self._seen_real_plans_ratelimiter.acquire(plan_key):
+            return
+
+        real_plan_event = copy.deepcopy(plan_event)
+        real_plan_event["timestamp"] = time.time() * 1000
+        real_plan_event["db"]["plan"] = {
+            "definition": obfuscated_plan,
+            "signature": row['query_plan_hash'],
+            "type": "real",
+            "source": "last_query_plan_stats",
+            "collection_errors": None,
+        }
+        # The plan describes the last execution of the cached plan, not one of the executions the metrics count.
+        real_plan_event["sqlserver"]["last_execution_time"] = last_execution_time
+        if self._collect_raw_query_statement:
+            raw_plan_event = copy.deepcopy(real_plan_event)
+            raw_plan_event["dbm_type"] = "rqp"  # raw query plan
+            raw_plan_event["db"]["plan"]["definition"] = raw_plan
+            raw_plan_signature = compute_sql_signature(raw_plan)
+            raw_plan_event["db"]["plan"]["raw_signature"] = raw_plan_signature
+            real_plan_event["db"]["plan"]["raw_signature"] = raw_plan_signature
+            yield raw_plan_event
+        self._count_real_plan("collected", tags=["setting:" + last_query_plan_stats])
+        yield real_plan_event

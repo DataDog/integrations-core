@@ -1,0 +1,1 @@
+Add `query_metrics.collect_real_plans` to collect the last actual execution plan of each query from `sys.dm_exec_query_plan_stats`, sent as `real` plan events.

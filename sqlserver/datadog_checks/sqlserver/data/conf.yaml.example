@@ -454,6 +454,34 @@ instances:
         #
         # collect_plans: true
 
+        ## @param collect_real_plans - mapping - optional
+        ## Configure collection of real execution plans, next to the estimated plans collected with `collect_plans`.
+        ## A real plan is the last actual execution plan of a cached plan, read from `sys.dm_exec_query_plan_stats`:
+        ## it describes the last execution of that plan, with the actual rows and executions of each operator, the
+        ## memory grant used, the actual degree of parallelism and spill warnings. The CPU and elapsed times SQL
+        ## Server puts in these plans (`QueryTimeStats`) are unreliable on SQL Server 2019, 2022 and 2025.
+        ##
+        ## Real plans require SQL Server 2019 or later, or Azure SQL. For full coverage, turn on
+        ## `LAST_QUERY_PLAN_STATS` in each database (`ALTER DATABASE SCOPED CONFIGURATION SET LAST_QUERY_PLAN_STATS
+        ## = ON;`) or trace flag 2451 for the server. With it off, SQL Server only keeps actual plans of a few
+        ## queries on its own, and the Agent collects those. The Agent never changes these settings itself. It
+        ## reports the databases where the setting is off in its logs and in its health events. Keeping the last
+        ## actual plan uses SQL Server's
+        ## lightweight query profiling, which adds a small CPU overhead to query execution; see Microsoft's
+        ## documentation of `LAST_QUERY_PLAN_STATS` before turning it on.
+        ##
+        ## Values in real plans are obfuscated, like in estimated plans. When `collect_raw_query_statement.enabled`
+        ## is true, a raw copy of each real plan is also sent.
+        ##
+        ## Set `collect_real_plans.enabled` to true to collect real plans. Defaults to false.
+        ## Use `collect_real_plans.samples_per_hour_per_query` to set how many real plans are collected per hour and
+        ## per plan. Defaults to 4. Real plans are only collected along with an estimated plan, so this can lower
+        ## but not raise that rate.
+        ## Use `collect_real_plans.max_plan_size_bytes` to skip real plans larger than this size. Defaults to
+        ## 1000000.
+        #
+        # collect_real_plans: {}
+
     ## Configure collection of procedure metrics
     #
     # procedure_metrics:
