@@ -5,12 +5,15 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import BaseModel, ConfigDict, ValidationError, model_validator
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterator
+    from contextlib import AbstractAsyncContextManager
     from pathlib import Path
 
     from ddev.cli.application import Application
@@ -18,6 +21,9 @@ if TYPE_CHECKING:
     from ddev.utils.git import ChangedFile
     from ddev.utils.github_async import AsyncGitHubClient
     from ddev.utils.github_async.models import PullRequest, PullRequestRef, PullRequestSimple
+
+    # Opens one instrumented client session. See `resolution_github_client`.
+    ResolutionClientFactory = Callable[[], AbstractAsyncContextManager[AsyncGitHubClient]]
 
 RUN_MANIFEST_NAME = 'run.json'
 NO_MATCHING_PR_REASON = 'no open pull request matches the requested revision'
@@ -29,6 +35,73 @@ MERGE_COMMIT_REFRESH_SECONDS = 2.0
 
 class RunResolutionError(Exception):
     """A run could not be resolved; the message is what the invocation aborts with."""
+
+
+def resolution_github_client(token: str, *, monitor: ComponentMonitor) -> ResolutionClientFactory:
+    """Build the GitHub client factory every resolver uses.
+
+    Every GitHub client the Dispatcher opens is instrumented, so a resolver must take its client
+    from here rather than calling `async_github_client` itself: one built in passing has no request
+    metrics, no rate-limit logging, and a limiter of its own, which quietly spends the same GitHub
+    quota the governor thinks it is managing. `monitor` is required for the same reason — an
+    optional one leaves a way to build exactly the client this function exists to prevent.
+
+    A factory rather than a client, because each resolution runs in its own `asyncio.run` and an
+    `httpx.AsyncClient` cannot cross event loops. The instrumentation it closes over is built once,
+    so every session shares one rate limiter.
+    """
+    from ddev.cli.ci.tests.github_monitor import GitHubMonitor
+    from ddev.monitoring.adapter import ComponentLogAdapter
+    from ddev.utils.github_async.defaults import default_github_rate_limiter, log_rate_limit_events
+    from ddev.utils.rate_limiting import RateLimitEvent
+
+    client_logger = ComponentLogAdapter(monitor)
+    github_monitor = GitHubMonitor(monitor)
+    log_event = log_rate_limit_events(client_logger)
+
+    def on_rate_limit_event(event: RateLimitEvent) -> None:
+        log_event(event)
+        github_monitor.rate_limit_event(event)
+
+    rate_limiter = default_github_rate_limiter(on_event=on_rate_limit_event)
+
+    def open_client() -> AbstractAsyncContextManager[AsyncGitHubClient]:
+        from ddev.utils.github_async import async_github_client
+
+        return async_github_client(
+            token=token, logger=client_logger, observer=github_monitor, rate_limiter=rate_limiter
+        )
+
+    return open_client
+
+
+@contextmanager
+def resolution_failures(*, description: str, not_found: str | None = None) -> Iterator[None]:
+    """Map everything a resolver's API session can fail with onto `RunResolutionError`.
+
+    `description` prefixes the generic failures; `not_found` replaces it for a 404, for a resolver
+    that can say something more useful than "could not read" when the thing simply is not there.
+    A `RunResolutionError` raised inside the session already says what went wrong, so it passes
+    through rather than being wrapped in a second message.
+    """
+    import httpx
+
+    from ddev.cli.ci.tests.changes import ChangeResolutionError
+    from ddev.utils.github_errors import GitHubAuthenticationError
+
+    try:
+        yield
+    except RunResolutionError:
+        raise
+    except (GitHubAuthenticationError, ChangeResolutionError) as error:
+        raise RunResolutionError(str(error)) from error
+    # Checked before `HTTPError`, which it subclasses.
+    except httpx.HTTPStatusError as error:
+        if not_found is not None and error.response.status_code == httpx.codes.NOT_FOUND:
+            raise RunResolutionError(not_found) from error
+        raise RunResolutionError(f'{description}: {error}') from error
+    except (httpx.HTTPError, ValidationError) as error:
+        raise RunResolutionError(f'{description}: {error}') from error
 
 
 @dataclass(frozen=True)
@@ -130,16 +203,31 @@ class ResolvedRun(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra='forbid')
 
-    schema_version: Literal[2] = 2
+    schema_version: Literal[4] = 4
     repository: str
     checkout_sha: str
     head_sha: str
-    head_branch: str
+    # Exactly one of these identifies the ref the results belong to. A run started from a release
+    # tag has no branch to attribute to, and inventing one would file its results under a branch
+    # that does not exist, so it carries the tag instead.
+    head_branch: str | None = None
+    head_tag: str | None = None
     all_targets: bool
     pr_number: int | None = None
     base_branch: str | None = None
     base_sha: str | None = None
     is_fork: bool = False
+    # Explicit targets replace the selection; exclusions filter whichever selection applies.
+    targets: tuple[str, ...] = ()
+    exclude_targets: tuple[str, ...] = ()
+    # What the run was started for, such as `pr`, `master` or `nightly`. It tells apart runs on one commit.
+    context: str = 'master'
+
+    @model_validator(mode='after')
+    def check_head_ref(self) -> ResolvedRun:
+        if (self.head_branch is None) == (self.head_tag is None):
+            raise ValueError('exactly one of head_branch and head_tag must be set')
+        return self
 
     @property
     def owner(self) -> str:
@@ -151,8 +239,12 @@ class ResolvedRun(BaseModel):
 
     @property
     def concurrency_key(self) -> str:
-        """New PR revisions must cancel old batches, so they key on the PR, not the merge SHA."""
-        return f'pr-{self.pr_number}' if self.pr_number is not None else self.head_sha
+        """New PR revisions must cancel old batches, so they key on the PR, not the merge SHA.
+
+        Other runs key on their context too, so a nightly run and a master push on one commit do not
+        cancel each other.
+        """
+        return f'pr-{self.pr_number}' if self.pr_number is not None else f'{self.context}-{self.head_sha}'
 
 
 def write_run_manifest(base_path: Path, *, run: ResolvedRun) -> None:
@@ -192,18 +284,42 @@ def resolve_run(
     repository: str,
     pr_resolver: PullRequestResolver | None,
     commit: str | None,
-    token: str,
+    github_client: ResolutionClientFactory,
     all_targets: bool,
+    targets: tuple[str, ...] = (),
+    exclude_targets: tuple[str, ...] = (),
+    head_tag: str | None = None,
+    context: str = 'master',
     monitor: ComponentMonitor | None = None,
 ) -> ResolvedRun | None:
-    """Resolve what to test, reporting why a run has nothing left to test before returning None."""
+    """Resolve what to test, reporting why a run has nothing left to test before returning None.
+
+    A pull request run's context is always `pr`, whatever *context* says.
+
+    `head_tag` names the release tag to test, and is the whole selection: the commit is read from
+    the tag rather than supplied alongside it, so the two cannot disagree about what is being
+    tested. Supplying it replaces branch attribution entirely.
+    """
     if pr_resolver is not None:
         return resolve_pull_request_run(
             app,
             repository=repository,
             resolver=pr_resolver,
-            token=token,
+            github_client=github_client,
             all_targets=all_targets,
+            exclude_targets=exclude_targets,
+            monitor=monitor,
+        )
+
+    if head_tag is not None:
+        return resolve_tag_run(
+            repository=repository,
+            tag=head_tag,
+            github_client=github_client,
+            all_targets=all_targets,
+            targets=targets,
+            exclude_targets=exclude_targets,
+            context=context,
             monitor=monitor,
         )
 
@@ -216,7 +332,11 @@ def resolve_run(
         checkout_sha=tested_commit,
         head_sha=tested_commit,
         head_branch=head_branch,
+        head_tag=head_tag,
         all_targets=all_targets,
+        targets=targets,
+        exclude_targets=exclude_targets,
+        context=context,
     )
     if monitor is not None:
         monitor.logger.info(
@@ -228,12 +348,79 @@ def resolve_run(
     return run
 
 
+def resolve_tag_run(
+    *,
+    repository: str,
+    tag: str,
+    github_client: ResolutionClientFactory,
+    all_targets: bool,
+    targets: tuple[str, ...] = (),
+    exclude_targets: tuple[str, ...] = (),
+    context: str = 'master',
+    monitor: ComponentMonitor | None = None,
+) -> ResolvedRun:
+    """Read the commit a release tag points at, and test that.
+
+    Release tags are annotated, so the reference points at a tag object rather than at a commit and
+    has to be followed one step further. A lightweight tag points straight at its commit and needs
+    no second call, so both are handled rather than only the shape we publish today.
+
+    Nothing here verifies the checkout: `validate_checkout` already refuses a tree that is not the
+    run's `checkout_sha`, which also covers a tag that moved after the workflow checked it out.
+    """
+    import asyncio
+
+    owner, _, repo = repository.partition('/')
+    if monitor is not None:
+        monitor.logger.info('Resolving tested revision', head_tag=tag, all_targets=all_targets)
+
+    async def resolve() -> str:
+        async with github_client() as client:
+            reference = (await client.get_ref(owner, repo, f'tags/{tag}')).data
+            if reference.object.type == 'commit':
+                return reference.object.sha
+            if reference.object.type != 'tag':
+                raise RunResolutionError(
+                    f'Tag {tag} points at a {reference.object.type}, which is not a commit to test.'
+                )
+            # An annotated tag wraps its commit; one tag object wrapping another is not something
+            # git produces for a release, so a second indirection is treated as unusable.
+            tag_object = (await client.get_tag(owner, repo, reference.object.sha)).data
+            if tag_object.object.type != 'commit':
+                raise RunResolutionError(f'Tag {tag} wraps a {tag_object.object.type}, which is not a commit to test.')
+            return tag_object.object.sha
+
+    with resolution_failures(
+        description=f'Could not read tag {tag}', not_found=f'Tag {tag} does not exist in {repository}.'
+    ):
+        tested_commit = asyncio.run(resolve())
+
+    run = ResolvedRun(
+        repository=repository,
+        checkout_sha=tested_commit,
+        head_sha=tested_commit,
+        head_tag=tag,
+        all_targets=all_targets,
+        targets=targets,
+        exclude_targets=exclude_targets,
+        context=context,
+    )
+    if monitor is not None:
+        monitor.logger.info(
+            'Tested revision resolved',
+            checkout_sha=run.checkout_sha,
+            head_sha=run.head_sha,
+            head_tag=run.head_tag,
+        )
+    return run
+
+
 def changes_for_run(
     app: Application, *, run: ResolvedRun, monitor: ComponentMonitor | None = None
 ) -> list[ChangedFile] | None:
-    """The files the run is responsible for; `None` when the run covers every target."""
+    """The files the run is responsible for; `None` when the run names its targets instead."""
     validate_checkout(app, run=run)
-    if run.all_targets:
+    if run.all_targets or run.targets:
         return None
 
     from ddev.cli.ci.tests.changes import ChangeResolutionError, changes_in_commit
@@ -285,43 +472,19 @@ def resolve_pull_request_run(
     *,
     repository: str,
     resolver: PullRequestResolver,
-    token: str,
+    github_client: ResolutionClientFactory,
     all_targets: bool,
+    exclude_targets: tuple[str, ...] = (),
     monitor: ComponentMonitor | None = None,
 ) -> ResolvedRun | None:
     """Read the pull request from the API, in one client session."""
     import asyncio
 
-    import httpx
-
-    from ddev.cli.ci.tests.changes import ChangeResolutionError
-    from ddev.utils.github_async import async_github_client
-    from ddev.utils.github_errors import GitHubAuthenticationError
-
-    client_logger = None
-    observer = None
-    rate_limiter = None
     if monitor is not None:
-        from ddev.cli.ci.tests.github_monitor import GitHubMonitor
-        from ddev.monitoring.adapter import ComponentLogAdapter
-        from ddev.utils.github_async.defaults import default_github_rate_limiter, log_rate_limit_events
-        from ddev.utils.rate_limiting import RateLimitEvent
-
-        client_logger = ComponentLogAdapter(monitor)
-        github_monitor = observer = GitHubMonitor(monitor)
-        log_event = log_rate_limit_events(client_logger)
-
-        def on_rate_limit_event(event: RateLimitEvent) -> None:
-            log_event(event)
-            github_monitor.rate_limit_event(event)
-
-        rate_limiter = default_github_rate_limiter(on_event=on_rate_limit_event)
         monitor.logger.info('Resolving pull request', pr_number=resolver.number, all_targets=all_targets)
 
     async def resolve() -> ResolvedRun | None:
-        async with async_github_client(
-            token=token, logger=client_logger, observer=observer, rate_limiter=rate_limiter
-        ) as client:
+        async with github_client() as client:
             pull = await resolver.resolve(client)
             if pull is None:
                 if monitor is not None:
@@ -341,6 +504,8 @@ def resolve_pull_request_run(
                 base_branch=pull.base.ref,
                 base_sha=pull.base.sha,
                 is_fork=head_is_fork(pull.head, owner=resolver.owner, repo=resolver.repo),
+                exclude_targets=exclude_targets,
+                context='pr',
             )
             if monitor is not None:
                 monitor.logger.info(
@@ -355,11 +520,5 @@ def resolve_pull_request_run(
                 )
             return run
 
-    try:
+    with resolution_failures(description='Could not read the pull request to test'):
         return asyncio.run(resolve())
-    except GitHubAuthenticationError as error:
-        raise RunResolutionError(str(error)) from error
-    except ChangeResolutionError as error:
-        raise RunResolutionError(str(error)) from error
-    except (httpx.HTTPError, ValidationError) as error:
-        raise RunResolutionError(f'Could not read the pull request to test: {error}') from error

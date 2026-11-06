@@ -59,6 +59,12 @@ PARTIAL_OP_FIXTURES = {
         'fw-a': 'synthetic/jobs_pending_idle.xml',
         'fw-b': 'synthetic/jobs_pending_idle.xml',
     },
+    # fw-b runs the Advanced Routing Engine.
+    '<show><advanced-routing><logical-router/></advanced-routing></show>': {'fw-b': 'fw-b/are_logical_router.xml'},
+    '<show><advanced-routing><bgp><peer><detail><logical-router>default</logical-router></detail></peer></bgp>'
+    '</advanced-routing></show>': {'fw-b': 'fw-b/are_bgp_peer_detail.xml'},
+    '<show><advanced-routing><ospf><neighbor><logical-router>default</logical-router></neighbor></ospf>'
+    '</advanced-routing></show>': {'fw-b': 'fw-b/are_ospf_neighbor.xml'},
 }
 
 
@@ -112,45 +118,6 @@ def find_op_fixture(cmd: str, firewall: str) -> Path | None:
     return FIXTURES / relative if relative else None
 
 
-# `type=log` queries to the fixture answering them: response file under FIXTURES, per set. The key is
-# `(dir, query)`; `nlogs` is not part of it, so a test can change the page size. `query` is None when the request has
-# none. Each `forward` query is the one the threats collector sends for a watermark one below its `seqno geq`.
-PROBE_SEQNO_START = 7691899338913581948
-# `nlogs` of the real `probe-seqno` capture, whose pages the threats tests answer themselves. These are the last five
-# pages of the L11 capture (`capture/probe-seqno-3-13-247-39/`), p15-p18 with 20 entries and p19 with 5, re-based
-# on p15's first seqno. L11 showed the seqno query is exact and its pages stable, so this is what PAN-OS returns for
-# that query.
-PROBE_SEQNO_PAGE_SIZE = 20
-PROBE_SEQNO_PAGES = 5
-PROBE_SEQNO_FIRST_PAGE = 15
-# `seqno` of the newest log of `probe/threat_back_p0.xml`, and the watermark + 1 each set's forward threat query starts
-# at. fw-b answers with fw-a's `threat_log_5m.xml` (every seqno in it is above both), but from its own seqno: a poller
-# that queried with the other firewall's watermark would get no answer, so a watermark shared between firewalls fails.
-BACKWARD_NEWEST_SEQNO = 7691899338913581520
-THREAT_LOG_FIRST_SEQNO = {'fw-a': 7691899338913480957, 'fw-b': 7691899338913480957 - 1000}
-
-
-def seqno_query(seqno: int) -> str:
-    return f'(seqno geq {seqno})'
-
-
-LOG_FIXTURES: dict[str, dict[tuple[str, str | None], str]] = {
-    'fw-a': {
-        ('backward', None): 'probe/threat_back_p0.xml',
-        ('forward', seqno_query(THREAT_LOG_FIRST_SEQNO['fw-a'])): 'fw-a/threat_log_5m.xml',
-    },
-    'fw-b': {
-        ('forward', seqno_query(THREAT_LOG_FIRST_SEQNO['fw-b'])): 'fw-a/threat_log_5m.xml',
-    },
-}
-
-
-def find_log_fixture(direction: str, query: str | None, firewall: str) -> Path | None:
-    """Return the fixture answering a `type=log` query for the firewall set, or None."""
-    relative = LOG_FIXTURES.get(firewall, {}).get((direction, query))
-    return FIXTURES / relative if relative else None
-
-
 def find_report_fixture(field: str, firewall: str) -> Path | None:
     """Return the fixture of the custom report aggregated by `field`, or None."""
     response = set_fixture(f'report_custom_{field}.xml', firewall)
@@ -163,29 +130,24 @@ def report_field(cmd: str) -> str | None:
     return match.group(1) if match else None
 
 
-def log_job_fixture(params: Mapping[str, str], firewall: str) -> Path | None:
-    """The fixture answering the `type=log` submit with these form `params`, or None."""
-    return find_log_fixture(params.get('dir', ''), params.get('query'), firewall)
-
-
 def report_job_fixture(params: Mapping[str, str], firewall: str) -> Path | None:
     """The fixture answering the `type=report` submit with these form `params`, or None."""
     field = report_field(params.get('cmd', ''))
     return find_report_fixture(field, firewall) if field else None
 
 
-# The two captured submit answers every fake builds its own from: a log submit and a report submit. The client reads
-# only the job id from them, so each fake numbers its jobs itself. Each capture announces its id twice.
-SUBMIT_TEMPLATES = {'log': 'fw-a/threat_log_5m_submit.xml', 'report': 'fw-a/report_custom_app_submit.xml'}
-SUBMIT_TEMPLATE_IDS = {'log': '2', 'report': '4'}
+# The captured submit answer every fake builds its own from. The client reads only the job id from it, so each fake
+# numbers its jobs itself. The capture announces its id twice.
+SUBMIT_TEMPLATE = 'fw-a/report_custom_app_submit.xml'
+SUBMIT_TEMPLATE_ID = '4'
 
 
-def submit_answer(kind: str, job_id: str) -> bytes:
-    """The submit answer of a `log` or `report` job numbered `job_id`: the capture with its id replaced in the message
+def submit_answer(job_id: str) -> bytes:
+    """The submit answer of a `report` job numbered `job_id`: the capture with its id replaced in the message
     text (`jobid <n>`) and in `<job><n></job>`, and nothing else changed."""
-    capture_id = SUBMIT_TEMPLATE_IDS[kind]
+    capture_id = SUBMIT_TEMPLATE_ID
     return (
-        (FIXTURES / SUBMIT_TEMPLATES[kind])
+        (FIXTURES / SUBMIT_TEMPLATE)
         .read_bytes()
         .replace(f'jobid {capture_id}<'.encode(), f'jobid {job_id}<'.encode())
         .replace(f'<job>{capture_id}</job>'.encode(), f'<job>{job_id}</job>'.encode())
