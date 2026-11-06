@@ -11,6 +11,7 @@ from os import environ
 
 import mock
 import pytest
+from cachetools import TTLCache
 from packaging.version import parse as parse_version
 
 from datadog_checks.base.utils.db.sql import compute_sql_signature
@@ -315,6 +316,98 @@ def test_statement_metrics_new_prepared_statement_instance_does_not_inflate(
     assert len(matching_rows) == 1
     # only ps1's +1 is counted; ps2 is baselined, not dumped
     assert matching_rows[0]['count_star'] == 1
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('prepared', [False, True])
+def test_statement_rows_expire_independently(dbm_instance: dict, prepared: bool):
+    # SDBM-3121: activity for one digest must not retain stale rows sharing its signature.
+    job = MySql(common.CHECK_NAME, {}, [dbm_instance]).statement_metrics
+    now = 0
+    job._statement_rows = TTLCache(maxsize=100, ttl=60, timer=lambda: now)
+
+    def row(identity: int) -> dict:
+        return {
+            'schema_name': 'test',
+            'query_signature': 'same-signature',
+            'digest': None if prepared else str(identity),
+            '_dd_statement_id': identity if prepared else None,
+        }
+
+    stale, active = row(1), row(2)
+    assert job._add_associated_rows([stale, active]) == [stale, active]
+    now = 40
+    assert job._add_associated_rows([active]) == [stale, active]
+    now = 61
+    assert job._add_associated_rows([]) == [active]
+    now = 101
+    assert job._add_associated_rows([]) == []
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('prepared', [False, True])
+def test_statement_metrics_after_row_eviction(dbm_instance: dict, prepared: bool):
+    # Evicting one identity must preserve another's delta and baseline a returning identity.
+    job = MySql(common.CHECK_NAME, {}, [dbm_instance]).statement_metrics
+    now = 0
+    job._statement_rows = TTLCache(maxsize=100, ttl=60, timer=lambda: now)
+
+    def row(identity: int, count: int) -> dict:
+        return {
+            'schema_name': 'test',
+            'query_signature': 'same-signature',
+            'digest': None if prepared else str(identity),
+            '_dd_statement_id': identity if prepared else None,
+            'digest_text': 'SELECT ?',
+            'count_star': count,
+        }
+
+    with (
+        mock.patch.object(job, '_get_statement_count'),
+        mock.patch.object(job, '_normalize_queries', side_effect=lambda rows: rows),
+        mock.patch.object(job, '_query_summary_per_statement') as query,
+    ):
+        query.return_value = [row(1, 100), row(2, 50)]
+        assert job._collect_per_statement_metrics([]) == []
+        now = 40
+        query.return_value = [row(2, 55)]
+        assert [r['count_star'] for r in job._collect_per_statement_metrics([])] == [5]
+        now = 61
+        query.return_value = [row(2, 60), row(3, 1000)]
+        assert [r['count_star'] for r in job._collect_per_statement_metrics([])] == [5]
+        query.return_value = [row(2, 65), row(1, 5000)]
+        assert [r['count_star'] for r in job._collect_per_statement_metrics([])] == [5]
+        query.return_value = [row(2, 70), row(1, 5003)]
+        assert [r['count_star'] for r in job._collect_per_statement_metrics([])] == [8]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('prepared', [False, True])
+def test_statement_metrics_capacity_counts_signature_groups(dbm_instance: dict, prepared: bool):
+    # Multiple identities sharing one signature must not crowd out each other's active counter baselines.
+    dbm_instance['statement_rows_cache_max_size'] = 1
+    job = MySql(common.CHECK_NAME, {}, [dbm_instance]).statement_metrics
+
+    def rows(count: int) -> list[dict]:
+        return [
+            {
+                'schema_name': 'test',
+                'query_signature': 'same-signature',
+                'digest': None if prepared else str(identity),
+                '_dd_statement_id': identity if prepared else None,
+                'digest_text': 'SELECT ?',
+                'count_star': count,
+            }
+            for identity in range(20)
+        ]
+
+    with (
+        mock.patch.object(job, '_get_statement_count'),
+        mock.patch.object(job, '_normalize_queries', side_effect=lambda rows: rows),
+        mock.patch.object(job, '_query_summary_per_statement', side_effect=[rows(100), rows(101)]),
+    ):
+        assert job._collect_per_statement_metrics([]) == []
+        assert [r['count_star'] for r in job._collect_per_statement_metrics([])] == [20]
 
 
 @pytest.mark.unit
