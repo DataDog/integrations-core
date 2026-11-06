@@ -1184,6 +1184,22 @@ pipeline:
             target: ocsf.privileges
             preserveSource: false
             type: append
+        - type: category-processor
+          name: Map admin privilege grants to `ocsf.tmp_privilege`
+          enabled: true
+          categories:
+            - filter:
+                query: "@ocsf.metadata.event_code:added_admin_key"
+              name: ADMIN_PRIVILEGES_ASSIGNED
+          target: ocsf.tmp_privilege
+        - type: array-processor
+          name: Move tmp_privilege into privileges array
+          enabled: true
+          operation:
+            source: ocsf.tmp_privilege
+            target: ocsf.privileges
+            preserveSource: false
+            type: append
         - type: schema-processor
           name: Apply OCSF schema for 3005
           enabled: true
