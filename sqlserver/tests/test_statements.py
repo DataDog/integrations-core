@@ -435,7 +435,6 @@ def test_statement_metrics_and_plans(
         else:
             assert row['query_signature'], "missing query signature"
         assert 'statement_text' not in row, "statement_text field should not be forwarded"
-        assert 'last_execution_time_with_offset' not in row, "only real plan events use it"
         assert row['is_encrypted'] == is_encrypted
         if not is_encrypted:
             assert row['is_proc'] == is_proc
@@ -1560,6 +1559,9 @@ def test_plan_lookup_failure_during_cancellation_propagates(dbm_instance):
         list(check.statement_metrics._collect_plans([_plan_row('cancelled')], mock.Mock(), float('inf')))
 
 
+REAL_PLAN_LAST_EXECUTION_TIME = '2026-11-06T06:44:10.123+01:00'
+
+
 def _real_plans_check(dbm_instance, major_version=16, engine_edition=ENGINE_EDITION_STANDARD, **real_plans_config):
     dbm_instance['query_metrics']['collect_real_plans'] = {'enabled': True, **real_plans_config}
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
@@ -1570,7 +1572,10 @@ def _real_plans_check(dbm_instance, major_version=16, engine_edition=ENGINE_EDIT
 
 def _collect_with_real_plan(check, rows, real_plan, last_query_plan_stats=True):
     estimated_plan = _load_test_xml_plan("last_query_plan_stats_2025_heavy_estimated.xml")
-    real_plan_lookup = {'side_effect': real_plan} if isinstance(real_plan, Exception) else {'return_value': real_plan}
+    if isinstance(real_plan, Exception):
+        real_plan_lookup = {'side_effect': real_plan}
+    else:
+        real_plan_lookup = {'return_value': (real_plan, REAL_PLAN_LAST_EXECUTION_TIME)}
     with (
         mock.patch.object(check.statement_metrics, '_load_plan', return_value=(estimated_plan, False)),
         mock.patch.object(check.statement_metrics, '_load_real_plan', **real_plan_lookup) as load_real_plan,
@@ -1599,7 +1604,6 @@ def test_collect_real_plans_event(aggregator, datadog_agent, dbm_instance, colle
         dbm_instance['collect_raw_query_statement'] = {'enabled': True}
     check = _real_plans_check(dbm_instance)
     row = _plan_row('real')
-    row['last_execution_time_with_offset'] = '2026-11-06T06:44:10.123+01:00'
     # an actual plan with both the compiled and the runtime value of its parameter
     real_plan = _load_test_xml_plan("test3_raw.xml")
 
@@ -1622,7 +1626,7 @@ def test_collect_real_plans_event(aggregator, datadog_agent, dbm_instance, colle
     assert "(42)" not in real_plan_definition and "(43)" not in real_plan_definition
     assert real_event['db']['plan']['source'] == 'last_query_plan_stats'
     assert real_event['db']['plan']['signature'] == row['query_plan_hash']
-    assert real_event['sqlserver']['last_execution_time'] == row['last_execution_time_with_offset']
+    assert real_event['sqlserver']['last_execution_time'] == REAL_PLAN_LAST_EXECUTION_TIME
     assert real_event['timestamp'] >= estimated_event['timestamp']
     # everything else describes the same query and cached plan as the estimated plan event
     for key in set(estimated_event) - {'db', 'sqlserver', 'timestamp'}:
@@ -1697,6 +1701,16 @@ def test_collect_real_plans_with_last_query_plan_stats_off(aggregator, dbm_insta
         'dd.sqlserver.statements.real_plans', value=1, tags=check.debug_tags() + ['status:collected', 'setting:off']
     )
     assert _real_plans_health_events(aggregator) == [('last_query_plan_stats_disabled', 'warning')]
+    health_event = aggregator.get_event_platform_events("dbm-health")[-1]
+    assert health_event['data']['databases'] == ['app_db']
+
+
+@pytest.mark.unit
+def test_collect_real_plans_samples_per_hour_below_one(dbm_instance):
+    """A real plan rate below one per hour falls back to the default instead of failing the whole check."""
+    check = _real_plans_check(dbm_instance, samples_per_hour_per_query=0)
+
+    assert check.statement_metrics._seen_real_plans_ratelimiter.ttl == 60 * 60 / 4
 
 
 @pytest.mark.unit
@@ -1730,6 +1744,11 @@ def test_last_query_plan_stats_health_event_transitions(aggregator, dbm_instance
     settings = {'db_a': False, 'db_b': False, 'db_c': True, 'master': False}
     trace_flag = {'on': False}
 
+    def read_setting(_cursor, db_name):
+        if isinstance(settings[db_name], Exception):
+            raise settings[db_name]
+        return settings[db_name]
+
     def check_databases(*db_names):
         # the settings are read again once LAST_QUERY_PLAN_STATS_REFRESH_INTERVAL has passed
         statement_metrics._last_query_plan_stats_read_at = 0
@@ -1739,7 +1758,7 @@ def test_last_query_plan_stats_health_event_transitions(aggregator, dbm_instance
             ),
             mock.patch(
                 'datadog_checks.sqlserver.statements.read_last_query_plan_stats',
-                side_effect=lambda _, db_name: settings[db_name],
+                side_effect=read_setting,
             ),
         ):
             return [statement_metrics._last_query_plan_stats_setting(mock.Mock(), db_name) for db_name in db_names]
@@ -1754,6 +1773,11 @@ def test_last_query_plan_stats_health_event_transitions(aggregator, dbm_instance
 
     settings['db_a'] = True
     assert check_databases('db_a') == ['on']
+    assert _real_plans_health_events(aggregator) == [('last_query_plan_stats_disabled', 'warning')]
+
+    # a setting that can't be read doesn't count as fixed
+    settings['db_b'] = RuntimeError('database is offline')
+    assert check_databases('db_b') == ['unknown']
     assert _real_plans_health_events(aggregator) == [('last_query_plan_stats_disabled', 'warning')]
 
     # db_b is fixed while only plans from another database are collected
