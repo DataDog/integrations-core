@@ -362,11 +362,14 @@ pipeline:
           12:15:30|tunnel=IPsec|bytes=847|bytes_sent=781|bytes_received=66|pkt=4|pkts_sent=3|pkts_received=1|max_encap=1|unknown_proto=2|strict_check=2|tunnel_fragment=3|sessions_created=2|sessions_closed=3|session_end_reason=threat|action_source=allow|start=2024/01/01
           12:30:15|elapsed=0|tunnel_insp_rule=insepction_rule_1|remote_user_ip=10.1.2.3|remote_user_id=40201234567|rule_uuid=731925f6-8e55-xxyy-b82f-910b26004dfd|pcap_id=1223xa155545|dynusergroup_name=agnet145|src_edl=10.0.1.2|dst_edl=10.0.3.4|high_res_timestamp=2024-01-16T14:15:34.518+05:30|nssai_sd=|nssai_sst=|pdu_session_id=1234758662|subcategory_of_app=encrypted-tunnel|category_of_app=business-systems|technology_of_app=browser-based|risk_of_app=1|characteristic_of_app=used-by-malware,able-to-transfer-file|container_of_app=google|is_saas_of_app=1|sanctioned_state_of_app=0|cluster_name=test-nw-cluster
       grok:
-        supportRules: ""
-        matchRules: >
-          rule_panorama (<%{integer}>)?((%{date("MMM  d HH:mm:ss")}|%{date("MMM
-          dd HH:mm:ss")}) (%{notSpace})?) %{data::keyvalue("="," \"/:,(){};+",
-          "", "|")}
+        supportRules: |-
+          _syslog_header (<%{integer}>)?(%{date("MMM  d HH:mm:ss")}|%{date("MMM dd HH:mm:ss")}) %{notSpace}
+        matchRules: |-
+          rule_panos_csv_traffic (%{_syslog_header} )?%{regex("[0-9]*,[^,]*,[^,]*,TRAFFIC,.*")::csv("future_use_1,receive_time,serial,type,subtype,future_use_6,time_generated,src,dst,natsrc,natdst,rule,suser,duser,app,vsys,from,to,inboundif,outboundif,logset,future_use_22,sessionid,repeatcnt,sport,dport,natsport,natdport,flags,proto,act,bytes,bytes_sent,bytes_received,pkt,start,elapsed,cat,future_use_39,seq,actflag,sloc,dloc,future_use_44,pktsent,pktrcvd,sessionendreason,dg_hier_level_1,dg_hier_level_2,dg_hier_level_3,dg_hier_level_4,vsysname,dvc,actsrc,suuid,duuid,tunnelid,monitortag,parentid,parentst,tunnel,associd,chunk,chunksent,chunkrcvd,ruleuuid,http2conn,appflap,policyid,link,sdwan_cluster,sdwan_device_type,sdwan_cluster_type,sdwan_site,dynusrgrp,xffip,scat,sprofile,smodel,sven,sosfam,sosver,shost,smac,dcat,dprofile,dmodel,dven,dosfam,dosver,dhost,dmac,contid,podnamespace,podname,sedl,dedl,hostid,srnum,sdag,ddag,sessionown,high_res_timestamp,nssai_sst,nssai_sd,subcatapp,appcat,apptech,apprisk,appchar,appcont,tunneledapp,appsaas,appstate,offloaded,flowtype,cluster")}
+          rule_panos_csv_threat (%{_syslog_header} )?%{regex("[0-9]*,[^,]*,[^,]*,THREAT,.*")::csv("future_use_1,receive_time,serial,type,subtype,future_use_6,time_generated,src,dst,natsrc,natdst,rule,suser,duser,app,vsys,from,to,inboundif,outboundif,logset,future_use_22,sessionid,repeatcnt,sport,dport,natsport,natdport,flags,proto,act,misc,threatid,cat,severity,dir,seqno,actflags,sloc,dloc,future_use_41,contenttype,pcapip,filedigest,cloud,urlidx,useragent,filetype,xff,ref,sender,sub,recipient,reportid,dg_hier_level_1,dg_hier_level_2,dg_hier_level_3,dg_hier_level_4,vsysname,dvc,future_use_61,suuid,duuid,http_method,tunnelid,monitortag,parent_session_id,parent_start_time,tunnel,thrcategory,contentver,future_use_72,assoc_id,ppid,httpheaders,urlcategory,ruleuuid,http2conn,dynusrgrp,xffip,scat,sprofile,smodel,sven,sosfam,sosver,shost,smac,dcat,dprofile,dmodel,dven,dosfam,dosver,dhost,dmac,contid,podnamespace,podname,src_edl,dst_edl,hostid,srnum,domain_edl,src_dag,dst_dag,partial_hash,high_res_timestamp,reason,justification,nssai_sst,subcatApp,appcat,apptech,apprisk,appchar,appcont,tunneledapp,appsaas,appstate,cloudreportid,flowtype,cluster")}
+          rule_panos_csv_system (%{_syslog_header} )?%{regex("[0-9]*,[^,]*,[^,]*,SYSTEM,.*")::csv("future_use_1,receive_time,serial,type,subtype,future_use_6,time_generated,vsys,eventid,object,future_use_11,future_use_12,module,severity,opaque,seqno,actionflags,dg_hier_level_1,dg_hier_level_2,dg_hier_level_3,dg_hier_level_4,vsys_name,device_name,future_use_24,future_use_25,high_res_timestamp")}
+          rule_pan_firewall_keyvalue (%{_syslog_header} )?%{regex("[A-Za-z0-9_.]+=[^|,]*, [A-Za-z0-9_.]+=.*")::keyvalue("=", " \"/:(){};+@")}
+          rule_panorama (<%{integer}>)?((%{date("MMM  d HH:mm:ss")}|%{date("MMM dd HH:mm:ss")}) (%{notSpace})?) %{data::keyvalue("="," \"/:,(){};+", "", "|")}
     - type: grok-parser
       name: Parsing 'time_generated' to 'timestamp' (epoch)
       enabled: true
@@ -375,7 +378,9 @@ pipeline:
         - Jan 24 2024 10:30:11 GMT
       grok:
         supportRules: ""
-        matchRules: date_rule %{date("MMM dd yyyy HH:mm:ss z"):timestamp}
+        matchRules: |-
+          date_rule %{date("MMM dd yyyy HH:mm:ss z"):timestamp}
+          panos_date_rule %{date("yyyy/MM/dd HH:mm:ss"):timestamp}
     - type: date-remapper
       name: Define `timestamp` as the official date of the log
       enabled: true
@@ -416,44 +421,44 @@ pipeline:
         query: '@type:("DECRYPTION" OR "TRAFFIC" OR "THREAT" OR "START" OR "END") '
       processors:
         - type: attribute-remapper
-          name: Map `natsrc` to `network.client.ip`
+          name: Map `src` to `network.client.ip`
           enabled: true
           sources:
-            - natsrc
+            - src
           sourceType: attribute
           target: network.client.ip
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `natdst` to `network.destination.ip`
+          name: Map `dst` to `network.destination.ip`
           enabled: true
           sources:
-            - natdst
+            - dst
           sourceType: attribute
           target: network.destination.ip
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `natsport` to `network.client.port`
+          name: Map `sport` to `network.client.port`
           enabled: true
           sources:
-            - natsport
+            - sport
           sourceType: attribute
           target: network.client.port
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: attribute-remapper
-          name: Map `natdport` to `network.destination.port`
+          name: Map `dport` to `network.destination.port`
           enabled: true
           sources:
-            - natdport
+            - dport
           sourceType: attribute
           target: network.destination.port
           targetType: attribute
-          preserveSource: false
+          preserveSource: true
           overrideOnConflict: false
         - type: geo-ip-parser
           name: Map `network.client.ip` to `network.client.geoip`
@@ -541,6 +546,69 @@ pipeline:
             - act
           sourceType: attribute
           target: palo.alto.panorama.action
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Processors for source NAT of "Decryption" OR "Traffic" OR "Threat" OR
+        "Tunnel Inspection" log types
+      enabled: true
+      filter:
+        query: '@type:("DECRYPTION" OR "TRAFFIC" OR "THREAT" OR "START" OR "END") @natsrc:* -@natsrc:"0.0.0.0"'
+      processors:
+        - type: attribute-remapper
+          name: Map `natsrc` to `network.client.nat.ip`
+          enabled: true
+          sources:
+            - natsrc
+          sourceType: attribute
+          target: network.client.nat.ip
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Map `natsport` to `network.client.nat.port`
+          enabled: true
+          sources:
+            - natsport
+          sourceType: attribute
+          target: network.client.nat.port
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+    - type: pipeline
+      name: Processors for destination NAT of "Decryption" OR "Traffic" OR "Threat" OR
+        "Tunnel Inspection" log types
+      enabled: true
+      filter:
+        query: '@type:("DECRYPTION" OR "TRAFFIC" OR "THREAT" OR "START" OR "END") @natdst:* -@natdst:"0.0.0.0"'
+      processors:
+        # PAN-OS copies the original destination into `natdst`/`natdport` when only source NAT is applied. Map the
+        # post-NAT destination only when it differs from the original one: join both into one string and
+        # let the `translated` rule's backreferences reject the case where the halves are equal.
+        - type: string-builder-processor
+          name: Join original and post-NAT destination
+          enabled: true
+          template: "%{network.destination.ip} %{network.destination.port} %{natdst} %{natdport}"
+          target: natdst_compare
+          replaceMissing: false
+        - type: grok-parser
+          name: Map post-NAT destination when it differs from the original one
+          enabled: true
+          source: natdst_compare
+          samples:
+            - 203.0.113.10 443 10.0.5.20 8443
+          grok:
+            supportRules: ""
+            matchRules: |-
+              translated (\S+) (\S+) (?!\1 \2$)%{notSpace:network.destination.nat.ip} %{integer:network.destination.nat.port}
+        - type: attribute-remapper
+          name: Remove the joined destination string
+          enabled: true
+          sources:
+            - natdst_compare
+          sourceType: attribute
+          target: natdst
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
