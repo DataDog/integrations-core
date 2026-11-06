@@ -1,0 +1,25 @@
+# A Job keeps its PodGroup after the preemption deletes its pod, and the replacement pod leaves the PodGroup pending.
+# The pause container can exit successfully when it is evicted, so a second completion ensures there is a replacement.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: event-job
+  namespace: default
+spec:
+  completions: 2
+  template:
+    metadata:
+      labels:
+        kai.scheduler/queue: team-a
+    spec:
+      schedulerName: kai-scheduler
+      priorityClassName: train
+      automountServiceAccountToken: false
+      restartPolicy: Never
+      containers:
+      - name: main
+        image: registry.k8s.io/pause:3.10
+        resources:
+          requests:
+            cpu: 800m
+            memory: 64Mi
