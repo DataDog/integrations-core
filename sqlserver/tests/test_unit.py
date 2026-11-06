@@ -16,6 +16,7 @@ import pytest
 
 from datadog_checks.base.stubs.datadog_agent import datadog_agent
 from datadog_checks.base.utils.db import QueryManager
+from datadog_checks.base.utils.serialization import json
 from datadog_checks.dev import EnvVars
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.connection import split_sqlserver_host_port
@@ -38,8 +39,11 @@ from datadog_checks.sqlserver.metrics import DEFAULT_PERFORMANCE_TABLE, SqlFract
 from datadog_checks.sqlserver.schemas import (
     KEY_PREFIX,
     KEY_PREFIX_PRE_2017,
+    SQLServerDatabaseSession,
     SQLServerObjectCollector,
     SQLServerSchemaCollector,
+    SQLServerTableCollector,
+    create_schema_collector_config,
 )
 from datadog_checks.sqlserver.sqlserver import SQLConnectionError
 from datadog_checks.sqlserver.utils import (
@@ -149,56 +153,110 @@ def test_execute_query_raw_collects_multiple_result_sets(instance_docker):
     assert cursor.fetchall.call_count == 2
 
 
-def create_schema_collector(
-    static_info_cache: dict | None = None, schema_config: dict | None = None
-) -> SQLServerSchemaCollector:
+def create_mock_check(static_info_cache: dict | None = None, schema_config: dict | None = None) -> mock.Mock:
     check = mock.Mock()
     check._config.schema_config = schema_config or {}
     check.log = mock.Mock()
     check.static_info_cache = static_info_cache or {}
-    return SQLServerSchemaCollector(check)
+    check.dbms = 'sqlserver'
+    check.tags = []
+    check.reported_hostname = 'test-host'
+    # Payloads are serialized to JSON, so the event fields taken from the check must be plain values.
+    check.database_identifier = 'test-host'
+    check.dbms_version = '16.0'
+    check.cloud_metadata = {}
+    return check
+
+
+def create_schema_collector(
+    static_info_cache: dict | None = None, schema_config: dict | None = None, collect_views: bool = False
+) -> SQLServerSchemaCollector:
+    check = create_mock_check(static_info_cache, schema_config)
+    config = create_schema_collector_config(check)
+    object_collectors: list[SQLServerObjectCollector] = [SQLServerTableCollector(check, config)]
+    if collect_views:
+        object_collectors.append(SQLServerViewCollector(check, config))
+    return SQLServerSchemaCollector(check, object_collectors)
+
+
+def create_session(check: mock.Mock, compatibility_level: int | None) -> SQLServerDatabaseSession:
+    return SQLServerDatabaseSession(check, contextlib.ExitStack(), "datadog_test", mock.Mock(), compatibility_level)
+
+
+def run_object_query(collector: SQLServerSchemaCollector, object_collector: SQLServerObjectCollector, database: str):
+    """Opens the database and starts one kind's catalog query, the way a collection run does."""
+    stack = contextlib.ExitStack()
+    session = stack.enter_context(collector._open_database(database))
+    stack.enter_context(object_collector._open_rows(session, database))
+    return stack
+
+
+def mock_connections(check: mock.Mock, *cursors: mock.Mock) -> None:
+    """Hands out `cursors`, in order, for each managed connection the collector opens."""
+    check.connection.open_managed_default_connection.side_effect = [contextlib.nullcontext() for _ in cursors]
+    check.connection.get_managed_cursor.side_effect = [contextlib.nullcontext(cursor) for cursor in cursors]
 
 
 @pytest.mark.parametrize(
     ('collector_class', 'expected_limit'),
     [
-        (SQLServerSchemaCollector, 'SELECT TOP 25'),
+        (SQLServerTableCollector, 'SELECT TOP 25'),
         (SQLServerViewCollector, 'SELECT TOP 7'),
     ],
 )
 def test_schema_collectors_apply_their_own_object_limit(
     collector_class: type[SQLServerObjectCollector], expected_limit: str
 ):
-    check = create_schema_collector(schema_config={'max_tables': 25, 'max_views': 7})._check
-    collector = collector_class(check)
+    check = create_mock_check(schema_config={'max_tables': 25, 'max_views': 7})
+    collector = collector_class(check, create_schema_collector_config(check))
     collector._is_2016_or_earlier = False
 
     assert expected_limit in collector._get_query()
 
 
-@pytest.mark.parametrize(
-    ('collector_class', 'expected_metric'),
-    [
-        (SQLServerSchemaCollector, 'dd.sqlserver.schema.tables_count'),
-        (SQLServerViewCollector, 'dd.sqlserver.schema.views_count'),
-    ],
-)
-def test_schema_collectors_report_separate_object_counts(
-    collector_class: type[SQLServerObjectCollector], expected_metric: str
-):
-    check = mock.Mock()
-    check._config.schema_config = {}
-    check.log = mock.Mock()
-    check.static_info_cache = {}
-    check.dbms = 'sqlserver'
-    check.tags = []
-    check.reported_hostname = 'test-host'
-    collector = collector_class(check)
+def test_schema_collector_reports_separate_object_counts():
+    collector = create_schema_collector(collect_views=True)
     collector._get_databases = mock.Mock(return_value=[])
 
     collector.collect_schemas()
 
-    assert expected_metric in {call.args[0] for call in check.gauge.call_args_list}
+    reported = {call.args[0] for call in collector._check.gauge.call_args_list}
+    assert {'dd.sqlserver.schema.tables_count', 'dd.sqlserver.schema.views_count'} <= reported
+
+
+def test_schema_collector_runs_tables_and_views_on_one_connection_per_database():
+    collector = create_schema_collector(
+        {STATIC_INFO_ENGINE_EDITION: ENGINE_EDITION_STANDARD, STATIC_INFO_MAJOR_VERSION: 13},
+        collect_views=True,
+    )
+    collector._get_databases = mock.Mock(
+        return_value=[
+            {"name": "datadog_test", "id": "1", "collation": "c", "owner": "dbo", "compatibility_level": "120"}
+        ]
+    )
+    collector._database_compatibility_levels = {"datadog_test": 120}
+    main_cursor = mock.Mock()
+    main_cursor.fetchone_dict.side_effect = [
+        {"schema_name": "s", "schema_id": 1, "owner_name": "dbo", "table_name": "t", "table_id": 101},
+        None,
+        {"schema_name": "s", "schema_id": 1, "owner_name": "dbo", "view_name": "v", "view_id": 201},
+        None,
+    ]
+    detail_cursor = mock.Mock()
+    detail_cursor.fetchall_dict.return_value = []
+    detail_cursor.fetchone_dict.return_value = {"partition_count": 1}
+    mock_connections(collector._check, main_cursor, detail_cursor)
+
+    collector.collect_schemas()
+
+    assert collector._check.connection.get_managed_cursor.call_args_list == [
+        mock.call(KEY_PREFIX),
+        mock.call(KEY_PREFIX_PRE_2017),
+    ]
+    assert main_cursor.execute.call_args_list[0] == mock.call("USE [datadog_test];")
+    assert detail_cursor.execute.call_args_list.count(mock.call("USE [datadog_test];")) == 1
+    kinds = [json.loads(call.args[0])["kind"] for call in collector._check.database_monitoring_metadata.call_args_list]
+    assert kinds == ["sqlserver_databases", "sqlserver_views"]
 
 
 def create_metadata_job(instance: dict, schema_config: dict) -> SqlserverMetadata:
@@ -220,37 +278,41 @@ def test_schema_collection_builds_collectors_from_config(
 ):
     metadata = create_metadata_job(instance_docker, schema_config)
 
-    assert [collector.kind for collector in metadata._schema_collectors] == expected_kinds
+    collector = metadata._schema_collector
+    assert (collector.kinds if collector else []) == expected_kinds
 
 
-@pytest.mark.parametrize('failing_index', [0, 1])
-def test_schema_collection_failure_does_not_skip_other_collectors(instance_docker: dict, failing_index: int):
+def test_schema_collection_failure_does_not_stop_job_loop(instance_docker: dict):
     metadata = create_metadata_job(instance_docker, {'enabled': True, 'collect_views': True})
-    for collector in metadata._schema_collectors:
-        collector.collect_schemas = mock.Mock()
-    metadata._schema_collectors[failing_index].collect_schemas.side_effect = RuntimeError("collection failed")
+    metadata._schema_collector.collect_schemas = mock.Mock(side_effect=RuntimeError("collection failed"))
 
     metadata.collect_schemas()
 
-    for collector in metadata._schema_collectors:
-        collector.collect_schemas.assert_called_once_with()
+    metadata._schema_collector.collect_schemas.assert_called_once_with()
 
 
-def test_schema_collection_stops_when_cancelled_between_collectors(instance_docker: dict):
+def test_schema_collection_stops_when_cancelled(instance_docker: dict):
     metadata = create_metadata_job(instance_docker, {'enabled': True, 'collect_views': True})
-    tables, views = metadata._schema_collectors
 
     def cancel_during_collection():
         metadata.cancel()
         raise RuntimeError("connection closed")
 
-    tables.collect_schemas = mock.Mock(side_effect=cancel_during_collection)
-    views.collect_schemas = mock.Mock()
+    metadata._schema_collector.collect_schemas = mock.Mock(side_effect=cancel_during_collection)
 
     with pytest.raises(Exception, match="Job loop cancelled"):
         metadata.collect_schemas()
 
-    views.collect_schemas.assert_not_called()
+
+def test_schema_collector_observes_job_cancellation(instance_docker: dict):
+    """The collector checks the job's cancel event between databases and kinds."""
+    metadata = create_metadata_job(instance_docker, {'enabled': True})
+    metadata._schema_collector._raise_if_cancelled()
+
+    metadata.cancel()
+
+    with pytest.raises(Exception, match="Job loop cancelled"):
+        metadata._schema_collector._raise_if_cancelled()
 
 
 @pytest.mark.parametrize(
@@ -266,17 +328,10 @@ def test_schema_collection_stops_when_cancelled_between_collectors(instance_dock
 def test_view_collector_legacy_query_detection(
     engine_edition: int, major_version: int, compatibility_level: int | None, expected_legacy: bool
 ):
-    check = create_schema_collector(
-        {
-            STATIC_INFO_ENGINE_EDITION: engine_edition,
-            STATIC_INFO_MAJOR_VERSION: major_version,
-        }
-    )._check
-    collector = SQLServerViewCollector(check)
-    if compatibility_level is not None:
-        collector._database_compatibility_levels = {"datadog_test": compatibility_level}
+    check = create_mock_check({STATIC_INFO_ENGINE_EDITION: engine_edition, STATIC_INFO_MAJOR_VERSION: major_version})
+    collector = SQLServerViewCollector(check, create_schema_collector_config(check))
 
-    assert collector._should_use_legacy_schema_query("datadog_test") is expected_legacy
+    assert collector._should_use_legacy_schema_query(create_session(check, compatibility_level)) is expected_legacy
 
 
 def test_schema_collector_records_database_compatibility_levels() -> None:
@@ -301,22 +356,7 @@ def test_schema_collector_records_database_compatibility_levels() -> None:
     collector._record_database_compatibility_levels(databases)
 
     assert collector._database_compatibility_levels == {"db_130": 130, "db_120": 120}
-    assert databases == [
-        {
-            "name": "db_130",
-            "id": "1",
-            "collation": "SQL_Latin1_General_CP1_CI_AS",
-            "owner": "dbo",
-            "compatibility_level": "130",
-        },
-        {
-            "name": "db_120",
-            "id": "2",
-            "collation": "SQL_Latin1_General_CP1_CI_AS",
-            "owner": "dbo",
-            "compatibility_level": "120",
-        },
-    ]
+    assert [database["compatibility_level"] for database in databases] == ["130", "120"]
 
 
 def test_schema_collector_emits_database_compatibility_levels() -> None:
@@ -339,15 +379,7 @@ def test_schema_collector_emits_database_compatibility_levels() -> None:
         collected_databases = collector._get_databases()
 
     assert collector._database_compatibility_levels == {"db_130": 130}
-    assert collected_databases == [
-        {
-            "name": "db_130",
-            "id": "1",
-            "collation": "SQL_Latin1_General_CP1_CI_AS",
-            "owner": "dbo",
-            "compatibility_level": "130",
-        }
-    ]
+    assert collected_databases == databases
     assert databases[0]["compatibility_level"] == "130"
 
 
@@ -362,41 +394,19 @@ def test_schema_collector_emits_database_compatibility_levels() -> None:
         (ENGINE_EDITION_STANDARD, 14, 130, False),
         (ENGINE_EDITION_STANDARD, 14, 100, True),
         (ENGINE_EDITION_STANDARD, 0, 170, True),
+        # Without a recorded compatibility level, JSON support cannot be confirmed.
+        (ENGINE_EDITION_SQL_DATABASE, 12, None, True),
+        (ENGINE_EDITION_AZURE_MANAGED_INSTANCE, 12, None, True),
+        (ENGINE_EDITION_STANDARD, 14, None, True),
     ],
 )
-def test_schema_collector_legacy_query_detection(
-    engine_edition: int, major_version: int, compatibility_level: int, expected_legacy: bool
+def test_table_collector_legacy_query_detection(
+    engine_edition: int, major_version: int, compatibility_level: int | None, expected_legacy: bool
 ) -> None:
-    collector = create_schema_collector(
-        {
-            STATIC_INFO_ENGINE_EDITION: engine_edition,
-            STATIC_INFO_MAJOR_VERSION: major_version,
-        }
-    )
-    collector._database_compatibility_levels = {"datadog_test": compatibility_level}
+    check = create_mock_check({STATIC_INFO_ENGINE_EDITION: engine_edition, STATIC_INFO_MAJOR_VERSION: major_version})
+    collector = SQLServerTableCollector(check, create_schema_collector_config(check))
 
-    assert collector._should_use_legacy_schema_query("datadog_test") is expected_legacy
-
-
-@pytest.mark.parametrize(
-    'engine_edition, major_version',
-    [
-        (ENGINE_EDITION_SQL_DATABASE, 12),
-        (ENGINE_EDITION_AZURE_MANAGED_INSTANCE, 12),
-        (ENGINE_EDITION_STANDARD, 14),
-    ],
-)
-def test_schema_collector_uses_legacy_query_when_compatibility_level_is_not_recorded(
-    engine_edition: int, major_version: int
-) -> None:
-    collector = create_schema_collector(
-        {
-            STATIC_INFO_ENGINE_EDITION: engine_edition,
-            STATIC_INFO_MAJOR_VERSION: major_version,
-        }
-    )
-
-    assert collector._should_use_legacy_schema_query("datadog_test") is True
+    assert collector._should_use_legacy_schema_query(create_session(check, compatibility_level)) is expected_legacy
 
 
 @pytest.mark.parametrize(
@@ -410,43 +420,31 @@ def test_schema_collector_uses_legacy_query_when_compatibility_level_is_not_reco
         (ENGINE_EDITION_STANDARD, 14, 120, True),
     ],
 )
-def test_schema_collector_uses_database_compatibility_level_for_schema_query(
+def test_table_collector_uses_database_compatibility_level_for_schema_query(
     engine_edition: int, major_version: int, compatibility_level: int, expected_legacy: bool
 ) -> None:
     collector = create_schema_collector(
-        {
-            STATIC_INFO_ENGINE_EDITION: engine_edition,
-            STATIC_INFO_MAJOR_VERSION: major_version,
-        }
+        {STATIC_INFO_ENGINE_EDITION: engine_edition, STATIC_INFO_MAJOR_VERSION: major_version}
     )
+    tables = collector._object_collectors[0]
     collector._database_compatibility_levels = {"datadog_test": compatibility_level}
     main_cursor = mock.Mock()
     detail_cursor = mock.Mock()
-    collector._check.connection.open_managed_default_connection.side_effect = [
-        contextlib.nullcontext(),
-        contextlib.nullcontext(),
-    ]
-    collector._check.connection.get_managed_cursor.side_effect = [
-        contextlib.nullcontext(main_cursor),
-        contextlib.nullcontext(detail_cursor),
-    ]
+    mock_connections(collector._check, main_cursor, detail_cursor)
 
-    with collector._get_cursor("datadog_test"):
-        pass
+    with run_object_query(collector, tables, "datadog_test"):
+        assert tables._is_2016_or_earlier is expected_legacy
 
     tables_query = main_cursor.execute.call_args_list[1][0][0]
-    assert collector._is_2016_or_earlier is expected_legacy
     assert ("STRING_AGG" in tables_query) is not expected_legacy
     assert (detail_cursor.execute.call_count == 1) is expected_legacy
 
 
-def test_schema_collector_reuses_pre_2017_connection_for_table_detail_queries() -> None:
+def test_table_collector_reuses_pre_2017_connection_for_table_detail_queries() -> None:
     collector = create_schema_collector(
-        {
-            STATIC_INFO_ENGINE_EDITION: ENGINE_EDITION_STANDARD,
-            STATIC_INFO_MAJOR_VERSION: 13,
-        }
+        {STATIC_INFO_ENGINE_EDITION: ENGINE_EDITION_STANDARD, STATIC_INFO_MAJOR_VERSION: 13}
     )
+    tables = collector._object_collectors[0]
     main_cursor = mock.Mock()
     detail_cursor = mock.Mock()
     detail_cursor.fetchall_dict.side_effect = [
@@ -458,22 +456,15 @@ def test_schema_collector_reuses_pre_2017_connection_for_table_detail_queries() 
         [{"foreign_key_name": "fk_table_2"}],
     ]
     detail_cursor.fetchone_dict.side_effect = [{"partition_count": 1}, {"partition_count": 2}]
-    collector._check.connection.open_managed_default_connection.side_effect = [
-        contextlib.nullcontext(),
-        contextlib.nullcontext(),
-    ]
-    collector._check.connection.get_managed_cursor.side_effect = [
-        contextlib.nullcontext(main_cursor),
-        contextlib.nullcontext(detail_cursor),
-    ]
+    mock_connections(collector._check, main_cursor, detail_cursor)
     database = {"name": "datadog_test", "id": "1", "collation": "SQL_Latin1_General_CP1_CI_AS", "owner": "dbo"}
     rows = [
         {"schema_name": "test_schema", "schema_id": 1, "owner_name": "dbo", "table_name": "table_1", "table_id": 101},
         {"schema_name": "test_schema", "schema_id": 1, "owner_name": "dbo", "table_name": "table_2", "table_id": 102},
     ]
 
-    with collector._get_cursor("datadog_test"):
-        mapped_rows = [collector._map_row(database, row) for row in rows]
+    with run_object_query(collector, tables, "datadog_test"):
+        mapped_rows = [tables._map_row(database, row) for row in rows]
 
     assert collector._check.connection.open_managed_default_connection.call_args_list == [
         mock.call(KEY_PREFIX),
@@ -486,7 +477,7 @@ def test_schema_collector_reuses_pre_2017_connection_for_table_detail_queries() 
     assert detail_cursor.execute.call_args_list[0] == mock.call("USE [datadog_test];")
     assert detail_cursor.execute.call_args_list.count(mock.call("USE [datadog_test];")) == 1
     assert detail_cursor.execute.call_count == 9
-    assert collector._pre_2017_cursor is None
+    assert tables._pre_2017_cursor is None
     assert [row["schemas"][0]["tables"][0]["partitions"]["partition_count"] for row in mapped_rows] == [1, 2]
 
 
@@ -499,43 +490,27 @@ def configure_pre_2017_detail_cursor(cursor: mock.Mock, partition_count: int = 1
     cursor.fetchone_dict.return_value = {"partition_count": partition_count}
 
 
-def test_schema_collector_uses_new_pre_2017_connection_for_each_database() -> None:
+def test_table_collector_uses_new_pre_2017_connection_for_each_database() -> None:
     collector = create_schema_collector(
-        {
-            STATIC_INFO_ENGINE_EDITION: ENGINE_EDITION_STANDARD,
-            STATIC_INFO_MAJOR_VERSION: 13,
-        }
+        {STATIC_INFO_ENGINE_EDITION: ENGINE_EDITION_STANDARD, STATIC_INFO_MAJOR_VERSION: 13}
     )
-    main_cursor_1 = mock.Mock()
+    tables = collector._object_collectors[0]
     detail_cursor_1 = mock.Mock()
     configure_pre_2017_detail_cursor(detail_cursor_1, partition_count=1)
-    main_cursor_2 = mock.Mock()
     detail_cursor_2 = mock.Mock()
     configure_pre_2017_detail_cursor(detail_cursor_2, partition_count=2)
-    collector._check.connection.open_managed_default_connection.side_effect = [
-        contextlib.nullcontext(),
-        contextlib.nullcontext(),
-        contextlib.nullcontext(),
-        contextlib.nullcontext(),
-    ]
-    collector._check.connection.get_managed_cursor.side_effect = [
-        contextlib.nullcontext(main_cursor_1),
-        contextlib.nullcontext(detail_cursor_1),
-        contextlib.nullcontext(main_cursor_2),
-        contextlib.nullcontext(detail_cursor_2),
-    ]
+    mock_connections(collector._check, mock.Mock(), detail_cursor_1, mock.Mock(), detail_cursor_2)
     row = {"schema_name": "test_schema", "schema_id": 1, "owner_name": "dbo", "table_name": "table", "table_id": 101}
 
-    with collector._get_cursor("datadog_test_1"):
-        collector._map_row(
-            {"name": "datadog_test_1", "id": "1", "collation": "SQL_Latin1_General_CP1_CI_AS", "owner": "dbo"},
-            row,
-        )
-    with collector._get_cursor("datadog_test_2"):
-        collector._map_row(
-            {"name": "datadog_test_2", "id": "2", "collation": "SQL_Latin1_General_CP1_CI_AS", "owner": "dbo"},
-            row,
-        )
+    for index, database_name in enumerate(["datadog_test_1", "datadog_test_2"], start=1):
+        database = {
+            "name": database_name,
+            "id": str(index),
+            "collation": "SQL_Latin1_General_CP1_CI_AS",
+            "owner": "dbo",
+        }
+        with run_object_query(collector, tables, database_name):
+            tables._map_row(database, row)
 
     assert collector._check.connection.get_managed_cursor.call_args_list == [
         mock.call(KEY_PREFIX),
@@ -545,16 +520,14 @@ def test_schema_collector_uses_new_pre_2017_connection_for_each_database() -> No
     ]
     assert detail_cursor_1.execute.call_args_list[0] == mock.call("USE [datadog_test_1];")
     assert detail_cursor_2.execute.call_args_list[0] == mock.call("USE [datadog_test_2];")
-    assert collector._pre_2017_cursor is None
+    assert tables._pre_2017_cursor is None
 
 
-def test_schema_collector_does_not_open_pre_2017_connection_for_modern_query() -> None:
+def test_table_collector_does_not_open_pre_2017_connection_for_modern_query() -> None:
     collector = create_schema_collector(
-        {
-            STATIC_INFO_ENGINE_EDITION: ENGINE_EDITION_STANDARD,
-            STATIC_INFO_MAJOR_VERSION: 14,
-        }
+        {STATIC_INFO_ENGINE_EDITION: ENGINE_EDITION_STANDARD, STATIC_INFO_MAJOR_VERSION: 14}
     )
+    tables = collector._object_collectors[0]
     collector._database_compatibility_levels = {"datadog_test": 130}
     cursor = mock.Mock()
     collector._check.connection.open_managed_default_connection.return_value = contextlib.nullcontext()
@@ -572,18 +545,18 @@ def test_schema_collector_does_not_open_pre_2017_connection_for_modern_query() -
         "partition_count": 1,
     }
 
-    with collector._get_cursor("datadog_test"):
-        mapped_row = collector._map_row(database, row)
+    with run_object_query(collector, tables, "datadog_test"):
+        mapped_row = tables._map_row(database, row)
 
     assert collector._check.connection.open_managed_default_connection.call_args_list == [mock.call(KEY_PREFIX)]
     assert collector._check.connection.get_managed_cursor.call_args_list == [mock.call(KEY_PREFIX)]
-    assert collector._pre_2017_cursor is None
+    assert tables._pre_2017_cursor is None
     assert mapped_row["schemas"][0]["tables"][0]["columns"] == [{"name": "id"}]
 
 
 def test_view_collector_maps_view_metadata():
-    check = create_schema_collector()._check
-    collector = SQLServerViewCollector(check)
+    check = create_mock_check()
+    collector = SQLServerViewCollector(check, create_schema_collector_config(check))
     collector._is_2016_or_earlier = False
     database = {"name": "datadog_test", "id": "1", "collation": "SQL_Latin1_General_CP1_CI_AS", "owner": "dbo"}
     row = {
@@ -621,8 +594,8 @@ def test_view_collector_maps_view_metadata():
 
 
 def test_view_collector_legacy_query_fetches_only_columns():
-    check = create_schema_collector()._check
-    collector = SQLServerViewCollector(check)
+    check = create_mock_check()
+    collector = SQLServerViewCollector(check, create_schema_collector_config(check))
     collector._is_2016_or_earlier = True
     detail_cursor = mock.Mock()
     detail_cursor.fetchall_dict.return_value = [
