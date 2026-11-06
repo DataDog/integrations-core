@@ -214,6 +214,7 @@ XML_PLAN_OBFUSCATION_ATTRS = frozenset(
         "ConstValue",
         "ScalarString",
         "ParameterCompiledValue",
+        "ParameterRuntimeValue",
     }
 )
 

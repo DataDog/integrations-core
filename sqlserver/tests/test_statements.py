@@ -897,6 +897,8 @@ def _mock_sql_obfuscate(sql_string, options=None):
     [
         ("test1_raw.xml", "test1_obfuscated.xml"),
         ("test2_raw.xml", "test2_obfuscated.xml"),
+        # actual plan: ParameterRuntimeValue holds the parameter value of the captured execution
+        ("test3_raw.xml", "test3_obfuscated.xml"),
     ],
 )
 def test_obfuscate_xml_plan(test_file, obfuscated_file, datadog_agent):
