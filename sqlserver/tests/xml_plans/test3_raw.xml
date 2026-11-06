@@ -1,0 +1,53 @@
+<ShowPlanXML xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan" Version="1.564" Build="16.0.4135.4">
+    <BatchSequence>
+        <Batch>
+            <Statements>
+                <StmtSimple StatementText="(@1 int)SELECT * FROM [things] WHERE [id]=@1" StatementId="1"
+                            StatementCompId="1" StatementType="SELECT" RetrievedFromCache="true"
+                            StatementSubTreeCost="0.0032842" StatementEstRows="1" SecurityPolicyApplied="false"
+                            StatementOptmLevel="TRIVIAL" QueryHash="0xEE42FC10D539A397"
+                            QueryPlanHash="0x1013D8712B73894E" CardinalityEstimationModelVersion="160">
+                    <QueryPlan DegreeOfParallelism="1" CachedPlanSize="16" CompileTime="1" CompileCPU="1"
+                               CompileMemory="112">
+                        <QueryTimeStats CpuTime="0" ElapsedTime="0"/>
+                        <RelOp NodeId="0" PhysicalOp="Table Scan" LogicalOp="Table Scan" EstimateRows="1"
+                               EstimatedRowsRead="2" EstimateIO="0.003125" EstimateCPU="0.0001592"
+                               AvgRowSize="23" EstimatedTotalSubtreeCost="0.0032842" TableCardinality="2"
+                               Parallel="0" EstimateRebinds="0" EstimateRewinds="0"
+                               EstimatedExecutionMode="Row">
+                            <RunTimeInformation>
+                                <RunTimeCountersPerThread Thread="0" ActualRows="1" ActualRowsRead="2"
+                                                          ActualEndOfScans="1" ActualExecutions="1"/>
+                            </RunTimeInformation>
+                            <TableScan Ordered="0" ForcedIndex="0" ForceScan="0" NoExpandHint="0" Storage="RowStore">
+                                <Object Database="[datadog_test]" Schema="[dbo]" Table="[things]"
+                                        IndexKind="Heap" Storage="RowStore"/>
+                                <Predicate>
+                                    <ScalarOperator ScalarString="[datadog_test].[dbo].[things].[id]=[@1]">
+                                        <Compare CompareOp="EQ">
+                                            <ScalarOperator>
+                                                <Identifier>
+                                                    <ColumnReference Database="[datadog_test]" Schema="[dbo]"
+                                                                     Table="[things]" Column="id"/>
+                                                </Identifier>
+                                            </ScalarOperator>
+                                            <ScalarOperator>
+                                                <Identifier>
+                                                    <ColumnReference Column="@1"/>
+                                                </Identifier>
+                                            </ScalarOperator>
+                                        </Compare>
+                                    </ScalarOperator>
+                                </Predicate>
+                            </TableScan>
+                        </RelOp>
+                        <ParameterList>
+                            <ColumnReference Column="@1" ParameterDataType="int" ParameterCompiledValue="(42)"
+                                             ParameterRuntimeValue="(43)"/>
+                        </ParameterList>
+                    </QueryPlan>
+                </StmtSimple>
+            </Statements>
+        </Batch>
+    </BatchSequence>
+</ShowPlanXML>
