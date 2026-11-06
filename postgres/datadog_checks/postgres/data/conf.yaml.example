@@ -173,7 +173,7 @@ instances:
     #
     # reported_hostname: <REPORTED_HOSTNAME>
 
-    ## @param ignore_databases - list of strings - optional - default: ['template0', 'template1', 'rdsadmin', 'azure_maintenance', 'cloudsqladmin', 'alloydbadmin', 'alloydbmetadata']
+    ## @param ignore_databases - list of strings - optional - default: ['template0', 'template1', 'rdsadmin', 'azure_maintenance', 'azure_sys', 'cloudsqladmin', 'alloydbadmin', 'alloydbmetadata']
     ## A list of databases to ignore. No metrics or statement samples will be collected for these databases.
     ## Each value can be a plain string or a Postgres pattern. If you want to ignore the postgres database,
     ## set collect_default_database to false in addition to adding it to this array.
@@ -186,6 +186,7 @@ instances:
     #   - template1
     #   - rdsadmin
     #   - azure_maintenance
+    #   - azure_sys
     #   - cloudsqladmin
     #   - alloydbadmin
     #   - alloydbmetadata
@@ -339,7 +340,7 @@ instances:
         #   - master$
         #   - AdventureWorks.*
 
-        ## @param exclude - list of strings - optional - default: ['template0', 'template1', 'rdsadmin', 'azure_maintenance', 'cloudsqladmin', 'alloydbadmin', 'alloydbmetadata']
+        ## @param exclude - list of strings - optional - default: ['template0', 'template1', 'rdsadmin', 'azure_maintenance', 'azure_sys', 'cloudsqladmin', 'alloydbadmin', 'alloydbmetadata']
         ## Regular expression for database names to exclude as part of `database_autodiscovery`.
         ## Character casing is ignored. The regular expressions start matching from the beginning,
         ## so to match anywhere, prepend `.*`. For exact matches append `$`.
@@ -544,7 +545,7 @@ instances:
         # include_databases:
         #   - mydb
 
-        ## @param exclude_databases - list of strings - optional - default: ['template0', 'template1', 'rdsadmin', 'azure_maintenance', 'cloudsqladmin', 'alloydbadmin', 'alloydbmetadata']
+        ## @param exclude_databases - list of strings - optional - default: ['template0', 'template1', 'rdsadmin', 'azure_maintenance', 'azure_sys', 'cloudsqladmin', 'alloydbadmin', 'alloydbmetadata']
         ## A list of regex patterns to exclude databases.
         ## Any database whose name matches any one of these patterns will be excluded.
         ## If empty, all databases matching other filters are included.
