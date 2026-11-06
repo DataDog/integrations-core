@@ -344,6 +344,9 @@ services:
 - id: ibm_db2
   paths:
   - ibm_db2/datadog_checks/ibm_db2/
+- id: ibm_hmc
+  paths:
+  - ibm_hmc/datadog_checks/ibm_hmc/
 - id: ibm_i
   paths:
   - ibm_i/datadog_checks/ibm_i/
