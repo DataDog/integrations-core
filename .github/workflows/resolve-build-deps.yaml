@@ -318,8 +318,10 @@ jobs:
         path: ~/builder_root
         # matrix.job.hash content-hashes per-target .builders/ inputs (including
         # images/macos/**/*, so pbs.env participates). Using it as the cache key
-        # keeps the gate and Actions cache aligned.
-        key: ${{ matrix.job.image }}-deps-builder-root-cache-${{ matrix.job.hash }}
+        # keeps the gate and Actions cache aligned. targets.json is not part of that
+        # hash, so the runner image is in the key too: a builder root compiled on one
+        # macOS version is never restored on another.
+        key: ${{ matrix.job.image }}-${{ matrix.job.runner_os }}-deps-builder-root-cache-${{ matrix.job.hash }}
 
     - name: Run the build
       env:
