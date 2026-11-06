@@ -28,6 +28,8 @@ tests:
       http2conn: 0
       inboundif: "ethernet1/1"
       logset: "POC-Dash-DD-204-9099"
+      natdport: 233
+      natdst: "185.64.148.0"
       network:
         bytes_read: 74
         bytes_written: 60
@@ -73,9 +75,6 @@ tests:
               name: "Île-de-France"
             timezone: "Europe/Paris"
           ip: "185.64.148.0"
-          nat:
-            ip: "185.64.148.0"
-            port: 233
           port: 233
       offloaded: 0
       outboundif: "ethernet1/2"
@@ -138,6 +137,8 @@ tests:
       inboundif: "ethernet1/2"
       logset: "New_Log_Profile"
       misc: "www.facebook.com/"
+      natdport: 443
+      natdst: "185.64.148.0"
       network:
         client:
           geoip:
@@ -181,9 +182,6 @@ tests:
               name: "Île-de-France"
             timezone: "Europe/Paris"
           ip: "185.64.148.0"
-          nat:
-            ip: "185.64.148.0"
-            port: 443
           port: 443
       outboundif: "ethernet1/1"
       palo:
@@ -274,6 +272,8 @@ tests:
       issuercn: "FRID"
       issuerlen: 532
       logset: "POC-Dash-DD-204-9099"
+      natdport: 7001
+      natdst: "185.64.148.0"
       network:
         client:
           geoip:
@@ -462,6 +462,8 @@ tests:
       dst: "185.64.148.0"
       dstzone: "untrust"
       dvc: "fw-01"
+      natdport: 443
+      natdst: "185.64.148.0"
       network:
         bytes_read: 200
         bytes_written: 400
@@ -491,9 +493,6 @@ tests:
               name: "Île-de-France"
             timezone: "Europe/Paris"
           ip: "185.64.148.0"
-          nat:
-            ip: "185.64.148.0"
-            port: 443
           port: 443
       palo:
         alto:
@@ -604,6 +603,8 @@ tests:
       http2conn: 0
       inboundif: "ethernet1/2"
       logset: "log-profile-01"
+      natdport: 443
+      natdst: "185.64.148.0"
       network:
         bytes_read: 1024
         bytes_written: 4096
@@ -633,9 +634,6 @@ tests:
               name: "Île-de-France"
             timezone: "Europe/Paris"
           ip: "185.64.148.0"
-          nat:
-            ip: "185.64.148.0"
-            port: 443
           port: 443
       offloaded: 0
       outboundif: "ethernet1/1"
@@ -710,6 +708,8 @@ tests:
       inboundif: "ethernet1/2"
       logset: "log-profile-01"
       misc: "host-01.example.com/"
+      natdport: 80
+      natdst: "185.64.148.0"
       network:
         client:
           geoip: {}
@@ -737,9 +737,6 @@ tests:
               name: "Île-de-France"
             timezone: "Europe/Paris"
           ip: "185.64.148.0"
-          nat:
-            ip: "185.64.148.0"
-            port: 80
           port: 80
       outboundif: "ethernet1/1"
       palo:
@@ -833,6 +830,8 @@ tests:
       flags: "0x19"
       inbound_if: "ethernet1/2"
       logset: "log-profile-01"
+      natdport: 53
+      natdst: "185.64.148.0"
       network:
         bytes_read: 78
         bytes_written: 202
@@ -862,9 +861,6 @@ tests:
               name: "Île-de-France"
             timezone: "Europe/Paris"
           ip: "185.64.148.0"
-          nat:
-            ip: "185.64.148.0"
-            port: 53
           port: 53
       outbound_if: "ethernet1/1"
       palo:

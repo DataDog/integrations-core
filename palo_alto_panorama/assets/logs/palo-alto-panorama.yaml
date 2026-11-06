@@ -583,23 +583,32 @@ pipeline:
       filter:
         query: '@type:("DECRYPTION" OR "TRAFFIC" OR "THREAT" OR "START" OR "END") @natdst:* -@natdst:"0.0.0.0"'
       processors:
+        # PAN-OS copies `dst`/`dport` into `natdst`/`natdport` when only source NAT is applied. Map the
+        # post-NAT destination only when it differs from the original one: join both into one string and
+        # let the `translated` rule's backreferences reject the case where the halves are equal.
+        - type: string-builder-processor
+          name: Join original and post-NAT destination
+          enabled: true
+          template: "%{dst} %{dport} %{natdst} %{natdport}"
+          target: natdst_compare
+          replaceMissing: false
+        - type: grok-parser
+          name: Map post-NAT destination when it differs from the original one
+          enabled: true
+          source: natdst_compare
+          samples:
+            - 203.0.113.10 443 10.0.5.20 8443
+          grok:
+            supportRules: ""
+            matchRules: |-
+              translated (\S+) (\S+) (?!\1 \2$)%{notSpace:network.destination.nat.ip} %{integer:network.destination.nat.port}
         - type: attribute-remapper
-          name: Map `natdst` to `network.destination.nat.ip`
+          name: Remove the joined destination string
           enabled: true
           sources:
-            - natdst
+            - natdst_compare
           sourceType: attribute
-          target: network.destination.nat.ip
-          targetType: attribute
-          preserveSource: false
-          overrideOnConflict: false
-        - type: attribute-remapper
-          name: Map `natdport` to `network.destination.nat.port`
-          enabled: true
-          sources:
-            - natdport
-          sourceType: attribute
-          target: network.destination.nat.port
+          target: natdst
           targetType: attribute
           preserveSource: false
           overrideOnConflict: false
