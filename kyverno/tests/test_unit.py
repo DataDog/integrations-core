@@ -10,6 +10,7 @@ from datadog_checks.kyverno import KyvernoCheck
 from .common import (
     ADMISSION_METRICS,
     BACKGROUND_METRICS,
+    CLEANUP_METRICS,
     COMMON_METRICS,
     OM_MOCKED_INSTANCE,
     REPORTS_METRICS,
@@ -22,7 +23,7 @@ from .common import (
     [
         ('admission', ADMISSION_METRICS),
         ('background', BACKGROUND_METRICS),
-        ('cleanup', []),
+        ('cleanup', CLEANUP_METRICS),
         ('reports', REPORTS_METRICS),
     ],
 )
