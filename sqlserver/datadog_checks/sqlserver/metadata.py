@@ -64,11 +64,14 @@ class SqlserverMetadata(DBMAsyncJob):
     def __init__(self, check, config: SQLServerConfig):
         self.log = check.log
         self._config = config
-        # The job also runs for Data Observability, which only uses schema collection, so settings stay a DBM feature.
+        # The job also runs for Data Observability, which only uses schema collection, so settings and column statistics
+        # stay DBM features.
         self._settings_enabled = self._config.dbm_enabled and is_affirmative(
             self._config.settings_config.get('enabled', True)
         )
-        column_statistics_enabled = is_affirmative(self._config.column_statistics_config.get('enabled', False))
+        column_statistics_enabled = self._config.dbm_enabled and is_affirmative(
+            self._config.column_statistics_config.get('enabled', False)
+        )
         self.collection_interval = self._config.settings_config.get(
             'collection_interval', DEFAULT_SETTINGS_COLLECTION_INTERVAL
         )

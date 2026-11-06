@@ -112,7 +112,10 @@ def test_sqlserver_collect_settings(aggregator, dd_run_check, dbm_instance):
 def test_collect_schemas_without_settings(
     aggregator, dd_run_check, instance_docker, dbm, data_observability_enabled, settings_config
 ):
-    """Schemas are collected even when settings collection is off, which it always is without DBM."""
+    """
+    Schemas are collected even when settings collection is off. Without DBM, settings and column statistics stay off
+    even when enabled, so a Data Observability instance collects only schemas.
+    """
     instance_docker['dbm'] = dbm
     instance_docker['data_observability'] = {'enabled': data_observability_enabled, 'queries': []}
     instance_docker['query_metrics'] = {'enabled': False}
@@ -123,6 +126,7 @@ def test_collect_schemas_without_settings(
     instance_docker['collect_schemas'] = {'enabled': True}
     # `run_sync` for the whole metadata job is read from `collect_settings`.
     instance_docker['collect_settings'] = settings_config
+    instance_docker['collect_column_statistics'] = {'enabled': True}
 
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
     dd_run_check(check)
@@ -133,6 +137,12 @@ def test_collect_schemas_without_settings(
         database['name'] for e in events if e['kind'] == 'sqlserver_databases' for database in e['metadata']
     }
     assert collected_databases == {'datadog_test_schemas'}
+    # The test database has no `datadog.column_statistics` procedure, so a collection run reports a health event
+    # rather than a payload. Either one shows that column statistics ran.
+    column_statistics_ran = bool(aggregator.get_event_platform_events("dbm-column-statistics")) or any(
+        e['name'].startswith('column_statistics') for e in aggregator.get_event_platform_events("dbm-health")
+    )
+    assert column_statistics_ran == dbm
 
 
 def test_collect_schemas(aggregator, dd_run_check, dbm_instance):
