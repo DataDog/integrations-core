@@ -6,6 +6,8 @@ from copy import deepcopy
 
 import paramiko
 import pytest
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ec, ed25519, rsa
 from mock import MagicMock, call, create_autospec
 
 from datadog_checks.ssh_check import CheckSSH
@@ -191,6 +193,38 @@ def test_force_sha1_disabled(aggregator, dd_run_check, settings):
             password=ssh.instance['password'],
         )
     ]
+
+
+def _write_private_key(path, private_key):
+    path.write_bytes(
+        private_key.private_bytes(
+            serialization.Encoding.PEM, serialization.PrivateFormat.OpenSSH, serialization.NoEncryption()
+        )
+    )
+    return str(path)
+
+
+@pytest.mark.parametrize(
+    'private_key_type, private_key, expected_class',
+    [
+        pytest.param('rsa', rsa.generate_private_key(65537, 2048), paramiko.RSAKey, id='rsa'),
+        pytest.param('ecdsa', ec.generate_private_key(ec.SECP256R1()), paramiko.ECDSAKey, id='ecdsa'),
+        pytest.param('ed25519', ed25519.Ed25519PrivateKey.generate(), paramiko.Ed25519Key, id='ed25519'),
+        pytest.param('ED25519', ed25519.Ed25519PrivateKey.generate(), paramiko.Ed25519Key, id='case insensitive'),
+        # Unknown types have always been loaded as RSA.
+        pytest.param('unknown', rsa.generate_private_key(65537, 2048), paramiko.RSAKey, id='unknown falls back to rsa'),
+    ],
+)
+def test_private_key_type(dd_run_check, tmp_path, private_key_type, private_key, expected_class):
+    inst = deepcopy(common.INSTANCES['main'])
+    inst['private_key_file'] = _write_private_key(tmp_path / 'id_key', private_key)
+    inst['private_key_type'] = private_key_type
+    client, ssh = _setup_check_with_mock_client(inst, connect_result=CONNECTION_SUCCEEDED, authentication_result=True)
+
+    dd_run_check(ssh)
+
+    # A key that fails to load makes the check silently fall back to password authentication.
+    assert isinstance(client.connect.call_args.kwargs.get('pkey'), expected_class)
 
 
 def test_force_sha1_enabled(aggregator, dd_run_check):
