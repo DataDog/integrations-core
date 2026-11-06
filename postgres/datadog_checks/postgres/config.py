@@ -461,14 +461,25 @@ def validate_config(config: InstanceConfig, instance: dict, validation_result: V
         'query_activity',
         'query_samples',
         'query_metrics',
-        'collect_settings',
-        'collect_schemas',
         'collect_roles',
         'collect_column_statistics',
     ]
     for feature in dbm_required:
         if (instance.get(feature) or {}).get('enabled') and not config.dbm:
             validation_result.add_warning(f'The `{feature}` feature requires the `dbm` option to be enabled.')
+
+    # The metadata job that collects settings and schemas also runs for Data Observability.
+    dbm_or_data_observability_required = ['collect_settings', 'collect_schemas']
+    for feature in dbm_or_data_observability_required:
+        if (instance.get(feature) or {}).get('enabled') and not _metadata_job_enabled(config):
+            validation_result.add_warning(
+                f'The `{feature}` feature requires the `dbm` or `data_observability.enabled` option to be enabled.'
+            )
+
+
+def _metadata_job_enabled(config: InstanceConfig) -> bool:
+    """Whether the check registers the metadata job that collects settings and schemas."""
+    return config.dbm or config.data_observability.enabled
 
 
 def apply_features(config: InstanceConfig, validation_result: ValidationResult):
@@ -481,8 +492,12 @@ def apply_features(config: InstanceConfig, validation_result: ValidationResult):
     validation_result.add_feature(FeatureKey.QUERY_ACTIVITY, config.query_activity.enabled and config.dbm)
     validation_result.add_feature(FeatureKey.QUERY_SAMPLES, config.query_samples.enabled and config.dbm)
     validation_result.add_feature(FeatureKey.QUERY_METRICS, config.query_metrics.enabled and config.dbm)
-    validation_result.add_feature(FeatureKey.COLLECT_SETTINGS, config.collect_settings.enabled and config.dbm)
-    validation_result.add_feature(FeatureKey.COLLECT_SCHEMAS, config.collect_schemas.enabled and config.dbm)
+    validation_result.add_feature(
+        FeatureKey.COLLECT_SETTINGS, config.collect_settings.enabled and _metadata_job_enabled(config)
+    )
+    validation_result.add_feature(
+        FeatureKey.COLLECT_SCHEMAS, config.collect_schemas.enabled and _metadata_job_enabled(config)
+    )
     validation_result.add_feature(FeatureKey.COLLECT_ROLES, config.collect_roles.enabled and config.dbm)
     validation_result.add_feature(FeatureKey.DATA_OBSERVABILITY, config.data_observability.enabled)
     validation_result.add_feature(

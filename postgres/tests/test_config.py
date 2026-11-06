@@ -152,6 +152,27 @@ def test_initialize_features_warn_if_dbm_missing_for_dbm_features(mock_check, mi
     assert FeatureKey.QUERY_METRICS in feature_keys
 
 
+@pytest.mark.parametrize(
+    'feature, feature_key',
+    [
+        ('collect_settings', FeatureKey.COLLECT_SETTINGS),
+        ('collect_schemas', FeatureKey.COLLECT_SCHEMAS),
+    ],
+)
+@pytest.mark.parametrize('data_observability_enabled', [True, False])
+def test_metadata_features_without_dbm(mock_check, minimal_instance, feature, feature_key, data_observability_enabled):
+    # Data Observability runs the metadata job on its own, so these features don't need dbm with it.
+    instance = minimal_instance
+    instance[feature] = {'enabled': True}
+    instance['data_observability'] = {'enabled': data_observability_enabled}
+    mock_check.instance = instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    features = {f['key']: f for f in result.features}
+    assert features[feature_key]['enabled'] is data_observability_enabled
+    assert any(f'`{feature}` feature requires' in w for w in result.warnings) is not data_observability_enabled
+
+
 def test_initialize_deprecated_options_warn(mock_check, minimal_instance):
     instance = minimal_instance
     instance['deep_database_monitoring'] = True

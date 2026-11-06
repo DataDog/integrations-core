@@ -943,7 +943,7 @@ files:
         - name: enabled
           fleet_configurable: true
           description: |
-            Enable collection of pg_settings. Requires `dbm: true`.
+            Enable collection of pg_settings. Requires `dbm: true` or `data_observability.enabled: true`.
           value:
             type: boolean
             example: true
@@ -988,7 +988,7 @@ files:
         - name: enabled
           fleet_configurable: true
           description: |
-            Enable collection of database schemas. Requires `dbm: true`.
+            Enable collection of database schemas. Requires `dbm: true` or `data_observability.enabled: true`.
           value:
             type: boolean
             example: true

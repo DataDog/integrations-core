@@ -488,7 +488,7 @@ instances:
     # collect_settings:
 
         ## @param enabled - boolean - optional - default: true
-        ## Enable collection of pg_settings. Requires `dbm: true`.
+        ## Enable collection of pg_settings. Requires `dbm: true` or `data_observability.enabled: true`.
         #
         # enabled: true
 
@@ -512,7 +512,7 @@ instances:
     # collect_schemas:
 
         ## @param enabled - boolean - optional - default: true
-        ## Enable collection of database schemas. Requires `dbm: true`.
+        ## Enable collection of database schemas. Requires `dbm: true` or `data_observability.enabled: true`.
         #
         # enabled: true
 
