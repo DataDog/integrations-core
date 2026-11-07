@@ -60,10 +60,3 @@ files:
         type: boolean
         example: false
     - template: instances/default
-      overrides:
-        # Overrides the shared tags.yaml template wording adopted in review; the
-        # shared template still says "emitted by this instance".
-        tags.description: |
-          A list of tags to attach to every metric and service check this instance emits.
-
-          Learn more about tagging at https://docs.datadoghq.com/tagging
