@@ -130,7 +130,11 @@ class HTTPRequestOptions(TypedDict, total=False):
     cert: str | tuple[str, str] | None
     """Client certificate, optionally paired with its private key."""
     proxies: Mapping[str, str] | None
-    """Proxy URLs keyed by scheme; None uses configured client proxies."""
+    """Proxy URLs keyed by scheme for this request. Omit to use the client's proxy settings.
+
+    When set, including to `None`, the client's `no_proxy` list is ignored, and for schemes the mapping does not name,
+    environment proxy variables, when trusted, take precedence over the configured proxies and `skip_proxy`.
+    """
     extra_headers: Mapping[str, str]
     """Headers merged after configured and per-request headers."""
     stream: bool
@@ -141,7 +145,12 @@ class HTTPRequestOptions(TypedDict, total=False):
 
 class HTTPClient(Protocol):
     options: dict[str, Any]
-    """Mutable defaults read by the backend before every request."""
+    """Default request options, which per-request options override.
+
+    Keys and value shapes follow `requests`. Once the persistent session exists, setting a key to `None`, or
+    replacing `headers` or `proxies` with a mapping that omits keys, does not remove the values the session was
+    created with. Use `set_header()` to change headers and `disable_auth()` to drop configured authentication.
+    """
 
     tls_config: dict[str, Any]
     """TLS settings for callers that build their own SSL context."""

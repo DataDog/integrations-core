@@ -16,8 +16,8 @@ For example, to make a GET request you would use:
 response = self.http.get(url)
 ```
 
-and the wrapper will pass the right things to the underlying HTTP library. All methods accept optional keyword arguments
-like `stream`, etc.
+and the wrapper will pass the right things to the underlying HTTP library. All methods accept the optional keyword
+arguments listed in `HTTPRequestOptions` under [Reference](#reference), such as `stream`.
 
 Any method-level option will override configuration. So for example if `tls_verify` was set to false and you do
 `self.http.get(url, verify=True)`, then SSL certificates will be verified on that particular request. You can
@@ -92,20 +92,24 @@ Explicit per-request authentication still overrides client configuration.
 ## Errors
 
 With `AGNOSTIC_HTTP_CLIENT` set, a failed request raises one of the backend-neutral types from the
-module `datadog_checks.base.utils.http_exceptions`, never an exception class belonging to the underlying HTTP
-library. Catch these instead:
+module `datadog_checks.base.utils.http_exceptions`. Catch these instead:
 
-| Exception | Raised when |
-| --- | --- |
-| `HTTPClientError` | Root of the tree. Catch this to handle any HTTP failure. |
-| `HTTPClientRequestError` | The request never produced a usable response. |
-| `HTTPClientConnectionError` | The connection could not be established or was lost. |
-| `HTTPClientSSLError` | The TLS handshake or certificate verification failed. |
-| `HTTPClientInvalidURLError` | The URL was rejected before a connection was attempted. |
-| `HTTPClientTimeoutError` | The request exceeded its configured timeout. |
-| `HTTPClientConnectTimeoutError` | The timeout elapsed while establishing the connection. |
-| `HTTPClientReadTimeoutError` | The timeout elapsed while waiting for response data. |
-| `HTTPClientStatusError` | An error status was raised through `raise_for_status()`. |
+| Exception | Parent | Raised when |
+| --- | --- | --- |
+| `HTTPClientError` | `Exception` | Root of the tree. Catch this to handle any HTTP failure. |
+| `HTTPClientRequestError` | `HTTPClientError` | The request never produced a usable response. |
+| `HTTPClientConnectionError` | `HTTPClientRequestError` | The connection could not be established or was lost. |
+| `HTTPClientSSLError` | `HTTPClientConnectionError` | The TLS handshake or certificate verification failed. |
+| `HTTPClientInvalidURLError` | `HTTPClientRequestError` | The URL was rejected before a connection was attempted. |
+| `HTTPClientTimeoutError` | `HTTPClientRequestError` | The request exceeded its configured timeout. |
+| `HTTPClientConnectTimeoutError` | `HTTPClientTimeoutError` | The timeout elapsed while establishing the connection. |
+| `HTTPClientReadTimeoutError` | `HTTPClientTimeoutError` | The timeout elapsed while waiting for response data. |
+| `HTTPClientStatusError` | `HTTPClientError` | An error status was raised through `raise_for_status()`. |
+
+Unlike in `requests`, a connect timeout is not a connection error. Catch `HTTPClientRequestError` to handle both.
+
+Each raised error also subclasses the matching `requests` exception, and therefore `OSError`, so that handlers in checks
+that have not opted in keep matching. Opted-in checks must not rely on those bases.
 
 For example, a check that skips optional data when its endpoint is unavailable looks like this:
 
@@ -120,9 +124,35 @@ except HTTPClientError as e:
     return
 ```
 
-Decoding the body is the only failure outside this tree. Calling `response.json()` on a body that is not valid JSON raises the
-standard library's `json.JSONDecodeError`, a subclass of `ValueError` that is not part of the tree above, so handle it
-separately from the types listed here.
+A few failures fall outside this tree, so handle them separately from the types listed here:
+
+- Calling `response.json()` on a body that is not valid JSON raises the standard library's `json.JSONDecodeError`, a
+  subclass of `ValueError`.
+- Reading a streamed body that contains a line longer than the client's line size cap raises a `ValueError`. The
+  OpenMetrics scrapers set this cap.
+- Errors that an `auth_token` reader or writer raises, other than HTTP failures, propagate unchanged.
+
+## Reference
+
+Opted-in checks may use the members documented below. To annotate clients and responses, import `HTTPClient`
+and `HTTPResponse` from `datadog_checks.base.utils.http_protocol`.
+
+::: datadog_checks.base.utils.http_protocol.HTTPClient
+    options:
+      heading_level: 3
+
+::: datadog_checks.base.utils.http_protocol.HTTPRequestOptions
+    options:
+      heading_level: 3
+
+::: datadog_checks.base.utils.http_protocol.HTTPResponse
+    options:
+      heading_level: 3
+
+::: datadog_checks.base.utils.http_protocol.HTTPHeaders
+    options:
+      heading_level: 3
+      members: false
 
 ## Future
 
