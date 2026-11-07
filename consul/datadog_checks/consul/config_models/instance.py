@@ -91,6 +91,7 @@ class InstanceConfig(BaseModel):
     metric_patterns: Optional[MetricPatterns] = None
     min_collection_interval: Optional[float] = None
     network_latency_checks: Optional[bool] = None
+    network_latency_sample_size: Optional[int] = Field(None, ge=1)
     new_leader_checks: Optional[bool] = None
     ntlm_domain: Optional[str] = None
     password: Optional[str] = None
