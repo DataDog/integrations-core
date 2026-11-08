@@ -301,6 +301,11 @@ class PostgreSql(DatabaseCheck):
         with db() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(query)
+                # psycopg3 keeps one result per statement and leaves the cursor on the first one. Skip results
+                # that have no rows to fetch (SET, CREATE, INSERT, ...) so that a multi-statement custom query
+                # such as `SET LOCAL statement_timeout = ...; SELECT ...` reads the rows of its SELECT.
+                while cursor.description is None and cursor.nextset():
+                    pass
                 rows = cursor.fetchall()
                 return rows
 
