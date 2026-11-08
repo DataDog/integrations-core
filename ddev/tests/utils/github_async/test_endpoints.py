@@ -38,6 +38,7 @@ from ddev.utils.github_async.models import (
     WorkflowJobsList,
     WorkflowJobStatus,
     WorkflowRun,
+    WorkflowRunsList,
 )
 from ddev.utils.github_errors import GitHubAuthenticationError, GitHubBodyTooLongError
 from tests.utils.github_async.helpers import (
@@ -145,6 +146,53 @@ async def test_get_workflow_run_success(status: str, is_completed: bool) -> None
     assert result.data.id == 42
     assert result.data.status == status
     assert result.data.is_completed is is_completed
+
+
+async def test_list_workflow_runs_filters_and_paginates():
+    paths = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == "/repos/owner/repo/actions/workflows/test-batch.yml/runs"
+        paths.append(str(request.url))
+        if len(paths) == 1:
+            assert dict(request.url.params) == {
+                "per_page": "100",
+                "branch": "master",
+                "event": "workflow_dispatch",
+                "created": ">=2026-11-08T00:00:00Z",
+            }
+            return json_response(
+                {"total_count": 2, "workflow_runs": [workflow_run_payload(id=1, display_title="first")]},
+                headers={
+                    "link": (
+                        '<https://api.github.com/repos/owner/repo/actions/workflows/test-batch.yml/runs?page=2>; '
+                        'rel="next"'
+                    )
+                },
+            )
+        assert dict(request.url.params) == {"page": "2"}
+        return json_response({"total_count": 2, "workflow_runs": [workflow_run_payload(id=2, display_title="second")]})
+
+    client = make_client(httpx.MockTransport(handler))
+    pages = [
+        page
+        async for page in client.list_workflow_runs(
+            "owner",
+            "repo",
+            "test-batch.yml",
+            per_page=100,
+            branch="master",
+            event="workflow_dispatch",
+            created=">=2026-11-08T00:00:00Z",
+        )
+    ]
+    assert len(paths) == 2
+    assert all(isinstance(page.data, WorkflowRunsList) for page in pages)
+    assert [(run.id, run.display_title) for page in pages for run in page.data.workflow_runs] == [
+        (1, "first"),
+        (2, "second"),
+    ]
 
 
 async def test_list_workflow_run_artifacts_single_page() -> None:
@@ -367,6 +415,10 @@ GITHUB_PAGE_SIZE_LIMIT = 100
 @pytest.mark.parametrize(
     "call",
     [
+        pytest.param(
+            lambda client, size: first_page(client.list_workflow_runs("o", "r", "test-batch.yml", per_page=size)),
+            id="list_workflow_runs",
+        ),
         pytest.param(
             lambda client, size: first_page(client.list_workflow_run_artifacts("o", "r", 1, per_page=size)),
             id="list_workflow_run_artifacts",

@@ -66,6 +66,7 @@ from .factories import (
     make_workflow_job,
     make_workflow_jobs_list,
     make_workflow_run,
+    make_workflow_runs_list,
 )
 from .fake_client import DEFAULT_COMMENT_ID, DEFAULT_DISPATCH_HTML_URL, FakeAsyncGitHubClient, RecordedRequest
 
@@ -103,4 +104,5 @@ __all__ = [
     'make_workflow_job',
     'make_workflow_jobs_list',
     'make_workflow_run',
+    'make_workflow_runs_list',
 ]

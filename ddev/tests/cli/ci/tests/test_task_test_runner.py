@@ -10,8 +10,10 @@ import json
 import logging
 import secrets
 from collections.abc import Callable
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
+from uuid import UUID
 
 import httpx
 import pytest
@@ -63,6 +65,7 @@ from tests.helpers.github_async import (
     make_workflow_job,
     make_workflow_jobs_list,
     make_workflow_run,
+    make_workflow_runs_list,
 )
 from tests.helpers.monitoring import RecordingJsonHandler, RecordingSink, make_monitor
 
@@ -409,6 +412,262 @@ async def test_a_dispatch_github_refuses_fails_the_dispatch_operation_only(tmp_p
     assert sink.records_named("jobs.count") == []
     assert failed_by_operation(sink) == {"dispatch_batch": 1}
     assert [record.value for record in sink.records_named("operations.count")] == [1]
+
+
+@pytest.mark.parametrize(
+    ("failure", "lookup_number", "redispatched", "other_match", "unidentified"),
+    [
+        pytest.param(500, 1, False, None, False, id="server-error"),
+        pytest.param(httpx.ReadTimeout("response timed out"), 2, False, None, False, id="read-timeout"),
+        pytest.param(httpx.WriteTimeout("send timed out"), 3, False, None, False, id="write-timeout"),
+        pytest.param(httpx.ReadError("response lost"), 1, False, None, False, id="read-error"),
+        pytest.param(httpx.RemoteProtocolError("connection closed"), 1, False, None, False, id="protocol-error"),
+        pytest.param(503, 2, True, None, False, id="second-response-lost"),
+        pytest.param(503, 1, True, (789, "failure"), False, id="lowest-matching-run-wins"),
+        pytest.param(500, 1, False, (123, "cancelled"), False, id="cancelled-lower-match-ignored"),
+        pytest.param(500, 1, False, None, True, id="unidentified-before-exact-match"),
+    ],
+)
+async def test_ambiguous_dispatch_adopts_its_run(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    failure: int | Exception,
+    lookup_number: int,
+    redispatched: bool,
+    other_match: tuple[int, str] | None,
+    unidentified: bool,
+):
+    """A lost response must still publish and track the batch\'s run."""
+    clock = FakeClock(start=0)
+    advance_clock_on_sleep(clock, monkeypatch)
+    monkeypatch.setattr(task_test_runner, "monotonic", clock)
+    identity = UUID(int=42)
+    monkeypatch.setattr(task_test_runner, "uuid4", lambda: identity)
+    if isinstance(failure, int):
+        request = httpx.Request("POST", "https://api.github.com/dispatches")
+        failure = httpx.HTTPStatusError("dispatch failed", request=request, response=httpx.Response(failure))
+    fake = FakeAsyncGitHubClient()
+    if redispatched:
+        fake.mock_response("create_workflow_dispatch", httpx.ReadTimeout("first response lost"), once=True)
+    fake.mock_response("create_workflow_dispatch", failure, once=True)
+    unrelated = make_workflow_run(
+        id=7, display_title="Test Batch" if unidentified else f"Test Batch [dispatch:{UUID(int=1).hex}] batch-err"
+    )
+    first_lookups = 3 if redispatched else 0
+    for _ in range(first_lookups + lookup_number - 1):
+        fake.mock_response("list_workflow_runs", make_workflow_runs_list([unrelated]), once=True)
+    found = make_workflow_run(id=456, display_title=f"Test Batch [dispatch:{identity.hex}] batch-err")
+    first_page = [unrelated]
+    if other_match is not None:
+        run_id, conclusion = other_match
+        first_page.append(make_workflow_run(id=run_id, display_title=found.display_title, conclusion=conclusion))
+    total_count = len(first_page) + 1
+    fake.mock_response(
+        "list_workflow_runs",
+        [
+            make_response(make_workflow_runs_list(first_page, total_count=total_count)),
+            make_response(make_workflow_runs_list([found], total_count=total_count)),
+        ],
+    )
+    handler = RecordingJsonHandler()
+    monitoring, sink = recording_runtime(handler=handler)
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+    batch = make_batch()
+    started = datetime.now(UTC)
+
+    assert await runner._dispatch_batch(batch) == (456, found.html_url)
+
+    dispatches = fake.calls_to("create_workflow_dispatch")
+    assert len(dispatches) == (2 if redispatched else 1)
+    assert all(call.kwargs["inputs"] == dispatches[0].kwargs["inputs"] for call in dispatches)
+    lookups = fake.calls_to("list_workflow_runs")
+    assert len(lookups) == first_lookups + lookup_number
+    assert clock() == (60 if redispatched else 0) + (10, 30, 60)[lookup_number - 1]
+    assert lookups[0].kwargs["event"] == "workflow_dispatch"
+    created = datetime.fromisoformat(lookups[0].kwargs["created"].removeprefix(">="))
+    assert started - timedelta(seconds=61) <= created <= datetime.now(UTC) - timedelta(seconds=60)
+    assert batch.run_id == 456
+    [progress] = drain_queue(runner.bus.queue)
+    assert (progress.run_id, progress.workflow_url) == (456, found.html_url)
+    assert [record.value for record in sink.records_named("batches.count")] == [1]
+    assert failed_by_operation(sink) == {"dispatch_batch": 0}
+    events = [event for event in handler.events if event.get("batch_id") == batch.batch_id]
+    failures = [event for event in events if "Ambiguous dispatch failure" in event["event"]]
+    assert [event["dispatch_attempt"] for event in failures] == ([1, 2] if redispatched else [1])
+    assert any(
+        "found run 456" in event["event"]
+        and event["run_id"] == 456
+        and event["matching_runs"] == (2 if other_match is not None else 1)
+        for event in events
+    )
+    assert any("adopted run 456" in event["event"] and event["run_id"] == 456 for event in events)
+    await runner.cancel_dispatched_runs()
+    assert fake.last_call("cancel_workflow_run").kwargs["run_id"] == 456
+
+
+@pytest.mark.parametrize(
+    ("retry_failure", "lookup_count", "elapsed", "rejects_identity"),
+    [
+        pytest.param(None, 3, 60, False, id="success"),
+        pytest.param(503, 6, 120, False, id="second-server-error-no-run"),
+        pytest.param(httpx.ReadTimeout("response timed out"), 6, 120, False, id="second-timeout-no-run"),
+        pytest.param(422, 3, 60, False, id="second-refusal"),
+        pytest.param(None, 0, 0, True, id="unsupported-identity-fallback"),
+        pytest.param(503, 0, 0, True, id="fallback-server-error-without-recovery"),
+        pytest.param(httpx.ReadTimeout("response lost"), 0, 0, True, id="fallback-timeout-without-recovery"),
+        pytest.param(422, 0, 0, True, id="fallback-rejected"),
+    ],
+)
+async def test_dispatch_retries_once_after_rejection_or_complete_absence(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    retry_failure: int | Exception | None,
+    lookup_count: int,
+    elapsed: int,
+    rejects_identity: bool,
+):
+    """A definite rejection or complete absence permits a bounded replay, not a dispatch loop."""
+    clock = FakeClock(start=0)
+    advance_clock_on_sleep(clock, monkeypatch)
+    monkeypatch.setattr(task_test_runner, "monotonic", clock)
+    identity = UUID(int=42)
+    monkeypatch.setattr(task_test_runner, "uuid4", lambda: identity)
+    request = httpx.Request("POST", "https://api.github.com/dispatches")
+    rejection = {"message": 'Unexpected inputs provided: ["dispatch_id"]'}
+    failure = httpx.HTTPStatusError(
+        "dispatch failed",
+        request=request,
+        response=httpx.Response(422 if rejects_identity else 500, json=rejection if rejects_identity else None),
+    )
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("create_workflow_dispatch", failure, once=True)
+    if isinstance(retry_failure, int):
+        retry_failure = httpx.HTTPStatusError(
+            "retry failed", request=request, response=httpx.Response(retry_failure, json=rejection)
+        )
+    if retry_failure is not None:
+        fake.mock_response("create_workflow_dispatch", retry_failure, once=True)
+    cancelled = make_workflow_run(
+        id=7, display_title=f"Test Batch [dispatch:{identity.hex}] batch-err", conclusion="cancelled"
+    )
+    fake.mock_response("list_workflow_runs", make_workflow_runs_list([cancelled]))
+    handler = RecordingJsonHandler()
+    runner = make_runner(fake, tmp_path, handler=handler)
+    batch = make_batch()
+
+    if retry_failure is None:
+        assert await runner._dispatch_batch(batch) == (123, DEFAULT_DISPATCH_HTML_URL)
+    else:
+        with pytest.raises(type(retry_failure)) as raised:
+            await runner._dispatch_batch(batch)
+        assert raised.value is retry_failure
+        assert batch.run_id is None
+
+    dispatches = fake.calls_to("create_workflow_dispatch")
+    assert len(dispatches) == 2
+    first_inputs, second_inputs = (call.kwargs["inputs"] for call in dispatches)
+    if rejects_identity:
+        assert "dispatch_id" in first_inputs
+        assert "dispatch_id" not in second_inputs
+        assert {key: value for key, value in first_inputs.items() if key != "dispatch_id"} == second_inputs
+        expected_log = "Workflow does not accept dispatch_id; dispatching batch batch-err without recovery"
+    else:
+        assert first_inputs == second_inputs
+        expected_log = "Re-dispatching batch batch-err"
+    assert len(fake.calls_to("list_workflow_runs")) == lookup_count
+    assert clock() == elapsed
+    assert [event["event"] for event in handler.events].count(expected_log) == 1
+
+
+@pytest.mark.parametrize(
+    ("listing", "reason", "redispatched"),
+    [
+        pytest.param(httpx.ReadTimeout("lookup timed out"), "lookup timed out", False, id="lookup-error"),
+        pytest.param(
+            make_workflow_runs_list([make_workflow_run()]),
+            "lacks a dispatch identity",
+            False,
+            id="unidentified-without-match",
+        ),
+        pytest.param(make_workflow_runs_list(total_count=1001), "truncated or incomplete", False, id="search-limit"),
+        pytest.param(make_workflow_runs_list(total_count=1), "truncated or incomplete", False, id="missing-page"),
+        pytest.param(
+            make_workflow_runs_list(
+                [make_workflow_run(display_title=f"Test Batch [dispatch:{UUID(int=42).hex}] batch-err")], total_count=2
+            ),
+            "truncated or incomplete",
+            False,
+            id="matching-run-in-incomplete-listing",
+        ),
+        pytest.param([], "truncated or incomplete", False, id="no-pages"),
+        pytest.param(httpx.ReadError("lookup response lost"), "lookup response lost", True, id="second-lookup-error"),
+    ],
+)
+async def test_ambiguous_dispatch_fails_when_lookup_is_inconclusive(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, listing: Any, reason: str, redispatched: bool
+):
+    """An uncertain lookup cannot justify another batch launch."""
+    clock = FakeClock(start=0)
+    advance_clock_on_sleep(clock, monkeypatch)
+    monkeypatch.setattr(task_test_runner, "monotonic", clock)
+    monkeypatch.setattr(task_test_runner, "uuid4", lambda: UUID(int=42))
+    request = httpx.Request("POST", "https://api.github.com/dispatches")
+    failure = httpx.HTTPStatusError("dispatch failed", request=request, response=httpx.Response(500))
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("create_workflow_dispatch", failure)
+    if redispatched:
+        for _ in range(3):
+            fake.mock_response("list_workflow_runs", make_workflow_runs_list(), once=True)
+    fake.mock_response("list_workflow_runs", listing)
+    handler = RecordingJsonHandler()
+    monitoring, sink = recording_runtime(handler=handler)
+    runner = make_runner(fake, tmp_path, monitor=monitoring.component("test-runner"))
+
+    with pytest.raises(httpx.HTTPStatusError) as raised:
+        await runner._dispatch_batch(make_batch())
+
+    assert raised.value is failure
+    assert len(fake.calls_to("create_workflow_dispatch")) == (2 if redispatched else 1)
+    assert drain_queue(runner.bus.queue) == []
+    assert sink.records_named("batches.count") == []
+    assert failed_by_operation(sink) == {"dispatch_batch": 1}
+    assert any("not re-dispatching" in event["event"] and reason in event["event"] for event in handler.events)
+
+
+@pytest.mark.parametrize(
+    ("failure", "payload"),
+    [
+        pytest.param(422, None, id="empty-rejection"),
+        pytest.param(403, None, id="forbidden"),
+        pytest.param(httpx.ConnectError("not sent"), None, id="connect-error"),
+        pytest.param(httpx.ConnectTimeout("not sent"), None, id="connect-timeout"),
+        pytest.param(httpx.PoolTimeout("not sent"), None, id="pool-timeout"),
+        pytest.param(422, {"message": 'Unexpected inputs provided: ["other"]'}, id="other-input"),
+        pytest.param(422, {"message": 'Unexpected inputs provided: ["dispatch_id_extra"]'}, id="similar-input"),
+        pytest.param(422, {"message": "Required input 'dispatch_id' not provided"}, id="other-rejection"),
+        pytest.param(422, ["dispatch_id"], id="non-object-rejection"),
+        pytest.param(400, {"message": 'Unexpected inputs provided: ["dispatch_id"]'}, id="not-validation-status"),
+    ],
+)
+async def test_non_ambiguous_dispatch_failure_does_not_lookup_runs(
+    tmp_path: Path, failure: int | Exception, payload: Any
+):
+    """Refusals and pre-send failures must retain their existing dispatch failure behavior."""
+    if isinstance(failure, int):
+        request = httpx.Request("POST", "https://api.github.com/dispatches")
+        failure = httpx.HTTPStatusError(
+            "dispatch refused", request=request, response=httpx.Response(failure, json=payload)
+        )
+    fake = FakeAsyncGitHubClient()
+    fake.mock_response("create_workflow_dispatch", failure)
+    runner = make_runner(fake, tmp_path)
+
+    with pytest.raises(type(failure)) as raised:
+        await runner._dispatch_batch(make_batch())
+
+    assert raised.value is failure
+    assert len(fake.calls_to("create_workflow_dispatch")) == 1
+    fake.assert_not_called("list_workflow_runs")
 
 
 async def test_collection_publishes_outcomes_before_a_cancellable_artifact_request(tmp_path: Path):
