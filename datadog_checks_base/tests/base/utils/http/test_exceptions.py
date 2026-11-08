@@ -14,6 +14,7 @@ from datadog_checks.base.utils.http_exceptions import (
     HTTPClientConnectTimeoutError,
     HTTPClientError,
     HTTPClientInvalidURLError,
+    HTTPClientLineTooLongError,
     HTTPClientReadTimeoutError,
     HTTPClientRequestError,
     HTTPClientSSLError,
@@ -229,6 +230,17 @@ def test_stream_seam_maps_mid_stream_exceptions(raised, expected, iter_method):
 
     with pytest.raises(expected):
         list(getattr(wrapped, iter_method)())
+
+
+def test_streamed_line_over_the_cap_raises_line_too_long():
+    transport = common.RequestsTransport()
+    transport.respond(content=b'x' * 11)
+    http = common.create_requests_client(transport)
+    http.max_line_size = 10
+    response = http.get('http://example.test/', stream=True)
+
+    with pytest.raises(HTTPClientLineTooLongError, match='line longer than 10 bytes'):
+        list(response.iter_lines())
 
 
 def test_response_adapter_maps_requests_wrapped_mid_stream_read_timeout() -> None:

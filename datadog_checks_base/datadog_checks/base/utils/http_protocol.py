@@ -161,6 +161,12 @@ class HTTPClient(Protocol):
 
     persist_connections: bool
 
+    max_line_size: int | None
+    """Longest line, in bytes, allowed when reading a streamed response body, or `None` for no limit.
+
+    Reading a longer line raises `HTTPClientLineTooLongError`.
+    """
+
     def get(self, url: str, **options: Unpack[HTTPRequestOptions]) -> HTTPResponse:
         """Perform a GET request using `HTTPRequestOptions`."""
         ...

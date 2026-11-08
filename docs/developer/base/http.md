@@ -101,6 +101,7 @@ module `datadog_checks.base.utils.http_exceptions`. Catch these instead:
 | `HTTPClientConnectionError` | `HTTPClientRequestError` | The connection could not be established or was lost. |
 | `HTTPClientSSLError` | `HTTPClientConnectionError` | The TLS handshake or certificate verification failed. |
 | `HTTPClientInvalidURLError` | `HTTPClientRequestError` | The URL was rejected before a connection was attempted. |
+| `HTTPClientLineTooLongError` | `HTTPClientRequestError` | A streamed body contained a line longer than the client's `max_line_size`. Also a `ValueError`. |
 | `HTTPClientTimeoutError` | `HTTPClientRequestError` | The request exceeded its configured timeout. |
 | `HTTPClientConnectTimeoutError` | `HTTPClientTimeoutError` | The timeout elapsed while establishing the connection. |
 | `HTTPClientReadTimeoutError` | `HTTPClientTimeoutError` | The timeout elapsed while waiting for response data. |
@@ -128,8 +129,6 @@ A few failures fall outside this tree, so handle them separately from the types 
 
 - Calling `response.json()` on a body that is not valid JSON raises the standard library's `json.JSONDecodeError`, a
   subclass of `ValueError`.
-- Reading a streamed body that contains a line longer than the client's line size cap raises a `ValueError`. The
-  OpenMetrics scrapers set this cap.
 - Errors that an `auth_token` reader or writer raises, other than HTTP failures, propagate unchanged.
 
 ## Reference

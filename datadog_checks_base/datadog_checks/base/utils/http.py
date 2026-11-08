@@ -36,6 +36,7 @@ from .common import ensure_bytes, ensure_unicode
 from .headers import get_default_headers, update_headers
 from .headers import get_header as get_header_value
 from .headers import set_header as set_header_value
+from .http_exceptions import HTTPClientLineTooLongError
 from .http_protocol import HTTPClient, HTTPResponse
 from .time import get_timestamp
 from .tls import SUPPORTED_PROTOCOL_VERSIONS, TlsConfig, create_ssl_context
@@ -215,31 +216,36 @@ class ResponseLineTooLongError(ValueError):
     pass
 
 
-def limit_line_size(response: requests.Response, max_line_size: int | None) -> None:
-    """Make reading `response` raise `ResponseLineTooLongError` once a line is longer than `max_line_size` bytes."""
+def limit_line_size(
+    response: requests.Response,
+    max_line_size: int | None,
+    error_type: type[ValueError] = ResponseLineTooLongError,
+) -> None:
+    """Make reading `response` raise `error_type` once a line is longer than `max_line_size` bytes."""
     if max_line_size is None:
         return
 
     raw = getattr(response, 'raw', None)
     # Don't overwrite test mocks or responses that are already limited
     if hasattr(raw, 'stream') and not isinstance(raw, LineCappedRawResponse):
-        response.raw = LineCappedRawResponse(raw, max_line_size)
+        response.raw = LineCappedRawResponse(raw, max_line_size, error_type)
 
 
 class LineCappedRawResponse(ObjectProxy):
     """
     Wraps a urllib3 response so that its decoded stream, which `requests` reads the body from, raises
-    `ResponseLineTooLongError` once a line is longer than `max_line_size` bytes. Everything else is forwarded.
+    `error_type` once a line is longer than `max_line_size` bytes. Everything else is forwarded.
     """
 
-    def __init__(self, raw: Any, max_line_size: int):
+    def __init__(self, raw: Any, max_line_size: int, error_type: type[ValueError] = ResponseLineTooLongError):
         super().__init__(raw)
         self._self_max_line_size = max_line_size
+        self._self_error_type = error_type
 
     def stream(self, amt: int | None = 2**16, *args: Any, **kwargs: Any) -> Iterator[bytes]:
         """
         Yield the decoded body in chunks that each contain a line break, except possibly the last one. Raise
-        `ResponseLineTooLongError` once a line is longer than `max_line_size` bytes.
+        `error_type` once a line is longer than `max_line_size` bytes.
         """
         # `amt` is the number of bytes read per chunk, 64 KiB by default (mirrors the urllib3 name)
         if amt is None or amt > self._self_max_line_size:
@@ -252,7 +258,7 @@ class LineCappedRawResponse(ObjectProxy):
             newline = chunk.find(b'\n')
             first_line_size = line_size + (len(chunk) if newline < 0 else newline)
             if first_line_size > self._self_max_line_size:
-                raise ResponseLineTooLongError(f'Response contains a line longer than {self._self_max_line_size} bytes')
+                raise self._self_error_type(f'Response contains a line longer than {self._self_max_line_size} bytes')
             line_size = first_line_size if newline < 0 else len(chunk) - chunk.rfind(b'\n') - 1
             if newline < 0:
                 buffer += chunk
@@ -794,7 +800,7 @@ class RequestsWrapper(object):
 
             if self._agnostic:
                 # The adapter hides the raw stream from later limit_line_size calls, so cap every read here
-                limit_line_size(response, self.max_line_size)
+                limit_line_size(response, self.max_line_size, HTTPClientLineTooLongError)
                 return requests_adapter.RequestsResponseAdapter(response, self.request_size)
             return ResponseWrapper(response, self.request_size, self.max_line_size)
 

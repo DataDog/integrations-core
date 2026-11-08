@@ -211,6 +211,8 @@ class FakeHTTPClient:
         self.trust_env = True
         self.ignore_tls_warning = False
         self.persist_connections = False
+        # Recorded only: responses are preset, so tests simulate the cap with `stream_error`.
+        self.max_line_size: int | None = None
         self.closed = False
         self._cookies = dict(cookies or {})
         # Shared with created clients so a setting changed after a check starts still reaches it.

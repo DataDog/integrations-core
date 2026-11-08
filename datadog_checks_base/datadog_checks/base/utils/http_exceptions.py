@@ -17,6 +17,7 @@ __all__ = [
     'HTTPClientReadTimeoutError',
     'HTTPClientConnectionError',
     'HTTPClientInvalidURLError',
+    'HTTPClientLineTooLongError',
     'HTTPClientSSLError',
 ]
 
@@ -74,3 +75,10 @@ class HTTPClientInvalidURLError(HTTPClientRequestError):
 
 class HTTPClientSSLError(HTTPClientConnectionError):
     """A TLS failure; catch before HTTPClientConnectionError when distinguishing them."""
+
+
+class HTTPClientLineTooLongError(HTTPClientRequestError, ValueError):
+    """A streamed response body with a line longer than the client's `max_line_size`.
+
+    Also a ValueError, so handlers written before this type existed keep matching.
+    """
