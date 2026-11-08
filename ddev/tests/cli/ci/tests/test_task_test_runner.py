@@ -352,6 +352,20 @@ async def test_a_jobs_listing_not_yet_visible_after_dispatch_is_retried(
     assert failed_by_operation(sink) == {"refresh_jobs": 0}
 
 
+async def test_list_jobs_collects_every_page(tmp_path: Path):
+    client = FakeAsyncGitHubClient()
+    expected = [make_workflow_job(id=idx, name=f"job-{idx}") for idx in range(51)]
+    client.mock_response(
+        "list_workflow_jobs",
+        [make_workflow_jobs_list(expected[:50]), make_workflow_jobs_list(expected[50:])],
+    )
+    runner = make_runner(client, tmp_path)
+
+    jobs = await runner._list_jobs(123, "batch-1", "listing workflow jobs")
+
+    assert [job.id for job in jobs] == [job.id for job in expected]
+
+
 async def test_a_workflow_run_not_yet_visible_after_dispatch_is_retried(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ):
@@ -436,7 +450,7 @@ async def test_collection_publishes_outcomes_before_a_cancellable_artifact_reque
         assert collecting.state is ExecutionState.ARTIFACT_DOWNLOAD
         assert collecting.status is Status.FAILURE
         assert collecting.jobs[0].conclusion == "failure"
-        assert client.last_call("list_workflow_jobs").kwargs["per_page"] == 100
+        assert client.last_call("list_workflow_jobs").kwargs["per_page"] == 50
         assert artifacts.last_call("list_workflow_run_artifacts").kwargs["per_page"] == 100
     finally:
         task.cancel()
