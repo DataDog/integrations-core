@@ -1,1 +1,0 @@
-Bump pyvmomi to 9.0.0.0, in step with the vSphere integration. The ESXi integration does not use the vSAN API and is unaffected by the underlying issue; the dependency pin is shared.
