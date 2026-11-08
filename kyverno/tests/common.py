@@ -58,18 +58,26 @@ COMMON_METRICS = [
 ]
 
 
-# CEL-based policy metrics. Both the admission and reports controllers expose the full set; they differ
-# only in the execution_cause label value (admission_request vs background_scan).
-CEL_POLICY_METRICS = [
-    metric
-    for policy_type in ('validating', 'mutating', 'image.validating', 'generating')
-    for metric in (
-        f'kyverno.{policy_type}.policy.execution.duration.seconds.bucket',
-        f'kyverno.{policy_type}.policy.execution.duration.seconds.count',
-        f'kyverno.{policy_type}.policy.execution.duration.seconds.sum',
-        f'kyverno.{policy_type}.policy.results.count',
-    )
-]
+# CEL-based policy metrics. The fixture samples are synthetic: upstream documents each metric and its
+# labels but never states which controller exposes which family, so these lists describe the fixtures
+# rather than a verified contract. GeneratingPolicy is the one documented constraint, as it is only
+# reconciled asynchronously and so always carries execution_cause="background_scan".
+CEL_POLICY_TYPES_ADMISSION = ('validating', 'mutating', 'image.validating')
+CEL_POLICY_TYPES_BACKGROUND_SCAN = (*CEL_POLICY_TYPES_ADMISSION, 'generating')
+
+
+def cel_policy_metrics(policy_types: tuple[str, ...]) -> list[str]:
+    return [
+        metric
+        for policy_type in policy_types
+        for metric in (
+            f'kyverno.{policy_type}.policy.execution.duration.seconds.bucket',
+            f'kyverno.{policy_type}.policy.execution.duration.seconds.count',
+            f'kyverno.{policy_type}.policy.execution.duration.seconds.sum',
+            f'kyverno.{policy_type}.policy.results.count',
+        )
+    ]
+
 
 REPORTS_METRICS = [
     'kyverno.controller.requeue.count',
@@ -77,7 +85,7 @@ REPORTS_METRICS = [
     'kyverno.policy.execution.duration.seconds.count',
     'kyverno.policy.execution.duration.seconds.sum',
     'kyverno.policy.results.count',
-    *CEL_POLICY_METRICS,
+    *cel_policy_metrics(CEL_POLICY_TYPES_BACKGROUND_SCAN),
 ]
 
 BACKGROUND_METRICS = [
@@ -92,7 +100,7 @@ ADMISSION_METRICS = [
     'kyverno.http.requests.duration.seconds.sum',
     'kyverno.policy.changes.count',
     'kyverno.policy.rule.info',
-    *CEL_POLICY_METRICS,
+    *cel_policy_metrics(CEL_POLICY_TYPES_ADMISSION),
 ]
 
 CLEANUP_METRICS = [
