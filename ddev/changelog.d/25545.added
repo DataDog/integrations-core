@@ -1,0 +1,1 @@
+Point the `compare_to` baseline in `.gitlab/build_agent.yaml` at the new release branch in `ddev release branch create`, so branches cut from a release branch compare their dependency changes against it.
