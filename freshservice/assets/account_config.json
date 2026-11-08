@@ -1,0 +1,35 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "API key",
+          "help": "The API key of the Freshservice integration user that Datadog uses. The user needs the Account Admin role.",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "domain",
+      "label": "Freshservice domain",
+      "help": "Your Freshservice host name, such as acme.freshservice.com.",
+      "editable": true,
+      "required": true,
+      "text": {
+        "pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.freshservice\\.com$"
+      }
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "freshservice-logs",
+      "additional_config_fields": []
+    }
+  ]
+}
