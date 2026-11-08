@@ -23,10 +23,12 @@ Use these logs to investigate administrative changes and to follow how tickets c
 
 1. Log in to Freshservice as the integration user.
 2. Click the profile picture in the upper right corner, then click **Profile Settings**.
-3. In the right panel, click **View API Key** and complete the CAPTCHA.
-4. Copy the API key.
+3. In the right panel, under **Your API Key**, complete the CAPTCHA.
+4. Copy the API key. For more details, see [Where do I find my API key?][6]
 
-API keys do not expire. Resetting the key in Freshservice, or deactivating the integration user, stops collection until you save the new key in Datadog.
+If Freshservice says the API key is disabled, an Account Admin can enable API key access for the user in the agent's permissions.
+
+Freshservice doesn't document an expiry for API keys. Resetting the key in Freshservice, or deactivating the integration user, stops collection until you save the new key in Datadog.
 
 ### Configuration
 
@@ -84,3 +86,4 @@ For further assistance, contact [Datadog Support][5].
 [3]: /integrations/freshservice
 [4]: /logs?query=source%3Afreshservice
 [5]: https://docs.datadoghq.com/help/
+[6]: https://support.freshservice.com/support/solutions/articles/50000000306-where-do-i-find-my-api-key-
