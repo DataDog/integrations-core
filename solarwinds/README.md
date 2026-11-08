@@ -16,25 +16,20 @@ To create a new trigger action in SolarWinds:
 2. Select any alert and click **Edit Alert**, or create a new alert if you do not have any.
 3. Navigate to **Trigger Actions > Add Action**.
 4. Select **Send a GET or POST Request to a Web Server**.
-5. Click **Configure Action"**.
+5. Click **Configure Action**.
 6. Fill in the Action Pane with the following details:
 
-        a. **Name of Action**: Send Alert to Datadog (or whatever you prefer)
-        b. **URL**: https://<YOUR-DC-INTAKE-URL>/intake/webhook/solarwinds?api_key=<DATADOG_API_KEY>
-        c. **Select**: Use HTTP/S POST
-        d. **Body to Post**: Copy and paste from alert template below
-        e. **Time of Day**: Leave as is
-        f. **Execution Settings**: Leave as is
-        b. **URL**: https://app.datadoghq.com/intake/webhook/solarwinds?api_key=<DATADOG_API_KEY>
-        c. **Select**: Use HTTP/S POST
-        d. **Body to Post**: Copy and paste from alert template below
-        e. **Time of Day**: Leave as is
-        f. **Execution Settings**: Leave as is
+    - **Name of Action**: Send Alert to Datadog (or whatever you prefer).
+    - **URL**: https://< YOUR-DC-INTAKE-URL >/intake/webhook/solarwinds?api_key=< DATADOG_API_KEY >
+    - **Select**: Use `HTTP/S POST`
+    - **Body to Post**: Copy and paste from alert template below.
+    - **Time of Day**: Leave as is.
+    - **Execution Settings**: Leave as is.
 
 7. Click **Add Action**.
 8. Click the **Reset Actions** step and then repeat steps 4 - 7, using the _Reset Action_ template instead of the _Trigger Action_ template.
 9. Click **Next**.
-10. Click **Submit** on the ***Summary** page.
+10. Click **Submit** on the _Summary_ page.
 
 ### Assign actions to alerts
 
@@ -43,7 +38,7 @@ To create a new trigger action in SolarWinds:
 3. Repeat for **Assign Action > Assign Reset Action** using the "Send Alert to Datadog - Reset" action.
 
 ### Trigger action body to post
-``` 
+```json 
 {
     "acknowledged": "${N=Alerting;M=Acknowledged}",
     "acknowledged_by": "${N=Alerting;M=AcknowledgedBy}",
@@ -66,7 +61,7 @@ To create a new trigger action in SolarWinds:
 ``` 
 
 ### Reset action body to post
-``` 
+```json 
 {
     "acknowledged": "${N=Alerting;M=Acknowledged}",
     "acknowledged_by": "${N=Alerting;M=AcknowledgedBy}",
@@ -105,6 +100,9 @@ The SolarWinds integration does not include any service checks.
 
 ## Troubleshooting
 
+- [Event not showing up in Event Explorer][2]
+
 Need help? Contact [Datadog support][1].
 
 [1]: https://docs.datadoghq.com/help
+[2]: https://docs.datadoghq.com/integrations/solarwinds/#troubleshooting
