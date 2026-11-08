@@ -9,7 +9,7 @@
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "Gain insights into Freshservice logs",
+    "description": "Collect Freshservice audit logs and ticket activity history as logs.",
     "title": "Freshservice",
     "media": [],
     "classifier_tags": [
@@ -37,6 +37,5 @@
     "name": "Datadog",
     "homepage": "https://www.datadoghq.com",
     "sales_email": "info@datadoghq.com"
-  },
-  "oauth": {}
+  }
 }
