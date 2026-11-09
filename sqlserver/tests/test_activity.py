@@ -875,7 +875,9 @@ def test_activity_collection_rate_limit(aggregator, dd_run_check, dbm_instance):
     dd_run_check(check)
     sleep_time = 1
     time.sleep(sleep_time)
-    # The rate limiter starts with no previous run, so the first two collections run back to back
+    # `datadog-checks-base` before 38.9.1 runs the first two collections back to back, and the minimum-base-package
+    # jobs still test with it. Use `+ 1` once the minimum base version is 38.9.1 or later. See
+    # https://github.com/DataDog/integrations-core/pull/25829 and https://github.com/DataDog/integrations-core/pull/25855
     max_collections = int(sleep_time / collection_interval) + 2
     min_collections = sleep_time  # at minimum, one collection per second
     check.cancel()
@@ -1068,6 +1070,41 @@ def test_sanitize_activity_row_recovers_leading_comment_for_non_proc_statement(d
     assert not row.get('is_proc')
     assert 'procedure_signature' not in row
     assert mock_agent.call_count == 2
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'obfuscator_options,expect_comments',
+    [
+        pytest.param({}, True, id='defaults'),
+        pytest.param({'collect_comments': False}, False, id='collect_comments_disabled'),
+        pytest.param({'collect_metadata': False}, False, id='collect_metadata_disabled'),
+    ],
+)
+def test_sanitize_activity_row_recovers_appended_comment_from_tail_text(
+    dbm_instance, datadog_agent, obfuscator_options, expect_comments
+):
+    case_comment = "/* orders-lookup */"
+    dbm_comment = "/*ddps='orders-service',dde='prod',ddpv='1.0.0'*/"
+    statement_text = "SELECT id, '" + 'x' * 600 + "' AS pad FROM dbo.orders"
+    batch = f"(@P0 nvarchar(4000)){statement_text} {case_comment} {dbm_comment}"
+    row = {
+        'statement_text': statement_text,
+        'text': batch[:500],
+        # RIGHT(text, 200) can start inside a string literal
+        'tail_text': batch[-200:],
+        'procedure_name': None,
+        'query_hash': b'\xa4\xffV\x1c\xd4\x14\xbeC',
+        'query_plan_hash': b'\xfe\xba\xbf\xc6_\x9bo\x83',
+    }
+    assert row['tail_text'].startswith('x')
+
+    check = SQLServer(CHECK_NAME, {}, [dict(dbm_instance, obfuscator_options=obfuscator_options)])
+    row = check.activity._obfuscate_and_sanitize_row(row)
+
+    assert row['dd_comments'] == ([dbm_comment] if expect_comments else [])
+    assert 'tail_text' not in row
+    assert 'statement_text' not in row
 
 
 @pytest.mark.unit

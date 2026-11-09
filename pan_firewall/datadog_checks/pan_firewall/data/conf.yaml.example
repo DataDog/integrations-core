@@ -254,11 +254,6 @@ instances:
     # vsys:
     #   - vsys1
 
-    ## @param collect_threats - boolean - optional - default: true
-    ## Set to `true` to count threat log entries by severity and type.
-    #
-    # collect_threats: true
-
     ## @param collect_rule_hits - boolean - optional - default: true
     ## Set to `false` to stop collecting security rule hit counts.
     #

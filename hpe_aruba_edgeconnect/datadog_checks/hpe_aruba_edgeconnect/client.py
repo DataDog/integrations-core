@@ -44,9 +44,15 @@ class _BaseClient:
 class OrchestratorClient(_BaseClient):
     """HTTP client for the HPE Aruba EdgeConnect orchestrator API."""
 
-    def __init__(self, http: RequestsWrapper, orch_ip: str, login_type: int | None = None) -> None:
+    def __init__(
+        self, http: RequestsWrapper, orch_ip: str, login_type: int | None = None, api_key: str | None = None
+    ) -> None:
         super().__init__(http, f'https://{orch_ip}')
         self._login_type = login_type
+        if api_key:
+            # An API key authenticates every request by itself, so no session login is needed. It
+            # lives on this session only; appliance clients use separate HTTP wrappers.
+            self._http.session.headers.update({'X-Auth-Token': api_key})
 
     def _do_login(self, username: str, password: str) -> None:
         payload: dict[str, Any] = {'user': username, 'password': password}
