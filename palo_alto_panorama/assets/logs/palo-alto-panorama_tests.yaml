@@ -30,6 +30,8 @@ tests:
       logset: "POC-Dash-DD-204-9099"
       natdport: 233
       natdst: "185.64.148.0"
+      natsport: 46973
+      natsrc: "185.64.148.0"
       network:
         bytes_read: 74
         bytes_written: 60
@@ -52,9 +54,6 @@ tests:
               name: "Île-de-France"
             timezone: "Europe/Paris"
           ip: "185.64.148.0"
-          nat:
-            ip: "185.64.148.0"
-            port: 46973
           port: 42071
         destination:
           geoip:
@@ -139,6 +138,8 @@ tests:
       misc: "www.facebook.com/"
       natdport: 443
       natdst: "185.64.148.0"
+      natsport: 16742
+      natsrc: "185.64.148.0"
       network:
         client:
           geoip:
@@ -159,9 +160,6 @@ tests:
               name: "Île-de-France"
             timezone: "Europe/Paris"
           ip: "185.64.148.0"
-          nat:
-            ip: "185.64.148.0"
-            port: 16742
           port: 49896
         destination:
           geoip:
@@ -274,6 +272,8 @@ tests:
       logset: "POC-Dash-DD-204-9099"
       natdport: 7001
       natdst: "185.64.148.0"
+      natsport: 5431
+      natsrc: "185.64.148.0"
       network:
         client:
           geoip:
@@ -294,9 +294,6 @@ tests:
               name: "Île-de-France"
             timezone: "Europe/Paris"
           ip: "185.64.148.0"
-          nat:
-            ip: "185.64.148.0"
-            port: 5431
           port: 5347
         destination:
           geoip:
@@ -317,9 +314,6 @@ tests:
               name: "Île-de-France"
             timezone: "Europe/Paris"
           ip: "185.64.148.0"
-          nat:
-            ip: "185.64.148.0"
-            port: 7001
           port: 7007
       notafter: 1704069400
       notbefore: 1704068400
@@ -464,15 +458,14 @@ tests:
       dvc: "fw-01"
       natdport: 443
       natdst: "185.64.148.0"
+      natsport: 40406
+      natsrc: "203.0.113.5"
       network:
         bytes_read: 200
         bytes_written: 400
         client:
           geoip: {}
           ip: "10.0.0.14"
-          nat:
-            ip: "203.0.113.5"
-            port: 40406
           port: 51517
         destination:
           geoip:
@@ -596,24 +589,20 @@ tests:
       dvc: "fw-01"
       elapsed: 15
       flags: "0x40001c"
-      future_use_1: 1
-      future_use_22: "2026/10/05 16:15:07"
-      future_use_6: 2049
       high_res_timestamp: "2026-10-05T16:15:07.123+00:00"
       http2conn: 0
       inboundif: "ethernet1/2"
       logset: "log-profile-01"
       natdport: 443
       natdst: "185.64.148.0"
+      natsport: 40404
+      natsrc: "203.0.113.5"
       network:
         bytes_read: 1024
         bytes_written: 4096
         client:
           geoip: {}
           ip: "10.0.0.10"
-          nat:
-            ip: "203.0.113.5"
-            port: 40404
           port: 51515
         destination:
           geoip:
@@ -653,7 +642,7 @@ tests:
       repeatcnt: 1
       rule: "rule-01"
       ruleuuid: "00000000-0000-4000-8000-000000000001"
-      seq: 7300000000000000000
+      seq: 7300000000000000001
       serial: "012345678901"
       sessionendreason: "tcp-fin"
       sessionid: 123456
@@ -677,7 +666,7 @@ tests:
      - "source:LOGS_SOURCE"
     timestamp: 1791216907000
  -
-  sample: "<14>Oct  5 16:15:08 panorama-01 1,2026/10/05 16:15:08,012345678901,THREAT,url,2817,2026/10/05 16:15:07,10.0.0.11,185.64.148.0,203.0.113.5,185.64.148.0,rule-02,example\\user2,,web-browsing,vsys1,trust,untrust,ethernet1/2,ethernet1/1,log-profile-01,2026/10/05 16:15:07,123457,1,51516,80,40405,80,0x40f400,tcp,block-url,host-01.example.com/,(9999),malware,medium,client-to-server,7300000000000000002,0x8000000000000000,10.0.0.0-10.255.255.255,FR,,text/html,0,,,1,Mozilla/5.0,,,,,,,,11,0,0,0,,fw-01,,,,get,0,,0,,N/A,unknown,AppThreat-0-0,0x0,0,4294967295,,\"malware,high-risk\",00000000-0000-4000-8000-000000000002,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2026-10-05T16:15:07.456+00:00,,,,,,,,,,,,,,,"
+  sample: "<14>Oct  5 16:15:08 panorama-01 1,2026/10/05 16:15:08,012345678901,THREAT,url,2817,2026/10/05 16:15:07,10.0.0.11,185.64.148.0,203.0.113.5,185.64.148.0,rule-02,example\\user2,,web-browsing,vsys1,trust,untrust,ethernet1/2,ethernet1/1,log-profile-01,2026/10/05 16:15:07,123457,1,51516,80,40405,80,0x40f400,tcp,block-url,\"host-01.example.com/search?q=\"\"a,b\"\"\",(9999),malware,medium,client-to-server,7300000000000000002,0x8000000000000000,10.0.0.0-10.255.255.255,FR,,text/html,0,,,1,Mozilla/5.0,,,,,,,,11,0,0,0,,fw-01,,,,get,0,,0,,N/A,unknown,AppThreat-0-0,0x0,0,4294967295,,\"malware,high-risk\",00000000-0000-4000-8000-000000000002,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2026-10-05T16:15:07.456+05:30,,,,,,,,,,,,,,,"
   result:
     custom:
       actflags: "0x8000000000000000"
@@ -697,26 +686,21 @@ tests:
       dstzone: "untrust"
       dvc: "fw-01"
       flags: "0x40f400"
-      future_use_1: 1
-      future_use_22: "2026/10/05 16:15:07"
-      future_use_6: 2817
-      future_use_72: "0x0"
-      high_res_timestamp: "2026-10-05T16:15:07.456+00:00"
+      high_res_timestamp: "2026-10-05T16:15:07.456+05:30"
       http:
         method: "get"
       http2conn: 0
       inboundif: "ethernet1/2"
       logset: "log-profile-01"
-      misc: "host-01.example.com/"
+      misc: 'host-01.example.com/search?q="a,b"'
       natdport: 80
       natdst: "185.64.148.0"
+      natsport: 40405
+      natsrc: "203.0.113.5"
       network:
         client:
           geoip: {}
           ip: "10.0.0.11"
-          nat:
-            ip: "203.0.113.5"
-            port: 40405
           port: 51516
         destination:
           geoip:
@@ -752,7 +736,7 @@ tests:
       repeatcnt: 1
       rule: "rule-02"
       ruleuuid: "00000000-0000-4000-8000-000000000002"
-      seqno: 7300000000000000000
+      seqno: 7300000000000000002
       serial: "012345678901"
       sessionid: 123457
       severity: "medium"
@@ -766,19 +750,19 @@ tests:
       thrcategory: "unknown"
       threatid: "(9999)"
       time_generated: "2026/10/05 16:15:07"
-      timestamp: 1791216907000
+      timestamp: 1791197107000
       tunnel: "N/A"
       tunnelid: 0
       type: "THREAT"
       urlcategory: "malware,high-risk"
       urlidx: 1
       useragent: "Mozilla/5.0"
-    message: '<14>Oct  5 16:15:08 panorama-01 1,2026/10/05 16:15:08,012345678901,THREAT,url,2817,2026/10/05 16:15:07,10.0.0.11,185.64.148.0,203.0.113.5,185.64.148.0,rule-02,example\user2,,web-browsing,vsys1,trust,untrust,ethernet1/2,ethernet1/1,log-profile-01,2026/10/05 16:15:07,123457,1,51516,80,40405,80,0x40f400,tcp,block-url,host-01.example.com/,(9999),malware,medium,client-to-server,7300000000000000002,0x8000000000000000,10.0.0.0-10.255.255.255,FR,,text/html,0,,,1,Mozilla/5.0,,,,,,,,11,0,0,0,,fw-01,,,,get,0,,0,,N/A,unknown,AppThreat-0-0,0x0,0,4294967295,,"malware,high-risk",00000000-0000-4000-8000-000000000002,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2026-10-05T16:15:07.456+00:00,,,,,,,,,,,,,,,'
+    message: '<14>Oct  5 16:15:08 panorama-01 1,2026/10/05 16:15:08,012345678901,THREAT,url,2817,2026/10/05 16:15:07,10.0.0.11,185.64.148.0,203.0.113.5,185.64.148.0,rule-02,example\user2,,web-browsing,vsys1,trust,untrust,ethernet1/2,ethernet1/1,log-profile-01,2026/10/05 16:15:07,123457,1,51516,80,40405,80,0x40f400,tcp,block-url,"host-01.example.com/search?q=""a,b""",(9999),malware,medium,client-to-server,7300000000000000002,0x8000000000000000,10.0.0.0-10.255.255.255,FR,,text/html,0,,,1,Mozilla/5.0,,,,,,,,11,0,0,0,,fw-01,,,,get,0,,0,,N/A,unknown,AppThreat-0-0,0x0,0,4294967295,,"malware,high-risk",00000000-0000-4000-8000-000000000002,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2026-10-05T16:15:07.456+05:30,,,,,,,,,,,,,,,'
     service: "THREAT"
     status: "warn"
     tags:
      - "source:LOGS_SOURCE"
-    timestamp: 1791216907000
+    timestamp: 1791197107000
  -
   sample: "<14>Oct  5 16:15:08 panorama-01 1,2026/10/05 16:15:08,012345678901,SYSTEM,auth,0,2026/10/05 16:15:07,,auth-success,,,,general,informational,authenticated for user 'user3'. From: 10.0.0.12.,7300000000000000003,0x8000000000000000,0,0,0,0,,panorama-01,0,0,2026-10-05T16:15:07.789+00:00"
   result:
@@ -790,15 +774,11 @@ tests:
       dg_hier_level_3: 0
       dg_hier_level_4: 0
       eventid: "auth-success"
-      future_use_1: 1
-      future_use_24: 0
-      future_use_25: 0
-      future_use_6: 0
       high_res_timestamp: "2026-10-05T16:15:07.789+00:00"
       module: "general"
       opaque: "authenticated for user 'user3'. From: 10.0.0.12."
       receive_time: "2026/10/05 16:15:08"
-      seqno: 7300000000000000000
+      seqno: 7300000000000000003
       serial: "012345678901"
       severity: "informational"
       status: "info"
@@ -821,9 +801,9 @@ tests:
       app: "dns-base"
       bytes: 280
       category: "any"
-      destination_zone: "untrust"
       device_name: "fw-01"
       dstloc: "FR"
+      dstzone: "untrust"
       elapsed: 0
       evt:
         name: "allow"
@@ -832,15 +812,14 @@ tests:
       logset: "log-profile-01"
       natdport: 53
       natdst: "185.64.148.0"
+      natsport: 40404
+      natsrc: "203.0.113.5"
       network:
         bytes_read: 78
         bytes_written: 202
         client:
           geoip: {}
           ip: "10.0.0.13"
-          nat:
-            ip: "203.0.113.5"
-            port: 40404
           port: 53535
         destination:
           geoip:
@@ -866,6 +845,7 @@ tests:
       palo:
         alto:
           panorama:
+            action: "allow"
             vsys: "vsys1"
       pkts_received: 1
       pkts_sent: 1
@@ -875,8 +855,9 @@ tests:
       seqno: 7300000000000000004
       serial: "012345678901"
       session_end_reason: "aged-out"
+      sessionendreason: "aged-out"
       sessionid: 123458
-      source_zone: "trust"
+      srczone: "trust"
       start: "2026/10/05 16:14:37"
       subtype: "end"
       time_generated: "2026/10/05 16:15:07"
