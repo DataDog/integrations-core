@@ -11,26 +11,57 @@ import logging
 import os
 import re
 import sys
+import time
+import urllib.error
+from collections.abc import Iterator
+from contextlib import contextmanager
+from typing import Any
 
 # 2nd party.
-from requests.exceptions import RequestException
-from tuf.api.exceptions import DownloadError
+from requests.exceptions import HTTPError, RequestException
+from tuf.api.exceptions import DownloadError, DownloadLengthMismatchError, LengthOrHashMismatchError, RepositoryError
 
+from .__about__ import __version__
 from .download import DEFAULT_ROOT_LAYOUT_TYPE, REPOSITORY_URL_PREFIX, ROOT_LAYOUTS, TUFDownloader
 from .download_v2 import V2_REPOSITORY_URL, TUFPointerDownloader
 from .exceptions import (
-    ChecksDownloaderException,
     CLIError,
+    DigestMismatch,
+    DuplicatePackage,
+    InconsistentSimpleIndex,
+    LengthMismatch,
+    MalformedPointerError,
     MissingVersion,
+    MissingVersions,
     NonCanonicalVersion,
     NonDatadogPackage,
+    NoSuchDatadogPackage,
+    NoSuchDatadogPackageVersion,
     TargetNotFoundError,
+    TUFInTotoError,
 )
 
 RESULT_FILE_HELP = (
     'Write a JSON summary of the download to this path before exiting, '
-    'such as the repository that served the wheel. Used by the Agent for its install telemetry.'
+    'such as the outcome on each repository. Used by the Agent for its install telemetry.'
 )
+
+INTEGRITY_ERRORS: tuple[type[BaseException], ...] = (
+    DigestMismatch,
+    LengthMismatch,
+    MalformedPointerError,
+    LengthOrHashMismatchError,
+    DownloadLengthMismatchError,
+)
+NOT_FOUND_ERRORS: tuple[type[BaseException], ...] = (
+    TargetNotFoundError,
+    NoSuchDatadogPackage,
+    NoSuchDatadogPackageVersion,
+    MissingVersions,
+)
+METADATA_ERRORS: tuple[type[BaseException], ...] = (RepositoryError, InconsistentSimpleIndex, DuplicatePackage)
+NETWORK_ERRORS: tuple[type[BaseException], ...] = (DownloadError, RequestException, urllib.error.URLError, TimeoutError)
+VERIFICATION_MODULES = ('in_toto', 'securesystemslib')
 
 V2_FALLBACK_ERRORS: tuple[type[BaseException], ...] = (
     MissingVersion,
@@ -52,22 +83,54 @@ def __is_canonical(version):
     return re.match(P, version) is not None
 
 
-def _v2_failure_category(exc: Exception) -> str:
-    if isinstance(exc, TargetNotFoundError):
-        return 'target version not found'
-    if isinstance(exc, (DownloadError, TimeoutError, RequestException)):
-        return 'network error'
+def download_error_category(exc: BaseException) -> str:
+    """
+    Return the category of a download failure, as reported in the Agent's install telemetry.
+
+    The values must match the download categories of the Agent's `integration install` telemetry
+    (`cmd/agent/subcommands/integrations/install_telemetry.go`), which reports any other value as `other`.
+    """
+    # Integrity first: some TUF integrity errors subclass its metadata or download errors.
+    if isinstance(exc, INTEGRITY_ERRORS):
+        return 'integrity'
+    if isinstance(exc, NOT_FOUND_ERRORS) or _http_status(exc) == 404:
+        return 'not_found'
+    if isinstance(exc, METADATA_ERRORS):
+        return 'metadata'
+    if isinstance(exc, TUFInTotoError) or type(exc).__module__.split('.')[0] in VERIFICATION_MODULES:
+        return 'verification'
+    if isinstance(exc, NETWORK_ERRORS):
+        return 'network'
     return 'other'
 
 
-def _error_type(exc: Exception) -> str:
-    # Only class names from a known set are reported, never messages, which can contain paths or URLs.
-    if isinstance(exc, (ChecksDownloaderException, *V2_FALLBACK_ERRORS)):
-        return type(exc).__name__
-    return 'other'
+def _http_status(exc: BaseException) -> int | None:
+    # Wheels and, without verification, v1 indices are fetched directly, where a 404 means the file isn't there.
+    # TUF metadata errors (DownloadHTTPError) are left out: its metadata always exists.
+    if isinstance(exc, HTTPError) and exc.response is not None:
+        return exc.response.status_code
+    if isinstance(exc, urllib.error.HTTPError):
+        return exc.code
+    return None
 
 
-def _write_result(path: str | None, result: dict[str, str]) -> None:
+@contextmanager
+def _attempt(result: dict[str, Any], repository: str) -> Iterator[None]:
+    """Record in `result` the outcome and duration of a download attempt on `repository`."""
+    start = time.monotonic()
+    try:
+        yield
+    except BaseException as exc:
+        # The class name only, never the message, which can contain paths or URLs.
+        result[repository] = {'result': 'failure', 'exception_class': type(exc).__name__}
+        raise
+    else:
+        result[repository] = {'result': 'success'}
+    finally:
+        result[repository]['duration_ms'] = round((time.monotonic() - start) * 1000)
+
+
+def _write_result(path: str | None, result: dict[str, Any]) -> None:
     if not path:
         return
     try:
@@ -187,12 +250,14 @@ def instantiate_downloader():
     return tuf_downloader, standard_distribution_name, version, ignore_python_version
 
 
-def run_downloader(tuf_downloader, standard_distribution_name, version, ignore_python_version):
+def run_downloader(tuf_downloader, standard_distribution_name, version, ignore_python_version) -> str:
+    """Download the wheel, print its local path, and return its path within the repository."""
     wheel_relpath = tuf_downloader.get_wheel_relpath(
         standard_distribution_name, version=version, ignore_python_version=ignore_python_version
     )
     wheel_abspath = tuf_downloader.download(wheel_relpath)
     print(wheel_abspath)  # pylint: disable=print-statement
+    return f'/targets/{wheel_relpath}'
 
 
 # Public module functions.
@@ -201,39 +266,51 @@ def run_downloader(tuf_downloader, standard_distribution_name, version, ignore_p
 def download() -> None:
     # Read up front so that the result is written even when validating the other arguments fails.
     result_file = _v2_parser().parse_args().result_file
-    result: dict[str, str] = {}
+    result: dict[str, Any] = {
+        'downloader_version': __version__,
+        'v2': {'result': 'skipped'},
+        'v1': {'result': 'skipped'},
+    }
     try:
         _download(result)
-    except Exception as exc:
-        result['error_type'] = _error_type(exc)
+    except BaseException as exc:
+        result['error_category'] = download_error_category(exc)
         raise
     finally:
         _write_result(result_file, result)
 
 
-def _download(result: dict[str, str]) -> None:
+def _download(result: dict[str, Any]) -> None:
     downloader, name, version, args = instantiate_v2_downloader()
-    result['repository'] = 'v2'
+
+    def run_v2() -> None:
+        try:
+            with _attempt(result, 'v2'):
+                run_v2_downloader(downloader, name, version)
+        finally:
+            if downloader.wheel_path is not None:
+                result['wheel_path'] = downloader.wheel_path
 
     if args.v2:
         warn_v2_ignored_args(args)
-        run_v2_downloader(downloader, name, version)
+        run_v2()
         return
 
     try:
-        run_v2_downloader(downloader, name, version)
+        run_v2()
     except V2_FALLBACK_ERRORS as exc:
-        result['repository'] = 'v1'
-        result['v2_failure'] = _v2_failure_category(exc)
         # Integrity failures (DigestMismatch / LengthMismatch / MalformedPointerError) are
         # intentionally not in V2_FALLBACK_ERRORS — they must propagate, not be masked by v1.
         logging.getLogger(__name__).info(
             'v2 download failed (%s, %s: %s), falling back to v1',
-            _v2_failure_category(exc),
+            download_error_category(exc),
             type(exc).__name__,
             exc,
         )
-        run_downloader(*instantiate_downloader())
+        # wheel_path is that of the last repository tried.
+        result.pop('wheel_path', None)
+        with _attempt(result, 'v1'):
+            result['wheel_path'] = run_downloader(*instantiate_downloader())
     except CLIError:
         # NonDatadogPackage and NonCanonicalVersion: v1 would raise the same.
         raise

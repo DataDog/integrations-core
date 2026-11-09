@@ -75,6 +75,8 @@ class TUFPointerDownloader:
     def __init__(self, repository_url: str, disable_verification: bool = False):
         self._repository_url = repository_url.rstrip('/')
         self._disable_verification = disable_verification
+        # Path of the last wheel that download() fetched or tried to fetch, within the repository.
+        self.wheel_path: str | None = None
 
         if disable_verification:
             logger.warning('Running with TUF verification disabled. Integrity is protected only by TLS (HTTPS).')
@@ -104,8 +106,8 @@ class TUFPointerDownloader:
         distribution = project.replace('-', '_')
         return f'{distribution}-{version}-py3-none-any.whl'
 
-    def _direct_wheel_url(self, project: str, version: str) -> str:
-        return f'{self._repository_url}/wheels/{project}/{self._wheel_filename(project, version)}'
+    def _direct_wheel_path(self, project: str, version: str) -> str:
+        return f'/wheels/{project}/{self._wheel_filename(project, version)}'
 
     @staticmethod
     def _validate_pointer(project: str, pointer: dict) -> None:
@@ -168,14 +170,14 @@ class TUFPointerDownloader:
         if self._disable_verification:
             if version is None:
                 raise MissingVersion('unsafe-disable-verification requires an explicit --version')
-            wheel_url = self._direct_wheel_url(project, version)
-            wheel_filename = self._wheel_filename(project, version)
+            self.wheel_path = self._direct_wheel_path(project, version)
             pointer: dict | None = None
         else:
             pointer = self.get_pointer(project, version)
             self._validate_pointer(project, pointer)
-            wheel_url = self._repository_url + pointer['wheel_path']
-            wheel_filename = Path(pointer['wheel_path']).name
+            self.wheel_path = pointer['wheel_path']
+        wheel_url = self._repository_url + self.wheel_path
+        wheel_filename = Path(self.wheel_path).name
 
         dest = (dest_dir or Path(tempfile.mkdtemp())) / wheel_filename
 

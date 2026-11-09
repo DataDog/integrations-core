@@ -14,6 +14,7 @@ import requests
 from tuf.api.exceptions import DownloadError, DownloadHTTPError
 
 from datadog_checks.downloader import cli
+from datadog_checks.downloader.__about__ import __version__
 from datadog_checks.downloader.download_v2 import (
     V2_POINTER_TARGET_DELEGATION,
     V2_POINTER_TARGET_PREFIX,
@@ -26,6 +27,7 @@ from datadog_checks.downloader.exceptions import (
     MissingVersion,
     NonCanonicalVersion,
     NonDatadogPackage,
+    NoSuchDatadogPackageVersion,
     TargetNotFoundError,
 )
 
@@ -333,6 +335,32 @@ class TestWheelFetchRetry:
         assert exc_info.value.response.status_code == 504
 
 
+class TestWheelPathWithinRepository:
+    """The wheel's path within the repository is reported to the Agent, even when the download then fails."""
+
+    POINTER_WHEEL_PATH = f'/wheels/{PROJECT}/republished/{WHEEL_NAME}'
+
+    @pytest.mark.parametrize('content', [WHEEL_CONTENT, b'tampered'], ids=['verified', 'digest-mismatch'])
+    def test_verified_download_reports_the_pointer_path(self, mock_get, mock_updater_cls, tmp_path, content):
+        mock_updater_cls.return_value = _mock_tuf_updater({**POINTER, 'wheel_path': self.POINTER_WHEEL_PATH})
+        mock_get.return_value = _mock_response(content)
+        downloader = TUFPointerDownloader(repository_url=REPO_URL)
+
+        try:
+            downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+        except (DigestMismatch, LengthMismatch):
+            pass
+
+        assert downloader.wheel_path == self.POINTER_WHEEL_PATH
+
+    def test_unverified_download_reports_the_direct_path(self, mock_get, tmp_path):
+        downloader = TUFPointerDownloader(repository_url=REPO_URL, disable_verification=True)
+
+        downloader.download(PROJECT, version=VERSION, dest_dir=tmp_path)
+
+        assert downloader.wheel_path == f'/wheels/{PROJECT}/{WHEEL_NAME}'
+
+
 class TestDisableVerification:
     def test_directly_downloads_wheel_without_tuf_or_digest_checks(self, mock_get, mock_updater_cls, tmp_path):
         content = b'bytes not matching any signed pointer'
@@ -602,49 +630,111 @@ class TestCliDownloadFallback:
 
 
 class TestDownloadResultFile:
-    """Covers the machine-readable result that the Agent requests with --result-file."""
+    """Covers the summary that the Agent requests with --result-file for its install telemetry."""
+
+    V2_WHEEL_PATH = f'/wheels/{PROJECT}/{WHEEL_NAME}'
+    V1_WHEEL_PATH = f'/targets/simple/{PROJECT}/datadog_postgres-{VERSION}-py2.py3-none-any.whl'
 
     @pytest.fixture
     def result_file(self, monkeypatch, tmp_path):
         path = tmp_path / 'result.json'
-        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres', '--result-file', str(path)])
+        monkeypatch.setattr('sys.argv', ['downloader', PROJECT, '--result-file', str(path)])
         monkeypatch.setattr(cli, 'instantiate_downloader', MagicMock(return_value=('d', 'n', 'v', False)))
+        # Each reading of the clock advances it by 1.5 s, so that every attempt takes 1500 ms.
+        ticks = iter(range(0, 3000, 3))
+        monkeypatch.setattr(cli, 'time', MagicMock(monotonic=lambda: next(ticks) / 2))
         return path
 
-    def test_reports_v2_when_v2_serves_the_wheel(self, monkeypatch, result_file):
-        monkeypatch.setattr(cli, 'run_v2_downloader', MagicMock())
+    @staticmethod
+    def v2_serves(wheel_path=V2_WHEEL_PATH, exc=None):
+        def run(downloader, *_):
+            downloader.wheel_path = wheel_path
+            if exc is not None:
+                raise exc
+
+        return MagicMock(side_effect=run)
+
+    def test_v2_serves_the_wheel(self, monkeypatch, result_file):
+        monkeypatch.setattr(cli, 'run_v2_downloader', self.v2_serves())
 
         cli.download()
 
-        assert json.loads(result_file.read_text()) == {'repository': 'v2'}
+        assert json.loads(result_file.read_text()) == {
+            'downloader_version': __version__,
+            'wheel_path': self.V2_WHEEL_PATH,
+            'v2': {'result': 'success', 'duration_ms': 1500},
+            'v1': {'result': 'skipped'},
+        }
 
-    def test_reports_v1_and_v2_failure_category_on_fallback(self, monkeypatch, result_file):
+    def test_v1_serves_the_wheel_after_v2_fails(self, monkeypatch, result_file):
         monkeypatch.setattr(cli, 'run_v2_downloader', MagicMock(side_effect=DownloadError('unreachable')))
-        monkeypatch.setattr(cli, 'run_downloader', MagicMock())
+        monkeypatch.setattr(cli, 'run_downloader', MagicMock(return_value=self.V1_WHEEL_PATH))
 
         cli.download()
 
-        assert json.loads(result_file.read_text()) == {'repository': 'v1', 'v2_failure': 'network error'}
+        assert json.loads(result_file.read_text()) == {
+            'downloader_version': __version__,
+            'wheel_path': self.V1_WHEEL_PATH,
+            'v2': {'result': 'failure', 'exception_class': 'DownloadError', 'duration_ms': 1500},
+            'v1': {'result': 'success', 'duration_ms': 1500},
+        }
 
-    @pytest.mark.parametrize(
-        'exc, expected_error_type',
-        [
-            pytest.param(DigestMismatch(PROJECT, 'a', 'b'), 'DigestMismatch', id='downloader-exception'),
-            pytest.param(ValueError('/home/user/secret path'), 'other', id='unknown-exception'),
-        ],
-    )
-    def test_reports_error_type_without_message_on_failure(self, monkeypatch, result_file, exc, expected_error_type):
-        monkeypatch.setattr(cli, 'run_v2_downloader', MagicMock(side_effect=exc))
+    def test_v2_failure_that_does_not_fall_back(self, monkeypatch, result_file):
+        exc = DigestMismatch(PROJECT, 'a', 'b')
+        monkeypatch.setattr(cli, 'run_v2_downloader', self.v2_serves(exc=exc))
 
-        with pytest.raises(type(exc)):
+        with pytest.raises(DigestMismatch):
             cli.download()
 
-        assert json.loads(result_file.read_text()) == {'repository': 'v2', 'error_type': expected_error_type}
+        assert json.loads(result_file.read_text()) == {
+            'downloader_version': __version__,
+            'wheel_path': self.V2_WHEEL_PATH,
+            'error_category': 'integrity',
+            'v2': {'result': 'failure', 'exception_class': 'DigestMismatch', 'duration_ms': 1500},
+            'v1': {'result': 'skipped'},
+        }
+
+    @pytest.mark.parametrize(
+        'v1_exc, exception_class, error_category',
+        [
+            pytest.param(NoSuchDatadogPackageVersion(PROJECT, VERSION), 'NoSuchDatadogPackageVersion', 'not_found'),
+            # The v1 check that refuses a core integration as extras exits instead of raising.
+            pytest.param(SystemExit(1), 'SystemExit', 'other', id='system-exit'),
+        ],
+    )
+    def test_both_repositories_fail(self, monkeypatch, result_file, v1_exc, exception_class, error_category):
+        # v2 found the wheel but couldn't fetch it, so its path must not be reported as v1's.
+        monkeypatch.setattr(cli, 'run_v2_downloader', self.v2_serves(exc=DownloadError('unreachable')))
+        monkeypatch.setattr(cli, 'run_downloader', MagicMock(side_effect=v1_exc))
+
+        with pytest.raises(type(v1_exc)):
+            cli.download()
+
+        assert json.loads(result_file.read_text()) == {
+            'downloader_version': __version__,
+            'error_category': error_category,
+            'v2': {'result': 'failure', 'exception_class': 'DownloadError', 'duration_ms': 1500},
+            'v1': {'result': 'failure', 'exception_class': exception_class, 'duration_ms': 1500},
+        }
+
+    def test_invalid_arguments_skip_both_repositories(self, monkeypatch, tmp_path):
+        path = tmp_path / 'result.json'
+        monkeypatch.setattr('sys.argv', ['downloader', 'requests', '--result-file', str(path)])
+
+        with pytest.raises(NonDatadogPackage):
+            cli.download()
+
+        assert json.loads(path.read_text()) == {
+            'downloader_version': __version__,
+            'error_category': 'other',
+            'v2': {'result': 'skipped'},
+            'v1': {'result': 'skipped'},
+        }
 
     def test_unwritable_result_file_does_not_fail_the_download(self, monkeypatch, tmp_path, capsys):
         monkeypatch.setattr(
             'sys.argv',
-            ['downloader', 'datadog-postgres', '--result-file', str(tmp_path / 'missing-dir' / 'result.json')],
+            ['downloader', PROJECT, '--result-file', str(tmp_path / 'missing-dir' / 'result.json')],
         )
         monkeypatch.setattr(cli, 'run_v2_downloader', MagicMock(side_effect=lambda *_: print('/tmp/wheel.whl')))
 
@@ -654,9 +744,17 @@ class TestDownloadResultFile:
 
     def test_v1_fallback_accepts_the_result_file_flag(self, monkeypatch, tmp_path):
         # The v1 fallback parses the same command line, so it must not reject the flag.
-        monkeypatch.setattr('sys.argv', ['downloader', 'datadog-postgres', '--result-file', str(tmp_path / 'r.json')])
+        monkeypatch.setattr('sys.argv', ['downloader', PROJECT, '--result-file', str(tmp_path / 'r.json')])
         monkeypatch.setattr(cli, 'TUFDownloader', MagicMock())
 
         _, name, _, _ = cli.instantiate_downloader()
 
-        assert name == 'datadog-postgres'
+        assert name == PROJECT
+
+    def test_v1_reports_the_wheel_path_within_the_repository(self, capsys):
+        tuf_downloader = MagicMock()
+        tuf_downloader.get_wheel_relpath.return_value = self.V1_WHEEL_PATH.removeprefix('/targets/')
+        tuf_downloader.download.return_value = '/opt/datadog-agent/repositories/wheel.whl'
+
+        assert cli.run_downloader(tuf_downloader, PROJECT, VERSION, False) == self.V1_WHEEL_PATH
+        assert capsys.readouterr().out == '/opt/datadog-agent/repositories/wheel.whl\n'
