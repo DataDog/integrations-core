@@ -275,9 +275,9 @@ def _run_every_schema_query(collector) -> list[str]:
     collector._get_databases()
     list(tables._iter_chunked_tables("app"))
     tables._strategy = STRATEGY_SINGLE_QUERY
-    with tables._open_rows(None, "app"):
+    with tables._open_rows(None, {"name": "app"}):
         pass
-    with views._open_rows(None, "app") as rows:
+    with views._open_rows(None, {"name": "app"}) as rows:
         list(rows)
 
     return [call.args[0] for call in db_cursor.execute.call_args_list]
@@ -359,7 +359,7 @@ def test_chunked_collection_passes_object_names_as_query_parameters(kind, detail
     db_cursor = _db_cursor(collector)
     db_cursor.fetchall.side_effect = [[{"name": name} for name in names]] + [[]] * detail_queries
 
-    with object_collector._open_rows(None, "mydb") as rows:
+    with object_collector._open_rows(None, {"name": "mydb"}) as rows:
         list(rows)
 
     # The first query lists the objects; the rest fetch their detail.
@@ -490,7 +490,7 @@ def test_view_query_limits_views_per_database(max_views, expected_limit):
     db_cursor = _db_cursor(views)
     db_cursor.fetchall.return_value = []
 
-    with views._open_rows(None, "mydb") as rows:
+    with views._open_rows(None, {"name": "mydb"}) as rows:
         list(rows)
 
     assert db_cursor.execute.call_args.args[1] == ["mydb", expected_limit]
@@ -539,7 +539,7 @@ def _make_collecting_collector(databases):
     collector._check.cloud_metadata = {}
     collector._check.agent_version = "7.70.0"
     _db_cursor(collector).fetchall.return_value = databases
-    collector._tables._open_rows = mock.Mock(side_effect=lambda session, name: contextlib.nullcontext(iter(())))
+    collector._tables._open_rows = mock.Mock(side_effect=lambda session, database: contextlib.nullcontext(iter(())))
     return collector
 
 
@@ -551,7 +551,7 @@ def test_collect_schemas_stops_at_next_database_when_cancelled():
         if cancel_event.is_set():
             raise Exception("Job loop cancelled. Aborting query.")
 
-    def cancel_during_collection(session, database_name):
+    def cancel_during_collection(session, database):
         cancel_event.set()
         return contextlib.nullcontext(iter(()))
 
@@ -561,7 +561,7 @@ def test_collect_schemas_stops_at_next_database_when_cancelled():
     with pytest.raises(Exception, match="cancelled"):
         collector.collect_schemas()
 
-    collector._tables._open_rows.assert_called_once_with(None, "app")
+    collector._tables._open_rows.assert_called_once_with(None, {"name": "app"})
 
 
 def test_collect_schemas_warns_when_no_tables_are_visible():
