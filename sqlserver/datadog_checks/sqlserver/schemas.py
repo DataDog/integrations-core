@@ -87,21 +87,22 @@ class SQLServerDatabaseSession:
     """
     The connection to one database that every object collector runs its catalog query on.
 
-    `cursor` is already switched to the database. `detail_cursor()` opens a second connection on first use, for the
-    per-object queries the legacy (pre-2017) path runs while `cursor` is still streaming rows; it is shared by every
-    object collector for this database and closed with the session.
+    `database` is the database's entry from `_get_databases`, and `cursor` is already switched to it.
+    `detail_cursor()` opens a second connection on first use, for the per-object queries the legacy (pre-2017) path
+    runs while `cursor` is still streaming rows; it is shared by every object collector for this database and closed
+    with the session.
     """
 
     def __init__(
         self,
         check: SQLServer,
         stack: contextlib.ExitStack,
-        database_name: str,
+        database: DatabaseInfo,
         cursor,
     ):
         self._check = check
         self._stack = stack
-        self.database_name = database_name
+        self.database = database
         self.cursor = cursor
         self._detail_cursor = None
 
@@ -109,7 +110,7 @@ class SQLServerDatabaseSession:
         if self._detail_cursor is None:
             self._stack.enter_context(self._check.connection.open_managed_default_connection(KEY_PREFIX_PRE_2017))
             cursor = self._stack.enter_context(self._check.connection.get_managed_cursor(KEY_PREFIX_PRE_2017))
-            cursor.execute(construct_use_statement(self.database_name))
+            cursor.execute(construct_use_statement(self.database["name"]))
             self._detail_cursor = cursor
         return self._detail_cursor
 
@@ -155,12 +156,11 @@ class SQLServerSchemaCollector(DatabaseSchemaCollector):
 
     @contextlib.contextmanager
     def _open_database(self, database: DatabaseInfo) -> Iterator[SQLServerDatabaseSession]:
-        database_name = database["name"]
         with contextlib.ExitStack() as stack:
             stack.enter_context(self._check.connection.open_managed_default_connection(KEY_PREFIX))
             cursor = stack.enter_context(self._check.connection.get_managed_cursor(KEY_PREFIX))
-            cursor.execute(construct_use_statement(database_name))
-            yield SQLServerDatabaseSession(self._check, stack, database_name, cursor)
+            cursor.execute(construct_use_statement(database["name"]))
+            yield SQLServerDatabaseSession(self._check, stack, database, cursor)
 
 
 class SQLServerObjectCollector(SchemaObjectCollector):
