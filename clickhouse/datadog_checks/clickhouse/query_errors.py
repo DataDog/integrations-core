@@ -14,12 +14,21 @@ from clickhouse_connect.driver.exceptions import Error
 from datadog_checks.base.utils.db.utils import RateLimitingTTLCache, default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
-from datadog_checks.clickhouse.query_log_job import ClickhouseQueryLogJob, agent_check_getter
+from datadog_checks.clickhouse.query_log_job import (
+    ClickhouseQueryLogJob,
+    agent_check_getter,
+    checkpoint_lag_cap_seconds,
+)
 
 # Query to fetch failed queries from system.query_log.
 # Collects ExceptionBeforeStart (type=3) and ExceptionWhileProcessing (type=4) events.
 # Includes exception, exception_code, and stack_trace fields in addition to the standard query fields.
+# Bounds the scan the same way as COMPLETED_QUERIES_QUERY; see the comment there for scan_start.
 QUERY_ERRORS_QUERY = """
+WITH greatest(
+    fromUnixTimestamp64Micro({min_checkpoint_us:UInt64}),
+    now64(6) - toIntervalSecond({max_lag_s:UInt32})
+) AS scan_start
 SELECT
     normalized_query_hash,
     hostName() as server_node,
@@ -52,8 +61,10 @@ SELECT
 FROM {query_log_table}
 WHERE
   {checkpoint_filter}
+  AND event_time_microseconds > scan_start
   AND event_time_microseconds <= now64(6)
-  AND event_date >= toDate(fromUnixTimestamp64Micro({min_checkpoint_us:UInt64}))
+  AND event_date >= toDate(scan_start)
+  AND event_time >= toDateTime(scan_start)
   AND type IN ('ExceptionBeforeStart', 'ExceptionWhileProcessing')
   AND is_initial_query = 1
   AND query != ''
@@ -143,6 +154,7 @@ class ClickhouseQueryErrors(ClickhouseQueryLogJob):
                 .replace("{internal_user_filter}", self._get_internal_user_filter())
             )
             params["min_checkpoint_us"] = min_checkpoint
+            params["max_lag_s"] = checkpoint_lag_cap_seconds(self._collection_interval)
             params["max_samples"] = self._max_samples_per_collection
 
             rows = self._execute_query(query, parameters=params)

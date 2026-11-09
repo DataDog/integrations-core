@@ -569,6 +569,77 @@ def test_query_samples_data(aggregator, instance, dd_run_check):
     )
 
 
+@pytest.mark.parametrize(
+    'job_name, dbm_type, payload_key, old_query, new_query',
+    [
+        pytest.param(
+            'query_completions',
+            'query_completion',
+            'clickhouse_query_completions',
+            'SELECT 1 AS lag_cap_old_marker',
+            'SELECT 1 AS lag_cap_new_marker',
+            id='query_completions',
+        ),
+        pytest.param(
+            'query_errors',
+            'query_error',
+            'clickhouse_query_errors',
+            'SELECT * FROM lag_cap_old_marker',
+            'SELECT * FROM lag_cap_new_marker',
+            id='query_errors',
+        ),
+    ],
+)
+def test_stale_checkpoint_reads_only_within_lag_cap(
+    aggregator, instance, dd_run_check, datadog_agent, job_name, dbm_type, payload_key, old_query, new_query
+):
+    """
+    A checkpoint restored far behind now must not make the job read its whole backlog: rows older than
+    the lag cap are skipped while the newest rows are still collected.
+    Regression test for https://github.com/DataDog/integrations-core/issues/25776.
+    """
+    lag_cap_seconds = 5
+
+    instance_config = deepcopy(instance)
+    instance_config['dbm'] = True
+    instance_config['query_metrics'] = {'enabled': False}
+    instance_config['query_samples'] = {'enabled': False}
+    instance_config['query_completions'] = {'enabled': False}
+    instance_config[job_name] = {'enabled': True, 'run_sync': True, 'collection_interval': 10}
+
+    check = ClickhouseCheck('clickhouse', {}, [instance_config])
+    job = getattr(check, job_name)
+    client = _get_clickhouse_client(instance_config)
+
+    def run_ignoring_errors(query):
+        try:
+            client.command(query)
+        except Exception:
+            pass  # query_errors markers are expected to fail
+
+    stale_checkpoint = int(client.query('SELECT toUnixTimestamp64Micro(now64(6))').result_rows[0][0])
+    run_ignoring_errors(old_query)
+    time.sleep(lag_cap_seconds + 3)
+    run_ignoring_errors(new_query)
+    client.command('SYSTEM FLUSH LOGS')
+
+    # Simulate resuming from a persistent cache written before old_query ran.
+    check.write_persistent_cache(job.CHECKPOINT_CACHE_KEY, str(stale_checkpoint))
+    check.write_persistent_cache(job.CHECKPOINT_CACHE_KEY + '_node_checkpoints', '{}')
+
+    with mock.patch(f'{type(job).__module__}.checkpoint_lag_cap_seconds', return_value=lag_cap_seconds):
+        dd_run_check(check)
+
+    statements = [
+        record['query_details']['statement']
+        for event in aggregator.get_event_platform_events('dbm-activity')
+        if event.get('dbm_type') == dbm_type
+        for record in event.get(payload_key, [])
+    ]
+    assert any('lag_cap_new_marker' in s for s in statements), f"Newest row not collected: {statements}"
+    assert not any('lag_cap_old_marker' in s for s in statements), f"Row older than the lag cap read: {statements}"
+
+
 def test_query_errors_data(aggregator, instance, dd_run_check):
     """
     Execute a failing query, then verify the query errors pipeline captures it:

@@ -18,6 +18,7 @@ from datadog_checks.clickhouse.query_log_job import (
     ClickhouseQueryLogJob,
     NodeCheckpoint,
     agent_check_getter,
+    checkpoint_lag_cap_seconds,
     collection_interval_gcd,
 )
 
@@ -27,7 +28,16 @@ from datadog_checks.clickhouse.query_log_job import (
 # Always includes hostName() as server_node for per-node checkpoint tracking.
 # For single-node deployments this is a single constant value; for multi-node
 # Cloud clusters it enables each node's checkpoint to advance independently.
+#
+# scan_start is the oldest row this run can return: the oldest per-node checkpoint, but never more
+# than max_lag_s before now (see checkpoint_lag_cap_seconds). event_date and event_time make up the
+# query_log sorting key, so bounding them lets ClickHouse skip granules outside the window instead of
+# reading every row since midnight; event_time_microseconds is not in the key.
 COMPLETED_QUERIES_QUERY = """
+WITH greatest(
+    fromUnixTimestamp64Micro({min_checkpoint_us:UInt64}),
+    now64(6) - toIntervalSecond({max_lag_s:UInt32})
+) AS scan_start
 SELECT
     normalized_query_hash,
     hostName() as server_node,
@@ -55,8 +65,10 @@ SELECT
 FROM {query_log_table}
 WHERE
   {checkpoint_filter}
+  AND event_time_microseconds > scan_start
   AND event_time_microseconds <= now64(6)
-  AND event_date >= toDate(fromUnixTimestamp64Micro({min_checkpoint_us:UInt64}))
+  AND event_date >= toDate(scan_start)
+  AND event_time >= toDateTime(scan_start)
   AND type = 'QueryFinish'
   AND is_initial_query = 1
   AND query != ''
@@ -236,6 +248,7 @@ class ClickhouseQueryCompletions(ClickhouseQueryLogJob):
                 .replace("{internal_user_filter}", self._get_internal_user_filter())
             )
             params["min_checkpoint_us"] = min_checkpoint
+            params["max_lag_s"] = checkpoint_lag_cap_seconds(self._collection_interval)
             params["max_samples"] = self._max_samples_per_collection
 
             rows = self._execute_query(query, parameters=params)

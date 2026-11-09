@@ -6,9 +6,24 @@ from unittest import mock
 import pytest
 
 from datadog_checks.clickhouse import ClickhouseCheck
-from datadog_checks.clickhouse.query_log_job import _NODE_CHECKPOINT_STALENESS_THRESHOLD_US
+from datadog_checks.clickhouse.query_log_job import _NODE_CHECKPOINT_STALENESS_THRESHOLD_US, checkpoint_lag_cap_seconds
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.mark.parametrize(
+    'collection_interval, expected',
+    [
+        # Short intervals keep the floor, so rows flushed to query_log late are not skipped.
+        pytest.param(1, 60, id='short-interval-uses-floor'),
+        pytest.param(10, 60, id='default-interval-uses-floor'),
+        # Long intervals scale, so a job that is keeping up (about one interval behind) stays within the cap.
+        pytest.param(30, 90, id='long-interval-scales'),
+        pytest.param(20.5, 62, id='fractional-interval-rounds-up'),
+    ],
+)
+def test_checkpoint_lag_cap_seconds(collection_interval, expected):
+    assert checkpoint_lag_cap_seconds(collection_interval) == expected
 
 
 @pytest.fixture

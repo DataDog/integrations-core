@@ -39,6 +39,13 @@ GET_CURRENT_TIME_QUERY = "SELECT toUnixTimestamp64Micro(now64(6))"
 # it is considered decommissioned
 _NODE_CHECKPOINT_STALENESS_THRESHOLD_US = 60 * 60 * 1_000_000  # 1 hour
 
+# How far back from now a sampling job (query completions, query errors) may read, as a multiple of
+# its collection interval, and never less than the floor below.
+CHECKPOINT_LAG_CAP_INTERVALS = 3
+# Keeps the cap well above the query_log flush interval (7.5s by default), so rows that are flushed
+# late are not skipped while the job is keeping up.
+CHECKPOINT_LAG_CAP_MIN_SECONDS = 60
+
 # List of internal Cloud users to exclude from query metrics/samples
 # These are Datadog Cloud internal service accounts
 INTERNAL_CLOUD_USERS = frozenset(
@@ -57,6 +64,19 @@ def agent_check_getter(self):
 def collection_interval_gcd(*intervals: float | int) -> int:
     """Helper function for computing the outer-loop collection interval for jobs with multiple sub-schedules."""
     return math.gcd(*(int(i) for i in intervals))
+
+
+def checkpoint_lag_cap_seconds(collection_interval: float) -> int:
+    """
+    The furthest back, in seconds before now, that a sampling job reads from system.query_log.
+
+    A sampling job fetches at most max_samples_per_collection rows per run, and its checkpoint only
+    advances to the last row fetched. When more rows arrive per interval than that, when the Agent
+    stalls, or when a stale checkpoint is restored from the persistent cache, the checkpoint falls
+    behind. Without this cap it never catches up, and every run scans the whole backlog. With it,
+    rows older than the cap are skipped, which is acceptable because these jobs are sampled anyway.
+    """
+    return max(CHECKPOINT_LAG_CAP_MIN_SECONDS, math.ceil(CHECKPOINT_LAG_CAP_INTERVALS * collection_interval))
 
 
 class NodeCheckpoint:
