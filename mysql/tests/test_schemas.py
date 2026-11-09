@@ -2,6 +2,7 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import contextlib
 import datetime
 import json
 import threading
@@ -14,6 +15,7 @@ from datadog_checks.mysql.schemas import (
     STRATEGY_SINGLE_QUERY,
     MySqlSchemaCollector,
     MySqlSchemaCollectorConfig,
+    MySqlViewCollector,
     group_indexes,
     group_partitions,
     normalize_columns,
@@ -32,8 +34,19 @@ def _make_collector(strategy, *, is_mariadb=False, version="8.0.35", config=None
     check.version = MySQLVersion(version, "MariaDB" if is_mariadb else "MySQL", "unspecified")
     metadata = mock.MagicMock()
     collector = MySqlSchemaCollector(check, metadata, MySqlSchemaCollectorConfig(config or {}))
-    collector._strategy = strategy
+    collector._tables._strategy = strategy
     return collector
+
+
+def _make_view_collector(config=None) -> MySqlViewCollector:
+    collector = _make_collector(STRATEGY_CHUNKED, config={"collect_views": True, **(config or {})})
+    views = collector._object_collectors[-1]
+    assert isinstance(views, MySqlViewCollector)
+    return views
+
+
+def _db_cursor(collector):
+    return collector._metadata.get_db_connection.return_value.cursor.return_value.__enter__.return_value
 
 
 def test_normalize_columns_matches_legacy_transforms():
@@ -247,19 +260,25 @@ def test_supports_single_query_collection_none_version():
 def test_use_single_query_opts_out_on_supported_server(use_single_query, expected):
     collector = _make_collector(STRATEGY_CHUNKED, version="8.0.35", config={"use_single_query": use_single_query})
 
-    assert collector._resolve_strategy() == expected
+    assert collector._tables._resolve_strategy() == expected
 
 
 def _run_every_schema_query(collector) -> list[str]:
-    """Run the database list, the chunked table list and detail queries, and the single query."""
-    db_cursor = collector._metadata.get_db_connection.return_value.cursor.return_value.__enter__.return_value
-    db_cursor.fetchall.side_effect = [[{"name": "app"}], [{"name": "t1"}]] + [[]] * 4
+    """
+    Run the database list, the chunked table list and detail queries, the single query, and the view list and
+    column queries.
+    """
+    tables, views = collector._object_collectors
+    db_cursor = _db_cursor(collector)
+    db_cursor.fetchall.side_effect = [[{"name": "app"}], [{"name": "t1"}]] + [[]] * 4 + [[{"name": "v1"}], []]
 
     collector._get_databases()
-    list(collector._iter_chunked_tables("app"))
-    collector._strategy = STRATEGY_SINGLE_QUERY
-    with collector._get_cursor("app"):
+    list(tables._iter_chunked_tables("app"))
+    tables._strategy = STRATEGY_SINGLE_QUERY
+    with tables._open_rows(None, "app"):
         pass
+    with views._open_rows(None, "app") as rows:
+        list(rows)
 
     return [call.args[0] for call in db_cursor.execute.call_args_list]
 
@@ -279,11 +298,13 @@ MARIADB_TIMEOUT_PREFIX = "SET STATEMENT max_statement_time=60.0 FOR "
     ],
 )
 def test_every_schema_query_applies_supported_query_timeout(is_mariadb, version, expected_timeout):
-    collector = _make_collector(STRATEGY_CHUNKED, is_mariadb=is_mariadb, version=version)
+    collector = _make_collector(
+        STRATEGY_CHUNKED, is_mariadb=is_mariadb, version=version, config={"collect_views": True}
+    )
 
     queries = _run_every_schema_query(collector)
 
-    assert len(queries) == 7
+    assert len(queries) == 9
     for query in queries:
         if expected_timeout == MYSQL_TIMEOUT_HINT:
             assert MYSQL_TIMEOUT_HINT in query
@@ -314,30 +335,41 @@ def test_chunked_collection_fetches_connection_once_per_database():
     db_cursor.fetchall.side_effect = [[{"name": "t1"}, {"name": "t2"}]] + [[]] * 8
 
     with mock.patch("datadog_checks.mysql.schemas.TABLES_CHUNK_SIZE", 1):
-        tables = list(collector._iter_chunked_tables("app"))
+        tables = list(collector._tables._iter_chunked_tables("app"))
 
     assert [table["name"] for table in tables] == ["t1", "t2"]
     assert db_cursor.execute.call_count == 9
     get_db_connection.assert_called_once()
 
 
-def test_chunked_collection_passes_table_names_as_query_parameters():
-    """Table names come from the server and must never be interpolated into SQL."""
-    collector = _make_collector(STRATEGY_CHUNKED, version="5.7.44")
-    table_names = ["normal_table", 'bad"table', "x') UNION SELECT user()#"]
-    db_cursor = collector._metadata.get_db_connection.return_value.cursor.return_value.__enter__.return_value
-    db_cursor.fetchall.side_effect = [[{"name": name} for name in table_names]] + [[]] * 4
+@pytest.mark.parametrize(
+    "kind, detail_queries",
+    [
+        # Column, index, foreign key, and partition detail.
+        pytest.param("mysql_databases", 4, id="tables"),
+        # Column detail.
+        pytest.param("mysql_views", 1, id="views"),
+    ],
+)
+def test_chunked_collection_passes_object_names_as_query_parameters(kind, detail_queries):
+    """Table and view names come from the server and must never be interpolated into SQL."""
+    collector = _make_collector(STRATEGY_CHUNKED, version="5.7.44", config={"collect_views": True})
+    [object_collector] = [c for c in collector._object_collectors if c.kind == kind]
+    names = ["normal_name", 'bad"name', "x') UNION SELECT user()#"]
+    db_cursor = _db_cursor(collector)
+    db_cursor.fetchall.side_effect = [[{"name": name} for name in names]] + [[]] * detail_queries
 
-    list(collector._iter_chunked_tables("mydb"))
+    with object_collector._open_rows(None, "mydb") as rows:
+        list(rows)
 
-    # The first query lists the tables; the rest fetch column, index, foreign key, and partition detail.
+    # The first query lists the objects; the rest fetch their detail.
     detail_calls = db_cursor.execute.call_args_list[1:]
-    assert len(detail_calls) == 4
+    assert len(detail_calls) == detail_queries
     for call in detail_calls:
         query, params = call.args
-        assert params == ["mydb"] + table_names
+        assert params == ["mydb"] + names
         assert query.count("%s") == len(params)
-        for name in table_names:
+        for name in names:
             assert name not in query
 
 
@@ -383,7 +415,7 @@ def _single_query_row():
 
 
 def test_map_row_single_query_shapes_payload_and_serializes_datetime():
-    collector = _make_collector(STRATEGY_SINGLE_QUERY)
+    collector = _make_collector(STRATEGY_SINGLE_QUERY)._tables
     obj = collector._map_row({"name": "mydb", "default_collation_name": "utf8"}, _single_query_row())
 
     assert obj["name"] == "mydb"
@@ -401,8 +433,8 @@ def test_map_row_single_query_shapes_payload_and_serializes_datetime():
 
 
 def test_map_row_chunked_matches_single_query():
-    single = _make_collector(STRATEGY_SINGLE_QUERY)
-    chunked = _make_collector(STRATEGY_CHUNKED)
+    single = _make_collector(STRATEGY_SINGLE_QUERY)._tables
+    chunked = _make_collector(STRATEGY_CHUNKED)._tables
 
     single_row = _single_query_row()
     chunked_row = {
@@ -421,15 +453,80 @@ def test_map_row_chunked_matches_single_query():
     assert single_table == chunked_table
 
 
-def test_base_event_includes_flavor_and_bare_version():
-    collector = _make_collector(STRATEGY_SINGLE_QUERY)
+@pytest.mark.parametrize("kind", ["mysql_databases", "mysql_views"])
+def test_base_event_includes_flavor_and_bare_version(kind):
+    collector = _make_collector(STRATEGY_SINGLE_QUERY, config={"collect_views": True})
+    [object_collector] = [c for c in collector._object_collectors if c.kind == kind]
     collector._check.version = MySQLVersion("8.0.35", "MySQL", "log")
     collector._check.agent_version = "7.70.0"
-    event = collector.base_event
+    event = object_collector.base_event
+    assert event["kind"] == kind
     assert event["flavor"] == "MySQL"
     assert event["dbms_version"] == "8.0.35"
     assert event["agent_version"] == "7.70.0"
-    assert collector.kind == "mysql_databases"
+
+
+@pytest.mark.parametrize(
+    "config, expected_kinds",
+    [
+        pytest.param({}, ["mysql_databases"], id="default"),
+        pytest.param({"collect_views": True}, ["mysql_databases", "mysql_views"], id="collect_views"),
+    ],
+)
+def test_collect_views_adds_views_kind(config, expected_kinds):
+    assert _make_collector(STRATEGY_CHUNKED, config=config).kinds == expected_kinds
+
+
+@pytest.mark.parametrize(
+    "max_views, expected_limit",
+    [
+        pytest.param(None, 1000, id="default"),
+        pytest.param(5, 5, id="configured"),
+        pytest.param(0, 1_000_000, id="zero means no limit"),
+    ],
+)
+def test_view_query_limits_views_per_database(max_views, expected_limit):
+    views = _make_view_collector({} if max_views is None else {"max_views": max_views})
+    db_cursor = _db_cursor(views)
+    db_cursor.fetchall.return_value = []
+
+    with views._open_rows(None, "mydb") as rows:
+        list(rows)
+
+    assert db_cursor.execute.call_args.args[1] == ["mydb", expected_limit]
+
+
+@pytest.mark.parametrize(
+    "definition, expected_definition",
+    [
+        pytest.param("select `id` from `t`", "select `id` from `t`", id="visible"),
+        # MySQL returns an empty definition when the user lacks SHOW VIEW.
+        pytest.param("", None, id="hidden"),
+    ],
+)
+def test_view_map_row_shapes_payload(definition, expected_definition):
+    views = _make_view_collector()
+    column = {
+        "name": "id",
+        "column_type": "int",
+        "default": None,
+        "nullable": "NO",
+        "ordinal_position": 1,
+        "column_key": "",
+        "extra": "",
+    }
+
+    obj = views._map_row(
+        {"name": "mydb", "default_collation_name": "utf8"},
+        {"name": "v", "definition": definition, "_columns": [column]},
+    )
+
+    assert obj == {
+        "name": "mydb",
+        "default_collation_name": "utf8",
+        "tables": [],
+        "views": [{"name": "v", "definition": expected_definition, "columns": normalize_columns([column])}],
+    }
 
 
 def _make_collecting_collector(databases):
@@ -441,10 +538,8 @@ def _make_collecting_collector(databases):
     collector._check.tags = []
     collector._check.cloud_metadata = {}
     collector._check.agent_version = "7.70.0"
-    db_cursor = collector._metadata.get_db_connection.return_value.cursor.return_value.__enter__.return_value
-    db_cursor.fetchall.return_value = databases
-    collector._get_cursor = mock.Mock(return_value=mock.MagicMock())
-    collector._get_next = mock.Mock(return_value=None)
+    _db_cursor(collector).fetchall.return_value = databases
+    collector._tables._open_rows = mock.Mock(side_effect=lambda session, name: contextlib.nullcontext(iter(())))
     return collector
 
 
@@ -456,17 +551,17 @@ def test_collect_schemas_stops_at_next_database_when_cancelled():
         if cancel_event.is_set():
             raise Exception("Job loop cancelled. Aborting query.")
 
-    def cancel_during_collection(database_name):
+    def cancel_during_collection(session, database_name):
         cancel_event.set()
-        return mock.MagicMock()
+        return contextlib.nullcontext(iter(()))
 
     collector._metadata._raise_if_cancelled.side_effect = raise_if_cancelled
-    collector._get_cursor.side_effect = cancel_during_collection
+    collector._tables._open_rows.side_effect = cancel_during_collection
 
     with pytest.raises(Exception, match="cancelled"):
         collector.collect_schemas()
 
-    collector._get_cursor.assert_called_once_with("app")
+    collector._tables._open_rows.assert_called_once_with(None, "app")
 
 
 def test_collect_schemas_warns_when_no_tables_are_visible():

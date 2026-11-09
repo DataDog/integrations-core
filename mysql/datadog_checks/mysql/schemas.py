@@ -7,10 +7,16 @@ from __future__ import annotations
 import contextlib
 import datetime
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Callable, Iterator
+from typing import TYPE_CHECKING, Any, Iterator
 
 from datadog_checks.base import is_affirmative
-from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
+from datadog_checks.base.utils.db.schemas import (
+    DEFAULT_MAX_VIEWS,
+    DatabaseSchemaCollector,
+    SchemaCollectorConfig,
+    SchemaObjectCollector,
+    ViewObjectCollector,
+)
 from datadog_checks.base.utils.format import json
 from datadog_checks.mysql.cursor import CommenterDictCursor, CommenterSSDictCursor
 from datadog_checks.mysql.queries import (
@@ -19,6 +25,7 @@ from datadog_checks.mysql.queries import (
     SQL_FOREIGN_KEYS,
     SQL_PARTITION,
     SQL_TABLES,
+    SQL_VIEWS,
     get_indexes_query,
     get_schema_json_query,
 )
@@ -200,51 +207,16 @@ class MySqlSchemaCollectorConfig(SchemaCollectorConfig):
         # Undocumented escape hatch: false always uses the chunked strategy. When true, single-query is
         # used only where the server supports it (see supports_single_query_collection).
         self.use_single_query = is_affirmative(schemas_config.get("use_single_query", True))
+        self.collect_views = is_affirmative(schemas_config.get("collect_views", False))
+        self.max_views = int(schemas_config.get("max_views", DEFAULT_MAX_VIEWS))
 
 
-class _ChunkedTableCursor:
-    """Adapts the chunked (shape B) generator to the cursor `fetchone` interface.
+class MySqlQueryRunner:
+    """Runs schema queries on the metadata job's connection, with the configured per-query timeout."""
 
-    The base `SchemaCollector` drives collection by repeatedly calling `_get_next(cursor)`; this
-    wrapper lets the chunked strategy yield fully-assembled table records the same way the
-    single-query strategy yields one DB row per table.
-    """
-
-    def __init__(self, rows: Iterator[dict]):
-        self._rows = rows
-
-    def fetchone(self):
-        return next(self._rows, None)
-
-
-class CancellableDatabases(list):
-    """Database list that raises once the job is cancelled, before the next database starts.
-
-    The base `SchemaCollector` catches exceptions per database, so a cancellation raised by a query
-    is swallowed and collection moves on. The loop iterates this list outside that handler, so
-    raising here reaches `DBMAsyncJob._job_loop`, which reports it as a cancellation.
-    """
-
-    def __init__(self, databases: list[dict], raise_if_cancelled: Callable[[], None]):
-        super().__init__(databases)
-        self._raise_if_cancelled = raise_if_cancelled
-
-    def __iter__(self) -> Iterator[dict]:
-        for database in super().__iter__():
-            self._raise_if_cancelled()
-            yield database
-
-
-class MySqlSchemaCollector(SchemaCollector):
-    _check: "MySql"
+    _check: MySql
     _config: MySqlSchemaCollectorConfig
-
-    def __init__(self, check: "MySql", metadata: "MySQLMetadata", config: MySqlSchemaCollectorConfig | None = None):
-        self._metadata = metadata
-        self._tables_found = False
-        self._database_count = 0
-        self._strategy = STRATEGY_CHUNKED
-        super().__init__(check, config or MySqlSchemaCollectorConfig(check._config.schemas_config))
+    _metadata: MySQLMetadata
 
     def _query_timeout(self) -> float | None:
         """Per-query timeout in seconds, or None when disabled by a max_execution_time of 0 or less."""
@@ -252,25 +224,6 @@ class MySqlSchemaCollector(SchemaCollector):
         if max_execution_time > 0:
             return max_execution_time
         return None
-
-    def collect_schemas(self) -> bool:
-        self._tables_found = False
-        self._database_count = 0
-        # Resolved once per run so the cursor and the row mapping always agree, even if the check
-        # thread updates the server version mid-collection.
-        self._strategy = self._resolve_strategy()
-        try:
-            return super().collect_schemas()
-        finally:
-            # Databases are visible, but MySQL hides tables from INFORMATION_SCHEMA unless the user
-            # holds some privilege on them. An empty result usually means the datadog user needs
-            # REFERENCES (or SELECT).
-            if self._database_count and not self._tables_found:
-                self._log.warning(
-                    "No tables were found across any of the %d databases. This may indicate insufficient privileges "
-                    "to view table metadata. The datadog user needs REFERENCES (or SELECT) privileges on the tables.",
-                    self._database_count,
-                )
 
     def _query_hint(self) -> str:
         """The MySQL optimizer hint that enforces the per-query timeout, for the query templates' `{hint}`.
@@ -293,9 +246,76 @@ class MySqlSchemaCollector(SchemaCollector):
             query = "SET STATEMENT max_statement_time={} FOR {}".format(timeout, query)
         cursor.execute(query, params)
 
+    def _fetch_grouped(self, conn, query: str, params: list) -> dict[Any, list[dict]]:
+        """Run a detail query on `conn` and group its rows by table_name.
+
+        Takes the connection from the caller so a database's detail queries share one liveness
+        ping instead of pinging before each query.
+        """
+        grouped: dict[Any, list[dict]] = defaultdict(list)
+        with conn.cursor(CommenterDictCursor) as cursor:
+            self._execute(cursor, query, params)
+            for row in cursor.fetchall():
+                grouped[row["table_name"]].append(dict(row))
+        return grouped
+
+
+class MySqlSchemaCollector(MySqlQueryRunner, DatabaseSchemaCollector):
+    """
+    Collects MySQL and MariaDB catalog metadata, one database at a time, on the metadata job's connection.
+
+    Tables are always collected, as `mysql_databases` payloads. Views are collected as `mysql_views` payloads
+    when `collect_views` is set.
+    """
+
+    def __init__(self, check: MySql, metadata: MySQLMetadata, config: MySqlSchemaCollectorConfig | None = None):
+        self._check = check
+        self._metadata = metadata
+        self._config = config or MySqlSchemaCollectorConfig(check._config.schemas_config)
+        self._database_count = 0
+        self._tables = MySqlTableCollector(check, metadata, self._config)
+        object_collectors: list[MySqlObjectCollector] = [self._tables]
+        if self._config.collect_views:
+            object_collectors.append(MySqlViewCollector(check, metadata, self._config))
+        super().__init__(check, object_collectors)
+
     @property
-    def kind(self) -> str:
-        return "mysql_databases"
+    def kinds(self) -> list[str]:
+        return [object_collector.kind for object_collector in self._object_collectors]
+
+    def _raise_if_cancelled(self) -> None:
+        self._metadata._raise_if_cancelled()
+
+    def collect_schemas(self) -> bool:
+        self._database_count = 0
+        self._tables.start_run()
+        try:
+            return super().collect_schemas()
+        finally:
+            # Databases are visible, but MySQL hides tables from INFORMATION_SCHEMA unless the user
+            # holds some privilege on them. An empty result usually means the datadog user needs
+            # REFERENCES (or SELECT).
+            if self._database_count and not self._tables.tables_found:
+                self._log.warning(
+                    "No tables were found across any of the %d databases. This may indicate insufficient privileges "
+                    "to view table metadata. The datadog user needs REFERENCES (or SELECT) privileges on the tables.",
+                    self._database_count,
+                )
+
+    def _get_databases(self) -> list[dict]:
+        with self._metadata.get_db_connection().cursor(CommenterDictCursor) as cursor:
+            self._execute(cursor, SQL_DATABASES.format(hint=self._query_hint()))
+            databases = [dict(row) for row in cursor.fetchall()]
+        self._database_count = len(databases)
+        return databases
+
+
+class MySqlObjectCollector(MySqlQueryRunner, SchemaObjectCollector):
+    """Collects one kind of MySQL catalog object. Queries name the database, so no session is needed."""
+
+    def __init__(self, check: MySql, metadata: MySQLMetadata, config: MySqlSchemaCollectorConfig):
+        self._metadata = metadata
+        super().__init__(check, config)
 
     @property
     def base_event(self):
@@ -307,6 +327,23 @@ class MySqlSchemaCollector(SchemaCollector):
         event["agent_version"] = self._check.agent_version
         return event
 
+
+class MySqlTableCollector(MySqlObjectCollector):
+    def __init__(self, check: MySql, metadata: MySQLMetadata, config: MySqlSchemaCollectorConfig):
+        super().__init__(check, metadata, config)
+        self.tables_found = False
+        self._strategy = STRATEGY_CHUNKED
+
+    @property
+    def kind(self) -> str:
+        return "mysql_databases"
+
+    def start_run(self) -> None:
+        self.tables_found = False
+        # Resolved once per run so the cursor and the row mapping always agree, even if the check
+        # thread updates the server version mid-collection.
+        self._strategy = self._resolve_strategy()
+
     def _resolve_strategy(self) -> str:
         """Resolve the collection strategy based on configuration, flavor, and server version."""
         if self._config.use_single_query and supports_single_query_collection(
@@ -315,17 +352,10 @@ class MySqlSchemaCollector(SchemaCollector):
             return STRATEGY_SINGLE_QUERY
         return STRATEGY_CHUNKED
 
-    def _get_databases(self) -> list[dict]:
-        with self._metadata.get_db_connection().cursor(CommenterDictCursor) as cursor:
-            self._execute(cursor, SQL_DATABASES.format(hint=self._query_hint()))
-            databases = [dict(row) for row in cursor.fetchall()]
-        self._database_count = len(databases)
-        return CancellableDatabases(databases, self._metadata._raise_if_cancelled)
-
     @contextlib.contextmanager
-    def _get_cursor(self, database_name: str):
+    def _open_rows(self, session: None, database_name: str) -> Iterator[Iterator[dict]]:
         if self._strategy == STRATEGY_CHUNKED:
-            yield _ChunkedTableCursor(self._iter_chunked_tables(database_name))
+            yield self._iter_chunked_tables(database_name)
             return
 
         query = get_schema_json_query(self._check.version, hint=self._query_hint())
@@ -334,13 +364,10 @@ class MySqlSchemaCollector(SchemaCollector):
         # worth of already-aggregated metadata plus the payload chunk buffer.
         with self._metadata.get_db_connection().cursor(CommenterSSDictCursor) as cursor:
             self._execute(cursor, query, params)
-            yield cursor
-
-    def _get_next(self, cursor):
-        return cursor.fetchone()
+            yield iter(cursor.fetchone, None)
 
     def _map_row(self, database: dict, cursor_row: dict) -> dict:
-        self._tables_found = True
+        self.tables_found = True
         object = super()._map_row(database, cursor_row)
         if self._strategy == STRATEGY_CHUNKED:
             table = self._build_table(
@@ -434,15 +461,41 @@ class MySqlSchemaCollector(SchemaCollector):
                     "_partitions": partitions_by_table.get(name, []),
                 }
 
-    def _fetch_grouped(self, conn, query: str, params: list) -> dict[Any, list[dict]]:
-        """Run a detail query on `conn` and group its rows by table_name.
 
-        Takes the connection from the caller so a database's detail queries share one liveness
-        ping instead of pinging before each query.
-        """
-        grouped: dict[Any, list[dict]] = defaultdict(list)
+class MySqlViewCollector(ViewObjectCollector, MySqlObjectCollector):
+    """Collects views and the columns they project, in the shape table columns use."""
+
+    @property
+    def kind(self) -> str:
+        return "mysql_views"
+
+    @contextlib.contextmanager
+    def _open_rows(self, session: None, database_name: str) -> Iterator[Iterator[dict]]:
+        yield self._iter_views(database_name)
+
+    def _iter_views(self, database_name: str) -> Iterator[dict]:
+        hint = self._query_hint()
+        conn = self._metadata.get_db_connection()
+        # 0 means no limit, as in SQL Server.
+        limit = self._config.max_views or 1_000_000
         with conn.cursor(CommenterDictCursor) as cursor:
-            self._execute(cursor, query, params)
-            for row in cursor.fetchall():
-                grouped[row["table_name"]].append(dict(row))
-        return grouped
+            self._execute(cursor, SQL_VIEWS.format(hint=hint), [database_name, limit])
+            views = [dict(row) for row in cursor.fetchall()]
+
+        for views_chunk in get_list_chunks(views, TABLES_CHUNK_SIZE):
+            view_names = [str(view["name"]) for view in views_chunk]
+            placeholders = ",".join(["%s"] * len(view_names))
+            columns_by_view = self._fetch_grouped(
+                conn, SQL_COLUMNS.format(hint=hint, placeholders=placeholders), [database_name] + view_names
+            )
+            for view in views_chunk:
+                yield {**view, "_columns": columns_by_view.get(view["name"], [])}
+
+    def _map_row(self, database: dict, cursor_row: dict) -> dict:
+        view = {
+            "name": cursor_row.get("name"),
+            # MySQL returns an empty definition when the user lacks the SHOW VIEW privilege.
+            "definition": cursor_row.get("definition") or None,
+            "columns": normalize_columns(cursor_row.get("_columns") or []),
+        }
+        return self._schema_with_view(database, view)
