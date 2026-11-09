@@ -4076,7 +4076,7 @@ pipeline:
               overrideOnConflict: false
           preserveSource: false
         - type: grok-parser
-          name: Strip trailing root dot from `Event.EventData.Data.QueryName` for OCSF
+          name: Map `Event.EventData.Data.QueryName` to `ocsf.query.hostname`
           enabled: true
           source: Event.EventData.Data.QueryName
           samples:
@@ -4085,8 +4085,8 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |
-              fqdn_with_root_dot %{data:ocsf.tmp_query_hostname}\.
-              fqdn_without_root_dot %{data:ocsf.tmp_query_hostname}
+              fqdn_with_root_dot %{data:ocsf.query.hostname}\.
+              fqdn_without_root_dot %{data:ocsf.query.hostname}
         - type: schema-processor
           name: Apply OCSF schema for 4003
           enabled: true
@@ -4325,11 +4325,11 @@ pipeline:
                 name: ocsf.actor.user.type
                 id: ocsf.actor.user.type_id
             - type: schema-remapper
-              name: Map normalized `Event.EventData.Data.QueryName` to `ocsf.query.hostname`
+              name: Map `ocsf.query.hostname` to `ocsf.query.hostname`
               sources:
-                - ocsf.tmp_query_hostname
+                - ocsf.query.hostname
               target: ocsf.query.hostname
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: false
             - type: schema-remapper
               name: Map `Event.System.Computer` to `ocsf.src_endpoint.hostname`

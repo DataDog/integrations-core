@@ -216,7 +216,7 @@ pipeline:
           target: ocsf.response_time
           replaceMissing: false
         - type: grok-parser
-          name: Strip trailing root dot from `dns.question.name` for OCSF
+          name: Map `dns.question.name` to `ocsf.query.hostname`
           enabled: true
           source: dns.question.name
           samples:
@@ -225,8 +225,8 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |
-              fqdn_with_root_dot %{data:ocsf.tmp_query_hostname}\.
-              fqdn_without_root_dot %{data:ocsf.tmp_query_hostname}
+              fqdn_with_root_dot %{data:ocsf.query.hostname}\.
+              fqdn_without_root_dot %{data:ocsf.query.hostname}
         - type: schema-processor
           name: Apply OCSF schema for 4003
           enabled: true
@@ -482,13 +482,13 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map normalized `dns.question.name` to `ocsf.query.hostname`
+            - name: Map `ocsf.query.hostname` to `ocsf.query.hostname`
               sources:
-                - ocsf.tmp_query_hostname
+                - ocsf.query.hostname
               sourceType: attribute
               target: ocsf.query.hostname
               targetFormat: string
-              preserveSource: false
+              preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
             - name: Map `dns.question.type` to `ocsf.query.type`
