@@ -4,6 +4,7 @@
 import json
 import logging
 import os
+import sys
 from contextlib import contextmanager
 
 import mock
@@ -19,7 +20,8 @@ from datadog_checks.dev.docker import (
     compose_file_active,
     docker_run,
 )
-from datadog_checks.dev.subprocess import run_command
+from datadog_checks.dev.structures import EnvVars
+from datadog_checks.dev.subprocess import SubprocessResult, run_command
 
 from .common import not_windows_ci
 
@@ -115,6 +117,16 @@ class TestDockerRun:
             assert compose_file_active(compose_file) is False
         finally:
             run_command(['docker', 'compose', '-f', compose_file, 'down'], capture=True)
+
+    def test_large_captured_output_does_not_break_later_subprocesses(self):
+        # Regression test for AI-7381: captured image pull output stored in the environment exceeded the Linux
+        # size limit for a single variable, so every later subprocess failed with `Argument list too long`.
+        compose_file = os.path.join(DOCKER_DIR, 'test_default.yaml')
+        pull_output = SubprocessResult('Downloading\n' * 20_000, '', 0)
+
+        with EnvVars(), mock.patch('datadog_checks.dev.docker.run_command', return_value=pull_output):
+            with docker_run(compose_file, capture=True):
+                run_command([sys.executable, '-c', 'pass'], check=True)
 
     @pytest.mark.parametrize(
         "attempts,expected_call_count",

@@ -1,0 +1,1 @@
+Fix `docker_run` with `capture` storing the captured `docker compose up` output in the environment, which made later subprocesses fail with `Argument list too long` after large image pulls.

@@ -11,10 +11,9 @@ from functools import cache
 from xml.etree.ElementTree import Element
 from xml.sax.saxutils import escape
 
-from datadog_checks.pan_firewall.errors import PanosApiError, PanosAuthError
 from datadog_checks.pan_firewall.xml_utils import num
 
-from .base import CollectContext, Sample
+from .base import CollectContext, Sample, read_each
 
 
 @cache
@@ -50,22 +49,11 @@ def parse_rule_hits(root: Element, vsys: str, patterns: Sequence[str], warn: Cal
 
 
 def collect_rule_hits(ctx: CollectContext) -> list[Sample]:
-    """A vsys that answers with an API error is skipped with a warning; when every vsys does, the collector fails."""
+    """A vsys whose call fails is skipped with a warning; when every vsys does, the collector fails."""
     patterns = ctx.config.security_rule_filter or ()
-    samples: list[Sample] = []
-    error: PanosApiError | None = None
-    answered = 0
-    for vsys in ctx.state.vsys:
-        try:
-            root = ctx.client.op(rule_hit_cmd(vsys))
-        except PanosAuthError:
-            raise
-        except PanosApiError as e:
-            ctx.warning('cannot read the rule hits of %s: %s', vsys, e, key=f'rule_hits:{vsys}')
-            error = e
-            continue
-        answered += 1
-        samples.extend(parse_rule_hits(root, vsys, patterns, ctx.warning))
-    if error is not None and not answered:
-        raise error
-    return samples
+    answers = read_each(
+        ctx.state.vsys,
+        lambda vsys: ctx.client.op(rule_hit_cmd(vsys)),
+        lambda vsys, e: ctx.warning('cannot read the rule hits of %s: %s', vsys, e, key=f'rule_hits:{vsys}'),
+    )
+    return [sample for vsys, root in answers for sample in parse_rule_hits(root, vsys, patterns, ctx.warning)]
