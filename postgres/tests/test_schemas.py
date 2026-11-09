@@ -19,7 +19,8 @@ pytestmark = [pytest.mark.integration, pytest.mark.usefixtures('dd_environment')
 def open_tables_query(collector: PostgresSchemaCollector, database_name: str):
     """Opens the database and starts the tables query, yielding its rows."""
     tables = collector._object_collectors[0]
-    with collector._open_database(database_name) as conn, tables._open_rows(conn, database_name) as rows:
+    database = {"name": database_name}
+    with collector._open_database(database) as conn, tables._open_rows(conn, database) as rows:
         yield rows
 
 

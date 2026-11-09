@@ -255,8 +255,8 @@ class PostgresSchemaCollector(DatabaseSchemaCollector):
                 return [dict(row) for row in cursor.fetchall()]
 
     @contextlib.contextmanager
-    def _open_database(self, database_name: str) -> Iterator[Any]:
-        with self._check.db_pool.get_connection(database_name) as conn:
+    def _open_database(self, database: DatabaseInfo) -> Iterator[Any]:
+        with self._check.db_pool.get_connection(database["name"]) as conn:
             yield conn
 
 
@@ -271,7 +271,7 @@ class PostgresObjectCollector(SchemaObjectCollector):
         """Returns this kind's catalog query and its parameters."""
 
     @contextlib.contextmanager
-    def _open_rows(self, conn, database_name: str) -> Iterator[Iterator[dict]]:
+    def _open_rows(self, conn, database: DatabaseInfo) -> Iterator[Iterator[dict]]:
         with conn.cursor(row_factory=dict_row) as cursor:
             # Each kind runs in its own transaction, so the timeout is local to its query and a failed query rolls
             # back without leaving the shared connection in an aborted transaction for the next kind.
