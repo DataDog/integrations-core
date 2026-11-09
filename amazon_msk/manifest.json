@@ -18,7 +18,8 @@
       "Supported OS::Windows",
       "Supported OS::macOS",
       "Offering::Integration",
-      "Product::Data Streams Monitoring"
+      "Product::Data Streams Monitoring",
+      "Product::Kafka Console"
     ],
     "resources": [
       {
