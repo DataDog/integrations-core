@@ -21,7 +21,7 @@ Linux command:
   sudo -u dd-agent -- datadog-agent integration install datadog-palo_alto_panorama==1.0.0
   ```
 
-Windows command:
+Windows command (run PowerShell as Administrator):
   ```powershell
   & "$env:ProgramFiles\Datadog\Datadog Agent\bin\agent.exe" integration install datadog-palo_alto_panorama==1.0.0
   ```
