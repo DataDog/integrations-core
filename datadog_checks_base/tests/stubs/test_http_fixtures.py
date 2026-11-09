@@ -69,8 +69,8 @@ def test_fake_http_aggregates_interactions_from_isolated_clients(fake_http):
     second_url = 'https://example.test/second'
     first_response = FakeHTTPResponse()
     second_response = FakeHTTPResponse()
-    fake_http.register_response('GET', first_url, first_response)
-    fake_http.register_response('GET', second_url, second_response)
+    fake_http.register_response('GET', first_url, first_response, once=True)
+    fake_http.register_response('GET', second_url, second_response, once=True)
     check = FixtureCheck('test', {}, [{}])
 
     default_client = check.http
@@ -91,7 +91,6 @@ def test_fake_http_installs_registered_response_and_records_request(fake_http):
 
     assert check.http.get(url, stream=True) is response
     fake_http.assert_requests([RecordedRequest(method='GET', url=url, options={'stream': True})])
-    fake_http.assert_all_responses_consumed()
 
 
 def test_fake_http_response_builds_and_registers_text_response(fake_http_response: Any):
@@ -132,7 +131,13 @@ def test_fake_http_response_builds_and_registers_json_response(
     assert response.json() is payload
     assert response.status_code == 201
     assert response.reason == 'Created'
-    fake_http.assert_all_responses_consumed()
+
+
+def test_fake_http_response_registers_one_time_response(fake_http: FakeHTTPClient, fake_http_response: Any):
+    fake_http_response('https://example.test/items', once=True)
+
+    with pytest.raises(AssertionError, match='1 registered response was not consumed'):
+        fake_http.assert_all_responses_consumed()
 
 
 def test_fake_http_routes_openmetrics_send_request(fake_http):

@@ -225,19 +225,39 @@ def test_fake_client_matches_responses_and_records_requests():
         RecordedRequest(method='GET', url=url, options={'params': {'page': 1}}),
         RecordedRequest(method='GET', url=url, options={'params': {'page': 2}}),
     ]
-    client.assert_all_responses_consumed()
 
 
-def test_fake_client_returns_registered_responses_in_queue_order():
+def test_fake_client_serves_a_registration_for_every_matching_request():
     client = FakeHTTPClient()
-    first = FakeHTTPResponse(status_code=202)
-    second = FakeHTTPResponse(status_code=204)
+    response = FakeHTTPResponse()
     url = 'https://example.test/items'
-    client.register_response('GET', url, first)
-    client.register_response('GET', url, second)
+    client.register_response('GET', url, response)
 
-    assert client.get(url) is first
-    assert client.get(url) is second
+    assert [client.get(url) for _ in range(3)] == [response, response, response]
+
+
+def test_fake_client_serves_the_latest_matching_registration():
+    client = FakeHTTPClient()
+    default = FakeHTTPResponse(status_code=200)
+    override = FakeHTTPResponse(status_code=503)
+    url = 'https://example.test/items'
+    client.register_response('GET', url, default)
+    client.register_response('GET', url, override)
+
+    assert [client.get(url) for _ in range(2)] == [override, override]
+
+
+def test_fake_client_serves_one_time_registrations_in_order_before_repeating_ones():
+    client = FakeHTTPClient()
+    repeating = FakeHTTPResponse(status_code=200)
+    first = FakeHTTPResponse(status_code=503)
+    second = FakeHTTPResponse(status_code=504)
+    url = 'https://example.test/items'
+    client.register_response('GET', url, repeating)
+    client.register_response('GET', url, first, once=True)
+    client.register_response('GET', url, second, once=True)
+
+    assert [client.get(url) for _ in range(4)] == [first, second, repeating, repeating]
     client.assert_all_responses_consumed()
 
 
@@ -250,7 +270,6 @@ def test_fake_client_raises_registered_exception():
         client.get('https://example.test/items')
 
     assert exc_info.value is error
-    client.assert_all_responses_consumed()
 
 
 def test_fake_client_reads_configured_cookies_and_falls_back_for_missing_names():
@@ -276,12 +295,14 @@ def test_created_clients_follow_the_parent_proxy_bypass(bypass):
     assert child.should_bypass_proxy('https://internal.example/') is True
 
 
-def test_fake_client_reports_unmatched_request_and_pending_responses():
+def test_fake_client_reports_unmatched_request_and_unconsumed_one_time_responses():
     client = FakeHTTPClient()
-    client.register_response('POST', 'https://example.test/items', FakeHTTPResponse())
+    url = 'https://example.test/items'
+    client.register_response('POST', url, FakeHTTPResponse(), once=True)
+    client.register_response('PUT', url, FakeHTTPResponse())
 
     with pytest.raises(AssertionError, match=r'No registered response matched GET https://example\.test/items'):
-        client.get('https://example.test/items')
+        client.get(url)
 
     with pytest.raises(AssertionError, match='1 registered response was not consumed'):
         client.assert_all_responses_consumed()
@@ -307,8 +328,7 @@ def test_fake_client_request_assertions():
 def test_fake_client_records_each_request_when_the_caller_reuses_one_options_container():
     client = FakeHTTPClient()
     url = 'https://example.test/items'
-    for _ in range(3):
-        client.register_response('GET', url, FakeHTTPResponse())
+    client.register_response('GET', url, FakeHTTPResponse())
 
     params = {'take': 30}
     for page in range(3):
@@ -336,7 +356,6 @@ def test_fake_client_matches_registrations_made_before_a_match_option_changed():
 
     assert client.get(url, params={'page': 1}) is first
     assert client.get(url, params={'page': 2}) is second
-    client.assert_all_responses_consumed()
 
 
 def test_fake_client_accepts_protocol_mapping_request_options():

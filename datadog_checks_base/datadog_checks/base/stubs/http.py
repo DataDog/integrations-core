@@ -66,6 +66,7 @@ class RegisteredResponse:
     url: str
     outcome: HTTPResponse | Exception
     match_options: Mapping[str, Any]
+    once: bool
 
 
 class FakeHTTPResponse:
@@ -235,14 +236,19 @@ class FakeHTTPClient:
         response: HTTPResponse | Exception,
         *,
         match_options: Mapping[str, Any] | None = None,
+        once: bool = False,
     ) -> None:
-        """Queue a response or exception for the first matching request."""
+        """Answer every matching request; the latest registration wins.
+
+        With `once=True`, answer one request instead, ahead of repeating registrations and in registration order.
+        """
         self._responses.append(
             RegisteredResponse(
                 method=method.upper(),
                 url=url,
                 outcome=response,
                 match_options=_snapshot_options(match_options or {}),
+                once=once,
             )
         )
 
@@ -300,25 +306,33 @@ class FakeHTTPClient:
             raise AssertionError(f'No recorded request matched {expected!r}. Recorded requests: {self.requests!r}.')
 
     def assert_all_responses_consumed(self) -> None:
-        count = len(self._responses)
-        if count:
-            noun = 'response was' if count == 1 else 'responses were'
-            raise AssertionError(f'{count} registered {noun} not consumed: {self._responses!r}.')
+        """Assert that every one-time registration was served."""
+        pending = [registered for registered in self._responses if registered.once]
+        if pending:
+            noun = 'response was' if len(pending) == 1 else 'responses were'
+            raise AssertionError(f'{len(pending)} registered {noun} not consumed: {pending!r}.')
 
     def _request(self, method: str, url: str, options: Mapping[str, Any]) -> HTTPResponse:
         request = RecordedRequest(method=method, url=url, options=options)
         self.requests.append(request)
 
+        outcome = self._take_outcome(request)
+        if isinstance(outcome, Exception):
+            raise outcome
+        return outcome
+
+    def _take_outcome(self, request: RecordedRequest) -> HTTPResponse | Exception:
         for index, registered in enumerate(self._responses):
-            if self._matches(registered, request):
-                outcome = self._responses.pop(index).outcome
-                if isinstance(outcome, Exception):
-                    raise outcome
-                return outcome
+            if registered.once and self._matches(registered, request):
+                return self._responses.pop(index).outcome
+
+        for registered in reversed(self._responses):
+            if not registered.once and self._matches(registered, request):
+                return registered.outcome
 
         raise AssertionError(
             f'No registered response matched {request.method} {request.url} with options {dict(request.options)!r}. '
-            f'Pending responses: {self._responses!r}.'
+            f'Registered responses: {self._responses!r}.'
         )
 
     @staticmethod

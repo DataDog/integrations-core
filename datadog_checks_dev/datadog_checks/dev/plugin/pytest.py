@@ -420,6 +420,7 @@ def fake_http_response(fake_http: Any) -> Callable[..., Any]:
     """Build and register a response on the base-owned HTTP fake.
 
     The `json_data` argument sets both the serialized body and parsed result unless `json_result` is overridden.
+    The response answers every matching request unless `once=True`; see `FakeHTTPClient.register_response`.
     """
     FakeHTTPResponse = importlib.import_module('datadog_checks.base.stubs.http').FakeHTTPResponse
 
@@ -432,6 +433,7 @@ def fake_http_response(fake_http: Any) -> Callable[..., Any]:
         status_code: int = 200,
         encoding: str = 'utf-8',
         match_options: Mapping[str, Any] | None = None,
+        once: bool = False,
         **overrides: Any,
     ) -> Any:
         if json_data is not FAKE_HTTP_JSON_UNSET:
@@ -445,7 +447,7 @@ def fake_http_response(fake_http: Any) -> Callable[..., Any]:
             encoding=encoding,
             **overrides,
         )
-        fake_http.register_response(method, url, response, match_options=match_options)
+        fake_http.register_response(method, url, response, match_options=match_options, once=once)
         return response
 
     return register_response
