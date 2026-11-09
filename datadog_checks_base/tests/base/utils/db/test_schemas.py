@@ -347,9 +347,9 @@ class FakeTablesCollector(SchemaObjectCollector):
         return "test_databases"
 
     @contextmanager
-    def _open_rows(self, session: FakeSession, database_name: str) -> Iterator[Iterator[str]]:
+    def _open_rows(self, session: FakeSession, database: dict[str, Any]) -> Iterator[Iterator[str]]:
         session.queries.append(self.kind)
-        yield self._iter_rows(database_name)
+        yield self._iter_rows(database["name"])
 
     def _iter_rows(self, database_name: str) -> Iterator[str]:
         for row in self._rows_by_database.get(database_name, []):
@@ -378,10 +378,12 @@ class FakeDatabaseCollector(DatabaseSchemaCollector):
         object_collectors: Sequence[SchemaObjectCollector],
         databases: Sequence[str],
         unopenable: Collection[str] = (),
+        unclosable: Collection[str] = (),
     ):
         super().__init__(check, object_collectors)
         self._databases = databases
         self._unopenable = set(unopenable)
+        self._unclosable = set(unclosable)
         self.get_databases_calls = 0
         self.sessions: list[FakeSession] = []
 
@@ -390,12 +392,15 @@ class FakeDatabaseCollector(DatabaseSchemaCollector):
         return [{"name": name} for name in self._databases]
 
     @contextmanager
-    def _open_database(self, database_name: str) -> Iterator[FakeSession]:
+    def _open_database(self, database: dict[str, Any]) -> Iterator[FakeSession]:
+        database_name = database["name"]
         if database_name in self._unopenable:
             raise RuntimeError(f"cannot open {database_name}")
         session = FakeSession(database_name)
         self.sessions.append(session)
         yield session
+        if database_name in self._unclosable:
+            raise RuntimeError(f"cannot close {database_name}")
 
 
 def events_by_kind(aggregator: AggregatorStub) -> dict[str, list[dict[str, Any]]]:
@@ -471,18 +476,54 @@ def test_database_collector_kind_failure_skips_only_that_kind(aggregator: Aggreg
 
 
 @pytest.mark.unit
-def test_database_collector_unopenable_database_skips_all_kinds(aggregator: AggregatorStub):
+@pytest.mark.parametrize(
+    "failure, expected_snapshots, expected_log",
+    [
+        pytest.param("open", ["db1", "db3"], "Skipping database db2", id="open fails"),
+        # The payloads were already sent, so the database must not be reported as skipped.
+        pytest.param("close", ["db1", "db2", "db3"], "Error closing database db2", id="close fails"),
+    ],
+)
+def test_database_collector_database_failure_continues_with_next_database(
+    aggregator: AggregatorStub,
+    caplog: pytest.LogCaptureFixture,
+    failure: str,
+    expected_snapshots: list[str],
+    expected_log: str,
+):
     check = TestDatabaseCheck()
     rows = {"db1": ["a"], "db2": ["b"], "db3": ["c"]}
     tables = FakeTablesCollector(check, SchemaCollectorConfig(), rows)
     views = FakeViewsCollector(check, SchemaCollectorConfig(), rows)
-    collector = FakeDatabaseCollector(check, [tables, views], ["db1", "db2", "db3"], unopenable=["db2"])
+    collector = FakeDatabaseCollector(
+        check,
+        [tables, views],
+        ["db1", "db2", "db3"],
+        unopenable=["db2"] if failure == "open" else (),
+        unclosable=["db2"] if failure == "close" else (),
+    )
 
     assert collector.collect_schemas() is True
 
     events = events_by_kind(aggregator)
-    assert snapshot_names(events["test_databases"]) == ["db1", "db3"]
-    assert snapshot_names(events["test_views"]) == ["db1", "db3"]
+    assert snapshot_names(events["test_databases"]) == expected_snapshots
+    assert snapshot_names(events["test_views"]) == expected_snapshots
+    warnings = [record.getMessage() for record in caplog.records if record.levelname == "WARNING"]
+    assert [message for message in warnings if "db2" in message] == [
+        message for message in warnings if message.startswith(expected_log)
+    ]
+    assert any(message.startswith(expected_log) for message in warnings)
+
+
+@pytest.mark.unit
+def test_database_collector_without_object_collectors_does_not_list_databases(aggregator: AggregatorStub):
+    """With every kind disabled, a run must not connect to the server at all."""
+    collector = FakeDatabaseCollector(TestDatabaseCheck(), [], ["db1"])
+
+    assert collector.collect_schemas() is True
+
+    assert collector.get_databases_calls == 0
+    assert collector.sessions == []
 
 
 @pytest.mark.unit

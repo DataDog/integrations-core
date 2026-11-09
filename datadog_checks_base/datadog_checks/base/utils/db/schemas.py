@@ -97,11 +97,12 @@ class SchemaObjectCollector(ABC):
         return self._config.payload_chunk_size
 
     @abstractmethod
-    def _open_rows(self, session: Any, database_name: str) -> ContextManager[Iterator[Any]]:
+    def _open_rows(self, session: Any, database: DatabaseInfo) -> ContextManager[Iterator[Any]]:
         """
         Runs this kind's catalog query for one database and yields an iterator over its rows.
 
-        `session` is whatever `DatabaseSchemaCollector._open_database` yielded for this database. The rows must be
+        `session` is whatever `DatabaseSchemaCollector._open_database` yielded for this database, and `database` is
+        its entry from `_get_databases`, so DBMS-specific fields listed there are available here. The rows must be
         fully read, or the query closed, when the context exits, because the next kind runs on the same session.
         """
 
@@ -126,7 +127,7 @@ class SchemaObjectCollector(ABC):
         self._queued_rows = []
         rows_count = 0
         try:
-            with self._open_rows(session, database['name']) as rows:
+            with self._open_rows(session, database) as rows:
                 for row in rows:
                     self._queued_rows.append(self._map_row(database, row))
                     rows_count += 1
@@ -148,32 +149,29 @@ class SchemaObjectCollector(ABC):
             self._collection_time_ms += now_ms() - started_at
 
     def _submit_telemetry(self, status: str) -> None:
-        """Reports this kind's totals for the run that just ended, then clears them for the next run."""
-        try:
-            telemetry_tags = self._check.tags + ["status:" + status, "kind:" + self.kind]
-            self._check.histogram(
-                f"dd.{self._check.dbms}.schema.time",
-                self._collection_time_ms,
-                tags=telemetry_tags,
-                hostname=self._check.reported_hostname,
-                raw=True,
-            )
-            self._check.gauge(
-                self.object_count_metric_name,
-                self._total_rows_count,
-                tags=telemetry_tags,
-                hostname=self._check.reported_hostname,
-                raw=True,
-            )
-            self._check.gauge(
-                f"dd.{self._check.dbms}.schema.payloads_count",
-                self._total_payloads_count,
-                tags=telemetry_tags,
-                hostname=self._check.reported_hostname,
-                raw=True,
-            )
-        finally:
-            self._reset()
+        """Reports this kind's totals for the run that just ended."""
+        telemetry_tags = self._check.tags + ["status:" + status, "kind:" + self.kind]
+        self._check.histogram(
+            f"dd.{self._check.dbms}.schema.time",
+            self._collection_time_ms,
+            tags=telemetry_tags,
+            hostname=self._check.reported_hostname,
+            raw=True,
+        )
+        self._check.gauge(
+            self.object_count_metric_name,
+            self._total_rows_count,
+            tags=telemetry_tags,
+            hostname=self._check.reported_hostname,
+            raw=True,
+        )
+        self._check.gauge(
+            f"dd.{self._check.dbms}.schema.payloads_count",
+            self._total_payloads_count,
+            tags=telemetry_tags,
+            hostname=self._check.reported_hostname,
+            raw=True,
+        )
 
     @property
     def base_event(self):
@@ -244,7 +242,7 @@ class DatabaseSchemaCollector(ABC):
         (such as a closed connection) ends the run instead of moving on to the next database.
         """
 
-    def _open_database(self, database_name: str) -> ContextManager[Any]:
+    def _open_database(self, database: DatabaseInfo) -> ContextManager[Any]:
         """
         Opens one database for collection and yields a session that every object collector receives.
 
@@ -260,6 +258,8 @@ class DatabaseSchemaCollector(ABC):
         Errors for a single database are logged and skipped. Any other error, including one raised while iterating
         the database list, ends the run with `status:error` telemetry and is re-raised.
         """
+        if not self._object_collectors:
+            return True
         status = "success"
         try:
             databases = self._get_databases()
@@ -277,30 +277,44 @@ class DatabaseSchemaCollector(ABC):
             raise e
         finally:
             for object_collector in self._object_collectors:
-                object_collector._submit_telemetry(status)
+                try:
+                    object_collector._submit_telemetry(status)
+                finally:
+                    object_collector._reset()
         return True
 
     def _collect_database(self, database: DatabaseInfo) -> None:
         database_name = database['name']
         self._log.debug("Starting collection of schemas for database %s", database_name)
         try:
-            with self._open_database(database_name) as session:
-                for object_collector in self._object_collectors:
+            with contextlib.ExitStack() as stack:
+                try:
+                    session = stack.enter_context(self._open_database(database))
+                except Exception as e:
                     self._raise_if_cancelled()
-                    try:
-                        object_collector._collect_database(session, database)
-                    except Exception as e:
-                        self._raise_if_cancelled()
-                        self._log.warning(
-                            "Skipping %s collection for database %s due to error: %s",
-                            object_collector.kind,
-                            database_name,
-                            e,
-                            exc_info=True,
-                        )
+                    self._log.warning("Skipping database %s due to error: %s", database_name, e, exc_info=True)
+                    return
+                self._collect_objects(session, database)
         except Exception as e:
+            # Every object collector's error is handled in `_collect_objects`, so what reaches here was raised while
+            # closing the database, after its payloads were sent.
             self._raise_if_cancelled()
-            self._log.warning("Skipping database %s due to error: %s", database_name, e, exc_info=True)
+            self._log.warning("Error closing database %s after collecting schemas: %s", database_name, e, exc_info=True)
+
+    def _collect_objects(self, session: Any, database: DatabaseInfo) -> None:
+        for object_collector in self._object_collectors:
+            self._raise_if_cancelled()
+            try:
+                object_collector._collect_database(session, database)
+            except Exception as e:
+                self._raise_if_cancelled()
+                self._log.warning(
+                    "Skipping %s collection for database %s due to error: %s",
+                    object_collector.kind,
+                    database['name'],
+                    e,
+                    exc_info=True,
+                )
 
 
 class SchemaCollector(SchemaObjectCollector):
@@ -343,8 +357,8 @@ class SchemaCollector(SchemaObjectCollector):
         raise NotImplementedError("Subclasses must implement _get_next")
 
     @contextlib.contextmanager
-    def _open_rows(self, _session: Any, database_name: str) -> Iterator[Iterator[Any]]:
-        with self._get_cursor(database_name) as cursor:
+    def _open_rows(self, _session: Any, database: DatabaseInfo) -> Iterator[Iterator[Any]]:
+        with self._get_cursor(database['name']) as cursor:
             yield self._iter_cursor(cursor)
 
     def _iter_cursor(self, cursor) -> Iterator[Any]:
