@@ -55,17 +55,16 @@ def integration_check() -> Callable[[dict, Optional[dict]], SQLServer]:
 
 
 def create_schema_collector(check: SQLServer) -> SQLServerSchemaCollector:
-    collector = check.sql_metadata._schema_collector
-    # Records each database's compatibility level, which picks the query form.
-    collector._get_databases()
-    return collector
+    return check.sql_metadata._schema_collector
 
 
 @contextlib.contextmanager
 def open_tables_query(collector: SQLServerSchemaCollector) -> Iterator[tuple[SQLServerTableCollector, object]]:
     """Opens the schema database and starts the tables query, yielding the table collector and its cursor."""
     tables = collector._object_collectors[0]
-    with collector._open_database(SCHEMA_DATABASE) as session, tables._open_rows(session, SCHEMA_DATABASE):
+    # The listed database carries its compatibility level, which picks the query form.
+    [database] = [database for database in collector._get_databases() if database["name"] == SCHEMA_DATABASE]
+    with collector._open_database(database) as session, tables._open_rows(session, database):
         yield tables, session.cursor
 
 
