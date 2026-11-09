@@ -12,6 +12,7 @@ from ddev.cli.ci.tests.batching.targets import (
     UNTESTABLE_TARGETS,
     AllTargetsRule,
     DirectTargetRule,
+    ExplicitTargetsRule,
     InfrastructureRule,
     RegistryRepositoryFacts,
     RepositoryWideRule,
@@ -386,3 +387,19 @@ def test_registry_repository_facts_eligible_targets_excludes_untestable_and_poli
 def test_all_targets_rule_selects_every_eligible_target_without_a_change():
     """`--all` must not depend on the change set: a run that tests everything has nothing to diff."""
     assert list(AllTargetsRule()([], facts("postgres", "mysql", "mesos_slave"))) == ["mysql", "postgres"]
+
+
+def test_explicit_targets_rule_selects_the_requested_targets_whatever_changed():
+    """`--targets` names what to test, so the change set neither adds to it nor narrows it."""
+    rule = ExplicitTargetsRule(targets=("redis", "ntp"))
+
+    assert list(rule([modified("postgres/tests/test_a.py")], facts("postgres", "redis", "ntp"))) == ["redis", "ntp"]
+
+
+@pytest.mark.parametrize("target", ["nttp", "mesos_slave"], ids=["unknown", "untestable-by-policy"])
+def test_explicit_targets_rule_rejects_a_target_that_is_not_testable(target: str):
+    # A misspelled target would otherwise be dropped and the run would test less than it was asked to.
+    rule = ExplicitTargetsRule(targets=("ntp", target))
+
+    with pytest.raises(PlanningError, match=target):
+        list(rule([], facts("ntp", "mesos_slave")))
