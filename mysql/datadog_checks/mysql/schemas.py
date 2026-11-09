@@ -353,7 +353,8 @@ class MySqlTableCollector(MySqlObjectCollector):
         return STRATEGY_CHUNKED
 
     @contextlib.contextmanager
-    def _open_rows(self, session: None, database_name: str) -> Iterator[Iterator[dict]]:
+    def _open_rows(self, session: None, database: dict) -> Iterator[Iterator[dict]]:
+        database_name = database["name"]
         if self._strategy == STRATEGY_CHUNKED:
             yield self._iter_chunked_tables(database_name)
             return
@@ -470,8 +471,8 @@ class MySqlViewCollector(ViewObjectCollector, MySqlObjectCollector):
         return "mysql_views"
 
     @contextlib.contextmanager
-    def _open_rows(self, session: None, database_name: str) -> Iterator[Iterator[dict]]:
-        yield self._iter_views(database_name)
+    def _open_rows(self, session: None, database: dict) -> Iterator[Iterator[dict]]:
+        yield self._iter_views(database["name"])
 
     def _iter_views(self, database_name: str) -> Iterator[dict]:
         hint = self._query_hint()
