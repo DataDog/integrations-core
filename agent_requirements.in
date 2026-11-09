@@ -12,8 +12,8 @@ clickhouse-connect==1.6.0
 cm-client==45.0.4
 confluent-kafka==2.13.2
 cryptography==50.0.1
-ddtrace==4.13.2
-dnspython==2.8.0
+ddtrace==4.16.1
+dnspython==2.9.1
 fastavro==1.12.2
 foundationdb==6.3.25
 hazelcast-python-client==5.7.0
@@ -34,10 +34,10 @@ prometheus-client==0.26.0
 protobuf==7.35.1
 psutil==6.0.0
 psycopg[c,pool]==3.3.4
-pyasn1==0.6.4
+pyasn1==0.6.5
 pydantic==2.13.5
 pyjwt==2.15.1
-pymongo==4.18.2
+pymongo==4.18.3
 pymqi==1.12.13
 pymysql==1.1.2
 pyodbc==5.3.0
