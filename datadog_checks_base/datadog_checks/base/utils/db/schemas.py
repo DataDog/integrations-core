@@ -239,7 +239,8 @@ class DatabaseSchemaCollector(ABC):
         """
         Raises if the owning job was cancelled. The default never raises.
 
-        It runs before each database and before any per-database error is skipped, so an error caused by a cancel
+        It runs before each database, before each object collector, and before any error is skipped, so a cancel
+        never starts another query, and an error caused by a cancel
         (such as a closed connection) ends the run instead of moving on to the next database.
         """
 
@@ -285,6 +286,7 @@ class DatabaseSchemaCollector(ABC):
         try:
             with self._open_database(database_name) as session:
                 for object_collector in self._object_collectors:
+                    self._raise_if_cancelled()
                     try:
                         object_collector._collect_database(session, database)
                     except Exception as e:

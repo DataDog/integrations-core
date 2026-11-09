@@ -1,11 +1,14 @@
 # (C) Datadog, Inc. 2023-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from collections.abc import Collection, Iterator, Mapping, Sequence
 from contextlib import contextmanager
+from typing import Any
 
 import pytest
 
 from datadog_checks.base.checks.db import DatabaseCheck
+from datadog_checks.base.stubs.aggregator import AggregatorStub
 from datadog_checks.base.utils.db.schemas import (
     DatabaseSchemaCollector,
     SchemaCollector,
@@ -322,60 +325,72 @@ def test_schema_collector_skips_malformed_database_entry(aggregator):
 class FakeSession:
     """Stands in for a per-database connection and records the queries run on it."""
 
-    def __init__(self, database_name):
+    def __init__(self, database_name: str):
         self.database_name = database_name
-        self.queries = []
+        self.queries: list[str] = []
 
 
 class FakeTablesCollector(SchemaObjectCollector):
-    def __init__(self, check, config, rows_by_database, fail_on=()):
+    def __init__(
+        self,
+        check: DatabaseCheck,
+        config: SchemaCollectorConfig,
+        rows_by_database: Mapping[str, Sequence[str]],
+        fail_on: Collection[tuple[str, str]] = (),
+    ):
         super().__init__(check, config)
         self._rows_by_database = rows_by_database
         self._fail_on = set(fail_on)
 
     @property
-    def kind(self):
+    def kind(self) -> str:
         return "test_databases"
 
     @contextmanager
-    def _open_rows(self, session, database_name):
+    def _open_rows(self, session: FakeSession, database_name: str) -> Iterator[Iterator[str]]:
         session.queries.append(self.kind)
         yield self._iter_rows(database_name)
 
-    def _iter_rows(self, database_name):
+    def _iter_rows(self, database_name: str) -> Iterator[str]:
         for row in self._rows_by_database.get(database_name, []):
             if (database_name, row) in self._fail_on:
                 raise RuntimeError(f"{self.kind} query failed")
             yield row
 
-    def _map_row(self, database, cursor_row):
+    def _map_row(self, database: dict[str, Any], cursor_row: str) -> dict[str, Any]:
         return {**database, "tables": [{"name": cursor_row}]}
 
 
 class FakeViewsCollector(ViewObjectCollector, FakeTablesCollector):
     @property
-    def kind(self):
+    def kind(self) -> str:
         return "test_views"
 
-    def _map_row(self, database, cursor_row):
+    def _map_row(self, database: dict[str, Any], cursor_row: str) -> dict[str, Any]:
         view = {"name": cursor_row, "definition": "SELECT 1", "columns": []}
         return {**database, "schemas": [self._schema_with_view({"name": "public"}, view)]}
 
 
 class FakeDatabaseCollector(DatabaseSchemaCollector):
-    def __init__(self, check, object_collectors, databases, unopenable=()):
+    def __init__(
+        self,
+        check: DatabaseCheck,
+        object_collectors: Sequence[SchemaObjectCollector],
+        databases: Sequence[str],
+        unopenable: Collection[str] = (),
+    ):
         super().__init__(check, object_collectors)
         self._databases = databases
         self._unopenable = set(unopenable)
         self.get_databases_calls = 0
-        self.sessions = []
+        self.sessions: list[FakeSession] = []
 
-    def _get_databases(self):
+    def _get_databases(self) -> list[dict[str, Any]]:
         self.get_databases_calls += 1
         return [{"name": name} for name in self._databases]
 
     @contextmanager
-    def _open_database(self, database_name):
+    def _open_database(self, database_name: str) -> Iterator[FakeSession]:
         if database_name in self._unopenable:
             raise RuntimeError(f"cannot open {database_name}")
         session = FakeSession(database_name)
@@ -383,22 +398,22 @@ class FakeDatabaseCollector(DatabaseSchemaCollector):
         yield session
 
 
-def events_by_kind(aggregator):
-    events = {}
+def events_by_kind(aggregator: AggregatorStub) -> dict[str, list[dict[str, Any]]]:
+    events: dict[str, list[dict[str, Any]]] = {}
     for event in aggregator.get_event_platform_events("dbm-metadata"):
         events.setdefault(event["kind"], []).append(event)
     return events
 
 
-def snapshot_names(events):
+def snapshot_names(events: Sequence[dict[str, Any]]) -> list[str | None]:
     """
     Names of the databases whose snapshot was completed by a terminal payload, in collection order.
 
     A terminal payload is empty when the rows were already flushed in chunks, so the name comes from the latest
     payload that had rows.
     """
-    completed = []
-    current = None
+    completed: list[str | None] = []
+    current: str | None = None
     for event in events:
         if event["metadata"]:
             current = event["metadata"][0]["name"]
@@ -408,7 +423,7 @@ def snapshot_names(events):
 
 
 @pytest.mark.unit
-def test_database_collector_opens_each_database_once_for_all_kinds(aggregator):
+def test_database_collector_opens_each_database_once_for_all_kinds(aggregator: AggregatorStub):
     check = TestDatabaseCheck()
     rows = {"db1": ["a"], "db2": ["b"]}
     tables = FakeTablesCollector(check, SchemaCollectorConfig(), rows)
@@ -431,7 +446,7 @@ def test_database_collector_opens_each_database_once_for_all_kinds(aggregator):
 
 
 @pytest.mark.unit
-def test_database_collector_kind_failure_skips_only_that_kind(aggregator):
+def test_database_collector_kind_failure_skips_only_that_kind(aggregator: AggregatorStub):
     """A kind failing partway through a database leaves its snapshot incomplete without affecting other kinds."""
     check = TestDatabaseCheck()
     config = SchemaCollectorConfig()
@@ -456,7 +471,7 @@ def test_database_collector_kind_failure_skips_only_that_kind(aggregator):
 
 
 @pytest.mark.unit
-def test_database_collector_unopenable_database_skips_all_kinds(aggregator):
+def test_database_collector_unopenable_database_skips_all_kinds(aggregator: AggregatorStub):
     check = TestDatabaseCheck()
     rows = {"db1": ["a"], "db2": ["b"], "db3": ["c"]}
     tables = FakeTablesCollector(check, SchemaCollectorConfig(), rows)
@@ -471,7 +486,7 @@ def test_database_collector_unopenable_database_skips_all_kinds(aggregator):
 
 
 @pytest.mark.unit
-def test_database_collector_reports_telemetry_per_kind(aggregator):
+def test_database_collector_reports_telemetry_per_kind(aggregator: AggregatorStub):
     check = TestDatabaseCheck()
     rows = {"db1": ["a", "b"]}
     tables = FakeTablesCollector(check, SchemaCollectorConfig(), {"db1": ["a"]})
@@ -488,13 +503,13 @@ def test_database_collector_reports_telemetry_per_kind(aggregator):
 
 
 @pytest.mark.unit
-def test_database_collector_database_listing_failure_reports_error_for_every_kind(aggregator):
+def test_database_collector_database_listing_failure_reports_error_for_every_kind(aggregator: AggregatorStub):
     check = TestDatabaseCheck()
     tables = FakeTablesCollector(check, SchemaCollectorConfig(), {})
     views = FakeViewsCollector(check, SchemaCollectorConfig(), {})
     collector = FakeDatabaseCollector(check, [tables, views], [])
 
-    def fail():
+    def fail() -> list[dict[str, Any]]:
         raise RuntimeError("cannot list databases")
 
     collector._get_databases = fail
@@ -513,7 +528,7 @@ def test_database_collector_database_listing_failure_reports_error_for_every_kin
         pytest.param(100, 100, id="keeps smaller configured size"),
     ],
 )
-def test_view_collector_payload_chunk_size(configured_chunk_size, expected_chunk_size):
+def test_view_collector_payload_chunk_size(configured_chunk_size: int, expected_chunk_size: int):
     """View rows carry full definitions, so view payloads must not use the much larger table chunk size."""
     config = SchemaCollectorConfig()
     config.payload_chunk_size = configured_chunk_size
@@ -523,26 +538,34 @@ def test_view_collector_payload_chunk_size(configured_chunk_size, expected_chunk
 
 
 @pytest.mark.unit
-def test_database_collector_stops_when_cancelled_during_collection(aggregator):
-    """An error raised because the job was cancelled ends the run instead of moving on to the next kind or database."""
+@pytest.mark.parametrize("tables_query_fails", [True, False], ids=["query fails", "query succeeds"])
+def test_database_collector_stops_when_cancelled_during_collection(
+    aggregator: AggregatorStub, tables_query_fails: bool
+):
+    """
+    A cancel during one kind's query ends the run before the next kind or database starts. When the cancel also
+    makes the query fail (such as a closed connection), the error is not skipped as a per-kind failure.
+    """
     check = TestDatabaseCheck()
     rows = {"db1": ["a"], "db2": ["b"]}
-    tables = FakeTablesCollector(check, SchemaCollectorConfig(), rows, fail_on=[("db1", "a")])
+    tables = FakeTablesCollector(check, SchemaCollectorConfig(), rows)
     views = FakeViewsCollector(check, SchemaCollectorConfig(), rows)
     collector = FakeDatabaseCollector(check, [tables, views], ["db1", "db2"])
     cancelled = False
 
-    def raise_if_cancelled():
+    def raise_if_cancelled() -> None:
         if cancelled:
             raise RuntimeError("cancelled")
 
-    def cancel_then_fail(database_name):
+    def cancel_during_query(database_name: str) -> Iterator[str]:
         nonlocal cancelled
         cancelled = True
-        raise RuntimeError("connection closed")
+        if tables_query_fails:
+            raise RuntimeError("connection closed")
+        yield from rows[database_name]
 
     collector._raise_if_cancelled = raise_if_cancelled
-    tables._iter_rows = cancel_then_fail
+    tables._iter_rows = cancel_during_query
 
     with pytest.raises(RuntimeError, match="cancelled"):
         collector.collect_schemas()
