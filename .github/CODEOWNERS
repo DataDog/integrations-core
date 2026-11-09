@@ -516,6 +516,7 @@ datadog_checks_base/datadog_checks/base/checks/windows/              @DataDog/wi
 /automox/                                                            @DataDog/cloud-siem
 /automox/*.md                                                        @DataDog/cloud-siem @DataDog/documentation
 /automox/manifest.json                                               @DataDog/cloud-siem @DataDog/documentation
+/automox/metadata.csv                                                @DataDog/cloud-siem @DataDog/documentation
 /automox/assets/logs/                                                @DataDog/cloud-siem @DataDog/documentation @DataDog/logs-integrations-reviewers
 
 

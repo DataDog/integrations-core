@@ -1,0 +1,33 @@
+{
+    "version": 2,
+    "created_at": "2026-10-04",
+    "last_updated_at": "2026-10-10",
+    "title": "Devices have been disconnected for 30 days",
+    "description": "A device that is failing a policy has not checked in with Automox for 30 days, so its patches and vulnerabilities are unknown. Reconnect its agent, or remove the device from Automox if it has been retired.",
+    "definition": {
+        "name": "[Automox] Devices have been disconnected for 30 days",
+        "type": "query alert",
+        "query": "max(last_1h):max:automox.needs_attention.disconnected_thirty_days{*} by {organization_id,automox_device} > 0",
+        "message": "{{#is_alert}}\n{{automox_device.name}} has not checked in with Automox for 30 days and is failing a policy.\n{{/is_alert}}\n{{#is_recovery}}\n{{automox_device.name}} has checked in again, or is no longer failing a policy.\n{{/is_recovery}}\n\nOrganization: {{organization_id.name}}\n\nRestart or reinstall the Automox agent if the device is still in use, and remove it from Automox if it has been retired.",
+        "tags": [
+            "integration:automox"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 0
+            },
+            "notify_audit": false,
+            "on_missing_data": "resolve",
+            "include_tags": true,
+            "new_group_delay": 60,
+            "silenced": {}
+        },
+        "priority": 3,
+        "restriction_policy": {
+            "bindings": []
+        }
+    },
+    "tags": [
+        "integration:automox"
+    ]
+}
