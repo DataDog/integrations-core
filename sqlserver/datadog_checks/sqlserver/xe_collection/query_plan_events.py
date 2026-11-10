@@ -92,7 +92,8 @@ EVENT_FILE_READ_QUERY = """\
 SELECT TOP (?) event_data, file_name, file_offset
 FROM sys.fn_xe_file_target_read_file(?, NULL, NULL, NULL)
 """
-# Reading from a checkpoint returns the events of the buffers after it, in this file and the next ones.
+# Reading from a checkpoint returns the events of the buffers after it, in this file and the next ones, including the
+# file a restarted session starts.
 EVENT_FILE_READ_FROM_CHECKPOINT_QUERY = """\
 SELECT TOP (?) event_data, file_name, file_offset
 FROM sys.fn_xe_file_target_read_file(?, NULL, ?, ?)
@@ -302,7 +303,7 @@ class QueryPlanEventsHandler(XESessionBase):
         events = self._process_events(xml_data) if xml_data else []
         if not events:
             return
-        # Reads start at a buffer, which can hold events already read.
+        # The ring buffer, and a file read from its start, return the events already read again: they're skipped.
         self._last_event_timestamp = events[-1]['timestamp']
         self._submit_lag(events)
         for plan_event in self._plan_events(cursor, events):
@@ -400,16 +401,15 @@ class QueryPlanEventsHandler(XESessionBase):
 
         rows = []
         if self._event_file_checkpoint is not None:
-            checkpoint_file, checkpoint_offset = self._event_file_checkpoint
             try:
                 cursor.execute(
                     EVENT_FILE_READ_FROM_CHECKPOINT_QUERY,
-                    (self.max_events, pattern, checkpoint_file, checkpoint_offset),
+                    (self.max_events, pattern, *self._event_file_checkpoint),
                 )
                 rows = cursor.fetchall()
             except Exception as e:
                 raise_if_cancelled(self._cancel_event)
-                # The checkpoint's file is gone, as after rollovers or a restart of the session.
+                # The checkpoint's file is gone, as after rollovers (error 25717).
                 self._log.debug(
                     "Failed to read %s after %s, reading the current file %s: %s",
                     self.session_name,
@@ -418,17 +418,6 @@ class QueryPlanEventsHandler(XESessionBase):
                     e,
                 )
                 self._event_file_checkpoint = None
-            else:
-                # The session moved on to a new file, as after a restart: files after the checkpoint's would have
-                # rows otherwise.
-                if not rows and checkpoint_file.lower() != current_file.lower():
-                    self._log.debug(
-                        "No events after the %s checkpoint %s, reading the current file %s",
-                        self.session_name,
-                        self._event_file_checkpoint,
-                        current_file,
-                    )
-                    self._event_file_checkpoint = None
         if self._event_file_checkpoint is None:
             cursor.execute(EVENT_FILE_READ_QUERY, (self.max_events, current_file))
             rows = cursor.fetchall()
