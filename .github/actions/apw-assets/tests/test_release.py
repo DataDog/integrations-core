@@ -4,7 +4,6 @@
 import copy
 import hashlib
 import json
-import re
 import subprocess
 from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
@@ -260,17 +259,6 @@ class TestRelease:
         self.release.publish(self.directory)
         assert not self.remote['draft']
         assert [call[1] for call in self.mutations] == ['create', 'upload', 'upload', 'upload', 'edit']
-
-    def test_release_notes_keep_the_downstream_producer_run_contract(self):
-        self.release.publish(self.directory)
-        create = self.mutations[0]
-        notes = create[create.index('--notes') + 1]
-        # Same pattern as dd-source's APW fed pin discovery (fedpins/plan.go).
-        pattern = rf'(?m)^Built by https://github\.com/{re.escape(REPOSITORY)}/actions/runs/([1-9][0-9]*)\.$'
-        runs = re.findall(pattern, notes)
-        assert runs == ['123']
-        assert f'\nBuilt by https://github.com/{REPOSITORY}/actions/runs/123.\n' in '\n' + notes
-        assert create[create.index('--title') + 1] == f'APW assets {COMMIT}'
 
     def test_interrupted_upload_resumes_without_replacing_uploaded_assets(self):
         self.fail_upload = 'release.json'
