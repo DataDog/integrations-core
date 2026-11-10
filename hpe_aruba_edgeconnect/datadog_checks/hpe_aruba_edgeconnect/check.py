@@ -500,10 +500,6 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
         if raw:
             last_ts = int(raw)
         else:
-            # An empty cache means a first run, or an HA failover to an Agent that has not run this check.
-            # Start one interval back so outstanding alarms already reported elsewhere are not resent. This
-            # compares the Agent clock with appliance alarm timestamps: an appliance clock running behind can
-            # drop alarms from this first window, and one running ahead can resend older alarms.
             last_ts = int((time.time() - (self.config.min_collection_interval or 60)) * 1000)
         newest_ts = last_ts
         for alarm in outstanding:
@@ -513,8 +509,6 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                     continue
                 newest_ts = max(newest_ts, int(raised_ms))
             self._submit_alarm_event(alarm, client.app_ip, base_tags)
-        # Save the starting cursor even when no alarm is newer, so later runs continue from it instead of
-        # opening a new window that skips alarms raised between runs.
         if not raw or newest_ts > last_ts:
             self.write_persistent_cache(cache_key, str(newest_ts))
 
