@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 STATUS_METRICS = {
     "ready": "gauge",
     "health": "gauge",
