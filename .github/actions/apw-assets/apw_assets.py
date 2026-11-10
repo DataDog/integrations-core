@@ -243,8 +243,9 @@ class Release:
             # points elsewhere before creating any release.
             self.tag_exists()
             notes = (
-                "Assets for integrations such as dashboards and monitors for "
-                f"{self.repository.split('/')[1]} at commit {self.commit}\n\n"
+                "Integration assets, such as dashboards and monitors, from "
+                f"{self.repository.split('/')[1]} at commit {self.commit}. "
+                "These assets are set up automatically by Datadog.\n\n"
                 f"Built by {os.environ['GITHUB_SERVER_URL']}/{self.repository}"
                 f"/actions/runs/{os.environ['GITHUB_RUN_ID']}.\n"
             )
