@@ -29,6 +29,8 @@ EVICTOR_NAME_ANNOTATION = 'evictor-pod-group-name'
 EVICTOR_NAMESPACE_ANNOTATION = 'evictor-pod-group-namespace'
 
 EVENT_INDEX_CACHE_KEY = 'podgroup_event_index'
+# Seconds between the eviction stamp and the `Evict` event that KAI records for it.
+EVICT_EVENT_TOLERANCE = 1
 ALERT_TYPES = {'created': 'info', 'pending': 'warning', 'admitted': 'info', 'evicted': 'warning'}
 
 
@@ -244,23 +246,23 @@ class PodGroupEventCollector:
         eviction = parse_timestamp(transition.timestamp)
         # The Kubernetes event recorder combines bursts of similar events, such as one per pod of a large PodGroup, into
         # events without KAI's annotations.
-        annotated = [
+        annotated = [event for event in events if EVICTOR_ACTION_ANNOTATION in event_annotations(event)]
+        # The scheduler records the event and stamps the eviction at most a second apart. An older event belongs to an
+        # earlier eviction, and a later one to an eviction that happened after the PodGroups were listed.
+        matching = [
             event
-            for event in events
-            if EVICTOR_ACTION_ANNOTATION in event_annotations(event)
-            and evict_event_timestamp(event) == eviction
+            for event in annotated
+            if eviction is not None and eviction <= evict_event_timestamp(event) <= eviction + EVICT_EVENT_TOLERANCE
         ]
-        latest = max(annotated, key=evict_event_timestamp, default=None)
-        # The scheduler records the event and stamps the eviction at the same moment. Matching the exact timestamp
-        # avoids attaching a later eviction's details when another eviction happens between the two API reads.
-        if latest is None:
+        matched = min(matching, key=evict_event_timestamp, default=None)
+        if matched is None:
             return []
 
-        annotations = event_annotations(latest)
+        annotations = event_annotations(matched)
         action = annotations[EVICTOR_ACTION_ANNOTATION]
         tags.append(f'kai_eviction_action:{action}')
         # KAI ends some eviction messages with a period and others without.
-        details = [f"{latest['message'].rstrip('.')}."] if latest.get('message') else []
+        details = [f"{matched['message'].rstrip('.')}."] if matched.get('message') else []
         details.append(f'Eviction action: {action}.')
         evictor_name = annotations.get(EVICTOR_NAME_ANNOTATION)
         evictor_namespace = annotations.get(EVICTOR_NAMESPACE_ANNOTATION)

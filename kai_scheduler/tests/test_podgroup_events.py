@@ -249,6 +249,7 @@ def test_repeated_poll_failure_warns_once_per_cause(instance, caplog):
     'evict_events',
     [
         pytest.param([{**EVICT_EVENT, 'lastTimestamp': STARTED_AT}], id='event of an earlier eviction'),
+        pytest.param([LATER_EVICT_EVENT], id='event of a later eviction'),
         pytest.param(Exception('events are forbidden'), id='events cannot be listed'),
     ],
 )
@@ -268,12 +269,21 @@ def test_evicted_without_evict_event(aggregator, instance, evict_events):
     )
 
 
-def test_eviction_details_match_transition(aggregator, instance):
+@pytest.mark.parametrize(
+    'evict_events',
+    [
+        # Another eviction of the PodGroup happened after the PodGroups were listed.
+        pytest.param([EVICT_EVENT, LATER_EVICT_EVENT], id='later eviction'),
+        # The scheduler can record the event in the second after it stamps the eviction.
+        pytest.param([{**EVICT_EVENT, 'lastTimestamp': '2026-11-03T10:05:01Z'}], id='event one second later'),
+    ],
+)
+def test_eviction_details_match_transition(aggregator, instance, evict_events):
     collector = make_collector(
         instance,
         [podgroup(last_start=STARTED_AT)],
         [podgroup(last_start=STARTED_AT, last_eviction=EVICTED_AT)],
-        evict_events=[EVICT_EVENT, LATER_EVICT_EVENT],
+        evict_events=evict_events,
     )
     collect(collector, 2)
 

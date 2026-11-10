@@ -44,7 +44,8 @@ clusterAgent:
         queue_controller_endpoint: http://queue-controller.kai-scheduler.svc:8080/metrics
 ```
 
-If you run several scheduling shards, add one `scheduler_endpoint` instance per shard service. Each instance with `collect_podgroup_events` enabled polls all the PodGroups of the cluster, so set `collect_podgroup_events: false` on all but one of them to avoid duplicate [events](#events).
+If you run several scheduling shards, add one `scheduler_endpoint` instance per shard service.
+If you enable `collect_podgroup_events` on more than one instance, each instance polls every PodGroup in the cluster and reports the same [events](#events). Set `collect_podgroup_events: false` on all instances except one.
 
 #### Binder metrics (optional)
 
@@ -81,7 +82,7 @@ By default, the KAI Scheduler integration polls the KAI PodGroup custom resource
 - **Created** (`kai.podgroup.created`): A PodGroup appears after the check has initialized its state.
 - **Pending** (`kai.podgroup.pending`): The scheduler cannot schedule the PodGroup on a node pool and adds an `UnschedulableOnNodePool` scheduling condition for it.
 - **Admitted** (`kai.podgroup.admitted`): The scheduler allocates pods to a PodGroup that has none allocated, such as a new PodGroup, an evicted one, or a Job that starts its next pod, and updates its `kai.scheduler/last-start-timestamp` annotation.
-- **Evicted** (`kai.podgroup.evicted`): The scheduler evicts some or all of the PodGroup's pods to preempt, reclaim, or consolidate, or because they are background pods whose capacity it gives to other pods, and updates its `kai.scheduler/last-eviction-timestamp` annotation. KAI sets this annotation starting with version 0.17.0. Stale gang evictions do not update it, so they are only counted in `kai.evicted_pods.count`.
+- **Evicted** (`kai.podgroup.evicted`): The scheduler evicts some or all of the PodGroup's pods to preempt, reclaim, or consolidate, or because they are background pods whose capacity it gives to other pods, and updates its `kai.scheduler/last-eviction-timestamp` annotation. KAI sets this annotation starting with version `0.17.0`. Stale gang evictions do not update it, so they are only counted in `kai.evicted_pods.count`.
 
 KAI does not record quota reservation, pod readiness, or completion on the PodGroup, so there are no equivalents of the Kueue `quota_reserved`, `running`, and `finished` Workload events.
 
@@ -89,9 +90,14 @@ Events are tagged with `kube_namespace`, `kai_workload` (the PodGroup name), `ka
 
 Pending events include the scheduling error and a `kai_pending_reason` tag for each reason KAI reports, such as `OverLimit`. Admitted events include the queued wait time when the check can determine it, counted from the PodGroup creation or from the latest eviction. After an eviction of only some of the pods, it can also include time the PodGroup spent running. Eviction events include the message and the eviction action, and are tagged with `kai_eviction_action` (such as `preempt` or `reclaim`) and `kai_evicted_by` (the preemptor PodGroup), when available from the `Evict` Kubernetes event that KAI records on the PodGroup.
 
-Each event also carries `kai_workload_event_index`, a per-PodGroup integer that increases for every event the check emits for that PodGroup. KAI stamps transitions with second-resolution timestamps, so several events can share one. Sort by `timestamp`, then by `kai_workload_event_index` as an integer, to order them. The index is kept in the Agent persistent cache so a process restart continues the sequence for PodGroups still present in the API. The cache is cleared when the check configuration changes, and a new pod starts the sequence at `0` because the run directory is not preserved across container recreation.
+Each event also includes `kai_workload_event_index`, an integer that goes up by one for each event the check emits for a PodGroup. KAI timestamps transitions to the second, so several events can have the same timestamp. To put events in order, sort by timestamp first, then by `kai_workload_event_index` as an integer.
 
-The first collection run seeds the PodGroup state and does not emit events for already existing transitions.
+The Agent stores the index in its persistent cache. After a process restart, the sequence picks up where it left off for PodGroups that still exist in the API. The sequence restarts at 0 in two cases:
+
+- The check configuration changes, which clears the cache.
+- A new pod starts. The run directory doesn't survive container recreation.
+
+The first collection run records the current state of each PodGroup. It doesn't emit events for transitions that happened before that run.
 
 Collecting events requires `list` role-based access control (RBAC) permission on `podgroups.scheduling.run.ai`, and `list` on `events` for the eviction details. Every instance with `collect_podgroup_events` enabled polls all the PodGroups of the cluster, so when you configure several instances, such as one per scheduling shard, set `collect_podgroup_events: false` on all but one of them. Set it to `false` on every instance to disable events.
 
