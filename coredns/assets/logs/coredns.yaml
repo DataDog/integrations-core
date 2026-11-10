@@ -227,319 +227,6 @@ pipeline:
             matchRules: |
               fqdn_with_root_dot %{regex("[^\\s]*[^\\s.]"):ocsf.query.hostname}\.
               fqdn_without_root_dot %{regex("[^\\s]*[^\\s.]"):ocsf.query.hostname}
-        - type: category-processor
-          name: ocsf.query.type
-          enabled: true
-          categories:
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"A"'
-              name: "A"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"NS"'
-              name: "NS"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"MD"'
-              name: "MD"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"MF"'
-              name: "MF"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"CNAME"'
-              name: "CNAME"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"SOA"'
-              name: "SOA"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"MB"'
-              name: "MB"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"MG"'
-              name: "MG"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"MR"'
-              name: "MR"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"NULL"'
-              name: "NULL"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"WKS"'
-              name: "WKS"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"PTR"'
-              name: "PTR"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"HINFO"'
-              name: "HINFO"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"MINFO"'
-              name: "MINFO"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"MX"'
-              name: "MX"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"TXT"'
-              name: "TXT"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"RP"'
-              name: "RP"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"AFSDB"'
-              name: "AFSDB"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"X25"'
-              name: "X25"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"ISDN"'
-              name: "ISDN"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"RT"'
-              name: "RT"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"NSAP"'
-              name: "NSAP"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"NSAP-PTR"'
-              name: "NSAP-PTR"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"SIG"'
-              name: "SIG"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"KEY"'
-              name: "KEY"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"PX"'
-              name: "PX"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"GPOS"'
-              name: "GPOS"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"AAAA"'
-              name: "AAAA"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"LOC"'
-              name: "LOC"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"NXT"'
-              name: "NXT"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"EID"'
-              name: "EID"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"NIMLOC"'
-              name: "NIMLOC"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"SRV"'
-              name: "SRV"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"ATMA"'
-              name: "ATMA"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"NAPTR"'
-              name: "NAPTR"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"KX"'
-              name: "KX"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"CERT"'
-              name: "CERT"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"A6"'
-              name: "A6"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"DNAME"'
-              name: "DNAME"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"SINK"'
-              name: "SINK"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"OPT"'
-              name: "OPT"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"APL"'
-              name: "APL"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"DS"'
-              name: "DS"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"SSHFP"'
-              name: "SSHFP"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"IPSECKEY"'
-              name: "IPSECKEY"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"RRSIG"'
-              name: "RRSIG"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"NSEC"'
-              name: "NSEC"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"DNSKEY"'
-              name: "DNSKEY"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"DHCID"'
-              name: "DHCID"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"NSEC3"'
-              name: "NSEC3"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"NSEC3PARAM"'
-              name: "NSEC3PARAM"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"TLSA"'
-              name: "TLSA"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"SMIMEA"'
-              name: "SMIMEA"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"HIP"'
-              name: "HIP"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"NINFO"'
-              name: "NINFO"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"RKEY"'
-              name: "RKEY"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"TALINK"'
-              name: "TALINK"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"CDS"'
-              name: "CDS"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"CDNSKEY"'
-              name: "CDNSKEY"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"OPENPGPKEY"'
-              name: "OPENPGPKEY"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"CSYNC"'
-              name: "CSYNC"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"ZONEMD"'
-              name: "ZONEMD"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"SVCB"'
-              name: "SVCB"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"HTTPS"'
-              name: "HTTPS"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"DSYNC"'
-              name: "DSYNC"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"SPF"'
-              name: "SPF"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"UINFO"'
-              name: "UINFO"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"UID"'
-              name: "UID"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"GID"'
-              name: "GID"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"UNSPEC"'
-              name: "UNSPEC"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"NID"'
-              name: "NID"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"L32"'
-              name: "L32"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"L64"'
-              name: "L64"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"LP"'
-              name: "LP"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"EUI48"'
-              name: "EUI48"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"EUI64"'
-              name: "EUI64"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"NXNAME"'
-              name: "NXNAME"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"TKEY"'
-              name: "TKEY"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"TSIG"'
-              name: "TSIG"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"IXFR"'
-              name: "IXFR"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"AXFR"'
-              name: "AXFR"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"MAILB"'
-              name: "MAILB"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"MAILA"'
-              name: "MAILA"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"ANY"'
-              name: "ANY"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"URI"'
-              name: "URI"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"CAA"'
-              name: "CAA"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"AVC"'
-              name: "AVC"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"DOA"'
-              name: "DOA"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"AMTRELAY"'
-              name: "AMTRELAY"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"RESINFO"'
-              name: "RESINFO"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"WALLET"'
-              name: "WALLET"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"CLA"'
-              name: "CLA"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"IPN"'
-              name: "IPN"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"TA"'
-              name: "TA"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.type:"DLV"'
-              name: "DLV"
-          target: ocsf.query.type
-        - type: category-processor
-          name: ocsf.query.class
-          enabled: true
-          categories:
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.class:"IN"'
-              name: "IN"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.class:"CS"'
-              name: "CS"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.class:"CH"'
-              name: "CH"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.class:"HS"'
-              name: "HS"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.class:"NONE"'
-              name: "NONE"
-            - filter:
-                query: '@ocsf.query.hostname:* @dns.question.class:"ANY"'
-              name: "ANY"
-          target: ocsf.query.class
         - type: schema-processor
           name: Apply OCSF schema for 4003
           enabled: true
@@ -804,18 +491,18 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.query.type` to `ocsf.query.type`
+            - name: Map `dns.question.type` to `ocsf.query.type`
               sources:
-                - ocsf.query.type
+                - dns.question.type
               sourceType: attribute
               target: ocsf.query.type
               targetFormat: string
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `ocsf.query.class` to `ocsf.query.class`
+            - name: Map `dns.question.class` to `ocsf.query.class`
               sources:
-                - ocsf.query.class
+                - dns.question.class
               sourceType: attribute
               target: ocsf.query.class
               targetFormat: string
@@ -840,3 +527,15 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+    - type: pipeline
+      name: OCSF cleanup for class DNS Activity [4003]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@ocsf.class_uid:4003 -@ocsf.query.hostname:*"
+      processors:
+        - type: exclude-attribute
+          name: Remove `ocsf.query` when `ocsf.query.hostname` is missing
+          enabled: true
+          attributeToExclude: ocsf.query
