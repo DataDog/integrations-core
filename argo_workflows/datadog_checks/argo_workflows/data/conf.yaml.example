@@ -48,6 +48,13 @@ instances:
     ## @param openmetrics_endpoint - string - required
     ## Endpoint exposing the Argo Workflow Controller's Prometheus metrics. For more information refer to:
     ## https://argo-workflows.readthedocs.io/en/latest/metrics/
+    ##
+    ## To collect the Argo Server (API server) metrics, configure a separate instance with the
+    ## Argo Server's `/metrics` endpoint, for example `https://<ARGO_SERVER_HOST>:2746/metrics`.
+    ## The Argo Server uses TLS with a self-signed certificate by default, so set `tls_verify` to false
+    ## or configure `tls_ca_cert`. Unless the Argo Server sets `ARGO_SERVER_METRICS_AUTH` to `false`,
+    ## the endpoint requires authentication: pass an Argo access token in the `Authorization` header
+    ## with the `headers` option.
     #
   - openmetrics_endpoint: http://localhost:9090/metrics
 

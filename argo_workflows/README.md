@@ -80,6 +80,58 @@ For setup details, see [Configure Autodiscovery with the DatadogInstrumentation 
 <!-- xxz tab xxx -->
 <!-- xxz tabs xxx -->
 
+#### Argo Server metrics
+
+The Argo Server (API server) exposes Prometheus-formatted gRPC server and Go runtime metrics at `/metrics` on its main listener, port `2746` by default. Autodiscovery does not configure this endpoint, so collect it with a separate instance of the check. The Argo Server's Go runtime metrics share the `argo_workflows.go.*` names with the Workflow Controller's; use the `endpoint` tag to tell them apart.
+
+Take into account the following when configuring this instance:
+- The Argo Server serves TLS by default with a self-signed certificate. Use `https` in `openmetrics_endpoint` and set `tls_verify` to `false`, or point `tls_ca_cert` to the certificate authority that signed the server's certificate.
+- The `/metrics` endpoint is authenticated by default, and the Argo Server returns HTTP `403` when authentication fails. When the Argo Server only enables the `client` auth mode, send an Argo access token in the `Authorization` header, as shown below. Alternatively, set the `ARGO_SERVER_METRICS_AUTH` environment variable to `false` on the Argo Server to disable authentication on `/metrics`.
+
+For example, add the following instance to the `argo_workflows.d/conf.yaml` file next to the Workflow Controller instance:
+
+```yaml
+instances:
+  - openmetrics_endpoint: http://<WORKFLOW_CONTROLLER_HOST>:9090/metrics
+  - openmetrics_endpoint: https://<ARGO_SERVER_HOST>:2746/metrics
+    tls_verify: false
+    headers:
+      Authorization: Bearer <ARGO_TOKEN>
+```
+
+With Kubernetes annotations, annotate the Argo Server pod:
+
+```yaml
+apiVersion: v1
+kind: Pod
+# (...)
+metadata:
+  name: '<POD_NAME>'
+  annotations:
+    ad.datadoghq.com/argo-server.checks: |
+      {
+        "argo_workflows": {
+          "init_config": {},
+          "instances": [
+            {
+              "openmetrics_endpoint": "https://%%host%%:2746/metrics",
+              "tls_verify": false,
+              "headers": {
+                "Authorization": "Bearer <ARGO_TOKEN>"
+              }
+            }
+          ]
+        }
+      }
+    # (...)
+spec:
+  containers:
+    - name: 'argo-server'
+# (...)
+```
+
+Omit `headers` when authentication is not required, for example when `ARGO_SERVER_METRICS_AUTH` is `false`.
+
 #### Log collection
 
 _Available for Agent versions >6.0_

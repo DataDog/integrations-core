@@ -40,6 +40,12 @@ METRIC_MAP = {
     'go_memstats_stack_sys_bytes': 'go.memstats.stack.sys_bytes',
     'go_memstats_sys_bytes': 'go.memstats.sys_bytes',
     'go_threads': 'go.threads',
+    # gRPC server metrics exposed by the Argo Server (API server)
+    'grpc_server_handled': 'grpc.server.handled',
+    'grpc_server_handling_seconds': 'grpc.server.handling_seconds',
+    'grpc_server_msg_received': 'grpc.server.msg_received',
+    'grpc_server_msg_sent': 'grpc.server.msg_sent',
+    'grpc_server_started': 'grpc.server.started',
 }
 
 # Metrics available in Argo Workflow v3.6+

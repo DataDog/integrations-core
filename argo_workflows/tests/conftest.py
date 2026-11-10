@@ -17,6 +17,10 @@ CHECK_ROOT = os.path.dirname(HERE)
 CONTROLLER_IP_STATE = 'argo_workflows_controller_ip'
 KUBECONFIG_STATE = 'argo_workflows_kubeconfig'
 
+# The Argo Server serves its metrics on the API/UI listener, over TLS with a self-signed certificate by default.
+# The manifest enables the `server` auth mode, so the scrape needs no bearer token.
+ARGO_SERVER_ENDPOINT = 'https://argo-server.argo.svc:2746/metrics'
+
 
 def setup_argo_wf():
     run_command(["kubectl", "create", "ns", "argo"])
@@ -57,7 +61,12 @@ def dd_environment():
             },
         }
 
-        yield {'openmetrics_endpoint': f'http://{controller_ip}:9090/metrics'}, metadata
+        instances = [
+            {'openmetrics_endpoint': f'http://{controller_ip}:9090/metrics'},
+            {'openmetrics_endpoint': ARGO_SERVER_ENDPOINT, 'tls_verify': False},
+        ]
+
+        yield {'instances': instances}, metadata
 
 
 @pytest.fixture(scope='session')

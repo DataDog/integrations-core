@@ -132,6 +132,43 @@ def test_check_with_fixtures(dd_run_check, aggregator, instance, mock_http_respo
     assert_service_checks(aggregator)
 
 
+GO_METRICS = {(n, t) for n, t in GAUGES | COUNTS if n.startswith('go.')}
+GRPC_SERVER_METRICS = {
+    (n, agg.MONOTONIC_COUNT)
+    for n in {
+        'grpc.server.handled.count',
+        'grpc.server.handling_seconds.bucket',
+        'grpc.server.handling_seconds.count',
+        'grpc.server.handling_seconds.sum',
+        'grpc.server.msg_received.count',
+        'grpc.server.msg_sent.count',
+        'grpc.server.started.count',
+    }
+}
+# The Argo Server exposes gRPC server metrics and the same Go runtime metrics as the controller,
+# but none of the controller's workflow metrics.
+ARGO_SERVER_METRICS = sorted(GO_METRICS | GRPC_SERVER_METRICS)
+
+
+def test_check_with_argo_server_fixture(dd_run_check, aggregator, mock_http_response):
+    mock_http_response(file_path='tests/fixtures/argo_server_metrics.txt')
+    instance = {'openmetrics_endpoint': 'https://localhost:2746/metrics', 'tls_verify': False}
+    check = ArgoWorkflowsCheck('argo_workflows', {}, [instance])
+    dd_run_check(check)
+
+    for m_name, m_type in ARGO_SERVER_METRICS:
+        aggregator.assert_metric(f'argo_workflows.{m_name}', metric_type=m_type)
+    for suff in ('count', 'quantile', 'sum'):
+        aggregator.assert_metric(f'argo_workflows.go.gc.duration.seconds.{suff}')
+    # Only the two RPCs exercised while capturing the fixture completed, both successfully.
+    aggregator.assert_metric_has_tag('argo_workflows.grpc.server.handled.count', 'grpc_code:OK', count=2)
+
+    aggregator.assert_all_metrics_covered()
+    aggregator.assert_metrics_using_metadata(get_metadata_metrics())
+    aggregator.assert_service_check('argo_workflows.openmetrics.health', ArgoWorkflowsCheck.OK)
+    assert_service_checks(aggregator)
+
+
 def test_emits_critical_service_check_when_service_is_down(dd_run_check, aggregator, instance, mock_http_response):
     mock_http_response(status_code=404)
     check = ArgoWorkflowsCheck('argo_workflows', {}, [instance])

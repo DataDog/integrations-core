@@ -1,0 +1,194 @@
+# HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 5.8958e-05
+go_gc_duration_seconds{quantile="0.25"} 8.9875e-05
+go_gc_duration_seconds{quantile="0.5"} 0.000255999
+go_gc_duration_seconds{quantile="0.75"} 0.000426042
+go_gc_duration_seconds{quantile="1"} 0.004638294
+go_gc_duration_seconds_sum 0.005649084
+go_gc_duration_seconds_count 6
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 102
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.21.6"} 1
+# HELP go_memstats_alloc_bytes Number of bytes allocated and still in use.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 1.0555848e+07
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated, even if freed.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 1.7561312e+07
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 1.457067e+06
+# HELP go_memstats_frees_total Total number of frees.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 64837
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 4.55544e+06
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and still in use.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 1.0555848e+07
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 1.318912e+06
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use.
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 1.421312e+07
+# HELP go_memstats_heap_objects Number of allocated objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 75738
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 1.236992e+06
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 1.5532032e+07
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.7943321424646292e+09
+# HELP go_memstats_lookups_total Total number of pointer lookups.
+# TYPE go_memstats_lookups_total counter
+go_memstats_lookups_total 0
+# HELP go_memstats_mallocs_total Total number of mallocs.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 140575
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 4800
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 15600
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 215544
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 244440
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 1.826404e+07
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 909029
+# HELP go_memstats_stack_inuse_bytes Number of bytes in use by the stack allocator.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 1.245184e+06
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 1.245184e+06
+# HELP go_memstats_sys_bytes Number of bytes obtained from system.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 2.3958792e+07
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads 9
+# HELP grpc_server_handled_total Total number of RPCs completed on the server, regardless of success or failure.
+# TYPE grpc_server_handled_total counter
+grpc_server_handled_total{grpc_code="Aborted",grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Aborted",grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="AlreadyExists",grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="AlreadyExists",grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Canceled",grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Canceled",grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="DataLoss",grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="DataLoss",grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="DeadlineExceeded",grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="DeadlineExceeded",grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="FailedPrecondition",grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="FailedPrecondition",grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Internal",grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Internal",grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="InvalidArgument",grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="InvalidArgument",grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="NotFound",grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="NotFound",grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="OK",grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 1
+grpc_server_handled_total{grpc_code="OK",grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 1
+grpc_server_handled_total{grpc_code="OutOfRange",grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="OutOfRange",grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="PermissionDenied",grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="PermissionDenied",grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="ResourceExhausted",grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="ResourceExhausted",grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Unauthenticated",grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Unauthenticated",grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Unavailable",grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Unavailable",grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Unimplemented",grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Unimplemented",grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Unknown",grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 0
+grpc_server_handled_total{grpc_code="Unknown",grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 0
+# HELP grpc_server_handling_seconds Histogram of response latency (seconds) of gRPC that had been application-level handled by the server.
+# TYPE grpc_server_handling_seconds histogram
+grpc_server_handling_seconds_bucket{grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary",le="0.005"} 1
+grpc_server_handling_seconds_bucket{grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary",le="0.01"} 1
+grpc_server_handling_seconds_bucket{grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary",le="0.025"} 1
+grpc_server_handling_seconds_bucket{grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary",le="0.05"} 1
+grpc_server_handling_seconds_bucket{grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary",le="0.1"} 1
+grpc_server_handling_seconds_bucket{grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary",le="0.25"} 1
+grpc_server_handling_seconds_bucket{grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary",le="0.5"} 1
+grpc_server_handling_seconds_bucket{grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary",le="1"} 1
+grpc_server_handling_seconds_bucket{grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary",le="2.5"} 1
+grpc_server_handling_seconds_bucket{grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary",le="5"} 1
+grpc_server_handling_seconds_bucket{grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary",le="10"} 1
+grpc_server_handling_seconds_bucket{grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary",le="+Inf"} 1
+grpc_server_handling_seconds_sum{grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 0.00036666
+grpc_server_handling_seconds_count{grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 1
+grpc_server_handling_seconds_bucket{grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary",le="0.005"} 0
+grpc_server_handling_seconds_bucket{grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary",le="0.01"} 0
+grpc_server_handling_seconds_bucket{grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary",le="0.025"} 0
+grpc_server_handling_seconds_bucket{grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary",le="0.05"} 0
+grpc_server_handling_seconds_bucket{grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary",le="0.1"} 0
+grpc_server_handling_seconds_bucket{grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary",le="0.25"} 1
+grpc_server_handling_seconds_bucket{grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary",le="0.5"} 1
+grpc_server_handling_seconds_bucket{grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary",le="1"} 1
+grpc_server_handling_seconds_bucket{grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary",le="2.5"} 1
+grpc_server_handling_seconds_bucket{grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary",le="5"} 1
+grpc_server_handling_seconds_bucket{grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary",le="10"} 1
+grpc_server_handling_seconds_bucket{grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary",le="+Inf"} 1
+grpc_server_handling_seconds_sum{grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 0.189178816
+grpc_server_handling_seconds_count{grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 1
+# HELP grpc_server_msg_received_total Total number of RPC stream messages received on the server.
+# TYPE grpc_server_msg_received_total counter
+grpc_server_msg_received_total{grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 1
+grpc_server_msg_received_total{grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 1
+# HELP grpc_server_msg_sent_total Total number of gRPC stream messages sent by the server.
+# TYPE grpc_server_msg_sent_total counter
+grpc_server_msg_sent_total{grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 1
+grpc_server_msg_sent_total{grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 1
+# HELP grpc_server_started_total Total number of RPCs started on the server.
+# TYPE grpc_server_started_total counter
+grpc_server_started_total{grpc_method="GetInfo",grpc_service="info.InfoService",grpc_type="unary"} 1
+grpc_server_started_total{grpc_method="ListWorkflows",grpc_service="workflow.WorkflowService",grpc_type="unary"} 1
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 0.29
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.073741816e+09
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 27
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 6.232064e+07
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.79433176819e+09
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 1.336922112e+09
+# HELP process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
+# TYPE process_virtual_memory_max_bytes gauge
+process_virtual_memory_max_bytes 1.8446744073709552e+19
+# HELP promhttp_metric_handler_requests_in_flight Current number of scrapes being served.
+# TYPE promhttp_metric_handler_requests_in_flight gauge
+promhttp_metric_handler_requests_in_flight 1
+# HELP promhttp_metric_handler_requests_total Total number of scrapes by HTTP status code.
+# TYPE promhttp_metric_handler_requests_total counter
+promhttp_metric_handler_requests_total{code="200"} 0
+promhttp_metric_handler_requests_total{code="500"} 0
+promhttp_metric_handler_requests_total{code="503"} 0
