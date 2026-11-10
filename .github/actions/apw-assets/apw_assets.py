@@ -242,12 +242,17 @@ class Release:
             # --target is ignored when a tag already exists; reject a tag that
             # points elsewhere before creating any release.
             self.tag_exists()
+            # Keep the "Built by" line exact and on its own line: Datadog's
+            # downstream pin tooling reads the producer run from it.
             notes = (
-                f"APW source snapshot from {self.repository}@{self.commit}.\n"
-                "Asset selection is performed by the downstream APW assembler.\n"
-                "The uploaded apw-assets.tar.gz is the consumer input; "
-                "GitHub's generated source archives are not used.\n"
-                "Source identity and SHA-256 are recorded in release.json and SHA256SUMS.\n"
+                f"Automated snapshot of {self.repository} at {self.commit}.\n\n"
+                "Datadog uses these snapshots internally to publish integration assets, "
+                "such as dashboards and monitors, in the Datadog app. This is not an Agent "
+                "or integration release, and you don't need it to install or use any integration. "
+                "Older snapshots are deleted automatically.\n\n"
+                "- `apw-assets.tar.gz`: committed source files\n"
+                "- `release.json`: source repository, commit and archive SHA-256\n"
+                "- `SHA256SUMS`: archive checksum\n\n"
                 f"Built by {os.environ['GITHUB_SERVER_URL']}/{self.repository}"
                 f"/actions/runs/{os.environ['GITHUB_RUN_ID']}.\n"
             )
