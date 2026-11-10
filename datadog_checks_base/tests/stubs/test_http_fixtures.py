@@ -166,7 +166,7 @@ def test_fake_http_response_builds_and_registers_json_response(
 
     assert check.http.post(url, json=payload) is response
     assert response.content == expected_content
-    assert response.json() is payload
+    assert response.json() == payload
     assert response.status_code == 201
     assert response.reason == 'Created'
 

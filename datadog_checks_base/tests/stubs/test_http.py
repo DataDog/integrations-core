@@ -31,7 +31,7 @@ def test_fake_response_returns_only_configured_results():
     )
 
     assert response.text == 'configured text'
-    assert response.json(parse_float=str) is json_result
+    assert response.json(parse_float=str) == json_result
     assert list(response.iter_content(chunk_size=1, decode_unicode=True)) == [b'complete ', b'body']
     assert list(response.iter_lines(chunk_size=1, decode_unicode=True)) == ['first', 'second']
     assert list(response) == [b'complete ', b'body']
@@ -111,6 +111,19 @@ def test_fake_response_raises_configured_json_error():
         response.json()
 
     assert exc_info.value is error
+
+
+def test_fake_response_json_changes_do_not_reach_later_calls_or_the_configured_result():
+    # A real client parses a new object on every call, so a check that edits the result in place affects nothing else.
+    payload = {'items': [{'name': 'a', 'secret': 'x'}]}
+    response = FakeHTTPResponse(json_result=payload)
+
+    edited = response.json()
+    del edited['items'][0]['secret']
+
+    assert edited == {'items': [{'name': 'a'}]}
+    assert response.json() == {'items': [{'name': 'a', 'secret': 'x'}]}
+    assert payload == {'items': [{'name': 'a', 'secret': 'x'}]}
 
 
 def test_fake_response_raises_configured_status_error():
