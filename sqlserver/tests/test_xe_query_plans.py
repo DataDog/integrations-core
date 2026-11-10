@@ -647,7 +647,7 @@ def parameter_runtime_values(plan: str) -> dict[str, str]:
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize('collect_raw_query_statement', [False, True])
 def test_query_plans_from_xe_session(
-    aggregator, dd_run_check, dbm_instance_xe_plans, bob_conn_str, collect_raw_query_statement
+    aggregator, datadog_agent, dd_run_check, dbm_instance_xe_plans, bob_conn_str, collect_raw_query_statement
 ):
     """
     The test servers run the datadog_query_plans session for one application's statements: an execution of a
@@ -677,7 +677,9 @@ def test_query_plans_from_xe_session(
     while time.time() < deadline:
         # the session dispatches its events to its file every second
         time.sleep(2)
-        dd_run_check(check, cancel=False)
+        # the Agent's obfuscator is a stub in tests
+        with mock.patch.object(datadog_agent, 'obfuscate_sql', side_effect=mock_obfuscate_sql):
+            dd_run_check(check, cancel=False)
         events = [
             e
             for e in aggregator.get_event_platform_events('dbm-samples')
