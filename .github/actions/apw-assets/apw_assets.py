@@ -243,11 +243,9 @@ class Release:
             # points elsewhere before creating any release.
             self.tag_exists()
             notes = (
-                f"APW source snapshot from {self.repository}@{self.commit}.\n"
-                "Asset selection is performed by the downstream APW assembler.\n"
-                "The uploaded apw-assets.tar.gz is the consumer input; "
-                "GitHub's generated source archives are not used.\n"
-                "Source identity and SHA-256 are recorded in release.json and SHA256SUMS.\n"
+                "Integration assets, such as dashboards and monitors, from "
+                f"{self.repository.split('/')[1]} at commit {self.commit}. "
+                "These assets are set up automatically by Datadog.\n\n"
                 f"Built by {os.environ['GITHUB_SERVER_URL']}/{self.repository}"
                 f"/actions/runs/{os.environ['GITHUB_RUN_ID']}.\n"
             )
@@ -263,7 +261,7 @@ class Release:
                 "--prerelease",
                 "--latest=false",
                 "--title",
-                f"APW assets {self.commit}",
+                f"Integration assets {datetime.now(timezone.utc):%Y-%m-%d %H:%M} UTC ({self.commit[:7]})",
                 "--notes",
                 notes,
             )
