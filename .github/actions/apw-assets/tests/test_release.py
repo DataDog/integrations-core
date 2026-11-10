@@ -259,6 +259,8 @@ class TestRelease:
         self.release.publish(self.directory)
         assert not self.remote['draft']
         assert [call[1] for call in self.mutations] == ['create', 'upload', 'upload', 'upload', 'edit']
+        # dd-source's APW pin tooling reads the producer run from this exact line.
+        assert f'\nBuilt by https://github.com/{REPOSITORY}/actions/runs/123.\n' in self.mutations[0][-1]
 
     def test_interrupted_upload_resumes_without_replacing_uploaded_assets(self):
         self.fail_upload = 'release.json'
