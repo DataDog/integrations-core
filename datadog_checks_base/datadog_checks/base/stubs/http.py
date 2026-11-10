@@ -178,7 +178,7 @@ class FakeHTTPResponse:
         if self._lines is not None:
             yield from self._lines
         elif decode_unicode and self.encoding is not None:
-            yield from self.content.decode(self.encoding).splitlines()
+            yield from self.content.decode(self.encoding, errors='replace').splitlines()
         else:
             yield from self.content.splitlines()
         if self._stream_error is not None:

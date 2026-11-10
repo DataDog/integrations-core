@@ -60,6 +60,7 @@ def test_fake_response_derives_text_and_stream_results_from_content(
     ('content', 'encoding', 'decode_unicode', 'expected_lines'),
     [
         pytest.param(b'caf\xe9\nsecond', 'latin-1', True, ['caf\xe9', 'second'], id='decoded with the encoding'),
+        pytest.param(b'caf\xe9\nsecond', 'utf-8', True, ['caf\ufffd', 'second'], id='invalid bytes replaced'),
         pytest.param(b'caf\xe9\nsecond', 'latin-1', False, [b'caf\xe9', b'second'], id='bytes unless decoding'),
         pytest.param(b'first\nsecond', None, True, [b'first', b'second'], id='bytes without an encoding'),
     ],
