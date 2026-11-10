@@ -4076,7 +4076,7 @@ pipeline:
               overrideOnConflict: false
           preserveSource: false
         - type: grok-parser
-          name: Map `Event.EventData.Data.QueryName` to `ocsf.query.hostname`
+          name: Parse `Event.EventData.Data.QueryName` to `ocsf.query.hostname`
           enabled: true
           source: Event.EventData.Data.QueryName
           samples:
@@ -4085,8 +4085,8 @@ pipeline:
           grok:
             supportRules: ""
             matchRules: |
-              fqdn_with_root_dot %{data:ocsf.query.hostname}\.
-              fqdn_without_root_dot %{data:ocsf.query.hostname}
+              fqdn_with_root_dot %{regex("[^\\s]*[^\\s.]"):ocsf.query.hostname}\.
+              fqdn_without_root_dot %{regex("[^\\s]*[^\\s.]"):ocsf.query.hostname}
         - type: schema-processor
           name: Apply OCSF schema for 4003
           enabled: true
