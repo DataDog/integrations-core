@@ -102,6 +102,9 @@ try:
 except ImportError:
     from datadog_checks.base.stubs import datadog_agent
 
+# Seconds the server waits on each blocked write of the SHOW BINARY LOGS result before it drops the connection.
+BINARY_LOGS_NET_WRITE_TIMEOUT = 2
+
 
 class MySql(DatabaseCheck):
     DBMS = 'mysql'
@@ -1145,8 +1148,7 @@ class MySql(DatabaseCheck):
     def _get_binary_log_stats(self, db):
         try:
             with closing(db.cursor(CommenterCursor)) as cursor:
-                cursor.execute("SHOW BINARY LOGS;")
-                cursor_results = cursor.fetchall()
+                cursor_results = self._show_binary_logs(db, cursor)
                 master_logs = {result[0]: result[1] for result in cursor_results}
 
                 binary_log_space = 0
@@ -1155,8 +1157,34 @@ class MySql(DatabaseCheck):
 
                 return binary_log_space
         except (pymysql.err.InternalError, pymysql.err.OperationalError) as e:
+            if not db.open:
+                self.warning(
+                    "Connection lost while reading BINARY LOGS, possibly after net_write_timeout of %ss: %s",
+                    BINARY_LOGS_NET_WRITE_TIMEOUT,
+                    e,
+                )
+                return None
             self.warning("Privileges error accessing the BINARY LOGS (must grant REPLICATION CLIENT): %s", e)
             return None
+
+    @staticmethod
+    def _show_binary_logs(db, cursor) -> tuple:
+        """
+        SHOW BINARY LOGS holds the binary log index lock while it sends one row per file. Another SHOW BINARY LOGS
+        or a log rotation then waits for that lock while holding the binary log lock, which every commit needs. If
+        the agent reads slowly, commits stall until the server's net_write_timeout (60s by default) fires. Run the
+        query with a short timeout, then restore the session value for later queries on this connection.
+        """
+        cursor.execute("SELECT @@SESSION.net_write_timeout")
+        (net_write_timeout,) = cursor.fetchone()
+        cursor.execute("SET SESSION net_write_timeout = {}".format(BINARY_LOGS_NET_WRITE_TIMEOUT))
+        try:
+            cursor.execute("SHOW BINARY LOGS;")
+            return cursor.fetchall()
+        finally:
+            # A write timeout closes the connection, which leaves no session to restore.
+            if db.open:
+                cursor.execute("SET SESSION net_write_timeout = %s", (net_write_timeout,))
 
     def _check_innodb_engine_enabled(self, db):
         # Whether InnoDB engine is available or not can be found out either
