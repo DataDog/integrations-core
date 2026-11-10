@@ -1,8 +1,6 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
-from xml.etree.ElementTree import ParseError
-
 import requests
 from lxml import etree
 
@@ -45,10 +43,13 @@ class IbmWasCheck(AgentCheck):
 
         try:
             server_data_xml = etree.fromstring(data)
-        except ParseError as e:
+        except etree.XMLSyntaxError as e:
             self.submit_service_checks(AgentCheck.CRITICAL)
-            self.log.Error("Unable to parse the XML response: {}".format(e))
+            self.log.error("Unable to parse the XML response: %s", e)
             return
+
+        # Reporting OK before this point would pair it with CRITICAL on a malformed response.
+        self.submit_service_checks(AgentCheck.OK)
 
         node_list = self.get_node_from_root(server_data_xml, "Node")
 
@@ -121,11 +122,9 @@ class IbmWasCheck(AgentCheck):
         try:
             resp = self.http.get(self.url)
             resp.raise_for_status()
-            self.submit_service_checks(AgentCheck.OK)
-        except (requests.HTTPError, requests.ConnectionError) as e:
-            self.warning(
-                "Couldn't connect to URL: %s with exception: %s. Please verify the address is reachable", self.url, e
-            )
+        except requests.RequestException as e:
+            # Broad by design: ReadTimeout descends from Timeout, not ConnectionError.
+            self.warning("Request to %s failed: %s", self.url, e)
             self.submit_service_checks(AgentCheck.CRITICAL)
             raise e
         return resp.content
