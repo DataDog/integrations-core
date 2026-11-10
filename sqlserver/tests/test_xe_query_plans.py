@@ -22,6 +22,7 @@ from datadog_checks.sqlserver.xe_collection.query_plan_events import (
     QUERY_STATS_STATEMENT_QUERY,
     SESSION_TARGETS_QUERY,
     QueryPlanEventsHandler,
+    event_file_pattern,
 )
 
 from .common import CHECK_NAME
@@ -38,6 +39,12 @@ STATEMENT = (
 PLAN_HANDLE = '0600050012eb2f1b60fced1f1200000001000000000000000000000000000000000000000000000000000000'
 SQL_HANDLE = '0x0200000012EB2F1BB0F35DCC64332DC0EB7A17EDFDB853E60000000000000000000000000000000000000000'
 CURRENT_FILE = '/var/opt/mssql/log/datadog_query_plans_0_134080000000000000.xel'
+BLOB_CURRENT_FILE = 'https://account.blob.core.windows.net/xe/datadog_query_plans_0_134080000000000000.xel'
+# The current file, and the path the files are read with, of local and Azure Blob Storage event_file targets.
+EVENT_FILE_PATHS = [
+    pytest.param(CURRENT_FILE, '/var/opt/mssql/log/datadog_query_plans*.xel', id='local'),
+    pytest.param(BLOB_CURRENT_FILE, 'https://account.blob.core.windows.net/xe/datadog_query_plans', id='blob'),
+]
 
 
 def load_event(fixture: str) -> etree._Element:
@@ -91,16 +98,18 @@ class FakeEventFile:
     the events of the buffers after it, in its file and the next ones, and fails when its file is gone.
     """
 
-    def __init__(self):
+    def __init__(self, current_file: str = CURRENT_FILE):
         # file name -> list of (offset, events)
-        self.files: dict[str, list[tuple[int, list[str]]]] = {CURRENT_FILE: []}
-        self.current_file = CURRENT_FILE
+        self.files: dict[str, list[tuple[int, list[str]]]] = {current_file: []}
+        self.current_file = current_file
 
     def add_buffer(self, *events: str) -> None:
         buffers = self.files[self.current_file]
         buffers.append(((len(buffers) + 1) * 1024, list(events)))
 
-    def start_file(self, name: str) -> None:
+    def start_file(self) -> None:
+        """The next file, as at a rollover or a restart of the session."""
+        name = re.sub(r'_(\d+)\.xel$', lambda m: '_{}.xel'.format(int(m.group(1)) + 1), self.current_file)
         self.files[name] = []
         self.current_file = name
 
@@ -132,8 +141,8 @@ class FakeEventFile:
 class FakeServer:
     """The queries of the handler, answered from an event_file target, or the given target rows."""
 
-    def __init__(self, targets=None, frame_text=STATEMENT, query_stats_text=STATEMENT):
-        self.event_file = FakeEventFile()
+    def __init__(self, targets=None, frame_text=STATEMENT, query_stats_text=STATEMENT, current_file=CURRENT_FILE):
+        self.event_file = FakeEventFile(current_file)
         self.targets = targets
         self.ring_buffer = None
         self.frame_text = frame_text
@@ -496,8 +505,31 @@ def distinct_event(second: int) -> str:
 
 
 @pytest.mark.unit
-def test_event_file_first_run_starts_at_the_newest_buffer(aggregator, xe_instance):
-    server = FakeServer()
+@pytest.mark.parametrize(
+    'file_name,expected',
+    [
+        *EVENT_FILE_PATHS,
+        pytest.param(
+            'C:\\MSSQL\\Log\\datadog_query_plans_0_134080000000000000.xel',
+            'C:\\MSSQL\\Log\\datadog_query_plans*.xel',
+            id='windows',
+        ),
+        # Azure Blob Storage paths are a blob name prefix: wildcards aren't allowed there
+        pytest.param(
+            'HTTPS://account.blob.core.windows.net/xe/datadog_query_plans_0_1.xel',
+            'HTTPS://account.blob.core.windows.net/xe/datadog_query_plans',
+            id='blob_uppercase_scheme',
+        ),
+    ],
+)
+def test_event_file_pattern(file_name, expected):
+    assert event_file_pattern(file_name) == expected
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('current_file,read_path', EVENT_FILE_PATHS)
+def test_event_file_first_run_starts_at_the_newest_buffer(aggregator, xe_instance, current_file, read_path):
+    server = FakeServer(current_file=current_file)
     handler = make_handler(xe_instance, server)
     server.event_file.add_buffer(distinct_event(1), distinct_event(2))
     server.event_file.add_buffer(distinct_event(3))
@@ -508,12 +540,7 @@ def test_event_file_first_run_starts_at_the_newest_buffer(aggregator, xe_instanc
     server.event_file.add_buffer(distinct_event(4), distinct_event(5))
     handler.run_job()
     assert sent_timestamps(aggregator) == [timestamp(4), timestamp(5)]
-    assert server.executed(EVENT_FILE_READ_FROM_CHECKPOINT_QUERY)[-1] == (
-        1000,
-        '/var/opt/mssql/log/datadog_query_plans*.xel',
-        CURRENT_FILE,
-        2048,
-    )
+    assert server.executed(EVENT_FILE_READ_FROM_CHECKPOINT_QUERY)[-1] == (1000, read_path, current_file, 2048)
 
 
 @pytest.mark.unit
@@ -548,13 +575,14 @@ def test_event_file_reads_complete_buffers(aggregator, xe_instance):
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize('current_file,read_path', EVENT_FILE_PATHS)
 @pytest.mark.parametrize('checkpoint_file_removed', [True, False], ids=['rollover', 'session_restart'])
-def test_event_file_checkpoint_file_replaced(aggregator, xe_instance, checkpoint_file_removed):
+def test_event_file_checkpoint_file_replaced(aggregator, xe_instance, checkpoint_file_removed, current_file, read_path):
     """
     When the checkpoint's file is gone after rollovers, the current file is read from its start, and when a restarted
     session writes a new file, reading goes on into it. Neither sends the events read before again.
     """
-    server = FakeServer()
+    server = FakeServer(current_file=current_file)
     # no rate limit, which would also stop the events read before
     handler = make_handler(xe_instance, server, samples_per_hour_per_query=10**9)
     handler.run_job()
@@ -563,7 +591,7 @@ def test_event_file_checkpoint_file_replaced(aggregator, xe_instance, checkpoint
     assert sent_timestamps(aggregator) == [timestamp(1)]
 
     old_file = server.event_file.current_file
-    server.event_file.start_file('/var/opt/mssql/log/datadog_query_plans_0_134080000000000001.xel')
+    server.event_file.start_file()
     if checkpoint_file_removed:
         del server.event_file.files[old_file]
     else:
@@ -574,6 +602,12 @@ def test_event_file_checkpoint_file_replaced(aggregator, xe_instance, checkpoint
     handler.run_job()
 
     assert sent_timestamps(aggregator) == [timestamp(1), timestamp(2)]
+    # checkpoints are files the read returned, and the reads after them cover every file of the target
+    assert {params[1:3] for params in server.executed(EVENT_FILE_READ_FROM_CHECKPOINT_QUERY)} == {
+        (read_path, current_file)
+    }
+    if checkpoint_file_removed:
+        assert server.executed(EVENT_FILE_READ_QUERY)[-1] == (1000, server.event_file.current_file)
 
 
 @pytest.mark.unit

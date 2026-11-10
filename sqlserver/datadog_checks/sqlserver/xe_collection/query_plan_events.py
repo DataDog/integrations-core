@@ -59,7 +59,7 @@ PLAN_QUERY_PLAN_HASH_PATTERN = re.compile(r'\bQueryPlanHash="0x([0-9A-Fa-f]+)"')
 # The event_file target writes `<filename>_0_<timestamp>.xel` files, a new one at each rollover or session start.
 EVENT_FILE_SUFFIX_PATTERN = re.compile(r"_\d+_\d+\.xel$", re.IGNORECASE)
 
-QUERY_PLANS_DOCS_URL = "https://docs.datadoghq.com/database_monitoring/setup_sql_server/"
+QUERY_PLANS_DOCS_URL = "https://docs.datadoghq.com/database_monitoring/guide/sql_real_execution_plans/"
 QUERY_PLANS_SESSION_SQL = """\
 CREATE EVENT SESSION datadog_query_plans ON SERVER
 ADD EVENT sqlserver.query_post_execution_plan_profile (
@@ -181,7 +181,13 @@ def hash_to_hex(value: str | None) -> str | None:
 
 
 def event_file_pattern(file_name: str) -> str:
-    """The pattern matching every file of the event_file target whose current file is `file_name`."""
+    """
+    The path matching every file of the event_file target whose current file is `file_name`, for
+    `sys.fn_xe_file_target_read_file`: a wildcard pattern for local files, and the blob name prefix for Azure Blob
+    Storage URLs, as on Azure SQL Database and Managed Instance, where wildcards aren't allowed.
+    """
+    if file_name.lower().startswith("https://"):
+        return EVENT_FILE_SUFFIX_PATTERN.sub("", file_name)
     return EVENT_FILE_SUFFIX_PATTERN.sub("*.xel", file_name)
 
 
