@@ -20,7 +20,7 @@ from .contract import (
     REMOTE_QUERY_TRACE_ID_HEADER,
     REMOTE_QUERY_TRACE_PARENT_ID_HEADER,
     REMOTE_QUERY_TRACE_SAMPLING_PRIORITY_HEADER,
-    RemoteQueryDelivery,
+    RemoteQueryResultDelivery,
     RemoteQueryRunStats,
     RemoteQueryTraceContext,
 )
@@ -200,7 +200,7 @@ class RemoteQueryProducerTracing:
         self._fetch_span = None
         self._request_span = None
 
-    def open_root(self, delivery: RemoteQueryDelivery) -> None:
+    def open_root(self, delivery: RemoteQueryResultDelivery) -> None:
         """Start the run's root span on the request's trace context, a local root when absent.
 
         The root follows the established integrations tracing identity: the service and
@@ -224,10 +224,7 @@ class RemoteQueryProducerTracing:
             self._root_started_at = time.monotonic()
             span.set_tag(REMOTE_QUERY_SPAN_RUN_ID_TAG, delivery.run_id)
             span.set_tag(REMOTE_QUERY_SPAN_TASK_ID_TAG, delivery.task_id)
-            upload_id = getattr(delivery, 'upload_id', None)
-            if upload_id is not None:
-                # A sessionless delivery has no upload session, so it carries no upload id tag.
-                span.set_tag(REMOTE_QUERY_SPAN_UPLOAD_ID_TAG, upload_id)
+            span.set_tag(REMOTE_QUERY_SPAN_UPLOAD_ID_TAG, delivery.upload_id)
             span.set_tag(REMOTE_QUERY_SPAN_ORIGIN_TAG, INTEGRATION_TRACING_SERVICE_NAME)
             if self._integration is not None:
                 span.set_tag(REMOTE_QUERY_SPAN_INTEGRATION_TAG, self._integration)
@@ -469,7 +466,7 @@ class NullRemoteQueryProducerTracing(RemoteQueryProducerTracing):
     def __init__(self) -> None:
         pass
 
-    def open_root(self, delivery: RemoteQueryDelivery) -> None:
+    def open_root(self, delivery: RemoteQueryResultDelivery) -> None:
         pass
 
     def succeed(self, stats: RemoteQueryRunStats) -> None:

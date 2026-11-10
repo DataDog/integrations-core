@@ -52,7 +52,7 @@ def real_server_request(instance, query, include_schema=False):
         'operation': 'produce_json_pages',
         'target': {'host': instance['server'], 'port': int(instance['port']), 'dbname': 'default'},
         'query': query,
-        'session_info': {
+        'resultDelivery': {
             'runId': RUN_ID,
             'taskId': TASK_ID,
             'uploadId': UPLOAD_ID,
@@ -92,7 +92,7 @@ def test_remote_query_registers_descriptor_and_sends_source_pages_against_real_c
         'target': {'host': instance['server'], 'port': int(instance['port']), 'dbname': 'default'},
         'query': 'SELECT 1 AS value',
         'includeSchema': True,
-        'session_info': {
+        'resultDelivery': {
             'runId': RUN_ID,
             'taskId': TASK_ID,
             'uploadId': UPLOAD_ID,

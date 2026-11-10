@@ -231,12 +231,12 @@ def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
     assert started['status'] == 'STARTED'
     assert started['operation'] == 'produce_json_pages'
     assert started['includeSchema'] is False
-    assert started['session_info']['uploadId'] == UPLOAD_ID
-    assert started['session_info']['runId'] == RUN_ID
-    assert started['session_info']['taskId'] == TASK_ID
-    assert started['session_info']['baseUrl'] == BASE_URL
-    assert 'partBytes' not in started['session_info']
-    assert started['session_info']['limits'] == {
+    assert started['resultDelivery']['uploadId'] == UPLOAD_ID
+    assert started['resultDelivery']['runId'] == RUN_ID
+    assert started['resultDelivery']['taskId'] == TASK_ID
+    assert started['resultDelivery']['baseUrl'] == BASE_URL
+    assert 'partBytes' not in started['resultDelivery']
+    assert started['resultDelivery']['limits'] == {
         'maxFileBytes': 104857600,
         'maxResultBytes': 10 * 1024**3,
         'maxRowBytes': 16 * 1024**2,
@@ -297,7 +297,7 @@ def test_producer_executes_query_exactly_once_verbatim_with_readonly_settings(mo
     clickhouse_client = make_client(rows=[[1]])
     fake = FakeUploadClient()
     request = valid_request()
-    request['session_info']['limits']['timeoutMs'] = 5000
+    request['resultDelivery']['limits']['timeoutMs'] = 5000
 
     events = collect_events(request, make_check(), upload_client=fake, clickhouse_client=clickhouse_client)
 
@@ -327,7 +327,7 @@ def test_client_and_server_timeouts_derive_from_the_remaining_wall(monkeypatch):
     check = make_check()
     check.create_remote_query_client = create_remote_query_client
     request = valid_request()
-    request['session_info']['limits']['timeoutMs'] = 30_000
+    request['resultDelivery']['limits']['timeoutMs'] = 30_000
     # 20 s of the 30 s wall are already consumed when the client is created and the stream
     # opens, so the send/receive timeout and max_execution_time must come from the remaining
     # 10 s rather than the full delivered budget.
@@ -473,7 +473,7 @@ def test_producer_splits_pages_by_the_schema_bearing_envelope_bound(monkeypatch)
     # Intake stamps the schema into every final page, so the producer's bound carries the
     # schema-bearing envelope: maxFileBytes here fits that envelope plus exactly the
     # longer row, so both rows never fit one page and the second row forces a second page.
-    request['session_info']['limits']['maxFileBytes'] = (
+    request['resultDelivery']['limits']['maxFileBytes'] = (
         len(prefix_bytes(schema_json=schema_json))
         + row_object_bound({'city': 'New York', 'country': 'USA'})
         + len(rq_pages.PAGE_SUFFIX)
@@ -730,7 +730,7 @@ def test_stream_enforces_timeout_with_retryable_error(monkeypatch):
     patch_upload_credentials(monkeypatch)
     clickhouse_client = make_client(rows=[[1], [2], [3]])
     request = valid_request()
-    request['session_info']['limits']['timeoutMs'] = 1000
+    request['resultDelivery']['limits']['timeoutMs'] = 1000
     # The leading zeros cover every earlier clock read (started_at, the client factory's and
     # settings' remaining-time derivations, the chunk guard, the setup guard, and the
     # per-row guards) so the wall still expires at the page-close guard, after rows were

@@ -60,7 +60,7 @@ def started_metadata(request: RemoteQueryRequest) -> dict[str, Any]:
         'status': 'STARTED',
         'operation': request.operation,
         'includeSchema': request.include_schema,
-        'session_info': request.session_info.model_dump(by_alias=True),
+        'resultDelivery': request.result_delivery.model_dump(by_alias=True),
     }
 
 

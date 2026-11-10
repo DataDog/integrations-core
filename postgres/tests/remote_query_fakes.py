@@ -374,7 +374,7 @@ def valid_request(query='SELECT 1 AS value', include_schema=False, **extra):
         'operation': 'produce_json_pages',
         'target': target,
         'query': query,
-        'session_info': valid_result_delivery(),
+        'resultDelivery': valid_result_delivery(),
     }
     if include_schema:
         request['includeSchema'] = True
@@ -416,7 +416,7 @@ def bounded_request(query='SELECT 1 AS value', **limit_overrides):
     limits.update(limit_overrides)
     limits['maxSchemaBytes'] = min(limits['maxSchemaBytes'], limits['maxFileBytes'])
     request = valid_request(query=query)
-    request['session_info']['limits'] = limits
+    request['resultDelivery']['limits'] = limits
     return request
 
 

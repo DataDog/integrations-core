@@ -11,17 +11,15 @@ import json
 import re
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from typing import Annotated, Any, Literal
+from typing import Any, Literal
 
 from pydantic import (
     BaseModel,
     ConfigDict,
-    Discriminator,
     Field,
     StrictBool,
     StrictInt,
     StrictStr,
-    Tag,
     ValidationError,
     field_validator,
     model_validator,
@@ -44,33 +42,6 @@ REMOTE_QUERY_PAGE_CONTRACT_VERSION = '1.0.0'
 
 
 REMOTE_QUERY_DESCRIPTOR_FORMAT_VERSION = 'csv-json-cell-v1'
-
-
-# The opt-in sessionless upload: independently routed pages, no upload session, and a bounded
-# completion proposal instead of a finalize receipt. The experiment ceilings below bound what
-# its `session_info` may ask for; they are a POC profile, never raised by the Agent or the integration.
-REMOTE_QUERY_SESSIONLESS_MAX_FILE_BYTES = 16 * 1024 * 1024
-
-
-REMOTE_QUERY_SESSIONLESS_MAX_RESULT_BYTES = 1024 * 1024 * 1024
-
-
-REMOTE_QUERY_SESSIONLESS_MAX_PAGES = 128
-
-
-REMOTE_QUERY_SESSIONLESS_MAX_COLUMNS = 1024
-
-
-# The encoded descriptor travels in every page's metadata part, so it is bounded as a whole.
-REMOTE_QUERY_SESSIONLESS_MAX_DESCRIPTOR_BYTES = 1024 * 1024
-
-
-REMOTE_QUERY_SESSIONLESS_MAX_COMPLETION_BYTES = 16 * 1024
-
-
-REMOTE_QUERY_SESSIONLESS_OBJECT_ID_PATTERN = re.compile(
-    r'\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\Z'
-)
 
 
 RemoteQueryLogicalType = Literal[
@@ -293,11 +264,7 @@ class RemoteQueryUploadLimits(BaseModel):
 
 
 class RemoteQueryResultDelivery(BaseModel):
-    """The session-backed `session_info`: the backend-injected upload instructions.
-
-    Its `uploadId` is what selects this shape. The Agent transports `session_info` as an
-    opaque JSON object, so this model is the only strict validator of its current fields.
-    """
+    """Backend-injected instructions for one session-backed result upload."""
 
     model_config = ConfigDict(extra='forbid', frozen=True)
 
@@ -306,71 +273,6 @@ class RemoteQueryResultDelivery(BaseModel):
     upload_id: StrictStr = Field(alias='uploadId', min_length=1)
     base_url: StrictStr = Field(alias='baseUrl', min_length=1)
     limits: RemoteQueryUploadLimits
-
-
-class RemoteQuerySessionlessLimits(RemoteQueryUploadLimits):
-    """The delivered limits of a sessionless run, additionally bounded by the experiment ceilings.
-
-    The numeric types and relations are the session limits'; the ceilings are intake's
-    experimental profile, so a delivery that asks for more is rejected instead of being
-    clamped or sent to intake only to be refused page by page.
-    """
-
-    @model_validator(mode='after')
-    def validate_experiment_ceilings(self) -> 'RemoteQuerySessionlessLimits':
-        ceilings = (
-            ('maxFileBytes', self.max_file_bytes, REMOTE_QUERY_SESSIONLESS_MAX_FILE_BYTES),
-            ('maxResultBytes', self.max_result_bytes, REMOTE_QUERY_SESSIONLESS_MAX_RESULT_BYTES),
-            ('maxPages', self.max_pages, REMOTE_QUERY_SESSIONLESS_MAX_PAGES),
-            ('maxColumns', self.max_columns, REMOTE_QUERY_SESSIONLESS_MAX_COLUMNS),
-            ('maxSchemaBytes', self.max_schema_bytes, REMOTE_QUERY_SESSIONLESS_MAX_DESCRIPTOR_BYTES),
-        )
-        for name, value, ceiling in ceilings:
-            if value > ceiling:
-                raise ValueError('{} must not exceed the sessionless experiment ceiling of {}'.format(name, ceiling))
-        return self
-
-
-class RemoteQuerySessionlessResultDelivery(BaseModel):
-    """The sessionless `session_info`: the backend-injected instructions of the opt-in sessionless upload.
-
-    There is no upload session: no upload id, bucket, account routing, token, or scan stamp.
-    The absence of `uploadId` is what selects this shape.
-    `runId` keeps its wire name but is the fresh per-delivery crawl id, never the ITS run id.
-    `scanSensitiveData` is a required strict boolean: it is requested of intake, which
-    decides and records whether it actually scanned.
-    """
-
-    model_config = ConfigDict(extra='forbid', frozen=True)
-
-    run_id: StrictStr = Field(alias='runId', min_length=1)
-    task_id: StrictStr = Field(alias='taskId', min_length=1)
-    base_url: StrictStr = Field(alias='baseUrl', min_length=1)
-    scan_sensitive_data: StrictBool = Field(alias='scanSensitiveData')
-    limits: RemoteQuerySessionlessLimits
-
-
-RemoteQueryDelivery = RemoteQueryResultDelivery | RemoteQuerySessionlessResultDelivery
-
-
-def delivery_variant(value: Any) -> str:
-    """Select the `session_info` model from the input: `uploadId` present means session-backed.
-
-    There is no mode or version field: a session-backed run is the one that names an upload
-    session. Each model is strict with no unknown keys, so a mixed shape (an `uploadId` with
-    `scanSensitiveData`, or a sessionless object missing it) fails validation instead of
-    being silently read as the other mode.
-    """
-    if isinstance(value, Mapping):
-        return 'session' if 'uploadId' in value else 'sessionless'
-    return 'session' if isinstance(value, RemoteQueryResultDelivery) else 'sessionless'
-
-
-RemoteQueryDeliveryInput = Annotated[
-    Annotated[RemoteQueryResultDelivery, Tag('session')]
-    | Annotated[RemoteQuerySessionlessResultDelivery, Tag('sessionless')],
-    Discriminator(delivery_variant),
-]
 
 
 REMOTE_QUERY_TRACE_ID_HEADER = 'x-datadog-trace-id'
@@ -437,7 +339,7 @@ class RemoteQueryRequest(BaseModel):
     target: RemoteQueryTarget
     query: StrictStr = Field(min_length=1)
     include_schema: StrictBool = Field(default=False, alias='includeSchema')
-    session_info: RemoteQueryDeliveryInput = Field(alias='session_info')
+    result_delivery: RemoteQueryResultDelivery = Field(alias='resultDelivery')
     trace_context: RemoteQueryTraceContext | None = Field(default=None, alias='traceContext')
 
 
@@ -445,7 +347,7 @@ class RemoteQueryResolveRequest(BaseModel):
     """A resolve_target request: one strict target-only operation, nothing else.
 
     The Agent's resolve dispatch carries only the operation and the target. Strict validation
-    rejects every execution field — query, includeSchema, session_info, credentials, a match
+    rejects every execution field — query, includeSchema, resultDelivery, credentials, a match
     fingerprint, or anything else — so a resolve sweep can never carry SQL or upload
     instructions.
     """
@@ -479,100 +381,6 @@ class SourcePageUploadMetadata:
     record_offset: int
     source_bytes: int
     rows: int
-
-
-def sessionless_page_metadata_bytes(
-    delivery: RemoteQuerySessionlessResultDelivery,
-    page: SourcePageUploadMetadata,
-    descriptor_json: bytes,
-) -> bytes:
-    """The strict metadata part of one sessionless page request, in intake's field order.
-
-    Every page repeats the complete descriptor because the requests are independent. The
-    bytes are a pure function of the delivery, the page identity, and the canonical
-    descriptor bytes, so every retry of one page request is byte-identical. The crawl id is
-    the delivery's `runId`; no org, bucket, path, policy, or scan stamp is ever sent.
-    """
-    return b''.join(
-        (
-            b'{"task_id":',
-            canonical_json_bytes(delivery.task_id),
-            b',"crawl_id":',
-            canonical_json_bytes(delivery.run_id),
-            b',"page_index":%d,"record_offset":%d,"source_bytes":%d,"source_rows":%d,'
-            % (
-                page.batch_index,
-                page.record_offset,
-                page.source_bytes,
-                page.rows,
-            ),
-            b'"scan_sensitive_data":',
-            b'true' if delivery.scan_sensitive_data else b'false',
-            b',"descriptor":',
-            descriptor_json,
-            b'}',
-        )
-    )
-
-
-class SessionlessPageReceipt(BaseModel):
-    """Intake's exact 201 receipt for one accepted sessionless page: strict, no unknown fields."""
-
-    model_config = ConfigDict(extra='forbid', frozen=True)
-
-    object_id: StrictStr
-    page_index: StrictInt = Field(ge=0)
-    record_offset: StrictInt = Field(ge=0)
-    rows: StrictInt = Field(ge=0)
-    bytes: StrictInt = Field(gt=0)
-
-    @field_validator('object_id')
-    @classmethod
-    def validate_object_id(cls, value: str) -> str:
-        if REMOTE_QUERY_SESSIONLESS_OBJECT_ID_PATTERN.match(value) is None:
-            raise ValueError('object_id must be a canonical lowercase UUID')
-        return value
-
-
-class SessionlessCompletionReceipt(BaseModel):
-    """The bounded completion proposal the integration reports: ordered object ids and totals.
-
-    Every field is required and the shape is exact. The ids and totals are claims the
-    trusted worker verifies against intake's stored objects, never authority themselves, and
-    the proposal carries no scan stamp. At most one id per logical page, so the count is the
-    page count; an empty proposal is the zero-page, zero-row, zero-byte empty result.
-    """
-
-    model_config = ConfigDict(extra='forbid', frozen=True)
-
-    object_ids: tuple[StrictStr, ...] = Field(alias='objectIds', max_length=REMOTE_QUERY_SESSIONLESS_MAX_PAGES)
-    page_count: StrictInt = Field(alias='pageCount', ge=0)
-    total_rows: StrictInt = Field(alias='totalRows', ge=0)
-    total_bytes: StrictInt = Field(alias='totalBytes', ge=0)
-
-    @field_validator('object_ids')
-    @classmethod
-    def validate_object_ids(cls, value: tuple[str, ...]) -> tuple[str, ...]:
-        if any(REMOTE_QUERY_SESSIONLESS_OBJECT_ID_PATTERN.match(object_id) is None for object_id in value):
-            raise ValueError('objectIds must be canonical lowercase UUIDs')
-        if len(set(value)) != len(value):
-            raise ValueError('objectIds must be unique')
-        return value
-
-    @model_validator(mode='after')
-    def validate_totals(self) -> 'SessionlessCompletionReceipt':
-        if self.page_count != len(self.object_ids):
-            raise ValueError('pageCount must equal the number of objectIds')
-        if not self.object_ids and (self.total_rows or self.total_bytes):
-            raise ValueError('an empty proposal must report zero rows and bytes')
-        return self
-
-    def wire(self) -> dict[str, Any]:
-        """The AP camelCase receipt, failing closed when its serialization exceeds the cap."""
-        wire = self.model_dump(by_alias=True, mode='json')
-        if len(canonical_json_bytes(wire)) > REMOTE_QUERY_SESSIONLESS_MAX_COMPLETION_BYTES:
-            raise RemoteQueryFailure('invalid_receipt', 'The sessionless completion proposal exceeds its size cap.')
-        return wire
 
 
 @dataclass(frozen=True)

@@ -52,7 +52,7 @@ def remote_query_request(pg_instance, query, include_schema=False, **limits):
         },
         'query': query,
         'includeSchema': include_schema,
-        'session_info': {
+        'resultDelivery': {
             'runId': RUN_ID,
             'taskId': TASK_ID,
             'uploadId': UPLOAD_ID,

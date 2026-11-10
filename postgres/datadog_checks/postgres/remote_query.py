@@ -538,7 +538,7 @@ class PostgresRemoteQueryHandler:
                 # included — as a root span on the request's trace context, fail-open through
                 # every boundary.
                 tracing = rq_tracing.open_remote_query_producer_tracing(parsed.trace_context, 'postgres')
-                tracing.open_root(parsed.session_info)
+                tracing.open_root(parsed.result_delivery)
                 if self._match_check_for_target(parsed.target) is None:
                     raise rq_contract.RemoteQueryFailure(
                         'target_not_found', 'No loaded Postgres integration instance matched target selector.'
@@ -548,7 +548,7 @@ class PostgresRemoteQueryHandler:
                     raise rq_contract.RemoteQueryFailure(
                         'target_unavailable', 'Matched Postgres check does not expose a configured database name.'
                     )
-                creds = rq_upload.resolve_upload_credentials(parsed.session_info, started_at, parsed.trace_context)
+                creds = rq_upload.resolve_upload_credentials(parsed.result_delivery, started_at, parsed.trace_context)
                 if not creds.api_key:
                     raise rq_contract.RemoteQueryFailure(
                         'credentials_unavailable',
@@ -646,7 +646,7 @@ class PostgresRemoteQueryHandler:
         for the whole window the query uses it and the check can interrupt the statement
         server-side when it is unscheduled.
         """
-        delivery = request.session_info
+        delivery = request.result_delivery
         limits = delivery.limits
         # The delivered timeout is the run-wide monotonic hard wall; the instance-configured
         # remote_queries.timeout_ms may shorten the statement timeout below it but never

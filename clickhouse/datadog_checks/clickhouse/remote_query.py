@@ -663,7 +663,7 @@ def _run_streamed_query(
 ) -> dict[str, Any]:
     """Stream the query result into bounded JSON pages and return the run receipt."""
     tracing = tracing if tracing is not None else rq_tracing.NULL_PRODUCER_TRACING
-    delivery = request.session_info
+    delivery = request.result_delivery
     limits = delivery.limits
     stream = None
     try:
@@ -828,12 +828,12 @@ class ClickhouseRemoteQueryHandler:
                 # included — as a root span on the request's trace context, fail-open through
                 # every boundary.
                 tracing = rq_tracing.open_remote_query_producer_tracing(parsed.trace_context, 'clickhouse')
-                tracing.open_root(parsed.session_info)
+                tracing.open_root(parsed.result_delivery)
                 if not self._check_matches_target(parsed.target):
                     raise rq_contract.RemoteQueryFailure(
                         'target_not_found', 'No loaded ClickHouse integration instance matched target selector.'
                     )
-                creds = rq_upload.resolve_upload_credentials(parsed.session_info, started_at, parsed.trace_context)
+                creds = rq_upload.resolve_upload_credentials(parsed.result_delivery, started_at, parsed.trace_context)
                 if not creds.api_key:
                     raise rq_contract.RemoteQueryFailure(
                         'credentials_unavailable',
@@ -907,7 +907,7 @@ class ClickhouseRemoteQueryHandler:
         writer. `tracing` is fail-open: every span failure is swallowed without changing an
         event, a receipt, a retry, or an error.
         """
-        delivery = request.session_info
+        delivery = request.result_delivery
         limits = delivery.limits
         deadline = started_at + limits.timeout_ms / 1000
         tracing = tracing if tracing is not None else rq_tracing.NULL_PRODUCER_TRACING

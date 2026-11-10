@@ -279,12 +279,12 @@ def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
     assert started['status'] == 'STARTED'
     assert started['operation'] == 'produce_json_pages'
     assert started['includeSchema'] is False
-    assert started['session_info']['uploadId'] == UPLOAD_ID
-    assert started['session_info']['runId'] == RUN_ID
-    assert started['session_info']['taskId'] == TASK_ID
-    assert started['session_info']['baseUrl'] == BASE_URL
-    assert 'partBytes' not in started['session_info']
-    assert started['session_info']['limits'] == {
+    assert started['resultDelivery']['uploadId'] == UPLOAD_ID
+    assert started['resultDelivery']['runId'] == RUN_ID
+    assert started['resultDelivery']['taskId'] == TASK_ID
+    assert started['resultDelivery']['baseUrl'] == BASE_URL
+    assert 'partBytes' not in started['resultDelivery']
+    assert started['resultDelivery']['limits'] == {
         'maxFileBytes': 104857600,
         'maxResultBytes': 10 * 1024**3,
         'maxRowBytes': 16 * 1024**2,
@@ -440,7 +440,7 @@ def test_instance_timeout_larger_than_delivery_cannot_lengthen_the_wall(monkeypa
     fake = FakeUploadClient()
     check = make_check(pool=pool, remote_queries=RemoteQueries(timeout_ms=300_000))
     request = valid_request()
-    request['session_info']['limits']['timeoutMs'] = 1000
+    request['resultDelivery']['limits']['timeoutMs'] = 1000
     # The wall is the delivered 1 s even though the instance override is 300 s: the run must
     # expire at the delivered wall, which is exactly the case the old replacement semantics
     # silently allowed to run past its parent budget. The leading constant values cover every
@@ -799,7 +799,7 @@ def test_stream_enforces_timeout_with_retryable_error(monkeypatch):
     patch_upload_credentials(monkeypatch)
     pool = FakePool(rows=[(1,)])
     request = valid_request()
-    request['session_info']['limits']['timeoutMs'] = 1000
+    request['resultDelivery']['limits']['timeoutMs'] = 1000
     # The leading zeros cover every clock read before the page-close guard (started_at,
     # statement-timeout resolution, the pre-copy guard, and the per-block and per-record
     # guards) so the wall still expires at the page-close guard, after the record was

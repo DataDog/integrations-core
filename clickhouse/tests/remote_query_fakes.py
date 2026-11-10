@@ -237,7 +237,7 @@ def valid_request(query='SELECT 1 AS value', include_schema=False, **extra):
         'operation': 'produce_json_pages',
         'target': target,
         'query': query,
-        'session_info': valid_result_delivery(),
+        'resultDelivery': valid_result_delivery(),
     }
     if include_schema:
         request['includeSchema'] = True
@@ -281,7 +281,7 @@ def bounded_request(query='SELECT 1 AS value', **limit_overrides):
     # rejects a schema budget beyond the page budget, so keep the pair consistent.
     limits['maxSchemaBytes'] = min(limits['maxSchemaBytes'], limits['maxFileBytes'])
     request = valid_request(query=query)
-    request['session_info']['limits'] = limits
+    request['resultDelivery']['limits'] = limits
     return request
 
 
@@ -432,7 +432,7 @@ def two_row_boundary_request(monkeypatch, extra_bound_bytes=0):
     patch_upload_credentials(monkeypatch)
     prefix_len = len(prefix_bytes())
     request = bounded_request()
-    limits = request['session_info']['limits']
+    limits = request['resultDelivery']['limits']
     row_bound = row_object_bound(BOUND_ROW)
     limits['maxFileBytes'] = prefix_len + row_bound + 1 + row_bound + len(rq_pages.PAGE_SUFFIX) + extra_bound_bytes
     # Same constraint as bounded_request: the schema budget must stay within the page budget.

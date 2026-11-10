@@ -120,7 +120,7 @@ def test_request_trace_context_parses_the_agent_carrier(delivery):
         'operation': 'produce_json_pages',
         'query': 'SELECT 1',
         'target': {'host': 'db', 'port': 5432, 'dbname': 'db'},
-        'session_info': delivery.model_dump(by_alias=True),
+        'resultDelivery': delivery.model_dump(by_alias=True),
     }
     # Absence is valid for mixed versions: an Agent that never sends the field — and an
     # explicit null — carries no context and the request parses exactly as before.
@@ -172,7 +172,7 @@ def test_request_trace_context_is_strict_without_echoing_values(delivery, mutati
         'operation': 'produce_json_pages',
         'query': 'SELECT 1',
         'target': {'host': 'db', 'port': 5432, 'dbname': 'db'},
-        'session_info': delivery.model_dump(by_alias=True),
+        'resultDelivery': delivery.model_dump(by_alias=True),
         'traceContext': {'traceId': TRACE_ID, 'parentId': PARENT_ID, 'samplingPriority': 2},
     }
     request['traceContext'].update(mutation)
@@ -203,7 +203,7 @@ def test_request_trace_context_is_a_closed_shape(delivery, carrier):
         'operation': 'produce_json_pages',
         'query': 'SELECT 1',
         'target': {'host': 'db', 'port': 5432, 'dbname': 'db'},
-        'session_info': delivery.model_dump(by_alias=True),
+        'resultDelivery': delivery.model_dump(by_alias=True),
         'traceContext': carrier,
     }
 
@@ -241,13 +241,18 @@ def test_target_requires_one_complete_selector(target):
         (('operation',), None),
         (('includeSchema',), 'true'),
         (('target', 'port'), '5432'),
-        (('session_info',), None),
-        (('session_info', 'token'), 'scoped-upload-token'),
-        (('session_info', 'artifactVersion'), 1),
-        (('session_info', 'protocol'), 'sessionless-v1'),
-        (('session_info', 'limits', 'maxFileBytes'), 128 * 1024**2 + 1),
-        (('session_info', 'limits', 'maxResultBytes'), rq_contract.REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES + 1),
-        (('session_info', 'limits', 'password'), 'SECRET_DO_NOT_LOG'),
+        (('resultDelivery',), None),
+        (('resultDelivery', 'token'), 'scoped-upload-token'),
+        (('resultDelivery', 'artifactVersion'), 1),
+        (('resultDelivery', 'protocol'), 'sessionless-v1'),
+        (('resultDelivery', 'scanSensitiveData'), True),
+        (('resultDelivery',), 'SECRET_DO_NOT_LOG'),
+        (('resultDelivery',), {}),
+        (('resultDelivery', 'uploadId'), ''),
+        (('resultDelivery', 'uploadId'), None),
+        (('resultDelivery', 'limits', 'maxFileBytes'), 128 * 1024**2 + 1),
+        (('resultDelivery', 'limits', 'maxResultBytes'), rq_contract.REMOTE_QUERY_UPLOAD_MAX_RESULT_BYTES + 1),
+        (('resultDelivery', 'limits', 'password'), 'SECRET_DO_NOT_LOG'),
     ],
 )
 def test_request_validation_rejects_malformed_instructions_without_echoing_values(delivery, path, value):
@@ -255,7 +260,7 @@ def test_request_validation_rejects_malformed_instructions_without_echoing_value
         'operation': 'produce_json_pages',
         'query': 'SELECT 1',
         'target': {'host': 'db', 'port': 5432, 'dbname': 'db'},
-        'session_info': delivery.model_dump(by_alias=True),
+        'resultDelivery': delivery.model_dump(by_alias=True),
     }
     parent = request
     for key in path[:-1]:
@@ -266,6 +271,42 @@ def test_request_validation_rejects_malformed_instructions_without_echoing_value
     message = rq_contract.validation_message(failure.value)
     assert path[-1] in message
     assert 'SECRET_DO_NOT_LOG' not in message
+
+
+@pytest.mark.parametrize('field', ['runId', 'taskId', 'uploadId', 'baseUrl', 'limits'])
+def test_request_requires_complete_session_delivery(delivery: rq_contract.RemoteQueryResultDelivery, field: str):
+    """Missing upload instructions must fail validation rather than start an unaddressable upload."""
+    instructions = delivery.model_dump(by_alias=True)
+    del instructions[field]
+    request = {
+        'operation': 'produce_json_pages',
+        'query': 'SELECT 1',
+        'target': {'database_instance': 'Primary/DB'},
+        'resultDelivery': instructions,
+    }
+
+    with pytest.raises(ValidationError) as failure:
+        rq_contract.RemoteQueryRequest.model_validate(request)
+
+    assert ('resultDelivery', field) in {item['loc'] for item in failure.value.errors()}
+
+
+@pytest.mark.parametrize('field', ['session_info', 'result_delivery'])
+def test_request_requires_the_wire_delivery_field(delivery: rq_contract.RemoteQueryResultDelivery, field: str):
+    """Only the public wire key may carry delivery instructions; alternate envelopes fail closed."""
+    request = {
+        'operation': 'produce_json_pages',
+        'query': 'SELECT 1',
+        'target': {'database_instance': 'Primary/DB'},
+        field: delivery.model_dump(by_alias=True),
+    }
+
+    with pytest.raises(ValidationError) as failure:
+        rq_contract.RemoteQueryRequest.model_validate(request)
+
+    errors = {(item['loc'], item['type']) for item in failure.value.errors()}
+    assert (('resultDelivery',), 'missing') in errors
+    assert ((field,), 'extra_forbidden') in errors
 
 
 def test_target_normalization():
@@ -299,7 +340,7 @@ def test_resolve_request_is_target_only():
     [
         ('query', 'SELECT 1'),
         ('includeSchema', True),
-        ('session_info', {'runId': 'run-1'}),
+        ('resultDelivery', {'runId': 'run-1'}),
         ('traceContext', {'traceId': TRACE_ID, 'parentId': PARENT_ID, 'samplingPriority': 2}),
         ('matchFingerprint', 'deadbeef'),
         ('apiKey', 'SECRET_DO_NOT_LOG'),

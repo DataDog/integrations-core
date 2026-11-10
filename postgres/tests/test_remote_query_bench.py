@@ -128,7 +128,7 @@ def bench_request(pg_instance, rows, max_file_bytes, timeout_ms):
         },
         'query': query,
         'includeSchema': False,
-        'session_info': {
+        'resultDelivery': {
             'runId': RUN_ID,
             'taskId': TASK_ID,
             'uploadId': UPLOAD_ID,
