@@ -145,20 +145,17 @@ class HTTPRequestOptions(TypedDict, total=False):
 
 class HTTPClient(Protocol):
     options: dict[str, Any]
-    """Default request options, which per-request options override.
+    """Default request options. Per-request options override them.
 
-    Keys and value shapes follow `requests` because it is currently the only backend. For example, `timeout` is a
-    `(connect, read)` tuple, basic authentication is a `(username, password)` tuple, and other authentication types
-    hold `requests` objects. Once the persistent session exists, setting a key to `None`, or replacing `headers` or
-    `proxies` with a mapping that omits keys, does not remove the values the session was created with. Use
-    `set_header()` to change headers and `disable_auth()` to drop configured authentication.
+    Values use the format of `requests`, the current backend: `timeout` is `(connect, read)` and basic `auth` is
+    `(username, password)`. Removing a value here does not remove it from an open session; use `set_header()` and
+    `disable_auth()` instead.
     """
 
     tls_config: dict[str, Any]
     """TLS settings for callers that build their own SSL context.
 
-    With the current `requests` backend, keys are the `tls_*` options of the instance configuration, such as
-    `tls_verify` and `tls_ca_cert`, after defaults and `HTTP_CONFIG_REMAPPER` aliases are applied.
+    Keys are the instance's `tls_*` options, such as `tls_verify`, with defaults and remapper aliases applied.
     """
 
     trust_env: bool

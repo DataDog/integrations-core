@@ -64,11 +64,11 @@ responses and raise `requests` exceptions unchanged.
 The `fake_http` fixture records the configuration each client is created with, but does not apply it: every client it
 creates starts with defaults. Test configuration in one of these ways:
 
-- To test how instance settings, `init_config` and `HTTP_CONFIG_REMAPPER` aliases resolve, create the check without
-  `fake_http` and assert on `check.http.options`, `check.http.tls_config` or `check.http.get_header()`. Creating the
+- To test how instance settings, `init_config`, and `HTTP_CONFIG_REMAPPER` aliases resolve, create the check without
+  `fake_http` and assert on `check.http.options`, `check.http.tls_config`, or `check.http.get_header()`. Creating the
   client sends no request, but running the check would send real ones.
 - To test configuration the check builds and passes to `create_http_client()`, such as a scraper configuration, assert
-  on `fake_http.created_clients`. It holds a `RecordedClient` with the `instance`, `init_config` and `remapper` of each
+  on `fake_http.created_clients`. It holds a `RecordedClient` with the `instance`, `init_config`, and `remapper` of each
   client, in creation order.
 
 If the check reads `options` or `tls_config` while it runs, set the values on `check.http` before running it.
