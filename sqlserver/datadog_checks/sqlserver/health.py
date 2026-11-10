@@ -19,6 +19,8 @@ class SqlServerHealthEvent(Enum):
     """
 
     EXPLAIN_PLAN_ERROR = 'explain_plan_error'
+    QUERY_PLANS_XE_SESSION_MISSING = 'query_plans_xe_session_missing'
+    QUERY_PLANS_XE_TARGET_UNSUPPORTED = 'query_plans_xe_target_unsupported'
 
 
 class SqlServerHealth(Health):
