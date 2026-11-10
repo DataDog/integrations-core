@@ -247,8 +247,8 @@ class Release:
             notes = (
                 f"Automated snapshot of {self.repository} at {self.commit}, containing assets "
                 "for integrations such as dashboards and monitors.\n\n"
-                "Datadog uses these snapshots internally to publish those assets in the Datadog app. This is not an Agent "
-                "or integration release, and you don't need it to install or use any integration. "
+                "Datadog uses these snapshots internally to publish those assets in the Datadog app. "
+                "This is not an Agent or integration release, and you don't need it to install or use any integration. "
                 "Older snapshots are deleted automatically.\n\n"
                 "- `apw-assets.tar.gz`: committed source files\n"
                 "- `release.json`: source repository, commit and archive SHA-256\n"
