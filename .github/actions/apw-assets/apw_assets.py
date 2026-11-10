@@ -261,7 +261,7 @@ class Release:
                 "--prerelease",
                 "--latest=false",
                 "--title",
-                f"APW assets {self.commit}",
+                f"Integration assets {datetime.now(timezone.utc):%Y-%m-%d %H:%M} UTC ({self.commit[:7]})",
                 "--notes",
                 notes,
             )
