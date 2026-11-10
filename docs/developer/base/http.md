@@ -122,8 +122,9 @@ module `datadog_checks.base.utils.http_exceptions`. Catch these instead:
 
 Unlike in `requests`, a connect timeout is not a connection error. Catch `HTTPClientRequestError` to handle both.
 
-Each raised error also subclasses the matching `requests` exception, and therefore `OSError`, so that handlers in checks
-that have not opted in keep matching. Opted-in checks must not rely on those bases.
+Errors translated from a `requests` exception also subclass the `requests` exception they replace, and therefore
+`OSError`, so that handlers in checks that have not opted in keep matching. `HTTPClientLineTooLongError` has no
+`requests` counterpart and subclasses `ValueError` instead. Opted-in checks must not rely on those bases.
 
 For example, a check that skips optional data when its endpoint is unavailable looks like this:
 
