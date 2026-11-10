@@ -18,6 +18,14 @@ on:
     # https://github.com/DataDog/integrations-core/pull/17319/files#diff-1b02d4258aa29155f48813d2eb55fc87f62abbded6d8a9fa9e3b8f08365d771aR64
     # broke the docs job (pydantic incompatible with ddev's version) but we didn't find out until later.
     - 'datadog_checks_base/pyproject.toml'
+  # Lets a superseded publish run hand off to the current tip of master, see the `publish` job.
+  workflow_dispatch:
+
+# Runs join the group when they are created, in push order, so a newer push to master
+# cancels any older run and a slow build of an older commit can never publish last.
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -65,29 +73,34 @@ jobs:
   publish:
     runs-on: ubuntu-latest
 
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/master'
     needs:
     - build
 
-    concurrency:
-      group: docs-publish
-      cancel-in-progress: false
-
     permissions:
+      # Dispatch a run for the tip of master when this run is superseded
+      actions: write
       contents: write
-      
+
     steps:
+    # GitHub does not guarantee ordering within a concurrency group, so for pushes seconds
+    # apart an older run can occasionally cancel a newer one. Rather than publish a stale
+    # snapshot, hand off to a fresh run for the tip of master, so the last run to finish
+    # always publishes the latest commit.
     - name: Check this commit is still the tip of master
       id: tip
       env:
         GH_TOKEN: ${{ github.token }}
+        REPO: ${{ github.repository }}
+        SHA: ${{ github.sha }}
       run: |
-        tip=$(gh api "repos/${{ github.repository }}/commits/master" --jq .sha)
-        if [ "$tip" = "${{ github.sha }}" ]; then
+        tip=$(gh api "repos/$REPO/commits/master" --jq .sha)
+        if [ "$tip" = "$SHA" ]; then
           echo "latest=true" >> "$GITHUB_OUTPUT"
         else
           echo "latest=false" >> "$GITHUB_OUTPUT"
-          echo "::notice::Skipping publish: master is at $tip, a newer run will publish."
+          gh workflow run docs.yml --repo "$REPO" --ref master
+          echo "::notice::Skipping publish: master is at $tip, dispatched a run to publish it."
         fi
 
     - uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
@@ -101,7 +114,8 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./site
-        commit_message: ${{ github.event.head_commit.message }}
+        # `head_commit` is only set on push events
+        commit_message: "${{ github.event.head_commit.message || format('deploy: {0}', github.sha) }}"
         # Write .nojekyll at the root, see:
         # https://help.github.com/en/github/working-with-github-pages/about-github-pages#static-site-generators
         enable_jekyll: false
