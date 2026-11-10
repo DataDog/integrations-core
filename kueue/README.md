@@ -1,6 +1,5 @@
 # Agent Check: Kueue
 
-## Overview
 
 This check monitors Kueue through the Datadog Agent.
 
