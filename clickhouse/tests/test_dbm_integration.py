@@ -14,7 +14,7 @@ import pytest
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, obfuscate_sql_with_metadata
 from datadog_checks.clickhouse import ClickhouseCheck
 
-from .common import CLICKHOUSE_VERSION
+from .common import CLICKHOUSE_VERSION, is_legacy
 
 # DBM features require ClickHouse 21.8+ for normalized_query_hash, query_kind, etc.
 # 21.8 itself is excluded because:
@@ -590,8 +590,32 @@ def test_query_samples_data(aggregator, instance, dd_run_check):
         ),
     ],
 )
+@pytest.mark.parametrize(
+    'single_endpoint_mode',
+    [
+        pytest.param(False, id='direct'),
+        # Reads through clusterAllReplicas(), as against ClickHouse Cloud.
+        pytest.param(
+            True,
+            id='single-endpoint',
+            marks=pytest.mark.skipif(
+                is_legacy(CLICKHOUSE_VERSION),
+                reason='dd_test_cluster is only defined in the non-legacy docker compose config',
+            ),
+        ),
+    ],
+)
 def test_stale_checkpoint_reads_only_within_lag_cap(
-    aggregator, instance, dd_run_check, datadog_agent, job_name, dbm_type, payload_key, old_query, new_query
+    aggregator,
+    instance,
+    dd_run_check,
+    datadog_agent,
+    single_endpoint_mode,
+    job_name,
+    dbm_type,
+    payload_key,
+    old_query,
+    new_query,
 ):
     """
     A checkpoint restored far behind now must not make the job read its whole backlog: rows older than
@@ -601,6 +625,7 @@ def test_stale_checkpoint_reads_only_within_lag_cap(
     lag_cap_seconds = 5
 
     instance_config = deepcopy(instance)
+    instance_config['single_endpoint_mode'] = single_endpoint_mode
     instance_config['dbm'] = True
     instance_config['query_metrics'] = {'enabled': False}
     instance_config['query_samples'] = {'enabled': False}
@@ -629,6 +654,10 @@ def test_stale_checkpoint_reads_only_within_lag_cap(
 
     with mock.patch(f'{type(job).__module__}.checkpoint_lag_cap_seconds', return_value=lag_cap_seconds):
         dd_run_check(check)
+
+    if single_endpoint_mode:
+        # Guards against this variant silently falling back to the local system table.
+        assert check.get_system_table('query_log').startswith('clusterAllReplicas(')
 
     statements = [
         record['query_details']['statement']
