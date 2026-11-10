@@ -107,6 +107,49 @@ def test_clean_wheel_removes_jsonpatch_console_scripts(tmp_path: Path):
     assert 'jsonpatch.py' in recorded_paths
 
 
+def _write_ca_bundle_wheel(path: Path, package: str) -> str:
+    """Write a minimal wheel holding `<package>/cacert.pem` and return its RECORD path."""
+    dist_info = f'{package}-1.0.0.dist-info'
+    record_path = f'{dist_info}/RECORD'
+    files = {
+        f'{package}/cacert.pem': b'-----BEGIN CERTIFICATE-----\n',
+        f'{package}/__init__.py': b'',
+        f'{dist_info}/METADATA': f'Metadata-Version: 2.1\nName: {package}\nVersion: 1.0.0\n'.encode(),
+        f'{dist_info}/WHEEL': b'Wheel-Version: 1.0\nGenerator: test\nRoot-Is-Purelib: true\nTag: py3-none-any\n',
+    }
+    with ZipFile(path, 'w', compression=ZIP_DEFLATED) as wheel:
+        for name, contents in files.items():
+            wheel.writestr(name, contents)
+        wheel.writestr(record_path, _record_contents(files, record_path))
+    return record_path
+
+
+def test_clean_wheel_removes_botocore_ca_bundle(tmp_path: Path):
+    wheel_path = tmp_path / 'botocore-1.0.0-py3-none-any.whl'
+    record_path = _write_ca_bundle_wheel(wheel_path, 'botocore')
+
+    assert build_wheels.clean_wheel(wheel_path)
+
+    with ZipFile(wheel_path) as wheel:
+        installed_paths = set(wheel.namelist())
+        recorded_paths = {row[0] for row in csv.reader(io.TextIOWrapper(wheel.open(record_path), encoding='utf-8'))}
+
+    assert 'botocore/cacert.pem' not in installed_paths
+    assert 'botocore/cacert.pem' not in recorded_paths
+    assert 'botocore/__init__.py' in installed_paths
+
+
+def test_clean_wheel_keeps_certifi_ca_bundle(tmp_path: Path):
+    # Every requests and botocore connection reads this bundle through certifi.where().
+    wheel_path = tmp_path / 'certifi-1.0.0-py3-none-any.whl'
+    _write_ca_bundle_wheel(wheel_path, 'certifi')
+
+    build_wheels.clean_wheel(wheel_path)
+
+    with ZipFile(wheel_path) as wheel:
+        assert 'certifi/cacert.pem' in wheel.namelist()
+
+
 @pytest.mark.parametrize('newline', ['\n', '\r\n'])
 @pytest.mark.parametrize('strip_docstrings', [True, False])
 def test_docstring_trimming_preserves_runtime_strings_and_python_syntax(
