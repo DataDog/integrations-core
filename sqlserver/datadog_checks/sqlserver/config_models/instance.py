@@ -119,6 +119,18 @@ class QueryErrors(BaseModel):
     max_events: Optional[int] = Field(None, examples=[1000])
 
 
+class QueryPlans(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        frozen=True,
+    )
+    collection_interval: Optional[float] = Field(None, examples=[10])
+    enabled: Optional[bool] = Field(None, examples=[False])
+    max_events: Optional[int] = Field(None, examples=[1000])
+    max_plan_size_bytes: Optional[int] = Field(None, examples=[1000000])
+    samples_per_hour_per_query: Optional[int] = Field(None, examples=[4])
+
+
 class CollectXe(BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
@@ -127,6 +139,7 @@ class CollectXe(BaseModel):
     debug_sample_events: Optional[int] = None
     query_completions: Optional[QueryCompletions] = None
     query_errors: Optional[QueryErrors] = None
+    query_plans: Optional[QueryPlans] = None
 
 
 class CustomQuery(BaseModel):

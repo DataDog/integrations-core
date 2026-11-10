@@ -730,3 +730,47 @@ def test_per_database_view_state_skipped_on_azure_sql_database(instance_minimal_
     diagnoses = _get_diagnoses(check)
 
     assert not _by_name(diagnoses, SQLServerConfigurationError.missing_per_database_view_state.value)
+
+
+@pytest.mark.parametrize(
+    "events,targets,result,diagnosis",
+    [
+        pytest.param(
+            [("query_post_execution_plan_profile",)],
+            [("event_file",)],
+            Diagnosis.DIAGNOSIS_SUCCESS,
+            "running, with event query_post_execution_plan_profile and target event_file",
+            id="running",
+        ),
+        pytest.param([], [], Diagnosis.DIAGNOSIS_WARNING, "doesn't exist or isn't running", id="not_running"),
+        pytest.param(
+            [("sql_batch_completed",)],
+            [("ring_buffer",)],
+            Diagnosis.DIAGNOSIS_WARNING,
+            "has none of the events",
+            id="no_plan_event",
+        ),
+        pytest.param(
+            [("query_post_execution_showplan",)],
+            [("histogram",)],
+            Diagnosis.DIAGNOSIS_WARNING,
+            "no event_file or ring_buffer target",
+            id="unsupported_target",
+        ),
+    ],
+)
+def test_query_plans_xe_session(instance_minimal_defaults, events, targets, result, diagnosis):
+    responses = [("sys.dm_xe_session_events", events), ("sys.dm_xe_session_targets", targets)] + _happy_responses()
+    check = _check(instance_minimal_defaults, responses, dbm=True, collect_xe={'query_plans': {'enabled': True}})
+
+    diagnoses = _get_diagnoses(check)
+
+    row = _by_name(diagnoses, SQLServerConfigurationError.query_plans_xe_session.value)[0]
+    assert row['result'] == result
+    assert diagnosis in row['diagnosis']
+
+
+def test_query_plans_xe_session_skipped_when_disabled(instance_minimal_defaults):
+    check = _check(instance_minimal_defaults, _happy_responses(), dbm=True)
+
+    assert not _by_name(_get_diagnoses(check), SQLServerConfigurationError.query_plans_xe_session.value)

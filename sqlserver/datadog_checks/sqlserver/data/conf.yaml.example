@@ -958,6 +958,65 @@ instances:
         #
         # query_errors: {}
 
+        ## @param query_plans - mapping - optional
+        ## Configure the collection of real execution plans from the `datadog_query_plans` XE session. Each plan is
+        ## the actual plan of one statement execution: it holds that execution's parameter values, the actual rows
+        ## and executions of each operator, the memory grant and the degree of parallelism. Plans are sent as plan
+        ## events of the `real` type.
+        ##
+        ## The Agent never creates, alters or starts this session: create and start it yourself, as the server
+        ## administrator, for example with:
+        ##
+        ##   CREATE EVENT SESSION datadog_query_plans ON SERVER
+        ##   ADD EVENT sqlserver.query_post_execution_plan_profile (
+        ##       ACTION (sqlserver.database_name, sqlserver.session_id, sqlserver.request_id, sqlserver.username,
+        ##               sqlserver.client_app_name, sqlserver.client_hostname, sqlserver.query_hash,
+        ##               sqlserver.query_plan_hash, sqlserver.plan_handle, sqlserver.tsql_frame)
+        ##       WHERE duration > 1000000 AND sqlserver.username <> N'datadog'
+        ##   )
+        ##   ADD TARGET package0.event_file (SET filename = N'datadog_query_plans', max_file_size = 64,
+        ##                                   max_rollover_files = 4)
+        ##   WITH (MAX_MEMORY = 8192 KB, EVENT_RETENTION_MODE = ALLOW_SINGLE_EVENT_LOSS,
+        ##         MAX_DISPATCH_LATENCY = 30 SECONDS, TRACK_CAUSALITY = ON, STARTUP_STATE = ON);
+        ##   ALTER EVENT SESSION datadog_query_plans ON SERVER STATE = START;
+        ##
+        ## The predicate keeps the statements that run longer than a second, except the Agent's own statements:
+        ## replace `datadog` with the Agent's login. Where an event_file target can't be used, as on Azure SQL
+        ## Database without blob storage, use a ring_buffer target instead, which holds far fewer plans.
+        ##
+        ## For more detail, replace `sqlserver.query_post_execution_plan_profile` with
+        ## `sqlserver.query_post_execution_showplan`, which adds each operator's CPU and elapsed time and reads, wait
+        ## statistics and spill details, at a higher cost. The Agent reads either event.
+        ##
+        ## Overhead: while the session runs, SQL Server profiles every statement on the server, whatever the
+        ## predicate. The predicate limits the number of events, not the cost. On SQL Server 2019, 2022 and 2025,
+        ## `query_post_execution_plan_profile` added about 0.25 ms of CPU to each small statement, and 0 to 1% to
+        ## statements of 30 ms or more: about 2 to 2.5 cores at 10,000 small statements per second.
+        ## `query_post_execution_showplan` added about 0.35 ms to each small statement, and 2 to 4% to statements of
+        ## 30 ms or more. On busy OLTP servers, run the session in time windows rather than all the time.
+        ##
+        ## The Agent's login needs `VIEW SERVER STATE`, or `VIEW SERVER PERFORMANCE STATE` on SQL Server 2022 and
+        ## later, to read the session.
+        ##
+        ## Values in the plans, including the runtime parameter values, are obfuscated. When
+        ## `collect_raw_query_statement.enabled` is `true`, a raw copy of each plan and its statement is also sent.
+        ##
+        ## Set `query_plans.enabled` to `true` to enable the collection of real execution plans.
+        ##
+        ## Use `query_plans.collection_interval` to set the interval (in seconds) for reading the session.
+        ## Defaults to 10 seconds.
+        ##
+        ## Use `query_plans.max_events` to set the maximum number of events to read per collection. Defaults to
+        ## 1000.
+        ##
+        ## Use `query_plans.samples_per_hour_per_query` to set how many plans are collected per hour for each query
+        ## and plan shape (query hash and query plan hash). Of the executions read in one collection, the slowest
+        ## is kept. Defaults to 4.
+        ##
+        ## Use `query_plans.max_plan_size_bytes` to skip plans larger than this size. Defaults to 1000000.
+        #
+        # query_plans: {}
+
     ## DEPRECATED: Use `collect_xe` instead.
     ## Configure the collection of events from XE (Extended Events) sessions. Requires `dbm: true`.
     ##
