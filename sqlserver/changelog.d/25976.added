@@ -1,0 +1,1 @@
+Collect real execution plans, with their runtime parameter values, from the `datadog_query_plans` Extended Events session with `collect_xe.query_plans`.
