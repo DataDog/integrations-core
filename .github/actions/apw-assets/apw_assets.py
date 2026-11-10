@@ -242,8 +242,6 @@ class Release:
             # --target is ignored when a tag already exists; reject a tag that
             # points elsewhere before creating any release.
             self.tag_exists()
-            # Keep the "Built by" line exact and on its own line: Datadog's
-            # downstream pin tooling reads the producer run from it.
             notes = (
                 "Assets for integrations such as dashboards and monitors for "
                 f"{self.repository.split('/')[1]} at commit {self.commit}\n\n"
