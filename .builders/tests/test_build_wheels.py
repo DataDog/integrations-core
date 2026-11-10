@@ -5,6 +5,7 @@ import base64
 import csv
 import hashlib
 import importlib
+import importlib.util
 import io
 import sys
 from pathlib import Path
@@ -107,13 +108,12 @@ def test_clean_wheel_removes_jsonpatch_console_scripts(tmp_path: Path):
     assert 'jsonpatch.py' in recorded_paths
 
 
-def _write_ca_bundle_wheel(path: Path, package: str) -> str:
-    """Write a minimal wheel holding `<package>/cacert.pem` and return its RECORD path."""
+def _write_wheel(path: Path, package: str, files: dict[str, bytes]) -> str:
+    """Write a minimal `<package>` wheel holding `files` and return its RECORD path."""
     dist_info = f'{package}-1.0.0.dist-info'
     record_path = f'{dist_info}/RECORD'
     files = {
-        f'{package}/cacert.pem': b'-----BEGIN CERTIFICATE-----\n',
-        f'{package}/__init__.py': b'',
+        **files,
         f'{dist_info}/METADATA': f'Metadata-Version: 2.1\nName: {package}\nVersion: 1.0.0\n'.encode(),
         f'{dist_info}/WHEEL': b'Wheel-Version: 1.0\nGenerator: test\nRoot-Is-Purelib: true\nTag: py3-none-any\n',
     }
@@ -124,30 +124,70 @@ def _write_ca_bundle_wheel(path: Path, package: str) -> str:
     return record_path
 
 
+def _read_wheel(path: Path, record_path: str) -> tuple[dict[str, bytes], set[str]]:
+    with ZipFile(path) as wheel:
+        contents = {name: wheel.read(name) for name in wheel.namelist()}
+        recorded_paths = {row[0] for row in csv.reader(io.TextIOWrapper(wheel.open(record_path), encoding='utf-8'))}
+    return contents, recorded_paths
+
+
+CERTIFI_OVERLAY = Path(build_wheels.__file__).parent / 'overlays' / 'certifi' / 'core.py'
+UPSTREAM_CERTIFI_CORE = b'def where(): ...\n'
+CA_BUNDLE = b'-----BEGIN CERTIFICATE-----\n'
+
+
 def test_clean_wheel_removes_botocore_ca_bundle(tmp_path: Path):
     wheel_path = tmp_path / 'botocore-1.0.0-py3-none-any.whl'
-    record_path = _write_ca_bundle_wheel(wheel_path, 'botocore')
+    record_path = _write_wheel(wheel_path, 'botocore', {'botocore/cacert.pem': CA_BUNDLE, 'botocore/__init__.py': b''})
 
     assert build_wheels.clean_wheel(wheel_path)
 
-    with ZipFile(wheel_path) as wheel:
-        installed_paths = set(wheel.namelist())
-        recorded_paths = {row[0] for row in csv.reader(io.TextIOWrapper(wheel.open(record_path), encoding='utf-8'))}
-
-    assert 'botocore/cacert.pem' not in installed_paths
+    contents, recorded_paths = _read_wheel(wheel_path, record_path)
+    assert 'botocore/cacert.pem' not in contents
     assert 'botocore/cacert.pem' not in recorded_paths
-    assert 'botocore/__init__.py' in installed_paths
+    assert 'botocore/__init__.py' in contents
 
 
-def test_clean_wheel_keeps_certifi_ca_bundle(tmp_path: Path):
-    # Every requests and botocore connection reads this bundle through certifi.where().
+def test_clean_wheel_points_certifi_at_agent_ca_bundle(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    # The real rules, pinned to this test's stand-in for upstream `certifi/core.py`.
+    rules = [
+        {**rule, 'upstream_sha256': hashlib.sha256(UPSTREAM_CERTIFI_CORE).hexdigest()}
+        for rule in build_wheels._load_file_replacement_rules()
+    ]
+    monkeypatch.setattr(build_wheels, '_load_file_replacement_rules', lambda: rules)
     wheel_path = tmp_path / 'certifi-1.0.0-py3-none-any.whl'
-    _write_ca_bundle_wheel(wheel_path, 'certifi')
+    record_path = _write_wheel(
+        wheel_path, 'certifi', {'certifi/cacert.pem': CA_BUNDLE, 'certifi/core.py': UPSTREAM_CERTIFI_CORE}
+    )
 
-    build_wheels.clean_wheel(wheel_path)
+    assert build_wheels.clean_wheel(wheel_path)
 
-    with ZipFile(wheel_path) as wheel:
-        assert 'certifi/cacert.pem' in wheel.namelist()
+    contents, recorded_paths = _read_wheel(wheel_path, record_path)
+    assert contents['certifi/core.py'] == CERTIFI_OVERLAY.read_bytes()
+    assert 'certifi/cacert.pem' not in contents
+    assert 'certifi/cacert.pem' not in recorded_paths
+
+
+def test_clean_wheel_rejects_changed_upstream_certifi_core(tmp_path: Path):
+    wheel_path = tmp_path / 'certifi-1.0.0-py3-none-any.whl'
+    _write_wheel(wheel_path, 'certifi', {'certifi/cacert.pem': CA_BUNDLE, 'certifi/core.py': UPSTREAM_CERTIFI_CORE})
+
+    with pytest.raises(RuntimeError, match='was reviewed against'):
+        build_wheels.clean_wheel(wheel_path)
+
+
+def test_certifi_overlay_returns_agent_ca_bundle(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    # The Agent's bundle comes from curl.se, whose comments contain UTF-8.
+    bundle = '# NetLock Arany (Class Gold) F\u0151tan\u00fas\u00edtv\u00e1ny\n-----BEGIN CERTIFICATE-----\n'
+    (tmp_path / 'ssl').mkdir()
+    (tmp_path / 'ssl' / 'cert.pem').write_text(bundle, encoding='utf-8')
+    monkeypatch.setattr(sys, 'prefix', str(tmp_path))
+    spec = importlib.util.spec_from_file_location('certifi_overlay', CERTIFI_OVERLAY)
+    overlay = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(overlay)
+
+    assert overlay.where() == str(tmp_path / 'ssl' / 'cert.pem')
+    assert overlay.contents() == bundle
 
 
 @pytest.mark.parametrize('newline', ['\n', '\r\n'])
