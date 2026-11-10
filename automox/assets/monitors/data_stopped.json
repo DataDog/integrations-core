@@ -1,0 +1,33 @@
+{
+    "version": 2,
+    "created_at": "2026-10-04",
+    "last_updated_at": "2026-10-04",
+    "title": "Automox data has stopped arriving",
+    "description": "The integration has sent no Automox organization metrics for two hours. Until it resumes, the other Automox monitors cannot alert. A revoked or expired Automox API key is the usual cause.",
+    "definition": {
+        "name": "[Automox] Automox data has stopped arriving",
+        "type": "query alert",
+        "query": "max(last_2h):sum:automox.org.device_count{*} by {organization_id} < 0",
+        "message": "{{#is_no_data}}\nDatadog has received no Automox metrics for two hours.\n{{/is_no_data}}\n{{#is_recovery}}\nAutomox metrics are arriving again.\n{{/is_recovery}}\n\nOrganization: {{organization_id.name}}\n\nCheck the Automox integration tile for errors, and that its API key is still valid under Settings > Keys in the Automox console.",
+        "tags": [
+            "integration:automox"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 0
+            },
+            "notify_audit": false,
+            "on_missing_data": "show_and_notify_no_data",
+            "include_tags": true,
+            "new_group_delay": 60,
+            "silenced": {}
+        },
+        "priority": 3,
+        "restriction_policy": {
+            "bindings": []
+        }
+    },
+    "tags": [
+        "integration:automox"
+    ]
+}
