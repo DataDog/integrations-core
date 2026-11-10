@@ -1,0 +1,16 @@
+# Rules for replacing whole files in wheels with a reviewed copy under overlays/.
+# Each rule names the wheels it applies to, the file to replace inside the wheel,
+# and the replacement relative to this directory.
+#
+# `upstream_sha256` is the SHA-256 of the upstream file the replacement was
+# reviewed against. The build fails when a version bump changes that file, so the
+# replacement gets reviewed again instead of silently dropping upstream changes.
+
+[[rules]]
+# Point certifi at the Agent's embedded CA bundle, so that requests, botocore and
+# every other library asking certifi for CAs trust the same list as the Agent's
+# OpenSSL. certifi's own bundle is removed in files_to_remove.toml.
+package_pattern = "certifi-*"
+path = "certifi/core.py"
+replacement = "overlays/certifi/core.py"
+upstream_sha256 = "5c55f2727746e697f7edac9e17c377d8752e0da7ecca191531b3b80403d61dad"

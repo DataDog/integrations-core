@@ -1,0 +1,1 @@
+Make `certifi` return the Agent's embedded CA bundle and remove the separate bundles shipped with `certifi` and `botocore`, so integrations using `requests`, `botocore` or other libraries that rely on `certifi` trust the same certificate authorities as the rest of the Agent.

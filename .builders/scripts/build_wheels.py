@@ -306,6 +306,43 @@ def _get_matching_rules(wheel_name: str) -> list[dict]:
     return matching
 
 
+@cache
+def _load_file_replacement_rules() -> list[dict]:
+    """Load the whole-file replacement rules from files_to_replace.toml."""
+    config_path = Path(__file__).parent / "files_to_replace.toml"
+    with open(config_path, "rb") as f:
+        config = tomllib.load(f)
+
+    return config.get("rules", [])
+
+
+def _get_matching_replacements(wheel_name: str) -> list[dict]:
+    return [rule for rule in _load_file_replacement_rules() if fnmatch.fnmatch(wheel_name, rule['package_pattern'])]
+
+
+def _replace_files_in_dir(unpacked_dir: Path, rules: list[dict]) -> None:
+    """
+    Overwrite files with their reviewed replacements.
+
+    Raises RuntimeError when the upstream file is missing or differs from the one the
+    replacement was reviewed against, so a version bump can't silently drop upstream changes.
+    """
+    for rule in rules:
+        target = unpacked_dir / rule['path']
+        if not target.is_file():
+            raise RuntimeError(f'`{rule["path"]}` to be replaced is missing from {unpacked_dir.name}')
+
+        upstream_sha256 = sha256(target.read_bytes()).hexdigest()
+        if upstream_sha256 != rule['upstream_sha256']:
+            raise RuntimeError(
+                f'`{rule["path"]}` in {unpacked_dir.name} has SHA-256 {upstream_sha256}, but its replacement '
+                f'was reviewed against {rule["upstream_sha256"]}. Review the upstream change, update '
+                f'`{rule["replacement"]}` if needed, then update `upstream_sha256` in files_to_replace.toml.'
+            )
+
+        shutil.copyfile(Path(__file__).parent / rule['replacement'], target)
+
+
 def _strip_docstrings(source: str, filename: str) -> str:
     """Empty Python docstrings without rewriting executable code or license comments."""
     data = source.encode('utf-8')
@@ -376,15 +413,16 @@ def _strip_lines_from_dir(unpacked_dir: Path, rules: list[dict]) -> bool:
 
 def clean_wheel(wheel_path: Path) -> bool:
     """
-    Unpack the wheel at most once, remove excluded test files and strip
-    matching lines, then repack only if changes were made.
+    Unpack the wheel at most once, remove excluded test files, replace files and
+    strip matching lines, then repack only if changes were made.
     """
     with ZipFile(wheel_path, 'r') as zf:
         has_excluded_files = any(is_excluded_from_wheel(name) for name in zf.namelist())
 
+    replacement_rules = _get_matching_replacements(wheel_path.name)
     line_removal_rules = _get_matching_rules(wheel_path.name)
 
-    if not has_excluded_files and not line_removal_rules:
+    if not has_excluded_files and not replacement_rules and not line_removal_rules:
         return False
 
     with TemporaryDirectory() as td:
@@ -397,6 +435,10 @@ def clean_wheel(wheel_path: Path) -> bool:
             if _remove_test_files_from_dir(unpacked_dir):
                 print(f'Tests removed from {wheel_path.name}')
                 modified = True
+        if replacement_rules:
+            _replace_files_in_dir(unpacked_dir, replacement_rules)
+            print(f'Replaced files in {wheel_path.name}')
+            modified = True
         if line_removal_rules:
             if _strip_lines_from_dir(unpacked_dir, line_removal_rules):
                 print(f'Stripped lines from {wheel_path.name}')

@@ -56,6 +56,15 @@ excluded_paths = [
   "!botocore/data/rds",
   # Riakcs integration monitors s3.
   "!botocore/data/s3",
+  # botocore reads its own CA bundle only when certifi can't be imported, and
+  # certifi is always installed because requests imports it. Removing the copy
+  # leaves one less trust list to patch when a CA is distrusted.
+  "botocore/cacert.pem",
+
+  # --- certifi ---
+  # certifi.where() returns the Agent's embedded CA bundle (see files_to_replace.toml),
+  # so certifi's own bundle is never read.
+  "certifi/cacert.pem",
 
   # --- Setuptools ---
   # Windows script launcher templates used only by legacy setuptools script installation;
