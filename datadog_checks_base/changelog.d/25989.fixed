@@ -1,0 +1,1 @@
+Remove the `certifi` fallback from TLS contexts. It loaded `certifi`'s bundle only when no default CA certificates could be loaded, a case the Agent no longer hits on Linux and macOS since 7.76.
