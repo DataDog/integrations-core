@@ -551,8 +551,8 @@ def test_event_file_reads_complete_buffers(aggregator, xe_instance):
 @pytest.mark.parametrize('checkpoint_file_removed', [True, False], ids=['rollover', 'session_restart'])
 def test_event_file_checkpoint_file_replaced(aggregator, xe_instance, checkpoint_file_removed):
     """
-    When the checkpoint's file is gone after rollovers, or the restarted session writes a new file, the current file
-    is read from its start, without sending the events read before again.
+    When the checkpoint's file is gone after rollovers, the current file is read from its start, and when a restarted
+    session writes a new file, reading goes on into it. Neither sends the events read before again.
     """
     server = FakeServer()
     # no rate limit, which would also stop the events read before
@@ -569,7 +569,7 @@ def test_event_file_checkpoint_file_replaced(aggregator, xe_instance, checkpoint
     else:
         # nothing after the checkpoint yet, and an empty new file
         handler.run_job()
-    # an event already read is in the new file too: a read from the start replays it
+    # an event already read is in the new file too, as a read from a file's start can replay it
     server.event_file.add_buffer(distinct_event(1), distinct_event(2))
     handler.run_job()
 
