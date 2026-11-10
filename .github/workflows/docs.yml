@@ -19,8 +19,6 @@ on:
     # broke the docs job (pydantic incompatible with ddev's version) but we didn't find out until later.
     - 'datadog_checks_base/pyproject.toml'
 
-# Runs join the group when they are created, in push order, so a newer push to master
-# cancels any older run and only one run can push to gh-pages at a time.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
