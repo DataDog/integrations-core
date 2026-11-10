@@ -17,7 +17,7 @@ from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError
 from datadog_checks.base.utils.http_protocol import HTTPHeaders, HTTPRequestOptions, HTTPResponse
 from datadog_checks.base.utils.tls import TlsConfig
 
-__all__ = ['FakeHTTPClient', 'FakeHTTPResponse', 'RecordedRequest']
+__all__ = ['FakeHTTPClient', 'FakeHTTPResponse', 'RecordedClient', 'RecordedRequest']
 
 JSON_RESULT_UNSET = object()
 SUPPRESSED_AUTH = object()
@@ -58,6 +58,20 @@ class RecordedRequest:
     def __post_init__(self) -> None:
         object.__setattr__(self, 'method', self.method.upper())
         object.__setattr__(self, 'options', _snapshot_options(self.options))
+
+
+@dataclass(frozen=True, slots=True)
+class RecordedClient:
+    """The configuration a client was created with through `FakeHTTPClient.create_client`."""
+
+    instance: Mapping[str, Any] = field(default_factory=dict)
+    init_config: Mapping[str, Any] = field(default_factory=dict)
+    remapper: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, 'instance', _snapshot_options(self.instance))
+        object.__setattr__(self, 'init_config', _snapshot_options(self.init_config))
+        object.__setattr__(self, 'remapper', _snapshot_options(self.remapper))
 
 
 @dataclass(frozen=True, slots=True)
@@ -219,12 +233,26 @@ class FakeHTTPClient:
         # Shared with created clients so a setting changed after a check starts still reaches it.
         self._proxy_bypass: dict[str, bool | Callable[[str], bool]] = {'value': should_bypass_proxy}
         self.requests: list[RecordedRequest] = []
+        self.created_clients: list[RecordedClient] = []
         self._responses: list[RegisteredResponse] = []
 
-    def create_client(self) -> FakeHTTPClient:
-        """Create an isolated client that shares registered responses, recorded requests and proxy bypass."""
+    def create_client(
+        self,
+        *,
+        instance: Mapping[str, Any] | None = None,
+        init_config: Mapping[str, Any] | None = None,
+        remapper: Mapping[str, Any] | None = None,
+    ) -> FakeHTTPClient:
+        """Create an isolated client that shares registered responses, recorded requests and proxy bypass.
+
+        The configuration is recorded in `created_clients`, not applied: the new client starts with defaults.
+        """
+        self.created_clients.append(
+            RecordedClient(instance=instance or {}, init_config=init_config or {}, remapper=remapper or {})
+        )
         client = FakeHTTPClient()
         client.requests = self.requests
+        client.created_clients = self.created_clients
         client._responses = self._responses
         client._proxy_bypass = self._proxy_bypass
         return client

@@ -388,13 +388,24 @@ def mock_http_response(mocker, mock_response):
 
 
 def _create_fake_http_client_factory(fake_http: Any) -> Callable[..., Any]:
-    def create_client(check: Any, *_args: Any, **_kwargs: Any) -> Any:
+    def create_client(
+        check: Any,
+        instance: dict | None = None,
+        *,
+        init_config: dict | None = None,
+        remapper: dict | None = None,
+    ) -> Any:
         # The fake models the backend-neutral contract, which a check only gets in production by opting in.
         if not getattr(check, 'AGNOSTIC_HTTP_CLIENT', False):
             raise AssertionError(
                 f'{type(check).__name__} must set AGNOSTIC_HTTP_CLIENT = True to use the fake_http fixture.'
             )
-        return fake_http.create_client()
+        # Record the configuration AgentCheck.create_http_client would hand to the real client.
+        return fake_http.create_client(
+            instance=check.instance if instance is None else instance,
+            init_config=check.init_config if init_config is None else init_config,
+            remapper=check.HTTP_CONFIG_REMAPPER if remapper is None else remapper,
+        )
 
     return create_client
 

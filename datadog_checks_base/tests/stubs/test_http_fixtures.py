@@ -12,12 +12,16 @@ import datadog_checks.dev
 from datadog_checks.base import AgentCheck
 from datadog_checks.base.checks.openmetrics.base_check import OpenMetricsBaseCheck
 from datadog_checks.base.checks.prometheus.prometheus_base import PrometheusCheck
-from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedClient, RecordedRequest
 from datadog_checks.dev import http as http_testing
 
 
 class FixtureCheck(AgentCheck):
     AGNOSTIC_HTTP_CLIENT = True
+
+
+class RemappedFixtureCheck(FixtureCheck):
+    HTTP_CONFIG_REMAPPER = {'user': {'name': 'username'}}
 
 
 class OpenMetricsFixtureCheck(OpenMetricsBaseCheck):
@@ -62,6 +66,40 @@ def test_fake_http_creates_isolated_clients(fake_http):
     default_client.close()
     assert default_client.closed
     assert not explicit_client.closed
+
+
+@pytest.mark.parametrize(
+    'create_client, expected',
+    [
+        pytest.param(
+            lambda check: check.http,
+            RecordedClient(
+                instance={'user': 'admin'},
+                init_config={'timeout': 5},
+                remapper={'user': {'name': 'username'}},
+            ),
+            id='check-configuration',
+        ),
+        pytest.param(
+            lambda check: check.create_http_client(
+                {'openmetrics_endpoint': 'https://example.test/metrics'},
+                init_config={},
+                remapper={'ssl_verify': {'name': 'tls_verify'}},
+            ),
+            RecordedClient(
+                instance={'openmetrics_endpoint': 'https://example.test/metrics'},
+                remapper={'ssl_verify': {'name': 'tls_verify'}},
+            ),
+            id='explicit-arguments',
+        ),
+    ],
+)
+def test_fake_http_records_the_configuration_a_check_creates_a_client_with(fake_http, create_client, expected):
+    check = RemappedFixtureCheck('test', {'timeout': 5}, [{'user': 'admin'}])
+
+    create_client(check)
+
+    assert fake_http.created_clients == [expected]
 
 
 def test_fake_http_aggregates_interactions_from_isolated_clients(fake_http):

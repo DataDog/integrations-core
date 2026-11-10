@@ -6,7 +6,7 @@ from datetime import timedelta
 
 import pytest
 
-from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedRequest
+from datadog_checks.base.stubs.http import FakeHTTPClient, FakeHTTPResponse, RecordedClient, RecordedRequest
 from datadog_checks.base.utils.http_exceptions import HTTPClientStatusError, HTTPClientTimeoutError
 from datadog_checks.base.utils.tls import TlsConfig, create_ssl_context
 
@@ -209,6 +209,36 @@ def test_created_client_tls_settings_are_isolated_from_parent():
     child.tls_config['tls_verify'] = False
 
     assert parent.tls_config['tls_verify'] is True
+
+
+def test_created_clients_record_their_configuration_in_the_parent():
+    parent = FakeHTTPClient()
+    child = parent.create_client(instance={'url': 'https://first.test'})
+
+    child.create_client(
+        instance={'url': 'https://second.test'},
+        init_config={'timeout': 5},
+        remapper={'ssl_verify': {'name': 'tls_verify'}},
+    )
+
+    assert parent.created_clients == [
+        RecordedClient(instance={'url': 'https://first.test'}),
+        RecordedClient(
+            instance={'url': 'https://second.test'},
+            init_config={'timeout': 5},
+            remapper={'ssl_verify': {'name': 'tls_verify'}},
+        ),
+    ]
+
+
+def test_created_client_records_the_configuration_it_received():
+    parent = FakeHTTPClient()
+    instance = {'headers': {'X-Token': 'first'}}
+    parent.create_client(instance=instance)
+
+    instance['headers']['X-Token'] = 'second'
+
+    assert parent.created_clients == [RecordedClient(instance={'headers': {'X-Token': 'first'}})]
 
 
 def test_fake_client_matches_responses_and_records_requests():
