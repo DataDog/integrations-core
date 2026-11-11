@@ -416,12 +416,18 @@ def test_iter_lines_allows_custom_delimiter_without_limit():
     assert list(ResponseWrapper(_gzip_response(b'x;y'), 4, None).iter_lines(delimiter=b';')) == [b'x', b'y']
 
 
-def test_iter_lines_uses_configured_line_size():
-    # Chunks of 256 bytes, smaller than the limit of 0.5 KiB
-    http = RequestsWrapper({'max_line_size': 0.5, 'request_size': 0.25}, {})
+@pytest.mark.parametrize(
+    'request_size',
+    [
+        pytest.param(0.25, id='chunks smaller than the line limit'),
+        pytest.param(1, id='chunks larger than the line limit'),
+    ],
+)
+def test_iter_lines_uses_configured_line_size(request_size):
+    http = RequestsWrapper({'max_line_size': 0.5, 'request_size': request_size}, {})
 
     with mock.patch('requests.Session.get', return_value=_gzip_response(b'x' * 512 + b'\ny\n')):
-        assert len(list(http.get('https://www.google.com', stream=True).iter_lines())) == 2
+        assert list(http.get('https://www.google.com', stream=True).iter_lines()) == [b'x' * 512, b'y']
     with mock.patch('requests.Session.get', return_value=_gzip_response(b'x' * 513 + b'\ny\n')):
         with pytest.raises(ResponseLineTooLongError, match=r'`max_line_size` option \(in KiB\)'):
             list(http.get('https://www.google.com', stream=True).iter_lines())

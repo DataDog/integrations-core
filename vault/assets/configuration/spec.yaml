@@ -82,6 +82,7 @@ files:
       enabled: true
     - template: instances/openmetrics
       overrides:
+        max_line_size.value.display_default: 16384
         openmetrics_endpoint.required: false
         openmetrics_endpoint.hidden: true
         auth_token.hidden: true
