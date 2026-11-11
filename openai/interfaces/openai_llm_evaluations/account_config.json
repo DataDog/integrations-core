@@ -6,7 +6,7 @@
         "password_setting": {
           "key": "api_key",
           "label": "API key",
-          "help": "A standard or project-scoped OpenAI API key with Write permission for model capabilities.",
+          "help": "A standard or project-scoped OpenAI API key with write permission for model capabilities.",
           "required": true,
           "editable": true,
           "password": {}
@@ -18,7 +18,7 @@
     {
       "key": "custom_tags",
       "label": "Tags",
-      "help": "Comma-separated list of custom tags to apply to OpenAI metrics and logs for organization and filtering (e.g., 'team:ai,env:prod').",
+      "help": "Comma-separated list of custom tags, such as `team:ai,env:prod`, to apply to OpenAI metrics and logs to organize and filter them.",
       "required": false,
       "editable": true,
       "text": {}
