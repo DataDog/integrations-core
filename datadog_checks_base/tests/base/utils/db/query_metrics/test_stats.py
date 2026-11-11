@@ -3,6 +3,8 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """Unit tests for QueryStats."""
 
+import pytest
+
 from datadog_checks.base.utils.db.query_metrics import QueryStats
 
 COUNTER_COLS = frozenset({'calls', 'total_exec_time', 'rows', 'shared_blks_hit'})
@@ -82,6 +84,26 @@ class TestQueryStats:
 
         delta = stats.diff([self._make_row(101, calls=16), self._make_row(102, calls=25)])
         assert [row['queryid'] for row in delta.derivative_rows] == [101]
+
+    @pytest.mark.parametrize(
+        'committed, expected_calls',
+        [
+            pytest.param(False, 15, id='discarded delta is reported again by the next diff'),
+            pytest.param(True, 5, id='committed delta is not reported twice'),
+        ],
+    )
+    def test_uncommitted_diff_leaves_baseline(self, committed, expected_calls):
+        """A caller whose text lookup fails discards the delta instead of losing that interval."""
+        stats = self._make_stats()
+        stats.diff([self._make_row(101, calls=10)])
+
+        pending = stats.diff([self._make_row(101, calls=20)], commit=False)
+        assert pending.derivative_rows[0]['calls'] == 10
+        if committed:
+            stats.commit(pending)
+
+        delta = stats.diff([self._make_row(101, calls=25)])
+        assert [row['calls'] for row in delta.derivative_rows] == [expected_calls]
 
     def test_execution_indicator_required(self):
         stats = self._make_stats()

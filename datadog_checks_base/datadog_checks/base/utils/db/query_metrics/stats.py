@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Callable, Hashable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +17,9 @@ class Delta[K: Hashable]:
     their deltas."""
     changed_keys: set[K]
     """Keys of :attr:`derivative_rows`, for resolving statement text only for what actually ran."""
+    snapshot: dict[K, dict] = field(default_factory=dict, repr=False, compare=False)
+    """The collapsed snapshot this delta was computed from, installed as the baseline by
+    :meth:`QueryStats.commit`."""
 
 
 class QueryStats[K: Hashable]:
@@ -50,8 +53,14 @@ class QueryStats[K: Hashable]:
     def reset(self):
         self._previous.clear()
 
-    def diff(self, snapshot: list[dict]) -> Delta[K]:
-        """Diff *snapshot* against the previous one and remember it for the next call."""
+    def diff(self, snapshot: list[dict], *, commit: bool = True) -> Delta[K]:
+        """Diff *snapshot* against the committed baseline.
+
+        By default *snapshot* becomes the baseline for the next call. Pass ``commit=False`` when work
+        that follows the diff, such as fetching statement text, can fail: the baseline is left as it
+        was until the delta is passed to :meth:`commit`. A delta that is never committed is
+        discarded, and the next diff covers its interval too instead of losing it.
+        """
         current = self._collapse(snapshot)
 
         derivative_rows: list[dict] = []
@@ -105,9 +114,14 @@ class QueryStats[K: Hashable]:
             len(changed_keys),
         )
 
-        self._remember(current)
+        delta = Delta(derivative_rows=derivative_rows, changed_keys=changed_keys, snapshot=current)
+        if commit:
+            self.commit(delta)
+        return delta
 
-        return Delta(derivative_rows=derivative_rows, changed_keys=changed_keys)
+    def commit(self, delta: Delta[K]):
+        """Install the snapshot *delta* was computed from as the baseline for the next diff."""
+        self._remember(delta.snapshot)
 
     def _collapse(self, snapshot: list[dict]) -> dict[K, dict]:
         """Group rows by key, summing counter columns across rows that share one.

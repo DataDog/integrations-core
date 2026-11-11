@@ -104,7 +104,12 @@ def resolve_obfuscations[K: Hashable](
     :param live_keys: Every key in the current snapshot. Cached keys absent from it are dropped.
     :param changed_keys: Keys needing resolution this collection; a subset of *live_keys*.
     :param fetch_texts: Reads statement text for a set of keys. May return fewer keys than asked
-        for; the rest stay misses and are retried next collection.
+        for, such as when a statement left the source table after the snapshot; the rest stay
+        misses and are retried next collection. Only the cache is retried, not the counters: a key
+        left unresolved is not reported, so this interval's counts for it are lost once the delta
+        is committed. A read that fails should therefore raise rather than return a partial result,
+        so the caller can skip :meth:`QueryStats.commit` and report the interval on the next
+        collection.
     :param classify: Reports what one non-empty text turned out to be. See :class:`TextKind`.
     """
     dropped = lookup.retain(live_keys)
