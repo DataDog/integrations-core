@@ -2,7 +2,7 @@
   "app_id": "intersystems-iris",
   "app_uuid": "01a03956-43a3-752e-b78a-0034963e71ae",
   "manifest_version": "2.0.0",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "title": "InterSystems IRIS",
     "description": "Monitor InterSystems IRIS instance health, licensing, mirroring, Enterprise Cache Protocol (ECP), and interoperability.",
