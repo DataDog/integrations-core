@@ -120,7 +120,7 @@ module `datadog_checks.base.utils.http_exceptions`. Catch these instead:
 | `HTTPClientReadTimeoutError` | `HTTPClientTimeoutError` | The timeout elapsed while waiting for response data. |
 | `HTTPClientStatusError` | `HTTPClientError` | An error status was raised through `raise_for_status()`. |
 
-Unlike in `requests`, a connect timeout is not a connection error. Catch `HTTPClientRequestError` to handle both.
+Unlike in `requests`, a timeout is never a connection error. Catch `HTTPClientRequestError` to handle both.
 
 Errors translated from a `requests` exception also subclass the `requests` exception they replace, and therefore
 `OSError`, so that handlers in checks that have not opted in keep matching. `HTTPClientLineTooLongError` has no
