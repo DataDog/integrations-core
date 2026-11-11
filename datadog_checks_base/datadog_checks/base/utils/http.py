@@ -644,8 +644,8 @@ class RequestsWrapper(object):
         self.max_line_size: int | None = None
         if config['max_line_size'] is not None:
             self.max_line_size = int(float(config['max_line_size']) * KIBIBYTE)
-            if self.max_line_size < self.request_size:
-                raise ConfigurationError('The `max_line_size` setting must be at least `request_size`')
+            if self.max_line_size <= 0:
+                raise ConfigurationError('The `max_line_size` setting must be greater than zero')
 
         self.aia_chasing_max_depth = DEFAULT_AIA_CHASING_MAX_DEPTH
 

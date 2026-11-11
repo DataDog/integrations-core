@@ -61,10 +61,17 @@ class TestRequestSize:
 
 
 class TestMaxLineSize:
-    @pytest.mark.parametrize('instance', [{'max_line_size': 0}, {'max_line_size': 1, 'request_size': 2}])
-    def test_config_invalid(self, instance):
-        with pytest.raises(ConfigurationError, match='`max_line_size` setting must be at least `request_size`'):
-            RequestsWrapper(instance, {})
+    @pytest.mark.parametrize(
+        'max_line_size',
+        [
+            pytest.param(0, id='zero'),
+            pytest.param(-1, id='negative'),
+            pytest.param(0.0001, id='less than one byte'),
+        ],
+    )
+    def test_config_invalid(self, max_line_size):
+        with pytest.raises(ConfigurationError, match='`max_line_size` setting must be greater than zero'):
+            RequestsWrapper({'max_line_size': max_line_size}, {})
 
 
 class TestVerify:

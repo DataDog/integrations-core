@@ -81,6 +81,7 @@ files:
         type: object
     - template: instances/openmetrics
       overrides:
+        max_line_size.value.display_default: 16384
         openmetrics_endpoint.hidden: true
         openmetrics_endpoint.required: false
         tls_verify.value.example: false

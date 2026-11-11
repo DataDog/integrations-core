@@ -1,1 +1,1 @@
-Document the `max_line_size` option in the example configuration and config models.
+Add `max_line_size` to the configuration models as a hidden HTTP option.
