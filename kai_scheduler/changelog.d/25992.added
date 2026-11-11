@@ -1,0 +1,1 @@
+Add the `scheduler`, `scheduler_queue`, and `scheduler_workload` tags to KAI PodGroup events.
