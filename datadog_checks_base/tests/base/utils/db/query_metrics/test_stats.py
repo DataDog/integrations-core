@@ -105,6 +105,25 @@ class TestQueryStats:
         delta = stats.diff([self._make_row(101, calls=25)])
         assert [row['calls'] for row in delta.derivative_rows] == [expected_calls]
 
+    @pytest.mark.parametrize(
+        'first_calls, uncommitted_calls',
+        [
+            pytest.param(None, 5, id='new key'),
+            pytest.param(10, 2, id='reset key'),
+        ],
+    )
+    def test_uncommitted_diff_baselines_keys_without_a_delta(self, first_calls, uncommitted_calls):
+        """A key with nothing to retry is baselined even if the diff is never committed, so a failed
+        text lookup does not also discard its counts until the next successful collection."""
+        stats = self._make_stats()
+        stats.diff([self._make_row(101, calls=first_calls)] if first_calls is not None else [])
+
+        pending = stats.diff([self._make_row(101, calls=uncommitted_calls)], commit=False)
+        assert pending.derivative_rows == []
+
+        delta = stats.diff([self._make_row(101, calls=uncommitted_calls + 3)])
+        assert [row['calls'] for row in delta.derivative_rows] == [3]
+
     def test_execution_indicator_required(self):
         stats = self._make_stats()
         stats.diff([self._make_row(101, calls=10, total_exec_time=100.0)])
