@@ -1,0 +1,33 @@
+{
+    "version": 2,
+    "created_at": "2026-10-22",
+    "last_updated_at": "2026-10-24",
+    "title": "Automox device data has stopped arriving",
+    "description": "The integration has sent no Automox device metrics for a day, though it collects them twice a day.",
+    "definition": {
+        "name": "[Automox] Automox device data has stopped arriving",
+        "type": "query alert",
+        "query": "max(last_1d):sum:automox.device.count{*} by {organization_id} < 0",
+        "message": "{{#is_no_data}}\nDatadog has received no Automox device metrics for a day. They are collected twice a day.\n{{/is_no_data}}\n{{#is_recovery}}\nAutomox device metrics are arriving again.\n{{/is_recovery}}\n\nOrganization: {{organization_id.name}}\n\nCheck the Automox integration tile for errors.",
+        "tags": [
+            "integration:automox"
+        ],
+        "options": {
+            "thresholds": {
+                "critical": 0
+            },
+            "notify_audit": false,
+            "on_missing_data": "show_and_notify_no_data",
+            "include_tags": true,
+            "new_group_delay": 60,
+            "silenced": {}
+        },
+        "priority": 3,
+        "restriction_policy": {
+            "bindings": []
+        }
+    },
+    "tags": [
+        "integration:automox"
+    ]
+}
