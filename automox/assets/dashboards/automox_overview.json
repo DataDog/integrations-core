@@ -550,7 +550,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:automox status:critical"
+                        "query": "source:automox status:critical $organization_id"
                       }
                     }
                   ],
@@ -602,7 +602,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:automox status:high"
+                        "query": "source:automox status:high $organization_id"
                       }
                     }
                   ],
@@ -656,7 +656,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:automox status:critical"
+                        "query": "source:automox status:critical $organization_id"
                       }
                     }
                   ],
@@ -722,7 +722,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:automox status:medium"
+                        "query": "source:automox status:medium $organization_id"
                       }
                     }
                   ],
@@ -774,7 +774,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:automox status:low"
+                        "query": "source:automox status:low $organization_id"
                       }
                     }
                   ],
@@ -826,7 +826,7 @@
                       },
                       "group_by": [],
                       "search": {
-                        "query": "source:automox status:info"
+                        "query": "source:automox status:info $organization_id"
                       }
                     }
                   ],
@@ -880,7 +880,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:automox status:high"
+                        "query": "source:automox status:high $organization_id"
                       }
                     }
                   ],
@@ -948,7 +948,7 @@
                         }
                       ],
                       "search": {
-                        "query": "source:automox status:medium"
+                        "query": "source:automox status:medium $organization_id"
                       }
                     }
                   ],
