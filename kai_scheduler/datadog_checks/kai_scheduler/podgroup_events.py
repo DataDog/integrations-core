@@ -198,6 +198,9 @@ class PodGroupEventCollector:
             nodepool = (metadata.get('labels') or {}).get(NODEPOOL_LABEL)
         tags = {
             'kube_namespace': metadata.get('namespace'),
+            'scheduler': 'kai',
+            'scheduler_workload': metadata.get('name'),
+            'scheduler_queue': spec.get('queue'),
             'kai_workload': metadata.get('name'),
             'kai_workload_uid': metadata.get('uid'),
             'kai_queue': spec.get('queue'),
