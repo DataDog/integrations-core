@@ -814,7 +814,7 @@ class ClickhouseRemoteQueryHandler:
         `open_remote_query_producer_tracing`: a root span on the request's trace context
         covering the admission failures below, the abort span around the failure tail's upload
         abort, and the terminal status; every span failure is swallowed without changing an
-        event, a page receipt, a retry, or an error.
+        event, a page acknowledgement, a retry, or an error.
         """
         started_at = started_at if started_at is not None else time.monotonic()
         stats = None
@@ -905,7 +905,7 @@ class ClickhouseRemoteQueryHandler:
         encode-and-page-build span (with upload `add_row` triggers nested inside it); page
         uploads and finalize are accounted by their own spans in the shared source-page
         writer. `tracing` is fail-open: every span failure is swallowed without changing an
-        event, a page receipt, a retry, or an error.
+        event, a page acknowledgement, a retry, or an error.
         """
         delivery = request.result_delivery
         limits = delivery.limits

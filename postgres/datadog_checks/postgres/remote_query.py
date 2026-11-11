@@ -6,7 +6,7 @@
 
 Describe the result without fetching it, then execute the query once through COPY.
 CopyPageWriter frames the native CSV; the shared uploader only sends complete records
-and verifies intake receipts. The successful Agent callback carries status only,
+and waits for intake to record each page. The successful Agent callback carries status only,
 never result bytes. resolve_target and execution use the same configured database scope.
 """
 
@@ -48,12 +48,8 @@ class ResultColumn:
 # Result description, vendor types, and the upload descriptor
 # ---------------------------------------------------------------------------
 
-# The catalog lookup resolves each described type through domain chains to its effective
-# base type, decides whether that effective type is an array (typcategory 'A'), and for
-# array columns resolves the ELEMENT type's own domain chain to read its typdelim — the
-# delimiter PostgreSQL's own array parser uses for that element family (box is semicolon-
-# delimited, for example). Depth bounds keep a pathological domain loop from recursing
-# forever; DISTINCT ON keeps the deepest (fully resolved) walk row per requested type.
+# Resolve domains to their effective base types so arrays and composites are rejected
+# even when their formatted names hide the underlying type. Bound recursive domain walks.
 VENDOR_TYPE_QUERY = """
 WITH RECURSIVE
 requested AS (
@@ -70,41 +66,24 @@ type_walk(origin, type_oid, depth) AS (
 ),
 effective AS (
     SELECT DISTINCT ON (origin) origin, type_oid FROM type_walk ORDER BY origin, depth DESC
-),
-element_walk(origin, type_oid, depth) AS (
-    SELECT e.origin, a.typelem, 0
-    FROM effective e
-    JOIN pg_catalog.pg_type a ON a.oid = e.type_oid
-    WHERE a.typcategory = 'A'
-    UNION ALL
-    SELECT w.origin, b.typbasetype, w.depth + 1
-    FROM element_walk w
-    JOIN pg_catalog.pg_type b ON b.oid = w.type_oid AND b.typtype = 'd'
-    WHERE w.depth < 32
-),
-element AS (
-    SELECT DISTINCT ON (origin) origin, type_oid FROM element_walk ORDER BY origin, depth DESC
 )
 SELECT r.type_oid, r.type_mod,
        pg_catalog.format_type(r.type_oid, r.type_mod) AS vendor_data_type,
        (a.typcategory = 'A') AS is_array,
-       pg_catalog.ascii(e.typdelim::text) AS element_delimiter
+       (a.typtype = 'c' OR a.oid = 2249) AS is_composite
 FROM requested r
 JOIN effective f ON f.origin = r.type_oid
 JOIN pg_catalog.pg_type a ON a.oid = f.type_oid
-LEFT JOIN element el ON el.origin = r.type_oid
-LEFT JOIN pg_catalog.pg_type e ON e.oid = el.type_oid
 """
 
 
 @dataclass(frozen=True)
 class ResolvedVendorType:
-    """One described type's vendor name plus its catalog-resolved array metadata."""
+    """A formatted type name and its domain-resolved unsupported-type flags."""
 
     vendor_data_type: str
     is_array: bool
-    # The element delimiter's internal-char byte code, or None for non-array types.
-    element_delimiter: int | None
+    is_composite: bool
 
 
 def described_columns(cursor: Any) -> list[ResultColumn]:
@@ -160,9 +139,7 @@ def resolve_vendor_types(
     the user query. Types are passed as text arrays and cast element-wise (text -> oid and
     text -> int4 both cast via I/O), which is version-stable and avoids psycopg's
     element-width-dependent int array dump OIDs. Each resolved type carries its vendor
-    name, whether its domain-resolved effective type is an array, and — for array types —
-    the byte code of the element type's own typdelim, resolved through the element's
-    domain chain.
+    name and whether its domain-resolved effective type is an array or composite.
     """
     distinct_pairs = sorted({(column.type_oid, column.type_modifier) for column in columns})
     if any(pair[1] is None for pair in distinct_pairs):
@@ -177,7 +154,7 @@ def resolve_vendor_types(
 
     type_map: dict[tuple[int, int], ResolvedVendorType] = {}
     for row in rows:
-        oid, type_modifier, vendor_data_type, is_array, element_delimiter = (
+        oid, type_modifier, vendor_data_type, is_array, is_composite = (
             row[0],
             row[1],
             row[2],
@@ -191,7 +168,7 @@ def resolve_vendor_types(
         type_map[(oid, type_modifier)] = ResolvedVendorType(
             vendor_data_type=vendor_data_type,
             is_array=bool(is_array),
-            element_delimiter=element_delimiter,
+            is_composite=bool(is_composite),
         )
 
     missing = [pair for pair in distinct_pairs if pair not in type_map]
@@ -203,11 +180,8 @@ def resolve_vendor_types(
     return type_map
 
 
-# Descriptor logical types for the built-in OID families. Any array family (a vendor type
-# rendered with an `[]` suffix) carries a JSON array, decoded by intake from the element
-# type the vendor name carries; custom types, domains, and extensions have no stable
-# cross-vendor family, so they map to `vendor` — intake falls back to the family's
-# documented string form, never a guess from contents.
+# Descriptor logical types for built-in OIDs. Unlisted custom types, domains, and
+# extensions map to vendor; intake preserves all non-null COPY fields as text.
 POSTGRES_LOGICAL_TYPE_BY_OID = {
     16: 'boolean',  # bool
     17: 'binary',  # bytea
@@ -234,16 +208,13 @@ POSTGRES_LOGICAL_TYPE_BY_OID = {
     1184: 'temporal',  # timestamptz
     1186: 'temporal',  # interval
     1266: 'temporal',  # timetz
-    2249: 'json',  # record
     2950: 'string',  # uuid
     3802: 'json',  # jsonb
 }
 
 
-def logical_type_for_column(column: ResultColumn, vendor_data_type: str) -> str:
-    """Map one described column to a closed descriptor logical type, deterministically."""
-    if vendor_data_type.endswith('[]'):
-        return 'json'
+def logical_type_for_column(column: ResultColumn) -> str:
+    """Map one supported column to a closed descriptor logical type."""
     return POSTGRES_LOGICAL_TYPE_BY_OID.get(column.type_oid, 'vendor')
 
 
@@ -258,32 +229,24 @@ def build_upload_descriptor(
     The vendor type names always come from `pg_catalog.format_type` — schema or not —
     because the descriptor is registered once, before any result record is read, and intake
     stamps the schema (when requested) into every final page from it. The format version
-    selects the native COPY CSV cell grammar, so intake decodes the source pages by these
-    column types instead of canonical JSON tokens. Every array column (a vendor name
-    rendered with an `[]` suffix) carries its element type's own typdelim — resolved
-    through the catalog, never guessed — so intake splits the native array literal on
-    exactly the separator PostgreSQL uses; a rendered array whose catalog type disagrees
-    fails closed instead of describing an undecodable column.
+    selects native COPY CSV fields, whose non-null text intake preserves unchanged.
+    Arrays and composites, including domains over either, fail before registration.
     """
     descriptor_columns = []
     for column in columns:
         resolved = type_map[(column.type_oid, column.type_modifier)]
         vendor_data_type = resolved.vendor_data_type
-        is_array_column = vendor_data_type.endswith('[]')
-        element_delimiter = None
-        if is_array_column:
-            if not resolved.is_array or resolved.element_delimiter is None:
-                raise rq_contract.RemoteQueryFailure(
-                    'schema_unavailable',
-                    'A rendered array column type did not resolve to a catalog array element delimiter.',
-                )
-            element_delimiter = valid_array_element_delimiter_code(resolved.element_delimiter)
+        if resolved.is_array or resolved.is_composite:
+            raise rq_contract.RemoteQueryFailure(
+                'unsupported_column',
+                'Column {!r} has an unsupported array or composite type; expand its fields into separate columns '
+                'or convert it to JSON or JSONB.'.format(column.name),
+            )
         descriptor_columns.append(
             rq_contract.RemoteQueryDescriptorColumn(
                 column_name=column.name,
                 vendor_data_type=vendor_data_type,
-                logical_type=logical_type_for_column(column, vendor_data_type),
-                array_element_delimiter=element_delimiter,
+                logical_type=logical_type_for_column(column),
             )
         )
     return rq_contract.RemoteQueryUploadDescriptor(
@@ -298,14 +261,8 @@ def build_upload_descriptor(
 # Native COPY CSV source wire (postgres-copy-csv-v1)
 # ---------------------------------------------------------------------------
 
-# The frozen native wire: the customer query is evaluated exactly once, by a single
-# `COPY ... TO STDOUT`. `FORCE_QUOTE *` makes every non-null field quoted — including
-# empty strings, numerics, booleans, and a literal backslash-N text — and `NULL '\\N'`
-# makes NULL the sole unquoted field, so NULL, empty string, and a literal `\\N` stay
-# distinguishable in the raw bytes and quote provenance survives to intake. Standard
-# PostgreSQL CSV escaping doubles quotes inside quoted fields, and commas and CR/LF ride
-# raw inside them; records end with one LF, so a record's terminator is the first LF that
-# closes every quoted field (an even number of quotes since the record's start).
+# Keep every non-null field quoted until intake's unquoted-field support is published.
+# This is valid COPY CSV for either intake version; only unquoted backslash-N is null.
 POSTGRES_COPY_SQL_OPTIONS = "FORMAT CSV, NULL '\\N', FORCE_QUOTE *"
 
 # Session output settings pinned transaction-locally so the native COPY text is a pure
@@ -334,24 +291,10 @@ def native_copy_sql(query: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-def valid_array_element_delimiter_code(code: int) -> str:
-    """Validate pg_type.typdelim: one printable, non-structural ASCII character."""
-    if code < 0x21 or code > 0x7E:
-        raise rq_contract.RemoteQueryFailure(
-            'schema_unavailable', 'A column type carries an array element delimiter that is not printable.'
-        )
-    value = chr(code)
-    if value in '" \\{}':
-        raise rq_contract.RemoteQueryFailure(
-            'schema_unavailable', 'A column type carries an array-literal structural element delimiter.'
-        )
-    return value
-
-
 class CopyPageWriter:
     """Frame COPY CSV blocks without decoding values or copying individual records.
 
-    With FORCE_QUOTE *, an LF terminates a record only at even quote parity.
+    An LF outside a quoted field terminates a record.
     Preserve parity across arbitrary libpq block boundaries, including doubled quotes.
     """
 
@@ -415,7 +358,7 @@ class CopyPageWriter:
         self.finish_native_copy_stream()
         while self._record_ends:
             self._close_page()
-        if self._uploader.descriptor.include_schema and not self._uploader.stats.pages_emitted:
+        if not self._uploader.stats.pages_emitted:
             self._uploader.upload(self._buf, ())
         self._uploader.finalize()
 
@@ -524,7 +467,7 @@ class PostgresRemoteQueryHandler:
         `open_remote_query_producer_tracing`: a root span on the request's trace context
         covering the admission failures below, the abort span around the failure tail's upload
         abort, and the terminal status; every span failure is swallowed without changing an
-        event, a page receipt, a retry, or an error.
+        event, a page acknowledgement, a retry, or an error.
         """
         started_at = started_at if started_at is not None else time.monotonic()
         stats = None
@@ -640,7 +583,7 @@ class PostgresRemoteQueryHandler:
         and page buffering run inside the encode-and-page-build span with upload-triggered
         page uploads nested inside it, and the shared source-page writer opens the
         page-upload attempt and finalize spans. `tracing` is fail-open: every span failure
-        is swallowed without changing an event, a page receipt, a retry, or an error.
+        is swallowed without changing an event, a page acknowledgement, a retry, or an error.
 
         The connection comes from `PostgreSql.remote_query_connection`, so it is registered
         for the whole window the query uses it and the check can interrupt the statement

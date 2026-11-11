@@ -21,10 +21,8 @@ def test_descriptor_request_bytes_are_canonical_and_deterministic():
     expected = (
         b'{"format_version":"csv-json-cell-v1","include_schema":true,'
         b'"agent_hostname":"rq-proof-agent-a","columns":['
-        b'{"column_name":"value","vendor_data_type":"text","logical_type":"string",'
-        b'"array_element_delimiter":null},'
-        b'{"column_name":"payload","vendor_data_type":"bytea","logical_type":"binary",'
-        b'"array_element_delimiter":null}]}'
+        b'{"column_name":"value","vendor_data_type":"text","logical_type":"string"},'
+        b'{"column_name":"payload","vendor_data_type":"bytea","logical_type":"binary"}]}'
     )
     assert rq_contract.descriptor_request_bytes(build()) == expected
     # A fresh construction produces a byte-identical registration body for retries.
@@ -51,7 +49,7 @@ def test_descriptor_request_and_schema_bytes_emit_valid_non_ascii_as_raw_utf8():
     """Intake's canonical encoder emits valid non-ASCII as raw UTF-8, never ``\\uXXXX`` escapes.
 
     The registration body and the schema bytes it derives from the descriptor must spell
-    non-ASCII identically, because intake checksums exactly these canonical bytes.
+    non-ASCII identically, so schema and registration carry the same column names.
     """
 
     def build():
@@ -65,8 +63,7 @@ def test_descriptor_request_and_schema_bytes_emit_valid_non_ascii_as_raw_utf8():
     assert body == (
         b'{"format_version":"csv-json-cell-v1","include_schema":true,'
         b'"agent_hostname":"agent-h\xc3\xb4te","columns":'
-        b'[{"column_name":"colonn\xc3\xa9","vendor_data_type":"v\xc3\xa9ndor","logical_type":"string",'
-        b'"array_element_delimiter":null}]}'
+        b'[{"column_name":"colonn\xc3\xa9","vendor_data_type":"v\xc3\xa9ndor","logical_type":"string"}]}'
     )
     assert b'\\u' not in body
     assert rq_contract.descriptor_request_bytes(build()) == body

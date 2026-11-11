@@ -15,7 +15,6 @@ from datadog_checks.base.utils.remote_queries import upload as rq_upload
 
 from .helpers import (
     Uploads,
-    acceptance_receipt,
     as_session_request,
     bounded_delivery,
     cell,
@@ -35,12 +34,12 @@ def test_descriptor_registration_happens_once_before_any_row(delivery, creds):
     assert uploads.descriptor_bodies == [rq_contract.descriptor_request_bytes(descriptor())]
 
 
-def test_writer_gates_rows_on_a_descriptor_receipt_that_confirms_the_registration(delivery, creds):
+def test_writer_gates_rows_on_descriptor_registration(delivery, creds):
     """The registration gate fails closed before any row flows or the run finalizes."""
-    uploads = Uploads(descriptor_response={'upload_id': creds.upload_id})
+    uploads = Uploads(descriptor_failure=rq_contract.RemoteQueryFailure('upload_failed', 'invalid_argument'))
     with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
         make_writer(delivery, creds, uploads)
-    assert failure.value.code == 'invalid_receipt'
+    assert failure.value.code == 'upload_failed'
     assert len(uploads.descriptor_bodies) == 1
     assert uploads.pages == []
     assert uploads.finalize_calls == 0
@@ -209,7 +208,7 @@ def test_pages_preserve_row_order_offsets_and_source_identity(delivery, creds):
 
     tokens = [json.dumps(row).encode('utf-8') for row in rows]
     # Sequential production advances on acceptance: each page uploads only after the
-    # previous page's 202, at the next index and offset, and finalize declares exactly
+    # previous page's 204, at the next index and offset, and finalize declares exactly
     # the accepted count.
     assert [page.batch_index for page, _ in uploads.pages] == [0, 1, 2]
     for index, (page, payload) in enumerate(uploads.pages):
@@ -243,7 +242,7 @@ def test_page_bound_accounts_for_redacted_number_leaves(delivery, creds):
     Each ``1`` cell token is one byte but bounds to the twelve-byte ``"[REDACTED]"`` marker
     intake substitutes for a matched number leaf; with a budget that fits exactly two
     marker-bounded rows, a token-length bound would pack all three rows onto one page and
-    lean on intake's defensive ``final_page_too_large`` rejection instead of splitting
+    lean on intake's defensive ``result_file_too_large`` rejection instead of splitting
     before upload.
     """
     two_rows = envelope_bound(delivery, 0) + 2 * 22 + 1
@@ -255,7 +254,7 @@ def test_page_bound_accounts_for_redacted_number_leaves(delivery, creds):
     writer.finish()
 
     # The split happened before upload — every page was accepted on its first attempt, so
-    # intake never answered final_page_too_large — and the source tokens stay exact numbers.
+    # intake never answered result_file_too_large — and the source tokens stay exact numbers.
     assert [(page.rows, payload) for page, payload in uploads.pages] == [(2, b'1\n1\n'), (1, b'1\n')]
     assert len(uploads.put_attempts) == 2
 
@@ -292,92 +291,30 @@ def test_single_record_exceeding_max_row_bytes_fails_closed(delivery, creds):
     assert uploads.pages == []
 
 
-def test_tracing_stats_come_from_intake_finalization_not_local_sizes(delivery, creds):
-    uploads = Uploads(final_growth=37)
+def test_tracing_stats_count_acknowledged_pages_locally(delivery, creds):
+    uploads = Uploads()
     stats = rq_contract.RemoteQueryRunStats()
     writer = rq_pages.SourcePageWriter(delivery, creds, uploads, descriptor(), lambda: None, stats)
     for _ in range(3):
         writer.add_row([string_cell('value-text')])
     writer.finish()
 
-    source_bytes = sum(page.source_bytes for page, _ in uploads.pages)
-    final_bytes = sum(page.source_bytes + 37 for page, _ in uploads.pages)
-    assert final_bytes != source_bytes  # finalize's totals genuinely differ from the source sizes
-    # Tracing stats mirror intake's finalization totals: the producer's own
-    # conservative page accounting is replaced by the authoritative totals, never merged.
-    assert stats.bytes_emitted == final_bytes
+    bound = envelope_bound(delivery, 0) + 3 * (1 + len(b'"value"') + 2 + len(b'"value-text"')) + 2
+    assert stats.bytes_emitted == bound
     assert stats.rows_emitted == 3
     assert stats.pages_emitted == 1
-    # The finalize request declared exactly the accepted page count.
     assert uploads.finalize_expected_counts == [1]
 
 
-@pytest.mark.parametrize(
-    'field,bad',
-    [
-        ('upload_id', 'other-upload'),
-        ('batch_index', 1),
-        ('record_offset', -1),
-        ('source_rows', True),
-        ('source_rows', 2),
-        ('status', 'processing'),
-    ],
-)
-def test_page_acceptance_receipt_identity_must_match(delivery, creds, field, bad):
+@pytest.mark.parametrize('include_schema', [False, True])
+def test_empty_result_semantics(delivery, creds, include_schema):
     uploads = Uploads()
-    writer = make_writer(delivery, creds, uploads)
-    writer.add_row([string_cell('value-text')])
-    receipt = acceptance_receipt(0, 0, 1)
-    uploads.receipt_override = lambda page: {**receipt, field: bad}
-    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
-        writer.finish()
-    assert failure.value.code == 'invalid_receipt'
-    # The unverified page never finalizes the run.
-    assert uploads.finalize_calls == 0
-
-
-@pytest.mark.parametrize('field', ['upload_id', 'batch_index', 'record_offset', 'source_rows', 'status'])
-def test_page_acceptance_receipt_fields_are_required(delivery, creds, field):
-    uploads = Uploads()
-    writer = make_writer(delivery, creds, uploads)
-    writer.add_row([string_cell('value-text')])
-    receipt = acceptance_receipt(0, 0, 1)
-    del receipt[field]
-    uploads.receipt_override = lambda page: receipt
-    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
-        writer.finish()
-    assert failure.value.code == 'invalid_receipt'
-    assert uploads.finalize_calls == 0
-
-
-def test_page_receipt_rejects_unknown_fields(creds):
-    page = rq_contract.SourcePageUploadMetadata(0, 0, 10, 1)
-    receipt = {**acceptance_receipt(0, 0, 1), 'unexpected': True}
-    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
-        rq_upload.verify_source_page_receipt(receipt, creds.upload_id, page)
-    assert failure.value.code == 'invalid_receipt'
-
-
-def test_empty_result_semantics(delivery, creds):
-    # include_schema=true: one zero-record source page so intake creates one schema-bearing
-    # final page with empty data.
-    uploads = Uploads()
-    writer = make_writer(delivery, creds, uploads, include_schema=True)
+    writer = make_writer(delivery, creds, uploads, include_schema=include_schema)
     writer.finish()
-    assert uploads.finalize_expected_counts == [1]  # the zero-record schema page was accepted
-    (page, payload) = uploads.pages[0]
+    assert uploads.finalize_expected_counts == [1]
+    [(page, payload)] = uploads.pages
     assert payload == b''
-    assert page.rows == 0
-    assert page.record_offset == 0
-    assert page.source_bytes == 0
-
-    # include_schema=false: zero pages; only the finalize call happens.
-    uploads = Uploads()
-    writer = make_writer(delivery, creds, uploads, include_schema=False)
-    writer.finish()
-    assert uploads.pages == []
-    assert uploads.finalize_calls == 1
-    assert uploads.finalize_expected_counts == [0]
+    assert (page.rows, page.record_offset, page.source_bytes) == (0, 0, 0)
 
 
 def test_result_cap_boundaries_use_the_conservative_page_bounds(delivery, creds):
@@ -386,7 +323,6 @@ def test_result_cap_boundaries_use_the_conservative_page_bounds(delivery, creds)
     bound it was split under and the active page its bound with the new row."""
     row_bound = 22
     frame = envelope_bound(delivery, 0) + row_bound  # one "x" row per page exactly
-    final_bytes_per_page = 30
 
     def run(max_result_bytes):
         scoped = bounded_delivery(
@@ -396,7 +332,7 @@ def test_result_cap_boundaries_use_the_conservative_page_bounds(delivery, creds)
             maxSchemaBytes=1,
             maxPages=8,
         )
-        uploads = Uploads(receipt_bytes=lambda page: final_bytes_per_page)
+        uploads = Uploads()
         writer = make_writer(scoped, creds, uploads)
         for _ in range(4):
             writer.add_row([cell(b'"x"', 12)])
@@ -414,11 +350,11 @@ def test_result_cap_boundaries_use_the_conservative_page_bounds(delivery, creds)
     assert failure.value.code == 'max_result_bytes_exceeded'
 
 
-def test_final_page_too_large_splits_and_retries_the_same_page_index(delivery, creds):
+def test_result_file_too_large_splits_and_retries_the_same_page_index(delivery, creds):
     def reject_wide_pages(page):
         if page.rows > 2:
             return rq_contract.RemoteQueryFailure(
-                rq_upload.REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE, 'intake would exceed maxFileBytes'
+                rq_upload.REMOTE_QUERY_RESULT_FILE_TOO_LARGE_ERROR_CODE, 'intake would exceed maxFileBytes'
             )
         return None
 
@@ -441,24 +377,24 @@ def test_final_page_too_large_splits_and_retries_the_same_page_index(delivery, c
     assert uploads.finalize_expected_counts == [2]
 
 
-def test_final_page_too_large_on_a_single_record_fails_closed(delivery, creds):
+def test_result_file_too_large_on_a_single_record_fails_closed(delivery, creds):
     uploads = Uploads(
         put_failure=lambda page: rq_contract.RemoteQueryFailure(
-            rq_upload.REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE, 'intake would exceed maxFileBytes'
+            rq_upload.REMOTE_QUERY_RESULT_FILE_TOO_LARGE_ERROR_CODE, 'intake would exceed maxFileBytes'
         )
     )
     writer = make_writer(delivery, creds, uploads)
     writer.add_row([string_cell('a')])
     with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
         writer.finish()
-    assert failure.value.code == rq_upload.REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE
+    assert failure.value.code == 'row_too_large'
     assert uploads.finalize_calls == 0
 
 
 def test_page_bound_survives_an_oversize_split(delivery, creds):
     """A page assembled after an oversize split still splits by the retained tail's bound.
 
-    The defensive final_page_too_large rejection halves the buffered page and leaves the
+    The defensive result_file_too_large rejection halves the buffered page and leaves the
     uncommitted tail as the active page with its bound recomputed; a later append must
     still see that bound, so the page it completes respects maxFileBytes instead of
     leaning on another intake rejection.
@@ -469,7 +405,7 @@ def test_page_bound_survives_an_oversize_split(delivery, creds):
         if not rejected:
             rejected.append(page.batch_index)
             return rq_contract.RemoteQueryFailure(
-                rq_upload.REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE, 'intake would exceed maxFileBytes'
+                rq_upload.REMOTE_QUERY_RESULT_FILE_TOO_LARGE_ERROR_CODE, 'intake would exceed maxFileBytes'
             )
         return None
 
@@ -501,16 +437,8 @@ def test_page_bound_survives_an_oversize_split(delivery, creds):
     assert uploads.finalize_expected_counts == [3]
 
 
-@pytest.mark.parametrize('failure', ['upload', 'receipt'])
-def test_failed_upload_releases_the_buffered_page(delivery, creds, failure):
-    kwargs = {}
-    if failure == 'upload':
-        kwargs['put_failure'] = lambda page: rq_contract.RemoteQueryFailure('upload_failed', 'unavailable')
-    else:
-        kwargs['receipt_override'] = lambda page: acceptance_receipt(
-            page.batch_index, page.record_offset, page.rows + 1
-        )
-    uploads = Uploads(**kwargs)
+def test_failed_upload_releases_the_buffered_page(delivery, creds):
+    uploads = Uploads(put_failure=lambda page: rq_contract.RemoteQueryFailure('upload_failed', 'unavailable'))
     writer = make_writer(delivery, creds, uploads)
     writer.add_row([string_cell('a')])
     with pytest.raises(rq_contract.RemoteQueryFailure):
@@ -525,12 +453,12 @@ def test_finalize_abort_and_test_drive_routing(monkeypatch, creds):
 
     def request(method, url, headers, data, timeout):
         calls.append((method, url, headers, data))
-        return SimpleNamespace(status_code=200, content=b'{"upload_id":"upload-1"}')
+        return SimpleNamespace(status_code=204, content=b'')
 
     monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
     creds = rq_upload.UploadCredentials(creds.base_url, creds.upload_id, creds.api_key, 'test-intake')
     client = rq_upload.RequestsUploadClient()
-    assert client.finalize_run(creds, 3)['upload_id'] == creds.upload_id
+    client.finalize_run(creds, 3)
     client.abort(creds)
     assert [call[1] for call in calls] == [
         'https://intake.example/uploads/upload-1/finalize',

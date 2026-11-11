@@ -117,7 +117,6 @@ def test_remote_query_registers_descriptor_and_sends_source_pages_against_real_c
             'column_name': 'value',
             'vendor_data_type': 'UInt8',
             'logical_type': 'integer',
-            'array_element_delimiter': None,
         }
     ]
     # One complete page uploaded as one direct PUT: exact whole-page identity, rows exact.

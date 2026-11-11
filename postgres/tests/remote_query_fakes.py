@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-import json
 from contextlib import contextmanager
 from types import SimpleNamespace
 from typing import Any
@@ -19,19 +18,10 @@ from datadog_checks.postgres.remote_query import PostgresRemoteQueryHandler
 
 
 class FakeUploadClient:
-    """Intake-side fake: one descriptor registration, page acceptance receipts, finalize totals.
-
-    Page PUTs answer the pinned acceptance receipt — no per-page final metadata exists at
-    acceptance — and the default finalize returns authoritative totals over the recorded
-    pages, so the producer's tracing stats come from finalization.
-    ``reject_first_page_too_large`` answers page 0's first PUT with intake's defensive
-    final_page_too_large rejection, so a run exercises the split-and-retry path; every
-    attempt (rejected or accepted) is recorded in ``put_attempts``.
-    """
+    """Intake double: synchronous status-only success for all upload operations."""
 
     def __init__(
         self,
-        put_page_response=None,
         put_log=None,
         reject_first_page_too_large=False,
     ):
@@ -43,27 +33,17 @@ class FakeUploadClient:
         self.finalize_expected_page_counts = []
         self.abort_calls = 0
         self.reject_first_page_too_large = reject_first_page_too_large
-        # When unset, the receipt carries shape-valid intake-derived metadata; tests pass a
-        # mapping (or a callable taking the page metadata) to mutate or reject it.
-        self.put_page_response = put_page_response
         self.put_log = put_log
 
     def register_descriptor(self, creds, body):
         self.descriptor_bodies.append(body)
-        registered = json.loads(body)
-        return {
-            'upload_id': creds.upload_id,
-            'format_version': registered['format_version'],
-            'include_schema': registered['include_schema'],
-            'columns': len(registered['columns']),
-        }
 
     def put_source_page(self, creds, page, body):
         payload = body.read()
         self.put_attempts.append(page.batch_index)
         if self.reject_first_page_too_large and page.batch_index == 0 and self.put_attempts.count(0) == 1:
             raise rq_contract.RemoteQueryFailure(
-                rq_upload.REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE, 'intake rejected the final page size.'
+                rq_upload.REMOTE_QUERY_RESULT_FILE_TOO_LARGE_ERROR_CODE, 'intake rejected the final page size.'
             )
         self.put_page_calls.append(
             SimpleNamespace(
@@ -76,29 +56,10 @@ class FakeUploadClient:
         )
         if self.put_log is not None:
             self.put_log.append(('put', page.batch_index, page.source_bytes, page.rows))
-        if self.put_page_response is not None:
-            response = self.put_page_response
-            if callable(response):
-                response = response(page)
-        else:
-            response = {
-                'upload_id': creds.upload_id,
-                'batch_index': page.batch_index,
-                'record_offset': page.record_offset,
-                'source_rows': page.rows,
-                'status': 'accepted',
-            }
-        return response
 
     def finalize_run(self, creds, expected_page_count):
         self.run_finalize_calls += 1
         self.finalize_expected_page_counts.append(expected_page_count)
-        return {
-            'upload_id': creds.upload_id,
-            'page_count': len(self.put_page_calls),
-            'total_rows': sum(call.rows for call in self.put_page_calls),
-            'total_bytes': sum(call.source_bytes for call in self.put_page_calls),
-        }
 
     def abort(self, creds):
         self.abort_calls += 1
@@ -109,11 +70,7 @@ class FakeUploadClient:
 
 
 def native_field(value: Any) -> str:
-    """The expected native COPY CSV field for one value, computed independently.
-
-    ``FORCE_QUOTE *`` quotes every non-null value — with internal quotes doubled — and
-    NULL is the sole unquoted field, the two-character \\N marker.
-    """
+    """The expected native COPY CSV field, including PostgreSQL null-marker quoting."""
     if value is None:
         return '\\N'
     if isinstance(value, bool):
@@ -183,12 +140,11 @@ class FakePlainCursor:
             if resolved is None:
                 continue
             if isinstance(resolved, str):
-                # A plain vendor name: a non-array type.
-                rows.append((key[0], key[1], resolved, False, None))
+                rows.append((key[0], key[1], resolved, False, False))
             else:
-                # (vendor name, element delimiter character): a catalog array type.
-                name, delimiter = resolved
-                rows.append((key[0], key[1], name, True, ord(delimiter)))
+                # (formatted name, is_array, is_composite), after resolving domains.
+                name, is_array, is_composite = resolved
+                rows.append((key[0], key[1], name, is_array, is_composite))
         return rows
 
     @contextmanager

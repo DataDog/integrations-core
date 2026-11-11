@@ -92,7 +92,6 @@ class RemoteQueryDescriptorColumn(BaseModel):
     column_name: StrictStr = Field(min_length=1, max_length=255)
     vendor_data_type: StrictStr = Field(min_length=1, max_length=1024)
     logical_type: RemoteQueryLogicalType
-    array_element_delimiter: StrictStr | None = None
 
     @field_validator('column_name')
     @classmethod
@@ -133,9 +132,8 @@ def descriptor_request_bytes(descriptor: RemoteQueryUploadDescriptor) -> bytes:
     """Canonical compact JSON for the descriptor registration request.
 
     Field order is the model's declaration order and the spelling is intake's canonical
-    JSON, so the body is a pure function of the descriptor, every registration retry for one
-    upload is byte-identical, and the checksum in intake's receipt is over exactly these
-    bytes.
+    JSON, so the body is a pure function of the descriptor and every registration retry
+    for one upload is byte-identical.
     """
     return canonical_json_bytes(descriptor.model_dump())
 
@@ -360,7 +358,7 @@ class RemoteQueryResolveRequest(BaseModel):
 
 @dataclass
 class RemoteQueryRunStats:
-    """Accepted page accounting, replaced by authoritative intake totals on finalization."""
+    """Locally counted acknowledged pages, rows, and source or estimated result bytes."""
 
     rows_emitted: int = 0
     pages_emitted: int = 0

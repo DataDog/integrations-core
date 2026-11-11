@@ -13,7 +13,6 @@ from .remote_query_fakes import (
     FakeColumn,
     FakePool,
     FakeUploadClient,
-    assembled_pages,
     assert_failed_event,
     assert_success,
     bounded_request,
@@ -66,7 +65,6 @@ def test_producer_resolves_distinct_type_pairs_with_one_parameterized_lookup(mon
     query, params = schema_queries[0]
     assert 'unnest(%s::text[], %s::text[])' in query
     assert 'pg_catalog.format_type(r.type_oid, r.type_mod)' in query
-    assert 'pg_catalog.ascii(e.typdelim::text)' in query
     # Only the DISTINCT (oid, typmod) pairs are resolved (two columns share one pair).
     assert sorted(zip(params[0], params[1])) == [('1043', '255'), ('25', '-1')]
     executed_names = [entry[0] for entry in control.executed]
@@ -76,19 +74,16 @@ def test_producer_resolves_distinct_type_pairs_with_one_parameterized_lookup(mon
             'column_name': 'a',
             'vendor_data_type': 'character varying(255)',
             'logical_type': 'string',
-            'array_element_delimiter': None,
         },
         {
             'column_name': 'b',
             'vendor_data_type': 'character varying(255)',
             'logical_type': 'string',
-            'array_element_delimiter': None,
         },
         {
             'column_name': 'c',
             'vendor_data_type': 'text',
             'logical_type': 'string',
-            'array_element_delimiter': None,
         },
     ]
 
@@ -187,13 +182,8 @@ def test_producer_fails_closed_when_description_lacks_type_modifiers(monkeypatch
         (1184, 'timestamp with time zone', 'temporal'),
         (1186, 'interval', 'temporal'),
         (1266, 'time with time zone', 'temporal'),
-        (2249, 'record', 'json'),
         (2950, 'uuid', 'string'),
         (3802, 'jsonb', 'json'),
-        # Array families carry JSON arrays whatever the element type, including quoted names.
-        (1009, 'text[]', 'json'),
-        (1015, 'character varying(255)[]', 'json'),
-        (1007, 'integer[]', 'json'),
         # Custom types, domains, and extensions have no stable cross-vendor family.
         (16709, 'mood', 'vendor'),
         (16710, 'my_int_domain', 'vendor'),
@@ -202,102 +192,41 @@ def test_producer_fails_closed_when_description_lacks_type_modifiers(monkeypatch
 )
 def test_logical_type_mapping_is_deterministic(type_oid, vendor_data_type, expected):
     column = remote_query.ResultColumn('c', type_oid, -1)
-    assert remote_query.logical_type_for_column(column, vendor_data_type) == expected
-
-
-def test_producer_carries_the_catalog_array_element_delimiter(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    # A box[] column: box's own pg_type.typdelim is the semicolon, so the descriptor must
-    # declare it — intake splits the native {(...);(...)} literal on that and nothing else.
-    record = native_record('{(1,2);(3,4)}')
-    pool = FakePool(
-        copy_blocks=[record],
-        description=[FakeColumn('box_array', 1021)],
-        vendor_types={(1021, -1): ('box[]', ';')},
-    )
-    fake = FakeUploadClient()
-
-    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
-
-    assert_success(events)
-    (page,) = assembled_pages(fake).values()
-    assert page == record
-    assert json.loads(fake.descriptor_bodies[0])['columns'] == [
-        {
-            'column_name': 'box_array',
-            'vendor_data_type': 'box[]',
-            'logical_type': 'json',
-            'array_element_delimiter': ';',
-        }
-    ]
-
-
-@pytest.mark.parametrize('delimiter', ['"', ' ', '\\', '{', '}'])
-def test_producer_fails_closed_on_structural_element_delimiters(monkeypatch, delimiter):
-    patch_upload_credentials(monkeypatch)
-    # A catalog element delimiter that is structural to the array literal grammar cannot be
-    # described: the run fails closed before any COPY or page.
-    pool = FakePool(
-        copy_blocks=[native_record('{a}')],
-        description=[FakeColumn('array_value', 1009)],
-        vendor_types={(1009, -1): ('text[]', delimiter)},
-    )
-    fake = FakeUploadClient()
-
-    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
-
-    assert_failed_event(events, 'schema_unavailable')
-    assert len(pool.cursors) == 2
-    assert fake.put_page_calls == []
-    assert fake.descriptor_bodies == []
+    assert remote_query.logical_type_for_column(column) == expected
 
 
 @pytest.mark.parametrize(
-    'vendor_types',
+    'type_oid, catalog_type',
     [
-        {(1009, -1): 'text[]'},  # a rendered array the catalog says is not an array
-        {(1009, -1): None},  # no catalog resolution at all
+        (1009, ('text[]', True, False)),
+        (1021, ('box[]', True, False)),
+        (2249, ('record', False, True)),
+        (20000, ('named_composite', False, True)),
+        (20001, ('domain_over_array', True, False)),
+        (20002, ('domain_over_composite', False, True)),
     ],
 )
-def test_producer_fails_closed_on_a_rendered_array_without_catalog_resolution(monkeypatch, vendor_types):
+@pytest.mark.parametrize('include_schema', [False, True])
+def test_producer_rejects_catalog_arrays_and_composites_before_upload(
+    monkeypatch: pytest.MonkeyPatch, type_oid: int, catalog_type: tuple[str, bool, bool], include_schema: bool
+):
+    # Unsupported columns must fail before registering a descriptor or evaluating COPY,
+    # including domains whose formatted name hides the unsupported base type.
     patch_upload_credentials(monkeypatch)
     pool = FakePool(
-        copy_blocks=[native_record('{a}')],
-        description=[FakeColumn('array_value', 1009)],
-        vendor_types=vendor_types,
+        copy_blocks=[native_record('not read')],
+        description=[FakeColumn('unsupported_value', type_oid)],
+        vendor_types={(type_oid, -1): catalog_type},
     )
     fake = FakeUploadClient()
 
-    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
+    events = collect_events(valid_request(include_schema=include_schema), make_check(pool=pool), client=fake)
 
-    assert_failed_event(events, 'schema_unavailable')
+    assert_failed_event(events, 'unsupported_column', 'unsupported_value')
+    message = events[-1].metadata['error']['message']
+    assert 'separate columns' in message
+    assert 'JSON or JSONB' in message
     assert len(pool.cursors) == 2
+    assert fake.descriptor_bodies == []
     assert fake.put_page_calls == []
-
-
-def test_producer_describes_a_domain_over_array_without_a_delimiter(monkeypatch):
-    patch_upload_credentials(monkeypatch)
-    # A domain over an array renders as the bare domain name, so the closed wire grammar
-    # classifies it with the vendor family: no delimiter, the exact server text, matching
-    # the decoder's own name-based classification.
-    record = native_record('{a,b}')
-    pool = FakePool(
-        copy_blocks=[record],
-        description=[FakeColumn('domain_value', 20000)],
-        vendor_types={(20000, -1): ('my_domain', ',')},
-    )
-    fake = FakeUploadClient()
-
-    events = collect_events(valid_request(), make_check(pool=pool), client=fake)
-
-    assert_success(events)
-    (page,) = assembled_pages(fake).values()
-    assert page == record
-    assert json.loads(fake.descriptor_bodies[0])['columns'] == [
-        {
-            'column_name': 'domain_value',
-            'vendor_data_type': 'my_domain',
-            'logical_type': 'vendor',
-            'array_element_delimiter': None,
-        }
-    ]
+    assert fake.run_finalize_calls == 0

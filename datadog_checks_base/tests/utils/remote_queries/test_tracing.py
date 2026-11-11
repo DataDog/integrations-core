@@ -54,7 +54,7 @@ def test_root_span_carries_run_identity_and_the_success_terminal(delivery):
     assert root.metrics[rq_tracing.REMOTE_QUERY_SPAN_BYTE_COUNT_METRIC] == 7
     assert root.metrics[rq_tracing.REMOTE_QUERY_SPAN_UPLOAD_ATTEMPT_COUNT_METRIC] == 0
     assert root.metrics[rq_tracing.REMOTE_QUERY_SPAN_UPLOAD_RETRY_COUNT_METRIC] == 0
-    # The first acknowledged page's wall from the root start — the first receipt-verified,
+    # The first acknowledged page's wall from the root start — the first acknowledged,
     # counted page.
     assert isinstance(root.metrics[rq_tracing.REMOTE_QUERY_SPAN_TIME_TO_FIRST_PAGE_METRIC], int)
     assert root.error == 0
@@ -68,7 +68,7 @@ def test_root_span_records_the_failure_code_and_partial_counters(delivery):
 
     tracing.open_root(delivery)
     tracing.begin_page_upload_attempt(retry=False).finish(error='rejected', http_status=503)
-    tracing.begin_page_upload_attempt(retry=True).finish(error=None, http_status=202)
+    tracing.begin_page_upload_attempt(retry=True).finish(error=None, http_status=204)
     tracing.fail('upload_failed', rq_contract.RemoteQueryRunStats(pages_emitted=1, rows_emitted=2, bytes_emitted=5))
     tracing.close()
 
@@ -97,7 +97,7 @@ def test_phase_spans_follow_real_execution_order_and_close_before_the_root(deliv
         tracing.enter_fetch()
     with tracing.phase('encode_and_page_build'):
         tracing.enter_fetch()
-        tracing.begin_page_upload_attempt(retry=False).finish(error=None, http_status=202)
+        tracing.begin_page_upload_attempt(retry=False).finish(error=None, http_status=204)
         tracing.enter_fetch()
     with tracing.finalize_span():
         pass

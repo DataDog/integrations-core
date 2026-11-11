@@ -11,6 +11,7 @@ import socketserver
 import threading
 import time
 from types import SimpleNamespace
+from typing import Any
 
 import pytest
 
@@ -22,90 +23,11 @@ from .helpers import (
     PARENT_ID,
     TRACE_ID,
     RefusingPropagator,
-    acceptance_receipt,
     as_session_request,
     descriptor,
-    descriptor_receipt,
-    finalize_receipt,
     make_tracing,
-    pending_receipt,
-    receipt,
     source_page,
 )
-
-
-def test_descriptor_receipt_confirms_the_registration_exactly():
-    upload_descriptor = descriptor(columns=(('value', 'text', 'string'),), include_schema=True)
-    body = rq_contract.descriptor_request_bytes(upload_descriptor)
-    rq_upload.verify_descriptor_response(descriptor_receipt(body), 'upload-1', upload_descriptor)
-
-
-@pytest.mark.parametrize(
-    'field,bad',
-    [
-        ('upload_id', None),  # missing
-        ('upload_id', 123),  # mistyped
-        ('upload_id', 'other-upload'),  # mismatched
-        ('format_version', None),
-        ('format_version', 2),
-        ('format_version', 'csv-json-cell-v2'),
-        ('include_schema', None),
-        ('include_schema', 0),
-        ('include_schema', False),  # flipped against the registered descriptor
-        ('columns', None),
-        ('columns', '1'),
-        ('columns', 2),
-        ('columns', 0),  # mismatched against the one registered column
-        ('columns', True),  # bool is not the registered integer type
-        ('upload_id', ''),
-        ('format_version', True),
-    ],
-)
-def test_descriptor_receipt_rejects_missing_mistyped_or_mismatched_fields(field, bad):
-    upload_descriptor = descriptor(columns=(('value', 'text', 'string'),), include_schema=True)
-    body = rq_contract.descriptor_request_bytes(upload_descriptor)
-    receipt = descriptor_receipt(body)
-    if bad is None:
-        del receipt[field]
-    else:
-        receipt[field] = bad
-    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
-        rq_upload.verify_descriptor_response(receipt, 'upload-1', upload_descriptor)
-    assert failure.value.code == 'invalid_receipt'
-
-
-@pytest.mark.parametrize('extra_key', ['sha256', 'descriptor_sha256'])
-def test_descriptor_receipt_allows_no_keys_beyond_the_pinned_four(extra_key):
-    """The receipt's key set is exactly the four pinned keys: an unknown extra key — even
-    alongside four matching values — is unknown intake behavior and fails closed. A retired
-    digest key is exactly the kind of drift the strict set rejects (lockstep with intake)."""
-    upload_descriptor = descriptor(columns=(('value', 'text', 'string'),), include_schema=True)
-    body = rq_contract.descriptor_request_bytes(upload_descriptor)
-    receipt = descriptor_receipt(body)
-    rq_upload.verify_descriptor_response(receipt, 'upload-1', upload_descriptor)
-    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
-        rq_upload.verify_descriptor_response({**receipt, extra_key: '0' * 64}, 'upload-1', upload_descriptor)
-    assert failure.value.code == 'invalid_receipt'
-
-
-def test_descriptor_receipt_rejects_a_non_object_response():
-    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
-        rq_upload.verify_descriptor_response(None, 'upload-1', descriptor())
-    assert failure.value.code == 'invalid_receipt'
-
-
-def test_finalize_totals_are_required_and_authoritative():
-    assert rq_upload.finalize_totals({'page_count': 1, 'total_rows': 2, 'total_bytes': 3}) == (1, 2, 3)
-    for missing in ({}, {'page_count': 1}, {'page_count': 1, 'total_rows': 2}):
-        with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
-            rq_upload.finalize_totals(missing)
-        assert failure.value.code == 'invalid_receipt'
-    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
-        rq_upload.finalize_totals({'page_count': '1', 'total_rows': 0, 'total_bytes': 0})
-    assert failure.value.code == 'invalid_receipt'
-    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
-        rq_upload.finalize_totals({'page_count': -1, 'total_rows': 0, 'total_bytes': 0})
-    assert failure.value.code == 'invalid_receipt'
 
 
 def test_upload_credentials_are_api_key_only(monkeypatch, delivery):
@@ -206,11 +128,11 @@ def test_http_descriptor_registration_replays_the_identical_body(monkeypatch, cr
         calls.append((method, url, headers, data))
         if len(calls) == 1:
             raise requests.exceptions.ConnectionError('response lost')
-        return SimpleNamespace(status_code=200, content=json.dumps({'upload_id': creds.upload_id}).encode())
+        return SimpleNamespace(status_code=204, content=b'')
 
     monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
     monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
-    assert rq_upload.RequestsUploadClient().register_descriptor(creds, body) == {'upload_id': 'upload-1'}
+    assert rq_upload.RequestsUploadClient().register_descriptor(creds, body) is None
     assert calls[0] == calls[1]
     method, url, headers, sent = calls[0]
     assert (method, url, sent) == ('POST', 'https://intake.example/uploads/upload-1/descriptor', body)
@@ -234,52 +156,26 @@ def test_http_source_page_retry_replays_exact_body_and_headers(monkeypatch, cred
             if trigger == 'lost_response':
                 raise requests.exceptions.ConnectionError('response lost')
             return SimpleNamespace(status_code=503, content=b'{"error":{"code":"unavailable"}}')
-        return SimpleNamespace(status_code=202, content=json.dumps(acceptance_receipt(2, 7, 1)).encode())
+        return SimpleNamespace(status_code=204, content=b'')
 
     monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
     monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
     client = rq_upload.RequestsUploadClient()
     with io.BytesIO(payload) as body:
-        receipt = client.put_source_page(creds, page, body)
+        client.put_source_page(creds, page, body)
     assert calls[0] == calls[1]
     method, url, headers, sent = calls[0]
     assert (method, url, sent) == ('PUT', 'https://intake.example/uploads/upload-1/pages/2', payload)
     assert headers == {
         'dd-api-key': 'test-api-key',
-        'Content-Type': 'application/vnd.datadog.remote-query.rows+csv;version=1',
+        'Content-Type': 'text/csv',
         'Content-Length': str(len(payload)),
-        'X-DD-Source-Page-Bytes': str(len(payload)),
         'X-DD-Source-Page-Rows': '1',
         'X-DD-Record-Offset': '7',
     }
-    # HTTP 202 is the successful page handoff: the client returns the acceptance receipt
-    # untouched — no final page metadata exists to synthesize.
-    assert receipt == acceptance_receipt(2, 7, 1)
 
 
-def test_http_page_handoff_requires_http_202(monkeypatch, creds):
-    """The pinned page handoff is HTTP 202 exactly: an HTTP 200 carrying an otherwise-valid
-    acceptance receipt is not the acceptance contract and fails closed, so a non-202
-    success can never advance the producer on an unverified handoff."""
-    import requests
-
-    calls = []
-
-    def request(method, url, headers, data, timeout):
-        calls.append(1)
-        return SimpleNamespace(status_code=200, content=json.dumps(acceptance_receipt(0, 7, 1)).encode())
-
-    monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
-    page = source_page(b'x')
-    with pytest.raises(rq_contract.RemoteQueryFailure) as failure, io.BytesIO(b'x') as body:
-        rq_upload.RequestsUploadClient().put_source_page(creds, page, body)
-    assert failure.value.code == 'invalid_receipt'
-    assert not failure.value.retryable
-    # The wrong-status success fails on its own response; it is not retried.
-    assert len(calls) == 1
-
-
-def test_http_final_page_too_large_surfaces_as_its_own_code(monkeypatch, creds):
+def test_http_result_file_too_large_surfaces_as_its_own_code(monkeypatch, creds):
     import requests
 
     calls = []
@@ -287,14 +183,14 @@ def test_http_final_page_too_large_surfaces_as_its_own_code(monkeypatch, creds):
     def request(*args, **kwargs):
         calls.append(args)
         return SimpleNamespace(
-            status_code=413, content=b'{"error":{"code":"final_page_too_large","message":"too large"}}'
+            status_code=413, content=b'{"error":{"code":"result_file_too_large","message":"too large"}}'
         )
 
     monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
     page = source_page(b'null\n')
     with pytest.raises(rq_contract.RemoteQueryFailure) as failure, io.BytesIO(b'null\n') as body:
         rq_upload.RequestsUploadClient().put_source_page(creds, page, body)
-    assert failure.value.code == 'final_page_too_large'
+    assert failure.value.code == 'result_file_too_large'
     assert not failure.value.retryable
     assert len(calls) == 1  # terminal: the writer splits; the client never retries it
 
@@ -326,43 +222,77 @@ def test_http_terminal_rejections_on_default_mapping_requests_fail_closed(monkey
     ]
 
 
-@pytest.mark.parametrize('status', [400, 403, 409])
-def test_http_terminal_rejections_are_not_retried(monkeypatch, creds, status):
+@pytest.mark.parametrize(
+    'status,code,retryable',
+    [
+        (400, 'invalid_argument', False),
+        (401, 'unauthenticated', False),
+        (404, 'not_found', False),
+        (409, 'already_exists', False),
+        (409, 'failed_precondition', False),
+        (410, 'gone', False),
+        (413, 'payload_too_large', False),
+        (422, 'scan_failed', False),
+        (422, 'storage_access_denied', False),
+        (500, 'internal', True),
+        (503, 'unavailable', True),
+    ],
+)
+def test_intake_error_retry_classification(
+    monkeypatch: pytest.MonkeyPatch, creds: rq_upload.UploadCredentials, status: int, code: str, retryable: bool
+):
+    # Retrying permanent intake errors wastes the run budget; transient intake errors
+    # must instead replay the request, with only the public code in diagnostics.
     import requests
 
     calls = []
 
-    def request(*args, **kwargs):
-        calls.append(args)
-        return SimpleNamespace(status_code=status, content=b'{"error":{"code":"already_exists"}}')
+    def request(*args: Any, **kwargs: Any) -> SimpleNamespace:
+        calls.append(1)
+        return SimpleNamespace(
+            status_code=status, content=json.dumps({'error': {'code': code, 'message': 'rejected'}}).encode()
+        )
 
     monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
-    page = source_page(b'x')
-    with pytest.raises(rq_contract.RemoteQueryFailure) as failure, io.BytesIO(b'x') as body:
-        rq_upload.RequestsUploadClient().put_source_page(creds, page, body)
+    monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
+    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
+        rq_upload.RequestsUploadClient().register_descriptor(creds, b'{}')
     assert failure.value.code == 'upload_failed'
-    assert not failure.value.retryable
-    assert len(calls) == 1
+    assert failure.value.retryable is retryable
+    assert len(calls) == (5 if retryable else 1)
+    if not retryable:
+        assert code in failure.value.message
 
 
-@pytest.mark.parametrize('status', [409, 410])
-def test_http_aborted_session_rejection_is_terminal_and_not_retried(monkeypatch, creds, status):
-    """A session intake has aborted rejects further pages for good; resending cannot help."""
+def test_unavailable_retries_until_the_run_wall_with_bounded_jitter(
+    monkeypatch: pytest.MonkeyPatch, creds: rq_upload.UploadCredentials
+):
+    # A busy intake can stay at capacity beyond five attempts; treating its 503 as
+    # permanent exhaustion would fail otherwise valid long-running queries.
     import requests
 
-    calls = []
+    attempts = []
+    delays = []
+    clock = {'now': 0.0}
 
-    def request(method, url, headers, data, timeout):
-        calls.append(url)
-        return SimpleNamespace(status_code=status, content=b'{"error":{"code":"upload_aborted"}}')
+    def request(*args: Any, **kwargs: Any) -> SimpleNamespace:
+        attempts.append(1)
+        if len(attempts) <= 8:
+            return SimpleNamespace(status_code=503, content=b'{"error":{"code":"unavailable","message":"retry"}}')
+        return SimpleNamespace(status_code=204, content=b'')
+
+    def wait(delay: float) -> None:
+        delays.append(delay)
+        clock['now'] += delay
 
     monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
-    monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: pytest.fail('a terminal rejection must not back off'))
-    with pytest.raises(rq_contract.RemoteQueryFailure) as failure, io.BytesIO(b'x') as body:
-        rq_upload.RequestsUploadClient().put_source_page(creds, source_page(b'x'), body)
-    assert failure.value.code == 'upload_failed'
-    assert not failure.value.retryable
-    assert len(calls) == 1
+    monkeypatch.setattr(rq_upload.time, 'monotonic', lambda: clock['now'])
+    monkeypatch.setattr(rq_upload.time, 'sleep', wait)
+    monkeypatch.setattr(rq_upload.random, 'uniform', lambda low, high: (low + high) / 2)
+    scoped = rq_upload.UploadCredentials(creds.base_url, creds.upload_id, creds.api_key, None, wall_deadline=100.0)
+    rq_upload.RequestsUploadClient().register_descriptor(scoped, b'{}')
+    assert len(attempts) == 9
+    assert delays == [0.75 * min(0.1 * 2**i, 5.0) for i in range(8)]
 
 
 def test_http_page_attempt_bound_kills_slow_attempts(monkeypatch, creds):
@@ -377,18 +307,18 @@ def test_http_page_attempt_bound_kills_slow_attempts(monkeypatch, creds):
     def request(method, url, headers, data, timeout):
         attempts.append(1)
         if len(attempts) == 1:
-            clock['now'] += 56
+            clock['now'] += 361
         sent.append(data.read())
-        return SimpleNamespace(status_code=202, content=json.dumps(acceptance_receipt(0, 0, 1)).encode())
+        return SimpleNamespace(status_code=204, content=b'')
 
     monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
     monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
-    # The wall is 100 s away, but the per-attempt bound is 55 s: the first attempt's body read
+    # The wall is 1000 s away, but the per-attempt bound is 360 s: the first attempt's body read
     # happens past it and is killed mid-body; the second, rewound attempt succeeds.
     monkeypatch.setattr(rq_upload.time, 'monotonic', lambda: clock['now'])
-    wall_creds = rq_upload.UploadCredentials(creds.base_url, creds.upload_id, creds.api_key, None, wall_deadline=100.0)
+    wall_creds = rq_upload.UploadCredentials(creds.base_url, creds.upload_id, creds.api_key, None, wall_deadline=1000.0)
     with io.BytesIO(payload) as body:
-        assert rq_upload.RequestsUploadClient().put_source_page(wall_creds, page, body) == acceptance_receipt(0, 0, 1)
+        assert rq_upload.RequestsUploadClient().put_source_page(wall_creds, page, body) is None
     assert len(attempts) == 2
     # The killed attempt fails its deadline check before any byte leaves; only the rewound
     # second attempt streams the page.
@@ -409,7 +339,7 @@ def test_http_page_attempt_bound_never_exceeds_the_run_wall(monkeypatch, creds):
 
     monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
     monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
-    # The wall is 50 s away, inside the 55 s attempt bound, so the attempt's own deadline is
+    # The wall is 50 s away, inside the 360 s attempt bound, so the attempt's own deadline is
     # the wall: a partially consumed budget bounds the page attempt, the killed attempt is not
     # retried past the wall, and the run surfaces the retryable wall timeout.
     clock = iter([0.0, 0.0, 51.0, 51.5] + [51.5] * 10)
@@ -447,153 +377,24 @@ def test_http_retry_sequence_never_extends_the_run_wall(monkeypatch, creds):
     assert len(attempts) == 1
 
 
-def test_http_finalize_sends_the_accepted_page_count(monkeypatch, creds):
-    import requests
-
-    bodies = []
-
-    def request(method, url, headers, data, timeout):
-        bodies.append((method, data))
-        return SimpleNamespace(status_code=200, content=json.dumps(finalize_receipt(3, 5, 99)).encode())
-
-    monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
-    assert rq_upload.RequestsUploadClient().finalize_run(creds, 3) == finalize_receipt(3, 5, 99)
-    # The request body is exactly the accepted page count, nothing else.
-    assert bodies == [('POST', b'{"expected_page_count":3}')]
-
-
-def test_http_finalize_polls_pending_until_the_authoritative_receipt(monkeypatch, creds):
-    import requests
-
-    calls = []
-    sleeps = []
-
-    def request(method, url, headers, data, timeout):
-        calls.append((method, data))
-        if len(calls) == 1:
-            return SimpleNamespace(status_code=202, content=json.dumps(pending_receipt(1, 3)).encode())
-        if len(calls) == 2:
-            # The completed count may advance between polls while pages are recorded.
-            return SimpleNamespace(status_code=202, content=json.dumps(pending_receipt(3, 3)).encode())
-        return SimpleNamespace(status_code=200, content=json.dumps(finalize_receipt(3, 5, 99)).encode())
-
-    monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
-    monkeypatch.setattr(rq_upload.time, 'sleep', sleeps.append)
-    scoped = rq_upload.UploadCredentials(
-        creds.base_url,
-        creds.upload_id,
-        creds.api_key,
-        None,
-        wall_deadline=rq_upload.time.monotonic() + 60,
-    )
-    assert rq_upload.RequestsUploadClient().finalize_run(scoped, 3) == finalize_receipt(3, 5, 99)
-    # Every poll replays the identical finalize body under the same wall.
-    assert calls == [('POST', b'{"expected_page_count":3}')] * 3
-    assert sleeps == [
-        rq_upload.REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS,
-        2 * rq_upload.REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS,
-    ]
-
-
-@pytest.mark.parametrize(
-    'pending',
-    [
-        {'status': 'processing', 'completed_page_count': 1, 'expected_page_count': 2},  # wrong expected echo
-        {'status': 'processing', 'completed_page_count': 4, 'expected_page_count': 3},  # beyond the expected count
-        {'status': 'processing', 'completed_page_count': -1, 'expected_page_count': 3},
-        {'status': 'processing', 'completed_page_count': True, 'expected_page_count': 3},
-        {'status': 'processing', 'completed_page_count': 1, 'expected_page_count': '3'},
-        {'status': 'accepted', 'completed_page_count': 1, 'expected_page_count': 3},  # not the pending status
-        {'status': 'processing', 'completed_page_count': 1},  # missing the expected echo
-        {'status': 'processing', 'completed_page_count': 1, 'expected_page_count': 3, 'upload_id': 'upload-1'},
-        'not-an-object',
-    ],
-)
-def test_http_finalize_pending_receipt_is_strictly_verified(monkeypatch, creds, pending):
+def test_http_finalize_sends_the_recorded_page_count(monkeypatch, creds):
     import requests
 
     calls = []
 
     def request(method, url, headers, data, timeout):
-        calls.append(1)
-        body = pending if isinstance(pending, str) else json.dumps(pending)
-        return SimpleNamespace(status_code=202, content=body.encode())
+        calls.append((method, url, data))
+        return SimpleNamespace(status_code=204, content=b'')
 
     monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
-    monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
-    scoped = rq_upload.UploadCredentials(
-        creds.base_url,
-        creds.upload_id,
-        creds.api_key,
-        None,
-        wall_deadline=rq_upload.time.monotonic() + 60,
-    )
-    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
-        rq_upload.RequestsUploadClient().finalize_run(scoped, 3)
-    assert failure.value.code == 'invalid_receipt'
-    # A malformed pending receipt fails closed on its own poll; nothing is retried.
-    assert len(calls) == 1
-
-
-def test_http_finalize_pending_backoff_is_bounded_under_the_run_wall(monkeypatch, creds):
-    import requests
-
-    attempts = []
-    sleeps = []
-    clock = {'now': 0.0}
-
-    def request(method, url, headers, data, timeout):
-        attempts.append(clock['now'])
-        return SimpleNamespace(status_code=202, content=json.dumps(pending_receipt(0, 1)).encode())
-
-    def sleep(seconds):
-        sleeps.append(seconds)
-        clock['now'] += seconds
-
-    monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
-    monkeypatch.setattr(rq_upload.time, 'sleep', sleep)
-    monkeypatch.setattr(rq_upload.time, 'monotonic', lambda: clock['now'])
-    scoped = rq_upload.UploadCredentials(creds.base_url, creds.upload_id, creds.api_key, None, wall_deadline=25.0)
-    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
-        rq_upload.RequestsUploadClient().finalize_run(scoped, 1)
-    assert failure.value.code == 'timeout'
-    assert failure.value.retryable
-    assert len(attempts) == 10
-    assert sleeps == [0.1, 0.2, 0.4, 0.8, 1.6, 3.2, 5.0, 5.0, 5.0, 5.0]
-
-
-def test_http_finalize_pending_then_terminal_rejection_fails_closed(monkeypatch, creds):
-    import requests
-
-    calls = []
-
-    def request(method, url, headers, data, timeout):
-        calls.append(1)
-        if len(calls) == 1:
-            return SimpleNamespace(status_code=202, content=json.dumps(pending_receipt(0, 1)).encode())
-        return SimpleNamespace(status_code=409, content=b'{"error":{"code":"already_exists"}}')
-
-    monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
-    monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
-    scoped = rq_upload.UploadCredentials(
-        creds.base_url,
-        creds.upload_id,
-        creds.api_key,
-        None,
-        wall_deadline=rq_upload.time.monotonic() + 60,
-    )
-    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
-        rq_upload.RequestsUploadClient().finalize_run(scoped, 1)
-    assert failure.value.code == 'upload_failed'
-    assert not failure.value.retryable
-    assert len(calls) == 2  # the terminal rejection is not retried; the run aborts
+    rq_upload.RequestsUploadClient().finalize_run(creds, 3)
+    assert calls == [('POST', 'https://intake.example/uploads/upload-1/finalize', b'{"expected_page_count":3}')]
 
 
 def test_trace_headers_reach_page_finalize_abort_and_retries_without_other_changes(monkeypatch, creds):
     import requests
 
     page = rq_contract.SourcePageUploadMetadata(0, 0, 1, 1)
-    page_receipt = json.dumps(receipt(page)).encode()
     calls = []
 
     def request(method, url, headers, data, timeout):
@@ -602,8 +403,8 @@ def test_trace_headers_reach_page_finalize_abort_and_retries_without_other_chang
             # A transient rejection: the page PUT retries once with the same headers.
             return SimpleNamespace(status_code=503, content=b'{"error":{"code":"unavailable"}}')
         if method == 'PUT':
-            return SimpleNamespace(status_code=202, content=page_receipt)
-        return SimpleNamespace(status_code=200, content=b'{"upload_id":"upload-1"}')
+            return SimpleNamespace(status_code=204, content=b'')
+        return SimpleNamespace(status_code=204, content=b'')
 
     monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
     monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
@@ -652,14 +453,13 @@ def test_page_upload_attempts_span_each_http_attempt_with_retry_and_outcome(monk
     import requests
 
     page = rq_contract.SourcePageUploadMetadata(0, 0, 1, 1)
-    page_receipt = json.dumps(receipt(page)).encode()
     calls = []
 
     def request(method, url, headers, data, timeout):
         calls.append(dict(headers))
         if len(calls) == 1:
             return SimpleNamespace(status_code=503, content=b'{"error":{"code":"unavailable"}}')
-        return SimpleNamespace(status_code=202, content=page_receipt)
+        return SimpleNamespace(status_code=204, content=b'')
 
     monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
     monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
@@ -668,12 +468,11 @@ def test_page_upload_attempts_span_each_http_attempt_with_retry_and_outcome(monk
     client = rq_upload.RequestsUploadClient(tracing=tracing)
 
     with io.BytesIO(b'x') as body:
-        page_receipt = client.put_source_page(creds, page, body)
+        client.put_source_page(creds, page, body)
 
     tracing.succeed(rq_contract.RemoteQueryRunStats())
     tracing.close()
 
-    assert page_receipt['status'] == 'accepted'
     first, second = tracer.by_name(rq_tracing.REMOTE_QUERY_PAGE_UPLOAD_SPAN_OPERATION)
     # The failed first attempt is a rejection with its public status counter; the retried
     # attempt succeeds and is marked as the page's second attempt.
@@ -683,7 +482,7 @@ def test_page_upload_attempts_span_each_http_attempt_with_retry_and_outcome(monk
     assert first.metrics[rq_tracing.REMOTE_QUERY_SPAN_HTTP_STATUS_METRIC] == 503
     assert second.tags[rq_tracing.REMOTE_QUERY_SPAN_RETRY_TAG] == 'true'
     assert second.error == 0
-    assert second.metrics[rq_tracing.REMOTE_QUERY_SPAN_HTTP_STATUS_METRIC] == 202
+    assert second.metrics[rq_tracing.REMOTE_QUERY_SPAN_HTTP_STATUS_METRIC] == 204
     assert [span.child_of for span in (first, second)] == [tracer.spans[0], tracer.spans[0]]
     # The root's attempt counters count each HTTP page upload attempt exactly once, a
     # retry being any attempt beyond a page's first.
@@ -708,12 +507,7 @@ def test_active_spans_replace_the_manual_trace_headers_only_on_spanned_requests(
 
     def request(method, url, headers, data, timeout):
         calls.append(dict(headers))
-        if url.endswith('/pages/0'):
-            page = rq_contract.SourcePageUploadMetadata(0, 0, 1, 1)
-            return SimpleNamespace(status_code=202, content=json.dumps(receipt(page)).encode())
-        if url.endswith('/finalize'):
-            return SimpleNamespace(status_code=200, content=b'{"upload_id":"upload-1"}')
-        return SimpleNamespace(status_code=200, content=b'{}')
+        return SimpleNamespace(status_code=204, content=b'')
 
     monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
     tracing, tracer = make_tracing()
@@ -766,9 +560,7 @@ def test_injection_failure_falls_back_to_the_manual_trace_headers(monkeypatch, d
 
     def request(method, url, headers, data, timeout):
         calls.append(dict(headers))
-        return SimpleNamespace(
-            status_code=202, content=json.dumps(receipt(rq_contract.SourcePageUploadMetadata(0, 0, 1, 1))).encode()
-        )
+        return SimpleNamespace(status_code=204, content=b'')
 
     monkeypatch.setattr(requests.Session, 'request', as_session_request(request))
     tracing, tracer = make_tracing(propagator=RefusingPropagator())
@@ -776,29 +568,16 @@ def test_injection_failure_falls_back_to_the_manual_trace_headers(monkeypatch, d
     client = rq_upload.RequestsUploadClient(tracing=tracing)
 
     with io.BytesIO(b'x') as body:
-        page_receipt = client.put_source_page(traced, rq_contract.SourcePageUploadMetadata(0, 0, 1, 1), body)
+        client.put_source_page(traced, rq_contract.SourcePageUploadMetadata(0, 0, 1, 1), body)
 
     # The propagator failed, so the request still carries the manual trace headers
     # verbatim — the no-tracer fallback — and the upload itself succeeded.
-    assert page_receipt['status'] == 'accepted'
     assert calls[0][rq_contract.REMOTE_QUERY_TRACE_ID_HEADER] == TRACE_ID
     assert calls[0][rq_contract.REMOTE_QUERY_TRACE_PARENT_ID_HEADER] == PARENT_ID
     assert calls[0][rq_contract.REMOTE_QUERY_TRACE_SAMPLING_PRIORITY_HEADER] == '2'
     # The span still finished with its outcome; only the injection fell back.
     [attempt] = tracer.by_name(rq_tracing.REMOTE_QUERY_PAGE_UPLOAD_SPAN_OPERATION)
     assert attempt.finished
-
-
-@pytest.mark.parametrize('body', [b'', b'not-json', b'[]', b'null'])
-def test_responses_require_json_objects(body):
-    with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
-        rq_upload.parse_json_object_response(body, 'page upload')
-    assert failure.value.code == 'invalid_receipt'
-
-
-def test_finalize_identity_must_match():
-    with pytest.raises(rq_contract.RemoteQueryFailure):
-        rq_upload.verify_run_finalize_response({'upload_id': 'other'}, 'upload-1')
 
 
 @pytest.mark.parametrize(
@@ -885,9 +664,8 @@ class StallingIntake:
 
     FIRST_READ_BYTES = 64 * 1024
 
-    def __init__(self, stall_seconds, response):
+    def __init__(self, stall_seconds):
         self.stall_seconds = stall_seconds
-        self.response = response
         self.connections = 0
         self.released = threading.Event()
         intake = self
@@ -933,10 +711,7 @@ class StallingIntake:
             if not chunk:
                 return
             received += len(chunk)
-        payload = json.dumps(self.response).encode()
-        conn.sendall(
-            b'HTTP/1.1 202 Accepted\r\nContent-Length: %d\r\nConnection: close\r\n\r\n' % len(payload) + payload
-        )
+        conn.sendall(b'HTTP/1.1 204 No Content\r\nContent-Length: 0\r\nConnection: close\r\n\r\n')
 
     def __enter__(self):
         threading.Thread(target=self.server.serve_forever, daemon=True).start()
@@ -962,17 +737,16 @@ def test_a_reader_that_stalls_longer_than_the_connect_timeout_does_not_fail_the_
     while the body was sent, so a reader that paused longer than that killed the attempt as a
     transport failure and the retries piled onto the same slow intake."""
     monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
-    receipt = acceptance_receipt(0, 0, 1)
-    with StallingIntake(stall_seconds=1.0, response=receipt) as intake:
+    with StallingIntake(stall_seconds=1.0) as intake:
         # The stall is 3x the connect timeout and well inside the write timeout.
         client = rq_upload.RequestsUploadClient(timeout=(0.3, 5), write_timeout=5)
-        assert put_page_to(intake, client) == receipt
+        assert put_page_to(intake, client) is None
     assert intake.connections == 1
 
 
 def test_a_reader_that_stalls_longer_than_the_write_timeout_fails_the_attempt(monkeypatch):
     monkeypatch.setattr(rq_upload.time, 'sleep', lambda _: None)
-    with StallingIntake(stall_seconds=30, response=acceptance_receipt(0, 0, 1)) as intake:
+    with StallingIntake(stall_seconds=30) as intake:
         client = rq_upload.RequestsUploadClient(timeout=(5, 5), write_timeout=0.3)
         with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
             put_page_to(intake, client)
@@ -983,7 +757,7 @@ def test_a_reader_that_stalls_longer_than_the_write_timeout_fails_the_attempt(mo
 
 
 def test_a_stalled_send_never_outlives_the_page_attempt_deadline():
-    with StallingIntake(stall_seconds=30, response=acceptance_receipt(0, 0, 1)) as intake:
+    with StallingIntake(stall_seconds=30) as intake:
         # The write timeout alone would allow 30 s; the run wall, and so the attempt, ends in 0.5 s.
         client = rq_upload.RequestsUploadClient(timeout=(5, 5), write_timeout=30)
         started = time.monotonic()

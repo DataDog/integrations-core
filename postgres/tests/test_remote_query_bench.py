@@ -7,7 +7,7 @@
 Each benchmark drives the normal ``PostgresRemoteQueryHandler.execute`` path — the never-fetched
 DECLARE descriptor, the single ``COPY ... TO STDOUT``, record framing, page buffering, and
 page uploads — with a discard upload client: every page body is read and dropped, a
-structurally valid receipt is returned, and no HTTP request is made, so the measured wall is
+synchronous success is reported, and no HTTP request is made, so the measured wall is
 exactly the producer's own work (COPY generation and fetch, CSV framing, source-page
 buffering), never network or intake work.
 
@@ -17,7 +17,6 @@ recorded in each benchmark's `extra_info` so before/after comparisons can target
 run as a whole; phase-level attribution belongs to the native producer spans.
 """
 
-import json
 import time
 from types import SimpleNamespace
 from typing import Any
@@ -41,7 +40,7 @@ READ_CHUNK_BYTES = 64 * 1024
 
 
 class DiscardUploadClient:
-    """Intake-side fake: reads each page body, drops it, and answers a valid receipt.
+    """Intake-side fake: reads each page body, drops it, and acknowledges it.
 
     Pages are never retained and no HTTP is made, so the in-process upload work stays
     negligible and the benchmark measures the producer's own pipeline only.
@@ -57,13 +56,6 @@ class DiscardUploadClient:
 
     def register_descriptor(self, creds, body):
         self.descriptor_bodies.append(body)
-        registered = json.loads(body)
-        return {
-            'upload_id': creds.upload_id,
-            'format_version': registered['format_version'],
-            'include_schema': registered['include_schema'],
-            'columns': len(registered['columns']),
-        }
 
     def put_source_page(self, creds, page, body):
         total = 0
@@ -81,22 +73,9 @@ class DiscardUploadClient:
         )
         self.rows += page.rows
         self.source_bytes += page.source_bytes
-        return {
-            'upload_id': creds.upload_id,
-            'batch_index': page.batch_index,
-            'record_offset': page.record_offset,
-            'source_rows': page.rows,
-            'status': 'accepted',
-        }
 
     def finalize_run(self, creds, expected_page_count):
         self.run_finalize_calls += 1
-        return {
-            'upload_id': creds.upload_id,
-            'page_count': len({call.batch_index for call in self.put_page_calls}),
-            'total_rows': self.rows,
-            'total_bytes': self.source_bytes,
-        }
 
     def abort(self, creds):
         self.abort_calls += 1

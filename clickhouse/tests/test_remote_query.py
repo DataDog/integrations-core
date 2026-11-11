@@ -275,7 +275,6 @@ def test_producer_writes_exact_rfc_v1_envelope_json(monkeypatch):
                 'column_name': 'value',
                 'vendor_data_type': 'UInt8',
                 'logical_type': 'integer',
-                'array_element_delimiter': None,
             }
         ],
     }
@@ -360,7 +359,7 @@ def test_producer_omits_settings_for_unknown_or_readonly_levels(monkeypatch, rea
     assert clickhouse_client.raw_stream_calls[0]['settings'] == {}
 
 
-def test_producer_zero_rows_with_schema_disabled_writes_no_page(monkeypatch):
+def test_producer_zero_rows_with_schema_disabled_writes_one_empty_page(monkeypatch):
     patch_upload_credentials(monkeypatch)
     clickhouse_client = make_client(rows=[])
     fake = FakeUploadClient()
@@ -368,7 +367,8 @@ def test_producer_zero_rows_with_schema_disabled_writes_no_page(monkeypatch):
     events = collect_events(valid_request(), make_check(), upload_client=fake, clickhouse_client=clickhouse_client)
 
     final = assert_success(events)
-    assert fake.put_page_calls == []
+    assert assembled_pages(fake) == {0: b''}
+    assert fake.finalize_expected_page_counts == [1]
     assert fake.run_finalize_calls == 1
     assert fake.abort_calls == 0
     assert final == {'status': 'SUCCEEDED'}
@@ -399,7 +399,6 @@ def test_producer_zero_rows_with_schema_enabled_writes_one_zero_record_page(monk
             'column_name': 'value',
             'vendor_data_type': 'UInt8',
             'logical_type': 'integer',
-            'array_element_delimiter': None,
         }
     ]
     assert fake.run_finalize_calls == 1
@@ -479,13 +478,11 @@ def test_producer_splits_pages_by_the_schema_bearing_envelope_bound(monkeypatch)
             'column_name': 'city',
             'vendor_data_type': 'String',
             'logical_type': 'string',
-            'array_element_delimiter': None,
         },
         {
             'column_name': 'country',
             'vendor_data_type': 'String',
             'logical_type': 'string',
-            'array_element_delimiter': None,
         },
     ]
     assert event_metadata(events[0])['includeSchema'] is True
@@ -513,15 +510,13 @@ def test_producer_descriptor_carries_clickhouse_type_strings_and_logical_types(m
             'column_name': 'count',
             'vendor_data_type': 'Nullable(UInt64)',
             'logical_type': 'integer',
-            'array_element_delimiter': None,
         },
         {
             'column_name': 'name',
             'vendor_data_type': 'LowCardinality(String)',
             'logical_type': 'string',
-            'array_element_delimiter': None,
         },
-        {'column_name': 'flag', 'vendor_data_type': 'Bool', 'logical_type': 'boolean', 'array_element_delimiter': None},
+        {'column_name': 'flag', 'vendor_data_type': 'Bool', 'logical_type': 'boolean'},
     ]
     assert page == csv_record([b'null', b'"x"', b'true'])
 

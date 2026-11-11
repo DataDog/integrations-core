@@ -131,16 +131,10 @@ class FakeClickhouseClient:
 
 
 class FakeUploadClient:
-    """Intake-side fake: one descriptor registration, page acceptance receipts, finalize totals.
-
-    Page PUTs answer the pinned acceptance receipt — no per-page final metadata exists at
-    acceptance — and the default finalize returns authoritative totals over the recorded
-    pages, so the producer's tracing stats come from finalization.
-    """
+    """Intake double: synchronous status-only success for all upload operations."""
 
     def __init__(
         self,
-        put_page_response=None,
         put_log=None,
     ):
         # SimpleNamespace(batch_index, record_offset, source_bytes, rows, payload)
@@ -149,20 +143,10 @@ class FakeUploadClient:
         self.run_finalize_calls = 0
         self.finalize_expected_page_counts = []
         self.abort_calls = 0
-        # When unset, the receipt carries shape-valid intake-derived metadata; tests pass a
-        # mapping (or a callable taking the page metadata) to mutate or reject it.
-        self.put_page_response = put_page_response
         self.put_log = put_log
 
     def register_descriptor(self, creds, body):
         self.descriptor_bodies.append(body)
-        registered = json.loads(body)
-        return {
-            'upload_id': creds.upload_id,
-            'format_version': registered['format_version'],
-            'include_schema': registered['include_schema'],
-            'columns': len(registered['columns']),
-        }
 
     def put_source_page(self, creds, page, body):
         payload = body.read()
@@ -177,29 +161,10 @@ class FakeUploadClient:
         )
         if self.put_log is not None:
             self.put_log.append(('put', page.batch_index, page.source_bytes, page.rows))
-        if self.put_page_response is not None:
-            response = self.put_page_response
-            if callable(response):
-                response = response(page)
-        else:
-            response = {
-                'upload_id': creds.upload_id,
-                'batch_index': page.batch_index,
-                'record_offset': page.record_offset,
-                'source_rows': page.rows,
-                'status': 'accepted',
-            }
-        return response
 
     def finalize_run(self, creds, expected_page_count):
         self.run_finalize_calls += 1
         self.finalize_expected_page_counts.append(expected_page_count)
-        return {
-            'upload_id': creds.upload_id,
-            'page_count': len(self.put_page_calls),
-            'total_rows': sum(call.rows for call in self.put_page_calls),
-            'total_bytes': sum(call.source_bytes for call in self.put_page_calls),
-        }
 
     def abort(self, creds):
         self.abort_calls += 1

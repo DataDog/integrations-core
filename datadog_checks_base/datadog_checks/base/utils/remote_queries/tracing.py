@@ -127,7 +127,7 @@ class RemoteQueryProducerTracing:
 
     Real spans parented on the request's existing trace context, additive to the event
     contract — which stays byte-identical, and tracing failure of
-    any kind never alters pages, receipts, retries, results, or errors.
+    any kind never alters pages, acknowledgements, retries, results, or errors.
 
     The tracer is the supported global ``ddtrace.trace.tracer`` singleton (importing
     ddtrace initializes that singleton together with its telemetry, which is accepted
@@ -255,7 +255,7 @@ class RemoteQueryProducerTracing:
             self._disable()
 
     def succeed(self, stats: RemoteQueryRunStats) -> None:
-        """Finish the root as SUCCEEDED with the run's counters (intake-authoritative)."""
+        """Finish the root as SUCCEEDED with the producer's acknowledged-page counters."""
         self._terminal(status='SUCCEEDED', error_code=None, stats=stats)
 
     def fail(self, error_code: str, stats: RemoteQueryRunStats) -> None:
@@ -402,7 +402,7 @@ class RemoteQueryProducerTracing:
     def note_page_acknowledged(self) -> None:
         """Record the first acknowledged page's wall from the root span's start, once.
 
-        The root span's metric counts to the first receipt-verified, counted page —
+        The root span's metric counts to the first acknowledged, counted page —
         the same boundary an operator would time by hand.
         """
         if self._first_page_ms is not None or self._root_started_at is None:

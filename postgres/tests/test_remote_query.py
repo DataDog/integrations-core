@@ -325,7 +325,6 @@ def test_producer_writes_exact_source_page_csv_and_descriptor(monkeypatch):
                 'column_name': 'value',
                 'vendor_data_type': 'integer',
                 'logical_type': 'integer',
-                'array_element_delimiter': None,
             }
         ],
     }
@@ -474,7 +473,7 @@ def test_statement_timeout_is_the_smaller_of_instance_override_and_remaining_wal
     assert remote_query.PostgresRemoteQueryHandler(check)._resolve_statement_timeout_ms(99.0) == 1
 
 
-def test_producer_zero_rows_with_schema_disabled_writes_no_page(monkeypatch):
+def test_producer_zero_rows_with_schema_disabled_writes_one_empty_page(monkeypatch):
     patch_upload_credentials(monkeypatch)
     pool = FakePool(rows=[])
     fake = FakeUploadClient()
@@ -482,7 +481,8 @@ def test_producer_zero_rows_with_schema_disabled_writes_no_page(monkeypatch):
     events = collect_events(valid_request(), make_check(pool=pool), client=fake)
 
     final = assert_success(events)
-    assert fake.put_page_calls == []
+    assert assembled_pages(fake) == {0: b''}
+    assert fake.finalize_expected_page_counts == [1]
     assert fake.run_finalize_calls == 1
     assert fake.abort_calls == 0
     assert final == {'status': 'SUCCEEDED'}
@@ -511,7 +511,6 @@ def test_producer_zero_rows_with_schema_enabled_writes_one_zero_record_page(monk
             'column_name': 'value',
             'vendor_data_type': 'integer',
             'logical_type': 'integer',
-            'array_element_delimiter': None,
         }
     ]
     assert fake.run_finalize_calls == 1

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
+import random
 import re
 import socket
 import time
@@ -22,7 +23,6 @@ from .contract import (
     RemoteQueryFailure,
     RemoteQueryResultDelivery,
     RemoteQueryTraceContext,
-    RemoteQueryUploadDescriptor,
     SourcePageUploadMetadata,
     canonical_json_bytes,
 )
@@ -32,28 +32,10 @@ from .tracing import NULL_PRODUCER_TRACING, RemoteQueryProducerTracing
 LOGGER = logging.getLogger(__name__)
 
 
-REMOTE_QUERY_SOURCE_PAGE_CONTENT_TYPE = 'application/vnd.datadog.remote-query.rows+csv;version=1'
+REMOTE_QUERY_SOURCE_PAGE_CONTENT_TYPE = 'text/csv'
 
 
-REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE = 'final_page_too_large'
-
-
-REMOTE_QUERY_PAGE_ACCEPTED_STATUS_CODE = 202
-
-
-REMOTE_QUERY_PAGE_RECEIPT_STATUS = 'accepted'
-
-
-REMOTE_QUERY_PAGE_RECEIPT_KEYS = frozenset(('upload_id', 'batch_index', 'record_offset', 'source_rows', 'status'))
-
-
-REMOTE_QUERY_FINALIZE_PENDING_STATUS_CODE = 202
-
-
-REMOTE_QUERY_FINALIZE_PENDING_STATUS = 'processing'
-
-
-REMOTE_QUERY_FINALIZE_PENDING_KEYS = frozenset(('status', 'completed_page_count', 'expected_page_count'))
+REMOTE_QUERY_RESULT_FILE_TOO_LARGE_ERROR_CODE = 'result_file_too_large'
 
 
 REMOTE_QUERY_UPLOAD_TEST_DRIVE_CONFIG_KEY = 'remote_queries.execute.intake_test_drive'
@@ -106,10 +88,10 @@ REMOTE_QUERY_UPLOAD_MAX_BACKOFF_SECONDS = 5.0
 REMOTE_QUERY_UPLOAD_HTTP_CONNECT_TIMEOUT_SECONDS = 10
 
 
-REMOTE_QUERY_UPLOAD_HTTP_ATTEMPT_SECONDS = 55
+REMOTE_QUERY_UPLOAD_HTTP_ATTEMPT_SECONDS = 360
 
 
-REMOTE_QUERY_UPLOAD_HTTP_READ_TIMEOUT_SECONDS = 300
+REMOTE_QUERY_UPLOAD_HTTP_READ_TIMEOUT_SECONDS = 360
 
 
 # The longest one socket send may block while the request is written, i.e. how long intake (or
@@ -142,13 +124,11 @@ class UploadCredentials:
 
 
 class UploadClient(Protocol):
-    def register_descriptor(self, creds: UploadCredentials, body: bytes) -> Mapping[str, Any]: ...
+    def register_descriptor(self, creds: UploadCredentials, body: bytes) -> None: ...
 
-    def put_source_page(
-        self, creds: UploadCredentials, page: SourcePageUploadMetadata, body: BinaryIO
-    ) -> Mapping[str, Any]: ...
+    def put_source_page(self, creds: UploadCredentials, page: SourcePageUploadMetadata, body: BinaryIO) -> None: ...
 
-    def finalize_run(self, creds: UploadCredentials, expected_page_count: int) -> Mapping[str, Any]: ...
+    def finalize_run(self, creds: UploadCredentials, expected_page_count: int) -> None: ...
 
     def abort(self, creds: UploadCredentials) -> None: ...
 
@@ -285,92 +265,57 @@ class RequestsUploadClient:
             headers.update(creds.trace_context.trace_headers())
         return headers
 
-    def register_descriptor(self, creds: UploadCredentials, body: bytes) -> Mapping[str, Any]:
-        """Register the immutable source-page descriptor; retries send byte-identical bodies."""
+    def register_descriptor(self, creds: UploadCredentials, body: bytes) -> None:
+        """Register the immutable descriptor; retries send byte-identical bodies."""
         headers = self._headers(creds, 'application/json')
         url = '{}/uploads/{}/descriptor'.format(creds.base_url.rstrip('/'), creds.upload_id)
-        _status, response_body = upload_with_retry(
+        status, _ = upload_with_retry(
             'POST', url, headers, body, self._timeout, deadline=creds.wall_deadline, write_timeout=self._write_timeout
         )
-        return parse_json_object_response(response_body, 'descriptor registration')
+        verify_no_content_response(status, 'descriptor registration')
 
-    def put_source_page(
-        self, creds: UploadCredentials, page: SourcePageUploadMetadata, buffer: BinaryIO
-    ) -> Mapping[str, Any]:
-        """Upload one record-complete source page and return the parsed acceptance receipt.
+    def put_source_page(self, creds: UploadCredentials, page: SourcePageUploadMetadata, buffer: BinaryIO) -> None:
+        """Upload a complete page, acknowledged only after intake records it.
 
-        The buffered page is streamed as the request body with stable declared source
-        metadata; every bounded retry rewinds the buffer and resends byte-identical content
-        for the same page index. The handoff succeeds on HTTP 202 exactly — intake admits and
-        starts the page there — and any other successful status fails closed; its defensive
-        `final_page_too_large` rejection surfaces
-        as its own failure code so the writer can split the buffered records and retry the
-        same index.
+        Retries rewind the same fixed-length, uncompressed body. An oversized result file
+        is surfaced separately so the writer can split records and retry the same index.
         """
         headers = self._headers(creds, REMOTE_QUERY_SOURCE_PAGE_CONTENT_TYPE)
-        headers['X-DD-Source-Page-Bytes'] = str(page.source_bytes)
         headers['X-DD-Source-Page-Rows'] = str(page.rows)
         headers['X-DD-Record-Offset'] = str(page.record_offset)
-        # The buffer is complete and rewound before the request, so the exact source size is
-        # declared as a stable Content-Length for one non-chunked request body.
         headers['Content-Length'] = str(page.source_bytes)
         url = '{}/uploads/{}/pages/{}'.format(creds.base_url.rstrip('/'), creds.upload_id, page.batch_index)
-        status, response_body = upload_with_retry(
+        status, _ = upload_with_retry(
             'PUT',
             url,
             headers,
             buffer,
             self._timeout,
             mapped_error_codes={
-                REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE: REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE
+                REMOTE_QUERY_RESULT_FILE_TOO_LARGE_ERROR_CODE: REMOTE_QUERY_RESULT_FILE_TOO_LARGE_ERROR_CODE
             },
             deadline=creds.wall_deadline,
             tracing=self._tracing,
             attempt_spans=True,
             write_timeout=self._write_timeout,
         )
-        if status != REMOTE_QUERY_PAGE_ACCEPTED_STATUS_CODE:
-            raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake page upload answered HTTP {}.'.format(status))
-        return parse_json_object_response(response_body, 'page upload')
+        verify_no_content_response(status, 'page upload')
 
-    def finalize_run(self, creds: UploadCredentials, expected_page_count: int) -> Mapping[str, Any]:
-        """Finalize the run with its accepted page count, polling pending until authoritative.
-
-        The request body is exactly `{"expected_page_count": N}` — the number of pages
-        intake accepted — and every poll replays it byte for byte. Intake answers HTTP 202
-        with the safe pending progress fields while accepted pages are still being recorded
-        behind the one-page lead, and HTTP 200 with the authoritative final receipt once
-        the expected count is complete. Each pending response is strictly verified and
-        retried with bounded backoff; the polling never extends the run-wide wall, so once
-        the wall expires the next request fails with the retryable wall timeout and the
-        run's existing best-effort abort takes over.
-        """
+    def finalize_run(self, creds: UploadCredentials, expected_page_count: int) -> None:
+        """Finalize with the recorded page count; a 204 confirms completion."""
         headers = self._headers(creds, 'application/json')
         url = '{}/uploads/{}/finalize'.format(creds.base_url.rstrip('/'), creds.upload_id)
-        request_body = canonical_json_bytes({'expected_page_count': expected_page_count})
-        backoff = REMOTE_QUERY_UPLOAD_INITIAL_BACKOFF_SECONDS
-        while True:
-            status, response_body = upload_with_retry(
-                'POST',
-                url,
-                headers,
-                request_body,
-                self._timeout,
-                deadline=creds.wall_deadline,
-                tracing=self._tracing,
-                write_timeout=self._write_timeout,
-            )
-            if status == 200:
-                return parse_json_object_response(response_body, 'run finalize')
-            if status != REMOTE_QUERY_FINALIZE_PENDING_STATUS_CODE:
-                raise RemoteQueryFailure(
-                    'invalid_receipt', 'its-agent-intake run finalize answered HTTP {}.'.format(status)
-                )
-            verify_finalize_pending_response(
-                parse_json_object_response(response_body, 'run finalize'), expected_page_count
-            )
-            time.sleep(backoff)
-            backoff = min(backoff * 2, REMOTE_QUERY_UPLOAD_MAX_BACKOFF_SECONDS)
+        status, _ = upload_with_retry(
+            'POST',
+            url,
+            headers,
+            canonical_json_bytes({'expected_page_count': expected_page_count}),
+            self._timeout,
+            deadline=creds.wall_deadline,
+            tracing=self._tracing,
+            write_timeout=self._write_timeout,
+        )
+        verify_no_content_response(status, 'run finalize')
 
     def abort(self, creds: UploadCredentials) -> None:
         headers = self._headers(creds, 'application/json')
@@ -386,148 +331,14 @@ class RequestsUploadClient:
             LOGGER.debug('Remote query upload abort failed (best-effort)')
 
 
-def parse_json_object_response(body: bytes, source: str) -> Mapping[str, Any]:
-    """Parse one intake response, failing closed on a non-JSON or non-object body."""
-    try:
-        parsed = json.loads(body.decode('utf-8'))
-    except (UnicodeDecodeError, ValueError):
-        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake {} response was not valid JSON.'.format(source))
-    if not isinstance(parsed, Mapping):
-        raise RemoteQueryFailure(
-            'invalid_receipt', 'its-agent-intake {} response was not a JSON object.'.format(source)
-        )
-    return parsed
-
-
-def verify_descriptor_receipt_field(response: Mapping[str, Any], field: str, expected: Any) -> None:
-    reported = response.get(field)
-    if type(reported) is not type(expected) or reported != expected:
-        raise RemoteQueryFailure(
-            'invalid_receipt',
-            'its-agent-intake descriptor response reported {} {!r} instead of {!r}.'.format(field, reported, expected),
-        )
-
-
-def verify_descriptor_response(
-    response: Mapping[str, Any],
-    upload_id: str,
-    descriptor: RemoteQueryUploadDescriptor,
-) -> None:
-    """Fail closed unless intake's descriptor receipt exactly confirms the registration."""
-    if not isinstance(response, Mapping):
-        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake descriptor response was not a JSON object.')
-    extra_keys = set(response) - {'upload_id', 'format_version', 'include_schema', 'columns'}
-    if extra_keys:
-        raise RemoteQueryFailure(
-            'invalid_receipt',
-            'its-agent-intake descriptor response carried unknown key(s): {}.'.format(', '.join(sorted(extra_keys))),
-        )
-    verify_descriptor_receipt_field(response, 'upload_id', upload_id)
-    verify_descriptor_receipt_field(response, 'format_version', descriptor.format_version)
-    verify_descriptor_receipt_field(response, 'include_schema', descriptor.include_schema)
-    verify_descriptor_receipt_field(response, 'columns', len(descriptor.columns))
-
-
-def verify_source_page_receipt(response: Mapping[str, Any], upload_id: str, page: SourcePageUploadMetadata) -> None:
-    """Fail closed unless intake's acceptance receipt matches the page identity exactly."""
-    if not isinstance(response, Mapping):
-        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake page upload response was not a JSON object.')
-    extra_keys = set(response) - REMOTE_QUERY_PAGE_RECEIPT_KEYS
-    if extra_keys:
-        raise RemoteQueryFailure(
-            'invalid_receipt',
-            'its-agent-intake page upload response carried unknown key(s): {}.'.format(', '.join(sorted(extra_keys))),
-        )
-    reported_upload_id = response.get('upload_id')
-    if not isinstance(reported_upload_id, str) or reported_upload_id != upload_id:
-        raise RemoteQueryFailure(
-            'invalid_receipt', 'its-agent-intake page upload response did not confirm the upload session.'
-        )
-    verify_page_receipt_field(response, 'batch_index', page.batch_index)
-    verify_page_receipt_field(response, 'record_offset', page.record_offset)
-    verify_page_receipt_field(response, 'source_rows', page.rows)
-    if response.get('status') != REMOTE_QUERY_PAGE_RECEIPT_STATUS:
-        raise RemoteQueryFailure(
-            'invalid_receipt', 'its-agent-intake page upload response did not report the page as accepted.'
-        )
-
-
-def verify_finalize_pending_response(response: Mapping[str, Any], expected_page_count: int) -> None:
-    """Fail closed unless intake's `202` pending receipt is exactly the safe progress fields.
-
-    `status` must be the pinned `processing`; `expected_page_count` must echo the
-    accepted count this producer declared, and `completed_page_count` must be a
-    well-typed count between zero and it. The pending receipt is progress diagnostics
-    only — it never authorizes success — so any unknown key fails closed.
-    """
-    if not isinstance(response, Mapping):
-        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake run finalize response was not a JSON object.')
-    extra_keys = set(response) - REMOTE_QUERY_FINALIZE_PENDING_KEYS
-    if extra_keys:
-        raise RemoteQueryFailure(
-            'invalid_receipt',
-            'its-agent-intake run finalize response carried unknown key(s): {}.'.format(', '.join(sorted(extra_keys))),
-        )
-    if response.get('status') != REMOTE_QUERY_FINALIZE_PENDING_STATUS:
-        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake run finalize response did not report processing.')
-    completed = response.get('completed_page_count')
-    if type(completed) is not int or completed < 0 or completed > expected_page_count:
-        raise RemoteQueryFailure(
-            'invalid_receipt', 'its-agent-intake run finalize response did not report a usable completed count.'
-        )
-    reported_expected = response.get('expected_page_count')
-    if type(reported_expected) is not int or reported_expected != expected_page_count:
-        raise RemoteQueryFailure(
-            'invalid_receipt', 'its-agent-intake run finalize response did not echo the expected page count.'
-        )
-
-
-def finalize_totals(response: Mapping[str, Any]) -> tuple[int, int, int]:
-    """Intake's authoritative run totals: `(page_count, total_rows, total_bytes)`.
-
-    Producer tracing uses these totals after finalization rather than local source accounting.
-    A response that does not report all three totals is an invalid intake response.
-    """
-    totals = []
-    for field in ('page_count', 'total_rows', 'total_bytes'):
-        reported = response.get(field)
-        if type(reported) is not int or reported < 0:
-            raise RemoteQueryFailure(
-                'invalid_receipt', 'its-agent-intake run finalize response did not report {}.'.format(field)
-            )
-        totals.append(reported)
-    return totals[0], totals[1], totals[2]
-
-
-def verify_page_receipt_field(response: Mapping[str, Any], field: str, expected: int) -> None:
-    reported = response.get(field)
-    if type(reported) is not int or reported != expected:
-        raise RemoteQueryFailure(
-            'invalid_receipt',
-            'its-agent-intake page upload response reported {} {!r} instead of {}.'.format(field, reported, expected),
-        )
-
-
-def verify_run_finalize_response(response: Mapping[str, Any], upload_id: str) -> None:
-    """Fail closed when intake's authoritative response reports a different upload session."""
-    if not isinstance(response, Mapping):
-        raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake run finalize response was not a JSON object.')
-    reported_upload_id = response.get('upload_id')
-    if reported_upload_id is None or reported_upload_id == '':
-        # Intake's authoritative result is verified by its-agent downstream, so an absent
-        # identity echo is accepted.
-        return
-    if str(reported_upload_id) != upload_id:
-        raise RemoteQueryFailure(
-            'invalid_receipt',
-            'its-agent-intake run finalize response reported upload id {!r} instead of {!r}.'.format(
-                str(reported_upload_id), upload_id
-            ),
-        )
+def verify_no_content_response(status: int, operation: str) -> None:
+    """Only intake's synchronous, status-only acknowledgement confirms success."""
+    if status != 204:
+        raise RemoteQueryFailure('upload_failed', 'its-agent-intake {} answered HTTP {}.'.format(operation, status))
 
 
 def is_transient_upload_status(status: int) -> bool:
-    return status == 408 or status == 429 or status >= 500
+    return status in (500, 503)
 
 
 def parse_error_code(body: bytes) -> str | None:
@@ -586,7 +397,9 @@ def upload_with_retry(
     # the fixed failure categories assigned below, never the caught exception's text or
     # repr — a transport exception can quote the URL, the request body, or credentials.
     last_failure = 'transport failure'
-    for attempt in range(REMOTE_QUERY_UPLOAD_MAX_RETRIES + 1):
+    attempt = 0
+    failures = 0
+    while True:
         if deadline is not None:
             raise_if_timed_out(deadline)
         if not isinstance(body, bytes):
@@ -619,6 +432,7 @@ def upload_with_retry(
                     headers=page_attempt.inject(headers) if page_attempt is not None else dict(headers),
                     data=request_body,
                     timeout=timeout,
+                    allow_redirects=False,
                 )
         except UploadAttemptExpired:
             last_failure = 'the page upload attempt exceeded its per-attempt deadline'
@@ -637,25 +451,34 @@ def upload_with_retry(
                 mapped_code = mapped_error_codes.get(error_code) if error_code is not None else None
                 if mapped_code is not None:
                     # A terminal rejection intake defines a producer behavior for (today the
-                    # defensive final_page_too_large), surfaced as its own failure code.
+                    # defensive result_file_too_large), surfaced as its own failure code.
                     raise RemoteQueryFailure(
                         mapped_code, 'its-agent-intake rejected the upload with error code {}.'.format(error_code)
                     )
                 raise RemoteQueryFailure(
-                    'upload_failed', 'upload to its-agent-intake rejected with status {}'.format(resp.status_code)
+                    'upload_failed',
+                    'upload to its-agent-intake rejected with status {} and error code {}.'.format(
+                        resp.status_code, error_code or 'unknown'
+                    ),
                 )
         finally:
             if page_attempt is not None:
                 page_attempt.finish(error=attempt_error, http_status=attempt_status)
-        if attempt == REMOTE_QUERY_UPLOAD_MAX_RETRIES:
-            break
-        time.sleep(backoff)
+        # Intake uses unavailable for capacity as well as interruption/shutdown. With
+        # a run wall, retry all 503s until that wall; no distinct capacity code exists.
+        if attempt_status != 503 or deadline is None:
+            failures += 1
+            if failures > REMOTE_QUERY_UPLOAD_MAX_RETRIES:
+                break
+        delay = random.uniform(backoff / 2, backoff)
+        if deadline is not None:
+            delay = min(delay, max(0, deadline - time.monotonic()))
+        time.sleep(delay)
         backoff = min(backoff * 2, REMOTE_QUERY_UPLOAD_MAX_BACKOFF_SECONDS)
+        attempt += 1
     raise RemoteQueryFailure(
         'upload_failed',
-        'upload to its-agent-intake failed after {} attempts: {}'.format(
-            REMOTE_QUERY_UPLOAD_MAX_RETRIES + 1, last_failure
-        ),
+        'upload to its-agent-intake failed after {} attempts: {}'.format(attempt + 1, last_failure),
         retryable=True,
     )
 

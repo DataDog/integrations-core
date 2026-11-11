@@ -26,13 +26,9 @@ from .contract import (
 )
 from .tracing import NULL_PRODUCER_TRACING, RemoteQueryProducerTracing
 from .upload import (
-    REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE,
+    REMOTE_QUERY_RESULT_FILE_TOO_LARGE_ERROR_CODE,
     UploadClient,
     UploadCredentials,
-    finalize_totals,
-    verify_descriptor_response,
-    verify_run_finalize_response,
-    verify_source_page_receipt,
 )
 
 PAGE_SUFFIX = b']}'
@@ -156,7 +152,7 @@ class PageUploader:
     """Upload complete CSV records; retry oversized pages at a record boundary.
 
     Callers own their buffers and supply record ends. Optional row bounds describe
-    final JSON sizes; otherwise only source sizes are known until intake finalizes.
+    final JSON sizes; otherwise statistics count uploaded source bytes.
     """
 
     def __init__(
@@ -183,7 +179,7 @@ class PageUploader:
                 'max_file_bytes_exceeded', 'The repeated schema plus the minimal page envelope exceeds maxFileBytes.'
             )
         body = descriptor_request_bytes(descriptor)
-        verify_descriptor_response(client.register_descriptor(creds, body), creds.upload_id, descriptor)
+        client.register_descriptor(creds, body)
 
     def page_bound(self, offset: int, row_bounds: Sequence[int]) -> int:
         prefix = page_prefix(
@@ -211,28 +207,27 @@ class PageUploader:
             page = SourcePageUploadMetadata(stats.pages_emitted, stats.rows_emitted, end, count)
             try:
                 self.guard()
-                receipt = self.client.put_source_page(self.creds, page, _SourcePageBody(buffer, end))
-                verify_source_page_receipt(receipt, self.creds.upload_id, page)
+                self.client.put_source_page(self.creds, page, _SourcePageBody(buffer, end))
             except RemoteQueryFailure as error:
-                if error.code != REMOTE_QUERY_FINAL_PAGE_TOO_LARGE_ERROR_CODE or count <= 1:
+                if error.code != REMOTE_QUERY_RESULT_FILE_TOO_LARGE_ERROR_CODE:
                     raise
+                if count <= 1:
+                    raise RemoteQueryFailure(
+                        'row_too_large', 'A single record exceeds the result file size limit.'
+                    ) from None
                 count //= 2
                 continue
             stats.pages_emitted += 1
             stats.rows_emitted += count
             stats.bytes_emitted += bound
-            # The root span's time_to_first_page_ms counts the first receipt-verified,
-            # counted page.
+            # The root span's time_to_first_page_ms counts the first recorded page.
             self.tracing.note_page_acknowledged()
             return count, end
 
     def finalize(self) -> None:
         # The finalize span is also the injection parent of the finalize requests.
         with self.tracing.finalize_span():
-            response = self.client.finalize_run(self.creds, self.stats.pages_emitted)
-            verify_run_finalize_response(response, self.creds.upload_id)
-            pages, rows, size = finalize_totals(response)
-        self.stats.pages_emitted, self.stats.rows_emitted, self.stats.bytes_emitted = pages, rows, size
+            self.client.finalize_run(self.creds, self.stats.pages_emitted)
 
 
 class SourcePageWriter:
@@ -289,7 +284,7 @@ class SourcePageWriter:
     def finish(self) -> None:
         while self._record_ends:
             self._close_page()
-        if self._uploader.descriptor.include_schema and not self._uploader.stats.pages_emitted:
+        if not self._uploader.stats.pages_emitted:
             self._uploader.upload(self._buf, (), ())
         self._uploader.finalize()
 

@@ -26,6 +26,7 @@ def as_session_request(request):
     """
 
     def session_request(session, *args, **kwargs):
+        assert kwargs.pop('allow_redirects') is False
         return request(*args, **kwargs)
 
     return session_request
@@ -37,22 +38,10 @@ def descriptor(
     agent_hostname=AGENT_HOSTNAME,
     format_version=None,
 ):
-    """Build a descriptor; a column may carry its array element delimiter as a 4th element."""
-    column_kwargs = []
-    for column in columns:
-        name, vendor, logical = column[:3]
-        delimiter = column[3] if len(column) > 3 else None
-        if delimiter is None:
-            column_kwargs.append({'column_name': name, 'vendor_data_type': vendor, 'logical_type': logical})
-        else:
-            column_kwargs.append(
-                {
-                    'column_name': name,
-                    'vendor_data_type': vendor,
-                    'logical_type': logical,
-                    'array_element_delimiter': delimiter,
-                }
-            )
+    """Build a source descriptor with exactly the supported column fields."""
+    column_kwargs = [
+        {'column_name': name, 'vendor_data_type': vendor, 'logical_type': logical} for name, vendor, logical in columns
+    ]
     return rq_contract.RemoteQueryUploadDescriptor(
         format_version=format_version
         if format_version is not None
@@ -98,28 +87,11 @@ def envelope_bound(delivery, record_offset, schema_json=None):
 
 
 class Uploads:
-    """A fake intake: registers the descriptor, accepts source pages, and finalizes the run.
+    """A synchronous intake double: successes return no data."""
 
-    Page PUTs answer the pinned acceptance receipt — no per-page final metadata exists at
-    acceptance — and finalize returns authoritative totals over the recorded pages, so run
-    tracing stats come from finalization, never from local sizes.
-    """
-
-    def __init__(
-        self,
-        final_growth=0,
-        put_failure=None,
-        receipt_bytes=None,
-        receipt_override=None,
-        descriptor_response=None,
-        finalize_response=None,
-    ):
-        self.final_growth = final_growth
+    def __init__(self, put_failure=None, descriptor_failure=None):
         self.put_failure = put_failure
-        self.receipt_bytes = receipt_bytes
-        self.receipt_override = receipt_override
-        self.descriptor_response = descriptor_response
-        self.finalize_response = finalize_response
+        self.descriptor_failure = descriptor_failure
         self.descriptor_bodies = []
         self.put_attempts = []
         self.pages = []
@@ -129,21 +101,8 @@ class Uploads:
 
     def register_descriptor(self, creds, body):
         self.descriptor_bodies.append(body)
-        if self.descriptor_response is not None:
-            return self.descriptor_response
-        # Intake's pinned receipt: the registered descriptor's identity and nothing else.
-        registered = json.loads(body)
-        return {
-            'upload_id': creds.upload_id,
-            'format_version': registered['format_version'],
-            'include_schema': registered['include_schema'],
-            'columns': len(registered['columns']),
-        }
-
-    def final_bytes_for(self, page):
-        if self.receipt_bytes is not None:
-            return self.receipt_bytes(page) + self.final_growth
-        return page.source_bytes + self.final_growth
+        if self.descriptor_failure is not None:
+            raise self.descriptor_failure
 
     def put_source_page(self, creds, page, body):
         payload = body.read()
@@ -153,27 +112,10 @@ class Uploads:
             if failure is not None:
                 raise failure
         self.pages.append((page, payload))
-        if self.receipt_override is not None:
-            return self.receipt_override(page)
-        return {
-            'upload_id': creds.upload_id,
-            'batch_index': page.batch_index,
-            'record_offset': page.record_offset,
-            'source_rows': page.rows,
-            'status': 'accepted',
-        }
 
     def finalize_run(self, creds, expected_page_count):
         self.finalize_calls += 1
         self.finalize_expected_counts.append(expected_page_count)
-        if self.finalize_response is not None:
-            return self.finalize_response
-        return {
-            'upload_id': creds.upload_id,
-            'page_count': len(self.pages),
-            'total_rows': sum(page.rows for page, _ in self.pages),
-            'total_bytes': sum(self.final_bytes_for(page) for page, _ in self.pages),
-        }
 
     def abort(self, creds):
         self.abort_calls += 1
@@ -196,19 +138,6 @@ def make_writer(delivery, creds, uploads, source_descriptor=None, include_schema
     )
 
 
-def descriptor_receipt(body, **overrides):
-    """Intake's pinned descriptor receipt for one registration body, with field overrides."""
-    registered = json.loads(body)
-    receipt = {
-        'upload_id': 'upload-1',
-        'format_version': registered['format_version'],
-        'include_schema': registered['include_schema'],
-        'columns': len(registered['columns']),
-    }
-    receipt.update(overrides)
-    return receipt
-
-
 def source_page(payload, batch_index=0, record_offset=7):
     return rq_contract.SourcePageUploadMetadata(
         batch_index=batch_index,
@@ -216,40 +145,6 @@ def source_page(payload, batch_index=0, record_offset=7):
         source_bytes=len(payload),
         rows=1,
     )
-
-
-def acceptance_receipt(batch_index, record_offset, source_rows, upload_id='upload-1', status='accepted'):
-    """The pinned page acceptance receipt for one accepted source page."""
-    return {
-        'upload_id': upload_id,
-        'batch_index': batch_index,
-        'record_offset': record_offset,
-        'source_rows': source_rows,
-        'status': status,
-    }
-
-
-def pending_receipt(completed_page_count, expected_page_count, status='processing'):
-    """The pinned 202 finalize pending receipt for one still-processing run."""
-    return {
-        'status': status,
-        'completed_page_count': completed_page_count,
-        'expected_page_count': expected_page_count,
-    }
-
-
-def finalize_receipt(page_count=1, total_rows=0, total_bytes=0, upload_id='upload-1'):
-    """The pinned authoritative final receipt intake answers on HTTP 200."""
-    return {
-        'upload_id': upload_id,
-        'page_count': page_count,
-        'total_rows': total_rows,
-        'total_bytes': total_bytes,
-    }
-
-
-def receipt(page):
-    return acceptance_receipt(page.batch_index, page.record_offset, page.rows)
 
 
 # ---------------------------------------------------------------------------
