@@ -9,6 +9,7 @@ files:
   - template: instances
     options:
     - name: scheduler_endpoint
+      formats: [url]
       description: |
         Endpoint exposing the KAI scheduler's Prometheus metrics. The scheduler serves scheduling cycle, action,
         preemption, and queue fair share metrics.
@@ -22,6 +23,7 @@ files:
         example: http://kai-scheduler-default.kai-scheduler.svc:8080/metrics
         type: string
     - name: queue_controller_endpoint
+      formats: [url]
       description: |
         Endpoint exposing the KAI queue-controller's Prometheus metrics. The queue-controller serves queue quota and
         allocation metrics.
@@ -31,6 +33,7 @@ files:
         example: http://queue-controller.kai-scheduler.svc:8080/metrics
         type: string
     - name: binder_endpoint
+      formats: [url]
       description: |
         Endpoint exposing the KAI binder's Prometheus metrics. The binder only serves generic controller-runtime,
         Go, and process metrics.
