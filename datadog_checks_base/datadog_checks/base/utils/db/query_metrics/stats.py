@@ -119,13 +119,12 @@ class QueryStats[K: Hashable]:
             len(changed_keys),
         )
 
-        if commit:
-            self._remember(current)
-            return Delta(derivative_rows=derivative_rows, changed_keys=changed_keys)
-
         pending = {key: self._counters(current[key]) for key in changed_keys}
         self._remember(current, skip=changed_keys)
-        return Delta(derivative_rows=derivative_rows, changed_keys=changed_keys, pending_baselines=pending)
+        delta = Delta(derivative_rows=derivative_rows, changed_keys=changed_keys, pending_baselines=pending)
+        if commit:
+            self.commit(delta)
+        return delta
 
     def commit(self, delta: Delta[K]):
         """Install the baselines a `diff(commit=False)` held back for *delta*'s changed keys."""
