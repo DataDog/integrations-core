@@ -64,12 +64,8 @@ def started_metadata(request: RemoteQueryRequest) -> dict[str, Any]:
     }
 
 
-def succeeded_metadata(receipt: Mapping[str, Any], stats: RemoteQueryRunStats, started_at: float) -> dict[str, Any]:
-    return {
-        'status': 'SUCCEEDED',
-        'upload_receipt': dict(receipt),
-        'stats': stats_metadata(stats, started_at),
-    }
+def succeeded_metadata() -> dict[str, Any]:
+    return {'status': 'SUCCEEDED'}
 
 
 def stats_metadata(stats: RemoteQueryRunStats, started_at: float) -> dict[str, Any]:

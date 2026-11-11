@@ -23,7 +23,7 @@ class FakeUploadClient:
 
     Page PUTs answer the pinned acceptance receipt — no per-page final metadata exists at
     acceptance — and the default finalize returns authoritative totals over the recorded
-    pages, so the producer's stats and compact receipt come from finalization.
+    pages, so the producer's tracing stats come from finalization.
     ``reject_first_page_too_large`` answers page 0's first PUT with intake's defensive
     final_page_too_large rejection, so a run exercises the split-and-retry path; every
     attempt (rejected or accepted) is recorded in ``put_attempts``.
@@ -134,7 +134,7 @@ def event_metadata(event):
 
 def assert_success(events):
     assert events[-1].event_type == 'final'
-    assert event_metadata(events[-1])['status'] == 'SUCCEEDED'
+    assert event_metadata(events[-1]) == {'status': 'SUCCEEDED'}
     return event_metadata(events[-1])
 
 

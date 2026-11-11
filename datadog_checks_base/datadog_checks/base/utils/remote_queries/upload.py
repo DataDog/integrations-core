@@ -485,9 +485,8 @@ def verify_finalize_pending_response(response: Mapping[str, Any], expected_page_
 def finalize_totals(response: Mapping[str, Any]) -> tuple[int, int, int]:
     """Intake's authoritative run totals: `(page_count, total_rows, total_bytes)`.
 
-    Run finalization is the authority for the compact completion receipt, so a response that
-    does not report all three totals is an invalid receipt rather than a fallback to local
-    source accounting.
+    Producer tracing uses these totals after finalization rather than local source accounting.
+    A response that does not report all three totals is an invalid intake response.
     """
     totals = []
     for field in ('page_count', 'total_rows', 'total_bytes'):
@@ -515,8 +514,8 @@ def verify_run_finalize_response(response: Mapping[str, Any], upload_id: str) ->
         raise RemoteQueryFailure('invalid_receipt', 'its-agent-intake run finalize response was not a JSON object.')
     reported_upload_id = response.get('upload_id')
     if reported_upload_id is None or reported_upload_id == '':
-        # The receipt's totals are already intake-derived, and intake's authoritative result
-        # is verified by its-agent downstream, so an absent identity echo is accepted.
+        # Intake's authoritative result is verified by its-agent downstream, so an absent
+        # identity echo is accepted.
         return
     if str(reported_upload_id) != upload_id:
         raise RemoteQueryFailure(

@@ -12,7 +12,6 @@ import io
 from array import array
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
-from typing import Any
 
 from .contract import (
     REMOTE_QUERY_PAGE_CONTRACT_VERSION,
@@ -227,14 +226,13 @@ class PageUploader:
             self.tracing.note_page_acknowledged()
             return count, end
 
-    def finalize(self) -> dict[str, Any]:
+    def finalize(self) -> None:
         # The finalize span is also the injection parent of the finalize requests.
         with self.tracing.finalize_span():
             response = self.client.finalize_run(self.creds, self.stats.pages_emitted)
             verify_run_finalize_response(response, self.creds.upload_id)
             pages, rows, size = finalize_totals(response)
         self.stats.pages_emitted, self.stats.rows_emitted, self.stats.bytes_emitted = pages, rows, size
-        return {'uploadId': self.creds.upload_id, 'pageCount': pages, 'totalRows': rows, 'totalBytes': size}
 
 
 class SourcePageWriter:
@@ -288,12 +286,12 @@ class SourcePageWriter:
         del self._record_bounds[:count]
         self._page_bound = self._uploader.page_bound(self._uploader.stats.rows_emitted, self._record_bounds)
 
-    def finish(self) -> dict[str, Any]:
+    def finish(self) -> None:
         while self._record_ends:
             self._close_page()
         if self._uploader.descriptor.include_schema and not self._uploader.stats.pages_emitted:
             self._uploader.upload(self._buf, (), ())
-        return self._uploader.finalize()
+        self._uploader.finalize()
 
     def discard(self) -> None:
         self._buf.clear()

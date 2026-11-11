@@ -261,13 +261,13 @@ def test_check_interface_executes_and_uploads(monkeypatch, runtime_check):
     runtime_check.run_remote_query(json.dumps(valid_request()), lambda *event: events.append(event))
 
     assert [event[0] for event in events] == ['metadata', 'final']
-    assert json.loads(events[-1][1])['status'] == 'SUCCEEDED'
+    assert json.loads(events[-1][1]) == {'status': 'SUCCEEDED'}
     assert all(event[2] == b'' for event in events)
     assert runtime_check.db_pool.requested_dbnames == ['datadog_test']
     assert client.run_finalize_calls == 1
 
 
-def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
+def test_producer_emits_started_and_status_only_success(monkeypatch):
     patch_upload_credentials(monkeypatch)
     pool = FakePool(rows=[(1,), (2,)])
     fake = FakeUploadClient()
@@ -295,16 +295,8 @@ def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
     }
 
     final = assert_success(events)
-    # Only the compact receipt crosses the callback: no schema, no bulk bytes.
-    assert final['upload_receipt'] == {
-        'uploadId': UPLOAD_ID,
-        'pageCount': 1,
-        'totalRows': 2,
-        'totalBytes': len(assembled_pages(fake)[0]),
-    }
-    assert final['stats']['rowsEmitted'] == 2
-    assert final['stats']['pagesEmitted'] == 1
-    assert 'elapsedMs' in final['stats']
+    # FINISH-02: the successful answer carries status only, not upload identity or totals.
+    assert final == {'status': 'SUCCEEDED'}
     # The finalize request declared exactly the accepted page count.
     assert fake.finalize_expected_page_counts == [1]
     # Event payloads are empty: bulk bytes never cross the emit bridge.
@@ -493,12 +485,7 @@ def test_producer_zero_rows_with_schema_disabled_writes_no_page(monkeypatch):
     assert fake.put_page_calls == []
     assert fake.run_finalize_calls == 1
     assert fake.abort_calls == 0
-    assert final['upload_receipt'] == {
-        'uploadId': UPLOAD_ID,
-        'pageCount': 0,
-        'totalRows': 0,
-        'totalBytes': 0,
-    }
+    assert final == {'status': 'SUCCEEDED'}
 
 
 def test_producer_zero_rows_with_schema_enabled_writes_one_zero_record_page(monkeypatch):
@@ -508,7 +495,7 @@ def test_producer_zero_rows_with_schema_enabled_writes_one_zero_record_page(monk
 
     events = collect_events(valid_request(include_schema=True), make_check(pool=pool), client=fake)
 
-    final = assert_success(events)
+    assert_success(events)
     pages = assembled_pages(fake)
     # include_schema=true keeps schema discovery for an empty result: exactly one
     # zero-record source page, so intake creates one schema-bearing final page with empty
@@ -527,9 +514,6 @@ def test_producer_zero_rows_with_schema_enabled_writes_one_zero_record_page(monk
             'array_element_delimiter': None,
         }
     ]
-    assert final['upload_receipt']['pageCount'] == 1
-    assert final['upload_receipt']['totalRows'] == 0
-    assert final['upload_receipt']['totalBytes'] == 0
     assert fake.run_finalize_calls == 1
 
 
@@ -643,15 +627,12 @@ def test_page_upload_streams_before_the_copy_is_exhausted(monkeypatch, rows_per_
     exhausted = next(index for index, entry in enumerate(order_log) if entry[0] == 'exhausted')
     assert exhausted > first_put
     # Pages are contiguous zero-based and every row is declared exactly once across the
-    # page PUTs; the compact receipt repeats intake's finalize totals.
+    # page PUTs; finalize declares the accepted page count.
     page_indexes = sorted({call.batch_index for call in fake.put_page_calls})
     assert page_indexes == list(range(len(page_indexes)))
     assert sum(call.rows for call in fake.put_page_calls) == 500
     assert b''.join(call.payload for call in fake.put_page_calls) == native_record('aaaa') * 500
-    receipt = event_metadata(events[-1])['upload_receipt']
-    assert receipt['totalRows'] == 500
-    assert receipt['pageCount'] == len(page_indexes)
-    assert receipt['totalBytes'] == sum(call.source_bytes for call in fake.put_page_calls)
+    assert fake.finalize_expected_page_counts == [len(page_indexes)]
 
 
 def test_descriptor_is_registered_before_the_first_source_record(monkeypatch):

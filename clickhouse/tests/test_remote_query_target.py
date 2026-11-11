@@ -21,7 +21,6 @@ from .remote_query_fakes import (
     assert_success,
     collect_events,
     collect_resolve_events,
-    event_metadata,
     forbidding_client_factory,
     make_check,
     make_client,
@@ -127,7 +126,6 @@ def test_stream_target_unavailable_when_check_cannot_create_clients(monkeypatch)
     events = list(ClickhouseRemoteQueryHandler(make_check()).execute(request, http_client=FakeUploadClient()))
 
     assert_failed_event(events, 'target_unavailable')
-    assert 'upload_receipt' not in event_metadata(events[-1])
 
 
 def test_resolve_verdict_reports_sanitized_match_identity():

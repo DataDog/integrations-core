@@ -12,13 +12,15 @@ exactly the producer's own work (COPY generation and fetch, CSV framing, source-
 buffering), never network or intake work.
 
 Two scales run per invocation: a fast multi-page development case and a 256 MiB comparison
-case. The run's ordinary elapsed stats (``stats.elapsedMs``) and derived throughput are
-recorded in each benchmark's ``extra_info`` so before/after comparisons can target the
+case. The locally measured elapsed time and derived throughput are
+recorded in each benchmark's `extra_info` so before/after comparisons can target the
 run as a whole; phase-level attribution belongs to the native producer spans.
 """
 
 import json
+import time
 from types import SimpleNamespace
+from typing import Any
 
 import pytest
 
@@ -146,12 +148,12 @@ def bench_request(pg_instance, rows, max_file_bytes, timeout_ms):
     }
 
 
-def record_benchmark_info(benchmark, client, final):
-    """Record the run's ordinary elapsed stats and derived throughput for the run."""
-    total_seconds = final['stats']['elapsedMs'] / 1000
+def record_benchmark_info(benchmark: Any, client: DiscardUploadClient, elapsed_ms: float) -> None:
+    """Record the locally measured run wall and derived throughput."""
+    total_seconds = elapsed_ms / 1000
     benchmark.extra_info.update(
         {
-            'elapsedMs': final['stats']['elapsedMs'],
+            'elapsedMs': elapsed_ms,
             'pageCount': client.page_count(),
             'rowCount': client.rows,
             'sourceBytes': client.source_bytes,
@@ -167,19 +169,19 @@ def run_producer(benchmark, integration_check, pg_instance, monkeypatch, rows, m
     check = integration_check(pg_instance)
     request = bench_request(pg_instance, rows, max_file_bytes, timeout_ms)
 
-    def produce_once():
+    def produce_once() -> tuple[DiscardUploadClient, dict[str, Any], float]:
         client = DiscardUploadClient()
+        started_at = time.monotonic()
         events = list(PostgresRemoteQueryHandler(check).execute(request, http_client=client))
-        return client, events[-1].metadata
+        return client, events[-1].metadata, (time.monotonic() - started_at) * 1000
 
-    client, final = benchmark.pedantic(produce_once, rounds=rounds, iterations=1)
+    client, final, elapsed_ms = benchmark.pedantic(produce_once, rounds=rounds, iterations=1)
 
     # The benchmark must measure a successful producer run, not a silent failure.
-    assert final['status'] == 'SUCCEEDED', final
-    assert final['upload_receipt']['totalRows'] == rows
+    assert final == {'status': 'SUCCEEDED'}, final
     assert client.rows == rows
     assert client.abort_calls == 0
-    record_benchmark_info(benchmark, client, final)
+    record_benchmark_info(benchmark, client, elapsed_ms)
     return client, final
 
 

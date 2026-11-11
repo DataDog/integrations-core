@@ -58,7 +58,7 @@ def test_source_pages_frame_canonical_json_cell_tokens_as_csv(delivery, creds):
     uploads = Uploads()
     writer = make_writer(delivery, creds, uploads, descriptor(columns=columns))
     writer.add_row([cell(token, rq_pages.redactable_leaf_final_bound(token)) for token in tokens])
-    result = writer.finish()
+    writer.finish()
 
     # The pinned dialect: comma delimiter, '"' doubled, LF record endings, no header row.
     (page, payload) = uploads.pages[0]
@@ -70,7 +70,6 @@ def test_source_pages_frame_canonical_json_cell_tokens_as_csv(delivery, creds):
     assert page.record_offset == 0
     assert page.source_bytes == len(payload)
     assert page.rows == 1
-    assert result['pageCount'] == 1
 
 
 def test_source_pages_reject_tokens_that_would_corrupt_the_csv_record():
@@ -139,7 +138,7 @@ def test_source_pages_frame_non_ascii_cells_as_raw_utf8_csv(delivery, creds):
     uploads = Uploads()
     writer = make_writer(delivery, creds, uploads, descriptor(columns=columns))
     writer.add_row([string_cell('héllo'), string_cell('a,bé')])
-    result = writer.finish()
+    writer.finish()
 
     # Raw UTF-8 tokens ride the CSV unchanged: only JSON framing characters (quote, comma)
     # trigger CSV quoting, and multibyte sequences never contain ASCII bytes.
@@ -150,7 +149,6 @@ def test_source_pages_frame_non_ascii_cells_as_raw_utf8_csv(delivery, creds):
     (fields,) = list(csv.reader([payload.decode('utf-8')]))
     assert [field.encode('utf-8') for field in fields] == [b'"h\xc3\xa9llo"', b'"a,b\xc3\xa9"']
     assert page.source_bytes == len(payload)
-    assert result['pageCount'] == 1
 
 
 def test_page_prefix_emits_valid_non_ascii_as_raw_utf8():
@@ -207,7 +205,7 @@ def test_pages_preserve_row_order_offsets_and_source_identity(delivery, creds):
     rows = ['first', 'second', 'third']
     for row in rows:
         writer.add_row([string_cell(row)])
-    result = writer.finish()
+    writer.finish()
 
     tokens = [json.dumps(row).encode('utf-8') for row in rows]
     # Sequential production advances on acceptance: each page uploads only after the
@@ -219,12 +217,6 @@ def test_pages_preserve_row_order_offsets_and_source_identity(delivery, creds):
         assert page.record_offset == index
         assert page.source_bytes == len(payload)
     assert uploads.finalize_expected_counts == [3]
-    assert result == {
-        'uploadId': 'upload-1',
-        'pageCount': 3,
-        'totalRows': 3,
-        'totalBytes': sum(len(csv_record([token])) for token in tokens),
-    }
 
 
 def test_page_bound_accounts_for_the_redaction_marker(delivery, creds):
@@ -300,23 +292,22 @@ def test_single_record_exceeding_max_row_bytes_fails_closed(delivery, creds):
     assert uploads.pages == []
 
 
-def test_stats_and_receipt_come_from_intake_finalization_not_local_sizes(delivery, creds):
+def test_tracing_stats_come_from_intake_finalization_not_local_sizes(delivery, creds):
     uploads = Uploads(final_growth=37)
     stats = rq_contract.RemoteQueryRunStats()
     writer = rq_pages.SourcePageWriter(delivery, creds, uploads, descriptor(), lambda: None, stats)
     for _ in range(3):
         writer.add_row([string_cell('value-text')])
-    result = writer.finish()
+    writer.finish()
 
     source_bytes = sum(page.source_bytes for page, _ in uploads.pages)
     final_bytes = sum(page.source_bytes + 37 for page, _ in uploads.pages)
     assert final_bytes != source_bytes  # finalize's totals genuinely differ from the source sizes
-    # Stats and the compact receipt mirror intake's finalization totals: the producer's own
+    # Tracing stats mirror intake's finalization totals: the producer's own
     # conservative page accounting is replaced by the authoritative totals, never merged.
     assert stats.bytes_emitted == final_bytes
     assert stats.rows_emitted == 3
     assert stats.pages_emitted == 1
-    assert result == {'uploadId': 'upload-1', 'pageCount': 1, 'totalRows': 3, 'totalBytes': final_bytes}
     # The finalize request declared exactly the accepted page count.
     assert uploads.finalize_expected_counts == [1]
 
@@ -372,8 +363,7 @@ def test_empty_result_semantics(delivery, creds):
     # final page with empty data.
     uploads = Uploads()
     writer = make_writer(delivery, creds, uploads, include_schema=True)
-    result = writer.finish()
-    assert result['pageCount'] == 1
+    writer.finish()
     assert uploads.finalize_expected_counts == [1]  # the zero-record schema page was accepted
     (page, payload) = uploads.pages[0]
     assert payload == b''
@@ -384,11 +374,10 @@ def test_empty_result_semantics(delivery, creds):
     # include_schema=false: zero pages; only the finalize call happens.
     uploads = Uploads()
     writer = make_writer(delivery, creds, uploads, include_schema=False)
-    result = writer.finish()
+    writer.finish()
     assert uploads.pages == []
     assert uploads.finalize_calls == 1
     assert uploads.finalize_expected_counts == [0]
-    assert result == {'uploadId': 'upload-1', 'pageCount': 0, 'totalRows': 0, 'totalBytes': 0}
 
 
 def test_result_cap_boundaries_use_the_conservative_page_bounds(delivery, creds):
@@ -411,13 +400,13 @@ def test_result_cap_boundaries_use_the_conservative_page_bounds(delivery, creds)
         writer = make_writer(scoped, creds, uploads)
         for _ in range(4):
             writer.add_row([cell(b'"x"', 12)])
-        return writer.finish(), uploads
+        writer.finish()
+        return uploads
 
     # Three closed pages' bounds plus the fourth page's bound fit exactly.
-    result, uploads = run(4 * frame)
-    assert result['pageCount'] == 4
-    # The receipt totals still come from intake's finalization, never the conservative bounds.
-    assert result['totalBytes'] == 4 * final_bytes_per_page
+    uploads = run(4 * frame)
+    assert len(uploads.pages) == 4
+    assert uploads.finalize_expected_counts == [4]
 
     # One byte less: the fourth page cannot be produced under the result cap.
     with pytest.raises(rq_contract.RemoteQueryFailure) as failure:
@@ -437,7 +426,7 @@ def test_final_page_too_large_splits_and_retries_the_same_page_index(delivery, c
     writer = make_writer(delivery, creds, uploads)
     for text in ('a', 'b', 'c', 'd'):
         writer.add_row([string_cell(text)])
-    result = writer.finish()
+    writer.finish()
 
     # The rejected four-record page is split: the same index is retried with fewer records,
     # and the tail becomes the next page, preserving row order without requerying.
@@ -449,8 +438,7 @@ def test_final_page_too_large_splits_and_retries_the_same_page_index(delivery, c
     ]
     assert uploads.pages[0][0].record_offset == 0
     assert uploads.pages[1][0].record_offset == 2
-    assert result['pageCount'] == 2
-    assert result['totalRows'] == 4
+    assert uploads.finalize_expected_counts == [2]
 
 
 def test_final_page_too_large_on_a_single_record_fails_closed(delivery, creds):
@@ -502,7 +490,7 @@ def test_page_bound_survives_an_oversize_split(delivery, creds):
     writer = make_writer(scoped, creds, uploads)
     for text in ('a' * 10, 'b' * 60, 'c' * 60, 'd' * 10, 'e' * 10):
         writer.add_row([string_cell(text)])
-    result = writer.finish()
+    writer.finish()
 
     # The rejected three-row page is halved, its acknowledged prefix leaves the tail — still
     # carrying the two wide rows — and the two later small rows split exactly as the budget
@@ -510,7 +498,7 @@ def test_page_bound_survives_an_oversize_split(delivery, creds):
     assert [(page.batch_index, page.rows) for page, _ in uploads.put_attempts] == [(0, 3), (0, 1), (1, 3), (2, 1)]
     assert [page.rows for page, _ in uploads.pages] == [1, 3, 1]
     assert [page.record_offset for page, _ in uploads.pages] == [0, 1, 4]
-    assert result['totalRows'] == 5
+    assert uploads.finalize_expected_counts == [3]
 
 
 @pytest.mark.parametrize('failure', ['upload', 'receipt'])

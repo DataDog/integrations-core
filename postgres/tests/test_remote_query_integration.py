@@ -10,6 +10,7 @@ records, bounded split/retry) without needing a live its-agent-intake.
 """
 
 import json
+import time
 
 import pytest
 
@@ -136,13 +137,8 @@ def test_remote_query_registers_real_descriptor_and_sends_source_pages(integrati
     assert page_call.source_bytes == len(pages[0])
     assert page_call.rows == 2
     assert client.run_finalize_calls == 1
-    # The compact receipt repeats intake's finalize totals, never local source accounting.
-    assert final['upload_receipt'] == {
-        'uploadId': UPLOAD_ID,
-        'pageCount': 1,
-        'totalRows': 2,
-        'totalBytes': len(pages[0]),
-    }
+    # The Agent receives status only after intake finalizes successfully.
+    assert final == {'status': 'SUCCEEDED'}
     assert 'password' not in json.dumps(request).lower()
 
 
@@ -333,18 +329,18 @@ def test_remote_query_evaluates_the_query_values_exactly_once(integration_check,
         timeoutMs=8000,
     )
 
+    started_at = time.monotonic()
     events, client = run_producer(request, check)
+    elapsed_ms = (time.monotonic() - started_at) * 1000
 
-    final = assert_success(events)
+    assert_success(events)
     (page,) = client.pages().values()
     # pg_sleep returns void: an empty quoted field next to each row's value.
     assert page == b'"","1"\n' + b'"","2"\n' + b'"","3"\n'
-    assert final['upload_receipt']['totalRows'] == 3
     # The three rows sleep a fixed 1.2 s in the database, and exactly one evaluation
     # produced them: the run's whole measured wall carries the sleep exactly once, while
     # a second evaluation (a cursor fetch or a double COPY) would carry it twice and
     # exceed the bound — the upload and finalize work is in-process and negligible.
-    elapsed_ms = final['stats']['elapsedMs']
     assert 1200 <= elapsed_ms < 2400, elapsed_ms
 
 
@@ -393,7 +389,7 @@ def test_remote_query_final_page_too_large_splits_and_retries_without_requery(
     )
     events, client = run_producer_with_rejections(request, check)
 
-    final = assert_success(events)
+    assert_success(events)
     # Page 0 was attempted with its three buffered records, rejected as too large, and
     # retried at the same index with the halved prefix — a pure re-send of buffered bytes.
     assert client.put_attempts.count(0) == 2
@@ -402,7 +398,6 @@ def test_remote_query_final_page_too_large_splits_and_retries_without_requery(
     pages = client.pages()
     joined = b''.join(pages[index] for index in sorted(pages))
     assert joined == b''.join(native_record(str(value)) for value in range(1, 9))
-    assert final['upload_receipt']['totalRows'] == 8
 
 
 @pytest.mark.integration
@@ -462,15 +457,13 @@ def test_remote_query_select_one_and_zero_row_schema_page(integration_check, pg_
     zero_row_request = remote_query_request(pg_instance, 'SELECT 1 AS value WHERE 1 = 0', include_schema=True)
     zero_events, zero_client = run_producer(zero_row_request, check)
 
-    zero_final = assert_success(zero_events)
+    assert_success(zero_events)
     # Zero-row query with schema requested: one zero-record source page, so intake creates
     # the schema-bearing final page with empty data.
     (zero_page,) = zero_client.pages().values()
     assert zero_page == b''
     (zero_call,) = zero_client.put_page_calls
     assert (zero_call.batch_index, zero_call.rows, zero_call.source_bytes) == (0, 0, 0)
-    assert zero_final['upload_receipt']['pageCount'] == 1
-    assert zero_final['upload_receipt']['totalRows'] == 0
     assert 'password' not in json.dumps(zero_row_request).lower()
 
 
@@ -497,7 +490,6 @@ def test_remote_query_splits_pages_and_reuses_pool_after_failure(integration_che
     # The pool connection remains reusable after the failed read-only transaction.
     ok_request = remote_query_request(pg_instance, 'SELECT 1 AS value')
     ok_events, ok_client = run_producer(ok_request, check)
-    ok_final = assert_success(ok_events)
+    assert_success(ok_events)
     (ok_page,) = ok_client.pages().values()
     assert ok_page == native_record('1')
-    assert ok_final['upload_receipt']['totalRows'] == 1

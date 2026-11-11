@@ -113,7 +113,7 @@ def test_check_interface_executes_and_uploads(monkeypatch, runtime_check):
     runtime_check.run_remote_query(json.dumps(valid_request()), lambda *event: events.append(event))
 
     assert [event[0] for event in events] == ['metadata', 'final']
-    assert json.loads(events[-1][1])['status'] == 'SUCCEEDED'
+    assert json.loads(events[-1][1]) == {'status': 'SUCCEEDED'}
     assert all(event[2] == b'' for event in events)
     assert len(database_client.raw_stream_calls) == 1
     assert client.run_finalize_calls == 1
@@ -128,8 +128,7 @@ def test_stream_executes_arbitrary_query_end_to_end(monkeypatch):
 
     events = collect_events(request, make_check(), clickhouse_client=clickhouse_client)
 
-    final = assert_success(events)
-    assert final['upload_receipt']['totalRows'] == 1
+    assert_success(events)
 
 
 def test_stream_binary_proof_query_preserves_nul_payload_exactly(monkeypatch):
@@ -219,7 +218,7 @@ def test_producer_uploads_with_api_key_only(monkeypatch):
     assert all('dd-application-key' not in headers for headers in client.headers)
 
 
-def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
+def test_producer_emits_started_and_status_only_success(monkeypatch):
     patch_upload_credentials(monkeypatch)
     clickhouse_client = make_client(names=('value',), types=('UInt8',), rows=[[1], [2]])
     fake = FakeUploadClient()
@@ -247,16 +246,8 @@ def test_producer_emits_started_and_final_with_compact_receipt(monkeypatch):
     }
 
     final = assert_success(events)
-    # Only the compact receipt crosses the callback: no schema, no bulk bytes.
-    assert final['upload_receipt'] == {
-        'uploadId': UPLOAD_ID,
-        'pageCount': 1,
-        'totalRows': 2,
-        'totalBytes': len(assembled_pages(fake)[0]),
-    }
-    assert final['stats']['rowsEmitted'] == 2
-    assert final['stats']['pagesEmitted'] == 1
-    assert 'elapsedMs' in final['stats']
+    # FINISH-02: the successful answer carries status only, not upload identity or totals.
+    assert final == {'status': 'SUCCEEDED'}
     # The finalize request declared exactly the accepted page count.
     assert fake.finalize_expected_page_counts == [1]
     # Event payloads are empty: bulk bytes never cross the emit bridge.
@@ -380,12 +371,7 @@ def test_producer_zero_rows_with_schema_disabled_writes_no_page(monkeypatch):
     assert fake.put_page_calls == []
     assert fake.run_finalize_calls == 1
     assert fake.abort_calls == 0
-    assert final['upload_receipt'] == {
-        'uploadId': UPLOAD_ID,
-        'pageCount': 0,
-        'totalRows': 0,
-        'totalBytes': 0,
-    }
+    assert final == {'status': 'SUCCEEDED'}
 
 
 def test_producer_zero_rows_with_schema_enabled_writes_one_zero_record_page(monkeypatch):
@@ -397,7 +383,7 @@ def test_producer_zero_rows_with_schema_enabled_writes_one_zero_record_page(monk
         valid_request(include_schema=True), make_check(), upload_client=fake, clickhouse_client=clickhouse_client
     )
 
-    final = assert_success(events)
+    assert_success(events)
     pages = assembled_pages(fake)
     # include_schema=true keeps schema discovery for an empty result: exactly one
     # zero-record source page, so intake creates one schema-bearing final page with empty
@@ -416,9 +402,6 @@ def test_producer_zero_rows_with_schema_enabled_writes_one_zero_record_page(monk
             'array_element_delimiter': None,
         }
     ]
-    assert final['upload_receipt']['pageCount'] == 1
-    assert final['upload_receipt']['totalRows'] == 0
-    assert final['upload_receipt']['totalBytes'] == 0
     assert fake.run_finalize_calls == 1
 
 
@@ -628,7 +611,6 @@ def test_row_line_ceiling_reserves_quote_bytes_for_quoted_numeric_columns(monkey
     assert_success(events)
     (page,) = assembled_pages(fake).values()
     assert page == record * rows
-    assert event_metadata(events[-1])['upload_receipt']['totalRows'] == rows
 
     # One byte too many in the normalized record: the exact maxRowBytes gate fails the run
     # on the framed record, with the read-time ceiling out of the way.
@@ -707,7 +689,6 @@ def test_page_upload_streams_before_the_result_stream_is_exhausted(monkeypatch):
     page_indexes = sorted({call.batch_index for call in fake.put_page_calls})
     assert page_indexes == list(range(len(page_indexes)))
     assert sum(call.rows for call in fake.put_page_calls) == 40000
-    assert event_metadata(events[-1])['upload_receipt']['totalRows'] == 40000
 
 
 def test_stream_uploads_pages_and_finalizes_run_in_order(monkeypatch):

@@ -14,9 +14,9 @@ and writes the final JSON pages, so this module no longer constructs a final JSO
 and no longer claims source bytes are final artifact metadata. Bulk page bytes
 never traverse the native emit bridge, AgentSecure, PAR, or AP action output; the emit
 callback carries only `metadata`/`final`/`error` events, and the final event carries
-only the compact run receipt.
+only the successful status.
 
-The request, event, receipt, descriptor, and intake-upload contracts mirror the Postgres
+The request, event, descriptor, and intake-upload contracts mirror the Postgres
 executor so the standard check remote-query interface and its-agent-intake treat both
 integrations uniformly.
 The integration-specific parts are the internal source format, the read-only posture, and
@@ -660,8 +660,8 @@ def _run_streamed_query(
     stats: rq_contract.RemoteQueryRunStats,
     deadline: float,
     tracing: rq_tracing.RemoteQueryProducerTracing | None = None,
-) -> dict[str, Any]:
-    """Stream the query result into bounded JSON pages and return the run receipt."""
+) -> None:
+    """Stream the query result into bounded JSON pages and finalize its upload."""
     tracing = tracing if tracing is not None else rq_tracing.NULL_PRODUCER_TRACING
     delivery = request.result_delivery
     limits = delivery.limits
@@ -706,7 +706,7 @@ def _run_streamed_query(
                     if not isinstance(values, list):
                         raise rq_contract.RemoteQueryFailure('query_failed', 'A result row was not a JSON array.')
                     writer.add_row(encode_row(values, columns))
-            return writer.finish()
+            writer.finish()
         finally:
             # Release the page even if the response stream or row conversion fails.
             writer.discard()
@@ -802,7 +802,7 @@ class ClickhouseRemoteQueryHandler:
         http_client: rq_upload.UploadClient | None = None,
         clickhouse_client_factory: Callable[['ClickhouseCheck', int], ClickhouseClient] | None = None,
     ) -> Iterator[rq_contract.RemoteQueryEvent]:
-        """Execute on the composed check; emit only status and the intake receipt.
+        """Execute on the composed check; emit status only on success.
 
         `started_at` is the monotonic run start captured at the request-parse boundary: the
         origin of the run-wide wall, the per-attempt deadlines, and the ordinary elapsed
@@ -814,7 +814,7 @@ class ClickhouseRemoteQueryHandler:
         `open_remote_query_producer_tracing`: a root span on the request's trace context
         covering the admission failures below, the abort span around the failure tail's upload
         abort, and the terminal status; every span failure is swallowed without changing an
-        event, a receipt, a retry, or an error.
+        event, a page receipt, a retry, or an error.
         """
         started_at = started_at if started_at is not None else time.monotonic()
         stats = None
@@ -848,7 +848,7 @@ class ClickhouseRemoteQueryHandler:
                 )
                 stats = rq_contract.RemoteQueryRunStats()
                 yield rq_contract.RemoteQueryEvent('metadata', rq_events.started_metadata(parsed))
-                receipt = self._produce_remote_query(
+                self._produce_remote_query(
                     parsed,
                     creds,
                     upload_client,
@@ -877,7 +877,7 @@ class ClickhouseRemoteQueryHandler:
                 yield rq_events.query_failure_event(error, started_at, stats)
                 return
             tracing.succeed(stats)
-            yield rq_contract.RemoteQueryEvent('final', rq_events.succeeded_metadata(receipt, stats, started_at))
+            yield rq_contract.RemoteQueryEvent('final', rq_events.succeeded_metadata())
         finally:
             # The run's only flush, best-effort: the root span finishes here at the latest and
             # the singleton is never shut down.
@@ -892,8 +892,8 @@ class ClickhouseRemoteQueryHandler:
         stats: rq_contract.RemoteQueryRunStats,
         clickhouse_client_factory: Callable[['ClickhouseCheck', int], ClickhouseClient] | None = None,
         tracing: rq_tracing.RemoteQueryProducerTracing | None = None,
-    ) -> dict[str, Any]:
-        """Execute the validated query once and return the compact run receipt.
+    ) -> None:
+        """Execute the validated query once and finalize its upload.
 
         The query runs exactly once, through a dedicated client whose query retries are
         disabled; it is never wrapped in a probe and never executed twice. Row lines are read
@@ -905,7 +905,7 @@ class ClickhouseRemoteQueryHandler:
         encode-and-page-build span (with upload `add_row` triggers nested inside it); page
         uploads and finalize are accounted by their own spans in the shared source-page
         writer. `tracing` is fail-open: every span failure is swallowed without changing an
-        event, a receipt, a retry, or an error.
+        event, a page receipt, a retry, or an error.
         """
         delivery = request.result_delivery
         limits = delivery.limits
@@ -939,7 +939,7 @@ class ClickhouseRemoteQueryHandler:
                     'target_unavailable', 'The matched ClickHouse instance is not reachable for remote queries.'
                 ) from None
             try:
-                receipt = _run_streamed_query(
+                _run_streamed_query(
                     request,
                     clickhouse_client,
                     creds,
@@ -983,7 +983,6 @@ class ClickhouseRemoteQueryHandler:
                 # text.
                 LOGGER.error('Remote query execution failed')
                 raise rq_contract.RemoteQueryFailure('query_failed', 'Remote query execution failed.') from None
-            return receipt
         finally:
             # The streamed response is owned and closed by _run_streamed_query. The dedicated
             # database client shares the check's existing HTTP connection pool — it does not

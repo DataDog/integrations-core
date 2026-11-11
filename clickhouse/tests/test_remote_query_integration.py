@@ -84,7 +84,7 @@ def patch_real_check(monkeypatch, instance):
 @pytest.mark.usefixtures('dd_environment')
 @pytestmark_integration
 def test_remote_query_registers_descriptor_and_sends_source_pages_against_real_clickhouse(instance, monkeypatch):
-    """End-to-end producer path against a real server: descriptor, CSV source page, receipt."""
+    """End-to-end producer path against a real server: descriptor, CSV source page, final status."""
     check = patch_real_check(monkeypatch, instance)
 
     request = {
@@ -127,12 +127,7 @@ def test_remote_query_registers_descriptor_and_sends_source_pages_against_real_c
     assert page_call.source_bytes == len(pages[0])
     assert page_call.rows == 1
     assert fake.run_finalize_calls == 1
-    assert final['upload_receipt'] == {
-        'uploadId': UPLOAD_ID,
-        'pageCount': 1,
-        'totalRows': 1,
-        'totalBytes': len(pages[0]),
-    }
+    assert final == {'status': 'SUCCEEDED'}
 
 
 @pytest.mark.integration
@@ -179,13 +174,11 @@ def test_remote_query_proof_queries_execute_against_real_clickhouse(
     request = real_server_request(instance, query, include_schema=include_schema)
     events = list(ClickhouseRemoteQueryHandler(check).execute(request, http_client=fake))
 
-    final = assert_success(events)
+    assert_success(events)
     pages = assembled_pages(fake)
     # Every proof query is a single row: one page uploaded as one direct PUT, bounded by
     # maxFileBytes, with the exact whole-page identity declared on the request.
     assert list(pages) == [0]
-    assert final['upload_receipt']['totalRows'] == 1
-    assert final['upload_receipt']['totalBytes'] == len(pages[0])
     (page_call,) = fake.put_page_calls
     assert page_call.source_bytes == len(pages[0])
     assert page_call.source_bytes <= 64 * 1024 * 1024

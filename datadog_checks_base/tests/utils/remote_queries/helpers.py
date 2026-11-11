@@ -102,7 +102,7 @@ class Uploads:
 
     Page PUTs answer the pinned acceptance receipt — no per-page final metadata exists at
     acceptance — and finalize returns authoritative totals over the recorded pages, so run
-    stats and the compact receipt come from finalization, never from local sizes.
+    tracing stats come from finalization, never from local sizes.
     """
 
     def __init__(

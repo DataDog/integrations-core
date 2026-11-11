@@ -36,7 +36,7 @@ class RemoteQueryHandler(Protocol):
         ...
 
     def execute(self, request: Mapping[str, Any], started_at: float) -> Iterator[RemoteQueryEvent]:
-        """Yield STARTED then a final receipt or error; upload result bytes outside the bridge.
+        """Yield STARTED then a final status or error; upload result bytes outside the bridge.
 
         `started_at` is the monotonic run start captured at the request-parse boundary: the
         origin of the run-wide wall (`limits.timeout_ms`), the per-attempt deadlines, and

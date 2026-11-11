@@ -6,7 +6,7 @@
 
 Describe the result without fetching it, then execute the query once through COPY.
 CopyPageWriter frames the native CSV; the shared uploader only sends complete records
-and verifies intake receipts. The Agent callback carries status and the final receipt,
+and verifies intake receipts. The successful Agent callback carries status only,
 never result bytes. resolve_target and execution use the same configured database scope.
 """
 
@@ -411,13 +411,13 @@ class CopyPageWriter:
         self._record_ends = array('q', (end - consumed for end in self._record_ends[count:]))
         return consumed
 
-    def finish(self) -> dict[str, Any]:
+    def finish(self) -> None:
         self.finish_native_copy_stream()
         while self._record_ends:
             self._close_page()
         if self._uploader.descriptor.include_schema and not self._uploader.stats.pages_emitted:
             self._uploader.upload(self._buf, ())
-        return self._uploader.finalize()
+        self._uploader.finalize()
 
     def discard(self) -> None:
         self._buf.clear()
@@ -512,7 +512,7 @@ class PostgresRemoteQueryHandler:
         *,
         http_client: rq_upload.UploadClient | None = None,
     ) -> Iterator[rq_contract.RemoteQueryEvent]:
-        """Execute on the composed check; emit only status and the intake receipt.
+        """Execute on the composed check; emit status only on success.
 
         `started_at` is the monotonic run start captured at the request-parse boundary: the
         origin of the run-wide wall, the per-attempt deadlines, and the ordinary elapsed
@@ -524,7 +524,7 @@ class PostgresRemoteQueryHandler:
         `open_remote_query_producer_tracing`: a root span on the request's trace context
         covering the admission failures below, the abort span around the failure tail's upload
         abort, and the terminal status; every span failure is swallowed without changing an
-        event, a receipt, a retry, or an error.
+        event, a page receipt, a retry, or an error.
         """
         started_at = started_at if started_at is not None else time.monotonic()
         stats = None
@@ -567,7 +567,7 @@ class PostgresRemoteQueryHandler:
                 stats = rq_contract.RemoteQueryRunStats()
                 yield rq_contract.RemoteQueryEvent('metadata', rq_events.started_metadata(parsed))
                 try:
-                    receipt = self._produce_remote_query(
+                    self._produce_remote_query(
                         parsed, creds, client, execution_dbname, started_at, stats, tracing=tracing
                     )
                 except psycopg_errors.QueryCanceled:
@@ -605,7 +605,7 @@ class PostgresRemoteQueryHandler:
                 yield rq_events.query_failure_event(error, started_at, stats)
                 return
             tracing.succeed(stats)
-            yield rq_contract.RemoteQueryEvent('final', rq_events.succeeded_metadata(receipt, stats, started_at))
+            yield rq_contract.RemoteQueryEvent('final', rq_events.succeeded_metadata())
         finally:
             # The run's only flush, best-effort: the root span finishes here at the latest and
             # the singleton is never shut down.
@@ -620,8 +620,8 @@ class PostgresRemoteQueryHandler:
         started_at: float,
         stats: rq_contract.RemoteQueryRunStats,
         tracing: rq_tracing.RemoteQueryProducerTracing | None = None,
-    ) -> dict[str, Any]:
-        """Execute the validated query once, natively, and return the compact run receipt.
+    ) -> None:
+        """Execute the validated query once, natively, and finalize its upload.
 
         The query's values are evaluated exactly once: a named server-side cursor DECLAREs it
         inside the existing read-only transaction with the effective statement timeout applied
@@ -640,7 +640,7 @@ class PostgresRemoteQueryHandler:
         and page buffering run inside the encode-and-page-build span with upload-triggered
         page uploads nested inside it, and the shared source-page writer opens the
         page-upload attempt and finalize spans. `tracing` is fail-open: every span failure
-        is swallowed without changing an event, a receipt, a retry, or an error.
+        is swallowed without changing an event, a page receipt, a retry, or an error.
 
         The connection comes from `PostgreSql.remote_query_connection`, so it is registered
         for the whole window the query uses it and the check can interrupt the statement
@@ -714,7 +714,7 @@ class PostgresRemoteQueryHandler:
                                             # record boundary; the final page close and the run
                                             # finalize below are their own phases.
                                             writer.finish_native_copy_stream()
-                                        return writer.finish()
+                                        writer.finish()
                                     finally:
                                         # Release the page even if record framing or the copy fails.
                                         writer.discard()
