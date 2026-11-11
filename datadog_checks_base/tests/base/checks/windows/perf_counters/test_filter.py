@@ -1,6 +1,8 @@
 # (C) Datadog, Inc. 2021-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import logging
+
 from datadog_checks.dev.testing import requires_windows
 
 from .utils import GLOBAL_TAGS, get_check
@@ -130,3 +132,57 @@ def test_include_total_respects_user_exclude(aggregator, dd_run_check, mock_perf
     aggregator.assert_metric_has_tag('test.foo.bar', 'instance:baz', count=0)
 
     aggregator.assert_all_metrics_covered()
+
+
+def test_include_fast_error_does_not_skip_subsequent_handles(
+    aggregator, dd_run_check, mock_performance_objects, mocker, caplog
+):
+    import pywintypes
+
+    from datadog_checks.base.checks.windows.perf_counters.constants import PDH_NO_DATA
+
+    mock_performance_objects({'Foo': (['inst_a', 'inst_b', 'inst_c'], {'Bar': [10, 20, 30]})})
+
+    error = pywintypes.error(PDH_NO_DATA, 'PdhGetFormattedCounterArray', 'Failed to retrieve counters values.')
+
+    def mock_get_counter_values(handle, duplicate_instances_exist):
+        if '(inst_b)' in handle:
+            raise error
+        if '(inst_a)' in handle:
+            return {'inst_a': 10}
+        if '(inst_c)' in handle:
+            return {'inst_c': 30}
+        return {}
+
+    mocker.patch(
+        'datadog_checks.base.checks.windows.perf_counters.counter.get_counter_values',
+        side_effect=mock_get_counter_values,
+    )
+
+    check = get_check(
+        {
+            'metrics': {
+                'Foo': {
+                    'name': 'foo',
+                    'include_fast': ['inst_a', 'inst_b', 'inst_c'],
+                    'counters': [{'Bar': {'name': 'bar', 'aggregate': True}}],
+                }
+            }
+        }
+    )
+    dd_run_check(check)
+
+    tags_a = ['instance:inst_a']
+    tags_a.extend(GLOBAL_TAGS)
+    aggregator.assert_metric('test.foo.bar', 10, tags=tags_a)
+
+    tags_c = ['instance:inst_c']
+    tags_c.extend(GLOBAL_TAGS)
+    aggregator.assert_metric('test.foo.bar', 30, tags=tags_c)
+
+    aggregator.assert_metric_has_tag('test.foo.bar', 'instance:inst_b', count=0)
+    aggregator.assert_metric('test.foo.bar.sum', 40, tags=GLOBAL_TAGS)
+    aggregator.assert_all_metrics_covered()
+
+    expected_message = f'Error collecting counter `Bar` (instance `inst_b`) for object `Foo`: `{error}`'
+    assert any(level == logging.ERROR and message == expected_message for _, level, message in caplog.record_tuples)

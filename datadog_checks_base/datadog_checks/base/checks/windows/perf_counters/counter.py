@@ -609,7 +609,7 @@ class MultiCounter(CounterBase):
         self.unique_instance_count = 0
 
         total = 0
-        for counter_handle in self.instances:
+        for idx, counter_handle in enumerate(self.instances):
             try:
                 instance_items = get_counter_values(counter_handle, self.duplicate_instances_exist)
 
@@ -650,7 +650,16 @@ class MultiCounter(CounterBase):
                     total += instance_total
 
             except pywintypes.error as error:
-                self.handle_counter_value_error(error)
+                try:
+                    self.handle_counter_value_error(error)
+                except pywintypes.error:
+                    self.logger.error(
+                        'Error collecting counter `%s` (instance `%s`) for object `%s`: `%s`',
+                        self.name,
+                        self.include_wildcards[idx],
+                        self.object_name,
+                        error,
+                    )
             except KeyError:
                 # To support IIS mocking tests for non-existing wildcard counters
                 pass

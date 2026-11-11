@@ -3,11 +3,18 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
 import ctypes
+import ctypes.wintypes
 
 import pywintypes
 import win32pdh
 
-from .constants import PDH_CSTATUS_INVALID_DATA, PDH_CSTATUS_NEW_DATA, PDH_CSTATUS_VALID_DATA, PDH_MORE_DATA
+from .constants import (
+    PDH_CALC_NEGATIVE_ERRORS,
+    PDH_CSTATUS_INVALID_DATA,
+    PDH_CSTATUS_NEW_DATA,
+    PDH_CSTATUS_VALID_DATA,
+    PDH_MORE_DATA,
+)
 
 #  If the PERF_TYPE_COUNTER value was selected then select one of the
 #  following to indicate the type of counter
@@ -81,16 +88,25 @@ def GetFormattedCounterArray(counter_handle, format):
         # To simulate real win32/win32pdh error/exception - no need to convert error to its real string for this
         # temporary function like it is done in
         #      https://github.com/mhammond/pywin32/blob/main/win32/src/PyWinTypesmodule.cpp#L278
-        raise pywintypes.error(result, 'PdhGetFormattedCounterArray', 'Failed to retrieve counters values.')
+        raise pywintypes.error(
+            result, 'PdhGetFormattedCounterArray', 'Failed to get the buffer size for counters values.'
+        )
 
-    # Then get items for real
+    # Then get items for real.
+    # Preserve the item count from the sizing call because when the last instance in the array
+    # has a negative delta (e.g. `_Total` when a short-lived instance disconnects), Windows pdh.dll
+    # still populates all items in `items_buffer` with their per-instance `FmtValue.CStatus`, but
+    # returns `PDH_CALC_NEGATIVE_*` and zeroes out `item_count` on return.
+    expected_item_count = item_count.value
     items_buffer = (ctypes.c_byte * buffer_size.value)()
     result = PdhGetFormattedCounterArrayW_fn(
         handle, format, ctypes.byref(buffer_size), ctypes.byref(item_count), items_buffer
     )
     if result == PDH_CSTATUS_INVALID_DATA:
         raise pywintypes.error(result, 'PdhGetFormattedCounterArray', 'The returned data is not valid.')
-    if result != PDH_CSTATUS_VALID_DATA:
+    if result in PDH_CALC_NEGATIVE_ERRORS:
+        item_count.value = expected_item_count
+    elif result != PDH_CSTATUS_VALID_DATA:
         raise pywintypes.error(result, 'PdhGetFormattedCounterArray', 'Failed to retrieve counters values.')
 
     # Instance values is a dictionary with instance name as a key and value could be a single
@@ -102,7 +118,7 @@ def GetFormattedCounterArray(counter_handle, format):
     instance_count = 0
 
     # Loop over all collected instances
-    if result == 0 and item_count.value > 0:
+    if item_count.value > 0:
         for idx in range(item_count.value):
             # Get offset in buffer for item at index idx
             offset = idx * ctypes.sizeof(PDH_FMT_COUNTERVALUE_ITEM_W)
@@ -129,6 +145,8 @@ def GetFormattedCounterArray(counter_handle, format):
 
             # Get instance name
             instance_name = item.contents.szName
+            if instance_name is None:
+                continue
 
             # For performance and to support non-unique instance names do not immedeatly store valuethem
             # in the instance_values but accumulate them over few iterations. Order of instances is
@@ -154,6 +172,7 @@ def GetFormattedCounterArray(counter_handle, format):
                 instance_count = 1
 
         # Flush last value(s) to the dictionary
-        instance_values[previous_instance_name] = previous_instance_value
+        if instance_count > 0:
+            instance_values[previous_instance_name] = previous_instance_value
 
     return instance_values
