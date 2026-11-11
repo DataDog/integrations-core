@@ -2,15 +2,18 @@
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
 
+import logging
 import threading
 
 import psycopg
 import pytest
 
+from datadog_checks.postgres import PostgreSql
 from datadog_checks.postgres.relationsmanager import (
     QUERY_PG_CLASS,
     QUERY_PG_CLASS_SIZE,
     STATIO_METRICS,
+    TABLE_BLOAT,
     RelationsManager,
 )
 
@@ -548,3 +551,46 @@ def test_relations_validation_accepts_list_of_str_and_dict():
             {"relation_name": "person", "schemas": ["foo"]},
         ]
     )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "statio_rows, bloat_rows, expect_warning",
+    [
+        pytest.param([("public", "customers", 1)], [], True, id="relations visible but bloat empty"),
+        pytest.param([], [], False, id="no relations matched at all"),
+        pytest.param([("public", "customers", 1)], [("public", "customers", 1.5)], False, id="bloat collected"),
+    ],
+)
+def test_bloat_privilege_warning(statio_rows, bloat_rows, expect_warning, pg_instance, caplog):
+    """
+    Bloat reads pg_stats, which hides rows for tables the user cannot read, so a datadog user with
+    only pg_monitor gets an empty result set instead of an error and the metrics vanish with no
+    diagnostic. Without this warning the misconfiguration is invisible in the logs, which is how it
+    reached support repeatedly. Relation metrics read pg_statio_user_tables and are not restricted,
+    so they distinguish a privilege problem from relations that simply match nothing.
+    """
+    check = PostgreSql('postgres', {}, [pg_instance])
+    caplog.set_level(logging.WARNING)
+
+    check._check_bloat_visibility(STATIO_METRICS, statio_rows, pg_instance["dbname"])
+    check._check_bloat_visibility(TABLE_BLOAT, bloat_rows, pg_instance["dbname"])
+
+    assert ("No bloat metrics returned" in caplog.text) is expect_warning
+
+
+@pytest.mark.unit
+def test_bloat_privilege_warning_is_not_repeated_every_run(pg_instance, caplog):
+    """
+    The check runs every 15s by default, so warning per run would flood the Agent log for as long as
+    the privilege is missing. It must warn once per database until the condition clears.
+    """
+    check = PostgreSql('postgres', {}, [pg_instance])
+    caplog.set_level(logging.WARNING)
+    dbname = pg_instance["dbname"]
+
+    for _ in range(3):
+        check._check_bloat_visibility(STATIO_METRICS, [("public", "customers", 1)], dbname)
+        check._check_bloat_visibility(TABLE_BLOAT, [], dbname)
+
+    assert caplog.text.count("No bloat metrics returned") == 1

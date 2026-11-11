@@ -122,6 +122,7 @@ instances:
 
     ## @param collect_bloat_metrics - boolean - optional - default: false
     ## Collect metrics about table bloat. Only available when `relation` metrics are enabled.
+    ## Only tables for which the `datadog` user has been granted the `SELECT` privilege are collected.
     #
     collect_bloat_metrics: false
 
