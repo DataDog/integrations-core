@@ -36,6 +36,7 @@ The Lustre check is included in the [Datadog Agent][3] package. No additional in
    ```
 
 
+
 **Note**: The Datadog Agent must have sufficient privileges to execute Lustre commands (lctl, lnetctl, lfs). This typically requires running as root or with appropriate sudo permissions.
 
 3. [Restart the Agent][5].

@@ -8,6 +8,7 @@ Control-M is a workload automation platform that orchestrates batch jobs, file t
 
 The integration provides:
 
+
 - **Server health monitoring**: Track which Control-M servers are up or disconnected.
 - **Job rollup metrics**: Total, active, waiting, and per-status breakdowns across all servers.
 - **Per-job completion tracking**: Run counts and durations for terminal jobs (ended OK, ended not OK, cancelled), with deduplication across check cycles.
