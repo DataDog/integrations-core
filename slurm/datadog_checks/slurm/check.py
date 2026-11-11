@@ -8,11 +8,6 @@ import time
 from dataclasses import dataclass
 from datetime import timedelta
 
-try:
-    import datadog_agent
-except ImportError:
-    from datadog_checks.base.stubs import datadog_agent
-
 from datadog_checks.base import AgentCheck, is_affirmative
 from datadog_checks.base.utils.tagging import tagger
 from datadog_checks.base.utils.time import get_timestamp
@@ -136,9 +131,6 @@ class SlurmCheck(AgentCheck, ConfigMixin):
         self.collect_seff_stats = is_affirmative(self.instance.get('collect_seff_stats', False))
         self.resolve_scontrol_host_pids = is_affirmative(self.instance.get('resolve_scontrol_host_pids', False))
         self.collect_job_events = is_affirmative(self.instance.get('collect_job_events', False))
-        if self.collect_job_events and not is_affirmative(datadog_agent.get_config('gpu.enabled')):
-            self.log.warning("collect_job_events requires GPU monitoring (gpu.enabled); job events are not collected.")
-            self.collect_job_events = False
 
         # Additional configurations
         self.gpu_stats = is_affirmative(self.instance.get('collect_gpu_stats', False))

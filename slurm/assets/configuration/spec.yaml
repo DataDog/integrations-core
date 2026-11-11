@@ -78,8 +78,9 @@ files:
     - name: collect_job_events
       description: |
         Whether to send job life cycle events (submitted, pending, started, finished, preempted, requeued,
-        and suspended), based on polling sacct for jobs active since the previous check run. Requires GPU
-        monitoring to be enabled in the Agent (`gpu.enabled: true`); otherwise this option is ignored.
+        and suspended), based on polling sacct for jobs active since the previous check run. Requires Slurm
+        accounting (slurmdbd). Enable on only one Agent per cluster, typically on the head node, to avoid
+        duplicate events. No local GPUs are required.
         Pending reasons come from squeue and require `collect_squeue_stats`.
         The first check run only records the current jobs and does not send events for them.
       fleet_configurable: true

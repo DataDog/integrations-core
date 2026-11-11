@@ -143,7 +143,7 @@ See [metadata.csv][6] for a list of metrics provided by this integration.
 
 ### Events
 
-Job events require Slurm accounting (`slurmdbd`) and GPU monitoring enabled in the Agent (`gpu.enabled: true`). To collect job events, set `collect_job_events: true` in `slurm.d/conf.yaml`. Event collection is disabled by default.
+Job events require Slurm accounting (`slurmdbd`). To collect job events, set `collect_job_events: true` in `slurm.d/conf.yaml`. Event collection is disabled by default. Enable it on only one Agent per cluster, typically on the head node, to avoid duplicate events. The collector needs access to `sacct` and `squeue` and permission to read cluster data; no local GPUs are required.
 
 The Slurm integration polls `sacct` for jobs active since the previous check run and sends Datadog events for job life cycle transitions. The transition is in the `slurm_job_transition` tag:
 
@@ -155,7 +155,7 @@ The Slurm integration polls `sacct` for jobs active since the previous check run
 
 Jobs that start and finish between two check runs still produce all of their events. Events are tagged with the job ID, name, user, account, partition, quality of service (QOS), cluster, state, transition, and GPU count when GPUs are requested. Started and finished events include the node list, finished events include the exit code, and submitted and pending events include the pending reason (`slurm_job_reason`).
 
-The `sacct` time window only returns jobs that were eligible to run during it. Held jobs, jobs waiting on a dependency or a begin time, and jobs canceled in those states are queried by ID instead, when they are reported as pending by `squeue` for the first time, or when a known job is no longer reported by `squeue`. The window covers at most the last hour: after a longer interruption, only jobs that were already known are reported for that gap.
+The `sacct` time window only returns jobs that were eligible to run during it. Held jobs, jobs waiting on a dependency or a begin time, and jobs canceled in those states are queried by ID instead, when they are reported as pending by `squeue` for the first time, or when a known job is no longer reported by `squeue`. The window covers at most the last hour. After a longer interruption, only jobs that were already known are reported for that gap.
 
 The first collection run seeds the job state and does not emit events for existing jobs. Transitions that happened before that run are never reported. The `sacct` command does not report pending reasons, so they are taken from `squeue` and are only available when `collect_squeue_stats` is enabled.
 

@@ -51,12 +51,6 @@ def sacct_output(*lines):
 
 
 @pytest.fixture
-def gpu_monitoring_enabled(datadog_agent):
-    with mock.patch.dict(datadog_agent._config, {'gpu.enabled': True}):
-        yield
-
-
-@pytest.fixture
 def events_instance(instance):
     instance['collect_job_events'] = True
     return instance
@@ -108,29 +102,19 @@ def poll(check, sacct, window='', by_id=None, reasons=None):
         check.collect_sacct_job_events()
 
 
-@pytest.mark.parametrize(
-    'collect_job_events, gpu_enabled, polled',
-    [
-        pytest.param(True, True, True, id='flag and gpu enabled'),
-        pytest.param(True, False, False, id='gpu disabled'),
-        pytest.param(False, True, False, id='flag disabled'),
-    ],
-)
+# Catch accidental suppression of cluster events on collectors without GPU monitoring.
+@pytest.mark.parametrize('collect_job_events', [True, False])
 @mock.patch('datadog_checks.slurm.check.get_subprocess_output')
-def test_job_events_gated_by_gpu_monitoring(
-    mock_output, instance, datadog_agent, dd_run_check, caplog, collect_job_events, gpu_enabled, polled
-):
+def test_job_events_opt_in(mock_output, instance, datadog_agent, dd_run_check, collect_job_events):
     mock_output.return_value = ('', '', 0)
     instance['collect_job_events'] = collect_job_events
-    with mock.patch.dict(datadog_agent._config, {'gpu.enabled': gpu_enabled}):
+    with mock.patch.dict(datadog_agent._config, {'gpu.enabled': False}):
         check = SlurmCheck('slurm', {}, [instance])
-    dd_run_check(check)
+        dd_run_check(check)
 
-    assert any('-anXP' in call.args[0] for call in mock_output.call_args_list) is polled
-    assert ('requires GPU monitoring' in caplog.text) is (collect_job_events and not gpu_enabled)
+    assert any('-anXP' in call.args[0] for call in mock_output.call_args_list) is collect_job_events
 
 
-@pytest.mark.usefixtures('gpu_monitoring_enabled')
 @mock.patch('datadog_checks.slurm.check.get_subprocess_output')
 def test_job_events_poll_window(mock_output, events_instance):
     check = SlurmCheck('slurm', {}, [events_instance])
@@ -159,7 +143,6 @@ def test_job_events_poll_window(mock_output, events_instance):
     assert_polled_from(SACCT_JOB_EVENT_MAX_LOOKBACK)
 
 
-@pytest.mark.usefixtures('gpu_monitoring_enabled')
 @mock.patch('datadog_checks.slurm.check.get_subprocess_output')
 @mock.patch('datadog_checks.slurm.check.time.time', return_value=NOW)
 def test_job_events_failed_poll_keeps_state(_, mock_output, events_instance, aggregator):
@@ -179,7 +162,6 @@ def test_job_events_failed_poll_keeps_state(_, mock_output, events_instance, agg
     assert [e['event_type'] for e in aggregator.events] == ['slurm.job.finished']
 
 
-@pytest.mark.usefixtures('gpu_monitoring_enabled')
 def test_job_events_first_poll_seeds_state(events_instance, aggregator):
     check = SlurmCheck('slurm', {}, [events_instance])
     run_polls(check, sacct_output(sacct_line('1', 'PENDING'), sacct_line('2', 'RUNNING', start='2026-10-21T12:01:00')))
@@ -187,7 +169,6 @@ def test_job_events_first_poll_seeds_state(events_instance, aggregator):
     assert aggregator.events == []
 
 
-@pytest.mark.usefixtures('gpu_monitoring_enabled')
 def test_job_events_transitions(events_instance, aggregator):
     events_instance['tags'] = ['env:test']
     check = SlurmCheck('slurm', {}, [events_instance])
@@ -251,7 +232,6 @@ def test_job_events_transitions(events_instance, aggregator):
     assert 'slurm_job_state:FAILED' in failed['tags']
 
 
-@pytest.mark.usefixtures('gpu_monitoring_enabled')
 def test_job_events_no_duplicates(events_instance, aggregator):
     check = SlurmCheck('slurm', {}, [events_instance])
     running = sacct_output(sacct_line('1', 'RUNNING', start='2026-10-21T12:01:00'))
@@ -260,7 +240,6 @@ def test_job_events_no_duplicates(events_instance, aggregator):
     assert [e['event_type'] for e in aggregator.events] == ['slurm.job.submitted', 'slurm.job.started']
 
 
-@pytest.mark.usefixtures('gpu_monitoring_enabled')
 def test_job_events_requeue(events_instance, aggregator):
     check = SlurmCheck('slurm', {}, [events_instance])
     run_polls(
@@ -282,7 +261,6 @@ def test_job_events_requeue(events_instance, aggregator):
     ]
 
 
-@pytest.mark.usefixtures('gpu_monitoring_enabled')
 def test_job_events_federated_job_started_on_sibling_cluster(events_instance, aggregator):
     check = SlurmCheck('slurm', {}, [events_instance])
     run_polls(
@@ -304,7 +282,6 @@ def test_job_events_federated_job_started_on_sibling_cluster(events_instance, ag
         pytest.param('SUSPENDED', 'Unknown', NOW, id='suspended'),
     ],
 )
-@pytest.mark.usefixtures('gpu_monitoring_enabled')
 def test_job_events_interruptions(events_instance, aggregator, state, end, timestamp):
     check = SlurmCheck('slurm', {}, [events_instance])
     run_polls(
@@ -320,7 +297,6 @@ def test_job_events_interruptions(events_instance, aggregator, state, end, times
     assert f'slurm_job_state:{state}' in event['tags']
 
 
-@pytest.mark.usefixtures('gpu_monitoring_enabled')
 def test_job_events_skip_transitions_before_first_poll(events_instance, aggregator):
     check = SlurmCheck('slurm', {}, [events_instance])
     # The job was submitted and started before the first poll, but slurmdbd only recorded it afterwards.
@@ -342,7 +318,6 @@ def test_job_events_skip_transitions_before_first_poll(events_instance, aggregat
         pytest.param('2026-10-21T12:05:00', id='start time set to the cancellation time'),
     ],
 )
-@pytest.mark.usefixtures('gpu_monitoring_enabled')
 def test_job_events_cancelled_while_pending(events_instance, aggregator, start):
     check = SlurmCheck('slurm', {}, [events_instance])
     run_polls(
@@ -368,7 +343,6 @@ def test_job_events_cancelled_while_pending(events_instance, aggregator, start):
     assert 'slurm_job_state:CANCELLED' in event['tags']
 
 
-@pytest.mark.usefixtures('gpu_monitoring_enabled')
 def test_job_events_submitted_carries_pending_reason(events_instance, aggregator):
     check = SlurmCheck('slurm', {}, [events_instance])
     run_polls(check, '', sacct_output(sacct_line('1', 'PENDING')), reasons=[{}, {'1': 'Priority'}])
@@ -379,7 +353,6 @@ def test_job_events_submitted_carries_pending_reason(events_instance, aggregator
     assert 'Pending reason is Priority.' in event['msg_text']
 
 
-@pytest.mark.usefixtures('gpu_monitoring_enabled')
 def test_job_events_pending_reason_changes(events_instance, aggregator):
     check = SlurmCheck('slurm', {}, [events_instance])
     pending = sacct_output(sacct_line('1', 'PENDING'))
@@ -409,7 +382,6 @@ def test_job_events_pending_reason_changes(events_instance, aggregator):
     assert 'slurm_job_state:PENDING' in event['tags']
 
 
-@pytest.mark.usefixtures('gpu_monitoring_enabled')
 def test_job_events_pending_reason_from_squeue_run(events_instance, aggregator, dd_run_check):
     events_instance['collect_squeue_stats'] = True
     check = SlurmCheck('slurm', {}, [events_instance])
@@ -426,7 +398,6 @@ def test_job_events_pending_reason_from_squeue_run(events_instance, aggregator, 
     assert event['msg_title'] == 'Slurm job 45 (train) pending: Resources'
 
 
-@pytest.mark.usefixtures('gpu_monitoring_enabled')
 def test_job_events_held_job_queried_by_id_once_gone_from_squeue(events_instance, aggregator):
     check = SlurmCheck('slurm', {}, [events_instance])
     sacct = FakeSacct()
@@ -455,7 +426,6 @@ def test_job_events_held_job_queried_by_id_once_gone_from_squeue(events_instance
     assert sacct.queried_ids == []
 
 
-@pytest.mark.usefixtures('gpu_monitoring_enabled')
 def test_job_events_pending_jobs_discovered_from_squeue(events_instance, aggregator):
     check = SlurmCheck('slurm', {}, [events_instance])
     sacct = FakeSacct()
@@ -471,7 +441,6 @@ def test_job_events_pending_jobs_discovered_from_squeue(events_instance, aggrega
     assert 'slurm_job_reason:Dependency' in event['tags']
 
 
-@pytest.mark.usefixtures('gpu_monitoring_enabled')
 def test_job_events_array_submitted_once(events_instance, aggregator):
     check = SlurmCheck('slurm', {}, [events_instance])
     run_polls(
@@ -499,7 +468,6 @@ def test_job_events_array_submitted_once(events_instance, aggregator):
     ]
 
 
-@pytest.mark.usefixtures('gpu_monitoring_enabled')
 def test_job_events_id_query_ignores_unrequested_array_tasks(events_instance, aggregator):
     check = SlurmCheck('slurm', {}, [events_instance])
     sacct = FakeSacct()
@@ -516,7 +484,6 @@ def test_job_events_id_query_ignores_unrequested_array_tasks(events_instance, ag
     assert [e['msg_title'] for e in aggregator.events] == ['Slurm job 19_[2-3] (train) submitted']
 
 
-@pytest.mark.usefixtures('gpu_monitoring_enabled')
 def test_job_events_id_queries_are_batched(events_instance):
     check = SlurmCheck('slurm', {}, [events_instance])
     sacct = FakeSacct()
@@ -526,7 +493,6 @@ def test_job_events_id_queries_are_batched(events_instance):
     assert [len(ids) for ids in sacct.queried_ids] == [SACCT_JOB_EVENT_IDS_PER_QUERY, 1]
 
 
-@pytest.mark.usefixtures('gpu_monitoring_enabled')
 def test_job_events_failed_id_query_keeps_state(events_instance, aggregator):
     check = SlurmCheck('slurm', {}, [events_instance])
     sacct = FakeSacct()
