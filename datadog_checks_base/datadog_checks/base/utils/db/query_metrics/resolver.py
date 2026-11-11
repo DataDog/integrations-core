@@ -108,7 +108,7 @@ def resolve_obfuscations[K: Hashable](
         misses and are retried next collection. Only the cache is retried, not the counters: a key
         left unresolved is not reported, so this interval's counts for it are lost once the delta
         is committed. A read that fails should therefore raise rather than return a partial result,
-        so the caller can skip :meth:`QueryStats.commit` and report the interval on the next
+        so the caller can skip `QueryStats.commit` and report the interval on the next
         collection.
     :param classify: Reports what one non-empty text turned out to be. See :class:`TextKind`.
     """

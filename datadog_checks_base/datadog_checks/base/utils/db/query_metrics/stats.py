@@ -19,7 +19,7 @@ class Delta[K: Hashable]:
     """Keys of :attr:`derivative_rows`, for resolving statement text only for what actually ran."""
     snapshot: dict[K, dict] = field(default_factory=dict, repr=False, compare=False)
     """The collapsed snapshot this delta was computed from, installed as the baseline by
-    :meth:`QueryStats.commit`."""
+    `QueryStats.commit`."""
 
 
 class QueryStats[K: Hashable]:
@@ -56,9 +56,9 @@ class QueryStats[K: Hashable]:
     def diff(self, snapshot: list[dict], *, commit: bool = True) -> Delta[K]:
         """Diff *snapshot* against the committed baseline.
 
-        By default *snapshot* becomes the baseline for the next call. Pass ``commit=False`` when work
+        By default *snapshot* becomes the baseline for the next call. Pass `commit=False` when work
         that follows the diff, such as fetching statement text, can fail: the baseline is left as it
-        was until the delta is passed to :meth:`commit`. A delta that is never committed is
+        was until the delta is passed to `commit`. A delta that is never committed is
         discarded, and the next diff covers its interval too instead of losing it.
         """
         current = self._collapse(snapshot)
