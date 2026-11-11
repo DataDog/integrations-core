@@ -148,8 +148,8 @@ class HTTPClient(Protocol):
     """Default request options. Per-request options override them.
 
     Values use the format of `requests`, the current backend: `timeout` is `(connect, read)` and basic `auth` is
-    `(username, password)`. Removing a value here does not remove it from an open session; use `set_header()` and
-    `disable_auth()` instead.
+    `(username, password)`. Removing a value here does not remove it from an open session, except for headers
+    deleted from `options['headers']` in place. Use `disable_auth()` to stop sending credentials.
     """
 
     tls_config: dict[str, Any]
