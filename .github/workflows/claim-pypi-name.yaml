@@ -43,25 +43,35 @@ jobs:
     - name: Find new and outdated packages
       id: find
       run: |
-        packages=()
-        shopt -s nullglob
-        for pyproject in */pyproject.toml; do
-          pkg=$(python -c "import tomllib, pathlib; data = tomllib.loads(pathlib.Path('${pyproject}').read_text()); print(data['project']['name'])")
-          response=$(curl -s -w "\n%{http_code}" "https://pypi.org/pypi/${pkg}/json")
-          status="${response##*$'\n'}"
-          if [ "$status" = "404" ]; then
-            packages+=("\"${pkg}\"")
-          elif [ "$status" = "200" ]; then
-            latest=$(echo "$response" | head -n -1 | python -c "import json, sys; print(json.load(sys.stdin)['info']['version'])")
-            if [ "$latest" = "0.0.1" ]; then
-              packages+=("\"${pkg}\"")
-            fi
-          else
-            echo "PyPI returned unexpected HTTP status ${status} for package ${pkg}. Please re-run this job." >&2
-            exit 1
-          fi
-        done
-        echo "packages=[$(IFS=,; echo "${packages[*]}")]" >> "$GITHUB_OUTPUT"
+        python - <<'EOF'
+        import json
+        import os
+        import pathlib
+        import sys
+        import tomllib
+        import urllib.error
+        import urllib.request
+
+        packages = []
+        for pyproject in sorted(pathlib.Path('.').glob('*/pyproject.toml')):
+            if pyproject.parent.name.startswith('.'):
+                continue
+            name = tomllib.loads(pyproject.read_text())['project']['name']
+            try:
+                with urllib.request.urlopen(f'https://pypi.org/pypi/{name}/json', timeout=30) as response:
+                    latest = json.load(response)['info']['version']
+            except urllib.error.HTTPError as error:
+                if error.code == 404:
+                    latest = None
+                else:
+                    print(f'PyPI returned unexpected HTTP status {error.code} for package {name}. Please re-run this job.', file=sys.stderr)
+                    sys.exit(1)
+            if latest in (None, '0.0.1'):
+                packages.append(name)
+
+        with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+            output.write(f'packages={json.dumps(packages)}\n')
+        EOF
 
   publish:
     name: Publish ${{ matrix.package }}
