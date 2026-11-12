@@ -63,16 +63,11 @@ class FakeCursor:
         self._rows = []
 
     def execute(self, query, args=None):
-        self.executed.append(query if args is None else query % args)
-        if query.startswith('SELECT @@SESSION.net_write_timeout'):
-            self._rows = [(60,)]
-        elif query.startswith('SHOW BINARY LOGS'):
+        self.executed.append(query)
+        if query.startswith('SHOW BINARY LOGS'):
             if self._show_binary_logs_error:
                 raise self._show_binary_logs_error
             self._rows = [('mysql-bin.000001', 100), ('mysql-bin.000002', 23)]
-
-    def fetchone(self):
-        return self._rows[0]
 
     def fetchall(self):
         return self._rows
@@ -81,43 +76,45 @@ class FakeCursor:
         pass
 
 
-def _binary_log_stats(cursor, connection_open=True):
+def _binary_log_stats(cursor):
     check = _build_check(binlog_size_metrics=True)
-    db = mock.MagicMock()
-    db.cursor.return_value = cursor
-    db.open = connection_open
-    return check._get_binary_log_stats(db)
+    binlog_connection = mock.MagicMock()
+    binlog_connection.cursor.return_value = cursor
+    with (
+        mock.patch.object(check, '_get_connection_args', return_value={}),
+        mock.patch(
+            'datadog_checks.mysql.mysql.connect_with_session_variables', return_value=binlog_connection
+        ) as connect,
+    ):
+        result = check._get_binary_log_stats()
+    connect.assert_called_once()
+    binlog_connection.close.assert_called_once()
+    return result
 
 
 @pytest.mark.unit
 def test_binary_logs_query_runs_with_short_net_write_timeout():
     """SHOW BINARY LOGS holds the binlog index lock while it sends rows, so a slow reader blocks every commit.
 
-    The query must run with a short `net_write_timeout`, and the session value must be restored for later queries.
+    The query must run with a short `net_write_timeout`, on a connection that is closed afterward.
     """
     cursor = FakeCursor()
 
     assert _binary_log_stats(cursor) == 123
     assert cursor.executed == [
-        'SELECT @@SESSION.net_write_timeout',
         'SET SESSION net_write_timeout = {}'.format(BINARY_LOGS_NET_WRITE_TIMEOUT),
         'SHOW BINARY LOGS;',
-        'SET SESSION net_write_timeout = 60',
     ]
 
 
 @pytest.mark.unit
-def test_binary_logs_query_restores_net_write_timeout_after_error():
-    cursor = FakeCursor(show_binary_logs_error=pymysql.err.OperationalError(1227, 'Access denied'))
-
-    assert _binary_log_stats(cursor) is None
-    assert cursor.executed[-1] == 'SET SESSION net_write_timeout = 60'
-
-
-@pytest.mark.unit
-def test_binary_logs_query_net_write_timeout_drops_connection():
-    """When the server hits `net_write_timeout` it closes the connection, so there is no session left to restore."""
-    cursor = FakeCursor(show_binary_logs_error=pymysql.err.OperationalError(2013, 'Lost connection'))
-
-    assert _binary_log_stats(cursor, connection_open=False) is None
-    assert cursor.executed[-1] == 'SHOW BINARY LOGS;'
+@pytest.mark.parametrize(
+    'error',
+    [
+        pytest.param(pymysql.err.OperationalError(2013, 'Lost connection to MySQL server during query'), id='timeout'),
+        pytest.param(pymysql.err.OperationalError(1227, 'Access denied'), id='privileges'),
+    ],
+)
+def test_binary_logs_query_error_skips_metric(error):
+    """A failed SHOW BINARY LOGS, including a server-side write timeout, only skips the binary log metric."""
+    assert _binary_log_stats(FakeCursor(show_binary_logs_error=error)) is None
