@@ -40,6 +40,7 @@ from datadog_checks.sqlserver.database_metrics import (
     SqlserverTableSizeMetrics,
     SqlserverTempDBFileSpaceUsageMetrics,
 )
+from datadog_checks.sqlserver.sqlserver import KEY_PREFIX
 from datadog_checks.sqlserver.utils import Database
 
 from .common import (
@@ -89,6 +90,45 @@ def test_instance_level_database_metrics_stay_within_parameter_limit(
 
     assert all(len(params) <= SQLSERVER_PARAMETER_LIMIT for params in query_params)
     assert [database for params in query_params for database in params] == databases
+
+
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+@pytest.mark.parametrize(
+    'database_metric_class, metric_name',
+    [
+        (SqlserverFileStatsMetrics, 'sqlserver.files.size_on_disk'),
+        (SqlserverDatabaseStatsMetrics, 'sqlserver.database.state'),
+        (SqlserverDatabaseBackupMetrics, 'sqlserver.database.backup_count'),
+    ],
+)
+def test_instance_level_database_metrics_collect_all_batches(
+    aggregator,
+    init_config,
+    instance_docker_metrics,
+    database_metric_class: type,
+    metric_name: str,
+):
+    """SDBM-3131: full batches must execute through the configured SQL Server driver."""
+    databases = [f'sdbm_3131_missing_{index}' for index in range(2 * SQLSERVER_PARAMETER_LIMIT + 1)]
+    expected_databases = ['master', 'msdb', 'tempdb']
+    for index, database in enumerate(expected_databases):
+        databases[index * SQLSERVER_PARAMETER_LIMIT] = database
+
+    sqlserver_check = SQLServer(CHECK_NAME, init_config, [instance_docker_metrics])
+    database_metrics = database_metric_class(
+        config=sqlserver_check._config,
+        new_query_executor=sqlserver_check._new_query_executor,
+        server_static_info=STATIC_SERVER_INFO,
+        execute_query_handler=sqlserver_check.execute_query_raw,
+        databases=databases,
+    )
+
+    with sqlserver_check.connection.open_managed_default_connection(KEY_PREFIX):
+        database_metrics.execute()
+
+    for database in expected_databases:
+        aggregator.assert_metric_has_tag(metric_name, f'db:{database}')
 
 
 @pytest.mark.integration
