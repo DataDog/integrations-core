@@ -1,0 +1,35 @@
+:9090 {
+  route /metrics {
+    rewrite * /router_metrics
+    file_server {
+      root /usr/share/caddy
+    }
+  }
+}
+
+:9091 {
+  route /metrics {
+    rewrite * /sidecar_metrics
+    file_server {
+      root /usr/share/caddy
+    }
+  }
+}
+
+:9092 {
+  route /metrics {
+    rewrite * /coordinator_metrics
+    file_server {
+      root /usr/share/caddy
+    }
+  }
+}
+
+:9093 {
+  route /metrics {
+    rewrite * /legacy_metrics
+    file_server {
+      root /usr/share/caddy
+    }
+  }
+}

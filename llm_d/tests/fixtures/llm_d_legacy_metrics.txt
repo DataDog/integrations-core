@@ -1,0 +1,476 @@
+# Synthesized fixture, NOT a live capture.
+#
+# Legacy EPP series that llm-d releases emitted before the llm_d_epp_* names. Names, types, HELP text, label
+# names, and bucket ladders are transcribed from the deprecated definitions, whose HELP names the replacement:
+#
+#   llm-d/llm-d-router @ 71f4f0999f95b96c49a9d0c4afbd18dfdb943c26 (v0.10.0)
+#     pkg/epp/metrics/metrics.go                                            inference_objective_*, inference_pool_*,
+#                                                                            inference_extension_*,
+#                                                                            llm_d_inference_scheduler_datalayer_*
+#     pkg/epp/metrics/collectors/inference_pool.go                          inference_pool_per_pod_queue_size
+#     pkg/epp/framework/plugins/scheduling/profilehandler/disagg/metrics.go llm_d_inference_scheduler_disagg_*
+#     pkg/epp/framework/plugins/requestcontrol/dataproducer/approximateprefix/metrics.go  prefix indexer
+#     pkg/epp/framework/plugins/requestcontrol/dataproducer/predictedlatency/metrics.go   TTFT and TPOT
+#     pkg/kvcache/metrics/collector.go                                      kvcache_*
+#
+# The GIE-origin names match kubernetes-sigs/gateway-api-inference-extension @
+# 616745e99b44f7ef0650b40ed1475756282d7e1f (v1.3.0) pkg/epp/metrics/metrics.go. v0.10.0 also dual-emits the
+# llm_d_epp_* twins; they are left out so this file reflects an EPP that only exposes the legacy names.
+# HELP inference_extension_flow_control_dispatch_cycle_duration_seconds [ALPHA] [Deprecated: Use llm_d_epp_flow_control_dispatch_cycle_duration_seconds] Distribution of time taken for each internal dispatch cycle in the Flow Control layer.
+# TYPE inference_extension_flow_control_dispatch_cycle_duration_seconds histogram
+inference_extension_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.0001"} 1
+inference_extension_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.0002"} 2
+inference_extension_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.0005"} 3
+inference_extension_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.001"} 3
+inference_extension_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.002"} 3
+inference_extension_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.005"} 3
+inference_extension_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.01"} 3
+inference_extension_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.02"} 3
+inference_extension_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.05"} 3
+inference_extension_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.1"} 3
+inference_extension_flow_control_dispatch_cycle_duration_seconds_bucket{le="+Inf"} 3
+inference_extension_flow_control_dispatch_cycle_duration_seconds_sum 0.0006
+inference_extension_flow_control_dispatch_cycle_duration_seconds_count 3
+# HELP inference_extension_flow_control_pool_saturation [ALPHA] [Deprecated: Use llm_d_epp_flow_control_pool_saturation] Pool saturation signal gating Flow Control dispatch. 1.0 is the gating set point; values above 1.0 indicate the magnitude of oversubscription past it. An empty pool reads as 1.0. With the default utilization detector, endpoints with missing or stale metrics score as fully saturated (fail-closed; see llm_d_epp_flow_control_stale_endpoints).
+# TYPE inference_extension_flow_control_pool_saturation gauge
+inference_extension_flow_control_pool_saturation{inference_pool="llama-3-1-8b-pool"} 0.6
+# HELP inference_extension_flow_control_queue_bytes [ALPHA] [Deprecated: Use llm_d_epp_flow_control_queue_bytes] Current total size in bytes of requests actively held in the Flow Control queue.
+# TYPE inference_extension_flow_control_queue_bytes gauge
+inference_extension_flow_control_queue_bytes{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 1800
+# HELP inference_extension_flow_control_queue_size [ALPHA] [Deprecated: Use llm_d_epp_flow_control_queue_size] Current number of requests actively held in the Flow Control queue.
+# TYPE inference_extension_flow_control_queue_size gauge
+inference_extension_flow_control_queue_size{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 2
+# HELP inference_extension_flow_control_request_enqueue_duration_seconds [ALPHA] [Deprecated: Use llm_d_epp_flow_control_request_enqueue_duration_seconds] Distribution of time taken to enqueue requests into the Flow Control layer.
+# TYPE inference_extension_flow_control_request_enqueue_duration_seconds histogram
+inference_extension_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.0001"} 2
+inference_extension_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.0002"} 3
+inference_extension_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.0005"} 3
+inference_extension_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.001"} 3
+inference_extension_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.002"} 3
+inference_extension_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.005"} 3
+inference_extension_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.01"} 3
+inference_extension_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.02"} 3
+inference_extension_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.05"} 3
+inference_extension_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.1"} 3
+inference_extension_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="+Inf"} 3
+inference_extension_flow_control_request_enqueue_duration_seconds_sum{fairness_id="default-flow",outcome="Dispatched",priority="0"} 0.00032
+inference_extension_flow_control_request_enqueue_duration_seconds_count{fairness_id="default-flow",outcome="Dispatched",priority="0"} 3
+# HELP inference_extension_flow_control_request_queue_duration_seconds [ALPHA] [Deprecated: Use llm_d_epp_flow_control_request_queue_duration_seconds] Distribution of total time requests spend in the Flow Control layer (from enqueue to final outcome).
+# TYPE inference_extension_flow_control_request_queue_duration_seconds histogram
+inference_extension_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.0001"} 0
+inference_extension_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.0005"} 0
+inference_extension_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.001"} 0
+inference_extension_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.005"} 2
+inference_extension_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.01"} 2
+inference_extension_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.025"} 2
+inference_extension_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.05"} 3
+inference_extension_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.1"} 3
+inference_extension_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.25"} 3
+inference_extension_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.5"} 3
+inference_extension_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 3
+inference_extension_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2.5"} 3
+inference_extension_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="5"} 3
+inference_extension_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="10"} 3
+inference_extension_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="30"} 3
+inference_extension_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="60"} 3
+inference_extension_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+inference_extension_flow_control_request_queue_duration_seconds_sum{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 0.036
+inference_extension_flow_control_request_queue_duration_seconds_count{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP inference_extension_info [ALPHA] General information of the current build of Inference Extension.
+# TYPE inference_extension_info gauge
+inference_extension_info{build_ref="v0.10.0",commit="71f4f0999f95b96c49a9d0c4afbd18dfdb943c26"} 1
+# HELP inference_extension_plugin_duration_seconds [ALPHA] [Deprecated: Use llm_d_epp_plugin_duration_seconds] Plugin processing latency distribution in seconds for each extension point, plugin type and plugin name.
+# TYPE inference_extension_plugin_duration_seconds histogram
+inference_extension_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.0001"} 1
+inference_extension_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.0002"} 2
+inference_extension_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.0005"} 3
+inference_extension_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.001"} 3
+inference_extension_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.002"} 3
+inference_extension_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.005"} 3
+inference_extension_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.01"} 3
+inference_extension_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.02"} 3
+inference_extension_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.05"} 3
+inference_extension_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.1"} 3
+inference_extension_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="+Inf"} 3
+inference_extension_plugin_duration_seconds_sum{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer"} 0.0005
+inference_extension_plugin_duration_seconds_count{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer"} 3
+# HELP inference_extension_prefix_indexer_hit_bytes [ALPHA] [Deprecated: Use llm_d_epp_prefix_indexer_hit_bytes] Length of the prefix match in number of bytes in the cache lookup.
+# TYPE inference_extension_prefix_indexer_hit_bytes histogram
+inference_extension_prefix_indexer_hit_bytes_bucket{le="0"} 1
+inference_extension_prefix_indexer_hit_bytes_bucket{le="16"} 1
+inference_extension_prefix_indexer_hit_bytes_bucket{le="32"} 1
+inference_extension_prefix_indexer_hit_bytes_bucket{le="64"} 1
+inference_extension_prefix_indexer_hit_bytes_bucket{le="128"} 1
+inference_extension_prefix_indexer_hit_bytes_bucket{le="256"} 2
+inference_extension_prefix_indexer_hit_bytes_bucket{le="512"} 2
+inference_extension_prefix_indexer_hit_bytes_bucket{le="1024"} 3
+inference_extension_prefix_indexer_hit_bytes_bucket{le="2048"} 3
+inference_extension_prefix_indexer_hit_bytes_bucket{le="4096"} 3
+inference_extension_prefix_indexer_hit_bytes_bucket{le="8192"} 3
+inference_extension_prefix_indexer_hit_bytes_bucket{le="16384"} 3
+inference_extension_prefix_indexer_hit_bytes_bucket{le="32768"} 3
+inference_extension_prefix_indexer_hit_bytes_bucket{le="65536"} 3
+inference_extension_prefix_indexer_hit_bytes_bucket{le="+Inf"} 3
+inference_extension_prefix_indexer_hit_bytes_sum 1280
+inference_extension_prefix_indexer_hit_bytes_count 3
+# HELP inference_extension_prefix_indexer_hit_ratio [ALPHA] [Deprecated: Use llm_d_epp_prefix_indexer_hit_ratio] Ratio of prefix length matched to total prefix length in the cache lookup.
+# TYPE inference_extension_prefix_indexer_hit_ratio histogram
+inference_extension_prefix_indexer_hit_ratio_bucket{le="0"} 1
+inference_extension_prefix_indexer_hit_ratio_bucket{le="0.1"} 1
+inference_extension_prefix_indexer_hit_ratio_bucket{le="0.2"} 1
+inference_extension_prefix_indexer_hit_ratio_bucket{le="0.3"} 1
+inference_extension_prefix_indexer_hit_ratio_bucket{le="0.4"} 1
+inference_extension_prefix_indexer_hit_ratio_bucket{le="0.5"} 2
+inference_extension_prefix_indexer_hit_ratio_bucket{le="0.6"} 2
+inference_extension_prefix_indexer_hit_ratio_bucket{le="0.7"} 2
+inference_extension_prefix_indexer_hit_ratio_bucket{le="0.8"} 2
+inference_extension_prefix_indexer_hit_ratio_bucket{le="0.9"} 3
+inference_extension_prefix_indexer_hit_ratio_bucket{le="1"} 3
+inference_extension_prefix_indexer_hit_ratio_bucket{le="+Inf"} 3
+inference_extension_prefix_indexer_hit_ratio_sum 1.35
+inference_extension_prefix_indexer_hit_ratio_count 3
+# HELP inference_extension_prefix_indexer_size [ALPHA] [Deprecated: Use llm_d_epp_prefix_indexer_size] Size of the prefix indexer.
+# TYPE inference_extension_prefix_indexer_size gauge
+inference_extension_prefix_indexer_size 512
+# HELP inference_extension_scheduler_attempts_total [ALPHA] [Deprecated: Use llm_d_epp_scheduler_attempts_total] Total number of scheduling attempts.
+# TYPE inference_extension_scheduler_attempts_total counter
+inference_extension_scheduler_attempts_total{namespace="llm-d",pod_name="llama-decode-0",port="8000",status="success",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 42
+# HELP inference_extension_scheduler_e2e_duration_seconds [ALPHA] [Deprecated: Use llm_d_epp_scheduler_e2e_duration_seconds] End-to-end scheduling latency distribution in seconds.
+# TYPE inference_extension_scheduler_e2e_duration_seconds histogram
+inference_extension_scheduler_e2e_duration_seconds_bucket{le="0.0001"} 0
+inference_extension_scheduler_e2e_duration_seconds_bucket{le="0.0002"} 0
+inference_extension_scheduler_e2e_duration_seconds_bucket{le="0.0005"} 2
+inference_extension_scheduler_e2e_duration_seconds_bucket{le="0.001"} 2
+inference_extension_scheduler_e2e_duration_seconds_bucket{le="0.002"} 3
+inference_extension_scheduler_e2e_duration_seconds_bucket{le="0.005"} 3
+inference_extension_scheduler_e2e_duration_seconds_bucket{le="0.01"} 3
+inference_extension_scheduler_e2e_duration_seconds_bucket{le="0.02"} 3
+inference_extension_scheduler_e2e_duration_seconds_bucket{le="0.05"} 3
+inference_extension_scheduler_e2e_duration_seconds_bucket{le="0.1"} 3
+inference_extension_scheduler_e2e_duration_seconds_bucket{le="+Inf"} 3
+inference_extension_scheduler_e2e_duration_seconds_sum 0.0019
+inference_extension_scheduler_e2e_duration_seconds_count 3
+# HELP inference_objective_input_tokens [ALPHA] [Deprecated: Use llm_d_epp_request_input_tokens] Inference objective input token count distribution for requests in each model.
+# TYPE inference_objective_input_tokens histogram
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 0
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8"} 0
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="16"} 0
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="32"} 0
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="64"} 0
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="128"} 1
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="256"} 2
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="512"} 2
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1024"} 3
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2048"} 3
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="4096"} 3
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8192"} 3
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="16384"} 3
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="32778"} 3
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="65536"} 3
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="131072"} 3
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="262144"} 3
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="524288"} 3
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1048576"} 3
+inference_objective_input_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+inference_objective_input_tokens_sum{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 970
+inference_objective_input_tokens_count{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP inference_objective_normalized_time_per_output_token_seconds [ALPHA] [Deprecated: Use llm_d_epp_request_ntpot_seconds] Inference objective latency divided by number of output tokens in seconds for each model and target model.
+# TYPE inference_objective_normalized_time_per_output_token_seconds histogram
+inference_objective_normalized_time_per_output_token_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.001"} 0
+inference_objective_normalized_time_per_output_token_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.002"} 0
+inference_objective_normalized_time_per_output_token_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.005"} 0
+inference_objective_normalized_time_per_output_token_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.01"} 1
+inference_objective_normalized_time_per_output_token_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.02"} 3
+inference_objective_normalized_time_per_output_token_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.05"} 3
+inference_objective_normalized_time_per_output_token_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.1"} 3
+inference_objective_normalized_time_per_output_token_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.2"} 3
+inference_objective_normalized_time_per_output_token_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.5"} 3
+inference_objective_normalized_time_per_output_token_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 3
+inference_objective_normalized_time_per_output_token_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2"} 3
+inference_objective_normalized_time_per_output_token_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="5"} 3
+inference_objective_normalized_time_per_output_token_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="10"} 3
+inference_objective_normalized_time_per_output_token_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+inference_objective_normalized_time_per_output_token_seconds_sum{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 0.036
+inference_objective_normalized_time_per_output_token_seconds_count{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP inference_objective_output_tokens [ALPHA] [Deprecated: Use llm_d_epp_request_output_tokens] Inference objective output token count distribution for requests in each model.
+# TYPE inference_objective_output_tokens histogram
+inference_objective_output_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 0
+inference_objective_output_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8"} 0
+inference_objective_output_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="16"} 0
+inference_objective_output_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="32"} 0
+inference_objective_output_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="64"} 1
+inference_objective_output_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="128"} 2
+inference_objective_output_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="256"} 3
+inference_objective_output_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="512"} 3
+inference_objective_output_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1024"} 3
+inference_objective_output_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2048"} 3
+inference_objective_output_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="4096"} 3
+inference_objective_output_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8192"} 3
+inference_objective_output_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+inference_objective_output_tokens_sum{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 392
+inference_objective_output_tokens_count{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP inference_objective_prompt_cached_tokens [ALPHA] [Deprecated: Use llm_d_epp_request_cached_tokens] Inference objective prompt cached token count distribution for requests in each model.
+# TYPE inference_objective_prompt_cached_tokens histogram
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 1
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8"} 1
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="16"} 1
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="32"} 1
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="64"} 1
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="128"} 2
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="256"} 2
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="512"} 3
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1024"} 3
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2048"} 3
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="4096"} 3
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8192"} 3
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="16384"} 3
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="32778"} 3
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="65536"} 3
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="131072"} 3
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="262144"} 3
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="524288"} 3
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1048576"} 3
+inference_objective_prompt_cached_tokens_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+inference_objective_prompt_cached_tokens_sum{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 608
+inference_objective_prompt_cached_tokens_count{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP inference_objective_request_duration_seconds [ALPHA] [Deprecated: Use llm_d_epp_request_duration_seconds] Inference objective response latency distribution in seconds for each model and target model.
+# TYPE inference_objective_request_duration_seconds histogram
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.005"} 0
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.025"} 0
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.05"} 0
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.1"} 0
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.2"} 0
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.4"} 0
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.6"} 0
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.8"} 1
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 1
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1.25"} 2
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1.5"} 2
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2"} 2
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="3"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="4"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="5"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="6"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="10"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="15"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="20"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="30"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="45"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="60"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="120"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="180"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="240"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="300"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="360"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="480"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="600"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="900"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1200"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1800"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2700"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="3600"} 3
+inference_objective_request_duration_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+inference_objective_request_duration_seconds_sum{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 4.4
+inference_objective_request_duration_seconds_count{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP inference_objective_request_error_total [ALPHA] [Deprecated: Use llm_d_epp_request_error_total] Counter of inference objective requests errors broken out for each model and target model.
+# TYPE inference_objective_request_error_total counter
+inference_objective_request_error_total{error_code="ServiceUnavailable",model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 2
+# HELP inference_objective_request_sizes [ALPHA] [Deprecated: Use llm_d_epp_request_size_bytes] Inference objective requests size distribution in bytes for each model and target model.
+# TYPE inference_objective_request_sizes histogram
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="64"} 0
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="128"} 0
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="256"} 0
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="512"} 1
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1024"} 2
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2048"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="4096"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8192"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="16384"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="32768"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="65536"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="131072"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="262144"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="524288"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1048576"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2097152"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="4194304"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8388608"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="16777216"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="33554432"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="67108864"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="134217728"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="268435456"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="536870912"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1073741824"} 3
+inference_objective_request_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+inference_objective_request_sizes_sum{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3460
+inference_objective_request_sizes_count{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP inference_objective_request_total [ALPHA] [Deprecated: Use llm_d_epp_request_total] Counter of inference objective requests broken out for each model and target model.
+# TYPE inference_objective_request_total counter
+inference_objective_request_total{model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 42
+# HELP inference_objective_request_tpot_seconds [ALPHA] [Deprecated: Use llm_d_epp_request_streaming_tpot_seconds] Inference model TPOT distribution in seconds for each model and target model.
+# TYPE inference_objective_request_tpot_seconds histogram
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.0005"} 0
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.00205"} 0
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.005"} 0
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.01"} 0
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.02"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.04"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.06"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.08"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.1"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.125"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.15"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.2"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.3"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.4"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.5"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.6"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.8"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1.5"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="3"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="4.5"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="6"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="12"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="18"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="24"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="30"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="36"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="48"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="60"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="90"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="120"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="180"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="270"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="360"} 3
+inference_objective_request_tpot_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+inference_objective_request_tpot_seconds_sum{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 0.042
+inference_objective_request_tpot_seconds_count{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP inference_objective_request_ttft_seconds [ALPHA] [Deprecated: Use llm_d_epp_request_ttft_seconds] Inference model TTFT distribution in seconds for each model and target model.
+# TYPE inference_objective_request_ttft_seconds histogram
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.005"} 0
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.025"} 0
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.05"} 0
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.1"} 1
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.2"} 2
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.4"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.6"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.8"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1.25"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1.5"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="3"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="4"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="5"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="6"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="10"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="15"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="20"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="30"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="45"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="60"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="120"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="180"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="240"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="300"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="360"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="480"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="600"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="900"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1200"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1800"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2700"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="3600"} 3
+inference_objective_request_ttft_seconds_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+inference_objective_request_ttft_seconds_sum{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 0.53
+inference_objective_request_ttft_seconds_count{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP inference_objective_response_sizes [ALPHA] [Deprecated: Use llm_d_epp_response_size_bytes] Inference objective responses size distribution in bytes for each model and target model.
+# TYPE inference_objective_response_sizes histogram
+inference_objective_response_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 0
+inference_objective_response_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8"} 0
+inference_objective_response_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="16"} 0
+inference_objective_response_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="32"} 0
+inference_objective_response_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="64"} 0
+inference_objective_response_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="128"} 0
+inference_objective_response_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="256"} 0
+inference_objective_response_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="512"} 0
+inference_objective_response_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1024"} 1
+inference_objective_response_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2048"} 2
+inference_objective_response_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="4096"} 3
+inference_objective_response_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8192"} 3
+inference_objective_response_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="16384"} 3
+inference_objective_response_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="32778"} 3
+inference_objective_response_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="65536"} 3
+inference_objective_response_sizes_bucket{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+inference_objective_response_sizes_sum{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 5200
+inference_objective_response_sizes_count{model_name="meta-llama/Llama-3.1-8B-Instruct",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP inference_objective_running_requests [ALPHA] [Deprecated: Use llm_d_epp_request_running] Inference objective number of running requests in each model.
+# TYPE inference_objective_running_requests gauge
+inference_objective_running_requests{model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP inference_pool_average_kv_cache_utilization [ALPHA] [Deprecated: Use llm_d_epp_average_kv_cache_utilization] The average kv cache utilization for an inference server pool.
+# TYPE inference_pool_average_kv_cache_utilization gauge
+inference_pool_average_kv_cache_utilization{name="llama-3-1-8b-pool"} 0.42
+# HELP inference_pool_average_queue_size [ALPHA] [Deprecated: Use llm_d_epp_average_queue_size] The average number of requests pending in the model server queue.
+# TYPE inference_pool_average_queue_size gauge
+inference_pool_average_queue_size{name="llama-3-1-8b-pool"} 1.5
+# HELP inference_pool_average_running_requests [ALPHA] [Deprecated: Use llm_d_epp_average_running_requests] The average number of running requests across model servers in the pool.
+# TYPE inference_pool_average_running_requests gauge
+inference_pool_average_running_requests{name="llama-3-1-8b-pool"} 4
+# HELP inference_pool_per_pod_queue_size [ALPHA] The total number of requests pending in the model server queue for each underlying pod.
+# TYPE inference_pool_per_pod_queue_size gauge
+inference_pool_per_pod_queue_size{model_server_pod="llama-decode-0",name="llama-3-1-8b-pool"} 1
+# HELP inference_pool_ready_pods [ALPHA] [Deprecated: Use llm_d_epp_ready_endpoints] The number of ready pods in the inference server pool.
+# TYPE inference_pool_ready_pods gauge
+inference_pool_ready_pods{name="llama-3-1-8b-pool"} 2
+# HELP kvcache_index_admissions_total Deprecated: use llm_d_router_epp_kv_cache_index_admissions_total. Total number of KV-block admissions
+# TYPE kvcache_index_admissions_total counter
+kvcache_index_admissions_total 900
+# HELP kvcache_index_evictions_total Deprecated: use llm_d_router_epp_kv_cache_index_evictions_total. Total number of KV-block evictions
+# TYPE kvcache_index_evictions_total counter
+kvcache_index_evictions_total 120
+# HELP kvcache_index_lookup_hits_total Deprecated: use llm_d_router_epp_kv_cache_index_lookup_hits_total. Number of keys found in the cache on Lookup()
+# TYPE kvcache_index_lookup_hits_total counter
+kvcache_index_lookup_hits_total 310
+# HELP kvcache_index_lookup_latency_seconds Deprecated: use llm_d_router_epp_kv_cache_index_lookup_latency_seconds. Latency of Lookup calls in seconds
+# TYPE kvcache_index_lookup_latency_seconds histogram
+kvcache_index_lookup_latency_seconds_bucket{le="0.005"} 3
+kvcache_index_lookup_latency_seconds_bucket{le="0.01"} 3
+kvcache_index_lookup_latency_seconds_bucket{le="0.025"} 3
+kvcache_index_lookup_latency_seconds_bucket{le="0.05"} 3
+kvcache_index_lookup_latency_seconds_bucket{le="0.1"} 3
+kvcache_index_lookup_latency_seconds_bucket{le="0.25"} 3
+kvcache_index_lookup_latency_seconds_bucket{le="0.5"} 3
+kvcache_index_lookup_latency_seconds_bucket{le="1"} 3
+kvcache_index_lookup_latency_seconds_bucket{le="2.5"} 3
+kvcache_index_lookup_latency_seconds_bucket{le="5"} 3
+kvcache_index_lookup_latency_seconds_bucket{le="10"} 3
+kvcache_index_lookup_latency_seconds_bucket{le="+Inf"} 3
+kvcache_index_lookup_latency_seconds_sum 0.0043
+kvcache_index_lookup_latency_seconds_count 3
+# HELP kvcache_index_lookup_requests_total Deprecated: use llm_d_router_epp_kv_cache_index_lookup_requests_total. Total number of lookup calls
+# TYPE kvcache_index_lookup_requests_total counter
+kvcache_index_lookup_requests_total 42
+# HELP kvcache_index_max_pod_hit_count_total Deprecated: use llm_d_router_epp_kv_cache_index_max_pod_hit_count_total. Maximum cache hits on a single pod on Lookup()
+# TYPE kvcache_index_max_pod_hit_count_total counter
+kvcache_index_max_pod_hit_count_total 310
+# HELP kvcache_kvevents_dedup_removed_hashes_forwarded_total Deprecated: use llm_d_router_epp_kv_cache_events_dedup_removed_hashes_forwarded_total. Block hashes forwarded for eviction after the KV-event dedup filter (block hashes, not BlockRemoved events)
+# TYPE kvcache_kvevents_dedup_removed_hashes_forwarded_total counter
+kvcache_kvevents_dedup_removed_hashes_forwarded_total 113
+# HELP kvcache_kvevents_dedup_removed_hashes_suppressed_total Deprecated: use llm_d_router_epp_kv_cache_events_dedup_removed_hashes_suppressed_total. Block hashes whose removal was suppressed by the KV-event dedup filter (block hashes, not BlockRemoved events)
+# TYPE kvcache_kvevents_dedup_removed_hashes_suppressed_total counter
+kvcache_kvevents_dedup_removed_hashes_suppressed_total 7
+# HELP llm_d_inference_scheduler_datalayer_extract_errors_total [ALPHA] [Deprecated: Use llm_d_epp_datalayer_extract_errors_total] Extract errors per source/extractor type.
+# TYPE llm_d_inference_scheduler_datalayer_extract_errors_total counter
+llm_d_inference_scheduler_datalayer_extract_errors_total{extractor_type="core-metrics-extractor",source_type="metrics-data-source"} 0
+# HELP llm_d_inference_scheduler_datalayer_poll_errors_total [ALPHA] [Deprecated: Use llm_d_epp_datalayer_poll_errors_total] Data-source poll errors per source type.
+# TYPE llm_d_inference_scheduler_datalayer_poll_errors_total counter
+llm_d_inference_scheduler_datalayer_poll_errors_total{source_type="metrics-data-source"} 1
+# HELP llm_d_inference_scheduler_disagg_decision_total [ALPHA] [Deprecated: Use llm_d_epp_disagg_decision_total] Total number of disaggregation routing decisions made
+# TYPE llm_d_inference_scheduler_disagg_decision_total counter
+llm_d_inference_scheduler_disagg_decision_total{decision_type="prefill-decode",model_name="meta-llama/Llama-3.1-8B-Instruct"} 30
+llm_d_inference_scheduler_disagg_decision_total{decision_type="decode-only",model_name="meta-llama/Llama-3.1-8B-Instruct"} 12

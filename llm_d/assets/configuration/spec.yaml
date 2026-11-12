@@ -1,0 +1,52 @@
+name: llm-d
+fleet_configurable: true
+files:
+- name: llm_d.yaml
+  options:
+  - template: init_config
+    options:
+    - template: init_config/openmetrics
+  - template: instances
+    options:
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.required: true
+        openmetrics_endpoint.value.example: http://localhost:9090/metrics
+        openmetrics_endpoint.description: |
+          Endpoint exposing llm-d Prometheus metrics. Configure one instance per endpoint:
+
+            - The router's Endpoint Picker (EPP) `/metrics` endpoint (default port 9090). Authentication is
+              enabled by default; see `auth_token`.
+            - The P/D sidecar `/metrics` endpoint, which is disabled unless the sidecar runs with `--metrics-port`.
+            - The coordinator `/metrics` endpoint (default port 9090).
+
+          Model servers expose their own metrics; collect them with the vLLM or SGLang integration.
+
+          This integration is part of GPU Monitoring and only runs when GPU Monitoring is enabled
+          in the Agent configuration (`gpu.enabled: true`, or `DD_GPU_ENABLED=true`). When GPU
+          Monitoring is off, every instance configured here is skipped.
+
+          For more information, see:
+          https://github.com/llm-d/llm-d-router/blob/main/docs/metrics.md
+        histogram_buckets_as_distributions.value.example: true
+        histogram_buckets_as_distributions.description: |
+          Whether to send histogram buckets as Datadog distribution metrics. This implicitly
+          enables the `collect_histogram_buckets` and `non_cumulative_histogram_buckets` options,
+          making percentile aggregations available for llm-d latency metrics.
+
+          This integration enables this option by default.
+
+          Learn more about distribution metrics:
+          https://docs.datadoghq.com/developers/metrics/types/?tab=distribution#metric-types
+        collect_counters_with_distributions.value.example: true
+        collect_counters_with_distributions.description: |
+          Whether to also collect observation counter metrics ending in `.sum` and `.count` when
+          sending histogram buckets as Datadog distribution metrics.
+
+          This integration enables this option by default.
+        rename_labels.description: |
+          A mapping of llm-d label names to their Datadog tag names. By default, the integration renames
+          the InferencePool `name` label to `inference_pool`, and the `namespace`, `port`, and legacy
+          `pod_name` labels, which describe the target model server endpoint rather than the scraped pod,
+          to `endpoint_namespace`, `endpoint_port`, and `endpoint_name`. The legacy `model_server_pod`
+          label is renamed to `model_server_endpoint`.
