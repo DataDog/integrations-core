@@ -96,8 +96,6 @@ class Deadlocks(DBMAsyncJob):
         query_signatures = []
         seen_spids = set()
         for process in process_list.findall('process'):
-            # Every process must be obfuscated, even when its signature is skipped, because the whole XML
-            # is sent in the payload.
             skip_signature = False
             spid = process.get('spid')
             if spid is not None:
