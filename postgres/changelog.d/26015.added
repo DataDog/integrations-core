@@ -1,1 +1,1 @@
-Collect column statistics by default, and add the `collect_column_statistics.function` option to override the function used to read them.
+Add the `collect_column_statistics.function` option to override the function used to read column statistics.
