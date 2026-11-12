@@ -6,7 +6,7 @@ import pytest
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.dev.utils import assert_service_checks, get_metadata_metrics
 
-from .common import COORDINATOR_METRICS, LEGACY_ROUTER_METRICS, ROUTER_METRICS, SIDECAR_METRICS
+from .common import COORDINATOR_METRICS, ROUTER_METRICS, SIDECAR_METRICS
 
 
 @pytest.mark.e2e
@@ -15,7 +15,7 @@ def test_check_llm_d_e2e(dd_agent_check, instances):
 
     # This only shows the check agrees with the fixtures Caddy serves, not with a live llm-d.
     # See the fixture provenance headers.
-    for metric in ROUTER_METRICS + LEGACY_ROUTER_METRICS + SIDECAR_METRICS + COORDINATOR_METRICS:
+    for metric in ROUTER_METRICS + SIDECAR_METRICS + COORDINATOR_METRICS:
         aggregator.assert_metric(metric)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())

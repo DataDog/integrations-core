@@ -46,7 +46,6 @@ files:
           This integration enables this option by default.
         rename_labels.description: |
           A mapping of llm-d label names to their Datadog tag names. By default, the integration renames
-          the InferencePool `name` label to `inference_pool`, and the `namespace`, `port`, and legacy
-          `pod_name` labels, which describe the target model server endpoint rather than the scraped pod,
-          to `endpoint_namespace`, `endpoint_port`, and `endpoint_name`. The legacy `model_server_pod`
-          label is renamed to `model_server_endpoint`.
+          the InferencePool `name` label to `inference_pool`, and the `namespace` and `port` labels, which
+          describe the target model server endpoint rather than the scraped pod, to `endpoint_namespace`
+          and `endpoint_port`.

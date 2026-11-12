@@ -24,12 +24,3 @@
     }
   }
 }
-
-:9093 {
-  route /metrics {
-    rewrite * /legacy_metrics
-    file_server {
-      root /usr/share/caddy
-    }
-  }
-}

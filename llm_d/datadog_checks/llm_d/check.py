@@ -32,8 +32,5 @@ class LlmDCheck(OpenMetricsBaseCheckV2):
                 # Scheduler and in-flight metrics describe the target endpoint, not the scraped pod.
                 'namespace': 'endpoint_namespace',
                 'port': 'endpoint_port',
-                'pod_name': 'endpoint_name',
-                # Legacy name of the per-endpoint queue label.
-                'model_server_pod': 'model_server_endpoint',
             },
         }

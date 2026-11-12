@@ -15,8 +15,6 @@ from datadog_checks.llm_d import LlmDCheck
 from .common import (
     COORDINATOR_HISTOGRAMS,
     COORDINATOR_METRICS,
-    LEGACY_ROUTER_HISTOGRAMS,
-    LEGACY_ROUTER_METRICS,
     ROUTER_HISTOGRAMS,
     ROUTER_METRICS,
     SIDECAR_HISTOGRAMS,
@@ -35,7 +33,6 @@ def run_check(dd_run_check, instance, fixture_file):
     ('fixture_file', 'metrics', 'histograms'),
     [
         pytest.param('llm_d_router_metrics.txt', ROUTER_METRICS, ROUTER_HISTOGRAMS, id='router'),
-        pytest.param('llm_d_legacy_metrics.txt', LEGACY_ROUTER_METRICS, LEGACY_ROUTER_HISTOGRAMS, id='legacy'),
         pytest.param('llm_d_sidecar_metrics.txt', SIDECAR_METRICS, SIDECAR_HISTOGRAMS, id='sidecar'),
         pytest.param('llm_d_coordinator_metrics.txt', COORDINATOR_METRICS, COORDINATOR_HISTOGRAMS, id='coordinator'),
     ],
@@ -65,9 +62,6 @@ def test_check_collects_mapped_metrics(dd_run_check, aggregator, router_instance
         ('llm_d_router_metrics.txt', 'llm_d.epp.scheduler.attempts.count', 'endpoint_namespace:llm-d'),
         ('llm_d_router_metrics.txt', 'llm_d.epp.scheduler.attempts.count', 'endpoint_port:8000'),
         ('llm_d_router_metrics.txt', 'llm_d.epp.inflight.requests', 'endpoint_namespace:llm-d'),
-        ('llm_d_legacy_metrics.txt', 'llm_d.epp.pool.ready_endpoints', 'inference_pool:llama-3-1-8b-pool'),
-        ('llm_d_legacy_metrics.txt', 'llm_d.epp.scheduler.attempts.count', 'endpoint_name:llama-decode-0'),
-        ('llm_d_legacy_metrics.txt', 'llm_d.epp.endpoint.queue_size', 'model_server_endpoint:llama-decode-0'),
     ],
 )
 def test_labels_are_renamed_to_avoid_collisions(dd_run_check, aggregator, router_instance, fixture_file, metric, tag):

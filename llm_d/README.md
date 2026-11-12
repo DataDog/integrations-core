@@ -20,6 +20,8 @@ This integration is part of [GPU Monitoring][4] and only runs when GPU Monitorin
 
 **Minimum Agent version:** 7.87.0
 
+**Supported llm-d versions:** v1.0.0 and later
+
 ## Setup
 
 Follow the instructions below to configure this check for an Agent running on Kubernetes. See the
@@ -135,9 +137,6 @@ podLabelsAsTags:
   llm-d.ai/role: llm_d_role
 ```
 
-The same setting can map a pod label that holds the InferencePool name to `inference_pool`, as an
-alternative to the annotation.
-
 ### Validation
 
 Run the [Agent status command][8] and look for `llm_d` under the Checks section.
@@ -151,15 +150,8 @@ See [metadata.csv][9] for a list of metrics provided by this integration.
 The integration renames these labels:
 
 - `name`, the InferencePool name, to `inference_pool`.
-- `namespace`, `port`, and the legacy `pod_name`, which describe the model server endpoint a request was
-  scheduled to rather than the scraped pod, to `endpoint_namespace`, `endpoint_port`, and `endpoint_name`.
-- The legacy `model_server_pod` to `model_server_endpoint`.
-
-Legacy EPP metric names (`inference_objective_*`, `inference_pool_*`, `inference_extension_*`,
-`llm_d_inference_scheduler_*`, and `kvcache_*`) are reported under the same Datadog metrics as their
-`llm_d_epp_*` replacements. llm-d v0.10 emits both the legacy and current names, and v0.11 emits both
-for the `kvcache_*` series. On those versions, add the legacy names to `exclude_metrics` to avoid
-counting them twice.
+- `namespace` and `port`, which describe the model server endpoint a request was scheduled to rather than
+  the scraped pod, to `endpoint_namespace` and `endpoint_port`.
 
 ### Events
 
