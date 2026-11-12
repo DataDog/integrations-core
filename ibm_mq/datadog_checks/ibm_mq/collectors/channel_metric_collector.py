@@ -7,7 +7,7 @@ from datadog_checks.base import AgentCheck, to_string
 from datadog_checks.base.log import CheckLoggingAdapter  # noqa: F401
 from datadog_checks.ibm_mq import metrics
 from datadog_checks.ibm_mq.config import IBMMQConfig  # noqa: F401
-from datadog_checks.ibm_mq.utils import decode_mq_description, normalize_desc_tag
+from datadog_checks.ibm_mq.utils import decode_mq_description, mq_pattern_matcher, normalize_desc_tag
 
 try:
     import pymqi
@@ -161,9 +161,13 @@ class ChannelMetricCollector(object):
         else:
             # Count active connections per channel
             channel_active_counts = {}
+            # channels_to_skip holds MQ generic names (e.g. "YMQU.*"), so an exact-string comparison
+            # never matched a real channel name and every channel was polled and submitted twice
+            # (AGENT-16599, issue 5). Match them as MQ patterns instead. Built once, not per row.
+            should_skip = mq_pattern_matcher(channels_to_skip)
             for channel_info in response:
                 channel_name = to_string(channel_info[pymqi.CMQCFC.MQCACH_CHANNEL_NAME]).strip()
-                if channel_name in channels_to_skip:
+                if should_skip(channel_name):
                     continue
                 channel_tags = tags + ["channel:{}".format(channel_name)]
                 if self.config.add_description_tags and pymqi.CMQCFC.MQCACH_DESC in channel_info:
