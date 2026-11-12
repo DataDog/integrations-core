@@ -115,8 +115,9 @@ class Deadlocks(DBMAsyncJob):
             signature = None
             for frame in process.findall('.//frame'):
                 if frame.text is not None and frame.text != "unknown":
+                    is_unknown = frame.text.strip() == "unknown"
                     frame.text = self.obfuscate_no_except_wrapper(frame.text)
-                    if signature is None and frame.text != OBFUSCATION_ERROR:
+                    if signature is None and not is_unknown and frame.text != OBFUSCATION_ERROR:
                         signature = compute_sql_signature(frame.text)
 
             for inputbuf in process.findall('.//inputbuf'):
