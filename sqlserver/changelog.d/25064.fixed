@@ -1,1 +1,1 @@
-Honor reported and excluded hostnames in SQL Server XE events.
+Honor `exclude_hostname` in SQL Server XE event payloads.
