@@ -1,4 +1,6 @@
-# This workflow claims package names on PyPI for our integrations by publishing empty packages.
+# This workflow claims package names on PyPI for our integrations by publishing placeholder packages whose
+# README and only module point to the Agent integration-management docs:
+# https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install
 # The working packages can be found here:
 # https://dd-integrations-core-wheels-build-stable.datadoghq.com/targets/simple/index.html
 # This is a work-around until PyPI adds support for namespaces and we claim an entire namespace for Datadog.
@@ -20,7 +22,7 @@ defaults:
 
 jobs:
   find-new-integrations:
-    name: Find unclaimed PyPI packages
+    name: Find packages to publish
     runs-on: ubuntu-latest
 
     permissions:
@@ -38,17 +40,23 @@ jobs:
       with:
         python-version: "${{ env.PYTHON_VERSION }}"
 
-    - name: Find unclaimed packages
+    - name: Find new and outdated packages
       id: find
       run: |
         packages=()
         shopt -s nullglob
         for pyproject in */pyproject.toml; do
           pkg=$(python -c "import tomllib, pathlib; data = tomllib.loads(pathlib.Path('${pyproject}').read_text()); print(data['project']['name'])")
-          status=$(curl -s -o /dev/null -w "%{http_code}" "https://pypi.org/pypi/${pkg}/json")
+          response=$(curl -s -w "\n%{http_code}" "https://pypi.org/pypi/${pkg}/json")
+          status="${response##*$'\n'}"
           if [ "$status" = "404" ]; then
             packages+=("\"${pkg}\"")
-          elif [ "$status" != "200" ]; then
+          elif [ "$status" = "200" ]; then
+            latest=$(echo "$response" | head -n -1 | python -c "import json, sys; print(json.load(sys.stdin)['info']['version'])")
+            if [ "$latest" = "0.0.1" ]; then
+              packages+=("\"${pkg}\"")
+            fi
+          else
             echo "PyPI returned unexpected HTTP status ${status} for package ${pkg}. Please re-run this job." >&2
             exit 1
           fi
@@ -84,16 +92,27 @@ jobs:
       env:
         PACKAGE_NAME: ${{ matrix.package }}
       run: |
-        mkdir -p dist pkg_placeholder
+        MODULE_NAME=$(echo "${PACKAGE_NAME}" | tr - _)
+        mkdir -p dist "pkg_placeholder/${MODULE_NAME}"
+        cat > pkg_placeholder/README.md << EOF
+        This package is a placeholder. It exists only to reserve the name on PyPI and contains no functional code.
+
+        Datadog integrations are installed and managed with the Datadog Agent, not with pip:
+        https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install
+        EOF
+        cat > "pkg_placeholder/${MODULE_NAME}/__init__.py" << EOF
+        print("This package is a placeholder. Install Datadog integrations with the Datadog Agent: https://docs.datadoghq.com/agent/guide/integration-management/?tab=linux#install")
+        EOF
         cat > pkg_placeholder/pyproject.toml << EOF
         [build-system]
         requires = ["hatchling"]
         build-backend = "hatchling.build"
         [project]
         name = "${PACKAGE_NAME}"
-        version = "0.0.1"
+        version = "0.0.2"
+        readme = "README.md"
         [tool.hatch.build.targets.wheel]
-        bypass-selection = true
+        only-include = ["${MODULE_NAME}"]
         EOF
         python -m build --no-isolation --wheel pkg_placeholder
         mv pkg_placeholder/dist/* dist/
@@ -101,7 +120,5 @@ jobs:
     - name: Push Python artifacts to PyPI
       uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
       with:
-        # We don't mind invalid metadata, we only want to claim the package name.
-        verify-metadata: false
         verbose: true
-        skip-existing: true
+        skip-existing: false
