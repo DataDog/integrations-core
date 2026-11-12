@@ -81,6 +81,29 @@ instances:
     #
     # collect_podgroup_events: true
 
+    ## @param collect_scheduling_goodput - boolean - optional - default: false
+    ## Experimental. Submit the scheduling goodput metrics, in GPU-hours since the previous run, as one series per
+    ## PodGroup tagged with `kai_workload` and its KAI queue, so that they can be summed by queue, cluster or reason:
+    ##
+    ## - `gpu.scheduling.badput_time`: GPU time that GPU PodGroups spent waiting to become fully runnable, tagged with
+    ##   the normalized `reason` and, when KAI reports one, the raw `scheduler_reason`.
+    ## - `gpu.scheduling.fully_admitted_time`: GPU time that GPU PodGroups spent with all their active pods running.
+    ##
+    ## Goodput is `fully_admitted_time / (fully_admitted_time + badput_time)`. The metrics have no `kai.` prefix so
+    ## that every scheduler integration submits the same metrics.
+    ##
+    ## Each GPU PodGroup active in an hour adds at least two custom metric series, plus one per extra badput reason.
+    ##
+    ## A GPU PodGroup has pods that request `nvidia.com/gpu`, `amd.com/gpu` or a KAI GPU fraction. It is fully admitted
+    ## once every one of its active pods runs, and at least `minMember` of its pods run or completed. This requires
+    ## cluster-wide `list` RBAC permission on `podgroups.scheduling.run.ai` and on `pods`, and `get` on `jobs.batch` to
+    ## tell whether a PodGroup left without pods waits for new ones or is done.
+    ##
+    ## Every instance with this option enabled counts all the PodGroups of the cluster, so enable it on one instance
+    ## only, otherwise the metrics are counted several times.
+    #
+    # collect_scheduling_goodput: false
+
     ## @param kube_config_dict - mapping - optional
     ## Optional kubeconfig dictionary used to configure the Kubernetes API client.
     ##
