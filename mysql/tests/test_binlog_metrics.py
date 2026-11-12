@@ -1,6 +1,9 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from contextlib import contextmanager
+from typing import Iterator
+
 import mock
 import pymysql
 import pytest
@@ -10,9 +13,33 @@ from datadog_checks.mysql.mysql import BINARY_LOGS_NET_WRITE_TIMEOUT
 
 from . import common
 
+SET_TIMEOUT = 'SET SESSION net_write_timeout = {}'.format(BINARY_LOGS_NET_WRITE_TIMEOUT)
+SHOW_BINARY_LOGS = 'SHOW BINARY LOGS;'
+TAGS = ['foo:bar']
 
-def _build_check(binlog_size_metrics):
-    options = {'replication': False}
+
+class FakeCursor:
+    def __init__(self, executed: list[str], show_binary_logs_error: Exception | None = None):
+        self.executed = executed
+        self._show_binary_logs_error = show_binary_logs_error
+        self._rows: list[tuple[str, int]] = []
+
+    def execute(self, query: str, args: object = None) -> None:
+        self.executed.append(query)
+        if query == SHOW_BINARY_LOGS:
+            if self._show_binary_logs_error:
+                raise self._show_binary_logs_error
+            self._rows = [('mysql-bin.000001', 100), ('mysql-bin.000002', 23)]
+
+    def fetchall(self) -> list[tuple[str, int]]:
+        return self._rows
+
+    def close(self) -> None:
+        pass
+
+
+def _build_check(binlog_size_metrics: bool | None = None, log_bin: str = 'ON') -> MySql:
+    options: dict[str, object] = {'replication': False}
     if binlog_size_metrics is not None:
         options['binlog_size_metrics'] = binlog_size_metrics
     instance = {
@@ -21,96 +48,40 @@ def _build_check(binlog_size_metrics):
         'options': options,
     }
     check = MySql(common.CHECK_NAME, {}, [instance])
-    check.global_variables._variables = {'log_bin': 'ON'}
+    check.global_variables._variables = {'log_bin': log_bin}
     return check
 
 
-def _collect(check):
-    with (
-        mock.patch.object(check, '_get_stats_from_status', return_value={}),
-        mock.patch.object(check, '_check_innodb_engine_enabled', return_value=False),
-        mock.patch.object(check, '_submit_metrics'),
-        mock.patch.object(check, '_compute_synthetic_results'),
-        mock.patch.object(check, 'version') as version,
-        mock.patch.object(check, '_get_binary_log_stats', return_value=123) as binary_log_stats,
-    ):
-        version.version_compatible.return_value = False
-        check._collect_metrics(mock.MagicMock(), tags=[])
-    return binary_log_stats
+def _fake_db(executed: list[str], show_binary_logs_error: Exception | None = None) -> mock.MagicMock:
+    db = mock.MagicMock()
+    db.cursor.side_effect = lambda *args: FakeCursor(executed, show_binary_logs_error)
+    return db
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize('binlog_size_metrics', [None, True])
-def test_binlog_size_metrics_collected_by_default(binlog_size_metrics):
-    """Binary log size metrics are collected when binlog is enabled and the option is not set or true."""
-    check = _build_check(binlog_size_metrics)
-    binary_log_stats = _collect(check)
-    binary_log_stats.assert_called_once()
+@pytest.mark.parametrize(
+    'binlog_size_metrics, log_bin, collected',
+    [
+        pytest.param(None, 'ON', True, id='default'),
+        pytest.param(True, 'ON', True, id='enabled'),
+        pytest.param(False, 'ON', False, id='disabled-by-option'),
+        pytest.param(None, 'OFF', False, id='log-bin-off'),
+    ],
+)
+def test_binary_log_metrics(aggregator, binlog_size_metrics: bool | None, log_bin: str, collected: bool):
+    check = _build_check(binlog_size_metrics, log_bin)
+    executed: list[str] = []
 
+    check._collect_binary_log_metrics(_fake_db(executed), TAGS)
 
-@pytest.mark.unit
-def test_binlog_size_metrics_disabled_by_option():
-    """Setting binlog_size_metrics to false skips the SHOW BINARY LOGS query."""
-    check = _build_check(binlog_size_metrics=False)
-    binary_log_stats = _collect(check)
-    binary_log_stats.assert_not_called()
-
-
-class FakeCursor:
-    def __init__(self, show_binary_logs_error=None):
-        self.executed = []
-        self._show_binary_logs_error = show_binary_logs_error
-        self._rows = []
-
-    def execute(self, query, args=None):
-        self.executed.append(query)
-        if query.startswith('SHOW BINARY LOGS'):
-            if self._show_binary_logs_error:
-                raise self._show_binary_logs_error
-            self._rows = [('mysql-bin.000001', 100), ('mysql-bin.000002', 23)]
-
-    def fetchall(self):
-        return self._rows
-
-    def close(self):
-        pass
-
-
-CONNECTION_ARGS = {'host': 'db.example', 'port': 3306, 'ssl': {'check_hostname': False}}
-
-
-def _binary_log_stats(check, cursor):
-    """Run `_get_binary_log_stats` against a fake dedicated connection, and return the connect mock and result."""
-    binlog_connection = mock.MagicMock()
-    binlog_connection.cursor.return_value = cursor
-    with (
-        mock.patch.object(check, '_get_connection_args', return_value=CONNECTION_ARGS),
-        mock.patch(
-            'datadog_checks.mysql.mysql.connect_with_session_variables', return_value=binlog_connection
-        ) as connect,
-    ):
-        result = check._get_binary_log_stats()
-    binlog_connection.close.assert_called_once()
-    return connect, result
-
-
-@pytest.mark.unit
-def test_binary_logs_query_runs_with_short_net_write_timeout():
-    """SHOW BINARY LOGS holds the binlog index lock while it sends rows, so a slow reader blocks every commit.
-
-    The query must run with a short `net_write_timeout`, on a connection that uses the instance's connection settings.
-    """
-    check = _build_check(binlog_size_metrics=True)
-    cursor = FakeCursor()
-
-    connect, result = _binary_log_stats(check, cursor)
-
-    assert result == 123
-    assert cursor.executed == [
-        'SET SESSION net_write_timeout = {}'.format(BINARY_LOGS_NET_WRITE_TIMEOUT),
-        'SHOW BINARY LOGS;',
-    ]
-    connect.assert_called_once_with(mysql_version=check.version, **CONNECTION_ARGS)
+    if collected:
+        assert executed == [SET_TIMEOUT, SHOW_BINARY_LOGS]
+        aggregator.assert_metric(
+            'mysql.binlog.disk_use', value=123, tags=TAGS, hostname=check.reported_hostname, count=1
+        )
+    else:
+        assert executed == []
+        aggregator.assert_metric('mysql.binlog.disk_use', count=0)
 
 
 @pytest.mark.unit
@@ -129,44 +100,44 @@ def test_binary_logs_query_runs_with_short_net_write_timeout():
         ),
     ],
 )
-def test_binary_logs_query_error_skips_metric_with_warning(error, expected_warning):
-    check = _build_check(binlog_size_metrics=True)
+def test_binary_log_query_error_skips_metric_with_warning(aggregator, error: Exception, expected_warning: str):
+    check = _build_check()
 
-    _, result = _binary_log_stats(check, FakeCursor(show_binary_logs_error=error))
+    check._collect_binary_log_metrics(_fake_db([], show_binary_logs_error=error), TAGS)
 
-    assert result is None
+    aggregator.assert_metric('mysql.binlog.disk_use', count=0)
     assert any(expected_warning in warning for warning in check.warnings)
 
 
 @pytest.mark.unit
-def test_binary_logs_timeout_does_not_affect_main_connection():
-    """A write timeout drops the connection that ran SHOW BINARY LOGS.
+def test_binary_log_query_runs_last_on_main_connection():
+    """A net_write_timeout drops the connection, so any query run on it after SHOW BINARY LOGS would fail."""
+    check = _build_check()
+    executed: list[str] = []
+    db = _fake_db(executed)
 
-    That connection must not be the main check connection, or every later query in the run fails and the run's
-    status metrics are lost.
-    """
-    check = _build_check(binlog_size_metrics=True)
-    main_cursor = FakeCursor()
-    main_db = mock.MagicMock()
-    main_db.cursor.return_value = main_cursor
-    binlog_connection = mock.MagicMock()
-    binlog_connection.cursor.return_value = FakeCursor(
-        show_binary_logs_error=pymysql.err.OperationalError(2013, 'Lost connection to MySQL server during query')
-    )
+    @contextmanager
+    def connect() -> Iterator[mock.MagicMock]:
+        check.service_check_tags = []
+        yield db
 
     with (
-        mock.patch.object(check, '_get_stats_from_status', return_value={}),
-        mock.patch.object(check, '_check_innodb_engine_enabled', return_value=False),
-        mock.patch.object(check, '_submit_metrics') as submit_metrics,
-        mock.patch.object(check, '_compute_synthetic_results'),
-        mock.patch.object(check, 'version') as version,
-        mock.patch.object(check, '_get_connection_args', return_value=CONNECTION_ARGS),
-        mock.patch('datadog_checks.mysql.mysql.connect_with_session_variables', return_value=binlog_connection),
+        mock.patch.object(check, '_connect', connect),
+        mock.patch.object(check.global_variables, 'collect'),
+        mock.patch.object(check, 'set_version'),
+        mock.patch.object(check, '_send_metadata'),
+        mock.patch.object(check, '_check_database_configuration'),
+        mock.patch.object(check, 'set_server_uuid'),
+        mock.patch.object(check, 'set_cluster_tags'),
+        mock.patch.object(check, '_send_database_instance_metadata'),
+        mock.patch.object(check, '_collect_metrics', side_effect=lambda *a, **kw: executed.append('metrics')),
+        mock.patch.object(check, '_collect_system_metrics'),
+        mock.patch.object(check, '_get_runtime_queries', return_value=None),
+        mock.patch.object(check, 'run_async_jobs'),
+        mock.patch.object(
+            check._query_manager, 'execute', side_effect=lambda *a, **kw: executed.append('custom_queries')
+        ),
     ):
-        version.version_compatible.return_value = False
-        check._collect_metrics(main_db, tags=[])
+        check.check(None)
 
-    assert not any('BINARY LOGS' in query for query in main_cursor.executed)
-    main_db.close.assert_not_called()
-    submit_metrics.assert_called_once()
-    assert submit_metrics.call_args.args[1]['Binlog_space_usage_bytes'] is None
+    assert executed == ['metrics', 'custom_queries', SET_TIMEOUT, SHOW_BINARY_LOGS]

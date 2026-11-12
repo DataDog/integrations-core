@@ -458,6 +458,9 @@ class MySql(DatabaseCheck):
                 # Custom queries
                 self._query_manager.execute(extra_tags=tags)
 
+                if not self._config.only_custom_queries:
+                    self._collect_binary_log_metrics(db, tags)
+
         except Exception as e:
             self.log.exception("error!")
             raise e
@@ -626,13 +629,6 @@ class MySql(DatabaseCheck):
                     results.update(self.innodb_stats.get_stats_from_innodb_status(db))
             self.innodb_stats.process_innodb_stats(results, self._config.options, metrics)
 
-        # Binary log statistics
-        if self.global_variables.log_bin_enabled and is_affirmative(
-            self._config.options.get('binlog_size_metrics', True)
-        ):
-            with tracked_query(self, operation="binary_log_metrics"):
-                results['Binlog_space_usage_bytes'] = self._get_binary_log_stats()
-
         # Compute key cache utilization metric
         key_blocks_unused = collect_scalar('Key_blocks_unused', results)
         key_cache_block_size = self.global_variables.key_cache_block_size
@@ -654,7 +650,6 @@ class MySql(DatabaseCheck):
 
         metrics.update(VARIABLES_VARS)
         metrics.update(INNODB_VARS)
-        metrics.update(BINLOG_VARS)
 
         if is_affirmative(self._config.options.get('extra_status_metrics', self._config.dbm_enabled)):
             self.log.debug("Collecting Extra Status Metrics")
@@ -1146,22 +1141,27 @@ class MySql(DatabaseCheck):
 
             return results
 
-    def _get_binary_log_stats(self):
+    def _collect_binary_log_metrics(self, db: pymysql.connections.Connection, tags: list[str]) -> None:
+        if not self.global_variables.log_bin_enabled or not is_affirmative(
+            self._config.options.get('binlog_size_metrics', True)
+        ):
+            return
+        with tracked_query(self, operation="binary_log_metrics"):
+            binary_log_space = self._get_binary_log_stats(db)
+        if binary_log_space is not None:
+            self._submit_metrics(BINLOG_VARS, {'Binlog_space_usage_bytes': binary_log_space}, tags)
+
+    def _get_binary_log_stats(self, db: pymysql.connections.Connection) -> int | None:
         """
         SHOW BINARY LOGS holds the binary log index lock while it sends one row per file. Another SHOW BINARY LOGS
         or a log rotation then waits for that lock while holding the binary log lock, which every commit needs. If
         the agent reads slowly, commits stall until the server's net_write_timeout (60s by default) fires.
 
-        Run the query with a short timeout on its own connection. The server drops the connection when the timeout
-        fires, and a dedicated connection keeps that from failing the rest of the check run.
+        Run the query with a short timeout as the last work on the check's connection: the server drops the
+        connection when the timeout fires, so nothing can run on it afterward.
         """
         try:
-            with (
-                closing(
-                    connect_with_session_variables(mysql_version=self.version, **self._get_connection_args())
-                ) as db,
-                closing(db.cursor(CommenterCursor)) as cursor,
-            ):
+            with closing(db.cursor(CommenterCursor)) as cursor:
                 cursor.execute("SET SESSION net_write_timeout = {}".format(BINARY_LOGS_NET_WRITE_TIMEOUT))
                 cursor.execute("SHOW BINARY LOGS;")
                 return sum(result[1] for result in cursor.fetchall())
