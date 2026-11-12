@@ -1,3 +1,6 @@
+# (C) Datadog, Inc. 2026-present
+# All rights reserved
+# Licensed under a 3-clause BSD style license (see LICENSE)
 from datetime import datetime, timezone
 from typing import Callable, NamedTuple
 from unittest.mock import Mock
