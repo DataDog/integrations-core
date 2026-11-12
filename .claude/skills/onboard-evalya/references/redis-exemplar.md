@@ -86,7 +86,9 @@ as-is (see the credentials rule above).
 ## activity-gen.sh contract
 
 - POSIX `sh`, `set -eu`.
-- Consumes the connection details from the `provides.*` env (`DB_HOST`, `DB_PORT`, credentials).
+- Reads `DB_HOST`, `DB_PORT` (default `6379`), and `REDIS_PASSWORD` from its compose `environment:`,
+  the same names the `provides.*` labels publish. In redisdb, `DB_HOST` is `redis-master`, not the
+  proxy.
 - `ACTIVITY_GEN=0` → log and `exec sleep infinity` (idle but alive so dependents still start).
 - Optional duration cap (`ACTIVITY_DURATION`, `0` = forever) for bounded CI runs.
 - Loops the operations that move each rate/counter target metric, with periodic progress logs.

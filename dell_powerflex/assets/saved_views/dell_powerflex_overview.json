@@ -1,0 +1,20 @@
+{
+  "name": "Dell PowerFlex overview",
+  "type": "logs",
+  "page": "stream",
+  "query": "source:dell-powerflex",
+  "timerange": {
+    "interval_ms": 900000
+  },
+  "options": {
+    "columns": [
+      "host",
+      "status",
+      "@powerflex.object_id"
+    ],
+    "show_date_column": true,
+    "show_message_column": true,
+    "message_display": "inline",
+    "show_timeline": true
+  }
+}

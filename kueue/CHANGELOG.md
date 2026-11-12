@@ -2,6 +2,17 @@
 
 <!-- towncrier release notes start -->
 
+## 3.0.0 / 2026-10-29
+
+***Changed***:
+
+* Stop copying check instance tags onto Kueue workload events. ([#25787](https://github.com/DataDog/integrations-core/pull/25787))
+
+***Added***:
+
+* Support HA Kueue: drop follower samples by default, add the `collect_follower_metrics` option, and submit Workload events only from the leader replica. ([#25541](https://github.com/DataDog/integrations-core/pull/25541))
+* Add a per-workload event index so Kueue workload events that share a timestamp can be ordered. ([#25762](https://github.com/DataDog/integrations-core/pull/25762))
+
 ## 2.0.0 / 2026-09-17 / Agent 7.84.0
 
 ***Changed***:

@@ -1,0 +1,82 @@
+{
+  "app_id": "hpe-aruba-edgeconnect",
+  "app_uuid": "019e4a11-44b8-78ac-9378-dc127e68437a",
+  "manifest_version": "2.0.0",
+  "display_on_public_website": true,
+  "tile": {
+    "title": "HPE Aruba EdgeConnect",
+    "description": "A secure SD-WAN platform for resilient connectivity, app performance, and network visibility.",
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "uninstallation": "README.md#Uninstallation",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "HPE Aruba EdgeConnect dashboard (light mode)",
+        "image_url": "images/Screenshot 2026-06-05 at 14.42.43.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "HPE Aruba EdgeConnect dashboard (dark mode)",
+        "image_url": "images/Screenshot 2026-06-05 at 14.42.56.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Network",
+      "Offering::Integration",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs",
+      "Submitted Data Type::Events"
+    ]
+  },
+  "oauth": {},
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com",
+    "vendor_id": "datadog"
+  },
+  "assets": {
+    "dashboards": {
+      "HPE Aruba EdgeConnect overview": "assets/dashboards/hpe_aruba_edgeconnect_overview.json"
+    },
+    "monitors": {
+      "Device unreachable": "assets/monitors/device_unreachable.json",
+      "Tunnel latency degradation": "assets/monitors/tunnel_latency_degradation.json",
+      "Tunnel packet loss too high": "assets/monitors/tunnel_packet_loss_too_high.json",
+      "Tunnel availability low": "assets/monitors/tunnel_availability_low.json",
+      "Device hardware unhealthy": "assets/monitors/device_hardware_unhealthy.json"
+    },
+    "logs": {
+      "source": "hpe-aruba-edgeconnect"
+    },
+    "integration": {
+      "source_type_name": "hpe-aruba-edgeconnect",
+      "auto_install": true,
+      "configuration": {},
+      "process_signatures": [],
+      "metrics": {
+        "prefix": "hpe_aruba_edgeconnect",
+        "check": [
+          "hpe_aruba_edgeconnect.orchestrator.reachability"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "source_type_id": 80663909,
+      "supports_ddr_coordinated_failover": false
+    }
+  },
+  "owner": "agent-integrations"
+}

@@ -488,7 +488,10 @@ class DBMAsyncJob(object):
 
     def _set_rate_limit(self, rate_limit):
         if self._rate_limiter.rate_limit_s != rate_limit:
+            last_event = self._rate_limiter.last_event
             self._rate_limiter = ConstantRateLimiter(rate_limit, max_sleep_chunk_s=self._max_sleep_chunk_s)
+            # Jobs change their rate from inside a run, so keep that run's tick for the wait that follows it
+            self._rate_limiter.last_event = last_event
 
     def _run_sync_job_rate_limited(self):
         if self._rate_limiter.shall_execute():
@@ -496,10 +499,16 @@ class DBMAsyncJob(object):
             self._run_job_traced()
 
     def _run_job_rate_limited(self):
+        previous_event = self._rate_limiter.last_event
         try:
             self._last_run_start = time.time()
+            # Measure the period from the start of this run so that the first run of a new or restarted loop
+            # is spaced like every other run. Jobs also read `last_event` during the run as its tick.
+            self._rate_limiter.last_event = self._last_run_start
             self._run_job_traced()
         except:
+            # A failed run reports its error without first waiting out a full period
+            self._rate_limiter.last_event = previous_event
             raise
         finally:
             if not self._cancel_event.is_set():
