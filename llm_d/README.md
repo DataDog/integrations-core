@@ -3,7 +3,7 @@
 ## Overview
 
 [llm-d][1] is a Kubernetes-native distributed inference stack that routes requests across model servers
-with an Endpoint Picker (EPP), and splits inference into prefill and decode stages with a P/D sidecar.
+with an Endpoint Picker (EPP), and splits inference into prefill and decode stages with a prefill/decode (P/D) sidecar.
 This check collects Prometheus metrics from the llm-d components:
 
 - **Router (EPP)**: request throughput, errors and outcomes, time to first token, inter-token latency,
@@ -16,7 +16,7 @@ Model server metrics are collected by the [vLLM][2] or [SGLang][3] integrations.
 Histogram buckets are submitted as Datadog distributions by default, so percentile aggregations are
 available for latency and token-count metrics.
 
-This integration is part of [GPU Monitoring][4] and only runs when GPU Monitoring is enabled.
+This integration is part of [GPU Monitoring][4] and runs only when GPU Monitoring is enabled.
 
 **Minimum Agent version:** 7.87.0
 
@@ -24,7 +24,7 @@ This integration is part of [GPU Monitoring][4] and only runs when GPU Monitorin
 
 ## Setup
 
-Follow the instructions below to configure this check for an Agent running on Kubernetes. See the
+Use the following instructions to configure this check for an Agent running on Kubernetes. See the
 [Autodiscovery integration templates][5] for more guidance.
 
 ### Prerequisites
@@ -50,9 +50,10 @@ available configuration options.
 
 #### Router (EPP)
 
-The EPP serves its metrics on port 9090 of the `epp` container. Authentication is enabled by default
-(`--metrics-endpoint-auth`): the EPP accepts bearer tokens for identities allowed to `get` the `/metrics`
-non-resource URL. Grant that to the Agent's ServiceAccount:
+The EPP serves metrics on port 9090 of the `epp` container. Metrics endpoint authentication
+(`--metrics-endpoint-auth`) is enabled by default, so the EPP only accepts bearer tokens from identities with
+`get` permission on the `/metrics` non-resource URL. To grant this permission to the Agent's ServiceAccount,
+create a ClusterRole and ClusterRoleBinding:
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -113,14 +114,14 @@ that port on the coordinator container.
 
 #### Model servers
 
-Collect engine metrics with the vLLM or SGLang integration. On decode pods that run the P/D sidecar, the
-sidecar listens on port 8000 and vLLM listens on the model server port (default 8200), so point the
-vLLM check at port 8200.
+Collect model server metrics with the vLLM or SGLang integration. On decode pods that run the P/D sidecar,
+the sidecar listens on port 8000 and vLLM listens on the model server port (default 8200). Point the vLLM
+check at the model server port, not the sidecar port.
 
 #### Tags
 
-Request metrics carry no InferencePool label. Tag the router and model server pods with the
-InferencePool name so their metrics can be grouped by deployment:
+EPP request metrics (`llm_d.epp.request.*`) don't include an InferencePool label. To group metrics by
+InferencePool, tag the router and model server pods with the InferencePool name:
 
 ```yaml
 metadata:
@@ -129,8 +130,8 @@ metadata:
 ```
 
 To tag model server metrics with their disaggregation role, map the `llm-d.ai/role` pod label to the
-`llm_d_role` tag. With the Datadog Helm chart, set `datadog.podLabelsAsTags`; with the Datadog Operator,
-set `spec.global.podLabelsAsTags`:
+`llm_d_role` tag. Set `datadog.podLabelsAsTags` in the Datadog Helm chart, or
+`spec.global.podLabelsAsTags` in the Datadog Operator:
 
 ```yaml
 podLabelsAsTags:
@@ -147,11 +148,14 @@ Run the [Agent status command][8] and look for `llm_d` under the Checks section.
 
 See [metadata.csv][9] for a list of metrics provided by this integration.
 
-The integration renames these labels:
+The integration renames the following labels:
 
-- `name`, the InferencePool name, to `inference_pool`.
-- `namespace` and `port`, which describe the model server endpoint a request was scheduled to rather than
-  the scraped pod, to `endpoint_namespace` and `endpoint_port`.
+- `name` (the InferencePool name) becomes `inference_pool`.
+- `namespace` becomes `endpoint_namespace`.
+- `port` becomes `endpoint_port`.
+
+The `namespace` and `port` labels describe the model server endpoint that a request was scheduled to, not the
+scraped pod.
 
 ### Events
 
