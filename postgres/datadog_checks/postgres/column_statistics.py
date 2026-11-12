@@ -74,6 +74,7 @@ GROUP BY schemaname, tablename
 ORDER BY schemaname, tablename
 """
 
+FUNCTION_PRESENT_QUERY = "SELECT to_regprocedure('datadog.column_statistics()') IS NOT NULL AS present"
 
 PAYLOAD_MAX_COLUMNS = 5_000
 MAX_QUERY_DURATION_SECONDS = 60
@@ -231,6 +232,10 @@ class PostgresColumnStatisticsCollector:
         try:
             with self._check.db_pool.get_connection(db_name) as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
+                    cursor.execute(FUNCTION_PRESENT_QUERY)
+                    if not cursor.fetchone()['present']:
+                        self._handle_function_not_found(db_name)
+                        return
                     filters_sql, filter_params = self._build_filters()
                     query = COLUMN_STATISTICS_QUERY.format(filters=filters_sql)
                     filter_params.append(self._config.max_tables)
@@ -264,18 +269,7 @@ class PostgresColumnStatisticsCollector:
 
         except psycopg.errors.DatabaseError as e:
             if isinstance(e, psycopg.errors.UndefinedFunction):
-                if db_name not in self._function_not_found_dbs:
-                    self._function_not_found_dbs.add(db_name)
-                    self._log.warning(
-                        "datadog.column_statistics() function not found in database '%s'. "
-                        "Please create the function as described in the documentation: "
-                        "https://docs.datadoghq.com/database_monitoring/setup_postgres/",
-                        db_name,
-                    )
-                    self._check.health.submit_health_event(
-                        name=PostgresHealthEvent.COLUMN_STATISTICS_FUNCTION_NOT_FOUND,
-                        status=HealthStatus.WARNING,
-                    )
+                self._handle_function_not_found(db_name)
             elif isinstance(e, psycopg.errors.InsufficientPrivilege):
                 if db_name not in self._insufficient_privilege_dbs:
                     self._insufficient_privilege_dbs.add(db_name)
@@ -292,6 +286,21 @@ class PostgresColumnStatisticsCollector:
                 self._log.exception("Error collecting column stats for database '%s'", db_name)
         except Exception:
             self._log.exception("Error collecting column stats for database '%s'", db_name)
+
+    def _handle_function_not_found(self, db_name: str):
+        if db_name in self._function_not_found_dbs:
+            return
+        self._function_not_found_dbs.add(db_name)
+        self._log.warning(
+            "datadog.column_statistics() function not found in database '%s'. "
+            "Please create the function as described in the documentation: "
+            "https://docs.datadoghq.com/database_monitoring/setup_postgres/",
+            db_name,
+        )
+        self._check.health.submit_health_event(
+            name=PostgresHealthEvent.COLUMN_STATISTICS_FUNCTION_NOT_FOUND,
+            status=HealthStatus.WARNING,
+        )
 
     def _handle_recovery(self, db_name: str):
         if db_name in self._function_not_found_dbs:

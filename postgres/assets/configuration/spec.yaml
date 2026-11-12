@@ -1166,13 +1166,14 @@ files:
       description: |
         Enable collection of column statistics from pg_stats.
         Requires the `datadog.column_statistics()` function to be created in the database.
+        Databases without the function are skipped and reported with a health warning.
       options:
         - name: enabled
           description: |
             Enable collection of column statistics. Requires `dbm: true`.
           value:
             type: boolean
-            example: false
+            example: true
           fleet_configurable: false
         - name: collection_interval
           description: |

@@ -114,7 +114,7 @@ EXPECTED_DEFAULTS = {
     },
     # === DBM: Column stats collection ===
     'collect_column_statistics': {
-        'enabled': False,
+        'enabled': True,
         'max_tables': 500,
         'collection_interval': 3600,
         'include_databases': [],

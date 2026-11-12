@@ -713,6 +713,7 @@ def test_query_samples_disabled_probes_pg_stat_statements_on_main_db_only(integr
         pg_instance,
         query_samples={'enabled': False},
         query_activity={'enabled': False},
+        collect_column_statistics={'enabled': False},
         database_autodiscovery={'enabled': True, 'include': ['app_.*']},
     )
     main_dbm = [
@@ -841,6 +842,7 @@ def test_autodiscovery_probes_each_database_connectivity(integration_check, pg_i
     if dbm:
         overrides['dbm'] = True
         overrides['query_samples'] = {'enabled': False}
+        overrides['collect_column_statistics'] = {'enabled': False}
         main_responses = _happy_server_responses() + [
             (_extension_schema('pg_stat_statements'), [('public',)]),
             ('SELECT 1 FROM "pg_stat_statements" LIMIT 1', [(1,)]),
@@ -913,7 +915,9 @@ def test_dbm_subfeature_disabled_skips_prerequisite_probes(
     integration_check, pg_instance, disabled, gated, still_running
 ):
     """Disabling a subfeature drops its prerequisites without affecting the other subfeature."""
-    check = _dbm_check(integration_check, pg_instance, **{disabled: {'enabled': False}})
+    check = _dbm_check(
+        integration_check, pg_instance, collect_column_statistics={'enabled': False}, **{disabled: {'enabled': False}}
+    )
     # Use responses that would FAIL the gated probes if they ran.
     server = _happy_server_responses(spl='pgaudit') if disabled == 'query_metrics' else _happy_server_responses()
     dbm = [
@@ -1360,10 +1364,25 @@ def _column_stats_check(integration_check, pg_instance, **overrides):
 
 
 def test_column_statistics_not_run_when_feature_disabled(integration_check, pg_instance):
-    check = _dbm_check(integration_check, pg_instance)
+    check = _dbm_check(integration_check, pg_instance, collect_column_statistics={'enabled': False})
     diagnoses = _run(check, _happy_server_responses() + _happy_dbm_responses())
     assert not _by_name(diagnoses, DatabaseConfigurationError.column_statistics_function_undefined.value)
     assert not _by_name(diagnoses, DatabaseConfigurationError.column_statistics_function_insufficient_privilege.value)
+
+
+def test_column_statistics_run_by_default_with_dbm(integration_check, pg_instance):
+    check = _dbm_check(integration_check, pg_instance)
+    diagnoses = _run(
+        check,
+        _happy_server_responses() + _happy_dbm_responses() + _happy_column_statistics_responses(),
+    )
+    _assert_all_succeed(
+        diagnoses,
+        [
+            DatabaseConfigurationError.column_statistics_function_undefined,
+            DatabaseConfigurationError.column_statistics_function_insufficient_privilege,
+        ],
+    )
 
 
 def test_column_statistics_not_run_without_dbm(integration_check, pg_instance):
