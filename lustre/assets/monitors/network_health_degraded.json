@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "title": "Network health degraded",
+  "tags": [
+    "integration:lustre"
+  ],
+  "definition": {
+    "name": "[Lustre] Network health degraded",
+    "type": "query alert",
+    "query": "avg(last_10m):avg:lustre.net.local.health_stats.health_value{*} by {local_nid} < 900",
+    "message": "Lustre network health is degraded (health value < 900, normal is 1000).\n\nThis indicates potential issues with:\n* Network connectivity\n* Hardware problems (cables, switches, NICs)\n* Driver issues\n* Network congestion\n* Remote peer connectivity\n\n{{#is_alert}}\nHealth value: {{value}} (1000 = perfect health)\nNetwork interface: {{local_nid.name}}\n{{/is_alert}}\n\nImmediate actions:\n1. Check network interface status and logs\n2. Verify physical network connections\n3. Test connectivity to remote peers\n4. Check for driver or firmware issues\n5. Monitor for network errors and timeouts",
+    "tags": [
+      "integration:lustre"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 900,
+        "warning": 950
+      },
+      "notify_audit": false,
+      "require_full_window": false,
+      "renotify_interval": 120,
+      "include_tags": true,
+      "evaluation_delay": 300,
+      "escalation_message": "",
+      "on_missing_data": "show_and_notify_no_data",
+      "new_group_delay": 0,
+      "silenced": {}
+    },
+    "priority": 1
+  },
+  "created_at": "2025-07-28",
+  "last_updated_at": "2025-07-28",
+  "description": "Lustre network health is degraded (health value < 900, normal is 1000)."
+}

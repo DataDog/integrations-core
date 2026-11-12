@@ -1,0 +1,22 @@
+{
+  "name": "Dell PowerFlex SDS logs",
+  "type": "logs",
+  "page": "stream",
+  "query": "source:dell-powerflex @powerflex.object_id:*",
+  "timerange": {
+    "interval_ms": 900000
+  },
+  "options": {
+    "columns": [
+      "host",
+      "status",
+      "@powerflex.object_id",
+      "@logger.method_name",
+      "@logger.line_number"
+    ],
+    "show_date_column": true,
+    "show_message_column": true,
+    "message_display": "inline",
+    "show_timeline": true
+  }
+}
