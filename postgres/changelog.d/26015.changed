@@ -1,1 +1,0 @@
-Collect column statistics by default. Databases without the datadog.column_statistics() function are skipped without running a failing query.
