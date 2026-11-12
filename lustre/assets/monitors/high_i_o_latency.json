@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "title": "High I/O latency",
+  "tags": [
+    "integration:lustre"
+  ],
+  "definition": {
+    "name": "[Lustre] High I/O latency",
+    "type": "query alert",
+    "query": "avg(last_15m):max:lustre.filesystem.write.max{*} by {device_uuid} > 10000000",
+    "message": "Lustre filesystem is experiencing high I/O write latency (>10 seconds).\n\nHigh latency can indicate:\n* Storage backend performance issues\n* Network connectivity problems\n* Lock contention\n* Resource exhaustion (memory, CPU)\n* Hardware problems (disks, controllers)\n\n{{#is_alert}}\nMaximum write latency: {{value}}μs ({{value}} microseconds)\nDevice: {{device_uuid.name}}\n{{/is_alert}}\n\nImmediate actions:\n1. Check storage backend performance\n2. Monitor network connectivity and health\n3. Review system resource utilization\n4. Check for lock contention in LDLM\n5. Examine hardware health (disks, RAID controllers)\n6. Review concurrent workload patterns",
+    "tags": [
+      "integration:lustre"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 10000000,
+        "warning": 5000000
+      },
+      "notify_audit": false,
+      "require_full_window": false,
+      "renotify_interval": 120,
+      "include_tags": true,
+      "evaluation_delay": 300,
+      "escalation_message": "",
+      "on_missing_data": "show_and_notify_no_data",
+      "new_group_delay": 0,
+      "silenced": {}
+    },
+    "priority": 2
+  },
+  "created_at": "2025-07-28",
+  "last_updated_at": "2025-07-28",
+  "description": "Lustre filesystem is experiencing high I/O write latency (>10 seconds)."
+}

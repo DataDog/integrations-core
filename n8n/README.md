@@ -229,10 +229,19 @@ The n8n integration does not include any events.
 
 See [service_checks.json][8] for a list of service checks provided by this integration.
 
-## Troubleshooting
+## Uninstallation
+
+To uninstall this integration from your Agent, run the following command:
+
+```bash
+datadog-agent integration remove datadog-n8n
+```
+
+Alternatively, to disable the integration, rename the `n8n.d/conf.yaml` file to `n8n.d/conf.yaml.example`.
+
+## Support
 
 Need help? Contact [Datadog support][9].
-
 
 [1]: https://n8n.io/
 [2]: https://app.datadoghq.com/account/settings/agent/latest
