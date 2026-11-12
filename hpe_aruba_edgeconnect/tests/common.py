@@ -336,6 +336,7 @@ EXPECTED_VALUES = [
     ('application.latency', 5.1, ['application:microsoft', 'tunnel_name:bondedTunnel_16', 'latency_type:cnd']),
 ]
 
+ALARM_RAISED_MS = 1779178081000
 ALARM_PAYLOAD = {
     'outstanding': [
         {
@@ -344,7 +345,7 @@ ALARM_PAYLOAD = {
             'source': 'System',
             'acknowledged': False,
             'clearable': False,
-            'time': 1779178081000,
+            'time': ALARM_RAISED_MS,
             'description': 'All NTP servers are unreachable',
             'type': 'SW',
             'recommendation': (

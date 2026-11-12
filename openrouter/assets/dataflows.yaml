@@ -1,6 +1,0 @@
-provides:
-  - id: openrouter-agent-console
-    always_on: false
-    granular: false
-    data_type: resources
-    direction: inbound
