@@ -78,6 +78,11 @@ subjects:
   namespace: <AGENT_NAMESPACE>
 ```
 
+Replace `<AGENT_NAMESPACE>` with the namespace the Agent runs in, and `<AGENT_SERVICE_ACCOUNT>` with the
+Agent's ServiceAccount. With the Datadog Helm chart, the ServiceAccount is named after the release (for
+example, `datadog` for a release named `datadog`). With the Datadog Operator, it is
+`<DATADOGAGENT_NAME>-agent` (for example, `datadog-agent`).
+
 Then annotate the router pod so the Agent sends its ServiceAccount token:
 
 ```yaml
@@ -98,6 +103,8 @@ metadata:
         }
       }
 ```
+
+Keep `<TOKEN>` as written. The Agent replaces it with the token it reads from the file.
 
 To serve `/metrics` without authentication instead, install the llm-d router chart with
 `router.monitoring.prometheus.auth.enabled: false` and omit `auth_token`.

@@ -19,6 +19,6 @@ def test_check_llm_d_e2e(dd_agent_check, instances):
         aggregator.assert_metric(metric)
 
     aggregator.assert_metrics_using_metadata(get_metadata_metrics())
-    # rate=True runs each of the 4 instances twice.
-    aggregator.assert_service_check('llm_d.openmetrics.health', ServiceCheck.OK, count=8)
+    # rate=True runs each instance twice.
+    aggregator.assert_service_check('llm_d.openmetrics.health', ServiceCheck.OK, count=2 * len(instances))
     assert_service_checks(aggregator)
