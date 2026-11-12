@@ -366,16 +366,25 @@ def test_deadlock_calls_obfuscator(deadlocks_collection_instance):
         assert expected_xml_string == result_string
 
 
-def test_deadlock_signature_uses_first_stack_frame(deadlocks_collection_instance):
+@pytest.mark.parametrize(
+    'first_frame, second_frame, expected_sql',
+    [
+        pytest.param('SELECT 1', 'SELECT 2', 'SELECT 1', id='first_frame'),
+        pytest.param('\n  unknown\n  ', 'SELECT 2', 'SELECT 2', id='skips_padded_unknown_frame'),
+        pytest.param('\n  unknown\n  ', '\n  unknown\n  ', 'SELECT 3', id='falls_back_to_inputbuf'),
+    ],
+)
+def test_deadlock_signature_source(deadlocks_collection_instance, first_frame, second_frame, expected_sql):
     root = ET.fromstring(
-        """
+        f"""
         <deadlock>
           <process-list>
             <process spid="51">
               <executionStack>
-                <frame>SELECT * FROM orders WHERE id = 1</frame>
-                <frame>SELECT * FROM customers WHERE id = 2</frame>
+                <frame>{first_frame}</frame>
+                <frame>{second_frame}</frame>
               </executionStack>
+              <inputbuf>SELECT 3</inputbuf>
             </process>
           </process-list>
         </deadlock>
@@ -389,7 +398,7 @@ def test_deadlock_signature_uses_first_stack_frame(deadlocks_collection_instance
     ):
         signatures = deadlocks_obj._obfuscate_xml(root)
 
-    assert signatures == [{'spid': 51, 'signature': 'sig:SELECT * FROM orders WHERE id = 1'}]
+    assert signatures == [{'spid': 51, 'signature': f'sig:{expected_sql}'}]
 
 
 @pytest.mark.parametrize('second_spid', ['51', 'not-an-int'], ids=['duplicate', 'non_integer'])
