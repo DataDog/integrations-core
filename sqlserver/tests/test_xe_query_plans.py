@@ -58,11 +58,14 @@ def make_event(
     duration_us: int | None = None,
     query_plan_hash: int | None = None,
     plan_transform=None,
+    activity_id: str | None = None,
 ) -> str:
     """A fixture event as `fn_xe_file_target_read_file` returns it, with some fields replaced."""
     event = load_event(fixture)
     if timestamp:
         event.set('timestamp', timestamp)
+    if activity_id:
+        event.find("./action[@name='attach_activity_id']/value").text = activity_id
     if duration_us is not None:
         event.find("./data[@name='duration']/value").text = str(duration_us)
     if query_plan_hash is not None:
@@ -556,22 +559,71 @@ def test_event_file_first_run_on_an_empty_file(aggregator, xe_instance):
 
 
 @pytest.mark.unit
-def test_event_file_reads_complete_buffers(aggregator, xe_instance):
+@pytest.mark.parametrize(
+    'buffers,expected_runs',
+    [
+        pytest.param([[1], [2, 3]], [[1, 2], [3], []], id='read_ends_within_a_buffer'),
+        pytest.param([[1, 2, 3, 4, 5]], [[1, 2], [3, 4], [5], []], id='buffer_larger_than_max_events'),
+        pytest.param([[1], [2, 3, 4, 5], [6]], [[1, 2], [3, 4], [5, 6], []], id='larger_buffer_after_another'),
+    ],
+)
+def test_event_file_reads_max_events_per_run(aggregator, xe_instance, buffers, expected_runs):
     """
-    A read stopped by `max_events` within a buffer leaves that buffer for the next read, since a read from a buffer's
-    offset starts after the buffer.
+    Each run reads at most `max_events` events, and the next run goes on from the last one, within its buffer too,
+    although a read from a buffer's offset starts after the whole buffer.
     """
     server = FakeServer()
-    handler = make_handler(xe_instance, server, max_events=3)
+    # no rate limit, which would also stop the events read before
+    handler = make_handler(xe_instance, server, max_events=2, samples_per_hour_per_query=10**9)
     handler.run_job()
-    server.event_file.add_buffer(distinct_event(1), distinct_event(2))
-    server.event_file.add_buffer(distinct_event(3), distinct_event(4))
+    for buffer in buffers:
+        server.event_file.add_buffer(*(distinct_event(second) for second in buffer))
 
-    handler.run_job()
-    assert sent_timestamps(aggregator) == [timestamp(1), timestamp(2)]
+    runs = []
+    for _ in expected_runs:
+        aggregator.reset()
+        handler.run_job()
+        runs.append(sent_timestamps(aggregator))
 
-    handler.run_job()
-    assert sent_timestamps(aggregator) == [timestamp(1), timestamp(2), timestamp(3), timestamp(4)]
+    assert runs == [[timestamp(second) for second in run] for run in expected_runs]
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'first,second',
+    [
+        pytest.param(
+            make_event(timestamp=timestamp(1), activity_id='A-1'),
+            make_event(timestamp=timestamp(1), activity_id='B-1'),
+            id='same_timestamp',
+        ),
+        pytest.param(
+            make_event(timestamp=timestamp(5), activity_id='A-1'),
+            make_event(timestamp=timestamp(3), activity_id='B-1'),
+            id='earlier_timestamp',
+        ),
+    ],
+)
+@pytest.mark.parametrize('target', ['event_file', 'ring_buffer'])
+def test_each_execution_is_sent_once(aggregator, xe_instance, target, first, second):
+    """
+    An execution is sent once, even read again from the ring buffer, and an execution read later is sent too, whatever
+    its timestamp.
+    """
+    server = FakeServer()
+    handler = make_handler(xe_instance, server, samples_per_hour_per_query=10**9)
+    if target == 'event_file':
+        handler.run_job()
+        server.event_file.add_buffer(first)
+        handler.run_job()
+        server.event_file.add_buffer(second)
+        handler.run_job()
+    else:
+        run_from_ring_buffer(handler, server, first)
+        run_from_ring_buffer(handler, server, first, second)
+        run_from_ring_buffer(handler, server, first, second)
+
+    assert [e['sqlserver']['activity_id'] for e in plan_events(aggregator)] == ['A-1', 'B-1']
 
 
 @pytest.mark.unit
@@ -594,11 +646,12 @@ def test_event_file_checkpoint_file_replaced(aggregator, xe_instance, checkpoint
     server.event_file.start_file()
     if checkpoint_file_removed:
         del server.event_file.files[old_file]
+        # an event already read is in the current file too, as a read from a file's start can replay it
+        server.event_file.add_buffer(distinct_event(1), distinct_event(2))
     else:
         # nothing after the checkpoint yet, and an empty new file
         handler.run_job()
-    # an event already read is in the new file too, as a read from a file's start can replay it
-    server.event_file.add_buffer(distinct_event(1), distinct_event(2))
+        server.event_file.add_buffer(distinct_event(2))
     handler.run_job()
 
     assert sent_timestamps(aggregator) == [timestamp(1), timestamp(2)]
