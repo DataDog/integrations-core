@@ -392,13 +392,20 @@ def test_deadlock_signature_uses_first_stack_frame(deadlocks_collection_instance
     assert signatures == [{'spid': 51, 'signature': 'sig:SELECT * FROM orders WHERE id = 1'}]
 
 
-def test_deadlock_signatures_deduplicate_spids(deadlocks_collection_instance):
+@pytest.mark.parametrize('second_spid', ['51', 'not-an-int'], ids=['duplicate', 'non_integer'])
+def test_deadlock_skipped_signatures_are_still_obfuscated(deadlocks_collection_instance, second_spid):
     root = ET.fromstring(
-        """
+        f"""
         <deadlock>
           <process-list>
-            <process spid="51"><inputbuf>SELECT 1</inputbuf></process>
-            <process spid="51"><inputbuf>SELECT 2</inputbuf></process>
+            <process spid="51">
+              <executionStack><frame>SELECT 1</frame></executionStack>
+              <inputbuf>SELECT 1</inputbuf>
+            </process>
+            <process spid="{second_spid}">
+              <executionStack><frame>SELECT 2</frame></executionStack>
+              <inputbuf>SELECT 2</inputbuf>
+            </process>
           </process-list>
         </deadlock>
         """
@@ -406,12 +413,14 @@ def test_deadlock_signatures_deduplicate_spids(deadlocks_collection_instance):
     deadlocks_obj = _get_deadlock_obj(deadlocks_collection_instance)
 
     with (
-        patch.object(deadlocks_obj, 'obfuscate_no_except_wrapper', side_effect=lambda sql: sql.strip()),
+        patch.object(deadlocks_obj, 'obfuscate_no_except_wrapper', side_effect=lambda sql: f'obfuscated:{sql}'),
         patch('datadog_checks.sqlserver.deadlocks.compute_sql_signature', side_effect=lambda sql: f'sig:{sql}'),
     ):
         signatures = deadlocks_obj._obfuscate_xml(root)
 
-    assert signatures == [{'spid': 51, 'signature': 'sig:SELECT 1'}]
+    assert signatures == [{'spid': 51, 'signature': 'sig:obfuscated:SELECT 1'}]
+    sql_texts = [element.text for element in root.iter() if element.tag in ('frame', 'inputbuf')]
+    assert sql_texts == ['obfuscated:SELECT 1'] * 2 + ['obfuscated:SELECT 2'] * 2
 
 
 @pytest.mark.unit

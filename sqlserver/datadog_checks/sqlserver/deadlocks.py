@@ -96,16 +96,20 @@ class Deadlocks(DBMAsyncJob):
         query_signatures = []
         seen_spids = set()
         for process in process_list.findall('process'):
+            # Every process must be obfuscated, even when its signature is skipped, because the whole XML
+            # is sent in the payload.
+            skip_signature = False
             spid = process.get('spid')
             if spid is not None:
                 try:
                     spid = int(spid)
                 except ValueError:
                     self._log.error("spid not an integer. Skipping query signature computation.")
-                    continue
-                if spid in seen_spids:
-                    continue
-                seen_spids.add(spid)
+                    skip_signature = True
+                else:
+                    # Parallel queries report several processes with the same spid.
+                    skip_signature = spid in seen_spids
+                    seen_spids.add(spid)
             else:
                 self._log.error("spid not found in process element. Skipping query signature computation.")
 
@@ -123,7 +127,8 @@ class Deadlocks(DBMAsyncJob):
                     if signature is None and inputbuf.text != OBFUSCATION_ERROR:
                         signature = compute_sql_signature(inputbuf.text)
 
-            query_signatures.append({"spid": spid, "signature": signature})
+            if not skip_signature:
+                query_signatures.append({"spid": spid, "signature": signature})
 
         return query_signatures
 
