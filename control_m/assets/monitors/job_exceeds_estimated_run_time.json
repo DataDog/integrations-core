@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "title": "Job exceeds estimated run time",
+  "tags": [
+    "integration:control-m"
+  ],
+  "definition": {
+    "name": "[Control-M] Job overrun detected",
+    "type": "query alert",
+    "query": "max(last_5m):max:control_m.job.overrun_ms{*} by {job_name,ctm_server} > 3600000",
+    "message": "{{#is_warning}}\nA Control-M job is running past its estimated end time.\n\n- Job: {{job_name.name}}\n- Server: {{ctm_server.name}}\n- Overrun: {{value}}ms\n\nThis may indicate a slow dependency, resource contention, or an outdated time estimate.\n{{/is_warning}}\n\n{{#is_alert}}\nA Control-M job has significantly exceeded its estimated end time.\n\n- Job: {{job_name.name}}\n- Server: {{ctm_server.name}}\n- Overrun: {{value}}ms\n\nInvestigate whether the job is hung or blocked. Check the Control-M UI or the Performance section of the Datadog dashboard.\n{{/is_alert}}\n\n{{#is_recovery}}\nControl-M job {{job_name.name}} on {{ctm_server.name}} is no longer overrunning.\n{{/is_recovery}}",
+    "tags": [
+      "integration:control-m"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 3600000,
+        "warning": 1800000
+      },
+      "notify_audit": false,
+      "notify_no_data": false,
+      "on_missing_data": "default",
+      "renotify_interval": 0,
+      "require_full_window": false,
+      "include_tags": true,
+      "new_group_delay": 60,
+      "silenced": {}
+    },
+    "priority": 2
+  },
+  "created_at": "2026-03-23",
+  "last_updated_at": "2026-03-23",
+  "description": "Alerts when a running Control-M job exceeds its estimated end time."
+}

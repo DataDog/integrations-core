@@ -8,11 +8,11 @@ Control-M is a workload automation platform that orchestrates batch jobs, file t
 
 The integration provides:
 
-- **Server health monitoring** — track which Control-M servers are up or disconnected.
-- **Job rollup metrics** — total, active, waiting, and per-status breakdowns across all servers.
-- **Per-job completion tracking** — run counts and durations for terminal jobs (ended OK, ended not OK, cancelled), with deduplication across check cycles.
-- **Events** — optional Datadog events for job failures, cancellations, slow runs, and (opt-in) successes.
-- **Metadata** — Control-M server version reported to the Datadog Agent.
+- **Server health monitoring**: Track which Control-M servers are up or disconnected.
+- **Job rollup metrics**: Total, active, waiting, and per-status breakdowns across all servers.
+- **Per-job completion tracking**: Run counts and durations for terminal jobs (ended OK, ended not OK, cancelled), with deduplication across check cycles.
+- **Events**: Optional Datadog events for job failures, cancellations, slow runs, and (opt-in) successes.
+- **Metadata**: Control-M server version reported to the Datadog Agent.
 
 ## Setup
 
@@ -143,7 +143,7 @@ When `emit_job_events` is enabled, the check emits Datadog events for terminal j
 
 Events include high-cardinality details in the body: job ID, run number, folder, type, start time, and duration.
 
-Events respect deduplication — the same job+run combination only fires an event on the first check cycle it appears.
+Events respect deduplication: the same job and run combination only fires an event on the first check cycle it appears.
 
 ## Troubleshooting
 
@@ -161,14 +161,19 @@ Events respect deduplication — the same job+run combination only fires an even
 
 - Verify `emit_job_events: true` is set in the instance configuration.
 - Success events require both `emit_job_events: true` and `emit_success_events: true`.
-- Events respect deduplication — a job that was already reported in a previous check cycle will not fire again.
+- Events respect deduplication: a job reported in a previous check cycle does not fire again.
 
 ### Duplicate metrics after Agent restart
 
 - The check persists dedup state to the Agent's cache. If the cache was cleared (e.g., a clean reinstall), previously reported terminal jobs may be re-emitted once. Increase `finalized_ttl_seconds` if completed jobs remain visible in the Control-M status feed for longer than 24 hours.
 
-Need help? Contact [Datadog support][8].
+## Uninstallation
 
+To uninstall the Control-M integration, remove the `control_m.d/conf.yaml` file from your Agent's `conf.d/` directory and restart the Agent.
+
+## Support
+
+Need help? Contact [Datadog support][8].
 
 [1]: https://www.bmc.com/it-solutions/control-m.html
 [2]: https://app.datadoghq.com/account/settings/agent/latest

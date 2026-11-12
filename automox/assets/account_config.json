@@ -1,0 +1,37 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "API Key",
+          "help": "An Automox API key from Settings > Keys. An organization key is sufficient.",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "organization_id",
+      "label": "Organization ID",
+      "help": "The Automox Organization numeric ID - not the Organization UUID.",
+      "editable": true,
+      "required": true,
+      "text": {
+        "pattern": "^\\d+$"
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "automox-audit-logs" },
+    { "dataflow_id": "automox-events-logs" },
+    { "dataflow_id": "automox-devices-metrics" },
+    { "dataflow_id": "automox-policy-compliance-metrics" },
+    { "dataflow_id": "automox-needs-attention-metrics" },
+    { "dataflow_id": "automox-policy-runs-metrics" }
+  ]
+}
