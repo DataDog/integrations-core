@@ -1,0 +1,2486 @@
+{
+  "title": "HPE Aruba EdgeConnect overview",
+  "description": "Comprehensive monitoring for HPE Aruba EdgeConnect SD-WAN appliances. Track fleet health, tunnel performance, and interface utilization.",
+  "widgets": [
+    {
+      "id": 5217907569224952,
+      "definition": {
+        "title": "About",
+        "background_color": "white",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2146845146545138,
+            "definition": {
+              "type": "image",
+              "url": "/static/images/logos/hpe-aruba-edgeconnect_large.svg",
+              "url_dark_theme": "/static/images/logos/hpe-aruba-edgeconnect_reversed_large.svg",
+              "sizing": "contain",
+              "margin": "md",
+              "has_background": true,
+              "has_border": true,
+              "vertical_align": "center",
+              "horizontal_align": "center"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 6799914719394123,
+            "definition": {
+              "type": "note",
+              "content": "## HPE Aruba EdgeConnect Overview\n\nThis dashboard provides a high-level overview of your HPE Aruba EdgeConnect SD-WAN appliances. It is organized into sections covering fleet health, device health, interface health and traffic, tunnel performance, network quality, QoS and traffic shaping, circuit SLA, and application experience. \n\nAll metrics are collected through the HPE Aruba EdgeConnect Orchestrator and appliance APIs.\n\n### Further Reading\n\n- [HPE Aruba Networking EdgeConnect SD-WAN](https://www.hpe.com/us/en/aruba-edgeconnect-sd-wan.html)\n- [HPE Aruba Networking EdgeConnect SD-WAN API](https://developer.arubanetworks.com/edgeconnect/docs/making-api-requests)\n- [HPE Aruba Networking EdgeConnect SD-WAN Logs](https://arubanetworking.hpe.com/techdocs/sdwan/docs/white-paper/appliance-logs/?utm_source=chatgpt.com)\n",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 4,
+              "height": 5
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 4,
+        "height": 8
+      }
+    },
+    {
+      "id": 1000001,
+      "definition": {
+        "title": "Fleet Overview",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2000001,
+            "definition": {
+              "type": "note",
+              "content": "High-level health of all EdgeConnect appliances to spot outages, hardware faults, resource pressure, and recent reboots at a glance.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 8,
+              "height": 1
+            }
+          },
+          {
+            "id": 2000005,
+            "definition": {
+              "title": "Recently rebooted appliances",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.device.uptime{$device_hostname,$device_ip,$site_name} by {device_hostname,site_name}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "sort": {
+                    "count": 25,
+                    "order_by": [
+                      {
+                        "index": 0,
+                        "order": "asc",
+                        "type": "formula"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "alias": "Uptime",
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 2000004,
+            "definition": {
+              "title": "Hardware faults",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "red_on_white",
+                      "value": 0
+                    },
+                    {
+                      "comparator": "<=",
+                      "palette": "green_on_white",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "count_not_null(query1) - count_nonzero(query1)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.device.hardware.ok{$device_hostname,$device_ip,$site_name} by {device_hostname}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 2000003,
+            "definition": {
+              "title": "Appliances down",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": ">",
+                      "palette": "red_on_white",
+                      "value": 0
+                    },
+                    {
+                      "comparator": "<=",
+                      "palette": "green_on_white",
+                      "value": 0
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "count_not_null(query1) - count_nonzero(query1)"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.device.reachability{$device_hostname,$device_ip,$site_name} by {device_hostname}"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 0
+            },
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 2,
+              "height": 1
+            }
+          },
+          {
+            "id": 1591543281184439,
+            "definition": {
+              "title": "Monitors",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "tag:(integration:hpe_aruba_edgeconnect)",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false,
+              "show_investigation": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 8,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 4,
+        "y": 0,
+        "width": 8,
+        "height": 8
+      }
+    },
+    {
+      "id": 4000001,
+      "definition": {
+        "title": "Device Health",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4000002,
+            "definition": {
+              "type": "note",
+              "content": "CPU, memory, and disk utilization metrics to identify appliances under resource pressure before they impact network performance.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 4000003,
+            "definition": {
+              "title": "CPU usage",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.device.cpu.usage{$device_hostname,$device_ip,$site_name} by {cpu_state}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "min": "0",
+                "max": "100"
+              },
+              "markers": [
+                {
+                  "label": "High CPU",
+                  "value": "y = 80",
+                  "display_type": "warning dashed"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 4000004,
+            "definition": {
+              "title": "Memory usage",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "Used memory",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "cached"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "cached",
+                      "query": "avg:hpe_aruba_edgeconnect.device.memory.usage{$device_hostname,$device_ip,$site_name} by {device_hostname}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 4000006,
+            "definition": {
+              "title": "Disk usage",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "disk_used",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "disk_used",
+                      "query": "avg:hpe_aruba_edgeconnect.device.disk.usage{$device_hostname,$device_ip,$site_name} by {device_hostname}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "label": "",
+                "scale": "linear",
+                "min": "0",
+                "max": "100"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 4000007,
+            "definition": {
+              "title": "Partitions by disk usage",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.device.disk.usage{$device_hostname,$device_ip,$site_name} by {device_hostname,mount}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "legend": "automatic",
+                  "type": "stacked"
+                }
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 12,
+        "height": 8
+      }
+    },
+    {
+      "id": 5000001,
+      "definition": {
+        "title": "Interface Health & Traffic",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7100001,
+            "definition": {
+              "type": "note",
+              "content": "Interface-level traffic, utilization, and drop metrics to identify congestion and link issues.\n",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 7100002,
+            "definition": {
+              "title": "Interface status by name",
+              "type": "query_table",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "min:hpe_aruba_edgeconnect.interface.status{$device_hostname,$device_ip,$interface_name,status_type:oper,$site_name} by {interface_name}"
+                    },
+                    {
+                      "aggregator": "last",
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "min:hpe_aruba_edgeconnect.interface.status{$device_hostname,$device_ip,$interface_name,status_type:admin,$site_name} by {interface_name}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "text_formats": [
+                    [],
+                    [
+                      {
+                        "match": {
+                          "type": "is",
+                          "value": "up"
+                        },
+                        "palette": "white_on_green"
+                      },
+                      {
+                        "match": {
+                          "type": "is",
+                          "value": "down"
+                        },
+                        "palette": "white_on_red"
+                      }
+                    ],
+                    [
+                      {
+                        "match": {
+                          "type": "is",
+                          "value": "up"
+                        },
+                        "palette": "white_on_green"
+                      },
+                      {
+                        "match": {
+                          "type": "is",
+                          "value": "down"
+                        },
+                        "palette": "white_on_red"
+                      }
+                    ]
+                  ],
+                  "sort": {
+                    "order_by": [
+                      {
+                        "type": "group",
+                        "name": "interface_name",
+                        "order": "asc"
+                      }
+                    ],
+                    "count": 25
+                  },
+                  "formulas": [
+                    {
+                      "alias": "Oper status",
+                      "formula": "query1",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_green"
+                        },
+                        {
+                          "comparator": "=",
+                          "value": 0,
+                          "palette": "white_on_red"
+                        }
+                      ]
+                    },
+                    {
+                      "alias": "Admin status",
+                      "formula": "query2",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_green"
+                        },
+                        {
+                          "comparator": "=",
+                          "value": 0,
+                          "palette": "white_on_red"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 7100011,
+            "definition": {
+              "title": "Interface bandwidth RX rate by interface name",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "RX",
+                      "formula": "rx",
+                      "style": {
+                        "palette": "cool"
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "rx",
+                      "query": "avg:hpe_aruba_edgeconnect.interface.bandwidth.rx.rate{$device_hostname,$device_ip,$interface_name,$site_name} by {interface_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "cool",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 7100010,
+            "definition": {
+              "title": "Interface bandwidth TX rate by interface name",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "TX",
+                      "formula": "tx",
+                      "style": {
+                        "palette": "warm"
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "tx",
+                      "query": "avg:hpe_aruba_edgeconnect.interface.bandwidth.tx.rate{$device_hostname,$device_ip,$interface_name,$site_name} by {interface_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 4053273908240618,
+            "definition": {
+              "title": "TX packet drop rate by interface name",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "TX Drop Rate",
+                      "formula": "tx_drops",
+                      "number_format": {
+                        "unit": {
+                          "per_unit_name": "second",
+                          "type": "canonical_unit",
+                          "unit_name": "packet"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "tx_drops",
+                      "query": "avg:hpe_aruba_edgeconnect.interface.drops.packets.tx.rate{$device_hostname,$device_ip,$interface_name,$site_name} by {interface_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1964879828770617,
+            "definition": {
+              "title": "RX packet drop rate by interface name",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "alias": "RX Drop Rate",
+                      "formula": "rx_drops",
+                      "number_format": {
+                        "unit": {
+                          "per_unit_name": "second",
+                          "type": "canonical_unit",
+                          "unit_name": "packet"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "rx_drops",
+                      "query": "avg:hpe_aruba_edgeconnect.interface.drops.packets.rx.rate{$device_hostname,$device_ip,$interface_name,$site_name} by {interface_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 16,
+        "width": 12,
+        "height": 8
+      }
+    },
+    {
+      "id": 7291048573621,
+      "definition": {
+        "title": "Tunnel Performance",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1928374650192,
+            "definition": {
+              "type": "note",
+              "content": "Tunnel throughput and availability metrics to understand SD-WAN traffic distribution and tunnel health.\n",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 5819273640182,
+            "definition": {
+              "title": "Top tunnels by throughput",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.tunnel.throughput.tx.bytes.rate{$device_ip,$device_hostname,$site_name} by {tunnel_name}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 7291048352617,
+            "definition": {
+              "title": "Tunnel availability",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "alias": "Availability",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.tunnel.availability{$device_ip,$tunnel_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "markers": [
+                {
+                  "value": "y = 90",
+                  "display_type": "error dashed"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 2938471650293,
+            "definition": {
+              "title": "Tunnel TX throughput",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.tunnel.throughput.tx.bytes.rate{$device_ip,$device_hostname,$tunnel_name,$site_name} by {tunnel_name,side}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte",
+                          "per_unit_name": "second"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "blue",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 8172635490817,
+            "definition": {
+              "title": "Tunnel RX throughput",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.tunnel.throughput.rx.bytes.rate{$device_ip,$device_hostname,$tunnel_name,$site_name} by {tunnel_name,side}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte",
+                          "per_unit_name": "second"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "red",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 24,
+        "width": 12,
+        "height": 8
+      }
+    },
+    {
+      "id": 8800000000001,
+      "definition": {
+        "title": "Application Experience",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8800000000010,
+            "definition": {
+              "type": "note",
+              "content": "Application latency metrics to correlate network performance with user-impacting application behavior.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 8800000000011,
+            "definition": {
+              "title": "Top latency metrics by application",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.application.latency{$device_hostname,$device_ip,$site_name} by {application,latency_type,device_ip}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ],
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                },
+                "palette": "datadog16"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 8800000000012,
+            "definition": {
+              "title": "Application latency over time",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.application.latency{$device_hostname,$device_ip,$site_name} by {application,latency_type}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      }
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "min": "0"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 32,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 6600000000001,
+      "definition": {
+        "title": "Network Quality",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 6600000000010,
+            "definition": {
+              "type": "note",
+              "content": "Latency, loss, jitter, and MOS metrics to evaluate tunnel quality and user experience.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 6600000000014,
+            "definition": {
+              "title": "Tunnel MOS score",
+              "type": "query_table",
+              "requests": [
+                {
+                  "request_type": "table",
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "metric_name": "hpe_aruba_edgeconnect.tunnel.qoe.mos",
+                      "filter": "$device_ip,$tunnel_name, fec:post",
+                      "alias": "Post-FEC MOS"
+                    },
+                    {
+                      "name": "query2",
+                      "data_source": "metrics",
+                      "metric_name": "hpe_aruba_edgeconnect.tunnel.qoe.mos",
+                      "filter": "$device_ip,$tunnel_name, fec:pre",
+                      "alias": "Pre-FEC MOS"
+                    }
+                  ],
+                  "rows": {
+                    "group_by": [
+                      {
+                        "name": "groupBy1",
+                        "group_keys": [
+                          {
+                            "query": "query1",
+                            "group_key": "tunnel_name"
+                          },
+                          {
+                            "query": "query2",
+                            "group_key": "tunnel_name"
+                          }
+                        ]
+                      }
+                    ],
+                    "sort": {
+                      "limit": 10,
+                      "columns": [
+                        {
+                          "column": "column1",
+                          "order": "asc"
+                        }
+                      ]
+                    }
+                  },
+                  "columns": [
+                    {
+                      "name": "column1",
+                      "type": "compute",
+                      "compute": {
+                        "query": "query1",
+                        "aggregation": "avg"
+                      },
+                      "format": {
+                        "mode": "number",
+                        "conditional_formats": [
+                          {
+                            "comparator": ">=",
+                            "value": 4,
+                            "palette": "white_on_green"
+                          },
+                          {
+                            "comparator": ">=",
+                            "value": 3,
+                            "palette": "white_on_yellow"
+                          },
+                          {
+                            "comparator": "<",
+                            "value": 3,
+                            "palette": "white_on_red"
+                          }
+                        ]
+                      },
+                      "alias": "Post-FEC MOS"
+                    },
+                    {
+                      "name": "column2",
+                      "type": "compute",
+                      "compute": {
+                        "query": "query2",
+                        "aggregation": "avg"
+                      },
+                      "format": {
+                        "mode": "number",
+                        "conditional_formats": [
+                          {
+                            "comparator": ">=",
+                            "value": 4,
+                            "palette": "white_on_green"
+                          },
+                          {
+                            "comparator": ">=",
+                            "value": 3,
+                            "palette": "white_on_yellow"
+                          },
+                          {
+                            "comparator": "<",
+                            "value": 3,
+                            "palette": "white_on_red"
+                          }
+                        ]
+                      },
+                      "alias": "Pre-FEC MOS"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 6600000000012,
+            "definition": {
+              "title": "Tunnel packet loss by tunnel and FEC",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.tunnel.loss{$device_ip,$tunnel_name} by {tunnel_name,fec}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "min": "0"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 6600000000013,
+            "definition": {
+              "title": "Tunnel jitter by tunnel",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.tunnel.jitter{$device_ip,$tunnel_name} by {tunnel_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      }
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "min": "0"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 6600000000011,
+            "definition": {
+              "title": "Tunnel latency by tunnel",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.tunnel.latency{$device_ip,$tunnel_name} by {tunnel_name}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      }
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "min": "0"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 74,
+        "width": 12,
+        "height": 8,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 7700000000001,
+      "definition": {
+        "title": "QoS & Traffic Shaping",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7700000000010,
+            "definition": {
+              "type": "note",
+              "content": "QoS drop and DSCP bandwidth metrics to validate traffic prioritization and detect policy issues.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 7700000000011,
+            "definition": {
+              "title": "QoS drops by overlay",
+              "type": "toplist",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.qos.class.drops{$device_hostname,$device_ip,$site_name} by {direction,overlay_name,drop_type}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "packet"
+                        }
+                      }
+                    }
+                  ],
+                  "sort": {
+                    "count": 25,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 7700000000012,
+            "definition": {
+              "title": "QoS drop percentage by overlay",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.qos.class.drop.percentage{$device_hostname,$device_ip,$site_name} by {overlay_name,direction}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "min": "0"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 7700000000013,
+            "definition": {
+              "title": "DSCP bandwidth TX rate",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "tx",
+                      "query": "avg:hpe_aruba_edgeconnect.qos.class.bandwidth.tx.rate{$device_hostname,$device_ip,$site_name} by {dscp,side}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "TX",
+                      "formula": "tx",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte_in_decimal_bytes_family",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "blue",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 7700000000014,
+            "definition": {
+              "title": "DSCP bandwidth RX rate",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "rx",
+                      "query": "avg:hpe_aruba_edgeconnect.qos.class.bandwidth.rx.rate{$device_hostname,$device_ip,$site_name} by {dscp,side}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "RX",
+                      "formula": "rx",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "byte_in_decimal_bytes_family",
+                          "per_unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 82,
+        "width": 12,
+        "height": 8
+      }
+    },
+    {
+      "id": 8802000000001,
+      "definition": {
+        "title": "Circuit SLA",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 8802000000010,
+            "definition": {
+              "type": "note",
+              "content": "Circuit-level SLA metrics to monitor WAN underlay health and detect provider or transport degradation.",
+              "background_color": "blue",
+              "font_size": "14",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 8802000000014,
+            "definition": {
+              "title": "Next hop status (admin)",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.nexthop.status{$device_ip,$probe_name,status_type:admin} by {probe_name}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "aggregator": "last",
+                  "conditional_formats": [
+                    {
+                      "comparator": "<=",
+                      "value": 55,
+                      "palette": "red_on_white"
+                    },
+                    {
+                      "comparator": "<=",
+                      "value": 59,
+                      "palette": "yellow_on_white"
+                    },
+                    {
+                      "comparator": "<=",
+                      "value": 60,
+                      "palette": "green_on_white"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": false,
+              "precision": 0
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 8802000000015,
+            "definition": {
+              "title": "Next hop status (oper)",
+              "type": "query_value",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.nexthop.status{$device_ip,$probe_name,status_type:oper} by {probe_name}"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "aggregator": "last",
+                  "conditional_formats": [
+                    {
+                      "comparator": "<",
+                      "value": 55,
+                      "palette": "red_on_white"
+                    },
+                    {
+                      "comparator": "<",
+                      "value": 60,
+                      "palette": "yellow_on_white"
+                    },
+                    {
+                      "comparator": "=",
+                      "value": 60,
+                      "palette": "green_on_white"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": false,
+              "precision": 0
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 8802000000011,
+            "definition": {
+              "title": "Circuit SLA latency",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.circuit.sla.latency{$device_ip,$probe_name} by {probe_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 8802000000013,
+            "definition": {
+              "title": "Circuit SLA packet loss",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.circuit.sla.loss{$device_ip,$probe_name} by {probe_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 4,
+              "y": 3,
+              "width": 4,
+              "height": 4
+            }
+          },
+          {
+            "id": 8802000000012,
+            "definition": {
+              "title": "Circuit SLA jitter",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      }
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:hpe_aruba_edgeconnect.circuit.sla.jitter{$device_ip,$probe_name} by {probe_name}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 8,
+              "y": 3,
+              "width": 4,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 90,
+        "width": 12,
+        "height": 8
+      }
+    },
+    {
+      "id": 9100000000001,
+      "definition": {
+        "title": "Alarm Events",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 9100000000010,
+            "definition": {
+              "type": "note",
+              "content": "Alarm activity reported by EdgeConnect appliances, including raise, clear, and delete alarm actions. Track alarm volume over time and inspect recent alarm events.",
+              "background_color": "blue",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 9100000000012,
+            "definition": {
+              "title": "Recent alarm events",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "query_string": "\"[HPE Aruba EdgeConnect]\" $site_name $device_hostname $device_ip $device_hostname",
+                    "data_source": "event_stream",
+                    "event_size": "s"
+                  },
+                  "columns": []
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 9100000000011,
+            "definition": {
+              "title": "Alarm events over time by alarm name",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "events",
+                      "search": {
+                        "query": "\"[HPE Aruba EdgeConnect]\" $site_name $device_hostname $device_ip $device_hostname"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": [
+                        {
+                          "facet": "alarm_name",
+                          "limit": 10,
+                          "sort": {
+                            "aggregation": "count",
+                            "order": "desc",
+                            "metric": "count"
+                          },
+                          "should_exclude_missing": true
+                        }
+                      ],
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "warm",
+                    "order_by": "values",
+                    "color_order": "monotonic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 98,
+        "width": 12,
+        "height": 5
+      }
+    },
+    {
+      "id": 8200123359353233,
+      "definition": {
+        "title": "Logs",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4496390021149506,
+            "definition": {
+              "type": "note",
+              "content": "High-level overview of log activity, highlighting error frequency, log volume by status, and recent failures to reflect the system’s current health and stability.",
+              "background_color": "blue",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 3737765269212010,
+            "definition": {
+              "title": "Error logs",
+              "title_size": "16",
+              "title_align": "left",
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "status:(alert OR error OR critical) source:hpe-aruba-edgeconnect",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 5156764731831606,
+            "definition": {
+              "title": "Log count by status",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:hpe-aruba-edgeconnect"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "limit": 10,
+                        "sort": {
+                          "order": "desc",
+                          "aggregation": "count"
+                        },
+                        "fields": [
+                          "status"
+                        ]
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "semantic",
+                    "order_by": "values",
+                    "color_order": "monotonic",
+                    "has_value_labels": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 103,
+        "width": 12,
+        "height": 5
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "device_hostname",
+      "prefix": "device_hostname",
+      "available_values": [
+        "newyorksp01",
+        "sanfransp02",
+        "sydneysp01"
+      ],
+      "default": "*"
+    },
+    {
+      "name": "site_name",
+      "prefix": "site_name",
+      "available_values": [
+        "nyc",
+        "sfo",
+        "syd"
+      ],
+      "default": "*"
+    },
+    {
+      "name": "device_ip",
+      "prefix": "device_ip",
+      "available_values": [
+        "10.0.0.2",
+        "10.0.0.3",
+        "localhost:50509",
+        "localhost:59233"
+      ],
+      "default": "*"
+    },
+    {
+      "name": "interface_name",
+      "prefix": "interface_name",
+      "available_values": [
+        "wan0",
+        "wan1"
+      ],
+      "default": "*"
+    },
+    {
+      "name": "tunnel_name",
+      "prefix": "tunnel_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "overlay_id",
+      "prefix": "overlay_id",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "probe_name",
+      "prefix": "probe_name",
+      "available_values": [
+        "om_passthrough_3",
+        "om_passthrough_6",
+        "om_passthrough_7",
+        "om_passthrough_9"
+      ],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed",
+  "url": "/dashboard/wwf-uhr-gpy/hpe-aruba-edgeconnect-overview",
+  "created_at": "2026-05-20T15:18:30.208581+00:00",
+  "tags": [
+    "ai:created_with_ai"
+  ]
+}

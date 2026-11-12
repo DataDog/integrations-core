@@ -49,12 +49,14 @@ def lines(stream: StringIO) -> list[str]:
     return stream.getvalue().splitlines()
 
 
+@pytest.mark.parametrize('component_override', [None, 'run-resolution'], ids=['per-component', 'invocation'])
 def test_component_binding_and_shared_scopes_enrich_logs_and_metrics(
-    handler: RecordingJsonHandler, sink: RecordingSink
+    handler: RecordingJsonHandler, sink: RecordingSink, component_override: str | None
 ):
     runtime = MonitoringRuntime(
         metrics_sink=sink,
         metrics_tag_projector=projector_for('repo', 'component', 'operation', 'batch_id'),
+        component_override=component_override,
         base_fields={'repo': 'DataDog/integrations-core'},
     )
     runtime.add_log_handler(handler)
@@ -67,7 +69,7 @@ def test_component_binding_and_shared_scopes_enrich_logs_and_metrics(
     [record] = sink.records
     assert record.tags == {
         'repo': 'DataDog/integrations-core',
-        'component': 'planner',
+        'component': component_override or 'planner',
         'operation': 'dispatch',
         'batch_id': 'batch-01',
     }
@@ -301,17 +303,20 @@ def test_records_carry_units_across_every_kind(sink: RecordingSink):
     assert (batches.unit, jobs.unit, elapsed.unit, seconds.unit) == (None, 'job', 'second', None)
 
 
-def test_metric_failures_use_the_sink_diagnostic_component(handler: RecordingJsonHandler):
-    def broken_projector(fields):
+@pytest.mark.parametrize('component', [None, 'run-resolution'], ids=['default', 'invocation'])
+def test_metric_failures_use_the_sink_diagnostic_component(handler: RecordingJsonHandler, component: str | None):
+    def broken_projector(fields: Mapping[str, Any]) -> dict[str, str]:
         raise RuntimeError('the projector exploded')
 
-    runtime = MonitoringRuntime(metrics_sink=RecordingSink(), metrics_tag_projector=broken_projector)
+    runtime = MonitoringRuntime(
+        metrics_sink=RecordingSink(), metrics_tag_projector=broken_projector, component_override=component
+    )
     runtime.add_log_handler(handler)
 
     runtime.component('test-runner').metrics.count('jobs', value=7, tags={'environment': 'py3.13'})
 
     [event] = [item for item in handler.events if item['event'] == 'Metric emission failed']
-    assert event['component'] == 'datadog-metrics'
+    assert event['component'] == (component or 'datadog-metrics')
     assert event['level'] == 'warning'
     assert event['category'] == 'conversion'
     assert event['metric_name'] == 'jobs'

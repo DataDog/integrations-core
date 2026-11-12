@@ -68,6 +68,31 @@ instances:
     #
     # binder_endpoint: http://binder.kai-scheduler.svc:8080/metrics
 
+    ## @param collect_podgroup_events - boolean - optional - default: true
+    ## Submit events for KAI PodGroup life cycle transitions by polling PodGroup custom resources from the Kubernetes
+    ## API.
+    ##
+    ## This requires `list` role-based access control (RBAC) permission on `podgroups.scheduling.run.ai`, and `list`
+    ## on `events` to add the eviction reason and preemptor to eviction events.
+    ##
+    ## Every instance with this option enabled polls all the PodGroups of the cluster. When you configure several
+    ## instances, such as one per scheduling shard, set it to `false` on all but one of them to avoid duplicate
+    ## events.
+    #
+    # collect_podgroup_events: true
+
+    ## @param kube_config_dict - mapping - optional
+    ## Optional kubeconfig dictionary used to configure the Kubernetes API client.
+    ##
+    ## If unset, the check uses in-cluster Kubernetes configuration.
+    #
+    # kube_config_dict:
+    #   apiVersion: v1
+    #   kind: Config
+    #   clusters: []
+    #   contexts: []
+    #   users: []
+
     ## @param cluster_check - boolean - optional - default: true
     ## Set to true when configuring this integration as a Cluster Agent cluster check.
     #
