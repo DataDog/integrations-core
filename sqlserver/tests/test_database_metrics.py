@@ -110,6 +110,8 @@ def test_instance_level_database_metrics_collect_all_batches(
     metric_name: str,
 ):
     """SDBM-3131: full batches must execute through the configured SQL Server driver."""
+    # Isolate the parameter limit from the cost of DB_NAME permission checks on large synthetic filters.
+    instance_docker_metrics.update(username='sa', password='Password123')
     databases = [f'sdbm_3131_missing_{index}' for index in range(2 * SQLSERVER_PARAMETER_LIMIT + 1)]
     expected_databases = ['master', 'msdb', 'tempdb']
     for index, database in enumerate(expected_databases):
