@@ -303,13 +303,9 @@ class XESessionBase(DBMAsyncJob):
 
             for _, elem in context:
                 try:
-                    # Get basic timestamp for filtering
-                    timestamp = elem.get('timestamp')
-
-                    # Filter by timestamp
-                    if not self._last_event_timestamp or (timestamp and timestamp > self._last_event_timestamp):
+                    if self._is_new_event(elem):
                         # Extract event attributes
-                        event_data = {"timestamp": timestamp, "event_name": elem.get('name', '')}
+                        event_data = {"timestamp": elem.get('timestamp'), "event_name": elem.get('name', '')}
 
                         # Process the event using appropriate handler
                         event_name = event_data["event_name"]
@@ -339,6 +335,11 @@ class XESessionBase(DBMAsyncJob):
         except Exception as e:
             self._log.error(f"Error processing ring buffer events: {e}")
             return []
+
+    def _is_new_event(self, event: etree._Element) -> bool:
+        """Whether an event wasn't read before: by default, whether it's newer than the last event timestamp."""
+        timestamp = event.get('timestamp')
+        return not self._last_event_timestamp or bool(timestamp and timestamp > self._last_event_timestamp)
 
     def _process_action_elements(self, event, event_data):
         """Process common action elements for all event types"""
