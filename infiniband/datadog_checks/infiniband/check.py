@@ -39,6 +39,10 @@ COUNTER_MULTIPLIERS = {
 }
 TAG_VALUE_RE = re.compile(r'[^a-z0-9_.-]+')
 RATE_RE = re.compile(r'^\s*(?P<value>\d+(?:\.\d+)?)\s*(?P<prefix>[kmg]?)b/sec\b', re.IGNORECASE)
+# "400 Gb/sec (4X NDR)": the link width and speed generation in parentheses.
+RATE_DETAIL_RE = re.compile(r'\((?P<width>\d+X)\s+(?P<speed>[A-Z]+)\)', re.IGNORECASE)
+PCI_ADDRESS_RE = re.compile(r'^[0-9a-f]{4,}:[0-9a-f]{2}:[0-9a-f]{2}\.[0-7]$')
+GUID_RE = re.compile(r'^[0-9a-f]{4}(:[0-9a-f]{4}){3}$')
 
 
 class InfinibandCheck(AgentCheck):
@@ -106,11 +110,16 @@ class InfinibandCheck(AgentCheck):
         if link_layer_tag:
             tags.append(link_layer_tag)
         tags.extend(self._get_gid_attr_tags(port_path))
+        if link_layer_tag == "link_layer:infiniband":
+            self._append_tag(tags, self._get_port_guid_tag(port_path))
 
-        self._collect_port_rate(port_path, tags)
+        # Width and speed can change when a link retrains, so they only go on the link
+        # state metrics; on counters they would split every series.
+        link_tags = tags + self._get_link_rate_tags(port_path)
+        self._collect_port_rate(port_path, link_tags)
         self._collect_counter_metrics(port_path, tags)
         self._collect_hw_counter_metrics(port_path, tags)
-        self._collect_status_metrics(port_path, tags)
+        self._collect_status_metrics(port_path, link_tags)
 
     def _read_sysfs_file(self, file_path):
         try:
@@ -146,7 +155,49 @@ class InfinibandCheck(AgentCheck):
         for file_name, tag_name, strip_prefix in DEVICE_TAG_FILES:
             tag = self._get_file_tag(os.path.join(device_path, file_name), tag_name, strip_prefix=strip_prefix)
             self._append_tag(tags, tag)
+        tags.extend(self._get_identity_tags(device_path))
         return tags
+
+    def _get_identity_tags(self, device_path):
+        # PCI address, NUMA node and GUIDs identify the HCA and pair it with the GPUs on
+        # the same host. They keep their ':' so they match the GPU and fabric values.
+        tags = []
+        pci_address = os.path.basename(os.path.realpath(os.path.join(device_path, "device"))).lower()
+        if PCI_ADDRESS_RE.match(pci_address):
+            tags.append(f"pci_bdf:{pci_address}")
+
+        numa_node = self._read_sysfs_file(os.path.join(device_path, "device", "numa_node"))
+        if numa_node is not None and numa_node.isdigit():  # -1 means unknown
+            tags.append(f"numa_node:{numa_node}")
+
+        for file_name in ("node_guid", "sys_image_guid"):
+            guid = self._parse_guid(self._read_sysfs_file(os.path.join(device_path, file_name)))
+            if guid:
+                tags.append(f"{file_name}:{guid}")
+        return tags
+
+    def _get_port_guid_tag(self, port_path):
+        # On InfiniBand ports, GID 0 is the subnet prefix followed by the port GUID.
+        gid = self._read_sysfs_file(os.path.join(port_path, "gids", "0"))
+        if gid is None:
+            return None
+        guid = self._parse_guid(":".join(gid.split(":")[4:]))
+        return f"port_guid:{guid}" if guid else None
+
+    def _parse_guid(self, value):
+        if not value:
+            return None
+        value = value.strip().lower()
+        if not GUID_RE.match(value) or not value.replace("0", "").replace(":", ""):
+            return None
+        return value
+
+    def _get_link_rate_tags(self, port_path):
+        rate = self._read_sysfs_file(os.path.join(port_path, "rate"))
+        match = RATE_DETAIL_RE.search(rate) if rate else None
+        if not match:
+            return []
+        return [f"port_width:{match.group('width').lower()}", f"port_speed:{match.group('speed').lower()}"]
 
     def _get_link_layer_tag(self, port_path):
         return self._get_file_tag(os.path.join(port_path, "link_layer"), "link_layer")
