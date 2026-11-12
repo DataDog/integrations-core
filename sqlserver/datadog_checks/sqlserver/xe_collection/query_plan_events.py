@@ -6,7 +6,7 @@ from __future__ import annotations
 import copy
 import re
 import time
-from collections import Counter
+from collections import Counter, OrderedDict
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Iterator
 
@@ -51,6 +51,12 @@ DEFAULT_MAX_PLAN_SIZE_BYTES = 1_000_000
 RATE_LIMITER_MAX_SIZE = 10_000
 STATEMENT_TEXT_CACHE_MAX_SIZE = 10_000
 STATEMENT_TEXT_CACHE_TTL_SECONDS = 600
+# The events read again are skipped by key. The keys kept outnumber the events of a ring buffer, 1,000 by default, and
+# of a read.
+SEEN_EVENT_KEYS_MAX_SIZE = 10_000
+# An event's key, with its timestamp and duration. The activity ID is unique with TRACK_CAUSALITY, and the other
+# actions tell executions apart without it.
+EVENT_KEY_ACTIONS = ("attach_activity_id", "session_id", "request_id", "query_hash", "query_plan_hash")
 # An actual plan holds at least one of these. Without them, it's a plan with no runtime data.
 RUNTIME_ELEMENTS = ("<RunTimeInformation", "<QueryTimeStats")
 # Used when the session has no query_hash or query_plan_hash action.
@@ -167,6 +173,13 @@ def parse_showplan_xml(data: etree._Element) -> str | None:
     return value.text.strip() if value.text and value.text.strip() else None
 
 
+def event_key(event: etree._Element) -> tuple:
+    """The identity of an execution's event, to recognize it when it's read again."""
+    actions = {action.get('name'): extract_value(action) for action in event.findall('./action')}
+    duration = extract_value(event.find("./data[@name='duration']"))
+    return (event.get('timestamp'), duration, *(actions.get(name) for name in EVENT_KEY_ACTIONS))
+
+
 def hash_to_hex(value: str | None) -> str | None:
     """
     The query_hash and query_plan_hash actions are unsigned 64-bit integers. They're sent as hex, as query metrics send
@@ -218,13 +231,22 @@ class QueryPlanEventsHandler(XESessionBase):
         self._statement_text_cache: TTLCache = TTLCache(
             maxsize=STATEMENT_TEXT_CACHE_MAX_SIZE, ttl=STATEMENT_TEXT_CACHE_TTL_SECONDS
         )
-        # The event_file checkpoint: the file and offset of the last buffer read. Reads start after it.
+        # The event_file checkpoint: the file and offset of the last buffer read in full. Reads start after it, or at
+        # the start of the current file without one.
         self._event_file_checkpoint: tuple[str, int] | None = None
+        # The buffer a read starts with when the previous runs read it in part, as a run reads at most `max_events`
+        # events, and the number of its events read.
+        self._event_file_partial_buffer: tuple[tuple[str, int], int] | None = None
         self._event_file_pattern: str | None = None
         self._event_file_started = False
         # The current setup problem, so its warning is logged once and its health event goes back to OK when fixed.
         self._session_problem: SqlServerHealthEvent | None = None
         self._statuses: Counter = Counter()
+        # The keys of the events read, the newest last, and whether the current read skips the events read before. The
+        # ring buffer returns all its events at every read, and so can a read of the current file without checkpoint,
+        # while a read after the checkpoint only returns new events.
+        self._seen_event_keys: OrderedDict[tuple, None] = OrderedDict()
+        self._skip_seen_events = False
 
         self.register_event_handler(PLAN_PROFILE_EVENT, self._parse_plan_event)
         self.register_event_handler(SHOWPLAN_EVENT, self._parse_plan_event)
@@ -241,6 +263,15 @@ class QueryPlanEventsHandler(XESessionBase):
 
     def _normalize_event_impl(self, event):
         return self._normalize_event(event)
+
+    def _is_new_event(self, event: etree._Element) -> bool:
+        key = event_key(event)
+        seen = key in self._seen_event_keys
+        self._seen_event_keys[key] = None
+        self._seen_event_keys.move_to_end(key)
+        if len(self._seen_event_keys) > SEEN_EVENT_KEYS_MAX_SIZE:
+            self._seen_event_keys.popitem(last=False)
+        return not (seen and self._skip_seen_events)
 
     def _parse_plan_event(self, event: etree._Element, event_data: dict) -> bool:
         try:
@@ -298,9 +329,9 @@ class QueryPlanEventsHandler(XESessionBase):
             return
         started = time.time()
         if target_name == EVENT_FILE_TARGET:
-            xml_data = self._read_event_file(cursor, file_name) if file_name else None
+            xml_data, self._skip_seen_events = self._read_event_file(cursor, file_name) if file_name else (None, False)
         else:
-            xml_data = self._read_ring_buffer(cursor)
+            xml_data, self._skip_seen_events = self._read_ring_buffer(cursor), True
         self._check.histogram(
             "dd.sqlserver.xe.query_plans.read_time",
             (time.time() - started) * 1000,
@@ -309,8 +340,6 @@ class QueryPlanEventsHandler(XESessionBase):
         events = self._process_events(xml_data) if xml_data else []
         if not events:
             return
-        # The ring buffer, and a file read from its start, return the events already read again: they're skipped.
-        self._last_event_timestamp = events[-1]['timestamp']
         self._submit_lag(events)
         for plan_event in self._plan_events(cursor, events):
             self._check.database_monitoring_query_sample(json.dumps(plan_event, default=default_json_event_encoding))
@@ -386,16 +415,18 @@ class QueryPlanEventsHandler(XESessionBase):
         )
 
     @tracked_method(agent_check_getter=agent_check_getter)
-    def _read_event_file(self, cursor: Any, current_file: str) -> str | None:
+    def _read_event_file(self, cursor: Any, current_file: str) -> tuple[str | None, bool]:
         """
-        The new events of the event_file target, as one XML document. The first run starts at the newest buffer of
-        the current file, so it doesn't replay the history.
+        The new events of the event_file target, as one XML document, and whether it can hold events read before, as a
+        read of the current file from its start can. The first run starts at the newest buffer of the current file, so
+        it doesn't replay the history.
         """
         pattern = event_file_pattern(current_file)
         if pattern != self._event_file_pattern:
             # A session created again with another file starts over.
             self._event_file_pattern = pattern
             self._event_file_checkpoint = None
+            self._event_file_partial_buffer = None
             self._event_file_started = False
         if self._event_file_checkpoint is None and not self._event_file_started:
             self._event_file_started = True
@@ -403,15 +434,14 @@ class QueryPlanEventsHandler(XESessionBase):
             row = cursor.fetchone()
             if row:
                 self._event_file_checkpoint = (row[0], int(row[1]))
-                return None
+                return None, False
 
+        # The events of the partial buffer read before are read again, and skipped.
+        limit = self.max_events + (self._event_file_partial_buffer[1] if self._event_file_partial_buffer else 0)
         rows = []
         if self._event_file_checkpoint is not None:
             try:
-                cursor.execute(
-                    EVENT_FILE_READ_FROM_CHECKPOINT_QUERY,
-                    (self.max_events, pattern, *self._event_file_checkpoint),
-                )
+                cursor.execute(EVENT_FILE_READ_FROM_CHECKPOINT_QUERY, (limit, pattern, *self._event_file_checkpoint))
                 rows = cursor.fetchall()
             except Exception as e:
                 raise_if_cancelled(self._cancel_event)
@@ -424,29 +454,38 @@ class QueryPlanEventsHandler(XESessionBase):
                     e,
                 )
                 self._event_file_checkpoint = None
-        if self._event_file_checkpoint is None:
-            cursor.execute(EVENT_FILE_READ_QUERY, (self.max_events, current_file))
+        read_from_file_start = self._event_file_checkpoint is None
+        if read_from_file_start:
+            cursor.execute(EVENT_FILE_READ_QUERY, (limit, current_file))
             rows = cursor.fetchall()
-        if not rows:
-            return None
-        rows = self._complete_buffers(rows)
-        last_row = rows[-1]
-        self._event_file_checkpoint = (last_row[1], int(last_row[2]))
-        return "<events>{}</events>".format("".join(row[0] for row in rows if row[0]))
+        new_rows = self._advance_event_file_checkpoint(rows, limit) if rows else []
+        if not new_rows:
+            return None, read_from_file_start
+        return "<events>{}</events>".format("".join(row[0] for row in new_rows if row[0])), read_from_file_start
 
-    def _complete_buffers(self, rows: list) -> list:
+    def _advance_event_file_checkpoint(self, rows: list, limit: int) -> list:
         """
-        The rows of complete buffers. A read stopped by `max_events` can end within a buffer, and reading after it
-        would skip the rest of that buffer, so its rows are read again next time.
+        The rows of a read not read before, after the checkpoint moves past them. A checkpoint is a whole buffer, so a
+        read stopped by its limit within a buffer checkpoints on the buffer before it, and the next read skips the
+        events of that buffer already read.
         """
-        if len(rows) < self.max_events:
-            return rows
-        last_buffer = (rows[-1][1], rows[-1][2])
-        complete = list(rows)
-        while complete and (complete[-1][1], complete[-1][2]) == last_buffer:
-            complete.pop()
-        # One buffer with more events than `max_events` is read in part.
-        return complete or rows
+        buffers = [(row[1], int(row[2])) for row in rows]
+        skipped = 0
+        if self._event_file_partial_buffer is not None:
+            partial_buffer, partial_rows = self._event_file_partial_buffer
+            while skipped < min(partial_rows, len(rows)) and buffers[skipped] == partial_buffer:
+                skipped += 1
+        if len(rows) < limit:
+            # The read reached the end of the files, so its last buffer is complete.
+            self._event_file_checkpoint = buffers[-1]
+            self._event_file_partial_buffer = None
+        else:
+            last_buffer_start = buffers.index(buffers[-1])
+            if last_buffer_start > 0:
+                self._event_file_checkpoint = buffers[last_buffer_start - 1]
+            # Otherwise the whole read is within its first buffer, and the checkpoint stays before it.
+            self._event_file_partial_buffer = (buffers[-1], len(rows) - last_buffer_start)
+        return rows[skipped:]
 
     def _plan_events(self, cursor: Any, events: list[dict]) -> Iterator[dict]:
         """The plan events, and their raw copies, of the events read, the slowest execution per query and plan."""
