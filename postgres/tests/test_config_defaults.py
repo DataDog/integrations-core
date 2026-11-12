@@ -115,6 +115,7 @@ EXPECTED_DEFAULTS = {
     # === DBM: Column stats collection ===
     'collect_column_statistics': {
         'enabled': True,
+        'function': 'datadog.column_statistics',
         'max_tables': 500,
         'collection_interval': 3600,
         'include_databases': [],

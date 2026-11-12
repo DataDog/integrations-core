@@ -1183,6 +1183,15 @@ files:
             example: 3600
             display_default: 3600
           fleet_configurable: false
+        - name: function
+          description: |
+            Override the function used to read column statistics. Accepts a function name, optionally
+            qualified with a schema, made of letters, digits and underscores.
+          value:
+            type: string
+            example: datadog.column_statistics
+            display_default: datadog.column_statistics
+          fleet_configurable: false
         - name: max_tables
           description: |
             Maximum number of tables to collect column statistics for.

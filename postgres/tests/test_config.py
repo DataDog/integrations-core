@@ -46,6 +46,25 @@ def test_initialize_valid_config(mock_check, minimal_instance):
     assert not result.errors
 
 
+@pytest.mark.parametrize(
+    'function,valid',
+    [
+        ('datadog.column_statistics', True),
+        ('monitoring.column_statistics()', True),
+        ('column_statistics', True),
+        ('datadog.column_statistics(); DROP TABLE users', False),
+        ('a.b.c', False),
+    ],
+)
+def test_collect_column_statistics_function_validation(mock_check, minimal_instance, function, valid):
+    minimal_instance.update({'dbm': True, 'collect_column_statistics': {'function': function}})
+    mock_check.instance = minimal_instance
+    mock_check.init_config = {}
+    config, result = build_config(check=mock_check)
+    assert result.valid is valid
+    assert any('collect_column_statistics.function' in str(e) for e in result.errors) is not valid
+
+
 def test_initialize_invalid_ssl_mode(mock_check, minimal_instance):
     instance = minimal_instance
     instance['ssl'] = 'invalid_ssl'

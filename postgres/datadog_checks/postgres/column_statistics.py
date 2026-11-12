@@ -18,9 +18,10 @@ from datadog_checks.base.utils.db.utils import default_json_event_encoding
 from datadog_checks.base.utils.serialization import json
 from datadog_checks.base.utils.tracking import tracked_method
 
+from .diagnose import _safe_identifier
 from .filters import regex_exclude_clauses, regex_include_clause
 from .health import PostgresHealthEvent
-from .util import payload_pg_version
+from .util import DEFAULT_COLUMN_STATISTICS_FUNCTION, column_statistics_function, payload_pg_version
 
 
 def agent_check_getter(self):
@@ -56,7 +57,7 @@ column_data AS (
         EXTRACT(EPOCH FROM (NOW() - st.last_vacuum))::bigint AS last_vacuum_age,
         EXTRACT(EPOCH FROM (NOW() - st.last_autovacuum))::bigint AS last_autovacuum_age,
         EXTRACT(EPOCH FROM (NOW() - GREATEST(st.last_analyze, st.last_autoanalyze)))::bigint AS stats_age
-    FROM datadog.column_statistics() s
+    FROM {function}() s
     JOIN tables t ON t.schemaname = s.schemaname AND t.tablename = s.tablename
     JOIN pg_stat_all_tables st ON st.schemaname = t.schemaname AND st.relname = t.tablename
 )
@@ -74,7 +75,7 @@ GROUP BY schemaname, tablename
 ORDER BY schemaname, tablename
 """
 
-FUNCTION_PRESENT_QUERY = "SELECT to_regprocedure('datadog.column_statistics()') IS NOT NULL AS present"
+FUNCTION_PRESENT_QUERY = "SELECT to_regprocedure(%s) IS NOT NULL AS present"
 
 PAYLOAD_MAX_COLUMNS = 5_000
 MAX_QUERY_DURATION_SECONDS = 60
@@ -83,6 +84,7 @@ MAX_QUERY_DURATION_SECONDS = 60
 class PostgresColumnStatisticsCollectorConfig:
     def __init__(self):
         self.collection_interval = 3600
+        self.function = DEFAULT_COLUMN_STATISTICS_FUNCTION
         self.max_tables = 500
         self.include_databases: list[str] = []
         self.exclude_databases: list[str] = []
@@ -93,7 +95,7 @@ class PostgresColumnStatisticsCollectorConfig:
 
 
 class PostgresColumnStatisticsCollector:
-    """Collects column statistics from pg_stats via the datadog.column_statistics() function."""
+    """Collects column statistics from pg_stats via the configured column statistics function."""
 
     def __init__(self, check: PostgreSql, cancel_event):
         self._check = check
@@ -101,6 +103,8 @@ class PostgresColumnStatisticsCollector:
         self._cancel_event = cancel_event
         self._config = PostgresColumnStatisticsCollectorConfig()
         self._config.collection_interval = check._config.collect_column_statistics.collection_interval
+        self._config.function = column_statistics_function(check._config)
+        self._function_sql = _safe_identifier(self._config.function)
         self._config.max_tables = check._config.collect_column_statistics.max_tables
         self._config.include_databases = list(check._config.collect_column_statistics.include_databases or [])
         self._config.exclude_databases = list(check._config.collect_column_statistics.exclude_databases or [])
@@ -232,12 +236,12 @@ class PostgresColumnStatisticsCollector:
         try:
             with self._check.db_pool.get_connection(db_name) as conn:
                 with conn.cursor(row_factory=dict_row) as cursor:
-                    cursor.execute(FUNCTION_PRESENT_QUERY)
+                    cursor.execute(FUNCTION_PRESENT_QUERY, (self._function_sql + "()",))
                     if not cursor.fetchone()['present']:
                         self._handle_function_not_found(db_name)
                         return
                     filters_sql, filter_params = self._build_filters()
-                    query = COLUMN_STATISTICS_QUERY.format(filters=filters_sql)
+                    query = COLUMN_STATISTICS_QUERY.format(filters=filters_sql, function=self._function_sql)
                     filter_params.append(self._config.max_tables)
                     cursor.execute("SET statement_timeout = %s", (MAX_QUERY_DURATION_SECONDS * 1000,))
                     try:
@@ -274,8 +278,9 @@ class PostgresColumnStatisticsCollector:
                 if db_name not in self._insufficient_privilege_dbs:
                     self._insufficient_privilege_dbs.add(db_name)
                     self._log.warning(
-                        "Insufficient privileges to execute datadog.column_statistics() in database '%s'. "
+                        "Insufficient privileges to execute %s() in database '%s'. "
                         "Please check the function permissions.",
+                        self._config.function,
                         db_name,
                     )
                     self._check.health.submit_health_event(
@@ -292,9 +297,10 @@ class PostgresColumnStatisticsCollector:
             return
         self._function_not_found_dbs.add(db_name)
         self._log.warning(
-            "datadog.column_statistics() function not found in database '%s'. "
+            "%s() function not found in database '%s'. "
             "Please create the function as described in the documentation: "
             "https://docs.datadoghq.com/database_monitoring/setup_postgres/",
+            self._config.function,
             db_name,
         )
         self._check.health.submit_health_event(
@@ -305,7 +311,7 @@ class PostgresColumnStatisticsCollector:
     def _handle_recovery(self, db_name: str):
         if db_name in self._function_not_found_dbs:
             self._function_not_found_dbs.discard(db_name)
-            self._log.info("datadog.column_statistics() function is now available in database '%s'", db_name)
+            self._log.info("%s() function is now available in database '%s'", self._config.function, db_name)
             if not self._function_not_found_dbs:
                 self._check.health.submit_health_event(
                     name=PostgresHealthEvent.COLUMN_STATISTICS_FUNCTION_NOT_FOUND,
@@ -313,7 +319,7 @@ class PostgresColumnStatisticsCollector:
                 )
         if db_name in self._insufficient_privilege_dbs:
             self._insufficient_privilege_dbs.discard(db_name)
-            self._log.info("datadog.column_statistics() privileges restored in database '%s'", db_name)
+            self._log.info("%s() privileges restored in database '%s'", self._config.function, db_name)
             if not self._insufficient_privilege_dbs:
                 self._check.health.submit_health_event(
                     name=PostgresHealthEvent.COLUMN_STATISTICS_INSUFFICIENT_PRIVILEGE,

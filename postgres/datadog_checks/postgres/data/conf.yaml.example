@@ -634,6 +634,12 @@ instances:
         #
         # collection_interval: 3600
 
+        ## @param function - string - optional - default: datadog.column_statistics
+        ## Override the function used to read column statistics. Accepts a function name, optionally
+        ## qualified with a schema, made of letters, digits and underscores.
+        #
+        # function: datadog.column_statistics
+
         ## @param max_tables - number - optional - default: 500
         ## Maximum number of tables to collect column statistics for.
         #

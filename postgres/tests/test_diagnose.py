@@ -1385,6 +1385,23 @@ def test_column_statistics_run_by_default_with_dbm(integration_check, pg_instanc
     )
 
 
+def test_column_statistics_uses_configured_function(integration_check, pg_instance):
+    check = integration_check(
+        dict(pg_instance, dbm=True, collect_column_statistics={'enabled': True, 'function': 'monitoring.col_stats'})
+    )
+    custom_call = 'SELECT 1 FROM "monitoring"."col_stats"() LIMIT 1'
+    diagnoses = _run(
+        check,
+        _happy_server_responses()
+        + _happy_dbm_responses()
+        + [(custom_call, psycopg.errors.UndefinedFunction('function monitoring.col_stats() does not exist'))],
+    )
+    fails = _by_name(diagnoses, DatabaseConfigurationError.column_statistics_function_undefined.value)
+    assert len(fails) == 1 and fails[0]['result'] == Diagnosis.DIAGNOSIS_FAIL
+    assert 'monitoring.col_stats()' in fails[0]['diagnosis']
+    assert 'monitoring.col_stats' in fails[0]['remediation']
+
+
 def test_column_statistics_not_run_without_dbm(integration_check, pg_instance):
     check = integration_check(dict(pg_instance, collect_column_statistics={'enabled': True}))
     diagnoses = _run(check, _happy_server_responses())

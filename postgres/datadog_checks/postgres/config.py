@@ -29,8 +29,9 @@ import time
 from datadog_checks.base import AgentCheck, ConfigurationError
 from datadog_checks.base.utils.aws import rds_parse_tags_from_endpoint
 from datadog_checks.base.utils.db.utils import get_agent_host_tags
+from datadog_checks.postgres.diagnose import _safe_identifier
 from datadog_checks.postgres.features import Feature, FeatureKey, FeatureNames
-from datadog_checks.postgres.util import AWS_RDS_HOSTNAME_SUFFIX
+from datadog_checks.postgres.util import AWS_RDS_HOSTNAME_SUFFIX, column_statistics_function
 
 SSL_MODES = {'disable', 'allow', 'prefer', 'require', 'verify-ca', 'verify-full'}
 TABLE_COUNT_LIMIT = 200
@@ -455,6 +456,12 @@ def validate_config(config: InstanceConfig, instance: dict, validation_result: V
                     break
             except re.error:
                 validation_result.add_warning(f'Invalid regex pattern in autodiscovery exclude: {exclude_pattern}')
+
+    if config.dbm and config.collect_column_statistics.enabled:
+        try:
+            _safe_identifier(column_statistics_function(config))
+        except ValueError as e:
+            validation_result.add_error(f'Invalid `collect_column_statistics.function`: {e}')
 
     # If the user provided config explicitly enables these features, we add a warning if dbm is not enabled
     dbm_required = [
