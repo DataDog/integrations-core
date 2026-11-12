@@ -4,6 +4,7 @@
 
 This check monitors [KrakenD][1] through the Datadog Agent.
 
+
 KrakenD is a high-performance API Gateway that provides a single entry point for microservices. This integration collects metrics using KrakenD's [OpenTelemetry exporter with Prometheus format][2] and supports [log collection][3] for comprehensive monitoring.
 
 ### What This Integration Monitors
