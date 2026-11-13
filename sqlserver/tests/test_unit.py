@@ -1564,6 +1564,33 @@ def test_needs_comment_recovery_recognizes_dbm_comment_markers(marker):
             id='comment_already_in_statement_metadata',
         ),
         pytest.param("/*dddbs='orders-service'*/ SELECT 1", [], True, id='comment_missing_from_statement_metadata'),
+        pytest.param(
+            "/* service='datadog-agent' */ SELECT 1", [], True, id='agent_comment_missing_from_statement_metadata'
+        ),
+        pytest.param(
+            "/* service='datadog-agent' */ /*dddbs='orders-service'*/ SELECT 1",
+            ["/*dddbs='orders-service'*/"],
+            True,
+            id='agent_comment_missing_with_apm_comment_retained',
+        ),
+        pytest.param(
+            "/* service='datadog-agent' */ SELECT 1",
+            ["/* service='datadog-agent' */"],
+            False,
+            id='agent_comment_already_in_statement_metadata',
+        ),
+        pytest.param(
+            "/* service='datadog-agent' */ /*dddbs='orders-service'*/ SELECT 1",
+            ["/* service='datadog-agent' */"],
+            True,
+            id='apm_comment_missing_with_agent_comment_retained',
+        ),
+        pytest.param(
+            "/*query_source='fleet-automation.agent-queries.count-datadog-agents'*/ SELECT 1",
+            [],
+            False,
+            id='unrelated_datadog_mention',
+        ),
     ],
 )
 def test_needs_comment_recovery_requires_missing_dbm_comment(full_text, statement_comments, expected):

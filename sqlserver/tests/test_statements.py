@@ -1238,12 +1238,12 @@ def test_normalize_queries_procedure_name_fallback(
 
 
 @pytest.mark.unit
-def test_normalize_queries_recovers_leading_comment_for_non_proc_statement(instance_docker, datadog_agent):
+@pytest.mark.parametrize('comment', ["/*dddbs='orders-service',dde='prod'*/", "/* service='datadog-agent' */"])
+def test_normalize_queries_recovers_leading_comment_for_non_proc_statement(instance_docker, datadog_agent, comment):
     instance_docker['dbm'] = True
     instance_docker['query_metrics'] = {'enabled': True, 'run_sync': True}
     check = SQLServer(CHECK_NAME, {}, [instance_docker])
 
-    comment = "/*dddbs='orders-service',dde='prod'*/"
     statement_text = "SELECT * FROM orders WHERE customer_id = @P1"
     row = {
         'statement_text': statement_text,

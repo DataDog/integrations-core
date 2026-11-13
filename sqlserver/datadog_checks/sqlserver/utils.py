@@ -16,6 +16,8 @@ DRIVER_CONFIG_DIR = os.path.join(CURRENT_DIR, 'data', 'driver_config')
 ODBC_INI = 'odbc.ini'
 ODBC_INST_INI = 'odbcinst.ini'
 
+AGENT_SQL_COMMENT = "/* service='datadog-agent' */"
+
 DBM_COMMENT_MARKERS = (
     'ddps=',
     'dddbs=',
@@ -159,6 +161,12 @@ def has_dbm_comment_marker(text: Optional[str]) -> bool:
 
 
 def needs_comment_recovery(full_text: Optional[str], statement_comments: Optional[Sequence[str]]) -> bool:
+    if (
+        full_text
+        and AGENT_SQL_COMMENT in full_text
+        and not any(AGENT_SQL_COMMENT in comment for comment in statement_comments or ())
+    ):
+        return True
     return has_dbm_comment_marker(full_text) and not any(
         has_dbm_comment_marker(comment) for comment in statement_comments or ()
     )
