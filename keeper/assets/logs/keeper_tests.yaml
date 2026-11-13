@@ -439,6 +439,84 @@ tests:
       "service" : "security",
       "source" : "keeper",
       "additionalProperties" : {
+        "audit_event" : "added_admin_key",
+        "remote_address" : "10.10.10.10",
+        "category" : "security",
+        "client_version" : "EMConsole.17.3.0",
+        "enterprise_id" : 260753,
+        "to_username" : "beiprogohefre-9771@company.com",
+        "timestamp" : "2025-06-11T12:04:14.772Z",
+        "username" : "xakemaukubri-2168@company.com"
+      },
+      "message" : "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"audit_event\":\"added_admin_key\",\"remote_address\":\"10.10.10.10\",\"category\":\"security\",\"client_version\":\"EMConsole.17.3.0\",\"to_username\":\"beiprogohefre-9771@company.com\",\"username\":\"xakemaukubri-2168@company.com\",\"enterprise_id\":260753}"
+    }
+  result:
+    custom:
+      additionalProperties: ""
+      client_version: "EMConsole.17.3.0"
+      enterprise_id: 260753
+      evt:
+        category: "security"
+        name: "added_admin_key"
+      hostname: "keepersecurity.com"
+      network:
+        client:
+          geoip: {}
+          ip: "10.10.10.10"
+      service: "security"
+      source: "keeper"
+      timestamp: 1749643454772
+      to_username: "beiprogohefre-9771@company.com"
+      usr:
+        email: "xakemaukubri-2168@company.com"
+      remote_address: 10.10.10.10
+      audit_event: added_admin_key
+      ocsf:
+        severity: Informational
+        privileges:
+          - ADMIN_PRIVILEGES_ASSIGNED
+        activity_name: Assign Privileges
+        metadata:
+          product:
+            name: Keeper
+            vendor_name: Keeper Security
+            version: EMConsole.17.3.0
+          tenant_uid: '260753'
+          event_code: added_admin_key
+          version: 1.5.0
+        category_uid: 3
+        category_name: Identity & Access Management
+        src_endpoint:
+          ip: 10.10.10.10
+        actor:
+          user:
+            email_addr: xakemaukubri-2168@company.com
+            name: xakemaukubri-2168@company.com
+        status_id: 1
+        class_uid: 3005
+        activity_id: 1
+        time: 1749643454772
+        severity_id: 1
+        class_name: User Access Management
+        user:
+          email_addr: beiprogohefre-9771@company.com
+          type_id: 1
+          name: beiprogohefre-9771@company.com
+          type: User
+        status: Success
+      username: xakemaukubri-2168@company.com
+    message: "<165>1 2025-06-11T12:04:14.772Z keepersecurity.com keeper - - - {\"audit_event\":\"added_admin_key\",\"remote_address\":\"10.10.10.10\",\"category\":\"security\",\"client_version\":\"EMConsole.17.3.0\",\"to_username\":\"beiprogohefre-9771@company.com\",\"username\":\"xakemaukubri-2168@company.com\",\"enterprise_id\":260753}"
+    service: "security"
+    tags:
+      - "source:LOGS_SOURCE"
+    timestamp: 1749643454772
+ -
+  sample: |-
+    {
+      "hostname" : "keepersecurity.com",
+      "service" : "security",
+      "source" : "keeper",
+      "additionalProperties" : {
         "audit_event" : "pending_removed_from_role",
         "role_id" : "261822/1124516927373322",
         "remote_address" : "10.10.10.10",
