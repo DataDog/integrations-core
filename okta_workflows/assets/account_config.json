@@ -1,0 +1,63 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API token",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "API Token",
+          "help": "This field is required for API token authentication",
+          "editable": true,
+          "required": false,
+          "password": {}
+        }
+      }
+    },
+    {
+      "auth_name": "OAuth",
+      "basic": {
+        "user_setting": {
+          "key": "client_id",
+          "label": "Client ID",
+          "help": "This field is required for OAuth authentication",
+          "editable": true,
+          "required": false,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "client_secret",
+          "label": "Client secret",
+          "help": "This field is required for OAuth authentication",
+          "editable": true,
+          "required": false,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "auth_method",
+      "label": "Authorization method",
+      "editable": true,
+      "required": false,
+      "dropdown": {
+        "options": [
+          { "value": "oauth", "label": "OAuth" },
+          { "value": "api_token", "label": "API token" }
+        ]
+      }
+    },
+    {
+      "key": "domain",
+      "label": "Domain",
+      "help": "This field is required for both OAuth and API token authentication",
+      "editable": true,
+      "required": true,
+      "text": {}
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "okta-workflows-logs" }
+  ]
+}
