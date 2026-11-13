@@ -7,6 +7,7 @@ from urllib.parse import urljoin, urlparse, urlunparse
 
 from datadog_checks.base import AgentCheck, OpenMetricsBaseCheckV2
 
+from . import ai_gateway
 from .metrics import PROMETHEUS_METRICS_MAP
 from .utils import _get_server_info
 
@@ -160,8 +161,10 @@ class EnvoyCheckV2(OpenMetricsBaseCheckV2):
 
     def __init__(self, name, init_config, instances):
         super().__init__(name, init_config, instances)
+        self.check_initializations.appendleft(self.configure_scraper_configs)
         self.check_initializations.append(self.configure_additional_transformers)
         openmetrics_endpoint = self.instance.get('openmetrics_endpoint')
+        self.ai_gateway_endpoint = self.instance.get('ai_gateway_endpoint')
         self.collect_server_info = self.instance.get('collect_server_info', True)
 
         self.base_url = None
@@ -198,11 +201,24 @@ class EnvoyCheckV2(OpenMetricsBaseCheckV2):
 
         return transform
 
+    def configure_scraper_configs(self):
+        if not self.ai_gateway_endpoint:
+            return
+
+        self.scraper_configs = [ai_gateway.scraper_config(self, self.instance, self.ai_gateway_endpoint)]
+        if self.instance.get('openmetrics_endpoint'):
+            self.scraper_configs.insert(0, self.instance)
+
     def configure_additional_transformers(self):
-        for metric, data in METRIC_WITH_LABEL_NAME.items():
-            self.scrapers[self.instance['openmetrics_endpoint']].metric_transformer.add_custom_transformer(
-                metric, self.configure_transformer_label_in_name(metric, **data), pattern=True
-            )
+        envoy_scraper = self.scrapers.get(self.instance.get('openmetrics_endpoint'))
+        if envoy_scraper is not None:
+            for metric, data in METRIC_WITH_LABEL_NAME.items():
+                envoy_scraper.metric_transformer.add_custom_transformer(
+                    metric, self.configure_transformer_label_in_name(metric, **data), pattern=True
+                )
+
+        if self.ai_gateway_endpoint:
+            ai_gateway.add_transformers(self, self.scrapers[self.ai_gateway_endpoint])
 
     @AgentCheck.metadata_entrypoint
     def _collect_metadata(self):
