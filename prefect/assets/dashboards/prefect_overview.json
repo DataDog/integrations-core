@@ -2181,7 +2181,7 @@
             "id": 7676892238288698,
             "definition": {
               "type": "note",
-              "content": "Overview of supporting database performance, including latency, connection counts, and memory usage, to highlight potential infrastructure constraints affecting system behavior.",
+              "content": "PostgreSQL and Redis instances backing Prefect server. Requires the Datadog PostgreSQL and Redis integrations configured with the same `service` as the Prefect check; set $service to that value. PostgreSQL widgets are empty for SQLite-backed servers; Redis widgets are empty without Redis messaging.",
               "background_color": "blue",
               "font_size": "16",
               "text_align": "center",
@@ -2232,7 +2232,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:redis.info.latency_ms{$service, $host}"
+                      "query": "avg:redis.ping.latency_ms{$service, $host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2256,7 +2256,7 @@
           {
             "id": 1527680987516770,
             "definition": {
-              "title": "PostgreSQL Latency",
+              "title": "PostgreSQL Transactions (Commits vs Rollbacks)",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -2273,21 +2273,24 @@
                 {
                   "formulas": [
                     {
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "millisecond"
-                        }
-                      },
-                      "alias": "Postgres latency",
+                      "alias": "Commits/s",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Rollbacks/s",
                       "formula": "query2"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:postgresql.commits{$service, $host} by {db}"
+                    },
+                    {
+                      "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:postgresql.dd.postgres.operation.time.avg{$service, $host}"
+                      "query": "sum:postgresql.rollbacks{$service, $host} by {db}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2384,7 +2387,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:postgresql.connections{$service, $host} by {db}"
+                      "query": "avg:postgresql.database_connections{$service, $host} by {db}"
                     }
                   ],
                   "formulas": [
