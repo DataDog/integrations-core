@@ -35,59 +35,74 @@ def test_get_current_branch():
 
 
 def test_files_changed():
-    with mock.patch('datadog_checks.dev.tooling.git.chdir') as chdir:
-        with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
-            name_status_out = mock.MagicMock()
-            name_status_out.stdout = '''
+    with mock.patch('datadog_checks.dev.tooling.git.get_base_ref', return_value='origin/master'):
+        with mock.patch('datadog_checks.dev.tooling.git.chdir') as chdir:
+            with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
+                name_status_out = mock.MagicMock()
+                name_status_out.stdout = '''
 M	foo
 R100	bar	baz
 R100	foo2	foo3
             '''
-            name_only_out = mock.MagicMock()
-            name_only_out.stdout = '''
+                name_only_out = mock.MagicMock()
+                name_only_out.stdout = '''
 file1
 file2
 '''
 
-            run.side_effect = [name_status_out, name_only_out]
-            set_root('/foo/')
-            retval = files_changed()
+                run.side_effect = [name_status_out, name_only_out]
+                set_root('/foo/')
+                retval = files_changed()
 
-            chdir.assert_has_calls(
-                [
-                    # since chdir is a context manager, we need to also assert __enter__/__exit__
-                    mock.call('/foo/'),
-                    mock.call().__enter__(),
-                    mock.call().__exit__(None, None, None),
-                    mock.call('/foo/'),
-                    mock.call().__enter__(),
-                    mock.call().__exit__(None, None, None),
+                chdir.assert_has_calls(
+                    [
+                        # since chdir is a context manager, we need to also assert __enter__/__exit__
+                        mock.call('/foo/'),
+                        mock.call().__enter__(),
+                        mock.call().__exit__(None, None, None),
+                        mock.call('/foo/'),
+                        mock.call().__enter__(),
+                        mock.call().__exit__(None, None, None),
+                    ]
+                )
+                calls = [
+                    mock.call('git diff --name-status origin/master...', capture='out'),
+                    mock.call('git diff --name-only origin/master', capture='out'),
                 ]
-            )
-            calls = [
-                mock.call('git diff --name-status origin/master...', capture='out'),
-                mock.call('git diff --name-only master', capture='out'),
-            ]
-            run.assert_has_calls(calls)
-            assert retval == ['bar', 'baz', 'file1', 'file2', 'foo', 'foo2', 'foo3']
+                run.assert_has_calls(calls)
+                assert retval == ['bar', 'baz', 'file1', 'file2', 'foo', 'foo2', 'foo3']
 
 
 def test_files_changed_not_include_uncommitted():
-    with mock.patch('datadog_checks.dev.tooling.git.chdir') as chdir:
-        with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
-            name_status_out = mock.MagicMock()
-            name_status_out.stdout = '''
+    with mock.patch('datadog_checks.dev.tooling.git.get_base_ref', return_value='origin/master'):
+        with mock.patch('datadog_checks.dev.tooling.git.chdir') as chdir:
+            with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
+                name_status_out = mock.MagicMock()
+                name_status_out.stdout = '''
 M	foo
 R100	bar	baz
 R100	foo2	foo3
             '''
-            run.side_effect = [name_status_out]
-            set_root('/foo/')
-            retval = files_changed(include_uncommitted=False)
+                run.side_effect = [name_status_out]
+                set_root('/foo/')
+                retval = files_changed(include_uncommitted=False)
 
-            chdir.assert_called_once_with('/foo/')
-            run.assert_called_once_with('git diff --name-status origin/master...', capture='out')
-            assert retval == ['bar', 'baz', 'foo', 'foo2', 'foo3']
+                chdir.assert_called_once_with('/foo/')
+                run.assert_called_once_with('git diff --name-status origin/master...', capture='out')
+                assert retval == ['bar', 'baz', 'foo', 'foo2', 'foo3']
+
+
+def test_files_changed_uses_pr_base_ref():
+    with mock.patch('datadog_checks.dev.tooling.git.get_base_ref', return_value='origin/feature-base'):
+        with mock.patch('datadog_checks.dev.tooling.git.chdir'):
+            with mock.patch('datadog_checks.dev.tooling.git.run_command') as run:
+                name_status_out = mock.MagicMock()
+                name_status_out.stdout = ''
+                run.side_effect = [name_status_out]
+                set_root('/foo/')
+                files_changed(include_uncommitted=False)
+
+                run.assert_called_once_with('git diff --name-status origin/feature-base...', capture='out')
 
 
 def test_get_commits_since():

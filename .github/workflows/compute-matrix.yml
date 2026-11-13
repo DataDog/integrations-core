@@ -38,9 +38,15 @@ jobs:
     - name: Fetch merge base
       env:
         GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        BASE_REF: "${{ github.event.pull_request.base.ref }}"
+        HEAD_SHA: "${{ github.event.pull_request.head.sha }}"
       run: |-
+        # Compare against the base branch *name* rather than the event payload's cached
+        # `base.sha`, which goes stale (and produces an overly broad diff) whenever the base
+        # branch is a moving/stacked branch that advances without a new push to this PR's head.
+        encoded_base_ref=$(jq -rn --arg ref "$BASE_REF" '$ref | @uri')
         merge_base=$(gh api \
-          repos/${{ github.repository }}/compare/${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }} \
+          "repos/${{ github.repository }}/compare/${encoded_base_ref}...${HEAD_SHA}" \
           --jq '.merge_base_commit.sha')
         echo "MERGE_BASE=$merge_base" >> "$GITHUB_ENV"
         git -c protocol.version=2 fetch --no-tags --no-recurse-submodules --filter=blob:none origin "$merge_base"
