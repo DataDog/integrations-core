@@ -1,0 +1,545 @@
+id: kueue
+metric_id: kueue
+backend_only: false
+facets:
+  - groups:
+      - Source Code
+    name: Logger Name
+    path: logger.name
+    source: log
+  - groups:
+      - Source Code
+    name: Logger Method
+    path: logger.method_name
+    source: log
+  - groups:
+      - User
+    name: User ID
+    path: usr.id
+    source: log
+  - groups:
+      - Web Access
+    name: Status Code
+    path: http.status_code
+    source: log
+  # No facet for `kueue.klog_severity`: it is strictly 1:1 with the built-in
+  # `status` and would duplicate a standard facet. The attribute itself has to
+  # stay — it is the lookup target that feeds the status-remapper, which cannot
+  # interpret klog's `Level(-N)` form directly.
+  - groups:
+      - Kueue
+    name: Replica Role
+    path: kueue.replica_role
+    source: log
+  - groups:
+      - Kueue
+    name: Workload Name
+    path: kueue.workload.name
+    source: log
+  - groups:
+      - Kueue
+    name: Workload Namespace
+    path: kueue.workload.namespace
+    source: log
+  - groups:
+      - Kueue
+    name: Object Name
+    path: kueue.object.name
+    source: log
+  - groups:
+      - Kueue
+    name: Object Namespace
+    path: kueue.object.namespace
+    source: log
+  - groups:
+      - Kueue
+    name: Cluster Queue
+    path: kueue.cluster_queue
+    source: log
+  - groups:
+      - Kueue
+    name: Local Queue
+    path: kueue.local_queue
+    source: log
+  - groups:
+      - Kueue
+    name: Reason
+    path: kueue.reason
+    source: log
+  - groups:
+      - Kueue
+    name: Admission Allowed
+    path: kueue.admission.allowed
+    source: log
+pipeline:
+  type: pipeline
+  name: Kueue
+  enabled: true
+  filter:
+    query: source:kueue
+  processors:
+    - type: attribute-remapper
+      name: Map `status` to `kueue.workload.status`
+      enabled: true
+      sources:
+        - status
+      sourceType: attribute
+      target: kueue.workload.status
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: grok-parser
+      name: Parse klog text-format lines
+      enabled: true
+      source: message
+      samples:
+        - 'E0803 15:38:32.949000       1 reflector.go:227] "Failed to watch" err="failed
+          to list *v1.MutatingAdmissionPolicy: mutatingadmissionpolicies.admissionregistration.k8s.io
+          is forbidden: User \"system:serviceaccount:kueue-system:kueue-controller-manager\"
+          cannot list resource" logger="UnhandledError" reflector="k8s.io/client-go/informers/factory.go:177"
+          type="*v1.MutatingAdmissionPolicy"'
+        - I0803 08:47:07.919503       1 leaderelection.go:258] "Attempting to
+          acquire leader lease..." lock="kueue-system/c1f6bfd2.kueue.x-k8s.io"
+        - I0803 08:47:19.824594       1 leaderelection.go:272] "Successfully
+          acquired lease" lock="kueue-system/c1f6bfd2.kueue.x-k8s.io"
+        - W0727 08:26:45.420112       1 apf_controller.go:377] Unable to update
+          watermark
+      grok:
+        # The klog thread id is captured anonymously on purpose: it is always 1,
+        # and writing any `logger.*` key here would create `logger` as an object
+        # that the `logger` -> `logger.name` remapper then moves wholesale into
+        # `logger.name`, turning a standard string attribute into an object.
+        supportRules: |
+          klog_severity [IWEF]
+          klog_quoted_msg [^"]*
+        # Rule order matters: most specific first. Each rule parses the key-value
+        # tail in place via the keyvalue filter, so no raw blob is retained (see
+        # the "Reduce/Remove uses of %{data:}" guidance).
+        #
+        # `klog_text_err` exists because the keyvalue filter cannot parse a value
+        # containing backslash-escaped quotes, which client-go emits in RBAC
+        # errors (User \"system:serviceaccount:...\"), so `err` is otherwise
+        # dropped and the failure text lost. It is anchored on the literal
+        # ` logger=` that follows: greedy capture resolves unambiguously because
+        # that sequence occurs exactly once per line. That does couple the rule
+        # to `err` being followed by `logger`, which holds for every
+        # client-go UnhandledError line; anything else falls through to
+        # `klog_text_kv`, which parses what it can.
+        matchRules: |
+          klog_text_err %{klog_severity:level}%{date("MMdd HH:mm:ss.SSSSSS"):kueue.klog_timestamp}\s+%{integer:}\s+%{notSpace:caller}\]\s*"%{klog_quoted_msg:msg}"\s+err="%{data:klog_err}" logger="%{klog_quoted_msg:kueue.klog.logger}"\s*%{data:kueue.klog:keyvalue}
+          klog_text_kv %{klog_severity:level}%{date("MMdd HH:mm:ss.SSSSSS"):kueue.klog_timestamp}\s+%{integer:}\s+%{notSpace:caller}\]\s*"%{klog_quoted_msg:msg}"\s*%{data:kueue.klog:keyvalue}
+          klog_text %{klog_severity:level}%{date("MMdd HH:mm:ss.SSSSSS"):kueue.klog_timestamp}\s+%{integer:}\s+%{notSpace:caller}\]\s*%{data:msg}
+    - type: grok-parser
+      name: Extract klog verbosity depth from `level`
+      enabled: true
+      source: level
+      samples:
+        - Level(-1)
+        - Level(-3)
+        - Level(-5)
+      grok:
+        supportRules: ""
+        matchRules: |
+          klog_verbosity_rule Level\(-%{integer:kueue.klog_verbosity}\)
+    - name: Normalize `level` into `kueue.klog_severity`
+      enabled: true
+      source: level
+      target: kueue.klog_severity
+      lookupTable: |-
+        Level(-1),debug
+        Level(-2),debug
+        Level(-3),debug
+        Level(-4),debug
+        Level(-5),debug
+        Level(-6),debug
+        Level(-7),debug
+        Level(-8),debug
+        Level(-9),debug
+        fatal,critical
+        panic,critical
+        dpanic,critical
+        F,critical
+        E,error
+        W,warn
+        I,info
+        error,error
+        warn,warn
+        warning,warn
+        info,info
+        debug,debug
+      type: lookup-processor
+    - type: status-remapper
+      name: Define `kueue.klog_severity` as the official status of the log
+      enabled: true
+      sources:
+        - kueue.klog_severity
+        - level
+    - type: attribute-remapper
+      name: Map `level` to `kueue.klog_level`
+      enabled: true
+      sources:
+        - level
+      sourceType: attribute
+      target: kueue.klog_level
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: date-remapper
+      name: Define `ts` or `kueue.klog_timestamp` as the official date of the log
+      enabled: true
+      sources:
+        - ts
+        - kueue.klog_timestamp
+    - type: message-remapper
+      name: Define `msg` as the official message of the log
+      enabled: true
+      sources:
+        - msg
+    - type: attribute-remapper
+      name: Map `logger` to `logger.name`
+      enabled: true
+      sources:
+        - logger
+      sourceType: attribute
+      target: logger.name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    # klog-text lines carry their logger name as a key-value pair instead of a
+    # top-level field, so the two logging paths would otherwise put the same
+    # concept in two places. Runs after the zap mapping and does not override
+    # it, so a JSON `logger` always wins. Note ~22% of klog lines (e.g. leader
+    # election) have no `logger=` pair at all and stay without a logger.name.
+    - type: attribute-remapper
+      name: Map klog `kueue.klog.logger` to `logger.name`
+      enabled: true
+      sources:
+        - kueue.klog.logger
+      sourceType: attribute
+      target: logger.name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: grok-parser
+      name: Extract file and line from `caller`
+      enabled: true
+      source: caller
+      samples:
+        - core/workload_controller.go:1283
+        - admission/http.go:163
+      grok:
+        supportRules: ""
+        matchRules: |
+          caller_rule %{regex("[^:]*"):logger.file_name}:%{integer:logger.line_number}
+    - type: attribute-remapper
+      name: Map `caller` to `logger.method_name`
+      enabled: true
+      sources:
+        - caller
+      sourceType: attribute
+      target: logger.method_name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    # No `kueue.component` classifier here by design. Kueue's subsystem is
+    # already carried by `logger.name`, which is a declared facet. Deriving a
+    # taxonomy from logger names would mean maintaining an allowlist that needs
+    # an entry every time kueue adds a controller, and no other integration in
+    # this repo does it — the convention is to expose the source's own field
+    # (cf. `ray.component.name`, mapped from a field Ray emits).
+    - type: attribute-remapper
+      name: Map `name` to `kueue.object.name`
+      enabled: true
+      sources:
+        - name
+      sourceType: attribute
+      target: kueue.object.name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `namespace` to `kueue.object.namespace`
+      enabled: true
+      sources:
+        - namespace
+      sourceType: attribute
+      target: kueue.object.namespace
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `object.name` to `kueue.object.name`
+      enabled: true
+      sources:
+        - object.name
+      sourceType: attribute
+      target: kueue.object.name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `object.namespace` to `kueue.object.namespace`
+      enabled: true
+      sources:
+        - object.namespace
+      sourceType: attribute
+      target: kueue.object.namespace
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `workload.name` to `kueue.workload.name`
+      enabled: true
+      sources:
+        - workload.name
+      sourceType: attribute
+      target: kueue.workload.name
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `workload.namespace` to `kueue.workload.namespace`
+      enabled: true
+      sources:
+        - workload.namespace
+      sourceType: attribute
+      target: kueue.workload.namespace
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    # `queue/cluster_queue.go` emits `workload` as a flat "namespace/name"
+    # string while other call sites emit an object, so the same concept arrives
+    # in two shapes. The object form is handled by the two remappers above;
+    # without this the flat form stayed un-namespaced at the root. Mirrors the
+    # nested+flat pairs already used for clusterQueue and localQueue.
+    - type: grok-parser
+      name: Split flat `workload` into namespace and name
+      enabled: true
+      source: workload
+      samples:
+        - default/job-adm-overquota-ebd31
+        - traf-ns/job-traf-ok2-r2-364ce
+      grok:
+        supportRules: ""
+        matchRules: |
+          flat_workload_rule %{regex("[^/]+"):kueue.workload.namespace}/%{notSpace:kueue.workload.name}
+    # Runs after the object-form remappers, so `workload` only still exists at
+    # this point on the flat-string logs; on object-form logs it is consumed.
+    - type: attribute-remapper
+      name: Map flat `workload` to `kueue.workload.ref`
+      enabled: true
+      sources:
+        - workload
+      sourceType: attribute
+      target: kueue.workload.ref
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map nested `clusterQueue.name` to `kueue.cluster_queue`
+      enabled: true
+      sources:
+        - clusterQueue.name
+      sourceType: attribute
+      target: kueue.cluster_queue
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map flat `clusterQueue` to `kueue.cluster_queue`
+      enabled: true
+      sources:
+        - clusterQueue
+      sourceType: attribute
+      target: kueue.cluster_queue
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map nested `localQueue.name` to `kueue.local_queue`
+      enabled: true
+      sources:
+        - localQueue.name
+      sourceType: attribute
+      target: kueue.local_queue
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map flat `localQueue` to `kueue.local_queue`
+      enabled: true
+      sources:
+        - localQueue
+      sourceType: attribute
+      target: kueue.local_queue
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `reconcileID` to `kueue.reconcile_id`
+      enabled: true
+      sources:
+        - reconcileID
+      sourceType: attribute
+      target: kueue.reconcile_id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `requestID` to `kueue.request_id`
+      enabled: true
+      sources:
+        - requestID
+      sourceType: attribute
+      target: kueue.request_id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `user` to `usr.id`
+      enabled: true
+      sources:
+        - user
+      sourceType: attribute
+      target: usr.id
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `code` to `http.status_code`
+      enabled: true
+      sources:
+        - code
+      sourceType: attribute
+      target: http.status_code
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `allowed` to `kueue.admission.allowed`
+      enabled: true
+      sources:
+        - allowed
+      sourceType: attribute
+      target: kueue.admission.allowed
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `reason` to `kueue.reason`
+      enabled: true
+      sources:
+        - reason
+      sourceType: attribute
+      target: kueue.reason
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `resource.group` to `kueue.resource.group`
+      enabled: true
+      sources:
+        - resource.group
+      sourceType: attribute
+      target: kueue.resource.group
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `resource.version` to `kueue.resource.version`
+      enabled: true
+      sources:
+        - resource.version
+      sourceType: attribute
+      target: kueue.resource.version
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `resource.resource` to `kueue.resource.type`
+      enabled: true
+      sources:
+        - resource.resource
+      sourceType: attribute
+      target: kueue.resource.type
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `isDeleted` to `kueue.workload.is_deleted`
+      enabled: true
+      sources:
+        - isDeleted
+      sourceType: attribute
+      target: kueue.workload.is_deleted
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    # Kueue logs `duration` in seconds (zap's default SecondsDurationEncoder;
+    # verified against Scheduling-cycle start/complete timestamp deltas, ratio 1.00).
+    # The Datadog standard attribute `duration` is nanoseconds, so convert in place.
+    - type: arithmetic-processor
+      name: Convert `duration` from seconds to nanoseconds
+      enabled: true
+      expression: duration * 1000000000
+      target: duration
+      replaceMissing: false
+    - type: attribute-remapper
+      name: Map `replica-role` to `kueue.replica_role`
+      enabled: true
+      sources:
+        - replica-role
+      sourceType: attribute
+      target: kueue.replica_role
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    # controller-runtime's `Starting EventSource` logs put the watched resource
+    # here (`kind source: *v1beta2.Workload`), plus some `channel source: 0x...`
+    # pointer values. Moved out of the reserved `source` name; intentionally not
+    # declared as a facet, since the pointer values are unique per restart.
+    - type: attribute-remapper
+      name: Map `source` to `kueue.watch_source`
+      enabled: true
+      sources:
+        - source
+      sourceType: attribute
+      target: kueue.watch_source
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    - type: attribute-remapper
+      name: Map `error` to `error.message`
+      enabled: true
+      sources:
+        - error
+      sourceType: attribute
+      target: error.message
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true
+    # klog's `err` is captured by the grok parser into the flat `klog_err`
+    # scratch field, not straight into `error.message`. Writing it there
+    # directly would create an `error` object early in the pipeline, which the
+    # remapper above then treats as its own source and nests one level too
+    # deep (`error.message.message`). Must stay after that remapper.
+    - type: attribute-remapper
+      name: Map klog `klog_err` to `error.message`
+      enabled: true
+      sources:
+        - klog_err
+      sourceType: attribute
+      target: error.message
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: false
+    - type: attribute-remapper
+      name: Map `stacktrace` to `error.stack`
+      enabled: true
+      sources:
+        - stacktrace
+      sourceType: attribute
+      target: error.stack
+      targetType: attribute
+      preserveSource: false
+      overrideOnConflict: true

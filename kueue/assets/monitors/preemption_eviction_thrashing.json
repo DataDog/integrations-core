@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "title": "Preemption/eviction thrashing",
+  "tags": [
+    "integration:kueue"
+  ],
+  "definition": {
+    "name": "[Kueue] Preemption/eviction thrashing",
+    "type": "query alert",
+    "query": "sum(last_5m):sum:kueue.evicted_workloads.count{*}.as_count() + sum:kueue.preempted_workloads.count{*}.as_count() > 15",
+    "message": "{{#is_alert}}\n## What's happening?\n\nKueue has churned through {{value}} preempted/evicted workloads in the last 5 minutes, above the critical threshold of {{threshold}}. This pattern indicates preemption/eviction thrashing rather than a single expected preemption event.\n\nThis monitor covers all ClusterQueues together. To identify which queue is responsible, break down `kueue.evicted_workloads.count` by `kueue_cluster_queue` and `kueue.preempted_workloads.count` by `preempting_cluster_queue`.\n{{/is_alert}}\n\n{{#is_warning}}\n## What's happening?\n\nKueue has churned through {{value}} preempted/evicted workloads in the last 5 minutes, above the warning threshold of {{warn_threshold}}.\n{{/is_warning}}\n\n{{#is_recovery}}\n## Recovered\n\nPreemption/eviction churn has resolved. Current value: {{value}}.\n{{/is_recovery}}",
+    "tags": [
+      "integration:kueue",
+      "$env",
+      "$kueue_cluster_queue"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 15,
+        "warning": 5
+      },
+      "notify_audit": false,
+      "require_full_window": false,
+      "notify_no_data": false,
+      "renotify_interval": 0,
+      "include_tags": true,
+      "on_missing_data": "default",
+      "new_host_delay": 300,
+      "silenced": {}
+    }
+  },
+  "created_at": "2026-07-23",
+  "last_updated_at": "2026-08-04",
+  "description": "Alerts when the combined count of preempted and evicted workloads across all ClusterQueues crosses a threshold over a rolling 5-minute window, indicating thrashing where workloads are repeatedly kicked out and re-admitted instead of completing."
+}

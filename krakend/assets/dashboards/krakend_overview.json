@@ -1,0 +1,1792 @@
+{
+  "title": "KrakenD Overview",
+  "description": "[[suggested_dashboards]]",
+  "widgets": [
+    {
+      "id": 7918711296477753,
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 5
+      },
+      "definition": {
+        "type": "group",
+        "title": "Overview",
+        "widgets": [
+          {
+            "id": 1364393203861052,
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            },
+            "definition": {
+              "url": "https://static.datadoghq.com/static/images/logos/krakend_large.svg",
+              "type": "image",
+              "margin": "md",
+              "sizing": "contain",
+              "has_border": true,
+              "has_background": true,
+              "url_dark_theme": "https://static.datadoghq.com/static/images/logos/krakend_reversed_large.svg",
+              "vertical_align": "center",
+              "horizontal_align": "center"
+            }
+          },
+          {
+            "id": 325662436799807,
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            },
+            "definition": {
+              "type": "query_value",
+              "title": "Total requests count",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "query": "sum:krakend.api.http_server.duration.count{*}.as_count()",
+                      "aggregator": "sum",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "request"
+                        }
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "title_size": "16",
+              "title_align": "left",
+              "timeseries_background": {
+                "type": "bars",
+                "yaxis": {}
+              }
+            }
+          },
+          {
+            "id": 2679970725477118,
+            "layout": {
+              "x": 9,
+              "y": 0,
+              "width": 3,
+              "height": 2
+            },
+            "definition": {
+              "type": "query_value",
+              "title": "Average requests rate",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "query": "sum:krakend.api.http_server.duration.count{*}.as_rate()",
+                      "aggregator": "avg",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "request"
+                        }
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 2,
+              "title_size": "16",
+              "title_align": "left",
+              "timeseries_background": {
+                "type": "bars",
+                "yaxis": {}
+              }
+            }
+          },
+          {
+            "id": 2094629257229052,
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            },
+            "definition": {
+              "type": "note",
+              "content": "## KrakenD Overview\n\nThis dashboard contains an overview of your KrakenD API Gateway. The dashboard is split in groups for the Global, Proxy and Backend Layer. Metrics are collected using the KarkenD Prometheus exporter.\n\n### Further Reading\n- [Datadog KrakenD Integration Documentation]()\n- [KrakenD Prometheus Exporter](https://www.krakend.io/docs/telemetry/opentelemetry/#prometheus-exporter-pull)\n- [KrakenD Layers and Metrics](https://www.krakend.io/docs/telemetry/opentelemetry-layers-metrics/)\n- [KarkenD Logs Overview](https://www.krakend.io/docs/logging/)",
+              "tick_pos": "50%",
+              "font_size": "14",
+              "show_tick": false,
+              "tick_edge": "left",
+              "text_align": "left",
+              "has_padding": true,
+              "vertical_align": "top",
+              "background_color": "white"
+            }
+          },
+          {
+            "id": 7820975829377267,
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            },
+            "definition": {
+              "type": "timeseries",
+              "title": "Average request duration",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "order_reverse": false
+                  },
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "query": "sum:krakend.api.http_server.duration.sum{*}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query2",
+                      "query": "sum:krakend.api.http_server.duration.count{*}.as_count()",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Duration",
+                      "formula": "query1 / query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "display_type": "line",
+                  "response_format": "timeseries"
+                }
+              ],
+              "title_size": "16",
+              "show_legend": true,
+              "title_align": "left",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ]
+            }
+          },
+          {
+            "id": 3611008578847180,
+            "layout": {
+              "x": 9,
+              "y": 2,
+              "width": 3,
+              "height": 2
+            },
+            "definition": {
+              "type": "timeseries",
+              "title": "Average response size",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "order_reverse": false
+                  },
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "query": "sum:krakend.api.http_server.response_size.sum{*}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query2",
+                      "query": "sum:krakend.api.http_server.duration.count{*}.as_count()",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Duration",
+                      "formula": "query1 / query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte"
+                        }
+                      }
+                    }
+                  ],
+                  "display_type": "line",
+                  "response_format": "timeseries"
+                }
+              ],
+              "title_size": "16",
+              "show_legend": true,
+              "title_align": "left",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ]
+            }
+          }
+        ],
+        "show_title": true,
+        "layout_type": "ordered",
+        "background_color": "vivid_blue"
+      }
+    },
+    {
+      "id": 1668871152654081,
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 12,
+        "height": 5
+      },
+      "definition": {
+        "type": "group",
+        "title": "Proxy Layer",
+        "widgets": [
+          {
+            "id": 1979478438311389,
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            },
+            "definition": {
+              "type": "timeseries",
+              "title": "Average latency",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "query": "sum:krakend.api.proxy_duration.sum{*}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query2",
+                      "query": "sum:krakend.api.proxy_duration.count{*}.as_count()",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Proxy Layer Latency",
+                      "formula": "query1 / query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "display_type": "line",
+                  "response_format": "timeseries"
+                }
+              ],
+              "title_size": "16",
+              "show_legend": true,
+              "title_align": "left",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ]
+            }
+          },
+          {
+            "id": 3519180611776344,
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            },
+            "definition": {
+              "type": "timeseries",
+              "title": "Errors",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "queries": [
+                    {
+                      "name": "query2",
+                      "query": "sum:krakend.api.proxy_duration.count{error:true}.as_count()",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Proxy Layer Errors",
+                      "formula": "query2"
+                    }
+                  ],
+                  "display_type": "bars",
+                  "response_format": "timeseries"
+                }
+              ],
+              "title_size": "16",
+              "show_legend": true,
+              "title_align": "left",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ]
+            }
+          },
+          {
+            "id": 8767501040669279,
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            },
+            "definition": {
+              "type": "timeseries",
+              "title": "Average latency by endpoint",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "query": "sum:krakend.api.proxy_duration.sum{*} by {http_route}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query2",
+                      "query": "sum:krakend.api.proxy_duration.count{*} by {http_route}.as_count()",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1 / query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "display_type": "line",
+                  "response_format": "timeseries"
+                }
+              ],
+              "title_size": "16",
+              "show_legend": true,
+              "title_align": "left",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ]
+            }
+          },
+          {
+            "id": 7856073831063234,
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            },
+            "definition": {
+              "type": "timeseries",
+              "title": "Errors by endpoint",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "queries": [
+                    {
+                      "name": "query2",
+                      "query": "sum:krakend.api.proxy_duration.count{error:true} by {http_route}.as_count()",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Proxy Layer Errors",
+                      "formula": "query2"
+                    }
+                  ],
+                  "display_type": "bars",
+                  "response_format": "timeseries"
+                }
+              ],
+              "title_size": "16",
+              "show_legend": true,
+              "title_align": "left",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ]
+            }
+          }
+        ],
+        "show_title": true,
+        "layout_type": "ordered",
+        "background_color": "vivid_blue"
+      }
+    },
+    {
+      "id": 7211431877554753,
+      "layout": {
+        "x": 0,
+        "y": 10,
+        "width": 12,
+        "height": 5
+      },
+      "definition": {
+        "type": "group",
+        "title": "Backend Layer Traffic",
+        "widgets": [
+          {
+            "id": 5694597350759392,
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            },
+            "definition": {
+              "type": "timeseries",
+              "title": "Number of backend requests by status",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "queries": [
+                    {
+                      "name": "query4",
+                      "query": "sum:krakend.api.backend_duration.count{complete:true}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query2",
+                      "query": "sum:krakend.api.http_client.request_canceled.count{*}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query5",
+                      "query": "sum:krakend.api.http_client.request_timedout.count{*}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query7",
+                      "query": "sum:krakend.api.backend_duration.count{error:true}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query3",
+                      "query": "sum:krakend.api.http_client.request_failed.count{*}.as_count()",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Completed",
+                      "formula": "query4",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "request"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "Cancelled",
+                      "formula": "query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "request"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "Timed Out",
+                      "formula": "query5",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "request"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "Failed",
+                      "formula": "query7 - query3",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "request"
+                        }
+                      }
+                    }
+                  ],
+                  "display_type": "bars",
+                  "response_format": "timeseries"
+                },
+                {
+                  "style": {
+                    "palette": "dog_classic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "queries": [
+                    {
+                      "name": "query0",
+                      "query": "sum:krakend.api.http_client.request_started.count{*}.as_count()",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Started",
+                      "formula": "query0",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "request"
+                        }
+                      }
+                    }
+                  ],
+                  "display_type": "line",
+                  "response_format": "timeseries"
+                }
+              ],
+              "title_size": "16",
+              "show_legend": true,
+              "title_align": "left",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ]
+            }
+          },
+          {
+            "id": 3025064496833709,
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            },
+            "definition": {
+              "type": "note",
+              "content": "Number of requests sent to the backend service by reported status:\n\n- **Completed**: number of request completed successfully.\n- **Cancelled**: number of requests cancelled by the user before completion\n- **Timed Out**: number of requests where the backend timed out.\n- **Failed**: number of requests that failed (excluding time outs and cancellations).\n- **Started**: the total number of requests started.",
+              "tick_pos": "50%",
+              "font_size": "14",
+              "show_tick": true,
+              "tick_edge": "left",
+              "text_align": "left",
+              "has_padding": true,
+              "vertical_align": "center",
+              "background_color": "blue"
+            }
+          },
+          {
+            "id": 5756818614376663,
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            },
+            "definition": {
+              "type": "timeseries",
+              "title": "Requests rate sent to each backend route",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "query": "sum:krakend.api.http_client.request_started.count{*} by {http_route}.as_rate()",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {}
+                    }
+                  ],
+                  "display_type": "line",
+                  "response_format": "timeseries"
+                }
+              ],
+              "title_size": "16",
+              "show_legend": true,
+              "title_align": "left",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ]
+            }
+          },
+          {
+            "id": 8988512619299241,
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            },
+            "definition": {
+              "type": "note",
+              "content": "This graph shows the number of requests per second emitted by the backend http client to each each backend url route.\n\nThe backend route is the one defined as the url pattern in each backend endpoint of the KrakenD configuration.",
+              "tick_pos": "50%",
+              "font_size": "14",
+              "show_tick": true,
+              "tick_edge": "left",
+              "text_align": "left",
+              "has_padding": true,
+              "vertical_align": "center",
+              "background_color": "blue"
+            }
+          }
+        ],
+        "show_title": true,
+        "layout_type": "ordered",
+        "background_color": "vivid_blue"
+      }
+    },
+    {
+      "id": 7938081500614199,
+      "layout": {
+        "x": 0,
+        "y": 15,
+        "width": 12,
+        "height": 7
+      },
+      "definition": {
+        "type": "group",
+        "title": "Access Logs",
+        "widgets": [
+          {
+            "id": 5268194541419794,
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 3
+            },
+            "definition": {
+              "type": "list_stream",
+              "title": "KrakenD Access Logs",
+              "requests": [
+                {
+                  "query": {
+                    "indexes": [],
+                    "storage": "hot",
+                    "data_source": "logs_stream",
+                    "query_string": "source:krakend @krakend.module:GIN"
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "auto"
+                    }
+                  ],
+                  "response_format": "event_list"
+                }
+              ],
+              "title_size": "16",
+              "title_align": "left"
+            }
+          },
+          {
+            "id": 5612783429544644,
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 12,
+              "height": 3
+            },
+            "definition": {
+              "type": "list_stream",
+              "title": "Access Logs - Errors",
+              "requests": [
+                {
+                  "query": {
+                    "indexes": [],
+                    "storage": "hot",
+                    "data_source": "logs_stream",
+                    "query_string": "source:krakend @krakend.module:GIN status:error"
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "auto"
+                    }
+                  ],
+                  "response_format": "event_list"
+                }
+              ],
+              "title_size": "16",
+              "title_align": "left"
+            }
+          }
+        ],
+        "show_title": true,
+        "layout_type": "ordered",
+        "background_color": "vivid_blue"
+      }
+    },
+    {
+      "id": 2356634121650356,
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 12,
+        "height": 5,
+        "is_column_break": true
+      },
+      "definition": {
+        "type": "group",
+        "title": "Global Layer ",
+        "widgets": [
+          {
+            "id": 4738452783440291,
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 4
+            },
+            "definition": {
+              "type": "treemap",
+              "title": "Endpoint usage",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "classic"
+                  },
+                  "queries": [
+                    {
+                      "name": "query2",
+                      "query": "sum:krakend.api.http_server.duration.count{*} by {http_route}.as_count()",
+                      "aggregator": "sum",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "request"
+                        }
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ]
+            }
+          },
+          {
+            "id": 8800341908176284,
+            "layout": {
+              "x": 4,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            },
+            "definition": {
+              "type": "timeseries",
+              "title": "Number of requests by endpoint",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "queries": [
+                    {
+                      "name": "query2",
+                      "query": "sum:krakend.api.http_server.duration.count{*} by {http_route}.as_count()",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query2"
+                    }
+                  ],
+                  "display_type": "bars",
+                  "response_format": "timeseries"
+                }
+              ],
+              "title_size": "16",
+              "show_legend": true,
+              "title_align": "left",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ]
+            }
+          },
+          {
+            "id": 6349009322816702,
+            "layout": {
+              "x": 8,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            },
+            "definition": {
+              "time": {},
+              "type": "timeseries",
+              "title": "Average response size by endpoint",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "query": "sum:krakend.api.http_server.response_size.sum{*} by {http_route}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query2",
+                      "query": "sum:krakend.api.http_server.response_size.count{*} by {http_route}.as_count()",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1 / query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "kibibyte"
+                        }
+                      }
+                    }
+                  ],
+                  "display_type": "line",
+                  "response_format": "timeseries"
+                }
+              ],
+              "title_size": "16",
+              "show_legend": true,
+              "title_align": "left",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ]
+            }
+          },
+          {
+            "id": 6272376607615005,
+            "layout": {
+              "x": 4,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            },
+            "definition": {
+              "type": "timeseries",
+              "title": "Requests by response code",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "query": "sum:krakend.api.http_server.duration.count{*} by {code_class}.as_count()",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "request"
+                        }
+                      }
+                    }
+                  ],
+                  "display_type": "bars",
+                  "response_format": "timeseries"
+                }
+              ],
+              "title_size": "16",
+              "show_legend": true,
+              "title_align": "left",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ]
+            }
+          },
+          {
+            "id": 6257889556238414,
+            "layout": {
+              "x": 8,
+              "y": 2,
+              "width": 4,
+              "height": 2
+            },
+            "definition": {
+              "type": "timeseries",
+              "title": "Average request duration by endpoint",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "query": "sum:krakend.api.http_server.duration.sum{*} by {http_route}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query2",
+                      "query": "sum:krakend.api.http_server.duration.count{*} by {http_route}.as_count()",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1 / query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "display_type": "line",
+                  "response_format": "timeseries"
+                }
+              ],
+              "title_size": "16",
+              "show_legend": true,
+              "title_align": "left",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ]
+            }
+          }
+        ],
+        "show_title": true,
+        "layout_type": "ordered",
+        "background_color": "vivid_blue"
+      }
+    },
+    {
+      "id": 1308092454003884,
+      "layout": {
+        "x": 0,
+        "y": 5,
+        "width": 12,
+        "height": 5
+      },
+      "definition": {
+        "type": "group",
+        "title": "Backend Layer Latency",
+        "widgets": [
+          {
+            "id": 3057114800712878,
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            },
+            "definition": {
+              "type": "timeseries",
+              "title": "Backend latency per operation",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "order_reverse": false
+                  },
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "query": "sum:krakend.api.http_client.response_read_time_seconds.sum{*}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query2",
+                      "query": "sum:krakend.api.http_client.response_read_time_seconds.count{*}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query3",
+                      "query": "sum:krakend.api.http_client.request_tls_duration.sum{*}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query4",
+                      "query": "sum:krakend.api.http_client.request_tls_duration.count{*}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query5",
+                      "query": "sum:krakend.api.http_client.request_dns_duration.sum{*}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query6",
+                      "query": "sum:krakend.api.http_client.request_dns_duration.count{*}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query7",
+                      "query": "sum:krakend.api.http_client.request_get_conn_duration.sum{*}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query8",
+                      "query": "sum:krakend.api.http_client.request_get_conn_duration.count{*}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query9",
+                      "query": "sum:krakend.api.http_client.duration.sum{*}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query10",
+                      "query": "sum:krakend.api.http_client.duration.count{*}.as_count()",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Response Read Duration",
+                      "formula": "query1 / query2",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "TLS Duration",
+                      "formula": "query3 / query4",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "DNS Duration",
+                      "formula": "query5 / query6",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "Connection Stablished Duration",
+                      "formula": "query7 / query8",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    },
+                    {
+                      "alias": "Backend Response Duration",
+                      "formula": "query9 / query10",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "display_type": "area",
+                  "response_format": "timeseries"
+                }
+              ],
+              "title_size": "16",
+              "show_legend": true,
+              "title_align": "left",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ]
+            }
+          },
+          {
+            "id": 6048060589016224,
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            },
+            "definition": {
+              "type": "note",
+              "content": "A breakdown of the average latency when KrakenD communicates with a backend service.\n\n-   **Connection Latency**: Time spent establishing the connection to the backend service.\n-   **DNS Latency**: Latency from DNS resolution, if required.\n-   **TLS Latency**: Latency from TLS negotiation, if required.\n-   **Backend Latency**: Time the backend service takes to serve the request.\n-   **Response Read Time**: Time spent reading the response from the backend.",
+              "tick_pos": "50%",
+              "font_size": "16",
+              "show_tick": true,
+              "tick_edge": "left",
+              "text_align": "left",
+              "has_padding": true,
+              "vertical_align": "center",
+              "background_color": "blue"
+            }
+          },
+          {
+            "id": 4794744136906402,
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            },
+            "definition": {
+              "type": "timeseries",
+              "title": "Average end-to-end backend latency",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "order_reverse": false
+                  },
+                  "queries": [
+                    {
+                      "name": "query9",
+                      "query": "sum:krakend.api.backend_duration.sum{*}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query10",
+                      "query": "sum:krakend.api.backend_duration.count{*}.as_count()",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Backend Latency",
+                      "formula": "query9 / query10",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "display_type": "line",
+                  "response_format": "timeseries"
+                }
+              ],
+              "title_size": "16",
+              "show_legend": true,
+              "title_align": "left",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ]
+            }
+          },
+          {
+            "id": 5165415072774117,
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            },
+            "definition": {
+              "type": "timeseries",
+              "title": "Average end-to-end backend latency by backend endpoint",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal",
+                    "order_reverse": false
+                  },
+                  "queries": [
+                    {
+                      "name": "query9",
+                      "query": "sum:krakend.api.backend_duration.sum{*} by {http_route}.as_count()",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "name": "query10",
+                      "query": "sum:krakend.api.backend_duration.count{*} by {http_route}.as_count()",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Backend Latency",
+                      "formula": "query9 / query10",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "display_type": "line",
+                  "response_format": "timeseries"
+                }
+              ],
+              "title_size": "16",
+              "show_legend": true,
+              "title_align": "left",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ]
+            }
+          }
+        ],
+        "show_title": true,
+        "layout_type": "ordered",
+        "background_color": "vivid_blue"
+      }
+    },
+    {
+      "id": 426770241222918,
+      "layout": {
+        "x": 0,
+        "y": 10,
+        "width": 12,
+        "height": 5
+      },
+      "definition": {
+        "type": "group",
+        "title": "Backend Layer Errors",
+        "widgets": [
+          {
+            "id": 8202317106610562,
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            },
+            "definition": {
+              "type": "timeseries",
+              "title": "Failed requests by endpoint",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "query": "sum:krakend.api.backend_duration.count{error:true} by {http_route}.as_count()",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "display_type": "line",
+                  "response_format": "timeseries"
+                }
+              ],
+              "title_size": "16",
+              "show_legend": true,
+              "title_align": "left",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ]
+            }
+          },
+          {
+            "id": 690862546487888,
+            "layout": {
+              "x": 6,
+              "y": 0,
+              "width": 6,
+              "height": 2
+            },
+            "definition": {
+              "type": "timeseries",
+              "title": "Timed out requests by endpoint",
+              "requests": [
+                {
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "query": "sum:krakend.api.http_client.request_timedout.count{*} by {http_route}.as_count()",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "display_type": "line",
+                  "response_format": "timeseries"
+                }
+              ],
+              "title_size": "16",
+              "show_legend": true,
+              "title_align": "left",
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ]
+            }
+          },
+          {
+            "id": 3997358739338644,
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            },
+            "definition": {
+              "type": "toplist",
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              },
+              "title": "Top 10 backend routes reporting errors",
+              "requests": [
+                {
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "query": "sum:krakend.api.backend_duration.count{error:true} by {http_route}.as_count()",
+                      "aggregator": "sum",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "request"
+                        }
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title_size": "16",
+              "title_align": "left"
+            }
+          },
+          {
+            "id": 6073583112242221,
+            "layout": {
+              "x": 6,
+              "y": 2,
+              "width": 6,
+              "height": 2
+            },
+            "definition": {
+              "type": "toplist",
+              "style": {
+                "display": {
+                  "type": "stacked",
+                  "legend": "automatic"
+                }
+              },
+              "title": "Top 10 backend hosts reporting errors",
+              "requests": [
+                {
+                  "sort": {
+                    "count": 10,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "query": "sum:krakend.api.backend_duration.count{error:true} by {host}.as_count()",
+                      "aggregator": "sum",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "request"
+                        }
+                      }
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "title_size": "16",
+              "title_align": "left"
+            }
+          }
+        ],
+        "show_title": true,
+        "layout_type": "ordered",
+        "background_color": "vivid_blue"
+      }
+    },
+    {
+      "id": 4516390755928807,
+      "layout": {
+        "x": 0,
+        "y": 15,
+        "width": 12,
+        "height": 7
+      },
+      "definition": {
+        "type": "group",
+        "title": "Applications Logs",
+        "widgets": [
+          {
+            "id": 8442942705898181,
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 3
+            },
+            "definition": {
+              "type": "list_stream",
+              "title": "KrakenD Application Logs",
+              "requests": [
+                {
+                  "query": {
+                    "indexes": [],
+                    "storage": "hot",
+                    "data_source": "logs_stream",
+                    "query_string": "source:krakend @krakend.module:KRAKEND"
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "auto"
+                    }
+                  ],
+                  "response_format": "event_list"
+                }
+              ],
+              "title_size": "16",
+              "title_align": "left"
+            }
+          },
+          {
+            "id": 3371469497984492,
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 12,
+              "height": 3
+            },
+            "definition": {
+              "type": "list_stream",
+              "title": "Access Logs - Errors",
+              "requests": [
+                {
+                  "query": {
+                    "indexes": [],
+                    "storage": "hot",
+                    "data_source": "logs_stream",
+                    "query_string": "source:krakend @krakend.module:KRAKEND status:error"
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "auto"
+                    }
+                  ],
+                  "response_format": "event_list"
+                }
+              ],
+              "title_size": "16",
+              "title_align": "left"
+            }
+          }
+        ],
+        "show_title": true,
+        "layout_type": "ordered",
+        "background_color": "vivid_blue"
+      }
+    }
+  ],
+  "template_variables": [],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

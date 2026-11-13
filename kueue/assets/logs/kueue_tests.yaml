@@ -1,0 +1,574 @@
+# bypass-global-timestamp-format-in-sample-checks
+id: "kueue"
+tests:
+ -
+  sample: "I0803 10:27:51.896624       1 leaderelection.go:258] \"Attempting to acquire leader lease...\" lock=\"kueue-system/c1f6bfd2.kueue.x-k8s.io\""
+  result:
+    custom:
+      kueue:
+        klog:
+          lock: "kueue-system/c1f6bfd2.kueue.x-k8s.io"
+        klog_level: "I"
+        klog_severity: "info"
+        klog_timestamp: 18527271896
+      logger:
+        file_name: "leaderelection.go"
+        line_number: 258
+        method_name: "leaderelection.go:258"
+    message: "Attempting to acquire leader lease..."
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 18527271896
+ -
+  sample: "I0803 10:27:57.277311       1 request.go:752] \"Waited before sending request\" delay=\"1.493622897s\" reason=\"client-side throttling, not priority and fairness\" verb=\"GET\" URL=\"https://10.250.0.1:443/apis/kubeflow.org/v2beta1\""
+  result:
+    custom:
+      kueue:
+        klog:
+          URL: "https://10.250.0.1:443/apis/kubeflow.org/v2beta1"
+          delay: "1.493622897s"
+          reason: "client-side throttling, not priority and fairness"
+          verb: "GET"
+        klog_level: "I"
+        klog_severity: "info"
+        klog_timestamp: 18527277277
+      logger:
+        file_name: "request.go"
+        line_number: 752
+        method_name: "request.go:752"
+    message: "Waited before sending request"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 18527277277
+ -
+  sample: "E0803 10:28:29.306177       1 leaderelection.go:461] \"Error retrieving lease lock\" err=\"client rate limiter Wait returned an error: rate: Wait(n=1) would exceed context deadline\" lock=\"kueue-system/c1f6bfd2.kueue.x-k8s.io\""
+  result:
+    custom:
+      kueue:
+        klog:
+          err: "client rate limiter Wait returned an error: rate: Wait(n=1) would exceed context deadline"
+          lock: "kueue-system/c1f6bfd2.kueue.x-k8s.io"
+        klog_level: "E"
+        klog_severity: "error"
+        klog_timestamp: 18527309306
+      logger:
+        file_name: "leaderelection.go"
+        line_number: 461
+        method_name: "leaderelection.go:461"
+    message: "Error retrieving lease lock"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 18527309306
+ -
+  sample: |-
+    {
+      "msg" : "Scheduling cycle starts",
+      "caller" : "scheduler/scheduler.go:291",
+      "schedulingCycle" : 1,
+      "level" : "Level(-2)",
+      "logger" : "scheduler",
+      "replica-role" : "follower",
+      "ts" : "2026-08-03T10:28:11.731778613Z"
+    }
+  result:
+    custom:
+      kueue:
+        klog_level: "Level(-2)"
+        klog_severity: "debug"
+        klog_verbosity: 2
+        replica_role: "follower"
+      logger:
+        file_name: "scheduler/scheduler.go"
+        line_number: 291
+        method_name: "scheduler/scheduler.go:291"
+        name: "scheduler"
+      schedulingCycle: 1
+      ts: "2026-08-03T10:28:11.731778613Z"
+    message: "Scheduling cycle starts"
+    status: "debug"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1785752891731
+ -
+  sample: |-
+    {
+      "msg" : "Creating bootstrap manager for certificate generation",
+      "caller" : "cert/cert.go:50",
+      "level" : "info",
+      "logger" : "cert-bootstrap",
+      "ts" : "2026-08-03T10:27:21.277231234Z"
+    }
+  result:
+    custom:
+      kueue:
+        klog_level: "info"
+        klog_severity: "info"
+      logger:
+        file_name: "cert/cert.go"
+        line_number: 50
+        method_name: "cert/cert.go:50"
+        name: "cert-bootstrap"
+      ts: "2026-08-03T10:27:21.277231234Z"
+    message: "Creating bootstrap manager for certificate generation"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1785752841277
+ -
+  sample: |-
+    {
+      "msg" : "Skipping admission check controller setup: Provisioning Requests not supported (Possible cause: missing or unsupported cluster-autoscaler)",
+      "caller" : "kueue/main.go:435",
+      "stacktrace" : "main.setupIndexes\n\t/workspace/cmd/kueue/main.go:435\nmain.main\n\t/workspace/cmd/kueue/main.go:354\nruntime.main\n\t/usr/local/go/src/runtime/proc.go:290",
+      "level" : "error",
+      "logger" : "setup",
+      "error" : "no matches for kind \"ProvisioningRequest\" in version \"autoscaling.x-k8s.io/v1\"",
+      "ts" : "2026-08-03T10:27:26.282177792Z"
+    }
+  result:
+    custom:
+      error:
+        message: "no matches for kind \"ProvisioningRequest\" in version \"autoscaling.x-k8s.io/v1\""
+        stack: "main.setupIndexes\n\t/workspace/cmd/kueue/main.go:435\nmain.main\n\t/workspace/cmd/kueue/main.go:354\nruntime.main\n\t/usr/local/go/src/runtime/proc.go:290"
+      kueue:
+        klog_level: "error"
+        klog_severity: "error"
+      logger:
+        file_name: "kueue/main.go"
+        line_number: 435
+        method_name: "kueue/main.go:435"
+        name: "setup"
+      ts: "2026-08-03T10:27:26.282177792Z"
+    message: "Skipping admission check controller setup: Provisioning Requests not supported (Possible cause: missing or unsupported cluster-autoscaler)"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1785752846282
+ -
+  sample: |-
+    {
+      "msg" : "Workload create event",
+      "caller" : "core/workload_controller.go:1172",
+      "level" : "Level(-2)",
+      "logger" : "workload-reconciler",
+      "workload" : {
+        "name" : "job-burst-2-08281",
+        "namespace" : "default"
+      },
+      "replica-role" : "follower",
+      "queue" : "user-queue",
+      "ts" : "2026-08-03T10:27:53.778502119Z",
+      "status" : "admitted"
+    }
+  result:
+    custom:
+      kueue:
+        klog_level: "Level(-2)"
+        klog_severity: "debug"
+        klog_verbosity: 2
+        replica_role: "follower"
+        workload:
+          name: "job-burst-2-08281"
+          namespace: "default"
+          status: "admitted"
+      logger:
+        file_name: "core/workload_controller.go"
+        line_number: 1172
+        method_name: "core/workload_controller.go:1172"
+        name: "workload-reconciler"
+      queue: "user-queue"
+      ts: "2026-08-03T10:27:53.778502119Z"
+    message: "Workload create event"
+    status: "debug"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1785752873778
+ -
+  sample: |-
+    {
+      "msg" : "LocalQueue create event",
+      "caller" : "core/localqueue_controller.go:239",
+      "level" : "Level(-2)",
+      "localQueue" : {
+        "name" : "user-queue",
+        "namespace" : "default"
+      },
+      "logger" : "localqueue-reconciler",
+      "replica-role" : "follower",
+      "ts" : "2026-08-03T10:27:53.778575906Z"
+    }
+  result:
+    custom:
+      kueue:
+        klog_level: "Level(-2)"
+        klog_severity: "debug"
+        klog_verbosity: 2
+        local_queue: "user-queue"
+        replica_role: "follower"
+      logger:
+        file_name: "core/localqueue_controller.go"
+        line_number: 239
+        method_name: "core/localqueue_controller.go:239"
+        name: "localqueue-reconciler"
+      ts: "2026-08-03T10:27:53.778575906Z"
+    message: "LocalQueue create event"
+    status: "debug"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1785752873778
+ -
+  sample: |-
+    {
+      "msg" : "kueue-controller-manager-797d4f6d67-sjlsm_16cded46-7489-46da-93a2-628df0f2e5c7 became leader",
+      "reason" : "LeaderElection",
+      "caller" : "recorder/recorder.go:116",
+      "level" : "debug",
+      "logger" : "events",
+      "type" : "Normal",
+      "ts" : "2026-08-03T10:28:11.73074468Z",
+      "object" : {
+        "uid" : "dae64fdd-9867-4e20-9c87-e72d98b65da4",
+        "apiVersion" : "coordination.k8s.io/v1",
+        "kind" : "Lease",
+        "resourceVersion" : "358351",
+        "namespace" : "kueue-system",
+        "name" : "c1f6bfd2.kueue.x-k8s.io"
+      }
+    }
+  result:
+    custom:
+      kueue:
+        klog_level: "debug"
+        klog_severity: "debug"
+        object:
+          name: "c1f6bfd2.kueue.x-k8s.io"
+          namespace: "kueue-system"
+        reason: "LeaderElection"
+      logger:
+        file_name: "recorder/recorder.go"
+        line_number: 116
+        method_name: "recorder/recorder.go:116"
+        name: "events"
+      object:
+        apiVersion: "coordination.k8s.io/v1"
+        kind: "Lease"
+        resourceVersion: "358351"
+        uid: "dae64fdd-9867-4e20-9c87-e72d98b65da4"
+      ts: "2026-08-03T10:28:11.73074468Z"
+      type: "Normal"
+    message: "kueue-controller-manager-797d4f6d67-sjlsm_16cded46-7489-46da-93a2-628df0f2e5c7 became leader"
+    status: "debug"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1785752891730
+ -
+  sample: |-
+    {
+      "msg" : "Reconciling Job",
+      "caller" : "jobframework/reconciler.go:394",
+      "level" : "Level(-2)",
+      "logger" : "job",
+      "namespace" : "default",
+      "name" : "burst-26",
+      "replica-role" : "leader",
+      "reconcileID" : "a65e5228-788f-4db5-a033-f19a9eb999e0",
+      "job" : "default/burst-26",
+      "gvk" : "batch/v1, Kind=Job",
+      "ts" : "2026-08-03T10:28:11.833906527Z"
+    }
+  result:
+    custom:
+      gvk: "batch/v1, Kind=Job"
+      job: "default/burst-26"
+      kueue:
+        klog_level: "Level(-2)"
+        klog_severity: "debug"
+        klog_verbosity: 2
+        object:
+          name: "burst-26"
+          namespace: "default"
+        reconcile_id: "a65e5228-788f-4db5-a033-f19a9eb999e0"
+        replica_role: "leader"
+      logger:
+        file_name: "jobframework/reconciler.go"
+        line_number: 394
+        method_name: "jobframework/reconciler.go:394"
+        name: "job"
+      ts: "2026-08-03T10:28:11.833906527Z"
+    message: "Reconciling Job"
+    status: "debug"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1785752891833
+ -
+  sample: |-
+    {
+      "msg" : "received request",
+      "level" : "Level(-5)",
+      "resource" : {
+        "resource" : "jobs",
+        "version" : "v1",
+        "group" : "batch"
+      },
+      "logger" : "admission",
+      "webhookGroup" : "batch",
+      "webhookKind" : "Job",
+      "caller" : "admission/http.go:117",
+      "requestID" : "3187ae90-3865-4aa3-b1af-c063f7754c85",
+      "namespace" : "default",
+      "name" : "burst-4",
+      "replica-role" : "leader",
+      "user" : "kubernetes-admin",
+      "ts" : "2026-08-04T08:41:13.75886368Z",
+      "object" : {
+        "name" : "burst-4",
+        "namespace" : "default"
+      }
+    }
+  result:
+    custom:
+      kueue:
+        klog_level: "Level(-5)"
+        klog_severity: "debug"
+        klog_verbosity: 5
+        object:
+          name: "burst-4"
+          namespace: "default"
+        replica_role: "leader"
+        request_id: "3187ae90-3865-4aa3-b1af-c063f7754c85"
+        resource:
+          group: "batch"
+          type: "jobs"
+          version: "v1"
+      logger:
+        file_name: "admission/http.go"
+        line_number: 117
+        method_name: "admission/http.go:117"
+        name: "admission"
+      ts: "2026-08-04T08:41:13.75886368Z"
+      usr:
+        id: "kubernetes-admin"
+      webhookGroup: "batch"
+      webhookKind: "Job"
+    message: "received request"
+    status: "debug"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1785832873758
+ -
+  sample: |-
+    {
+      "msg" : "wrote response",
+      "reason" : "",
+      "caller" : "admission/http.go:163",
+      "code" : 200,
+      "level" : "Level(-5)",
+      "requestID" : "b4c2fbaa-5b18-48eb-8176-497a56aa4951",
+      "allowed" : true,
+      "logger" : "admission",
+      "replica-role" : "leader",
+      "message" : "",
+      "ts" : "2026-08-04T08:41:15.3384783Z"
+    }
+  result:
+    custom:
+      http:
+        status_code: 200
+      kueue:
+        admission:
+          allowed: true
+        klog_level: "Level(-5)"
+        klog_severity: "debug"
+        klog_verbosity: 5
+        reason: ""
+        replica_role: "leader"
+        request_id: "b4c2fbaa-5b18-48eb-8176-497a56aa4951"
+      logger:
+        file_name: "admission/http.go"
+        line_number: 163
+        method_name: "admission/http.go:163"
+        name: "admission"
+      ts: "2026-08-04T08:41:15.3384783Z"
+    message: "wrote response"
+    status: "debug"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1785832875338
+ -
+  sample: |-
+    {
+      "msg" : "Event occurred",
+      "reason" : "Pending",
+      "note" : "couldn't assign flavors to pod set main: insufficient unused quota for cpu in flavor default-flavor, 50m more needed",
+      "caller" : "events/event_broadcaster.go:338",
+      "apiVersion" : "kueue.x-k8s.io/v1beta2",
+      "level" : "debug",
+      "kind" : "Workload",
+      "logger" : "events",
+      "action" : "Pending",
+      "type" : "Warning",
+      "ts" : "2026-08-04T08:41:16.908615205Z",
+      "object" : {
+        "name" : "job-burst-41-b83db",
+        "namespace" : "default"
+      }
+    }
+  result:
+    custom:
+      action: "Pending"
+      apiVersion: "kueue.x-k8s.io/v1beta2"
+      kind: "Workload"
+      kueue:
+        klog_level: "debug"
+        klog_severity: "debug"
+        object:
+          name: "job-burst-41-b83db"
+          namespace: "default"
+        reason: "Pending"
+      logger:
+        file_name: "events/event_broadcaster.go"
+        line_number: 338
+        method_name: "events/event_broadcaster.go:338"
+        name: "events"
+      note: "couldn't assign flavors to pod set main: insufficient unused quota for cpu in flavor default-flavor, 50m more needed"
+      ts: "2026-08-04T08:41:16.908615205Z"
+      type: "Warning"
+    message: "Event occurred"
+    status: "debug"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1785832876908
+ -
+  sample: |-
+    {
+      "msg" : "Starting EventSource",
+      "caller" : "controller/controller.go:369",
+      "level" : "info",
+      "logger" : "job",
+      "replica-role" : "follower",
+      "source" : "kind source: *v1.Job",
+      "ts" : "2026-08-04T08:40:38.889704153Z"
+    }
+  result:
+    custom:
+      kueue:
+        klog_level: "info"
+        klog_severity: "info"
+        replica_role: "follower"
+        watch_source: "kind source: *v1.Job"
+      logger:
+        file_name: "controller/controller.go"
+        line_number: 369
+        method_name: "controller/controller.go:369"
+        name: "job"
+      ts: "2026-08-04T08:40:38.889704153Z"
+    message: "Starting EventSource"
+    status: "info"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1785832838889
+ -
+  sample: |-
+    {
+      "msg" : "Scheduling cycle complete",
+      "duration" : 1.184E-4,
+      "caller" : "scheduler/scheduler.go:293",
+      "schedulingCycle" : 8,
+      "level" : "Level(-2)",
+      "logger" : "scheduler",
+      "replica-role" : "leader",
+      "ts" : "2026-08-04T08:41:13.859450894Z"
+    }
+  result:
+    custom:
+      duration: 118400.0
+      kueue:
+        klog_level: "Level(-2)"
+        klog_severity: "debug"
+        klog_verbosity: 2
+        replica_role: "leader"
+      logger:
+        file_name: "scheduler/scheduler.go"
+        line_number: 293
+        method_name: "scheduler/scheduler.go:293"
+        name: "scheduler"
+      schedulingCycle: 8
+      ts: "2026-08-04T08:41:13.859450894Z"
+    message: "Scheduling cycle complete"
+    status: "debug"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1785832873859
+ -
+  sample: |-
+    {
+      "msg" : "Observed UID",
+      "uid" : "566671ba-d4d6-43bd-9eb1-7d7a2b12ce98",
+      "caller" : "expectations/store.go:59",
+      "pod" : {
+        "name" : "burst-6-qvhlg",
+        "namespace" : "default"
+      },
+      "level" : "Level(-3)",
+      "workload" : "default/job-burst-6-1da97",
+      "store" : "ElasticJobUngater",
+      "key" : {
+        "name" : "job-burst-6-1da97",
+        "namespace" : "default"
+      },
+      "ts" : "2026-08-04T08:41:13.8973686Z"
+    }
+  result:
+    custom:
+      key:
+        name: "job-burst-6-1da97"
+        namespace: "default"
+      kueue:
+        klog_level: "Level(-3)"
+        klog_severity: "debug"
+        klog_verbosity: 3
+        workload:
+          name: "job-burst-6-1da97"
+          namespace: "default"
+          ref: "default/job-burst-6-1da97"
+      logger:
+        file_name: "expectations/store.go"
+        line_number: 59
+        method_name: "expectations/store.go:59"
+      pod:
+        name: "burst-6-qvhlg"
+        namespace: "default"
+      store: "ElasticJobUngater"
+      ts: "2026-08-04T08:41:13.8973686Z"
+      uid: "566671ba-d4d6-43bd-9eb1-7d7a2b12ce98"
+    message: "Observed UID"
+    status: "debug"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 1785832873897
+ -
+  sample: "E0804 08:40:26.274175       1 reflector.go:227] \"Failed to watch\" err=\"failed to list *v1.MutatingAdmissionPolicy: mutatingadmissionpolicies.admissionregistration.k8s.io is forbidden: User \\\"system:serviceaccount:kueue-system:kueue-controller-manager\\\" cannot list resource \\\"mutatingadmissionpolicies\\\" in API group \\\"admissionregistration.k8s.io\\\" at the cluster scope\" logger=\"UnhandledError\" reflector=\"k8s.io/client-go/informers/factory.go:177\" type=\"*v1.MutatingAdmissionPolicy\""
+  result:
+    custom:
+      error:
+        message: "failed to list *v1.MutatingAdmissionPolicy: mutatingadmissionpolicies.admissionregistration.k8s.io is forbidden: User \\\"system:serviceaccount:kueue-system:kueue-controller-manager\\\" cannot list resource \\\"mutatingadmissionpolicies\\\" in API group \\\"admissionregistration.k8s.io\\\" at the cluster scope"
+      kueue:
+        klog:
+          reflector: "k8s.io/client-go/informers/factory.go:177"
+          type: "*v1.MutatingAdmissionPolicy"
+        klog_level: "E"
+        klog_severity: "error"
+        klog_timestamp: 18607226274
+      logger:
+        file_name: "reflector.go"
+        line_number: 227
+        method_name: "reflector.go:227"
+        name: "UnhandledError"
+    message: "Failed to watch"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 18607226274
