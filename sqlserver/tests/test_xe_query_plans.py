@@ -96,14 +96,17 @@ def mock_obfuscate_sql(query, options=None):
     return re.sub(r"([^@\w])[0-9]+", r"\1?", query)
 
 
-# The error of a read from a checkpoint whose file is gone, as ODBC drivers report it, and as drivers without the error
-# number do.
+# The error of a read from a checkpoint whose file is gone, as ODBC Driver 18 reports it on SQL Server 2022, and as a
+# driver without the error number would.
+CHECKPOINT_FILE_GONE_MESSAGE = (
+    "The operating system returned error 2(The system cannot find the file specified.) while reading from the file "
+    "'{}'."
+)
 CHECKPOINT_FILE_GONE_ERRORS = {
-    'odbc': (
-        "('42000', \"[42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]The file '{}' is invalid. (25717) "
-        "(SQLExecDirectW)\")"
-    ),
-    'without_error_number': "The file '{}' is invalid.",
+    'odbc': "('42000', \"[42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]"
+    + CHECKPOINT_FILE_GONE_MESSAGE
+    + " (25717) (SQLExecDirectW)\")",
+    'without_error_number': CHECKPOINT_FILE_GONE_MESSAGE,
 }
 
 
