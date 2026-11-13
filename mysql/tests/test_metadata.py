@@ -718,6 +718,48 @@ def test_collect_schemas(aggregator, dd_run_check, dbm_instance, use_single_quer
         assert expected_data_for_db[db_name] == actual_payload
 
 
+@pytest.mark.integration
+@pytest.mark.usefixtures('dd_environment')
+def test_collect_views(aggregator, dd_run_check, dbm_instance):
+    is_maria_db = MYSQL_FLAVOR.lower() == 'mariadb'
+    dbm_instance['collect_schemas'] = {"enabled": True, "collect_views": True}
+    dd_run_check(MySql(common.CHECK_NAME, {}, instances=[dbm_instance]))
+
+    view_events = [e for e in aggregator.get_event_platform_events("dbm-metadata") if e['kind'] == 'mysql_views']
+    views_by_database = {}
+    for event in view_events:
+        assert event["flavor"] in ("MariaDB", "MySQL", "Percona")
+        for db_entry in event['metadata']:
+            assert db_entry['tables'] == []
+            views_by_database.setdefault(db_entry['name'], []).extend(db_entry['views'])
+
+    assert 'datadog_test_schemas_second' not in views_by_database
+    [view] = views_by_database['datadog_test_schemas']
+    assert view['name'] == 'restaurant_names'
+    assert 'Restaurants' in view['definition']
+    column_defaults = "NULL" if is_maria_db else None
+    assert view['columns'] == [
+        {
+            "name": "RestaurantName",
+            "column_type": "varchar(255)",
+            "default": column_defaults,
+            "nullable": True,
+            "ordinal_position": 1,
+            "column_key": "",
+            "extra": "",
+        },
+        {
+            "name": "District",
+            "column_type": "varchar(100)",
+            "default": column_defaults,
+            "nullable": True,
+            "ordinal_position": 2,
+            "column_key": "",
+            "extra": "",
+        },
+    ]
+
+
 @pytest.mark.unit
 def test_schemas_collection_config(dbm_instance):
     dbm_instance['schemas_collection'] = {"enabled": True, "max_execution_time": 0}
