@@ -6,6 +6,16 @@ metric_id: krakend
 # If id and app_id already match, this field can be left blank.
 backend_only: false
 facets:
+  - facetType: range
+    groups:
+      - Measure
+    name: Duration
+    path: duration
+    source: log
+    type: double
+    unit:
+      family: time
+      name: nanosecond
   - groups:
       - Web Access
     name: URL Path
@@ -50,8 +60,11 @@ pipeline:
 
           ansi_escape_code (\e\[[0-9;]*m)?
 
-          duration_rule (%{number:duration:scale(1000000)}ms)?(%{number:duration:scale(1000000000)}s)?(%{number:duration:scale(1000)}µs)?
+          duration_rule ((%{integer:krakend.duration.hours}h)?%{integer:krakend.duration.minutes}m%{number:duration:scale(1000000000)}s|%{number:duration}ns|(%{number:duration:scale(1000000)}ms)?(%{number:duration:scale(1000000000)}s)?(%{number:duration:scale(1000)}µs)?)
+        # Check continuation prefixes separately so their capture needs no nested repetition.
         matchRules: >-
+          access_log_with_errors \[%{regex("GIN"):krakend.module}\] %{date("yyyy/MM/dd - HH:mm:ss"):timestamp}\s+\|\s+%{integer:http.status_code}\s+\|\s+%{duration_rule}\s+\|\s+%{ip:network.client.ip}\s+\|\s+%{word:http.method}\s+"%{regex("[^\\r\\n]*"):http.url_details.path}"\r?\n%{regex("(?![\\s\\S]*\\n(?![ \\t]*Error #[0-9]{2,}: ))[ \\t]*Error #[0-9]{2,}: [\\s\\S]*"):krakend.error.details}
+
           access_log \[%{word:krakend.module}\] %{date("yyyy/MM/dd - HH:mm:ss"):timestamp}\s+\|\s+%{integer:http.status_code}\s+\|\s+%{duration_rule}\s+\|\s+%{ip:network.client.ip}\s+\|\s+%{word:http.method}\s+"%{data:http.url_details.path}"
 
           application_log \[%{word:krakend.module}\] %{date("yyyy/MM/dd - HH:mm:ss.SSS"):timestamp}\s*?%{ansi_escape_code}▶ %{word:level:lowercase}\s*?%{ansi_escape_code} %{message_content}
@@ -59,6 +72,39 @@ pipeline:
           application_log_simple \[%{word:krakend.module}\] %{date("yyyy/MM/dd - HH:mm:ss.SSS"):timestamp}\s*?%{ansi_escape_code}▶ %{word:level:lowercase}\s*?%{ansi_escape_code} %{data:krakend.app.message}
 
           structured_application_log %{message_content}
+    - type: pipeline
+      name: Convert compound GIN durations to nanoseconds
+      enabled: true
+      filter:
+        query: "@krakend.duration.minutes:*"
+      processors:
+        - type: arithmetic-processor
+          name: Sum duration components
+          enabled: true
+          expression: "krakend.duration.hours * 3600000000000 + krakend.duration.minutes * 60000000000 + duration"
+          target: duration
+          replaceMissing: true
+        # Remap onto the existing duration to drop the components without replacing its value.
+        - type: attribute-remapper
+          name: Remove duration hours
+          enabled: true
+          sources:
+            - krakend.duration.hours
+          sourceType: attribute
+          target: duration
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
+        - type: attribute-remapper
+          name: Remove duration minutes
+          enabled: true
+          sources:
+            - krakend.duration.minutes
+          sourceType: attribute
+          target: duration
+          targetType: attribute
+          preserveSource: false
+          overrideOnConflict: false
     - type: attribute-remapper
       name: Clean version
       enabled: true
