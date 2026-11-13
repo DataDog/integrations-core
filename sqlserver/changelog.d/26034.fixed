@@ -1,0 +1,1 @@
+Recover Agent identity comments omitted by SQL Server statement offsets, including when APM comments are already present.
