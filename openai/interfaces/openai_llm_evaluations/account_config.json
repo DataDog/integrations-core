@@ -1,0 +1,55 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "API Key",
+      "bearer_token": {
+        "password_setting": {
+          "key": "api_key",
+          "label": "API key",
+          "help": "A standard or project-scoped OpenAI API key with write permission for model capabilities.",
+          "required": true,
+          "editable": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "custom_tags",
+      "label": "Tags",
+      "help": "Comma-separated list of custom tags, such as `team:ai,env:prod`, to apply to OpenAI metrics and logs to organize and filter them.",
+      "required": false,
+      "editable": true,
+      "text": {}
+    }
+  ],
+  "dataflow_config": [
+    {
+      "dataflow_id": "openai-llm-completions",
+      "toggle": {
+        "default": true,
+        "label": "Use this API key to evaluate your LLM applications",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "llm_observability_enabled",
+        "should_map_legacy_fields": true
+      },
+      "additional_config_fields": []
+    },
+    {
+      "dataflow_id": "openai-project-cloud-cost-data",
+      "toggle": {
+        "default": false,
+        "label": "Collect project cost data",
+        "editable": true
+      },
+      "legacy_flat_mapping": {
+        "enable_field": "ccm_enabled",
+        "should_map_legacy_fields": true
+      },
+      "additional_config_fields": []
+    }
+  ]
+}
