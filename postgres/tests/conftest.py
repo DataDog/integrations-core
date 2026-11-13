@@ -87,10 +87,22 @@ def dd_environment(e2e_instance, skip_env):
 # To use this, launch the necessary docker compose files manually and then run the tests with --skip-env
 def pytest_addoption(parser: pytest.Parser):
     parser.addoption(
+        "--remote-query-quality",
+        action="store_true",
+        default=False,
+        help="run median-of-five remote query throughput and anonymous-memory measurements",
+    )
+    parser.addoption(
         "--skip-env",
         action="store_true",
         default=False,
         help="skip environment setup",
+    )
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    config.addinivalue_line(
+        "markers", "remote_query_quality: opt-in remote query resource and performance measurements"
     )
 
 

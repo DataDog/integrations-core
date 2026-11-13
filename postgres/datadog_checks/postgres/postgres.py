@@ -1,13 +1,15 @@
 # (C) Datadog, Inc. 2019-present
 # All rights reserved
 # Licensed under Simplified BSD License (see LICENSE)
+import asyncio
 import contextlib
 import copy
 import functools
 import os
+import threading
 from collections import defaultdict
 from collections.abc import Callable
-from time import time
+from time import monotonic, time
 
 import psycopg
 from cachetools import TTLCache
@@ -50,6 +52,7 @@ from datadog_checks.postgres.statements_v2 import PostgresStatementMetricsV2
 from .__about__ import __version__
 from .config import build_config, sanitize
 from .diagnose import run_diagnostics
+from .remote_queries import RemoteQueryError, Run, failed, match, parse_request
 from .util import (
     ANALYZE_PROGRESS_METRICS,
     AWS_RDS_HOSTNAME_SUFFIX,
@@ -120,6 +123,9 @@ class PostgreSql(DatabaseCheck):
 
     def __init__(self, name, init_config, instances):
         super(PostgreSql, self).__init__(name, init_config, instances)
+        self._remote_query_condition = threading.Condition()
+        self._remote_query_runs: set[Run] = set()
+        self._remote_query_unscheduled = False
         self.health = PostgresHealth(self)
         self._resolved_hostname = None
         self._database_hostname = None
@@ -500,6 +506,73 @@ class PostgreSql(DatabaseCheck):
             self.metadata_samples = self.register_async_job(PostgresMetadata(self, self._config))
         if self._config.data_observability.enabled:
             self.data_observability = self.register_async_job(PostgresDataObservability(self, self._config))
+
+    def remote_query(self, request: str) -> str:
+        """Resolve a target or execute and deliver one session-backed remote query."""
+        received = monotonic()
+        with self._remote_query_condition:
+            if self._remote_query_unscheduled:
+                return failed("cancelled", "The check was unscheduled.")
+        try:
+            parsed = parse_request(request)
+            with self._remote_query_condition:
+                if self._remote_query_unscheduled:
+                    return failed("cancelled", "The check was unscheduled.")
+                if parsed["operation"] == "resolve":
+                    match(self, parsed["target"])
+                    return '{"status":"MATCHED"}'
+                run = Run(parsed, received)
+                self._remote_query_runs.add(run)
+        except RemoteQueryError as error:
+            return failed(error.code, error.message)
+        except Exception:
+            return failed("internal_error", "Remote query failed unexpectedly.")
+        try:
+            loop = asyncio.new_event_loop()
+            try:
+                return loop.run_until_complete(
+                    run.execute(
+                        self,
+                        datadog_agent.get_config("api_key") or "",
+                        datadog_agent.get_hostname(),
+                        datadog_agent.get_config("proxy") or {},
+                    )
+                )
+            finally:
+                # asyncio.run waits for the default executor, including uncancellable DNS.
+                # Closing the dedicated loop does not wait for abandoned resolver threads.
+                loop.close()
+        except Exception:
+            return failed("internal_error", "Remote query failed unexpectedly.")
+        finally:
+            with self._remote_query_condition:
+                self._remote_query_runs.discard(run)
+                self._remote_query_condition.notify_all()
+
+    def cancel_remote_query(self, crawl_id: str) -> None:
+        """Signal every active call for this crawl ID without waiting for its abort."""
+        with self._remote_query_condition:
+            for run in self._remote_query_runs:
+                if run.delivery["crawlId"] == crawl_id:
+                    run.cancel()
+
+    def cancel(self) -> None:
+        with self._remote_query_condition:
+            self._remote_query_unscheduled = True
+            for run in self._remote_query_runs:
+                run.cancel()
+        super().cancel()
+        self._wait_for_remote_queries()
+
+    def _wait_for_remote_queries(self) -> None:
+        with self._remote_query_condition:
+            self._remote_query_condition.wait_for(lambda: not self._remote_query_runs)
+
+    def _finalize(self) -> None:
+        # A scheduled run can also reach this hook after cancel(); neither path may tear
+        # down the check while a remote call still uses its configuration or token provider.
+        self._wait_for_remote_queries()
+        super()._finalize()
 
     def shutdown(self) -> None:
         """Release the resources this check holds for its whole lifetime."""
