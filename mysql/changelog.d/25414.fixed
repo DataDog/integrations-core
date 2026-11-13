@@ -1,0 +1,1 @@
+Stop Data Observability monitor queries on the server once they reach the row limit, never read past the limit when a query has a larger `LIMIT` of its own, and mark them as Agent queries in Database Monitoring.
