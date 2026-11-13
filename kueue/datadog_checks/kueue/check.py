@@ -418,6 +418,8 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             self.filter_empty_tags(
                 [
                     f'kube_namespace:{metadata.get("namespace")}',
+                    'scheduler:kueue',
+                    f'scheduler_workload:{metadata.get("name")}',
                     f'kueue_workload:{metadata.get("name")}',
                     f'kueue_workload_uid:{metadata.get("uid")}',
                     f'kueue_local_queue:{spec.get("queueName")}',
@@ -439,6 +441,8 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             admission = previous_state.get('admission') or {}
 
         if cluster_queue := admission.get('clusterQueue'):
+            # The ClusterQueue holds the quota, so it is the scheduler queue, as on the pods the Agent tags.
+            tags.append(f'scheduler_queue:{cluster_queue}')
             tags.append(f'kueue_cluster_queue:{cluster_queue}')
             tags.extend(
                 tagger.tag(f'{KUEUE_QUEUE_ENTITY_PREFIX}clusterqueue//{cluster_queue}', tagger.ORCHESTRATOR) or []
