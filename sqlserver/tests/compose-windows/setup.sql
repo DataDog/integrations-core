@@ -481,7 +481,8 @@ ADD EVENT sqlserver.rpc_completed (
         sqlserver.client_app_name,
         sqlserver.client_hostname,
         sqlserver.session_id,
-        sqlserver.request_id
+        sqlserver.request_id,
+        sqlserver.context_info
     )
     WHERE (
         sql_text <> '' AND
@@ -496,7 +497,8 @@ ADD EVENT sqlserver.sql_batch_completed(
         sqlserver.client_app_name,
         sqlserver.client_hostname,
         sqlserver.session_id,
-        sqlserver.request_id
+        sqlserver.request_id,
+        sqlserver.context_info
     )
     WHERE (
         sql_text <> '' AND
@@ -512,7 +514,8 @@ ADD EVENT sqlserver.module_end(
         sqlserver.client_app_name,
         sqlserver.client_hostname,
         sqlserver.session_id,
-        sqlserver.request_id
+        sqlserver.request_id,
+        sqlserver.context_info
     )
     WHERE (
         sql_text <> '' AND
@@ -545,7 +548,8 @@ ADD EVENT sqlserver.error_reported(
         sqlserver.client_app_name,
         sqlserver.client_hostname,
         sqlserver.session_id,
-        sqlserver.request_id
+        sqlserver.request_id,
+        sqlserver.context_info
     )
     WHERE severity >= 11
 ),
@@ -557,7 +561,8 @@ ADD EVENT sqlserver.attention(
         sqlserver.client_app_name,
         sqlserver.client_hostname,
         sqlserver.session_id,
-        sqlserver.request_id
+        sqlserver.request_id,
+        sqlserver.context_info
     )
 )
 ADD TARGET package0.ring_buffer

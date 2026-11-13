@@ -94,6 +94,9 @@ class XESessionBase(DBMAsyncJob):
         "username",
         "activity_id",
         "activity_id_xfer",
+        # Populated only when the XE session collects the sqlserver.context_info action. Tracers in DBM full
+        # mode for SQL Server propagate trace context through context_info rather than the SQL comment.
+        "context_info",
     ]
 
     BASE_SQL_FIELDS = [
