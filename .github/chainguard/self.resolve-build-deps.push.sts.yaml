@@ -1,4 +1,4 @@
-# Policy for: .github/workflows/resolve-build-deps.yaml publish job in DataDog/integrations-core
+# Policy for: .github/workflows/resolve-build-deps.yaml sync-pins and publish jobs in DataDog/integrations-core
 # Triggered by push to feature branches that update dependencies
 #
 # Naming convention:
@@ -8,11 +8,13 @@
 #
 # Security model:
 #   - Publish job runs on push to any feature branch
+#   - Sync-pins job pushes only on ADMS branches (engraver-auto-version-upgrade/**)
 #   - Workflow file must be committed to the same branch
 #   - Access is scoped to this specific workflow file via job_workflow_ref
 #
 # Permissions granted:
-#   - contents: write  - Push commits (lockfiles) back to the feature branch
+#   - contents: write  - Push commits back to the feature branch: lockfiles (publish) and
+#                        check pyproject.toml pins synced from agent_requirements.in (sync-pins)
 #
 # Usage in workflows:
 #   - uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
