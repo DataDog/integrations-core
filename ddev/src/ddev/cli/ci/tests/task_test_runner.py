@@ -46,6 +46,9 @@ CANCEL_REQUEST_TIMEOUT = 3.0
 # https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows
 WORKFLOW_INPUTS_LIMIT = 65535
 
+# Observed ~10 s timeouts at 100 jobs/page; smaller pages may avoid them (AI-7507).
+WORKFLOW_JOBS_PER_PAGE = 50
+
 # GitHub can answer 404 while a resource is becoming visible after a successful mutation.
 SAFE_RETRY_WITH_404 = SAFE_RETRY.also_on(on_status(404))
 
@@ -484,7 +487,11 @@ class TaskTestRunner(AsyncProcessor[TestBatch]):
         with self._metrics.operation(Operation.REFRESH_JOBS) as op:
             try:
                 async for page in self._client.list_workflow_jobs(
-                    self._options.owner, self._options.repo, run_id, per_page=100, retry=SAFE_RETRY_WITH_404
+                    self._options.owner,
+                    self._options.repo,
+                    run_id,
+                    per_page=WORKFLOW_JOBS_PER_PAGE,
+                    retry=SAFE_RETRY_WITH_404,
                 ):
                     jobs.extend(page.data.jobs)
             except ValidationError as error:

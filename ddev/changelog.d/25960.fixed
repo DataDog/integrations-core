@@ -1,0 +1,1 @@
+List Dispatcher batch jobs in pages of 50 to reduce exposure to GitHub's server response timeout.
