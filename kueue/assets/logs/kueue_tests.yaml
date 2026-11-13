@@ -46,6 +46,8 @@ tests:
   sample: "E0803 10:28:29.306177       1 leaderelection.go:461] \"Error retrieving lease lock\" err=\"client rate limiter Wait returned an error: rate: Wait(n=1) would exceed context deadline\" lock=\"kueue-system/c1f6bfd2.kueue.x-k8s.io\""
   result:
     custom:
+      error:
+        message: "client rate limiter Wait returned an error: rate: Wait(n=1) would exceed context deadline"
       kueue:
         klog:
           err: "client rate limiter Wait returned an error: rate: Wait(n=1) would exceed context deadline"
@@ -207,6 +209,7 @@ tests:
         klog_severity: "debug"
         klog_verbosity: 2
         local_queue: "user-queue"
+        local_queue_namespace: "default"
         replica_role: "follower"
       logger:
         file_name: "core/localqueue_controller.go"
