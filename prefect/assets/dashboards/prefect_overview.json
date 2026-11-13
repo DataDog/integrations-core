@@ -2387,7 +2387,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:postgresql.database_connections{$service, $host} by {db}"
+                      "query": "avg:postgresql.connections{$service, $host} by {db}"
                     }
                   ],
                   "formulas": [
