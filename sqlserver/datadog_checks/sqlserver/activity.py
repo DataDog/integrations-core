@@ -7,6 +7,8 @@ import datetime
 import re
 import time
 
+from cachetools import LRUCache
+
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import (
@@ -30,6 +32,7 @@ DEFAULT_COLLECTION_INTERVAL = 10
 MAX_PAYLOAD_BYTES = 19e6
 
 TAIL_TEXT_SIZE = 200
+FULL_TEXT_OBFUSCATION_CACHE_SIZE = 128
 
 CONNECTIONS_QUERY = """\
 SELECT
@@ -203,6 +206,7 @@ class SqlserverActivity(DBMAsyncJob):
         self._conn_key_prefix = "dbm-activity-"
         self._activity_payload_max_bytes = MAX_PAYLOAD_BYTES
         self._exec_requests_cols_cached = None
+        self._full_text_obfuscation_cache = LRUCache(maxsize=FULL_TEXT_OBFUSCATION_CACHE_SIZE)
 
         self._collect_raw_query_statement = self._config.collect_raw_query_statement.get("enabled", False)
         self._raw_statement_text_cache = RateLimitingTTLCache(
@@ -386,9 +390,14 @@ class SqlserverActivity(DBMAsyncJob):
             should_recover_comments = needs_comment_recovery(row.get('text'), comments)
             if row.get('text') and (has_proc_context or should_recover_comments):
                 try:
-                    full_text_statement = obfuscate_sql_with_metadata(
-                        row['text'], self._config.obfuscator_options, replace_null_character=True
-                    )
+                    cache_key = (row['text'], self._config.obfuscator_options)
+                    try:
+                        full_text_statement = self._full_text_obfuscation_cache[cache_key]
+                    except KeyError:
+                        full_text_statement = obfuscate_sql_with_metadata(
+                            row['text'], self._config.obfuscator_options, replace_null_character=True
+                        )
+                        self._full_text_obfuscation_cache[cache_key] = full_text_statement
                     comments = self._merge_comments(comments, full_text_statement['metadata'])
                     if has_proc_context:
                         row['procedure_signature'] = compute_sql_signature(full_text_statement['query'])

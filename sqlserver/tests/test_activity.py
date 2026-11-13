@@ -18,6 +18,7 @@ import mock
 import pytest
 from dateutil import parser
 
+from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.base.utils.db.utils import DBMAsyncJob, default_json_event_encoding
 from datadog_checks.dev.ci import running_on_windows_ci
 from datadog_checks.sqlserver import SQLServer
@@ -1076,6 +1077,62 @@ def test_sanitize_activity_row_recovers_leading_comment_for_non_proc_statement(d
     assert not row.get('is_proc')
     assert 'procedure_signature' not in row
     assert mock_agent.call_count == 2
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('procedure_name', [None, 'get_orders'])
+def test_sanitize_activity_rows_reuse_batch_without_mixing_statement_metadata(
+    dbm_instance, datadog_agent, procedure_name
+):
+    statements = ['SELECT customer_id FROM orders', 'SELECT count(*) FROM orders']
+    comments = ["/* service='datadog-agent' */", "/*dddbs='orders-service'*/"]
+    batches = [comment + ' ' + '; '.join(statements) for comment in comments]
+
+    def _obfuscate_sql(sql_query: str, options: str | None = None) -> str:
+        metadata = {'comments': [comment for comment in comments if comment in sql_query]}
+        return json.dumps({'query': sql_query, 'metadata': metadata})
+
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        for batch_index, statement_index in [(0, 0), (0, 1), (1, 0), (0, 1)]:
+            statement = statements[statement_index]
+            row = check.activity._obfuscate_and_sanitize_row(
+                {'statement_text': statement, 'text': batches[batch_index], 'procedure_name': procedure_name}
+            )
+            assert row['text'] == statement
+            assert row['query_signature'] == compute_sql_signature(statement)
+            assert row['dd_comments'] == [comments[batch_index]]
+            if procedure_name:
+                assert row['procedure_signature'] == compute_sql_signature(batches[batch_index])
+            else:
+                assert 'procedure_signature' not in row
+
+    assert mock_agent.call_count == 6
+
+
+@pytest.mark.unit
+def test_sanitize_activity_row_batch_cache_respects_obfuscator_options(dbm_instance, datadog_agent):
+    comment = "/* service='datadog-agent' */"
+    statement = 'SELECT customer_id FROM orders'
+    template = {'statement_text': statement, 'text': comment + ' ' + statement}
+
+    def _obfuscate_sql(sql_query: str, options: str | None = None) -> str:
+        collect_comments = json.loads(options)['collect_comments']
+        comments = [comment] if collect_comments and comment in sql_query else []
+        return json.dumps({'query': sql_query, 'metadata': {'comments': comments}})
+
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    options = json.loads(check.activity._config.obfuscator_options)
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', passthrough=True) as mock_agent:
+        mock_agent.side_effect = _obfuscate_sql
+        for collect_comments in [True, False, True]:
+            check.activity._config.obfuscator_options = json.dumps(dict(options, collect_comments=collect_comments))
+            row = check.activity._obfuscate_and_sanitize_row(template.copy())
+            assert row['dd_comments'] == ([comment] if collect_comments else [])
+            assert row['text'] == statement
+
+    assert mock_agent.call_count == 5
 
 
 @pytest.mark.unit
