@@ -16,6 +16,7 @@ from datadog_checks.base.utils.db.sql import compute_sql_signature
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.xe_collection.query_plan_events import (
     EVENT_FILE_LAST_BUFFER_QUERY,
+    EVENT_FILE_OLDEST_FILE_QUERY,
     EVENT_FILE_READ_FROM_CHECKPOINT_QUERY,
     EVENT_FILE_READ_QUERY,
     FRAME_STATEMENT_QUERY,
@@ -95,16 +96,32 @@ def mock_obfuscate_sql(query, options=None):
     return re.sub(r"([^@\w])[0-9]+", r"\1?", query)
 
 
+# The error of a read from a checkpoint whose file is gone, as ODBC drivers report it, and as drivers without the error
+# number do.
+CHECKPOINT_FILE_GONE_ERRORS = {
+    'odbc': (
+        "('42000', \"[42000] [Microsoft][ODBC Driver 18 for SQL Server][SQL Server]The file '{}' is invalid. (25717) "
+        "(SQLExecDirectW)\")"
+    ),
+    'without_error_number': "The file '{}' is invalid.",
+}
+
+
 class FakeEventFile:
     """
-    The files of an event_file target, as `fn_xe_file_target_read_file` reads them: a read from a checkpoint returns
-    the events of the buffers after it, in its file and the next ones, and fails when its file is gone.
+    The files of an event_file target, as `fn_xe_file_target_read_file` reads them, oldest first: a read from a
+    checkpoint returns the events of the buffers after it, in its file and the next ones, and fails when its file is
+    gone.
     """
 
     def __init__(self, current_file: str = CURRENT_FILE):
         # file name -> list of (offset, events)
         self.files: dict[str, list[tuple[int, list[str]]]] = {current_file: []}
         self.current_file = current_file
+        self.pattern = event_file_pattern(current_file)
+        self.file_gone_error = CHECKPOINT_FILE_GONE_ERRORS['odbc']
+        # The errors of the next reads from a checkpoint.
+        self.checkpoint_read_errors: list[Exception] = []
 
     def add_buffer(self, *events: str) -> None:
         buffers = self.files[self.current_file]
@@ -125,17 +142,25 @@ class FakeEventFile:
                 rows.extend((event, name, offset) for event in events)
         return rows
 
+    def matching_files(self, path: str) -> list[str]:
+        return sorted(self.files) if path == self.pattern else [path]
+
     def responses(self, sql: str, params: tuple):
         if sql == EVENT_FILE_LAST_BUFFER_QUERY:
             rows = self.rows([params[0]])
             return [(rows[-1][1], rows[-1][2])] if rows else []
+        if sql == EVENT_FILE_OLDEST_FILE_QUERY:
+            rows = self.rows(self.matching_files(params[0]))
+            return [(rows[0][1],)] if rows else []
         if sql == EVENT_FILE_READ_QUERY:
-            top, file_name = params
-            return self.rows([file_name])[:top]
+            top, path = params
+            return self.rows(self.matching_files(path))[:top]
         if sql == EVENT_FILE_READ_FROM_CHECKPOINT_QUERY:
             top, _pattern, file_name, offset = params
+            if self.checkpoint_read_errors:
+                raise self.checkpoint_read_errors.pop(0)
             if file_name not in self.files:
-                raise Exception("The file '{}' is invalid".format(file_name))
+                raise Exception(self.file_gone_error.format(file_name))
             files = sorted(self.files)
             return self.rows(files[files.index(file_name) :], after=(file_name, offset))[:top]
         return None
@@ -631,8 +656,8 @@ def test_each_execution_is_sent_once(aggregator, xe_instance, target, first, sec
 @pytest.mark.parametrize('checkpoint_file_removed', [True, False], ids=['rollover', 'session_restart'])
 def test_event_file_checkpoint_file_replaced(aggregator, xe_instance, checkpoint_file_removed, current_file, read_path):
     """
-    When the checkpoint's file is gone after rollovers, the current file is read from its start, and when a restarted
-    session writes a new file, reading goes on into it. Neither sends the events read before again.
+    When the checkpoint's file is gone after rollovers, the files retained are read from the oldest, and when a
+    restarted session writes a new file, reading goes on into it. Neither sends the events read before again.
     """
     server = FakeServer(current_file=current_file)
     # no rate limit, which would also stop the events read before
@@ -660,7 +685,71 @@ def test_event_file_checkpoint_file_replaced(aggregator, xe_instance, checkpoint
         (read_path, current_file)
     }
     if checkpoint_file_removed:
-        assert server.executed(EVENT_FILE_READ_QUERY)[-1] == (1000, server.event_file.current_file)
+        assert server.executed(EVENT_FILE_READ_QUERY)[-1] == (1000, read_path)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    'read_before,files_after,failure,expected',
+    [
+        pytest.param(
+            [[1]],
+            [[[2]], [[3], [4, 5]], [[6, 7]]],
+            'odbc',
+            [1, 3, 4, 5, 6, 7],
+            id='checkpoint_file_deleted',
+        ),
+        pytest.param(
+            [[1]],
+            [[[2]], [[3], [4, 5]], [[6, 7]]],
+            'without_error_number',
+            [1, 3, 4, 5, 6, 7],
+            id='checkpoint_file_deleted_without_error_number',
+        ),
+        pytest.param([[1]], [[[2]], [[3]], [[4]]], 'transient', [1, 2, 3, 4], id='transient_read_error'),
+        pytest.param(
+            [[1], [2, 3, 4]],
+            [[], [[5, 6, 7]]],
+            'odbc',
+            [1, 2, 5, 6, 7],
+            id='partial_buffer_then_checkpoint_file_deleted',
+        ),
+        # the first buffer read in part, with no checkpoint before it, and its file deleted
+        pytest.param(
+            [[1, 2, 3]], [[], [[4, 5, 6]]], 'odbc', [1, 2, 4, 5, 6], id='partial_first_buffer_then_its_file_deleted'
+        ),
+    ],
+)
+def test_event_file_checkpoint_read_failure(aggregator, xe_instance, read_before, files_after, failure, expected):
+    """
+    Every execution still in a file of the target is sent once, with at most `max_events` per run: after the
+    checkpoint's file is gone, from the oldest file retained rather than the current one, and after a read failing
+    otherwise, from the checkpoint at the next run.
+    """
+    server = FakeServer()
+    # no rate limit, which would also stop the events read before
+    handler = make_handler(xe_instance, server, max_events=2, samples_per_hour_per_query=10**9)
+    handler.run_job()
+    for buffer in read_before:
+        server.event_file.add_buffer(*(distinct_event(second) for second in buffer))
+    handler.run_job()
+    # the events after the checkpoint, in its file and the next ones
+    checkpoint_file = server.event_file.current_file
+    for i, buffers in enumerate(files_after):
+        if i:
+            server.event_file.start_file()
+        for buffer in buffers:
+            server.event_file.add_buffer(*(distinct_event(second) for second in buffer))
+    if failure == 'transient':
+        server.event_file.checkpoint_read_errors.append(Exception('Query timeout expired (SQLExecDirectW)'))
+    else:
+        server.event_file.file_gone_error = CHECKPOINT_FILE_GONE_ERRORS[failure]
+        del server.event_file.files[checkpoint_file]
+
+    for _ in range(len(expected)):
+        handler.run_job()
+
+    assert sent_timestamps(aggregator) == [timestamp(second) for second in expected]
 
 
 @pytest.mark.unit
