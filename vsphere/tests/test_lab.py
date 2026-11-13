@@ -22,7 +22,7 @@ def test_lab(aggregator):
 
     Example usage:
     $ export TEST_VSPHERE_USER='XXXXX' TEST_VSPHERE_PASS='XXXXX'
-    $ TEST_VSPHERE_RUN_LAB=true ddev test vsphere:py38 -k test_lab
+    $ TEST_VSPHERE_RUN_LAB=true ddev test vsphere --envs default --pytest-args='-k test_lab'
 
     """
     if not is_affirmative(os.environ.get('TEST_VSPHERE_RUN_LAB')):

@@ -8,15 +8,18 @@ from typing import TYPE_CHECKING
 
 import click
 
+from ddev.testing.selection import TestCommand, parse_envs, parse_pytest_args
+
 if TYPE_CHECKING:
     from ddev.cli.application import Application
-    from ddev.utils.hatch import Environment
 
 
-@click.command('test')
+@click.command('test', cls=TestCommand)
 @click.argument('intg_name', metavar='INTEGRATION')
-@click.argument('environment', required=False)
-@click.argument('pytest_args', nargs=-1)
+@click.option('--envs', callback=parse_envs, help='Comma-separated names or matrix aliases, or all or active')
+@click.option(
+    '--pytest-args', default='', callback=parse_pytest_args, help='Pytest arguments, parsed with POSIX quoting'
+)
 @click.option('--dev', 'local_dev', is_flag=True, help='Install the local version of the integration')
 @click.option(
     '--base',
@@ -53,7 +56,7 @@ def test_command(
     ctx: click.Context,
     *,
     intg_name: str,
-    environment: str | None,
+    envs: tuple[str, ...] | None,
     pytest_args: tuple[str, ...],
     local_dev: bool,
     local_base: bool,
@@ -70,58 +73,55 @@ def test_command(
 
     This runs the end-to-end tests.
 
-    If no ENVIRONMENT is specified, `active` is selected which will test all environments
-    that are currently running. You may choose `all` to test all environments whether or not
-    they are running.
+    With no --envs selection, test active environments, or all environments if none
+    are active or when running in CI. Use --envs all to test every eligible environment.
+    Use --envs active to test only environments that are already running.
 
     Testing active environments will not stop them after tests complete. Testing environments
     that are not running will start and stop them automatically.
 
-    See these docs for to pass ENVIRONMENT and PYTEST_ARGS:
+    For example: ddev env test postgres --envs all --pytest-args='-m "not flaky"'
+
+    See the testing documentation:
 
     \b
     https://datadoghq.dev/integrations-core/testing/
     """
-    from functools import partial
-
     from ddev.cli.env.start import start
     from ddev.cli.env.stop import stop
     from ddev.cli.test import test
     from ddev.config.constants import AppEnvVars
     from ddev.e2e.config import EnvDataStorage
     from ddev.e2e.constants import E2EMetadata
+    from ddev.testing.selection import e2e_pytest_args, load_environment_catalog, validate_target
     from ddev.utils.ci import running_in_ci
-    from ddev.utils.hatch import HatchCommandError, list_environment_names
     from ddev.utils.structures import EnvVars
 
     app: Application = ctx.obj
+    validate_target(intg_name, 'ddev env test')
+    e2e_pytest_args(pytest_args)
+    if envs and len(envs) > 1 and {'all', 'active'}.intersection(envs):
+        raise click.UsageError('Use --envs all or --envs active alone, not with named environments.')
     integration = app.repo.integrations.get(intg_name)
 
     storage = EnvDataStorage(app.data_dir)
     active_envs = storage.get_environments(integration.name)
 
-    if environment is None:
-        environment = 'all' if (not active_envs or running_in_ci()) else 'active'
+    if envs is None:
+        envs = ('all',) if (not active_envs or running_in_ci()) else ('active',)
 
-    if environment == 'active':
-        env_names = active_envs
+    catalog = load_environment_catalog(integration)
+    if envs == ('active',):
+        names = catalog.resolve(active_envs)
+    elif envs == ('all',):
+        names = list(catalog.environments)
     else:
-        try:
-            env_names = list_environment_names(
-                app.platform,
-                integration,
-                filters=[
-                    is_e2e_environment,
-                    partial(uses_python_version, python_filter=python_filter),
-                    partial(uses_platform, platform=app.platform.name),
-                    partial(is_selected_environment, environment_name=environment),
-                ],
-            )
-        except HatchCommandError as error:
-            app.abort(f'Failed to list environments for `{integration.name}`:\n{error}')
-
+        names = catalog.resolve(envs)
+    env_names, excluded = catalog.select(names, mode='e2e_env', platform=app.platform.name, python_filter=python_filter)
+    for name, reason in excluded.items():
+        app.display_info(f'Excluded {integration.name}:{name} by {reason}.')
     if not env_names:
-        app.display_info(f"Selected target {integration.name!r} disabled by e2e-env option.")
+        app.display_info(f'No eligible environments selected for {integration.name}.')
         return
 
     app.display_header(integration.display_name)
@@ -159,7 +159,8 @@ def test_command(
                 ddtrace = ddtrace_env.lower() in ('1', 'true', 'yes')
                 ctx.invoke(
                     test,
-                    target_spec=f'{intg_name}:{env_name}',
+                    target_spec=intg_name,
+                    envs=(env_name,),
                     pytest_args=pytest_args,
                     recreate=recreate,
                     junit=junit,
@@ -179,19 +180,3 @@ def test_command(
                 if test_succeeded and env_index < len(env_names) - 1:
                     warning += ' The next environment may fail to start if cleanup was incomplete.'
                 app.display_warning(warning)
-
-
-def is_e2e_environment(environment: Environment) -> bool:
-    return environment.e2e_env
-
-
-def uses_python_version(environment: Environment, python_filter: str | None) -> bool:
-    return python_filter is None or environment.python == python_filter
-
-
-def uses_platform(environment: Environment, platform: str) -> bool:
-    return not environment.platforms or platform in environment.platforms
-
-
-def is_selected_environment(environment: Environment, environment_name: str) -> bool:
-    return environment.name == environment_name or environment_name == 'all'

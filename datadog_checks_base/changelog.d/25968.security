@@ -1,0 +1,1 @@
+Bump `ddtrace` to 4.16.3 and `oauthlib` to 4.0.1 to address CVE-2026-116588, CVE-2026-116589, and CVE-2026-49272.

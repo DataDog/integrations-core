@@ -45,7 +45,7 @@ def test_lab(aggregator, dd_run_check):
 
     Example usage:
     $ export TEST_CITRIX_USER='XXXXX' TEST_CITRIX_PASS='XXXXX'
-    $ TEST_CITRIX_RUN_LAB=true ddev test citrix_hypervisor:py38 -k test_lab
+    $ TEST_CITRIX_RUN_LAB=true ddev test citrix_hypervisor --envs default --pytest-args='-k test_lab'
 
     """
     if not is_affirmative(os.environ.get('TEST_CITRIX_RUN_LAB')):

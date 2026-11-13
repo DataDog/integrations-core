@@ -1,0 +1,1 @@
+Bump `dnspython` to 2.9.2 to address CVE-2026-114605.

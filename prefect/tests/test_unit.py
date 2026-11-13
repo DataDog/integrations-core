@@ -847,6 +847,81 @@ def test_flow_name_after_flows_filter_failure(
     aggregator.assert_metric("prefect.server.task_runs.paused", value=1, tags=base + TAGS_TR8, count=1)
 
 
+@pytest.mark.parametrize(
+    "run, ages",
+    [
+        pytest.param(
+            {"state_type": "SCHEDULED", "state_name": "Late", "expected_start_time": "2026-01-20T15:00:30Z"},
+            (30.0, 45.0),
+            id="late-run-stays-in-backlog",
+        ),
+        pytest.param(
+            {"state_type": "PENDING", "expected_start_time": "2026-01-20T14:00:00Z"},
+            (3660.0, 3675.0),
+            id="pending-overdue-before-first-check",
+        ),
+        pytest.param(
+            {
+                "state_type": "SCHEDULED",
+                "state_name": "AwaitingRetry",
+                "expected_start_time": "2026-01-20T13:00:00Z",
+                "next_scheduled_start_time": "2026-01-20T15:01:10Z",
+            },
+            (None, 5.0),
+            id="retry-ages-from-retry-time",
+        ),
+        pytest.param(
+            {
+                "state_type": "PENDING",
+                "run_count": 1,
+                "expected_start_time": "2026-01-20T13:00:00Z",
+                "state": {"type": "PENDING", "timestamp": "2026-01-20T15:00:50Z"},
+            },
+            (10.0, 25.0),
+            id="pending-retry-ages-from-pending-time",
+        ),
+    ],
+)
+def test_backlog_keeps_overdue_run_across_checks(
+    check: PrefectCheck, dd_run_check: Callable, aggregator: AggregatorStub, mock_prefect_client, mocker, run, ages
+):
+    """A run still waiting on a later collection stays in the backlog, and its age keeps growing (AI-7517)."""
+    flow_run = {
+        "id": "fr-overdue",
+        "work_pool_id": "wp-1",
+        "work_pool_name": "default-pool",
+        "work_queue_id": "wq-1",
+        "work_queue_name": "default-queue",
+        "deployment_id": "d-1",
+        "flow_id": "f-1",
+        **run,
+    }
+    post_responses = mock_prefect_client.paginate_filter.side_effect
+    overrides = {"/flow_runs/filter": [flow_run], "/task_runs/filter": []}
+    mock_prefect_client.paginate_filter.side_effect = lambda endpoint, payload=None: (
+        overrides[endpoint] if endpoint in overrides else post_responses(endpoint, payload)
+    )
+    mocker.patch.object(check, '_get_last_check_time')
+    reset_check_time(check)
+
+    # last_check_time is not reset between collections: the check moves it forward itself
+    for now, age in zip(("2026-01-20T15:01:00", "2026-01-20T15:01:15"), ages, strict=True):
+        aggregator.reset()
+        mocker.patch(
+            "datadog_checks.prefect.check._utcnow",
+            return_value=datetime.fromisoformat(now).replace(tzinfo=timezone.utc),
+        )
+        dd_run_check(check)
+
+        tags = check.base_tags + WQ1_STATUS_TAGS
+        aggregator.assert_metric(
+            "prefect.server.work_queue.backlog.size", value=0.0 if age is None else 1.0, tags=tags, count=1
+        )
+        aggregator.assert_metric(
+            "prefect.server.work_queue.backlog.age", value=0.0 if age is None else age, tags=tags, count=1
+        )
+
+
 ALL_EVENT_CASES = [
     EventCase(
         msg_text="flow-run went from Late to Pending\n"
