@@ -1190,6 +1190,29 @@ class TestSubmission:
 
         aggregator.assert_all_metrics_covered()
 
+    def test_query_execution_error_while_reading_rows(self, caplog, aggregator):
+        def executor(query):
+            if query == 'foo':
+                yield [1]
+                raise ValueError('interrupted')
+            yield [2]
+
+        query_manager = create_query_manager(
+            {'name': 'test query', 'query': 'foo', 'columns': [{'name': 'test.foo', 'type': 'gauge'}]},
+            {'name': 'next query', 'query': 'bar', 'columns': [{'name': 'test.bar', 'type': 'gauge'}]},
+            executor=executor,
+        )
+        query_manager.compile_queries()
+        query_manager.execute()
+
+        expected_message = 'Error querying test query: interrupted'
+        matches = [level for _, level, message in caplog.record_tuples if message == expected_message]
+
+        assert matches == [logging.ERROR]
+        aggregator.assert_metric('test.foo', 1)
+        aggregator.assert_metric('test.bar', 2)
+        aggregator.assert_all_metrics_covered()
+
     def test_query_execution_error_with_handler(self, caplog, aggregator):
         class Result(object):
             def __init__(self, _):
