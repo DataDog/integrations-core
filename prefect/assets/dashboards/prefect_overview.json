@@ -2181,7 +2181,7 @@
             "id": 7676892238288698,
             "definition": {
               "type": "note",
-              "content": "PostgreSQL and Redis instances backing Prefect server. Requires the Datadog PostgreSQL and Redis integrations configured with the same `service` as the Prefect check; set $service to that value. PostgreSQL widgets are empty for SQLite-backed servers; Redis widgets are empty without Redis messaging.",
+              "content": "PostgreSQL and Redis instances backing Prefect server. Requires the Datadog PostgreSQL and Redis integrations configured with the same `service` as the Prefect check; set $service to that value ($host doesn't filter this section). PostgreSQL widgets are empty for SQLite-backed servers; Redis widgets are empty without Redis messaging.",
               "background_color": "blue",
               "font_size": "16",
               "text_align": "center",
@@ -2232,7 +2232,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:redis.ping.latency_ms{$service, $host}"
+                      "query": "avg:redis.ping.latency_ms{$service}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2285,12 +2285,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:postgresql.commits{$service, $host} by {db}"
+                      "query": "sum:postgresql.commits{$service} by {db}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:postgresql.rollbacks{$service, $host} by {db}"
+                      "query": "sum:postgresql.rollbacks{$service} by {db}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2334,7 +2334,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:redis.net.clients{$service, $host} by {host}"
+                      "query": "avg:redis.net.clients{$service} by {host}"
                     }
                   ],
                   "formulas": [
@@ -2387,7 +2387,7 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:postgresql.connections{$service, $host} by {db}"
+                      "query": "avg:postgresql.connections{$service} by {db}"
                     }
                   ],
                   "formulas": [
@@ -2439,17 +2439,17 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:redis.mem.used{$service, $host} by {host}"
+                      "query": "avg:redis.mem.used{$service} by {host}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "avg:redis.mem.rss{$service, $host} by {host}"
+                      "query": "avg:redis.mem.rss{$service} by {host}"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query3",
-                      "query": "avg:redis.mem.peak{$service, $host} by {host}"
+                      "query": "avg:redis.mem.peak{$service} by {host}"
                     }
                   ],
                   "response_format": "timeseries",
@@ -2529,12 +2529,12 @@
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:postgresql.buffer_hit{$service, $host}.as_rate()"
+                      "query": "sum:postgresql.buffer_hit{$service}.as_rate()"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:postgresql.disk_read{$service, $host}.as_rate()"
+                      "query": "sum:postgresql.disk_read{$service}.as_rate()"
                     }
                   ],
                   "response_format": "timeseries",
