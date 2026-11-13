@@ -1,0 +1,85 @@
+{
+  "app_id": "kueue",
+  "app_uuid": "019f8f11-dc13-7916-8cfe-a2d43c019913",
+  "manifest_version": "2.0.0",
+  "display_on_public_website": true,
+  "tile": {
+    "title": "Kueue",
+    "description": "Monitor the health and performance of Kueue, the Kubernetes-native job queueing system.",
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "uninstallation": "README.md#Uninstallation",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "Kueue Overview (light mode)",
+        "image_url": "images/Screenshot 2026-08-04 at 17.15.43.png"
+      },
+      {
+        "media_type": "image",
+        "caption": "Kueue Overview (dark mode)",
+        "image_url": "images/Screenshot 2026-08-04 at 17.16.35.png"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Orchestration",
+      "Category::Kubernetes",
+      "Offering::Integration",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Queried Data Type::Events",
+      "Queried Data Type::Metrics",
+      "Queried Data Type::Logs",
+      "Submitted Data Type::Events",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "oauth": {},
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.datadoghq.com",
+    "sales_email": "info@datadoghq.com",
+    "vendor_id": "datadog"
+  },
+  "assets": {
+    "dashboards": {
+      "Kueue Overview": "assets/dashboards/kueue_overview.json"
+    },
+    "monitors": {
+      "Growing pending workload backlog": "assets/monitors/growing_pending_workload_backlog.json",
+      "High admission wait time": "assets/monitors/high_admission_wait_time.json",
+      "ClusterQueue not active": "assets/monitors/clusterqueue_not_active.json",
+      "Preemption/eviction thrashing": "assets/monitors/preemption_eviction_thrashing.json"
+    },
+    "logs": {
+      "source": "kueue"
+    },
+    "integration": {
+      "source_type_name": "kueue",
+      "auto_install": false,
+      "configuration": {},
+      "process_signatures": [],
+      "metrics": {
+        "prefix": "kueue",
+        "check": [
+          "kueue.build_info"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "events": {
+        "creates_events": true
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "source_type_id": 85916374,
+      "supports_ddr_coordinated_failover": false
+    }
+  },
+  "owner": "agent-integrations"
+}

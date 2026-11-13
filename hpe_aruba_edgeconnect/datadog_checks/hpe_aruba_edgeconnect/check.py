@@ -6,6 +6,7 @@ from __future__ import annotations
 import ipaddress
 import json
 import threading
+import time
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
@@ -39,6 +40,7 @@ from .utils import parse_speed
 
 class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
     __NAMESPACE__ = 'hpe_aruba_edgeconnect'
+    HA_SUPPORTED = True
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -495,7 +497,10 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
             return
         cache_key = f'last_alarm_ts:{client.app_ip}'
         raw = self.read_persistent_cache(cache_key)
-        last_ts = int(raw) if raw else 0
+        if raw:
+            last_ts = int(raw)
+        else:
+            last_ts = int((time.time() - (self.config.min_collection_interval or 60)) * 1000)
         newest_ts = last_ts
         for alarm in outstanding:
             raised_ms = alarm.get('time')
@@ -504,7 +509,7 @@ class HpeArubaEdgeconnectCheck(AgentCheck, ConfigMixin):
                     continue
                 newest_ts = max(newest_ts, int(raised_ms))
             self._submit_alarm_event(alarm, client.app_ip, base_tags)
-        if newest_ts > last_ts:
+        if not raw or newest_ts > last_ts:
             self.write_persistent_cache(cache_key, str(newest_ts))
 
     def _submit_alarm_event(self, alarm: dict[str, Any], app_ip: str, base_tags: list[str]) -> None:

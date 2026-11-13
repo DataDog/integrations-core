@@ -1,0 +1,234 @@
+id: krakend
+tests:
+  - sample: "[GIN] 2025/07/29 - 10:00:08 | 200 |    1.199041ms |   162.159.200.1 | GET      \"/api/valid\""
+    result:
+      custom:
+        duration: 1199041.0
+        http:
+          method: "GET"
+          status_code: 200
+          url_details:
+            path: "/api/valid"
+        krakend:
+          module: "GIN"
+        network:
+          client:
+            ip: "162.159.200.1"
+        timestamp: 1753783208000
+      message: "[GIN] 2025/07/29 - 10:00:08 | 200 |    1.199041ms |   162.159.200.1 | GET      \"/api/valid\""
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1753783208000
+  - sample: "[ENDPOINT: /api/invalid] invalid status code 500 [GET /invalid/]: http://api:8000/invalid/"
+    result:
+      custom:
+        http:
+          url_details:
+            path: "/api/invalid"
+        krakend:
+          app:
+            context: "ENDPOINT"
+            message: " invalid status code 500 [GET /invalid/]: http://api:8000/invalid/"
+      message: "[ENDPOINT: /api/invalid] invalid status code 500 [GET /invalid/]: http://api:8000/invalid/"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1
+  - sample: "[KRAKEND] 2025/07/30 - 09:08:32.857 \e[31m▶ ERROR\e[0m [ENDPOINT: /api/not-found] invalid status ode 404 [GET /hastalavista/]: http://api:8000/hastalavista/"
+    result:
+      custom:
+        http:
+          url_details:
+            path: "/api/not-found"
+        krakend:
+          app:
+            context: "ENDPOINT"
+            message: " invalid status ode 404 [GET /hastalavista/]: http://api:8000/hastalavista/"
+          module: "KRAKEND"
+        level: "error"
+        timestamp: 1753866512857
+      message: "[KRAKEND] 2025/07/30 - 09:08:32.857 \e[31m▶ ERROR\e[0m [ENDPOINT: /api/not-found] invalid status ode 404 [GET /hastalavista/]: http://api:8000/hastalavista/"
+      status: "error"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1753866512857
+  - sample: "[KRAKEND] 2025/07/30 - 16:41:43.155 ▶ INFO\e[0m [ENDPOINT: /api/cancelled][JWTValidator] Validator disabled for this endpoint"
+    result:
+      custom:
+        http:
+          url_details:
+            path: "/api/cancelled"
+        krakend:
+          app:
+            context: "ENDPOINT"
+            message: "[JWTValidator] Validator disabled for this endpoint"
+          module: "KRAKEND"
+        level: "info"
+        timestamp: 1753893703155
+      message: "[KRAKEND] 2025/07/30 - 16:41:43.155 ▶ INFO\e[0m [ENDPOINT: /api/cancelled][JWTValidator] Validator disabled for this endpoint"
+      status: "info"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1753893703155
+  - sample: "[KRAKEND] 2025/07/30 - 16:44:53.638 ▶ INFO\e[0m Starting the KrakenD instance"
+    result:
+      custom:
+        krakend:
+          app:
+            message: "Starting the KrakenD instance"
+          module: "KRAKEND"
+        level: "info"
+        timestamp: 1753893893638
+      message: "[KRAKEND] 2025/07/30 - 16:44:53.638 ▶ INFO\e[0m Starting the KrakenD instance"
+      status: "info"
+      tags:
+      - "source:LOGS_SOURCE"
+      timestamp: 1753893893638
+  - sample: '[GIN] 2025/07/29 - 10:00:08 | 503 |    850ns |   162.159.200.1 | GET      "/api/slow"'
+    result:
+      custom:
+        duration: 850
+        http:
+          method: GET
+          status_code: 503
+          url_details:
+            path: /api/slow
+        krakend:
+          module: GIN
+        network:
+          client:
+            ip: 162.159.200.1
+        timestamp: 1753783208000
+      message: '[GIN] 2025/07/29 - 10:00:08 | 503 |    850ns |   162.159.200.1 | GET      "/api/slow"'
+      tags:
+      - source:LOGS_SOURCE
+      timestamp: 1753783208000
+  - sample: '[GIN] 2025/07/29 - 10:00:08 | 503 |    2.5s |   162.159.200.1 | GET      "/api/slow"'
+    result:
+      custom:
+        duration: 2500000000
+        http:
+          method: GET
+          status_code: 503
+          url_details:
+            path: /api/slow
+        krakend:
+          module: GIN
+        network:
+          client:
+            ip: 162.159.200.1
+        timestamp: 1753783208000
+      message: '[GIN] 2025/07/29 - 10:00:08 | 503 |    2.5s |   162.159.200.1 | GET      "/api/slow"'
+      tags:
+      - source:LOGS_SOURCE
+      timestamp: 1753783208000
+  - sample: '[GIN] 2025/07/29 - 10:00:08 | 503 |    850µs |   162.159.200.1 | GET      "/api/slow"'
+    result:
+      custom:
+        duration: 850000
+        http:
+          method: GET
+          status_code: 503
+          url_details:
+            path: /api/slow
+        krakend:
+          module: GIN
+        network:
+          client:
+            ip: 162.159.200.1
+        timestamp: 1753783208000
+      message: '[GIN] 2025/07/29 - 10:00:08 | 503 |    850µs |   162.159.200.1 | GET      "/api/slow"'
+      tags:
+      - source:LOGS_SOURCE
+      timestamp: 1753783208000
+  - sample: '[GIN] 2025/07/29 - 10:00:08 | 503 |    1m2.5s |   162.159.200.1 | GET      "/api/slow"'
+    result:
+      custom:
+        duration: 62500000000
+        http:
+          method: GET
+          status_code: 503
+          url_details:
+            path: /api/slow
+        krakend:
+          module: GIN
+        network:
+          client:
+            ip: 162.159.200.1
+        timestamp: 1753783208000
+      message: '[GIN] 2025/07/29 - 10:00:08 | 503 |    1m2.5s |   162.159.200.1 | GET      "/api/slow"'
+      tags:
+      - source:LOGS_SOURCE
+      timestamp: 1753783208000
+  - sample: '[GIN] 2025/07/29 - 10:00:08 | 503 |    1h2m3.5s |   162.159.200.1 | GET      "/api/slow"'
+    result:
+      custom:
+        duration: 3723500000000
+        http:
+          method: GET
+          status_code: 503
+          url_details:
+            path: /api/slow
+        krakend:
+          module: GIN
+        network:
+          client:
+            ip: 162.159.200.1
+        timestamp: 1753783208000
+      message: '[GIN] 2025/07/29 - 10:00:08 | 503 |    1h2m3.5s |   162.159.200.1 | GET      "/api/slow"'
+      tags:
+      - source:LOGS_SOURCE
+      timestamp: 1753783208000
+  - sample: |-
+      [GIN] 2026/11/13 - 13:42:49 | 500 |    1.280042ms |      172.19.0.1 | GET      "/api/invalid"
+      Error #01: invalid status code 500 [GET /invalid/]: http://api:8000/invalid/
+    result:
+      custom:
+        duration: 1280042
+        http:
+          method: GET
+          status_code: 500
+          url_details:
+            path: /api/invalid
+        krakend:
+          module: GIN
+          error:
+            details: "Error #01: invalid status code 500 [GET /invalid/]: http://api:8000/invalid/"
+        network:
+          client:
+            ip: 172.19.0.1
+        timestamp: 1794577369000
+      message: |-
+        [GIN] 2026/11/13 - 13:42:49 | 500 |    1.280042ms |      172.19.0.1 | GET      "/api/invalid"
+        Error #01: invalid status code 500 [GET /invalid/]: http://api:8000/invalid/
+      tags:
+      - source:LOGS_SOURCE
+      timestamp: 1794577369000
+  - sample: |-
+      [GIN] 2026/11/13 - 13:42:49 | 500 |    1.280042ms |      172.19.0.1 | GET      "/api/invalid"
+      Error #01: invalid status code 500 [GET /invalid/]: http://api:8000/invalid/
+      Error #02: context canceled
+    result:
+      custom:
+        duration: 1280042
+        http:
+          method: GET
+          status_code: 500
+          url_details:
+            path: /api/invalid
+        krakend:
+          module: GIN
+          error:
+            details: |-
+              Error #01: invalid status code 500 [GET /invalid/]: http://api:8000/invalid/
+              Error #02: context canceled
+        network:
+          client:
+            ip: 172.19.0.1
+        timestamp: 1794577369000
+      message: |-
+        [GIN] 2026/11/13 - 13:42:49 | 500 |    1.280042ms |      172.19.0.1 | GET      "/api/invalid"
+        Error #01: invalid status code 500 [GET /invalid/]: http://api:8000/invalid/
+        Error #02: context canceled
+      tags:
+      - source:LOGS_SOURCE
+      timestamp: 1794577369000

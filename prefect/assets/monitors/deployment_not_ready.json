@@ -1,0 +1,37 @@
+{
+  "version": 2,
+  "title": "Deployment not ready",
+  "tags": [
+    "integration:prefect"
+  ],
+  "definition": {
+    "name": "[Prefect] Deployment not ready",
+    "type": "query alert",
+    "query": "min(last_5m):sum:prefect.server.deployment.is_ready{is_paused:false} by {deployment_id,host,work_queue_id,work_pool_id,work_queue_name,work_pool_name,flow_id,deployment_name} == 0",
+    "message": "{{#is_alert}}\nPrefect deployment {{deployment_name.name}} is in NOT_READY state.\n\nDeployment Details:\n- Deployment ID: {{deployment_id.name}}\n- Flow: {{flow_id.name}}\n- Work Queue: {{work_queue_name.name}} ({{work_queue_id.name}})\n- Work Pool: {{work_pool_name.name}} ({{work_pool_id.name}})\n\n- Host: {{host.name}}\n{{/is_alert}}\n\n{{#is_alert_recovery}}\nPrefect deployment {{deployment_name.name}} has returned to READY state.\n\nDeployment Details:\n- Deployment ID: {{deployment_id.name}}\n- Flow: {{flow_id.name}}\n- Work Queue: {{work_queue_name.name}} ({{work_queue_id.name}})\n- Work Pool: {{work_pool_name.name}} ({{work_pool_id.name}})\n{{/is_alert_recovery}}",
+    "tags": [
+      "integration:prefect"
+    ],
+    "options": {
+      "thresholds": {
+        "critical": 0
+      },
+      "notify_audit": false,
+      "threshold_windows": null,
+      "on_missing_data": "show_no_data",
+      "include_tags": true,
+      "new_group_delay": 60,
+      "notify_by": [
+        "deployment_id",
+        "host",
+        "work_queue_id",
+        "work_pool_id"
+      ],
+      "silenced": {}
+    },
+    "priority": 1
+  },
+  "created_at": "2026-02-25",
+  "last_updated_at": "2026-04-08",
+  "description": "Triggers when a Prefect deployment is in a non-ready state, meaning it cannot schedule or execute flow runs properly."
+}

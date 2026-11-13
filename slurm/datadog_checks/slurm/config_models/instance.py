@@ -40,6 +40,7 @@ class InstanceConfig(BaseModel):
         frozen=True,
     )
     collect_gpu_stats: Optional[bool] = None
+    collect_job_events: Optional[bool] = None
     collect_sacct_stats: Optional[bool] = None
     collect_scontrol_stats: Optional[bool] = None
     collect_sdiag_stats: Optional[bool] = None

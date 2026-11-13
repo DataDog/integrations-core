@@ -215,7 +215,9 @@ unsorted = [
 # This integrations for historical reasons do not have a name in metadata that aligns with their
 # display name.
 [overrides.validate.metadata.integration]
+dell_powerflex = "dell-powerflex"
 ecs_fargate = "amazon_fargate"
+hpe_aruba_edgeconnect = "hpe-aruba-edgeconnect"
 kube_scheduler = "kube_scheduler"
 nifi = "nifi"
 nginx_ingress_controller = "nginx-ingress-controller"
