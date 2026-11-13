@@ -1,0 +1,1 @@
+Auto-enable TLS when connecting to MongoDB Atlas hosts to avoid a misleading connection error.

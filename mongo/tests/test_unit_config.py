@@ -72,6 +72,39 @@ def test_default_tls_params():
     assert config.tls_params == {}
 
 
+def test_atlas_host_auto_enables_tls():
+    instance = {'hosts': ['mycluster-shard-00-00.abc123.mongodb.net']}
+    config = MongoConfig(instance, mock.Mock(), {})
+    assert config.tls_params.get('tls') is True
+    assert 'tlsCAFile' in config.tls_params  # certifi CA set automatically
+
+
+def test_atlas_host_explicit_tls_false_respected():
+    # Explicit tls: false must not be overridden by auto-detection
+    instance = {'hosts': ['mycluster-shard-00-00.abc123.mongodb.net'], 'tls': False}
+    config = MongoConfig(instance, mock.Mock(), {})
+    assert config.tls_params.get('tls') is False
+
+
+def test_non_atlas_host_tls_not_auto_enabled():
+    instance = {'hosts': ['self-hosted.internal:27017']}
+    config = MongoConfig(instance, mock.Mock(), {})
+    assert config.tls_params == {}
+
+
+def test_spoofed_atlas_hostname_not_auto_enabled():
+    # 'mongodb.net' appears mid-string — must not trigger auto-TLS
+    instance = {'hosts': ['evil.mongodb.net.attacker.com:27017']}
+    config = MongoConfig(instance, mock.Mock(), {})
+    assert config.tls_params == {}
+
+
+def test_atlas_server_uri_auto_enables_tls():
+    instance = {'server': 'mongodb://user:pass@mycluster-shard-00-00.abc123.mongodb.net:27017/admin'}
+    config = MongoConfig(instance, mock.Mock(), {})
+    assert config.tls_params.get('tls') is True
+
+
 def test_default_scheme(instance):
     instance['hosts'] = ['test.mongodb.com']
     with mock.patch('pymongo.uri_parser.parse_uri', return_value={'nodelist': ["test.mongodb.com"]}) as mock_parse_uri:
