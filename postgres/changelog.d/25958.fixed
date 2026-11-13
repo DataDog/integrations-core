@@ -1,0 +1,1 @@
+Fix custom queries with more than one statement, such as `SET LOCAL statement_timeout = ...; SELECT ...`, which failed and submitted no metrics since the psycopg3 upgrade.
