@@ -1,0 +1,1 @@
+Bump `pymongo` to 4.18.3 to address CVE-2026-106435.
