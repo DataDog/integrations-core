@@ -10,13 +10,13 @@ Palo Alto Networks next-generation firewalls run PAN-OS and enforce security pol
 
 The integration collects metrics across multiple layers of the firewall, including:
 
-- **Firewall inventory**: Discovers firewalls from a static list or from Panorama, and reports them to NDM with their serial number, model, software version, and high availability (HA) state.
+- **Firewall inventory**: Discovers firewalls from a static list or from Panorama, and reports them to NDM with their serial number, model, software version, and high availability (HA) state. Also reports traffic, error, and drop counters for the HA links.
 - **System resources**: Reports management-plane CPU, memory, swap, and disk usage, and data-plane CPU utilization, to detect overloaded firewalls. Hardware firewalls also report power and temperature sensors.
 - **Network interfaces**: Provides traffic, errors, drops, and attack counters per interface. Reports each interface to NDM with its description and admin status.
 - **IPsec tunnels**: Reports tunnel state and traffic, and the number of active, inactive, and initializing tunnels.
-- **Routing**: Reports BGP peer state and prefix counts, and OSPF neighbor state, to detect a routing peer going down.
+- **Routing**: Reports BGP peer state and prefix counts, and optionally OSPF neighbor state (set `collect_ospf` to `true`), to detect a routing peer going down. Works with both the legacy routing engine and the Advanced Routing Engine, which also reports BGP connections established and dropped, and OSPF neighbor state changes. See [metadata.csv][7] for the metrics each engine sends.
 - **Licenses**: Reports expiration status and days left for each subscription.
-- **Security rules and threats**: Provides hit counts per security rule, and threat counts by severity, action, and subtype alongside the threat logs.
+- **Security rules**: Provides hit counts per security rule.
 - **Global counters and reports** (optional): Collects PAN-OS global counters, dropped packets by aspect, and top-N reports for applications, sources, destinations, zones, and rules.
 
 **Minimum Agent version:** 7.86.0
@@ -32,7 +32,7 @@ No additional installation is needed on your server.
 
 ### Configuration
 
-1. Create an account for the Agent on each firewall. In PAN-OS, go to **Device > Admin Roles** and add a role profile with an **XML API** tab that allows **Operational Requests**, **Report**, and **Log**. Then go to **Device > Administrators**, add an account that uses this role, and commit the changes.
+1. Create an account for the Agent on each firewall. In PAN-OS, go to **Device > Admin Roles** and add a role profile with an **XML API** tab that allows **Operational Requests** and **Report**. Then go to **Device > Administrators**, add an account that uses this role, and commit the changes.
 
    **Note**: For Panorama discovery, also create an account on Panorama with a role that allows **Operational Requests** in the XML API tab. The Agent uses it only to list the managed firewalls, and polls each firewall with the matching `firewall_credentials` entry.
 
@@ -67,7 +67,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 The integration submits a gauge only when its PAN-OS call runs, so each gauge series has one point per interval of its group. Size monitor evaluation windows to match:
 
 - Every 2 minutes: BGP peer metrics and data-plane CPU utilization.
-- Every 3 minutes: management-plane CPU, memory, and swap, IPsec tunnel and OSPF neighbor metrics.
+- Every 3 minutes: management-plane CPU, memory, and swap, IPsec tunnel, HA link, and OSPF neighbor metrics.
 - Every 5 minutes: power and temperature sensors.
 - Every 30 minutes: disk usage, interface speed, and top-N report metrics.
 - Every 24 hours: license days left and expiration.
