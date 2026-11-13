@@ -328,6 +328,18 @@
   value:
     example: false
     type: boolean
+- name: collect_histograms_as_distributions
+  display_priority: 0
+  description: |
+    Whether or not to send histogram buckets as Datadog distribution metrics without the `upper_bound`
+    and `lower_bound` tags. This implicitly enables the `histogram_buckets_as_distributions` option.
+
+    This option requires an Agent version that supports submitting histogram buckets without bound
+    tags. On older Agent versions, the check fails with a configuration error.
+  fleet_configurable: true
+  value:
+    example: false
+    type: boolean
 - name: use_process_start_time
   display_priority: 0
   description: |
