@@ -50,7 +50,7 @@ def assert_event_field_values(event, expected_values):
 def validate_common_payload_fields(payload, expected_type):
     """Validate common fields in event payloads"""
     assert 'timestamp' in payload
-    assert payload['host'] == 'test-host'
+    assert payload['host'] == 'reported-host'
     assert payload['ddagentversion'] == '7.30.0'
     assert payload['ddsource'] == 'sqlserver'
     assert payload['dbm_type'] == expected_type
@@ -95,6 +95,7 @@ def mock_check():
 
     check.static_info_cache = {'version': '2019', 'engine_edition': 'Standard Edition'}
     check.resolved_hostname = "test-host"
+    check.reported_hostname = "reported-host"
     check.agent_version = '7.30.0'
     check.tag_manager = TagManager()
     check.tag_manager.set_tag('test', 'tag')
@@ -1172,6 +1173,7 @@ class TestRunJob:
 
             # Now validate the actual payload structure that was going to be serialized
             assert original_payload is not None, "Payload was not captured"
+            assert original_payload['host'] == 'reported-host'
 
             # Check essential payload properties
             assert 'ddsource' in original_payload, "Missing 'ddsource' in payload"
@@ -1194,6 +1196,41 @@ class TestRunJob:
                 assert "query_details" in event, "Missing 'query_details' in event"
                 query_details = event["query_details"]
                 assert "xe_type" in query_details, "Missing 'xe_type' in query_details"
+
+    @pytest.mark.parametrize(
+        'exclude_hostname, expected_host',
+        [
+            pytest.param(False, 'resolved.hostname', id='hostname_included'),
+            pytest.param(True, None, id='hostname_excluded'),
+        ],
+    )
+    def test_run_job_payload_host_respects_exclude_hostname(
+        self, aggregator, sample_multiple_events_xml, exclude_hostname, expected_host
+    ):
+        instance = {
+            'host': 'localhost,1433',
+            'username': 'sa',
+            'password': 'Password12!',
+            'dbm': True,
+            'exclude_hostname': exclude_hostname,
+            'collect_raw_query_statement': {'enabled': True},
+        }
+        with patch('datadog_checks.sqlserver.SQLServer.resolve_db_host', return_value='resolved.hostname'):
+            check = SQLServer(CHECK_NAME, {}, [instance])
+            handler = QueryCompletionEventsHandler(check, check._config)
+            with (
+                patch.object(handler, 'session_exists', return_value=True),
+                patch.object(handler, '_query_ring_buffer', return_value=sample_multiple_events_xml),
+            ):
+                handler.run_job()
+
+        activity_events = aggregator.get_event_platform_events('dbm-activity')
+        rqt_events = aggregator.get_event_platform_events('dbm-samples')
+        assert len(activity_events) == 1
+        assert rqt_events
+        assert [event['host'] for event in activity_events + rqt_events] == [expected_host] * (
+            len(activity_events) + len(rqt_events)
+        )
 
     def test_no_session(self, query_completion_handler, mock_check, mock_handler_log):
         """Test behavior when session doesn't exist"""
