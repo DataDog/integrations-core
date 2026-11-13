@@ -354,8 +354,6 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             self._clean_and_emit_metric("deployment.is_ready", 1.0 if d.get('status', '') == 'READY' else 0.0, dtags)
 
     def _get_runs(self, type: Literal["flow_runs", "task_runs"], now_iso: str) -> list[dict]:
-        # The state clause must stay inside the or_: backlog and concurrency.in_use need every active run,
-        # not only the runs whose timestamps fall in the collection window
         payload = {
             type: {
                 "operator": "or_",
