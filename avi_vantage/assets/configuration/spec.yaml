@@ -47,6 +47,7 @@ files:
         display_default: []
     - template: instances/openmetrics
       overrides:
+        max_line_size.value.display_default: 16384
         persist_connections.hidden: true
         persist_connections.default: true
         openmetrics_endpoint.hidden: true

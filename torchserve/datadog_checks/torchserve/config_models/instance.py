@@ -130,6 +130,7 @@ class InstanceConfig(BaseModel):
     limit: Optional[int] = None
     log_requests: Optional[bool] = None
     management_api_url: Optional[str] = None
+    max_line_size: Optional[float] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, Metrics]]], ...]] = None
     min_collection_interval: Optional[float] = None

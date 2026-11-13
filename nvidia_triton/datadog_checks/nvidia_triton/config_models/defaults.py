@@ -76,6 +76,10 @@ def instance_log_requests():
     return False
 
 
+def instance_max_line_size():
+    return 16384
+
+
 def instance_min_collection_interval():
     return 15
 

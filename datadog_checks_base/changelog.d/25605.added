@@ -1,0 +1,1 @@
+Add a `max_line_size` option (in KiB) that limits the size of lines read with `iter_lines`. OpenMetrics checks default to 16384 (16 MiB), and `null` removes their limit.
