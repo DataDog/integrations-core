@@ -28,8 +28,81 @@ env:
   SOURCE_DATE_EPOCH: "1580601600"
 
 jobs:
+  # ADMS bumps only agent_requirements.in, so its PRs fail `ddev validate dep`
+  # until each check's pyproject.toml pin matches. Syncing and pushing here
+  # fixes that in minutes instead of after the build. The push starts a new run,
+  # which cancels this one and finds nothing left to sync. The job runs on every
+  # branch with its steps gated, because skipping it would also skip every job
+  # downstream of gate.
+  sync-pins:
+    name: Sync check dependency pins
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      pushed: ${{ steps.commit.outputs.pushed }}
+    env:
+      IS_ADMS_BRANCH: ${{ startsWith(github.ref_name, 'engraver-auto-version-upgrade/') }}
+    steps:
+      - name: Create token
+        if: env.IS_ADMS_BRANCH == 'true'
+        uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+        id: token-generator
+        with:
+          scope: DataDog/integrations-core
+          policy: self.resolve-build-deps.push
+
+      - name: Checkout code
+        if: env.IS_ADMS_BRANCH == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          token: ${{ steps.token-generator.outputs.token }}
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        if: env.IS_ADMS_BRANCH == 'true'
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install ddev from local folder
+        if: env.IS_ADMS_BRANCH == 'true'
+        uses: ./.github/actions/setup-ddev
+        with:
+          install-mode: local
+          cache-profile: local-ddev
+
+      - name: Sync check dependency pins
+        if: env.IS_ADMS_BRANCH == 'true'
+        run: |
+          ddev config set upgrade_check false
+          ddev config set repos.core .
+          ddev config set repo core
+          ddev dep sync
+
+      # Pushing to the exact ref fails if the branch moved since this run
+      # started; the run for the newer commit does the sync instead.
+      - name: Commit synced pins to branch
+        id: commit
+        if: env.IS_ADMS_BRANCH == 'true'
+        run: |
+          git config user.name "dd-agent-integrations-bot[bot]"
+          git config user.email "dd-agent-integrations-bot[bot]@users.noreply.github.com"
+          git add '*/pyproject.toml'
+          if git diff --cached --quiet; then
+            echo "No pin changes to commit."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "Sync check dependency pins"
+            git push origin "HEAD:${GITHUB_REF}"
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
+          fi
+
   gate:
     name: Check content hashes
+    needs:
+      - sync-pins
+    if: needs.sync-pins.outputs.pushed != 'true'
     runs-on: ubuntu-22.04
     permissions:
       contents: read
