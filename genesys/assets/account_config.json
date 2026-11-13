@@ -1,0 +1,108 @@
+{
+  "supported_auth_methods": [
+    {
+      "auth_name": "Client ID and secret",
+      "basic": {
+        "user_setting": {
+          "key": "client_id",
+          "label": "Client ID",
+          "editable": true,
+          "required": true,
+          "text": {}
+        },
+        "password_setting": {
+          "key": "client_secret",
+          "label": "Client secret",
+          "editable": true,
+          "required": true,
+          "password": {}
+        }
+      }
+    }
+  ],
+  "additional_config_fields": [
+    {
+      "key": "region",
+      "label": "Region",
+      "editable": true,
+      "required": true,
+      "dropdown": {
+        "options": [
+          { "value": "US East (Virginia)", "label": "US East (Virginia)" },
+          { "value": "US East 2 (Ohio)", "label": "US East 2 (Ohio)" },
+          { "value": "US West (Oregon)", "label": "US West (Oregon)" },
+          { "value": "Canada (Central)", "label": "Canada (Central)" },
+          { "value": "Europe (Ireland)", "label": "Europe (Ireland)" },
+          { "value": "Europe (London)", "label": "Europe (London)" },
+          { "value": "Europe (Frankfurt)", "label": "Europe (Frankfurt)" },
+          { "value": "Europe (Zurich)", "label": "Europe (Zurich)" },
+          { "value": "Asia Pacific (Mumbai)", "label": "Asia Pacific (Mumbai)" },
+          { "value": "Asia Pacific (Tokyo)", "label": "Asia Pacific (Tokyo)" },
+          { "value": "Asia Pacific (Seoul)", "label": "Asia Pacific (Seoul)" },
+          { "value": "Asia Pacific (Osaka)", "label": "Asia Pacific (Osaka)" },
+          { "value": "Asia Pacific (Sydney)", "label": "Asia Pacific (Sydney)" },
+          { "value": "South America (São Paulo)", "label": "South America (São Paulo)" },
+          { "value": "Middle East (UAE)", "label": "Middle East (UAE)" }
+        ]
+      }
+    },
+    {
+      "key": "get_audit_logs",
+      "label": "Collect audit logs",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "get_callback_metrics",
+      "label": "Collect callback metrics",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "get_chat_metrics",
+      "label": "Collect chat metrics",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "get_email_metrics",
+      "label": "Collect email metrics",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "get_message_metrics",
+      "label": "Collect message metrics",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    },
+    {
+      "key": "get_voice_metrics",
+      "label": "Collect voice metrics",
+      "editable": true,
+      "required": false,
+      "checkbox": {
+        "default": true
+      }
+    }
+  ],
+  "dataflow_config": [
+    { "dataflow_id": "genesys-logs" },
+    { "dataflow_id": "genesys-metrics" }
+  ]
+}
