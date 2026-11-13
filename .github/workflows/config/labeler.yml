@@ -605,6 +605,10 @@ integration/ibm_db2:
 - changed-files:
   - any-glob-to-any-file:
     - ibm_db2/**/*
+integration/ibm_hmc:
+- changed-files:
+  - any-glob-to-any-file:
+    - ibm_hmc/**/*
 integration/ibm_i:
 - changed-files:
   - any-glob-to-any-file:
@@ -1029,10 +1033,6 @@ integration/podman:
 - changed-files:
   - any-glob-to-any-file:
     - podman/**/*
-integration/powershell:
-- changed-files:
-  - any-glob-to-any-file:
-    - powershell/**/*
 integration/postfix:
 - changed-files:
   - any-glob-to-any-file:
@@ -1049,6 +1049,10 @@ integration/powerdns_recursor:
 - changed-files:
   - any-glob-to-any-file:
     - powerdns_recursor/**/*
+integration/powershell:
+- changed-files:
+  - any-glob-to-any-file:
+    - powershell/**/*
 integration/prefect:
 - changed-files:
   - any-glob-to-any-file:
