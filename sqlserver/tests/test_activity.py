@@ -1160,3 +1160,107 @@ def test_sanitize_activity_row_skips_unneeded_full_text_obfuscation(
 
     assert row['dd_comments'] == expected_comments
     assert mock_agent.call_count == 1
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('raw_query_export', [False, True])
+@pytest.mark.parametrize('argument', ['42', ''])
+@pytest.mark.parametrize(
+    'obfuscator_options,expect_comments',
+    [
+        pytest.param({}, True, id='defaults'),
+        pytest.param({'collect_comments': False}, False, id='comments_disabled'),
+        pytest.param({'collect_metadata': False}, False, id='metadata_disabled'),
+    ],
+)
+def test_activity_recovers_procedure_invocation_comments(
+    dbm_instance: dict,
+    datadog_agent,
+    raw_query_export: bool,
+    argument: str,
+    obfuscator_options: dict,
+    expect_comments: bool,
+):
+    comment = "/*ddps='orders-service',dde='prod',ddpv='1.0.0'*/"
+    invocation = f"EXEC dbo.orders {argument} {comment}"
+    statement = "WAITFOR DELAY '00:00:06'"
+    check = SQLServer(
+        CHECK_NAME,
+        {},
+        [
+            dict(
+                dbm_instance,
+                collect_raw_query_statement={'enabled': raw_query_export},
+                obfuscator_options=obfuscator_options,
+            )
+        ],
+    )
+    cursor = mock.Mock()
+    cursor.fetchone.return_value = (1,)
+    columns, join = check.activity._get_input_buffer_columns_and_join(cursor)
+    if expect_comments or raw_query_export:
+        assert 'input_buffer.event_info' in columns
+        assert 'sys.dm_exec_input_buffer' in join
+    else:
+        assert not columns
+        assert not join
+
+    def obfuscate_sql(sql: str, options: str | None = None) -> str:
+        return json.dumps(
+            {
+                'query': 'WAITFOR DELAY ?',
+                'metadata': {'comments': [comment] if expect_comments and comment in sql else []},
+            }
+        )
+
+    with mock.patch.object(datadog_agent, 'obfuscate_sql', side_effect=obfuscate_sql):
+        row = check.activity._obfuscate_and_sanitize_row(
+            {
+                'statement_text': statement,
+                'text': f"CREATE PROCEDURE dbo.orders AS {statement}",
+                'procedure_name': 'orders',
+                'schema_name': 'dbo',
+                'raw_statement': invocation,
+            }
+        )
+
+    assert row['dd_comments'] == ([comment] if expect_comments else [])
+    assert row['text'] == 'WAITFOR DELAY ?'
+    assert row['procedure_name'] == 'dbo.orders'
+    assert row['query_signature']
+    assert row['procedure_signature']
+    if raw_query_export:
+        events = list(check.activity._rows_to_raw_statement_events([row]))
+        assert len(events) == 1
+        assert events[0]['db']['statement'] == invocation
+        assert events[0]['db']['metadata']['comments'] == row['dd_comments']
+    assert 'raw_statement' not in row
+
+
+@pytest.mark.unit
+def test_activity_deduplicates_procedure_invocation_comments(dbm_instance: dict, datadog_agent):
+    comment = "/*ddps='orders-service'*/"
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    with mock.patch.object(
+        datadog_agent,
+        'obfuscate_sql',
+        return_value=json.dumps({'query': 'SELECT ?', 'metadata': {'comments': [comment]}}),
+    ):
+        row = check.activity._obfuscate_and_sanitize_row(
+            {
+                'statement_text': f"SELECT 42 {comment}",
+                'text': 'CREATE PROCEDURE dbo.orders AS SELECT 42',
+                'procedure_name': 'orders',
+                'raw_statement': f"EXEC dbo.orders {comment}",
+            }
+        )
+    assert row['dd_comments'] == [comment]
+    assert 'raw_statement' not in row
+
+
+@pytest.mark.unit
+def test_activity_skips_unavailable_input_buffer(dbm_instance: dict):
+    check = SQLServer(CHECK_NAME, {}, [dbm_instance])
+    cursor = mock.Mock()
+    cursor.fetchone.return_value = (None,)
+    assert check.activity._get_input_buffer_columns_and_join(cursor) == ('', '')
