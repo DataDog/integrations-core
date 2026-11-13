@@ -538,28 +538,28 @@
                         "palette": "green"
                       },
                       "alias": "Okay",
-                      "formula": "diff(query1)"
+                      "formula": "query1"
                     },
                     {
                       "style": {
                         "palette": "red"
                       },
                       "alias": "Not Okay",
-                      "formula": "diff(query2)"
+                      "formula": "query2"
                     },
                     {
                       "style": {
                         "palette": "orange"
                       },
                       "alias": "Waiting",
-                      "formula": "diff(query3)"
+                      "formula": "query3"
                     },
                     {
                       "style": {
                         "palette": "blue"
                       },
                       "alias": "Executing",
-                      "formula": "diff(query4)"
+                      "formula": "query4"
                     }
                   ],
                   "queries": [
@@ -1184,7 +1184,7 @@
                       "aggregator": "last",
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "avg:control_m.job.overrun_ms{$control_m_instance,$ctm_server} by {job_name}"
+                      "query": "avg:control_m.job.overrun_ms{$control_m_instance,$ctm_server} by {job_name,job_id,ctm_server,control_m_instance}"
                     }
                   ],
                   "response_format": "scalar"
@@ -1598,14 +1598,14 @@
                         "palette": "cool"
                       },
                       "alias": "Wait Host",
-                      "formula": "monotonic_diff(query3)"
+                      "formula": "query3"
                     },
                     {
                       "style": {
                         "palette": "warm"
                       },
                       "alias": "Wait Condition",
-                      "formula": "monotonic_diff(query1)"
+                      "formula": "query1"
                     }
                   ],
                   "queries": [
