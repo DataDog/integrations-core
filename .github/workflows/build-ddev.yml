@@ -193,7 +193,7 @@ jobs:
     # picks up the fix from https://github.com/pypa/hatch/pull/2196 and now
     # *requires* virtualenv>=21, so they must be bumped together.
     - name: Install Hatch
-      run: uv pip install --system "hatch==1.18.1" "virtualenv==21.14.13"
+      run: uv pip install --system "hatch==1.18.2" "virtualenv==21.15.6"
 
     - name: Install Hatch environment collector plugin
       run: uv pip install --system -e . --no-deps
