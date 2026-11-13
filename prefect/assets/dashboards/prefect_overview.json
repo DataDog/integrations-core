@@ -558,13 +558,7 @@
                   ],
                   "formulas": [
                     {
-                      "alias": "Median",
-                      "number_format": {
-                        "unit": {
-                          "type": "canonical_unit",
-                          "unit_name": "second"
-                        }
-                      },
+                      "alias": "Task runs",
                       "formula": "query1"
                     }
                   ],
@@ -2618,7 +2612,7 @@
                   "response_format": "event_list",
                   "query": {
                     "data_source": "logs_stream",
-                    "query_string": "status:error $service $host",
+                    "query_string": "source:prefect status:error $service $host",
                     "indexes": [],
                     "storage": "hot"
                   },
