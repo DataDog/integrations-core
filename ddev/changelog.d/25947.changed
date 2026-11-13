@@ -1,1 +1,0 @@
-Require explicit `--envs` and `--pytest-args` options for `ddev test` and `ddev env test`.

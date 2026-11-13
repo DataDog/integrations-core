@@ -1,1 +1,0 @@
-Run macOS CI jobs on the `macos-15-large` runner image, replacing the retired `macos-14-large`.
