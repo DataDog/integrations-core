@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "title": "No requests observed",
+  "tags": [
+    "integration:krakend"
+  ],
+  "definition": {
+    "name": "[KrakenD] The API gateway stopped serving requests",
+    "tags": [
+      "integration:krakend"
+    ],
+    "type": "query alert",
+    "query": "sum(last_5m):sum:krakend.api.http_server.duration.count{*} by {endpoint,krakend.service_name}.as_count() == 0",
+    "message": "The KrakenD API Gateway is observing no requests for service **{{[krakend.service_name].name}}** in endpoint `{{endpoint.name}}`\n\nMonitor triggered at {{first_triggered_at}}",
+    "options": {
+      "silenced": {},
+      "thresholds": {
+        "critical": 0
+      },
+      "include_tags": false,
+      "notify_audit": false,
+      "new_group_delay": 60,
+      "on_missing_data": "default"
+    },
+    "priority": 1
+  },
+  "created_at": "2025-07-31",
+  "description": "This monitor fires when KrakenD stops serving requests",
+  "last_updated_at": "2025-08-07"
+}

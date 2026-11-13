@@ -217,6 +217,7 @@ unsorted = [
 [overrides.validate.metadata.integration]
 dell_powerflex = "dell-powerflex"
 ecs_fargate = "amazon_fargate"
+hpe_aruba_edgeconnect = "hpe-aruba-edgeconnect"
 kube_scheduler = "kube_scheduler"
 nifi = "nifi"
 nginx_ingress_controller = "nginx-ingress-controller"

@@ -1,0 +1,29 @@
+id: "prefect"
+tests:
+ -
+  sample: "13:42:21.560 | ERROR   | Task run 'fail-23b' - Finished in state Failed('Task run encountered an exception RuntimeError: Intentional fail for testing')"
+  result:
+    custom:
+      level: "ERROR"
+      prefect_resource:
+        name: "fail-23b"
+        type: "Task run "
+      timestamp: 31498941560
+    message: "Task run 'fail-23b' - Finished in state Failed('Task run encountered an exception RuntimeError: Intentional fail for testing')"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 31498941560
+ -
+  sample: "13:42:21.560 | ERROR   | prefect.worker - Still processing items: 5 items remaining"
+  result:
+    custom:
+      level: "ERROR"
+      prefect_resource:
+        type: "prefect.worker"
+      timestamp: 31498941560
+    message: "prefect.worker - Still processing items: 5 items remaining"
+    status: "error"
+    tags:
+     - "source:LOGS_SOURCE"
+    timestamp: 31498941560

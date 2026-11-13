@@ -172,7 +172,7 @@ Run E2E tests by following these steps:
 3. Run the E2E tests in that environment:
 
    ```shell
-   ddev env test --dev <INTEGRATION> <ENV>
+   ddev env test --dev <INTEGRATION> --envs <ENV>
    ```
 
 4. Stop the environment when done:
@@ -185,11 +185,11 @@ Where `<ENV>` is one of the environment names listed by the `show` command. For 
 ```shell
 ddev env show pgbouncer
 ddev env start pgbouncer py3.11-1.23
-ddev env test --dev pgbouncer py3.11-1.23
+ddev env test --dev pgbouncer --envs py3.11-1.23
 ddev env stop pgbouncer py3.11-1.23
 ```
 
-Run specific tests with `ddev --no-interactive test <INTEGRATION> -- -k <PYTEST_FILTER_STRING>`, for example `ddev --no-interactive test kuma -- -k test_code_class_injection -s`.
+Run specific tests with `ddev --no-interactive test <INTEGRATION> --pytest-args='-k <PYTEST_FILTER_STRING>'`, for example `ddev --no-interactive test kuma --pytest-args='-k test_code_class_injection -s'`.
 
 #### Recreating Environments
 
@@ -200,7 +200,7 @@ Add `--recreate` to recreate test environments from scratch:
 ddev test --recreate <INTEGRATION>
 
 # E2E tests - recreates both Hatch environments and Docker containers/volumes
-ddev env test --dev --recreate <INTEGRATION> <ENV>
+ddev env test --dev --recreate <INTEGRATION> --envs <ENV>
 ```
 
 For E2E tests, `--recreate` performs `docker compose down --volumes` followed by `docker compose up -d --force-recreate`.

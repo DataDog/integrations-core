@@ -52,16 +52,18 @@ If there is no version suffix, it means that either:
 
 ### Explicit
 
-Passing just the integration name will run every test environment. You may select a subset of environments
-to run by appending a `:` followed by a comma-separated list of environments.
+Passing just the integration name runs its default environment or matrix. Select environments or matrix aliases
+with one comma-separated `--envs` value. Whitespace around entries is ignored; duplicates run only once,
+in first-selection order. Empty entries and unknown names are errors, even if a filter would exclude them.
+Python, platform and test-mode filters intersect the selection; excluded environments are reported separately.
 
 For example, executing:
 
 ```
-ddev test postgres:py3.9-13.0,py3.9-11.0
+ddev test postgres --envs py3.13-13.0-UTF8,py3.13-11.0-UTF8
 ```
 
-will run tests for the environment `py3.9-13.0` followed by the environment `py3.9-11.0`.
+runs `py3.13-13.0-UTF8` followed by `py3.13-11.0-UTF8`. Use `--envs default` to select the default matrix.
 
 ### Detection
 
@@ -107,11 +109,20 @@ To run only the lint checks, use the `--lint`/`-s` shortcut flag.
 You may also only run the formatter using the `--fmt`/`-fs` shortcut flag. The formatter will
 automatically resolve the most common errors caught by the lint checks.
 
-## Argument forwarding
+## Pytest arguments
 
 You may pass arbitrary [arguments](https://docs.pytest.org/en/stable/reference/reference.html#command-line-flags)
-directly to `pytest`, for example:
+to `pytest` with `--pytest-args`, for example:
 
 ```
-ddev test postgres -- -m unit --pdb -x
+ddev test postgres --pytest-args='-m unit --pdb -x'
 ```
+
+The string is split once using POSIX quoting on every platform, without shell evaluation. Quote paths with
+spaces inside the value, for example `--pytest-args='"tests/test file.py::test_case" -k "not flaky"'`.
+The resulting arguments use the existing Hatch forwarding, including its script formatting and default test paths.
+
+The target is the only positional input. Migrate `ddev test postgres:default -- -m unit` to
+`ddev test postgres --envs default --pytest-args='-m unit'`. For E2E, migrate
+`ddev env test postgres all -- -m unit` to `ddev env test postgres --envs all --pytest-args='-m unit'`.
+Other lifecycle commands and `ddev ci setup` keep their own positional contracts.

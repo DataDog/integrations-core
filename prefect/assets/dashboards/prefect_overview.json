@@ -1,0 +1,2773 @@
+{
+  "title": "Prefect Overview",
+  "description": "[[suggested_dashboards]]",
+  "widgets": [
+    {
+      "id": 7886362585765300,
+      "definition": {
+        "title": "About",
+        "background_color": "white",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1740856494836592,
+            "definition": {
+              "type": "image",
+              "url": "/static/images/logos/prefect_large.svg",
+              "url_dark_theme": "/static/images/logos/prefect_reversed_large.svg",
+              "sizing": "contain",
+              "margin": "md",
+              "has_background": true,
+              "has_border": true,
+              "vertical_align": "center",
+              "horizontal_align": "center"
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 4,
+              "height": 2
+            }
+          },
+          {
+            "id": 7751699873574134,
+            "definition": {
+              "type": "note",
+              "content": "## Prefect Overview \n\nThis dashboard provides a high-level overview of your Prefect Server. It is organized into sections covering flow performance and task-level drilldowns, health metrics for work queues, work pools, and deployments, as well as related databases commonly used with Prefect. All metrics are collected through the Prefect API.\n\n### Further Reading\n\n-   [Prefect Server API Documentation](https://docs.prefect.io/v3/api-ref/rest-api/server)\n-   [Prefect Home Page](https://www.prefect.io/)\n",
+              "background_color": "white",
+              "font_size": "14",
+              "text_align": "left",
+              "vertical_align": "top",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 2,
+              "width": 4,
+              "height": 4
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 0,
+        "width": 4,
+        "height": 7
+      }
+    },
+    {
+      "id": 7264378449447946,
+      "definition": {
+        "title": "Overview",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1325605199285004,
+            "definition": {
+              "type": "note",
+              "content": "High-level snapshot of overall system activity, summarizing backlog size, flow age, throughput, success rate, and monitor statuses to reflect current system health and stability.",
+              "background_color": "blue",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 8,
+              "height": 1
+            }
+          },
+          {
+            "id": 7227370372165031,
+            "definition": {
+              "title": "Work Queue Backlog Size",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:prefect.server.work_queue.backlog.size{$work_pool_name, $work_queue_name ,$host ,$service}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "scalar"
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": false
+                },
+                "type": "bars"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 8827758425106977,
+            "definition": {
+              "title": "Oldest Scheduled Flow Age",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "max:prefect.server.work_queue.backlog.age{$work_pool_name, $work_queue_name ,$host ,$service}",
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 1,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": false
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 2,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 4663317336489810,
+            "definition": {
+              "title": "Throughput",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "comparator": "=",
+                      "value": 0,
+                      "palette": "white_on_red"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:prefect.server.flow_runs.throughput{$work_pool_name, $deployment_name, $work_queue_name, $flow_id, $host, $service}.as_rate()",
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": true,
+              "precision": 0,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": false
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 1106656352084120,
+            "definition": {
+              "title": "Flow Run Success Rate",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_value",
+              "requests": [
+                {
+                  "conditional_formats": [
+                    {
+                      "value": 95,
+                      "comparator": ">=",
+                      "palette": "white_on_green"
+                    },
+                    {
+                      "value": 80,
+                      "comparator": "<",
+                      "palette": "white_on_red"
+                    },
+                    {
+                      "value": 95,
+                      "comparator": "<",
+                      "palette": "white_on_yellow"
+                    }
+                  ],
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "sum:prefect.server.flow_runs.completed.count{$work_pool_name, $deployment_name, $work_queue_name, $flow_id ,$host ,$service}.as_count()",
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "aggregator": "last"
+                    },
+                    {
+                      "query": "sum:prefect.server.flow_runs.crashed.count{$work_pool_name, $deployment_name, $work_queue_name, $flow_id ,$host ,$service}.as_count()",
+                      "name": "query4",
+                      "data_source": "metrics",
+                      "aggregator": "last"
+                    },
+                    {
+                      "query": "sum:prefect.server.flow_runs.cancelled.count{$work_pool_name, $deployment_name, $work_queue_name, $flow_id ,$host ,$service}.as_count()",
+                      "name": "query5",
+                      "data_source": "metrics",
+                      "aggregator": "last"
+                    },
+                    {
+                      "query": "sum:prefect.server.flow_runs.failed.count{$work_pool_name, $deployment_name, $work_queue_name, $flow_id, $service, $host}.as_count()",
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "(query1 / (query1 + query4 + query5 + query3)) * 100"
+                    }
+                  ]
+                }
+              ],
+              "autoscale": false,
+              "precision": 1,
+              "timeseries_background": {
+                "yaxis": {
+                  "include_zero": false
+                },
+                "type": "area"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 2,
+              "height": 2
+            }
+          },
+          {
+            "id": 3431979943691468,
+            "definition": {
+              "title": "Monitors",
+              "type": "manage_status",
+              "display_format": "countsAndList",
+              "color_preference": "text",
+              "hide_zero_counts": true,
+              "show_status": true,
+              "last_triggered_format": "relative",
+              "query": "[Prefect] ",
+              "sort": "status,asc",
+              "count": 50,
+              "start": 0,
+              "summary_type": "monitors",
+              "show_priority": false,
+              "show_last_triggered": false
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 8,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 4,
+        "y": 0,
+        "width": 8,
+        "height": 7
+      }
+    },
+    {
+      "id": 7449763367381561,
+      "definition": {
+        "title": "Task Performance",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 4241259185377579,
+            "definition": {
+              "type": "note",
+              "content": "Breakdown of task-level execution metrics, including throughput, duration, and failure rates, to provide insight into performance distribution and task-level issues within flows.",
+              "background_color": "blue",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 979290307454025,
+            "definition": {
+              "title": "Task Run Summary per Flow",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:prefect.server.task_runs.throughput{$flow_id,$work_pool_name,$work_queue_name,$deployment_name,$service,$host} by {flow_id,work_pool_name,work_queue_name}.as_rate()",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:prefect.server.task_runs.late_start.count{$flow_id,$work_pool_name,$work_queue_name,$deployment_name,$service,$host} by {flow_id,work_pool_name,work_queue_name}.as_rate()",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "sum:prefect.server.task_runs.pending{$flow_id,$work_pool_name,$work_queue_name,$deployment_name,$service,$host} by {flow_id,work_pool_name,work_queue_name}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query6",
+                      "query": "sum:prefect.server.task_runs.completed.count{$flow_id,$work_pool_name,$work_queue_name,$deployment_name,$service,$host} by {flow_id,work_pool_name,work_queue_name}.as_rate()",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query7",
+                      "query": "sum:prefect.server.task_runs.failed.count{$flow_id,$work_pool_name,$work_queue_name,$deployment_name,$service,$host} by {flow_id,work_pool_name,work_queue_name}.as_rate()",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query8",
+                      "query": "sum:prefect.server.task_runs.crashed.count{$flow_id,$work_pool_name,$work_queue_name,$deployment_name,$service,$host} by {flow_id,work_pool_name,work_queue_name}.as_rate()",
+                      "aggregator": "sum"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query9",
+                      "query": "sum:prefect.server.task_runs.paused{$flow_id,$work_pool_name,$work_queue_name,$deployment_name,$service,$host} by {flow_id,work_pool_name,work_queue_name}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query10",
+                      "query": "max:prefect.server.task_runs.dependency_wait_duration.95percentile{$flow_id,$work_pool_name,$work_queue_name,$deployment_name,$service,$host} by {flow_id,work_pool_name,work_queue_name}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "sort": {
+                    "count": 25,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "alias": "Throughput",
+                      "conditional_formats": [
+                        {
+                          "comparator": "=",
+                          "value": 0,
+                          "palette": "white_on_yellow"
+                        }
+                      ],
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Late Starts",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_yellow"
+                        }
+                      ],
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Pending",
+                      "formula": "query5"
+                    },
+                    {
+                      "alias": "Completed",
+                      "formula": "query6"
+                    },
+                    {
+                      "alias": "Failed",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_red"
+                        }
+                      ],
+                      "formula": "query7"
+                    },
+                    {
+                      "alias": "Crashed",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_red"
+                        }
+                      ],
+                      "formula": "query8"
+                    },
+                    {
+                      "alias": "Paused",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_yellow"
+                        }
+                      ],
+                      "formula": "query9"
+                    },
+                    {
+                      "alias": "Dep. Wait (P95)",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 1,
+                          "palette": "white_on_yellow"
+                        }
+                      ],
+                      "formula": "query10"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 12,
+              "height": 2
+            }
+          },
+          {
+            "id": 2108155767436250,
+            "definition": {
+              "title": "Task Throughput by Task Key",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:prefect.server.task_runs.throughput{$work_pool_name,$work_queue_name,$flow_id,$service,$host, $deployment_name} by {task_key}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Task runs",
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "blue",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "min": "0"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 1061442714577341,
+            "definition": {
+              "title": "Task Execution Duration Avg per Task Key",
+              "type": "treemap",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:prefect.server.task_runs.execution_duration.avg{$flow_id,$work_pool_name,$work_queue_name,$deployment_name,$service,$host} by {flow_id,task_key}",
+                      "aggregator": "avg"
+                    }
+                  ],
+                  "style": {
+                    "palette": "classic"
+                  },
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query1"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 2
+            }
+          },
+          {
+            "id": 8373198244350521,
+            "definition": {
+              "title": "Task Run Summary per Task Key",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:prefect.server.task_runs.execution_duration.avg{$flow_id,$work_pool_name,$work_queue_name,$deployment_name,$service,$host} by {flow_id,task_key}",
+                      "aggregator": "max"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "max:prefect.server.task_runs.execution_duration.95percentile{$flow_id,$work_pool_name,$work_queue_name,$deployment_name,$service,$host} by {flow_id,task_key}",
+                      "aggregator": "max"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:prefect.server.task_runs.throughput{$flow_id,$work_pool_name,$work_queue_name,$deployment_name,$service,$host} by {flow_id,task_key}.as_rate()",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:prefect.server.task_runs.late_start.count{$flow_id,$work_pool_name,$work_queue_name,$deployment_name,$service,$host} by {flow_id,task_key}.as_rate()",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "sum:prefect.server.task_runs.failed.count{$flow_id,$work_pool_name,$work_queue_name,$deployment_name,$service,$host} by {flow_id,task_key}.as_rate()",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query6",
+                      "query": "sum:prefect.server.task_runs.crashed.count{$flow_id,$work_pool_name,$work_queue_name,$deployment_name,$service,$host} by {flow_id,task_key}.as_rate()",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query7",
+                      "query": "max:prefect.server.task_runs.dependency_wait_duration.avg{$flow_id,$work_pool_name,$work_queue_name,$deployment_name,$service,$host} by {flow_id,task_key}",
+                      "aggregator": "max"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query8",
+                      "query": "max:prefect.server.task_runs.dependency_wait_duration.95percentile{$flow_id,$work_pool_name,$work_queue_name,$deployment_name,$service,$host} by {flow_id,task_key}",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "text_formats": [],
+                  "sort": {
+                    "count": 25,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "alias": "Duration (Avg)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Duration (P95)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Throughput",
+                      "conditional_formats": [
+                        {
+                          "comparator": "=",
+                          "value": 0,
+                          "palette": "white_on_yellow"
+                        }
+                      ],
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Late Starts",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_yellow"
+                        }
+                      ],
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Failed",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_red"
+                        }
+                      ],
+                      "formula": "query5"
+                    },
+                    {
+                      "alias": "Crashed",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_red"
+                        }
+                      ],
+                      "formula": "query6"
+                    },
+                    {
+                      "alias": "Dep. Wait (Avg)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "formula": "query7"
+                    },
+                    {
+                      "alias": "Dep. Wait (P95)",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 1,
+                          "palette": "white_on_yellow"
+                        }
+                      ],
+                      "formula": "query8"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 5,
+              "width": 12,
+              "height": 2
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 7,
+        "width": 12,
+        "height": 8
+      }
+    },
+    {
+      "id": 6223295706526424,
+      "definition": {
+        "title": "Flow Performance",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 1260993776462885,
+            "definition": {
+              "type": "note",
+              "content": "High-level view of flow execution performance, including success rates, latency, and queue wait times, along with failure and crash counts to surface reliability issues and execution bottlenecks.",
+              "background_color": "blue",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 2322278835140143,
+            "definition": {
+              "title": "Flow Run Success Rate Over Time (%)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "sum:prefect.server.flow_runs.completed.count{$work_pool_name,$work_queue_name,$flow_id, $host, $service, $deployment_name}.as_count()",
+                      "name": "query1",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "query": "sum:prefect.server.flow_runs.failed.count{$work_pool_name,$work_queue_name,$flow_id, $host, $service, $deployment_name}.as_count()",
+                      "name": "query3",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "query": "sum:prefect.server.flow_runs.crashed.count{$work_pool_name,$work_queue_name,$flow_id, $host, $service, $deployment_name}.as_count()",
+                      "name": "query4",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "query": "sum:prefect.server.flow_runs.cancelled.count{$work_pool_name,$work_queue_name,$flow_id, $host, $service, $deployment_name}.as_count()",
+                      "name": "query5",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Success Rate %",
+                      "formula": "(query1 / (query1 + query3 + query4 + query5)) * 100"
+                    }
+                  ],
+                  "style": {
+                    "palette": "green",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "min": "0",
+                "max": "100"
+              },
+              "markers": [
+                {
+                  "label": "95% SLA",
+                  "value": "y = 95",
+                  "display_type": "warning dashed"
+                },
+                {
+                  "label": "Critical",
+                  "value": "y = 80",
+                  "display_type": "error dashed"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 5668881434135773,
+            "definition": {
+              "title": "Flow Queue Wait Duration",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:prefect.server.flow_runs.queue_wait_duration.median{$work_pool_name,$work_queue_name,$flow_id, $service, $host, $deployment_name}",
+                      "name": "query1",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Median",
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "blue",
+                    "order_reverse": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "max:prefect.server.flow_runs.queue_wait_duration.95percentile{$work_pool_name,$work_queue_name,$flow_id, $service, $host, $deployment_name}",
+                      "name": "query2",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "P95",
+                      "formula": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "orange",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "max:prefect.server.flow_runs.queue_wait_duration.max{$work_pool_name,$work_queue_name,$flow_id, $service, $host, $deployment_name}",
+                      "name": "query3",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Max",
+                      "formula": "query3"
+                    }
+                  ],
+                  "style": {
+                    "palette": "red",
+                    "line_type": "dashed",
+                    "line_width": "thin"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "min": "0"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 3456020371313878,
+            "definition": {
+              "title": "Flow Execution Latency",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:prefect.server.flow_runs.execution_duration.median{$work_pool_name,$work_queue_name,$flow_id, $service, $host, $deployment_name}",
+                      "name": "query1",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Median",
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "blue",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "avg:prefect.server.flow_runs.execution_duration.95percentile{$work_pool_name,$work_queue_name,$flow_id, $service, $host, $deployment_name}",
+                      "name": "query2",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "P95",
+                      "formula": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "orange",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                },
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "query": "max:prefect.server.flow_runs.execution_duration.max{$work_pool_name,$work_queue_name,$flow_id, $service, $host, $deployment_name}",
+                      "name": "query3",
+                      "data_source": "metrics"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Max",
+                      "formula": "query3"
+                    }
+                  ],
+                  "style": {
+                    "palette": "red",
+                    "line_type": "dashed",
+                    "line_width": "thin"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "min": "0"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 1,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 4915926572835868,
+            "definition": {
+              "title": "Late Start Ratio",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:prefect.server.flow_runs.late_start.count{$deployment_name,$work_pool_name,$work_queue_name,$flow_id,$service,$host}.as_count()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:prefect.server.flow_runs.throughput{$deployment_name,$work_pool_name,$work_queue_name,$flow_id,$service,$host}.as_count()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Late Start Ratio",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "percent"
+                        }
+                      },
+                      "formula": "(query1 / query2) * 100"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": [
+                {
+                  "label": "Critical",
+                  "value": "y = 50",
+                  "display_type": "error dashed"
+                },
+                {
+                  "label": "Warning",
+                  "value": "y = 20",
+                  "display_type": "warning dashed"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 6993848850360829,
+            "definition": {
+              "title": "Flow Run Failure and Crashed Count ",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:prefect.server.flow_runs.failed.count{$deployment_name,$work_pool_name,$work_queue_name,$flow_id,$service,$host}.as_rate()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:prefect.server.flow_runs.crashed.count{$deployment_name,$work_pool_name,$work_queue_name,$flow_id,$service,$host}.as_rate()"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Failed",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Crashed",
+                      "formula": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "has_value_labels": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 4,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 5746974707853699,
+            "definition": {
+              "title": "Pending vs Runnning Flow Runs",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:prefect.server.flow_runs.running{$deployment_name,$work_pool_name,$work_queue_name,$flow_id,$service,$host}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:prefect.server.flow_runs.pending{$deployment_name,$work_pool_name,$work_queue_name,$flow_id,$service,$host}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Running",
+                      "style": {
+                        "palette": "green",
+                        "palette_index": 4
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Pending",
+                      "style": {
+                        "palette": "orange",
+                        "palette_index": 4
+                      },
+                      "formula": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "semantic",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 8,
+              "y": 4,
+              "width": 4,
+              "height": 3
+            }
+          },
+          {
+            "id": 8065851980645182,
+            "definition": {
+              "title": "Flow Run Rates",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:prefect.server.flow_runs.throughput{$deployment_name,$work_pool_name,$work_queue_name,$flow_id,$service,$host} by {deployment_name,work_pool_name,work_queue_name}.as_rate()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:prefect.server.flow_runs.completed.count{$deployment_name,$work_pool_name,$work_queue_name,$flow_id,$service,$host} by {deployment_name,work_queue_name,work_pool_name}.as_rate()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:prefect.server.flow_runs.failed.count{$deployment_name,$work_pool_name,$work_queue_name,$flow_id,$service,$host} by {deployment_name,work_queue_name,work_pool_name}.as_rate()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:prefect.server.flow_runs.crashed.count{$deployment_name,$work_pool_name,$work_queue_name,$flow_id,$service,$host} by {deployment_name,work_queue_name,work_pool_name}.as_rate()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query5",
+                      "query": "sum:prefect.server.flow_runs.cancelled.count{$deployment_name,$work_pool_name,$work_queue_name,$flow_id,$service,$host} by {deployment_name,work_queue_name,work_pool_name}.as_rate()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query6",
+                      "query": "sum:prefect.server.flow_runs.paused{$deployment_name,$work_pool_name,$work_queue_name,$flow_id,$service,$host} by {deployment_name,work_queue_name,work_pool_name}"
+                    }
+                  ],
+                  "sort": {
+                    "count": 25,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 2,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "alias": "Throughput",
+                      "number_format": {
+                        "unit": {
+                          "type": "custom_unit_label",
+                          "label": "/s"
+                        }
+                      },
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Completed",
+                      "number_format": {
+                        "unit": {
+                          "type": "custom_unit_label",
+                          "label": "/s"
+                        }
+                      },
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Failed",
+                      "number_format": {
+                        "unit": {
+                          "type": "custom_unit_label",
+                          "label": "/s"
+                        }
+                      },
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_red"
+                        }
+                      ],
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Crashed",
+                      "number_format": {
+                        "unit": {
+                          "type": "custom_unit_label",
+                          "label": "/s"
+                        }
+                      },
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_red"
+                        }
+                      ],
+                      "formula": "query4"
+                    },
+                    {
+                      "alias": "Cancelled",
+                      "number_format": {
+                        "unit": {
+                          "type": "custom_unit_label",
+                          "label": "/s"
+                        }
+                      },
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_yellow"
+                        }
+                      ],
+                      "formula": "query5"
+                    },
+                    {
+                      "alias": "Paused",
+                      "number_format": {
+                        "unit": {
+                          "type": "custom_unit_label",
+                          "label": "/s"
+                        }
+                      },
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_yellow"
+                        }
+                      ],
+                      "formula": "query6"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 12,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 15,
+        "width": 12,
+        "height": 11
+      }
+    },
+    {
+      "id": 8765218229679976,
+      "definition": {
+        "title": "Work Queue Health",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 2137056680914541,
+            "definition": {
+              "type": "note",
+              "content": "View of work queue state and scheduling efficiency, including backlog size, queue age, polling frequency, and concurrency usage to indicate how effectively work is being processed.",
+              "background_color": "blue",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 5830901774553584,
+            "definition": {
+              "title": "Queue Health by Queue & Pool",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "max:prefect.server.work_queue.backlog.size{$work_pool_name,$work_queue_name, $host, $service} by {work_pool_name,work_queue_name}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "max:prefect.server.work_queue.backlog.age{$work_pool_name,$work_queue_name ,$host, $service} by {work_pool_name,work_queue_name}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "max:prefect.server.work_queue.last_polled_age_seconds{$work_pool_name,$work_queue_name ,$host, $service} by {work_pool_name,work_queue_name}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "max:prefect.server.work_queue.concurrency.in_use{$work_pool_name,$work_queue_name ,$host, $service} by {work_pool_name,work_queue_name}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "sort": {
+                    "count": 25,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "alias": "Backlog Size",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 10,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": ">",
+                          "value": 5,
+                          "palette": "white_on_yellow"
+                        },
+                        {
+                          "comparator": "<=",
+                          "value": 5,
+                          "palette": "white_on_green"
+                        }
+                      ],
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Oldest Age",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 60,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": ">",
+                          "value": 30,
+                          "palette": "white_on_yellow"
+                        },
+                        {
+                          "comparator": "<=",
+                          "value": 30,
+                          "palette": "white_on_green"
+                        }
+                      ],
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Last Polled",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 30,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": ">",
+                          "value": 10,
+                          "palette": "white_on_yellow"
+                        },
+                        {
+                          "comparator": "<=",
+                          "value": 10,
+                          "palette": "white_on_green"
+                        }
+                      ],
+                      "formula": "query3"
+                    },
+                    {
+                      "alias": "Concurrency in use",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "fraction"
+                        }
+                      },
+                      "formula": "query4"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 12,
+              "height": 2
+            }
+          },
+          {
+            "id": 5999292429521448,
+            "definition": {
+              "title": "Work Queue Backlog Age",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "query": "max:prefect.server.work_queue.backlog.age{$work_pool_name,$work_queue_name,$service,$host} by {work_queue_name}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "formulas": [
+                    {
+                      "formula": "query1",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      }
+                    }
+                  ],
+                  "style": {
+                    "palette": "warm",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              },
+              "markers": []
+            },
+            "layout": {
+              "x": 0,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 7716407539028958,
+            "definition": {
+              "title": "Work Queue Backlog Size",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "query": "sum:prefect.server.work_queue.backlog.size{$work_pool_name,$work_queue_name,$service,$host} by {work_queue_name}",
+                      "data_source": "metrics",
+                      "name": "query1"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "orange",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 3,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 26,
+        "width": 12,
+        "height": 7,
+        "is_column_break": true
+      }
+    },
+    {
+      "id": 2758401854485980,
+      "definition": {
+        "title": "Deployment Health",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3759393136969509,
+            "definition": {
+              "type": "note",
+              "content": "Overview of deployment readiness and execution performance, including status indicators and latency comparisons to highlight differences across deployments.",
+              "background_color": "blue",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "id": 5577827245520921,
+            "definition": {
+              "title": "Deployments per Work Queue and Work Pool",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:prefect.server.deployment.is_ready{$deployment_name,$work_pool_name,$work_queue_name,$flow_id,$service,$host} by {deployment_name,work_pool_name,work_queue_name}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "sort": {
+                    "count": 25,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "alias": "Is Ready",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_green"
+                        },
+                        {
+                          "comparator": "=",
+                          "value": 0,
+                          "palette": "white_on_red"
+                        }
+                      ],
+                      "formula": "query2"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 3754340084624923,
+            "definition": {
+              "title": "Deployments Ranked by Latency",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "query": "avg:prefect.server.flow_runs.execution_duration.95percentile{$work_pool_name,$work_queue_name,$flow_id ,$host, $service, $deployment_name} by {deployment_name}",
+                      "name": "query1",
+                      "data_source": "metrics",
+                      "aggregator": "max"
+                    },
+                    {
+                      "query": "avg:prefect.server.flow_runs.execution_duration.median{$work_pool_name,$work_queue_name,$flow_id ,$host, $service, $deployment_name} by {deployment_name}",
+                      "name": "query2",
+                      "data_source": "metrics"
+                    },
+                    {
+                      "query": "max:prefect.server.flow_runs.execution_duration.max{$work_pool_name,$work_queue_name,$flow_id ,$host, $service, $deployment_name} by {deployment_name}",
+                      "name": "query3",
+                      "data_source": "metrics",
+                      "aggregator": "max"
+                    }
+                  ],
+                  "sort": {
+                    "count": 25,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "alias": "P95 Duration",
+                      "cell_display_mode": "number",
+                      "formula": "query1"
+                    },
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "alias": "Median Duration",
+                      "formula": "query2"
+                    },
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "alias": "Max Duration",
+                      "formula": "query3"
+                    }
+                  ]
+                }
+              ],
+              "has_search_bar": "auto"
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 33,
+        "width": 6,
+        "height": 8
+      }
+    },
+    {
+      "id": 3257906885826481,
+      "definition": {
+        "title": "Work Pool Health",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3387578463101171,
+            "definition": {
+              "type": "note",
+              "content": "Snapshot of worker infrastructure health, including availability, heartbeat age, and pool status to reflect worker responsiveness and system capacity.",
+              "background_color": "blue",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 6,
+              "height": 1
+            }
+          },
+          {
+            "id": 1704047154747702,
+            "definition": {
+              "title": "Worker Health by Pool",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:prefect.server.work_pool.worker.is_online{$work_pool_name, $service, $host} by {work_pool_name,worker_name}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:prefect.server.work_pool.worker.heartbeat_age_seconds{$work_pool_name, $service, $host} by {worker_name,work_pool_name}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "sort": {
+                    "count": 25,
+                    "order_by": [
+                      {
+                        "type": "formula",
+                        "index": 0,
+                        "order": "desc"
+                      }
+                    ]
+                  },
+                  "formulas": [
+                    {
+                      "alias": "Online Status",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">=",
+                          "value": 1,
+                          "palette": "white_on_green"
+                        },
+                        {
+                          "comparator": "<",
+                          "value": 1,
+                          "palette": "white_on_red"
+                        }
+                      ],
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Heartbeat Age",
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "second"
+                        }
+                      },
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 60,
+                          "palette": "white_on_red"
+                        },
+                        {
+                          "comparator": ">",
+                          "value": 30,
+                          "palette": "white_on_yellow"
+                        },
+                        {
+                          "comparator": "<=",
+                          "value": 30,
+                          "palette": "white_on_green"
+                        }
+                      ],
+                      "formula": "query2"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 134101944440854,
+            "definition": {
+              "title": "Work Queue Status by Pool",
+              "title_size": "16",
+              "title_align": "left",
+              "type": "query_table",
+              "requests": [
+                {
+                  "response_format": "scalar",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:prefect.server.work_queue.is_ready{$work_queue_name, $work_pool_name, $service, $host} by {work_pool_name}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:prefect.server.work_queue.is_not_ready{$work_queue_name, $work_pool_name, $service, $host} by {work_pool_name}",
+                      "aggregator": "last"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:prefect.server.work_queue.is_paused{$work_queue_name, $work_pool_name, $service, $host} by {work_pool_name}",
+                      "aggregator": "last"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "alias": "Ready",
+                      "cell_display_mode": "number",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">=",
+                          "value": 1,
+                          "palette": "white_on_green"
+                        }
+                      ],
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Not Ready",
+                      "cell_display_mode": "number",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_red"
+                        }
+                      ],
+                      "formula": "query2"
+                    },
+                    {
+                      "alias": "Paused",
+                      "cell_display_mode": "number",
+                      "conditional_formats": [
+                        {
+                          "comparator": ">",
+                          "value": 0,
+                          "palette": "white_on_yellow"
+                        }
+                      ],
+                      "formula": "query3"
+                    }
+                  ]
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 6,
+        "y": 33,
+        "width": 6,
+        "height": 8
+      }
+    },
+    {
+      "id": 2400604912101174,
+      "definition": {
+        "title": "Related Databases",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 7676892238288698,
+            "definition": {
+              "type": "note",
+              "content": "Overview of supporting database performance, including latency, connection counts, and memory usage, to highlight potential infrastructure constraints affecting system behavior.",
+              "background_color": "blue",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 2968427955156519,
+            "definition": {
+              "title": "Redis Latency",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      },
+                      "alias": "Redis latency",
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:redis.info.latency_ms{$service, $host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "purple",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1527680987516770,
+            "definition": {
+              "title": "PostgreSQL Latency",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "type": "canonical_unit",
+                          "unit_name": "millisecond"
+                        }
+                      },
+                      "alias": "Postgres latency",
+                      "formula": "query2"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:postgresql.dd.postgres.operation.time.avg{$service, $host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "dog_classic",
+                    "order_by": "values",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 6458436593500682,
+            "definition": {
+              "title": "Redis Connected Clients",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:redis.net.clients{$service, $host} by {host}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 4715380401140329,
+            "definition": {
+              "title": "PostgreSQL Connections",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "response_format": "timeseries",
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:postgresql.connections{$service, $host} by {db}"
+                    }
+                  ],
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "style": {
+                    "palette": "blue",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "include_zero": true,
+                "scale": "linear",
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 4,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 5038525147383155,
+            "definition": {
+              "title": "Redis Memory",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "avg:redis.mem.used{$service, $host} by {host}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "avg:redis.mem.rss{$service, $host} by {host}"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "avg:redis.mem.peak{$service, $host} by {host}"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "formulas": [
+                    {
+                      "number_format": {
+                        "unit": {
+                          "unit_name": "byte_in_binary_bytes_family",
+                          "type": "canonical_unit"
+                        }
+                      },
+                      "alias": "Used",
+                      "formula": "query1"
+                    },
+                    {
+                      "number_format": {
+                        "unit": {
+                          "unit_name": "byte_in_binary_bytes_family",
+                          "type": "canonical_unit"
+                        }
+                      },
+                      "alias": "RSS",
+                      "formula": "query2"
+                    },
+                    {
+                      "number_format": {
+                        "unit": {
+                          "unit_name": "byte_in_binary_bytes_family",
+                          "type": "canonical_unit"
+                        }
+                      },
+                      "alias": "Peak",
+                      "formula": "query3"
+                    }
+                  ],
+                  "style": {
+                    "palette": "purple",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "line"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "include_zero": false,
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 0,
+              "y": 7,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 5213596157603449,
+            "definition": {
+              "title": "PostgreSQL Buffer Cache (Hits vs Disk Reads)",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "type": "timeseries",
+              "requests": [
+                {
+                  "queries": [
+                    {
+                      "data_source": "metrics",
+                      "name": "query1",
+                      "query": "sum:postgresql.buffer_hit{$service, $host}.as_rate()"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:postgresql.disk_read{$service, $host}.as_rate()"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "formulas": [
+                    {
+                      "alias": "Buffer Hits/s",
+                      "formula": "query1"
+                    },
+                    {
+                      "alias": "Disk Reads/s",
+                      "formula": "query2"
+                    }
+                  ],
+                  "style": {
+                    "palette": "blue",
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "area"
+                }
+              ],
+              "yaxis": {
+                "scale": "linear",
+                "include_zero": true,
+                "min": "auto",
+                "max": "auto"
+              }
+            },
+            "layout": {
+              "x": 6,
+              "y": 7,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 41,
+        "width": 12,
+        "height": 11
+      }
+    },
+    {
+      "id": 8463802766317090,
+      "definition": {
+        "title": "Logs",
+        "background_color": "vivid_blue",
+        "show_title": true,
+        "type": "group",
+        "layout_type": "ordered",
+        "widgets": [
+          {
+            "id": 3095432232352326,
+            "definition": {
+              "type": "note",
+              "content": "High-level overview of log activity, highlighting error frequency, log volume by status, and recent failures to reflect the system’s current health and stability.",
+              "background_color": "blue",
+              "font_size": "16",
+              "text_align": "center",
+              "vertical_align": "center",
+              "show_tick": false,
+              "tick_pos": "50%",
+              "tick_edge": "left",
+              "has_padding": true
+            },
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 1
+            }
+          },
+          {
+            "id": 3339507359543152,
+            "definition": {
+              "title": "Error logs",
+              "title_size": "16",
+              "title_align": "left",
+              "time": {},
+              "requests": [
+                {
+                  "response_format": "event_list",
+                  "query": {
+                    "data_source": "logs_stream",
+                    "query_string": "source:prefect status:error $service $host",
+                    "indexes": [],
+                    "storage": "hot"
+                  },
+                  "columns": [
+                    {
+                      "field": "status_line",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "timestamp",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "host",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "service",
+                      "width": "auto"
+                    },
+                    {
+                      "field": "content",
+                      "width": "compact"
+                    }
+                  ]
+                }
+              ],
+              "type": "list_stream"
+            },
+            "layout": {
+              "x": 0,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          },
+          {
+            "id": 1740555103391191,
+            "definition": {
+              "title": "Log count by status",
+              "title_size": "16",
+              "title_align": "left",
+              "show_legend": true,
+              "legend_layout": "auto",
+              "legend_columns": [
+                "avg",
+                "min",
+                "max",
+                "value",
+                "sum"
+              ],
+              "time": {},
+              "type": "timeseries",
+              "requests": [
+                {
+                  "formulas": [
+                    {
+                      "formula": "query1"
+                    }
+                  ],
+                  "queries": [
+                    {
+                      "name": "query1",
+                      "data_source": "logs",
+                      "search": {
+                        "query": "source:prefect $service $host"
+                      },
+                      "indexes": [
+                        "*"
+                      ],
+                      "group_by": {
+                        "limit": 10,
+                        "sort": {
+                          "order": "desc",
+                          "aggregation": "count"
+                        },
+                        "fields": [
+                          "status"
+                        ]
+                      },
+                      "compute": {
+                        "aggregation": "count"
+                      },
+                      "storage": "hot"
+                    }
+                  ],
+                  "response_format": "timeseries",
+                  "style": {
+                    "palette": "warm",
+                    "order_by": "values",
+                    "color_order": "monotonic",
+                    "has_value_labels": false,
+                    "line_type": "solid",
+                    "line_width": "normal"
+                  },
+                  "display_type": "bars"
+                }
+              ]
+            },
+            "layout": {
+              "x": 6,
+              "y": 1,
+              "width": 6,
+              "height": 3
+            }
+          }
+        ]
+      },
+      "layout": {
+        "x": 0,
+        "y": 52,
+        "width": 12,
+        "height": 5
+      }
+    }
+  ],
+  "template_variables": [
+    {
+      "name": "work_pool_name",
+      "prefix": "work_pool_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "work_queue_name",
+      "prefix": "work_queue_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "deployment_name",
+      "prefix": "deployment_name",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "flow_id",
+      "prefix": "flow_id",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "service",
+      "prefix": "service",
+      "available_values": [],
+      "default": "*"
+    },
+    {
+      "name": "host",
+      "prefix": "host",
+      "available_values": [],
+      "default": "*"
+    }
+  ],
+  "layout_type": "ordered",
+  "notify_list": [],
+  "reflow_type": "fixed"
+}

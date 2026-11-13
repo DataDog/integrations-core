@@ -50,6 +50,18 @@ This [workflow](https://github.com/DataDog/integrations-core/blob/master/.github
 - [Upload](https://github.com/actions/upload-artifact) collected [test results](#test-results)
 - [Upload](https://github.com/actions/upload-artifact) coverage data
 
+By default, the unit/integration and E2E test wrappers append `-k "not fips"` to pytest arguments.
+Direct callers of `test-target.yml` can opt out while preserving their pytest selection:
+
+```yaml
+with:
+  exclude-fips: false
+  pytest-args: '-k fips'
+```
+
+This option does not select a FIPS Agent image or schedule FIPS jobs. Dispatcher keeps the default
+exclusion and does not expose this input.
+
 ## Target setup
 
 Some targets require additional set up such as the installation of system dependencies. Therefore, all such logic is put into [scripts](https://github.com/DataDog/integrations-core/tree/master/.ddev/ci/scripts) that live under `/.ddev/ci/scripts`.

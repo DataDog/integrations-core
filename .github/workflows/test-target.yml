@@ -84,6 +84,11 @@ on:
         required: false
         type: string
         default: ""
+      exclude-fips:
+        description: "Append the default FIPS test exclusion to unit/integration and E2E pytest arguments"
+        required: false
+        type: boolean
+        default: true
       context:
         description: "Context where the test is run. This is used for CI visibility descovery."
         required: false
@@ -203,6 +208,7 @@ jobs:
       #   INPUT_PLATFORM
       #   INPUT_MINIMUM_BASE_PACKAGE
       #   INPUT_PYTEST_ARGS
+      #   INPUT_EXCLUDE_FIPS
       #   INPUT_IS_FORK
       run: bash .github/workflows/scripts/setup-test-env.sh
       env:
@@ -221,6 +227,7 @@ jobs:
         INPUT_MINIMUM_BASE_PACKAGE: ${{ inputs.minimum-base-package }}
         INPUT_JOB_NAME: "${{ inputs.job-name }}${{ inputs.target-env && format('-{0}', inputs.target-env) || '' }}"
         INPUT_PYTEST_ARGS: ${{ inputs.pytest-args }}
+        INPUT_EXCLUDE_FIPS: ${{ inputs.exclude-fips }}
         INPUT_IS_FORK: ${{ github.event.pull_request.head.repo.fork || false }}
         DD_API_KEY_SECRET: ${{ steps.dd-sts.outputs.api_key }}
         SETUP_ENV_VARS: ${{ inputs.setup-env-vars }}
@@ -330,7 +337,7 @@ jobs:
         TARGET_ENV: ${{ inputs.target-env }}
       run: |-
         if [[ -n "$TARGET_ENV" ]]; then
-          ddev test --bench --junit "${TARGET}:${TARGET_ENV}"
+          ddev test --bench --junit "$TARGET" --envs "$TARGET_ENV"
         else
           ddev test --bench --junit "$TARGET"
         fi
@@ -345,7 +352,7 @@ jobs:
         TARGET_ENV: ${{ inputs.target-env }}
       run: |-
         if [[ -n "$TARGET_ENV" ]]; then
-          ddev test --latest --junit "${TARGET}:${TARGET_ENV}"
+          ddev test --latest --junit "$TARGET" --envs "$TARGET_ENV"
         else
           ddev test --latest --junit "$TARGET"
         fi
@@ -355,8 +362,7 @@ jobs:
       timeout-minutes: ${{ inputs.step-timeout-minutes }}
       run: bash .github/workflows/scripts/run-e2e-tests.sh
       env:
-        # Override INPUT_TARGET to include :latest suffix
-        INPUT_TARGET: "${{ inputs.target }}:latest"
+        INPUT_TARGET_ENV: "latest"
         INPUT_SESSION_NAME: "latest-e2e-tests"
         INPUT_IS_LATEST: "true"
 
