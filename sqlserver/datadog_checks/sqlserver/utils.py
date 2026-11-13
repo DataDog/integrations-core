@@ -26,6 +26,7 @@ DBM_COMMENT_MARKERS = (
     'ddpv=',
     'traceparent=',
     'ddsh=',
+    'service=',
 )
 
 

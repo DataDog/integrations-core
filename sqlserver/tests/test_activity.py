@@ -1044,8 +1044,14 @@ def test_sanitize_activity_row(dbm_instance, row):
 
 
 @pytest.mark.unit
-def test_sanitize_activity_row_recovers_leading_comment_for_non_proc_statement(dbm_instance, datadog_agent):
-    comment = "/*dddbs='orders-service',dde='prod'*/"
+@pytest.mark.parametrize(
+    'comment',
+    [
+        pytest.param("/*dddbs='orders-service',dde='prod'*/", id='tracer'),
+        pytest.param("/* service='datadog-agent' */", id='agent'),
+    ],
+)
+def test_sanitize_activity_row_recovers_leading_comment_for_non_proc_statement(dbm_instance, datadog_agent, comment):
     statement_text = "SELECT * FROM orders WHERE customer_id = @P1"
     row = {
         # sp_executesql includes the RPC parameter declaration and leading comment in the full
