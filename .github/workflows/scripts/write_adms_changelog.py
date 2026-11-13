@@ -1,8 +1,8 @@
 """Write `.security` changelog fragments for the checks an ADMS PR changes.
 
 Run by sync-dependency-pins.yaml after `ddev dep sync`. Every top-level folder whose
-pyproject.toml differs between the PR's merge base and the working tree gets
-`<folder>/changelog.d/<PR>.security` unless it already has a fragment for the PR.
+pyproject.toml differs between the PR's merge base and the working tree gets a
+fragment at `<folder>/changelog.d/<PR>.security`, unless it already has one for the PR.
 
 The diff is taken against the working tree, not the PR's own patches, because the sync
 can undo a PR change: `ddev dep sync` resets a check pin that ADMS bumped without
@@ -23,9 +23,11 @@ FALLBACK_MESSAGE = "Update dependencies to address security vulnerabilities."
 NON_PACKAGE_FOLDERS = {".builders"}
 # An added dependency line such as `+    "pymongo==4.18.3",` or `+    "virtualenv>=21.14.5",`.
 ADDED_PIN = re.compile(r'^\+\s*"([A-Za-z0-9][A-Za-z0-9._-]*)(?:\[[^\]]*\])?\s*(?:==|>=|~=)\s*([^",;\s]+)')
-# ADMS opens its PR a few seconds after pushing, so the PR should exist by the time this runs.
-PR_LOOKUP_ATTEMPTS = 6
+# ADMS opens its PR a few seconds after pushing, so the PR normally exists by the time this
+# runs. Wait up to three minutes before giving up, since a missed PR means no fragments.
+PR_LOOKUP_ATTEMPTS = 18
 PR_LOOKUP_DELAY_SECONDS = 10
+REQUEST_TIMEOUT_SECONDS = 30
 
 
 def github_get(path: str, token: str) -> object:
@@ -33,7 +35,7 @@ def github_get(path: str, token: str) -> object:
         f"{API_URL}{path}",
         headers={"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"},
     )
-    with urllib.request.urlopen(req) as resp:
+    with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT_SECONDS) as resp:
         return json.loads(resp.read().decode())
 
 
@@ -54,7 +56,10 @@ def merge_base(repo: str, base_ref: str, head_sha: str, token: str) -> str:
 
 
 def git(*args: str) -> str:
-    return subprocess.run(["git", *args], check=True, capture_output=True, text=True).stdout
+    result = subprocess.run(["git", *args], capture_output=True, text=True)
+    if result.returncode != 0:
+        raise RuntimeError(f"git {' '.join(args)} failed: {result.stderr.strip()}")
+    return result.stdout
 
 
 def split_diff_by_file(diff: str) -> dict[str, str]:
@@ -62,10 +67,14 @@ def split_diff_by_file(diff: str) -> dict[str, str]:
     patches: dict[str, str] = {}
     current = None
     for line in diff.splitlines():
-        if line.startswith("+++ b/"):
-            current = line[len("+++ b/") :]
-            patches[current] = ""
-        elif current is not None and not line.startswith(("diff --git", "index ", "--- ")):
+        if line.startswith("diff --git"):
+            current = None
+        elif line.startswith("+++ "):
+            # A deleted file has `+++ /dev/null` and no post-change path.
+            current = line[len("+++ b/") :] if line.startswith("+++ b/") else None
+            if current is not None:
+                patches[current] = ""
+        elif current is not None and line.startswith(("+", "-", " ", "@@")):
             patches[current] += line + "\n"
     return patches
 

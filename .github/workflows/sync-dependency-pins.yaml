@@ -26,6 +26,7 @@ defaults:
 env:
   PYTHON_VERSION: "3.13"
   SYNC_COMMIT_MESSAGE: Sync check dependency pins and changelog
+  FRAGMENTS_COMMIT_MESSAGE: Add changelog fragments for synced dependency pins
 
 jobs:
   sync:
@@ -59,7 +60,9 @@ jobs:
         ddev config set repo core
         ddev dep sync
 
+    # Fragments are best effort: a failure here must not stop the pin sync push.
     - name: Write changelog fragments
+      continue-on-error: true
       env:
         GITHUB_TOKEN: ${{ github.token }}
       run: python .github/workflows/scripts/write_adms_changelog.py
@@ -74,10 +77,10 @@ jobs:
         policy: self.sync-dependency-pins.push
 
     # Pushing to the exact ref fails if the branch moved since this run started;
-    # the run for the newer commit does the sync instead. Refusing to change pins
-    # again on top of our own sync commit stops a push loop if `ddev dep sync`
-    # ever stops being idempotent. A fragments-only follow-up is still allowed,
-    # for when the PR did not exist yet on the first run.
+    # the run for the newer commit does the sync instead. The loop guard refuses
+    # to change pins on top of our own sync commit, in case `ddev dep sync` stops
+    # being idempotent, and allows at most one fragments-only follow-up, for when
+    # the PR did not exist yet on the first run.
     - name: Commit synced pins to branch
       env:
         TOKEN: ${{ steps.token-generator.outputs.token }}
@@ -85,12 +88,22 @@ jobs:
         git config user.name "dd-agent-integrations-bot[bot]"
         git config user.email "dd-agent-integrations-bot[bot]@users.noreply.github.com"
         git add '*/pyproject.toml' '*/changelog.d/*'
+        last_subject=$(git log -1 --format=%s)
         if git diff --cached --quiet; then
           echo "No pin or changelog changes to commit."
-        elif [ "$(git log -1 --format=%s)" = "$SYNC_COMMIT_MESSAGE" ] \
-          && ! git diff --cached --quiet -- '*/pyproject.toml'; then
-          echo "::warning::ddev dep sync changed pins again right after a sync commit; not pushing."
+          exit 0
+        elif git diff --cached --quiet -- '*/pyproject.toml'; then
+          message=$FRAGMENTS_COMMIT_MESSAGE
+          if [ "$last_subject" = "$FRAGMENTS_COMMIT_MESSAGE" ]; then
+            echo "::warning::Changelog fragments changed again right after a fragments commit; not pushing."
+            exit 0
+          fi
         else
-          git commit -m "$SYNC_COMMIT_MESSAGE"
-          git push "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${GITHUB_REF}"
+          message=$SYNC_COMMIT_MESSAGE
+          if [ "$last_subject" = "$SYNC_COMMIT_MESSAGE" ] || [ "$last_subject" = "$FRAGMENTS_COMMIT_MESSAGE" ]; then
+            echo "::warning::ddev dep sync changed pins again right after a sync commit; not pushing."
+            exit 0
+          fi
         fi
+        git commit -m "$message"
+        git push "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${GITHUB_REF}"
