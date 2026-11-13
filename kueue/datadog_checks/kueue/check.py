@@ -1,7 +1,9 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import functools
 import json
+import logging
 import re
 from datetime import datetime, timezone
 from typing import NamedTuple
@@ -12,6 +14,12 @@ from datadog_checks.base.checks.openmetrics.v2.transform import get_native_dynam
 from datadog_checks.base.utils.tagging import tagger
 
 from .config_models import ConfigMixin
+from .goodput import (
+    GoodputTracker,
+    aggregate,
+    badput_by_reason,
+    workload_points,
+)
 from .kube_client import KubernetesAPIClient
 from .metrics import LOCAL_QUEUE_METRIC_MAP, METRIC_MAP, RESOURCE_METRIC_MAP
 
@@ -27,6 +35,8 @@ RESOURCE_NAME_MAP = {
 
 OTHER_RESOURCE_NAME = 'other'
 KUEUE_QUEUE_ENTITY_PREFIX = 'kubernetes_kueue_queue://'
+# Consecutive polls with unknown ClusterQueues before the check warns that Kueue metadata is missing.
+UNRESOLVED_CLUSTER_QUEUE_POLLS = 3
 KUEUE_RESOURCE_FLAVOR_ENTITY_PREFIX = 'kueue_resource_flavor://'
 KUEUE_WORKLOAD_ENTITY_PREFIX = 'kueue_workload://'
 WORKLOAD_EVENT_INDEX_CACHE_KEY = 'workload_event_index'
@@ -79,15 +89,54 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         self._workload_state = None
         self._workload_event_index: dict[str, int] | None = None
         self._workload_event_index_dirty = False
+        self.goodput = GoodputTracker(log=self.log)
+        self.goodput_failing = False
+        self.warned_unresolved_cluster_queues = False
+        self.unresolved_cluster_queue_polls = 0
+        self.skipping_workloads = False
 
     def get_default_config(self):
         return {'metrics': [METRIC_MAP]}
 
     def check(self, instance):
-        super().check(instance)
+        try:
+            super().check(instance)
+        except Exception:
+            # The Workloads are not polled on this run, so the next poll must only set a new baseline instead of
+            # attributing the whole outage to the state seen before it.
+            self.goodput.reset()
+            raise
 
+        if not (self.collect_workload_events or self.collect_scheduling_goodput):
+            return
+
+        # Followers poll as well, so that a promoted follower diffs against a current state instead of a stale one.
+        is_leader = self.is_event_source()
+        workloads = self.fetch_workloads()
+        if workloads is None:
+            # Without this poll nobody knows what the Workloads did since the last one, so the next poll must only
+            # set a new baseline.
+            self.goodput.reset()
+            return
+
+        # Events and goodput are isolated from each other: a failure in one must not skip or corrupt the other.
+        events_error = None
         if self.collect_workload_events:
-            self.collect_workload_events_from_api(submit_events=self.is_event_source())
+            try:
+                self.collect_workload_events_from_api(submit_events=is_leader, workloads=workloads)
+            except Exception as e:
+                events_error = e
+        if self.collect_scheduling_goodput:
+            try:
+                self.collect_scheduling_goodput_from_workloads(workloads, submit=is_leader)
+                self.goodput_failing = False
+            except Exception as e:
+                self.goodput.reset()
+                # Only the first failure of a streak carries the traceback, instead of one every run.
+                self.log.warning('Cannot collect Kueue scheduling goodput: %s', e, exc_info=not self.goodput_failing)
+                self.goodput_failing = True
+        if events_error is not None:
+            raise events_error
 
     def create_scraper(self, config):
         return KueueOpenMetricsScraper(self, self.get_config_with_defaults(config))
@@ -95,7 +144,9 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
     def is_event_source(self) -> bool:
         """Return whether the last scrape came from a replica that should submit Workload events."""
         if self.scrapers[self.config.openmetrics_endpoint].is_follower:
-            self.log.debug('Not submitting Kueue Workload events: the scraped replica is a follower')
+            self.log.debug(
+                'Not submitting Kueue Workload events or scheduling goodput: the scraped replica is a follower'
+            )
             return False
         return True
 
@@ -177,24 +228,93 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
             self.load_configuration_models()
 
         self.collect_workload_events = self.config.collect_workload_events
+        self.collect_scheduling_goodput = self.config.collect_scheduling_goodput
         self.kube_config_dict = self.config.kube_config_dict
         self.workload_events_namespaces = set(self.config.workload_events_namespaces or [])
 
-    def collect_workload_events_from_api(self, submit_events: bool) -> None:
+    def fetch_workloads(self) -> list[dict] | None:
+        """List the Workloads, or return None when the Kubernetes API cannot be reached."""
+        try:
+            if self.kube_client is None:
+                self.kube_client = KubernetesAPIClient(log=self.log, kube_config_dict=self.kube_config_dict)
+
+            return self.list_workloads()
+        except Exception as e:
+            self.log.warning('Cannot list Kueue Workloads from the Kubernetes API: %s', e)
+            return None
+
+    def collect_scheduling_goodput_from_workloads(self, workloads: list[dict], submit: bool) -> None:
+        """Submit the GPU-hours spent waiting and fully admitted since the previous poll, per Workload.
+
+        Only the leader submits, so that one instance per Kueue replica does not count each interval several times.
+        """
+        # Several Workloads share a LocalQueue, so the tagger is asked once per LocalQueue and poll.
+        contributions = self.goodput.update(workloads, functools.cache(self.resolve_cluster_queue))
+        if self.goodput.skipped and not self.skipping_workloads:
+            self.log.warning(
+                'Scheduling goodput: %d Kueue Workloads could not be parsed and are not counted; enable debug logs '
+                'for details',
+                self.goodput.skipped,
+            )
+        self.skipping_workloads = bool(self.goodput.skipped)
+        # The tagger may not know the LocalQueues yet right after the Agent starts, so only a lasting gap warns.
+        self.unresolved_cluster_queue_polls = (
+            self.unresolved_cluster_queue_polls + 1 if self.goodput.unresolved_cluster_queues else 0
+        )
+        if self.unresolved_cluster_queue_polls >= UNRESOLVED_CLUSTER_QUEUE_POLLS and not (
+            self.warned_unresolved_cluster_queues
+        ):
+            self.warned_unresolved_cluster_queues = True
+            self.log.warning(
+                'Scheduling goodput: the ClusterQueue of %d GPU Workloads that are not admitted yet is unknown, so '
+                'their badput has no ClusterQueue tag. Enable Kueue metadata in the Cluster Agent '
+                '(`cluster_agent.kueue.enabled`) to resolve it, or group by `kueue_local_queue`.',
+                self.goodput.unresolved_cluster_queues,
+            )
+        if not submit or self.goodput.pods_ready_missing:
+            # Without the fully admitted time, every group that ever waited would report a goodput of 0.
+            return
+
+        # Instance tags stay off, as on events: they include the tags Autodiscovery copies from the controller pod,
+        # such as its `kube_namespace`, which would collide with the tags of the Workload.
+        for metric, value, tags in workload_points(contributions):
+            self.count(metric, value, tags=tags, raw=True)
+
+        if not self.log.isEnabledFor(logging.DEBUG):
+            return
+        reasons = badput_by_reason(contributions)
+        for queue, queue_totals in aggregate(contributions).items():
+            queue_reasons = reasons.get(queue) or {}
+            self.log.debug(
+                'Scheduling goodput for %s: badput=%.1f GPU-s, fully_admitted=%.1f GPU-s, goodput=%s, '
+                'badput by reason=%s',
+                queue,
+                queue_totals.badput,
+                queue_totals.fully_admitted,
+                queue_totals.goodput,
+                {f'{r}/{sr}': round(v, 1) for (r, sr), v in queue_reasons.items()},
+            )
+
+    @staticmethod
+    def resolve_cluster_queue(namespace: str, local_queue: str) -> str | None:
+        """Return the ClusterQueue of a LocalQueue from the Agent tagger, which knows it from the Cluster Agent."""
+        entity = f'{KUEUE_QUEUE_ENTITY_PREFIX}localqueue/{namespace}/{local_queue}'
+        for tag in tagger.tag(entity, tagger.ORCHESTRATOR) or []:
+            if tag.startswith('kueue_cluster_queue:'):
+                return tag.split(':', 1)[1]
+        return None
+
+    def collect_workload_events_from_api(self, submit_events: bool, workloads: list[dict] | None = None) -> None:
         """Poll Workloads, update the tracked state and submit events for new transitions.
 
         Followers call this with `submit_events=False` to keep the state current without submitting events. If they
         skipped polling, a follower promoted to leader would diff against stale state and resubmit every transition
         the previous leader already reported.
         """
-        try:
-            if self.kube_client is None:
-                self.kube_client = KubernetesAPIClient(log=self.log, kube_config_dict=self.kube_config_dict)
-
-            workloads = self.list_workloads()
-        except Exception as e:
-            self.log.warning('Cannot collect Kueue Workload events from the Kubernetes API: %s', e)
-            return
+        if workloads is None:
+            workloads = self.fetch_workloads()
+            if workloads is None:
+                return
 
         self._ensure_workload_event_index()
 

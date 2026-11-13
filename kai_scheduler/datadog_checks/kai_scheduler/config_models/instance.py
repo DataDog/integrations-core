@@ -102,6 +102,7 @@ class InstanceConfig(BaseModel):
     collect_counters_with_distributions: Optional[bool] = None
     collect_histogram_buckets: Optional[bool] = None
     collect_podgroup_events: Optional[bool] = None
+    collect_scheduling_goodput: Optional[bool] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
