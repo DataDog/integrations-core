@@ -48,7 +48,7 @@ instances:
     # private_key_file: <PRIVATE_KEY_FILE>
 
     ## @param private_key_type - string - optional - default: rsa
-    ## Private key type to choose between `rsa` or `ecdsa`.
+    ## Private key type to choose between `rsa`, `ecdsa`, or `ed25519`.
     #
     # private_key_type: rsa
 
