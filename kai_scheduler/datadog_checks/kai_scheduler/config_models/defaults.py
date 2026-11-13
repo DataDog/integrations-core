@@ -48,6 +48,10 @@ def instance_collect_histograms_as_distributions():
     return False
 
 
+def instance_collect_podgroup_events():
+    return True
+
+
 def instance_disable_generic_tags():
     return False
 

@@ -24,6 +24,7 @@ from .metrics import (
     QUEUE_CONTROLLER_METRICS,
     SCHEDULER_METRICS,
 )
+from .podgroup_events import PodGroupEventCollector
 
 DEFAULT_RENAME_LABELS = {
     'queue_metadata_name': 'kai_queue',
@@ -67,6 +68,20 @@ class KaiSchedulerCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         super().__init__(name, init_config, instances)
         self.check_initializations.appendleft(self.parse_config)
         self.check_initializations.append(self.configure_scheduler_transformers)
+        self.check_initializations.append(self.configure_podgroup_events)
+        self.podgroup_events: PodGroupEventCollector | None = None
+
+    def check(self, instance):
+        try:
+            super().check(instance)
+        finally:
+            # Events come from the Kubernetes API, so a failing metrics endpoint must not stop them, and a failure
+            # to collect events must not fail the metrics run.
+            if self.podgroup_events:
+                try:
+                    self.podgroup_events.collect()
+                except Exception as e:
+                    self.log.warning('Cannot collect KAI PodGroup events: %s', e, exc_info=True)
 
     def get_default_config(self):
         return {
@@ -120,6 +135,10 @@ class KaiSchedulerCheck(OpenMetricsBaseCheckV2, ConfigMixin):
         scraper = self.scrapers[endpoint]
         scraper.metric_transformer.add_custom_transformer(FAIR_SHARE_MEMORY_METRIC, fair_share_memory_transformer)
         scraper.metric_transformer.add_custom_transformer(EVICTED_PODS_METRIC, EvictedPodsTransformer(self, scraper))
+
+    def configure_podgroup_events(self):
+        if self.config.collect_podgroup_events:
+            self.podgroup_events = PodGroupEventCollector(self, self.config.kube_config_dict)
 
 
 class KaiOpenMetricsScraper(OpenMetricsScraper):

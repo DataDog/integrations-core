@@ -1,0 +1,84 @@
+{
+  "app_id": "krakend",
+  "app_uuid": "db598784-537a-4e3f-921a-7965f80ed7a8",
+  "manifest_version": "2.0.0",
+  "display_on_public_website": true,
+  "tile": {
+    "title": "KrakenD",
+    "description": "Monitor KrakenD gateway performance by collecting key metrics and logs for full visibility.",
+    "overview": "README.md#Overview",
+    "configuration": "README.md#Setup",
+    "uninstallation": "README.md#Uninstallation",
+    "support": "README.md#Support",
+    "changelog": "CHANGELOG.md",
+    "media": [
+      {
+        "media_type": "image",
+        "caption": "KrakenD dashboard (light mode)",
+        "image_url": "images/Screenshot 2025-07-30 at 15.02.17.jpg"
+      },
+      {
+        "media_type": "image",
+        "caption": "KrakenD dashboard (dark mode)",
+        "image_url": "images/Screenshot 2025-07-30 at 15.02.25.jpg"
+      }
+    ],
+    "classifier_tags": [
+      "Category::Orchestration",
+      "Category::Metrics",
+      "Category::Log Collection",
+      "Offering::Integration",
+      "Supported OS::Linux",
+      "Supported OS::Windows",
+      "Supported OS::macOS",
+      "Queried Data Type::Metrics",
+      "Queried Data Type::Logs",
+      "Submitted Data Type::Metrics",
+      "Submitted Data Type::Logs"
+    ]
+  },
+  "oauth": {},
+  "author": {
+    "support_email": "help@datadoghq.com",
+    "name": "Datadog",
+    "homepage": "https://www.krakend.io/",
+    "sales_email": "sales@datadoghq.com",
+    "vendor_id": "datadog"
+  },
+  "assets": {
+    "dashboards": {
+      "KrakenD Overview": "assets/dashboards/krakend_overview.json"
+    },
+    "monitors": {
+      "No requests observed": "assets/monitors/no_requests_observed.json",
+      "OpenMetrics endpoint is unreachable": "assets/monitors/openmetrics_endpoint_is_unreachable.json",
+      "High error rate from backend endpoints": "assets/monitors/high_error_rate_from_backend_endpoints.json",
+      "High error rate in the global layer": "assets/monitors/high_error_rate_in_the_global_layer.json"
+    },
+    "logs": {
+      "source": "krakend"
+    },
+    "integration": {
+      "source_type_name": "KrakenD",
+      "auto_install": true,
+      "configuration": {},
+      "process_signatures": [],
+      "metrics": {
+        "prefix": "krakend",
+        "check": [
+          "krakend.api.http_server.duration.bucket"
+        ],
+        "metadata_path": "metadata.csv"
+      },
+      "events": {
+        "creates_events": false
+      },
+      "service_checks": {
+        "metadata_path": "assets/service_checks.json"
+      },
+      "source_type_id": 45562493,
+      "supports_ddr_coordinated_failover": false
+    }
+  },
+  "owner": "agent-integrations"
+}
