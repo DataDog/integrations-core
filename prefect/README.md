@@ -38,6 +38,44 @@ No additional installation is needed on your server.
 
 [Run the Agent's status subcommand][8] and look for `prefect` under the Checks section.
 
+### Related databases
+
+The Related Databases section of the Prefect dashboard shows the PostgreSQL database and Redis instance that Prefect server uses. It requires the Datadog [PostgreSQL][11] and [Redis][12] integrations monitoring those instances, with the same `service` set on the Prefect, PostgreSQL, and Redis instances. Select that value in the `service` template variable to filter the whole dashboard.
+
+1. Set `service` on the instance in your `prefect.d/conf.yaml` file:
+
+    ```yaml
+    instances:
+      - prefect_url: http://localhost:4200/api
+        service: prefect
+    ```
+
+2. In your `postgres.d/conf.yaml` file, add an instance for the Prefect database. Set `dbname` to the database in `PREFECT_SERVER_DATABASE_CONNECTION_URL` and set `dbstrict` to `true`. Without `dbstrict`, the check collects per-database metrics for every database on the server, so the dashboard mixes in other applications' databases when the server is shared. If another instance already monitors the server, add this one as a separate instance.
+
+    ```yaml
+    instances:
+      - host: <POSTGRES_HOST>
+        port: 5432
+        username: datadog
+        password: <PASSWORD>
+        dbname: prefect
+        dbstrict: true
+        service: prefect
+    ```
+
+3. Set `service` on the instance in your `redisdb.d/conf.yaml` file:
+
+    ```yaml
+    instances:
+      - host: <REDIS_HOST>
+        port: 6379
+        service: prefect
+    ```
+
+4. [Restart the Agent][7].
+
+The PostgreSQL widgets stay empty when Prefect server uses its default SQLite database, which is the case unless `PREFECT_SERVER_DATABASE_CONNECTION_URL` points to PostgreSQL. The Redis widgets stay empty unless Prefect server uses the `prefect-redis` package for event messaging, with `PREFECT_MESSAGING_BROKER` and `PREFECT_MESSAGING_CACHE` set to `prefect_redis.messaging`. For more information, see [Scale self-hosted Prefect][13].
+
 ## Data Collected
 
 ### Metrics
@@ -88,3 +126,6 @@ Need help? Contact [Datadog support][10].
 [8]: https://docs.datadoghq.com/agent/configuration/agent-commands/#agent-status-and-information
 [9]: https://github.com/DataDog/integrations-core/blob/master/prefect/metadata.csv
 [10]: https://docs.datadoghq.com/help/
+[11]: https://docs.datadoghq.com/integrations/postgres/
+[12]: https://docs.datadoghq.com/integrations/redisdb/
+[13]: https://docs.prefect.io/v3/advanced/self-hosted
