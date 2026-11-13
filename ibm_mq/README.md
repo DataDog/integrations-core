@@ -184,7 +184,7 @@ To configure this check for an Agent running on a host:
    - `queue_manager`: The Queue Manager named
    - `host`: The host where IBM MQ is running
    - `port`: The port that IBM MQ has exposed
-   - `convert_endianness`: You need to enable this if your MQ server is running on AIX or IBM i
+   - `convert_endianness`: Enable this only if the Agent host and the MQ server host have different endianness, for example when an Agent on Linux x86 monitors an MQ server on AIX or IBM i. It is not needed when the Agent runs on the same host as the MQ server, including on AIX.
 
    If you are using a username and password setup, you can set the `username` and `password`. If no username is set, the Agent process owner (`dd-agent`) is used.
 
@@ -300,7 +300,7 @@ you can potentially reduce the scope of the check by trying the following:
 
 ### Errors in the logs
 
-- `Unpack for type ((67108864,)) not implemented`: If you're seeing errors like this, and your MQ server is running on a IBM OS, enable `convert_endianness` and restart your Agent.
+- `Unpack for type ((67108864,)) not implemented`: If you're seeing errors like this, and the Agent host and your MQ server host have different endianness, enable `convert_endianness` and restart your Agent.
 
 ### Warnings in the logs
 
