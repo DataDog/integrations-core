@@ -40,6 +40,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
+        fetch-depth: 0  # ddev finds changed checks from the merge base with origin/master
         persist-credentials: false
 
     - name: Set up Python ${{ env.PYTHON_VERSION }}
@@ -61,14 +62,40 @@ jobs:
         ddev dep sync
 
     # Fragments are best effort: a failure here must not stop the pin sync push.
+    # `ddev release changelog new` writes `<PR>.security.1` rather than skip an
+    # existing fragment, so it only runs while the PR has none. It finds the PR
+    # through the search API, which can lag behind a new PR and make it guess the
+    # next issue number instead, so new fragments are renamed to the real number
+    # afterwards, as update-dependencies.yml does.
     - name: Write changelog fragments
       continue-on-error: true
       env:
-        GITHUB_TOKEN: ${{ github.token }}
-      run: python .github/workflows/scripts/write_adms_changelog.py
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        pr=""
+        for _ in $(seq 18); do
+          pr=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --state open --json number --jq '.[0].number // empty')
+          [ -n "$pr" ] && break
+          sleep 10
+        done
+        if [ -z "$pr" ]; then
+          echo "::warning::No open PR for $GITHUB_REF_NAME after 3 minutes; skipping changelog fragments."
+          exit 0
+        fi
+        if compgen -G "*/changelog.d/${pr}.*" > /dev/null; then
+          echo "PR #${pr} already has changelog fragments."
+          exit 0
+        fi
 
-    # Created only after the branch's own code (ddev and the fragment script) has
-    # run, so that code never has access to a write token.
+        ddev release changelog new security -m "Update dependencies to address security vulnerabilities."
+
+        git ls-files --others --exclude-standard -- '*/changelog.d/*' | while read -r file; do
+          target="$(dirname "$file")/${pr}.security"
+          [ "$file" = "$target" ] || mv "$file" "$target"
+        done
+
+    # Created only after the branch's own ddev code has run, so that code never
+    # has access to a write token.
     - name: Create token
       uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
       id: token-generator
