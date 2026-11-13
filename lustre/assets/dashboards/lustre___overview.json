@@ -581,7 +581,7 @@
           {
             "id": 18,
             "definition": {
-              "title": "I/O operation latency",
+              "title": "Average I/O latency (µs/operation)",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -608,7 +608,7 @@
                           "unit_name": "microsecond"
                         }
                       },
-                      "formula": "derivative(query1)"
+                      "formula": "query1 / query3"
                     },
                     {
                       "alias": "Write Latency",
@@ -621,19 +621,29 @@
                           "unit_name": "microsecond"
                         }
                       },
-                      "formula": "derivative(query2)"
+                      "formula": "query2 / query4"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "max:lustre.filesystem.read.sum{$device_uuid, $host} by {device_uuid}"
+                      "query": "monotonic_diff(sum:lustre.filesystem.read.sum{$device_uuid, $host} by {host,device_uuid}.rollup(max, 60))"
                     },
                     {
                       "data_source": "metrics",
                       "name": "query2",
-                      "query": "max:lustre.filesystem.write.sum{$device_uuid, $host} by {device_uuid}"
+                      "query": "monotonic_diff(sum:lustre.filesystem.write.sum{$device_uuid, $host} by {host,device_uuid}.rollup(max, 60))"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query3",
+                      "query": "sum:lustre.filesystem.read.count{$device_uuid, $host} by {host,device_uuid}.as_count().rollup(sum, 60)"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query4",
+                      "query": "sum:lustre.filesystem.write.count{$device_uuid, $host} by {host,device_uuid}.as_count().rollup(sum, 60)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1092,7 +1102,7 @@
           {
             "id": 6410782059505070,
             "definition": {
-              "title": "Number of active requests on MDS",
+              "title": "Average active requests on MDS",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1118,15 +1128,20 @@
                           "unit_name": "request"
                         }
                       },
-                      "alias": "MDS requests",
-                      "formula": "query1"
+                      "alias": "Average MDS requests",
+                      "formula": "query1 / query2"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
                       "name": "query1",
-                      "query": "sum:lustre.mds.mdt.req_active.count{$host} by {host}.as_count()"
+                      "query": "monotonic_diff(sum:lustre.mds.mdt.req_active.sum{$host} by {host}.rollup(max, 60))"
+                    },
+                    {
+                      "data_source": "metrics",
+                      "name": "query2",
+                      "query": "sum:lustre.mds.mdt.req_active.count{$host} by {host}.as_count().rollup(sum, 60)"
                     }
                   ],
                   "response_format": "timeseries",
@@ -1280,7 +1295,7 @@
           {
             "id": 6161259613951870,
             "definition": {
-              "title": "Number of active requests on OSS",
+              "title": "Average active requests on OSS",
               "title_size": "16",
               "title_align": "left",
               "show_legend": true,
@@ -1306,15 +1321,20 @@
                           "unit_name": "request"
                         }
                       },
-                      "alias": "OSS requests",
-                      "formula": "query2"
+                      "alias": "Average OSS requests",
+                      "formula": "query1 / query2"
                     }
                   ],
                   "queries": [
                     {
                       "data_source": "metrics",
+                      "name": "query1",
+                      "query": "monotonic_diff(sum:lustre.oss.req_active.sum{$host} by {host}.rollup(max, 60))"
+                    },
+                    {
+                      "data_source": "metrics",
                       "name": "query2",
-                      "query": "sum:lustre.oss.req_active.count{$host} by {host}.as_count()"
+                      "query": "sum:lustre.oss.req_active.count{$host} by {host}.as_count().rollup(sum, 60)"
                     }
                   ],
                   "response_format": "timeseries",
