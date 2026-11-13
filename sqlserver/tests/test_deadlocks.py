@@ -366,6 +366,72 @@ def test_deadlock_calls_obfuscator(deadlocks_collection_instance):
         assert expected_xml_string == result_string
 
 
+@pytest.mark.parametrize(
+    'first_frame, second_frame, expected_sql',
+    [
+        pytest.param('SELECT 1', 'SELECT 2', 'SELECT 1', id='first_frame'),
+        pytest.param('\n  unknown\n  ', 'SELECT 2', 'SELECT 2', id='skips_padded_unknown_frame'),
+        pytest.param('\n  unknown\n  ', '\n  unknown\n  ', 'SELECT 3', id='falls_back_to_inputbuf'),
+    ],
+)
+def test_deadlock_signature_source(deadlocks_collection_instance, first_frame, second_frame, expected_sql):
+    root = ET.fromstring(
+        f"""
+        <deadlock>
+          <process-list>
+            <process spid="51">
+              <executionStack>
+                <frame>{first_frame}</frame>
+                <frame>{second_frame}</frame>
+              </executionStack>
+              <inputbuf>SELECT 3</inputbuf>
+            </process>
+          </process-list>
+        </deadlock>
+        """
+    )
+    deadlocks_obj = _get_deadlock_obj(deadlocks_collection_instance)
+
+    with (
+        patch.object(deadlocks_obj, 'obfuscate_no_except_wrapper', side_effect=lambda sql: sql.strip()),
+        patch('datadog_checks.sqlserver.deadlocks.compute_sql_signature', side_effect=lambda sql: f'sig:{sql}'),
+    ):
+        signatures = deadlocks_obj._obfuscate_xml(root)
+
+    assert signatures == [{'spid': 51, 'signature': f'sig:{expected_sql}'}]
+
+
+@pytest.mark.parametrize('second_spid', ['51', 'not-an-int'], ids=['duplicate', 'non_integer'])
+def test_deadlock_skipped_signatures_are_still_obfuscated(deadlocks_collection_instance, second_spid):
+    root = ET.fromstring(
+        f"""
+        <deadlock>
+          <process-list>
+            <process spid="51">
+              <executionStack><frame>SELECT 1</frame></executionStack>
+              <inputbuf>SELECT 1</inputbuf>
+            </process>
+            <process spid="{second_spid}">
+              <executionStack><frame>SELECT 2</frame></executionStack>
+              <inputbuf>SELECT 2</inputbuf>
+            </process>
+          </process-list>
+        </deadlock>
+        """
+    )
+    deadlocks_obj = _get_deadlock_obj(deadlocks_collection_instance)
+
+    with (
+        patch.object(deadlocks_obj, 'obfuscate_no_except_wrapper', side_effect=lambda sql: f'obfuscated:{sql}'),
+        patch('datadog_checks.sqlserver.deadlocks.compute_sql_signature', side_effect=lambda sql: f'sig:{sql}'),
+    ):
+        signatures = deadlocks_obj._obfuscate_xml(root)
+
+    assert signatures == [{'spid': 51, 'signature': 'sig:obfuscated:SELECT 1'}]
+    sql_texts = [element.text for element in root.iter() if element.tag in ('frame', 'inputbuf')]
+    assert sql_texts == ['obfuscated:SELECT 1'] * 2 + ['obfuscated:SELECT 2'] * 2
+
+
 @pytest.mark.unit
 def test_collect_deadlocks_config(dbm_instance):
     dbm_instance['collect_deadlocks'] = {"enabled": True, 'collection_interval': 0.2}
