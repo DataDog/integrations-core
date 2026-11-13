@@ -64,6 +64,7 @@ nav:
   - Dev Package:
     - What's in the box?: ddev/about.md
     - Test framework: ddev/test.md
+    - Migrate to ddev 21: ddev/migrate-21.md
     - Plugins: ddev/plugins.md
     - Configuration: ddev/configuration.md
     - Multi-repo/Worktrees: ddev/multirepo.md

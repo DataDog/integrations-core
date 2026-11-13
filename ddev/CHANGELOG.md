@@ -2,6 +2,23 @@
 
 <!-- towncrier release notes start -->
 
+## 21.0.0 / 2026-11-13
+
+***Changed***:
+
+* Require explicit `--envs` and `--pytest-args` options for `ddev test` and `ddev env test`. ([#25947](https://github.com/DataDog/integrations-core/pull/25947))
+  Migrate `ddev test postgres:default -- -m unit` to `ddev test postgres --envs default --pytest-args='-m unit'`,
+  and `ddev env test postgres all -- -m 'not flaky'` to `ddev env test postgres --envs all --pytest-args='-m "not flaky"'`.
+  Both commands accept comma-separated environment names; E2E also accepts `--envs active`.
+  See the [migration guide](https://datadoghq.dev/integrations-core/ddev/migrate-21/) for Windows quoting,
+  Python 3.13 tooling requirements, matched workflow/package pins and rollback combinations.
+
+***Fixed***:
+
+* Retry wheel downloads in `ddev size` on dropped connections and gateway errors, fixing recurring failures in the disk-usage measurement CI job. ([#25247](https://github.com/DataDog/integrations-core/pull/25247))
+* Run macOS CI jobs on the `macos-15-large` runner image, replacing the retired `macos-14-large`. ([#25940](https://github.com/DataDog/integrations-core/pull/25940))
+* Export Dispatcher run resolution logs and metrics to Datadog under a distinct component. ([#25961](https://github.com/DataDog/integrations-core/pull/25961))
+
 ## 20.2.0 / 2026-11-03
 
 ***Added***:
