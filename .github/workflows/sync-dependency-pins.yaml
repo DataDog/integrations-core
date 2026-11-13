@@ -1,0 +1,87 @@
+name: Sync Dependency Pins
+
+# ADMS bumps only agent_requirements.in, so its PRs fail `ddev validate dep`
+# until each check's pyproject.toml pin matches. This copies the new pins into
+# the checks and pushes them to the ADMS branch.
+#
+# The same ADMS push also starts resolve-build-deps.yaml; GitHub has no way to
+# order two workflows triggered by one push. Our sync push starts a new
+# resolve-build-deps run, whose concurrency group cancels the earlier one long
+# before it reaches the build. Check pyproject.toml files are not resolution
+# inputs, so the sync commit does not change what gets resolved.
+on:
+  push:
+    branches:
+    - engraver-auto-version-upgrade/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PYTHON_VERSION: "3.13"
+  SYNC_COMMIT_MESSAGE: Sync check dependency pins
+
+jobs:
+  sync:
+    name: Sync check dependency pins
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      id-token: write  # Required for OIDC token federation with dd-octo-sts
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install ddev from local folder
+      uses: ./.github/actions/setup-ddev
+      with:
+        install-mode: local
+        cache-profile: local-ddev
+
+    - name: Sync check dependency pins
+      run: |
+        ddev config set upgrade_check false
+        ddev config set repos.core .
+        ddev config set repo core
+        ddev dep sync
+
+    # Created only after the branch's own ddev code has run, so that code never
+    # has access to a write token.
+    - name: Create token
+      uses: DataDog/dd-octo-sts-action@96a25462dbcb10ebf0bfd6e2ccc917d2ab235b9a # v1.0.4
+      id: token-generator
+      with:
+        scope: DataDog/integrations-core
+        policy: self.sync-dependency-pins.push
+
+    # Pushing to the exact ref fails if the branch moved since this run started;
+    # the run for the newer commit does the sync instead. Refusing to sync on
+    # top of our own sync commit stops a push loop if `ddev dep sync` ever stops
+    # being idempotent.
+    - name: Commit synced pins to branch
+      env:
+        TOKEN: ${{ steps.token-generator.outputs.token }}
+      run: |
+        git config user.name "dd-agent-integrations-bot[bot]"
+        git config user.email "dd-agent-integrations-bot[bot]@users.noreply.github.com"
+        git add '*/pyproject.toml'
+        if git diff --cached --quiet; then
+          echo "No pin changes to commit."
+        elif [ "$(git log -1 --format=%s)" = "$SYNC_COMMIT_MESSAGE" ]; then
+          echo "::warning::ddev dep sync changed pins again right after a sync commit; not pushing."
+        else
+          git commit -m "$SYNC_COMMIT_MESSAGE"
+          git push "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${GITHUB_REF}"
+        fi
