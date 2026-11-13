@@ -420,6 +420,7 @@ class PrefectCheck(AgentCheck, ConfigMixin):
             # next_scheduled_start_time while it awaits the retry, the Pending state's timestamp once picked up
             overdue_since = _parse_time(fr.get('next_scheduled_start_time'), self.log)
             if overdue_since is None and state_type == 'PENDING' and (fr.get('run_count') or 0) > 0:
+                # The retry time isn't on the flow run once it leaves AwaitingRetry, so the age restarts at pickup
                 overdue_since = _parse_time((fr.get('state') or {}).get('timestamp'), self.log)
             overdue_since = overdue_since or expected_start_time
             if overdue_since:
