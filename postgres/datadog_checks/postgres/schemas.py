@@ -5,14 +5,22 @@
 from __future__ import annotations
 
 import contextlib
-from typing import TYPE_CHECKING, TypedDict
+from abc import abstractmethod
+from collections.abc import Iterator
+from typing import TYPE_CHECKING, Any, TypedDict
 
 from psycopg.rows import dict_row
 
 if TYPE_CHECKING:
     from datadog_checks.postgres import PostgreSql
 
-from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
+from datadog_checks.base.utils.db.schemas import (
+    DatabaseSchemaCollector,
+    SchemaCollectorConfig,
+    SchemaObjectCollector,
+    ViewColumn,
+    ViewObjectCollector,
+)
 from datadog_checks.postgres.filters import regex_exclude_clauses, regex_include_clause
 from datadog_checks.postgres.version_utils import V10, V11, VersionUtils
 
@@ -171,7 +179,9 @@ FROM   pg_catalog.pg_database db
 
 
 class PostgresSchemaCollectorConfig(SchemaCollectorConfig):
+    collect_views: bool
     max_tables: int
+    max_views: int
     exclude_databases: list[str]
     include_databases: list[str]
     exclude_schemas: list[str]
@@ -182,14 +192,22 @@ class PostgresSchemaCollectorConfig(SchemaCollectorConfig):
     max_query_duration: int
 
 
-class PostgresSchemaCollector(SchemaCollector):
+class PostgresSchemaCollector(DatabaseSchemaCollector):
+    """
+    Collects PostgreSQL catalog metadata, using one pooled connection per database for every object kind.
+
+    Tables are always collected, as `pg_databases` payloads. Views and materialized views are collected as
+    `pg_views` payloads when `collect_views` is set.
+    """
+
     _check: PostgreSql
-    _config: PostgresSchemaCollectorConfig
 
     def __init__(self, check: PostgreSql):
         config = PostgresSchemaCollectorConfig()
         config.collection_interval = check._config.collect_schemas.collection_interval
+        config.collect_views = bool(check._config.collect_schemas.collect_views)
         config.max_tables = check._config.collect_schemas.max_tables
+        config.max_views = int(check._config.collect_schemas.max_views)
         config.exclude_databases = check._config.collect_schemas.exclude_databases
         config.include_databases = check._config.collect_schemas.include_databases
         config.exclude_schemas = check._config.collect_schemas.exclude_schemas
@@ -198,11 +216,17 @@ class PostgresSchemaCollector(SchemaCollector):
         config.include_tables = check._config.collect_schemas.include_tables
         config.max_columns = int(check._config.collect_schemas.max_columns)
         config.max_query_duration = int(check._config.collect_schemas.max_query_duration)
-        super().__init__(check, config)
+        object_collectors: list[PostgresObjectCollector] = [PostgresTableCollector(check, config)]
+        if config.collect_views:
+            object_collectors.append(PostgresViewCollector(check, config))
+        super().__init__(check, object_collectors)
+        self._check = check
+        # Shared with every object collector, so a change here applies to all kinds.
+        self._config = config
 
     @property
-    def kind(self):
-        return "pg_databases"
+    def kinds(self) -> list[str]:
+        return [object_collector.kind for object_collector in self._object_collectors]
 
     def _get_databases(self):
         query = DATABASE_INFORMATION_QUERY
@@ -231,15 +255,36 @@ class PostgresSchemaCollector(SchemaCollector):
                 return [dict(row) for row in cursor.fetchall()]
 
     @contextlib.contextmanager
-    def _get_cursor(self, database_name):
-        with self._check.db_pool.get_connection(database_name) as conn:
-            with conn.cursor(row_factory=dict_row) as cursor:
-                # Explicitly wrap these queries in a transaction so we can set the statement timeout locally
-                with conn.transaction():
-                    query, params = self.get_rows_query()
-                    cursor.execute(f"SET LOCAL statement_timeout = '{self._config.max_query_duration}s';")
-                    cursor.execute(query, params)
-                yield cursor
+    def _open_database(self, database: DatabaseInfo) -> Iterator[Any]:
+        with self._check.db_pool.get_connection(database["name"]) as conn:
+            yield conn
+
+
+class PostgresObjectCollector(SchemaObjectCollector):
+    """Collects one kind of PostgreSQL catalog object from the schemas that pass the schema filters."""
+
+    _check: PostgreSql
+    _config: PostgresSchemaCollectorConfig
+
+    @abstractmethod
+    def get_rows_query(self) -> tuple[str, list[str]]:
+        """Returns this kind's catalog query and its parameters."""
+
+    @contextlib.contextmanager
+    def _open_rows(self, conn, database: DatabaseInfo) -> Iterator[Iterator[dict]]:
+        with conn.cursor(row_factory=dict_row) as cursor:
+            # Each kind runs in its own transaction, so the timeout is local to its query and a failed query rolls
+            # back without leaving the shared connection in an aborted transaction for the next kind.
+            with conn.transaction():
+                query, params = self.get_rows_query()
+                cursor.execute(f"SET LOCAL statement_timeout = '{self._config.max_query_duration}s';")
+                cursor.execute(query, params)
+            yield self._iter_rows(cursor)
+
+    @staticmethod
+    def _iter_rows(cursor) -> Iterator[dict]:
+        while row := cursor.fetchone():
+            yield row
 
     def _get_schemas_query(self):
         query = SCHEMA_QUERY
@@ -256,6 +301,12 @@ class PostgresSchemaCollector(SchemaCollector):
                 ", ".join(f"'{owner}'" for owner in self._check._config.ignore_schemas_owned_by)
             )
         return query, params
+
+
+class PostgresTableCollector(PostgresObjectCollector):
+    @property
+    def kind(self):
+        return "pg_databases"
 
     def _get_tables_query(self):
         if VersionUtils.parse_version(str(self._check.version)) < V10:
@@ -362,12 +413,6 @@ class PostgresSchemaCollector(SchemaCollector):
 
         return query, schemas_params + tables_params
 
-    def _get_next(self, cursor):
-        return cursor.fetchone()
-
-    def _get_all(self, cursor):
-        return cursor.fetchall()
-
     def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
         object = super()._map_row(database, cursor_row)
         # Map the cursor row to the expected schema, and strip out None values
@@ -408,3 +453,106 @@ class PostgresSchemaCollector(SchemaCollector):
             }
         ]
         return object
+
+
+VIEW_COLUMNS_QUERY = """
+SELECT a.attname                            AS name,
+       format_type(a.atttypid, a.atttypmod) AS data_type,
+       NOT a.attnotnull                     AS nullable,
+       pg_get_expr(ad.adbin, ad.adrelid)    AS default,
+       selected_views.view_id,
+       a.attnum                            AS ordinal_position
+FROM   selected_views
+       INNER JOIN pg_attribute a
+               ON a.attrelid = selected_views.view_id
+       LEFT JOIN pg_attrdef ad
+              ON ad.adrelid = a.attrelid
+                 AND ad.adnum = a.attnum
+WHERE  a.attnum > 0
+       AND NOT a.attisdropped
+"""
+
+
+class ViewColumnObject(ViewColumn):
+    default: str | None
+
+
+class ViewObject(TypedDict):
+    columns: list[ViewColumnObject]
+    definition: str | None
+    id: str
+    name: str
+    owner: str
+    relkind: str
+
+
+class PostgresViewCollector(ViewObjectCollector, PostgresObjectCollector):
+    """Collects regular (`relkind` v) and materialized (`relkind` m) views."""
+
+    @property
+    def kind(self) -> str:
+        return "pg_views"
+
+    def get_rows_query(self) -> tuple[str, list[str]]:
+        schemas_query, schemas_params = self._get_schemas_query()
+        # 0 means no limit, as in SQL Server.
+        limit = int(self._config.max_views or 1_000_000)
+        query = f"""
+            WITH
+            schemas AS (
+                {schemas_query}
+            ),
+            selected_views AS (
+                SELECT schemas.schema_id, schemas.schema_name, schemas.schema_owner,
+                    c.oid AS view_id, c.relname AS view_name,
+                    c.relowner::regrole::text AS view_owner, c.relkind::text AS relkind
+                FROM schemas
+                INNER JOIN pg_class c ON schemas.schema_id = c.relnamespace
+                WHERE c.relkind IN ('v', 'm')
+                ORDER BY schemas.schema_name, c.relname
+                LIMIT {limit}
+            ),
+            views AS (
+                SELECT selected_views.*,
+                    pg_get_viewdef(selected_views.view_id, true) AS definition
+                FROM selected_views
+            ),
+            columns AS (
+                {VIEW_COLUMNS_QUERY}
+            )
+
+            SELECT views.schema_id, views.schema_name, views.schema_owner,
+                views.view_id, views.view_name, views.view_owner,
+                views.relkind, views.definition,
+                array_agg(
+                    json_build_object(
+                        'data_type', columns.data_type,
+                        'default', columns.default,
+                        'name', columns.name,
+                        'nullable', columns.nullable
+                    ) ORDER BY columns.ordinal_position
+                ) FILTER (WHERE columns.name IS NOT NULL) AS columns
+            FROM views
+                LEFT JOIN columns ON views.view_id = columns.view_id
+            GROUP BY views.schema_id, views.schema_name, views.schema_owner,
+                views.view_id, views.view_name, views.view_owner,
+                views.relkind, views.definition
+            ;
+        """
+        return query, schemas_params
+
+    def _map_row(self, database: DatabaseInfo, cursor_row) -> DatabaseObject:
+        view: ViewObject = {
+            "columns": (cursor_row.get("columns") or [])[: self._config.max_columns],
+            "definition": cursor_row.get("definition"),
+            "id": str(cursor_row.get("view_id")),
+            "name": cursor_row.get("view_name"),
+            "owner": cursor_row.get("view_owner"),
+            "relkind": cursor_row.get("relkind"),
+        }
+        schema = {
+            "id": str(cursor_row.get("schema_id")),
+            "name": cursor_row.get("schema_name"),
+            "owner": cursor_row.get("schema_owner"),
+        }
+        return {**database, "schemas": [self._schema_with_view(schema, view)]}
