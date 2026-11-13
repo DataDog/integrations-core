@@ -14,11 +14,13 @@ pytestmark = [requires_windows]
 def format_counter_array(mocker, slots, data_call_result=None):
     """`slots` holds `(name, cstatus, value)` tuples; `None` leaves a slot zeroed, as if pdh.dll never wrote it.
 
-    The data call returns `PDH_CALC_NEGATIVE_VALUE` unless `data_call_result` is given.
+    The data call returns `PDH_CALC_NEGATIVE_VALUE` unless `data_call_result` is given, and reports the
+    item count only when it succeeds, as pdh.dll does.
     """
     from datadog_checks.base.checks.windows.perf_counters.constants import (
         COUNTER_VALUE_FORMAT,
         PDH_CALC_NEGATIVE_VALUE,
+        PDH_CSTATUS_VALID_DATA,
         PDH_MORE_DATA,
     )
     from datadog_checks.base.checks.windows.perf_counters.utils_win32pdh_fix import (
@@ -42,8 +44,9 @@ def format_counter_array(mocker, slots, data_call_result=None):
                 item.szName = ctypes.addressof(name)
                 item.FmtValue.CStatus = slot[1] & 0xFFFFFFFF
                 item.FmtValue.value.doubleValue = slot[2]
-        item_count.value = 0
-        return PDH_CALC_NEGATIVE_VALUE if data_call_result is None else data_call_result
+        result = PDH_CALC_NEGATIVE_VALUE if data_call_result is None else data_call_result
+        item_count.value = len(slots) if result == PDH_CSTATUS_VALID_DATA else 0
+        return result
 
     mock_windll = mocker.patch(
         'datadog_checks.base.checks.windows.perf_counters.utils_win32pdh_fix.ctypes.windll', create=True
@@ -57,12 +60,33 @@ def test_get_formatted_counter_array_negative_value_last_instance(mocker):
         PDH_CSTATUS_INVALID_DATA,
         PDH_CSTATUS_VALID_DATA,
     )
+    from datadog_checks.base.checks.windows.perf_counters.utils_win32pdh_fix import PartialCounterValues
 
     slots = [
+        ('bad_share', PDH_CSTATUS_INVALID_DATA, 0.0),
         ('healthy_share', PDH_CSTATUS_VALID_DATA, 42.5),
         ('_Total', PDH_CSTATUS_INVALID_DATA, 0.0),
     ]
-    assert format_counter_array(mocker, slots) == {'healthy_share': 42.5}
+    result = format_counter_array(mocker, slots)
+    assert result == {'healthy_share': 42.5}
+    assert isinstance(result, PartialCounterValues)
+    assert result.invalid_instances == ['bad_share', '_Total']
+
+
+def test_get_formatted_counter_array_valid_data_returns_plain_dict(mocker):
+    from datadog_checks.base.checks.windows.perf_counters.constants import (
+        PDH_CSTATUS_INVALID_DATA,
+        PDH_CSTATUS_VALID_DATA,
+    )
+    from datadog_checks.base.checks.windows.perf_counters.utils_win32pdh_fix import PartialCounterValues
+
+    slots = [
+        ('bad_share', PDH_CSTATUS_INVALID_DATA, 0.0),
+        ('healthy_share', PDH_CSTATUS_VALID_DATA, 42.5),
+    ]
+    result = format_counter_array(mocker, slots, data_call_result=PDH_CSTATUS_VALID_DATA)
+    assert result == {'healthy_share': 42.5}
+    assert not isinstance(result, PartialCounterValues)
 
 
 def test_get_formatted_counter_array_all_instances_invalid(mocker):
@@ -74,9 +98,9 @@ def test_get_formatted_counter_array_all_instances_invalid(mocker):
 def test_get_formatted_counter_array_null_szname_skipped(mocker):
     from datadog_checks.base.checks.windows.perf_counters.constants import PDH_CSTATUS_VALID_DATA
 
-    assert format_counter_array(mocker, [('healthy_share', PDH_CSTATUS_VALID_DATA, 12.0), None]) == {
-        'healthy_share': 12.0
-    }
+    result = format_counter_array(mocker, [('healthy_share', PDH_CSTATUS_VALID_DATA, 12.0), None])
+    assert result == {'healthy_share': 12.0}
+    assert result.invalid_instances == []
 
 
 def test_get_formatted_counter_array_sizing_call_error(mocker):

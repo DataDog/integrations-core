@@ -12,6 +12,7 @@ from datadog_checks.base.errors import ConfigTypeError, ConfigValueError
 from .constants import PDH_CSTATUS_INVALID_DATA, PDH_INVALID_DATA
 from .transform import NATIVE_TRANSFORMERS, TRANSFORMERS
 from .utils import construct_counter_path, get_counter_value, get_counter_values, validate_path
+from .utils_win32pdh_fix import PartialCounterValues
 
 
 class PerfObject:
@@ -398,6 +399,10 @@ class PerfObject:
     # At least one derived class (IIS CompatibilityPerfObject(PerfObject)) relies on this
     # function call as callback for its own state management
     def _instance_excluded(self, instance):
+        return self._instance_filtered_out(instance)
+
+    # Only the `include`/`exclude` filters, without the derived-class callback above
+    def _instance_filtered_out(self, instance):
         return self.exclude_pattern.search(instance) or (
             self.include_pattern is not None and not self.include_pattern.search(instance)
         )
@@ -609,9 +614,15 @@ class MultiCounter(CounterBase):
         self.unique_instance_count = 0
 
         total = 0
+        # Skip `.sum`/`.avg` rather than report them short if a handle failed or a monitored instance had no value
+        aggregate_incomplete = False
         for idx, counter_handle in enumerate(self.instances):
             try:
                 instance_items = get_counter_values(counter_handle, self.duplicate_instances_exist)
+                if isinstance(instance_items, PartialCounterValues) and any(
+                    not self._instance_filtered_out(instance) for instance in instance_items.invalid_instances
+                ):
+                    aggregate_incomplete = True
 
                 for instance, value in instance_items.items():
                     # Some instances may not have a value yet, so we only
@@ -653,6 +664,7 @@ class MultiCounter(CounterBase):
                 try:
                     self.handle_counter_value_error(error)
                 except pywintypes.error:
+                    aggregate_incomplete = True
                     self.logger.error(
                         'Error collecting counter `%s` (instance `%s`) for object `%s`: `%s`',
                         self.name,
@@ -664,7 +676,7 @@ class MultiCounter(CounterBase):
                 # To support IIS mocking tests for non-existing wildcard counters
                 pass
 
-        if not self.monitored_instance_count:
+        if not self.monitored_instance_count or aggregate_incomplete:
             return
 
         if self.aggregate is not False:
@@ -722,3 +734,7 @@ class MultiCounter(CounterBase):
         # is always done from the live parent object (perf_obj)
         perf_obj = self.perf_obj_weakref()
         return perf_obj._instance_excluded(instance)
+
+    def _instance_filtered_out(self, instance):
+        perf_obj = self.perf_obj_weakref()
+        return perf_obj._instance_filtered_out(instance)

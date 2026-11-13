@@ -181,7 +181,7 @@ def test_include_fast_error_does_not_skip_subsequent_handles(
     aggregator.assert_metric('test.foo.bar', 30, tags=tags_c)
 
     aggregator.assert_metric_has_tag('test.foo.bar', 'instance:inst_b', count=0)
-    aggregator.assert_metric('test.foo.bar.sum', 40, tags=GLOBAL_TAGS)
+    aggregator.assert_metric('test.foo.bar.sum', count=0)
     aggregator.assert_all_metrics_covered()
 
     expected_message = f'Error collecting counter `Bar` (instance `inst_b`) for object `Foo`: `{error}`'

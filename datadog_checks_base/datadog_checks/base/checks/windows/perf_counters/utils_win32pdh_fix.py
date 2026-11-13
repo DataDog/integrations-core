@@ -58,6 +58,18 @@ class PDH_FMT_COUNTERVALUE_ITEM_W(ctypes.Structure):
     ]
 
 
+class PartialCounterValues(dict):
+    """Instance values recovered when `PdhGetFormattedCounterArrayW` returns `PDH_CALC_NEGATIVE_*`.
+
+    `invalid_instances` lists the instances that had no valid value in this sample, so that callers
+    can tell whether an aggregate over the returned values is complete.
+    """
+
+    def __init__(self, values, invalid_instances):
+        super().__init__(values)
+        self.invalid_instances = invalid_instances
+
+
 # This function is a temporary work around of inability of win32pdh.GetFormattedCounterArray()
 # retrieve non-unique instances since win32pdh.GetFormattedCounterArray() is using a simple
 # dictionary of name to values. See for details
@@ -104,7 +116,8 @@ def GetFormattedCounterArray(counter_handle, format):
     )
     if result == PDH_CSTATUS_INVALID_DATA:
         raise pywintypes.error(result, 'PdhGetFormattedCounterArray', 'The returned data is not valid.')
-    if result in PDH_CALC_NEGATIVE_ERRORS:
+    partial = result in PDH_CALC_NEGATIVE_ERRORS
+    if partial:
         item_count.value = expected_item_count
     elif result != PDH_CSTATUS_VALID_DATA:
         raise pywintypes.error(result, 'PdhGetFormattedCounterArray', 'Failed to retrieve counters values.')
@@ -112,6 +125,7 @@ def GetFormattedCounterArray(counter_handle, format):
     # Instance values is a dictionary with instance name as a key and value could be a single
     # atomic value or list of them for non-unique instances
     instance_values = {}
+    invalid_instances = []
 
     previous_instance_name = ""
     previous_instance_value = None
@@ -130,6 +144,8 @@ def GetFormattedCounterArray(counter_handle, format):
             # Typically errored instances are not reported but Microsoft docs implies a stricter validation
             instance_status = item.contents.FmtValue.CStatus
             if instance_status != PDH_CSTATUS_VALID_DATA and instance_status != PDH_CSTATUS_NEW_DATA:
+                if item.contents.szName is not None:
+                    invalid_instances.append(item.contents.szName)
                 continue
 
             # Get instance value pair
@@ -175,4 +191,6 @@ def GetFormattedCounterArray(counter_handle, format):
         if instance_count > 0:
             instance_values[previous_instance_name] = previous_instance_value
 
+    if partial:
+        return PartialCounterValues(instance_values, invalid_instances)
     return instance_values
