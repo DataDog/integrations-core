@@ -1,0 +1,1 @@
+Add `azure_sys` to the default lists of excluded databases so the Azure Flexible Server system database is skipped by query metrics, samples, autodiscovery, and schema collection.
