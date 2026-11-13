@@ -24,7 +24,7 @@ def request(check: PostgreSql, address: str, query: str = "SELECT 1 AS value", *
         "query": query,
         "includeSchema": True,
         "resultDelivery": {
-            "runId": str(uuid4()),
+            "crawlId": str(uuid4()),
             "taskId": str(uuid4()),
             "uploadId": "test-upload",
             "baseUrl": address,

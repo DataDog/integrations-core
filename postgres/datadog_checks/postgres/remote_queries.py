@@ -126,9 +126,9 @@ def parse_request(raw: str) -> dict:
         if not _text(request["query"]) or type(request["includeSchema"]) is not bool:
             raise ValueError
         delivery = request["resultDelivery"]
-        if not _object(delivery, {"runId", "taskId", "uploadId", "baseUrl", "limits"}):
+        if not _object(delivery, {"crawlId", "taskId", "uploadId", "baseUrl", "limits"}):
             raise ValueError
-        for key in ("runId", "taskId"):
+        for key in ("crawlId", "taskId"):
             if not isinstance(delivery[key], str):
                 raise ValueError
             UUID(delivery[key])
@@ -258,7 +258,7 @@ class ResultSizer:
         schema = [{"column_name": c["column_name"], "vendor_data_type": c["vendor_data_type"]} for c in columns]
         header = {
             "contract_version": "1.0.0",
-            "crawl_id": delivery["runId"],
+            "crawl_id": delivery["crawlId"],
             "task_id": delivery["taskId"],
             "record_offset": 2**63 - 1,
             "data": [],
@@ -336,7 +336,7 @@ class Run:
             "Remote query %s code=%s crawl_id=%s task_id=%s upload_id=%s",
             event,
             code,
-            self.delivery["runId"],
+            self.delivery["crawlId"],
             self.delivery["taskId"],
             self.delivery["uploadId"],
         )

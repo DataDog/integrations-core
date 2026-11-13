@@ -398,7 +398,7 @@ def test_cancel01_02_03_blocked_first_record(
                 release.set()
                 cancellation.result(5)
             else:
-                rq_check.cancel_remote_query(payload["resultDelivery"]["runId"])
+                rq_check.cancel_remote_query(payload["resultDelivery"]["crawlId"])
                 assert time.monotonic() - start < 0.5
                 rq_check.cancel_remote_query("unknown")
             answers = [future.result(8) for future in futures]
@@ -694,7 +694,7 @@ def test_obs03_data_free_run_logs(rq_check: PostgreSql, intake: StubIntake, capl
     lines = [record.message for record in caplog.records if record.message.startswith("Remote query ")]
     assert lines
     for line in lines:
-        assert all(payload["resultDelivery"][key] in line for key in ("runId", "taskId", "uploadId"))
+        assert all(payload["resultDelivery"][key] in line for key in ("crawlId", "taskId", "uploadId"))
         assert all(secret not in line for secret in ("result-secret", "remote-query-api-key", "SELECT"))
 
 
