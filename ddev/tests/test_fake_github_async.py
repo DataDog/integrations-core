@@ -353,6 +353,11 @@ MIRROR_CALLS = [
         {'workflow_id': 'wf.yml'},
     ),
     ('get_workflow_run', lambda f, _: f.get_workflow_run('o', 'r', 42), {'run_id': 42}),
+    (
+        'list_workflow_runs',
+        lambda f, _: first_page(f.list_workflow_runs('o', 'r', 'test-batch.yml', branch='master')),
+        {'workflow_id': 'test-batch.yml', 'branch': 'master'},
+    ),
     ('with_rate_limit', lambda f, _: f.with_rate_limit(VIEW_RATE_LIMITER), {'rate_limiter': VIEW_RATE_LIMITER}),
     ('cancel_workflow_run', lambda f, _: f.cancel_workflow_run('o', 'r', 42), {'run_id': 42}),
     (
