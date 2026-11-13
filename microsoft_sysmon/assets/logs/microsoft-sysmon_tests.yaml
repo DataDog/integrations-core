@@ -209,7 +209,7 @@ tests:
             "ProcessGuid" : "{ac9e6aaa-ac1b-67d2-d100-000000001500}",
             "QueryResults" : "type: 5 alb-logs-http-agent-shard0-1513124509.us-east-1.elb.amazonaws.com;2600:1f18:24e6:b901:bc25:8af3:b8c5:379f;2600:1f18:24e6:b900:6c95:a871:b291:a0c2;2600:1f18:24e6:b900:5514:23e8:c81c:ac65;2600:1f18:24e6:b900:954f:416b:a2f9:3e09;2600:1f18:24e6:b902:2717:60a2:f762:a702;2600:1f18:24e6:b902:8791:4c2d:6b6c:aabb;2600:1f18:24e6:b900:4e3a:a924:af85:cda6;2600:1f18:24e6:b901:b3c6:a361:fb6d:7502;::ffff:3.233.144.0;::ffff:3.233.144.52;::ffff:3.233.144.38;::ffff:3.233.144.98;::ffff:3.233.144.113;::ffff:3.233.144.39;::ffff:3.233.144.51;::ffff:3.233.144.97;",
             "RuleName" : "-",
-            "QueryName" : "agent-http-intake.logs.datadoghq.com",
+            "QueryName" : "agent-http-intake.logs.datadoghq.com.",
             "UtcTime" : "2025-03-18 11:54:05.278"
           }
         },
@@ -240,7 +240,7 @@ tests:
           "Level" : "4"
         }
       },
-      "message" : "Dns query:\r\nRuleName: -\r\nUtcTime: 2025-03-18 11:54:05.278\r\nProcessGuid: {ac9e6aaa-ac1b-67d2-d100-000000001500}\r\nProcessId: 6556\r\nQueryName: agent-http-intake.logs.datadoghq.com\r\nQueryStatus: 0\r\nQueryResults: type: 5 alb-logs-http-agent-shard0-1513124509.us-east-1.elb.amazonaws.com;2600:1f18:24e6:b901:bc25:8af3:b8c5:379f;2600:1f18:24e6:b900:6c95:a871:b291:a0c2;2600:1f18:24e6:b900:5514:23e8:c81c:ac65;2600:1f18:24e6:b900:954f:416b:a2f9:3e09;2600:1f18:24e6:b902:2717:60a2:f762:a702;2600:1f18:24e6:b902:8791:4c2d:6b6c:aabb;2600:1f18:24e6:b900:4e3a:a924:af85:cda6;2600:1f18:24e6:b901:b3c6:a361:fb6d:7502;::ffff:3.233.144.0;::ffff:3.233.144.52;::ffff:3.233.144.38;::ffff:3.233.144.98;::ffff:3.233.144.113;::ffff:3.233.144.39;::ffff:3.233.144.51;::ffff:3.233.144.97;\r\nImage: C:\\Program Files\\Datadog\\Datadog Agent\\bin\\agent.exe\r\nUser: ZEROAD\\ddagentuser"
+      "message" : "Dns query:\r\nRuleName: -\r\nUtcTime: 2025-03-18 11:54:05.278\r\nProcessGuid: {ac9e6aaa-ac1b-67d2-d100-000000001500}\r\nProcessId: 6556\r\nQueryName: agent-http-intake.logs.datadoghq.com.\r\nQueryStatus: 0\r\nQueryResults: type: 5 alb-logs-http-agent-shard0-1513124509.us-east-1.elb.amazonaws.com;2600:1f18:24e6:b901:bc25:8af3:b8c5:379f;2600:1f18:24e6:b900:6c95:a871:b291:a0c2;2600:1f18:24e6:b900:5514:23e8:c81c:ac65;2600:1f18:24e6:b900:954f:416b:a2f9:3e09;2600:1f18:24e6:b902:2717:60a2:f762:a702;2600:1f18:24e6:b902:8791:4c2d:6b6c:aabb;2600:1f18:24e6:b900:4e3a:a924:af85:cda6;2600:1f18:24e6:b901:b3c6:a361:fb6d:7502;::ffff:3.233.144.0;::ffff:3.233.144.52;::ffff:3.233.144.38;::ffff:3.233.144.98;::ffff:3.233.144.113;::ffff:3.233.144.39;::ffff:3.233.144.51;::ffff:3.233.144.97;\r\nImage: C:\\Program Files\\Datadog\\Datadog Agent\\bin\\agent.exe\r\nUser: ZEROAD\\ddagentuser"
     }
   result:
     custom:
@@ -250,7 +250,7 @@ tests:
             Image: "C:\\Program Files\\Datadog\\Datadog Agent\\bin\\agent.exe"
             ProcessGuid: "{ac9e6aaa-ac1b-67d2-d100-000000001500}"
             ProcessId: "6556"
-            QueryName: "agent-http-intake.logs.datadoghq.com"
+            QueryName: "agent-http-intake.logs.datadoghq.com."
             QueryResults: "type: 5 alb-logs-http-agent-shard0-1513124509.us-east-1.elb.amazonaws.com;2600:1f18:24e6:b901:bc25:8af3:b8c5:379f;2600:1f18:24e6:b900:6c95:a871:b291:a0c2;2600:1f18:24e6:b900:5514:23e8:c81c:ac65;2600:1f18:24e6:b900:954f:416b:a2f9:3e09;2600:1f18:24e6:b902:2717:60a2:f762:a702;2600:1f18:24e6:b902:8791:4c2d:6b6c:aabb;2600:1f18:24e6:b900:4e3a:a924:af85:cda6;2600:1f18:24e6:b901:b3c6:a361:fb6d:7502;::ffff:3.233.144.0;::ffff:3.233.144.52;::ffff:3.233.144.38;::ffff:3.233.144.98;::ffff:3.233.144.113;::ffff:3.233.144.39;::ffff:3.233.144.51;::ffff:3.233.144.97;"
             QueryStatus: "0"
             RuleName: "-"
@@ -282,7 +282,7 @@ tests:
         answer:
           name: "type: 5 alb-logs-http-agent-shard0-1513124509.us-east-1.elb.amazonaws.com;2600:1f18:24e6:b901:bc25:8af3:b8c5:379f;2600:1f18:24e6:b900:6c95:a871:b291:a0c2;2600:1f18:24e6:b900:5514:23e8:c81c:ac65;2600:1f18:24e6:b900:954f:416b:a2f9:3e09;2600:1f18:24e6:b902:2717:60a2:f762:a702;2600:1f18:24e6:b902:8791:4c2d:6b6c:aabb;2600:1f18:24e6:b900:4e3a:a924:af85:cda6;2600:1f18:24e6:b901:b3c6:a361:fb6d:7502;::ffff:3.233.144.0;::ffff:3.233.144.52;::ffff:3.233.144.38;::ffff:3.233.144.98;::ffff:3.233.144.113;::ffff:3.233.144.39;::ffff:3.233.144.51;::ffff:3.233.144.97;"
         question:
-          name: "agent-http-intake.logs.datadoghq.com"
+          name: "agent-http-intake.logs.datadoghq.com."
       evt:
         id: "22"
       level: "Information"
@@ -369,7 +369,7 @@ tests:
           - rdata: "::ffff:3.233.144.39"
           - rdata: "::ffff:3.233.144.51"
           - rdata: "::ffff:3.233.144.97"
-    message: "Dns query:\r\nRuleName: -\r\nUtcTime: 2025-03-18 11:54:05.278\r\nProcessGuid: {ac9e6aaa-ac1b-67d2-d100-000000001500}\r\nProcessId: 6556\r\nQueryName: agent-http-intake.logs.datadoghq.com\r\nQueryStatus: 0\r\nQueryResults: type: 5 alb-logs-http-agent-shard0-1513124509.us-east-1.elb.amazonaws.com;2600:1f18:24e6:b901:bc25:8af3:b8c5:379f;2600:1f18:24e6:b900:6c95:a871:b291:a0c2;2600:1f18:24e6:b900:5514:23e8:c81c:ac65;2600:1f18:24e6:b900:954f:416b:a2f9:3e09;2600:1f18:24e6:b902:2717:60a2:f762:a702;2600:1f18:24e6:b902:8791:4c2d:6b6c:aabb;2600:1f18:24e6:b900:4e3a:a924:af85:cda6;2600:1f18:24e6:b901:b3c6:a361:fb6d:7502;::ffff:3.233.144.0;::ffff:3.233.144.52;::ffff:3.233.144.38;::ffff:3.233.144.98;::ffff:3.233.144.113;::ffff:3.233.144.39;::ffff:3.233.144.51;::ffff:3.233.144.97;\r\nImage: C:\\Program Files\\Datadog\\Datadog Agent\\bin\\agent.exe\r\nUser: ZEROAD\\ddagentuser"
+    message: "Dns query:\r\nRuleName: -\r\nUtcTime: 2025-03-18 11:54:05.278\r\nProcessGuid: {ac9e6aaa-ac1b-67d2-d100-000000001500}\r\nProcessId: 6556\r\nQueryName: agent-http-intake.logs.datadoghq.com.\r\nQueryStatus: 0\r\nQueryResults: type: 5 alb-logs-http-agent-shard0-1513124509.us-east-1.elb.amazonaws.com;2600:1f18:24e6:b901:bc25:8af3:b8c5:379f;2600:1f18:24e6:b900:6c95:a871:b291:a0c2;2600:1f18:24e6:b900:5514:23e8:c81c:ac65;2600:1f18:24e6:b900:954f:416b:a2f9:3e09;2600:1f18:24e6:b902:2717:60a2:f762:a702;2600:1f18:24e6:b902:8791:4c2d:6b6c:aabb;2600:1f18:24e6:b900:4e3a:a924:af85:cda6;2600:1f18:24e6:b901:b3c6:a361:fb6d:7502;::ffff:3.233.144.0;::ffff:3.233.144.52;::ffff:3.233.144.38;::ffff:3.233.144.98;::ffff:3.233.144.113;::ffff:3.233.144.39;::ffff:3.233.144.51;::ffff:3.233.144.97;\r\nImage: C:\\Program Files\\Datadog\\Datadog Agent\\bin\\agent.exe\r\nUser: ZEROAD\\ddagentuser"
     status: "info"
     tags:
       - "source:LOGS_SOURCE"

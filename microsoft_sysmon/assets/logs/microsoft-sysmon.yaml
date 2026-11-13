@@ -4075,6 +4075,18 @@ pipeline:
               preserveSource: true
               overrideOnConflict: false
           preserveSource: false
+        - type: grok-parser
+          name: Parse `Event.EventData.Data.QueryName` to `ocsf.query.hostname`
+          enabled: true
+          source: Event.EventData.Data.QueryName
+          samples:
+            - "www.example.com."
+            - "example.com"
+          grok:
+            supportRules: ""
+            matchRules: |
+              fqdn_with_root_dot %{regex("[^\\s]*[^\\s.]"):ocsf.query.hostname}\.
+              fqdn_without_root_dot %{regex("[^\\s]*[^\\s.]"):ocsf.query.hostname}
         - type: schema-processor
           name: Apply OCSF schema for 4003
           enabled: true
@@ -4313,9 +4325,9 @@ pipeline:
                 name: ocsf.actor.user.type
                 id: ocsf.actor.user.type_id
             - type: schema-remapper
-              name: Map `Event.EventData.Data.QueryName` to `ocsf.query.hostname`
+              name: Map `ocsf.query.hostname` to `ocsf.query.hostname`
               sources:
-                - Event.EventData.Data.QueryName
+                - ocsf.query.hostname
               target: ocsf.query.hostname
               preserveSource: true
               overrideOnConflict: false

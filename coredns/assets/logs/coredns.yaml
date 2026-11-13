@@ -215,6 +215,18 @@ pipeline:
           expression: duration / 1000000
           target: ocsf.response_time
           replaceMissing: false
+        - type: grok-parser
+          name: Parse `dns.question.name` to `ocsf.query.hostname`
+          enabled: true
+          source: dns.question.name
+          samples:
+            - "example.org."
+            - "example.org"
+          grok:
+            supportRules: ""
+            matchRules: |
+              fqdn_with_root_dot %{regex("[^\\s]*[^\\s.]"):ocsf.query.hostname}\.
+              fqdn_without_root_dot %{regex("[^\\s]*[^\\s.]"):ocsf.query.hostname}
         - type: schema-processor
           name: Apply OCSF schema for 4003
           enabled: true
@@ -470,9 +482,9 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
-            - name: Map `dns.question.name` to `ocsf.query.hostname`
+            - name: Map `ocsf.query.hostname` to `ocsf.query.hostname`
               sources:
-                - dns.question.name
+                - ocsf.query.hostname
               sourceType: attribute
               target: ocsf.query.hostname
               targetFormat: string
@@ -515,3 +527,15 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
               type: schema-remapper
+    - type: pipeline
+      name: OCSF cleanup for class DNS Activity [4003]
+      enabled: true
+      ocsf:
+        isOcsf: true
+      filter:
+        query: "@ocsf.class_uid:4003 -@ocsf.query.hostname:*"
+      processors:
+        - type: exclude-attribute
+          name: Remove `ocsf.query` when `ocsf.query.hostname` is missing
+          enabled: true
+          attributeToExclude: ocsf.query
