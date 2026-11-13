@@ -5,16 +5,23 @@
 from __future__ import annotations
 
 import contextlib
+import threading
 from abc import abstractmethod
+from collections.abc import Iterator
 from typing import TYPE_CHECKING, TypedDict
 
 from datadog_checks.base.utils.serialization import json
-from datadog_checks.sqlserver.utils import construct_use_statement, execute_query, is_azure_database
+from datadog_checks.sqlserver.utils import (
+    construct_use_statement,
+    execute_query,
+    is_azure_database,
+    raise_if_cancelled,
+)
 
 if TYPE_CHECKING:
     from datadog_checks.sqlserver import SQLServer
 
-from datadog_checks.base.utils.db.schemas import SchemaCollector, SchemaCollectorConfig
+from datadog_checks.base.utils.db.schemas import DatabaseSchemaCollector, SchemaCollectorConfig, SchemaObjectCollector
 from datadog_checks.sqlserver.const import (
     DEFAULT_SCHEMAS_COLLECTION_INTERVAL,
     STATIC_INFO_ENGINE_EDITION,
@@ -76,23 +83,66 @@ class SQLServerDatabaseObject(DatabaseObject):
     schemas: list[SchemaObject]
 
 
-class SQLServerObjectCollector(SchemaCollector):
+class SQLServerDatabaseSession:
     """
-    Collects one kind of SQL Server catalog object, one database at a time.
-    Tables and views collection is implemented by subclasses.
+    The connection to one database that every object collector runs its catalog query on.
+
+    `database` is the database's entry from `_get_databases`, and `cursor` is already switched to it.
+    `detail_cursor()` opens a second connection on first use, for the per-object queries the legacy (pre-2017) path
+    runs while `cursor` is still streaming rows; it is shared by every object collector for this database and closed
+    with the session.
     """
 
-    _check: SQLServer
+    def __init__(
+        self,
+        check: SQLServer,
+        stack: contextlib.ExitStack,
+        database: DatabaseInfo,
+        cursor,
+    ):
+        self._check = check
+        self._stack = stack
+        self.database = database
+        self.cursor = cursor
+        self._detail_cursor = None
 
-    def __init__(self, check: SQLServer):
-        config = SchemaCollectorConfig()
-        config.collection_interval = check._config.schema_config.get(
-            "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
-        )
-        self._is_2016_or_earlier = None
-        self._database_compatibility_levels: dict[str, int] = {}
-        self._pre_2017_cursor = None
-        super().__init__(check, config)
+    def detail_cursor(self):
+        if self._detail_cursor is None:
+            self._stack.enter_context(self._check.connection.open_managed_default_connection(KEY_PREFIX_PRE_2017))
+            cursor = self._stack.enter_context(self._check.connection.get_managed_cursor(KEY_PREFIX_PRE_2017))
+            cursor.execute(construct_use_statement(self.database["name"]))
+            self._detail_cursor = cursor
+        return self._detail_cursor
+
+
+def create_schema_collector_config(check: SQLServer) -> SchemaCollectorConfig:
+    config = SchemaCollectorConfig()
+    config.collection_interval = check._config.schema_config.get(
+        "collection_interval", DEFAULT_SCHEMAS_COLLECTION_INTERVAL
+    )
+    return config
+
+
+class SQLServerSchemaCollector(DatabaseSchemaCollector):
+    """Collects SQL Server catalog metadata, opening one connection per database for every object kind."""
+
+    def __init__(
+        self,
+        check: SQLServer,
+        object_collectors: list[SQLServerObjectCollector],
+        cancel_event: threading.Event | None = None,
+    ):
+        super().__init__(check, object_collectors)
+        self._check = check
+        self._cancel_event = cancel_event
+
+    @property
+    def kinds(self) -> list[str]:
+        return [object_collector.kind for object_collector in self._object_collectors]
+
+    def _raise_if_cancelled(self) -> None:
+        if self._cancel_event is not None:
+            raise_if_cancelled(self._cancel_event)
 
     def _get_databases(self) -> list[DatabaseInfo]:
         database_names = self._check.get_databases()
@@ -102,54 +152,49 @@ class SQLServerObjectCollector(SchemaCollector):
                     return []
                 placeholders = ",".join(["?"] * len(database_names))
                 query = DB_QUERY.format(placeholders)
-                databases = execute_query(query, cursor, convert_results_to_str=True, parameters=tuple(database_names))
-                self._record_database_compatibility_levels(databases)
-                return databases
+                return execute_query(query, cursor, convert_results_to_str=True, parameters=tuple(database_names))
 
     @contextlib.contextmanager
-    def _get_cursor(self, database_name):
+    def _open_database(self, database: DatabaseInfo) -> Iterator[SQLServerDatabaseSession]:
         with contextlib.ExitStack() as stack:
-            try:
-                stack.enter_context(self._check.connection.open_managed_default_connection(KEY_PREFIX))
-                cursor = stack.enter_context(self._check.connection.get_managed_cursor(KEY_PREFIX))
-                switch_db_statement = construct_use_statement(database_name)
-                cursor.execute(switch_db_statement)
-                self._is_2016_or_earlier = self._should_use_legacy_schema_query(database_name)
+            stack.enter_context(self._check.connection.open_managed_default_connection(KEY_PREFIX))
+            cursor = stack.enter_context(self._check.connection.get_managed_cursor(KEY_PREFIX))
+            cursor.execute(construct_use_statement(database["name"]))
+            yield SQLServerDatabaseSession(self._check, stack, database, cursor)
 
-                if self._is_2016_or_earlier:
-                    stack.enter_context(self._check.connection.open_managed_default_connection(KEY_PREFIX_PRE_2017))
-                    self._pre_2017_cursor = stack.enter_context(
-                        self._check.connection.get_managed_cursor(KEY_PREFIX_PRE_2017)
-                    )
-                    self._pre_2017_cursor.execute(switch_db_statement)
 
-                query = self._get_query()
-                cursor.execute(query)
-                yield cursor
-            finally:
-                self._pre_2017_cursor = None
+class SQLServerObjectCollector(SchemaObjectCollector):
+    """
+    Collects one kind of SQL Server catalog object on a `SQLServerDatabaseSession`.
 
-    def _record_database_compatibility_levels(self, databases: list[DatabaseInfo]) -> None:
-        self._database_compatibility_levels = {}
-        for database in databases:
-            self._database_compatibility_levels[database["name"]] = int(database["compatibility_level"])
+    While a database's rows stream, `_is_2016_or_earlier` says which query form is running, and on the legacy form
+    `_pre_2017_cursor` is the session's detail cursor for fetching each object's related rows.
+    """
 
-    def _should_use_legacy_schema_query(self, database_name: str) -> bool:
+    _check: SQLServer
+
+    def __init__(self, check: SQLServer, config: SchemaCollectorConfig):
+        self._is_2016_or_earlier = None
+        self._pre_2017_cursor = None
+        super().__init__(check, config)
+
+    def _should_use_legacy_schema_query(self, database: DatabaseInfo) -> bool:
         """
-        Return whether the current database needs the legacy query.
+        Return whether the database needs the legacy query.
 
         The modern query builds column metadata with JSON output, which is controlled by each database's
-        compatibility_level and requires level 130 or higher. If the level was not recorded, use the legacy query
-        because JSON support cannot be confirmed.
+        compatibility_level and requires level 130 or higher. If the level is unknown, use the legacy query because
+        JSON support cannot be confirmed.
         """
-        compatibility_level = self._database_compatibility_levels.get(database_name)
-        if compatibility_level is None:
+        # Listed values are strings, so a NULL level arrives as "None".
+        compatibility_level = str(database.get("compatibility_level", ""))
+        if not compatibility_level.isdigit():
             self._check.log.debug(
                 "compatibility_level is not available for SQL Server database %s, using pre-2017 schema query",
-                database_name,
+                database["name"],
             )
             return True
-        return compatibility_level < MINIMUM_JSON_COMPATIBILITY_LEVEL
+        return int(compatibility_level) < MINIMUM_JSON_COMPATIBILITY_LEVEL
 
     @abstractmethod
     def _get_query(self) -> str:
@@ -158,25 +203,35 @@ class SQLServerObjectCollector(SchemaCollector):
         Implementations return the legacy form when `self._is_2016_or_earlier` is set.
         """
 
-    def _get_next(self, cursor):
-        return cursor.fetchone_dict()
+    @contextlib.contextmanager
+    def _open_rows(self, session: SQLServerDatabaseSession, database: DatabaseInfo) -> Iterator[Iterator[dict]]:
+        self._is_2016_or_earlier = self._should_use_legacy_schema_query(database)
+        try:
+            if self._is_2016_or_earlier:
+                self._pre_2017_cursor = session.detail_cursor()
+            session.cursor.execute(self._get_query())
+            yield self._iter_rows(session.cursor)
+        finally:
+            self._pre_2017_cursor = None
 
-    def _get_all(self, cursor):
-        return cursor.fetchall_dict()
+    @staticmethod
+    def _iter_rows(cursor) -> Iterator[dict]:
+        while row := cursor.fetchone_dict():
+            yield row
 
 
-class SQLServerSchemaCollector(SQLServerObjectCollector):
-    def __init__(self, check: SQLServer):
-        super().__init__(check)
+class SQLServerTableCollector(SQLServerObjectCollector):
+    def __init__(self, check: SQLServer, config: SchemaCollectorConfig):
+        super().__init__(check, config)
         self._max_tables = check._config.schema_config.get('max_tables', 300)
 
     @property
     def kind(self):
         return "sqlserver_databases"
 
-    def _should_use_legacy_schema_query(self, database_name: str) -> bool:
+    def _should_use_legacy_schema_query(self, database: DatabaseInfo) -> bool:
         """
-        Return whether the current database needs the legacy table query.
+        Return whether the database needs the legacy table query.
 
         Besides JSON output, the modern table query uses STRING_AGG to build index column lists. On self-managed
         SQL Server, this requires SQL Server 2017 or later. Azure SQL Database and Azure SQL Managed Instance report
@@ -191,7 +246,7 @@ class SQLServerSchemaCollector(SQLServerObjectCollector):
                 return True
             if major_version <= 13:
                 return True
-        return super()._should_use_legacy_schema_query(database_name)
+        return super()._should_use_legacy_schema_query(database)
 
     def _get_query(self) -> str:
         limit = int(self._max_tables or 1_000_000)

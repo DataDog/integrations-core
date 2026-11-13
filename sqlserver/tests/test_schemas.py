@@ -2,7 +2,9 @@
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
 
+import contextlib
 import json
+from collections.abc import Iterator
 from datetime import datetime
 from typing import Callable, Optional
 
@@ -11,7 +13,7 @@ import pytest
 from datadog_checks.sqlserver import SQLServer
 from datadog_checks.sqlserver.const import STATIC_INFO_MAJOR_VERSION, STATIC_INFO_YEAR
 from datadog_checks.sqlserver.queries import INDEX_QUERY_PRE_2017
-from datadog_checks.sqlserver.schemas import SQLServerSchemaCollector
+from datadog_checks.sqlserver.schemas import SQLServerSchemaCollector, SQLServerTableCollector
 
 from . import common
 
@@ -53,16 +55,24 @@ def integration_check() -> Callable[[dict, Optional[dict]], SQLServer]:
 
 
 def create_schema_collector(check: SQLServer) -> SQLServerSchemaCollector:
-    collector = SQLServerSchemaCollector(check)
-    collector._get_databases()
-    return collector
+    return check.sql_metadata._schema_collector
+
+
+@contextlib.contextmanager
+def open_tables_query(collector: SQLServerSchemaCollector) -> Iterator[tuple[SQLServerTableCollector, object]]:
+    """Opens the schema database and starts the tables query, yielding the table collector and its cursor."""
+    tables = collector._object_collectors[0]
+    # The listed database carries its compatibility level, which picks the query form.
+    [database] = [database for database in collector._get_databases() if database["name"] == SCHEMA_DATABASE]
+    with collector._open_database(database) as session, tables._open_rows(session, database):
+        yield tables, session.cursor
 
 
 def test_get_cursor(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
     collector = create_schema_collector(check)
 
-    with collector._get_cursor(SCHEMA_DATABASE) as cursor:
+    with open_tables_query(collector) as (tables, cursor):
         assert cursor is not None
         schemas = []
         rows = cursor.fetchall_dict()
@@ -78,7 +88,7 @@ def test_tables(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
     collector = create_schema_collector(check)
 
-    with collector._get_cursor(SCHEMA_DATABASE) as cursor:
+    with open_tables_query(collector) as (tables, cursor):
         assert cursor is not None
         tables = []
         rows = cursor.fetchall_dict()
@@ -97,9 +107,9 @@ def test_schema_table_id_matches_sqlserver_object_id(
     check.static_info_cache[STATIC_INFO_MAJOR_VERSION] = major_version
     collector = create_schema_collector(check)
 
-    with collector._get_cursor(SCHEMA_DATABASE) as cursor:
+    with open_tables_query(collector) as (tables, cursor):
         row = next(row for row in cursor.fetchall_dict() if row['table_name'] == 'cities')
-        mapped = collector._map_row({"name": SCHEMA_DATABASE}, row)
+        mapped = tables._map_row({"name": SCHEMA_DATABASE}, row)
         cursor.execute("SELECT OBJECT_ID('test_schema.cities') AS table_id")
         expected_id = cursor.fetchone_dict()['table_id']
 
@@ -111,7 +121,7 @@ def test_columns(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
     collector = create_schema_collector(check)
 
-    with collector._get_cursor(SCHEMA_DATABASE) as cursor:
+    with open_tables_query(collector) as (tables, cursor):
         assert cursor is not None
         # Assert that at least one row has columns
         rows = cursor.fetchall_dict()
@@ -131,7 +141,7 @@ def test_indexes(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
     collector = create_schema_collector(check)
 
-    with collector._get_cursor(SCHEMA_DATABASE) as cursor:
+    with open_tables_query(collector) as (tables, cursor):
         assert cursor is not None
         # Assert that at least one row has indexes
         rows = cursor.fetchall_dict()
@@ -189,7 +199,7 @@ def _legacy_indexes(collector, table_row):
 
 def test_collect_schemas(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
-    collector = SQLServerSchemaCollector(check)
+    collector = check.sql_metadata._schema_collector
 
     collector.collect_schemas()
 
@@ -241,7 +251,7 @@ def test_collect_views(aggregator, dbm_instance, integration_check, sa_conn):
 def test_collect_schemas_pre_2017(dbm_instance, integration_check):
     check = integration_check(dbm_instance)
     check.static_info_cache[STATIC_INFO_MAJOR_VERSION] = 13
-    collector = SQLServerSchemaCollector(check)
+    collector = check.sql_metadata._schema_collector
 
     collector.collect_schemas()
 
@@ -251,8 +261,8 @@ def test_indexes_pre_2017(dbm_instance, integration_check):
     check.static_info_cache[STATIC_INFO_MAJOR_VERSION] = 13
     collector = create_schema_collector(check)
 
-    with collector._get_cursor(SCHEMA_DATABASE) as cursor:
-        assert collector._is_2016_or_earlier
+    with open_tables_query(collector) as (tables, cursor):
+        assert tables._is_2016_or_earlier
         rows = {row['table_name']: row for row in cursor.fetchall_dict()}
-        _assert_include_split(_legacy_indexes(collector, rows['index_coverage']))
-        _assert_key_order(_legacy_indexes(collector, rows['key_order']))
+        _assert_include_split(_legacy_indexes(tables, rows['index_coverage']))
+        _assert_key_order(_legacy_indexes(tables, rows['key_order']))
