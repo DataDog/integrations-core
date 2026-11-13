@@ -1,0 +1,1 @@
+Fix missing Datadog Agent service comments in SQL Server query activity samples.
