@@ -97,6 +97,7 @@ class CollectColumnStatistics(BaseModel):
     exclude_databases: Optional[tuple[str, ...]] = None
     exclude_schemas: Optional[tuple[str, ...]] = None
     exclude_tables: Optional[tuple[str, ...]] = None
+    function: Optional[str] = None
     include_databases: Optional[tuple[str, ...]] = None
     include_schemas: Optional[tuple[str, ...]] = None
     include_tables: Optional[tuple[str, ...]] = None

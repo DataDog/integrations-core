@@ -206,17 +206,17 @@ DIAGNOSTIC_METADATA = {
         "docs_anchor": DatabaseConfigurationError.config_validation.value,
     },
     DatabaseConfigurationError.column_statistics_function_undefined: {
-        "description": "The `datadog.column_statistics` function is required to collect column statistics.",
+        "description": "The `{column_statistics_function}` function is required to collect column statistics.",
         "remediation": (
-            "Create the `datadog.column_statistics` function in every monitored database as documented in the "
+            "Create the `{column_statistics_function}` function in every monitored database as documented in the "
             "Postgres DBM setup guide."
         ),
         "docs_anchor": DatabaseConfigurationError.column_statistics_function_undefined.value,
     },
     DatabaseConfigurationError.column_statistics_function_insufficient_privilege: {
-        "description": "The datadog user lacks EXECUTE on `datadog.column_statistics`.",
+        "description": "The datadog user lacks EXECUTE on `{column_statistics_function}`.",
         "remediation": (
-            "Run `GRANT EXECUTE ON FUNCTION datadog.column_statistics() TO <datadog_user>;` in every monitored "
+            "Run `GRANT EXECUTE ON FUNCTION {column_statistics_function}() TO <datadog_user>;` in every monitored "
             "database."
         ),
         "docs_anchor": DatabaseConfigurationError.column_statistics_function_insufficient_privilege.value,
@@ -257,11 +257,24 @@ def build_remediation(code, **kwargs):
     return " ".join(parts)
 
 
+DEFAULT_COLUMN_STATISTICS_FUNCTION = "datadog.column_statistics"
+
+
+def column_statistics_function(config):
+    name = (config.collect_column_statistics.function or DEFAULT_COLUMN_STATISTICS_FUNCTION).strip()
+    return name[:-2] if name.endswith("()") else name
+
+
 def _diagnostic_context(code, **kwargs):
     context = dict(kwargs)
     context.setdefault("dbname", "the monitored database")
     if code == DatabaseConfigurationError.undefined_explain_function:
         context.setdefault("explain_function", "datadog.explain_statement")
+    if code in (
+        DatabaseConfigurationError.column_statistics_function_undefined,
+        DatabaseConfigurationError.column_statistics_function_insufficient_privilege,
+    ):
+        context.setdefault("column_statistics_function", DEFAULT_COLUMN_STATISTICS_FUNCTION)
     return context
 
 

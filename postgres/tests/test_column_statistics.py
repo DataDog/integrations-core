@@ -166,6 +166,19 @@ def test_collect_column_statistics_happy_path(integration_check, dbm_instance, p
     assert 'pgtable' in all_tables, f"Expected 'pgtable' in collected tables, got {all_tables}"
 
 
+def test_collect_column_statistics_runs_without_explicit_config(
+    integration_check, dbm_instance, pg_instance, aggregator
+):
+    """A DBM instance with no collect_column_statistics section collects and emits column statistics."""
+    _analyze_tables(pg_instance)
+    del dbm_instance['collect_column_statistics']
+    check = integration_check(dbm_instance)
+    run_one_check(check)
+    events = aggregator.get_event_platform_events("dbm-column-statistics")
+    tables = {entry['table'] for event in events for entry in event['column_statistics']}
+    assert {'persons', 'cities', 'pgtable'} <= tables
+
+
 def test_collect_column_statistics_include_filter(integration_check, dbm_instance, pg_instance, aggregator):
     """include_tables restricts the result set to tables whose name matches the regex."""
     _analyze_tables(pg_instance)

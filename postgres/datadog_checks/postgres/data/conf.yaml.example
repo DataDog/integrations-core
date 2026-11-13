@@ -620,18 +620,25 @@ instances:
 
     ## Enable collection of column statistics from pg_stats.
     ## Requires the `datadog.column_statistics()` function to be created in the database.
+    ## Databases without the function are skipped and reported with a health warning.
     #
     # collect_column_statistics:
 
-        ## @param enabled - boolean - optional - default: false
+        ## @param enabled - boolean - optional - default: true
         ## Enable collection of column statistics. Requires `dbm: true`.
         #
-        # enabled: false
+        # enabled: true
 
         ## @param collection_interval - number - optional - default: 3600
         ## Set the column statistics collection interval (in seconds).
         #
         # collection_interval: 3600
+
+        ## @param function - string - optional - default: datadog.column_statistics
+        ## Override the function used to read column statistics. Accepts a function name, optionally
+        ## qualified with a schema, made of letters, digits and underscores.
+        #
+        # function: datadog.column_statistics
 
         ## @param max_tables - number - optional - default: 500
         ## Maximum number of tables to collect column statistics for.

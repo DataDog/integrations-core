@@ -1,0 +1,1 @@
+Collect column statistics by default on DBM instances. Instances that did not set `collect_column_statistics.enabled` now send column statistics for every database that has the `datadog.column_statistics()` function.
