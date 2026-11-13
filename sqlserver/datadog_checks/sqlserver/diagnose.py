@@ -17,6 +17,13 @@ from datadog_checks.base import ConfigurationError, is_affirmative
 from datadog_checks.sqlserver.connection_errors import SQLConnectionError
 from datadog_checks.sqlserver.const import STATIC_INFO_ENGINE_EDITION
 from datadog_checks.sqlserver.utils import is_azure_database, is_azure_sql_database
+from datadog_checks.sqlserver.xe_collection.query_plan_events import (
+    EVENT_FILE_TARGET,
+    PLAN_SOURCES,
+    QUERY_PLANS_DOCS_URL,
+    RING_BUFFER_TARGET,
+)
+from datadog_checks.sqlserver.xe_collection.query_plan_events import SESSION_NAME as QUERY_PLANS_SESSION_NAME
 
 CATEGORY_SQLSERVER = "sqlserver"
 KEY_PREFIX = "sqlserver-diagnose-"
@@ -47,6 +54,7 @@ class SQLServerConfigurationError(Enum):
     odbc_driver_not_installed = "odbc-driver-not-installed"
     per_database_access = "per-database-access"
     missing_per_database_view_state = "missing-per-database-view-state"
+    query_plans_xe_session = "query-plans-xe-session"
 
 
 DIAGNOSTIC_METADATA = {
@@ -124,6 +132,18 @@ DIAGNOSTIC_METADATA = {
         "remediation": ("Grant VIEW DATABASE STATE to the Datadog user on the listed databases."),
         "docs_url": SQLSERVER_DBM_GRANTS_DOCS_URL,
     },
+    SQLServerConfigurationError.query_plans_xe_session: {
+        "description": (
+            "Verifies that the datadog_query_plans XE session is running, with a query_post_execution_plan_profile "
+            "or query_post_execution_showplan event and an event_file or ring_buffer target, when "
+            "`collect_xe.query_plans` is enabled."
+        ),
+        "remediation": (
+            "Create and start the datadog_query_plans XE session as described in the documentation. "
+            "The Agent never creates or starts it."
+        ),
+        "docs_url": QUERY_PLANS_DOCS_URL,
+    },
 }
 
 
@@ -179,6 +199,8 @@ class SqlserverDiagnose:
                         self._diagnose_msdb_select(cursor)
                     if self._needs_per_database_access():
                         self._diagnose_per_database_access(cursor)
+                    if self._needs_query_plans_xe_session():
+                        self._diagnose_query_plans_xe_session(cursor)
         except (ConfigurationError, SQLConnectionError) as e:
             code = SQLServerConfigurationError.connection_failure
             self._fail(
@@ -475,6 +497,64 @@ class SqlserverDiagnose:
             category=CATEGORY_SQLSERVER,
         )
 
+    def _diagnose_query_plans_xe_session(self, cursor: Any) -> None:
+        code = SQLServerConfigurationError.query_plans_xe_session
+        level = "database_" if is_azure_sql_database(self._current_engine_edition()) else ""
+        try:
+            # sys.dm_xe_sessions only lists running sessions, and needs no more than the Agent's usual grants.
+            cursor.execute(
+                "SELECT e.event_name FROM sys.dm_xe_{level}sessions s "
+                "JOIN sys.dm_xe_{level}session_events e ON s.address = e.event_session_address "
+                "WHERE s.name = ?".format(level=level),
+                (QUERY_PLANS_SESSION_NAME,),
+            )
+            events = {row[0] for row in cursor.fetchall() or []}
+            cursor.execute(
+                "SELECT t.target_name FROM sys.dm_xe_{level}sessions s "
+                "JOIN sys.dm_xe_{level}session_targets t ON s.address = t.event_session_address "
+                "WHERE s.name = ?".format(level=level),
+                (QUERY_PLANS_SESSION_NAME,),
+            )
+            targets = {row[0] for row in cursor.fetchall() or []}
+        except Exception as e:
+            self._warn(
+                code,
+                diagnosis="Unable to read the {} XE session: {}".format(QUERY_PLANS_SESSION_NAME, e),
+                rawerror=str(e),
+            )
+            return
+        if not events and not targets:
+            self._warn(
+                code,
+                diagnosis=(
+                    "`collect_xe.query_plans` is enabled, but the {} XE session doesn't exist or isn't running."
+                ).format(QUERY_PLANS_SESSION_NAME),
+            )
+            return
+        plan_events = sorted(events & set(PLAN_SOURCES))
+        if not plan_events:
+            self._warn(
+                code,
+                diagnosis="The {} XE session has none of the events {}.".format(
+                    QUERY_PLANS_SESSION_NAME, ", ".join(sorted(PLAN_SOURCES))
+                ),
+            )
+            return
+        supported_targets = sorted(targets & {EVENT_FILE_TARGET, RING_BUFFER_TARGET})
+        if not supported_targets:
+            self._warn(
+                code,
+                diagnosis="The {} XE session has no event_file or ring_buffer target.".format(QUERY_PLANS_SESSION_NAME),
+            )
+            return
+        self._check.diagnosis.success(
+            name=code.value,
+            diagnosis="The {} XE session is running, with event {} and target {}.".format(
+                QUERY_PLANS_SESSION_NAME, ", ".join(plan_events), ", ".join(supported_targets)
+            ),
+            category=CATEGORY_SQLSERVER,
+        )
+
     def _diagnose_msdb_select(self, cursor: Any) -> None:
         code = SQLServerConfigurationError.missing_msdb_select
         failures = []
@@ -558,6 +638,11 @@ class SqlserverDiagnose:
             or database_metrics["secondary_log_shipping_metrics"]["enabled"]
         )
 
+    def _needs_query_plans_xe_session(self) -> bool:
+        config = self._check._config
+        query_plans = config.xe_collection_config.get('query_plans', {}) or {}
+        return config.dbm_enabled and is_affirmative(query_plans.get('enabled', False))
+
     def _msdb_probe_queries(self) -> list[tuple[str, str]]:
         config = self._check._config
         database_metrics = config.database_metrics_config
@@ -628,6 +713,16 @@ class SqlserverDiagnose:
             rawerror=rawerror,
         )
         self._failed.add(code.value)
+
+    def _warn(self, code: SQLServerConfigurationError, diagnosis: str, rawerror: str | None = None) -> None:
+        self._check.diagnosis.warning(
+            name=code.value,
+            diagnosis=diagnosis,
+            category=CATEGORY_SQLSERVER,
+            description=DIAGNOSTIC_METADATA[code]["description"],
+            remediation=build_remediation(code),
+            rawerror=rawerror,
+        )
 
     def _database_desc(self) -> str:
         connection = self._check.connection

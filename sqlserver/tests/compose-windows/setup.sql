@@ -484,8 +484,8 @@ ADD EVENT sqlserver.rpc_completed (
         sqlserver.request_id
     )
     WHERE (
-        sql_text <> '' AND
-        duration > 1000000 -- in microseconds, 1 second
+        duration > 1000000 AND -- in microseconds, 1 second
+        statement <> N'' -- not sql_text: it's NULL for stored procedures called by RPC
     )
 ),
 ADD EVENT sqlserver.sql_batch_completed(
@@ -499,8 +499,8 @@ ADD EVENT sqlserver.sql_batch_completed(
         sqlserver.request_id
     )
     WHERE (
-        sql_text <> '' AND
-        duration > 1000000
+        duration > 1000000 AND
+        batch_text <> N''
     )
 ),
 ADD EVENT sqlserver.module_end(
@@ -515,8 +515,8 @@ ADD EVENT sqlserver.module_end(
         sqlserver.request_id
     )
     WHERE (
-        sql_text <> '' AND
-        duration > 1000000
+        duration > 1000000 AND
+        statement <> N''
     )
 )
 ADD TARGET package0.ring_buffer
@@ -570,3 +570,24 @@ WITH (
 
 ALTER EVENT SESSION datadog_query_completions ON SERVER STATE = START;
 ALTER EVENT SESSION datadog_query_errors ON SERVER STATE = START;
+GO
+
+-- 3. Real execution plans, as in the documentation, except for the predicate and the dispatch latency: the tests only
+-- capture their own application's statements, whatever their duration, and read them a second after they ran.
+IF EXISTS (
+    SELECT * FROM sys.server_event_sessions WHERE name = 'datadog_query_plans'
+)
+    DROP EVENT SESSION datadog_query_plans ON SERVER;
+GO
+CREATE EVENT SESSION datadog_query_plans ON SERVER
+ADD EVENT sqlserver.query_post_execution_plan_profile (
+    ACTION (sqlserver.database_name, sqlserver.session_id, sqlserver.request_id, sqlserver.username,
+            sqlserver.client_app_name, sqlserver.client_hostname, sqlserver.query_hash, sqlserver.query_plan_hash,
+            sqlserver.plan_handle, sqlserver.tsql_frame)
+    WHERE sqlserver.client_app_name = N'datadog-query-plans-test'
+)
+ADD TARGET package0.event_file (SET filename = N'datadog_query_plans', max_file_size = 64, max_rollover_files = 4)
+WITH (MAX_MEMORY = 8192 KB, EVENT_RETENTION_MODE = ALLOW_SINGLE_EVENT_LOSS, MAX_DISPATCH_LATENCY = 1 SECONDS,
+      TRACK_CAUSALITY = ON, STARTUP_STATE = ON);
+GO
+ALTER EVENT SESSION datadog_query_plans ON SERVER STATE = START;

@@ -22,6 +22,8 @@ class SqlServerHealthEvent(Enum):
     COLUMN_STATISTICS_PROCEDURE_NOT_FOUND = 'column_statistics_procedure_not_found'
     COLUMN_STATISTICS_INSUFFICIENT_PRIVILEGE = 'column_statistics_insufficient_privilege'
     COLUMN_STATISTICS_PROCEDURE_OUTDATED = 'column_statistics_procedure_outdated'
+    QUERY_PLANS_XE_SESSION_MISSING = 'query_plans_xe_session_missing'
+    QUERY_PLANS_XE_TARGET_UNSUPPORTED = 'query_plans_xe_target_unsupported'
 
 
 class SqlServerHealth(Health):

@@ -118,6 +118,8 @@ class XESessionBase(DBMAsyncJob):
             session_config = xe_config.get('query_completions', {})
         elif session_name == "datadog_query_errors":
             session_config = xe_config.get('query_errors', {})
+        elif session_name == "datadog_query_plans":
+            session_config = xe_config.get('query_plans', {})
         else:
             session_config = {}
 
@@ -225,47 +227,51 @@ class XESessionBase(DBMAsyncJob):
         """
         raise_if_cancelled(self._cancel_event)
 
-        raw_xml = None
         with self._check.connection.open_managed_default_connection(self._conn_key_prefix):
             with self._check.connection.get_managed_cursor(self._conn_key_prefix) as cursor:
-                # For Azure SQL Database support
-                level = ""
-                if self._is_azure_sql_database:
-                    level = "database_"
+                return self._read_ring_buffer(cursor)
 
-                # Determine if we need to use CONVERT based on connector type
-                use_convert = False
-                if self._check.connection.connector == "adodbapi":
-                    use_convert = True
-                    self._log.debug("Using CONVERT syntax for Windows/adodbapi compatibility")
+    def _read_ring_buffer(self, cursor):
+        """Read the session's ring buffer target data with an open cursor, or None when it's empty or unreadable."""
+        raw_xml = None
+        # For Azure SQL Database support
+        level = ""
+        if self._is_azure_sql_database:
+            level = "database_"
 
-                try:
-                    # Choose the appropriate query based on connector type
-                    if use_convert:
-                        query = f"""
-                            SELECT CONVERT(NVARCHAR(MAX), t.target_data) AS target_xml
-                            FROM sys.dm_xe_{level}sessions s
-                            JOIN sys.dm_xe_{level}session_targets t
-                                ON s.address = t.event_session_address
-                            WHERE s.name = ?
-                            AND t.target_name = 'ring_buffer'
-                        """
-                    else:
-                        query = f"""
-                            SELECT CAST(t.target_data AS XML) AS target_xml
-                            FROM sys.dm_xe_{level}sessions s
-                            JOIN sys.dm_xe_{level}session_targets t
-                                ON s.address = t.event_session_address
-                            WHERE s.name = ?
-                            AND t.target_name = 'ring_buffer'
-                        """
+        # Determine if we need to use CONVERT based on connector type
+        use_convert = False
+        if self._check.connection.connector == "adodbapi":
+            use_convert = True
+            self._log.debug("Using CONVERT syntax for Windows/adodbapi compatibility")
 
-                    cursor.execute(query, (self.session_name,))
-                    row = cursor.fetchone()
-                    if row and row[0]:
-                        raw_xml = str(row[0])
-                except Exception as e:
-                    self._log.error(f"Error querying ring buffer: {e}")
+        try:
+            # Choose the appropriate query based on connector type
+            if use_convert:
+                query = f"""
+                    SELECT CONVERT(NVARCHAR(MAX), t.target_data) AS target_xml
+                    FROM sys.dm_xe_{level}sessions s
+                    JOIN sys.dm_xe_{level}session_targets t
+                        ON s.address = t.event_session_address
+                    WHERE s.name = ?
+                    AND t.target_name = 'ring_buffer'
+                """
+            else:
+                query = f"""
+                    SELECT CAST(t.target_data AS XML) AS target_xml
+                    FROM sys.dm_xe_{level}sessions s
+                    JOIN sys.dm_xe_{level}session_targets t
+                        ON s.address = t.event_session_address
+                    WHERE s.name = ?
+                    AND t.target_name = 'ring_buffer'
+                """
+
+            cursor.execute(query, (self.session_name,))
+            row = cursor.fetchone()
+            if row and row[0]:
+                raw_xml = str(row[0])
+        except Exception as e:
+            self._log.error(f"Error querying ring buffer: {e}")
 
         if not raw_xml:
             return None
@@ -297,13 +303,9 @@ class XESessionBase(DBMAsyncJob):
 
             for _, elem in context:
                 try:
-                    # Get basic timestamp for filtering
-                    timestamp = elem.get('timestamp')
-
-                    # Filter by timestamp
-                    if not self._last_event_timestamp or (timestamp and timestamp > self._last_event_timestamp):
+                    if self._is_new_event(elem):
                         # Extract event attributes
-                        event_data = {"timestamp": timestamp, "event_name": elem.get('name', '')}
+                        event_data = {"timestamp": elem.get('timestamp'), "event_name": elem.get('name', '')}
 
                         # Process the event using appropriate handler
                         event_name = event_data["event_name"]
@@ -333,6 +335,11 @@ class XESessionBase(DBMAsyncJob):
         except Exception as e:
             self._log.error(f"Error processing ring buffer events: {e}")
             return []
+
+    def _is_new_event(self, event: etree._Element) -> bool:
+        """Whether an event wasn't read before: by default, whether it's newer than the last event timestamp."""
+        timestamp = event.get('timestamp')
+        return not self._last_event_timestamp or bool(timestamp and timestamp > self._last_event_timestamp)
 
     def _process_action_elements(self, event, event_data):
         """Process common action elements for all event types"""
