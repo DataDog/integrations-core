@@ -58,6 +58,10 @@ def instance_enable_legacy_tags_normalization():
     return True
 
 
+def instance_hostname_source():
+    return 'guest_agent'
+
+
 def instance_infrastructure_mode():
     return 'full'
 
