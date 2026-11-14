@@ -1,0 +1,9 @@
+# File-based EDS for the `file_eds` cluster: an API-delivered assignment gives
+# cluster.version a non-zero hash. The endpoint is never sent traffic.
+version_info: "1"
+resources:
+- "@type": type.googleapis.com/envoy.config.endpoint.v3.ClusterLoadAssignment
+  cluster_name: file_eds
+  endpoints:
+  - lb_endpoints:
+    - endpoint: {address: {socket_address: {address: 127.0.0.1, port_value: 10099}}}
