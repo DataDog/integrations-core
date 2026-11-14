@@ -66,7 +66,7 @@ pipeline:
       grok:
         supportRules: |
           _level %{word:db.severity}
-          _thread_name %{notSpace:logger.thread_name}
+          _thread_name %{data:logger.thread_name}
           _thread_id %{integer:logger.thread_id}
           _logger_name %{notSpace:logger.name}
           _table %{word:db.table}
