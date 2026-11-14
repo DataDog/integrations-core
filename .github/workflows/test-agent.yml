@@ -33,6 +33,11 @@ on:
         description: Agent 6 image on Windows
         default: "datadog/agent-dev:master-py2-win-servercore"
         type: string
+      target:
+        required: false
+        description: Integration to test through the Dispatcher, e.g. "ntp". By default tests all
+        default: ""
+        type: string
 
 jobs:
   test:
@@ -55,3 +60,25 @@ jobs:
        contents: read
        # needed for dd-sts in test-target.yml
        id-token: write
+
+  # Shadow mode: the same images tested through the Dispatcher, alongside the legacy job above. It
+  # reports only its own `Dispatcher (test-agent)` statuses, and `blocking: false` keeps its failures
+  # from failing this workflow.
+  dispatcher:
+    uses: DataDog/integrations-core/.github/workflows/test-dispatch.yml@master
+    with:
+      # A tag supplies its own commit, so exactly one of the two is passed.
+      checkout_sha: ${{ github.ref_type == 'branch' && github.sha || '' }}
+      head-tag: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+      # `all` and `targets` are incompatible, so an explicit target replaces the full run.
+      all: ${{ inputs.target == '' }}
+      targets: ${{ inputs.target }}
+      exclude-targets: ${{ inputs.target == '' && 'ddev' || '' }}
+      context: test-agent
+      agent-image: ${{ inputs.agent-image }}
+      agent-image-windows: ${{ inputs.agent-image-windows }}
+      blocking: false
+    permissions:
+      contents: read
+      # The Dispatcher's octo-sts and dd-sts exchanges
+      id-token: write
