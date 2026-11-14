@@ -3,7 +3,7 @@
   "app_uuid": "84477b49-a750-40ac-adec-0736875192d7",
   "app_id": "automox",
   "owner": "saas-integrations",
-  "display_on_public_website": false,
+  "display_on_public_website": true,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
