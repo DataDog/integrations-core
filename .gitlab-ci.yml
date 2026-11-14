@@ -4,6 +4,7 @@ include:
   - local: .evalya/gitlab-ci.yaml
 
 variables:
+  EVALYA_IMAGE: registry.ddbuild.io/ci/evalya:pipeline-152585680-3065c9244fb55fc4bf68ab3ab7a7bd1ec4306dd0@sha256:d06df5952be1e478147e786b6d9cfcdaba89f8df9cca9078018bdfa9bf78a88d
   TAGGER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:tagger
   VALIDATE_AGENT_BUILD: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/integrations-core:validate_agent_build
   NOTIFIER_IMAGE: 486234852809.dkr.ecr.us-east-1.amazonaws.com/slack-notifier:latest
