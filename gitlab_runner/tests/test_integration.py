@@ -25,6 +25,19 @@ def test_check(aggregator, dd_run_check):
     aggregator.assert_all_metrics_covered()
 
 
+def test_check_without_allowed_metrics(aggregator, dd_run_check):
+    """
+    allowed_metrics is optional: the check must still collect its built-in metrics
+    when init_config doesn't define it at all.
+    """
+    instance = copy.deepcopy(CONFIG['instances'][0])
+    gitlab_runner = GitlabRunnerCheck('gitlab_runner', {}, instances=[instance])
+
+    dd_run_check(gitlab_runner)
+
+    aggregator.assert_metric('gitlab_runner.ci_runner_errors')
+
+
 def test_connection_failure(aggregator):
     """
     Make sure we're failing when the URL isn't right
