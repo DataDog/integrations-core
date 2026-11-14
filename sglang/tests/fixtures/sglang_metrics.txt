@@ -96,3 +96,37 @@ sglang:generation_tokens_histogram_bucket{le="64",model_name="facebook/opt-125m"
 sglang:generation_tokens_histogram_bucket{le="+Inf",model_name="facebook/opt-125m"} 1
 sglang:generation_tokens_histogram_count{model_name="facebook/opt-125m"} 1
 sglang:generation_tokens_histogram_sum{model_name="facebook/opt-125m"} 32
+
+# Optional cache metrics from the upstream SGLang collector.
+# HELP sglang:hicache_host_used_tokens Tokens currently stored in the host KV cache.
+# TYPE sglang:hicache_host_used_tokens gauge
+sglang:hicache_host_used_tokens{model_name="test-model",engine_type="unified",dp_rank="0",tp_rank="0"} 2048
+sglang:hicache_host_used_tokens{model_name="test-model",engine_type="unified",dp_rank="1",tp_rank="0"} 4096
+# HELP sglang:hicache_host_total_tokens Host KV cache capacity in tokens.
+# TYPE sglang:hicache_host_total_tokens gauge
+sglang:hicache_host_total_tokens{model_name="test-model",engine_type="unified",dp_rank="0",tp_rank="0"} 8192
+# HELP sglang:evicted_tokens_total Device KV token slots freed by eviction.
+# TYPE sglang:evicted_tokens_total counter
+sglang:evicted_tokens_total{model_name="test-model",engine_type="unified",dp_rank="0",tp_rank="0"} 128
+# HELP sglang:load_back_tokens_total Tokens loaded from host memory back to the GPU. Select one tensor-parallel rank rather than summing duplicated logical counts across ranks.
+# TYPE sglang:load_back_tokens_total counter
+sglang:load_back_tokens_total{model_name="test-model",engine_type="unified",dp_rank="0",tp_rank="0",pool="kv"} 64
+# HELP sglang:load_back_duration_seconds Duration of host-to-device cache reload copies.
+# TYPE sglang:load_back_duration_seconds histogram
+sglang:load_back_duration_seconds_bucket{model_name="test-model",engine_type="unified",dp_rank="0",tp_rank="0",le="0.1"} 0
+sglang:load_back_duration_seconds_bucket{model_name="test-model",engine_type="unified",dp_rank="0",tp_rank="0",le="0.5"} 2
+sglang:load_back_duration_seconds_bucket{model_name="test-model",engine_type="unified",dp_rank="0",tp_rank="0",le="+Inf"} 2
+sglang:load_back_duration_seconds_sum{model_name="test-model",engine_type="unified",dp_rank="0",tp_rank="0"} 0.5
+sglang:load_back_duration_seconds_count{model_name="test-model",engine_type="unified",dp_rank="0",tp_rank="0"} 2
+# HELP sglang:swa_available_tokens Free token slots in the sliding-window-attention cache pool.
+# TYPE sglang:swa_available_tokens gauge
+sglang:swa_available_tokens{model_name="test-model",engine_type="unified",dp_rank="0",tp_rank="0"} 1024
+# HELP sglang:swa_evictable_tokens Evictable token slots in the sliding-window-attention cache pool.
+# TYPE sglang:swa_evictable_tokens gauge
+sglang:swa_evictable_tokens{model_name="test-model",engine_type="unified",dp_rank="0",tp_rank="0"} 512
+# HELP sglang:swa_used_tokens Actively used token slots in the sliding-window-attention cache pool.
+# TYPE sglang:swa_used_tokens gauge
+sglang:swa_used_tokens{model_name="test-model",engine_type="unified",dp_rank="0",tp_rank="0"} 256
+# HELP sglang:fwd_occupancy Forward pass GPU occupancy percentage.
+# TYPE sglang:fwd_occupancy gauge
+sglang:fwd_occupancy{model_name="test-model",engine_type="unified",dp_rank="0",tp_rank="0"} 75
