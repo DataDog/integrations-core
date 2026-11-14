@@ -170,6 +170,12 @@ FROM   pg_catalog.pg_database db
 """
 
 
+def _strip_indentation(query: str) -> str:
+    # Only indentation is removed so whitespace within a line, such as in quoted values, is left intact. Newlines are
+    # kept so a `--` comment can't swallow the rest of the statement.
+    return "\n".join(line.lstrip() for line in query.splitlines())
+
+
 class PostgresSchemaCollectorConfig(SchemaCollectorConfig):
     max_tables: int
     exclude_databases: list[str]
@@ -227,7 +233,7 @@ class PostgresSchemaCollector(SchemaCollector):
 
         with self._check._get_main_db() as conn:
             with conn.cursor(row_factory=dict_row) as cursor:
-                cursor.execute(query, params)
+                cursor.execute(_strip_indentation(query), params)
                 return [dict(row) for row in cursor.fetchall()]
 
     @contextlib.contextmanager
@@ -238,7 +244,7 @@ class PostgresSchemaCollector(SchemaCollector):
                 with conn.transaction():
                     query, params = self.get_rows_query()
                     cursor.execute(f"SET LOCAL statement_timeout = '{self._config.max_query_duration}s';")
-                    cursor.execute(query, params)
+                    cursor.execute(_strip_indentation(query), params)
                 yield cursor
 
     def _get_schemas_query(self):
@@ -283,10 +289,12 @@ class PostgresSchemaCollector(SchemaCollector):
             f"""
             ,
             partition_keys AS (
-                {PARTITION_KEY_QUERY}
+                SELECT * FROM ( {PARTITION_KEY_QUERY} ) pk
+                WHERE pk.table_id IN (SELECT table_id FROM schema_tables)
             ),
             num_partitions AS (
-                {NUM_PARTITIONS_QUERY}
+                SELECT * FROM ( {NUM_PARTITIONS_QUERY} ) np
+                WHERE np.table_id IN (SELECT table_id FROM schema_tables)
             )
         """
             if is_at_least_11
@@ -300,19 +308,17 @@ class PostgresSchemaCollector(SchemaCollector):
             if is_at_least_11
             else ""
         )
-        # There should only ever by one partition key and one partition count
-        # so we can use the array_agg to get the first element and avoid complicating
-        # the group by
-        parition_selects = (
+        partition_selects = (
             """
         ,
-            (array_agg(partition_keys.partition_key))[1] partition_key,
-            (array_agg(num_partitions.num_partitions))[1] num_partitions
+            partition_keys.partition_key,
+            num_partitions.num_partitions
         """
             if is_at_least_11
             else ""
         )
         limit = int(self._config.max_tables or 1_000_000)
+        max_columns = int(self._config.max_columns)
 
         query = f"""
             WITH
@@ -331,32 +337,37 @@ class PostgresSchemaCollector(SchemaCollector):
                 LIMIT {limit}
             ),
             columns AS (
-                {columns_query}
+                SELECT table_id, (array_agg(row_to_json(c) ORDER BY c.name))[1:{max_columns}] AS columns
+                FROM ( {columns_query} ) c
+                WHERE c.table_id IN (SELECT table_id FROM schema_tables)
+                GROUP BY table_id
             ),
             indexes AS (
-                {indexes_query}
+                SELECT table_id, array_agg(row_to_json(i) ORDER BY i.name) AS indexes
+                FROM ( {indexes_query} ) i
+                WHERE i.table_id IN (SELECT table_id FROM schema_tables)
+                GROUP BY table_id
             ),
             constraints AS (
-                {constraints_query}
+                SELECT table_id, array_agg(row_to_json(k) ORDER BY k.name) AS foreign_keys
+                FROM ( {constraints_query} ) k
+                WHERE k.table_id IN (SELECT table_id FROM schema_tables)
+                GROUP BY table_id
             )
             {partitions_ctes}
 
             SELECT schema_tables.schema_id, schema_tables.schema_name, schema_tables.schema_owner,
             schema_tables.table_id, schema_tables.table_name, schema_tables.table_owner, schema_tables.relkind,
             schema_tables.toast_table,
-                array_agg(row_to_json(columns.*)) FILTER (WHERE columns.name IS NOT NULL) as columns,
-                array_agg(row_to_json(indexes.*)) FILTER (WHERE indexes.name IS NOT NULL) as indexes,
-                array_agg(row_to_json(constraints.*)) FILTER (WHERE constraints.name IS NOT NULL)
-                    as foreign_keys
-                {parition_selects}
+                columns.columns,
+                indexes.indexes,
+                constraints.foreign_keys
+                {partition_selects}
             FROM schema_tables
                 LEFT JOIN columns ON schema_tables.table_id = columns.table_id
                 LEFT JOIN indexes ON schema_tables.table_id = indexes.table_id
                 LEFT JOIN constraints ON schema_tables.table_id = constraints.table_id
                 {partition_joins}
-            GROUP BY schema_tables.schema_id, schema_tables.schema_name, schema_tables.schema_owner,
-                schema_tables.table_id, schema_tables.table_name, schema_tables.table_owner, schema_tables.relkind,
-                schema_tables.toast_table
             ;
         """
 
@@ -385,14 +396,9 @@ class PostgresSchemaCollector(SchemaCollector):
                                 "id": str(cursor_row.get("table_id")),
                                 "name": cursor_row.get("table_name"),
                                 "owner": cursor_row.get("table_owner"),
-                                # The query can create duplicates of the joined tables
-                                "columns": list({v and v['name']: v for v in cursor_row.get("columns") or []}.values())[
-                                    : self._config.max_columns
-                                ],
-                                "indexes": list({v and v['name']: v for v in cursor_row.get("indexes") or []}.values()),
-                                "foreign_keys": list(
-                                    {v and v['name']: v for v in cursor_row.get("foreign_keys") or []}.values()
-                                ),
+                                "columns": cursor_row.get("columns") or [],
+                                "indexes": cursor_row.get("indexes") or [],
+                                "foreign_keys": cursor_row.get("foreign_keys") or [],
                                 "relkind": cursor_row.get("relkind"),
                                 "toast_table": cursor_row.get("toast_table"),
                                 "num_partitions": cursor_row.get("num_partitions"),
