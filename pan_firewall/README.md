@@ -44,7 +44,7 @@ No additional installation is needed on your server.
 
    **Note**: The Agent connects to the management interface of each firewall over HTTPS. HTTPS must be enabled in the management profile of that interface, and if you restrict management access, the Agent host must be in the **Permitted IP Addresses** list. With Panorama discovery, the Agent polls each firewall at the IP address that Panorama reports for it.
 
-   PAN-OS management interfaces ship with a self-signed certificate. Either install a certificate signed by a certificate authority (CA) that the Agent trusts, or set `tls_verify` to `false`.
+   PAN-OS management interfaces ship with a self-signed certificate. Either install a certificate signed by a certificate authority (CA) that the Agent trusts, or set `tls_ca_cert` to the path of a PEM file that contains the CA certificate or the self-signed certificate itself. Set `tls_verify` to `false` only as a last resort, because it disables server authentication.
 
    If you use Panorama discovery, configure `firewall_ips` with an explicit include list that matches your known firewall IP ranges, so that the check only connects to expected firewalls.
 
@@ -67,7 +67,7 @@ See [metadata.csv][7] for a list of metrics provided by this integration.
 The integration submits a gauge only when its PAN-OS call runs, so each gauge series has one point per interval of its group. Size monitor evaluation windows to match:
 
 - Every 2 minutes: BGP peer metrics and data-plane CPU utilization.
-- Every 3 minutes: management-plane CPU, memory, and swap, IPsec tunnel, HA link, and OSPF neighbor metrics.
+- Every 3 minutes: management-plane CPU, memory, and swap; IPsec tunnel metrics; HA link metrics; and OSPF neighbor metrics.
 - Every 5 minutes: power and temperature sensors.
 - Every 30 minutes: disk usage, interface speed, and top-N report metrics.
 - Every 24 hours: license days left and expiration.
