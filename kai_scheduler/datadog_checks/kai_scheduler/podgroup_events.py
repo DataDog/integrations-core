@@ -173,7 +173,7 @@ class PodGroupEventCollector:
             text.extend(self.admitted_details(metadata, transition, previous))
         elif transition.name == 'evicted':
             text.extend(self.evicted_details(namespace, uid, transition, tags))
-        tags.append(f'kai_workload_event_index:{self.next_event_index(uid)}')
+        tags.append(f'kai_pod_group_event_index:{self.next_event_index(uid)}')
 
         self.check.event(
             {
@@ -201,11 +201,11 @@ class PodGroupEventCollector:
             'job_scheduler': 'kai',
             'job_scheduler_workload': metadata.get('name'),
             'job_scheduler_queue': spec.get('queue'),
-            'kai_workload': metadata.get('name'),
-            'kai_workload_uid': metadata.get('uid'),
+            'kai_pod_group': metadata.get('name'),
+            'kai_pod_group_uid': metadata.get('uid'),
             'kai_queue': spec.get('queue'),
             'kai_nodepool': nodepool or DEFAULT_NODEPOOL,
-            'kai_workload_priority_class': spec.get('priorityClassName'),
+            'kai_pod_group_priority_class': spec.get('priorityClassName'),
             'kai_transition': transition.name,
         }
         return [f'{key}:{value}' for key, value in tags.items() if value]
