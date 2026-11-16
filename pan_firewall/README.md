@@ -66,7 +66,7 @@ The integration submits a gauge only when its PAN-OS call runs, so each gauge se
 - Every 30 minutes: disk usage, interface speed, and top-N report metrics.
 - Every 24 hours: license days left and expiration.
 
-`pan_firewall.panorama.can_connect` is sent on every check run. A collector that fails retries after at most 5 minutes. Collection pauses for up to 10 minutes while the firewall runs a commit or a content, antivirus, or WildFire update, so short gaps are expected.
+The check sends `pan_firewall.panorama.can_connect` on every run. A collector that fails retries after at most 5 minutes. Collection pauses for up to 10 minutes while the firewall runs a commit or a content, antivirus, or WildFire update, so short gaps are expected.
 
 ### Logs
 
