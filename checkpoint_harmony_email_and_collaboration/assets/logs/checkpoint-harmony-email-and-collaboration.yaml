@@ -698,7 +698,7 @@ pipeline:
           enabled: true
           source: event.entity.entity_payload.email_links
           target: ocsf.evidence.email.urls
-          preserve_source: true
+          preserveSource: true
           processors:
             - type: attribute-remapper
               name: Map `$sourceElem` to `$targetElem.url_string`
@@ -712,7 +712,7 @@ pipeline:
           enabled: true
           source: event.entity.entity_payload.attachments
           target: ocsf.evidence.email.files
-          preserve_source: true
+          preserveSource: true
           processors:
             - type: attribute-remapper
               name: Map `$sourceElem.name` to `$targetElem.name`
@@ -757,7 +757,7 @@ pipeline:
           enabled: true
           source: ocsf.evidence.email.files
           target: ocsf.evidence.email.files
-          preserve_source: true
+          preserveSource: true
           processors:
             - type: attribute-remapper
               name: Map `$sourceElem.type_id` to `$targetElem.type_id`
@@ -1241,10 +1241,6 @@ pipeline:
               targets:
                 name: ocsf.action
                 id: ocsf.action_id
-              fallback:
-                values:
-                  ocsf.action: Other
-                  ocsf.action_id: '99'
             - type: schema-category-mapper
               name: ocsf.disposition_id
               categories:
@@ -1287,10 +1283,6 @@ pipeline:
               targets:
                 name: ocsf.disposition
                 id: ocsf.disposition_id
-              fallback:
-                values:
-                  ocsf.disposition: Other
-                  ocsf.disposition_id: '99'
             - type: schema-category-mapper
               name: ocsf.risk_level_id
               categories:
@@ -1790,10 +1782,6 @@ pipeline:
               targets:
                 name: ocsf.action
                 id: ocsf.action_id
-              fallback:
-                values:
-                  ocsf.action: Other
-                  ocsf.action_id: '99'
             - type: schema-category-mapper
               name: ocsf.disposition_id
               categories:
@@ -1836,10 +1824,6 @@ pipeline:
               targets:
                 name: ocsf.disposition
                 id: ocsf.disposition_id
-              fallback:
-                values:
-                  ocsf.disposition: Other
-                  ocsf.disposition_id: '99'
             - type: schema-category-mapper
               name: ocsf.finding_info.analytic.type_id
               categories:
@@ -2067,7 +2051,7 @@ pipeline:
           enabled: true
           source: event.entity.entity_payload.recipients_user
           target: ocsf.resources
-          preserve_source: true
+          preserveSource: true
           processors:
             - type: attribute-remapper
               name: Map `$sourceElem.entity_id` to `$targetElem.uid`
@@ -2315,10 +2299,6 @@ pipeline:
               targets:
                 name: ocsf.action
                 id: ocsf.action_id
-              fallback:
-                values:
-                  ocsf.action: Other
-                  ocsf.action_id: '99'
             - type: schema-category-mapper
               name: ocsf.disposition_id
               categories:
@@ -2361,10 +2341,6 @@ pipeline:
               targets:
                 name: ocsf.disposition
                 id: ocsf.disposition_id
-              fallback:
-                values:
-                  ocsf.disposition: Other
-                  ocsf.disposition_id: '99'
             - type: schema-category-mapper
               name: ocsf.confidence_id
               categories:
