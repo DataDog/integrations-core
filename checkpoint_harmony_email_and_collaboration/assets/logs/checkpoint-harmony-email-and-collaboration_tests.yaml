@@ -604,7 +604,6 @@ tests:
             name: Harmony Email & Collaboration
             vendor_name: Check Point
           tenant_uid: datadog
-          log_name: security_event
           event_code: phishing
           profiles:
             - security_control
@@ -1735,7 +1734,6 @@ tests:
             name: Harmony Email & Collaboration
             vendor_name: Check Point
           tenant_uid: '1234563'
-          log_name: security_event
           event_code: alert
           profiles:
             - security_control
@@ -2243,7 +2241,6 @@ tests:
             name: Harmony Email & Collaboration
             vendor_name: Check Point
           tenant_uid: example1
-          log_name: security_event
           event_code: alert
           profiles:
             - security_control
@@ -5623,7 +5620,6 @@ tests:
             name: Harmony Email & Collaboration
             vendor_name: Check Point
           tenant_uid: '1234563'
-          log_name: security_event
           event_code: graymail
           profiles:
             - security_control
@@ -6288,7 +6284,6 @@ tests:
             name: Harmony Email & Collaboration
             vendor_name: Check Point
           tenant_uid: example4
-          log_name: security_event
           event_code: graymail
           profiles:
             - security_control
@@ -6844,7 +6839,6 @@ tests:
             name: Harmony Email & Collaboration
             vendor_name: Check Point
           tenant_uid: example6
-          log_name: security_event
           event_code: malicious_url
           profiles:
             - security_control
@@ -7509,7 +7503,6 @@ tests:
             name: Harmony Email & Collaboration
             vendor_name: Check Point
           tenant_uid: example5
-          log_name: security_event
           event_code: malicious_url
           profiles:
             - security_control
@@ -8210,7 +8203,6 @@ tests:
             name: Harmony Email & Collaboration
             vendor_name: Check Point
           tenant_uid: '1234563'
-          log_name: security_event
           event_code: malware
           profiles:
             - security_control
@@ -9089,7 +9081,6 @@ tests:
             name: Harmony Email & Collaboration
             vendor_name: Check Point
           tenant_uid: example4
-          log_name: security_event
           event_code: malware
           profiles:
             - security_control
@@ -9801,7 +9792,6 @@ tests:
             name: Harmony Email & Collaboration
             vendor_name: Check Point
           tenant_uid: example6
-          log_name: security_event
           event_code: phishing
           profiles:
             - security_control
@@ -10668,7 +10658,6 @@ tests:
             name: Harmony Email & Collaboration
             vendor_name: Check Point
           tenant_uid: example7
-          log_name: security_event
           event_code: phishing
           profiles:
             - security_control
@@ -11279,7 +11268,6 @@ tests:
             name: Harmony Email & Collaboration
             vendor_name: Check Point
           tenant_uid: '1234563'
-          log_name: security_event
           event_code: shadow_it
           profiles:
             - security_control
@@ -11916,7 +11904,6 @@ tests:
             name: Harmony Email & Collaboration
             vendor_name: Check Point
           tenant_uid: example5
-          log_name: security_event
           event_code: shadow_it
           profiles:
             - security_control
@@ -12560,7 +12547,6 @@ tests:
             name: Harmony Email & Collaboration
             vendor_name: Check Point
           tenant_uid: example2
-          log_name: security_event
           event_code: spam
           profiles:
             - security_control
@@ -13293,7 +13279,6 @@ tests:
             name: Harmony Email & Collaboration
             vendor_name: Check Point
           tenant_uid: example7
-          log_name: security_event
           event_code: spam
           profiles:
             - security_control
@@ -14047,7 +14032,6 @@ tests:
             name: Harmony Email & Collaboration
             vendor_name: Check Point
           tenant_uid: example7
-          log_name: security_event
           event_code: suspicious_phishing
           profiles:
             - security_control
@@ -14680,6 +14664,7 @@ tests:
         severity: Low
         activity_name: system_log
         metadata:
+          tenant_uid: "example2"
           uid: 8a8cce2f1ecbc9514c754aaa61ab60df
           product:
             name: Harmony Email & Collaboration
@@ -15498,7 +15483,6 @@ tests:
             name: Harmony Email & Collaboration
             vendor_name: Check Point
           tenant_uid: example2
-          log_name: security_event
           event_code: spam
           profiles:
             - security_control

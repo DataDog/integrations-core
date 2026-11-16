@@ -202,11 +202,6 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Metadata Log Name
-    path: ocsf.metadata.log_name
-    source: log
-  - groups:
-      - OCSF
     name: Metadata Original Time
     path: ocsf.metadata.original_time
     source: log
@@ -450,6 +445,30 @@ pipeline:
           targetType: attribute
           preserveSource: true
           overrideOnConflict: false
+        - type: grok-parser
+          name: Parse `event.security_event.time` to `ocsf.time`
+          enabled: true
+          source: event.security_event.time
+          samples:
+            - '2025-03-31T05:28:26.530183Z'
+            - '2026-11-09T22:12:21.832445'
+          grok:
+            supportRules: ''
+            matchRules: |
+              zulu6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'","UTC"):ocsf.time}
+              zulu0 %{date("yyyy-MM-dd'T'HH:mm:ss'Z'","UTC"):ocsf.time}
+              naive6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS","UTC"):ocsf.time}
+              naive0 %{date("yyyy-MM-dd'T'HH:mm:ss","UTC"):ocsf.time}
+        - type: grok-parser
+          name: Parse `message` to `ocsf.message`
+          enabled: true
+          source: message
+          samples:
+            - Phishing attempt detected in an email from user1@example.com - 'Example subject'
+          grok:
+            supportRules: ''
+            matchRules: |
+              msg %{regex("[\\s\\S]+"):ocsf.message}
     - type: pipeline
       name: OCSF sub pipeline for class Detection Finding [2004] (Email and File)
       enabled: true
@@ -497,30 +516,6 @@ pipeline:
             preserveSource: true
             type: append
         - type: grok-parser
-          name: Parse `event.security_event.time` to `ocsf.time`
-          enabled: true
-          source: event.security_event.time
-          samples:
-            - '2025-03-31T05:28:26.530183Z'
-            - '2026-11-09T22:12:21.832445'
-          grok:
-            supportRules: ''
-            matchRules: |
-              zulu6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'","UTC"):ocsf.time}
-              zulu0 %{date("yyyy-MM-dd'T'HH:mm:ss'Z'","UTC"):ocsf.time}
-              naive6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS","UTC"):ocsf.time}
-              naive0 %{date("yyyy-MM-dd'T'HH:mm:ss","UTC"):ocsf.time}
-        - type: grok-parser
-          name: Parse `message` to `ocsf.message`
-          enabled: true
-          source: message
-          samples:
-            - Spam attempt detected in an email from webcasts@gitlab.com - 'Example email subject 8'
-          grok:
-            supportRules: ''
-            matchRules: |
-              msg %{regex("[\\s\\S]+"):ocsf.message}
-        - type: grok-parser
           name: Parse `event.security_event.entity_info.entity_created` to `ocsf.finding_info.created_time`
           enabled: true
           source: event.security_event.entity_info.entity_created
@@ -532,17 +527,6 @@ pipeline:
             matchRules: |
               frac6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.finding_info.created_time}
               frac0 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.finding_info.created_time}
-        - type: attribute-remapper
-          name: Map `event.security_event.entity_payload.policy_rule_id` to `ocsf.policy.uid`
-          enabled: true
-          sources:
-            - event.security_event.entity_payload.policy_rule_id
-          sourceType: attribute
-          target: ocsf.policy.uid
-          targetType: attribute
-          targetFormat: string
-          preserveSource: true
-          overrideOnConflict: true
         - type: attribute-remapper
           name: Map `event.security_event.saas_info.entity_id` to `ocsf.resource.uid`
           enabled: true
@@ -608,31 +592,16 @@ pipeline:
             target: ocsf.resources
             preserveSource: false
             type: append
-        - type: attribute-remapper
-          name: Map `event.entity.entity_payload.from_email`, `event.security_event.entity_payload.event_metadata.sender_address` to `ocsf.tmp_from`
-          enabled: true
-          sources:
-            - event.entity.entity_payload.from_email
-            - event.security_event.entity_payload.event_metadata.sender_address
-          sourceType: attribute
-          target: ocsf.tmp_from
-          targetType: attribute
-          preserveSource: true
-          overrideOnConflict: true
         - type: grok-parser
-          name: Parse `ocsf.tmp_from` to `ocsf.evidence.email.from`
+          name: Parse `event.entity.entity_payload.from_email` to `ocsf.evidence.email.from`
           enabled: true
-          source: ocsf.tmp_from
+          source: event.entity.entity_payload.from_email
           samples:
             - dummy@alerting-services.com
           grok:
             supportRules: ''
             matchRules: |
               email %{regex("[^@\\s]+@[^@\\s]+\\.[^@\\s]+"):ocsf.evidence.email.from}
-        - type: exclude-attribute
-          name: Remove intermediate `ocsf.tmp_from`
-          enabled: true
-          attributeToExclude: ocsf.tmp_from
         - type: attribute-remapper
           name: Map `event.entity.entity_payload.to` to `ocsf.evidence.email.to`
           enabled: true
@@ -1119,13 +1088,6 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `event.security_event.entity_info.entity_type` to `ocsf.metadata.log_name`
-              sources:
-                - event.security_event.entity_info.entity_type
-              target: ocsf.metadata.log_name
-              preserveSource: true
-              overrideOnConflict: true
-            - type: schema-remapper
               name: Map `event.security_event.entity_info.customer_domain` to `ocsf.metadata.tenant_uid`
               sources:
                 - event.security_event.entity_info.customer_domain
@@ -1257,19 +1219,23 @@ pipeline:
               name: ocsf.action_id
               categories:
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:quarantine*'
+                    query: '@event.security_event.security_event_action.action_type:auto_restore -@event.security_event.security_event_action.action_type:block_user'
+                  name: Allowed
+                  id: 1
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:block_user OR (@event.security_event.security_event_action.action_type:(quarantine_email OR quarantine_file) -@event.security_event.security_event_action.action_type:auto_restore)'
                   name: Denied
                   id: 2
                 - filter:
-                    query: (-@event.security_event.security_event_action.action_type:* OR @event.security_event.security_event_action.action_type:send_email_to* OR @event.security_event.entity_payload.current_state:(detected OR Detected)) -@event.security_event.security_event_action.action_type:(add_spam_header OR add_smart_banner)
+                    query: '(-@event.security_event.security_event_action.action_type:* OR @event.security_event.security_event_action.action_type:(send_email_to* OR phishing_found_event) OR @event.security_event.entity_payload.current_state:(detected OR Detected)) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set)'
                   name: Observed
                   id: 3
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:(add_spam_header OR add_smart_banner)'
+                    query: '@event.security_event.security_event_action.action_type:(move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file)'
                   name: Modified
                   id: 4
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:*'
+                    query: '@event.security_event.security_event_action.action_type:* -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set OR send_email_to* OR phishing_found_event)'
                   name: Other
                   id: 99
               targets:
@@ -1283,23 +1249,39 @@ pipeline:
               name: ocsf.disposition_id
               categories:
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:quarantine*'
+                    query: '@event.security_event.security_event_action.action_type:(quarantine_email OR quarantine_file) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore)'
                   name: Quarantined
                   id: 3
                 - filter:
-                    query: (@event.security_event.entity_payload.current_state:(detected OR Detected) OR -@event.security_event.security_event_action.action_type:*) -@event.security_event.security_event_action.action_type:(add_spam_header OR add_smart_banner OR send_email_to*)
+                    query: '@event.security_event.security_event_action.action_type:move_to_spam -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file)'
+                  name: Custom Action
+                  id: 7
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:auto_restore -@event.security_event.security_event_action.action_type:block_user'
+                  name: Restored
+                  id: 9
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:inline_attachment_change -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam)'
+                  name: Corrected
+                  id: 11
+                - filter:
+                    query: '(-@event.security_event.security_event_action.action_type:* OR @event.security_event.security_event_action.action_type:phishing_found_event OR @event.security_event.entity_payload.current_state:(detected OR Detected)) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set OR send_email_to*)'
                   name: Detected
                   id: 15
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:(add_spam_header OR add_smart_banner)'
+                    query: '@event.security_event.security_event_action.action_type:(add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change)'
                   name: Tagged
                   id: 18
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:send_email_to*'
+                    query: '@event.security_event.security_event_action.action_type:send_email_to* -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set)'
                   name: Alert
                   id: 19
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:*'
+                    query: '@event.security_event.security_event_action.action_type:block_user'
+                  name: Access Revoked
+                  id: 24
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:* -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set OR send_email_to* OR phishing_found_event)'
                   name: Other
                   id: 99
               targets:
@@ -1421,10 +1403,11 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `ocsf.policy.uid` to `ocsf.policy.uid`
+              name: Map `event.security_event.entity_payload.policy_rule_id` to `ocsf.policy.uid`
               sources:
-                - ocsf.policy.uid
+                - event.security_event.entity_payload.policy_rule_id
               target: ocsf.policy.uid
+              targetFormat: string
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
@@ -1481,30 +1464,6 @@ pipeline:
             target: ocsf.finding_info.types
             preserveSource: true
             type: append
-        - type: grok-parser
-          name: Parse `event.security_event.time` to `ocsf.time`
-          enabled: true
-          source: event.security_event.time
-          samples:
-            - '2025-03-31T05:28:26.530183Z'
-            - '2026-11-09T22:12:21.832445'
-          grok:
-            supportRules: ''
-            matchRules: |
-              zulu6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'","UTC"):ocsf.time}
-              zulu0 %{date("yyyy-MM-dd'T'HH:mm:ss'Z'","UTC"):ocsf.time}
-              naive6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS","UTC"):ocsf.time}
-              naive0 %{date("yyyy-MM-dd'T'HH:mm:ss","UTC"):ocsf.time}
-        - type: grok-parser
-          name: Parse `message` to `ocsf.message`
-          enabled: true
-          source: message
-          samples:
-            - 'user3@org2.example.com performed geo-suspicious events: logged in from Germany (198.51.100.16) and after 12 minutes logged in from Israel (2001:db8::2)'
-          grok:
-            supportRules: ''
-            matchRules: |
-              msg %{regex("[\\s\\S]+"):ocsf.message}
         - type: grok-parser
           name: Parse `event.security_event.entity_info.entity_created` to `ocsf.finding_info.created_time`
           enabled: true
@@ -1575,6 +1534,13 @@ pipeline:
           samples:
             - 'user3@org2.example.com performed geo-suspicious events: logged in from Germany (198.51.100.16) and after 12 minutes logged in from Israel (2001:db8::2)'
             - 'Unusual geo activity for skyler.someone@org24.example.com: logged in for the first time from Canada'
+            - user1@example.com was detected sending phishing emails strongly indicating their account is compromised. First email was New File Shared with You
+            - 'A suspicious login failure for user1@example.com, attempting to login from Germany, failing at the MFA stage'
+            - Detected suspicious login for user user1@example.com from 198.51.100.7 (Canada) - matched a suspicious-activity pattern. First-time login from an often-abused cloud/VPS provider by an established user.
+            - Detected suspicious New-InboxRule for user user1@example.com from 198.51.100.7 (Canada) - matched a suspicious-activity pattern. Inbox rule moves targeted emails to archive
+            - user1@example.com has sent an unusual number of email messages or a few emails to an unusually large number of recipients - a 328 recipients within a few minutes.
+            - 'Account compromise detected in series of activities: login, login, UserLoginFailed for user user1@example.com Last activity from 198.51.100.7 (United States)'
+            - user1@example.com logged in from an unusual country (Nigeria, 198.51.100.7)
           grok:
             supportRules: |
               _email %{regex("[^@\\s]+@[^@\\s]+\\.[^@\\s:]+")}
@@ -1584,6 +1550,12 @@ pipeline:
               superman_pair %{_email:ocsf.tmp_evidence_actor.actor.user.email_addr} performed geo-suspicious events: logged in from %{_country} \(%{ip:ocsf.tmp_evidence_login_1.src_endpoint.ip}\) and after %{_gap} logged in from %{_country} \(%{ip:ocsf.tmp_evidence_login_2.src_endpoint.ip}\)
               superman_user %{_email:ocsf.tmp_evidence_actor.actor.user.email_addr} performed %{data}
               unusual_geo Unusual geo activity for %{_email:ocsf.tmp_evidence_actor.actor.user.email_addr}: %{data}
+              compromised_sender %{_email:ocsf.tmp_evidence_actor.actor.user.email_addr} was detected sending phishing emails%{data}
+              mfa_failure A suspicious login failure for %{_email:ocsf.tmp_evidence_actor.actor.user.email_addr}, attempting to login from %{data}
+              suspicious_activity Detected suspicious %{data} for user %{_email:ocsf.tmp_evidence_actor.actor.user.email_addr} from %{ip:ocsf.tmp_evidence_login_1.src_endpoint.ip} \(%{data}
+              mass_mailing %{_email:ocsf.tmp_evidence_actor.actor.user.email_addr} has sent an unusual number of email messages%{data}
+              compromise_series Account compromise detected in series of activities: %{data} for user %{_email:ocsf.tmp_evidence_actor.actor.user.email_addr} Last activity from %{ip:ocsf.tmp_evidence_login_1.src_endpoint.ip}%{data}
+              unusual_country %{_email:ocsf.tmp_evidence_actor.actor.user.email_addr} logged in from an unusual country \(%{data}, %{ip:ocsf.tmp_evidence_login_1.src_endpoint.ip}\)
         - type: attribute-remapper
           name: Map `ocsf.tmp_evidence_actor.actor.user.email_addr` to `ocsf.tmp_evidence_actor.actor.user.name`
           enabled: true
@@ -1796,19 +1768,23 @@ pipeline:
               name: ocsf.action_id
               categories:
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:quarantine*'
+                    query: '@event.security_event.security_event_action.action_type:auto_restore -@event.security_event.security_event_action.action_type:block_user'
+                  name: Allowed
+                  id: 1
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:block_user OR (@event.security_event.security_event_action.action_type:(quarantine_email OR quarantine_file) -@event.security_event.security_event_action.action_type:auto_restore)'
                   name: Denied
                   id: 2
                 - filter:
-                    query: (-@event.security_event.security_event_action.action_type:* OR @event.security_event.security_event_action.action_type:send_email_to* OR @event.security_event.entity_payload.current_state:(detected OR Detected)) -@event.security_event.security_event_action.action_type:(add_spam_header OR add_smart_banner)
+                    query: '(-@event.security_event.security_event_action.action_type:* OR @event.security_event.security_event_action.action_type:(send_email_to* OR phishing_found_event) OR @event.security_event.entity_payload.current_state:(detected OR Detected)) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set)'
                   name: Observed
                   id: 3
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:(add_spam_header OR add_smart_banner)'
+                    query: '@event.security_event.security_event_action.action_type:(move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file)'
                   name: Modified
                   id: 4
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:*'
+                    query: '@event.security_event.security_event_action.action_type:* -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set OR send_email_to* OR phishing_found_event)'
                   name: Other
                   id: 99
               targets:
@@ -1822,23 +1798,39 @@ pipeline:
               name: ocsf.disposition_id
               categories:
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:quarantine*'
+                    query: '@event.security_event.security_event_action.action_type:(quarantine_email OR quarantine_file) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore)'
                   name: Quarantined
                   id: 3
                 - filter:
-                    query: (@event.security_event.entity_payload.current_state:(detected OR Detected) OR -@event.security_event.security_event_action.action_type:*) -@event.security_event.security_event_action.action_type:(add_spam_header OR add_smart_banner OR send_email_to*)
+                    query: '@event.security_event.security_event_action.action_type:move_to_spam -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file)'
+                  name: Custom Action
+                  id: 7
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:auto_restore -@event.security_event.security_event_action.action_type:block_user'
+                  name: Restored
+                  id: 9
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:inline_attachment_change -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam)'
+                  name: Corrected
+                  id: 11
+                - filter:
+                    query: '(-@event.security_event.security_event_action.action_type:* OR @event.security_event.security_event_action.action_type:phishing_found_event OR @event.security_event.entity_payload.current_state:(detected OR Detected)) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set OR send_email_to*)'
                   name: Detected
                   id: 15
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:(add_spam_header OR add_smart_banner)'
+                    query: '@event.security_event.security_event_action.action_type:(add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change)'
                   name: Tagged
                   id: 18
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:send_email_to*'
+                    query: '@event.security_event.security_event_action.action_type:send_email_to* -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set)'
                   name: Alert
                   id: 19
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:*'
+                    query: '@event.security_event.security_event_action.action_type:block_user'
+                  name: Access Revoked
+                  id: 24
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:* -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set OR send_email_to* OR phishing_found_event)'
                   name: Other
                   id: 99
               targets:
@@ -1977,30 +1969,6 @@ pipeline:
             preserveSource: true
             type: append
         - type: grok-parser
-          name: Parse `event.security_event.time` to `ocsf.time`
-          enabled: true
-          source: event.security_event.time
-          samples:
-            - '2025-03-31T05:28:26.530183Z'
-            - '2026-11-09T22:12:21.832445'
-          grok:
-            supportRules: ''
-            matchRules: |
-              zulu6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'","UTC"):ocsf.time}
-              zulu0 %{date("yyyy-MM-dd'T'HH:mm:ss'Z'","UTC"):ocsf.time}
-              naive6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS","UTC"):ocsf.time}
-              naive0 %{date("yyyy-MM-dd'T'HH:mm:ss","UTC"):ocsf.time}
-        - type: grok-parser
-          name: Parse `message` to `ocsf.message`
-          enabled: true
-          source: message
-          samples:
-            - 'SmartDLP has detected HIPAA leak in ''Re: Example email subject 2'' (wren.magna@org3.example.com''s mailbox)'
-          grok:
-            supportRules: ''
-            matchRules: |
-              msg %{regex("[\\s\\S]+"):ocsf.message}
-        - type: grok-parser
           name: Parse `event.security_event.entity_info.entity_created` to `ocsf.finding_info.created_time`
           enabled: true
           source: event.security_event.entity_info.entity_created
@@ -2012,16 +1980,6 @@ pipeline:
             matchRules: |
               frac6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZZ"):ocsf.finding_info.created_time}
               frac0 %{date("yyyy-MM-dd'T'HH:mm:ssZZ"):ocsf.finding_info.created_time}
-        - type: grok-parser
-          name: Parse `message` to `ocsf.data_security.classifier_details.name`
-          enabled: true
-          source: message
-          samples:
-            - SmartDLP has detected PII, PCI leak in 'Card_dump_details_2025_test_file_2.csv' (Created by Test User)
-          grok:
-            supportRules: ''
-            matchRules: |
-              rules %{regex("[^ ]+ has detected "):}%{regex(".+?(?= leak in )"):ocsf.data_security.classifier_details.name} leak in %{data}
         - type: string-builder-processor
           name: Add DLP rule names
           enabled: true
@@ -2179,16 +2137,6 @@ pipeline:
             preserveSource: false
             type: append
         - type: grok-parser
-          name: Parse `event.entity.entity_payload.download_url` to `ocsf.dst_endpoint.hostname`
-          enabled: true
-          source: event.entity.entity_payload.download_url
-          samples:
-            - https://sub20.sharepoint.com/sites/ProjectApollo
-          grok:
-            supportRules: ''
-            matchRules: |
-              host %{regex("https?://"):}%{regex("[^/:?]+"):ocsf.dst_endpoint.hostname}%{data}
-        - type: grok-parser
           name: Parse `event.entity.entity_payload.sender_client_ip` to `ocsf.src_endpoint.ip`
           enabled: true
           source: event.entity.entity_payload.sender_client_ip
@@ -2345,19 +2293,23 @@ pipeline:
               name: ocsf.action_id
               categories:
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:quarantine*'
+                    query: '@event.security_event.security_event_action.action_type:auto_restore -@event.security_event.security_event_action.action_type:block_user'
+                  name: Allowed
+                  id: 1
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:block_user OR (@event.security_event.security_event_action.action_type:(quarantine_email OR quarantine_file) -@event.security_event.security_event_action.action_type:auto_restore)'
                   name: Denied
                   id: 2
                 - filter:
-                    query: (-@event.security_event.security_event_action.action_type:* OR @event.security_event.security_event_action.action_type:send_email_to* OR @event.security_event.entity_payload.current_state:(detected OR Detected)) -@event.security_event.security_event_action.action_type:(add_spam_header OR add_smart_banner)
+                    query: '(-@event.security_event.security_event_action.action_type:* OR @event.security_event.security_event_action.action_type:(send_email_to* OR phishing_found_event) OR @event.security_event.entity_payload.current_state:(detected OR Detected)) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set)'
                   name: Observed
                   id: 3
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:(add_spam_header OR add_smart_banner)'
+                    query: '@event.security_event.security_event_action.action_type:(move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file)'
                   name: Modified
                   id: 4
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:*'
+                    query: '@event.security_event.security_event_action.action_type:* -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set OR send_email_to* OR phishing_found_event)'
                   name: Other
                   id: 99
               targets:
@@ -2371,23 +2323,39 @@ pipeline:
               name: ocsf.disposition_id
               categories:
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:quarantine*'
+                    query: '@event.security_event.security_event_action.action_type:(quarantine_email OR quarantine_file) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore)'
                   name: Quarantined
                   id: 3
                 - filter:
-                    query: (@event.security_event.entity_payload.current_state:(detected OR Detected) OR -@event.security_event.security_event_action.action_type:*) -@event.security_event.security_event_action.action_type:(add_spam_header OR add_smart_banner OR send_email_to*)
+                    query: '@event.security_event.security_event_action.action_type:move_to_spam -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file)'
+                  name: Custom Action
+                  id: 7
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:auto_restore -@event.security_event.security_event_action.action_type:block_user'
+                  name: Restored
+                  id: 9
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:inline_attachment_change -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam)'
+                  name: Corrected
+                  id: 11
+                - filter:
+                    query: '(-@event.security_event.security_event_action.action_type:* OR @event.security_event.security_event_action.action_type:phishing_found_event OR @event.security_event.entity_payload.current_state:(detected OR Detected)) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set OR send_email_to*)'
                   name: Detected
                   id: 15
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:(add_spam_header OR add_smart_banner)'
+                    query: '@event.security_event.security_event_action.action_type:(add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set) -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change)'
                   name: Tagged
                   id: 18
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:send_email_to*'
+                    query: '@event.security_event.security_event_action.action_type:send_email_to* -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set)'
                   name: Alert
                   id: 19
                 - filter:
-                    query: '@event.security_event.security_event_action.action_type:*'
+                    query: '@event.security_event.security_event_action.action_type:block_user'
+                  name: Access Revoked
+                  id: 24
+                - filter:
+                    query: '@event.security_event.security_event_action.action_type:* -@event.security_event.security_event_action.action_type:(block_user OR auto_restore OR quarantine_email OR quarantine_file OR move_to_spam OR inline_attachment_change OR add_spam_header OR add_graymail_header OR add_smart_banner OR subject_body_change_set OR send_email_to* OR phishing_found_event)'
                   name: Other
                   id: 99
               targets:
@@ -2744,9 +2712,9 @@ pipeline:
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
-              name: Map `ocsf.dst_endpoint.hostname` to `ocsf.dst_endpoint.hostname`
+              name: Map `download_url_details.host` to `ocsf.dst_endpoint.hostname`
               sources:
-                - ocsf.dst_endpoint.hostname
+                - download_url_details.host
               target: ocsf.dst_endpoint.hostname
               preserveSource: true
               overrideOnConflict: true
@@ -2773,30 +2741,6 @@ pipeline:
       filter:
         query: '@event.security_event.entity_payload.category:* -@ocsf.class_uid:*'
       processors:
-        - type: grok-parser
-          name: Parse `event.security_event.time` to `ocsf.time`
-          enabled: true
-          source: event.security_event.time
-          samples:
-            - '2025-03-31T05:28:26.530183Z'
-            - '2026-11-09T22:12:21.832445'
-          grok:
-            supportRules: ''
-            matchRules: |
-              zulu6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'","UTC"):ocsf.time}
-              zulu0 %{date("yyyy-MM-dd'T'HH:mm:ss'Z'","UTC"):ocsf.time}
-              naive6 %{date("yyyy-MM-dd'T'HH:mm:ss.SSSSSS","UTC"):ocsf.time}
-              naive0 %{date("yyyy-MM-dd'T'HH:mm:ss","UTC"):ocsf.time}
-        - type: grok-parser
-          name: Parse `message` to `ocsf.message`
-          enabled: true
-          source: message
-          samples:
-            - Spam attempt detected in an email from webcasts@gitlab.com - 'Example email subject 8'
-          grok:
-            supportRules: ''
-            matchRules: |
-              msg %{regex("[\\s\\S]+"):ocsf.message}
         - type: schema-processor
           name: Apply OCSF schema for 0
           enabled: true
@@ -2834,6 +2778,13 @@ pipeline:
               sources:
                 - event.security_event.entity_info.entity_id
               target: ocsf.metadata.uid
+              preserveSource: true
+              overrideOnConflict: true
+            - type: schema-remapper
+              name: Map `event.security_event.entity_info.customer_domain` to `ocsf.metadata.tenant_uid`
+              sources:
+                - event.security_event.entity_info.customer_domain
+              target: ocsf.metadata.tenant_uid
               preserveSource: true
               overrideOnConflict: true
             - type: schema-remapper
