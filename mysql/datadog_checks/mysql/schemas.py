@@ -9,6 +9,9 @@ import datetime
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Iterator
 
+import pymysql
+from pymysql.constants import ER
+
 from datadog_checks.base import is_affirmative
 from datadog_checks.base.utils.db.schemas import (
     DEFAULT_MAX_VIEWS,
@@ -85,6 +88,19 @@ def _json_safe_create_time(value: Any) -> Any:
     if isinstance(value, (datetime.date, datetime.datetime)):
         return value.isoformat()
     return value
+
+
+def quote_identifier(name: Any) -> str:
+    """Quote a MySQL identifier with backticks, doubling any backtick in it."""
+    return "`{}`".format(str(name).replace("`", "``"))
+
+
+def view_body(create_view: str | None, quoted_name: str) -> str | None:
+    """Return the `select ...` part of a `SHOW CREATE VIEW` statement, as `information_schema.VIEWS` reports it."""
+    marker = " VIEW {} AS ".format(quoted_name)
+    if not create_view or marker not in create_view:
+        return None
+    return create_view.split(marker, 1)[1]
 
 
 def normalize_columns(rows: list[dict]) -> list[dict]:
@@ -480,7 +496,11 @@ class MySqlViewCollector(ViewObjectCollector, MySqlObjectCollector):
             self._execute(cursor, SQL_VIEWS.format(hint=hint), [database_name, limit])
             views = [dict(row) for row in cursor.fetchall()]
 
+        # MariaDB always reports definitions the user may see, so only MySQL needs the fallback.
+        can_show_create_view = not self._check.is_mariadb
         for views_chunk in get_list_chunks(views, TABLES_CHUNK_SIZE):
+            if can_show_create_view:
+                can_show_create_view = self._fill_hidden_definitions(conn, database_name, views_chunk)
             view_names = [str(view["name"]) for view in views_chunk]
             placeholders = ",".join(["%s"] * len(view_names))
             columns_by_view = self._fetch_grouped(
@@ -489,10 +509,34 @@ class MySqlViewCollector(ViewObjectCollector, MySqlObjectCollector):
             for view in views_chunk:
                 yield {**view, "_columns": columns_by_view.get(view["name"], [])}
 
+    def _fill_hidden_definitions(self, conn, database_name: str, views: list[dict]) -> bool:
+        """
+        Fill in definitions that `information_schema.VIEWS` left empty, from `SHOW CREATE VIEW`.
+
+        Before 8.0.24, MySQL leaves `VIEW_DEFINITION` empty for any user other than the view's definer, even with
+        the `SHOW VIEW` privilege, while `SHOW CREATE VIEW` still returns it. Returns False once the user is denied
+        `SHOW VIEW`, so the database's remaining views are not tried one by one.
+        """
+        with conn.cursor(CommenterDictCursor) as cursor:
+            for view in views:
+                if view.get("definition"):
+                    continue
+                quoted_name = "{}.{}".format(quote_identifier(database_name), quote_identifier(view["name"]))
+                try:
+                    self._execute(cursor, "SHOW CREATE VIEW {}".format(quoted_name))
+                    row = cursor.fetchone()
+                except pymysql.err.MySQLError as e:
+                    if e.args and e.args[0] in (ER.TABLEACCESS_DENIED_ERROR, ER.SPECIFIC_ACCESS_DENIED_ERROR):
+                        return False
+                    self._log.debug("Unable to read the definition of view %s: %s", quoted_name, e)
+                    continue
+                view["definition"] = view_body(row.get("Create View") if row else None, quoted_name)
+        return True
+
     def _map_row(self, database: DatabaseInfo, cursor_row: dict) -> dict:
         view = {
             "name": cursor_row.get("name"),
-            # MySQL returns an empty definition when the user lacks the SHOW VIEW privilege.
+            # Empty when the user lacks the SHOW VIEW privilege.
             "definition": cursor_row.get("definition") or None,
             "columns": normalize_columns(cursor_row.get("_columns") or []),
         }

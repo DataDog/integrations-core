@@ -8,6 +8,7 @@ import json
 import threading
 from unittest import mock
 
+import pymysql
 import pytest
 
 from datadog_checks.mysql.schemas import (
@@ -270,7 +271,9 @@ def _run_every_schema_query(collector) -> list[str]:
     """
     tables, views = collector._object_collectors
     db_cursor = _db_cursor(collector)
-    db_cursor.fetchall.side_effect = [[{"name": "app"}], [{"name": "t1"}]] + [[]] * 4 + [[{"name": "v1"}], []]
+    db_cursor.fetchall.side_effect = (
+        [[{"name": "app"}], [{"name": "t1"}]] + [[]] * 4 + [[{"name": "v1", "definition": "select 1"}], []]
+    )
 
     collector._get_databases()
     list(tables._iter_chunked_tables("app"))
@@ -357,7 +360,9 @@ def test_chunked_collection_passes_object_names_as_query_parameters(kind, detail
     [object_collector] = [c for c in collector._object_collectors if c.kind == kind]
     names = ["normal_name", 'bad"name', "x') UNION SELECT user()#"]
     db_cursor = _db_cursor(collector)
-    db_cursor.fetchall.side_effect = [[{"name": name} for name in names]] + [[]] * detail_queries
+    db_cursor.fetchall.side_effect = [[{"name": name, "definition": "select 1"} for name in names]] + [
+        []
+    ] * detail_queries
 
     with object_collector._open_rows(None, {"name": "mydb"}) as rows:
         list(rows)
@@ -494,6 +499,59 @@ def test_view_query_limits_views_per_database(max_views, expected_limit):
         list(rows)
 
     assert db_cursor.execute.call_args.args[1] == ["mydb", expected_limit]
+
+
+HIDDEN_VIEW_CREATE_STATEMENT = (
+    "CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `mydb`.`odd``name` "
+    "AS select `mydb`.`t`.`id` AS `id` from `mydb`.`t`"
+)
+
+
+def _collect_views(views, *, is_mariadb=False, show_create_view=None) -> tuple[list[dict], list[str]]:
+    """Run the view collector on one database whose listing returns `views`, and return its rows and queries."""
+    collector = _make_view_collector()
+    collector._check.is_mariadb = is_mariadb
+    db_cursor = _db_cursor(collector)
+    db_cursor.fetchall.side_effect = [views, []]
+    db_cursor.fetchone.return_value = {"Create View": HIDDEN_VIEW_CREATE_STATEMENT}
+    if show_create_view is not None:
+        db_cursor.execute.side_effect = lambda query, params=None: (
+            show_create_view() if query.startswith("SHOW CREATE VIEW") else None
+        )
+
+    with collector._open_rows(None, {"name": "mydb"}) as rows:
+        collected = list(rows)
+    return collected, [call.args[0] for call in db_cursor.execute.call_args_list]
+
+
+def test_view_collector_reads_hidden_definitions_from_show_create_view():
+    """MySQL before 8.0.24 hides definitions from information_schema even with SHOW VIEW."""
+    rows, queries = _collect_views(
+        [{"name": "odd`name", "definition": ""}, {"name": "visible", "definition": "select 2"}]
+    )
+
+    assert [row["definition"] for row in rows] == ["select `mydb`.`t`.`id` AS `id` from `mydb`.`t`", "select 2"]
+    # The name is quoted with its backtick doubled, so it cannot break out of the identifier.
+    assert [query for query in queries if query.startswith("SHOW")] == ["SHOW CREATE VIEW `mydb`.`odd``name`"]
+
+
+def test_view_collector_stops_reading_definitions_when_show_view_is_denied():
+    def deny():
+        raise pymysql.err.OperationalError(pymysql.constants.ER.TABLEACCESS_DENIED_ERROR, "SHOW VIEW command denied")
+
+    rows, queries = _collect_views(
+        [{"name": "v1", "definition": ""}, {"name": "v2", "definition": ""}], show_create_view=deny
+    )
+
+    assert [row["definition"] for row in rows] == ["", ""]
+    assert len([query for query in queries if query.startswith("SHOW")]) == 1
+
+
+def test_view_collector_does_not_read_definitions_on_mariadb():
+    rows, queries = _collect_views([{"name": "v1", "definition": ""}], is_mariadb=True)
+
+    assert [row["definition"] for row in rows] == [""]
+    assert not [query for query in queries if "SHOW CREATE VIEW" in query]
 
 
 @pytest.mark.parametrize(
