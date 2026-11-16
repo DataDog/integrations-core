@@ -22,10 +22,6 @@ files:
 
           Model servers expose their own metrics; collect them with the vLLM or SGLang integration.
 
-          This integration is part of GPU Monitoring and only runs when GPU Monitoring is enabled
-          in the Agent configuration (`gpu.enabled: true`, or `DD_GPU_ENABLED=true`). When GPU
-          Monitoring is off, every instance configured here is skipped.
-
           For more information, see:
           https://github.com/llm-d/llm-d-router/blob/main/docs/metrics.md
         histogram_buckets_as_distributions.value.example: true
