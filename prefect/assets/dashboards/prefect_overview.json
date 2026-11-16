@@ -35,7 +35,7 @@
             "id": 7751699873574134,
             "definition": {
               "type": "note",
-              "content": "## Prefect Overview \n\nThis dashboard provides a high-level overview of your Prefect Server. It is organized into sections covering flow performance and task-level drilldowns, health metrics for work queues, work pools, and deployments, as well as related databases commonly used with Prefect. All metrics are collected through the Prefect API.\n\n### Further Reading\n\n-   [Prefect Server API Documentation](https://docs.prefect.io/v3/api-ref/rest-api/server)\n-   [Prefect Home Page](https://www.prefect.io/)\n",
+              "content": "## Prefect Overview \n\nThis dashboard provides a high-level overview of your Prefect server. It is organized into sections covering flow performance and task-level drilldowns, health metrics for work queues, work pools, and deployments, as well as related databases commonly used with Prefect. All metrics are collected through the Prefect API.\n\n### Further Reading\n\n-   [Prefect Server API Documentation](https://docs.prefect.io/v3/api-ref/rest-api/server)\n-   [Prefect Home Page](https://www.prefect.io/)\n",
               "background_color": "white",
               "font_size": "14",
               "text_align": "left",

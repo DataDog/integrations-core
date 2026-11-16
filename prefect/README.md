@@ -2,9 +2,9 @@
 
 ## Overview
 
-This check monitors [Prefect Server][1] through the Datadog Agent.
+This check monitors [Prefect server][1] through the Datadog Agent.
 
-Prefect is a Python-first workflow orchestration platform used to schedule and execute flows and tasks across work pools, work queues, and workers. This integration collects orchestration health and performance metrics and events directly from the [Prefect Server API][2] and supports [log collection][3] for comprehensive monitoring.
+Prefect is a Python-first workflow orchestration platform used to schedule and execute flows and tasks across work pools, work queues, and workers. This integration collects orchestration health and performance metrics and events directly from the [Prefect server API][2] and supports [log collection][3] for comprehensive monitoring.
 
 ### What this integration monitors
 
@@ -34,13 +34,11 @@ No additional installation is needed on your server.
 
 2. [Restart the Agent][7].
 
-### Validation
-
-[Run the Agent's status subcommand][8] and look for `prefect` under the Checks section.
-
 ### Configure the Related Databases dashboard section
 
 The Related Databases section of the Prefect dashboard shows the PostgreSQL database and Redis instance that Prefect server uses. This section requires the Datadog [PostgreSQL][11] and [Redis][12] integrations to monitor those instances. Set the same `service` on the Prefect, PostgreSQL, and Redis instances, then select that value in the `service` template variable to filter the whole dashboard.
+
+The PostgreSQL widgets stay empty if Prefect server uses its default SQLite database. They show data only when `PREFECT_SERVER_DATABASE_CONNECTION_URL` points to a PostgreSQL database. The Redis widgets stay empty unless Prefect server uses the `prefect-redis` package for event messaging, with `PREFECT_MESSAGING_BROKER` and `PREFECT_MESSAGING_CACHE` set to `prefect_redis.messaging`. For more information, see [Scale self-hosted Prefect][13].
 
 1. Set `service` on the instance in your `prefect.d/conf.yaml` file:
 
@@ -50,7 +48,9 @@ The Related Databases section of the Prefect dashboard shows the PostgreSQL data
         service: prefect
     ```
 
-2. In your `postgres.d/conf.yaml` file, add an instance for the Prefect database. Set `dbname` to the database in `PREFECT_SERVER_DATABASE_CONNECTION_URL` and set `dbstrict` to `true`. Without `dbstrict`, the check collects per-database metrics for every database on the server, so the dashboard mixes in other applications' databases when the server is shared. If another instance already monitors the server, add this one as a separate instance.
+2. In your `postgres.d/conf.yaml` file, add an instance for the Prefect database. Set `dbname` to the database name in `PREFECT_SERVER_DATABASE_CONNECTION_URL`, and set `dbstrict` to `true`. If another instance already monitors the server, add this one as a separate instance.
+
+    **Note**: Without `dbstrict`, the check collects per-database metrics for every database on the server. If the server is shared, the dashboard includes other applications' databases.
 
     ```yaml
     instances:
@@ -74,7 +74,9 @@ The Related Databases section of the Prefect dashboard shows the PostgreSQL data
 
 4. [Restart the Agent][7].
 
-The PostgreSQL widgets stay empty when Prefect server uses its default SQLite database, which is the case unless `PREFECT_SERVER_DATABASE_CONNECTION_URL` points to PostgreSQL. The Redis widgets stay empty unless Prefect server uses the `prefect-redis` package for event messaging, with `PREFECT_MESSAGING_BROKER` and `PREFECT_MESSAGING_CACHE` set to `prefect_redis.messaging`. For more information, see [Scale self-hosted Prefect][13].
+### Validation
+
+[Run the Agent's status subcommand][8] and look for `prefect` under the Checks section.
 
 ## Data Collected
 
