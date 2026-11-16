@@ -5,7 +5,7 @@
 Any integration that makes use of our [pytest plugin](ddev/plugins.md#pytest) in its test suite supports
 end-to-end testing on a live [Datadog Agent][].
 
-The entrypoint for E2E management is the command group [`env`](ddev/cli.md#ddev-env).
+The entrypoint for E2E management is the command group [`env`](ddev/cli.md#ddev-env). Each subcommand takes the integration name and, where needed, an environment name.
 
 ## Discovery
 
