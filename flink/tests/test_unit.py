@@ -87,8 +87,8 @@ def test_custom_metric_collected_via_extra_metrics_regex(dd_run_check, aggregato
 
 
 def test_custom_metric_type_override_via_extra_metrics(dd_run_check, aggregator, instance, mock_metrics):
-    """`extra_metrics`' `type:` override fixes a wrong exposed type (same failure mode as Bug 1 --
-    counters exposed as `gauge` -- but on a custom metric this integration can't know about ahead of time)."""
+    """`extra_metrics`' `type:` override fixes a wrong exposed type (a counter exposed as `gauge`, as the check
+    already handles for its built-in counters, but on a custom metric it can't know about ahead of time)."""
     instance = copy.deepcopy(instance)
     instance["extra_metrics"] = [
         {
