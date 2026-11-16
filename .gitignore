@@ -151,6 +151,8 @@ treemap*.png
 !.claude/skills/
 .claude/skills/*
 !.claude/skills/onboard-evalya/
+# Harness-agnostic skills live in .agents/skills; Claude Code loads them through symlinks here
+!.claude/skills/togo-prd
 
 # Claude Code PR review artifacts
 .agint-review/
