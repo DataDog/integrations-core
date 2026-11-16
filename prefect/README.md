@@ -38,7 +38,7 @@ No additional installation is needed on your server.
 
 [Run the Agent's status subcommand][8] and look for `prefect` under the Checks section.
 
-### Related databases
+### Configure the Related Databases dashboard section
 
 The Related Databases section of the Prefect dashboard shows the PostgreSQL database and Redis instance that Prefect server uses. It requires the Datadog [PostgreSQL][11] and [Redis][12] integrations monitoring those instances, with the same `service` set on the Prefect, PostgreSQL, and Redis instances. Select that value in the `service` template variable to filter the whole dashboard.
 
