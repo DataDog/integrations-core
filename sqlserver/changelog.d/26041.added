@@ -1,0 +1,1 @@
+Add incremental query metrics collection, enabled with the hidden `query_metrics.incremental_query_metrics` option.
