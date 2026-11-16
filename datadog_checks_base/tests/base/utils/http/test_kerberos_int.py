@@ -85,7 +85,7 @@ def test_kerberos_auth_with_agent(kerberos_agent):
     Steps to reproduce:
     1. Change decorator above from `True` to `False` to enable test
     2. Edit compose/kerberos-agent/Dockerfile to appropriate Agent release
-    3. Run test via `ddev test -k test_kerberos_auth_with_agent datadog_checks_base:py38`
+    3. Run test via `ddev test datadog_checks_base --envs default --pytest-args='-k test_kerberos_auth_with_agent'`
     4. After compose builds, and during `time.sleep` exec into Agent container in separate shell
        via `docker exec -it compose_agent_1 /bin/bash`
     5. Execute check via `agent check nginx` and verify successful result.

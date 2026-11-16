@@ -1,0 +1,13 @@
+services:
+  caddy:
+    image: caddy:2.7
+    container_name: caddy
+    ports:
+      - "9090:9090"
+      - "9091:9091"
+      - "9092:9092"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ../fixtures/llm_d_router_metrics.txt:/usr/share/caddy/router_metrics
+      - ../fixtures/llm_d_sidecar_metrics.txt:/usr/share/caddy/sidecar_metrics
+      - ../fixtures/llm_d_coordinator_metrics.txt:/usr/share/caddy/coordinator_metrics

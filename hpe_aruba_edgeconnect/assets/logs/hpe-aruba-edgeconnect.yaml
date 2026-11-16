@@ -1,0 +1,102 @@
+id: hpe-aruba-edgeconnect
+# See app_id in your integration's manifest.json file to learn more:
+# https://docs.datadoghq.com/developers/integrations/check_references/#manifest-file
+metric_id: hpe-aruba-edgeconnect
+# If for some reason id must be different than app_id, add the app_id in this field instead.
+# If id and app_id already match, this field can be left blank.
+backend_only: false
+facets:
+  - description: ""
+    facetType: list
+    groups:
+      - HPE Aruba EdgeConnect
+    name: process.component
+    path: process.component
+    source: log
+    type: string
+pipeline:
+  type: pipeline
+  name: HPE Aruba EdgeConnect
+  enabled: true
+  filter:
+    query: source:hpe-aruba-edgeconnect
+  processors:
+    - type: grok-parser
+      name: Grok Parser
+      enabled: true
+      source: message
+      samples:
+        - "May 21 08:13:34 2026 SanFranSP02 tunneld[26132]: CPU 0 TID
+          1140410936620480: [tunneld.DEBUG]: cpkt_btun_peer_update_tasklet()
+          tunnel 20:bondedTunnel_19 Bonded tunnel 20 opstate = UP  tunstate =
+          UP"
+        - "May 21 08:17:24 2026 SanFranSP02 tunneld[26132]: CPU 1 TID
+          1140410927240640: [tunneld.INFO]: cpkt_dpc_get_average_tunnel_stats:
+          tunnel_25(tid=26)i:4 Remote_wrx_pkt(168), remote_postfec_loss(0)"
+        - "May 21 08:24:20 2026 SanFranSP02 sysd[26198]: CPU 0 TID
+          140496206808512: [sysd.INFO]: NMON:
+          nmon_gw_conn_tst_rx_process_packet: Received ICMP ECHO response from
+          8.8.8.8 on monitored interface wan0"
+        - "May 21 08:24:18 2026 SanFranSP02 mgmtd[25974]:CPU 0 TID
+          139724457364416: [mgmtd.DEBUG]: SEND REQ: local mgmtd peer sysd-26198
+          service 2 type 5 (action_request) msg id 6318480"
+        - "May 21 08:24:18 2026 SanFranSP02 mgmtd[25974]: CPU 0 TID
+          139724457364416: [mgmtd.INFO]: Handling ACTION request"
+        - "May 21 09:38:23 2026 SanFranSP02 mdreq[7767]: [mdreq.DEBUG]: session
+          1: finished sending frame 2000003 on fd 7 of 90 bytes"
+        - "May 21 09:45:48 2026 SanFranSP02 mgmtd[25974]: nodejs@system action
+          /cn/st2/action/orchestratorliveness succeeded
+          params:orchestrator_state="
+        - "May 21 10:03:01 2026 SanFranSP02 syslogd 1.5.1: restart."
+        - >-
+          timestamp="Jun  7 07:30:18 2022", hostname="sris-eva",
+          process="tunneld[8375]", 
+
+          cpu="0", tid="964683264", level="NOTICE", 
+
+          function="cddos_thresh_action_entry_exit_handler()", event="DDOS: Raise Min threshold 
+
+          action", source_ip="4.4.4.4", zone_id="0", threshold="1", value="128", action="log", 
+
+          source_level="Source-level", protocol="TCP", flows_per_second="Flows per second"
+        - "Jun  2 10:11:47 2026 SanFranSP02 pm[25282]: CPU 1 TID
+          140014226732928: [pm.INFO]: Couldn't get PID in /var/run/routerd.pid"
+      grok:
+        supportRules: |-
+          functionColon %{regex("[^:]+"):function.name}:\s+%{data}
+          functionParentheses %{word:function.name}\(\)\s+%{data}
+          fallback %{data}
+        matchRules: >
+          generalRule %{date("MMM d HH:mm:ss
+          yyyy"):timestamp}\s+%{notSpace:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s*CPU\s+%{integer:cpu}\s+TID\s+%{integer:thread.tid}\:\s+\[%{word}\.%{word:level}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
+
+          generalRule2 %{date("MMM  d HH:mm:ss yyyy"):timestamp}\s+%{notSpace:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s*CPU\s+%{integer:cpu}\s+TID\s+%{integer:thread.tid}\:\s+\[%{word}\.%{word:level}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
+
+          mdreqRule %{date("MMM d HH:mm:ss yyyy"):timestamp}\s+%{notSpace:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s+\[%{word}\.%{word:level}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
+
+          mdreqRule2 %{date("MMM  d HH:mm:ss yyyy"):timestamp}\s+%{notSpace:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s+\[%{word}\.%{word:level}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
+
+          mgmtdRule %{date("MMM d HH:mm:ss yyyy"):timestamp}\s+%{notSpace:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
+
+          mgmtdRule2 %{date("MMM d HH:mm:ss yyyy"):timestamp}\s+%{notSpace:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
+
+          fallbackRule %{date("MMM d HH:mm:ss yyyy"):timestamp}\s+%{notSpace:host_name} %{data:message}
+
+          fallbackRule2 %{date("MMM  d HH:mm:ss yyyy"):timestamp}\s+%{notSpace:host_name} %{data:message}
+
+          kvRule %{data::keyvalue}
+    - type: status-remapper
+      name: Status Remapper
+      enabled: true
+      sources:
+        - level
+    - type: date-remapper
+      name: Date Remapper
+      enabled: true
+      sources:
+        - timestamp
+    - type: message-remapper
+      name: Message Remapper
+      enabled: true
+      sources:
+        - message

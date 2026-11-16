@@ -49,7 +49,7 @@ tests:
           version: "1.5.0"
         query:
           class: "IN"
-          hostname: "trace-k8s.agent.datadoghq.com.apm1.cluster.local."
+          hostname: "trace-k8s.agent.datadoghq.com.apm1.cluster.local"
           type: "AAAA"
         rcode: "NXDomain"
         rcode_id: 3
@@ -118,7 +118,7 @@ tests:
           version: "1.5.0"
         query:
           class: "IN"
-          hostname: "example.org."
+          hostname: "example.org"
           type: "A"
         rcode: "NoError"
         rcode_id: 0
