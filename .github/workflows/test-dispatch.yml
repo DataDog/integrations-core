@@ -236,6 +236,21 @@ jobs:
           ddev config set upgrade_check false
           ddev config override
 
+      - name: Get Datadog credentials
+        id: dd-sts
+        uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
+        with:
+          policy: integrations-dispatcher-api-key
+
+      - name: Configure Datadog
+        env:
+          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
+        run: |
+          set -euo pipefail
+          # The key and site are stored for future Dispatcher monitoring; dispatching does not use them.
+          ddev config set orgs.default.api_key "$DD_API_KEY"
+          ddev config set orgs.default.site datadoghq.com
+
       - name: Resolve the run
         id: resolve
         env:
@@ -356,21 +371,6 @@ jobs:
           path: dispatcher-planning-repo
           fetch-depth: 2
           persist-credentials: false
-
-      - name: Get Datadog credentials
-        id: dd-sts
-        uses: DataDog/dd-sts-action@2e8187910199bd93129520183c093e19aa585c75 # v1.0.0
-        with:
-          policy: integrations-dispatcher-api-key
-
-      - name: Configure Datadog
-        env:
-          DD_API_KEY: ${{ steps.dd-sts.outputs.api_key }}
-        run: |
-          set -euo pipefail
-          # The key and site are stored for future Dispatcher monitoring; dispatching does not use them.
-          ddev config set orgs.default.api_key "$DD_API_KEY"
-          ddev config set orgs.default.site datadoghq.com
 
       - name: Plan and dispatch the batches
         id: dispatch

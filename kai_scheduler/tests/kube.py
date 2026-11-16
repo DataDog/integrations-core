@@ -3,6 +3,7 @@
 # Licensed under a 3-clause BSD style license (see LICENSE)
 """kubectl helpers for the KAI Scheduler kind environment."""
 
+import json
 import os
 import time
 
@@ -71,3 +72,43 @@ def delete_preemption_pods() -> None:
     kubectl(
         ['delete', 'pod', 'preempt-low-pod', 'preempt-high-pod', '-n', WORKLOAD_NAMESPACE, '--ignore-not-found'],
     )
+
+
+def podgroup_owned_by(owner: str) -> str:
+    """Return the name of the PodGroup that the KAI pod grouper created for a pod or Job."""
+    podgroups = json.loads(kubectl_output(['get', 'podgroups', '-n', WORKLOAD_NAMESPACE, '-o', 'json']))['items']
+    for podgroup in podgroups:
+        if any(reference.get('name') == owner for reference in podgroup['metadata'].get('ownerReferences', [])):
+            return podgroup['metadata']['name']
+    raise RuntimeError(f'No PodGroup is owned by {WORKLOAD_NAMESPACE}/{owner}')
+
+
+def run_event_job() -> None:
+    retry_apply('event-job.yaml')
+    # The Job controller creates the pod asynchronously, and waiting on a selector that matches no pod fails at once.
+    kubectl(
+        [
+            'wait',
+            'job/event-job',
+            '-n',
+            WORKLOAD_NAMESPACE,
+            '--for=jsonpath={.status.active}=1',
+            f'--timeout={WAIT_TIMEOUT}',
+        ]
+    )
+    kubectl(
+        [
+            'wait',
+            'pod',
+            '-l',
+            'job-name=event-job',
+            '-n',
+            WORKLOAD_NAMESPACE,
+            '--for=condition=Ready',
+            f'--timeout={WAIT_TIMEOUT}',
+        ]
+    )
+
+
+def delete_event_job() -> None:
+    kubectl(['delete', 'job', 'event-job', '-n', WORKLOAD_NAMESPACE, '--ignore-not-found', '--cascade=foreground'])

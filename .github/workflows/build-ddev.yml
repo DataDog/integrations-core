@@ -125,9 +125,9 @@ jobs:
           os: windows-2022
         # macOS
         - target: aarch64-apple-darwin
-          os: macos-14
+          os: macos-15
         - target: x86_64-apple-darwin
-          os: macos-14-large
+          os: macos-15-large
 
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -464,7 +464,7 @@ jobs:
     needs:
     - define-tags
     - binaries
-    runs-on: macos-14-large
+    runs-on: macos-15-large
     permissions:
       # needed for dd-sts
       id-token: write
@@ -551,7 +551,7 @@ jobs:
     needs:
     - define-tags
     - binaries
-    runs-on: macos-14-large
+    runs-on: macos-15-large
     environment: ddev-sign-upload
     permissions:
       # needed for dd-sts

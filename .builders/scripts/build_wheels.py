@@ -23,7 +23,7 @@ from zipfile import ZipFile
 import pathspec
 import urllib3
 from dotenv import dotenv_values
-from utils import iter_wheels
+from utils import iter_wheels, wheel_supports_macos
 
 
 def unpack_wheel(wheel_file: Path, dest_dir: Path | None = None):
@@ -173,6 +173,62 @@ def wheel_was_built(wheel: Path) -> bool:
 
     file_hash = sha256(wheel.read_bytes()).hexdigest()
     return file_hash != wheel_hashes[wheel.name]
+
+
+def use_macos_target_wheels(external_wheels_dir: Path, python_path: Path, env_vars: dict[str, str]) -> None:
+    """
+    Replace each external wheel that needs a newer macOS than `MACOSX_DEPLOYMENT_TARGET` with a wheel of the
+    same release that doesn't.
+
+    pip ranks wheels by the macOS version of the runner, so a newer runner can make it pick a wheel that the
+    oldest macOS the Agent supports can't load, even when the release also ships one that it can. A replacement
+    must declare the same dependencies, since resolution used the original's metadata. When the release has no
+    compatible wheel, the original stays for `repair_wheels.py` to reject.
+    """
+    target = tuple(int(part) for part in os.environ['MACOSX_DEPLOYMENT_TARGET'].split('.')[:2])
+    arch = os.uname().machine
+    platform = f'macosx_{target[0]}_{target[1]}_{arch}'
+    # pip refuses `--only-binary=:all:` while `--no-binary` is set, and the packages in it never reach this point
+    download_env = {key: value for key, value in env_vars.items() if key != 'PIP_NO_BINARY'}
+
+    for wheel in iter_wheels(external_wheels_dir):
+        if wheel_supports_macos(wheel.name, target, arch):
+            continue
+
+        metadata = extract_metadata(wheel)
+        with TemporaryDirectory() as d:
+            command_args = [
+                str(python_path),
+                '-m',
+                'pip',
+                'download',
+                f'{metadata["Name"]}=={metadata["Version"]}',
+                '--no-deps',
+                '--only-binary=:all:',
+                '--platform',
+                platform,
+                '--dest',
+                d,
+                '--extra-index-url',
+                CUSTOM_EXTERNAL_INDEX,
+            ]
+            print(f'Running: {join_command_args(command_args)}', file=sys.stderr)
+            if subprocess.run(command_args, env=download_env).returncode:
+                print(f'No wheel of the same release as {wheel.name} supports {platform}')
+                continue
+
+            replacement = next(iter_wheels(d))
+            replacement_metadata = extract_metadata(replacement)
+            for field in ('Requires-Dist', 'Requires-Python'):
+                if sorted(replacement_metadata.get_all(field, [])) != sorted(metadata.get_all(field, [])):
+                    raise RuntimeError(f'{replacement.name} and {wheel.name} declare a different `{field}`')
+
+            wheel.unlink()
+            shutil.move(replacement, external_wheels_dir)
+            print(
+                f'::warning::Using {replacement.name} instead of {wheel.name}, '
+                f'which needs a newer macOS than {platform}'
+            )
 
 
 def _remove_test_files_from_dir(unpacked_dir: Path) -> bool:
@@ -468,6 +524,9 @@ def main():
                 shutil.move(wheel, staged_built_wheels_dir)
             else:
                 shutil.move(wheel, staged_external_wheels_dir)
+
+        if sys.platform == 'darwin':
+            use_macos_target_wheels(staged_external_wheels_dir, python_path, env_vars)
 
         # Repair wheels
         check_process(

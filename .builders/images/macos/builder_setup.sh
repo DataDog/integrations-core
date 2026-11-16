@@ -37,11 +37,11 @@ case "$(uname -m)" in
 esac
 export RUSTUP_HOME="${DD_PREFIX_PATH}/rustup" CARGO_HOME="${DD_PREFIX_PATH}/cargo"
 curl --retry 5 --fail "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/${RUST_TARGET}/rustup-init" -o /tmp/rustup-init
-echo "${RUSTUP_SHA256}  /tmp/rustup-init" | sha256sum --check
+echo "${RUSTUP_SHA256}  /tmp/rustup-init" | sha256sum -c -
 chmod +x /tmp/rustup-init
 /tmp/rustup-init -y --no-modify-path --profile minimal --default-toolchain "${RUST_VERSION}"
 # The shims are copies of the rustup binary we just verified, so they carry the same hash
-echo "${RUSTUP_SHA256}  ${CARGO_HOME}/bin/rustc" | sha256sum --check
+echo "${RUSTUP_SHA256}  ${CARGO_HOME}/bin/rustc" | sha256sum -c -
 rm /tmp/rustup-init
 mkdir -p "${DD_PREFIX_PATH}/bin"
 ln -sf "${CARGO_HOME}"/bin/* "${DD_PREFIX_PATH}/bin/"
@@ -104,8 +104,8 @@ RELATIVE_PATH="libxslt-{{version}}" \
 
 # curl
 DOWNLOAD_URL="https://curl.haxx.se/download/curl-{{version}}.tar.gz" \
-VERSION="8.21.0" \
-SHA256="d9b327997999045a24cda50f3983e69e51c516bd8be6ef9842fc7f99135e33bb" \
+VERSION="8.23.0" \
+SHA256="e3de77cfa6367083c776a26647fc9f633b538c06c3baa73d931a252ac8f72b49" \
 RELATIVE_PATH="curl-{{version}}" \
   install-from-source \
     --disable-manual \

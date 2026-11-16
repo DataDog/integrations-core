@@ -1,15 +1,29 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+import time
+
 import pytest
+import yaml
 
 from datadog_checks.base.constants import ServiceCheck
 from datadog_checks.kai_scheduler import KaiSchedulerCheck
 
 from .common import CHECK_NAME, INSTANCE_STATE_KEY, KUBECONFIG_STATE_KEY, live_metadata_metrics
-from .kube import delete_preemption_pods, trigger_preemption
+from .kube import (
+    WORKLOAD_NAMESPACE,
+    delete_event_job,
+    delete_preemption_pods,
+    podgroup_owned_by,
+    retry_apply,
+    run_event_job,
+    trigger_preemption,
+    wait_for_pod,
+)
 
 pytestmark = [pytest.mark.e2e]
+
+EVENT_POLL_ATTEMPTS = 30
 
 
 @pytest.fixture
@@ -69,3 +83,53 @@ def test_e2e_evicted_pods(dd_agent_check, dd_run_check, aggregator, live_instanc
             'kube_namespace:default',
         ],
     )
+
+
+def test_e2e_podgroup_events(dd_agent_check, dd_run_check, aggregator, dd_get_state, live_instance, kubeconfig):
+    # `dd_agent_check` is requested first only so that this test is skipped outside of E2E runs.
+    instance = {
+        'scheduler_endpoint': live_instance['scheduler_endpoint'],
+        'kube_config_dict': yaml.safe_load(dd_get_state(KUBECONFIG_STATE_KEY)),
+    }
+    check = KaiSchedulerCheck(CHECK_NAME, {}, [instance])
+    # The preemption pods would leave no room in `team-a` for the Job.
+    delete_preemption_pods()
+    delete_event_job()
+    dd_run_check(check)
+
+    try:
+        run_event_job()
+        podgroup = podgroup_owned_by('event-job')
+        for transition in ('created', 'admitted'):
+            assert_podgroup_event(dd_run_check, check, aggregator, podgroup, transition)
+
+        retry_apply('preempt-high-pod.yaml')
+        wait_for_pod('preempt-high-pod', 'condition=Ready')
+        evicted = assert_podgroup_event(dd_run_check, check, aggregator, podgroup, 'evicted')
+        assert 'kai_eviction_action:preempt' in evicted['tags']
+        assert f'kai_evicted_by:{WORKLOAD_NAMESPACE}/{podgroup_owned_by("preempt-high-pod")}' in evicted['tags']
+        # The Job creates a replacement pod, which cannot fit in `team-a` next to the preemptor.
+        assert_podgroup_event(dd_run_check, check, aggregator, podgroup, 'pending')
+    finally:
+        delete_event_job()
+
+
+def assert_podgroup_event(dd_run_check, check, aggregator, podgroup: str, transition: str) -> dict:
+    """Run the check until exactly one event of a PodGroup transition is submitted, and return it."""
+    for attempt in range(EVENT_POLL_ATTEMPTS):
+        events = [
+            event
+            for event in aggregator.events
+            if event['event_type'] == f'kai.podgroup.{transition}' and f'kai_workload:{podgroup}' in event['tags']
+        ]
+        if events:
+            assert len(events) == 1, events
+            event = events[0]
+            assert event['msg_title'] == f'KAI PodGroup {WORKLOAD_NAMESPACE}/{podgroup} {transition}'
+            assert 'kai_queue:team-a' in event['tags']
+            assert 'kai_nodepool:default' in event['tags']
+            return event
+        if attempt < EVENT_POLL_ATTEMPTS - 1:
+            time.sleep(1)
+            dd_run_check(check)
+    raise AssertionError(f'No {transition} event was submitted for PodGroup {podgroup}: {aggregator.events}')
