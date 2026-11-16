@@ -2181,7 +2181,7 @@
             "id": 7676892238288698,
             "definition": {
               "type": "note",
-              "content": "PostgreSQL and Redis instances backing Prefect server. Requires the Datadog PostgreSQL and Redis integrations configured with the same `service` as the Prefect check; set $service to that value ($host doesn't filter this section). PostgreSQL widgets are empty for SQLite-backed servers; Redis widgets are empty without Redis messaging.",
+              "content": "PostgreSQL and Redis instances backing Prefect server. Requires the Datadog PostgreSQL and Redis integrations configured with the same `service` as the Prefect check. To filter this section, set $service to that value. The $host variable doesn't filter this section. PostgreSQL widgets are empty for SQLite-backed servers, and Redis widgets are empty without Redis messaging.",
               "background_color": "blue",
               "font_size": "16",
               "text_align": "center",
