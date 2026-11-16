@@ -48,7 +48,7 @@ instances:
     ## @param openmetrics_endpoint - string - required
     ## The URL exposing metrics in the OpenMetrics format.
     #
-  - openmetrics_endpoint: http://%%host%%:18080/metrics
+  - openmetrics_endpoint: http://%%host%%:8080/metrics
 
     ## @param raw_metric_prefix - string - optional
     ## A prefix that is removed from all exposed metric names, if present.
