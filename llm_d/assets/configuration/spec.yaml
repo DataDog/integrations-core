@@ -47,6 +47,6 @@ files:
         rename_labels.description: |
           A mapping of llm-d label names to their Datadog tag names. By default, the integration renames
           the EPP pool name labels (`name` and `inference_pool`) to `llm_d_pool`, so the `inference_pool`
-          tag only comes from the pod annotation. It also renames the `namespace` and `port` labels, which
+          tag comes only from the pod annotation. It also renames the `namespace` and `port` labels, which
           describe the target model server endpoint rather than the scraped pod, to `endpoint_namespace`
           and `endpoint_port`.

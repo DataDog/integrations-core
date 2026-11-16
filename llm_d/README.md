@@ -127,8 +127,8 @@ check at the model server port, not the sidecar port.
 
 #### Tags
 
-The `inference_pool` tag groups router, sidecar, and model server metrics by deployment. It comes only from
-the following pod annotation, so this annotation is required on the router and model server pods:
+The `inference_pool` tag groups router, sidecar, and model server metrics by deployment. The tag comes only
+from a pod annotation, so add the following annotation to the router and model server pods:
 
 ```yaml
 metadata:
@@ -136,8 +136,8 @@ metadata:
     ad.datadoghq.com/tags: '{"inference_pool": "<INFERENCE_POOL_NAME>"}'
 ```
 
-EPP request metrics (`llm_d.epp.request.*`) don't include a pool label. The pool name that the EPP reports on
-its pool and Flow Control metrics is collected as the `llm_d_pool` tag. In standalone mode
+EPP request metrics (`llm_d.epp.request.*`) don't include a pool label. The integration collects the pool name
+that the EPP reports on its pool and Flow Control metrics as the `llm_d_pool` tag. In standalone mode
 (`--endpoint-selector`, without an InferencePool), pool metrics report the EPP Deployment name.
 
 To tag model server metrics with their disaggregation role, map the `llm-d.ai/role` pod label to the
