@@ -1,0 +1,448 @@
+# HELP certwatcher_read_certificate_errors_total Total number of certificate read errors
+# TYPE certwatcher_read_certificate_errors_total counter
+certwatcher_read_certificate_errors_total 0
+# HELP certwatcher_read_certificate_total Total number of certificate reads
+# TYPE certwatcher_read_certificate_total counter
+certwatcher_read_certificate_total 1
+# HELP controller_runtime_active_workers Number of currently used workers per controller
+# TYPE controller_runtime_active_workers gauge
+controller_runtime_active_workers{controller="crd-gate"} 0
+controller_runtime_active_workers{controller="managed/clusternopresource.nop.crossplane.io"} 0
+controller_runtime_active_workers{controller="managed/nopresource.nop.crossplane.io"} 0
+# HELP controller_runtime_max_concurrent_reconciles Maximum number of concurrent reconciles per controller
+# TYPE controller_runtime_max_concurrent_reconciles gauge
+controller_runtime_max_concurrent_reconciles{controller="crd-gate"} 1
+controller_runtime_max_concurrent_reconciles{controller="managed/clusternopresource.nop.crossplane.io"} 1
+controller_runtime_max_concurrent_reconciles{controller="managed/nopresource.nop.crossplane.io"} 1
+# HELP controller_runtime_reconcile_errors_total Total number of reconciliation errors per controller
+# TYPE controller_runtime_reconcile_errors_total counter
+controller_runtime_reconcile_errors_total{controller="crd-gate"} 0
+controller_runtime_reconcile_errors_total{controller="managed/clusternopresource.nop.crossplane.io"} 0
+controller_runtime_reconcile_errors_total{controller="managed/nopresource.nop.crossplane.io"} 0
+# HELP controller_runtime_reconcile_panics_total Total number of reconciliation panics per controller
+# TYPE controller_runtime_reconcile_panics_total counter
+controller_runtime_reconcile_panics_total{controller="crd-gate"} 0
+controller_runtime_reconcile_panics_total{controller="managed/clusternopresource.nop.crossplane.io"} 0
+controller_runtime_reconcile_panics_total{controller="managed/nopresource.nop.crossplane.io"} 0
+# HELP controller_runtime_reconcile_time_seconds Length of time per reconciliation per controller
+# TYPE controller_runtime_reconcile_time_seconds histogram
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="0.005"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="0.01"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="0.025"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="0.05"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="0.1"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="0.15"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="0.2"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="0.25"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="0.3"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="0.35"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="0.4"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="0.45"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="0.5"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="0.6"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="0.7"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="0.8"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="0.9"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="1"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="1.25"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="1.5"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="1.75"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="2"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="2.5"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="3"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="3.5"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="4"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="4.5"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="5"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="6"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="7"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="8"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="9"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="10"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="15"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="20"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="25"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="30"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="40"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="50"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="60"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="crd-gate",le="+Inf"} 26
+controller_runtime_reconcile_time_seconds_sum{controller="crd-gate"} 0.004446283
+controller_runtime_reconcile_time_seconds_count{controller="crd-gate"} 26
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="0.005"} 30
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="0.01"} 146
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="0.025"} 361
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="0.05"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="0.1"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="0.15"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="0.2"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="0.25"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="0.3"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="0.35"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="0.4"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="0.45"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="0.5"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="0.6"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="0.7"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="0.8"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="0.9"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="1"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="1.25"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="1.5"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="1.75"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="2"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="2.5"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="3"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="3.5"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="4"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="4.5"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="5"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="6"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="7"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="8"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="9"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="10"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="15"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="20"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="25"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="30"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="40"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="50"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="60"} 370
+controller_runtime_reconcile_time_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",le="+Inf"} 370
+controller_runtime_reconcile_time_seconds_sum{controller="managed/nopresource.nop.crossplane.io"} 4.522684731000001
+controller_runtime_reconcile_time_seconds_count{controller="managed/nopresource.nop.crossplane.io"} 370
+# HELP controller_runtime_reconcile_total Total number of reconciliations per controller
+# TYPE controller_runtime_reconcile_total counter
+controller_runtime_reconcile_total{controller="crd-gate",result="error"} 0
+controller_runtime_reconcile_total{controller="crd-gate",result="requeue"} 0
+controller_runtime_reconcile_total{controller="crd-gate",result="requeue_after"} 0
+controller_runtime_reconcile_total{controller="crd-gate",result="success"} 26
+controller_runtime_reconcile_total{controller="managed/clusternopresource.nop.crossplane.io",result="error"} 0
+controller_runtime_reconcile_total{controller="managed/clusternopresource.nop.crossplane.io",result="requeue"} 0
+controller_runtime_reconcile_total{controller="managed/clusternopresource.nop.crossplane.io",result="requeue_after"} 0
+controller_runtime_reconcile_total{controller="managed/clusternopresource.nop.crossplane.io",result="success"} 0
+controller_runtime_reconcile_total{controller="managed/nopresource.nop.crossplane.io",result="error"} 0
+controller_runtime_reconcile_total{controller="managed/nopresource.nop.crossplane.io",result="requeue"} 0
+controller_runtime_reconcile_total{controller="managed/nopresource.nop.crossplane.io",result="requeue_after"} 370
+controller_runtime_reconcile_total{controller="managed/nopresource.nop.crossplane.io",result="success"} 0
+# HELP controller_runtime_terminal_reconcile_errors_total Total number of terminal reconciliation errors per controller
+# TYPE controller_runtime_terminal_reconcile_errors_total counter
+controller_runtime_terminal_reconcile_errors_total{controller="crd-gate"} 0
+controller_runtime_terminal_reconcile_errors_total{controller="managed/clusternopresource.nop.crossplane.io"} 0
+controller_runtime_terminal_reconcile_errors_total{controller="managed/nopresource.nop.crossplane.io"} 0
+# HELP controller_runtime_webhook_latency_seconds Histogram of the latency of processing admission requests
+# TYPE controller_runtime_webhook_latency_seconds histogram
+controller_runtime_webhook_latency_seconds_bucket{webhook="/validate-nop-crossplane-io-v1alpha1-nopresource",le="0.005"} 379
+controller_runtime_webhook_latency_seconds_bucket{webhook="/validate-nop-crossplane-io-v1alpha1-nopresource",le="0.01"} 379
+controller_runtime_webhook_latency_seconds_bucket{webhook="/validate-nop-crossplane-io-v1alpha1-nopresource",le="0.025"} 380
+controller_runtime_webhook_latency_seconds_bucket{webhook="/validate-nop-crossplane-io-v1alpha1-nopresource",le="0.05"} 380
+controller_runtime_webhook_latency_seconds_bucket{webhook="/validate-nop-crossplane-io-v1alpha1-nopresource",le="0.1"} 380
+controller_runtime_webhook_latency_seconds_bucket{webhook="/validate-nop-crossplane-io-v1alpha1-nopresource",le="0.25"} 380
+controller_runtime_webhook_latency_seconds_bucket{webhook="/validate-nop-crossplane-io-v1alpha1-nopresource",le="0.5"} 380
+controller_runtime_webhook_latency_seconds_bucket{webhook="/validate-nop-crossplane-io-v1alpha1-nopresource",le="1"} 380
+controller_runtime_webhook_latency_seconds_bucket{webhook="/validate-nop-crossplane-io-v1alpha1-nopresource",le="2.5"} 380
+controller_runtime_webhook_latency_seconds_bucket{webhook="/validate-nop-crossplane-io-v1alpha1-nopresource",le="5"} 380
+controller_runtime_webhook_latency_seconds_bucket{webhook="/validate-nop-crossplane-io-v1alpha1-nopresource",le="10"} 380
+controller_runtime_webhook_latency_seconds_bucket{webhook="/validate-nop-crossplane-io-v1alpha1-nopresource",le="+Inf"} 380
+controller_runtime_webhook_latency_seconds_sum{webhook="/validate-nop-crossplane-io-v1alpha1-nopresource"} 0.20465547800000009
+controller_runtime_webhook_latency_seconds_count{webhook="/validate-nop-crossplane-io-v1alpha1-nopresource"} 380
+# HELP controller_runtime_webhook_panics_total Total number of webhook panics
+# TYPE controller_runtime_webhook_panics_total counter
+controller_runtime_webhook_panics_total 0
+# HELP controller_runtime_webhook_requests_in_flight Current number of admission requests being served.
+# TYPE controller_runtime_webhook_requests_in_flight gauge
+controller_runtime_webhook_requests_in_flight{webhook="/validate-nop-crossplane-io-v1alpha1-clusternopresource"} 0
+controller_runtime_webhook_requests_in_flight{webhook="/validate-nop-crossplane-io-v1alpha1-nopresource"} 0
+# HELP controller_runtime_webhook_requests_total Total number of admission requests by HTTP status code.
+# TYPE controller_runtime_webhook_requests_total counter
+controller_runtime_webhook_requests_total{code="200",webhook="/validate-nop-crossplane-io-v1alpha1-clusternopresource"} 0
+controller_runtime_webhook_requests_total{code="200",webhook="/validate-nop-crossplane-io-v1alpha1-nopresource"} 380
+controller_runtime_webhook_requests_total{code="500",webhook="/validate-nop-crossplane-io-v1alpha1-clusternopresource"} 0
+controller_runtime_webhook_requests_total{code="500",webhook="/validate-nop-crossplane-io-v1alpha1-nopresource"} 0
+# HELP crossplane_managed_resource_exists The number of managed resources that exist
+# TYPE crossplane_managed_resource_exists gauge
+crossplane_managed_resource_exists{gvk="nop.crossplane.io/v1alpha1, Kind=ClusterNopResource"} 0
+crossplane_managed_resource_exists{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource"} 2
+# HELP crossplane_managed_resource_first_time_to_readiness_seconds The time it took for a managed resource to become ready first time after creation
+# TYPE crossplane_managed_resource_first_time_to_readiness_seconds histogram
+crossplane_managed_resource_first_time_to_readiness_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="1"} 0
+crossplane_managed_resource_first_time_to_readiness_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="5"} 0
+crossplane_managed_resource_first_time_to_readiness_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="10"} 0
+crossplane_managed_resource_first_time_to_readiness_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="15"} 2
+crossplane_managed_resource_first_time_to_readiness_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="30"} 2
+crossplane_managed_resource_first_time_to_readiness_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="60"} 2
+crossplane_managed_resource_first_time_to_readiness_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="120"} 2
+crossplane_managed_resource_first_time_to_readiness_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="300"} 2
+crossplane_managed_resource_first_time_to_readiness_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="600"} 2
+crossplane_managed_resource_first_time_to_readiness_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="1800"} 2
+crossplane_managed_resource_first_time_to_readiness_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="3600"} 2
+crossplane_managed_resource_first_time_to_readiness_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="+Inf"} 2
+crossplane_managed_resource_first_time_to_readiness_seconds_sum{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource"} 20.780838128
+crossplane_managed_resource_first_time_to_readiness_seconds_count{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource"} 2
+# HELP crossplane_managed_resource_first_time_to_reconcile_seconds The time it took for a managed resource to be detected by the controller
+# TYPE crossplane_managed_resource_first_time_to_reconcile_seconds histogram
+crossplane_managed_resource_first_time_to_reconcile_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="1e-08"} 0
+crossplane_managed_resource_first_time_to_reconcile_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="1e-07"} 0
+crossplane_managed_resource_first_time_to_reconcile_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="1e-06"} 0
+crossplane_managed_resource_first_time_to_reconcile_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="9.999999999999999e-06"} 0
+crossplane_managed_resource_first_time_to_reconcile_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="9.999999999999999e-05"} 0
+crossplane_managed_resource_first_time_to_reconcile_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="0.001"} 0
+crossplane_managed_resource_first_time_to_reconcile_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="0.01"} 0
+crossplane_managed_resource_first_time_to_reconcile_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="0.1"} 0
+crossplane_managed_resource_first_time_to_reconcile_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="1"} 2
+crossplane_managed_resource_first_time_to_reconcile_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="10"} 2
+crossplane_managed_resource_first_time_to_reconcile_seconds_bucket{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource",le="+Inf"} 2
+crossplane_managed_resource_first_time_to_reconcile_seconds_sum{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource"} 0.749587289
+crossplane_managed_resource_first_time_to_reconcile_seconds_count{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource"} 2
+# HELP crossplane_managed_resource_ready The number of managed resources in Ready=True state
+# TYPE crossplane_managed_resource_ready gauge
+crossplane_managed_resource_ready{gvk="nop.crossplane.io/v1alpha1, Kind=ClusterNopResource"} 0
+crossplane_managed_resource_ready{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource"} 2
+# HELP crossplane_managed_resource_synced The number of managed resources in Synced=True state
+# TYPE crossplane_managed_resource_synced gauge
+crossplane_managed_resource_synced{gvk="nop.crossplane.io/v1alpha1, Kind=ClusterNopResource"} 0
+crossplane_managed_resource_synced{gvk="nop.crossplane.io/v1alpha1, Kind=NopResource"} 2
+# HELP go_gc_duration_seconds A summary of the wall-time pause (stop-the-world) duration in garbage collection cycles.
+# TYPE go_gc_duration_seconds summary
+go_gc_duration_seconds{quantile="0"} 2.1583e-05
+go_gc_duration_seconds{quantile="0.25"} 6.0374e-05
+go_gc_duration_seconds{quantile="0.5"} 0.000100667
+go_gc_duration_seconds{quantile="0.75"} 0.000198086
+go_gc_duration_seconds{quantile="1"} 0.000946997
+go_gc_duration_seconds_sum 0.003508951
+go_gc_duration_seconds_count 21
+# HELP go_gc_gogc_percent Heap size target percentage configured by the user, otherwise 100. This value is set by the GOGC environment variable, and the runtime/debug.SetGCPercent function. Sourced from /gc/gogc:percent.
+# TYPE go_gc_gogc_percent gauge
+go_gc_gogc_percent 100
+# HELP go_gc_gomemlimit_bytes Go runtime memory limit configured by the user, otherwise math.MaxInt64. This value is set by the GOMEMLIMIT environment variable, and the runtime/debug.SetMemoryLimit function. Sourced from /gc/gomemlimit:bytes.
+# TYPE go_gc_gomemlimit_bytes gauge
+go_gc_gomemlimit_bytes 9.223372036854776e+18
+# HELP go_goroutines Number of goroutines that currently exist.
+# TYPE go_goroutines gauge
+go_goroutines 73
+# HELP go_info Information about the Go environment.
+# TYPE go_info gauge
+go_info{version="go1.24.13"} 1
+# HELP go_memstats_alloc_bytes Number of bytes allocated in heap and currently in use. Equals to /memory/classes/heap/objects:bytes.
+# TYPE go_memstats_alloc_bytes gauge
+go_memstats_alloc_bytes 8.233528e+06
+# HELP go_memstats_alloc_bytes_total Total number of bytes allocated in heap until now, even if released already. Equals to /gc/heap/allocs:bytes.
+# TYPE go_memstats_alloc_bytes_total counter
+go_memstats_alloc_bytes_total 7.4164368e+07
+# HELP go_memstats_buck_hash_sys_bytes Number of bytes used by the profiling bucket hash table. Equals to /memory/classes/profiling/buckets:bytes.
+# TYPE go_memstats_buck_hash_sys_bytes gauge
+go_memstats_buck_hash_sys_bytes 1.484861e+06
+# HELP go_memstats_frees_total Total number of heap objects frees. Equals to /gc/heap/frees:objects + /gc/heap/tiny/allocs:objects.
+# TYPE go_memstats_frees_total counter
+go_memstats_frees_total 512369
+# HELP go_memstats_gc_sys_bytes Number of bytes used for garbage collection system metadata. Equals to /memory/classes/metadata/other:bytes.
+# TYPE go_memstats_gc_sys_bytes gauge
+go_memstats_gc_sys_bytes 3.611696e+06
+# HELP go_memstats_heap_alloc_bytes Number of heap bytes allocated and currently in use, same as go_memstats_alloc_bytes. Equals to /memory/classes/heap/objects:bytes.
+# TYPE go_memstats_heap_alloc_bytes gauge
+go_memstats_heap_alloc_bytes 8.233528e+06
+# HELP go_memstats_heap_idle_bytes Number of heap bytes waiting to be used. Equals to /memory/classes/heap/released:bytes + /memory/classes/heap/free:bytes.
+# TYPE go_memstats_heap_idle_bytes gauge
+go_memstats_heap_idle_bytes 4.38272e+06
+# HELP go_memstats_heap_inuse_bytes Number of heap bytes that are in use. Equals to /memory/classes/heap/objects:bytes + /memory/classes/heap/unused:bytes
+# TYPE go_memstats_heap_inuse_bytes gauge
+go_memstats_heap_inuse_bytes 1.1051008e+07
+# HELP go_memstats_heap_objects Number of currently allocated objects. Equals to /gc/heap/objects:objects.
+# TYPE go_memstats_heap_objects gauge
+go_memstats_heap_objects 49486
+# HELP go_memstats_heap_released_bytes Number of heap bytes released to OS. Equals to /memory/classes/heap/released:bytes.
+# TYPE go_memstats_heap_released_bytes gauge
+go_memstats_heap_released_bytes 3.063808e+06
+# HELP go_memstats_heap_sys_bytes Number of heap bytes obtained from system. Equals to /memory/classes/heap/objects:bytes + /memory/classes/heap/unused:bytes + /memory/classes/heap/released:bytes + /memory/classes/heap/free:bytes.
+# TYPE go_memstats_heap_sys_bytes gauge
+go_memstats_heap_sys_bytes 1.5433728e+07
+# HELP go_memstats_last_gc_time_seconds Number of seconds since 1970 of last garbage collection.
+# TYPE go_memstats_last_gc_time_seconds gauge
+go_memstats_last_gc_time_seconds 1.7948582238842885e+09
+# HELP go_memstats_mallocs_total Total number of heap objects allocated, both live and gc-ed. Semantically a counter version for go_memstats_heap_objects gauge. Equals to /gc/heap/allocs:objects + /gc/heap/tiny/allocs:objects.
+# TYPE go_memstats_mallocs_total counter
+go_memstats_mallocs_total 561855
+# HELP go_memstats_mcache_inuse_bytes Number of bytes in use by mcache structures. Equals to /memory/classes/metadata/mcache/inuse:bytes.
+# TYPE go_memstats_mcache_inuse_bytes gauge
+go_memstats_mcache_inuse_bytes 4832
+# HELP go_memstats_mcache_sys_bytes Number of bytes used for mcache structures obtained from system. Equals to /memory/classes/metadata/mcache/inuse:bytes + /memory/classes/metadata/mcache/free:bytes.
+# TYPE go_memstats_mcache_sys_bytes gauge
+go_memstats_mcache_sys_bytes 15704
+# HELP go_memstats_mspan_inuse_bytes Number of bytes in use by mspan structures. Equals to /memory/classes/metadata/mspan/inuse:bytes.
+# TYPE go_memstats_mspan_inuse_bytes gauge
+go_memstats_mspan_inuse_bytes 195040
+# HELP go_memstats_mspan_sys_bytes Number of bytes used for mspan structures obtained from system. Equals to /memory/classes/metadata/mspan/inuse:bytes + /memory/classes/metadata/mspan/free:bytes.
+# TYPE go_memstats_mspan_sys_bytes gauge
+go_memstats_mspan_sys_bytes 228480
+# HELP go_memstats_next_gc_bytes Number of heap bytes when next garbage collection will take place. Equals to /gc/heap/goal:bytes.
+# TYPE go_memstats_next_gc_bytes gauge
+go_memstats_next_gc_bytes 1.1638194e+07
+# HELP go_memstats_other_sys_bytes Number of bytes used for other system allocations. Equals to /memory/classes/other:bytes.
+# TYPE go_memstats_other_sys_bytes gauge
+go_memstats_other_sys_bytes 1.038019e+06
+# HELP go_memstats_stack_inuse_bytes Number of bytes obtained from system for stack allocator in non-CGO environments. Equals to /memory/classes/heap/stacks:bytes.
+# TYPE go_memstats_stack_inuse_bytes gauge
+go_memstats_stack_inuse_bytes 1.343488e+06
+# HELP go_memstats_stack_sys_bytes Number of bytes obtained from system for stack allocator. Equals to /memory/classes/heap/stacks:bytes + /memory/classes/os-stacks:bytes.
+# TYPE go_memstats_stack_sys_bytes gauge
+go_memstats_stack_sys_bytes 1.343488e+06
+# HELP go_memstats_sys_bytes Number of bytes obtained from system. Equals to /memory/classes/total:byte.
+# TYPE go_memstats_sys_bytes gauge
+go_memstats_sys_bytes 2.3155976e+07
+# HELP go_sched_gomaxprocs_threads The current runtime.GOMAXPROCS setting, or the number of operating system threads that can execute user-level Go code simultaneously. Sourced from /sched/gomaxprocs:threads.
+# TYPE go_sched_gomaxprocs_threads gauge
+go_sched_gomaxprocs_threads 4
+# HELP go_threads Number of OS threads created.
+# TYPE go_threads gauge
+go_threads 9
+# HELP process_cpu_seconds_total Total user and system CPU time spent in seconds.
+# TYPE process_cpu_seconds_total counter
+process_cpu_seconds_total 4.47
+# HELP process_max_fds Maximum number of open file descriptors.
+# TYPE process_max_fds gauge
+process_max_fds 1.073741816e+09
+# HELP process_network_receive_bytes_total Number of bytes received by the process over the network.
+# TYPE process_network_receive_bytes_total counter
+process_network_receive_bytes_total 5.255136e+06
+# HELP process_network_transmit_bytes_total Number of bytes sent by the process over the network.
+# TYPE process_network_transmit_bytes_total counter
+process_network_transmit_bytes_total 1.554233e+06
+# HELP process_open_fds Number of open file descriptors.
+# TYPE process_open_fds gauge
+process_open_fds 11
+# HELP process_resident_memory_bytes Resident memory size in bytes.
+# TYPE process_resident_memory_bytes gauge
+process_resident_memory_bytes 4.6886912e+07
+# HELP process_start_time_seconds Start time of the process since unix epoch in seconds.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1.79485647811e+09
+# HELP process_virtual_memory_bytes Virtual memory size in bytes.
+# TYPE process_virtual_memory_bytes gauge
+process_virtual_memory_bytes 1.301417984e+09
+# HELP process_virtual_memory_max_bytes Maximum amount of virtual memory available in bytes.
+# TYPE process_virtual_memory_max_bytes gauge
+process_virtual_memory_max_bytes 1.8446744073709552e+19
+# HELP rest_client_requests_total Number of HTTP requests, partitioned by status code, method, and host.
+# TYPE rest_client_requests_total counter
+rest_client_requests_total{code="200",host="10.96.0.1:443",method="GET"} 20
+rest_client_requests_total{code="200",host="10.96.0.1:443",method="PUT"} 374
+# HELP workqueue_adds_total Total number of adds handled by workqueue
+# TYPE workqueue_adds_total counter
+workqueue_adds_total{controller="crd-gate",name="crd-gate"} 26
+workqueue_adds_total{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io"} 0
+workqueue_adds_total{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io"} 370
+# HELP workqueue_depth Current depth of workqueue
+# TYPE workqueue_depth gauge
+workqueue_depth{controller="crd-gate",name="crd-gate"} 0
+workqueue_depth{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io"} 0
+workqueue_depth{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io"} 0
+# HELP workqueue_longest_running_processor_seconds How many seconds has the longest running processor for workqueue been running.
+# TYPE workqueue_longest_running_processor_seconds gauge
+workqueue_longest_running_processor_seconds{controller="crd-gate",name="crd-gate"} 0
+workqueue_longest_running_processor_seconds{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io"} 0
+workqueue_longest_running_processor_seconds{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io"} 0
+# HELP workqueue_queue_duration_seconds How long in seconds an item stays in workqueue before being requested
+# TYPE workqueue_queue_duration_seconds histogram
+workqueue_queue_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="1e-08"} 0
+workqueue_queue_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="1e-07"} 0
+workqueue_queue_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="1e-06"} 0
+workqueue_queue_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="9.999999999999999e-06"} 3
+workqueue_queue_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="9.999999999999999e-05"} 4
+workqueue_queue_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="0.001"} 8
+workqueue_queue_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="0.01"} 26
+workqueue_queue_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="0.1"} 26
+workqueue_queue_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="1"} 26
+workqueue_queue_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="10"} 26
+workqueue_queue_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="100"} 26
+workqueue_queue_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="1000"} 26
+workqueue_queue_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="+Inf"} 26
+workqueue_queue_duration_seconds_sum{controller="crd-gate",name="crd-gate"} 0.068971527
+workqueue_queue_duration_seconds_count{controller="crd-gate",name="crd-gate"} 26
+workqueue_queue_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="1e-08"} 0
+workqueue_queue_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="1e-07"} 0
+workqueue_queue_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="1e-06"} 0
+workqueue_queue_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="9.999999999999999e-06"} 0
+workqueue_queue_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="9.999999999999999e-05"} 0
+workqueue_queue_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="0.001"} 0
+workqueue_queue_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="0.01"} 0
+workqueue_queue_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="0.1"} 0
+workqueue_queue_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="1"} 0
+workqueue_queue_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="10"} 0
+workqueue_queue_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="100"} 0
+workqueue_queue_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="1000"} 0
+workqueue_queue_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="+Inf"} 0
+workqueue_queue_duration_seconds_sum{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io"} 0
+workqueue_queue_duration_seconds_count{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io"} 0
+workqueue_queue_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="1e-08"} 0
+workqueue_queue_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="1e-07"} 0
+workqueue_queue_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="1e-06"} 0
+workqueue_queue_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="9.999999999999999e-06"} 24
+workqueue_queue_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="9.999999999999999e-05"} 238
+workqueue_queue_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="0.001"} 265
+workqueue_queue_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="0.01"} 359
+workqueue_queue_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="0.1"} 370
+workqueue_queue_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="1"} 370
+workqueue_queue_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="10"} 370
+workqueue_queue_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="100"} 370
+workqueue_queue_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="1000"} 370
+workqueue_queue_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="+Inf"} 370
+workqueue_queue_duration_seconds_sum{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io"} 0.6456329529999993
+workqueue_queue_duration_seconds_count{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io"} 370
+# HELP workqueue_retries_total Total number of retries handled by workqueue
+# TYPE workqueue_retries_total counter
+workqueue_retries_total{controller="crd-gate",name="crd-gate"} 0
+workqueue_retries_total{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io"} 0
+workqueue_retries_total{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io"} 370
+# HELP workqueue_unfinished_work_seconds How many seconds of work has been done that is in progress and hasn't been observed by work_duration. Large values indicate stuck threads. One can deduce the number of stuck threads by observing the rate at which this increases.
+# TYPE workqueue_unfinished_work_seconds gauge
+workqueue_unfinished_work_seconds{controller="crd-gate",name="crd-gate"} 0
+workqueue_unfinished_work_seconds{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io"} 0
+workqueue_unfinished_work_seconds{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io"} 0
+# HELP workqueue_work_duration_seconds How long in seconds processing an item from workqueue takes.
+# TYPE workqueue_work_duration_seconds histogram
+workqueue_work_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="1e-08"} 0
+workqueue_work_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="1e-07"} 0
+workqueue_work_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="1e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="9.999999999999999e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="9.999999999999999e-05"} 20
+workqueue_work_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="0.001"} 25
+workqueue_work_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="0.01"} 26
+workqueue_work_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="0.1"} 26
+workqueue_work_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="1"} 26
+workqueue_work_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="10"} 26
+workqueue_work_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="100"} 26
+workqueue_work_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="1000"} 26
+workqueue_work_duration_seconds_bucket{controller="crd-gate",name="crd-gate",le="+Inf"} 26
+workqueue_work_duration_seconds_sum{controller="crd-gate",name="crd-gate"} 0.004505822
+workqueue_work_duration_seconds_count{controller="crd-gate",name="crd-gate"} 26
+workqueue_work_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="1e-08"} 0
+workqueue_work_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="1e-07"} 0
+workqueue_work_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="1e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="9.999999999999999e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="9.999999999999999e-05"} 0
+workqueue_work_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="0.001"} 0
+workqueue_work_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="0.01"} 0
+workqueue_work_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="0.1"} 0
+workqueue_work_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="1"} 0
+workqueue_work_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="10"} 0
+workqueue_work_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="100"} 0
+workqueue_work_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="1000"} 0
+workqueue_work_duration_seconds_bucket{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io",le="+Inf"} 0
+workqueue_work_duration_seconds_sum{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io"} 0
+workqueue_work_duration_seconds_count{controller="managed/clusternopresource.nop.crossplane.io",name="managed/clusternopresource.nop.crossplane.io"} 0
+workqueue_work_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="1e-08"} 0
+workqueue_work_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="1e-07"} 0
+workqueue_work_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="1e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="9.999999999999999e-06"} 0
+workqueue_work_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="9.999999999999999e-05"} 0
+workqueue_work_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="0.001"} 0
+workqueue_work_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="0.01"} 146
+workqueue_work_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="0.1"} 370
+workqueue_work_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="1"} 370
+workqueue_work_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="10"} 370
+workqueue_work_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="100"} 370
+workqueue_work_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="1000"} 370
+workqueue_work_duration_seconds_bucket{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io",le="+Inf"} 370
+workqueue_work_duration_seconds_sum{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io"} 4.532292781000002
+workqueue_work_duration_seconds_count{controller="managed/nopresource.nop.crossplane.io",name="managed/nopresource.nop.crossplane.io"} 370

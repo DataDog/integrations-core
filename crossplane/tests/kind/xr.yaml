@@ -1,0 +1,13 @@
+apiVersion: example.crossplane.io/v1alpha1
+kind: XNopApp
+metadata:
+  name: app-1
+  namespace: default
+spec: {}
+---
+apiVersion: example.crossplane.io/v1alpha1
+kind: XNopApp
+metadata:
+  name: app-2
+  namespace: default
+spec: {}

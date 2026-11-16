@@ -3,3 +3,7 @@ check-types = true
 
 [[envs.default.matrix]]
 python = ["3.13"]
+version = ["2.4.3"]
+
+[envs.default.overrides]
+matrix.version.env-vars = "CROSSPLANE_VERSION"
