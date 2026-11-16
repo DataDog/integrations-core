@@ -136,10 +136,6 @@ class SQLServerSchemaCollector(DatabaseSchemaCollector):
         self._check = check
         self._cancel_event = cancel_event
 
-    @property
-    def kinds(self) -> list[str]:
-        return [object_collector.kind for object_collector in self._object_collectors]
-
     def _raise_if_cancelled(self) -> None:
         if self._cancel_event is not None:
             raise_if_cancelled(self._cancel_event)
