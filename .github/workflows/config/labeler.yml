@@ -829,6 +829,10 @@ integration/litellm:
 - changed-files:
   - any-glob-to-any-file:
     - litellm/**/*
+integration/llm_d:
+- changed-files:
+  - any-glob-to-any-file:
+    - llm_d/**/*
 integration/lparstats:
 - changed-files:
   - any-glob-to-any-file:

@@ -458,6 +458,9 @@ services:
 - id: litellm
   paths:
   - litellm/datadog_checks/litellm/
+- id: llm_d
+  paths:
+  - llm_d/datadog_checks/llm_d/
 - id: lparstats
   paths:
   - lparstats/datadog_checks/lparstats/

@@ -68,21 +68,21 @@ pipeline:
           fallback %{data}
         matchRules: >
           generalRule %{date("MMM d HH:mm:ss
-          yyyy"):timestamp}\s+%{word:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s*CPU\s+%{integer:cpu}\s+TID\s+%{integer:thread.tid}\:\s+\[%{word}\.%{word:level}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
+          yyyy"):timestamp}\s+%{notSpace:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s*CPU\s+%{integer:cpu}\s+TID\s+%{integer:thread.tid}\:\s+\[%{word}\.%{word:level}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
 
-          generalRule2 %{date("MMM  d HH:mm:ss yyyy"):timestamp}\s+%{word:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s*CPU\s+%{integer:cpu}\s+TID\s+%{integer:thread.tid}\:\s+\[%{word}\.%{word:level}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
+          generalRule2 %{date("MMM  d HH:mm:ss yyyy"):timestamp}\s+%{notSpace:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s*CPU\s+%{integer:cpu}\s+TID\s+%{integer:thread.tid}\:\s+\[%{word}\.%{word:level}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
 
-          mdreqRule %{date("MMM d HH:mm:ss yyyy"):timestamp}\s+%{word:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s+\[%{word}\.%{word:level}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
+          mdreqRule %{date("MMM d HH:mm:ss yyyy"):timestamp}\s+%{notSpace:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s+\[%{word}\.%{word:level}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
 
-          mdreqRule2 %{date("MMM  d HH:mm:ss yyyy"):timestamp}\s+%{word:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s+\[%{word}\.%{word:level}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
+          mdreqRule2 %{date("MMM  d HH:mm:ss yyyy"):timestamp}\s+%{notSpace:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s+\[%{word}\.%{word:level}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
 
-          mgmtdRule %{date("MMM d HH:mm:ss yyyy"):timestamp}\s+%{word:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
+          mgmtdRule %{date("MMM d HH:mm:ss yyyy"):timestamp}\s+%{notSpace:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
 
-          mgmtdRule2 %{date("MMM d HH:mm:ss yyyy"):timestamp}\s+%{word:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
+          mgmtdRule2 %{date("MMM d HH:mm:ss yyyy"):timestamp}\s+%{notSpace:host_name}\s+%{word:process.component}\[%{integer:process.pid}\]\:\s+(?<message>%{functionColon}|%{functionParentheses}|%{fallback})
 
-          fallbackRule %{date("MMM d HH:mm:ss yyyy"):timestamp}\s+%{word:host_name} %{data:message}
+          fallbackRule %{date("MMM d HH:mm:ss yyyy"):timestamp}\s+%{notSpace:host_name} %{data:message}
 
-          fallbackRule2 %{date("MMM  d HH:mm:ss yyyy"):timestamp}\s+%{word:host_name} %{data:message}
+          fallbackRule2 %{date("MMM  d HH:mm:ss yyyy"):timestamp}\s+%{notSpace:host_name} %{data:message}
 
           kvRule %{data::keyvalue}
     - type: status-remapper

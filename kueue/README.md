@@ -157,10 +157,17 @@ not preserved across container recreation.
 
 The first collection run seeds the Workload state and does not emit events for already existing transitions.
 
-## Troubleshooting
+### Service Checks
+
+See [service_checks.json][15] for a list of service checks provided by this integration.
+
+## Uninstallation
+
+To disable the integration, remove the `kueue.yaml` entry from the Cluster Agent `confd` configuration, or remove the Autodiscovery annotations from the Kueue metrics Service.
+
+## Support
 
 Need help? Contact [Datadog support][8].
-
 
 [2]: https://app.datadoghq.com/account/settings/agent/latest
 [3]: https://docs.datadoghq.com/containers/kubernetes/integrations/
@@ -173,3 +180,4 @@ Need help? Contact [Datadog support][8].
 [12]: https://docs.datadoghq.com/containers/kubernetes/log/
 [13]: https://docs.datadoghq.com/gpu_monitoring/
 [14]: https://docs.datadoghq.com/containers/cluster_agent/endpointschecks/
+[15]: https://github.com/DataDog/integrations-core/blob/master/kueue/assets/service_checks.json
