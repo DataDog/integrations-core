@@ -44,9 +44,13 @@ WHERE
     v.is_ms_shipped = 0
 """
 
+# max_length, precision and scale are raw sys.columns values. max_length is in
+# bytes (twice the declared length for nchar and nvarchar) and -1 for (max)
+# types. data_type stays the bare type name.
 COLUMN_QUERY = """
 SELECT
-    c.name, t.name as data_type, coalesce(dc.definition, 'None') as "default", c.is_nullable AS nullable
+    c.name, t.name as data_type, coalesce(dc.definition, 'None') as "default", c.is_nullable AS nullable,
+    c.max_length, c.precision, c.scale
 FROM
     sys.columns c
     INNER JOIN sys.types t ON c.user_type_id = t.user_type_id
@@ -59,6 +63,9 @@ SELECT
     c.name,
     t.name AS data_type,
     c.is_nullable AS nullable,
+    c.max_length,
+    c.precision,
+    c.scale,
     CONVERT(varchar(10), c.column_id) AS ordinal_position
 FROM
     sys.columns c
