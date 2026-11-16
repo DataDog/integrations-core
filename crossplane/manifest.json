@@ -2,25 +2,25 @@
   "manifest_version": "2.0.0",
   "app_uuid": "8409d40e-364c-4aea-bd02-792ed0eb7714",
   "app_id": "crossplane",
-  "owner": "<FILL IN>",
+  "owner": "agent-integrations",
   "display_on_public_website": false,
   "tile": {
     "overview": "README.md#Overview",
     "configuration": "README.md#Setup",
     "support": "README.md#Support",
     "changelog": "CHANGELOG.md",
-    "description": "<FILL IN - A brief description of what this offering provides>",
+    "description": "Monitor the health of Crossplane control planes, composition functions, and managed resources.",
     "title": "Crossplane",
     "media": [],
     "classifier_tags": [
-      "<Add relevant tags from this list: https://docs.datadoghq.com/developers/integrations/check_references/#classifier-tags>",
       "Supported OS::Linux",
       "Supported OS::Windows",
       "Supported OS::macOS",
-      "Category::<FILL IN>",
-      "Offering::<FILL IN>",
-      "Queried Data Type::<FILL IN>",
-      "Submitted Data Type::<FILL IN>"
+      "Category::Kubernetes",
+      "Category::Configuration & Deployment",
+      "Offering::Integration",
+      "Queried Data Type::Metrics",
+      "Submitted Data Type::Metrics"
     ]
   },
   "assets": {
