@@ -57,6 +57,7 @@ from datadog_checks.sqlserver.deadlocks import Deadlocks
 from datadog_checks.sqlserver.health import SqlServerHealth
 from datadog_checks.sqlserver.metadata import SqlserverMetadata
 from datadog_checks.sqlserver.statements import SqlserverStatementMetrics
+from datadog_checks.sqlserver.statements_v2 import SqlserverStatementMetricsV2
 from datadog_checks.sqlserver.stored_procedures import SqlserverProcedureMetrics
 from datadog_checks.sqlserver.utils import (
     Database,
@@ -214,7 +215,12 @@ class SQLServer(DatabaseCheck):
     def _register_async_jobs(self):
         """Build and register the async jobs enabled by this check's configuration."""
         if self._config.dbm_enabled:
-            self.statement_metrics = self.register_async_job(SqlserverStatementMetrics(self, self._config))
+            if is_affirmative(self._config.statement_metrics_config.get('incremental_query_metrics', False)):
+                self.log.info("Using incremental query metrics collector")
+                statement_metrics_class = SqlserverStatementMetricsV2
+            else:
+                statement_metrics_class = SqlserverStatementMetrics
+            self.statement_metrics = self.register_async_job(statement_metrics_class(self, self._config))
             self.procedure_metrics = self.register_async_job(SqlserverProcedureMetrics(self, self._config))
             self.sql_metadata = self.register_async_job(SqlserverMetadata(self, self._config))
             self.activity = self.register_async_job(SqlserverActivity(self, self._config))

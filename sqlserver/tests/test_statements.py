@@ -56,6 +56,12 @@ def stop_orphaned_threads():
     DBMAsyncJob.executor = ThreadPoolExecutor()
 
 
+# Both query metrics collectors must honor the same contract, so the end-to-end tests run against each.
+parametrize_incremental_query_metrics = pytest.mark.parametrize(
+    'incremental_query_metrics', [False, True], ids=['v1', 'incremental']
+)
+
+
 @pytest.fixture
 def dbm_instance(instance_docker):
     instance_docker['dbm'] = True
@@ -329,6 +335,7 @@ test_statement_metrics_and_plans_parameterized = (
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
 @pytest.mark.parametrize(*test_statement_metrics_and_plans_parameterized)
+@parametrize_incremental_query_metrics
 def test_statement_metrics_and_plans(
     aggregator,
     dd_run_check,
@@ -344,10 +351,12 @@ def test_statement_metrics_and_plans(
     expected_queries_patterns,
     collect_raw_query_statement,
     procedure_name,
+    incremental_query_metrics,
     caplog,
     datadog_agent,
 ):
     caplog.set_level(logging.INFO)
+    dbm_instance['query_metrics']['incremental_query_metrics'] = incremental_query_metrics
     if disable_secondary_tags:
         dbm_instance['query_metrics']['disable_secondary_tags'] = True
     dbm_instance['query_activity'] = {'enabled': True, 'collection_interval': 2}
@@ -1002,10 +1011,18 @@ def test_statement_conditional_stored_procedure_with_temp_table(
         2000,
     ],
 )
+@parametrize_incremental_query_metrics
 def test_statement_stored_procedure_characters_limit(
-    aggregator, datadog_agent, dd_run_check, dbm_instance, bob_conn, stored_procedure_characters_limit
+    aggregator,
+    datadog_agent,
+    dd_run_check,
+    dbm_instance,
+    bob_conn,
+    stored_procedure_characters_limit,
+    incremental_query_metrics,
 ):
     dbm_instance['stored_procedure_characters_limit'] = stored_procedure_characters_limit
+    dbm_instance['query_metrics']['incremental_query_metrics'] = incremental_query_metrics
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     query = "EXEC procedureWithLargeCommment;"
 
@@ -1049,7 +1066,11 @@ def test_statement_stored_procedure_characters_limit(
 
 @pytest.mark.integration
 @pytest.mark.usefixtures('dd_environment')
-def test_statement_with_embedded_characters(aggregator, datadog_agent, dd_run_check, dbm_instance, bob_conn):
+@parametrize_incremental_query_metrics
+def test_statement_with_embedded_characters(
+    aggregator, datadog_agent, dd_run_check, dbm_instance, bob_conn, incremental_query_metrics
+):
+    dbm_instance['query_metrics']['incremental_query_metrics'] = incremental_query_metrics
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
     query = "EXEC nullCharTest;"
 
@@ -1350,6 +1371,7 @@ def test_normalize_queries_skips_unneeded_full_text_obfuscation(
         ),  # should filter to configured database datadog_test-1
     ],
 )
+@parametrize_incremental_query_metrics
 def test_statement_with_metrics_azure_sql_filtered_to_configured_database(
     aggregator,
     dd_run_check,
@@ -1358,7 +1380,9 @@ def test_statement_with_metrics_azure_sql_filtered_to_configured_database(
     configured_database,
     engine_edition,
     filter_to_configured_database,
+    incremental_query_metrics,
 ):
+    dbm_instance['query_metrics']['incremental_query_metrics'] = incremental_query_metrics
     if configured_database:
         dbm_instance['database'] = configured_database
     check = SQLServer(CHECK_NAME, {}, [dbm_instance])
