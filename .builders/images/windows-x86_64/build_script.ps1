@@ -24,7 +24,7 @@ Remove-Item "librdkafka-${kafka_version}.tar.gz"
 $triplet = "x64-windows"
 $vcpkg_dir = "C:\vcpkg"
 $librdkafka_dir = "C:\librdkafka\librdkafka-${kafka_version}"
-# Pinned to the vcpkg commit that first added the curl 8.23.0 port entry (it also has openssl 3.6.4)
+# Pinned to the vcpkg commit that first added the curl 8.23.0 port entry (it also has openssl 3.6.5)
 $desired_commit = "357b1a6f8343064ca982a20771e420fcecfe7efc"
 
 # Clone and configure vcpkg

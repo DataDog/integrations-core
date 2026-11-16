@@ -1037,10 +1037,6 @@ integration/podman:
 - changed-files:
   - any-glob-to-any-file:
     - podman/**/*
-integration/powershell:
-- changed-files:
-  - any-glob-to-any-file:
-    - powershell/**/*
 integration/postfix:
 - changed-files:
   - any-glob-to-any-file:
@@ -1057,6 +1053,10 @@ integration/powerdns_recursor:
 - changed-files:
   - any-glob-to-any-file:
     - powerdns_recursor/**/*
+integration/powershell:
+- changed-files:
+  - any-glob-to-any-file:
+    - powershell/**/*
 integration/prefect:
 - changed-files:
   - any-glob-to-any-file:
