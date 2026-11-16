@@ -127,5 +127,5 @@ Need help? Contact [Datadog support][10].
 [9]: https://github.com/DataDog/integrations-core/blob/master/prefect/metadata.csv
 [10]: https://docs.datadoghq.com/help/
 [11]: https://docs.datadoghq.com/integrations/postgres/
-[12]: https://docs.datadoghq.com/integrations/redisdb/
+[12]: https://docs.datadoghq.com/integrations/redis/
 [13]: https://docs.prefect.io/v3/advanced/self-hosted
