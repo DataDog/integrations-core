@@ -40,7 +40,7 @@ No additional installation is needed on your server.
 
 ### Configure the Related Databases dashboard section
 
-The Related Databases section of the Prefect dashboard shows the PostgreSQL database and Redis instance that Prefect server uses. It requires the Datadog [PostgreSQL][11] and [Redis][12] integrations monitoring those instances, with the same `service` set on the Prefect, PostgreSQL, and Redis instances. Select that value in the `service` template variable to filter the whole dashboard.
+The Related Databases section of the Prefect dashboard shows the PostgreSQL database and Redis instance that Prefect server uses. This section requires the Datadog [PostgreSQL][11] and [Redis][12] integrations to monitor those instances. Set the same `service` on the Prefect, PostgreSQL, and Redis instances, then select that value in the `service` template variable to filter the whole dashboard.
 
 1. Set `service` on the instance in your `prefect.d/conf.yaml` file:
 
