@@ -358,21 +358,25 @@ facets:
     name: Destination Endpoint Owner Name
     path: ocsf.dst_endpoint.owner.name
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
     name: Dst Endpoint Port
     path: ocsf.dst_endpoint.port
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Destination Endpoint Network Zone
     path: ocsf.dst_endpoint.zone
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
     name: Duration Milliseconds
     path: ocsf.duration
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Finding Information Analytic Category
@@ -410,11 +414,6 @@ facets:
     source: log
   - groups:
       - OCSF
-    name: Alert
-    path: ocsf.is_alert
-    source: log
-  - groups:
-      - OCSF
     name: Metadata Log Name
     path: ocsf.metadata.log_name
     source: log
@@ -448,11 +447,13 @@ facets:
     name: Source Endpoint Owner Name
     path: ocsf.src_endpoint.owner.name
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
     name: Src Endpoint Port
     path: ocsf.src_endpoint.port
     source: log
+    type: integer
   - groups:
       - OCSF
     name: Source Endpoint Network Zone
@@ -463,11 +464,13 @@ facets:
     name: Status Detail
     path: ocsf.status_detail
     source: log
-  - groups:
+  - facetType: range
+    groups:
       - OCSF
     name: Event Time
     path: ocsf.time
     source: log
+    type: integer
   - groups:
       - OCSF
     name: TLS Certificate Issuer Details
