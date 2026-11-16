@@ -24,6 +24,9 @@ RESTARTED_AT = '2026-11-03T10:06:00Z'
 
 BASE_TAGS = [
     'kube_namespace:team-a',
+    'job_scheduler:kai',
+    'job_scheduler_workload:pg-train',
+    'job_scheduler_queue:research',
     'kai_workload:pg-train',
     'kai_workload_uid:pg-uid',
     'kai_queue:research',
