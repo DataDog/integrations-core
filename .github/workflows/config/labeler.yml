@@ -357,6 +357,10 @@ integration/crio:
 - changed-files:
   - any-glob-to-any-file:
     - crio/**/*
+integration/crossplane:
+- changed-files:
+  - any-glob-to-any-file:
+    - crossplane/**/*
 integration/datadog_agent:
 - changed-files:
   - any-glob-to-any-file:

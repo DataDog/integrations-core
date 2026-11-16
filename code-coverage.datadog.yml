@@ -206,6 +206,9 @@ services:
 - id: crio
   paths:
   - crio/datadog_checks/crio/
+- id: crossplane
+  paths:
+  - crossplane/datadog_checks/crossplane/
 - id: datadog_agent
   paths:
   - datadog_agent/datadog_checks/datadog_agent/
