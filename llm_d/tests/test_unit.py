@@ -57,8 +57,9 @@ def test_check_collects_mapped_metrics(dd_run_check, aggregator, router_instance
 @pytest.mark.parametrize(
     ('fixture_file', 'metric', 'tag'),
     [
-        ('llm_d_router_metrics.txt', 'llm_d.epp.pool.ready_endpoints', 'inference_pool:llama-3-1-8b-pool'),
-        ('llm_d_router_metrics.txt', 'llm_d.epp.endpoint.queue_size', 'inference_pool:llama-3-1-8b-pool'),
+        ('llm_d_router_metrics.txt', 'llm_d.epp.pool.ready_endpoints', 'llm_d_pool:llama-3-1-8b-pool'),
+        ('llm_d_router_metrics.txt', 'llm_d.epp.endpoint.queue_size', 'llm_d_pool:llama-3-1-8b-pool'),
+        ('llm_d_router_metrics.txt', 'llm_d.epp.flow_control.pool_saturation', 'llm_d_pool:llama-3-1-8b-pool'),
         ('llm_d_router_metrics.txt', 'llm_d.epp.scheduler.attempts.count', 'endpoint_namespace:llm-d'),
         ('llm_d_router_metrics.txt', 'llm_d.epp.scheduler.attempts.count', 'endpoint_port:8000'),
         ('llm_d_router_metrics.txt', 'llm_d.epp.inflight.requests', 'endpoint_namespace:llm-d'),
@@ -68,6 +69,15 @@ def test_labels_are_renamed_to_avoid_collisions(dd_run_check, aggregator, router
     run_check(dd_run_check, router_instance, fixture_file)
 
     aggregator.assert_metric_has_tag(metric, tag)
+
+
+def test_inference_pool_tag_is_not_derived_from_epp_labels(dd_run_check, aggregator, router_instance):
+    # The pod annotation is the only source of `inference_pool`; a second value from the EPP splits deployments.
+    run_check(dd_run_check, router_instance, 'llm_d_router_metrics.txt')
+
+    for metric in aggregator.metric_names:
+        for sample in aggregator.metrics(metric):
+            assert not any(tag.startswith('inference_pool:') for tag in sample.tags), (metric, sample.tags)
 
 
 def test_emits_critical_openmetrics_service_check_when_service_is_down(

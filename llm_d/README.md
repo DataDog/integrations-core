@@ -127,14 +127,18 @@ check at the model server port, not the sidecar port.
 
 #### Tags
 
-EPP request metrics (`llm_d.epp.request.*`) don't include an InferencePool label. To group metrics by
-InferencePool, tag the router and model server pods with the InferencePool name:
+The `inference_pool` tag groups router, sidecar, and model server metrics by deployment. It comes only from
+the following pod annotation, so this annotation is required on the router and model server pods:
 
 ```yaml
 metadata:
   annotations:
     ad.datadoghq.com/tags: '{"inference_pool": "<INFERENCE_POOL_NAME>"}'
 ```
+
+EPP request metrics (`llm_d.epp.request.*`) don't include a pool label. The pool name that the EPP reports on
+its pool and Flow Control metrics is collected as the `llm_d_pool` tag. In standalone mode
+(`--endpoint-selector`, without an InferencePool), pool metrics report the EPP Deployment name.
 
 To tag model server metrics with their disaggregation role, map the `llm-d.ai/role` pod label to the
 `llm_d_role` tag. Set `datadog.podLabelsAsTags` in the Datadog Helm chart, or
@@ -157,7 +161,7 @@ See [metadata.csv][9] for a list of metrics provided by this integration.
 
 The integration renames the following labels:
 
-- `name` (the InferencePool name) becomes `inference_pool`.
+- `name` and `inference_pool` (the pool name that the EPP reports) become `llm_d_pool`.
 - `namespace` becomes `endpoint_namespace`.
 - `port` becomes `endpoint_port`.
 
