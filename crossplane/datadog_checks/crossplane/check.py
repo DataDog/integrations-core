@@ -1,71 +1,75 @@
 # (C) Datadog, Inc. 2026-present
 # All rights reserved
 # Licensed under a 3-clause BSD style license (see LICENSE)
+from __future__ import annotations
 
-from datadog_checks.base import AgentCheck
-from datadog_checks.base.types import InitConfigType, InstanceType
+from collections import ChainMap
+from pathlib import Path
+from typing import TYPE_CHECKING
+
+from datadog_checks.base import OpenMetricsBaseCheckV2
+from datadog_checks.base.checks.openmetrics.v2.metrics_mapping import MetricsMapping
 
 from .config_models import ConfigMixin
 
-# from datadog_checks.base.utils.db import QueryManager
-# from requests.exceptions import ConnectionError, HTTPError, InvalidURL, Timeout
-# from json import JSONDecodeError
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+    from datadog_checks.base.types import InstanceType
+
+# Endpoint labels renamed for hygiene; see the class docstring.
+RENAME_LABELS_MAP = {
+    # `rest_client_requests` (core and provider) tags the Kubernetes API server address under
+    # `host`, which collides with the reserved Datadog `host` tag used for host-based metric
+    # assignment.
+    'host': 'rest_client_host',
+    # `go_info` (core and provider) tags the Go runtime version under `version`, which collides
+    # with the reserved Datadog `version` tag, normally reserved for the monitored service's own
+    # version.
+    'version': 'go_version',
+    # The `workqueue_*` metrics (core and provider) tag the workqueue under the generic `name`
+    # label, whose value is always identical to the `controller` label in practice.
+    # `leader_election_master_status` (core only) also carries a `name` label, identifying the
+    # election lease rather than a workqueue; it is renamed the same way for consistency since
+    # OpenMetrics label renames apply check-wide.
+    'name': 'workqueue_name',
+    # `engine_watches_started` (core only) tags the watched resource kind under the generic `type`
+    # label.
+    'type': 'watch_type',
+}
 
 
-class CrossplaneCheck(AgentCheck, ConfigMixin):
-    # This will be the prefix of every metric the integration sends
+class CrossplaneCheck(OpenMetricsBaseCheckV2, ConfigMixin):
+    """
+    Collects Crossplane core and provider controller-runtime telemetry (reconciliation totals and
+    errors, workqueue depth and active workers, circuit breaker activity, managed resource
+    readiness/sync/time-to-readiness, and, for Upjet-based providers, external cloud API call and
+    Terraform CLI metrics) by scraping a Crossplane core or provider pod's Prometheus metrics
+    endpoint.
+
+    The endpoint-to-submission mappings are declared in `metrics/core.yaml` and
+    `metrics/provider.yaml` and loaded unconditionally via the `METRICS_MAP` file-based mechanism,
+    since either mapping may apply depending on whether the configured endpoint belongs to
+    Crossplane core or to a provider.
+    """
+
     __NAMESPACE__ = 'crossplane'
+    DEFAULT_METRIC_LIMIT = 0
 
-    def __init__(self, name: str, init_config: InitConfigType, instances: list[InstanceType]) -> None:
-        super().__init__(name, init_config, instances)
+    METRICS_MAP = (
+        MetricsMapping(Path('metrics/core.yaml')),
+        MetricsMapping(Path('metrics/provider.yaml')),
+    )
 
-        # If the check is going to perform SQL queries you should define a query manager here.
-        # More info at
-        # https://datadoghq.dev/integrations-core/base/databases/#datadog_checks.base.utils.db.core.QueryManager
-        # sample_query = {
-        #     "name": "sample",
-        #     "query": "SELECT * FROM sample_table",
-        #     "columns": [
-        #         {"name": "metric", "type": "gauge"}
-        #     ],
-        # }
-        # self._query_manager = QueryManager(self, self.execute_query, queries=[sample_query])
-        # self.check_initializations.append(self._query_manager.compile_queries)
+    def get_default_config(self) -> dict:
+        # A fresh copy each call, since the framework may mutate what this returns. The base check
+        # merges this entry by entry with any instance-level `rename_labels`, so an instance that
+        # renames one label keeps the collision-avoiding renames it did not mention.
+        return {'rename_labels': dict(RENAME_LABELS_MAP)}
 
-    def check(self, _: InstanceType) -> None:
-        # The following are useful bits of code to help new users get started.
-
-        # Read validated, typed configuration from self.config (and self.shared_config).
-        # Fields must be declared in spec.yaml and the models regenerated with `ddev validate models`.
-        # url = self.config.url
-
-        # Perform HTTP Requests with our HTTP wrapper.
-        # More info at https://datadoghq.dev/integrations-core/base/http/
-        # try:
-        #     response = self.http.get(url)
-        #     response.raise_for_status()
-        #     response_json = response.json()
-
-        # except (HTTPError, InvalidURL, ConnectionError, Timeout):
-        #     self.log.debug("Could not connect", exc_info=True)
-
-        # except JSONDecodeError:
-        #    self.log.debug("Could not parse JSON", exc_info=True)
-
-        # except ValueError:
-        #    self.log.debug("Unexpected value", exc_info=True)
-
-        # This is how you submit metrics
-        # There are different types of metrics that you can submit (gauge, event).
-        # More info at https://datadoghq.dev/integrations-core/base/api/#datadog_checks.base.checks.base.AgentCheck
-        # self.gauge("test", 1.23, tags=['foo:bar'])
-
-        # Perform database queries using the Query Manager
-        # self._query_manager.execute()
-
-        # This is how you use the persistent cache. This cache is file based and persists across agent restarts.
-        # If you need an in-memory cache that is persisted across runs
-        # You can define a dictionary in the __init__ method.
-        # self.write_persistent_cache("key", "value")
-        # value = self.read_persistent_cache("key")
-        pass
+    def get_config_with_defaults(self, config: InstanceType) -> Mapping:
+        # Preserve file-based metric mappings (METRICS_MAP) and other defaults, then force
+        # enable_health_service_check to False so the deprecated OpenMetrics health service check
+        # cannot be enabled or emitted, regardless of instance configuration.
+        merged = super().get_config_with_defaults(config)
+        return ChainMap({'enable_health_service_check': False}, merged)

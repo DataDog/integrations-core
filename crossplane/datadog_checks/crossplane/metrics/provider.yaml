@@ -1,0 +1,116 @@
+# Crossplane managed resource metrics (crossplane-runtime)
+crossplane_managed_resource_exists: managed_resource.exists
+crossplane_managed_resource_ready: managed_resource.ready
+crossplane_managed_resource_synced: managed_resource.synced
+crossplane_managed_resource_first_time_to_readiness_seconds: managed_resource.first_time_to_readiness_seconds
+crossplane_managed_resource_first_time_to_reconcile_seconds: managed_resource.first_time_to_reconcile_seconds
+crossplane_managed_resource_deletion_seconds:
+  name: managed_resource.deletion_seconds
+  type: histogram
+crossplane_managed_resource_drift_seconds:
+  name: managed_resource.drift_seconds
+  type: histogram
+
+# Upjet provider resource metrics (Upjet-based providers only)
+upjet_resource_ext_api_duration:
+  name: upjet.resource.ext_api_duration
+  type: histogram
+upjet_resource_external_api_calls:
+  name: upjet.resource.external_api_calls
+  type: counter
+upjet_resource_deletion_seconds:
+  name: upjet.resource.deletion_seconds
+  type: histogram
+upjet_resource_reconcile_delay_seconds:
+  name: upjet.resource.reconcile_delay_seconds
+  type: histogram
+upjet_resource_ttr:
+  name: upjet.resource.ttr
+  type: histogram
+
+# Upjet Terraform metrics (Upjet-based providers only)
+upjet_terraform_cli_duration:
+  name: upjet.terraform.cli_duration
+  type: histogram
+upjet_terraform_active_cli_invocations:
+  name: upjet.terraform.active_cli_invocations
+  type: gauge
+upjet_terraform_running_processes:
+  name: upjet.terraform.running_processes
+  type: gauge
+
+# Certificate watcher metrics
+certwatcher_read_certificate_errors: certwatcher.read_certificate_errors
+certwatcher_read_certificate: certwatcher.read_certificate
+
+# Controller runtime metrics
+controller_runtime_active_workers: controller_runtime.active_workers
+controller_runtime_max_concurrent_reconciles: controller_runtime.max_concurrent_reconciles
+controller_runtime_reconcile: controller_runtime.reconcile
+controller_runtime_reconcile_errors: controller_runtime.reconcile.errors
+controller_runtime_reconcile_panics: controller_runtime.reconcile.panics
+controller_runtime_reconcile_time_seconds: controller_runtime.reconcile.time_seconds
+controller_runtime_terminal_reconcile_errors: controller_runtime.terminal_reconcile_errors
+
+# Controller runtime webhook metrics
+controller_runtime_webhook_latency_seconds:
+  name: controller_runtime.webhook.latency_seconds
+  type: histogram
+controller_runtime_webhook_panics: controller_runtime.webhook.panics
+controller_runtime_webhook_requests: controller_runtime.webhook.requests
+controller_runtime_webhook_requests_in_flight: controller_runtime.webhook.requests_in_flight
+
+# Go runtime metrics
+go_gc_duration_seconds: go.gc.duration_seconds
+go_gc_gogc_percent: go.gc.gogc_percent
+go_gc_gomemlimit_bytes: go.gc.gomemlimit_bytes
+go_goroutines: go.goroutines
+go_info: go.info
+go_memstats_alloc_bytes:
+  name: go.memstats.alloc_bytes
+  type: native_dynamic  # exposed as both a gauge and a _total counter
+go_memstats_buck_hash_sys_bytes: go.memstats.buck_hash_sys_bytes
+go_memstats_frees: go.memstats.frees
+go_memstats_gc_sys_bytes: go.memstats.gc_sys_bytes
+go_memstats_heap_alloc_bytes: go.memstats.heap_alloc_bytes
+go_memstats_heap_idle_bytes: go.memstats.heap_idle_bytes
+go_memstats_heap_inuse_bytes: go.memstats.heap_inuse_bytes
+go_memstats_heap_objects: go.memstats.heap_objects
+go_memstats_heap_released_bytes: go.memstats.heap_released_bytes
+go_memstats_heap_sys_bytes: go.memstats.heap_sys_bytes
+go_memstats_last_gc_time_seconds: go.memstats.last_gc_time_seconds
+go_memstats_mallocs: go.memstats.mallocs
+go_memstats_mcache_inuse_bytes: go.memstats.mcache_inuse_bytes
+go_memstats_mcache_sys_bytes: go.memstats.mcache_sys_bytes
+go_memstats_mspan_inuse_bytes: go.memstats.mspan_inuse_bytes
+go_memstats_mspan_sys_bytes: go.memstats.mspan_sys_bytes
+go_memstats_next_gc_bytes: go.memstats.next_gc_bytes
+go_memstats_other_sys_bytes: go.memstats.other_sys_bytes
+go_memstats_stack_inuse_bytes: go.memstats.stack_inuse_bytes
+go_memstats_stack_sys_bytes: go.memstats.stack_sys_bytes
+go_memstats_sys_bytes: go.memstats.sys_bytes
+go_sched_gomaxprocs_threads: go.sched.gomaxprocs_threads
+go_threads: go.threads
+
+# Process metrics
+process_cpu_seconds: process.cpu_seconds
+process_max_fds: process.max_fds
+process_network_receive_bytes: process.network.receive_bytes
+process_network_transmit_bytes: process.network.transmit_bytes
+process_open_fds: process.open_fds
+process_resident_memory_bytes: process.resident_memory_bytes
+process_start_time_seconds: process.start_time_seconds
+process_virtual_memory_bytes: process.virtual_memory_bytes
+process_virtual_memory_max_bytes: process.virtual_memory_max_bytes
+
+# Kubernetes REST client metrics
+rest_client_requests: rest_client.requests
+
+# Workqueue metrics
+workqueue_adds: workqueue.adds
+workqueue_depth: workqueue.depth
+workqueue_longest_running_processor_seconds: workqueue.longest_running_processor_seconds
+workqueue_queue_duration_seconds: workqueue.queue_duration_seconds
+workqueue_retries: workqueue.retries
+workqueue_unfinished_work_seconds: workqueue.unfinished_work_seconds
+workqueue_work_duration_seconds: workqueue.work_duration_seconds

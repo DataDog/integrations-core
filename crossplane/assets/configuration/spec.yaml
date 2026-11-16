@@ -4,7 +4,9 @@ files:
   options:
   - template: init_config
     options:
-    - template: init_config/default
+    - template: init_config/openmetrics
   - template: instances
     options:
-    - template: instances/default
+    - template: instances/openmetrics
+      overrides:
+        openmetrics_endpoint.value.example: http://%%host%%:18080/metrics
