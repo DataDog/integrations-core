@@ -225,6 +225,11 @@ class DatabaseSchemaCollector(ABC):
         self._log = check.log
         self._object_collectors = list(object_collectors)
 
+    @property
+    def kinds(self) -> list[str]:
+        """The payload kinds this collector sends, in collection order."""
+        return [object_collector.kind for object_collector in self._object_collectors]
+
     @abstractmethod
     def _get_databases(self) -> list[DatabaseInfo]:
         """
