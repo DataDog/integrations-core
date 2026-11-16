@@ -90,7 +90,8 @@ class SchedulingState(str, Enum):
     """Was ready, and Kueue reports `PodsReady=False` with `WaitForRecovery`: some pods stopped being ready. Kueue
     also reports it for a few seconds when the pods complete, before `Finished`, so it is not counted as waiting."""
     READINESS_UNKNOWN = 'readiness_unknown'
-    """Admitted without a `PodsReady` condition. Kueue only maintains it when `waitForPodsReady` is enabled."""
+    """No `PodsReady` condition. Kueue sets it on every Workload, pending ones included, only when `waitForPodsReady`
+    is enabled."""
     INACTIVE = 'inactive'
     """Deactivated with `spec.active: false`. It is not waiting for resources."""
     FINISHED = 'finished'
@@ -110,7 +111,8 @@ STATE_CATEGORY = {
     SchedulingState.RUNNABLE: Category.FULLY_ADMITTED,
     # Kueue also reports it while the pods of a completing Workload terminate, which is not a wait.
     SchedulingState.RECOVERING: Category.NONE,
-    # Without `waitForPodsReady`, Kueue never reports when the pods are ready: see `GoodputTracker.pods_ready_missing`.
+    # Without `waitForPodsReady`, Kueue never reports when the pods are ready, so the Workload is not tracked: see
+    # `GoodputTracker.update`.
     SchedulingState.READINESS_UNKNOWN: Category.NONE,
     SchedulingState.INACTIVE: Category.NONE,
     SchedulingState.FINISHED: Category.NONE,
@@ -182,6 +184,13 @@ def classify(workload: dict) -> SchedulingState:
     if (workload.get('spec') or {}).get('active') is False:
         return SchedulingState.INACTIVE
 
+    pods_ready = conditions.get('PodsReady')
+    # Kueue sets `PodsReady` on every Workload, from before its admission until after it finishes, only when
+    # `waitForPodsReady` is enabled. Checking it per Workload, rather than once for the cluster, also leaves out the
+    # Workloads created after it was disabled, while the older ones keep their condition.
+    if pods_ready is None:
+        return SchedulingState.READINESS_UNKNOWN
+
     # An evicted Workload is not fully runnable, even while `Admitted` and `PodsReady` are still True for a moment.
     # Kueue sets `Evicted=False` once it admits the Workload again.
     evicted = conditions.get('Evicted')
@@ -191,17 +200,13 @@ def classify(workload: dict) -> SchedulingState:
         return SchedulingState.WAITING
 
     admitted = is_true(conditions.get('Admitted'))
-    pods_ready = conditions.get('PodsReady')
     # `PodsReady` can stay True for a moment after the admission is removed, so it is only trusted together with
     # `Admitted`.
     if admitted and is_true(pods_ready):
         return SchedulingState.RUNNABLE
 
-    if admitted and pods_ready is not None and pods_ready.get('reason') == 'WaitForRecovery':
+    if admitted and pods_ready.get('reason') == 'WaitForRecovery':
         return SchedulingState.RECOVERING
-
-    if admitted and pods_ready is None:
-        return SchedulingState.READINESS_UNKNOWN
 
     return SchedulingState.WAITING
 
@@ -385,8 +390,8 @@ class GoodputTracker:
         self.previous_monotonic: float | None = None
         self.previous_wall: float | None = None
         self.warned_readiness_unknown = False
-        self.pods_ready_missing = False
-        """Whether Kueue runs without `waitForPodsReady`, so that fully admitted time cannot be measured."""
+        # Consecutive polls that saw GPU Workloads without `PodsReady`, which are not counted.
+        self.readiness_unknown_polls = 0
         # GPU Workloads of the last poll whose ClusterQueue was unknown, and Workloads that could not be parsed, which
         # the check reports.
         self.unresolved_cluster_queues = 0
@@ -411,6 +416,7 @@ class GoodputTracker:
 
         current: dict[str, Observation] = {}
         self.skipped = 0
+        readiness_unknown = 0
         for workload in workloads:
             metadata = workload.get('metadata') or {}
             uid = metadata.get('uid')
@@ -440,6 +446,13 @@ class GoodputTracker:
                 # Keep the ClusterQueue once known, so that the series of a Workload keep the same queue tags when the
                 # tagger briefly cannot resolve its LocalQueue.
                 observation = observation._replace(queue=previous.queue)
+            if observation.state == SchedulingState.READINESS_UNKNOWN and previous is None:
+                # Without `PodsReady`, the time the Workload runs cannot be told apart from its waits: counting only
+                # the waits would report a goodput of 0, however short the Workload is. Kueue sets no condition at all
+                # on a Workload it did not reconcile yet.
+                if observation.gpus > 0 and (workload.get('status') or {}).get('conditions'):
+                    readiness_unknown += 1
+                continue
             if observation.gpus <= 0 and previous is None:
                 continue
             # A tracked Workload whose GPU PodSets are all reclaimable, such as when its GPU pods completed but CPU
@@ -460,6 +473,7 @@ class GoodputTracker:
                 contributions = self.contributions(current, elapsed, now_wall)
 
         self.log_transitions(current)
+        self.warn_readiness_unknown(readiness_unknown)
         # Finished Workloads contributed their last interval and are not tracked any longer. Workloads that
         # disappeared are dropped without a contribution, as when they were deleted is unknown.
         self.previous = {uid: obs for uid, obs in current.items() if obs.state != SchedulingState.FINISHED}
@@ -499,18 +513,8 @@ class GoodputTracker:
         return contributions
 
     def log_transitions(self, current: dict[str, Observation]) -> None:
-        unknown = 0
-        pods_ready_reported = False
         for uid, observation in current.items():
             previous = (self.previous or {}).get(uid)
-            # A Workload admitted for a whole interval without `PodsReady` means `waitForPodsReady` is off, and one
-            # that is ready or recovering means it is on.
-            if observation.state == SchedulingState.READINESS_UNKNOWN and (
-                previous is not None and previous.state == SchedulingState.READINESS_UNKNOWN
-            ):
-                unknown += 1
-            if observation.state in (SchedulingState.RUNNABLE, SchedulingState.RECOVERING):
-                pods_ready_reported = True
             if previous is None or previous.state != observation.state:
                 self.debug(
                     'Scheduling goodput: Workload %s (%g GPUs, queue %s) %s -> %s (reason: %s, scheduler_reason: %s)',
@@ -522,17 +526,16 @@ class GoodputTracker:
                     observation.cause,
                     observation.reason,
                 )
-        if pods_ready_reported:
-            self.pods_ready_missing = False
-        elif unknown:
-            self.pods_ready_missing = True
-        if self.pods_ready_missing and not self.warned_readiness_unknown and self.log:
+
+    def warn_readiness_unknown(self, readiness_unknown: int) -> None:
+        # Kueue may not have set `PodsReady` yet on a Workload it just reconciled, so only a lasting gap warns.
+        self.readiness_unknown_polls = self.readiness_unknown_polls + 1 if readiness_unknown else 0
+        if self.readiness_unknown_polls >= 2 and not self.warned_readiness_unknown and self.log:
             self.warned_readiness_unknown = True
             self.log.warning(
-                'Scheduling goodput: %d admitted GPU Workloads have no PodsReady condition, so the fully admitted time '
-                'cannot be measured and no goodput metric is submitted. Enable waitForPodsReady in the Kueue '
-                'configuration.',
-                unknown,
+                'Scheduling goodput: %d GPU Workloads have no PodsReady condition, so their fully admitted time cannot '
+                'be measured and they are not counted. Enable waitForPodsReady in the Kueue configuration.',
+                readiness_unknown,
             )
 
     def debug(self, *args) -> None:

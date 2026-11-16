@@ -271,8 +271,7 @@ class KueueCheck(OpenMetricsBaseCheckV2, ConfigMixin):
                 '(`cluster_agent.kueue.enabled`) to resolve it, or group by `kueue_local_queue`.',
                 self.goodput.unresolved_cluster_queues,
             )
-        if not submit or self.goodput.pods_ready_missing:
-            # Without the fully admitted time, every group that ever waited would report a goodput of 0.
+        if not submit:
             return
 
         # Instance tags stay off, as on events: they include the tags Autodiscovery copies from the controller pod,

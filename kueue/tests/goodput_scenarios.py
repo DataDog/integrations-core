@@ -30,13 +30,23 @@ def condition(type_, status, reason, t=0):
     return {'type': type_, 'status': status, 'reason': reason, 'lastTransitionTime': iso(t), 'message': ''}
 
 
-# Condition sets for the Kueue states used in the scenarios, as Kueue reports them with `waitForPodsReady`.
+# Condition sets for the Kueue states used in the scenarios, as Kueue reports them with `waitForPodsReady`, which
+# sets `PodsReady` on every Workload, pending ones included. The `_no_podsready` ones are as Kueue reports them
+# without it.
 STATES = {
-    'pending_quota': [condition('QuotaReserved', 'False', 'WaitingForQuota')],
-    'pending_max_quota': [condition('QuotaReserved', 'False', 'ExceedsMaxQuota')],
+    'pending_quota': [
+        condition('QuotaReserved', 'False', 'WaitingForQuota'),
+        condition('PodsReady', 'False', 'WaitForStart'),
+    ],
+    'pending_max_quota': [
+        condition('QuotaReserved', 'False', 'ExceedsMaxQuota'),
+        condition('PodsReady', 'False', 'WaitForStart'),
+    ],
+    'pending_no_podsready': [condition('QuotaReserved', 'False', 'Pending')],
     'quota_reserved': [
         condition('QuotaReserved', 'True', 'QuotaReserved'),
         condition('Admitted', 'False', 'UnsatisfiedAdmissionChecks'),
+        condition('PodsReady', 'False', 'WaitForStart'),
     ],
     'admitted_pods_pending': [
         condition('QuotaReserved', 'True', 'QuotaReserved'),

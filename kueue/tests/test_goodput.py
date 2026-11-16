@@ -45,6 +45,7 @@ def reset_persistent_cache():
         ('quota_reserved', SchedulingState.WAITING),
         ('admitted_pods_pending', SchedulingState.WAITING),
         ('admitted_no_podsready', SchedulingState.READINESS_UNKNOWN),
+        ('pending_no_podsready', SchedulingState.READINESS_UNKNOWN),
         ('running', SchedulingState.RUNNABLE),
         ('recovering', SchedulingState.RECOVERING),
         ('preempted', SchedulingState.PREEMPTED),
@@ -731,10 +732,10 @@ def test_requested_gpus_uses_the_admitted_pods_with_partial_admission():
 
 
 def test_check_submits_nothing_without_pods_ready(dd_run_check, aggregator, instance, mock_http_response):
-    # Without `waitForPodsReady`, admitted Workloads never get `PodsReady`: only the waits could be counted, and every
-    # group that ever waited would report a goodput of 0.
+    # Without `waitForPodsReady`, Workloads never get `PodsReady`: only the waits could be counted, and every group
+    # that ever waited would report a goodput of 0.
     mock_http_response(file_path=get_fixture_path('metrics.txt'))
-    without_pods_ready = [workload('run', 'admitted_no_podsready', 2), workload('wait', 'pending_quota', 2)]
+    without_pods_ready = [workload('run', 'admitted_no_podsready', 2), workload('wait', 'pending_no_podsready', 2)]
     with_pods_ready = [workload('run', 'running', 2), workload('wait', 'pending_quota', 2)]
     check, clock = goodput_check(instance, without_pods_ready, without_pods_ready, with_pods_ready, with_pods_ready)
     dd_run_check(check)
@@ -748,6 +749,42 @@ def test_check_submits_nothing_without_pods_ready(dd_run_check, aggregator, inst
         clock.t = t
         dd_run_check(check)
     aggregator.assert_metric(FULLY_ADMITTED_METRIC, value=30 / 3600, tags=[*A100_TAGS, 'kueue_workload:run'])
+
+
+def test_check_submits_nothing_for_short_workloads_without_pods_ready(
+    dd_run_check, aggregator, instance, mock_http_response, caplog
+):
+    # Without `waitForPodsReady`, a Workload that waits, then runs and finishes within one poll interval is never
+    # seen admitted twice in a row, but its waits must not be submitted as a goodput of 0 either.
+    mock_http_response(file_path=get_fixture_path('metrics.txt'))
+    finished = workload('w', 'admitted_no_podsready', 2)
+    finished['status']['conditions'].append(workload('w', 'finished', 2, finished_at=40)['status']['conditions'][-1])
+    polls = [
+        [workload('w', 'pending_no_podsready', 2)],
+        [workload('w', 'pending_no_podsready', 2)],
+        [workload('w', 'admitted_no_podsready', 2)],
+        [finished],
+    ]
+    check, clock = goodput_check(instance, *polls)
+    with caplog.at_level('WARNING'):
+        for t in (0, 15, 30, 45):
+            clock.t = t
+            dd_run_check(check)
+    aggregator.assert_metric(BADPUT_METRIC, count=0)
+    aggregator.assert_metric(FULLY_ADMITTED_METRIC, count=0)
+    assert caplog.text.count('Enable waitForPodsReady') == 1
+
+
+def test_workloads_created_after_pods_ready_is_disabled_are_not_counted():
+    # Disabling `waitForPodsReady` leaves the condition on the Workloads that already had it, but not on new ones.
+    clock, tracker = make_tracker()
+    snapshot = [workload('old', 'running', 2), workload('new', 'pending_no_podsready', 2)]
+    tracker.update(snapshot)
+    clock.t = 15
+    contributions = tracker.update(snapshot)
+    assert [(c.name, c.category, c.gpu_seconds) for c in contributions] == [
+        ('team-a/old', Category.FULLY_ADMITTED, 2 * 15)
+    ]
 
 
 def test_check_leaves_instance_tags_off(dd_run_check, aggregator, instance, mock_http_response):
