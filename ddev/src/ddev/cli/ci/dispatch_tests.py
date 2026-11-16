@@ -266,12 +266,12 @@ def dispatch_tests(
     console_handler.setFormatter(
         console_formatter(hidden_fields=console_hidden_fields() | PROTECTED_RUN_FIELDS | set(tag_fields(caller_tags)))
     )
-    # `--dry-run` and `--resolve-only` dispatch nothing, so they report no metrics either.
-    metrics_sink = None if (dry_run or resolve_only) else build_datadog_metrics_sink(app)
+    metrics_sink = None if (dry_run and not resolve_only) else build_datadog_metrics_sink(app)
     monitoring = MonitoringRuntime(
         console_handler=console_handler,
         metrics_sink=metrics_sink,
         metrics_tag_projector=metric_tag_mapping,
+        component_override='run-resolution' if resolve_only else None,
         protected_fields=PROTECTED_RUN_FIELDS,
         base_fields={
             **{name: value for name, value in tag_fields(caller_tags).items() if name not in PROTECTED_RUN_FIELDS},
@@ -445,6 +445,7 @@ def dispatch_tests(
                 batch_count=batch_count,
                 job_count=job_count,
                 error=summary_error,
+                count_run=not resolve_only,
             )
         finally:
             monitoring.close()
@@ -515,8 +516,9 @@ def run_summary(
     batch_count: int = 0,
     job_count: int = 0,
     error: str | None = None,
+    count_run: bool = True,
 ) -> None:
-    """Emit one terminal record for executed and valid no-op runs."""
+    """Emit one terminal record, counting runs only for invocations that can dispatch."""
     dispatcher_outcome = dispatcher.outcome if dispatcher is not None else None
     progress = dispatcher_outcome.progress if dispatcher_outcome is not None else None
     if progress is not None:
@@ -525,7 +527,7 @@ def run_summary(
     cancelled = outcome is ExecutionOutcome.CANCELLED
     final_report_published = dispatcher_outcome.final_report_published if dispatcher_outcome is not None else False
     elapsed = time.monotonic() - started
-    if outcome in RUN_OUTCOME_METRICS:
+    if count_run and outcome in RUN_OUTCOME_METRICS:
         metrics = monitor.metrics
         metrics.count('runs.count', 1)
         # Every counter on every run: a monitor on one outcome sees zeros instead of gaps.

@@ -66,7 +66,7 @@ The recommended way to collect logs from HPE Aruba EdgeConnect is to configure t
     logs:
       - type: tcp
         port: 10514
-        source: hpe_aruba_edgeconnect
+        source: hpe-aruba-edgeconnect
         service: <SERVICE>
     ```
 
@@ -74,12 +74,18 @@ The recommended way to collect logs from HPE Aruba EdgeConnect is to configure t
 
 The HPE Aruba EdgeConnect integration includes alarm event support. Events are disabled by default; to enable them, set `collect_events` to `true` in the configuration.
 
+**First run.** Each Agent keeps its own record of the last alarm it reported. When an Agent runs the check without that record, such as on its first run or when it takes over collection from another Agent, it sends only the alarms raised during the last collection interval as events. Older outstanding alarms are not sent as events, but the `hpe_aruba_edgeconnect.device.hardware.ok` metric still reflects current hardware alarms.
+
 
 ### Service Checks
 
 The HPE Aruba EdgeConnect integration does not include any service checks.
 
-## Troubleshooting
+## Uninstallation
+
+To disable the integration, rename the configuration file from `hpe_aruba_edgeconnect.d/conf.yaml` to `hpe_aruba_edgeconnect.d/conf.yaml.example`. Alternatively, if you are running a containerized environment, you can remove the annotation used to enable the integration.
+
+## Support
 
 Need help? Contact [Datadog support][9].
 
