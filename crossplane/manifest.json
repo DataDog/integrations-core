@@ -40,9 +40,6 @@
         "metadata_path": "metadata.csv"
       }
     },
-    "dashboards": {
-        "<FILL IN dashboard short_name ex: integration name overview>": "assets/dashboards/<FILL IN>.json"
-    },
     "monitors": {},
     "saved_views": {}
   },
