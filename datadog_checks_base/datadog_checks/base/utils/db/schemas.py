@@ -265,6 +265,9 @@ class DatabaseSchemaCollector(ABC):
         """
         if not self._object_collectors:
             return True
+        # Each run starts from zero, so its telemetry covers only that run.
+        for object_collector in self._object_collectors:
+            object_collector._reset()
         status = "success"
         try:
             databases = self._get_databases()
@@ -282,10 +285,7 @@ class DatabaseSchemaCollector(ABC):
             raise e
         finally:
             for object_collector in self._object_collectors:
-                try:
-                    object_collector._submit_telemetry(status)
-                finally:
-                    object_collector._reset()
+                object_collector._submit_telemetry(status)
         return True
 
     def _collect_database(self, database: DatabaseInfo) -> None:

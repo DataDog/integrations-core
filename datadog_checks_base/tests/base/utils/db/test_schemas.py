@@ -544,6 +544,21 @@ def test_database_collector_reports_telemetry_per_kind(aggregator: AggregatorStu
 
 
 @pytest.mark.unit
+def test_database_collector_telemetry_covers_only_the_latest_run(aggregator: AggregatorStub):
+    """Totals must not carry over between runs, or every run after the first would over-report."""
+    check = TestDatabaseCheck()
+    tables = FakeTablesCollector(check, SchemaCollectorConfig(), {"db1": ["a", "b"]})
+    collector = FakeDatabaseCollector(check, [tables], ["db1"])
+
+    collector.collect_schemas()
+    collector.collect_schemas()
+
+    tags = check.tags + ["status:success", "kind:test_databases"]
+    counts = [m.value for m in aggregator.metrics(f"dd.{check.dbms}.schema.tables_count") if m.tags == tags]
+    assert counts == [2, 2]
+
+
+@pytest.mark.unit
 def test_database_collector_database_listing_failure_reports_error_for_every_kind(aggregator: AggregatorStub):
     check = TestDatabaseCheck()
     tables = FakeTablesCollector(check, SchemaCollectorConfig(), {})
