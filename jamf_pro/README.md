@@ -66,7 +66,7 @@ Choose one of the following destinations. Amazon S3 with the Datadog Forwarder i
 
 To be alerted when Jamf stops sending logs, create [log monitors][12]:
 
-- On `source:jamf-pro`, alerting when no logs arrive for 1 hour.
+- On `source:jamf-pro`, alerting when no logs arrive for 1 hour. Use this monitor only if you send Jamf Pro webhooks and devices check in at least once an hour.
 - On `source:jamf-pro JSSACCESSLOG`, alerting when no logs arrive for 24 hours. Use this monitor only with the Amazon S3 destination, or after validation step 2 shows Datadog destination logs under `source:jamf-pro`, and only if someone signs in to Jamf Pro or an API client requests a token at least once a day.
 
 ## Data Collected
