@@ -1,0 +1,673 @@
+# Synthesized fixture, NOT a live capture.
+#
+# llm-d needs GPUs, a Gateway or standalone proxy, and model weights, so the EPP cannot run in CI. Metric
+# names, types, HELP text, label names, and histogram bucket ladders are transcribed from upstream source:
+#
+#   llm-d/llm-d-router @ 7bdf81e1b121f730926824d66eee59e6f826a593 (main, after v1.0.0)
+#     pkg/epp/metrics/llm_d_router_metrics.go                               request, pool, scheduler, plugin,
+#                                                                            info, flow control, data layer
+#     pkg/epp/metrics/streaming_histogram_buckets.go                        streaming TPOT and ITL ladders
+#     pkg/epp/metrics/grpc_stream_metrics.go                                ext_proc streams
+#     pkg/epp/metrics/collectors/inference_pool.go                          per-endpoint queue size and NIXL
+#     pkg/epp/framework/plugins/scheduling/profilehandler/disagg/metrics.go disaggregation decisions
+#     pkg/epp/framework/plugins/scheduling/filter/endpointhealth/metrics.go endpoint health
+#     pkg/epp/framework/plugins/requesthandling/dataproducer/approximateprefix/metrics.go  prefix indexer
+#     pkg/epp/framework/plugins/requesthandling/dataproducer/prefixmetrics/metrics.go      prefix prediction
+#     pkg/epp/framework/plugins/requesthandling/dataproducer/inflightload/metrics.go       in-flight load
+#     pkg/kvcache/metrics/collector.go                                      KV-cache index and events
+#     pkg/common/observability/metrics/metrics.go                           shared bucket ladders
+#
+# request_outcome_total, scheduler_failures_total, datalayer_polls_total, datalayer_poll_duration_seconds,
+# endpoint_health_*, and the api_surface label are newer than the v1.0.0 tag; every other family here is
+# also emitted by v1.0.0. Label pairs are sorted by name, as the Prometheus Go client writes them.
+# HELP llm_d_epp_average_kv_cache_utilization [ALPHA] The average kv cache utilization for an inference server pool.
+# TYPE llm_d_epp_average_kv_cache_utilization gauge
+llm_d_epp_average_kv_cache_utilization{name="llama-3-1-8b-pool"} 0.42
+# HELP llm_d_epp_average_queue_size [ALPHA] The average number of requests pending in the model server queue.
+# TYPE llm_d_epp_average_queue_size gauge
+llm_d_epp_average_queue_size{name="llama-3-1-8b-pool"} 1.5
+# HELP llm_d_epp_average_running_requests [ALPHA] The average number of running requests across model servers in the pool.
+# TYPE llm_d_epp_average_running_requests gauge
+llm_d_epp_average_running_requests{name="llama-3-1-8b-pool"} 4
+# HELP llm_d_epp_datalayer_extract_errors_total [ALPHA] Extract errors per source/extractor type.
+# TYPE llm_d_epp_datalayer_extract_errors_total counter
+llm_d_epp_datalayer_extract_errors_total{extractor_type="core-metrics-extractor",source_type="metrics-data-source"} 0
+# HELP llm_d_epp_datalayer_poll_duration_seconds [ALPHA] Data-source poll duration per source type.
+# TYPE llm_d_epp_datalayer_poll_duration_seconds histogram
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.0005"} 0
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.001"} 0
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.0025"} 1
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.005"} 2
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.01"} 3
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.025"} 3
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.05"} 3
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.1"} 3
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.25"} 3
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="0.5"} 3
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="1"} 3
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="2.5"} 3
+llm_d_epp_datalayer_poll_duration_seconds_bucket{source_type="metrics-data-source",le="+Inf"} 3
+llm_d_epp_datalayer_poll_duration_seconds_sum{source_type="metrics-data-source"} 0.011
+llm_d_epp_datalayer_poll_duration_seconds_count{source_type="metrics-data-source"} 3
+# HELP llm_d_epp_datalayer_poll_errors_total [ALPHA] Data-source poll errors per source type.
+# TYPE llm_d_epp_datalayer_poll_errors_total counter
+llm_d_epp_datalayer_poll_errors_total{source_type="metrics-data-source"} 1
+# HELP llm_d_epp_datalayer_polls_total [ALPHA] Data-source polls per source type and outcome.
+# TYPE llm_d_epp_datalayer_polls_total counter
+llm_d_epp_datalayer_polls_total{outcome="success",source_type="metrics-data-source"} 1200
+# HELP llm_d_epp_disagg_decision_total [ALPHA] Total number of disaggregation routing decisions made
+# TYPE llm_d_epp_disagg_decision_total counter
+llm_d_epp_disagg_decision_total{decision_type="prefill-decode",model_name="meta-llama/Llama-3.1-8B-Instruct",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler"} 30
+llm_d_epp_disagg_decision_total{decision_type="decode-only",model_name="meta-llama/Llama-3.1-8B-Instruct",plugin_name="disagg-profile-handler",plugin_type="disagg-profile-handler"} 12
+# HELP llm_d_epp_endpoint_health_ejections_total [ALPHA] Endpoints marked unhealthy by the endpoint health filter, by reason.
+# TYPE llm_d_epp_endpoint_health_ejections_total counter
+llm_d_epp_endpoint_health_ejections_total{plugin_name="endpoint-health-filter",reason="poll"} 1
+# HELP llm_d_epp_endpoint_health_excluded_endpoints [ALPHA] Endpoints the endpoint health filter currently excludes from scheduling.
+# TYPE llm_d_epp_endpoint_health_excluded_endpoints gauge
+llm_d_epp_endpoint_health_excluded_endpoints{plugin_name="endpoint-health-filter"} 0
+# HELP llm_d_epp_endpoint_health_fail_open_total [ALPHA] Filter calls in which every candidate was unhealthy and all candidates were kept.
+# TYPE llm_d_epp_endpoint_health_fail_open_total counter
+llm_d_epp_endpoint_health_fail_open_total{plugin_name="endpoint-health-filter"} 0
+# HELP llm_d_epp_endpoint_health_readmissions_total [ALPHA] Unhealthy marks cleared by the endpoint health filter, by reason.
+# TYPE llm_d_epp_endpoint_health_readmissions_total counter
+llm_d_epp_endpoint_health_readmissions_total{plugin_name="endpoint-health-filter",reason="poll"} 1
+# HELP llm_d_epp_extproc_stream_duration_seconds [ALPHA] Duration an ext_proc gRPC stream stays open, in seconds.
+# TYPE llm_d_epp_extproc_stream_duration_seconds histogram
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="0.001"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="0.005"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="0.01"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="0.05"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="0.1"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="0.5"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="1"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="5"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="10"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="30"} 0
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="60"} 1
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="120"} 1
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="300"} 2
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="600"} 3
+llm_d_epp_extproc_stream_duration_seconds_bucket{le="+Inf"} 3
+llm_d_epp_extproc_stream_duration_seconds_sum 575
+llm_d_epp_extproc_stream_duration_seconds_count 3
+# HELP llm_d_epp_extproc_streams_inflight [ALPHA] Number of ext_proc gRPC streams currently open.
+# TYPE llm_d_epp_extproc_streams_inflight gauge
+llm_d_epp_extproc_streams_inflight 4
+# HELP llm_d_epp_extproc_streams_total [ALPHA] Total ext_proc gRPC streams completed, by gRPC status code.
+# TYPE llm_d_epp_extproc_streams_total counter
+llm_d_epp_extproc_streams_total{code="OK"} 3
+# HELP llm_d_epp_flow_control_capacity_utilization_bytes [ALPHA] Fraction of a priority band's effective byte-size capacity currently occupied, aggregated over every flow in the band (0.0-1.0). The denominator falls back to a default when the band does not configure one, so every configured band reports a series. The all-bands rollup is a separate metric, flow_control_global_capacity_utilization_bytes.
+# TYPE llm_d_epp_flow_control_capacity_utilization_bytes gauge
+llm_d_epp_flow_control_capacity_utilization_bytes{inference_pool="llama-3-1-8b-pool",priority="0"} 0.01
+# HELP llm_d_epp_flow_control_capacity_utilization_requests [ALPHA] Fraction of a priority band's effective request-count capacity currently occupied, aggregated over every flow in the band (0.0-1.0). The denominator falls back to a default when the band does not configure one, so every configured band reports a series. The all-bands rollup is a separate metric, flow_control_global_capacity_utilization_requests.
+# TYPE llm_d_epp_flow_control_capacity_utilization_requests gauge
+llm_d_epp_flow_control_capacity_utilization_requests{inference_pool="llama-3-1-8b-pool",priority="0"} 0.02
+# HELP llm_d_epp_flow_control_detector_saturation [ALPHA] Saturation signal reported by an individual saturation detector, labeled by the detector reference name and by the pipeline stage ('prefill' or 'decode') whose endpoints were evaluated. Recorded by the max composite saturation detector for each of its children in scope on every evaluation, so operators can tell which signal (e.g. concurrency vs queue depth) is driving flow_control_pool_saturation in each stage. The stage label is empty when the detector is evaluated without stage partitioning.
+# TYPE llm_d_epp_flow_control_detector_saturation gauge
+llm_d_epp_flow_control_detector_saturation{detector="utilization-detector",stage="decode"} 0.6
+# HELP llm_d_epp_flow_control_dispatch_cycle_duration_seconds [ALPHA] Distribution of time taken for each internal dispatch cycle in the Flow Control layer.
+# TYPE llm_d_epp_flow_control_dispatch_cycle_duration_seconds histogram
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.0001"} 1
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.0002"} 2
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.0005"} 3
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.001"} 3
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.002"} 3
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.005"} 3
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.01"} 3
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.02"} 3
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.05"} 3
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="0.1"} 3
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_bucket{le="+Inf"} 3
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_sum 0.0006
+llm_d_epp_flow_control_dispatch_cycle_duration_seconds_count 3
+# HELP llm_d_epp_flow_control_global_capacity_utilization_bytes [ALPHA] Fraction of the global byte-size capacity currently occupied across all priority bands (0.0-1.0). Global capacity is optional and unset by default; this series is emitted only when it is configured. Kept separate from flow_control_capacity_utilization_bytes so aggregations over the per-band family do not double count the rollup.
+# TYPE llm_d_epp_flow_control_global_capacity_utilization_bytes gauge
+llm_d_epp_flow_control_global_capacity_utilization_bytes{inference_pool="llama-3-1-8b-pool"} 0.01
+# HELP llm_d_epp_flow_control_global_capacity_utilization_requests [ALPHA] Fraction of the global request-count capacity currently occupied across all priority bands (0.0-1.0). Global capacity is optional and unset by default; this series is emitted only when it is configured. Kept separate from flow_control_capacity_utilization_requests so aggregations over the per-band family do not double count the rollup.
+# TYPE llm_d_epp_flow_control_global_capacity_utilization_requests gauge
+llm_d_epp_flow_control_global_capacity_utilization_requests{inference_pool="llama-3-1-8b-pool"} 0.02
+# HELP llm_d_epp_flow_control_pending_reclaim [ALPHA] Sum of outstanding and cooling pending-reclaim debits, in saturation-gauge units.
+# TYPE llm_d_epp_flow_control_pending_reclaim gauge
+llm_d_epp_flow_control_pending_reclaim{inference_pool="llama-3-1-8b-pool"} 0
+# HELP llm_d_epp_flow_control_pool_saturation [ALPHA] Pool saturation signal gating Flow Control dispatch. The stage label partitions by pipeline role: 'prefill' and 'decode' are per-stage signals, 'effective' is max(prefill, decode) and is the value used for gating. 1.0 is the gating set point; values above 1.0 indicate the magnitude of oversubscription past it. An empty pool reads as 1.0. With the default utilization detector, endpoints with missing or stale metrics score as fully saturated under stalenessPolicy=saturated; see flow_control_stale_endpoints.
+# TYPE llm_d_epp_flow_control_pool_saturation gauge
+llm_d_epp_flow_control_pool_saturation{inference_pool="llama-3-1-8b-pool",stage="effective"} 0.6
+# HELP llm_d_epp_flow_control_queue_bytes [ALPHA] Current total size in bytes of requests actively held in the Flow Control queue.
+# TYPE llm_d_epp_flow_control_queue_bytes gauge
+llm_d_epp_flow_control_queue_bytes{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 1800
+# HELP llm_d_epp_flow_control_queue_size [ALPHA] Current number of requests actively held in the Flow Control queue.
+# TYPE llm_d_epp_flow_control_queue_size gauge
+llm_d_epp_flow_control_queue_size{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 2
+# HELP llm_d_epp_flow_control_reclaim_target [ALPHA] Last computed reclamation deficit, in saturation-gauge units.
+# TYPE llm_d_epp_flow_control_reclaim_target gauge
+llm_d_epp_flow_control_reclaim_target{inference_pool="llama-3-1-8b-pool"} 0
+# HELP llm_d_epp_flow_control_request_enqueue_duration_seconds [ALPHA] Distribution of time taken to enqueue requests into the Flow Control layer.
+# TYPE llm_d_epp_flow_control_request_enqueue_duration_seconds histogram
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.0001"} 2
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.0002"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.0005"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.001"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.002"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.005"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.01"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.02"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.05"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="0.1"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_bucket{fairness_id="default-flow",outcome="Dispatched",priority="0",le="+Inf"} 3
+llm_d_epp_flow_control_request_enqueue_duration_seconds_sum{fairness_id="default-flow",outcome="Dispatched",priority="0"} 0.00032
+llm_d_epp_flow_control_request_enqueue_duration_seconds_count{fairness_id="default-flow",outcome="Dispatched",priority="0"} 3
+# HELP llm_d_epp_flow_control_request_queue_duration_seconds [ALPHA] Distribution of total time requests spend in the Flow Control layer (from enqueue to final outcome).
+# TYPE llm_d_epp_flow_control_request_queue_duration_seconds histogram
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.0001"} 0
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.0005"} 0
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.001"} 0
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.005"} 2
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.01"} 2
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.025"} 2
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.05"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.1"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.25"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.5"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2.5"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="5"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="10"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="30"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="60"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_bucket{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+llm_d_epp_flow_control_request_queue_duration_seconds_sum{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 0.036
+llm_d_epp_flow_control_request_queue_duration_seconds_count{fairness_id="default-flow",inference_pool="llama-3-1-8b-pool",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="Dispatched",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP llm_d_epp_flow_control_requests_total [ALPHA] Total number of requests processed by the Flow Control layer.
+# TYPE llm_d_epp_flow_control_requests_total counter
+llm_d_epp_flow_control_requests_total{inference_pool="llama-3-1-8b-pool",outcome="Dispatched",priority="0"} 42
+# HELP llm_d_epp_flow_control_revocation_confirmation_seconds [ALPHA] Time from revocation issue to confirmed stream termination.
+# TYPE llm_d_epp_flow_control_revocation_confirmation_seconds histogram
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llama-3-1-8b-pool",le="0.005"} 0
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llama-3-1-8b-pool",le="0.01"} 0
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llama-3-1-8b-pool",le="0.025"} 0
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llama-3-1-8b-pool",le="0.05"} 1
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llama-3-1-8b-pool",le="0.1"} 1
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llama-3-1-8b-pool",le="0.25"} 1
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llama-3-1-8b-pool",le="0.5"} 1
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llama-3-1-8b-pool",le="1"} 1
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llama-3-1-8b-pool",le="2.5"} 1
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llama-3-1-8b-pool",le="5"} 1
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llama-3-1-8b-pool",le="10"} 1
+llm_d_epp_flow_control_revocation_confirmation_seconds_bucket{inference_pool="llama-3-1-8b-pool",le="+Inf"} 1
+llm_d_epp_flow_control_revocation_confirmation_seconds_sum{inference_pool="llama-3-1-8b-pool"} 0.04
+llm_d_epp_flow_control_revocation_confirmation_seconds_count{inference_pool="llama-3-1-8b-pool"} 1
+# HELP llm_d_epp_flow_control_revocations_issued_total [ALPHA] Total number of in-flight eviction revocations issued, labeled by the demand band's priority.
+# TYPE llm_d_epp_flow_control_revocations_issued_total counter
+llm_d_epp_flow_control_revocations_issued_total{inference_pool="llama-3-1-8b-pool",priority="0"} 1
+# HELP llm_d_epp_flow_control_revocations_total [ALPHA] Total number of in-flight eviction revocations by terminal outcome (confirmed, timed_out). Every issued revocation eventually increments exactly one outcome.
+# TYPE llm_d_epp_flow_control_revocations_total counter
+llm_d_epp_flow_control_revocations_total{inference_pool="llama-3-1-8b-pool",outcome="confirmed"} 1
+# HELP llm_d_epp_flow_control_stale_endpoints [ALPHA] Number of candidate endpoints whose metrics are missing or older than the staleness threshold, as of the most recent saturation evaluation. Recorded by the utilization saturation detector, which scores these endpoints according to stalenessPolicy: saturated by default or excluded under ignore. A nonzero value during a dispatch stall indicates a metrics collection problem rather than genuine overload. Labeled by the pipeline stage ('prefill' or 'decode') whose endpoints were evaluated; the stage label is empty when the detector is evaluated without stage partitioning.
+# TYPE llm_d_epp_flow_control_stale_endpoints gauge
+llm_d_epp_flow_control_stale_endpoints{detector="utilization-detector",stage="decode"} 0
+# HELP llm_d_epp_inflight_requests [ALPHA] Current number of in-flight requests per endpoint, as tracked by the in-flight load producer.
+# TYPE llm_d_epp_inflight_requests gauge
+llm_d_epp_inflight_requests{endpoint_name="llama-decode-0",fairness_id="default-flow",namespace="llm-d",priority="0",producer_name="inflight-load-producer"} 2
+# HELP llm_d_epp_inflight_tokens [ALPHA] Current number of in-flight tokens per endpoint (uncached prompt tokens, optionally plus estimated output), as tracked by the in-flight load producer.
+# TYPE llm_d_epp_inflight_tokens gauge
+llm_d_epp_inflight_tokens{endpoint_name="llama-decode-0",fairness_id="default-flow",namespace="llm-d",priority="0",producer_name="inflight-load-producer"} 480
+# HELP llm_d_epp_info [ALPHA] General information of the current build of Inference Extension.
+# TYPE llm_d_epp_info gauge
+llm_d_epp_info{build_ref="main",commit="7bdf81e1b121f730926824d66eee59e6f826a593"} 1
+# HELP llm_d_epp_kv_cache_events_active_subscribers [ALPHA] Number of ZMQ subscribers currently managed, including those retrying a failed connection
+# TYPE llm_d_epp_kv_cache_events_active_subscribers gauge
+llm_d_epp_kv_cache_events_active_subscribers 2
+# HELP llm_d_epp_kv_cache_events_dedup_removed_hashes_forwarded_total [ALPHA] Block hashes forwarded for eviction after the KV-event dedup filter (block hashes, not BlockRemoved events)
+# TYPE llm_d_epp_kv_cache_events_dedup_removed_hashes_forwarded_total counter
+llm_d_epp_kv_cache_events_dedup_removed_hashes_forwarded_total 113
+# HELP llm_d_epp_kv_cache_events_dedup_removed_hashes_suppressed_total [ALPHA] Block hashes whose removal was suppressed by the KV-event dedup filter (block hashes, not BlockRemoved events)
+# TYPE llm_d_epp_kv_cache_events_dedup_removed_hashes_suppressed_total counter
+llm_d_epp_kv_cache_events_dedup_removed_hashes_suppressed_total 7
+# HELP llm_d_epp_kv_cache_events_messages_received_total [ALPHA] Total number of messages received from ZMQ subscribers
+# TYPE llm_d_epp_kv_cache_events_messages_received_total counter
+llm_d_epp_kv_cache_events_messages_received_total{pod_identifier="llm-d/llama-decode-0"} 1020
+# HELP llm_d_epp_kv_cache_events_pool_capacity [ALPHA] Number of worker shards (capacity) in the event processing pool
+# TYPE llm_d_epp_kv_cache_events_pool_capacity gauge
+llm_d_epp_kv_cache_events_pool_capacity 4
+# HELP llm_d_epp_kv_cache_events_pool_queue_depth [ALPHA] Total number of messages queued across all worker shards
+# TYPE llm_d_epp_kv_cache_events_pool_queue_depth gauge
+llm_d_epp_kv_cache_events_pool_queue_depth 0
+# HELP llm_d_epp_kv_cache_events_removals_skipped_total [ALPHA] Total number of KV-cache removal events skipped for groups excluded from prefix indexing
+# TYPE llm_d_epp_kv_cache_events_removals_skipped_total counter
+llm_d_epp_kv_cache_events_removals_skipped_total{cache_kind="sliding_window",reason="excluded_group"} 0
+# HELP llm_d_epp_kv_cache_events_stores_skipped_total [ALPHA] Total number of KV-cache store events skipped before prefix indexing
+# TYPE llm_d_epp_kv_cache_events_stores_skipped_total counter
+llm_d_epp_kv_cache_events_stores_skipped_total{cache_kind="sliding_window",reason="excluded_group"} 0
+# HELP llm_d_epp_kv_cache_events_subscriber_reconnections_total [ALPHA] Total number of ZMQ subscriber reconnection attempts
+# TYPE llm_d_epp_kv_cache_events_subscriber_reconnections_total counter
+llm_d_epp_kv_cache_events_subscriber_reconnections_total{pod_identifier="llm-d/llama-decode-0"} 1
+# HELP llm_d_epp_kv_cache_events_zmq_errors_total [ALPHA] Total number of ZMQ subscriber errors
+# TYPE llm_d_epp_kv_cache_events_zmq_errors_total counter
+llm_d_epp_kv_cache_events_zmq_errors_total{operation="recv",pod_identifier="llm-d/llama-decode-0"} 0
+# HELP llm_d_epp_kv_cache_index_admissions_total [ALPHA] Total number of KV-block admissions
+# TYPE llm_d_epp_kv_cache_index_admissions_total counter
+llm_d_epp_kv_cache_index_admissions_total 900
+# HELP llm_d_epp_kv_cache_index_evictions_total [ALPHA] Total number of KV-block evictions
+# TYPE llm_d_epp_kv_cache_index_evictions_total counter
+llm_d_epp_kv_cache_index_evictions_total 120
+# HELP llm_d_epp_kv_cache_index_lookup_hits_total [ALPHA] Contiguous prefix blocks matched by the best pod per lookup
+# TYPE llm_d_epp_kv_cache_index_lookup_hits_total counter
+llm_d_epp_kv_cache_index_lookup_hits_total 310
+# HELP llm_d_epp_kv_cache_index_lookup_latency_seconds [ALPHA] Duration of Lookup and WalkKeys calls in seconds, including WalkKeys callbacks
+# TYPE llm_d_epp_kv_cache_index_lookup_latency_seconds histogram
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="0.005"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="0.01"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="0.025"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="0.05"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="0.1"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="0.25"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="0.5"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="1"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="2.5"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="5"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="10"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_bucket{le="+Inf"} 3
+llm_d_epp_kv_cache_index_lookup_latency_seconds_sum 0.0043
+llm_d_epp_kv_cache_index_lookup_latency_seconds_count 3
+# HELP llm_d_epp_kv_cache_index_lookup_requests_total [ALPHA] Total number of lookup calls
+# TYPE llm_d_epp_kv_cache_index_lookup_requests_total counter
+llm_d_epp_kv_cache_index_lookup_requests_total 42
+# HELP llm_d_epp_kv_cache_index_max_pod_hit_count_total [ALPHA] Longest contiguous per-pod prefix chain observed per lookup
+# TYPE llm_d_epp_kv_cache_index_max_pod_hit_count_total counter
+llm_d_epp_kv_cache_index_max_pod_hit_count_total 310
+# HELP llm_d_epp_per_endpoint_nixl_failed_notifications_total [ALPHA] The number of failed NIXL KV cache notifications reported by each underlying endpoint.
+# TYPE llm_d_epp_per_endpoint_nixl_failed_notifications_total counter
+llm_d_epp_per_endpoint_nixl_failed_notifications_total{model_server_endpoint="llama-decode-0:8000",name="llama-3-1-8b-pool"} 0
+# HELP llm_d_epp_per_endpoint_nixl_failed_transfers_total [ALPHA] The number of failed NIXL KV cache transfers reported by each underlying endpoint.
+# TYPE llm_d_epp_per_endpoint_nixl_failed_transfers_total counter
+llm_d_epp_per_endpoint_nixl_failed_transfers_total{model_server_endpoint="llama-decode-0:8000",name="llama-3-1-8b-pool"} 0
+# HELP llm_d_epp_per_endpoint_nixl_kv_expired_requests_total [ALPHA] The number of requests whose KV cache expired before it was read, reported by each underlying endpoint.
+# TYPE llm_d_epp_per_endpoint_nixl_kv_expired_requests_total counter
+llm_d_epp_per_endpoint_nixl_kv_expired_requests_total{model_server_endpoint="llama-decode-0:8000",name="llama-3-1-8b-pool"} 1
+# HELP llm_d_epp_per_endpoint_queue_size [ALPHA] The total number of requests pending in the model server queue for each underlying endpoint.
+# TYPE llm_d_epp_per_endpoint_queue_size gauge
+llm_d_epp_per_endpoint_queue_size{model_server_endpoint="llama-decode-0:8000",name="llama-3-1-8b-pool"} 1
+# HELP llm_d_epp_plugin_duration_seconds [ALPHA] Plugin processing latency distribution in seconds for each extension point, plugin type and plugin name.
+# TYPE llm_d_epp_plugin_duration_seconds histogram
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.0001"} 1
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.0002"} 2
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.0005"} 3
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.001"} 3
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.002"} 3
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.005"} 3
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.01"} 3
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.02"} 3
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.05"} 3
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="0.1"} 3
+llm_d_epp_plugin_duration_seconds_bucket{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer",le="+Inf"} 3
+llm_d_epp_plugin_duration_seconds_sum{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer"} 0.0005
+llm_d_epp_plugin_duration_seconds_count{extension_point="Scorer",plugin_name="prefix-cache-scorer",plugin_type="prefix-cache-scorer"} 3
+# HELP llm_d_epp_prefix_indexer_hit_bytes [ALPHA] Length of the prefix match in number of bytes in the cache lookup.
+# TYPE llm_d_epp_prefix_indexer_hit_bytes histogram
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0"} 1
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="16"} 1
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="32"} 1
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="64"} 1
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="128"} 1
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="256"} 2
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="512"} 2
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="1024"} 3
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="2048"} 3
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="4096"} 3
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="8192"} 3
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="16384"} 3
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="32768"} 3
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="65536"} 3
+llm_d_epp_prefix_indexer_hit_bytes_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="+Inf"} 3
+llm_d_epp_prefix_indexer_hit_bytes_sum{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 1280
+llm_d_epp_prefix_indexer_hit_bytes_count{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 3
+# HELP llm_d_epp_prefix_indexer_hit_ratio [ALPHA] Ratio of prefix length matched to total prefix length in the cache lookup.
+# TYPE llm_d_epp_prefix_indexer_hit_ratio histogram
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0"} 1
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.1"} 1
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.2"} 1
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.3"} 1
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.4"} 1
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.5"} 2
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.6"} 2
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.7"} 2
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.8"} 2
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="0.9"} 3
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="1"} 3
+llm_d_epp_prefix_indexer_hit_ratio_bucket{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="+Inf"} 3
+llm_d_epp_prefix_indexer_hit_ratio_sum{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 1.35
+llm_d_epp_prefix_indexer_hit_ratio_count{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 3
+# HELP llm_d_epp_prefix_indexer_size [ALPHA] Size of the prefix indexer.
+# TYPE llm_d_epp_prefix_indexer_size gauge
+llm_d_epp_prefix_indexer_size{plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 512
+# HELP llm_d_epp_prefix_predicted_cached_tokens [ALPHA] Prompt tokens the producer predicted the scheduler's chosen endpoint holds in its prefix cache, per request. The modality label holds the request's carried modalities as a comma-joined sorted list (none for text-only, other for anything but image, audio and video); each request is observed once.
+# TYPE llm_d_epp_prefix_predicted_cached_tokens histogram
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="1"} 1
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="8"} 1
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="16"} 1
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="32"} 1
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="64"} 2
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="128"} 2
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="256"} 2
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="512"} 3
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="1024"} 3
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="2048"} 3
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="4096"} 3
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="8192"} 3
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="16384"} 3
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="32768"} 3
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="65536"} 3
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="131072"} 3
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="262144"} 3
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="524288"} 3
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="1048576"} 3
+llm_d_epp_prefix_predicted_cached_tokens_bucket{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer",le="+Inf"} 3
+llm_d_epp_prefix_predicted_cached_tokens_sum{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 576
+llm_d_epp_prefix_predicted_cached_tokens_count{endpoint_role="decode",modality="none",plugin_name="approx-prefix-cache-producer",plugin_type="approx-prefix-cache-producer"} 3
+# HELP llm_d_epp_ready_endpoints [ALPHA] The number of ready endpoints in the inference server pool.
+# TYPE llm_d_epp_ready_endpoints gauge
+llm_d_epp_ready_endpoints{name="llama-3-1-8b-pool"} 2
+# HELP llm_d_epp_request_cached_tokens [ALPHA] Distribution of prompt tokens read from cache per request, as reported by the model server in the response.
+# TYPE llm_d_epp_request_cached_tokens histogram
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 1
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8"} 1
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="16"} 1
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="32"} 1
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="64"} 1
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="128"} 2
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="256"} 2
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="512"} 3
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1024"} 3
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2048"} 3
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="4096"} 3
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8192"} 3
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="16384"} 3
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="32768"} 3
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="65536"} 3
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="131072"} 3
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="262144"} 3
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="524288"} 3
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1048576"} 3
+llm_d_epp_request_cached_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+llm_d_epp_request_cached_tokens_sum{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 608
+llm_d_epp_request_cached_tokens_count{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP llm_d_epp_request_duration_seconds [ALPHA] End-to-end request latency distribution in seconds.
+# TYPE llm_d_epp_request_duration_seconds histogram
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.005"} 0
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.025"} 0
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.05"} 0
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.1"} 0
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.2"} 0
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.4"} 0
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.6"} 0
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.8"} 1
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 1
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1.25"} 2
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1.5"} 2
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2"} 2
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="3"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="4"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="5"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="6"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="10"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="15"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="20"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="30"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="45"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="60"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="120"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="180"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="240"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="300"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="360"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="480"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="600"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="900"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1200"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1800"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2700"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="3600"} 3
+llm_d_epp_request_duration_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+llm_d_epp_request_duration_seconds_sum{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 4.4
+llm_d_epp_request_duration_seconds_count{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP llm_d_epp_request_error_total [ALPHA] Total number of request errors.
+# TYPE llm_d_epp_request_error_total counter
+llm_d_epp_request_error_total{api_surface="chat_completions",error_code="ServiceUnavailable",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 2
+# HELP llm_d_epp_request_input_tokens [ALPHA] Input token count distribution per request.
+# TYPE llm_d_epp_request_input_tokens histogram
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 0
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8"} 0
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="16"} 0
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="32"} 0
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="64"} 0
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="128"} 1
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="256"} 2
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="512"} 2
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1024"} 3
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2048"} 3
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="4096"} 3
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8192"} 3
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="16384"} 3
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="32768"} 3
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="65536"} 3
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="131072"} 3
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="262144"} 3
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="524288"} 3
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1048576"} 3
+llm_d_epp_request_input_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+llm_d_epp_request_input_tokens_sum{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 970
+llm_d_epp_request_input_tokens_count{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP llm_d_epp_request_ntpot_seconds [ALPHA] Normalized time per output token in seconds (end-to-end latency divided by output token count).
+# TYPE llm_d_epp_request_ntpot_seconds histogram
+llm_d_epp_request_ntpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.001"} 0
+llm_d_epp_request_ntpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.002"} 0
+llm_d_epp_request_ntpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.005"} 0
+llm_d_epp_request_ntpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.01"} 1
+llm_d_epp_request_ntpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.02"} 3
+llm_d_epp_request_ntpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.05"} 3
+llm_d_epp_request_ntpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.1"} 3
+llm_d_epp_request_ntpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.2"} 3
+llm_d_epp_request_ntpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.5"} 3
+llm_d_epp_request_ntpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 3
+llm_d_epp_request_ntpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2"} 3
+llm_d_epp_request_ntpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="5"} 3
+llm_d_epp_request_ntpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="10"} 3
+llm_d_epp_request_ntpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+llm_d_epp_request_ntpot_seconds_sum{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 0.036
+llm_d_epp_request_ntpot_seconds_count{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP llm_d_epp_request_outcome_total [ALPHA] Total number of requests by how they ended.
+# TYPE llm_d_epp_request_outcome_total counter
+llm_d_epp_request_outcome_total{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="completed",priority="0",reason="",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 40
+llm_d_epp_request_outcome_total{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",outcome="rejected",priority="0",reason="rejected-saturated",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 2
+# HELP llm_d_epp_request_output_tokens [ALPHA] Output token count distribution per request.
+# TYPE llm_d_epp_request_output_tokens histogram
+llm_d_epp_request_output_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 0
+llm_d_epp_request_output_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8"} 0
+llm_d_epp_request_output_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="16"} 0
+llm_d_epp_request_output_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="32"} 0
+llm_d_epp_request_output_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="64"} 1
+llm_d_epp_request_output_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="128"} 2
+llm_d_epp_request_output_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="256"} 3
+llm_d_epp_request_output_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="512"} 3
+llm_d_epp_request_output_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1024"} 3
+llm_d_epp_request_output_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2048"} 3
+llm_d_epp_request_output_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="4096"} 3
+llm_d_epp_request_output_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8192"} 3
+llm_d_epp_request_output_tokens_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+llm_d_epp_request_output_tokens_sum{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 392
+llm_d_epp_request_output_tokens_count{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP llm_d_epp_request_running [ALPHA] Current number of active running requests.
+# TYPE llm_d_epp_request_running gauge
+llm_d_epp_request_running{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP llm_d_epp_request_size_bytes [ALPHA] Incoming request body size distribution in bytes.
+# TYPE llm_d_epp_request_size_bytes histogram
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="64"} 0
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="128"} 0
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="256"} 0
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="512"} 1
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1024"} 2
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2048"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="4096"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8192"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="16384"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="32768"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="65536"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="131072"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="262144"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="524288"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1048576"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2097152"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="4194304"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8388608"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="16777216"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="33554432"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="67108864"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="134217728"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="268435456"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="536870912"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1073741824"} 3
+llm_d_epp_request_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+llm_d_epp_request_size_bytes_sum{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3460
+llm_d_epp_request_size_bytes_count{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP llm_d_epp_request_streaming_itl_seconds [ALPHA] Inter-token latency in seconds for streaming requests, measured as the time between consecutive response body chunks.
+# TYPE llm_d_epp_request_streaming_itl_seconds histogram
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.001"} 0
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.005"} 0
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.01"} 1
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.015"} 2
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.02"} 3
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.025"} 3
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.03"} 3
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.035"} 3
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.04"} 3
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.045"} 3
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.05"} 3
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.06"} 3
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.08"} 3
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.1"} 3
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.15"} 3
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.2"} 3
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.3"} 3
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.5"} 3
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.75"} 3
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 3
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2"} 3
+llm_d_epp_request_streaming_itl_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+llm_d_epp_request_streaming_itl_seconds_sum{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 0.042
+llm_d_epp_request_streaming_itl_seconds_count{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP llm_d_epp_request_streaming_tpot_seconds [ALPHA] Average time per output token in seconds for streaming requests, computed as (e2e - TTFT) / (output_tokens - 1).
+# TYPE llm_d_epp_request_streaming_tpot_seconds histogram
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.0005"} 0
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.00205"} 0
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.005"} 0
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.01"} 0
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.015"} 2
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.02"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.025"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.03"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.035"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.04"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.045"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.05"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.06"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.08"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.1"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.125"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.15"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.2"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.3"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.4"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.5"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.6"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.8"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2"} 3
+llm_d_epp_request_streaming_tpot_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+llm_d_epp_request_streaming_tpot_seconds_sum{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 0.042
+llm_d_epp_request_streaming_tpot_seconds_count{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP llm_d_epp_request_total [ALPHA] Total number of processed requests.
+# TYPE llm_d_epp_request_total counter
+llm_d_epp_request_total{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 42
+# HELP llm_d_epp_request_ttft_seconds [ALPHA] Time to first token in seconds, measured from request received to first response byte. For non-streaming requests, this equals total request duration.
+# TYPE llm_d_epp_request_ttft_seconds histogram
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.005"} 0
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.025"} 0
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.05"} 0
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.1"} 1
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.2"} 2
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.4"} 3
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.6"} 3
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="0.8"} 3
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 3
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1.25"} 3
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1.5"} 3
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2"} 3
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="3"} 3
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="4"} 3
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="5"} 3
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="6"} 3
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8"} 3
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="10"} 3
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="15"} 3
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="20"} 3
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="30"} 3
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="45"} 3
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="60"} 3
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="120"} 3
+llm_d_epp_request_ttft_seconds_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+llm_d_epp_request_ttft_seconds_sum{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 0.53
+llm_d_epp_request_ttft_seconds_count{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",streaming="true",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP llm_d_epp_response_size_bytes [ALPHA] Outgoing response body size distribution in bytes.
+# TYPE llm_d_epp_response_size_bytes histogram
+llm_d_epp_response_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1"} 0
+llm_d_epp_response_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8"} 0
+llm_d_epp_response_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="16"} 0
+llm_d_epp_response_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="32"} 0
+llm_d_epp_response_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="64"} 0
+llm_d_epp_response_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="128"} 0
+llm_d_epp_response_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="256"} 0
+llm_d_epp_response_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="512"} 0
+llm_d_epp_response_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="1024"} 1
+llm_d_epp_response_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="2048"} 2
+llm_d_epp_response_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="4096"} 3
+llm_d_epp_response_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="8192"} 3
+llm_d_epp_response_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="16384"} 3
+llm_d_epp_response_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="32768"} 3
+llm_d_epp_response_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="65536"} 3
+llm_d_epp_response_size_bytes_bucket{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct",le="+Inf"} 3
+llm_d_epp_response_size_bytes_sum{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 5200
+llm_d_epp_response_size_bytes_count{api_surface="chat_completions",fairness_id="default-flow",model_name="meta-llama/Llama-3.1-8B-Instruct",priority="0",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 3
+# HELP llm_d_epp_scheduler_attempts_total [ALPHA] Total number of scheduling attempts.
+# TYPE llm_d_epp_scheduler_attempts_total counter
+llm_d_epp_scheduler_attempts_total{endpoint_name="llama-decode-0",namespace="llm-d",port="8000",status="success",target_model_name="meta-llama/Llama-3.1-8B-Instruct"} 42
+# HELP llm_d_epp_scheduler_e2e_duration_seconds [ALPHA] End-to-end scheduling latency distribution in seconds.
+# TYPE llm_d_epp_scheduler_e2e_duration_seconds histogram
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.0001"} 0
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.0002"} 0
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.0005"} 2
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.001"} 2
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.002"} 3
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.005"} 3
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.01"} 3
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.02"} 3
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.05"} 3
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.1"} 3
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.2"} 3
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="0.5"} 3
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="1"} 3
+llm_d_epp_scheduler_e2e_duration_seconds_bucket{le="+Inf"} 3
+llm_d_epp_scheduler_e2e_duration_seconds_sum 0.0019
+llm_d_epp_scheduler_e2e_duration_seconds_count 3
+# HELP llm_d_epp_scheduler_failures_total [ALPHA] Total number of failed scheduling attempts, by reason.
+# TYPE llm_d_epp_scheduler_failures_total counter
+llm_d_epp_scheduler_failures_total{reason="all_filtered"} 1
+# HELP llm_d_epp_std_dev_kv_cache_utilization [ALPHA] The standard deviation kv cache utilization for an inference server pool.
+# TYPE llm_d_epp_std_dev_kv_cache_utilization gauge
+llm_d_epp_std_dev_kv_cache_utilization{name="llama-3-1-8b-pool"} 0.05
+# HELP llm_d_epp_std_dev_queue_size [ALPHA] The standard deviation number of requests pending in the model server queue.
+# TYPE llm_d_epp_std_dev_queue_size gauge
+llm_d_epp_std_dev_queue_size{name="llama-3-1-8b-pool"} 0.5
+# HELP llm_d_epp_std_dev_running_requests [ALPHA] The standard deviation number of running requests across model servers in the pool.
+# TYPE llm_d_epp_std_dev_running_requests gauge
+llm_d_epp_std_dev_running_requests{name="llama-3-1-8b-pool"} 1
