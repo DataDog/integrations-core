@@ -35,7 +35,7 @@ on:
         type: string
       target:
         required: false
-        description: Integration to test through the Dispatcher, e.g. "ntp". By default tests all
+        description: Integration to test through the Dispatcher, e.g. "ntp". Empty tests every target except ddev
         default: ""
         type: string
 
