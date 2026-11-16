@@ -149,8 +149,8 @@ apply to metrics only, not to events. Eviction events also include the eviction 
 the Kueue preemption reason when available. Pending events include the reason reported by Kueue.
 
 Events also carry the scheduler tags that the Agent adds to the pods of every batch scheduler, so that the same
-queries work for Kueue and other schedulers: `scheduler:kueue`, `scheduler_workload` (the Workload name), and
-`scheduler_queue` (the ClusterQueue, when the Workload has been admitted).
+queries work for Kueue and other schedulers: `job_scheduler:kueue`, `job_scheduler_workload` (the Workload name), and
+`job_scheduler_queue` (the ClusterQueue, when the Workload has been admitted).
 
 Each event also carries `kueue_workload_event_index`, a per-Workload integer that increases for every event the check
 emits for that Workload. Kueue often stamps several transitions with the same second-resolution timestamp; sort by
