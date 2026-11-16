@@ -1,0 +1,1 @@
+Add `max_line_size` to the configuration models as a hidden HTTP option.

@@ -4,7 +4,9 @@
 import ssl
 
 import mock
+import pytest
 
+from datadog_checks.base.errors import ConfigurationError
 from datadog_checks.base.utils.http import STANDARD_FIELDS, RequestsWrapper
 
 
@@ -56,6 +58,20 @@ class TestRequestSize:
 
         assert isinstance(http.request_size, int)
         assert http.request_size == 512
+
+
+class TestMaxLineSize:
+    @pytest.mark.parametrize(
+        'max_line_size',
+        [
+            pytest.param(0, id='zero'),
+            pytest.param(-1, id='negative'),
+            pytest.param(0.0001, id='less than one byte'),
+        ],
+    )
+    def test_config_invalid(self, max_line_size):
+        with pytest.raises(ConfigurationError, match='`max_line_size` setting must be greater than zero'):
+            RequestsWrapper({'max_line_size': max_line_size}, {})
 
 
 class TestVerify:

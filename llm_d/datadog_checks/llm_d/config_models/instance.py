@@ -99,6 +99,7 @@ class InstanceConfig(BaseModel):
     cache_shared_labels: Optional[bool] = None
     collect_counters_with_distributions: Optional[bool] = None
     collect_histogram_buckets: Optional[bool] = None
+    collect_histograms_as_distributions: Optional[bool] = None
     connect_timeout: Optional[float] = None
     disable_generic_tags: Optional[bool] = None
     empty_default_hostname: Optional[bool] = None
@@ -124,6 +125,7 @@ class InstanceConfig(BaseModel):
     kerberos_keytab: Optional[str] = None
     kerberos_principal: Optional[str] = None
     log_requests: Optional[bool] = None
+    max_line_size: Optional[float] = None
     metric_patterns: Optional[MetricPatterns] = None
     metrics: Optional[tuple[Union[str, MappingProxyType[str, Union[str, Metrics]]], ...]] = None
     min_collection_interval: Optional[float] = None

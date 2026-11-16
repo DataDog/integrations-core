@@ -457,4 +457,6 @@
       - <TAG_PREFIX:.*>
       - <TAG_SUFFIX$>
 - template: instances/http
+  overrides:
+    max_line_size.value.display_default: 16384
 - template: instances/default

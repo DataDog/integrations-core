@@ -10,6 +10,7 @@ files:
     options:
     - template: instances/openmetrics
       overrides:
+        max_line_size.value.display_default: 16384
         openmetrics_endpoint.hidden: true
         openmetrics_endpoint.required: false
         headers.display_priority: 4

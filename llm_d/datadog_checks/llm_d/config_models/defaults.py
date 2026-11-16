@@ -40,6 +40,10 @@ def instance_collect_histogram_buckets():
     return True
 
 
+def instance_collect_histograms_as_distributions():
+    return False
+
+
 def instance_disable_generic_tags():
     return False
 
@@ -78,6 +82,10 @@ def instance_kerberos_force_initiate():
 
 def instance_log_requests():
     return False
+
+
+def instance_max_line_size():
+    return 16384
 
 
 def instance_min_collection_interval():
