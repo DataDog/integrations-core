@@ -57,9 +57,9 @@ def test_check_collects_mapped_metrics(dd_run_check, aggregator, router_instance
 @pytest.mark.parametrize(
     ('fixture_file', 'metric', 'tag'),
     [
-        ('llm_d_router_metrics.txt', 'llm_d.epp.pool.ready_endpoints', 'llm_d_pool:llama-3-1-8b-pool'),
-        ('llm_d_router_metrics.txt', 'llm_d.epp.endpoint.queue_size', 'llm_d_pool:llama-3-1-8b-pool'),
-        ('llm_d_router_metrics.txt', 'llm_d.epp.flow_control.pool_saturation', 'llm_d_pool:llama-3-1-8b-pool'),
+        ('llm_d_router_metrics.txt', 'llm_d.epp.pool.ready_endpoints', 'llm_d_pool:llm-d-epp'),
+        ('llm_d_router_metrics.txt', 'llm_d.epp.endpoint.queue_size', 'llm_d_pool:llm-d-epp'),
+        ('llm_d_router_metrics.txt', 'llm_d.epp.flow_control.pool_saturation', 'llm_d_pool:llm-d-epp'),
         ('llm_d_router_metrics.txt', 'llm_d.epp.scheduler.attempts.count', 'endpoint_namespace:llm-d'),
         ('llm_d_router_metrics.txt', 'llm_d.epp.scheduler.attempts.count', 'endpoint_port:8000'),
         ('llm_d_router_metrics.txt', 'llm_d.epp.inflight.requests', 'endpoint_namespace:llm-d'),
