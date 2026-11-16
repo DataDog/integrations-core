@@ -3,6 +3,7 @@
 # Licensed under Simplified BSD License (see LICENSE)
 import copy
 import gc
+import threading
 import weakref
 from itertools import groupby
 
@@ -140,6 +141,31 @@ def test_schema_collector_runs_tables_and_views_on_one_connection_per_database(p
     assert conn.transaction.call_count == 4
     timeouts = [c for c in cursor.execute.call_args_list if c.args[0].startswith('SET LOCAL statement_timeout')]
     assert len(timeouts) == 4
+
+
+def test_schema_collector_stops_when_the_metadata_job_is_cancelled(pg_instance, integration_check):
+    """A cancel during the tables query must not start the views query or the next database, so shutdown is quick."""
+    pg_instance['collect_schemas'] = {'collect_views': True}
+    check = integration_check(pg_instance)
+    check.version = VersionInfo(18, 0, 0)
+    cancel_event = threading.Event()
+    collector = PostgresSchemaCollector(check, cancel_event)
+    collector._get_databases = mock.Mock(return_value=[{'name': 'db1'}, {'name': 'db2'}])
+    cursor = mock.MagicMock()
+    cursor.fetchone.return_value = None
+    cursor.execute.side_effect = lambda query, params=None: cancel_event.set()
+    conn = mock.MagicMock()
+    conn.cursor.return_value.__enter__.return_value = cursor
+    check.db_pool = mock.Mock()
+    check.db_pool.get_connection.return_value.__enter__ = mock.Mock(return_value=conn)
+    check.db_pool.get_connection.return_value.__exit__ = mock.Mock(return_value=False)
+
+    with pytest.raises(Exception, match="Job loop cancelled"):
+        collector.collect_schemas()
+
+    assert check.db_pool.get_connection.call_args_list == [mock.call('db1')]
+    # Only the tables kind ran its transaction.
+    assert conn.transaction.call_count == 1
 
 
 def test_get_instance_metrics_lt_92(integration_check, pg_instance):
